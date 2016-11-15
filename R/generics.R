@@ -19,41 +19,51 @@
 NULL
 
 # use S3 dispatch to apply the operators
+#' @export
 `+.node` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`+`", e1, e2)
 }
 
+#' @export
 `-.node` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`-`", e1, e2)
 }
 
+#' @export
 `*.node` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`*`", e1, e2)
 }
 
+#' @export
 `/.node` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`/`", e1, e2)
 }
 
+#' @export
 `log.node` <- function (e1) {
   op("tf$log", e1)
 }
 
+#' @export
 `exp.node` <- function (e1) {
   op("tf$exp", e1)
 }
 
 # overload %*% as an S3 generic
-`%*%` <- function (x, y)
-  UseMethod('%*%', x)
 
+#' @export
 `%*%.default` <- function (x, y)
   .Primitive("%*%")(x, y)
 
+#' @export
+`%*%` <- function (x, y)
+  UseMethod('%*%', x)
+
+#' @export
 `%*%.node` <- function(x, y) {
 
   # check dimensions of these objects
@@ -69,3 +79,4 @@ NULL
 
   op("tf$matmul", x, y)
 }
+

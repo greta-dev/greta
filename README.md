@@ -1,6 +1,7 @@
-### Probabilistic Modelling with TensorFlow
+grete
+-----
 
-### 
+### Probabilistic Modelling with TensorFlow
 
 Existing tools for fitting bespoke statistical models (such as BUGS,
 JAGS and STAN) are very effective for moderately-sized problems, but
@@ -79,9 +80,10 @@ using grete. This runs in around a minute on my laptop.
     y %~% normal(z, sigma)
 
     # draw samples
-    draws <- sample(alpha, beta, sigma,
+    draws <- samples(alpha, beta, sigma,
                     method = 'hmc',
-                    n_samples = 1000)
+                    n_samples = 1000,
+                    control = list(epsilon = 0.00001))
 
 Why 'grete'?
 ------------

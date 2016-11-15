@@ -5,11 +5,12 @@ output: md_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+set.seed(1)
 ```
 
-### Probabilistic Modelling with TensorFlow
+## grete
 
-###
+### Probabilistic Modelling with TensorFlow
 
 Existing tools for fitting bespoke statistical models (such as BUGS, JAGS and STAN) are very effective for moderately-sized problems, but don't scale so well to large datasets. These tools also require users to learn a domain-specific language and fix errors at compile time.
 
@@ -33,7 +34,7 @@ devtools::install_github('goldingn/grete')
 
 The following example fits a large hierarchical linear regression model using grete. This runs in around a minute on my laptop.
 
-```{r eval = FALSE}
+```{r eval = TRUE, results='hide', message=FALSE}
 # generate a large (10,000 observations, 100 covariates) fake data set
 n <- 10000
 m <- 100
@@ -73,9 +74,10 @@ z = alpha + x %*% beta
 y %~% normal(z, sigma)
 
 # draw samples
-draws <- sample(alpha, beta, sigma,
+draws <- samples(alpha, beta, sigma,
                 method = 'hmc',
-                n_samples = 1000)
+                n_samples = 1000,
+                control = list(epsilon = 0.00001))
 ```
 
 ## Why 'grete'?
