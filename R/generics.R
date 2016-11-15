@@ -1,11 +1,11 @@
 # overload operators with generics
 
-#' @name grete-operations
+#' @name greta-operations
 #'
-#' @title operations on grete nodes
+#' @title operations on greta nodes
 #'
 #' @description This is a list of currently implemented operations to combine
-#'  grete nodes into probabilistic models. More will follow.
+#'  greta nodes into probabilistic models. More will follow.
 #'
 #' @section Usage: \preformatted{
 #'  x + y

@@ -1,4 +1,4 @@
-Package: grete
+Package: greta
 Type: Package
 Title: Probabilistic Modelling with TensorFlow
 Version: 0.1.0
@@ -7,18 +7,18 @@ Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
 Description: Existing tools for fitting bespoke statistical models (such as
     BUGS, JAGS and STAN) are very effective for moderately-sized problems, but
     don't scale so well to large datasets. These tools also require users to learn
-    a domain-specific language and fix errors at compile time. grete enables users
+    a domain-specific language and fix errors at compile time. greta enables users
     to construct probabilistic models interactively in native R code, then sample
     from those models efficiently using Hamiltonian Monte Carlo. TensorFlow is used
-    to perform all of the calculations, so grete is particularly fast where the
-    model contains very linear algebra operations. grete can also be run across
+    to perform all of the calculations, so greta is particularly fast where the
+    model contains very linear algebra operations. greta can also be run across
     distributed machines or on GPUs, just by installing the relevant version of
     TensorFlow. This package is in the early stages of development. Future releases
     will likely enable fitting models with fast approximate inference schemes,
     different samplers, and more distributions and operations.
 License: Apache License 2.0
-URL: https://github.com/goldingn/grete
-BugReports: https://github.com/goldingn/grete/issues
+URL: https://github.com/goldingn/greta
+BugReports: https://github.com/goldingn/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
     TensorFlow (https://www.tensorflow.org/)
 Encoding: UTF-8
@@ -26,7 +26,7 @@ LazyData: true
 Depends:
     R (>= 3.0)
 Collate:
-    'grete_package.R'
+    'greta_package.R'
     'node_class.R'
     'node_types.R'
     'distributions.R'

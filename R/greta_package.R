@@ -1,7 +1,7 @@
 # package file
 
-#' grete: Probabilistic Modelling with TensorFlow
-#' @name grete
+#' greta: Probabilistic Modelling with TensorFlow
+#' @name greta
 #' @docType package
 #' @import tensorflow
 #' @import R6

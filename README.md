@@ -1,4 +1,4 @@
-grete
+greta
 -----
 
 ### Probabilistic Modelling with TensorFlow
@@ -8,11 +8,11 @@ JAGS and STAN) are very effective for moderately-sized problems, but
 don't scale so well to large datasets. These tools also require users to
 learn a domain-specific language and fix errors at compile time.
 
-`grete` enables users to write probabilistic models interactively in
+`greta` enables users to write probabilistic models interactively in
 native R code, then sample from those models efficiently using
 Hamiltonian Monte Carlo. Most of the calculations are performed using
-TensorFlow, so `grete` is particularly fast where the model contains
-lots of linear algebra. `grete` can also be run across distributed
+TensorFlow, so `greta` is particularly fast where the model contains
+lots of linear algebra. `greta` can also be run across distributed
 machines or on GPUs, just by installing the relevant version of
 TensorFlow.
 
@@ -22,24 +22,24 @@ different samplers, and more distributions and operations.
 
 ### Installation
 
-`grete` depends on the `tensorflow` R package, which will need to be
-succesfully installed before `grete` will work. To successfully install
+`greta` depends on the `tensorflow` R package, which will need to be
+succesfully installed before `greta` will work. To successfully install
 `tensorflow`, you will need a working installation of python; to have
 installed the correct version of TensorFlow; and then install
 tensorflow, pointing to the version of python against which TensorFlow
 was installed. Full installation details can be found [at the
 `tensorflow` R API site](https://rstudio.github.io/tensorflow/).
 
-Once you've successfully installed these prerequisites, `grete` can be
+Once you've successfully installed these prerequisites, `greta` can be
 installed from github using the devtools package
 
-    devtools::install_github('goldingn/grete')
+    devtools::install_github('goldingn/greta')
 
 Example
 -------
 
 The following example fits a large hierarchical linear regression model
-using grete. This runs in around a minute on my laptop.
+using greta. This runs in around a minute on my laptop.
 
     # generate a large (10,000 observations, 100 covariates) fake data set
     n <- 10000
@@ -57,8 +57,8 @@ using grete. This runs in around a minute on my laptop.
     true_z <- true_alpha + covariates %*% true_beta
     response <- rnorm(n, true_z, true_sigma)
 
-    # fit a model with grete
-    library(grete)
+    # fit a model with greta
+    library(greta)
 
     # define data as observed variables
     x = observed(covariates)
@@ -85,7 +85,7 @@ using grete. This runs in around a minute on my laptop.
                     n_samples = 1000,
                     control = list(epsilon = 0.00001))
 
-Why 'grete'?
+Why 'greta'?
 ------------
 
 There's a recent convention of naming probabilistic modelling software
@@ -105,5 +105,7 @@ In case that's not enough reason to admire her, Grete Hermann also
 theory](https://arxiv.org/pdf/0812.3986.pdf) and was part of the German
 resistance against the Nazi regime prior to World War Two.
 
-I pronounce the package as *Greh*•tuh. You can pronounce it however you
-like.
+Grete (usually pronounced *Greh*•tuh, like its alternate spelling
+*Greta*) is pretty confusing for most non-German speakers, so I've taken
+the liberty of naming the package greta instead. You can call it
+whatever you like.

@@ -1,6 +1,6 @@
-#' @name grete-samplers
+#' @name greta-samplers
 #' @title sample model variables
-#' @description After defining a grete model in R, draw samples of the random
+#' @description After defining a greta model in R, draw samples of the random
 #'   variables of interest
 #' @param ... stochastic nodes to sample values from, probably parameters of a
 #'   model

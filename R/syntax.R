@@ -4,7 +4,7 @@
 # special operator to create a data node in the parent environment,
 # and assign it a likelihood
 
-#' @name likelihood
+#' @name greta-likelihood
 #' @title create an observed, stochastic node
 #' @description The likelihood operator is used to link observed data with
 #'   random variables. This can be used to define the likelhood term for a

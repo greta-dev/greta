@@ -14,6 +14,6 @@ be automatically detected from \code{data}, but this can be used to enforce
 specific dimensions}
 }
 \description{
-define an object in an R session as data in a grete model
+define an object in an R session as data in a greta model
 }
 

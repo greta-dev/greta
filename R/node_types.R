@@ -90,7 +90,7 @@ data_node <- R6Class(
 
 #' @name observed
 #' @title define observed data
-#' @description define an object in an R session as data in a grete model
+#' @description define an object in an R session as data in a greta model
 #' @param data an object that can be coerced to an array
 #' @param dim (optional) the dimensions of the data node. The dimensions should
 #'   be automatically detected from \code{data}, but this can be used to enforce

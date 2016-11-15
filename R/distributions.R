@@ -147,10 +147,10 @@ lognormal_distribution <- R6Class (
 
 # export constructors
 
-#' @name grete-distributions
-#' @title grete probability distributions
+#' @name greta-distributions
+#' @title greta probability distributions
 #' @description These probability distributions can be used to define random
-#'   variables in a grete model. They return a 'node' object that can be
+#'   variables in a greta model. They return a 'node' object that can be
 #'   combined with other nodes to construct a model.
 #' @param mu,sigma probability distribution parameters
 #' @param range a finite, length 2 numeric vector giving the range of values to
