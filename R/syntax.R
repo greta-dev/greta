@@ -3,6 +3,24 @@
 
 # special operator to create a data node in the parent environment,
 # and assign it a likelihood
+
+#' @name likelihood
+#' @title create an observed, stochastic node
+#' @description The likelihood operator is used to link observed data with
+#'   random variables. This can be used to define the likelhood term for a
+#'   model.
+#' @param data a data node, defined using \code{observed()}
+#' @param distribution a stochastic node, created using a distribution
+#' @export
+#' @examples
+#' # observed data
+#' y = observed(rnorm(10))
+#'
+#' # random variable
+#' theta = normal(0, 1)
+#'
+#' # link them (i.e. we observed theta to have the values in y)
+#' y %~% theta
 `%~%` <- function (data, distribution) {
 
   if (!inherits(data, 'data_node'))

@@ -88,10 +88,16 @@ data_node <- R6Class(
   )
 )
 
-# export these so people can manually define them (in case an operation is on
-# datas only)
+#' @name observed
+#' @title define observed data
+#' @description define an object in an R session as data in a grete model
+#' @param data an object that can be coerced to an array
+#' @param dim (optional) the dimensions of the data node. The dimensions should
+#'   be automatically detected from \code{data}, but this can be used to enforce
+#'   specific dimensions
 #' @export
-observed <- data_node$new
+observed <- function (data, dim = NULL)
+  data_node$new(data)
 
 
 # a node for applying operations to values

@@ -145,9 +145,66 @@ lognormal_distribution <- R6Class (
   )
 )
 
-# export constructors (add flat)
+# export constructors
+
+#' @name grete-distributions
+#' @title grete probability distributions
+#' @description These probability distributions can be used to define random
+#'   variables in a grete model. They return a 'node' object that can be
+#'   combined with other nodes to construct a model.
+#' @param mu,sigma probability distribution parameters
+#' @param range a finite, length 2 numeric vector giving the range of values to
+#'   which \code{flat} distributions are constrained. The first element must
+#'   be lower than the second.
+#' @param dim the dimensions of the variable, by default a scalar
+#' @details Most of these distributions have non-uniform probability densities,
+#'   however the distributions \code{flat} and \code{free} do not. These can
+#'   therefore be used as parameters in likelihood (rather than Bayesian)
+#'   inference. By default, all distributions are
+#' @examples
+#' # a fixed distribution, e.g. for a prior
+#' mu = normal(0, 1)
+#'
+#' # an unconstrained, positive parameter sigma
+#' log_sigma = free()
+#' sigma = exp(log_sigma)
+#'
+#' # a hierarchical distribution
+#' theta = normal(mu, lognormal(0, 1))
+#'
+#' # a vector of 3 variables drawn from the same hierarchical distribution
+#' thetas = normal(mu, sigma, dim = 3)
+#'
+#' # a matrix of 12 variables drawn from the same hierarchical distribution
+#' thetas = normal(mu, sigma, dim = c(3, 4))
+#'
+#' # a constrained parameter with no density (e.g. for a constrained likelihood model)
+#' theta = flat(c(1, 5))
+
+#' @rdname distributions
 #' @export
-normal <- normal_distribution$new
-lognormal <- lognormal_distribution$new
-flat <- flat_distribution$new
-free <- free_distribution$new
+normal <- function (mu, sigma, dim = 1)
+  normal_distribution$new(mu = mu, sigma = sigma, dim = dim)
+
+#' @rdname distributions
+#' @export
+lognormal <- function (mu, sigma, dim = 1)
+  lognormal_distribution$new(mu = mu, sigma = sigma, dim = dim)
+
+#' @rdname distributions
+#' @export
+flat <- function (range, dim = 1) {
+  if (is_node(range))
+    stop ('range must be fixed, and cannot be another node')
+  if (!(is.vector(range) && length(range) == 2 &&
+        is.numeric(range) && range[1] < range[2])) {
+    stop ('range must be a length 2 numeric vector in ascending order')
+  }
+  flat_distribution$new(lower = range[1], upper = range[2], dim = dim)
+}
+
+
+#' @rdname distributions
+#' @export
+free <- function (dim = 1)
+  free_distribution$new(dim = dim)

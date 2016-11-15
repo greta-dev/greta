@@ -83,7 +83,7 @@ relist_tf <- function (x, list_template) {
   names(vectors) <- NULL
 
   # loop through vectors coercing into arrays
-  list <- mapply(unflatten_rowwise, vectors, dims)
+  list <- mapply(unflatten_rowwise, vectors, dims, SIMPLIFY = FALSE)
   names(list) <- names(list_template)
   list
 

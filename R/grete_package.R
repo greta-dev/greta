@@ -5,7 +5,6 @@
 #' @docType package
 #' @import tensorflow
 #' @import R6
-#' @export
 NULL
 
 
@@ -30,7 +29,6 @@ node_list_object <- R6Class(
   )
 )
 
-# put a node list object in the global environment
-#' @export
-assign('.nodes', node_list_object$new(),
-       envir = parent.frame())
+# crate the node list object whenever the package is loaded
+.onLoad <- function(libname, pkgname)
+  .nodes <<- node_list_object$new()

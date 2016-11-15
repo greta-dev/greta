@@ -1,5 +1,23 @@
 # overload operators with generics
 
+#' @name grete-operations
+#'
+#' @title operations on grete nodes
+#'
+#' @description This is a list of currently implemented operations to combine
+#'  grete nodes into probabilistic models. More will follow.
+#'
+#' @section Usage: \preformatted{
+#'  x + y
+#'  x - y
+#'  x * y
+#'  x / y
+#'  log(x)
+#'  exp(x)
+#'  x \%*\% y
+#'  }
+NULL
+
 # use S3 dispatch to apply the operators
 `+.node` <- function (e1, e2) {
   check_dims(e1, e2)
