@@ -8,9 +8,12 @@ Carlo. Most of the calculations are performed using TensorFlow, so
 algebra. `greta` models can also be run across distributed machines or
 on GPUs, just by installing the relevant version of TensorFlow.
 
-This package is in the early stages of development. Future releases will
-likely enable fitting models with fast approximate inference schemes,
-different samplers, and more distributions and operations.
+This package is in the early stages of development, so expect it to be
+buggy for a while. *It is not ready for use in serious analysis*.
+
+Future releases should stabilise and will likely enable fitting models
+with fast approximate inference schemes, different samplers, and more
+distributions and operations.
 
 Example
 -------
