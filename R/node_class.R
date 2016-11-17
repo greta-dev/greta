@@ -39,9 +39,9 @@ node <- R6Class(
 
     add_child = function (node) {
 
-      # register the node if needed
-      if (!node$registered)
-        node$register()
+      # # register the node if needed
+      # if (!node$registered)
+      #   node$register()
 
       # add to list of children
       self$children = c(self$children, node)

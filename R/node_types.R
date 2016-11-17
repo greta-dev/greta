@@ -24,10 +24,12 @@ constant_node <- R6Class(
     # is x is a numeric scalar, accept it
     initialize = function (x) {
 
+
       if (!(is.numeric(x) && is.vector(x) && length(x) == 1))
         stop ('object cannot be coerced to a node')
 
       self$value(x)
+      self$register()
 
     },
 
@@ -59,6 +61,7 @@ data_node <- R6Class(
 
       # update and store array and store dimension
       self$value(data)
+      self$register()
 
     },
 
@@ -132,6 +135,7 @@ operation_node <- R6Class(
       # assign empty value of the right dimension
       self$value(array(NA, dim = dim))
       self$dim <- dim
+      self$register()
 
     },
 
@@ -301,6 +305,7 @@ distribution <- R6Class (
 
       # store array (updates dim)
       self$value(array(0, dim = dim))
+      self$register()
 
     },
 
