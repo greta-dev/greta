@@ -292,10 +292,16 @@ distribution <- R6Class (
     to_free = function (x) notimplemented(),
 
     initialize = function (name = 'no distribution', dim = 1) {
+
       # for all distributions, set name, store dims and initilialise value
       self$distribution_name <- name
+
+      # coerce dim to integer
+      dim <- as.integer(dim)
+
       # store array (updates dim)
       self$value(array(0, dim = dim))
+
     },
 
     add_parameter = function (parameter, name) {

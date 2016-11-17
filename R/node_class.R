@@ -151,7 +151,7 @@ node <- R6Class(
 
         # coerce 1D arrays to column vectors
         if (length(dim) == 1)
-          dim <- c(dim, 1)
+          dim <- c(dim, 1L)
 
         # update value and store
         dim(new_value) <- dim
