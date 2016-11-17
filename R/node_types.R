@@ -97,7 +97,7 @@ data_node <- R6Class(
 #'   specific dimensions
 #' @export
 observed <- function (data, dim = NULL)
-  data_node$new(data)
+  data_node$new(data, dim = dim)
 
 
 # a node for applying operations to values
@@ -110,15 +110,6 @@ operation_node <- R6Class(
     .operation = NA,
     arguments = list(),
 
-    value = function (new_value = NULL) {
-
-      if (!is.null(new_value))
-        stop('value of deterministic nodes cannot be set')
-
-      child_values <- lapply(self$children, function (x) x$value())
-      do.call(self$.operation, child_values)
-    },
-
     add_argument = function (argument) {
 
       # guess at a name, coerce to a node, and add as a child
@@ -127,14 +118,27 @@ operation_node <- R6Class(
 
     },
 
-    initialize = function (operation, ...) {
+    initialize = function (operation, ..., dimfun = NULL) {
 
       # coerce all arguments to nodes, and remember the operation
-      dots <- lapply(list(...), self$as_node)
+      dots <- lapply(list(...), to_node)
       for(node in dots)
         self$add_argument(node)
 
       self$.operation <- operation
+
+      # work out the dimensions of the new node, if NULL assume an elementwise
+      # operation and get the largest number of each dimension, otherwise expect
+      # a function to be passed which will calculate it from the provided list
+      # of nodes arguments
+      if (is.null(dimfun))
+        dim <- do.call(pmax, lapply(dots, member, 'dim'))
+      else
+        dim <- dimfun(dots)
+
+      # assign empty value of the right dimension
+      self$value(array(NA, dim = dim))
+      self$dim <- dim
 
     },
 

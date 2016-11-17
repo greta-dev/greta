@@ -20,7 +20,7 @@ notimplemented <- function ()
 
 # is this array actually a scalar?
 is_scalar <- function (x) {
-  identical(x$dim, c(1, 1))
+  identical(x$dim, c(1L, 1L))
 }
 
 # coerce an object to a node
