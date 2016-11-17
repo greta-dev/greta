@@ -2,8 +2,8 @@
 #' @title sample model variables
 #' @description After defining a greta model in R, draw samples of the random
 #'   variables of interest
-#' @param ... stochastic nodes to sample values from, probably parameters of a
-#'   model
+#' @param ... nodes to sample values from, probably parameters of a
+#'   model. Observed nodes cannot be sampled from.
 #' @param method the method used to sample values. Currently only \code{hmc} is
 #'   implemented
 #' @param n_samples the number of samples to draw (after any warm-up, but before
@@ -45,13 +45,13 @@ samples <- function (...,
   names <- vapply(names, deparse, '')
   names(target_nodes) <- names
 
-  # check they're all stochastic, provide a useful error message if not
+  # check they're not data nodes, provide a useful error message if they are
   type <- vapply(target_nodes, member, 'type', FUN.VALUE = '')
-  bad <- type != 'stochastic'
+  bad <- type == 'data'
   if (any(bad)) {
-    is_are <- ifelse(sum(bad) == 1, 'is', 'are')
-    bad_nodes <- paste(names[bad], collape = ', ')
-    msg <- sprintf('%s %s not stochastic. only stochastic nodes can be sampled',
+    is_are <- ifelse(sum(bad) == 1, 'is an observed node', 'are observed nodes')
+    bad_nodes <- paste(names[bad], collapse = ', ')
+    msg <- sprintf('%s %s, observed nodes cannot be sampled',
                    bad_nodes,
                    is_are)
     stop (msg)
