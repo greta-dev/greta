@@ -19,11 +19,27 @@ notimplemented <- function ()
   stop ('method not yet implemented')
 
 # is this array actually a scalar?
-is_scalar <- function (x)
-  identical(x$dim, c(1, 1))
+is_scalar <- function (x) {
+  identical(x$dim, c(1L, 1L))
+}
+
+# coerce an object to a node
+to_node <- function (x) {
+  if (!is_node(x)) {
+    if (is.numeric(x))
+      x <- observed(x)
+    else
+      stop ('cannot coerce object to observed node')
+  }
+  x
+}
 
 # check dimensions of arguments to ops
 check_dims <- function(x, y) {
+
+  # coerece to nodes
+  x <- to_node(x)
+  y <- to_node(y)
 
   # if one is a scalar, it should be fine
   if ( !( is_scalar(x) | is_scalar(y) ) ) {
