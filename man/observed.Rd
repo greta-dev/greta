@@ -4,14 +4,10 @@
 \alias{observed}
 \title{define observed data}
 \usage{
-observed(data, dim = NULL)
+observed(data)
 }
 \arguments{
 \item{data}{an object that can be coerced to an array}
-
-\item{dim}{(optional) the dimensions of the data node. The dimensions should
-be automatically detected from \code{data}, but this can be used to enforce
-specific dimensions}
 }
 \description{
 define an object in an R session as data in a greta model

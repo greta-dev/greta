@@ -48,24 +48,10 @@ data_node <- R6Class(
     type = 'data',
     likelihood = NA,
 
-    initialize = function (data, dim = NULL) {
+    initialize = function (data) {
 
       # coerce data from common formats to an array here
-
-      # is it's a numeric scalar, but a dim is provided, replicate the scalar
-      # the right number of times
-      if (is.numeric(data) && is.vector(data) &&
-          length(data) == 1 && !is.null(dim)) {
-
-        data <- rep(data, prod(dim))
-
-      }
-
       data <- as.array(data)
-
-      # try to use user-specified dimensions
-      if (!is.null(dim))
-        dim(data) <- dim
 
       # coerce 1D arrays to column vectors
       if (length(dim(data)) == 1)
@@ -102,12 +88,9 @@ data_node <- R6Class(
 #' @title define observed data
 #' @description define an object in an R session as data in a greta model
 #' @param data an object that can be coerced to an array
-#' @param dim (optional) the dimensions of the data node. The dimensions should
-#'   be automatically detected from \code{data}, but this can be used to enforce
-#'   specific dimensions
 #' @export
-observed <- function (data, dim = NULL)
-  data_node$new(data, dim = dim)
+observed <- function (data)
+  data_node$new(data)
 
 
 # a node for applying operations to values
