@@ -51,6 +51,16 @@ data_node <- R6Class(
     initialize = function (data, dim = NULL) {
 
       # coerce data from common formats to an array here
+
+      # is it's a numeric scalar, but a dim is provided, replicate the scalar
+      # the right number of times
+      if (is.numeric(data) && is.vector(data) &&
+          length(data) == 1 && !is.null(dim)) {
+
+        data <- rep(data, prod(dim))
+
+      }
+
       data <- as.array(data)
 
       # try to use user-specified dimensions
