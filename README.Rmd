@@ -1,6 +1,8 @@
 ---
 title: "greta"
-output: md_document
+output:
+  md_document:
+    variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
@@ -10,12 +12,14 @@ set.seed(1)
 
 # greta: probabilistic modelling with TensorFlow
 
-`greta` lets users write probabilistic models interactively in native R code, then sample from those models efficiently using Hamiltonian Monte Carlo.
-Most of the calculations are performed using TensorFlow, so `greta` is particularly fast where the model contains lots of linear algebra. `greta` models can also be run across distributed machines or on GPUs, just by installing the relevant version of TensorFlow.
+greta lets you write probabilistic models interactively in native R code, then sample from them efficiently using Hamiltonian Monte Carlo.
 
-This package is in the early stages of development, so expect it to be buggy for a while. *It is not ready for use in serious analysis*.
+The computational heavy lifting is done by [TensorFlow](https://www.tensorflow.org/), Google's automatic differentiation library. greta is particularly fast where the model contains lots of linear algebra, and greta models can be easily set up to run across CPUs or GPUs, just by installing the relevant version of TensorFlow. 
 
-Future releases should stabilise and will likely enable fitting models with fast approximate inference schemes, different samplers, and more distributions and operations.
+This package is in the early stages of development, so expect it to be buggy for a while. *It is not yet ready for use in serious analysis*.
+
+Releases in the near future will implement more distributions and functions.
+Later releases will implement [different samplers](http://www.stat.columbia.edu/~gelman/research/published/nuts.pdf) and may enable fitting models with fast [approximate inference schemes](http://andrewgelman.com/2015/02/18/vb-stan-black-box-black-box-variational-bayes/) and running computations across a [distributed network](https://www.tensorflow.org/versions/r0.11/how_tos/distributed/index.html).
 
 ## Example
 
@@ -32,10 +36,10 @@ x = observed(as.matrix(iris[, 2:4]))
 # priors
 sigma = lognormal(0, 10)
 alpha = normal(0, 10)
-mu_beta <- normal(0, 10)
-sigma_beta <- lognormal(0, 10)
+mu_beta = normal(0, 10)
+sigma_beta = lognormal(0, 10)
 
-# linear model with hierarchical structure on the m regression coefficients
+# linear model with hierarchical structure on the regression coefficients
 beta = normal(mu_beta, sigma_beta, dim = 3)
 z = alpha + x %*% beta
 
@@ -45,12 +49,13 @@ y %~% normal(z, sigma)
 
 With the model defined, we can draw samples of the parameters we care about. This takes around 45 seconds on my laptop.
 
-```{r eval = TRUE, results='hide', message=FALSE}
+```{r eval = TRUE, results='hide', message=FALSE, fig.height=6}
 draws <- samples(alpha, beta, sigma,
                 method = 'hmc',
                 n_samples = 500,
                 control = list(epsilon = 0.005))
 
+# plot the trace for two of the parameters
 plot(draws[, 1:2],
      type = 'l',
      col = grey(0.2, 0.5))
@@ -67,13 +72,13 @@ When greta is a bit more mature, I'll put together some benchmarks to give a cle
 
 ### Installation
 
-`greta` can be installed from github using the devtools package
+greta can be installed from GitHub using the devtools package
 
 ```{r eval=FALSE}
 devtools::install_github('goldingn/greta')
 ```
 
-however `greta` depends on TensorFlow and the `tensorflow` R package, which will need to be succesfully installed before `greta` will work. To install `tensorflow`, you will need a working installation of python; to have installed the correct version of TensorFlow; and then to install tensorflow, pointing to the version of python against which TensorFlow was installed. Full installation details can be found [at the `tensorflow` site](https://rstudio.github.io/tensorflow/).
+however greta depends on TensorFlow and RStudio's tensorflow R package, which will need to be succesfully installed before greta will work. To install the tensorflow R package, you will need a working installation of python; to have installed the correct version of TensorFlow; and then to point to the correct version of python when installing the tensorflow R package. Full installation details can be found at RStudio's tensorflow [website](https://rstudio.github.io/tensorflow/).
 
 ## Why 'greta'?
 
