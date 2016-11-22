@@ -41,8 +41,7 @@ With the model defined, we can draw samples of the parameters we care about. Thi
 ``` r
 draws <- samples(alpha, beta, sigma,
                 method = 'hmc',
-                n_samples = 500,
-                control = list(epsilon = 0.005))
+                n_samples = 500)
 
 # plot the trace for two of the parameters
 plot(draws[, 1:2],
@@ -56,9 +55,9 @@ plot(draws[, 1:2],
 
 For small to medium size (a few hundred data points) problems, STAN is likely to be way faster than greta (not accounting for STAN's compilation time). Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than (the current version of) STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
 
-greta also has the advantage that TensorFlow can be run across CPUs or GPUs on lots of different machines. That means greta *should* be able to scale to massive datasets.
+For example, while the code above takes 45 seconds to run with the 150-row iris data, if you duplicate the iris data 1,000 times to get a dataset of 150,000 rows, it takes less than 90 seconds to draw the same number of samples. That's not bad. Not bad at all.
 
-When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of when and where it will be most useful.
+Those numbers are on a laptop. Since TensorFlow can be run across multiple CPUs or GPUs on lots of different machines, greta models *should* scale really well to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
 
 ### Installation
 
@@ -79,4 +78,4 @@ There's a recent convention of naming probabilistic modelling software after pio
 
 In case that's not enough reason to admire her, Grete Hermann also [disproved a popular theorem in quantum theory](https://arxiv.org/pdf/0812.3986.pdf) and was part of the German resistance against the Nazi regime prior to World War Two.
 
-Grete (usually pronounced *Greh*•tuh, like its alternate spelling *Greta*) is pretty confusing for most non-German speakers, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
+Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) is pretty confusing for most non-German speakers pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
