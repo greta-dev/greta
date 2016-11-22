@@ -24,10 +24,12 @@ constant_node <- R6Class(
     # is x is a numeric scalar, accept it
     initialize = function (x) {
 
+
       if (!(is.numeric(x) && is.vector(x) && length(x) == 1))
         stop ('object cannot be coerced to a node')
 
       self$value(x)
+      self$register()
 
     },
 
@@ -48,14 +50,10 @@ data_node <- R6Class(
     type = 'data',
     likelihood = NA,
 
-    initialize = function (data, dim = NULL) {
+    initialize = function (data) {
 
       # coerce data from common formats to an array here
       data <- as.array(data)
-
-      # try to use user-specified dimensions
-      if (!is.null(dim))
-        dim(data) <- dim
 
       # coerce 1D arrays to column vectors
       if (length(dim(data)) == 1)
@@ -63,6 +61,7 @@ data_node <- R6Class(
 
       # update and store array and store dimension
       self$value(data)
+      self$register()
 
     },
 
@@ -92,11 +91,8 @@ data_node <- R6Class(
 #' @title define observed data
 #' @description define an object in an R session as data in a greta model
 #' @param data an object that can be coerced to an array
-#' @param dim (optional) the dimensions of the data node. The dimensions should
-#'   be automatically detected from \code{data}, but this can be used to enforce
-#'   specific dimensions
 #' @export
-observed <- function (data, dim = NULL)
+observed <- function (data)
   data_node$new(data)
 
 
@@ -110,15 +106,6 @@ operation_node <- R6Class(
     .operation = NA,
     arguments = list(),
 
-    value = function (new_value = NULL) {
-
-      if (!is.null(new_value))
-        stop('value of deterministic nodes cannot be set')
-
-      child_values <- lapply(self$children, function (x) x$value())
-      do.call(self$.operation, child_values)
-    },
-
     add_argument = function (argument) {
 
       # guess at a name, coerce to a node, and add as a child
@@ -127,14 +114,28 @@ operation_node <- R6Class(
 
     },
 
-    initialize = function (operation, ...) {
+    initialize = function (operation, ..., dimfun = NULL) {
 
       # coerce all arguments to nodes, and remember the operation
-      dots <- lapply(list(...), self$as_node)
+      dots <- lapply(list(...), to_node)
       for(node in dots)
         self$add_argument(node)
 
       self$.operation <- operation
+
+      # work out the dimensions of the new node, if NULL assume an elementwise
+      # operation and get the largest number of each dimension, otherwise expect
+      # a function to be passed which will calculate it from the provided list
+      # of nodes arguments
+      if (is.null(dimfun))
+        dim <- do.call(pmax, lapply(dots, member, 'dim'))
+      else
+        dim <- dimfun(dots)
+
+      # assign empty value of the right dimension
+      self$value(array(NA, dim = dim))
+      self$dim <- dim
+      self$register()
 
     },
 
@@ -295,10 +296,17 @@ distribution <- R6Class (
     to_free = function (x) notimplemented(),
 
     initialize = function (name = 'no distribution', dim = 1) {
+
       # for all distributions, set name, store dims and initilialise value
       self$distribution_name <- name
+
+      # coerce dim to integer
+      dim <- as.integer(dim)
+
       # store array (updates dim)
       self$value(array(0, dim = dim))
+      self$register()
+
     },
 
     add_parameter = function (parameter, name) {

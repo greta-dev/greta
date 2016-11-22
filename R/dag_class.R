@@ -178,7 +178,7 @@ dag_class <- R6Class(
 
       # get all registered nodes, and their descendents
       all_nodes <- .nodes$nodes()
-      all_children <- lapply(all_nodes, member, 'child_names()')
+      all_plus_children <- lapply(all_nodes, function (x) c(x$name, x$child_names()))
 
       # find target nodes and remove from all_nodes those that don't contain the targets
       target_names <- vapply(node_list,
@@ -188,12 +188,12 @@ dag_class <- R6Class(
 
       self$target_nodes <- target_names
 
-      contain_targets <- vapply(all_children,
+      contain_targets <- vapply(all_plus_children,
                                 function(x) any(target_names %in% x),
                                 FALSE)
 
       # get the unique set
-      dag_node_names <- unique(unlist(all_children[which(contain_targets)]))
+      dag_node_names <- unique(unlist(all_plus_children[which(contain_targets)]))
       idx <- match(dag_node_names, names(all_nodes))
 
       # get dependency graph and add as an attribute?
