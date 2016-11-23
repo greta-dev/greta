@@ -9,9 +9,15 @@ This is a list of functions in base R that are currently
 }
 \details{
 TensorFlow only enables rounding to integers, so \code{round()} will
-  error is set to anything other than \code{0}. Any additional arguments to
-  \code{chol()} will be ignored, see the TensorFlow documentation for details
-  of the cholesky routine.
+  error is set to anything other than \code{0}.
+
+  Any additional arguments to \code{chol()} will be ignored, see the
+  TensorFlow documentation for details of the cholesky routine.
+
+  \code{diag()} can only be used to extract the diagonal part of a square
+  matrix, it cannot be used to create a matrix from a node, nor to assign the
+  diagonal elements of a square matrix. A static diagonal matrix can always
+  be created with e.g. \code{diag(3)}.
 }
 \section{Usage}{
  \preformatted{
@@ -47,6 +53,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  # matrix operations
  t(x)
  chol(x, ...)
+ diag(x, nrow, ncol)
  }
 }
 \examples{
@@ -56,7 +63,10 @@ b = log1p(expm1(x))
 c = sign(x - 5)
 d = abs(x - 5)
 
+e = diag(x)
+
 z = t(a)
+
 
 }
 

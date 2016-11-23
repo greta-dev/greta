@@ -38,12 +38,19 @@
 #'  # matrix operations
 #'  t(x)
 #'  chol(x, ...)
+#'  diag(x, nrow, ncol)
 #'  }
 #'
 #' @details TensorFlow only enables rounding to integers, so \code{round()} will
-#'   error is set to anything other than \code{0}. Any additional arguments to
-#'   \code{chol()} will be ignored, see the TensorFlow documentation for details
-#'   of the cholesky routine.
+#'   error is set to anything other than \code{0}.
+#'
+#'   Any additional arguments to \code{chol()} will be ignored, see the
+#'   TensorFlow documentation for details of the cholesky routine.
+#'
+#'   \code{diag()} can only be used to extract the diagonal part of a square
+#'   matrix, it cannot be used to create a matrix from a node, nor to assign the
+#'   diagonal elements of a square matrix. A static diagonal matrix can always
+#'   be created with e.g. \code{diag(3)}.
 #'
 #' @examples
 #' x = observed(matrix(1:9, nrow = 3, ncol = 3))
@@ -52,7 +59,10 @@
 #' c = sign(x - 5)
 #' d = abs(x - 5)
 #'
+#' e = diag(x)
+#'
 #' z = t(a)
+#'
 #'
 NULL
 
@@ -177,4 +187,33 @@ NULL
   }
 
   op("tf$cholesky", e1, dimfun = dimfun)
+}
+
+#' @export
+diag.node <- function (x = 1, nrow, ncol) {
+
+  # can only extract from a node, cannot create from a node or assign.
+  if (missing(x) | !missing(nrow) | !missing(ncol))
+    stop ('diag can only be used to extract diagonal elements from a matrix, not to create or assign values')
+
+  dimfun <- function (node_list) {
+
+    x <- node_list[[1]]
+    dim <- x$dim
+
+    # check the rank isn't too high
+    if (length(dim) != 2)
+      stop ('cannot only extract the diagonal from a node with exactly two dimensions')
+
+    if (dim[1] != dim[2])
+      stop ('diagonal elements can only be extracted from square matrices')
+
+    # return the dimensions
+    c(dim[1], 1)
+
+  }
+
+  # return the extraction op
+  return (op('tf$diag_part', x, dimfun = dimfun))
+
 }
