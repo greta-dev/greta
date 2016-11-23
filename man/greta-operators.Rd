@@ -2,14 +2,15 @@
 % Please edit documentation in R/operators.R
 \name{greta-operators}
 \alias{greta-operators}
-\title{arithmetic operators for greta nodes}
+\title{operators for greta nodes}
 \description{
-This is a list of currently implemented arithmetic operators to
-  combine greta nodes into probabilistic models.
+This is a list of currently implemented arithmetic, logical and
+  relational operators to combine greta nodes into probabilistic models.
 }
 \details{
-greta's operators are used just like R's the standard arithmetic
-  operators, but they return other greta nodes, rather than values.
+greta's operators are used just like R's the standard arithmetic,
+  logical and relational operators, but they return other greta nodes, rather
+  than values.
 }
 \section{Usage}{
  \preformatted{
@@ -39,8 +40,9 @@ greta's operators are used just like R's the standard arithmetic
  }
 }
 \examples{
- # arithmetic
  x = observed(-1:12)
+
+ # arithmetic
  a = x + 1
  b = 2 * x + 3
  c = x \%\% 2

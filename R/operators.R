@@ -1,9 +1,9 @@
 #' @name greta-operators
 #'
-#' @title arithmetic operators for greta nodes
+#' @title operators for greta nodes
 #'
-#' @description This is a list of currently implemented arithmetic operators to
-#'   combine greta nodes into probabilistic models.
+#' @description This is a list of currently implemented arithmetic, logical and
+#'   relational operators to combine greta nodes into probabilistic models.
 #'
 #' @section Usage: \preformatted{
 #'  # arithmetic operators
@@ -31,12 +31,14 @@
 #'  x != y
 #'  }
 #'
-#' @details greta's operators are used just like R's the standard arithmetic
-#'   operators, but they return other greta nodes, rather than values.
+#' @details greta's operators are used just like R's the standard arithmetic,
+#'   logical and relational operators, but they return other greta nodes, rather
+#'   than values.
 #'
 #' @examples
-#'  # arithmetic
 #'  x = observed(-1:12)
+#'
+#'  # arithmetic
 #'  a = x + 1
 #'  b = 2 * x + 3
 #'  c = x %% 2
