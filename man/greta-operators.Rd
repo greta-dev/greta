@@ -28,6 +28,14 @@ greta's operators are used just like R's the standard arithmetic
  !x
  x & y
  x | y
+
+ # relational operators
+ x < y
+ x > y
+ x <= y
+ x >= y
+ x == y
+ x != y
  }
 }
 \examples{
@@ -42,5 +50,10 @@ greta's operators are used just like R's the standard arithmetic
  e = (x > 1) | (x < 1)
  f = e & (x < 2)
  g = !f
+
+ # relational
+ h = x < 1
+ i = (-x) >= x
+ j = h == x
 }
 

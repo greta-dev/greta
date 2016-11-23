@@ -21,6 +21,14 @@
 #'  !x
 #'  x & y
 #'  x | y
+#'
+#'  # relational operators
+#'  x < y
+#'  x > y
+#'  x <= y
+#'  x >= y
+#'  x == y
+#'  x != y
 #'  }
 #'
 #' @details greta's operators are used just like R's the standard arithmetic
@@ -38,6 +46,11 @@
 #'  e = (x > 1) | (x < 1)
 #'  f = e & (x < 2)
 #'  g = !f
+#'
+#'  # relational
+#'  h = x < 1
+#'  i = (-x) >= x
+#'  j = h == x
 NULL
 
 # use S3 dispatch to apply the operators
@@ -156,3 +169,39 @@ NULL
 }
 
 # relational operators
+
+#' @export
+`<.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`<`", e1, e2)
+}
+
+#' @export
+`>.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`>`", e1, e2)
+}
+
+#' @export
+`<=.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`<=`", e1, e2)
+}
+
+#' @export
+`>=.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`>=`", e1, e2)
+}
+
+#' @export
+`==.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`==`", e1, e2)
+}
+
+#' @export
+`!=.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`!=`", e1, e2)
+}
