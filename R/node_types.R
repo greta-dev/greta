@@ -290,15 +290,17 @@ distribution <- R6Class (
   public = list(
 
     type = 'stochastic',
+    discrete = NA,
     parameters = list(),
     distribution_name = 'no distribution',
     from_free = function (x) notimplemented(),
     to_free = function (x) notimplemented(),
 
-    initialize = function (name = 'no distribution', dim = 1) {
+    initialize = function (name = 'no distribution', dim = 1, discrete = FALSE) {
 
-      # for all distributions, set name, store dims and initilialise value
+      # for all distributions, set name, store dims and set whether discrete
       self$distribution_name <- name
+      self$discrete <- discrete
 
       # coerce dim to integer
       dim <- as.integer(dim)
