@@ -32,7 +32,8 @@ Collate:
     'distributions.R'
     'utils.R'
     'syntax.R'
-    'generics.R'
+    'operators.R'
+    'functions.R'
     'dag_class.R'
     'samplers.R'
 Imports:

@@ -1,21 +1,43 @@
-# overload operators with generics
-
-#' @name greta-operations
+#' @name greta-operators
 #'
-#' @title operations on greta nodes
+#' @title arithmetic operators for greta nodes
 #'
-#' @description This is a list of currently implemented operations to combine
-#'  greta nodes into probabilistic models. More will follow.
+#' @description This is a list of currently implemented arithmetic operators to
+#'   combine greta nodes into probabilistic models.
 #'
 #' @section Usage: \preformatted{
+#'  # arithmetic operators
+#'  -x
 #'  x + y
 #'  x - y
 #'  x * y
 #'  x / y
-#'  log(x)
-#'  exp(x)
+#'  x ^ y
+#'  x \%\% y
+#'  x \%/\% y
 #'  x \%*\% y
+#'
+#'  # logical operators
+#'  !x
+#'  x & y
+#'  x | y
 #'  }
+#'
+#' @details greta's operators are used just like R's the standard arithmetic
+#'   operators, but they return other greta nodes, rather than values.
+#'
+#' @examples
+#'  # arithmetic
+#'  x = observed(-1:12)
+#'  a = x + 1
+#'  b = 2 * x + 3
+#'  c = x %% 2
+#'  d = x %/% 5
+#'
+#'  # logical
+#'  e = (x > 1) | (x < 1)
+#'  f = e & (x < 2)
+#'  g = !f
 NULL
 
 # use S3 dispatch to apply the operators
@@ -27,8 +49,13 @@ NULL
 
 #' @export
 `-.node` <- function (e1, e2) {
-  check_dims(e1, e2)
-  op("`-`", e1, e2)
+  # handle unary minus
+  if (missing(e2)) {
+    op("`-`", e1)
+  } else {
+    check_dims(e1, e2)
+    op("`-`", e1, e2)
+  }
 }
 
 #' @export
@@ -44,29 +71,22 @@ NULL
 }
 
 #' @export
-`log.node` <- function (e1) {
-  op("tf$log", e1)
+`^.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("tf$pow", e1, e2)
 }
 
 #' @export
-`exp.node` <- function (e1) {
-  op("tf$exp", e1)
+`%%.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`%%`", e1, e2)
 }
 
 #' @export
-`t.node` <- function (e1) {
-
-  # reverse the dimensions
-  dimfun <- function (node_list) {
-    x <- node_list[[1]]
-    if (length(x$dim) != 2)
-      stop ('only 2D arrays can be transposed')
-    rev(x$dim)
-  }
-
-  op("tf$transpose", e1, dimfun = dimfun)
+`%/%.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`%/%`", e1, e2)
 }
-
 
 # overload %*% as an S3 generic
 # would rather get S4 version working properly, but uuurgh S4.
@@ -116,3 +136,23 @@ NULL
 
 }
 
+
+# logical operators
+#' @export
+`!.node` <- function (e1) {
+  op("`!`", e1)
+}
+
+#' @export
+`&.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`&`", e1, e2)
+}
+
+#' @export
+`|.node` <- function (e1, e2) {
+  check_dims(e1, e2)
+  op("`|`", e1, e2)
+}
+
+# relational operators
