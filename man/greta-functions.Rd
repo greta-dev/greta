@@ -2,16 +2,61 @@
 % Please edit documentation in R/functions.R
 \name{greta-functions}
 \alias{greta-functions}
-\title{functions for greta nodes}
+\title{R functions that work for greta nodes}
 \description{
-This is a list of currently implemented functions to transform
- greta nodes. More will follow.
+This is a list of functions in base R that are currently
+  implemented to transform greta nodes.
+}
+\details{
+TensorFlow only enables rounding to integers, so \code{round()} will
+  error is set to anything other than \code{0}. Any additional arguments to
+  \code{chol()} will be ignored, see the TensorFlow documentation for details
+  of the cholesky routine.
 }
 \section{Usage}{
  \preformatted{
+
+ # logarithms and exponentials
  log(x)
  exp(x)
+ log1p(x)
+ expm1(x)
+
+ # miscellaneous mathematics
+ abs(x)
+ sqrt(x)
+ sign(x)
+
+ # rounding of numbers
+ ceiling(x)
+ floor(x)
+ round(x, digits = 0)
+
+ # trigonometry
+ cos(x)
+ sin(x)
+ tan(x)
+ acos(x)
+ asin(x)
+ atan(x)
+
+ # special mathematical functions
+ lgamma(x)
+ digamma(x)
+
+ # matrix operations
  t(x)
+ chol(x, ...)
  }
+}
+\examples{
+x = observed(matrix(1:9, nrow = 3, ncol = 3))
+a = log(exp(x))
+b = log1p(expm1(x))
+c = sign(x - 5)
+d = abs(x - 5)
+
+z = t(a)
+
 }
 
