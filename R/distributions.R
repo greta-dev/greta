@@ -4,12 +4,6 @@ flat_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    from_free = function (x) {
-      upper <- self$parameters$upper$value()
-      lower <- self$parameters$lower$value()
-      plogis(x) * (upper - lower) + lower
-    },
-
     to_free = function (y) {
       upper <- self$parameters$upper$value()
       lower <- self$parameters$lower$value()
@@ -41,8 +35,6 @@ flat_distribution <- R6Class (
       self$add_parameter(upper, 'upper')
     },
 
-    log_density_function = function (value, parameters) 0,
-
     tf_log_density_function = function (value, parameters)
       tf$constant(0, dtype = tf$float32)
 
@@ -54,16 +46,12 @@ free_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    from_free = function (x) x,
-
     to_free = function (y) y,
 
     tf_from_free = function (x, env) x,
 
     initialize = function (dim = 1)
       super$initialize('free', dim),
-
-    log_density_function = function (value, parameters) 0,
 
     tf_log_density_function = function (value, parameters)
       tf$constant(0, dtype = tf$float32)
@@ -76,7 +64,6 @@ normal_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    from_free = function (x) x,
     to_free = function (y) y,
 
     tf_from_free = function (x, env) x,
@@ -88,17 +75,8 @@ normal_distribution <- R6Class (
       self$add_parameter(sigma, 'sigma')
     },
 
-    log_density_function = function (x) {
-      # convert to tensorflow later
-      dnorm(x,
-            self$parameters$mu$value(),
-            self$parameters$sigma$value(),
-            log = TRUE)
-    },
-
     tf_log_density_function = function (x, parameters) {
 
-      x <- x
       mu <- parameters$mu
       var <- tf$square(parameters$sigma)
 
@@ -114,7 +92,6 @@ lognormal_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    from_free = exp,
     to_free = log,
     tf_from_free = function (x, env) tf$exp(x),
 
@@ -122,14 +99,6 @@ lognormal_distribution <- R6Class (
       super$initialize('lognormal', dim)
       self$add_parameter(mu, 'mu')
       self$add_parameter(sigma, 'sigma')
-    },
-
-    log_density_function = function (x) {
-      # convert to tensorflow later
-      dlnorm(x,
-             self$parameters$mu$value(),
-             self$parameters$sigma$value(),
-             log = TRUE)
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -202,7 +171,6 @@ flat <- function (range, dim = 1) {
   }
   flat_distribution$new(lower = range[1], upper = range[2], dim = dim)
 }
-
 
 #' @rdname distributions
 #' @export
