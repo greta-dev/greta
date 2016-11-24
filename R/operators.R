@@ -3,7 +3,8 @@
 #' @title operators for greta nodes
 #'
 #' @description This is a list of currently implemented arithmetic, logical and
-#'   relational operators to combine greta nodes into probabilistic models.
+#'   relational operators to combine greta nodes into probabilistic models. Also
+#'   see \link{greta-functions} and \link{greta-transforms}.
 #'
 #' @section Usage: \preformatted{
 #'  # arithmetic operators

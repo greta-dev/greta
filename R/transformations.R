@@ -1,8 +1,11 @@
 #' @name greta-transforms
 #' @aliases greta-inverse-links
 #' @title transformation functions for greta nodes
-#' @description parameter transformations for greta nodes, which may also be
-#'   used as inverse link functions
+#'
+#' @description transformations for greta nodes, which may also be
+#'   used as inverse link functions. Also see \link{greta-operators} and
+#'   \link{greta-functions}.
+#'
 #' @param x a real-valued (i.e. values ranging from -Inf to Inf) greta node to
 #'   transform to a constrained value
 #' @details greta does not allow you to state the transformation/link on the

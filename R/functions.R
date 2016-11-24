@@ -3,7 +3,8 @@
 #' @title R functions that work for greta nodes
 #'
 #' @description This is a list of functions in base R that are currently
-#'   implemented to transform greta nodes.
+#'   implemented to transform greta nodes. Also see \link{greta-operators} and
+#'   \link{greta-transforms}.
 #'
 #' @section Usage: \preformatted{
 #'

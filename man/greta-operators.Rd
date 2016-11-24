@@ -5,7 +5,8 @@
 \title{operators for greta nodes}
 \description{
 This is a list of currently implemented arithmetic, logical and
-  relational operators to combine greta nodes into probabilistic models.
+  relational operators to combine greta nodes into probabilistic models. Also
+  see \link{greta-functions} and \link{greta-transforms}.
 }
 \details{
 greta's operators are used just like R's the standard arithmetic,

@@ -6,6 +6,31 @@
 \alias{greta-package}
 \title{greta: Probabilistic Modelling with TensorFlow}
 \description{
-greta: Probabilistic Modelling with TensorFlow
+greta lets you write probabilistic models interactively in
+  native R code, then sample from them efficiently using Hamiltonian Monte
+  Carlo.
+
+  The computational heavy lifting is done by TensorFlow, Google's automatic
+  differentiation library. greta is particularly fast where the model
+  contains lots of linear algebra, and greta models can be easily set up to
+  run across CPUs or GPUs just by installing the relevant version of
+  TensorFlow.
+
+  See the example below for the general set up of a greta model, and
+  \link{greta-distributions}, \link{greta-operators}, \link{greta-functions},
+  and \link{greta-transforms} for details of the currently implemeted
+  distributions and how to combine them into mode.ls
+}
+\examples{
+# define a simple model
+mu = free()
+sigma = lognormal(1, 0.1)
+x = observed(rnorm(10))
+x \%~\% normal(mu, sigma)
+
+# and sample from it
+draws <- sample(mu, sigma,
+                n_samples = 100,
+                warmup = 10)
 }
 

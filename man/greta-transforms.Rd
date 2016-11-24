@@ -25,8 +25,9 @@ log1pe(x)
 transform to a constrained value}
 }
 \description{
-parameter transformations for greta nodes, which may also be
-  used as inverse link functions
+transformations for greta nodes, which may also be
+  used as inverse link functions. Also see \link{greta-operators} and
+  \link{greta-functions}.
 }
 \details{
 greta does not allow you to state the transformation/link on the
