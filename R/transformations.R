@@ -32,8 +32,10 @@
 NULL
 
 # inverse link functions in tensorflow
-tf_iprobit <- function (x)
-  (tf$erf(x / sqrt(2)) + 1) / 2
+tf_iprobit <- function (x) {
+  sqrt2 <- tf$constant(sqrt(2))
+  (tf$erf(x / sqrt2) + 1) / 2
+}
 
 tf_ilogit <- function (x)
   1 / (1 + exp(-x))
@@ -49,42 +51,22 @@ tf_log1pe <- function (x)
 
 #' @rdname greta-transforms
 #' @export
-iprobit <- function (x) {
-  if (!inherits(node))
-    stop ('can only be applied to a greta node')
-  op('tf_iprobit', x)
-}
+iprobit <- function (x) op('tf_iprobit', x)
 
 #' @rdname greta-transforms
 #' @export
-ilogit <- function (x) {
-  if (!inherits(node))
-    stop ('can only be applied to a greta node')
-  op('tf_ilogit', x)
-}
+ilogit <- function (x) op('tf_ilogit', x)
 
 #' @rdname greta-transforms
 #' @export
-icloglog <- function (x) {
-  if (!inherits(node))
-    stop ('can only be applied to a greta node')
-  op('tf_icloglog', x)
-}
+icloglog <- function (x) op('tf_icloglog', x)
 
 #' @rdname greta-transforms
 #' @export
-icauchit <- function (x) {
-  if (!inherits(node))
-    stop ('can only be applied to a greta node')
-  op('tf_icauchit', x)
-}
+icauchit <- function (x) op('tf_icauchit', x)
 
 #' @rdname greta-transforms
 #' @export
-log1pe <- function (x) {
-  if (!inherits(node))
-    stop ('can only be applied to a greta node')
-  op('tf_log1pe', x)
-}
+log1pe <- function (x) op('tf_log1pe', x)
 
 
