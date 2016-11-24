@@ -78,6 +78,13 @@ dag_class <- R6Class(
     # define tf graph in environment
     define_tf = function () {
 
+      # check for unfixed discrete random variables
+      bad_nodes <- vapply(self$children,
+                          function(x) x$type == 'stochastic' && x$discrete && !x$.fixed_value,
+                          FALSE)
+      if (any(bad_nodes))
+        stop ('the model contains an unobserved discrete random variable, so cannot be sampled from')
+
       # define all nodes, node densities and free states in the environment
       lapply(self$children,
              function (x) x$define_tf(self$tf_environment))
