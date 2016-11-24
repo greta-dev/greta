@@ -151,22 +151,22 @@ binomial_distribution <- R6Class (
     tf_from_free = function (x, env)
       stop ('cannot infer discrete random variables'),
 
-    initialize = function (trials, p, dim = 1) {
+    initialize = function (size, p, dim = 1) {
       # add the nodes as children and parameters
       super$initialize('binomial', dim, discrete = TRUE)
-      self$add_parameter(trials, 'trials')
+      self$add_parameter(size, 'size')
       self$add_parameter(p, 'p')
 
     },
 
     tf_log_density_function = function (x, parameters) {
 
-      trials <- parameters$trials
+      size <- parameters$size
       p <- parameters$p
 
-      log_choose <- tf$lgamma(trials + 1) - tf$lgamma(x + 1) -
-        tf$lgamma(trials - x + 1)
-      log_choose + x * tf$log(p) + (trials - x) * tf$log(1 - p)
+      log_choose <- tf$lgamma(size + 1) - tf$lgamma(x + 1) -
+        tf$lgamma(size - x + 1)
+      log_choose + x * tf$log(p) + (size - x) * tf$log(1 - p)
 
     }
 
@@ -194,6 +194,38 @@ poisson_distribution <- R6Class (
 
       lambda <- parameters$lambda
       x * tf$log(lambda) - lambda - tf$lgamma(x + 1)
+
+    }
+
+  )
+)
+
+negative_binomial_distribution <- R6Class (
+  'negative_binomial_distribution',
+  inherit = distribution,
+  public = list(
+
+    to_free = function (y)
+      stop ('cannot infer discrete random variables'),
+
+    tf_from_free = function (x, env)
+      stop ('cannot infer discrete random variables'),
+
+    initialize = function (p, r, dim = 1) {
+      # add the nodes as children and parameters
+      super$initialize('negative_binomial', dim, discrete = TRUE)
+      self$add_parameter(p, 'p')
+      self$add_parameter(r, 'r')
+    },
+
+    tf_log_density_function = function (x, parameters) {
+
+      r <- parameters$r
+      p <- parameters$p
+
+      log_choose <- tf$lgamma(x + r) - tf$lgamma(x + 1) -
+        tf$lgamma(r)
+      log_choose + r * tf$log(p) + x * tf$log(1 - p)
 
     }
 
@@ -252,7 +284,6 @@ exponential_distribution <- R6Class (
   )
 )
 
-
 student_distribution <- R6Class (
   'student_distribution',
   inherit = distribution,
@@ -290,22 +321,22 @@ beta_distribution <- R6Class (
     to_free = function (y) qlogis(y),
     tf_from_free = function (x, env) tf_ilogit(x),
 
-    initialize = function (alpha, beta, dim = 1) {
+    initialize = function (shape1, shape2, dim = 1) {
       # add the nodes as children and parameters
       super$initialize('beta', dim)
-      self$add_parameter(alpha, 'alpha')
-      self$add_parameter(beta, 'beta')
+      self$add_parameter(shape1, 'shape2')
+      self$add_parameter(shape2, 'shape2')
     },
 
     tf_log_density_function = function (x, parameters) {
 
-      alpha <- parameters$alpha
-      beta <- parameters$beta
+      shape1 <- parameters$shape1
+      shape2 <- parameters$shape2
 
-      (alpha - 1) * tf$log(x) +
-        (beta - 1) * tf$log(1 - x) +
-        tf$lgamma(alpha + beta) -
-        tf$lgamma(alpha) - tf$lgamma(beta)
+      (shape1 - 1) * tf$log(x) +
+        (shape2 - 1) * tf$log(1 - x) +
+        tf$lgamma(shape1 + shape2) -
+        tf$lgamma(shape1) - tf$lgamma(shape2)
 
     }
 
@@ -325,15 +356,16 @@ beta_distribution <- R6Class (
 #' @param mu unconstrained parameter
 #' @param sigma positive parameter (\code{sigma > 0})
 #' @param p probability parameter (\code{0 < p < 1})
-#' @param trials positive integer parameter (\code{trials} in \code{{1, 2, 3, ...}})
+#' @param size positive integer parameter (\code{size} in \code{{1, 2, 3, ...}})
+#' @param r positive parameter (\code{r > 0})
 #' @param lambda positive parameter (\code{lambda > 0})
 #' @param shape positive parameter (\code{shape > 0})
 #' @param scale positive parameter (\code{scale > 0})
 #' @param rate positive parameter (\code{rate > 0})
 #' @param mean unconstrained parameter
 #' @param df positive parameter (\code{df > 0})
-#' @param alpha positive parameter (\code{alpha > 0})
-#' @param beta positive parameter (\code{beta > 0})
+#' @param shape1 positive parameter (\code{shape1 > 0})
+#' @param shape2 positive parameter (\code{shape2 > 0})
 #'
 #' @param range a finite, length 2 numeric vector giving the range of values to
 #'   which \code{flat} distributions are constrained. The first element must
@@ -391,8 +423,13 @@ bernoulli <- function (p, dim = 1)
 
 #' @rdname greta-distributions
 #' @export
-binomial <- function (trials, p, dim = 1)
-  binomial_distribution$new(trials, p, dim = dim)
+binomial <- function (size, p, dim = 1)
+  binomial_distribution$new(size, p, dim = dim)
+
+#' @rdname greta-distributions
+#' @export
+negative_binomial <- function (p, r, dim = 1)
+  negative_binomial_distribution$new(p, r, dim = dim)
 
 #' @rdname greta-distributions
 #' @export
@@ -416,8 +453,8 @@ student <- function (mean, df, dim = 1)
 
 #' @rdname greta-distributions
 #' @export
-beta <- function (alpha, beta, dim = 1)
-  beta_distribution$new(alpha, beta, dim = dim)
+beta <- function (shape1, shape2, dim = 1)
+  beta_distribution$new(shape1, shape2, dim = dim)
 
 #' @rdname greta-distributions
 #' @export

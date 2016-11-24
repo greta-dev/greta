@@ -10,6 +10,7 @@
 \alias{gamma}
 \alias{greta-distributions}
 \alias{lognormal}
+\alias{negative_binomial}
 \alias{normal}
 \alias{poisson}
 \alias{student}
@@ -23,7 +24,9 @@ lognormal(mu, sigma, dim = 1)
 
 bernoulli(p, dim = 1)
 
-binomial(trials, p, dim = 1)
+binomial(size, p, dim = 1)
+
+negative_binomial(p, r, dim = 1)
 
 poisson(lambda, dim = 1)
 
@@ -33,7 +36,7 @@ exponential(rate, dim = 1)
 
 student(mean, df, dim = 1)
 
-beta(alpha, beta, dim = 1)
+beta(shape1, shape2, dim = 1)
 
 flat(range, dim = 1)
 }
@@ -46,7 +49,9 @@ flat(range, dim = 1)
 
 \item{p}{probability parameter (\code{0 < p < 1})}
 
-\item{trials}{positive integer parameter (\code{trials} in \code{{1, 2, 3, ...}})}
+\item{size}{positive integer parameter (\code{size} in \code{{1, 2, 3, ...}})}
+
+\item{r}{positive parameter (\code{r > 0})}
 
 \item{lambda}{positive parameter (\code{lambda > 0})}
 
@@ -60,9 +65,9 @@ flat(range, dim = 1)
 
 \item{df}{positive parameter (\code{df > 0})}
 
-\item{alpha}{positive parameter (\code{alpha > 0})}
+\item{shape1}{positive parameter (\code{shape1 > 0})}
 
-\item{beta}{positive parameter (\code{beta > 0})}
+\item{shape2}{positive parameter (\code{shape2 > 0})}
 
 \item{range}{a finite, length 2 numeric vector giving the range of values to
 which \code{flat} distributions are constrained. The first element must
