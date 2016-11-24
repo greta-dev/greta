@@ -3,6 +3,7 @@
 \name{greta-distributions}
 \alias{bernoulli}
 \alias{beta}
+\alias{binomial}
 \alias{exponential}
 \alias{flat}
 \alias{free}
@@ -22,6 +23,8 @@ lognormal(mu, sigma, dim = 1)
 
 bernoulli(p, dim = 1)
 
+binomial(trials, p, dim = 1)
+
 poisson(lambda, dim = 1)
 
 gamma(shape, scale, dim = 1)
@@ -37,27 +40,29 @@ flat(range, dim = 1)
 \arguments{
 \item{dim}{the dimensions of the variable, by default a scalar}
 
-\item{mu}{unconstrained distribution parameter}
+\item{mu}{unconstrained parameter}
 
-\item{sigma}{positive distribution parameter (\code{sigma > 0})}
+\item{sigma}{positive parameter (\code{sigma > 0})}
 
-\item{p}{probability distribution parameter (\code{0 < p < 1})}
+\item{p}{probability parameter (\code{0 < p < 1})}
 
-\item{lambda}{positive distribution parameter (\code{lambda > 0})}
+\item{trials}{positive integer parameter (\code{trials} in \code{{1, 2, 3, ...}})}
 
-\item{shape}{positive distribution parameter (\code{shape > 0})}
+\item{lambda}{positive parameter (\code{lambda > 0})}
 
-\item{scale}{positive distribution parameter (\code{scale > 0})}
+\item{shape}{positive parameter (\code{shape > 0})}
 
-\item{rate}{positive distribution parameter (\code{rate > 0})}
+\item{scale}{positive parameter (\code{scale > 0})}
 
-\item{mean}{unconstrained distribution parameter}
+\item{rate}{positive parameter (\code{rate > 0})}
 
-\item{df}{positive distribution parameter (\code{df > 0})}
+\item{mean}{unconstrained parameter}
 
-\item{alpha}{positive distribution parameter (\code{alpha > 0})}
+\item{df}{positive parameter (\code{df > 0})}
 
-\item{beta}{positive distribution parameter (\code{beta > 0})}
+\item{alpha}{positive parameter (\code{alpha > 0})}
+
+\item{beta}{positive parameter (\code{beta > 0})}
 
 \item{range}{a finite, length 2 numeric vector giving the range of values to
 which \code{flat} distributions are constrained. The first element must

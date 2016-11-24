@@ -140,6 +140,39 @@ bernoulli_distribution <- R6Class (
   )
 )
 
+binomial_distribution <- R6Class (
+  'binomial_distribution',
+  inherit = distribution,
+  public = list(
+
+    to_free = function (y)
+      stop ('cannot infer discrete random variables'),
+
+    tf_from_free = function (x, env)
+      stop ('cannot infer discrete random variables'),
+
+    initialize = function (trials, p, dim = 1) {
+      # add the nodes as children and parameters
+      super$initialize('binomial', dim, discrete = TRUE)
+      self$add_parameter(trials, 'trials')
+      self$add_parameter(p, 'p')
+
+    },
+
+    tf_log_density_function = function (x, parameters) {
+
+      trials <- parameters$trials
+      p <- parameters$p
+
+      log_choose <- tf$lgamma(trials + 1) - tf$lgamma(x + 1) -
+        tf$lgamma(trials - x + 1)
+      log_choose + x * tf$log(p) + (trials - x) * tf$log(1 - p)
+
+    }
+
+  )
+)
+
 poisson_distribution <- R6Class (
   'poisson_distribution',
   inherit = distribution,
@@ -289,17 +322,18 @@ beta_distribution <- R6Class (
 #'   variables in a greta model. They return a 'node' object that can be
 #'   combined with other nodes to construct a model.
 #'
-#' @param mu unconstrained distribution parameter
-#' @param sigma positive distribution parameter (\code{sigma > 0})
-#' @param p probability distribution parameter (\code{0 < p < 1})
-#' @param lambda positive distribution parameter (\code{lambda > 0})
-#' @param shape positive distribution parameter (\code{shape > 0})
-#' @param scale positive distribution parameter (\code{scale > 0})
-#' @param rate positive distribution parameter (\code{rate > 0})
-#' @param mean unconstrained distribution parameter
-#' @param df positive distribution parameter (\code{df > 0})
-#' @param alpha positive distribution parameter (\code{alpha > 0})
-#' @param beta positive distribution parameter (\code{beta > 0})
+#' @param mu unconstrained parameter
+#' @param sigma positive parameter (\code{sigma > 0})
+#' @param p probability parameter (\code{0 < p < 1})
+#' @param trials positive integer parameter (\code{trials} in \code{{1, 2, 3, ...}})
+#' @param lambda positive parameter (\code{lambda > 0})
+#' @param shape positive parameter (\code{shape > 0})
+#' @param scale positive parameter (\code{scale > 0})
+#' @param rate positive parameter (\code{rate > 0})
+#' @param mean unconstrained parameter
+#' @param df positive parameter (\code{df > 0})
+#' @param alpha positive parameter (\code{alpha > 0})
+#' @param beta positive parameter (\code{beta > 0})
 #'
 #' @param range a finite, length 2 numeric vector giving the range of values to
 #'   which \code{flat} distributions are constrained. The first element must
@@ -354,6 +388,11 @@ lognormal <- function (mu, sigma, dim = 1)
 #' @export
 bernoulli <- function (p, dim = 1)
   bernoulli_distribution$new(p, dim = dim)
+
+#' @rdname greta-distributions
+#' @export
+binomial <- function (trials, p, dim = 1)
+  binomial_distribution$new(trials, p, dim = dim)
 
 #' @rdname greta-distributions
 #' @export
