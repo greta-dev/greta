@@ -16,58 +16,38 @@
 \alias{student}
 \title{greta probability distributions}
 \usage{
-free(dim = 1)
+normal(mean, sd, dim = 1)
 
-normal(mu, sigma, dim = 1)
+lognormal(meanlog, sdlog, dim = 1)
 
-lognormal(mu, sigma, dim = 1)
+bernoulli(prob, dim = 1)
 
-bernoulli(p, dim = 1)
+binomial(size, prob, dim = 1)
 
-binomial(size, p, dim = 1)
-
-negative_binomial(p, r, dim = 1)
+negative_binomial(size, prob, dim = 1)
 
 poisson(lambda, dim = 1)
 
-gamma(shape, scale, dim = 1)
+gamma(shape, rate, dim = 1)
 
 exponential(rate, dim = 1)
 
-student(mean, df, dim = 1)
+student(df, ncp, dim = 1)
 
 beta(shape1, shape2, dim = 1)
 
-flat(range, dim = 1)
+free(dim = 1)
+
+flat(range, dim)
 }
 \arguments{
+\item{mean, meanlog, ncp}{unconstrained parameters}
+
+\item{sd, sdlog, size, lambda, shape, scale, rate, df, shape1, shape2}{positive parameters}
+
 \item{dim}{the dimensions of the variable, by default a scalar}
 
-\item{mu}{unconstrained parameter}
-
-\item{sigma}{positive parameter (\code{sigma > 0})}
-
-\item{p}{probability parameter (\code{0 < p < 1})}
-
-\item{size}{positive integer parameter (\code{size} in \code{{1, 2, 3, ...}})}
-
-\item{r}{positive parameter (\code{r > 0})}
-
-\item{lambda}{positive parameter (\code{lambda > 0})}
-
-\item{shape}{positive parameter (\code{shape > 0})}
-
-\item{scale}{positive parameter (\code{scale > 0})}
-
-\item{rate}{positive parameter (\code{rate > 0})}
-
-\item{mean}{unconstrained parameter}
-
-\item{df}{positive parameter (\code{df > 0})}
-
-\item{shape1}{positive parameter (\code{shape1 > 0})}
-
-\item{shape2}{positive parameter (\code{shape2 > 0})}
+\item{prob}{probability parameter (\code{0 < prob < 1})}
 
 \item{range}{a finite, length 2 numeric vector giving the range of values to
 which \code{flat} distributions are constrained. The first element must
@@ -84,8 +64,13 @@ Most of these distributions have non-uniform probability densities,
   therefore be used as parameters in likelihood (rather than Bayesian)
   inference.
 
-  The discrete probability distributions (\code{bernoulli}, \code{poisson})
-  can be used as likelihoods, but not as unknown variables.
+  The discrete probability distributions (\code{bernoulli}, \code{binomial},
+  \code{negative_binomial}, \code{poisson}) can be used as likelihoods, but
+  not as unknown variables.
+
+  Wherever possible, the parameterisation of these distributions matches the
+  those in the \code{stats} package. E.g. for the parameterisation of
+  \code{negative_binomial()}, see \code{\link{dnbinom}}.
 }
 \examples{
 # a fixed distribution, e.g. for a prior
