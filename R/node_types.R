@@ -104,6 +104,7 @@ operation_node <- R6Class(
 
     type = 'operation',
     .operation = NA,
+    .operation_args = NA,
     arguments = list(),
 
     add_argument = function (argument) {
@@ -114,7 +115,10 @@ operation_node <- R6Class(
 
     },
 
-    initialize = function (operation, ..., dimfun = NULL) {
+    initialize = function (operation,
+                           ...,
+                           dimfun = NULL,
+                           operation_args = list()) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), to_node)
@@ -122,6 +126,7 @@ operation_node <- R6Class(
         self$add_argument(node)
 
       self$.operation <- operation
+      self$.operation_args <- operation_args
 
       # work out the dimensions of the new node, if NULL assume an elementwise
       # operation and get the largest number of each dimension, otherwise expect
@@ -164,6 +169,10 @@ operation_node <- R6Class(
       # fetch the tensors for the environment
       arg_names <- self$child_names(recursive = FALSE)
       args <- lapply(arg_names, function (x) get(x, envir = env))
+
+      # fetch additional (non-tensor) arguments, if any
+      if (length(self$.operation_args) > 0)
+        args <- c(args, self$.operation_args)
 
       # apply function on tensors
       node <- do.call(fun, args)
