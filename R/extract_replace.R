@@ -125,6 +125,11 @@ tf_replace <- function (x, value, index, dims) {
 #' @export
 `[<-.node` <- function(x, ..., value) {
 
+  if (inherits(x, 'stochastic_node'))
+    stop('cannot replace values in a stochastic node')
+
+  value <- to_node(value)
+
   # store the full call to mimic on a dummy array, plus the array's dimensions
   call <- sys.call()
   dims <- x$dim
@@ -138,6 +143,9 @@ tf_replace <- function (x, value, index, dims) {
   call$value <- NULL
 
   index <- as.vector(eval(call))
+
+  if (length(index) != prod(value$dim))
+    stop('number of items to replace does not match number of items to insert')
 
   # function to return dimensions of output
   dimfun <- function (node_list)
