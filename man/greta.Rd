@@ -18,8 +18,8 @@ greta lets you write probabilistic models interactively in
 
   See the example below for the general set up of a greta model, and
   \link{greta-distributions}, \link{greta-operators}, \link{greta-functions},
-  and \link{greta-transforms} for details of the currently implemeted
-  distributions and how to combine them into mode.ls
+  \link{greta-transforms} and \link{greta-structures} for details of the
+  currently implemented syntax and how to combine them into models
 }
 \examples{
 # define a simple model

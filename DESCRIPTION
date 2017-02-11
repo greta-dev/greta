@@ -35,6 +35,7 @@ Collate:
     'operators.R'
     'functions.R'
     'transformations.R'
+    'structures.R'
     'extract_replace.R'
     'dag_class.R'
     'samplers.R'
