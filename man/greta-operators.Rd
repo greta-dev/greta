@@ -39,14 +39,6 @@ greta's operators are used just like R's the standard arithmetic,
  x >= y
  x == y
  x != y
-
- # extract
- x[i]
- x[i, j, ...]
-
- # replace
- x[i] <- value
- x[i, j, ...] <- value
  }
 }
 \examples{
@@ -67,9 +59,5 @@ greta's operators are used just like R's the standard arithmetic,
  h = x < 1
  i = (-x) >= x
  j = h == x
-
- # extract/replace
- x[1:3]
- x[2:4] <- 1:3
 }
 

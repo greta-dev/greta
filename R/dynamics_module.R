@@ -108,7 +108,6 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
 #'   \code{iterate_lambda_vectorised} is a vectorised version for iterating over
 #'   multiple matrices, returning a vector of growth rates.
 #'
-#' @return
 NULL
 
 #' @name iterate_lambda
