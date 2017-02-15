@@ -13,7 +13,7 @@ tf_iterate_lambda <- function (mat, state, niter) {
 
   # return the final growth rate (should be same for all states at convergence)
   lambda <- states[[niter + 1]][1] / states[[niter]][1]
-  lambda
+  tf$reshape(lambda, shape = c(1L, 1L))
 
 }
 
@@ -21,24 +21,22 @@ tf_iterate_lambda <- function (mat, state, niter) {
 # x m^2 matrix, each row being unpacked *rowwise*
 tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
 
-  # create vector to store results
-  lambdas <- tf$zeros(shape(n))
+  # loop through rows, getting lambda
+  lambdas_list <- lapply(seq_len(n) - 1,
+                         function (i) {
+                           mat_i <- tf$reshape(mat[i, ], shape = shape(m, m))
+                           tf_iterate_lambda(mat_i, state, niter)
+                         })
 
-  # loop through matrices
-  for (i in seq_len(n)) {
-
-    # create matrix & iterate it
-    mat_i <- tf$reshape(mat[i, ], shape = shape(m, m))
-    lambdas[i, ] <- tf_iterate_lambda(mat_i, state, niter)
-
-  }
-
+  lambdas <- tf$concat(0L, lambdas_list)
   lambdas
 
 }
 
 # node functions exposed via module
 iterate_lambda <- function(matrix, state, niter) {
+
+  niter <- as.integer(niter)
 
   dimfun <- function(node_list) {
 
@@ -64,9 +62,14 @@ iterate_lambda <- function(matrix, state, niter) {
      state,
      operation_args = list(niter = niter),
      dimfun = dimfun)
+
 }
 
 iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
+
+  n <- as.integer(n)
+  m <- as.integer(m)
+  niter <- as.integer(niter)
 
   dimfun <- function(node_list) {
 
@@ -80,7 +83,7 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
     if (m != state_dim[1])
       stop ('number of elements in state must match the dimension of matrix')
 
-    if (length(matrices_dim) != 2 | matrix_dim[2] != (m ^ 2) | matrix_dim[1] != n)
+    if (length(matrices_dim) != 2 | matrices_dim[2] != (m ^ 2) | matrices_dim[1] != n)
       stop ('matrix must be a rectangular matrix (rank 2 tensor) with dimensions n x m^2')
 
     # output dimensions
@@ -95,6 +98,7 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
                            m = m,
                            niter = niter),
      dimfun = dimfun)
+
 }
 
 #' @name dynamics-module
