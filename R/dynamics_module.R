@@ -21,14 +21,51 @@ tf_iterate_lambda <- function (mat, state, niter) {
 # x m^2 matrix, each row being unpacked *rowwise*
 tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
 
-  # loop through rows, getting lambda
-  lambdas_list <- lapply(seq_len(n) - 1,
-                         function (i) {
-                           mat_i <- tf$reshape(mat[i, ], shape = shape(m, m))
-                           tf_iterate_lambda(mat_i, state, niter)
-                         })
+  # create indices for a block-diagonal sparse matrix
+  # column wise offset to move the matrices along one horizontally
+  offset <- rep(seq_len(n) - 1, each = m ^ 2) * m
+  idx_cols <- rep(seq_len(m), m * n) + offset
+  idx_rows <- rep(rep(seq_len(m), each = m), n) + offset
 
-  lambdas <- tf$concat(0L, lambdas_list)
+  # set up sparse tensor
+  indices <- tf$constant(cbind(idx_rows, idx_cols) - 1,
+                         dtype = tf$int64)
+  values <- tf$reshape(mat,
+                       shape = shape(n * m ^ 2))
+  shape <- tf$constant(as.integer(rep(n * m, 2)),
+                       dtype = tf$int64)
+  full_mat <- tf$SparseTensor(indices = indices,
+                              values = values,
+                              shape = shape)
+
+  # replicate state for all patches
+  state <- tf$tile(state, tf$constant(c(n, 1L), shape = shape(2)))
+
+  # store states (can't overwrite since we need to maintain the chain of nodes)
+  states <- list(state)
+
+  # iterate the matrix
+  for (i in seq_len(niter))
+    states[[i + 1]] <-  tf$sparse_tensor_dense_matmul(full_mat, states[[i]])
+
+  # indices to subset the first state for each patch
+  idx_begin <- tf$constant(c(0L, 0L))
+  idx_end <- tf$constant(c(m * n, 1L))
+  idx_strides <- tf$constant(c(m, 1L))
+
+  # subset these iterated states to get the first state per sub-matrix
+  before <- tf$strided_slice(states[[niter]],
+                             begin = idx_begin,
+                             end = idx_end,
+                             strides = idx_strides)
+
+  after <- tf$strided_slice(states[[niter + 1]],
+                            begin = idx_begin,
+                            end = idx_end,
+                            strides = idx_strides)
+
+  # get growth rate
+  lambdas <- after/before
   lambdas
 
 }
