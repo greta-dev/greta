@@ -68,7 +68,7 @@ samples <- function (...,
 
   # random starting locations
   init <- dag$example_parameters()
-  init[] <- rnorm(length(init))
+  init[] <- rnorm(length(init), 0, 0.1)
 
   # get default control options
   con <- switch(method,
