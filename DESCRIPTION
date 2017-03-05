@@ -36,7 +36,8 @@ Collate:
     'functions.R'
     'transformations.R'
     'structures.R'
-    'extract_replace.R'
+    'extract_replace_combine.R'
+    'dynamics_module.R'
     'dag_class.R'
     'samplers.R'
 Imports:

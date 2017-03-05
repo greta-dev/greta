@@ -1,3 +1,41 @@
+#' @name extract-replace-combine
+#' @aliases extract, replace, cbind, rbind
+#' @title Extract, Replace and Combine Nodes
+#'
+#' @description Generic methods to extract and replace elements of nodes, or to
+#'   combine nodes.
+#'
+#' @section Usage: \preformatted{
+#' # extract
+#' x[i]
+#' x[i, j, ...]
+#'
+#' # replace
+#' x[i] <- value
+#' x[i, j, ...] <- value
+#'
+#' # combine
+#' cbind(...)
+#' rbind(...)
+#' }
+#'
+#' @param i,j indices specifying elements to extract or replace
+#' @param value a node to replace elements
+#' @param ... either further indices specifying elements to extract or replace,
+#'   or multiple nodes to combine (\code{cbind} & \code{rbind})
+#'
+#' @examples
+#'  x = observed(matrix(1:12, 3, 4))
+#'
+#'  # extract/replace
+#'  x[1:3, ]
+#'  x[, 2:4] <- 1:3
+#'
+#'  # combine
+#'  cbind(x[, 2], x[, 1])
+#'  rbind(x[1, ], x[3, ])
+NULL
+
 # map R's extract and replace syntax to tensorflow, for use in operation nodes
 # the following arguments are required:
 #   nelem - number of elements in the original array,
@@ -70,8 +108,8 @@ tf_replace <- function (x, value, index, dims) {
 
   # update the values into a new tensor
   result_flat <- recombine(ref = x_flat,
-                          index = index,
-                          updates = value_flat)
+                           index = index,
+                           updates = value_flat)
 
   # reshape the result
   result <- tf$reshape(result_flat, to_shape(dims))
@@ -158,5 +196,71 @@ tf_replace <- function (x, value, index, dims) {
      dimfun = dimfun,
      operation_args = list(index = index,
                            dims = dims))
+
+}
+
+
+# combine
+
+tf_cbind <- function (...) {
+  node_list <- list(...)
+  tf$concat(1L, node_list)
+}
+
+tf_rbind <- function (...) {
+  node_list <- list(...)
+  tf$concat(0L, node_list)
+}
+
+#' @export
+cbind.node <- function (...) {
+
+  dimfun <- function (node_list) {
+
+    dims <- lapply(node_list, function (x) x$dim)
+    ndims <- vapply(dims, length, FUN.VALUE = 1)
+    if (!all(ndims == 2))
+      stop ('all nodes must be two-dimensional')
+
+    # dimensions
+    rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
+    cols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
+
+    # check all the same
+    if (!all(rows == rows[1]))
+      stop ('all nodes must be have the same number of rows')
+
+    # output dimensions
+    c(rows[1], sum(cols))
+  }
+
+  op('tf_cbind', ..., dimfun = dimfun)
+
+}
+
+#' @export
+rbind.node <- function (...) {
+
+  dimfun <- function (node_list) {
+
+    dims <- lapply(node_list, function (x) x$dim)
+    ndims <- vapply(dims, length, FUN.VALUE = 1)
+    if (!all(ndims == 2))
+      stop ('all nodes must be two-dimensional')
+
+    # dimensions
+    rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
+    cols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
+
+    # check all the same
+    if (!all(cols == cols[1]))
+      stop ('all nodes must be have the same number of columns')
+
+
+    # output dimensions
+    c(sum(rows), cols[1])
+  }
+
+  op('tf_rbind', ..., dimfun = dimfun)
 
 }

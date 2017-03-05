@@ -39,12 +39,16 @@ node <- R6Class(
 
     add_child = function (node) {
 
-      # # register the node if needed
-      # if (!node$registered)
-      #   node$register()
+      # if the node is already listed as a child, clone and re-register it to a
+      # new name
+      if (node$name %in% self$child_names()) {
+        node <- node$clone()
+        node$register()
+      }
 
       # add to list of children
       self$children = c(self$children, node)
+
     },
 
     # get or set the name of this node
