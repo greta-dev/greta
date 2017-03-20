@@ -27,8 +27,8 @@ dag_class <- R6Class(
       for (name in stoch_names) {
 
         # names of tensors
-        free_name <- paste0(stoch_names, '_free')
-        gradient_name <- paste0(stoch_names, '_gradient')
+        free_name <- paste0(name, '_free')
+        gradient_name <- paste0(name, '_gradient')
 
         # define and evaluate the command
         command <- sprintf('%s <- tf$reshape(tf$gradients(joint_density, %s), shape(-1))',
