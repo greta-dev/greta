@@ -147,7 +147,7 @@ operation_node <- R6Class(
     switch_op = function (op) {
       # look up the operation in this table to see if there is a more stable
       # name
-      op_list <- list("`*`" = 'tf$mul')
+      op_list <- list("`*`" = 'tf$multiply')
 
       idx <- match(op, names(op_list))
 

@@ -27,8 +27,8 @@ dag_class <- R6Class(
       for (name in stoch_names) {
 
         # names of tensors
-        free_name <- paste0(stoch_names, '_free')
-        gradient_name <- paste0(stoch_names, '_gradient')
+        free_name <- paste0(name, '_free')
+        gradient_name <- paste0(name, '_gradient')
 
         # define and evaluate the command
         command <- sprintf('%s <- tf$reshape(tf$gradients(joint_density, %s), shape(-1))',
@@ -43,13 +43,10 @@ dag_class <- R6Class(
       gradient_names <- paste0(stoch_names, '_gradient')
 
       # define and evaluate the command
-      command <- sprintf('gradients <- tf$concat(0L, list(%s))',
+      command <- sprintf('gradients <- tf$concat(list(%s), 0L)',
                          paste(gradient_names, collapse = ','))
       eval(parse(text = command),
            envir = self$tf_environment)
-
-
-
 
     },
 
@@ -95,7 +92,7 @@ dag_class <- R6Class(
 
       # start a session and initialise all variables
       self$run_tf(  sess <- tf$Session()  )
-      self$run_tf(  sess$run(tf$initialize_all_variables())  )
+      self$run_tf(  sess$run(tf$global_variables_initializer())  )
 
     },
 
