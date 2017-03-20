@@ -133,7 +133,7 @@ bernoulli_distribution <- R6Class (
     tf_log_density_function = function (x, parameters) {
 
       prob <- parameters$prob
-      tf$log(tf$select(tf$equal(x, 1), prob, 1 - prob))
+      tf$log(tf$where(tf$equal(x, 1), prob, 1 - prob))
 
     }
 

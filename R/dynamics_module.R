@@ -36,7 +36,7 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
                        dtype = tf$int64)
   full_mat <- tf$SparseTensor(indices = indices,
                               values = values,
-                              shape = shape)
+                              dense_shape = shape)
 
   # replicate state for all patches
   state <- tf$tile(state, tf$constant(c(n, 1L), shape = shape(2)))

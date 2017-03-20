@@ -89,8 +89,7 @@ recombine <- function (ref, index, updates) {
   full_list[update_idx] <- update_list
 
   # concatenate the vectors
-  result <- tf$concat(tf$constant(0L),
-                      full_list)
+  result <- tf$concat(full_list, 0L)
 
   # rotate it
   result <- tf$reshape(result, shape(result$get_shape()$as_list()[1]))
@@ -204,12 +203,12 @@ tf_replace <- function (x, value, index, dims) {
 
 tf_cbind <- function (...) {
   node_list <- list(...)
-  tf$concat(1L, node_list)
+  tf$concat(node_list, 1L)
 }
 
 tf_rbind <- function (...) {
   node_list <- list(...)
-  tf$concat(0L, node_list)
+  tf$concat(node_list, 0L)
 }
 
 #' @export
