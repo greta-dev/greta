@@ -80,7 +80,7 @@ normal_distribution <- R6Class (
       mean <- parameters$mean
       var <- tf$square(parameters$sd)
 
-      -0.5 * tf$log(2 * pi) - 0.5 * tf$log(var) - 0.5 * tf$square(tf$sub(mean, x)) / var
+      -0.5 * tf$log(2 * pi) - 0.5 * tf$log(var) - 0.5 * tf$square(tf$subtract(mean, x)) / var
 
     }
 
@@ -107,7 +107,7 @@ lognormal_distribution <- R6Class (
       var <- tf$square(parameters$sdlog)
       lx <- tf$log(x)
 
-      -0.5 * tf$log(2 * pi) - 0.5 * tf$log(var) - 0.5 * tf$square(tf$sub(mean, lx)) / var
+      -0.5 * tf$log(2 * pi) - 0.5 * tf$log(var) - 0.5 * tf$square(tf$subtract(mean, lx)) / var
 
     }
   )
