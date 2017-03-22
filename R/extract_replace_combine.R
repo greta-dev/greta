@@ -1,5 +1,5 @@
 #' @name extract-replace-combine
-#' @aliases extract, replace, cbind, rbind
+#' @aliases extract, replace, cbind, rbind, c, rep
 #' @title Extract, Replace and Combine Nodes
 #'
 #' @description Generic methods to extract and replace elements of nodes, or to
@@ -18,13 +18,21 @@
 #' cbind(...)
 #' rbind(...)
 #' c(..., recursive = FALSE)
+#' rep(x, times, ..., recursive = FALSE)
+#'
 #' }
 #'
 #' @param i,j indices specifying elements to extract or replace
 #' @param value a node to replace elements
-#' @param ... either further indices specifying elements to extract or replace,
-#'   or multiple nodes to combine (\code{cbind} & \code{rbind})
-#' @param recursive generic argument ignored for greta nodes
+#' @param ... either further indices specifying elements to extract or replace
+#'   (\code{[}), or multiple nodes to combine (\code{cbind()}, \code{rbind()} &
+#'   \code{c()}), or generic arguments that are ignored for greta nodes
+#'   (\code{rep()})
+#' @param times a single integer giving the number of times to repeat the
+#'   (column) vector
+#' @param drop,recursive generic arguments that are ignored for greta nodes
+#'
+#' @details \code{c()} and \code{rep()} currently only work with column vectors.
 #'
 #' @examples
 #'  x = observed(matrix(1:12, 3, 4))
@@ -37,6 +45,7 @@
 #'  cbind(x[, 2], x[, 1])
 #'  rbind(x[1, ], x[3, ])
 #'  c(x[, 1], x[, 2])
+#'  rep(x[, 2], 3)
 #'
 NULL
 
@@ -294,5 +303,14 @@ c.node <- function (...) {
   }
 
   op('tf_rbind', ..., dimfun = dimfun)
+
+}
+
+#' @export
+rep.node <- function (x, times, ...) {
+
+  # create a list of these nodes, then concatenate them
+  nodes <- replicate(times, x, simplify = FALSE)
+  do.call(`c.node`, nodes)
 
 }
