@@ -105,7 +105,7 @@ node <- R6Class(
 
       # if it isn't a node already, try to make it a constant node
       if (!is_node(object))
-        object <- constant_node$new(object)
+        object <- data_node$new(object)
 
       object
 

@@ -15,6 +15,7 @@
 \alias{normal}
 \alias{poisson}
 \alias{student}
+\alias{wishart}
 \title{greta probability distributions}
 \usage{
 normal(mean, sd, dim = 1)
@@ -39,23 +40,28 @@ beta(shape1, shape2, dim = 1)
 
 free(dim = 1)
 
-flat(range, dim)
+flat(range, dim = 1)
 
 multivariate_normal(mean, Sigma, dim = 2)
+
+wishart(df, Sigma, dim = 2)
 }
 \arguments{
 \item{mean, meanlog, ncp}{unconstrained parameters}
 
 \item{sd, sdlog, size, lambda, shape, scale, rate, df, shape1, shape2}{positive parameters}
 
-\item{dim}{the dimensions of the variable, for univariate distributions this
-can be greater than 1 to represent multiple independent variables.}
+\item{dim}{the dimensions of the variable. For univariate distributions this
+can be greater than 1 to represent multiple independent variables. For
+multivariate distributions this cannot be smaller than 2.}
 
 \item{prob}{probability parameter (\code{0 < prob < 1})}
 
 \item{range}{a finite, length 2 numeric vector giving the range of values to
 which \code{flat} distributions are constrained. The first element must
 be lower than the second.}
+
+\item{Sigma}{positive definite variance-covariance matrix parameter}
 }
 \description{
 These probability distributions can be used to define random
@@ -93,7 +99,15 @@ thetas = normal(mu, sigma, dim = 3)
 # a matrix of 12 variables drawn from the same hierarchical distribution
 thetas = normal(mu, sigma, dim = c(3, 4))
 
-# a constrained parameter with no density (e.g. for a constrained likelihood model)
+# a constrained variable with no density (e.g. for a constrained likelihood model)
 theta = flat(c(1, 5))
+
+# a multivariate normal variable, with correlation between two elements
+Sig <- diag(4)
+Sig[3, 4] <- Sig[4, 3] <- 0.6
+theta = multivariate_normal(rep(mu, 4), Sig, dim = 4)
+
+# a Wishart variable with the same covariance parameter
+theta = wishart(df = 5, Sigma = Sig, dim = 4)
 }
 
