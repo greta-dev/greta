@@ -14,6 +14,8 @@
 
 \item{...}{either further indices specifying elements to extract or replace,
 or multiple nodes to combine (\code{cbind} & \code{rbind})}
+
+\item{recursive}{generic argument ignored for greta nodes}
 }
 \description{
 Generic methods to extract and replace elements of nodes, or to
@@ -32,6 +34,7 @@ x[i, j, ...] <- value
 # combine
 cbind(...)
 rbind(...)
+c(..., recursive = FALSE)
 }
 }
 \examples{
@@ -39,10 +42,12 @@ rbind(...)
 
  # extract/replace
  x[1:3, ]
- x[, 2:4] <- 1:3
+ x[, 2:4] <- 1:9
 
  # combine
  cbind(x[, 2], x[, 1])
  rbind(x[1, ], x[3, ])
+ c(x[, 1], x[, 2])
+
 }
 

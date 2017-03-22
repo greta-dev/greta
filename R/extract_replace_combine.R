@@ -17,23 +17,27 @@
 #' # combine
 #' cbind(...)
 #' rbind(...)
+#' c(..., recursive = FALSE)
 #' }
 #'
 #' @param i,j indices specifying elements to extract or replace
 #' @param value a node to replace elements
 #' @param ... either further indices specifying elements to extract or replace,
 #'   or multiple nodes to combine (\code{cbind} & \code{rbind})
+#' @param recursive generic argument ignored for greta nodes
 #'
 #' @examples
 #'  x = observed(matrix(1:12, 3, 4))
 #'
 #'  # extract/replace
 #'  x[1:3, ]
-#'  x[, 2:4] <- 1:3
+#'  x[, 2:4] <- 1:9
 #'
 #'  # combine
 #'  cbind(x[, 2], x[, 1])
 #'  rbind(x[1, ], x[3, ])
+#'  c(x[, 1], x[, 2])
+#'
 NULL
 
 # map R's extract and replace syntax to tensorflow, for use in operation nodes
@@ -211,6 +215,8 @@ tf_rbind <- function (...) {
   tf$concat(node_list, 0L)
 }
 
+
+
 #' @export
 cbind.node <- function (...) {
 
@@ -258,6 +264,30 @@ rbind.node <- function (...) {
 
     # output dimensions
     c(sum(rows), cols[1])
+  }
+
+  op('tf_rbind', ..., dimfun = dimfun)
+
+}
+
+
+#' @export
+c.node <- function (...) {
+
+  dimfun <- function (node_list) {
+
+    dims <- lapply(node_list, function (x) x$dim)
+    ndims <- vapply(dims, length, FUN.VALUE = 1)
+    ncols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
+
+    if (any(ndims != 2) | any(ncols != 1) )
+      stop ('all nodes must be (column) vectors')
+
+    # output length
+    nrows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
+
+    # output dimensions
+    c(sum(nrows), 1)
   }
 
   op('tf_rbind', ..., dimfun = dimfun)
