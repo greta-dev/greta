@@ -10,6 +10,7 @@
 \alias{gamma}
 \alias{greta-distributions}
 \alias{lognormal}
+\alias{multivariate_normal}
 \alias{negative_binomial}
 \alias{normal}
 \alias{poisson}
@@ -39,13 +40,16 @@ beta(shape1, shape2, dim = 1)
 free(dim = 1)
 
 flat(range, dim)
+
+multivariate_normal(mean, Sigma, dim = 2)
 }
 \arguments{
 \item{mean, meanlog, ncp}{unconstrained parameters}
 
 \item{sd, sdlog, size, lambda, shape, scale, rate, df, shape1, shape2}{positive parameters}
 
-\item{dim}{the dimensions of the variable, by default a scalar}
+\item{dim}{the dimensions of the variable, for univariate distributions this
+can be greater than 1 to represent multiple independent variables.}
 
 \item{prob}{probability parameter (\code{0 < prob < 1})}
 

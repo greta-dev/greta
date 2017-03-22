@@ -343,6 +343,49 @@ beta_distribution <- R6Class (
   )
 )
 
+# need to add checking of mean and Sigma dimensions
+multivariate_normal_distribution <- R6Class (
+  'multivariate_normal_distribution',
+  inherit = distribution,
+  public = list(
+
+    to_free = function (y) y,
+    tf_from_free = function (x, env) x,
+
+    initialize = function (mean, Sigma, dim = 2) {
+      # add the nodes as children and parameters
+      super$initialize('multivariate_normal', dim)
+      self$add_parameter(mean, 'mean')
+      self$add_parameter(Sigma, 'Sigma')
+    },
+
+    tf_log_density_function = function (x, parameters) {
+
+      mean <- parameters$mean
+      Sigma <- parameters$Sigma
+
+      # number of observations & dimension of distribution
+      nobs <- x$get_shape()$as_list()[2]
+      dim <- x$get_shape()$as_list()[1]
+
+      # Cholesky decomposition of Sigma
+      L <- tf$cholesky(Sigma)
+
+      # whiten (decorrelate) the errors
+      diff <- x - mean
+      diff_col <- tf$reshape(diff, shape(dim, nobs))
+      alpha <- tf$matrix_triangular_solve(L, diff_col, lower = TRUE)
+
+      # calculate density
+      tf$constant(-0.5 * dim * nobs * log(2 * pi)) -
+        tf$constant(nobs, dtype = tf$float32) *
+        tf$reduce_sum(tf$log(tf$diag_part(L))) -
+        tf$constant(0.5) * tf$reduce_sum(tf$square(alpha))
+
+    }
+
+  )
+)
 
 
 # export constructors
@@ -361,7 +404,8 @@ beta_distribution <- R6Class (
 #'   which \code{flat} distributions are constrained. The first element must
 #'   be lower than the second.
 #'
-#' @param dim the dimensions of the variable, by default a scalar
+#' @param dim the dimensions of the variable, for univariate distributions this
+#'   can be greater than 1 to represent multiple independent variables.
 #'
 #' @details Most of these distributions have non-uniform probability densities,
 #'   however the distributions \code{flat} and \code{free} do not. These can
@@ -462,5 +506,30 @@ flat <- function (range, dim) {
     stop ('range must be a length 2 numeric vector in ascending order')
   }
   flat_distribution$new(lower = range[1], upper = range[2], dim = dim)
+}
+
+#' @rdname greta-distributions
+#' @export
+multivariate_normal <- function (mean, Sigma, dim = 2) {
+
+  # check mean has the correct dimensions
+  if (mean$dim[1] != dim) {
+    stop (sprintf('mean has %i rows, but the distribution has dimension %i',
+                  mean$dim[1], dim))
+  }
+
+  # check Sigma is square
+  if (Sigma$dim[1] != Sigma$dim[2]) {
+    stop (sprintf('Sigma must be square, but has %i rows and %i columns',
+                  Sigma$dim[1], Sigma$dim[1]))
+  }
+
+  # Sigma has the correct dimensions
+  if (Sigma$dim[1] != dim) {
+    stop (sprintf('Sigma has dimension %i, but the distribution has dimension %i',
+                  Sigma$dim[1], dim))
+  }
+
+  multivariate_normal_distribution$new(mean, Sigma, dim)
 }
 
