@@ -8,7 +8,7 @@
 #' @section Usage: \preformatted{
 #' # extract
 #' x[i]
-#' x[i, j, ...]
+#' x[i, j, ..., drop = FALSE]
 #'
 #' # replace
 #' x[i] <- value
@@ -132,10 +132,13 @@ tf_replace <- function (x, value, index, dims) {
   # create a dummy array containing the order of elements Python-style
   dummy_in <- dummy(dims_in)
 
-  # subset the dummy array using the original subsetting call
-  call[[1]] <- `[`
-  call[[2]] <- dummy_in
-  dummy_out <- array(eval(call))
+
+  # modify the call, switching to primitive subsetting, changing the target
+  # object, and ensuring no dropping happens
+  call_list <- as.list(call)[-1]
+  call_list[[1]] <- as.name("dummy_in")
+  call_list$drop <- FALSE
+  dummy_out <- do.call(`[`, call_list)
 
   # get number of elements in input and dimension of output
   nelem <- prod(dims_in)
