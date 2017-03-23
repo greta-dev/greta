@@ -210,7 +210,8 @@ stochastic_node <- R6Class (
       } else {
 
         # otherwise, make a Variable tensor to hold the free state
-        tf_obj <- tf$Variable(initial_value = self$value(), dtype = tf$float32)
+        obj <- self$to_free(self$value())
+        tf_obj <- tf$Variable(initial_value = obj, dtype = tf$float32)
 
         # assign this as the free state
         free_name <- sprintf('%s_free',
@@ -287,7 +288,25 @@ stochastic_node <- R6Class (
 
     },
 
-    tf_from_free = function (free_node, env) notimplemented()
+    tf_from_free = function (free_node, env) notimplemented(),
+
+    # overwrite value with option to switch to free state
+    value = function(new_value = NULL, free = FALSE, ...) {
+
+      if (is.null(new_value)) {
+        ans <- super$value(new_value, ...)
+        if (free)
+          ans <- self$to_free(ans)
+
+        return (ans)
+
+      } else {
+
+        super$value(new_value, ...)
+
+      }
+
+    }
 
   )
 )

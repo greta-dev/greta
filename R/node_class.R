@@ -139,7 +139,7 @@ node <- R6Class(
     },
 
     # get or set this nodes' current value
-    value = function (new_value = NULL) {
+    value = function (new_value = NULL, ...) {
 
       if (is.null(new_value)) {
 
