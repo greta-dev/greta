@@ -600,13 +600,13 @@ flat <- function (range, dim = 1) {
 
 #' @rdname greta-distributions
 #' @export
-multivariate_normal <- function (mean, Sigma, dim = 2) {
+multivariate_normal <- function (mean, Sigma, dim) {
   multivariate_normal_distribution$new(mean, Sigma, dim)
 }
 
 #' @rdname greta-distributions
 #' @export
-wishart <- function (df, Sigma, dim = 2) {
+wishart <- function (df, Sigma, dim) {
   wishart_distribution$new(df, Sigma, dim)
 }
 

@@ -42,9 +42,9 @@ free(dim = 1)
 
 flat(range, dim = 1)
 
-multivariate_normal(mean, Sigma, dim = 2)
+multivariate_normal(mean, Sigma, dim)
 
-wishart(df, Sigma, dim = 2)
+wishart(df, Sigma, dim)
 }
 \arguments{
 \item{mean, meanlog, ncp}{unconstrained parameters}
