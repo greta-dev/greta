@@ -417,23 +417,17 @@ wishart_distribution <- R6Class (
     # grab it in lower-triangular form, so it's upper when putting it back in python-style
     to_free = function (y) {
       L <- t(chol(y))
-      L[lower.tri(L, diag = TRUE)]
+      vals <- L[lower.tri(L, diag = TRUE)]
+      matrix(vals)
     },
 
     tf_from_free = function (x, env) {
       dims <- self$parameters$Sigma$dim
-      L_dummy <- matrix(0, dims[1], dims[2])
-      indices <- which(lower.tri(L_dummy, diag = TRUE))
-      rows <- row(L_dummy)[indices]
-      cols <- col(L_dummy)[indices]
-      # reorder
-      indices_2d <- cbind(as.integer(rows - 1),
-                          as.integer(cols - 1))
-      L <- tf$sparse_to_dense(sparse_indices = indices_2d[, 2:1],
-                              output_shape = as.integer(dims),
-                              sparse_values = x, # why won't this re-order?
-                              default_value = 0,
-                              validate_indices = TRUE)
+      L_dummy <- greta:::dummy(dims)
+      indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
+      values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
+      values <- greta:::recombine(values, indices, x)
+      L <- tf$reshape(values, shape(dims[1], dims[2]))
       tf$matmul(tf$transpose(L), L)
     },
 
