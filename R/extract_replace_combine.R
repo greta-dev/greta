@@ -71,7 +71,7 @@ tf_extract <- function (x, nelem, tf_index, dims_out) {
 recombine <- function (ref, index, updates) {
 
   # vector denoting whether an element is being updated
-  nelem <- ref$get_shape()$as_list()
+  nelem <- ref$get_shape()$as_list()[1]
   replaced <- rep(0, nelem)
   replaced[index + 1] <- seq_along(index)
   runs <- rle(replaced)

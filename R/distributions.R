@@ -449,6 +449,9 @@ wishart_distribution <- R6Class (
         stop (sprintf('Sigma has dimension %i, but the distribution has dimension %i',
                       self$parameters$Sigma$dim[1], dim))
       }
+
+      # make the initial value PD
+      self$value(diag(dim))
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -457,7 +460,7 @@ wishart_distribution <- R6Class (
       Sigma <- parameters$Sigma
 
       dist <- tf$contrib$distributions$WishartFull(df = df, scale = Sigma)
-      dist$log_pdf(x)
+      tf$reshape(dist$log_pdf(x), shape(1, 1))
 
     }
 
