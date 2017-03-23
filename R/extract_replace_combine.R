@@ -1,5 +1,5 @@
 #' @name extract-replace-combine
-#' @aliases extract, replace, cbind, rbind
+#' @aliases extract, replace, cbind, rbind, c, rep
 #' @title Extract, Replace and Combine Nodes
 #'
 #' @description Generic methods to extract and replace elements of nodes, or to
@@ -8,7 +8,7 @@
 #' @section Usage: \preformatted{
 #' # extract
 #' x[i]
-#' x[i, j, ...]
+#' x[i, j, ..., drop = FALSE]
 #'
 #' # replace
 #' x[i] <- value
@@ -17,23 +17,36 @@
 #' # combine
 #' cbind(...)
 #' rbind(...)
+#' c(..., recursive = FALSE)
+#' rep(x, times, ..., recursive = FALSE)
+#'
 #' }
 #'
 #' @param i,j indices specifying elements to extract or replace
 #' @param value a node to replace elements
-#' @param ... either further indices specifying elements to extract or replace,
-#'   or multiple nodes to combine (\code{cbind} & \code{rbind})
+#' @param ... either further indices specifying elements to extract or replace
+#'   (\code{[}), or multiple nodes to combine (\code{cbind()}, \code{rbind()} &
+#'   \code{c()}), or generic arguments that are ignored for greta nodes
+#'   (\code{rep()})
+#' @param times a single integer giving the number of times to repeat the
+#'   (column) vector
+#' @param drop,recursive generic arguments that are ignored for greta nodes
+#'
+#' @details \code{c()} and \code{rep()} currently only work with column vectors.
 #'
 #' @examples
 #'  x = observed(matrix(1:12, 3, 4))
 #'
 #'  # extract/replace
 #'  x[1:3, ]
-#'  x[, 2:4] <- 1:3
+#'  x[, 2:4] <- 1:9
 #'
 #'  # combine
 #'  cbind(x[, 2], x[, 1])
 #'  rbind(x[1, ], x[3, ])
+#'  c(x[, 1], x[, 2])
+#'  rep(x[, 2], 3)
+#'
 NULL
 
 # map R's extract and replace syntax to tensorflow, for use in operation nodes
@@ -58,7 +71,7 @@ tf_extract <- function (x, nelem, tf_index, dims_out) {
 recombine <- function (ref, index, updates) {
 
   # vector denoting whether an element is being updated
-  nelem <- ref$get_shape()$as_list()
+  nelem <- ref$get_shape()$as_list()[1]
   replaced <- rep(0, nelem)
   replaced[index + 1] <- seq_along(index)
   runs <- rle(replaced)
@@ -128,10 +141,13 @@ tf_replace <- function (x, value, index, dims) {
   # create a dummy array containing the order of elements Python-style
   dummy_in <- dummy(dims_in)
 
-  # subset the dummy array using the original subsetting call
-  call[[1]] <- `[`
-  call[[2]] <- dummy_in
-  dummy_out <- array(eval(call))
+
+  # modify the call, switching to primitive subsetting, changing the target
+  # object, and ensuring no dropping happens
+  call_list <- as.list(call)[-1]
+  call_list[[1]] <- as.name("dummy_in")
+  call_list$drop <- FALSE
+  dummy_out <- do.call(`[`, call_list)
 
   # get number of elements in input and dimension of output
   nelem <- prod(dims_in)
@@ -211,6 +227,8 @@ tf_rbind <- function (...) {
   tf$concat(node_list, 0L)
 }
 
+
+
 #' @export
 cbind.node <- function (...) {
 
@@ -261,5 +279,38 @@ rbind.node <- function (...) {
   }
 
   op('tf_rbind', ..., dimfun = dimfun)
+
+}
+
+
+#' @export
+c.node <- function (...) {
+
+  dimfun <- function (node_list) {
+
+    dims <- lapply(node_list, function (x) x$dim)
+    ndims <- vapply(dims, length, FUN.VALUE = 1)
+    ncols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
+
+    if (any(ndims != 2) | any(ncols != 1) )
+      stop ('all nodes must be (column) vectors')
+
+    # output length
+    nrows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
+
+    # output dimensions
+    c(sum(nrows), 1)
+  }
+
+  op('tf_rbind', ..., dimfun = dimfun)
+
+}
+
+#' @export
+rep.node <- function (x, times, ...) {
+
+  # create a list of these nodes, then concatenate them
+  nodes <- replicate(times, x, simplify = FALSE)
+  do.call(`c.node`, nodes)
 
 }

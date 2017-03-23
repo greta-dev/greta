@@ -40,13 +40,14 @@
 #'  t(x)
 #'  chol(x, ...)
 #'  diag(x, nrow, ncol)
+#'  solve(a, b, ...)
 #'  }
 #'
 #' @details TensorFlow only enables rounding to integers, so \code{round()} will
 #'   error is set to anything other than \code{0}.
 #'
-#'   Any additional arguments to \code{chol()} will be ignored, see the
-#'   TensorFlow documentation for details of the cholesky routine.
+#'   Any additional arguments to \code{chol()} and \code{solve()} will be
+#'   ignored, see the TensorFlow documentation for details of these routines.
 #'
 #'   \code{diag()} can only be used to extract the diagonal part of a square
 #'   matrix, it cannot be used to create a matrix from a node, nor to assign the
@@ -216,5 +217,66 @@ diag.node <- function (x = 1, nrow, ncol) {
 
   # return the extraction op
   return (op('tf$diag_part', x, dimfun = dimfun))
+
+}
+
+#' @export
+solve.node <- function (a, b, ...) {
+
+  # check the matrix is square
+  if (a$dim[1] != a$dim[2]) {
+    stop (sprintf('a must be square, but has %i rows and %i columns',
+                  a$dim[1], a$dim[2]))
+  }
+
+  # if they just want the matrix inverse, do that
+  if (missing(b)) {
+
+    dimfun <- function (node_list) {
+
+      a <- node_list[[1]]
+
+      # a must be square
+      if (a$dim[1] != a$dim[2]) {
+        stop (sprintf('a must be square, but has %i rows and %i columns',
+                      a$dim[1], a$dim[2]))
+      }
+
+      # return the dimensions
+      a$dim
+
+    }
+
+    return (op("tf$matrix_inverse", a, dimfun = dimfun))
+
+  } else {
+
+
+    dimfun <- function (node_list) {
+
+      a <- node_list[[1]]
+      b <- node_list[[2]]
+
+      # a must be square
+      if (a$dim[1] != a$dim[2]) {
+        stop (sprintf('a must be square, but has %i rows and %i columns',
+                      a$dim[1], a$dim[2]))
+      }
+
+      # b must have the right number of rows
+      if (b$dim[1] != a$dim[1]) {
+        stop (sprintf('b must have the same number of rows as a (%i), but has %i rows instead',
+                      a$dim[1], b$dim[1]))
+      }
+
+      # return the dimensions
+      b$dim
+
+    }
+
+    # ... and solve the linear equations
+    return (op("tf$matrix_solve", a, b))
+
+  }
 
 }

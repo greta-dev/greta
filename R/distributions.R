@@ -343,6 +343,129 @@ beta_distribution <- R6Class (
   )
 )
 
+# need to add checking of mean and Sigma dimensions
+multivariate_normal_distribution <- R6Class (
+  'multivariate_normal_distribution',
+  inherit = distribution,
+  public = list(
+
+    to_free = function (y) y,
+    tf_from_free = function (x, env) x,
+
+    initialize = function (mean, Sigma, dim = 2) {
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('multivariate_normal', dim)
+      self$add_parameter(mean, 'mean')
+      self$add_parameter(Sigma, 'Sigma')
+
+      # check mean has the correct dimensions
+      if (self$parameters$mean$dim[1] != dim) {
+        stop (sprintf('mean has %i rows, but the distribution has dimension %i',
+                      self$parameters$mean$dim[1], dim))
+      }
+
+      # check Sigma is square
+      if (self$parameters$Sigma$dim[1] != self$parameters$Sigma$dim[2]) {
+        stop (sprintf('Sigma must be square, but has %i rows and %i columns',
+                      self$parameters$Sigma$dim[1],
+                      self$parameters$Sigma$dim[1]))
+      }
+
+      # Sigma has the correct dimensions
+      if (self$parameters$Sigma$dim[1] != dim) {
+        stop (sprintf('Sigma has dimension %i, but the distribution has dimension %i',
+                      self$parameters$Sigma$dim[1], dim))
+      }
+    },
+
+    tf_log_density_function = function (x, parameters) {
+
+      mean <- parameters$mean
+      Sigma <- parameters$Sigma
+
+      # number of observations & dimension of distribution
+      nobs <- x$get_shape()$as_list()[2]
+      dim <- x$get_shape()$as_list()[1]
+
+      # Cholesky decomposition of Sigma
+      L <- tf$cholesky(Sigma)
+
+      # whiten (decorrelate) the errors
+      diff <- x - mean
+      diff_col <- tf$reshape(diff, shape(dim, nobs))
+      alpha <- tf$matrix_triangular_solve(L, diff_col, lower = TRUE)
+
+      # calculate density
+      tf$constant(-0.5 * dim * nobs * log(2 * pi)) -
+        tf$constant(nobs, dtype = tf$float32) *
+        tf$reduce_sum(tf$log(tf$diag_part(L))) -
+        tf$constant(0.5) * tf$reduce_sum(tf$square(alpha))
+
+    }
+
+  )
+)
+
+# need to add checking of mean and Sigma dimensions
+wishart_distribution <- R6Class (
+  'wishart_distribution',
+  inherit = distribution,
+  public = list(
+
+    # grab it in lower-triangular form, so it's upper when putting it back in python-style
+    to_free = function (y) {
+      L <- t(chol(y))
+      vals <- L[lower.tri(L, diag = TRUE)]
+      matrix(vals)
+    },
+
+    tf_from_free = function (x, env) {
+      dims <- self$parameters$Sigma$dim
+      L_dummy <- greta:::dummy(dims)
+      indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
+      values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
+      values <- greta:::recombine(values, indices, x)
+      L <- tf$reshape(values, shape(dims[1], dims[2]))
+      tf$matmul(tf$transpose(L), L)
+    },
+
+    initialize = function (df, Sigma, dim = 2) {
+      # add the nodes as children and parameters
+      super$initialize('wishart', c(dim, dim))
+      self$add_parameter(df, 'df')
+      self$add_parameter(Sigma, 'Sigma')
+
+      # check Sigma is square
+      if (self$parameters$Sigma$dim[1] != self$parameters$Sigma$dim[2]) {
+        stop (sprintf('Sigma must be square, but has %i rows and %i columns',
+                      self$parameters$Sigma$dim[1],
+                      self$parameters$Sigma$dim[1]))
+      }
+
+      # Sigma has the correct dimensions
+      if (self$parameters$Sigma$dim[1] != dim) {
+        stop (sprintf('Sigma has dimension %i, but the distribution has dimension %i',
+                      self$parameters$Sigma$dim[1], dim))
+      }
+
+      # make the initial value PD
+      self$value(diag(dim))
+    },
+
+    tf_log_density_function = function (x, parameters) {
+
+      df <- parameters$df
+      Sigma <- parameters$Sigma
+
+      dist <- tf$contrib$distributions$WishartFull(df = df, scale = Sigma)
+      tf$reshape(dist$log_pdf(x), shape(1, 1))
+
+    }
+
+  )
+)
 
 
 # export constructors
@@ -356,12 +479,15 @@ beta_distribution <- R6Class (
 #' @param mean,meanlog,ncp unconstrained parameters
 #' @param sd,sdlog,size,lambda,shape,scale,rate,df,shape1,shape2 positive parameters
 #' @param prob probability parameter (\code{0 < prob < 1})
+#' @param Sigma positive definite variance-covariance matrix parameter
 #'
 #' @param range a finite, length 2 numeric vector giving the range of values to
 #'   which \code{flat} distributions are constrained. The first element must
 #'   be lower than the second.
 #'
-#' @param dim the dimensions of the variable, by default a scalar
+#' @param dim the dimensions of the variable. For univariate distributions this
+#'   can be greater than 1 to represent multiple independent variables. For
+#'   multivariate distributions this cannot be smaller than 2.
 #'
 #' @details Most of these distributions have non-uniform probability densities,
 #'   however the distributions \code{flat} and \code{free} do not. These can
@@ -393,8 +519,16 @@ beta_distribution <- R6Class (
 #' # a matrix of 12 variables drawn from the same hierarchical distribution
 #' thetas = normal(mu, sigma, dim = c(3, 4))
 #'
-#' # a constrained parameter with no density (e.g. for a constrained likelihood model)
+#' # a constrained variable with no density (e.g. for a constrained likelihood model)
 #' theta = flat(c(1, 5))
+#'
+#' # a multivariate normal variable, with correlation between two elements
+#' Sig <- diag(4)
+#' Sig[3, 4] <- Sig[4, 3] <- 0.6
+#' theta = multivariate_normal(rep(mu, 4), Sig, dim = 4)
+#'
+#' # a Wishart variable with the same covariance parameter
+#' theta = wishart(df = 5, Sigma = Sig, dim = 4)
 NULL
 
 #' @rdname greta-distributions
@@ -454,7 +588,7 @@ free <- function (dim = 1)
 
 #' @rdname greta-distributions
 #' @export
-flat <- function (range, dim) {
+flat <- function (range, dim = 1) {
   if (is_node(range))
     stop ('range must be fixed, and cannot be another node')
   if (!(is.vector(range) && length(range) == 2 &&
@@ -462,5 +596,17 @@ flat <- function (range, dim) {
     stop ('range must be a length 2 numeric vector in ascending order')
   }
   flat_distribution$new(lower = range[1], upper = range[2], dim = dim)
+}
+
+#' @rdname greta-distributions
+#' @export
+multivariate_normal <- function (mean, Sigma, dim = 2) {
+  multivariate_normal_distribution$new(mean, Sigma, dim)
+}
+
+#' @rdname greta-distributions
+#' @export
+wishart <- function (df, Sigma, dim = 2) {
+  wishart_distribution$new(df, Sigma, dim)
 }
 

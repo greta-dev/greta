@@ -100,12 +100,13 @@ dag_class <- R6Class(
     run_tf = function (call)
       eval(substitute(call), envir = self$tf_environment),
 
-    # return the expected parameter format either in list or vector form
+    # return the expected free parameter format either in list or vector form
     example_parameters = function (flat = TRUE) {
 
       # get example parameter list for all non-fixed  parameters for the dag
       current_parameters <- self$all_values(type = 'stochastic',
-                                            omit_fixed = TRUE)
+                                            omit_fixed = TRUE,
+                                            free = TRUE)
 
       # optionally flatten them
       if (flat)
@@ -260,7 +261,7 @@ dag_class <- R6Class(
     # get or set values in all descendents as a named list, only for nodes of
     # the named type (if type != NULL), and if omit_fixed = TRUE, omit the
     # fixed values when reporting (ignored when setting)
-    all_values = function (new_values = NULL, type = NULL, omit_fixed = TRUE) {
+    all_values = function (new_values = NULL, type = NULL, omit_fixed = TRUE, free = FALSE) {
 
       # find all nodes of this type in the graph
       node_names <- self$child_names(type = type)
@@ -276,7 +277,7 @@ dag_class <- R6Class(
       if (is.null(new_values)) {
 
         # get all values in a list
-        values <- lapply(nodes, function(x) x$value())
+        values <- lapply(nodes, function(x) x$value(free = free))
         names(values) <- node_names
         return (values)
 
@@ -292,7 +293,7 @@ dag_class <- R6Class(
 
         # then assign them
         for (i in seq_along(nodes))
-          nodes[[i]]$value(new_values[[i]])
+          nodes[[i]]$value(new_values[[i]], free = free)
 
       }
 
