@@ -3,14 +3,14 @@
 \name{greta-likelihood}
 \alias{\%~\%}
 \alias{greta-likelihood}
-\title{create an observed, stochastic node}
+\title{Create an Observed, Stochastic Greta Array}
 \usage{
 data \%~\% distribution
 }
 \arguments{
-\item{data}{a data node, defined using \code{observed()}}
+\item{data}{a fixed greta array, defined using \code{observed()}}
 
-\item{distribution}{a stochastic node, created using a distribution}
+\item{distribution}{a stochastic greta array, created using a distribution}
 }
 \description{
 The likelihood operator is used to link observed data with

@@ -12,6 +12,10 @@ as.greta_array.node <- function (x, ...) {
   ga
 }
 
+# array method (only one defined)
+as.greta_array.array <- function (x, ...)
+  as.greta_array(to_node(x))
+
 # checking class status
 is.greta_array <- function (x)
   inherits(x, 'greta_array')

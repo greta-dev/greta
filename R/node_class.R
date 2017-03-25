@@ -182,6 +182,10 @@ node <- R6Class(
 
   ))
 
+# generic to grab dimensions
+dim.node <- function (x)
+  x$dim
+
 # is this object of class node
 is.node <- function (x)
   inherits(x, 'node')
@@ -191,8 +195,10 @@ to_node <- function (x) {
   if (!is.node(x)) {
     if (is.numeric(x))
       x <- observed(x)
+    else if (is.greta_array(x))
+      x <- x$node
     else
-      stop ('cannot coerce object to observed node')
+      stop ('cannot coerce object to a node')
   }
   x
 }

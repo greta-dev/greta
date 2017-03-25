@@ -17,29 +17,28 @@ in_env <- function (call, env)
 notimplemented <- function ()
   stop ('method not yet implemented')
 
-# is this array actually a scalar?
+# is this greta_array actually a scalar?
 is_scalar <- function (x) {
-  identical(x$dim, c(1L, 1L))
+  identical(dim(x), c(1L, 1L))
 }
-
 
 # check dimensions of arguments to ops
 check_dims <- function(x, y) {
 
   # coerce to nodes
-  x <- to_node(x)
-  y <- to_node(y)
+  x <- as.greta_array(x)
+  y <- as.greta_array(y)
 
   # if one is a scalar, it should be fine
   if ( !( is_scalar(x) | is_scalar(y) ) ) {
 
     # if they're non-scalar, but have the same dimensions, that's fine too
-    if ( !identical(x$dim, y$dim) ) {
+    if ( !identical(dim(x), dim(y)) ) {
 
       # otherwise it's not fine
       msg <- sprintf('incompatible dimensions: %s vs %s',
-                     paste0(x$dim, collapse = 'x'),
-                     paste0(y$dim, collapse = 'x'))
+                     paste0(dim(x), collapse = 'x'),
+                     paste0(dim(y), collapse = 'x'))
       stop (msg)
 
     }

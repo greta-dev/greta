@@ -1,9 +1,9 @@
 #' @name extract-replace-combine
 #' @aliases extract, replace, cbind, rbind, c, rep
-#' @title Extract, Replace and Combine Nodes
+#' @title Extract, Replace and Combine greta Arrays
 #'
-#' @description Generic methods to extract and replace elements of nodes, or to
-#'   combine nodes.
+#' @description Generic methods to extract and replace elements of greta arrays, or to
+#'   combine greta arrays.
 #'
 #' @section Usage: \preformatted{
 #' # extract
@@ -23,14 +23,14 @@
 #' }
 #'
 #' @param i,j indices specifying elements to extract or replace
-#' @param value a node to replace elements
+#' @param value a greta array to replace elements
 #' @param ... either further indices specifying elements to extract or replace
-#'   (\code{[}), or multiple nodes to combine (\code{cbind()}, \code{rbind()} &
-#'   \code{c()}), or generic arguments that are ignored for greta nodes
+#'   (\code{[}), or multiple greta arrays to combine (\code{cbind()}, \code{rbind()} &
+#'   \code{c()}), or generic arguments that are ignored for greta arrays
 #'   (\code{rep()})
 #' @param times a single integer giving the number of times to repeat the
 #'   (column) vector
-#' @param drop,recursive generic arguments that are ignored for greta nodes
+#' @param drop,recursive generic arguments that are ignored for greta arrays
 #'
 #' @details \code{c()} and \code{rep()} currently only work with column vectors.
 #'
@@ -130,17 +130,16 @@ tf_replace <- function (x, value, index, dims) {
 }
 
 
-# extract syntax for nodes
+# extract syntax for greta_array objects
 #' @export
-`[.node` <- function(x, ...) {
+`[.greta_array` <- function(x, ...) {
 
   # store the full call to mimic on a dummy array, plus the array's dimensions
   call <- sys.call()
-  dims_in <- x$dim
+  dims_in <- dim(x)
 
   # create a dummy array containing the order of elements Python-style
   dummy_in <- dummy(dims_in)
-
 
   # modify the call, switching to primitive subsetting, changing the target
   # object, and ensuring no dropping happens
@@ -158,9 +157,8 @@ tf_replace <- function (x, value, index, dims) {
   tf_index <- tf$constant(as.integer(index),
                           dtype = tf$int32)
 
-
   # function to return dimensions of output
-  dimfun <- function (node_list)
+  dimfun <- function (elem_list)
     dims_out
 
   # create operation node, passing call and dims as additional arguments
@@ -173,19 +171,18 @@ tf_replace <- function (x, value, index, dims) {
 
 }
 
-
-# extract syntax for nodes
+# extract syntax for greta array objects
 #' @export
-`[<-.node` <- function(x, ..., value) {
+`[<-.greta_array` <- function(x, ..., value) {
 
-  if (inherits(x, 'stochastic_node'))
-    stop('cannot replace values in a stochastic node')
+  if (inherits(x$node, 'stochastic_node'))
+    stop('cannot replace values in a stochastic greta array')
 
-  value <- to_node(value)
+  value <- as.greta_array(value)
 
   # store the full call to mimic on a dummy array, plus the array's dimensions
   call <- sys.call()
-  dims <- x$dim
+  dims <- dim(x)
 
   # create a dummy array containing the order of elements Python-style
   dummy <- dummy(dims)
@@ -197,11 +194,11 @@ tf_replace <- function (x, value, index, dims) {
 
   index <- as.vector(eval(call))
 
-  if (length(index) != prod(value$dim))
+  if (length(index) != prod(dim(value)))
     stop('number of items to replace does not match number of items to insert')
 
   # function to return dimensions of output
-  dimfun <- function (node_list)
+  dimfun <- function (elem_list)
     dims
 
   # create operation node, passing call and dims as additional arguments
@@ -214,30 +211,26 @@ tf_replace <- function (x, value, index, dims) {
 
 }
 
-
 # combine
-
 tf_cbind <- function (...) {
-  node_list <- list(...)
-  tf$concat(node_list, 1L)
+  elem_list <- list(...)
+  tf$concat(elem_list, 1L)
 }
 
 tf_rbind <- function (...) {
-  node_list <- list(...)
-  tf$concat(node_list, 0L)
+  elem_list <- list(...)
+  tf$concat(elem_list, 0L)
 }
 
-
-
 #' @export
-cbind.node <- function (...) {
+cbind.greta_array <- function (...) {
 
-  dimfun <- function (node_list) {
+  dimfun <- function (elem_list) {
 
-    dims <- lapply(node_list, function (x) x$dim)
+    dims <- lapply(elem_list, dim)
     ndims <- vapply(dims, length, FUN.VALUE = 1)
     if (!all(ndims == 2))
-      stop ('all nodes must be two-dimensional')
+      stop ('all greta arrays must be two-dimensional')
 
     # dimensions
     rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
@@ -245,7 +238,7 @@ cbind.node <- function (...) {
 
     # check all the same
     if (!all(rows == rows[1]))
-      stop ('all nodes must be have the same number of rows')
+      stop ('all greta arrays must be have the same number of rows')
 
     # output dimensions
     c(rows[1], sum(cols))
@@ -256,14 +249,14 @@ cbind.node <- function (...) {
 }
 
 #' @export
-rbind.node <- function (...) {
+rbind.greta_array <- function (...) {
 
-  dimfun <- function (node_list) {
+  dimfun <- function (elem_list) {
 
-    dims <- lapply(node_list, function (x) x$dim)
+    dims <- lapply(elem_list, dim)
     ndims <- vapply(dims, length, FUN.VALUE = 1)
     if (!all(ndims == 2))
-      stop ('all nodes must be two-dimensional')
+      stop ('all greta arrays must be two-dimensional')
 
     # dimensions
     rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
@@ -271,7 +264,7 @@ rbind.node <- function (...) {
 
     # check all the same
     if (!all(cols == cols[1]))
-      stop ('all nodes must be have the same number of columns')
+      stop ('all greta arrays must be have the same number of columns')
 
 
     # output dimensions
@@ -284,16 +277,16 @@ rbind.node <- function (...) {
 
 
 #' @export
-c.node <- function (...) {
+c.greta_array <- function (...) {
 
-  dimfun <- function (node_list) {
+  dimfun <- function (elem_list) {
 
-    dims <- lapply(node_list, function (x) x$dim)
+    dims <- lapply(elem_list, dim)
     ndims <- vapply(dims, length, FUN.VALUE = 1)
     ncols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
 
     if (any(ndims != 2) | any(ncols != 1) )
-      stop ('all nodes must be (column) vectors')
+      stop ('all greta arrays must be (column) vectors')
 
     # output length
     nrows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
@@ -307,10 +300,10 @@ c.node <- function (...) {
 }
 
 #' @export
-rep.node <- function (x, times, ...) {
+rep.greta_array <- function (x, times, ...) {
 
   # create a list of these nodes, then concatenate them
   nodes <- replicate(times, x, simplify = FALSE)
-  do.call(`c.node`, nodes)
+  do.call(`c.greta_array`, nodes)
 
 }

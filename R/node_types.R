@@ -186,7 +186,9 @@ operation_node <- R6Class(
 
 # wrapper to parse inputs before R6 mangles them, & shorthand to speed up the
 # rest of the definitions
-op <- operation_node$new
+op <- function (...) {
+  ga(operation_node$new(...))
+}
 
 
 stochastic_node <- R6Class (

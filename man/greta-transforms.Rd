@@ -8,7 +8,7 @@
 \alias{ilogit}
 \alias{iprobit}
 \alias{log1pe}
-\title{transformation functions for greta nodes}
+\title{Transformation Functions for Greta Arrays}
 \usage{
 iprobit(x)
 
@@ -21,11 +21,11 @@ icauchit(x)
 log1pe(x)
 }
 \arguments{
-\item{x}{a real-valued (i.e. values ranging from -Inf to Inf) greta node to
+\item{x}{a real-valued (i.e. values ranging from -Inf to Inf) greta array to
 transform to a constrained value}
 }
 \description{
-transformations for greta nodes, which may also be
+transformations for greta arrays, which may also be
   used as inverse link functions. Also see \link{greta-operators} and
   \link{greta-functions}.
 }
@@ -38,7 +38,7 @@ greta does not allow you to state the transformation/link on the
   'i') are therefore more likely to useful in modelling, and these are what
   are provided here.
 
-  The log1pe inverse link function is equivalent to \code{log(1 + exp(x))},
+  The \code{log1pe} inverse link function is equivalent to \code{log(1 + exp(x))},
   yielding a positive transformed parameter. Unlike the log transformation,
   this transformation is approximately linear for x > 1. i.e. when \eqn{x >
   1}, \eqn{y \approx x}

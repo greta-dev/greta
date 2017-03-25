@@ -472,8 +472,8 @@ wishart_distribution <- R6Class (
 #' @name greta-distributions
 #' @title greta probability distributions
 #' @description These probability distributions can be used to define random
-#'   variables in a greta model. They return a 'node' object that can be
-#'   combined with other nodes to construct a model.
+#'   variables in a greta model. They return a greta array object that can be
+#'   combined with other greta arrays to construct a model.
 #'
 #' @param mean,meanlog,ncp unconstrained parameters
 #' @param sd,sdlog,size,lambda,shape,scale,rate,df,shape1,shape2 positive parameters

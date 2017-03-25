@@ -1,9 +1,9 @@
 #' @name greta-functions
 #'
-#' @title R functions that work for greta nodes
+#' @title R functions that work for greta arrays
 #'
 #' @description This is a list of functions in base R that are currently
-#'   implemented to transform greta nodes. Also see \link{greta-operators} and
+#'   implemented to transform greta arrays Also see \link{greta-operators} and
 #'   \link{greta-transforms}.
 #'
 #' @section Usage: \preformatted{
@@ -44,15 +44,16 @@
 #'  }
 #'
 #' @details TensorFlow only enables rounding to integers, so \code{round()} will
-#'   error is set to anything other than \code{0}.
+#'   error if \code{digits} is set to anything other than \code{0}.
 #'
 #'   Any additional arguments to \code{chol()} and \code{solve()} will be
 #'   ignored, see the TensorFlow documentation for details of these routines.
 #'
-#'   \code{diag()} can only be used to extract the diagonal part of a square
-#'   matrix, it cannot be used to create a matrix from a node, nor to assign the
-#'   diagonal elements of a square matrix. A static diagonal matrix can always
-#'   be created with e.g. \code{diag(3)}.
+#'   \code{diag()} can only be used to extract the diagonal part of a square and
+#'   two-dimensional greta array, it cannot be used to create a matrix-like
+#'   greta array from a vector-like greta array, nor to assign the diagonal
+#'   elements of a greta array. A static diagonal matrix can always be created
+#'   with e.g. \code{diag(3)}.
 #'
 #' @examples
 #' x = observed(matrix(1:9, nrow = 3, ncol = 3))
@@ -69,52 +70,52 @@
 NULL
 
 #' @export
-`log.node` <- function (e1) {
+`log.greta_array` <- function (e1) {
   op("tf$log", e1)
 }
 
 #' @export
-`exp.node` <- function (e1) {
+`exp.greta_array` <- function (e1) {
   op("tf$exp", e1)
 }
 
 #' @export
-`log1p.node` <- function (e1) {
+`log1p.greta_array` <- function (e1) {
   log(1 + e1)
 }
 
 #' @export
-`expm1.node` <- function (e1) {
+`expm1.greta_array` <- function (e1) {
   exp(e1) - 1
 }
 
 #' @export
-`abs.node` <- function (e1) {
+`abs.greta_array` <- function (e1) {
   op("tf$abs", e1)
 }
 
 #' @export
-`sqrt.node` <- function (e1) {
+`sqrt.greta_array` <- function (e1) {
   op("tf$sqrt", e1)
 }
 
 #' @export
-`sign.node` <- function (e1) {
+`sign.greta_array` <- function (e1) {
   op("tf$sign", e1)
 }
 
 #' @export
-`ceiling.node` <- function (e1) {
+`ceiling.greta_array` <- function (e1) {
   op("tf$ceil", e1)
 }
 
 #' @export
-`floor.node` <- function (e1) {
+`floor.greta_array` <- function (e1) {
   op("tf$floor", e1)
 }
 
 #' @export
-`round.node` <- function (e1, digits = 0) {
+`round.greta_array` <- function (e1, digits = 0) {
   if (digits != 0)
     stop("TensorFlow round only supports rounding to integers")
   op("tf$round", e1)
@@ -122,69 +123,69 @@ NULL
 
 # trigonometry functions
 #' @export
-`cos.node` <- function (e1) {
+`cos.greta_array` <- function (e1) {
   op("tf$cos", e1)
 }
 
 #' @export
-`sin.node` <- function (e1) {
+`sin.greta_array` <- function (e1) {
   op("tf$sin", e1)
 }
 
 #' @export
-`tan.node` <- function (e1) {
+`tan.greta_array` <- function (e1) {
   op("tf$tan", e1)
 }
 
 #' @export
-`acos.node` <- function (e1) {
+`acos.greta_array` <- function (e1) {
   op("tf$acos", e1)
 }
 
 #' @export
-`asin.node` <- function (e1) {
+`asin.greta_array` <- function (e1) {
   op("tf$asin", e1)
 }
 
 #' @export
-`atan.node` <- function (e1) {
+`atan.greta_array` <- function (e1) {
   op("tf$atan", e1)
 }
 
 #' @export
-`lgamma.node` <- function (e1) {
+`lgamma.greta_array` <- function (e1) {
   op("tf$lgamma", e1)
 }
 
 #' @export
-`digamma.node` <- function (e1) {
+`digamma.greta_array` <- function (e1) {
   op("tf$digamma", e1)
 }
 
 #' @export
-`t.node` <- function (e1) {
+`t.greta_array` <- function (e1) {
 
   # reverse the dimensions
-  dimfun <- function (node_list) {
-    x <- node_list[[1]]
-    if (length(x$dim) != 2)
+  dimfun <- function (elem_list) {
+    x <- elem_list[[1]]
+    if (length(dim(x)) != 2)
       stop ('only 2D arrays can be transposed')
-    rev(x$dim)
+    rev(dim(x))
   }
 
   op("tf$transpose", e1, dimfun = dimfun)
 }
 
 #' @export
-`chol.node` <- function (e1, ...) {
+`chol.greta_array` <- function (e1, ...) {
 
   if (!identical(list(), list(...)))
     warning ('chol() options are ignored by TensorFlow')
 
-  dimfun <- function (node_list) {
-    dim <- node_list[[1]]$dim
+  dimfun <- function (elem_list) {
+    dim <- dim(elem_list[[1]])
     if ( !(length(dim) == 2 && dim[1] == dim[2]) )
-      stop ('only 2D, square can Cholesky decomposed')
+      stop ('only 2D, square greta arrays can be Cholesky decomposed')
     dim
   }
 
@@ -192,16 +193,16 @@ NULL
 }
 
 #' @export
-diag.node <- function (x = 1, nrow, ncol) {
+diag.greta_array <- function (x = 1, nrow, ncol) {
 
   # can only extract from a node, cannot create from a node or assign.
   if (missing(x) | !missing(nrow) | !missing(ncol))
     stop ('diag can only be used to extract diagonal elements from a matrix, not to create or assign values')
 
-  dimfun <- function (node_list) {
+  dimfun <- function (elem_list) {
 
-    x <- node_list[[1]]
-    dim <- x$dim
+    x <- elem_list[[1]]
+    dim <- dim(x)
 
     # check the rank isn't too high
     if (length(dim) != 2)
@@ -221,29 +222,29 @@ diag.node <- function (x = 1, nrow, ncol) {
 }
 
 #' @export
-solve.node <- function (a, b, ...) {
+solve.greta_array <- function (a, b, ...) {
 
   # check the matrix is square
-  if (a$dim[1] != a$dim[2]) {
+  if (dim(a)[1] != dim(a)[2]) {
     stop (sprintf('a must be square, but has %i rows and %i columns',
-                  a$dim[1], a$dim[2]))
+                  dim(a)[1], dim(a)[2]))
   }
 
   # if they just want the matrix inverse, do that
   if (missing(b)) {
 
-    dimfun <- function (node_list) {
+    dimfun <- function (elem_list) {
 
-      a <- node_list[[1]]
+      a <- elem_list[[1]]
 
       # a must be square
-      if (a$dim[1] != a$dim[2]) {
+      if (dim(a)[1] != dim(a)[2]) {
         stop (sprintf('a must be square, but has %i rows and %i columns',
-                      a$dim[1], a$dim[2]))
+                      dim(a)[1], dim(a)[2]))
       }
 
       # return the dimensions
-      a$dim
+      dim(a)
 
     }
 
@@ -252,25 +253,25 @@ solve.node <- function (a, b, ...) {
   } else {
 
 
-    dimfun <- function (node_list) {
+    dimfun <- function (elem_list) {
 
-      a <- node_list[[1]]
-      b <- node_list[[2]]
+      a <- elem_list[[1]]
+      b <- elem_list[[2]]
 
       # a must be square
-      if (a$dim[1] != a$dim[2]) {
+      if (dim(a)[1] != dim(a)[2]) {
         stop (sprintf('a must be square, but has %i rows and %i columns',
-                      a$dim[1], a$dim[2]))
+                      dim(a)[1], dim(a)[2]))
       }
 
       # b must have the right number of rows
-      if (b$dim[1] != a$dim[1]) {
+      if (dim(b)[1] != dim(a)[1]) {
         stop (sprintf('b must have the same number of rows as a (%i), but has %i rows instead',
-                      a$dim[1], b$dim[1]))
+                      dim(a)[1], dim(b)[1]))
       }
 
       # return the dimensions
-      b$dim
+      dim(b)
 
     }
 
