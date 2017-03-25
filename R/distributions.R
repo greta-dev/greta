@@ -1,4 +1,3 @@
-
 flat_distribution <- R6Class (
   'flat_distribution',
   inherit = distribution,

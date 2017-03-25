@@ -111,3 +111,12 @@ dummy <- function (dims) {
   vec <- seq_len(prod(dims)) - 1
   unflatten_rowwise(vec, dims)
 }
+
+# evaluate a tensor or node
+grab <- function (x) {
+  if (greta:::is_node(x)) {
+    x$define_tf(environment())
+    x <- get(x$name)
+  }
+  tf$Session()$run(x)
+}
