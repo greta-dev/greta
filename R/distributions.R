@@ -450,7 +450,7 @@ wishart_distribution <- R6Class (
       }
 
       # make the initial value PD
-      self$value(diag(dim))
+      self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
     },
 
     tf_log_density_function = function (x, parameters) {

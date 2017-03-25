@@ -139,7 +139,7 @@ operation_node <- R6Class(
         dim <- dimfun(dots)
 
       # assign empty value of the right dimension
-      self$value(array(NA, dim = dim))
+      self$value(unknowns(dim = dim))
       self$dim <- dim
       self$register()
 
@@ -337,7 +337,7 @@ distribution <- R6Class (
       dim <- as.integer(dim)
 
       # store array (updates dim)
-      self$value(array(0, dim = dim))
+      self$value(unknowns(dim = dim))
       self$register()
 
     },

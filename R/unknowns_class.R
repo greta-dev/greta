@@ -5,7 +5,6 @@ as.unknowns <- function(x) {
 }
 
 as.unknowns.array <- function (x) {
-  x[] <- "  ?"
   class(x) <- c('unknowns', class(x))
   x
 }
@@ -23,6 +22,9 @@ strip_unknown_class <- function (x) {
 print.unknowns <- function (x, ...) {
   # remove 'unknown' class attribute
   x <- strip_unknown_class(x)
+
+  # set values to ? for printing
+  x[] <- "  ?"
 
   # print with question marks
   print.default(x, quote = FALSE, ...)
@@ -53,7 +55,7 @@ print.unknowns <- function (x, ...) {
 }
 
 # create an unknowns array from some dimensions
-unknowns <- function (dims = c(1, 1)) {
-  x <- array(dim = dims)
+unknowns <- function (dims = c(1, 1), data = NA) {
+  x <- array(data = data, dim = dims)
   as.unknowns(x)
 }
