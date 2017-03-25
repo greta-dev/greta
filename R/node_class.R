@@ -104,7 +104,7 @@ node <- R6Class(
     as_node = function (object) {
 
       # if it isn't a node already, try to make it a constant node
-      if (!is_node(object))
+      if (!is.node(object))
         object <- data_node$new(object)
 
       object
@@ -181,3 +181,18 @@ node <- R6Class(
     }
 
   ))
+
+# is this object of class node
+is.node <- function (x)
+  inherits(x, 'node')
+
+# coerce an object to a node
+to_node <- function (x) {
+  if (!is.node(x)) {
+    if (is.numeric(x))
+      x <- observed(x)
+    else
+      stop ('cannot coerce object to observed node')
+  }
+  x
+}

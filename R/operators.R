@@ -116,7 +116,7 @@ NULL
 `%*%` <- function (x, y) {
 
   # if y is a node, coerce x before dispatch
-  if (is_node(y) & !is_node(x))
+  if (is.node(y) & !is.node(x))
     x <- to_node(x)
 
   UseMethod('%*%', x)

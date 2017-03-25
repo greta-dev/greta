@@ -1,13 +1,12 @@
 # utility functions
 
-# is this object of class node
-is_node <- function (x) inherits(x, 'node')
-
 # helper for *apply statements on R6 objects
-member <- function(x, method) eval(parse(text = paste0('x$', method)))
+member <- function(x, method)
+  eval(parse(text = paste0('x$', method)))
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape arguments
-to_shape <- function(dim) do.call(shape, as.list(dim))
+to_shape <- function(dim)
+  do.call(shape, as.list(dim))
 
 # run code ins specified environment, e.g.
 # in_env(nm <- dag$child_names(), env)
@@ -23,21 +22,11 @@ is_scalar <- function (x) {
   identical(x$dim, c(1L, 1L))
 }
 
-# coerce an object to a node
-to_node <- function (x) {
-  if (!is_node(x)) {
-    if (is.numeric(x))
-      x <- observed(x)
-    else
-      stop ('cannot coerce object to observed node')
-  }
-  x
-}
 
 # check dimensions of arguments to ops
 check_dims <- function(x, y) {
 
-  # coerece to nodes
+  # coerce to nodes
   x <- to_node(x)
   y <- to_node(y)
 
@@ -118,7 +107,7 @@ grab <- function (x) {
   if (is.greta_array(x))
     x <- x$node
 
-  if (is_node(x)) {
+  if (is.node(x)) {
     x$define_tf(environment())
     x <- get(x$name)
   }
