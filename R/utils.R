@@ -112,11 +112,17 @@ dummy <- function (dims) {
   unflatten_rowwise(vec, dims)
 }
 
-# evaluate a tensor or node
+# evaluate a greta_array, node, or tensor
 grab <- function (x) {
-  if (greta:::is_node(x)) {
+
+  if (is.greta_array(x))
+    x <- x$node
+
+  if (is_node(x)) {
     x$define_tf(environment())
     x <- get(x$name)
   }
+
   tf$Session()$run(x)
+
 }
