@@ -21,24 +21,24 @@
 #'
 #' # link them (i.e. we observed theta to have the values in y)
 #' y %~% theta
-`%~%` <- function (data, distribution) {
+`%~%` <- function (y, theta) {
 
-  if (!inherits(data$node, 'data_node'))
+  if (!inherits(y$node, 'data_node'))
     stop ('left hand side of likelihood must be a data greta array')
 
-  if (!inherits(distribution$node, 'distribution'))
+  if (!inherits(theta$node, 'distribution'))
     stop ('right hand side of likelihood must be a stochastic greta array')
 
   # provide the data to the likelihood and lock in the values in the
   # distribution
-  distribution$node$value(data$node$value())
-  distribution$node$.fixed_value <- TRUE
+  theta$node$value(y$node$value())
+  theta$node$.fixed_value <- TRUE
 
   # give the distribution to the data as a likelihood (this will register the
   # child distribution)
-  data$node$set_likelihood(distribution)
+  y$node$set_likelihood(theta$node)
 
   # register the data node, with it's own name
-  data$node$register()
+  y$node$register()
 
 }

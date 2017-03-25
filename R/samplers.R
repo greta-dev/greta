@@ -46,7 +46,7 @@ samples <- function (...,
   names(target_greta_arrays) <- names
 
   # check they're not data nodes, provide a useful error message if they are
-  type <- vapply(target_greta_arrays, member, 'type', FUN.VALUE = '')
+  type <- vapply(target_greta_arrays, member, 'node$type', FUN.VALUE = '')
   bad <- type == 'data'
   if (any(bad)) {
     is_are <- ifelse(sum(bad) == 1, 'is an observed greta array', 'are observed greta arrays')

@@ -10,6 +10,7 @@ observed(data)
 \item{data}{an object that can be coerced to an array}
 }
 \description{
-define an object in an R session as data in a greta model
+define an object in an R session as a greta array for use as
+  data in a greta model
 }
 

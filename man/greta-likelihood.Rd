@@ -5,7 +5,7 @@
 \alias{greta-likelihood}
 \title{Create an Observed, Stochastic Greta Array}
 \usage{
-data \%~\% distribution
+y \%~\% theta
 }
 \arguments{
 \item{data}{a fixed greta array, defined using \code{observed()}}

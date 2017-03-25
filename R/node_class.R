@@ -101,16 +101,6 @@ node <- R6Class(
 
     },
 
-    as_node = function (object) {
-
-      # if it isn't a node already, try to make it a constant node
-      if (!is.node(object))
-        object <- data_node$new(object)
-
-      object
-
-    },
-
     # define objects on tensorflow graph in environment env
     tf = function (env)
       stop ('no method to evaluate this node in TensorFlow'),
@@ -194,7 +184,7 @@ is.node <- function (x)
 to_node <- function (x) {
   if (!is.node(x)) {
     if (is.numeric(x))
-      x <- observed(x)
+      x <- data_node$new(x)
     else if (is.greta_array(x))
       x <- x$node
     else

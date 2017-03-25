@@ -5,6 +5,10 @@ as.greta_array <- function(x, ...) {
   UseMethod('as.greta_array')
 }
 
+# safely handle self-coersion
+as.greta_array.greta_array <- function (x, ...)
+  x
+
 # node method (only one defined)
 as.greta_array.node <- function (x, ...) {
   ga <- list(node = x)
@@ -21,6 +25,7 @@ is.greta_array <- function (x)
   inherits(x, 'greta_array')
 
 # print method
+#' @export
 print.greta_array <- function (x, ...) {
   text <- sprintf('greta array (%s)\n\n',
                   x$node$type)
@@ -29,17 +34,10 @@ print.greta_array <- function (x, ...) {
 }
 
 # get dimensions
-dim.greta_array <- function(x) x$node$dim
-
-# need to change generics to act on greta_array S3 class, and change op to a
-# function that takes greta_arrays, gets their nodes, creates an operation node,
-# and wraps it in a greta_array object
-
-# change all distribution etc. constructors to wrap in greta_array class too,
-# e.g.:
-# beta <- function (shape1, shape2, dim = 1)
-#   ga(greta:::beta_distribution$new(shape1, shape2, dim))
-#
+#' @export
+dim.greta_array <- function(x)
+  x$node$dim
 
 # short hand for use in functions
-ga <- function (x) as.greta_array(x)
+ga <- function (x)
+  as.greta_array(x)

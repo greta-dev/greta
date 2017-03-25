@@ -138,7 +138,7 @@ NULL
       stop ('only two-dimensional greta arrays can be matrix-multiplied')
 
     # check the dimensions match
-    if (dim(x)[2] != dim(x)[1]) {
+    if (dim(x)[2] != dim(y)[1]) {
       msg <- sprintf('incompatible dimensions: %s vs %s',
                      paste0(dim(x), collapse = 'x'),
                      paste0(dim(y), collapse = 'x'))

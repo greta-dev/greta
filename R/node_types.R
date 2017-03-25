@@ -89,11 +89,12 @@ data_node <- R6Class(
 
 #' @name observed
 #' @title define observed data
-#' @description define an object in an R session as data in a greta model
+#' @description define an object in an R session as a greta array for use as
+#'   data in a greta model
 #' @param data an object that can be coerced to an array
 #' @export
 observed <- function (data)
-  data_node$new(data)
+  ga(data_node$new(data))
 
 
 # a node for applying operations to values
@@ -110,7 +111,7 @@ operation_node <- R6Class(
     add_argument = function (argument) {
 
       # guess at a name, coerce to a node, and add as a child
-      parameter <- self$as_node(argument)
+      parameter <- to_node(argument)
       self$add_child(parameter)
 
     },
@@ -347,7 +348,7 @@ distribution <- R6Class (
 
       # just add as a scalar numeric (not a constant node) here.
       # ensure that the value can be fetched
-      parameter <- self$as_node(parameter)
+      parameter <- to_node(parameter)
       self$add_child(parameter)
       self$parameters[[name]] <- parameter
 
