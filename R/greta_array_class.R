@@ -5,6 +5,7 @@ as.greta_array <- function(x, ...) {
   UseMethod('as.greta_array')
 }
 
+
 # safely handle self-coersion
 as.greta_array.greta_array <- function (x, ...)
   x
@@ -17,7 +18,7 @@ as.greta_array.node <- function (x, ...) {
 }
 
 # array method (only one defined)
-as.greta_array.array <- function (x, ...)
+as.greta_array.numeric <- function (x, ...)
   as.greta_array(to_node(x))
 
 # checking class status
@@ -31,6 +32,44 @@ print.greta_array <- function (x, ...) {
                   x$node$type)
   cat(text)
   print(x$node$value(), ...)
+}
+
+# summary method
+#' @export
+summary.greta_array <- function (x, ...) {
+  # array type
+  type_text <- sprintf("'%s' greta array",
+                                 x$node$type)
+
+  len <- length(x)
+  if (len == 1) {
+    shape_text <- "with 1 element"
+  } else {
+    dim_text <- paste(dim(x), collapse = ' x ')
+    shape_text <- sprintf("with %i elements (%s)",
+                          len,
+                          dim_text)
+  }
+
+  # distribution info
+  if (x$node$type == 'stochastic') {
+    distribution_text <- sprintf("following a %s distribution",
+                                 x$node$distribution_name)
+
+  } else {
+    distribution_text <- ""
+  }
+
+  cat(type_text, shape_text, distribution_text, '\n')
+
+  values <- x$node$value()
+  if (inherits(values, 'unknowns')) {
+    cat('\n  (values currently unknown)')
+  } else {
+    cat('\n')
+    print(summary(values))
+  }
+
 }
 
 # get dimensions
