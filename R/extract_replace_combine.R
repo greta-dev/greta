@@ -146,7 +146,40 @@ tf_replace <- function (x, value, index, dims) {
   call_list <- as.list(call)[-1]
   call_list[[1]] <- as.name("dummy_in")
   call_list$drop <- FALSE
-  dummy_out <- do.call(`[`, call_list)
+
+  # put dummy_in in the parent environment & execute there (to evaluate any
+  # promises using variables in that environment), then remove
+  pf <- parent.frame()
+  assign('dummy_in', dummy_in, envir = pf)
+  dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
+  rm('dummy_in', envir = pf)
+
+  # if this is a data node, also subset the values and pass on
+  if ('data' %in% x$node$type) {
+
+    values_in <- x$node$value()
+    call_list <- as.list(call)[-1]
+    call_list[[1]] <- as.name("values_in")
+    call_list$drop <- FALSE
+
+    # put values_in in the parent environment & execute there (to evaluate any
+    # promises using variables in that environment), then remove
+    pf <- parent.frame()
+    assign('values_in', values_in, envir = pf)
+    values_out <- do.call(.Primitive("["), call_list, envir = pf)
+    rm('values_in', envir = pf)
+
+    # make sure it's an array
+    values <- as.array(values_out)
+
+  } else {
+
+    values <- NULL
+
+  }
+
+  # coerce result to an array
+  dummy_out <- as.array(dummy_out)
 
   # get number of elements in input and dimension of output
   nelem <- prod(dims_in)
@@ -167,7 +200,8 @@ tf_replace <- function (x, value, index, dims) {
      dimfun = dimfun,
      operation_args = list(nelem = nelem,
                            tf_index = tf_index,
-                           dims_out = dims_out))
+                           dims_out = dims_out),
+     value = values)
 
 }
 
@@ -227,7 +261,7 @@ cbind.greta_array <- function (...) {
 
   dimfun <- function (elem_list) {
 
-    dims <- lapply(elem_list, dim)
+    dims <- lapply(elem_list, function(x) x$dim)
     ndims <- vapply(dims, length, FUN.VALUE = 1)
     if (!all(ndims == 2))
       stop ('all greta arrays must be two-dimensional')
@@ -253,7 +287,7 @@ rbind.greta_array <- function (...) {
 
   dimfun <- function (elem_list) {
 
-    dims <- lapply(elem_list, dim)
+    dims <- lapply(elem_list, function(x) x$dim)
     ndims <- vapply(dims, length, FUN.VALUE = 1)
     if (!all(ndims == 2))
       stop ('all greta arrays must be two-dimensional')
@@ -281,7 +315,7 @@ c.greta_array <- function (...) {
 
   dimfun <- function (elem_list) {
 
-    dims <- lapply(elem_list, dim)
+    dims <- lapply(elem_list, function(x) x$dim)
     ndims <- vapply(dims, length, FUN.VALUE = 1)
     ncols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
 

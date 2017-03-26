@@ -119,7 +119,8 @@ operation_node <- R6Class(
     initialize = function (operation,
                            ...,
                            dimfun = NULL,
-                           operation_args = list()) {
+                           operation_args = list(),
+                           value = NULL) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), to_node)
@@ -138,8 +139,14 @@ operation_node <- R6Class(
       else
         dim <- dimfun(dots)
 
-      # assign empty value of the right dimension
-      self$value(unknowns(dim = dim))
+      # assign empty value of the right dimension, or the values passed via the
+      # operation
+      if (is.null(value))
+        value <- unknowns(dim = dim)
+      else if (!all.equal(dim(value), dim))
+        stop ('values have the wrong dimension so cannot be used')
+
+      self$value(value)
       self$dim <- dim
       self$register()
 

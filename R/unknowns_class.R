@@ -19,6 +19,7 @@ strip_unknown_class <- function (x) {
   x
 }
 
+#' @export
 print.unknowns <- function (x, ...) {
   # remove 'unknown' class attribute
   x <- strip_unknown_class(x)
