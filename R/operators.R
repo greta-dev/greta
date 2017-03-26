@@ -1,9 +1,9 @@
 #' @name greta-operators
 #'
-#' @title operators for greta nodes
+#' @title Operators for Greta Arrays
 #'
 #' @description This is a list of currently implemented arithmetic, logical and
-#'   relational operators, and extract/replace syntax to combine greta nodes
+#'   relational operators, and extract/replace syntax to combine greta arrays
 #'   into probabilistic models. Also see \link{greta-functions} and
 #'   \link{greta-transforms}.
 #'
@@ -34,8 +34,9 @@
 #'  }
 #'
 #' @details greta's operators are used just like R's the standard arithmetic,
-#'   logical and relational operators, but they return other greta nodes, rather
-#'   than values.
+#'   logical and relational operators, but they return other greta arrays. Since
+#'   the operations are only carried during sampling, the greta array objects
+#'   have unknown values.
 #'
 #' @examples
 #'  x = observed(-1:12)
@@ -59,13 +60,13 @@ NULL
 
 # use S3 dispatch to apply the operators
 #' @export
-`+.node` <- function (e1, e2) {
+`+.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`+`", e1, e2)
 }
 
 #' @export
-`-.node` <- function (e1, e2) {
+`-.greta_array` <- function (e1, e2) {
   # handle unary minus
   if (missing(e2)) {
     op("`-`", e1)
@@ -76,31 +77,31 @@ NULL
 }
 
 #' @export
-`*.node` <- function (e1, e2) {
+`*.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`*`", e1, e2)
 }
 
 #' @export
-`/.node` <- function (e1, e2) {
+`/.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`/`", e1, e2)
 }
 
 #' @export
-`^.node` <- function (e1, e2) {
+`^.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("tf$pow", e1, e2)
 }
 
 #' @export
-`%%.node` <- function (e1, e2) {
+`%%.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`%%`", e1, e2)
 }
 
 #' @export
-`%/%.node` <- function (e1, e2) {
+`%/%.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`%/%`", e1, e2)
 }
@@ -115,37 +116,37 @@ NULL
 #' @export
 `%*%` <- function (x, y) {
 
-  # if y is a node, coerce x before dispatch
-  if (is_node(y) & !is_node(x))
-    x <- to_node(x)
+  # if y is a greta array, coerce x before dispatch
+  if (is.greta_array(y) & !is.greta_array(x))
+    x <- ga(x)
 
   UseMethod('%*%', x)
 
 }
 
 #' @export
-`%*%.node` <- function(x, y) {
+`%*%.greta_array` <- function(x, y) {
 
   # define a function to get the dimensions of the result
-  dimfun <- function (node_list) {
+  dimfun <- function (elem_list) {
 
-    x <- node_list[[1]]
-    y <- node_list[[2]]
+    x <- elem_list[[1]]
+    y <- elem_list[[2]]
 
     # check they're matrices
-    if (length(x$dim) != 2 | length(y$dim) != 2)
-      stop ('only 2D arrays can be matrix-multiplied')
+    if (length(dim(x)) != 2 | length(dim(x)) != 2)
+      stop ('only two-dimensional greta arrays can be matrix-multiplied')
 
     # check the dimensions match
-    if (x$dim[2] != y$dim[1]) {
+    if (dim(x)[2] != dim(y)[1]) {
       msg <- sprintf('incompatible dimensions: %s vs %s',
-                     paste0(x$dim, collapse = 'x'),
-                     paste0(y$dim, collapse = 'x'))
+                     paste0(dim(x), collapse = 'x'),
+                     paste0(dim(y), collapse = 'x'))
       stop (msg)
     }
 
     # dimensions of the result
-    c(x$dim[1], y$dim[2])
+    c(dim(x)[1], dim(y)[2])
 
   }
 
@@ -156,18 +157,18 @@ NULL
 
 # logical operators
 #' @export
-`!.node` <- function (e1) {
+`!.greta_array` <- function (e1) {
   op("`!`", e1)
 }
 
 #' @export
-`&.node` <- function (e1, e2) {
+`&.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`&`", e1, e2)
 }
 
 #' @export
-`|.node` <- function (e1, e2) {
+`|.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`|`", e1, e2)
 }
@@ -175,37 +176,37 @@ NULL
 # relational operators
 
 #' @export
-`<.node` <- function (e1, e2) {
+`<.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`<`", e1, e2)
 }
 
 #' @export
-`>.node` <- function (e1, e2) {
+`>.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`>`", e1, e2)
 }
 
 #' @export
-`<=.node` <- function (e1, e2) {
+`<=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`<=`", e1, e2)
 }
 
 #' @export
-`>=.node` <- function (e1, e2) {
+`>=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`>=`", e1, e2)
 }
 
 #' @export
-`==.node` <- function (e1, e2) {
+`==.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`==`", e1, e2)
 }
 
 #' @export
-`!=.node` <- function (e1, e2) {
+`!=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`!=`", e1, e2)
 }

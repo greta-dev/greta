@@ -2,8 +2,8 @@
 #' @title sample model variables
 #' @description After defining a greta model in R, draw samples of the random
 #'   variables of interest
-#' @param ... nodes to sample values from, probably parameters of a
-#'   model. Observed nodes cannot be sampled from.
+#' @param ... greta arrays to sample values from, probably parameters of a
+#'   model. Observed greta arrays cannot be sampled from.
 #' @param method the method used to sample values. Currently only \code{hmc} is
 #'   implemented
 #' @param n_samples the number of samples to draw (after any warm-up, but before
@@ -38,27 +38,27 @@ samples <- function (...,
   method <- match.arg(method)
 
   # nodes required
-  target_nodes <- list(...)
+  target_greta_arrays <- list(...)
 
   # find variable names to label samples
   names <- substitute(list(...))[-1]
   names <- vapply(names, deparse, '')
-  names(target_nodes) <- names
+  names(target_greta_arrays) <- names
 
   # check they're not data nodes, provide a useful error message if they are
-  type <- vapply(target_nodes, member, 'type', FUN.VALUE = '')
+  type <- vapply(target_greta_arrays, member, 'node$type', FUN.VALUE = '')
   bad <- type == 'data'
   if (any(bad)) {
-    is_are <- ifelse(sum(bad) == 1, 'is an observed node', 'are observed nodes')
-    bad_nodes <- paste(names[bad], collapse = ', ')
-    msg <- sprintf('%s %s, observed nodes cannot be sampled',
-                   bad_nodes,
+    is_are <- ifelse(sum(bad) == 1, 'is an observed greta array', 'are observed greta arrays')
+    bad_greta_arrays <- paste(names[bad], collapse = ', ')
+    msg <- sprintf('%s %s, observed greta arrays cannot be sampled',
+                   bad_greta_arrays,
                    is_are)
     stop (msg)
   }
 
   # get the dag containing the target nodes
-  dag <- dag_class$new(target_nodes)
+  dag <- dag_class$new(target_greta_arrays)
 
   if (verbose)
     message('compiling model')

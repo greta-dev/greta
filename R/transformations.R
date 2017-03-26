@@ -1,12 +1,12 @@
 #' @name greta-transforms
 #' @aliases greta-inverse-links
-#' @title transformation functions for greta nodes
+#' @title Transformation Functions for Greta Arrays
 #'
-#' @description transformations for greta nodes, which may also be
+#' @description transformations for greta arrays, which may also be
 #'   used as inverse link functions. Also see \link{greta-operators} and
 #'   \link{greta-functions}.
 #'
-#' @param x a real-valued (i.e. values ranging from -Inf to Inf) greta node to
+#' @param x a real-valued (i.e. values ranging from -Inf to Inf) greta array to
 #'   transform to a constrained value
 #' @details greta does not allow you to state the transformation/link on the
 #'   left hand side of an assignment, as is common in the BUGS and STAN
@@ -16,7 +16,7 @@
 #'   'i') are therefore more likely to useful in modelling, and these are what
 #'   are provided here.
 #'
-#'   The log1pe inverse link function is equivalent to \code{log(1 + exp(x))},
+#'   The \code{log1pe} inverse link function is equivalent to \code{log(1 + exp(x))},
 #'   yielding a positive transformed parameter. Unlike the log transformation,
 #'   this transformation is approximately linear for x > 1. i.e. when \eqn{x >
 #'   1}, \eqn{y \approx x}
@@ -54,22 +54,25 @@ tf_log1pe <- function (x)
 
 #' @rdname greta-transforms
 #' @export
-iprobit <- function (x) op('tf_iprobit', x)
+iprobit <- function (x)
+  op('tf_iprobit', x)
 
 #' @rdname greta-transforms
 #' @export
-ilogit <- function (x) op('tf_ilogit', x)
+ilogit <- function (x)
+  op('tf_ilogit', x)
 
 #' @rdname greta-transforms
 #' @export
-icloglog <- function (x) op('tf_icloglog', x)
+icloglog <- function (x)
+  op('tf_icloglog', x)
 
 #' @rdname greta-transforms
 #' @export
-icauchit <- function (x) op('tf_icauchit', x)
+icauchit <- function (x)
+  op('tf_icauchit', x)
 
 #' @rdname greta-transforms
 #' @export
-log1pe <- function (x) op('tf_log1pe', x)
-
-
+log1pe <- function (x)
+  op('tf_log1pe', x)

@@ -4,30 +4,29 @@
 \alias{greta-structures}
 \alias{ones}
 \alias{zeros}
-\title{greta data structures}
+\title{greta Data Structures}
 \usage{
 zeros(...)
 
 ones(...)
 }
 \arguments{
-\item{...}{dimensions of the arrays to create}
+\item{...}{dimensions of the greta arrays to create}
 }
 \value{
-a greta node object which may be manipulated in the same way as data
-  or parameter nodes
+a greta array object
 }
 \description{
 These structures can be used to set up more complex models. For
-  example, scalar parameters can be embedded in a matrix by first creating a
-  matrix with \code{zeros()} or \code{ones()}, and then embedding the
+  example, scalar parameters can be embedded in a greta array by first creating a
+  greta array with \code{zeros()} or \code{ones()}, and then embedding the
   parameter value using greta's replacement syntax
 }
 \examples{
-# a 3 row, 4 column array of 0s
+# a 3 row, 4 column greta array of 0s
 z <- zeros(3, 4)
 
-# a 3x3x3 array of 1s
+# a 3x3x3 greta array of 1s
 z <- ones(3, 3, 3)
 }
 

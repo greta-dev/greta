@@ -30,6 +30,8 @@ Collate:
     'node_class.R'
     'node_types.R'
     'distributions.R'
+    'unknowns_class.R'
+    'greta_array_class.R'
     'utils.R'
     'syntax.R'
     'operators.R'

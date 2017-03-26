@@ -1,4 +1,3 @@
-
 flat_distribution <- R6Class (
   'flat_distribution',
   inherit = distribution,
@@ -451,7 +450,7 @@ wishart_distribution <- R6Class (
       }
 
       # make the initial value PD
-      self$value(diag(dim))
+      self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -473,8 +472,8 @@ wishart_distribution <- R6Class (
 #' @name greta-distributions
 #' @title greta probability distributions
 #' @description These probability distributions can be used to define random
-#'   variables in a greta model. They return a 'node' object that can be
-#'   combined with other nodes to construct a model.
+#'   variables in a greta model. They return a greta array object that can be
+#'   combined with other greta arrays to construct a model.
 #'
 #' @param mean,meanlog,ncp unconstrained parameters
 #' @param sd,sdlog,size,lambda,shape,scale,rate,df,shape1,shape2 positive parameters
@@ -534,79 +533,76 @@ NULL
 #' @rdname greta-distributions
 #' @export
 normal <- function (mean, sd, dim = 1)
-  normal_distribution$new(mean, sd, dim)
+  ga(normal_distribution$new(mean, sd, dim))
 
 #' @rdname greta-distributions
 #' @export
 lognormal <- function (meanlog, sdlog, dim = 1)
-  lognormal_distribution$new(meanlog, sdlog, dim)
+  ga(lognormal_distribution$new(meanlog, sdlog, dim))
 
 #' @rdname greta-distributions
 #' @export
 bernoulli <- function (prob, dim = 1)
-  bernoulli_distribution$new(prob, dim)
+  ga(bernoulli_distribution$new(prob, dim))
 
 #' @rdname greta-distributions
 #' @export
 binomial <- function (size, prob, dim = 1)
-  binomial_distribution$new(size, prob, dim)
+  ga(binomial_distribution$new(size, prob, dim))
 
 #' @rdname greta-distributions
 #' @export
 negative_binomial <- function (size, prob, dim = 1)
-  negative_binomial_distribution$new(size, prob, dim)
+  ga(negative_binomial_distribution$new(size, prob, dim))
 
 #' @rdname greta-distributions
 #' @export
 poisson <- function (lambda, dim = 1)
-  poisson_distribution$new(lambda, dim)
+  ga(poisson_distribution$new(lambda, dim))
 
 #' @rdname greta-distributions
 #' @export
 gamma <- function (shape, rate, dim = 1)
-  gamma_distribution$new(shape, rate, dim)
+  ga(gamma_distribution$new(shape, rate, dim))
 
 #' @rdname greta-distributions
 #' @export
 exponential <- function (rate, dim = 1)
-  exponential_distribution$new(rate, dim)
+  ga(exponential_distribution$new(rate, dim))
 
 #' @rdname greta-distributions
 #' @export
 student <- function (df, ncp, dim = 1)
-  student_distribution$new(df, ncp, dim)
+  ga(student_distribution$new(df, ncp, dim))
 
 #' @rdname greta-distributions
 #' @export
 beta <- function (shape1, shape2, dim = 1)
-  beta_distribution$new(shape1, shape2, dim)
+  ga(beta_distribution$new(shape1, shape2, dim))
 
 #' @rdname greta-distributions
 #' @export
 free <- function (dim = 1)
-  free_distribution$new(dim)
+  ga(free_distribution$new(dim))
 
 #' @rdname greta-distributions
 #' @export
 flat <- function (range, dim = 1) {
-  if (is_node(range))
-    stop ('range must be fixed, and cannot be another node')
+  if (is.greta_array(range))
+    stop ('range must be fixed, and cannot be another greta array')
   if (!(is.vector(range) && length(range) == 2 &&
         is.numeric(range) && range[1] < range[2])) {
     stop ('range must be a length 2 numeric vector in ascending order')
   }
-  flat_distribution$new(lower = range[1], upper = range[2], dim = dim)
+  ga(flat_distribution$new(lower = range[1], upper = range[2], dim = dim))
 }
 
 #' @rdname greta-distributions
 #' @export
-multivariate_normal <- function (mean, Sigma, dim) {
-  multivariate_normal_distribution$new(mean, Sigma, dim)
-}
+multivariate_normal <- function (mean, Sigma, dim)
+  ga(multivariate_normal_distribution$new(mean, Sigma, dim))
 
 #' @rdname greta-distributions
 #' @export
-wishart <- function (df, Sigma, dim) {
-  wishart_distribution$new(df, Sigma, dim)
-}
-
+wishart <- function (df, Sigma, dim)
+  ga(wishart_distribution$new(df, Sigma, dim))

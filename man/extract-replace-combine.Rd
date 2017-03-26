@@ -8,25 +8,25 @@
 \alias{rbind,}
 \alias{rep}
 \alias{replace,}
-\title{Extract, Replace and Combine Nodes}
+\title{Extract, Replace and Combine greta Arrays}
 \arguments{
 \item{i, j}{indices specifying elements to extract or replace}
 
-\item{value}{a node to replace elements}
+\item{value}{a greta array to replace elements}
 
 \item{...}{either further indices specifying elements to extract or replace
-(\code{[}), or multiple nodes to combine (\code{cbind()}, \code{rbind()} &
-\code{c()}), or generic arguments that are ignored for greta nodes
+(\code{[}), or multiple greta arrays to combine (\code{cbind()}, \code{rbind()} &
+\code{c()}), or generic arguments that are ignored for greta arrays
 (\code{rep()})}
 
 \item{times}{a single integer giving the number of times to repeat the
 (column) vector}
 
-\item{drop, recursive}{generic arguments that are ignored for greta nodes}
+\item{drop, recursive}{generic arguments that are ignored for greta arrays}
 }
 \description{
-Generic methods to extract and replace elements of nodes, or to
-  combine nodes.
+Generic methods to extract and replace elements of greta arrays, or to
+  combine greta arrays.
 }
 \details{
 \code{c()} and \code{rep()} currently only work with column vectors.

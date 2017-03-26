@@ -2,23 +2,24 @@
 % Please edit documentation in R/functions.R
 \name{greta-functions}
 \alias{greta-functions}
-\title{R functions that work for greta nodes}
+\title{R functions that work for greta arrays}
 \description{
 This is a list of functions in base R that are currently
-  implemented to transform greta nodes. Also see \link{greta-operators} and
+  implemented to transform greta arrays Also see \link{greta-operators} and
   \link{greta-transforms}.
 }
 \details{
 TensorFlow only enables rounding to integers, so \code{round()} will
-  error is set to anything other than \code{0}.
+  error if \code{digits} is set to anything other than \code{0}.
 
   Any additional arguments to \code{chol()} and \code{solve()} will be
   ignored, see the TensorFlow documentation for details of these routines.
 
-  \code{diag()} can only be used to extract the diagonal part of a square
-  matrix, it cannot be used to create a matrix from a node, nor to assign the
-  diagonal elements of a square matrix. A static diagonal matrix can always
-  be created with e.g. \code{diag(3)}.
+  \code{diag()} can only be used to extract the diagonal part of a square and
+  two-dimensional greta array, it cannot be used to create a matrix-like
+  greta array from a vector-like greta array, nor to assign the diagonal
+  elements of a greta array. A static diagonal matrix can always be created
+  with e.g. \code{diag(3)}.
 }
 \section{Usage}{
  \preformatted{

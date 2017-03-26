@@ -89,11 +89,12 @@ data_node <- R6Class(
 
 #' @name observed
 #' @title define observed data
-#' @description define an object in an R session as data in a greta model
+#' @description define an object in an R session as a greta array for use as
+#'   data in a greta model
 #' @param data an object that can be coerced to an array
 #' @export
 observed <- function (data)
-  data_node$new(data)
+  ga(data_node$new(data))
 
 
 # a node for applying operations to values
@@ -110,7 +111,7 @@ operation_node <- R6Class(
     add_argument = function (argument) {
 
       # guess at a name, coerce to a node, and add as a child
-      parameter <- self$as_node(argument)
+      parameter <- to_node(argument)
       self$add_child(parameter)
 
     },
@@ -118,7 +119,8 @@ operation_node <- R6Class(
     initialize = function (operation,
                            ...,
                            dimfun = NULL,
-                           operation_args = list()) {
+                           operation_args = list(),
+                           value = NULL) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), to_node)
@@ -137,8 +139,14 @@ operation_node <- R6Class(
       else
         dim <- dimfun(dots)
 
-      # assign empty value of the right dimension
-      self$value(array(NA, dim = dim))
+      # assign empty value of the right dimension, or the values passed via the
+      # operation
+      if (is.null(value))
+        value <- unknowns(dim = dim)
+      else if (!all.equal(dim(value), dim))
+        stop ('values have the wrong dimension so cannot be used')
+
+      self$value(value)
       self$dim <- dim
       self$register()
 
@@ -186,7 +194,9 @@ operation_node <- R6Class(
 
 # wrapper to parse inputs before R6 mangles them, & shorthand to speed up the
 # rest of the definitions
-op <- operation_node$new
+op <- function (...) {
+  ga(operation_node$new(...))
+}
 
 
 stochastic_node <- R6Class (
@@ -334,7 +344,7 @@ distribution <- R6Class (
       dim <- as.integer(dim)
 
       # store array (updates dim)
-      self$value(array(0, dim = dim))
+      self$value(unknowns(dim = dim))
       self$register()
 
     },
@@ -345,7 +355,7 @@ distribution <- R6Class (
 
       # just add as a scalar numeric (not a constant node) here.
       # ensure that the value can be fetched
-      parameter <- self$as_node(parameter)
+      parameter <- to_node(parameter)
       self$add_child(parameter)
       self$parameters[[name]] <- parameter
 

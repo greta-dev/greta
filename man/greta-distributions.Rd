@@ -65,8 +65,8 @@ be lower than the second.}
 }
 \description{
 These probability distributions can be used to define random
-  variables in a greta model. They return a 'node' object that can be
-  combined with other nodes to construct a model.
+  variables in a greta model. They return a greta array object that can be
+  combined with other greta arrays to construct a model.
 }
 \details{
 Most of these distributions have non-uniform probability densities,

@@ -9,8 +9,8 @@ samples(..., method = c("hmc", "nuts"), n_samples = 1000, thin = 1,
   warmup = 100, verbose = TRUE, control = list())
 }
 \arguments{
-\item{...}{nodes to sample values from, probably parameters of a
-model. Observed nodes cannot be sampled from.}
+\item{...}{greta arrays to sample values from, probably parameters of a
+model. Observed greta arrays cannot be sampled from.}
 
 \item{method}{the method used to sample values. Currently only \code{hmc} is
 implemented}

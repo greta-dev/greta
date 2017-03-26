@@ -10,8 +10,8 @@ dag_class <- R6Class(
     parameters_example = NA,
 
     # create a dag from some target nodes
-    initialize = function (target_nodes) {
-      self$build_dag(target_nodes)
+    initialize = function (target_greta_arrays) {
+      self$build_dag(target_greta_arrays)
       self$tf_environment <- new.env()
       self$parameters_example <- self$example_parameters(flat = FALSE)
     },
@@ -179,7 +179,9 @@ dag_class <- R6Class(
     },
 
     # return a list of nodes connected to those in the target node list
-    build_dag = function (node_list) {
+    build_dag = function (greta_array_list) {
+
+      node_list <- lapply(greta_array_list, member, 'node')
 
       # get all registered nodes, and their descendents
       all_nodes <- .nodes$nodes()

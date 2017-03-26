@@ -101,16 +101,6 @@ node <- R6Class(
 
     },
 
-    as_node = function (object) {
-
-      # if it isn't a node already, try to make it a constant node
-      if (!is_node(object))
-        object <- data_node$new(object)
-
-      object
-
-    },
-
     # define objects on tensorflow graph in environment env
     tf = function (env)
       stop ('no method to evaluate this node in TensorFlow'),
@@ -181,3 +171,24 @@ node <- R6Class(
     }
 
   ))
+
+# generic to grab dimensions
+dim.node <- function (x)
+  x$dim
+
+# is this object of class node
+is.node <- function (x)
+  inherits(x, 'node')
+
+# coerce an object to a node
+to_node <- function (x) {
+  if (!is.node(x)) {
+    if (is.numeric(x))
+      x <- data_node$new(x)
+    else if (is.greta_array(x))
+      x <- x$node
+    else
+      stop ('cannot coerce object to a node')
+  }
+  x
+}

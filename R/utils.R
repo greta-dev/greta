@@ -1,13 +1,12 @@
 # utility functions
 
-# is this object of class node
-is_node <- function (x) inherits(x, 'node')
-
 # helper for *apply statements on R6 objects
-member <- function(x, method) eval(parse(text = paste0('x$', method)))
+member <- function(x, method)
+  eval(parse(text = paste0('x$', method)))
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape arguments
-to_shape <- function(dim) do.call(shape, as.list(dim))
+to_shape <- function(dim)
+  do.call(shape, as.list(dim))
 
 # run code ins specified environment, e.g.
 # in_env(nm <- dag$child_names(), env)
@@ -18,39 +17,28 @@ in_env <- function (call, env)
 notimplemented <- function ()
   stop ('method not yet implemented')
 
-# is this array actually a scalar?
+# is this greta_array actually a scalar?
 is_scalar <- function (x) {
-  identical(x$dim, c(1L, 1L))
-}
-
-# coerce an object to a node
-to_node <- function (x) {
-  if (!is_node(x)) {
-    if (is.numeric(x))
-      x <- observed(x)
-    else
-      stop ('cannot coerce object to observed node')
-  }
-  x
+  identical(dim(x), c(1L, 1L))
 }
 
 # check dimensions of arguments to ops
 check_dims <- function(x, y) {
 
-  # coerece to nodes
-  x <- to_node(x)
-  y <- to_node(y)
+  # coerce to nodes
+  x <- as.greta_array(x)
+  y <- as.greta_array(y)
 
   # if one is a scalar, it should be fine
   if ( !( is_scalar(x) | is_scalar(y) ) ) {
 
     # if they're non-scalar, but have the same dimensions, that's fine too
-    if ( !identical(x$dim, y$dim) ) {
+    if ( !identical(dim(x), dim(y)) ) {
 
       # otherwise it's not fine
       msg <- sprintf('incompatible dimensions: %s vs %s',
-                     paste0(x$dim, collapse = 'x'),
-                     paste0(y$dim, collapse = 'x'))
+                     paste0(dim(x), collapse = 'x'),
+                     paste0(dim(y), collapse = 'x'))
       stop (msg)
 
     }
@@ -110,4 +98,19 @@ relist_tf <- function (x, list_template) {
 dummy <- function (dims) {
   vec <- seq_len(prod(dims)) - 1
   unflatten_rowwise(vec, dims)
+}
+
+# evaluate a greta_array, node, or tensor
+grab <- function (x) {
+
+  if (is.greta_array(x))
+    x <- x$node
+
+  if (is.node(x)) {
+    x$define_tf(environment())
+    x <- get(x$name)
+  }
+
+  tf$Session()$run(x)
+
 }

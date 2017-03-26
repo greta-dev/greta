@@ -2,17 +2,18 @@
 % Please edit documentation in R/operators.R
 \name{greta-operators}
 \alias{greta-operators}
-\title{operators for greta nodes}
+\title{Operators for Greta Arrays}
 \description{
 This is a list of currently implemented arithmetic, logical and
-  relational operators, and extract/replace syntax to combine greta nodes
+  relational operators, and extract/replace syntax to combine greta arrays
   into probabilistic models. Also see \link{greta-functions} and
   \link{greta-transforms}.
 }
 \details{
 greta's operators are used just like R's the standard arithmetic,
-  logical and relational operators, but they return other greta nodes, rather
-  than values.
+  logical and relational operators, but they return other greta arrays. Since
+  the operations are only carried during sampling, the greta array objects
+  have unknown values.
 }
 \section{Usage}{
  \preformatted{
