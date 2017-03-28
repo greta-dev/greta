@@ -1,7 +1,7 @@
 # dynamics module
 
 # iterate matrix tensor `mat` `niter` times, each time using and updating vector
-# tensor `state`
+# tensor `state`, and return lambda for the final iteration
 tf_iterate_lambda <- function (mat, state, niter) {
 
   # store states (can't overwrite since we need to maintain the chain of nodes)
@@ -14,6 +14,22 @@ tf_iterate_lambda <- function (mat, state, niter) {
   # return the final growth rate (should be same for all states at convergence)
   lambda <- states[[niter + 1]][1] / states[[niter]][1]
   tf$reshape(lambda, shape = c(1L, 1L))
+
+}
+
+# iterate matrix tensor `mat` `niter` times, each time using and updating vector
+# tensor `state`, and return the final state
+tf_iterate_state <- function (mat, state, niter) {
+
+  # store states (can't overwrite since we need to maintain the chain of nodes)
+  states <- list(state)
+
+  # iterate the matrix
+  for (i in seq_len(niter))
+    states[[i + 1]] <-  tf$matmul(mat, states[[i]])
+
+  # return the final growth rate (should be same for all states at convergence)
+  states[[niter + 1]]
 
 }
 
@@ -91,10 +107,42 @@ iterate_lambda <- function(matrix, state, niter) {
       stop ('number of elements in state must match the dimension of matrix')
 
     # output dimensions
-    state_dim
+    c(1, 1)
   }
 
   op('tf_iterate_lambda',
+     matrix,
+     state,
+     operation_args = list(niter = niter),
+     dimfun = dimfun)
+
+}
+
+# node functions exposed via module
+iterate_state <- function(matrix, state, niter) {
+
+  niter <- as.integer(niter)
+
+  dimfun <- function(elem_list) {
+
+    # input dimensions
+    matrix_dim <- dim(elem_list[[1]])
+    state_dim <- dim(elem_list[[2]])
+
+    if (length(state_dim) != 2 | state_dim[2] != 1)
+      stop ('state must be a column vector (rank 2 tensor)')
+
+    if (length(matrix_dim) != 2 | matrix_dim[1] != matrix_dim[2])
+      stop ('matrix must be a square matrix (rank 2 tensor)')
+
+    if (matrix_dim[2] != state_dim[1])
+      stop ('number of elements in state must match the dimension of matrix')
+
+    # output dimensions
+    state_dim
+  }
+
+  op('tf_iterate_state',
      matrix,
      state,
      operation_args = list(niter = niter),
@@ -146,14 +194,27 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
 #'   far only for iterating Leslie matrices. \code{iterate_lambda} iterates a
 #'   matrix a certain number of times and returns, as a scalar greta array, the
 #'   terminal growth rate for the first element of the state vector.
-#'   \code{iterate_lambda_vectorised} is a vectorised version for iterating over
-#'   multiple matrices, returning a vector of growth rates.
+#'   \code{iterate_state} carries out the same procedure, but returns the final
+#'   state vector. \code{iterate_lambda_vectorised} is a vectorised version of
+#'   \code{iterate_lambda} for iterating over multiple matrices, returning a
+#'   vector of growth rates.
 #'
 NULL
 
 #' @name iterate_lambda
 #' @rdname dynamics-module
 #' @usage dynamics$iterate_lambda(matrix, state, niter)
+#' @param matrix a square, two-dimensional (i.e. matrix-like) greta array
+#'   representing transition probabilities between states
+#' @param state a column vector greta array representing the initial state from
+#'   which to iterate the matrix
+#' @param niter a positive integer giving the number of times to iterate the
+#'   matrix
+NULL
+
+#' @name iterate_state
+#' @rdname dynamics-module
+#' @usage dynamics$iterate_state(matrix, state, niter)
 #' @param matrix a square, two-dimensional (i.e. matrix-like) greta array
 #'   representing transition probabilities between states
 #' @param state a column vector greta array representing the initial state from
@@ -175,4 +236,5 @@ NULL
 
 #' @export
 dynamics <- list(iterate_lambda = iterate_lambda,
+                 iterate_state = iterate_state,
                  iterate_lambda_vectorised = iterate_lambda_vectorised)

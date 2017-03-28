@@ -41,6 +41,10 @@
 #'  chol(x, ...)
 #'  diag(x, nrow, ncol)
 #'  solve(a, b, ...)
+#'
+#'  # miscellaneous operations
+#'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+#'
 #'  }
 #'
 #' @details TensorFlow only enables rounding to integers, so \code{round()} will
@@ -55,6 +59,10 @@
 #'   elements of a greta array. A static diagonal matrix can always be created
 #'   with e.g. \code{diag(3)}.
 #'
+#'   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
+#'   can only be either 1 or 2), and for subtraction, addition, division and
+#'   multiplication.
+#'
 #' @examples
 #' x = observed(matrix(1:9, nrow = 3, ncol = 3))
 #' a = log(exp(x))
@@ -66,56 +74,58 @@
 #'
 #' z = t(a)
 #'
+#' y = sweep(x, 1, e, '-')
+#'
 #'
 NULL
 
 #' @export
-`log.greta_array` <- function (e1) {
+log.greta_array <- function (e1) {
   op("tf$log", e1)
 }
 
 #' @export
-`exp.greta_array` <- function (e1) {
+exp.greta_array <- function (e1) {
   op("tf$exp", e1)
 }
 
 #' @export
-`log1p.greta_array` <- function (e1) {
+log1p.greta_array <- function (e1) {
   log(1 + e1)
 }
 
 #' @export
-`expm1.greta_array` <- function (e1) {
+expm1.greta_array <- function (e1) {
   exp(e1) - 1
 }
 
 #' @export
-`abs.greta_array` <- function (e1) {
+abs.greta_array <- function (e1) {
   op("tf$abs", e1)
 }
 
 #' @export
-`sqrt.greta_array` <- function (e1) {
+sqrt.greta_array <- function (e1) {
   op("tf$sqrt", e1)
 }
 
 #' @export
-`sign.greta_array` <- function (e1) {
+sign.greta_array <- function (e1) {
   op("tf$sign", e1)
 }
 
 #' @export
-`ceiling.greta_array` <- function (e1) {
+ceiling.greta_array <- function (e1) {
   op("tf$ceil", e1)
 }
 
 #' @export
-`floor.greta_array` <- function (e1) {
+floor.greta_array <- function (e1) {
   op("tf$floor", e1)
 }
 
 #' @export
-`round.greta_array` <- function (e1, digits = 0) {
+round.greta_array <- function (e1, digits = 0) {
   if (digits != 0)
     stop("TensorFlow round only supports rounding to integers")
   op("tf$round", e1)
@@ -123,47 +133,47 @@ NULL
 
 # trigonometry functions
 #' @export
-`cos.greta_array` <- function (e1) {
+cos.greta_array <- function (e1) {
   op("tf$cos", e1)
 }
 
 #' @export
-`sin.greta_array` <- function (e1) {
+sin.greta_array <- function (e1) {
   op("tf$sin", e1)
 }
 
 #' @export
-`tan.greta_array` <- function (e1) {
+tan.greta_array <- function (e1) {
   op("tf$tan", e1)
 }
 
 #' @export
-`acos.greta_array` <- function (e1) {
+acos.greta_array <- function (e1) {
   op("tf$acos", e1)
 }
 
 #' @export
-`asin.greta_array` <- function (e1) {
+asin.greta_array <- function (e1) {
   op("tf$asin", e1)
 }
 
 #' @export
-`atan.greta_array` <- function (e1) {
+atan.greta_array <- function (e1) {
   op("tf$atan", e1)
 }
 
 #' @export
-`lgamma.greta_array` <- function (e1) {
+lgamma.greta_array <- function (e1) {
   op("tf$lgamma", e1)
 }
 
 #' @export
-`digamma.greta_array` <- function (e1) {
+digamma.greta_array <- function (e1) {
   op("tf$digamma", e1)
 }
 
 #' @export
-`t.greta_array` <- function (e1) {
+t.greta_array <- function (e1) {
 
   # reverse the dimensions
   dimfun <- function (elem_list) {
@@ -177,7 +187,7 @@ NULL
 }
 
 #' @export
-`chol.greta_array` <- function (e1, ...) {
+chol.greta_array <- function (e1, ...) {
 
   if (!identical(list(), list(...)))
     warning ('chol() options are ignored by TensorFlow')
@@ -217,7 +227,7 @@ diag.greta_array <- function (x = 1, nrow, ncol) {
   }
 
   # return the extraction op
-  return (op('tf$diag_part', x, dimfun = dimfun))
+  op('tf$diag_part', x, dimfun = dimfun)
 
 }
 
@@ -279,5 +289,75 @@ solve.greta_array <- function (a, b, ...) {
     return (op("tf$matrix_solve", a, b))
 
   }
+
+}
+
+# tensorflow version of sweep, based on broadcasting of tf ops
+tf_sweep <- function (x, STATS, MARGIN, FUN) {
+
+  # if the second margin, transpose before and after
+  if (MARGIN == 2)
+    x <- tf$transpose(x)
+
+  # apply the function rowwise
+  result <- do.call(FUN, list(x, STATS))
+
+  if (MARGIN == 2)
+    result <- tf$transpose(result)
+
+  result
+
+}
+
+#' @export
+sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
+  UseMethod('sweep', x)
+
+#' @export
+sweep.default <- base:::sweep
+
+#' @export
+sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*')) {
+
+  # only allow these four functions
+  FUN <- match.arg(FUN)
+
+  STATS <- as.greta_array(STATS)
+
+  if (!MARGIN %in% seq_len(2))
+    stop ('MARGIN can only be 1 or 2')
+
+  dimfun <- function (elem_list) {
+
+    x <- elem_list[[1]]
+    STATS <- elem_list[[2]]
+
+    # x must be 2D
+    if (length(dim(x)) != 2) {
+      stop (sprintf('x must be a 2D array, but has %i dimensions',
+                    length(dim(x))))
+    }
+
+    # STATS must be a column array
+    if (length(dim(STATS)) != 2 & dim(STATS)[2] != 1) {
+      stop (sprintf('STATS must be a column vector array, but has dimensions %s',
+                    paste(dim(STATS), collapse = ' x ')))
+    }
+
+    # STATS must have the same dimension as the correct dim of x
+    if (dim(x)[MARGIN] != dim(STATS)[1])
+      stop ('the number of elements of STATS does not match dim(x)[MARGIN]')
+
+    # return the dimensions of x
+    dim(x)
+
+  }
+
+  op("tf_sweep",
+     x,
+     STATS,
+     operation_args = list(MARGIN = MARGIN,
+                           FUN = FUN),
+     dimfun = dimfun)
 
 }
