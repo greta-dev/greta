@@ -114,3 +114,23 @@ grab <- function (x) {
   tf$Session()$run(x)
 
 }
+
+# flatten a tensor to a rank-2 column vector
+tf_flatten <- function (x)
+  tf$reshape(x, shape = c(tf$size(x), 1L))
+
+# flatten a greta array. Uses Python-like row-major order, so not exposed to
+# users. Useful for the reducing functions
+flatten <- function (x) {
+
+  stopifnot(is.greta_array(x))
+
+  dimfun <- function (elem_list) {
+    len <- prod(dim(elem_list[[1]]))
+    c(len, 1)
+  }
+
+  op('tf_flatten',
+     x,
+     dimfun = dimfun)
+}

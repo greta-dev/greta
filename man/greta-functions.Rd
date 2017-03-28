@@ -36,6 +36,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
 
  # miscellaneous mathematics
  abs(x)
+ mean(x)
  sqrt(x)
  sign(x)
 
@@ -61,6 +62,12 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  chol(x, ...)
  diag(x, nrow, ncol)
  solve(a, b, ...)
+
+ # reducing operations
+ sum(..., na.rm = TRUE)
+ prod(..., na.rm = TRUE)
+ min(..., na.rm = TRUE)
+ max(..., na.rm = TRUE)
 
  # miscellaneous operations
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
