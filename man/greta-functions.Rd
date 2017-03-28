@@ -20,6 +20,10 @@ TensorFlow only enables rounding to integers, so \code{round()} will
   greta array from a vector-like greta array, nor to assign the diagonal
   elements of a greta array. A static diagonal matrix can always be created
   with e.g. \code{diag(3)}.
+
+  \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
+  can only be either 1 or 2), and for subtraction, addition, division and
+  multiplication.
 }
 \section{Usage}{
  \preformatted{
@@ -57,6 +61,10 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  chol(x, ...)
  diag(x, nrow, ncol)
  solve(a, b, ...)
+
+ # miscellaneous operations
+ sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+
  }
 }
 \examples{
@@ -69,6 +77,8 @@ d = abs(x - 5)
 e = diag(x)
 
 z = t(a)
+
+y = sweep(x, 1, e, '-')
 
 
 }

@@ -41,6 +41,10 @@
 #'  chol(x, ...)
 #'  diag(x, nrow, ncol)
 #'  solve(a, b, ...)
+#'
+#'  # miscellaneous operations
+#'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+#'
 #'  }
 #'
 #' @details TensorFlow only enables rounding to integers, so \code{round()} will
@@ -55,6 +59,10 @@
 #'   elements of a greta array. A static diagonal matrix can always be created
 #'   with e.g. \code{diag(3)}.
 #'
+#'   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
+#'   can only be either 1 or 2), and for subtraction, addition, division and
+#'   multiplication.
+#'
 #' @examples
 #' x = observed(matrix(1:9, nrow = 3, ncol = 3))
 #' a = log(exp(x))
@@ -65,6 +73,8 @@
 #' e = diag(x)
 #'
 #' z = t(a)
+#'
+#' y = sweep(x, 1, e, '-')
 #'
 #'
 NULL
@@ -217,7 +227,7 @@ diag.greta_array <- function (x = 1, nrow, ncol) {
   }
 
   # return the extraction op
-  return (op('tf$diag_part', x, dimfun = dimfun))
+  op('tf$diag_part', x, dimfun = dimfun)
 
 }
 
@@ -279,5 +289,75 @@ solve.greta_array <- function (a, b, ...) {
     return (op("tf$matrix_solve", a, b))
 
   }
+
+}
+
+# tensorflow version of sweep, based on broadcasting of tf ops
+tf_sweep <- function (x, STATS, MARGIN, FUN) {
+
+  # if the second margin, transpose before and after
+  if (MARGIN == 2)
+    x <- tf$transpose(x)
+
+  # apply the function rowwise
+  result <- do.call(FUN, list(x, STATS))
+
+  if (MARGIN == 2)
+    result <- tf$transpose(result)
+
+  result
+
+}
+
+#' @export
+sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
+  UseMethod('sweep', x)
+
+#' @export
+sweep.default <- base:::sweep
+
+#' @export
+sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*')) {
+
+  # only allow these four functions
+  FUN <- match.arg(FUN)
+
+  STATS <- as.greta_array(STATS)
+
+  if (!MARGIN %in% seq_len(2))
+    stop ('MARGIN can only be 1 or 2')
+
+  dimfun <- function (elem_list) {
+
+    x <- elem_list[[1]]
+    STATS <- elem_list[[2]]
+
+    # x must be 2D
+    if (length(dim(x)) != 2) {
+      stop (sprintf('x must be a 2D array, but has %i dimensions',
+                    length(dim(x))))
+    }
+
+    # STATS must be a column array
+    if (length(dim(STATS)) != 2 & dim(STATS)[2] != 1) {
+      stop (sprintf('STATS must be a column vector array, but has dimensions %s',
+                    paste(dim(STATS), collapse = ' x ')))
+    }
+
+    # STATS must have the same dimension as the correct dim of x
+    if (dim(x)[MARGIN] != dim(STATS)[1])
+      stop ('the number of elements of STATS does not match dim(x)[MARGIN]')
+
+    # return the dimensions of x
+    dim(x)
+
+  }
+
+  op("tf_sweep",
+     x,
+     STATS,
+     operation_args = list(MARGIN = MARGIN,
+                           FUN = FUN),
+     dimfun = dimfun)
 
 }
