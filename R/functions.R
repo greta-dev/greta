@@ -16,6 +16,7 @@
 #'
 #'  # miscellaneous mathematics
 #'  abs(x)
+#'  mean(x)
 #'  sqrt(x)
 #'  sign(x)
 #'
@@ -41,6 +42,12 @@
 #'  chol(x, ...)
 #'  diag(x, nrow, ncol)
 #'  solve(a, b, ...)
+#'
+#'  # reducing operations
+#'  sum(..., na.rm = TRUE)
+#'  prod(..., na.rm = TRUE)
+#'  min(..., na.rm = TRUE)
+#'  max(..., na.rm = TRUE)
 #'
 #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
@@ -291,6 +298,94 @@ solve.greta_array <- function (a, b, ...) {
   }
 
 }
+
+# sum, prod, min, mean, max
+
+#' @export
+sum.greta_array <- function (..., na.rm = TRUE) {
+
+  # combine all elements into a column vector
+  dots <- list(...)
+  flat_dots <- lapply(dots, flatten)
+  vec <- do.call(c, flat_dots)
+
+  # results will be 1 x 1
+  dimfun <- function (x) c(1, 1)
+
+  # sum the elements
+  op('tf$reduce_sum',
+     vec,
+     dimfun = dimfun)
+
+}
+
+#' @export
+prod.greta_array <- function (..., na.rm = TRUE) {
+
+  # combine all elements into a column vector
+  dots <- list(...)
+  flat_dots <- lapply(dots, flatten)
+  vec <- do.call(c, flat_dots)
+
+  # results will be 1 x 1
+  dimfun <- function (x) c(1, 1)
+
+  # sum the elements
+  op('tf$reduce_prod',
+     vec,
+     dimfun = dimfun)
+
+}
+
+#' @export
+min.greta_array <- function (..., na.rm = TRUE) {
+
+  # combine all elements into a column vector
+  dots <- list(...)
+  flat_dots <- lapply(dots, flatten)
+  vec <- do.call(c, flat_dots)
+
+  # results will be 1 x 1
+  dimfun <- function (x) c(1, 1)
+
+  # sum the elements
+  op('tf$reduce_min',
+     vec,
+     dimfun = dimfun)
+
+}
+
+#' @export
+mean.greta_array <- function (x, trim = 0, na.rm = TRUE, ...) {
+
+  # results will be 1 x 1
+  dimfun <- function (x) c(1, 1)
+
+  # sum the elements
+  op('tf$reduce_mean',
+     x,
+     dimfun = dimfun)
+
+}
+
+#' @export
+max.greta_array <- function (..., na.rm = TRUE) {
+
+  # combine all elements into a column vector
+  dots <- list(...)
+  flat_dots <- lapply(dots, flatten)
+  vec <- do.call(c, flat_dots)
+
+  # results will be 1 x 1
+  dimfun <- function (x) c(1, 1)
+
+  # sum the elements
+  op('tf$reduce_max',
+     vec,
+     dimfun = dimfun)
+
+}
+
 
 # tensorflow version of sweep, based on broadcasting of tf ops
 tf_sweep <- function (x, STATS, MARGIN, FUN) {
