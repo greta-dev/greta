@@ -70,52 +70,52 @@
 NULL
 
 #' @export
-`log.greta_array` <- function (e1) {
+log.greta_array <- function (e1) {
   op("tf$log", e1)
 }
 
 #' @export
-`exp.greta_array` <- function (e1) {
+exp.greta_array <- function (e1) {
   op("tf$exp", e1)
 }
 
 #' @export
-`log1p.greta_array` <- function (e1) {
+log1p.greta_array <- function (e1) {
   log(1 + e1)
 }
 
 #' @export
-`expm1.greta_array` <- function (e1) {
+expm1.greta_array <- function (e1) {
   exp(e1) - 1
 }
 
 #' @export
-`abs.greta_array` <- function (e1) {
+abs.greta_array <- function (e1) {
   op("tf$abs", e1)
 }
 
 #' @export
-`sqrt.greta_array` <- function (e1) {
+sqrt.greta_array <- function (e1) {
   op("tf$sqrt", e1)
 }
 
 #' @export
-`sign.greta_array` <- function (e1) {
+sign.greta_array <- function (e1) {
   op("tf$sign", e1)
 }
 
 #' @export
-`ceiling.greta_array` <- function (e1) {
+ceiling.greta_array <- function (e1) {
   op("tf$ceil", e1)
 }
 
 #' @export
-`floor.greta_array` <- function (e1) {
+floor.greta_array <- function (e1) {
   op("tf$floor", e1)
 }
 
 #' @export
-`round.greta_array` <- function (e1, digits = 0) {
+round.greta_array <- function (e1, digits = 0) {
   if (digits != 0)
     stop("TensorFlow round only supports rounding to integers")
   op("tf$round", e1)
@@ -123,47 +123,47 @@ NULL
 
 # trigonometry functions
 #' @export
-`cos.greta_array` <- function (e1) {
+cos.greta_array <- function (e1) {
   op("tf$cos", e1)
 }
 
 #' @export
-`sin.greta_array` <- function (e1) {
+sin.greta_array <- function (e1) {
   op("tf$sin", e1)
 }
 
 #' @export
-`tan.greta_array` <- function (e1) {
+tan.greta_array <- function (e1) {
   op("tf$tan", e1)
 }
 
 #' @export
-`acos.greta_array` <- function (e1) {
+acos.greta_array <- function (e1) {
   op("tf$acos", e1)
 }
 
 #' @export
-`asin.greta_array` <- function (e1) {
+asin.greta_array <- function (e1) {
   op("tf$asin", e1)
 }
 
 #' @export
-`atan.greta_array` <- function (e1) {
+atan.greta_array <- function (e1) {
   op("tf$atan", e1)
 }
 
 #' @export
-`lgamma.greta_array` <- function (e1) {
+lgamma.greta_array <- function (e1) {
   op("tf$lgamma", e1)
 }
 
 #' @export
-`digamma.greta_array` <- function (e1) {
+digamma.greta_array <- function (e1) {
   op("tf$digamma", e1)
 }
 
 #' @export
-`t.greta_array` <- function (e1) {
+t.greta_array <- function (e1) {
 
   # reverse the dimensions
   dimfun <- function (elem_list) {
@@ -177,7 +177,7 @@ NULL
 }
 
 #' @export
-`chol.greta_array` <- function (e1, ...) {
+chol.greta_array <- function (e1, ...) {
 
   if (!identical(list(), list(...)))
     warning ('chol() options are ignored by TensorFlow')
