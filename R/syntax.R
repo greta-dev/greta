@@ -29,6 +29,15 @@
   if (!inherits(theta$node, 'distribution'))
     stop ('right hand side of likelihood must be a stochastic greta array')
 
+  # if theta isn't scalar, make sure it has the right dimensions
+  if (!is_scalar(theta)) {
+    if (!identical(dim(y), dim(theta))) {
+      stop (sprintf('left- and right-hand side of likelihood have different dimensions. The distribution must have dimension of either %s or 1 x 1, but instead has dimension %s',
+                    paste(dim(y), collapse = ' x '),
+                    paste(dim(theta), collapse = ' x ')))
+    }
+  }
+
   # provide the data to the likelihood and lock in the values in the
   # distribution
   theta$node$value(y$node$value())
