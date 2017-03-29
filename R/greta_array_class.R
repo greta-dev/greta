@@ -75,7 +75,7 @@ summary.greta_array <- function (x, ...) {
 # get dimensions
 #' @export
 dim.greta_array <- function(x)
-  x$node$dim
+  as.integer(x$node$dim)
 
 #' @export
 length.greta_array <- function(x)

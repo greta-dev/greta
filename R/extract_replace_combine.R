@@ -185,6 +185,10 @@ tf_replace <- function (x, value, index, dims) {
   nelem <- prod(dims_in)
   dims_out <- dim(dummy_out)
 
+  # make sure it's a column vector
+  if (length(dims_out) == 1)
+    dims_out <- c(dims_out, 1)
+
   # get the index in flat python format, as a tensor
   index <- flatten_rowwise(dummy_out)
   tf_index <- tf$constant(as.integer(index),
