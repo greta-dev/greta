@@ -18,31 +18,83 @@ notimplemented <- function ()
   stop ('method not yet implemented')
 
 # is this greta_array actually a scalar?
-is_scalar <- function (x) {
+is_scalar <- function (x)
   identical(dim(x), c(1L, 1L))
-}
 
-# check dimensions of arguments to ops
-check_dims <- function(x, y) {
+# check dimensions of arguments to ops, and return the maximum dimension
+check_dims <- function (..., target_dim = NULL) {
 
-  # coerce to nodes
-  x <- as.greta_array(x)
-  y <- as.greta_array(y)
+  # coerce args to greta arrays
+  elem_list <- list(...)
+  elem_list <- lapply(elem_list, as.greta_array)
 
-  # if one is a scalar, it should be fine
-  if ( !( is_scalar(x) | is_scalar(y) ) ) {
+  # dimensions of each
+  dim_list <- lapply(elem_list, dim)
+
+  # as text, for printing
+  dims_paste <- vapply(dim_list, paste, '', collapse= 'x')
+  dims_text <- paste(dims_paste, collapse = ', ')
+
+  # which are scalars
+  scalars <- vapply(elem_list, is_scalar, FALSE)
+
+  # if more than one is non-scalar, need to check them
+  if (sum(!scalars) > 1) {
+
+    match_first <- vapply(dim_list,
+                          identical,
+                          FUN.VALUE = FALSE,
+                          dim_list[[1]])
 
     # if they're non-scalar, but have the same dimensions, that's fine too
-    if ( !identical(dim(x), dim(y)) ) {
+    if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- sprintf('incompatible dimensions: %s vs %s',
-                     paste0(dim(x), collapse = 'x'),
-                     paste0(dim(y), collapse = 'x'))
+      msg <- sprintf('incompatible dimensions: %s',
+                     dims_text)
       stop (msg)
 
     }
   }
+
+  # if there's a target dimension, make sure they all match it
+  if (!is.null(target_dim)) {
+
+    # make sure it's 2D
+    if (length(target_dim) == 1)
+      target_dim <- c(target_dim, 1)
+
+    target_dim <- as.integer(target_dim)
+
+    # if they are all scalars, that's fine too
+    if (!all(scalars)) {
+
+      # check all arguments against this
+      matches_target <- vapply(dim_list,
+                               identical,
+                               FUN.VALUE = FALSE,
+                               target_dim)
+
+      # error if not
+      if (!all(matches_target)) {
+        stop (sprintf('array dimensions should be %s, but input dimensions were %s',
+                      paste(target_dim, collapse = 'x'),
+                      dims_text))
+      }
+
+    }
+
+    output_dim <- target_dim
+
+  } else {
+
+    # otherwise, find the correct output dimension
+    output_dim <- do.call(pmax, dim_list)
+
+  }
+
+  output_dim
+
 }
 
 # convert an array to a vector row-wise
@@ -134,3 +186,22 @@ flatten <- function (x) {
      x,
      dimfun = dimfun)
 }
+
+# function to get and check dim for univariate distributions
+get_dims <- function (..., target_dim) {
+
+  # check the dims are compatible with one another and the target if specified
+  check_dims(..., target_dim)
+
+  elem_list <- list(...)
+  dims_in <- lapply(elem_list, dim)
+
+
+  # if dim is null, make sure the parameters all have the same dimension (or are scalar)
+
+  # do this in the initialization for each distribution
+  # on add_parameter, expand out any scalar parameters
+
+
+}
+

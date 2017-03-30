@@ -18,25 +18,25 @@
 \alias{wishart}
 \title{greta probability distributions}
 \usage{
-normal(mean, sd, dim = 1)
+normal(mean, sd, dim = NULL)
 
-lognormal(meanlog, sdlog, dim = 1)
+lognormal(meanlog, sdlog, dim = NULL)
 
-bernoulli(prob, dim = 1)
+bernoulli(prob, dim = NULL)
 
-binomial(size, prob, dim = 1)
+binomial(size, prob, dim = NULL)
 
-negative_binomial(size, prob, dim = 1)
+negative_binomial(size, prob, dim = NULL)
 
-poisson(lambda, dim = 1)
+poisson(lambda, dim = NULL)
 
-gamma(shape, rate, dim = 1)
+gamma(shape, rate, dim = NULL)
 
-exponential(rate, dim = 1)
+exponential(rate, dim = NULL)
 
-student(df, ncp, dim = 1)
+student(df, ncp, dim = NULL)
 
-beta(shape1, shape2, dim = 1)
+beta(shape1, shape2, dim = NULL)
 
 free(dim = 1)
 
