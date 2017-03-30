@@ -20,7 +20,7 @@ flat_distribution <- R6Class (
 
     },
 
-    initialize = function (lower = -1e6, upper = 1e6, dim = 1) {
+    initialize = function (lower = -1e6, upper = 1e6, dim) {
 
       if (!(is.numeric(lower) & is.numeric(upper) &
             is.finite(lower) & is.finite(upper) &
@@ -67,8 +67,9 @@ normal_distribution <- R6Class (
 
     tf_from_free = function (x, env) x,
 
-    initialize = function (mean, sd, dim = 1) {
+    initialize = function (mean, sd, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(mean, sd, target_dim = dim)
       super$initialize('normal', dim)
       self$add_parameter(mean, 'mean')
       self$add_parameter(sd, 'sd')
@@ -94,7 +95,8 @@ lognormal_distribution <- R6Class (
     to_free = log,
     tf_from_free = function (x, env) tf$exp(x),
 
-    initialize = function (meanlog, sdlog, dim = 1) {
+    initialize = function (meanlog, sdlog, dim) {
+      dim <- check_dims(meanlog, sdlog, target_dim = dim)
       super$initialize('lognormal', dim)
       self$add_parameter(meanlog, 'meanlog')
       self$add_parameter(sdlog, 'sdlog')
@@ -123,8 +125,9 @@ bernoulli_distribution <- R6Class (
     tf_from_free = function (x, env)
       stop ('cannot infer discrete random variables'),
 
-    initialize = function (prob, dim = 1) {
+    initialize = function (prob, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(prob, target_dim = dim)
       super$initialize('bernoulli', dim, discrete = TRUE)
       self$add_parameter(prob, 'prob')
     },
@@ -150,8 +153,9 @@ binomial_distribution <- R6Class (
     tf_from_free = function (x, env)
       stop ('cannot infer discrete random variables'),
 
-    initialize = function (size, prob, dim = 1) {
+    initialize = function (size, prob, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(size, prob, target_dim = dim)
       super$initialize('binomial', dim, discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(prob, 'prob')
@@ -183,8 +187,9 @@ poisson_distribution <- R6Class (
     tf_from_free = function (x, env)
       stop ('cannot infer discrete random variables'),
 
-    initialize = function (lambda, dim = 1) {
+    initialize = function (lambda, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(lambda, target_dim = dim)
       super$initialize('poisson', dim, discrete = TRUE)
       self$add_parameter(lambda, 'lambda')
     },
@@ -210,8 +215,9 @@ negative_binomial_distribution <- R6Class (
     tf_from_free = function (x, env)
       stop ('cannot infer discrete random variables'),
 
-    initialize = function (size, prob, dim = 1) {
+    initialize = function (size, prob, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(size, prob, target_dim = dim)
       super$initialize('negative_binomial', dim, discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(prob, 'prob')
@@ -239,8 +245,9 @@ gamma_distribution <- R6Class (
     to_free = function (y) log(expm1(y)),
     tf_from_free = function (x, env) tf_log1pe(x),
 
-    initialize = function (shape, rate, dim = 1) {
+    initialize = function (shape, rate, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(shape, rate, target_dim = dim)
       super$initialize('gamma', dim)
       self$add_parameter(shape, 'shape')
       self$add_parameter(rate, 'rate')
@@ -267,8 +274,9 @@ exponential_distribution <- R6Class (
     to_free = function (y) log(expm1(y)),
     tf_from_free = function (x, env) tf_log1pe(x),
 
-    initialize = function (rate, dim = 1) {
+    initialize = function (rate, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(rate, target_dim = dim)
       super$initialize('exponential', dim)
       self$add_parameter(rate, 'rate')
     },
@@ -291,8 +299,9 @@ student_distribution <- R6Class (
     to_free = function (y) y,
     tf_from_free = function (x, env) x,
 
-    initialize = function (df, ncp, dim = 1) {
+    initialize = function (df, ncp, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(df, ncp, target_dim = dim)
       super$initialize('student', dim)
       self$add_parameter(df, 'df')
       self$add_parameter(ncp, 'ncp')
@@ -320,8 +329,9 @@ beta_distribution <- R6Class (
     to_free = function (y) qlogis(y),
     tf_from_free = function (x, env) tf_ilogit(x),
 
-    initialize = function (shape1, shape2, dim = 1) {
+    initialize = function (shape1, shape2, dim) {
       # add the nodes as children and parameters
+      dim <- check_dims(shape1, shape2, target_dim = dim)
       super$initialize('beta', dim)
       self$add_parameter(shape1, 'shape2')
       self$add_parameter(shape2, 'shape2')
@@ -351,7 +361,7 @@ multivariate_normal_distribution <- R6Class (
     to_free = function (y) y,
     tf_from_free = function (x, env) x,
 
-    initialize = function (mean, Sigma, dim = 2) {
+    initialize = function (mean, Sigma, dim) {
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
@@ -430,7 +440,7 @@ wishart_distribution <- R6Class (
       tf$matmul(tf$transpose(L), L)
     },
 
-    initialize = function (df, Sigma, dim = 2) {
+    initialize = function (df, Sigma, dim) {
       # add the nodes as children and parameters
       super$initialize('wishart', c(dim, dim))
       self$add_parameter(df, 'df')
@@ -532,52 +542,52 @@ NULL
 
 #' @rdname greta-distributions
 #' @export
-normal <- function (mean, sd, dim = 1)
+normal <- function (mean, sd, dim = NULL)
   ga(normal_distribution$new(mean, sd, dim))
 
 #' @rdname greta-distributions
 #' @export
-lognormal <- function (meanlog, sdlog, dim = 1)
+lognormal <- function (meanlog, sdlog, dim = NULL)
   ga(lognormal_distribution$new(meanlog, sdlog, dim))
 
 #' @rdname greta-distributions
 #' @export
-bernoulli <- function (prob, dim = 1)
+bernoulli <- function (prob, dim = NULL)
   ga(bernoulli_distribution$new(prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-binomial <- function (size, prob, dim = 1)
+binomial <- function (size, prob, dim = NULL)
   ga(binomial_distribution$new(size, prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-negative_binomial <- function (size, prob, dim = 1)
+negative_binomial <- function (size, prob, dim = NULL)
   ga(negative_binomial_distribution$new(size, prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-poisson <- function (lambda, dim = 1)
+poisson <- function (lambda, dim = NULL)
   ga(poisson_distribution$new(lambda, dim))
 
 #' @rdname greta-distributions
 #' @export
-gamma <- function (shape, rate, dim = 1)
+gamma <- function (shape, rate, dim = NULL)
   ga(gamma_distribution$new(shape, rate, dim))
 
 #' @rdname greta-distributions
 #' @export
-exponential <- function (rate, dim = 1)
+exponential <- function (rate, dim = NULL)
   ga(exponential_distribution$new(rate, dim))
 
 #' @rdname greta-distributions
 #' @export
-student <- function (df, ncp, dim = 1)
+student <- function (df, ncp, dim = NULL)
   ga(student_distribution$new(df, ncp, dim))
 
 #' @rdname greta-distributions
 #' @export
-beta <- function (shape1, shape2, dim = 1)
+beta <- function (shape1, shape2, dim = NULL)
   ga(beta_distribution$new(shape1, shape2, dim))
 
 #' @rdname greta-distributions

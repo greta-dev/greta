@@ -334,11 +334,14 @@ distribution <- R6Class (
     from_free = function (x) notimplemented(),
     to_free = function (x) notimplemented(),
 
-    initialize = function (name = 'no distribution', dim = 1, discrete = FALSE) {
+    initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
 
       # for all distributions, set name, store dims and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
+
+      if (is.null(dim))
+        dim <- c(1, 1)
 
       # coerce dim to integer
       dim <- as.integer(dim)

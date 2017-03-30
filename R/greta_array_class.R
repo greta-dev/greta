@@ -1,25 +1,28 @@
 # define a greta_array S3 class for the objects users manipulate
 
 # coerce to greta_array class
-as.greta_array <- function(x, ...) {
-  UseMethod('as.greta_array')
-}
-
+as.greta_array <- function(x, ...)
+  UseMethod('as.greta_array', x)
 
 # safely handle self-coersion
+#' @export
 as.greta_array.greta_array <- function (x, ...)
   x
 
 # node method (only one defined)
+#' @export
 as.greta_array.node <- function (x, ...) {
   ga <- list(node = x)
   class(ga) <- c('greta_array', 'array')
   ga
 }
 
-# array method (only one defined)
+# numeric methods
+#' @export
 as.greta_array.numeric <- function (x, ...)
-  as.greta_array(to_node(x))
+  as.greta_array.node(to_node(x))
+# as.greta_array.double <- as.greta_array.numeric
+# as.greta_array.integer <- as.greta_array.numeric
 
 # checking class status
 is.greta_array <- function (x)
