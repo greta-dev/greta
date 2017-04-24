@@ -41,10 +41,11 @@ Collate:
     'extract_replace_combine.R'
     'dynamics_module.R'
     'dag_class.R'
+    'greta_model_class.R'
     'samplers.R'
 Imports:
     R6,
     tensorflow
 Suggests:
     testthat
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
