@@ -87,6 +87,7 @@ length.greta_array <- function(x)
 # head handles matrices differently to arrays, so explicitly handle 2D greta
 # arrays
 #' @export
+#' @importFrom utils head
 head.greta_array <- function (x, n = 6L, ...) {
 
   stopifnot(length(n) == 1L)
@@ -119,6 +120,7 @@ head.greta_array <- function (x, n = 6L, ...) {
 }
 
 #' @export
+#' @importFrom utils tail
 tail.greta_array <- function (x, n = 6L, ...) {
 
   stopifnot(length(n) == 1L)
