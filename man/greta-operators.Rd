@@ -42,6 +42,7 @@ greta's operators are used just like R's the standard arithmetic,
  x != y
  }
 }
+
 \examples{
  x = observed(-1:12)
 
@@ -61,4 +62,3 @@ greta's operators are used just like R's the standard arithmetic,
  i = (-x) >= x
  j = h == x
 }
-

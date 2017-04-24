@@ -1,5 +1,5 @@
 #' @name extract-replace-combine
-#' @aliases extract, replace, cbind, rbind, c, rep
+#' @aliases extract replace cbind rbind c rep
 #' @title Extract, Replace and Combine greta Arrays
 #'
 #' @description Generic methods to extract and replace elements of greta arrays, or to
