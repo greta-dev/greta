@@ -28,8 +28,10 @@ sigma = lognormal(1, 0.1)
 x = observed(rnorm(10))
 x \%~\% normal(mu, sigma)
 
+m <- define_model(mu, sigma)
+
 # and sample from it
-draws <- sample(mu, sigma,
-                n_samples = 100,
-                warmup = 10)
+draws <- mcmc(m,
+              n_samples = 100,
+              warmup = 10)
 }
