@@ -205,3 +205,33 @@ get_dims <- function (..., target_dim) {
 
 }
 
+# look in the environment specified by env, and return a named list of all greta
+# arrays in that environment
+all_greta_arrays <- function (env = parent.frame(),
+                              include_data = TRUE) {
+
+  # all objects in that environment as a named list
+  all_object_names <- ls(envir = env)
+  all_objects <- lapply(all_object_names, get, envir = env)
+  names(all_objects) <- all_object_names
+
+  # find the greta arrays
+  is_greta_array <- vapply(all_objects,
+                           is.greta_array,
+                           FUN.VALUE = FALSE)
+  all_arrays <- all_objects[is_greta_array]
+
+  # optionally strip out the data arrays
+  if (!include_data) {
+
+    is_data <- vapply(all_arrays,
+                      function (x) x$node$type == 'data',
+                      FUN.VALUE = FALSE)
+    all_arrays <- all_arrays[!is_data]
+
+  }
+
+  all_arrays
+
+}
+

@@ -1,9 +1,71 @@
-#' @name greta-samplers
-#' @title sample model variables
-#' @description After defining a greta model in R, draw samples of the random
-#'   variables of interest
-#' @param ... greta arrays to sample values from, probably parameters of a
-#'   model. Observed greta arrays cannot be sampled from.
+#' @name greta-inference
+#' @title Statistical Inference on Greta Models
+#' @description Define a \code{greta_model} object and carry out statistical
+#'   inference on parameters of interest by MCMC
+NULL
+
+#' @rdname greta-inference
+#' @export
+#'
+#' @param \dots \code{greta_array} objects to be tracked by the model (i.e.
+#'   those for which samples will be retained during mcmc). If not provided, all
+#'   of the non-data \code{greta_array} objects defined in the calling
+#'   environment will be tracked.
+#'
+#' @return \code{define_model} - a \code{greta_model} object. See
+#'   \code{\link{greta-model}} for details.
+#'
+#' @examples
+#'
+#' # define a simple model
+#' mu = free()
+#' sigma = lognormal(1, 0.1)
+#' x = observed(rnorm(10))
+#' x %~% normal(mu, sigma)
+#'
+#' m <- define_model(mu, sigma)
+#'
+define_model <- function (...) {
+
+  # nodes required
+  target_greta_arrays <- list(...)
+
+  # if no arrays were specified, find all of the non-data arrays
+  if (identical(target_greta_arrays, list())) {
+
+    target_greta_arrays <- all_greta_arrays(parent.frame(),
+                                            include_data = FALSE)
+
+  } else {
+
+    # otherwise, find variable names for the provided nodes
+    names <- substitute(list(...))[-1]
+    names <- vapply(names, deparse, '')
+    names(target_greta_arrays) <- names
+
+  }
+
+  # get the dag containing the target nodes
+  dag <- dag_class$new(target_greta_arrays)
+
+  # define the TF graph
+  dag$define_tf()
+
+  # create the model object and add the arraysof interest
+  model <- as.greta_model(dag)
+  model$target_greta_arrays <- target_greta_arrays
+
+  model
+
+}
+
+#' @rdname greta-inference
+#' @export
+#'
+#' @param model greta_model object
+#' @param variables a vector giving the names of greta arrays to sample values
+#'   from, probably parameters of a model. If empty, the target arrays in
+#'   \code{model} will be used. Observed greta arrays cannot be sampled from.
 #' @param method the method used to sample values. Currently only \code{hmc} is
 #'   implemented
 #' @param n_samples the number of samples to draw (after any warm-up, but before
@@ -16,34 +78,32 @@
 #' @param verbose whether to print progress information to the console
 #' @param control an optional named list of hyperparameters and options to
 #'   control behaviour of the sampler
-#' @export
-#' @examples
-#' # define a simple model
-#' mu = free()
-#' sigma = lognormal(1, 0.1)
-#' x = observed(rnorm(10))
-#' x %~% normal(mu, sigma)
 #'
-#' draws <- sample(mu, sigma,
-#'                 n_samples = 100,
-#'                 warmup = 10)
-samples <- function (...,
-                    method = c('hmc', 'nuts'),
-                    n_samples = 1000,
-                    thin = 1,
-                    warmup = 100,
-                    verbose = TRUE,
-                    control = list()) {
+#' @return \code{mcmc} - a dataframe of mcmc samples of the parameters of interest, as defined
+#'   in \code{model}. This dataframe can be coerced to other formats to check
+#'   model convergence or summarise results, e.g. using \code{coda::mcmc}.
+#'
+#' @examples
+#'
+#' # carry out mcmc on the model
+#' draws <- mcmc(m,
+#'               n_samples = 100,
+#'               warmup = 10)
+#'
+mcmc <- function (model,
+                     method = c('hmc', 'nuts'),
+                     n_samples = 1000,
+                     thin = 1,
+                     warmup = 100,
+                     verbose = TRUE,
+                     control = list(),
+                  initial_values = NULL) {
 
   method <- match.arg(method)
 
-  # nodes required
-  target_greta_arrays <- list(...)
-
   # find variable names to label samples
-  names <- substitute(list(...))[-1]
-  names <- vapply(names, deparse, '')
-  names(target_greta_arrays) <- names
+  target_greta_arrays <- model$target_greta_arrays
+  names <- names(target_greta_arrays)
 
   # check they're not data nodes, provide a useful error message if they are
   type <- vapply(target_greta_arrays, member, 'node$type', FUN.VALUE = '')
@@ -58,17 +118,13 @@ samples <- function (...,
   }
 
   # get the dag containing the target nodes
-  dag <- dag_class$new(target_greta_arrays)
-
-  if (verbose)
-    message('compiling model')
-
-  # define the TF graph
-  dag$define_tf()
+  dag <- model$dag
 
   # random starting locations
-  init <- dag$example_parameters()
-  init[] <- rnorm(length(init), 0, 0.1)
+  if (is.null(initial_values)) {
+    initial_values <- dag$example_parameters()
+    initial_values[] <- rnorm(length(initial_values), 0, 0.1)
+  }
 
   # get default control options
   con <- switch(method,
@@ -93,7 +149,7 @@ samples <- function (...,
 
     # run it
     warmup_draws <- method(dag = dag,
-                           init = init,
+                           init = initial_values,
                            n_samples = warmup,
                            thin = thin,
                            verbose = verbose,
@@ -109,7 +165,7 @@ samples <- function (...,
 
   # run the sampler
   draws <- method(dag = dag,
-                  init = init,
+                  init = initial_values,
                   n_samples = n_samples,
                   thin = thin,
                   verbose = verbose,
@@ -127,7 +183,6 @@ samples <- function (...,
 nuts <- function (dag, init, n_samples, thin, verbose, control = list()) {
   stop ('not yet implemented')
 }
-
 
 hmc <- function (dag,
                  init,

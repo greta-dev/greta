@@ -13,4 +13,3 @@ observed(data)
 define an object in an R session as a greta array for use as
   data in a greta model
 }
-

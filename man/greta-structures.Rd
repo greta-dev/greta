@@ -2,8 +2,8 @@
 % Please edit documentation in R/structures.R
 \name{greta-structures}
 \alias{greta-structures}
-\alias{ones}
 \alias{zeros}
+\alias{ones}
 \title{greta Data Structures}
 \usage{
 zeros(...)
@@ -29,4 +29,3 @@ z <- zeros(3, 4)
 # a 3x3x3 greta array of 1s
 z <- ones(3, 3, 3)
 }
-

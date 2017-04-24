@@ -74,6 +74,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
 
  }
 }
+
 \examples{
 x = observed(matrix(1:9, nrow = 3, ncol = 3))
 a = log(exp(x))
@@ -89,4 +90,3 @@ y = sweep(x, 1, e, '-')
 
 
 }
-

@@ -33,4 +33,3 @@ draws <- sample(mu, sigma,
                 n_samples = 100,
                 warmup = 10)
 }
-
