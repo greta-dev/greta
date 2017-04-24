@@ -27,6 +27,7 @@ Depends:
     R (>= 3.0)
 Collate:
     'greta_package.R'
+    'overloaded_docs.R'
     'node_class.R'
     'node_types.R'
     'distributions.R'

@@ -39,25 +39,25 @@ print.greta_array <- function (x, ...) {
 
 # summary method
 #' @export
-summary.greta_array <- function (x, ...) {
+summary.greta_array <- function (object, ...) {
   # array type
   type_text <- sprintf("'%s' greta array",
-                                 x$node$type)
+                       object$node$type)
 
-  len <- length(x)
+  len <- length(object)
   if (len == 1) {
     shape_text <- "with 1 element"
   } else {
-    dim_text <- paste(dim(x), collapse = ' x ')
+    dim_text <- paste(dim(object), collapse = ' x ')
     shape_text <- sprintf("with %i elements (%s)",
                           len,
                           dim_text)
   }
 
   # distribution info
-  if (x$node$type == 'stochastic') {
+  if (object$node$type == 'stochastic') {
     distribution_text <- sprintf("following a %s distribution",
-                                 x$node$distribution_name)
+                                 object$node$distribution_name)
 
   } else {
     distribution_text <- ""
@@ -65,7 +65,7 @@ summary.greta_array <- function (x, ...) {
 
   cat(type_text, shape_text, distribution_text, '\n')
 
-  values <- x$node$value()
+  values <- object$node$value()
   if (inherits(values, 'unknowns')) {
     cat('\n  (values currently unknown)')
   } else {
@@ -87,6 +87,7 @@ length.greta_array <- function(x)
 # head handles matrices differently to arrays, so explicitly handle 2D greta
 # arrays
 #' @export
+#' @importFrom utils head
 head.greta_array <- function (x, n = 6L, ...) {
 
   stopifnot(length(n) == 1L)
@@ -119,6 +120,7 @@ head.greta_array <- function (x, n = 6L, ...) {
 }
 
 #' @export
+#' @importFrom utils tail
 tail.greta_array <- function (x, n = 6L, ...) {
 
   stopifnot(length(n) == 1L)

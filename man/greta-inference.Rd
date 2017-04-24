@@ -37,9 +37,8 @@ sampler hyperparameters.}
 \item{control}{an optional named list of hyperparameters and options to
 control behaviour of the sampler}
 
-\item{variables}{a vector giving the names of greta arrays to sample values
-from, probably parameters of a model. If empty, the target arrays in
-\code{model} will be used. Observed greta arrays cannot be sampled from.}
+\item{initial_values}{an optional named vector of initial values for the free
+parameters in the model}
 }
 \value{
 \code{define_model} - a \code{greta_model} object. See

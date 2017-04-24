@@ -113,6 +113,7 @@ NULL
 `%*%.default` <- function (x, y)
   .Primitive("%*%")(x, y)
 
+#' @rdname greta-overloaded
 #' @export
 `%*%` <- function (x, y) {
 

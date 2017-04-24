@@ -21,33 +21,33 @@
 #'
 #' # link them (i.e. we observed theta to have the values in y)
 #' y %~% theta
-`%~%` <- function (y, theta) {
+`%~%` <- function (data, distribution) {
 
-  if (!inherits(y$node, 'data_node'))
+  if (!inherits(data$node, 'data_node'))
     stop ('left hand side of likelihood must be a data greta array')
 
-  if (!inherits(theta$node, 'distribution'))
+  if (!inherits(distribution$node, 'distribution'))
     stop ('right hand side of likelihood must be a stochastic greta array')
 
   # if theta isn't scalar, make sure it has the right dimensions
-  if (!is_scalar(theta)) {
-    if (!identical(dim(y), dim(theta))) {
+  if (!is_scalar(distribution)) {
+    if (!identical(dim(data), dim(distribution))) {
       stop (sprintf('left- and right-hand side of likelihood have different dimensions. The distribution must have dimension of either %s or 1 x 1, but instead has dimension %s',
-                    paste(dim(y), collapse = ' x '),
-                    paste(dim(theta), collapse = ' x ')))
+                    paste(dim(data), collapse = ' x '),
+                    paste(dim(distribution), collapse = ' x ')))
     }
   }
 
   # provide the data to the likelihood and lock in the values in the
   # distribution
-  theta$node$value(y$node$value())
-  theta$node$.fixed_value <- TRUE
+  distribution$node$value(data$node$value())
+  distribution$node$.fixed_value <- TRUE
 
   # give the distribution to the data as a likelihood (this will register the
   # child distribution)
-  y$node$set_likelihood(theta$node)
+  data$node$set_likelihood(distribution$node)
 
   # register the data node, with it's own name
-  y$node$register()
+  data$node$register()
 
 }

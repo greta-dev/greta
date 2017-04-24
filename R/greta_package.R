@@ -28,10 +28,12 @@
 #' x = observed(rnorm(10))
 #' x %~% normal(mu, sigma)
 #'
+#' m <- define_model(mu, sigma)
+#'
 #' # and sample from it
-#' draws <- sample(mu, sigma,
-#'                 n_samples = 100,
-#'                 warmup = 10)
+#' draws <- mcmc(m,
+#'               n_samples = 100,
+#'               warmup = 10)
 NULL
 
 # unexported object to hold the list of defined nodes
@@ -57,4 +59,4 @@ node_list_object <- R6Class(
 
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname)
-  .nodes <<- node_list_object$new()
+  options(nodes = node_list_object$new())

@@ -7,23 +7,7 @@
 \alias{iterate_state}
 \alias{iterate_lambda_vectorised}
 \title{Functions for modelling dynamical systems}
-\usage{
-dynamics$iterate_lambda(matrix, state, niter)
-
-dynamics$iterate_state(matrix, state, niter)
-
-dynamics$iterate_lambda_vectorised(matrices, state, n, m, niter)
-}
 \arguments{
-\item{matrix}{a square, two-dimensional (i.e. matrix-like) greta array
-representing transition probabilities between states}
-
-\item{state}{a column vector greta array representing the initial state from
-which to iterate the matrix}
-
-\item{niter}{a positive integer giving the number of times to iterate the
-matrix}
-
 \item{matrix}{a square, two-dimensional (i.e. matrix-like) greta array
 representing transition probabilities between states}
 
@@ -52,3 +36,12 @@ A module providing functions specific to dynamical modelling. So
   \code{iterate_lambda} for iterating over multiple matrices, returning a
   vector of growth rates.
 }
+\section{Usage}{
+
+\preformatted{
+  dynamics$iterate_lambda(matrix, state, niter)
+  dynamics$iterate_state(matrix, state, niter)
+  dynamics$iterate_lambda_vectorised(matrices, state, n, m, niter)
+}
+}
+
