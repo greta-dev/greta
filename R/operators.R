@@ -39,6 +39,7 @@
 #'   have unknown values.
 #'
 #' @examples
+#'
 #'  x = observed(-1:12)
 #'
 #'  # arithmetic
@@ -56,6 +57,7 @@
 #'  h = x < 1
 #'  i = (-x) >= x
 #'  j = h == x
+#'
 NULL
 
 # use S3 dispatch to apply the operators

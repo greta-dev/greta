@@ -512,6 +512,7 @@ wishart_distribution <- R6Class (
 #'   \code{negative_binomial()}, see \code{\link{dnbinom}}.
 #'
 #' @examples
+#'
 #' # a fixed distribution, e.g. for a prior
 #' mu = normal(0, 1)
 #'

@@ -83,7 +83,6 @@
 #'
 #' y = sweep(x, 1, e, '-')
 #'
-#'
 NULL
 
 #' @export

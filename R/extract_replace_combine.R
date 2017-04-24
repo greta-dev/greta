@@ -35,6 +35,7 @@
 #' @details \code{c()} and \code{rep()} currently only work with column vectors.
 #'
 #' @examples
+#' \dontrun{
 #'  x = observed(matrix(1:12, 3, 4))
 #'
 #'  # extract/replace
@@ -46,7 +47,7 @@
 #'  rbind(x[1, ], x[3, ])
 #'  c(x[, 1], x[, 2])
 #'  rep(x[, 2], 3)
-#'
+#' }
 NULL
 
 # map R's extract and replace syntax to tensorflow, for use in operation nodes

@@ -22,6 +22,7 @@
 #' @import tensorflow
 #' @import R6
 #' @examples
+#' \dontrun{
 #' # define a simple model
 #' mu = free()
 #' sigma = lognormal(1, 0.1)
@@ -34,6 +35,7 @@
 #' draws <- mcmc(m,
 #'               n_samples = 100,
 #'               warmup = 10)
+#' }
 NULL
 
 # unexported object to hold the list of defined nodes
