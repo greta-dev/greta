@@ -12,7 +12,9 @@ node <- R6Class(
     dim = NA,
 
     register = function () {
+
       # register this node in the global list, as soon as it is assigned a name
+      .nodes <- options()$nodes
       name <- 'node'
       current_nodes <- .nodes$nodes()
       node_names <- names(current_nodes)
@@ -33,6 +35,7 @@ node <- R6Class(
       self$node_name(name)
       current_nodes[[name]] <- self
       .nodes$node_list <- current_nodes
+      options(nodes = .nodes)
       self$registered <- TRUE
 
     },

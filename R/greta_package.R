@@ -57,4 +57,4 @@ node_list_object <- R6Class(
 
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname)
-  .nodes <<- node_list_object$new()
+  options(nodes = node_list_object$new())

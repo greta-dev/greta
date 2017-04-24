@@ -183,6 +183,7 @@ dag_class <- R6Class(
 
       node_list <- lapply(greta_array_list, member, 'node')
 
+      .nodes <- options()$nodes
       # get all registered nodes, and their descendents
       all_nodes <- .nodes$nodes()
       all_plus_children <- lapply(all_nodes, function (x) c(x$name, x$child_names()))
@@ -215,6 +216,7 @@ dag_class <- R6Class(
                             omit_fixed = FALSE) {
 
       children <- self$children
+      .nodes <- options()$nodes
 
       if (length(children) > 0) {
 
@@ -265,7 +267,9 @@ dag_class <- R6Class(
     # fixed values when reporting (ignored when setting)
     all_values = function (new_values = NULL, type = NULL, omit_fixed = TRUE, free = FALSE) {
 
+
       # find all nodes of this type in the graph
+      .nodes <- options()$nodes
       node_names <- self$child_names(type = type)
       node_names <- c(self$name, node_names)
       nodes <- .nodes$nodes(node_names)
