@@ -51,6 +51,7 @@ rep(x, times, ..., recursive = FALSE)
 }
 
 \examples{
+\dontrun{
  x = observed(matrix(1:12, 3, 4))
 
  # extract/replace
@@ -62,5 +63,5 @@ rep(x, times, ..., recursive = FALSE)
  rbind(x[1, ], x[3, ])
  c(x[, 1], x[, 2])
  rep(x[, 2], 3)
-
+}
 }

@@ -17,6 +17,8 @@ NULL
 #'
 #' @examples
 #'
+#' \dontrun{
+#'
 #' # define a simple model
 #' mu = free()
 #' sigma = lognormal(1, 0.1)
@@ -25,6 +27,7 @@ NULL
 #'
 #' m <- define_model(mu, sigma)
 #'
+#' }
 define_model <- function (...) {
 
   # nodes required
@@ -85,12 +88,12 @@ define_model <- function (...) {
 #'   model convergence or summarise results, e.g. using \code{coda::mcmc}.
 #'
 #' @examples
-#'
+#' \dontrun{
 #' # carry out mcmc on the model
 #' draws <- mcmc(m,
 #'               n_samples = 100,
 #'               warmup = 10)
-#'
+#' }
 mcmc <- function (model,
                   method = c('hmc', 'nuts'),
                   n_samples = 1000,

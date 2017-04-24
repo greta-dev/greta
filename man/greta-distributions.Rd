@@ -83,6 +83,7 @@ Most of these distributions have non-uniform probability densities,
   \code{negative_binomial()}, see \code{\link{dnbinom}}.
 }
 \examples{
+
 # a fixed distribution, e.g. for a prior
 mu = normal(0, 1)
 

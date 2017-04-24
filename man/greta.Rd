@@ -22,6 +22,7 @@ greta lets you write probabilistic models interactively in
   currently implemented syntax and how to combine them into models
 }
 \examples{
+\dontrun{
 # define a simple model
 mu = free()
 sigma = lognormal(1, 0.1)
@@ -34,4 +35,5 @@ m <- define_model(mu, sigma)
 draws <- mcmc(m,
               n_samples = 100,
               warmup = 10)
+}
 }

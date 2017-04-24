@@ -54,6 +54,8 @@ Define a \code{greta_model} object and carry out statistical
 }
 \examples{
 
+\dontrun{
+
 # define a simple model
 mu = free()
 sigma = lognormal(1, 0.1)
@@ -62,10 +64,11 @@ x \%~\% normal(mu, sigma)
 
 m <- define_model(mu, sigma)
 
-
+}
+\dontrun{
 # carry out mcmc on the model
 draws <- mcmc(m,
               n_samples = 100,
               warmup = 10)
-
+}
 }
