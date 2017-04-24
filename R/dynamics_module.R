@@ -215,12 +215,6 @@ NULL
 #' @name iterate_state
 #' @rdname dynamics-module
 #' @usage dynamics$iterate_state(matrix, state, niter)
-#' @param matrix a square, two-dimensional (i.e. matrix-like) greta array
-#'   representing transition probabilities between states
-#' @param state a column vector greta array representing the initial state from
-#'   which to iterate the matrix
-#' @param niter a positive integer giving the number of times to iterate the
-#'   matrix
 NULL
 
 #' @name iterate_lambda_vectorised

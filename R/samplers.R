@@ -61,11 +61,10 @@ define_model <- function (...) {
 
 #' @rdname greta-inference
 #' @export
+#' @importFrom stats rnorm runif
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #'
 #' @param model greta_model object
-#' @param variables a vector giving the names of greta arrays to sample values
-#'   from, probably parameters of a model. If empty, the target arrays in
-#'   \code{model} will be used. Observed greta arrays cannot be sampled from.
 #' @param method the method used to sample values. Currently only \code{hmc} is
 #'   implemented
 #' @param n_samples the number of samples to draw (after any warm-up, but before
@@ -78,6 +77,8 @@ define_model <- function (...) {
 #' @param verbose whether to print progress information to the console
 #' @param control an optional named list of hyperparameters and options to
 #'   control behaviour of the sampler
+#' @param initial_values an optional named vector of initial values for the free
+#'   parameters in the model
 #'
 #' @return \code{mcmc} - a dataframe of mcmc samples of the parameters of interest, as defined
 #'   in \code{model}. This dataframe can be coerced to other formats to check
@@ -91,12 +92,12 @@ define_model <- function (...) {
 #'               warmup = 10)
 #'
 mcmc <- function (model,
-                     method = c('hmc', 'nuts'),
-                     n_samples = 1000,
-                     thin = 1,
-                     warmup = 100,
-                     verbose = TRUE,
-                     control = list(),
+                  method = c('hmc', 'nuts'),
+                  n_samples = 1000,
+                  thin = 1,
+                  warmup = 100,
+                  verbose = TRUE,
+                  control = list(),
                   initial_values = NULL) {
 
   method <- match.arg(method)

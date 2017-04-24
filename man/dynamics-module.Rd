@@ -24,15 +24,6 @@ which to iterate the matrix}
 \item{niter}{a positive integer giving the number of times to iterate the
 matrix}
 
-\item{matrix}{a square, two-dimensional (i.e. matrix-like) greta array
-representing transition probabilities between states}
-
-\item{state}{a column vector greta array representing the initial state from
-which to iterate the matrix}
-
-\item{niter}{a positive integer giving the number of times to iterate the
-matrix}
-
 \item{matrices}{a rectangular two-dimensional greta array of dimension n x
 m^2, each row of which gives the rowwise elements of a different m x m
 matrix to iterate}

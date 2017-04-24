@@ -49,7 +49,7 @@ wishart(df, Sigma, dim)
 \arguments{
 \item{mean, meanlog, ncp}{unconstrained parameters}
 
-\item{sd, sdlog, size, lambda, shape, scale, rate, df, shape1, shape2}{positive parameters}
+\item{sd, sdlog, size, lambda, shape, rate, df, shape1, shape2}{positive parameters}
 
 \item{dim}{the dimensions of the variable. For univariate distributions this
 can be greater than 1 to represent multiple independent variables. For

@@ -486,7 +486,7 @@ wishart_distribution <- R6Class (
 #'   combined with other greta arrays to construct a model.
 #'
 #' @param mean,meanlog,ncp unconstrained parameters
-#' @param sd,sdlog,size,lambda,shape,scale,rate,df,shape1,shape2 positive parameters
+#' @param sd,sdlog,size,lambda,shape,rate,df,shape1,shape2 positive parameters
 #' @param prob probability parameter (\code{0 < prob < 1})
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'

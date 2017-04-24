@@ -87,100 +87,100 @@
 NULL
 
 #' @export
-log.greta_array <- function (e1) {
-  op("tf$log", e1)
+log.greta_array <- function (x, base = exp(1)) {
+  op("tf$log", x)
 }
 
 #' @export
-exp.greta_array <- function (e1) {
-  op("tf$exp", e1)
+exp.greta_array <- function (x) {
+  op("tf$exp", x)
 }
 
 #' @export
-log1p.greta_array <- function (e1) {
-  log(1 + e1)
+log1p.greta_array <- function (x) {
+  log(1 + x)
 }
 
 #' @export
-expm1.greta_array <- function (e1) {
-  exp(e1) - 1
+expm1.greta_array <- function (x) {
+  exp(x) - 1
 }
 
 #' @export
-abs.greta_array <- function (e1) {
-  op("tf$abs", e1)
+abs.greta_array <- function (x) {
+  op("tf$abs", x)
 }
 
 #' @export
-sqrt.greta_array <- function (e1) {
-  op("tf$sqrt", e1)
+sqrt.greta_array <- function (x) {
+  op("tf$sqrt", x)
 }
 
 #' @export
-sign.greta_array <- function (e1) {
-  op("tf$sign", e1)
+sign.greta_array <- function (x) {
+  op("tf$sign", x)
 }
 
 #' @export
-ceiling.greta_array <- function (e1) {
-  op("tf$ceil", e1)
+ceiling.greta_array <- function (x) {
+  op("tf$ceil", x)
 }
 
 #' @export
-floor.greta_array <- function (e1) {
-  op("tf$floor", e1)
+floor.greta_array <- function (x) {
+  op("tf$floor", x)
 }
 
 #' @export
-round.greta_array <- function (e1, digits = 0) {
+round.greta_array <- function (x, digits = 0) {
   if (digits != 0)
     stop("TensorFlow round only supports rounding to integers")
-  op("tf$round", e1)
+  op("tf$round", x)
 }
 
 # trigonometry functions
 #' @export
-cos.greta_array <- function (e1) {
-  op("tf$cos", e1)
+cos.greta_array <- function (x) {
+  op("tf$cos", x)
 }
 
 #' @export
-sin.greta_array <- function (e1) {
-  op("tf$sin", e1)
+sin.greta_array <- function (x) {
+  op("tf$sin", x)
 }
 
 #' @export
-tan.greta_array <- function (e1) {
-  op("tf$tan", e1)
+tan.greta_array <- function (x) {
+  op("tf$tan", x)
 }
 
 #' @export
-acos.greta_array <- function (e1) {
-  op("tf$acos", e1)
+acos.greta_array <- function (x) {
+  op("tf$acos", x)
 }
 
 #' @export
-asin.greta_array <- function (e1) {
-  op("tf$asin", e1)
+asin.greta_array <- function (x) {
+  op("tf$asin", x)
 }
 
 #' @export
-atan.greta_array <- function (e1) {
-  op("tf$atan", e1)
+atan.greta_array <- function (x) {
+  op("tf$atan", x)
 }
 
 #' @export
-lgamma.greta_array <- function (e1) {
-  op("tf$lgamma", e1)
+lgamma.greta_array <- function (x) {
+  op("tf$lgamma", x)
 }
 
 #' @export
-digamma.greta_array <- function (e1) {
-  op("tf$digamma", e1)
+digamma.greta_array <- function (x) {
+  op("tf$digamma", x)
 }
 
 #' @export
-t.greta_array <- function (e1) {
+t.greta_array <- function (x) {
 
   # reverse the dimensions
   dimfun <- function (elem_list) {
@@ -190,11 +190,11 @@ t.greta_array <- function (e1) {
     rev(dim(x))
   }
 
-  op("tf$transpose", e1, dimfun = dimfun)
+  op("tf$transpose", x, dimfun = dimfun)
 }
 
 #' @export
-chol.greta_array <- function (e1, ...) {
+chol.greta_array <- function (x, ...) {
 
   if (!identical(list(), list(...)))
     warning ('chol() options are ignored by TensorFlow')
@@ -206,8 +206,18 @@ chol.greta_array <- function (e1, ...) {
     dim
   }
 
-  op("tf$cholesky", e1, dimfun = dimfun)
+  op("tf$cholesky", x, dimfun = dimfun)
 }
+
+#' @rdname greta-overloaded
+#' @export
+diag <- function (x = 1, nrow, ncol)
+  UseMethod('diag', x)
+
+# wrapper function to avoid a CRAN check warning about using a .Internal() call
+#' @export
+diag.default <- function (...)
+  base::diag(...)
 
 #' @export
 diag.greta_array <- function (x = 1, nrow, ncol) {
@@ -404,15 +414,16 @@ tf_sweep <- function (x, STATS, MARGIN, FUN) {
 
 }
 
+#' @rdname greta-overloaded
 #' @export
 sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
   UseMethod('sweep', x)
 
 #' @export
-sweep.default <- base:::sweep
+sweep.default <- base::sweep
 
 #' @export
-sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*')) {
+sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), check.margin = TRUE, ...) {
 
   # only allow these four functions
   FUN <- match.arg(FUN)
