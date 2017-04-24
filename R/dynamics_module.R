@@ -199,11 +199,18 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
 #'   \code{iterate_lambda} for iterating over multiple matrices, returning a
 #'   vector of growth rates.
 #'
+#' @section Usage:
+#' \preformatted{
+#'   dynamics$iterate_lambda(matrix, state, niter)
+#'   dynamics$iterate_state(matrix, state, niter)
+#'   dynamics$iterate_lambda_vectorised(matrices, state, n, m, niter)
+#' }
+#'
+
 NULL
 
 #' @name iterate_lambda
 #' @rdname dynamics-module
-#' @usage dynamics$iterate_lambda(matrix, state, niter)
 #' @param matrix a square, two-dimensional (i.e. matrix-like) greta array
 #'   representing transition probabilities between states
 #' @param state a column vector greta array representing the initial state from
@@ -214,12 +221,10 @@ NULL
 
 #' @name iterate_state
 #' @rdname dynamics-module
-#' @usage dynamics$iterate_state(matrix, state, niter)
 NULL
 
 #' @name iterate_lambda_vectorised
 #' @rdname dynamics-module
-#' @usage dynamics$iterate_lambda_vectorised(matrices, state, n, m, niter)
 #' @param matrices a rectangular two-dimensional greta array of dimension n x
 #'   m^2, each row of which gives the rowwise elements of a different m x m
 #'   matrix to iterate
