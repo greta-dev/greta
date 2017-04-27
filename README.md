@@ -40,26 +40,24 @@ draws <- mcmc(model,
 ``` r
 library(MCMCvis)
 
-# plot the trace for two of the parameters
-MCMCtrace(draws,
-          params = c('alpha', 'beta1', 'sigma'))
+MCMCtrace(draws, params = c('alpha', 'beta1', 'sigma'))
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
+<img src="README_files/figure-markdown_github/unnamed-chunk-3-1.png" width=".49\linewidth" />
 
 ``` r
 MCMCplot(draws)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-3-2.png)
+<img src="README_files/figure-markdown_github/unnamed-chunk-3-2.png" width=".49\linewidth" />
 
 ### How fast is it?
 
 For small to medium size (a few hundred data points) problems, STAN is likely to be faster than greta. Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
 
-For example, while the code above takes around 45 seconds to run with the 150-row iris data, if you duplicate the iris data 1,000 times to get a dataset of 150,000 rows, it still takes less than 90 seconds to draw the same number of samples. That's not bad. Not bad at all.
+For example, while the code above takes around 100 seconds to run with the 150-row iris data, if you run the same model and sampler on a dataset of 150,000 rows, it still only takes around 200 seconds. That's not bad. Not bad at all.
 
-Those numbers are on a laptop. Since TensorFlow can be run across multiple CPUs or GPUs on lots of different machines, greta models *should* scale really well to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
+Those numbers are on a laptop. Since TensorFlow can be run across large numbers of CPUs, or on GPUs, greta models can be made to scale to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
 
 ### Installation
 
@@ -69,7 +67,7 @@ greta can be installed from GitHub using the devtools package
 devtools::install_github('goldingn/greta')
 ```
 
-however greta depends on TensorFlow and RStudio's tensorflow R package, which will need to be succesfully installed before greta will work. To install the tensorflow R package, you will need a working installation of python; to have installed the correct version of TensorFlow; and then to point to the correct version of python when installing the tensorflow R package. Full installation details can be found at RStudio's tensorflow [website](https://rstudio.github.io/tensorflow/).
+however greta depends on TensorFlow which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow
 
 Why 'greta'?
 ------------
