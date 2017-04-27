@@ -87,16 +87,6 @@ data_node <- R6Class(
   )
 )
 
-#' @name observed
-#' @title define observed data
-#' @description define an object in an R session as a greta array for use as
-#'   data in a greta model
-#' @param data an object that can be coerced to an array
-#' @export
-observed <- function (data)
-  ga(data_node$new(data))
-
-
 # a node for applying operations to values
 operation_node <- R6Class(
   'operation_node',
@@ -211,7 +201,9 @@ stochastic_node <- R6Class (
       # if it's an observed stochastic, make it a constant and assign
       if (self$.fixed_value) {
 
-        tf_obj <- tf$constant(self$value(), shape = to_shape(self$dim), dtype = tf$float32)
+        tf_obj <- tf$constant(self$value(),
+                              shape = to_shape(self$dim),
+                              dtype = tf$float32)
 
         assign(self$name,
                tf_obj,

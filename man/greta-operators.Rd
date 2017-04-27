@@ -45,7 +45,7 @@ greta's operators are used just like R's the standard arithmetic,
 
 \examples{
 
- x = observed(-1:12)
+ x = data(-1:12)
 
  # arithmetic
  a = x + 1

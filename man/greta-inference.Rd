@@ -44,9 +44,9 @@ parameters in the model}
 \code{define_model} - a \code{greta_model} object. See
   \code{\link{greta-model}} for details.
 
-\code{mcmc} - a dataframe of mcmc samples of the parameters of interest, as defined
-  in \code{model}. This dataframe can be coerced to other formats to check
-  model convergence or summarise results, e.g. using \code{coda::mcmc}.
+\code{mcmc} - an \code{mcmc.list} object that can be analysed using
+  functions from the coda package. This will on contain mcmc samples of the
+  parameters of interest, as defined in \code{model}.
 }
 \description{
 Define a \code{greta_model} object and carry out statistical
@@ -59,8 +59,8 @@ Define a \code{greta_model} object and carry out statistical
 # define a simple model
 mu = free()
 sigma = lognormal(1, 0.1)
-x = observed(rnorm(10))
-x \%~\% normal(mu, sigma)
+x = rnorm(10)
+likelihood(x) = normal(mu, sigma)
 
 m <- define_model(mu, sigma)
 

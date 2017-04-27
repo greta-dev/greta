@@ -71,7 +71,7 @@
 #'   multiplication.
 #'
 #' @examples
-#' x = observed(matrix(1:9, nrow = 3, ncol = 3))
+#' x = data(matrix(1:9, nrow = 3, ncol = 3))
 #' a = log(exp(x))
 #' b = log1p(expm1(x))
 #' c = sign(x - 5)

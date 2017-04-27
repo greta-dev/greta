@@ -22,8 +22,8 @@ NULL
 #' # define a simple model
 #' mu = free()
 #' sigma = lognormal(1, 0.1)
-#' x = observed(rnorm(10))
-#' x %~% normal(mu, sigma)
+#' x = rnorm(10)
+#' likelihood(x) = normal(mu, sigma)
 #'
 #' m <- define_model(mu, sigma)
 #'
@@ -66,6 +66,7 @@ define_model <- function (...) {
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom coda mcmc mcmc.list
 #'
 #' @param model greta_model object
 #' @param method the method used to sample values. Currently only \code{hmc} is
@@ -83,9 +84,9 @@ define_model <- function (...) {
 #' @param initial_values an optional named vector of initial values for the free
 #'   parameters in the model
 #'
-#' @return \code{mcmc} - a dataframe of mcmc samples of the parameters of interest, as defined
-#'   in \code{model}. This dataframe can be coerced to other formats to check
-#'   model convergence or summarise results, e.g. using \code{coda::mcmc}.
+#' @return \code{mcmc} - an \code{mcmc.list} object that can be analysed using
+#'   functions from the coda package. This will on contain mcmc samples of the
+#'   parameters of interest, as defined in \code{model}.
 #'
 #' @examples
 #' \dontrun{
@@ -113,9 +114,9 @@ mcmc <- function (model,
   type <- vapply(target_greta_arrays, member, 'node$type', FUN.VALUE = '')
   bad <- type == 'data'
   if (any(bad)) {
-    is_are <- ifelse(sum(bad) == 1, 'is an observed greta array', 'are observed greta arrays')
+    is_are <- ifelse(sum(bad) == 1, 'is an data greta array', 'are data greta arrays')
     bad_greta_arrays <- paste(names[bad], collapse = ', ')
-    msg <- sprintf('%s %s, observed greta arrays cannot be sampled',
+    msg <- sprintf('%s %s, data greta arrays cannot be sampled',
                    bad_greta_arrays,
                    is_are)
     stop (msg)
@@ -160,7 +161,7 @@ mcmc <- function (model,
                            control = con)
 
     # use the last draw of the full parameter vector as the init
-    init <- attr(warmup_draws, 'last_x')
+    initial_values <- attr(warmup_draws, 'last_x')
 
     if (verbose)
       message('sampling')
@@ -177,9 +178,10 @@ mcmc <- function (model,
 
   # coerce to data.frame, but keep the sample density
   draws_df <- data.frame(draws)
-  attr(draws_df, 'density') <- attr(draws, 'density')
-  attr(draws_df, 'last_x') <- attr(draws, 'last_x')
-  draws_df
+  draws_mcmc <- coda::mcmc(draws_df)
+  draws_mcmc_list <- coda::mcmc.list(draws_mcmc)
+
+  draws_mcmc_list
 
 }
 
