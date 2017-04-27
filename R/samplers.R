@@ -161,7 +161,7 @@ mcmc <- function (model,
                            control = con)
 
     # use the last draw of the full parameter vector as the init
-    init <- attr(warmup_draws, 'last_x')
+    initial_values <- attr(warmup_draws, 'last_x')
 
     if (verbose)
       message('sampling')
