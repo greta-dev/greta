@@ -121,9 +121,9 @@ NULL
 
   # if y is a greta array, coerce x before dispatch
   if (is.greta_array(y) & !is.greta_array(x))
-    x <- ga(x)
-
-  UseMethod('%*%', x)
+    data(x) %*% y
+  else
+    UseMethod('%*%', x)
 
 }
 
