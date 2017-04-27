@@ -12,50 +12,52 @@ Releases in the near future will implement more distributions and functions. Lat
 Example
 -------
 
-Here's an example of a hierarchical linear regression model applied to the iris data.
+Here's an example of a Bayesian linear regression model applied to the iris data.
 
 ``` r
-data(iris)
 library(greta)
 
-# define data as observed variables
-y = observed(iris[, 1])
-x = observed(as.matrix(iris[, 2:4]))
+alpha = normal(0, 3)
+beta = normal(0, 3, dim = 3)
+sigma = lognormal(0, 3)
 
-# priors
-sigma = lognormal(0, 10)
-alpha = normal(0, 10)
-mu_beta = normal(0, 10)
-sigma_beta = lognormal(0, 10)
-
-# linear model with hierarchical structure on the regression coefficients
-beta = normal(mu_beta, sigma_beta, dim = 3)
-z = alpha + x %*% beta
-
-# data likelihood term (y already defined as observed)
-y %~% normal(z, sigma)
+z <- alpha + iris[, 2:4] %*% beta
+likelihood(iris[, 1]) = normal(z, sigma)
 ```
 
 With the model defined, we can draw samples of the parameters we care about. This takes around 45 seconds on my laptop.
 
 ``` r
-draws <- samples(alpha, beta, sigma,
-                method = 'hmc',
-                n_samples = 500)
+model <- define_model(alpha, beta, sigma)
 
-# plot the trace for two of the parameters
-plot(draws[, 1:2],
-     type = 'l',
-     col = grey(0.2, 0.5))
+draws <- mcmc(model,
+              method = 'hmc',
+              n_samples = 2000)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
+`draws` is an `mcmc.list` from the `coda` package, so you can plot and summarise the samples using your favourite MCMC visualisation software
+
+``` r
+library(MCMCvis)
+
+# plot the trace for two of the parameters
+MCMCtrace(draws,
+          params = c('alpha', 'beta1', 'sigma'))
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+``` r
+MCMCplot(draws)
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-3-2.png)
 
 ### How fast is it?
 
-For small to medium size (a few hundred data points) problems, STAN is likely to be way faster than greta (not accounting for STAN's compilation time). Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than (the current version of) STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
+For small to medium size (a few hundred data points) problems, STAN is likely to be faster than greta. Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
 
-For example, while the code above takes 45 seconds to run with the 150-row iris data, if you duplicate the iris data 1,000 times to get a dataset of 150,000 rows, it takes less than 90 seconds to draw the same number of samples. That's not bad. Not bad at all.
+For example, while the code above takes around 45 seconds to run with the 150-row iris data, if you duplicate the iris data 1,000 times to get a dataset of 150,000 rows, it still takes less than 90 seconds to draw the same number of samples. That's not bad. Not bad at all.
 
 Those numbers are on a laptop. Since TensorFlow can be run across multiple CPUs or GPUs on lots of different machines, greta models *should* scale really well to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
 
