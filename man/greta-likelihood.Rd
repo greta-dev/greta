@@ -2,28 +2,31 @@
 % Please edit documentation in R/syntax.R
 \name{greta-likelihood}
 \alias{greta-likelihood}
-\alias{\%~\%}
-\title{Create an Observed, Stochastic Greta Array}
+\alias{likelihood<-}
+\title{Define a Likelihood over Data}
 \usage{
-data \%~\% distribution
+likelihood(data) <- value
 }
 \arguments{
-\item{data}{a fixed greta array, defined using \code{observed()}}
+\item{data}{either a data greta array (defined using \code{data()}), or
+some data that can be coereced to a data greta array}
 
-\item{distribution}{a stochastic greta array, created using a distribution}
+\item{value}{a stochastic greta array, created using a distribution}
 }
 \description{
-The likelihood operator is used to link observed data with
+The likelihood function is used to link observed data with
   random variables. This can be used to define the likelhood term for a
   model.
 }
 \examples{
 # observed data
-y = observed(rnorm(10))
+y = rnorm(100, 0, 3)
 
-# random variable
-theta = normal(0, 1)
+# mean and variance parameters (with no priors)
+mu = free()
+sigma = exp(free())
 
-# link them (i.e. we observed theta to have the values in y)
-y \%~\% theta
+# define the likelihood
+likelihood(y) = normal(mu, sigma)
+
 }

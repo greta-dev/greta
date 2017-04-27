@@ -1,30 +1,32 @@
 # syntax definitions
 
-
 # special operator to create a data node in the parent environment,
 # and assign it a likelihood
 
 #' @name greta-likelihood
-#' @title Create an Observed, Stochastic Greta Array
-#' @description The likelihood operator is used to link observed data with
+#' @title Define a Likelihood over Data
+#' @description The likelihood function is used to link observed data with
 #'   random variables. This can be used to define the likelhood term for a
 #'   model.
-#' @param data a fixed greta array, defined using \code{observed()}
-#' @param distribution a stochastic greta array, created using a distribution
+#' @param data either a data greta array (defined using \code{data()}), or
+#'   some data that can be coereced to a data greta array
+#' @param value a stochastic greta array, created using a distribution
 #' @export
 #' @examples
 #' # observed data
-#' y = observed(rnorm(10))
+#' y = rnorm(100, 0, 3)
 #'
-#' # random variable
-#' theta = normal(0, 1)
+#' # mean and variance parameters (with no priors)
+#' mu = free()
+#' sigma = exp(free())
 #'
-#' # link them (i.e. we observed theta to have the values in y)
-#' y %~% theta
-`%~%` <- function (data, distribution) {
+#' # define the likelihood
+#' likelihood(y) = normal(mu, sigma)
+#'
+`likelihood<-` <- function (data, value) {
 
-  if (!inherits(data$node, 'data_node'))
-    stop ('left hand side of likelihood must be a data greta array')
+  data <- as.greta_array(data)
+  distribution <- value
 
   if (!inherits(distribution$node, 'distribution'))
     stop ('right hand side of likelihood must be a stochastic greta array')
