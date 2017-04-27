@@ -80,7 +80,7 @@ dag_class <- R6Class(
                           function(x) x$type == 'stochastic' && x$discrete && !x$.fixed_value,
                           FALSE)
       if (any(bad_nodes))
-        stop ('the model contains an unobserved discrete random variable, so cannot be sampled from')
+        stop ("the model contains a discrete random variable that isn't in the likelhood, so cannot be sampled from")
 
       # define all nodes, node densities and free states in the environment
       lapply(self$children,

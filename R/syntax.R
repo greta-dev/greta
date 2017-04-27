@@ -25,6 +25,7 @@
 #'
 `likelihood<-` <- function (data, value) {
 
+  data_tmp <- data
   data <- as.greta_array(data)
   distribution <- value
 
@@ -51,5 +52,7 @@
 
   # register the data node, with it's own name
   data$node$register()
+
+  data_tmp
 
 }

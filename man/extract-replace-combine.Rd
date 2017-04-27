@@ -52,7 +52,7 @@ rep(x, times, ..., recursive = FALSE)
 
 \examples{
 \dontrun{
- x = observed(matrix(1:12, 3, 4))
+ x = data(matrix(1:12, 3, 4))
 
  # extract/replace
  x[1:3, ]

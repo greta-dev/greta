@@ -26,8 +26,8 @@ greta lets you write probabilistic models interactively in
 # define a simple model
 mu = free()
 sigma = lognormal(1, 0.1)
-x = observed(rnorm(10))
-x \%~\% normal(mu, sigma)
+x = rnorm(10)
+likelihood(x) =  normal(mu, sigma)
 
 m <- define_model(mu, sigma)
 
