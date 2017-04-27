@@ -47,7 +47,8 @@ Collate:
     'samplers.R'
 Imports:
     R6,
-    tensorflow
+    tensorflow,
+    coda
 Suggests:
     testthat
 RoxygenNote: 6.0.1

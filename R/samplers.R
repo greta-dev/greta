@@ -66,6 +66,7 @@ define_model <- function (...) {
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom coda mcmc mcmc.list
 #'
 #' @param model greta_model object
 #' @param method the method used to sample values. Currently only \code{hmc} is
@@ -83,9 +84,9 @@ define_model <- function (...) {
 #' @param initial_values an optional named vector of initial values for the free
 #'   parameters in the model
 #'
-#' @return \code{mcmc} - a dataframe of mcmc samples of the parameters of interest, as defined
-#'   in \code{model}. This dataframe can be coerced to other formats to check
-#'   model convergence or summarise results, e.g. using \code{coda::mcmc}.
+#' @return \code{mcmc} - an \code{mcmc.list} object that can be analysed using
+#'   functions from the coda package. This will on contain mcmc samples of the
+#'   parameters of interest, as defined in \code{model}.
 #'
 #' @examples
 #' \dontrun{
@@ -177,9 +178,10 @@ mcmc <- function (model,
 
   # coerce to data.frame, but keep the sample density
   draws_df <- data.frame(draws)
-  attr(draws_df, 'density') <- attr(draws, 'density')
-  attr(draws_df, 'last_x') <- attr(draws, 'last_x')
-  draws_df
+  draws_mcmc <- coda::mcmc(draws_df)
+  draws_mcmc_list <- coda::mcmc.list(draws_mcmc)
+
+  draws_mcmc_list
 
 }
 
