@@ -48,7 +48,7 @@ draws <- mcmc(model,
 
 `draws` is an `mcmc.list` from the `coda` package, so you can plot and summarise the samples using your favourite MCMC visualisation software
 
-```{r eval = TRUE, results='hide', out.width='.49\\linewidth', message=FALSE, warning=FALSE, fig.height=4, fig.width=5}
+```{r eval = TRUE, results='hide', out.width=c('400px', '400px'), message=FALSE, warning=FALSE, fig.height=4, fig.width=5, fig.show='hold'}
 library(MCMCvis)
 
 MCMCtrace(draws, params = c('alpha', 'beta1', 'sigma'))

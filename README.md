@@ -41,15 +41,10 @@ draws <- mcmc(model,
 library(MCMCvis)
 
 MCMCtrace(draws, params = c('alpha', 'beta1', 'sigma'))
-```
-
-<img src="README_files/figure-markdown_github/unnamed-chunk-3-1.png" width=".49\linewidth" />
-
-``` r
 MCMCplot(draws)
 ```
 
-<img src="README_files/figure-markdown_github/unnamed-chunk-3-2.png" width=".49\linewidth" />
+<img src="README_files/figure-markdown_github/unnamed-chunk-3-1.png" width="400px" /><img src="README_files/figure-markdown_github/unnamed-chunk-3-2.png" width="400px" />
 
 ### How fast is it?
 
