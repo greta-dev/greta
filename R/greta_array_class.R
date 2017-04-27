@@ -21,8 +21,10 @@ as.greta_array.node <- function (x, ...) {
 #' @export
 as.greta_array.numeric <- function (x, ...)
   as.greta_array.node(to_node(x))
-# as.greta_array.double <- as.greta_array.numeric
-# as.greta_array.integer <- as.greta_array.numeric
+
+#' @export
+as.greta_array.data.frame <- function (x, ...)
+  as.greta_array(as.matrix(x))
 
 # checking class status
 is.greta_array <- function (x)

@@ -87,18 +87,6 @@ data_node <- R6Class(
   )
 )
 
-#' @name data
-#' @title Declare greta Arrays as Data
-#' @description define an object in an R session as a greta array for use as
-#'   data in a greta model.
-#' @param x an object that can be coerced to an array
-#' @details This overwrites the \code{\link[utils]{data}} function in the
-#'   \code{utils} package, which is used to access datasets. You can still
-#'   access that function by doing \code{utils::data()}
-#' @export
-data <- function (x)
-  ga(data_node$new(x))
-
 # a node for applying operations to values
 operation_node <- R6Class(
   'operation_node',
