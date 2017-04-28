@@ -45,6 +45,7 @@ Collate:
     'dag_class.R'
     'greta_model_class.R'
     'samplers.R'
+    'logo.R'
 Imports:
     R6,
     tensorflow,
