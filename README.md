@@ -1,10 +1,10 @@
 ![](README_files/figure-markdown_github/top_banner-1.png)
 
-greta is an R package for writing flexible statistical models and fitting them by MCMC, it's:
+greta is an R package for writing statistical models and fitting them by MCMC, it's:
 
 **easy** - greta models can be written interactively in R, so there's no need to learn a new language like BUGS or Stan and if you make a mistake you get feedback immediately, not from a compiler.
 
-**fast** - greta uses Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's really fast on big datasets and can run in parallel across hundreds of CPUs, or on GPUs.
+**fast** - greta uses Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's really fast on big datasets and can run in parallel across lots of CPUs, or on GPUs.
 
 **extensible** - because greta is written in R, you can define your own functions and modules to add new methods and models.
 
@@ -82,15 +82,25 @@ Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be co
 
 ### How does it work?
 
-##### writing a model
+#### writing a model
 
-greta lets you create and manipulate `greta_array` objects, which behave more-or-less like R's arrays. greta arrays can contain either data, random variables (with some distribution), or the ouputs of operations on random variables. Random variables are defined either via their prior distributions (`normal()`, `beta()` etc.; see `` ?`greta-distributions` ``), or for frequentist inference using the function `free()`. greta arrays can be manipulated using R's standard arithmetic, logical and relational operators (`+`, `*`, etc., see `` ?`greta-operators` ``) and common functions (`sum()`, `log()` etc.; see `` ?`greta-functions` ``). R objects (including vectors, matrices, arrays and some dataframes) can be coerced to greta arrays using the `data()` function (see `?greta::data`), though many of the operators will automagically transform data too, like in the example above. The `likelihood()` syntax states that some observed data is assumed to follow a certain distribution, allowing us to define a model likelihood (see `?likelihood`).
+greta lets you create and manipulate `greta_array` objects, which behave more-or-less like R's arrays. greta arrays can contain either data, random variables (with some distribution), or the ouputs of operations on random variables.
 
-##### defining and running a model
+Random variables are defined either via their prior distributions (`normal()`, `beta()` etc.; see `` ?`greta-distributions` ``), or for frequentist inference using the function `free()`.
 
-When writing a model greta doesn't actually perform any of these operations, it just remembers what to do to create a new greta array, and which existing greta arrays to use. The function `define_model()` then finds all of the greta arrays connected to the parameters we care about to create a *directed acyclic graph* (DAG) describing the model. This DAG is then translated into a TensorFlow graph, and Tensors are created for the log-density of the model, and the gradient of the log-density. `mcmc` then uses this TensorFlow graph to run a Hamiltonian Monte Carlo algorithm to sample the parameters of the model.
+greta arrays can be manipulated using R's standard arithmetic, logical and relational operators (`+`, `*`, etc., see `` ?`greta-operators` ``) and common functions (`sum()`, `log()` etc.; see `` ?`greta-functions` ``).
 
-##### software
+R objects (including vectors, matrices, arrays and some dataframes) can be coerced to greta arrays using the `data()` function (see `?greta::data`), though many of the operators will automagically transform data too, like in the example above.
+
+The `likelihood()` syntax states that some observed data is assumed to follow a certain distribution, allowing us to define a model likelihood (see `?likelihood`).
+
+#### defining and running a model
+
+When writing a model greta doesn't actually perform any of these operations, it just remembers what to do to create a new greta array, and which existing greta arrays to use. The function `define_model()` then finds all of the greta arrays connected to the parameters we care about to create a *directed acyclic graph* (DAG) describing the model.
+
+This DAG is then translated into a TensorFlow graph, and Tensors are created for the log-density of the model, and the gradient of the log-density. `mcmc` then uses this TensorFlow graph to run a Hamiltonian Monte Carlo algorithm to sample the parameters of the model.
+
+#### software
 
 greta relies on some pretty incredible pieces of software, including Rstudio's [`reticulate`](https://github.com/rstudio/reticulate) and [`tensorflow`](https://rstudio.github.io/tensorflow/) packages, which bring Google TensorFlow and all things python to R. Under the hood, greta also uses Winston Chang's [`R6`](https://github.com/wch/R6) object system.
 
