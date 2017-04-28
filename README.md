@@ -1,8 +1,8 @@
 ![](README_files/figure-markdown_github/top_banner-1.png)
 
-greta is an R package for writing statistical models and fitting them by MCMC. greta is:
+greta is an R package for writing flexible statistical models and fitting them by MCMC, it's:
 
-**easy to write** - greta models are written interactively in R, so there's no need to learn a new language like BUGS or Stan and you get error messages back as you write you code, not after you compile it.
+**easy** - greta models can be written interactively in R, so there's no need to learn a new language like BUGS or Stan and if you make a mistake you get feedback immediately, not from a compiler.
 
 **fast** - greta uses Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's really fast on big datasets and can run in parallel across hundreds of CPUs, or on GPUs.
 
@@ -11,7 +11,7 @@ greta is an R package for writing statistical models and fitting them by MCMC. g
 Example
 -------
 
-Here's an example of a simple Bayesian linear regression model applied to the iris data.
+Here's a simple Bayesian linear regression model applied to the iris data.
 
 ``` r
 library(greta)
@@ -32,7 +32,7 @@ model <- define_model(intercept, coefficient, sd)
 draws <- mcmc(model, n_samples = 1000)
 ```
 
-`draws` is an `mcmc.list` from the `coda` package, so you can plot and summarise the samples using your favourite MCMC visualisation software
+`draws` is an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software
 
 ``` r
 library(MCMCvis)
