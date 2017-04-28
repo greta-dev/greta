@@ -33,7 +33,7 @@ model <- define_model(intercept, coefficient, sd)
 draws <- mcmc(model, n_samples = 1000)
 ```
 
-`draws` is an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software
+This outputs an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software.
 
 ``` r
 library(MCMCvis)
@@ -54,9 +54,9 @@ greta can be installed from GitHub using the devtools package
 devtools::install_github('goldingn/greta')
 ```
 
-however greta depends on TensorFlow which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow
+however greta depends on TensorFlow which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow.
 
-![](README_files/figure-markdown_github/banner_4-1.png)
+![](README_files/figure-markdown_github/banner_3-1.png)
 
 ### How fast is it?
 
@@ -66,7 +66,7 @@ For example, while the code above takes around 60 seconds to run with the 150-ro
 
 Those numbers are on a laptop. Since TensorFlow can be run across large numbers of CPUs, or on GPUs, greta models can be made to scale to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
 
-![](README_files/figure-markdown_github/banner_3-1.png)
+![](README_files/figure-markdown_github/banner_4-1.png)
 
 ### Why 'greta'?
 
@@ -76,6 +76,24 @@ There's a recent convention of naming probabilistic modelling software after pio
 
 In case that's not enough reason to admire her, Grete Hermann also [disproved a popular theorem in quantum theory](https://arxiv.org/pdf/0812.3986.pdf) and was part of the German resistance against the Nazi regime prior to World War Two.
 
-Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) is pretty confusing for most non-German speakers pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
+Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be confusing for non-German speakers to pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
+
+![](README_files/figure-markdown_github/banner_5-1.png)
+
+### How does it work?
+
+##### writing a model
+
+greta lets you create and manipulate `greta_array` objects, which behave more-or-less like R's arrays. greta arrays can contain either data, random variables (with some distribution), or the ouputs of operations on random variables. Random variables are defined either via their prior distributions (`normal()`, `beta()` etc.; see `` ?`greta-distributions` ``), or for frequentist inference using the function `free()`. greta arrays can be manipulated using R's standard arithmetic, logical and relational operators (`+`, `*`, etc., see `` ?`greta-operators` ``) and common functions (`sum()`, `log()` etc.; see `` ?`greta-functions` ``). R objects (including vectors, matrices, arrays and some dataframes) can be coerced to greta arrays using the `data()` function (see `?greta::data`), though many of the operators will automagically transform data too, like in the example above. The `likelihood()` syntax states that some observed data is assumed to follow a certain distribution, allowing us to define a model likelihood (see `?likelihood`).
+
+##### defining and running a model
+
+When writing a model greta doesn't actually perform any of these operations, it just remembers what to do to create a new greta array, and which existing greta arrays to use. The function `define_model()` then finds all of the greta arrays connected to the parameters we care about to create a *directed acyclic graph* (DAG) describing the model. This DAG is then translated into a TensorFlow graph, and Tensors are created for the log-density of the model, and the gradient of the log-density. `mcmc` then uses this TensorFlow graph to run a Hamiltonian Monte Carlo algorithm to sample the parameters of the model.
+
+##### software
+
+greta relies on some pretty incredible pieces of software, including Rstudio's [`reticulate`](https://github.com/rstudio/reticulate) and [`tensorflow`](https://rstudio.github.io/tensorflow/) packages, which bring Google TensorFlow and all things python to R. Under the hood, greta also uses Winston Chang's [`R6`](https://github.com/wch/R6) object system.
+
+The design and scope of greta was inspired by other general-purpose like [BUGS](http://www.openbugs.net/) and [JAGS](http://mcmc-jags.sourceforge.net/), but particularly by [Stan](http://mc-stan.org/). Using TensorFlow as a backend for general-purpose statistical modelling is nothing new; [Edward](http://edwardlib.org/) does something similar for Python, and [GPflow](https://github.com/GPflow/GPflow) was a source of inspiration for the implementation of greta.
 
 ![](README_files/figure-markdown_github/bottom_banner-1.png)

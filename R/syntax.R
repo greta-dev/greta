@@ -4,6 +4,7 @@
 # and assign it a likelihood
 
 #' @name greta-likelihood
+#' @aliases likelihood
 #' @title Define a Likelihood over Data
 #' @description The likelihood function is used to link observed data with
 #'   random variables. This can be used to define the likelhood term for a

@@ -3,6 +3,7 @@
 \name{greta-likelihood}
 \alias{greta-likelihood}
 \alias{likelihood<-}
+\alias{likelihood}
 \title{Define a Likelihood over Data}
 \usage{
 likelihood(data) <- value
