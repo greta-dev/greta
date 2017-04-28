@@ -12,20 +12,24 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 ### Example
 
-Here's a simple Bayesian linear regression model applied to the iris data.
+Here's a simple Bayesian linear regression model for the sepal length variable in R's `iris` dataset.
 
 ``` r
 library(greta)
 
+# create parameters, stating their prior distributions
 intercept = normal(0, 5)
 coefficient = normal(0, 3)
 sd = lognormal(0, 3)
 
+# write the equation for the expected mean sepal length
 mean <- intercept + coefficient * iris$Petal.Length
+
+# define the likelihood of the observed data
 likelihood(iris$Sepal.Length) = normal(mean, sd)
 ```
 
-With the model defined, we can draw samples of the parameters we care about.
+With the model written, we can draw samples of the parameters we care about.
 
 ``` r
 model <- define_model(intercept, coefficient, sd)
