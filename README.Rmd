@@ -6,14 +6,13 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 set.seed(1)
 ```
 
-```{r top_banner, echo=FALSE, fig.height=1, fig.width=10}
+```{r top_banner, echo=FALSE, fig.height=1, fig.width=14}
 greta:::banner()
 ```
-# greta: fast and easy statistical modelling in R
 
 greta is an R package for writing statistical models and fitting them by MCMC. greta is:
 

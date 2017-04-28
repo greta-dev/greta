@@ -1,4 +1,4 @@
-![](README_files/figure-markdown_github/top_banner-1.png) \# greta: fast and easy statistical modelling in R
+![](README_files/figure-markdown_github/top_banner-1.png)
 
 greta is an R package for writing statistical models and fitting them by MCMC. greta is:
 
