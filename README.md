@@ -48,7 +48,7 @@ MCMCplot(draws, xlim = c(-1, 5))
 
 <img src="README_files/figure-markdown_github/vis-1.png" width="400px" /><img src="README_files/figure-markdown_github/vis-2.png" width="400px" />
 
-![](README_files/figure-markdown_github/banner_2-1.png)
+<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
 
 ### Installation
 
@@ -60,7 +60,7 @@ devtools::install_github('goldingn/greta')
 
 however greta depends on TensorFlow which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow.
 
-![](README_files/figure-markdown_github/banner_3-1.png)
+<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
 
 ### How fast is it?
 
@@ -70,7 +70,7 @@ For example, the example code above takes around 60 seconds to run on my laptop 
 
 Since TensorFlow can be run across multiple CPUs, or on GPUs, greta models can be made to scale to massive datasets. I'll add some benchmarks soon to give a clearer idea of how greta compares with other MCMC software.
 
-![](README_files/figure-markdown_github/banner_4-1.png)
+<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
 
 ### Why 'greta'?
 
@@ -82,7 +82,7 @@ In case that's not enough reason to admire her, Grete Hermann also [disproved a 
 
 Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be confusing for non-German speakers to pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
 
-![](README_files/figure-markdown_github/banner_5-1.png)
+<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
 
 ### How does it work?
 
@@ -191,7 +191,7 @@ greta relies on some pretty incredible pieces of software, including Rstudio's [
 
 The design and scope of greta was inspired by other general-purpose like [BUGS](http://www.openbugs.net/) and [JAGS](http://mcmc-jags.sourceforge.net/), but particularly by [Stan](http://mc-stan.org/). Using TensorFlow as a backend for general-purpose statistical modelling is nothing new; [Edward](http://edwardlib.org/) does something similar for Python, and [GPflow](https://github.com/GPflow/GPflow) was a source of inspiration for the implementation of greta.
 
-![](README_files/figure-markdown_github/banner_6-1.png)
+<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
 
 ### Contributors
 
@@ -199,7 +199,7 @@ I would welcome contributions to this project from anyone with time to spare. Th
 
 greta has a basic module system to package up more niche functionality. Check out `?dynamics` for an example of a module for stage-structured dynamical models. I'm still working out whether these modules should be kept in this package, or split out into one or more separate packages. Either way I would be very keen for people to contribute new modules!
 
-#### some gory details for potential contributors to the project
+#### some gory details for contributors
 
 greta arrays are the user-facing representation of the model, but under the hood each greta array corresponds to an R6 `node` object. Each node points to its 'child' nodes - the nodes corresponding to the greta arrays that were used to create this one. When `define_model()` is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. In addition to remembering where they are in the DAG, each node has a method to define a corresponding Tensor in a TensorFlow graph. `define_model()` triggers those methods to create a DAG for the model in TensorFlow. The pass-by-reference nature of R6 objects means each node can tell its child nodes to define themselves on the TensorFlow graph first, before the parent node creates its own Tensor.
 
