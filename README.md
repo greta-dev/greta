@@ -8,6 +8,8 @@ greta is an R package for writing flexible statistical models and fitting them b
 
 **extensible** - because greta is written in R, you can define your own functions and modules to add new methods and models.
 
+![](README_files/figure-markdown_github/banner_1-1.png)
+
 Example
 -------
 
@@ -43,13 +45,7 @@ MCMCplot(draws, xlim = c(-1, 5))
 
 <img src="README_files/figure-markdown_github/vis-1.png" width="400px" /><img src="README_files/figure-markdown_github/vis-2.png" width="400px" />
 
-### How fast is it?
-
-For small to medium size (a few hundred data points) problems, Stan will probably be faster than greta. Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
-
-For example, while the code above takes around 60 seconds to run with the 150-row iris data, if you run the same model and sampler on a dataset of 15,000 rows, it still only takes around 65 seconds. That's not bad. Not bad at all.
-
-Those numbers are on a laptop. Since TensorFlow can be run across large numbers of CPUs, or on GPUs, greta models can be made to scale to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
+![](README_files/figure-markdown_github/banner_2-1.png)
 
 ### Installation
 
@@ -61,6 +57,18 @@ devtools::install_github('goldingn/greta')
 
 however greta depends on TensorFlow which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow
 
+![](README_files/figure-markdown_github/banner_4-1.png)
+
+### How fast is it?
+
+For small to medium size (a few hundred data points) problems, Stan will probably be faster than greta. Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
+
+For example, while the code above takes around 60 seconds to run with the 150-row iris data, if you run the same model and sampler on a dataset of 15,000 rows, it still only takes around 65 seconds. That's not bad. Not bad at all.
+
+Those numbers are on a laptop. Since TensorFlow can be run across large numbers of CPUs, or on GPUs, greta models can be made to scale to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
+
+![](README_files/figure-markdown_github/banner_3-1.png)
+
 Why 'greta'?
 ------------
 
@@ -71,3 +79,5 @@ There's a recent convention of naming probabilistic modelling software after pio
 In case that's not enough reason to admire her, Grete Hermann also [disproved a popular theorem in quantum theory](https://arxiv.org/pdf/0812.3986.pdf) and was part of the German resistance against the Nazi regime prior to World War Two.
 
 Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) is pretty confusing for most non-German speakers pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
+
+![](README_files/figure-markdown_github/bottom_banner-1.png)

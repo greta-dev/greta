@@ -1,6 +1,10 @@
 # greta logo generation
 # Muli fontface from: https://fonts.google.com/specimen/Muli
 
+# plot a purple banner, with greta in white
+# 'width' gives the width:height ratio
+# 'margin' gives the proportion of the vertical height to use a border on each side
+# the text is scaled to never exceed that border
 banner <- function (width = 8, margin = 0.2) {
 
   # warn in the banner isn't height-filled
@@ -12,15 +16,14 @@ banner <- function (width = 8, margin = 0.2) {
              min_width)
   }
 
-  # cache the old background colour and switch to purple
+  # cache the old graphics options
   old_bg <- par('bg')
   old_mar <- par('mar')
-  old_xpd <- par('xpd')
   old_family <- par('family')
 
+  # switch to a purple background, no margins and Muli typeface
   par(bg = 'darkorchid1',
       mar = rep(0, 4),
-      xpd = NA,
       family = 'Muli')
 
   # set up the device, to have the correct width
@@ -55,6 +58,30 @@ banner <- function (width = 8, margin = 0.2) {
       mar = old_mar,
       xpd = old_xpd,
       family = old_family)
+
+  invisible(NULL)
+
+}
+
+# same dimensions as banner, but with no text
+blank_banner <- function (width = 8, margin = 0.2) {
+
+  # cache the old graphics options
+  old_bg <- par('bg')
+  old_mar <- par('mar')
+
+  # switch to a purple background with no margins
+  par(bg = 'darkorchid1',
+      mar = rep(0, 4))
+
+  # set up the device, to have the correct width
+  plot.new()
+  plot.window(xlim = c(0, width),
+              ylim = c(0, 1),
+              asp = 1)
+
+  par(bg = old_bg,
+      mar = old_mar)
 
   invisible(NULL)
 
