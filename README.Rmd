@@ -6,74 +6,93 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 set.seed(1)
 ```
 
-# greta: probabilistic modelling with TensorFlow
+```{r top_banner, echo=FALSE, fig.height=3, fig.width=42}
+greta:::banner(14)
+```
 
-greta lets you write probabilistic models interactively in native R code, then sample from them efficiently using Hamiltonian Monte Carlo.
+greta is an R package for writing statistical models and fitting them by MCMC, it's:
 
-The computational heavy lifting is done by [TensorFlow](https://www.tensorflow.org/), Google's automatic differentiation library. greta is particularly fast where the model contains lots of linear algebra, and greta models can be easily set up to run across CPUs or GPUs, just by installing the relevant version of TensorFlow. 
+**easy** - greta models can be written interactively in R, so there's no need to learn a new language like BUGS or Stan and if you make a mistake you get feedback immediately, not from a compiler.
 
-This package is in the early stages of development, so expect it to be buggy for a while. *It is not yet ready for use in serious analysis*.
+**fast** - greta uses Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's really fast on big datasets and can run in parallel across lots of CPUs, or on GPUs.
 
-Releases in the near future will implement more distributions and functions.
-Later releases will implement [different samplers](http://www.stat.columbia.edu/~gelman/research/published/nuts.pdf) and may enable fitting models with fast [approximate inference schemes](http://andrewgelman.com/2015/02/18/vb-stan-black-box-black-box-variational-bayes/) and running computations across a [distributed network](https://www.tensorflow.org/versions/r0.11/how_tos/distributed/index.html).
+**extensible** - because greta is written in R, you can define your own functions and modules to add new methods and models.
 
-## Example
+```{r banner_1, echo=FALSE, fig.height=0.2, fig.width=14}
+greta:::blank_banner(14 / 0.2)
+```
 
-Here's an example of a Bayesian linear regression model applied to the iris data.
+### Example
 
-```{r eval = TRUE, results='hide', message=FALSE}
+Here's a simple Bayesian linear regression model for the sepal length variable in R's `iris` dataset.
+
+```{r model, eval = TRUE, results='hide', message=FALSE}
 library(greta)
 
-alpha = normal(0, 3)
-beta = normal(0, 3, dim = 3)
-sigma = lognormal(0, 3)
+# create parameters, stating their prior distributions
+intercept = normal(0, 5)
+coefficient = normal(0, 3)
+sd = lognormal(0, 3)
 
-z <- alpha + iris[, 2:4] %*% beta
-likelihood(iris[, 1]) = normal(z, sigma)
+# write the equation for the expected mean sepal length
+mean <- intercept + coefficient * iris$Petal.Length
+
+# define the likelihood of the observed data
+likelihood(iris$Sepal.Length) = normal(mean, sd)
 ```
 
-With the model defined, we can draw samples of the parameters we care about. This takes around 45 seconds on my laptop.
+With the model written, we can draw samples of the parameters we care about.
 
-```{r eval = TRUE, results='hide', message=FALSE}
-model <- define_model(alpha, beta, sigma)
+```{r mcmc, eval = TRUE, results='hide', message=FALSE}
+model <- define_model(intercept, coefficient, sd)
 
-draws <- mcmc(model,
-              method = 'hmc',
-              n_samples = 2000)
+draws <- mcmc(model, n_samples = 1000)
 ```
 
-`draws` is an `mcmc.list` from the `coda` package, so you can plot and summarise the samples using your favourite MCMC visualisation software
+This outputs an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software.
 
-```{r eval = TRUE, results='hide', out.width=c('400px', '400px'), message=FALSE, warning=FALSE, fig.height=4, fig.width=5, fig.show='hold'}
+```{r vis, eval = TRUE, results='hide', out.width=c('400px', '400px'), message=FALSE, warning=FALSE, fig.height=4, fig.width=5, fig.show='hold'}
 library(MCMCvis)
 
-MCMCtrace(draws, params = c('alpha', 'beta1', 'sigma'))
-MCMCplot(draws)
+MCMCtrace(draws)
+MCMCplot(draws, xlim = c(-1, 5))
 ```
 
-### How fast is it?
-
-For small to medium size (a few hundred data points) problems, STAN is likely to be faster than greta. Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
-
-For example, while the code above takes around 100 seconds to run with the 150-row iris data, if you run the same model and sampler on a dataset of 150,000 rows, it still only takes around 200 seconds. That's not bad. Not bad at all.
-
-Those numbers are on a laptop. Since TensorFlow can be run across large numbers of CPUs, or on GPUs, greta models can be made to scale to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
+```{r banner_2, echo=FALSE, fig.height=0.2, fig.width=14}
+knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
+```
 
 ### Installation
 
 greta can be installed from GitHub using the devtools package
 
-```{r eval=FALSE}
+```{r install, eval=FALSE}
 devtools::install_github('goldingn/greta')
 ```
 
-however greta depends on TensorFlow which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow
+however greta depends on TensorFlow which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow.
 
-## Why 'greta'?
+```{r banner_3, echo=FALSE, fig.height=0.2, fig.width=14}
+knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
+```
+
+### How fast is it?
+
+For small to medium size (a few hundred data points) problems, Stan will probably be faster than greta. Where the model involves thousands of datapoints or multiplication of large matrices, greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
+
+For example, the example code above takes around 60 seconds to run on my laptop for the 150-row iris data. If you run the same model and sampler on a dataset of 15,000 rows, it still only takes around 65 seconds. That's not bad. Not bad at all.
+
+Since TensorFlow can be run across multiple CPUs, or on GPUs, greta models can be made to scale to massive datasets. I'll add some benchmarks soon to give a clearer idea of how greta compares with other MCMC software.
+
+```{r banner_4, echo=FALSE, fig.height=0.2, fig.width=14}
+knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
+```
+
+### Why 'greta'?
 
 There's a recent convention of naming probabilistic modelling software after pioneers in the field (e.g. [STAN](https://en.wikipedia.org/wiki/Stanislaw_Ulam) and [Edward](https://en.wikipedia.org/wiki/George_E._P._Box)).
 
@@ -81,4 +100,116 @@ There's a recent convention of naming probabilistic modelling software after pio
 
 In case that's not enough reason to admire her, Grete Hermann also [disproved a popular theorem in quantum theory](https://arxiv.org/pdf/0812.3986.pdf) and was part of the German resistance against the Nazi regime prior to World War Two.
 
-Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) is pretty confusing for most non-German speakers pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
+Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be confusing for non-German speakers to pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
+
+```{r banner_5, echo=FALSE, fig.height=0.2, fig.width=14}
+knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
+```
+
+### How does it work?
+
+#### writing a model
+
+With greta, you create and manipulate `greta_array` objects, which behave more-or-less like R's arrays.
+greta arrays can contain either data, random variables (with some distribution), or the result of applying some function to another greta array.
+
+For example, we can convert other R objects, like vectors or matrices to greta arrays using the `data()` function:
+
+```{r greta_data, echo=TRUE}
+sl <- data(iris$Sepal.Length)
+head(sl)
+```
+
+However many functions and mathematical operations will automagically transform data too, which is we we don't need to call `data()` in the example above. See `?greta::data` for details on what types of object can be converted to greta arrays.
+
+We can also create greta arrays representing random or unknown variables, like model parameters. For a Bayesian model, we can define these via their prior distributions:
+
+```{r priors1, echo=TRUE}
+# a scalar variable
+a = normal(mean = 0, sd = 10)
+a
+```
+```{r priors2, echo=TRUE}
+# a 3x3 matrix with all elements having the same distribution
+b = normal(mean = 0, sd = 1, dim = c(3, 3))
+b
+```
+
+The values of these distributions are as-yet unknown, so they are represented by `?`s when we print them. See `` ?`greta-distributions` `` for a list of the implemented distributions. If you don't want to define a prior over a variable (e.g. for a frequentist analysis), you can define variables using `free()` instead.
+
+greta arrays can be manipulated using R's standard arithmetic, logical and relational operators (`+`, `*`, etc., see `` ?`greta-operators` ``) and common functions (`sum()`, `log()` etc.; see `` ?`greta-functions` ``).
+When we are writing our model, we define new greta arrays as the output of these functions, but they aren't actually *applied* just yet. Instead, greta just works out what shape they should be and remembers what to do later when it comes to fit the model. 
+
+For example, we can multiply data with parameters, transform or sum across the new values:
+
+```{r operations1, echo=TRUE}
+# sepal length multiplied by a parameter
+c <- sl * a
+head(c)
+```
+```{r operations2, echo=TRUE}
+# log-transform and then sum the first 10 values
+d <- sum(log(c[1:10]))
+d
+```
+
+As with the random variables, the outputs of these operations aren't yet known, so the values are represented by `?`s.
+
+Because greta is tracking the size and shape of the greta arrays, it will tell us if something we do doesn't make sense, like trying to add two objects of the wrong shape and size:
+```{r operations_error, echo=TRUE, error=TRUE}
+# try to add two differently shaped greta arrays
+c[1:5] + c[1:2]
+```
+
+The `likelihood()` syntax lets us tell greta that some data should follow a certain distribution, i.e. defining a likelihood so that we can fit the model to data. It always goes on the left hand side, and with a distribution on the right hand side, like in the example.
+
+#### what happens next
+
+When we're writing out the model by creating new greta arrays, greta doesn't actually apply any of the functions, it just remembers what to do to create a new greta array, and which existing greta arrays to use.
+When we run `define_model()`, greta rounds up then all of the greta arrays connected to the parameters we care about - that defines our statistical model.
+We can then run `mcmc()` on the model, which uses an mcmc algorithm to try different values of the parameters and evaluate the 'joint density' of the model (either the posterior or the likelihood depending on whether the model was Bayesian).
+
+#### software
+
+greta relies on some pretty incredible pieces of software, including Rstudio's [`reticulate`](https://github.com/rstudio/reticulate) and [`tensorflow`](https://rstudio.github.io/tensorflow/) packages, which bring Google TensorFlow and all things python to R. Under the hood, greta also uses Winston Chang's [`R6`](https://github.com/wch/R6) object system.
+
+The design and scope of greta was inspired by other general-purpose like [BUGS](http://www.openbugs.net/) and [JAGS](http://mcmc-jags.sourceforge.net/), but particularly by [Stan](http://mc-stan.org/). Using TensorFlow as a backend for general-purpose statistical modelling is nothing new; [Edward](http://edwardlib.org/) does something similar for Python, and [GPflow](https://github.com/GPflow/GPflow) was a source of inspiration for the implementation of greta.
+
+```{r banner_6, echo=FALSE, fig.height=0.2, fig.width=14}
+knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
+```
+
+### Contributors
+
+I would welcome contributions to this project from anyone with time to spare.
+The issues tracker lists a number of known bugs and extensions I have planned.
+Please feel free to add to those any bugs or issues you come across, or features you'd like to help add.
+
+greta has a basic module system to package up more niche functionality.
+Check out `?dynamics` for an example of a module for stage-structured dynamical models.
+I'm still working out whether these modules should be kept in this package, or split out into one or more separate packages.
+Either way I would be very keen for people to contribute new modules!
+
+#### some gory details for contributors
+
+greta arrays are the user-facing representation of the model, but under the hood each greta array corresponds to an R6 `node` object.
+Each node points to its 'child' nodes - the nodes corresponding to the greta arrays that were used to create this one.
+When `define_model()` is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model.
+In addition to remembering where they are in the DAG, each node has a method to define a corresponding Tensor in a TensorFlow graph.
+`define_model()` triggers those methods to create a DAG for the model in TensorFlow.
+The pass-by-reference nature of R6 objects means each node can tell its child nodes to define themselves on the TensorFlow graph first, before the parent node creates its own Tensor.
+
+Nodes representing random variables also have a method to create a Tensor that calculates their log-density, given their value.
+Those log-densities are summed on the TensorFlow graph to create a Tensor for the joint log-density of the model.
+TensorFlow's automatic gradient capabilities are then used to define a Tensor for the gradient of the log-density with respect to each parameter in the model.
+The `dag` R6 object contained within the model then exposes methods to send parameters to the TensorFlow graph and return the joint density and gradient.
+These methods are used by the Hamiltonian Monte Carlo algorithm to sample from the model parameters.
+
+Crucially, all nodes ever created in an R session are registered (recorded in a hidden list), whether or not the greta arrays to which they correspond were assigned as objects.
+That enables us to nest functions and string together operations without losing track of dependency between nodes.
+It also enables us to define a likelihood via the syntax in the example above.
+`likelihood()` creates a distribution node, sets it as having a fixed value, and registers it, but doesn't assign it to a greta_array object.
+
+```{r bottom_banner, echo=FALSE, fig.height=0.5, fig.width=14}
+greta:::blank_banner(14 / 0.5)
+```
