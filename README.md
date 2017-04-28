@@ -88,26 +88,123 @@ Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be co
 
 #### writing a model
 
-greta lets you create and manipulate `greta_array` objects, which behave more-or-less like R's arrays. greta arrays can contain either data, random variables (with some distribution), or the ouputs of operations on random variables.
+With greta, you create and manipulate `greta_array` objects, which behave more-or-less like R's arrays. greta arrays can contain either data, random variables (with some distribution), or the result of applying some function to another greta array.
 
-Random variables are defined either via their prior distributions (`normal()`, `beta()` etc.; see `` ?`greta-distributions` ``), or for frequentist inference using the function `free()`.
+For example, we can convert other R objects, like vectors or matrices to greta arrays using the `data()` function:
 
-greta arrays can be manipulated using R's standard arithmetic, logical and relational operators (`+`, `*`, etc., see `` ?`greta-operators` ``) and common functions (`sum()`, `log()` etc.; see `` ?`greta-functions` ``).
+``` r
+sl <- data(iris$Sepal.Length)
+head(sl)
+```
 
-R objects (including vectors, matrices, arrays and some dataframes) can be coerced to greta arrays using the `data()` function (see `?greta::data`), though many of the operators will automagically transform data too, like in the example above.
+    ## greta array (operation)
+    ## 
+    ##      [,1]
+    ## [1,]  5.1
+    ## [2,]  4.9
+    ## [3,]  4.7
+    ## [4,]  4.6
+    ## [5,]  5.0
+    ## [6,]  5.4
 
-The `likelihood()` syntax states that some observed data is assumed to follow a certain distribution, allowing us to define a model likelihood (see `?likelihood`).
+However many functions and mathematical operations will automagically transform data too, which is we we don't need to call `data()` in the example above. See `?greta::data` for details on what types of object can be converted to greta arrays.
 
-#### defining and running a model
+We can also create greta arrays representing random or unknown variables, like model parameters. For a Bayesian model, we can define these via their prior distributions:
 
-When writing a model greta doesn't actually perform any of these operations, it just remembers what to do to create a new greta array, and which existing greta arrays to use. The function `define_model()` then finds all of the greta arrays connected to the parameters we care about to create a *directed acyclic graph* (DAG) describing the model.
+``` r
+# a scalar variable
+a = normal(mean = 0, sd = 10)
+a
+```
 
-This DAG is then translated into a TensorFlow graph, and Tensors are created for the log-density of the model, and the gradient of the log-density. `mcmc` then uses this TensorFlow graph to run a Hamiltonian Monte Carlo algorithm to sample the parameters of the model.
+    ## greta array (stochastic)
+    ## 
+    ##      [,1]
+    ## [1,]   ?
+
+``` r
+# a 3x3 matrix with all elements having the same distribution
+b = normal(mean = 0, sd = 1, dim = c(3, 3))
+b
+```
+
+    ## greta array (stochastic)
+    ## 
+    ##      [,1] [,2] [,3]
+    ## [1,]   ?    ?    ? 
+    ## [2,]   ?    ?    ? 
+    ## [3,]   ?    ?    ?
+
+The values of these distributions are as-yet unknown, so they are represented by `?`s when we print them. See `` ?`greta-distributions` `` for a list of the implemented distributions. If you don't want to define a prior over a variable (e.g. for a frequentist analysis), you can define variables using `free()` instead.
+
+greta arrays can be manipulated using R's standard arithmetic, logical and relational operators (`+`, `*`, etc., see `` ?`greta-operators` ``) and common functions (`sum()`, `log()` etc.; see `` ?`greta-functions` ``). When we are writing our model, we define new greta arrays as the output of these functions, but they aren't actually *applied* just yet. Instead, greta just works out what shape they should be and remembers what to do later when it comes to fit the model.
+
+For example, we can multiply data with parameters, transform or sum across the new values:
+
+``` r
+# sepal length multiplied by a parameter
+c <- sl * a
+head(c)
+```
+
+    ## greta array (operation)
+    ## 
+    ##      [,1]
+    ## [1,]   ? 
+    ## [2,]   ? 
+    ## [3,]   ? 
+    ## [4,]   ? 
+    ## [5,]   ? 
+    ## [6,]   ?
+
+``` r
+# log-transform and then sum the first 10 values
+d <- sum(log(c[1:10]))
+d
+```
+
+    ## greta array (operation)
+    ## 
+    ##      [,1]
+    ## [1,]   ?
+
+As with the random variables, the outputs of these operations aren't yet known, so the values are represented by `?`s.
+
+Because greta is tracking the size and shape of the greta arrays, it will tell us if something we do doesn't make sense, like trying to add two objects of the wrong shape and size:
+
+``` r
+# try to add two differently shaped greta arrays
+c[1:5] + c[1:2]
+```
+
+    ## Error in check_dims(e1, e2): incompatible dimensions: 5x1, 2x1
+
+The `likelihood()` syntax lets us tell greta that some data should follow a certain distribution, i.e. defining a likelihood so that we can fit the model to data. It always goes on the left hand side, and with a distribution on the right hand side, like in the example.
+
+#### what happens next
+
+When we're writing out the model by creating new greta arrays, greta doesn't actually apply any of the functions, it just remembers what to do to create a new greta array, and which existing greta arrays to use. When we run `define_model()`, greta rounds up then all of the greta arrays connected to the parameters we care about - that defines our statistical model. We can then run `mcmc()` on the model, which uses an mcmc algorithm to try different values of the parameters and evaluate the 'joint density' of the model (either the posterior or the likelihood depending on whether the model was Bayesian).
 
 #### software
 
 greta relies on some pretty incredible pieces of software, including Rstudio's [`reticulate`](https://github.com/rstudio/reticulate) and [`tensorflow`](https://rstudio.github.io/tensorflow/) packages, which bring Google TensorFlow and all things python to R. Under the hood, greta also uses Winston Chang's [`R6`](https://github.com/wch/R6) object system.
 
 The design and scope of greta was inspired by other general-purpose like [BUGS](http://www.openbugs.net/) and [JAGS](http://mcmc-jags.sourceforge.net/), but particularly by [Stan](http://mc-stan.org/). Using TensorFlow as a backend for general-purpose statistical modelling is nothing new; [Edward](http://edwardlib.org/) does something similar for Python, and [GPflow](https://github.com/GPflow/GPflow) was a source of inspiration for the implementation of greta.
+
+![](README_files/figure-markdown_github/banner_6-1.png)
+
+### Contributors
+
+I would welcome contributions to this project from anyone with time to spare. The issues tracker lists a number of known bugs and extensions I have planned. Please feel free to add to those any bugs or issues you come across, or features you'd like to help add.
+
+greta has a basic module system to package up more niche functionality. Check out `?dynamics` for an example of a module for stage-structured dynamical models. I'm still working out whether these modules should be kept in this package, or split out into one or more separate packages. Either way I would be very keen for people to contribute new modules!
+
+#### some gory details for potential contributors to the project
+
+greta arrays are the user-facing representation of the model, but under the hood each greta array corresponds to an R6 `node` object. Each node points to its 'child' nodes - the nodes corresponding to the greta arrays that were used to create this one. When `define_model()` is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. In addition to remembering where they are in the DAG, each node has a method to define a corresponding Tensor in a TensorFlow graph. `define_model()` triggers those methods to create a DAG for the model in TensorFlow. The pass-by-reference nature of R6 objects means each node can tell its child nodes to define themselves on the TensorFlow graph first, before the parent node creates its own Tensor.
+
+Nodes representing random variables also have a method to create a Tensor that calculates their log-density, given their value. Those log-densities are summed on the TensorFlow graph to create a Tensor for the joint log-density of the model. TensorFlow's automatic gradient capabilities are then used to define a Tensor for the gradient of the log-density with respect to each parameter in the model. The `dag` R6 object contained within the model then exposes methods to send parameters to the TensorFlow graph and return the joint density and gradient. These methods are used by the Hamiltonian Monte Carlo algorithm to sample from the model parameters.
+
+Crucially, all nodes ever created in an R session are registered (recorded in a hidden list), whether or not the greta arrays to which they correspond were assigned as objects. That enables us to nest functions and string together operations without losing track of dependency between nodes. It also enables us to define a likelihood via the syntax in the example above. `likelihood()` creates a distribution node, sets it as having a fixed value, and registers it, but doesn't assign it to a greta\_array object.
 
 ![](README_files/figure-markdown_github/bottom_banner-1.png)
