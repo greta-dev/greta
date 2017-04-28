@@ -22,7 +22,7 @@ banner <- function (width = 8, margin = 0.2) {
   old_family <- par('family')
 
   # switch to a purple background, no margins and Muli typeface
-  par(bg = 'darkorchid4',
+  par(bg = 'darkorchid3',
       mar = rep(0, 4),
       family = 'Muli')
 
@@ -70,7 +70,7 @@ blank_banner <- function (width = 8, margin = 0.2) {
   old_mar <- par('mar')
 
   # switch to a purple background with no margins
-  par(bg = 'darkorchid4',
+  par(bg = 'darkorchid3',
       mar = rep(0, 4))
 
   # set up the device, to have the correct width
