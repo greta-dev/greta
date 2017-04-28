@@ -1,38 +1,35 @@
-greta: probabilistic modelling with TensorFlow
-==============================================
+![](README_files/figure-markdown_github/top_banner-1.png) \# greta: fast and easy statistical modelling in R
 
-greta lets you write probabilistic models interactively in native R code, then sample from them efficiently using Hamiltonian Monte Carlo.
+greta is an R package for writing statistical models and fitting them by MCMC. greta is:
 
-The computational heavy lifting is done by [TensorFlow](https://www.tensorflow.org/), Google's automatic differentiation library. greta is particularly fast where the model contains lots of linear algebra, and greta models can be easily set up to run across CPUs or GPUs, just by installing the relevant version of TensorFlow.
+**easy to write** - greta models are written interactively in R, so there's no need to learn a new language like BUGS or Stan and you get error messages back as you write you code, not after you compile it.
 
-This package is in the early stages of development, so expect it to be buggy for a while. *It is not yet ready for use in serious analysis*.
+**fast** - greta uses Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's really fast on big datasets and can run in parallel across hundreds of CPUs, or on GPUs.
 
-Releases in the near future will implement more distributions and functions. Later releases will implement [different samplers](http://www.stat.columbia.edu/~gelman/research/published/nuts.pdf) and may enable fitting models with fast [approximate inference schemes](http://andrewgelman.com/2015/02/18/vb-stan-black-box-black-box-variational-bayes/) and running computations across a [distributed network](https://www.tensorflow.org/versions/r0.11/how_tos/distributed/index.html).
+**extensible** - because greta is written in R, you can define your own functions and modules to add new methods and models.
 
 Example
 -------
 
-Here's an example of a Bayesian linear regression model applied to the iris data.
+Here's an example of a simple Bayesian linear regression model applied to the iris data.
 
 ``` r
 library(greta)
 
-alpha = normal(0, 3)
-beta = normal(0, 3, dim = 3)
-sigma = lognormal(0, 3)
+intercept = normal(0, 5)
+coefficient = normal(0, 3)
+sd = lognormal(0, 3)
 
-z <- alpha + iris[, 2:4] %*% beta
-likelihood(iris[, 1]) = normal(z, sigma)
+mean <- intercept + coefficient * iris$Petal.Length
+likelihood(iris$Sepal.Length) = normal(mean, sd)
 ```
 
-With the model defined, we can draw samples of the parameters we care about. This takes around 45 seconds on my laptop.
+With the model defined, we can draw samples of the parameters we care about.
 
 ``` r
-model <- define_model(alpha, beta, sigma)
+model <- define_model(intercept, coefficient, sd)
 
-draws <- mcmc(model,
-              method = 'hmc',
-              n_samples = 2000)
+draws <- mcmc(model, n_samples = 1000)
 ```
 
 `draws` is an `mcmc.list` from the `coda` package, so you can plot and summarise the samples using your favourite MCMC visualisation software
@@ -40,17 +37,17 @@ draws <- mcmc(model,
 ``` r
 library(MCMCvis)
 
-MCMCtrace(draws, params = c('alpha', 'beta1', 'sigma'))
-MCMCplot(draws)
+MCMCtrace(draws)
+MCMCplot(draws, xlim = c(-1, 5))
 ```
 
-<img src="README_files/figure-markdown_github/unnamed-chunk-3-1.png" width="400px" /><img src="README_files/figure-markdown_github/unnamed-chunk-3-2.png" width="400px" />
+<img src="README_files/figure-markdown_github/vis-1.png" width="400px" /><img src="README_files/figure-markdown_github/vis-2.png" width="400px" />
 
 ### How fast is it?
 
-For small to medium size (a few hundred data points) problems, STAN is likely to be faster than greta. Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
+For small to medium size (a few hundred data points) problems, Stan will probably be faster than greta. Where the model involves thousands of datapoints and large linear algebra operations (e.g. multiplication of big matrices), greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
 
-For example, while the code above takes around 100 seconds to run with the 150-row iris data, if you run the same model and sampler on a dataset of 150,000 rows, it still only takes around 200 seconds. That's not bad. Not bad at all.
+For example, while the code above takes around 60 seconds to run with the 150-row iris data, if you run the same model and sampler on a dataset of 15,000 rows, it still only takes around 65 seconds. That's not bad. Not bad at all.
 
 Those numbers are on a laptop. Since TensorFlow can be run across large numbers of CPUs, or on GPUs, greta models can be made to scale to massive datasets. When greta is a bit more mature, I'll put together some benchmarks to give a clearer idea of how it compares with other modelling software.
 
