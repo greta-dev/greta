@@ -26,7 +26,7 @@ greta is an R package for writing flexible statistical models and fitting them b
 greta:::blank_banner(14 / 0.2)
 ```
 
-## Example
+### Example
 
 Here's a simple Bayesian linear regression model applied to the iris data.
 
@@ -88,7 +88,7 @@ Those numbers are on a laptop. Since TensorFlow can be run across large numbers 
 greta:::blank_banner(14 / 0.2)
 ```
 
-## Why 'greta'?
+### Why 'greta'?
 
 There's a recent convention of naming probabilistic modelling software after pioneers in the field (e.g. [STAN](https://en.wikipedia.org/wiki/Stanislaw_Ulam) and [Edward](https://en.wikipedia.org/wiki/George_E._P._Box)).
 
