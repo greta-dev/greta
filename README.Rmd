@@ -229,6 +229,10 @@ knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
 
 ### Contributors
 
+[![Build Status](https://travis-ci.org/goldingn/greta.svg)](https://travis-ci.org/goldingn/greta)
+[![codecov.io](https://codecov.io/github/goldingn/greta/coverage.svg?branch=master)](https://codecov.io/github/goldingn/greta?branch=master)
+[![cran version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta)
+
 I would welcome contributions to this project from anyone with time to spare!
 The issues tracker lists a number of known bugs and extensions I have planned.
 Please feel free to add to those any bugs or issues you come across, or let me know if you'd like to help fix some of them or add new features.
