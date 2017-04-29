@@ -6,13 +6,20 @@ warnings_are_errors: false
 
 os: linux
 
+r_packages:
+  - reticulate
+  - tensorflow
+  - R6
+  - coda
+  - testthat
+  - covr
+
 cache:
   packages: true
   directories:
     - $HOME/.cache/pip
 
 before_install:
-  - export PATH=$(perl -e 'print join(":", grep { !m{/opt/python/} } split /:/, $ENV{PATH})')
   - source travis_install.sh
 
 addons:
