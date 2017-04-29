@@ -5,6 +5,7 @@
 # 'width' gives the width:height ratio
 # 'margin' gives the proportion of the vertical height to use a border on each side
 # the text is scaled to never exceed that border
+#' @importFrom graphics par plot.new plot.window strheight strwidth text
 banner <- function (width = 8, margin = 0.2) {
 
   # warn in the banner isn't height-filled

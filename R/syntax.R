@@ -1,15 +1,12 @@
 # syntax definitions
 
-# special operator to create a data node in the parent environment,
-# and assign it a likelihood
-
 #' @name greta-likelihood
 #' @aliases likelihood
 #' @title Define a Likelihood over Data
 #' @description The likelihood function is used to link observed data with
 #'   random variables. This can be used to define the likelhood term for a
 #'   model.
-#' @param data either a data greta array (defined using \code{data()}), or
+#' @param data either a data greta array (defined using \code{as_data()}), or
 #'   some data that can be coereced to a data greta array
 #' @param value a stochastic greta array, created using a distribution
 #' @export

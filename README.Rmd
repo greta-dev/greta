@@ -113,14 +113,14 @@ greta arrays can contain either data, random variables (with some probability di
 
 ##### data
 
-For example, we can convert other R objects, like vectors or matrices to greta arrays using the `data()` function:
+For example, we can convert other R objects, like vectors or matrices to greta arrays using the `as_data()` function:
 
 ```{r greta_data, echo=TRUE}
-sl <- data(iris$Sepal.Length)
+sl <- as_data(iris$Sepal.Length)
 head(sl)
 ```
 
-However many functions and mathematical operations will automagically transform data too, which is we we don't need to call `data()` in the example above. See `?greta::data` for details on what types of object can be converted to greta arrays.
+However many functions and mathematical operations will automagically transform data too, which is we we don't need to call `as_data()` in the example above. See `?as_data` for details on what types of object can be converted to greta arrays.
 
 ##### variables
 
@@ -228,6 +228,10 @@ knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
 ```
 
 ### Contributors
+
+[![Build Status](https://travis-ci.org/goldingn/greta.svg)](https://travis-ci.org/goldingn/greta)
+[![codecov.io](https://codecov.io/github/goldingn/greta/coverage.svg?branch=master)](https://codecov.io/github/goldingn/greta?branch=master)
+[![cran version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta)
 
 I would welcome contributions to this project from anyone with time to spare!
 The issues tracker lists a number of known bugs and extensions I have planned.
