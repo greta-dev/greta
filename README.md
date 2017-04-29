@@ -90,10 +90,10 @@ With greta, you create and manipulate `greta_array` objects, which behave more-o
 
 ##### data
 
-For example, we can convert other R objects, like vectors or matrices to greta arrays using the `data()` function:
+For example, we can convert other R objects, like vectors or matrices to greta arrays using the `as_data()` function:
 
 ``` r
-sl <- data(iris$Sepal.Length)
+sl <- as_data(iris$Sepal.Length)
 head(sl)
 ```
 
@@ -107,7 +107,7 @@ head(sl)
     ## [5,]  5.0
     ## [6,]  5.4
 
-However many functions and mathematical operations will automagically transform data too, which is we we don't need to call `data()` in the example above. See `?greta::data` for details on what types of object can be converted to greta arrays.
+However many functions and mathematical operations will automagically transform data too, which is we we don't need to call `as_data()` in the example above. See `?as_data` for details on what types of object can be converted to greta arrays.
 
 ##### variables
 

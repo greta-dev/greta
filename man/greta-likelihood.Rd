@@ -9,7 +9,7 @@
 likelihood(data) <- value
 }
 \arguments{
-\item{data}{either a data greta array (defined using \code{data()}), or
+\item{data}{either a data greta array (defined using \code{as_data()}), or
 some data that can be coereced to a data greta array}
 
 \item{value}{a stochastic greta array, created using a distribution}

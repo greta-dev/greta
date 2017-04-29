@@ -30,7 +30,7 @@ Collate:
     'overloaded_docs.R'
     'node_class.R'
     'node_types.R'
-    'data.R'
+    'as_data.R'
     'distributions.R'
     'unknowns_class.R'
     'greta_array_class.R'
