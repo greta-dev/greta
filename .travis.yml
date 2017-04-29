@@ -16,9 +16,6 @@ cache:
   directories:
     - $HOME/.cache/pip
 
-before_install:
-  - source travis_install.sh
-
 addons:
   apt:
     sources:
@@ -31,3 +28,14 @@ addons:
       - python-joblib
       - python-dev
 
+before_install:
+  - pip install --upgrade pip
+  - pip install numpy
+  - pip install tensorflow
+
+after_success:
+  - Rscript -e "covr::codecov()"
+
+email:
+  on_success: change
+  on_failure: change
