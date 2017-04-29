@@ -3,3 +3,5 @@
 README.Rmd
 README.md
 README_files
+.travis.yml
+travis_install.sh
