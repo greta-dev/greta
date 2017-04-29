@@ -18,9 +18,10 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 **easy** - greta models can be [written interactively](#example) in R, so there's no need to learn a new language like BUGS or Stan and if you make a mistake you get [feedback](#feedback) immediately, not from a compiler.
 
-**fast** - greta uses both [Hamiltonian Monte Carlo](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12681/full) and Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's particularly fast on big datasets and can run in parallel across lots of CPUs, or on a GPU.
+**fast** - greta does [Hamiltonian Monte Carlo](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12681/full) and uses Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's particularly fast on big datasets and can run in parallel across lots of CPUs, or on a GPU.
 
 **extensible** - because greta is written in R, you can define your own [functions](#functions) and [modules](#modules) to add new methods.
+
 ```{r banner_1, echo=FALSE, fig.height=0.2, fig.width=14}
 greta:::blank_banner(14 / 0.2)
 ```
