@@ -1,0 +1,41 @@
+sudo: required
+language: r
+warnings_are_errors: false
+dist: trusty
+
+r_packages:
+  - reticulate
+  - tensorflow
+  - R6
+  - coda
+  - testthat
+  - covr
+
+cache:
+  packages: true
+  directories:
+    - $HOME/.cache/pip
+
+addons:
+  apt:
+    sources:
+      ubuntu-toolchain-r-test
+    packages:
+      - libmagick++-dev
+      - wget
+      - libatlas3gf-base
+      - libatlas-dev
+      - python-joblib
+      - python-dev
+
+before_install:
+  - pip install --upgrade pip
+  - pip install numpy
+  - pip install tensorflow
+
+after_success:
+  - Rscript -e "covr::codecov()"
+
+email:
+  on_success: change
+  on_failure: change
