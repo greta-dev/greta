@@ -2,13 +2,11 @@
 
 greta is an R package for writing statistical models and fitting them by MCMC, it's:
 
-**easy** - greta models can be written interactively in R, so there's no need to learn a new language like BUGS or Stan and if you make a mistake you get feedback immediately, not from a compiler.
+**easy** - greta models can be [written interactively](#example) in R, so there's no need to learn a new language like BUGS or Stan and if you make a mistake you get [feedback](#feedback) immediately, not from a compiler.
 
-**fast** - greta uses Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's particularly fast on big datasets and can run in parallel across lots of CPUs, or on a GPU.
+**fast** - greta uses both [Hamiltonian Monte Carlo](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12681/full) and Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's particularly fast on big datasets and can run in parallel across lots of CPUs, or on a GPU.
 
-**extensible** - because greta is written in R, you can define your own functions and modules to add new methods and models.
-
-![](README_files/figure-markdown_github/banner_1-1.png)
+**extensible** - because greta is written in R, you can define your own [functions](#functions) and [modules](#modules) to add new methods. ![](README_files/figure-markdown_github/banner_1-1.png)
 
 ### Example
 
@@ -86,9 +84,9 @@ Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be co
 
 ### How does it work?
 
-#### writing a model
-
 With greta, you create and manipulate `greta_array` objects, which behave more-or-less like R's arrays. greta arrays can contain either data, random variables (with some probability distribution), or the result of applying some function to another greta array.
+
+##### data
 
 For example, we can convert other R objects, like vectors or matrices to greta arrays using the `data()` function:
 
@@ -108,6 +106,8 @@ head(sl)
     ## [6,]  5.4
 
 However many functions and mathematical operations will automagically transform data too, which is we we don't need to call `data()` in the example above. See `?greta::data` for details on what types of object can be converted to greta arrays.
+
+##### variables
 
 We can also create greta arrays representing random or unknown variables, like model parameters. For a Bayesian model, we can define these via their prior distributions:
 
@@ -137,6 +137,8 @@ b
 
 The values of these distributions are as-yet unknown, so they are represented by `?`s when we print them. See `` ?`greta-distributions` `` for a list of the implemented distributions. If you don't want to define a prior over a variable (e.g. for a frequentist analysis), you can define variables using `free()` instead.
 
+##### operations
+
 greta arrays can be manipulated using R's standard arithmetic, logical and relational operators (`+`, `*`, etc., see `` ?`greta-operators` ``) and common functions (`sum()`, `log()` etc.; see `` ?`greta-functions` ``). When we are writing our model, we define new greta arrays as the output of these functions, but the functions aren't actually executed just yet. Instead, greta just works out what shape they should be and remembers what to do later when it comes to fit the model.
 
 For example, we might want to multiply some data with a parameter, then transform and sum the result:
@@ -158,8 +160,8 @@ head(c)
     ## [6,]   ?
 
 ``` r
-# log-transform and then sum the first 10 values
-d <- sum(log(c[1:10]))
+# log-transform and then sum these values
+d <- sum(log(c))
 d
 ```
 
@@ -170,7 +172,47 @@ d
 
 As with the random variables, the outputs of these operations aren't yet known, so the values are represented by `?`s.
 
-Because greta is tracking the size and shape of the greta arrays, it will tell us if something we do doesn't make sense, like trying to add two objects of the wrong shape and size:
+##### extract and replace
+
+You can use R's extract and replace syntax (using `[`) on greta arrays, just as you can with R's vectors, matrices and arrays. E.g. to extract the two middle columns from a greta array we can do:
+
+``` r
+e <- ones(4, 3)
+e[, 2:3]
+```
+
+    ## greta array (operation)
+    ## 
+    ##      [,1] [,2]
+    ## [1,]    1    1
+    ## [2,]    1    1
+    ## [3,]    1    1
+    ## [4,]    1    1
+
+or for a single element:
+
+``` r
+e[1, 3]
+```
+
+    ## greta array (operation)
+    ## 
+    ##      [,1]
+    ## [1,]    1
+
+To make a matrix that has random variables in the first column, but zeros everywhere else, we could do:
+
+``` r
+# a 4x3 greta array of zeros
+x <- zeros(4, 3)
+
+# now with random variables in the first column
+x[, 1] = normal(0, 1, dim = 4)
+```
+
+##### feedback
+
+Because greta tracks the size and shape of these greta arrays, it will tell us if something we do doesn't make sense, like trying to add two objects with the wrong dimensions:
 
 ``` r
 # try to add two differently shaped greta arrays
@@ -178,6 +220,39 @@ c[1:5] + c[1:2]
 ```
 
     ## Error in check_dims(e1, e2): incompatible dimensions: 5x1, 2x1
+
+##### functions
+
+You're free to write your own functions for greta arrays, to simplify your code and share methods with others. For example to recreate the `inprod()` function from BUGS and JAGS, we could do:
+
+``` r
+inprod <- function (a, b) {
+  a %*% b
+}
+```
+
+Which we could use to get a linear combination of data and covariates
+
+``` r
+beta = normal(0, 1, dim = 3)
+inprod(iris[1:10, 2:4], beta)
+```
+
+    ## greta array (operation)
+    ## 
+    ##       [,1]
+    ##  [1,]   ? 
+    ##  [2,]   ? 
+    ##  [3,]   ? 
+    ##  [4,]   ? 
+    ##  [5,]   ? 
+    ##  [6,]   ? 
+    ##  [7,]   ? 
+    ##  [8,]   ? 
+    ##  [9,]   ? 
+    ## [10,]   ?
+
+##### likelihood
 
 The `likelihood()` syntax lets us tell greta that some data should follow a certain distribution, i.e. defining a likelihood so that we can fit the model to data. `likelihood()` always goes on the left hand side, and with a distribution on the right hand side, like this:`likelihood(<some_data>) = <some_distribution>(<some_parameters>)`
 
@@ -196,6 +271,8 @@ The design and scope of greta was inspired by other general-purpose MCMC softwar
 ### Contributors
 
 I would welcome contributions to this project from anyone with time to spare! The issues tracker lists a number of known bugs and extensions I have planned. Please feel free to add to those any bugs or issues you come across, or let me know if you'd like to help fix some of them or add new features.
+
+#### modules
 
 greta has a basic module system to package up more 'niche' functionality. Check out `?dynamics` for an example of a module for stage-structured dynamical models. I'm still working out whether these modules should be kept in this package, or split out into one or more separate packages. Either way I would be keen for people to contribute new modules!
 
