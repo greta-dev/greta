@@ -88,6 +88,9 @@ sigma = free(lower = 0)
 # a prior-free parameter constrained to be less that -1
 neg_alpha = free(upper = -1)
 
+# a prior-free parameter constrained to be between 0 and 1
+psi = free(lower = 0, upper = 1)
+
 # an unconstrained parameter with standard normal prior
 mu = normal(0, 1)
 
