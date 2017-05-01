@@ -284,7 +284,7 @@ exponential_distribution <- R6Class (
     tf_log_density_function = function (x, parameters) {
 
       rate <- parameters$shape
-      -x / rate - tf$log(rate)
+      -1 * x / rate - tf$log(rate)
 
     }
 
