@@ -1,56 +1,126 @@
-flat_distribution <- R6Class (
-  'flat_distribution',
-  inherit = distribution,
-  public = list(
-
-    to_free = function (y) {
-      upper <- self$parameters$upper$value()
-      lower <- self$parameters$lower$value()
-      qlogis((y - lower) / (upper - lower))
-    },
-
-    tf_from_free = function (x, env) {
-
-      # cannot allow the upper and lower values to be nodes
-      # otherwise it would severely screw with the gradients
-      upper <- self$parameters$upper$value()
-      lower <- self$parameters$lower$value()
-
-      (1 / (1 + tf$exp(-1 * x))) * (upper - lower) + lower
-
-    },
-
-    initialize = function (lower = -1e6, upper = 1e6, dim) {
-
-      if (!(is.numeric(lower) & is.numeric(upper) &
-            is.finite(lower) & is.finite(upper) &
-            length(lower) == 1 & length(upper) == 1)) {
-        stop ('lower and upper must be finite scalars')
-      }
-
-      super$initialize('flat', dim)
-
-      self$add_parameter(lower, 'lower')
-      self$add_parameter(upper, 'upper')
-    },
-
-    tf_log_density_function = function (value, parameters)
-      tf$constant(0, dtype = tf$float32)
-
-  )
-)
-
 free_distribution <- R6Class (
   'free_distribution',
   inherit = distribution,
   public = list(
 
-    to_free = function (y) y,
+    constraint = NULL,
 
-    tf_from_free = function (x, env) x,
+    initialize = function (lower = -Inf, upper = Inf, dim = 1) {
 
-    initialize = function (dim = 1)
-      super$initialize('free', dim),
+      # check and assign limits
+      bad_limits <- TRUE
+
+      # find constraint type
+      if (lower == -Inf & upper == Inf) {
+
+        self$constraint <- 'none'
+        bad_limits <- FALSE
+
+      } else if (lower == -Inf & upper != Inf) {
+
+        self$constraint <- 'low'
+        bad_limits <- !is.finite(upper)
+
+      } else if (lower != -Inf & upper == Inf) {
+
+        self$constraint <- 'high'
+        bad_limits <- !is.finite(lower)
+
+      } else if (lower != -Inf & upper != Inf) {
+
+        self$constraint <- 'both'
+        bad_limits <- !is.finite(lower) | !is.finite(upper)
+
+      }
+
+      # must be length one, and can't be greta arrays
+      if (length(lower) != 1 | length(upper) != 1 |
+          !is.numeric(lower) | !is.numeric(upper)) {
+
+        bad_limits <- TRUE
+
+      }
+
+      if (bad_limits) {
+
+        stop ('lower and upper must either be -Inf (lower only), ',
+              'Inf (upper only) or finite scalars')
+
+      }
+
+      if (lower >= upper) {
+
+        stop ('upper bound must be greater than lower bound')
+
+      }
+
+      # add parameters
+      super$initialize('free', dim)
+      self$add_parameter(lower, 'lower')
+      self$add_parameter(upper, 'upper')
+
+    },
+
+
+    to_free = function (y) {
+
+      if (self$constraint == 'none') {
+
+        x <- y
+
+      } else if (self$constraint == 'both') {
+
+        upper <- self$parameters$upper$value()
+        lower <- self$parameters$lower$value()
+        x <- qlogis((y - lower) / (upper - lower))
+
+      } else if (self$constraint == 'low') {
+
+        upper <- self$parameters$upper$value()
+        baseline <- upper - y
+        x <- log(exp(baseline) - 1)
+
+      } else if (self$constraint == 'high') {
+
+        lower <- self$parameters$lower$value()
+        baseline <- y - lower
+        x <- log(exp(baseline) - 1)
+
+      }
+
+      x
+
+    },
+
+    tf_from_free = function (x, env) {
+
+      if (self$constraint == 'none') {
+
+        y <- x
+
+      } else if (self$constraint == 'both') {
+
+        upper <- self$parameters$upper$value()
+        lower <- self$parameters$lower$value()
+        y <- (1 / (1 + tf$exp(-1 * x))) * (upper - lower) + lower
+
+      } else if (self$constraint == 'low') {
+
+        upper <- self$parameters$upper$value()
+        baseline <- tf$log(1 + tf$exp(x))
+        y <- upper - baseline
+
+      } else if (self$constraint == 'high') {
+
+        lower <- self$parameters$lower$value()
+        baseline <- tf$log(1 + tf$exp(x))
+        y <- baseline + lower
+
+      }
+
+      y
+
+    },
 
     tf_log_density_function = function (value, parameters)
       tf$constant(0, dtype = tf$float32)
@@ -491,29 +561,27 @@ wishart_distribution <- R6Class (
 
 #' @name greta-distributions
 #' @title greta probability distributions
-#' @description These probability distributions can be used to define random
-#'   variables in a greta model. They return a greta array object that can be
-#'   combined with other greta arrays to construct a model.
+#' @description These functions can be used to define random variables in a
+#'   greta model. They return a greta array object that can be combined with
+#'   other greta arrays to construct a model. All of these functions construct
+#'   random variables with prior distributions, except for \code{free()}, which
+#'   creates 'free' parameters, so can be used for frequentist analyses.
+#'
+#' @param lower,upper a length-one vectors giving optional limits to free
+#'   parameters. These must be specified as numerics, and cannot be greta
+#'   arrays. They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
+#'   (\code{upper}), though \code{lower} must always be less than \code{upper}.
 #'
 #' @param mean,meanlog,ncp unconstrained parameters
 #' @param sd,sdlog,size,lambda,shape,rate,df,shape1,shape2 positive parameters
 #' @param prob probability parameter (\code{0 < prob < 1})
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'
-#' @param range a finite, length 2 numeric vector giving the range of values to
-#'   which \code{flat} distributions are constrained. The first element must
-#'   be lower than the second.
-#'
 #' @param dim the dimensions of the variable. For univariate distributions this
 #'   can be greater than 1 to represent multiple independent variables. For
 #'   multivariate distributions this cannot be smaller than 2.
 #'
-#' @details Most of these distributions have non-uniform probability densities,
-#'   however the distributions \code{flat} and \code{free} do not. These can
-#'   therefore be used as parameters in likelihood (rather than Bayesian)
-#'   inference.
-#'
-#'   The discrete probability distributions (\code{bernoulli}, \code{binomial},
+#' @details The discrete probability distributions (\code{bernoulli}, \code{binomial},
 #'   \code{negative_binomial}, \code{poisson}) can be used as likelihoods, but
 #'   not as unknown variables.
 #'
@@ -523,12 +591,17 @@ wishart_distribution <- R6Class (
 #'
 #' @examples
 #'
-#' # a fixed distribution, e.g. for a prior
-#' mu = normal(0, 1)
+#' # an unconstrained and prior-free parameter (e.g. for a frequentist model)
+#' alpha = free()
 #'
-#' # an unconstrained, positive parameter sigma
-#' log_sigma = free()
-#' sigma = exp(log_sigma)
+#' # positive prior-free parameter (could also do: sigma = exp(free()) )
+#' sigma = free(lower = 0)
+#'
+#' # a prior-free parameter constrained to be less that -1
+#' neg_alpha = free(upper = -1)
+#'
+#' # an unconstrained parameter with standard normal prior
+#' mu = normal(0, 1)
 #'
 #' # a hierarchical distribution
 #' theta = normal(mu, lognormal(0, 1))
@@ -539,9 +612,6 @@ wishart_distribution <- R6Class (
 #' # a matrix of 12 variables drawn from the same hierarchical distribution
 #' thetas = normal(mu, sigma, dim = c(3, 4))
 #'
-#' # a constrained variable with no density (e.g. for a constrained likelihood model)
-#' theta = flat(c(1, 5))
-#'
 #' # a multivariate normal variable, with correlation between two elements
 #' Sig <- diag(4)
 #' Sig[3, 4] <- Sig[4, 3] <- 0.6
@@ -550,6 +620,17 @@ wishart_distribution <- R6Class (
 #' # a Wishart variable with the same covariance parameter
 #' theta = wishart(df = 5, Sigma = Sig, dim = 4)
 NULL
+
+#' @rdname greta-distributions
+#' @export
+free <- function (lower = -Inf, upper = Inf, dim = 1) {
+
+  if (is.greta_array(lower) | is.greta_array(upper))
+    stop ('lower and upper must be fixed, they cannot be another greta array')
+
+  ga(free_distribution$new(lower, upper, dim))
+
+}
 
 #' @rdname greta-distributions
 #' @export
@@ -600,23 +681,6 @@ student <- function (df, ncp, dim = NULL)
 #' @export
 beta <- function (shape1, shape2, dim = NULL)
   ga(beta_distribution$new(shape1, shape2, dim))
-
-#' @rdname greta-distributions
-#' @export
-free <- function (dim = 1)
-  ga(free_distribution$new(dim))
-
-#' @rdname greta-distributions
-#' @export
-flat <- function (range, dim = 1) {
-  if (is.greta_array(range))
-    stop ('range must be fixed, and cannot be another greta array')
-  if (!(is.vector(range) && length(range) == 2 &&
-        is.numeric(range) && range[1] < range[2])) {
-    stop ('range must be a length 2 numeric vector in ascending order')
-  }
-  ga(flat_distribution$new(lower = range[1], upper = range[2], dim = dim))
-}
 
 #' @rdname greta-distributions
 #' @export
