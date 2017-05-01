@@ -43,3 +43,16 @@ test_that('bernoulli distribution has correct density', {
 
 })
 
+test_that('binomial distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::binomial,
+                                     stats::dbinom,
+                                     parameters = list(size = 10, prob = 0.8),
+                                     x = rbinom(100, 10, 0.8))
+
+  expect_true(all(difference < 1e-6))
+
+})
+
