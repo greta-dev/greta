@@ -60,5 +60,13 @@ node_list_object <- R6Class(
 )
 
 # crate the node list object whenever the package is loaded
-.onLoad <- function(libname, pkgname)
+.onLoad <- function (libname, pkgname) {
+
+  # silence TF's CPU instructions message
+  Sys.setenv(TF_CPP_MIN_LOG_LEVEL=2)
+
+  # set up the node list
   options(nodes = node_list_object$new())
+
+
+}
