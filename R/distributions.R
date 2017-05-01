@@ -105,10 +105,12 @@ lognormal_distribution <- R6Class (
     tf_log_density_function = function (x, parameters) {
 
       mean <- parameters$meanlog
-      var <- tf$square(parameters$sdlog)
+      sd <- parameters$sdlog
+      var <- tf$square(sd)
       lx <- tf$log(x)
 
-      -0.5 * tf$log(2 * pi) - 0.5 * tf$log(var) - 0.5 * tf$square(tf$subtract(mean, lx)) / var
+      -1 * (lx + tf$log(sigma) + 0.9189385) +
+        -0.5 * tf$square(tf$subtract(lx, mean)) / var
 
     }
   )

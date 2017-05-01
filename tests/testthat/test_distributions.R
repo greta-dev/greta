@@ -13,3 +13,16 @@ test_that('normal distribution has correct density', {
 
 })
 
+test_that('lognormal distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::lognormal,
+                                     stats::dlnorm,
+                                     parameters = list(meanlog = 1, sdlog = 3),
+                                     x = rlnorm(100, 1, 3))
+
+  expect_true(all(difference < 1e-6))
+
+})
+
