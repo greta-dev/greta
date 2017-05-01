@@ -145,30 +145,30 @@ tf_replace <- function (x, value, index, dims) {
   # modify the call, switching to primitive subsetting, changing the target
   # object, and ensuring no dropping happens
   call_list <- as.list(call)[-1]
-  call_list[[1]] <- as.name("dummy_in")
+  call_list[[1]] <- as.name("._dummy_in")
   call_list$drop <- FALSE
 
   # put dummy_in in the parent environment & execute there (to evaluate any
   # promises using variables in that environment), then remove
   pf <- parent.frame()
-  assign('dummy_in', dummy_in, envir = pf)
+  assign('._dummy_in', dummy_in, envir = pf)
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
-  rm('dummy_in', envir = pf)
+  rm('._dummy_in', envir = pf)
 
   # if this is a data node, also subset the values and pass on
   if ('data' %in% x$node$type) {
 
     values_in <- x$node$value()
     call_list <- as.list(call)[-1]
-    call_list[[1]] <- as.name("values_in")
+    call_list[[1]] <- as.name("._values_in")
     call_list$drop <- FALSE
 
     # put values_in in the parent environment & execute there (to evaluate any
     # promises using variables in that environment), then remove
     pf <- parent.frame()
-    assign('values_in', values_in, envir = pf)
+    assign('._values_in', values_in, envir = pf)
     values_out <- do.call(.Primitive("["), call_list, envir = pf)
-    rm('values_in', envir = pf)
+    rm('._values_in', envir = pf)
 
     # make sure it's an array
     values <- as.array(values_out)
@@ -210,7 +210,7 @@ tf_replace <- function (x, value, index, dims) {
 
 }
 
-# extract syntax for greta array objects
+# replace syntax for greta array objects
 #' @export
 `[<-.greta_array` <- function(x, ..., value) {
 
@@ -226,12 +226,24 @@ tf_replace <- function (x, value, index, dims) {
   # create a dummy array containing the order of elements Python-style
   dummy <- dummy(dims)
 
-  # subset the dummy array using the original subsetting call
-  call[[1]] <- `[`
-  call[[2]] <- dummy
-  call$value <- NULL
+  # modify the call, switching to primitive subsetting, changing the target
+  # object, and ensuring no dropping happens
+  call_list <- as.list(call)[-1]
+  call_list[[1]] <- as.name("._dummy_in")
+  call_list$value <- NULL
 
-  index <- as.vector(eval(call))
+  # put dummy in the parent environment & execute there (to evaluate any
+  # promises using variables in that environment), then remove
+  pf <- parent.frame()
+  assign('._dummy_in', dummy, envir = pf)
+  dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
+  rm('._dummy_in', envir = pf)
+
+  # # subset the dummy array using the original subsetting call
+  # call[[1]] <- `[`
+  # call[[2]] <- dummy
+
+  index <- as.vector(dummy_out)
 
   if (length(index) != prod(dim(value)))
     stop('number of items to replace does not match number of items to insert')
