@@ -41,10 +41,10 @@ tf_iprobit <- function (x) {
 }
 
 tf_ilogit <- function (x)
-  1 / (1 + exp(-x))
+  1 / (1 + exp(-1 * x))
 
 tf_icloglog <- function (x)
-  1 - exp(-exp(x))
+  1 - exp(-1 * exp(x))
 
 tf_icauchit <- function (x)
   (1 / pi) * atan(x) + 0.5

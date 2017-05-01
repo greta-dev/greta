@@ -152,21 +152,6 @@ dummy <- function (dims) {
   unflatten_rowwise(vec, dims)
 }
 
-# evaluate a greta_array, node, or tensor
-grab <- function (x) {
-
-  if (is.greta_array(x))
-    x <- x$node
-
-  if (is.node(x)) {
-    x$define_tf(environment())
-    x <- get(x$name)
-  }
-
-  tf$Session()$run(x)
-
-}
-
 # flatten a tensor to a rank-2 column vector
 tf_flatten <- function (x)
   tf$reshape(x, shape = c(tf$size(x), 1L))

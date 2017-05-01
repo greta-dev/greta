@@ -105,10 +105,12 @@ lognormal_distribution <- R6Class (
     tf_log_density_function = function (x, parameters) {
 
       mean <- parameters$meanlog
-      var <- tf$square(parameters$sdlog)
+      sd <- parameters$sdlog
+      var <- tf$square(sd)
       lx <- tf$log(x)
 
-      -0.5 * tf$log(2 * pi) - 0.5 * tf$log(var) - 0.5 * tf$square(tf$subtract(mean, lx)) / var
+      -1 * (lx + tf$log(sd) + 0.9189385) +
+        -0.5 * tf$square(tf$subtract(lx, mean)) / var
 
     }
   )
@@ -135,7 +137,15 @@ bernoulli_distribution <- R6Class (
     tf_log_density_function = function (x, parameters) {
 
       prob <- parameters$prob
-      tf$log(tf$where(tf$equal(x, 1), prob, 1 - prob))
+
+      # optionally reshape prob
+      prob_shape <- prob$get_shape()$as_list()
+      x_shape <- x$get_shape()$as_list()
+
+      if (identical(prob_shape, c(1L, 1L)) & !identical(x_shape, c(1L, 1L)))
+        probs <- tf$tile(prob, x_shape)
+
+      tf$log(tf$where(tf$equal(x, 1), probs, 1 - probs))
 
     }
 
@@ -284,7 +294,7 @@ exponential_distribution <- R6Class (
     tf_log_density_function = function (x, parameters) {
 
       rate <- parameters$shape
-      -x / rate - tf$log(rate)
+      -1 * x / rate - tf$log(rate)
 
     }
 
@@ -333,7 +343,7 @@ beta_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(shape1, shape2, target_dim = dim)
       super$initialize('beta', dim)
-      self$add_parameter(shape1, 'shape2')
+      self$add_parameter(shape1, 'shape1')
       self$add_parameter(shape2, 'shape2')
     },
 

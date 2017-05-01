@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Probabilistic Modelling with TensorFlow
-Version: 0.1.1
-Date: 2017-04-29
+Version: 0.1.2
+Date: 2017-05-01
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
 Description: Existing tools for fitting bespoke statistical models (such as
@@ -12,7 +12,7 @@ Description: Existing tools for fitting bespoke statistical models (such as
     to construct probabilistic models interactively in native R code, then sample
     from those models efficiently using Hamiltonian Monte Carlo. TensorFlow is used
     to perform all of the calculations, so greta is particularly fast where the
-    model contains very linear algebra operations. greta can also be run across
+    model contains large linear algebra operations. greta can also be run across
     distributed machines or on GPUs, just by installing the relevant version of
     TensorFlow. This package is in the early stages of development. Future releases
     will likely enable fitting models with fast approximate inference schemes,
