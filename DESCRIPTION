@@ -21,7 +21,7 @@ License: Apache License 2.0
 URL: https://github.com/goldingn/greta
 BugReports: https://github.com/goldingn/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
-    TensorFlow (https://www.tensorflow.org/)
+    TensorFlow (>= 1.0.0; https://www.tensorflow.org/)
 Encoding: UTF-8
 LazyData: true
 Depends:
