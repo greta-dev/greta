@@ -1,5 +1,7 @@
 # test functions
 
+set.seed(2017-05-01)
+
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
 

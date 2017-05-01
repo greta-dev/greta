@@ -26,3 +26,20 @@ test_that('lognormal distribution has correct density', {
 
 })
 
+test_that('bernoulli distribution has correct density', {
+
+  source('helpers.R')
+
+  # r version of the bernoulli density
+  dbern <- function (x, prob, log = FALSE)
+    dbinom(x, size = 1, prob = prob, log = log)
+
+  difference <- compare_distribution(greta::bernoulli,
+                                     dbern,
+                                     parameters = list(prob = 0.3),
+                                     x = rbinom(100, 1, 0.3))
+
+  expect_true(all(difference < 1e-6))
+
+})
+
