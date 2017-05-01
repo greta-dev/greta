@@ -109,7 +109,7 @@ lognormal_distribution <- R6Class (
       var <- tf$square(sd)
       lx <- tf$log(x)
 
-      -1 * (lx + tf$log(sigma) + 0.9189385) +
+      -1 * (lx + tf$log(sd) + 0.9189385) +
         -0.5 * tf$square(tf$subtract(lx, mean)) / var
 
     }
