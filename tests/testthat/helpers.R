@@ -39,7 +39,9 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # get the log density as a vector
   tensor_name <- paste0(dist$node$name, '_density')
   tensor <- get(tensor_name, envir = env)
-  greta_log_density <- grab(tensor)[, 1]
+  greta_log_density <- grab(tensor)
+  if (!is.vector(greta_log_density))
+    greta_log_density <- greta_log_density[, 1]
 
   # get R version
   r_log_density <- do.call(r_fun,
