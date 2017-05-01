@@ -333,7 +333,7 @@ beta_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(shape1, shape2, target_dim = dim)
       super$initialize('beta', dim)
-      self$add_parameter(shape1, 'shape2')
+      self$add_parameter(shape1, 'shape1')
       self$add_parameter(shape2, 'shape2')
     },
 
