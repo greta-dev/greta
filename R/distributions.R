@@ -658,10 +658,13 @@ wishart_distribution <- R6Class (
 #' # a multivariate normal variable, with correlation between two elements
 #' Sig <- diag(4)
 #' Sig[3, 4] <- Sig[4, 3] <- 0.6
-#' theta = multivariate_normal(rep(mu, 4), Sig, dim = 4)
+#' theta = multivariate_normal(rep(mu, 4), Sig)
+#'
+#' # 10 independent replicates of that
+#' theta = multivariate_normal(rep(mu, 4), Sig, dim = 10)
 #'
 #' # a Wishart variable with the same covariance parameter
-#' theta = wishart(df = 5, Sigma = Sig, dim = 4)
+#' theta = wishart(df = 5, Sigma = Sig)
 NULL
 
 #' @rdname greta-distributions
