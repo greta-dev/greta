@@ -27,7 +27,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # x is the vector of values at which to evaluate the log density
 
   # define greta distribution, with fixed values
-  dist <- do.call(greta_fun, c(parameters, dim = length(x)))
+  dist <- do.call(greta_fun, c(parameters, dim = NROW(x)))
   likelihood(x) = dist
 
   stopifnot(dist$node$.fixed_value)
@@ -39,9 +39,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # get the log density as a vector
   tensor_name <- paste0(dist$node$name, '_density')
   tensor <- get(tensor_name, envir = env)
-  greta_log_density <- grab(tensor)
-  if (!is.vector(greta_log_density))
-    greta_log_density <- greta_log_density[, 1]
+  greta_log_density <- as.vector(grab(tensor))
 
   # get R version
   r_log_density <- do.call(r_fun,

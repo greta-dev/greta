@@ -169,7 +169,6 @@ test_that('student distribution has correct density', {
 
 })
 
-
 test_that('beta distribution has correct density', {
 
   source('helpers.R')
@@ -182,3 +181,27 @@ test_that('beta distribution has correct density', {
   expect_true(all(difference < 1e-4))
 
 })
+
+test_that('multivariate normal distribution has correct density', {
+
+  source('helpers.R')
+
+  # parameters to test
+  m <- 5
+  mn <- rnorm(m)
+  sig <- rWishart(1, m + 1, diag(m))[, , 1]
+
+  # function converting Sigma to sigma
+  dmvnorm2 <- function (x, mean, Sigma, log = FALSE)
+    mvtnorm::dmvnorm(x = x, mean = mean, sigma = Sigma, log = log)
+
+  difference <- compare_distribution(greta::multivariate_normal,
+                                     dmvnorm2,
+                                     parameters = list(mean = mn, Sigma = sig),
+                                     x = mvtnorm::rmvnorm(100, mn, sig))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
+
