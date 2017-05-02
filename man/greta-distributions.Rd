@@ -2,6 +2,7 @@
 % Please edit documentation in R/distributions.R
 \name{greta-distributions}
 \alias{greta-distributions}
+\alias{free}
 \alias{normal}
 \alias{lognormal}
 \alias{bernoulli}
@@ -12,84 +13,98 @@
 \alias{exponential}
 \alias{student}
 \alias{beta}
-\alias{free}
-\alias{flat}
 \alias{multivariate_normal}
 \alias{wishart}
 \title{greta probability distributions}
 \usage{
-normal(mean, sd, dim = NULL)
+free(lower = -Inf, upper = Inf, dim = 1)
 
-lognormal(meanlog, sdlog, dim = NULL)
+normal(mean, sd, dim = 1)
 
-bernoulli(prob, dim = NULL)
+lognormal(meanlog, sdlog, dim = 1)
 
-binomial(size, prob, dim = NULL)
+bernoulli(prob, dim = 1)
 
-negative_binomial(size, prob, dim = NULL)
+binomial(size, prob, dim = 1)
 
-poisson(lambda, dim = NULL)
+negative_binomial(size, prob, dim = 1)
 
-gamma(shape, rate, dim = NULL)
+poisson(lambda, dim = 1)
 
-exponential(rate, dim = NULL)
+gamma(shape, rate, dim = 1)
 
-student(df, ncp, dim = NULL)
+exponential(rate, dim = 1)
 
-beta(shape1, shape2, dim = NULL)
+student(df, location, scale, dim = 1)
 
-free(dim = 1)
+beta(shape1, shape2, dim = 1)
 
-flat(range, dim = 1)
+multivariate_normal(mean, Sigma, dim = 1)
 
-multivariate_normal(mean, Sigma, dim)
-
-wishart(df, Sigma, dim)
+wishart(df, Sigma)
 }
 \arguments{
-\item{mean, meanlog, ncp}{unconstrained parameters}
+\item{lower, upper}{a length-one vectors giving optional limits to free
+parameters. These must be specified as numerics, and cannot be greta
+arrays. They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
+(\code{upper}), though \code{lower} must always be less than \code{upper}.}
 
-\item{sd, sdlog, size, lambda, shape, rate, df, shape1, shape2}{positive parameters}
+\item{dim}{the dimensions of the variable, either a scalar or a vector of
+positive integers. See details.}
 
-\item{dim}{the dimensions of the variable. For univariate distributions this
-can be greater than 1 to represent multiple independent variables. For
-multivariate distributions this cannot be smaller than 2.}
+\item{mean, meanlog, location}{unconstrained parameters}
+
+\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2}{positive
+parameters}
 
 \item{prob}{probability parameter (\code{0 < prob < 1})}
-
-\item{range}{a finite, length 2 numeric vector giving the range of values to
-which \code{flat} distributions are constrained. The first element must
-be lower than the second.}
 
 \item{Sigma}{positive definite variance-covariance matrix parameter}
 }
 \description{
-These probability distributions can be used to define random
-  variables in a greta model. They return a greta array object that can be
-  combined with other greta arrays to construct a model.
+These functions can be used to define random variables in a
+  greta model. They return a greta array object that can be combined with
+  other greta arrays to construct a model. All of these functions construct
+  random variables with prior distributions, except for \code{free()}, which
+  creates 'free' parameters, so can be used for frequentist analyses.
 }
 \details{
-Most of these distributions have non-uniform probability densities,
-  however the distributions \code{flat} and \code{free} do not. These can
-  therefore be used as parameters in likelihood (rather than Bayesian)
-  inference.
-
-  The discrete probability distributions (\code{bernoulli}, \code{binomial},
+The discrete probability distributions (\code{bernoulli}, \code{binomial},
   \code{negative_binomial}, \code{poisson}) can be used as likelihoods, but
   not as unknown variables.
 
+  For univariate distributions \code{dim} gives the dimensions of the greta
+  array to create, each element of which will be (independently) distributed
+  according to the distribution. For \code{multivariate_normal()}, \code{dim}
+  must be a scalar giving the number of rows in the resulting greta array,
+  each row being (independently) distributed according to the multivariate
+  normal distribution. The number of columns will always be the dimension of
+  the distribution, determined from the parameters specified.
+  \code{wishart()} always returns a single square, 2D greta array, with
+  dimension determined from the parameter \code{Sigma}.
+
   Wherever possible, the parameterisation of these distributions matches the
   those in the \code{stats} package. E.g. for the parameterisation of
-  \code{negative_binomial()}, see \code{\link{dnbinom}}.
+  \code{negative_binomial()}, see \code{\link{dnbinom}}. \code{student()} is an
+  exception, since the \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{location-scale representation} we use is more useful,
+  and widely used, for statistical modelling than the noncentral version
+  implemented in \code{stats}
 }
 \examples{
+# an unconstrained and prior-free parameter (e.g. for a frequentist model)
+alpha = free()
 
-# a fixed distribution, e.g. for a prior
+# positive prior-free parameter (could also do: sigma = exp(free()) )
+sigma = free(lower = 0)
+
+# a prior-free parameter constrained to be less that -1
+neg_alpha = free(upper = -1)
+
+# a prior-free parameter constrained to be between 0 and 1
+psi = free(lower = 0, upper = 1)
+
+# an unconstrained parameter with standard normal prior
 mu = normal(0, 1)
-
-# an unconstrained, positive parameter sigma
-log_sigma = free()
-sigma = exp(log_sigma)
 
 # a hierarchical distribution
 theta = normal(mu, lognormal(0, 1))
@@ -100,14 +115,14 @@ thetas = normal(mu, sigma, dim = 3)
 # a matrix of 12 variables drawn from the same hierarchical distribution
 thetas = normal(mu, sigma, dim = c(3, 4))
 
-# a constrained variable with no density (e.g. for a constrained likelihood model)
-theta = flat(c(1, 5))
-
 # a multivariate normal variable, with correlation between two elements
 Sig <- diag(4)
 Sig[3, 4] <- Sig[4, 3] <- 0.6
-theta = multivariate_normal(rep(mu, 4), Sig, dim = 4)
+theta = multivariate_normal(rep(mu, 4), Sig)
+
+# 10 independent replicates of that
+theta = multivariate_normal(rep(mu, 4), Sig, dim = 10)
 
 # a Wishart variable with the same covariance parameter
-theta = wishart(df = 5, Sigma = Sig, dim = 4)
+theta = wishart(df = 5, Sigma = Sig)
 }

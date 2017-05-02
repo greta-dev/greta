@@ -15,11 +15,11 @@ TensorFlow only enables rounding to integers, so \code{round()} will
   Any additional arguments to \code{chol()} and \code{solve()} will be
   ignored, see the TensorFlow documentation for details of these routines.
 
-  \code{diag()} can only be used to extract the diagonal part of a square and
-  two-dimensional greta array, it cannot be used to create a matrix-like
-  greta array from a vector-like greta array, nor to assign the diagonal
-  elements of a greta array. A static diagonal matrix can always be created
-  with e.g. \code{diag(3)}.
+  \code{diag()} can be used to extract or replace the diagonal part of a
+  square and two-dimensional greta array, but it cannot be used to create a
+  matrix-like greta array from a scalar or vector-like greta array. A static
+  diagonal matrix can always be created with e.g. \code{diag(3)}, and then
+  converted into a greta array.
 
   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
   can only be either 1 or 2), and for subtraction, addition, division and
@@ -61,6 +61,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  t(x)
  chol(x, ...)
  diag(x, nrow, ncol)
+ diag(x) <- value
  solve(a, b, ...)
 
  # reducing operations
@@ -83,6 +84,7 @@ c = sign(x - 5)
 d = abs(x - 5)
 
 e = diag(x)
+diag(x) <- e + 1
 
 z = t(a)
 
