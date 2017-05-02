@@ -52,5 +52,7 @@ Imports:
     tensorflow,
     coda
 Suggests:
-    testthat
+    testthat,
+    mvtnorm,
+    MCMCpack
 RoxygenNote: 6.0.1

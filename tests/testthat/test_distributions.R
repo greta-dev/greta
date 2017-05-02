@@ -204,4 +204,31 @@ test_that('multivariate normal distribution has correct density', {
 
 })
 
+test_that('Wishart distribution has correct density', {
+
+  source('helpers.R')
+
+  # parameters to test
+  m <- 5
+  df <- m + 1
+  sig <- rWishart(1, df, diag(m))[, , 1]
+
+  # wrapper for argument names
+  dwishart <- function (x, df, Sigma, log = FALSE) {
+    ans <- MCMCpack::dwish(W = x, v = df, S = Sigma)
+    if (log)
+      ans <- log(ans)
+    ans
+  }
+
+  # no vectorised wishart, so loop through all of these
+  difference <- replicate(10,
+                          compare_distribution(greta::wishart,
+                                               dwishart,
+                                               parameters = list(df = df, Sigma = sig),
+                                               x = rWishart(1, df, sig)[, , 1]))
+
+  expect_true(all(difference < 1e-4))
+
+})
 

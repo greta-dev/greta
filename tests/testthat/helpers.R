@@ -27,7 +27,13 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # x is the vector of values at which to evaluate the log density
 
   # define greta distribution, with fixed values
-  dist <- do.call(greta_fun, c(parameters, dim = NROW(x)))
+
+  parameters_greta <- parameters
+  # no dim for wishart
+  if (!identical(names(parameters), c('df', 'Sigma')))
+    parameters_greta <- c(parameters_greta, dim = NROW(x))
+
+  dist <- do.call(greta_fun, parameters_greta)
   likelihood(x) = dist
 
   stopifnot(dist$node$.fixed_value)

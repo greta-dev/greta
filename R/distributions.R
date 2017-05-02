@@ -548,6 +548,9 @@ wishart_distribution <- R6Class (
     initialize = function (df, Sigma) {
       # add the nodes as children and parameters
 
+      df <- ga(df)
+      Sigma <- ga(Sigma)
+
       # check dimensions of Sigma
       if (nrow(Sigma) != ncol(Sigma) |
           length(dim(Sigma)) != 2) {
@@ -556,6 +559,8 @@ wishart_distribution <- R6Class (
               paste(dim(Sigma), collapse = ' x '))
 
       }
+
+      dim <- nrow(Sigma)
 
       super$initialize('wishart', dim(Sigma))
       self$add_parameter(df, 'df')
@@ -572,7 +577,7 @@ wishart_distribution <- R6Class (
       Sigma <- parameters$Sigma
 
       dist <- tf$contrib$distributions$WishartFull(df = df, scale = Sigma)
-      tf$reshape(dist$log_pdf(x), shape(1, 1))
+      tf$reshape(dist$log_prob(x), shape(1, 1))
 
     }
 
