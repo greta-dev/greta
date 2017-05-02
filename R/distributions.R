@@ -449,30 +449,51 @@ multivariate_normal_distribution <- R6Class (
 
     initialize = function (mean, Sigma, dim) {
 
+      # coerce to greta arrays
+      mean <- ga(mean)
+      Sigma <- ga(Sigma)
+
+      # check dimensions of mean
+      if (ncol(mean) != 1 |
+          length(dim(mean)) != 2) {
+
+        stop ('mean must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(Sigma), collapse = ' x '))
+
+      }
+
+      # check dimensions of Sigma
+      if (nrow(Sigma) != ncol(Sigma) |
+          length(dim(Sigma)) != 2) {
+
+        stop ('Sigma must be a square 2D greta array, but has dimensions ',
+              paste(dim(Sigma), collapse = ' x '))
+
+      }
+
+      # compare possible dimensions
+      dim_mean <- nrow(mean)
+      dim_Sigma <- nrow(Sigma)
+
+      if (dim_mean != dim_Sigma) {
+        stop ('mean and Sigma have different dimensions, ',
+              dim_mean, ' vs ', dim_Sigma)
+      }
+
+      if (dim_mean == 1)
+        stop ('the multivariate normal distribution is for vectors, but the parameters were scalar')
+
+      # check dim is a positive scalar integer
+      dim <- as.integer(dim)
+      if (length(dim) > 1 | dim <= 0 | !is.finite(dim))
+        stop ('dim must be a scalar positive integer, but was: ', dput(dim))
+
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('multivariate_normal', dim)
+      super$initialize('multivariate_normal', c(dim, dim_mean))
       self$add_parameter(mean, 'mean')
       self$add_parameter(Sigma, 'Sigma')
 
-      # check mean has the correct dimensions
-      if (self$parameters$mean$dim[1] != dim) {
-        stop (sprintf('mean has %i rows, but the distribution has dimension %i',
-                      self$parameters$mean$dim[1], dim))
-      }
-
-      # check Sigma is square
-      if (self$parameters$Sigma$dim[1] != self$parameters$Sigma$dim[2]) {
-        stop (sprintf('Sigma must be square, but has %i rows and %i columns',
-                      self$parameters$Sigma$dim[1],
-                      self$parameters$Sigma$dim[1]))
-      }
-
-      # Sigma has the correct dimensions
-      if (self$parameters$Sigma$dim[1] != dim) {
-        stop (sprintf('Sigma has dimension %i, but the distribution has dimension %i',
-                      self$parameters$Sigma$dim[1], dim))
-      }
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -481,23 +502,21 @@ multivariate_normal_distribution <- R6Class (
       Sigma <- parameters$Sigma
 
       # number of observations & dimension of distribution
-      nobs <- x$get_shape()$as_list()[2]
-      dim <- x$get_shape()$as_list()[1]
+      nobs <- x$get_shape()$as_list()[1]
+      dim <- x$get_shape()$as_list()[2]
 
       # Cholesky decomposition of Sigma
       L <- tf$cholesky(Sigma)
 
       # whiten (decorrelate) the errors
-      diff <- x - mean
-      diff_col <- tf$reshape(diff, shape(dim, nobs))
+      mean_col <- tf$tile(mean, c(1L, nobs))
+      diff_col <- tf$transpose(x) - mean_col
       alpha <- tf$matrix_triangular_solve(L, diff_col, lower = TRUE)
 
-      # calculate density
-      tf$constant(-0.5 * dim * nobs * log(2 * pi)) -
-        tf$constant(nobs, dtype = tf$float32) *
+      # calculate density, per-row in x:
+      -0.5 * dim * log(2 * pi) -
         tf$reduce_sum(tf$log(tf$diag_part(L))) -
-        tf$constant(0.5) * tf$reduce_sum(tf$square(alpha))
-
+        0.5 * tf$reduce_sum(tf$square(alpha), axis = 0L)
     }
 
   )
@@ -526,27 +545,25 @@ wishart_distribution <- R6Class (
       tf$matmul(tf$transpose(L), L)
     },
 
-    initialize = function (df, Sigma, dim) {
+    initialize = function (df, Sigma) {
       # add the nodes as children and parameters
-      super$initialize('wishart', c(dim, dim))
+
+      # check dimensions of Sigma
+      if (nrow(Sigma) != ncol(Sigma) |
+          length(dim(Sigma)) != 2) {
+
+        stop ('Sigma must be a square 2D greta array, but has dimensions ',
+              paste(dim(Sigma), collapse = ' x '))
+
+      }
+
+      super$initialize('wishart', dim(Sigma))
       self$add_parameter(df, 'df')
       self$add_parameter(Sigma, 'Sigma')
 
-      # check Sigma is square
-      if (self$parameters$Sigma$dim[1] != self$parameters$Sigma$dim[2]) {
-        stop (sprintf('Sigma must be square, but has %i rows and %i columns',
-                      self$parameters$Sigma$dim[1],
-                      self$parameters$Sigma$dim[1]))
-      }
-
-      # Sigma has the correct dimensions
-      if (self$parameters$Sigma$dim[1] != dim) {
-        stop (sprintf('Sigma has dimension %i, but the distribution has dimension %i',
-                      self$parameters$Sigma$dim[1], dim))
-      }
-
       # make the initial value PD
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
+
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -584,13 +601,22 @@ wishart_distribution <- R6Class (
 #' @param prob probability parameter (\code{0 < prob < 1})
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'
-#' @param dim the dimensions of the variable. For univariate distributions this
-#'   can be greater than 1 to represent multiple independent variables. For
-#'   multivariate distributions this cannot be smaller than 2.
+#' @param dim the dimensions of the variable, either a scalar or a vector of
+#'   positive integers. See details.
 #'
 #' @details The discrete probability distributions (\code{bernoulli}, \code{binomial},
 #'   \code{negative_binomial}, \code{poisson}) can be used as likelihoods, but
 #'   not as unknown variables.
+#'
+#'   For univariate distributions \code{dim} gives the dimensions of the greta
+#'   array to create, each element of which will be (independently) distributed
+#'   according to the distribution. For \code{multivariate_normal()}, \code{dim}
+#'   must be a scalar giving the number of rows in the resulting greta array,
+#'   each row being (independently) distributed according to the multivariate
+#'   normal distribution. The number of columns will always be the dimension of
+#'   the distribution, determined from the parameters specified.
+#'   \code{wishart()} always returns a single square, 2D greta array, with
+#'   dimension determined from the parameter \code{Sigma}.
 #'
 #'   Wherever possible, the parameterisation of these distributions matches the
 #'   those in the \code{stats} package. E.g. for the parameterisation of
@@ -646,60 +672,60 @@ free <- function (lower = -Inf, upper = Inf, dim = 1) {
 
 #' @rdname greta-distributions
 #' @export
-normal <- function (mean, sd, dim = NULL)
+normal <- function (mean, sd, dim = 1)
   ga(normal_distribution$new(mean, sd, dim))
 
 #' @rdname greta-distributions
 #' @export
-lognormal <- function (meanlog, sdlog, dim = NULL)
+lognormal <- function (meanlog, sdlog, dim = 1)
   ga(lognormal_distribution$new(meanlog, sdlog, dim))
 
 #' @rdname greta-distributions
 #' @export
-bernoulli <- function (prob, dim = NULL)
+bernoulli <- function (prob, dim = 1)
   ga(bernoulli_distribution$new(prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-binomial <- function (size, prob, dim = NULL)
+binomial <- function (size, prob, dim = 1)
   ga(binomial_distribution$new(size, prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-negative_binomial <- function (size, prob, dim = NULL)
+negative_binomial <- function (size, prob, dim = 1)
   ga(negative_binomial_distribution$new(size, prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-poisson <- function (lambda, dim = NULL)
+poisson <- function (lambda, dim = 1)
   ga(poisson_distribution$new(lambda, dim))
 
 #' @rdname greta-distributions
 #' @export
-gamma <- function (shape, rate, dim = NULL)
+gamma <- function (shape, rate, dim = 1)
   ga(gamma_distribution$new(shape, rate, dim))
 
 #' @rdname greta-distributions
 #' @export
-exponential <- function (rate, dim = NULL)
+exponential <- function (rate, dim = 1)
   ga(exponential_distribution$new(rate, dim))
 
 #' @rdname greta-distributions
 #' @export
-student <- function (df, location, scale, dim = NULL)
+student <- function (df, location, scale, dim = 1)
   ga(student_distribution$new(df, location, scale, dim))
 
 #' @rdname greta-distributions
 #' @export
-beta <- function (shape1, shape2, dim = NULL)
+beta <- function (shape1, shape2, dim = 1)
   ga(beta_distribution$new(shape1, shape2, dim))
 
 #' @rdname greta-distributions
 #' @export
-multivariate_normal <- function (mean, Sigma, dim)
+multivariate_normal <- function (mean, Sigma, dim = 1)
   ga(multivariate_normal_distribution$new(mean, Sigma, dim))
 
 #' @rdname greta-distributions
 #' @export
-wishart <- function (df, Sigma, dim)
-  ga(wishart_distribution$new(df, Sigma, dim))
+wishart <- function (df, Sigma)
+  ga(wishart_distribution$new(df, Sigma))
