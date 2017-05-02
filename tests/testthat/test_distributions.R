@@ -169,3 +169,16 @@ test_that('student distribution has correct density', {
 
 })
 
+
+test_that('beta distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::beta,
+                                     stats::dbeta,
+                                     parameters = list(shape1 = 2.3, shape2 = 3.4),
+                                     x = rbeta(100, 2.3, 3.4))
+
+  expect_true(all(difference < 1e-4))
+
+})
