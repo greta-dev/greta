@@ -55,3 +55,21 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   abs(greta_log_density - r_log_density)
 
 }
+
+# an array of random standard normals with the specificed dims
+# e.g. randn(3, 2, 1)
+randn <- function (...) {
+  dim <- c(...)
+  array(rnorm(prod(dim)), dim = dim)
+}
+
+# check a greta operation and the equivalent R operation give the same output
+# e.g. check_op(sum, randn(100, 3))
+check_op <- function (op, data) {
+  r_out <- op(data)
+  greta_array <- op(as_data(data))
+  greta_out <- grab(greta_array)
+  difference <- as.vector(abs(r_out - greta_out))
+  expect_true(all(difference < 1e4))
+}
+
