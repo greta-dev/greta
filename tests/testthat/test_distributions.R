@@ -135,3 +135,37 @@ test_that('gamma distribution has correct density', {
 
 })
 
+test_that('exponential distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::exponential,
+                                     stats::dexp,
+                                     parameters = list(rate = 1.9),
+                                     x = rexp(100, 1.9))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
+test_that('student distribution has correct density', {
+
+  source('helpers.R')
+
+  # use location-scale version of student T; related to R's via this function:
+  dt_ls <- function (x, df, location, scale, log = FALSE) {
+    ans <- stats::dt((x - location) / scale, df) / scale
+    if (log)
+      ans <- log(ans)
+    ans
+  }
+
+  difference <- compare_distribution(greta::student,
+                                     dt_ls,
+                                     parameters = list(df = 3, location = -0.9, scale = 2),
+                                     x = rnorm(100, -0.9, 2))
+
+  expect_true(all(difference < 1e-4))
+
+})
+

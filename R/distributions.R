@@ -363,8 +363,8 @@ exponential_distribution <- R6Class (
 
     tf_log_density_function = function (x, parameters) {
 
-      rate <- parameters$shape
-      -1 * x / rate - tf$log(rate)
+      rate <- parameters$rate
+      tf$log(rate) - rate * x
 
     }
 
@@ -379,22 +379,28 @@ student_distribution <- R6Class (
     to_free = function (y) y,
     tf_from_free = function (x, env) x,
 
-    initialize = function (df, ncp, dim) {
+    initialize = function (df, location, scale, dim) {
       # add the nodes as children and parameters
-      dim <- check_dims(df, ncp, target_dim = dim)
+      dim <- check_dims(df, location, scale, target_dim = dim)
       super$initialize('student', dim)
       self$add_parameter(df, 'df')
-      self$add_parameter(ncp, 'ncp')
+      self$add_parameter(location, 'location')
+      self$add_parameter(scale, 'scale')
     },
 
     tf_log_density_function = function (x, parameters) {
 
       df <- parameters$df
-      ncp <- parameters$ncp
+      location <- parameters$location
+      scale <- parameters$scale
 
-      const <- tf$lgamma((df + 1) * 0.5) - tf$lgamma(df * 0.5) -
-        0.5 * (tf$log(df) + log(pi))
-      const - 0.5 * (df + 1) * tf$log(1 + (1 / df) * (tf$square(x - ncp)))
+      x_ <- (x - location) / scale
+
+      const <- tf$lgamma((df + 1) * 0.5) -
+        tf$lgamma(df * 0.5) -
+        0.5 * (tf$log(tf$square(scale)) + tf$log(df) + log(pi))
+
+      const - 0.5 * (df + 1) * tf$log(1 + (1 / df) * (tf$square(x_)))
 
     }
 
@@ -572,8 +578,9 @@ wishart_distribution <- R6Class (
 #'   arrays. They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
 #'   (\code{upper}), though \code{lower} must always be less than \code{upper}.
 #'
-#' @param mean,meanlog,ncp unconstrained parameters
-#' @param sd,sdlog,size,lambda,shape,rate,df,shape1,shape2 positive parameters
+#' @param mean,meanlog,location unconstrained parameters
+#' @param sd,sdlog,size,lambda,shape,rate,df,scale,shape1,shape2 positive
+#'   parameters
 #' @param prob probability parameter (\code{0 < prob < 1})
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'
@@ -587,10 +594,12 @@ wishart_distribution <- R6Class (
 #'
 #'   Wherever possible, the parameterisation of these distributions matches the
 #'   those in the \code{stats} package. E.g. for the parameterisation of
-#'   \code{negative_binomial()}, see \code{\link{dnbinom}}.
+#'   \code{negative_binomial()}, see \code{\link{dnbinom}}. \code{student()} is an
+#'   exception, since the \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{location-scale representation} we use is more useful,
+#'   and widely used, for statistical modelling than the noncentral version
+#'   implemented in \code{stats}
 #'
 #' @examples
-#'
 #' # an unconstrained and prior-free parameter (e.g. for a frequentist model)
 #' alpha = free()
 #'
@@ -677,8 +686,8 @@ exponential <- function (rate, dim = NULL)
 
 #' @rdname greta-distributions
 #' @export
-student <- function (df, ncp, dim = NULL)
-  ga(student_distribution$new(df, ncp, dim))
+student <- function (df, location, scale, dim = NULL)
+  ga(student_distribution$new(df, location, scale, dim))
 
 #' @rdname greta-distributions
 #' @export

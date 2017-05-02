@@ -35,7 +35,7 @@ gamma(shape, rate, dim = NULL)
 
 exponential(rate, dim = NULL)
 
-student(df, ncp, dim = NULL)
+student(df, location, scale, dim = NULL)
 
 beta(shape1, shape2, dim = NULL)
 
@@ -53,9 +53,10 @@ arrays. They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
 can be greater than 1 to represent multiple independent variables. For
 multivariate distributions this cannot be smaller than 2.}
 
-\item{mean, meanlog, ncp}{unconstrained parameters}
+\item{mean, meanlog, location}{unconstrained parameters}
 
-\item{sd, sdlog, size, lambda, shape, rate, df, shape1, shape2}{positive parameters}
+\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2}{positive
+parameters}
 
 \item{prob}{probability parameter (\code{0 < prob < 1})}
 
@@ -75,10 +76,12 @@ The discrete probability distributions (\code{bernoulli}, \code{binomial},
 
   Wherever possible, the parameterisation of these distributions matches the
   those in the \code{stats} package. E.g. for the parameterisation of
-  \code{negative_binomial()}, see \code{\link{dnbinom}}.
+  \code{negative_binomial()}, see \code{\link{dnbinom}}. \code{student()} is an
+  exception, since the \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{location-scale representation} we use is more useful,
+  and widely used, for statistical modelling than the noncentral version
+  implemented in \code{stats}
 }
 \examples{
-
 # an unconstrained and prior-free parameter (e.g. for a frequentist model)
 alpha = free()
 
