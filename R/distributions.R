@@ -595,8 +595,8 @@ wishart_distribution <- R6Class (
 #'   random variables with prior distributions, except for \code{free()}, which
 #'   creates 'free' parameters, so can be used for frequentist analyses.
 #'
-#' @param lower,upper a length-one vectors giving optional limits to free
-#'   parameters. These must be specified as numerics, and cannot be greta
+#' @param lower,upper scalar values giving optional limits to free
+#'   parameters. These must be specified as numerics, they cannot be greta
 #'   arrays. They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
 #'   (\code{upper}), though \code{lower} must always be less than \code{upper}.
 #'
@@ -613,15 +613,22 @@ wishart_distribution <- R6Class (
 #'   \code{negative_binomial}, \code{poisson}) can be used as likelihoods, but
 #'   not as unknown variables.
 #'
-#'   For univariate distributions \code{dim} gives the dimensions of the greta
-#'   array to create, each element of which will be (independently) distributed
-#'   according to the distribution. For \code{multivariate_normal()}, \code{dim}
-#'   must be a scalar giving the number of rows in the resulting greta array,
-#'   each row being (independently) distributed according to the multivariate
-#'   normal distribution. The number of columns will always be the dimension of
-#'   the distribution, determined from the parameters specified.
-#'   \code{wishart()} always returns a single square, 2D greta array, with
-#'   dimension determined from the parameter \code{Sigma}.
+#'   For \code{free()}, dim gives the dimension of the greta array to create as
+#'   a free parameter. All elements of that array will have the same constraints
+#'   (\code{lower} and \code{upper}).
+#'   For univariate distributions \code{dim} also gives the dimensions of the
+#'   greta array to create. Each element of the greta array will be
+#'   (independently) distributed according to the distribution. \code{dim} can
+#'   also be left at its default of \code{NULL}, in which case the dimension
+#'   will be detected from the dimensions of the parameters (provided they are
+#'   compatible with one another).
+#'   For \code{multivariate_normal()}, \code{dim} must be a scalar giving the
+#'   number of rows in the resulting greta array, each row being (independently)
+#'   distributed according to the multivariate normal distribution. The number
+#'   of columns will always be the dimension of the distribution, determined
+#'   from the parameters specified. \code{wishart()} always returns a single
+#'   square, 2D greta array, with dimension determined from the parameter
+#'   \code{Sigma}.
 #'
 #'   Wherever possible, the parameterisation of these distributions matches the
 #'   those in the \code{stats} package. E.g. for the parameterisation of
@@ -680,52 +687,52 @@ free <- function (lower = -Inf, upper = Inf, dim = 1) {
 
 #' @rdname greta-distributions
 #' @export
-normal <- function (mean, sd, dim = 1)
+normal <- function (mean, sd, dim = NULL)
   ga(normal_distribution$new(mean, sd, dim))
 
 #' @rdname greta-distributions
 #' @export
-lognormal <- function (meanlog, sdlog, dim = 1)
+lognormal <- function (meanlog, sdlog, dim = NULL)
   ga(lognormal_distribution$new(meanlog, sdlog, dim))
 
 #' @rdname greta-distributions
 #' @export
-bernoulli <- function (prob, dim = 1)
+bernoulli <- function (prob, dim = NULL)
   ga(bernoulli_distribution$new(prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-binomial <- function (size, prob, dim = 1)
+binomial <- function (size, prob, dim = NULL)
   ga(binomial_distribution$new(size, prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-negative_binomial <- function (size, prob, dim = 1)
+negative_binomial <- function (size, prob, dim = NULL)
   ga(negative_binomial_distribution$new(size, prob, dim))
 
 #' @rdname greta-distributions
 #' @export
-poisson <- function (lambda, dim = 1)
+poisson <- function (lambda, dim = NULL)
   ga(poisson_distribution$new(lambda, dim))
 
 #' @rdname greta-distributions
 #' @export
-gamma <- function (shape, rate, dim = 1)
+gamma <- function (shape, rate, dim = NULL)
   ga(gamma_distribution$new(shape, rate, dim))
 
 #' @rdname greta-distributions
 #' @export
-exponential <- function (rate, dim = 1)
+exponential <- function (rate, dim = NULL)
   ga(exponential_distribution$new(rate, dim))
 
 #' @rdname greta-distributions
 #' @export
-student <- function (df, location, scale, dim = 1)
+student <- function (df, location, scale, dim = NULL)
   ga(student_distribution$new(df, location, scale, dim))
 
 #' @rdname greta-distributions
 #' @export
-beta <- function (shape1, shape2, dim = 1)
+beta <- function (shape1, shape2, dim = NULL)
   ga(beta_distribution$new(shape1, shape2, dim))
 
 #' @rdname greta-distributions
