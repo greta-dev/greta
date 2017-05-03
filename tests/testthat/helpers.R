@@ -65,11 +65,43 @@ randn <- function (...) {
 
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
-check_op <- function (op, data) {
-  r_out <- op(data)
-  greta_array <- op(as_data(data))
+check_op <- function (op, a, b) {
+
+  if (missing(b)) {
+    r_out <- op(a)
+    greta_array <- op(as_data(a))
+  } else {
+    r_out <- op(a, b)
+    greta_array <- op(as_data(a), as_data(b))
+  }
+
   greta_out <- grab(greta_array)
   difference <- as.vector(abs(r_out - greta_out))
-  expect_true(all(difference < 1e4))
+  expect_true(all(difference < 1e-4))
 }
 
+# generate a random string to describing a binary operation on two variables, do
+# an op selected from 'ops' to an arg from 'args' and to init
+add_op_string <- function (init = 'a',
+                           args = c('a', 'b'),
+                           ops = c('+', '-', '*', '/')) {
+
+  op <- sample(ops, 1)
+  arg <- sample(args, 1)
+  sprintf('(%s %s %s)', arg, op, init)
+
+}
+
+# generate a random function that combines two variables together in a string of
+# (n) increasingly bizarre operations
+gen_opfun <- function (n, ops) {
+
+  string <- 'a'
+  for (i in seq_len(n))
+    string <- add_op_string(string, ops = ops)
+
+  fun_string <- sprintf('function(a, b) {%s}', string)
+
+  eval(parse(text = fun_string))
+
+}
