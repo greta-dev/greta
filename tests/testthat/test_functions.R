@@ -35,5 +35,59 @@ test_that('simple functions work as expected', {
   check_op(lgamma, x)
   check_op(digamma,x)
 
+})
+
+test_that('matrix functions work as expected', {
+
+  source('helpers.R')
+
+  a <- rWishart(1, 6, diag(5))[, , 1]
+  b <- randn(5, 25)
+
+  check_op(t, b)
+  check_op(chol, a)
+  check_op(diag, a)
+  check_op(`diag<-`, a, 1:5)
+  check_op(solve, a, b)
+
+})
+
+test_that('reducing functions work as expected', {
+
+  source('helpers.R')
+
+  a <- randn(1, 3)
+  b <- randn(5, 25)
+
+  check_op(sum, a, b)
+  check_op(prod, a, b)
+  check_op(min, a, b)
+  check_op(max, a, b)
+
+})
+
+test_that('sweep works as expected', {
+
+  source('helpers.R')
+
+  stats_list <- list(randn(5), randn(25))
+  x <- randn(5, 25)
+
+  for (dim in c(1, 2)) {
+    for (fun in c('-', '+', '/', '*')) {
+
+      stats <- stats_list[[dim]]
+
+      r_out <- sweep(x, dim, stats, FUN = fun)
+
+      greta_array <- sweep(as_data(x), dim, as_data(stats), FUN = fun)
+      greta_out <- grab(greta_array)
+
+      difference <- as.vector(abs(r_out - greta_out))
+      expect_true(all(difference < 1e-4))
+
+    }
+
+  }
 
 })
