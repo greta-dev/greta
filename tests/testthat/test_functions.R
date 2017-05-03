@@ -48,6 +48,7 @@ test_that('matrix functions work as expected', {
   check_op(chol, a)
   check_op(diag, a)
   check_op(`diag<-`, a, 1:5)
+  check_op(solve, a)
   check_op(solve, a, b)
 
 })
