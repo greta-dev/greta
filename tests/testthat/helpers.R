@@ -65,14 +65,17 @@ randn <- function (...) {
 
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
-check_op <- function (op, a, b) {
+check_op <- function (op, a, b, greta_op = NULL) {
+
+  if (is.null(greta_op))
+    greta_op <- op
 
   if (missing(b)) {
     r_out <- op(a)
-    greta_array <- op(as_data(a))
+    greta_array <- greta_op(as_data(a))
   } else {
     r_out <- op(a, b)
-    greta_array <- op(as_data(a), as_data(b))
+    greta_array <- greta_op(as_data(a), as_data(b))
   }
 
   greta_out <- grab(greta_array)

@@ -50,7 +50,7 @@ tf_icauchit <- function (x)
   (1 / pi) * atan(x) + 0.5
 
 tf_log1pe <- function (x)
-  log1p(exp(x))
+  tf$log1p(exp(x))
 
 #' @rdname greta-transforms
 #' @export
