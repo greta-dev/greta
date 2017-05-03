@@ -194,6 +194,10 @@ t.greta_array <- function (x) {
   op("tf$transpose", x, dimfun = dimfun)
 }
 
+# transpose and get the right matrix, like R
+tf_chol <- function (x)
+  tf$transpose(tf$cholesky(x))
+
 #' @export
 chol.greta_array <- function (x, ...) {
 
@@ -207,7 +211,7 @@ chol.greta_array <- function (x, ...) {
     dim
   }
 
-  op("tf$cholesky", x, dimfun = dimfun)
+  op("tf_chol", x, dimfun = dimfun)
 }
 
 #' @rdname greta-overloaded
