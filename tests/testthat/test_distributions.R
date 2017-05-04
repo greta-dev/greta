@@ -53,6 +53,19 @@ test_that('normal distribution has correct density', {
 
 })
 
+test_that('uniform distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::uniform,
+                                     stats::dunif,
+                                     parameters = list(min = -2.1, max = -1.2),
+                                     x = runif(100, -2.1, -1.2))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('lognormal distribution has correct density', {
 
   source('helpers.R')
@@ -248,6 +261,7 @@ test_that('continuous distributions can be sampled from', {
 
   # constrained
   sample_distribution(beta(6.3, 5.9), lower = 0, upper = 1)
+  sample_distribution(uniform(-13, 2.4), lower = -13, upper = 2.4)
 
   # multivariate
   sig <- rWishart(4, 3, diag(3))[, , 1]
