@@ -156,6 +156,18 @@ dummy <- function (dims) {
 tf_flatten <- function (x)
   tf$reshape(x, shape = c(tf$size(x), 1L))
 
+# convert Tensor to logical
+tf_as_logical <- function (x)
+  tf$cast(x, tf$bool)
+
+# and to float
+tf_as_float <- function (x)
+  tf$cast(x, tf$float32)
+
+# and to integer
+tf_as_integer <- function (x)
+  tf$cast(x, tf$int64)
+
 # flatten a greta array. Uses Python-like row-major order, so not exposed to
 # users. Useful for the reducing functions
 flatten <- function (x) {

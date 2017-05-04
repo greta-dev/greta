@@ -194,6 +194,10 @@ t.greta_array <- function (x) {
   op("tf$transpose", x, dimfun = dimfun)
 }
 
+# transpose and get the right matrix, like R
+tf_chol <- function (x)
+  tf$transpose(tf$cholesky(x))
+
 #' @export
 chol.greta_array <- function (x, ...) {
 
@@ -207,7 +211,7 @@ chol.greta_array <- function (x, ...) {
     dim
   }
 
-  op("tf$cholesky", x, dimfun = dimfun)
+  op("tf_chol", x, dimfun = dimfun)
 }
 
 #' @rdname greta-overloaded
@@ -252,9 +256,15 @@ diag.greta_array <- function (x = 1, nrow, ncol) {
 #' @export
 solve.greta_array <- function (a, b, ...) {
 
+  # check a is 2D
+  if (length(dim(a)) != 2) {
+    stop (sprintf("'a' and 'b' must both be 2D, but 'a' has dimensions: %s",
+                  paste(dim(a), collapse = ' x ')))
+  }
+
   # check the matrix is square
   if (dim(a)[1] != dim(a)[2]) {
-    stop (sprintf('a must be square, but has %i rows and %i columns',
+    stop (sprintf("'a' must be square, but has %i rows and %i columns",
                   dim(a)[1], dim(a)[2]))
   }
 
@@ -265,12 +275,6 @@ solve.greta_array <- function (a, b, ...) {
 
       a <- elem_list[[1]]
 
-      # a must be square
-      if (dim(a)[1] != dim(a)[2]) {
-        stop (sprintf('a must be square, but has %i rows and %i columns',
-                      dim(a)[1], dim(a)[2]))
-      }
-
       # return the dimensions
       dim(a)
 
@@ -280,21 +284,22 @@ solve.greta_array <- function (a, b, ...) {
 
   } else {
 
+    # check b is 2D
+    if (length(dim(b)) != 2) {
+      stop (sprintf("'a' and 'b' must both be 2D, but 'b' has dimensions: %s",
+                    paste(dim(b), collapse = ' x ')))
+    }
+
+
 
     dimfun <- function (elem_list) {
 
       a <- elem_list[[1]]
       b <- elem_list[[2]]
 
-      # a must be square
-      if (dim(a)[1] != dim(a)[2]) {
-        stop (sprintf('a must be square, but has %i rows and %i columns',
-                      dim(a)[1], dim(a)[2]))
-      }
-
       # b must have the right number of rows
       if (dim(b)[1] != dim(a)[1]) {
-        stop (sprintf('b must have the same number of rows as a (%i), but has %i rows instead',
+        stop (sprintf("'b' must have the same number of rows as 'a' (%i), but has %i rows instead",
                       dim(a)[1], dim(b)[1]))
       }
 
@@ -304,7 +309,7 @@ solve.greta_array <- function (a, b, ...) {
     }
 
     # ... and solve the linear equations
-    return (op("tf$matrix_solve", a, b))
+    return (op("tf$matrix_solve", a, b, dimfun = dimfun))
 
   }
 
@@ -446,7 +451,7 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
     }
 
     # STATS must be a column array
-    if (length(dim(STATS)) != 2 & dim(STATS)[2] != 1) {
+    if (!(length(dim(STATS)) == 2 && dim(STATS)[2] == 1)) {
       stop (sprintf('STATS must be a column vector array, but has dimensions %s',
                     paste(dim(STATS), collapse = ' x ')))
     }

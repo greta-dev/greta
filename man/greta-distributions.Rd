@@ -19,33 +19,33 @@
 \usage{
 free(lower = -Inf, upper = Inf, dim = 1)
 
-normal(mean, sd, dim = 1)
+normal(mean, sd, dim = NULL)
 
-lognormal(meanlog, sdlog, dim = 1)
+lognormal(meanlog, sdlog, dim = NULL)
 
-bernoulli(prob, dim = 1)
+bernoulli(prob, dim = NULL)
 
-binomial(size, prob, dim = 1)
+binomial(size, prob, dim = NULL)
 
-negative_binomial(size, prob, dim = 1)
+negative_binomial(size, prob, dim = NULL)
 
-poisson(lambda, dim = 1)
+poisson(lambda, dim = NULL)
 
-gamma(shape, rate, dim = 1)
+gamma(shape, rate, dim = NULL)
 
-exponential(rate, dim = 1)
+exponential(rate, dim = NULL)
 
-student(df, location, scale, dim = 1)
+student(df, location, scale, dim = NULL)
 
-beta(shape1, shape2, dim = 1)
+beta(shape1, shape2, dim = NULL)
 
 multivariate_normal(mean, Sigma, dim = 1)
 
 wishart(df, Sigma)
 }
 \arguments{
-\item{lower, upper}{a length-one vectors giving optional limits to free
-parameters. These must be specified as numerics, and cannot be greta
+\item{lower, upper}{scalar values giving optional limits to free
+parameters. These must be specified as numerics, they cannot be greta
 arrays. They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
 (\code{upper}), though \code{lower} must always be less than \code{upper}.}
 
@@ -73,15 +73,22 @@ The discrete probability distributions (\code{bernoulli}, \code{binomial},
   \code{negative_binomial}, \code{poisson}) can be used as likelihoods, but
   not as unknown variables.
 
-  For univariate distributions \code{dim} gives the dimensions of the greta
-  array to create, each element of which will be (independently) distributed
-  according to the distribution. For \code{multivariate_normal()}, \code{dim}
-  must be a scalar giving the number of rows in the resulting greta array,
-  each row being (independently) distributed according to the multivariate
-  normal distribution. The number of columns will always be the dimension of
-  the distribution, determined from the parameters specified.
-  \code{wishart()} always returns a single square, 2D greta array, with
-  dimension determined from the parameter \code{Sigma}.
+  For \code{free()}, dim gives the dimension of the greta array to create as
+  a free parameter. All elements of that array will have the same constraints
+  (\code{lower} and \code{upper}).
+  For univariate distributions \code{dim} also gives the dimensions of the
+  greta array to create. Each element of the greta array will be
+  (independently) distributed according to the distribution. \code{dim} can
+  also be left at its default of \code{NULL}, in which case the dimension
+  will be detected from the dimensions of the parameters (provided they are
+  compatible with one another).
+  For \code{multivariate_normal()}, \code{dim} must be a scalar giving the
+  number of rows in the resulting greta array, each row being (independently)
+  distributed according to the multivariate normal distribution. The number
+  of columns will always be the dimension of the distribution, determined
+  from the parameters specified. \code{wishart()} always returns a single
+  square, 2D greta array, with dimension determined from the parameter
+  \code{Sigma}.
 
   Wherever possible, the parameterisation of these distributions matches the
   those in the \code{stats} package. E.g. for the parameterisation of
