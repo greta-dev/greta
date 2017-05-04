@@ -92,3 +92,40 @@ test_that('sweep works as expected', {
   }
 
 })
+
+
+test_that('solve and sweep error as expected', {
+
+  source('helpers.R')
+
+  a <- as_data(randn(5, 25))
+  b <- as_data(randn(5, 25, 2))
+  stats <- as_data(randn(5))
+
+  # solve - only square matrices allowed
+  expect_error(solve(a, a),
+               '^a must be square, but has')
+  expect_error(solve(a),
+               '^a must be square, but has')
+
+  # sweep
+  # x must be 2D
+  expect_error(sweep(b, 1, stats),
+               '^x must be a 2D array, but has')
+
+  # dim must be either 1 or 2
+  expect_error(sweep(a, 3, stats),
+               'MARGIN can only be 1 or 2')
+
+  # stats must have the correct number of elements
+  expect_error(sweep(a, 1, c(stats, stats)),
+               '^the number of elements of STATS does not match')
+
+  # stats must be a column vector
+  expect_error(sweep(a, 1, t(stats)),
+               '^STATS must be a column vector array, but has dimensions')
+
+  expect_error(sweep(a, 2, stats),
+               '^the number of elements of STATS does not match')
+
+})
