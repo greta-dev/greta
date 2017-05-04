@@ -232,3 +232,26 @@ test_that('Wishart distribution has correct density', {
 
 })
 
+
+test_that('continuous distributions can be sampled from', {
+
+  source('helpers.R')
+
+  # unconstrained
+  sample_distribution(normal(-2, 3))
+  sample_distribution(student(5.6, -2, 2.3))
+
+  # positive
+  sample_distribution(lognormal(1.2, 0.2), lower = 0)
+  sample_distribution(gamma(0.9, 1.3), lower = 0)
+  sample_distribution(exponential(6.3), lower = 0)
+
+  # constrained
+  sample_distribution(beta(6.3, 5.9), lower = 0, upper = 1)
+
+  # multivariate
+  sig <- rWishart(4, 3, diag(3))[, , 1]
+  sample_distribution(multivariate_normal(rnorm(3), sig))
+  sample_distribution(wishart(4, sig))
+
+})
