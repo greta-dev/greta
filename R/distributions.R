@@ -128,6 +128,73 @@ free_distribution <- R6Class (
   )
 )
 
+uniform_distribution <- R6Class (
+  'uniform_distribution',
+  inherit = distribution,
+  public = list(
+
+    log_density = NULL,
+
+    to_free = function (y) {
+      max <- self$parameters$max$value()
+      min <- self$parameters$min$value()
+      qlogis((y - min) / (max - min))
+    },
+
+    tf_from_free = function (x, env) {
+
+      max <- self$parameters$max$value()
+      min <- self$parameters$min$value()
+      (1 / (1 + tf$exp(-1 * x))) * (max - min) + min
+
+    },
+
+    initialize = function (min, max, dim) {
+
+      # check and assign limits
+      bad_limits <- FALSE
+
+      if (!is.finite(min) | !is.finite(max))
+        bad_limits <- TRUE
+
+      # must be length one, and can't be greta arrays
+      if (length(min) != 1 | length(max) != 1 |
+          !is.numeric(max) | !is.numeric(max)) {
+
+        bad_limits <- TRUE
+
+      }
+
+      if (bad_limits) {
+
+        stop ('min and max must finite scalars')
+
+      }
+
+      if (min >= max) {
+
+        stop ('max must be greater than min')
+
+      }
+
+      # add the nodes as children and parameters
+      super$initialize('uniform', dim)
+      self$add_parameter(min, 'min')
+      self$add_parameter(max, 'max')
+
+      # the density is fixed, so calculate it now
+      self$log_density <- tf$constant(-log(max - min))
+
+    },
+
+    # weird hack to make TF see a gradient here
+    tf_log_density_function = function (x, parameters)
+      self$log_density + tf$reduce_sum(x * 0)
+
+  )
+)
+
+
 normal_distribution <- R6Class (
   'normal_distribution',
   inherit = distribution,
@@ -682,6 +749,17 @@ free <- function (lower = -Inf, upper = Inf, dim = 1) {
     stop ('lower and upper must be fixed, they cannot be another greta array')
 
   ga(free_distribution$new(lower, upper, dim))
+
+}
+
+#' @rdname greta-distributions
+#' @export
+uniform <- function (min, max, dim = NULL) {
+
+  if (is.greta_array(min) | is.greta_array(max))
+    stop ('min and max must be fixed, they cannot be another greta array')
+
+  ga(uniform_distribution$new(min, max, dim))
 
 }
 
