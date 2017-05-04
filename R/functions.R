@@ -308,7 +308,7 @@ solve.greta_array <- function (a, b, ...) {
     }
 
     # ... and solve the linear equations
-    return (op("tf$matrix_solve", a, b))
+    return (op("tf$matrix_solve", a, b, dimfun = dimfun))
 
   }
 
@@ -450,7 +450,7 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
     }
 
     # STATS must be a column array
-    if (length(dim(STATS)) != 2 & dim(STATS)[2] != 1) {
+    if (!(length(dim(STATS)) == 2 && dim(STATS)[2] == 1)) {
       stop (sprintf('STATS must be a column vector array, but has dimensions %s',
                     paste(dim(STATS), collapse = ' x ')))
     }
