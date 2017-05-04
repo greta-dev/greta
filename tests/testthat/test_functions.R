@@ -100,13 +100,28 @@ test_that('solve and sweep error as expected', {
 
   a <- as_data(randn(5, 25))
   b <- as_data(randn(5, 25, 2))
+  c <- as_data(randn(5, 5))
   stats <- as_data(randn(5))
 
-  # solve - only square matrices allowed
+  # solve
+
+  # a must be 2D
+  expect_error(solve(b, a),
+               "'a' and 'b' must both be 2D, but 'a' has dimensions:")
+
+  # b must also be 2D
+  expect_error(solve(c, b),
+               "'a' and 'b' must both be 2D, but 'b' has dimensions:")
+
+  # only square matrices allowed for first element
   expect_error(solve(a, a),
-               '^a must be square, but has')
+               "^'a' must be square, but has")
   expect_error(solve(a),
-               '^a must be square, but has')
+               "^'a' must be square, but has")
+
+  # dimension of second array must match
+  expect_error(solve(c, t(a)),
+               "^'b' must have the same number of rows as 'a'")
 
   # sweep
   # x must be 2D
