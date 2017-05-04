@@ -158,14 +158,6 @@ node <- R6Class(
       }
     },
 
-    # log density function for just this node
-    log_density_function = function (val)
-      stop ('log density function not implemented for this node'),
-
-    # evaluate this node's density, given it's value
-    log_density = function ()
-      self$log_density_function(self$value()),
-
     # basic print method
     print = function() {
       msg <- sprintf('%s node',
