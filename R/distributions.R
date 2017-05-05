@@ -258,12 +258,6 @@ bernoulli_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y)
-      stop ('cannot infer discrete random variables'),
-
-    tf_from_free = function (x, env)
-      stop ('cannot infer discrete random variables'),
-
     initialize = function (prob, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(prob, target_dim = dim)
@@ -294,12 +288,6 @@ binomial_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y)
-      stop ('cannot infer discrete random variables'),
-
-    tf_from_free = function (x, env)
-      stop ('cannot infer discrete random variables'),
-
     initialize = function (size, prob, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(size, prob, target_dim = dim)
@@ -328,12 +316,6 @@ poisson_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y)
-      stop ('cannot infer discrete random variables'),
-
-    tf_from_free = function (x, env)
-      stop ('cannot infer discrete random variables'),
-
     initialize = function (lambda, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(lambda, target_dim = dim)
@@ -355,12 +337,6 @@ negative_binomial_distribution <- R6Class (
   'negative_binomial_distribution',
   inherit = distribution,
   public = list(
-
-    to_free = function (y)
-      stop ('cannot infer discrete random variables'),
-
-    tf_from_free = function (x, env)
-      stop ('cannot infer discrete random variables'),
 
     initialize = function (size, prob, dim) {
       # add the nodes as children and parameters

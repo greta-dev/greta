@@ -8,11 +8,6 @@ member <- function(x, method)
 to_shape <- function(dim)
   do.call(shape, as.list(dim))
 
-# run code ins specified environment, e.g.
-# in_env(nm <- dag$child_names(), env)
-in_env <- function (call, env)
-  eval(substitute(call), envir = env)
-
 # placeholder error
 notimplemented <- function ()
   stop ('method not yet implemented')
@@ -182,24 +177,6 @@ flatten <- function (x) {
   op('tf_flatten',
      x,
      dimfun = dimfun)
-}
-
-# function to get and check dim for univariate distributions
-get_dims <- function (..., target_dim) {
-
-  # check the dims are compatible with one another and the target if specified
-  check_dims(..., target_dim)
-
-  elem_list <- list(...)
-  dims_in <- lapply(elem_list, dim)
-
-
-  # if dim is null, make sure the parameters all have the same dimension (or are scalar)
-
-  # do this in the initialization for each distribution
-  # on add_parameter, expand out any scalar parameters
-
-
 }
 
 # look in the environment specified by env, and return a named list of all greta

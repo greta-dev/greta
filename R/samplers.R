@@ -98,7 +98,7 @@ define_model <- function (...) {
 #'               warmup = 10)
 #' }
 mcmc <- function (model,
-                  method = c('hmc', 'nuts'),
+                  method = c('hmc'),
                   n_samples = 1000,
                   thin = 1,
                   warmup = 100,
@@ -137,16 +137,14 @@ mcmc <- function (model,
   con <- switch(method,
                 hmc = list(Lmin = 10,
                            Lmax = 20,
-                           epsilon = 0.005),
-                nuts = list())
+                           epsilon = 0.005))
 
   # update them with user overrides
   con[names(control)] <- control
 
   # fetch the algorithm
   method <- switch(method,
-                   hmc = hmc,
-                   nuts = nuts)
+                   hmc = hmc)
 
   # if warmup is required, do that now and update init
   if (warmup > 0) {
@@ -185,11 +183,6 @@ mcmc <- function (model,
 
   draws_mcmc_list
 
-}
-
-# run NUTS HMC sampler
-nuts <- function (dag, init, n_samples, thin, verbose, control = list()) {
-  stop ('not yet implemented')
 }
 
 hmc <- function (dag,
