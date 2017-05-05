@@ -232,3 +232,32 @@ all_greta_arrays <- function (env = parent.frame(),
 
 }
 
+# check the version of tensorflow is valid. error, warn, or message if not and
+# (if not an error) return an invisible logical saying whether it is valid
+check_tf_version <- function (alert = c('error', 'warn', 'message')) {
+
+  alert <- match.arg(alert)
+
+  tf_version <- tf$`__version__`
+  tf_version_split <- strsplit(tf_version, '.', fixed = TRUE)[[1]]
+  tf_version_valid <- as.numeric(tf_version_split[1]) >= 1
+
+  if (!tf_version_valid) {
+
+    text <- paste0('\n\n  greta requires TensorFlow version 1.0.0 or higher, ',
+                   'but you have version ', tf_version, '\n  ',
+                   'You can write models, but not sample from them.\n  ',
+                   'See https://www.tensorflow.org/install for installation ',
+                   'instructions.\n\n')
+
+    switch(alert,
+           error = stop (text, call. = FALSE),
+           warn = warning (text, call. = FALSE),
+           message = message(text))
+
+  }
+
+  # if not an error, return a logical on whether it was valid
+  invisible(tf_version_valid)
+
+}

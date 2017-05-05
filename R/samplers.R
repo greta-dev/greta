@@ -30,6 +30,8 @@ NULL
 #' }
 define_model <- function (...) {
 
+  check_tf_version('error')
+
   # nodes required
   target_greta_arrays <- list(...)
 
