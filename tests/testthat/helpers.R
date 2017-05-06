@@ -100,14 +100,17 @@ check_op <- function (op, a, b, greta_op = NULL) {
 # with_greta(foo(3), swap = 'x')
 
 # execute a call via greta, swapping the objects named in 'swap' to greta
-# arrays, then converting the result back to R
-with_greta <- function (call, swap = c('x')) {
+# arrays, then converting the result back to R. 'swap_scope' tells eval() how
+# many environments to go up to get the objects for the swap; 1 would be
+# environment above the funct, 2 would be the environment above that etc.
+with_greta <- function (call, swap = c('x'), swap_scope = 1) {
 
   swap_entries <- paste0(swap, ' = as_data(', swap, ')')
   swap_text <- paste0('list(',
                       paste(swap_entries, collapse = ', '),
                       ')')
-  swap_list <- eval(parse(text = swap_text))
+  swap_list <- eval(parse(text = swap_text),
+                    envir = parent.frame(n = swap_scope))
 
   greta_result <- with(swap_list,
                        eval(call))
@@ -132,7 +135,9 @@ check_expr <- function (expr, swap = c('x')) {
   call <- substitute(expr)
 
   r_out <- eval(expr)
-  greta_out <- with_greta(call, swap = swap)
+  greta_out <- with_greta(call,
+                          swap = swap,
+                          swap_scope = 2)
 
   difference <- as.vector(abs(r_out - greta_out))
   expect_true(all(difference < 1e-4))
