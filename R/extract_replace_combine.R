@@ -186,7 +186,8 @@ tf_replace <- function (x, value, index, dims) {
     dims_out <- c(dims_out, 1)
 
   # give values these dimensions
-  values <- array(values, dim = dims_out)
+  if (is.array(values))
+    values <- array(values, dim = dims_out)
 
   # get the index in flat python format, as a tensor
   index <- flatten_rowwise(dummy_out)
