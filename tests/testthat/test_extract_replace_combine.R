@@ -50,6 +50,12 @@ test_that('extract works like R', {
   check_expr(c[], 'c')
   check_expr(d[], 'd')
 
+  # can do negative extracts
+  check_expr(a[-1], 'a')
+  check_expr(b[-(1:3), ], 'b')
+  check_expr(c[-(1:4), ], 'c')
+  check_expr(d[-(1:2), -1, , drop = FALSE], 'd')
+
 })
 
 test_that('replace works like R', {
@@ -209,17 +215,17 @@ test_that('rbind, cbind and c work like R', {
   d <- randn(5, 5)
 
   check_op(rbind, a, a)
-  check_op(rbind, b, b)
-  check_op(rbind, d, d)
+  check_op(rbind, b, d)
+  check_op(rbind, d, b)
 
-  check_op(cbind, a, a)
   check_op(cbind, b, b)
+  check_op(cbind, a, d)
   check_op(cbind, d, d)
 
   # flatten and concatenate arrays
-  check_op(c, a, a)
-  check_op(c, b, b)
-  check_op(c, d, d)
+  check_op(c, a, d)
+  check_op(c, b, a)
+  check_op(c, d, b)
 
   # unary c flattens arrays
   check_op(c, a)
@@ -228,8 +234,28 @@ test_that('rbind, cbind and c work like R', {
 
 })
 
+test_that('rbind and cbind give informative error messages', {
 
+  source('helpers.R')
 
-# expect similar errors to R
+  a <- as_data(randn(5, 1))
+  b <- as_data(randn(1, 5))
 
-# e.g. replacing with a vector that isn't a mulitple of the replacement length
+  expect_error(rbind(a, b),
+               'all greta arrays must be have the same number of columns')
+
+  expect_error(cbind(a, b),
+               'all greta arrays must be have the same number of rows')
+
+})
+
+test_that('replacement gives informative error messages', {
+
+  source('helpers.R')
+
+  x <- as_data(randn(2, 2, 2))
+  expect_error(x[1:2, , 1] <- seq_len(3),
+               'number of items to replace is not a multiple of replacement length')
+
+})
+
