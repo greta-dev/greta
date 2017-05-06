@@ -131,6 +131,16 @@ test_that('replace works like R', {
   x <- randn(2, 2, 2)
   check_expr({x[] <- seq_len(2 * 2 * 2); x})
 
+  # can do negative replacements
+  x <- randn(10)
+  check_expr({x[-1] <- seq_len(9); x})
+  x <- randn(10, 1)
+  check_expr({x[-(1:3), ] <- seq_len(7 * 1); x})
+  x <- randn(10, 5)
+  check_expr({x[-(1:4), ] <- seq_len(6 * 5); x})
+  x <- randn(2, 2, 2)
+  check_expr({x[-1, -1, ] <- seq_len(1 * 1 * 2); x})
+
   # can replace multiple entries with one;
   x <- randn(10)
   check_expr({x[1:3] <- 1; x})
