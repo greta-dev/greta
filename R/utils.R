@@ -147,10 +147,6 @@ dummy <- function (dims) {
   unflatten_rowwise(vec, dims)
 }
 
-# flatten a tensor to a rank-2 column vector
-tf_flatten <- function (x)
-  tf$reshape(x, shape = c(tf$size(x), 1L))
-
 # convert Tensor to logical
 tf_as_logical <- function (x)
   tf$cast(x, tf$bool)
@@ -163,21 +159,9 @@ tf_as_float <- function (x)
 tf_as_integer <- function (x)
   tf$cast(x, tf$int64)
 
-# flatten a greta array. Uses Python-like row-major order, so not exposed to
-# users. Useful for the reducing functions
-flatten <- function (x) {
-
-  stopifnot(is.greta_array(x))
-
-  dimfun <- function (elem_list) {
-    len <- prod(dim(elem_list[[1]]))
-    c(len, 1)
-  }
-
-  op('tf_flatten',
-     x,
-     dimfun = dimfun)
-}
+# flatten a greta array into a column vector in column-major order
+flatten <- function (x)
+  x[seq_along(x)]
 
 # look in the environment specified by env, and return a named list of all greta
 # arrays in that environment
