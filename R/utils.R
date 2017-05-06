@@ -10,7 +10,7 @@ to_shape <- function(dim)
 
 # placeholder error
 notimplemented <- function ()
-  stop ('method not yet implemented')
+  stop ('method not yet implemented', call. = FALSE)
 
 # is this greta_array actually a scalar?
 is_scalar <- function (x)
@@ -47,7 +47,7 @@ check_dims <- function (..., target_dim = NULL) {
       # otherwise it's not fine
       msg <- sprintf('incompatible dimensions: %s',
                      dims_text)
-      stop (msg)
+      stop (msg, call. = FALSE)
 
     }
   }
@@ -74,7 +74,8 @@ check_dims <- function (..., target_dim = NULL) {
       if (!all(matches_target)) {
         stop (sprintf('array dimensions should be %s, but input dimensions were %s',
                       paste(target_dim, collapse = 'x'),
-                      dims_text))
+                      dims_text),
+              call. = FALSE)
       }
 
     }

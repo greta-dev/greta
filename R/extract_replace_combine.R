@@ -295,7 +295,8 @@ cbind.greta_array <- function (...) {
 
     # check all the same
     if (!all(rows == rows[1]))
-      stop ('all greta arrays must be have the same number of rows')
+      stop ('all greta arrays must be have the same number of rows',
+            call. = FALSE)
 
     # output dimensions
     c(rows[1], sum(cols))
@@ -322,7 +323,8 @@ rbind.greta_array <- function (...) {
 
     # check all the same
     if (!all(cols == cols[1]))
-      stop ('all greta arrays must be have the same number of columns')
+      stop ('all greta arrays must be have the same number of columns',
+            call. = FALSE)
 
     # output dimensions
     c(sum(rows), cols[1])
