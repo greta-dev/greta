@@ -190,6 +190,9 @@ tf_replace <- function (x, value, index, dims) {
   if (length(dims_out) == 1)
     dims_out <- c(dims_out, 1)
 
+  # give values these dimensions
+  values <- array(values, dim = dims_out)
+
   # get the index in flat python format, as a tensor
   index <- flatten_rowwise(dummy_out)
   tf_index <- tf$constant(as.integer(index),
