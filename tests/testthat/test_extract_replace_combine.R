@@ -157,6 +157,78 @@ test_that('replace works like R', {
 
 })
 
+test_that('rep works like R', {
+
+  source('helpers.R')
+
+  a <- randn(10)
+  b <- randn(10, 1)
+  c <- randn(10, 5)
+  d <- randn(10, 2, 2)
+
+  rep_times <- function(x)
+    rep(x, times = 3)
+
+  check_op(rep_times, a)
+  check_op(rep_times, b)
+  check_op(rep_times, c)
+  check_op(rep_times, d)
+
+  rep_length <- function(x)
+    rep(x, length.out = 3)
+
+  check_op(rep_length, a)
+  check_op(rep_length, b)
+  check_op(rep_length, c)
+  check_op(rep_length, d)
+
+  rep_times_each <- function(x)
+    rep(x, times = 3, each = 3)
+
+  check_op(rep_times_each, a)
+  check_op(rep_times_each, b)
+  check_op(rep_times_each, c)
+  check_op(rep_times_each, d)
+
+  rep_length_each <- function(x)
+    rep(x, length = 30, each = 3)
+
+  check_op(rep_length_each, a)
+  check_op(rep_length_each, b)
+  check_op(rep_length_each, c)
+  check_op(rep_length_each, d)
+
+})
+
+test_that('rbind, cbind and c work like R', {
+
+  source('helpers.R')
+
+  a <- randn(5, 1)
+  b <- randn(1, 5)
+  d <- randn(5, 5)
+
+  check_op(rbind, a, a)
+  check_op(rbind, b, b)
+  check_op(rbind, d, d)
+
+  check_op(cbind, a, a)
+  check_op(cbind, b, b)
+  check_op(cbind, d, d)
+
+  # flatten and concatenate arrays
+  check_op(c, a, a)
+  check_op(c, b, b)
+  check_op(c, d, d)
+
+  # unary c flattens arrays
+  check_op(c, a)
+  check_op(c, b)
+  check_op(c, d)
+
+})
+
+
 
 # expect similar errors to R
 
