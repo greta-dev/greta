@@ -125,7 +125,6 @@ with_greta <- function (call, swap = c('x')) {
 
 }
 
-
 # check an expression is equivalent when done in R, and when done on greta
 # arrays with results ported back to R
 # e.g. check_expr(a[1:3], swap = 'a')
