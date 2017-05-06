@@ -330,17 +330,21 @@ rbind.greta_array <- function (...) {
 c.greta_array <- function (...) {
 
   # loop through arrays, flattening them R-style
-  arrays <- list(...)
-  arrays <- lapply(arrays, function(x) x[seq_along(x)])
+  arrays <- lapply(list(...), flatten)
+
+  # get output dimensions
+  length_vec <- vapply(arrays, length, FUN.VALUE = 1)
+  dim_out <- c(sum(length_vec), 1L)
 
   # get the output dimension
-  dimfun <- function (elem_list) {
-    length_vec <- vapply(elem_list, length, FUN.VALUE = 1)
-    out_nrow <- sum(length_vec)
-    c(out_nrow, 1L)
-  }
+  dimfun <- function (elem_list)
+    dim_out
 
-  op('tf_rbind', ..., dimfun = dimfun)
+  # create the op, expanding 'arrays' out to match op()'s dots input
+  do.call(op,
+          c(operation = 'tf_rbind',
+            arrays,
+            dimfun = dimfun))
 
 }
 
