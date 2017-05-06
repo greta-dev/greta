@@ -269,3 +269,16 @@ test_that('replacement gives informative error messages', {
 
 })
 
+test_that('stochastic and operation greta arrays can be extracted', {
+
+  source('helpers.R')
+
+  a = normal(0, 1, dim = c(3, 4))
+  a_sub <- a[1:2, 2:3]
+  expect_identical(dim(a_sub), c(2L, 2L))
+
+  b <- a * 2
+  b_sub <- b[1:2, ]
+  expect_identical(dim(b_sub), c(2L, 4L))
+
+})
