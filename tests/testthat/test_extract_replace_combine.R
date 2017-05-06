@@ -146,7 +146,7 @@ test_that('replace works like R', {
   check_expr({x[1:2, , 1] <- seq_len(2); x})
 
   # replace with a greta array (e.g. with subset of self)
-  # check_expr seems to balls this one up, so do it longhand:
+  # check_expr seems to balls this one up, so do it longhand
   x <- randn(10, 1)
   ga_x <- as_data(x)
   x[1:6, ] <- x[6:1, ]
@@ -156,3 +156,8 @@ test_that('replace works like R', {
   expect_true(all(difference < 1e4))
 
 })
+
+
+# expect similar errors to R
+
+# e.g. replacing with a vector that isn't a mulitple of the replacement length

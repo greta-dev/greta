@@ -239,13 +239,20 @@ tf_replace <- function (x, value, index, dims) {
 
   index <- as.vector(dummy_out)
 
-  if (length(index) != prod(dim(value))) {
-    if (prod(dim(value)) == 1) {
-      value <- rep(value, length.out = length(index))
+  if (length(index) != length(value)) {
+
+    if ((length(index) %% length(value)) != 0) {
+
+      stop ('number of items to replace is not a multiple of ',
+            'replacement length')
+
     } else {
-      stop('number of items to replace does not match number of items to insert')
+
+      value <- rep(value, length.out = length(index))
+
     }
   }
+
 
   # function to return dimensions of output
   dimfun <- function (elem_list)
