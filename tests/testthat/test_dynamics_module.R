@@ -11,14 +11,13 @@ test_that('lambda iteration works', {
 
   # r version
   target_lambda <- it_lambda(matrix = mat,
-                                  state = init,
-                                  niter = niter)
+                             state = init,
+                             niter = niter)
 
   # greta version
-  iterate_lambda <- dynamics$iterate_lambda
-  lambda <- iterate_lambda(matrix = mat,
-                                    state = init,
-                                    niter = niter)
+  lambda <- greta:::iterate_lambda(matrix = mat,
+                                   state = init,
+                                   niter = niter)
   greta_lambda <- grab(lambda)[1, 1]
 
   difference <- abs(greta_lambda - target_lambda)
@@ -37,15 +36,14 @@ test_that('state iteration works', {
 
   # r version
   target_state <- it_state(matrix = mat,
-                                state = init,
-                                niter = niter)
+                           state = init,
+                           niter = niter)
   target_state <- target_state / sum(target_state)
 
   # greta version
-  iterate_state <- dynamics$iterate_state
-  state <- iterate_state(matrix = mat,
-                                    state = init,
-                                    niter = niter)
+  state <- greta:::iterate_state(matrix = mat,
+                                 state = init,
+                                 niter = niter)
   greta_state <- grab(state)[, 1]
   greta_state <- greta_state / sum(greta_state)
 
@@ -75,12 +73,11 @@ test_that('vectorised lambda iteration works', {
   flat_mat_list <- lapply(mat_list, greta:::flatten_rowwise)
   matrices <- do.call(rbind, flat_mat_list)
 
-  iterate_lambda_vectorised <- dynamics$iterate_lambda_vectorised
-  lambdas <- iterate_lambda_vectorised(matrices,
-                                                state = init,
-                                                niter = niter,
-                                                n = n_mat,
-                                                m = n)
+  lambdas <- greta:::iterate_lambda_vectorised(matrices,
+                                               state = init,
+                                               niter = niter,
+                                               n = n_mat,
+                                               m = n)
   greta_lambdas <- grab(lambdas)[, 1]
 
   difference <- abs(greta_lambdas - target_lambdas)
@@ -107,62 +104,58 @@ test_that('dynamics module errors informatively', {
   mismatched_state <- randu(m + 1, 1)
 
   # wrongly shaped matrix
-  iterate_state <- dynamics$iterate_state
-  iterate_lambda <- dynamics$iterate_lambda
-  iterate_lambda_vectorised <- dynamics$iterate_lambda_vectorised
-
-  expect_error(iterate_lambda(matrix = bad_mat,
-                                       state = good_state,
-                                       niter = niter),
-               'matrix must be a two-dimensional square greta array')
-
-  expect_error(iterate_state(matrix = bad_mat,
+  expect_error(greta:::iterate_lambda(matrix = bad_mat,
                                       state = good_state,
                                       niter = niter),
                'matrix must be a two-dimensional square greta array')
 
-  expect_error(iterate_lambda_vectorised(matrices = bad_matrices,
-                                                  state = good_state,
-                                                  niter = niter,
-                                                  n = n,
-                                                  m = m),
+  expect_error(greta:::iterate_state(matrix = bad_mat,
+                                     state = good_state,
+                                     niter = niter),
+               'matrix must be a two-dimensional square greta array')
+
+  expect_error(greta:::iterate_lambda_vectorised(matrices = bad_matrices,
+                                                 state = good_state,
+                                                 niter = niter,
+                                                 n = n,
+                                                 m = m),
                '^matrix must be a rectangular greta array with dimensions')
 
 
   # wrongly shaped state
-  expect_error(iterate_lambda(matrix = good_mat,
-                                       state = bad_state,
-                                       niter = niter),
-               'state must be a column vector greta array')
-
-  expect_error(iterate_state(matrix = good_mat,
+  expect_error(greta:::iterate_lambda(matrix = good_mat,
                                       state = bad_state,
                                       niter = niter),
                'state must be a column vector greta array')
 
-  expect_error(iterate_lambda_vectorised(matrices = good_matrices,
-                                      state = bad_state,
-                                      niter = niter,
-                                      n = n,
-                                      m = m),
+  expect_error(greta:::iterate_state(matrix = good_mat,
+                                     state = bad_state,
+                                     niter = niter),
+               'state must be a column vector greta array')
+
+  expect_error(greta:::iterate_lambda_vectorised(matrices = good_matrices,
+                                                 state = bad_state,
+                                                 niter = niter,
+                                                 n = n,
+                                                 m = m),
                'state must be a column vector greta array')
 
   # mismatched matrix and state
-  expect_error(iterate_lambda(matrix = good_mat,
-                                       state = mismatched_state,
-                                       niter = niter),
-               'number of elements in state must match the dimension of matrix')
-
-  expect_error(iterate_state(matrix = good_mat,
+  expect_error(greta:::iterate_lambda(matrix = good_mat,
                                       state = mismatched_state,
                                       niter = niter),
                'number of elements in state must match the dimension of matrix')
 
-  expect_error(iterate_lambda_vectorised(matrices = good_matrices,
-                                                  state = mismatched_state,
-                                                  niter = niter,
-                                                  n = n,
-                                                  m = m),
+  expect_error(greta:::iterate_state(matrix = good_mat,
+                                     state = mismatched_state,
+                                     niter = niter),
+               'number of elements in state must match the dimension of matrix')
+
+  expect_error(greta:::iterate_lambda_vectorised(matrices = good_matrices,
+                                                 state = mismatched_state,
+                                                 niter = niter,
+                                                 n = n,
+                                                 m = m),
                'number of elements in state must match the dimension of matrix')
 
 
