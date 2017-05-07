@@ -246,9 +246,79 @@ test_that('Wishart distribution has correct density', {
 })
 
 
+test_that('scalar-valued distributions can be defined in models', {
+
+  source('helpers.R')
+
+  x <- randn(5)
+  y <- round(randu(5))
+  p <- iprobit(normal(0, 1))
+
+  # continuous distributions
+  define_model(normal(-2, 3))
+  define_model(student(5.6, -2, 2.3))
+  define_model(lognormal(1.2, 0.2))
+  define_model(gamma(0.9, 1.3))
+  define_model(exponential(6.3))
+  define_model(beta(6.3, 5.9))
+  define_model(uniform(-13, 2.4))
+  sig <- rWishart(4, 3, diag(3))[, , 1]
+  define_model(multivariate_normal(rnorm(3), sig))
+  define_model(wishart(4, sig))
+
+  # density-free and discrete data need a bit of help
+  define_model((likelihood(x) = normal(free(), 1)))
+  define_model((likelihood(y) = bernoulli(p)))
+  define_model((likelihood(y) = binomial(1, p)))
+  define_model((likelihood(y) = negative_binomial(1, p)))
+  define_model((likelihood(y) = poisson(p)))
+
+  # need to set and check better error messages for when define_model can't
+  # create a density
+
+})
+
+test_that('array-valued distributions can be defined in models', {
+
+  source('helpers.R')
+
+  dim <- c(5, 2)
+  x <- randn(5, 2)
+  y <- round(randu(5, 2))
+  p <- iprobit(normal(0, 1, dim = dim))
+
+  # continuous distributions
+  define_model(normal(-2, 3, dim = dim))
+  define_model(student(5.6, -2, 2.3, dim = dim))
+  define_model(lognormal(1.2, 0.2, dim = dim))
+  define_model(gamma(0.9, 1.3, dim = dim))
+  define_model(exponential(6.3, dim = dim))
+  define_model(beta(6.3, 5.9, dim = dim))
+  define_model(uniform(-13, 2.4, dim = dim))  #! (non-conformable)
+
+  sig <- rWishart(4, 3, diag(3))[, , 1]
+  define_model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
+
+  # density-free and discrete data need a bit of help
+  define_model((likelihood(x) = normal(free(dim = dim), 1, dim = dim))) #! (should handle dimensions)
+  define_model((likelihood(y) = bernoulli(p, dim = dim))) #! probs error (in likelihood)
+  define_model((likelihood(y) = binomial(1, p, dim = dim))) #! (should handle dimensions)
+  define_model((likelihood(y) = negative_binomial(1, p, dim = dim))) #! (should handle dimensions)
+  define_model((likelihood(y) = poisson(p, dim = dim)))
+
+  # need to set and check better error messages for these
+
+})
+
+
 test_that('continuous distributions can be sampled from', {
 
   source('helpers.R')
+
+  x <- randn(100)
+
+  # free (with a density)
+  sample_distribution((likelihood(x) = normal(free(), 1)))
 
   # unconstrained
   sample_distribution(normal(-2, 3))
@@ -269,3 +339,5 @@ test_that('continuous distributions can be sampled from', {
   sample_distribution(wishart(4, sig))
 
 })
+
+
