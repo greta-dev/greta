@@ -124,41 +124,6 @@ dag_class <- R6Class(
 
     },
 
-    # check proposed model parameters 'parameters' as a named list (if flat =
-    # FALSE), or a named vector (if flat = TRUE). If they are valid, return as a
-    # named list.
-    check_parameters = function (parameters, flat = TRUE) {
-
-      # get example parameter list for all non-fixed parameters for the dag
-      current_parameters <- self$all_values(type = 'stochastic',
-                                            omit_fixed = TRUE)
-
-      # unflatten the new parameters if required, and convert each element to an array
-      if (flat)
-        parameters <- relist_tf(parameters, current_parameters)
-
-      # and check they match
-      if (!length(parameters) == length(current_parameters))
-        stop ('length of new parameters does not match dag')
-
-      classes <- vapply(parameters, class, '')
-      current_classes <- vapply(current_parameters, class, '')
-      if (!all(classes == current_classes))
-        stop ('classes of new parameters do not match dag')
-
-      dims <- vapply(parameters, dim, 1)
-      current_dims <- vapply(current_parameters, dim, 1)
-      if (!all(dims == current_dims))
-        stop ('dimensions of new parameters do not match dag')
-
-      if (!all(names(parameters) == names(current_parameters)))
-        stop ('names of new parameters do not match dag')
-
-      # otherwise return as a list
-      parameters
-
-    },
-
     send_parameters = function (parameters, flat = TRUE) {
 
       # convert parameters to a named list
@@ -273,8 +238,7 @@ dag_class <- R6Class(
     # get or set values in all descendents as a named list, only for nodes of
     # the named type (if type != NULL), and if omit_fixed = TRUE, omit the
     # fixed values when reporting (ignored when setting)
-    all_values = function (new_values = NULL, type = NULL, omit_fixed = TRUE, free = FALSE) {
-
+    all_values = function (type = NULL, omit_fixed = TRUE, free = FALSE) {
 
       # find all nodes of this type in the graph
       .nodes <- options()$nodes
@@ -288,28 +252,11 @@ dag_class <- R6Class(
         node_names <- node_names[which(!fixed)]
       }
 
-      if (is.null(new_values)) {
+      # get all values in a list
+      values <- lapply(nodes, function(x) x$value(free = free))
+      names(values) <- node_names
 
-        # get all values in a list
-        values <- lapply(nodes, function(x) x$value(free = free))
-        names(values) <- node_names
-        return (values)
-
-      } else {
-
-        # or check the new values have the right dimension ()
-        current_values <- self$all_values(type = type, omit_fixed = TRUE)
-        current_shape <- vapply(current_values, length, 1)
-        new_shape <- vapply(new_values, length, 1)
-
-        if (!identical(current_shape, new_shape))
-          stop ('new values have different shape to current values')
-
-        # then assign them
-        for (i in seq_along(nodes))
-          nodes[[i]]$value(new_values[[i]], free = free)
-
-      }
+      values
 
     },
 
