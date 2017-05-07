@@ -84,7 +84,7 @@ dag_class <- R6Class(
 
       # define all nodes, node densities and free states in the environment
       lapply(self$children,
-             function (x) x$define_tf(self$tf_environment))
+           function (x) x$define_tf(self$tf_environment))
 
       # define an overall log density and relevant gradients there
       self$define_joint_density()
