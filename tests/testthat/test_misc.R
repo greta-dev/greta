@@ -41,13 +41,6 @@ test_that('.onLoad runs', {
 
 })
 
-test_that('notimplemented errors', {
-
-  expect_error(greta:::notimplemented(),
-               'method not yet implemented')
-
-})
-
 test_that('tensorflow coercion work', {
 
   float <- greta:::tf_as_float(1)
@@ -136,7 +129,10 @@ test_that('define_model and mcmc error informatively', {
 
 })
 
-# bad parameters to distributions
+# bad parameters to distributions (especially support for free & uniform, and
+# dims for multivariate_normal & wishart)
+
+# evaluate free with different constraints
 
 # check_dims errors
 
