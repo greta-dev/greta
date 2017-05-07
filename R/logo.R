@@ -6,7 +6,9 @@
 # 'margin' gives the proportion of the vertical height to use a border on each side
 # the text is scaled to never exceed that border
 #' @importFrom graphics par plot.new plot.window strheight strwidth text
-banner <- function (width = 8, margin = 0.2) {
+banner <- function (width = 8, margin = 0.2, font = c('Muli', 'sans')) {
+
+  font <- match.arg(font)
 
   # warn in the banner isn't height-filled
   min_width <- 3.184175 + 2 * margin * (1 - 3.184175)
@@ -25,7 +27,7 @@ banner <- function (width = 8, margin = 0.2) {
   # switch to a purple background, no margins and Muli typeface
   par(bg = 'darkorchid3',
       mar = rep(0, 4),
-      family = 'Muli')
+      family = font)
 
   # set up the device, to have the correct width
   plot.new()

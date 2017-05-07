@@ -27,10 +27,11 @@ test_that('check_tf_version works', {
 
 test_that('logo runs', {
 
-  greta:::blank_banner()
-  greta:::banner()
-  expect_warning(greta:::banner(width = 2),
+  # use an available font
+  greta:::banner(font = 'sans')
+  expect_warning(greta:::banner(width = 2, font = 'sans'),
                  '^with a margin of 0.2 the minimum width to ensure the banner is height-filled is')
+  greta:::blank_banner()
 
 })
 
