@@ -290,8 +290,6 @@ stochastic_node <- R6Class (
 
     },
 
-    tf_from_free = function (free_node, env) notimplemented(),
-
     # overwrite value with option to switch to free state
     value = function(new_value = NULL, free = FALSE, ...) {
 
@@ -323,8 +321,8 @@ distribution <- R6Class (
     discrete = NA,
     parameters = list(),
     distribution_name = 'no distribution',
-    from_free = function (x) notimplemented(),
-    to_free = function (x) notimplemented(),
+    from_free = function (x) x,
+    to_free = function (x) x,
 
     initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
 
