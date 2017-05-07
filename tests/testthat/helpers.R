@@ -63,6 +63,13 @@ randn <- function (...) {
   array(rnorm(prod(dim)), dim = dim)
 }
 
+
+# ditto for standard uniforms
+randu <- function (...) {
+  dim <- c(...)
+  array(runif(prod(dim)), dim = dim)
+}
+
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
 check_op <- function (op, a, b, greta_op = NULL) {
@@ -179,4 +186,16 @@ sample_distribution <- function (greta_array, n = 10, lower = -Inf, upper = Inf)
   expect_true(all(samples >= lower & samples <= upper))
 }
 
+# R versions of dynamics module methods
+iterate_lambda <- function (matrix, state, niter) {
+  states <- list(state)
+  for (i in seq_len(niter))
+    states[[i + 1]] <- states[[i]] %*% matrix
+  states[[niter + 1]][1] / states[[niter]][1]
+}
 
+iterate_state <- function (matrix, state, niter) {
+  for (i in seq_len(niter))
+    state <- state %*% matrix
+  state[1, ]
+}
