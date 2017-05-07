@@ -1,6 +1,12 @@
 # test functions
 
+# flush the node list and set the RNG seed
+flush <- function ()
+  options('nodes')$nodes$flush()
+
+flush()
 set.seed(2017-05-01)
+
 
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {

@@ -45,6 +45,9 @@ node_list_object <- R6Class(
 
     node_list = list(),
 
+    flush = function ()
+      self$node_list <- list(),
+
     # return list of nodes. If `names` is provided, return only those
     nodes = function (names = NULL) {
       nodes <- self$node_list
