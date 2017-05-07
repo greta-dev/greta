@@ -128,6 +128,73 @@ free_distribution <- R6Class (
   )
 )
 
+uniform_distribution <- R6Class (
+  'uniform_distribution',
+  inherit = distribution,
+  public = list(
+
+    log_density = NULL,
+
+    to_free = function (y) {
+      max <- self$parameters$max$value()
+      min <- self$parameters$min$value()
+      qlogis((y - min) / (max - min))
+    },
+
+    tf_from_free = function (x, env) {
+
+      max <- self$parameters$max$value()
+      min <- self$parameters$min$value()
+      (1 / (1 + tf$exp(-1 * x))) * (max - min) + min
+
+    },
+
+    initialize = function (min, max, dim) {
+
+      # check and assign limits
+      bad_limits <- FALSE
+
+      if (!is.finite(min) | !is.finite(max))
+        bad_limits <- TRUE
+
+      # must be length one, and can't be greta arrays
+      if (length(min) != 1 | length(max) != 1 |
+          !is.numeric(max) | !is.numeric(max)) {
+
+        bad_limits <- TRUE
+
+      }
+
+      if (bad_limits) {
+
+        stop ('min and max must finite scalars')
+
+      }
+
+      if (min >= max) {
+
+        stop ('max must be greater than min')
+
+      }
+
+      # add the nodes as children and parameters
+      super$initialize('uniform', dim)
+      self$add_parameter(min, 'min')
+      self$add_parameter(max, 'max')
+
+      # the density is fixed, so calculate it now
+      self$log_density <- tf$constant(-log(max - min))
+
+    },
+
+    # weird hack to make TF see a gradient here
+    tf_log_density_function = function (x, parameters)
+      self$log_density + tf$reduce_sum(x * 0)
+
+  )
+)
+
+
 normal_distribution <- R6Class (
   'normal_distribution',
   inherit = distribution,
@@ -191,12 +258,6 @@ bernoulli_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y)
-      stop ('cannot infer discrete random variables'),
-
-    tf_from_free = function (x, env)
-      stop ('cannot infer discrete random variables'),
-
     initialize = function (prob, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(prob, target_dim = dim)
@@ -227,12 +288,6 @@ binomial_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y)
-      stop ('cannot infer discrete random variables'),
-
-    tf_from_free = function (x, env)
-      stop ('cannot infer discrete random variables'),
-
     initialize = function (size, prob, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(size, prob, target_dim = dim)
@@ -261,12 +316,6 @@ poisson_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y)
-      stop ('cannot infer discrete random variables'),
-
-    tf_from_free = function (x, env)
-      stop ('cannot infer discrete random variables'),
-
     initialize = function (lambda, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(lambda, target_dim = dim)
@@ -288,12 +337,6 @@ negative_binomial_distribution <- R6Class (
   'negative_binomial_distribution',
   inherit = distribution,
   public = list(
-
-    to_free = function (y)
-      stop ('cannot infer discrete random variables'),
-
-    tf_from_free = function (x, env)
-      stop ('cannot infer discrete random variables'),
 
     initialize = function (size, prob, dim) {
       # add the nodes as children and parameters
@@ -597,8 +640,14 @@ wishart_distribution <- R6Class (
 #'
 #' @param lower,upper scalar values giving optional limits to free
 #'   parameters. These must be specified as numerics, they cannot be greta
-#'   arrays. They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
+#'   arrays (though see details for a workaround). They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
 #'   (\code{upper}), though \code{lower} must always be less than \code{upper}.
+#'
+#' @param min,max scalar values giving optional limits to \code{uniform}
+#'   variables. Like \code{lower} and \code{upper}, these must be specified as
+#'   numerics, they cannot be greta arrays (though see details for a
+#'   workaround). Unlike \code{lower} and \code{upper}, they must be finite.
+#'   \code{min} must always be less than \code{max}.
 #'
 #' @param mean,meanlog,location unconstrained parameters
 #' @param sd,sdlog,size,lambda,shape,rate,df,scale,shape1,shape2 positive
@@ -613,15 +662,16 @@ wishart_distribution <- R6Class (
 #'   \code{negative_binomial}, \code{poisson}) can be used as likelihoods, but
 #'   not as unknown variables.
 #'
-#'   For \code{free()}, dim gives the dimension of the greta array to create as
-#'   a free parameter. All elements of that array will have the same constraints
-#'   (\code{lower} and \code{upper}).
-#'   For univariate distributions \code{dim} also gives the dimensions of the
-#'   greta array to create. Each element of the greta array will be
-#'   (independently) distributed according to the distribution. \code{dim} can
-#'   also be left at its default of \code{NULL}, in which case the dimension
-#'   will be detected from the dimensions of the parameters (provided they are
-#'   compatible with one another).
+#'   For \code{free()}, \code{dim} gives the dimension of the greta array to
+#'   create as a free parameter. All elements of that array will have the same
+#'   constraints (\code{lower} and \code{upper}). For univariate distributions
+#'   \code{dim} also gives the dimensions of the greta array to create. Each
+#'   element of the greta array will be (independently) distributed according to
+#'   the distribution. \code{dim} can also be left at its default of
+#'   \code{NULL}, in which case the dimension will be detected from the
+#'   dimensions of the parameters (provided they are compatible with one
+#'   another).
+#'
 #'   For \code{multivariate_normal()}, \code{dim} must be a scalar giving the
 #'   number of rows in the resulting greta array, each row being (independently)
 #'   distributed according to the multivariate normal distribution. The number
@@ -629,6 +679,14 @@ wishart_distribution <- R6Class (
 #'   from the parameters specified. \code{wishart()} always returns a single
 #'   square, 2D greta array, with dimension determined from the parameter
 #'   \code{Sigma}.
+#'
+#'   The parameters of both \code{free} and \code{uniform} must be fixed, not
+#'   greta variables. This ensures these values can always be transformed to a
+#'   continuous scale to run the samplers efficiently. However, a hierarchical
+#'   \code{uniform} or \code{free} parameter can always be created by defining a
+#'   \code{free} or \code{uniform} variable constrained between 0 and 1, and then
+#'   transforming it to the required scale. I.e. \code{min + u * (max - min)},
+#'   where u is e.g. \code{uniform(0, 1)}. See below for an example.
 #'
 #'   Wherever possible, the parameterisation of these distributions matches the
 #'   those in the \code{stats} package. E.g. for the parameterisation of
@@ -649,6 +707,12 @@ wishart_distribution <- R6Class (
 #'
 #' # a prior-free parameter constrained to be between 0 and 1
 #' psi = free(lower = 0, upper = 1)
+#'
+#' # a uniform parameter constrained to be between 0 and 1
+#' phi = uniform(min = 0, max = 1)
+#'
+#' # create a hierarchical uniform, constrained between alpha and alpha + sigma,
+#' eta = alpha + uniform(0, 1) * sigma
 #'
 #' # an unconstrained parameter with standard normal prior
 #' mu = normal(0, 1)
@@ -682,6 +746,17 @@ free <- function (lower = -Inf, upper = Inf, dim = 1) {
     stop ('lower and upper must be fixed, they cannot be another greta array')
 
   ga(free_distribution$new(lower, upper, dim))
+
+}
+
+#' @rdname greta-distributions
+#' @export
+uniform <- function (min, max, dim = NULL) {
+
+  if (is.greta_array(min) | is.greta_array(max))
+    stop ('min and max must be fixed, they cannot be another greta array')
+
+  ga(uniform_distribution$new(min, max, dim))
 
 }
 

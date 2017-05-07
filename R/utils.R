@@ -8,14 +8,9 @@ member <- function(x, method)
 to_shape <- function(dim)
   do.call(shape, as.list(dim))
 
-# run code ins specified environment, e.g.
-# in_env(nm <- dag$child_names(), env)
-in_env <- function (call, env)
-  eval(substitute(call), envir = env)
-
 # placeholder error
 notimplemented <- function ()
-  stop ('method not yet implemented')
+  stop ('method not yet implemented', call. = FALSE)
 
 # is this greta_array actually a scalar?
 is_scalar <- function (x)
@@ -52,7 +47,7 @@ check_dims <- function (..., target_dim = NULL) {
       # otherwise it's not fine
       msg <- sprintf('incompatible dimensions: %s',
                      dims_text)
-      stop (msg)
+      stop (msg, call. = FALSE)
 
     }
   }
@@ -79,7 +74,8 @@ check_dims <- function (..., target_dim = NULL) {
       if (!all(matches_target)) {
         stop (sprintf('array dimensions should be %s, but input dimensions were %s',
                       paste(target_dim, collapse = 'x'),
-                      dims_text))
+                      dims_text),
+              call. = FALSE)
       }
 
     }
@@ -152,10 +148,6 @@ dummy <- function (dims) {
   unflatten_rowwise(vec, dims)
 }
 
-# flatten a tensor to a rank-2 column vector
-tf_flatten <- function (x)
-  tf$reshape(x, shape = c(tf$size(x), 1L))
-
 # convert Tensor to logical
 tf_as_logical <- function (x)
   tf$cast(x, tf$bool)
@@ -168,39 +160,9 @@ tf_as_float <- function (x)
 tf_as_integer <- function (x)
   tf$cast(x, tf$int64)
 
-# flatten a greta array. Uses Python-like row-major order, so not exposed to
-# users. Useful for the reducing functions
-flatten <- function (x) {
-
-  stopifnot(is.greta_array(x))
-
-  dimfun <- function (elem_list) {
-    len <- prod(dim(elem_list[[1]]))
-    c(len, 1)
-  }
-
-  op('tf_flatten',
-     x,
-     dimfun = dimfun)
-}
-
-# function to get and check dim for univariate distributions
-get_dims <- function (..., target_dim) {
-
-  # check the dims are compatible with one another and the target if specified
-  check_dims(..., target_dim)
-
-  elem_list <- list(...)
-  dims_in <- lapply(elem_list, dim)
-
-
-  # if dim is null, make sure the parameters all have the same dimension (or are scalar)
-
-  # do this in the initialization for each distribution
-  # on add_parameter, expand out any scalar parameters
-
-
-}
+# flatten a greta array into a column vector in column-major order
+flatten <- function (x)
+  x[seq_along(x)]
 
 # look in the environment specified by env, and return a named list of all greta
 # arrays in that environment
@@ -232,3 +194,32 @@ all_greta_arrays <- function (env = parent.frame(),
 
 }
 
+# check the version of tensorflow is valid. error, warn, or message if not and
+# (if not an error) return an invisible logical saying whether it is valid
+check_tf_version <- function (alert = c('error', 'warn', 'message')) {
+
+  alert <- match.arg(alert)
+
+  tf_version <- tf$`__version__`
+  tf_version_split <- strsplit(tf_version, '.', fixed = TRUE)[[1]]
+  tf_version_valid <- as.numeric(tf_version_split[1]) >= 1
+
+  if (!tf_version_valid) {
+
+    text <- paste0('\n\n  greta requires TensorFlow version 1.0.0 or higher, ',
+                   'but you have version ', tf_version, '\n  ',
+                   'You can write models, but not sample from them.\n  ',
+                   'See https://www.tensorflow.org/install for installation ',
+                   'instructions.\n\n')
+
+    switch(alert,
+           error = stop (text, call. = FALSE),
+           warn = warning (text, call. = FALSE),
+           message = message(text))
+
+  }
+
+  # if not an error, return a logical on whether it was valid
+  invisible(tf_version_valid)
+
+}

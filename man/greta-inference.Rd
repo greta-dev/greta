@@ -8,8 +8,8 @@
 \usage{
 define_model(...)
 
-mcmc(model, method = c("hmc", "nuts"), n_samples = 1000, thin = 1,
-  warmup = 100, verbose = TRUE, control = list(), initial_values = NULL)
+mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
+  verbose = TRUE, control = list(), initial_values = NULL)
 }
 \arguments{
 \item{\dots}{\code{greta_array} objects to be tracked by the model (i.e.

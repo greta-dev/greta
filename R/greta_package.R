@@ -65,8 +65,11 @@ node_list_object <- R6Class(
   # silence TF's CPU instructions message
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL=2)
 
+  check_tf_version('warn')
+
   # set up the node list
   options(nodes = node_list_object$new())
 
-
 }
+
+

@@ -26,13 +26,8 @@
 #' @param value a greta array to replace elements
 #' @param ... either further indices specifying elements to extract or replace
 #'   (\code{[}), or multiple greta arrays to combine (\code{cbind()}, \code{rbind()} &
-#'   \code{c()}), or generic arguments that are ignored for greta arrays
-#'   (\code{rep()})
-#' @param times a single integer giving the number of times to repeat the
-#'   (column) vector
+#'   \code{c()}), or additional arguments (\code{rep()})
 #' @param drop,recursive generic arguments that are ignored for greta arrays
-#'
-#' @details \code{c()} and \code{rep()} currently only work with column vectors.
 #'
 #' @examples
 #' \dontrun{
@@ -45,8 +40,8 @@
 #'  # combine
 #'  cbind(x[, 2], x[, 1])
 #'  rbind(x[1, ], x[3, ])
-#'  c(x[, 1], x[, 2])
-#'  rep(x[, 2], 3)
+#'  c(x[, 1], x)
+#'  rep(x[, 2], times = 3)
 #' }
 NULL
 
@@ -190,6 +185,10 @@ tf_replace <- function (x, value, index, dims) {
   if (length(dims_out) == 1)
     dims_out <- c(dims_out, 1)
 
+  # give values these dimensions
+  if (is.array(values))
+    values <- array(values, dim = dims_out)
+
   # get the index in flat python format, as a tensor
   index <- flatten_rowwise(dummy_out)
   tf_index <- tf$constant(as.integer(index),
@@ -239,14 +238,22 @@ tf_replace <- function (x, value, index, dims) {
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
   rm('._dummy_in', envir = pf)
 
-  # # subset the dummy array using the original subsetting call
-  # call[[1]] <- `[`
-  # call[[2]] <- dummy
-
   index <- as.vector(dummy_out)
 
-  if (length(index) != prod(dim(value)))
-    stop('number of items to replace does not match number of items to insert')
+  if (length(index) != length(value)) {
+
+    if ((length(index) %% length(value)) != 0) {
+
+      stop ('number of items to replace is not a multiple of ',
+            'replacement length')
+
+    } else {
+
+      value <- rep(value, length.out = length(index))
+
+    }
+  }
+
 
   # function to return dimensions of output
   dimfun <- function (elem_list)
@@ -262,7 +269,7 @@ tf_replace <- function (x, value, index, dims) {
 
 }
 
-# combine
+# mapping of cbind and rbind to tf$concat
 tf_cbind <- function (...) {
   elem_list <- list(...)
   tf$concat(elem_list, 1L)
@@ -289,10 +296,12 @@ cbind.greta_array <- function (...) {
 
     # check all the same
     if (!all(rows == rows[1]))
-      stop ('all greta arrays must be have the same number of rows')
+      stop ('all greta arrays must be have the same number of rows',
+            call. = FALSE)
 
     # output dimensions
     c(rows[1], sum(cols))
+
   }
 
   op('tf_cbind', ..., dimfun = dimfun)
@@ -315,46 +324,47 @@ rbind.greta_array <- function (...) {
 
     # check all the same
     if (!all(cols == cols[1]))
-      stop ('all greta arrays must be have the same number of columns')
-
+      stop ('all greta arrays must be have the same number of columns',
+            call. = FALSE)
 
     # output dimensions
     c(sum(rows), cols[1])
+
   }
 
   op('tf_rbind', ..., dimfun = dimfun)
 
 }
-
 
 #' @export
 c.greta_array <- function (...) {
 
-  dimfun <- function (elem_list) {
+  # loop through arrays, flattening them R-style
+  arrays <- lapply(list(...), flatten)
 
-    dims <- lapply(elem_list, function(x) x$dim)
-    ndims <- vapply(dims, length, FUN.VALUE = 1)
-    ncols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
+  # get output dimensions
+  length_vec <- vapply(arrays, length, FUN.VALUE = 1)
+  dim_out <- c(sum(length_vec), 1L)
 
-    if (any(ndims != 2) | any(ncols != 1) )
-      stop ('all greta arrays must be (column) vectors')
+  # get the output dimension
+  dimfun <- function (elem_list)
+    dim_out
 
-    # output length
-    nrows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
-
-    # output dimensions
-    c(sum(nrows), 1)
-  }
-
-  op('tf_rbind', ..., dimfun = dimfun)
+  # create the op, expanding 'arrays' out to match op()'s dots input
+  do.call(op,
+          c(operation = 'tf_rbind',
+            arrays,
+            dimfun = dimfun))
 
 }
 
 #' @export
-rep.greta_array <- function (x, times, ...) {
+rep.greta_array <- function (x, ...) {
 
-  # create a list of these nodes, then concatenate them
-  nodes <- replicate(times, x, simplify = FALSE)
-  do.call(`c.greta_array`, nodes)
+  # get the index
+  idx <- rep(seq_along(x), ...)
+
+  # apply (implicitly coercing to a column vector)
+  x[idx]
 
 }

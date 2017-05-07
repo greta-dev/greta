@@ -16,20 +16,13 @@
 
 \item{...}{either further indices specifying elements to extract or replace
 (\code{[}), or multiple greta arrays to combine (\code{cbind()}, \code{rbind()} &
-\code{c()}), or generic arguments that are ignored for greta arrays
-(\code{rep()})}
-
-\item{times}{a single integer giving the number of times to repeat the
-(column) vector}
+\code{c()}), or additional arguments (\code{rep()})}
 
 \item{drop, recursive}{generic arguments that are ignored for greta arrays}
 }
 \description{
 Generic methods to extract and replace elements of greta arrays, or to
   combine greta arrays.
-}
-\details{
-\code{c()} and \code{rep()} currently only work with column vectors.
 }
 \section{Usage}{
  \preformatted{
@@ -61,7 +54,7 @@ rep(x, times, ..., recursive = FALSE)
  # combine
  cbind(x[, 2], x[, 1])
  rbind(x[1, ], x[3, ])
- c(x[, 1], x[, 2])
- rep(x[, 2], 3)
+ c(x[, 1], x)
+ rep(x[, 2], times = 3)
 }
 }

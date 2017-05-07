@@ -70,8 +70,14 @@ knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
 
 greta can be installed from GitHub using the devtools package
 
-```{r install, eval=FALSE}
+```{r install1, eval=FALSE}
 devtools::install_github('goldingn/greta')
+```
+
+or, you can install the development version with:
+
+```{r install2, eval=FALSE}
+devtools::install_github('goldingn/greta@dev')
 ```
 
 however greta depends on TensorFlow (version 1.0.0 or higher) which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow.

@@ -32,29 +32,6 @@ print.unknowns <- function (x, ...) {
 
 }
 
-`[.unknowns` <- function(x, ...) {
-
-  # get ready to evaluate in environment above this
-  pf <- parent.frame()
-
-  # evaluate the call as a matrix/array
-  call <- sys.call()
-
-  # make x in parent environment not an unknowns
-  pf$x <- strip_unknown_class(pf$x)
-
-  # execute the subsetting call there, without dropping
-  call[[1]] <- .Primitive("[")
-  call$drop <- FALSE
-  out <- eval(call, envir = pf)
-
-  # make x in parent environment not unknowns again
-  pf$x <- as.unknowns(pf$x)
-
-  # convert out back to unknowns here, and return
-  as.unknowns(out)
-}
-
 # create an unknowns array from some dimensions
 unknowns <- function (dims = c(1, 1), data = NA) {
   x <- array(data = data, dim = dims)

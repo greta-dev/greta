@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Probabilistic Modelling with TensorFlow
-Version: 0.1.3
-Date: 2017-05-03
+Version: 0.1.4
+Date: 2017-05-07
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
 Description: Existing tools for fitting bespoke statistical models (such as

@@ -41,16 +41,16 @@ tf_iprobit <- function (x) {
 }
 
 tf_ilogit <- function (x)
-  1 / (1 + exp(-1 * x))
+  1 / (1 + tf$exp(-1 * x))
 
 tf_icloglog <- function (x)
-  1 - exp(-1 * exp(x))
+  1 - tf$exp(-1 * tf$exp(x))
 
 tf_icauchit <- function (x)
-  (1 / pi) * atan(x) + 0.5
+  (1 / pi) * tf$atan(x) + 0.5
 
 tf_log1pe <- function (x)
-  tf$log1p(exp(x))
+  tf$log1p(tf$exp(x))
 
 #' @rdname greta-transforms
 #' @export

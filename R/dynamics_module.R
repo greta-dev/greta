@@ -9,7 +9,7 @@ tf_iterate_lambda <- function (mat, state, niter) {
 
   # iterate the matrix
   for (i in seq_len(niter))
-    states[[i + 1]] <-  tf$matmul(mat, states[[i]])
+    states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
 
   # return the final growth rate (should be same for all states at convergence)
   lambda <- states[[niter + 1]][1] / states[[niter]][1]
@@ -26,7 +26,7 @@ tf_iterate_state <- function (mat, state, niter) {
 
   # iterate the matrix
   for (i in seq_len(niter))
-    states[[i + 1]] <-  tf$matmul(mat, states[[i]])
+    states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
 
   # return the final growth rate (should be same for all states at convergence)
   states[[niter + 1]]
@@ -53,6 +53,8 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
   full_mat <- tf$SparseTensor(indices = indices,
                               values = values,
                               dense_shape = shape)
+
+  # t_full_mat <- tf$transpose(full_mat)
 
   # replicate state for all patches
   state <- tf$tile(state, tf$constant(c(n, 1L), shape = shape(2)))
@@ -98,13 +100,16 @@ iterate_lambda <- function(matrix, state, niter) {
     state_dim <- dim(elem_list[[2]])
 
     if (length(state_dim) != 2 | state_dim[2] != 1)
-      stop ('state must be a column vector (rank 2 tensor)')
+      stop ('state must be a column vector greta array',
+            call. = FALSE)
 
     if (length(matrix_dim) != 2 | matrix_dim[1] != matrix_dim[2])
-      stop ('matrix must be a square matrix (rank 2 tensor)')
+      stop ('matrix must be a two-dimensional square greta array',
+            call. = FALSE)
 
     if (matrix_dim[2] != state_dim[1])
-      stop ('number of elements in state must match the dimension of matrix')
+      stop ('number of elements in state must match the dimension of matrix',
+            call. = FALSE)
 
     # output dimensions
     c(1, 1)
@@ -130,13 +135,16 @@ iterate_state <- function(matrix, state, niter) {
     state_dim <- dim(elem_list[[2]])
 
     if (length(state_dim) != 2 | state_dim[2] != 1)
-      stop ('state must be a column vector (rank 2 tensor)')
+      stop ('state must be a column vector greta array',
+            call. = FALSE)
 
     if (length(matrix_dim) != 2 | matrix_dim[1] != matrix_dim[2])
-      stop ('matrix must be a square matrix (rank 2 tensor)')
+      stop ('matrix must be a two-dimensional square greta array',
+            call. = FALSE)
 
     if (matrix_dim[2] != state_dim[1])
-      stop ('number of elements in state must match the dimension of matrix')
+      stop ('number of elements in state must match the dimension of matrix',
+            call. = FALSE)
 
     # output dimensions
     state_dim
@@ -163,13 +171,16 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
     state_dim <- dim(elem_list[[2]])
 
     if (length(state_dim) != 2 | state_dim[2] != 1)
-      stop ('state must be a column vector (rank 2 tensor)')
+      stop ('state must be a column vector greta array',
+            call. = FALSE)
 
     if (m != state_dim[1])
-      stop ('number of elements in state must match the dimension of matrix')
+      stop ('number of elements in state must match the dimension of matrix',
+            call. = FALSE)
 
     if (length(matrices_dim) != 2 | matrices_dim[2] != (m ^ 2) | matrices_dim[1] != n)
-      stop ('matrix must be a rectangular matrix (rank 2 tensor) with dimensions n x m^2')
+      stop ('matrix must be a rectangular greta array with dimensions n x m^2',
+            call. = FALSE)
 
     # output dimensions
     c(n, 1)

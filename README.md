@@ -58,6 +58,12 @@ greta can be installed from GitHub using the devtools package
 devtools::install_github('goldingn/greta')
 ```
 
+or, you can install the development version with:
+
+``` r
+devtools::install_github('goldingn/greta@dev')
+```
+
 however greta depends on TensorFlow (version 1.0.0 or higher) which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow.
 
 <img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />

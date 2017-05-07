@@ -321,9 +321,7 @@ solve.greta_array <- function (a, b, ...) {
 sum.greta_array <- function (..., na.rm = TRUE) {
 
   # combine all elements into a column vector
-  dots <- list(...)
-  flat_dots <- lapply(dots, flatten)
-  vec <- do.call(c, flat_dots)
+  vec <- c(...)
 
   # results will be 1 x 1
   dimfun <- function (x) c(1, 1)
@@ -339,9 +337,7 @@ sum.greta_array <- function (..., na.rm = TRUE) {
 prod.greta_array <- function (..., na.rm = TRUE) {
 
   # combine all elements into a column vector
-  dots <- list(...)
-  flat_dots <- lapply(dots, flatten)
-  vec <- do.call(c, flat_dots)
+  vec <- c(...)
 
   # results will be 1 x 1
   dimfun <- function (x) c(1, 1)
@@ -357,9 +353,7 @@ prod.greta_array <- function (..., na.rm = TRUE) {
 min.greta_array <- function (..., na.rm = TRUE) {
 
   # combine all elements into a column vector
-  dots <- list(...)
-  flat_dots <- lapply(dots, flatten)
-  vec <- do.call(c, flat_dots)
+  vec <- c(...)
 
   # results will be 1 x 1
   dimfun <- function (x) c(1, 1)
@@ -388,9 +382,7 @@ mean.greta_array <- function (x, trim = 0, na.rm = TRUE, ...) {
 max.greta_array <- function (..., na.rm = TRUE) {
 
   # combine all elements into a column vector
-  dots <- list(...)
-  flat_dots <- lapply(dots, flatten)
-  vec <- do.call(c, flat_dots)
+  vec <- c(...)
 
   # results will be 1 x 1
   dimfun <- function (x) c(1, 1)
