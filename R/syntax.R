@@ -24,7 +24,7 @@
 `likelihood<-` <- function (data, value) {
 
   data_tmp <- data
-  data <- as.greta_array(data)
+  data <- as_data(data)
   distribution <- value
 
   if (!(is.greta_array(distribution) &&
