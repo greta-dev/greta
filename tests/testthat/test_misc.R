@@ -99,3 +99,12 @@ test_that('likelihood errors informatively', {
                '^left- and right-hand side of likelihood have different dimensions.')
 
 })
+
+test_that('greta_model objects print', {
+
+  m <- define_model(normal(0, 1))
+  message <- capture.output(print(m))
+  expect_equal(message, 'greta model')
+
+})
+
