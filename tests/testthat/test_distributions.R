@@ -301,7 +301,7 @@ test_that('array-valued distributions can be defined in models', {
 
   # density-free and discrete data need a bit of help
   define_model((likelihood(x) = normal(free(dim = dim), 1)))
-  define_model((likelihood(y) = bernoulli(p))) #! probs error (in likelihood)
+  define_model((likelihood(y) = bernoulli(p)))
   define_model((likelihood(y) = binomial(1, p)))
   define_model((likelihood(y) = negative_binomial(1, p)))
   define_model((likelihood(y) = poisson(p)))
@@ -312,14 +312,22 @@ test_that('array-valued distributions can be defined in models', {
 debugonce(greta:::check_dims)
 greta:::check_dims(1, p, target_dim = dim)
 
-test_that('continuous distributions can be sampled from', {
+test_that('distributions can be sampled from', {
 
   source('helpers.R')
 
   x <- randn(100)
+  y <- round(randu(100))
+  p <- iprobit(normal(0, 1, dim = 100))
 
   # free (with a density)
   sample_distribution((likelihood(x) = normal(free(), 1)))
+
+  # discrete
+  sample_distribution((likelihood(y) = bernoulli(p)))
+  sample_distribution((likelihood(y) = binomial(1, p)))
+  sample_distribution((likelihood(y) = negative_binomial(1, p)))
+  sample_distribution((likelihood(y) = poisson(p)))
 
   # unconstrained
   sample_distribution(normal(-2, 3))
