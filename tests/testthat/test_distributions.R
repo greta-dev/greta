@@ -294,7 +294,7 @@ test_that('array-valued distributions can be defined in models', {
   define_model(gamma(0.9, 1.3, dim = dim))
   define_model(exponential(6.3, dim = dim))
   define_model(beta(6.3, 5.9, dim = dim))
-  define_model(uniform(-13, 2.4, dim = dim))  #! (non-conformable)
+  define_model(uniform(-13, 2.4, dim = dim))
 
   sig <- rWishart(4, 3, diag(3))[, , 1]
   define_model(multivariate_normal(rnorm(3), sig, dim = dim[1]))

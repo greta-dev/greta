@@ -64,25 +64,30 @@ free_distribution <- R6Class (
 
     to_free = function (y) {
 
+      upper <- self$parameters$upper$value()
+      lower <- self$parameters$lower$value()
+
+      if (is_scalar(upper))
+        upper <- as.vector(upper)
+
+      if (is_scalar(lower))
+        lower <- as.vector(lower)
+
       if (self$constraint == 'none') {
 
         x <- y
 
       } else if (self$constraint == 'both') {
 
-        upper <- self$parameters$upper$value()
-        lower <- self$parameters$lower$value()
         x <- qlogis((y - lower) / (upper - lower))
 
       } else if (self$constraint == 'low') {
 
-        upper <- self$parameters$upper$value()
         baseline <- upper - y
         x <- log(exp(baseline) - 1)
 
       } else if (self$constraint == 'high') {
 
-        lower <- self$parameters$lower$value()
         baseline <- y - lower
         x <- log(exp(baseline) - 1)
 
@@ -136,8 +141,16 @@ uniform_distribution <- R6Class (
     log_density = NULL,
 
     to_free = function (y) {
+
       max <- self$parameters$max$value()
       min <- self$parameters$min$value()
+
+      if (is_scalar(max))
+        max <- as.vector(max)
+
+      if (is_scalar(min))
+        min <- as.vector(min)
+
       qlogis((y - min) / (max - min))
     },
 
