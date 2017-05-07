@@ -56,6 +56,8 @@ test_that('random strings of operators work as expected', {
 
   for (i in 1:10) {
 
+    flush()
+
     a <- randn(25, 4)
     b <- randn(25, 4)
 
