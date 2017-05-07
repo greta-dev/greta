@@ -300,16 +300,17 @@ test_that('array-valued distributions can be defined in models', {
   define_model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
 
   # density-free and discrete data need a bit of help
-  define_model((likelihood(x) = normal(free(dim = dim), 1, dim = dim))) #! (should handle dimensions)
-  define_model((likelihood(y) = bernoulli(p, dim = dim))) #! probs error (in likelihood)
-  define_model((likelihood(y) = binomial(1, p, dim = dim))) #! (should handle dimensions)
-  define_model((likelihood(y) = negative_binomial(1, p, dim = dim))) #! (should handle dimensions)
-  define_model((likelihood(y) = poisson(p, dim = dim)))
+  define_model((likelihood(x) = normal(free(dim = dim), 1)))
+  define_model((likelihood(y) = bernoulli(p))) #! probs error (in likelihood)
+  define_model((likelihood(y) = binomial(1, p)))
+  define_model((likelihood(y) = negative_binomial(1, p)))
+  define_model((likelihood(y) = poisson(p)))
 
   # need to set and check better error messages for these
 
 })
-
+debugonce(greta:::check_dims)
+greta:::check_dims(1, p, target_dim = dim)
 
 test_that('continuous distributions can be sampled from', {
 
