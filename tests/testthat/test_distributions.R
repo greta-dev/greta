@@ -254,18 +254,6 @@ test_that('scalar-valued distributions can be defined in models', {
   y <- round(randu(5))
   p <- iprobit(normal(0, 1))
 
-  # continuous distributions
-  define_model(normal(-2, 3))
-  define_model(student(5.6, -2, 2.3))
-  define_model(lognormal(1.2, 0.2))
-  define_model(gamma(0.9, 1.3))
-  define_model(exponential(6.3))
-  define_model(beta(6.3, 5.9))
-  define_model(uniform(-13, 2.4))
-  sig <- rWishart(4, 3, diag(3))[, , 1]
-  define_model(multivariate_normal(rnorm(3), sig))
-  define_model(wishart(4, sig))
-
   # density-free and discrete data need a bit of help
   define_model((likelihood(x) = normal(free(), 1)))
   define_model((likelihood(y) = bernoulli(p)))
@@ -273,8 +261,25 @@ test_that('scalar-valued distributions can be defined in models', {
   define_model((likelihood(y) = negative_binomial(1, p)))
   define_model((likelihood(y) = poisson(p)))
 
-  # need to set and check better error messages for when define_model can't
-  # create a density
+  flush()
+
+  # continuous distributions
+  define_model(normal(-2, 3))
+  define_model(student(5.6, -2, 2.3))
+  define_model(lognormal(1.2, 0.2))
+
+  flush()
+
+  define_model(gamma(0.9, 1.3))
+  define_model(exponential(6.3))
+  define_model(beta(6.3, 5.9))
+
+  flush()
+
+  define_model(uniform(-13, 2.4))
+  sig <- rWishart(4, 3, diag(3))[, , 1]
+  define_model(multivariate_normal(rnorm(3), sig))
+  define_model(wishart(4, sig))
 
 })
 
@@ -287,18 +292,6 @@ test_that('array-valued distributions can be defined in models', {
   y <- round(randu(5, 2))
   p <- iprobit(normal(0, 1, dim = dim))
 
-  # continuous distributions
-  define_model(normal(-2, 3, dim = dim))
-  define_model(student(5.6, -2, 2.3, dim = dim))
-  define_model(lognormal(1.2, 0.2, dim = dim))
-  define_model(gamma(0.9, 1.3, dim = dim))
-  define_model(exponential(6.3, dim = dim))
-  define_model(beta(6.3, 5.9, dim = dim))
-  define_model(uniform(-13, 2.4, dim = dim))
-
-  sig <- rWishart(4, 3, diag(3))[, , 1]
-  define_model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
-
   # density-free and discrete data need a bit of help
   define_model((likelihood(x) = normal(free(dim = dim), 1)))
   define_model((likelihood(y) = bernoulli(p)))
@@ -306,7 +299,24 @@ test_that('array-valued distributions can be defined in models', {
   define_model((likelihood(y) = negative_binomial(1, p)))
   define_model((likelihood(y) = poisson(p)))
 
-  # need to set and check better error messages for these
+  flush()
+
+  # continuous distributions
+  define_model(normal(-2, 3, dim = dim))
+  define_model(student(5.6, -2, 2.3, dim = dim))
+  define_model(lognormal(1.2, 0.2, dim = dim))
+
+  flush()
+
+  define_model(gamma(0.9, 1.3, dim = dim))
+  define_model(exponential(6.3, dim = dim))
+  define_model(beta(6.3, 5.9, dim = dim))
+  define_model(uniform(-13, 2.4, dim = dim))
+
+  flush()
+
+  sig <- rWishart(4, 3, diag(3))[, , 1]
+  define_model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
 
 })
 
@@ -327,18 +337,26 @@ test_that('distributions can be sampled from', {
   sample_distribution((likelihood(y) = negative_binomial(1, p)))
   sample_distribution((likelihood(y) = poisson(p)))
 
+  flush()
+
   # unconstrained
   sample_distribution(normal(-2, 3))
   sample_distribution(student(5.6, -2, 2.3))
+
+  flush()
 
   # positive
   sample_distribution(lognormal(1.2, 0.2), lower = 0)
   sample_distribution(gamma(0.9, 1.3), lower = 0)
   sample_distribution(exponential(6.3), lower = 0)
 
+  flush()
+
   # constrained
   sample_distribution(beta(6.3, 5.9), lower = 0, upper = 1)
   sample_distribution(uniform(-13, 2.4), lower = -13, upper = 2.4)
+
+  flush()
 
   # multivariate
   sig <- rWishart(4, 3, diag(3))[, , 1]
