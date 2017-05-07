@@ -10,7 +10,7 @@ test_that('lambda iteration works', {
   niter <- 50
 
   # r version
-  target_lambda <- iterate_lambda(matrix = mat,
+  target_lambda <- it_lambda(matrix = mat,
                                   state = init,
                                   niter = niter)
 
@@ -35,7 +35,7 @@ test_that('state iteration works', {
   niter <- 50
 
   # r version
-  target_state <- iterate_state(matrix = mat,
+  target_state <- it_state(matrix = mat,
                                 state = init,
                                 niter = niter)
   target_state <- target_state / sum(target_state)
@@ -64,7 +64,7 @@ test_that('vectorised lambda iteration works', {
 
   # r version
   target_lambda_list <- lapply(mat_list,
-                               iterate_lambda,
+                               it_lambda,
                                state = init,
                                niter = niter)
   target_lambdas <- unlist(target_lambda_list)

@@ -187,14 +187,14 @@ sample_distribution <- function (greta_array, n = 10, lower = -Inf, upper = Inf)
 }
 
 # R versions of dynamics module methods
-iterate_lambda <- function (matrix, state, niter) {
+it_lambda <- function (matrix, state, niter) {
   states <- list(state)
   for (i in seq_len(niter))
     states[[i + 1]] <- states[[i]] %*% matrix
   states[[niter + 1]][1] / states[[niter]][1]
 }
 
-iterate_state <- function (matrix, state, niter) {
+it_state <- function (matrix, state, niter) {
   for (i in seq_len(niter))
     state <- state %*% matrix
   state[1, ]
