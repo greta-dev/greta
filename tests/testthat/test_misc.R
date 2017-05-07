@@ -79,7 +79,7 @@ test_that('all_greta_arrays works', {
 test_that('likelihood errors informatively', {
 
   source('helpers.R')
-
+  flush()
   y <- randn(3, 3, 2)
   x <- randn(1)
 
@@ -108,3 +108,42 @@ test_that('greta_model objects print', {
 
 })
 
+test_that('greta_model objects print', {
+
+  m <- define_model(normal(0, 1))
+  message <- capture.output(print(m))
+  expect_equal(message, 'greta model')
+
+})
+
+test_that('define_model and mcmc error informatively', {
+
+  source('helpers.R')
+  x <- as_data(randn(10))
+
+  # no model with non-probability density greta arrays
+  expect_error(define_model(free()),
+               'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
+  expect_error(define_model(x),
+               'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
+
+  expect_error(define_model(),
+               'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
+  #
+  # mcmc()
+  # message <- capture.output(print(m))
+  # expect_equal(message, 'greta model')
+
+})
+
+# bad parameters to distributions
+
+# check_dims errors
+
+# define_model with no greta arrays passed
+
+# define_model with unfixed discrete variables
+
+# mcmc for data greta arrays
+
+# mcmc sampler reject proposals (?!?)
