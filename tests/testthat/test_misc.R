@@ -75,3 +75,27 @@ test_that('all_greta_arrays works', {
   expect_identical(names(array_list_nodata), c('a', 'c'))
 
 })
+
+test_that('likelihood errors informatively', {
+
+  source('helpers.R')
+
+  y <- randn(3, 3, 2)
+  x <- randn(1)
+
+  # not a stochastic greta array on the right
+  expect_error({likelihood(y) = x},
+               'right hand side of likelihood must be a stochastic greta array')
+
+  expect_error({likelihood(y) = as_data(x)},
+               'right hand side of likelihood must be a stochastic greta array')
+
+  # no density on the right
+  expect_error({likelihood(y) = free()},
+               'free parameters do not have distributions, so cannot be used to define a likelihood')
+
+  # non-scalar and wrong dimensions
+  expect_error({likelihood(y) = normal(0, 1, dim = c(3, 3, 1))},
+               '^left- and right-hand side of likelihood have different dimensions.')
+
+})
