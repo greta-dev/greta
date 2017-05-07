@@ -23,6 +23,17 @@ grab <- function (x) {
 
 }
 
+set_likelihood <- function(dist, data) {
+  # fix the value of dist
+  dist$node$value(data$node$value())
+  dist$node$.fixed_value <- TRUE
+
+  # give the distribution to the data as a likelihood (this will register the
+  # child distribution)
+  data$node$set_likelihood(dist$node)
+  data$node$register()
+}
+
 compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.
@@ -39,8 +50,10 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   if (!identical(names(parameters), c('df', 'Sigma')))
     parameters_greta <- c(parameters_greta, dim = NROW(x))
 
+  # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
-  likelihood(x) = dist
+
+  set_likelihood(dist, as_data(x))
 
   stopifnot(dist$node$.fixed_value)
 
