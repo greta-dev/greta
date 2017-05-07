@@ -8,10 +8,6 @@ member <- function(x, method)
 to_shape <- function(dim)
   do.call(shape, as.list(dim))
 
-# placeholder error
-notimplemented <- function ()
-  stop ('method not yet implemented', call. = FALSE)
-
 # is this greta_array actually a scalar?
 is_scalar <- function (x)
   identical(dim(x), c(1L, 1L))

@@ -213,10 +213,6 @@ normal_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y) y,
-
-    tf_from_free = function (x, env) x,
-
     initialize = function (mean, sd, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(mean, sd, target_dim = dim)
@@ -432,9 +428,6 @@ student_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y) y,
-    tf_from_free = function (x, env) x,
-
     initialize = function (df, location, scale, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(df, location, scale, target_dim = dim)
@@ -499,9 +492,6 @@ multivariate_normal_distribution <- R6Class (
   'multivariate_normal_distribution',
   inherit = distribution,
   public = list(
-
-    to_free = function (y) y,
-    tf_from_free = function (x, env) x,
 
     initialize = function (mean, Sigma, dim) {
 
