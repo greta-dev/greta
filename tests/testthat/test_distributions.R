@@ -309,8 +309,6 @@ test_that('array-valued distributions can be defined in models', {
   # need to set and check better error messages for these
 
 })
-debugonce(greta:::check_dims)
-greta:::check_dims(1, p, target_dim = dim)
 
 test_that('distributions can be sampled from', {
 
