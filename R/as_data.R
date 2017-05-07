@@ -43,4 +43,5 @@ as_data.greta_array <- function (x) {
 
 # otherwise try to coerce to a greta array
 #' @export
-as_data.default <- as.greta_array
+as_data.default <- function (x)
+  as.greta_array(x)
