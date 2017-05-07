@@ -15,9 +15,6 @@ as.greta_model.dag_class <- function (x, ...) {
   ans
 }
 
-as.greta_model.greta_model <- function (x, ...)
-  x
-
 #' @rdname greta-model
 #' @param x a \code{greta_model} object
 #' @param \dots further arguments passed to or from other methods (currently ignored).
