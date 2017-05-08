@@ -169,9 +169,21 @@ test_that('check_dims errors informatively', {
 
 })
 
+test_that('rejected mcmc proposals', {
+
+  source('helpers.R')
+
+  x <- rnorm(10000, 1e6, 1)
+  z = normal(-1e6, 1e-6)
+  likelihood(x) = normal(z, 1e6)
+  m <- define_model(z)
+  expect_message(mcmc(m, n_samples = 1, warmup = 0),
+                 'proposal rejected due to numerical instability')
+
+})
+
+
 # bad parameters to distributions (especially support for free & uniform, and
 # dims for multivariate_normal & wishart)
 
 # evaluate free with different constraints
-
-# mcmc sampler reject proposals (?!?)
