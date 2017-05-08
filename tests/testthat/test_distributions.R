@@ -478,6 +478,12 @@ test_that('multivariate_normal distribution errors informatively', {
   expect_error(multivariate_normal(0, 1),
                'the multivariate normal distribution is for vectors, but the parameters were scalar')
 
+  # bad dim
+  expect_error(multivariate_normal(m_a, a, dim = -1),
+               'dim must be a scalar positive integer, but was: -1')
+  expect_error(multivariate_normal(m_a, a, dim = c(1, 3)),
+               '^dim must be a scalar positive integer, but was:')
+
 })
 
 # sample free with different constraints

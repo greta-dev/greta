@@ -43,14 +43,6 @@ free_distribution <- R6Class (
 
       }
 
-      # must be length one, and can't be greta arrays
-      if (length(lower) != 1 | length(upper) != 1 |
-          !is.numeric(lower) | !is.numeric(upper)) {
-
-        bad_limits <- TRUE
-
-      }
-
       if (bad_limits) {
 
         stop ('lower and upper must either be -Inf (lower only), ',
@@ -552,11 +544,12 @@ multivariate_normal_distribution <- R6Class (
       }
 
       # check dim is a positive scalar integer
+      dim_old <- dim
       dim <- as.integer(dim)
-      if (length(dim) > 1 | dim <= 0 | !is.finite(dim)) {
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
 
         stop ('dim must be a scalar positive integer, but was: ',
-              dput(dim),
+              capture.output(dput(dim_old)),
               call. = FALSE)
 
       }
