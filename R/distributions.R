@@ -7,6 +7,16 @@ free_distribution <- R6Class (
 
     initialize = function (lower = -Inf, upper = Inf, dim = 1) {
 
+      good_types <- is.numeric(lower) && length(lower) == 1 &
+        is.numeric(upper) && length(upper) == 1
+
+      if (!good_types) {
+
+        stop ('lower and upper must be numeric vectors of length 1',
+              call. = FALSE)
+
+      }
+
       # check and assign limits
       bad_limits <- TRUE
 
@@ -44,13 +54,15 @@ free_distribution <- R6Class (
       if (bad_limits) {
 
         stop ('lower and upper must either be -Inf (lower only), ',
-              'Inf (upper only) or finite scalars')
+              'Inf (upper only) or finite scalars',
+              call. = FALSE)
 
       }
 
       if (lower >= upper) {
 
-        stop ('upper bound must be greater than lower bound')
+        stop ('upper bound must be greater than lower bound',
+              call. = FALSE)
 
       }
 
@@ -164,29 +176,27 @@ uniform_distribution <- R6Class (
 
     initialize = function (min, max, dim) {
 
-      # check and assign limits
-      bad_limits <- FALSE
+      good_types <- is.numeric(min) && length(min) == 1 &
+        is.numeric(max) && length(max) == 1
 
-      if (!is.finite(min) | !is.finite(max))
-        bad_limits <- TRUE
+      if (!good_types) {
 
-      # must be length one, and can't be greta arrays
-      if (length(min) != 1 | length(max) != 1 |
-          !is.numeric(max) | !is.numeric(max)) {
-
-        bad_limits <- TRUE
+        stop ('min and max must be numeric vectors of length 1',
+              call. = FALSE)
 
       }
 
-      if (bad_limits) {
+      if (!is.finite(min) | !is.finite(max)) {
 
-        stop ('min and max must finite scalars')
+        stop ('min and max must finite scalars',
+              call. = FALSE)
 
       }
 
       if (min >= max) {
 
-        stop ('max must be greater than min')
+        stop ('max must be greater than min',
+              call. = FALSE)
 
       }
 
@@ -504,7 +514,8 @@ multivariate_normal_distribution <- R6Class (
           length(dim(mean)) != 2) {
 
         stop ('mean must be a 2D greta array with one column, but has dimensions ',
-              paste(dim(Sigma), collapse = ' x '))
+              paste(dim(mean), collapse = ' x '),
+              call. = FALSE)
 
       }
 
@@ -513,7 +524,8 @@ multivariate_normal_distribution <- R6Class (
           length(dim(Sigma)) != 2) {
 
         stop ('Sigma must be a square 2D greta array, but has dimensions ',
-              paste(dim(Sigma), collapse = ' x '))
+              paste(dim(Sigma), collapse = ' x '),
+              call. = FALSE)
 
       }
 
@@ -522,17 +534,30 @@ multivariate_normal_distribution <- R6Class (
       dim_Sigma <- nrow(Sigma)
 
       if (dim_mean != dim_Sigma) {
+
         stop ('mean and Sigma have different dimensions, ',
-              dim_mean, ' vs ', dim_Sigma)
+              dim_mean, ' vs ', dim_Sigma,
+              call. = FALSE)
+
       }
 
-      if (dim_mean == 1)
-        stop ('the multivariate normal distribution is for vectors, but the parameters were scalar')
+      if (dim_mean == 1) {
+
+        stop ('the multivariate normal distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
 
       # check dim is a positive scalar integer
       dim <- as.integer(dim)
-      if (length(dim) > 1 | dim <= 0 | !is.finite(dim))
-        stop ('dim must be a scalar positive integer, but was: ', dput(dim))
+      if (length(dim) > 1 | dim <= 0 | !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              dput(dim),
+              call. = FALSE)
+
+      }
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
@@ -602,7 +627,8 @@ wishart_distribution <- R6Class (
           length(dim(Sigma)) != 2) {
 
         stop ('Sigma must be a square 2D greta array, but has dimensions ',
-              paste(dim(Sigma), collapse = ' x '))
+              paste(dim(Sigma), collapse = ' x '),
+              call. = FALSE)
 
       }
 

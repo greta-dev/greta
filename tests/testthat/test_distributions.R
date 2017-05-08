@@ -245,7 +245,6 @@ test_that('Wishart distribution has correct density', {
 
 })
 
-
 test_that('scalar-valued distributions can be defined in models', {
 
   source('helpers.R')
@@ -364,3 +363,118 @@ test_that('distributions can be sampled from', {
   sample_distribution(wishart(4, sig))
 
 })
+
+
+test_that('free distribution errors informatively', {
+
+  source('helpers.R')
+
+  # bad types
+  expect_error(free(upper = NA),
+               'lower and upper must be numeric vectors of length 1')
+  expect_error(free(upper = head),
+               'lower and upper must be numeric vectors of length 1')
+  expect_error(free(lower = 1:3),
+               'lower and upper must be numeric vectors of length 1')
+
+  # good types, bad values
+  expect_error(free(lower = Inf),
+               '^lower and upper must either be')
+  expect_error(free(upper = -Inf),
+               '^lower and upper must either be')
+
+  # lower >= upper
+  expect_error(free(lower = 1, upper = 1),
+               'upper bound must be greater than lower bound')
+
+})
+
+test_that('uniform distribution errors informatively', {
+
+  source('helpers.R')
+
+  # bad types
+  expect_error(uniform(min = 0, max = NA),
+               'min and max must be numeric vectors of length 1')
+  expect_error(uniform(min = 0, max = head),
+               'min and max must be numeric vectors of length 1')
+  expect_error(uniform(min = 1:3, max = 5),
+               'min and max must be numeric vectors of length 1')
+
+  # good types, bad values
+  expect_error(uniform(min = -Inf, max = Inf),
+               'min and max must finite scalars')
+
+  # lower >= upper
+  expect_error(uniform(min = 1, max = 1),
+               'max must be greater than min')
+
+})
+
+test_that('wishart distribution errors informatively', {
+
+  source('helpers.R')
+
+  a <- randn(3, 3)
+  b <- randn(3, 3, 3)
+  c <- randn(3, 2)
+
+  expect_true(inherits(wishart(3, a),
+                       'greta_array'))
+  expect_error(wishart(3, b),
+               '^Sigma must be a square 2D greta array, but has dimensions')
+  expect_error(wishart(3, c),
+               '^Sigma must be a square 2D greta array, but has dimensions')
+
+
+})
+
+test_that('multivariate_normal distribution errors informatively', {
+
+  source('helpers.R')
+
+  m_a <- randn(3)
+  m_b <- randn(3, 1)
+  m_c <- randn(1, 3)
+  m_d <- randn(3, 2)
+
+  a <- randn(3, 3)
+  b <- randn(3, 3, 3)
+  c <- randn(3, 2)
+  d <- randn(4, 4)
+
+  # good means
+  expect_true(inherits(multivariate_normal(m_a, a),
+                       'greta_array'))
+
+  expect_true(inherits(multivariate_normal(m_b, a),
+                       'greta_array'))
+
+  # bad means
+  expect_error(multivariate_normal(m_c, a),
+                       'mean must be a 2D greta array with one column, but has dimensions 1 x 3')
+
+  expect_error(multivariate_normal(m_d, a),
+                       'mean must be a 2D greta array with one column, but has dimensions 3 x 2')
+
+  # good sigmas
+  expect_true(inherits(multivariate_normal(m_a, a),
+                       'greta_array'))
+
+  # bad sigmas
+  expect_error(multivariate_normal(m_a, b),
+               'Sigma must be a square 2D greta array, but has dimensions 3 x 3 x 3')
+  expect_error(multivariate_normal(m_a, c),
+               'Sigma must be a square 2D greta array, but has dimensions 3 x 2')
+
+  # mismatched parameters
+  expect_error(multivariate_normal(m_a, d),
+               'mean and Sigma have different dimensions, 3 vs 4')
+
+  # scalars
+  expect_error(multivariate_normal(0, 1),
+               'the multivariate normal distribution is for vectors, but the parameters were scalar')
+
+})
+
+# sample free with different constraints

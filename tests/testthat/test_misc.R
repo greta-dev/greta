@@ -191,9 +191,3 @@ test_that('rejected mcmc proposals', {
   mcmc(m, n_samples = 1, warmup = 0)
 
 })
-
-
-# bad parameters to distributions (especially support for free & uniform, and
-# dims for multivariate_normal & wishart)
-
-# evaluate free with different constraints
