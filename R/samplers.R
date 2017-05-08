@@ -50,6 +50,11 @@ define_model <- function (...) {
 
   }
 
+  if (length(target_greta_arrays) == 0) {
+    stop ('could not find any non-data greta arrays',
+          call. = FALSE)
+  }
+
   # check they have a density among them
   have_density <- vapply(target_greta_arrays,
                          greta_array_has_density,
@@ -132,7 +137,7 @@ mcmc <- function (model,
     msg <- sprintf('%s %s, data greta arrays cannot be sampled',
                    bad_greta_arrays,
                    is_are)
-    stop (msg)
+    stop (msg, call. = FALSE)
   }
 
   # get the dag containing the target nodes

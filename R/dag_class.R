@@ -206,10 +206,6 @@ dag_class <- R6Class(
         # account for multiple nodes depending on the same nodes
         names <- unique(names)
 
-      } else {
-        # otherwise return own name (to make sure at least something is returned
-        # on recursion)
-        names <- self$node_name()
       }
 
       # optionally filter to a specific type
