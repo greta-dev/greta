@@ -329,6 +329,9 @@ test_that('distributions can be sampled from', {
 
   # free (with a density)
   sample_distribution((likelihood(x) = normal(free(), 1)))
+  sample_distribution((likelihood(x) = normal(free(lower = -1), 1)))
+  sample_distribution((likelihood(x) = normal(free(upper = -2), 1)))
+  sample_distribution((likelihood(x) = normal(free(lower = 1.2, upper = 1.3), 1)))
 
   # discrete
   sample_distribution((likelihood(y) = bernoulli(p)))

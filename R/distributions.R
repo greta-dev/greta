@@ -125,7 +125,9 @@ free_distribution <- R6Class (
 
         upper <- self$parameters$upper$value()
         baseline <- tf$log(1 + tf$exp(x))
-        y <- upper - baseline
+        # have to coerce upper since it's being subtracted *from* and has type
+        # 'float32_ref'
+        y <- tf_as_float(upper) - baseline
 
       } else if (self$constraint == 'high') {
 
