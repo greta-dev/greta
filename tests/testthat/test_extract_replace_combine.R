@@ -285,6 +285,16 @@ test_that('rbind, cbind and c work like R', {
 
 })
 
+test_that('assign errors on stochastic greta arrays', {
+
+  source('helpers.R')
+
+  z <- normal(0, 1, dim = 5)
+  expect_error(z[1] <- 3,
+               'cannot replace values in a stochastic greta array')
+
+})
+
 test_that('rbind and cbind give informative error messages', {
 
   source('helpers.R')
