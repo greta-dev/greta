@@ -112,20 +112,60 @@ test_that('greta_model objects print', {
 test_that('define_model and mcmc error informatively', {
 
   source('helpers.R')
+
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
   expect_error(define_model(free()),
                'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
+
   expect_error(define_model(x),
                'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
 
   expect_error(define_model(),
-               'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
-  #
-  # mcmc()
-  # message <- capture.output(print(m))
-  # expect_equal(message, 'greta model')
+               'could not find any non-data greta arrays')
+
+  # can't define a model for an unfixed discrete variable
+  expect_error(define_model(bernoulli(0.5)),
+               "model contains a discrete random variable that isn't in the likelihood, so cannot be sampled from")
+
+  # can't draw samples of a data greta array
+  z = normal(0, 1)
+  m <- define_model(x, z)
+  expect_error(mcmc(m),
+               'x is a data greta array, data greta arrays cannot be sampled')
+
+})
+
+test_that('check_dims errors informatively', {
+
+  source('helpers.R')
+
+  a <- ones(3, 3)
+  b <- ones(1)
+  c <- ones(2, 2)
+  d <- ones(2, 2, 2)
+  dim1 <- c(3, 3)
+
+  # with one scalar, it should always should work
+  expect_equal(greta:::check_dims(a, b),
+               dim(a))
+
+  # but not when target_dim is set
+  expect_error(greta:::check_dims(a, b, target_dim = dim1),
+               'array dimensions should be 3x3, but input dimensions were 3x3, 1x1')
+
+  # with both scalar, it should always should work
+  expect_equal(greta:::check_dims(b, b),
+               dim(b))
+
+  # with two differently shaped arrays it shouldn't
+  expect_error(greta:::check_dims(a, c),
+               'incompatible dimensions: 3x3, 2x2')
+
+  # with two scalars and a target dimenssion, just return the target dimension
+  expect_equal(greta:::check_dims(b, b, target_dim = dim1),
+               dim1)
 
 })
 
@@ -133,13 +173,5 @@ test_that('define_model and mcmc error informatively', {
 # dims for multivariate_normal & wishart)
 
 # evaluate free with different constraints
-
-# check_dims errors
-
-# define_model with no greta arrays passed
-
-# define_model with unfixed discrete variables
-
-# mcmc for data greta arrays
 
 # mcmc sampler reject proposals (?!?)

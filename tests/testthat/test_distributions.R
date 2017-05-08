@@ -364,5 +364,3 @@ test_that('distributions can be sampled from', {
   sample_distribution(wishart(4, sig))
 
 })
-
-
