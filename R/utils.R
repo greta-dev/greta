@@ -8,10 +8,6 @@ member <- function(x, method)
 to_shape <- function(dim)
   do.call(shape, as.list(dim))
 
-# placeholder error
-notimplemented <- function ()
-  stop ('method not yet implemented', call. = FALSE)
-
 # is this greta_array actually a scalar?
 is_scalar <- function (x)
   identical(dim(x), c(1L, 1L))
@@ -223,3 +219,8 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
   invisible(tf_version_valid)
 
 }
+
+# determine whether a greta array has (can define) a density
+# only stochastics can have densities, and free nodes can't have densities
+greta_array_has_density <- function (x)
+  x$node$type == 'stochastic' && x$node$distribution_name != 'free'

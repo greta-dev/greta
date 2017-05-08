@@ -1,6 +1,12 @@
 # test functions
 
+# flush the node list and set the RNG seed
+flush <- function ()
+  options('nodes')$nodes$flush()
+
+flush()
 set.seed(2017-05-01)
+
 
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
@@ -15,6 +21,17 @@ grab <- function (x) {
 
   tf$Session()$run(x)
 
+}
+
+set_likelihood <- function(dist, data) {
+  # fix the value of dist
+  dist$node$value(data$node$value())
+  dist$node$.fixed_value <- TRUE
+
+  # give the distribution to the data as a likelihood (this will register the
+  # child distribution)
+  data$node$set_likelihood(dist$node)
+  data$node$register()
 }
 
 compare_distribution <- function (greta_fun, r_fun, parameters, x) {
@@ -33,8 +50,10 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   if (!identical(names(parameters), c('df', 'Sigma')))
     parameters_greta <- c(parameters_greta, dim = NROW(x))
 
+  # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
-  likelihood(x) = dist
+
+  set_likelihood(dist, as_data(x))
 
   stopifnot(dist$node$.fixed_value)
 
@@ -181,7 +200,7 @@ gen_opfun <- function (n, ops) {
 # greta array is defined as astochastic in the call, like: sample_distribution(normal(0, 1))
 sample_distribution <- function (greta_array, n = 10, lower = -Inf, upper = Inf) {
   m <- define_model(greta_array)
-  draws <- mcmc(m, n_samples = n, warmup = 0)
+  draws <- mcmc(m, n_samples = n, warmup = 1)
   samples <- as.vector(draws[[1]])
   expect_true(all(samples >= lower & samples <= upper))
 }

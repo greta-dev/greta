@@ -138,7 +138,8 @@ NULL
 
     # check they're matrices
     if (length(dim(x)) != 2 | length(dim(x)) != 2)
-      stop ('only two-dimensional greta arrays can be matrix-multiplied')
+      stop ('only two-dimensional greta arrays can be matrix-multiplied',
+            call. = FALSE)
 
     # check the dimensions match
     if (dim(x)[2] != dim(y)[1]) {

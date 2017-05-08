@@ -77,14 +77,22 @@ dag_class <- R6Class(
 
       # check for unfixed discrete random variables
       bad_nodes <- vapply(self$children,
-                          function(x) x$type == 'stochastic' && x$discrete && !x$.fixed_value,
+                          function(x) {
+                            x$type == 'stochastic' &&
+                              x$discrete &&
+                              !x$.fixed_value
+                            },
                           FALSE)
-      if (any(bad_nodes))
-        stop ("the model contains a discrete random variable that isn't in the likelhood, so cannot be sampled from")
+
+      if (any(bad_nodes)) {
+        stop ("model contains a discrete random variable that isn't in the ",
+              "likelihood, so cannot be sampled from",
+              call. = FALSE)
+      }
 
       # define all nodes, node densities and free states in the environment
       lapply(self$children,
-             function (x) x$define_tf(self$tf_environment))
+           function (x) x$define_tf(self$tf_environment))
 
       # define an overall log density and relevant gradients there
       self$define_joint_density()
@@ -113,41 +121,6 @@ dag_class <- R6Class(
         current_parameters <- unlist_tf(current_parameters)
 
       current_parameters
-
-    },
-
-    # check proposed model parameters 'parameters' as a named list (if flat =
-    # FALSE), or a named vector (if flat = TRUE). If they are valid, return as a
-    # named list.
-    check_parameters = function (parameters, flat = TRUE) {
-
-      # get example parameter list for all non-fixed parameters for the dag
-      current_parameters <- self$all_values(type = 'stochastic',
-                                            omit_fixed = TRUE)
-
-      # unflatten the new parameters if required, and convert each element to an array
-      if (flat)
-        parameters <- relist_tf(parameters, current_parameters)
-
-      # and check they match
-      if (!length(parameters) == length(current_parameters))
-        stop ('length of new parameters does not match dag')
-
-      classes <- vapply(parameters, class, '')
-      current_classes <- vapply(current_parameters, class, '')
-      if (!all(classes == current_classes))
-        stop ('classes of new parameters do not match dag')
-
-      dims <- vapply(parameters, dim, 1)
-      current_dims <- vapply(current_parameters, dim, 1)
-      if (!all(dims == current_dims))
-        stop ('dimensions of new parameters do not match dag')
-
-      if (!all(names(parameters) == names(current_parameters)))
-        stop ('names of new parameters do not match dag')
-
-      # otherwise return as a list
-      parameters
 
     },
 
@@ -233,10 +206,6 @@ dag_class <- R6Class(
         # account for multiple nodes depending on the same nodes
         names <- unique(names)
 
-      } else {
-        # otherwise return own name (to make sure at least something is returned
-        # on recursion)
-        names <- self$node_name()
       }
 
       # optionally filter to a specific type
@@ -265,8 +234,7 @@ dag_class <- R6Class(
     # get or set values in all descendents as a named list, only for nodes of
     # the named type (if type != NULL), and if omit_fixed = TRUE, omit the
     # fixed values when reporting (ignored when setting)
-    all_values = function (new_values = NULL, type = NULL, omit_fixed = TRUE, free = FALSE) {
-
+    all_values = function (type = NULL, omit_fixed = TRUE, free = FALSE) {
 
       # find all nodes of this type in the graph
       .nodes <- options()$nodes
@@ -280,28 +248,11 @@ dag_class <- R6Class(
         node_names <- node_names[which(!fixed)]
       }
 
-      if (is.null(new_values)) {
+      # get all values in a list
+      values <- lapply(nodes, function(x) x$value(free = free))
+      names(values) <- node_names
 
-        # get all values in a list
-        values <- lapply(nodes, function(x) x$value(free = free))
-        names(values) <- node_names
-        return (values)
-
-      } else {
-
-        # or check the new values have the right dimension ()
-        current_values <- self$all_values(type = type, omit_fixed = TRUE)
-        current_shape <- vapply(current_values, length, 1)
-        new_shape <- vapply(new_values, length, 1)
-
-        if (!identical(current_shape, new_shape))
-          stop ('new values have different shape to current values')
-
-        # then assign them
-        for (i in seq_along(nodes))
-          nodes[[i]]$value(new_values[[i]], free = free)
-
-      }
+      values
 
     },
 

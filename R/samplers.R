@@ -50,6 +50,22 @@ define_model <- function (...) {
 
   }
 
+  if (length(target_greta_arrays) == 0) {
+    stop ('could not find any non-data greta arrays',
+          call. = FALSE)
+  }
+
+  # check they have a density among them
+  have_density <- vapply(target_greta_arrays,
+                         greta_array_has_density,
+                         FALSE)
+
+  if (!any(have_density)) {
+    stop ('none of the greta arrays in the model are associated with a ',
+          'probability density, so a model cannot be defined',
+          call. = FALSE)
+  }
+
   # get the dag containing the target nodes
   dag <- dag_class$new(target_greta_arrays)
 
@@ -116,12 +132,12 @@ mcmc <- function (model,
   type <- vapply(target_greta_arrays, member, 'node$type', FUN.VALUE = '')
   bad <- type == 'data'
   if (any(bad)) {
-    is_are <- ifelse(sum(bad) == 1, 'is an data greta array', 'are data greta arrays')
+    is_are <- ifelse(sum(bad) == 1, 'is a data greta array', 'are data greta arrays')
     bad_greta_arrays <- paste(names[bad], collapse = ', ')
     msg <- sprintf('%s %s, data greta arrays cannot be sampled',
                    bad_greta_arrays,
                    is_are)
-    stop (msg)
+    stop (msg, call. = FALSE)
   }
 
   # get the dag containing the target nodes
@@ -307,16 +323,6 @@ hmc <- function (dag,
       dag$send_parameters(x)
       trace[i / thin, ] <- dag$trace_values()
       ljd[i / thin] <- dag$log_density()
-
-      # if (verbose) {
-      #
-      #   # optionally report acceptance statistics
-      #   acceptance_rate <- round(accept_count / i, 3)
-      #   message(sprintf('iteration %i, acceptance rate: %s',
-      #                   i,
-      #                   prettyNum(acceptance_rate)))
-      # }
-
     }
 
     if (verbose)

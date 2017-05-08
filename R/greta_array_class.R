@@ -9,7 +9,82 @@ as.greta_array <- function(x, ...)
 as.greta_array.greta_array <- function (x, ...)
   x
 
-# node method (only one defined)
+# coerce logical vectors to numerics
+#' @export
+as.greta_array.logical <- function (x) {
+  x[] <- as.numeric(x[])
+  as.greta_array.numeric(x)
+}
+
+# coerce dataframes if all columns can safely be converted to numeric, error
+# otherwise
+#' @export
+as.greta_array.data.frame <- function (x) {
+  classes <- vapply(x, class, '')
+  valid <- classes %in% c('numeric', 'integer', 'logical')
+
+  if (!all(valid)) {
+    invalid_types <- unique(classes[!valid])
+    stop ('cannot coerce a dataframe to a greta_array unless all columns are ',
+          'numeric, integer or logical. This dataframe had columns of type: ',
+          paste(invalid_types, collapse = ', '),
+          call. = FALSE)
+  }
+
+  as.greta_array.numeric(as.matrix(x))
+
+}
+
+# coerce logical matrices to numeric matrices, and error if they aren't logical
+# or numeric
+#' @export
+as.greta_array.matrix <- function (x) {
+  if (!is.numeric(x)) {
+
+    if (is.logical(x))
+      x[] <- as.numeric(x[])
+    else
+      stop ('cannot convert a matrix to a greta_array unless it is numeric, ',
+            'integer or logical. This matrix had type: ',
+            class(as.vector(x)),
+            call. = FALSE)
+
+  }
+
+  as.greta_array.numeric(x)
+
+}
+
+# coerce logical arrays to numeric arrays, and error if they aren't logical
+# or numeric
+#' @export
+as.greta_array.array <- function (x) {
+  if (!is.numeric(x)) {
+
+    if (is.logical(x))
+      x[] <- as.numeric(x[])
+    else
+      stop ('cannot convert an array to a greta_array unless it is numeric, ',
+            'integer or logical. This array had type: ',
+            class(as.vector(x)),
+            call. = FALSE)
+
+  }
+
+  as.greta_array.numeric(x)
+
+}
+
+# finally, reject if there are any missing values, or set up the greta_array
+#' @export
+as.greta_array.numeric <- function (x) {
+  if (any(!is.finite(x)))
+    stop ('cannot convert objects with missing or infinite values to greta_arrays',
+          call. = FALSE)
+  as.greta_array.node(data_node$new(x))
+}
+
+# node method (only one that does anything)
 #' @export
 as.greta_array.node <- function (x, ...) {
   ga <- list(node = x)
@@ -17,14 +92,14 @@ as.greta_array.node <- function (x, ...) {
   ga
 }
 
-# numeric methods
+# otherwise error
 #' @export
-as.greta_array.numeric <- function (x, ...)
-  as.greta_array.node(to_node(x))
-
-#' @export
-as.greta_array.data.frame <- function (x, ...)
-  as.greta_array(as.matrix(x))
+as.greta_array.default <- function (x) {
+  stop ('objects of class ',
+        paste(class(x), collapse = ' or '),
+        ' cannot be coerced to greta arrays',
+        call. = FALSE)
+}
 
 # checking class status
 is.greta_array <- function (x)

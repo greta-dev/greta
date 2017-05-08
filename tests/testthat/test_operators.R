@@ -56,6 +56,8 @@ test_that('random strings of operators work as expected', {
 
   for (i in 1:10) {
 
+    flush()
+
     a <- randn(25, 4)
     b <- randn(25, 4)
 
@@ -80,5 +82,15 @@ test_that('random strings of operators work as expected', {
     expect_true(all(difference < 1e-2))
 
   }
+
+})
+
+test_that('%*% errors informatively', {
+
+  a <- ones(3, 4)
+  b <- ones(1, 4)
+
+  expect_error(a %*% b,
+               'incompatible dimensions: 3x4 vs 1x4')
 
 })

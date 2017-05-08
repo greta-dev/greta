@@ -1,50 +1,8 @@
 # different types of node
 
-deterministic_node <- R6Class (
-  'deterministic_node',
-  inherit = node,
-  public = list(
-
-    type = 'deterministic',
-
-    # deterministic nodes add nothing to the density, only to the value
-    log_density_function = function (val) 0
-
-  )
-)
-
-# a node for constant values
-constant_node <- R6Class(
-  'constant_node',
-  inherit = deterministic_node,
-  public = list(
-
-    type = 'constant',
-
-    # is x is a numeric scalar, accept it
-    initialize = function (x) {
-
-
-      if (!(is.numeric(x) && is.vector(x) && length(x) == 1))
-        stop ('object cannot be coerced to a node')
-
-      self$value(x)
-      self$register()
-
-    },
-
-    tf = function (env) {
-      assign(self$name,
-             tf$constant(self$value(), dtype = tf$float32),
-             envir = env)
-    }
-  )
-)
-
-
 data_node <- R6Class(
   'data_node',
-  inherit = constant_node,
+  inherit = node,
   public = list(
 
     type = 'data',
@@ -90,7 +48,7 @@ data_node <- R6Class(
 # a node for applying operations to values
 operation_node <- R6Class(
   'operation_node',
-  inherit = deterministic_node,
+  inherit = node,
   public = list(
 
     type = 'operation',
@@ -188,13 +146,36 @@ op <- function (...) {
   ga(operation_node$new(...))
 }
 
-
-stochastic_node <- R6Class (
+# define base distribution constructor classes
+distribution <- R6Class (
+  'distribution',
   inherit = node,
-  'stochastic_node',
   public = list(
 
     type = 'stochastic',
+    discrete = NA,
+    parameters = list(),
+    distribution_name = 'no distribution',
+    tf_from_free = function (x, env) x,
+    to_free = function (x) x,
+
+    initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
+
+      # for all distributions, set name, store dims and set whether discrete
+      self$distribution_name <- name
+      self$discrete <- discrete
+
+      if (is.null(dim))
+        dim <- c(1, 1)
+
+      # coerce dim to integer
+      dim <- as.integer(dim)
+
+      # store array (updates dim)
+      self$value(unknowns(dim = dim))
+      self$register()
+
+    },
 
     tf_define = function (env) {
 
@@ -290,8 +271,6 @@ stochastic_node <- R6Class (
 
     },
 
-    tf_from_free = function (free_node, env) notimplemented(),
-
     # overwrite value with option to switch to free state
     value = function(new_value = NULL, free = FALSE, ...) {
 
@@ -308,40 +287,6 @@ stochastic_node <- R6Class (
 
       }
 
-    }
-
-  )
-)
-
-# define base distribution constructor classes
-distribution <- R6Class (
-  'distribution',
-  inherit = stochastic_node,
-  public = list(
-
-    type = 'stochastic',
-    discrete = NA,
-    parameters = list(),
-    distribution_name = 'no distribution',
-    from_free = function (x) notimplemented(),
-    to_free = function (x) notimplemented(),
-
-    initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
-
-      # for all distributions, set name, store dims and set whether discrete
-      self$distribution_name <- name
-      self$discrete <- discrete
-
-      if (is.null(dim))
-        dim <- c(1, 1)
-
-      # coerce dim to integer
-      dim <- as.integer(dim)
-
-      # store array (updates dim)
-      self$value(unknowns(dim = dim))
-      self$register()
-
     },
 
     add_parameter = function (parameter, name) {
@@ -354,12 +299,7 @@ distribution <- R6Class (
       self$add_child(parameter)
       self$parameters[[name]] <- parameter
 
-    },
-
-    print = function() {
-      msg <- sprintf('%s distribution',
-                     self$distribution_name)
-      cat(msg)
     }
+
   )
 )

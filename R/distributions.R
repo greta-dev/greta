@@ -7,6 +7,16 @@ free_distribution <- R6Class (
 
     initialize = function (lower = -Inf, upper = Inf, dim = 1) {
 
+      good_types <- is.numeric(lower) && length(lower) == 1 &
+        is.numeric(upper) && length(upper) == 1
+
+      if (!good_types) {
+
+        stop ('lower and upper must be numeric vectors of length 1',
+              call. = FALSE)
+
+      }
+
       # check and assign limits
       bad_limits <- TRUE
 
@@ -33,24 +43,18 @@ free_distribution <- R6Class (
 
       }
 
-      # must be length one, and can't be greta arrays
-      if (length(lower) != 1 | length(upper) != 1 |
-          !is.numeric(lower) | !is.numeric(upper)) {
-
-        bad_limits <- TRUE
-
-      }
-
       if (bad_limits) {
 
         stop ('lower and upper must either be -Inf (lower only), ',
-              'Inf (upper only) or finite scalars')
+              'Inf (upper only) or finite scalars',
+              call. = FALSE)
 
       }
 
       if (lower >= upper) {
 
-        stop ('upper bound must be greater than lower bound')
+        stop ('upper bound must be greater than lower bound',
+              call. = FALSE)
 
       }
 
@@ -64,25 +68,30 @@ free_distribution <- R6Class (
 
     to_free = function (y) {
 
+      upper <- self$parameters$upper$value()
+      lower <- self$parameters$lower$value()
+
+      if (is_scalar(upper))
+        upper <- as.vector(upper)
+
+      if (is_scalar(lower))
+        lower <- as.vector(lower)
+
       if (self$constraint == 'none') {
 
         x <- y
 
       } else if (self$constraint == 'both') {
 
-        upper <- self$parameters$upper$value()
-        lower <- self$parameters$lower$value()
         x <- qlogis((y - lower) / (upper - lower))
 
       } else if (self$constraint == 'low') {
 
-        upper <- self$parameters$upper$value()
         baseline <- upper - y
         x <- log(exp(baseline) - 1)
 
       } else if (self$constraint == 'high') {
 
-        lower <- self$parameters$lower$value()
         baseline <- y - lower
         x <- log(exp(baseline) - 1)
 
@@ -108,7 +117,9 @@ free_distribution <- R6Class (
 
         upper <- self$parameters$upper$value()
         baseline <- tf$log(1 + tf$exp(x))
-        y <- upper - baseline
+        # have to coerce upper since it's being subtracted *from* and has type
+        # 'float32_ref'
+        y <- tf_as_float(upper) - baseline
 
       } else if (self$constraint == 'high') {
 
@@ -136,8 +147,16 @@ uniform_distribution <- R6Class (
     log_density = NULL,
 
     to_free = function (y) {
+
       max <- self$parameters$max$value()
       min <- self$parameters$min$value()
+
+      if (is_scalar(max))
+        max <- as.vector(max)
+
+      if (is_scalar(min))
+        min <- as.vector(min)
+
       qlogis((y - min) / (max - min))
     },
 
@@ -151,29 +170,27 @@ uniform_distribution <- R6Class (
 
     initialize = function (min, max, dim) {
 
-      # check and assign limits
-      bad_limits <- FALSE
+      good_types <- is.numeric(min) && length(min) == 1 &
+        is.numeric(max) && length(max) == 1
 
-      if (!is.finite(min) | !is.finite(max))
-        bad_limits <- TRUE
+      if (!good_types) {
 
-      # must be length one, and can't be greta arrays
-      if (length(min) != 1 | length(max) != 1 |
-          !is.numeric(max) | !is.numeric(max)) {
-
-        bad_limits <- TRUE
+        stop ('min and max must be numeric vectors of length 1',
+              call. = FALSE)
 
       }
 
-      if (bad_limits) {
+      if (!is.finite(min) | !is.finite(max)) {
 
-        stop ('min and max must finite scalars')
+        stop ('min and max must finite scalars',
+              call. = FALSE)
 
       }
 
       if (min >= max) {
 
-        stop ('max must be greater than min')
+        stop ('max must be greater than min',
+              call. = FALSE)
 
       }
 
@@ -199,10 +216,6 @@ normal_distribution <- R6Class (
   'normal_distribution',
   inherit = distribution,
   public = list(
-
-    to_free = function (y) y,
-
-    tf_from_free = function (x, env) x,
 
     initialize = function (mean, sd, dim) {
       # add the nodes as children and parameters
@@ -274,9 +287,9 @@ bernoulli_distribution <- R6Class (
       x_shape <- x$get_shape()$as_list()
 
       if (identical(prob_shape, c(1L, 1L)) & !identical(x_shape, c(1L, 1L)))
-        probs <- tf$tile(prob, x_shape)
+        prob <- tf$tile(prob, x_shape)
 
-      tf$log(tf$where(tf$equal(x, 1), probs, 1 - probs))
+      tf$log(tf$where(tf$equal(x, 1), prob, 1 - prob))
 
     }
 
@@ -419,9 +432,6 @@ student_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y) y,
-    tf_from_free = function (x, env) x,
-
     initialize = function (df, location, scale, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(df, location, scale, target_dim = dim)
@@ -487,9 +497,6 @@ multivariate_normal_distribution <- R6Class (
   inherit = distribution,
   public = list(
 
-    to_free = function (y) y,
-    tf_from_free = function (x, env) x,
-
     initialize = function (mean, Sigma, dim) {
 
       # coerce to greta arrays
@@ -501,7 +508,8 @@ multivariate_normal_distribution <- R6Class (
           length(dim(mean)) != 2) {
 
         stop ('mean must be a 2D greta array with one column, but has dimensions ',
-              paste(dim(Sigma), collapse = ' x '))
+              paste(dim(mean), collapse = ' x '),
+              call. = FALSE)
 
       }
 
@@ -510,7 +518,8 @@ multivariate_normal_distribution <- R6Class (
           length(dim(Sigma)) != 2) {
 
         stop ('Sigma must be a square 2D greta array, but has dimensions ',
-              paste(dim(Sigma), collapse = ' x '))
+              paste(dim(Sigma), collapse = ' x '),
+              call. = FALSE)
 
       }
 
@@ -519,17 +528,31 @@ multivariate_normal_distribution <- R6Class (
       dim_Sigma <- nrow(Sigma)
 
       if (dim_mean != dim_Sigma) {
+
         stop ('mean and Sigma have different dimensions, ',
-              dim_mean, ' vs ', dim_Sigma)
+              dim_mean, ' vs ', dim_Sigma,
+              call. = FALSE)
+
       }
 
-      if (dim_mean == 1)
-        stop ('the multivariate normal distribution is for vectors, but the parameters were scalar')
+      if (dim_mean == 1) {
+
+        stop ('the multivariate normal distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
 
       # check dim is a positive scalar integer
+      dim_old <- dim
       dim <- as.integer(dim)
-      if (length(dim) > 1 | dim <= 0 | !is.finite(dim))
-        stop ('dim must be a scalar positive integer, but was: ', dput(dim))
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
@@ -599,7 +622,8 @@ wishart_distribution <- R6Class (
           length(dim(Sigma)) != 2) {
 
         stop ('Sigma must be a square 2D greta array, but has dimensions ',
-              paste(dim(Sigma), collapse = ' x '))
+              paste(dim(Sigma), collapse = ' x '),
+              call. = FALSE)
 
       }
 

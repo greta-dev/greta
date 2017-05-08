@@ -64,8 +64,7 @@ node <- R6Class(
     # return the names of all child nodes, and if recursive = TRUE, all nodes
     # lower in this graph. If type is a character, only nodes with that type
     # (from the type public object)  will  be listed
-    child_names = function (recursive = TRUE,
-                            type = NULL) {
+    child_names = function (recursive = TRUE) {
 
       children <- self$children
 
@@ -90,23 +89,9 @@ node <- R6Class(
         names <- self$node_name()
       }
 
-      # optionally filter to a specific type
-      if (!is.null(type) && is.character(type)) {
-
-        named_nodes <- .nodes$nodes(names)
-        types <- vapply(named_nodes, function(x) x$type, '')
-        idx <- which(types == type)
-        names <- names[idx]
-
-      }
-
       names
 
     },
-
-    # define objects on tensorflow graph in environment env
-    tf = function (env)
-      stop ('no method to evaluate this node in TensorFlow'),
 
     # define this and all descendent objects on tensorflow graph in environment env
     define_tf = function (env) {
@@ -156,13 +141,6 @@ node <- R6Class(
 
         self$.value <- new_value
       }
-    },
-
-    # basic print method
-    print = function() {
-      msg <- sprintf('%s node',
-                     self$type)
-      cat(msg)
     }
 
   ))

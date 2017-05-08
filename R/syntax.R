@@ -24,18 +24,35 @@
 `likelihood<-` <- function (data, value) {
 
   data_tmp <- data
-  data <- as.greta_array(data)
+  data <- as_data(data)
   distribution <- value
 
-  if (!inherits(distribution$node, 'distribution'))
-    stop ('right hand side of likelihood must be a stochastic greta array')
+  if (!(is.greta_array(distribution) &&
+        inherits(distribution$node, 'distribution'))) {
+
+    stop ('right hand side of likelihood must be a stochastic greta array',
+          call. = FALSE)
+
+  }
+
+  if (distribution$node$distribution_name == 'free') {
+
+    stop ('free parameters do not have distributions, ',
+          'so cannot be used to define a likelihood',
+          call. = FALSE)
+
+  }
 
   # if theta isn't scalar, make sure it has the right dimensions
   if (!is_scalar(distribution)) {
     if (!identical(dim(data), dim(distribution))) {
-      stop (sprintf('left- and right-hand side of likelihood have different dimensions. The distribution must have dimension of either %s or 1 x 1, but instead has dimension %s',
-                    paste(dim(data), collapse = ' x '),
-                    paste(dim(distribution), collapse = ' x ')))
+      stop ('left- and right-hand side of likelihood have different ',
+            'dimensions. The distribution must have dimension of either ',
+            paste(dim(data), collapse = ' x '),
+            ' or 1 x 1, but instead has dimension ',
+
+            paste(dim(distribution), collapse = ' x '),
+            call. = FALSE)
     }
   }
 

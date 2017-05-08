@@ -12,16 +12,22 @@ test_that('simple functions work as expected', {
   check_op(log1p, exp(x))
   check_op(expm1, x)
 
+  flush()
+
   # miscellaneous mathematics
   check_op(abs, x)
   check_op(mean, x)
   check_op(sqrt, exp(x))
   check_op(sign, x)
 
+  flush()
+
   # rounding of numbers
   check_op(ceiling, x)
   check_op(floor, x)
   check_op(round, x)
+
+  flush()
 
   # trigonometry
   check_op(cos, x)
@@ -30,6 +36,8 @@ test_that('simple functions work as expected', {
   check_op(acos, 2 * plogis(x) - 1)
   check_op(asin, 2 * plogis(x) - 1)
   check_op(atan, x)
+
+  flush()
 
   # special mathematical functions
   check_op(lgamma, x)
@@ -76,6 +84,8 @@ test_that('sweep works as expected', {
 
   for (dim in c(1, 2)) {
     for (fun in c('-', '+', '/', '*')) {
+
+      flush()
 
       stats <- stats_list[[dim]]
 
