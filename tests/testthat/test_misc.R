@@ -173,12 +173,22 @@ test_that('rejected mcmc proposals', {
 
   source('helpers.R')
 
+  # numerical rejection
   x <- rnorm(10000, 1e6, 1)
   z = normal(-1e6, 1e-6)
   likelihood(x) = normal(z, 1e6)
   m <- define_model(z)
   expect_message(mcmc(m, n_samples = 1, warmup = 0),
                  'proposal rejected due to numerical instability')
+
+  flush()
+
+  # bad proposal
+  x <- rnorm(100, 0, 0.01)
+  z = normal(0, 10)
+  likelihood(x) = normal(z, 0.01)
+  m <- define_model(z)
+  mcmc(m, n_samples = 1, warmup = 0)
 
 })
 

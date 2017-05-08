@@ -323,16 +323,6 @@ hmc <- function (dag,
       dag$send_parameters(x)
       trace[i / thin, ] <- dag$trace_values()
       ljd[i / thin] <- dag$log_density()
-
-      # if (verbose) {
-      #
-      #   # optionally report acceptance statistics
-      #   acceptance_rate <- round(accept_count / i, 3)
-      #   message(sprintf('iteration %i, acceptance rate: %s',
-      #                   i,
-      #                   prettyNum(acceptance_rate)))
-      # }
-
     }
 
     if (verbose)
