@@ -69,32 +69,6 @@ test_that('all_greta_arrays works', {
 
 })
 
-test_that('distribution errors informatively', {
-
-  source('helpers.R')
-
-  flush()
-
-  y <- randn(3, 3, 2)
-  x <- randn(1)
-
-  # not a stochastic greta array on the right
-  expect_error({distribution(y) = x},
-               'right hand side of distribution must be a distribution greta array')
-
-  expect_error({distribution(y) = as_data(x)},
-               'right hand side of distribution must be a distribution greta array')
-
-  # no density on the right
-  expect_error({distribution(y) = free()},
-               'right hand side of distribution must be a distribution greta array')
-
-  # non-scalar and wrong dimensions
-  expect_error({distribution(y) = normal(0, 1, dim = c(3, 3, 1))},
-               '^left- and right-hand side of distribution have different dimensions.')
-
-})
-
 test_that('greta_model objects print', {
 
   m <- define_model(normal(0, 1))
@@ -134,7 +108,7 @@ test_that('define_model and mcmc error informatively', {
                "model contains a discrete random variable that doesn't have a fixed value, so cannot be sampled from")
 
   # no parameters here, so define_model or dag should error
-  expect_error(define_model(distribution(y) = normal(0, 1)),
+  expect_error(define_model(distribution(x) = normal(0, 1)),
                'none of the greta arrays in the model are unknown, so a model cannot be defined')
 
   # can't draw samples of a data greta array
