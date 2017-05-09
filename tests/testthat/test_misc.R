@@ -75,7 +75,7 @@ test_that('distribution errors informatively', {
 
   flush()
 
-    y <- randn(3, 3, 2)
+  y <- randn(3, 3, 2)
   x <- randn(1)
 
   # not a stochastic greta array on the right

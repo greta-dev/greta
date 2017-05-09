@@ -1,6 +1,6 @@
 uniform_distribution <- R6Class (
   'uniform_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     log_density = NULL,
@@ -73,7 +73,7 @@ uniform_distribution <- R6Class (
 
 normal_distribution <- R6Class (
   'normal_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     initialize = function (mean, sd, dim) {
@@ -98,7 +98,7 @@ normal_distribution <- R6Class (
 
 lognormal_distribution <- R6Class (
   'lognormal_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     to_free = log,
@@ -127,7 +127,7 @@ lognormal_distribution <- R6Class (
 
 bernoulli_distribution <- R6Class (
   'bernoulli_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     initialize = function (prob, dim) {
@@ -157,7 +157,7 @@ bernoulli_distribution <- R6Class (
 
 binomial_distribution <- R6Class (
   'binomial_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     initialize = function (size, prob, dim) {
@@ -185,7 +185,7 @@ binomial_distribution <- R6Class (
 
 poisson_distribution <- R6Class (
   'poisson_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     initialize = function (lambda, dim) {
@@ -207,7 +207,7 @@ poisson_distribution <- R6Class (
 
 negative_binomial_distribution <- R6Class (
   'negative_binomial_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     initialize = function (size, prob, dim) {
@@ -234,7 +234,7 @@ negative_binomial_distribution <- R6Class (
 
 gamma_distribution <- R6Class (
   'gamma_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     to_free = function (y) log(expm1(y)),
@@ -263,7 +263,7 @@ gamma_distribution <- R6Class (
 
 exponential_distribution <- R6Class (
   'exponential_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     to_free = function (y) log(expm1(y)),
@@ -288,7 +288,7 @@ exponential_distribution <- R6Class (
 
 student_distribution <- R6Class (
   'student_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     initialize = function (df, location, scale, dim) {
@@ -321,7 +321,7 @@ student_distribution <- R6Class (
 
 beta_distribution <- R6Class (
   'beta_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     to_free = function (y) qlogis(y),
@@ -353,7 +353,7 @@ beta_distribution <- R6Class (
 # need to add checking of mean and Sigma dimensions
 multivariate_normal_distribution <- R6Class (
   'multivariate_normal_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     initialize = function (mean, Sigma, dim) {
@@ -450,7 +450,7 @@ multivariate_normal_distribution <- R6Class (
 # need to add checking of mean and Sigma dimensions
 wishart_distribution <- R6Class (
   'wishart_distribution',
-  inherit = distribution,
+  inherit = distribution_node,
   public = list(
 
     # grab it in lower-triangular form, so it's upper when putting it back in python-style

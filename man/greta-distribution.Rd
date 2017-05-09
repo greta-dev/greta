@@ -6,11 +6,14 @@
 \alias{distribution}
 \alias{likelihood}
 \alias{likelihood<-}
+\alias{distribution}
 \title{Define a Distribution Over a greta Array}
 \usage{
 distribution(greta_array) <- value
 
 likelihood(greta_array) <- value
+
+distribution(greta_array)
 }
 \arguments{
 \item{greta_array}{any greta array that doesn't already have a probability
@@ -29,13 +32,20 @@ The distribution function is used to link observed data, free
 }
 \examples{
 # observed data
-y = rnorm(100, 0, 3)
+y_ = rnorm(5, 0, 3)
+
+# explicitly coerce to a data greta array (so we can refer to it later)
+y <- as_data(y_)
+y
 
 # mean and variance parameters (with no priors)
 mu = free()
 sigma = exp(free())
 
-# define the likelihood
+# define the distribution over y (the model likelihood)
 distribution(y) = normal(mu, sigma)
+
+# get the distribution over y
+distribution(y)
 
 }

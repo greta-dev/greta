@@ -4,12 +4,12 @@ deterministic_node <- R6Class(
   public = list(
 
     type = 'deterministic',
-    distribution = NA,
+    distribution = NULL,
 
     set_distribution = function (distribution) {
 
       # check it
-      if (!inherits(distribution, 'distribution'))
+      if (!inherits(distribution, 'distribution_node'))
         stop ('invalid distribution')
 
       # register it
@@ -156,7 +156,6 @@ op <- function (...) {
   ga(operation_node$new(...))
 }
 
-# define base distribution constructor classes
 stochastic_node <- R6Class (
   'stochastic_node',
   inherit = node,
@@ -393,8 +392,8 @@ free_node <- R6Class (
   )
 )
 
-distribution <- R6Class (
-  'distribution',
+distribution_node <- R6Class (
+  'distribution_node',
   inherit = stochastic_node,
   public = list(
     type = 'distribution',
