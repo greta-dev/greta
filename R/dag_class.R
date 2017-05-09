@@ -85,8 +85,8 @@ dag_class <- R6Class(
                           FALSE)
 
       if (any(bad_nodes)) {
-        stop ("model contains a discrete random variable that isn't in the ",
-              "likelihood, so cannot be sampled from",
+        stop ("model contains a discrete random variable that doesn't have a ",
+              "fixed value, so cannot be sampled from",
               call. = FALSE)
       }
 

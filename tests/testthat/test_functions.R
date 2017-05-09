@@ -4,6 +4,8 @@ test_that('simple functions work as expected', {
 
   source('helpers.R')
 
+  flush()
+
   x <- randn(25, 4)
 
   # logarithms and exponentials
@@ -49,6 +51,8 @@ test_that('matrix functions work as expected', {
 
   source('helpers.R')
 
+  flush()
+
   a <- rWishart(1, 6, diag(5))[, , 1]
   b <- randn(5, 25)
 
@@ -65,6 +69,8 @@ test_that('reducing functions work as expected', {
 
   source('helpers.R')
 
+  flush()
+
   a <- randn(1, 3)
   b <- randn(5, 25)
 
@@ -78,6 +84,8 @@ test_that('reducing functions work as expected', {
 test_that('sweep works as expected', {
 
   source('helpers.R')
+
+  flush()
 
   stats_list <- list(randn(5), randn(25))
   x <- randn(5, 25)
@@ -107,6 +115,8 @@ test_that('sweep works as expected', {
 test_that('solve and sweep error as expected', {
 
   source('helpers.R')
+
+  flush()
 
   a <- as_data(randn(5, 25))
   b <- as_data(randn(5, 25, 2))

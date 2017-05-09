@@ -1,15 +1,13 @@
 # test functions
 
-# flush the node list and set the RNG seed
+# set the seed before running tests
+set.seed(2017-05-01)
+
+# flush the node list and tensor graph
 flush <- function () {
   options('nodes')$nodes$flush()
   tf$reset_default_graph()
 }
-
-
-flush()
-set.seed(2017-05-01)
-
 
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
@@ -26,14 +24,14 @@ grab <- function (x) {
 
 }
 
-set_likelihood <- function(dist, data) {
+set_distribution <- function(dist, data) {
   # fix the value of dist
   dist$node$value(data$node$value())
   dist$node$.fixed_value <- TRUE
 
   # give the distribution to the data as a likelihood (this will register the
   # child distribution)
-  data$node$set_likelihood(dist$node)
+  data$node$set_distribution(dist$node)
   data$node$register()
 }
 
@@ -56,7 +54,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
 
-  set_likelihood(dist, as_data(x))
+  set_distribution(dist, as_data(x))
 
   stopifnot(dist$node$.fixed_value)
 

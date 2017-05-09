@@ -4,6 +4,8 @@ test_that('print and summary work', {
 
   source('helpers.R')
 
+  flush()
+
   ga_data <- as_data(matrix(1:9, nrow = 3))
   ga_stochastic <- normal(0, 1)
   ga_operation <- ga_data * ga_stochastic
@@ -48,6 +50,8 @@ test_that('length and dim work', {
 
   source('helpers.R')
 
+  flush()
+
   ga_data <- as_data(matrix(1:9, nrow = 3))
   ga_stochastic <- normal(0, 1, dim = c(3, 3))
   ga_operation <- ga_data * ga_stochastic
@@ -67,6 +71,8 @@ test_that('length and dim work', {
 test_that('head and tail work', {
 
   source('helpers.R')
+
+  flush()
 
   a <- randn(10, 1)
   b <- randn(10, 4)

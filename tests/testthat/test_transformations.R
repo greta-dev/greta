@@ -4,6 +4,8 @@ test_that('transformations work as expected', {
 
   source('helpers.R')
 
+  flush()
+
   a <- randn(25, 4)
 
   r_icloglog <- function (x)

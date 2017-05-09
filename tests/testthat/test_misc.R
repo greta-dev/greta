@@ -72,8 +72,10 @@ test_that('all_greta_arrays works', {
 test_that('likelihood errors informatively', {
 
   source('helpers.R')
+
   flush()
-  y <- randn(3, 3, 2)
+
+    y <- randn(3, 3, 2)
   x <- randn(1)
 
   # not a stochastic greta array on the right
@@ -113,6 +115,8 @@ test_that('define_model and mcmc error informatively', {
 
   source('helpers.R')
 
+  flush()
+
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
@@ -127,7 +131,7 @@ test_that('define_model and mcmc error informatively', {
 
   # can't define a model for an unfixed discrete variable
   expect_error(define_model(bernoulli(0.5)),
-               "model contains a discrete random variable that isn't in the likelihood, so cannot be sampled from")
+               "model contains a discrete random variable that doesn't have a fixed value, so cannot be sampled from")
 
   # can't draw samples of a data greta array
   z = normal(0, 1)
@@ -140,6 +144,8 @@ test_that('define_model and mcmc error informatively', {
 test_that('check_dims errors informatively', {
 
   source('helpers.R')
+
+  flush()
 
   a <- ones(3, 3)
   b <- ones(1)
@@ -172,6 +178,8 @@ test_that('check_dims errors informatively', {
 test_that('rejected mcmc proposals', {
 
   source('helpers.R')
+
+  flush()
 
   # numerical rejection
   x <- rnorm(10000, 1e6, 1)

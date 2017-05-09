@@ -682,9 +682,10 @@ wishart_distribution <- R6Class (
 #' @param dim the dimensions of the variable, either a scalar or a vector of
 #'   positive integers. See details.
 #'
-#' @details The discrete probability distributions (\code{bernoulli}, \code{binomial},
-#'   \code{negative_binomial}, \code{poisson}) can be used as likelihoods, but
-#'   not as unknown variables.
+#' @details The discrete probability distributions (\code{bernoulli},
+#'   \code{binomial}, \code{negative_binomial}, \code{poisson}) can be used when
+#'   they have fixed values (e.g. defined as a likelihood using
+#'   \code{\link{distribution}}, but not as unknown variables.
 #'
 #'   For \code{free()}, \code{dim} gives the dimension of the greta array to
 #'   create as a free parameter. All elements of that array will have the same

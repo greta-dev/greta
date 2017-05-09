@@ -6,7 +6,7 @@ data_node <- R6Class(
   public = list(
 
     type = 'data',
-    likelihood = NA,
+    distribution = NA,
 
     initialize = function (data) {
 
@@ -23,7 +23,7 @@ data_node <- R6Class(
 
     },
 
-    set_likelihood = function (distribution) {
+    set_distribution = function (distribution) {
 
       # check it
       if (!inherits(distribution, 'distribution'))
@@ -33,7 +33,7 @@ data_node <- R6Class(
       self$add_child(distribution)
 
       # add it
-      self$likelihood <- distribution
+      self$distribution <- distribution
 
     },
 

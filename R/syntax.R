@@ -1,14 +1,19 @@
 # syntax definitions
 
-#' @name greta-likelihood
-#' @aliases likelihood
-#' @title Define a Likelihood over Data
-#' @description The likelihood function is used to link observed data with
-#'   random variables. This can be used to define the likelhood term for a
-#'   model.
-#' @param data either a data greta array (defined using \code{as_data()}), or
-#'   some data that can be coereced to a data greta array
-#' @param value a stochastic greta array, created using a distribution
+#' @name greta-distribution
+#' @aliases distribution likelihood
+#' @title Define a Distribution Over a greta Array
+#' @description The distribution function is used to link observed data, free
+#'   parameters and other greta arrays with probability distributions. For
+#'   example, \code{distribution} can be used to define the likelhood term for a
+#'   model by using \code{distribution} on some observed data. \code{likelihood}
+#'   is an alias for \code{distribution}. It is deprecated and will be removed
+#'   in version 0.2.
+#' @param greta_array any greta array that doesn't already have a probability
+#'   distribution.
+#' @param value a greta array with a probability distribution (see
+#'   \code{\link{greta-distributions}})
+#'
 #' @export
 #' @examples
 #' # observed data
@@ -19,12 +24,12 @@
 #' sigma = exp(free())
 #'
 #' # define the likelihood
-#' likelihood(y) = normal(mu, sigma)
+#' distribution(y) = normal(mu, sigma)
 #'
-`likelihood<-` <- function (data, value) {
+`distribution<-` <- function (greta_array, value) {
 
-  data_tmp <- data
-  data <- as_data(data)
+  greta_array_tmp <- greta_array
+  data <- as_data(greta_array)
   distribution <- value
 
   if (!(is.greta_array(distribution) &&
@@ -63,11 +68,21 @@
 
   # give the distribution to the data as a likelihood (this will register the
   # child distribution)
-  data$node$set_likelihood(distribution$node)
+  data$node$set_distribution(distribution$node)
 
   # register the data node, with it's own name
   data$node$register()
 
-  data_tmp
+  greta_array
 
 }
+
+#' @rdname greta-distribution
+#' @export
+`likelihood<-` <- `distribution<-`
+
+
+# need a way of setting a distribution for all node types
+
+# need a has_distribution internal function to determine whether an array
+# already has a distribution defined

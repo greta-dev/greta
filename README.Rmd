@@ -42,7 +42,7 @@ sd = lognormal(0, 3)
 mean <- intercept + coefficient * iris$Petal.Length
 
 # define the likelihood of the observed data
-likelihood(iris$Sepal.Length) = normal(mean, sd)
+distribution(iris$Sepal.Length) = normal(mean, sd)
 ```
 
 With the model written, we can draw samples of the parameters we care about.
@@ -212,10 +212,10 @@ beta = normal(0, 1, dim = 3)
 inprod(iris[1:10, 2:4], beta)
 ```
 
-##### likelihood
+##### distribution
 
-The `likelihood()` syntax lets us tell greta that some data should follow a certain distribution, i.e. defining a likelihood so that we can fit the model to data.
-`likelihood()` always goes on the left hand side, and with a distribution on the right hand side, like this:`likelihood(<some_data>) = <some_distribution>(<some_parameters>)`
+The `distribution()` syntax lets us tell greta that some greta array (usually data) should follow a certain distribution, e.g. defining a likelihood so that we can fit the model to data.
+`distribution()` always goes on the left hand side, and with a distribution on the right hand side, like this:`distribution(<some_data>) = <some_distribution>(<some_parameters>)`
 
 #### what happens next
 
@@ -272,7 +272,7 @@ These methods are used by the Hamiltonian Monte Carlo algorithm to sample from t
 Crucially, all nodes ever created in an R session are registered (recorded in a hidden list), whether or not the greta arrays to which they correspond were assigned as objects.
 That enables us to nest functions and string together operations without losing track of dependency between nodes.
 It also enables us to define a likelihood via the syntax in the example above:
-`likelihood()` creates a distribution node, sets it as having a fixed value, and registers it, but doesn't assign it to a greta_array object.
+`distribution()` creates a distribution node, sets it as having a fixed value, and registers it, but doesn't assign it to a greta_array object.
 
 ```{r bottom_banner, echo=FALSE, fig.height=0.5, fig.width=14}
 greta:::blank_banner(14 / 0.5)

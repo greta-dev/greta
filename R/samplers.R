@@ -23,7 +23,7 @@ NULL
 #' mu = free()
 #' sigma = lognormal(1, 0.1)
 #' x = rnorm(10)
-#' likelihood(x) = normal(mu, sigma)
+#' distribution(x) = normal(mu, sigma)
 #'
 #' m <- define_model(mu, sigma)
 #'
