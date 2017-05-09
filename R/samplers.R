@@ -59,14 +59,21 @@ define_model <- function (...) {
   dag <- dag_class$new(target_greta_arrays)
 
   # check they have a density among them
-  node_types <- vapply(dag$children,
-                  member,
-                  FUN.VALUE = '',
-                  'type')
+  distribs <- dag$child_names(types = 'distribution')
 
-  if (!('distribution' %in% node_types)) {
+  if (length(distribs) == 0) {
     stop ('none of the greta arrays in the model are associated with a ',
           'probability density, so a model cannot be defined',
+          call. = FALSE)
+  }
+
+  # check they have an unknown node among them
+  unknown <- dag$child_names(types = c('free', 'distribution'),
+                             omit_fixed = TRUE)
+
+  if (length(unknown) == 0) {
+    stop ('none of the greta arrays in the model are unknown, so a model ',
+          'cannot be defined',
           call. = FALSE)
   }
 

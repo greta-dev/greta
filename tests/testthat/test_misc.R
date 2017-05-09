@@ -133,6 +133,10 @@ test_that('define_model and mcmc error informatively', {
   expect_error(define_model(bernoulli(0.5)),
                "model contains a discrete random variable that doesn't have a fixed value, so cannot be sampled from")
 
+  # no parameters here, so define_model or dag should error
+  expect_error(define_model(distribution(y) = normal(0, 1)),
+               'none of the greta arrays in the model are unknown, so a model cannot be defined')
+
   # can't draw samples of a data greta array
   z = normal(0, 1)
   m <- define_model(x, z)
