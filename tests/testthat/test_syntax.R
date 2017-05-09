@@ -6,12 +6,12 @@ test_that('`distribution<-` works in models', {
 
   flush()
 
+  # with a distribution parameter
   y <- as_data(randn(5))
   expect_equal(y$node$type, 'data')
   y_op <- y * 1
   expect_equal(y_op$node$type, 'operation')
 
-  # distribution parameter
   # data
   mu <- normal(0, 1)
   distribution(y) = normal(mu, 2)
@@ -19,10 +19,18 @@ test_that('`distribution<-` works in models', {
 
   # operation
   mu <- normal(0, 1)
-  distribution(y_op) = normal(mu, 1)  #!
+  distribution(y_op) = normal(mu, 1)
   sample_distribution(mu)
 
-  # free parameter
+  # with a free parameter
+
+  flush()
+
+  y <- as_data(randn(5))
+  expect_equal(y$node$type, 'data')
+  y_op <- y * 1
+  expect_equal(y_op$node$type, 'operation')
+
   # data
   mu <- free()
   distribution(y) = normal(mu, 2)
@@ -30,7 +38,7 @@ test_that('`distribution<-` works in models', {
 
   # op
   mu <- free()
-  distribution(y_op) = normal(mu, 1)  #!
+  distribution(y_op) = normal(mu, 1)
   sample_distribution(mu)
 
   # test truncation
@@ -49,22 +57,25 @@ test_that('distribution() works', {
   d = c * 1
 
   # when run on a distribution, should just return the same greta array
-  expect_identical(distribution(a), a)  #!
+  expect_identical(distribution(a), a)
 
-  # when run on somehting without a distribution, should return NULL
+  # when run on something without a distribution, should return NULL
   expect_null(distribution(b))
   expect_null(distribution(c))
   expect_null(distribution(d))
 
   # once assigned, should return the original distribution
-  distribution(b) = a  #!
-  expect_equal(distribution(b), a)  #!
+  a2 = normal(0, 1)
+  distribution(b) = a2
+  expect_equal(distribution(b), a2)
 
-  distribution(c) = a  #!
-  expect_equal(distribution(c), a)
+  a2 = normal(0, 1)
+  distribution(c) = a2
+  expect_equal(distribution(c), a2)
 
-  distribution(d) = a  #!
-  expect_equal(distribution(d), a)  #!
+  a3 = normal(0, 1)
+  distribution(d) = a3
+  expect_equal(distribution(d), a3)
 
 })
 
@@ -96,12 +107,7 @@ test_that('`distribution<-` errors informatively', {
   y_ <- as_data(y)
   distribution(y_) = normal(0, 1)
   expect_error({distribution(y_) = normal(0, 1)},
-               'greta array already has a distribution')  #!
-
-  # # it works when the new distribution is pre-assigned
-  # mu = normal(0, 1)
-  # distribution(y_) = mu
-  # distribution(y_) = mu
+               'greta_array already has a distribution assigned')
 
 })
 
@@ -116,7 +122,6 @@ test_that('distribution() errors informatively', {
   expect_error(distribution(y),
                'not a greta array')
 
-  distribution(free())
 
 })
 

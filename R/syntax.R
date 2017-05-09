@@ -47,19 +47,39 @@
 #'
 `distribution<-` <- function (greta_array, value) {
 
+  # stash old version to return
   greta_array_tmp <- greta_array
-  greta_array <- as_data(greta_array)
+
+  # coerce to a greta array (converts numerics to data arrays)
+  greta_array <- ga(greta_array)
+
+  # rename for clarity
   distribution <- value
+
+  # only for greta arrays
+  if (!is.greta_array(greta_array)) {
+    greta_array <-
+    stop ('left hand side of distribution must be a greta array',
+          call. = FALSE)
+  }
+
+  if (inherits(greta_array$node, 'distribution_node')) {
+    stop ('left hand side of distribution is already a distribution greta array',
+          call. = FALSE)
+  }
+
+  if (!is.null(greta_array$node$distribution)) {
+    stop ('greta_array already has a distribution assigned',
+          call. = FALSE)
+  }
 
   if (!(is.greta_array(distribution) &&
         inherits(distribution$node, 'distribution_node'))) {
-
     stop ('right hand side of distribution must be a distribution greta array',
           call. = FALSE)
-
   }
 
-  # if theta isn't scalar, make sure it has the right dimensions
+  # if distribution isn't scalar, make sure it has the right dimensions
   if (!is_scalar(distribution)) {
     if (!identical(dim(greta_array), dim(distribution))) {
       stop ('left- and right-hand side of distribution have different ',
@@ -73,6 +93,13 @@
 
   # provide the data to the distribution and lock in the values in the
   # distribution
+
+  # if the distribution already has a fixed value, clone it and register the new one
+  if (distribution$node$.fixed_value) {
+    stop ('right hand side of distribution has already been assigned fixed values',
+          call. = FALSE)
+  }
+
   distribution$node$value(greta_array$node$value())
   distribution$node$.fixed_value <- TRUE
 
@@ -98,7 +125,7 @@ distribution <- function (greta_array) {
   }
 
   # if greta_array *is* a distribution, return itself
-  if (inherits(greta_array, 'distribution_node')) {
+  if (inherits(greta_array$node, 'distribution_node')) {
 
     distrib <- greta_array
 
