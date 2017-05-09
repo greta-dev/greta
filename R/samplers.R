@@ -55,19 +55,20 @@ define_model <- function (...) {
           call. = FALSE)
   }
 
-  # check they have a density among them
-  have_density <- vapply(target_greta_arrays,
-                         greta_array_has_density,
-                         FALSE)
+  # get the dag containing the target nodes
+  dag <- dag_class$new(target_greta_arrays)
 
-  if (!any(have_density)) {
+  # check they have a density among them
+  node_types <- vapply(dag$children,
+                  member,
+                  FUN.VALUE = '',
+                  'type')
+
+  if (!('distribution' %in% node_types)) {
     stop ('none of the greta arrays in the model are associated with a ',
           'probability density, so a model cannot be defined',
           call. = FALSE)
   }
-
-  # get the dag containing the target nodes
-  dag <- dag_class$new(target_greta_arrays)
 
   # define the TF graph
   dag$define_tf()

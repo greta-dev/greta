@@ -35,15 +35,7 @@
   if (!(is.greta_array(distribution) &&
         inherits(distribution$node, 'distribution'))) {
 
-    stop ('right hand side of distribution must be a stochastic greta array',
-          call. = FALSE)
-
-  }
-
-  if (distribution$node$distribution_name == 'free') {
-
-    stop ('free parameters do not have distributions, ',
-          'so cannot be used to define a distribution',
+    stop ('right hand side of distribution must be a distribution greta array',
           call. = FALSE)
 
   }

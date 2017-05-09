@@ -213,7 +213,7 @@ tf_replace <- function (x, value, index, dims) {
 #' @export
 `[<-.greta_array` <- function(x, ..., value) {
 
-  if (x$node$type == 'stochastic') {
+  if (inherits(x$node, 'stochastic_node')) {
     stop('cannot replace values in a stochastic greta array',
          call. = FALSE)
   }

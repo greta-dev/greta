@@ -19,7 +19,7 @@ dag_class <- R6Class(
     define_gradients = function () {
 
       # get names of free states for all non-fixed stochastic nodes
-      stoch_names <- self$child_names(type = 'stochastic',
+      stoch_names <- self$child_names(types = c('free', 'distribution'),
                                       omit_fixed = TRUE)
 
       # loop through them, defining the gradient of the joint density w.r.t. the
@@ -53,9 +53,9 @@ dag_class <- R6Class(
     # define tensor for overall log density and gradients
     define_joint_density = function () {
 
-      # get names of densities for all stochastic nodes
-      stoch_names <- self$child_names(type = 'stochastic')
-      density_names <- paste0(stoch_names, '_density')
+      # get names of densities for all distribution nodes
+      dist_names <- self$child_names(types = 'distribution')
+      density_names <- paste0(dist_names, '_density')
 
       # get TF density tensors for all stochastic nodes
       densities <- lapply(density_names,
@@ -78,7 +78,7 @@ dag_class <- R6Class(
       # check for unfixed discrete random variables
       bad_nodes <- vapply(self$children,
                           function(x) {
-                            x$type == 'stochastic' &&
+                            x$type == 'distribution' &&
                               x$discrete &&
                               !x$.fixed_value
                             },
@@ -112,7 +112,7 @@ dag_class <- R6Class(
     example_parameters = function (flat = TRUE) {
 
       # get example parameter list for all non-fixed  parameters for the dag
-      current_parameters <- self$all_values(type = 'stochastic',
+      current_parameters <- self$all_values(types = c('free', 'distribution'),
                                             omit_fixed = TRUE,
                                             free = TRUE)
 
@@ -185,7 +185,7 @@ dag_class <- R6Class(
     },
 
     child_names = function (recursive = TRUE,
-                            type = NULL,
+                            types = NULL,
                             omit_fixed = FALSE) {
 
       children <- self$children
@@ -209,11 +209,11 @@ dag_class <- R6Class(
       }
 
       # optionally filter to a specific type
-      if (!is.null(type) && is.character(type)) {
+      if (!is.null(types) && is.character(types)) {
 
         named_nodes <- .nodes$nodes(names)
-        types <- vapply(named_nodes, function(x) x$type, '')
-        idx <- which(types == type)
+        named_types <- vapply(named_nodes, function(x) x$type, '')
+        idx <- which(named_types %in% types)
         names <- names[idx]
 
       }
@@ -234,11 +234,11 @@ dag_class <- R6Class(
     # get or set values in all descendents as a named list, only for nodes of
     # the named type (if type != NULL), and if omit_fixed = TRUE, omit the
     # fixed values when reporting (ignored when setting)
-    all_values = function (type = NULL, omit_fixed = TRUE, free = FALSE) {
+    all_values = function (types = NULL, omit_fixed = TRUE, free = FALSE) {
 
       # find all nodes of this type in the graph
       .nodes <- options()$nodes
-      node_names <- self$child_names(type = type)
+      node_names <- self$child_names(types = types)
       node_names <- c(self$name, node_names)
       nodes <- .nodes$nodes(node_names)
 

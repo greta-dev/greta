@@ -219,8 +219,3 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
   invisible(tf_version_valid)
 
 }
-
-# determine whether a greta array has (can define) a density
-# only stochastics can have densities, and free nodes can't have densities
-greta_array_has_density <- function (x)
-  x$node$type == 'stochastic' && x$node$distribution_name != 'free'

@@ -132,7 +132,7 @@ summary.greta_array <- function (object, ...) {
   }
 
   # distribution info
-  if (object$node$type == 'stochastic') {
+  if (inherits(object$node, 'distribution')) {
     distribution_text <- sprintf("following a %s distribution",
                                  object$node$distribution_name)
 
