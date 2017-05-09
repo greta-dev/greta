@@ -35,7 +35,7 @@
   if (!(is.greta_array(distribution) &&
         inherits(distribution$node, 'distribution'))) {
 
-    stop ('right hand side of likelihood must be a stochastic greta array',
+    stop ('right hand side of distribution must be a stochastic greta array',
           call. = FALSE)
 
   }
@@ -43,7 +43,7 @@
   if (distribution$node$distribution_name == 'free') {
 
     stop ('free parameters do not have distributions, ',
-          'so cannot be used to define a likelihood',
+          'so cannot be used to define a distribution',
           call. = FALSE)
 
   }
@@ -51,7 +51,7 @@
   # if theta isn't scalar, make sure it has the right dimensions
   if (!is_scalar(distribution)) {
     if (!identical(dim(data), dim(distribution))) {
-      stop ('left- and right-hand side of likelihood have different ',
+      stop ('left- and right-hand side of distribution have different ',
             'dimensions. The distribution must have dimension of either ',
             paste(dim(data), collapse = ' x '),
             ' or 1 x 1, but instead has dimension ',
@@ -61,13 +61,13 @@
     }
   }
 
-  # provide the data to the likelihood and lock in the values in the
+  # provide the data to the distribution and lock in the values in the
   # distribution
   distribution$node$value(data$node$value())
   distribution$node$.fixed_value <- TRUE
 
-  # give the distribution to the data as a likelihood (this will register the
-  # child distribution)
+  # give the distribution to the data (this will register the child
+  # distribution)
   data$node$set_distribution(distribution$node)
 
   # register the data node, with it's own name

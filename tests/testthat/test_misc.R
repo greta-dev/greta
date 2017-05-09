@@ -69,7 +69,7 @@ test_that('all_greta_arrays works', {
 
 })
 
-test_that('likelihood errors informatively', {
+test_that('distribution errors informatively', {
 
   source('helpers.R')
 
@@ -79,19 +79,19 @@ test_that('likelihood errors informatively', {
   x <- randn(1)
 
   # not a stochastic greta array on the right
-  expect_error({likelihood(y) = x},
-               'right hand side of likelihood must be a stochastic greta array')
+  expect_error({distribution(y) = x},
+               'right hand side of distribution must be a stochastic greta array')
 
-  expect_error({likelihood(y) = as_data(x)},
-               'right hand side of likelihood must be a stochastic greta array')
+  expect_error({distribution(y) = as_data(x)},
+               'right hand side of distribution must be a stochastic greta array')
 
   # no density on the right
-  expect_error({likelihood(y) = free()},
-               'free parameters do not have distributions, so cannot be used to define a likelihood')
+  expect_error({distribution(y) = free()},
+               'free parameters do not have distributions, so cannot be used to define a distribution')
 
   # non-scalar and wrong dimensions
-  expect_error({likelihood(y) = normal(0, 1, dim = c(3, 3, 1))},
-               '^left- and right-hand side of likelihood have different dimensions.')
+  expect_error({distribution(y) = normal(0, 1, dim = c(3, 3, 1))},
+               '^left- and right-hand side of distribution have different dimensions.')
 
 })
 
@@ -184,7 +184,7 @@ test_that('rejected mcmc proposals', {
   # numerical rejection
   x <- rnorm(10000, 1e6, 1)
   z = normal(-1e6, 1e-6)
-  likelihood(x) = normal(z, 1e6)
+  distribution(x) = normal(z, 1e6)
   m <- define_model(z)
   expect_message(mcmc(m, n_samples = 1, warmup = 0),
                  'proposal rejected due to numerical instability')
@@ -194,7 +194,7 @@ test_that('rejected mcmc proposals', {
   # bad proposal
   x <- rnorm(100, 0, 0.01)
   z = normal(0, 10)
-  likelihood(x) = normal(z, 0.01)
+  distribution(x) = normal(z, 0.01)
   m <- define_model(z)
   mcmc(m, n_samples = 1, warmup = 0)
 

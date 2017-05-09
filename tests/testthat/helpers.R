@@ -28,9 +28,6 @@ set_distribution <- function(dist, data) {
   # fix the value of dist
   dist$node$value(data$node$value())
   dist$node$.fixed_value <- TRUE
-
-  # give the distribution to the data as a likelihood (this will register the
-  # child distribution)
   data$node$set_distribution(dist$node)
   data$node$register()
 }
