@@ -1,12 +1,37 @@
+deterministic_node <- R6Class(
+  'deterministic_node',
+  inherit = node,
+  public = list(
+
+    type = 'deterministic',
+    distribution = NA,
+
+    set_distribution = function (distribution) {
+
+      # check it
+      if (!inherits(distribution, 'distribution'))
+        stop ('invalid distribution')
+
+      # register it
+      self$add_child(distribution)
+
+      # add it
+      self$distribution <- distribution
+
+    }
+
+  )
+)
+
+
 # different types of node
 
 data_node <- R6Class(
   'data_node',
-  inherit = node,
+  inherit = deterministic_node,
   public = list(
 
     type = 'data',
-    distribution = NA,
 
     initialize = function (data) {
 
@@ -23,20 +48,6 @@ data_node <- R6Class(
 
     },
 
-    set_distribution = function (distribution) {
-
-      # check it
-      if (!inherits(distribution, 'distribution'))
-        stop ('invalid distribution')
-
-      # register it
-      self$add_child(distribution)
-
-      # add it
-      self$distribution <- distribution
-
-    },
-
     tf = function (env) {
       assign(self$name,
              tf$constant(self$value(), dtype = tf$float32),
@@ -48,14 +59,13 @@ data_node <- R6Class(
 # a node for applying operations to values
 operation_node <- R6Class(
   'operation_node',
-  inherit = node,
+  inherit = deterministic_node,
   public = list(
 
     type = 'operation',
     .operation = NA,
     .operation_args = NA,
     arguments = list(),
-    distribution = NA,
 
     add_argument = function (argument) {
 
@@ -113,20 +123,6 @@ operation_node <- R6Class(
         op <- op_list[[idx]]
 
       op
-    },
-
-    set_distribution = function (distribution) {
-
-      # check it
-      if (!inherits(distribution, 'distribution'))
-        stop ('invalid distribution')
-
-      # register it
-      self$add_child(distribution)
-
-      # add it
-      self$distribution <- distribution
-
     },
 
     tf = function (env) {
