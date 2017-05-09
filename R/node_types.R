@@ -3,22 +3,7 @@ deterministic_node <- R6Class(
   inherit = node,
   public = list(
 
-    type = 'deterministic',
-    distribution = NULL,
-
-    set_distribution = function (distribution) {
-
-      # check it
-      if (!inherits(distribution, 'distribution_node'))
-        stop ('invalid distribution')
-
-      # register it
-      self$add_child(distribution)
-
-      # add it
-      self$distribution <- distribution
-
-    }
+    type = 'deterministic'
 
   )
 )

@@ -10,6 +10,7 @@ node <- R6Class(
     .value = array(NA),
     .fixed_value = FALSE,
     dim = NA,
+    distribution = NULL,
 
     register = function () {
 
@@ -141,6 +142,17 @@ node <- R6Class(
 
         self$.value <- new_value
       }
+    },
+
+    set_distribution = function (distribution) {
+
+      # check it
+      if (!inherits(distribution, 'distribution_node'))
+        stop ('invalid distribution')
+
+      # add it
+      self$distribution <- distribution
+
     }
 
   ))
