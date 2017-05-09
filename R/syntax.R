@@ -3,35 +3,47 @@
 #' @name greta-distribution
 #' @aliases distribution likelihood
 #' @title Define a Distribution Over a greta Array
-#' @description The distribution function is used to link observed data, free
+#' @description \code{distribution} is used to link observed data, free
 #'   parameters and other greta arrays with probability distributions. For
 #'   example, \code{distribution} can be used to define the likelhood term for a
-#'   model by using \code{distribution} on some observed data. \code{likelihood}
-#'   is an alias for \code{distribution}. It is deprecated and will be removed
-#'   in version 0.2.
-#' @param greta_array any greta array that doesn't already have a probability
-#'   distribution.
-#' @param value a greta array with a probability distribution (see
+#'   model by using \code{distribution} on some observed data.
+#'   \code{likelihood} is an alias for \code{distribution}. It is deprecated and
+#'   will be removed in version 0.2.
+#'
+#' @param greta_array a greta array. For the assignment method it must be a
+#'   greta array that doesn't already have a probability distribution.
+#'
+#' @param value a \emph{distribution} greta array (see
 #'   \code{\link{greta-distributions}})
+#'
+#' @details The extract method returns a distribution greta array if one was
+#'   assigned to \code{greta_array}, or if \code{greta_array} already was a
+#'   distribution greta array. If \code{greta_array} has no distribution, it
+#'   returns NULL.
+#'
+#' Distribution can also be used to create truncated distributions, by first
+#' defining a greta array with constraints (the truncation) and then defining
+#' the distribution on that greta array. See example for an example.
 #'
 #' @export
 #' @examples
-#' # observed data
-#' y_ = rnorm(5, 0, 3)
 #'
-#' # explicitly coerce to a data greta array (so we can refer to it later)
-#' y <- as_data(y_)
-#' y
+#' # define a model likelihood
 #'
-#' # mean and variance parameters (with no priors)
+#' # observed data and mean parameter to be estimated
+#' # (explicitly coerce data to a greta array so we can refer to it later)
+#' y = as_data(rnorm(5, 0, 3))
 #' mu = free()
-#' sigma = exp(free())
-#'
 #' # define the distribution over y (the model likelihood)
-#' distribution(y) = normal(mu, sigma)
+#' distribution(y) = normal(mu, 1)
 #'
 #' # get the distribution over y
 #' distribution(y)
+#'
+#' # define a truncated-positive standard normal random variable
+#' tn = free(lower = 0)
+#' distribution(tn) = normal(0, 1)
+#'
 #'
 `distribution<-` <- function (greta_array, value) {
 
@@ -77,10 +89,6 @@
 
 #' @rdname greta-distribution
 #' @export
-`likelihood<-` <- `distribution<-`
-
-#' @rdname greta-distribution
-#' @export
 distribution <- function (greta_array) {
 
   # only for greta arrays
@@ -108,3 +116,7 @@ distribution <- function (greta_array) {
   distrib
 
 }
+
+#' @rdname greta-distribution
+#' @export
+`likelihood<-` <- `distribution<-`

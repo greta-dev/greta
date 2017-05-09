@@ -5,47 +5,58 @@
 \alias{distribution<-}
 \alias{distribution}
 \alias{likelihood}
-\alias{likelihood<-}
 \alias{distribution}
+\alias{likelihood<-}
 \title{Define a Distribution Over a greta Array}
 \usage{
 distribution(greta_array) <- value
 
-likelihood(greta_array) <- value
-
 distribution(greta_array)
+
+likelihood(greta_array) <- value
 }
 \arguments{
-\item{greta_array}{any greta array that doesn't already have a probability
-distribution.}
+\item{greta_array}{a greta array. For the assignment method it must be a
+greta array that doesn't already have a probability distribution.}
 
-\item{value}{a greta array with a probability distribution (see
+\item{value}{a \emph{distribution} greta array (see
 \code{\link{greta-distributions}})}
 }
 \description{
-The distribution function is used to link observed data, free
+\code{distribution} is used to link observed data, free
   parameters and other greta arrays with probability distributions. For
   example, \code{distribution} can be used to define the likelhood term for a
-  model by using \code{distribution} on some observed data. \code{likelihood}
-  is an alias for \code{distribution}. It is deprecated and will be removed
-  in version 0.2.
+  model by using \code{distribution} on some observed data.
+  \code{likelihood} is an alias for \code{distribution}. It is deprecated and
+  will be removed in version 0.2.
+}
+\details{
+The extract method returns a distribution greta array if one was
+  assigned to \code{greta_array}, or if \code{greta_array} already was a
+  distribution greta array. If \code{greta_array} has no distribution, it
+  returns NULL.
+
+Distribution can also be used to create truncated distributions, by first
+defining a greta array with constraints (the truncation) and then defining
+the distribution on that greta array. See example for an example.
 }
 \examples{
-# observed data
-y_ = rnorm(5, 0, 3)
 
-# explicitly coerce to a data greta array (so we can refer to it later)
-y <- as_data(y_)
-y
+# define a model likelihood
 
-# mean and variance parameters (with no priors)
+# observed data and mean parameter to be estimated
+# (explicitly coerce data to a greta array so we can refer to it later)
+y = as_data(rnorm(5, 0, 3))
 mu = free()
-sigma = exp(free())
-
 # define the distribution over y (the model likelihood)
-distribution(y) = normal(mu, sigma)
+distribution(y) = normal(mu, 1)
 
 # get the distribution over y
 distribution(y)
+
+# define a truncated-positive standard normal random variable
+tn = free(lower = 0)
+distribution(tn) = normal(0, 1)
+
 
 }
