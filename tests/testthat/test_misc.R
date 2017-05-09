@@ -196,6 +196,6 @@ test_that('rejected mcmc proposals', {
   z = normal(0, 10)
   distribution(x) = normal(z, 0.01)
   m <- define_model(z)
-  mcmc(m, n_samples = 1, warmup = 0)
+  mcmc(m, n_samples = 1, warmup = 0, verbose = FALSE)
 
 })
