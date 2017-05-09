@@ -1,47 +1,5 @@
 context('distributions')
 
-test_that('free distributions have no density', {
-
-  source('helpers.R')
-
-  flush()
-
-  none <- function (x, lower, upper, log) 0
-
-  # no constraints
-  difference <- compare_distribution(greta::free,
-                                     none,
-                                     parameters = list(lower = -Inf, upper = Inf),
-                                     x = rnorm(100))
-
-  expect_true(difference == 0)
-
-  # lower constraint
-  difference <- compare_distribution(greta::free,
-                                     none,
-                                     parameters = list(lower = -1, upper = Inf),
-                                     x = rnorm(100))
-
-  expect_true(difference == 0)
-
-  # upper constraint
-  difference <- compare_distribution(greta::free,
-                                     none,
-                                     parameters = list(lower = -Inf, upper = 1),
-                                     x = rnorm(100))
-
-  expect_true(difference == 0)
-
-  # both constraints
-  difference <- compare_distribution(greta::free,
-                                     none,
-                                     parameters = list(lower = -1, upper = 1),
-                                     x = rnorm(100))
-
-  expect_true(difference == 0)
-
-})
-
 test_that('normal distribution has correct density', {
 
   source('helpers.R')

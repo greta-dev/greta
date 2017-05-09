@@ -80,14 +80,14 @@ test_that('distribution errors informatively', {
 
   # not a stochastic greta array on the right
   expect_error({distribution(y) = x},
-               'right hand side of distribution must be a stochastic greta array')
+               'right hand side of distribution must be a distribution greta array')
 
   expect_error({distribution(y) = as_data(x)},
-               'right hand side of distribution must be a stochastic greta array')
+               'right hand side of distribution must be a distribution greta array')
 
   # no density on the right
   expect_error({distribution(y) = free()},
-               'free parameters do not have distributions, so cannot be used to define a distribution')
+               'right hand side of distribution must be a distribution greta array')
 
   # non-scalar and wrong dimensions
   expect_error({distribution(y) = normal(0, 1, dim = c(3, 3, 1))},

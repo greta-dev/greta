@@ -23,12 +23,12 @@ test_that('print and summary work', {
 
   # stochastic arrays
   # print method
-  expected_output <- "greta array (stochastic)\n\n     [,1]\n[1,]   ? "
+  expected_output <- "greta array (distribution)\n\n     [,1]\n[1,]   ? "
   result <- evaluate_promise(ga_stochastic, print = TRUE)
   expect_identical(result$output, expected_output)
 
   # summary method
-  expected_output <- "'stochastic' greta array with 1 element following a normal distribution \n\n  (values currently unknown)"
+  expected_output <- "'distribution' greta array with 1 element following a normal distribution \n\n  (values currently unknown)"
   result <- evaluate_promise(summary(ga_stochastic), print = TRUE)
   expect_identical(result$output, expected_output)
 
