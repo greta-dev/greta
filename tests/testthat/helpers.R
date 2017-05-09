@@ -1,8 +1,11 @@
 # test functions
 
 # flush the node list and set the RNG seed
-flush <- function ()
+flush <- function () {
   options('nodes')$nodes$flush()
+  tf$reset_default_graph()
+}
+
 
 flush()
 set.seed(2017-05-01)
