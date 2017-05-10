@@ -216,3 +216,57 @@ it_state <- function (matrix, state, niter) {
     state <- state %*% matrix
   state[1, ]
 }
+
+compare_truncated_distribution <- function (greta_fun, which, parameters, truncation) {
+  # calculate the absolute difference in the log density of some data between
+  # greta and a r benchmark, for an implied truncated distribution 'greta_array'
+  # is a greta array created from a distribution and a constrained free() greta
+  # array. 'r_fun' is an r function returning the log density for the same
+  # truncated distribution, taking x as its only argument.
+
+  require(truncdist)
+
+  x <- do.call(truncdist::rtrunc,
+               c(n = 100,
+                 spec = which,
+                 a = truncation[1],
+                 b = truncation[2],
+                 parameters))
+
+  # create truncated R function and evaluate it
+  r_fun <- truncfun(which, parameters, truncation)
+  r_log_density <- log(r_fun(x))
+
+  # create greta array
+  z <- free(truncation[1], truncation[2])
+  distribution(x) = do.call(greta_fun, parameters)
+
+  # create tensorflow bits
+  tf_x <- tf$constant(x, dtype = tf$float32)
+  tf_parameters <- lapply(parameters,
+                          function (a) tf$constant(a, dtype = tf$float32))
+
+  # evaluate tensorflow log density
+  tf_log_density <- greta_array$node$tf_log_density_function(tf_x, tf_parameters)
+  greta_log_density <- as.vector(grab(tf_log_density))
+
+  # return absolute difference
+  abs(greta_log_density - r_log_density)
+
+}
+
+# use the truncdist package to crete a truncated distribution function for use
+# in compare_truncated_distribution
+truncfun <- function (which = 'norm', parameters, truncation) {
+
+  args <- c(spec = which,
+                a = truncation[1],
+                b = truncation[2],
+                parameters)
+
+  function (x) {
+    arg_list <- c(x = list(x), args)
+    do.call(truncdist::dtrunc, arg_list)
+  }
+
+}
