@@ -58,5 +58,4 @@ distribution(y)
 tn = free(lower = 0)
 distribution(tn) = normal(0, 1)
 
-
 }

@@ -26,9 +26,10 @@ grab <- function (x) {
 
 set_distribution <- function(dist, data) {
   # fix the value of dist
-  dist$node$value(data$node$value())
-  dist$node$.fixed_value <- TRUE
-  data$node$set_distribution(dist$node)
+  distrib <- dist$node$distribution
+  distrib$value(data$node$value())
+  distrib$.fixed_value <- TRUE
+  data$node$set_distribution(distrib)
   data$node$register()
 }
 
@@ -51,16 +52,17 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
 
-  set_distribution(dist, as_data(x))
+  distribution(x) = dist
+  # set_distribution(dist, as_data(x))
 
-  stopifnot(dist$node$.fixed_value)
+  stopifnot(dist$node$distribution$.fixed_value)
 
   # define the tensor in an environment
   env <- new.env()
-  dist$node$define_tf(env = env)
+  dist$node$distribution$define_tf(env = env)
 
   # get the log density as a vector
-  tensor_name <- paste0(dist$node$name, '_density')
+  tensor_name <- paste0(dist$node$distribution$name, '_density')
   tensor <- get(tensor_name, envir = env)
   greta_log_density <- as.vector(grab(tensor))
 
@@ -239,15 +241,21 @@ compare_truncated_distribution <- function (greta_fun, which, parameters, trunca
 
   # create greta array
   z <- free(truncation[1], truncation[2])
-  distribution(x) = do.call(greta_fun, parameters)
+  distribution(z) = do.call(greta_fun, parameters)
 
-  # create tensorflow bits
-  tf_x <- tf$constant(x, dtype = tf$float32)
-  tf_parameters <- lapply(parameters,
-                          function (a) tf$constant(a, dtype = tf$float32))
+  # get the modified distribution
+  distrib <- z$node$distribution
+
+  # create tensorflow bits in an environment
+  env <- new.env()
+  env[[distrib$x$name]] <- tf$constant(x, dtype = tf$float32)
+  for (param_name in names(distrib$parameters)) {
+    node_name <- distrib$parameters[[param_name]]$name
+    env[[node_name]] <- tf$constant(parameters[[param_name]], dtype = tf$float32)
+  }
 
   # evaluate tensorflow log density
-  tf_log_density <- greta_array$node$tf_log_density_function(tf_x, tf_parameters)
+  tf_log_density <- z$node$distribution$tf_log_density(env)
   greta_log_density <- as.vector(grab(tf_log_density))
 
   # return absolute difference

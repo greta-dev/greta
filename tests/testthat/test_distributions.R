@@ -242,11 +242,21 @@ test_that('scalar-valued distributions can be defined in models', {
   p <- iprobit(normal(0, 1))
 
   # density-free and discrete data need a bit of help
-  define_model((distribution(x) = normal(free(), 1)))
-  define_model((distribution(y) = bernoulli(p)))
-  define_model((distribution(y) = binomial(1, p)))
-  define_model((distribution(y) = negative_binomial(1, p)))
-  define_model((distribution(y) = poisson(p)))
+  a = free()
+  distribution(x) = normal(a, 1)
+  define_model(a)
+
+  distribution(y) = bernoulli(p)
+  define_model(p)
+
+  distribution(y) = binomial(1, p)
+  define_model(p)
+
+  distribution(y) = negative_binomial(1, p)
+  define_model(p)
+
+  distribution(y) = poisson(p)
+  define_model(p)
 
   flush()
 
@@ -282,11 +292,21 @@ test_that('array-valued distributions can be defined in models', {
   p <- iprobit(normal(0, 1, dim = dim))
 
   # density-free and discrete data need a bit of help
-  define_model((distribution(x) = normal(free(dim = dim), 1)))
-  define_model((distribution(y) = bernoulli(p)))
-  define_model((distribution(y) = binomial(1, p)))
-  define_model((distribution(y) = negative_binomial(1, p)))
-  define_model((distribution(y) = poisson(p)))
+  a <- free(dim = dim)
+  distribution(x) = normal(a, 1)
+  define_model(a)
+
+  distribution(y) = bernoulli(p)
+  define_model(p)
+
+  distribution(y) = binomial(1, p)
+  define_model(p)
+
+  distribution(y) = negative_binomial(1, p)
+  define_model(p)
+
+  distribution(y) = poisson(p)
+  define_model(p)
 
   flush()
 
@@ -320,16 +340,35 @@ test_that('distributions can be sampled from', {
   p <- iprobit(normal(0, 1, dim = 100))
 
   # free (with a density)
-  sample_distribution((distribution(x) = normal(free(), 1)))
-  sample_distribution((distribution(x) = normal(free(lower = -1), 1)))
-  sample_distribution((distribution(x) = normal(free(upper = -2), 1)))
-  sample_distribution((distribution(x) = normal(free(lower = 1.2, upper = 1.3), 1)))
+  a <- free()
+  distribution(x) = normal(a, 1)
+  sample_distribution(a)
+
+  b <- free(lower = -1)
+  distribution(x) = normal(b, 1)
+  sample_distribution(b)
+
+  c <- free(upper = -2)
+  distribution(x) = normal(c, 1)
+  sample_distribution(c)
+
+
+  d <- free(lower = 1.2, upper = 1.3)
+  distribution(x) = normal(d, 1)
+  sample_distribution(d)
 
   # discrete
-  sample_distribution((distribution(y) = bernoulli(p)))
-  sample_distribution((distribution(y) = binomial(1, p)))
-  sample_distribution((distribution(y) = negative_binomial(1, p)))
-  sample_distribution((distribution(y) = poisson(p)))
+  distribution(y) = bernoulli(p)
+  sample_distribution(p)
+
+  distribution(y) = binomial(1, p)
+  sample_distribution(p)
+
+  distribution(y) = negative_binomial(1, p)
+  sample_distribution(p)
+
+  distribution(y) = poisson(p)
+  sample_distribution(p)
 
   flush()
 

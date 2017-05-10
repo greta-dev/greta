@@ -67,15 +67,15 @@ test_that('distribution() works', {
   # once assigned, should return the original distribution
   a2 = normal(0, 1)
   distribution(b) = a2
-  expect_equal(distribution(b), a2)
+  expect_equal(distribution(b), b)
 
   a2 = normal(0, 1)
   distribution(c) = a2
-  expect_equal(distribution(c), a2)
+  expect_equal(distribution(c), c)
 
   a3 = normal(0, 1)
   distribution(d) = a3
-  expect_equal(distribution(d), a3)
+  expect_equal(distribution(d), d)
 
 })
 
@@ -90,14 +90,14 @@ test_that('`distribution<-` errors informatively', {
 
   # not a stochastic greta array on the right
   expect_error({distribution(y) = x},
-               'right hand side of distribution must be a distribution greta array')
+               'right hand side must be a greta array')
 
   expect_error({distribution(y) = as_data(x)},
-               'right hand side of distribution must be a distribution greta array')
+               'right hand side must have a distribution')
 
   # no density on the right
   expect_error({distribution(y) = free()},
-               'right hand side of distribution must be a distribution greta array')
+               'right hand side must have a distribution')
 
   # non-scalar and wrong dimensions
   expect_error({distribution(y) = normal(0, 1, dim = c(3, 3, 1))},
