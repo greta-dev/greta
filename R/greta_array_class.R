@@ -108,8 +108,10 @@ is.greta_array <- function (x)
 # print method
 #' @export
 print.greta_array <- function (x, ...) {
+
   text <- sprintf('greta array (%s)\n\n',
-                  x$node$type)
+                  x$node$description())
+
   cat(text)
   print(x$node$value(), ...)
 }

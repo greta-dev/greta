@@ -55,6 +55,14 @@ node <- R6Class(
 
     },
 
+    remove_child = function (node) {
+
+      # remove node from list of children
+      rem_idx <- self$child_names() == node$name
+      self$children <- self$children[-rem_idx]
+
+    },
+
     # get or set the name of this node
     node_name = function (name = NULL) {
       if (!is.null(name))
@@ -153,7 +161,24 @@ node <- R6Class(
       # add it
       self$distribution <- distribution
 
+    },
+
+    # return a string describing this node, for use in print and summary etc.
+    description = function () {
+
+      text <- self$type
+
+      if (!is.null(self$distribution)) {
+        text <- paste(text,
+                      'following a',
+                      self$distribution$distribution_name,
+                      'distribution')
+      }
+
+      text
+
     }
+
 
   ))
 

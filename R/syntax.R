@@ -44,22 +44,26 @@
 #' tn = free(lower = 0)
 #' distribution(tn) = normal(0, 1)
 #'
-#'
 `distribution<-` <- function (greta_array, value) {
 
-  # stash old version to return
+  # stash the old greta array to return
   greta_array_tmp <- greta_array
 
   # coerce to a greta array (converts numerics to data arrays)
   greta_array <- ga(greta_array)
 
-  # rename for clarity
-  distribution <- value
+  if (!is.greta_array(value)) {
+    stop ('right hand side must be a greta array',
+          call. = FALSE)
+  }
+
+  # grab the distribution
+  distribution_node <- value$node$distribution
 
   # only for greta arrays
   if (!is.greta_array(greta_array)) {
-    greta_array <-
-    stop ('left hand side of distribution must be a greta array',
+    stop ('left hand side must be a greta array or something that ',
+          'can be passed to as_data',
           call. = FALSE)
   }
 
@@ -73,20 +77,21 @@
           call. = FALSE)
   }
 
-  if (!(is.greta_array(distribution) &&
-        inherits(distribution$node, 'distribution_node'))) {
-    stop ('right hand side of distribution must be a distribution greta array',
+  if (!inherits(distribution_node, 'distribution_node')) {
+
+    stop ('right hand side must have a distribution',
           call. = FALSE)
+
   }
 
   # if distribution isn't scalar, make sure it has the right dimensions
-  if (!is_scalar(distribution)) {
-    if (!identical(dim(greta_array), dim(distribution))) {
+  if (!is_scalar(value)) {
+    if (!identical(dim(greta_array), dim(value))) {
       stop ('left- and right-hand side of distribution have different ',
             'dimensions. The distribution must have dimension of either ',
             paste(dim(greta_array), collapse = ' x '),
             ' or 1 x 1, but instead has dimension ',
-            paste(dim(distribution), collapse = ' x '),
+            paste(dim(value), collapse = ' x '),
             call. = FALSE)
     }
   }
@@ -94,22 +99,36 @@
   # provide the data to the distribution and lock in the values in the
   # distribution
 
-  # if the distribution already has a fixed value, clone it and register the new one
-  if (distribution$node$.fixed_value) {
+  # if the distribution already has a fixed value, error
+  if (distribution_node$.fixed_value) {
     stop ('right hand side of distribution has already been assigned fixed values',
           call. = FALSE)
   }
 
-  distribution$node$value(greta_array$node$value())
-  distribution$node$.fixed_value <- TRUE
+  # assign the new node as the distribution's target
+  # also adds distribution_node as this node's distribution
+  distribution_node$replace_x(greta_array$node)
 
-  # give the distribution to the data (this will register the child
-  # distribution)
-  greta_array$node$set_distribution(distribution$node)
+  # optionally set that as a fixed value
+  if (inherits(greta_array$node, 'data_node'))
+    distribution_node$.fixed_value <- TRUE
 
-  # register the data node, with it's own name
-  greta_array$node$register()
+  # if the greta_array was a variable, add its constraints as truncation
+  if (inherits(greta_array$node, 'variable_node')) {
 
+    # check the distribution can handle truncation
+    if (is.null(distribution_node$tf_cdf_function)) {
+
+      stop('distribution cannot be truncated to the constraints of a free greta array',
+           call. = FALSE)
+
+    }
+
+    distribution_node$truncation <- c(greta_array$node$lower, greta_array$node$upper)
+
+  }
+
+  # return greta_array (pre-conversion to a greta array)
   greta_array_tmp
 
 }
@@ -124,19 +143,15 @@ distribution <- function (greta_array) {
           call. = FALSE)
   }
 
-  # if greta_array *is* a distribution, return itself
-  if (inherits(greta_array$node, 'distribution_node')) {
+  # if greta_array has a distribution, return this greta array
+  if (inherits(greta_array$node$distribution, 'distribution_node')) {
 
     distrib <- greta_array
 
   } else {
 
-    # otherwise, get the array's assigned distribution node
-    distrib <- greta_array$node$distribution
-
-    # coerce to a greta array if it isn't missing
-    if (!is.null(distrib))
-      distrib <- ga(distrib)
+    # otherwise return NULL
+    distrib <- NULL
 
   }
 

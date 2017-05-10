@@ -3,29 +3,9 @@ uniform_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
+    min = NA,
+    max = NA,
     log_density = NULL,
-
-    to_free = function (y) {
-
-      max <- self$parameters$max$value()
-      min <- self$parameters$min$value()
-
-      if (is_scalar(max))
-        max <- as.vector(max)
-
-      if (is_scalar(min))
-        min <- as.vector(min)
-
-      qlogis((y - min) / (max - min))
-    },
-
-    tf_from_free = function (x, env) {
-
-      max <- self$parameters$max$value()
-      min <- self$parameters$min$value()
-      (1 / (1 + tf$exp(-1 * x))) * (max - min) + min
-
-    },
 
     initialize = function (min, max, dim) {
 
@@ -53,8 +33,15 @@ uniform_distribution <- R6Class (
 
       }
 
-      # add the nodes as children and parameters
+      # store min and max as numeric scalars (needed in create_x, done in
+      # initialisation)
+      self$min <- min
+      self$max <- max
+
+      # initialize the rest
       super$initialize('uniform', dim)
+
+      # add them as children and greta arrays
       self$add_parameter(min, 'min')
       self$add_parameter(max, 'max')
 
@@ -63,9 +50,31 @@ uniform_distribution <- R6Class (
 
     },
 
+    # default value
+    create_x = function() {
+      variable(lower = self$min,
+               upper = self$max,
+               dim = self$dim)
+    },
+
+    to_free = function (y) {
+
+      max <- self$parameters$max$value()
+      min <- self$parameters$min$value()
+
+      if (is_scalar(max))
+        max <- as.vector(max)
+
+      if (is_scalar(min))
+        min <- as.vector(min)
+
+      qlogis((y - min) / (max - min))
+    },
+
     # weird hack to make TF see a gradient here
-    tf_log_density_function = function (x, parameters)
+    tf_log_density_function = function (x, parameters) {
       self$log_density + tf$reduce_sum(x * 0)
+    }
 
   )
 )
@@ -84,12 +93,32 @@ normal_distribution <- R6Class (
       self$add_parameter(sd, 'sd')
     },
 
+    # default value
+    create_x = function() {
+      variable(dim = self$dim)
+    },
+
     tf_log_density_function = function (x, parameters) {
 
-      mean <- parameters$mean
-      var <- tf$square(parameters$sd)
+      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
+                                              scale = parameters$sd)
+      norm$log_prob(x)
 
-      -0.5 * tf$log(2 * pi) - 0.5 * tf$log(var) - 0.5 * tf$square(tf$subtract(mean, x)) / var
+    },
+
+    tf_cdf_function = function (x, parameters) {
+
+      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
+                                              scale = parameters$sd)
+      norm$cdf(x)
+
+    },
+
+    tf_log_cdf_function = function (x, parameters) {
+
+      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
+                                              scale = parameters$sd)
+      norm$log_cdf(x)
 
     }
 
@@ -101,14 +130,16 @@ lognormal_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    to_free = log,
-    tf_from_free = function (x, env) tf$exp(x),
-
     initialize = function (meanlog, sdlog, dim) {
       dim <- check_dims(meanlog, sdlog, target_dim = dim)
       super$initialize('lognormal', dim)
       self$add_parameter(meanlog, 'meanlog')
       self$add_parameter(sdlog, 'sdlog')
+    },
+
+    # default value
+    create_x = function() {
+      variable(lower = 0, dim = self$dim)
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -135,6 +166,11 @@ bernoulli_distribution <- R6Class (
       dim <- check_dims(prob, target_dim = dim)
       super$initialize('bernoulli', dim, discrete = TRUE)
       self$add_parameter(prob, 'prob')
+    },
+
+    # default value (should get overwritten anyway!)
+    create_x = function() {
+      variable(dim = self$dim)
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -169,6 +205,11 @@ binomial_distribution <- R6Class (
 
     },
 
+    # default value (should get overwritten anyway!)
+    create_x = function() {
+      variable(dim = self$dim)
+    },
+
     tf_log_density_function = function (x, parameters) {
 
       size <- parameters$size
@@ -195,6 +236,11 @@ poisson_distribution <- R6Class (
       self$add_parameter(lambda, 'lambda')
     },
 
+    # default value (should get overwritten anyway!)
+    create_x = function() {
+      variable(dim = self$dim)
+    },
+
     tf_log_density_function = function (x, parameters) {
 
       lambda <- parameters$lambda
@@ -218,6 +264,11 @@ negative_binomial_distribution <- R6Class (
       self$add_parameter(prob, 'prob')
     },
 
+    # default value (should get overwritten anyway!)
+    create_x = function() {
+      variable(dim = self$dim)
+    },
+
     tf_log_density_function = function (x, parameters) {
 
       size <- parameters$size
@@ -237,15 +288,17 @@ gamma_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    to_free = function (y) log(expm1(y)),
-    tf_from_free = function (x, env) tf_log1pe(x),
-
     initialize = function (shape, rate, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(shape, rate, target_dim = dim)
       super$initialize('gamma', dim)
       self$add_parameter(shape, 'shape')
       self$add_parameter(rate, 'rate')
+    },
+
+    # default value
+    create_x = function() {
+      variable(lower = 0, dim = self$dim)
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -266,14 +319,16 @@ exponential_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    to_free = function (y) log(expm1(y)),
-    tf_from_free = function (x, env) tf_log1pe(x),
-
     initialize = function (rate, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(rate, target_dim = dim)
       super$initialize('exponential', dim)
       self$add_parameter(rate, 'rate')
+    },
+
+    # default value
+    create_x = function() {
+      variable(lower = 0, dim = self$dim)
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -300,6 +355,11 @@ student_distribution <- R6Class (
       self$add_parameter(scale, 'scale')
     },
 
+    # default value
+    create_x = function() {
+      variable(dim = self$dim)
+    },
+
     tf_log_density_function = function (x, parameters) {
 
       df <- parameters$df
@@ -324,15 +384,17 @@ beta_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    to_free = function (y) qlogis(y),
-    tf_from_free = function (x, env) tf_ilogit(x),
-
     initialize = function (shape1, shape2, dim) {
       # add the nodes as children and parameters
       dim <- check_dims(shape1, shape2, target_dim = dim)
       super$initialize('beta', dim)
       self$add_parameter(shape1, 'shape1')
       self$add_parameter(shape2, 'shape2')
+    },
+
+    # default value
+    create_x = function() {
+      variable(lower = 0, upper = 1, dim = self$dim)
     },
 
     tf_log_density_function = function (x, parameters) {
@@ -421,6 +483,11 @@ multivariate_normal_distribution <- R6Class (
 
     },
 
+    # default value
+    create_x = function() {
+      variable(dim = self$dim)
+    },
+
     tf_log_density_function = function (x, parameters) {
 
       mean <- parameters$mean
@@ -460,15 +527,15 @@ wishart_distribution <- R6Class (
       matrix(vals)
     },
 
-    tf_from_free = function (x, env) {
-      dims <- self$parameters$Sigma$dim
-      L_dummy <- greta:::dummy(dims)
-      indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
-      values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
-      values <- greta:::recombine(values, indices, x)
-      L <- tf$reshape(values, shape(dims[1], dims[2]))
-      tf$matmul(tf$transpose(L), L)
-    },
+    # tf_from_free = function (x, env) {
+    #   dims <- self$parameters$Sigma$dim
+    #   L_dummy <- greta:::dummy(dims)
+    #   indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
+    #   values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
+    #   values <- greta:::recombine(values, indices, x)
+    #   L <- tf$reshape(values, shape(dims[1], dims[2]))
+    #   tf$matmul(tf$transpose(L), L)
+    # },
 
     initialize = function (df, Sigma) {
       # add the nodes as children and parameters
@@ -497,6 +564,18 @@ wishart_distribution <- R6Class (
 
     },
 
+
+    # default value
+    create_x = function() {
+
+      # handle reshaping via a greta array
+      free_greta_array <- free(dim = prod(self$dim))
+      matrix_greta_array <- flat_to_symmetric(free_greta_array, self$dim)
+      matrix_greta_array$node
+
+    },
+
+
     tf_log_density_function = function (x, parameters) {
 
       df <- parameters$df
@@ -509,6 +588,20 @@ wishart_distribution <- R6Class (
 
   )
 )
+
+
+# shorthand for distribution parameter constructors
+create <- function (distribution, ...) {
+
+  # get and initialize the distribution, with a default value node
+  constructor <- get(paste0(distribution, '_distribution'))
+  distrib <- constructor$new(...)
+
+  # return the value node as a greta array
+  value <- distrib$x
+  as.greta_array(value)
+
+}
 
 
 # export constructors
@@ -629,7 +722,8 @@ free <- function (lower = -Inf, upper = Inf, dim = 1) {
   if (is.greta_array(lower) | is.greta_array(upper))
     stop ('lower and upper must be fixed, they cannot be another greta array')
 
-  ga(free_node$new(lower, upper, dim))
+  node <- variable_node$new(lower, upper, dim)
+  as.greta_array(node)
 
 }
 
@@ -640,66 +734,66 @@ uniform <- function (min, max, dim = NULL) {
   if (is.greta_array(min) | is.greta_array(max))
     stop ('min and max must be fixed, they cannot be another greta array')
 
-  ga(uniform_distribution$new(min, max, dim))
+  create('uniform', min, max, dim)
 
 }
 
 #' @rdname greta-distributions
 #' @export
 normal <- function (mean, sd, dim = NULL)
-  ga(normal_distribution$new(mean, sd, dim))
+  create('normal', mean, sd, dim)
 
 #' @rdname greta-distributions
 #' @export
 lognormal <- function (meanlog, sdlog, dim = NULL)
-  ga(lognormal_distribution$new(meanlog, sdlog, dim))
+  create('lognormal', meanlog, sdlog, dim)
 
 #' @rdname greta-distributions
 #' @export
 bernoulli <- function (prob, dim = NULL)
-  ga(bernoulli_distribution$new(prob, dim))
+  create('bernoulli', prob, dim)
 
 #' @rdname greta-distributions
 #' @export
 binomial <- function (size, prob, dim = NULL)
-  ga(binomial_distribution$new(size, prob, dim))
+  create('binomial', size, prob, dim)
 
 #' @rdname greta-distributions
 #' @export
 negative_binomial <- function (size, prob, dim = NULL)
-  ga(negative_binomial_distribution$new(size, prob, dim))
+  create('negative_binomial', size, prob, dim)
 
 #' @rdname greta-distributions
 #' @export
 poisson <- function (lambda, dim = NULL)
-  ga(poisson_distribution$new(lambda, dim))
+  create('poisson', lambda, dim)
 
 #' @rdname greta-distributions
 #' @export
 gamma <- function (shape, rate, dim = NULL)
-  ga(gamma_distribution$new(shape, rate, dim))
+  create('gamma', shape, rate, dim)
 
 #' @rdname greta-distributions
 #' @export
 exponential <- function (rate, dim = NULL)
-  ga(exponential_distribution$new(rate, dim))
+  create('exponential', rate, dim)
 
 #' @rdname greta-distributions
 #' @export
 student <- function (df, location, scale, dim = NULL)
-  ga(student_distribution$new(df, location, scale, dim))
+  create('student', df, location, scale, dim)
 
 #' @rdname greta-distributions
 #' @export
 beta <- function (shape1, shape2, dim = NULL)
-  ga(beta_distribution$new(shape1, shape2, dim))
+  create('beta', shape1, shape2, dim)
 
 #' @rdname greta-distributions
 #' @export
 multivariate_normal <- function (mean, Sigma, dim = 1)
-  ga(multivariate_normal_distribution$new(mean, Sigma, dim))
+  create('multivariate_normal', mean, Sigma, dim)
 
 #' @rdname greta-distributions
 #' @export
 wishart <- function (df, Sigma)
-  ga(wishart_distribution$new(df, Sigma))
+  create('wishart', df, Sigma)

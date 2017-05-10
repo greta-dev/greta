@@ -202,10 +202,10 @@ stochastic_node <- R6Class (
         # map from the free to constrained state in a new tensor
 
         # fetch the free node
-        free_node <- get(free_name, envir = env)
+        tf_free <- get(free_name, envir = env)
 
         # appy transformation
-        node <- self$tf_from_free(free_node, env)
+        node <- self$tf_from_free(tf_free, env)
 
         # assign back to environment with base name (density will use this)
         assign(self$name,
@@ -237,12 +237,12 @@ stochastic_node <- R6Class (
   )
 )
 
-free_node <- R6Class (
-  'free_node',
+variable_node <- R6Class (
+  'variable_node',
   inherit = stochastic_node,
   public = list(
 
-    type = 'free',
+    type = 'variable',
     constraint = NULL,
     lower = -Inf,
     upper = Inf,
@@ -377,6 +377,11 @@ free_node <- R6Class (
   )
 )
 
+# helper function to create a variable node
+# by default, make x (the node containing the value) a free parameter of the correct dimension
+variable = function(...)
+  variable_node$new(...)
+
 distribution_node <- R6Class (
   'distribution_node',
   inherit = stochastic_node,
@@ -384,6 +389,8 @@ distribution_node <- R6Class (
     type = 'distribution',
     distribution_name = 'no distribution',
     discrete = NA,
+    x = NULL,
+    truncation = NULL,
 
     initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
 
@@ -393,24 +400,41 @@ distribution_node <- R6Class (
       self$distribution_name <- name
       self$discrete <- discrete
 
+      # initialize x (the target values of this distribution)
+      self$add_x(self$create_x())
+
+    },
+
+    # create x, add as a child, and give it this distribution
+    add_x = function (new_x) {
+
+      # add as x and as a child
+      self$x <- new_x
+      self$add_child(new_x)
+
+      # get its values
+      self$value(new_x$value())
+
+      # give self to x as its distribution
+      self$x$set_distribution(self)
+
+    },
+
+    # replace the existing x with a new one, including updating the parameter and possibly fixing the value
+    replace_x = function (new_x) {
+
+      # remove x from children
+      self$remove_child(self$x)
+
+      # add the new one in
+      self$add_x(new_x)
+
     },
 
     tf = function (env) {
 
-      # define self as a tensor
-      self$tf_define(env)
+      # define density as a tensor
       self$tf_define_density(env)
-
-    },
-
-    tf_log_density = function (env) {
-
-      # fetch inputs
-      value <- get(self$name, envir = env)
-      parameters <- self$tf_fetch_parameters(env)
-
-      # calculate log density
-      self$tf_log_density_function(value, parameters)
 
     },
 
@@ -430,6 +454,22 @@ distribution_node <- R6Class (
 
     },
 
+    tf_log_density = function (env) {
+
+      # fetch inputs
+      tf_x <- get(self$x$name, envir = env)
+      tf_parameters <- self$tf_fetch_parameters(env)
+
+      # calculate log density
+      ld <- self$tf_log_density_function(tf_x, tf_parameters)
+
+      # check for truncation
+      if (!is.null(self$truncation))
+        ld <- ld - self$tf_log_density_offset(tf_parameters)
+
+      ld
+    },
+
     tf_fetch_parameters = function (env) {
       # fetch the tensors corresponding to this node's parameters from the
       # environment, and return them in a named list
@@ -440,6 +480,57 @@ distribution_node <- R6Class (
       # fetch tensors
       lapply(names, function (x) get(x, envir = env))
 
+    },
+
+    tf_log_density_offset = function (parameters) {
+
+      # calculate the log-adjustment to the truncation term of the density
+      # function i.e. the density of a distribution, truncated between a and b,
+      # is the non truncated density, divided by the integral of the density
+      # function between the truncation bounds. This can be calculated from the
+      # distribution's CDF
+
+      if (is.null(self$tf_cdf_function)) {
+
+        stop('distribution cannot be truncated',
+             call. = FALSE)
+
+      }
+
+      lower <- self$truncation[1]
+      upper <- self$truncation[2]
+
+      if (lower == -Inf && upper == Inf) {
+
+        # if neither constrained, offset is 0
+        offset <- 0
+
+      } else if (lower == -Inf) {
+
+        # if only upper is constrained, just need the cdf at the upper
+        offset <- self$tf_log_cdf_function(upper, parameters)
+
+      } else if (upper == Inf) {
+
+        # if only lower is constrained, get the log of the integral above it
+        offset <- tf$log(1 - self$tf_cdf_function(lower, parameters))
+
+      } else {
+
+        # if both are constrained, get the log of the integral between them
+        offset <- tf$log(self$tf_cdf_function(upper, parameters) -
+                           self$tf_cdf_function(lower, parameters))
+
+      }
+
+      offset
+
+    },
+
+    # default version of the log truncation function, should be overloaded with
+    # a more efficient one
+    tf_log_cdf_function = function (quantile, parameters) {
+      tf$log(self$tf_cdf_function(quantile, parameters))
     },
 
     add_parameter = function (parameter, name) {

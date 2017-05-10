@@ -68,7 +68,7 @@ define_model <- function (...) {
   }
 
   # check they have an unknown node among them
-  unknown <- dag$child_names(types = c('free', 'distribution'),
+  unknown <- dag$child_names(types = 'variable',
                              omit_fixed = TRUE)
 
   if (length(unknown) == 0) {

@@ -19,12 +19,12 @@ dag_class <- R6Class(
     define_gradients = function () {
 
       # get names of free states for all non-fixed stochastic nodes
-      stoch_names <- self$child_names(types = c('free', 'distribution'),
+      variable_names <- self$child_names(types = 'variable',
                                       omit_fixed = TRUE)
 
       # loop through them, defining the gradient of the joint density w.r.t. the
       # free state
-      for (name in stoch_names) {
+      for (name in variable_names) {
 
         # names of tensors
         free_name <- paste0(name, '_free')
@@ -40,7 +40,7 @@ dag_class <- R6Class(
       }
 
       # combine the gradients into one tensor
-      gradient_names <- paste0(stoch_names, '_gradient')
+      gradient_names <- paste0(variable_names, '_gradient')
 
       # define and evaluate the command
       command <- sprintf('gradients <- tf$concat(list(%s), 0L)',
@@ -112,7 +112,7 @@ dag_class <- R6Class(
     example_parameters = function (flat = TRUE) {
 
       # get example parameter list for all non-fixed  parameters for the dag
-      current_parameters <- self$all_values(types = c('free', 'distribution'),
+      current_parameters <- self$all_values(types = 'variable',
                                             omit_fixed = TRUE,
                                             free = TRUE)
 

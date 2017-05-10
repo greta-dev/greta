@@ -219,3 +219,30 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
   invisible(tf_version_valid)
 
 }
+
+# given a flat tensor, convert it into a square symmetric matrix by considering
+# it  as the non-zero elements of the lower-triangular decomposition of the
+# square matrix
+tf_flat_to_symmetric = function (x, dims) {
+  L_dummy <- greta:::dummy(dims)
+  indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
+  values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
+  values <- greta:::recombine(values, indices, x)
+  L <- tf$reshape(values, shape(dims[1], dims[2]))
+  tf$matmul(tf$transpose(L), L)
+}
+
+flat_to_symmetric <- function (x, dim) {
+
+  dimfun <- function (elem_list)
+    dim
+
+  # sum the elements
+  op('tf_flat_to_symmetric',
+     x,
+     operation_args = list(dims = dim),
+     dimfun = dimfun)
+
+}
+
+
