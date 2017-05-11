@@ -147,8 +147,6 @@ stochastic_node <- R6Class (
   public = list(
 
     type = 'stochastic',
-    parameters = list(),
-    tf_from_free = function (x, env) x,
 
     initialize = function (dim = NULL) {
 
@@ -161,73 +159,6 @@ stochastic_node <- R6Class (
       # store array (updates dim)
       self$value(unknowns(dim = dim))
       self$register()
-
-    },
-
-    tf = function (env) {
-
-      # define self as a tensor
-      self$tf_define(env)
-
-    },
-
-
-    tf_define = function (env) {
-
-      # if it's an observed stochastic, make it a constant and assign
-      if (self$.fixed_value) {
-
-        tf_obj <- tf$constant(self$value(),
-                              shape = to_shape(self$dim),
-                              dtype = tf$float32)
-
-        assign(self$name,
-               tf_obj,
-               envir = env)
-
-      } else {
-
-        # otherwise, make a Variable tensor to hold the free state
-        obj <- self$value()
-        tf_obj <- tf$Variable(initial_value = obj, dtype = tf$float32)
-
-        # assign this as the free state
-        free_name <- sprintf('%s_free',
-                             self$name)
-        assign(free_name,
-               tf_obj,
-               envir = env)
-
-        # map from the free to constrained state in a new tensor
-
-        # fetch the free node
-        tf_free <- get(free_name, envir = env)
-
-        # appy transformation
-        node <- self$tf_from_free(tf_free, env)
-
-        # assign back to environment with base name (density will use this)
-        assign(self$name,
-               node,
-               envir = env)
-
-      }
-
-    },
-
-    # return or overwrite value
-    value = function(new_value = NULL, ...) {
-
-      if (is.null(new_value)) {
-        ans <- super$value(new_value, ...)
-
-        return (ans)
-
-      } else {
-
-        super$value(new_value, ...)
-
-      }
 
     }
 
@@ -304,6 +235,49 @@ variable_node <- R6Class (
 
     },
 
+    tf = function (env) {
+
+      # if it's an observed stochastic, make it a constant and assign
+      if (self$.fixed_value) {
+
+        tf_obj <- tf$constant(self$value(),
+                              shape = to_shape(self$dim),
+                              dtype = tf$float32)
+
+        assign(self$name,
+               tf_obj,
+               envir = env)
+
+      } else {
+
+        # otherwise, make a Variable tensor to hold the free state
+        obj <- self$value()
+        tf_obj <- tf$Variable(initial_value = obj, dtype = tf$float32)
+
+        # assign this as the free state
+        free_name <- sprintf('%s_free',
+                             self$name)
+        assign(free_name,
+               tf_obj,
+               envir = env)
+
+        # map from the free to constrained state in a new tensor
+
+        # fetch the free node
+        tf_free <- get(free_name, envir = env)
+
+        # appy transformation
+        node <- self$tf_from_free(tf_free, env)
+
+        # assign back to environment with base name (density will use this)
+        assign(self$name,
+               node,
+               envir = env)
+
+      }
+
+    },
+
     tf_from_free = function (x, env) {
 
       if (self$constraint == 'none') {
@@ -353,6 +327,7 @@ distribution_node <- R6Class (
     discrete = NA,
     x = NULL,
     truncation = NULL,
+    parameters = list(),
 
     initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
 
@@ -394,13 +369,6 @@ distribution_node <- R6Class (
     },
 
     tf = function (env) {
-
-      # define density as a tensor
-      self$tf_define_density(env)
-
-    },
-
-    tf_define_density = function (env) {
 
       # define a tensor with this node's log density in env
 
