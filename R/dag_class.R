@@ -18,7 +18,7 @@ dag_class <- R6Class(
 
     define_gradients = function () {
 
-      # get names of free states for all non-fixed stochastic nodes
+      # get names of free states for all variable nodes
       variable_names <- self$child_names(types = 'variable',
                                       omit_fixed = TRUE)
 
@@ -57,7 +57,7 @@ dag_class <- R6Class(
       dist_names <- self$child_names(types = 'distribution')
       density_names <- paste0(dist_names, '_density')
 
-      # get TF density tensors for all stochastic nodes
+      # get TF density tensors for all distribution
       densities <- lapply(density_names,
                           function(x) get(x, envir = self$tf_environment))
 
@@ -272,8 +272,7 @@ dag_class <- R6Class(
 
     },
 
-    # get gradient of joint density w.r.t. free states of all unfixed
-    # stochastic nodes
+    # get gradient of joint density w.r.t. free states of all variable nodes
     gradients = function () {
       ex <- expression(sess$run(gradients, feed_dict = parameter_dict))
       eval(ex,

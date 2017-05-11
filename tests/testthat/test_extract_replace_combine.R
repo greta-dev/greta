@@ -293,7 +293,7 @@ test_that('rbind, cbind and c work like R', {
 
 })
 
-test_that('assign errors on stochastic greta arrays', {
+test_that('assign errors on variable greta arrays', {
 
   source('helpers.R')
 
@@ -301,7 +301,7 @@ test_that('assign errors on stochastic greta arrays', {
 
   z <- normal(0, 1, dim = 5)
   expect_error(z[1] <- 3,
-               'cannot replace values in a stochastic greta array')
+               'cannot replace values in a variable greta array')
 
 })
 

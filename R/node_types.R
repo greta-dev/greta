@@ -138,19 +138,9 @@ op <- function (...) {
   ga(operation_node$new(...))
 }
 
-stochastic_node <- R6Class (
-  'stochastic_node',
-  inherit = node,
-  public = list(
-
-    type = 'stochastic'
-
-  )
-)
-
 variable_node <- R6Class (
   'variable_node',
-  inherit = stochastic_node,
+  inherit = node,
   public = list(
 
     type = 'variable',
@@ -220,7 +210,7 @@ variable_node <- R6Class (
 
     tf = function (env) {
 
-      # if it's an observed stochastic, make it a constant and assign
+      # if it's observed, make it a constant and assign
       if (self$.fixed_value) {
 
         tf_obj <- tf$constant(self$value(),
@@ -303,7 +293,7 @@ variable = function(...)
 
 distribution_node <- R6Class (
   'distribution_node',
-  inherit = stochastic_node,
+  inherit = node,
   public = list(
     type = 'distribution',
     distribution_name = 'no distribution',
