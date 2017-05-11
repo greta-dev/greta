@@ -378,13 +378,6 @@ distribution_node <- R6Class (
       # function between the truncation bounds. This can be calculated from the
       # distribution's CDF
 
-      if (is.null(self$tf_cdf_function)) {
-
-        stop('distribution cannot be truncated',
-             call. = FALSE)
-
-      }
-
       lower <- self$truncation[1]
       upper <- self$truncation[2]
 
@@ -413,12 +406,6 @@ distribution_node <- R6Class (
 
       offset
 
-    },
-
-    # default version of the log truncation function, should be overloaded with
-    # a more efficient one
-    tf_log_cdf_function = function (quantile, parameters) {
-      tf$log(self$tf_cdf_function(quantile, parameters))
     },
 
     add_parameter = function (parameter, name) {
