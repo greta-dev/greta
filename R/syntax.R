@@ -50,7 +50,7 @@
   greta_array_tmp <- greta_array
 
   # coerce to a greta array (converts numerics to data arrays)
-  greta_array <- ga(greta_array)
+  greta_array <- as.greta_array(greta_array)
 
   if (!is.greta_array(value)) {
     stop ('right hand side must be a greta array',

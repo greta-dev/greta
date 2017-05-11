@@ -135,7 +135,7 @@ operation_node <- R6Class(
 
 # shorthand to speed up op definitions
 op <- function (...) {
-  ga(operation_node$new(...))
+  as.greta_array(operation_node$new(...))
 }
 
 variable_node <- R6Class (

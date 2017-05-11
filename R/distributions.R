@@ -407,8 +407,8 @@ multivariate_normal_distribution <- R6Class (
     initialize = function (mean, Sigma, dim) {
 
       # coerce to greta arrays
-      mean <- ga(mean)
-      Sigma <- ga(Sigma)
+      mean <- as.greta_array(mean)
+      Sigma <- as.greta_array(Sigma)
 
       # check dimensions of mean
       if (ncol(mean) != 1 |
@@ -509,8 +509,8 @@ wishart_distribution <- R6Class (
     initialize = function (df, Sigma) {
       # add the nodes as children and parameters
 
-      df <- ga(df)
-      Sigma <- ga(Sigma)
+      df <- as.greta_array(df)
+      Sigma <- as.greta_array(Sigma)
 
       # check dimensions of Sigma
       if (nrow(Sigma) != ncol(Sigma) |

@@ -234,7 +234,3 @@ tail.greta_array <- function (x, n = 6L, ...) {
   ans
 
 }
-
-# short hand for use in functions
-ga <- function (x)
-  as.greta_array(x)

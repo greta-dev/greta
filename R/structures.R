@@ -15,7 +15,7 @@ NULL
 #' z <- zeros(3, 4)
 #'
 zeros <- function (...)
-  ga(array(data = 0, dim = c(...)))
+  as.greta_array(array(data = 0, dim = c(...)))
 
 #' @export
 #' @rdname greta-structures
@@ -23,4 +23,4 @@ zeros <- function (...)
 #' # a 3x3x3 greta array of 1s
 #' z <- ones(3, 3, 3)
 ones <- function (...)
-  ga(array(data = 1, dim = c(...)))
+  as.greta_array(array(data = 1, dim = c(...)))
