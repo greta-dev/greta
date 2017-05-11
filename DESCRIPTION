@@ -54,5 +54,6 @@ Imports:
 Suggests:
     testthat,
     mvtnorm,
-    MCMCpack
+    MCMCpack,
+    truncdist
 RoxygenNote: 6.0.1
