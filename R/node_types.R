@@ -210,44 +210,29 @@ variable_node <- R6Class (
 
     tf = function (env) {
 
-      # if it's observed, make it a constant and assign
-      if (self$.fixed_value) {
+      # omake a Variable tensor to hold the free state
+      tf_obj <- tf$Variable(initial_value = self$value(),
+                            dtype = tf$float32)
 
-        tf_obj <- tf$constant(self$value(),
-                              shape = to_shape(self$dim),
-                              dtype = tf$float32)
+      # assign this as the free state
+      free_name <- sprintf('%s_free',
+                           self$name)
+      assign(free_name,
+             tf_obj,
+             envir = env)
 
-        assign(self$name,
-               tf_obj,
-               envir = env)
+      # map from the free to constrained state in a new tensor
 
-      } else {
+      # fetch the free node
+      tf_free <- get(free_name, envir = env)
 
-        # otherwise, make a Variable tensor to hold the free state
-        obj <- self$value()
-        tf_obj <- tf$Variable(initial_value = obj, dtype = tf$float32)
+      # appy transformation
+      node <- self$tf_from_free(tf_free, env)
 
-        # assign this as the free state
-        free_name <- sprintf('%s_free',
-                             self$name)
-        assign(free_name,
-               tf_obj,
-               envir = env)
-
-        # map from the free to constrained state in a new tensor
-
-        # fetch the free node
-        tf_free <- get(free_name, envir = env)
-
-        # appy transformation
-        node <- self$tf_from_free(tf_free, env)
-
-        # assign back to environment with base name (density will use this)
-        assign(self$name,
-               node,
-               envir = env)
-
-      }
+      # assign back to environment with base name (density will use this)
+      assign(self$name,
+             node,
+             envir = env)
 
     },
 
