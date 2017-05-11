@@ -28,8 +28,7 @@ data_node <- R6Class(
         dim(data) <- c(dim(data), 1)
 
       # update and store array and store dimension
-      self$value(data)
-      self$register()
+      super$initialize(dim = dim(data), value = data)
 
     },
 
@@ -51,14 +50,6 @@ operation_node <- R6Class(
     .operation = NA,
     .operation_args = NA,
     arguments = list(),
-
-    add_argument = function (argument) {
-
-      # guess at a name, coerce to a node, and add as a child
-      parameter <- to_node(argument)
-      self$add_child(parameter)
-
-    },
 
     initialize = function (operation,
                            ...,
@@ -90,9 +81,15 @@ operation_node <- R6Class(
       else if (!all.equal(dim(value), dim))
         stop ('values have the wrong dimension so cannot be used')
 
-      self$value(value)
-      self$dim <- dim
-      self$register()
+      super$initialize(dim, value)
+
+    },
+
+    add_argument = function (argument) {
+
+      # guess at a name, coerce to a node, and add as a child
+      parameter <- to_node(argument)
+      self$add_child(parameter)
 
     },
 
@@ -146,21 +143,7 @@ stochastic_node <- R6Class (
   inherit = node,
   public = list(
 
-    type = 'stochastic',
-
-    initialize = function (dim = NULL) {
-
-      if (is.null(dim))
-        dim <- c(1, 1)
-
-      # coerce dim to integer
-      dim <- as.integer(dim)
-
-      # store array (updates dim)
-      self$value(unknowns(dim = dim))
-      self$register()
-
-    }
+    type = 'stochastic'
 
   )
 )

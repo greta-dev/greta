@@ -12,6 +12,23 @@ node <- R6Class(
     dim = NA,
     distribution = NULL,
 
+    initialize = function (dim = NULL, value = NULL) {
+
+      if (is.null(dim))
+        dim <- c(1, 1)
+
+      # coerce dim to integer
+      dim <- as.integer(dim)
+
+      # store array (updates dim)
+      if (is.null(value))
+        value <- unknowns(dim = dim)
+
+      self$value(value)
+      self$register()
+
+    },
+
     register = function () {
 
       # register this node in the global list, as soon as it is assigned a name
