@@ -300,7 +300,7 @@ distribution_node <- R6Class (
 
     },
 
-    # create x, add as a child, and give it this distribution
+    # create target node, add as a child, and give it this distribution
     add_target = function (new_target) {
 
       # add as x and as a child
@@ -315,7 +315,7 @@ distribution_node <- R6Class (
 
     },
 
-    # replace the existing x with a new one, including updating the parameter and possibly fixing the value
+    # replace the existing target node with a new one
     replace_target = function (new_target) {
 
       # remove x from children
@@ -381,12 +381,7 @@ distribution_node <- R6Class (
       lower <- self$truncation[1]
       upper <- self$truncation[2]
 
-      if (lower == -Inf && upper == Inf) {
-
-        # if neither constrained, offset is 0
-        offset <- 0
-
-      } else if (lower == -Inf) {
+      if (lower == -Inf) {
 
         # if only upper is constrained, just need the cdf at the upper
         offset <- self$tf_log_cdf_function(upper, parameters)
