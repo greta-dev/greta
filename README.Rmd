@@ -235,7 +235,7 @@ knitr::include_graphics('README_files/figure-markdown_github/banner_1-1.png')
 
 ### Contributors
 
-[![Build Status](https://travis-ci.org/goldingn/greta.svg)](https://travis-ci.org/goldingn/greta)
+[![Build Status](https://travis-ci.org/goldingn/greta.svg?branch=master)](https://travis-ci.org/goldingn/greta)
 [![codecov.io](https://codecov.io/github/goldingn/greta/coverage.svg?branch=master)](https://codecov.io/github/goldingn/greta?branch=master)
 [![cran version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta)
 
