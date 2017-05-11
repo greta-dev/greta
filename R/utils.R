@@ -224,10 +224,16 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
 tf_flat_to_symmetric = function (x, dims) {
-  L_dummy <- greta:::dummy(dims)
+
+  # create a dummy array to find the indices
+  L_dummy <- dummy(dims)
   indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
+
+  # create an empty vector to fill with the values
   values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
-  values <- greta:::recombine(values, indices, x)
+  values <- recombine(values, indices, x)
+
+  # reshape into lower triangular, then symmetric matrix
   L <- tf$reshape(values, shape(dims[1], dims[2]))
   tf$matmul(tf$transpose(L), L)
 }
