@@ -19,7 +19,7 @@ likelihood(greta_array) <- value
 \item{greta_array}{a greta array. For the assignment method it must be a
 greta array that doesn't already have a probability distribution.}
 
-\item{value}{a \emph{distribution} greta array (see
+\item{value}{a greta array with a distribution (see
 \code{\link{greta-distributions}})}
 }
 \description{
@@ -31,14 +31,13 @@ greta array that doesn't already have a probability distribution.}
   will be removed in version 0.2.
 }
 \details{
-The extract method returns a distribution greta array if one was
-  assigned to \code{greta_array}, or if \code{greta_array} already was a
-  distribution greta array. If \code{greta_array} has no distribution, it
-  returns NULL.
+The extract method returns the greta array if it has a distribution,
+  or \code{NULL} if it doesn't. It has now real function, but is included for
+  completeness
 
-Distribution can also be used to create truncated distributions, by first
-defining a greta array with constraints (the truncation) and then defining
-the distribution on that greta array. See example for an example.
+  \code{distribution} can also be used to create truncated distributions, by first
+  defining a greta array with constraints (the truncation) and then defining
+  the distribution on that greta array. See below for an example.
 }
 \examples{
 

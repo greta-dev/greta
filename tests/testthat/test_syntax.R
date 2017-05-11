@@ -88,7 +88,7 @@ test_that('`distribution<-` errors informatively', {
   y <- randn(3, 3, 2)
   x <- randn(1)
 
-  # not a stochastic greta array on the right
+  # not a greta array with a distribution on the right
   expect_error({distribution(y) = x},
                'right hand side must be a greta array')
 
@@ -101,13 +101,30 @@ test_that('`distribution<-` errors informatively', {
 
   # non-scalar and wrong dimensions
   expect_error({distribution(y) = normal(0, 1, dim = c(3, 3, 1))},
-               '^left- and right-hand side of distribution have different dimensions.')
+               '^left and right hand sides have different dimensions.')
 
   # double assignment of distribution to node
   y_ <- as_data(y)
   distribution(y_) = normal(0, 1)
   expect_error({distribution(y_) = normal(0, 1)},
-               'greta_array already has a distribution assigned')
+               'left hand side already has a distribution assigned')
+
+  # assignment with a greta array that already has a fixed value
+  y1 <- as_data(y)
+  y2 <- as_data(y)
+  d <- normal(0, 1)
+  distribution(y1) = d
+  expect_error({distribution(y2) = d},
+               'right hand side has already been assigned fixed values')
+
+  # unsupported truncation
+  z = free(lower = 0)
+  expect_error({distribution(z) = student(5, 0, 1)},
+               'distribution cannot be truncated')
+
+  # shouldn't error with -Inf, Inf
+  z = free()
+  distribution(z) = student(5, 0, 1)
 
 })
 

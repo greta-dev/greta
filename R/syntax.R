@@ -13,17 +13,16 @@
 #' @param greta_array a greta array. For the assignment method it must be a
 #'   greta array that doesn't already have a probability distribution.
 #'
-#' @param value a \emph{distribution} greta array (see
+#' @param value a greta array with a distribution (see
 #'   \code{\link{greta-distributions}})
 #'
-#' @details The extract method returns a distribution greta array if one was
-#'   assigned to \code{greta_array}, or if \code{greta_array} already was a
-#'   distribution greta array. If \code{greta_array} has no distribution, it
-#'   returns NULL.
+#' @details The extract method returns the greta array if it has a distribution,
+#'   or \code{NULL} if it doesn't. It has now real function, but is included for
+#'   completeness
 #'
-#' Distribution can also be used to create truncated distributions, by first
-#' defining a greta array with constraints (the truncation) and then defining
-#' the distribution on that greta array. See example for an example.
+#'   \code{distribution} can also be used to create truncated distributions, by first
+#'   defining a greta array with constraints (the truncation) and then defining
+#'   the distribution on that greta array. See below for an example.
 #'
 #' @export
 #' @examples
@@ -52,57 +51,42 @@
   # coerce to a greta array (converts numerics to data arrays)
   greta_array <- as.greta_array(greta_array)
 
+  # only for greta arrays without distributions
+  if (!is.null(greta_array$node$distribution)) {
+    stop ('left hand side already has a distribution assigned',
+          call. = FALSE)
+  }
+
+  # can only assign with greta arrays
   if (!is.greta_array(value)) {
     stop ('right hand side must be a greta array',
           call. = FALSE)
   }
 
-  # grab the distribution
+  # that have distributions
   distribution_node <- value$node$distribution
 
-  # only for greta arrays
-  if (!is.greta_array(greta_array)) {
-    stop ('left hand side must be a greta array or something that ',
-          'can be passed to as_data',
-          call. = FALSE)
-  }
-
-  if (inherits(greta_array$node, 'distribution_node')) {
-    stop ('left hand side of distribution is already a distribution greta array',
-          call. = FALSE)
-  }
-
-  if (!is.null(greta_array$node$distribution)) {
-    stop ('greta_array already has a distribution assigned',
-          call. = FALSE)
-  }
-
   if (!inherits(distribution_node, 'distribution_node')) {
-
     stop ('right hand side must have a distribution',
           call. = FALSE)
+  }
 
+  # that aren't already fixed
+  if (distribution_node$.fixed_value) {
+    stop ('right hand side has already been assigned fixed values',
+          call. = FALSE)
   }
 
   # if distribution isn't scalar, make sure it has the right dimensions
   if (!is_scalar(value)) {
     if (!identical(dim(greta_array), dim(value))) {
-      stop ('left- and right-hand side of distribution have different ',
-            'dimensions. The distribution must have dimension of either ',
+      stop ('left and right hand sides have different dimensions. ',
+            'The distribution must have dimension of either ',
             paste(dim(greta_array), collapse = ' x '),
             ' or 1 x 1, but instead has dimension ',
             paste(dim(value), collapse = ' x '),
             call. = FALSE)
     }
-  }
-
-  # provide the data to the distribution and lock in the values in the
-  # distribution
-
-  # if the distribution already has a fixed value, error
-  if (distribution_node$.fixed_value) {
-    stop ('right hand side of distribution has already been assigned fixed values',
-          call. = FALSE)
   }
 
   # assign the new node as the distribution's target
@@ -113,18 +97,25 @@
   if (inherits(greta_array$node, 'data_node'))
     distribution_node$.fixed_value <- TRUE
 
-  # if the greta_array was a variable, add its constraints as truncation
+  # if the greta_array was a variable, check its constraints as truncation
   if (inherits(greta_array$node, 'variable_node')) {
 
-    # check the distribution can handle truncation
-    if (is.null(distribution_node$tf_cdf_function)) {
+    truncated <- greta_array$node$lower != -Inf |
+      greta_array$node$upper != Inf
 
-      stop('distribution cannot be truncated to the constraints of a free greta array',
-           call. = FALSE)
+    if (truncated) {
+
+      # check the distribution can handle truncation
+      if (is.null(distribution_node$tf_cdf_function)) {
+        stop(distribution_node$distribution_name,
+             ' distribution cannot be truncated',
+             call. = FALSE)
+      } else {
+        distribution_node$truncation <- c(greta_array$node$lower,
+                                          greta_array$node$upper)
+      }
 
     }
-
-    distribution_node$truncation <- c(greta_array$node$lower, greta_array$node$upper)
 
   }
 
