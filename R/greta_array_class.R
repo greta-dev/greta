@@ -134,9 +134,9 @@ summary.greta_array <- function (object, ...) {
   }
 
   # distribution info
-  if (inherits(object$node, 'distribution_node')) {
+  if (inherits(object$node$distribution, 'distribution_node')) {
     distribution_text <- sprintf("following a %s distribution",
-                                 object$node$distribution_name)
+                                 object$node$distribution$distribution_name)
 
   } else {
     distribution_text <- ""

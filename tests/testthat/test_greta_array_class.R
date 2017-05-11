@@ -28,7 +28,7 @@ test_that('print and summary work', {
   expect_identical(result$output, expected_output)
 
   # summary method
-  expected_output <- "'variable' greta array with 1 element  \n\n  (values currently unknown)"
+  expected_output <- "'variable' greta array with 1 element following a normal distribution \n\n  (values currently unknown)"
   result <- evaluate_promise(summary(ga_stochastic), print = TRUE)
   expect_identical(result$output, expected_output)
 
