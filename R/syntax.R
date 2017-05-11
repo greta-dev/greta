@@ -107,7 +107,7 @@
 
   # assign the new node as the distribution's target
   # also adds distribution_node as this node's distribution
-  distribution_node$replace_x(greta_array$node)
+  distribution_node$replace_target(greta_array$node)
 
   # optionally set that as a fixed value
   if (inherits(greta_array$node, 'data_node'))

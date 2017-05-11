@@ -248,7 +248,7 @@ compare_truncated_distribution <- function (greta_fun, which, parameters, trunca
 
   # create tensorflow bits in an environment
   env <- new.env()
-  env[[distrib$x$name]] <- tf$constant(x, dtype = tf$float32)
+  env[[distrib$target$name]] <- tf$constant(x, dtype = tf$float32)
   for (param_name in names(distrib$parameters)) {
     node_name <- distrib$parameters[[param_name]]$name
     env[[node_name]] <- tf$constant(parameters[[param_name]], dtype = tf$float32)

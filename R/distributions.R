@@ -33,7 +33,7 @@ uniform_distribution <- R6Class (
 
       }
 
-      # store min and max as numeric scalars (needed in create_x, done in
+      # store min and max as numeric scalars (needed in create_target, done in
       # initialisation)
       self$min <- min
       self$max <- max
@@ -51,7 +51,7 @@ uniform_distribution <- R6Class (
     },
 
     # default value
-    create_x = function() {
+    create_target = function() {
       variable(lower = self$min,
                upper = self$max,
                dim = self$dim)
@@ -80,7 +80,7 @@ normal_distribution <- R6Class (
     },
 
     # default value
-    create_x = function() {
+    create_target = function() {
       variable(dim = self$dim)
     },
 
@@ -124,7 +124,7 @@ lognormal_distribution <- R6Class (
     },
 
     # default value
-    create_x = function() {
+    create_target = function() {
       variable(lower = 0, dim = self$dim)
     },
 
@@ -155,7 +155,7 @@ bernoulli_distribution <- R6Class (
     },
 
     # default value (should get overwritten anyway!)
-    create_x = function() {
+    create_target = function() {
       variable(dim = self$dim)
     },
 
@@ -192,7 +192,7 @@ binomial_distribution <- R6Class (
     },
 
     # default value (should get overwritten anyway!)
-    create_x = function() {
+    create_target = function() {
       variable(dim = self$dim)
     },
 
@@ -223,7 +223,7 @@ poisson_distribution <- R6Class (
     },
 
     # default value (should get overwritten anyway!)
-    create_x = function() {
+    create_target = function() {
       variable(dim = self$dim)
     },
 
@@ -251,7 +251,7 @@ negative_binomial_distribution <- R6Class (
     },
 
     # default value (should get overwritten anyway!)
-    create_x = function() {
+    create_target = function() {
       variable(dim = self$dim)
     },
 
@@ -283,7 +283,7 @@ gamma_distribution <- R6Class (
     },
 
     # default value
-    create_x = function() {
+    create_target = function() {
       variable(lower = 0, dim = self$dim)
     },
 
@@ -313,7 +313,7 @@ exponential_distribution <- R6Class (
     },
 
     # default value
-    create_x = function() {
+    create_target = function() {
       variable(lower = 0, dim = self$dim)
     },
 
@@ -342,7 +342,7 @@ student_distribution <- R6Class (
     },
 
     # default value
-    create_x = function() {
+    create_target = function() {
       variable(dim = self$dim)
     },
 
@@ -379,7 +379,7 @@ beta_distribution <- R6Class (
     },
 
     # default value
-    create_x = function() {
+    create_target = function() {
       variable(lower = 0, upper = 1, dim = self$dim)
     },
 
@@ -470,7 +470,7 @@ multivariate_normal_distribution <- R6Class (
     },
 
     # default value
-    create_x = function() {
+    create_target = function() {
       variable(dim = self$dim)
     },
 
@@ -533,9 +533,8 @@ wishart_distribution <- R6Class (
 
     },
 
-
     # default value
-    create_x = function() {
+    create_target = function() {
 
       # handle reshaping via a greta array
       free_greta_array <- free(dim = prod(self$dim))
@@ -543,7 +542,6 @@ wishart_distribution <- R6Class (
       matrix_greta_array$node
 
     },
-
 
     tf_log_density_function = function (x, parameters) {
 
@@ -560,14 +558,14 @@ wishart_distribution <- R6Class (
 
 
 # shorthand for distribution parameter constructors
-create <- function (distribution, ...) {
+distrib <- function (distribution, ...) {
 
   # get and initialize the distribution, with a default value node
   constructor <- get(paste0(distribution, '_distribution'))
   distrib <- constructor$new(...)
 
   # return the value node as a greta array
-  value <- distrib$x
+  value <- distrib$target
   as.greta_array(value)
 
 }
@@ -703,66 +701,66 @@ uniform <- function (min, max, dim = NULL) {
   if (is.greta_array(min) | is.greta_array(max))
     stop ('min and max must be fixed, they cannot be another greta array')
 
-  create('uniform', min, max, dim)
+  distrib('uniform', min, max, dim)
 
 }
 
 #' @rdname greta-distributions
 #' @export
 normal <- function (mean, sd, dim = NULL)
-  create('normal', mean, sd, dim)
+  distrib('normal', mean, sd, dim)
 
 #' @rdname greta-distributions
 #' @export
 lognormal <- function (meanlog, sdlog, dim = NULL)
-  create('lognormal', meanlog, sdlog, dim)
+  distrib('lognormal', meanlog, sdlog, dim)
 
 #' @rdname greta-distributions
 #' @export
 bernoulli <- function (prob, dim = NULL)
-  create('bernoulli', prob, dim)
+  distrib('bernoulli', prob, dim)
 
 #' @rdname greta-distributions
 #' @export
 binomial <- function (size, prob, dim = NULL)
-  create('binomial', size, prob, dim)
+  distrib('binomial', size, prob, dim)
 
 #' @rdname greta-distributions
 #' @export
 negative_binomial <- function (size, prob, dim = NULL)
-  create('negative_binomial', size, prob, dim)
+  distrib('negative_binomial', size, prob, dim)
 
 #' @rdname greta-distributions
 #' @export
 poisson <- function (lambda, dim = NULL)
-  create('poisson', lambda, dim)
+  distrib('poisson', lambda, dim)
 
 #' @rdname greta-distributions
 #' @export
 gamma <- function (shape, rate, dim = NULL)
-  create('gamma', shape, rate, dim)
+  distrib('gamma', shape, rate, dim)
 
 #' @rdname greta-distributions
 #' @export
 exponential <- function (rate, dim = NULL)
-  create('exponential', rate, dim)
+  distrib('exponential', rate, dim)
 
 #' @rdname greta-distributions
 #' @export
 student <- function (df, location, scale, dim = NULL)
-  create('student', df, location, scale, dim)
+  distrib('student', df, location, scale, dim)
 
 #' @rdname greta-distributions
 #' @export
 beta <- function (shape1, shape2, dim = NULL)
-  create('beta', shape1, shape2, dim)
+  distrib('beta', shape1, shape2, dim)
 
 #' @rdname greta-distributions
 #' @export
 multivariate_normal <- function (mean, Sigma, dim = 1)
-  create('multivariate_normal', mean, Sigma, dim)
+  distrib('multivariate_normal', mean, Sigma, dim)
 
 #' @rdname greta-distributions
 #' @export
 wishart <- function (df, Sigma)
-  create('wishart', df, Sigma)
+  distrib('wishart', df, Sigma)

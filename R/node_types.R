@@ -298,7 +298,7 @@ distribution_node <- R6Class (
     type = 'distribution',
     distribution_name = 'no distribution',
     discrete = NA,
-    x = NULL,
+    target = NULL,
     truncation = NULL,
     parameters = list(),
 
@@ -310,34 +310,34 @@ distribution_node <- R6Class (
       self$distribution_name <- name
       self$discrete <- discrete
 
-      # initialize x (the target values of this distribution)
-      self$add_x(self$create_x())
+      # initialize the target values of this distribution
+      self$add_target(self$create_target())
 
     },
 
     # create x, add as a child, and give it this distribution
-    add_x = function (new_x) {
+    add_target = function (new_target) {
 
       # add as x and as a child
-      self$x <- new_x
-      self$add_child(new_x)
+      self$target <- new_target
+      self$add_child(new_target)
 
       # get its values
-      self$value(new_x$value())
+      self$value(new_target$value())
 
       # give self to x as its distribution
-      self$x$set_distribution(self)
+      self$target$set_distribution(self)
 
     },
 
     # replace the existing x with a new one, including updating the parameter and possibly fixing the value
-    replace_x = function (new_x) {
+    replace_target = function (new_target) {
 
       # remove x from children
-      self$remove_child(self$x)
+      self$remove_child(self$target)
 
       # add the new one in
-      self$add_x(new_x)
+      self$add_target(new_target)
 
     },
 
@@ -360,11 +360,11 @@ distribution_node <- R6Class (
     tf_log_density = function (env) {
 
       # fetch inputs
-      tf_x <- get(self$x$name, envir = env)
+      tf_target <- get(self$target$name, envir = env)
       tf_parameters <- self$tf_fetch_parameters(env)
 
       # calculate log density
-      ld <- self$tf_log_density_function(tf_x, tf_parameters)
+      ld <- self$tf_log_density_function(tf_target, tf_parameters)
 
       # check for truncation
       if (!is.null(self$truncation))
