@@ -113,8 +113,7 @@ dag_class <- R6Class(
 
       # get example parameter list for all non-fixed  parameters for the dag
       current_parameters <- self$all_values(types = 'variable',
-                                            omit_fixed = TRUE,
-                                            free = TRUE)
+                                            omit_fixed = TRUE)
 
       # optionally flatten them
       if (flat)
@@ -234,7 +233,7 @@ dag_class <- R6Class(
     # get or set values in all descendents as a named list, only for nodes of
     # the named type (if type != NULL), and if omit_fixed = TRUE, omit the
     # fixed values when reporting (ignored when setting)
-    all_values = function (types = NULL, omit_fixed = TRUE, free = FALSE) {
+    all_values = function (types = NULL, omit_fixed = TRUE) {
 
       # find all nodes of this type in the graph
       .nodes <- options()$nodes
@@ -249,7 +248,7 @@ dag_class <- R6Class(
       }
 
       # get all values in a list
-      values <- lapply(nodes, function(x) x$value(free = free))
+      values <- lapply(nodes, function(x) x$value())
       names(values) <- node_names
 
       values

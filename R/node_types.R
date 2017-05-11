@@ -149,7 +149,6 @@ stochastic_node <- R6Class (
     type = 'stochastic',
     parameters = list(),
     tf_from_free = function (x, env) x,
-    to_free = function (x) x,
 
     initialize = function (dim = NULL) {
 
@@ -189,7 +188,7 @@ stochastic_node <- R6Class (
       } else {
 
         # otherwise, make a Variable tensor to hold the free state
-        obj <- self$to_free(self$value())
+        obj <- self$value()
         tf_obj <- tf$Variable(initial_value = obj, dtype = tf$float32)
 
         # assign this as the free state
@@ -216,13 +215,11 @@ stochastic_node <- R6Class (
 
     },
 
-    # overwrite value with option to switch to free state
-    value = function(new_value = NULL, free = FALSE, ...) {
+    # return or overwrite value
+    value = function(new_value = NULL, ...) {
 
       if (is.null(new_value)) {
         ans <- super$value(new_value, ...)
-        if (free)
-          ans <- self$to_free(ans)
 
         return (ans)
 
@@ -304,41 +301,6 @@ variable_node <- R6Class (
       super$initialize(dim)
       self$lower <- lower
       self$upper <- upper
-
-    },
-
-    to_free = function (y) {
-
-      upper <- self$upper
-      lower <- self$lower
-
-      if (is_scalar(upper))
-        upper <- as.vector(upper)
-
-      if (is_scalar(lower))
-        lower <- as.vector(lower)
-
-      if (self$constraint == 'none') {
-
-        x <- y
-
-      } else if (self$constraint == 'both') {
-
-        x <- qlogis((y - lower) / (upper - lower))
-
-      } else if (self$constraint == 'low') {
-
-        baseline <- upper - y
-        x <- log(exp(baseline) - 1)
-
-      } else if (self$constraint == 'high') {
-
-        baseline <- y - lower
-        x <- log(exp(baseline) - 1)
-
-      }
-
-      x
 
     },
 

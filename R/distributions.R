@@ -57,20 +57,6 @@ uniform_distribution <- R6Class (
                dim = self$dim)
     },
 
-    to_free = function (y) {
-
-      max <- self$parameters$max$value()
-      min <- self$parameters$min$value()
-
-      if (is_scalar(max))
-        max <- as.vector(max)
-
-      if (is_scalar(min))
-        min <- as.vector(min)
-
-      qlogis((y - min) / (max - min))
-    },
-
     # weird hack to make TF see a gradient here
     tf_log_density_function = function (x, parameters) {
       self$log_density + tf$reduce_sum(x * 0)
@@ -519,23 +505,6 @@ wishart_distribution <- R6Class (
   'wishart_distribution',
   inherit = distribution_node,
   public = list(
-
-    # grab it in lower-triangular form, so it's upper when putting it back in python-style
-    to_free = function (y) {
-      L <- t(chol(y))
-      vals <- L[lower.tri(L, diag = TRUE)]
-      matrix(vals)
-    },
-
-    # tf_from_free = function (x, env) {
-    #   dims <- self$parameters$Sigma$dim
-    #   L_dummy <- greta:::dummy(dims)
-    #   indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
-    #   values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
-    #   values <- greta:::recombine(values, indices, x)
-    #   L <- tf$reshape(values, shape(dims[1], dims[2]))
-    #   tf$matmul(tf$transpose(L), L)
-    # },
 
     initialize = function (df, Sigma) {
       # add the nodes as children and parameters
