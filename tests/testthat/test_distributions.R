@@ -1,48 +1,10 @@
 context('distributions')
 
-test_that('free distributions have no density', {
-
-  source('helpers.R')
-
-  none <- function (x, lower, upper, log) 0
-
-  # no constraints
-  difference <- compare_distribution(greta::free,
-                                     none,
-                                     parameters = list(lower = -Inf, upper = Inf),
-                                     x = rnorm(100))
-
-  expect_true(difference == 0)
-
-  # lower constraint
-  difference <- compare_distribution(greta::free,
-                                     none,
-                                     parameters = list(lower = -1, upper = Inf),
-                                     x = rnorm(100))
-
-  expect_true(difference == 0)
-
-  # upper constraint
-  difference <- compare_distribution(greta::free,
-                                     none,
-                                     parameters = list(lower = -Inf, upper = 1),
-                                     x = rnorm(100))
-
-  expect_true(difference == 0)
-
-  # both constraints
-  difference <- compare_distribution(greta::free,
-                                     none,
-                                     parameters = list(lower = -1, upper = 1),
-                                     x = rnorm(100))
-
-  expect_true(difference == 0)
-
-})
-
 test_that('normal distribution has correct density', {
 
   source('helpers.R')
+
+  flush()
 
   difference <- compare_distribution(greta::normal,
                                      stats::dnorm,
@@ -57,6 +19,8 @@ test_that('uniform distribution has correct density', {
 
   source('helpers.R')
 
+  flush()
+
   difference <- compare_distribution(greta::uniform,
                                      stats::dunif,
                                      parameters = list(min = -2.1, max = -1.2),
@@ -70,6 +34,8 @@ test_that('lognormal distribution has correct density', {
 
   source('helpers.R')
 
+  flush()
+
   difference <- compare_distribution(greta::lognormal,
                                      stats::dlnorm,
                                      parameters = list(meanlog = 1, sdlog = 3),
@@ -82,6 +48,8 @@ test_that('lognormal distribution has correct density', {
 test_that('bernoulli distribution has correct density', {
 
   source('helpers.R')
+
+  flush()
 
   # r version of the bernoulli density
   dbern <- function (x, prob, log = FALSE)
@@ -100,6 +68,8 @@ test_that('binomial distribution has correct density', {
 
   source('helpers.R')
 
+  flush()
+
   difference <- compare_distribution(greta::binomial,
                                      stats::dbinom,
                                      parameters = list(size = 10, prob = 0.8),
@@ -112,6 +82,8 @@ test_that('binomial distribution has correct density', {
 test_that('negative binomial distribution has correct density', {
 
   source('helpers.R')
+
+  flush()
 
   difference <- compare_distribution(greta::negative_binomial,
                                      stats::dnbinom,
@@ -126,6 +98,8 @@ test_that('poisson distribution has correct density', {
 
   source('helpers.R')
 
+  flush()
+
   difference <- compare_distribution(greta::poisson,
                                      stats::dpois,
                                      parameters = list(lambda = 17.2),
@@ -138,6 +112,8 @@ test_that('poisson distribution has correct density', {
 test_that('gamma distribution has correct density', {
 
   source('helpers.R')
+
+  flush()
 
   difference <- compare_distribution(greta::gamma,
                                      stats::dgamma,
@@ -152,6 +128,8 @@ test_that('exponential distribution has correct density', {
 
   source('helpers.R')
 
+  flush()
+
   difference <- compare_distribution(greta::exponential,
                                      stats::dexp,
                                      parameters = list(rate = 1.9),
@@ -164,6 +142,8 @@ test_that('exponential distribution has correct density', {
 test_that('student distribution has correct density', {
 
   source('helpers.R')
+
+  flush()
 
   # use location-scale version of student T; related to R's via this function:
   dt_ls <- function (x, df, location, scale, log = FALSE) {
@@ -186,6 +166,8 @@ test_that('beta distribution has correct density', {
 
   source('helpers.R')
 
+  flush()
+
   difference <- compare_distribution(greta::beta,
                                      stats::dbeta,
                                      parameters = list(shape1 = 2.3, shape2 = 3.4),
@@ -198,6 +180,8 @@ test_that('beta distribution has correct density', {
 test_that('multivariate normal distribution has correct density', {
 
   source('helpers.R')
+
+  flush()
 
   # parameters to test
   m <- 5
@@ -220,6 +204,8 @@ test_that('multivariate normal distribution has correct density', {
 test_that('Wishart distribution has correct density', {
 
   source('helpers.R')
+
+  flush()
 
   # parameters to test
   m <- 5
@@ -249,16 +235,28 @@ test_that('scalar-valued distributions can be defined in models', {
 
   source('helpers.R')
 
+  flush()
+
   x <- randn(5)
   y <- round(randu(5))
   p <- iprobit(normal(0, 1))
 
   # density-free and discrete data need a bit of help
-  define_model((likelihood(x) = normal(free(), 1)))
-  define_model((likelihood(y) = bernoulli(p)))
-  define_model((likelihood(y) = binomial(1, p)))
-  define_model((likelihood(y) = negative_binomial(1, p)))
-  define_model((likelihood(y) = poisson(p)))
+  a = free()
+  distribution(x) = normal(a, 1)
+  define_model(a)
+
+  distribution(y) = bernoulli(p)
+  define_model(p)
+
+  distribution(y) = binomial(1, p)
+  define_model(p)
+
+  distribution(y) = negative_binomial(1, p)
+  define_model(p)
+
+  distribution(y) = poisson(p)
+  define_model(p)
 
   flush()
 
@@ -286,17 +284,29 @@ test_that('array-valued distributions can be defined in models', {
 
   source('helpers.R')
 
+  flush()
+
   dim <- c(5, 2)
   x <- randn(5, 2)
   y <- round(randu(5, 2))
   p <- iprobit(normal(0, 1, dim = dim))
 
   # density-free and discrete data need a bit of help
-  define_model((likelihood(x) = normal(free(dim = dim), 1)))
-  define_model((likelihood(y) = bernoulli(p)))
-  define_model((likelihood(y) = binomial(1, p)))
-  define_model((likelihood(y) = negative_binomial(1, p)))
-  define_model((likelihood(y) = poisson(p)))
+  a <- free(dim = dim)
+  distribution(x) = normal(a, 1)
+  define_model(a)
+
+  distribution(y) = bernoulli(p)
+  define_model(p)
+
+  distribution(y) = binomial(1, p)
+  define_model(p)
+
+  distribution(y) = negative_binomial(1, p)
+  define_model(p)
+
+  distribution(y) = poisson(p)
+  define_model(p)
 
   flush()
 
@@ -323,21 +333,42 @@ test_that('distributions can be sampled from', {
 
   source('helpers.R')
 
+  flush()
+
   x <- randn(100)
   y <- round(randu(100))
   p <- iprobit(normal(0, 1, dim = 100))
 
   # free (with a density)
-  sample_distribution((likelihood(x) = normal(free(), 1)))
-  sample_distribution((likelihood(x) = normal(free(lower = -1), 1)))
-  sample_distribution((likelihood(x) = normal(free(upper = -2), 1)))
-  sample_distribution((likelihood(x) = normal(free(lower = 1.2, upper = 1.3), 1)))
+  a <- free()
+  distribution(x) = normal(a, 1)
+  sample_distribution(a)
+
+  b <- free(lower = -1)
+  distribution(x) = normal(b, 1)
+  sample_distribution(b)
+
+  c <- free(upper = -2)
+  distribution(x) = normal(c, 1)
+  sample_distribution(c)
+
+
+  d <- free(lower = 1.2, upper = 1.3)
+  distribution(x) = normal(d, 1)
+  sample_distribution(d)
 
   # discrete
-  sample_distribution((likelihood(y) = bernoulli(p)))
-  sample_distribution((likelihood(y) = binomial(1, p)))
-  sample_distribution((likelihood(y) = negative_binomial(1, p)))
-  sample_distribution((likelihood(y) = poisson(p)))
+  distribution(y) = bernoulli(p)
+  sample_distribution(p)
+
+  distribution(y) = binomial(1, p)
+  sample_distribution(p)
+
+  distribution(y) = negative_binomial(1, p)
+  sample_distribution(p)
+
+  distribution(y) = poisson(p)
+  sample_distribution(p)
 
   flush()
 
@@ -372,6 +403,8 @@ test_that('free distribution errors informatively', {
 
   source('helpers.R')
 
+  flush()
+
   # bad types
   expect_error(free(upper = NA),
                'lower and upper must be numeric vectors of length 1')
@@ -396,6 +429,8 @@ test_that('uniform distribution errors informatively', {
 
   source('helpers.R')
 
+  flush()
+
   # bad types
   expect_error(uniform(min = 0, max = NA),
                'min and max must be numeric vectors of length 1')
@@ -418,6 +453,8 @@ test_that('wishart distribution errors informatively', {
 
   source('helpers.R')
 
+  flush()
+
   a <- randn(3, 3)
   b <- randn(3, 3, 3)
   c <- randn(3, 2)
@@ -435,6 +472,8 @@ test_that('wishart distribution errors informatively', {
 test_that('multivariate_normal distribution errors informatively', {
 
   source('helpers.R')
+
+  flush()
 
   m_a <- randn(3)
   m_b <- randn(3, 1)

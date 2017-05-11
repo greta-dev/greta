@@ -69,30 +69,6 @@ test_that('all_greta_arrays works', {
 
 })
 
-test_that('likelihood errors informatively', {
-
-  source('helpers.R')
-  flush()
-  y <- randn(3, 3, 2)
-  x <- randn(1)
-
-  # not a stochastic greta array on the right
-  expect_error({likelihood(y) = x},
-               'right hand side of likelihood must be a stochastic greta array')
-
-  expect_error({likelihood(y) = as_data(x)},
-               'right hand side of likelihood must be a stochastic greta array')
-
-  # no density on the right
-  expect_error({likelihood(y) = free()},
-               'free parameters do not have distributions, so cannot be used to define a likelihood')
-
-  # non-scalar and wrong dimensions
-  expect_error({likelihood(y) = normal(0, 1, dim = c(3, 3, 1))},
-               '^left- and right-hand side of likelihood have different dimensions.')
-
-})
-
 test_that('greta_model objects print', {
 
   m <- define_model(normal(0, 1))
@@ -113,6 +89,8 @@ test_that('define_model and mcmc error informatively', {
 
   source('helpers.R')
 
+  flush()
+
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
@@ -127,7 +105,12 @@ test_that('define_model and mcmc error informatively', {
 
   # can't define a model for an unfixed discrete variable
   expect_error(define_model(bernoulli(0.5)),
-               "model contains a discrete random variable that isn't in the likelihood, so cannot be sampled from")
+               "model contains a discrete random variable that doesn't have a fixed value, so cannot be sampled from")
+
+  # no parameters here, so define_model or dag should error
+  distribution(x) = normal(0, 1)
+  expect_error(define_model(x),
+               'none of the greta arrays in the model are unknown, so a model cannot be defined')
 
   # can't draw samples of a data greta array
   z = normal(0, 1)
@@ -140,6 +123,8 @@ test_that('define_model and mcmc error informatively', {
 test_that('check_dims errors informatively', {
 
   source('helpers.R')
+
+  flush()
 
   a <- ones(3, 3)
   b <- ones(1)
@@ -173,10 +158,12 @@ test_that('rejected mcmc proposals', {
 
   source('helpers.R')
 
+  flush()
+
   # numerical rejection
   x <- rnorm(10000, 1e6, 1)
   z = normal(-1e6, 1e-6)
-  likelihood(x) = normal(z, 1e6)
+  distribution(x) = normal(z, 1e6)
   m <- define_model(z)
   expect_message(mcmc(m, n_samples = 1, warmup = 0),
                  'proposal rejected due to numerical instability')
@@ -186,8 +173,8 @@ test_that('rejected mcmc proposals', {
   # bad proposal
   x <- rnorm(100, 0, 0.01)
   z = normal(0, 10)
-  likelihood(x) = normal(z, 0.01)
+  distribution(x) = normal(z, 0.01)
   m <- define_model(z)
-  mcmc(m, n_samples = 1, warmup = 0)
+  mcmc(m, n_samples = 1, warmup = 0, verbose = FALSE)
 
 })

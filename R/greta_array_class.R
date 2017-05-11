@@ -108,8 +108,10 @@ is.greta_array <- function (x)
 # print method
 #' @export
 print.greta_array <- function (x, ...) {
+
   text <- sprintf('greta array (%s)\n\n',
-                  x$node$type)
+                  x$node$description())
+
   cat(text)
   print(x$node$value(), ...)
 }
@@ -132,9 +134,9 @@ summary.greta_array <- function (object, ...) {
   }
 
   # distribution info
-  if (object$node$type == 'stochastic') {
+  if (inherits(object$node$distribution, 'distribution_node')) {
     distribution_text <- sprintf("following a %s distribution",
-                                 object$node$distribution_name)
+                                 object$node$distribution$distribution_name)
 
   } else {
     distribution_text <- ""
@@ -232,7 +234,3 @@ tail.greta_array <- function (x, n = 6L, ...) {
   ans
 
 }
-
-# short hand for use in functions
-ga <- function (x)
-  as.greta_array(x)

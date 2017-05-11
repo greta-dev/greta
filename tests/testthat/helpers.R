@@ -1,12 +1,13 @@
 # test functions
 
-# flush the node list and set the RNG seed
-flush <- function ()
-  options('nodes')$nodes$flush()
-
-flush()
+# set the seed before running tests
 set.seed(2017-05-01)
 
+# flush the node list and tensor graph
+flush <- function () {
+  options('nodes')$nodes$flush()
+  tf$reset_default_graph()
+}
 
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
@@ -23,14 +24,12 @@ grab <- function (x) {
 
 }
 
-set_likelihood <- function(dist, data) {
+set_distribution <- function(dist, data) {
   # fix the value of dist
-  dist$node$value(data$node$value())
-  dist$node$.fixed_value <- TRUE
-
-  # give the distribution to the data as a likelihood (this will register the
-  # child distribution)
-  data$node$set_likelihood(dist$node)
+  distrib <- dist$node$distribution
+  distrib$value(data$node$value())
+  distrib$.fixed_value <- TRUE
+  data$node$set_distribution(distrib)
   data$node$register()
 }
 
@@ -53,16 +52,17 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
 
-  set_likelihood(dist, as_data(x))
+  distribution(x) = dist
+  # set_distribution(dist, as_data(x))
 
-  stopifnot(dist$node$.fixed_value)
+  stopifnot(dist$node$distribution$.fixed_value)
 
   # define the tensor in an environment
   env <- new.env()
-  dist$node$define_tf(env = env)
+  dist$node$distribution$define_tf(env = env)
 
   # get the log density as a vector
-  tensor_name <- paste0(dist$node$name, '_density')
+  tensor_name <- paste0(dist$node$distribution$name, '_density')
   tensor <- get(tensor_name, envir = env)
   greta_log_density <- as.vector(grab(tensor))
 
@@ -200,7 +200,7 @@ gen_opfun <- function (n, ops) {
 # greta array is defined as astochastic in the call, like: sample_distribution(normal(0, 1))
 sample_distribution <- function (greta_array, n = 10, lower = -Inf, upper = Inf) {
   m <- define_model(greta_array)
-  draws <- mcmc(m, n_samples = n, warmup = 1)
+  draws <- mcmc(m, n_samples = n, warmup = 1, verbose = FALSE)
   samples <- as.vector(draws[[1]])
   expect_true(all(samples >= lower & samples <= upper))
 }
@@ -217,4 +217,64 @@ it_state <- function (matrix, state, niter) {
   for (i in seq_len(niter))
     state <- state %*% matrix
   state[1, ]
+}
+
+compare_truncated_distribution <- function (greta_fun, which, parameters, truncation) {
+  # calculate the absolute difference in the log density of some data between
+  # greta and a r benchmark, for an implied truncated distribution 'greta_array'
+  # is a greta array created from a distribution and a constrained free() greta
+  # array. 'r_fun' is an r function returning the log density for the same
+  # truncated distribution, taking x as its only argument.
+
+  require(truncdist)
+
+  x <- do.call(truncdist::rtrunc,
+               c(n = 100,
+                 spec = which,
+                 a = truncation[1],
+                 b = truncation[2],
+                 parameters))
+
+  # create truncated R function and evaluate it
+  r_fun <- truncfun(which, parameters, truncation)
+  r_log_density <- log(r_fun(x))
+
+  # create greta array
+  z <- free(truncation[1], truncation[2])
+  distribution(z) = do.call(greta_fun, parameters)
+
+  # get the modified distribution
+  distrib <- z$node$distribution
+
+  # create tensorflow bits in an environment
+  env <- new.env()
+  env[[distrib$target$name]] <- tf$constant(x, dtype = tf$float32)
+  for (param_name in names(distrib$parameters)) {
+    node_name <- distrib$parameters[[param_name]]$name
+    env[[node_name]] <- tf$constant(parameters[[param_name]], dtype = tf$float32)
+  }
+
+  # evaluate tensorflow log density
+  tf_log_density <- z$node$distribution$tf_log_density(env)
+  greta_log_density <- as.vector(grab(tf_log_density))
+
+  # return absolute difference
+  abs(greta_log_density - r_log_density)
+
+}
+
+# use the truncdist package to crete a truncated distribution function for use
+# in compare_truncated_distribution
+truncfun <- function (which = 'norm', parameters, truncation) {
+
+  args <- c(spec = which,
+                a = truncation[1],
+                b = truncation[2],
+                parameters)
+
+  function (x) {
+    arg_list <- c(x = list(x), args)
+    do.call(truncdist::dtrunc, arg_list)
+  }
+
 }

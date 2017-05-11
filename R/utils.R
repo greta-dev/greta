@@ -220,7 +220,35 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
 
 }
 
-# determine whether a greta array has (can define) a density
-# only stochastics can have densities, and free nodes can't have densities
-greta_array_has_density <- function (x)
-  x$node$type == 'stochastic' && x$node$distribution_name != 'free'
+# given a flat tensor, convert it into a square symmetric matrix by considering
+# it  as the non-zero elements of the lower-triangular decomposition of the
+# square matrix
+tf_flat_to_symmetric = function (x, dims) {
+
+  # create a dummy array to find the indices
+  L_dummy <- dummy(dims)
+  indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
+
+  # create an empty vector to fill with the values
+  values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
+  values <- recombine(values, indices, x)
+
+  # reshape into lower triangular, then symmetric matrix
+  L <- tf$reshape(values, shape(dims[1], dims[2]))
+  tf$matmul(tf$transpose(L), L)
+}
+
+flat_to_symmetric <- function (x, dim) {
+
+  dimfun <- function (elem_list)
+    dim
+
+  # sum the elements
+  op('tf_flat_to_symmetric',
+     x,
+     operation_args = list(dims = dim),
+     dimfun = dimfun)
+
+}
+
+

@@ -26,7 +26,7 @@ sd = lognormal(0, 3)
 mean <- intercept + coefficient * iris$Petal.Length
 
 # define the likelihood of the observed data
-likelihood(iris$Sepal.Length) = normal(mean, sd)
+distribution(iris$Sepal.Length) = normal(mean, sd)
 ```
 
 With the model written, we can draw samples of the parameters we care about.
@@ -260,9 +260,9 @@ inprod(iris[1:10, 2:4], beta)
     ##  [9,]   ? 
     ## [10,]   ?
 
-##### likelihood
+##### distribution
 
-The `likelihood()` syntax lets us tell greta that some data should follow a certain distribution, i.e. defining a likelihood so that we can fit the model to data. `likelihood()` always goes on the left hand side, and with a distribution on the right hand side, like this:`likelihood(<some_data>) = <some_distribution>(<some_parameters>)`
+The `distribution()` syntax lets us tell greta that some greta array (usually data) should follow a certain distribution, e.g. defining a likelihood so that we can fit the model to data. `distribution()` always goes on the left hand side, and with a distribution on the right hand side, like this:`distribution(<some_data>) = <some_distribution>(<some_parameters>)`
 
 #### what happens next
 
@@ -278,7 +278,7 @@ The design and scope of greta was inspired by other general-purpose MCMC softwar
 
 ### Contributors
 
-[![Build Status](https://travis-ci.org/goldingn/greta.svg)](https://travis-ci.org/goldingn/greta) [![codecov.io](https://codecov.io/github/goldingn/greta/coverage.svg?branch=master)](https://codecov.io/github/goldingn/greta?branch=master) [![cran version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta)
+[![Build Status](https://travis-ci.org/goldingn/greta.svg?branch=master)](https://travis-ci.org/goldingn/greta) [![codecov.io](https://codecov.io/github/goldingn/greta/coverage.svg?branch=master)](https://codecov.io/github/goldingn/greta?branch=master) [![cran version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta)
 
 I would welcome contributions to this project from anyone with time to spare! The issues tracker lists a number of known bugs and extensions I have planned. Please feel free to add to those any bugs or issues you come across, or let me know if you'd like to help fix some of them or add new features.
 
@@ -296,6 +296,6 @@ In addition to remembering where they are in the DAG, each node has a method to 
 
 Nodes representing random variables also have a method to create a Tensor that calculates their log-density, given their value. Those log-densities are summed on the TensorFlow graph to create a Tensor for the joint log-density of the model. TensorFlow's automatic gradient capabilities are then used to define a Tensor for the gradient of the log-density with respect to each parameter in the model. The `dag` R6 object contained within the model then exposes methods to send parameters to the TensorFlow graph and return the joint density and gradient. These methods are used by the Hamiltonian Monte Carlo algorithm to sample from the model parameters.
 
-Crucially, all nodes ever created in an R session are registered (recorded in a hidden list), whether or not the greta arrays to which they correspond were assigned as objects. That enables us to nest functions and string together operations without losing track of dependency between nodes. It also enables us to define a likelihood via the syntax in the example above: `likelihood()` creates a distribution node, sets it as having a fixed value, and registers it, but doesn't assign it to a greta\_array object.
+Crucially, all nodes ever created in an R session are registered (recorded in a hidden list), whether or not the greta arrays to which they correspond were assigned as objects. That enables us to nest functions and string together operations without losing track of dependency between nodes. It also enables us to define a likelihood via the syntax in the example above: `distribution()` creates a distribution node, sets it as having a fixed value, and registers it, but doesn't assign it to a greta\_array object.
 
 ![](README_files/figure-markdown_github/bottom_banner-1.png)

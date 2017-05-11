@@ -1,12 +1,22 @@
+deterministic_node <- R6Class(
+  'deterministic_node',
+  inherit = node,
+  public = list(
+
+    type = 'deterministic'
+
+  )
+)
+
+
 # different types of node
 
 data_node <- R6Class(
   'data_node',
-  inherit = node,
+  inherit = deterministic_node,
   public = list(
 
     type = 'data',
-    likelihood = NA,
 
     initialize = function (data) {
 
@@ -18,22 +28,7 @@ data_node <- R6Class(
         dim(data) <- c(dim(data), 1)
 
       # update and store array and store dimension
-      self$value(data)
-      self$register()
-
-    },
-
-    set_likelihood = function (distribution) {
-
-      # check it
-      if (!inherits(distribution, 'distribution'))
-        stop ('invalid distribution')
-
-      # register it
-      self$add_child(distribution)
-
-      # add it
-      self$likelihood <- distribution
+      super$initialize(dim = dim(data), value = data)
 
     },
 
@@ -48,21 +43,13 @@ data_node <- R6Class(
 # a node for applying operations to values
 operation_node <- R6Class(
   'operation_node',
-  inherit = node,
+  inherit = deterministic_node,
   public = list(
 
     type = 'operation',
     .operation = NA,
     .operation_args = NA,
     arguments = list(),
-
-    add_argument = function (argument) {
-
-      # guess at a name, coerce to a node, and add as a child
-      parameter <- to_node(argument)
-      self$add_child(parameter)
-
-    },
 
     initialize = function (operation,
                            ...,
@@ -94,9 +81,15 @@ operation_node <- R6Class(
       else if (!all.equal(dim(value), dim))
         stop ('values have the wrong dimension so cannot be used')
 
-      self$value(value)
-      self$dim <- dim
-      self$register()
+      super$initialize(dim, value)
+
+    },
+
+    add_argument = function (argument) {
+
+      # guess at a name, coerce to a node, and add as a child
+      parameter <- to_node(argument)
+      self$add_child(parameter)
 
     },
 
@@ -140,87 +133,200 @@ operation_node <- R6Class(
   )
 )
 
-# wrapper to parse inputs before R6 mangles them, & shorthand to speed up the
-# rest of the definitions
+# shorthand to speed up op definitions
 op <- function (...) {
-  ga(operation_node$new(...))
+  as.greta_array(operation_node$new(...))
 }
 
-# define base distribution constructor classes
-distribution <- R6Class (
-  'distribution',
+variable_node <- R6Class (
+  'variable_node',
   inherit = node,
   public = list(
 
-    type = 'stochastic',
-    discrete = NA,
-    parameters = list(),
+    type = 'variable',
+    constraint = NULL,
+    lower = -Inf,
+    upper = Inf,
+
+    initialize = function (lower = -Inf, upper = Inf, dim = 1) {
+
+      good_types <- is.numeric(lower) && length(lower) == 1 &
+        is.numeric(upper) && length(upper) == 1
+
+      if (!good_types) {
+
+        stop ('lower and upper must be numeric vectors of length 1',
+              call. = FALSE)
+
+      }
+
+      # check and assign limits
+      bad_limits <- TRUE
+
+      # find constraint type
+      if (lower == -Inf & upper == Inf) {
+
+        self$constraint <- 'none'
+        bad_limits <- FALSE
+
+      } else if (lower == -Inf & upper != Inf) {
+
+        self$constraint <- 'low'
+        bad_limits <- !is.finite(upper)
+
+      } else if (lower != -Inf & upper == Inf) {
+
+        self$constraint <- 'high'
+        bad_limits <- !is.finite(lower)
+
+      } else if (lower != -Inf & upper != Inf) {
+
+        self$constraint <- 'both'
+        bad_limits <- !is.finite(lower) | !is.finite(upper)
+
+      }
+
+      if (bad_limits) {
+
+        stop ('lower and upper must either be -Inf (lower only), ',
+              'Inf (upper only) or finite scalars',
+              call. = FALSE)
+
+      }
+
+      if (lower >= upper) {
+
+        stop ('upper bound must be greater than lower bound',
+              call. = FALSE)
+
+      }
+
+      # add parameters
+      super$initialize(dim)
+      self$lower <- lower
+      self$upper <- upper
+
+    },
+
+    tf = function (env) {
+
+      # omake a Variable tensor to hold the free state
+      tf_obj <- tf$Variable(initial_value = self$value(),
+                            dtype = tf$float32)
+
+      # assign this as the free state
+      free_name <- sprintf('%s_free',
+                           self$name)
+      assign(free_name,
+             tf_obj,
+             envir = env)
+
+      # map from the free to constrained state in a new tensor
+
+      # fetch the free node
+      tf_free <- get(free_name, envir = env)
+
+      # appy transformation
+      node <- self$tf_from_free(tf_free, env)
+
+      # assign back to environment with base name (density will use this)
+      assign(self$name,
+             node,
+             envir = env)
+
+    },
+
+    tf_from_free = function (x, env) {
+
+      if (self$constraint == 'none') {
+
+        y <- x
+
+      } else if (self$constraint == 'both') {
+
+        upper <- self$upper
+        lower <- self$lower
+        y <- (1 / (1 + tf$exp(-1 * x))) * (upper - lower) + lower
+
+      } else if (self$constraint == 'low') {
+
+        upper <- self$upper
+        baseline <- tf$log(1 + tf$exp(x))
+        # have to coerce upper since it's being subtracted *from* and has type
+        # 'float32_ref'
+        y <- tf_as_float(upper) - baseline
+
+      } else if (self$constraint == 'high') {
+
+        lower <- self$lower
+        baseline <- tf$log(1 + tf$exp(x))
+        y <- baseline + lower
+
+      }
+
+      y
+
+    }
+
+  )
+)
+
+# helper function to create a variable node
+# by default, make x (the node containing the value) a free parameter of the correct dimension
+variable = function(...)
+  variable_node$new(...)
+
+distribution_node <- R6Class (
+  'distribution_node',
+  inherit = node,
+  public = list(
+    type = 'distribution',
     distribution_name = 'no distribution',
-    tf_from_free = function (x, env) x,
-    to_free = function (x) x,
+    discrete = NA,
+    target = NULL,
+    truncation = NULL,
+    parameters = list(),
 
     initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
+
+      super$initialize(dim)
 
       # for all distributions, set name, store dims and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
 
-      if (is.null(dim))
-        dim <- c(1, 1)
-
-      # coerce dim to integer
-      dim <- as.integer(dim)
-
-      # store array (updates dim)
-      self$value(unknowns(dim = dim))
-      self$register()
+      # initialize the target values of this distribution
+      self$add_target(self$create_target())
 
     },
 
-    tf_define = function (env) {
+    # create target node, add as a child, and give it this distribution
+    add_target = function (new_target) {
 
-      # if it's an observed stochastic, make it a constant and assign
-      if (self$.fixed_value) {
+      # add as x and as a child
+      self$target <- new_target
+      self$add_child(new_target)
 
-        tf_obj <- tf$constant(self$value(),
-                              shape = to_shape(self$dim),
-                              dtype = tf$float32)
+      # get its values
+      self$value(new_target$value())
 
-        assign(self$name,
-               tf_obj,
-               envir = env)
-
-      } else {
-
-        # otherwise, make a Variable tensor to hold the free state
-        obj <- self$to_free(self$value())
-        tf_obj <- tf$Variable(initial_value = obj, dtype = tf$float32)
-
-        # assign this as the free state
-        free_name <- sprintf('%s_free',
-                             self$name)
-        assign(free_name,
-               tf_obj,
-               envir = env)
-
-        # map from the free to constrained state in a new tensor
-
-        # fetch the free node
-        free_node <- get(free_name, envir = env)
-
-        # appy transformation
-        node <- self$tf_from_free(free_node, env)
-
-        # assign back to environment with base name (density will use this)
-        assign(self$name,
-               node,
-               envir = env)
-
-      }
+      # give self to x as its distribution
+      self$target$set_distribution(self)
 
     },
 
-    tf_define_density = function (env) {
+    # replace the existing target node with a new one
+    replace_target = function (new_target) {
+
+      # remove x from children
+      self$remove_child(self$target)
+
+      # add the new one in
+      self$add_target(new_target)
+
+    },
+
+    tf = function (env) {
 
       # define a tensor with this node's log density in env
 
@@ -236,6 +342,22 @@ distribution <- R6Class (
 
     },
 
+    tf_log_density = function (env) {
+
+      # fetch inputs
+      tf_target <- get(self$target$name, envir = env)
+      tf_parameters <- self$tf_fetch_parameters(env)
+
+      # calculate log density
+      ld <- self$tf_log_density_function(tf_target, tf_parameters)
+
+      # check for truncation
+      if (!is.null(self$truncation))
+        ld <- ld - self$tf_log_density_offset(tf_parameters)
+
+      ld
+    },
+
     tf_fetch_parameters = function (env) {
       # fetch the tensors corresponding to this node's parameters from the
       # environment, and return them in a named list
@@ -248,44 +370,36 @@ distribution <- R6Class (
 
     },
 
-    # fetch tensor corresponding to this node from the environment
-    tf_fetch_self = function (env)
-      get(self$name, envir = env),
+    tf_log_density_offset = function (parameters) {
 
-    tf = function (env) {
+      # calculate the log-adjustment to the truncation term of the density
+      # function i.e. the density of a distribution, truncated between a and b,
+      # is the non truncated density, divided by the integral of the density
+      # function between the truncation bounds. This can be calculated from the
+      # distribution's CDF
 
-      # define self as a tensor
-      self$tf_define(env)
-      self$tf_define_density(env)
+      lower <- self$truncation[1]
+      upper <- self$truncation[2]
 
-    },
+      if (lower == -Inf) {
 
-    tf_log_density = function (env) {
+        # if only upper is constrained, just need the cdf at the upper
+        offset <- self$tf_log_cdf_function(upper, parameters)
 
-      # fetch inputs
-      value <- self$tf_fetch_self(env)
-      parameters <- self$tf_fetch_parameters(env)
+      } else if (upper == Inf) {
 
-      # calculate log density
-      self$tf_log_density_function(value, parameters)
-
-    },
-
-    # overwrite value with option to switch to free state
-    value = function(new_value = NULL, free = FALSE, ...) {
-
-      if (is.null(new_value)) {
-        ans <- super$value(new_value, ...)
-        if (free)
-          ans <- self$to_free(ans)
-
-        return (ans)
+        # if only lower is constrained, get the log of the integral above it
+        offset <- tf$log(1 - self$tf_cdf_function(lower, parameters))
 
       } else {
 
-        super$value(new_value, ...)
+        # if both are constrained, get the log of the integral between them
+        offset <- tf$log(self$tf_cdf_function(upper, parameters) -
+                           self$tf_cdf_function(lower, parameters))
 
       }
+
+      offset
 
     },
 
@@ -301,5 +415,5 @@ distribution <- R6Class (
 
     }
 
-  )
-)
+  ))
+

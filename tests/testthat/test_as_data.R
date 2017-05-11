@@ -4,6 +4,8 @@ test_that('as_data coerces correctly', {
 
   source('helpers.R')
 
+  flush()
+
   # logical, integer and numeric
   # vector, matrix, array, dataframe
 
@@ -109,6 +111,8 @@ test_that('as_data coerces correctly', {
 test_that('as_data errors informatively', {
 
   source('helpers.R')
+
+  flush()
 
   # wrong class of object
   expect_error(as_data(NULL),

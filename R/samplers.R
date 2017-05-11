@@ -23,7 +23,7 @@ NULL
 #' mu = free()
 #' sigma = lognormal(1, 0.1)
 #' x = rnorm(10)
-#' likelihood(x) = normal(mu, sigma)
+#' distribution(x) = normal(mu, sigma)
 #'
 #' m <- define_model(mu, sigma)
 #'
@@ -55,19 +55,27 @@ define_model <- function (...) {
           call. = FALSE)
   }
 
-  # check they have a density among them
-  have_density <- vapply(target_greta_arrays,
-                         greta_array_has_density,
-                         FALSE)
+  # get the dag containing the target nodes
+  dag <- dag_class$new(target_greta_arrays)
 
-  if (!any(have_density)) {
+  # check they have a density among them
+  distribs <- dag$child_names(types = 'distribution')
+
+  if (length(distribs) == 0) {
     stop ('none of the greta arrays in the model are associated with a ',
           'probability density, so a model cannot be defined',
           call. = FALSE)
   }
 
-  # get the dag containing the target nodes
-  dag <- dag_class$new(target_greta_arrays)
+  # check they have an unknown node among them
+  unknown <- dag$child_names(types = 'variable',
+                             omit_fixed = TRUE)
+
+  if (length(unknown) == 0) {
+    stop ('none of the greta arrays in the model are unknown, so a model ',
+          'cannot be defined',
+          call. = FALSE)
+  }
 
   # define the TF graph
   dag$define_tf()

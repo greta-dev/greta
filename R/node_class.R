@@ -10,6 +10,24 @@ node <- R6Class(
     .value = array(NA),
     .fixed_value = FALSE,
     dim = NA,
+    distribution = NULL,
+
+    initialize = function (dim = NULL, value = NULL) {
+
+      if (is.null(dim))
+        dim <- c(1, 1)
+
+      # coerce dim to integer
+      dim <- as.integer(dim)
+
+      # store array (updates dim)
+      if (is.null(value))
+        value <- unknowns(dim = dim)
+
+      self$value(value)
+      self$register()
+
+    },
 
     register = function () {
 
@@ -51,6 +69,14 @@ node <- R6Class(
 
       # add to list of children
       self$children = c(self$children, node)
+
+    },
+
+    remove_child = function (node) {
+
+      # remove node from list of children
+      rem_idx <- self$child_names() == node$name
+      self$children <- self$children[-rem_idx]
 
     },
 
@@ -141,7 +167,35 @@ node <- R6Class(
 
         self$.value <- new_value
       }
+    },
+
+    set_distribution = function (distribution) {
+
+      # check it
+      if (!inherits(distribution, 'distribution_node'))
+        stop ('invalid distribution')
+
+      # add it
+      self$distribution <- distribution
+
+    },
+
+    # return a string describing this node, for use in print and summary etc.
+    description = function () {
+
+      text <- self$type
+
+      if (!is.null(self$distribution)) {
+        text <- paste(text,
+                      'following a',
+                      self$distribution$distribution_name,
+                      'distribution')
+      }
+
+      text
+
     }
+
 
   ))
 

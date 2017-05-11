@@ -1,73 +1,155 @@
 # syntax definitions
 
-#' @name greta-likelihood
-#' @aliases likelihood
-#' @title Define a Likelihood over Data
-#' @description The likelihood function is used to link observed data with
-#'   random variables. This can be used to define the likelhood term for a
-#'   model.
-#' @param data either a data greta array (defined using \code{as_data()}), or
-#'   some data that can be coereced to a data greta array
-#' @param value a stochastic greta array, created using a distribution
+#' @name greta-distribution
+#' @aliases distribution likelihood
+#' @title Define a Distribution Over a greta Array
+#' @description \code{distribution} is used to link observed data, free
+#'   parameters and other greta arrays with probability distributions. For
+#'   example, \code{distribution} can be used to define the likelhood term for a
+#'   model by using \code{distribution} on some observed data.
+#'   \code{likelihood} is an alias for \code{distribution}. It is deprecated and
+#'   will be removed in version 0.2.
+#'
+#' @param greta_array a greta array. For the assignment method it must be a
+#'   greta array that doesn't already have a probability distribution.
+#'
+#' @param value a greta array with a distribution (see
+#'   \code{\link{greta-distributions}})
+#'
+#' @details The extract method returns the greta array if it has a distribution,
+#'   or \code{NULL} if it doesn't. It has now real function, but is included for
+#'   completeness
+#'
+#'   \code{distribution} can also be used to create truncated distributions, by first
+#'   defining a greta array with constraints (the truncation) and then defining
+#'   the distribution on that greta array. See below for an example.
+#'
 #' @export
 #' @examples
-#' # observed data
-#' y = rnorm(100, 0, 3)
 #'
-#' # mean and variance parameters (with no priors)
+#' # define a model likelihood
+#'
+#' # observed data and mean parameter to be estimated
+#' # (explicitly coerce data to a greta array so we can refer to it later)
+#' y = as_data(rnorm(5, 0, 3))
 #' mu = free()
-#' sigma = exp(free())
+#' # define the distribution over y (the model likelihood)
+#' distribution(y) = normal(mu, 1)
 #'
-#' # define the likelihood
-#' likelihood(y) = normal(mu, sigma)
+#' # get the distribution over y
+#' distribution(y)
 #'
-`likelihood<-` <- function (data, value) {
+#' # define a truncated-positive standard normal random variable
+#' tn = free(lower = 0)
+#' distribution(tn) = normal(0, 1)
+#'
+`distribution<-` <- function (greta_array, value) {
 
-  data_tmp <- data
-  data <- as_data(data)
-  distribution <- value
+  # stash the old greta array to return
+  greta_array_tmp <- greta_array
 
-  if (!(is.greta_array(distribution) &&
-        inherits(distribution$node, 'distribution'))) {
+  # coerce to a greta array (converts numerics to data arrays)
+  greta_array <- as.greta_array(greta_array)
 
-    stop ('right hand side of likelihood must be a stochastic greta array',
+  # only for greta arrays without distributions
+  if (!is.null(greta_array$node$distribution)) {
+    stop ('left hand side already has a distribution assigned',
           call. = FALSE)
-
   }
 
-  if (distribution$node$distribution_name == 'free') {
-
-    stop ('free parameters do not have distributions, ',
-          'so cannot be used to define a likelihood',
+  # can only assign with greta arrays
+  if (!is.greta_array(value)) {
+    stop ('right hand side must be a greta array',
           call. = FALSE)
-
   }
 
-  # if theta isn't scalar, make sure it has the right dimensions
-  if (!is_scalar(distribution)) {
-    if (!identical(dim(data), dim(distribution))) {
-      stop ('left- and right-hand side of likelihood have different ',
-            'dimensions. The distribution must have dimension of either ',
-            paste(dim(data), collapse = ' x '),
+  # that have distributions
+  distribution_node <- value$node$distribution
+
+  if (!inherits(distribution_node, 'distribution_node')) {
+    stop ('right hand side must have a distribution',
+          call. = FALSE)
+  }
+
+  # that aren't already fixed
+  if (distribution_node$.fixed_value) {
+    stop ('right hand side has already been assigned fixed values',
+          call. = FALSE)
+  }
+
+  # if distribution isn't scalar, make sure it has the right dimensions
+  if (!is_scalar(value)) {
+    if (!identical(dim(greta_array), dim(value))) {
+      stop ('left and right hand sides have different dimensions. ',
+            'The distribution must have dimension of either ',
+            paste(dim(greta_array), collapse = ' x '),
             ' or 1 x 1, but instead has dimension ',
-
-            paste(dim(distribution), collapse = ' x '),
+            paste(dim(value), collapse = ' x '),
             call. = FALSE)
     }
   }
 
-  # provide the data to the likelihood and lock in the values in the
-  # distribution
-  distribution$node$value(data$node$value())
-  distribution$node$.fixed_value <- TRUE
+  # assign the new node as the distribution's target
+  # also adds distribution_node as this node's distribution
+  distribution_node$replace_target(greta_array$node)
 
-  # give the distribution to the data as a likelihood (this will register the
-  # child distribution)
-  data$node$set_likelihood(distribution$node)
+  # optionally set that as a fixed value
+  if (inherits(greta_array$node, 'data_node'))
+    distribution_node$.fixed_value <- TRUE
 
-  # register the data node, with it's own name
-  data$node$register()
+  # if the greta_array was a variable, check its constraints as truncation
+  if (inherits(greta_array$node, 'variable_node')) {
 
-  data_tmp
+    truncated <- greta_array$node$lower != -Inf |
+      greta_array$node$upper != Inf
+
+    if (truncated) {
+
+      # check the distribution can handle truncation
+      if (is.null(distribution_node$tf_cdf_function)) {
+        stop(distribution_node$distribution_name,
+             ' distribution cannot be truncated',
+             call. = FALSE)
+      } else {
+        distribution_node$truncation <- c(greta_array$node$lower,
+                                          greta_array$node$upper)
+      }
+
+    }
+
+  }
+
+  # return greta_array (pre-conversion to a greta array)
+  greta_array_tmp
 
 }
+
+#' @rdname greta-distribution
+#' @export
+distribution <- function (greta_array) {
+
+  # only for greta arrays
+  if (!is.greta_array(greta_array)) {
+    stop ('not a greta array',
+          call. = FALSE)
+  }
+
+  # if greta_array has a distribution, return this greta array
+  if (inherits(greta_array$node$distribution, 'distribution_node')) {
+
+    distrib <- greta_array
+
+  } else {
+
+    # otherwise return NULL
+    distrib <- NULL
+
+  }
+
+  distrib
+
+}
+
+#' @rdname greta-distribution
+#' @export
+`likelihood<-` <- `distribution<-`

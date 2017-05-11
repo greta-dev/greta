@@ -4,6 +4,8 @@ test_that('print and summary work', {
 
   source('helpers.R')
 
+  flush()
+
   ga_data <- as_data(matrix(1:9, nrow = 3))
   ga_stochastic <- normal(0, 1)
   ga_operation <- ga_data * ga_stochastic
@@ -21,12 +23,12 @@ test_that('print and summary work', {
 
   # stochastic arrays
   # print method
-  expected_output <- "greta array (stochastic)\n\n     [,1]\n[1,]   ? "
+  expected_output <- "greta array (variable following a normal distribution)\n\n     [,1]\n[1,]   ? "
   result <- evaluate_promise(ga_stochastic, print = TRUE)
   expect_identical(result$output, expected_output)
 
   # summary method
-  expected_output <- "'stochastic' greta array with 1 element following a normal distribution \n\n  (values currently unknown)"
+  expected_output <- "'variable' greta array with 1 element following a normal distribution \n\n  (values currently unknown)"
   result <- evaluate_promise(summary(ga_stochastic), print = TRUE)
   expect_identical(result$output, expected_output)
 
@@ -48,6 +50,8 @@ test_that('length and dim work', {
 
   source('helpers.R')
 
+  flush()
+
   ga_data <- as_data(matrix(1:9, nrow = 3))
   ga_stochastic <- normal(0, 1, dim = c(3, 3))
   ga_operation <- ga_data * ga_stochastic
@@ -67,6 +71,8 @@ test_that('length and dim work', {
 test_that('head and tail work', {
 
   source('helpers.R')
+
+  flush()
 
   a <- randn(10, 1)
   b <- randn(10, 4)

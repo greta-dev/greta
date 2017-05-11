@@ -4,6 +4,8 @@ test_that('extract works like R', {
 
   source('helpers.R')
 
+  flush()
+
   a <- randn(10)
   b <- randn(10, 1)
   c <- randn(10, 5)
@@ -72,6 +74,8 @@ test_that('extract works like R', {
 test_that('replace works like R', {
 
   source('helpers.R')
+
+  flush()
 
   # check using expressions, and comparing the whole object to which replacement
   # was applied
@@ -208,6 +212,8 @@ test_that('rep works like R', {
 
   source('helpers.R')
 
+  flush()
+
   a <- randn(10)
   b <- randn(10, 1)
   c <- randn(10, 5)
@@ -257,6 +263,8 @@ test_that('rbind, cbind and c work like R', {
 
   source('helpers.R')
 
+  flush()
+
   a <- randn(5, 1)
   b <- randn(1, 5)
   d <- randn(5, 5)
@@ -285,19 +293,23 @@ test_that('rbind, cbind and c work like R', {
 
 })
 
-test_that('assign errors on stochastic greta arrays', {
+test_that('assign errors on variable greta arrays', {
 
   source('helpers.R')
 
+  flush()
+
   z <- normal(0, 1, dim = 5)
   expect_error(z[1] <- 3,
-               'cannot replace values in a stochastic greta array')
+               'cannot replace values in a variable greta array')
 
 })
 
 test_that('rbind and cbind give informative error messages', {
 
   source('helpers.R')
+
+  flush()
 
   a <- as_data(randn(5, 1))
   b <- as_data(randn(1, 5))
@@ -314,6 +326,8 @@ test_that('replacement gives informative error messages', {
 
   source('helpers.R')
 
+  flush()
+
   x <- as_data(randn(2, 2, 2))
   expect_error(x[1:2, , 1] <- seq_len(3),
                'number of items to replace is not a multiple of replacement length')
@@ -323,6 +337,8 @@ test_that('replacement gives informative error messages', {
 test_that('stochastic and operation greta arrays can be extracted', {
 
   source('helpers.R')
+
+  flush()
 
   a = normal(0, 1, dim = c(3, 4))
   a_sub <- a[1:2, 2:3]
