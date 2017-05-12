@@ -4,9 +4,11 @@ node <- R6Class(
   public = list(
 
     type = 'undefined',
+    unique_name = '',
     name = 'nameless',
     registered = FALSE,
     children = list(),
+    parents = list(),
     .value = array(NA),
     .fixed_value = FALSE,
     dim = NA,
@@ -26,6 +28,7 @@ node <- R6Class(
 
       self$value(value)
       self$register()
+      self$unique_name <- capture.output(self$.__enclos_env__)
 
     },
 
@@ -69,6 +72,7 @@ node <- R6Class(
 
       # add to list of children
       self$children = c(self$children, node)
+      node$add_parent(self)
 
     },
 
@@ -77,6 +81,30 @@ node <- R6Class(
       # remove node from list of children
       rem_idx <- self$child_names() == node$name
       self$children <- self$children[-rem_idx]
+      node$remove_parent(self)
+
+    },
+
+
+    add_parent = function (node) {
+
+      # if the node is already listed as a parent, clone and re-register it to a
+      # new name
+      if (node$name %in% self$parent_names()) {
+        node <- node$clone()
+        node$register()
+      }
+
+      # add to list of children
+      self$parents = c(self$parents, node)
+
+    },
+
+    remove_parent = function (node) {
+
+      # remove node from list of children
+      rem_idx <- self$parent_names() == node$name
+      self$parents <- self$parents[-rem_idx]
 
     },
 
@@ -104,6 +132,35 @@ node <- R6Class(
           names <- c(names,
                      unlist(lapply(children,
                                    function(x) x$child_names(recursive = TRUE))))
+        }
+
+        # account for multiple nodes depending on the same nodes
+        names <- unique(names)
+
+      } else {
+        # otherwise return own name (to make sure at least somethign is returned
+        # on recursion)
+        names <- self$node_name()
+      }
+
+      names
+
+    },
+
+    parent_names = function (recursive = TRUE) {
+
+      parents <- self$parents
+
+      if (length(parents) > 0) {
+
+        names <- vapply(parents,
+                        function(x) x$name,
+                        '')
+
+        if (recursive) {
+          names <- c(names,
+                     unlist(lapply(parents,
+                                   function(x) x$parent_names(recursive = TRUE))))
         }
 
         # account for multiple nodes depending on the same nodes
