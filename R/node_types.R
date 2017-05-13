@@ -5,8 +5,6 @@ data_node <- R6Class(
   inherit = node,
   public = list(
 
-    type = 'data',
-
     initialize = function (data) {
 
       # coerce data from common formats to an array here
@@ -35,7 +33,6 @@ operation_node <- R6Class(
   inherit = node,
   public = list(
 
-    type = 'operation',
     .operation = NA,
     .operation_args = NA,
     arguments = list(),
@@ -132,7 +129,6 @@ variable_node <- R6Class (
   inherit = node,
   public = list(
 
-    type = 'variable',
     constraint = NULL,
     lower = -Inf,
     upper = Inf,
@@ -270,7 +266,6 @@ distribution_node <- R6Class (
   'distribution_node',
   inherit = node,
   public = list(
-    type = 'distribution',
     distribution_name = 'no distribution',
     discrete = NA,
     target = NULL,
@@ -395,15 +390,12 @@ distribution_node <- R6Class (
 
     add_parameter = function (parameter, name) {
 
-      # coerce to a node, add as a child and register as a parameter
-
-      # just add as a scalar numeric (not a constant node) here.
-      # ensure that the value can be fetched
       parameter <- to_node(parameter)
       self$add_child(parameter)
       self$parameters[[name]] <- parameter
 
     }
 
-  ))
+  )
+)
 

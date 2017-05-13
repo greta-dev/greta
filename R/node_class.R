@@ -2,8 +2,6 @@
 node <- R6Class(
   'node',
   public = list(
-
-    type = 'undefined',
     unique_name = '',
     children = list(),
     parents = list(),
@@ -231,7 +229,7 @@ node <- R6Class(
     # return a string describing this node, for use in print and summary etc.
     description = function () {
 
-      text <- self$type
+      text <- node_type(self)
 
       if (!is.null(self$distribution)) {
         text <- paste(text,

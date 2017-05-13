@@ -135,11 +135,13 @@ mcmc <- function (model,
   names <- names(target_greta_arrays)
 
   # check they're not data nodes, provide a useful error message if they are
-  type <- vapply(target_greta_arrays, member, 'node$type', FUN.VALUE = '')
-  bad <- type == 'data'
-  if (any(bad)) {
-    is_are <- ifelse(sum(bad) == 1, 'is a data greta array', 'are data greta arrays')
-    bad_greta_arrays <- paste(names[bad], collapse = ', ')
+  are_data <- vapply(target_greta_arrays,
+                     function (x) inherits(x$node, 'data_node'),
+                     FUN.VALUE = FALSE)
+
+  if (any(are_data)) {
+    is_are <- ifelse(sum(are_data) == 1, 'is a data greta array', 'are data greta arrays')
+    bad_greta_arrays <- paste(names[are_data], collapse = ', ')
     msg <- sprintf('%s %s, data greta arrays cannot be sampled',
                    bad_greta_arrays,
                    is_are)

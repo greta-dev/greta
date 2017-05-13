@@ -20,7 +20,7 @@ dag_class <- R6Class(
       self$target_nodes <- lapply(target_greta_arrays, member, 'node')
 
       # stash the node names, types, and tf names
-      self$node_types <- vapply(self$node_list, member, 'type', FUN.VALUE = '')
+      self$node_types <- vapply(self$node_list, node_type, FUN.VALUE = '')
       self$node_tf_names <- self$make_names()
 
       # set up the tf environment

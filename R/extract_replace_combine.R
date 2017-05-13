@@ -151,7 +151,7 @@ tf_replace <- function (x, value, index, dims) {
   rm('._dummy_in', envir = pf)
 
   # if this is a data node, also subset the values and pass on
-  if ('data' %in% x$node$type) {
+  if (inherits(x$node, 'data_node')) {
 
     values_in <- x$node$value()
     call_list <- as.list(call)[-1]

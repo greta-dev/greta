@@ -8,9 +8,9 @@ test_that('`distribution<-` works in models', {
 
   # with a distribution parameter
   y <- as_data(randn(5))
-  expect_equal(y$node$type, 'data')
+  expect_equal(node_type(y$node), 'data')
   y_op <- y * 1
-  expect_equal(y_op$node$type, 'operation')
+  expect_equal(node_type(y_op$node), 'operation')
 
   # data
   mu <- normal(0, 1)
@@ -27,9 +27,9 @@ test_that('`distribution<-` works in models', {
   flush()
 
   y <- as_data(randn(5))
-  expect_equal(y$node$type, 'data')
+  expect_equal(node_type(y$node), 'data')
   y_op <- y * 1
-  expect_equal(y_op$node$type, 'operation')
+  expect_equal(node_type(y_op$node), 'operation')
 
   # data
   mu <- free()
