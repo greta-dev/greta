@@ -38,39 +38,14 @@
 #' }
 NULL
 
-# unexported object to hold the list of defined nodes
-node_list_object <- R6Class(
-  'node_list_object',
-  public = list(
-
-    node_list = list(),
-
-    flush = function ()
-      self$node_list <- list(),
-
-    registered_names = function() names(self$node_list),
-
-    # return list of nodes. If `names` is provided, return only those
-    nodes = function (names = NULL) {
-      nodes <- self$node_list
-      if (!is.null(names))
-        nodes <- nodes[names]
-      nodes
-    }
-
-  )
-)
-
 # crate the node list object whenever the package is loaded
 .onLoad <- function (libname, pkgname) {
 
   # silence TF's CPU instructions message
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL=2)
 
+  # warn if TF version is bad
   check_tf_version('warn')
-
-  # set up the node list
-  options(nodes = node_list_object$new())
 
 }
 

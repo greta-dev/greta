@@ -251,4 +251,3 @@ flat_to_symmetric <- function (x, dim) {
 
 }
 
-

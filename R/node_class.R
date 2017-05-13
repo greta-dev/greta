@@ -5,8 +5,6 @@ node <- R6Class(
 
     type = 'undefined',
     unique_name = '',
-    name = 'nameless',
-    registered = FALSE,
     children = list(),
     parents = list(),
     .value = array(NA),
@@ -27,37 +25,39 @@ node <- R6Class(
         value <- unknowns(dim = dim)
 
       self$value(value)
-      self$register()
-      self$unique_name <- capture.output(self$.__enclos_env__)
+      self$get_unique_name()
 
     },
 
-    register = function () {
+    register = function (dag) {
+      if (! (self$unique_name %in% names(dag$node_list)))
+        dag$node_list[[self$unique_name]] <- self
+    },
 
-      # register this node in the global list, as soon as it is assigned a name
-      .nodes <- options()$nodes
-      name <- 'node'
-      current_nodes <- .nodes$nodes()
-      node_names <- names(current_nodes)
-      if (name %in% node_names) {
-        # find a unique name for it (adding numbers to the end)
-        good_name <- FALSE
-        counter <- 1
-        while (!good_name) {
-          counter <- counter + 1
-          proposed_name <- paste0(name, counter)
-          if (!proposed_name %in% node_names)
-            good_name <- TRUE
-        }
-        name <- proposed_name
+    # recursively register self and family
+    register_family = function (dag) {
+
+      if (! (self$unique_name %in% names(dag$node_list))) {
+
+        # add self to list
+        self$register(dag)
+
+        # find my immediate family (not including self)
+        family <- c(self$parents, self$children)
+
+        # get and assign their names
+        family_names <- vapply(family, member, 'unique_name', FUN.VALUE = '')
+        names(family) <- family_names
+
+        # find the unregistered ones
+        unregistered_idx <- which(! (family_names %in% names(dag$node_list)))
+        unregistered <- family[unregistered_idx]
+
+        # add them to the node list
+        for (relative in unregistered)
+          relative$register_family(dag)
+
       }
-
-      # assign name and add to register
-      self$node_name(name)
-      current_nodes[[name]] <- self
-      .nodes$node_list <- current_nodes
-      options(nodes = .nodes)
-      self$registered <- TRUE
 
     },
 
@@ -65,9 +65,8 @@ node <- R6Class(
 
       # if the node is already listed as a child, clone and re-register it to a
       # new name
-      if (node$name %in% self$child_names()) {
+      if (node$unique_name %in% self$child_names()) {
         node <- node$clone()
-        node$register()
       }
 
       # add to list of children
@@ -79,20 +78,18 @@ node <- R6Class(
     remove_child = function (node) {
 
       # remove node from list of children
-      rem_idx <- self$child_names() == node$name
+      rem_idx <- which(self$child_names() == node$unique_name)
       self$children <- self$children[-rem_idx]
       node$remove_parent(self)
 
     },
 
-
     add_parent = function (node) {
 
       # if the node is already listed as a parent, clone and re-register it to a
       # new name
-      if (node$name %in% self$parent_names()) {
+      if (node$unique_name %in% self$parent_names()) {
         node <- node$clone()
-        node$register()
       }
 
       # add to list of children
@@ -103,16 +100,9 @@ node <- R6Class(
     remove_parent = function (node) {
 
       # remove node from list of children
-      rem_idx <- self$parent_names() == node$name
+      rem_idx <- which(self$parent_names() == node$unique_name)
       self$parents <- self$parents[-rem_idx]
 
-    },
-
-    # get or set the name of this node
-    node_name = function (name = NULL) {
-      if (!is.null(name))
-        self$name <- name
-      self$name
     },
 
     # return the names of all child nodes, and if recursive = TRUE, all nodes
@@ -125,7 +115,7 @@ node <- R6Class(
       if (length(children) > 0) {
 
         names <- vapply(children,
-                        function(x) x$name,
+                        function(x) x$unique_name,
                         '')
 
         if (recursive) {
@@ -140,7 +130,7 @@ node <- R6Class(
       } else {
         # otherwise return own name (to make sure at least somethign is returned
         # on recursion)
-        names <- self$node_name()
+        names <- self$unique_name
       }
 
       names
@@ -154,7 +144,7 @@ node <- R6Class(
       if (length(parents) > 0) {
 
         names <- vapply(parents,
-                        function(x) x$name,
+                        function(x) x$unique_name,
                         '')
 
         if (recursive) {
@@ -169,31 +159,36 @@ node <- R6Class(
       } else {
         # otherwise return own name (to make sure at least somethign is returned
         # on recursion)
-        names <- self$node_name()
+        names <- self$unique_name
       }
 
       names
 
     },
 
+    defined = function (dag) {
+      tf_name <- dag$tf_name(self)
+      tf_name %in% ls(dag$tf_environment)
+    },
+
     # define this and all descendent objects on tensorflow graph in environment env
-    define_tf = function (env) {
+    define_tf = function (dag) {
 
       # if defined already, skip
-      if (!self$name %in% ls(env)) {
+      if (!self$defined(dag)) {
 
         # make sure children are defined
         children_defined <- vapply(self$children,
-                                   function(x) x$name %in% (ls(env)),
+                                   function(x) x$defined(dag),
                                    FUN.VALUE = FALSE)
 
         if (any(!children_defined)) {
           lapply(self$children[which(!children_defined)],
-                 function(x) x$define_tf(env))
+                 function(x) x$define_tf(dag))
         }
 
         # then define self
-        self$tf(env)
+        self$tf(dag)
 
       }
 
@@ -250,6 +245,15 @@ node <- R6Class(
       }
 
       text
+
+    },
+
+    get_unique_name = function () {
+
+      name <- capture.output(self$.__enclos_env__)
+      name <- gsub('<environment: ', 'node_', name)
+      name <- gsub('>', '', name)
+      self$unique_name <- name
 
     }
 
