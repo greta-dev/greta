@@ -1,22 +1,7 @@
-deterministic_node <- R6Class(
-  'deterministic_node',
-  inherit = node,
-  public = list(
-
-    type = 'deterministic'
-
-  )
-)
-
-
-# different types of node
-
 data_node <- R6Class(
   'data_node',
-  inherit = deterministic_node,
+  inherit = node,
   public = list(
-
-    type = 'data',
 
     initialize = function (data) {
 
@@ -32,10 +17,10 @@ data_node <- R6Class(
 
     },
 
-    tf = function (env) {
-      assign(self$name,
+    tf = function (dag) {
+      assign(dag$tf_name(self),
              tf$constant(self$value(), dtype = tf$float32),
-             envir = env)
+             envir = dag$tf_environment)
     }
   )
 )
@@ -43,10 +28,9 @@ data_node <- R6Class(
 # a node for applying operations to values
 operation_node <- R6Class(
   'operation_node',
-  inherit = deterministic_node,
+  inherit = node,
   public = list(
 
-    type = 'operation',
     .operation = NA,
     .operation_args = NA,
     arguments = list(),
@@ -107,7 +91,7 @@ operation_node <- R6Class(
       op
     },
 
-    tf = function (env) {
+    tf = function (dag) {
 
       # switch out the op for non-sugared variety
       op <- self$switch_op(self$.operation)
@@ -116,8 +100,8 @@ operation_node <- R6Class(
       fun <- eval(parse(text = op))
 
       # fetch the tensors for the environment
-      arg_names <- self$child_names(recursive = FALSE)
-      args <- lapply(arg_names, function (x) get(x, envir = env))
+      arg_tf_names <- lapply(self$children, dag$tf_name)
+      args <- lapply(arg_tf_names, get, envir = dag$tf_environment)
 
       # fetch additional (non-tensor) arguments, if any
       if (length(self$.operation_args) > 0)
@@ -127,7 +111,7 @@ operation_node <- R6Class(
       node <- do.call(fun, args)
 
       # assign it in the environment
-      assign(self$name, node, envir = env)
+      assign(dag$tf_name(self), node, envir = dag$tf_environment)
 
     }
   )
@@ -143,7 +127,6 @@ variable_node <- R6Class (
   inherit = node,
   public = list(
 
-    type = 'variable',
     constraint = NULL,
     lower = -Inf,
     upper = Inf,
@@ -208,31 +191,32 @@ variable_node <- R6Class (
 
     },
 
-    tf = function (env) {
+    tf = function (dag) {
 
-      # omake a Variable tensor to hold the free state
+      # make a Variable tensor to hold the free state
       tf_obj <- tf$Variable(initial_value = self$value(),
                             dtype = tf$float32)
 
       # assign this as the free state
-      free_name <- sprintf('%s_free',
-                           self$name)
+      tf_name <- dag$tf_name(self)
+
+      free_name <- sprintf('%s_free', tf_name)
       assign(free_name,
              tf_obj,
-             envir = env)
+             envir = dag$tf_environment)
 
       # map from the free to constrained state in a new tensor
 
       # fetch the free node
-      tf_free <- get(free_name, envir = env)
+      tf_free <- get(free_name, envir = dag$tf_environment)
 
       # appy transformation
-      node <- self$tf_from_free(tf_free, env)
+      node <- self$tf_from_free(tf_free, dag$tf_environment)
 
       # assign back to environment with base name (density will use this)
-      assign(self$name,
+      assign(tf_name,
              node,
-             envir = env)
+             envir = dag$tf_environment)
 
     },
 
@@ -280,7 +264,6 @@ distribution_node <- R6Class (
   'distribution_node',
   inherit = node,
   public = list(
-    type = 'distribution',
     distribution_name = 'no distribution',
     discrete = NA,
     target = NULL,
@@ -326,27 +309,27 @@ distribution_node <- R6Class (
 
     },
 
-    tf = function (env) {
+    tf = function (dag) {
 
       # define a tensor with this node's log density in env
 
       # run the TF version of the density function
-      tf_obj <- self$tf_log_density(env)
+      tf_obj <- self$tf_log_density(dag)
 
       # assign the result back to env
-      density_name <- sprintf('%s_density',
-                              self$name)
-      assign(density_name,
+      assign(dag$tf_name(self),
              tf_obj,
-             envir = env)
+             envir = dag$tf_environment)
 
     },
 
-    tf_log_density = function (env) {
+    tf_log_density = function (dag) {
 
       # fetch inputs
-      tf_target <- get(self$target$name, envir = env)
-      tf_parameters <- self$tf_fetch_parameters(env)
+
+      tf_target <- get(dag$tf_name(self$target),
+                       envir = dag$tf_environment)
+      tf_parameters <- self$tf_fetch_parameters(dag)
 
       # calculate log density
       ld <- self$tf_log_density_function(tf_target, tf_parameters)
@@ -358,15 +341,15 @@ distribution_node <- R6Class (
       ld
     },
 
-    tf_fetch_parameters = function (env) {
+    tf_fetch_parameters = function (dag) {
       # fetch the tensors corresponding to this node's parameters from the
       # environment, and return them in a named list
 
       # find names
-      names <- lapply(self$parameters, member, 'name')
+      tf_names <- lapply(self$parameters, dag$tf_name)
 
       # fetch tensors
-      lapply(names, function (x) get(x, envir = env))
+      lapply(tf_names, get, envir = dag$tf_environment)
 
     },
 
@@ -405,15 +388,12 @@ distribution_node <- R6Class (
 
     add_parameter = function (parameter, name) {
 
-      # coerce to a node, add as a child and register as a parameter
-
-      # just add as a scalar numeric (not a constant node) here.
-      # ensure that the value can be fetched
       parameter <- to_node(parameter)
       self$add_child(parameter)
       self$parameters[[name]] <- parameter
 
     }
 
-  ))
+  )
+)
 

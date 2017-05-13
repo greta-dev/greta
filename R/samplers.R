@@ -32,6 +32,8 @@ define_model <- function (...) {
 
   check_tf_version('error')
 
+  tf$reset_default_graph()
+
   # nodes required
   target_greta_arrays <- list(...)
 
@@ -58,20 +60,18 @@ define_model <- function (...) {
   # get the dag containing the target nodes
   dag <- dag_class$new(target_greta_arrays)
 
-  # check they have a density among them
-  distribs <- dag$child_names(types = 'distribution')
+  # get and check the types
+  types <- dag$node_types
 
-  if (length(distribs) == 0) {
+  # check they have a density among them
+  if (!('distribution' %in% types)) {
     stop ('none of the greta arrays in the model are associated with a ',
           'probability density, so a model cannot be defined',
           call. = FALSE)
   }
 
-  # check they have an unknown node among them
-  unknown <- dag$child_names(types = 'variable',
-                             omit_fixed = TRUE)
-
-  if (length(unknown) == 0) {
+  # check they have a variable node among them
+  if (!('variable' %in% types)) {
     stop ('none of the greta arrays in the model are unknown, so a model ',
           'cannot be defined',
           call. = FALSE)
@@ -137,11 +137,13 @@ mcmc <- function (model,
   names <- names(target_greta_arrays)
 
   # check they're not data nodes, provide a useful error message if they are
-  type <- vapply(target_greta_arrays, member, 'node$type', FUN.VALUE = '')
-  bad <- type == 'data'
-  if (any(bad)) {
-    is_are <- ifelse(sum(bad) == 1, 'is a data greta array', 'are data greta arrays')
-    bad_greta_arrays <- paste(names[bad], collapse = ', ')
+  are_data <- vapply(target_greta_arrays,
+                     function (x) inherits(x$node, 'data_node'),
+                     FUN.VALUE = FALSE)
+
+  if (any(are_data)) {
+    is_are <- ifelse(sum(are_data) == 1, 'is a data greta array', 'are data greta arrays')
+    bad_greta_arrays <- paste(names[are_data], collapse = ', ')
     msg <- sprintf('%s %s, data greta arrays cannot be sampled',
                    bad_greta_arrays,
                    is_are)

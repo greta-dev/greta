@@ -59,7 +59,7 @@ uniform_distribution <- R6Class (
 
     # weird hack to make TF see a gradient here
     tf_log_density_function = function (x, parameters) {
-      self$log_density + tf$reduce_sum(x * 0)
+      self$log_density + x * 0
     }
 
   )

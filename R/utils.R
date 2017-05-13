@@ -180,7 +180,7 @@ all_greta_arrays <- function (env = parent.frame(),
   if (!include_data) {
 
     is_data <- vapply(all_arrays,
-                      function (x) x$node$type == 'data',
+                      function(x) inherits(x$node, 'data_node'),
                       FUN.VALUE = FALSE)
     all_arrays <- all_arrays[!is_data]
 
@@ -251,4 +251,8 @@ flat_to_symmetric <- function (x, dim) {
 
 }
 
-
+node_type <- function (node) {
+  classes <- class(node)
+  type <- grep('*_node', classes, value = TRUE)
+  gsub('_node', '', type)
+}
