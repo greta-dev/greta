@@ -8,7 +8,6 @@ node <- R6Class(
     children = list(),
     parents = list(),
     .value = array(NA),
-    .fixed_value = FALSE,
     dim = NA,
     distribution = NULL,
 
@@ -202,9 +201,6 @@ node <- R6Class(
         self$.value
 
       } else {
-
-        if (self$.fixed_value)
-          stop ('this node has a fixed value; it cannot be reset')
 
         # get the dimension of the new value
         dim <- dim(new_value)

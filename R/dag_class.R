@@ -4,11 +4,9 @@ dag_class <- R6Class(
   public = list (
 
     node_list = list(),
-    node_names = NA,
     node_types = NA,
     node_tf_names = NA,
     tf_environment = NA,
-    defined = FALSE,
     target_nodes = NA,
     parameters_example = NA,
 
@@ -22,7 +20,6 @@ dag_class <- R6Class(
       self$target_nodes <- lapply(target_greta_arrays, member, 'node')
 
       # stash the node names, types, and tf names
-      self$node_names <- names(self$node_list)
       self$node_types <- vapply(self$node_list, member, 'type', FUN.VALUE = '')
       self$node_tf_names <- self$build_names()
 
@@ -34,15 +31,7 @@ dag_class <- R6Class(
 
     },
 
-    # return list of nodes. If `names` is provided, return only those
-    nodes = function (types = NULL) {
-      nodes <- self$node_list
-      if (!is.null(types))
-        nodes <- nodes[which(self$node_types %in% types)]
-      nodes
-    },
-
-    # get tf names for different node types
+    # get the TF names for different node types
     get_tf_names = function (types = NULL) {
       names <- self$node_tf_names
       if (!is.null(types))
@@ -50,6 +39,7 @@ dag_class <- R6Class(
       names
     },
 
+    # look up the TF name for a singe node
     tf_name = function (node) {
       self$node_tf_names[node$unique_name]
     },
@@ -67,24 +57,22 @@ dag_class <- R6Class(
         free_name <- paste0(name, '_free')
         gradient_name <- paste0(name, '_gradient')
 
-        # define and evaluate the command
-        command <- sprintf('%s <- tf$reshape(tf$gradients(joint_density, %s), shape(-1))',
-                           gradient_name,
-                           free_name)
-        eval(parse(text = command),
-             envir = self$tf_environment)
+        gradient <- tf$gradients(self$tf_environment$joint_density,
+                                 self$tf_environment[[free_name]])
+        gradient_reshape <- tf$reshape(gradient, shape(-1))
+
+        self$tf_environment[[gradient_name]] <- gradient_reshape
 
       }
 
       # combine the gradients into one tensor
       gradient_names <- paste0(variable_tf_names, '_gradient')
 
-      # define and evaluate the command
-      command <- sprintf('gradients <- tf$concat(list(%s), 0L)',
-                         paste(gradient_names, collapse = ','))
+      gradient_list <- lapply(gradient_names,
+                              get,
+                              envir = self$tf_environment)
 
-      eval(parse(text = command),
-           envir = self$tf_environment)
+      self$tf_environment$gradients <- tf$concat(gradient_list, 0L)
 
     },
 
@@ -95,13 +83,12 @@ dag_class <- R6Class(
       density_names <- self$get_tf_names(types = 'distribution')
 
       # get TF density tensors for all distribution
-      densities <- lapply(density_names,
-                          function(x) get(x, envir = self$tf_environment))
+      densities <- lapply(density_names, get, envir = self$tf_environment)
 
       # reduce_sum them
       summed_densities <- lapply(densities, tf$reduce_sum)
 
-      # remoe their names and sum them together
+      # remove their names and sum them together
       names(summed_densities) <- NULL
       sum_total <- tf$add_n(summed_densities)
 
@@ -114,7 +101,8 @@ dag_class <- R6Class(
     define_tf = function () {
 
       # check for unfixed discrete distributions
-      bad_nodes <- vapply(self$nodes('distribution'),
+      distributions <- self$node_list[self$node_types == 'distribution']
+      bad_nodes <- vapply(distributions,
                           function(x) {
                             x$discrete && !inherits(x$target, 'data_node')
                             },
@@ -127,21 +115,17 @@ dag_class <- R6Class(
       }
 
       # define all nodes, node densities and free states in the environment
-      lapply(self$nodes(), function (x) x$define_tf(self))
+      lapply(self$node_list, function (x) x$define_tf(self))
 
       # define an overall log density and relevant gradients there
       self$define_joint_density()
       self$define_gradients()
 
       # start a session and initialise all variables
-      self$run_tf(  sess <- tf$Session()  )
-      self$run_tf(  sess$run(tf$global_variables_initializer())  )
+      with(self$tf_environment,
+           {sess <- tf$Session(); sess$run(tf$global_variables_initializer())})
 
     },
-
-    # run a command in the environment in which the TF graph and session are defined
-    run_tf = function (call)
-      eval(substitute(call), envir = self$tf_environment),
 
     # return the expected free parameter format either in list or vector form
     example_parameters = function (flat = TRUE) {
@@ -159,27 +143,21 @@ dag_class <- R6Class(
 
     send_parameters = function (parameters, flat = TRUE) {
 
-      # convert parameters to a named list
+      # convert parameters to a named list and change TF names to free versions
       parameters <- relist_tf(parameters, self$parameters_example)
-
-      # change node names to free versions
       names(parameters) <- paste0(names(parameters), '_free')
 
-      # coerce to dict *in tf_environment* so that keys are linked to tensors
-      assign('parameters', parameters, envir = self$tf_environment)
-
-      # create a feed dict
-      ex <- expression(parameter_dict <- do.call(dict, parameters))
-      eval(ex,
-           envir = self$tf_environment)
+      # create a feed dict in the TF environment
+      self$tf_environment$parameters <- parameters
+      with(self$tf_environment,
+           parameter_dict <- do.call(dict, parameters))
 
     },
 
     log_density = function() {
 
-      ex <- expression(sess$run(joint_density, feed_dict = parameter_dict))
-      eval(ex,
-           envir = self$tf_environment)
+      with(self$tf_environment,
+           sess$run(joint_density, feed_dict = parameter_dict))
 
     },
 
@@ -198,17 +176,11 @@ dag_class <- R6Class(
     # get values in all descendents as a named list, only for nodes of
     # the named type (if type != NULL), and if omit_fixed = TRUE, omit the
     # fixed values when reporting (ignored when setting)
-    all_values = function (types = NULL, omit_fixed = TRUE) {
+    all_values = function (types = NULL) {
 
       # find all nodes of this type in the graph
-      nodes <- self$nodes(types = types)
+      nodes <- distributions <- self$node_list[self$node_types %in% types]
       names <- self$get_tf_names(types = types)
-
-      if (omit_fixed) {
-        fixed <- vapply(nodes, member, '.fixed_value', FUN.VALUE = TRUE)
-        nodes <- nodes[which(!fixed)]
-        names <- names[which(!fixed)]
-      }
 
       # get all values in a list
       values <- lapply(nodes, member, 'value()')
@@ -221,14 +193,17 @@ dag_class <- R6Class(
     # return the current values of the traced nodes, as a named vector
     trace_values = function () {
 
-      command <- 'sess$run(%s, feed_dict = parameter_dict)'
+      target_tf_names <- lapply(self$target_nodes,
+                                self$tf_name)
 
-      # evaluate the nodes corresponding to each of the target variables
-      trace_list <- lapply(self$target_nodes,
-                           function (node) {
-                             eval(parse(text = sprintf(command, self$tf_name(node))),
-                                  envir = self$tf_environment)
-                           })
+      target_tensors <- lapply(target_tf_names,
+                               get,
+                               envir = self$tf_environment)
+
+      # evaluate them in the tensorflow environment
+      trace_list <- lapply(target_tensors,
+                           self$tf_environment$sess$run,
+                           feed_dict = self$tf_environment$parameter_dict)
 
       # flatten and return
       unlist(trace_list)
@@ -237,8 +212,8 @@ dag_class <- R6Class(
 
     # get gradient of joint density w.r.t. free states of all variable nodes
     gradients = function () {
-      ex <- expression(sess$run(gradients, feed_dict = parameter_dict))
-      eval(ex, envir = self$tf_environment)
+      with(self$tf_environment,
+           sess$run(gradients, feed_dict = parameter_dict))
     },
 
     build_names = function () {
