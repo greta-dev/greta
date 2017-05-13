@@ -1,5 +1,3 @@
-# different types of node
-
 data_node <- R6Class(
   'data_node',
   inherit = node,

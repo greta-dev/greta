@@ -32,6 +32,8 @@ define_model <- function (...) {
 
   check_tf_version('error')
 
+  tf$reset_default_graph()
+
   # nodes required
   target_greta_arrays <- list(...)
 
