@@ -21,13 +21,40 @@ dag_class <- R6Class(
 
       # stash the node names, types, and tf names
       self$node_types <- vapply(self$node_list, member, 'type', FUN.VALUE = '')
-      self$node_tf_names <- self$build_names()
+      self$node_tf_names <- self$make_names()
 
       # set up the tf environment
       self$tf_environment <- new.env()
 
       # stash an example list to relist parameters
       self$parameters_example <- self$example_parameters(flat = FALSE)
+
+    },
+
+    # return a list of nodes connected to those in the target node list
+    build_dag = function (greta_array_list) {
+
+      target_node_list <- lapply(greta_array_list, member, "node")
+
+      # loop through the target nodes, recursively registering them to this dag
+      for (node in target_node_list) {
+        node$register_family(self)
+      }
+
+    },
+
+    make_names = function () {
+      # given a vector of node types, create names for TF tensors, sequentially
+      # within each type
+
+      types <- self$node_types
+
+      for (type in c('variable', 'data', 'operation', 'distribution')) {
+        idx <- which(types == type)
+        types[idx] <- paste(type, seq_along(idx), sep = '_')
+      }
+
+      self$node_tf_names <- types
 
     },
 
@@ -42,6 +69,36 @@ dag_class <- R6Class(
     # look up the TF name for a singe node
     tf_name = function (node) {
       self$node_tf_names[node$unique_name]
+    },
+
+    # define tf graph in environment
+    define_tf = function () {
+
+      # check for unfixed discrete distributions
+      distributions <- self$node_list[self$node_types == 'distribution']
+      bad_nodes <- vapply(distributions,
+                          function(x) {
+                            x$discrete && !inherits(x$target, 'data_node')
+                          },
+                          FALSE)
+
+      if (any(bad_nodes)) {
+        stop ("model contains a discrete random variable that doesn't have a ",
+              "fixed value, so cannot be sampled from",
+              call. = FALSE)
+      }
+
+      # define all nodes, node densities and free states in the environment
+      lapply(self$node_list, function (x) x$define_tf(self))
+
+      # define an overall log density and relevant gradients there
+      self$define_joint_density()
+      self$define_gradients()
+
+      # start a session and initialise all variables
+      with(self$tf_environment,
+           {sess <- tf$Session(); sess$run(tf$global_variables_initializer())})
+
     },
 
     define_gradients = function () {
@@ -97,41 +154,13 @@ dag_class <- R6Class(
 
     },
 
-    # define tf graph in environment
-    define_tf = function () {
-
-      # check for unfixed discrete distributions
-      distributions <- self$node_list[self$node_types == 'distribution']
-      bad_nodes <- vapply(distributions,
-                          function(x) {
-                            x$discrete && !inherits(x$target, 'data_node')
-                            },
-                          FALSE)
-
-      if (any(bad_nodes)) {
-        stop ("model contains a discrete random variable that doesn't have a ",
-              "fixed value, so cannot be sampled from",
-              call. = FALSE)
-      }
-
-      # define all nodes, node densities and free states in the environment
-      lapply(self$node_list, function (x) x$define_tf(self))
-
-      # define an overall log density and relevant gradients there
-      self$define_joint_density()
-      self$define_gradients()
-
-      # start a session and initialise all variables
-      with(self$tf_environment,
-           {sess <- tf$Session(); sess$run(tf$global_variables_initializer())})
-
-    },
-
     # return the expected free parameter format either in list or vector form
     example_parameters = function (flat = TRUE) {
 
-      # get example parameter list for all non-fixed  parameters for the dag
-      current_parameters <- self$all_values(types = 'variable')
+      # find all variable nodes in the graph and get their values
+      nodes <- self$node_list[self$node_types == 'variable']
+      names(nodes) <- self$get_tf_names(types = 'variable')
+      current_parameters <- lapply(nodes, member, 'value()')
 
       # optionally flatten them
       if (flat)
@@ -161,33 +190,10 @@ dag_class <- R6Class(
 
     },
 
-    # return a list of nodes connected to those in the target node list
-    build_dag = function (greta_array_list) {
-
-      target_node_list <- lapply(greta_array_list, member, "node")
-
-      # loop through the target nodes, recursively registering them to this dag
-      for (node in target_node_list) {
-        node$register_family(self)
-      }
-
-    },
-
-    # get values in all descendents as a named list, only for nodes of
-    # the named type (if type != NULL), and if omit_fixed = TRUE, omit the
-    # fixed values when reporting (ignored when setting)
-    all_values = function (types = NULL) {
-
-      # find all nodes of this type in the graph
-      nodes <- distributions <- self$node_list[self$node_types %in% types]
-      names <- self$get_tf_names(types = types)
-
-      # get all values in a list
-      values <- lapply(nodes, member, 'value()')
-      names(values) <- names
-
-      values
-
+    # get gradient of joint density w.r.t. free states of all variable nodes
+    gradients = function () {
+      with(self$tf_environment,
+           sess$run(gradients, feed_dict = parameter_dict))
     },
 
     # return the current values of the traced nodes, as a named vector
@@ -208,29 +214,7 @@ dag_class <- R6Class(
       # flatten and return
       unlist(trace_list)
 
-    },
-
-    # get gradient of joint density w.r.t. free states of all variable nodes
-    gradients = function () {
-      with(self$tf_environment,
-           sess$run(gradients, feed_dict = parameter_dict))
-    },
-
-    build_names = function () {
-      # given a vector of node types, create names for TF tensors, sequentially
-      # within each type
-
-      types <- self$node_types
-
-      for (type in c('variable', 'data', 'operation', 'distribution')) {
-        idx <- which(types == type)
-        types[idx] <- paste(type, seq_along(idx), sep = '_')
-      }
-
-      self$node_tf_names <- types
-
     }
-
 
   )
 )
