@@ -89,8 +89,6 @@ test_that('define_model and mcmc error informatively', {
 
   source('helpers.R')
 
-  flush()
-
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
@@ -124,8 +122,6 @@ test_that('check_dims errors informatively', {
 
   source('helpers.R')
 
-  flush()
-
   a <- ones(3, 3)
   b <- ones(1)
   c <- ones(2, 2)
@@ -158,8 +154,6 @@ test_that('rejected mcmc proposals', {
 
   source('helpers.R')
 
-  flush()
-
   # numerical rejection
   x <- rnorm(10000, 1e6, 1)
   z = normal(-1e6, 1e-6)
@@ -167,8 +161,6 @@ test_that('rejected mcmc proposals', {
   m <- define_model(z)
   expect_message(mcmc(m, n_samples = 1, warmup = 0),
                  'proposal rejected due to numerical instability')
-
-  flush()
 
   # bad proposal
   x <- rnorm(100, 0, 0.01)

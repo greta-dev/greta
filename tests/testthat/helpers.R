@@ -3,11 +3,6 @@
 # set the seed before running tests
 set.seed(2017-05-01)
 
-# flush the node list and tensor graph
-flush <- function () {
-  tf$reset_default_graph()
-}
-
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
 
@@ -44,6 +39,8 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # x is the vector of values at which to evaluate the log density
 
   # define greta distribution, with fixed values
+
+  tf$reset_default_graph()
 
   parameters_greta <- parameters
   # no dim for wishart
@@ -95,6 +92,8 @@ randu <- function (...) {
 # e.g. check_op(sum, randn(100, 3))
 check_op <- function (op, a, b, greta_op = NULL) {
 
+  tf$reset_default_graph()
+
   if (is.null(greta_op))
     greta_op <- op
 
@@ -110,22 +109,6 @@ check_op <- function (op, a, b, greta_op = NULL) {
   difference <- as.vector(abs(r_out - greta_out))
   expect_true(all(difference < 1e-4))
 }
-
-# take an expression, and execute it, converting the objects named in 'swap' to
-# greta arrays
-
-# call_to_text <- function (call)
-#   paste(deparse(call), collapse = ' ')
-
-# # can check with_greta works with this code:
-# foo <- function (x) {
-#   if(inherits(x, 'greta_array'))
-#     stop ('noooo')
-#   x
-# }
-# x <- randn(3)
-# foo(3)
-# with_greta(foo(3), swap = 'x')
 
 # execute a call via greta, swapping the objects named in 'swap' to greta
 # arrays, then converting the result back to R. 'swap_scope' tells eval() how
@@ -160,6 +143,9 @@ with_greta <- function (call, swap = c('x'), swap_scope = 1) {
 # arrays with results ported back to R
 # e.g. check_expr(a[1:3], swap = 'a')
 check_expr <- function (expr, swap = c('x')) {
+
+  tf$reset_default_graph()
+
   call <- substitute(expr)
 
   r_out <- eval(expr)
@@ -227,6 +213,8 @@ compare_truncated_distribution <- function (greta_fun, which, parameters, trunca
   # is a greta array created from a distribution and a constrained free() greta
   # array. 'r_fun' is an r function returning the log density for the same
   # truncated distribution, taking x as its only argument.
+
+  tf$reset_default_graph()
 
   require(truncdist)
 

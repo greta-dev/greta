@@ -4,8 +4,6 @@ test_that('truncated distributions define correct densities', {
 
   source('helpers.R')
 
-  flush()
-
   # non-truncated normal (via truncation trick)
   difference <- compare_truncated_distribution(normal,
                                                'norm',

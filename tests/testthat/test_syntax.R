@@ -4,8 +4,6 @@ test_that('`distribution<-` works in models', {
 
   source('helpers.R')
 
-  flush()
-
   # with a distribution parameter
   y <- as_data(randn(5))
   expect_equal(node_type(y$node), 'data')
@@ -23,8 +21,6 @@ test_that('`distribution<-` works in models', {
   sample_distribution(mu)
 
   # with a free parameter
-
-  flush()
 
   y <- as_data(randn(5))
   expect_equal(node_type(y$node), 'data')
@@ -48,8 +44,6 @@ test_that('`distribution<-` works in models', {
 test_that('distribution() works', {
 
   source('helpers.R')
-
-  flush()
 
   a = normal(0, 1)
   b = free()
@@ -82,8 +76,6 @@ test_that('distribution() works', {
 test_that('`distribution<-` errors informatively', {
 
   source('helpers.R')
-
-  flush()
 
   y <- randn(3, 3, 2)
   x <- randn(1)
@@ -131,8 +123,6 @@ test_that('`distribution<-` errors informatively', {
 test_that('distribution() errors informatively', {
 
   source('helpers.R')
-
-  flush()
 
   y <- randn(3)
 
