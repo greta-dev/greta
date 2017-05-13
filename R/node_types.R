@@ -1,19 +1,8 @@
-deterministic_node <- R6Class(
-  'deterministic_node',
-  inherit = node,
-  public = list(
-
-    type = 'deterministic'
-
-  )
-)
-
-
 # different types of node
 
 data_node <- R6Class(
   'data_node',
-  inherit = deterministic_node,
+  inherit = node,
   public = list(
 
     type = 'data',
@@ -43,7 +32,7 @@ data_node <- R6Class(
 # a node for applying operations to values
 operation_node <- R6Class(
   'operation_node',
-  inherit = deterministic_node,
+  inherit = node,
   public = list(
 
     type = 'operation',
