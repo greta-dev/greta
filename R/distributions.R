@@ -46,7 +46,7 @@ uniform_distribution <- R6Class (
       self$add_parameter(max, 'max')
 
       # the density is fixed, so calculate it now
-      self$log_density <- tf$constant(-log(max - min))
+      self$log_density <- -log(max - min)
 
     },
 
