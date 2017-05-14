@@ -32,8 +32,8 @@ operation_node <- R6Class(
   public = list(
 
     operation_name = NA,
-    .operation = NA,
-    .operation_args = NA,
+    operation = NA,
+    operation_args = NA,
     arguments = list(),
 
     initialize = function (operation,
@@ -53,8 +53,8 @@ operation_node <- R6Class(
         tf_operation <- paste0('tf$', operation)
 
       self$operation_name <- operation
-      self$.operation <- tf_operation
-      self$.operation_args <- operation_args
+      self$operation <- tf_operation
+      self$operation_args <- operation_args
 
       # work out the dimensions of the new node, if NULL assume an elementwise
       # operation and get the largest number of each dimension, otherwise expect
@@ -101,7 +101,7 @@ operation_node <- R6Class(
     tf = function (dag) {
 
       # switch out the op for non-sugared variety
-      op <- self$switch_op(self$.operation)
+      op <- self$switch_op(self$operation)
 
       # get the function
       fun <- eval(parse(text = op))
@@ -111,8 +111,8 @@ operation_node <- R6Class(
       args <- lapply(arg_tf_names, get, envir = dag$tf_environment)
 
       # fetch additional (non-tensor) arguments, if any
-      if (length(self$.operation_args) > 0)
-        args <- c(args, self$.operation_args)
+      if (length(self$operation_args) > 0)
+        args <- c(args, self$operation_args)
 
       # apply function on tensors
       node <- do.call(fun, args)
