@@ -273,6 +273,27 @@ dag_class <- R6Class(
       original_names <- names(self$node_list)
       lapply(names, match, original_names)
 
+    },
+
+    adjacency_matrix = function () {
+
+      # make dag matrix
+      n_node <- length(self$node_list)
+      node_names <- names(self$node_list)
+      dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
+      rownames(dag_mat) <- colnames(dag_mat) <- node_names
+
+      parents <- lapply(self$node_list, member, 'parent_names(recursive = FALSE)')
+      children <- lapply(self$node_list, member, 'child_names(recursive = FALSE)')
+
+      # children in the lower left, parents in the upper right
+      for (i in seq_len(n_node)) {
+        dag_mat[i, parents[[i]]] <- 1
+        dag_mat[children[[i]], i] <- 1
+      }
+
+      dag_mat
+
     }
 
   )

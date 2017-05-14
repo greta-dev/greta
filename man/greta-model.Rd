@@ -3,14 +3,19 @@
 \name{greta-model}
 \alias{greta-model}
 \alias{print.greta_model}
+\alias{plot.greta_model}
 \title{Greta Model Objects}
 \usage{
 \method{print}{greta_model}(x, ...)
+
+\method{plot}{greta_model}(x, y, ...)
 }
 \arguments{
 \item{x}{a \code{greta_model} object}
 
 \item{\dots}{further arguments passed to or from other methods (currently ignored).}
+
+\item{y}{not used}
 }
 \description{
 Methods to inspect \code{greta_model} objects.

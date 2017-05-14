@@ -52,6 +52,7 @@ Imports:
     tensorflow,
     coda
 Suggests:
+    DiagrammeR,
     testthat,
     mvtnorm,
     MCMCpack,

@@ -177,7 +177,7 @@ test_that('disjoint graphs are checked', {
 
   # if the target nodes aren't related, they sould be checked separately
 
-  a <- uniform(0, 1)
+  a = uniform(0, 1)
   b = normal(a, 2)
 
   # c is unrelated and has no density
@@ -192,5 +192,17 @@ test_that('disjoint graphs are checked', {
   expect_error(m <- define_model(a, b, d),
                'the model contains 2 disjoint graphs, one or more of these sub-graphs does not contain any greta arrays that are unknown, so a model cannot be defined')
 
+
+})
+
+test_that("plotting models doesn't error", {
+
+  source('helpers.R')
+
+  a = uniform(0, 1)
+
+  m <- define_model(a)
+
+  plot(m)
 
 })

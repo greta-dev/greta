@@ -249,6 +249,27 @@ node <- R6Class(
       name <- gsub('>', '', name)
       self$unique_name <- name
 
+    },
+
+    plotting_label = function () {
+      label <- ''
+      type <- node_type(self)
+
+      # replace distributions with more info
+      if (type == 'distribution')
+        label <- self$distribution_name
+
+      # if it's data and scalar, just put the value
+      if (type == 'data' & is_scalar(self)) {
+
+        val <- as.numeric(self$value())
+        val <- round(val, 2)
+        label <- prettyNum(val)
+
+      }
+
+      label
+
     }
 
 
