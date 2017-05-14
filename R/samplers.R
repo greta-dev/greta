@@ -111,6 +111,7 @@ define_model <- function (...) {
   # create the model object and add the arraysof interest
   model <- as.greta_model(dag)
   model$target_greta_arrays <- target_greta_arrays
+  model$visible_greta_arrays <- all_greta_arrays(parent.frame())
 
   model
 
