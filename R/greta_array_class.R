@@ -121,7 +121,7 @@ print.greta_array <- function (x, ...) {
 summary.greta_array <- function (object, ...) {
   # array type
   type_text <- sprintf("'%s' greta array",
-                       object$node$type)
+                       node_type(object$node))
 
   len <- length(object)
   if (len == 1) {

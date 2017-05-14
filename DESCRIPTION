@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Probabilistic Modelling with TensorFlow
-Version: 0.1.6
-Date: 2017-05-11
+Version: 0.1.7
+Date: 2017-05-14
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
 Description: Existing tools for fitting bespoke statistical models (such as
@@ -52,6 +52,7 @@ Imports:
     tensorflow,
     coda
 Suggests:
+    DiagrammeR,
     testthat,
     mvtnorm,
     MCMCpack,

@@ -46,7 +46,7 @@ uniform_distribution <- R6Class (
       self$add_parameter(max, 'max')
 
       # the density is fixed, so calculate it now
-      self$log_density <- tf$constant(-log(max - min))
+      self$log_density <- -log(max - min)
 
     },
 
@@ -59,7 +59,7 @@ uniform_distribution <- R6Class (
 
     # weird hack to make TF see a gradient here
     tf_log_density_function = function (x, parameters) {
-      self$log_density + tf$reduce_sum(x * 0)
+      self$log_density + x * 0
     }
 
   )

@@ -64,48 +64,56 @@ NULL
 #' @export
 `+.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("`+`", e1, e2)
+  op("+", e1, e2,
+     tf_operation = '`+`')
 }
 
 #' @export
 `-.greta_array` <- function (e1, e2) {
   # handle unary minus
   if (missing(e2)) {
-    op("`-`", e1)
+    op("-", e1,
+       tf_operation = '`-`')
   } else {
     check_dims(e1, e2)
-    op("`-`", e1, e2)
+    op("-", e1, e2,
+     tf_operation = '`-`')
   }
 }
 
 #' @export
 `*.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("`*`", e1, e2)
+  op("*", e1, e2,
+     tf_operation = '`*`')
 }
 
 #' @export
 `/.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("`/`", e1, e2)
+  op("/", e1, e2,
+     tf_operation = '`/`')
 }
 
 #' @export
 `^.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf$pow", e1, e2)
+  op("power", e1, e2,
+     tf_operation = 'tf$pow')
 }
 
 #' @export
 `%%.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("`%%`", e1, e2)
+  op("`%%`", e1, e2,
+     tf_operation = '`%%`')
 }
 
 #' @export
 `%/%.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("`%/%`", e1, e2)
+  op("`%/%`", e1, e2,
+     tf_operation = '`%/%`')
 }
 
 # overload %*% as an S3 generic
@@ -154,7 +162,8 @@ NULL
 
   }
 
-  op("tf$matmul", x, y, dimfun = dimfun)
+  op("%*%", x, y, dimfun = dimfun,
+     tf_operation = 'tf$matmul')
 
 }
 
@@ -172,19 +181,22 @@ tf_or <- function(x, y)
 
 #' @export
 `!.greta_array` <- function (e1) {
-  op("tf_not", e1)
+  op("not", e1,
+     tf_operation = 'tf_not')
 }
 
 #' @export
 `&.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf_and", e1, e2)
+  op("and", e1, e2,
+     tf_operation = 'tf_and')
 }
 
 #' @export
 `|.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf_or", e1, e2)
+  op("or", e1, e2,
+     tf_operation = 'tf_or')
 }
 
 # relational operators
@@ -211,35 +223,41 @@ tf_neq <- function(x, y)
 #' @export
 `<.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf_lt", e1, e2)
+  op("<", e1, e2,
+     tf_operation = 'tf_lt')
 }
 
 #' @export
 `>.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf_gt", e1, e2)
+  op(">", e1, e2,
+     tf_operation = 'tf_gt')
 }
 
 #' @export
 `<=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf_lte", e1, e2)
+  op("<=", e1, e2,
+     tf_operation = 'tf_lte')
 }
 
 #' @export
 `>=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf_gte", e1, e2)
+  op(">=", e1, e2,
+     tf_operation = 'tf_gte')
 }
 
 #' @export
 `==.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf_eq", e1, e2)
+  op("==", e1, e2,
+     tf_operation = 'tf_eq')
 }
 
 #' @export
 `!=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("tf_neq", e1, e2)
+  op("!=", e1, e2,
+     tf_operation = 'tf_neq')
 }

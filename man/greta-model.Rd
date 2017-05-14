@@ -3,15 +3,29 @@
 \name{greta-model}
 \alias{greta-model}
 \alias{print.greta_model}
+\alias{plot.greta_model}
 \title{Greta Model Objects}
 \usage{
 \method{print}{greta_model}(x, ...)
+
+\method{plot}{greta_model}(x, y, ...)
 }
 \arguments{
 \item{x}{a \code{greta_model} object}
 
 \item{\dots}{further arguments passed to or from other methods (currently ignored).}
+
+\item{y}{unused default argument}
 }
 \description{
-Methods to inspect \code{greta_model} objects.
+Methods to inspect \code{greta_model} objects (returned by
+  \code{\link{define_model}}), including a graphic representation of the
+  constructed model.
+}
+\details{
+The plot method produces a visual representation of the defined
+  model. It uses the \code{DiagrammeR} package, which must be installed
+  first. Here's a key to the plots:
+  \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
+  \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 }

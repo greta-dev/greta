@@ -4,8 +4,6 @@ test_that('normal distribution has correct density', {
 
   source('helpers.R')
 
-  flush()
-
   difference <- compare_distribution(greta::normal,
                                      stats::dnorm,
                                      parameters = list(mean = -2, sd = 3),
@@ -18,8 +16,6 @@ test_that('normal distribution has correct density', {
 test_that('uniform distribution has correct density', {
 
   source('helpers.R')
-
-  flush()
 
   difference <- compare_distribution(greta::uniform,
                                      stats::dunif,
@@ -34,8 +30,6 @@ test_that('lognormal distribution has correct density', {
 
   source('helpers.R')
 
-  flush()
-
   difference <- compare_distribution(greta::lognormal,
                                      stats::dlnorm,
                                      parameters = list(meanlog = 1, sdlog = 3),
@@ -48,8 +42,6 @@ test_that('lognormal distribution has correct density', {
 test_that('bernoulli distribution has correct density', {
 
   source('helpers.R')
-
-  flush()
 
   # r version of the bernoulli density
   dbern <- function (x, prob, log = FALSE)
@@ -68,8 +60,6 @@ test_that('binomial distribution has correct density', {
 
   source('helpers.R')
 
-  flush()
-
   difference <- compare_distribution(greta::binomial,
                                      stats::dbinom,
                                      parameters = list(size = 10, prob = 0.8),
@@ -82,8 +72,6 @@ test_that('binomial distribution has correct density', {
 test_that('negative binomial distribution has correct density', {
 
   source('helpers.R')
-
-  flush()
 
   difference <- compare_distribution(greta::negative_binomial,
                                      stats::dnbinom,
@@ -98,8 +86,6 @@ test_that('poisson distribution has correct density', {
 
   source('helpers.R')
 
-  flush()
-
   difference <- compare_distribution(greta::poisson,
                                      stats::dpois,
                                      parameters = list(lambda = 17.2),
@@ -112,8 +98,6 @@ test_that('poisson distribution has correct density', {
 test_that('gamma distribution has correct density', {
 
   source('helpers.R')
-
-  flush()
 
   difference <- compare_distribution(greta::gamma,
                                      stats::dgamma,
@@ -128,8 +112,6 @@ test_that('exponential distribution has correct density', {
 
   source('helpers.R')
 
-  flush()
-
   difference <- compare_distribution(greta::exponential,
                                      stats::dexp,
                                      parameters = list(rate = 1.9),
@@ -142,8 +124,6 @@ test_that('exponential distribution has correct density', {
 test_that('student distribution has correct density', {
 
   source('helpers.R')
-
-  flush()
 
   # use location-scale version of student T; related to R's via this function:
   dt_ls <- function (x, df, location, scale, log = FALSE) {
@@ -166,8 +146,6 @@ test_that('beta distribution has correct density', {
 
   source('helpers.R')
 
-  flush()
-
   difference <- compare_distribution(greta::beta,
                                      stats::dbeta,
                                      parameters = list(shape1 = 2.3, shape2 = 3.4),
@@ -180,8 +158,6 @@ test_that('beta distribution has correct density', {
 test_that('multivariate normal distribution has correct density', {
 
   source('helpers.R')
-
-  flush()
 
   # parameters to test
   m <- 5
@@ -204,8 +180,6 @@ test_that('multivariate normal distribution has correct density', {
 test_that('Wishart distribution has correct density', {
 
   source('helpers.R')
-
-  flush()
 
   # parameters to test
   m <- 5
@@ -235,8 +209,6 @@ test_that('scalar-valued distributions can be defined in models', {
 
   source('helpers.R')
 
-  flush()
-
   x <- randn(5)
   y <- round(randu(5))
   p <- iprobit(normal(0, 1))
@@ -258,20 +230,14 @@ test_that('scalar-valued distributions can be defined in models', {
   distribution(y) = poisson(p)
   define_model(p)
 
-  flush()
-
   # continuous distributions
   define_model(normal(-2, 3))
   define_model(student(5.6, -2, 2.3))
   define_model(lognormal(1.2, 0.2))
 
-  flush()
-
   define_model(gamma(0.9, 1.3))
   define_model(exponential(6.3))
   define_model(beta(6.3, 5.9))
-
-  flush()
 
   define_model(uniform(-13, 2.4))
   sig <- rWishart(4, 3, diag(3))[, , 1]
@@ -283,8 +249,6 @@ test_that('scalar-valued distributions can be defined in models', {
 test_that('array-valued distributions can be defined in models', {
 
   source('helpers.R')
-
-  flush()
 
   dim <- c(5, 2)
   x <- randn(5, 2)
@@ -308,21 +272,15 @@ test_that('array-valued distributions can be defined in models', {
   distribution(y) = poisson(p)
   define_model(p)
 
-  flush()
-
   # continuous distributions
   define_model(normal(-2, 3, dim = dim))
   define_model(student(5.6, -2, 2.3, dim = dim))
   define_model(lognormal(1.2, 0.2, dim = dim))
 
-  flush()
-
   define_model(gamma(0.9, 1.3, dim = dim))
   define_model(exponential(6.3, dim = dim))
   define_model(beta(6.3, 5.9, dim = dim))
   define_model(uniform(-13, 2.4, dim = dim))
-
-  flush()
 
   sig <- rWishart(4, 3, diag(3))[, , 1]
   define_model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
@@ -332,8 +290,6 @@ test_that('array-valued distributions can be defined in models', {
 test_that('distributions can be sampled from', {
 
   source('helpers.R')
-
-  flush()
 
   x <- randn(100)
   y <- round(randu(100))
@@ -352,7 +308,6 @@ test_that('distributions can be sampled from', {
   distribution(x) = normal(c, 1)
   sample_distribution(c)
 
-
   d <- free(lower = 1.2, upper = 1.3)
   distribution(x) = normal(d, 1)
   sample_distribution(d)
@@ -370,26 +325,18 @@ test_that('distributions can be sampled from', {
   distribution(y) = poisson(p)
   sample_distribution(p)
 
-  flush()
-
   # unconstrained
   sample_distribution(normal(-2, 3))
   sample_distribution(student(5.6, -2, 2.3))
-
-  flush()
 
   # positive
   sample_distribution(lognormal(1.2, 0.2), lower = 0)
   sample_distribution(gamma(0.9, 1.3), lower = 0)
   sample_distribution(exponential(6.3), lower = 0)
 
-  flush()
-
   # constrained
   sample_distribution(beta(6.3, 5.9), lower = 0, upper = 1)
   sample_distribution(uniform(-13, 2.4), lower = -13, upper = 2.4)
-
-  flush()
 
   # multivariate
   sig <- rWishart(4, 3, diag(3))[, , 1]
@@ -402,8 +349,6 @@ test_that('distributions can be sampled from', {
 test_that('free distribution errors informatively', {
 
   source('helpers.R')
-
-  flush()
 
   # bad types
   expect_error(free(upper = NA),
@@ -429,8 +374,6 @@ test_that('uniform distribution errors informatively', {
 
   source('helpers.R')
 
-  flush()
-
   # bad types
   expect_error(uniform(min = 0, max = NA),
                'min and max must be numeric vectors of length 1')
@@ -453,8 +396,6 @@ test_that('wishart distribution errors informatively', {
 
   source('helpers.R')
 
-  flush()
-
   a <- randn(3, 3)
   b <- randn(3, 3, 3)
   c <- randn(3, 2)
@@ -472,8 +413,6 @@ test_that('wishart distribution errors informatively', {
 test_that('multivariate_normal distribution errors informatively', {
 
   source('helpers.R')
-
-  flush()
 
   m_a <- randn(3)
   m_b <- randn(3, 1)

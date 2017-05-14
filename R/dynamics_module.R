@@ -115,10 +115,11 @@ iterate_lambda <- function(matrix, state, niter) {
     c(1, 1)
   }
 
-  op('tf_iterate_lambda',
+  op('iterate_lambda',
      matrix,
      state,
      operation_args = list(niter = niter),
+     tf_operation = 'tf_iterate_lambda',
      dimfun = dimfun)
 
 }
@@ -150,10 +151,11 @@ iterate_state <- function(matrix, state, niter) {
     state_dim
   }
 
-  op('tf_iterate_state',
+  op('iterate_state',
      matrix,
      state,
      operation_args = list(niter = niter),
+     tf_operation = 'tf_iterate_state',
      dimfun = dimfun)
 
 }
@@ -187,12 +189,13 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
 
   }
 
-  op('tf_iterate_lambda_vectorised',
+  op('iterate_lambda_vectorised',
      matrices,
      state,
      operation_args = list(n = n,
                            m = m,
                            niter = niter),
+     tf_operation = 'tf_iterate_lambda_vectorised',
      dimfun = dimfun)
 
 }

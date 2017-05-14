@@ -4,8 +4,6 @@ test_that('extract works like R', {
 
   source('helpers.R')
 
-  flush()
-
   a <- randn(10)
   b <- randn(10, 1)
   c <- randn(10, 5)
@@ -17,8 +15,6 @@ test_that('extract works like R', {
   check_expr(c[1:6], 'c')
   check_expr(d[1:6], 'd')
 
-  flush()
-
   # can extract first column, regardless of dimension
   check_expr(b[1:6, ], 'b')
   check_expr(b[1:6, 1], 'b')
@@ -26,8 +22,6 @@ test_that('extract works like R', {
   check_expr(c[1:6, 1], 'c')
   check_expr(d[1:2, , ], 'd')
   check_expr(d[1:2, 1, , drop = FALSE], 'd')
-
-  flush()
 
   # can extract with negative dimensions
   check_expr(a[3:1], 'a')
@@ -39,29 +33,21 @@ test_that('extract works like R', {
   # can extract with a mix of numerics and logicals
   check_expr(d[2:1, , c(TRUE, FALSE), drop = FALSE], 'd')
 
-  flush()
-
   # can extract with missing entries in various places
   check_expr(d[, , 2:1], 'd')
   check_expr(d[, 2:1, ], 'd')
   check_expr(d[2:1, , ], 'd')
-
-  flush()
 
   # can extract single elements without dropping dimensions
   check_expr(d[, , 1, drop = FALSE], 'd')
   check_expr(d[, 1, , drop = FALSE], 'd')
   check_expr(d[1, , , drop = FALSE], 'd')
 
-  flush()
-
   # can do empty extracts
   check_expr(a[], 'a')
   check_expr(b[], 'b')
   check_expr(c[], 'c')
   check_expr(d[], 'd')
-
-  flush()
 
   # can do negative extracts
   check_expr(a[-1], 'a')
@@ -74,8 +60,6 @@ test_that('extract works like R', {
 test_that('replace works like R', {
 
   source('helpers.R')
-
-  flush()
 
   # check using expressions, and comparing the whole object to which replacement
   # was applied
@@ -90,8 +74,6 @@ test_that('replace works like R', {
   x <- randn(2, 2, 2)
   check_expr({x[1:6] <- seq_len(6); x})
 
-  flush()
-
   # can replace first column, regardless of dimension
   x <- randn(10, 1)
   check_expr({x[1:6, 1] <- seq_len(6 * 1); x})
@@ -100,8 +82,6 @@ test_that('replace works like R', {
   x <- randn(2, 2, 2)
   check_expr({x[1:2, 1, ] <- seq_len(2 * 1 * 2); x})
 
-  flush()
-
   # can replace a chunk, regardless of dimension
   x <- randn(10, 1)
   check_expr({x[1:6, ] <- seq_len(6); x})
@@ -109,8 +89,6 @@ test_that('replace works like R', {
   check_expr({x[1:6, ] <- seq_len(6 * 5); x})
   x <- randn(10, 2, 2)
   check_expr({x[1:2, , ] <- seq_len(2 * 2 * 2); x})
-
-  flush()
 
   # can replace with negative dimensions
   x <- randn(10)
@@ -121,8 +99,6 @@ test_that('replace works like R', {
   # can replace with logicals (the logical vector is repeated 3 1/3 times)
   x <- randn(10)
   check_expr({x[c(TRUE, FALSE, TRUE)] <- seq_len(7); x})
-
-  flush()
 
   # can extract with a mix of numerics and logicals
   x <- randn(10, 2, 2)
@@ -136,8 +112,6 @@ test_that('replace works like R', {
   x <- randn(10, 2, 2)
   check_expr({x[1:2, , ] <- seq_len(2 * 2 * 2); x})
 
-  flush()
-
   # can assign single elements without dropping dimensions
   x <- randn(10, 2, 2)
   check_expr({x[1, , ] <- seq_len(1 * 2 * 2); x})
@@ -145,8 +119,6 @@ test_that('replace works like R', {
   check_expr({x[, 1, ] <- seq_len(10 * 1 * 2); x})
   x <- randn(10, 2, 2)
   check_expr({x[, , 1] <- seq_len(10 * 2 * 1); x})
-
-  flush()
 
   # can do full replacements
   x <- randn(10)
@@ -158,8 +130,6 @@ test_that('replace works like R', {
   x <- randn(2, 2, 2)
   check_expr({x[] <- seq_len(2 * 2 * 2); x})
 
-  flush()
-
   # can do negative replacements
   x <- randn(10)
   check_expr({x[-1] <- seq_len(9); x})
@@ -169,8 +139,6 @@ test_that('replace works like R', {
   check_expr({x[-(1:4), ] <- seq_len(6 * 5); x})
   x <- randn(2, 2, 2)
   check_expr({x[-1, -1, ] <- seq_len(1 * 1 * 2); x})
-
-  flush()
 
   # can replace multiple entries with one;
   x <- randn(10)
@@ -182,8 +150,6 @@ test_that('replace works like R', {
   x <- randn(2, 2, 2)
   check_expr({x[1:2, , ] <- 1; x})
 
-  flush()
-
   # can replace multiple entries with a vector (with factorizing length)
   x <- randn(10)
   check_expr({x[1:4] <- seq_len(2); x})
@@ -193,8 +159,6 @@ test_that('replace works like R', {
   check_expr({x[1:9, ] <- seq_len(3); x})
   x <- randn(2, 2, 2)
   check_expr({x[1:2, , 1] <- seq_len(2); x})
-
-  flush()
 
   # replace with a greta array (e.g. with subset of self)
   # check_expr seems to balls this one up, so do it longhand
@@ -212,8 +176,6 @@ test_that('rep works like R', {
 
   source('helpers.R')
 
-  flush()
-
   a <- randn(10)
   b <- randn(10, 1)
   c <- randn(10, 5)
@@ -227,8 +189,6 @@ test_that('rep works like R', {
   check_op(rep_times, c)
   check_op(rep_times, d)
 
-  flush()
-
   rep_length <- function(x)
     rep(x, length.out = 3)
 
@@ -237,8 +197,6 @@ test_that('rep works like R', {
   check_op(rep_length, c)
   check_op(rep_length, d)
 
-  flush()
-
   rep_times_each <- function(x)
     rep(x, times = 3, each = 3)
 
@@ -246,8 +204,6 @@ test_that('rep works like R', {
   check_op(rep_times_each, b)
   check_op(rep_times_each, c)
   check_op(rep_times_each, d)
-
-  flush()
 
   rep_length_each <- function(x)
     rep(x, length = 30, each = 3)
@@ -263,8 +219,6 @@ test_that('rbind, cbind and c work like R', {
 
   source('helpers.R')
 
-  flush()
-
   a <- randn(5, 1)
   b <- randn(1, 5)
   d <- randn(5, 5)
@@ -277,14 +231,10 @@ test_that('rbind, cbind and c work like R', {
   check_op(cbind, a, d)
   check_op(cbind, d, d)
 
-  flush()
-
   # flatten and concatenate arrays
   check_op(c, a, d)
   check_op(c, b, a)
   check_op(c, d, b)
-
-  flush()
 
   # unary c flattens arrays
   check_op(c, a)
@@ -297,8 +247,6 @@ test_that('assign errors on variable greta arrays', {
 
   source('helpers.R')
 
-  flush()
-
   z <- normal(0, 1, dim = 5)
   expect_error(z[1] <- 3,
                'cannot replace values in a variable greta array')
@@ -308,8 +256,6 @@ test_that('assign errors on variable greta arrays', {
 test_that('rbind and cbind give informative error messages', {
 
   source('helpers.R')
-
-  flush()
 
   a <- as_data(randn(5, 1))
   b <- as_data(randn(1, 5))
@@ -326,8 +272,6 @@ test_that('replacement gives informative error messages', {
 
   source('helpers.R')
 
-  flush()
-
   x <- as_data(randn(2, 2, 2))
   expect_error(x[1:2, , 1] <- seq_len(3),
                'number of items to replace is not a multiple of replacement length')
@@ -337,8 +281,6 @@ test_that('replacement gives informative error messages', {
 test_that('stochastic and operation greta arrays can be extracted', {
 
   source('helpers.R')
-
-  flush()
 
   a = normal(0, 1, dim = c(3, 4))
   a_sub <- a[1:2, 2:3]

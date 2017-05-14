@@ -3,21 +3,17 @@
 # set the seed before running tests
 set.seed(2017-05-01)
 
-# flush the node list and tensor graph
-flush <- function () {
-  options('nodes')$nodes$flush()
-  tf$reset_default_graph()
-}
-
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
 
-  if (inherits(x, 'greta_array'))
-    x <- x$node
+  if (is.node(x))
+    x <- as.greta_array(x)
 
-  if (inherits(x, 'node')) {
-    x$define_tf(environment())
-    x <- get(x$name)
+  if (is.greta_array(x)) {
+    dag <- dag_class$new(list(x))
+    x$node$define_tf(dag)
+    x <- get(dag$tf_name(x$node),
+             envir = dag$tf_environment)
   }
 
   tf$Session()$run(x)
@@ -44,6 +40,8 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
 
   # define greta distribution, with fixed values
 
+  tf$reset_default_graph()
+
   parameters_greta <- parameters
   # no dim for wishart
   if (!identical(names(parameters), c('df', 'Sigma')))
@@ -52,18 +50,19 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
 
-  distribution(x) = dist
-  # set_distribution(dist, as_data(x))
+  # set density
+  x_ <- as_data(x)
+  distribution(x_) = dist
 
-  stopifnot(dist$node$distribution$.fixed_value)
+  # create dag
+  dag <- greta:::dag_class$new(list(x_))
 
   # define the tensor in an environment
-  env <- new.env()
-  dist$node$distribution$define_tf(env = env)
+  dist$node$distribution$define_tf(dag)
 
   # get the log density as a vector
-  tensor_name <- paste0(dist$node$distribution$name, '_density')
-  tensor <- get(tensor_name, envir = env)
+  tensor_name <- dag$tf_name(dist$node$distribution)
+  tensor <- get(tensor_name, envir = dag$tf_environment)
   greta_log_density <- as.vector(grab(tensor))
 
   # get R version
@@ -93,6 +92,8 @@ randu <- function (...) {
 # e.g. check_op(sum, randn(100, 3))
 check_op <- function (op, a, b, greta_op = NULL) {
 
+  tf$reset_default_graph()
+
   if (is.null(greta_op))
     greta_op <- op
 
@@ -108,22 +109,6 @@ check_op <- function (op, a, b, greta_op = NULL) {
   difference <- as.vector(abs(r_out - greta_out))
   expect_true(all(difference < 1e-4))
 }
-
-# take an expression, and execute it, converting the objects named in 'swap' to
-# greta arrays
-
-# call_to_text <- function (call)
-#   paste(deparse(call), collapse = ' ')
-
-# # can check with_greta works with this code:
-# foo <- function (x) {
-#   if(inherits(x, 'greta_array'))
-#     stop ('noooo')
-#   x
-# }
-# x <- randn(3)
-# foo(3)
-# with_greta(foo(3), swap = 'x')
 
 # execute a call via greta, swapping the objects named in 'swap' to greta
 # arrays, then converting the result back to R. 'swap_scope' tells eval() how
@@ -158,6 +143,9 @@ with_greta <- function (call, swap = c('x'), swap_scope = 1) {
 # arrays with results ported back to R
 # e.g. check_expr(a[1:3], swap = 'a')
 check_expr <- function (expr, swap = c('x')) {
+
+  tf$reset_default_graph()
+
   call <- substitute(expr)
 
   r_out <- eval(expr)
@@ -226,6 +214,8 @@ compare_truncated_distribution <- function (greta_fun, which, parameters, trunca
   # array. 'r_fun' is an r function returning the log density for the same
   # truncated distribution, taking x as its only argument.
 
+  tf$reset_default_graph()
+
   require(truncdist)
 
   x <- do.call(truncdist::rtrunc,
@@ -239,24 +229,26 @@ compare_truncated_distribution <- function (greta_fun, which, parameters, trunca
   r_fun <- truncfun(which, parameters, truncation)
   r_log_density <- log(r_fun(x))
 
-  # create greta array
+
+
+  # create greta array for truncated distribution
   z <- free(truncation[1], truncation[2])
-  distribution(z) = do.call(greta_fun, parameters)
+  dist = do.call(greta_fun, parameters)
+  distribution(z) = dist
 
-  # get the modified distribution
-  distrib <- z$node$distribution
+  # set data as the target
+  x_ <- as_data(x)
+  distribution(x_) = dist
 
-  # create tensorflow bits in an environment
-  env <- new.env()
-  env[[distrib$target$name]] <- tf$constant(x, dtype = tf$float32)
-  for (param_name in names(distrib$parameters)) {
-    node_name <- distrib$parameters[[param_name]]$name
-    env[[node_name]] <- tf$constant(parameters[[param_name]], dtype = tf$float32)
-  }
+  # create dag and define the density
+  dag <- greta:::dag_class$new(list(x_))
+  x_$node$distribution$define_tf(dag)
 
-  # evaluate tensorflow log density
-  tf_log_density <- z$node$distribution$tf_log_density(env)
-  greta_log_density <- as.vector(grab(tf_log_density))
+  # get the log density as a vector
+  tensor_name <- dag$tf_name(dist$node$distribution)
+  tensor <- get(tensor_name, envir = dag$tf_environment)
+  greta_log_density <- as.vector(grab(tensor))
+
 
   # return absolute difference
   abs(greta_log_density - r_log_density)

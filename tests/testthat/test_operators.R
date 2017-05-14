@@ -4,8 +4,6 @@ test_that('arithmetic operators work as expected', {
 
   source('helpers.R')
 
-  flush()
-
   a <- randn(25, 4)
   b <- randn(25, 4)
 
@@ -25,8 +23,6 @@ test_that('logical operators work as expected', {
 
   source('helpers.R')
 
-  flush()
-
   a <- randn(25, 4) > 0
   b <- randn(25, 4) > 0
   a[] <- as.integer(a[])
@@ -41,8 +37,6 @@ test_that('logical operators work as expected', {
 test_that('relational operators work as expected', {
 
   source('helpers.R')
-
-  flush()
 
   a <- randn(25, 4)
   b <- randn(25, 4)
@@ -61,8 +55,6 @@ test_that('random strings of operators work as expected', {
   source('helpers.R')
 
   for (i in 1:10) {
-
-    flush()
 
     a <- randn(25, 4)
     b <- randn(25, 4)
