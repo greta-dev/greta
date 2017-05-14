@@ -55,24 +55,29 @@ tf_log1pe <- function (x)
 #' @rdname greta-transforms
 #' @export
 iprobit <- function (x)
-  op('tf_iprobit', x)
+  op('iprobit', x,
+     tf_operation = 'tf_iprobit')
 
 #' @rdname greta-transforms
 #' @export
 ilogit <- function (x)
-  op('tf_ilogit', x)
+  op('ilogit', x,
+     tf_operation = 'tf_ilogit')
 
 #' @rdname greta-transforms
 #' @export
 icloglog <- function (x)
-  op('tf_icloglog', x)
+  op('icloglog', x,
+     tf_operation = 'tf_icloglog')
 
 #' @rdname greta-transforms
 #' @export
 icauchit <- function (x)
-  op('tf_icauchit', x)
+  op('icauchit', x,
+     tf_operation = 'tf_icauchit')
 
 #' @rdname greta-transforms
 #' @export
 log1pe <- function (x)
-  op('tf_log1pe', x)
+  op('log1pe', x,
+     tf_operation = 'tf_log1pe')

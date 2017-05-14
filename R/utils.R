@@ -244,9 +244,10 @@ flat_to_symmetric <- function (x, dim) {
     dim
 
   # sum the elements
-  op('tf_flat_to_symmetric',
+  op('flat_to_symmetric',
      x,
      operation_args = list(dims = dim),
+     tf_operation = 'tf_flat_to_symmetric',
      dimfun = dimfun)
 
 }

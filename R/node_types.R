@@ -31,6 +31,7 @@ operation_node <- R6Class(
   inherit = node,
   public = list(
 
+    operation_name = NA,
     .operation = NA,
     .operation_args = NA,
     arguments = list(),
@@ -39,6 +40,7 @@ operation_node <- R6Class(
                            ...,
                            dimfun = NULL,
                            operation_args = list(),
+                           tf_operation = NULL,
                            value = NULL) {
 
       # coerce all arguments to nodes, and remember the operation
@@ -46,7 +48,12 @@ operation_node <- R6Class(
       for(node in dots)
         self$add_argument(node)
 
-      self$.operation <- operation
+      # default to the same name for the op in R as in TF
+      if (is.null(tf_operation))
+        tf_operation <- paste0('tf$', operation)
+
+      self$operation_name <- operation
+      self$.operation <- tf_operation
       self$.operation_args <- operation_args
 
       # work out the dimensions of the new node, if NULL assume an elementwise
