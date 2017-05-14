@@ -63,18 +63,46 @@ define_model <- function (...) {
   # get and check the types
   types <- dag$node_types
 
-  # check they have a density among them
-  if (!('distribution' %in% types)) {
-    stop ('none of the greta arrays in the model are associated with a ',
-          'probability density, so a model cannot be defined',
-          call. = FALSE)
+  # the user might pass greta arrays with groups of nodes that are unconnected
+  # to one another. Need to check there are densities in each graph
+
+  # so find the subgraph to which each node belongs
+  graph_id <- dag$subgraph_membership()
+
+  graphs <- unique(graph_id)
+  n_graphs <- length(graphs)
+
+  # separate messages to avoid the subgraphs issue for beginners
+  if (n_graphs == 1) {
+    density_message <- paste('none of the greta arrays in the model are',
+                             'associated with a probability density, so a',
+                             'model cannot be defined')
+    variable_message <- paste('none of the greta arrays in the model are',
+                              'unknown, so a model cannot be defined')
+  } else {
+    density_message <- paste('the model contains', n_graphs, 'disjoint graphs,',
+                             'one or more of these sub-graphs does not contain',
+                             'any greta arrays that are associated with a',
+                             'probability density, so a model cannot be',
+                             'defined')
+    variable_message <- paste('the model contains', n_graphs, 'disjoint',
+                              'graphs, one or more of these sub-graphs does',
+                              'not contain any greta arrays that are unknown,',
+                              'so a model cannot be defined')
   }
 
-  # check they have a variable node among them
-  if (!('variable' %in% types)) {
-    stop ('none of the greta arrays in the model are unknown, so a model ',
-          'cannot be defined',
-          call. = FALSE)
+  for (graph in graphs) {
+
+    types_sub <- types[graph_id == graph]
+
+    # check they have a density among them
+    if (!('distribution' %in% types_sub))
+      stop (density_message, call. = FALSE)
+
+    # check they have a variable node among them
+    if (!('variable' %in% types_sub))
+      stop (variable_message, call. = FALSE)
+
   }
 
   # define the TF graph

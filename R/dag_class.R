@@ -214,6 +214,65 @@ dag_class <- R6Class(
       # flatten and return
       unlist(trace_list)
 
+    },
+
+    # for all the nodes in this dag, return a vector of membership to sub-graphs
+    subgraph_membership = function () {
+
+      neighbour_list <- self$find_node_neighbours()
+
+      n_node <- length(neighbour_list)
+      no_of_clusters <- 1
+      registered <- rep(FALSE, n_node)
+      membership <- rep(NA, n_node)
+
+      # loop through all nodes
+      for (node in seq_len(n_node)) {
+
+        # if they haven't been registered
+        if (!registered[node]) {
+
+          # add this one to the register, with cluster membership
+          registered[node] <- TRUE
+          membership[node] <- no_of_clusters
+
+          # get this node's neighbours (numeric vector, indexing nodes)
+          neighbours <- neighbour_list[[node]]
+
+          # loop through the neighbours
+          for (neighbour in neighbours) {
+            if (!registered[neighbour]) {
+              registered[neighbour] <- TRUE;
+              membership[neighbour] <- no_of_clusters
+            }
+          }
+
+          # increment cluster ID
+          no_of_clusters <- no_of_clusters + 1
+
+        }
+      }
+
+      names(membership) <- names(neighbour_list)
+      membership
+
+    },
+
+    find_node_neighbours = function () {
+
+      # loop through each node in this dag, finding all members of its sub-graph
+      sub_dags <- lapply(self$node_list,
+                         function (x) dag_class$new(list(as.greta_array(x))))
+      sub_node_lists <- lapply(sub_dags, member, 'node_list')
+
+      # get their names
+      names <- lapply(sub_node_lists, function (node_list) {
+        vapply(node_list, member, 'unique_name', FUN.VALUE = '')})
+
+      # convert these to indices against this dag's node list
+      original_names <- names(self$node_list)
+      lapply(names, match, original_names)
+
     }
 
   )
