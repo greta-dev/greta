@@ -79,6 +79,7 @@ plot.greta_model <- function (x, y, ...) {
   #add greta array names where available
   known_nodes <- vapply(x$visible_greta_arrays, member,
                         'node$unique_name', FUN.VALUE = '')
+  known_nodes <- known_nodes[known_nodes %in% names]
   known_idx <- match(known_nodes, names)
   node_labels[known_idx] <- paste(names(known_nodes),
                                   node_labels[known_idx],
