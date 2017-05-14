@@ -26,5 +26,6 @@ Methods to inspect \code{greta_model} objects (returned by
 The plot method produces a visual representation of the defined
   model. It uses the \code{DiagrammeR} package, which must be installed
   first. Here's a key to the plots:
-  \figure{plot_legend.png}{options: width="100\%"}
+  \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
+  \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 }
