@@ -134,9 +134,26 @@ define_model <- function (...) {
 #'   sampler hyperparameters.
 #' @param verbose whether to print progress information to the console
 #' @param control an optional named list of hyperparameters and options to
-#'   control behaviour of the sampler
+#'   control behaviour of the sampler. See Details.
 #' @param initial_values an optional named vector of initial values for the free
 #'   parameters in the model
+#'
+#' @details Currently, the only implemented mcmc procedure is 'vanilla'
+#'   Hamiltonian Monte Carlo (\code{method = 'hmc'}). Unlike variants such as
+#'   NUTS (which Stan uses) HMC does require some manual tuning of sampler
+#'   hyperparameters. The main thing to consider is the leapfrog stepsize
+#'   hyperparameter \code{epsilon}. If you're getting a lot of rejected
+#'   proposals, you might want to reduce \code{epsilon}, or if the sampler is
+#'   moving too slowly you might want to increase \code{epsilon}.
+#'
+#'   \code{epsilon} can be controlled via the \code{control} argument, along
+#'   with two other hyprparameters: \code{Lmin} and \code{Lmax}; positive
+#'   integers (with \code{Lmax > Lmin}) giving the upper and lower limits to the
+#'   number of leapfrog steps per iteration (from which the number is selected
+#'   uniformly at random)
+#'
+#'   The default control options for HMC are:
+#'   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
 #'
 #' @return \code{mcmc} - an \code{mcmc.list} object that can be analysed using
 #'   functions from the coda package. This will on contain mcmc samples of the
