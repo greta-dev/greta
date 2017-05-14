@@ -2,7 +2,9 @@
 
 #' @name greta-model
 #' @title Greta Model Objects
-#' @description Methods to inspect \code{greta_model} objects.
+#' @description Methods to inspect \code{greta_model} objects (returned by
+#'   \code{\link{define_model}}), including a graphic representation of the
+#'   constructed model.
 NULL
 
 # register generic method to coerce objects to a greta model
@@ -24,7 +26,15 @@ print.greta_model <- function (x, ...) {
 }
 
 #' @rdname greta-model
-#' @param y not used
+#' @param y unused default argument
+#'
+
+#' @details The plot method produces a visual representation of the defined
+#'   model. It uses the \code{DiagrammeR} package, which must be installed
+#'   first. Here's a key to the plots:
+#'   \figure{plot_legend.png}{options: width="100\%"}
+#'
+#'
 #' @export
 plot.greta_model <- function (x, y, ...) {
 
@@ -159,6 +169,8 @@ plot.greta_model <- function (x, y, ...) {
   gr$global_attrs$value[gr$global_attrs$attr == 'layout'] <- 'dot'
 
   DiagrammeR::render_graph(gr)
+
+  invisible(gr)
 
 }
 
