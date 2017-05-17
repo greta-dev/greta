@@ -32,6 +32,8 @@ define_model <- function (...) {
 
   check_tf_version('error')
 
+  tf$reset_default_graph()
+
   # nodes required
   target_greta_arrays <- list(...)
 
@@ -58,23 +60,49 @@ define_model <- function (...) {
   # get the dag containing the target nodes
   dag <- dag_class$new(target_greta_arrays)
 
-  # check they have a density among them
-  distribs <- dag$child_names(types = 'distribution')
+  # get and check the types
+  types <- dag$node_types
 
-  if (length(distribs) == 0) {
-    stop ('none of the greta arrays in the model are associated with a ',
-          'probability density, so a model cannot be defined',
-          call. = FALSE)
+  # the user might pass greta arrays with groups of nodes that are unconnected
+  # to one another. Need to check there are densities in each graph
+
+  # so find the subgraph to which each node belongs
+  graph_id <- dag$subgraph_membership()
+
+  graphs <- unique(graph_id)
+  n_graphs <- length(graphs)
+
+  # separate messages to avoid the subgraphs issue for beginners
+  if (n_graphs == 1) {
+    density_message <- paste('none of the greta arrays in the model are',
+                             'associated with a probability density, so a',
+                             'model cannot be defined')
+    variable_message <- paste('none of the greta arrays in the model are',
+                              'unknown, so a model cannot be defined')
+  } else {
+    density_message <- paste('the model contains', n_graphs, 'disjoint graphs,',
+                             'one or more of these sub-graphs does not contain',
+                             'any greta arrays that are associated with a',
+                             'probability density, so a model cannot be',
+                             'defined')
+    variable_message <- paste('the model contains', n_graphs, 'disjoint',
+                              'graphs, one or more of these sub-graphs does',
+                              'not contain any greta arrays that are unknown,',
+                              'so a model cannot be defined')
   }
 
-  # check they have an unknown node among them
-  unknown <- dag$child_names(types = 'variable',
-                             omit_fixed = TRUE)
+  for (graph in graphs) {
 
-  if (length(unknown) == 0) {
-    stop ('none of the greta arrays in the model are unknown, so a model ',
-          'cannot be defined',
-          call. = FALSE)
+    types_sub <- types[graph_id == graph]
+
+    # check they have a density among them
+    if (!('distribution' %in% types_sub))
+      stop (density_message, call. = FALSE)
+
+    # check they have a variable node among them
+    if (!('variable' %in% types_sub))
+      stop (variable_message, call. = FALSE)
+
   }
 
   # define the TF graph
@@ -83,6 +111,7 @@ define_model <- function (...) {
   # create the model object and add the arraysof interest
   model <- as.greta_model(dag)
   model$target_greta_arrays <- target_greta_arrays
+  model$visible_greta_arrays <- all_greta_arrays(parent.frame())
 
   model
 
@@ -106,9 +135,26 @@ define_model <- function (...) {
 #'   sampler hyperparameters.
 #' @param verbose whether to print progress information to the console
 #' @param control an optional named list of hyperparameters and options to
-#'   control behaviour of the sampler
+#'   control behaviour of the sampler. See Details.
 #' @param initial_values an optional named vector of initial values for the free
 #'   parameters in the model
+#'
+#' @details Currently, the only implemented mcmc procedure is 'vanilla'
+#'   Hamiltonian Monte Carlo (\code{method = 'hmc'}). Unlike variants such as
+#'   NUTS (which Stan uses) HMC does require some manual tuning of sampler
+#'   hyperparameters. The main thing to consider is the leapfrog stepsize
+#'   hyperparameter \code{epsilon}. If you're getting a lot of rejected
+#'   proposals, you might want to reduce \code{epsilon}, or if the sampler is
+#'   moving too slowly you might want to increase \code{epsilon}.
+#'
+#'   \code{epsilon} can be controlled via the \code{control} argument, along
+#'   with two other hyprparameters: \code{Lmin} and \code{Lmax}; positive
+#'   integers (with \code{Lmax > Lmin}) giving the upper and lower limits to the
+#'   number of leapfrog steps per iteration (from which the number is selected
+#'   uniformly at random)
+#'
+#'   The default control options for HMC are:
+#'   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
 #'
 #' @return \code{mcmc} - an \code{mcmc.list} object that can be analysed using
 #'   functions from the coda package. This will on contain mcmc samples of the
@@ -137,11 +183,13 @@ mcmc <- function (model,
   names <- names(target_greta_arrays)
 
   # check they're not data nodes, provide a useful error message if they are
-  type <- vapply(target_greta_arrays, member, 'node$type', FUN.VALUE = '')
-  bad <- type == 'data'
-  if (any(bad)) {
-    is_are <- ifelse(sum(bad) == 1, 'is a data greta array', 'are data greta arrays')
-    bad_greta_arrays <- paste(names[bad], collapse = ', ')
+  are_data <- vapply(target_greta_arrays,
+                     function (x) inherits(x$node, 'data_node'),
+                     FUN.VALUE = FALSE)
+
+  if (any(are_data)) {
+    is_are <- ifelse(sum(are_data) == 1, 'is a data greta array', 'are data greta arrays')
+    bad_greta_arrays <- paste(names[are_data], collapse = ', ')
     msg <- sprintf('%s %s, data greta arrays cannot be sampled',
                    bad_greta_arrays,
                    is_are)

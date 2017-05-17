@@ -89,8 +89,6 @@ test_that('define_model and mcmc error informatively', {
 
   source('helpers.R')
 
-  flush()
-
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
@@ -113,7 +111,7 @@ test_that('define_model and mcmc error informatively', {
                'none of the greta arrays in the model are unknown, so a model cannot be defined')
 
   # can't draw samples of a data greta array
-  z = normal(0, 1)
+  z = normal(x, 1)
   m <- define_model(x, z)
   expect_error(mcmc(m),
                'x is a data greta array, data greta arrays cannot be sampled')
@@ -123,8 +121,6 @@ test_that('define_model and mcmc error informatively', {
 test_that('check_dims errors informatively', {
 
   source('helpers.R')
-
-  flush()
 
   a <- ones(3, 3)
   b <- ones(1)
@@ -158,8 +154,6 @@ test_that('rejected mcmc proposals', {
 
   source('helpers.R')
 
-  flush()
-
   # numerical rejection
   x <- rnorm(10000, 1e6, 1)
   z = normal(-1e6, 1e-6)
@@ -168,13 +162,47 @@ test_that('rejected mcmc proposals', {
   expect_message(mcmc(m, n_samples = 1, warmup = 0),
                  'proposal rejected due to numerical instability')
 
-  flush()
-
   # bad proposal
   x <- rnorm(100, 0, 0.01)
   z = normal(0, 10)
   distribution(x) = normal(z, 0.01)
   m <- define_model(z)
   mcmc(m, n_samples = 1, warmup = 0, verbose = FALSE)
+
+})
+
+test_that('disjoint graphs are checked', {
+
+  source('helpers.R')
+
+  # if the target nodes aren't related, they sould be checked separately
+
+  a = uniform(0, 1)
+  b = normal(a, 2)
+
+  # c is unrelated and has no density
+  c = free()
+
+  expect_error(m <- define_model(a, b, c),
+               'the model contains 2 disjoint graphs, one or more of these sub-graphs does not contain any greta arrays that are associated with a probability density, so a model cannot be defined')
+
+  # d is unrelated and known
+  d = as_data(randn(3))
+  distribution(d) = normal(0, 1)
+  expect_error(m <- define_model(a, b, d),
+               'the model contains 2 disjoint graphs, one or more of these sub-graphs does not contain any greta arrays that are unknown, so a model cannot be defined')
+
+
+})
+
+test_that("plotting models doesn't error", {
+
+  source('helpers.R')
+
+  a = uniform(0, 1)
+
+  m <- define_model(a)
+
+  plot(m)
 
 })

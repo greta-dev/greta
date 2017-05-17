@@ -151,7 +151,7 @@ tf_replace <- function (x, value, index, dims) {
   rm('._dummy_in', envir = pf)
 
   # if this is a data node, also subset the values and pass on
-  if ('data' %in% x$node$type) {
+  if (inherits(x$node, 'data_node')) {
 
     values_in <- x$node$value()
     call_list <- as.list(call)[-1]
@@ -199,12 +199,13 @@ tf_replace <- function (x, value, index, dims) {
     dims_out
 
   # create operation node, passing call and dims as additional arguments
-  op('tf_extract',
+  op('extract',
      x,
      dimfun = dimfun,
      operation_args = list(nelem = nelem,
                            tf_index = tf_index,
                            dims_out = dims_out),
+     tf_operation = 'tf_extract',
      value = values)
 
 }
@@ -262,12 +263,13 @@ tf_replace <- function (x, value, index, dims) {
     dims
 
   # create operation node, passing call and dims as additional arguments
-  op('tf_replace',
+  op('replace',
      x,
      value,
      dimfun = dimfun,
      operation_args = list(index = index,
-                           dims = dims))
+                           dims = dims),
+     tf_operation = 'tf_replace')
 
 }
 
@@ -306,7 +308,8 @@ cbind.greta_array <- function (...) {
 
   }
 
-  op('tf_cbind', ..., dimfun = dimfun)
+  op('cbind', ..., dimfun = dimfun,
+     tf_operation = 'tf_cbind')
 
 }
 
@@ -334,7 +337,8 @@ rbind.greta_array <- function (...) {
 
   }
 
-  op('tf_rbind', ..., dimfun = dimfun)
+  op('rbind', ..., dimfun = dimfun,
+     tf_operation = 'tf_rbind')
 
 }
 
@@ -354,9 +358,10 @@ c.greta_array <- function (...) {
 
   # create the op, expanding 'arrays' out to match op()'s dots input
   do.call(op,
-          c(operation = 'tf_rbind',
+          c(operation = 'rbind',
             arrays,
-            dimfun = dimfun))
+            dimfun = dimfun,
+            tf_operation = 'tf_rbind'))
 
 }
 

@@ -89,12 +89,12 @@ NULL
 
 #' @export
 log.greta_array <- function (x, base = exp(1)) {
-  op("tf$log", x)
+  op("log", x)
 }
 
 #' @export
 exp.greta_array <- function (x) {
-  op("tf$exp", x)
+  op("exp", x)
 }
 
 #' @export
@@ -109,75 +109,75 @@ expm1.greta_array <- function (x) {
 
 #' @export
 abs.greta_array <- function (x) {
-  op("tf$abs", x)
+  op("abs", x)
 }
 
 #' @export
 sqrt.greta_array <- function (x) {
-  op("tf$sqrt", x)
+  op("sqrt", x)
 }
 
 #' @export
 sign.greta_array <- function (x) {
-  op("tf$sign", x)
+  op("sign", x)
 }
 
 #' @export
 ceiling.greta_array <- function (x) {
-  op("tf$ceil", x)
+  op("ceil", x, tf_operation = 'tf$ceil')
 }
 
 #' @export
 floor.greta_array <- function (x) {
-  op("tf$floor", x)
+  op("floor", x)
 }
 
 #' @export
 round.greta_array <- function (x, digits = 0) {
   if (digits != 0)
     stop("TensorFlow round only supports rounding to integers")
-  op("tf$round", x)
+  op("round", x)
 }
 
 # trigonometry functions
 #' @export
 cos.greta_array <- function (x) {
-  op("tf$cos", x)
+  op("cos", x)
 }
 
 #' @export
 sin.greta_array <- function (x) {
-  op("tf$sin", x)
+  op("sin", x)
 }
 
 #' @export
 tan.greta_array <- function (x) {
-  op("tf$tan", x)
+  op("tan", x)
 }
 
 #' @export
 acos.greta_array <- function (x) {
-  op("tf$acos", x)
+  op("acos", x)
 }
 
 #' @export
 asin.greta_array <- function (x) {
-  op("tf$asin", x)
+  op("asin", x)
 }
 
 #' @export
 atan.greta_array <- function (x) {
-  op("tf$atan", x)
+  op("atan", x)
 }
 
 #' @export
 lgamma.greta_array <- function (x) {
-  op("tf$lgamma", x)
+  op("lgamma", x)
 }
 
 #' @export
 digamma.greta_array <- function (x) {
-  op("tf$digamma", x)
+  op("digamma", x)
 }
 
 #' @export
@@ -191,7 +191,7 @@ t.greta_array <- function (x) {
     rev(dim(x))
   }
 
-  op("tf$transpose", x, dimfun = dimfun)
+  op("transpose", x, dimfun = dimfun, tf_operation = 'tf$transpose')
 }
 
 # transpose and get the right matrix, like R
@@ -211,7 +211,7 @@ chol.greta_array <- function (x, ...) {
     dim
   }
 
-  op("tf_chol", x, dimfun = dimfun)
+  op("chol", x, dimfun = dimfun, tf_operation = 'tf_chol')
 }
 
 #' @rdname greta-overloaded
@@ -226,10 +226,6 @@ diag.default <- function (...)
 
 #' @export
 diag.greta_array <- function (x = 1, nrow, ncol) {
-
-  # can only extract from a node, cannot create from a node or assign.
-  if (missing(x) | !missing(nrow) | !missing(ncol))
-    stop ('diag can only be used to extract diagonal elements from a matrix or to assign values, not to create a new matrix')
 
   dimfun <- function (elem_list) {
 
@@ -249,7 +245,7 @@ diag.greta_array <- function (x = 1, nrow, ncol) {
   }
 
   # return the extraction op
-  op('tf$diag_part', x, dimfun = dimfun)
+  op('diag', x, dimfun = dimfun, tf_operation = 'tf$diag_part')
 
 }
 
@@ -280,7 +276,7 @@ solve.greta_array <- function (a, b, ...) {
 
     }
 
-    return (op("tf$matrix_inverse", a, dimfun = dimfun))
+    return (op("solve", a, dimfun = dimfun, tf_operation = 'tf$matrix_inverse'))
 
   } else {
 
@@ -309,7 +305,7 @@ solve.greta_array <- function (a, b, ...) {
     }
 
     # ... and solve the linear equations
-    return (op("tf$matrix_solve", a, b, dimfun = dimfun))
+    return (op("solve", a, b, dimfun = dimfun, tf_operation = 'tf$matrix_solve'))
 
   }
 
@@ -327,9 +323,10 @@ sum.greta_array <- function (..., na.rm = TRUE) {
   dimfun <- function (x) c(1, 1)
 
   # sum the elements
-  op('tf$reduce_sum',
+  op('sum',
      vec,
-     dimfun = dimfun)
+     dimfun = dimfun,
+     tf_operation = 'tf$reduce_sum')
 
 }
 
@@ -343,9 +340,10 @@ prod.greta_array <- function (..., na.rm = TRUE) {
   dimfun <- function (x) c(1, 1)
 
   # sum the elements
-  op('tf$reduce_prod',
+  op('prod',
      vec,
-     dimfun = dimfun)
+     dimfun = dimfun,
+     tf_operation = 'tf$reduce_prod')
 
 }
 
@@ -359,9 +357,10 @@ min.greta_array <- function (..., na.rm = TRUE) {
   dimfun <- function (x) c(1, 1)
 
   # sum the elements
-  op('tf$reduce_min',
+  op('min',
      vec,
-     dimfun = dimfun)
+     dimfun = dimfun,
+     tf_operation = 'tf$reduce_min')
 
 }
 
@@ -372,9 +371,10 @@ mean.greta_array <- function (x, trim = 0, na.rm = TRUE, ...) {
   dimfun <- function (x) c(1, 1)
 
   # sum the elements
-  op('tf$reduce_mean',
+  op('mean',
      x,
-     dimfun = dimfun)
+     dimfun = dimfun,
+     tf_operation = 'tf$reduce_mean')
 
 }
 
@@ -388,9 +388,10 @@ max.greta_array <- function (..., na.rm = TRUE) {
   dimfun <- function (x) c(1, 1)
 
   # sum the elements
-  op('tf$reduce_max',
+  op('max',
      vec,
-     dimfun = dimfun)
+     dimfun = dimfun,
+     tf_operation = 'tf$reduce_max')
 
 }
 
@@ -457,11 +458,12 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
 
   }
 
-  op("tf_sweep",
+  op("sweep",
      x,
      STATS,
      operation_args = list(MARGIN = MARGIN,
                            FUN = FUN),
+     tf_operation = 'tf_sweep',
      dimfun = dimfun)
 
 }

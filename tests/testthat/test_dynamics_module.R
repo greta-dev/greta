@@ -4,8 +4,6 @@ test_that('lambda iteration works', {
 
   source('helpers.R')
 
-  flush()
-
   n <- 10
   mat <- randu(n, n)
   init <- rep(1, n)
@@ -30,8 +28,6 @@ test_that('lambda iteration works', {
 test_that('state iteration works', {
 
   source('helpers.R')
-
-  flush()
 
   n <- 10
   mat <- randu(n, n)
@@ -59,8 +55,6 @@ test_that('state iteration works', {
 test_that('vectorised lambda iteration works', {
 
   source('helpers.R')
-
-  flush()
 
   n <- 10
   n_mat <- 20
@@ -94,8 +88,6 @@ test_that('vectorised lambda iteration works', {
 test_that('dynamics module errors informatively', {
 
   source('helpers.R')
-
-  flush()
 
   niter <- 3
   n <- 10
@@ -165,6 +157,5 @@ test_that('dynamics module errors informatively', {
                                                  n = n,
                                                  m = m),
                'number of elements in state must match the dimension of matrix')
-
 
 })

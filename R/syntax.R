@@ -72,7 +72,7 @@
   }
 
   # that aren't already fixed
-  if (distribution_node$.fixed_value) {
+  if (inherits(distribution_node$target, 'data_node')) {
     stop ('right hand side has already been assigned fixed values',
           call. = FALSE)
   }
@@ -92,10 +92,6 @@
   # assign the new node as the distribution's target
   # also adds distribution_node as this node's distribution
   distribution_node$replace_target(greta_array$node)
-
-  # optionally set that as a fixed value
-  if (inherits(greta_array$node, 'data_node'))
-    distribution_node$.fixed_value <- TRUE
 
   # if the greta_array was a variable, check its constraints as truncation
   if (inherits(greta_array$node, 'variable_node')) {

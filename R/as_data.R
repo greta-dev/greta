@@ -34,7 +34,7 @@ as_data <- function (x)
 # if it's already a *data* greta_array fine, else error
 #' @export
 as_data.greta_array <- function (x) {
-  if (x$node$type != 'data') {
+  if (!inherits(x$node, 'data_node')) {
     stop ('cannot coerce a non-data greta_array to data',
           call. = FALSE)
   }

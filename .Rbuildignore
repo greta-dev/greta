@@ -5,3 +5,4 @@ README.md
 README_files
 README_cache
 .travis.yml
+man/figures/plot_greta_legend.R
