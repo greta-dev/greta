@@ -125,7 +125,7 @@ a = normal(mean = 0, sd = 10)
 a
 ```
 
-    ## greta array (stochastic)
+    ## greta array (variable following a normal distribution)
     ## 
     ##      [,1]
     ## [1,]   ?
@@ -136,7 +136,7 @@ b = normal(mean = 0, sd = 1, dim = c(3, 3))
 b
 ```
 
-    ## greta array (stochastic)
+    ## greta array (variable following a normal distribution)
     ## 
     ##      [,1] [,2] [,3]
     ## [1,]   ?    ?    ? 
@@ -227,7 +227,7 @@ Because greta tracks the size and shape of these greta arrays, it will tell us i
 c[1:5] + c[1:2]
 ```
 
-    ## Error in check_dims(e1, e2): incompatible dimensions: 5x1, 2x1
+    ## Error: incompatible dimensions: 5x1, 2x1
 
 ##### functions
 
