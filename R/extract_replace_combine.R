@@ -107,17 +107,17 @@ recombine <- function (ref, index, updates) {
 }
 
 # replace elements in a tensor with another tensor
-tf_replace <- function (x, value, index, dims) {
+tf_replace <- function (x, replacement, index, dims) {
 
   # flatten original tensor and new values
   nelem <- prod(dims)
   x_flat <- tf$reshape(x, shape(nelem))
-  value_flat <- tf$reshape(value, shape(length(index)))
+  replacement_flat <- tf$reshape(replacement, shape(length(index)))
 
   # update the values into a new tensor
   result_flat <- recombine(ref = x_flat,
                            index = index,
-                           updates = value_flat)
+                           updates = replacement_flat)
 
   # reshape the result
   result <- tf$reshape(result_flat, to_shape(dims))
@@ -219,7 +219,8 @@ tf_replace <- function (x, value, index, dims) {
          call. = FALSE)
   }
 
-  value <- as.greta_array(value)
+  # rename value since it is confusing when passed to the op
+  replacement <- as.greta_array(value)
 
   # store the full call to mimic on a dummy array, plus the array's dimensions
   call <- sys.call()
@@ -243,32 +244,44 @@ tf_replace <- function (x, value, index, dims) {
 
   index <- as.vector(dummy_out)
 
-  if (length(index) != length(value)) {
+  if (length(index) != length(replacement)) {
 
-    if ((length(index) %% length(value)) != 0) {
+    if ((length(index) %% length(replacement)) != 0) {
 
       stop ('number of items to replace is not a multiple of ',
             'replacement length')
 
     } else {
 
-      value <- rep(value, length.out = length(index))
+      replacement <- rep(replacement, length.out = length(index))
 
     }
   }
-
 
   # function to return dimensions of output
   dimfun <- function (elem_list)
     dims
 
+  # do replace on the values (unknowns or arrays)
+  x_value <- x$node$value()
+  replacement_value <- replacement$node$value()
+
+  new_value <- x_value
+  r_index <- match(index, dummy)
+  new_value[r_index] <- replacement_value
+
+  # if either parent has an unknowns array as a value, coerce this to unknowns
+  if (inherits(x_value, 'unknowns') | inherits(replacement_value, 'unknowns'))
+    new_value <- as.unknowns(new_value)
+
   # create operation node, passing call and dims as additional arguments
   op('replace',
      x,
-     value,
+     replacement,
      dimfun = dimfun,
      operation_args = list(index = index,
                            dims = dims),
+     value = new_value,
      tf_operation = 'tf_replace')
 
 }

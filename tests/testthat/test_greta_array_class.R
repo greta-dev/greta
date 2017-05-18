@@ -21,7 +21,7 @@ test_that('print and summary work', {
 
   # stochastic arrays
   # print method
-  expected_output <- "greta array (variable following a normal distribution)\n\n     [,1]\n[1,]   ? "
+  expected_output <- "greta array (variable following a normal distribution)\n\n     [,1]\n[1,]  ?  "
   result <- evaluate_promise(ga_stochastic, print = TRUE)
   expect_identical(result$output, expected_output)
 
@@ -32,7 +32,7 @@ test_that('print and summary work', {
 
   # operation arrays
   # print method
-  expected_output <- "greta array (operation)\n\n     [,1] [,2] [,3]\n[1,]   ?    ?    ? \n[2,]   ?    ?    ? \n[3,]   ?    ?    ? "
+  expected_output <- "greta array (operation)\n\n     [,1] [,2] [,3]\n[1,]  ?    ?    ?  \n[2,]  ?    ?    ?  \n[3,]  ?    ?    ?  "
   result <- evaluate_promise(ga_operation, print = TRUE)
   expect_identical(result$output, expected_output)
 
