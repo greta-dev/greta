@@ -128,7 +128,7 @@ a
     ## greta array (variable following a normal distribution)
     ## 
     ##      [,1]
-    ## [1,]   ?
+    ## [1,]  ?
 
 ``` r
 # a 3x3 matrix with all elements having the same distribution
@@ -139,9 +139,9 @@ b
     ## greta array (variable following a normal distribution)
     ## 
     ##      [,1] [,2] [,3]
-    ## [1,]   ?    ?    ? 
-    ## [2,]   ?    ?    ? 
-    ## [3,]   ?    ?    ?
+    ## [1,]  ?    ?    ?  
+    ## [2,]  ?    ?    ?  
+    ## [3,]  ?    ?    ?
 
 The values of these distributions are as-yet unknown, so they are represented by `?`s when we print them. See `` ?`greta-distributions` `` for a list of the implemented distributions. If you don't want to define a prior over a variable (e.g. for a frequentist analysis), you can define variables using `free()` instead.
 
@@ -160,12 +160,12 @@ head(c)
     ## greta array (operation)
     ## 
     ##      [,1]
-    ## [1,]   ? 
-    ## [2,]   ? 
-    ## [3,]   ? 
-    ## [4,]   ? 
-    ## [5,]   ? 
-    ## [6,]   ?
+    ## [1,]  ?  
+    ## [2,]  ?  
+    ## [3,]  ?  
+    ## [4,]  ?  
+    ## [5,]  ?  
+    ## [6,]  ?
 
 ``` r
 # log-transform and then sum these values
@@ -176,7 +176,7 @@ d
     ## greta array (operation)
     ## 
     ##      [,1]
-    ## [1,]   ?
+    ## [1,]  ?
 
 As with the random variables, the outputs of these operations aren't yet known, so the values are represented by `?`s.
 
@@ -249,16 +249,16 @@ inprod(iris[1:10, 2:4], beta)
     ## greta array (operation)
     ## 
     ##       [,1]
-    ##  [1,]   ? 
-    ##  [2,]   ? 
-    ##  [3,]   ? 
-    ##  [4,]   ? 
-    ##  [5,]   ? 
-    ##  [6,]   ? 
-    ##  [7,]   ? 
-    ##  [8,]   ? 
-    ##  [9,]   ? 
-    ## [10,]   ?
+    ##  [1,]  ?  
+    ##  [2,]  ?  
+    ##  [3,]  ?  
+    ##  [4,]  ?  
+    ##  [5,]  ?  
+    ##  [6,]  ?  
+    ##  [7,]  ?  
+    ##  [8,]  ?  
+    ##  [9,]  ?  
+    ## [10,]  ?
 
 ##### distribution
 
