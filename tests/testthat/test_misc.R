@@ -206,3 +206,18 @@ test_that("plotting models doesn't error", {
   plot(m)
 
 })
+
+
+test_that("structures work correctly", {
+
+  source('helpers.R')
+
+  a <- ones(2, 2)
+  b <- zeros(2)
+  c <- greta_array(3, dim = c(2, 2, 2))
+
+  expect_identical(grab(a), array(1, dim = c(2, 2)))
+  expect_identical(grab(b), array(0, dim = c(2, 1)))
+  expect_identical(grab(c), array(3, dim = c(2, 2, 2)))
+
+})
