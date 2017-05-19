@@ -263,7 +263,7 @@ greta_col <- function (which = c('main', 'dark', 'light')) {
   which <- match.arg(which)
   switch (which,
           main = '#a464b4',
-          dark = '#7b428a',
+          dark = '#8b4b9b',
           light = '#ba87c5')
 }
 
