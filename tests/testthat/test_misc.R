@@ -25,16 +25,6 @@ test_that('check_tf_version works', {
 
 })
 
-test_that('logo runs', {
-
-  # use an available font
-  greta:::banner(font = 'sans')
-  expect_warning(greta:::banner(width = 2, font = 'sans'),
-                 '^with a margin of 0.2 the minimum width to ensure the banner is height-filled is')
-  greta:::blank_banner()
-
-})
-
 test_that('.onLoad runs', {
 
   greta:::.onLoad()
@@ -66,14 +56,6 @@ test_that('all_greta_arrays works', {
 
   expect_identical(names(array_list), c('a', 'b', 'c'))
   expect_identical(names(array_list_nodata), c('a', 'c'))
-
-})
-
-test_that('greta_model objects print', {
-
-  m <- define_model(normal(0, 1))
-  message <- capture.output(print(m))
-  expect_equal(message, 'greta model')
 
 })
 
