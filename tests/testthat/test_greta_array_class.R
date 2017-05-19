@@ -49,6 +49,12 @@ test_that('print and summary work', {
   result <- evaluate_promise(z, print = TRUE)
   expect_identical(result$output, expected_output)
 
+  # assigned unknown arrays (only partly unknown)
+  n <- normal(0, 1, dim = c(3, 3)) ^ 2
+  n[, 1] <- ones(3)
+  expected_output <- "greta array (operation)\n\n     [,1] [,2] [,3]\n[1,] 1     ?    ?  \n[2,] 1     ?    ?  \n[3,] 1     ?    ?  "
+  result <- evaluate_promise(n, print = TRUE)
+  expect_identical(result$output, expected_output)
 
 })
 
