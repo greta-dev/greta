@@ -65,7 +65,7 @@ plot.greta_model <- function (x, y, ...) {
 
   node_colours <- rep('PaleTurquoise', n_nodes)
   node_colours[types == 'variable'] <- 'orange'
-  node_colours[types == 'distribution'] <- 'violet'
+  node_colours[types == 'distribution'] <- greta_col('main')
   node_colours[types == 'operation'] <- 'lightgray'
 
   node_size <- rep(1, length(types))

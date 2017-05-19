@@ -257,3 +257,13 @@ node_type <- function (node) {
   type <- grep('*_node', classes, value = TRUE)
   gsub('_node', '', type)
 }
+
+# colour scheme for plotting
+greta_col <- function (which = c('main', 'dark', 'light')) {
+  which <- match.arg(which)
+  switch (which,
+          main = '#a464b4',
+          dark = '#7b428a',
+          light = '#ba87c5')
+}
+

@@ -1,4 +1,4 @@
-![](README_files/figure-markdown_github/top_banner-1.png)
+<img src="README_files/top_banner.png" width="4032" />
 
 greta is an R package for writing statistical models and fitting them by MCMC, it's:
 
@@ -8,7 +8,7 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 **extensible** - because greta is written in R, you can define your own [functions](#functions) and [modules](#modules) to add new methods.
 
-![](README_files/figure-markdown_github/banner_1-1.png)
+<img src="README_files/banner.png" width="1344" />
 
 ### Example
 
@@ -48,7 +48,7 @@ MCMCplot(draws, xlim = c(-1, 5))
 
 <img src="README_files/figure-markdown_github/vis-1.png" width="400px" /><img src="README_files/figure-markdown_github/vis-2.png" width="400px" />
 
-<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
+<img src="README_files/banner.png" width="1344" />
 
 ### Installation
 
@@ -66,7 +66,7 @@ devtools::install_github('goldingn/greta@dev')
 
 however greta depends on TensorFlow (version 1.0.0 or higher) which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow.
 
-<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
+<img src="README_files/banner.png" width="1344" />
 
 ### How fast is it?
 
@@ -76,7 +76,7 @@ For example, the example code above takes around 60 seconds to run on my laptop 
 
 Since TensorFlow can be run across multiple CPUs or on a GPU, greta models can be made to scale to massive datasets. I'll add some benchmarks soon to give a clearer idea of how greta compares with other MCMC software.
 
-<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
+<img src="README_files/banner.png" width="1344" />
 
 ### Why 'greta'?
 
@@ -88,7 +88,7 @@ In case that's not enough reason to admire her, Grete Hermann also [disproved a 
 
 Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be confusing for non-German speakers to pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
 
-<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
+<img src="README_files/banner.png" width="1344" />
 
 ### How does it work?
 
@@ -274,7 +274,7 @@ greta relies on some pretty incredible pieces of software, including Rstudio's [
 
 The design and scope of greta was inspired by other general-purpose MCMC software like [BUGS](http://www.openbugs.net/) and [JAGS](http://mcmc-jags.sourceforge.net/), but particularly by [Stan](http://mc-stan.org/). The python package [Edward](http://edwardlib.org/) also uses TensorFlow as a backend for general-purpose statistical modelling, as does [GPflow](https://github.com/GPflow/GPflow), which was a source of inspiration for how greta is implemented.
 
-<img src="README_files/figure-markdown_github/banner_1-1.png" width="1344" />
+<img src="README_files/banner.png" width="1344" />
 
 ### Contributors
 
@@ -298,4 +298,4 @@ Nodes representing random variables also have a method to create a Tensor that c
 
 Crucially, all nodes ever created in an R session are registered (recorded in a hidden list), whether or not the greta arrays to which they correspond were assigned as objects. That enables us to nest functions and string together operations without losing track of dependency between nodes. It also enables us to define a likelihood via the syntax in the example above: `distribution()` creates a distribution node, sets it as having a fixed value, and registers it, but doesn't assign it to a greta\_array object.
 
-![](README_files/figure-markdown_github/bottom_banner-1.png)
+<img src="README_files/bottom_banner.png" width="1344" />
