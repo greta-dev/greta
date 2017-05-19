@@ -167,7 +167,7 @@ banner <- function (width = 8, margin = 0.2, font = c('Muli', 'sans'), add_logo 
     plot_logo(background = 'purple',
               add = TRUE,
               x_start = string_width + xpos * 3,
-              y_range = 0.55 + string_height * 0.56 * c(-1, 1))
+              y_range = 0.55 + string_height * 0.5 * c(-1, 1))
 
   }
 
