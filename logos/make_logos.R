@@ -38,6 +38,10 @@ plot_logo <- function (background = c('white', 'purple'),
                       white = greta:::greta_col('light'),
                       purple = greta:::greta_col('dark'))
 
+  node_col <- switch (background,
+                      white = greta:::greta_col('dark'),
+                      purple = greta:::greta_col('dark'))
+
   if (!add) {
 
     old_mar <- par()$mar
@@ -76,7 +80,7 @@ plot_logo <- function (background = c('white', 'purple'),
     points(y ~ x,
            data = nodes,
            pch = 21,
-           bg = greta:::greta_col('dark'),
+           bg = node_col,
            col = bg_col,
            cex = pointsize - 1.5,
            lwd = pointsize * 4)
@@ -94,7 +98,7 @@ plot_logo <- function (background = c('white', 'purple'),
     points(y ~ x,
            data = nodes,
            pch = 21,
-           bg = greta:::greta_col('dark'),
+           bg = node_col,
            col = bg_col,
            cex = pointsize - 1.5,
            lwd = 0)
@@ -111,11 +115,15 @@ plot_logo <- function (background = c('white', 'purple'),
 # 'margin' gives the proportion of the vertical height to use a border on each side
 # the text is scaled to never exceed that border
 #' @importFrom graphics par plot.new plot.window strheight strwidth text
-banner <- function (width = 8, margin = 0.2, font = c('Muli', 'sans'), add_logo = TRUE) {
+banner <- function (background = c('purple', 'white'),
+                    width = 8, margin = 0.2,
+                    font = c('Muli', 'sans'),
+                    add_logo = TRUE) {
 
   font <- match.arg(font)
+  background <- match.arg(background)
 
-  # warn in the banner isn't height-filled
+  # warn if the banner isn't height-filled
   min_width <- 3.184175 + 2 * margin * (1 - 3.184175)
   if (width < min_width) {
     warning ('with a margin of ',
@@ -124,13 +132,21 @@ banner <- function (width = 8, margin = 0.2, font = c('Muli', 'sans'), add_logo 
              min_width)
   }
 
+  bg_col <- switch (background,
+                    white = 'white',
+                    purple = greta:::greta_col('main'))
+
+  text_col <- switch (background,
+                      white = greta:::greta_col('dark'),
+                      purple = 'white')
+
   # cache the old graphics options
   old_bg <- par('bg')
   old_mar <- par('mar')
   old_family <- par('family')
 
   # switch to a purple background, no margins and Muli typeface
-  par(bg = greta:::greta_col(),
+  par(bg = bg_col,
       mar = rep(0, 4),
       family = font)
 
@@ -157,7 +173,7 @@ banner <- function (width = 8, margin = 0.2, font = c('Muli', 'sans'), add_logo 
   text(x = xpos,
        y = 0.5,
        label = 'greta',
-       col = 'white',
+       col = text_col,
        cex = fontsize,
        pos = 4,
        offset = 0)
@@ -210,7 +226,7 @@ blank_banner <- function (width = 8, margin = 0.2) {
 png('README_files/top_banner.png',
     height = 288, width = 4032,
     pointsize = 25)
-banner(14)
+banner(width = 14)
 dev.off()
 
 # thin blank banner for between document sections
@@ -227,4 +243,27 @@ png('README_files/bottom_banner.png',
 blank_banner(14/0.5)
 dev.off()
 
+png('logos/icon_on_white.png',
+    height = 1000, width = 1800,
+    pointsize = 16)
+plot_logo(pointsize = 24)
+dev.off()
+
+png('logos/icon_on_purple.png',
+    height = 1000, width = 1800,
+    pointsize = 16)
+plot_logo('purple', pointsize = 24)
+dev.off()
+
+png('logos/name_on_purple.png',
+    height = 1000, width = 1800,
+    pointsize = 60)
+banner(width = 2.310505, add_logo = FALSE)
+dev.off()
+
+png('logos/name_on_white.png',
+    height = 1000, width = 1800,
+    pointsize = 60)
+banner('white', width = 2.310505, add_logo = FALSE)
+dev.off()
 
