@@ -203,3 +203,13 @@ test_that("structures work correctly", {
   expect_identical(grab(c), array(3, dim = c(2, 2, 2)))
 
 })
+
+test_that('mcmc works with verbosity and warmup', {
+
+  x <- rnorm(10)
+  z = normal(0, 1)
+  distribution(x) = normal(z, 1)
+  m <- define_model(z)
+  mcmc(m, n_samples = 5, warmup = 5, verbose = TRUE)
+
+})
