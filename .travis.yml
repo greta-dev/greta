@@ -13,6 +13,9 @@ r_packages:
   - DiagrammeR
   - knitr
 
+r_github_packages:
+  - rich-iannone/DiagrammeRsvg
+
 cache:
   packages: true
   directories:
