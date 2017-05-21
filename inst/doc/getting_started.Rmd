@@ -250,7 +250,8 @@ We can assign values from one greta array to another too. For example, if we wan
 
 ```{r replace}
 z <- zeros(4, 3)
-(z[, 1] <- normal(0, 1, dim = 4))
+z[, 1] <- normal(0, 1, dim = 4)
+z
 ```
 
 R's subset operator `[` has an argument `drop`, which determines whether to reduce the number of dimensions of a array or matrix when the object has zero elements in that dimension. By default, `drop = TRUE` for R objects, so matrices are automatically converted into vectors (which have dimension `NULL`) if you take out a single column:
@@ -416,7 +417,7 @@ The MCMCvis package makes some nice plots of the MCMC chain and the parameter es
 ```{r mcmcvis, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
 library (MCMCvis)
 MCMCtrace(draws)
-MCMCplot(draws)
+MCMCplot(draws, xlim = c(-1, 5))
 ```
 
 #### Tweaking the sampler

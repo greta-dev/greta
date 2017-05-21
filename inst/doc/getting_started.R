@@ -106,7 +106,8 @@ mean[1:3]
 
 ## ----replace-------------------------------------------------------------
 z <- zeros(4, 3)
-(z[, 1] <- normal(0, 1, dim = 4))
+z[, 1] <- normal(0, 1, dim = 4)
+z
 
 ## ----drop----------------------------------------------------------------
 z <- matrix(1, nrow = 2, ncol = 2)
@@ -204,5 +205,5 @@ summary(draws)
 ## ----mcmcvis, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'----
 library (MCMCvis)
 MCMCtrace(draws)
-MCMCplot(draws)
+MCMCplot(draws, xlim = c(-1, 5))
 
