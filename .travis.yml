@@ -12,6 +12,8 @@ r_packages:
   - covr
   - DiagrammeR
   - knitr
+  - rmarkdown
+  - rsvg
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg

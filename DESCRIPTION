@@ -52,6 +52,7 @@ Imports:
     coda
 Suggests:
     knitr,
+    rmarkdown,
     DiagrammeR,
     testthat,
     mvtnorm,
