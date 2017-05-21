@@ -14,6 +14,7 @@ r_packages:
   - knitr
   - rmarkdown
   - rsvg
+  - MCMCvis
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
