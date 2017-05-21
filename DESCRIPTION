@@ -51,6 +51,7 @@ Imports:
     tensorflow,
     coda
 Suggests:
+    knitr,
     DiagrammeR,
     testthat,
     mvtnorm,

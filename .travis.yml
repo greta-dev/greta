@@ -10,6 +10,8 @@ r_packages:
   - coda
   - testthat
   - covr
+  - DiagrammeR
+  - knitr
 
 cache:
   packages: true
