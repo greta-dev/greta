@@ -56,4 +56,5 @@ Suggests:
     mvtnorm,
     MCMCpack,
     truncdist
+VignetteBuilder: knitr
 RoxygenNote: 6.0.1
