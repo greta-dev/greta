@@ -32,6 +32,7 @@ addons:
       - libatlas-dev
       - python-joblib
       - python-dev
+      - libv8-dev
 
 before_install:
   - pip install --upgrade pip
