@@ -259,11 +259,17 @@ node_type <- function (node) {
 }
 
 # colour scheme for plotting
-greta_col <- function (which = c('main', 'dark', 'light')) {
+greta_col <- function (which = c('main',
+                                 'dark',
+                                 'light',
+                                 'lighter',
+                                 'super_light')) {
   which <- match.arg(which)
   switch (which,
           main = '#a464b4',
           dark = '#8b4b9b',
-          light = '#ba87c5')
+          light = '#ba87c5',
+          lighter = '#e1cce5',
+          super_light = '#f5eef6')
 }
 
