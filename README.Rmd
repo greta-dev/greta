@@ -22,6 +22,7 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 **extensible** - because greta is written in R, you can define your own [functions](#functions) and [modules](#modules) to add new methods.
 
+
 ```{r banner_1, echo=FALSE, fig.height=0.2, fig.width=14}
 knitr::include_graphics('README_files/banner.png')
 ```
@@ -61,6 +62,8 @@ library(MCMCvis)
 MCMCtrace(draws)
 MCMCplot(draws, xlim = c(-1, 5))
 ```
+
+Check out [getting started](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/getting_started.html) for an introductory greta tutorial.
 
 ```{r banner_2, echo=FALSE, fig.height=0.2, fig.width=14}
 knitr::include_graphics('README_files/banner.png')
@@ -131,6 +134,8 @@ knitr::include_graphics('README_files/banner.png')
 I would welcome contributions to this project from anyone with time to spare!
 The issues tracker lists a number of known bugs and extensions I have planned.
 Please feel free to add to those any bugs or issues you come across, or let me know if you'd like to help fix some of them or add new features.
+
+For an explanation of how greta works, check out [How does this work?](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/how_does_this_work.html)
 
 #### modules
 
