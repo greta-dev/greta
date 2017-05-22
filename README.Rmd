@@ -26,7 +26,7 @@ To get started with greta, take a look at the example below then check out the [
 There are also several [example models](https://rawgit.com/goldingn/greta/dev/inst/doc/example_models.html), with equivalent BUGS and Stan code.
 If you'd like to understand how greta works under the hood, check out [How does this work?](https://rawgit.com/goldingn/greta/dev/inst/doc/how_does_this_work.html)
 
-```{r banner_1, echo=FALSE, fig.height=0.2, fig.width=14}
+```{r banner_1, echo=FALSE, fig.width=14}
 knitr::include_graphics('README_files/banner.png')
 ```
 
@@ -66,7 +66,7 @@ MCMCtrace(draws)
 MCMCplot(draws, xlim = c(-1, 5))
 ```
 
-```{r banner_2, echo=FALSE, fig.height=0.2, fig.width=14}
+```{r banner_2, echo=FALSE, fig.width=14}
 knitr::include_graphics('README_files/banner.png')
 ```
 
@@ -86,7 +86,7 @@ devtools::install_github('goldingn/greta@dev')
 
 however greta depends on TensorFlow (version 1.0.0 or higher) which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow.
 
-```{r banner_3, echo=FALSE, fig.height=0.2, fig.width=14}
+```{r banner_3, echo=FALSE, fig.width=14}
 knitr::include_graphics('README_files/banner.png')
 ```
 
@@ -98,7 +98,7 @@ For example, the example code above takes around 60 seconds to run on my laptop 
 
 Since TensorFlow can be run across multiple CPUs or on a GPU, greta models can be made to scale to massive datasets. I'll add some benchmarks soon to give a clearer idea of how greta compares with other MCMC software.
 
-```{r banner_4, echo=FALSE, fig.height=0.2, fig.width=14}
+```{r banner_4, echo=FALSE, fig.width=14}
 knitr::include_graphics('README_files/banner.png')
 ```
 
@@ -112,7 +112,7 @@ In case that's not enough reason to admire her, Grete Hermann also [disproved a 
 
 Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be confusing for non-German speakers to pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
 
-```{r banner_5, echo=FALSE, fig.height=0.2, fig.width=14}
+```{r banner_5, echo=FALSE, fig.width=14}
 knitr::include_graphics('README_files/banner.png')
 ```
 
@@ -122,7 +122,7 @@ greta relies on some pretty incredible pieces of software, including Rstudio's [
 
 The design and scope of greta was inspired by other general-purpose MCMC software like [BUGS](http://www.openbugs.net/) and [JAGS](http://mcmc-jags.sourceforge.net/), but particularly by [Stan](http://mc-stan.org/). The python package [Edward](http://edwardlib.org/) also uses TensorFlow as a backend for general-purpose statistical modelling, as does [GPflow](https://github.com/GPflow/GPflow), which was a source of inspiration for how greta is implemented.
 
-```{r banner_6, echo=FALSE, fig.height=0.2, fig.width=14}
+```{r banner_6, echo=FALSE, fig.width=14}
 knitr::include_graphics('README_files/banner.png')
 ```
 
@@ -143,6 +143,6 @@ Check out `?dynamics` for an example of a module for stage-structured dynamical 
 I'm still working out whether these modules should be kept in this package, or split out into one or more separate packages.
 Either way I would be keen for people to contribute new modules!
 
-```{r bottom_banner, echo=FALSE, fig.height=0.5, fig.width=14}
+```{r bottom_banner, echo=FALSE, fig.width=14}
 knitr::include_graphics('README_files/bottom_banner.png')
 ```

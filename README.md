@@ -10,7 +10,7 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 To get started with greta, take a look at the example below then check out the [getting started](https://rawgit.com/goldingn/greta/dev/inst/doc/getting_started.html) tutorial. There are also several [example models](https://rawgit.com/goldingn/greta/dev/inst/doc/example_models.html), with equivalent BUGS and Stan code. If you'd like to understand how greta works under the hood, check out [How does this work?](https://rawgit.com/goldingn/greta/dev/inst/doc/how_does_this_work.html)
 
-<img src="README_files/banner.png" width="1344" />
+<img src="README_files/banner.png" width="940" />
 
 ### Example
 
@@ -50,7 +50,7 @@ MCMCplot(draws, xlim = c(-1, 5))
 
 <img src="README_files/figure-markdown_github/vis-1.png" width="400px" /><img src="README_files/figure-markdown_github/vis-2.png" width="400px" />
 
-<img src="README_files/banner.png" width="1344" />
+<img src="README_files/banner.png" width="940" />
 
 ### Installation
 
@@ -68,7 +68,7 @@ devtools::install_github('goldingn/greta@dev')
 
 however greta depends on TensorFlow (version 1.0.0 or higher) which will need to be successfully installed before greta will work. See [here](https://www.tensorflow.org/install/) for instructions on installing TensorFlow.
 
-<img src="README_files/banner.png" width="1344" />
+<img src="README_files/banner.png" width="940" />
 
 ### How fast is it?
 
@@ -78,7 +78,7 @@ For example, the example code above takes around 60 seconds to run on my laptop 
 
 Since TensorFlow can be run across multiple CPUs or on a GPU, greta models can be made to scale to massive datasets. I'll add some benchmarks soon to give a clearer idea of how greta compares with other MCMC software.
 
-<img src="README_files/banner.png" width="1344" />
+<img src="README_files/banner.png" width="940" />
 
 ### Why 'greta'?
 
@@ -90,7 +90,7 @@ In case that's not enough reason to admire her, Grete Hermann also [disproved a 
 
 Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be confusing for non-German speakers to pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
 
-<img src="README_files/banner.png" width="1344" />
+<img src="README_files/banner.png" width="940" />
 
 #### software
 
@@ -98,7 +98,7 @@ greta relies on some pretty incredible pieces of software, including Rstudio's [
 
 The design and scope of greta was inspired by other general-purpose MCMC software like [BUGS](http://www.openbugs.net/) and [JAGS](http://mcmc-jags.sourceforge.net/), but particularly by [Stan](http://mc-stan.org/). The python package [Edward](http://edwardlib.org/) also uses TensorFlow as a backend for general-purpose statistical modelling, as does [GPflow](https://github.com/GPflow/GPflow), which was a source of inspiration for how greta is implemented.
 
-<img src="README_files/banner.png" width="1344" />
+<img src="README_files/banner.png" width="940" />
 
 ### Contributors
 
@@ -110,4 +110,4 @@ I would welcome contributions to this project from anyone with time to spare! Th
 
 greta has a basic module system to package up more 'niche' functionality. Check out `?dynamics` for an example of a module for stage-structured dynamical models. I'm still working out whether these modules should be kept in this package, or split out into one or more separate packages. Either way I would be keen for people to contribute new modules!
 
-<img src="README_files/bottom_banner.png" width="1344" />
+<img src="README_files/bottom_banner.png" width="940" />
