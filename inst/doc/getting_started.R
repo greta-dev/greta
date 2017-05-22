@@ -1,7 +1,6 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE,
-                      cache = TRUE,
                       comment = NA,
                       progress = FALSE)
 set.seed(1)
@@ -195,4 +194,15 @@ knitr::include_graphics('../man/figures/plotlegend.png')
 
 ## ----install_diagrammer, eval = FALSE------------------------------------
 #  install.packages('DiagrammeR')
+
+## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------
+draws <- mcmc(model, n_samples = 1000)
+
+## ----coda_summary--------------------------------------------------------
+summary(draws)
+
+## ----mcmcvis, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'----
+library (MCMCvis)
+MCMCtrace(draws)
+MCMCplot(draws, xlim = c(-1, 5))
 

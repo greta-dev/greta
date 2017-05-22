@@ -18,7 +18,6 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE,
-                      cache = TRUE,
                       comment = NA,
                       progress = FALSE)
 set.seed(1)
@@ -388,7 +387,7 @@ knitr::include_graphics('../man/figures/plotlegend.png')
 
 #### Installing DiagrammeR
 
-These plots are made possible by the [DiagrammeR R package](). Installing greta doesn't automatically install DiagrammeR, because DiagrammeR auto-installs a number of packages, including igraph, that can be time consuming and tedious to install on high-performance computing systems. If we try to plot but don't already have DiagrammeR installed, greta will prompt you to do so. We can install DiagrammeR and its dependencies with:
+These plots are made possible by the [DiagrammeR R package](http://rich-iannone.github.io/DiagrammeR/). Installing greta doesn't automatically install DiagrammeR, because DiagrammeR auto-installs a number of packages, including igraph, that can be time consuming and tedious to install on high-performance computing systems. If we try to plot but don't already have DiagrammeR installed, greta will prompt you to do so. We can install DiagrammeR and its dependencies with:
 
 ```{r install_diagrammer, eval = FALSE}
 install.packages('DiagrammeR')
@@ -422,7 +421,7 @@ MCMCplot(draws, xlim = c(-1, 5))
 
 #### Tweaking the sampler
 
-Static HMC is currently the only sampling algorithm available in greta. Unlike other HMC samplers (like [NUTS]()), static HMC won't automatically tune the sampler for us If we want to make our MCMC more efficient, we can try tuning the HMC parameters via the `control` argument. The stepsize parameter `epsilon` is the most important one, shrinking that will make the sampler take smaller steps, which can help if greta tells us that a lot of samples are being rejected.
+Static HMC is currently the only sampling algorithm available in greta. Unlike other HMC samplers (like [NUTS](https://en.wikipedia.org/wiki/Stan_(software)#Algorithms)), static HMC won't automatically tune the sampler for us If we want to make our MCMC more efficient, we can try tuning the HMC parameters via the `control` argument. The stepsize parameter `epsilon` is the most important one, shrinking that will make the sampler take smaller steps, which can help if greta tells us that a lot of samples are being rejected.
 
 A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `define_model()` stage. Future versions of greta will implement samplers for discrete MCMC, as well as self-tuning versions of HMC.
 
