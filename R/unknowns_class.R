@@ -4,6 +4,9 @@ as.unknowns <- function(x) {
   UseMethod('as.unknowns')
 }
 
+as.unknowns.unknowns <- function (x)
+  x
+
 as.unknowns.array <- function (x) {
   class(x) <- c('unknowns', class(x))
   x
@@ -24,8 +27,8 @@ print.unknowns <- function (x, ...) {
   # remove 'unknown' class attribute
   x <- strip_unknown_class(x)
 
-  # set values to ? for printing
-  x[] <- "  ?"
+  # set NA values to ? for printing
+  x[is.na(x)] <- " ?"
 
   # print with question marks
   print.default(x, quote = FALSE, ...)

@@ -25,16 +25,6 @@ test_that('check_tf_version works', {
 
 })
 
-test_that('logo runs', {
-
-  # use an available font
-  greta:::banner(font = 'sans')
-  expect_warning(greta:::banner(width = 2, font = 'sans'),
-                 '^with a margin of 0.2 the minimum width to ensure the banner is height-filled is')
-  greta:::blank_banner()
-
-})
-
 test_that('.onLoad runs', {
 
   greta:::.onLoad()
@@ -66,14 +56,6 @@ test_that('all_greta_arrays works', {
 
   expect_identical(names(array_list), c('a', 'b', 'c'))
   expect_identical(names(array_list_nodata), c('a', 'c'))
-
-})
-
-test_that('greta_model objects print', {
-
-  m <- define_model(normal(0, 1))
-  message <- capture.output(print(m))
-  expect_equal(message, 'greta model')
 
 })
 
@@ -204,5 +186,30 @@ test_that("plotting models doesn't error", {
   m <- define_model(a)
 
   plot(m)
+
+})
+
+
+test_that("structures work correctly", {
+
+  source('helpers.R')
+
+  a <- ones(2, 2)
+  b <- zeros(2)
+  c <- greta_array(3, dim = c(2, 2, 2))
+
+  expect_identical(grab(a), array(1, dim = c(2, 2)))
+  expect_identical(grab(b), array(0, dim = c(2, 1)))
+  expect_identical(grab(c), array(3, dim = c(2, 2, 2)))
+
+})
+
+test_that('mcmc works with verbosity and warmup', {
+
+  x <- rnorm(10)
+  z = normal(0, 1)
+  distribution(x) = normal(z, 1)
+  m <- define_model(z)
+  mcmc(m, n_samples = 5, warmup = 5, verbose = TRUE)
 
 })

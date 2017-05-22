@@ -63,15 +63,19 @@ plot.greta_model <- function (x, y, ...) {
   node_shapes[types == 'distribution'] <- 'diamond'
   node_shapes[types == 'operation'] <- 'circle'
 
-  node_colours <- rep('PaleTurquoise', n_nodes)
-  node_colours[types == 'variable'] <- 'orange'
-  node_colours[types == 'distribution'] <- 'violet'
+  node_edge_colours <- rep(greta_col('lighter'), n_nodes)
+  node_edge_colours[types == 'distribution'] <- greta_col('light')
+  node_edge_colours[types == 'operation'] <- 'lightgray'
+
+  node_colours <- rep(greta_col('super_light'), n_nodes)
+  node_colours[types == 'distribution'] <- greta_col('lighter')
   node_colours[types == 'operation'] <- 'lightgray'
+  node_colours[types == 'data'] <- 'white'
 
   node_size <- rep(1, length(types))
-  node_size[types == 'variable'] <- 0.8
+  node_size[types == 'variable'] <- 0.6
   node_size[types == 'data'] <- 0.5
-  node_size[types == 'operation'] <- 0.3
+  node_size[types == 'operation'] <- 0.2
 
   # get node labels
   node_labels <- vapply(x$dag$node_list, member, 'plotting_label()', FUN.VALUE = '')
@@ -145,13 +149,14 @@ plot.greta_model <- function (x, y, ...) {
 
   }
 
-
   # node options
   gr$nodes_df$type <- 'lower'
-  gr$nodes_df$fontcolor <- 'black'
-  gr$nodes_df$fontsize <- 14
+  gr$nodes_df$fontcolor <- greta_col('dark')
+  gr$nodes_df$fontsize <- 12
+  gr$nodes_df$penwidth <- 2
 
   gr$nodes_df$shape <- node_shapes
+  gr$nodes_df$color <- node_edge_colours
   gr$nodes_df$fillcolor <- node_colours
   gr$nodes_df$width <- node_size
   gr$nodes_df$height <- node_size * 0.8
@@ -170,9 +175,9 @@ plot.greta_model <- function (x, y, ...) {
   # set the layout type
   gr$global_attrs$value[gr$global_attrs$attr == 'layout'] <- 'dot'
 
-  DiagrammeR::render_graph(gr)
+  print(DiagrammeR::render_graph(gr))
 
-  # invisible(gr)
+  invisible(gr)
 
 }
 

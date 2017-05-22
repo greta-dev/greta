@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Probabilistic Modelling with TensorFlow
-Version: 0.1.7
-Date: 2017-05-14
+Version: 0.1.8
+Date: 2017-05-22
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
 Description: Existing tools for fitting bespoke statistical models (such as
@@ -46,15 +46,18 @@ Collate:
     'dag_class.R'
     'greta_model_class.R'
     'samplers.R'
-    'logo.R'
 Imports:
     R6,
     tensorflow,
     coda
 Suggests:
+    knitr,
+    rmarkdown,
     DiagrammeR,
+    MCMCvis,
     testthat,
     mvtnorm,
     MCMCpack,
     truncdist
+VignetteBuilder: knitr
 RoxygenNote: 6.0.1

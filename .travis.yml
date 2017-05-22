@@ -10,6 +10,14 @@ r_packages:
   - coda
   - testthat
   - covr
+  - DiagrammeR
+  - knitr
+  - rmarkdown
+  - rsvg
+  - MCMCvis
+
+r_github_packages:
+  - rich-iannone/DiagrammeRsvg
 
 cache:
   packages: true
@@ -27,6 +35,7 @@ addons:
       - libatlas-dev
       - python-joblib
       - python-dev
+      - libv8-dev
 
 before_install:
   - pip install --upgrade pip

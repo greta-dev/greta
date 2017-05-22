@@ -21,7 +21,7 @@ test_that('print and summary work', {
 
   # stochastic arrays
   # print method
-  expected_output <- "greta array (variable following a normal distribution)\n\n     [,1]\n[1,]   ? "
+  expected_output <- "greta array (variable following a normal distribution)\n\n     [,1]\n[1,]  ?  "
   result <- evaluate_promise(ga_stochastic, print = TRUE)
   expect_identical(result$output, expected_output)
 
@@ -32,13 +32,28 @@ test_that('print and summary work', {
 
   # operation arrays
   # print method
-  expected_output <- "greta array (operation)\n\n     [,1] [,2] [,3]\n[1,]   ?    ?    ? \n[2,]   ?    ?    ? \n[3,]   ?    ?    ? "
+  expected_output <- "greta array (operation)\n\n     [,1] [,2] [,3]\n[1,]  ?    ?    ?  \n[2,]  ?    ?    ?  \n[3,]  ?    ?    ?  "
   result <- evaluate_promise(ga_operation, print = TRUE)
   expect_identical(result$output, expected_output)
 
   # summary method
   expected_output <- "'operation' greta array with 9 elements (3 x 3)  \n\n  (values currently unknown)"
   result <- evaluate_promise(summary(ga_operation), print = TRUE)
+  expect_identical(result$output, expected_output)
+
+  # assigned arrays (only partly unknown)
+  z <- zeros(3, 3)
+  z[, 1] <- ones(3)
+  z[, 2] <- normal(0, 1, 3)
+  expected_output <- "greta array (operation)\n\n     [,1] [,2] [,3]\n[1,] 1     ?   0   \n[2,] 1     ?   0   \n[3,] 1     ?   0   "
+  result <- evaluate_promise(z, print = TRUE)
+  expect_identical(result$output, expected_output)
+
+  # assigned unknown arrays (only partly unknown)
+  n <- normal(0, 1, dim = c(3, 3)) ^ 2
+  n[, 1] <- ones(3)
+  expected_output <- "greta array (operation)\n\n     [,1] [,2] [,3]\n[1,] 1     ?    ?  \n[2,] 1     ?    ?  \n[3,] 1     ?    ?  "
+  result <- evaluate_promise(n, print = TRUE)
   expect_identical(result$output, expected_output)
 
 })

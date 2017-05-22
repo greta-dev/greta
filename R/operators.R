@@ -64,7 +64,7 @@ NULL
 #' @export
 `+.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("+", e1, e2,
+  op("add", e1, e2,
      tf_operation = '`+`')
 }
 
@@ -72,11 +72,11 @@ NULL
 `-.greta_array` <- function (e1, e2) {
   # handle unary minus
   if (missing(e2)) {
-    op("-", e1,
+    op("minus", e1,
        tf_operation = '`-`')
   } else {
     check_dims(e1, e2)
-    op("-", e1, e2,
+    op("subtract", e1, e2,
      tf_operation = '`-`')
   }
 }
@@ -84,14 +84,14 @@ NULL
 #' @export
 `*.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("*", e1, e2,
+  op("multiply", e1, e2,
      tf_operation = '`*`')
 }
 
 #' @export
 `/.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("/", e1, e2,
+  op("divide", e1, e2,
      tf_operation = '`/`')
 }
 
@@ -105,14 +105,14 @@ NULL
 #' @export
 `%%.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("`%%`", e1, e2,
+  op("`modulo`", e1, e2,
      tf_operation = '`%%`')
 }
 
 #' @export
 `%/%.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("`%/%`", e1, e2,
+  op("`integer divide`", e1, e2,
      tf_operation = '`%/%`')
 }
 
@@ -162,7 +162,7 @@ NULL
 
   }
 
-  op("%*%", x, y, dimfun = dimfun,
+  op("matrix multiply", x, y, dimfun = dimfun,
      tf_operation = 'tf$matmul')
 
 }
@@ -223,41 +223,41 @@ tf_neq <- function(x, y)
 #' @export
 `<.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("<", e1, e2,
+  op("less", e1, e2,
      tf_operation = 'tf_lt')
 }
 
 #' @export
 `>.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op(">", e1, e2,
+  op("greater", e1, e2,
      tf_operation = 'tf_gt')
 }
 
 #' @export
 `<=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("<=", e1, e2,
+  op("less/equal", e1, e2,
      tf_operation = 'tf_lte')
 }
 
 #' @export
 `>=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op(">=", e1, e2,
+  op("greater/equal", e1, e2,
      tf_operation = 'tf_gte')
 }
 
 #' @export
 `==.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("==", e1, e2,
+  op("equal", e1, e2,
      tf_operation = 'tf_eq')
 }
 
 #' @export
 `!=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("!=", e1, e2,
+  op("not equal", e1, e2,
      tf_operation = 'tf_neq')
 }
