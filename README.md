@@ -10,6 +10,14 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 <img src="README_files/banner.png" width="1344" />
 
+To get started with greta, take a look at the example below then check out the [getting started](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/getting_started.html) tutorial.
+
+There are also several [example models](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/example_models.html), with equivalent BUGS and Stan code.
+
+If you'd like to understand how greta works under the hood, check out [How does this work?](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/how_does_this_work.html)
+
+<img src="README_files/banner.png" width="1344" />
+
 ### Example
 
 Here's a simple Bayesian linear regression model for the sepal length variable in R's `iris` dataset.
@@ -47,8 +55,6 @@ MCMCplot(draws, xlim = c(-1, 5))
 ```
 
 <img src="README_files/figure-markdown_github/vis-1.png" width="400px" /><img src="README_files/figure-markdown_github/vis-2.png" width="400px" />
-
-Check out [getting started](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/getting_started.html) for an introductory greta tutorial.
 
 <img src="README_files/banner.png" width="1344" />
 
@@ -105,8 +111,6 @@ The design and scope of greta was inspired by other general-purpose MCMC softwar
 [![Build Status](https://travis-ci.org/goldingn/greta.svg?branch=master)](https://travis-ci.org/goldingn/greta) [![codecov.io](https://codecov.io/github/goldingn/greta/coverage.svg?branch=master)](https://codecov.io/github/goldingn/greta?branch=master) [![cran version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta)
 
 I would welcome contributions to this project from anyone with time to spare! The issues tracker lists a number of known bugs and extensions I have planned. Please feel free to add to those any bugs or issues you come across, or let me know if you'd like to help fix some of them or add new features.
-
-For an explanation of how greta works, check out [How does this work?](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/how_does_this_work.html)
 
 #### modules
 

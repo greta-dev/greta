@@ -54,6 +54,7 @@ Suggests:
     knitr,
     rmarkdown,
     DiagrammeR,
+    MCMCvis,
     testthat,
     mvtnorm,
     MCMCpack,
