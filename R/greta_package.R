@@ -21,6 +21,7 @@
 #' @docType package
 #' @import tensorflow
 #' @import R6
+#' @importFrom grDevices colorRampPalette
 #' @examples
 #' \dontrun{
 #' # define a simple model
