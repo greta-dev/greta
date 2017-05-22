@@ -8,13 +8,7 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 **extensible** - because greta is written in R, you can define your own [functions](#functions) and [modules](#modules) to add new methods.
 
-<img src="README_files/banner.png" width="1344" />
-
-To get started with greta, take a look at the example below then check out the [getting started](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/getting_started.html) tutorial.
-
-There are also several [example models](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/example_models.html), with equivalent BUGS and Stan code.
-
-If you'd like to understand how greta works under the hood, check out [How does this work?](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/how_does_this_work.html)
+To get started with greta, take a look at the example below then check out the [getting started](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/getting_started.html) tutorial. There are also several [example models](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/example_models.html), with equivalent BUGS and Stan code. If you'd like to understand how greta works under the hood, check out [How does this work?](https://cdn.rawgit.com/goldingn/greta/dev/inst/doc/how_does_this_work.html)
 
 <img src="README_files/banner.png" width="1344" />
 
