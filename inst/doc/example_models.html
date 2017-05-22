@@ -69,7 +69,7 @@ h6 {
 }
 </style>
 
-<link href="data:text/css;charset=utf-8,pre%7B%0Abackground%2Dcolor%3A%20transparent%3B%0Aborder%3A%201px%20solid%20%23f5eef6%3B%0Aborder%2Dradius%3A%200%3B%0Acolor%3A%20%238b4b9b%3B%0A%7D%0Apre%2Er%7B%0Abackground%2Dcolor%3A%20%23f5eef6%3B%0Aborder%3A%20none%3B%0Aborder%2Dradius%3A%200%3B%0A%7D%0A%2Elist%2Dgroup%2Ditem%2Eactive%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Ahover%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Afocus%20%7B%0Abackground%2Dcolor%3A%20%23ba87c5%3B%0Aborder%2Dcolor%3A%20%23ba87c5%3B%0A%7D%0Ahr%20%7B%0Aheight%3A10px%3B%0Aborder%2Dtop%3A4px%20solid%20%23a464b4%3B%0A%7D%0Acode%20%7B%0Abackground%2Dcolor%3A%20%23f5eef6%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+<link href="data:text/css;charset=utf-8,pre%7B%0Abackground%2Dcolor%3A%20transparent%3B%0Aborder%3A%201px%20solid%20%23f5eef6%3B%0Aborder%2Dradius%3A%200%3B%0Acolor%3A%20%23696969%3B%0A%7D%0Apre%2Er%7B%0Abackground%2Dcolor%3A%20%23f5eef6%3B%0Aborder%3A%20none%3B%0Aborder%2Dradius%3A%200%3B%0A%7D%0A%2Elist%2Dgroup%2Ditem%2Eactive%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Ahover%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Afocus%20%7B%0Abackground%2Dcolor%3A%20%23ba87c5%3B%0Aborder%2Dcolor%3A%20%23ba87c5%3B%0A%7D%0Ahr%20%7B%0Aheight%3A10px%3B%0Aborder%2Dtop%3A4px%20solid%20%23a464b4%3B%0A%7D%0Acode%20%7B%0Abackground%2Dcolor%3A%20%23f5eef6%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -229,6 +229,7 @@ div.tocify {
 <h2>BUGS models</h2>
 <p>The <a href="http://www.openbugs.net/w/Examples">OpenBUGS website</a> provides a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The <a href="https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically">Stan wiki</a> provides Stan implementations of these models.</p>
 <p>The following sections provide greta implementations of some of these example models, alongside the BUGS code from <a href="http://www.openbugs.net">openbugs.net</a> and Stan code and R version of the data from the <a href="https://github.com/stan-dev/example-models/wiki">Stan example models wiki</a>.</p>
+<hr>
 <div id="air" class="section level3">
 <h3>Air</h3>
 <p><em>Air</em> analyses reported respiratory illness versus exposure to nitrogen dioxide in 103 children. The parameters <code>alpha</code>, <code>beta</code> and <code>sigma2</code> are known in advance, and the data are grouped into three categories.</p>
@@ -293,6 +294,7 @@ model {
   X ~ normal(alpha + beta * Z, sigma);
   y ~ binomial_logit(n, theta1 + theta2 * X);
 }</code></pre>
+<hr>
 </div>
 </div>
 <div id="beetles" class="section level3">
@@ -377,6 +379,7 @@ generated quantities {
   }
   alpha &lt;- alpha_star - beta*mean_x;              
 } </code></pre>
+<hr>
 </div>
 </div>
 </div>
