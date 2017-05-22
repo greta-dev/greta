@@ -1,24 +1,24 @@
 pre{
   background-color: transparent;
-  border: 1px solid #f5eef6;
+  border: 1px solid #f4f0f9;
   border-radius: 0;
   color: #696969;
 }
 pre.r{
-  background-color: #f5eef6;
-    border: none;
+  background-color: #f4f0f9;
+  border: none;
   border-radius: 0;
 }
 .list-group-item.active,
 .list-group-item.active:hover,
 .list-group-item.active:focus {
-  background-color: #ba87c5;
-    border-color: #ba87c5;
+  background-color: #8960b3;
+    border-color: #8960b3;
 }
 hr {
   height:10px;
-  border-top:4px solid #a464b4;
+  border-top:4px solid #a379cc4;
 }
 code {
-  background-color: #f5eef6;
+  background-color: #f4f0f9;
 }

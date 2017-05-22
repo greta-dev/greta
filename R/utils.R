@@ -258,6 +258,18 @@ node_type <- function (node) {
   gsub('_node', '', type)
 }
 
+# given a base colour, return a function taking a value between 0 and 1 and
+# returning a colour linearly interpolated between black, the colour and white,
+# so that values close to 0.5 match the base colour, values close to 0 are
+# nearer black, and values close to 1 are nearer white
+palettize <- function (base_colour) {
+  pal <- colorRampPalette(c('#000000', base_colour, '#ffffff'))
+  function (val){
+    stopifnot(val > 0 & val < 1)
+    cols <- pal(1001)
+    cols[round(val * 1000 + 1)]
+  }
+}
 # colour scheme for plotting
 greta_col <- function (which = c('main',
                                  'dark',
@@ -265,11 +277,12 @@ greta_col <- function (which = c('main',
                                  'lighter',
                                  'super_light')) {
   which <- match.arg(which)
+  pal <- palettize('#996bc7')
   switch (which,
-          main = '#a464b4',
-          dark = '#8b4b9b',
-          light = '#ba87c5',
-          lighter = '#e1cce5',
-          super_light = '#f5eef6')
+          dark = pal(0.45),  #45%
+          main = pal(0.55),  #55%
+          light = pal(0.65),  #65%ish
+          lighter = pal(0.85),  #85%ish
+          super_light = pal(0.95))  #95%ish
 }
 
