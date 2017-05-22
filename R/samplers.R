@@ -139,19 +139,19 @@ define_model <- function (...) {
 #' @param initial_values an optional named vector of initial values for the free
 #'   parameters in the model
 #'
-#' @details Currently, the only implemented mcmc procedure is 'vanilla'
-#'   Hamiltonian Monte Carlo (\code{method = 'hmc'}). Unlike variants such as
-#'   NUTS (which Stan uses) HMC does require some manual tuning of sampler
-#'   hyperparameters. The main thing to consider is the leapfrog stepsize
-#'   hyperparameter \code{epsilon}. If you're getting a lot of rejected
-#'   proposals, you might want to reduce \code{epsilon}, or if the sampler is
-#'   moving too slowly you might want to increase \code{epsilon}.
+
+#' @details Currently, the only implemented MCMC procedure is static Hamiltonian
+#'   Monte Carlo (\code{method = 'hmc'}). During the warmup iterations, the
+#'   leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
+#'   sampler efficiency. The \code{control} argument can be used to specify the
+#'   initial value for epsilon, along with two other hyprparameters: \code{Lmin}
+#'   and \code{Lmax}; positive integers (with \code{Lmax > Lmin}) giving the
+#'   upper and lower limits to the number of leapfrog steps per iteration (from
+#'   which the number is selected uniformly at random).
 #'
-#'   \code{epsilon} can be controlled via the \code{control} argument, along
-#'   with two other hyprparameters: \code{Lmin} and \code{Lmax}; positive
-#'   integers (with \code{Lmax > Lmin}) giving the upper and lower limits to the
-#'   number of leapfrog steps per iteration (from which the number is selected
-#'   uniformly at random)
+#'   If you're getting a lot of rejected proposals, you might want to reduce
+#'   \code{epsilon}, or if the sampler is moving too slowly you might want to
+#'   increase \code{epsilon}. You can also
 #'
 #'   The default control options for HMC are:
 #'   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
@@ -230,10 +230,12 @@ mcmc <- function (model,
                            n_samples = warmup,
                            thin = thin,
                            verbose = verbose,
+                           tune = TRUE,
                            control = con)
 
     # use the last draw of the full parameter vector as the init
     initial_values <- attr(warmup_draws, 'last_x')
+    con <- attr(warmup_draws, 'control')
 
     if (verbose)
       message('sampling')
@@ -246,6 +248,7 @@ mcmc <- function (model,
                   n_samples = n_samples,
                   thin = thin,
                   verbose = verbose,
+                  tune = FALSE,
                   control = con)
 
   # coerce to data.frame, but keep the sample density
@@ -262,6 +265,7 @@ hmc <- function (dag,
                  n_samples,
                  thin,
                  verbose,
+                 tune = FALSE,
                  control = list(Lmin = 10,
                                 Lmax = 20,
                                 epsilon = 0.005)) {
@@ -271,11 +275,20 @@ hmc <- function (dag,
   Lmax <- control$Lmax
   epsilon <- control$epsilon
 
+  # tuning parameters
+  accept_group = 50
+  target_acceptance = 0.651
+  kappa = 0.75
+  gamma = 0.1
+
   # set initial location, log joint density and gradients
   x <- init
   dag$send_parameters(x)
   grad <- dag$gradients()
   logprob <- dag$log_density()
+
+  if (tune)
+    epsilon_trace <- rep(NA, n_samples)
 
   # set up trace store (grab values of target variables from graph to get
   # dimension and names)
@@ -288,6 +301,9 @@ hmc <- function (dag,
 
   # set up log joint density store
   ljd <- rep(NA, n_samples)
+
+  # track acceptance
+  accept_trace <- rep(0, n_samples)
 
   # get free parameter dimension
   npar <- length(x)
@@ -360,6 +376,7 @@ hmc <- function (dag,
         # on acceptance, iterate the counter and leave the parameters in the dag
         # to be put in the trace
         accept_count <- accept_count + 1
+        accept_trace[i] <- 1
 
       } else {
 
@@ -384,13 +401,41 @@ hmc <- function (dag,
     if (verbose)
       setTxtProgressBar(pb, i)
 
+    # optionally tune epsilon
+    if (tune) {
+
+      # acceptance rate over the last accept_group runs
+      start <- max(1, i - accept_group)
+      end <- i
+      accept_rate <- mean(accept_trace[start:end], na.rm = TRUE)
+
+      # decrease the adaptation rate as we go
+      adapt_rate <- min(1, gamma * i ^ (-kappa))
+
+      # shift epsilon in the right direction, making sure it never goes negative
+      epsilon <- epsilon + pmax(-(epsilon + sqrt(.Machine$double.eps)),
+                                adapt_rate * (accept_rate - target_acceptance))
+
+      # keep track of epsilon
+      epsilon_trace[i] <- epsilon
+
+    }
+
   }
 
   if (verbose)
     close(pb)
 
+  # store the tuned epsilon as the mean of the last half
+  if (tune) {
+    start <- floor(n_samples/2)
+    end <- n_samples
+    control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
+  }
+
   attr(trace, 'density') <- -ljd
   attr(trace, 'last_x') <- x
+  attr(trace, 'control') <- control
   trace
 
 }
