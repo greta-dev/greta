@@ -66,8 +66,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   greta_log_density <- as.vector(grab(tensor))
 
   # get R version
-  r_log_density <- do.call(r_fun,
-                           c(list(x), parameters, log = TRUE))
+  r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
 
   # return absolute difference
   abs(greta_log_density - r_log_density)
@@ -295,4 +294,15 @@ qt_ls <- function (p, df, location, scale, log.p = FALSE) {
     ans <- log(ans)
   ans
 }
+
+# cdf function of the
+pinvgamma <- function (q, shape, scale) {
+  if (q < 0)
+    0
+  else
+    1 - pgamma(1 / q, shape, scale)
+}
+
+qinvgamma <- function(p, shape, scale)
+  1 / qgamma(1 - p, shape, scale)
 

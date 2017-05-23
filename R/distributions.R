@@ -287,6 +287,32 @@ gamma_distribution <- R6Class (
   )
 )
 
+inverse_gamma_distribution <- R6Class (
+  'inverse_gamma_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (shape, scale, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(shape, scale, target_dim = dim)
+      super$initialize('inverse_gamma', dim)
+      self$add_parameter(shape, 'shape')
+      self$add_parameter(scale, 'scale')
+    },
+
+    # default value
+    create_target = function() {
+      variable(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$InverseGamma(concentration = parameters$shape,
+                                            rate = parameters$scale)
+    }
+
+  )
+)
+
 exponential_distribution <- R6Class (
   'exponential_distribution',
   inherit = distribution_node,
@@ -706,6 +732,7 @@ distrib <- function (distribution, ...) {
 #'   \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
 #'   \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
 #'   \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
+#'   \code{inverse_gamma} \tab \code{\link[MCMCpack:dinvgamma]{MCMCpack::dinvgamma}}\cr
 #'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
 #'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
@@ -816,6 +843,11 @@ poisson <- function (lambda, dim = NULL)
 #' @export
 gamma <- function (shape, rate, dim = NULL)
   distrib('gamma', shape, rate, dim)
+
+#' @rdname greta-distributions
+#' @export
+inverse_gamma <- function (shape, scale, dim = NULL)
+  distrib('inverse_gamma', shape, scale, dim)
 
 #' @rdname greta-distributions
 #' @export

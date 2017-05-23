@@ -11,6 +11,7 @@
 \alias{negative_binomial}
 \alias{poisson}
 \alias{gamma}
+\alias{inverse_gamma}
 \alias{exponential}
 \alias{student}
 \alias{beta}
@@ -38,6 +39,8 @@ negative_binomial(size, prob, dim = NULL)
 poisson(lambda, dim = NULL)
 
 gamma(shape, rate, dim = NULL)
+
+inverse_gamma(shape, scale, dim = NULL)
 
 exponential(rate, dim = NULL)
 
@@ -138,6 +141,7 @@ The discrete probability distributions (\code{bernoulli},
   \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
   \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
   \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
+  \code{inverse_gamma} \tab \code{\link[MCMCpack:dinvgamma]{MCMCpack::dinvgamma}}\cr
   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr

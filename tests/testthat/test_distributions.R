@@ -108,6 +108,20 @@ test_that('gamma distribution has correct density', {
 
 })
 
+
+test_that('inverse gamma distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::inverse_gamma,
+                                     MCMCpack::dinvgamma,
+                                     parameters = list(shape = 1.2, scale = 0.9),
+                                     x = MCMCpack::rinvgamma(100, 1.2, 0.9))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('exponential distribution has correct density', {
 
   source('helpers.R')

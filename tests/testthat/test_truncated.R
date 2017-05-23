@@ -190,6 +190,45 @@ test_that('truncated gamma has correct densities', {
 
 })
 
+test_that('truncated inverse gamma has correct densities', {
+
+  source('helpers.R')
+  library(MCMCpack)
+
+  # non-truncated
+  difference <- compare_truncated_distribution(inverse_gamma,
+                                               'invgamma',
+                                               parameters = list(shape = 2,
+                                                                 scale = 1.2),
+                                               truncation = c(-Inf, Inf))
+  expect_true(all(difference < 1e-4))
+
+  # positive-truncated
+  difference <- compare_truncated_distribution(inverse_gamma,
+                                               'invgamma',
+                                               parameters = list(shape = 2,
+                                                                 scale = 1.2),
+                                               truncation = c(1, Inf))
+  expect_true(all(difference < 1e-4))
+
+  # negative-truncated
+  difference <- compare_truncated_distribution(inverse_gamma,
+                                               'invgamma',
+                                               parameters = list(shape = 2,
+                                                                 scale = 1.2),
+                                               truncation = c(-Inf, 2))
+  expect_true(all(difference < 1e-4))
+
+  # fully-truncated
+  difference <- compare_truncated_distribution(inverse_gamma,
+                                               'invgamma',
+                                               parameters = list(shape = 2,
+                                                                 scale = 1.2),
+                                               truncation = c(1, 2))
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('truncated exponential has correct densities', {
 
   source('helpers.R')
