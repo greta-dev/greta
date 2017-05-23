@@ -313,6 +313,49 @@ inverse_gamma_distribution <- R6Class (
   )
 )
 
+
+weibull_distribution <- R6Class (
+  'weibull_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (shape, scale, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(shape, scale, target_dim = dim)
+      super$initialize('weibull', dim)
+      self$add_parameter(shape, 'shape')
+      self$add_parameter(scale, 'scale')
+    },
+
+    # default value
+    create_target = function() {
+      variable(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      a <- parameters$shape
+      b <- parameters$scale
+
+      log_prob = function (x) {
+        log(a) - log(b) + (a - 1) * (log(x) - log(b)) - (x / b) ^ a
+      }
+
+      cdf = function (x) {
+        1 - exp(-(x / b) ^ a)
+      }
+
+      log_cdf = function (x) {
+        log(cdf(x))
+      }
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+
+    }
+
+  )
+)
+
 exponential_distribution <- R6Class (
   'exponential_distribution',
   inherit = distribution_node,
@@ -733,6 +776,7 @@ distrib <- function (distribution, ...) {
 #'   \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
 #'   \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
 #'   \code{inverse_gamma} \tab \code{\link[MCMCpack:dinvgamma]{MCMCpack::dinvgamma}}\cr
+#'   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
 #'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
 #'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
@@ -848,6 +892,11 @@ gamma <- function (shape, rate, dim = NULL)
 #' @export
 inverse_gamma <- function (shape, scale, dim = NULL)
   distrib('inverse_gamma', shape, scale, dim)
+
+#' @rdname greta-distributions
+#' @export
+weibull <- function (shape, scale, dim = NULL)
+  distrib('weibull', shape, scale, dim)
 
 #' @rdname greta-distributions
 #' @export

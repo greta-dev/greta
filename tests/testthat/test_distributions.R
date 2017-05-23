@@ -122,6 +122,19 @@ test_that('inverse gamma distribution has correct density', {
 
 })
 
+test_that('weibull distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::weibull,
+                                     dweibull,
+                                     parameters = list(shape = 1.2, scale = 0.9),
+                                     x = rweibull(100, 1.2, 0.9))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('exponential distribution has correct density', {
 
   source('helpers.R')
