@@ -404,6 +404,30 @@ cauchy_distribution <- R6Class (
   )
 )
 
+chi_squared_distribution <- R6Class (
+  'chi_squared_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (df, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(df, target_dim = dim)
+      super$initialize('chi_squared', dim)
+      self$add_parameter(df, 'df')
+    },
+
+    # default value
+    create_target = function() {
+      variable(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Chi2(df = parameters$df)
+    }
+
+  )
+)
+
 # need to add checking of mean and Sigma dimensions
 multivariate_normal_distribution <- R6Class (
   'multivariate_normal_distribution',
@@ -654,6 +678,7 @@ distrib <- function (distribution, ...) {
 #'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
 #'   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
+#'   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
 #'   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
 #'   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
 #'   }
@@ -778,6 +803,11 @@ beta <- function (shape1, shape2, dim = NULL)
 #' @export
 cauchy <- function (location, scale, dim = NULL)
   distrib('cauchy', location, scale, dim)
+
+#' @rdname greta-distributions
+#' @export
+chi_squared <- function (df, dim = NULL)
+  distrib('chi_squared', df, dim)
 
 #' @rdname greta-distributions
 #' @export

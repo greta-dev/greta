@@ -168,6 +168,19 @@ test_that('cauchy distribution has correct density', {
 
 })
 
+test_that('chi squared distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::chi_squared,
+                                     stats::dchisq,
+                                     parameters = list(df = 9.3),
+                                     x = rchisq(100, 9.3))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('multivariate normal distribution has correct density', {
 
   source('helpers.R')

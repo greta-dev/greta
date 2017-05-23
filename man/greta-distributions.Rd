@@ -15,6 +15,7 @@
 \alias{student}
 \alias{beta}
 \alias{cauchy}
+\alias{chi_squared}
 \alias{multivariate_normal}
 \alias{wishart}
 \title{greta probability distributions}
@@ -44,6 +45,8 @@ student(df, location, scale, dim = NULL)
 beta(shape1, shape2, dim = NULL)
 
 cauchy(location, scale, dim = NULL)
+
+chi_squared(df, dim = NULL)
 
 multivariate_normal(mean, Sigma, dim = 1)
 
@@ -136,6 +139,7 @@ The discrete probability distributions (\code{bernoulli},
   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
+  \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
   }
