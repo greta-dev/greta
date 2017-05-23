@@ -479,28 +479,18 @@ multivariate_normal_distribution <- R6Class (
       variable(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
 
-      mean <- parameters$mean
-      Sigma <- parameters$Sigma
+      L <- tf$cholesky(parameters$Sigma)
+      mu = tf$transpose(parameters$mean)
+      tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
+                                                      scale_tril = L)
 
-      # number of observations & dimension of distribution
-      nobs <- x$get_shape()$as_list()[1]
-      dim <- x$get_shape()$as_list()[2]
+    },
 
-      # Cholesky decomposition of Sigma
-      L <- tf$cholesky(Sigma)
-
-      # whiten (decorrelate) the errors
-      mean_col <- tf$tile(mean, c(1L, nobs))
-      diff_col <- tf$transpose(x) - mean_col
-      alpha <- tf$matrix_triangular_solve(L, diff_col, lower = TRUE)
-
-      # calculate density, per-row in x:
-      -0.5 * dim * log(2 * pi) -
-        tf$reduce_sum(tf$log(tf$diag_part(L))) -
-        0.5 * tf$reduce_sum(tf$square(alpha), axis = 0L)
-    }
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
@@ -548,15 +538,23 @@ wishart_distribution <- R6Class (
 
     },
 
+    tf_distrib = function (parameters) {
+
+      tf$contrib$distributions$WishartFull(df = parameters$df,
+                                           scale = parameters$Sigma)
+
+    },
+
     tf_log_density_function = function (x, parameters) {
 
-      df <- parameters$df
-      Sigma <- parameters$Sigma
+      lp <- self$tf_distrib(parameters)$log_prob(x)
+      tf$reshape(lp, shape(1, 1))
 
-      dist <- tf$contrib$distributions$WishartFull(df = df, scale = Sigma)
-      tf$reshape(dist$log_prob(x), shape(1, 1))
+    },
 
-    }
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
