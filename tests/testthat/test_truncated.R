@@ -342,6 +342,43 @@ test_that('truncated cauchy has correct densities', {
 
 })
 
+test_that('truncated logistic has correct densities', {
+
+  source('helpers.R')
+
+  # non-truncated
+  difference <- compare_truncated_distribution(logistic,
+                                               'logis',
+                                               parameters = list(location = -1.3,
+                                                                 scale = 2.3),
+                                               truncation = c(-Inf, Inf))
+  expect_true(all(difference < 1e-4))
+
+  # positive-truncated
+  difference <- compare_truncated_distribution(logistic,
+                                               'logis',
+                                               parameters = list(location = -1.3,
+                                                                 scale = 2.3),
+                                               truncation = c(0.1, Inf))
+  expect_true(all(difference < 1e-4))
+
+  # negative-truncated
+  difference <- compare_truncated_distribution(logistic,
+                                               'logis',
+                                               parameters = list(location = -1.3,
+                                                                 scale = 2.3),
+                                               truncation = c(-Inf, 0.2))
+  expect_true(all(difference < 1e-4))
+
+  # fully-truncated
+  difference <- compare_truncated_distribution(logistic,
+                                               'logis',
+                                               parameters = list(location = -1.3,
+                                                                 scale = 2.3),
+                                               truncation = c(0.1, 0.2))
+  expect_true(all(difference < 1e-4))
+
+})
 
 test_that('truncated chi squared has correct densities', {
 

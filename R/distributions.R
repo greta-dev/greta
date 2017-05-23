@@ -428,6 +428,38 @@ chi_squared_distribution <- R6Class (
   )
 )
 
+
+logistic_distribution <- R6Class (
+  'logistic_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (location, scale, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(location, scale, target_dim = dim)
+      super$initialize('logistic', dim)
+      self$add_parameter(location, 'location')
+      self$add_parameter(scale, 'scale')
+    },
+
+    # default value
+    create_target = function() {
+      variable(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Logistic(loc = parameters$location,
+                                        scale = parameters$scale)
+    },
+
+    # log_cdf in tf$cotrib$distributions has the wrong sign :/
+    tf_log_cdf_function = function (x, parameters) {
+      tf$log(self$tf_cdf_function(x, parameters))
+    }
+
+  )
+)
+
 # need to add checking of mean and Sigma dimensions
 multivariate_normal_distribution <- R6Class (
   'multivariate_normal_distribution',
@@ -679,6 +711,7 @@ distrib <- function (distribution, ...) {
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
 #'   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
 #'   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
+#'   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
 #'   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
 #'   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
 #'   }
@@ -808,6 +841,11 @@ cauchy <- function (location, scale, dim = NULL)
 #' @export
 chi_squared <- function (df, dim = NULL)
   distrib('chi_squared', df, dim)
+
+#' @rdname greta-distributions
+#' @export
+logistic <- function (location, scale, dim = NULL)
+  distrib('logistic', location, scale, dim)
 
 #' @rdname greta-distributions
 #' @export

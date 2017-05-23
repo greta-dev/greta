@@ -16,6 +16,7 @@
 \alias{beta}
 \alias{cauchy}
 \alias{chi_squared}
+\alias{logistic}
 \alias{multivariate_normal}
 \alias{wishart}
 \title{greta probability distributions}
@@ -47,6 +48,8 @@ beta(shape1, shape2, dim = NULL)
 cauchy(location, scale, dim = NULL)
 
 chi_squared(df, dim = NULL)
+
+logistic(location, scale, dim = NULL)
 
 multivariate_normal(mean, Sigma, dim = 1)
 
@@ -140,6 +143,7 @@ The discrete probability distributions (\code{bernoulli},
   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
+  \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
   }

@@ -168,6 +168,20 @@ test_that('cauchy distribution has correct density', {
 
 })
 
+test_that('logistic distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::logistic,
+                                     stats::dlogis,
+                                     parameters = list(location = -1.3,
+                                                       scale = 2.1),
+                                     x = rlogis(100, -1.3, 2.1))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('chi squared distribution has correct density', {
 
   source('helpers.R')
