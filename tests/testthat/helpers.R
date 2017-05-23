@@ -207,7 +207,10 @@ it_state <- function (matrix, state, niter) {
   state[1, ]
 }
 
-compare_truncated_distribution <- function (greta_fun, which, parameters, truncation) {
+compare_truncated_distribution <- function (greta_fun,
+                                            which,
+                                            parameters,
+                                            truncation) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark, for an implied truncated distribution 'greta_array'
   # is a greta array created from a distribution and a constrained free() greta
@@ -216,7 +219,7 @@ compare_truncated_distribution <- function (greta_fun, which, parameters, trunca
 
   tf$reset_default_graph()
 
-  require(truncdist)
+  require (truncdist)
 
   x <- do.call(truncdist::rtrunc,
                c(n = 100,
@@ -270,3 +273,26 @@ truncfun <- function (which = 'norm', parameters, truncation) {
   }
 
 }
+
+# R distribution functions for the location-scale Student T distribution
+dt_ls <- function (x, df, location, scale, log = FALSE) {
+  ans <- stats::dt((x - location) / scale, df) / scale
+  if (log)
+    ans <- log(ans)
+  ans
+}
+
+pt_ls <- function (q, df, location, scale, log.p = FALSE) {
+  ans <- stats::pt((q - location) / scale, df)
+  if (log.p)
+    ans <- log(ans)
+  ans
+}
+
+qt_ls <- function (p, df, location, scale, log.p = FALSE) {
+  ans <- stats::qt(p, df) * scale + location
+  if (log.p)
+    ans <- log(ans)
+  ans
+}
+
