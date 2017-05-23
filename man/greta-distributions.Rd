@@ -160,7 +160,7 @@ The discrete probability distributions (\code{bernoulli},
 # an unconstrained and prior-free parameter (e.g. for a frequentist model)
 alpha = free()
 
-# positive prior-free parameter (could also do: sigma = exp(free()) )
+# positive prior-free parameter
 sigma = free(lower = 0)
 
 # a prior-free parameter constrained to be less that -1
@@ -171,9 +171,6 @@ psi = free(lower = 0, upper = 1)
 
 # a uniform parameter constrained to be between 0 and 1
 phi = uniform(min = 0, max = 1)
-
-# create a hierarchical uniform, constrained between alpha and alpha + sigma,
-eta = alpha + uniform(0, 1) * sigma
 
 # an unconstrained parameter with standard normal prior
 mu = normal(0, 1)

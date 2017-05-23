@@ -791,7 +791,7 @@ distrib <- function (distribution, ...) {
 #' # an unconstrained and prior-free parameter (e.g. for a frequentist model)
 #' alpha = free()
 #'
-#' # positive prior-free parameter (could also do: sigma = exp(free()) )
+#' # positive prior-free parameter
 #' sigma = free(lower = 0)
 #'
 #' # a prior-free parameter constrained to be less that -1
