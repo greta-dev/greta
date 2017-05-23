@@ -121,25 +121,18 @@ lognormal_distribution <- R6Class (
       var <- tf$square(sd)
 
       log_prob = function (x) {
-
         lx <- tf$log(x)
-
         -1 * (lx + tf$log(sd) + 0.9189385) +
           -0.5 * tf$square(tf$subtract(lx, mean)) / var
-
       }
 
       cdf = function (x) {
-
         lx <- tf$log(x)
         0.5 + 0.5 * tf$erf((lx - mean) / (sqrt(2) * sd))
-
       }
 
       log_cdf = function (x) {
-
         log(cdf(x))
-
       }
 
       list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
@@ -167,9 +160,7 @@ bernoulli_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-
       tf$contrib$distributions$Bernoulli(probs = parameters$prob)
-
     },
 
     # no CDF for discrete distributions
@@ -199,21 +190,9 @@ binomial_distribution <- R6Class (
       variable(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
-
-      size <- parameters$size
-      prob <- parameters$prob
-
-      log_choose <- tf$lgamma(size + 1) - tf$lgamma(x + 1) -
-        tf$lgamma(size - x + 1)
-      log_choose + x * tf$log(prob) + (size - x) * tf$log(1 - prob)
-
-    },
-
     tf_distrib = function (parameters) {
-
-      tf$contrib$distributions$Bernoulli(probs = parameters$prob)
-
+      tf$contrib$distributions$Binomial(total_count = parameters$size,
+                                        probs = parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -241,9 +220,7 @@ poisson_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-
       tf$contrib$distributions$Poisson(rate = parameters$lambda)
-
     },
 
     # no CDF for discrete distributions
@@ -271,15 +248,9 @@ negative_binomial_distribution <- R6Class (
       variable(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
-
-      size <- parameters$size
-      prob <- parameters$prob
-
-      log_choose <- tf$lgamma(x + size) - tf$lgamma(x + 1) -
-        tf$lgamma(size)
-      log_choose + size * tf$log(prob) + x * tf$log(1 - prob)
-
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$NegativeBinomial(total_count = parameters$size,
+                                                probs = 1 - parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -309,10 +280,8 @@ gamma_distribution <- R6Class (
 
 
     tf_distrib = function (parameters) {
-
       tf$contrib$distributions$Gamma(concentration = parameters$shape,
                                      rate = parameters$rate)
-
     }
 
   )
@@ -336,9 +305,7 @@ exponential_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-
       tf$contrib$distributions$Exponential(rate = parameters$rate)
-
     }
 
   )
@@ -365,11 +332,9 @@ student_distribution <- R6Class (
 
 
     tf_distrib = function (parameters) {
-
       tf$contrib$distributions$StudentT(df = parameters$df,
                                         loc = parameters$location,
                                         scale = parameters$scale)
-
     }
 
   )
@@ -394,10 +359,8 @@ beta_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-
       tf$contrib$distributions$Beta(concentration1 = parameters$shape1,
                                     concentration0 = parameters$shape2)
-
     }
 
   )
@@ -480,12 +443,10 @@ multivariate_normal_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-
       L <- tf$cholesky(parameters$Sigma)
       mu = tf$transpose(parameters$mean)
       tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
                                                       scale_tril = L)
-
     },
 
     # no CDF for multivariate distributions
@@ -539,17 +500,13 @@ wishart_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-
       tf$contrib$distributions$WishartFull(df = parameters$df,
                                            scale = parameters$Sigma)
-
     },
 
     tf_log_density_function = function (x, parameters) {
-
       lp <- self$tf_distrib(parameters)$log_prob(x)
       tf$reshape(lp, shape(1, 1))
-
     },
 
     # no CDF for multivariate distributions
