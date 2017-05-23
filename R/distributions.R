@@ -408,6 +408,32 @@ student_distribution <- R6Class (
   )
 )
 
+laplace_distribution <- R6Class (
+  'laplace_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (location, scale, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(location, scale, target_dim = dim)
+      super$initialize('laplace', dim)
+      self$add_parameter(location, 'location')
+      self$add_parameter(scale, 'scale')
+    },
+
+    # default value
+    create_target = function() {
+      variable(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Laplace(loc = parameters$location,
+                                       scale = parameters$scale)
+    }
+
+  )
+)
+
 beta_distribution <- R6Class (
   'beta_distribution',
   inherit = distribution_node,
@@ -779,6 +805,7 @@ distrib <- function (distribution, ...) {
 #'   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
 #'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
 #'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
+#'   \code{laplace} \tab \code{\link[rmutil:dlaplace]{rmutil::dlaplace}}\cr
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
 #'   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
 #'   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
@@ -907,6 +934,11 @@ exponential <- function (rate, dim = NULL)
 #' @export
 student <- function (df, location, scale, dim = NULL)
   distrib('student', df, location, scale, dim)
+
+#' @rdname greta-distributions
+#' @export
+laplace <- function (location, scale, dim = NULL)
+  distrib('laplace', location, scale, dim)
 
 #' @rdname greta-distributions
 #' @export

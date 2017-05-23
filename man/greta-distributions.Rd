@@ -15,6 +15,7 @@
 \alias{weibull}
 \alias{exponential}
 \alias{student}
+\alias{laplace}
 \alias{beta}
 \alias{cauchy}
 \alias{chi_squared}
@@ -48,6 +49,8 @@ weibull(shape, scale, dim = NULL)
 exponential(rate, dim = NULL)
 
 student(df, location, scale, dim = NULL)
+
+laplace(location, scale, dim = NULL)
 
 beta(shape1, shape2, dim = NULL)
 
@@ -148,6 +151,7 @@ The discrete probability distributions (\code{bernoulli},
   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
+  \code{laplace} \tab \code{\link[rmutil:dlaplace]{rmutil::dlaplace}}\cr
   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
@@ -171,6 +175,9 @@ psi = free(lower = 0, upper = 1)
 
 # a uniform parameter constrained to be between 0 and 1
 phi = uniform(min = 0, max = 1)
+
+# create a hierarchical uniform, constrained between alpha and alpha + sigma,
+eta = alpha + uniform(0, 1) * sigma
 
 # an unconstrained parameter with standard normal prior
 mu = normal(0, 1)

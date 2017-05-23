@@ -169,6 +169,20 @@ test_that('student distribution has correct density', {
 
 })
 
+
+test_that('laplace distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::laplace,
+                                     dlaplace,
+                                     parameters = list(location = -0.9, scale = 2),
+                                     x = rmutil::rlaplace(100, -0.9, 2))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('beta distribution has correct density', {
 
   source('helpers.R')

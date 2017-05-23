@@ -295,7 +295,7 @@ qt_ls <- function (p, df, location, scale, log.p = FALSE) {
   ans
 }
 
-# cdf function of the
+# inverse gamma
 pinvgamma <- function (q, shape, scale) {
   if (q < 0)
     0
@@ -306,3 +306,13 @@ pinvgamma <- function (q, shape, scale) {
 qinvgamma <- function(p, shape, scale)
   1 / qgamma(1 - p, shape, scale)
 
+
+# laplace
+dlaplace <- function (x, location, scale, log = FALSE)
+  rmutil::dlaplace(x, m = location, s = scale, log = log)
+
+plaplace <- function (q, location, scale)
+  rmutil::plaplace(q, m = location, s = scale)
+
+qlaplace <- function (p, location, scale)
+  rmutil::qlaplace(p, m = location, s = scale)

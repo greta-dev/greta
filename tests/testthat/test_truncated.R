@@ -343,6 +343,45 @@ test_that('truncated student has correct densities', {
 
 })
 
+
+test_that('truncated laplace has correct densities', {
+
+  source('helpers.R')
+
+  # non-truncated
+  difference <- compare_truncated_distribution(laplace,
+                                               'laplace',
+                                               parameters = list(location = 2,
+                                                                 scale = 3.4),
+                                               truncation = c(-Inf, Inf))
+  expect_true(all(difference < 1e-4))
+
+  # positive-truncated
+  difference <- compare_truncated_distribution(laplace,
+                                               'laplace',
+                                               parameters = list(location = 2,
+                                                                 scale = 3.4),
+                                               truncation = c(1, Inf))
+  expect_true(all(difference < 1e-4))
+
+  # negative-truncated
+  difference <- compare_truncated_distribution(laplace,
+                                               'laplace',
+                                               parameters = list(location = 2,
+                                                                 scale = 3.4),
+                                               truncation = c(-Inf, 2))
+  expect_true(all(difference < 1e-4))
+
+  # fully-truncated
+  difference <- compare_truncated_distribution(laplace,
+                                               'laplace',
+                                               parameters = list(location = 2,
+                                                                 scale = 3.4),
+                                               truncation = c(1, 2))
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('truncated beta has correct densities', {
 
   source('helpers.R')
