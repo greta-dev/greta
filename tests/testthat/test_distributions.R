@@ -155,6 +155,19 @@ test_that('beta distribution has correct density', {
 
 })
 
+test_that('cauchy distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::cauchy,
+                                     stats::dcauchy,
+                                     parameters = list(location = -1.3, scale = 3.4),
+                                     x = rcauchy(100, -1.3, 3.4))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('multivariate normal distribution has correct density', {
 
   source('helpers.R')

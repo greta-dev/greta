@@ -330,7 +330,6 @@ student_distribution <- R6Class (
       variable(dim = self$dim)
     },
 
-
     tf_distrib = function (parameters) {
       tf$contrib$distributions$StudentT(df = parameters$df,
                                         loc = parameters$location,
@@ -361,6 +360,45 @@ beta_distribution <- R6Class (
     tf_distrib = function (parameters) {
       tf$contrib$distributions$Beta(concentration1 = parameters$shape1,
                                     concentration0 = parameters$shape2)
+    }
+
+  )
+)
+
+cauchy_distribution <- R6Class (
+  'cauchy_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (location, scale, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(location, scale, target_dim = dim)
+      super$initialize('cauchy', dim)
+      self$add_parameter(location, 'location')
+      self$add_parameter(scale, 'scale')
+    },
+
+    # default value
+    create_target = function() {
+      variable(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      loc <- parameters$location
+      s <- parameters$scale
+
+      log_prob = function (x)
+        -tf$log(pi * s * (1 + ((x - loc) / s) ^ 2))
+
+      cdf = function (x)
+        (1 / pi)  * tf$atan((x - loc) / s) + 0.5
+
+      log_cdf = function (x)
+        tf$log(cdf(x))
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+
     }
 
   )
@@ -615,6 +653,7 @@ distrib <- function (distribution, ...) {
 #'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
 #'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
+#'   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
 #'   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
 #'   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
 #'   }
@@ -734,6 +773,11 @@ student <- function (df, location, scale, dim = NULL)
 #' @export
 beta <- function (shape1, shape2, dim = NULL)
   distrib('beta', shape1, shape2, dim)
+
+#' @rdname greta-distributions
+#' @export
+cauchy <- function (location, scale, dim = NULL)
+  distrib('cauchy', location, scale, dim)
 
 #' @rdname greta-distributions
 #' @export
