@@ -57,6 +57,11 @@ uniform_distribution <- R6Class (
                dim = self$dim)
     },
 
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Uniform(low = parameters$min,
+                                       high = parameters$max)
+    },
+
     # weird hack to make TF see a gradient here
     tf_log_density_function = function (x, parameters) {
       self$log_density + x * 0
@@ -84,28 +89,9 @@ normal_distribution <- R6Class (
       variable(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
-
-      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
-                                              scale = parameters$sd)
-      norm$log_prob(x)
-
-    },
-
-    tf_cdf_function = function (x, parameters) {
-
-      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
-                                              scale = parameters$sd)
-      norm$cdf(x)
-
-    },
-
-    tf_log_cdf_function = function (x, parameters) {
-
-      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
-                                              scale = parameters$sd)
-      norm$log_cdf(x)
-
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Normal(loc = parameters$mean,
+                                      scale = parameters$sd)
     }
 
   )
@@ -128,17 +114,38 @@ lognormal_distribution <- R6Class (
       variable(lower = 0, dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
 
       mean <- parameters$meanlog
       sd <- parameters$sdlog
       var <- tf$square(sd)
-      lx <- tf$log(x)
 
-      -1 * (lx + tf$log(sd) + 0.9189385) +
-        -0.5 * tf$square(tf$subtract(lx, mean)) / var
+      log_prob = function (x) {
+
+        lx <- tf$log(x)
+
+        -1 * (lx + tf$log(sd) + 0.9189385) +
+          -0.5 * tf$square(tf$subtract(lx, mean)) / var
+
+      }
+
+      cdf = function (x) {
+
+        lx <- tf$log(x)
+        0.5 + 0.5 * tf$erf((lx - mean) / (sqrt(2) * sd))
+
+      }
+
+      log_cdf = function (x) {
+
+        log(cdf(x))
+
+      }
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
 
     }
+
   )
 )
 
@@ -159,20 +166,16 @@ bernoulli_distribution <- R6Class (
       variable(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
 
-      prob <- parameters$prob
+      tf$contrib$distributions$Bernoulli(probs = parameters$prob)
 
-      # optionally reshape prob
-      prob_shape <- prob$get_shape()$as_list()
-      x_shape <- x$get_shape()$as_list()
+    },
 
-      if (identical(prob_shape, c(1L, 1L)) & !identical(x_shape, c(1L, 1L)))
-        prob <- tf$tile(prob, x_shape)
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
-      tf$log(tf$where(tf$equal(x, 1), prob, 1 - prob))
-
-    }
 
   )
 )
@@ -205,7 +208,17 @@ binomial_distribution <- R6Class (
         tf$lgamma(size - x + 1)
       log_choose + x * tf$log(prob) + (size - x) * tf$log(1 - prob)
 
-    }
+    },
+
+    tf_distrib = function (parameters) {
+
+      tf$contrib$distributions$Bernoulli(probs = parameters$prob)
+
+    },
+
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
@@ -227,12 +240,15 @@ poisson_distribution <- R6Class (
       variable(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
 
-      lambda <- parameters$lambda
-      x * tf$log(lambda) - lambda - tf$lgamma(x + 1)
+      tf$contrib$distributions$Poisson(rate = parameters$lambda)
 
-    }
+    },
+
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
@@ -264,7 +280,11 @@ negative_binomial_distribution <- R6Class (
         tf$lgamma(size)
       log_choose + size * tf$log(prob) + x * tf$log(1 - prob)
 
-    }
+    },
+
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
@@ -287,13 +307,11 @@ gamma_distribution <- R6Class (
       variable(lower = 0, dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
 
-      shape <- parameters$shape
-      scale <- 1 /parameters$rate
+    tf_distrib = function (parameters) {
 
-      -shape * tf$log(scale) - tf$lgamma(shape) +
-        (shape - 1) * tf$log(x) - x / scale
+      tf$contrib$distributions$Gamma(concentration = parameters$shape,
+                                     rate = parameters$rate)
 
     }
 
@@ -317,10 +335,9 @@ exponential_distribution <- R6Class (
       variable(lower = 0, dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
 
-      rate <- parameters$rate
-      tf$log(rate) - rate * x
+      tf$contrib$distributions$Exponential(rate = parameters$rate)
 
     }
 
@@ -346,19 +363,12 @@ student_distribution <- R6Class (
       variable(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
 
-      df <- parameters$df
-      location <- parameters$location
-      scale <- parameters$scale
+    tf_distrib = function (parameters) {
 
-      x_ <- (x - location) / scale
-
-      const <- tf$lgamma((df + 1) * 0.5) -
-        tf$lgamma(df * 0.5) -
-        0.5 * (tf$log(tf$square(scale)) + tf$log(df) + log(pi))
-
-      const - 0.5 * (df + 1) * tf$log(1 + (1 / df) * (tf$square(x_)))
+      tf$contrib$distributions$StudentT(df = parameters$df,
+                                        loc = parameters$location,
+                                        scale = parameters$scale)
 
     }
 
@@ -383,15 +393,10 @@ beta_distribution <- R6Class (
       variable(lower = 0, upper = 1, dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
 
-      shape1 <- parameters$shape1
-      shape2 <- parameters$shape2
-
-      (shape1 - 1) * tf$log(x) +
-        (shape2 - 1) * tf$log(1 - x) +
-        tf$lgamma(shape1 + shape2) -
-        tf$lgamma(shape1) - tf$lgamma(shape2)
+      tf$contrib$distributions$Beta(concentration1 = parameters$shape1,
+                                    concentration0 = parameters$shape2)
 
     }
 

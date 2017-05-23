@@ -399,6 +399,24 @@ distribution_node <- R6Class (
       self$add_child(parameter)
       self$parameters[[name]] <- parameter
 
+    },
+
+    tf_log_density_function = function (x, parameters) {
+
+      self$tf_distrib(parameters)$log_prob(x)
+
+    },
+
+    tf_cdf_function = function (x, parameters) {
+
+      self$tf_distrib(parameters)$cdf(x)
+
+    },
+
+    tf_log_cdf_function = function (x, parameters) {
+
+      self$tf_distrib(parameters)$log_cdf(x)
+
     }
 
   )

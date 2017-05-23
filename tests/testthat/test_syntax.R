@@ -111,7 +111,7 @@ test_that('`distribution<-` errors informatively', {
 
   # unsupported truncation
   z = free(lower = 0)
-  expect_error({distribution(z) = student(5, 0, 1)},
+  expect_error({distribution(z) = bernoulli(0.4)},
                'distribution cannot be truncated')
 
   # shouldn't error with -Inf, Inf
