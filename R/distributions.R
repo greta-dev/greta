@@ -592,12 +592,32 @@ distrib <- function (distribution, ...) {
 #'   transforming it to the required scale. I.e. \code{min + u * (max - min)},
 #'   where u is e.g. \code{uniform(0, 1)}. See below for an example.
 #'
-#'   Wherever possible, the parameterisation of these distributions matches the
-#'   those in the \code{stats} package. E.g. for the parameterisation of
-#'   \code{negative_binomial()}, see \code{\link{dnbinom}}. \code{student()} is an
-#'   exception, since the \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{location-scale representation} we use is more useful,
-#'   and widely used, for statistical modelling than the noncentral version
-#'   implemented in \code{stats}
+#'   Wherever possible, the parameterisation and argument names of greta
+#'   distributions matches commonly used R functions for distributions, such as
+#'   those in the \code{stats} package.\code{student()} is an exception, since
+#'   the
+#'   \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{location-scale
+#'   representation} we use is more useful, and widely used, for statistical
+#'   modelling than the noncentral version implemented in \code{stats}. The
+#'   following table states the distribution function to which greta's
+#'   implementation corresponds:
+#'
+#'   \tabular{ll}{
+#'   greta \tab reference\cr
+#'   \code{uniform} \tab \code{\link[stats:dunif]{stats::dunif}}\cr
+#'   \code{normal} \tab \code{\link[stats:dnorm]{stats::dnorm}}\cr
+#'   \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
+#'   \code{bernoulli} \tab {\code{\link[stats:dbinom]{stats::dbinom}} (n = 1)}\cr
+#'   \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
+#'   \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
+#'   \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
+#'   \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
+#'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
+#'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
+#'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
+#'   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
+#'   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
+#'   }
 #'
 #' @examples
 #' # an unconstrained and prior-free parameter (e.g. for a frequentist model)
