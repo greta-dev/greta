@@ -150,11 +150,11 @@ tf_as_logical <- function (x)
 
 # and to float
 tf_as_float <- function (x)
-  tf$cast(x, tf$float32)
+  tf$cast(x, tf_float())
 
 # and to integer
 tf_as_integer <- function (x)
-  tf$cast(x, tf$int64)
+  tf$cast(x, tf_int())
 
 # flatten a greta array into a column vector in column-major order
 flatten <- function (x)
@@ -230,7 +230,7 @@ tf_flat_to_symmetric = function (x, dims) {
   indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
 
   # create an empty vector to fill with the values
-  values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
+  values <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
   values <- tf_recombine(values, indices, x)
 
   # reshape into lower triangular, then symmetric matrix
@@ -286,3 +286,24 @@ greta_col <- function (which = c('main',
           super_light = pal(0.95))  #95%ish
 }
 
+# access the float and int type options
+tf_float <- function () {
+  type <- options('greta_float_type')
+  if (! type %in% c('16', '32', '64')) {
+    warning ("unknown float type: ", type,
+             ". Acceptable types are '16', '32', or '64'. Switching to 64-bit floats")
+    type <- '64'
+  }
+  tf[[paste0('float', type)]]
+}
+
+# access the float and int type options
+tf_int <- function () {
+  type <- options('greta_int_type')
+  if (! type %in% c('8', '16', '32', '64')) {
+    warning ("unknown int type: ", type,
+             ". Acceptable types are '8', '16', '32', or '64'. Switching to 32-bit ints")
+    type <- '32'
+  }
+  tf[[paste0('int', type)]]
+}

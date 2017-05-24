@@ -19,7 +19,7 @@ data_node <- R6Class(
 
     tf = function (dag) {
       assign(dag$tf_name(self),
-             tf$constant(self$value(), dtype = tf$float32),
+             tf$constant(self$value(), dtype = tf_float()),
              envir = dag$tf_environment)
     }
   )
@@ -202,7 +202,7 @@ variable_node <- R6Class (
 
       # make a Variable tensor to hold the free state
       tf_obj <- tf$Variable(initial_value = self$value(),
-                            dtype = tf$float32)
+                            dtype = tf_float())
 
       # assign this as the free state
       tf_name <- dag$tf_name(self)

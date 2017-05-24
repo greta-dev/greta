@@ -45,11 +45,11 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
 
   # set up sparse tensor
   indices <- tf$constant(cbind(idx_rows, idx_cols) - 1,
-                         dtype = tf$int64)
+                         dtype = tf_int())
   values <- tf$reshape(mat,
                        shape = shape(n * m ^ 2))
   shape <- tf$constant(as.integer(rep(n * m, 2)),
-                       dtype = tf$int64)
+                       dtype = tf_int())
   full_mat <- tf$SparseTensor(indices = indices,
                               values = values,
                               dense_shape = shape)
