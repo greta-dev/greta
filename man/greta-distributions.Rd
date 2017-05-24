@@ -22,6 +22,7 @@
 \alias{logistic}
 \alias{multivariate_normal}
 \alias{wishart}
+\alias{multinomial}
 \title{greta probability distributions}
 \usage{
 free(lower = -Inf, upper = Inf, dim = 1)
@@ -63,6 +64,8 @@ logistic(location, scale, dim = NULL)
 multivariate_normal(mean, Sigma, dim = 1)
 
 wishart(df, Sigma)
+
+multinomial(size, prob, dim = 1)
 }
 \arguments{
 \item{lower, upper}{scalar values giving optional limits to free
@@ -111,7 +114,7 @@ The discrete probability distributions (\code{bernoulli},
   dimensions of the parameters (provided they are compatible with one
   another).
 
-  For \code{multivariate_normal()}, \code{dim} must be a scalar giving the
+  For \code{multivariate_normal()} and \code{multinomial()}, \code{dim} must be a scalar giving the
   number of rows in the resulting greta array, each row being (independently)
   distributed according to the multivariate normal distribution. The number
   of columns will always be the dimension of the distribution, determined
@@ -157,6 +160,7 @@ The discrete probability distributions (\code{bernoulli},
   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
+  \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
   }
 }

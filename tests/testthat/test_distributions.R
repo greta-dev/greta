@@ -286,6 +286,31 @@ test_that('Wishart distribution has correct density', {
 
 })
 
+
+test_that('multinomial distribution has correct density', {
+
+  source('helpers.R')
+
+  # parameters to test
+  m <- 5
+  prob <- runif(m)
+  size <- 5
+
+  # vectorise R's density function
+  dmultinom_vec <- function (x, size, prob)
+    apply(x, 1, stats::dmultinom, size = size, prob = prob)
+
+  difference <- compare_distribution(greta::multinomial,
+                                     dmultinom_vec,
+                                     parameters = list(size = size, prob = prob),
+                                     x = t(rmultinom(100, size, prob)))
+
+  # tf implementation doesn't standardise probabilities!
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('scalar-valued distributions can be defined in models', {
 
   source('helpers.R')

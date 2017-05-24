@@ -556,6 +556,84 @@ logistic_distribution <- R6Class (
 )
 
 # need to add checking of mean and Sigma dimensions
+multinomial_distribution <- R6Class (
+  'multinomial_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (size, prob, dim) {
+
+      # coerce to greta arrays
+      size <- as.greta_array(size)
+      prob <- as.greta_array(prob)
+
+      # check dimensions of prob
+      if (length(size) != 1) {
+
+        stop ('size must be a scalar, but has dimensions ',
+              paste(dim(size), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      # check dimensions of prob
+      if (ncol(prob) != 1 |
+          length(dim(prob)) != 2) {
+
+        stop ('prob must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(prob), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (length(prob) == 1) {
+
+        stop ('the multinomial distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
+
+      # check dim is a positive scalar integer
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('multinomial', c(dim, length(prob)))
+      self$add_parameter(size, 'size')
+      self$add_parameter(prob, 'prob')
+
+    },
+
+    # default value
+    create_target = function() {
+      variable(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      # transpose and scale probs to get absolute density correct
+      probs <- tf$transpose(parameters$prob)
+      probs <- probs / tf$reduce_sum(probs)
+      tf$contrib$distributions$Multinomial(total_count = parameters$size,
+                                           probs = probs)
+    },
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
+# need to add checking of mean and Sigma dimensions
 multivariate_normal_distribution <- R6Class (
   'multivariate_normal_distribution',
   inherit = distribution_node,
@@ -765,7 +843,7 @@ distrib <- function (distribution, ...) {
 #'   dimensions of the parameters (provided they are compatible with one
 #'   another).
 #'
-#'   For \code{multivariate_normal()}, \code{dim} must be a scalar giving the
+#'   For \code{multivariate_normal()} and \code{multinomial()}, \code{dim} must be a scalar giving the
 #'   number of rows in the resulting greta array, each row being (independently)
 #'   distributed according to the multivariate normal distribution. The number
 #'   of columns will always be the dimension of the distribution, determined
@@ -811,6 +889,7 @@ distrib <- function (distribution, ...) {
 #'   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
 #'   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
 #'   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
+#'   \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
 #'   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
 #'   }
 #'
@@ -969,3 +1048,8 @@ multivariate_normal <- function (mean, Sigma, dim = 1)
 #' @export
 wishart <- function (df, Sigma)
   distrib('wishart', df, Sigma)
+
+#' @rdname greta-distributions
+#' @export
+multinomial <- function (size, prob, dim = 1)
+  distrib('multinomial', size, prob, dim)
