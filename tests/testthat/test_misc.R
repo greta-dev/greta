@@ -37,8 +37,10 @@ test_that('tensorflow coercion work', {
   integer <- greta:::tf_as_integer(1)
   logical <- greta:::tf_as_logical(1)
 
-  expect_equal(float$dtype$name, 'float32')
-  expect_equal(integer$dtype$name, 'int64')
+  float_type <- paste0('float', options('greta_float_type'))
+  int_type <- paste0('int', options('greta_int_type'))
+  expect_equal(float$dtype$name, float_type)
+  expect_equal(integer$dtype$name, int_type)
   expect_equal(logical$dtype$name, 'bool')
 
 })
@@ -136,6 +138,10 @@ test_that('rejected mcmc proposals', {
 
   source('helpers.R')
 
+  # drop numerical precision to enable rejection
+  old_float_type <- options()$greta_float_type
+  options(greta_float_type = '32')
+
   # numerical rejection
   x <- rnorm(10000, 1e6, 1)
   z = normal(-1e6, 1e-6)
@@ -143,6 +149,8 @@ test_that('rejected mcmc proposals', {
   m <- define_model(z)
   expect_message(mcmc(m, n_samples = 1, warmup = 0),
                  'proposal rejected due to numerical instability')
+
+  options(greta_float_type = old_float_type)
 
   # bad proposal
   x <- rnorm(100, 0, 0.01)

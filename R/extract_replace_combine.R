@@ -55,7 +55,7 @@ tf_extract <- function (x, nelem, index, dims_out) {
 
   # flatten tensor, gather using index, reshape to output dimension
   tensor_in_flat <- tf$reshape(x, shape(nelem))
-  tf_index <- tf$constant(as.integer(index), dtype = tf$int32)
+  tf_index <- tf$constant(as.integer(index), dtype = tf_int())
   tensor_out_flat <- tf$gather(tensor_in_flat, tf_index)
   tensor_out <- tf$reshape(tensor_out_flat, to_shape(dims_out))
   tensor_out

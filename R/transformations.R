@@ -36,21 +36,20 @@ NULL
 
 # inverse link functions in tensorflow
 tf_iprobit <- function (x) {
-  sqrt2 <- tf$constant(sqrt(2))
-  (tf$erf(x / sqrt2) + 1) / 2
+  (tf$erf(x / fl(sqrt(2))) + fl(1)) / fl(2)
 }
 
 tf_ilogit <- function (x)
-  1 / (1 + tf$exp(-1 * x))
+  tf$nn$sigmoid(x)
 
 tf_icloglog <- function (x)
-  1 - tf$exp(-1 * tf$exp(x))
+  fl(1) - tf$exp(-tf$exp(x))
 
 tf_icauchit <- function (x)
-  (1 / pi) * tf$atan(x) + 0.5
+  fl(1 / pi) * tf$atan(x) + fl(0.5)
 
 tf_log1pe <- function (x)
-  tf$log1p(tf$exp(x))
+  tf$nn$softplus(x)
 
 #' @rdname greta-transforms
 #' @export

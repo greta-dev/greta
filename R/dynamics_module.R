@@ -44,12 +44,9 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
   idx_rows <- rep(rep(seq_len(m), each = m), n) + offset
 
   # set up sparse tensor
-  indices <- tf$constant(cbind(idx_rows, idx_cols) - 1,
-                         dtype = tf$int64)
-  values <- tf$reshape(mat,
-                       shape = shape(n * m ^ 2))
-  shape <- tf$constant(as.integer(rep(n * m, 2)),
-                       dtype = tf$int64)
+  indices <- tf$constant(cbind(idx_rows, idx_cols) - 1, dtype = tf$int64)
+  values <- tf$reshape(mat, shape = shape(n * m ^ 2))
+  shape <- tf$constant(as.integer(rep(n * m, 2)), dtype = tf$int64)
   full_mat <- tf$SparseTensor(indices = indices,
                               values = values,
                               dense_shape = shape)
@@ -57,7 +54,10 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
   # t_full_mat <- tf$transpose(full_mat)
 
   # replicate state for all patches
-  state <- tf$tile(state, tf$constant(c(n, 1L), shape = shape(2)))
+  state <- tf$tile(state,
+                   tf$constant(c(n, 1L),
+                               dtype = tf_int(),
+                               shape = shape(2)))
 
   # store states (can't overwrite since we need to maintain the chain of nodes)
   states <- list(state)
@@ -67,9 +67,9 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
     states[[i + 1]] <-  tf$sparse_tensor_dense_matmul(full_mat, states[[i]])
 
   # indices to subset the first state for each patch
-  idx_begin <- tf$constant(c(0L, 0L))
-  idx_end <- tf$constant(c(m * n, 1L))
-  idx_strides <- tf$constant(c(m, 1L))
+  idx_begin <- tf$constant(c(0L, 0L), dtype = tf_int())
+  idx_end <- tf$constant(c(m * n, 1L), dtype = tf_int())
+  idx_strides <- tf$constant(c(m, 1L), dtype = tf_int())
 
   # subset these iterated states to get the first state per sub-matrix
   before <- tf$strided_slice(states[[niter]],
@@ -83,7 +83,7 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
                             strides = idx_strides)
 
   # get growth rate
-  lambdas <- after/before
+  lambdas <- after / before
   lambdas
 
 }
