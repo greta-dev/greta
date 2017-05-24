@@ -289,9 +289,9 @@ greta_col <- function (which = c('main',
 # access the float and int type options
 tf_float <- function () {
   type <- options('greta_float_type')
-  if (! type %in% c('16', '32', '64')) {
+  if (! type %in% c('32', '64')) {
     warning ("unknown float type: ", type,
-             ". Acceptable types are '16', '32', or '64'. Switching to 64-bit floats")
+             ". Allowed types are '32', or '64'. Switching to 64-bit floats")
     type <- '64'
   }
   tf[[paste0('float', type)]]
@@ -302,7 +302,7 @@ tf_int <- function () {
   type <- options('greta_int_type')
   if (! type %in% c('8', '16', '32', '64')) {
     warning ("unknown int type: ", type,
-             ". Acceptable types are '8', '16', '32', or '64'. Switching to 32-bit ints")
+             ". Allowed types are '8', '16', '32', or '64'. Switching to 32-bit ints")
     type <- '32'
   }
   tf[[paste0('int', type)]]
