@@ -3,7 +3,7 @@ knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE,
                       comment = NA,
                       progress = FALSE)
-set.seed(1)
+set.seed(123)
 library(greta)
 
 ## ----ones----------------------------------------------------------------
