@@ -54,7 +54,7 @@ With the model written, we can draw samples of the parameters we care about.
 ```{r mcmc, eval = TRUE, results='hide', message=FALSE}
 model <- define_model(intercept, coefficient, sd)
 
-draws <- mcmc(model, n_samples = 1000)
+system.time(draws <- mcmc(model, n_samples = 500))
 ```
 
 This outputs an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software.
@@ -94,7 +94,7 @@ knitr::include_graphics('README_files/banner.png')
 
 For small to medium size (a few hundred data points) problems, Stan will probably be faster than greta. Where the model involves thousands of datapoints or multiplication of large matrices, greta is likely to be faster than STAN. That's because TensorFlow is heavily optimised for linear algebra operations.
 
-For example, the example code above takes around 60 seconds to run on my laptop for the 150-row iris data. If you run the same model and sampler on a dataset of 15,000 rows, it still only takes around 65 seconds. That's not bad. Not bad at all.
+For example, the example code above takes around 30 seconds to run on my laptop for the 150-row iris data. If you run the same model and sampler on a dataset of 15,000 rows, it still only takes around 35 seconds. That's not bad. Not bad at all.
 
 Since TensorFlow can be run across multiple CPUs or on a GPU, greta models can be made to scale to massive datasets. I'll add some benchmarks soon to give a clearer idea of how greta compares with other MCMC software.
 
