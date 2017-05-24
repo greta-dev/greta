@@ -118,13 +118,13 @@ The discrete probability distributions (\code{bernoulli},
   dimensions of the parameters (provided they are compatible with one
   another).
 
-  For \code{multivariate_normal()} and \code{multinomial()}, \code{dim} must be a scalar giving the
-  number of rows in the resulting greta array, each row being (independently)
-  distributed according to the multivariate normal distribution. The number
-  of columns will always be the dimension of the distribution, determined
-  from the parameters specified. \code{wishart()} always returns a single
-  square, 2D greta array, with dimension determined from the parameter
-  \code{Sigma}.
+  For \code{multivariate_normal()}, \code{multinomial()}, and
+  \code{categorical()} \code{dim} must be a scalar giving the number of rows
+  in the resulting greta array, each row being (independently) distributed
+  according to the multivariate normal distribution. The number of columns
+  will always be the dimension of the distribution, determined from the
+  parameters specified. \code{wishart()} always returns a single square, 2D
+  greta array, with dimension determined from the parameter \code{Sigma}.
 
   \code{multinomial()} does not check that observed values sum to
   \code{size}, and \code{categorical()} does not check that only one of the
