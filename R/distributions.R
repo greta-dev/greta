@@ -634,6 +634,74 @@ multinomial_distribution <- R6Class (
 )
 
 # need to add checking of mean and Sigma dimensions
+categorical_distribution <- R6Class (
+  'categorical_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (prob, dim) {
+
+      # coerce to greta arrays
+      prob <- as.greta_array(prob)
+
+      # check dimensions of prob
+      if (ncol(prob) != 1 |
+          length(dim(prob)) != 2) {
+
+        stop ('prob must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(prob), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (length(prob) == 1) {
+
+        stop ('the categorical distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
+
+      # check dim is a positive scalar integer
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('categorical', c(dim, length(prob)))
+      self$add_parameter(prob, 'prob')
+
+    },
+
+    # default value
+    create_target = function() {
+      variable(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      # transpose and scale probs to get absolute density correct
+      probs <- tf$transpose(parameters$prob)
+      probs <- probs / tf$reduce_sum(probs)
+      tf$contrib$distributions$Multinomial(total_count = 1,
+                                           probs = probs)
+    },
+
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
+# need to add checking of mean and Sigma dimensions
 multivariate_normal_distribution <- R6Class (
   'multivariate_normal_distribution',
   inherit = distribution_node,
@@ -822,7 +890,8 @@ distrib <- function (distribution, ...) {
 #' @param mean,meanlog,location unconstrained parameters
 #' @param sd,sdlog,size,lambda,shape,rate,df,scale,shape1,shape2 positive
 #'   parameters
-#' @param prob probability parameter (\code{0 < prob < 1})
+#' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
+#'   \code{multinomial} and \code{categorical}
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'
 #' @param dim the dimensions of the variable, either a scalar or a vector of
@@ -850,6 +919,11 @@ distrib <- function (distribution, ...) {
 #'   from the parameters specified. \code{wishart()} always returns a single
 #'   square, 2D greta array, with dimension determined from the parameter
 #'   \code{Sigma}.
+#'
+#'   \code{multinomial()} does not check that observed values sum to
+#'   \code{size}, and \code{categorical()} does not check that only one of the
+#'   observed entries is 1. It's the user's responsibility to check their data
+#'   matches the distribution!
 #'
 #'   The parameters of both \code{free} and \code{uniform} must be fixed, not
 #'   greta variables. This ensures these values can always be transformed to a
@@ -890,6 +964,7 @@ distrib <- function (distribution, ...) {
 #'   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
 #'   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
 #'   \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
+#'   \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
 #'   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
 #'   }
 #'
@@ -1053,3 +1128,8 @@ wishart <- function (df, Sigma)
 #' @export
 multinomial <- function (size, prob, dim = 1)
   distrib('multinomial', size, prob, dim)
+
+#' @rdname greta-distributions
+#' @export
+categorical <- function (prob, dim = 1)
+  distrib('categorical', prob, dim)

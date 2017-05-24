@@ -23,6 +23,7 @@
 \alias{multivariate_normal}
 \alias{wishart}
 \alias{multinomial}
+\alias{categorical}
 \title{greta probability distributions}
 \usage{
 free(lower = -Inf, upper = Inf, dim = 1)
@@ -66,6 +67,8 @@ multivariate_normal(mean, Sigma, dim = 1)
 wishart(df, Sigma)
 
 multinomial(size, prob, dim = 1)
+
+categorical(prob, dim = 1)
 }
 \arguments{
 \item{lower, upper}{scalar values giving optional limits to free
@@ -87,7 +90,8 @@ workaround). Unlike \code{lower} and \code{upper}, they must be finite.
 \item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2}{positive
 parameters}
 
-\item{prob}{probability parameter (\code{0 < prob < 1})}
+\item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
+\code{multinomial} and \code{categorical}}
 
 \item{Sigma}{positive definite variance-covariance matrix parameter}
 }
@@ -121,6 +125,11 @@ The discrete probability distributions (\code{bernoulli},
   from the parameters specified. \code{wishart()} always returns a single
   square, 2D greta array, with dimension determined from the parameter
   \code{Sigma}.
+
+  \code{multinomial()} does not check that observed values sum to
+  \code{size}, and \code{categorical()} does not check that only one of the
+  observed entries is 1. It's the user's responsibility to check their data
+  matches the distribution!
 
   The parameters of both \code{free} and \code{uniform} must be fixed, not
   greta variables. This ensures these values can always be transformed to a
@@ -161,6 +170,7 @@ The discrete probability distributions (\code{bernoulli},
   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
   \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
+  \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
   }
 }

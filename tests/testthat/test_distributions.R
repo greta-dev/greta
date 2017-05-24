@@ -286,7 +286,6 @@ test_that('Wishart distribution has correct density', {
 
 })
 
-
 test_that('multinomial distribution has correct density', {
 
   source('helpers.R')
@@ -305,7 +304,26 @@ test_that('multinomial distribution has correct density', {
                                      parameters = list(size = size, prob = prob),
                                      x = t(rmultinom(100, size, prob)))
 
-  # tf implementation doesn't standardise probabilities!
+  expect_true(all(difference < 1e-4))
+
+})
+
+test_that('categorical distribution has correct density', {
+
+  source('helpers.R')
+
+  # parameters to test
+  m <- 5
+  prob <- runif(m)
+
+  # vectorise R's density function
+  dcategorical_vec <- function (x, prob)
+    apply(x, 1, stats::dmultinom, size = 1, prob = prob)
+
+  difference <- compare_distribution(greta::categorical,
+                                     dcategorical_vec,
+                                     parameters = list(prob = prob),
+                                     x = t(rmultinom(100, 1, prob)))
 
   expect_true(all(difference < 1e-4))
 
