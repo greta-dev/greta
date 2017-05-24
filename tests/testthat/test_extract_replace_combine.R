@@ -291,3 +291,27 @@ test_that('stochastic and operation greta arrays can be extracted', {
   expect_identical(dim(b_sub), c(2L, 4L))
 
 })
+
+test_that('extract, replace, combine work in models', {
+
+  source('helpers.R')
+
+  # extract
+  a = normal(0, 1, dim = c(3, 4))
+  a_sub <- a[1:2, 2:3]
+  m_a <- define_model(a_sub)
+  draws_a <- mcmc(m_a, n_samples = 100)
+
+  # replace
+  b <- ones(4, 3)
+  b[, 2] <- normal(0, 1, dim = 4)
+  m_b <- define_model(b)
+  draws_b <- mcmc(m_b, n_samples = 100)
+
+  # combine
+  d <- c(normal(0, 1, dim = 2),
+         lognormal(0, 1, dim = 3))
+  m_d <- define_model(d)
+  draws_d <- mcmc(m_d, n_samples = 100)
+
+})
