@@ -142,8 +142,11 @@ dag_class <- R6Class(
       # get TF density tensors for all distribution
       densities <- lapply(density_names, get, envir = self$tf_environment)
 
+      # convert to double precision floats
+      densities_double <- lapply(densities, tf$cast, tf$float64)
+
       # reduce_sum them
-      summed_densities <- lapply(densities, tf$reduce_sum)
+      summed_densities <- lapply(densities_double, tf$reduce_sum)
 
       # remove their names and sum them together
       names(summed_densities) <- NULL

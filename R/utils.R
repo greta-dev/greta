@@ -307,3 +307,7 @@ tf_int <- function () {
   }
   tf[[paste0('int', type)]]
 }
+
+# cast a scalar as a float or integer of the correct type in TF code
+fl <- function(x) tf$constant(x, dtype = tf_float())
+int <- function(x) tf$constant(x, dtype = tf_int())

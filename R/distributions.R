@@ -64,7 +64,7 @@ uniform_distribution <- R6Class (
 
     # weird hack to make TF see a gradient here
     tf_log_density_function = function (x, parameters) {
-      self$log_density + x * 0
+      fl(self$log_density) + x * fl(0)
     }
 
   )
@@ -122,13 +122,13 @@ lognormal_distribution <- R6Class (
 
       log_prob = function (x) {
         lx <- tf$log(x)
-        -1 * (lx + tf$log(sd) + 0.9189385) +
-          -0.5 * tf$square(tf$subtract(lx, mean)) / var
+        fl(-1) * (lx + tf$log(sd) + fl(0.9189385)) +
+          fl(-0.5) * tf$square(tf$subtract(lx, mean)) / var
       }
 
       cdf = function (x) {
         lx <- tf$log(x)
-        0.5 + 0.5 * tf$erf((lx - mean) / (sqrt(2) * sd))
+        fl(0.5) + fl(0.5) * tf$erf((lx - mean) / (fl(sqrt(2)) * sd))
       }
 
       log_cdf = function (x) {
@@ -250,7 +250,7 @@ negative_binomial_distribution <- R6Class (
 
     tf_distrib = function (parameters) {
       tf$contrib$distributions$NegativeBinomial(total_count = parameters$size,
-                                                probs = 1 - parameters$prob)
+                                                probs = fl(1) - parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -338,11 +338,11 @@ weibull_distribution <- R6Class (
       b <- parameters$scale
 
       log_prob = function (x) {
-        log(a) - log(b) + (a - 1) * (log(x) - log(b)) - (x / b) ^ a
+        log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
       }
 
       cdf = function (x) {
-        1 - exp(-(x / b) ^ a)
+        fl(1) - exp(-(x / b) ^ a)
       }
 
       log_cdf = function (x) {
@@ -484,10 +484,10 @@ cauchy_distribution <- R6Class (
       s <- parameters$scale
 
       log_prob = function (x)
-        -tf$log(pi * s * (1 + ((x - loc) / s) ^ 2))
+        -tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s)))
 
       cdf = function (x)
-        (1 / pi)  * tf$atan((x - loc) / s) + 0.5
+        fl(1 / pi)  * tf$atan((x - loc) / s) + fl(0.5)
 
       log_cdf = function (x)
         tf$log(cdf(x))
@@ -689,10 +689,9 @@ categorical_distribution <- R6Class (
       # transpose and scale probs to get absolute density correct
       probs <- tf$transpose(parameters$prob)
       probs <- probs / tf$reduce_sum(probs)
-      tf$contrib$distributions$Multinomial(total_count = 1,
+      tf$contrib$distributions$Multinomial(total_count = fl(1),
                                            probs = probs)
     },
-
 
     # no CDF for multivariate distributions
     tf_cdf_function = NULL,
