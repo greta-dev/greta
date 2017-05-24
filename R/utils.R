@@ -231,7 +231,7 @@ tf_flat_to_symmetric = function (x, dims) {
 
   # create an empty vector to fill with the values
   values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
-  values <- recombine(values, indices, x)
+  values <- tf_recombine(values, indices, x)
 
   # reshape into lower triangular, then symmetric matrix
   L <- tf$reshape(values, shape(dims[1], dims[2]))
