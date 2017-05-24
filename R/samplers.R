@@ -201,9 +201,39 @@ mcmc <- function (model,
 
   # random starting locations
   if (is.null(initial_values)) {
-    initial_values <- dag$example_parameters()
-    initial_values[] <- rnorm(length(initial_values), 0, 0.1)
+
+    # try several times
+    valid <- FALSE
+    attempts <- 1
+    while (!valid & attempts < 10) {
+
+      initial_values <- dag$example_parameters()
+      # increase the jitter each time
+      initial_values[] <- rnorm(length(initial_values), 0, 1 + attempts / 5)
+
+      # test validity of values
+      valid <- valid_parameters(dag, initial_values)
+      attempts <- attempts + 1
+
+    }
+
+    if (!valid) {
+      stop ('Could not find reasonable starting values after ', attempts,
+            ' attempts. Please specify initial values manually via the ',
+            'initial_values argument to mcmc',
+            call. = FALSE)
+    }
+
+  } else {
+
+    if (!valid_parameters(dag, initial_values)) {
+      stop ('The log density and gradients could not be evaluated at these ',
+            'initial values.',
+            call. = FALSE)
+    }
+
   }
+
 
   # get default control options
   con <- switch(method,

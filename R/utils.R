@@ -286,3 +286,10 @@ greta_col <- function (which = c('main',
           super_light = pal(0.95))  #95%ish
 }
 
+# check whether initial values are valid
+valid_parameters <- function(dag, initial_values) {
+  dag$send_parameters(initial_values)
+  ld <- dag$log_density()
+  grad <- dag$gradients()
+  all(is.finite(c(ld, grad)))
+}
