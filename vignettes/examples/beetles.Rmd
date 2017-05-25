@@ -14,17 +14,12 @@ N <- 8
 
 #### greta code
 ```{r beetles_greta}
-# precalculate for centering
-mean_x <- mean(x)
-
-# priors and model
-alpha_star = normal(0, 1e3)
-beta = normal(0, 1e3)
-p <- ilogit(alpha_star + beta * (x - mean_x))
+alpha_star = normal(0, 32)
+beta = normal(0, 32)
+p <- ilogit(alpha_star + beta * (x - mean(x)))
 likelihood(r) = binomial(n, p)
 
-# other interesting quantities
-alpha <- alpha_star - beta * mean_x
+alpha <- alpha_star - beta * mean(x)
 rhat <- p * n
 ```
 

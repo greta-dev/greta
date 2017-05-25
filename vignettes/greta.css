@@ -8,6 +8,7 @@ pre.r{
   background-color: #f4f0f9;
   border: none;
   border-radius: 0;
+  line-height: 1.5;
 }
 .list-group-item.active,
 .list-group-item.active:hover,
