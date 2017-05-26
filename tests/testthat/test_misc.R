@@ -31,7 +31,7 @@ test_that('.onLoad runs', {
 
 })
 
-test_that('tensorflow coercion work', {
+test_that('tensorflow coercion works', {
 
   float <- greta:::tf_as_float(1)
   integer <- greta:::tf_as_integer(1)
@@ -93,6 +93,11 @@ test_that('define and mcmc error informatively', {
   expect_error(model(x),
                'none of the greta arrays in the model are unknown, so a model cannot be defined')
 
+  # a bad number of cores
+  a = normal(0, 1)
+  expect_warning(model(a, n_cores = 1000000L),
+               'cores were requested, but only')
+
   # can't draw samples of a data greta array
   z = normal(x, 1)
   m <- model(x, z)
@@ -143,13 +148,8 @@ test_that('rejected mcmc proposals', {
   distribution(x) = normal(z, 1e6)
   m <- model(z)
 
-  # mock up the progress bar to force its output to stdout for testing
-  cpb2 <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
-  dummy_cpb <- function(...)
-    cpb2(..., stream = stdout(), force = TRUE)
-
   with_mock(
-    `greta:::create_progress_bar` = dummy_cpb,
+    `greta:::create_progress_bar` = mock_create_progress_bar,
     m <- model(z),
     out <- capture_output(mcmc(m, n_samples = 1, warmup = 0)),
     expect_match(out, '100% bad')
@@ -222,5 +222,60 @@ test_that('mcmc works with verbosity and warmup', {
   distribution(x) = normal(z, 1)
   m <- model(z)
   mcmc(m, n_samples = 5, warmup = 5, verbose = TRUE)
+
+})
+
+test_that('progress bar gives a range of messages', {
+
+  source('helpers.R')
+
+  # 1/101 should be <1%
+  with_mock(
+    `greta:::create_progress_bar` = mock_create_progress_bar,
+    `greta:::mcmc` = mock_mcmc,
+    out <- capture_output(mcmc(101)),
+    expect_match(out, '<1% bad')
+  )
+
+  # 1/50 should be 50%
+  with_mock(
+    `greta:::create_progress_bar` = mock_create_progress_bar,
+    `greta:::mcmc` = mock_mcmc,
+    out <- capture_output(mcmc(50)),
+    expect_match(out, '2% bad')
+  )
+
+  # 1/1 should be 100%
+  with_mock(
+    `greta:::create_progress_bar` = mock_create_progress_bar,
+    `greta:::mcmc` = mock_mcmc,
+    out <- capture_output(mcmc(1)),
+    expect_match(out, '100% bad')
+  )
+
+})
+
+
+test_that('stashed_samples works', {
+
+  source('helpers.R')
+
+  # set up model
+  a <- normal(0, 1)
+  m <- model(a)
+
+  draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE)
+
+  # with a completed sample, this should be NULL
+  ans <- stashed_samples()
+  expect_null(ans)
+
+  # mock up a stash
+  stash <- greta:::greta_stash
+  assign('trace_stash', as.matrix(rnorm(17)), envir = stash)
+
+  # should convert to an mcmc.list
+  ans <- stashed_samples()
+  expect_s3_class(ans, 'mcmc.list')
 
 })

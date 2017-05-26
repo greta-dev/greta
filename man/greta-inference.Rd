@@ -47,15 +47,20 @@ Carry out statistical inference on parameters of interest by
   \code{stashed_samples()}.
 }
 \details{
-If \code{verbose = TRUE}, the progress bar shows the number of iterations
-  so far and the expected time to complete the phase of model fitting (warmup
-  or sampling). Occasionally, a proposed set of parameters can have such a
-  low density as to cause numerical instability (I.e. the log density or its
-  gradient is \code{NA},\code{Inf} or \code{-Inf}). When this happens, the
-  progress bar will also display the proportion of samples so far that were
-  'bad' (numerically unstable) and therefore rejected. If you're getting a
-  lot of these, you may want to manually define starting values to move the
-  sampler into a more reasonable part of the aprameter space.
+If \code{verbose = TRUE}, the progress bar shows the number of
+  iterations so far and the expected time to complete the phase of model
+  fitting (warmup or sampling). Occasionally, a proposed set of parameters
+  can cause numerical instability (I.e. the log density or its gradient is
+  \code{NA}, \code{Inf} or \code{-Inf}); normally because the log joint
+  density is so low that it can't be represented as a floating point number.
+  When this happens, the progress bar will also display the proportion of
+  samples so far that were 'bad' (numerically unstable) and therefore
+  rejected.
+  If you're getting a lot of numerical instability, you might want to
+  manually define starting values to move the sampler into a more reasonable
+  part of the parameter space. Alternatively, you could redefine the model
+  (via \code{model}) to have double precision, though this will slow down
+  sampling.
 
   Currently, the only implemented MCMC procedure is static Hamiltonian
   Monte Carlo (\code{method = 'hmc'}). During the warmup iterations, the

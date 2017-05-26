@@ -315,3 +315,13 @@ plaplace <- function (q, location, scale)
 
 qlaplace <- function (p, location, scale)
   rmutil::qlaplace(p, m = location, s = scale)
+
+# mock up the progress bar to force its output to stdout for testing
+cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
+mock_create_progress_bar <- function(...)
+  cpb(..., stream = stdout(), force = TRUE)
+
+mock_mcmc <- function (n_samples = 101) {
+  pb <- create_progress_bar('sampling', c(0, n_samples))
+  iterate_progress_bar(pb, n_samples, rejects = 1)
+}
