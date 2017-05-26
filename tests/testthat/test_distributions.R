@@ -169,7 +169,6 @@ test_that('student distribution has correct density', {
 
 })
 
-
 test_that('laplace distribution has correct density', {
 
   source('helpers.R')
@@ -218,6 +217,19 @@ test_that('logistic distribution has correct density', {
                                      parameters = list(location = -1.3,
                                                        scale = 2.1),
                                      x = rlogis(100, -1.3, 2.1))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
+test_that('f distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::f,
+                                     df,
+                                     parameters = list(df1 = 5.9, df2 = 2),
+                                     x = rf(100, 5.9, 2))
 
   expect_true(all(difference < 1e-4))
 

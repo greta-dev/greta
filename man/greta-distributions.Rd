@@ -20,6 +20,7 @@
 \alias{cauchy}
 \alias{chi_squared}
 \alias{logistic}
+\alias{f}
 \alias{multivariate_normal}
 \alias{wishart}
 \alias{multinomial}
@@ -62,6 +63,8 @@ chi_squared(df, dim = NULL)
 
 logistic(location, scale, dim = NULL)
 
+f(df1, df2, dim = NULL)
+
 multivariate_normal(mean, Sigma, dim = 1)
 
 wishart(df, Sigma)
@@ -87,7 +90,7 @@ workaround). Unlike \code{lower} and \code{upper}, they must be finite.
 
 \item{mean, meanlog, location}{unconstrained parameters}
 
-\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2}{positive
+\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2, df1, df2}{positive
 parameters}
 
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for

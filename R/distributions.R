@@ -555,6 +555,56 @@ logistic_distribution <- R6Class (
   )
 )
 
+f_distribution <- R6Class (
+  'f_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (df1, df2, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(df1, df2, target_dim = dim)
+      super$initialize('d', dim)
+      self$add_parameter(df1, 'df1')
+      self$add_parameter(df2, 'df2')
+    },
+
+    # default value
+    create_target = function() {
+      variable(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      df1 <- parameters$df1
+      df2 <- parameters$df2
+
+      tf_lbeta <- function(a, b)
+        tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
+
+      log_prob = function (x) {
+        df1_x <- df1 * x
+        la <- df1 * log(df1_x) + df2 * log(df2)
+        lb <- (df1 + df2) * log(df1_x + df2)
+        lnumerator <- fl(0.5) * (la - lb)
+        lnumerator - log(x) - tf_lbeta(df1 / fl(2), df2 / fl(2))
+      }
+
+      cdf = function (x) {
+        df1_x <- df1 * x
+        ratio <- df1_x / (df1_x + df2)
+        tf$betainc(df1 / fl(2), df2 / fl(2), ratio)
+      }
+
+      log_cdf = function(x)
+        log(cdf(x))
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+
+    }
+
+  )
+)
+
 # need to add checking of mean and Sigma dimensions
 multinomial_distribution <- R6Class (
   'multinomial_distribution',
@@ -887,7 +937,7 @@ distrib <- function (distribution, ...) {
 #'   \code{min} must always be less than \code{max}.
 #'
 #' @param mean,meanlog,location unconstrained parameters
-#' @param sd,sdlog,size,lambda,shape,rate,df,scale,shape1,shape2 positive
+#' @param sd,sdlog,size,lambda,shape,rate,df,scale,shape1,shape2,df1,df2 positive
 #'   parameters
 #' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
 #'   \code{multinomial} and \code{categorical}
@@ -1112,6 +1162,11 @@ chi_squared <- function (df, dim = NULL)
 #' @export
 logistic <- function (location, scale, dim = NULL)
   distrib('logistic', location, scale, dim)
+
+#' @rdname greta-distributions
+#' @export
+f <- function (df1, df2, dim = NULL)
+  distrib('f', df1, df2, dim)
 
 #' @rdname greta-distributions
 #' @export
