@@ -49,6 +49,7 @@ Collate:
 Imports:
     R6,
     tensorflow,
+    reticulate,
     coda
 Suggests:
     knitr,
