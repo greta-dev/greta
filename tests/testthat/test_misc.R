@@ -155,12 +155,17 @@ test_that('rejected mcmc proposals', {
     expect_match(out, '100% bad')
   )
 
-  # bad proposal
-  x <- rnorm(100, 0, 0.01)
-  z = normal(0, 10)
-  distribution(x) = normal(z, 0.01)
+  # bad initial values
+  expect_error(mcmc(m, n_samples = 1, warmup = 0, initial_values = 1e20),
+               'could not be evaluated at these initial values')
+
+  # reallybad proposals
+  x <- rnorm(100000, 1e12, 1)
+  z = normal(-1e12, 1e-12)
+  distribution(x) = normal(z, 1e-12)
   m <- model(z)
-  mcmc(m, n_samples = 1, warmup = 0, verbose = FALSE)
+  expect_error(mcmc(m, n_samples = 1, warmup = 0),
+               'Could not find reasonable starting values after 10 attempts')
 
 })
 

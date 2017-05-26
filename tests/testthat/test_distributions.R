@@ -557,10 +557,10 @@ test_that('multivariate_normal distribution errors informatively', {
 
   # bad means
   expect_error(multivariate_normal(m_c, a),
-                       'mean must be a 2D greta array with one column, but has dimensions 1 x 3')
+               'mean must be a 2D greta array with one column, but has dimensions 1 x 3')
 
   expect_error(multivariate_normal(m_d, a),
-                       'mean must be a 2D greta array with one column, but has dimensions 3 x 2')
+               'mean must be a 2D greta array with one column, but has dimensions 3 x 2')
 
   # good sigmas
   expect_true(inherits(multivariate_normal(m_a, a),
@@ -588,4 +588,61 @@ test_that('multivariate_normal distribution errors informatively', {
 
 })
 
-# sample free with different constraints
+test_that('multinomial distribution errors informatively', {
+
+  source('helpers.R')
+
+  p_a <- randu(3)
+  p_b <- randu(3, 2)
+
+  # good size & probs
+  expect_true(inherits(multinomial(size = 10, p_a),
+                       'greta_array'))
+
+  # bad probs
+  expect_error(multinomial(10, p_b),
+               'prob must be a 2D greta array with one column, but has dimensions 3 x 2')
+
+  # bad size
+  expect_error(multinomial(c(1, 2), p_a),
+               'size must be a scalar, but has dimensions 2 x 1')
+
+  # scalars
+  expect_error(multinomial(c(1), 1),
+               'the multinomial distribution is for vectors, but the parameters were scalar')
+
+  # bad dim
+  expect_error(multinomial(10, p_a, dim = -1),
+               'dim must be a scalar positive integer, but was: -1')
+  expect_error(multinomial(10, p_a, dim = c(1, 3)),
+               '^dim must be a scalar positive integer, but was:')
+
+})
+
+
+test_that('categorical distribution errors informatively', {
+
+  source('helpers.R')
+
+  p_a <- randu(3)
+  p_b <- randu(3, 2)
+
+  # good probs
+  expect_true(inherits(categorical(p_a),
+                       'greta_array'))
+
+  # bad probs
+  expect_error(categorical(p_b),
+               'prob must be a 2D greta array with one column, but has dimensions 3 x 2')
+
+  # scalars
+  expect_error(categorical(c(1), 1),
+               'the categorical distribution is for vectors, but the parameters were scalar')
+
+  # bad dim
+  expect_error(categorical(p_a, dim = -1),
+               'dim must be a scalar positive integer, but was: -1')
+  expect_error(categorical(p_a, dim = c(1, 3)),
+               '^dim must be a scalar positive integer, but was:')
+
+})
