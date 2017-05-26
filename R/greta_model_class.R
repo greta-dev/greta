@@ -2,10 +2,181 @@
 
 #' @name greta-model
 #' @title Greta Model Objects
-#' @description Methods to inspect \code{greta_model} objects (returned by
-#'   \code{\link{define_model}}), including a graphic representation of the
-#'   constructed model.
+#' @description Create a \code{greta_model} object representing a statistical
+#'   model (using \code{model}), and plot a graphical representation of the
+#'   model. Statistical inference can be performed on \code{greta_model} objects
+#'   with \code{\link{mcmc}}
 NULL
+
+#' @rdname greta-model
+#' @export
+#' @importFrom parallel detectCores
+#'
+#' @param \dots for \code{model}: \code{greta_array} objects to be tracked by
+#'   the model (i.e. those for which samples will be retained during mcmc). If
+#'   not provided, all of the non-data \code{greta_array} objects defined in the
+#'   calling environment will be tracked. For \code{print} and
+#'   \code{plot}:further arguments passed to or from other methods (currently
+#'   ignored).
+#'
+#' @param precision the floating point precision to use when evaluating this
+#'   model. Switching from \code{'single'} (the default) to \code{'double'}
+#'   should reduce the risk of numerical instability during sampling, but will
+#'   also increase the computation time, particularly for large models.
+#'
+#' @param n_cores the number of cpu cores to use when evaluating this model.
+#'   Defaults to and cannot exceed the number detected by
+#'   \code{parallel::detectCores}.
+#'
+#' @param compile whether to apply
+#'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
+#'   the tensorflow graph representing the model. This may slow down model
+#'   definition, and speed up model evaluation.
+#'
+#' @details \code{model()} takes greta arrays as arguments, and defines a
+#'   statistical model by finding all of the other greta arrays on which they
+#'   depend, or which depend on them. Further arguments to \code{model} can be used to configure the tensorflow
+#'   graph representing the model, to tweak performance.
+#'
+#' @return \code{model} - a \code{greta_model} object.
+#'
+#' @examples
+#'
+#' \dontrun{
+#'
+#' # define a simple model
+#' mu = free()
+#' sigma = lognormal(1, 0.1)
+#' x = rnorm(10)
+#' distribution(x) = normal(mu, sigma)
+#'
+#' m <- model(mu, sigma)
+#'
+#' plot(m)
+#' }
+#'
+model <- function (...,
+                   precision = c('single', 'double'),
+                   n_cores = NULL,
+                   compile = TRUE) {
+
+  check_tf_version('error')
+
+  # get the floating point precision
+  tf_float <- switch(match.arg(precision),
+                     single = tf$float32,
+                     double = tf$float64)
+
+  # check and set the number of cores
+  n_detected <- parallel::detectCores()
+  if (is.null(n_cores)) {
+    n_cores <- n_detected
+  } else {
+
+    n_cores <- as.integer(n_cores)
+
+    if (!n_cores %in% seq_len(n_detected)) {
+      warning (n_cores, ' cores were requested, but only ',
+               n_detected, ' cores are available. Using ',
+               n_detected, ' cores.')
+      n_cores <- n_detected
+    }
+  }
+
+  # flush all tensors from the default graph
+  tf$reset_default_graph()
+
+  # nodes required
+  target_greta_arrays <- list(...)
+
+  # if no arrays were specified, find all of the non-data arrays
+  if (identical(target_greta_arrays, list())) {
+
+    target_greta_arrays <- all_greta_arrays(parent.frame(),
+                                            include_data = FALSE)
+
+  } else {
+
+    # otherwise, find variable names for the provided nodes
+    names <- substitute(list(...))[-1]
+    names <- vapply(names, deparse, '')
+    names(target_greta_arrays) <- names
+
+  }
+
+  if (length(target_greta_arrays) == 0) {
+    stop ('could not find any non-data greta arrays',
+          call. = FALSE)
+  }
+
+  # get the dag containing the target nodes
+  dag <- dag_class$new(target_greta_arrays,
+                       tf_float = tf_float,
+                       n_cores = n_cores,
+                       compile = compile)
+
+  # get and check the types
+  types <- dag$node_types
+
+  # the user might pass greta arrays with groups of nodes that are unconnected
+  # to one another. Need to check there are densities in each graph
+
+  # so find the subgraph to which each node belongs
+  graph_id <- dag$subgraph_membership()
+
+  graphs <- unique(graph_id)
+  n_graphs <- length(graphs)
+
+  # separate messages to avoid the subgraphs issue for beginners
+  if (n_graphs == 1) {
+    density_message <- paste('none of the greta arrays in the model are',
+                             'associated with a probability density, so a',
+                             'model cannot be defined')
+    variable_message <- paste('none of the greta arrays in the model are',
+                              'unknown, so a model cannot be defined')
+  } else {
+    density_message <- paste('the model contains', n_graphs, 'disjoint graphs,',
+                             'one or more of these sub-graphs does not contain',
+                             'any greta arrays that are associated with a',
+                             'probability density, so a model cannot be',
+                             'defined')
+    variable_message <- paste('the model contains', n_graphs, 'disjoint',
+                              'graphs, one or more of these sub-graphs does',
+                              'not contain any greta arrays that are unknown,',
+                              'so a model cannot be defined')
+  }
+
+  for (graph in graphs) {
+
+    types_sub <- types[graph_id == graph]
+
+    # check they have a density among them
+    if (!('distribution' %in% types_sub))
+      stop (density_message, call. = FALSE)
+
+    # check they have a variable node among them
+    if (!('variable' %in% types_sub))
+      stop (variable_message, call. = FALSE)
+
+  }
+
+  # define the TF graph
+  dag$define_tf()
+
+  # create the model object and add details
+  model <- as.greta_model(dag)
+  model$target_greta_arrays <- target_greta_arrays
+  model$visible_greta_arrays <- all_greta_arrays(parent.frame())
+
+  model
+
+}
+
+#' @name greta-model
+#'
+#' @details \code{define_model} is an alias for \code{model}. It is deprecated,
+#'   and will be removed in version 0.2.
+define_model <- model
 
 # register generic method to coerce objects to a greta model
 as.greta_model <- function(x, ...)
@@ -19,7 +190,6 @@ as.greta_model.dag_class <- function (x, ...) {
 
 #' @rdname greta-model
 #' @param x a \code{greta_model} object
-#' @param \dots further arguments passed to or from other methods (currently ignored).
 #' @export
 print.greta_model <- function (x, ...) {
   cat('greta model')
@@ -28,13 +198,13 @@ print.greta_model <- function (x, ...) {
 #' @rdname greta-model
 #' @param y unused default argument
 #'
-
 #' @details The plot method produces a visual representation of the defined
 #'   model. It uses the \code{DiagrammeR} package, which must be installed
 #'   first. Here's a key to the plots:
 #'   \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
 #'   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 #'
+#' @return \code{plot} - a \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object (invisibly).
 #'
 #' @export
 plot.greta_model <- function (x, y, ...) {

@@ -253,7 +253,7 @@ z &lt;- x * 3
 length(z$node$children)</code></pre>
 <pre><code>[1] 2</code></pre>
 <p>Each node also has a list of its parents, the nodes that have been created from this one.</p>
-<p>When <code>define_model()</code> is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.</p>
+<p>When <code>model()</code> is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.</p>
 <p>Nodes also have a value member, which is an array for data nodes or an ‘unknowns’ object for other node types. The unknowns class is a thin wrapper around arrays, which prints the question marks. Generic functions for working on arrays (e.g. <code>dim</code>, <code>length</code>, <code>print</code>) make use these node values to return something familiar to the user.</p>
 <pre class="r"><code>x$node$value()</code></pre>
 <pre><code>     [,1] [,2] [,3]
@@ -273,7 +273,7 @@ class(x$node$value())</code></pre>
 </div>
 <div id="tensors" class="section level3">
 <h3>Tensors</h3>
-<p>In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn’t happen until the user runs <code>define_model()</code>, which creates a ‘dag_class’ object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.</p>
+<p>In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn’t happen until the user runs <code>model()</code>, which creates a ‘dag_class’ object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.</p>
 <p>The node <code>tf()</code> method takes the dag as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.</p>
 <pre class="r"><code>x$node$tf</code></pre>
 <pre><code>function (dag) {
@@ -281,7 +281,7 @@ class(x$node$value())</code></pre>
              tf$constant(self$value(), dtype = tf_float()),
              envir = dag$tf_environment)
     }
-&lt;environment: 0x120304f18&gt;</code></pre>
+&lt;environment: 0x1230458d0&gt;</code></pre>
 <p>Because R6 objects are pass-by-reference (rather than pass-by-copy), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their children, they can make sure those children are defined as tensors before they are. The <code>define_tf()</code> member function ensures that that happens, enabling operation nodes to use the tensors for their children when defining their own tensor.</p>
 <pre class="r"><code>z$node$tf</code></pre>
 <pre><code>function (dag) {
@@ -307,7 +307,7 @@ class(x$node$value())</code></pre>
       assign(dag$tf_name(self), node, envir = dag$tf_environment)
 
     }
-&lt;environment: 0x103529140&gt;</code></pre>
+&lt;environment: 0x128b0f378&gt;</code></pre>
 </div>
 </div>
 <div id="variables-and-free-states" class="section level2">
@@ -343,7 +343,7 @@ class(a$node)</code></pre>
       y
 
     }
-&lt;environment: 0x11dc418d0&gt;</code></pre>
+&lt;environment: 0x12c4dbaa0&gt;</code></pre>
 </div>
 <div id="distributions" class="section level2">
 <h2>distributions</h2>
@@ -376,14 +376,14 @@ class(b$node$distribution$target)</code></pre>
 
       ld
     }
-&lt;environment: 0x10a82e548&gt;</code></pre>
+&lt;environment: 0x12c6708a8&gt;</code></pre>
 <p>If the distribution was truncated, the log density is normalised using the cumulative distribution function.</p>
 </div>
 <div id="joint-density" class="section level2">
 <h2>Joint density</h2>
 <p>Those log-densities for these distributions are summed on the TensorFlow graph to create a Tensor for the joint log-density of the model. TensorFlow’s automatic gradient capabilities are then used to define a Tensor for the gradient of the log-density with respect to each parameter in the model.</p>
 <p>The <code>dag</code> R6 object contained within the model then exposes methods to send parameters to the TensorFlow graph and return the joint density and gradient.</p>
-<pre class="r"><code>model &lt;- define_model(b)
+<pre class="r"><code>model &lt;- model(b)
 model$dag$send_parameters</code></pre>
 <pre><code>function (parameters, flat = TRUE) {
 
@@ -397,7 +397,7 @@ model$dag$send_parameters</code></pre>
            parameter_dict &lt;- do.call(dict, parameters))
 
     }
-&lt;environment: 0x108ca8f80&gt;</code></pre>
+&lt;environment: 0x108f5ab88&gt;</code></pre>
 <pre class="r"><code>model$dag$log_density</code></pre>
 <pre><code>function() {
 
@@ -405,13 +405,13 @@ model$dag$send_parameters</code></pre>
            sess$run(joint_density, feed_dict = parameter_dict))
 
     }
-&lt;environment: 0x108ca8f80&gt;</code></pre>
+&lt;environment: 0x108f5ab88&gt;</code></pre>
 <pre class="r"><code>model$dag$gradients</code></pre>
 <pre><code>function () {
       with(self$tf_environment,
            sess$run(gradients, feed_dict = parameter_dict))
     }
-&lt;environment: 0x108ca8f80&gt;</code></pre>
+&lt;environment: 0x108f5ab88&gt;</code></pre>
 <p>These methods are used by MCMC samplers to explore the model parameters.</p>
 </div>
 

@@ -10,7 +10,7 @@ create_progress_bar <- function (phase, iter, ...) {
 
   # name for formatting
   name <- switch(phase,
-                 warmup = 'warmup  ',
+                 warmup = '  warmup',
                  sampling = 'sampling')
 
   # total iterations for bat

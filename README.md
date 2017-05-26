@@ -34,7 +34,7 @@ distribution(iris$Sepal.Length) = normal(mean, sd)
 With the model written, we can draw samples of the parameters we care about.
 
 ``` r
-model <- define_model(intercept, coefficient, sd)
+model <- define(intercept, coefficient, sd)
 
 draws <- mcmc(model, n_samples = 500)
 ```

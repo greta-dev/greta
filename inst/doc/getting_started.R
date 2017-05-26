@@ -35,10 +35,10 @@ library(greta)
 #  distribution(y) = normal(mean, sd)
 #  
 #  # defining the model
-#  model <- define_model(int, coef, sd)
+#  m <- model(int, coef, sd)
 #  
 #  # plotting
-#  plot(model)
+#  plot(m)
 #  
 #  # sampling
 #  draws <- mcmc(model, n_samples = 1000)
@@ -135,14 +135,14 @@ sd = lognormal(0, 3)
 mean <- int + coef * x
 distribution(y) = normal(mean, sd)
 
-## ----define--------------------------------------------------------------
-model <- define_model(int, coef, sd)
+## ----define_model--------------------------------------------------------
+m <- model(int, coef, sd)
 
 ## ----plot, eval = FALSE--------------------------------------------------
-#  plot(model)
+#  plot(m)
 
 ## ----plot_hidden, echo = FALSE, results='hide'---------------------------
-gr <- plot(model)
+gr <- plot(m)
 fname <- tempfile(fileext = '.png')
 DiagrammeR::export_graph(gr,
                          file_name = fname,
@@ -155,7 +155,7 @@ knitr::include_graphics(fname)
 
 ## ----plot_coef, echo = FALSE, results='hide'-----------------------------
 coef = normal(0, 3)
-m_coef <- define_model(coef)
+m_coef <- model(coef)
 gr <- plot(m_coef)
 fname <- tempfile(fileext = '.png')
 DiagrammeR::export_graph(gr,
@@ -172,7 +172,7 @@ sd = free()
 y <- as_data(iris$Sepal.Length)
 mean <- ones(150)
 distribution(y) = normal(mean, sd)
-m_likelihood <- define_model(sd)
+m_likelihood <- model(sd)
 gr <- plot(m_likelihood)
 idx <- which(gr$nodes_df$label == 'mean\n')
 gr$nodes_df$shape[idx] <- 'circle'
@@ -196,7 +196,7 @@ knitr::include_graphics('../man/figures/plotlegend.png')
 #  install.packages('DiagrammeR')
 
 ## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------
-draws <- mcmc(model, n_samples = 1000)
+draws <- mcmc(m, n_samples = 1000)
 
 ## ----coda_summary--------------------------------------------------------
 summary(draws)

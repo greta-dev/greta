@@ -62,40 +62,40 @@ test_that('all_greta_arrays works', {
 
 test_that('greta_model objects print', {
 
-  m <- define_model(normal(0, 1))
+  m <- model(normal(0, 1))
   message <- capture.output(print(m))
   expect_equal(message, 'greta model')
 
 })
 
-test_that('define_model and mcmc error informatively', {
+test_that('define and mcmc error informatively', {
 
   source('helpers.R')
 
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
-  expect_error(define_model(free()),
+  expect_error(model(free()),
                'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
 
-  expect_error(define_model(x),
+  expect_error(model(x),
                'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
 
-  expect_error(define_model(),
+  expect_error(model(),
                'could not find any non-data greta arrays')
 
   # can't define a model for an unfixed discrete variable
-  expect_error(define_model(bernoulli(0.5)),
+  expect_error(model(bernoulli(0.5)),
                "model contains a discrete random variable that doesn't have a fixed value, so cannot be sampled from")
 
-  # no parameters here, so define_model or dag should error
+  # no parameters here, so define or dag should error
   distribution(x) = normal(0, 1)
-  expect_error(define_model(x),
+  expect_error(model(x),
                'none of the greta arrays in the model are unknown, so a model cannot be defined')
 
   # can't draw samples of a data greta array
   z = normal(x, 1)
-  m <- define_model(x, z)
+  m <- model(x, z)
   expect_error(mcmc(m),
                'x is a data greta array, data greta arrays cannot be sampled')
 
@@ -141,7 +141,7 @@ test_that('rejected mcmc proposals', {
   x <- rnorm(10000, 1e6, 1)
   z = normal(-1e6, 1e-6)
   distribution(x) = normal(z, 1e6)
-  m <- define_model(z)
+  m <- model(z)
 
   # mock up the progress bar to force its output to stdout for testing
   cpb2 <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
@@ -150,7 +150,7 @@ test_that('rejected mcmc proposals', {
 
   with_mock(
     `greta:::create_progress_bar` = dummy_cpb,
-    m <- define_model(z),
+    m <- model(z),
     out <- capture_output(mcmc(m, n_samples = 1, warmup = 0)),
     expect_match(out, '100% bad')
   )
@@ -159,7 +159,7 @@ test_that('rejected mcmc proposals', {
   x <- rnorm(100, 0, 0.01)
   z = normal(0, 10)
   distribution(x) = normal(z, 0.01)
-  m <- define_model(z)
+  m <- model(z)
   mcmc(m, n_samples = 1, warmup = 0, verbose = FALSE)
 
 })
@@ -176,13 +176,13 @@ test_that('disjoint graphs are checked', {
   # c is unrelated and has no density
   c = free()
 
-  expect_error(m <- define_model(a, b, c),
+  expect_error(m <- model(a, b, c),
                'the model contains 2 disjoint graphs, one or more of these sub-graphs does not contain any greta arrays that are associated with a probability density, so a model cannot be defined')
 
   # d is unrelated and known
   d = as_data(randn(3))
   distribution(d) = normal(0, 1)
-  expect_error(m <- define_model(a, b, d),
+  expect_error(m <- model(a, b, d),
                'the model contains 2 disjoint graphs, one or more of these sub-graphs does not contain any greta arrays that are unknown, so a model cannot be defined')
 
 
@@ -194,7 +194,7 @@ test_that("plotting models doesn't error", {
 
   a = uniform(0, 1)
 
-  m <- define_model(a)
+  m <- model(a)
 
   plot(m)
 
@@ -220,7 +220,7 @@ test_that('mcmc works with verbosity and warmup', {
   x <- rnorm(10)
   z = normal(0, 1)
   distribution(x) = normal(z, 1)
-  m <- define_model(z)
+  m <- model(z)
   mcmc(m, n_samples = 5, warmup = 5, verbose = TRUE)
 
 })

@@ -186,7 +186,7 @@ gen_opfun <- function (n, ops) {
 # sample n values from a distribution by HMC, check they all have the correct support
 # greta array is defined as astochastic in the call, like: sample_distribution(normal(0, 1))
 sample_distribution <- function (greta_array, n = 10, lower = -Inf, upper = Inf) {
-  m <- define_model(greta_array)
+  m <- model(greta_array)
   draws <- mcmc(m, n_samples = n, warmup = 1, verbose = FALSE)
   samples <- as.vector(draws[[1]])
   expect_true(all(samples >= lower & samples <= upper))

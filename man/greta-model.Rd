@@ -2,30 +2,88 @@
 % Please edit documentation in R/greta_model_class.R
 \name{greta-model}
 \alias{greta-model}
+\alias{model}
+\alias{greta-model}
+\alias{define_model}
 \alias{print.greta_model}
 \alias{plot.greta_model}
 \title{Greta Model Objects}
 \usage{
+model(..., precision = c("single", "double"), n_cores = NULL,
+  compile = TRUE)
+
+define_model(..., precision = c("single", "double"), n_cores = NULL,
+  compile = TRUE)
+
 \method{print}{greta_model}(x, ...)
 
 \method{plot}{greta_model}(x, y, ...)
 }
 \arguments{
-\item{x}{a \code{greta_model} object}
+\item{\dots}{for \code{model}: \code{greta_array} objects to be tracked by
+the model (i.e. those for which samples will be retained during mcmc). If
+not provided, all of the non-data \code{greta_array} objects defined in the
+calling environment will be tracked. For \code{print} and
+\code{plot}:further arguments passed to or from other methods (currently
+ignored).}
 
-\item{\dots}{further arguments passed to or from other methods (currently ignored).}
+\item{precision}{the floating point precision to use when evaluating this
+model. Switching from \code{'single'} (the default) to \code{'double'}
+should reduce the risk of numerical instability during sampling, but will
+also increase the computation time, particularly for large models.}
+
+\item{n_cores}{the number of cpu cores to use when evaluating this model.
+Defaults to and cannot exceed the number detected by
+\code{parallel::detectCores}.}
+
+\item{compile}{whether to apply
+\href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
+the tensorflow graph representing the model. This may slow down model
+definition, and speed up model evaluation.}
+
+\item{x}{a \code{greta_model} object}
 
 \item{y}{unused default argument}
 }
+\value{
+\code{model} - a \code{greta_model} object.
+
+\code{plot} - a \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object (invisibly).
+}
 \description{
-Methods to inspect \code{greta_model} objects (returned by
-  \code{\link{define_model}}), including a graphic representation of the
-  constructed model.
+Create a \code{greta_model} object representing a statistical
+  model (using \code{model}), and plot a graphical representation of the
+  model. Statistical inference can be performed on \code{greta_model} objects
+  with \code{\link{mcmc}}
 }
 \details{
+\code{model()} takes greta arrays as arguments, and defines a
+  statistical model by finding all of the other greta arrays on which they
+  depend, or which depend on them. Further arguments to \code{model} can be used to configure the tensorflow
+  graph representing the model, to tweak performance.
+
+\code{define_model} is an alias for \code{model}. It is deprecated,
+  and will be removed in version 0.2.
+
 The plot method produces a visual representation of the defined
   model. It uses the \code{DiagrammeR} package, which must be installed
   first. Here's a key to the plots:
   \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
+}
+\examples{
+
+\dontrun{
+
+# define a simple model
+mu = free()
+sigma = lognormal(1, 0.1)
+x = rnorm(10)
+distribution(x) = normal(mu, sigma)
+
+m <- model(mu, sigma)
+
+plot(m)
+}
+
 }

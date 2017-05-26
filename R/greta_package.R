@@ -30,7 +30,7 @@
 #' x = rnorm(10)
 #' distribution(x) = normal(mu, sigma)
 #'
-#' m <- define_model(mu, sigma)
+#' m <- model(mu, sigma)
 #'
 #' # and sample from it
 #' draws <- mcmc(m,

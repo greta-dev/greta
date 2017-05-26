@@ -340,33 +340,33 @@ test_that('scalar-valued distributions can be defined in models', {
   # density-free and discrete data need a bit of help
   a = free()
   distribution(x) = normal(a, 1)
-  define_model(a)
+  model(a)
 
   distribution(y) = bernoulli(p)
-  define_model(p)
+  model(p)
 
   distribution(y) = binomial(1, p)
-  define_model(p)
+  model(p)
 
   distribution(y) = negative_binomial(1, p)
-  define_model(p)
+  model(p)
 
   distribution(y) = poisson(p)
-  define_model(p)
+  model(p)
 
   # continuous distributions
-  define_model(normal(-2, 3))
-  define_model(student(5.6, -2, 2.3))
-  define_model(lognormal(1.2, 0.2))
+  model(normal(-2, 3))
+  model(student(5.6, -2, 2.3))
+  model(lognormal(1.2, 0.2))
 
-  define_model(gamma(0.9, 1.3))
-  define_model(exponential(6.3))
-  define_model(beta(6.3, 5.9))
+  model(gamma(0.9, 1.3))
+  model(exponential(6.3))
+  model(beta(6.3, 5.9))
 
-  define_model(uniform(-13, 2.4))
+  model(uniform(-13, 2.4))
   sig <- rWishart(4, 3, diag(3))[, , 1]
-  define_model(multivariate_normal(rnorm(3), sig))
-  define_model(wishart(4, sig))
+  model(multivariate_normal(rnorm(3), sig))
+  model(wishart(4, sig))
 
 })
 
@@ -382,32 +382,32 @@ test_that('array-valued distributions can be defined in models', {
   # density-free and discrete data need a bit of help
   a <- free(dim = dim)
   distribution(x) = normal(a, 1)
-  define_model(a)
+  model(a)
 
   distribution(y) = bernoulli(p)
-  define_model(p)
+  model(p)
 
   distribution(y) = binomial(1, p)
-  define_model(p)
+  model(p)
 
   distribution(y) = negative_binomial(1, p)
-  define_model(p)
+  model(p)
 
   distribution(y) = poisson(p)
-  define_model(p)
+  model(p)
 
   # continuous distributions
-  define_model(normal(-2, 3, dim = dim))
-  define_model(student(5.6, -2, 2.3, dim = dim))
-  define_model(lognormal(1.2, 0.2, dim = dim))
+  model(normal(-2, 3, dim = dim))
+  model(student(5.6, -2, 2.3, dim = dim))
+  model(lognormal(1.2, 0.2, dim = dim))
 
-  define_model(gamma(0.9, 1.3, dim = dim))
-  define_model(exponential(6.3, dim = dim))
-  define_model(beta(6.3, 5.9, dim = dim))
-  define_model(uniform(-13, 2.4, dim = dim))
+  model(gamma(0.9, 1.3, dim = dim))
+  model(exponential(6.3, dim = dim))
+  model(beta(6.3, 5.9, dim = dim))
+  model(uniform(-13, 2.4, dim = dim))
 
   sig <- rWishart(4, 3, diag(3))[, , 1]
-  define_model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
+  model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
 
 })
 

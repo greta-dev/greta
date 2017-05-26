@@ -54,7 +54,7 @@ This allows us to create a wide range of models, like in the general-purpose mod
 greta also lets us declare that a greta array follows a probability distribution, allowing us to train models using observed data, and to define prior distributions over our parameters, for Bayesian analyses.
 
 The rest of this vignette walks through an example of fitting a model using greta.
-<!-- If you'd like to see examples of some common models fitted in greta and with equivalent BUGS and Stan code, take a look at [Example models](example_models.html). -->
+If you'd like to see examples of some common models fitted in greta and with equivalent BUGS and Stan code, take a look at [Example models](example_models.html).
 If you'd like more technical details about how greta works under the hood, check out [How does this work?](how_does_this_work.html).
 
 <hr>
@@ -84,10 +84,10 @@ mean <- int + coef * x
 distribution(y) = normal(mean, sd)
 
 # defining the model
-model <- define_model(int, coef, sd)
+m <- model(int, coef, sd)
 
 # plotting
-plot(model)
+plot(m)
 
 # sampling
 draws <- mcmc(model, n_samples = 1000)
@@ -294,7 +294,7 @@ With the syntax `distribution(<lhs>) <- <rhs>`, we are stating that the greta ar
 
 ### Defining the model
 
-Now all of the greta arrays making up the model have been created, we need to combine them and set up the model so that we can sample from it, using `define_model()`:
+Now all of the greta arrays making up the model have been created, we need to combine them and set up the model so that we can sample from it, using `model()`:
 
 ```{r hidden_model, echo = FALSE}
 x <- as_data(iris$Petal.Length)
@@ -305,11 +305,11 @@ sd = lognormal(0, 3)
 mean <- int + coef * x
 distribution(y) = normal(mean, sd)
 ```
-```{r define}
-model <- define_model(int, coef, sd)
+```{r define_model}
+m <- model(int, coef, sd)
 ```
 
-`define_model()` returns a 'greta model' object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to `define_model()` to flag them as the parameters we're interested in. When sampling from the model with `mcmc()` those will be the greta arrays for which samples will be returned. Alternatively, we can run `define_model()` without passing any greta arrays, in which all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.
+`()` returns a 'greta model' object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to `()` to flag them as the parameters we're interested in. When sampling from the model with `mcmc()` those will be the greta arrays for which samples will be returned. Alternatively, we can run `()` without passing any greta arrays, in which all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.
 
 <hr>
 
@@ -317,10 +317,10 @@ model <- define_model(int, coef, sd)
 
 greta provides a plot function for greta models to help you visualise and check the model before sampling from it.
 ```{r plot, eval = FALSE}
-plot(model)
+plot(m)
 ```
 ```{r plot_hidden, echo = FALSE, results='hide'}
-gr <- plot(model)
+gr <- plot(m)
 fname <- tempfile(fileext = '.png')
 DiagrammeR::export_graph(gr,
                          file_name = fname,
@@ -341,7 +341,7 @@ For example, a plot of just the prior distribution over `coef` (defined as `coef
 
 ```{r plot_coef, echo = FALSE, results='hide'}
 coef = normal(0, 3)
-m_coef <- define_model(coef)
+m_coef <- model(coef)
 gr <- plot(m_coef)
 fname <- tempfile(fileext = '.png')
 DiagrammeR::export_graph(gr,
@@ -361,7 +361,7 @@ sd = free()
 y <- as_data(iris$Sepal.Length)
 mean <- ones(150)
 distribution(y) = normal(mean, sd)
-m_likelihood <- define_model(sd)
+m_likelihood <- model(sd)
 gr <- plot(m_likelihood)
 idx <- which(gr$nodes_df$label == 'mean\n')
 gr$nodes_df$shape[idx] <- 'circle'
@@ -402,7 +402,7 @@ When defining the model, greta combines all of the distributions together to def
 Now we have a greta model that will give us the joint density for a candidate set of values, so we can use that to carry out inference on the model. We do that using an Markov chain Monte Carlo (MCMC) algorithm to sample values of the parameters we're interested in, using the `mcmc()` function:
 
 ```{r mcmc, message=FALSE, results='hide', progress = FALSE}
-draws <- mcmc(model, n_samples = 1000)
+draws <- mcmc(m, n_samples = 1000)
 ```
 
 Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm, which uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 100 iterations 'warming up' and burning in the sampler.
@@ -423,7 +423,7 @@ MCMCplot(draws, xlim = c(-1, 5))
 
 Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about propsals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interstions (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manual set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
 
-A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `define_model()` stage. Future versions of greta will implement samplers for discrete MCMC, as well as self-tuning versions of HMC.
+A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `()` stage. Future versions of greta will implement samplers for discrete MCMC, as well as self-tuning versions of HMC.
 
 <hr>
 
