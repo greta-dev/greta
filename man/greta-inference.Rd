@@ -7,7 +7,7 @@
 \title{Statistical Inference on Greta Models}
 \usage{
 define_model(..., precision = c("single", "double"), n_cores = NULL,
-  compile = FALSE)
+  compile = TRUE)
 
 mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
   verbose = TRUE, control = list(), initial_values = NULL)
@@ -27,8 +27,10 @@ also increase the computation time, particularly for large models.}
 Defaults to and cannot exceed the number detected by
 \code{parallel::detectCores}.}
 
-\item{compile}{whether to apply XLA compilation to the tensorflow graph. This
-may slow down model definition, and speed up model evaluation.}
+\item{compile}{whether to apply
+\href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
+the tensorflow graph representing the model. This may slow down model
+definition, and speed up model evaluation.}
 
 \item{model}{greta_model object}
 
