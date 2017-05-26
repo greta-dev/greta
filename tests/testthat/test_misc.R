@@ -226,7 +226,7 @@ test_that('mcmc works with verbosity and warmup', {
   z = normal(0, 1)
   distribution(x) = normal(z, 1)
   m <- model(z)
-  mcmc(m, n_samples = 5, warmup = 5, verbose = TRUE)
+  mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE)
 
 })
 
