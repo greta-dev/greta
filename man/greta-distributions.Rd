@@ -14,6 +14,7 @@
 \alias{inverse_gamma}
 \alias{weibull}
 \alias{exponential}
+\alias{pareto}
 \alias{student}
 \alias{laplace}
 \alias{beta}
@@ -50,6 +51,8 @@ inverse_gamma(shape, scale, dim = NULL)
 weibull(shape, scale, dim = NULL)
 
 exponential(rate, dim = NULL)
+
+pareto(a, b, dim = NULL)
 
 student(df, location, scale, dim = NULL)
 
@@ -90,7 +93,7 @@ workaround). Unlike \code{lower} and \code{upper}, they must be finite.
 
 \item{mean, meanlog, location}{unconstrained parameters}
 
-\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2, df1, df2}{positive
+\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2, df1, df2, a, b}{positive
 parameters}
 
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
@@ -165,12 +168,14 @@ The discrete probability distributions (\code{bernoulli},
   \code{inverse_gamma} \tab \code{\link[MCMCpack:dinvgamma]{MCMCpack::dinvgamma}}\cr
   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
+  \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
   \code{laplace} \tab \code{\link[rmutil:dlaplace]{rmutil::dlaplace}}\cr
   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
+  \code{f} \tab \code{\link[stats:df]{stats::df}}\cr
   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
   \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
   \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr

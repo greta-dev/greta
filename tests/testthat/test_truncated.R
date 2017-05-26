@@ -301,6 +301,47 @@ test_that('truncated exponential has correct densities', {
 
 })
 
+test_that('truncated pareto has correct densities', {
+
+  source('helpers.R')
+  library(extraDistr)
+
+  # mock up the paretos to have differently names parameters
+  preto <- function(a_, b_) pareto(a_, b_)
+  dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+  ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+  qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
+
+  # non-truncated
+  difference <- compare_truncated_distribution(preto,
+                                               'preto',
+                                               parameters = list(a_ = 1.9, b_ = 4.3),
+                                               truncation = c(-Inf, Inf))
+  expect_true(all(difference < 1e-4))
+
+  # positive-truncated
+  difference <- compare_truncated_distribution(preto,
+                                               'preto',
+                                               parameters = list(a_ = 1.9, b_ = 4.3),
+                                               truncation = c(7.2, Inf))
+  expect_true(all(difference < 1e-4))
+
+  # negative-truncated
+  difference <- compare_truncated_distribution(preto,
+                                               'preto',
+                                               parameters = list(a_ = 1.9, b_ = 4.3),
+                                               truncation = c(-Inf, 21.3))
+  expect_true(all(difference < 1e-4))
+
+  # fully-truncated
+  difference <- compare_truncated_distribution(preto,
+                                               'preto',
+                                               parameters = list(a_ = 1.9, b_ = 4.3),
+                                               truncation = c(7.2, 21.3))
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('truncated student has correct densities', {
 
   source('helpers.R')

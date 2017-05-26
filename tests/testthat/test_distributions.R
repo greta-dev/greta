@@ -148,6 +148,19 @@ test_that('exponential distribution has correct density', {
 
 })
 
+test_that('pareto distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::pareto,
+                                     extraDistr::dpareto,
+                                     parameters = list(a = 1.9, b = 2.3),
+                                     x = extraDistr::rpareto(100, 1.9, 2.3))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('student distribution has correct density', {
 
   source('helpers.R')

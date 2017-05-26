@@ -380,6 +380,45 @@ exponential_distribution <- R6Class (
   )
 )
 
+pareto_distribution <- R6Class (
+  'pareto_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (a, b, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(a, b, target_dim = dim)
+      super$initialize('pareto', dim)
+      self$add_parameter(a, 'a')
+      self$add_parameter(b, 'b')
+    },
+
+    # default value
+    create_target = function() {
+      variable(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      a <- parameters$a
+      b <- parameters$b
+
+      log_prob <- function (x)
+        log(a) + a * log(b) - (a + 1) * log(x)
+
+      cdf <- function (x)
+        1 - (b / x) ^ a
+
+      log_cdf <- function (x)
+        log(cdf(x))
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+
+    }
+
+  )
+)
+
 student_distribution <- R6Class (
   'student_distribution',
   inherit = distribution_node,
@@ -937,7 +976,7 @@ distrib <- function (distribution, ...) {
 #'   \code{min} must always be less than \code{max}.
 #'
 #' @param mean,meanlog,location unconstrained parameters
-#' @param sd,sdlog,size,lambda,shape,rate,df,scale,shape1,shape2,df1,df2 positive
+#' @param sd,sdlog,size,lambda,shape,rate,df,scale,shape1,shape2,df1,df2,a,b positive
 #'   parameters
 #' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
 #'   \code{multinomial} and \code{categorical}
@@ -1005,12 +1044,14 @@ distrib <- function (distribution, ...) {
 #'   \code{inverse_gamma} \tab \code{\link[MCMCpack:dinvgamma]{MCMCpack::dinvgamma}}\cr
 #'   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
 #'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
+#'   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
 #'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
 #'   \code{laplace} \tab \code{\link[rmutil:dlaplace]{rmutil::dlaplace}}\cr
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
 #'   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
 #'   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
 #'   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
+#'   \code{f} \tab \code{\link[stats:df]{stats::df}}\cr
 #'   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
 #'   \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
 #'   \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
@@ -1132,6 +1173,11 @@ weibull <- function (shape, scale, dim = NULL)
 #' @export
 exponential <- function (rate, dim = NULL)
   distrib('exponential', rate, dim)
+
+#' @rdname greta-distributions
+#' @export
+pareto <- function (a, b, dim = NULL)
+  distrib('pareto', a, b, dim)
 
 #' @rdname greta-distributions
 #' @export

@@ -62,6 +62,7 @@ Suggests:
     mvtnorm,
     MCMCpack,
     rmutil,
+    extraDistr,
     truncdist
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
