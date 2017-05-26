@@ -69,7 +69,7 @@ h6 {
 }
 </style>
 
-<link href="data:text/css;charset=utf-8,pre%7B%0Abackground%2Dcolor%3A%20transparent%3B%0Aborder%3A%201px%20solid%20%23f4f0f9%3B%0Aborder%2Dradius%3A%200%3B%0Acolor%3A%20%23696969%3B%0A%7D%0Apre%2Er%7B%0Abackground%2Dcolor%3A%20%23f4f0f9%3B%0Aborder%3A%20none%3B%0Aborder%2Dradius%3A%200%3B%0A%7D%0A%2Elist%2Dgroup%2Ditem%2Eactive%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Ahover%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Afocus%20%7B%0Abackground%2Dcolor%3A%20%238960b3%3B%0Aborder%2Dcolor%3A%20%238960b3%3B%0A%7D%0Ahr%20%7B%0Aheight%3A10px%3B%0Aborder%2Dtop%3A4px%20solid%20%23a379cc4%3B%0A%7D%0Acode%20%7B%0Abackground%2Dcolor%3A%20%23f4f0f9%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+<link href="data:text/css;charset=utf-8,pre%7B%0Abackground%2Dcolor%3A%20transparent%3B%0Aborder%3A%201px%20solid%20%23f4f0f9%3B%0Aborder%2Dradius%3A%200%3B%0Acolor%3A%20%23696969%3B%0A%7D%0Apre%2Er%7B%0Abackground%2Dcolor%3A%20%23f4f0f9%3B%0Aborder%3A%20none%3B%0Aborder%2Dradius%3A%200%3B%0Aline%2Dheight%3A%201%2E5%3B%0A%7D%0A%2Elist%2Dgroup%2Ditem%2Eactive%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Ahover%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Afocus%20%7B%0Abackground%2Dcolor%3A%20%238960b3%3B%0Aborder%2Dcolor%3A%20%238960b3%3B%0A%7D%0Ahr%20%7B%0Aheight%3A10px%3B%0Aborder%2Dtop%3A4px%20solid%20%23a379cc4%3B%0A%7D%0Acode%20%7B%0Abackground%2Dcolor%3A%20%23f4f0f9%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -239,17 +239,18 @@ div.tocify {
 <pre class="r"><code>y &lt;- c(21, 20, 15)
 n &lt;- c(48, 34, 21)
 Z &lt;- c(10, 30, 50)
-alpha &lt;- 4.48        
-beta &lt;- 0.76         
-sigma2 &lt;- 81.14      
-J &lt;- 3               </code></pre>
+alpha &lt;- 4.48
+beta &lt;- 0.76
+sigma2 &lt;- 81.14
+sigma &lt;- sqrt(sigma2)
+tau &lt;- 1 / sigma2
+J &lt;- 3</code></pre>
 </div>
 <div id="greta-code" class="section level4">
 <h4>greta code</h4>
-<pre class="r"><code># priors
-theta = normal(0, 1e3)
+<pre class="r"><code>theta = normal(0, 32)
 mu &lt;- alpha + beta * Z
-X = normal(mu, sqrt(sigma2))
+X = normal(mu, sigma)
 p &lt;- ilogit(theta[1] + theta[2] * X)
 distribution(y) = binomial(n, p)</code></pre>
 </div>
@@ -310,17 +311,12 @@ N &lt;- 8</code></pre>
 </div>
 <div id="greta-code-1" class="section level4">
 <h4>greta code</h4>
-<pre class="r"><code># precalculate for centering
-mean_x &lt;- mean(x)
-
-# priors and model
-alpha_star = normal(0, 1e3)
-beta = normal(0, 1e3)
-p &lt;- ilogit(alpha_star + beta * (x - mean_x))
+<pre class="r"><code>alpha_star = normal(0, 32)
+beta = normal(0, 32)
+p &lt;- ilogit(alpha_star + beta * (x - mean(x)))
 likelihood(r) = binomial(n, p)
 
-# other interesting quantities
-alpha &lt;- alpha_star - beta * mean_x
+alpha &lt;- alpha_star - beta * mean(x)
 rhat &lt;- p * n</code></pre>
 </div>
 <div id="bugs-code-1" class="section level4">
