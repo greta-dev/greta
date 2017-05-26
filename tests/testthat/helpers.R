@@ -231,8 +231,6 @@ compare_truncated_distribution <- function (greta_fun,
   r_fun <- truncfun(which, parameters, truncation)
   r_log_density <- log(r_fun(x))
 
-
-
   # create greta array for truncated distribution
   z <- free(truncation[1], truncation[2])
   dist = do.call(greta_fun, parameters)
@@ -244,6 +242,7 @@ compare_truncated_distribution <- function (greta_fun,
 
   # create dag and define the density
   dag <- greta:::dag_class$new(list(x_))
+
   x_$node$distribution$define_tf(dag)
 
   # get the log density as a vector

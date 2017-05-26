@@ -6,11 +6,26 @@ NULL
 
 #' @rdname greta-inference
 #' @export
+#' @importFrom parallel detectCores
 #'
 #' @param \dots \code{greta_array} objects to be tracked by the model (i.e.
 #'   those for which samples will be retained during mcmc). If not provided, all
 #'   of the non-data \code{greta_array} objects defined in the calling
 #'   environment will be tracked.
+#'
+#' @param precision the floating point precision to use when evaluating this
+#'   model. Switching from \code{'single'} (the default) to \code{'double'}
+#'   should reduce the risk of numerical instability during sampling, but will
+#'   also increase the computation time, particularly for large models.
+#'
+#' @param n_cores the number of cpu cores to use when evaluating this model.
+#'   Defaults to and cannot exceed the number detected by
+#'   \code{parallel::detectCores}.
+#'
+#' @param compile whether to apply
+#'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
+#'   the tensorflow graph representing the model. This may slow down model
+#'   definition, and speed up model evaluation.
 #'
 #' @return \code{define_model} - a \code{greta_model} object. See
 #'   \code{\link{greta-model}} for details.
@@ -28,10 +43,35 @@ NULL
 #' m <- define_model(mu, sigma)
 #'
 #' }
-define_model <- function (...) {
+define_model <- function (...,
+                          precision = c('single', 'double'),
+                          n_cores = NULL,
+                          compile = TRUE) {
 
   check_tf_version('error')
 
+  # get the floating point precision
+  tf_float <- switch(match.arg(precision),
+                     single = tf$float32,
+                     double = tf$float64)
+
+  # check and set the number of cores
+  n_detected <- parallel::detectCores()
+  if (is.null(n_cores)) {
+    n_cores <- n_detected
+  } else {
+
+    n_cores <- as.integer(n_cores)
+
+    if (!n_cores %in% seq_len(n_detected)) {
+      warning (n_cores, ' cores were requested, but only ',
+               n_detected, ' cores are available. Using ',
+               n_detected, ' cores.')
+      n_cores <- n_detected
+    }
+  }
+
+  # flush all tensors from the default graph
   tf$reset_default_graph()
 
   # nodes required
@@ -58,7 +98,10 @@ define_model <- function (...) {
   }
 
   # get the dag containing the target nodes
-  dag <- dag_class$new(target_greta_arrays)
+  dag <- dag_class$new(target_greta_arrays,
+                       tf_float = tf_float,
+                       n_cores = n_cores,
+                       compile = compile)
 
   # get and check the types
   types <- dag$node_types
@@ -108,7 +151,7 @@ define_model <- function (...) {
   # define the TF graph
   dag$define_tf()
 
-  # create the model object and add the arraysof interest
+  # create the model object and add details
   model <- as.greta_model(dag)
   model$target_greta_arrays <- target_greta_arrays
   model$visible_greta_arrays <- all_greta_arrays(parent.frame())

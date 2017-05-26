@@ -6,7 +6,8 @@
 \alias{mcmc}
 \title{Statistical Inference on Greta Models}
 \usage{
-define_model(...)
+define_model(..., precision = c("single", "double"), n_cores = NULL,
+  compile = FALSE)
 
 mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
   verbose = TRUE, control = list(), initial_values = NULL)
@@ -16,6 +17,18 @@ mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
 those for which samples will be retained during mcmc). If not provided, all
 of the non-data \code{greta_array} objects defined in the calling
 environment will be tracked.}
+
+\item{precision}{the floating point precision to use when evaluating this
+model. Switching from \code{'single'} (the default) to \code{'double'}
+should reduce the risk of numerical instability during sampling, but will
+also increase the computation time, particularly for large models.}
+
+\item{n_cores}{the number of cpu cores to use when evaluating this model.
+Defaults to and cannot exceed the number detected by
+\code{parallel::detectCores}.}
+
+\item{compile}{whether to apply XLA compilation to the tensorflow graph. This
+may slow down model definition, and speed up model evaluation.}
 
 \item{model}{greta_model object}
 

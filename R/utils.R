@@ -295,26 +295,12 @@ valid_parameters <- function(dag, initial_values) {
 }
 
 # access the float and int type options
-tf_float <- function () {
-  type <- options('greta_float_type')
-  if (! type %in% c('32', '64')) {
-    warning ("unknown float type: ", type,
-             ". Allowed types are '32', or '64'. Switching to 64-bit floats")
-    type <- '64'
-  }
-  tf[[paste0('float', type)]]
-}
+tf_float <- function ()
+  options()$greta_tf_float
 
 # access the float and int type options
-tf_int <- function () {
-  type <- options('greta_int_type')
-  if (! type %in% c('8', '16', '32', '64')) {
-    warning ("unknown int type: ", type,
-             ". Allowed types are '8', '16', '32', or '64'. Switching to 32-bit ints")
-    type <- '32'
-  }
-  tf[[paste0('int', type)]]
-}
+tf_int <- function ()
+  tf$int32
 
 # cast a scalar as a float or integer of the correct type in TF code
 fl <- function(x) tf$constant(x, dtype = tf_float())

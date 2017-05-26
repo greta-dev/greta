@@ -37,10 +37,9 @@ test_that('tensorflow coercion work', {
   integer <- greta:::tf_as_integer(1)
   logical <- greta:::tf_as_logical(1)
 
-  float_type <- paste0('float', options('greta_float_type'))
-  int_type <- paste0('int', options('greta_int_type'))
+  float_type <- options()$greta_tf_float$name
   expect_equal(float$dtype$name, float_type)
-  expect_equal(integer$dtype$name, int_type)
+  expect_equal(integer$dtype$name, 'int32')
   expect_equal(logical$dtype$name, 'bool')
 
 })

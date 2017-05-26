@@ -48,9 +48,8 @@ NULL
   # warn if TF version is bad
   check_tf_version('warn')
 
-  # set numerical options
-  options(greta_float_type = '64')
-  options(greta_int_type = '32')
+  # default float type
+  options(greta_tf_float = tf$float32)
 
 }
 
