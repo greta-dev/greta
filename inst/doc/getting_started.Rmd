@@ -408,7 +408,7 @@ Now we have a greta model that will give us the joint density for a candidate se
 draws <- mcmc(m, n_samples = 1000)
 ```
 
-Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm, which uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 100 iterations 'warming up' and burning in the sampler.
+Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm, which uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 100 iterations 'warming up' (tuning the sampler parameters) and 'burning in' (moving to the area of highest probability) the sampler.
 
 `draws` is an `mcmc.list` object, from the coda R package. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.
 
@@ -421,6 +421,8 @@ library (MCMCvis)
 MCMCtrace(draws)
 MCMCplot(draws, xlim = c(-1, 5))
 ```
+
+If your model is taking a long time whilst in the sampling phase and you want to take a look at the samples. You can stop the sampler (e.g. using the stop button in RStudio) and then retrieve the samples drawn so far, by using `stashed_samples()`. Note that this won't return anything if you stop the model during the warmup phase (since those aren't valid posterior samples) or if the sampler completed successfully.
 
 #### Tweaking the sampler
 
