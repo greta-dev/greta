@@ -3,10 +3,13 @@
 \name{greta-inference}
 \alias{greta-inference}
 \alias{mcmc}
+\alias{stashed_samples}
 \title{Statistical Inference on Greta Models}
 \usage{
 mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
   verbose = TRUE, control = list(), initial_values = NULL)
+
+stashed_samples()
 }
 \arguments{
 \item{model}{greta_model object}
@@ -33,12 +36,15 @@ control behaviour of the sampler. See Details.}
 parameters in the model}
 }
 \value{
-\code{mcmc} - an \code{mcmc.list} object that can be analysed using
-  functions from the coda package. This will on contain mcmc samples of the
-  parameters of interest, as defined in \code{model}.
+an \code{mcmc.list} object that can be analysed using
+  functions from the coda package. This will contain mcmc samples of the
+  greta arrays used to create \code{model}.
 }
 \description{
-Carry out statistical inference on parameters of interest by MCMC
+Carry out statistical inference on parameters of interest by
+  MCMC. \code{mcmc} runs the MCMC sampler. If the sampler is aborted before
+  finishing, the samples collected so far can be retrieved with
+  \code{stashed_samples()}.
 }
 \details{
 If \code{verbose = TRUE}, the progress bar shows the number of iterations
@@ -55,17 +61,16 @@ If \code{verbose = TRUE}, the progress bar shows the number of iterations
   Monte Carlo (\code{method = 'hmc'}). During the warmup iterations, the
   leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
   sampler efficiency. The \code{control} argument can be used to specify the
-  initial value for epsilon, along with two other hyprparameters: \code{Lmin}
+  initial value for epsilon, along with two other hyperparameters: \code{Lmin}
   and \code{Lmax}; positive integers (with \code{Lmax > Lmin}) giving the
   upper and lower limits to the number of leapfrog steps per iteration (from
   which the number is selected uniformly at random).
 
-  If you're getting a lot of rejected proposals, you might want to reduce
-  \code{epsilon}, or if the sampler is moving too slowly you might want to
-  increase \code{epsilon}.
-
   The default control options for HMC are:
   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
+
+\code{stashed_samples()} returns an \code{mcmc.list} object if (and
+  only if) the sampler was aborted during the sampling phase.
 }
 \examples{
 \dontrun{

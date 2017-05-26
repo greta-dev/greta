@@ -1,13 +1,15 @@
 #' @name greta-inference
 #' @title Statistical Inference on Greta Models
-#' @description Carry out statistical inference on parameters of interest by MCMC
+#' @description Carry out statistical inference on parameters of interest by
+#'   MCMC. \code{mcmc} runs the MCMC sampler. If the sampler is aborted before
+#'   finishing, the samples collected so far can be retrieved with
+#'   \code{stashed_samples()}.
 NULL
 
 #' @rdname greta-inference
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom coda mcmc mcmc.list
 #'
 #' @param model greta_model object
 #' @param method the method used to sample values. Currently only \code{hmc} is
@@ -25,36 +27,37 @@ NULL
 #' @param initial_values an optional named vector of initial values for the free
 #'   parameters in the model
 #'
-#' @details
-#'   If \code{verbose = TRUE}, the progress bar shows the number of iterations
-#'   so far and the expected time to complete the phase of model fitting (warmup
-#'   or sampling). Occasionally, a proposed set of parameters can have such a
-#'   low density as to cause numerical instability (I.e. the log density or its
-#'   gradient is \code{NA},\code{Inf} or \code{-Inf}). When this happens, the
-#'   progress bar will also display the proportion of samples so far that were
-#'   'bad' (numerically unstable) and therefore rejected. If you're getting a
-#'   lot of these, you may want to manually define starting values to move the
-#'   sampler into a more reasonable part of the aprameter space.
+
+#' @details If \code{verbose = TRUE}, the progress bar shows the number of
+#'   iterations so far and the expected time to complete the phase of model
+#'   fitting (warmup or sampling). Occasionally, a proposed set of parameters
+#'   can cause numerical instability (I.e. the log density or its gradient is
+#'   \code{NA}, \code{Inf} or \code{-Inf}); normally because the log joint
+#'   density is so low that it can't be represented as a floating point number.
+#'   When this happens, the progress bar will also display the proportion of
+#'   samples so far that were 'bad' (numerically unstable) and therefore
+#'   rejected.
+#'   If you're getting a lot of numerical instability, you might want to
+#'   manually define starting values to move the sampler into a more reasonable
+#'   part of the parameter space. Alternatively, you could redefine the model
+#'   (via \code{model}) to have double precision, though this will slow down
+#'   sampling.
 #'
 #'   Currently, the only implemented MCMC procedure is static Hamiltonian
 #'   Monte Carlo (\code{method = 'hmc'}). During the warmup iterations, the
 #'   leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
 #'   sampler efficiency. The \code{control} argument can be used to specify the
-#'   initial value for epsilon, along with two other hyprparameters: \code{Lmin}
+#'   initial value for epsilon, along with two other hyperparameters: \code{Lmin}
 #'   and \code{Lmax}; positive integers (with \code{Lmax > Lmin}) giving the
 #'   upper and lower limits to the number of leapfrog steps per iteration (from
 #'   which the number is selected uniformly at random).
 #'
-#'   If you're getting a lot of rejected proposals, you might want to reduce
-#'   \code{epsilon}, or if the sampler is moving too slowly you might want to
-#'   increase \code{epsilon}.
-#'
 #'   The default control options for HMC are:
 #'   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
 #'
-#' @return \code{mcmc} - an \code{mcmc.list} object that can be analysed using
-#'   functions from the coda package. This will on contain mcmc samples of the
-#'   parameters of interest, as defined in \code{model}.
+#' @return an \code{mcmc.list} object that can be analysed using
+#'   functions from the coda package. This will contain mcmc samples of the
+#'   greta arrays used to create \code{model}.
 #'
 #' @examples
 #' \dontrun{
@@ -168,6 +171,7 @@ mcmc <- function (model,
                            verbose = verbose,
                            pb = pb_warmup,
                            tune = TRUE,
+                           stash = FALSE,
                            control = con)
 
     # use the last draw of the full parameter vector as the init
@@ -181,7 +185,6 @@ mcmc <- function (model,
   else
     pb_sampling <- NULL
 
-
   # run the sampler
   draws <- method(dag = dag,
                   init = initial_values,
@@ -190,16 +193,57 @@ mcmc <- function (model,
                   verbose = verbose,
                   pb = pb_sampling,
                   tune = FALSE,
+                  stash = TRUE,
                   control = con)
 
-  # coerce to data.frame, but keep the sample density
-  draws_df <- data.frame(draws)
-  draws_mcmc <- coda::mcmc(draws_df)
-  draws_mcmc_list <- coda::mcmc.list(draws_mcmc)
-
-  draws_mcmc_list
+  # if this was successful, trash the stash, prepare and return the draws
+  rm('trace_stash', envir = greta_stash)
+  prepare_draws(draws)
 
 }
+
+
+#' @importFrom coda mcmc mcmc.list
+prepare_draws <- function (draws) {
+  # given a matrix of draws returned by the sampler, prepare it and return
+  draws_df <- data.frame(draws)
+  draws_mcmc <- coda::mcmc(draws_df)
+  coda::mcmc.list(draws_mcmc)
+}
+
+#' @rdname greta-inference
+#' @export
+#' @importFrom stats na.omit
+#'
+#' @details \code{stashed_samples()} returns an \code{mcmc.list} object if (and
+#'   only if) the sampler was aborted during the sampling phase.
+stashed_samples <- function () {
+
+  stashed <- exists('trace_stash', envir = greta_stash)
+
+  if (stashed) {
+
+    # get them, remove the NAs, and return
+    draws <- greta_stash$trace_stash
+    draws_clean <- na.omit(draws)
+    draws_prepped <- prepare_draws(draws_clean)
+
+    return (draws_prepped)
+
+  } else {
+
+    return (invisible())
+
+  }
+
+}
+
+# create an object stash in greta's namespace, to return traces to the user when
+# they abort a run
+greta_stash <- new.env()
+
+stash_trace <- function (trace)
+  assign('trace_stash', trace, envir = greta_stash)
 
 hmc <- function (dag,
                  init,
@@ -208,6 +252,7 @@ hmc <- function (dag,
                  verbose,
                  pb,
                  tune = FALSE,
+                 stash = FALSE,
                  control = list(Lmin = 10,
                                 Lmax = 20,
                                 epsilon = 0.005)) {
@@ -242,6 +287,10 @@ hmc <- function (dag,
                   nrow = n_samples %/% thin,
                   ncol = n_target)
   colnames(trace) <- names(init_trace)
+
+  # if anything goes awry, stash the trace so far
+  if (stash)
+    on.exit(stash_trace(trace))
 
   # set up log joint density store
   ljd <- rep(NA, n_samples)
@@ -296,8 +345,6 @@ hmc <- function (dag,
       x <- x_old
       logprob <- logprob_old
       grad <- grad_old
-
-
 
     } else {
 
