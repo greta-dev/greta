@@ -36,7 +36,7 @@ With the model written, we can draw samples of the parameters we care about.
 ``` r
 model <- define_model(intercept, coefficient, sd)
 
-system.time(draws <- mcmc(model, n_samples = 500))
+draws <- mcmc(model, n_samples = 500)
 ```
 
 This outputs an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software.

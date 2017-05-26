@@ -127,7 +127,7 @@ test_that('check_dims errors informatively', {
   expect_error(greta:::check_dims(a, c),
                'incompatible dimensions: 3x3, 2x2')
 
-  # with two scalars and a target dimenssion, just return the target dimension
+  # with two scalars and a target dimension, just return the target dimension
   expect_equal(greta:::check_dims(b, b, target_dim = dim1),
                dim1)
 
@@ -137,19 +137,23 @@ test_that('rejected mcmc proposals', {
 
   source('helpers.R')
 
-  # drop numerical precision to enable rejection
-  old_float_type <- options()$greta_float_type
-  options(greta_float_type = '32')
-
-  # numerical rejection
+  # set up for numerical rejection of initial location
   x <- rnorm(10000, 1e6, 1)
   z = normal(-1e6, 1e-6)
   distribution(x) = normal(z, 1e6)
   m <- define_model(z)
-  expect_message(mcmc(m, n_samples = 1, warmup = 0),
-                 'proposal rejected due to numerical instability')
 
-  options(greta_float_type = old_float_type)
+  # mock up the progress bar to force its output to stdout for testing
+  cpb2 <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
+  dummy_cpb <- function(...)
+    cpb2(..., stream = stdout(), force = TRUE)
+
+  with_mock(
+    `greta:::create_progress_bar` = dummy_cpb,
+    m <- define_model(z),
+    out <- capture_output(mcmc(m, n_samples = 1, warmup = 0)),
+    expect_match(out, '100% bad')
+  )
 
   # bad proposal
   x <- rnorm(100, 0, 0.01)

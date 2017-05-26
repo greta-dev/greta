@@ -45,11 +45,13 @@ Collate:
     'dynamics_module.R'
     'dag_class.R'
     'greta_model_class.R'
+    'progress_bar.R'
     'samplers.R'
 Imports:
     R6,
     tensorflow,
     reticulate,
+    progress,
     coda
 Suggests:
     knitr,

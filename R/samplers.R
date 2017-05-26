@@ -295,7 +295,9 @@ mcmc <- function (model,
   if (warmup > 0) {
 
     if (verbose)
-      message('warming up')
+      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples))
+    else
+      pb_warmup <- NULL
 
     # run it
     warmup_draws <- method(dag = dag,
@@ -303,6 +305,7 @@ mcmc <- function (model,
                            n_samples = warmup,
                            thin = thin,
                            verbose = verbose,
+                           pb = pb_warmup,
                            tune = TRUE,
                            control = con)
 
@@ -310,10 +313,13 @@ mcmc <- function (model,
     initial_values <- attr(warmup_draws, 'last_x')
     con <- attr(warmup_draws, 'control')
 
-    if (verbose)
-      message('sampling')
-
   }
+
+  if (verbose)
+    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples))
+  else
+    pb_sampling <- NULL
+
 
   # run the sampler
   draws <- method(dag = dag,
@@ -321,6 +327,7 @@ mcmc <- function (model,
                   n_samples = n_samples,
                   thin = thin,
                   verbose = verbose,
+                  pb = pb_sampling,
                   tune = FALSE,
                   control = con)
 
@@ -338,6 +345,7 @@ hmc <- function (dag,
                  n_samples,
                  thin,
                  verbose,
+                 pb,
                  tune = FALSE,
                  control = list(Lmin = 10,
                                 Lmax = 20,
@@ -353,6 +361,8 @@ hmc <- function (dag,
   target_acceptance = 0.651
   kappa = 0.75
   gamma = 0.1
+
+  numerical_rejections <- 0
 
   # set initial location, log joint density and gradients
   x <- init
@@ -382,10 +392,6 @@ hmc <- function (dag,
   npar <- length(x)
 
   accept_count <- 0
-
-  # set up progress bar
-  if (verbose)
-    pb <- txtProgressBar(max = n_samples, style = 3)
 
   # loop through iterations
   for (i in 1:n_samples) {
@@ -425,12 +431,12 @@ hmc <- function (dag,
     # if the step was bad, reject it out of hand
     if (reject) {
 
-      if (verbose)
-        message ('proposal rejected due to numerical instability')
-
+      numerical_rejections <- numerical_rejections + 1
       x <- x_old
       logprob <- logprob_old
       grad <- grad_old
+
+
 
     } else {
 
@@ -472,7 +478,7 @@ hmc <- function (dag,
     }
 
     if (verbose)
-      setTxtProgressBar(pb, i)
+      iterate_progress_bar(pb = pb, it = i, rejects = numerical_rejections)
 
     # optionally tune epsilon
     if (tune) {
@@ -495,9 +501,6 @@ hmc <- function (dag,
     }
 
   }
-
-  if (verbose)
-    close(pb)
 
   # store the tuned epsilon as the mean of the last half
   if (tune) {
