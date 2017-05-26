@@ -314,7 +314,7 @@ plot.greta_model <- function (x, y, ...) {
   # for each distribution
   for (i in seq_along(distribution_idx)) {
 
-    idx <- which(from == target_idx[i] & to == distribution_idx[i])
+    idx <- which(to == target_idx[i] & from == distribution_idx[i])
     edge_style[idx] <- 'dashed'
 
   }
@@ -344,6 +344,12 @@ plot.greta_model <- function (x, y, ...) {
 
   # set the layout type
   gr$global_attrs$value[gr$global_attrs$attr == 'layout'] <- 'dot'
+  # make it horizontal
+  gr$global_attrs <- rbind(gr$global_attrs,
+                           data.frame(attr = 'rankdir',
+                                      value = 'LR',
+                                      attr_type = 'graph'))
+
 
   print(DiagrammeR::render_graph(gr))
 

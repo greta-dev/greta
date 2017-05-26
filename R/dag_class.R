@@ -314,11 +314,31 @@ dag_class <- R6Class(
       # make dag matrix
       n_node <- length(self$node_list)
       node_names <- names(self$node_list)
+      node_types <- self$node_types
       dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
       rownames(dag_mat) <- colnames(dag_mat) <- node_names
 
       parents <- lapply(self$node_list, member, 'parent_names(recursive = FALSE)')
       children <- lapply(self$node_list, member, 'child_names(recursive = FALSE)')
+
+      # for distribution nodes, remove target nodes from children, and put them
+      # in parents to send the arrow in the opposite direction when plotting
+      distribs <- which(node_types == 'distribution')
+      for (i in distribs) {
+
+        own_name <- node_names[i]
+        target_name <- self$node_list[[i]]$target$unique_name
+
+        # switch the target from child to parent of the distribution
+        children[[i]] <- children[[i]][children[[i]] != target_name]
+        parents[[i]] <- c(parents[[i]], target_name)
+
+        # switch the distribution from parent to child of the target
+        idx <- match(target_name, node_names)
+        parents[[idx]] <- parents[[idx]][parents[[idx]] != own_name]
+        children[[idx]] <- c(children[[idx]], own_name)
+
+      }
 
       # children in the lower left, parents in the upper right
       for (i in seq_len(n_node)) {
