@@ -424,13 +424,13 @@ student_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (df, location, scale, dim) {
+    initialize = function (df, mu, sigma, dim) {
       # add the nodes as children and parameters
-      dim <- check_dims(df, location, scale, target_dim = dim)
+      dim <- check_dims(df, mu, sigma, target_dim = dim)
       super$initialize('student', dim)
       self$add_parameter(df, 'df')
-      self$add_parameter(location, 'location')
-      self$add_parameter(scale, 'scale')
+      self$add_parameter(mu, 'mu')
+      self$add_parameter(sigma, 'sigma')
     },
 
     # default value
@@ -440,8 +440,8 @@ student_distribution <- R6Class (
 
     tf_distrib = function (parameters) {
       tf$contrib$distributions$StudentT(df = parameters$df,
-                                        loc = parameters$location,
-                                        scale = parameters$scale)
+                                        loc = parameters$mu,
+                                        scale = parameters$sigma)
     }
 
   )
@@ -1023,13 +1023,9 @@ distrib <- function (distribution, ...) {
 #'
 #'   Wherever possible, the parameterisation and argument names of greta
 #'   distributions matches commonly used R functions for distributions, such as
-#'   those in the \code{stats} package.\code{student()} is an exception, since
-#'   the
-#'   \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{location-scale
-#'   representation} we use is more useful, and widely used, for statistical
-#'   modelling than the noncentral version implemented in \code{stats}. The
-#'   following table states the distribution function to which greta's
-#'   implementation corresponds:
+#'   those in the \code{stats} or \code{extraDistr} packages. The following
+#'   table states the distribution function to which greta's implementation
+#'   corresponds:
 #'
 #'   \tabular{ll}{
 #'   greta \tab reference\cr
@@ -1045,7 +1041,7 @@ distrib <- function (distribution, ...) {
 #'   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
 #'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
 #'   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
-#'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
+#'   \code{student} \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr
 #'   \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
 #'   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
@@ -1181,8 +1177,8 @@ pareto <- function (a, b, dim = NULL)
 
 #' @rdname greta-distributions
 #' @export
-student <- function (df, location, scale, dim = NULL)
-  distrib('student', df, location, scale, dim)
+student <- function (df, mu, sigma, dim = NULL)
+  distrib('student', df, mu, sigma, dim)
 
 #' @rdname greta-distributions
 #' @export

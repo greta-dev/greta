@@ -54,7 +54,7 @@ exponential(rate, dim = NULL)
 
 pareto(a, b, dim = NULL)
 
-student(df, location, scale, dim = NULL)
+student(df, mu, sigma, dim = NULL)
 
 laplace(mu, sigma, dim = NULL)
 
@@ -147,13 +147,9 @@ The discrete probability distributions (\code{bernoulli},
 
   Wherever possible, the parameterisation and argument names of greta
   distributions matches commonly used R functions for distributions, such as
-  those in the \code{stats} package.\code{student()} is an exception, since
-  the
-  \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{location-scale
-  representation} we use is more useful, and widely used, for statistical
-  modelling than the noncentral version implemented in \code{stats}. The
-  following table states the distribution function to which greta's
-  implementation corresponds:
+  those in the \code{stats} or \code{extraDistr} packages. The following
+  table states the distribution function to which greta's implementation
+  corresponds:
 
   \tabular{ll}{
   greta \tab reference\cr
@@ -169,7 +165,7 @@ The discrete probability distributions (\code{bernoulli},
   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
-  \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
+  \code{student} \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr
   \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr

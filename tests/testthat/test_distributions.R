@@ -161,17 +161,9 @@ test_that('student distribution has correct density', {
 
   source('helpers.R')
 
-  # use location-scale version of student T; related to R's via this function:
-  dt_ls <- function (x, df, location, scale, log = FALSE) {
-    ans <- stats::dt((x - location) / scale, df) / scale
-    if (log)
-      ans <- log(ans)
-    ans
-  }
-
   difference <- compare_distribution(greta::student,
-                                     dt_ls,
-                                     parameters = list(df = 3, location = -0.9, scale = 2),
+                                     dstudent,
+                                     parameters = list(df = 3, mu = -0.9, sigma = 2),
                                      x = rnorm(100, -0.9, 2))
 
   expect_true(all(difference < 1e-4))

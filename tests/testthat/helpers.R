@@ -315,7 +315,12 @@ dlaplace <- extraDistr::dlaplace
 plaplace <- extraDistr::plaplace
 qlaplace <- extraDistr::qlaplace
 
-# mock up the paretos to have differently named parameters
+dstudent <- extraDistr::dnst
+pstudent <- extraDistr::pnst
+qstudent <- extraDistr::qnst
+
+# mock up pareto to have differently named parameters (a and b are use for the
+# truncation)
 preto <- function(a_, b_) pareto(a_, b_)
 dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
 ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
