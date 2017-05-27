@@ -34,9 +34,9 @@ distribution(iris$Sepal.Length) = normal(mean, sd)
 With the model written, we can draw samples of the parameters we care about.
 
 ``` r
-model <- define(intercept, coefficient, sd)
+m <- model(intercept, coefficient, sd)
 
-draws <- mcmc(model, n_samples = 500)
+draws <- mcmc(m, n_samples = 500)
 ```
 
 This outputs an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software.
@@ -92,7 +92,7 @@ Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be co
 
 <img src="README_files/banner.png" width="940" />
 
-#### software
+### Software
 
 greta relies on some pretty incredible pieces of software, including Rstudio's [`reticulate`](https://github.com/rstudio/reticulate) and [`tensorflow`](https://rstudio.github.io/tensorflow/) packages, which bring Google TensorFlow and all things python to R. Under the hood, greta also uses Winston Chang's [`R6`](https://github.com/wch/R6) object system.
 
