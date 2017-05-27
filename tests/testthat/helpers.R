@@ -316,6 +316,13 @@ plaplace <- function (q, location, scale)
 qlaplace <- function (p, location, scale)
   rmutil::qlaplace(p, m = location, s = scale)
 
+# mock up the paretos to have differently names parameters
+preto <- function(a_, b_) pareto(a_, b_)
+dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
+
+
 # mock up the progress bar to force its output to stdout for testing
 cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
 mock_create_progress_bar <- function(...)
