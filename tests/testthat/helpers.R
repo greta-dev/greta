@@ -294,29 +294,6 @@ qt_ls <- function (p, df, location, scale, log.p = FALSE) {
   ans
 }
 
-# inverse gamma
-dinvgamma <- MCMCpack::dinvgamma
-pinvgamma <- function (q, shape, scale) {
-  if (q < 0)
-    0
-  else
-    1 - pgamma(1 / q, shape, scale)
-}
-qinvgamma <- function(p, shape, scale)
-  1 / qgamma(1 - p, shape, scale)
-
-# apparently testthat can't see these
-dlaplace <- extraDistr::dlaplace
-plaplace <- extraDistr::plaplace
-qlaplace <- extraDistr::qlaplace
-
-# mock up the paretos to have differently named parameters
-preto <- function(a_, b_) pareto(a_, b_)
-dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
-ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
-qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
-
-
 # mock up the progress bar to force its output to stdout for testing
 cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
 mock_create_progress_bar <- function(...)
@@ -326,3 +303,20 @@ mock_mcmc <- function (n_samples = 101) {
   pb <- create_progress_bar('sampling', c(0, n_samples))
   iterate_progress_bar(pb, n_samples, rejects = 1)
 }
+
+# apparently testthat can't see these
+
+dinvgamma <- extraDistr::dinvgamma
+qinvgamma <- extraDistr::qinvgamma
+pinvgamma <- function (q, alpha, beta)
+  ifelse(q < 0, 0, extraDistr::pinvgamma(q, alpha, beta))
+
+dlaplace <- extraDistr::dlaplace
+plaplace <- extraDistr::plaplace
+qlaplace <- extraDistr::qlaplace
+
+# mock up the paretos to have differently named parameters
+preto <- function(a_, b_) pareto(a_, b_)
+dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)

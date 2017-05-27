@@ -46,7 +46,7 @@ poisson(lambda, dim = NULL)
 
 gamma(shape, rate, dim = NULL)
 
-inverse_gamma(shape, scale, dim = NULL)
+inverse_gamma(alpha, beta, dim = NULL)
 
 weibull(shape, scale, dim = NULL)
 
@@ -160,12 +160,12 @@ The discrete probability distributions (\code{bernoulli},
   \code{uniform} \tab \code{\link[stats:dunif]{stats::dunif}}\cr
   \code{normal} \tab \code{\link[stats:dnorm]{stats::dnorm}}\cr
   \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
-  \code{bernoulli} \tab {\code{\link[stats:dbinom]{stats::dbinom}} (n = 1)}\cr
+  \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
   \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
   \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
   \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
   \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
-  \code{inverse_gamma} \tab \code{\link[MCMCpack:dinvgamma]{MCMCpack::dinvgamma}}\cr
+  \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr
   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr

@@ -292,12 +292,12 @@ inverse_gamma_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (shape, scale, dim) {
+    initialize = function (alpha, beta, dim) {
       # add the nodes as children and parameters
-      dim <- check_dims(shape, scale, target_dim = dim)
+      dim <- check_dims(alpha, beta, target_dim = dim)
       super$initialize('inverse_gamma', dim)
-      self$add_parameter(shape, 'shape')
-      self$add_parameter(scale, 'scale')
+      self$add_parameter(alpha, 'alpha')
+      self$add_parameter(beta, 'beta')
     },
 
     # default value
@@ -306,8 +306,8 @@ inverse_gamma_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-      tf$contrib$distributions$InverseGamma(concentration = parameters$shape,
-                                            rate = parameters$scale)
+      tf$contrib$distributions$InverseGamma(concentration = parameters$alpha,
+                                            rate = parameters$beta)
     }
 
   )
@@ -1036,12 +1036,12 @@ distrib <- function (distribution, ...) {
 #'   \code{uniform} \tab \code{\link[stats:dunif]{stats::dunif}}\cr
 #'   \code{normal} \tab \code{\link[stats:dnorm]{stats::dnorm}}\cr
 #'   \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
-#'   \code{bernoulli} \tab {\code{\link[stats:dbinom]{stats::dbinom}} (n = 1)}\cr
+#'   \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
 #'   \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
 #'   \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
 #'   \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
 #'   \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
-#'   \code{inverse_gamma} \tab \code{\link[MCMCpack:dinvgamma]{MCMCpack::dinvgamma}}\cr
+#'   \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr
 #'   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
 #'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
 #'   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
@@ -1161,8 +1161,8 @@ gamma <- function (shape, rate, dim = NULL)
 
 #' @rdname greta-distributions
 #' @export
-inverse_gamma <- function (shape, scale, dim = NULL)
-  distrib('inverse_gamma', shape, scale, dim)
+inverse_gamma <- function (alpha, beta, dim = NULL)
+  distrib('inverse_gamma', alpha, beta, dim)
 
 #' @rdname greta-distributions
 #' @export

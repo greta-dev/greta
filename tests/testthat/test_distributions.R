@@ -43,12 +43,8 @@ test_that('bernoulli distribution has correct density', {
 
   source('helpers.R')
 
-  # r version of the bernoulli density
-  dbern <- function (x, prob, log = FALSE)
-    dbinom(x, size = 1, prob = prob, log = log)
-
   difference <- compare_distribution(greta::bernoulli,
-                                     dbern,
+                                     extraDistr::dbern,
                                      parameters = list(prob = 0.3),
                                      x = rbinom(100, 1, 0.3))
 
@@ -114,9 +110,9 @@ test_that('inverse gamma distribution has correct density', {
   source('helpers.R')
 
   difference <- compare_distribution(greta::inverse_gamma,
-                                     MCMCpack::dinvgamma,
-                                     parameters = list(shape = 1.2, scale = 0.9),
-                                     x = MCMCpack::rinvgamma(100, 1.2, 0.9))
+                                     extraDistr::dinvgamma,
+                                     parameters = list(alpha = 1.2, beta = 0.9),
+                                     x = extraDistr::rinvgamma(100, 1.2, 0.9))
 
   expect_true(all(difference < 1e-4))
 
