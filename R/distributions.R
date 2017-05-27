@@ -452,12 +452,12 @@ laplace_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (location, scale, dim) {
+    initialize = function (mu, sigma, dim) {
       # add the nodes as children and parameters
-      dim <- check_dims(location, scale, target_dim = dim)
+      dim <- check_dims(mu, sigma, target_dim = dim)
       super$initialize('laplace', dim)
-      self$add_parameter(location, 'location')
-      self$add_parameter(scale, 'scale')
+      self$add_parameter(mu, 'mu')
+      self$add_parameter(sigma, 'sigma')
     },
 
     # default value
@@ -466,8 +466,8 @@ laplace_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-      tf$contrib$distributions$Laplace(loc = parameters$location,
-                                       scale = parameters$scale)
+      tf$contrib$distributions$Laplace(loc = parameters$mu,
+                                       scale = parameters$sigma)
     }
 
   )
@@ -1046,7 +1046,7 @@ distrib <- function (distribution, ...) {
 #'   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
 #'   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
 #'   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
-#'   \code{laplace} \tab \code{\link[rmutil:dlaplace]{rmutil::dlaplace}}\cr
+#'   \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
 #'   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
 #'   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
 #'   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
@@ -1186,8 +1186,8 @@ student <- function (df, location, scale, dim = NULL)
 
 #' @rdname greta-distributions
 #' @export
-laplace <- function (location, scale, dim = NULL)
-  distrib('laplace', location, scale, dim)
+laplace <- function (mu, sigma, dim = NULL)
+  distrib('laplace', mu, sigma, dim)
 
 #' @rdname greta-distributions
 #' @export

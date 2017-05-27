@@ -295,28 +295,22 @@ qt_ls <- function (p, df, location, scale, log.p = FALSE) {
 }
 
 # inverse gamma
+dinvgamma <- MCMCpack::dinvgamma
 pinvgamma <- function (q, shape, scale) {
   if (q < 0)
     0
   else
     1 - pgamma(1 / q, shape, scale)
 }
-
 qinvgamma <- function(p, shape, scale)
   1 / qgamma(1 - p, shape, scale)
 
+# apparently testthat can't see these
+dlaplace <- extraDistr::dlaplace
+plaplace <- extraDistr::plaplace
+qlaplace <- extraDistr::qlaplace
 
-# laplace
-dlaplace <- function (x, location, scale, log = FALSE)
-  rmutil::dlaplace(x, m = location, s = scale, log = log)
-
-plaplace <- function (q, location, scale)
-  rmutil::plaplace(q, m = location, s = scale)
-
-qlaplace <- function (p, location, scale)
-  rmutil::qlaplace(p, m = location, s = scale)
-
-# mock up the paretos to have differently names parameters
+# mock up the paretos to have differently named parameters
 preto <- function(a_, b_) pareto(a_, b_)
 dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
 ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)

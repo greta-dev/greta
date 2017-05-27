@@ -187,9 +187,9 @@ test_that('laplace distribution has correct density', {
   source('helpers.R')
 
   difference <- compare_distribution(greta::laplace,
-                                     dlaplace,
-                                     parameters = list(location = -0.9, scale = 2),
-                                     x = rmutil::rlaplace(100, -0.9, 2))
+                                     extraDistr::dlaplace,
+                                     parameters = list(mu = -0.9, sigma = 2),
+                                     x = extraDistr::rlaplace(100, -0.9, 2))
 
   expect_true(all(difference < 1e-4))
 

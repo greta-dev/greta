@@ -56,7 +56,7 @@ pareto(a, b, dim = NULL)
 
 student(df, location, scale, dim = NULL)
 
-laplace(location, scale, dim = NULL)
+laplace(mu, sigma, dim = NULL)
 
 beta(shape1, shape2, dim = NULL)
 
@@ -170,7 +170,7 @@ The discrete probability distributions (\code{bernoulli},
   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
   \code{student} \tab \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{wikipedia}\cr
-  \code{laplace} \tab \code{\link[rmutil:dlaplace]{rmutil::dlaplace}}\cr
+  \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
