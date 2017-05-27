@@ -15,6 +15,7 @@ r_packages:
   - rmarkdown
   - rsvg
   - MCMCvis
+  - extraDistr
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
