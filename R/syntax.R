@@ -1,6 +1,6 @@
 # syntax definitions
 
-#' @name greta-distribution
+#' @name distribution
 #' @aliases distribution likelihood
 #' @title Define a Distribution Over a greta Array
 #' @description \code{distribution} links observed data, variables, and other
@@ -119,7 +119,7 @@
 
 }
 
-#' @rdname greta-distribution
+#' @rdname distribution
 #' @export
 distribution <- function (greta_array) {
 
@@ -145,6 +145,6 @@ distribution <- function (greta_array) {
 
 }
 
-#' @rdname greta-distribution
+#' @rdname distribution
 #' @export
 `likelihood<-` <- `distribution<-`
