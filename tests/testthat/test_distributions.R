@@ -91,6 +91,19 @@ test_that('negative binomial distribution has correct density', {
 
 })
 
+test_that('hypergeometric distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::hypergeometric,
+                                     stats::dhyper,
+                                     parameters = list(m = 11, n = 8, k = 5),
+                                     x = rhyper(100, 11, 8, 5))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('poisson distribution has correct density', {
 
   source('helpers.R')
@@ -415,6 +428,9 @@ test_that('scalar-valued distributions can be defined in models', {
   distribution(y) = negative_binomial(1, p)
   model(p)
 
+  distribution(y) = hypergeometric(5, 5, p)
+  model(p)
+
   distribution(y) = poisson(p)
   model(p)
 
@@ -487,6 +503,9 @@ test_that('array-valued distributions can be defined in models', {
   model(p)
 
   distribution(y) = negative_binomial(1, p)
+  model(p)
+
+  distribution(y) = hypergeometric(10, 5, p)
   model(p)
 
   distribution(y) = poisson(p)
@@ -566,6 +585,9 @@ test_that('distributions can be sampled from', {
   sample_distribution(p)
 
   distribution(y) = negative_binomial(1, p)
+  sample_distribution(p)
+
+  distribution(y) = hypergeometric(10, 5, p)
   sample_distribution(p)
 
   distribution(y) = poisson(p)

@@ -9,6 +9,7 @@
 \alias{binomial}
 \alias{beta_binomial}
 \alias{negative_binomial}
+\alias{hypergeometric}
 \alias{poisson}
 \alias{gamma}
 \alias{inverse_gamma}
@@ -43,6 +44,8 @@ binomial(size, prob, dim = NULL)
 beta_binomial(size, alpha, beta, dim = NULL)
 
 negative_binomial(size, prob, dim = NULL)
+
+hypergeometric(m, n, k, dim = NULL)
 
 poisson(lambda, dim = NULL)
 
@@ -94,10 +97,12 @@ or a vector of positive integers. See details.}
 
 \item{mean, meanlog, location, mu}{unconstrained parameters}
 
-\item{sd, sdlog, sigma, size, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b}{positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.}
+\item{sd, sdlog, sigma, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b}{positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.}
 
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
 \code{multinomial} and \code{categorical}}
+
+\item{size, m, n, k}{positive integer parameter}
 
 \item{Sigma}{positive definite variance-covariance matrix parameter}
 }
@@ -156,6 +161,7 @@ The discrete probability distributions (\code{bernoulli},
    \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
    \code{beta_binomial} \tab \code{\link[extraDistr:dbbinom]{extraDistr::dbbinom}}\cr
    \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
+   \code{hypergeometric} \tab \code{\link[stats:dhyper]{stats::dhyper}}\cr
    \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
    \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
    \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr

@@ -303,6 +303,45 @@ negative_binomial_distribution <- R6Class (
   )
 )
 
+hypergeometric_distribution <- R6Class (
+  'hypergeometric_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (m, n, k, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(m, n, k, target_dim = dim)
+      super$initialize('hypergeometric', dim, discrete = TRUE)
+      self$add_parameter(m, 'm')
+      self$add_parameter(n, 'n')
+      self$add_parameter(k, 'k')
+    },
+
+    # default value (should get overwritten anyway!)
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      m <- parameters$m
+      n <- parameters$n
+      k <- parameters$k
+
+      log_prob <- function (x)
+        tf_lchoose(m, x) + tf_lchoose(n, k - x) - tf_lchoose(m + n, k)
+
+      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
+    },
+
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
 gamma_distribution <- R6Class (
   'gamma_distribution',
   inherit = distribution_node,
@@ -1149,10 +1188,15 @@ distrib <- function (distribution, ...) {
 #'   \code{min} must always be less than \code{max}.
 #'
 #' @param mean,meanlog,location,mu unconstrained parameters
-#' @param sd,sdlog,sigma,size,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b
+#'
+#' @param sd,sdlog,sigma,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b
 #'   positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.
+#'
+#' @param size,m,n,k positive integer parameter
+#'
 #' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
 #'   \code{multinomial} and \code{categorical}
+#'
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
@@ -1205,6 +1249,7 @@ distrib <- function (distribution, ...) {
 #'    \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
 #'    \code{beta_binomial} \tab \code{\link[extraDistr:dbbinom]{extraDistr::dbbinom}}\cr
 #'    \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
+#'    \code{hypergeometric} \tab \code{\link[stats:dhyper]{stats::dhyper}}\cr
 #'    \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
 #'    \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
 #'    \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr
@@ -1302,6 +1347,11 @@ beta_binomial <- function (size, alpha, beta, dim = NULL)
 #' @export
 negative_binomial <- function (size, prob, dim = NULL)
   distrib('negative_binomial', size, prob, dim)
+
+#' @rdname greta-distributions
+#' @export
+hypergeometric <- function (m, n, k, dim = NULL)
+  distrib('hypergeometric', m, n, k, dim)
 
 #' @rdname greta-distributions
 #' @export
