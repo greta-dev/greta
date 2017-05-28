@@ -25,6 +25,7 @@
 \alias{wishart}
 \alias{multinomial}
 \alias{categorical}
+\alias{dirichlet}
 \title{greta probability distributions}
 \usage{
 uniform(min, max, dim = NULL)
@@ -72,6 +73,8 @@ wishart(df, Sigma)
 multinomial(size, prob, dim = 1)
 
 categorical(prob, dim = 1)
+
+dirichlet(alpha, dim = 1)
 }
 \arguments{
 \item{min, max}{scalar values giving optional limits to \code{uniform}
@@ -85,7 +88,7 @@ or a vector of positive integers. See details.}
 
 \item{mean, meanlog, location, mu}{unconstrained parameters}
 
-\item{sd, sdlog, sigma, size, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b}{positive parameters}
+\item{sd, sdlog, sigma, size, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b}{positive parameters, \code{alpha} must be a vector for \code{dirichlet}.}
 
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
 \code{multinomial} and \code{categorical}}
@@ -138,30 +141,31 @@ The discrete probability distributions (\code{bernoulli},
   table states the distribution function to which greta's implementation
   corresponds:
 
-  \tabular{ll}{ greta \tab reference\cr \code{uniform} \tab
-  \code{\link[stats:dunif]{stats::dunif}}\cr \code{normal} \tab
-  \code{\link[stats:dnorm]{stats::dnorm}}\cr \code{lognormal} \tab
-  \code{\link[stats:dlnorm]{stats::dlnorm}}\cr \code{bernoulli} \tab
-  \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr \code{binomial} \tab
-  \code{\link[stats:dbinom]{stats::dbinom}}\cr \code{negative_binomial} \tab
-  \code{\link[stats:dnbinom]{stats::dnbinom}}\cr \code{poisson} \tab
-  \code{\link[stats:dpois]{stats::dpois}}\cr \code{gamma} \tab
-  \code{\link[stats:dgamma]{stats::dgamma}}\cr \code{inverse_gamma} \tab
-  \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr \code{weibull}
-  \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr \code{exponential}
-  \tab \code{\link[stats:dexp]{stats::dexp}}\cr \code{pareto} \tab
-  \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr \code{student}
-  \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr \code{laplace} \tab
-  \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr \code{beta} \tab
-  \code{\link[stats:dbeta]{stats::dbeta}}\cr \code{cauchy} \tab
-  \code{\link[stats:dcauchy]{stats::dcauchy}}\cr \code{chi_squared} \tab
-  \code{\link[stats:dchisq]{stats::dchisq}}\cr \code{logistic} \tab
-  \code{\link[stats:dlogis]{stats::dlogis}}\cr \code{f} \tab
-  \code{\link[stats:df]{stats::df}}\cr \code{multivariate_normal} \tab
-  \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr \code{multinomial} \tab
-  \code{\link[stats:dmultinom]{stats::dmultinom}}\cr \code{categorical} \tab
-  {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
-  \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
+  \tabular{ll}{ greta \tab reference\cr
+   \code{uniform} \tab \code{\link[stats:dunif]{stats::dunif}}\cr
+   \code{normal} \tab \code{\link[stats:dnorm]{stats::dnorm}}\cr
+   \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
+   \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
+   \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
+   \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
+   \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
+   \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
+   \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr
+   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
+   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
+   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
+   \code{student} \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr
+   \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
+   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
+   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
+   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
+   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
+   \code{f} \tab \code{\link[stats:df]{stats::df}}\cr
+   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
+   \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
+   \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
+   \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
+   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
 }
 \examples{
 # a uniform parameter constrained to be between 0 and 1

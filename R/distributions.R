@@ -645,6 +645,71 @@ f_distribution <- R6Class (
 )
 
 # need to add checking of mean and Sigma dimensions
+dirichlet_distribution <- R6Class (
+  'dirichlet_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (alpha, dim) {
+
+      # coerce to greta arrays
+      alpha <- as.greta_array(alpha)
+
+      # check dimensions of alpha
+      if (ncol(alpha) != 1 |
+          length(dim(alpha)) != 2) {
+
+        stop ('alpha must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(alpha), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (length(alpha) == 1) {
+
+        stop ('the dirichlet distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
+
+      # check dim is a positive scalar integer
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('dirichlet', c(dim, length(alpha)))
+      self$add_parameter(alpha, 'alpha')
+
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      # transpose and scale probs to get absolute density correct
+      alpha <- tf$transpose(parameters$alpha)
+      tf$contrib$distributions$Dirichlet(concentration = alpha)
+    },
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
+# need to add checking of mean and Sigma dimensions
 multinomial_distribution <- R6Class (
   'multinomial_distribution',
   inherit = distribution_node,
@@ -972,7 +1037,7 @@ distrib <- function (distribution, ...) {
 #'
 #' @param mean,meanlog,location,mu unconstrained parameters
 #' @param sd,sdlog,sigma,size,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b
-#'   positive parameters
+#'   positive parameters, \code{alpha} must be a vector for \code{dirichlet}.
 #' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
 #'   \code{multinomial} and \code{categorical}
 #' @param Sigma positive definite variance-covariance matrix parameter
@@ -1018,30 +1083,31 @@ distrib <- function (distribution, ...) {
 #'   table states the distribution function to which greta's implementation
 #'   corresponds:
 #'
-#'   \tabular{ll}{ greta \tab reference\cr \code{uniform} \tab
-#'   \code{\link[stats:dunif]{stats::dunif}}\cr \code{normal} \tab
-#'   \code{\link[stats:dnorm]{stats::dnorm}}\cr \code{lognormal} \tab
-#'   \code{\link[stats:dlnorm]{stats::dlnorm}}\cr \code{bernoulli} \tab
-#'   \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr \code{binomial} \tab
-#'   \code{\link[stats:dbinom]{stats::dbinom}}\cr \code{negative_binomial} \tab
-#'   \code{\link[stats:dnbinom]{stats::dnbinom}}\cr \code{poisson} \tab
-#'   \code{\link[stats:dpois]{stats::dpois}}\cr \code{gamma} \tab
-#'   \code{\link[stats:dgamma]{stats::dgamma}}\cr \code{inverse_gamma} \tab
-#'   \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr \code{weibull}
-#'   \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr \code{exponential}
-#'   \tab \code{\link[stats:dexp]{stats::dexp}}\cr \code{pareto} \tab
-#'   \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr \code{student}
-#'   \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr \code{laplace} \tab
-#'   \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr \code{beta} \tab
-#'   \code{\link[stats:dbeta]{stats::dbeta}}\cr \code{cauchy} \tab
-#'   \code{\link[stats:dcauchy]{stats::dcauchy}}\cr \code{chi_squared} \tab
-#'   \code{\link[stats:dchisq]{stats::dchisq}}\cr \code{logistic} \tab
-#'   \code{\link[stats:dlogis]{stats::dlogis}}\cr \code{f} \tab
-#'   \code{\link[stats:df]{stats::df}}\cr \code{multivariate_normal} \tab
-#'   \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr \code{multinomial} \tab
-#'   \code{\link[stats:dmultinom]{stats::dmultinom}}\cr \code{categorical} \tab
-#'   {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
-#'   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
+#'   \tabular{ll}{ greta \tab reference\cr
+#'    \code{uniform} \tab \code{\link[stats:dunif]{stats::dunif}}\cr
+#'    \code{normal} \tab \code{\link[stats:dnorm]{stats::dnorm}}\cr
+#'    \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
+#'    \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
+#'    \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
+#'    \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
+#'    \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
+#'    \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
+#'    \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr
+#'    \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
+#'    \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
+#'    \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
+#'    \code{student} \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr
+#'    \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
+#'    \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
+#'    \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
+#'    \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
+#'    \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
+#'    \code{f} \tab \code{\link[stats:df]{stats::df}}\cr
+#'    \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
+#'    \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
+#'    \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
+#'    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
+#'    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
 #'
 #' @examples
 #' # a uniform parameter constrained to be between 0 and 1
@@ -1200,3 +1266,8 @@ multinomial <- function (size, prob, dim = 1)
 #' @export
 categorical <- function (prob, dim = 1)
   distrib('categorical', prob, dim)
+
+#' @rdname greta-distributions
+#' @export
+dirichlet <- function (alpha, dim = 1)
+  distrib('dirichlet', alpha, dim)

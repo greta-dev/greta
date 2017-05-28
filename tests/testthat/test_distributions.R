@@ -342,6 +342,24 @@ test_that('categorical distribution has correct density', {
 
 })
 
+
+test_that('dirichlet distribution has correct density', {
+
+  source('helpers.R')
+
+  # parameters to test
+  m <- 5
+  alpha <- runif(m)
+
+  difference <- compare_distribution(greta::dirichlet,
+                                     extraDistr::ddirichlet,
+                                     parameters = list(alpha = alpha),
+                                     x = extraDistr::rdirichlet(100, alpha))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('scalar-valued distributions can be defined in models', {
 
   source('helpers.R')
