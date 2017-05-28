@@ -31,6 +31,7 @@ Collate:
     'overloaded_docs.R'
     'node_class.R'
     'node_types.R'
+    'variable.R'
     'distributions.R'
     'unknowns_class.R'
     'greta_array_class.R'

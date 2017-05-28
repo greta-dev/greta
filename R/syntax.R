@@ -3,10 +3,9 @@
 #' @name greta-distribution
 #' @aliases distribution likelihood
 #' @title Define a Distribution Over a greta Array
-#' @description \code{distribution} is used to link observed data, free
-#'   parameters and other greta arrays with probability distributions. For
-#'   example, \code{distribution} can be used to define the likelhood term for a
-#'   model by using \code{distribution} on some observed data.
+#' @description \code{distribution} links observed data, variables, and other
+#'   greta arrays to probability distributions. For example a model likelhood
+#'   can be set by using \code{distribution} on some observed data.
 #'   \code{likelihood} is an alias for \code{distribution}. It is deprecated and
 #'   will be removed in version 0.2.
 #'
@@ -20,9 +19,9 @@
 #'   or \code{NULL} if it doesn't. It has now real function, but is included for
 #'   completeness
 #'
-#'   \code{distribution} can also be used to create truncated distributions, by first
-#'   defining a greta array with constraints (the truncation) and then defining
-#'   the distribution on that greta array. See below for an example.
+#'   \code{distribution} can also be used to create truncated distributions, by
+#'   first defining a greta array with constraints (the truncation) and then
+#'   defining the distribution on that greta array. See below for an example.
 #'
 #' @export
 #' @examples
@@ -32,7 +31,7 @@
 #' # observed data and mean parameter to be estimated
 #' # (explicitly coerce data to a greta array so we can refer to it later)
 #' y = as_data(rnorm(5, 0, 3))
-#' mu = free()
+#' mu = variable()
 #' # define the distribution over y (the model likelihood)
 #' distribution(y) = normal(mu, 1)
 #'
@@ -40,7 +39,7 @@
 #' distribution(y)
 #'
 #' # define a truncated-positive standard normal random variable
-#' tn = free(lower = 0)
+#' tn = variable(lower = 0)
 #' distribution(tn) = normal(0, 1)
 #'
 `distribution<-` <- function (greta_array, value) {

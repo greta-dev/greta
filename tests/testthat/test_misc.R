@@ -75,7 +75,7 @@ test_that('define and mcmc error informatively', {
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
-  expect_error(model(free()),
+  expect_error(model(variable()),
                'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
 
   expect_error(model(x),
@@ -179,7 +179,7 @@ test_that('disjoint graphs are checked', {
   b = normal(a, 2)
 
   # c is unrelated and has no density
-  c = free()
+  c = variable()
 
   expect_error(m <- model(a, b, c),
                'the model contains 2 disjoint graphs, one or more of these sub-graphs does not contain any greta arrays that are associated with a probability density, so a model cannot be defined')

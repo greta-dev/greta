@@ -220,6 +220,13 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
 
 }
 
+tf_lchoose <- function (n, k) {
+  n <- tf_as_integer(n)
+  k <- tf_as_integer(k)
+  one <- tf_as_integer(1)
+  -tf$lgamma(one + n - k) - tf$lgamma(one + k) + tf$lgamma(one + n)
+}
+
 # given a flat tensor, convert it into a square symmetric matrix by considering
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix

@@ -212,7 +212,7 @@ compare_truncated_distribution <- function (greta_fun,
                                             truncation) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark, for an implied truncated distribution 'greta_array'
-  # is a greta array created from a distribution and a constrained free() greta
+  # is a greta array created from a distribution and a constrained variable greta
   # array. 'r_fun' is an r function returning the log density for the same
   # truncated distribution, taking x as its only argument.
 
@@ -232,7 +232,7 @@ compare_truncated_distribution <- function (greta_fun,
   r_log_density <- log(r_fun(x))
 
   # create greta array for truncated distribution
-  z <- free(truncation[1], truncation[2])
+  z <- variable(truncation[1], truncation[2])
   dist = do.call(greta_fun, parameters)
   distribution(z) = dist
 

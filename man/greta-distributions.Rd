@@ -2,7 +2,6 @@
 % Please edit documentation in R/distributions.R
 \name{greta-distributions}
 \alias{greta-distributions}
-\alias{free}
 \alias{uniform}
 \alias{normal}
 \alias{lognormal}
@@ -28,8 +27,6 @@
 \alias{categorical}
 \title{greta probability distributions}
 \usage{
-free(lower = -Inf, upper = Inf, dim = 1)
-
 uniform(min, max, dim = NULL)
 
 normal(mean, sd, dim = NULL)
@@ -77,24 +74,18 @@ multinomial(size, prob, dim = 1)
 categorical(prob, dim = 1)
 }
 \arguments{
-\item{lower, upper}{scalar values giving optional limits to free
-parameters. These must be specified as numerics, they cannot be greta
-arrays (though see details for a workaround). They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
-(\code{upper}), though \code{lower} must always be less than \code{upper}.}
-
-\item{dim}{the dimensions of the variable, either a scalar or a vector of
-positive integers. See details.}
-
 \item{min, max}{scalar values giving optional limits to \code{uniform}
 variables. Like \code{lower} and \code{upper}, these must be specified as
 numerics, they cannot be greta arrays (though see details for a
 workaround). Unlike \code{lower} and \code{upper}, they must be finite.
 \code{min} must always be less than \code{max}.}
 
+\item{dim}{the dimensions of the greta array to be returned, either a scalar
+or a vector of positive integers. See details.}
+
 \item{mean, meanlog, location}{unconstrained parameters}
 
-\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2, df1, df2, a, b}{positive
-parameters}
+\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2, df1, df2, a, b}{positive parameters}
 
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
 \code{multinomial} and \code{categorical}}
@@ -103,10 +94,10 @@ parameters}
 }
 \description{
 These functions can be used to define random variables in a
-  greta model. They return a greta array object that can be combined with
-  other greta arrays to construct a model. All of these functions construct
-  random variables with prior distributions, except for \code{free()}, which
-  creates 'free' parameters, so can be used for frequentist analyses.
+  greta model. They return a variable greta array that follows the specified
+  distribution. This variable greta array can be used to represent a
+  parameter with  prior distribution, or used with \code{\link{distribution}}
+  to define a distribution over an existing greta array.
 }
 \details{
 The discrete probability distributions (\code{bernoulli},
@@ -114,15 +105,12 @@ The discrete probability distributions (\code{bernoulli},
   they have fixed values (e.g. defined as a likelihood using
   \code{\link{distribution}}, but not as unknown variables.
 
-  For \code{free()}, \code{dim} gives the dimension of the greta array to
-  create as a free parameter. All elements of that array will have the same
-  constraints (\code{lower} and \code{upper}). For univariate distributions
-  \code{dim} also gives the dimensions of the greta array to create. Each
-  element of the greta array will be (independently) distributed according to
-  the distribution. \code{dim} can also be left at its default of
-  \code{NULL}, in which case the dimension will be detected from the
-  dimensions of the parameters (provided they are compatible with one
-  another).
+  For univariate distributions \code{dim} gives the dimensions of the greta
+  array to create. Each element of the greta array will be (independently)
+  distributed according to the distribution. \code{dim} can also be left at
+  its default of \code{NULL}, in which case the dimension will be detected
+  from the dimensions of the parameters (provided they are compatible with
+  one another).
 
   For \code{multivariate_normal()}, \code{multinomial()}, and
   \code{categorical()} \code{dim} must be a scalar giving the number of rows
@@ -137,13 +125,12 @@ The discrete probability distributions (\code{bernoulli},
   observed entries is 1. It's the user's responsibility to check their data
   matches the distribution!
 
-  The parameters of both \code{free} and \code{uniform} must be fixed, not
-  greta variables. This ensures these values can always be transformed to a
-  continuous scale to run the samplers efficiently. However, a hierarchical
-  \code{uniform} or \code{free} parameter can always be created by defining a
-  \code{free} or \code{uniform} variable constrained between 0 and 1, and then
-  transforming it to the required scale. I.e. \code{min + u * (max - min)},
-  where u is e.g. \code{uniform(0, 1)}. See below for an example.
+  The parameters of \code{uniform} must be fixed, not greta arrays. This
+  ensures these values can always be transformed to a continuous scale to run
+  the samplers efficiently. However, a hierarchical \code{uniform} parameter
+  can always be created by defining a \code{uniform} variable constrained
+  between 0 and 1, and then transforming it to the required scale. See
+  below for an example.
 
   Wherever possible, the parameterisation and argument names of greta
   distributions matches commonly used R functions for distributions, such as
@@ -151,50 +138,43 @@ The discrete probability distributions (\code{bernoulli},
   table states the distribution function to which greta's implementation
   corresponds:
 
-  \tabular{ll}{
-  greta \tab reference\cr
-  \code{uniform} \tab \code{\link[stats:dunif]{stats::dunif}}\cr
-  \code{normal} \tab \code{\link[stats:dnorm]{stats::dnorm}}\cr
-  \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
-  \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
-  \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
-  \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
-  \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
-  \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
-  \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr
-  \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
-  \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
-  \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
-  \code{student} \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr
-  \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
-  \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
-  \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
-  \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
-  \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
-  \code{f} \tab \code{\link[stats:df]{stats::df}}\cr
-  \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
-  \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
-  \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
-  \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
-  }
+  \tabular{ll}{ greta \tab reference\cr \code{uniform} \tab
+  \code{\link[stats:dunif]{stats::dunif}}\cr \code{normal} \tab
+  \code{\link[stats:dnorm]{stats::dnorm}}\cr \code{lognormal} \tab
+  \code{\link[stats:dlnorm]{stats::dlnorm}}\cr \code{bernoulli} \tab
+  \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr \code{binomial} \tab
+  \code{\link[stats:dbinom]{stats::dbinom}}\cr \code{negative_binomial} \tab
+  \code{\link[stats:dnbinom]{stats::dnbinom}}\cr \code{poisson} \tab
+  \code{\link[stats:dpois]{stats::dpois}}\cr \code{gamma} \tab
+  \code{\link[stats:dgamma]{stats::dgamma}}\cr \code{inverse_gamma} \tab
+  \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr \code{weibull}
+  \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr \code{exponential}
+  \tab \code{\link[stats:dexp]{stats::dexp}}\cr \code{pareto} \tab
+  \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr \code{student}
+  \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr \code{laplace} \tab
+  \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr \code{beta} \tab
+  \code{\link[stats:dbeta]{stats::dbeta}}\cr \code{cauchy} \tab
+  \code{\link[stats:dcauchy]{stats::dcauchy}}\cr \code{chi_squared} \tab
+  \code{\link[stats:dchisq]{stats::dchisq}}\cr \code{logistic} \tab
+  \code{\link[stats:dlogis]{stats::dlogis}}\cr \code{f} \tab
+  \code{\link[stats:df]{stats::df}}\cr \code{multivariate_normal} \tab
+  \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr \code{multinomial} \tab
+  \code{\link[stats:dmultinom]{stats::dmultinom}}\cr \code{categorical} \tab
+  {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
+  \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
 }
 \examples{
-# an unconstrained and prior-free parameter (e.g. for a frequentist model)
-alpha = free()
-
-# positive prior-free parameter
-sigma = free(lower = 0)
-
-# a prior-free parameter constrained to be less that -1
-neg_alpha = free(upper = -1)
-
-# a prior-free parameter constrained to be between 0 and 1
-psi = free(lower = 0, upper = 1)
-
 # a uniform parameter constrained to be between 0 and 1
 phi = uniform(min = 0, max = 1)
 
-# create a hierarchical uniform, constrained between alpha and alpha + sigma,
+# a length-three variable, with each element following a standard normal
+# distribution
+alpha = normal(0, 1, dim = 3)
+
+# a length-three variable of lognormals
+sigma = lognormal(0, 3, dim = 3)
+
+# a hierarchical uniform, constrained between alpha and alpha + sigma,
 eta = alpha + uniform(0, 1) * sigma
 
 # an unconstrained parameter with standard normal prior

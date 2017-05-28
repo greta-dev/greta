@@ -97,7 +97,7 @@ z$node$tf
 Hamiltonian Monte Carlo (HMC) requires all of the parameters to be transformed to a continuous scale for sampling. Variable nodes are therefore converted to tensors by first defining a 'free' (unconstrained) version of themselves as a tensor, and then applying a transformation function to convert them back to the scale of interest.
 
 ```{r free_state}
-a = free(lower = 0)
+a = variable(lower = 0)
 class(a$node)
 a$node$tf_from_free
 ```

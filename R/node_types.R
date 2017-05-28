@@ -258,8 +258,9 @@ variable_node <- R6Class (
 )
 
 # helper function to create a variable node
-# by default, make x (the node containing the value) a free parameter of the correct dimension
-variable = function(...)
+# by default, make x (the node
+# containing the value) a free parameter of the correct dimension
+vble = function(...)
   variable_node$new(...)
 
 distribution_node <- R6Class (

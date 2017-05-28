@@ -36,6 +36,8 @@
 #'  # special mathematical functions
 #'  lgamma(x)
 #'  digamma(x)
+#'  choose(n, k)
+#'  lchoose(n, k)
 #'
 #'  # matrix operations
 #'  t(x)

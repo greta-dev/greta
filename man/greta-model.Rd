@@ -76,7 +76,7 @@ The plot method produces a visual representation of the defined
 \dontrun{
 
 # define a simple model
-mu = free()
+mu = variable()
 sigma = lognormal(1, 0.1)
 x = rnorm(10)
 distribution(x) = normal(mu, sigma)

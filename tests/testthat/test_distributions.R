@@ -351,7 +351,7 @@ test_that('scalar-valued distributions can be defined in models', {
   p <- iprobit(normal(0, 1))
 
   # density-free and discrete data need a bit of help
-  a = free()
+  a = variable()
   distribution(x) = normal(a, 1)
   model(a)
 
@@ -393,7 +393,7 @@ test_that('array-valued distributions can be defined in models', {
   p <- iprobit(normal(0, 1, dim = dim))
 
   # density-free and discrete data need a bit of help
-  a <- free(dim = dim)
+  a <- variable(dim = dim)
   distribution(x) = normal(a, 1)
   model(a)
 
@@ -432,20 +432,20 @@ test_that('distributions can be sampled from', {
   y <- round(randu(100))
   p <- iprobit(normal(0, 1, dim = 100))
 
-  # free (with a density)
-  a <- free()
+  # variable (with a density)
+  a <- variable()
   distribution(x) = normal(a, 1)
   sample_distribution(a)
 
-  b <- free(lower = -1)
+  b <- variable(lower = -1)
   distribution(x) = normal(b, 1)
   sample_distribution(b)
 
-  c <- free(upper = -2)
+  c <- variable(upper = -2)
   distribution(x) = normal(c, 1)
   sample_distribution(c)
 
-  d <- free(lower = 1.2, upper = 1.3)
+  d <- variable(lower = 1.2, upper = 1.3)
   distribution(x) = normal(d, 1)
   sample_distribution(d)
 
@@ -488,21 +488,21 @@ test_that('free distribution errors informatively', {
   source('helpers.R')
 
   # bad types
-  expect_error(free(upper = NA),
+  expect_error(variable(upper = NA),
                'lower and upper must be numeric vectors of length 1')
-  expect_error(free(upper = head),
+  expect_error(variable(upper = head),
                'lower and upper must be numeric vectors of length 1')
-  expect_error(free(lower = 1:3),
+  expect_error(variable(lower = 1:3),
                'lower and upper must be numeric vectors of length 1')
 
   # good types, bad values
-  expect_error(free(lower = Inf),
+  expect_error(variable(lower = Inf),
                '^lower and upper must either be')
-  expect_error(free(upper = -Inf),
+  expect_error(variable(upper = -Inf),
                '^lower and upper must either be')
 
   # lower >= upper
-  expect_error(free(lower = 1, upper = 1),
+  expect_error(variable(lower = 1, upper = 1),
                'upper bound must be greater than lower bound')
 
 })

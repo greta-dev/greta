@@ -20,20 +20,19 @@ test_that('`distribution<-` works in models', {
   distribution(y_op) = normal(mu, 1)
   sample_distribution(mu)
 
-  # with a free parameter
-
+  # with a variable
   y <- as_data(randn(5))
   expect_equal(node_type(y$node), 'data')
   y_op <- y * 1
   expect_equal(node_type(y_op$node), 'operation')
 
   # data
-  mu <- free()
+  mu <- variable()
   distribution(y) = normal(mu, 2)
   sample_distribution(mu)
 
   # op
-  mu <- free()
+  mu <- variable()
   distribution(y_op) = normal(mu, 1)
   sample_distribution(mu)
 
@@ -46,7 +45,7 @@ test_that('distribution() works', {
   source('helpers.R')
 
   a = normal(0, 1)
-  b = free()
+  b = variable()
   c = as_data(randn(5))
   d = c * 1
 
@@ -88,7 +87,7 @@ test_that('`distribution<-` errors informatively', {
                'right hand side must have a distribution')
 
   # no density on the right
-  expect_error({distribution(y) = free()},
+  expect_error({distribution(y) = variable()},
                'right hand side must have a distribution')
 
   # non-scalar and wrong dimensions
@@ -110,12 +109,12 @@ test_that('`distribution<-` errors informatively', {
                'right hand side has already been assigned fixed values')
 
   # unsupported truncation
-  z = free(lower = 0)
+  z = variable(lower = 0)
   expect_error({distribution(z) = bernoulli(0.4)},
                'distribution cannot be truncated')
 
   # shouldn't error with -Inf, Inf
-  z = free()
+  z = variable()
   distribution(z) = student(5, 0, 1)
 
 })
