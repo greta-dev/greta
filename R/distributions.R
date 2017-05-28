@@ -202,6 +202,49 @@ binomial_distribution <- R6Class (
   )
 )
 
+beta_binomial_distribution <- R6Class (
+  'beta_binomial_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (size, alpha, beta, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(size, alpha, beta, target_dim = dim)
+      super$initialize('beta_binomial', dim, discrete = TRUE)
+      self$add_parameter(size, 'size')
+      self$add_parameter(alpha, 'alpha')
+      self$add_parameter(beta, 'beta')
+
+    },
+
+    # default value (should get overwritten anyway!)
+    create_target = function() {
+      vble(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      size <- parameters$size
+      alpha <- parameters$alpha
+      beta <- parameters$beta
+
+      log_prob <- function(x) {
+        tf_lchoose(size, x) +
+          tf_lbeta(x + alpha, size - x + beta) -
+          tf_lbeta(alpha, beta)
+      }
+
+      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
+    },
+
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
 poisson_distribution <- R6Class (
   'poisson_distribution',
   inherit = distribution_node,
@@ -1160,6 +1203,7 @@ distrib <- function (distribution, ...) {
 #'    \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
 #'    \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
 #'    \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
+#'    \code{beta_binomial} \tab \code{\link[extraDistr:dbbinom]{extraDistr::dbbinom}}\cr
 #'    \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
 #'    \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
 #'    \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
@@ -1248,6 +1292,11 @@ bernoulli <- function (prob, dim = NULL)
 #' @export
 binomial <- function (size, prob, dim = NULL)
   distrib('binomial', size, prob, dim)
+
+#' @rdname greta-distributions
+#' @export
+beta_binomial <- function (size, alpha, beta, dim = NULL)
+  distrib('beta_binomial', size, alpha, beta, dim)
 
 #' @rdname greta-distributions
 #' @export

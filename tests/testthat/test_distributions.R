@@ -65,6 +65,19 @@ test_that('binomial distribution has correct density', {
 
 })
 
+test_that('beta-binomial distribution has correct density', {
+
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::beta_binomial,
+                                     extraDistr::dbbinom,
+                                     parameters = list(size = 10, alpha = 0.8, beta = 1.2),
+                                     x = extraDistr::rbbinom(100, 10, 0.8, 1.2))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('negative binomial distribution has correct density', {
 
   source('helpers.R')
@@ -396,6 +409,9 @@ test_that('scalar-valued distributions can be defined in models', {
   distribution(y) = binomial(1, p)
   model(p)
 
+  distribution(y) = beta_binomial(1, p, 0.2)
+  model(p)
+
   distribution(y) = negative_binomial(1, p)
   model(p)
 
@@ -455,7 +471,6 @@ test_that('array-valued distributions can be defined in models', {
   y <- round(randu(5, 2))
   p <- iprobit(normal(0, 1, dim = dim))
 
-
   # variable (need to define a likelihood)
   a <- variable(dim = dim)
   distribution(x) = normal(a, 1)
@@ -466,6 +481,9 @@ test_that('array-valued distributions can be defined in models', {
   model(p)
 
   distribution(y) = binomial(1, p)
+  model(p)
+
+  distribution(y) = beta_binomial(1, p, 0.2)
   model(p)
 
   distribution(y) = negative_binomial(1, p)

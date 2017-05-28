@@ -7,6 +7,7 @@
 \alias{lognormal}
 \alias{bernoulli}
 \alias{binomial}
+\alias{beta_binomial}
 \alias{negative_binomial}
 \alias{poisson}
 \alias{gamma}
@@ -38,6 +39,8 @@ lognormal(meanlog, sdlog, dim = NULL)
 bernoulli(prob, dim = NULL)
 
 binomial(size, prob, dim = NULL)
+
+beta_binomial(size, alpha, beta, dim = NULL)
 
 negative_binomial(size, prob, dim = NULL)
 
@@ -151,6 +154,7 @@ The discrete probability distributions (\code{bernoulli},
    \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
    \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
    \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
+   \code{beta_binomial} \tab \code{\link[extraDistr:dbbinom]{extraDistr::dbbinom}}\cr
    \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
    \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
    \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
