@@ -558,7 +558,7 @@ test_that('distributions can be sampled from', {
   distribution(x) = normal(d, 1)
   sample_distribution(d)
 
-  # discrete
+  # univariate discrete
   distribution(y) = bernoulli(p)
   sample_distribution(p)
 
@@ -571,28 +571,54 @@ test_that('distributions can be sampled from', {
   distribution(y) = poisson(p)
   sample_distribution(p)
 
-  # unconstrained
+  distribution(y) = beta_binomial(1, p, 0.3)
+  sample_distribution(p)
+
+  # multivariate discrete
+  y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
+  p <- iprobit(normal(0, 1, dim = 3))
+  distribution(y) = multinomial(4, p, dim = 5)
+  sample_distribution(p)
+
+  y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
+  p <- iprobit(normal(0, 1, dim = 3))
+  distribution(y) = categorical(p, dim = 5)
+  sample_distribution(p)
+
+  y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
+  alpha <- lognormal(0, 1, dim = 3)
+  distribution(y) = dirichlet_multinomial(4, alpha, dim = 5)
+  sample_distribution(alpha)
+
+  # univariate continuous
   sample_distribution(normal(-2, 3))
   sample_distribution(student(5.6, -2, 2.3))
+  sample_distribution(laplace(-1.2, 1.1))
+  sample_distribution(cauchy(-1.2, 1.1))
+  sample_distribution(logistic(-1.2, 1.1))
 
-  # positive
   sample_distribution(lognormal(1.2, 0.2), lower = 0)
   sample_distribution(gamma(0.9, 1.3), lower = 0)
   sample_distribution(exponential(6.3), lower = 0)
-
-  # constrained
   sample_distribution(beta(6.3, 5.9), lower = 0, upper = 1)
+  sample_distribution(inverse_gamma(0.9, 1.3), lower = 0)
+  sample_distribution(weibull(2, 1.1), lower = 0)
+  sample_distribution(pareto(2.4, 1.5), lower = 0)
+  sample_distribution(chi_squared(4.3), lower = 0)
+  sample_distribution(f(24.3, 2.4), lower = 0)
+
   sample_distribution(uniform(-13, 2.4), lower = -13, upper = 2.4)
 
-  # multivariate
+  # multivariate continuous
   sig <- rWishart(4, 3, diag(3))[, , 1]
   sample_distribution(multivariate_normal(rnorm(3), sig))
   sample_distribution(wishart(4, sig))
+  sample_distribution(dirichlet(runif(3)))
 
 })
 
 
-test_that('free distribution errors informatively', {
+test_that('variable() errors informatively', {
 
   source('helpers.R')
 
@@ -652,7 +678,6 @@ test_that('wishart distribution errors informatively', {
                '^Sigma must be a square 2D greta array, but has dimensions')
   expect_error(wishart(3, c),
                '^Sigma must be a square 2D greta array, but has dimensions')
-
 
 })
 
@@ -741,7 +766,6 @@ test_that('multinomial distribution errors informatively', {
 
 })
 
-
 test_that('categorical distribution errors informatively', {
 
   source('helpers.R')
@@ -765,6 +789,68 @@ test_that('categorical distribution errors informatively', {
   expect_error(categorical(p_a, dim = -1),
                'dim must be a scalar positive integer, but was: -1')
   expect_error(categorical(p_a, dim = c(1, 3)),
+               '^dim must be a scalar positive integer, but was:')
+
+})
+
+test_that('dirichlet distribution errors informatively', {
+
+  source('helpers.R')
+
+  alpha_a <- randu(3)
+  alpha_b <- randu(3, 2)
+
+  # good alpha
+  expect_true(inherits(dirichlet(alpha_a),
+                       'greta_array'))
+
+  # bad probs
+  expect_error(dirichlet(alpha_b),
+               'alpha must be a 2D greta array with one column, but has dimensions 3 x 2')
+
+  # scalars
+  expect_error(dirichlet(1),
+               'the dirichlet distribution is for vectors, but the parameters were scalar')
+
+  # bad dim
+  expect_error(dirichlet(alpha_a, dim = -1),
+               'dim must be a scalar positive integer, but was: -1')
+  expect_error(dirichlet(alpha_a, dim = c(1, 3)),
+               '^dim must be a scalar positive integer, but was:')
+
+})
+
+
+
+test_that('dirichlet-multinomial distribution errors informatively', {
+
+  source('helpers.R')
+
+  size <- 4
+  alpha_a <- randu(3)
+  alpha_b <- randu(3, 2)
+
+  # good alpha
+  expect_true(inherits(dirichlet_multinomial(size, alpha_a),
+                       'greta_array'))
+
+  # bad probs
+  expect_error(dirichlet_multinomial(size, alpha_b),
+               'alpha must be a 2D greta array with one column, but has dimensions 3 x 2')
+
+  # bad size
+  expect_error(dirichlet_multinomial(c(1, 2), alpha_a),
+               'size must be a scalar, but has dimensions 2 x 1')
+
+
+  # scalars
+  expect_error(dirichlet_multinomial(size, alpha = 1),
+               'the dirichlet distribution is for vectors, but the parameters were scalar')
+
+  # bad dim
+  expect_error(dirichlet_multinomial(size, alpha_a, dim = -1),
+               'dim must be a scalar positive integer, but was: -1')
+  expect_error(dirichlet_multinomial(size, alpha_a, dim = c(1, 3)),
                '^dim must be a scalar positive integer, but was:')
 
 })
