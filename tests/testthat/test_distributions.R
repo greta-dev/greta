@@ -384,11 +384,12 @@ test_that('scalar-valued distributions can be defined in models', {
   y <- round(randu(5))
   p <- iprobit(normal(0, 1))
 
-  # density-free and discrete data need a bit of help
+  # variable (need to define a likelihood)
   a = variable()
   distribution(x) = normal(a, 1)
   model(a)
 
+  # univariate discrete distributions
   distribution(y) = bernoulli(p)
   model(p)
 
@@ -401,19 +402,47 @@ test_that('scalar-valued distributions can be defined in models', {
   distribution(y) = poisson(p)
   model(p)
 
-  # continuous distributions
+  # multivariate discrete distributions
+  y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
+  p <- iprobit(normal(0, 1, dim = 3))
+  distribution(y) = multinomial(4, p)
+  model(p)
+
+  y <- extraDistr::rmnom(1, size = 1, prob = runif(3))
+  p <- iprobit(normal(0, 1, dim = 3))
+  distribution(y) = categorical(p)
+  model(p)
+
+  y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
+  alpha <- lognormal(0, 1, dim = 3)
+  distribution(y) = dirichlet_multinomial(4, alpha)
+  model(alpha)
+
+  # univariate continuous distributions
   model(normal(-2, 3))
   model(student(5.6, -2, 2.3))
-  model(lognormal(1.2, 0.2))
+  model(laplace(-1.2, 1.1))
+  model(cauchy(-1.2, 1.1))
+  model(logistic(-1.2, 1.1))
 
+  model(lognormal(1.2, 0.2))
   model(gamma(0.9, 1.3))
   model(exponential(6.3))
   model(beta(6.3, 5.9))
+  model(inverse_gamma(0.9, 1.3))
+  model(weibull(2, 1.1))
+  model(pareto(2.4, 1.5))
+  model(chi_squared(4.3))
+  model(f(24.3, 2.4))
 
   model(uniform(-13, 2.4))
+
+  # multivariate continuous distributions
   sig <- rWishart(4, 3, diag(3))[, , 1]
+
   model(multivariate_normal(rnorm(3), sig))
   model(wishart(4, sig))
+  model(dirichlet(runif(3)))
 
 })
 
@@ -426,11 +455,13 @@ test_that('array-valued distributions can be defined in models', {
   y <- round(randu(5, 2))
   p <- iprobit(normal(0, 1, dim = dim))
 
-  # density-free and discrete data need a bit of help
+
+  # variable (need to define a likelihood)
   a <- variable(dim = dim)
   distribution(x) = normal(a, 1)
   model(a)
 
+  # univariate discrete distributions
   distribution(y) = bernoulli(p)
   model(p)
 
@@ -443,18 +474,44 @@ test_that('array-valued distributions can be defined in models', {
   distribution(y) = poisson(p)
   model(p)
 
-  # continuous distributions
+  # multivariate discrete distributions
+  y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
+  p <- iprobit(normal(0, 1, dim = 3))
+  distribution(y) = multinomial(4, p, dim = 5)
+  model(p)
+
+  y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
+  p <- iprobit(normal(0, 1, dim = 3))
+  distribution(y) = categorical(p, dim = 5)
+  model(p)
+
+  y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
+  alpha <- lognormal(0, 1, dim = 3)
+  distribution(y) = dirichlet_multinomial(4, alpha, dim = 5)
+  model(alpha)
+
+  # univariate continuous distributions
   model(normal(-2, 3, dim = dim))
   model(student(5.6, -2, 2.3, dim = dim))
-  model(lognormal(1.2, 0.2, dim = dim))
+  model(laplace(-1.2, 1.1, dim = dim))
+  model(cauchy(-1.2, 1.1, dim = dim))
+  model(logistic(-1.2, 1.1, dim = dim))
 
+  model(lognormal(1.2, 0.2, dim = dim))
   model(gamma(0.9, 1.3, dim = dim))
   model(exponential(6.3, dim = dim))
   model(beta(6.3, 5.9, dim = dim))
   model(uniform(-13, 2.4, dim = dim))
+  model(inverse_gamma(0.9, 1.3, dim = dim))
+  model(weibull(2, 1.1, dim = dim))
+  model(pareto(2.4, 1.5, dim = dim))
+  model(chi_squared(4.3, dim = dim))
+  model(f(24.3, 2.4, dim = dim))
 
+  # multivariate continuous distributions
   sig <- rWishart(4, 3, diag(3))[, , 1]
   model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
+  model(dirichlet(runif(3), dim = dim[1]))
 
 })
 
