@@ -65,7 +65,7 @@ length(z$node$children)
 
 Each node also has a list of its parents, the nodes that have been created from this one.
 
-When `define_model()` is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.
+When `model()` is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.
 
 Nodes also have a value member, which is an array for data nodes or an 'unknowns' object for other node types. The unknowns class is a thin wrapper around arrays, which prints the question marks. Generic functions for working on arrays (e.g. `dim`, `length`, `print`) make use these node values to return something familiar to the user.
 ```{r nodes2}
@@ -78,7 +78,7 @@ class(z$node$value())
 
 ### Tensors
 
-In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn't happen until the user runs `define_model()`, which creates a 'dag_class' object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.
+In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn't happen until the user runs `model()`, which creates a 'dag_class' object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.
 
 The node `tf()` method takes the dag as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.
 
@@ -97,7 +97,7 @@ z$node$tf
 Hamiltonian Monte Carlo (HMC) requires all of the parameters to be transformed to a continuous scale for sampling. Variable nodes are therefore converted to tensors by first defining a 'free' (unconstrained) version of themselves as a tensor, and then applying a transformation function to convert them back to the scale of interest.
 
 ```{r free_state}
-a = free(lower = 0)
+a = variable(lower = 0)
 class(a$node)
 a$node$tf_from_free
 ```
@@ -130,7 +130,7 @@ TensorFlow's automatic gradient capabilities are then used to define a Tensor fo
 The `dag` R6 object contained within the model then exposes methods to send parameters to the TensorFlow graph and return the joint density and gradient.
 
 ```{r dag1}
-model <- define_model(b)
+model <- model(b)
 model$dag$send_parameters
 model$dag$log_density
 model$dag$gradients

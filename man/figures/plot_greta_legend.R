@@ -1,5 +1,6 @@
 # plot legend
-library(DiagrammeR)
+library (DiagrammeR)
+library (raster)
 
 ns <- 0.3
 # bespoke set of nodes for legend
@@ -72,8 +73,8 @@ export_graph(gr2, file_name = f_edges,
 # combine the two panels into one
 
 # load images
-nodes <- raster::brick(f_nodes)
-edges <- raster::brick(f_edges)
+nodes <- brick(f_nodes)
+edges <- brick(f_edges)
 
 # drop 2 pixels on each side to deal with crappy rendering of graphs
 nodes <- crop(nodes, extent(nodes) - 4)

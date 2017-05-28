@@ -5,6 +5,8 @@ test_that('simple functions work as expected', {
   source('helpers.R')
 
   x <- randn(25, 4)
+  n <- 10
+  k <- 5
 
   # logarithms and exponentials
   check_op(log, exp(x))

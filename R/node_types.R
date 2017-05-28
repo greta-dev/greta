@@ -19,7 +19,7 @@ data_node <- R6Class(
 
     tf = function (dag) {
       assign(dag$tf_name(self),
-             tf$constant(self$value(), dtype = tf$float32),
+             tf$constant(self$value(), dtype = tf_float()),
              envir = dag$tf_environment)
     }
   )
@@ -202,7 +202,7 @@ variable_node <- R6Class (
 
       # make a Variable tensor to hold the free state
       tf_obj <- tf$Variable(initial_value = self$value(),
-                            dtype = tf$float32)
+                            dtype = tf_float())
 
       # assign this as the free state
       tf_name <- dag$tf_name(self)
@@ -229,29 +229,24 @@ variable_node <- R6Class (
 
     tf_from_free = function (x, env) {
 
+      upper <- self$upper
+      lower <- self$lower
+
       if (self$constraint == 'none') {
 
         y <- x
 
       } else if (self$constraint == 'both') {
 
-        upper <- self$upper
-        lower <- self$lower
-        y <- (1 / (1 + tf$exp(-1 * x))) * (upper - lower) + lower
+        y <- tf_ilogit(x) * fl(upper - lower) + fl(lower)
 
       } else if (self$constraint == 'low') {
 
-        upper <- self$upper
-        baseline <- tf$log(1 + tf$exp(x))
-        # have to coerce upper since it's being subtracted *from* and has type
-        # 'float32_ref'
-        y <- tf_as_float(upper) - baseline
+        y <- fl(upper) - tf_log1pe(x)
 
       } else if (self$constraint == 'high') {
 
-        lower <- self$lower
-        baseline <- tf$log(1 + tf$exp(x))
-        y <- baseline + lower
+        y <- tf_log1pe(x) + fl(lower)
 
       }
 
@@ -263,8 +258,9 @@ variable_node <- R6Class (
 )
 
 # helper function to create a variable node
-# by default, make x (the node containing the value) a free parameter of the correct dimension
-variable = function(...)
+# by default, make x (the node
+# containing the value) a free parameter of the correct dimension
+vble = function(...)
   variable_node$new(...)
 
 distribution_node <- R6Class (
@@ -374,18 +370,18 @@ distribution_node <- R6Class (
       if (lower == -Inf) {
 
         # if only upper is constrained, just need the cdf at the upper
-        offset <- self$tf_log_cdf_function(upper, parameters)
+        offset <- self$tf_log_cdf_function(fl(upper), parameters)
 
       } else if (upper == Inf) {
 
         # if only lower is constrained, get the log of the integral above it
-        offset <- tf$log(1 - self$tf_cdf_function(lower, parameters))
+        offset <- tf$log(fl(1) - self$tf_cdf_function(fl(lower), parameters))
 
       } else {
 
         # if both are constrained, get the log of the integral between them
-        offset <- tf$log(self$tf_cdf_function(upper, parameters) -
-                           self$tf_cdf_function(lower, parameters))
+        offset <- tf$log(self$tf_cdf_function(fl(upper), parameters) -
+                           self$tf_cdf_function(fl(lower), parameters))
 
       }
 
@@ -398,6 +394,24 @@ distribution_node <- R6Class (
       parameter <- to_node(parameter)
       self$add_child(parameter)
       self$parameters[[name]] <- parameter
+
+    },
+
+    tf_log_density_function = function (x, parameters) {
+
+      self$tf_distrib(parameters)$log_prob(x)
+
+    },
+
+    tf_cdf_function = function (x, parameters) {
+
+      self$tf_distrib(parameters)$cdf(x)
+
+    },
+
+    tf_log_cdf_function = function (x, parameters) {
+
+      self$tf_distrib(parameters)$log_cdf(x)
 
     }
 

@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Probabilistic Modelling with TensorFlow
-Version: 0.1.8
-Date: 2017-05-22
+Version: 0.1.9
+Date: 2017-05-28
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
 Description: Existing tools for fitting bespoke statistical models (such as
@@ -31,6 +31,7 @@ Collate:
     'overloaded_docs.R'
     'node_class.R'
     'node_types.R'
+    'variable.R'
     'distributions.R'
     'unknowns_class.R'
     'greta_array_class.R'
@@ -45,10 +46,13 @@ Collate:
     'dynamics_module.R'
     'dag_class.R'
     'greta_model_class.R'
+    'progress_bar.R'
     'samplers.R'
 Imports:
     R6,
     tensorflow,
+    reticulate,
+    progress,
     coda
 Suggests:
     knitr,
@@ -58,6 +62,8 @@ Suggests:
     testthat,
     mvtnorm,
     MCMCpack,
+    rmutil,
+    extraDistr,
     truncdist
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1

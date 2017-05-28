@@ -231,14 +231,14 @@ dev.off()
 
 # thin blank banner for between document sections
 png('README_files/banner.png',
-    height = 19, width = 1344,
+    height = 4, width = 940,
     pointsize = 25)
 blank_banner(14/0.2)
 dev.off()
 
 # thicker blank banner for end of document
 png('README_files/bottom_banner.png',
-    height = 48, width = 1344,
+    height = 8, width = 940,
     pointsize = 25)
 blank_banner(14/0.5)
 dev.off()

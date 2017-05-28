@@ -24,12 +24,12 @@ greta lets you write probabilistic models interactively in
 \examples{
 \dontrun{
 # define a simple model
-mu = free()
+mu = variable()
 sigma = lognormal(1, 0.1)
 x = rnorm(10)
 distribution(x) = normal(mu, sigma)
 
-m <- define_model(mu, sigma)
+m <- model(mu, sigma)
 
 # and sample from it
 draws <- mcmc(m,

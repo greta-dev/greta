@@ -37,7 +37,7 @@ x$node$tf
 z$node$tf
 
 ## ----free_state----------------------------------------------------------
-a = free(lower = 0)
+a = variable(lower = 0)
 class(a$node)
 a$node$tf_from_free
 
@@ -52,7 +52,7 @@ class(b$node$distribution$target)
 b$node$distribution$tf_log_density
 
 ## ----dag1----------------------------------------------------------------
-model <- define_model(b)
+model <- model(b)
 model$dag$send_parameters
 model$dag$log_density
 model$dag$gradients

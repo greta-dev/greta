@@ -51,10 +51,11 @@ NULL
 #   tf_index - rank 1 tensor giving index to subsetted elements in flattened
 #     input tensor
 #   dims_out - dimension of output array
-tf_extract <- function (x, nelem, tf_index, dims_out) {
+tf_extract <- function (x, nelem, index, dims_out) {
 
   # flatten tensor, gather using index, reshape to output dimension
   tensor_in_flat <- tf$reshape(x, shape(nelem))
+  tf_index <- tf$constant(as.integer(index), dtype = tf_int())
   tensor_out_flat <- tf$gather(tensor_in_flat, tf_index)
   tensor_out <- tf$reshape(tensor_out_flat, to_shape(dims_out))
   tensor_out
@@ -64,7 +65,7 @@ tf_extract <- function (x, nelem, tf_index, dims_out) {
 # using tf$concat, update the elements of a tensor `ref`, putting the new
 # values, a tensor `updates` at the elements given by the R vector `index` (in
 # 0-indexing)
-recombine <- function (ref, index, updates) {
+tf_recombine <- function (ref, index, updates) {
 
   # vector denoting whether an element is being updated
   nelem <- ref$get_shape()$as_list()[1]
@@ -115,7 +116,7 @@ tf_replace <- function (x, replacement, index, dims) {
   replacement_flat <- tf$reshape(replacement, shape(length(index)))
 
   # update the values into a new tensor
-  result_flat <- recombine(ref = x_flat,
+  result_flat <- tf_recombine(ref = x_flat,
                            index = index,
                            updates = replacement_flat)
 
@@ -191,8 +192,6 @@ tf_replace <- function (x, replacement, index, dims) {
 
   # get the index in flat python format, as a tensor
   index <- flatten_rowwise(dummy_out)
-  tf_index <- tf$constant(as.integer(index),
-                          dtype = tf$int32)
 
   # function to return dimensions of output
   dimfun <- function (elem_list)
@@ -203,7 +202,7 @@ tf_replace <- function (x, replacement, index, dims) {
      x,
      dimfun = dimfun,
      operation_args = list(nelem = nelem,
-                           tf_index = tf_index,
+                           index = index,
                            dims_out = dims_out),
      tf_operation = 'tf_extract',
      value = values)

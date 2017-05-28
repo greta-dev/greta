@@ -150,11 +150,11 @@ tf_as_logical <- function (x)
 
 # and to float
 tf_as_float <- function (x)
-  tf$cast(x, tf$float32)
+  tf$cast(x, tf_float())
 
 # and to integer
 tf_as_integer <- function (x)
-  tf$cast(x, tf$int64)
+  tf$cast(x, tf_int())
 
 # flatten a greta array into a column vector in column-major order
 flatten <- function (x)
@@ -220,6 +220,14 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
 
 }
 
+tf_lchoose <- function (n, k) {
+  one <- fl(1)
+  -tf$lgamma(one + n - k) - tf$lgamma(one + k) + tf$lgamma(one + n)
+}
+
+tf_lbeta <- function (a, b)
+  tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
+
 # given a flat tensor, convert it into a square symmetric matrix by considering
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
@@ -230,8 +238,8 @@ tf_flat_to_symmetric = function (x, dims) {
   indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
 
   # create an empty vector to fill with the values
-  values <- tf$zeros(shape(prod(dims), 1), dtype = tf$float32)
-  values <- recombine(values, indices, x)
+  values <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
+  values <- tf_recombine(values, indices, x)
 
   # reshape into lower triangular, then symmetric matrix
   L <- tf$reshape(values, shape(dims[1], dims[2]))
@@ -258,6 +266,18 @@ node_type <- function (node) {
   gsub('_node', '', type)
 }
 
+# given a base colour, return a function taking a value between 0 and 1 and
+# returning a colour linearly interpolated between black, the colour and white,
+# so that values close to 0.5 match the base colour, values close to 0 are
+# nearer black, and values close to 1 are nearer white
+palettize <- function (base_colour) {
+  pal <- colorRampPalette(c('#000000', base_colour, '#ffffff'))
+  function (val){
+    stopifnot(val > 0 & val < 1)
+    cols <- pal(1001)
+    cols[round(val * 1000 + 1)]
+  }
+}
 # colour scheme for plotting
 greta_col <- function (which = c('main',
                                  'dark',
@@ -265,11 +285,30 @@ greta_col <- function (which = c('main',
                                  'lighter',
                                  'super_light')) {
   which <- match.arg(which)
+  pal <- palettize('#996bc7')
   switch (which,
-          main = '#a464b4',
-          dark = '#8b4b9b',
-          light = '#ba87c5',
-          lighter = '#e1cce5',
-          super_light = '#f5eef6')
+          dark = pal(0.45),  #45%
+          main = pal(0.55),  #55%
+          light = pal(0.65),  #65%ish
+          lighter = pal(0.85),  #85%ish
+          super_light = pal(0.95))  #95%ish
 }
 
+# check whether initial values are valid
+valid_parameters <- function(dag, initial_values) {
+  dag$send_parameters(initial_values)
+  ld <- dag$log_density()
+  grad <- dag$gradients()
+  all(is.finite(c(ld, grad)))
+}
+
+# access the float and int type options
+tf_float <- function ()
+  options()$greta_tf_float
+
+# access the float and int type options
+tf_int <- function ()
+  tf$int32
+
+# cast a scalar as a float or integer of the correct type in TF code
+fl <- function(x) tf$constant(x, dtype = tf_float())

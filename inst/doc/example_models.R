@@ -6,16 +6,17 @@ library (greta)
 y <- c(21, 20, 15)
 n <- c(48, 34, 21)
 Z <- c(10, 30, 50)
-alpha <- 4.48        
-beta <- 0.76         
-sigma2 <- 81.14      
-J <- 3               
+alpha <- 4.48
+beta <- 0.76
+sigma2 <- 81.14
+sigma <- sqrt(sigma2)
+tau <- 1 / sigma2
+J <- 3
 
 ## ----air_greta-----------------------------------------------------------
-# priors
-theta = normal(0, 1e3)
+theta = normal(0, 32)
 mu <- alpha + beta * Z
-X = normal(mu, sqrt(sigma2))
+X = normal(mu, sigma)
 p <- ilogit(theta[1] + theta[2] * X)
 distribution(y) = binomial(n, p)
 
@@ -29,17 +30,12 @@ r <- c(6, 13, 18, 28, 52, 53, 61, 60)
 N <- 8
 
 ## ----beetles_greta-------------------------------------------------------
-# precalculate for centering
-mean_x <- mean(x)
-
-# priors and model
-alpha_star = normal(0, 1e3)
-beta = normal(0, 1e3)
-p <- ilogit(alpha_star + beta * (x - mean_x))
+alpha_star = normal(0, 32)
+beta = normal(0, 32)
+p <- ilogit(alpha_star + beta * (x - mean(x)))
 likelihood(r) = binomial(n, p)
 
-# other interesting quantities
-alpha <- alpha_star - beta * mean_x
+alpha <- alpha_star - beta * mean(x)
 rhat <- p * n
 
 ## ----beetles_stan, echo = FALSE------------------------------------------

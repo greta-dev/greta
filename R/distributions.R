@@ -52,14 +52,19 @@ uniform_distribution <- R6Class (
 
     # default value
     create_target = function() {
-      variable(lower = self$min,
+      vble(lower = self$min,
                upper = self$max,
                dim = self$dim)
     },
 
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Uniform(low = parameters$min,
+                                       high = parameters$max)
+    },
+
     # weird hack to make TF see a gradient here
     tf_log_density_function = function (x, parameters) {
-      self$log_density + x * 0
+      fl(self$log_density) + x * fl(0)
     }
 
   )
@@ -81,31 +86,12 @@ normal_distribution <- R6Class (
 
     # default value
     create_target = function() {
-      variable(dim = self$dim)
+      vble(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
-
-      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
-                                              scale = parameters$sd)
-      norm$log_prob(x)
-
-    },
-
-    tf_cdf_function = function (x, parameters) {
-
-      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
-                                              scale = parameters$sd)
-      norm$cdf(x)
-
-    },
-
-    tf_log_cdf_function = function (x, parameters) {
-
-      norm <- tf$contrib$distributions$Normal(loc = parameters$mean,
-                                              scale = parameters$sd)
-      norm$log_cdf(x)
-
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Normal(loc = parameters$mean,
+                                      scale = parameters$sd)
     }
 
   )
@@ -125,20 +111,34 @@ lognormal_distribution <- R6Class (
 
     # default value
     create_target = function() {
-      variable(lower = 0, dim = self$dim)
+      vble(lower = 0, dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
 
       mean <- parameters$meanlog
       sd <- parameters$sdlog
       var <- tf$square(sd)
-      lx <- tf$log(x)
 
-      -1 * (lx + tf$log(sd) + 0.9189385) +
-        -0.5 * tf$square(tf$subtract(lx, mean)) / var
+      log_prob = function (x) {
+        lx <- tf$log(x)
+        fl(-1) * (lx + tf$log(sd) + fl(0.9189385)) +
+          fl(-0.5) * tf$square(tf$subtract(lx, mean)) / var
+      }
+
+      cdf = function (x) {
+        lx <- tf$log(x)
+        fl(0.5) + fl(0.5) * tf$erf((lx - mean) / (fl(sqrt(2)) * sd))
+      }
+
+      log_cdf = function (x) {
+        log(cdf(x))
+      }
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
 
     }
+
   )
 )
 
@@ -156,23 +156,17 @@ bernoulli_distribution <- R6Class (
 
     # default value (should get overwritten anyway!)
     create_target = function() {
-      variable(dim = self$dim)
+      vble(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Bernoulli(probs = parameters$prob)
+    },
 
-      prob <- parameters$prob
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
-      # optionally reshape prob
-      prob_shape <- prob$get_shape()$as_list()
-      x_shape <- x$get_shape()$as_list()
-
-      if (identical(prob_shape, c(1L, 1L)) & !identical(x_shape, c(1L, 1L)))
-        prob <- tf$tile(prob, x_shape)
-
-      tf$log(tf$where(tf$equal(x, 1), prob, 1 - prob))
-
-    }
 
   )
 )
@@ -193,19 +187,60 @@ binomial_distribution <- R6Class (
 
     # default value (should get overwritten anyway!)
     create_target = function() {
-      variable(dim = self$dim)
+      vble(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Binomial(total_count = parameters$size,
+                                        probs = parameters$prob)
+    },
+
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
+beta_binomial_distribution <- R6Class (
+  'beta_binomial_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (size, alpha, beta, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(size, alpha, beta, target_dim = dim)
+      super$initialize('beta_binomial', dim, discrete = TRUE)
+      self$add_parameter(size, 'size')
+      self$add_parameter(alpha, 'alpha')
+      self$add_parameter(beta, 'beta')
+
+    },
+
+    # default value (should get overwritten anyway!)
+    create_target = function() {
+      vble(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
 
       size <- parameters$size
-      prob <- parameters$prob
+      alpha <- parameters$alpha
+      beta <- parameters$beta
 
-      log_choose <- tf$lgamma(size + 1) - tf$lgamma(x + 1) -
-        tf$lgamma(size - x + 1)
-      log_choose + x * tf$log(prob) + (size - x) * tf$log(1 - prob)
+      log_prob <- function(x) {
+        tf_lchoose(size, x) +
+          tf_lbeta(x + alpha, size - x + beta) -
+          tf_lbeta(alpha, beta)
+      }
 
-    }
+      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
+    },
+
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
@@ -224,15 +259,16 @@ poisson_distribution <- R6Class (
 
     # default value (should get overwritten anyway!)
     create_target = function() {
-      variable(dim = self$dim)
+      vble(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Poisson(rate = parameters$lambda)
+    },
 
-      lambda <- parameters$lambda
-      x * tf$log(lambda) - lambda - tf$lgamma(x + 1)
-
-    }
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
@@ -252,19 +288,56 @@ negative_binomial_distribution <- R6Class (
 
     # default value (should get overwritten anyway!)
     create_target = function() {
-      variable(dim = self$dim)
+      vble(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$NegativeBinomial(total_count = parameters$size,
+                                                probs = fl(1) - parameters$prob)
+    },
 
-      size <- parameters$size
-      prob <- parameters$prob
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
-      log_choose <- tf$lgamma(x + size) - tf$lgamma(x + 1) -
-        tf$lgamma(size)
-      log_choose + size * tf$log(prob) + x * tf$log(1 - prob)
+  )
+)
 
-    }
+hypergeometric_distribution <- R6Class (
+  'hypergeometric_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (m, n, k, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(m, n, k, target_dim = dim)
+      super$initialize('hypergeometric', dim, discrete = TRUE)
+      self$add_parameter(m, 'm')
+      self$add_parameter(n, 'n')
+      self$add_parameter(k, 'k')
+    },
+
+    # default value (should get overwritten anyway!)
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      m <- parameters$m
+      n <- parameters$n
+      k <- parameters$k
+
+      log_prob <- function (x)
+        tf_lchoose(m, x) + tf_lchoose(n, k - x) - tf_lchoose(m + n, k)
+
+      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
+    },
+
+    # no CDF for discrete distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
@@ -284,16 +357,81 @@ gamma_distribution <- R6Class (
 
     # default value
     create_target = function() {
-      variable(lower = 0, dim = self$dim)
+      vble(lower = 0, dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
 
-      shape <- parameters$shape
-      scale <- 1 /parameters$rate
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Gamma(concentration = parameters$shape,
+                                     rate = parameters$rate)
+    }
 
-      -shape * tf$log(scale) - tf$lgamma(shape) +
-        (shape - 1) * tf$log(x) - x / scale
+  )
+)
+
+inverse_gamma_distribution <- R6Class (
+  'inverse_gamma_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (alpha, beta, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(alpha, beta, target_dim = dim)
+      super$initialize('inverse_gamma', dim)
+      self$add_parameter(alpha, 'alpha')
+      self$add_parameter(beta, 'beta')
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$InverseGamma(concentration = parameters$alpha,
+                                            rate = parameters$beta)
+    }
+
+  )
+)
+
+
+weibull_distribution <- R6Class (
+  'weibull_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (shape, scale, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(shape, scale, target_dim = dim)
+      super$initialize('weibull', dim)
+      self$add_parameter(shape, 'shape')
+      self$add_parameter(scale, 'scale')
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      a <- parameters$shape
+      b <- parameters$scale
+
+      log_prob = function (x) {
+        log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
+      }
+
+      cdf = function (x) {
+        fl(1) - exp(-(x / b) ^ a)
+      }
+
+      log_cdf = function (x) {
+        log(cdf(x))
+      }
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
 
     }
 
@@ -314,13 +452,49 @@ exponential_distribution <- R6Class (
 
     # default value
     create_target = function() {
-      variable(lower = 0, dim = self$dim)
+      vble(lower = 0, dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Exponential(rate = parameters$rate)
+    }
 
-      rate <- parameters$rate
-      tf$log(rate) - rate * x
+  )
+)
+
+pareto_distribution <- R6Class (
+  'pareto_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (a, b, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(a, b, target_dim = dim)
+      super$initialize('pareto', dim)
+      self$add_parameter(a, 'a')
+      self$add_parameter(b, 'b')
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      a <- parameters$a
+      b <- parameters$b
+
+      log_prob <- function (x)
+        log(a) + a * log(b) - (a + 1) * log(x)
+
+      cdf <- function (x)
+        1 - (b / x) ^ a
+
+      log_cdf <- function (x)
+        log(cdf(x))
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
 
     }
 
@@ -332,34 +506,50 @@ student_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (df, location, scale, dim) {
+    initialize = function (df, mu, sigma, dim) {
       # add the nodes as children and parameters
-      dim <- check_dims(df, location, scale, target_dim = dim)
+      dim <- check_dims(df, mu, sigma, target_dim = dim)
       super$initialize('student', dim)
       self$add_parameter(df, 'df')
-      self$add_parameter(location, 'location')
-      self$add_parameter(scale, 'scale')
+      self$add_parameter(mu, 'mu')
+      self$add_parameter(sigma, 'sigma')
     },
 
     # default value
     create_target = function() {
-      variable(dim = self$dim)
+      vble(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$StudentT(df = parameters$df,
+                                        loc = parameters$mu,
+                                        scale = parameters$sigma)
+    }
 
-      df <- parameters$df
-      location <- parameters$location
-      scale <- parameters$scale
+  )
+)
 
-      x_ <- (x - location) / scale
+laplace_distribution <- R6Class (
+  'laplace_distribution',
+  inherit = distribution_node,
+  public = list(
 
-      const <- tf$lgamma((df + 1) * 0.5) -
-        tf$lgamma(df * 0.5) -
-        0.5 * (tf$log(tf$square(scale)) + tf$log(df) + log(pi))
+    initialize = function (mu, sigma, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(mu, sigma, target_dim = dim)
+      super$initialize('laplace', dim)
+      self$add_parameter(mu, 'mu')
+      self$add_parameter(sigma, 'sigma')
+    },
 
-      const - 0.5 * (df + 1) * tf$log(1 + (1 / df) * (tf$square(x_)))
+    # default value
+    create_target = function() {
+      vble(dim = self$dim)
+    },
 
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Laplace(loc = parameters$mu,
+                                       scale = parameters$sigma)
     }
 
   )
@@ -380,25 +570,444 @@ beta_distribution <- R6Class (
 
     # default value
     create_target = function() {
-      variable(lower = 0, upper = 1, dim = self$dim)
+      vble(lower = 0, upper = 1, dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Beta(concentration1 = parameters$shape1,
+                                    concentration0 = parameters$shape2)
+    }
 
-      shape1 <- parameters$shape1
-      shape2 <- parameters$shape2
+  )
+)
 
-      (shape1 - 1) * tf$log(x) +
-        (shape2 - 1) * tf$log(1 - x) +
-        tf$lgamma(shape1 + shape2) -
-        tf$lgamma(shape1) - tf$lgamma(shape2)
+cauchy_distribution <- R6Class (
+  'cauchy_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (location, scale, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(location, scale, target_dim = dim)
+      super$initialize('cauchy', dim)
+      self$add_parameter(location, 'location')
+      self$add_parameter(scale, 'scale')
+    },
+
+    # default value
+    create_target = function() {
+      vble(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      loc <- parameters$location
+      s <- parameters$scale
+
+      log_prob = function (x)
+        -tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s)))
+
+      cdf = function (x)
+        fl(1 / pi)  * tf$atan((x - loc) / s) + fl(0.5)
+
+      log_cdf = function (x)
+        tf$log(cdf(x))
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
 
     }
 
   )
 )
 
-# need to add checking of mean and Sigma dimensions
+chi_squared_distribution <- R6Class (
+  'chi_squared_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (df, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(df, target_dim = dim)
+      super$initialize('chi_squared', dim)
+      self$add_parameter(df, 'df')
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Chi2(df = parameters$df)
+    }
+
+  )
+)
+
+
+logistic_distribution <- R6Class (
+  'logistic_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (location, scale, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(location, scale, target_dim = dim)
+      super$initialize('logistic', dim)
+      self$add_parameter(location, 'location')
+      self$add_parameter(scale, 'scale')
+    },
+
+    # default value
+    create_target = function() {
+      vble(dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$Logistic(loc = parameters$location,
+                                        scale = parameters$scale)
+    },
+
+    # log_cdf in tf$cotrib$distributions has the wrong sign :/
+    tf_log_cdf_function = function (x, parameters) {
+      tf$log(self$tf_cdf_function(x, parameters))
+    }
+
+  )
+)
+
+f_distribution <- R6Class (
+  'f_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (df1, df2, dim) {
+      # add the nodes as children and parameters
+      dim <- check_dims(df1, df2, target_dim = dim)
+      super$initialize('d', dim)
+      self$add_parameter(df1, 'df1')
+      self$add_parameter(df2, 'df2')
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+
+      df1 <- parameters$df1
+      df2 <- parameters$df2
+
+      tf_lbeta <- function(a, b)
+        tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
+
+      log_prob = function (x) {
+        df1_x <- df1 * x
+        la <- df1 * log(df1_x) + df2 * log(df2)
+        lb <- (df1 + df2) * log(df1_x + df2)
+        lnumerator <- fl(0.5) * (la - lb)
+        lnumerator - log(x) - tf_lbeta(df1 / fl(2), df2 / fl(2))
+      }
+
+      cdf = function (x) {
+        df1_x <- df1 * x
+        ratio <- df1_x / (df1_x + df2)
+        tf$betainc(df1 / fl(2), df2 / fl(2), ratio)
+      }
+
+      log_cdf = function(x)
+        log(cdf(x))
+
+      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+
+    }
+
+  )
+)
+
+dirichlet_distribution <- R6Class (
+  'dirichlet_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (alpha, dim) {
+
+      # coerce to greta arrays
+      alpha <- as.greta_array(alpha)
+
+      # check dimensions of alpha
+      if (ncol(alpha) != 1 |
+          length(dim(alpha)) != 2) {
+
+        stop ('alpha must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(alpha), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (length(alpha) == 1) {
+
+        stop ('the dirichlet distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
+
+      # check dim is a positive scalar integer
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('dirichlet', c(dim, length(alpha)))
+      self$add_parameter(alpha, 'alpha')
+
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      # transpose and scale probs to get absolute density correct
+      alpha <- tf$transpose(parameters$alpha)
+      tf$contrib$distributions$Dirichlet(concentration = alpha)
+    },
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
+
+dirichlet_multinomial_distribution <- R6Class (
+  'dirichlet_multinomial_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (size, alpha, dim) {
+
+      # coerce to greta arrays
+      size <- as.greta_array(size)
+      alpha <- as.greta_array(alpha)
+
+      # check dimensions
+      if (length(size) != 1) {
+
+        stop ('size must be a scalar, but has dimensions ',
+              paste(dim(size), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (ncol(alpha) != 1 |
+          length(dim(alpha)) != 2) {
+
+        stop ('alpha must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(alpha), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (length(alpha) == 1) {
+
+        stop ('the dirichlet distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
+
+      # check dim is a positive scalar integer
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('dirichlet_multinomial', dim = c(dim, length(alpha)), discrete = TRUE)
+      self$add_parameter(size, 'size')
+      self$add_parameter(alpha, 'alpha')
+
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      # transpose and scale probs to get absolute density correct
+      alpha <- tf$transpose(parameters$alpha)
+      tf$contrib$distributions$DirichletMultinomial(total_count = parameters$size,
+                                                    concentration = alpha)
+    },
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
+multinomial_distribution <- R6Class (
+  'multinomial_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (size, prob, dim) {
+
+      # coerce to greta arrays
+      size <- as.greta_array(size)
+      prob <- as.greta_array(prob)
+
+      # check dimensions
+      if (length(size) != 1) {
+
+        stop ('size must be a scalar, but has dimensions ',
+              paste(dim(size), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (ncol(prob) != 1 |
+          length(dim(prob)) != 2) {
+
+        stop ('prob must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(prob), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (length(prob) == 1) {
+
+        stop ('the multinomial distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
+
+      # check dim is a positive scalar integer
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('multinomial', dim = c(dim, length(prob)), discrete = TRUE)
+      self$add_parameter(size, 'size')
+      self$add_parameter(prob, 'prob')
+
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      # transpose and scale probs to get absolute density correct
+      probs <- tf$transpose(parameters$prob)
+      probs <- probs / tf$reduce_sum(probs)
+      tf$contrib$distributions$Multinomial(total_count = parameters$size,
+                                           probs = probs)
+    },
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
+categorical_distribution <- R6Class (
+  'categorical_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (prob, dim) {
+
+      # coerce to greta arrays
+      prob <- as.greta_array(prob)
+
+      # check dimensions of prob
+      if (ncol(prob) != 1 |
+          length(dim(prob)) != 2) {
+
+        stop ('prob must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(prob), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (length(prob) == 1) {
+
+        stop ('the categorical distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
+
+      # check dim is a positive scalar integer
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('categorical', dim = c(dim, length(prob)), discrete = TRUE)
+      self$add_parameter(prob, 'prob')
+
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      # transpose and scale probs to get absolute density correct
+      probs <- tf$transpose(parameters$prob)
+      probs <- probs / tf$reduce_sum(probs)
+      tf$contrib$distributions$Multinomial(total_count = fl(1),
+                                           probs = probs)
+    },
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
 multivariate_normal_distribution <- R6Class (
   'multivariate_normal_distribution',
   inherit = distribution_node,
@@ -471,36 +1080,23 @@ multivariate_normal_distribution <- R6Class (
 
     # default value
     create_target = function() {
-      variable(dim = self$dim)
+      vble(dim = self$dim)
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_distrib = function (parameters) {
+      L <- tf$cholesky(parameters$Sigma)
+      mu = tf$transpose(parameters$mean)
+      tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
+                                                      scale_tril = L)
+    },
 
-      mean <- parameters$mean
-      Sigma <- parameters$Sigma
-
-      # number of observations & dimension of distribution
-      nobs <- x$get_shape()$as_list()[1]
-      dim <- x$get_shape()$as_list()[2]
-
-      # Cholesky decomposition of Sigma
-      L <- tf$cholesky(Sigma)
-
-      # whiten (decorrelate) the errors
-      mean_col <- tf$tile(mean, c(1L, nobs))
-      diff_col <- tf$transpose(x) - mean_col
-      alpha <- tf$matrix_triangular_solve(L, diff_col, lower = TRUE)
-
-      # calculate density, per-row in x:
-      -0.5 * dim * log(2 * pi) -
-        tf$reduce_sum(tf$log(tf$diag_part(L))) -
-        0.5 * tf$reduce_sum(tf$square(alpha), axis = 0L)
-    }
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
 
-# need to add checking of mean and Sigma dimensions
 wishart_distribution <- R6Class (
   'wishart_distribution',
   inherit = distribution_node,
@@ -537,21 +1133,25 @@ wishart_distribution <- R6Class (
     create_target = function() {
 
       # handle reshaping via a greta array
-      free_greta_array <- free(dim = prod(self$dim))
+      free_greta_array <- vble(dim = prod(self$dim))
       matrix_greta_array <- flat_to_symmetric(free_greta_array, self$dim)
       matrix_greta_array$node
 
     },
 
+    tf_distrib = function (parameters) {
+      tf$contrib$distributions$WishartFull(df = parameters$df,
+                                           scale = parameters$Sigma)
+    },
+
     tf_log_density_function = function (x, parameters) {
+      lp <- self$tf_distrib(parameters)$log_prob(x)
+      tf$reshape(lp, shape(1, 1))
+    },
 
-      df <- parameters$df
-      Sigma <- parameters$Sigma
-
-      dist <- tf$contrib$distributions$WishartFull(df = df, scale = Sigma)
-      tf$reshape(dist$log_prob(x), shape(1, 1))
-
-    }
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
 
   )
 )
@@ -576,15 +1176,10 @@ distrib <- function (distribution, ...) {
 #' @name greta-distributions
 #' @title greta probability distributions
 #' @description These functions can be used to define random variables in a
-#'   greta model. They return a greta array object that can be combined with
-#'   other greta arrays to construct a model. All of these functions construct
-#'   random variables with prior distributions, except for \code{free()}, which
-#'   creates 'free' parameters, so can be used for frequentist analyses.
-#'
-#' @param lower,upper scalar values giving optional limits to free
-#'   parameters. These must be specified as numerics, they cannot be greta
-#'   arrays (though see details for a workaround). They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
-#'   (\code{upper}), though \code{lower} must always be less than \code{upper}.
+#'   greta model. They return a variable greta array that follows the specified
+#'   distribution. This variable greta array can be used to represent a
+#'   parameter with  prior distribution, or used with \code{\link{distribution}}
+#'   to define a distribution over an existing greta array.
 #'
 #' @param min,max scalar values giving optional limits to \code{uniform}
 #'   variables. Like \code{lower} and \code{upper}, these must be specified as
@@ -592,77 +1187,107 @@ distrib <- function (distribution, ...) {
 #'   workaround). Unlike \code{lower} and \code{upper}, they must be finite.
 #'   \code{min} must always be less than \code{max}.
 #'
-#' @param mean,meanlog,location unconstrained parameters
-#' @param sd,sdlog,size,lambda,shape,rate,df,scale,shape1,shape2 positive
-#'   parameters
-#' @param prob probability parameter (\code{0 < prob < 1})
+#' @param mean,meanlog,location,mu unconstrained parameters
+#'
+#' @param sd,sdlog,sigma,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b
+#'   positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.
+#'
+#' @param size,m,n,k positive integer parameter
+#'
+#' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
+#'   \code{multinomial} and \code{categorical}
+#'
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'
-#' @param dim the dimensions of the variable, either a scalar or a vector of
-#'   positive integers. See details.
+#' @param dim the dimensions of the greta array to be returned, either a scalar
+#'   or a vector of positive integers. See details.
 #'
 #' @details The discrete probability distributions (\code{bernoulli},
-#'   \code{binomial}, \code{negative_binomial}, \code{poisson}) can be used when
-#'   they have fixed values (e.g. defined as a likelihood using
+#'   \code{binomial}, \code{negative_binomial}, \code{poisson},
+#'   \code{multinomial}, \code{categorical}, \code{dirichlet_multinomial}) can
+#'   be used when they have fixed values (e.g. defined as a likelihood using
 #'   \code{\link{distribution}}, but not as unknown variables.
 #'
-#'   For \code{free()}, \code{dim} gives the dimension of the greta array to
-#'   create as a free parameter. All elements of that array will have the same
-#'   constraints (\code{lower} and \code{upper}). For univariate distributions
-#'   \code{dim} also gives the dimensions of the greta array to create. Each
-#'   element of the greta array will be (independently) distributed according to
-#'   the distribution. \code{dim} can also be left at its default of
-#'   \code{NULL}, in which case the dimension will be detected from the
-#'   dimensions of the parameters (provided they are compatible with one
-#'   another).
+#'   For univariate distributions \code{dim} gives the dimensions of the greta
+#'   array to create. Each element of the greta array will be (independently)
+#'   distributed according to the distribution. \code{dim} can also be left at
+#'   its default of \code{NULL}, in which case the dimension will be detected
+#'   from the dimensions of the parameters (provided they are compatible with
+#'   one another).
 #'
-#'   For \code{multivariate_normal()}, \code{dim} must be a scalar giving the
-#'   number of rows in the resulting greta array, each row being (independently)
-#'   distributed according to the multivariate normal distribution. The number
-#'   of columns will always be the dimension of the distribution, determined
-#'   from the parameters specified. \code{wishart()} always returns a single
-#'   square, 2D greta array, with dimension determined from the parameter
-#'   \code{Sigma}.
+#'   For \code{multivariate_normal()}, \code{multinomial()}, and
+#'   \code{categorical()} \code{dim} must be a scalar giving the number of rows
+#'   in the resulting greta array, each row being (independently) distributed
+#'   according to the multivariate normal distribution. The number of columns
+#'   will always be the dimension of the distribution, determined from the
+#'   parameters specified. \code{wishart()} always returns a single square, 2D
+#'   greta array, with dimension determined from the parameter \code{Sigma}.
 #'
-#'   The parameters of both \code{free} and \code{uniform} must be fixed, not
-#'   greta variables. This ensures these values can always be transformed to a
-#'   continuous scale to run the samplers efficiently. However, a hierarchical
-#'   \code{uniform} or \code{free} parameter can always be created by defining a
-#'   \code{free} or \code{uniform} variable constrained between 0 and 1, and then
-#'   transforming it to the required scale. I.e. \code{min + u * (max - min)},
-#'   where u is e.g. \code{uniform(0, 1)}. See below for an example.
+#'   \code{multinomial()} does not check that observed values sum to
+#'   \code{size}, and \code{categorical()} does not check that only one of the
+#'   observed entries is 1. It's the user's responsibility to check their data
+#'   matches the distribution!
 #'
-#'   Wherever possible, the parameterisation of these distributions matches the
-#'   those in the \code{stats} package. E.g. for the parameterisation of
-#'   \code{negative_binomial()}, see \code{\link{dnbinom}}. \code{student()} is an
-#'   exception, since the \href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution#In_terms_of_scaling_parameter_.CF.83.2C_or_.CF.832}{location-scale representation} we use is more useful,
-#'   and widely used, for statistical modelling than the noncentral version
-#'   implemented in \code{stats}
+#'   The parameters of \code{uniform} must be fixed, not greta arrays. This
+#'   ensures these values can always be transformed to a continuous scale to run
+#'   the samplers efficiently. However, a hierarchical \code{uniform} parameter
+#'   can always be created by defining a \code{uniform} variable constrained
+#'   between 0 and 1, and then transforming it to the required scale. See
+#'   below for an example.
+#'
+#'   Wherever possible, the parameterisation and argument names of greta
+#'   distributions matches commonly used R functions for distributions, such as
+#'   those in the \code{stats} or \code{extraDistr} packages. The following
+#'   table states the distribution function to which greta's implementation
+#'   corresponds:
+#'
+#'   \tabular{ll}{ greta \tab reference\cr
+#'    \code{uniform} \tab \code{\link[stats:dunif]{stats::dunif}}\cr
+#'    \code{normal} \tab \code{\link[stats:dnorm]{stats::dnorm}}\cr
+#'    \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
+#'    \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
+#'    \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
+#'    \code{beta_binomial} \tab \code{\link[extraDistr:dbbinom]{extraDistr::dbbinom}}\cr
+#'    \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
+#'    \code{hypergeometric} \tab \code{\link[stats:dhyper]{stats::dhyper}}\cr
+#'    \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
+#'    \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
+#'    \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr
+#'    \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
+#'    \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
+#'    \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
+#'    \code{student} \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr
+#'    \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
+#'    \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
+#'    \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
+#'    \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
+#'    \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
+#'    \code{f} \tab \code{\link[stats:df]{stats::df}}\cr
+#'    \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
+#'    \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
+#'    \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
+#'    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
+#'    \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
+#'    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
 #'
 #' @examples
-#' # an unconstrained and prior-free parameter (e.g. for a frequentist model)
-#' alpha = free()
-#'
-#' # positive prior-free parameter (could also do: sigma = exp(free()) )
-#' sigma = free(lower = 0)
-#'
-#' # a prior-free parameter constrained to be less that -1
-#' neg_alpha = free(upper = -1)
-#'
-#' # a prior-free parameter constrained to be between 0 and 1
-#' psi = free(lower = 0, upper = 1)
-#'
 #' # a uniform parameter constrained to be between 0 and 1
 #' phi = uniform(min = 0, max = 1)
 #'
-#' # create a hierarchical uniform, constrained between alpha and alpha + sigma,
-#' eta = alpha + uniform(0, 1) * sigma
+#' # a length-three variable, with each element following a standard normal
+#' # distribution
+#' alpha = normal(0, 1, dim = 3)
 #'
-#' # an unconstrained parameter with standard normal prior
-#' mu = normal(0, 1)
+#' # a length-three variable of lognormals
+#' sigma = lognormal(0, 3, dim = 3)
+#'
+#' # a hierarchical uniform, constrained between alpha and alpha + sigma,
+#' eta = alpha + uniform(0, 1, dim = 3) * sigma
 #'
 #' # a hierarchical distribution
-#' theta = normal(mu, lognormal(0, 1))
+#' mu = normal(0, 1)
+#' sigma = lognormal(0, 1)
+#' theta = normal(mu, sigma)
 #'
 #' # a vector of 3 variables drawn from the same hierarchical distribution
 #' thetas = normal(mu, sigma, dim = 3)
@@ -681,18 +1306,6 @@ distrib <- function (distribution, ...) {
 #' # a Wishart variable with the same covariance parameter
 #' theta = wishart(df = 5, Sigma = Sig)
 NULL
-
-#' @rdname greta-distributions
-#' @export
-free <- function (lower = -Inf, upper = Inf, dim = 1) {
-
-  if (is.greta_array(lower) | is.greta_array(upper))
-    stop ('lower and upper must be fixed, they cannot be another greta array')
-
-  node <- variable_node$new(lower, upper, dim)
-  as.greta_array(node)
-
-}
 
 #' @rdname greta-distributions
 #' @export
@@ -727,8 +1340,18 @@ binomial <- function (size, prob, dim = NULL)
 
 #' @rdname greta-distributions
 #' @export
+beta_binomial <- function (size, alpha, beta, dim = NULL)
+  distrib('beta_binomial', size, alpha, beta, dim)
+
+#' @rdname greta-distributions
+#' @export
 negative_binomial <- function (size, prob, dim = NULL)
   distrib('negative_binomial', size, prob, dim)
+
+#' @rdname greta-distributions
+#' @export
+hypergeometric <- function (m, n, k, dim = NULL)
+  distrib('hypergeometric', m, n, k, dim)
 
 #' @rdname greta-distributions
 #' @export
@@ -742,18 +1365,58 @@ gamma <- function (shape, rate, dim = NULL)
 
 #' @rdname greta-distributions
 #' @export
+inverse_gamma <- function (alpha, beta, dim = NULL)
+  distrib('inverse_gamma', alpha, beta, dim)
+
+#' @rdname greta-distributions
+#' @export
+weibull <- function (shape, scale, dim = NULL)
+  distrib('weibull', shape, scale, dim)
+
+#' @rdname greta-distributions
+#' @export
 exponential <- function (rate, dim = NULL)
   distrib('exponential', rate, dim)
 
 #' @rdname greta-distributions
 #' @export
-student <- function (df, location, scale, dim = NULL)
-  distrib('student', df, location, scale, dim)
+pareto <- function (a, b, dim = NULL)
+  distrib('pareto', a, b, dim)
+
+#' @rdname greta-distributions
+#' @export
+student <- function (df, mu, sigma, dim = NULL)
+  distrib('student', df, mu, sigma, dim)
+
+#' @rdname greta-distributions
+#' @export
+laplace <- function (mu, sigma, dim = NULL)
+  distrib('laplace', mu, sigma, dim)
 
 #' @rdname greta-distributions
 #' @export
 beta <- function (shape1, shape2, dim = NULL)
   distrib('beta', shape1, shape2, dim)
+
+#' @rdname greta-distributions
+#' @export
+cauchy <- function (location, scale, dim = NULL)
+  distrib('cauchy', location, scale, dim)
+
+#' @rdname greta-distributions
+#' @export
+chi_squared <- function (df, dim = NULL)
+  distrib('chi_squared', df, dim)
+
+#' @rdname greta-distributions
+#' @export
+logistic <- function (location, scale, dim = NULL)
+  distrib('logistic', location, scale, dim)
+
+#' @rdname greta-distributions
+#' @export
+f <- function (df1, df2, dim = NULL)
+  distrib('f', df1, df2, dim)
 
 #' @rdname greta-distributions
 #' @export
@@ -764,3 +1427,23 @@ multivariate_normal <- function (mean, Sigma, dim = 1)
 #' @export
 wishart <- function (df, Sigma)
   distrib('wishart', df, Sigma)
+
+#' @rdname greta-distributions
+#' @export
+multinomial <- function (size, prob, dim = 1)
+  distrib('multinomial', size, prob, dim)
+
+#' @rdname greta-distributions
+#' @export
+categorical <- function (prob, dim = 1)
+  distrib('categorical', prob, dim)
+
+#' @rdname greta-distributions
+#' @export
+dirichlet <- function (alpha, dim = 1)
+  distrib('dirichlet', alpha, dim)
+
+#' @rdname greta-distributions
+#' @export
+dirichlet_multinomial <- function (size, alpha, dim = 1)
+  distrib('dirichlet_multinomial', size, alpha, dim)

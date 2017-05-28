@@ -1,127 +1,15 @@
 #' @name greta-inference
 #' @title Statistical Inference on Greta Models
-#' @description Define a \code{greta_model} object and carry out statistical
-#'   inference on parameters of interest by MCMC
+#' @description Carry out statistical inference on parameters of interest by
+#'   MCMC. \code{mcmc} runs the MCMC sampler. If the sampler is aborted before
+#'   finishing, the samples collected so far can be retrieved with
+#'   \code{stashed_samples()}.
 NULL
-
-#' @rdname greta-inference
-#' @export
-#'
-#' @param \dots \code{greta_array} objects to be tracked by the model (i.e.
-#'   those for which samples will be retained during mcmc). If not provided, all
-#'   of the non-data \code{greta_array} objects defined in the calling
-#'   environment will be tracked.
-#'
-#' @return \code{define_model} - a \code{greta_model} object. See
-#'   \code{\link{greta-model}} for details.
-#'
-#' @examples
-#'
-#' \dontrun{
-#'
-#' # define a simple model
-#' mu = free()
-#' sigma = lognormal(1, 0.1)
-#' x = rnorm(10)
-#' distribution(x) = normal(mu, sigma)
-#'
-#' m <- define_model(mu, sigma)
-#'
-#' }
-define_model <- function (...) {
-
-  check_tf_version('error')
-
-  tf$reset_default_graph()
-
-  # nodes required
-  target_greta_arrays <- list(...)
-
-  # if no arrays were specified, find all of the non-data arrays
-  if (identical(target_greta_arrays, list())) {
-
-    target_greta_arrays <- all_greta_arrays(parent.frame(),
-                                            include_data = FALSE)
-
-  } else {
-
-    # otherwise, find variable names for the provided nodes
-    names <- substitute(list(...))[-1]
-    names <- vapply(names, deparse, '')
-    names(target_greta_arrays) <- names
-
-  }
-
-  if (length(target_greta_arrays) == 0) {
-    stop ('could not find any non-data greta arrays',
-          call. = FALSE)
-  }
-
-  # get the dag containing the target nodes
-  dag <- dag_class$new(target_greta_arrays)
-
-  # get and check the types
-  types <- dag$node_types
-
-  # the user might pass greta arrays with groups of nodes that are unconnected
-  # to one another. Need to check there are densities in each graph
-
-  # so find the subgraph to which each node belongs
-  graph_id <- dag$subgraph_membership()
-
-  graphs <- unique(graph_id)
-  n_graphs <- length(graphs)
-
-  # separate messages to avoid the subgraphs issue for beginners
-  if (n_graphs == 1) {
-    density_message <- paste('none of the greta arrays in the model are',
-                             'associated with a probability density, so a',
-                             'model cannot be defined')
-    variable_message <- paste('none of the greta arrays in the model are',
-                              'unknown, so a model cannot be defined')
-  } else {
-    density_message <- paste('the model contains', n_graphs, 'disjoint graphs,',
-                             'one or more of these sub-graphs does not contain',
-                             'any greta arrays that are associated with a',
-                             'probability density, so a model cannot be',
-                             'defined')
-    variable_message <- paste('the model contains', n_graphs, 'disjoint',
-                              'graphs, one or more of these sub-graphs does',
-                              'not contain any greta arrays that are unknown,',
-                              'so a model cannot be defined')
-  }
-
-  for (graph in graphs) {
-
-    types_sub <- types[graph_id == graph]
-
-    # check they have a density among them
-    if (!('distribution' %in% types_sub))
-      stop (density_message, call. = FALSE)
-
-    # check they have a variable node among them
-    if (!('variable' %in% types_sub))
-      stop (variable_message, call. = FALSE)
-
-  }
-
-  # define the TF graph
-  dag$define_tf()
-
-  # create the model object and add the arraysof interest
-  model <- as.greta_model(dag)
-  model$target_greta_arrays <- target_greta_arrays
-  model$visible_greta_arrays <- all_greta_arrays(parent.frame())
-
-  model
-
-}
 
 #' @rdname greta-inference
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom coda mcmc mcmc.list
 #'
 #' @param model greta_model object
 #' @param method the method used to sample values. Currently only \code{hmc} is
@@ -139,29 +27,48 @@ define_model <- function (...) {
 #' @param initial_values an optional named vector of initial values for the free
 #'   parameters in the model
 #'
-#' @details Currently, the only implemented mcmc procedure is 'vanilla'
-#'   Hamiltonian Monte Carlo (\code{method = 'hmc'}). Unlike variants such as
-#'   NUTS (which Stan uses) HMC does require some manual tuning of sampler
-#'   hyperparameters. The main thing to consider is the leapfrog stepsize
-#'   hyperparameter \code{epsilon}. If you're getting a lot of rejected
-#'   proposals, you might want to reduce \code{epsilon}, or if the sampler is
-#'   moving too slowly you might want to increase \code{epsilon}.
+
+#' @details If \code{verbose = TRUE}, the progress bar shows the number of
+#'   iterations so far and the expected time to complete the phase of model
+#'   fitting (warmup or sampling). Occasionally, a proposed set of parameters
+#'   can cause numerical instability (I.e. the log density or its gradient is
+#'   \code{NA}, \code{Inf} or \code{-Inf}); normally because the log joint
+#'   density is so low that it can't be represented as a floating point number.
+#'   When this happens, the progress bar will also display the proportion of
+#'   samples so far that were 'bad' (numerically unstable) and therefore
+#'   rejected.
+#'   If you're getting a lot of numerical instability, you might want to
+#'   manually define starting values to move the sampler into a more reasonable
+#'   part of the parameter space. Alternatively, you could redefine the model
+#'   (via \code{model}) to have double precision, though this will slow down
+#'   sampling.
 #'
-#'   \code{epsilon} can be controlled via the \code{control} argument, along
-#'   with two other hyprparameters: \code{Lmin} and \code{Lmax}; positive
-#'   integers (with \code{Lmax > Lmin}) giving the upper and lower limits to the
-#'   number of leapfrog steps per iteration (from which the number is selected
-#'   uniformly at random)
+#'   Currently, the only implemented MCMC procedure is static Hamiltonian
+#'   Monte Carlo (\code{method = 'hmc'}). During the warmup iterations, the
+#'   leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
+#'   sampler efficiency. The \code{control} argument can be used to specify the
+#'   initial value for epsilon, along with two other hyperparameters: \code{Lmin}
+#'   and \code{Lmax}; positive integers (with \code{Lmax > Lmin}) giving the
+#'   upper and lower limits to the number of leapfrog steps per iteration (from
+#'   which the number is selected uniformly at random).
 #'
 #'   The default control options for HMC are:
 #'   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
 #'
-#' @return \code{mcmc} - an \code{mcmc.list} object that can be analysed using
-#'   functions from the coda package. This will on contain mcmc samples of the
-#'   parameters of interest, as defined in \code{model}.
+#' @return an \code{mcmc.list} object that can be analysed using
+#'   functions from the coda package. This will contain mcmc samples of the
+#'   greta arrays used to create \code{model}.
 #'
 #' @examples
 #' \dontrun{
+#'
+#' # define a simple model
+#' mu = variable()
+#' sigma = lognormal(1, 0.1)
+#' x = rnorm(10)
+#' distribution(x) = normal(mu, sigma)
+#' m <- model(mu, sigma)
+#'
 #' # carry out mcmc on the model
 #' draws <- mcmc(m,
 #'               n_samples = 100,
@@ -201,9 +108,39 @@ mcmc <- function (model,
 
   # random starting locations
   if (is.null(initial_values)) {
-    initial_values <- dag$example_parameters()
-    initial_values[] <- rnorm(length(initial_values), 0, 0.1)
+
+    # try several times
+    valid <- FALSE
+    attempts <- 1
+    while (!valid & attempts < 10) {
+
+      initial_values <- dag$example_parameters()
+      # increase the jitter each time
+      initial_values[] <- rnorm(length(initial_values), 0, 1 + attempts / 5)
+
+      # test validity of values
+      valid <- valid_parameters(dag, initial_values)
+      attempts <- attempts + 1
+
+    }
+
+    if (!valid) {
+      stop ('Could not find reasonable starting values after ', attempts,
+            ' attempts. Please specify initial values manually via the ',
+            'initial_values argument to mcmc',
+            call. = FALSE)
+    }
+
+  } else {
+
+    if (!valid_parameters(dag, initial_values)) {
+      stop ('The log density and gradients could not be evaluated at these ',
+            'initial values.',
+            call. = FALSE)
+    }
+
   }
+
 
   # get default control options
   con <- switch(method,
@@ -222,7 +159,9 @@ mcmc <- function (model,
   if (warmup > 0) {
 
     if (verbose)
-      message('warming up')
+      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples))
+    else
+      pb_warmup <- NULL
 
     # run it
     warmup_draws <- method(dag = dag,
@@ -230,15 +169,21 @@ mcmc <- function (model,
                            n_samples = warmup,
                            thin = thin,
                            verbose = verbose,
+                           pb = pb_warmup,
+                           tune = TRUE,
+                           stash = FALSE,
                            control = con)
 
     # use the last draw of the full parameter vector as the init
     initial_values <- attr(warmup_draws, 'last_x')
-
-    if (verbose)
-      message('sampling')
+    con <- attr(warmup_draws, 'control')
 
   }
+
+  if (verbose)
+    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples))
+  else
+    pb_sampling <- NULL
 
   # run the sampler
   draws <- method(dag = dag,
@@ -246,22 +191,68 @@ mcmc <- function (model,
                   n_samples = n_samples,
                   thin = thin,
                   verbose = verbose,
+                  pb = pb_sampling,
+                  tune = FALSE,
+                  stash = TRUE,
                   control = con)
 
-  # coerce to data.frame, but keep the sample density
-  draws_df <- data.frame(draws)
-  draws_mcmc <- coda::mcmc(draws_df)
-  draws_mcmc_list <- coda::mcmc.list(draws_mcmc)
-
-  draws_mcmc_list
+  # if this was successful, trash the stash, prepare and return the draws
+  rm('trace_stash', envir = greta_stash)
+  prepare_draws(draws)
 
 }
+
+
+#' @importFrom coda mcmc mcmc.list
+prepare_draws <- function (draws) {
+  # given a matrix of draws returned by the sampler, prepare it and return
+  draws_df <- data.frame(draws)
+  draws_mcmc <- coda::mcmc(draws_df)
+  coda::mcmc.list(draws_mcmc)
+}
+
+#' @rdname greta-inference
+#' @export
+#' @importFrom stats na.omit
+#'
+#' @details \code{stashed_samples()} returns an \code{mcmc.list} object if (and
+#'   only if) the sampler was aborted during the sampling phase.
+stashed_samples <- function () {
+
+  stashed <- exists('trace_stash', envir = greta_stash)
+
+  if (stashed) {
+
+    # get them, remove the NAs, and return
+    draws <- greta_stash$trace_stash
+    draws_clean <- na.omit(draws)
+    draws_prepped <- prepare_draws(draws_clean)
+
+    return (draws_prepped)
+
+  } else {
+
+    return (invisible())
+
+  }
+
+}
+
+# create an object stash in greta's namespace, to return traces to the user when
+# they abort a run
+greta_stash <- new.env()
+
+stash_trace <- function (trace)
+  assign('trace_stash', trace, envir = greta_stash)
 
 hmc <- function (dag,
                  init,
                  n_samples,
                  thin,
                  verbose,
+                 pb,
+                 tune = FALSE,
+                 stash = FALSE,
                  control = list(Lmin = 10,
                                 Lmax = 20,
                                 epsilon = 0.005)) {
@@ -271,11 +262,22 @@ hmc <- function (dag,
   Lmax <- control$Lmax
   epsilon <- control$epsilon
 
+  # tuning parameters
+  accept_group = 50
+  target_acceptance = 0.651
+  kappa = 0.75
+  gamma = 0.1
+
+  numerical_rejections <- 0
+
   # set initial location, log joint density and gradients
   x <- init
   dag$send_parameters(x)
   grad <- dag$gradients()
   logprob <- dag$log_density()
+
+  if (tune)
+    epsilon_trace <- rep(NA, n_samples)
 
   # set up trace store (grab values of target variables from graph to get
   # dimension and names)
@@ -286,17 +288,20 @@ hmc <- function (dag,
                   ncol = n_target)
   colnames(trace) <- names(init_trace)
 
+  # if anything goes awry, stash the trace so far
+  if (stash)
+    on.exit(stash_trace(trace))
+
   # set up log joint density store
   ljd <- rep(NA, n_samples)
+
+  # track acceptance
+  accept_trace <- rep(0, n_samples)
 
   # get free parameter dimension
   npar <- length(x)
 
   accept_count <- 0
-
-  # set up progress bar
-  if (verbose)
-    pb <- txtProgressBar(max = n_samples, style = 3)
 
   # loop through iterations
   for (i in 1:n_samples) {
@@ -336,9 +341,7 @@ hmc <- function (dag,
     # if the step was bad, reject it out of hand
     if (reject) {
 
-      if (verbose)
-        message ('proposal rejected due to numerical instability')
-
+      numerical_rejections <- numerical_rejections + 1
       x <- x_old
       logprob <- logprob_old
       grad <- grad_old
@@ -360,6 +363,7 @@ hmc <- function (dag,
         # on acceptance, iterate the counter and leave the parameters in the dag
         # to be put in the trace
         accept_count <- accept_count + 1
+        accept_trace[i] <- 1
 
       } else {
 
@@ -382,15 +386,40 @@ hmc <- function (dag,
     }
 
     if (verbose)
-      setTxtProgressBar(pb, i)
+      iterate_progress_bar(pb = pb, it = i, rejects = numerical_rejections)
+
+    # optionally tune epsilon
+    if (tune) {
+
+      # acceptance rate over the last accept_group runs
+      start <- max(1, i - accept_group)
+      end <- i
+      accept_rate <- mean(accept_trace[start:end], na.rm = TRUE)
+
+      # decrease the adaptation rate as we go
+      adapt_rate <- min(1, gamma * i ^ (-kappa))
+
+      # shift epsilon in the right direction, making sure it never goes negative
+      epsilon <- epsilon + pmax(-(epsilon + sqrt(.Machine$double.eps)),
+                                adapt_rate * (accept_rate - target_acceptance))
+
+      # keep track of epsilon
+      epsilon_trace[i] <- epsilon
+
+    }
 
   }
 
-  if (verbose)
-    close(pb)
+  # store the tuned epsilon as the mean of the last half
+  if (tune) {
+    start <- floor(n_samples/2)
+    end <- n_samples
+    control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
+  }
 
   attr(trace, 'density') <- -ljd
   attr(trace, 'last_x') <- x
+  attr(trace, 'control') <- control
   trace
 
 }

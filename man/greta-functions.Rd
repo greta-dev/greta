@@ -56,6 +56,8 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  # special mathematical functions
  lgamma(x)
  digamma(x)
+ choose(n, k)
+ lchoose(n, k)
 
  # matrix operations
  t(x)

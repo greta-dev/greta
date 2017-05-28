@@ -66,8 +66,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   greta_log_density <- as.vector(grab(tensor))
 
   # get R version
-  r_log_density <- do.call(r_fun,
-                           c(list(x), parameters, log = TRUE))
+  r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
 
   # return absolute difference
   abs(greta_log_density - r_log_density)
@@ -187,7 +186,7 @@ gen_opfun <- function (n, ops) {
 # sample n values from a distribution by HMC, check they all have the correct support
 # greta array is defined as astochastic in the call, like: sample_distribution(normal(0, 1))
 sample_distribution <- function (greta_array, n = 10, lower = -Inf, upper = Inf) {
-  m <- define_model(greta_array)
+  m <- model(greta_array)
   draws <- mcmc(m, n_samples = n, warmup = 1, verbose = FALSE)
   samples <- as.vector(draws[[1]])
   expect_true(all(samples >= lower & samples <= upper))
@@ -207,16 +206,19 @@ it_state <- function (matrix, state, niter) {
   state[1, ]
 }
 
-compare_truncated_distribution <- function (greta_fun, which, parameters, truncation) {
+compare_truncated_distribution <- function (greta_fun,
+                                            which,
+                                            parameters,
+                                            truncation) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark, for an implied truncated distribution 'greta_array'
-  # is a greta array created from a distribution and a constrained free() greta
+  # is a greta array created from a distribution and a constrained variable greta
   # array. 'r_fun' is an r function returning the log density for the same
   # truncated distribution, taking x as its only argument.
 
   tf$reset_default_graph()
 
-  require(truncdist)
+  require (truncdist)
 
   x <- do.call(truncdist::rtrunc,
                c(n = 100,
@@ -229,10 +231,8 @@ compare_truncated_distribution <- function (greta_fun, which, parameters, trunca
   r_fun <- truncfun(which, parameters, truncation)
   r_log_density <- log(r_fun(x))
 
-
-
   # create greta array for truncated distribution
-  z <- free(truncation[1], truncation[2])
+  z <- variable(truncation[1], truncation[2])
   dist = do.call(greta_fun, parameters)
   distribution(z) = dist
 
@@ -242,6 +242,7 @@ compare_truncated_distribution <- function (greta_fun, which, parameters, trunca
 
   # create dag and define the density
   dag <- greta:::dag_class$new(list(x_))
+
   x_$node$distribution$define_tf(dag)
 
   # get the log density as a vector
@@ -270,3 +271,57 @@ truncfun <- function (which = 'norm', parameters, truncation) {
   }
 
 }
+
+# R distribution functions for the location-scale Student T distribution
+dt_ls <- function (x, df, location, scale, log = FALSE) {
+  ans <- stats::dt((x - location) / scale, df) / scale
+  if (log)
+    ans <- log(ans)
+  ans
+}
+
+pt_ls <- function (q, df, location, scale, log.p = FALSE) {
+  ans <- stats::pt((q - location) / scale, df)
+  if (log.p)
+    ans <- log(ans)
+  ans
+}
+
+qt_ls <- function (p, df, location, scale, log.p = FALSE) {
+  ans <- stats::qt(p, df) * scale + location
+  if (log.p)
+    ans <- log(ans)
+  ans
+}
+
+# mock up the progress bar to force its output to stdout for testing
+cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
+mock_create_progress_bar <- function(...)
+  cpb(..., stream = stdout(), force = TRUE)
+
+mock_mcmc <- function (n_samples = 101) {
+  pb <- create_progress_bar('sampling', c(0, n_samples))
+  iterate_progress_bar(pb, n_samples, rejects = 1)
+}
+
+# apparently testthat can't see these
+
+dinvgamma <- extraDistr::dinvgamma
+qinvgamma <- extraDistr::qinvgamma
+pinvgamma <- function (q, alpha, beta)
+  ifelse(q < 0, 0, extraDistr::pinvgamma(q, alpha, beta))
+
+dlaplace <- extraDistr::dlaplace
+plaplace <- extraDistr::plaplace
+qlaplace <- extraDistr::qlaplace
+
+dstudent <- extraDistr::dnst
+pstudent <- extraDistr::pnst
+qstudent <- extraDistr::qnst
+
+# mock up pareto to have differently named parameters (a and b are use for the
+# truncation)
+preto <- function(a_, b_) pareto(a_, b_)
+dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)

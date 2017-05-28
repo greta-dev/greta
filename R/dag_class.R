@@ -1,3 +1,5 @@
+#' @importFrom reticulate py_set_attr
+
 # create dag class
 dag_class <- R6Class(
   'dag_class',
@@ -9,9 +11,15 @@ dag_class <- R6Class(
     tf_environment = NA,
     target_nodes = NA,
     parameters_example = NA,
+    tf_float = NA,
+    n_cores = NA,
+    compile = NA,
 
     # create a dag from some target nodes
-    initialize = function (target_greta_arrays) {
+    initialize = function (target_greta_arrays,
+                           tf_float = tf$float32,
+                           n_cores = 2L,
+                           compile = FALSE) {
 
       # build the dag
       self$build_dag(target_greta_arrays)
@@ -28,6 +36,11 @@ dag_class <- R6Class(
 
       # stash an example list to relist parameters
       self$parameters_example <- self$example_parameters(flat = FALSE)
+
+      # store the performance control info
+      self$tf_float <- tf_float
+      self$n_cores <- n_cores
+      self$compile <- compile
 
     },
 
@@ -74,6 +87,12 @@ dag_class <- R6Class(
     # define tf graph in environment
     define_tf = function () {
 
+      # temporarily pass float type info to options, so it can be accessed by
+      # nodes on definition, without cluncky explicit passing
+      old_float_type <- options()$greta_tf_float
+      on.exit(options(greta_tf_float = old_float_type))
+      options(greta_tf_float = self$tf_float)
+
       # check for unfixed discrete distributions
       distributions <- self$node_list[self$node_types == 'distribution']
       bad_nodes <- vapply(distributions,
@@ -95,9 +114,21 @@ dag_class <- R6Class(
       self$define_joint_density()
       self$define_gradients()
 
+      # use core and compilation options to create a config object
+      with(self$tf_environment,
+           {config <- tf$ConfigProto(intra_op_parallelism_threads = self$n_cores,
+                                     inter_op_parallelism_threads = self$n_cores)})
+
+      if (self$compile) {
+        with(self$tf_environment,
+             {py_set_attr(config$graph_options$optimizer_options,
+                          'global_jit_level',
+                          tf$OptimizerOptions$ON_1)})
+      }
+
       # start a session and initialise all variables
       with(self$tf_environment,
-           {sess <- tf$Session(); sess$run(tf$global_variables_initializer())})
+           {sess <- tf$Session(config = config); sess$run(tf$global_variables_initializer())})
 
     },
 
@@ -142,8 +173,11 @@ dag_class <- R6Class(
       # get TF density tensors for all distribution
       densities <- lapply(density_names, get, envir = self$tf_environment)
 
+      # convert to double precision floats
+      densities_double <- lapply(densities, tf$cast, tf$float64)
+
       # reduce_sum them
-      summed_densities <- lapply(densities, tf$reduce_sum)
+      summed_densities <- lapply(densities_double, tf$reduce_sum)
 
       # remove their names and sum them together
       names(summed_densities) <- NULL
@@ -280,11 +314,31 @@ dag_class <- R6Class(
       # make dag matrix
       n_node <- length(self$node_list)
       node_names <- names(self$node_list)
+      node_types <- self$node_types
       dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
       rownames(dag_mat) <- colnames(dag_mat) <- node_names
 
       parents <- lapply(self$node_list, member, 'parent_names(recursive = FALSE)')
       children <- lapply(self$node_list, member, 'child_names(recursive = FALSE)')
+
+      # for distribution nodes, remove target nodes from children, and put them
+      # in parents to send the arrow in the opposite direction when plotting
+      distribs <- which(node_types == 'distribution')
+      for (i in distribs) {
+
+        own_name <- node_names[i]
+        target_name <- self$node_list[[i]]$target$unique_name
+
+        # switch the target from child to parent of the distribution
+        children[[i]] <- children[[i]][children[[i]] != target_name]
+        parents[[i]] <- c(parents[[i]], target_name)
+
+        # switch the distribution from parent to child of the target
+        idx <- match(target_name, node_names)
+        parents[[idx]] <- parents[[idx]][parents[[idx]] != own_name]
+        children[[idx]] <- c(children[[idx]], own_name)
+
+      }
 
       # children in the lower left, parents in the upper right
       for (i in seq_len(n_node)) {

@@ -69,7 +69,7 @@ h6 {
 }
 </style>
 
-<link href="data:text/css;charset=utf-8,pre%7B%0Abackground%2Dcolor%3A%20transparent%3B%0Aborder%3A%201px%20solid%20%23f5eef6%3B%0Aborder%2Dradius%3A%200%3B%0Acolor%3A%20%23696969%3B%0A%7D%0Apre%2Er%7B%0Abackground%2Dcolor%3A%20%23f5eef6%3B%0Aborder%3A%20none%3B%0Aborder%2Dradius%3A%200%3B%0A%7D%0A%2Elist%2Dgroup%2Ditem%2Eactive%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Ahover%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Afocus%20%7B%0Abackground%2Dcolor%3A%20%23ba87c5%3B%0Aborder%2Dcolor%3A%20%23ba87c5%3B%0A%7D%0Ahr%20%7B%0Aheight%3A10px%3B%0Aborder%2Dtop%3A4px%20solid%20%23a464b4%3B%0A%7D%0Acode%20%7B%0Abackground%2Dcolor%3A%20%23f5eef6%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+<link href="data:text/css;charset=utf-8,pre%7B%0Abackground%2Dcolor%3A%20transparent%3B%0Aborder%3A%201px%20solid%20%23f4f0f9%3B%0Aborder%2Dradius%3A%200%3B%0Acolor%3A%20%23696969%3B%0A%7D%0Apre%2Er%7B%0Abackground%2Dcolor%3A%20%23f4f0f9%3B%0Aborder%3A%20none%3B%0Aborder%2Dradius%3A%200%3B%0Aline%2Dheight%3A%201%2E5%3B%0A%7D%0A%2Elist%2Dgroup%2Ditem%2Eactive%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Ahover%2C%0A%2Elist%2Dgroup%2Ditem%2Eactive%3Afocus%20%7B%0Abackground%2Dcolor%3A%20%238960b3%3B%0Aborder%2Dcolor%3A%20%238960b3%3B%0A%7D%0Ahr%20%7B%0Aheight%3A10px%3B%0Aborder%2Dtop%3A4px%20solid%20%23a379cc4%3B%0A%7D%0Acode%20%7B%0Abackground%2Dcolor%3A%20%23f4f0f9%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -253,7 +253,7 @@ z &lt;- x * 3
 length(z$node$children)</code></pre>
 <pre><code>[1] 2</code></pre>
 <p>Each node also has a list of its parents, the nodes that have been created from this one.</p>
-<p>When <code>define_model()</code> is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.</p>
+<p>When <code>model()</code> is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.</p>
 <p>Nodes also have a value member, which is an array for data nodes or an ‘unknowns’ object for other node types. The unknowns class is a thin wrapper around arrays, which prints the question marks. Generic functions for working on arrays (e.g. <code>dim</code>, <code>length</code>, <code>print</code>) make use these node values to return something familiar to the user.</p>
 <pre class="r"><code>x$node$value()</code></pre>
 <pre><code>     [,1] [,2] [,3]
@@ -273,15 +273,15 @@ class(x$node$value())</code></pre>
 </div>
 <div id="tensors" class="section level3">
 <h3>Tensors</h3>
-<p>In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn’t happen until the user runs <code>define_model()</code>, which creates a ‘dag_class’ object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.</p>
+<p>In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn’t happen until the user runs <code>model()</code>, which creates a ‘dag_class’ object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.</p>
 <p>The node <code>tf()</code> method takes the dag as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.</p>
 <pre class="r"><code>x$node$tf</code></pre>
 <pre><code>function (dag) {
       assign(dag$tf_name(self),
-             tf$constant(self$value(), dtype = tf$float32),
+             tf$constant(self$value(), dtype = tf_float()),
              envir = dag$tf_environment)
     }
-&lt;environment: 0x11f3219f8&gt;</code></pre>
+&lt;environment: 0x120047e60&gt;</code></pre>
 <p>Because R6 objects are pass-by-reference (rather than pass-by-copy), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their children, they can make sure those children are defined as tensors before they are. The <code>define_tf()</code> member function ensures that that happens, enabling operation nodes to use the tensors for their children when defining their own tensor.</p>
 <pre class="r"><code>z$node$tf</code></pre>
 <pre><code>function (dag) {
@@ -307,17 +307,20 @@ class(x$node$value())</code></pre>
       assign(dag$tf_name(self), node, envir = dag$tf_environment)
 
     }
-&lt;environment: 0x1107a4608&gt;</code></pre>
+&lt;environment: 0x103640d90&gt;</code></pre>
 </div>
 </div>
 <div id="variables-and-free-states" class="section level2">
 <h2>variables and free states</h2>
 <p>Hamiltonian Monte Carlo (HMC) requires all of the parameters to be transformed to a continuous scale for sampling. Variable nodes are therefore converted to tensors by first defining a ‘free’ (unconstrained) version of themselves as a tensor, and then applying a transformation function to convert them back to the scale of interest.</p>
-<pre class="r"><code>a = free(lower = 0)
+<pre class="r"><code>a = variable(lower = 0)
 class(a$node)</code></pre>
 <pre><code>[1] &quot;variable_node&quot; &quot;node&quot;          &quot;R6&quot;           </code></pre>
 <pre class="r"><code>a$node$tf_from_free</code></pre>
 <pre><code>function (x, env) {
+
+      upper &lt;- self$upper
+      lower &lt;- self$lower
 
       if (self$constraint == 'none') {
 
@@ -325,30 +328,22 @@ class(a$node)</code></pre>
 
       } else if (self$constraint == 'both') {
 
-        upper &lt;- self$upper
-        lower &lt;- self$lower
-        y &lt;- (1 / (1 + tf$exp(-1 * x))) * (upper - lower) + lower
+        y &lt;- tf_ilogit(x) * fl(upper - lower) + fl(lower)
 
       } else if (self$constraint == 'low') {
 
-        upper &lt;- self$upper
-        baseline &lt;- tf$log(1 + tf$exp(x))
-        # have to coerce upper since it's being subtracted *from* and has type
-        # 'float32_ref'
-        y &lt;- tf_as_float(upper) - baseline
+        y &lt;- fl(upper) - tf_log1pe(x)
 
       } else if (self$constraint == 'high') {
 
-        lower &lt;- self$lower
-        baseline &lt;- tf$log(1 + tf$exp(x))
-        y &lt;- baseline + lower
+        y &lt;- tf_log1pe(x) + fl(lower)
 
       }
 
       y
 
     }
-&lt;environment: 0x126c09630&gt;</code></pre>
+&lt;environment: 0x121cb17c8&gt;</code></pre>
 </div>
 <div id="distributions" class="section level2">
 <h2>distributions</h2>
@@ -381,14 +376,14 @@ class(b$node$distribution$target)</code></pre>
 
       ld
     }
-&lt;environment: 0x1242d6f50&gt;</code></pre>
+&lt;environment: 0x120445640&gt;</code></pre>
 <p>If the distribution was truncated, the log density is normalised using the cumulative distribution function.</p>
 </div>
 <div id="joint-density" class="section level2">
 <h2>Joint density</h2>
 <p>Those log-densities for these distributions are summed on the TensorFlow graph to create a Tensor for the joint log-density of the model. TensorFlow’s automatic gradient capabilities are then used to define a Tensor for the gradient of the log-density with respect to each parameter in the model.</p>
 <p>The <code>dag</code> R6 object contained within the model then exposes methods to send parameters to the TensorFlow graph and return the joint density and gradient.</p>
-<pre class="r"><code>model &lt;- define_model(b)
+<pre class="r"><code>model &lt;- model(b)
 model$dag$send_parameters</code></pre>
 <pre><code>function (parameters, flat = TRUE) {
 
@@ -402,7 +397,7 @@ model$dag$send_parameters</code></pre>
            parameter_dict &lt;- do.call(dict, parameters))
 
     }
-&lt;environment: 0x108a11068&gt;</code></pre>
+&lt;environment: 0x1390f3f48&gt;</code></pre>
 <pre class="r"><code>model$dag$log_density</code></pre>
 <pre><code>function() {
 
@@ -410,13 +405,13 @@ model$dag$send_parameters</code></pre>
            sess$run(joint_density, feed_dict = parameter_dict))
 
     }
-&lt;environment: 0x108a11068&gt;</code></pre>
+&lt;environment: 0x1390f3f48&gt;</code></pre>
 <pre class="r"><code>model$dag$gradients</code></pre>
 <pre><code>function () {
       with(self$tf_environment,
            sess$run(gradients, feed_dict = parameter_dict))
     }
-&lt;environment: 0x108a11068&gt;</code></pre>
+&lt;environment: 0x1390f3f48&gt;</code></pre>
 <p>These methods are used by MCMC samplers to explore the model parameters.</p>
 </div>
 

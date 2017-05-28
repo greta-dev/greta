@@ -21,15 +21,16 @@
 #' @docType package
 #' @import tensorflow
 #' @import R6
+#' @importFrom grDevices colorRampPalette
 #' @examples
 #' \dontrun{
 #' # define a simple model
-#' mu = free()
+#' mu = variable()
 #' sigma = lognormal(1, 0.1)
 #' x = rnorm(10)
 #' distribution(x) = normal(mu, sigma)
 #'
-#' m <- define_model(mu, sigma)
+#' m <- model(mu, sigma)
 #'
 #' # and sample from it
 #' draws <- mcmc(m,
@@ -46,6 +47,9 @@ NULL
 
   # warn if TF version is bad
   check_tf_version('warn')
+
+  # default float type
+  options(greta_tf_float = tf$float32)
 
 }
 

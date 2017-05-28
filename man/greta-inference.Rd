@@ -2,21 +2,16 @@
 % Please edit documentation in R/samplers.R
 \name{greta-inference}
 \alias{greta-inference}
-\alias{define_model}
 \alias{mcmc}
+\alias{stashed_samples}
 \title{Statistical Inference on Greta Models}
 \usage{
-define_model(...)
-
 mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
   verbose = TRUE, control = list(), initial_values = NULL)
+
+stashed_samples()
 }
 \arguments{
-\item{\dots}{\code{greta_array} objects to be tracked by the model (i.e.
-those for which samples will be retained during mcmc). If not provided, all
-of the non-data \code{greta_array} objects defined in the calling
-environment will be tracked.}
-
 \item{model}{greta_model object}
 
 \item{method}{the method used to sample values. Currently only \code{hmc} is
@@ -41,49 +36,57 @@ control behaviour of the sampler. See Details.}
 parameters in the model}
 }
 \value{
-\code{define_model} - a \code{greta_model} object. See
-  \code{\link{greta-model}} for details.
-
-\code{mcmc} - an \code{mcmc.list} object that can be analysed using
-  functions from the coda package. This will on contain mcmc samples of the
-  parameters of interest, as defined in \code{model}.
+an \code{mcmc.list} object that can be analysed using
+  functions from the coda package. This will contain mcmc samples of the
+  greta arrays used to create \code{model}.
 }
 \description{
-Define a \code{greta_model} object and carry out statistical
-  inference on parameters of interest by MCMC
+Carry out statistical inference on parameters of interest by
+  MCMC. \code{mcmc} runs the MCMC sampler. If the sampler is aborted before
+  finishing, the samples collected so far can be retrieved with
+  \code{stashed_samples()}.
 }
 \details{
-Currently, the only implemented mcmc procedure is 'vanilla'
-  Hamiltonian Monte Carlo (\code{method = 'hmc'}). Unlike variants such as
-  NUTS (which Stan uses) HMC does require some manual tuning of sampler
-  hyperparameters. The main thing to consider is the leapfrog stepsize
-  hyperparameter \code{epsilon}. If you're getting a lot of rejected
-  proposals, you might want to reduce \code{epsilon}, or if the sampler is
-  moving too slowly you might want to increase \code{epsilon}.
+If \code{verbose = TRUE}, the progress bar shows the number of
+  iterations so far and the expected time to complete the phase of model
+  fitting (warmup or sampling). Occasionally, a proposed set of parameters
+  can cause numerical instability (I.e. the log density or its gradient is
+  \code{NA}, \code{Inf} or \code{-Inf}); normally because the log joint
+  density is so low that it can't be represented as a floating point number.
+  When this happens, the progress bar will also display the proportion of
+  samples so far that were 'bad' (numerically unstable) and therefore
+  rejected.
+  If you're getting a lot of numerical instability, you might want to
+  manually define starting values to move the sampler into a more reasonable
+  part of the parameter space. Alternatively, you could redefine the model
+  (via \code{model}) to have double precision, though this will slow down
+  sampling.
 
-  \code{epsilon} can be controlled via the \code{control} argument, along
-  with two other hyprparameters: \code{Lmin} and \code{Lmax}; positive
-  integers (with \code{Lmax > Lmin}) giving the upper and lower limits to the
-  number of leapfrog steps per iteration (from which the number is selected
-  uniformly at random)
+  Currently, the only implemented MCMC procedure is static Hamiltonian
+  Monte Carlo (\code{method = 'hmc'}). During the warmup iterations, the
+  leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
+  sampler efficiency. The \code{control} argument can be used to specify the
+  initial value for epsilon, along with two other hyperparameters: \code{Lmin}
+  and \code{Lmax}; positive integers (with \code{Lmax > Lmin}) giving the
+  upper and lower limits to the number of leapfrog steps per iteration (from
+  which the number is selected uniformly at random).
 
   The default control options for HMC are:
   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
+
+\code{stashed_samples()} returns an \code{mcmc.list} object if (and
+  only if) the sampler was aborted during the sampling phase.
 }
 \examples{
-
 \dontrun{
 
 # define a simple model
-mu = free()
+mu = variable()
 sigma = lognormal(1, 0.1)
 x = rnorm(10)
 distribution(x) = normal(mu, sigma)
+m <- model(mu, sigma)
 
-m <- define_model(mu, sigma)
-
-}
-\dontrun{
 # carry out mcmc on the model
 draws <- mcmc(m,
               n_samples = 100,
