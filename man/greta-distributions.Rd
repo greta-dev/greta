@@ -83,9 +83,9 @@ workaround). Unlike \code{lower} and \code{upper}, they must be finite.
 \item{dim}{the dimensions of the greta array to be returned, either a scalar
 or a vector of positive integers. See details.}
 
-\item{mean, meanlog, location}{unconstrained parameters}
+\item{mean, meanlog, location, mu}{unconstrained parameters}
 
-\item{sd, sdlog, size, lambda, shape, rate, df, scale, shape1, shape2, df1, df2, a, b}{positive parameters}
+\item{sd, sdlog, sigma, size, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b}{positive parameters}
 
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
 \code{multinomial} and \code{categorical}}
@@ -175,13 +175,12 @@ alpha = normal(0, 1, dim = 3)
 sigma = lognormal(0, 3, dim = 3)
 
 # a hierarchical uniform, constrained between alpha and alpha + sigma,
-eta = alpha + uniform(0, 1) * sigma
-
-# an unconstrained parameter with standard normal prior
-mu = normal(0, 1)
+eta = alpha + uniform(0, 1, dim = 3) * sigma
 
 # a hierarchical distribution
-theta = normal(mu, lognormal(0, 1))
+mu = normal(0, 1)
+sigma = lognormal(0, 1)
+theta = normal(mu, sigma)
 
 # a vector of 3 variables drawn from the same hierarchical distribution
 thetas = normal(mu, sigma, dim = 3)
