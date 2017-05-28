@@ -248,7 +248,7 @@ div.tocify {
 [3,]  ?    ?    ?  </code></pre>
 <p>greta knows the result must also be a 3x3 matrix, but it doesn’t try to calculate the results. Instead it treats the new greta array <code>z2</code> like a placeholder, for which it will calculate the results later.</p>
 <p>Because greta only creates <em>placeholders</em> when we’re building our model, we can construct models using greta arrays that represent unknown variables. For example, if we create a new greta array <code>a</code> representing some unknown values, we can still manipulate it as though it were data:</p>
-<pre class="r"><code>(a &lt;- free(dim = c(3, 3)))</code></pre>
+<pre class="r"><code>(a &lt;- variable(dim = c(3, 3)))</code></pre>
 <pre><code>greta array (variable)
 
      [,1] [,2] [,3]
@@ -278,7 +278,7 @@ x &lt;- as_data(iris$Petal.Length)
 y &lt;- as_data(iris$Sepal.Length)
 
 # variables and priors
-int = free()
+int = variable()
 coef = normal(0, 3)
 sd = lognormal(0, 3)
 
@@ -367,19 +367,19 @@ y &lt;- as_data(iris$Sepal.Length)</code></pre>
 <div id="variables-and-priors" class="section level3">
 <h3>Variables and priors</h3>
 <p>The second section of the script creates three greta arrays to represent the parameters in our model:</p>
-<pre class="r"><code>int = free()
+<pre class="r"><code>int = variable()
 coef = normal(0, 3)
 sd = lognormal(0, 3)</code></pre>
-<div id="free-variables" class="section level4">
-<h4>free variables</h4>
-<p>The first line uses the <code>free()</code> function to create a greta array <code>int</code> representing a variable - an unknown value that we will learn when we fit the model to data. <code>free()</code> has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of <code>lower = -Inf, upper = Inf</code> meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).</p>
+<div id="variables" class="section level4">
+<h4>variables</h4>
+<p>The first line uses the <code>variable()</code> function to create a greta array <code>int</code> representing a variable - an unknown value that we will learn when we fit the model to data. <code>variable()</code> has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of <code>lower = -Inf, upper = Inf</code> meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).</p>
 <pre class="r"><code>int</code></pre>
 <pre><code>greta array (variable)
 
      [,1]
 [1,]  ?  </code></pre>
 <p>If we had instead wanted a 2x3 array of positive variables we could have created it like this:</p>
-<pre class="r"><code>free(lower = 0, dim = c(2, 3))</code></pre>
+<pre class="r"><code>variable(lower = 0, dim = c(2, 3))</code></pre>
 <pre><code>greta array (variable)
 
      [,1] [,2] [,3]
@@ -388,7 +388,7 @@ sd = lognormal(0, 3)</code></pre>
 </div>
 <div id="variables-with-probability-distributions" class="section level4">
 <h4>variables with probability distributions</h4>
-<p>Variable greta arrays that are created with <code>free()</code>, like <code>int</code>, are not associated with probability distributions. I.e. we haven’t made any assumptions or statements about what distribution we expect their values to follow. That’s normally the case for a frequentist analysis, but for a Bayesian model we need to specify <em>prior distributions</em> over our parameters, stating the distribution we expect them to be drawn from (<em>before</em> considering the data we’re using in the model).</p>
+<p>Variable greta arrays like <code>int</code> that are created with <code>variable()</code>, are not associated with probability distributions. I.e. we haven’t made any assumptions or statements about what distribution we expect their values to follow. That’s normally the case for a frequentist analysis, but for a Bayesian model we need to specify <em>prior distributions</em> over our parameters, stating the distribution we expect them to be drawn from (<em>before</em> considering the data we’re using in the model).</p>
 <p>In our example script, we simultaneously create the variables <code>coef</code> and <code>sd</code>, and state the prior distributions for them, using two of greta’s probability distribution functions. Each of these distributions takes as arguments the distribution’s parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions argument at its default value to create scalar greta arrays:</p>
 <pre class="r"><code>coef</code></pre>
 <pre><code>greta array (variable following a normal distribution)
@@ -405,19 +405,19 @@ sd = lognormal(0, 3)</code></pre>
 <div id="creating-priors-with-distribution" class="section level4">
 <h4>creating priors with <code>distribution()</code></h4>
 <p>greta’s probability distributions have two roles: to create variables following a certain distribution; and, when used in combination with the <code>distribution()</code> function, to state the distribution of an existing greta array.</p>
-<p>In fact, creating a new variable using a probability distribution is the same as first creating a free variable (with the appropriate constraint) and then stating that it follows a distribution. So our code in the script for creating <code>coef</code> is equivalent to this:</p>
-<pre class="r"><code>coef = free()
+<p>In fact, creating a new variable using a probability distribution is the same as first creating a variable (with the appropriate constraint) and then stating that it follows a distribution. So our code in the script for creating <code>coef</code> is equivalent to this:</p>
+<pre class="r"><code>coef = variable()
 distribution(coef) = normal(0, 3)</code></pre>
 <p>The former is somewhat similar to the BUGS approach, where the variable and its distribution are defined at the same time. The latter approach (using <code>distribution()</code>) is similar to Stan code in that the variable is defined first, and the distribution statement added later.</p>
-<p>As well as taking more lines of code, the second approach relies on us to get the constraints of the free variable right. Because <code>sd</code> must be positive to be a valid standard deviation parameter, the <code>distribution()</code> approach for that parameter would look like this:</p>
-<pre class="r"><code>sd = free(lower = 0)
+<p>As well as taking more lines of code, the second approach relies on us to get the constraints of the variable right. Because <code>sd</code> must be positive to be a valid standard deviation parameter, the <code>distribution()</code> approach for that parameter would look like this:</p>
+<pre class="r"><code>sd = variable(lower = 0)
 distribution(sd) = lognormal(0, 3)</code></pre>
 </div>
 <div id="truncated-distributions" class="section level4">
 <h4>Truncated distributions</h4>
 <p>In general, it’s easier to define parameters with priors just by using the probability distributions, like we did in the example script. However <code>distribution()</code> has two other uses: it can be used to define a <a href="#Likelihood">likelihood</a> over observed data; and it can be used to create variables with truncated distributions.</p>
-<p>If we define a free variable with constraints (using <code>lower</code> and <code>upper</code>), we can then assign it a probability distribution, and greta will instead use the truncated probability distribution, usng the specified constraints. For example, to define a variable <code>z</code> that has a standard normal distribution truncated between -1 and 2, we can do:</p>
-<pre class="r"><code>z = free(lower = -1, upper = 2)
+<p>If we define a variable with constraints (using <code>lower</code> and <code>upper</code>), we can then assign it a probability distribution, and greta will instead use the truncated probability distribution, usng the specified constraints. For example, to define a variable <code>z</code> that has a standard normal distribution truncated between -1 and 2, we can do:</p>
+<pre class="r"><code>z = variable(lower = -1, upper = 2)
 distribution(z) = normal(0, 1)
 z</code></pre>
 <pre><code>greta array (variable following a normal distribution)

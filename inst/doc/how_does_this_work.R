@@ -37,7 +37,7 @@ x$node$tf
 z$node$tf
 
 ## ----free_state----------------------------------------------------------
-a = free(lower = 0)
+a = variable(lower = 0)
 class(a$node)
 a$node$tf_from_free
 

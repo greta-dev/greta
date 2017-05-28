@@ -44,8 +44,8 @@ greta knows the result must also be a 3x3 matrix, but it doesn't try to calculat
 
 Because greta only creates *placeholders* when we're building our model, we can construct models using greta arrays that represent unknown variables. For example, if we create a new greta array `a` representing some unknown values, we can still manipulate it as though it were data:
 
-```{r free}
-(a <- free(dim = c(3, 3)))
+```{r variable}
+(a <- variable(dim = c(3, 3)))
 (a2 <- a + a ^ 2)
 ```
 
@@ -73,7 +73,7 @@ x <- as_data(iris$Petal.Length)
 y <- as_data(iris$Sepal.Length)
 
 # variables and priors
-int = free()
+int = variable()
 coef = normal(0, 3)
 sd = lognormal(0, 3)
 
@@ -153,27 +153,27 @@ greta_array(0:1, dim = c(3, 3))
 
 The second section of the script creates three greta arrays to represent the parameters in our model:
 ```{r variables}
-int = free()
+int = variable()
 coef = normal(0, 3)
 sd = lognormal(0, 3)
 ```
 
-#### free variables
+#### variables
 
-The first line uses the `free()` function to create a greta array `int` representing a variable - an unknown value that we will learn when we fit the model to data. `free()` has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of `lower = -Inf, upper = Inf` meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).
+The first line uses the `variable()` function to create a greta array `int` representing a variable - an unknown value that we will learn when we fit the model to data. `variable()` has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of `lower = -Inf, upper = Inf` meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).
 
 ```{r int}
 int
 ```
 
 If we had instead wanted a 2x3 array of positive variables we could have created it like this:
-```{r positive_free}
-free(lower = 0, dim = c(2, 3))
+```{r positive_variable}
+variable(lower = 0, dim = c(2, 3))
 ```
 
 #### variables with probability distributions
 
-Variable greta arrays that are created with `free()`, like `int`, are not associated with probability distributions. I.e. we haven't made any assumptions or statements about what distribution we expect their values to follow. That's normally the case for a frequentist analysis, but for a Bayesian model we need to specify *prior distributions* over our parameters, stating the distribution we expect them to be drawn from (*before* considering the data we're using in the model).
+Variable greta arrays like `int` that are created with `variable()`, are not associated with probability distributions. I.e. we haven't made any assumptions or statements about what distribution we expect their values to follow. That's normally the case for a frequentist analysis, but for a Bayesian model we need to specify *prior distributions* over our parameters, stating the distribution we expect them to be drawn from (*before* considering the data we're using in the model).
 
 In our example script, we simultaneously create the variables `coef` and `sd`, and state the prior distributions for them, using two of greta's probability distribution functions. Each of these distributions takes as arguments the distribution's parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions argument at its default value to create scalar greta arrays:
 
@@ -188,19 +188,19 @@ greta implements a number of common probability distributions, and more are bein
 
 greta's probability distributions have two roles: to create variables following a certain distribution; and, when used in combination with the `distribution()` function, to state the distribution of an existing greta array.
 
-In fact, creating a new variable using a probability distribution is the same as first creating a free variable (with the appropriate constraint) and then stating that it follows a distribution. So our code in the script for creating `coef` is equivalent to this:
+In fact, creating a new variable using a probability distribution is the same as first creating a variable (with the appropriate constraint) and then stating that it follows a distribution. So our code in the script for creating `coef` is equivalent to this:
 ```{r normal_prior2, eval = FALSE}
-coef = free()
+coef = variable()
 distribution(coef) = normal(0, 3)
 ```
 
 The former is somewhat similar to the BUGS approach, where the variable and its distribution are defined at the same time. The latter approach (using `distribution()`)
 is similar to Stan code in that the variable is defined first, and the distribution statement added later.
 
-As well as taking more lines of code, the second approach relies on us to get the constraints of the free variable right. Because `sd` must be positive to be a valid standard deviation parameter, the `distribution()` approach for that parameter would look like this:
+As well as taking more lines of code, the second approach relies on us to get the constraints of the variable right. Because `sd` must be positive to be a valid standard deviation parameter, the `distribution()` approach for that parameter would look like this:
 
 ```{r sd_distribution, eval = FALSE}
-sd = free(lower = 0)
+sd = variable(lower = 0)
 distribution(sd) = lognormal(0, 3)
 ```
 
@@ -208,10 +208,10 @@ distribution(sd) = lognormal(0, 3)
 
 In general, it's easier to define parameters with priors just by using the probability distributions, like we did in the example script. However `distribution()` has two other uses: it can be used to define a [likelihood](#Likelihood) over observed data; and it can be used to create variables with truncated distributions.
 
-If we define a free variable with constraints (using `lower` and `upper`), we can then assign it a probability distribution, and greta will instead use the truncated probability distribution, usng the specified constraints. For example, to define a variable `z` that has a standard normal distribution truncated between -1 and 2, we can do:
+If we define a variable with constraints (using `lower` and `upper`), we can then assign it a probability distribution, and greta will instead use the truncated probability distribution, usng the specified constraints. For example, to define a variable `z` that has a standard normal distribution truncated between -1 and 2, we can do:
 
 ```{r truncated}
-z = free(lower = -1, upper = 2)
+z = variable(lower = -1, upper = 2)
 distribution(z) = normal(0, 1)
 z
 ```
@@ -299,7 +299,7 @@ Now all of the greta arrays making up the model have been created, we need to co
 ```{r hidden_model, echo = FALSE}
 x <- as_data(iris$Petal.Length)
 y <- as_data(iris$Sepal.Length)
-int = free()
+int = variable()
 coef = normal(0, 3)
 sd = lognormal(0, 3)
 mean <- int + coef * x
@@ -363,7 +363,7 @@ knitr::include_graphics(fname)
 It's the same for the model likelihood, but this time the distribution's parameters are a variable (`sd`) and the result of an operation (`mean`), and the distribution's value is given by data (the observed sepal lengths `y`):
 
 ```{r plot_likelihood, echo = FALSE, results='hide'}
-sd = free()
+sd = variable()
 y <- as_data(iris$Sepal.Length)
 mean <- ones(150)
 distribution(y) = normal(mean, sd)

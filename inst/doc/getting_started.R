@@ -12,8 +12,8 @@ library(greta)
 ## ----ones_op-------------------------------------------------------------
 (z2 <- z + z ^ 2)
 
-## ----free----------------------------------------------------------------
-(a <- free(dim = c(3, 3)))
+## ----variable------------------------------------------------------------
+(a <- variable(dim = c(3, 3)))
 (a2 <- a + a ^ 2)
 
 ## ----first_model, eval = FALSE-------------------------------------------
@@ -24,7 +24,7 @@ library(greta)
 #  y <- as_data(iris$Sepal.Length)
 #  
 #  # variables and priors
-#  int = free()
+#  int = variable()
 #  coef = normal(0, 3)
 #  sd = lognormal(0, 3)
 #  
@@ -66,30 +66,30 @@ greta_array(pi, dim = c(2, 2))
 greta_array(0:1, dim = c(3, 3))
 
 ## ----variables-----------------------------------------------------------
-int = free()
+int = variable()
 coef = normal(0, 3)
 sd = lognormal(0, 3)
 
 ## ----int-----------------------------------------------------------------
 int
 
-## ----positive_free-------------------------------------------------------
-free(lower = 0, dim = c(2, 3))
+## ----positive_variable---------------------------------------------------
+variable(lower = 0, dim = c(2, 3))
 
 ## ----priors--------------------------------------------------------------
 coef
 sd
 
 ## ----normal_prior2, eval = FALSE-----------------------------------------
-#  coef = free()
+#  coef = variable()
 #  distribution(coef) = normal(0, 3)
 
 ## ----sd_distribution, eval = FALSE---------------------------------------
-#  sd = free(lower = 0)
+#  sd = variable(lower = 0)
 #  distribution(sd) = lognormal(0, 3)
 
 ## ----truncated-----------------------------------------------------------
-z = free(lower = -1, upper = 2)
+z = variable(lower = -1, upper = 2)
 distribution(z) = normal(0, 1)
 z
 
@@ -129,7 +129,7 @@ distribution(y) = normal(mean, sd)
 ## ----hidden_model, echo = FALSE------------------------------------------
 x <- as_data(iris$Petal.Length)
 y <- as_data(iris$Sepal.Length)
-int = free()
+int = variable()
 coef = normal(0, 3)
 sd = lognormal(0, 3)
 mean <- int + coef * x
@@ -171,7 +171,7 @@ DiagrammeR::export_graph(gr,
 knitr::include_graphics(fname)
 
 ## ----plot_likelihood, echo = FALSE, results='hide'-----------------------
-sd = free()
+sd = variable()
 y <- as_data(iris$Sepal.Length)
 mean <- ones(150)
 distribution(y) = normal(mean, sd)
