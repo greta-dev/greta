@@ -26,6 +26,7 @@
 \alias{multinomial}
 \alias{categorical}
 \alias{dirichlet}
+\alias{dirichlet_multinomial}
 \title{greta probability distributions}
 \usage{
 uniform(min, max, dim = NULL)
@@ -75,6 +76,8 @@ multinomial(size, prob, dim = 1)
 categorical(prob, dim = 1)
 
 dirichlet(alpha, dim = 1)
+
+dirichlet_multinomial(size, alpha, dim = 1)
 }
 \arguments{
 \item{min, max}{scalar values giving optional limits to \code{uniform}
@@ -88,7 +91,7 @@ or a vector of positive integers. See details.}
 
 \item{mean, meanlog, location, mu}{unconstrained parameters}
 
-\item{sd, sdlog, sigma, size, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b}{positive parameters, \code{alpha} must be a vector for \code{dirichlet}.}
+\item{sd, sdlog, sigma, size, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b}{positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.}
 
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
 \code{multinomial} and \code{categorical}}
@@ -104,8 +107,9 @@ These functions can be used to define random variables in a
 }
 \details{
 The discrete probability distributions (\code{bernoulli},
-  \code{binomial}, \code{negative_binomial}, \code{poisson}) can be used when
-  they have fixed values (e.g. defined as a likelihood using
+  \code{binomial}, \code{negative_binomial}, \code{poisson},
+  \code{multinomial}, \code{categorical}, \code{dirichlet_multinomial}) can
+  be used when they have fixed values (e.g. defined as a likelihood using
   \code{\link{distribution}}, but not as unknown variables.
 
   For univariate distributions \code{dim} gives the dimensions of the greta
@@ -165,6 +169,7 @@ The discrete probability distributions (\code{bernoulli},
    \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
    \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
+   \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
 }
 \examples{

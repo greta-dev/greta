@@ -342,7 +342,6 @@ test_that('categorical distribution has correct density', {
 
 })
 
-
 test_that('dirichlet distribution has correct density', {
 
   source('helpers.R')
@@ -355,6 +354,23 @@ test_that('dirichlet distribution has correct density', {
                                      extraDistr::ddirichlet,
                                      parameters = list(alpha = alpha),
                                      x = extraDistr::rdirichlet(100, alpha))
+
+  expect_true(all(difference < 1e-4))
+
+})
+test_that('dirichlet-multinomial distribution has correct density', {
+
+  source('helpers.R')
+
+  # parameters to test
+  m <- 5
+  size <- 10
+  alpha <- runif(m)
+
+  difference <- compare_distribution(greta::dirichlet_multinomial,
+                                     extraDistr::ddirmnom,
+                                     parameters = list(size = size, alpha = alpha),
+                                     x = extraDistr::rdirmnom(100, size, alpha))
 
   expect_true(all(difference < 1e-4))
 

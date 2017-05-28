@@ -644,7 +644,6 @@ f_distribution <- R6Class (
   )
 )
 
-# need to add checking of mean and Sigma dimensions
 dirichlet_distribution <- R6Class (
   'dirichlet_distribution',
   inherit = distribution_node,
@@ -709,7 +708,82 @@ dirichlet_distribution <- R6Class (
   )
 )
 
-# need to add checking of mean and Sigma dimensions
+
+dirichlet_multinomial_distribution <- R6Class (
+  'dirichlet_multinomial_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (size, alpha, dim) {
+
+      # coerce to greta arrays
+      size <- as.greta_array(size)
+      alpha <- as.greta_array(alpha)
+
+      # check dimensions
+      if (length(size) != 1) {
+
+        stop ('size must be a scalar, but has dimensions ',
+              paste(dim(size), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (ncol(alpha) != 1 |
+          length(dim(alpha)) != 2) {
+
+        stop ('alpha must be a 2D greta array with one column, but has dimensions ',
+              paste(dim(alpha), collapse = ' x '),
+              call. = FALSE)
+
+      }
+
+      if (length(alpha) == 1) {
+
+        stop ('the dirichlet distribution is for vectors, ',
+              'but the parameters were scalar',
+              call. = FALSE)
+
+      }
+
+      # check dim is a positive scalar integer
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar positive integer, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # coerce the parameter arguments to nodes and add as children and
+      # parameters
+      super$initialize('dirichlet_multinomial', dim = c(dim, length(alpha)), discrete = TRUE)
+      self$add_parameter(size, 'size')
+      self$add_parameter(alpha, 'alpha')
+
+    },
+
+    # default value
+    create_target = function() {
+      vble(lower = 0, dim = self$dim)
+    },
+
+    tf_distrib = function (parameters) {
+      # transpose and scale probs to get absolute density correct
+      alpha <- tf$transpose(parameters$alpha)
+      tf$contrib$distributions$DirichletMultinomial(total_count = parameters$size,
+                                                    concentration = alpha)
+    },
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
+
 multinomial_distribution <- R6Class (
   'multinomial_distribution',
   inherit = distribution_node,
@@ -721,7 +795,7 @@ multinomial_distribution <- R6Class (
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
-      # check dimensions of prob
+      # check dimensions
       if (length(size) != 1) {
 
         stop ('size must be a scalar, but has dimensions ',
@@ -730,7 +804,6 @@ multinomial_distribution <- R6Class (
 
       }
 
-      # check dimensions of prob
       if (ncol(prob) != 1 |
           length(dim(prob)) != 2) {
 
@@ -761,7 +834,7 @@ multinomial_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('multinomial', c(dim, length(prob)))
+      super$initialize('multinomial', dim = c(dim, length(prob)), discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(prob, 'prob')
 
@@ -769,7 +842,7 @@ multinomial_distribution <- R6Class (
 
     # default value
     create_target = function() {
-      vble(dim = self$dim)
+      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -787,7 +860,6 @@ multinomial_distribution <- R6Class (
   )
 )
 
-# need to add checking of mean and Sigma dimensions
 categorical_distribution <- R6Class (
   'categorical_distribution',
   inherit = distribution_node,
@@ -829,14 +901,14 @@ categorical_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('categorical', c(dim, length(prob)))
+      super$initialize('categorical', dim = c(dim, length(prob)), discrete = TRUE)
       self$add_parameter(prob, 'prob')
 
     },
 
     # default value
     create_target = function() {
-      vble(dim = self$dim)
+      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -854,7 +926,6 @@ categorical_distribution <- R6Class (
   )
 )
 
-# need to add checking of mean and Sigma dimensions
 multivariate_normal_distribution <- R6Class (
   'multivariate_normal_distribution',
   inherit = distribution_node,
@@ -944,7 +1015,6 @@ multivariate_normal_distribution <- R6Class (
   )
 )
 
-# need to add checking of mean and Sigma dimensions
 wishart_distribution <- R6Class (
   'wishart_distribution',
   inherit = distribution_node,
@@ -1037,7 +1107,7 @@ distrib <- function (distribution, ...) {
 #'
 #' @param mean,meanlog,location,mu unconstrained parameters
 #' @param sd,sdlog,sigma,size,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b
-#'   positive parameters, \code{alpha} must be a vector for \code{dirichlet}.
+#'   positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.
 #' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
 #'   \code{multinomial} and \code{categorical}
 #' @param Sigma positive definite variance-covariance matrix parameter
@@ -1046,8 +1116,9 @@ distrib <- function (distribution, ...) {
 #'   or a vector of positive integers. See details.
 #'
 #' @details The discrete probability distributions (\code{bernoulli},
-#'   \code{binomial}, \code{negative_binomial}, \code{poisson}) can be used when
-#'   they have fixed values (e.g. defined as a likelihood using
+#'   \code{binomial}, \code{negative_binomial}, \code{poisson},
+#'   \code{multinomial}, \code{categorical}, \code{dirichlet_multinomial}) can
+#'   be used when they have fixed values (e.g. defined as a likelihood using
 #'   \code{\link{distribution}}, but not as unknown variables.
 #'
 #'   For univariate distributions \code{dim} gives the dimensions of the greta
@@ -1107,6 +1178,7 @@ distrib <- function (distribution, ...) {
 #'    \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
 #'    \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
 #'    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
+#'    \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
 #'    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
 #'
 #' @examples
@@ -1271,3 +1343,8 @@ categorical <- function (prob, dim = 1)
 #' @export
 dirichlet <- function (alpha, dim = 1)
   distrib('dirichlet', alpha, dim)
+
+#' @rdname greta-distributions
+#' @export
+dirichlet_multinomial <- function (size, alpha, dim = 1)
+  distrib('dirichlet_multinomial', size, alpha, dim)
