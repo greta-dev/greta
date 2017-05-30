@@ -24,6 +24,7 @@ logo_shape <- function (x_start = 0, y_range = c(0, 1)) {
 plot_logo <- function (background = c('white', 'purple'),
                        pointsize = 4.5,
                        add = FALSE,
+                       edge_width = 1,
                        ...) {
 
   background <- match.arg(background)
@@ -83,14 +84,14 @@ plot_logo <- function (background = c('white', 'purple'),
            bg = node_col,
            col = bg_col,
            cex = pointsize - 1.5,
-           lwd = pointsize * 4)
+           lwd = pointsize * 4 * edge_width)
 
     # plot lines
     for (i in seq_len(nrow(edges))) {
       link <- edges[i, ]
       lines(x = data$coords$x[link],
             y = data$coords$y[link],
-            lwd = pointsize * 2.3,
+            lwd = pointsize * 2.3 * edge_width,
             col = link_col)
     }
 
@@ -118,7 +119,7 @@ plot_logo <- function (background = c('white', 'purple'),
 banner <- function (background = c('purple', 'white'),
                     width = 8, margin = 0.2,
                     font = c('Muli', 'sans'),
-                    add_logo = TRUE) {
+                    add_logo = TRUE, ...) {
 
   font <- match.arg(font)
   background <- match.arg(background)
@@ -180,10 +181,11 @@ banner <- function (background = c('purple', 'white'),
 
   if (add_logo) {
 
-    plot_logo(background = 'purple',
+    plot_logo(background = background,
               add = TRUE,
               x_start = string_width + xpos * 3,
-              y_range = 0.55 + string_height * 0.5 * c(-1, 1))
+              y_range = 0.55 + string_height * 0.5 * c(-1, 1),
+              ...)
 
   }
 
@@ -265,5 +267,11 @@ png('logos/name_on_white.png',
     height = 1000, width = 1800,
     pointsize = 60)
 banner('white', width = 2.310505, add_logo = FALSE)
+dev.off()
+
+png('logos/name_icon_on_white.png',
+    height = 1000, width = 3600,
+    pointsize = 60)
+banner('white', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 
