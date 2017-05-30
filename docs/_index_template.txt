@@ -1,0 +1,22 @@
+---
+title: "{{pagetitle}}"
+output:
+  html_document:
+    css: greta.css
+    toc: no
+    theme: lumen
+    highlight: default
+---
+
+{{#sections}}
+
+##{{title}}
+{{{desc}}}
+
+left  |  right
+----: | :----
+{{#contents}}
+{{#aliases}}[{{{.}}}]({{path}}) {{/aliases}} | {{title}}
+{{/contents}}
+
+{{/sections}}

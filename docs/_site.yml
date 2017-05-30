@@ -1,0 +1,22 @@
+name: greta
+output_dir: "."
+
+output:
+  html_document:
+    css: greta.css
+    toc: true
+    theme: lumen
+    highlight: default
+
+navbar:
+  theme: lumen
+  title: "greta"
+  left:
+    - text: "getting started"
+      href: getting_started.html
+    - text: "example models"
+      href: example_models.html
+    - text: "how does this work?"
+      href: how_does_this_work.html
+    - text: "documentation"
+      href: reference-index.html
