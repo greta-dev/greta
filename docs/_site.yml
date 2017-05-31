@@ -9,14 +9,15 @@ output:
     highlight: default
 
 navbar:
-  theme: lumen
   title: "greta"
-  left:
-    - text: "getting started"
+  right:
+    - text: "get started"
       href: getting_started.html
-    - text: "example models"
+    - text: "examples"
       href: example_models.html
+    - text: "docs"
+      href: reference-index.html
     - text: "how does this work?"
       href: how_does_this_work.html
-    - text: "documentation"
-      href: reference-index.html
+    - icon: fa-github fa-lg
+      href: https://github.com/goldingn/greta

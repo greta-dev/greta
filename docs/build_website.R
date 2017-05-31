@@ -20,7 +20,10 @@ if (!dir.exists('docs'))
   dir.create('docs')
 
 # copy css over
-file.copy('vignettes/greta.css', 'docs')
+file.copy('vignettes/greta.css', 'docs/greta.css', overwrite = TRUE)
+
+# copy banner icon over
+file.copy('logos/name_icon_on_lighter.png', 'docs/banner_icon.png', overwrite = TRUE)
 
 # copy vignettes (and examples) over
 vignettes <- list.files('vignettes/', pattern = '.Rmd', full.names = TRUE)
@@ -34,7 +37,7 @@ if (!dir.exists('docs/reference'))
 pkg <- pkgdown::as_pkgdown()
 topics <- purrr::transpose(pkg$topics)
 data_list <- lapply(topics, pkgdown:::data_reference_topic, pkg, examples = FALSE)
-lapply(data_list, write_rmd)
+lapply(data_list, write_topic)
 
 # need to run this the same way
 # pkgdown::build_reference_index()

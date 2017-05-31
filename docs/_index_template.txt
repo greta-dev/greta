@@ -1,22 +1,25 @@
 ---
-title: "{{pagetitle}}"
+title: "greta documentation"
 output:
   html_document:
     css: greta.css
-    toc: no
+    toc: yes
+    toc_float:
+      collapsed: false
+      toc_depth: 4
     theme: lumen
     highlight: default
 ---
 
+<hr>
+
 {{#sections}}
 
-##{{title}}
-{{{desc}}}
-
-left  |  right
-----: | :----
 {{#contents}}
-{{#aliases}}[{{{.}}}]({{path}}) {{/aliases}} | {{title}}
+###[{{title}}]({{path}})
+
+{{#aliases}}`{{{.}}}` {{/aliases}}
+<hr>
 {{/contents}}
 
 {{/sections}}

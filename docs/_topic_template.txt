@@ -3,20 +3,27 @@ title: "{{{title}}}"
 output:
   html_document:
     css: greta.css
-    toc: no
+    toc: yes
+    toc_float:
+      collapsed: false
+      toc_depth: 4
     theme: lumen
     highlight: default
 ---
 
-  ```{r setup, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(comment = NA, cache = TRUE)
 ```
+
+<h2 class="hasAnchor" id="description"><a class="anchor" href="#description"></a> Description</h2>
 
 {{#description}}
 {{#contents}}
 {{{.}}}
 {{/contents}}
 {{/description}}
+
+<h2 class="hasAnchor" id="usage"><a class="anchor" href="#usage"></a> Usage</h2>
 
 {{#usage}}
 
@@ -26,15 +33,12 @@ knitr::opts_chunk$set(comment = NA, cache = TRUE)
 
 {{#has_args}}
 <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
-<table class="ref-arguments">
-  <colgroup><col class="name" /><col class="desc" /></colgroup>
-  {{#arguments}}
-    <tr>
-      <th>{{{name}}}</th>
-      <td>{{{description}}}</td>
-    </tr>
-  {{/arguments}}
-</table>
+
+{{#arguments}}
+`{{{name}}}`
+{{{description}}}
+{{/arguments}}
+
 {{/has_args}}
 
 {{#sections}}

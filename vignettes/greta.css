@@ -23,3 +23,21 @@ hr {
 code {
   background-color: #f4f0f9;
 }
+.navbar,
+.navbar-default{
+  border-color: #E0D2EE;
+  background-color: #E0D2EE;
+  font-size: 14px;
+  line-height: 40px;
+  height: 40px;
+  padding-top: 0;
+}
+.navbar-default .navbar-brand {
+    font-size: 22px;
+}
+.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:hover, .navbar-default .navbar-nav>.active>a:focus {
+    color: #333333;
+}
+.navbar-default .navbar-nav>li>a {
+  color: #8960B3;
+}
