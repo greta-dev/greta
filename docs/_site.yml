@@ -7,17 +7,3 @@ output:
     toc: true
     theme: lumen
     highlight: default
-
-navbar:
-  title: "greta"
-  right:
-    - text: "get started"
-      href: getting_started.html
-    - text: "examples"
-      href: example_models.html
-    - text: "docs"
-      href: reference-index.html
-    - text: "how does this work?"
-      href: how_does_this_work.html
-    - icon: fa-github fa-lg
-      href: https://github.com/goldingn/greta

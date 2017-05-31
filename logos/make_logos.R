@@ -280,6 +280,12 @@ png('logos/name_icon_on_white.png',
 banner('white', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 
+png('logos/name_icon_on_purple.png',
+    height = 1000, width = 3600,
+    pointsize = 60)
+banner('purple', width = 4, add_logo = TRUE, edge_width = 2.7)
+dev.off()
+
 png('logos/name_icon_on_lighter.png',
     height = 1000, width = 3600,
     pointsize = 60)
