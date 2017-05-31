@@ -25,19 +25,26 @@ code {
 }
 .navbar,
 .navbar-default{
-  border-color: #E0D2EE;
-  background-color: #E0D2EE;
+  border-color: #A379CC;
+  background-color: #A379CC;
   font-size: 14px;
-  line-height: 40px;
-  height: 40px;
+  line-height: 20px;
+  height: 20px;
+  min-height: 50px;
   padding-top: 0;
 }
 .navbar-default .navbar-brand {
-    font-size: 22px;
+  color: #ffffff;
+  font-size: 24px;
 }
 .navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:hover, .navbar-default .navbar-nav>.active>a:focus {
-    color: #333333;
+    color: #F4F0F9;
+}
+
+.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus {
+    color: #ffffff;
+    background-color: transparent;
 }
 .navbar-default .navbar-nav>li>a {
-  color: #8960B3;
+  color: #F4F0F9;
 }
