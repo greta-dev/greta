@@ -21,7 +21,7 @@ logo_shape <- function (x_start = 0, y_range = c(0, 1)) {
 
 }
 
-plot_logo <- function (background = c('white', 'purple'),
+plot_logo <- function (background = c('white', 'purple', 'lighter'),
                        pointsize = 4.5,
                        add = FALSE,
                        edge_width = 1,
@@ -33,14 +33,17 @@ plot_logo <- function (background = c('white', 'purple'),
 
   bg_col <- switch (background,
                     white = 'white',
+                    lighter = greta:::greta_col('lighter'),
                     purple = greta:::greta_col('main'))
 
   link_col <- switch (background,
                       white = greta:::greta_col('light'),
+                      lighter = greta:::greta_col('dark'),
                       purple = greta:::greta_col('dark'))
 
   node_col <- switch (background,
                       white = greta:::greta_col('dark'),
+                      lighter = greta:::greta_col('dark'),
                       purple = greta:::greta_col('dark'))
 
   if (!add) {
@@ -116,7 +119,7 @@ plot_logo <- function (background = c('white', 'purple'),
 # 'margin' gives the proportion of the vertical height to use a border on each side
 # the text is scaled to never exceed that border
 #' @importFrom graphics par plot.new plot.window strheight strwidth text
-banner <- function (background = c('purple', 'white'),
+banner <- function (background = c('purple', 'white', 'lighter'),
                     width = 8, margin = 0.2,
                     font = c('Muli', 'sans'),
                     add_logo = TRUE, ...) {
@@ -135,10 +138,12 @@ banner <- function (background = c('purple', 'white'),
 
   bg_col <- switch (background,
                     white = 'white',
+                    lighter = greta:::greta_col('lighter'),
                     purple = greta:::greta_col('main'))
 
   text_col <- switch (background,
                       white = greta:::greta_col('dark'),
+                      lighter = greta:::greta_col('dark'),
                       purple = 'white')
 
   # cache the old graphics options
@@ -273,5 +278,11 @@ png('logos/name_icon_on_white.png',
     height = 1000, width = 3600,
     pointsize = 60)
 banner('white', width = 4, add_logo = TRUE, edge_width = 2.7)
+dev.off()
+
+png('logos/name_icon_on_lighter.png',
+    height = 1000, width = 3600,
+    pointsize = 60)
+banner('lighter', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 
