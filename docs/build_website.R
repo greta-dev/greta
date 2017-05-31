@@ -23,7 +23,7 @@ if (!dir.exists('docs'))
 file.copy('vignettes/greta.css', 'docs/greta.css', overwrite = TRUE)
 
 # copy banner icon over
-file.copy('logos/name_icon_on_lighter.png', 'docs/banner_icon.png', overwrite = TRUE)
+file.copy('logos/name_icon_on_purple.png', 'docs/banner_icon.png', overwrite = TRUE)
 
 # copy vignettes (and examples) over
 vignettes <- list.files('vignettes/', pattern = '.Rmd', full.names = TRUE)

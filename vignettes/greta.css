@@ -10,11 +10,11 @@ pre{
   border-radius: 0;
   line-height: 1.5;
 }
-.list-group-item.active
+.list-group-item.active,
 .list-group-item.active:hover,
 .list-group-item.active:focus {
-  background-color: #8960b3;
-    border-color: #8960b3;
+  background-color: #B797D7;
+  border-color: #B797D7;
 }
 hr {
   height:8px;

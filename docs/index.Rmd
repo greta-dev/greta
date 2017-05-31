@@ -7,9 +7,21 @@ output:
     toc: false
 ---
 
+<style type="text/css">
+body{
+  font-size: 18px;
+}
+pre{
+  font-size: 15px;
+}
+</style>
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+set.seed(1)
 ```
+
+<p></p>
 
 ```{r logo_title, out.width="60%", fig.align='center'}
 knitr::include_graphics('../logos/name_icon_on_white.png')
@@ -17,9 +29,51 @@ knitr::include_graphics('../logos/name_icon_on_white.png')
 
 <center><h2 style="color:#8960B3;"> simple and scalable statistical modelling in R</h2></center>
 
-<br>
-<br>
+<p style="margin-top: 2.5em;"></p>
 
-greta is an R package for writing statistical models and sampling from them by MCMC
+<hr>
 
+greta is an R package for writing statistical models and fitting them by MCMC, it's:
+<p style="margin-top: 1.4em;"></p>
+&emsp; **simple** - greta models are written in R, so there's no need to learn a language like BUGS or Stan
 
+&emsp; **scalable** - greta uses [Google TensorFlow](https://www.tensorflow.org/) so it's fast even on massive datasets, and it runs on CPU clusters and GPUs
+
+&emsp; **extensible** - you can write your own R functions, or even packages, using greta
+
+<hr>
+
+To get started with greta, take a look at the [**getting started**](getting_started.html) tutorial.
+There are also several [**example models**](example_models.html), with equivalent BUGS and Stan code.
+If you'd like to understand how greta works under the hood see the [**technical details**](how_does_this_work.html)
+
+<hr>
+
+Here's an example of a Bayesian linear regression model for the sepal length variable in R's `iris` dataset.
+
+```{r model, echo = TRUE, eval = TRUE, results='hide', message=FALSE}
+library(greta)
+
+intercept = normal(0, 5)
+coefficient = normal(0, 3)
+sd = lognormal(0, 3)
+
+mean <- intercept + coefficient * iris$Petal.Length
+distribution(iris$Sepal.Length) = normal(mean, sd)
+```
+
+With the model written, we can draw samples of the parameters we care about.
+
+```{r mcmc, echo = TRUE, eval = TRUE, results='hide', message=FALSE}
+m <- model(intercept, coefficient, sd)
+draws <- mcmc(m, n_samples = 500)
+```
+
+This outputs an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software.
+
+```{r vis, echo = TRUE, eval = TRUE, results='hide', out.width=c('400px', '400px'), message=FALSE, warning=FALSE, fig.height=4, fig.width=5, fig.show='hold'}
+MCMCvis::MCMCtrace(draws)
+MCMCvis::MCMCplot(draws, xlim = c(-1, 5))
+```
+
+<hr>
