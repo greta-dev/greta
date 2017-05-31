@@ -1,0 +1,25 @@
+---
+output:
+  html_document:
+    css: greta.css
+    theme: lumen
+    highlight: default
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r logo_title, out.width="60%", fig.align='center'}
+knitr::include_graphics('../logos/name_icon_on_white.png')
+```
+
+<center><h2 style="color:#8960B3;"> simple and scalable statistical modelling in R</h2></center>
+
+<br>
+<br>
+
+greta is an R package for writing statistical models and sampling from them by MCMC
+
+
