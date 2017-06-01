@@ -23,14 +23,13 @@ set.seed(1)
 
 <p></p>
 
-```{r logo_title, out.width="60%", fig.align='center'}
+```{r logo_title, out.width="50%", fig.align='center'}
 knitr::include_graphics('../logos/name_icon_on_white.png')
 ```
 
-<center><h2 style="color:#8960B3;"> simple and scalable statistical modelling in R</h2></center>
+<center><p style="color:#8960B3; font-size: 24px;"> simple and scalable statistical modelling in R</p></center>
 
-<p style="margin-top: 2.5em;"></p>
-
+<p style="margin-top: 2em;"></p>
 <hr>
 
 greta is an R package for writing statistical models and fitting them by MCMC, it's:
@@ -41,11 +40,12 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 &emsp; **extensible** - you can write your own R functions, or even packages, using greta
 
+
 <hr>
 
-To get started with greta, take a look at the [**getting started**](getting_started.html) tutorial.
-There are also several [**example models**](example_models.html), with equivalent BUGS and Stan code.
-If you'd like to understand how greta works under the hood see the [**technical details**](how_does_this_work.html)
+To get started with greta, take a look at the [getting started](getting_started.html) tutorial.
+There are also several [example models](example_models.html), with equivalent BUGS and Stan code.
+If you'd like to understand how greta works under the hood see the [technical details](how_does_this_work.html)
 
 <hr>
 

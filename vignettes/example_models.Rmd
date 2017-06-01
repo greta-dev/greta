@@ -27,9 +27,13 @@ The [OpenBUGS website](http://www.openbugs.net/w/Examples) provides a number of 
 The following sections provide greta implementations of some of these example models, alongside the BUGS code from [openbugs.net](http://www.openbugs.net) and Stan code and R version of the data from the [Stan example models wiki](https://github.com/stan-dev/example-models/wiki). 
 
 <hr>
+
 ```{r child='examples/air.Rmd'}
 ```
+
 <hr>
+
 ```{r child='examples/beetles.Rmd'}
 ```
+
 <hr>

@@ -1,3 +1,6 @@
+body{
+  font-size: 16px;
+}
 pre{
   background-color: transparent;
   border: 1px solid #f4f0f9;
@@ -13,8 +16,8 @@ pre{
 .list-group-item.active,
 .list-group-item.active:hover,
 .list-group-item.active:focus {
-  background-color: #B797D7;
-  border-color: #B797D7;
+  background-color: #A379CC;
+  border-color: #A379CC7;
 }
 hr {
   height:8px;
@@ -33,6 +36,10 @@ code {
   height: 20px;
   min-height: 40px;
   padding-top: 0;
+}
+.navbar-default .navbar-collapse,
+.navbar-default .navbar-form {
+  background-color: #A379CC;
 }
 .navbar-default .navbar-nav>li>a {
   padding-top: 10px;
@@ -54,4 +61,16 @@ code {
     background-size: 100% auto;
     background-repeat: no-repeat;
     vertical-align: middle;
+}
+.dropdown-menu>.active>a,
+.dropdown-menu>.active>a:hover,
+.dropdown-menu>.active>a:focus {
+    color: #ffffff;
+    text-decoration: none;
+    outline: 0;
+    background-color: #A379CC;
+}
+.dropdown-menu>li>a {
+    color: #555555;
+    white-space: nowrap;
 }
