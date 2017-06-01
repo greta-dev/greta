@@ -1,0 +1,24 @@
+---
+title: "software"
+output:
+  html_document:
+    css: greta.css
+    toc: no
+    theme: lumen
+---
+
+<style type="text/css">
+body{
+  font-size: 18px;
+}
+</style>
+
+greta relies on some pretty incredible pieces of software.
+
+Rstudio's [`reticulate`](https://github.com/rstudio/reticulate) and [`tensorflow`](https://rstudio.github.io/tensorflow/) packages bring Google TensorFlow and all things python to R.
+Under the hood, greta also uses Winston Chang's [`R6`](https://github.com/wch/R6) object system.
+greta's model plotting functionality is made possible by [`DiagrammeR`](http://rich-iannone.github.io/DiagrammeR/).
+
+The design and scope of greta was inspired by other general-purpose MCMC software like [BUGS](http://www.openbugs.net/) and [JAGS](http://mcmc-jags.sourceforge.net/), but particularly by [Stan](http://mc-stan.org/).
+
+The python package [Edward](http://edwardlib.org/) also uses TensorFlow as a backend for general-purpose statistical modelling, as does [GPflow](https://github.com/GPflow/GPflow), which was a source of inspiration for how greta is implemented.
