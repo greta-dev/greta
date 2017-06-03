@@ -53,15 +53,6 @@ code {
 .navbar-default .navbar-nav>.active>a:focus {
   color: #ffffff;
 }
-.logo {
-    display: inline-block;
-    width: 144px;
-    height: 40px;
-    background-image: url(banner_icon.png);
-    background-size: 100% auto;
-    background-repeat: no-repeat;
-    vertical-align: middle;
-}
 .dropdown-menu>.active>a,
 .dropdown-menu>.active>a:hover,
 .dropdown-menu>.active>a:focus {
