@@ -1,6 +1,7 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE,
+                      cache = TRUE,
                       comment = NA,
                       progress = FALSE)
 set.seed(123)
