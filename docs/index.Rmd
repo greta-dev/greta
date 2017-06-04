@@ -11,8 +11,11 @@ output:
 body{
   padding-top: 30px;
 }
-pre{
-  font-size: 18px;
+pre, pre:not([class]){
+  font-size: 20px;
+  color: #5a3a78;
+  background-color: #f7f7f7;
+  border: none;
 }
 .container-fluid {
     padding-left: 0;
@@ -38,7 +41,7 @@ set.seed(1)
 ```{r logo_title, out.width="50%", fig.align='left'}
 knitr::include_graphics('../logos/name_icon_on_light.png')
 ```
-    <p style="color:#ffffff; font-size: 24px;"> simple and scalable statistical modelling in R</p>
+    <p style="color:#ffffff; font-size: 24px;"> &emsp; simple and scalable statistical modelling in R</p>
     
   <br><br>
         
@@ -56,7 +59,7 @@ knitr::include_graphics('../logos/name_icon_on_light.png')
 <div class="col-md-4">
   <p class="bullet"><b>simple</b></p>
   <br>
-  greta models are written in R, so there's no need to learn a language like BUGS or Stan
+  greta models are written right in R, so there's no need to learn another language like BUGS or Stan
 </div>
 
 <div class="col-md-4">
@@ -68,7 +71,7 @@ knitr::include_graphics('../logos/name_icon_on_light.png')
 <div class="col-md-4">
   <p class="bullet"><b>extensible</b></p>
   <br>
-  you can write your own R functions, modules, and even packages using greta
+  it's easy to write your own R functions, modules, and even packages using greta
 </div>
 
 </div>
@@ -86,33 +89,33 @@ knitr::include_graphics('../logos/name_icon_on_light.png')
 
 <div class="row">
 
-<div class="col-md-1"></div>
+<div class="col-md-2"></div>
 
-<div class="col-md-5">
+<div class="col-md-4">
   <span class="fa fa-code fa-2x" style="vertical-align:middle;"></span> &emsp; <a href="#example">basic example</a>
 </div>
 
-<div class="col-md-5">
+<div class="col-md-4">
 &thinsp; <span class="fa fa-arrow-circle-right fa-2x" style="vertical-align:middle;"></span>&emsp; [getting started](getting_started.html)
 </div>
 
-<div class="col-md-1"></div>
+<div class="col-md-2"></div>
 
 </div>
 
 <div class="row">
 
-<div class="col-md-1"></div>
+<div class="col-md-2"></div>
 
-<div class="col-md-5">
+<div class="col-md-4">
   &thinsp; <span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span> &emsp; [example models](example_models.html)
 </div>
 
-<div class="col-md-5">
+<div class="col-md-4">
   &thinsp; <span class="fa fa-book fa-2x" style="vertical-align:middle;"></span> &emsp; [package docs](reference-index.html)
 </div>
 
-<div class="col-md-1"></div>
+<div class="col-md-2"></div>
 
 </div>
 
@@ -126,33 +129,65 @@ knitr::include_graphics('../logos/name_icon_on_light.png')
 
 <div id="example">
 
-<br>
+<div class="container">
+
+<br><br>
 
 <h1 style="color: #8960B3;">basic example</h1>
 
-<br>
+<div class="row">
 
-Here's a Bayesian linear regression model for the sepal length variable in R's `iris` dataset:
+<div class="col-md-6">
 
-```{r model, echo = TRUE, eval = TRUE, results='hide', message=FALSE}
+Here's a Bayesian linear regression model fit to the `iris` data using greta:
+
+```
 library(greta)
+```
+```
+x <- as_data(iris$Petal.Length)
+y <- as_data(iris$Sepal.Length)
 
-intercept = normal(0, 5)
-coefficient = normal(0, 3)
+int = normal(0, 5)
+coef = normal(0, 3)
 sd = lognormal(0, 3)
 
-mean <- intercept + coefficient * iris$Petal.Length
-distribution(iris$Sepal.Length) = normal(mean, sd)
-
-m <- model(intercept, coefficient, sd)
+mean <- int + coef * x
+distribution(y) = normal(mean, sd)
 ```
+```
+m <- model(int, coef, sd)
+```
+```{r model, echo = FALSE, eval = TRUE, results='hide', message=FALSE}
+library(greta)
 
-with the model defined, it easy to draw samples of the parameters we care about:
+x <- as_data(iris$Petal.Length)
+y <- as_data(iris$Sepal.Length)
 
-```{r vis, echo = TRUE, eval = TRUE, results='hide', out.width=c('400px', '400px'), message=FALSE, warning=FALSE, fig.height=4, fig.width=5, fig.show='hold'}
+int = normal(0, 5)
+coef = normal(0, 3)
+sd = lognormal(0, 3)
+
+mean <- int + coef * x
+distribution(y) = normal(mean, sd)
+
+m <- model(int, coef, sd)
+```
+</div>
+<div class="col-md-6">
+```
 draws <- mcmc(m, n_samples = 500)
-MCMCvis::MCMCtrace(draws)
-MCMCvis::MCMCplot(draws, xlim = c(-1, 5))
+bayesplot::mcmc_trace(draws)
+```
+```{r vis, echo = FALSE, eval = TRUE, results='hide', message=FALSE, warning=FALSE, fig.height=4, fig.width=4, fig.align="center"}
+draws <- mcmc(m, n_samples = 500)
+bayesplot::mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1))
 ```
 
+</div>
+</div>
+
+<br>
+
+</div>
 </div>
