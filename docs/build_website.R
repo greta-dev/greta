@@ -1,17 +1,13 @@
-# template rmd file to paste html contents into
-topic_template <- function() readLines('docs/_topic_template.txt')
-
-# template rmd file to paste html contents into
-index_template <- function() readLines('docs/_index_template.txt')
-
-# substitute in the data and write the rmd
+# bespoke templating of pkgdown helpfiles and index page
 write_topic <- function (data) {
-  rmd <- whisker::whisker.render(topic_template(), data)
+  topic_template <- readLines('docs/_topic_template.txt')
+  rmd <- whisker::whisker.render(topic_template, data)
   cat(rmd, file = paste0("docs/", data$name, ".Rmd"))
 }
 
 write_index <- function (data) {
-  rmd <- whisker::whisker.render(index_template(), data)
+  index_template <- readLines('docs/_index_template.txt')
+  rmd <- whisker::whisker.render(index_template, data)
   cat(rmd, file = "docs/reference-index.Rmd")
 }
 
@@ -20,15 +16,28 @@ if (!dir.exists('docs'))
   dir.create('docs')
 
 # copy css over
-file.copy('vignettes/greta.css', 'docs/greta.css', overwrite = TRUE)
+file.copy('vignettes/greta.css',
+          'docs/greta.css',
+          overwrite = TRUE)
 
 # copy banner icon over
-file.copy('logos/name_icon_on_purple.png', 'docs/banner_icon.png', overwrite = TRUE)
+file.copy('logos/name_icon_on_purple.png',
+          'docs/banner_icon.png',
+          overwrite = TRUE)
 
 # copy vignettes (and examples) over
-vignettes <- list.files('vignettes/', pattern = '.Rmd', full.names = TRUE)
-sapply(vignettes, file.copy, 'docs', recursive = TRUE)
-file.copy('vignettes/examples', 'docs', recursive = TRUE, overwrite = TRUE)
+vignettes <- list.files('vignettes/',
+                        pattern = '.Rmd',
+                        full.names = TRUE)
+sapply(vignettes,
+       file.copy,
+       'docs',
+       recursive = TRUE)
+
+file.copy('vignettes/examples',
+          'docs',
+          recursive = TRUE,
+          overwrite = TRUE)
 
 if (!dir.exists('docs/reference'))
   dir.create('docs/reference')
@@ -45,5 +54,3 @@ write_index(data_index)
 
 # roll the whole site
 rmarkdown::render_site('docs')
-
-# still need to get this to see the examples (render being run from the top level, not from docs)
