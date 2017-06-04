@@ -86,13 +86,13 @@ a, a:hover{
   padding-right: 25px;
 }
 #head {
-  background-color: #B797D7;
+  background: #B797D7 url(greta-header.png) 0 45% / cover no-repeat;
   max-width: 100%;
   margin: 0 auto;
 }
 #header-content {
   margin: 0 auto;
-  width: 940px;
+  width: 1000px;
 }
 #panel1 {
   background-color: #f7f7f7;

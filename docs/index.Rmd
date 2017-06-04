@@ -33,9 +33,9 @@ knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
 set.seed(1)
 ```
 
-<div id="head">
+<div id="head"">
   <p></p>
-  <div id="header-content">
+  <div id="header-content" class="container">
   <br>
 
 ```{r logo_title, out.width="50%", fig.align='left'}
@@ -45,11 +45,12 @@ knitr::include_graphics('../logos/name_icon_on_light.png')
     
   <br><br>
         
-  </div>
+</div>
 
 </div>
 
-<div id="bullets" class="row text-center">
+
+<div id="bullets">
 
 <br><br>
 

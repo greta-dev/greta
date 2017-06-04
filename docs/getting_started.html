@@ -626,15 +626,15 @@ atanh(z_greta)</code></pre>
 <h3>Plotting</h3>
 <p>greta provides a plot function for greta models to help you visualise and check the model before sampling from it.</p>
 <pre class="r"><code>plot(m)</code></pre>
-<p><img src="/private/var/folders/y8/bwn1d6dx6hs042dp0xz246vc0000gn/T/RtmpkUqngH/filed463fb4f660.png" width="800" /></p>
+<p><img src="/private/var/folders/y8/bwn1d6dx6hs042dp0xz246vc0000gn/T/Rtmpk2wlx5/filee2676abf23df.png" width="800" /></p>
 <p>The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; <code>x</code> and <code>y</code>), variables (large circles; <code>int</code>, <code>coef</code>, <code>sd</code>) or the results of operations (small circles; <code>mean</code>). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from. There are also nodes for greta arrays that were <em>implicitly defined</em> in our model. The data nodes (squares) with numbers are the parameters used to define the prior distributions, and there’s also an intermediate operation node (small circle), which was the result of multiplying <code>coef</code> and <code>x</code> (before adding <code>int</code> to create <code>mean</code>).</p>
 <p>Here’s a legend for the plot (it’s in the <code>?`greta-model`</code> helpfile too):</p>
 <p><img src="/Users/nick/Dropbox/github/greta/man/figures/plotlegend.png" width="750" /></p>
 <p>The fourth type of node (diamonds) represents probability distributions. These have greta arrays as parameters (linked via solid lines), and have other greta arrays as <em>values</em>(linked via dashed lines). Distributions calculate the probability density of the <em>values</em>, given the parameters and their distribution type.</p>
 <p>For example, a plot of just the prior distribution over <code>coef</code> (defined as <code>coef = normal(0, 3)</code>) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution’s value, the variable <code>coef</code>:</p>
-<p><img src="/private/var/folders/y8/bwn1d6dx6hs042dp0xz246vc0000gn/T/RtmpkUqngH/filed46331f64b25.png" width="500" /></p>
+<p><img src="/private/var/folders/y8/bwn1d6dx6hs042dp0xz246vc0000gn/T/Rtmpk2wlx5/filee26798c8e6e.png" width="500" /></p>
 <p>It’s the same for the model likelihood, but this time the distribution’s parameters are a variable (<code>sd</code>) and the result of an operation (<code>mean</code>), and the distribution’s value is given by data (the observed sepal lengths <code>y</code>):</p>
-<p><img src="/private/var/folders/y8/bwn1d6dx6hs042dp0xz246vc0000gn/T/RtmpkUqngH/filed4631e36c449.png" width="500" /></p>
+<p><img src="/private/var/folders/y8/bwn1d6dx6hs042dp0xz246vc0000gn/T/Rtmpk2wlx5/filee2677c43401.png" width="500" /></p>
 <div id="installing-diagrammer" class="section level4">
 <h4>Installing DiagrammeR</h4>
 <p>These plots are made possible by the <a href="http://rich-iannone.github.io/DiagrammeR/">DiagrammeR R package</a>. Installing greta doesn’t automatically install DiagrammeR, because DiagrammeR auto-installs a number of other packages, such as igraph, that can be time consuming and tedious to install, and aren’t necessary when running greta on high-performance computing systems. If we try to plot but don’t already have DiagrammeR installed, greta will prompt us to do so. We can install DiagrammeR and its dependencies with:</p>
