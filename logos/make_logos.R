@@ -21,7 +21,7 @@ logo_shape <- function (x_start = 0, y_range = c(0, 1)) {
 
 }
 
-plot_logo <- function (background = c('white', 'purple', 'lighter'),
+plot_logo <- function (background = c('white', 'purple', 'light', 'lighter'),
                        pointsize = 4.5,
                        add = FALSE,
                        edge_width = 1,
@@ -33,16 +33,19 @@ plot_logo <- function (background = c('white', 'purple', 'lighter'),
 
   bg_col <- switch (background,
                     white = 'white',
+                    light = greta:::greta_col('light'),
                     lighter = greta:::greta_col('lighter'),
                     purple = greta:::greta_col('main'))
 
   link_col <- switch (background,
                       white = greta:::greta_col('light'),
+                      light = greta:::greta_col('dark'),
                       lighter = greta:::greta_col('dark'),
                       purple = greta:::greta_col('dark'))
 
   node_col <- switch (background,
                       white = greta:::greta_col('dark'),
+                      light = greta:::greta_col('dark'),
                       lighter = greta:::greta_col('dark'),
                       purple = greta:::greta_col('dark'))
 
@@ -119,7 +122,7 @@ plot_logo <- function (background = c('white', 'purple', 'lighter'),
 # 'margin' gives the proportion of the vertical height to use a border on each side
 # the text is scaled to never exceed that border
 #' @importFrom graphics par plot.new plot.window strheight strwidth text
-banner <- function (background = c('purple', 'white', 'lighter'),
+banner <- function (background = c('purple', 'white', 'light', 'lighter'),
                     width = 8, margin = 0.2,
                     font = c('Muli', 'sans'),
                     add_logo = TRUE, ...) {
@@ -138,11 +141,13 @@ banner <- function (background = c('purple', 'white', 'lighter'),
 
   bg_col <- switch (background,
                     white = 'white',
+                    light = greta:::greta_col('light'),
                     lighter = greta:::greta_col('lighter'),
                     purple = greta:::greta_col('main'))
 
   text_col <- switch (background,
                       white = greta:::greta_col('dark'),
+                      light = 'white',
                       lighter = greta:::greta_col('dark'),
                       purple = 'white')
 
@@ -284,6 +289,12 @@ png('logos/name_icon_on_purple.png',
     height = 1000, width = 3600,
     pointsize = 60)
 banner('purple', width = 4, add_logo = TRUE, edge_width = 2.7)
+dev.off()
+
+png('logos/name_icon_on_light.png',
+    height = 1000, width = 3600,
+    pointsize = 60)
+banner('light', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 
 png('logos/name_icon_on_lighter.png',
