@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>greta probability distributions</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="greta.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 54px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+
+.section h2 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h3 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h4 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h5 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h6 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+<style type="text/css">
+.logo {
+    display: inline-block;
+    width: 144px;
+    height: 40px;
+    background-image: url(banner_icon.png);
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+</style>
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="logo" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <a href="getting_started.html">get started</a>
+        </li>
+        <li>
+          <a href="example_models.html">examples</a>
+        </li>
+        <li>
+          <a href="reference-index.html">docs</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            more
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="why_greta.html">why 'greta'?</a>
+            </li>
+            <li>
+              <a href="how_does_this_work.html">technical details</a>
+            </li>
+            <li>
+              <a href="software.html">software</a>
+            </li>
+            <li>
+              <a href="contribute.html">contribute to greta</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="https://github.com/goldingn/greta">
+            <span class="fa fa-github fa-lg"></span>
+          </a>
+        </li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">greta probability distributions</h1>
+
+</div>
+
+
+<h2 class="hasAnchor" id="description">
+<a class="anchor" href="#description"></a> Description
+</h2>
+<p>
+These functions can be used to define random variables in a greta model. They return a variable greta array that follows the specified distribution. This variable greta array can be used to represent a parameter with prior distribution, or used with <code><a href='distribution.html'>distribution</a></code> to define a distribution over an existing greta array.
+</p>
+<h2 class="hasAnchor" id="usage">
+<a class="anchor" href="#usage"></a> Usage
+</h2>
+<pre class="r"><span class='fu'>uniform</span>(<span class='no'>min</span>, <span class='no'>max</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>normal</span>(<span class='no'>mean</span>, <span class='no'>sd</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>lognormal</span>(<span class='no'>meanlog</span>, <span class='no'>sdlog</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>bernoulli</span>(<span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>binomial</span>(<span class='no'>size</span>, <span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>beta_binomial</span>(<span class='no'>size</span>, <span class='no'>alpha</span>, <span class='no'>beta</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>negative_binomial</span>(<span class='no'>size</span>, <span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>hypergeometric</span>(<span class='no'>m</span>, <span class='no'>n</span>, <span class='no'>k</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>poisson</span>(<span class='no'>lambda</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>gamma</span>(<span class='no'>shape</span>, <span class='no'>rate</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>inverse_gamma</span>(<span class='no'>alpha</span>, <span class='no'>beta</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>weibull</span>(<span class='no'>shape</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>exponential</span>(<span class='no'>rate</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>pareto</span>(<span class='no'>a</span>, <span class='no'>b</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>student</span>(<span class='no'>df</span>, <span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>laplace</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>beta</span>(<span class='no'>shape1</span>, <span class='no'>shape2</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>cauchy</span>(<span class='no'>location</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>chi_squared</span>(<span class='no'>df</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>logistic</span>(<span class='no'>location</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>f</span>(<span class='no'>df1</span>, <span class='no'>df2</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>multivariate_normal</span>(<span class='no'>mean</span>, <span class='no'>Sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+
+<span class='fu'>wishart</span>(<span class='no'>df</span>, <span class='no'>Sigma</span>)
+
+<span class='fu'>multinomial</span>(<span class='no'>size</span>, <span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+
+<span class='fu'>categorical</span>(<span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+
+<span class='fu'>dirichlet</span>(<span class='no'>alpha</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+
+<span class='fu'>dirichlet_multinomial</span>(<span class='no'>size</span>, <span class='no'>alpha</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
+<h2 class="hasAnchor" id="arguments">
+<a class="anchor" href="#arguments"></a> Arguments
+</h2>
+<code>min, max</code>
+<p>
+scalar values giving optional limits to <code>uniform</code> variables. Like <code>lower</code> and <code>upper</code>, these must be specified as numerics, they cannot be greta arrays (though see details for a workaround). Unlike <code>lower</code> and <code>upper</code>, they must be finite. <code>min</code> must always be less than <code>max</code>.
+</p>
+<code>dim</code>
+<p>
+the dimensions of the greta array to be returned, either a scalar or a vector of positive integers. See details.
+</p>
+<code>mean, meanlog, location, mu</code>
+<p>
+unconstrained parameters
+</p>
+<code>sd, sdlog, sigma, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b</code>
+<p>
+positive parameters, <code>alpha</code> must be a vector for <code>dirichlet</code> and <code>dirichlet_multinomial</code>.
+</p>
+<code>prob</code>
+<p>
+probability parameter (<code>0 &lt; prob &lt; 1</code>), must be a vector for <code>multinomial</code> and <code>categorical</code>
+</p>
+<code>size, m, n, k</code>
+<p>
+positive integer parameter
+</p>
+<code>Sigma</code>
+<p>
+positive definite variance-covariance matrix parameter
+</p>
+<h2 class="hasAnchor" id="details">
+<a class="anchor" href="#details"></a>Details
+</h2>
+<p>
+The discrete probability distributions (<code>bernoulli</code>, <code>binomial</code>, <code>negative_binomial</code>, <code>poisson</code>, <code>multinomial</code>, <code>categorical</code>, <code>dirichlet_multinomial</code>) can be used when they have fixed values (e.g. defined as a likelihood using <code><a href='distribution.html'>distribution</a></code>, but not as unknown variables.
+</p>
+<p>
+For univariate distributions <code>dim</code> gives the dimensions of the greta array to create. Each element of the greta array will be (independently) distributed according to the distribution. <code>dim</code> can also be left at its default of <code>NULL</code>, in which case the dimension will be detected from the dimensions of the parameters (provided they are compatible with one another).
+</p>
+<p>
+For <code>multivariate_normal()</code>, <code>multinomial()</code>, and <code>categorical()</code> <code>dim</code> must be a scalar giving the number of rows in the resulting greta array, each row being (independently) distributed according to the multivariate normal distribution. The number of columns will always be the dimension of the distribution, determined from the parameters specified. <code>wishart()</code> always returns a single square, 2D greta array, with dimension determined from the parameter <code>Sigma</code>.
+</p>
+<p>
+<code>multinomial()</code> does not check that observed values sum to <code>size</code>, and <code>categorical()</code> does not check that only one of the observed entries is 1. It’s the user’s responsibility to check their data matches the distribution!
+</p>
+<p>
+The parameters of <code>uniform</code> must be fixed, not greta arrays. This ensures these values can always be transformed to a continuous scale to run the samplers efficiently. However, a hierarchical <code>uniform</code> parameter can always be created by defining a <code>uniform</code> variable constrained between 0 and 1, and then transforming it to the required scale. See below for an example.
+</p>
+<p>
+Wherever possible, the parameterisation and argument names of greta distributions matches commonly used R functions for distributions, such as those in the <code>stats</code> or <code>extraDistr</code> packages. The following table states the distribution function to which greta’s implementation corresponds:
+</p>
+<p>
+</p>
+<table>
+<tr>
+<td>
+greta
+</td>
+</tr>
+<tr>
+<td>
+reference
+</td>
+</tr>
+<tr>
+<td>
+<code>uniform</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Uniform'>stats::dunif</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>normal</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Normal'>stats::dnorm</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>lognormal</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Lognormal'>stats::dlnorm</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>bernoulli</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/extraDistr/topics/Bernoulli'>extraDistr::dbern</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>binomial</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Binomial'>stats::dbinom</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>beta_binomial</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/extraDistr/topics/BetaBinom'>extraDistr::dbbinom</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>negative_binomial</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/NegBinomial'>stats::dnbinom</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>hypergeometric</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Hypergeometric'>stats::dhyper</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>poisson</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Poisson'>stats::dpois</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>gamma</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/GammaDist'>stats::dgamma</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>inverse_gamma</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/extraDistr/topics/InvGamma'>extraDistr::dinvgamma</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>weibull</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Weibull'>stats::dweibull</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>exponential</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Exponential'>stats::dexp</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>pareto</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/extraDistr/topics/Pareto'>extraDistr::dpareto</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>student</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/extraDistr/topics/NonStandardT'>extraDistr::dnst</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>laplace</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/extraDistr/topics/Laplace'>extraDistr::dlaplace</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>beta</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Beta'>stats::dbeta</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>cauchy</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Cauchy'>stats::dcauchy</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>chi_squared</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Chisquare'>stats::dchisq</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>logistic</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Logistic'>stats::dlogis</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>f</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Fdist'>stats::df</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>multivariate_normal</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/mvtnorm/topics/Mvnorm'>mvtnorm::dmvnorm</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>multinomial</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Multinom'>stats::dmultinom</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>categorical</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/Multinom'>stats::dmultinom</a></code> (size = 1)
+</td>
+</tr>
+<tr>
+<td>
+<code>dirichlet</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/extraDistr/topics/Dirichlet'>extraDistr::ddirichlet</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>dirichlet_multinomial</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/extraDistr/topics/DirMnom'>extraDistr::ddirmnom</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>wishart</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href='http://www.rdocumentation.org/packages/MCMCpack/topics/wishart'>MCMCpack::dwish</a></code>
+</td>
+</tr>
+</table>
+<h2 class="hasAnchor" id="examples">
+<a class="anchor" href="#examples"></a>Examples
+</h2>
+<pre class="r"><span class='co'># a uniform parameter constrained to be between 0 and 1</span>
+<span class='no'>phi</span> <span class='kw'>=</span> <span class='fu'>uniform</span>(<span class='kw'>min</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+
+<span class='co'># a length-three variable, with each element following a standard normal</span>
+<span class='co'># distribution</span>
+<span class='no'>alpha</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+
+<span class='co'># a length-three variable of lognormals</span>
+<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+
+<span class='co'># a hierarchical uniform, constrained between alpha and alpha + sigma,</span>
+<span class='no'>eta</span> <span class='kw'>=</span> <span class='no'>alpha</span> + <span class='fu'>uniform</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>) * <span class='no'>sigma</span>
+
+<span class='co'># a hierarchical distribution</span>
+<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+
+<span class='co'># a vector of 3 variables drawn from the same hierarchical distribution</span>
+<span class='no'>thetas</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+
+<span class='co'># a matrix of 12 variables drawn from the same hierarchical distribution</span>
+<span class='no'>thetas</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>4</span>))
+
+<span class='co'># a multivariate normal variable, with correlation between two elements</span>
+<span class='no'>Sig</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='greta-overloaded.html'>diag</a></span>(<span class='fl'>4</span>)
+<span class='no'>Sig</span>[<span class='fl'>3</span>, <span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='no'>Sig</span>[<span class='fl'>4</span>, <span class='fl'>3</span>] <span class='kw'>&lt;-</span> <span class='fl'>0.6</span>
+<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>)
+
+<span class='co'># 10 independent replicates of that</span>
+<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+
+<span class='co'># a Wishart variable with the same covariance parameter</span>
+<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>wishart</span>(<span class='kw'>df</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Sigma</span> <span class='kw'>=</span> <span class='no'>Sig</span>)</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -8,7 +8,6 @@ vignettes/how_does_this_work_cache
 *.pdf
 docs/site_libs
 docs/*.Rmd
-docs/*.html
 docs/*.css
 docs/*.png
 docs/examples

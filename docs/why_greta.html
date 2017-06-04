@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>why greta?</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="greta.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 54px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+
+.section h2 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h3 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h4 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h5 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h6 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+<style type="text/css">
+.logo {
+    display: inline-block;
+    width: 144px;
+    height: 40px;
+    background-image: url(banner_icon.png);
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+</style>
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="logo" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <a href="getting_started.html">get started</a>
+        </li>
+        <li>
+          <a href="example_models.html">examples</a>
+        </li>
+        <li>
+          <a href="reference-index.html">docs</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            more
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="why_greta.html">why 'greta'?</a>
+            </li>
+            <li>
+              <a href="how_does_this_work.html">technical details</a>
+            </li>
+            <li>
+              <a href="software.html">software</a>
+            </li>
+            <li>
+              <a href="contribute.html">contribute to greta</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="https://github.com/goldingn/greta">
+            <span class="fa fa-github fa-lg"></span>
+          </a>
+        </li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">why ‘greta’?</h1>
+
+</div>
+
+
+<style type="text/css">
+body{
+  font-size: 18px;
+}
+.column-left{
+  float: left;
+  width: 70%;
+  text-align: left;
+}
+.column-right{
+  float: right;
+  width: 30%;
+  padding-left: 40px;
+  text-align: right;
+}
+</style>
+<div class="column-left">
+
+<p>There’s a recent convention of naming statistical modelling software after pioneers in the field (e.g. <a href="https://en.wikipedia.org/wiki/Stanislaw_Ulam">STAN</a> and <a href="https://en.wikipedia.org/wiki/George_E._P._Box">Edward</a>).</p>
+<p><a href="https://en.wikipedia.org/wiki/Grete_Hermann">Grete Hermann</a> wasn’t a statistician. She wrote <a href="http://dl.acm.org/citation.cfm?id=307342&amp;coll=portal&amp;dl=ACM">the first algorithms</a> for computer algebra; in the 1920s, well before the first electronic computer was built. This work laid the foundations for the computer algebra libraries that enable modern statistical modelling.</p>
+<p>In case that’s not enough reason to admire her, Grete Hermann also <a href="https://arxiv.org/pdf/0812.3986.pdf">disproved a popular theorem in quantum theory</a> and was part of the German resistance against the Nazi regime prior to World War Two.</p>
+<hr>
+<p>Grete (usually said <em>Greh</em>•tuh, like its alternate spelling <em>Greta</em>) can be confusing for non-German speakers to pronounce, so I’ve taken the liberty of naming the package greta instead. You can call it whatever you like.</p>
+</div>
+<div class="column-right">
+<p><a href="http://www.uni-bremen.de/de/unispitzen/professorinnen-im-portrait/grete-henry-hermann.html"><img src="http://www.uni-bremen.de/fileadmin/_processed_/csm_Portrait-Henry_rgb_cdc2a34979.jpg" /></a></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
