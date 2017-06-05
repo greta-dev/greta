@@ -65,12 +65,14 @@ a, a:hover{
   max-width : 585px;
   padding-left: 15px;
   padding-right: 15px;
+  padding-top: 45px;
 }
 #main-icon-text{
   color:#ffffff;
   font-size: 24px;
   padding-left: 30px;
   padding-right: 30px;
+  padding-bottom: 30px;
 }
 #panel1 {
   background-color: #f7f7f7;
@@ -105,7 +107,6 @@ set.seed(1)
 <div id="head">
 <p></p>
 <div id="header-content" class="container">
-<br>
 
 <div class="row">
 
@@ -113,13 +114,10 @@ set.seed(1)
 
 </div>
 
-
 <div class="row">
 <p id="main-icon-text">simple and scalable statistical modelling in R</p>
 </div>
     
-<br>
-        
 </div>
 
 </div>
