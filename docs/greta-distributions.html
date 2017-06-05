@@ -401,11 +401,11 @@ These functions can be used to define random variables in a greta model. They re
 
 <span class='fu'>dirichlet</span>(<span class='no'>alpha</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
 
-<span class='fu'>dirichlet_multinomial</span>(<span class='no'>size</span>, <span class='no'>alpha</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
+<span class='fu'>dirichlet_multinomial</span>(<span class='no'>size</span>, <span class='no'>alpha</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
-<code>min, max</code>
+<code>min</code>, <code>max</code>
 <p>
 scalar values giving optional limits to <code>uniform</code> variables. Like <code>lower</code> and <code>upper</code>, these must be specified as numerics, they cannot be greta arrays (though see details for a workaround). Unlike <code>lower</code> and <code>upper</code>, they must be finite. <code>min</code> must always be less than <code>max</code>.
 </p>
@@ -413,11 +413,11 @@ scalar values giving optional limits to <code>uniform</code> variables. Like <co
 <p>
 the dimensions of the greta array to be returned, either a scalar or a vector of positive integers. See details.
 </p>
-<code>mean, meanlog, location, mu</code>
+<code>mean</code>, <code>meanlog</code>, <code>location</code>, <code>mu</code>
 <p>
 unconstrained parameters
 </p>
-<code>sd, sdlog, sigma, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b</code>
+<code>sd</code>, <code>sdlog</code>, <code>sigma</code>, <code>lambda</code>, <code>shape</code>, <code>rate</code>, <code>df</code>, <code>scale</code>, <code>shape1</code>, <code>shape2</code>, <code>alpha</code>, <code>beta</code>, <code>df1</code>, <code>df2</code>, <code>a</code>, <code>b</code>
 <p>
 positive parameters, <code>alpha</code> must be a vector for <code>dirichlet</code> and <code>dirichlet_multinomial</code>.
 </p>
@@ -425,7 +425,7 @@ positive parameters, <code>alpha</code> must be a vector for <code>dirichlet</co
 <p>
 probability parameter (<code>0 &lt; prob &lt; 1</code>), must be a vector for <code>multinomial</code> and <code>categorical</code>
 </p>
-<code>size, m, n, k</code>
+<code>size</code>, <code>m</code>, <code>n</code>, <code>k</code>
 <p>
 positive integer parameter
 </p>

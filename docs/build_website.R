@@ -4,11 +4,21 @@ write_topic <- function (data) {
   rmd <- whisker::whisker.render(topic_template, data)
   cat(rmd, file = paste0("docs/", data$name, ".Rmd"))
 }
-
 write_index <- function (data) {
   index_template <- readLines('docs/_index_template.txt')
   rmd <- whisker::whisker.render(index_template, data)
   cat(rmd, file = "docs/reference-index.Rmd")
+}
+
+# codeface and split argument names in a topic
+split_args <- function (topic) {
+  for (i in seq_along(topic$arguments)) {
+    arg_names <- topic$arguments[[i]]$name
+    arg_names <- gsub(', ', '`, `', arg_names)
+    arg_names <- paste0('`', arg_names, '`')
+    topic$arguments[[i]]$name <- arg_names
+  }
+  topic
 }
 
 # make sure docs exists
@@ -52,6 +62,7 @@ if (!dir.exists('docs/reference'))
 pkg <- pkgdown::as_pkgdown()
 topics <- purrr::transpose(pkg$topics)
 data_list <- lapply(topics, pkgdown:::data_reference_topic, pkg, examples = FALSE)
+data_list <- lapply(data_list, split_args)
 lapply(data_list, write_topic)
 
 # build page for helpfile index

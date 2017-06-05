@@ -27,7 +27,7 @@ knitr::opts_chunk$set(comment = NA, cache = TRUE)
 
 {{#usage}}
 
-<pre class="r">{{{.}}}</pre>
+<pre class="r">{{{.}}} </pre>
 
 {{/usage}}
 
@@ -35,7 +35,7 @@ knitr::opts_chunk$set(comment = NA, cache = TRUE)
 <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
 
 {{#arguments}}
-`{{{name}}}`
+{{{name}}}
 {{{description}}}
 {{/arguments}}
 
