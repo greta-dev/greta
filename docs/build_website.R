@@ -14,6 +14,7 @@ write_index <- function (data) {
 split_args <- function (topic) {
   for (i in seq_along(topic$arguments)) {
     arg_names <- topic$arguments[[i]]$name
+    arg_names <- gsub('&#8230;', '...', arg_names)
     arg_names <- gsub(', ', '`, `', arg_names)
     arg_names <- paste0('`', arg_names, '`')
     topic$arguments[[i]]$name <- arg_names
