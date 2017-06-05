@@ -293,12 +293,14 @@ a, a:hover{
   max-width : 585px;
   padding-left: 15px;
   padding-right: 15px;
+  padding-top: 45px;
 }
 #main-icon-text{
   color:#ffffff;
   font-size: 24px;
   padding-left: 30px;
   padding-right: 30px;
+  padding-bottom: 30px;
 }
 #panel1 {
   background-color: #f7f7f7;
@@ -328,7 +330,6 @@ a, a:hover{
 <p>
 </p>
 <div id="header-content" class="container">
-<p><br></p>
 <div class="row">
 <p><img id="main-icon" src="main-icon.png" /></p>
 </div>
@@ -337,7 +338,6 @@ a, a:hover{
 simple and scalable statistical modelling in R
 </p>
 </div>
-<p><br></p>
 </div>
 </div>
 <div id="bullets">
@@ -422,7 +422,7 @@ distribution(y) = normal(mean, sd)</code></pre>
 <pre><code>m &lt;- model(int, coef, sd)</code></pre>
 </div>
 <div class="col-md-6">
-<pre><code>draws &lt;- mcmc(m, n_samples = 500)
+<pre><code>draws &lt;- mcmc(m, n_samples = 1000)
 bayesplot::mcmc_trace(draws)</code></pre>
 <p><img src="index_files/figure-html/vis-1.png" width="384" style="display: block; margin: auto;" /></p>
 </div>
