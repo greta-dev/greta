@@ -9,7 +9,7 @@ output:
 
 <style type="text/css">
 body{
-  padding-top: 30px;
+  padding-top: 10px;
 }
 pre, pre:not([class]){
   font-size: 20px;
@@ -33,7 +33,7 @@ knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
 set.seed(1)
 ```
 
-<div id="head"">
+<div id="head">
   <p></p>
   <div id="header-content" class="container">
   <br>
@@ -41,9 +41,9 @@ set.seed(1)
 ```{r logo_title, out.width="50%", fig.align='left'}
 knitr::include_graphics('../logos/name_icon_on_light.png')
 ```
-    <p style="color:#ffffff; font-size: 24px;"> &emsp; simple and scalable statistical modelling in R</p>
+    <p style="color:#ffffff; font-size: 24px;"> &emsp; &nbsp; simple and scalable statistical modelling in R</p>
     
-  <br><br>
+  <br>
         
 </div>
 
@@ -90,33 +90,33 @@ knitr::include_graphics('../logos/name_icon_on_light.png')
 
 <div class="row">
 
-<div class="col-md-2"></div>
+<div class="col-md-1"></div>
 
-<div class="col-md-4">
+<div class="col-md-5">
   <span class="fa fa-code fa-2x" style="vertical-align:middle;"></span> &emsp; <a href="#example">basic example</a>
 </div>
 
-<div class="col-md-4">
+<div class="col-md-1"></div>
+
+<div class="col-md-5">
 &thinsp; <span class="fa fa-arrow-circle-right fa-2x" style="vertical-align:middle;"></span>&emsp; [getting started](getting_started.html)
 </div>
-
-<div class="col-md-2"></div>
 
 </div>
 
 <div class="row">
 
-<div class="col-md-2"></div>
+<div class="col-md-1"></div>
 
-<div class="col-md-4">
+<div class="col-md-5">
   &thinsp; <span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span> &emsp; [example models](example_models.html)
 </div>
 
-<div class="col-md-4">
+<div class="col-md-1"></div>
+
+<div class="col-md-5">
   &thinsp; <span class="fa fa-book fa-2x" style="vertical-align:middle;"></span> &emsp; [package docs](reference-index.html)
 </div>
-
-<div class="col-md-2"></div>
 
 </div>
 

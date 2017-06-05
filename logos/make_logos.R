@@ -157,7 +157,7 @@ banner <- function (background = c('purple', 'white', 'light', 'lighter'),
   old_family <- par('family')
 
   # switch to a purple background, no margins and Muli typeface
-  par(bg = bg_col,
+  par(bg = NA,
       mar = rep(0, 4),
       family = font)
 
@@ -267,39 +267,41 @@ png('logos/icon_on_purple.png',
 plot_logo('purple', pointsize = 24)
 dev.off()
 
+ptsz <- 80
+
 png('logos/name_on_purple.png',
     height = 1000, width = 1800,
-    pointsize = 60)
+    pointsize = ptsz)
 banner(width = 2.310505, add_logo = FALSE)
 dev.off()
 
 png('logos/name_on_white.png',
     height = 1000, width = 1800,
-    pointsize = 60)
+    pointsize = ptsz)
 banner('white', width = 2.310505, add_logo = FALSE)
 dev.off()
 
 png('logos/name_icon_on_white.png',
     height = 1000, width = 3600,
-    pointsize = 60)
+    pointsize = ptsz)
 banner('white', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 
 png('logos/name_icon_on_purple.png',
     height = 1000, width = 3600,
-    pointsize = 60)
+    pointsize = ptsz)
 banner('purple', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 
 png('logos/name_icon_on_light.png',
     height = 1000, width = 3600,
-    pointsize = 60)
+    pointsize = ptsz)
 banner('light', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 
 png('logos/name_icon_on_lighter.png',
     height = 1000, width = 3600,
-    pointsize = 60)
+    pointsize = ptsz)
 banner('lighter', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 
