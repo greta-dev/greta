@@ -6,10 +6,7 @@ README_cache
 vignettes/getting_started_cache
 vignettes/how_does_this_work_cache
 *.pdf
-docs/site_libs
 docs/*.Rmd
-docs/*.css
-docs/*.png
 docs/examples
 docs/*_cache
 docs/*_files
