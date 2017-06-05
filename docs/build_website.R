@@ -20,9 +20,12 @@ file.copy('vignettes/greta.css',
           'docs/greta.css',
           overwrite = TRUE)
 
-# copy banner icon over
+# copy banner and header icons over
 file.copy('logos/name_icon_on_purple.png',
-          'docs/banner_icon.png',
+          'docs/banner-icon.png',
+          overwrite = TRUE)
+file.copy('logos/greta-header.png',
+          'docs/greta-header.png',
           overwrite = TRUE)
 
 # copy vignettes (and examples) over
