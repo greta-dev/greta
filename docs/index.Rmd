@@ -53,8 +53,24 @@ a, a:hover{
   margin: 0 auto;
 }
 #header-content {
+  max-width: 100%;
   margin: 0 auto;
-  width: 1000px;
+}
+#main-icon {
+  width: 50%;
+  height: auto;
+  margin-right : auto;
+  margin-left : auto;
+  min-width : 210px;
+  max-width : 585px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+#main-icon-text{
+  color:#ffffff;
+  font-size: 24px;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 #panel1 {
   background-color: #f7f7f7;
@@ -87,16 +103,22 @@ set.seed(1)
 ```
 
 <div id="head">
-  <p></p>
-  <div id="header-content" class="container">
-  <br>
+<p></p>
+<div id="header-content" class="container">
+<br>
 
-```{r logo_title, out.width="50%", fig.align='left'}
-knitr::include_graphics('main-icon.png')
-```
-    <p style="color:#ffffff; font-size: 24px;"> &emsp; &nbsp; simple and scalable statistical modelling in R</p>
+<div class="row">
+
+<img id="main-icon" src="main-icon.png" />
+
+</div>
+
+
+<div class="row">
+<p id="main-icon-text">simple and scalable statistical modelling in R</p>
+</div>
     
-  <br>
+<br>
         
 </div>
 

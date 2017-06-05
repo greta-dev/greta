@@ -281,8 +281,24 @@ a, a:hover{
   margin: 0 auto;
 }
 #header-content {
+  max-width: 100%;
   margin: 0 auto;
-  width: 1000px;
+}
+#main-icon {
+  width: 50%;
+  height: auto;
+  margin-right : auto;
+  margin-left : auto;
+  min-width : 210px;
+  max-width : 585px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+#main-icon-text{
+  color:#ffffff;
+  font-size: 24px;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 #panel1 {
   background-color: #f7f7f7;
@@ -313,10 +329,14 @@ a, a:hover{
 </p>
 <div id="header-content" class="container">
 <p><br></p>
-<img src="main-icon.png" width="50%" style="display: block; margin: auto auto auto 0;" />
-<p style="color:#ffffff; font-size: 24px;">
-    simple and scalable statistical modelling in R
+<div class="row">
+<p><img id="main-icon" src="main-icon.png" /></p>
+</div>
+<div class="row">
+<p id="main-icon-text">
+simple and scalable statistical modelling in R
 </p>
+</div>
 <p><br></p>
 </div>
 </div>
