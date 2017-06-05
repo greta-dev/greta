@@ -9,4 +9,3 @@ vignettes/how_does_this_work_cache
 docs/*.Rmd
 docs/examples
 docs/*_cache
-docs/*_files
