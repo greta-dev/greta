@@ -39,7 +39,7 @@ set.seed(1)
   <br>
 
 ```{r logo_title, out.width="50%", fig.align='left'}
-knitr::include_graphics('../logos/name_icon_on_light.png')
+knitr::include_graphics('main-icon.png')
 ```
     <p style="color:#ffffff; font-size: 24px;"> &emsp; &nbsp; simple and scalable statistical modelling in R</p>
     
