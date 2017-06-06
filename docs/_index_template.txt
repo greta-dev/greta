@@ -1,0 +1,25 @@
+---
+title: "greta documentation"
+output:
+  html_document:
+    css: greta.css
+    toc: yes
+    toc_float:
+      collapsed: false
+      toc_depth: 4
+    theme: lumen
+    highlight: default
+---
+
+<hr>
+
+{{#sections}}
+
+{{#contents}}
+###[{{title}}]({{path}})
+
+{{#aliases}}`{{{.}}}` {{/aliases}}
+<hr>
+{{/contents}}
+
+{{/sections}}

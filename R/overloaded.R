@@ -1,6 +1,5 @@
-# documentation for overloaded functions
-
 #' @name greta-overloaded
+#'
 #' @title Functions overloaded by greta
 #'
 #' @description greta provides a wide range of methods to apply common R
@@ -12,5 +11,3 @@
 #' @param x,y,nrow,ncol,MARGIN,STATS,FUN,check.margin,\dots	arguments as in original documentation
 #'
 NULL
-
-

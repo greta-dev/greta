@@ -21,9 +21,10 @@ logo_shape <- function (x_start = 0, y_range = c(0, 1)) {
 
 }
 
-plot_logo <- function (background = c('white', 'purple'),
+plot_logo <- function (background = c('white', 'purple', 'light', 'lighter'),
                        pointsize = 4.5,
                        add = FALSE,
+                       edge_width = 1,
                        ...) {
 
   background <- match.arg(background)
@@ -32,14 +33,20 @@ plot_logo <- function (background = c('white', 'purple'),
 
   bg_col <- switch (background,
                     white = 'white',
+                    light = greta:::greta_col('light'),
+                    lighter = greta:::greta_col('lighter'),
                     purple = greta:::greta_col('main'))
 
   link_col <- switch (background,
                       white = greta:::greta_col('light'),
+                      light = greta:::greta_col('dark'),
+                      lighter = greta:::greta_col('dark'),
                       purple = greta:::greta_col('dark'))
 
   node_col <- switch (background,
                       white = greta:::greta_col('dark'),
+                      light = greta:::greta_col('dark'),
+                      lighter = greta:::greta_col('dark'),
                       purple = greta:::greta_col('dark'))
 
   if (!add) {
@@ -83,14 +90,14 @@ plot_logo <- function (background = c('white', 'purple'),
            bg = node_col,
            col = bg_col,
            cex = pointsize - 1.5,
-           lwd = pointsize * 4)
+           lwd = pointsize * 4 * edge_width)
 
     # plot lines
     for (i in seq_len(nrow(edges))) {
       link <- edges[i, ]
       lines(x = data$coords$x[link],
             y = data$coords$y[link],
-            lwd = pointsize * 2.3,
+            lwd = pointsize * 2.3 * edge_width,
             col = link_col)
     }
 
@@ -115,10 +122,10 @@ plot_logo <- function (background = c('white', 'purple'),
 # 'margin' gives the proportion of the vertical height to use a border on each side
 # the text is scaled to never exceed that border
 #' @importFrom graphics par plot.new plot.window strheight strwidth text
-banner <- function (background = c('purple', 'white'),
+banner <- function (background = c('purple', 'white', 'light', 'lighter'),
                     width = 8, margin = 0.2,
                     font = c('Muli', 'sans'),
-                    add_logo = TRUE) {
+                    add_logo = TRUE, ...) {
 
   font <- match.arg(font)
   background <- match.arg(background)
@@ -134,10 +141,14 @@ banner <- function (background = c('purple', 'white'),
 
   bg_col <- switch (background,
                     white = 'white',
+                    light = greta:::greta_col('light'),
+                    lighter = greta:::greta_col('lighter'),
                     purple = greta:::greta_col('main'))
 
   text_col <- switch (background,
                       white = greta:::greta_col('dark'),
+                      light = 'white',
+                      lighter = greta:::greta_col('dark'),
                       purple = 'white')
 
   # cache the old graphics options
@@ -146,7 +157,7 @@ banner <- function (background = c('purple', 'white'),
   old_family <- par('family')
 
   # switch to a purple background, no margins and Muli typeface
-  par(bg = bg_col,
+  par(bg = NA,
       mar = rep(0, 4),
       family = font)
 
@@ -180,10 +191,11 @@ banner <- function (background = c('purple', 'white'),
 
   if (add_logo) {
 
-    plot_logo(background = 'purple',
+    plot_logo(background = background,
               add = TRUE,
               x_start = string_width + xpos * 3,
-              y_range = 0.55 + string_height * 0.5 * c(-1, 1))
+              y_range = 0.55 + string_height * 0.5 * c(-1, 1),
+              ...)
 
   }
 
@@ -255,15 +267,41 @@ png('logos/icon_on_purple.png',
 plot_logo('purple', pointsize = 24)
 dev.off()
 
+ptsz <- 80
+
 png('logos/name_on_purple.png',
     height = 1000, width = 1800,
-    pointsize = 60)
+    pointsize = ptsz)
 banner(width = 2.310505, add_logo = FALSE)
 dev.off()
 
 png('logos/name_on_white.png',
     height = 1000, width = 1800,
-    pointsize = 60)
+    pointsize = ptsz)
 banner('white', width = 2.310505, add_logo = FALSE)
+dev.off()
+
+png('logos/name_icon_on_white.png',
+    height = 1000, width = 3600,
+    pointsize = ptsz)
+banner('white', width = 4, add_logo = TRUE, edge_width = 2.7)
+dev.off()
+
+png('logos/name_icon_on_purple.png',
+    height = 1000, width = 3600,
+    pointsize = ptsz)
+banner('purple', width = 4, add_logo = TRUE, edge_width = 2.7)
+dev.off()
+
+png('logos/name_icon_on_light.png',
+    height = 1000, width = 3600,
+    pointsize = ptsz)
+banner('light', width = 4, add_logo = TRUE, edge_width = 2.7)
+dev.off()
+
+png('logos/name_icon_on_lighter.png',
+    height = 1000, width = 3600,
+    pointsize = ptsz)
+banner('lighter', width = 4, add_logo = TRUE, edge_width = 2.7)
 dev.off()
 

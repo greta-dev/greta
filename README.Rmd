@@ -20,7 +20,11 @@ greta is an R package for writing statistical models and fitting them by MCMC, i
 
 **scalable** - greta does [Hamiltonian Monte Carlo](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12681/full) and uses Google's [TensorFlow](https://www.tensorflow.org/) computational engine, meaning it's particularly fast on big datasets and can run in parallel across lots of CPUs, or on a GPU.
 
-**extensible** - because greta is written in R, you can define your own [functions](#functions) and [modules](#modules) to add new methods.
+**extensible** - because greta is written in R, you can define your own functions and [modules](#modules) to add new methods.
+
+```{r banner_0, echo=FALSE, fig.width=14}
+knitr::include_graphics('README_files/banner.png')
+```
 
 To get started with greta, take a look at the example below then check out the [**Getting started**](https://rawgit.com/goldingn/greta/master/inst/doc/getting_started.html) tutorial.
 There are also several [**Example models**](https://rawgit.com/goldingn/greta/master/inst/doc/example_models.html), with equivalent BUGS and Stan code.
@@ -37,15 +41,15 @@ Here's a simple Bayesian linear regression model for the sepal length variable i
 ```{r model, eval = TRUE, results='hide', message=FALSE}
 library(greta)
 
-# create parameters, stating their prior distributions
+# create variables with prior distributions
 intercept = normal(0, 5)
 coefficient = normal(0, 3)
 sd = lognormal(0, 3)
 
-# write the equation for the expected mean sepal length
+# equation for mean sepal length
 mean <- intercept + coefficient * iris$Petal.Length
 
-# define the likelihood of the observed data
+# likelihood of the observed data
 distribution(iris$Sepal.Length) = normal(mean, sd)
 ```
 
@@ -53,17 +57,14 @@ With the model written, we can draw samples of the parameters we care about.
 
 ```{r mcmc, eval = TRUE, results='hide', message=FALSE}
 m <- model(intercept, coefficient, sd)
-
 draws <- mcmc(m, n_samples = 500)
 ```
 
 This outputs an `mcmc.list` object, so you can plot and summarise the samples using your favourite MCMC visualisation software.
 
 ```{r vis, eval = TRUE, results='hide', out.width=c('400px', '400px'), message=FALSE, warning=FALSE, fig.height=4, fig.width=5, fig.show='hold'}
-library(MCMCvis)
-
-MCMCtrace(draws)
-MCMCplot(draws, xlim = c(-1, 5))
+MCMCvis::MCMCtrace(draws)
+MCMCvis::MCMCplot(draws, xlim = c(-1, 5))
 ```
 
 ```{r banner_2, echo=FALSE, fig.width=14}

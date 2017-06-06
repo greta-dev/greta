@@ -1,0 +1,9 @@
+name: greta
+output_dir: "."
+
+output:
+  html_document:
+    css: greta.css
+    toc: true
+    theme: lumen
+    highlight: default
