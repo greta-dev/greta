@@ -22,9 +22,11 @@ split_args <- function (topic) {
   topic
 }
 
-# make sure docs exists
+# make sure docs and docs/figures exist
 if (!dir.exists('docs'))
   dir.create('docs')
+if (!dir.exists('docs/figures'))
+  dir.create('docs/figures')
 
 # copy css over
 file.copy('vignettes/greta.css',
@@ -40,6 +42,11 @@ file.copy('logos/name_icon_on_light.png',
           overwrite = TRUE)
 file.copy('logos/greta-header.png',
           'docs/greta-header.png',
+          overwrite = TRUE)
+
+# move man figures over
+file.copy('man/figures/plotlegend.png',
+          'docs/figures/plotlegend.png',
           overwrite = TRUE)
 
 # copy vignettes (and examples) over
