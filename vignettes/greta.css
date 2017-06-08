@@ -10,11 +10,25 @@ pre{
 .r{
   background-color: #f4f0f9;
   border: none;
-  border-radius: 0;
   line-height: 1.5;
 }
 body, pre, .r {
   font-size: 17px;
+}
+.data pre{
+  background-color: #fafafa;
+  border: none;
+  color: #8080809;
+}
+.bugs pre{
+  background-color: #F7FCFC;
+  border: none;
+  color: #808080;
+}
+.stan pre{
+  background-color: #FCF7F7;
+  border: none;
+  color: #808080;
 }
 .list-group-item.active,
 .list-group-item.active:hover,
