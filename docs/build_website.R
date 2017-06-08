@@ -21,6 +21,29 @@ split_args <- function (topic) {
   topic
 }
 
+as_section_slug <- function (title)
+  gsub(" ", "-", paste("section", title))
+
+make_section <- function (section, data_index) {
+
+  topic_details <- function (path, contents) {
+    paths <- vapply(contents, '[[', 'path', FUN.VALUE = '')
+    idx <- match(path, paths)
+    contents[[idx]]
+  }
+
+  topic_list <- lapply(section$members,
+                       topic_details,
+                       data_index$sections[[1]]$contents)
+
+  list(title = section$title,
+       slug = as_section_slug(section$title),
+       desc = section$desc,
+       class = NULL,
+       contents = topic_list)
+}
+
+
 # make sure docs and docs/figures exist
 if (!dir.exists('docs'))
   dir.create('docs')
@@ -74,7 +97,34 @@ lapply(data_list, write_topic)
 
 # build page for helpfile index
 data_index <- pkgdown:::data_reference_index(pkg)
-write_index(data_index)
+
+# split into sections
+
+# name the sections and their members, by path
+sections <- list(list(title = "creating greta arrays",
+                      desc = "Create greta arrays representing observed data or fixed values",
+                      members = c("as_data.html", "greta-structures.html")),
+                 list(title = "variables & distributions",
+                      desc = "Create variables and assign probability distributions over greta arrays",
+                      members = c("variable.html", "distribution.html", "greta-distributions.html")),
+                 list(title = "manipulating greta arrays",
+                      desc = "Functions and operations for modifying greta arrays",
+                      members = c("greta-operators.html", "greta-functions.html", "extract-replace-combine.html", "greta-transforms.html")),
+                 list(title = "modelling",
+                      desc = "Define and visualise models and fit them to data",
+                      members = c("greta-model.html", "greta-inference.html")),
+                 list(title = "modules",
+                      desc = "Collections of methods for doing more specialist analyses",
+                      members = c("dynamics-module.html")))
+
+# loop through these, splitting the existing index into these sections
+sections_combined <- lapply(sections, make_section, data_index)
+
+data_index_sections <- list(pagetitle = 'greta documentation',
+                            sections = sections_combined)
+class(data_index_sections) <- "print_yaml"
+
+write_index(data_index_sections)
 
 # roll the whole site
 rmarkdown::render_site('docs')

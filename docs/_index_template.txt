@@ -1,5 +1,5 @@
 ---
-title: "greta documentation"
+title: "package documentation"
 output:
   html_document:
     css: greta.css
@@ -11,15 +11,25 @@ output:
     highlight: default
 ---
 
+<hr style="height:5px; visibility:hidden;" />
 <hr>
 
 {{#sections}}
 
+##{{title}}
+{{desc}}
+
+<hr style="height:0px; visibility:hidden;" />
+
 {{#contents}}
-###[{{title}}]({{path}})
+####[{{title}}]({{path}})
 
 {{#aliases}}`{{{.}}}` {{/aliases}}
-<hr>
+
+<hr style="height:0px; visibility:hidden;" />
+
 {{/contents}}
+
+<hr>
 
 {{/sections}}

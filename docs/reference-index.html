@@ -11,7 +11,7 @@
 
 
 
-<title>greta documentation</title>
+<title>package documentation</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,81 +335,102 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">greta documentation</h1>
+<h1 class="title toc-ignore">package documentation</h1>
 
 </div>
 
 
+<hr style="height:5px; visibility:hidden;" />
 <hr>
-<div id="declare-r-objects-as-data" class="section level3">
-<h3><a href="as_data.html">Declare R Objects as Data</a></h3>
-<code>as_data</code>
+<div id="creating-greta-arrays" class="section level2">
+<h2>creating greta arrays</h2>
+<p>Create greta arrays representing observed data or fixed values</p>
+<hr style="height:0px; visibility:hidden;" />
+<div id="declare-r-objects-as-data" class="section level4">
+<h4><a href="as_data.html">Declare R Objects as Data</a></h4>
+<p><code>as_data</code></p>
+<hr style="height:0px; visibility:hidden;" />
+</div>
+<div id="greta-data-structures" class="section level4">
+<h4><a href="greta-structures.html">greta Data Structures</a></h4>
+<p><code>zeros</code> <code>ones</code> <code>greta_array</code></p>
+<hr style="height:0px; visibility:hidden;" />
 <hr>
 </div>
-<div id="define-a-distribution-over-a-greta-array" class="section level3">
-<h3><a href="distribution.html">Define a Distribution Over a greta Array</a></h3>
-<code>distribution&lt;-</code> <code>distribution</code> <code>likelihood&lt;-</code>
+</div>
+<div id="variables-distributions" class="section level2">
+<h2>variables &amp; distributions</h2>
+<p>Create variables and assign probability distributions over greta arrays</p>
+<hr style="height:0px; visibility:hidden;" />
+<div id="greta-variables" class="section level4">
+<h4><a href="variable.html">greta variables</a></h4>
+<p><code>variable</code> <code>free</code></p>
+<hr style="height:0px; visibility:hidden;" />
+</div>
+<div id="define-a-distribution-over-a-greta-array" class="section level4">
+<h4><a href="distribution.html">Define a Distribution Over a greta Array</a></h4>
+<p><code>distribution&lt;-</code> <code>distribution</code> <code>likelihood&lt;-</code></p>
+<hr style="height:0px; visibility:hidden;" />
+</div>
+<div id="greta-probability-distributions" class="section level4">
+<h4><a href="greta-distributions.html">greta probability distributions</a></h4>
+<p><code>uniform</code> <code>normal</code> <code>lognormal</code> <code>bernoulli</code> <code>binomial</code> <code>beta_binomial</code> <code>negative_binomial</code> <code>hypergeometric</code> <code>poisson</code> <code>gamma</code> <code>inverse_gamma</code> <code>weibull</code> <code>exponential</code> <code>pareto</code> <code>student</code> <code>laplace</code> <code>beta</code> <code>cauchy</code> <code>chi_squared</code> <code>logistic</code> <code>f</code> <code>multivariate_normal</code> <code>wishart</code> <code>multinomial</code> <code>categorical</code> <code>dirichlet</code> <code>dirichlet_multinomial</code></p>
+<hr style="height:0px; visibility:hidden;" />
 <hr>
 </div>
-<div id="functions-for-modelling-dynamical-systems" class="section level3">
-<h3><a href="dynamics-module.html">Functions for modelling dynamical systems</a></h3>
-<code>dynamics-module</code>
+</div>
+<div id="manipulating-greta-arrays" class="section level2">
+<h2>manipulating greta arrays</h2>
+<p>Functions and operations for modifying greta arrays</p>
+<hr style="height:0px; visibility:hidden;" />
+<div id="operators-for-greta-arrays" class="section level4">
+<h4><a href="greta-operators.html">Operators for Greta Arrays</a></h4>
+<p><code>greta-operators</code></p>
+<hr style="height:0px; visibility:hidden;" />
+</div>
+<div id="r-functions-that-work-for-greta-arrays" class="section level4">
+<h4><a href="greta-functions.html">R functions that work for greta arrays</a></h4>
+<p><code>greta-functions</code></p>
+<hr style="height:0px; visibility:hidden;" />
+</div>
+<div id="extract-replace-and-combine-greta-arrays" class="section level4">
+<h4><a href="extract-replace-combine.html">Extract, Replace and Combine greta Arrays</a></h4>
+<p><code>extract-replace-combine</code></p>
+<hr style="height:0px; visibility:hidden;" />
+</div>
+<div id="transformation-functions-for-greta-arrays" class="section level4">
+<h4><a href="greta-transforms.html">Transformation Functions for Greta Arrays</a></h4>
+<p><code>iprobit</code> <code>ilogit</code> <code>icloglog</code> <code>icauchit</code> <code>log1pe</code></p>
+<hr style="height:0px; visibility:hidden;" />
 <hr>
 </div>
-<div id="extract-replace-and-combine-greta-arrays" class="section level3">
-<h3><a href="extract-replace-combine.html">Extract, Replace and Combine greta Arrays</a></h3>
-<code>extract-replace-combine</code>
+</div>
+<div id="modelling" class="section level2">
+<h2>modelling</h2>
+<p>Define and visualise models and fit them to data</p>
+<hr style="height:0px; visibility:hidden;" />
+<div id="greta-model-objects" class="section level4">
+<h4><a href="greta-model.html">Greta Model Objects</a></h4>
+<p><code>model</code> <code>define_model</code> <code>print</code> <code>plot</code></p>
+<hr style="height:0px; visibility:hidden;" />
+</div>
+<div id="statistical-inference-on-greta-models" class="section level4">
+<h4><a href="greta-inference.html">Statistical Inference on Greta Models</a></h4>
+<p><code>mcmc</code> <code>stashed_samples</code></p>
+<hr style="height:0px; visibility:hidden;" />
 <hr>
 </div>
-<div id="greta-probability-distributions" class="section level3">
-<h3><a href="greta-distributions.html">greta probability distributions</a></h3>
-<code>uniform</code> <code>normal</code> <code>lognormal</code> <code>bernoulli</code> <code>binomial</code> <code>beta_binomial</code> <code>negative_binomial</code> <code>hypergeometric</code> <code>poisson</code> <code>gamma</code> <code>inverse_gamma</code> <code>weibull</code> <code>exponential</code> <code>pareto</code> <code>student</code> <code>laplace</code> <code>beta</code> <code>cauchy</code> <code>chi_squared</code> <code>logistic</code> <code>f</code> <code>multivariate_normal</code> <code>wishart</code> <code>multinomial</code> <code>categorical</code> <code>dirichlet</code> <code>dirichlet_multinomial</code>
+</div>
+<div id="modules" class="section level2">
+<h2>modules</h2>
+<p>Collections of methods for doing more specialist analyses</p>
+<hr style="height:0px; visibility:hidden;" />
+<div id="functions-for-modelling-dynamical-systems" class="section level4">
+<h4><a href="dynamics-module.html">Functions for modelling dynamical systems</a></h4>
+<p><code>dynamics-module</code></p>
+<hr style="height:0px; visibility:hidden;" />
 <hr>
 </div>
-<div id="r-functions-that-work-for-greta-arrays" class="section level3">
-<h3><a href="greta-functions.html">R functions that work for greta arrays</a></h3>
-<code>greta-functions</code>
-<hr>
-</div>
-<div id="statistical-inference-on-greta-models" class="section level3">
-<h3><a href="greta-inference.html">Statistical Inference on Greta Models</a></h3>
-<code>mcmc</code> <code>stashed_samples</code>
-<hr>
-</div>
-<div id="greta-model-objects" class="section level3">
-<h3><a href="greta-model.html">Greta Model Objects</a></h3>
-<code>model</code> <code>define_model</code> <code>print</code> <code>plot</code>
-<hr>
-</div>
-<div id="operators-for-greta-arrays" class="section level3">
-<h3><a href="greta-operators.html">Operators for Greta Arrays</a></h3>
-<code>greta-operators</code>
-<hr>
-</div>
-<div id="functions-overloaded-by-greta" class="section level3">
-<h3><a href="greta-overloaded.html">Functions overloaded by greta</a></h3>
-<code>%*%</code> <code>diag</code> <code>sweep</code>
-<hr>
-</div>
-<div id="greta-data-structures" class="section level3">
-<h3><a href="greta-structures.html">greta Data Structures</a></h3>
-<code>zeros</code> <code>ones</code> <code>greta_array</code>
-<hr>
-</div>
-<div id="transformation-functions-for-greta-arrays" class="section level3">
-<h3><a href="greta-transforms.html">Transformation Functions for Greta Arrays</a></h3>
-<code>iprobit</code> <code>ilogit</code> <code>icloglog</code> <code>icauchit</code> <code>log1pe</code>
-<hr>
-</div>
-<div id="greta-probabilistic-modelling-with-tensorflow" class="section level3">
-<h3><a href="greta.html">greta: Probabilistic Modelling with TensorFlow</a></h3>
-<code>greta</code>
-<hr>
-</div>
-<div id="greta-variables" class="section level3">
-<h3><a href="variable.html">greta variables</a></h3>
-<code>variable</code> <code>free</code>
-<hr>
 </div>
 
 
