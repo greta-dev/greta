@@ -123,6 +123,7 @@ plot_logo <- function (background = c('white', 'purple', 'light', 'lighter'),
 # the text is scaled to never exceed that border
 #' @importFrom graphics par plot.new plot.window strheight strwidth text
 banner <- function (background = c('purple', 'white', 'light', 'lighter'),
+                    transparent_bg = FALSE,
                     width = 8, margin = 0.2,
                     font = c('Muli', 'sans'),
                     add_logo = TRUE, ...) {
@@ -157,7 +158,7 @@ banner <- function (background = c('purple', 'white', 'light', 'lighter'),
   old_family <- par('family')
 
   # switch to a purple background, no margins and Muli typeface
-  par(bg = NA,
+  par(bg = ifelse(transparent_bg, NA, bg_col),
       mar = rep(0, 4),
       family = font)
 
@@ -231,7 +232,7 @@ blank_banner <- function (width = 8, margin = 0.2) {
 
 }
 
-# ~~~~~~~~~~~``
+# ~~~~~~~~~~~
 # render logos and banners
 
 # banner for top of documents, with name and logo
@@ -272,36 +273,57 @@ ptsz <- 80
 png('logos/name_on_purple.png',
     height = 1000, width = 1800,
     pointsize = ptsz)
-banner(width = 2.310505, add_logo = FALSE)
+banner(transparent_bg = TRUE,
+       width = 2.310505,
+       add_logo = FALSE)
 dev.off()
 
 png('logos/name_on_white.png',
     height = 1000, width = 1800,
     pointsize = ptsz)
-banner('white', width = 2.310505, add_logo = FALSE)
+banner('white',
+       transparent_bg = TRUE,
+       width = 2.310505,
+       add_logo = FALSE)
 dev.off()
 
 png('logos/name_icon_on_white.png',
     height = 1000, width = 3600,
     pointsize = ptsz)
-banner('white', width = 4, add_logo = TRUE, edge_width = 2.7)
+banner('white',
+       transparent_bg = TRUE,
+       width = 4,
+       add_logo = TRUE,
+       edge_width = 2.7)
 dev.off()
 
 png('logos/name_icon_on_purple.png',
     height = 1000, width = 3600,
     pointsize = ptsz)
-banner('purple', width = 4, add_logo = TRUE, edge_width = 2.7)
+banner('purple',
+       transparent_bg = TRUE,
+       width = 4,
+       add_logo = TRUE,
+       edge_width = 2.7)
 dev.off()
 
 png('logos/name_icon_on_light.png',
     height = 1000, width = 3600,
     pointsize = ptsz)
-banner('light', width = 4, add_logo = TRUE, edge_width = 2.7)
+banner('light',
+       transparent_bg = TRUE,
+       width = 4,
+       add_logo = TRUE,
+       edge_width = 2.7)
 dev.off()
 
 png('logos/name_icon_on_lighter.png',
     height = 1000, width = 3600,
     pointsize = ptsz)
-banner('lighter', width = 4, add_logo = TRUE, edge_width = 2.7)
+banner('lighter',
+       transparent_bg = TRUE,
+       width = 4,
+       add_logo = TRUE,
+       edge_width = 2.7)
 dev.off()
 

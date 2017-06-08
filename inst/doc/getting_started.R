@@ -1,11 +1,149 @@
 ## ----setup, include=FALSE------------------------------------------------
+
 knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE,
                       cache = TRUE,
                       comment = NA,
                       progress = FALSE)
+
 set.seed(123)
+
 library(greta)
+
+if (!file.exists('figures'))
+  dir.create('figures')
+
+file.copy('../man/figures/plotlegend.png',
+          'figures/plotlegend.png')
+
+## ----ones----------------------------------------------------------------
+(z <- ones(3, 3))
+
+## ----ones_op-------------------------------------------------------------
+(z2 <- z + z ^ 2)
+
+## ----variable------------------------------------------------------------
+(a <- variable(dim = c(3, 3)))
+(a2 <- a + a ^ 2)
+
+## ----first_model, eval = FALSE-------------------------------------------
+#  library(greta)
+#  
+#  # data
+#  x <- as_data(iris$Petal.Length)
+#  y <- as_data(iris$Sepal.Length)
+#  
+#  # variables and priors
+#  int = variable()
+#  coef = normal(0, 3)
+#  sd = lognormal(0, 3)
+#  
+#  # operations
+#  mean <- int + coef * x
+#  
+#  # likelihood
+#  distribution(y) = normal(mean, sd)
+#  
+#  # defining the model
+#  m <- model(int, coef, sd)
+#  
+#  # plotting
+#  plot(m)
+#  
+#  # sampling
+#  draws <- mcmc(model, n_samples = 1000)
+
+## ----data----------------------------------------------------------------
+x <- as_data(iris$Petal.Length)
+y <- as_data(iris$Sepal.Length)
+
+## ----print_greta_array---------------------------------------------------
+as_data(iris[1:5, 1:4])
+
+## ----logical_data--------------------------------------------------------
+(is_setosa <- iris$Species[c(1, 41, 81, 121)] == 'setosa')
+as_data(is_setosa)
+
+## ----dim-----------------------------------------------------------------
+dim(as_data(is_setosa))
+
+## ----structures----------------------------------------------------------
+ones(1, 3)
+zeros(2, 2)
+
+## ----greta_array---------------------------------------------------------
+greta_array(pi, dim = c(2, 2))
+greta_array(0:1, dim = c(3, 3))
+
+## ----variables-----------------------------------------------------------
+int = variable()
+coef = normal(0, 3)
+sd = lognormal(0, 3)
+
+## ----int-----------------------------------------------------------------
+int
+
+## ----positive_variable---------------------------------------------------
+variable(lower = 0, dim = c(2, 3))
+
+## ----priors--------------------------------------------------------------
+coef
+sd
+
+## ----normal_prior2, eval = FALSE-----------------------------------------
+#  coef = variable()
+#  distribution(coef) = normal(0, 3)
+
+## ----sd_distribution, eval = FALSE---------------------------------------
+#  sd = variable(lower = 0)
+#  distribution(sd) = lognormal(0, 3)
+
+## ----truncated-----------------------------------------------------------
+z = variable(lower = -1, upper = 2)
+distribution(z) = normal(0, 1)
+z
+
+## ----linear_predictor----------------------------------------------------
+mean <- int + coef * x
+
+## ----mean----------------------------------------------------------------
+dim(mean)
+head(mean)
+
+## ----extract-------------------------------------------------------------
+mean[1:3]
+
+## ----replace-------------------------------------------------------------
+z <- zeros(4, 3)
+z[, 1] <- normal(0, 1, dim = 4)
+z
+
+## ----drop----------------------------------------------------------------
+z <- matrix(1, nrow = 2, ncol = 2)
+dim(z[, 1])
+dim(z[, 1, drop = FALSE])
+
+## ----drop_greta----------------------------------------------------------
+z_greta <- as_data(z)
+dim(z_greta[, 1])
+
+## ----function1-----------------------------------------------------------
+atanh <- function (z)
+  (log(1 + z) - log(1 - z)) / 2
+
+atanh(z_greta)
+
+## ----likelihood----------------------------------------------------------
+distribution(y) = normal(mean, sd)
+
+## ----hidden_model, echo = FALSE------------------------------------------
+x <- as_data(iris$Petal.Length)
+y <- as_data(iris$Sepal.Length)
+int = variable()
+coef = normal(0, 3)
+sd = lognormal(0, 3)
+mean <- int + coef * x
+distribution(y) = normal(mean, sd)
 
 ## ----define_model--------------------------------------------------------
 m <- model(int, coef, sd)
@@ -15,32 +153,23 @@ m <- model(int, coef, sd)
 
 ## ----plot_hidden, echo = FALSE, results='hide'---------------------------
 gr <- plot(m)
-fname <- tempfile(fileext = '.png')
+fname <- "figures/full_graph.png"
 DiagrammeR::export_graph(gr,
                          file_name = fname,
                          file_type = 'png',
                          width = 895 * 2,
                          height = 313 * 2)
 
-## ----plot_show, echo = FALSE, out.width = 800----------------------------
-knitr::include_graphics(fname)
-
-## ----legend_show, echo = FALSE, out.width = 750--------------------------
-knitr::include_graphics('../man/figures/plotlegend.png')
-
 ## ----plot_coef, echo = FALSE, results='hide'-----------------------------
 coef = normal(0, 3)
 m_coef <- model(coef)
 gr <- plot(m_coef)
-fname <- tempfile(fileext = '.png')
+fname <- "figures/coef_graph.png"
 DiagrammeR::export_graph(gr,
                          file_name = fname,
                          file_type = 'png',
                          width = 325 * 2,
                          height = 123 * 2)
-
-## ----plot_coef_show, echo = FALSE, out.width = 500-----------------------
-knitr::include_graphics(fname)
 
 ## ----plot_likelihood, echo = FALSE, results='hide'-----------------------
 sd = variable()
@@ -55,24 +184,20 @@ gr$nodes_df$fillcolor[idx] <- 'lightgray'
 gr$nodes_df$width[idx] <- 0.2
 gr$nodes_df$height[idx] <- 0.2
 gr$nodes_df <- gr$nodes_df[c(3, 1, 2, 4), ]
-
-fname <- tempfile(fileext = '.png')
+fname <- "figures/likelihood_graph.png"
 DiagrammeR::export_graph(gr,
                          file_name = fname,
-                         file_type = 'png',
+                         file_type = "png",
                          width = 325 * 2,
                          height = 105 * 2)
-
-## ----plot_likelihood_show, echo = FALSE, out.width = 500-----------------
-knitr::include_graphics(fname)
 
 ## ----install_diagrammer, eval = FALSE------------------------------------
 #  install.packages('DiagrammeR')
 
-## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------
+## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------------
 draws <- mcmc(m, n_samples = 1000)
 
-## ----coda_summary--------------------------------------------------------
+## ----coda_summary--------------------------------------------------------------
 summary(draws)
 
 ## ----mcmcvis, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'----

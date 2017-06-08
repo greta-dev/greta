@@ -5,7 +5,8 @@
 [See the BUGS page for details](http://www.openbugs.net/Examples/Air.html)
 
 #### data
-```{r air_data}
+<div class="data">
+```{r air_data, highlight = FALSE}
 y <- c(21, 20, 15)
 n <- c(48, 34, 21)
 Z <- c(10, 30, 50)
@@ -16,17 +17,19 @@ sigma <- sqrt(sigma2)
 tau <- 1 / sigma2
 J <- 3
 ```
+</div>
 
 #### greta code
 ```{r air_greta}
-theta = normal(0, 32)
+theta = normal(0, 32, dim = 2)
 mu <- alpha + beta * Z
 X = normal(mu, sigma)
 p <- ilogit(theta[1] + theta[2] * X)
 distribution(y) = binomial(n, p)
 ```
 
-#### BUGS code
+#### BUGS/JAGS code
+<div class="bugs">
 ```
 for(j in 1 : J) {
    y[j] ~ dbin(p[j], n[j])
@@ -37,8 +40,11 @@ for(j in 1 : J) {
 theta[1] ~ dnorm(0.0, 0.001)
 theta[2] ~ dnorm(0.0, 0.001)
 ```
+</div>
 
 #### Stan code
+<div class="stan">
 ```{r air_stan, echo = FALSE}
 cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/master/bugs_examples/vol2/air/air.stan'), sep = '\n')
 ```
+</div>
