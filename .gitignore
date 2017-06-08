@@ -5,6 +5,7 @@
 README_cache
 vignettes/getting_started_cache
 vignettes/how_does_this_work_cache
+vignettes/figures
 *.pdf
 docs/*.Rmd
 docs/examples
