@@ -351,7 +351,8 @@ div.tocify {
 <p><a href="http://www.openbugs.net/Examples/Air.html">See the BUGS page for details</a></p>
 <div id="data" class="section level4">
 <h4>data</h4>
-<pre class="r"><code>y &lt;- c(21, 20, 15)
+<div class="data">
+<pre class="text"><code>y &lt;- c(21, 20, 15)
 n &lt;- c(48, 34, 21)
 Z &lt;- c(10, 30, 50)
 alpha &lt;- 4.48
@@ -361,16 +362,18 @@ sigma &lt;- sqrt(sigma2)
 tau &lt;- 1 / sigma2
 J &lt;- 3</code></pre>
 </div>
+</div>
 <div id="greta-code" class="section level4">
 <h4>greta code</h4>
-<pre class="r"><code>theta = normal(0, 32)
+<pre class="r"><code>theta = normal(0, 32, dim = 2)
 mu &lt;- alpha + beta * Z
 X = normal(mu, sigma)
 p &lt;- ilogit(theta[1] + theta[2] * X)
 distribution(y) = binomial(n, p)</code></pre>
 </div>
-<div id="bugs-code" class="section level4">
-<h4>BUGS code</h4>
+<div id="bugsjags-code" class="section level4">
+<h4>BUGS/JAGS code</h4>
+<div class="bugs">
 <pre><code>for(j in 1 : J) {
    y[j] ~ dbin(p[j], n[j])
    logit(p[j]) &lt;- theta[1] + theta[2] * X[j]
@@ -380,8 +383,10 @@ distribution(y) = binomial(n, p)</code></pre>
 theta[1] ~ dnorm(0.0, 0.001)
 theta[2] ~ dnorm(0.0, 0.001)</code></pre>
 </div>
+</div>
 <div id="stan-code" class="section level4">
 <h4>Stan code</h4>
+<div class="stan">
 <pre><code>data {
   real alpha; 
   real beta; 
@@ -410,6 +415,7 @@ model {
   X ~ normal(alpha + beta * Z, sigma);
   y ~ binomial_logit(n, theta1 + theta2 * X);
 }</code></pre>
+</div>
 <hr>
 </div>
 </div>
@@ -419,23 +425,26 @@ model {
 <p><a href="http://www.openbugs.net/Examples/Beetles.html">See the BUGS page for details</a></p>
 <div id="data-1" class="section level4">
 <h4>data</h4>
-<pre class="r"><code>x &lt;- c(1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839)
+<div class="data">
+<pre class="text"><code>x &lt;- c(1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839)
 n &lt;- c(59, 60, 62, 56, 63, 59, 62, 60)
 r &lt;- c(6, 13, 18, 28, 52, 53, 61, 60)
 N &lt;- 8</code></pre>
+</div>
 </div>
 <div id="greta-code-1" class="section level4">
 <h4>greta code</h4>
 <pre class="r"><code>alpha_star = normal(0, 32)
 beta = normal(0, 32)
 p &lt;- ilogit(alpha_star + beta * (x - mean(x)))
-likelihood(r) = binomial(n, p)
+distribution(r) = binomial(n, p)
 
 alpha &lt;- alpha_star - beta * mean(x)
 rhat &lt;- p * n</code></pre>
 </div>
-<div id="bugs-code-1" class="section level4">
-<h4>BUGS code</h4>
+<div id="bugsjags-code-1" class="section level4">
+<h4>BUGS/JAGS code</h4>
+<div class="bugs">
 <pre><code>for( i in 1 : N ) {
   r[i] ~ dbin(p[i],n[i])
   logit(p[i]) &lt;- alpha.star + beta * (x[i] - mean(x[]))
@@ -446,8 +455,10 @@ alpha &lt;- alpha.star - beta * mean(x[])
 beta ~ dnorm(0.0,0.001)
 alpha.star ~ dnorm(0.0,0.001)</code></pre>
 </div>
+</div>
 <div id="stan-code-1" class="section level4">
 <h4>Stan code</h4>
+<div class="stan">
 <pre><code>data {
     int&lt;lower=0&gt; N;
     int&lt;lower=0&gt; n[N];
@@ -490,6 +501,7 @@ generated quantities {
   }
   alpha &lt;- alpha_star - beta*mean_x;              
 } </code></pre>
+</div>
 <hr>
 </div>
 </div>
