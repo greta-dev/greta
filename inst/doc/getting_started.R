@@ -1,13 +1,20 @@
 ## ----setup, include=FALSE------------------------------------------------
+
 knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE,
                       cache = TRUE,
                       comment = NA,
                       progress = FALSE)
+
 set.seed(123)
+
 library(greta)
+
 if (!file.exists('figures'))
   dir.create('figures')
+
+file.copy('../man/figures/plotlegend.png',
+          'figures/plotlegend.png')
 
 ## ----ones----------------------------------------------------------------
 (z <- ones(3, 3))
@@ -153,12 +160,6 @@ DiagrammeR::export_graph(gr,
                          width = 895 * 2,
                          height = 313 * 2)
 
-## ----plot_show, echo = FALSE, out.width = 800----------------------------
-knitr::include_graphics(fname)
-
-## ----legend_show, echo = FALSE, out.width = 750--------------------------
-knitr::include_graphics('../man/figures/plotlegend.png')
-
 ## ----plot_coef, echo = FALSE, results='hide'-----------------------------
 coef = normal(0, 3)
 m_coef <- model(coef)
@@ -169,9 +170,6 @@ DiagrammeR::export_graph(gr,
                          file_type = 'png',
                          width = 325 * 2,
                          height = 123 * 2)
-
-## ----plot_coef_show, echo = FALSE, out.width = 500-----------------------
-knitr::include_graphics(fname)
 
 ## ----plot_likelihood, echo = FALSE, results='hide'-----------------------
 sd = variable()
@@ -192,9 +190,6 @@ DiagrammeR::export_graph(gr,
                          file_type = "png",
                          width = 325 * 2,
                          height = 105 * 2)
-
-## ----plot_likelihood_show, echo = FALSE, out.width = 500-----------------
-knitr::include_graphics(fname)
 
 ## ----install_diagrammer, eval = FALSE------------------------------------
 #  install.packages('DiagrammeR')
