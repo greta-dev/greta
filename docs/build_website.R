@@ -9,7 +9,6 @@ write_index <- function (data) {
   rmd <- whisker::whisker.render(index_template, data)
   cat(rmd, file = "docs/reference-index.Rmd")
 }
-
 # codeface and split argument names in a topic
 split_args <- function (topic) {
   for (i in seq_along(topic$arguments)) {
