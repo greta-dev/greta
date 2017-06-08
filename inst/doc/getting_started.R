@@ -194,10 +194,10 @@ DiagrammeR::export_graph(gr,
 ## ----install_diagrammer, eval = FALSE------------------------------------
 #  install.packages('DiagrammeR')
 
-## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------
+## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------------
 draws <- mcmc(m, n_samples = 1000)
 
-## ----coda_summary--------------------------------------------------------
+## ----coda_summary--------------------------------------------------------------
 summary(draws)
 
 ## ----mcmcvis, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'----
