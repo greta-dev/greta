@@ -48,6 +48,7 @@ Collate:
     'greta_model_class.R'
     'progress_bar.R'
     'samplers.R'
+    'install_tensorflow.R'
 Imports:
     R6,
     tensorflow,
