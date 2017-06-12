@@ -16,7 +16,7 @@ knitr::include_graphics('README_files/top_banner.png')
 
 ### greta is an R package for writing statistical models and fitting them by MCMC.
 
-greta is like BUGS, JAGS and Stan, except that you write models right in R, it's scales well to massive datasets, and it's easy to extend and build on.
+greta let you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it's easy to extend and build on.
 
 ### See [the website](https://goldingn.github.io/greta/) for more information,  [tutorials](https://goldingn.github.io/greta/getting_started.html), [examples](https://goldingn.github.io/greta/example_models.html), and [package documentation](https://goldingn.github.io/greta/reference-index.html).
 
