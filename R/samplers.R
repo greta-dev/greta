@@ -292,9 +292,6 @@ hmc <- function (dag,
   if (stash)
     on.exit(stash_trace(trace))
 
-  # set up log joint density store
-  ljd <- rep(NA, n_samples)
-
   # track acceptance
   accept_trace <- rep(0, n_samples)
 
@@ -310,20 +307,20 @@ hmc <- function (dag,
     x_old <- x
     logprob_old <- logprob
     grad_old <- grad
-    p_old <- rnorm(npar)
+    p <- p_old <- rnorm(npar)
 
     # start leapfrog steps
     reject <- FALSE
-    p <- p_old + 0.5 * epsilon * grad
+    # p <- p_old + 0.5 * epsilon * grad
     n_steps <- base::sample(Lmin:Lmax, 1)
     for (l in seq_len(n_steps)) {
 
       # step
+      p <- p + 0.5 * epsilon * grad
       x <- x + epsilon * p
 
       # send parameters
       dag$send_parameters(x)
-      logprob <- dag$log_density()
       grad <- dag$gradients()
 
       # check gradients are finite
@@ -332,11 +329,9 @@ hmc <- function (dag,
         break()
       }
 
-      p <- p + epsilon * grad
+      p <- p + 0.5 * epsilon * grad
 
     }
-
-    p <- p - 0.5 * epsilon * grad
 
     # if the step was bad, reject it out of hand
     if (reject) {
@@ -351,11 +346,12 @@ hmc <- function (dag,
       # otherwise do the Metropolis accept/reject step
 
       # inner products
-      p_prod <- (t(p) %*% p)[1, 1]
-      p_prod_old <- (t(p_old) %*% p_old)[1, 1]
+      p_prod <- 0.5 * sum(p ^ 2)
+      p_prod_old <- 0.5 * sum(p_old ^ 2)
 
       # acceptance ratio
-      log_accept_ratio = logprob - 0.5 * p_prod - logprob_old + 0.5 * p_prod_old
+      logprob <- dag$log_density()
+      log_accept_ratio = logprob - p_prod - logprob_old + p_prod_old
       log_u = log(runif(1))
 
       if (log_u < log_accept_ratio) {
@@ -382,7 +378,6 @@ hmc <- function (dag,
     if (i %% thin == 0) {
       dag$send_parameters(x)
       trace[i / thin, ] <- dag$trace_values()
-      ljd[i / thin] <- dag$log_density()
     }
 
     if (verbose)
@@ -417,7 +412,6 @@ hmc <- function (dag,
     control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
   }
 
-  attr(trace, 'density') <- -ljd
   attr(trace, 'last_x') <- x
   attr(trace, 'control') <- control
   trace
