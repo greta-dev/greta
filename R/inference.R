@@ -251,7 +251,7 @@ prepare_draws <- function (draws) {
 #'
 #' @details Currently, the only implemented optimisation algorithm is Adagrad
 #'   (\code{method = 'adagrad'}). The \code{control} argument can be used to
-#'   specify the optimiser hyperparameters: \code{learning_rate} (default 0.1),
+#'   specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
 #'   \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
 #'   (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,
 #'   see
@@ -262,6 +262,7 @@ prepare_draws <- function (draws) {
 #'   \itemize{
 #'     \item{par}{the best set of parameters found}
 #'     \item{value}{the log joint density of the model at the parameters par}
+#'     \item{iterations}{the number of iterations taken by the optimiser}
 #'     \item{convergence}{an integer code, 0 indicates successful completion, 1
 #'     indicates the iteration limit max_iterations had been reached}
 #'   }
@@ -274,7 +275,7 @@ prepare_draws <- function (draws) {
 opt <- function (model,
                   method = c('adagrad'),
                   max_iterations = 100,
-                  tolerance = 1e-12,
+                  tolerance = 1e-6,
                   control = list(),
                   initial_values = NULL) {
 
@@ -288,7 +289,7 @@ opt <- function (model,
 
   # default control options
   con <- switch (method,
-                 adagrad = list(learning_rate = 0.1,
+                 adagrad = list(learning_rate = 0.8,
                                 initial_accumulator_value = 0.1,
                                 use_locking = TRUE))
 
@@ -322,7 +323,7 @@ opt <- function (model,
   it <- 0
 
   while (it < max_iterations & diff > tolerance) {
-    it <- it + run
+    it <- it + 1
     with(tfe, sess$run(train))
     obj <- with(tfe, sess$run(-joint_density))
     diff <- abs(old_obj - obj)
@@ -331,6 +332,7 @@ opt <- function (model,
 
   list(par = model$dag$trace_values(),
        value = with(tfe, sess$run(joint_density)),
+       iterations = it,
        convergence = ifelse(it < max_iterations, 0, 1))
 
 }
