@@ -7,21 +7,39 @@ test_that('check_tf_version works', {
   tf$`__version__` <- "0.9.0"
 
   # expected text
-  expected_message <-
-    paste0("\n\n  greta requires TensorFlow version 1.0.0 or higher, but you ",
-           "have version 0.9.0\n  You can write models, but not sample from ",
-           "them.\n  See https://www.tensorflow.org/install for installation ",
-           "instructions.\n\n")
+  expected_message <- "you have version 0.9.0"
 
-  expect_error(greta:::check_tf_version('error'),
+  expect_error(check_tf_version('error'),
                expected_message)
-  expect_warning(greta:::check_tf_version('warn'),
+  expect_warning(check_tf_version('warn'),
                  expected_message)
-  expect_message(greta:::check_tf_version('message'),
+  expect_message(check_tf_version('message'),
                  expected_message)
 
   # reset the true version
   tf$`__version__` <- true_version
+
+  # stash the module and forge a missing installation
+  tf_tmp <- tf
+  env <- parent.env(environment(check_tf_version))
+  unlockBinding('tf', env)
+  env$tf <- NULL
+  lockBinding('tf', env)
+
+  # expected text
+  expected_message <- "isn't installed"
+
+  expect_error(check_tf_version('error'),
+               expected_message)
+  expect_warning(check_tf_version('warn'),
+                 expected_message)
+  expect_message(check_tf_version('message'),
+                 expected_message)
+
+  # replace the tf module
+  unlockBinding('tf', env)
+  env$tf <- tf_tmp
+  lockBinding('tf', env)
 
 })
 

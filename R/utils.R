@@ -228,10 +228,6 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
            message = message(text))
   }
 
-
-  # if not an error, return a logical on whether it was valid
-  invisible(tf_version_valid)
-
 }
 
 tf_lchoose <- function (n, k) {
