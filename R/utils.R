@@ -256,16 +256,73 @@ tf_flat_to_symmetric = function (x, dims) {
   tf$matmul(tf$transpose(L), L)
 }
 
-flat_to_symmetric <- function (x, dim) {
+# convert an unconstrained vector into symmetric correlation matrix
+tf_flat_to_symmetric_correl = function (x, dims) {
+
+  # to -1, 1 scale
+  y <- tf$tanh(x)
+
+  # list of indices mapping relevant part of each row to an element of y
+  y_index_list <- list()
+  count <- 0
+  for (i in 1:(k - 1)) {
+    nelem <- k - i
+    y_index_list[[i]] <- count + seq_len(nelem) - 1
+    count <- count + nelem
+  }
+
+  # dummy list to store transformed versions of rows
+  values_list <- y_index_list
+  values_list[[1]] <- tf$reshape(y[y_index_list[[1]]], shape(k - 1))
+  sum_sqs <- tf$square(values_list[[1]])
+
+  for (i in 2:(k - 1)) {
+    # relevant columns (0-indexed)
+    idx <- i:(k - 1) - 1
+    # components of z on this row (straight from y)
+    z <- tf$reshape(y[y_index_list[[i]]], shape(k - i))
+    # assign to w, using relevant parts of the sum of squares
+    values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs[idx])
+    # increment sum of squares
+    sum_sqs_part <- tf$square(values_list[[i]]) + sum_sqs[idx]
+    sum_sqs <- tf_recombine(sum_sqs, idx, sum_sqs_part)
+  }
+
+  # dummy array to find the indices
+  L_dummy <- dummy(dims)
+  indices_diag <- diag(L_dummy)
+  indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
+
+  # diagonal & off-diagonal elements
+  values_diag <- tf$concat(list(tf$ones(1L, dtype = tf_float()),
+                                sqrt(fl(1) - sum_sqs)), 0L)
+  values_offdiag <- tf$concat(values_list, 0L)
+
+  # plug elements into a vector of 0s
+  values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
+  values_0_diag <- tf_recombine(values_0, indices_diag, values_diag)
+  values_z <- tf_recombine(values_0_diag, indices_offdiag, values_offdiag)
+
+  # reshape into cholesky and then correlation matrix
+  L <- tf$reshape(values_z, shape(dims[1], dims[2]))
+  tf$matmul(tf$transpose(L), L)
+
+}
+
+flat_to_symmetric <- function (x, dim, correl = FALSE) {
 
   dimfun <- function (elem_list)
     dim
+
+  fun <- ifelse(correl,
+                "tf_flat_to_symmetric_correl",
+                "tf_flat_to_symmetric")
 
   # sum the elements
   op('flat_to_symmetric',
      x,
      operation_args = list(dims = dim),
-     tf_operation = 'tf_flat_to_symmetric',
+     tf_operation = fun,
      dimfun = dimfun)
 
 }

@@ -1133,6 +1133,8 @@ wishart_distribution <- R6Class (
     create_target = function() {
 
       # handle reshaping via a greta array
+      k <- self$dim[1]
+      free_greta_array <- vble(dim = k + k * (k - 1) / 2)
       free_greta_array <- vble(dim = prod(self$dim))
       matrix_greta_array <- flat_to_symmetric(free_greta_array, self$dim)
       matrix_greta_array$node
@@ -1156,6 +1158,68 @@ wishart_distribution <- R6Class (
   )
 )
 
+onion_distribution <- R6Class (
+  'onion_distribution',
+  inherit = distribution_node,
+  public = list(
+
+    initialize = function (eta, dim = 2) {
+
+      # check dim is a scalar integer greater than 1
+      dim_old <- dim
+      dim <- as.integer(dim)
+      if (length(dim) > 1 || dim <= 1 || !is.finite(dim)) {
+
+        stop ('dim must be a scalar integer greater than one, but was: ',
+              capture.output(dput(dim_old)),
+              call. = FALSE)
+
+      }
+
+      # add the nodes as children and parameters
+      eta <- as.greta_array(eta)
+
+      super$initialize('onion', c(dim, dim))
+      self$add_parameter(eta, 'eta')
+
+      # make the initial value PD
+      self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
+
+    },
+
+    # default value
+    create_target = function() {
+
+      # handle reshaping via a greta array
+      k <- self$dim[1]
+      free_greta_array <- vble(dim = k * (k - 1) / 2)
+      matrix_greta_array <- flat_to_symmetric(free_greta_array, self$dim, correl = TRUE)
+      matrix_greta_array$node
+
+    },
+
+    tf_distrib = function (parameters) {
+
+      eta <- parameters$eta
+
+      log_prob = function (x) {
+
+        diags <- tf$diag_part(tf$cholesky(x))
+        det <- tf$square(tf$reduce_prod(diags))
+        det ^ (eta - fl(1))
+
+      }
+
+      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
+    },
+
+    # no CDF for multivariate distributions
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
 
 # shorthand for distribution parameter constructors
 distrib <- function (distribution, ...) {
@@ -1189,7 +1253,7 @@ distrib <- function (distribution, ...) {
 #'
 #' @param mean,meanlog,location,mu unconstrained parameters
 #'
-#' @param sd,sdlog,sigma,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b
+#' @param sd,sdlog,sigma,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b,eta
 #'   positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.
 #'
 #' @param size,m,n,k positive integer parameter
@@ -1268,7 +1332,8 @@ distrib <- function (distribution, ...) {
 #'    \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
 #'    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
 #'    \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
-#'    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
+#'    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
+#'    \code{onion} \tab \code{\href{}{rethinking::dlkjcorr}}\cr }
 #'
 #' @examples
 #' # a uniform parameter constrained to be between 0 and 1
@@ -1427,6 +1492,11 @@ multivariate_normal <- function (mean, Sigma, dim = 1)
 #' @export
 wishart <- function (df, Sigma)
   distrib('wishart', df, Sigma)
+
+#' @rdname greta-distributions
+#' @export
+onion <- function (eta, dim = 2)
+  distrib('onion', eta, dim)
 
 #' @rdname greta-distributions
 #' @export

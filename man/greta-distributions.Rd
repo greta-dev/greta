@@ -25,6 +25,7 @@
 \alias{f}
 \alias{multivariate_normal}
 \alias{wishart}
+\alias{onion}
 \alias{multinomial}
 \alias{categorical}
 \alias{dirichlet}
@@ -77,6 +78,8 @@ multivariate_normal(mean, Sigma, dim = 1)
 
 wishart(df, Sigma)
 
+onion(eta, dim = 2)
+
 multinomial(size, prob, dim = 1)
 
 categorical(prob, dim = 1)
@@ -97,7 +100,7 @@ or a vector of positive integers. See details.}
 
 \item{mean, meanlog, location, mu}{unconstrained parameters}
 
-\item{sd, sdlog, sigma, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b}{positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.}
+\item{sd, sdlog, sigma, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b, eta}{positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.}
 
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
 \code{multinomial} and \code{categorical}}
@@ -180,7 +183,8 @@ The discrete probability distributions (\code{bernoulli},
    \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
    \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
-   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr }
+   \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
+   \code{onion} \tab \code{\href{}{rethinking::dlkjcorr}}\cr }
 }
 \examples{
 # a uniform parameter constrained to be between 0 and 1
