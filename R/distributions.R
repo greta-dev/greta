@@ -1187,7 +1187,12 @@ onion_distribution <- R6Class (
       # make the initial value PD
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
 
-      # add a member to represent a user-representation of the node
+      # convert target (Cholesky factor) to user-facing representation
+      # (symmetric matrix) and add the distribution to that
+      chol_greta_array <- as.greta_array(self$target)
+      matrix_greta_array <- chol_to_symmetric(chol_greta_array)
+      self$user_node <- matrix_greta_array$node
+      self$user_node$set_distribution(self)
 
     },
 
@@ -1200,8 +1205,7 @@ onion_distribution <- R6Class (
 
       # instead, make the cholesky the target
       chol_greta_array <- flat_to_chol(free_greta_array, self$dim, correl = TRUE)
-      matrix_greta_array <- chol_to_symmetric(chol_greta_array)
-      matrix_greta_array$node
+      chol_greta_array$node
 
     },
 
@@ -1211,7 +1215,7 @@ onion_distribution <- R6Class (
 
       log_prob = function (x) {
 
-        diags <- tf$diag_part(tf$cholesky(x))
+        diags <- tf$diag_part(x)
         det <- tf$square(tf$reduce_prod(diags))
         det ^ (eta - fl(1))
 
