@@ -384,6 +384,7 @@ test_that('dirichlet distribution has correct density', {
   expect_true(all(difference < 1e-4))
 
 })
+
 test_that('dirichlet-multinomial distribution has correct density', {
 
   source('helpers.R')

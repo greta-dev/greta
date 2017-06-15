@@ -1136,7 +1136,9 @@ wishart_distribution <- R6Class (
       k <- self$dim[1]
       free_greta_array <- vble(dim = k + k * (k - 1) / 2)
       free_greta_array <- vble(dim = prod(self$dim))
-      matrix_greta_array <- flat_to_symmetric(free_greta_array, self$dim)
+
+      chol_greta_array <- flat_to_chol(free_greta_array, self$dim)
+      matrix_greta_array <- chol_to_symmetric(chol_greta_array)
       matrix_greta_array$node
 
     },
@@ -1197,7 +1199,8 @@ onion_distribution <- R6Class (
       free_greta_array <- vble(dim = k * (k - 1) / 2)
 
       # instead, make the cholesky the target
-      matrix_greta_array <- flat_to_symmetric(free_greta_array, self$dim, correl = TRUE)
+      chol_greta_array <- flat_to_chol(free_greta_array, self$dim, correl = TRUE)
+      matrix_greta_array <- chol_to_symmetric(chol_greta_array)
       matrix_greta_array$node
 
     },

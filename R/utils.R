@@ -241,7 +241,7 @@ tf_lbeta <- function (a, b)
 # given a flat tensor, convert it into a square symmetric matrix by considering
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
-tf_flat_to_symmetric = function (x, dims) {
+tf_flat_to_chol = function (x, dims) {
 
   # create a dummy array to find the indices
   L_dummy <- dummy(dims)
@@ -251,16 +251,18 @@ tf_flat_to_symmetric = function (x, dims) {
   values <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
   values <- tf_recombine(values, indices, x)
 
-  # reshape into lower triangular, then symmetric matrix
-  L <- tf$reshape(values, shape(dims[1], dims[2]))
-  tf$matmul(tf$transpose(L), L)
+  # reshape into lower triangular and return
+  tf$reshape(values, shape(dims[1], dims[2]))
+
 }
 
 # convert an unconstrained vector into symmetric correlation matrix
-tf_flat_to_symmetric_correl = function (x, dims) {
+tf_flat_to_chol_correl = function (x, dims) {
 
   # to -1, 1 scale
   y <- tf$tanh(x)
+
+  k <- dims[1]
 
   # list of indices mapping relevant part of each row to an element of y
   y_index_list <- list()
@@ -303,26 +305,41 @@ tf_flat_to_symmetric_correl = function (x, dims) {
   values_0_diag <- tf_recombine(values_0, indices_diag, values_diag)
   values_z <- tf_recombine(values_0_diag, indices_offdiag, values_offdiag)
 
-  # reshape into cholesky and then correlation matrix
-  L <- tf$reshape(values_z, shape(dims[1], dims[2]))
-  tf$matmul(tf$transpose(L), L)
+  # reshape into cholesky and return
+  tf$reshape(values_z, shape(dims[1], dims[2]))
 
 }
 
-flat_to_symmetric <- function (x, dim, correl = FALSE) {
+tf_chol_to_symmetric <- function (L)
+  tf$matmul(tf$transpose(L), L)
+
+flat_to_chol <- function (x, dim, correl = FALSE) {
 
   dimfun <- function (elem_list)
     dim
 
   fun <- ifelse(correl,
-                "tf_flat_to_symmetric_correl",
-                "tf_flat_to_symmetric")
+                "tf_flat_to_chol_correl",
+                "tf_flat_to_chol")
 
   # sum the elements
-  op('flat_to_symmetric',
+  op('flat_to_chol',
      x,
      operation_args = list(dims = dim),
      tf_operation = fun,
+     dimfun = dimfun)
+
+}
+
+chol_to_symmetric <- function (L) {
+
+  dimfun <- function (elem_list)
+    dim(elem_list[[1]])
+
+  # sum the elements
+  op('chol_to_symmetric',
+     L,
+     tf_operation = 'tf_chol_to_symmetric',
      dimfun = dimfun)
 
 }
