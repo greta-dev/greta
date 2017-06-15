@@ -1185,6 +1185,8 @@ onion_distribution <- R6Class (
       # make the initial value PD
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
 
+      # add a member to represent a user-representation of the node
+
     },
 
     # default value
@@ -1193,6 +1195,8 @@ onion_distribution <- R6Class (
       # handle reshaping via a greta array
       k <- self$dim[1]
       free_greta_array <- vble(dim = k * (k - 1) / 2)
+
+      # instead, make the cholesky the target
       matrix_greta_array <- flat_to_symmetric(free_greta_array, self$dim, correl = TRUE)
       matrix_greta_array$node
 
@@ -1228,8 +1232,8 @@ distrib <- function (distribution, ...) {
   constructor <- get(paste0(distribution, '_distribution'))
   distrib <- constructor$new(...)
 
-  # return the value node as a greta array
-  value <- distrib$target
+  # return the user-facing representation of the node as a greta array
+  value <- distrib$user_node
   as.greta_array(value)
 
 }

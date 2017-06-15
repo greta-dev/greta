@@ -270,6 +270,7 @@ distribution_node <- R6Class (
     distribution_name = 'no distribution',
     discrete = NA,
     target = NULL,
+    user_node = NULL,
     truncation = NULL,
     parameters = list(),
 
@@ -283,6 +284,9 @@ distribution_node <- R6Class (
 
       # initialize the target values of this distribution
       self$add_target(self$create_target())
+
+      # set the target as the user node (user-facing representation) by default
+      self$user_node <- self$target
 
     },
 
