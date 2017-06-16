@@ -206,21 +206,21 @@ variable_node <- R6Class (
 
       # assign this as the free state
       tf_name <- dag$tf_name(self)
-
       free_name <- sprintf('%s_free', tf_name)
       assign(free_name,
              tf_obj,
              envir = dag$tf_environment)
 
+      # get the log jacobian adjustment for the free state
+      tf_adj <- self$tf_adjustment(dag)
+      adj_name <- sprintf('%s_adj', tf_name)
+      assign(adj_name,
+             tf_adj,
+             envir = dag$tf_environment)
+
       # map from the free to constrained state in a new tensor
-
-      # fetch the free node
       tf_free <- get(free_name, envir = dag$tf_environment)
-
-      # appy transformation
       node <- self$tf_from_free(tf_free, dag$tf_environment)
-
-      # assign back to environment with base name (density will use this)
       assign(tf_name,
              node,
              envir = dag$tf_environment)
@@ -251,6 +251,42 @@ variable_node <- R6Class (
       }
 
       y
+
+    },
+
+    # adjustments for univariate variables
+    tf_log_jacobian_adjustment = function (free) {
+
+      ljac_none <- function (x)
+        fl(0)
+
+      ljac_log1pe <- function (x)
+        -tf$reduce_sum(tf_log1pe(x * -1))
+
+      ljac_logistic <- function (x) {
+        lrange <- log(self$upper - self$lower)
+        tf$reduce_sum(x - fl(2) * tf_log1pe(x) + lrange)
+      }
+
+      fun <- switch (self$constraint,
+                     none = ljac_none,
+                     high = ljac_log1pe,
+                     low = ljac_log1pe,
+                     both = ljac_logistic)
+
+      fun(free)
+
+    },
+
+    # create a tensor giving the log jacobian adjustment for this variable
+    tf_adjustment = function (dag) {
+
+      # find free version of node
+      free_tensor_name <- paste0(dag$tf_name(self), '_free')
+      free_tensor <- get(free_tensor_name, envir = dag$tf_environment)
+
+      # apply jacobian adjustment to it
+      self$tf_log_jacobian_adjustment(free_tensor)
 
     }
 
