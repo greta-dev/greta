@@ -1083,8 +1083,37 @@ multivariate_normal_distribution <- R6Class (
       vble(dim = self$dim)
     },
 
+    # fetch the tensors for the parameters, using the cholesky factor of Sigma
+    # if available
+    tf_fetch_parameters = function (dag) {
+
+      # find names
+      tf_names <- lapply(self$parameters, dag$tf_name)
+
+      # replace Sigma's tensor with the cholesky factor, if available
+      cf <- self$parameters$Sigma$representations$cholesky_factor
+      if (!is.null(cf))
+        tf_names$Sigma <- dag$tf_name(cf)
+
+      # fetch tensors
+      lapply(tf_names, get, envir = dag$tf_environment)
+
+    },
+
     tf_distrib = function (parameters) {
-      L <- tf$cholesky(parameters$Sigma)
+
+      # check if Sigma (the node version) has a cholesky factor to use
+      cf <- self$parameters$Sigma$representations$cholesky_factor
+
+      # how to make sure that's the value being used as the parameter?
+
+      # need to check the parameters definition bit
+
+      if (is.null(cf))
+        L <- tf$cholesky(parameters$Sigma)
+      else
+        L <- tf$transpose(parameters$Sigma)
+
       mu = tf$transpose(parameters$mean)
       tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
                                                       scale_tril = L)
@@ -1237,7 +1266,8 @@ onion_distribution <- R6Class (
 
         diags <- tf$diag_part(x)
         det <- tf$square(tf$reduce_prod(diags))
-        det ^ (eta - fl(1))
+        prob <- det ^ (eta - fl(1))
+        tf$log(prob)
 
       }
 
