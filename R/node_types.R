@@ -248,6 +248,10 @@ variable_node <- R6Class (
 
         y <- tf_log1pe(x) + fl(lower)
 
+      } else {
+
+        y <- x
+
       }
 
       y
@@ -268,11 +272,24 @@ variable_node <- R6Class (
         tf$reduce_sum(x - fl(2) * tf_log1pe(x) + lrange)
       }
 
+      ljac_corr_mat <- function (x) {
+        # find dimension
+        n <- x$get_shape()$as_list()[1]
+        k <- (1 + sqrt(8 * n + 1)) / 2
+
+        # draw the rest of the owl
+        l1mz2 <- tf$log(1 - tf$square(tf$tanh(x)))
+        i <- rep(1:(k - 1), (k - 1) : 1)
+        a <- fl(k - i - 1) * l1mz2
+        fl(0.5) * tf$reduce_sum(a) + tf$reduce_sum(l1mz2)
+      }
+
       fun <- switch (self$constraint,
                      none = ljac_none,
                      high = ljac_log1pe,
                      low = ljac_log1pe,
-                     both = ljac_logistic)
+                     both = ljac_logistic,
+                     correlation_matrix = ljac_corr_mat)
 
       fun(free)
 

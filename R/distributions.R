@@ -1224,6 +1224,7 @@ onion_distribution <- R6Class (
       # handle reshaping via a greta array
       k <- self$dim[1]
       free_greta_array <- vble(dim = k * (k - 1) / 2)
+      free_greta_array$constraint = "correlation_matrix"
 
       # first create a greta array for the cholesky
       chol_greta_array <- flat_to_chol(free_greta_array, self$dim, correl = TRUE)
