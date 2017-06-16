@@ -330,11 +330,16 @@ distribution_node <- R6Class (
 
     },
 
+    # which node to use af the *tf* target (overwritten by some distributions)
+    get_tf_target_node = function () {
+      self$target
+    },
+
     tf_log_density = function (dag) {
 
       # fetch inputs
-
-      tf_target <- get(dag$tf_name(self$target),
+      tf_target_node <- self$get_tf_target_node()
+      tf_target <- get(dag$tf_name(tf_target_node),
                        envir = dag$tf_environment)
       tf_parameters <- self$tf_fetch_parameters(dag)
 

@@ -56,13 +56,13 @@
           call. = FALSE)
   }
 
-  # can only assign with greta arrays
+  # can only assign with greta arrays ...
   if (!is.greta_array(value)) {
     stop ('right hand side must be a greta array',
           call. = FALSE)
   }
 
-  # that have distributions
+  # ... that have distributions
   distribution_node <- value$node$distribution
 
   if (!inherits(distribution_node, 'distribution_node')) {
