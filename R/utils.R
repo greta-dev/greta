@@ -396,3 +396,31 @@ tf_int <- function ()
 
 # cast a scalar as a float or integer of the correct type in TF code
 fl <- function(x) tf$constant(x, dtype = tf_float())
+
+# evaluate expressions (dag density or gradient), capturing numerical errors
+# like matrix inversions as bad samples, and erroring otherwise
+cleanly <- function (expr) {
+
+  res <- tryCatch(expr, error = function(e) e)
+
+  # if it errored
+  if (inherits(res, 'error')) {
+
+    numerical_messages <- c("is not invertible")
+
+    numerical_errors <- vapply(numerical_messages,
+                               grepl,
+                               res$message,
+                               FUN.VALUE = 0) == 1
+
+    # if it was just a numerical error, quietly return a bad value
+    if (any(numerical_errors))
+      res <- NA
+    else
+      stop('greta hit a tensorflow error:\n\n', res, call. = FALSE)
+
+  }
+
+  res
+
+}

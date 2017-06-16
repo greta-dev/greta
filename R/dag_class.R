@@ -219,15 +219,17 @@ dag_class <- R6Class(
 
     log_density = function() {
 
-      with(self$tf_environment,
-           sess$run(joint_density, feed_dict = parameter_dict))
+      cleanly(with(self$tf_environment,
+                   sess$run(joint_density, feed_dict = parameter_dict)))
 
     },
 
     # get gradient of joint density w.r.t. free states of all variable nodes
     gradients = function () {
-      with(self$tf_environment,
-           sess$run(gradients, feed_dict = parameter_dict))
+
+      cleanly(with(self$tf_environment,
+                   sess$run(gradients, feed_dict = parameter_dict)))
+
     },
 
     # return the current values of the traced nodes, as a named vector
