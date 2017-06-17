@@ -1164,7 +1164,6 @@ wishart_distribution <- R6Class (
       # handle reshaping via a greta array
       k <- self$dim[1]
       free_greta_array <- vble(dim = k + k * (k - 1) / 2)
-      free_greta_array <- vble(dim = prod(self$dim))
       free_greta_array$constraint = "covariance_matrix"
 
       # first create a greta array for the cholesky
@@ -1183,8 +1182,22 @@ wishart_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-      tf$contrib$distributions$WishartFull(df = parameters$df,
-                                           scale = parameters$Sigma)
+
+      # if there is a cholesky factor for Sigma,use that
+      is_cholesky <- !is.null(self$parameters$Sigma$representations$cholesky_factor)
+
+      if (is_cholesky) {
+
+        tf$contrib$distributions$WishartCholesky(df = parameters$df,
+                                                 scale = parameters$Sigma)
+
+      } else {
+
+        tf$contrib$distributions$WishartFull(df = parameters$df,
+                                             scale = parameters$Sigma)
+
+      }
+
     },
 
     tf_log_density_function = function (x, parameters) {

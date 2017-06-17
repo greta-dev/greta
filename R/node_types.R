@@ -273,21 +273,28 @@ variable_node <- R6Class (
       }
 
       ljac_corr_mat <- function (x) {
+
         # find dimension
         n <- x$get_shape()$as_list()[1]
-        k <- (1 + sqrt(8 * n + 1)) / 2
+        K <- (1 + sqrt(8 * n + 1)) / 2
 
         # draw the rest of the owl
         l1mz2 <- tf$log(1 - tf$square(tf$tanh(x)))
-        i <- rep(1:(k - 1), (k - 1) : 1)
-        a <- fl(k - i - 1) * l1mz2
+        i <- rep(1:(K - 1), (K - 1) : 1)
+        a <- fl(K - i - 1) * l1mz2
         fl(0.5) * tf$reduce_sum(a) + tf$reduce_sum(l1mz2)
+
       }
 
       ljac_cov_mat <- function (x) {
-        # to do!
-        warning('gah!')
-        fl(0)
+
+        # find dimension
+        n <- x$get_shape()$as_list()[1]
+        K <- (sqrt(8 * n + 1) - 1) / 2
+
+        k <- seq_len(K)
+        fl(K * log(2)) + tf$reduce_sum(fl(K - k + 2) * x[k - 1])
+
       }
 
       fun <- switch (self$constraint,
