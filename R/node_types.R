@@ -284,12 +284,19 @@ variable_node <- R6Class (
         fl(0.5) * tf$reduce_sum(a) + tf$reduce_sum(l1mz2)
       }
 
+      ljac_cov_mat <- function (x) {
+        # to do!
+        warning('gah!')
+        fl(0)
+      }
+
       fun <- switch (self$constraint,
                      none = ljac_none,
                      high = ljac_log1pe,
                      low = ljac_log1pe,
                      both = ljac_logistic,
-                     correlation_matrix = ljac_corr_mat)
+                     correlation_matrix = ljac_corr_mat,
+                     covariance_matrix = ljac_cov_mat)
 
       fun(free)
 

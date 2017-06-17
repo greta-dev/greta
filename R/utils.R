@@ -243,16 +243,22 @@ tf_lbeta <- function (a, b)
 # square matrix
 tf_flat_to_chol = function (x, dims) {
 
-  # create a dummy array to find the indices
+  # indices to the cholesky factor
   L_dummy <- dummy(dims)
-  indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
+  indices_diag <- diag(L_dummy)
+  indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
+
+  # indices to the free state
+  x_index_diag <- seq_along(indices_diag) - 1
+  x_index_offdiag <- length(indices_diag) + seq_along(indices_offdiag) - 1
 
   # create an empty vector to fill with the values
-  values <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
-  values <- tf_recombine(values, indices, x)
+  values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
+  values_0_diag <- tf_recombine(values_0, indices_diag, tf$exp(x[x_index_diag]))
+  values_z <- tf_recombine(values_0_diag, indices_offdiag, x[x_index_offdiag])
 
   # reshape into lower triangular and return
-  tf$reshape(values, shape(dims[1], dims[2]))
+  tf$reshape(values_z, shape(dims[1], dims[2]))
 
 }
 
@@ -410,7 +416,8 @@ cleanly <- function (expr) {
   # if it errored
   if (inherits(res, 'error')) {
 
-    numerical_messages <- c("is not invertible")
+    numerical_messages <- c("is not invertible",
+                            "Cholesky decomposition was not successful")
 
     numerical_errors <- vapply(numerical_messages,
                                grepl,

@@ -1165,10 +1165,20 @@ wishart_distribution <- R6Class (
       k <- self$dim[1]
       free_greta_array <- vble(dim = k + k * (k - 1) / 2)
       free_greta_array <- vble(dim = prod(self$dim))
+      free_greta_array$constraint = "covariance_matrix"
 
+      # first create a greta array for the cholesky
       chol_greta_array <- flat_to_chol(free_greta_array, self$dim)
+
+      # create symmetric matrix to return as target node
       matrix_greta_array <- chol_to_symmetric(chol_greta_array)
-      matrix_greta_array$node
+      target_node <- matrix_greta_array$node
+
+      # assign the cholesky factor as a representation of it
+      target_node$representations$cholesky_factor <- chol_greta_array$node
+
+      # return the symmetric node
+      target_node
 
     },
 
