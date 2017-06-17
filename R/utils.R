@@ -278,16 +278,20 @@ tf_flat_to_chol_correl = function (x, dims) {
   values_list[[1]] <- tf$reshape(y[y_index_list[[1]]], shape(k - 1))
   sum_sqs <- tf$square(values_list[[1]])
 
-  for (i in 2:(k - 1)) {
-    # relevant columns (0-indexed)
-    idx <- i:(k - 1) - 1
-    # components of z on this row (straight from y)
-    z <- tf$reshape(y[y_index_list[[i]]], shape(k - i))
-    # assign to w, using relevant parts of the sum of squares
-    values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs[idx])
-    # increment sum of squares
-    sum_sqs_part <- tf$square(values_list[[i]]) + sum_sqs[idx]
-    sum_sqs <- tf_recombine(sum_sqs, idx, sum_sqs_part)
+  if (k > 2) {
+
+    for (i in 2:(k - 1)) {
+      # relevant columns (0-indexed)
+      idx <- i:(k - 1) - 1
+      # components of z on this row (straight from y)
+      z <- tf$reshape(y[y_index_list[[i]]], shape(k - i))
+      # assign to w, using relevant parts of the sum of squares
+      values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs[idx])
+      # increment sum of squares
+      sum_sqs_part <- tf$square(values_list[[i]]) + sum_sqs[idx]
+      sum_sqs <- tf_recombine(sum_sqs, idx, sum_sqs_part)
+    }
+
   }
 
   # dummy array to find the indices
