@@ -242,11 +242,11 @@ variable_node <- R6Class (
 
       } else if (self$constraint == 'low') {
 
-        y <- fl(upper) - tf_log1pe(x)
+        y <- fl(upper) - tf$exp(x)
 
       } else if (self$constraint == 'high') {
 
-        y <- tf_log1pe(x) + fl(lower)
+        y <- tf$exp(x) + fl(lower)
 
       } else {
 
@@ -264,8 +264,8 @@ variable_node <- R6Class (
       ljac_none <- function (x)
         fl(0)
 
-      ljac_log1pe <- function (x)
-        -tf$reduce_sum(tf_log1pe(x * -1))
+      ljac_exp <- function (x)
+        tf$reduce_sum(x)
 
       ljac_logistic <- function (x) {
         lrange <- log(self$upper - self$lower)
@@ -299,8 +299,8 @@ variable_node <- R6Class (
 
       fun <- switch (self$constraint,
                      none = ljac_none,
-                     high = ljac_log1pe,
-                     low = ljac_log1pe,
+                     high = ljac_exp,
+                     low = ljac_exp,
                      both = ljac_logistic,
                      correlation_matrix = ljac_corr_mat,
                      covariance_matrix = ljac_cov_mat)
