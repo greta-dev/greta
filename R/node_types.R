@@ -280,9 +280,11 @@ variable_node <- R6Class (
 
         # draw the rest of the owl
         l1mz2 <- tf$log(1 - tf$square(tf$tanh(x)))
-        i <- rep(1:(K - 1), (K - 1) : 1)
-        a <- fl(K - i - 1) * l1mz2
-        fl(0.5) * tf$reduce_sum(a) + tf$reduce_sum(l1mz2)
+        i <- rep(1:(K - 1), (K - 1):1)
+        powers <- tf$constant(K - i - 1,
+                              dtype = tf_float(),
+                              shape = shape(length(i), 1))
+        fl(0.5) * tf$reduce_sum(powers * l1mz2) + tf$reduce_sum(l1mz2)
 
       }
 
@@ -293,7 +295,8 @@ variable_node <- R6Class (
         K <- (sqrt(8 * n + 1) - 1) / 2
 
         k <- seq_len(K)
-        fl(K * log(2)) + tf$reduce_sum(fl(K - k + 2) * x[k - 1])
+        powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = c(K, 1))
+        fl(K * log(2)) + tf$reduce_sum(powers * x[k - 1])
 
       }
 
