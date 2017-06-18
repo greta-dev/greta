@@ -2,12 +2,9 @@
 % Please edit documentation in R/variable.R
 \name{variable}
 \alias{variable}
-\alias{free}
-\title{greta variables}
+\title{create greta variables}
 \usage{
 variable(lower = -Inf, upper = Inf, dim = 1)
-
-free(lower = -Inf, upper = Inf, dim = 1)
 }
 \arguments{
 \item{lower, upper}{scalar values giving optional limits to variables. These
@@ -24,10 +21,7 @@ or a vector of positive integers. See details.}
   parameters, to be lerned during model fitting. These parameters are not
   associated with a probability distribution. To create a variable greta
   array following a specific probability distribution, see
-  \code{\link{greta-distributions}}.
-
- \code{free()} is an alias for \code{variable()}. It is deprecated and
- will be removed in version 0.2
+  \code{\link{distributions}}.
 }
 \details{
 \code{lower} and \code{upper} must be fixed, they cannot be greta arrays.

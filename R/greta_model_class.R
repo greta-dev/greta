@@ -1,14 +1,14 @@
 # greta_model objects
 
-#' @name greta-model
-#' @title Greta Model Objects
+#' @name model
+#' @title greta model objects
 #' @description Create a \code{greta_model} object representing a statistical
 #'   model (using \code{model}), and plot a graphical representation of the
 #'   model. Statistical inference can be performed on \code{greta_model} objects
 #'   with \code{\link{mcmc}}
 NULL
 
-#' @rdname greta-model
+#' @rdname model
 #' @export
 #' @importFrom parallel detectCores
 #'
@@ -172,7 +172,7 @@ model <- function (...,
 
 }
 
-#' @name greta-model
+#' @name model
 #'
 #' @details \code{define_model} is an alias for \code{model}. It is deprecated,
 #'   and will be removed in version 0.2.
@@ -188,14 +188,14 @@ as.greta_model.dag_class <- function (x, ...) {
   ans
 }
 
-#' @rdname greta-model
+#' @rdname model
 #' @param x a \code{greta_model} object
 #' @export
 print.greta_model <- function (x, ...) {
   cat('greta model')
 }
 
-#' @rdname greta-model
+#' @rdname model
 #' @param y unused default argument
 #'
 #' @details The plot method produces a visual representation of the defined

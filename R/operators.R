@@ -1,11 +1,10 @@
-#' @name greta-operators
+#' @name operators
 #'
-#' @title Operators for Greta Arrays
+#' @title arithmetic, logical and relational operators for greta grrays
 #'
 #' @description This is a list of currently implemented arithmetic, logical and
-#'   relational operators, and extract/replace syntax to combine greta arrays
-#'   into probabilistic models. Also see \link{greta-functions} and
-#'   \link{greta-transforms}.
+#'   relational operators to combine greta arrays into probabilistic models.
+#'   Also see \link{functions} and \link{transforms}.
 #'
 #' @section Usage: \preformatted{
 #'  # arithmetic operators
@@ -123,7 +122,7 @@ NULL
 `%*%.default` <- function (x, y)
   .Primitive("%*%")(x, y)
 
-#' @rdname greta-overloaded
+#' @rdname overloaded
 #' @export
 `%*%` <- function (x, y) {
 

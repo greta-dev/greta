@@ -1,19 +1,17 @@
 # syntax definitions
 
 #' @name distribution
-#' @aliases distribution likelihood
-#' @title Define a Distribution Over a greta Array
+#' @aliases distribution
+#' @title define a distribution over data
 #' @description \code{distribution} links observed data, variables, and other
 #'   greta arrays to probability distributions. For example a model likelhood
 #'   can be set by using \code{distribution} on some observed data.
-#'   \code{likelihood} is an alias for \code{distribution}. It is deprecated and
-#'   will be removed in version 0.2.
 #'
 #' @param greta_array a greta array. For the assignment method it must be a
 #'   greta array that doesn't already have a probability distribution.
 #'
 #' @param value a greta array with a distribution (see
-#'   \code{\link{greta-distributions}})
+#'   \code{\link{distributions}})
 #'
 #' @details The extract method returns the greta array if it has a distribution,
 #'   or \code{NULL} if it doesn't. It has now real function, but is included for
@@ -144,7 +142,3 @@ distribution <- function (greta_array) {
   distrib
 
 }
-
-#' @rdname distribution
-#' @export
-`likelihood<-` <- `distribution<-`

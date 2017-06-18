@@ -202,7 +202,7 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
 
 #' @name dynamics-module
 #' @aliases dynamics
-#' @title Functions for modelling dynamical systems
+#' @title methods for modelling structured dynamical systems
 #'
 #' @description A module providing functions specific to dynamical modelling. So
 #'   far only for iterating Leslie matrices. \code{iterate_lambda} iterates a

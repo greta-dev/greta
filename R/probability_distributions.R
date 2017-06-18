@@ -1321,8 +1321,8 @@ distrib <- function (distribution, ...) {
 
 # export constructors
 
-#' @name greta-distributions
-#' @title greta probability distributions
+#' @name distributions
+#' @title probability distributions
 #' @description These functions can be used to define random variables in a
 #'   greta model. They return a variable greta array that follows the specified
 #'   distribution. This variable greta array can be used to represent a
@@ -1456,7 +1456,7 @@ distrib <- function (distribution, ...) {
 #' theta = wishart(df = 5, Sigma = Sig)
 NULL
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 uniform <- function (min, max, dim = NULL) {
 
@@ -1467,137 +1467,137 @@ uniform <- function (min, max, dim = NULL) {
 
 }
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 normal <- function (mean, sd, dim = NULL)
   distrib('normal', mean, sd, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 lognormal <- function (meanlog, sdlog, dim = NULL)
   distrib('lognormal', meanlog, sdlog, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 bernoulli <- function (prob, dim = NULL)
   distrib('bernoulli', prob, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 binomial <- function (size, prob, dim = NULL)
   distrib('binomial', size, prob, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 beta_binomial <- function (size, alpha, beta, dim = NULL)
   distrib('beta_binomial', size, alpha, beta, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 negative_binomial <- function (size, prob, dim = NULL)
   distrib('negative_binomial', size, prob, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 hypergeometric <- function (m, n, k, dim = NULL)
   distrib('hypergeometric', m, n, k, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 poisson <- function (lambda, dim = NULL)
   distrib('poisson', lambda, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 gamma <- function (shape, rate, dim = NULL)
   distrib('gamma', shape, rate, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 inverse_gamma <- function (alpha, beta, dim = NULL)
   distrib('inverse_gamma', alpha, beta, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 weibull <- function (shape, scale, dim = NULL)
   distrib('weibull', shape, scale, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 exponential <- function (rate, dim = NULL)
   distrib('exponential', rate, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 pareto <- function (a, b, dim = NULL)
   distrib('pareto', a, b, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 student <- function (df, mu, sigma, dim = NULL)
   distrib('student', df, mu, sigma, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 laplace <- function (mu, sigma, dim = NULL)
   distrib('laplace', mu, sigma, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 beta <- function (shape1, shape2, dim = NULL)
   distrib('beta', shape1, shape2, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 cauchy <- function (location, scale, dim = NULL)
   distrib('cauchy', location, scale, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 chi_squared <- function (df, dim = NULL)
   distrib('chi_squared', df, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 logistic <- function (location, scale, dim = NULL)
   distrib('logistic', location, scale, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 f <- function (df1, df2, dim = NULL)
   distrib('f', df1, df2, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 multivariate_normal <- function (mean, Sigma, dim = 1)
   distrib('multivariate_normal', mean, Sigma, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 wishart <- function (df, Sigma)
   distrib('wishart', df, Sigma)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 lkj_correlation <- function (eta, dim = 2)
   distrib('lkj_correlation', eta, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 multinomial <- function (size, prob, dim = 1)
   distrib('multinomial', size, prob, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 categorical <- function (prob, dim = 1)
   distrib('categorical', prob, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 dirichlet <- function (alpha, dim = 1)
   distrib('dirichlet', alpha, dim)
 
-#' @rdname greta-distributions
+#' @rdname distributions
 #' @export
 dirichlet_multinomial <- function (size, alpha, dim = 1)
   distrib('dirichlet_multinomial', size, alpha, dim)

@@ -1,4 +1,4 @@
-#' @name greta-overloaded
+#' @name overloaded
 #'
 #' @title Functions overloaded by greta
 #'

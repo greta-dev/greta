@@ -1,10 +1,10 @@
-#' @name greta-inference
-#' @title Statistical Inference on Greta Models
+#' @name inference
+#' @title statistical inference on greta models
 #' @description Carry out statistical inference on greta models by
 #'   MCMC or likelihood/posterior optimisation.
 NULL
 
-#' @rdname greta-inference
+#' @rdname inference
 #' @export
 #' @importFrom stats na.omit
 #'
@@ -39,7 +39,7 @@ greta_stash <- new.env()
 stash_trace <- function (trace)
   assign('trace_stash', trace, envir = greta_stash)
 
-#' @rdname greta-inference
+#' @rdname inference
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
@@ -243,7 +243,7 @@ prepare_draws <- function (draws) {
 }
 
 
-#' @rdname greta-inference
+#' @rdname inference
 #' @export
 #'
 #' @param max_iterations the maximum number of iterations before giving up
