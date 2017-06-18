@@ -1417,7 +1417,7 @@ distrib <- function (distribution, ...) {
 #'    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
 #'    \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
 #'    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
-#'    \code{onion} \tab \code{\href{}{rethinking::dlkjcorr}}\cr }
+#'    \code{onion} \tab \code{\href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}}\cr }
 #'
 #' @examples
 #' # a uniform parameter constrained to be between 0 and 1

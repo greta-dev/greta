@@ -282,7 +282,7 @@ test_that('multivariate normal distribution has correct density', {
   # parameters to test
   m <- 5
   mn <- rnorm(m)
-  sig <- rWishart(1, m + 1, diag(m))[, , 1]
+  sig <- MCMCpack::rwish(m + 1, diag(m))
 
   # function converting Sigma to sigma
   dmvnorm2 <- function (x, mean, Sigma, log = FALSE)
@@ -304,7 +304,7 @@ test_that('Wishart distribution has correct density', {
   # parameters to test
   m <- 5
   df <- m + 1
-  sig <- rWishart(1, df, diag(m))[, , 1]
+  sig <- MCMCpack::rwish(df, diag(m))
 
   # wrapper for argument names
   dwishart <- function (x, df, Sigma, log = FALSE) {
@@ -319,7 +319,7 @@ test_that('Wishart distribution has correct density', {
                           compare_distribution(greta::wishart,
                                                dwishart,
                                                parameters = list(df = df, Sigma = sig),
-                                               x = rWishart(1, df, sig)[, , 1]))
+                                               x = MCMCpack::rwish(df, sig)))
 
   expect_true(all(difference < 1e-4))
 
@@ -471,7 +471,7 @@ test_that('scalar-valued distributions can be defined in models', {
   model(uniform(-13, 2.4))
 
   # multivariate continuous distributions
-  sig <- rWishart(4, 3, diag(3))[, , 1]
+  sig <- MCMCpack::rwish(1, 4, diag(3))
 
   model(multivariate_normal(rnorm(3), sig))
   model(wishart(4, sig))
@@ -547,7 +547,7 @@ test_that('array-valued distributions can be defined in models', {
   model(f(24.3, 2.4, dim = dim))
 
   # multivariate continuous distributions
-  sig <- rWishart(4, 3, diag(3))[, , 1]
+  sig <- MCMCpack:::rwish(4, diag(3))
   model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
   model(dirichlet(runif(3), dim = dim[1]))
 
@@ -633,7 +633,7 @@ test_that('distributions can be sampled from', {
   sample_distribution(uniform(-13, 2.4), lower = -13, upper = 2.4)
 
   # multivariate continuous
-  sig <- rWishart(4, 3, diag(3))[, , 1]
+  sig <- MCMCpack::rwish(4, diag(3))
   sample_distribution(multivariate_normal(rnorm(3), sig))
   sample_distribution(wishart(4, sig))
   sample_distribution(dirichlet(runif(3)))
