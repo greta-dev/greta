@@ -43,28 +43,33 @@ create_progress_bar <- function (phase, iter, ...) {
 # 'pb' is a progress_bar R6 object created by create_progress_bar
 # 'it' is the current iteration
 # 'rejects' is the total number of rejections so far due o numerical instability
-iterate_progress_bar <- function (pb, it, rejects) {
+iterate_progress_bar <- function (pb, it, rejects, increment = 10) {
 
-  if (rejects > 0) {
-    reject_perc <- 100 * rejects / it
-    if (reject_perc < 1) {
-      reject_perc_string <- '<1'
+  if (it %% increment == 0) {
+
+    if (rejects > 0) {
+      reject_perc <- 100 * rejects / it
+      if (reject_perc < 1) {
+        reject_perc_string <- '<1'
+      } else {
+        reject_perc_string <- prettyNum(round(reject_perc))
+      }
+      # pad the end of the line to keep the update bar a consistent width
+      pad_char <- pmax(0, 2 - nchar(reject_perc_string))
+      pad <- paste0(rep(' ', pad_char), collapse = '')
+
+      reject_text <- paste0('| ', reject_perc_string, '% bad', pad)
     } else {
-      reject_perc_string <- prettyNum(round(reject_perc))
+      reject_text <- '         '
     }
-    # pad the end of the line to keep the update bar a consistent width
-    pad_char <- pmax(0, 2 - nchar(reject_perc_string))
-    pad <- paste0(rep(' ', pad_char), collapse = '')
 
-    reject_text <- paste0('| ', reject_perc_string, '% bad', pad)
-  } else {
-    reject_text <- '         '
+    total <- pb$.__enclos_env__$private$total
+    iter_pretty <- prettyNum(it, width = nchar(total))
+
+    invisible(pb$tick(increment,
+                      tokens = list(iter = iter_pretty,
+                                    rejection = reject_text)))
+
   }
-
-  total <- pb$.__enclos_env__$private$total
-  iter_pretty <- prettyNum(it, width = nchar(total))
-
-  invisible(pb$tick(tokens = list(iter = iter_pretty,
-                                  rejection = reject_text)))
 
 }

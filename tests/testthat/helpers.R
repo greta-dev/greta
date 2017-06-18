@@ -299,9 +299,10 @@ cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
 mock_create_progress_bar <- function(...)
   cpb(..., stream = stdout(), force = TRUE)
 
-mock_mcmc <- function (n_samples = 101) {
+mock_mcmc <- function (n_samples = 1010) {
   pb <- create_progress_bar('sampling', c(0, n_samples))
-  iterate_progress_bar(pb, n_samples, rejects = 1)
+  # for (i in seq_len(n_samples))
+  iterate_progress_bar(pb, n_samples, rejects = 10)
 }
 
 # apparently testthat can't see these

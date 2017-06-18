@@ -58,7 +58,7 @@ test_that('rejected mcmc proposals', {
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     m <- model(z),
-    out <- capture_output(mcmc(m, n_samples = 1, warmup = 0)),
+    out <- capture_output(mcmc(m, n_samples = 10, warmup = 0)),
     expect_match(out, '100% bad')
   )
 
@@ -90,27 +90,27 @@ test_that('progress bar gives a range of messages', {
 
   source('helpers.R')
 
-  # 1/101 should be <1%
+  # 10/1010 should be <1%
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(101)),
+    out <- capture_output(mcmc(1010)),
     expect_match(out, '<1% bad')
   )
 
-  # 1/50 should be 50%
+  # 10/500 should be 50%
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(50)),
+    out <- capture_output(mcmc(500)),
     expect_match(out, '2% bad')
   )
 
-  # 1/1 should be 100%
+  # 10/10 should be 100%
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(1)),
+    out <- capture_output(mcmc(10)),
     expect_match(out, '100% bad')
   )
 
