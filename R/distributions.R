@@ -1416,7 +1416,7 @@ distrib <- function (distribution, ...) {
 #'    \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
 #'    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
 #'    \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
-#'    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
+#'    \code{wishart} \tab \code{\link[stats:rWishart]{stats::rWishart}}\cr
 #'    \code{lkj_correlation} \tab \code{\href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}}\cr }
 #'
 #' @examples
