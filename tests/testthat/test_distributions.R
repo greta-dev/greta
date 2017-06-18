@@ -325,6 +325,38 @@ test_that('Wishart distribution has correct density', {
 
 })
 
+test_that('onion distribution has correct density', {
+
+  source('helpers.R')
+
+  # parameters to test
+  m <- 5
+  eta <- 3
+
+  # onion density
+  donion <- function (x, eta, log = FALSE) {
+    res <- det(x) ^ (eta - 1)
+    if (log) res <- log(res)
+    return (res)
+  }
+
+  ronion <- function (m) {
+    wish <- MCMCpack::rwish(m + 1, diag(m))
+    iwish <- solve(wish)
+    cov2cor(iwish)
+  }
+
+  # no vectorised onion, so loop through all of these
+  difference <- replicate(10,
+                          compare_distribution(greta::onion,
+                                               donion,
+                                               parameters = list(eta = eta),
+                                               x = ronion(m)))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('multinomial distribution has correct density', {
 
   source('helpers.R')
@@ -471,7 +503,7 @@ test_that('scalar-valued distributions can be defined in models', {
   model(uniform(-13, 2.4))
 
   # multivariate continuous distributions
-  sig <- MCMCpack::rwish(1, 4, diag(3))
+  sig <- MCMCpack::rwish(4, diag(3))
 
   model(multivariate_normal(rnorm(3), sig))
   model(wishart(4, sig))
