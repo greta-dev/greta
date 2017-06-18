@@ -320,8 +320,8 @@ tf_flat_to_chol_correl = function (x, dims) {
 
 }
 
-tf_chol_to_symmetric <- function (L)
-  tf$matmul(tf$transpose(L), L)
+tf_chol_to_symmetric <- function (U)
+  tf$matmul(tf$transpose(U), U)
 
 flat_to_chol <- function (x, dim, correl = FALSE) {
 

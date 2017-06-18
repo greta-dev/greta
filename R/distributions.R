@@ -644,7 +644,6 @@ chi_squared_distribution <- R6Class (
   )
 )
 
-
 logistic_distribution <- R6Class (
   'logistic_distribution',
   inherit = distribution_node,
