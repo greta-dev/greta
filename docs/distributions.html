@@ -351,9 +351,9 @@ These functions can be used to define random variables in a greta model. They re
 </h2>
 <pre class="r"><span class='fu'>uniform</span>(<span class='no'>min</span>, <span class='no'>max</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>normal</span>(<span class='no'>mean</span>, <span class='no'>sd</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>normal</span>(<span class='no'>mean</span>, <span class='no'>sd</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(-<span class='fl'>Inf</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>lognormal</span>(<span class='no'>meanlog</span>, <span class='no'>sdlog</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lognormal</span>(<span class='no'>meanlog</span>, <span class='no'>sdlog</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
 <span class='fu'>bernoulli</span>(<span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
@@ -367,29 +367,29 @@ These functions can be used to define random variables in a greta model. They re
 
 <span class='fu'>poisson</span>(<span class='no'>lambda</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>gamma</span>(<span class='no'>shape</span>, <span class='no'>rate</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>gamma</span>(<span class='no'>shape</span>, <span class='no'>rate</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>inverse_gamma</span>(<span class='no'>alpha</span>, <span class='no'>beta</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>inverse_gamma</span>(<span class='no'>alpha</span>, <span class='no'>beta</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>weibull</span>(<span class='no'>shape</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>weibull</span>(<span class='no'>shape</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>exponential</span>(<span class='no'>rate</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>exponential</span>(<span class='no'>rate</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>pareto</span>(<span class='no'>a</span>, <span class='no'>b</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>pareto</span>(<span class='no'>a</span>, <span class='no'>b</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>student</span>(<span class='no'>df</span>, <span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>student</span>(<span class='no'>df</span>, <span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(-<span class='fl'>Inf</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>laplace</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>laplace</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(-<span class='fl'>Inf</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>beta</span>(<span class='no'>shape1</span>, <span class='no'>shape2</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>beta</span>(<span class='no'>shape1</span>, <span class='no'>shape2</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>))
 
-<span class='fu'>cauchy</span>(<span class='no'>location</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>cauchy</span>(<span class='no'>location</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(-<span class='fl'>Inf</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>chi_squared</span>(<span class='no'>df</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>chi_squared</span>(<span class='no'>df</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>logistic</span>(<span class='no'>location</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>logistic</span>(<span class='no'>location</span>, <span class='no'>scale</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(-<span class='fl'>Inf</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>f</span>(<span class='no'>df1</span>, <span class='no'>df2</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>f</span>(<span class='no'>df1</span>, <span class='no'>df2</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
 <span class='fu'>multivariate_normal</span>(<span class='no'>mean</span>, <span class='no'>Sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
 
@@ -422,6 +422,10 @@ unconstrained parameters
 <code>sd</code>, <code>sdlog</code>, <code>sigma</code>, <code>lambda</code>, <code>shape</code>, <code>rate</code>, <code>df</code>, <code>scale</code>, <code>shape1</code>, <code>shape2</code>, <code>alpha</code>, <code>beta</code>, <code>df1</code>, <code>df2</code>, <code>a</code>, <code>b</code>, <code>eta</code>
 <p>
 positive parameters, <code>alpha</code> must be a vector for <code>dirichlet</code> and <code>dirichlet_multinomial</code>.
+</p>
+<code>truncation</code>
+<p>
+a length-two vector giving values between which to truncate the distribution, similarly to the <code>lower</code> and <code>upper</code> arguments to <code><a href='variable.html'>variable</a></code>
 </p>
 <code>prob</code>
 <p>
