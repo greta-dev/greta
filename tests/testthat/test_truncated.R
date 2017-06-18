@@ -47,7 +47,7 @@ test_that('truncated lognormal has correct densities', {
                                                'lnorm',
                                                parameters = list(meanlog = -1,
                                                                  sdlog = 2.4),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, Inf))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -63,7 +63,7 @@ test_that('truncated lognormal has correct densities', {
                                                'lnorm',
                                                parameters = list(meanlog = -1,
                                                                  sdlog = 2.4),
-                                               truncation = c(-Inf, 2))
+                                               truncation = c(0, 2))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated
@@ -72,82 +72,6 @@ test_that('truncated lognormal has correct densities', {
                                                parameters = list(meanlog = -1,
                                                                  sdlog = 2.4),
                                                truncation = c(2, 4))
-  expect_true(all(difference < 1e-4))
-
-})
-
-test_that('truncated uniform has correct densities', {
-
-  source('helpers.R')
-
-  # non-truncated
-  difference <- compare_truncated_distribution(uniform,
-                                               'unif',
-                                               parameters = list(min = -1,
-                                                                 max = 5),
-                                               truncation = c(-Inf, Inf))
-  expect_true(all(difference < 1e-4))
-
-  # positive-truncated
-  difference <- compare_truncated_distribution(uniform,
-                                               'unif',
-                                               parameters = list(min = -1,
-                                                                 max = 5),
-                                               truncation = c(0, Inf))
-  expect_true(all(difference < 1e-4))
-
-  # negative-truncated
-  difference <- compare_truncated_distribution(uniform,
-                                               'unif',
-                                               parameters = list(min = -1,
-                                                                 max = 5),
-                                               truncation = c(-Inf, 4))
-  expect_true(all(difference < 1e-4))
-
-  # fully-truncated
-  difference <- compare_truncated_distribution(uniform,
-                                               'unif',
-                                               parameters = list(min = -1,
-                                                                 max = 5),
-                                               truncation = c(1, 2))
-  expect_true(all(difference < 1e-4))
-
-})
-
-test_that('truncated uniform has correct densities', {
-
-  source('helpers.R')
-
-  # non-truncated
-  difference <- compare_truncated_distribution(uniform,
-                                               'unif',
-                                               parameters = list(min = -1,
-                                                                 max = 5),
-                                               truncation = c(-Inf, Inf))
-  expect_true(all(difference < 1e-4))
-
-  # positive-truncated
-  difference <- compare_truncated_distribution(uniform,
-                                               'unif',
-                                               parameters = list(min = -1,
-                                                                 max = 5),
-                                               truncation = c(0, Inf))
-  expect_true(all(difference < 1e-4))
-
-  # negative-truncated
-  difference <- compare_truncated_distribution(uniform,
-                                               'unif',
-                                               parameters = list(min = -1,
-                                                                 max = 5),
-                                               truncation = c(-Inf, 4))
-  expect_true(all(difference < 1e-4))
-
-  # fully-truncated
-  difference <- compare_truncated_distribution(uniform,
-                                               'unif',
-                                               parameters = list(min = -1,
-                                                                 max = 5),
-                                               truncation = c(1, 2))
   expect_true(all(difference < 1e-4))
 
 })
@@ -161,7 +85,7 @@ test_that('truncated gamma has correct densities', {
                                                'gamma',
                                                parameters = list(shape = 2,
                                                                  rate = 2),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, Inf))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -177,7 +101,7 @@ test_that('truncated gamma has correct densities', {
                                                'gamma',
                                                parameters = list(shape = 2,
                                                                  rate = 2),
-                                               truncation = c(-Inf, 2))
+                                               truncation = c(0, 2))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated
@@ -199,7 +123,7 @@ test_that('truncated inverse gamma has correct densities', {
                                                'invgamma',
                                                parameters = list(alpha = 2,
                                                                  beta = 1.2),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, Inf))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -215,7 +139,7 @@ test_that('truncated inverse gamma has correct densities', {
                                                'invgamma',
                                                parameters = list(alpha = 2,
                                                                  beta = 1.2),
-                                               truncation = c(-Inf, 2))
+                                               truncation = c(0, 2))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated
@@ -237,7 +161,7 @@ test_that('truncated weibull has correct densities', {
                                                'weibull',
                                                parameters = list(shape = 2,
                                                                  scale = 1.2),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, Inf))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -253,7 +177,7 @@ test_that('truncated weibull has correct densities', {
                                                'weibull',
                                                parameters = list(shape = 2,
                                                                  scale = 1.2),
-                                               truncation = c(-Inf, 2))
+                                               truncation = c(0, 2))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated
@@ -274,7 +198,7 @@ test_that('truncated exponential has correct densities', {
   difference <- compare_truncated_distribution(exponential,
                                                'exp',
                                                parameters = list(rate = 2),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, Inf))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -288,7 +212,7 @@ test_that('truncated exponential has correct densities', {
   difference <- compare_truncated_distribution(exponential,
                                                'exp',
                                                parameters = list(rate = 2),
-                                               truncation = c(-Inf, 2))
+                                               truncation = c(0, 2))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated
@@ -308,7 +232,7 @@ test_that('truncated pareto has correct densities', {
   difference <- compare_truncated_distribution(preto,
                                                'preto',
                                                parameters = list(a_ = 1.9, b_ = 4.3),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, Inf))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -322,7 +246,7 @@ test_that('truncated pareto has correct densities', {
   difference <- compare_truncated_distribution(preto,
                                                'preto',
                                                parameters = list(a_ = 1.9, b_ = 4.3),
-                                               truncation = c(-Inf, 21.3))
+                                               truncation = c(0, 21.3))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated
@@ -424,7 +348,7 @@ test_that('truncated beta has correct densities', {
                                                'beta',
                                                parameters = list(shape1 = 2.1,
                                                                  shape2 = 2.3),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, 1))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -432,7 +356,7 @@ test_that('truncated beta has correct densities', {
                                                'beta',
                                                parameters = list(shape1 = 2.1,
                                                                  shape2 = 2.3),
-                                               truncation = c(0.1, Inf))
+                                               truncation = c(0.1, 1))
   expect_true(all(difference < 1e-4))
 
   # negative-truncated
@@ -440,7 +364,7 @@ test_that('truncated beta has correct densities', {
                                                'beta',
                                                parameters = list(shape1 = 2.1,
                                                                  shape2 = 2.3),
-                                               truncation = c(-Inf, 0.2))
+                                               truncation = c(0, 0.2))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated
@@ -538,7 +462,7 @@ test_that('truncated f has correct densities', {
                                                'f',
                                                parameters = list(df1 = 1.3,
                                                                  df2 = 4.7),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, Inf))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -554,7 +478,7 @@ test_that('truncated f has correct densities', {
                                                'f',
                                                parameters = list(df1 = 1.3,
                                                                  df2 = 4.7),
-                                               truncation = c(-Inf, 0.2))
+                                               truncation = c(0, 0.2))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated
@@ -575,7 +499,7 @@ test_that('truncated chi squared has correct densities', {
   difference <- compare_truncated_distribution(chi_squared,
                                                'chisq',
                                                parameters = list(df = 9.3),
-                                               truncation = c(-Inf, Inf))
+                                               truncation = c(0, Inf))
   expect_true(all(difference < 1e-4))
 
   # positive-truncated
@@ -589,7 +513,7 @@ test_that('truncated chi squared has correct densities', {
   difference <- compare_truncated_distribution(chi_squared,
                                                'chisq',
                                                parameters = list(df = 9.3),
-                                               truncation = c(-Inf, 0.2))
+                                               truncation = c(0, 0.2))
   expect_true(all(difference < 1e-4))
 
   # fully-truncated

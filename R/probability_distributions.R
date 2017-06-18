@@ -38,6 +38,8 @@ uniform_distribution <- R6Class (
       self$min <- min
       self$max <- max
 
+      self$bounds <- c(min, max)
+
       # initialize the rest
       super$initialize('uniform', dim)
 
@@ -99,6 +101,7 @@ lognormal_distribution <- R6Class (
     initialize = function (meanlog, sdlog, dim, truncation) {
       dim <- check_dims(meanlog, sdlog, target_dim = dim)
       check_positive(truncation)
+      self$bounds <- c(0, Inf)
       super$initialize('lognormal', dim, truncation)
       self$add_parameter(meanlog, 'meanlog')
       self$add_parameter(sdlog, 'sdlog')
@@ -311,6 +314,7 @@ gamma_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(shape, rate, target_dim = dim)
       check_positive(truncation)
+      self$bounds <- c(0, Inf)
       super$initialize('gamma', dim, truncation)
       self$add_parameter(shape, 'shape')
       self$add_parameter(rate, 'rate')
@@ -333,6 +337,7 @@ inverse_gamma_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(alpha, beta, target_dim = dim)
       check_positive(truncation)
+      self$bounds <- c(0, Inf)
       super$initialize('inverse_gamma', dim, truncation)
       self$add_parameter(alpha, 'alpha')
       self$add_parameter(beta, 'beta')
@@ -355,6 +360,7 @@ weibull_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(shape, scale, target_dim = dim)
       check_positive(truncation)
+      self$bounds <- c(0, Inf)
       super$initialize('weibull', dim, truncation)
       self$add_parameter(shape, 'shape')
       self$add_parameter(scale, 'scale')
@@ -393,6 +399,7 @@ exponential_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(rate, target_dim = dim)
       check_positive(truncation)
+      self$bounds <- c(0, Inf)
       super$initialize('exponential', dim, truncation)
       self$add_parameter(rate, 'rate')
     },
@@ -413,6 +420,7 @@ pareto_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(a, b, target_dim = dim)
       check_positive(truncation)
+      self$bounds <- c(0, Inf)
       super$initialize('pareto', dim, truncation)
       self$add_parameter(a, 'a')
       self$add_parameter(b, 'b')
@@ -492,6 +500,7 @@ beta_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(shape1, shape2, target_dim = dim)
       check_unit(truncation)
+      self$bounds <- c(0, 1)
       super$initialize('beta', dim, truncation)
       self$add_parameter(shape1, 'shape1')
       self$add_parameter(shape2, 'shape2')
@@ -548,6 +557,7 @@ chi_squared_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(df, target_dim = dim)
       check_positive(truncation)
+      self$bounds <- c(0, Inf)
       super$initialize('chi_squared', dim, truncation)
       self$add_parameter(df, 'df')
     },
@@ -594,6 +604,7 @@ f_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(df1, df2, target_dim = dim)
       check_positive(truncation)
+      self$bounds <- c(0, Inf)
       super$initialize('d', dim, truncation)
       self$add_parameter(df1, 'df1')
       self$add_parameter(df2, 'df2')
@@ -672,6 +683,7 @@ dirichlet_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
+      self$bounds <- c(0, Inf)
       super$initialize('dirichlet', c(dim, length(alpha)), truncation = c(0, Inf))
       self$add_parameter(alpha, 'alpha')
 
@@ -1210,6 +1222,10 @@ distrib <- function (distribution, ...) {
 #'   distribution. This variable greta array can be used to represent a
 #'   parameter with  prior distribution, or used with \code{\link{distribution}}
 #'   to define a distribution over an existing greta array.
+#'
+#' @param truncation a length-two vector giving values between which to truncate
+#'   the distribution, similarly to the \code{lower} and \code{upper} arguments
+#'   to \code{\link{variable}}
 #'
 #' @param min,max scalar values giving optional limits to \code{uniform}
 #'   variables. Like \code{lower} and \code{upper}, these must be specified as

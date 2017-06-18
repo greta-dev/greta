@@ -330,8 +330,11 @@ variable_node <- R6Class (
 # helper function to create a variable node
 # by default, make x (the node
 # containing the value) a free parameter of the correct dimension
-vble = function (truncation, dim = 1)
+vble = function (truncation, dim = 1) {
+  if (is.null(truncation)) truncation <- c(-Inf, Inf)
   variable_node$new(lower = truncation[1], upper = truncation[2], dim = dim)
+}
+
 
 distribution_node <- R6Class (
   'distribution_node',
@@ -341,10 +344,11 @@ distribution_node <- R6Class (
     discrete = NA,
     target = NULL,
     user_node = NULL,
+    bounds = c(-Inf, Inf),
     truncation = NULL,
     parameters = list(),
 
-    initialize = function (name = 'no distribution', dim = NULL, truncation = c(-Inf, Inf), discrete = FALSE) {
+    initialize = function (name = 'no distribution', dim = NULL, truncation = NULL, discrete = FALSE) {
 
       super$initialize(dim)
 
@@ -354,6 +358,15 @@ distribution_node <- R6Class (
 
       # initialize the target values of this distribution
       self$add_target(self$create_target(truncation))
+
+      # if there's a truncation, it's different from the bounds, and it's a truncatable distribution, set the truncation
+      if (!is.null(truncation) &
+          !identical(truncation, self$bounds) &
+          !is.null(self$tf_cdf_function)) {
+
+        self$truncation <- truncation
+
+      }
 
       # set the target as the user node (user-facing representation) by default
       self$user_node <- self$target
@@ -451,12 +464,12 @@ distribution_node <- R6Class (
       lower <- self$truncation[1]
       upper <- self$truncation[2]
 
-      if (lower == -Inf) {
+      if (lower == self$bounds[1]) {
 
         # if only upper is constrained, just need the cdf at the upper
         offset <- self$tf_log_cdf_function(fl(upper), parameters)
 
-      } else if (upper == Inf) {
+      } else if (upper == self$bounds[2]) {
 
         # if only lower is constrained, get the log of the integral above it
         offset <- tf$log(fl(1) - self$tf_cdf_function(fl(lower), parameters))

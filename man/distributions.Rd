@@ -102,6 +102,10 @@ or a vector of positive integers. See details.}
 
 \item{sd, sdlog, sigma, lambda, shape, rate, df, scale, shape1, shape2, alpha, beta, df1, df2, a, b, eta}{positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.}
 
+\item{truncation}{a length-two vector giving values between which to truncate
+the distribution, similarly to the \code{lower} and \code{upper} arguments
+to \code{\link{variable}}}
+
 \item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
 \code{multinomial} and \code{categorical}}
 

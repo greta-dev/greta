@@ -232,9 +232,7 @@ compare_truncated_distribution <- function (greta_fun,
   r_log_density <- log(r_fun(x))
 
   # create greta array for truncated distribution
-  z <- variable(truncation[1], truncation[2])
-  dist = do.call(greta_fun, parameters)
-  distribution(z) = dist
+  dist = do.call(greta_fun, c(parameters, list(dim = 1, truncation = truncation)))
 
   # set data as the target
   x_ <- as_data(x)
@@ -322,7 +320,7 @@ qstudent <- extraDistr::qnst
 
 # mock up pareto to have differently named parameters (a and b are use for the
 # truncation)
-preto <- function(a_, b_) pareto(a_, b_)
+preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
 dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
 ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
 qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
