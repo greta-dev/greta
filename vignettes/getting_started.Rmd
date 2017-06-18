@@ -36,6 +36,35 @@ file.copy('../man/figures/plotlegend.png',
 
 <hr>
 
+## Installation
+
+If you haven't already, you can install greta from GitHub using the devtools package:
+
+```{r install_greta, eval = FALSE}
+devtools::install_github("goldingn/greta")
+library(greta)
+```
+
+### TensorFlow
+
+Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.0.0 or higher). greta exports `install_tensorflow()` from the `tensorflow` R package, which will attempt to install the latest version of TensorFlow from within your R session.
+
+```{r install_tensorflow, eval = FALSE}
+install_tensorflow()
+```
+
+You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.
+
+### DiagrammeR
+
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because Diagrammer automatically installs a lot of other packages it can take a long time to install, so DiagrammeR isn't installed automatically with greta. If you want to plot models, you can install DiagrammeR from CRAN.
+
+```{r install_diagrammer, eval = FALSE}
+install.packages('DiagrammeR')
+```
+
+<hr>
+
 ## How greta works
 
 greta lets us build statistical models interactively in R, and then sample from them by MCMC. We build greta models with *greta array* objects, which behave much like R's array, matrix and vector objects for numeric data. Like those numeric data objects, greta arrays can be manipulated with functions and mathematical operators to create new greta arrays.
@@ -387,14 +416,6 @@ DiagrammeR::export_graph(gr,
                          height = 105 * 2)
 ```
 <p><img src="figures/likelihood_graph.png" width="500" /></p>
-
-#### Installing DiagrammeR
-
-These plots are made possible by the [DiagrammeR R package](http://rich-iannone.github.io/DiagrammeR/). Installing greta doesn't automatically install DiagrammeR, because DiagrammeR auto-installs a number of other packages, such as igraph, that can be time consuming and tedious to install, and aren't necessary when running greta on high-performance computing systems. If we try to plot but don't already have DiagrammeR installed, greta will prompt us to do so. We can install DiagrammeR and its dependencies with:
-
-```{r install_diagrammer, eval = FALSE}
-install.packages('DiagrammeR')
-```
 
 <hr>
 

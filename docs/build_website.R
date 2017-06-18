@@ -4,11 +4,13 @@ write_topic <- function (data) {
   rmd <- whisker::whisker.render(topic_template, data)
   cat(rmd, file = paste0("docs/", data$name, ".Rmd"))
 }
+
 write_index <- function (data) {
   index_template <- readLines('docs/_index_template.txt')
   rmd <- whisker::whisker.render(index_template, data)
   cat(rmd, file = "docs/reference-index.Rmd")
 }
+
 # codeface and split argument names in a topic
 split_args <- function (topic) {
   for (i in seq_along(topic$arguments)) {
@@ -103,16 +105,16 @@ data_index <- pkgdown:::data_reference_index(pkg)
 # name the sections and their members, by path
 sections <- list(list(title = "creating greta arrays",
                       desc = "Create greta arrays representing observed data or fixed values",
-                      members = c("as_data.html", "greta-structures.html")),
+                      members = c("structures.html", "as_data.html")),
                  list(title = "variables & distributions",
                       desc = "Create variables and assign probability distributions over greta arrays",
-                      members = c("variable.html", "distribution.html", "greta-distributions.html")),
+                      members = c("variable.html", "distributions.html", "distribution.html")),
                  list(title = "manipulating greta arrays",
                       desc = "Functions and operations for modifying greta arrays",
-                      members = c("greta-operators.html", "greta-functions.html", "extract-replace-combine.html", "greta-transforms.html")),
+                      members = c("operators.html", "functions.html", "extract-replace-combine.html", "transforms.html")),
                  list(title = "modelling",
                       desc = "Define and visualise models and fit them to data",
-                      members = c("greta-model.html", "greta-inference.html")),
+                      members = c("model.html", "inference.html")),
                  list(title = "modules",
                       desc = "Collections of methods for doing more specialist analyses",
                       members = c("dynamics-module.html")))
