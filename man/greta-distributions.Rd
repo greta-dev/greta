@@ -25,7 +25,7 @@
 \alias{f}
 \alias{multivariate_normal}
 \alias{wishart}
-\alias{onion}
+\alias{lkj_correlation}
 \alias{multinomial}
 \alias{categorical}
 \alias{dirichlet}
@@ -78,7 +78,7 @@ multivariate_normal(mean, Sigma, dim = 1)
 
 wishart(df, Sigma)
 
-onion(eta, dim = 2)
+lkj_correlation(eta, dim = 2)
 
 multinomial(size, prob, dim = 1)
 
@@ -184,7 +184,7 @@ The discrete probability distributions (\code{bernoulli},
    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
    \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
-   \code{onion} \tab \code{\href{}{rethinking::dlkjcorr}}\cr }
+   \code{lkj_correlation} \tab \code{\href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}}\cr }
 }
 \examples{
 # a uniform parameter constrained to be between 0 and 1

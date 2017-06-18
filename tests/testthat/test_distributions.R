@@ -325,7 +325,7 @@ test_that('Wishart distribution has correct density', {
 
 })
 
-test_that('onion distribution has correct density', {
+test_that('lkj distribution has correct density', {
 
   source('helpers.R')
 
@@ -333,25 +333,25 @@ test_that('onion distribution has correct density', {
   m <- 5
   eta <- 3
 
-  # onion density
-  donion <- function (x, eta, log = FALSE) {
+  # lkj  density
+  dlkj_correlation <- function (x, eta, log = FALSE) {
     res <- det(x) ^ (eta - 1)
     if (log) res <- log(res)
     return (res)
   }
 
-  ronion <- function (m) {
+  rcorrelation <- function (m) {
     wish <- MCMCpack::rwish(m + 1, diag(m))
     iwish <- solve(wish)
     cov2cor(iwish)
   }
 
-  # no vectorised onion, so loop through all of these
+  # no vectorised lkj, so loop through all of these
   difference <- replicate(10,
-                          compare_distribution(greta::onion,
-                                               donion,
+                          compare_distribution(greta::lkj_correlation,
+                                               dlkj_correlation,
                                                parameters = list(eta = eta),
-                                               x = ronion(m)))
+                                               x = rcorrelation(m)))
 
   expect_true(all(difference < 1e-4))
 

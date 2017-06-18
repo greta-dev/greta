@@ -1211,8 +1211,8 @@ wishart_distribution <- R6Class (
   )
 )
 
-onion_distribution <- R6Class (
-  'onion_distribution',
+lkj_correlation_distribution <- R6Class (
+  'lkj_correlation_distribution',
   inherit = distribution_node,
   public = list(
 
@@ -1232,7 +1232,7 @@ onion_distribution <- R6Class (
       # add the nodes as children and parameters
       eta <- as.greta_array(eta)
 
-      super$initialize('onion', c(dim, dim))
+      super$initialize('lkj_correlation', c(dim, dim))
       self$add_parameter(eta, 'eta')
 
       # make the initial value PD
@@ -1417,7 +1417,7 @@ distrib <- function (distribution, ...) {
 #'    \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
 #'    \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
 #'    \code{wishart} \tab \code{\link[MCMCpack:dwish]{MCMCpack::dwish}}\cr
-#'    \code{onion} \tab \code{\href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}}\cr }
+#'    \code{lkj_correlation} \tab \code{\href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}}\cr }
 #'
 #' @examples
 #' # a uniform parameter constrained to be between 0 and 1
@@ -1579,8 +1579,8 @@ wishart <- function (df, Sigma)
 
 #' @rdname greta-distributions
 #' @export
-onion <- function (eta, dim = 2)
-  distrib('onion', eta, dim)
+lkj_correlation <- function (eta, dim = 2)
+  distrib('lkj_correlation', eta, dim)
 
 #' @rdname greta-distributions
 #' @export
