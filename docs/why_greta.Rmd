@@ -26,7 +26,7 @@ body{
 
 <div class="column-left">
 
-There's a recent convention of naming statistical modelling software after pioneers in the field (e.g. [STAN](https://en.wikipedia.org/wiki/Stanislaw_Ulam) and [Edward](https://en.wikipedia.org/wiki/George_E._P._Box)).
+There's a recent convention of naming statistical modelling software after pioneers in the field (e.g. [Stan](https://en.wikipedia.org/wiki/Stanislaw_Ulam) and [Edward](https://en.wikipedia.org/wiki/George_E._P._Box)).
 
 [Grete Hermann](https://en.wikipedia.org/wiki/Grete_Hermann) wasn't a statistician. She wrote [the first algorithms](http://dl.acm.org/citation.cfm?id=307342&coll=portal&dl=ACM) for computer algebra; in the 1920s, well before the first electronic computer was built. This work laid the foundations for the computer algebra libraries that enable modern statistical modelling.
 

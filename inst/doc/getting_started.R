@@ -16,6 +16,16 @@ if (!file.exists('figures'))
 file.copy('../man/figures/plotlegend.png',
           'figures/plotlegend.png')
 
+## ----install_greta, eval = FALSE-----------------------------------------
+#  devtools::install_github("goldingn/greta")
+#  library(greta)
+
+## ----install_tensorflow, eval = FALSE------------------------------------
+#  install_tensorflow()
+
+## ----install_diagrammer, eval = FALSE------------------------------------
+#  install.packages('DiagrammeR')
+
 ## ----ones----------------------------------------------------------------
 (z <- ones(3, 3))
 
@@ -190,9 +200,6 @@ DiagrammeR::export_graph(gr,
                          file_type = "png",
                          width = 325 * 2,
                          height = 105 * 2)
-
-## ----install_diagrammer, eval = FALSE------------------------------------
-#  install.packages('DiagrammeR')
 
 ## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------
 draws <- mcmc(m, n_samples = 1000)

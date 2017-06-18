@@ -45,6 +45,8 @@ devtools::install_github("goldingn/greta")
 library(greta)
 ```
 
+<hr>
+
 ### TensorFlow
 
 Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.0.0 or higher). greta exports `install_tensorflow()` from the `tensorflow` R package, which will attempt to install the latest version of TensorFlow from within your R session.
@@ -54,6 +56,8 @@ install_tensorflow()
 ```
 
 You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.
+
+<hr>
 
 ### DiagrammeR
 
