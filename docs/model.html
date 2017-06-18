@@ -11,7 +11,7 @@
 
 
 
-<title>Statistical Inference on Greta Models</title>
+<title>greta model objects</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,7 +335,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Statistical Inference on Greta Models</h1>
+<h1 class="title toc-ignore">greta model objects</h1>
 
 </div>
 
@@ -344,84 +344,80 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-Carry out statistical inference on parameters of interest by MCMC. <code>mcmc</code> runs the MCMC sampler. If the sampler is aborted before finishing, the samples collected so far can be retrieved with <code>stashed_samples()</code>.
+Create a <code>greta_model</code> object representing a statistical model (using <code>model</code>), and plot a graphical representation of the model. Statistical inference can be performed on <code>greta_model</code> objects with <code><a href='inference.html'>mcmc</a></code>
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<pre class="r"><span class='fu'>mcmc</span>(<span class='no'>model</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"hmc"</span>), <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<pre class="r"><span class='fu'>model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"single"</span>, <span class='st'>"double"</span>), <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
-<span class='fu'>stashed_samples</span>() </pre>
+<span class='fu'>define_model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"single"</span>, <span class='st'>"double"</span>), <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+
+<span class='co'># S3 method for greta_model</span>
+<span class='fu'>print</span>(<span class='no'>x</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for greta_model</span>
+<span class='fu'>plot</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='no'>...</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
-<code>model</code>
+<code>...</code>
 <p>
-greta_model object
+for <code>model</code>: <code>greta_array</code> objects to be tracked by the model (i.e. those for which samples will be retained during mcmc). If not provided, all of the non-data <code>greta_array</code> objects defined in the calling environment will be tracked. For <code>print</code> and <code>plot</code>:further arguments passed to or from other methods (currently ignored).
 </p>
-<code>method</code>
+<code>precision</code>
 <p>
-the method used to sample values. Currently only <code>hmc</code> is implemented
+the floating point precision to use when evaluating this model. Switching from <code>‘single’</code> (the default) to <code>‘double’</code> should reduce the risk of numerical instability during sampling, but will also increase the computation time, particularly for large models.
 </p>
-<code>n_samples</code>
+<code>n_cores</code>
 <p>
-the number of samples to draw (after any warm-up, but before thinning)
+the number of cpu cores to use when evaluating this model. Defaults to and cannot exceed the number detected by <code>parallel::detectCores</code>.
 </p>
-<code>thin</code>
+<code>compile</code>
 <p>
-the thinning rate; every <code>thin</code> samples is retained, the rest are discarded
+whether to apply <a href = 'https://www.tensorflow.org/performance/xla/'>XLA JIT compilation</a> to the tensorflow graph representing the model. This may slow down model definition, and speed up model evaluation.
 </p>
-<code>warmup</code>
+<code>x</code>
 <p>
-the number of samples to spend warming up the sampler. During this phase the sampler moves toward the highest density area and may tune sampler hyperparameters.
+a <code>greta_model</code> object
 </p>
-<code>verbose</code>
+<code>y</code>
 <p>
-whether to print progress information to the console
-</p>
-<code>control</code>
-<p>
-an optional named list of hyperparameters and options to control behaviour of the sampler. See Details.
-</p>
-<code>initial_values</code>
-<p>
-an optional named vector of initial values for the free parameters in the model
+unused default argument
 </p>
 <h2 class="hasAnchor" id="value">
 <a class="anchor" href="#value"></a>Value
 </h2>
 <p>
-an <code>mcmc.list</code> object that can be analysed using functions from the coda package. This will contain mcmc samples of the greta arrays used to create <code>model</code>.
+<p><code>model</code> - a <code>greta_model</code> object.</p>
+<code>plot</code> - a <code><a href='http://www.rdocumentation.org/packages/DiagrammeR/topics/create_graph'>DiagrammeR::gdr_graph</a></code> object (invisibly).
 </p>
 <h2 class="hasAnchor" id="details">
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-If <code>verbose = TRUE</code>, the progress bar shows the number of iterations so far and the expected time to complete the phase of model fitting (warmup or sampling). Occasionally, a proposed set of parameters can cause numerical instability (I.e. the log density or its gradient is <code>NA</code>, <code>Inf</code> or <code>-Inf</code>); normally because the log joint density is so low that it can’t be represented as a floating point number. When this happens, the progress bar will also display the proportion of samples so far that were ‘bad’ (numerically unstable) and therefore rejected. If you’re getting a lot of numerical instability, you might want to manually define starting values to move the sampler into a more reasonable part of the parameter space. Alternatively, you could redefine the model (via <code>model</code>) to have double precision, though this will slow down sampling.
+<code>model()</code> takes greta arrays as arguments, and defines a statistical model by finding all of the other greta arrays on which they depend, or which depend on them. Further arguments to <code>model</code> can be used to configure the tensorflow graph representing the model, to tweak performance. <code>define_model</code> is an alias for <code>model</code>. It is deprecated, and will be removed in version 0.2.
 </p>
 <p>
-Currently, the only implemented MCMC procedure is static Hamiltonian Monte Carlo (<code>method = ‘hmc’</code>). During the warmup iterations, the leapfrog stepsize hyperparameter <code>epsilon</code> is tuned to maximise the sampler efficiency. The <code>control</code> argument can be used to specify the initial value for epsilon, along with two other hyperparameters: <code>Lmin</code> and <code>Lmax</code>; positive integers (with <code>Lmax &gt; Lmin</code>) giving the upper and lower limits to the number of leapfrog steps per iteration (from which the number is selected uniformly at random).
-</p>
-<p>
-The default control options for HMC are: <code>control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)</code> <code>stashed_samples()</code> returns an <code>mcmc.list</code> object if (and only if) the sampler was aborted during the sampling phase.
+The plot method produces a visual representation of the defined model. It uses the <code>DiagrammeR</code> package, which must be installed first. Here’s a key to the plots: <img src='figures/plotlegend.png' width="100%" />
 </p>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
 <pre class="r">
 
+
 <span class='co'># define a simple model</span>
 <span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='variable.html'>variable</a></span>()
-<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='greta-distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
+<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
 <span class='no'>x</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>10</span>)
-<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>=</span> <span class='fu'><a href='greta-distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
-<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='greta-model.html'>model</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 
-<span class='co'># carry out mcmc on the model</span>
-<span class='no'>draws</span> <span class='kw'>&lt;-</span> <span class='fu'>mcmc</span>(<span class='no'>m</span>,
-              <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-              <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>10</span>)</pre>
+<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>model</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+
+<span class='fu'>plot</span>(<span class='no'>m</span>)</pre>
 
 
 

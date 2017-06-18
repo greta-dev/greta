@@ -11,7 +11,7 @@
 
 
 
-<title>Transformation Functions for Greta Arrays</title>
+<title>create data greta arrays</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,7 +335,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Transformation Functions for Greta Arrays</h1>
+<h1 class="title toc-ignore">create data greta arrays</h1>
 
 </div>
 
@@ -344,49 +344,57 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-transformations for greta arrays, which may also be used as inverse link functions. Also see <a href='greta-operators.html'>greta-operators</a> and <a href='greta-functions.html'>greta-functions</a>.
+These structures can be used to set up more complex models. For example, scalar parameters can be embedded in a greta array by first creating a greta array with <code>zeros()</code> or <code>ones()</code>, and then embedding the parameter value using greta’s replacement syntax.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<pre class="r"><span class='fu'>iprobit</span>(<span class='no'>x</span>)
+<pre class="r"><span class='fu'>zeros</span>(<span class='no'>...</span>)
 
-<span class='fu'>ilogit</span>(<span class='no'>x</span>)
+<span class='fu'>ones</span>(<span class='no'>...</span>)
 
-<span class='fu'>icloglog</span>(<span class='no'>x</span>)
-
-<span class='fu'>icauchit</span>(<span class='no'>x</span>)
-
-<span class='fu'>log1pe</span>(<span class='no'>x</span>) </pre>
+<span class='fu'>greta_array</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'>length</span>(<span class='no'>data</span>)) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
-<code>x</code>
+<code>...</code>
 <p>
-a real-valued (i.e. values ranging from -Inf to Inf) greta array to transform to a constrained value
+dimensions of the greta arrays to create
+</p>
+<code>data</code>
+<p>
+a vector giving data to fill the greta array. Other object types are coerced by <code>as.vector</code>.
+</p>
+<code>dim</code>
+<p>
+an integer vector giving the dimensions for the greta array to be created.
+</p>
+<h2 class="hasAnchor" id="value">
+<a class="anchor" href="#value"></a>Value
+</h2>
+<p>
+a greta array object
 </p>
 <h2 class="hasAnchor" id="details">
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-greta does not allow you to state the transformation/link on the left hand side of an assignment, as is common in the BUGS and STAN modelling languages. That’s because the same syntax has a very different meaning in R, and can only be applied to objects that are already in existence. The inverse forms of the common link functions (prefixed with an ‘i’) are therefore more likely to useful in modelling, and these are what are provided here.
-</p>
-<p>
-The <code>log1pe</code> inverse link function is equivalent to <code>log(1 + exp(x))</code>, yielding a positive transformed parameter. Unlike the log transformation, this transformation is approximately linear for x &gt; 1. i.e. when <span class="math inline">\(x &amp;gt;  1\)</span>, <span class="math inline">\(y \approx x\)</span>
+<code>greta_array</code> is a convenience function to create an R array with <code>array</code> and then coerce it to a greta array. I.e. it is equivalent to <code>as_data(array(data, dim))</code>.
 </p>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
-<pre class="r"> <span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='greta-distributions.html'>normal</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<pre class="r"><span class='co'># a 3 row, 4 column greta array of 0s</span>
+<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>zeros</span>(<span class='fl'>3</span>, <span class='fl'>4</span>)
 
- <span class='co'># transformation to the unit interval</span>
- <span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'>iprobit</span>(<span class='no'>x</span>)
- <span class='no'>p2</span> <span class='kw'>&lt;-</span> <span class='fu'>ilogit</span>(<span class='no'>x</span>)
- <span class='no'>p3</span> <span class='kw'>&lt;-</span> <span class='fu'>icloglog</span>(<span class='no'>x</span>)
- <span class='no'>p4</span> <span class='kw'>&lt;-</span> <span class='fu'>icauchit</span>(<span class='no'>x</span>)
+<span class='co'># a 3x3x3 greta array of 1s</span>
+<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>ones</span>(<span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span>)
 
- <span class='co'># and to positive reals</span>
- <span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>log1pe</span>(<span class='no'>x</span>)</pre>
+<span class='co'># a 2x4 greta array filled with pi</span>
+<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>greta_array</span>(<span class='no'>pi</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>2</span>, <span class='fl'>4</span>))
+
+<span class='co'># a 3x3x3 greta array filled with 1, 2, and 3</span>
+<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>greta_array</span>(<span class='fl'>1</span>:<span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span>))</pre>
 
 
 

@@ -11,7 +11,7 @@
 
 
 
-<title>greta probability distributions</title>
+<title>probability distributions</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,7 +335,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">greta probability distributions</h1>
+<h1 class="title toc-ignore">probability distributions</h1>
 
 </div>
 
@@ -395,6 +395,8 @@ These functions can be used to define random variables in a greta model. They re
 
 <span class='fu'>wishart</span>(<span class='no'>df</span>, <span class='no'>Sigma</span>)
 
+<span class='fu'>lkj_correlation</span>(<span class='no'>eta</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+
 <span class='fu'>multinomial</span>(<span class='no'>size</span>, <span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
 
 <span class='fu'>categorical</span>(<span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
@@ -417,7 +419,7 @@ the dimensions of the greta array to be returned, either a scalar or a vector of
 <p>
 unconstrained parameters
 </p>
-<code>sd</code>, <code>sdlog</code>, <code>sigma</code>, <code>lambda</code>, <code>shape</code>, <code>rate</code>, <code>df</code>, <code>scale</code>, <code>shape1</code>, <code>shape2</code>, <code>alpha</code>, <code>beta</code>, <code>df1</code>, <code>df2</code>, <code>a</code>, <code>b</code>
+<code>sd</code>, <code>sdlog</code>, <code>sigma</code>, <code>lambda</code>, <code>shape</code>, <code>rate</code>, <code>df</code>, <code>scale</code>, <code>shape1</code>, <code>shape2</code>, <code>alpha</code>, <code>beta</code>, <code>df1</code>, <code>df2</code>, <code>a</code>, <code>b</code>, <code>eta</code>
 <p>
 positive parameters, <code>alpha</code> must be a vector for <code>dirichlet</code> and <code>dirichlet_multinomial</code>.
 </p>
@@ -678,7 +680,15 @@ reference
 <code>wishart</code>
 </td>
 <td>
-<code><a href='http://www.rdocumentation.org/packages/MCMCpack/topics/wishart'>MCMCpack::dwish</a></code>
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/rWishart'>stats::rWishart</a></code>
+</td>
+</tr>
+<tr>
+<td>
+<code>lkj_correlation</code>
+</td>
+<td>
+<code><a href = 'https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html'>rethinking::dlkjcorr</a></code>
 </td>
 </tr>
 </table>
@@ -710,7 +720,7 @@ reference
 <span class='no'>thetas</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>4</span>))
 
 <span class='co'># a multivariate normal variable, with correlation between two elements</span>
-<span class='no'>Sig</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='greta-overloaded.html'>diag</a></span>(<span class='fl'>4</span>)
+<span class='no'>Sig</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='fl'>4</span>)
 <span class='no'>Sig</span>[<span class='fl'>3</span>, <span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='no'>Sig</span>[<span class='fl'>4</span>, <span class='fl'>3</span>] <span class='kw'>&lt;-</span> <span class='fl'>0.6</span>
 <span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>)
 

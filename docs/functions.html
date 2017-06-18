@@ -11,7 +11,7 @@
 
 
 
-<title>greta Data Structures</title>
+<title>functions for greta arrays</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,7 +335,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">greta Data Structures</h1>
+<h1 class="title toc-ignore">functions for greta arrays</h1>
 
 </div>
 
@@ -344,57 +344,87 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-These structures can be used to set up more complex models. For example, scalar parameters can be embedded in a greta array by first creating a greta array with <code>zeros()</code> or <code>ones()</code>, and then embedding the parameter value using greta’s replacement syntax.
+This is a list of functions in base R that are currently implemented to transform greta arrays. Also see <a href='operators.html'>operators</a> and <a href='transforms.html'>transforms</a>.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<pre class="r"><span class='fu'>zeros</span>(<span class='no'>...</span>)
-
-<span class='fu'>ones</span>(<span class='no'>...</span>)
-
-<span class='fu'>greta_array</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'>length</span>(<span class='no'>data</span>)) </pre>
-<h2 class="hasAnchor" id="arguments">
-<a class="anchor" href="#arguments"></a> Arguments
-</h2>
-<code>...</code>
-<p>
-dimensions of the greta arrays to create
-</p>
-<code>data</code>
-<p>
-a vector giving data to fill the greta array. Other object types are coerced by <code>as.vector</code>.
-</p>
-<code>dim</code>
-<p>
-an integer vector giving the dimensions for the greta array to be created.
-</p>
-<h2 class="hasAnchor" id="value">
-<a class="anchor" href="#value"></a>Value
-</h2>
-<p>
-a greta array object
-</p>
 <h2 class="hasAnchor" id="details">
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-<code>greta_array</code> is a convenience function to create an R array with <code>array</code> and then coerce it to a greta array. I.e. it is equivalent to <code>as_data(array(data, dim))</code>.
+TensorFlow only enables rounding to integers, so <code>round()</code> will error if <code>digits</code> is set to anything other than <code>0</code>.
 </p>
+<p>
+Any additional arguments to <code>chol()</code> and <code>solve()</code> will be ignored, see the TensorFlow documentation for details of these routines.
+</p>
+<p>
+<code>diag()</code> can be used to extract or replace the diagonal part of a square and two-dimensional greta array, but it cannot be used to create a matrix-like greta array from a scalar or vector-like greta array. A static diagonal matrix can always be created with e.g. <code>diag(3)</code>, and then converted into a greta array.
+</p>
+<p>
+<code>sweep()</code> only works on two-dimensional greta arrays (so <code>MARGIN</code> can only be either 1 or 2), and only for subtraction, addition, division and multiplication.
+</p>
+<h2 class="hasAnchor" id="usage">
+<a class="anchor" href="#usage"></a>Usage
+</h2>
+<p>
+</p>
+<pre>
+# logarithms and exponentials
+ log(x)
+ exp(x)
+ log1p(x)
+ expm1(x)
+# miscellaneous mathematics
+ abs(x)
+ mean(x)
+ sqrt(x)
+ sign(x)
+# rounding of numbers
+ ceiling(x)
+ floor(x)
+ round(x, digits = 0)
+# trigonometry
+ cos(x)
+ sin(x)
+ tan(x)
+ acos(x)
+ asin(x)
+ atan(x)
+# special mathematical functions
+ lgamma(x)
+ digamma(x)
+ choose(n, k)
+ lchoose(n, k)
+# matrix operations
+ t(x)
+ chol(x, ...)
+ diag(x, nrow, ncol)
+ diag(x) &lt;- value
+ solve(a, b, ...)
+# reducing operations
+ sum(..., na.rm = TRUE)
+ prod(..., na.rm = TRUE)
+ min(..., na.rm = TRUE)
+ max(..., na.rm = TRUE)
+# miscellaneous operations
+ sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+</pre>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
-<pre class="r"><span class='co'># a 3 row, 4 column greta array of 0s</span>
-<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>zeros</span>(<span class='fl'>3</span>, <span class='fl'>4</span>)
+<pre class="r"><span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>9</span>, <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>3</span>))
+<span class='no'>a</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='fu'>exp</span>(<span class='no'>x</span>))
+<span class='no'>b</span> <span class='kw'>=</span> <span class='fu'>log1p</span>(<span class='fu'>expm1</span>(<span class='no'>x</span>))
+<span class='no'>c</span> <span class='kw'>=</span> <span class='fu'>sign</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
+<span class='no'>d</span> <span class='kw'>=</span> <span class='fu'>abs</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
 
-<span class='co'># a 3x3x3 greta array of 1s</span>
-<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>ones</span>(<span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span>)
+<span class='no'>e</span> <span class='kw'>=</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
+<span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
 
-<span class='co'># a 2x4 greta array filled with pi</span>
-<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>greta_array</span>(<span class='no'>pi</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>2</span>, <span class='fl'>4</span>))
+<span class='no'>z</span> <span class='kw'>=</span> <span class='fu'>t</span>(<span class='no'>a</span>)
 
-<span class='co'># a 3x3x3 greta array filled with 1, 2, and 3</span>
-<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>greta_array</span>(<span class='fl'>1</span>:<span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span>))</pre>
+<span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='overloaded.html'>sweep</a></span>(<span class='no'>x</span>, <span class='fl'>1</span>, <span class='no'>e</span>, <span class='st'>'-'</span>)</pre>
 
 
 

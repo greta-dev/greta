@@ -11,7 +11,7 @@
 
 
 
-<title>R functions that work for greta arrays</title>
+<title>statistical inference on greta models</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,7 +335,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">R functions that work for greta arrays</h1>
+<h1 class="title toc-ignore">statistical inference on greta models</h1>
 
 </div>
 
@@ -344,87 +344,127 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-This is a list of functions in base R that are currently implemented to transform greta arrays Also see <a href='greta-operators.html'>greta-operators</a> and <a href='greta-transforms.html'>greta-transforms</a>.
+Carry out statistical inference on greta models by MCMC or likelihood/posterior optimisation.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
+<pre class="r"><span class='fu'>stashed_samples</span>()
+
+<span class='fu'>mcmc</span>(<span class='no'>model</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"hmc"</span>), <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>opt</span>(<span class='no'>model</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"adagrad"</span>), <span class='kw'>max_iterations</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
+  <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='kw'>NULL</span>) </pre>
+<h2 class="hasAnchor" id="arguments">
+<a class="anchor" href="#arguments"></a> Arguments
+</h2>
+<code>model</code>
+<p>
+greta_model object
+</p>
+<code>method</code>
+<p>
+the method used to sample or optimise values. Currently only one method is available for each procedure: <code>hmc</code> and <code>adagrad</code>
+</p>
+<code>n_samples</code>
+<p>
+the number of MCMC samples to draw (after any warm-up, but before thinning)
+</p>
+<code>thin</code>
+<p>
+the MCMC thinning rate; every <code>thin</code> samples is retained, the rest are discarded
+</p>
+<code>warmup</code>
+<p>
+the number of samples to spend warming up the mcmc sampler. During this phase the sampler moves toward the highest density area and tunes sampler hyperparameters.
+</p>
+<code>verbose</code>
+<p>
+whether to print progress information to the console
+</p>
+<code>control</code>
+<p>
+an optional named list of hyperparameters and options to control behaviour of the sampler or optimiser. See Details.
+</p>
+<code>initial_values</code>
+<p>
+an optional named vector of initial values for the free parameters in the model. These will be used as the starting point for sampling/optimisation
+</p>
+<code>max_iterations</code>
+<p>
+the maximum number of iterations before giving up
+</p>
+<code>tolerance</code>
+<p>
+the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level
+</p>
+<h2 class="hasAnchor" id="value">
+<a class="anchor" href="#value"></a>Value
+</h2>
+<p>
+<p><code>mcmc</code> &amp; <code>stashed_samples</code> - an <code>mcmc.list</code> object that can be analysed using functions from the coda package. This will contain mcmc samples of the greta arrays used to create <code>model</code>.</p>
+<code>opt</code> - a list containing the following named elements:
+</p>
+<ul>
+<li>
+<p>
+parthe best set of parameters found
+</p>
+</li>
+<li>
+<p>
+valuethe log joint density of the model at the parameters par
+</p>
+</li>
+<li>
+<p>
+iterationsthe number of iterations taken by the optimiser
+</p>
+</li>
+<li>
+<p>
+convergencean integer code, 0 indicates successful completion, 1 indicates the iteration limit max_iterations had been reached
+</p>
+</li>
+</ul>
 <h2 class="hasAnchor" id="details">
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-TensorFlow only enables rounding to integers, so <code>round()</code> will error if <code>digits</code> is set to anything other than <code>0</code>.
+If the sampler is aborted before finishing, the samples collected so far can be retrieved with <code>stashed_samples()</code>. Only samples from the sampling phase will be returned.
 </p>
 <p>
-Any additional arguments to <code>chol()</code> and <code>solve()</code> will be ignored, see the TensorFlow documentation for details of these routines.
+For MCMC if <code>verbose = TRUE</code>, the progress bar shows the number of iterations so far and the expected time to complete the phase of model fitting (warmup or sampling). Occasionally, a proposed set of parameters can cause numerical instability (I.e. the log density or its gradient is <code>NA</code>, <code>Inf</code> or <code>-Inf</code>); normally because the log joint density is so low that it can’t be represented as a floating point number. When this happens, the progress bar will also display the proportion of samples so far that were ‘bad’ (numerically unstable) and therefore rejected. If you’re getting a lot of numerical instability, you might want to manually define starting values to move the sampler into a more reasonable part of the parameter space. Alternatively, you could redefine the model (via <code>model</code>) to have double precision, though this will slow down sampling.
 </p>
 <p>
-<code>diag()</code> can be used to extract or replace the diagonal part of a square and two-dimensional greta array, but it cannot be used to create a matrix-like greta array from a scalar or vector-like greta array. A static diagonal matrix can always be created with e.g. <code>diag(3)</code>, and then converted into a greta array.
+Currently, the only implemented MCMC procedure is static Hamiltonian Monte Carlo (<code>method = ‘hmc’</code>). During the warmup iterations, the leapfrog stepsize hyperparameter <code>epsilon</code> is tuned to maximise the sampler efficiency. The <code>control</code> argument can be used to specify the initial value for epsilon, along with two other hyperparameters: <code>Lmin</code> and <code>Lmax</code>; positive integers (with <code>Lmax &gt; Lmin</code>) giving the upper and lower limits to the number of leapfrog steps per iteration (from which the number is selected uniformly at random).
 </p>
 <p>
-<code>sweep()</code> only works on two-dimensional greta arrays (so <code>MARGIN</code> can only be either 1 or 2), and for subtraction, addition, division and multiplication.
+The default control options for HMC are: <code>control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)</code>
 </p>
-<h2 class="hasAnchor" id="usage">
-<a class="anchor" href="#usage"></a>Usage
-</h2>
 <p>
+Currently, the only implemented optimisation algorithm is Adagrad (<code>method = ‘adagrad’</code>). The <code>control</code> argument can be used to specify the optimiser hyperparameters: <code>learning_rate</code> (default 0.8), <code>initial_accumulator_value</code> (default 0.1) and <code>use_locking</code> (default <code>TRUE</code>). The are passed directly to TensorFlow’s optimisers, see <a href = 'https://www.tensorflow.org/api_docs/python/tf/train/AdagradOptimizer'>the TensorFlow docs</a> for more information
 </p>
-<pre>
-# logarithms and exponentials
- log(x)
- exp(x)
- log1p(x)
- expm1(x)
-# miscellaneous mathematics
- abs(x)
- mean(x)
- sqrt(x)
- sign(x)
-# rounding of numbers
- ceiling(x)
- floor(x)
- round(x, digits = 0)
-# trigonometry
- cos(x)
- sin(x)
- tan(x)
- acos(x)
- asin(x)
- atan(x)
-# special mathematical functions
- lgamma(x)
- digamma(x)
- choose(n, k)
- lchoose(n, k)
-# matrix operations
- t(x)
- chol(x, ...)
- diag(x, nrow, ncol)
- diag(x) &lt;- value
- solve(a, b, ...)
-# reducing operations
- sum(..., na.rm = TRUE)
- prod(..., na.rm = TRUE)
- min(..., na.rm = TRUE)
- max(..., na.rm = TRUE)
-# miscellaneous operations
- sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-</pre>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
-<pre class="r"><span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>9</span>, <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>3</span>))
-<span class='no'>a</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='fu'>exp</span>(<span class='no'>x</span>))
-<span class='no'>b</span> <span class='kw'>=</span> <span class='fu'>log1p</span>(<span class='fu'>expm1</span>(<span class='no'>x</span>))
-<span class='no'>c</span> <span class='kw'>=</span> <span class='fu'>sign</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
-<span class='no'>d</span> <span class='kw'>=</span> <span class='fu'>abs</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
+<pre class="r">
+<span class='co'># define a simple model</span>
+<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='variable.html'>variable</a></span>()
+<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
+<span class='no'>x</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>10</span>)
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 
-<span class='no'>e</span> <span class='kw'>=</span> <span class='fu'><a href='greta-overloaded.html'>diag</a></span>(<span class='no'>x</span>)
-<span class='fu'><a href='greta-overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
+<span class='co'># carry out mcmc on the model</span>
+<span class='no'>draws</span> <span class='kw'>&lt;-</span> <span class='fu'>mcmc</span>(<span class='no'>m</span>,
+              <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+              <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 
-<span class='no'>z</span> <span class='kw'>=</span> <span class='fu'>t</span>(<span class='no'>a</span>)
 
-<span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='greta-overloaded.html'>sweep</a></span>(<span class='no'>x</span>, <span class='fl'>1</span>, <span class='no'>e</span>, <span class='st'>'-'</span>)</pre>
+<span class='co'># find the MAP estimate</span>
+<span class='no'>opt_res</span> <span class='kw'>&lt;-</span> <span class='fu'>opt</span>(<span class='no'>m</span>)</pre>
 
 
 
