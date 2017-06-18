@@ -34,9 +34,9 @@
 \usage{
 uniform(min, max, dim = NULL)
 
-normal(mean, sd, dim = NULL)
+normal(mean, sd, dim = NULL, truncation = c(-Inf, Inf))
 
-lognormal(meanlog, sdlog, dim = NULL)
+lognormal(meanlog, sdlog, dim = NULL, truncation = c(0, Inf))
 
 bernoulli(prob, dim = NULL)
 
@@ -50,29 +50,29 @@ hypergeometric(m, n, k, dim = NULL)
 
 poisson(lambda, dim = NULL)
 
-gamma(shape, rate, dim = NULL)
+gamma(shape, rate, dim = NULL, truncation = c(0, Inf))
 
-inverse_gamma(alpha, beta, dim = NULL)
+inverse_gamma(alpha, beta, dim = NULL, truncation = c(0, Inf))
 
-weibull(shape, scale, dim = NULL)
+weibull(shape, scale, dim = NULL, truncation = c(0, Inf))
 
-exponential(rate, dim = NULL)
+exponential(rate, dim = NULL, truncation = c(0, Inf))
 
-pareto(a, b, dim = NULL)
+pareto(a, b, dim = NULL, truncation = c(0, Inf))
 
-student(df, mu, sigma, dim = NULL)
+student(df, mu, sigma, dim = NULL, truncation = c(-Inf, Inf))
 
-laplace(mu, sigma, dim = NULL)
+laplace(mu, sigma, dim = NULL, truncation = c(-Inf, Inf))
 
-beta(shape1, shape2, dim = NULL)
+beta(shape1, shape2, dim = NULL, truncation = c(0, 1))
 
-cauchy(location, scale, dim = NULL)
+cauchy(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 
-chi_squared(df, dim = NULL)
+chi_squared(df, dim = NULL, truncation = c(0, Inf))
 
-logistic(location, scale, dim = NULL)
+logistic(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 
-f(df1, df2, dim = NULL)
+f(df1, df2, dim = NULL, truncation = c(0, Inf))
 
 multivariate_normal(mean, Sigma, dim = 1)
 

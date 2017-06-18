@@ -330,8 +330,8 @@ variable_node <- R6Class (
 # helper function to create a variable node
 # by default, make x (the node
 # containing the value) a free parameter of the correct dimension
-vble = function(...)
-  variable_node$new(...)
+vble = function (truncation, dim = 1)
+  variable_node$new(lower = truncation[1], upper = truncation[2], dim = dim)
 
 distribution_node <- R6Class (
   'distribution_node',
@@ -344,7 +344,7 @@ distribution_node <- R6Class (
     truncation = NULL,
     parameters = list(),
 
-    initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
+    initialize = function (name = 'no distribution', dim = NULL, truncation = c(-Inf, Inf), discrete = FALSE) {
 
       super$initialize(dim)
 
@@ -353,11 +353,16 @@ distribution_node <- R6Class (
       self$discrete <- discrete
 
       # initialize the target values of this distribution
-      self$add_target(self$create_target())
+      self$add_target(self$create_target(truncation))
 
       # set the target as the user node (user-facing representation) by default
       self$user_node <- self$target
 
+    },
+
+    # create a target variable node (unconstrained by default)
+    create_target = function (truncation) {
+      vble(truncation, dim = self$dim)
     },
 
     # create target node, add as a child, and give it this distribution

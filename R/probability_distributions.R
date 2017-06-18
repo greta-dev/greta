@@ -50,11 +50,10 @@ uniform_distribution <- R6Class (
 
     },
 
-    # default value
-    create_target = function() {
-      vble(lower = self$min,
-               upper = self$max,
-               dim = self$dim)
+    # default value (ignore any truncation arguments)
+    create_target = function (...) {
+      vble(truncation = c(self$min, self$max),
+           dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -76,17 +75,12 @@ normal_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (mean, sd, dim) {
+    initialize = function (mean, sd, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(mean, sd, target_dim = dim)
-      super$initialize('normal', dim)
+      super$initialize('normal', dim, truncation)
       self$add_parameter(mean, 'mean')
       self$add_parameter(sd, 'sd')
-    },
-
-    # default value
-    create_target = function() {
-      vble(dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -102,16 +96,12 @@ lognormal_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (meanlog, sdlog, dim) {
+    initialize = function (meanlog, sdlog, dim, truncation) {
       dim <- check_dims(meanlog, sdlog, target_dim = dim)
-      super$initialize('lognormal', dim)
+      check_positive(truncation)
+      super$initialize('lognormal', dim, truncation)
       self$add_parameter(meanlog, 'meanlog')
       self$add_parameter(sdlog, 'sdlog')
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -154,11 +144,6 @@ bernoulli_distribution <- R6Class (
       self$add_parameter(prob, 'prob')
     },
 
-    # default value (should get overwritten anyway!)
-    create_target = function() {
-      vble(dim = self$dim)
-    },
-
     tf_distrib = function (parameters) {
       tf$contrib$distributions$Bernoulli(probs = parameters$prob)
     },
@@ -183,11 +168,6 @@ binomial_distribution <- R6Class (
       self$add_parameter(size, 'size')
       self$add_parameter(prob, 'prob')
 
-    },
-
-    # default value (should get overwritten anyway!)
-    create_target = function() {
-      vble(dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -215,11 +195,6 @@ beta_binomial_distribution <- R6Class (
       self$add_parameter(alpha, 'alpha')
       self$add_parameter(beta, 'beta')
 
-    },
-
-    # default value (should get overwritten anyway!)
-    create_target = function() {
-      vble(dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -257,11 +232,6 @@ poisson_distribution <- R6Class (
       self$add_parameter(lambda, 'lambda')
     },
 
-    # default value (should get overwritten anyway!)
-    create_target = function() {
-      vble(dim = self$dim)
-    },
-
     tf_distrib = function (parameters) {
       tf$contrib$distributions$Poisson(rate = parameters$lambda)
     },
@@ -284,11 +254,6 @@ negative_binomial_distribution <- R6Class (
       super$initialize('negative_binomial', dim, discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(prob, 'prob')
-    },
-
-    # default value (should get overwritten anyway!)
-    create_target = function() {
-      vble(dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -317,11 +282,6 @@ hypergeometric_distribution <- R6Class (
       self$add_parameter(k, 'k')
     },
 
-    # default value (should get overwritten anyway!)
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
-    },
-
     tf_distrib = function (parameters) {
 
       m <- parameters$m
@@ -347,19 +307,14 @@ gamma_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (shape, rate, dim) {
+    initialize = function (shape, rate, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(shape, rate, target_dim = dim)
-      super$initialize('gamma', dim)
+      check_positive(truncation)
+      super$initialize('gamma', dim, truncation)
       self$add_parameter(shape, 'shape')
       self$add_parameter(rate, 'rate')
     },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
-    },
-
 
     tf_distrib = function (parameters) {
       tf$contrib$distributions$Gamma(concentration = parameters$shape,
@@ -374,17 +329,13 @@ inverse_gamma_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (alpha, beta, dim) {
+    initialize = function (alpha, beta, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(alpha, beta, target_dim = dim)
-      super$initialize('inverse_gamma', dim)
+      check_positive(truncation)
+      super$initialize('inverse_gamma', dim, truncation)
       self$add_parameter(alpha, 'alpha')
       self$add_parameter(beta, 'beta')
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -395,23 +346,18 @@ inverse_gamma_distribution <- R6Class (
   )
 )
 
-
 weibull_distribution <- R6Class (
   'weibull_distribution',
   inherit = distribution_node,
   public = list(
 
-    initialize = function (shape, scale, dim) {
+    initialize = function (shape, scale, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(shape, scale, target_dim = dim)
-      super$initialize('weibull', dim)
+      check_positive(truncation)
+      super$initialize('weibull', dim, truncation)
       self$add_parameter(shape, 'shape')
       self$add_parameter(scale, 'scale')
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -443,16 +389,12 @@ exponential_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (rate, dim) {
+    initialize = function (rate, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(rate, target_dim = dim)
-      super$initialize('exponential', dim)
+      check_positive(truncation)
+      super$initialize('exponential', dim, truncation)
       self$add_parameter(rate, 'rate')
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -467,17 +409,13 @@ pareto_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (a, b, dim) {
+    initialize = function (a, b, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(a, b, target_dim = dim)
-      super$initialize('pareto', dim)
+      check_positive(truncation)
+      super$initialize('pareto', dim, truncation)
       self$add_parameter(a, 'a')
       self$add_parameter(b, 'b')
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -506,18 +444,13 @@ student_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (df, mu, sigma, dim) {
+    initialize = function (df, mu, sigma, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(df, mu, sigma, target_dim = dim)
-      super$initialize('student', dim)
+      super$initialize('student', dim, truncation)
       self$add_parameter(df, 'df')
       self$add_parameter(mu, 'mu')
       self$add_parameter(sigma, 'sigma')
-    },
-
-    # default value
-    create_target = function() {
-      vble(dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -534,17 +467,12 @@ laplace_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (mu, sigma, dim) {
+    initialize = function (mu, sigma, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(mu, sigma, target_dim = dim)
-      super$initialize('laplace', dim)
+      super$initialize('laplace', dim, truncation)
       self$add_parameter(mu, 'mu')
       self$add_parameter(sigma, 'sigma')
-    },
-
-    # default value
-    create_target = function() {
-      vble(dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -560,17 +488,13 @@ beta_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (shape1, shape2, dim) {
+    initialize = function (shape1, shape2, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(shape1, shape2, target_dim = dim)
-      super$initialize('beta', dim)
+      check_unit(truncation)
+      super$initialize('beta', dim, truncation)
       self$add_parameter(shape1, 'shape1')
       self$add_parameter(shape2, 'shape2')
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, upper = 1, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -586,17 +510,12 @@ cauchy_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (location, scale, dim) {
+    initialize = function (location, scale, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(location, scale, target_dim = dim)
-      super$initialize('cauchy', dim)
+      super$initialize('cauchy', dim, truncation)
       self$add_parameter(location, 'location')
       self$add_parameter(scale, 'scale')
-    },
-
-    # default value
-    create_target = function() {
-      vble(dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -625,16 +544,12 @@ chi_squared_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (df, dim) {
+    initialize = function (df, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(df, target_dim = dim)
-      super$initialize('chi_squared', dim)
+      check_positive(truncation)
+      super$initialize('chi_squared', dim, truncation)
       self$add_parameter(df, 'df')
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -649,17 +564,12 @@ logistic_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (location, scale, dim) {
+    initialize = function (location, scale, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(location, scale, target_dim = dim)
-      super$initialize('logistic', dim)
+      super$initialize('logistic', dim, truncation)
       self$add_parameter(location, 'location')
       self$add_parameter(scale, 'scale')
-    },
-
-    # default value
-    create_target = function() {
-      vble(dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -680,17 +590,13 @@ f_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (df1, df2, dim) {
+    initialize = function (df1, df2, dim, truncation) {
       # add the nodes as children and parameters
       dim <- check_dims(df1, df2, target_dim = dim)
-      super$initialize('d', dim)
+      check_positive(truncation)
+      super$initialize('d', dim, truncation)
       self$add_parameter(df1, 'df1')
       self$add_parameter(df2, 'df2')
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -766,14 +672,9 @@ dirichlet_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('dirichlet', c(dim, length(alpha)))
+      super$initialize('dirichlet', c(dim, length(alpha)), truncation = c(0, Inf))
       self$add_parameter(alpha, 'alpha')
 
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -846,11 +747,6 @@ dirichlet_multinomial_distribution <- R6Class (
 
     },
 
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
-    },
-
     tf_distrib = function (parameters) {
       # transpose and scale probs to get absolute density correct
       alpha <- tf$transpose(parameters$alpha)
@@ -921,11 +817,6 @@ multinomial_distribution <- R6Class (
 
     },
 
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
-    },
-
     tf_distrib = function (parameters) {
       # transpose and scale probs to get absolute density correct
       probs <- tf$transpose(parameters$prob)
@@ -985,11 +876,6 @@ categorical_distribution <- R6Class (
       super$initialize('categorical', dim = c(dim, length(prob)), discrete = TRUE)
       self$add_parameter(prob, 'prob')
 
-    },
-
-    # default value
-    create_target = function() {
-      vble(lower = 0, dim = self$dim)
     },
 
     tf_distrib = function (parameters) {
@@ -1077,11 +963,6 @@ multivariate_normal_distribution <- R6Class (
 
     },
 
-    # default value
-    create_target = function() {
-      vble(dim = self$dim)
-    },
-
     # fetch the tensors for the parameters, using the cholesky factor of Sigma
     # if available
     tf_fetch_parameters = function (dag) {
@@ -1157,12 +1038,13 @@ wishart_distribution <- R6Class (
 
     },
 
-    # default value
-    create_target = function() {
+    # default value, cholesky factor (ignores truncation)
+    create_target = function (truncation) {
 
       # handle reshaping via a greta array
       k <- self$dim[1]
-      free_greta_array <- vble(dim = k + k * (k - 1) / 2)
+      free_greta_array <- vble(truncation = c(-Inf, Inf),
+                               dim = k + k * (k - 1) / 2)
       free_greta_array$constraint = "covariance_matrix"
 
       # first create a greta array for the cholesky
@@ -1240,12 +1122,13 @@ lkj_correlation_distribution <- R6Class (
 
     },
 
-    # default value
-    create_target = function() {
+    # default (cholesky factor, ignores truncation)
+    create_target = function (truncation) {
 
       # handle reshaping via a greta array
       k <- self$dim[1]
-      free_greta_array <- vble(dim = k * (k - 1) / 2)
+      free_greta_array <- vble(truncation = c(-Inf, Inf),
+                               dim = k * (k - 1) / 2)
       free_greta_array$constraint = "correlation_matrix"
 
       # first create a greta array for the cholesky
@@ -1317,7 +1200,6 @@ distrib <- function (distribution, ...) {
   as.greta_array(value)
 
 }
-
 
 # export constructors
 
@@ -1469,13 +1351,13 @@ uniform <- function (min, max, dim = NULL) {
 
 #' @rdname distributions
 #' @export
-normal <- function (mean, sd, dim = NULL)
-  distrib('normal', mean, sd, dim)
+normal <- function (mean, sd, dim = NULL, truncation = c(-Inf, Inf))
+  distrib('normal', mean, sd, dim, truncation)
 
 #' @rdname distributions
 #' @export
-lognormal <- function (meanlog, sdlog, dim = NULL)
-  distrib('lognormal', meanlog, sdlog, dim)
+lognormal <- function (meanlog, sdlog, dim = NULL, truncation = c(0, Inf))
+  distrib('lognormal', meanlog, sdlog, dim, truncation)
 
 #' @rdname distributions
 #' @export
@@ -1509,63 +1391,63 @@ poisson <- function (lambda, dim = NULL)
 
 #' @rdname distributions
 #' @export
-gamma <- function (shape, rate, dim = NULL)
-  distrib('gamma', shape, rate, dim)
+gamma <- function (shape, rate, dim = NULL, truncation = c(0, Inf))
+  distrib('gamma', shape, rate, dim, truncation)
 
 #' @rdname distributions
 #' @export
-inverse_gamma <- function (alpha, beta, dim = NULL)
-  distrib('inverse_gamma', alpha, beta, dim)
+inverse_gamma <- function (alpha, beta, dim = NULL, truncation = c(0, Inf))
+  distrib('inverse_gamma', alpha, beta, dim, truncation)
 
 #' @rdname distributions
 #' @export
-weibull <- function (shape, scale, dim = NULL)
-  distrib('weibull', shape, scale, dim)
+weibull <- function (shape, scale, dim = NULL, truncation = c(0, Inf))
+  distrib('weibull', shape, scale, dim, truncation)
 
 #' @rdname distributions
 #' @export
-exponential <- function (rate, dim = NULL)
-  distrib('exponential', rate, dim)
+exponential <- function (rate, dim = NULL, truncation = c(0, Inf))
+  distrib('exponential', rate, dim, truncation)
 
 #' @rdname distributions
 #' @export
-pareto <- function (a, b, dim = NULL)
-  distrib('pareto', a, b, dim)
+pareto <- function (a, b, dim = NULL, truncation = c(0, Inf))
+  distrib('pareto', a, b, dim, truncation)
 
 #' @rdname distributions
 #' @export
-student <- function (df, mu, sigma, dim = NULL)
-  distrib('student', df, mu, sigma, dim)
+student <- function (df, mu, sigma, dim = NULL, truncation = c(-Inf, Inf))
+  distrib('student', df, mu, sigma, dim, truncation)
 
 #' @rdname distributions
 #' @export
-laplace <- function (mu, sigma, dim = NULL)
-  distrib('laplace', mu, sigma, dim)
+laplace <- function (mu, sigma, dim = NULL, truncation = c(-Inf, Inf))
+  distrib('laplace', mu, sigma, dim, truncation)
 
 #' @rdname distributions
 #' @export
-beta <- function (shape1, shape2, dim = NULL)
-  distrib('beta', shape1, shape2, dim)
+beta <- function (shape1, shape2, dim = NULL, truncation = c(0, 1))
+  distrib('beta', shape1, shape2, dim, truncation)
 
 #' @rdname distributions
 #' @export
-cauchy <- function (location, scale, dim = NULL)
-  distrib('cauchy', location, scale, dim)
+cauchy <- function (location, scale, dim = NULL, truncation = c(-Inf, Inf))
+  distrib('cauchy', location, scale, dim, truncation)
 
 #' @rdname distributions
 #' @export
-chi_squared <- function (df, dim = NULL)
-  distrib('chi_squared', df, dim)
+chi_squared <- function (df, dim = NULL, truncation = c(0, Inf))
+  distrib('chi_squared', df, dim, truncation)
 
 #' @rdname distributions
 #' @export
-logistic <- function (location, scale, dim = NULL)
-  distrib('logistic', location, scale, dim)
+logistic <- function (location, scale, dim = NULL, truncation = c(-Inf, Inf))
+  distrib('logistic', location, scale, dim, truncation)
 
 #' @rdname distributions
 #' @export
-f <- function (df1, df2, dim = NULL)
-  distrib('f', df1, df2, dim)
+f <- function (df1, df2, dim = NULL, truncation = c(0, Inf))
+  distrib('f', df1, df2, dim, truncation)
 
 #' @rdname distributions
 #' @export

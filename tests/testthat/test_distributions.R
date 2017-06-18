@@ -518,7 +518,6 @@ test_that('array-valued distributions can be defined in models', {
   dim <- c(5, 2)
   x <- randn(5, 2)
   y <- round(randu(5, 2))
-  p <- iprobit(normal(0, 1, dim = dim))
 
   # variable (need to define a likelihood)
   a <- variable(dim = dim)
@@ -526,21 +525,27 @@ test_that('array-valued distributions can be defined in models', {
   model(a)
 
   # univariate discrete distributions
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = bernoulli(p)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = binomial(1, p)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = beta_binomial(1, p, 0.2)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = negative_binomial(1, p)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = hypergeometric(10, 5, p)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = poisson(p)
   model(p)
 
@@ -591,7 +596,6 @@ test_that('distributions can be sampled from', {
 
   x <- randn(100)
   y <- round(randu(100))
-  p <- iprobit(normal(0, 1, dim = 100))
 
   # variable (with a density)
   a <- variable()
@@ -611,21 +615,27 @@ test_that('distributions can be sampled from', {
   sample_distribution(d)
 
   # univariate discrete
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = bernoulli(p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = binomial(1, p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = negative_binomial(1, p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = hypergeometric(10, 5, p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = poisson(p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = beta_binomial(1, p, 0.3)
   sample_distribution(p)
 
@@ -874,8 +884,6 @@ test_that('dirichlet distribution errors informatively', {
                '^dim must be a scalar positive integer, but was:')
 
 })
-
-
 
 test_that('dirichlet-multinomial distribution errors informatively', {
 

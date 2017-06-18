@@ -1,5 +1,3 @@
-# syntax definitions
-
 #' @name distribution
 #' @aliases distribution
 #' @title define a distribution over data
