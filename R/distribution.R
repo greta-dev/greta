@@ -12,12 +12,8 @@
 #'   \code{\link{distributions}})
 #'
 #' @details The extract method returns the greta array if it has a distribution,
-#'   or \code{NULL} if it doesn't. It has now real function, but is included for
+#'   or \code{NULL} if it doesn't. It has no real use-case, but is included for
 #'   completeness
-#'
-#'   \code{distribution} can also be used to create truncated distributions, by
-#'   first defining a greta array with constraints (the truncation) and then
-#'   defining the distribution on that greta array. See below for an example.
 #'
 #' @export
 #' @examples
@@ -28,15 +24,12 @@
 #' # (explicitly coerce data to a greta array so we can refer to it later)
 #' y = as_data(rnorm(5, 0, 3))
 #' mu = variable()
+#'
 #' # define the distribution over y (the model likelihood)
 #' distribution(y) = normal(mu, 1)
 #'
 #' # get the distribution over y
 #' distribution(y)
-#'
-#' # define a truncated-positive standard normal random variable
-#' tn = variable(lower = 0)
-#' distribution(tn) = normal(0, 1)
 #'
 `distribution<-` <- function (greta_array, value) {
 

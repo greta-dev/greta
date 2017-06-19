@@ -205,3 +205,23 @@ test_that("structures work correctly", {
   expect_identical(grab(c), array(3, dim = c(2, 2, 2)))
 
 })
+
+test_that("cleanly() handles TF errors nicely", {
+
+  source('helpers.R')
+
+  inversion_stop <- function ()
+    stop ("this non-invertible thing is not invertible")
+
+  cholesky_stop <- function ()
+    stop ("Cholesky decomposition was not successful")
+
+  other_stop <- function ()
+    stop ("Fetchez la vache!")
+
+  expect_equal(cleanly(inversion_stop()), NA)
+  expect_equal(cleanly(cholesky_stop()), NA)
+  expect_error(cleanly(other_stop()),
+               "greta hit a tensorflow error:")
+
+})

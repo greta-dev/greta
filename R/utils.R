@@ -428,7 +428,7 @@ cleanly <- function (expr) {
     if (any(numerical_errors))
       res <- NA
     else
-      stop('greta hit a tensorflow error:\n\n', res, call. = FALSE)
+      stop("greta hit a tensorflow error:\n\n", res, call. = FALSE)
 
   }
 
@@ -438,13 +438,15 @@ cleanly <- function (expr) {
 
 # check truncation for different distributions
 check_positive <- function (truncation) {
-  if (truncation[1] < 0)
-    stop ('lower bound must be 0 or higher',
+  if (truncation[1] < 0) {
+    stop ("lower bound must be 0 or higher",
           call. = FALSE)
+  }
 }
 
 check_unit <- function (truncation) {
-  if (truncation[1] < 0 | truncation[2] > 1)
-    stop ('lower and upper bounds must be between 0 and 1',
+  if (truncation[1] < 0 | truncation[2] > 1) {
+    stop ("lower and upper bounds must be between 0 and 1",
           call. = FALSE)
+  }
 }

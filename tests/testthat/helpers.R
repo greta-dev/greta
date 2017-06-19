@@ -29,6 +29,23 @@ set_distribution <- function(dist, data) {
   data$node$register()
 }
 
+# evaluate the (unadjusted) density of distribution greta array at some data
+get_density <- function (distrib, data) {
+
+  x <- as_data(data)
+  distribution(x) = distrib
+
+  # create dag and define the density
+  dag <- greta:::dag_class$new(list(x))
+  x$node$distribution$define_tf(dag)
+
+  # get the log density as a vector
+  tensor_name <- dag$tf_name(distrib$node$distribution)
+  tensor <- get(tensor_name, envir = dag$tf_environment)
+  as.vector(grab(tensor))
+
+}
+
 compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.

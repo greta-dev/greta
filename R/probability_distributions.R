@@ -9,6 +9,9 @@ uniform_distribution <- R6Class (
 
     initialize = function (min, max, dim) {
 
+      if (is.greta_array(min) | is.greta_array(max))
+        stop ('min and max must be fixed, they cannot be another greta array')
+
       good_types <- is.numeric(min) && length(min) == 1 &
         is.numeric(max) && length(max) == 1
 
@@ -59,18 +62,19 @@ uniform_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters) {
-      tf$contrib$distributions$Uniform(low = parameters$min,
-                                       high = parameters$max)
-    },
 
-    # weird hack to make TF see a gradient here
-    tf_log_density_function = function (x, parameters) {
-      fl(self$log_density) + x * fl(0)
+      tf_ld <- fl(self$log_density)
+
+      # weird hack to make TF see a gradient here
+      log_prob = function (x)
+        tf_ld + x * fl(0)
+
+      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
     }
 
   )
 )
-
 
 normal_distribution <- R6Class (
   'normal_distribution',
@@ -1373,14 +1377,8 @@ NULL
 
 #' @rdname distributions
 #' @export
-uniform <- function (min, max, dim = NULL) {
-
-  if (is.greta_array(min) | is.greta_array(max))
-    stop ('min and max must be fixed, they cannot be another greta array')
-
+uniform <- function (min, max, dim = NULL)
   distrib('uniform', min, max, dim)
-
-}
 
 #' @rdname distributions
 #' @export
