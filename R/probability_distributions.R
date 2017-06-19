@@ -1123,8 +1123,25 @@ lkj_correlation_distribution <- R6Class (
 
       }
 
+      if (!is.greta_array(eta)) {
+
+        if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
+          stop ("eta must be a positive scalar value, or a scalar greta array",
+                call. = FALSE)
+        }
+
+      }
+
       # add the nodes as children and parameters
       eta <- as.greta_array(eta)
+
+      if (!is_scalar(eta)) {
+
+        stop ("eta must be a scalar, but had dimensions: ",
+              capture.output(dput(dim(eta))),
+              call. = FALSE)
+
+      }
 
       super$initialize('lkj_correlation', c(dim, dim))
       self$add_parameter(eta, 'eta')

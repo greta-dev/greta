@@ -507,6 +507,7 @@ test_that('scalar-valued distributions can be defined in models', {
 
   model(multivariate_normal(rnorm(3), sig))
   model(wishart(4, sig))
+  model(lkj_correlation(5, dim = 3))
   model(dirichlet(runif(3)))
 
 })
@@ -587,6 +588,8 @@ test_that('array-valued distributions can be defined in models', {
   sig <- MCMCpack:::rwish(4, diag(3))
   model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
   model(dirichlet(runif(3), dim = dim[1]))
+  model(wishart(4, sig))
+  model(lkj_correlation(3, dim = dim[1]))
 
 })
 
@@ -678,6 +681,7 @@ test_that('distributions can be sampled from', {
   sig <- MCMCpack::rwish(4, diag(3))
   sample_distribution(multivariate_normal(rnorm(3), sig))
   sample_distribution(wishart(4, sig))
+  sample_distribution(lkj_correlation(4, dim = 3))
   sample_distribution(dirichlet(runif(3)))
 
 })
@@ -743,6 +747,27 @@ test_that('wishart distribution errors informatively', {
                '^Sigma must be a square 2D greta array, but has dimensions')
   expect_error(wishart(3, c),
                '^Sigma must be a square 2D greta array, but has dimensions')
+
+})
+
+
+test_that('lkj_correlation distribution errors informatively', {
+
+  source('helpers.R')
+
+  dim <- 3
+
+  expect_true(inherits(lkj_correlation(3, dim),
+                       'greta_array'))
+
+  expect_error(lkj_correlation(-1, dim),
+               "^eta must be a positive scalar value, or a scalar greta array")
+
+  expect_error(lkj_correlation(c(3, 3), dim),
+               "^eta must be a positive scalar value, or a scalar greta array")
+
+  expect_error(lkj_correlation(uniform(0, 1, dim = 2), dim),
+               "^eta must be a scalar, but had dimensions")
 
 })
 
@@ -904,7 +929,6 @@ test_that('dirichlet-multinomial distribution errors informatively', {
   # bad size
   expect_error(dirichlet_multinomial(c(1, 2), alpha_a),
                'size must be a scalar, but has dimensions 2 x 1')
-
 
   # scalars
   expect_error(dirichlet_multinomial(size, alpha = 1),
