@@ -55,21 +55,27 @@ stash_trace <- function (trace)
 #'   During this phase the sampler moves toward the highest density area and
 #'   tunes sampler hyperparameters.
 #' @param verbose whether to print progress information to the console
+#' @param pb_update how regularly to update the progress bar (in iterations)
 #' @param control an optional named list of hyperparameters and options to
 #'   control behaviour of the sampler or optimiser. See Details.
 #' @param initial_values an optional named vector of initial values for the free
 #'   parameters in the model. These will be used as the starting point for
 #'   sampling/optimisation
 #'
-#' @details For MCMC if \code{verbose = TRUE}, the progress bar shows the number of
-#'   iterations so far and the expected time to complete the phase of model
-#'   fitting (warmup or sampling). Occasionally, a proposed set of parameters
-#'   can cause numerical instability (I.e. the log density or its gradient is
-#'   \code{NA}, \code{Inf} or \code{-Inf}); normally because the log joint
-#'   density is so low that it can't be represented as a floating point number.
-#'   When this happens, the progress bar will also display the proportion of
-#'   samples so far that were 'bad' (numerically unstable) and therefore
-#'   rejected.
+#' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
+#'   the number of iterations so far and the expected time to complete the phase
+#'   of model fitting (warmup or sampling). Updating the progress bar regularly
+#'   slows down sampling, by as much as 9 seconds per 1000 updates. So if you
+#'   want the sampler to run faster, you can change \code{pb_update} to increase
+#'   the number of iterations between updates of the progress bar, or turn the
+#'   progress bar off altogether by setting \code{verbose = FALSE}.
+#'
+#'   Occasionally, a proposed set of parameters can cause numerical instability
+#'   (I.e. the log density or its gradient is \code{NA}, \code{Inf} or
+#'   \code{-Inf}); normally because the log joint density is so low that it
+#'   can't be represented as a floating point number. When this happens, the
+#'   progress bar will also display the proportion of samples so far that were
+#'   'bad' (numerically unstable) and therefore rejected.
 #'   If you're getting a lot of numerical instability, you might want to
 #'   manually define starting values to move the sampler into a more reasonable
 #'   part of the parameter space. Alternatively, you could redefine the model
@@ -77,7 +83,7 @@ stash_trace <- function (trace)
 #'   sampling.
 #'
 #'   Currently, the only implemented MCMC procedure is static Hamiltonian
-#'   Monte Carlo (\code{method = 'hmc'}). During the warmup iterations, the
+#'   Monte Carlo (\code{method = "hmc"}). During the warmup iterations, the
 #'   leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
 #'   sampler efficiency. The \code{control} argument can be used to specify the
 #'   initial value for epsilon, along with two other hyperparameters: \code{Lmin}
@@ -107,11 +113,12 @@ stash_trace <- function (trace)
 #'               warmup = 10)
 #' }
 mcmc <- function (model,
-                  method = c('hmc'),
+                  method = c("hmc"),
                   n_samples = 1000,
                   thin = 1,
                   warmup = 100,
                   verbose = TRUE,
+                  pb_update = 10,
                   control = list(),
                   initial_values = NULL) {
 
@@ -191,7 +198,7 @@ mcmc <- function (model,
   if (warmup > 0) {
 
     if (verbose)
-      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples))
+      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
     else
       pb_warmup <- NULL
 
@@ -213,7 +220,7 @@ mcmc <- function (model,
   }
 
   if (verbose)
-    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples))
+    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
   else
     pb_sampling <- NULL
 
@@ -250,7 +257,7 @@ prepare_draws <- function (draws) {
 #' @param tolerance the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level
 #'
 #' @details Currently, the only implemented optimisation algorithm is Adagrad
-#'   (\code{method = 'adagrad'}). The \code{control} argument can be used to
+#'   (\code{method = "adagrad"}). The \code{control} argument can be used to
 #'   specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
 #'   \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
 #'   (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,
@@ -273,7 +280,7 @@ prepare_draws <- function (draws) {
 #' opt_res <- opt(m)
 #' }
 opt <- function (model,
-                  method = c('adagrad'),
+                  method = c("adagrad"),
                   max_iterations = 100,
                   tolerance = 1e-6,
                   control = list(),

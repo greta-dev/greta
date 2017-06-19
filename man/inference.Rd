@@ -10,7 +10,8 @@
 stashed_samples()
 
 mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
-  verbose = TRUE, control = list(), initial_values = NULL)
+  verbose = TRUE, pb_update = 10, control = list(),
+  initial_values = NULL)
 
 opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
   control = list(), initial_values = NULL)
@@ -32,6 +33,8 @@ During this phase the sampler moves toward the highest density area and
 tunes sampler hyperparameters.}
 
 \item{verbose}{whether to print progress information to the console}
+
+\item{pb_update}{how regularly to update the progress bar (in iterations)}
 
 \item{control}{an optional named list of hyperparameters and options to
 control behaviour of the sampler or optimiser. See Details.}
@@ -67,15 +70,20 @@ If the sampler is aborted before finishing, the samples collected so
   far can be retrieved with \code{stashed_samples()}. Only samples from the
   sampling phase will be returned.
 
-For MCMC if \code{verbose = TRUE}, the progress bar shows the number of
-  iterations so far and the expected time to complete the phase of model
-  fitting (warmup or sampling). Occasionally, a proposed set of parameters
-  can cause numerical instability (I.e. the log density or its gradient is
-  \code{NA}, \code{Inf} or \code{-Inf}); normally because the log joint
-  density is so low that it can't be represented as a floating point number.
-  When this happens, the progress bar will also display the proportion of
-  samples so far that were 'bad' (numerically unstable) and therefore
-  rejected.
+For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
+  the number of iterations so far and the expected time to complete the phase
+  of model fitting (warmup or sampling). Updating the progress bar regularly
+  slows down sampling, by as much as 9 seconds per 1000 updates. So if you
+  want the sampler to run faster, you can change \code{pb_update} to increase
+  the number of iterations between updates of the progress bar, or turn the
+  progress bar off altogether by setting \code{verbose = FALSE}.
+
+  Occasionally, a proposed set of parameters can cause numerical instability
+  (I.e. the log density or its gradient is \code{NA}, \code{Inf} or
+  \code{-Inf}); normally because the log joint density is so low that it
+  can't be represented as a floating point number. When this happens, the
+  progress bar will also display the proportion of samples so far that were
+  'bad' (numerically unstable) and therefore rejected.
   If you're getting a lot of numerical instability, you might want to
   manually define starting values to move the sampler into a more reasonable
   part of the parameter space. Alternatively, you could redefine the model
@@ -83,7 +91,7 @@ For MCMC if \code{verbose = TRUE}, the progress bar shows the number of
   sampling.
 
   Currently, the only implemented MCMC procedure is static Hamiltonian
-  Monte Carlo (\code{method = 'hmc'}). During the warmup iterations, the
+  Monte Carlo (\code{method = "hmc"}). During the warmup iterations, the
   leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
   sampler efficiency. The \code{control} argument can be used to specify the
   initial value for epsilon, along with two other hyperparameters: \code{Lmin}
@@ -95,7 +103,7 @@ For MCMC if \code{verbose = TRUE}, the progress bar shows the number of
   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
 
 Currently, the only implemented optimisation algorithm is Adagrad
-  (\code{method = 'adagrad'}). The \code{control} argument can be used to
+  (\code{method = "adagrad"}). The \code{control} argument can be used to
   specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
   \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
   (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,

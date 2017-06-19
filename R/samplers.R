@@ -23,6 +23,10 @@ hmc <- function (dag,
 
   numerical_rejections <- 0
 
+  # start the progress bar
+  if (verbose)
+    iterate_progress_bar(pb = pb, it = 0, rejects = 0)
+
   # set initial location, log joint density and gradients
   x <- init
   dag$send_parameters(x)

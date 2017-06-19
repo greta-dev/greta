@@ -298,7 +298,7 @@ mock_create_progress_bar <- function(...)
   cpb(..., stream = stdout(), force = TRUE)
 
 mock_mcmc <- function (n_samples = 1010) {
-  pb <- create_progress_bar('sampling', c(0, n_samples))
+  pb <- create_progress_bar('sampling', c(0, n_samples), pb_update = 10)
   # for (i in seq_len(n_samples))
   iterate_progress_bar(pb, n_samples, rejects = 10)
 }
