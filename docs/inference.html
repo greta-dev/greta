@@ -352,7 +352,8 @@ Carry out statistical inference on greta models by MCMC or likelihood/posterior 
 <pre class="r"><span class='fu'>stashed_samples</span>()
 
 <span class='fu'>mcmc</span>(<span class='no'>model</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"hmc"</span>), <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(),
+  <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
 <span class='fu'>opt</span>(<span class='no'>model</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"adagrad"</span>), <span class='kw'>max_iterations</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
   <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='kw'>NULL</span>) </pre>
@@ -382,6 +383,10 @@ the number of samples to spend warming up the mcmc sampler. During this phase th
 <code>verbose</code>
 <p>
 whether to print progress information to the console
+</p>
+<code>pb_update</code>
+<p>
+how regularly to update the progress bar (in iterations)
 </p>
 <code>control</code>
 <p>
@@ -435,16 +440,19 @@ convergencean integer code, 0 indicates successful completion, 1 indicates the i
 If the sampler is aborted before finishing, the samples collected so far can be retrieved with <code>stashed_samples()</code>. Only samples from the sampling phase will be returned.
 </p>
 <p>
-For MCMC if <code>verbose = TRUE</code>, the progress bar shows the number of iterations so far and the expected time to complete the phase of model fitting (warmup or sampling). Occasionally, a proposed set of parameters can cause numerical instability (I.e. the log density or its gradient is <code>NA</code>, <code>Inf</code> or <code>-Inf</code>); normally because the log joint density is so low that it can’t be represented as a floating point number. When this happens, the progress bar will also display the proportion of samples so far that were ‘bad’ (numerically unstable) and therefore rejected. If you’re getting a lot of numerical instability, you might want to manually define starting values to move the sampler into a more reasonable part of the parameter space. Alternatively, you could redefine the model (via <code>model</code>) to have double precision, though this will slow down sampling.
+For <code>mcmc()</code> if <code>verbose = TRUE</code>, the progress bar shows the number of iterations so far and the expected time to complete the phase of model fitting (warmup or sampling). Updating the progress bar regularly slows down sampling, by as much as 9 seconds per 1000 updates. So if you want the sampler to run faster, you can change <code>pb_update</code> to increase the number of iterations between updates of the progress bar, or turn the progress bar off altogether by setting <code>verbose = FALSE</code>.
 </p>
 <p>
-Currently, the only implemented MCMC procedure is static Hamiltonian Monte Carlo (<code>method = ‘hmc’</code>). During the warmup iterations, the leapfrog stepsize hyperparameter <code>epsilon</code> is tuned to maximise the sampler efficiency. The <code>control</code> argument can be used to specify the initial value for epsilon, along with two other hyperparameters: <code>Lmin</code> and <code>Lmax</code>; positive integers (with <code>Lmax &gt; Lmin</code>) giving the upper and lower limits to the number of leapfrog steps per iteration (from which the number is selected uniformly at random).
+Occasionally, a proposed set of parameters can cause numerical instability (I.e. the log density or its gradient is <code>NA</code>, <code>Inf</code> or <code>-Inf</code>); normally because the log joint density is so low that it can’t be represented as a floating point number. When this happens, the progress bar will also display the proportion of samples so far that were ‘bad’ (numerically unstable) and therefore rejected. If you’re getting a lot of numerical instability, you might want to manually define starting values to move the sampler into a more reasonable part of the parameter space. Alternatively, you could redefine the model (via <code>model</code>) to have double precision, though this will slow down sampling.
+</p>
+<p>
+Currently, the only implemented MCMC procedure is static Hamiltonian Monte Carlo (<code>method = “hmc”</code>). During the warmup iterations, the leapfrog stepsize hyperparameter <code>epsilon</code> is tuned to maximise the sampler efficiency. The <code>control</code> argument can be used to specify the initial value for epsilon, along with two other hyperparameters: <code>Lmin</code> and <code>Lmax</code>; positive integers (with <code>Lmax &gt; Lmin</code>) giving the upper and lower limits to the number of leapfrog steps per iteration (from which the number is selected uniformly at random).
 </p>
 <p>
 The default control options for HMC are: <code>control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)</code>
 </p>
 <p>
-Currently, the only implemented optimisation algorithm is Adagrad (<code>method = ‘adagrad’</code>). The <code>control</code> argument can be used to specify the optimiser hyperparameters: <code>learning_rate</code> (default 0.8), <code>initial_accumulator_value</code> (default 0.1) and <code>use_locking</code> (default <code>TRUE</code>). The are passed directly to TensorFlow’s optimisers, see <a href = 'https://www.tensorflow.org/api_docs/python/tf/train/AdagradOptimizer'>the TensorFlow docs</a> for more information
+Currently, the only implemented optimisation algorithm is Adagrad (<code>method = “adagrad”</code>). The <code>control</code> argument can be used to specify the optimiser hyperparameters: <code>learning_rate</code> (default 0.8), <code>initial_accumulator_value</code> (default 0.1) and <code>use_locking</code> (default <code>TRUE</code>). The are passed directly to TensorFlow’s optimisers, see <a href = 'https://www.tensorflow.org/api_docs/python/tf/train/AdagradOptimizer'>the TensorFlow docs</a> for more information
 </p>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
