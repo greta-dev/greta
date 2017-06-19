@@ -11,16 +11,15 @@ distribution(greta_array) <- value
 distribution(greta_array)
 }
 \arguments{
-\item{greta_array}{a greta array. For the assignment method it must be a
-greta array that doesn't already have a probability distribution.}
+\item{greta_array}{a data greta array. For the assignment method it must not
+already have a probability distribution assigned}
 
 \item{value}{a greta array with a distribution (see
 \code{\link{distributions}})}
 }
 \description{
-\code{distribution} links observed data, variables, and other
-  greta arrays to probability distributions. For example a model likelhood
-  can be set by using \code{distribution} on some observed data.
+\code{distribution} defines probability distributions over
+  observed data, e.g. to set a model likelihood.
 }
 \details{
 The extract method returns the greta array if it has a distribution,
@@ -34,7 +33,8 @@ The extract method returns the greta array if it has a distribution,
 # observed data and mean parameter to be estimated
 # (explicitly coerce data to a greta array so we can refer to it later)
 y = as_data(rnorm(5, 0, 3))
-mu = variable()
+
+mu = uniform(-3, 3)
 
 # define the distribution over y (the model likelihood)
 distribution(y) = normal(mu, 1)

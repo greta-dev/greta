@@ -524,34 +524,3 @@ test_that('truncated chi squared has correct densities', {
   expect_true(all(difference < 1e-4))
 
 })
-
-test_that('truncation works the same both ways', {
-
-  source('helpers.R')
-
-  mean <- -1
-  sd <- 2.4
-
-  rtnorms <- function (truncation) {
-    truncdist::rtrunc(n = 100,
-                      spec = 'norm',
-                      a = truncation[1],
-                      b = truncation[2],
-                      mean = mean,
-                      sd = sd)
-  }
-
-  compare_truncation <- function (truncation) {
-    x <- rtnorms(truncation)
-    a <- normal(mean, sd, truncation = truncation)
-    b <- variable(truncation[1], truncation[2])
-    distribution(b) = normal(mean, sd)
-    expect_identical(get_density(a, x), get_density(b, x))
-  }
-
-  compare_truncation(c(-Inf, Inf))
-  compare_truncation(c(0, Inf))
-  compare_truncation(c(-Inf, -1))
-  compare_truncation(c(-2, -1))
-
-})
