@@ -12,7 +12,7 @@
 #'   clusters or on GPUs.
 #'
 #'   See the simple example below, and take a look at the
-#'   \href{https://goldingn.github.io}{greta website} for more information
+#'   \href{https://goldingn.github.io/greta}{greta website} for more information
 #'   including
 #'   \href{https://goldingn.github.io/greta/getting_started.html}{tutorials} and
 #'   \href{https://goldingn.github.io/greta/example_models.html}{examples}.

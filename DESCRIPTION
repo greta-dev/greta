@@ -49,7 +49,7 @@ Suggests:
     knitr,
     rmarkdown,
     DiagrammeR,
-    MCMCvis,
+    bayesplot,
     testthat,
     mvtnorm,
     MCMCpack,
