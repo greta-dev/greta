@@ -14,7 +14,7 @@ r_packages:
   - knitr
   - rmarkdown
   - rsvg
-  - MCMCvis
+  - bayesplot
   - extraDistr
 
 r_github_packages:
