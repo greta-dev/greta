@@ -19,27 +19,15 @@ test_that('check_tf_version works', {
   # reset the true version
   tf$`__version__` <- true_version
 
-  # stash the module and forge a missing installation
-  tf_tmp <- tf
-  env <- parent.env(environment(check_tf_version))
-  unlockBinding('tf', env)
-  env$tf <- NULL
-  lockBinding('tf', env)
-
-  # expected text
+  # forge a missing installation
   expected_message <- "isn't installed"
 
-  expect_error(check_tf_version('error'),
-               expected_message)
-  expect_warning(check_tf_version('warn'),
-                 expected_message)
-  expect_message(check_tf_version('message'),
-                 expected_message)
-
-  # replace the tf module
-  unlockBinding('tf', env)
-  env$tf <- tf_tmp
-  lockBinding('tf', env)
+  with_mock(
+    `reticulate::py_module_available` = function(x) {FALSE},
+    expect_error(check_tf_version('error'), expected_message),
+    expect_warning(check_tf_version('warn'), expected_message),
+    expect_message(check_tf_version('message'), expected_message)
+  )
 
 })
 

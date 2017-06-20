@@ -199,7 +199,7 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
 
   text <- NULL
 
-  if (!reticulate:::py_module_available('tensorflow')) {
+  if (!reticulate::py_module_available('tensorflow')) {
 
     text <- "TensorFlow isn't installed."
 

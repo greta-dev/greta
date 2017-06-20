@@ -50,7 +50,7 @@ NULL
   check_tf_version('warn')
 
   # default float type
-  if (reticulate:::py_module_available('tensorflow'))
+  if (reticulate::py_module_available('tensorflow'))
     options(greta_tf_float = tf$float32)
 
 }
