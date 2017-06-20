@@ -190,15 +190,16 @@ all_greta_arrays <- function (env = parent.frame(),
 
 }
 
-# check tensorflow is installed and the version of tensorflow is valid. error, warn, or message if not and
-# (if not an error) return an invisible logical saying whether it is valid
+# check tensorflow is installed and the version of tensorflow is valid. error,
+# warn, or message if not and (if not an error) return an invisible logical
+# saying whether it is valid
 check_tf_version <- function (alert = c('error', 'warn', 'message')) {
 
   alert <- match.arg(alert)
 
   text <- NULL
 
-  if (!exists('tf') || is.null(tf)) {
+  if (!reticulate:::py_module_available('tensorflow')) {
 
     text <- "TensorFlow isn't installed."
 
@@ -216,7 +217,7 @@ check_tf_version <- function (alert = c('error', 'warn', 'message')) {
 
   }
 
-  if (! is.null(text)) {
+  if (!is.null(text)) {
 
     text <- paste0("\n\n  greta requires TensorFlow version 1.0.0 or higher, ",
                    "but ", text, "\n  ",
