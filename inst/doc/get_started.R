@@ -16,88 +16,6 @@ if (!file.exists('figures'))
 file.copy('../man/figures/plotlegend.png',
           'figures/plotlegend.png')
 
-## ----ones----------------------------------------------------------------
-(z <- ones(3, 3))
-
-## ----ones_op-------------------------------------------------------------
-(z2 <- z + z ^ 2)
-
-## ----variable------------------------------------------------------------
-(a <- variable(dim = c(3, 3)))
-(a2 <- a + a ^ 2)
-
-## ----first_model, eval = FALSE-------------------------------------------
-#  library(greta)
-#  
-#  # data
-#  x <- as_data(iris$Petal.Length)
-#  y <- as_data(iris$Sepal.Length)
-#  
-#  # variables and priors
-#  int = variable()
-#  coef = normal(0, 3)
-#  sd = lognormal(0, 3)
-#  
-#  # operations
-#  mean <- int + coef * x
-#  
-#  # likelihood
-#  distribution(y) = normal(mean, sd)
-#  
-#  # defining the model
-#  m <- model(int, coef, sd)
-#  
-#  # plotting
-#  plot(m)
-#  
-#  # sampling
-#  draws <- mcmc(model, n_samples = 1000)
-
-## ----data----------------------------------------------------------------
-x <- as_data(iris$Petal.Length)
-y <- as_data(iris$Sepal.Length)
-
-## ----print_greta_array---------------------------------------------------
-as_data(iris[1:5, 1:4])
-
-## ----logical_data--------------------------------------------------------
-(is_setosa <- iris$Species[c(1, 41, 81, 121)] == 'setosa')
-as_data(is_setosa)
-
-## ----dim-----------------------------------------------------------------
-dim(as_data(is_setosa))
-
-## ----structures----------------------------------------------------------
-ones(1, 3)
-zeros(2, 2)
-
-## ----greta_array---------------------------------------------------------
-greta_array(pi, dim = c(2, 2))
-greta_array(0:1, dim = c(3, 3))
-
-## ----variables-----------------------------------------------------------
-int = variable()
-coef = normal(0, 3)
-sd = lognormal(0, 3)
-
-## ----int-----------------------------------------------------------------
-int
-
-## ----positive_variable---------------------------------------------------
-variable(lower = 0, dim = c(2, 3))
-
-## ----priors--------------------------------------------------------------
-coef
-sd
-
-## ----normal_prior2, eval = FALSE-----------------------------------------
-#  coef = variable()
-#  distribution(coef) = normal(0, 3)
-
-## ----sd_distribution, eval = FALSE---------------------------------------
-#  sd = variable(lower = 0)
-#  distribution(sd) = lognormal(0, 3)
-
 ## ----truncated-----------------------------------------------------------
 z = variable(lower = -1, upper = 2)
 distribution(z) = normal(0, 1)
@@ -194,10 +112,10 @@ DiagrammeR::export_graph(gr,
 ## ----install_diagrammer, eval = FALSE------------------------------------
 #  install.packages('DiagrammeR')
 
-## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------------
+## ----mcmc, message=FALSE, results='hide', progress = FALSE---------------
 draws <- mcmc(m, n_samples = 1000)
 
-## ----coda_summary--------------------------------------------------------------
+## ----coda_summary--------------------------------------------------------
 summary(draws)
 
 ## ----mcmcvis, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'----
