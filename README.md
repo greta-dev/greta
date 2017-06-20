@@ -4,7 +4,9 @@
 
 greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it's easy to extend and build on.
 
-### See [the website](https://goldingn.github.io/greta/) for more information, [tutorials](https://goldingn.github.io/greta/getting_started.html), [examples](https://goldingn.github.io/greta/example_models.html), and [package documentation](https://goldingn.github.io/greta/reference-index.html).
+<img src="README_files/banner.png" width="940" />
+
+### See the [website](https://goldingn.github.io/greta/) for more information, [tutorials](https://goldingn.github.io/greta/get_started.html), [examples](https://goldingn.github.io/greta/example_models.html), and [package documentation](https://goldingn.github.io/greta/reference-index.html).
 
 You can install the package from GitHub:
 
