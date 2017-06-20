@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Get started with greta</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="greta.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 54px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+
+.section h2 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h3 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h4 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h5 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h6 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+<style type="text/css">
+.logo {
+    display: inline-block;
+    width: 144px;
+    height: 40px;
+    background-image: url(banner-icon.png);
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+</style>
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="logo" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <a href="getting_started.html">get started</a>
+        </li>
+        <li>
+          <a href="example_models.html">examples</a>
+        </li>
+        <li>
+          <a href="reference-index.html">docs</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            more
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="why_greta.html">why 'greta'?</a>
+            </li>
+            <li>
+              <a href="how_does_this_work.html">technical details</a>
+            </li>
+            <li>
+              <a href="software.html">software</a>
+            </li>
+            <li>
+              <a href="contribute.html">contribute to greta</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="https://github.com/goldingn/greta">
+            <span class="fa fa-github fa-lg"></span>
+          </a>
+        </li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Get started with greta</h1>
+
+</div>
+
+
+<hr>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>You can install the stable version of greta from CRAN:</p>
+<pre class="r"><code>install.packages(&quot;greta&quot;)
+library(greta)</code></pre>
+<p>Alternatively, you can install the latest release, or the development version, from GitHub using the devtools package:</p>
+<pre class="r"><code>devtools::install_github(&quot;goldingn/greta&quot;)  # latest release
+devtools::install_github(&quot;goldingn/greta@dev&quot;)  # development version
+library(greta)</code></pre>
+<hr>
+<div id="tensorflow" class="section level3">
+<h3>TensorFlow</h3>
+<p>Before you can fit models with greta, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> python package (version 1.0.0 or higher). greta exports <code>install_tensorflow()</code> from the <code>tensorflow</code> R package, which will attempt to install the latest version of TensorFlow from within your R session.</p>
+<pre class="r"><code>install_tensorflow()</code></pre>
+<p>You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you’re having trouble with this step, <a href="https://tensorflow.rstudio.com/installation.html">this guide</a> may help.</p>
+<hr>
+</div>
+<div id="diagrammer" class="section level3">
+<h3>DiagrammeR</h3>
+<p>greta’s <a href="#plotting">plotting functionality</a> depends on the <a href="http://rich-iannone.github.io/DiagrammeR/">DiagrammeR package</a>. Because Diagrammer automatically installs a lot of other packages it can take a long time to install, so DiagrammeR isn’t installed automatically with greta. If you want to plot models, you can install DiagrammeR from CRAN.</p>
+<pre class="r"><code>install.packages(&#39;DiagrammeR&#39;)</code></pre>
+<hr>
+</div>
+</div>
+<div id="how-greta-works" class="section level2">
+<h2>How greta works</h2>
+<p>greta lets us build statistical models interactively in R, and then sample from them by MCMC. We build greta models with <em>greta array</em> objects, which behave much like R’s array, matrix and vector objects for numeric data. Like those numeric data objects, greta arrays can be manipulated with functions and mathematical operators to create new greta arrays.</p>
+<p>The key difference between greta arrays and numeric data objects is that when you do something to a greta array, greta <em>doesn’t calculate the values</em> of the new greta array. Instead, it just remembers what operation to do, and works out the size and shape of the result.</p>
+<p>For example, we can create a greta array <code>z</code> representing some data (a 3x3 matrix of 1s):</p>
+<pre class="r"><code>(z &lt;- ones(3, 3))</code></pre>
+<pre><code>greta array (data)
+
+     [,1] [,2] [,3]
+[1,]    1    1    1
+[2,]    1    1    1
+[3,]    1    1    1</code></pre>
+<p>we can then create a new greta array <code>z2</code> by doing something to <code>z</code>:</p>
+<pre class="r"><code>(z2 &lt;- z + z ^ 2)</code></pre>
+<pre><code>greta array (operation)
+
+     [,1] [,2] [,3]
+[1,]  ?    ?    ?  
+[2,]  ?    ?    ?  
+[3,]  ?    ?    ?  </code></pre>
+<p>greta knows the result must also be a 3x3 matrix, but it doesn’t try to calculate the results. Instead it treats the new greta array <code>z2</code> like a placeholder, for which it will calculate the results later.</p>
+<p>Because greta only creates <em>placeholders</em> when we’re building our model, we can construct models using greta arrays that represent unknown variables. For example, if we create a new greta array <code>a</code> representing some unknown values, we can still manipulate it as though it were data:</p>
+<pre class="r"><code>(a &lt;- variable(dim = c(3, 3)))</code></pre>
+<pre><code>greta array (variable)
+
+     [,1] [,2] [,3]
+[1,]  ?    ?    ?  
+[2,]  ?    ?    ?  
+[3,]  ?    ?    ?  </code></pre>
+<pre class="r"><code>(a2 &lt;- a + a ^ 2)</code></pre>
+<pre><code>greta array (operation)
+
+     [,1] [,2] [,3]
+[1,]  ?    ?    ?  
+[2,]  ?    ?    ?  
+[3,]  ?    ?    ?  </code></pre>
+<p>This allows us to create a wide range of models, like in the general-purpose modelling languages like BUGS and Stan. But unlike those languages we build greta models interactively in R so get feedback immediately if there’s a mistake like a misspelled variable name or if one of our greta arrays has the wrong shape.</p>
+<p>greta also lets us declare that a greta array follows a probability distribution, allowing us to train models using observed data, and to define prior distributions over our parameters, for Bayesian analyses.</p>
+<p>The rest of this vignette walks through an example of fitting a model using greta. If you’d like to see examples of some common models fitted in greta and with equivalent BUGS and Stan code, take a look at <a href="example_models.html">Example models</a>. If you’d like more technical details about how greta works under the hood, check out <a href="how_does_this_work.html">How does this work?</a>.</p>
+<hr>
+</div>
+<div id="building-a-model" class="section level2">
+<h2>Building a model</h2>
+<p>The rest of the vignette explains step-by-step how to build, visualise and fit a model with greta. We’ll be stepping through a model for linear regression between two of the variables in the <a href="https://en.wikipedia.org/wiki/Iris_flower_data_set"><code>iris</code></a> dataset, which is included with base R. The model is <em>Bayesian</em> (we specify priors over the variables), though it is also possible to do frequentist (no priors) inference in greta, using <code>variable()</code> instead of a probability distribution to create random variables.</p>
+<p>Here’s the whole script to specify and fit the model:</p>
+<pre class="r"><code>library(greta)
+
+# data
+x &lt;- as_data(iris$Petal.Length)
+y &lt;- as_data(iris$Sepal.Length)
+
+# variables and priors
+int = normal(0, 1)
+coef = normal(0, 3)
+sd = student(3, 0, 1, truncation = c(0, Inf))
+
+# operations
+mean &lt;- int + coef * x
+
+# likelihood
+distribution(y) = normal(mean, sd)
+
+# defining the model
+m &lt;- model(int, coef, sd)
+
+# plotting
+plot(m)
+
+# sampling
+draws &lt;- mcmc(m, n_samples = 1000)</code></pre>
+<p>Throughout this example, and the rest of greta’s documentation, <code>&lt;-</code> is used when assigning <em>deterministic</em> values, and <code>=</code> when assigning variable or <em>stochastic</em> values. This makes the model code a little bit clearer to read, since <code>=</code> corresponds to the <code>~</code> symbol used to define stochastic relationships in BUGS and Stan. However, it doesn’t actually make any difference to the model which assignment operator you use.</p>
+<hr>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<p>The first section of the script takes the iris data (which is automatically loaded) and converts the two columns we care about into greta arrays:</p>
+<pre class="r"><code>x &lt;- as_data(iris$Petal.Length)
+y &lt;- as_data(iris$Sepal.Length)</code></pre>
+<p>The greta function <code>as_data()</code> converts other R objects into greta arrays. In this case it’s converting numeric vectors (the two columns of the iris dataframe) into greta arrays. <code>as_data()</code> can also convert matrices and R arrays with numeric, integer or logical (<code>TRUE</code> or <code>FALSE</code>) values into greta arrays. It can also convert dataframes to greta arrays, so long as all elements are either numeric, integer or logical.</p>
+<p>E.g. we can convert the first 5 rows and 4 columns of the iris dataframe, and print the result:</p>
+<pre class="r"><code>as_data(iris[1:5, 1:4])</code></pre>
+<pre><code>greta array (data)
+
+     [,1] [,2] [,3] [,4]
+[1,]  5.1  3.5  1.4  0.2
+[2,]  4.9  3.0  1.4  0.2
+[3,]  4.7  3.2  1.3  0.2
+[4,]  4.6  3.1  1.5  0.2
+[5,]  5.0  3.6  1.4  0.2</code></pre>
+<p>Whenever <code>as_data()</code> converts logical values to greta arrays, it converts them to 1s (for <code>TRUE</code>) and 0s (for <code>FALSE</code>). E.g. if we first convert the last column of <code>iris</code> from a factor into a logical vector, we can see this:</p>
+<pre class="r"><code>(is_setosa &lt;- iris$Species[c(1, 41, 81, 121)] == &#39;setosa&#39;)</code></pre>
+<pre><code>[1]  TRUE  TRUE FALSE FALSE</code></pre>
+<pre class="r"><code>as_data(is_setosa)</code></pre>
+<pre><code>greta array (data)
+
+     [,1]
+[1,]    1
+[2,]    1
+[3,]    0
+[4,]    0</code></pre>
+<p>You can also see from this example that greta arrays always consider a vector as either a column vector (the default) or a row vector, and greta arrays always have at least two dimensions:</p>
+<pre class="r"><code>dim(as_data(is_setosa))</code></pre>
+<pre><code>[1] 4 1</code></pre>
+<div id="explicit-vs.automatic-conversion" class="section level4">
+<h4>explicit vs. automatic conversion</h4>
+<p>For many models, we don’t <em>have</em> to explicitly convert data to greta arrays, the R objects will be converted automatically when we do an <a href="#Operations">operation</a> on them. That’s handy for when we want to use constants in our model because it saves us manually converting numbers each time. However, it’s good practice to explicitly convert your data to a greta array using <code>as_data()</code>. This has two advantages: it lets greta work out the names of your data greta arrays (e.g. <code>x</code> and <code>y</code> in our example) which it can use when <a href="#Plotting">plotting</a> the model; and <code>as_data()</code> will check your data for missing (<code>NA</code>) or non-finite (<code>Inf</code> or <code>-Inf</code>) values, which will break the model.</p>
+</div>
+<div id="data-structures" class="section level4">
+<h4>data structures</h4>
+<p>greta also provides some convenience functions to generate fixed numeric values. <code>ones()</code> and <code>zeros()</code> create greta arrays filled with either 1 or zero, and with the specified dimensions:</p>
+<pre class="r"><code>ones(1, 3)</code></pre>
+<pre><code>greta array (data)
+
+     [,1] [,2] [,3]
+[1,]    1    1    1</code></pre>
+<pre class="r"><code>zeros(2, 2)</code></pre>
+<pre><code>greta array (data)
+
+     [,1] [,2]
+[1,]    0    0
+[2,]    0    0</code></pre>
+<p>The <code>greta_array()</code> function is generalises this to let you create greta arrays with any values, in the same way as R’s <code>array()</code> function:</p>
+<pre class="r"><code>greta_array(pi, dim = c(2, 2))</code></pre>
+<pre><code>greta array (data)
+
+         [,1]     [,2]
+[1,] 3.141593 3.141593
+[2,] 3.141593 3.141593</code></pre>
+<pre class="r"><code>greta_array(0:1, dim = c(3, 3))</code></pre>
+<pre><code>greta array (data)
+
+     [,1] [,2] [,3]
+[1,]    0    1    0
+[2,]    1    0    1
+[3,]    0    1    0</code></pre>
+<p><code>greta_array()</code> is just a thin wrapper around <code>array()</code>, provided for convenience. A command like <code>greta_array(&lt;some arguments&gt;)</code> has exactly the same effect as: <code>as_data(array&lt;some arguments&gt;)</code>.</p>
+<hr>
+</div>
+</div>
+<div id="variables-and-priors" class="section level3">
+<h3>Variables and priors</h3>
+<p>The second section of the script creates three greta arrays to represent the parameters in our model:</p>
+<pre class="r"><code>int = normal(0, 1)
+coef = normal(0, 3)
+sd = student(3, 0, 1, truncation = c(0, Inf))</code></pre>
+<p>Each of these is a variable greta array, and each is assumed <em>a priori</em> (before fitting to data) to follow a different probability distribution. In other wirds, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with proability distributions, it will be clearer to first demonstrate the alternative; variables without probabiltiy distributions.</p>
+<div id="variables-without-probability-distributions" class="section level4">
+<h4>variables without probability distributions</h4>
+<p>If we were carrying out a frequentist analysis of this model, we could create variable greta arrays (values we want to learn) without probability distributions using the <code>variable()</code> function. E.g. in a frequentist version of the model we could create <code>int</code> with:</p>
+<pre class="r"><code>(int = variable())</code></pre>
+<pre><code>greta array (variable)
+
+     [,1]
+[1,]  ?  </code></pre>
+<p><code>variable()</code> has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of <code>lower = -Inf, upper = Inf</code> meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).</p>
+<p>We can create a variable constrained between two values by specifying <code>lower</code> and <code>upper</code>. So we could have created the positive variable <code>sd</code> (the standard deviation of the likelihood) with:</p>
+<pre class="r"><code>(sd = variable(lower = 0))</code></pre>
+<pre><code>greta array (variable)
+
+     [,1]
+[1,]  ?  </code></pre>
+<p>If we had instead wanted a 2x3 array of positive variables we could have created it like this:</p>
+<pre class="r"><code>variable(lower = 0, dim = c(2, 3))</code></pre>
+<pre><code>greta array (variable)
+
+     [,1] [,2] [,3]
+[1,]  ?    ?    ?  
+[2,]  ?    ?    ?  </code></pre>
+</div>
+<div id="variables-with-probability-distributions" class="section level4">
+<h4>variables with probability distributions</h4>
+<p>In our example script, when we created the variables <code>int</code>, <code>coef</code> and <code>sd</code>, we simultaneously stated the prior distributions for them using some of greta’s probability distribution functions. You can see a list of the currently available distributions in the <a href="https://goldingn.github.io/greta/greta-distributions.html"><code>?distributions</code></a> helpfile. Each of these distribution functions takes as arguments the distribution’s parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions arguments at their default value to create scalar greta arrays.</p>
+<p>Both <code>int</code> and <code>coef</code> were given zero-mean normal distributions, which are a common choice of prior for unconstrained variables in Bayesian analyses. For the strictly positive parameter <code>sd</code>, we chose a slightly unconvential option, a positive-truncated (non-standard) student’s t distribution, which we create using greta’s built-in support for truncated distributions.</p>
+</div>
+<div id="variables-with-truncated-distributions" class="section level4">
+<h4>variables with truncated distributions</h4>
+<p>Some of greta’s probability distributions (those that are continous and univariate) can be specified as truncated distributions. By modifying the <code>truncation</code> argument, we can state that the resulting distribution should be truncated between the two truncation bounds. So to create a standard normal distribution truncated between -1 and 1 we can do:</p>
+<pre class="r"><code>(z = normal(0, 1, truncation = c(-1, 1)))</code></pre>
+<pre><code>greta array (variable following a normal distribution)
+
+     [,1]
+[1,]  ?  </code></pre>
+<p>greta will account for this truncation when calculating the density of this distribution; rescaling it to be a valid probability distribution. We can only truncate to within the support of the distribution; e.g. greta will throw an error if we try to truncate a lognormal distribution (which must be positive) to have a lower bound of -1.</p>
+<hr>
+</div>
+</div>
+<div id="operations" class="section level3">
+<h3>Operations</h3>
+<p>The third section of the script uses mathematical operators to combine some of our parameters and data, to calculate the predicted sepal lengths, for a given parameter set:</p>
+<pre class="r"><code>mean &lt;- int + coef * x</code></pre>
+<p>Because both <code>int</code> and <code>coef</code> are both scalars, the resulting greta array <code>mean</code> has the same dimensions as <code>x</code>; a column vector with 150 elements:</p>
+<pre class="r"><code>dim(mean)</code></pre>
+<pre><code>[1] 150   1</code></pre>
+<pre class="r"><code>head(mean)</code></pre>
+<pre><code>greta array (operation)
+
+     [,1]
+[1,]  ?  
+[2,]  ?  
+[3,]  ?  
+[4,]  ?  
+[5,]  ?  
+[6,]  ?  </code></pre>
+<p>greta arrays can be manipulated using R’s standard arithmetic, logical and relational operators; including <code>+</code>, <code>*</code> and many others. The <code>?`greta-operators`</code>) helpfile lists the operators that are implemeneted for greta arrays. You can also use a lot of common R functions for numeric data, such as <code>sum()</code>, <code>log()</code> and others. the available functions are listed in the <code>?`greta-functions`</code> helpfile. All of these mathematical manipulations of greta arrays produce ‘operation’ greta arrays.</p>
+<div id="extract-and-replace" class="section level4">
+<h4>Extract and replace</h4>
+<p>We can use R’s extract and replace syntax (using <code>[</code>) on greta arrays, just like with R’s vectors, matrices and arrays. E.g. to extract elements from <code>mean</code> we can do:</p>
+<pre class="r"><code>mean[1:3]</code></pre>
+<pre><code>greta array (operation)
+
+     [,1]
+[1,]  ?  
+[2,]  ?  
+[3,]  ?  </code></pre>
+<p>We can assign values from one greta array to another too. For example, if we wanted to create a matrix that has random normal variables in the first column, but zeros everywhere else, we could do:</p>
+<pre class="r"><code>z &lt;- zeros(4, 3)
+z[, 1] &lt;- normal(0, 1, dim = 4)
+z</code></pre>
+<pre><code>greta array (operation)
+
+     [,1] [,2] [,3]
+[1,]  ?   0    0   
+[2,]  ?   0    0   
+[3,]  ?   0    0   
+[4,]  ?   0    0   </code></pre>
+<p>R’s subset operator <code>[</code> has an argument <code>drop</code>, which determines whether to reduce the number of dimensions of a array or matrix when the object has zero elements in that dimension. By default, <code>drop = TRUE</code> for R objects, so matrices are automatically converted into vectors (which have dimension <code>NULL</code>) if you take out a single column:</p>
+<pre class="r"><code>z &lt;- matrix(1, nrow = 2, ncol = 2)
+dim(z[, 1])</code></pre>
+<pre><code>NULL</code></pre>
+<pre class="r"><code>dim(z[, 1, drop = FALSE])</code></pre>
+<pre><code>[1] 2 1</code></pre>
+<p>greta arrays must always have two dimensions, so greta always acts as though <code>drop=FALSE</code>:</p>
+<pre class="r"><code>z_greta &lt;- as_data(z)
+dim(z_greta[, 1])</code></pre>
+<pre><code>[1] 2 1</code></pre>
+</div>
+<div id="functions" class="section level4">
+<h4>Functions</h4>
+<p>We can write our own functions for greta arrays, using the existing operators and functions. For example, we could define the <a href="https://en.wikipedia.org/wiki/Inverse_hyperbolic_function#Inverse_hyperbolic_tangent">inverse hyperbolic tangent function</a> for greta arrays like this:</p>
+<pre class="r"><code>atanh &lt;- function (z)
+  (log(1 + z) - log(1 - z)) / 2
+
+atanh(z_greta)</code></pre>
+<pre><code>greta array (operation)
+
+     [,1] [,2]
+[1,]  ?    ?  
+[2,]  ?    ?  </code></pre>
+<hr>
+</div>
+</div>
+<div id="likelihood" class="section level3">
+<h3>Likelihood</h3>
+<p>So far, we have created greta arrays representing the variables in our model (with prior distributions) and created other greta arrays from them and some fixed, <em>independent</em> data. To perform statistical inference on this model, we also need to link it to some observed <em>dependent</em> data. By comparing the sepal lengths predicted under different parameter values with the observed sepal lengths, we can estimate the most plausible values of those parameters. We do that by defining a likelihood for the observed sepal length data <code>y</code>.</p>
+<p>By defining a likelihood over observed data, we are stating that these observed data are actually a random sample from some probability distribution, and we’re trying to work out the parameters of that distribution. In greta we do that with the <code>distribution()</code> assignment function:</p>
+<pre class="r"><code>distribution(y) = normal(mean, sd)</code></pre>
+<p>With the syntax <code>distribution(&lt;lhs&gt;) = &lt;rhs&gt;</code>, we are stating that the data greta array on the left <code>&lt;lhs&gt;</code> has the same distribution as the greta array on the right <code>&lt;rhs&gt;</code>. In this case, we’re temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays <code>mean</code> and <code>sd</code>), but then stating that values of that distribution have been observed (<code>y</code>). In this case both <code>&lt;lhs&gt;</code> (<code>y</code>) and <code>&lt;rhs&gt;</code> are column vectors with the same dimensions, so each element in <code>y</code> has a normal distribution with the corresponding parameters.</p>
+<hr>
+</div>
+<div id="defining-the-model" class="section level3">
+<h3>Defining the model</h3>
+<p>Now all of the greta arrays making up the model have been created, we need to combine them and set up the model so that we can sample from it, using <code>model()</code>:</p>
+<pre class="r"><code>m &lt;- model(int, coef, sd)</code></pre>
+<p><code>model()</code> returns a ‘greta model’ object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to <code>model()</code> to flag them as the parameters we’re interested in. When sampling from the model with <code>mcmc()</code> those will be the greta arrays for which samples will be returned. Alternatively, we can run <code>model()</code> without passing any greta arrays, in which case all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.</p>
+<hr>
+</div>
+<div id="plotting" class="section level3">
+<h3>Plotting</h3>
+<p>greta provides a plot function for greta models to help you visualise and check the model before sampling from it.</p>
+<pre class="r"><code>plot(m)</code></pre>
+<p>
+<img src="figures/full_graph.png" width="800" />
+</p>
+<p>The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; <code>x</code> and <code>y</code>), variables (large circles; <code>int</code>, <code>coef</code>, <code>sd</code>) or the results of operations (small circles; <code>mean</code>). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from. There are also nodes for greta arrays that were <em>implicitly defined</em> in our model. The data nodes (squares) with numbers are the parameters used to define the prior distributions, and there’s also an intermediate operation node (small circle), which was the result of multiplying <code>coef</code> and <code>x</code> (before adding <code>int</code> to create <code>mean</code>).</p>
+<p>Here’s a legend for the plot (it’s in the <code>?`greta-model`</code> helpfile too):</p>
+<p>
+<img src="figures/plotlegend.png" width="750" />
+</p>
+<p>The fourth type of node (diamonds) represents probability distributions. These have greta arrays as parameters (linked via solid lines), and have other greta arrays as <em>values</em>(linked via dashed lines). Distributions calculate the probability density of the <em>values</em>, given the parameters and their distribution type.</p>
+<p>For example, a plot of just the prior distribution over <code>coef</code> (defined as <code>coef = normal(0, 3)</code>) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution’s value, the variable <code>coef</code>:</p>
+<p>
+<img src="figures/coef_graph.png" width="500" />
+</p>
+<p>It’s the same for the model likelihood, but this time the distribution’s parameters are a variable (<code>sd</code>) and the result of an operation (<code>mean</code>), and the distribution’s value is given by data (the observed sepal lengths <code>y</code>):</p>
+<p>
+<img src="figures/likelihood_graph.png" width="500" />
+</p>
+<hr>
+</div>
+<div id="sampling" class="section level3">
+<h3>Sampling</h3>
+<p>When defining the model, greta combines all of the distributions together to define the <em>joint density</em> of the model, a measure of how ‘good’ (or how probable if we’re being Bayesian) are a particular candidate set of values for the variables in the model.</p>
+<p>Now we have a greta model that will give us the joint density for a candidate set of values, so we can use that to carry out inference on the model. We do that using an Markov chain Monte Carlo (MCMC) algorithm to sample values of the parameters we’re interested in, using the <code>mcmc()</code> function:</p>
+<pre class="r"><code>draws &lt;- mcmc(m, n_samples = 1000)</code></pre>
+<p>Here we’re using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm, which uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 100 iterations ‘warming up’ (tuning the sampler parameters) and ‘burning in’ (moving to the area of highest probability) the sampler.</p>
+<p><code>draws</code> is an <code>mcmc.list</code> object, from the coda R package. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.</p>
+<pre class="r"><code>summary(draws)</code></pre>
+<pre><code>
+Iterations = 1:1000
+Thinning interval = 1 
+Number of chains = 1 
+Sample size per chain = 1000 
+
+1. Empirical mean and standard deviation for each variable,
+   plus standard error of the mean:
+
+       Mean      SD  Naive SE Time-series SE
+int  4.2839 0.08063 0.0025497      0.0022142
+coef 0.4139 0.01952 0.0006172      0.0006316
+sd   0.4097 0.02221 0.0007025      0.0007025
+
+2. Quantiles for each variable:
+
+       2.5%    25%    50%    75%  97.5%
+int  4.1299 4.2257 4.2793 4.3409 4.4422
+coef 0.3782 0.3997 0.4144 0.4287 0.4490
+sd   0.3717 0.3922 0.4085 0.4255 0.4521</code></pre>
+<p>The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates</p>
+<pre class="r"><code>library (bayesplot)
+mcmc_trace(draws)
+mcmc_intervals(draws)</code></pre>
+<p><img src="get_started_files/figure-html/mcmcvis-1.png" width="400px" /><img src="get_started_files/figure-html/mcmcvis-2.png" width="400px" /></p>
+<p>If your model is taking a long time whilst in the sampling phase and you want to take a look at the samples. You can stop the sampler (e.g. using the stop button in RStudio) and then retrieve the samples drawn so far, by using <code>stashed_samples()</code>. Note that this won’t return anything if you stop the model during the warmup phase (since those aren’t valid posterior samples) or if the sampler completed successfully.</p>
+<div id="tweaking-the-sampler" class="section level4">
+<h4>Tweaking the sampler</h4>
+<p>Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it’s moving too slowly, or if you are getting a lot of messages about propsals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interstions (via the <code>warmup</code> argument). If you’re still getting a lot of rejected samples, it’s often a good idea to manual set the initial values for the sampler (via the <code>initial_values</code> argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.</p>
+<p>A downside of HMC is that it can’t be used to sample discrete variables (e.g. integers), so we can’t specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it’s in the likelihood. If we try to build such a model, greta will give us an error when we run <code>model()</code>. Future versions of greta will implement a wider range of MCMC samplers, including some for discrete variables.</p>
+<hr>
+</div>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

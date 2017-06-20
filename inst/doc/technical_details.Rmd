@@ -1,5 +1,5 @@
 ---
-title: "How does this work?"
+title: "Technical details"
 output:
   html_document:
     css: greta.css
@@ -86,7 +86,7 @@ The node `tf()` method takes the dag as an argument, and defines a tensor repres
 x$node$tf
 ```
 
-Because R6 objects are pass-by-reference (rather than pass-by-copy), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their children, they can make sure those children are defined as tensors before they are. The `define_tf()` member function ensures that that happens, enabling operation nodes to use the tensors for their children when defining their own tensor.
+Because R6 objects are pass-by-reference (rather than pass-by-value), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their children, they can make sure those children are defined as tensors before they are. The `define_tf()` member function ensures that that happens, enabling operation nodes to use the tensors for their children when defining their own tensor.
 
 ```{r tensors2}
 z$node$tf

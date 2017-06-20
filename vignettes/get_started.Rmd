@@ -38,10 +38,18 @@ file.copy('../man/figures/plotlegend.png',
 
 ## Installation
 
-If you haven't already, you can install greta from GitHub using the devtools package:
+You can install the stable version of greta from CRAN:
 
 ```{r install_greta, eval = FALSE}
-devtools::install_github("goldingn/greta")
+install.packages("greta")
+library(greta)
+```
+
+Alternatively, you can install the latest release, or the development version, from GitHub using the devtools package:
+
+```{r install_greta_github, eval = FALSE}
+devtools::install_github("goldingn/greta")  # latest release
+devtools::install_github("goldingn/greta@dev")  # development version
 library(greta)
 ```
 
