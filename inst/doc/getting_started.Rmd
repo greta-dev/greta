@@ -104,7 +104,7 @@ If you'd like more technical details about how greta works under the hood, check
 
 ## Building a model
 
-The rest of the vignette explains step-by-step how to build, visualise and fit a model with greta. We'll be stepping through a model for linear regression between two of the variables in the [`iris`](https://en.wikipedia.org/wiki/Iris_flower_data_set) dataset, which is included with base R. The model is *semi-Bayesian*, just to illustrate how to do both Bayesian (specifying priors over variables) and frequentist (no priors) inference in greta. In a real analysis it might make more sense just to pick one of those two approaches.
+The rest of the vignette explains step-by-step how to build, visualise and fit a model with greta. We'll be stepping through a model for linear regression between two of the variables in the [`iris`](https://en.wikipedia.org/wiki/Iris_flower_data_set) dataset, which is included with base R. The model is *Bayesian* (we specify priors over the variables), though it is also possible to do frequentist (no priors) inference in greta, using `variable()` instead of a probability distribution to create random variables.
 
 Here's the whole script to specify and fit the model:
 
@@ -116,9 +116,9 @@ x <- as_data(iris$Petal.Length)
 y <- as_data(iris$Sepal.Length)
 
 # variables and priors
-int = variable()
+int = normal(0, 1)
 coef = normal(0, 3)
-sd = lognormal(0, 3)
+sd = student(3, 0, 1, truncation = c(0, Inf))
 
 # operations
 mean <- int + coef * x
@@ -133,7 +133,7 @@ m <- model(int, coef, sd)
 plot(m)
 
 # sampling
-draws <- mcmc(model, n_samples = 1000)
+draws <- mcmc(m, n_samples = 1000)
 ```
 
 Throughout this example, and the rest of greta's documentation, `<-` is used when assigning *deterministic* values, and `=` when assigning variable or *stochastic* values. This makes the model code a little bit clearer to read, since `=` corresponds to the `~` symbol used to define stochastic relationships in BUGS and Stan. However, it doesn't actually make any difference to the model which assignment operator you use.
@@ -196,70 +196,48 @@ greta_array(0:1, dim = c(3, 3))
 
 The second section of the script creates three greta arrays to represent the parameters in our model:
 ```{r variables}
-int = variable()
+int = normal(0, 1)
 coef = normal(0, 3)
-sd = lognormal(0, 3)
+sd = student(3, 0, 1, truncation = c(0, Inf))
 ```
 
-#### variables
+Each of these is a variable greta array, and each is assumed *a priori* (before fitting to data) to follow a different probability distribution. In other wirds, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with proability distributions, it will be clearer to first demonstrate the alternative; variables without probabiltiy distributions.
 
-The first line uses the `variable()` function to create a greta array `int` representing a variable - an unknown value that we will learn when we fit the model to data. `variable()` has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of `lower = -Inf, upper = Inf` meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).
+#### variables without probability distributions
 
-```{r int}
-int
+If we were carrying out a frequentist analysis of this model, we could create variable greta arrays (values we want to learn) without probability distributions using the `variable()` function. E.g. in a frequentist version of the model we could create `int` with:
+
+```{r int_variable}
+(int = variable())
+```
+
+`variable()` has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of `lower = -Inf, upper = Inf` meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).
+
+We can create a variable constrained between two values by specifying `lower` and `upper`. So we could have created the positive variable `sd` (the standard deviation of the likelihood) with:
+
+```{r positive_variable}
+(sd = variable(lower = 0))
 ```
 
 If we had instead wanted a 2x3 array of positive variables we could have created it like this:
-```{r positive_variable}
+```{r matrix_variable}
 variable(lower = 0, dim = c(2, 3))
 ```
 
 #### variables with probability distributions
 
-Variable greta arrays like `int` that are created with `variable()`, are not associated with probability distributions. I.e. we haven't made any assumptions or statements about what distribution we expect their values to follow. That's normally the case for a frequentist analysis, but for a Bayesian model we need to specify *prior distributions* over our parameters, stating the distribution we expect them to be drawn from (*before* considering the data we're using in the model).
+In our example script, when we created the variables `int`, `coef` and `sd`, we simultaneously stated the prior distributions for them using some of greta's probability distribution functions. You can see a list of the currently available distributions in the [`?distributions`](https://goldingn.github.io/greta/greta-distributions.html) helpfile. Each of these distribution functions takes as arguments the distribution's parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions arguments at their default value to create scalar greta arrays.
 
-In our example script, we simultaneously create the variables `coef` and `sd`, and state the prior distributions for them, using two of greta's probability distribution functions. Each of these distributions takes as arguments the distribution's parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions argument at its default value to create scalar greta arrays:
+Both `int` and `coef` were given zero-mean normal distributions, which are a common choice of prior for unconstrained variables in Bayesian analyses. For the strictly positive parameter `sd`, we chose a slightly unconvential option, a positive-truncated (non-standard) student's t distribution, which we create using greta's built-in support for truncated distributions.
 
-```{r priors}
-coef
-sd
+#### variables with truncated distributions
+
+Some of greta's probability distributions (those that are continous and univariate) can be specified as truncated distributions. By modifying the `truncation` argument, we can state that the resulting distribution should be truncated between the two truncation bounds. So to create a standard normal distribution truncated between -1 and 1 we can do:
+
+```{r truncated1}
+(z = normal(0, 1, truncation = c(-1, 1)))
 ```
-
-greta implements a number of common probability distributions, and more are being added. You can see a list of the currently available distributions in the `?greta-distributions` helpfile.
-
-#### creating priors with `distribution()`
-
-greta's probability distributions have two roles: to create variables following a certain distribution; and, when used in combination with the `distribution()` function, to state the distribution of an existing greta array.
-
-In fact, creating a new variable using a probability distribution is the same as first creating a variable (with the appropriate constraint) and then stating that it follows a distribution. So our code in the script for creating `coef` is equivalent to this:
-```{r normal_prior2, eval = FALSE}
-coef = variable()
-distribution(coef) = normal(0, 3)
-```
-
-The former is somewhat similar to the BUGS approach, where the variable and its distribution are defined at the same time. The latter approach (using `distribution()`)
-is similar to Stan code in that the variable is defined first, and the distribution statement added later.
-
-As well as taking more lines of code, the second approach relies on us to get the constraints of the variable right. Because `sd` must be positive to be a valid standard deviation parameter, the `distribution()` approach for that parameter would look like this:
-
-```{r sd_distribution, eval = FALSE}
-sd = variable(lower = 0)
-distribution(sd) = lognormal(0, 3)
-```
-
-#### Truncated distributions
-
-In general, it's easier to define parameters with priors just by using the probability distributions, like we did in the example script. However `distribution()` has two other uses: it can be used to define a [likelihood](#Likelihood) over observed data; and it can be used to create variables with truncated distributions.
-
-If we define a variable with constraints (using `lower` and `upper`), we can then assign it a probability distribution, and greta will instead use the truncated probability distribution, usng the specified constraints. For example, to define a variable `z` that has a standard normal distribution truncated between -1 and 2, we can do:
-
-```{r truncated}
-z = variable(lower = -1, upper = 2)
-distribution(z) = normal(0, 1)
-z
-```
-
-Truncation like this isn't yet implemented for all probability distributions, but greta will let you know if it can't truncate the distribution.
+greta will account for this truncation when calculating the density of this distribution; rescaling it to be a valid probability distribution. We can only truncate to within the support of the distribution; e.g. greta will throw an error if we try to truncate a lognormal distribution (which must be positive) to have a lower bound of -1. 
 
 <hr>
 
@@ -326,12 +304,14 @@ atanh(z_greta)
 
 ### Likelihood
 
-With the predicted sepal length `mean`, we can now define a likelihood for the observed sepal length data `y`:
+So far, we have created greta arrays representing the variables in our model (with prior distributions) and created other greta arrays from them and some fixed, *independent* data. To perform statistical inference on this model, we also need to link it to some observed *dependent* data. By comparing the sepal lengths predicted under different parameter values with the observed sepal lengths, we can estimate the most plausible values of those parameters. We do that by defining a likelihood for the observed sepal length data `y`.
+
+By defining a likelihood over observed data, we are stating that these observed data are actually a random sample from some probability distribution, and we're trying to work out the parameters of that distribution. In greta we do that with the `distribution()` assignment function:
 ```{r likelihood}
 distribution(y) = normal(mean, sd)
 ```
 
-With the syntax `distribution(<lhs>) <- <rhs>`, we are stating that the greta array on the left `<lhs>` has the same distribution as the greta array on the right `<rhs>`. In this case both `<lhs>` (`y`) and `<rhs>` are column vectors with the same dimensions, so each element in `y` has a normal distribution with the corresponding parameters.
+With the syntax `distribution(<lhs>) <- <rhs>`, we are stating that the data greta array on the left `<lhs>` has the same distribution as the greta array on the right `<rhs>`. In this case, we're temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays `mean` and `sd`), but then stating that some of the values of that distribution have been observed (`y`). In this case both `<lhs>` (`y`) and `<rhs>` are column vectors with the same dimensions, so each element in `y` has a normal distribution with the corresponding parameters.
 
 <hr>
 
@@ -342,9 +322,9 @@ Now all of the greta arrays making up the model have been created, we need to co
 ```{r hidden_model, echo = FALSE}
 x <- as_data(iris$Petal.Length)
 y <- as_data(iris$Sepal.Length)
-int = variable()
+int = normal(0, 1)
 coef = normal(0, 3)
-sd = lognormal(0, 3)
+sd = student(3, 0, 1, truncation = c(0, Inf))
 mean <- int + coef * x
 distribution(y) = normal(mean, sd)
 ```
@@ -352,7 +332,7 @@ distribution(y) = normal(mean, sd)
 m <- model(int, coef, sd)
 ```
 
-`()` returns a 'greta model' object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to `()` to flag them as the parameters we're interested in. When sampling from the model with `mcmc()` those will be the greta arrays for which samples will be returned. Alternatively, we can run `()` without passing any greta arrays, in which all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.
+`model()` returns a 'greta model' object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to `model()` to flag them as the parameters we're interested in. When sampling from the model with `mcmc()` those will be the greta arrays for which samples will be returned. Alternatively, we can run `model()` without passing any greta arrays, in which all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.
 
 <hr>
 
@@ -368,8 +348,8 @@ fname <- "figures/full_graph.png"
 DiagrammeR::export_graph(gr,
                          file_name = fname,
                          file_type = 'png',
-                         width = 895 * 2,
-                         height = 313 * 2)
+                         width = 958 * 2,
+                         height = 450 * 2)
 ```
 <p><img src="figures/full_graph.png" width="800" /></p>
 
@@ -409,6 +389,7 @@ gr <- plot(m_likelihood)
 idx <- which(gr$nodes_df$label == 'mean\n')
 gr$nodes_df$shape[idx] <- 'circle'
 gr$nodes_df$fillcolor[idx] <- 'lightgray'
+gr$nodes_df$color[idx] <- 'lightgray'
 gr$nodes_df$width[idx] <- 0.2
 gr$nodes_df$height[idx] <- 0.2
 gr$nodes_df <- gr$nodes_df[c(3, 1, 2, 4), ]
@@ -425,7 +406,7 @@ DiagrammeR::export_graph(gr,
 
 ### Sampling
 
-When defining the model, greta combines all of the distributions together to define the *joint density* of the model, a measure of how likely (or probable, if we're being Bayesian) are a particular candidate set of values for the variables in the model.
+When defining the model, greta combines all of the distributions together to define the *joint density* of the model, a measure of how 'good' (or how probable if we're being Bayesian) are a particular candidate set of values for the variables in the model.
 
 Now we have a greta model that will give us the joint density for a candidate set of values, so we can use that to carry out inference on the model. We do that using an Markov chain Monte Carlo (MCMC) algorithm to sample values of the parameters we're interested in, using the `mcmc()` function:
 
@@ -440,11 +421,18 @@ Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorith
 ```{r coda_summary}
 summary(draws)
 ```
-The MCMCvis package makes some nice plots of the MCMC chain and the parameter estimates
-```{r mcmcvis, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
-library (MCMCvis)
-MCMCtrace(draws)
-MCMCplot(draws, xlim = c(-1, 5))
+The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates
+
+```{r mcmcvis_public, eval = FALSE}
+library (bayesplot)
+mcmc_trace(draws)
+mcmc_intervals(draws)
+```
+
+```{r mcmcvis, echo = FALSE, message = FALSE, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
+library (bayesplot)
+mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1))
+mcmc_intervals(draws)
 ```
 
 If your model is taking a long time whilst in the sampling phase and you want to take a look at the samples. You can stop the sampler (e.g. using the stop button in RStudio) and then retrieve the samples drawn so far, by using `stashed_samples()`. Note that this won't return anything if you stop the model during the warmup phase (since those aren't valid posterior samples) or if the sampler completed successfully.
@@ -453,7 +441,7 @@ If your model is taking a long time whilst in the sampling phase and you want to
 
 Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about propsals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interstions (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manual set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
 
-A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `()` stage. Future versions of greta will implement samplers for discrete MCMC, as well as self-tuning versions of HMC.
+A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `model()`. Future versions of greta will implement a wider range of MCMC samplers, including some for discrete variables.
 
 <hr>
 

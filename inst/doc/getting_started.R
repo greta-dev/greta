@@ -44,9 +44,9 @@ file.copy('../man/figures/plotlegend.png',
 #  y <- as_data(iris$Sepal.Length)
 #  
 #  # variables and priors
-#  int = variable()
+#  int = normal(0, 1)
 #  coef = normal(0, 3)
-#  sd = lognormal(0, 3)
+#  sd = student(3, 0, 1, truncation = c(0, Inf))
 #  
 #  # operations
 #  mean <- int + coef * x
@@ -61,7 +61,7 @@ file.copy('../man/figures/plotlegend.png',
 #  plot(m)
 #  
 #  # sampling
-#  draws <- mcmc(model, n_samples = 1000)
+#  draws <- mcmc(m, n_samples = 1000)
 
 ## ----data----------------------------------------------------------------
 x <- as_data(iris$Petal.Length)
@@ -86,32 +86,21 @@ greta_array(pi, dim = c(2, 2))
 greta_array(0:1, dim = c(3, 3))
 
 ## ----variables-----------------------------------------------------------
-int = variable()
+int = normal(0, 1)
 coef = normal(0, 3)
-sd = lognormal(0, 3)
+sd = student(3, 0, 1, truncation = c(0, Inf))
 
-## ----int-----------------------------------------------------------------
-int
+## ----int_variable--------------------------------------------------------
+(int = variable())
 
 ## ----positive_variable---------------------------------------------------
+(sd = variable(lower = 0))
+
+## ----matrix_variable-----------------------------------------------------
 variable(lower = 0, dim = c(2, 3))
 
-## ----priors--------------------------------------------------------------
-coef
-sd
-
-## ----normal_prior2, eval = FALSE-----------------------------------------
-#  coef = variable()
-#  distribution(coef) = normal(0, 3)
-
-## ----sd_distribution, eval = FALSE---------------------------------------
-#  sd = variable(lower = 0)
-#  distribution(sd) = lognormal(0, 3)
-
-## ----truncated-----------------------------------------------------------
-z = variable(lower = -1, upper = 2)
-distribution(z) = normal(0, 1)
-z
+## ----truncated1----------------------------------------------------------
+(z = normal(0, 1, truncation = c(-1, 1)))
 
 ## ----linear_predictor----------------------------------------------------
 mean <- int + coef * x
@@ -149,9 +138,9 @@ distribution(y) = normal(mean, sd)
 ## ----hidden_model, echo = FALSE------------------------------------------
 x <- as_data(iris$Petal.Length)
 y <- as_data(iris$Sepal.Length)
-int = variable()
+int = normal(0, 1)
 coef = normal(0, 3)
-sd = lognormal(0, 3)
+sd = student(3, 0, 1, truncation = c(0, Inf))
 mean <- int + coef * x
 distribution(y) = normal(mean, sd)
 
@@ -167,8 +156,8 @@ fname <- "figures/full_graph.png"
 DiagrammeR::export_graph(gr,
                          file_name = fname,
                          file_type = 'png',
-                         width = 895 * 2,
-                         height = 313 * 2)
+                         width = 958 * 2,
+                         height = 450 * 2)
 
 ## ----plot_coef, echo = FALSE, results='hide'-----------------------------
 coef = normal(0, 3)
@@ -191,6 +180,7 @@ gr <- plot(m_likelihood)
 idx <- which(gr$nodes_df$label == 'mean\n')
 gr$nodes_df$shape[idx] <- 'circle'
 gr$nodes_df$fillcolor[idx] <- 'lightgray'
+gr$nodes_df$color[idx] <- 'lightgray'
 gr$nodes_df$width[idx] <- 0.2
 gr$nodes_df$height[idx] <- 0.2
 gr$nodes_df <- gr$nodes_df[c(3, 1, 2, 4), ]
@@ -207,8 +197,13 @@ draws <- mcmc(m, n_samples = 1000)
 ## ----coda_summary--------------------------------------------------------
 summary(draws)
 
-## ----mcmcvis, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'----
-library (MCMCvis)
-MCMCtrace(draws)
-MCMCplot(draws, xlim = c(-1, 5))
+## ----mcmcvis_public, eval = FALSE----------------------------------------
+#  library (bayesplot)
+#  mcmc_trace(draws)
+#  mcmc_intervals(draws)
+
+## ----mcmcvis, echo = FALSE, message = FALSE, out.width=c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'----
+library (bayesplot)
+mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1))
+mcmc_intervals(draws)
 
