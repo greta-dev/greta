@@ -246,34 +246,15 @@ dag_class <- R6Class(
     # variable nodes, with or without applying the jacobian adjustment
     log_density = function(adjusted = TRUE) {
 
-      if (adjusted) {
-
-        cleanly(with(self$tf_environment,
-                     sess$run(joint_density_adj, feed_dict = parameter_dict)))
-
-      } else {
-
-        cleanly(with(self$tf_environment,
-                     sess$run(joint_density, feed_dict = parameter_dict)))
-
-      }
+      cleanly(with(self$tf_environment,
+                   sess$run(joint_density_adj, feed_dict = parameter_dict)))
 
     },
 
     gradients = function (adjusted = TRUE) {
 
-
-      if (adjusted) {
-
-        cleanly(with(self$tf_environment,
-                     sess$run(gradients_adj, feed_dict = parameter_dict)))
-
-      } else {
-
-        cleanly(with(self$tf_environment,
-                     sess$run(gradients, feed_dict = parameter_dict)))
-
-      }
+      cleanly(with(self$tf_environment,
+                   sess$run(gradients_adj, feed_dict = parameter_dict)))
 
     },
 
