@@ -3,7 +3,7 @@
 #' greta: simple and scalable statistical modelling in R
 #' @name greta
 #'
-#' @description greta lets you write ststistical models interactively in native
+#' @description greta lets you write statistical models interactively in native
 #'   R code, then sample from them efficiently using Hamiltonian Monte Carlo.
 #'
 #'   The computational heavy lifting is done by TensorFlow, Google's automatic
@@ -14,7 +14,7 @@
 #'   See the simple example below, and take a look at the
 #'   \href{https://goldingn.github.io/greta}{greta website} for more information
 #'   including
-#'   \href{https://goldingn.github.io/greta/getting_started.html}{tutorials} and
+#'   \href{https://goldingn.github.io/greta/get_started.html}{tutorials} and
 #'   \href{https://goldingn.github.io/greta/example_models.html}{examples}.
 #'
 #' @docType package
