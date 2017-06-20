@@ -668,21 +668,21 @@ Sample size per chain = 1000
    plus standard error of the mean:
 
        Mean      SD  Naive SE Time-series SE
-int  4.3088 0.07731 0.0024448      0.0019365
-coef 0.4084 0.01886 0.0005965      0.0005538
-sd   0.4084 0.02100 0.0006642      0.0005674
+int  4.2839 0.08063 0.0025497      0.0022142
+coef 0.4139 0.01952 0.0006172      0.0006316
+sd   0.4097 0.02221 0.0007025      0.0007025
 
 2. Quantiles for each variable:
 
        2.5%    25%    50%    75%  97.5%
-int  4.1531 4.2596 4.3058 4.3580 4.4692
-coef 0.3708 0.3957 0.4085 0.4206 0.4454
-sd   0.3692 0.3942 0.4078 0.4224 0.4544</code></pre>
+int  4.1299 4.2257 4.2793 4.3409 4.4422
+coef 0.3782 0.3997 0.4144 0.4287 0.4490
+sd   0.3717 0.3922 0.4085 0.4255 0.4521</code></pre>
 <p>The MCMCvis package makes some nice plots of the MCMC chain and the parameter estimates</p>
 <pre class="r"><code>library (MCMCvis)
 MCMCtrace(draws)
 MCMCplot(draws, xlim = c(-1, 5))</code></pre>
-<p><img src="getting_started_files/figure-html/mcmcvis-1.png" width="400px" /><img src="getting_started_files/figure-html/mcmcvis-2.png" width="400px" /></p>
+<p><img src="get_started_files/figure-html/mcmcvis-1.png" width="400px" /><img src="get_started_files/figure-html/mcmcvis-2.png" width="400px" /></p>
 <p>If your model is taking a long time whilst in the sampling phase and you want to take a look at the samples. You can stop the sampler (e.g. using the stop button in RStudio) and then retrieve the samples drawn so far, by using <code>stashed_samples()</code>. Note that this won’t return anything if you stop the model during the warmup phase (since those aren’t valid posterior samples) or if the sampler completed successfully.</p>
 <div id="tweaking-the-sampler" class="section level4">
 <h4>Tweaking the sampler</h4>
