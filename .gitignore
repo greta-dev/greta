@@ -10,3 +10,4 @@ vignettes/figures
 docs/*.Rmd
 docs/examples
 docs/*_cache
+cran-comments.md
