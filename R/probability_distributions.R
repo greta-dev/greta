@@ -1242,7 +1242,7 @@ distrib <- function (distribution, ...) {
 #'   greta model. They return a variable greta array that follows the specified
 #'   distribution. This variable greta array can be used to represent a
 #'   parameter with  prior distribution, or used with \code{\link{distribution}}
-#'   to define a distribution over an existing greta array.
+#'   to define a distribution over a data greta array.
 #'
 #' @param truncation a length-two vector giving values between which to truncate
 #'   the distribution, similarly to the \code{lower} and \code{upper} arguments
