@@ -616,14 +616,14 @@ atanh(z_greta)</code></pre>
 <p>So far, we have created greta arrays representing the variables in our model (with prior distributions) and created other greta arrays from them and some fixed, <em>independent</em> data. To perform statistical inference on this model, we also need to link it to some observed <em>dependent</em> data. By comparing the sepal lengths predicted under different parameter values with the observed sepal lengths, we can estimate the most plausible values of those parameters. We do that by defining a likelihood for the observed sepal length data <code>y</code>.</p>
 <p>By defining a likelihood over observed data, we are stating that these observed data are actually a random sample from some probability distribution, and we’re trying to work out the parameters of that distribution. In greta we do that with the <code>distribution()</code> assignment function:</p>
 <pre class="r"><code>distribution(y) = normal(mean, sd)</code></pre>
-<p>With the syntax <code>distribution(&lt;lhs&gt;) &lt;- &lt;rhs&gt;</code>, we are stating that the data greta array on the left <code>&lt;lhs&gt;</code> has the same distribution as the greta array on the right <code>&lt;rhs&gt;</code>. In this case, we’re temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays <code>mean</code> and <code>sd</code>), but then stating that some of the values of that distribution have been observed (<code>y</code>). In this case both <code>&lt;lhs&gt;</code> (<code>y</code>) and <code>&lt;rhs&gt;</code> are column vectors with the same dimensions, so each element in <code>y</code> has a normal distribution with the corresponding parameters.</p>
+<p>With the syntax <code>distribution(&lt;lhs&gt;) = &lt;rhs&gt;</code>, we are stating that the data greta array on the left <code>&lt;lhs&gt;</code> has the same distribution as the greta array on the right <code>&lt;rhs&gt;</code>. In this case, we’re temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays <code>mean</code> and <code>sd</code>), but then stating that values of that distribution have been observed (<code>y</code>). In this case both <code>&lt;lhs&gt;</code> (<code>y</code>) and <code>&lt;rhs&gt;</code> are column vectors with the same dimensions, so each element in <code>y</code> has a normal distribution with the corresponding parameters.</p>
 <hr>
 </div>
 <div id="defining-the-model" class="section level3">
 <h3>Defining the model</h3>
 <p>Now all of the greta arrays making up the model have been created, we need to combine them and set up the model so that we can sample from it, using <code>model()</code>:</p>
 <pre class="r"><code>m &lt;- model(int, coef, sd)</code></pre>
-<p><code>model()</code> returns a ‘greta model’ object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to <code>model()</code> to flag them as the parameters we’re interested in. When sampling from the model with <code>mcmc()</code> those will be the greta arrays for which samples will be returned. Alternatively, we can run <code>model()</code> without passing any greta arrays, in which all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.</p>
+<p><code>model()</code> returns a ‘greta model’ object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to <code>model()</code> to flag them as the parameters we’re interested in. When sampling from the model with <code>mcmc()</code> those will be the greta arrays for which samples will be returned. Alternatively, we can run <code>model()</code> without passing any greta arrays, in which case all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.</p>
 <hr>
 </div>
 <div id="plotting" class="section level3">
@@ -667,16 +667,16 @@ Sample size per chain = 1000
    plus standard error of the mean:
 
        Mean      SD  Naive SE Time-series SE
-int  4.3088 0.07731 0.0024448      0.0019365
-coef 0.4084 0.01886 0.0005965      0.0005538
-sd   0.4084 0.02100 0.0006642      0.0005674
+int  4.2839 0.08063 0.0025497      0.0022142
+coef 0.4139 0.01952 0.0006172      0.0006316
+sd   0.4097 0.02221 0.0007025      0.0007025
 
 2. Quantiles for each variable:
 
        2.5%    25%    50%    75%  97.5%
-int  4.1531 4.2596 4.3058 4.3580 4.4692
-coef 0.3708 0.3957 0.4085 0.4206 0.4454
-sd   0.3692 0.3942 0.4078 0.4224 0.4544</code></pre>
+int  4.1299 4.2257 4.2793 4.3409 4.4422
+coef 0.3782 0.3997 0.4144 0.4287 0.4490
+sd   0.3717 0.3922 0.4085 0.4255 0.4521</code></pre>
 <p>The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates</p>
 <pre class="r"><code>library (bayesplot)
 mcmc_trace(draws)

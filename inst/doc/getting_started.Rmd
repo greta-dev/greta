@@ -311,7 +311,7 @@ By defining a likelihood over observed data, we are stating that these observed 
 distribution(y) = normal(mean, sd)
 ```
 
-With the syntax `distribution(<lhs>) <- <rhs>`, we are stating that the data greta array on the left `<lhs>` has the same distribution as the greta array on the right `<rhs>`. In this case, we're temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays `mean` and `sd`), but then stating that some of the values of that distribution have been observed (`y`). In this case both `<lhs>` (`y`) and `<rhs>` are column vectors with the same dimensions, so each element in `y` has a normal distribution with the corresponding parameters.
+With the syntax `distribution(<lhs>) = <rhs>`, we are stating that the data greta array on the left `<lhs>` has the same distribution as the greta array on the right `<rhs>`. In this case, we're temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays `mean` and `sd`), but then stating that values of that distribution have been observed (`y`). In this case both `<lhs>` (`y`) and `<rhs>` are column vectors with the same dimensions, so each element in `y` has a normal distribution with the corresponding parameters.
 
 <hr>
 
@@ -332,7 +332,7 @@ distribution(y) = normal(mean, sd)
 m <- model(int, coef, sd)
 ```
 
-`model()` returns a 'greta model' object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to `model()` to flag them as the parameters we're interested in. When sampling from the model with `mcmc()` those will be the greta arrays for which samples will be returned. Alternatively, we can run `model()` without passing any greta arrays, in which all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.
+`model()` returns a 'greta model' object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to `model()` to flag them as the parameters we're interested in. When sampling from the model with `mcmc()` those will be the greta arrays for which samples will be returned. Alternatively, we can run `model()` without passing any greta arrays, in which case all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.
 
 <hr>
 
