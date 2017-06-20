@@ -524,3 +524,16 @@ test_that('truncated chi squared has correct densities', {
   expect_true(all(difference < 1e-4))
 
 })
+
+
+test_that('bad truncations error', {
+
+  source('helpers.R')
+
+  expect_error(lognormal(0, 1, truncation = c(-1, Inf)),
+               "lower bound must be 0 or higher")
+
+  expect_error(beta(1, 1, truncation = c(-1, 2)),
+               "lower and upper bounds must be between 0 and 1")
+
+})

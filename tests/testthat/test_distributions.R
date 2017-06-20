@@ -769,6 +769,16 @@ test_that('lkj_correlation distribution errors informatively', {
   expect_error(lkj_correlation(uniform(0, 1, dim = 2), dim),
                "^eta must be a scalar, but had dimensions")
 
+  expect_error(lkj_correlation(4, dim = -1),
+               "dim must be a scalar integer greater than one, but was:")
+
+  expect_error(lkj_correlation(4, dim = c(3, 3)),
+               "dim must be a scalar integer greater than one, but was:")
+
+  expect_error(lkj_correlation(4, dim = NA),
+               "dim must be a scalar integer greater than one, but was:")
+
+
 })
 
 test_that('multivariate_normal distribution errors informatively', {
@@ -939,5 +949,16 @@ test_that('dirichlet-multinomial distribution errors informatively', {
                'dim must be a scalar positive integer, but was: -1')
   expect_error(dirichlet_multinomial(size, alpha_a, dim = c(1, 3)),
                '^dim must be a scalar positive integer, but was:')
+
+})
+
+test_that('Wishart can use a choleskied Sigma', {
+
+  source('helpers.R')
+
+  sig <- lkj_correlation(3, dim = 4)
+  w <- wishart(5, sig)
+  m <- model(w)
+  draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE)
 
 })
