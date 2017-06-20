@@ -1,5 +1,5 @@
 ---
-title: "Getting started with greta"
+title: "Get started with greta"
 output:
   html_document:
     css: greta.css
