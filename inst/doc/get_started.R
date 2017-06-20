@@ -18,12 +18,13 @@ file.copy('../man/figures/plotlegend.png',
 
 ## ----install_greta, eval = FALSE-----------------------------------------
 #  install.packages("greta")
-#  library(greta)
 
 ## ----install_greta_github, eval = FALSE----------------------------------
 #  devtools::install_github("goldingn/greta")  # latest release
 #  devtools::install_github("goldingn/greta@dev")  # development version
-#  library(greta)
+
+## ----load----------------------------------------------------------------
+library(greta)
 
 ## ----install_tensorflow, eval = FALSE------------------------------------
 #  install_tensorflow()

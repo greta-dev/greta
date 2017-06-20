@@ -42,7 +42,6 @@ You can install the stable version of greta from CRAN:
 
 ```{r install_greta, eval = FALSE}
 install.packages("greta")
-library(greta)
 ```
 
 Alternatively, you can install the latest release, or the development version, from GitHub using the devtools package:
@@ -50,6 +49,9 @@ Alternatively, you can install the latest release, or the development version, f
 ```{r install_greta_github, eval = FALSE}
 devtools::install_github("goldingn/greta")  # latest release
 devtools::install_github("goldingn/greta@dev")  # development version
+```
+
+```{r load}
 library(greta)
 ```
 
@@ -74,6 +76,8 @@ greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](
 ```{r install_diagrammer, eval = FALSE}
 install.packages('DiagrammeR')
 ```
+
+
 
 <hr>
 
