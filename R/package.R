@@ -47,7 +47,7 @@ NULL
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL=2)
 
   # warn if TF version is bad
-  check_tf_version('warn')
+  check_tf_version('startup')
 
   # default float type
   if (reticulate::py_module_available('tensorflow'))
