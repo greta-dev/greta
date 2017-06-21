@@ -9,6 +9,9 @@ output:
     toc_depth: 3
     theme: lumen
     highlight: default
+  pdf_document:
+    toc: yes
+    toc_depth: 4
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Example models}
