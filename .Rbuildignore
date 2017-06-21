@@ -13,3 +13,5 @@ vignettes/build_vignettes.R
 vignettes/example_models_cache
 vignettes/get_started_cache
 vignettes/technical_details_cache
+vignettes/get_started_files
+vignettes/figures

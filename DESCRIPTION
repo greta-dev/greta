@@ -50,6 +50,7 @@ Suggests:
     rmarkdown,
     DiagrammeR,
     bayesplot,
+    lattice,
     testthat,
     mvtnorm,
     MCMCpack,
