@@ -81,6 +81,7 @@ test_that('length and dim work', {
 
 test_that('head and tail work', {
 
+  skip_on_cran()
   source('helpers.R')
 
   a <- randn(10, 1)

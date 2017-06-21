@@ -2,6 +2,7 @@ context('syntax')
 
 test_that('`distribution<-` works in models', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # with a distribution parameter

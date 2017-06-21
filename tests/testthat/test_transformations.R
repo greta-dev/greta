@@ -2,6 +2,7 @@ context('transformations')
 
 test_that('transformations work as expected', {
 
+  skip_on_cran()
   source('helpers.R')
 
   a <- randn(25, 4)

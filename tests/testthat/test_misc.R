@@ -2,6 +2,8 @@ context('miscellaneous methods')
 
 test_that('check_tf_version works', {
 
+  skip_on_cran()
+
   # record the true version and forge an old version
   true_version <- tf$`__version__`
   tf$`__version__` <- "0.9.0"
@@ -39,6 +41,8 @@ test_that('.onLoad runs', {
 
 test_that('tensorflow coercion works', {
 
+  skip_on_cran()
+
   float <- greta:::tf_as_float(1)
   integer <- greta:::tf_as_integer(1)
   logical <- greta:::tf_as_logical(1)
@@ -68,6 +72,8 @@ test_that('all_greta_arrays works', {
 
 test_that('greta_model objects print', {
 
+  skip_on_cran()
+
   m <- model(normal(0, 1))
   message <- capture.output(print(m))
   expect_equal(message, 'greta model')
@@ -76,6 +82,7 @@ test_that('greta_model objects print', {
 
 test_that('define and mcmc error informatively', {
 
+  skip_on_cran()
   source('helpers.R')
 
   x <- as_data(randn(10))
@@ -146,6 +153,7 @@ test_that('check_dims errors informatively', {
 
 test_that('disjoint graphs are checked', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # if the target nodes aren't related, they sould be checked separately
@@ -170,6 +178,7 @@ test_that('disjoint graphs are checked', {
 
 test_that("plotting models doesn't error", {
 
+  skip_on_cran()
   source('helpers.R')
 
   a = uniform(0, 1)
@@ -182,6 +191,7 @@ test_that("plotting models doesn't error", {
 
 test_that("structures work correctly", {
 
+  skip_on_cran()
   source('helpers.R')
 
   a <- ones(2, 2)

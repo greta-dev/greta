@@ -2,6 +2,7 @@ context('distributions')
 
 test_that('normal distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::normal,
@@ -15,6 +16,7 @@ test_that('normal distribution has correct density', {
 
 test_that('uniform distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::uniform,
@@ -28,6 +30,7 @@ test_that('uniform distribution has correct density', {
 
 test_that('lognormal distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::lognormal,
@@ -41,6 +44,7 @@ test_that('lognormal distribution has correct density', {
 
 test_that('bernoulli distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::bernoulli,
@@ -54,6 +58,7 @@ test_that('bernoulli distribution has correct density', {
 
 test_that('binomial distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::binomial,
@@ -67,6 +72,7 @@ test_that('binomial distribution has correct density', {
 
 test_that('beta-binomial distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::beta_binomial,
@@ -80,6 +86,7 @@ test_that('beta-binomial distribution has correct density', {
 
 test_that('negative binomial distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::negative_binomial,
@@ -93,6 +100,7 @@ test_that('negative binomial distribution has correct density', {
 
 test_that('hypergeometric distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::hypergeometric,
@@ -106,6 +114,7 @@ test_that('hypergeometric distribution has correct density', {
 
 test_that('poisson distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::poisson,
@@ -119,6 +128,7 @@ test_that('poisson distribution has correct density', {
 
 test_that('gamma distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::gamma,
@@ -133,6 +143,7 @@ test_that('gamma distribution has correct density', {
 
 test_that('inverse gamma distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::inverse_gamma,
@@ -146,6 +157,7 @@ test_that('inverse gamma distribution has correct density', {
 
 test_that('weibull distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::weibull,
@@ -159,6 +171,7 @@ test_that('weibull distribution has correct density', {
 
 test_that('exponential distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::exponential,
@@ -172,6 +185,7 @@ test_that('exponential distribution has correct density', {
 
 test_that('pareto distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::pareto,
@@ -185,6 +199,7 @@ test_that('pareto distribution has correct density', {
 
 test_that('student distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::student,
@@ -198,6 +213,7 @@ test_that('student distribution has correct density', {
 
 test_that('laplace distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::laplace,
@@ -211,6 +227,7 @@ test_that('laplace distribution has correct density', {
 
 test_that('beta distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::beta,
@@ -224,6 +241,7 @@ test_that('beta distribution has correct density', {
 
 test_that('cauchy distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::cauchy,
@@ -237,6 +255,7 @@ test_that('cauchy distribution has correct density', {
 
 test_that('logistic distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::logistic,
@@ -251,6 +270,7 @@ test_that('logistic distribution has correct density', {
 
 test_that('f distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::f,
@@ -264,6 +284,7 @@ test_that('f distribution has correct density', {
 
 test_that('chi squared distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   difference <- compare_distribution(greta::chi_squared,
@@ -277,6 +298,7 @@ test_that('chi squared distribution has correct density', {
 
 test_that('multivariate normal distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # parameters to test
@@ -299,6 +321,7 @@ test_that('multivariate normal distribution has correct density', {
 
 test_that('Wishart distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # parameters to test
@@ -327,6 +350,7 @@ test_that('Wishart distribution has correct density', {
 
 test_that('lkj distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # parameters to test
@@ -359,6 +383,7 @@ test_that('lkj distribution has correct density', {
 
 test_that('multinomial distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # parameters to test
@@ -381,6 +406,7 @@ test_that('multinomial distribution has correct density', {
 
 test_that('categorical distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # parameters to test
@@ -402,6 +428,7 @@ test_that('categorical distribution has correct density', {
 
 test_that('dirichlet distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # parameters to test
@@ -419,6 +446,7 @@ test_that('dirichlet distribution has correct density', {
 
 test_that('dirichlet-multinomial distribution has correct density', {
 
+  skip_on_cran()
   source('helpers.R')
 
   # parameters to test
@@ -437,6 +465,7 @@ test_that('dirichlet-multinomial distribution has correct density', {
 
 test_that('scalar-valued distributions can be defined in models', {
 
+  skip_on_cran()
   source('helpers.R')
 
   x <- randn(5)
@@ -514,6 +543,7 @@ test_that('scalar-valued distributions can be defined in models', {
 
 test_that('array-valued distributions can be defined in models', {
 
+  skip_on_cran()
   source('helpers.R')
 
   dim <- c(5, 2)
@@ -595,6 +625,7 @@ test_that('array-valued distributions can be defined in models', {
 
 test_that('distributions can be sampled from', {
 
+  skip_on_cran()
   source('helpers.R')
 
   x <- randn(100)
@@ -954,6 +985,7 @@ test_that('dirichlet-multinomial distribution errors informatively', {
 
 test_that('Wishart can use a choleskied Sigma', {
 
+  skip_on_cran()
   source('helpers.R')
 
   sig <- lkj_correlation(3, dim = 4)
