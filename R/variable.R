@@ -2,7 +2,7 @@
 #' @export
 #' @title create greta variables
 #' @description \code{variable()} creates greta arrays representing unknown
-#'   parameters, to be lerned during model fitting. These parameters are not
+#'   parameters, to be learned during model fitting. These parameters are not
 #'   associated with a probability distribution. To create a variable greta
 #'   array following a specific probability distribution, see
 #'   \code{\link{distributions}}.

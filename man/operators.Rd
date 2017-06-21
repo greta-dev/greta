@@ -2,7 +2,7 @@
 % Please edit documentation in R/operators.R
 \name{operators}
 \alias{operators}
-\title{arithmetic, logical and relational operators for greta grrays}
+\title{arithmetic, logical and relational operators for greta arrays}
 \description{
 This is a list of currently implemented arithmetic, logical and
   relational operators to combine greta arrays into probabilistic models.
