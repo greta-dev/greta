@@ -9,9 +9,6 @@ output:
       toc_depth: 4
     theme: lumen
     highlight: default
-  pdf_document:
-    toc: yes
-    toc_depth: 4
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Get started with greta}
