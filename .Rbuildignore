@@ -10,3 +10,6 @@ docs
 man/figures/plot_greta_legend.R
 cran-comments.md
 vignettes/build_vignettes.R
+vignettes/example_models_cache
+vignettes/get_started_cache
+vignettes/technical_details_cache
