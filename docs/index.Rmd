@@ -172,7 +172,7 @@ set.seed(1)
 <div class="col-md-1"></div>
 
 <div class="col-md-5">
-&thinsp; <span class="fa fa-arrow-circle-right fa-2x" style="vertical-align:middle;"></span>&emsp; [getting started](getting_started.html)
+&thinsp; <span class="fa fa-arrow-circle-right fa-2x" style="vertical-align:middle;"></span>&emsp; [get started](get_started.html)
 </div>
 
 </div>
