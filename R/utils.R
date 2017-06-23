@@ -196,12 +196,13 @@ all_greta_arrays <- function (env = parent.frame(),
 check_tf_version <- function (alert = c('error', 'warn', 'message', 'startup')) {
 
   alert <- match.arg(alert)
-
   text <- NULL
+  available <- TRUE
 
   if (!reticulate::py_module_available('tensorflow')) {
 
     text <- "TensorFlow isn't installed."
+    available <- FALSE
 
   } else {
 
@@ -212,6 +213,7 @@ check_tf_version <- function (alert = c('error', 'warn', 'message', 'startup')) 
     if (!tf_version_valid) {
 
       text <- paste0("you have version ", tf_version)
+      available <- FALSE
 
     }
 
@@ -229,6 +231,8 @@ check_tf_version <- function (alert = c('error', 'warn', 'message', 'startup')) 
            message = message(text),
            startup = packageStartupMessage(text))
   }
+
+  invisible(available)
 
 }
 
