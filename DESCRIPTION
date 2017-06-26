@@ -5,7 +5,7 @@ Version: 0.2.0
 Date: 2017-06-26
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
-Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow.
+Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://goldingn.github.io/greta> for more information).
 License: Apache License 2.0
 URL: https://github.com/goldingn/greta
 BugReports: https://github.com/goldingn/greta/issues
