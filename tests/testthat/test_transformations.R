@@ -2,7 +2,7 @@ context('transformations')
 
 test_that('transformations work as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- randn(25, 4)

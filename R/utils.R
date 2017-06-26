@@ -193,7 +193,7 @@ all_greta_arrays <- function (env = parent.frame(),
 # check tensorflow is installed and the version of tensorflow is valid. error,
 # warn, or message if not and (if not an error) return an invisible logical
 # saying whether it is valid
-check_tf_version <- function (alert = c('error', 'warn', 'message', 'startup')) {
+check_tf_version <- function (alert = c('none', 'error', 'warn', 'message', 'startup')) {
 
   alert <- match.arg(alert)
   text <- NULL
@@ -229,7 +229,8 @@ check_tf_version <- function (alert = c('error', 'warn', 'message', 'startup')) 
            error = stop (text, call. = FALSE),
            warn = warning (text, call. = FALSE),
            message = message(text),
-           startup = packageStartupMessage(text))
+           startup = packageStartupMessage(text),
+           none = NULL)
   }
 
   invisible(available)

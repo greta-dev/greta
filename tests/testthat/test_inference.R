@@ -2,7 +2,7 @@ context('inference methods')
 
 test_that('opt converges', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   x <- rnorm(5, 2, 0.1)
@@ -26,7 +26,7 @@ test_that('opt converges', {
 
 test_that('opt accepts initial values', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   x <- rnorm(5, 2, 0.1)
@@ -49,7 +49,7 @@ test_that('opt accepts initial values', {
 
 test_that('rejected mcmc proposals', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # set up for numerical rejection of initial location
@@ -81,7 +81,7 @@ test_that('rejected mcmc proposals', {
 
 test_that('mcmc works with verbosity and warmup', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   x <- rnorm(10)
@@ -94,7 +94,7 @@ test_that('mcmc works with verbosity and warmup', {
 
 test_that('progress bar gives a range of messages', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # 10/1010 should be <1%
@@ -125,7 +125,7 @@ test_that('progress bar gives a range of messages', {
 
 test_that('stashed_samples works', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # set up model

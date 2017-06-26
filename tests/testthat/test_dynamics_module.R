@@ -2,7 +2,7 @@ context('dynamics module')
 
 test_that('lambda iteration works', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   n <- 10
@@ -28,7 +28,7 @@ test_that('lambda iteration works', {
 
 test_that('state iteration works', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   n <- 10
@@ -56,7 +56,7 @@ test_that('state iteration works', {
 
 test_that('vectorised lambda iteration works', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   n <- 10

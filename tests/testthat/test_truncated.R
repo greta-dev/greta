@@ -2,7 +2,7 @@ context('truncated distributions')
 
 test_that('truncated normal has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated normal
@@ -41,7 +41,7 @@ test_that('truncated normal has correct densities', {
 
 test_that('truncated lognormal has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -80,7 +80,7 @@ test_that('truncated lognormal has correct densities', {
 
 test_that('truncated gamma has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -119,7 +119,7 @@ test_that('truncated gamma has correct densities', {
 
 test_that('truncated inverse gamma has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -158,7 +158,7 @@ test_that('truncated inverse gamma has correct densities', {
 
 test_that('truncated weibull has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -197,7 +197,7 @@ test_that('truncated weibull has correct densities', {
 
 test_that('truncated exponential has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -232,7 +232,7 @@ test_that('truncated exponential has correct densities', {
 
 test_that('truncated pareto has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -267,7 +267,7 @@ test_that('truncated pareto has correct densities', {
 
 test_that('truncated student has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -311,7 +311,7 @@ test_that('truncated student has correct densities', {
 
 test_that('truncated laplace has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -350,7 +350,7 @@ test_that('truncated laplace has correct densities', {
 
 test_that('truncated beta has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -389,7 +389,7 @@ test_that('truncated beta has correct densities', {
 
 test_that('truncated cauchy has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -428,7 +428,7 @@ test_that('truncated cauchy has correct densities', {
 
 test_that('truncated logistic has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -467,7 +467,7 @@ test_that('truncated logistic has correct densities', {
 
 test_that('truncated f has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -506,7 +506,7 @@ test_that('truncated f has correct densities', {
 
 test_that('truncated chi squared has correct densities', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # non-truncated
@@ -542,7 +542,7 @@ test_that('truncated chi squared has correct densities', {
 
 test_that('bad truncations error', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   expect_error(lognormal(0, 1, truncation = c(-1, Inf)),

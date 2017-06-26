@@ -2,7 +2,7 @@ context('syntax')
 
 test_that('`distribution<-` works in models', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # with a distribution parameter

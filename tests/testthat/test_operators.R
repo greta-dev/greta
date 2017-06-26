@@ -2,7 +2,7 @@ context('operators')
 
 test_that('arithmetic operators work as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- randn(25, 4)
@@ -22,7 +22,7 @@ test_that('arithmetic operators work as expected', {
 
 test_that('logical operators work as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- randn(25, 4) > 0
@@ -38,7 +38,7 @@ test_that('logical operators work as expected', {
 
 test_that('relational operators work as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- randn(25, 4)
@@ -55,7 +55,7 @@ test_that('relational operators work as expected', {
 
 test_that('random strings of operators work as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   for (i in 1:10) {

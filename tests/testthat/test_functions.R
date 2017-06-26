@@ -2,7 +2,7 @@ context('functions')
 
 test_that('simple functions work as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   x <- randn(25, 4)
@@ -42,7 +42,7 @@ test_that('simple functions work as expected', {
 
 test_that('matrix functions work as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- rWishart(1, 6, diag(5))[, , 1]
@@ -59,7 +59,7 @@ test_that('matrix functions work as expected', {
 
 test_that('reducing functions work as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- randn(1, 3)
@@ -74,7 +74,7 @@ test_that('reducing functions work as expected', {
 
 test_that('sweep works as expected', {
 
-  skip_on_cran()
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   stats_list <- list(randn(5), randn(25))
