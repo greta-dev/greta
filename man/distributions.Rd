@@ -161,34 +161,34 @@ The discrete probability distributions (\code{bernoulli},
   corresponds:
 
   \tabular{ll}{ greta \tab reference\cr
-   \code{uniform} \tab \code{\link[stats:dunif]{stats::dunif}}\cr
-   \code{normal} \tab \code{\link[stats:dnorm]{stats::dnorm}}\cr
-   \code{lognormal} \tab \code{\link[stats:dlnorm]{stats::dlnorm}}\cr
-   \code{bernoulli} \tab \code{\link[extraDistr:dbern]{extraDistr::dbern}}\cr
-   \code{binomial} \tab \code{\link[stats:dbinom]{stats::dbinom}}\cr
-   \code{beta_binomial} \tab \code{\link[extraDistr:dbbinom]{extraDistr::dbbinom}}\cr
-   \code{negative_binomial} \tab \code{\link[stats:dnbinom]{stats::dnbinom}}\cr
-   \code{hypergeometric} \tab \code{\link[stats:dhyper]{stats::dhyper}}\cr
-   \code{poisson} \tab \code{\link[stats:dpois]{stats::dpois}}\cr
-   \code{gamma} \tab \code{\link[stats:dgamma]{stats::dgamma}}\cr
-   \code{inverse_gamma} \tab \code{\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}}\cr
-   \code{weibull} \tab \code{\link[stats:dweibull]{stats::dweibull}}\cr
-   \code{exponential} \tab \code{\link[stats:dexp]{stats::dexp}}\cr
-   \code{pareto} \tab \code{\link[extraDistr:dpareto]{extraDistr::dpareto}}\cr
-   \code{student} \tab \code{\link[extraDistr:dnst]{extraDistr::dnst}}\cr
-   \code{laplace} \tab \code{\link[extraDistr:dlaplace]{extraDistr::dlaplace}}\cr
-   \code{beta} \tab \code{\link[stats:dbeta]{stats::dbeta}}\cr
-   \code{cauchy} \tab \code{\link[stats:dcauchy]{stats::dcauchy}}\cr
-   \code{chi_squared} \tab \code{\link[stats:dchisq]{stats::dchisq}}\cr
-   \code{logistic} \tab \code{\link[stats:dlogis]{stats::dlogis}}\cr
-   \code{f} \tab \code{\link[stats:df]{stats::df}}\cr
-   \code{multivariate_normal} \tab \code{\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}}\cr
-   \code{multinomial} \tab \code{\link[stats:dmultinom]{stats::dmultinom}}\cr
-   \code{categorical} \tab {\code{\link[stats:dmultinom]{stats::dmultinom}} (size = 1)}\cr
-   \code{dirichlet} \tab \code{\link[extraDistr:ddirichlet]{extraDistr::ddirichlet}}\cr
-   \code{dirichlet_multinomial} \tab \code{\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}}\cr
-   \code{wishart} \tab \code{\link[stats:rWishart]{stats::rWishart}}\cr
-   \code{lkj_correlation} \tab \code{\link[rethinking:dlkjcorr]{rethinking::dlkjcorr}}\cr }
+   \code{uniform} \tab \link[stats:dunif]{stats::dunif}\cr
+   \code{normal} \tab \link[stats:dnorm]{stats::dnorm}\cr
+   \code{lognormal} \tab \link[stats:dlnorm]{stats::dlnorm}\cr
+   \code{bernoulli} \tab \link[extraDistr:dbern]{extraDistr::dbern}\cr
+   \code{binomial} \tab \link[stats:dbinom]{stats::dbinom}\cr
+   \code{beta_binomial} \tab \link[extraDistr:dbbinom]{extraDistr::dbbinom}\cr
+   \code{negative_binomial} \tab \link[stats:dnbinom]{stats::dnbinom}\cr
+   \code{hypergeometric} \tab \link[stats:dhyper]{stats::dhyper}\cr
+   \code{poisson} \tab \link[stats:dpois]{stats::dpois}\cr
+   \code{gamma} \tab \link[stats:dgamma]{stats::dgamma}\cr
+   \code{inverse_gamma} \tab \link[extraDistr:dinvgamma]{extraDistr::dinvgamma}\cr
+   \code{weibull} \tab \link[stats:dweibull]{stats::dweibull}\cr
+   \code{exponential} \tab \link[stats:dexp]{stats::dexp}\cr
+   \code{pareto} \tab \link[extraDistr:dpareto]{extraDistr::dpareto}\cr
+   \code{student} \tab \link[extraDistr:dnst]{extraDistr::dnst}\cr
+   \code{laplace} \tab \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr
+   \code{beta} \tab \link[stats:dbeta]{stats::dbeta}\cr
+   \code{cauchy} \tab \link[stats:dcauchy]{stats::dcauchy}\cr
+   \code{chi_squared} \tab \link[stats:dchisq]{stats::dchisq}\cr
+   \code{logistic} \tab \link[stats:dlogis]{stats::dlogis}\cr
+   \code{f} \tab \link[stats:df]{stats::df}\cr
+   \code{multivariate_normal} \tab \link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}\cr
+   \code{multinomial} \tab \link[stats:dmultinom]{stats::dmultinom}\cr
+   \code{categorical} \tab {\link[stats:dmultinom]{stats::dmultinom} (size = 1)}\cr
+   \code{dirichlet} \tab \link[extraDistr:ddirichlet]{extraDistr::ddirichlet}\cr
+   \code{dirichlet_multinomial} \tab \link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr
+   \code{wishart} \tab \link[stats:rWishart]{stats::rWishart}\cr
+   \code{lkj_correlation} \tab \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}\cr }
 }
 \examples{
 # a uniform parameter constrained to be between 0 and 1
