@@ -410,8 +410,8 @@ basic example
 <div class="col-md-6">
 <p>Here’s a Bayesian linear regression model fit to the <code>iris</code> data using greta:</p>
 <pre><code>library(greta)</code></pre>
-<pre><code>x &lt;- as_data(iris$Petal.Length)
-y &lt;- as_data(iris$Sepal.Length)
+<pre><code>x &lt;- iris$Petal.Length
+y &lt;- iris$Sepal.Length
 
 int = normal(0, 5)
 coef = normal(0, 3)

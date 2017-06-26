@@ -1,5 +1,5 @@
-#' @name greta-structures
-#' @title greta Data Structures
+#' @name structures
+#' @title create data greta arrays
 #' @description These structures can be used to set up more complex models. For
 #'   example, scalar parameters can be embedded in a greta array by first
 #'   creating a greta array with \code{zeros()} or \code{ones()}, and then
@@ -18,7 +18,7 @@
 NULL
 
 #' @export
-#' @rdname greta-structures
+#' @rdname structures
 #' @examples
 #' # a 3 row, 4 column greta array of 0s
 #' z <- zeros(3, 4)
@@ -27,7 +27,7 @@ zeros <- function (...)
   as.greta_array(array(data = 0, dim = c(...)))
 
 #' @export
-#' @rdname greta-structures
+#' @rdname structures
 #' @examples
 #' # a 3x3x3 greta array of 1s
 #' z <- ones(3, 3, 3)
@@ -36,7 +36,7 @@ ones <- function (...)
   as.greta_array(array(data = 1, dim = c(...)))
 
 #' @export
-#' @rdname greta-structures
+#' @rdname structures
 #' @examples
 #' # a 2x4 greta array filled with pi
 #' z <- greta_array(pi, dim = c(2, 4))

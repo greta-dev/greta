@@ -2,6 +2,7 @@ context('extract/replace/combine')
 
 test_that('extract works like R', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- randn(10)
@@ -59,6 +60,7 @@ test_that('extract works like R', {
 
 test_that('replace works like R', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # check using expressions, and comparing the whole object to which replacement
@@ -174,6 +176,7 @@ test_that('replace works like R', {
 
 test_that('rep works like R', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- randn(10)
@@ -217,6 +220,7 @@ test_that('rep works like R', {
 
 test_that('rbind, cbind and c work like R', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- randn(5, 1)
@@ -294,6 +298,7 @@ test_that('stochastic and operation greta arrays can be extracted', {
 
 test_that('extract, replace, combine work in models', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # extract

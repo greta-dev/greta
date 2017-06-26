@@ -8,7 +8,7 @@
 \alias{rbind}
 \alias{c}
 \alias{rep}
-\title{Extract, Replace and Combine greta Arrays}
+\title{extract, replace and combine greta arrays}
 \arguments{
 \item{i, j}{indices specifying elements to extract or replace}
 
@@ -21,8 +21,8 @@
 \item{drop, recursive}{generic arguments that are ignored for greta arrays}
 }
 \description{
-Generic methods to extract and replace elements of greta arrays, or to
-  combine greta arrays.
+Generic methods to extract and replace elements of greta arrays,
+  or to combine greta arrays.
 }
 \section{Usage}{
  \preformatted{

@@ -2,7 +2,7 @@
 
 *Air* analyses reported respiratory illness versus exposure to nitrogen dioxide in 103 children. The parameters `alpha`, `beta` and `sigma2` are known in advance, and the data are grouped into three categories.
 
-[See the BUGS page for details](http://www.openbugs.net/Examples/Air.html)
+See [WinBUGS examples volume 2](https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf) (pdf) for details.
 
 #### data
 <div class="data">

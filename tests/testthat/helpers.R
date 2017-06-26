@@ -29,6 +29,23 @@ set_distribution <- function(dist, data) {
   data$node$register()
 }
 
+# evaluate the (unadjusted) density of distribution greta array at some data
+get_density <- function (distrib, data) {
+
+  x <- as_data(data)
+  distribution(x) = distrib
+
+  # create dag and define the density
+  dag <- greta:::dag_class$new(list(x))
+  x$node$distribution$define_tf(dag)
+
+  # get the log density as a vector
+  tensor_name <- dag$tf_name(distrib$node$distribution)
+  tensor <- get(tensor_name, envir = dag$tf_environment)
+  as.vector(grab(tensor))
+
+}
+
 compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.
@@ -232,9 +249,7 @@ compare_truncated_distribution <- function (greta_fun,
   r_log_density <- log(r_fun(x))
 
   # create greta array for truncated distribution
-  z <- variable(truncation[1], truncation[2])
-  dist = do.call(greta_fun, parameters)
-  distribution(z) = dist
+  dist = do.call(greta_fun, c(parameters, list(dim = 1, truncation = truncation)))
 
   # set data as the target
   x_ <- as_data(x)
@@ -299,9 +314,10 @@ cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
 mock_create_progress_bar <- function(...)
   cpb(..., stream = stdout(), force = TRUE)
 
-mock_mcmc <- function (n_samples = 101) {
-  pb <- create_progress_bar('sampling', c(0, n_samples))
-  iterate_progress_bar(pb, n_samples, rejects = 1)
+mock_mcmc <- function (n_samples = 1010) {
+  pb <- create_progress_bar('sampling', c(0, n_samples), pb_update = 10)
+  # for (i in seq_len(n_samples))
+  iterate_progress_bar(pb, n_samples, rejects = 10)
 }
 
 # apparently testthat can't see these
@@ -321,7 +337,7 @@ qstudent <- extraDistr::qnst
 
 # mock up pareto to have differently named parameters (a and b are use for the
 # truncation)
-preto <- function(a_, b_) pareto(a_, b_)
+preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
 dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
 ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
 qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)

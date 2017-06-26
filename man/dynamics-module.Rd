@@ -6,7 +6,7 @@
 \alias{iterate_lambda}
 \alias{iterate_state}
 \alias{iterate_lambda_vectorised}
-\title{Functions for modelling dynamical systems}
+\title{methods for modelling structured dynamical systems}
 \arguments{
 \item{matrix}{a square, two-dimensional (i.e. matrix-like) greta array
 representing transition probabilities between states}

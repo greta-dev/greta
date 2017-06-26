@@ -342,13 +342,13 @@ div.tocify {
 
 <div id="bugs-models" class="section level2">
 <h2>BUGS models</h2>
-<p>The <a href="http://www.openbugs.net/w/Examples">OpenBUGS website</a> provides a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The <a href="https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically">Stan wiki</a> provides Stan implementations of these models.</p>
-<p>The following sections provide greta implementations of some of these example models, alongside the BUGS code from <a href="http://www.openbugs.net">openbugs.net</a> and Stan code and R version of the data from the <a href="https://github.com/stan-dev/example-models/wiki">Stan example models wiki</a>.</p>
+<p>The BUGS project provide a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The <a href="https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically">Stan wiki</a> provides Stan implementations of these models.</p>
+<p>The following sections provide greta implementations of some of these example models, alongside the BUGS code from <a href="https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf">WinBUGS examples volume 2</a> (pdf) and Stan code and an R version of the data from the <a href="https://github.com/stan-dev/example-models/wiki">Stan example models wiki</a>.</p>
 <hr>
 <div id="air" class="section level3">
 <h3>Air</h3>
 <p><em>Air</em> analyses reported respiratory illness versus exposure to nitrogen dioxide in 103 children. The parameters <code>alpha</code>, <code>beta</code> and <code>sigma2</code> are known in advance, and the data are grouped into three categories.</p>
-<p><a href="http://www.openbugs.net/Examples/Air.html">See the BUGS page for details</a></p>
+<p>See <a href="https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf">WinBUGS examples volume 2</a> (pdf) for details.</p>
 <div id="data" class="section level4">
 <h4>data</h4>
 <div class="data">
@@ -422,7 +422,7 @@ model {
 <div id="beetles" class="section level3">
 <h3>Beetles</h3>
 <p><em>Beetles</em> considers dose-response data from an experiment applying carbon disulphide to 8 beetles. The original example compares three different link functions; the logit, probit and complementary log-log. Here, only the code for the logit link is shown. You can implement the other two link functions in greta by changing <code>ilogit</code> to <code>iprobit</code> or <code>icloglog</code>.</p>
-<p><a href="http://www.openbugs.net/Examples/Beetles.html">See the BUGS page for details</a></p>
+<p>See <a href="https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf">WinBUGS examples volume 2</a> (pdf) for details.</p>
 <div id="data-1" class="section level4">
 <h4>data</h4>
 <div class="data">

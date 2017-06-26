@@ -1,10 +1,9 @@
-#' @name greta-transforms
-#' @aliases greta-inverse-links
-#' @title Transformation Functions for Greta Arrays
+#' @name transforms
+#' @aliases inverse-links
+#' @title transformation functions for greta arrays
 #'
-#' @description transformations for greta arrays, which may also be
-#'   used as inverse link functions. Also see \link{greta-operators} and
-#'   \link{greta-functions}.
+#' @description transformations for greta arrays, which may also be used as
+#'   inverse link functions. Also see \link{operators} and \link{functions}.
 #'
 #' @param x a real-valued (i.e. values ranging from -Inf to Inf) greta array to
 #'   transform to a constrained value
@@ -51,31 +50,31 @@ tf_icauchit <- function (x)
 tf_log1pe <- function (x)
   tf$nn$softplus(x)
 
-#' @rdname greta-transforms
+#' @rdname transforms
 #' @export
 iprobit <- function (x)
   op('iprobit', x,
      tf_operation = 'tf_iprobit')
 
-#' @rdname greta-transforms
+#' @rdname transforms
 #' @export
 ilogit <- function (x)
   op('ilogit', x,
      tf_operation = 'tf_ilogit')
 
-#' @rdname greta-transforms
+#' @rdname transforms
 #' @export
 icloglog <- function (x)
   op('icloglog', x,
      tf_operation = 'tf_icloglog')
 
-#' @rdname greta-transforms
+#' @rdname transforms
 #' @export
 icauchit <- function (x)
   op('icauchit', x,
      tf_operation = 'tf_icauchit')
 
-#' @rdname greta-transforms
+#' @rdname transforms
 #' @export
 log1pe <- function (x)
   op('log1pe', x,

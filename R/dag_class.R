@@ -110,7 +110,7 @@ dag_class <- R6Class(
       # define all nodes, node densities and free states in the environment
       lapply(self$node_list, function (x) x$define_tf(self))
 
-      # define an overall log density and relevant gradients there
+      # define an overall log density and gradients, plus adjusted versions
       self$define_joint_density()
       self$define_gradients()
 
@@ -132,6 +132,42 @@ dag_class <- R6Class(
 
     },
 
+    # define tensor for overall log density and gradients
+    define_joint_density = function () {
+
+      # get names of densities for all distribution nodes
+      density_names <- self$get_tf_names(types = 'distribution')
+
+      # get TF density tensors for all distribution
+      densities <- lapply(density_names, get, envir = self$tf_environment)
+
+      # reduce_sum them
+      summed_densities <- lapply(densities, tf$reduce_sum)
+
+      # remove their names and sum them together
+      names(summed_densities) <- NULL
+      joint_density <- tf$add_n(summed_densities)
+
+      # assign overall density to environment
+      assign('joint_density', joint_density, envir = self$tf_environment)
+
+      # define adjusted joint density
+
+      # get names of adjustment tensors for all variable nodes
+      adj_names <- paste0(self$get_tf_names(types = 'variable'), '_adj')
+
+      # get TF density tensors for all distribution
+      adj <- lapply(adj_names, get, envir = self$tf_environment)
+
+      # remove their names and sum them together
+      names(adj) <- NULL
+      total_adj <- tf$add_n(adj)
+
+      # assign overall density to environment
+      assign('joint_density_adj', joint_density + total_adj, envir = self$tf_environment)
+
+    },
+
     define_gradients = function () {
 
       # get names of free states for all variable nodes
@@ -144,47 +180,36 @@ dag_class <- R6Class(
         # names of tensors
         free_name <- paste0(name, '_free')
         gradient_name <- paste0(name, '_gradient')
+        gradient_adj_name <- paste0(name, '_gradient_adj')
 
+        # raw gradients
         gradient <- tf$gradients(self$tf_environment$joint_density,
                                  self$tf_environment[[free_name]])
         gradient_reshape <- tf$reshape(gradient, shape(-1))
-
         self$tf_environment[[gradient_name]] <- gradient_reshape
+
+        # adjusted gradients
+        gradient_adj <- tf$gradients(self$tf_environment$joint_density_adj,
+                                 self$tf_environment[[free_name]])
+        gradient_adj_reshape <- tf$reshape(gradient_adj, shape(-1))
+        self$tf_environment[[gradient_adj_name]] <- gradient_adj_reshape
 
       }
 
       # combine the gradients into one tensor
       gradient_names <- paste0(variable_tf_names, '_gradient')
-
       gradient_list <- lapply(gradient_names,
                               get,
                               envir = self$tf_environment)
-
       self$tf_environment$gradients <- tf$concat(gradient_list, 0L)
 
-    },
+      # same for adjusted gradients
+      gradient_adj_names <- paste0(variable_tf_names, '_gradient_adj')
+      gradient_adj_list <- lapply(gradient_adj_names,
+                                  get,
+                                  envir = self$tf_environment)
 
-    # define tensor for overall log density and gradients
-    define_joint_density = function () {
-
-      # get names of densities for all distribution nodes
-      density_names <- self$get_tf_names(types = 'distribution')
-
-      # get TF density tensors for all distribution
-      densities <- lapply(density_names, get, envir = self$tf_environment)
-
-      # convert to double precision floats
-      densities_double <- lapply(densities, tf$cast, tf$float64)
-
-      # reduce_sum them
-      summed_densities <- lapply(densities_double, tf$reduce_sum)
-
-      # remove their names and sum them together
-      names(summed_densities) <- NULL
-      sum_total <- tf$add_n(summed_densities)
-
-      # assign overall density to environment
-      assign('joint_density', sum_total, envir = self$tf_environment)
+      self$tf_environment$gradients_adj <- tf$concat(gradient_adj_list, 0L)
 
     },
 
@@ -217,17 +242,20 @@ dag_class <- R6Class(
 
     },
 
-    log_density = function() {
+    # get log density and gradient of joint density w.r.t. free states of all
+    # variable nodes, with or without applying the jacobian adjustment
+    log_density = function(adjusted = TRUE) {
 
-      with(self$tf_environment,
-           sess$run(joint_density, feed_dict = parameter_dict))
+      cleanly(with(self$tf_environment,
+                   sess$run(joint_density_adj, feed_dict = parameter_dict)))
 
     },
 
-    # get gradient of joint density w.r.t. free states of all variable nodes
-    gradients = function () {
-      with(self$tf_environment,
-           sess$run(gradients, feed_dict = parameter_dict))
+    gradients = function (adjusted = TRUE) {
+
+      cleanly(with(self$tf_environment,
+                   sess$run(gradients_adj, feed_dict = parameter_dict)))
+
     },
 
     # return the current values of the traced nodes, as a named vector

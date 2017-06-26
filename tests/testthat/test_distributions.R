@@ -2,6 +2,7 @@ context('distributions')
 
 test_that('normal distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::normal,
@@ -15,6 +16,7 @@ test_that('normal distribution has correct density', {
 
 test_that('uniform distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::uniform,
@@ -28,6 +30,7 @@ test_that('uniform distribution has correct density', {
 
 test_that('lognormal distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::lognormal,
@@ -41,6 +44,7 @@ test_that('lognormal distribution has correct density', {
 
 test_that('bernoulli distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::bernoulli,
@@ -54,6 +58,7 @@ test_that('bernoulli distribution has correct density', {
 
 test_that('binomial distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::binomial,
@@ -67,6 +72,7 @@ test_that('binomial distribution has correct density', {
 
 test_that('beta-binomial distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::beta_binomial,
@@ -80,6 +86,7 @@ test_that('beta-binomial distribution has correct density', {
 
 test_that('negative binomial distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::negative_binomial,
@@ -93,6 +100,7 @@ test_that('negative binomial distribution has correct density', {
 
 test_that('hypergeometric distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::hypergeometric,
@@ -106,6 +114,7 @@ test_that('hypergeometric distribution has correct density', {
 
 test_that('poisson distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::poisson,
@@ -119,6 +128,7 @@ test_that('poisson distribution has correct density', {
 
 test_that('gamma distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::gamma,
@@ -133,6 +143,7 @@ test_that('gamma distribution has correct density', {
 
 test_that('inverse gamma distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::inverse_gamma,
@@ -146,6 +157,7 @@ test_that('inverse gamma distribution has correct density', {
 
 test_that('weibull distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::weibull,
@@ -159,6 +171,7 @@ test_that('weibull distribution has correct density', {
 
 test_that('exponential distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::exponential,
@@ -172,6 +185,7 @@ test_that('exponential distribution has correct density', {
 
 test_that('pareto distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::pareto,
@@ -185,6 +199,7 @@ test_that('pareto distribution has correct density', {
 
 test_that('student distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::student,
@@ -198,6 +213,7 @@ test_that('student distribution has correct density', {
 
 test_that('laplace distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::laplace,
@@ -211,6 +227,7 @@ test_that('laplace distribution has correct density', {
 
 test_that('beta distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::beta,
@@ -224,6 +241,7 @@ test_that('beta distribution has correct density', {
 
 test_that('cauchy distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::cauchy,
@@ -237,6 +255,7 @@ test_that('cauchy distribution has correct density', {
 
 test_that('logistic distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::logistic,
@@ -251,6 +270,7 @@ test_that('logistic distribution has correct density', {
 
 test_that('f distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::f,
@@ -264,6 +284,7 @@ test_that('f distribution has correct density', {
 
 test_that('chi squared distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   difference <- compare_distribution(greta::chi_squared,
@@ -277,12 +298,13 @@ test_that('chi squared distribution has correct density', {
 
 test_that('multivariate normal distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # parameters to test
   m <- 5
   mn <- rnorm(m)
-  sig <- rWishart(1, m + 1, diag(m))[, , 1]
+  sig <- MCMCpack::rwish(m + 1, diag(m))
 
   # function converting Sigma to sigma
   dmvnorm2 <- function (x, mean, Sigma, log = FALSE)
@@ -299,12 +321,13 @@ test_that('multivariate normal distribution has correct density', {
 
 test_that('Wishart distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # parameters to test
   m <- 5
   df <- m + 1
-  sig <- rWishart(1, df, diag(m))[, , 1]
+  sig <- MCMCpack::rwish(df, diag(m))
 
   # wrapper for argument names
   dwishart <- function (x, df, Sigma, log = FALSE) {
@@ -319,7 +342,40 @@ test_that('Wishart distribution has correct density', {
                           compare_distribution(greta::wishart,
                                                dwishart,
                                                parameters = list(df = df, Sigma = sig),
-                                               x = rWishart(1, df, sig)[, , 1]))
+                                               x = MCMCpack::rwish(df, sig)))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
+test_that('lkj distribution has correct density', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  # parameters to test
+  m <- 5
+  eta <- 3
+
+  # lkj  density
+  dlkj_correlation <- function (x, eta, log = FALSE) {
+    res <- det(x) ^ (eta - 1)
+    if (log) res <- log(res)
+    return (res)
+  }
+
+  rcorrelation <- function (m) {
+    wish <- MCMCpack::rwish(m + 1, diag(m))
+    iwish <- solve(wish)
+    cov2cor(iwish)
+  }
+
+  # no vectorised lkj, so loop through all of these
+  difference <- replicate(10,
+                          compare_distribution(greta::lkj_correlation,
+                                               dlkj_correlation,
+                                               parameters = list(eta = eta),
+                                               x = rcorrelation(m)))
 
   expect_true(all(difference < 1e-4))
 
@@ -327,6 +383,7 @@ test_that('Wishart distribution has correct density', {
 
 test_that('multinomial distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # parameters to test
@@ -349,6 +406,7 @@ test_that('multinomial distribution has correct density', {
 
 test_that('categorical distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # parameters to test
@@ -370,6 +428,7 @@ test_that('categorical distribution has correct density', {
 
 test_that('dirichlet distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # parameters to test
@@ -384,8 +443,10 @@ test_that('dirichlet distribution has correct density', {
   expect_true(all(difference < 1e-4))
 
 })
+
 test_that('dirichlet-multinomial distribution has correct density', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # parameters to test
@@ -404,6 +465,7 @@ test_that('dirichlet-multinomial distribution has correct density', {
 
 test_that('scalar-valued distributions can be defined in models', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   x <- randn(5)
@@ -470,22 +532,23 @@ test_that('scalar-valued distributions can be defined in models', {
   model(uniform(-13, 2.4))
 
   # multivariate continuous distributions
-  sig <- rWishart(4, 3, diag(3))[, , 1]
+  sig <- MCMCpack::rwish(4, diag(3))
 
   model(multivariate_normal(rnorm(3), sig))
   model(wishart(4, sig))
+  model(lkj_correlation(5, dim = 3))
   model(dirichlet(runif(3)))
 
 })
 
 test_that('array-valued distributions can be defined in models', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   dim <- c(5, 2)
   x <- randn(5, 2)
   y <- round(randu(5, 2))
-  p <- iprobit(normal(0, 1, dim = dim))
 
   # variable (need to define a likelihood)
   a <- variable(dim = dim)
@@ -493,21 +556,27 @@ test_that('array-valued distributions can be defined in models', {
   model(a)
 
   # univariate discrete distributions
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = bernoulli(p)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = binomial(1, p)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = beta_binomial(1, p, 0.2)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = negative_binomial(1, p)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = hypergeometric(10, 5, p)
   model(p)
 
+  p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = poisson(p)
   model(p)
 
@@ -546,19 +615,21 @@ test_that('array-valued distributions can be defined in models', {
   model(f(24.3, 2.4, dim = dim))
 
   # multivariate continuous distributions
-  sig <- rWishart(4, 3, diag(3))[, , 1]
+  sig <- MCMCpack:::rwish(4, diag(3))
   model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
   model(dirichlet(runif(3), dim = dim[1]))
+  model(wishart(4, sig))
+  model(lkj_correlation(3, dim = dim[1]))
 
 })
 
 test_that('distributions can be sampled from', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   x <- randn(100)
   y <- round(randu(100))
-  p <- iprobit(normal(0, 1, dim = 100))
 
   # variable (with a density)
   a <- variable()
@@ -578,21 +649,27 @@ test_that('distributions can be sampled from', {
   sample_distribution(d)
 
   # univariate discrete
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = bernoulli(p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = binomial(1, p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = negative_binomial(1, p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = hypergeometric(10, 5, p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = poisson(p)
   sample_distribution(p)
 
+  p <- iprobit(normal(0, 1, dim = 100))
   distribution(y) = beta_binomial(1, p, 0.3)
   sample_distribution(p)
 
@@ -632,9 +709,10 @@ test_that('distributions can be sampled from', {
   sample_distribution(uniform(-13, 2.4), lower = -13, upper = 2.4)
 
   # multivariate continuous
-  sig <- rWishart(4, 3, diag(3))[, , 1]
+  sig <- MCMCpack::rwish(4, diag(3))
   sample_distribution(multivariate_normal(rnorm(3), sig))
   sample_distribution(wishart(4, sig))
+  sample_distribution(lkj_correlation(4, dim = 3))
   sample_distribution(dirichlet(runif(3)))
 
 })
@@ -700,6 +778,37 @@ test_that('wishart distribution errors informatively', {
                '^Sigma must be a square 2D greta array, but has dimensions')
   expect_error(wishart(3, c),
                '^Sigma must be a square 2D greta array, but has dimensions')
+
+})
+
+
+test_that('lkj_correlation distribution errors informatively', {
+
+  source('helpers.R')
+
+  dim <- 3
+
+  expect_true(inherits(lkj_correlation(3, dim),
+                       'greta_array'))
+
+  expect_error(lkj_correlation(-1, dim),
+               "^eta must be a positive scalar value, or a scalar greta array")
+
+  expect_error(lkj_correlation(c(3, 3), dim),
+               "^eta must be a positive scalar value, or a scalar greta array")
+
+  expect_error(lkj_correlation(uniform(0, 1, dim = 2), dim),
+               "^eta must be a scalar, but had dimensions")
+
+  expect_error(lkj_correlation(4, dim = -1),
+               "dim must be a scalar integer greater than one, but was:")
+
+  expect_error(lkj_correlation(4, dim = c(3, 3)),
+               "dim must be a scalar integer greater than one, but was:")
+
+  expect_error(lkj_correlation(4, dim = NA),
+               "dim must be a scalar integer greater than one, but was:")
+
 
 })
 
@@ -842,8 +951,6 @@ test_that('dirichlet distribution errors informatively', {
 
 })
 
-
-
 test_that('dirichlet-multinomial distribution errors informatively', {
 
   source('helpers.R')
@@ -864,7 +971,6 @@ test_that('dirichlet-multinomial distribution errors informatively', {
   expect_error(dirichlet_multinomial(c(1, 2), alpha_a),
                'size must be a scalar, but has dimensions 2 x 1')
 
-
   # scalars
   expect_error(dirichlet_multinomial(size, alpha = 1),
                'the dirichlet distribution is for vectors, but the parameters were scalar')
@@ -874,5 +980,17 @@ test_that('dirichlet-multinomial distribution errors informatively', {
                'dim must be a scalar positive integer, but was: -1')
   expect_error(dirichlet_multinomial(size, alpha_a, dim = c(1, 3)),
                '^dim must be a scalar positive integer, but was:')
+
+})
+
+test_that('Wishart can use a choleskied Sigma', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  sig <- lkj_correlation(3, dim = 4)
+  w <- wishart(5, sig)
+  m <- model(w)
+  draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE)
 
 })

@@ -1,14 +1,11 @@
 #' @rdname variable
 #' @export
-#' @title greta variables
+#' @title create greta variables
 #' @description \code{variable()} creates greta arrays representing unknown
-#'   parameters, to be lerned during model fitting. These parameters are not
+#'   parameters, to be learned during model fitting. These parameters are not
 #'   associated with a probability distribution. To create a variable greta
 #'   array following a specific probability distribution, see
-#'   \code{\link{greta-distributions}}.
-#'
-#'  \code{free()} is an alias for \code{variable()}. It is deprecated and
-#'  will be removed in version 0.2
+#'   \code{\link{distributions}}.
 #'
 #' @param lower,upper scalar values giving optional limits to variables. These
 #'  must be specified as numerics, they cannot be greta arrays (though see
@@ -50,7 +47,3 @@ variable <- function (lower = -Inf, upper = Inf, dim = 1) {
   as.greta_array(node)
 
 }
-
-#' @rdname variable
-#' @export
-free <- variable

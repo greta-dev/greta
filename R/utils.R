@@ -190,33 +190,50 @@ all_greta_arrays <- function (env = parent.frame(),
 
 }
 
-# check the version of tensorflow is valid. error, warn, or message if not and
-# (if not an error) return an invisible logical saying whether it is valid
-check_tf_version <- function (alert = c('error', 'warn', 'message')) {
+# check tensorflow is installed and the version of tensorflow is valid. error,
+# warn, or message if not and (if not an error) return an invisible logical
+# saying whether it is valid
+check_tf_version <- function (alert = c('none', 'error', 'warn', 'message', 'startup')) {
 
   alert <- match.arg(alert)
+  text <- NULL
+  available <- TRUE
 
-  tf_version <- tf$`__version__`
-  tf_version_split <- strsplit(tf_version, '.', fixed = TRUE)[[1]]
-  tf_version_valid <- as.numeric(tf_version_split[1]) >= 1
+  if (!reticulate::py_module_available('tensorflow')) {
 
-  if (!tf_version_valid) {
+    text <- "TensorFlow isn't installed."
+    available <- FALSE
 
-    text <- paste0('\n\n  greta requires TensorFlow version 1.0.0 or higher, ',
-                   'but you have version ', tf_version, '\n  ',
-                   'You can write models, but not sample from them.\n  ',
-                   'See https://www.tensorflow.org/install for installation ',
-                   'instructions.\n\n')
+  } else {
 
-    switch(alert,
-           error = stop (text, call. = FALSE),
-           warn = warning (text, call. = FALSE),
-           message = message(text))
+    tf_version <- tf$`__version__`
+    tf_version_split <- strsplit(tf_version, '.', fixed = TRUE)[[1]]
+    tf_version_valid <- as.numeric(tf_version_split[1]) >= 1
+
+    if (!tf_version_valid) {
+
+      text <- paste0("you have version ", tf_version)
+      available <- FALSE
+
+    }
 
   }
 
-  # if not an error, return a logical on whether it was valid
-  invisible(tf_version_valid)
+  if (!is.null(text)) {
+
+    text <- paste0("\n\n  greta requires TensorFlow version 1.0.0 or higher, ",
+                   "but ", text, "\n  ",
+                   "Use install_tensorflow() to install the latest version.",
+                   "\n\n")
+    switch(alert,
+           error = stop (text, call. = FALSE),
+           warn = warning (text, call. = FALSE),
+           message = message(text),
+           startup = packageStartupMessage(text),
+           none = NULL)
+  }
+
+  invisible(available)
 
 }
 
@@ -231,31 +248,115 @@ tf_lbeta <- function (a, b)
 # given a flat tensor, convert it into a square symmetric matrix by considering
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
-tf_flat_to_symmetric = function (x, dims) {
+tf_flat_to_chol = function (x, dims) {
 
-  # create a dummy array to find the indices
+  # indices to the cholesky factor
   L_dummy <- dummy(dims)
-  indices <- sort(L_dummy[upper.tri(L_dummy, diag = TRUE)])
+  indices_diag <- diag(L_dummy)
+  indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
+
+  # indices to the free state
+  x_index_diag <- seq_along(indices_diag) - 1
+  x_index_offdiag <- length(indices_diag) + seq_along(indices_offdiag) - 1
 
   # create an empty vector to fill with the values
-  values <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
-  values <- tf_recombine(values, indices, x)
+  values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
+  values_0_diag <- tf_recombine(values_0, indices_diag, tf$exp(x[x_index_diag]))
+  values_z <- tf_recombine(values_0_diag, indices_offdiag, x[x_index_offdiag])
 
-  # reshape into lower triangular, then symmetric matrix
-  L <- tf$reshape(values, shape(dims[1], dims[2]))
-  tf$matmul(tf$transpose(L), L)
+  # reshape into lower triangular and return
+  tf$reshape(values_z, shape(dims[1], dims[2]))
+
 }
 
-flat_to_symmetric <- function (x, dim) {
+# convert an unconstrained vector into symmetric correlation matrix
+tf_flat_to_chol_correl = function (x, dims) {
+
+  # to -1, 1 scale
+  y <- tf$tanh(x)
+
+  k <- dims[1]
+
+  # list of indices mapping relevant part of each row to an element of y
+  y_index_list <- list()
+  count <- 0
+  for (i in 1:(k - 1)) {
+    nelem <- k - i
+    y_index_list[[i]] <- count + seq_len(nelem) - 1
+    count <- count + nelem
+  }
+
+  # dummy list to store transformed versions of rows
+  values_list <- y_index_list
+  values_list[[1]] <- tf$reshape(y[y_index_list[[1]]], shape(k - 1))
+  sum_sqs <- tf$square(values_list[[1]])
+
+  if (k > 2) {
+
+    for (i in 2:(k - 1)) {
+      # relevant columns (0-indexed)
+      idx <- i:(k - 1) - 1
+      # components of z on this row (straight from y)
+      z <- tf$reshape(y[y_index_list[[i]]], shape(k - i))
+      # assign to w, using relevant parts of the sum of squares
+      values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs[idx])
+      # increment sum of squares
+      sum_sqs_part <- tf$square(values_list[[i]]) + sum_sqs[idx]
+      sum_sqs <- tf_recombine(sum_sqs, idx, sum_sqs_part)
+    }
+
+  }
+
+  # dummy array to find the indices
+  L_dummy <- dummy(dims)
+  indices_diag <- diag(L_dummy)
+  indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
+
+  # diagonal & off-diagonal elements
+  values_diag <- tf$concat(list(tf$ones(1L, dtype = tf_float()),
+                                sqrt(fl(1) - sum_sqs)), 0L)
+  values_offdiag <- tf$concat(values_list, 0L)
+
+  # plug elements into a vector of 0s
+  values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
+  values_0_diag <- tf_recombine(values_0, indices_diag, values_diag)
+  values_z <- tf_recombine(values_0_diag, indices_offdiag, values_offdiag)
+
+  # reshape into cholesky and return
+  tf$reshape(values_z, shape(dims[1], dims[2]))
+
+}
+
+tf_chol_to_symmetric <- function (U)
+  tf$matmul(tf$transpose(U), U)
+
+flat_to_chol <- function (x, dim, correl = FALSE) {
 
   dimfun <- function (elem_list)
     dim
 
+  fun <- ifelse(correl,
+                "tf_flat_to_chol_correl",
+                "tf_flat_to_chol")
+
   # sum the elements
-  op('flat_to_symmetric',
+  op('flat_to_chol',
      x,
      operation_args = list(dims = dim),
-     tf_operation = 'tf_flat_to_symmetric',
+     tf_operation = fun,
+     dimfun = dimfun)
+
+}
+
+chol_to_symmetric <- function (L) {
+
+  dimfun <- function (elem_list)
+    dim(elem_list[[1]])
+
+  # sum the elements
+  op('chol_to_symmetric',
+     L,
+     tf_operation = 'tf_chol_to_symmetric',
      dimfun = dimfun)
 
 }
@@ -312,3 +413,47 @@ tf_int <- function ()
 
 # cast a scalar as a float or integer of the correct type in TF code
 fl <- function(x) tf$constant(x, dtype = tf_float())
+
+# evaluate expressions (dag density or gradient), capturing numerical errors
+# like matrix inversions as bad samples, and erroring otherwise
+cleanly <- function (expr) {
+
+  res <- tryCatch(expr, error = function(e) e)
+
+  # if it errored
+  if (inherits(res, 'error')) {
+
+    numerical_messages <- c("is not invertible",
+                            "Cholesky decomposition was not successful")
+
+    numerical_errors <- vapply(numerical_messages,
+                               grepl,
+                               res$message,
+                               FUN.VALUE = 0) == 1
+
+    # if it was just a numerical error, quietly return a bad value
+    if (any(numerical_errors))
+      res <- NA
+    else
+      stop("greta hit a tensorflow error:\n\n", res, call. = FALSE)
+
+  }
+
+  res
+
+}
+
+# check truncation for different distributions
+check_positive <- function (truncation) {
+  if (truncation[1] < 0) {
+    stop ("lower bound must be 0 or higher",
+          call. = FALSE)
+  }
+}
+
+check_unit <- function (truncation) {
+  if (truncation[1] < 0 | truncation[2] > 1) {
+    stop ("lower and upper bounds must be between 0 and 1",
+          call. = FALSE)
+  }
+}

@@ -2,14 +2,14 @@
 
 ### greta is an R package for writing statistical models and fitting them by MCMC.
 
-greta let you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it's easy to extend and build on.
+greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it's easy to extend and build on.
 
-### See [the website](https://goldingn.github.io/greta/) for more information, [tutorials](https://goldingn.github.io/greta/getting_started.html), [examples](https://goldingn.github.io/greta/example_models.html), and [package documentation](https://goldingn.github.io/greta/reference-index.html).
+### See the [website](https://goldingn.github.io/greta/) for more information, [tutorials](https://goldingn.github.io/greta/get_started.html), [examples](https://goldingn.github.io/greta/example_models.html), and [package documentation](https://goldingn.github.io/greta/reference-index.html).
 
-You can install the package from GitHub:
+You can install the package from CRAN:
 
 ``` r
-devtools::install_github('goldingn/greta')
+install.packages("greta")
 ```
 
 I would love to hear any feedback, bug reports or feature requests via the [issues tracker](https://github.com/goldingn/greta/issues). I would also be very keen for contributions from anyone with time to spare!

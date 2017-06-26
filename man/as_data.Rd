@@ -2,7 +2,7 @@
 % Please edit documentation in R/as_data.R
 \name{as_data}
 \alias{as_data}
-\title{Declare R Objects as Data}
+\title{convert other objects to greta arrays}
 \usage{
 as_data(x)
 }

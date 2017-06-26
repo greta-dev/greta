@@ -5,6 +5,7 @@ node <- R6Class(
     unique_name = '',
     children = list(),
     parents = list(),
+    representations = list(),
     .value = array(NA),
     dim = NA,
     distribution = NULL,

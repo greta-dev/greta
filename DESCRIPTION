@@ -1,22 +1,11 @@
 Package: greta
 Type: Package
-Title: Probabilistic Modelling with TensorFlow
-Version: 0.1.9
-Date: 2017-05-28
+Title: Simple and Scalable Statistical Modelling in R
+Version: 0.2.0
+Date: 2017-06-26
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
-Description: Existing tools for fitting bespoke statistical models (such as
-    BUGS, JAGS and STAN) are very effective for moderately-sized problems, but
-    don't scale so well to large datasets. These tools also require users to learn
-    a domain-specific language and fix errors at compile time. greta enables users
-    to construct probabilistic models interactively in native R code, then sample
-    from those models efficiently using Hamiltonian Monte Carlo. TensorFlow is used
-    to perform all of the calculations, so greta is particularly fast where the
-    model contains large linear algebra operations. greta can also be run across
-    distributed machines or on GPUs, just by installing the relevant version of
-    TensorFlow. This package is in the early stages of development. Future releases
-    will likely enable fitting models with fast approximate inference schemes,
-    different samplers, and more distributions and operations.
+Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://goldingn.github.io/greta> for more information).
 License: Apache License 2.0
 URL: https://github.com/goldingn/greta
 BugReports: https://github.com/goldingn/greta/issues
@@ -27,27 +16,29 @@ LazyData: true
 Depends:
     R (>= 3.0)
 Collate:
-    'greta_package.R'
+    'package.R'
     'overloaded.R'
     'node_class.R'
     'node_types.R'
     'variable.R'
-    'distributions.R'
+    'probability_distributions.R'
     'unknowns_class.R'
     'greta_array_class.R'
     'as_data.R'
     'utils.R'
-    'syntax.R'
+    'distribution.R'
     'operators.R'
     'functions.R'
-    'transformations.R'
+    'transforms.R'
     'structures.R'
     'extract_replace_combine.R'
     'dynamics_module.R'
     'dag_class.R'
     'greta_model_class.R'
     'progress_bar.R'
+    'inference.R'
     'samplers.R'
+    'install_tensorflow.R'
 Imports:
     R6,
     tensorflow,
@@ -58,7 +49,8 @@ Suggests:
     knitr,
     rmarkdown,
     DiagrammeR,
-    MCMCvis,
+    bayesplot,
+    lattice,
     testthat,
     mvtnorm,
     MCMCpack,

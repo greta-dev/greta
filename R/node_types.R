@@ -206,21 +206,21 @@ variable_node <- R6Class (
 
       # assign this as the free state
       tf_name <- dag$tf_name(self)
-
       free_name <- sprintf('%s_free', tf_name)
       assign(free_name,
              tf_obj,
              envir = dag$tf_environment)
 
+      # get the log jacobian adjustment for the free state
+      tf_adj <- self$tf_adjustment(dag)
+      adj_name <- sprintf('%s_adj', tf_name)
+      assign(adj_name,
+             tf_adj,
+             envir = dag$tf_environment)
+
       # map from the free to constrained state in a new tensor
-
-      # fetch the free node
       tf_free <- get(free_name, envir = dag$tf_environment)
-
-      # appy transformation
       node <- self$tf_from_free(tf_free, dag$tf_environment)
-
-      # assign back to environment with base name (density will use this)
       assign(tf_name,
              node,
              envir = dag$tf_environment)
@@ -242,15 +242,85 @@ variable_node <- R6Class (
 
       } else if (self$constraint == 'low') {
 
-        y <- fl(upper) - tf_log1pe(x)
+        y <- fl(upper) - tf$exp(x)
 
       } else if (self$constraint == 'high') {
 
-        y <- tf_log1pe(x) + fl(lower)
+        y <- tf$exp(x) + fl(lower)
+
+      } else {
+
+        y <- x
 
       }
 
       y
+
+    },
+
+    # adjustments for univariate variables
+    tf_log_jacobian_adjustment = function (free) {
+
+      ljac_none <- function (x)
+        fl(0)
+
+      ljac_exp <- function (x)
+        tf$reduce_sum(x)
+
+      ljac_logistic <- function (x) {
+        lrange <- log(self$upper - self$lower)
+        tf$reduce_sum(x - fl(2) * tf_log1pe(x) + lrange)
+      }
+
+      ljac_corr_mat <- function (x) {
+
+        # find dimension
+        n <- x$get_shape()$as_list()[1]
+        K <- (1 + sqrt(8 * n + 1)) / 2
+
+        # draw the rest of the owl
+        l1mz2 <- tf$log(1 - tf$square(tf$tanh(x)))
+        i <- rep(1:(K - 1), (K - 1):1)
+        powers <- tf$constant(K - i - 1,
+                              dtype = tf_float(),
+                              shape = shape(length(i), 1))
+        fl(0.5) * tf$reduce_sum(powers * l1mz2) + tf$reduce_sum(l1mz2)
+
+      }
+
+      ljac_cov_mat <- function (x) {
+
+        # find dimension
+        n <- x$get_shape()$as_list()[1]
+        K <- (sqrt(8 * n + 1) - 1) / 2
+
+        k <- seq_len(K)
+        powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = c(K, 1))
+        fl(K * log(2)) + tf$reduce_sum(powers * x[k - 1])
+
+      }
+
+      fun <- switch (self$constraint,
+                     none = ljac_none,
+                     high = ljac_exp,
+                     low = ljac_exp,
+                     both = ljac_logistic,
+                     correlation_matrix = ljac_corr_mat,
+                     covariance_matrix = ljac_cov_mat)
+
+      fun(free)
+
+    },
+
+    # create a tensor giving the log jacobian adjustment for this variable
+    tf_adjustment = function (dag) {
+
+      # find free version of node
+      free_tensor_name <- paste0(dag$tf_name(self), '_free')
+      free_tensor <- get(free_tensor_name, envir = dag$tf_environment)
+
+      # apply jacobian adjustment to it
+      self$tf_log_jacobian_adjustment(free_tensor)
 
     }
 
@@ -260,8 +330,11 @@ variable_node <- R6Class (
 # helper function to create a variable node
 # by default, make x (the node
 # containing the value) a free parameter of the correct dimension
-vble = function(...)
-  variable_node$new(...)
+vble = function (truncation, dim = 1) {
+  if (is.null(truncation)) truncation <- c(-Inf, Inf)
+  variable_node$new(lower = truncation[1], upper = truncation[2], dim = dim)
+}
+
 
 distribution_node <- R6Class (
   'distribution_node',
@@ -270,10 +343,12 @@ distribution_node <- R6Class (
     distribution_name = 'no distribution',
     discrete = NA,
     target = NULL,
+    user_node = NULL,
+    bounds = c(-Inf, Inf),
     truncation = NULL,
     parameters = list(),
 
-    initialize = function (name = 'no distribution', dim = NULL, discrete = FALSE) {
+    initialize = function (name = 'no distribution', dim = NULL, truncation = NULL, discrete = FALSE) {
 
       super$initialize(dim)
 
@@ -282,8 +357,25 @@ distribution_node <- R6Class (
       self$discrete <- discrete
 
       # initialize the target values of this distribution
-      self$add_target(self$create_target())
+      self$add_target(self$create_target(truncation))
 
+      # if there's a truncation, it's different from the bounds, and it's a truncatable distribution, set the truncation
+      if (!is.null(truncation) &
+          !identical(truncation, self$bounds) &
+          !is.null(self$tf_cdf_function)) {
+
+        self$truncation <- truncation
+
+      }
+
+      # set the target as the user node (user-facing representation) by default
+      self$user_node <- self$target
+
+    },
+
+    # create a target variable node (unconstrained by default)
+    create_target = function (truncation) {
+      vble(truncation, dim = self$dim)
     },
 
     # create target node, add as a child, and give it this distribution
@@ -326,11 +418,16 @@ distribution_node <- R6Class (
 
     },
 
+    # which node to use af the *tf* target (overwritten by some distributions)
+    get_tf_target_node = function () {
+      self$target
+    },
+
     tf_log_density = function (dag) {
 
       # fetch inputs
-
-      tf_target <- get(dag$tf_name(self$target),
+      tf_target_node <- self$get_tf_target_node()
+      tf_target <- get(dag$tf_name(tf_target_node),
                        envir = dag$tf_environment)
       tf_parameters <- self$tf_fetch_parameters(dag)
 
@@ -367,12 +464,12 @@ distribution_node <- R6Class (
       lower <- self$truncation[1]
       upper <- self$truncation[2]
 
-      if (lower == -Inf) {
+      if (lower == self$bounds[1]) {
 
         # if only upper is constrained, just need the cdf at the upper
         offset <- self$tf_log_cdf_function(fl(upper), parameters)
 
-      } else if (upper == Inf) {
+      } else if (upper == self$bounds[2]) {
 
         # if only lower is constrained, get the log of the integral above it
         offset <- tf$log(fl(1) - self$tf_cdf_function(fl(lower), parameters))

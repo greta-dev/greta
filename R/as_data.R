@@ -1,5 +1,5 @@
 #' @name as_data
-#' @title Declare R Objects as Data
+#' @title convert other objects to greta arrays
 #' @description define an object in an R session as a data greta array for use
 #'   as data in a greta model.
 #' @param x an R object that can be coerced to a greta_array (see details).

@@ -1,27 +1,19 @@
-# syntax definitions
-
 #' @name distribution
-#' @aliases distribution likelihood
-#' @title Define a Distribution Over a greta Array
-#' @description \code{distribution} links observed data, variables, and other
-#'   greta arrays to probability distributions. For example a model likelhood
-#'   can be set by using \code{distribution} on some observed data.
-#'   \code{likelihood} is an alias for \code{distribution}. It is deprecated and
-#'   will be removed in version 0.2.
+#' @aliases distribution
+#' @title define a distribution over data
+
+#' @description \code{distribution} defines probability distributions over
+#'   observed data, e.g. to set a model likelihood.
 #'
-#' @param greta_array a greta array. For the assignment method it must be a
-#'   greta array that doesn't already have a probability distribution.
+#' @param greta_array a data greta array. For the assignment method it must not
+#'   already have a probability distribution assigned
 #'
 #' @param value a greta array with a distribution (see
-#'   \code{\link{greta-distributions}})
+#'   \code{\link{distributions}})
 #'
 #' @details The extract method returns the greta array if it has a distribution,
-#'   or \code{NULL} if it doesn't. It has now real function, but is included for
+#'   or \code{NULL} if it doesn't. It has no real use-case, but is included for
 #'   completeness
-#'
-#'   \code{distribution} can also be used to create truncated distributions, by
-#'   first defining a greta array with constraints (the truncation) and then
-#'   defining the distribution on that greta array. See below for an example.
 #'
 #' @export
 #' @examples
@@ -31,16 +23,14 @@
 #' # observed data and mean parameter to be estimated
 #' # (explicitly coerce data to a greta array so we can refer to it later)
 #' y = as_data(rnorm(5, 0, 3))
-#' mu = variable()
+#'
+#' mu = uniform(-3, 3)
+#'
 #' # define the distribution over y (the model likelihood)
 #' distribution(y) = normal(mu, 1)
 #'
 #' # get the distribution over y
 #' distribution(y)
-#'
-#' # define a truncated-positive standard normal random variable
-#' tn = variable(lower = 0)
-#' distribution(tn) = normal(0, 1)
 #'
 `distribution<-` <- function (greta_array, value) {
 
@@ -52,17 +42,23 @@
 
   # only for greta arrays without distributions
   if (!is.null(greta_array$node$distribution)) {
-    stop ('left hand side already has a distribution assigned',
+    stop ("left hand side already has a distribution assigned",
           call. = FALSE)
   }
 
-  # can only assign with greta arrays
+  # only for data greta arrays
+  if (node_type(greta_array$node) != 'data') {
+    stop ("distributions can only be assigned to data greta arrays",
+          call. = FALSE)
+  }
+
+  # can only assign with greta arrays ...
   if (!is.greta_array(value)) {
-    stop ('right hand side must be a greta array',
+    stop ("right hand side must be a greta array",
           call. = FALSE)
   }
 
-  # that have distributions
+  # ... that have distributions
   distribution_node <- value$node$distribution
 
   if (!inherits(distribution_node, 'distribution_node')) {
@@ -91,28 +87,6 @@
   # assign the new node as the distribution's target
   # also adds distribution_node as this node's distribution
   distribution_node$replace_target(greta_array$node)
-
-  # if the greta_array was a variable, check its constraints as truncation
-  if (inherits(greta_array$node, 'variable_node')) {
-
-    truncated <- greta_array$node$lower != -Inf |
-      greta_array$node$upper != Inf
-
-    if (truncated) {
-
-      # check the distribution can handle truncation
-      if (is.null(distribution_node$tf_cdf_function)) {
-        stop(distribution_node$distribution_name,
-             ' distribution cannot be truncated',
-             call. = FALSE)
-      } else {
-        distribution_node$truncation <- c(greta_array$node$lower,
-                                          greta_array$node$upper)
-      }
-
-    }
-
-  }
 
   # return greta_array (pre-conversion to a greta array)
   greta_array_tmp
@@ -144,7 +118,3 @@ distribution <- function (greta_array) {
   distrib
 
 }
-
-#' @rdname distribution
-#' @export
-`likelihood<-` <- `distribution<-`

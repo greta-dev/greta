@@ -2,26 +2,34 @@ context('miscellaneous methods')
 
 test_that('check_tf_version works', {
 
+  skip_if_not(check_tf_version())
+
   # record the true version and forge an old version
   true_version <- tf$`__version__`
   tf$`__version__` <- "0.9.0"
 
   # expected text
-  expected_message <-
-    paste0("\n\n  greta requires TensorFlow version 1.0.0 or higher, but you ",
-           "have version 0.9.0\n  You can write models, but not sample from ",
-           "them.\n  See https://www.tensorflow.org/install for installation ",
-           "instructions.\n\n")
+  expected_message <- "you have version 0.9.0"
 
-  expect_error(greta:::check_tf_version('error'),
+  expect_error(check_tf_version('error'),
                expected_message)
-  expect_warning(greta:::check_tf_version('warn'),
+  expect_warning(check_tf_version('warn'),
                  expected_message)
-  expect_message(greta:::check_tf_version('message'),
+  expect_message(check_tf_version('message'),
                  expected_message)
 
   # reset the true version
   tf$`__version__` <- true_version
+
+  # forge a missing installation
+  expected_message <- "isn't installed"
+
+  with_mock(
+    `reticulate::py_module_available` = function(x) {FALSE},
+    expect_error(check_tf_version('error'), expected_message),
+    expect_warning(check_tf_version('warn'), expected_message),
+    expect_message(check_tf_version('message'), expected_message)
+  )
 
 })
 
@@ -32,6 +40,8 @@ test_that('.onLoad runs', {
 })
 
 test_that('tensorflow coercion works', {
+
+  skip_if_not(check_tf_version())
 
   float <- greta:::tf_as_float(1)
   integer <- greta:::tf_as_integer(1)
@@ -62,6 +72,8 @@ test_that('all_greta_arrays works', {
 
 test_that('greta_model objects print', {
 
+  skip_if_not(check_tf_version())
+
   m <- model(normal(0, 1))
   message <- capture.output(print(m))
   expect_equal(message, 'greta model')
@@ -70,6 +82,7 @@ test_that('greta_model objects print', {
 
 test_that('define and mcmc error informatively', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   x <- as_data(randn(10))
@@ -138,39 +151,9 @@ test_that('check_dims errors informatively', {
 
 })
 
-test_that('rejected mcmc proposals', {
-
-  source('helpers.R')
-
-  # set up for numerical rejection of initial location
-  x <- rnorm(10000, 1e6, 1)
-  z = normal(-1e6, 1e-6)
-  distribution(x) = normal(z, 1e6)
-  m <- model(z)
-
-  with_mock(
-    `greta:::create_progress_bar` = mock_create_progress_bar,
-    m <- model(z),
-    out <- capture_output(mcmc(m, n_samples = 1, warmup = 0)),
-    expect_match(out, '100% bad')
-  )
-
-  # bad initial values
-  expect_error(mcmc(m, n_samples = 1, warmup = 0, initial_values = 1e20),
-               'could not be evaluated at these initial values')
-
-  # reallybad proposals
-  x <- rnorm(100000, 1e12, 1)
-  z = normal(-1e12, 1e-12)
-  distribution(x) = normal(z, 1e-12)
-  m <- model(z)
-  expect_error(mcmc(m, n_samples = 1, warmup = 0),
-               'Could not find reasonable starting values after 10 attempts')
-
-})
-
 test_that('disjoint graphs are checked', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   # if the target nodes aren't related, they sould be checked separately
@@ -195,6 +178,7 @@ test_that('disjoint graphs are checked', {
 
 test_that("plotting models doesn't error", {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a = uniform(0, 1)
@@ -205,9 +189,9 @@ test_that("plotting models doesn't error", {
 
 })
 
-
 test_that("structures work correctly", {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- ones(2, 2)
@@ -220,67 +204,22 @@ test_that("structures work correctly", {
 
 })
 
-test_that('mcmc works with verbosity and warmup', {
-
-  x <- rnorm(10)
-  z = normal(0, 1)
-  distribution(x) = normal(z, 1)
-  m <- model(z)
-  mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE)
-
-})
-
-test_that('progress bar gives a range of messages', {
+test_that("cleanly() handles TF errors nicely", {
 
   source('helpers.R')
 
-  # 1/101 should be <1%
-  with_mock(
-    `greta:::create_progress_bar` = mock_create_progress_bar,
-    `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(101)),
-    expect_match(out, '<1% bad')
-  )
+  inversion_stop <- function ()
+    stop ("this non-invertible thing is not invertible")
 
-  # 1/50 should be 50%
-  with_mock(
-    `greta:::create_progress_bar` = mock_create_progress_bar,
-    `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(50)),
-    expect_match(out, '2% bad')
-  )
+  cholesky_stop <- function ()
+    stop ("Cholesky decomposition was not successful")
 
-  # 1/1 should be 100%
-  with_mock(
-    `greta:::create_progress_bar` = mock_create_progress_bar,
-    `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(1)),
-    expect_match(out, '100% bad')
-  )
+  other_stop <- function ()
+    stop ("Fetchez la vache!")
 
-})
-
-
-test_that('stashed_samples works', {
-
-  source('helpers.R')
-
-  # set up model
-  a <- normal(0, 1)
-  m <- model(a)
-
-  draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE)
-
-  # with a completed sample, this should be NULL
-  ans <- stashed_samples()
-  expect_null(ans)
-
-  # mock up a stash
-  stash <- greta:::greta_stash
-  assign('trace_stash', as.matrix(rnorm(17)), envir = stash)
-
-  # should convert to an mcmc.list
-  ans <- stashed_samples()
-  expect_s3_class(ans, 'mcmc.list')
+  expect_equal(cleanly(inversion_stop()), NA)
+  expect_equal(cleanly(cholesky_stop()), NA)
+  expect_error(cleanly(other_stop()),
+               "greta hit a tensorflow error:")
 
 })

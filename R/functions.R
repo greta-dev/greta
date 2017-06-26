@@ -1,10 +1,10 @@
-#' @name greta-functions
+#' @name functions
 #'
-#' @title R functions that work for greta arrays
+#' @title functions for greta arrays
 #'
 #' @description This is a list of functions in base R that are currently
-#'   implemented to transform greta arrays Also see \link{greta-operators} and
-#'   \link{greta-transforms}.
+#'   implemented to transform greta arrays. Also see \link{operators} and
+#'   \link{transforms}.
 #'
 #' @section Usage: \preformatted{
 #'
@@ -70,8 +70,8 @@
 #'   converted into a greta array.
 #'
 #'   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
-#'   can only be either 1 or 2), and for subtraction, addition, division and
-#'   multiplication.
+#'   can only be either 1 or 2), and only for subtraction, addition, division
+#'   and multiplication.
 #'
 #' @examples
 #' x = as_data(matrix(1:9, nrow = 3, ncol = 3))
@@ -216,7 +216,7 @@ chol.greta_array <- function (x, ...) {
   op("chol", x, dimfun = dimfun, tf_operation = 'tf_chol')
 }
 
-#' @rdname greta-overloaded
+#' @rdname overloaded
 #' @export
 diag <- function (x = 1, nrow, ncol)
   UseMethod('diag', x)
@@ -415,7 +415,7 @@ tf_sweep <- function (x, STATS, MARGIN, FUN) {
 
 }
 
-#' @rdname greta-overloaded
+#' @rdname overloaded
 #' @export
 sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
   UseMethod('sweep', x)

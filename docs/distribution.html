@@ -11,7 +11,7 @@
 
 
 
-<title>Define a Distribution Over a greta Array</title>
+<title>define a distribution over data</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,7 +335,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Define a Distribution Over a greta Array</h1>
+<h1 class="title toc-ignore">define a distribution over data</h1>
 
 </div>
 
@@ -344,35 +344,30 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-<code>distribution</code> links observed data, variables, and other greta arrays to probability distributions. For example a model likelhood can be set by using <code>distribution</code> on some observed data. <code>likelihood</code> is an alias for <code>distribution</code>. It is deprecated and will be removed in version 0.2.
+<code>distribution</code> defines probability distributions over observed data, e.g. to set a model likelihood.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
 <pre class="r"><span class='fu'>distribution</span>(<span class='no'>greta_array</span>) <span class='kw'>&lt;-</span> <span class='no'>value</span>
 
-<span class='fu'>distribution</span>(<span class='no'>greta_array</span>)
-
-<span class='fu'>likelihood</span>(<span class='no'>greta_array</span>) <span class='kw'>&lt;-</span> <span class='no'>value</span> </pre>
+<span class='fu'>distribution</span>(<span class='no'>greta_array</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
 <code>greta_array</code>
 <p>
-a greta array. For the assignment method it must be a greta array that doesn’t already have a probability distribution.
+a data greta array. For the assignment method it must not already have a probability distribution assigned
 </p>
 <code>value</code>
 <p>
-a greta array with a distribution (see <code><a href='greta-distributions.html'>greta-distributions</a></code>)
+a greta array with a distribution (see <code><a href='distributions.html'>distributions</a></code>)
 </p>
 <h2 class="hasAnchor" id="details">
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-The extract method returns the greta array if it has a distribution, or <code>NULL</code> if it doesn’t. It has now real function, but is included for completeness
-</p>
-<p>
-<code>distribution</code> can also be used to create truncated distributions, by first defining a greta array with constraints (the truncation) and then defining the distribution on that greta array. See below for an example.
+The extract method returns the greta array if it has a distribution, or <code>NULL</code> if it doesn’t. It has no real use-case, but is included for completeness
 </p>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
@@ -383,16 +378,14 @@ The extract method returns the greta array if it has a distribution, or <code>NU
 <span class='co'># observed data and mean parameter to be estimated</span>
 <span class='co'># (explicitly coerce data to a greta array so we can refer to it later)</span>
 <span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>rnorm</span>(<span class='fl'>5</span>, <span class='fl'>0</span>, <span class='fl'>3</span>))
-<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='variable.html'>variable</a></span>()
+
+<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>uniform</a></span>(-<span class='fl'>3</span>, <span class='fl'>3</span>)
+
 <span class='co'># define the distribution over y (the model likelihood)</span>
-<span class='fu'>distribution</span>(<span class='no'>y</span>) <span class='kw'>=</span> <span class='fu'><a href='greta-distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='fl'>1</span>)
+<span class='fu'>distribution</span>(<span class='no'>y</span>) <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='fl'>1</span>)
 
 <span class='co'># get the distribution over y</span>
-<span class='fu'>distribution</span>(<span class='no'>y</span>)
-
-<span class='co'># define a truncated-positive standard normal random variable</span>
-<span class='no'>tn</span> <span class='kw'>=</span> <span class='fu'><a href='variable.html'>variable</a></span>(<span class='kw'>lower</span> <span class='kw'>=</span> <span class='fl'>0</span>)
-<span class='fu'>distribution</span>(<span class='no'>tn</span>) <span class='kw'>=</span> <span class='fu'><a href='greta-distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>)</pre>
+<span class='fu'>distribution</span>(<span class='no'>y</span>)</pre>
 
 
 

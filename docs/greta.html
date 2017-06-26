@@ -11,7 +11,7 @@
 
 
 
-<title>greta: Probabilistic Modelling with TensorFlow</title>
+<title>greta: simple and scalable statistical modelling in R</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,7 +335,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">greta: Probabilistic Modelling with TensorFlow</h1>
+<h1 class="title toc-ignore">greta: simple and scalable statistical modelling in R</h1>
 
 </div>
 
@@ -344,13 +344,13 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-greta lets you write probabilistic models interactively in native R code, then sample from them efficiently using Hamiltonian Monte Carlo.
+greta lets you write statistical models interactively in native R code, then sample from them efficiently using Hamiltonian Monte Carlo.
 </p>
 <p>
-The computational heavy lifting is done by TensorFlow, Google’s automatic differentiation library. greta is particularly fast where the model contains lots of linear algebra, and greta models can be easily set up to run across CPUs or GPUs just by installing the relevant version of TensorFlow.
+The computational heavy lifting is done by TensorFlow, Google’s automatic differentiation library. So greta is particularly fast where the model contains lots of linear algebra, and greta models can be run across CPU clusters or on GPUs.
 </p>
 <p>
-See the example below for the general set up of a greta model, and <a href='greta-distributions.html'>greta-distributions</a>, <a href='greta-operators.html'>greta-operators</a>, <a href='greta-functions.html'>greta-functions</a>, <a href='greta-transforms.html'>greta-transforms</a> and <a href='greta-structures.html'>greta-structures</a> for details of the currently implemented syntax and how to combine them into models
+See the simple example below, and take a look at the <a href = 'https://goldingn.github.io/greta'>greta website</a> for more information including <a href = 'https://goldingn.github.io/greta/get_started.html'>tutorials</a> and <a href = 'https://goldingn.github.io/greta/example_models.html'>examples</a>.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
@@ -359,18 +359,20 @@ See the example below for the general set up of a greta model, and <a href='gret
 <a class="anchor" href="#examples"></a>Examples
 </h2>
 <pre class="r">
-<span class='co'># define a simple model</span>
-<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='variable.html'>variable</a></span>()
-<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='greta-distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
-<span class='no'>x</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>10</span>)
-<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>=</span> <span class='fu'><a href='greta-distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='co'># a simple Bayesian regression model for the iris data</span>
 
-<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='greta-model.html'>model</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='co'># priors</span>
+<span class='no'>int</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>5</span>)
+<span class='no'>coef</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
+<span class='no'>sd</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
 
-<span class='co'># and sample from it</span>
-<span class='no'>draws</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='greta-inference.html'>mcmc</a></span>(<span class='no'>m</span>,
-              <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-              <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>10</span>)</pre>
+<span class='co'># likelihood</span>
+<span class='no'>mean</span> <span class='kw'>&lt;-</span> <span class='no'>int</span> + <span class='no'>coef</span> * <span class='no'>iris</span>$<span class='no'>Petal.Length</span>
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>iris</span>$<span class='no'>Sepal.Length</span>) <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mean</span>, <span class='no'>sd</span>)
+
+<span class='co'># build and sample</span>
+<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>int</span>, <span class='no'>coef</span>, <span class='no'>sd</span>)
+<span class='no'>draws</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>100</span>)</pre>
 
 
 
