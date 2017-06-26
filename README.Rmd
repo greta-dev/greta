@@ -32,6 +32,7 @@ I would love to hear any feedback, bug reports or feature requests via the [issu
 [![codecov.io](https://codecov.io/github/goldingn/greta/coverage.svg?branch=master)](https://codecov.io/github/goldingn/greta?branch=master)
 [![cran version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![doi](https://zenodo.org/badge/73758247.svg)](https://zenodo.org/badge/latestdoi/73758247)
 ```{r bottom_banner, echo=FALSE, fig.width=14}
 knitr::include_graphics('README_files/bottom_banner.png')
 ```
