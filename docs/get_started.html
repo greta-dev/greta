@@ -402,7 +402,7 @@ devtools::install_github(&quot;goldingn/greta@dev&quot;)  # development version<
 [3,]  ?    ?    ?  </code></pre>
 <p>This allows us to create a wide range of models, like in the general-purpose modelling languages like BUGS and Stan. But unlike those languages we build greta models interactively in R so get feedback immediately if there’s a mistake like a misspelled variable name or if one of our greta arrays has the wrong shape.</p>
 <p>greta also lets us declare that a greta array follows a probability distribution, allowing us to train models using observed data, and to define prior distributions over our parameters, for Bayesian analyses.</p>
-<p>The rest of this vignette walks through an example of fitting a model using greta. If you’d like to see examples of some common models fitted in greta and with equivalent BUGS and Stan code, take a look at <a href="example_models.html">Example models</a>. If you’d like more technical details about how greta works under the hood, check out <a href="how_does_this_work.html">How does this work?</a>.</p>
+<p>The rest of this vignette walks through an example of fitting a model using greta. If you’d like to see examples of some common models fitted in greta and with equivalent BUGS and Stan code, take a look at <a href="example_models.html">Example models</a>. If you’d like more technical details about how greta works under the hood, check out <a href="technical_details.html">Technical details</a>.</p>
 <hr>
 </div>
 <div id="building-a-model" class="section level2">
@@ -534,7 +534,7 @@ sd = student(3, 0, 1, truncation = c(0, Inf))</code></pre>
 </div>
 <div id="variables-with-probability-distributions" class="section level4">
 <h4>variables with probability distributions</h4>
-<p>In our example script, when we created the variables <code>int</code>, <code>coef</code> and <code>sd</code>, we simultaneously stated the prior distributions for them using some of greta’s probability distribution functions. You can see a list of the currently available distributions in the <a href="https://goldingn.github.io/greta/greta-distributions.html"><code>?distributions</code></a> helpfile. Each of these distribution functions takes as arguments the distribution’s parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions arguments at their default value to create scalar greta arrays.</p>
+<p>In our example script, when we created the variables <code>int</code>, <code>coef</code> and <code>sd</code>, we simultaneously stated the prior distributions for them using some of greta’s probability distribution functions. You can see a list of the currently available distributions in the <a href="https://goldingn.github.io/greta/distributions.html"><code>?greta::distributions</code></a> helpfile. Each of these distribution functions takes as arguments the distribution’s parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions arguments at their default value to create scalar greta arrays.</p>
 <p>Both <code>int</code> and <code>coef</code> were given zero-mean normal distributions, which are a common choice of prior for unconstrained variables in Bayesian analyses. For the strictly positive parameter <code>sd</code>, we chose a slightly unconvential option, a positive-truncated (non-standard) student’s t distribution, which we create using greta’s built-in support for truncated distributions.</p>
 </div>
 <div id="variables-with-truncated-distributions" class="section level4">
@@ -566,7 +566,7 @@ sd = student(3, 0, 1, truncation = c(0, Inf))</code></pre>
 [4,]  ?  
 [5,]  ?  
 [6,]  ?  </code></pre>
-<p>greta arrays can be manipulated using R’s standard arithmetic, logical and relational operators; including <code>+</code>, <code>*</code> and many others. The <code>?`greta-operators`</code>) helpfile lists the operators that are implemeneted for greta arrays. You can also use a lot of common R functions for numeric data, such as <code>sum()</code>, <code>log()</code> and others. the available functions are listed in the <code>?`greta-functions`</code> helpfile. All of these mathematical manipulations of greta arrays produce ‘operation’ greta arrays.</p>
+<p>greta arrays can be manipulated using R’s standard arithmetic, logical and relational operators; including <code>+</code>, <code>*</code> and many others. The <a href="https://goldingn.github.io/greta/operators.html"><code>?greta::operators</code></a> helpfile lists the operators that are implemeneted for greta arrays. You can also use a lot of common R functions for numeric data, such as <code>sum()</code>, <code>log()</code> and others. the available functions are listed in the <a href="https://goldingn.github.io/greta/functions.html"><code>?greta::functions</code></a> helpfile. All of these mathematical manipulations of greta arrays produce ‘operation’ greta arrays.</p>
 <div id="extract-and-replace" class="section level4">
 <h4>Extract and replace</h4>
 <p>We can use R’s extract and replace syntax (using <code>[</code>) on greta arrays, just like with R’s vectors, matrices and arrays. E.g. to extract elements from <code>mean</code> we can do:</p>
@@ -637,7 +637,7 @@ atanh(z_greta)</code></pre>
 <img src="figures/full_graph.png" width="800" />
 </p>
 <p>The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; <code>x</code> and <code>y</code>), variables (large circles; <code>int</code>, <code>coef</code>, <code>sd</code>) or the results of operations (small circles; <code>mean</code>). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from. There are also nodes for greta arrays that were <em>implicitly defined</em> in our model. The data nodes (squares) with numbers are the parameters used to define the prior distributions, and there’s also an intermediate operation node (small circle), which was the result of multiplying <code>coef</code> and <code>x</code> (before adding <code>int</code> to create <code>mean</code>).</p>
-<p>Here’s a legend for the plot (it’s in the <code>?`greta-model`</code> helpfile too):</p>
+<p>Here’s a legend for the plot (it’s in the <a href="https://goldingn.github.io/greta/model.html"><code>?greta::model</code></a> helpfile too):</p>
 <p>
 <img src="figures/plotlegend.png" width="750" />
 </p>
