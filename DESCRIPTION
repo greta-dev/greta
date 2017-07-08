@@ -33,7 +33,6 @@ Collate:
     'transforms.R'
     'structures.R'
     'extract_replace_combine.R'
-    'dynamics_module.R'
     'dag_class.R'
     'greta_model_class.R'
     'progress_bar.R'
