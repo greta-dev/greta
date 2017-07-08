@@ -44,9 +44,9 @@ operation_node <- R6Class(
                            value = NULL) {
 
       # coerce all arguments to nodes, and remember the operation
-      dots <- lapply(list(...), to_node)
-      for(node in dots)
-        self$add_argument(node)
+      dots <- lapply(list(...), as.greta_array)
+      for (greta_array in dots)
+        self$add_argument(greta_array$node)
 
       # default to the same name for the op in R as in TF
       if (is.null(tf_operation))
@@ -56,12 +56,12 @@ operation_node <- R6Class(
       self$operation <- tf_operation
       self$operation_args <- operation_args
 
-      # work out the dimensions of the new node, if NULL assume an elementwise
+      # work out the dimensions of the new greta array, if NULL assume an elementwise
       # operation and get the largest number of each dimension, otherwise expect
       # a function to be passed which will calculate it from the provided list
       # of nodes arguments
       if (is.null(dimfun))
-        dim <- do.call(pmax, lapply(dots, member, 'dim'))
+        dim <- do.call(pmax, lapply(dots, dim))
       else
         dim <- dimfun(dots)
 

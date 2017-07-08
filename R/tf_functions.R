@@ -10,7 +10,7 @@ tf_as_float <- function (x)
 
 # and to integer
 tf_as_integer <- function (x)
-  tf$cast(x, tf_int())
+  tf$cast(x, tf$int32)
 
 tf_lchoose <- function (n, k) {
   one <- fl(1)

@@ -127,10 +127,10 @@ NULL
 `%*%` <- function (x, y) {
 
   # if y is a greta array, coerce x before dispatch
-  if (is.greta_array(y) & !is.greta_array(x))
+  if (inherits(y, "greta_array") & !inherits(x, "greta_array"))
     as_data(x) %*% y
   else
-    UseMethod('%*%', x)
+    UseMethod ("%*%", x)
 
 }
 

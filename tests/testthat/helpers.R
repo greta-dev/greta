@@ -6,10 +6,10 @@ set.seed(2017-05-01)
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
 
-  if (is.node(x))
+  if (inherits(x, "node"))
     x <- as.greta_array(x)
 
-  if (is.greta_array(x)) {
+  if (inherits(x, "greta_array")) {
     dag <- dag_class$new(list(x))
     x$node$define_tf(dag)
     x <- get(dag$tf_name(x$node),

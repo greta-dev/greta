@@ -2,11 +2,23 @@
 
 # create a named list
 as_module <- function (...) {
+
+  dots <- list(...)
+  names <- names(dots)
+
+  # guess names from call
   cl <- match.call()
   nm <- as.character(as.list(cl)[-1])
-  dots <- list(...)
-  names(dots) <- nm
+
+  if (is.null(names)) {
+    names(dots) <- nm
+  } else {
+    blank_names <- names == ""
+    names(dots[blank_names]) <- nm[blank_names]
+  }
+
   dots
+
 }
 
 # helper for *apply statements on R6 objects
@@ -169,7 +181,8 @@ all_greta_arrays <- function (env = parent.frame(),
 
   # find the greta arrays
   is_greta_array <- vapply(all_objects,
-                           is.greta_array,
+                           inherits,
+                           "greta_array",
                            FUN.VALUE = FALSE)
   all_arrays <- all_objects[is_greta_array]
 
@@ -307,15 +320,11 @@ valid_parameters <- function(dag, initial_values) {
   all(is.finite(c(ld, grad)))
 }
 
-# access the float and int type options
+# access the float type option
 tf_float <- function ()
   options()$greta_tf_float
 
-# access the float and int type options
-tf_int <- function ()
-  tf$int32
-
-# cast a scalar as a float or integer of the correct type in TF code
+# cast an R scalar as a float of the correct type in TF code
 fl <- function(x) tf$constant(x, dtype = tf_float())
 
 # evaluate expressions (dag density or gradient), capturing numerical errors

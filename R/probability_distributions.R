@@ -9,8 +9,8 @@ uniform_distribution <- R6Class (
 
     initialize = function (min, max, dim) {
 
-      if (is.greta_array(min) | is.greta_array(max))
-        stop ('min and max must be fixed, they cannot be another greta array')
+      if (inherits(min, "greta_array") | inherits(max, "greta_array"))
+        stop ("min and max must be fixed, they cannot be another greta array")
 
       good_types <- is.numeric(min) && length(min) == 1 &
         is.numeric(max) && length(max) == 1
@@ -1127,7 +1127,7 @@ lkj_correlation_distribution <- R6Class (
 
       }
 
-      if (!is.greta_array(eta)) {
+      if (!inherits(eta, "greta_array")) {
 
         if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
           stop ("eta must be a positive scalar value, or a scalar greta array",
