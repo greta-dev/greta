@@ -17,6 +17,8 @@ Depends:
     R (>= 3.0)
 Collate:
     'package.R'
+    'utils.R'
+    'tf_functions.R'
     'overloaded.R'
     'node_class.R'
     'node_types.R'
@@ -25,7 +27,6 @@ Collate:
     'unknowns_class.R'
     'greta_array_class.R'
     'as_data.R'
-    'utils.R'
     'distribution.R'
     'operators.R'
     'functions.R'
