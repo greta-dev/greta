@@ -48,10 +48,6 @@ operation_node <- R6Class(
       for (greta_array in dots)
         self$add_argument(greta_array$node)
 
-      # default to the same name for the op in R as in TF
-      if (is.null(tf_operation))
-        tf_operation <- paste0('tf$', operation)
-
       self$operation_name <- operation
       self$operation <- tf_operation
       self$operation_args <- operation_args
@@ -86,9 +82,6 @@ operation_node <- R6Class(
 
     tf = function (dag) {
 
-      # get the function
-      fun <- eval(parse(text = self$operation))
-
       # fetch the tensors for the environment
       arg_tf_names <- lapply(self$children, dag$tf_name)
       args <- lapply(arg_tf_names, get, envir = dag$tf_environment)
@@ -98,7 +91,7 @@ operation_node <- R6Class(
         args <- c(args, self$operation_args)
 
       # apply function on tensors
-      node <- do.call(fun, args)
+      node <- do.call(self$operation, args)
 
       # assign it in the environment
       assign(dag$tf_name(self), node, envir = dag$tf_environment)
@@ -221,7 +214,7 @@ variable_node <- R6Class (
 
       } else if (self$constraint == 'both') {
 
-        y <- tf_ilogit(x) * fl(upper - lower) + fl(lower)
+        y <- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
 
       } else if (self$constraint == 'low') {
 
@@ -252,7 +245,7 @@ variable_node <- R6Class (
 
       ljac_logistic <- function (x) {
         lrange <- log(self$upper - self$lower)
-        tf$reduce_sum(x - fl(2) * tf_log1pe(x) + lrange)
+        tf$reduce_sum(x - fl(2) * tf$nn$softplus(x) + lrange)
       }
 
       ljac_corr_mat <- function (x) {

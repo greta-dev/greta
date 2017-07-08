@@ -253,8 +253,8 @@ flat_to_chol <- function (x, dim, correl = FALSE) {
     dim
 
   fun <- ifelse(correl,
-                "tf_flat_to_chol_correl",
-                "tf_flat_to_chol")
+                tf_flat_to_chol_correl,
+                tf_flat_to_chol)
 
   # sum the elements
   op('flat_to_chol',
@@ -273,7 +273,7 @@ chol_to_symmetric <- function (L) {
   # sum the elements
   op('chol_to_symmetric',
      L,
-     tf_operation = 'tf_chol_to_symmetric',
+     tf_operation = tf_chol_to_symmetric,
      dimfun = dimfun)
 
 }
@@ -348,7 +348,7 @@ cleanly <- function (expr) {
     if (any(numerical_errors))
       res <- NA
     else
-      stop("greta hit a tensorflow error:\n\n", res, call. = FALSE)
+      stop ("greta hit a tensorflow error:\n\n", res, call. = FALSE)
 
   }
 

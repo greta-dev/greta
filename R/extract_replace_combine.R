@@ -204,7 +204,7 @@ tf_replace <- function (x, replacement, index, dims) {
      operation_args = list(nelem = nelem,
                            index = index,
                            dims_out = dims_out),
-     tf_operation = 'tf_extract',
+     tf_operation = tf_extract,
      value = values)
 
 }
@@ -214,7 +214,7 @@ tf_replace <- function (x, replacement, index, dims) {
 `[<-.greta_array` <- function(x, ..., value) {
 
   if (inherits(x$node, 'variable_node')) {
-    stop('cannot replace values in a variable greta array',
+    stop ('cannot replace values in a variable greta array',
          call. = FALSE)
   }
 
@@ -281,7 +281,7 @@ tf_replace <- function (x, replacement, index, dims) {
      operation_args = list(index = index,
                            dims = dims),
      value = new_value,
-     tf_operation = 'tf_replace')
+     tf_operation = tf_replace)
 
 }
 
@@ -321,7 +321,7 @@ cbind.greta_array <- function (...) {
   }
 
   op('cbind', ..., dimfun = dimfun,
-     tf_operation = 'tf_cbind')
+     tf_operation = tf_cbind)
 
 }
 
@@ -350,7 +350,7 @@ rbind.greta_array <- function (...) {
   }
 
   op('rbind', ..., dimfun = dimfun,
-     tf_operation = 'tf_rbind')
+     tf_operation = tf_rbind)
 
 }
 
@@ -373,7 +373,7 @@ c.greta_array <- function (...) {
           c(operation = 'rbind',
             arrays,
             dimfun = dimfun,
-            tf_operation = 'tf_rbind'))
+            tf_operation = tf_rbind))
 
 }
 

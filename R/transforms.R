@@ -34,12 +34,8 @@
 NULL
 
 # inverse link functions in tensorflow
-tf_iprobit <- function (x) {
+tf_iprobit <- function (x)
   (tf$erf(x / fl(sqrt(2))) + fl(1)) / fl(2)
-}
-
-tf_ilogit <- function (x)
-  tf$nn$sigmoid(x)
 
 tf_icloglog <- function (x)
   fl(1) - tf$exp(-tf$exp(x))
@@ -47,35 +43,27 @@ tf_icloglog <- function (x)
 tf_icauchit <- function (x)
   fl(1 / pi) * tf$atan(x) + fl(0.5)
 
-tf_log1pe <- function (x)
-  tf$nn$softplus(x)
-
 #' @rdname transforms
 #' @export
 iprobit <- function (x)
-  op('iprobit', x,
-     tf_operation = 'tf_iprobit')
+  op('iprobit', x, tf_operation = tf_iprobit)
 
 #' @rdname transforms
 #' @export
 ilogit <- function (x)
-  op('ilogit', x,
-     tf_operation = 'tf_ilogit')
+  op('ilogit', x, tf_operation = tf$nn$sigmoid)
 
 #' @rdname transforms
 #' @export
 icloglog <- function (x)
-  op('icloglog', x,
-     tf_operation = 'tf_icloglog')
+  op('icloglog', x, tf_operation = tf_icloglog)
 
 #' @rdname transforms
 #' @export
 icauchit <- function (x)
-  op('icauchit', x,
-     tf_operation = 'tf_icauchit')
+  op('icauchit', x, tf_operation = tf_icauchit)
 
 #' @rdname transforms
 #' @export
 log1pe <- function (x)
-  op('log1pe', x,
-     tf_operation = 'tf_log1pe')
+  op('log1pe', x, tf_operation = tf$nn$softplus)
