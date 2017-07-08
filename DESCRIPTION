@@ -39,6 +39,7 @@ Collate:
     'inference.R'
     'samplers.R'
     'install_tensorflow.R'
+    'internals.R'
 Imports:
     R6,
     tensorflow,

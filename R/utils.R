@@ -1,5 +1,14 @@
 # utility functions
 
+# create a named list
+as_module <- function (...) {
+  cl <- match.call()
+  nm <- as.character(as.list(cl)[-1])
+  dots <- list(...)
+  names(dots) <- nm
+  dots
+}
+
 # helper for *apply statements on R6 objects
 member <- function(x, method)
   eval(parse(text = paste0('x$', method)))
