@@ -20,9 +20,9 @@ test_that('as_data coerces correctly', {
   ga_int_vec <- as_data(int_vec)
   ga_num_vec <- as_data(num_vec)
 
-  expect_true(greta:::is.greta_array(ga_log_vec))
-  expect_true(greta:::is.greta_array(ga_int_vec))
-  expect_true(greta:::is.greta_array(ga_num_vec))
+  expect_true(is.greta_array(ga_log_vec))
+  expect_true(is.greta_array(ga_int_vec))
+  expect_true(is.greta_array(ga_num_vec))
 
   expect_identical(c(length(log_vec), 1L), dim(ga_log_vec))
   expect_identical(c(length(int_vec), 1L), dim(ga_int_vec))
@@ -41,9 +41,9 @@ test_that('as_data coerces correctly', {
   ga_int_mat <- as_data(int_mat)
   ga_num_mat <- as_data(num_mat)
 
-  expect_true(greta:::is.greta_array(ga_log_mat))
-  expect_true(greta:::is.greta_array(ga_int_mat))
-  expect_true(greta:::is.greta_array(ga_num_mat))
+  expect_true(is.greta_array(ga_log_mat))
+  expect_true(is.greta_array(ga_int_mat))
+  expect_true(is.greta_array(ga_num_mat))
 
   expect_identical(dim(log_mat), dim(ga_log_mat))
   expect_identical(dim(int_mat), dim(ga_int_mat))
@@ -62,9 +62,9 @@ test_that('as_data coerces correctly', {
   ga_int_arr <- as_data(int_arr)
   ga_num_arr <- as_data(num_arr)
 
-  expect_true(greta:::is.greta_array(ga_log_arr))
-  expect_true(greta:::is.greta_array(ga_int_arr))
-  expect_true(greta:::is.greta_array(ga_num_arr))
+  expect_true(is.greta_array(ga_log_arr))
+  expect_true(is.greta_array(ga_int_arr))
+  expect_true(is.greta_array(ga_num_arr))
 
   expect_identical(dim(log_arr), dim(ga_log_arr))
   expect_identical(dim(int_arr), dim(ga_int_arr))
@@ -87,9 +87,9 @@ test_that('as_data coerces correctly', {
   ga_int_df <- as_data(int_df)
   ga_num_df <- as_data(num_df)
 
-  expect_true(greta:::is.greta_array(ga_log_df))
-  expect_true(greta:::is.greta_array(ga_int_df))
-  expect_true(greta:::is.greta_array(ga_num_df))
+  expect_true(is.greta_array(ga_log_df))
+  expect_true(is.greta_array(ga_int_df))
+  expect_true(is.greta_array(ga_num_df))
 
   expect_identical(dim(log_df), dim(ga_log_df))
   expect_identical(dim(int_df), dim(ga_int_df))

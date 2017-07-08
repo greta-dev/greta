@@ -84,27 +84,10 @@ operation_node <- R6Class(
 
     },
 
-    switch_op = function (op) {
-      # look up the operation in this table to see if there is a more stable
-      # name
-      op_list <- list("`*`" = 'tf$multiply')
-
-      idx <- match(op, names(op_list))
-
-      # only change if there is a swap to make
-      if (!is.na(idx))
-        op <- op_list[[idx]]
-
-      op
-    },
-
     tf = function (dag) {
 
-      # switch out the op for non-sugared variety
-      op <- self$switch_op(self$operation)
-
       # get the function
-      fun <- eval(parse(text = op))
+      fun <- eval(parse(text = self$operation))
 
       # fetch the tensors for the environment
       arg_tf_names <- lapply(self$children, dag$tf_name)

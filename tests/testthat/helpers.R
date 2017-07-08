@@ -20,6 +20,9 @@ grab <- function (x) {
 
 }
 
+is.greta_array <- function(x)
+  inherits(x, "greta_array")
+
 set_distribution <- function(dist, data) {
   # fix the value of dist
   distrib <- dist$node$distribution

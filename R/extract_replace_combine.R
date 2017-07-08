@@ -301,7 +301,7 @@ cbind.greta_array <- function (...) {
 
   dimfun <- function (elem_list) {
 
-    dims <- lapply(elem_list, function(x) x$dim)
+    dims <- lapply(elem_list, dim)
     ndims <- vapply(dims, length, FUN.VALUE = 1)
     if (!all(ndims == 2))
       stop ('all greta arrays must be two-dimensional')
@@ -330,7 +330,7 @@ rbind.greta_array <- function (...) {
 
   dimfun <- function (elem_list) {
 
-    dims <- lapply(elem_list, function(x) x$dim)
+    dims <- lapply(elem_list, dim)
     ndims <- vapply(dims, length, FUN.VALUE = 1)
     if (!all(ndims == 2))
       stop ('all greta arrays must be two-dimensional')
