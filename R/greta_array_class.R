@@ -88,7 +88,8 @@ as.greta_array.numeric <- function (x) {
 # node method (only one that does anything)
 #' @export
 as.greta_array.node <- function (x, ...) {
-  ga <- list(node = x)
+  ga <- new.env()
+  ga$node <- x
   class(ga) <- c('greta_array', 'array')
   ga
 }
