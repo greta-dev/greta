@@ -2,7 +2,7 @@
 
 # coerce to greta_array class
 as.greta_array <- function(x, ...)
-  UseMethod('as.greta_array', x)
+  UseMethod ("as.greta_array", x)
 
 # safely handle self-coersion
 #' @export
@@ -20,14 +20,14 @@ as.greta_array.logical <- function (x) {
 # otherwise
 #' @export
 as.greta_array.data.frame <- function (x) {
-  classes <- vapply(x, class, '')
-  valid <- classes %in% c('numeric', 'integer', 'logical')
+  classes <- vapply(x, class, "")
+  valid <- classes %in% c("numeric", "integer", "logical")
 
   if (!all(valid)) {
     invalid_types <- unique(classes[!valid])
-    stop ('cannot coerce a dataframe to a greta_array unless all columns are ',
-          'numeric, integer or logical. This dataframe had columns of type: ',
-          paste(invalid_types, collapse = ', '),
+    stop ("cannot coerce a dataframe to a greta_array unless all columns are ",
+          "numeric, integer or logical. This dataframe had columns of type: ",
+          paste(invalid_types, collapse = ", "),
           call. = FALSE)
   }
 
@@ -44,8 +44,8 @@ as.greta_array.matrix <- function (x) {
     if (is.logical(x))
       x[] <- as.numeric(x[])
     else
-      stop ('cannot convert a matrix to a greta_array unless it is numeric, ',
-            'integer or logical. This matrix had type: ',
+      stop ("cannot convert a matrix to a greta_array unless it is numeric, ",
+            "integer or logical. This matrix had type: ",
             class(as.vector(x)),
             call. = FALSE)
 
@@ -64,8 +64,8 @@ as.greta_array.array <- function (x) {
     if (is.logical(x))
       x[] <- as.numeric(x[])
     else
-      stop ('cannot convert an array to a greta_array unless it is numeric, ',
-            'integer or logical. This array had type: ',
+      stop ("cannot convert an array to a greta_array unless it is numeric, ",
+            "integer or logical. This array had type: ",
             class(as.vector(x)),
             call. = FALSE)
 
@@ -79,8 +79,7 @@ as.greta_array.array <- function (x) {
 #' @export
 as.greta_array.numeric <- function (x) {
   if (any(!is.finite(x)))
-    stop ("cannot convert objects with missing or infinite values ",
-          "to greta_arrays",
+    stop ("cannot convert objects with missing or infinite values to greta_arrays",
           call. = FALSE)
   as.greta_array.node(data_node$new(x))
 }
@@ -90,16 +89,16 @@ as.greta_array.numeric <- function (x) {
 as.greta_array.node <- function (x, ...) {
   ga <- new.env()
   ga$node <- x
-  class(ga) <- c('greta_array', 'array')
+  class(ga) <- c("greta_array", "array")
   ga
 }
 
 # otherwise error
 #' @export
 as.greta_array.default <- function (x) {
-  stop ('objects of class ',
-        paste(class(x), collapse = ' or '),
-        ' cannot be coerced to greta arrays',
+  stop ("objects of class ",
+        paste(class(x), collapse = " or "),
+        " cannot be coerced to greta arrays",
         call. = FALSE)
 }
 
@@ -107,7 +106,7 @@ as.greta_array.default <- function (x) {
 #' @export
 print.greta_array <- function (x, ...) {
 
-  text <- sprintf('greta array (%s)\n\n',
+  text <- sprintf("greta array (%s)\n\n",
                   x$node$description())
 
   cat(text)
@@ -125,7 +124,7 @@ summary.greta_array <- function (object, ...) {
   if (len == 1) {
     shape_text <- "with 1 element"
   } else {
-    dim_text <- paste(dim(object), collapse = ' x ')
+    dim_text <- paste(dim(object), collapse = " x ")
     shape_text <- sprintf("with %i elements (%s)",
                           len,
                           dim_text)
@@ -140,13 +139,13 @@ summary.greta_array <- function (object, ...) {
     distribution_text <- ""
   }
 
-  cat(type_text, shape_text, distribution_text, '\n')
+  cat(type_text, shape_text, distribution_text, "\n")
 
   values <- object$node$value()
-  if (inherits(values, 'unknowns')) {
-    cat('\n  (values currently unknown)')
+  if (inherits(values, "unknowns")) {
+    cat("\n  (values currently unknown)")
   } else {
-    cat('\n')
+    cat("\n")
     print(summary(values))
   }
 
