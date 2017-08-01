@@ -223,3 +223,25 @@ test_that("cleanly() handles TF errors nicely", {
                "greta hit a tensorflow error:")
 
 })
+
+test_that("double precision works for all jacobians", {
+
+  none = normal(0, 1)
+  model(none, precision = "double")
+
+  high = normal(0, 1, truncation = c(-1, Inf))
+  model(high, precision = "double")
+
+  low = normal(0, 1, truncation = c(-Inf, 1))
+  model(low, precision = "double")
+
+  both = normal(0, 1, truncation = c(-1, 1))
+  model(both, precision = "double")
+
+  correlation_matrix = lkj_correlation(1)
+  model(correlation_matrix, precision = "double")
+
+  covariance_matrix = wishart(3, diag(2))
+  model(covariance_matrix, precision = "double")
+
+})
