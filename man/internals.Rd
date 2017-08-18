@@ -14,9 +14,9 @@ This help file lists the available internals, but they are not fully
 documented and are subject to change and deprecation without warning (care
 will be taken not to break dependent CRAN packages). For an overview of how
 greta works internally, see the \emph{technical details} vignette. See
-\url{https://github.com/goldingn} for examples of R packages implementing
-greta modules and new samplers, and using greta as a backend. Please get in
-contact via GitHub if the behaviour of any of these functions is unclear.
+\url{https://github.com/greta-dev} for examples of R packages extending and
+building on greta. Please get in contact via GitHub if the behaviour of any
+of these functions is unclear.
 
 The methods are broadly structured into three sections:
 
@@ -33,58 +33,18 @@ representing specific distributions, these inherit from
 \code{distribution_node}. \code{.internals$utils$op()},
 \code{.internals$utils$vble()}, and \code{.internals$utils$distrib()} are
 utility functions to create operation, variable and distribution nodes.
+
+You can use \code{attach()} to put a sublist in the search path. E.g.
+\code{attach(.internals$utils)} will enable you to call \code{op()},
+\code{vble()} and \code{distrib()} directly
 }
 \section{Usage}{
  \preformatted{
- # functions operating on TensorFlow objects
- .internals$tf_functions$tf_as_logical(x)
-                         tf_as_float(x)
-                         tf_as_integer(x)
-                         tf_lchoose(n, k)
-                         tf_lbeta(a, b)
-                         tf_flat_to_chol(x, dims)
-                         tf_flat_to_chol_correl(x, dims)
-                         tf_chol_to_symmetric(U)
-
- # utility functions
- .internals$utils$vble(truncation, dim = 1)
-                  op(...)
-                  distrib(distribution, ...)
-
- # R6 node object generators
- .internals$node_class$node
-                       distribution_node
-                       data_node
-                       variable_node
-                       operation_node
-                       distributions$uniform_distribution
-                                     normal_distribution
-                                     lognormal_distribution
-                                     bernoulli_distribution
-                                     binomial_distribution
-                                     beta_binomial_distribution
-                                     negative_binomial_distribution
-                                     hypergeometric_distribution
-                                     poisson_distribution
-                                     gamma_distribution
-                                     inverse_gamma_distribution
-                                     weibull_distribution
-                                     exponential_distribution
-                                     pareto_distribution
-                                     student_distribution
-                                     laplace_distribution
-                                     beta_distribution
-                                     cauchy_distribution
-                                     logistic_distribution
-                                     chi_squared_distribution
-                                     f_distribution
-                                     multivariate_normal_distribution
-                                     wishart_distribution
-                                     lkj_correlation_distribution
-                                     multinomial_distribution
-                                     categorical_distribution
-                                     dirichlet_distribution
-                                     dirichlet_multinomial_distribution
+ .internals$tf_functions                 # functions on tensors
+            utils                        # simplifying code
+            nodes$helpers                # node creation wrappers
+                  node_classes           # R6 node classes
+                  distribution_classes   # R6 distribution classes
 }
 }
 

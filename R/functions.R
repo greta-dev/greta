@@ -196,10 +196,6 @@ t.greta_array <- function (x) {
   op("transpose", x, dimfun = dimfun, tf_operation = tf$transpose)
 }
 
-# transpose and get the right matrix, like R
-tf_chol <- function (x)
-  tf$transpose(tf$cholesky(x))
-
 #' @export
 chol.greta_array <- function (x, ...) {
 
@@ -397,23 +393,6 @@ max.greta_array <- function (..., na.rm = TRUE) {
 
 }
 
-
-# tensorflow version of sweep, based on broadcasting of tf ops
-tf_sweep <- function (x, STATS, MARGIN, FUN) {
-
-  # if the second margin, transpose before and after
-  if (MARGIN == 2)
-    x <- tf$transpose(x)
-
-  # apply the function rowwise
-  result <- do.call(FUN, list(x, STATS))
-
-  if (MARGIN == 2)
-    result <- tf$transpose(result)
-
-  result
-
-}
 
 #' @rdname overloaded
 #' @export

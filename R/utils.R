@@ -1,7 +1,7 @@
 # utility functions
 
 # create a named list
-as_module <- function (...) {
+as_module <- function (..., sort = TRUE) {
 
   dots <- list(...)
   names <- names(dots)
@@ -16,6 +16,9 @@ as_module <- function (...) {
     blank_names <- names == ""
     names(dots[blank_names]) <- nm[blank_names]
   }
+
+  if (sort)
+    dots <- dots[order(names(dots))]
 
   dots
 

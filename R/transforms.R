@@ -33,16 +33,6 @@
 #'  y <- log1pe(x)
 NULL
 
-# inverse link functions in tensorflow
-tf_iprobit <- function (x)
-  (tf$erf(x / fl(sqrt(2))) + fl(1)) / fl(2)
-
-tf_icloglog <- function (x)
-  fl(1) - tf$exp(-tf$exp(x))
-
-tf_icauchit <- function (x)
-  fl(1 / pi) * tf$atan(x) + fl(0.5)
-
 #' @rdname transforms
 #' @export
 iprobit <- function (x)

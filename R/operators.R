@@ -167,17 +167,6 @@ NULL
 }
 
 # logical operators
-
-# TF logical functions on numerics
-tf_not <- function(x)
-  tf_as_float(!tf_as_logical(x))
-
-tf_and <- function(x, y)
-  tf_as_float(tf_as_logical(x) & tf_as_logical(y))
-
-tf_or <- function(x, y)
-  tf_as_float(tf_as_logical(x) | tf_as_logical(y))
-
 #' @export
 `!.greta_array` <- function (e1) {
   op("not", e1,
@@ -199,25 +188,6 @@ tf_or <- function(x, y)
 }
 
 # relational operators
-
-tf_lt <- function(x, y)
-  tf_as_float(x < y)
-
-tf_gt <- function(x, y)
-  tf_as_float(x > y)
-
-tf_lte <- function(x, y)
-  tf_as_float(x <= y)
-
-tf_gte <- function(x, y)
-  tf_as_float(x >= y)
-
-tf_eq <- function(x, y)
-  tf_as_float(x == y)
-
-tf_neq <- function(x, y)
-  tf_as_float(x != y)
-
 
 #' @export
 `<.greta_array` <- function (e1, e2) {
