@@ -3,6 +3,9 @@
 # set the seed before running tests
 set.seed(2017-05-01)
 
+expect_ok <- function (expr)
+  expect_error(expr, NA)
+
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
 
