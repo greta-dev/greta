@@ -1,14 +1,14 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.2.0
-Date: 2017-06-26
+Version: 0.2.1
+Date: 2017-08-19
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
 Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://goldingn.github.io/greta> for more information).
 License: Apache License 2.0
-URL: https://github.com/goldingn/greta
-BugReports: https://github.com/goldingn/greta/issues
+URL: https://github.com/greta-dev/greta
+BugReports: https://github.com/greta-dev/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
     TensorFlow (>= 1.0.0; https://www.tensorflow.org/)
 Encoding: UTF-8
@@ -17,6 +17,8 @@ Depends:
     R (>= 3.0)
 Collate:
     'package.R'
+    'utils.R'
+    'tf_functions.R'
     'overloaded.R'
     'node_class.R'
     'node_types.R'
@@ -25,20 +27,19 @@ Collate:
     'unknowns_class.R'
     'greta_array_class.R'
     'as_data.R'
-    'utils.R'
     'distribution.R'
     'operators.R'
     'functions.R'
     'transforms.R'
     'structures.R'
     'extract_replace_combine.R'
-    'dynamics_module.R'
     'dag_class.R'
     'greta_model_class.R'
     'progress_bar.R'
     'inference.R'
     'samplers.R'
     'install_tensorflow.R'
+    'internals.R'
 Imports:
     R6,
     tensorflow,

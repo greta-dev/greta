@@ -35,7 +35,7 @@ test_that('check_tf_version works', {
 
 test_that('.onLoad runs', {
 
-  greta:::.onLoad()
+  expect_ok( greta:::.onLoad() )
 
 })
 
@@ -185,7 +185,7 @@ test_that("plotting models doesn't error", {
 
   m <- model(a)
 
-  plot(m)
+  expect_ok( plot(m) )
 
 })
 
@@ -221,5 +221,44 @@ test_that("cleanly() handles TF errors nicely", {
   expect_equal(cleanly(cholesky_stop()), NA)
   expect_error(cleanly(other_stop()),
                "greta hit a tensorflow error:")
+
+})
+
+test_that("double precision works for all jacobians", {
+
+  none = normal(0, 1)
+  expect_ok( model(none, precision = "double") )
+
+  high = normal(0, 1, truncation = c(-1, Inf))
+  expect_ok( model(high, precision = "double") )
+
+  low = normal(0, 1, truncation = c(-Inf, 1))
+  expect_ok( model(low, precision = "double") )
+
+  both = normal(0, 1, truncation = c(-1, 1))
+  expect_ok( model(both, precision = "double") )
+
+  correlation_matrix = lkj_correlation(1)
+  expect_ok( model(correlation_matrix, precision = "double") )
+
+  covariance_matrix = wishart(3, diag(2))
+  expect_ok( model(covariance_matrix, precision = "double") )
+
+})
+
+test_that("module works", {
+
+  mod <- module(mean,
+                functions = module(sum,
+                                   exp,
+                                   log))
+
+  # returns a list
+  expect_true(inherits(mod, "list"))
+  expect_true(inherits(mod$functions, "list"))
+
+  # all elements named, and reordered
+  expect_identical(names(mod), c("functions", "mean"))
+  expect_identical(names(mod$functions), c("exp", "log", "sum"))
 
 })

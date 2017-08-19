@@ -17,13 +17,13 @@ body{
 
 I'd be really keen to hear about any bugs you find. Or anything else that doesn't work as you expected it to. I'd also like to know if there are features you'd like added to greta.
 
-You report bugs or request features by leaving a message on the [GitHub issue tracker](https://github.com/goldingn/greta/issues)
+You report bugs or request features by leaving a message on the [GitHub issue tracker](https://github.com/greta-dev/greta/issues)
 
 ###contributing code
 
 greta is an open source project, and I would welcome contributions from anyone with time to spare!
 
-The [issues tracker](https://github.com/goldingn/greta/issues) already lists a number of extensions I have planned. If you think you can help implement one of those (or incorporate your own idea), please leave a message there first so we can discuss how to do it, and so that we aren't duplicating effort.
+The [issues tracker](https://github.com/greta-dev/greta/issues) already lists a number of extensions I have planned. If you think you can help implement one of those (or incorporate your own idea), please leave a message there first so we can discuss how to do it, and so that we aren't duplicating effort.
 
 ###modules
 

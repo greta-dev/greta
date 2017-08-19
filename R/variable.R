@@ -40,7 +40,7 @@
 #'
 variable <- function (lower = -Inf, upper = Inf, dim = 1) {
 
-  if (is.greta_array(lower) | is.greta_array(upper))
+  if (inherits(lower, "greta_array") | inherits(upper, "greta_array"))
     stop ('lower and upper must be fixed, they cannot be another greta array')
 
   node <- variable_node$new(lower, upper, dim)

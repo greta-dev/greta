@@ -44,24 +44,20 @@ operation_node <- R6Class(
                            value = NULL) {
 
       # coerce all arguments to nodes, and remember the operation
-      dots <- lapply(list(...), to_node)
-      for(node in dots)
-        self$add_argument(node)
-
-      # default to the same name for the op in R as in TF
-      if (is.null(tf_operation))
-        tf_operation <- paste0('tf$', operation)
+      dots <- lapply(list(...), as.greta_array)
+      for (greta_array in dots)
+        self$add_argument(greta_array$node)
 
       self$operation_name <- operation
       self$operation <- tf_operation
       self$operation_args <- operation_args
 
-      # work out the dimensions of the new node, if NULL assume an elementwise
+      # work out the dimensions of the new greta array, if NULL assume an elementwise
       # operation and get the largest number of each dimension, otherwise expect
       # a function to be passed which will calculate it from the provided list
       # of nodes arguments
       if (is.null(dimfun))
-        dim <- do.call(pmax, lapply(dots, member, 'dim'))
+        dim <- do.call(pmax, lapply(dots, dim))
       else
         dim <- dimfun(dots)
 
@@ -84,27 +80,7 @@ operation_node <- R6Class(
 
     },
 
-    switch_op = function (op) {
-      # look up the operation in this table to see if there is a more stable
-      # name
-      op_list <- list("`*`" = 'tf$multiply')
-
-      idx <- match(op, names(op_list))
-
-      # only change if there is a swap to make
-      if (!is.na(idx))
-        op <- op_list[[idx]]
-
-      op
-    },
-
     tf = function (dag) {
-
-      # switch out the op for non-sugared variety
-      op <- self$switch_op(self$operation)
-
-      # get the function
-      fun <- eval(parse(text = op))
 
       # fetch the tensors for the environment
       arg_tf_names <- lapply(self$children, dag$tf_name)
@@ -115,7 +91,7 @@ operation_node <- R6Class(
         args <- c(args, self$operation_args)
 
       # apply function on tensors
-      node <- do.call(fun, args)
+      node <- do.call(self$operation, args)
 
       # assign it in the environment
       assign(dag$tf_name(self), node, envir = dag$tf_environment)
@@ -123,11 +99,6 @@ operation_node <- R6Class(
     }
   )
 )
-
-# shorthand to speed up op definitions
-op <- function (...) {
-  as.greta_array(operation_node$new(...))
-}
 
 variable_node <- R6Class (
   'variable_node',
@@ -238,7 +209,7 @@ variable_node <- R6Class (
 
       } else if (self$constraint == 'both') {
 
-        y <- tf_ilogit(x) * fl(upper - lower) + fl(lower)
+        y <- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
 
       } else if (self$constraint == 'low') {
 
@@ -269,7 +240,7 @@ variable_node <- R6Class (
 
       ljac_logistic <- function (x) {
         lrange <- log(self$upper - self$lower)
-        tf$reduce_sum(x - fl(2) * tf_log1pe(x) + lrange)
+        tf$reduce_sum(x - fl(2) * tf$nn$softplus(x) + lrange)
       }
 
       ljac_corr_mat <- function (x) {
@@ -279,7 +250,7 @@ variable_node <- R6Class (
         K <- (1 + sqrt(8 * n + 1)) / 2
 
         # draw the rest of the owl
-        l1mz2 <- tf$log(1 - tf$square(tf$tanh(x)))
+        l1mz2 <- tf$log(fl(1) - tf$square(tf$tanh(x)))
         i <- rep(1:(K - 1), (K - 1):1)
         powers <- tf$constant(K - i - 1,
                               dtype = tf_float(),
@@ -326,15 +297,6 @@ variable_node <- R6Class (
 
   )
 )
-
-# helper function to create a variable node
-# by default, make x (the node
-# containing the value) a free parameter of the correct dimension
-vble = function (truncation, dim = 1) {
-  if (is.null(truncation)) truncation <- c(-Inf, Inf)
-  variable_node$new(lower = truncation[1], upper = truncation[2], dim = dim)
-}
-
 
 distribution_node <- R6Class (
   'distribution_node',
@@ -515,3 +477,45 @@ distribution_node <- R6Class (
   )
 )
 
+# modules for export via .internals
+node_classes_module <- module(node,
+                              distribution_node,
+                              data_node,
+                              variable_node,
+                              operation_node)
+
+
+# shorthand for distribution parameter constructors
+distrib <- function (distribution, ...) {
+
+  # get and initialize the distribution, with a default value node
+  constructor <- get(paste0(distribution, '_distribution'))
+  distrib <- constructor$new(...)
+
+  # return the user-facing representation of the node as a greta array
+  value <- distrib$user_node
+  as.greta_array(value)
+
+}
+
+# shorthand to speed up op definitions
+op <- function (...)
+  as.greta_array(operation_node$new(...))
+
+# helper function to create a variable node
+# by default, make x (the node
+# containing the value) a free parameter of the correct dimension
+vble <- function (truncation, dim = 1) {
+
+  if (is.null(truncation))
+    truncation <- c(-Inf, Inf)
+
+  variable_node$new(lower = truncation[1],
+                    upper = truncation[2],
+                    dim = dim)
+
+}
+
+constructors_module <- module(distrib,
+                              op,
+                              vble)
