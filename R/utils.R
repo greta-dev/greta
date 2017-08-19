@@ -14,7 +14,8 @@ module <- function (..., sort = TRUE) {
     names(dots) <- nm
   } else {
     blank_names <- names == ""
-    names(dots[blank_names]) <- nm[blank_names]
+    names[blank_names] <- nm[blank_names]
+    names(dots) <- names
   }
 
   if (sort)
