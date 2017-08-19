@@ -3,16 +3,11 @@
 \name{model}
 \alias{model}
 \alias{model}
-\alias{model}
-\alias{define_model}
 \alias{print.greta_model}
 \alias{plot.greta_model}
 \title{greta model objects}
 \usage{
 model(..., precision = c("single", "double"), n_cores = NULL,
-  compile = TRUE)
-
-define_model(..., precision = c("single", "double"), n_cores = NULL,
   compile = TRUE)
 
 \method{print}{greta_model}(x, ...)
@@ -61,9 +56,6 @@ Create a \code{greta_model} object representing a statistical
   statistical model by finding all of the other greta arrays on which they
   depend, or which depend on them. Further arguments to \code{model} can be used to configure the tensorflow
   graph representing the model, to tweak performance.
-
-\code{define_model} is an alias for \code{model}. It is deprecated,
-  and will be removed in version 0.2.
 
 The plot method produces a visual representation of the defined
   model. It uses the \code{DiagrammeR} package, which must be installed

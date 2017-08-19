@@ -15,10 +15,10 @@ greta lets you write statistical models interactively in native
   clusters or on GPUs.
 
   See the simple example below, and take a look at the
-  \href{https://goldingn.github.io/greta}{greta website} for more information
+  \href{https://greta-dev.github.io/greta}{greta website} for more information
   including
-  \href{https://goldingn.github.io/greta/get_started.html}{tutorials} and
-  \href{https://goldingn.github.io/greta/example_models.html}{examples}.
+  \href{https://greta-dev.github.io/greta/get_started.html}{tutorials} and
+  \href{https://greta-dev.github.io/greta/example_models.html}{examples}.
 }
 \examples{
 \dontrun{

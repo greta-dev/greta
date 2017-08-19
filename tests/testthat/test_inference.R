@@ -88,7 +88,7 @@ test_that('mcmc works with verbosity and warmup', {
   z = normal(0, 1)
   distribution(x) = normal(z, 1)
   m <- model(z)
-  mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE)
+  expect_ok( mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE) )
 
 })
 

@@ -101,10 +101,6 @@ as.greta_array.default <- function (x) {
         call. = FALSE)
 }
 
-# checking class status
-is.greta_array <- function (x)
-  inherits(x, 'greta_array')
-
 # print method
 #' @export
 print.greta_array <- function (x, ...) {
