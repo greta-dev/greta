@@ -172,12 +172,6 @@ model <- function (...,
 
 }
 
-#' @name model
-#'
-#' @details \code{define_model} is an alias for \code{model}. It is deprecated,
-#'   and will be removed in version 0.2.
-define_model <- model
-
 # register generic method to coerce objects to a greta model
 as.greta_model <- function(x, ...)
   UseMethod('as.greta_model', x)
