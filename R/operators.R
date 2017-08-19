@@ -64,7 +64,7 @@ NULL
 `+.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("add", e1, e2,
-     tf_operation = '`+`')
+     tf_operation = tf$add)
 }
 
 #' @export
@@ -72,11 +72,11 @@ NULL
   # handle unary minus
   if (missing(e2)) {
     op("minus", e1,
-       tf_operation = '`-`')
+       tf_operation = tf$negative)
   } else {
     check_dims(e1, e2)
     op("subtract", e1, e2,
-     tf_operation = '`-`')
+     tf_operation = tf$subtract)
   }
 }
 
@@ -84,35 +84,35 @@ NULL
 `*.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("multiply", e1, e2,
-     tf_operation = '`*`')
+     tf_operation = tf$multiply)
 }
 
 #' @export
 `/.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("divide", e1, e2,
-     tf_operation = '`/`')
+     tf_operation = tf$truediv)
 }
 
 #' @export
 `^.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("power", e1, e2,
-     tf_operation = 'tf$pow')
+     tf_operation = tf$pow)
 }
 
 #' @export
 `%%.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`modulo`", e1, e2,
-     tf_operation = '`%%`')
+     tf_operation = tf$mod)
 }
 
 #' @export
 `%/%.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("`integer divide`", e1, e2,
-     tf_operation = '`%/%`')
+     tf_operation = tf$floordiv)
 }
 
 # overload %*% as an S3 generic
@@ -127,10 +127,10 @@ NULL
 `%*%` <- function (x, y) {
 
   # if y is a greta array, coerce x before dispatch
-  if (is.greta_array(y) & !is.greta_array(x))
+  if (inherits(y, "greta_array") & !inherits(x, "greta_array"))
     as_data(x) %*% y
   else
-    UseMethod('%*%', x)
+    UseMethod ("%*%", x)
 
 }
 
@@ -162,101 +162,71 @@ NULL
   }
 
   op("matrix multiply", x, y, dimfun = dimfun,
-     tf_operation = 'tf$matmul')
+     tf_operation = tf$matmul)
 
 }
 
 # logical operators
-
-# TF logical functions on numerics
-tf_not <- function(x)
-  tf_as_float(!tf_as_logical(x))
-
-tf_and <- function(x, y)
-  tf_as_float(tf_as_logical(x) & tf_as_logical(y))
-
-tf_or <- function(x, y)
-  tf_as_float(tf_as_logical(x) | tf_as_logical(y))
-
 #' @export
 `!.greta_array` <- function (e1) {
   op("not", e1,
-     tf_operation = 'tf_not')
+     tf_operation = tf_not)
 }
 
 #' @export
 `&.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("and", e1, e2,
-     tf_operation = 'tf_and')
+     tf_operation = tf_and)
 }
 
 #' @export
 `|.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("or", e1, e2,
-     tf_operation = 'tf_or')
+     tf_operation = tf_or)
 }
 
 # relational operators
-
-tf_lt <- function(x, y)
-  tf_as_float(x < y)
-
-tf_gt <- function(x, y)
-  tf_as_float(x > y)
-
-tf_lte <- function(x, y)
-  tf_as_float(x <= y)
-
-tf_gte <- function(x, y)
-  tf_as_float(x >= y)
-
-tf_eq <- function(x, y)
-  tf_as_float(x == y)
-
-tf_neq <- function(x, y)
-  tf_as_float(x != y)
-
 
 #' @export
 `<.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("less", e1, e2,
-     tf_operation = 'tf_lt')
+     tf_operation = tf_lt)
 }
 
 #' @export
 `>.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("greater", e1, e2,
-     tf_operation = 'tf_gt')
+     tf_operation = tf_gt)
 }
 
 #' @export
 `<=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("less/equal", e1, e2,
-     tf_operation = 'tf_lte')
+     tf_operation = tf_lte)
 }
 
 #' @export
 `>=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("greater/equal", e1, e2,
-     tf_operation = 'tf_gte')
+     tf_operation = tf_gte)
 }
 
 #' @export
 `==.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("equal", e1, e2,
-     tf_operation = 'tf_eq')
+     tf_operation = tf_eq)
 }
 
 #' @export
 `!=.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
   op("not equal", e1, e2,
-     tf_operation = 'tf_neq')
+     tf_operation = tf_neq)
 }

@@ -475,69 +475,69 @@ test_that('scalar-valued distributions can be defined in models', {
   # variable (need to define a likelihood)
   a = variable()
   distribution(x) = normal(a, 1)
-  model(a)
+  expect_ok( model(a) )
 
   # univariate discrete distributions
   distribution(y) = bernoulli(p)
-  model(p)
+  expect_ok( model(p) )
 
   distribution(y) = binomial(1, p)
-  model(p)
+  expect_ok( model(p) )
 
   distribution(y) = beta_binomial(1, p, 0.2)
-  model(p)
+  expect_ok( model(p) )
 
   distribution(y) = negative_binomial(1, p)
-  model(p)
+  expect_ok( model(p) )
 
   distribution(y) = hypergeometric(5, 5, p)
-  model(p)
+  expect_ok( model(p) )
 
   distribution(y) = poisson(p)
-  model(p)
+  expect_ok( model(p))
 
   # multivariate discrete distributions
   y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
   distribution(y) = multinomial(4, p)
-  model(p)
+  expect_ok( model(p) )
 
   y <- extraDistr::rmnom(1, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
   distribution(y) = categorical(p)
-  model(p)
+  expect_ok( model(p) )
 
   y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
   distribution(y) = dirichlet_multinomial(4, alpha)
-  model(alpha)
+  expect_ok( model(alpha) )
 
   # univariate continuous distributions
-  model(normal(-2, 3))
-  model(student(5.6, -2, 2.3))
-  model(laplace(-1.2, 1.1))
-  model(cauchy(-1.2, 1.1))
-  model(logistic(-1.2, 1.1))
+  expect_ok( model(normal(-2, 3)) )
+  expect_ok( model(student(5.6, -2, 2.3)) )
+  expect_ok( model(laplace(-1.2, 1.1)) )
+  expect_ok( model(cauchy(-1.2, 1.1)) )
+  expect_ok( model(logistic(-1.2, 1.1)) )
 
-  model(lognormal(1.2, 0.2))
-  model(gamma(0.9, 1.3))
-  model(exponential(6.3))
-  model(beta(6.3, 5.9))
-  model(inverse_gamma(0.9, 1.3))
-  model(weibull(2, 1.1))
-  model(pareto(2.4, 1.5))
-  model(chi_squared(4.3))
-  model(f(24.3, 2.4))
+  expect_ok( model(lognormal(1.2, 0.2)) )
+  expect_ok( model(gamma(0.9, 1.3)) )
+  expect_ok( model(exponential(6.3)) )
+  expect_ok( model(beta(6.3, 5.9)) )
+  expect_ok( model(inverse_gamma(0.9, 1.3)) )
+  expect_ok( model(weibull(2, 1.1)) )
+  expect_ok( model(pareto(2.4, 1.5)) )
+  expect_ok( model(chi_squared(4.3)) )
+  expect_ok( model(f(24.3, 2.4)) )
 
-  model(uniform(-13, 2.4))
+  expect_ok( model(uniform(-13, 2.4)) )
 
   # multivariate continuous distributions
   sig <- MCMCpack::rwish(4, diag(3))
 
-  model(multivariate_normal(rnorm(3), sig))
-  model(wishart(4, sig))
-  model(lkj_correlation(5, dim = 3))
-  model(dirichlet(runif(3)))
+  expect_ok( model(multivariate_normal(rnorm(3), sig)) )
+  expect_ok( model(wishart(4, sig)) )
+  expect_ok( model(lkj_correlation(5, dim = 3)) )
+  expect_ok( model(dirichlet(runif(3))) )
 
 })
 
@@ -553,73 +553,73 @@ test_that('array-valued distributions can be defined in models', {
   # variable (need to define a likelihood)
   a <- variable(dim = dim)
   distribution(x) = normal(a, 1)
-  model(a)
+  expect_ok( model(a) )
 
   # univariate discrete distributions
   p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = bernoulli(p)
-  model(p)
+  expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = binomial(1, p)
-  model(p)
+  expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = beta_binomial(1, p, 0.2)
-  model(p)
+  expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = negative_binomial(1, p)
-  model(p)
+  expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = hypergeometric(10, 5, p)
-  model(p)
+  expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
   distribution(y) = poisson(p)
-  model(p)
+  expect_ok( model(p) )
 
   # multivariate discrete distributions
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
   distribution(y) = multinomial(4, p, dim = 5)
-  model(p)
+  expect_ok( model(p) )
 
   y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
   distribution(y) = categorical(p, dim = 5)
-  model(p)
+  expect_ok( model(p) )
 
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
   distribution(y) = dirichlet_multinomial(4, alpha, dim = 5)
-  model(alpha)
+  expect_ok( model(alpha) )
 
   # univariate continuous distributions
-  model(normal(-2, 3, dim = dim))
-  model(student(5.6, -2, 2.3, dim = dim))
-  model(laplace(-1.2, 1.1, dim = dim))
-  model(cauchy(-1.2, 1.1, dim = dim))
-  model(logistic(-1.2, 1.1, dim = dim))
+  expect_ok( model(normal(-2, 3, dim = dim)) )
+  expect_ok( model(student(5.6, -2, 2.3, dim = dim)) )
+  expect_ok( model(laplace(-1.2, 1.1, dim = dim)) )
+  expect_ok( model(cauchy(-1.2, 1.1, dim = dim)) )
+  expect_ok( model(logistic(-1.2, 1.1, dim = dim)) )
 
-  model(lognormal(1.2, 0.2, dim = dim))
-  model(gamma(0.9, 1.3, dim = dim))
-  model(exponential(6.3, dim = dim))
-  model(beta(6.3, 5.9, dim = dim))
-  model(uniform(-13, 2.4, dim = dim))
-  model(inverse_gamma(0.9, 1.3, dim = dim))
-  model(weibull(2, 1.1, dim = dim))
-  model(pareto(2.4, 1.5, dim = dim))
-  model(chi_squared(4.3, dim = dim))
-  model(f(24.3, 2.4, dim = dim))
+  expect_ok( model(lognormal(1.2, 0.2, dim = dim)) )
+  expect_ok( model(gamma(0.9, 1.3, dim = dim)) )
+  expect_ok( model(exponential(6.3, dim = dim)) )
+  expect_ok( model(beta(6.3, 5.9, dim = dim)) )
+  expect_ok( model(uniform(-13, 2.4, dim = dim)) )
+  expect_ok( model(inverse_gamma(0.9, 1.3, dim = dim)) )
+  expect_ok( model(weibull(2, 1.1, dim = dim)) )
+  expect_ok( model(pareto(2.4, 1.5, dim = dim)) )
+  expect_ok( model(chi_squared(4.3, dim = dim)) )
+  expect_ok( model(f(24.3, 2.4, dim = dim)) )
 
   # multivariate continuous distributions
   sig <- MCMCpack:::rwish(4, diag(3))
-  model(multivariate_normal(rnorm(3), sig, dim = dim[1]))
-  model(dirichlet(runif(3), dim = dim[1]))
-  model(wishart(4, sig))
-  model(lkj_correlation(3, dim = dim[1]))
+  expect_ok( model(multivariate_normal(rnorm(3), sig, dim = dim[1])) )
+  expect_ok( model(dirichlet(runif(3), dim = dim[1])) )
+  expect_ok( model(wishart(4, sig)) )
+  expect_ok( model(lkj_correlation(3, dim = dim[1])) )
 
 })
 
@@ -991,6 +991,6 @@ test_that('Wishart can use a choleskied Sigma', {
   sig <- lkj_correlation(3, dim = 4)
   w <- wishart(5, sig)
   m <- model(w)
-  draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE)
+  expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE) )
 
 })

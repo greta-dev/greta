@@ -3,13 +3,16 @@
 # set the seed before running tests
 set.seed(2017-05-01)
 
+expect_ok <- function (expr)
+  expect_error(expr, NA)
+
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
 
-  if (is.node(x))
+  if (inherits(x, "node"))
     x <- as.greta_array(x)
 
-  if (is.greta_array(x)) {
+  if (inherits(x, "greta_array")) {
     dag <- dag_class$new(list(x))
     x$node$define_tf(dag)
     x <- get(dag$tf_name(x$node),
@@ -19,6 +22,9 @@ grab <- function (x) {
   tf$Session()$run(x)
 
 }
+
+is.greta_array <- function(x)
+  inherits(x, "greta_array")
 
 set_distribution <- function(dist, data) {
   # fix the value of dist

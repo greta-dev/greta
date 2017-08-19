@@ -17,6 +17,8 @@ Depends:
     R (>= 3.0)
 Collate:
     'package.R'
+    'utils.R'
+    'tf_functions.R'
     'overloaded.R'
     'node_class.R'
     'node_types.R'
@@ -25,20 +27,19 @@ Collate:
     'unknowns_class.R'
     'greta_array_class.R'
     'as_data.R'
-    'utils.R'
     'distribution.R'
     'operators.R'
     'functions.R'
     'transforms.R'
     'structures.R'
     'extract_replace_combine.R'
-    'dynamics_module.R'
     'dag_class.R'
     'greta_model_class.R'
     'progress_bar.R'
     'inference.R'
     'samplers.R'
     'install_tensorflow.R'
+    'internals.R'
 Imports:
     R6,
     tensorflow,

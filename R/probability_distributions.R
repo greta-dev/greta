@@ -9,8 +9,8 @@ uniform_distribution <- R6Class (
 
     initialize = function (min, max, dim) {
 
-      if (is.greta_array(min) | is.greta_array(max))
-        stop ('min and max must be fixed, they cannot be another greta array')
+      if (inherits(min, "greta_array") | inherits(max, "greta_array"))
+        stop ("min and max must be fixed, they cannot be another greta array")
 
       good_types <- is.numeric(min) && length(min) == 1 &
         is.numeric(max) && length(max) == 1
@@ -1127,7 +1127,7 @@ lkj_correlation_distribution <- R6Class (
 
       }
 
-      if (!is.greta_array(eta)) {
+      if (!inherits(eta, "greta_array")) {
 
         if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
           stop ("eta must be a positive scalar value, or a scalar greta array",
@@ -1221,18 +1221,35 @@ lkj_correlation_distribution <- R6Class (
   )
 )
 
-# shorthand for distribution parameter constructors
-distrib <- function (distribution, ...) {
-
-  # get and initialize the distribution, with a default value node
-  constructor <- get(paste0(distribution, '_distribution'))
-  distrib <- constructor$new(...)
-
-  # return the user-facing representation of the node as a greta array
-  value <- distrib$user_node
-  as.greta_array(value)
-
-}
+# module for export via .internals
+distribution_classes_module <- module(uniform_distribution,
+                                      normal_distribution,
+                                      lognormal_distribution,
+                                      bernoulli_distribution,
+                                      binomial_distribution,
+                                      beta_binomial_distribution,
+                                      negative_binomial_distribution,
+                                      hypergeometric_distribution,
+                                      poisson_distribution,
+                                      gamma_distribution,
+                                      inverse_gamma_distribution,
+                                      weibull_distribution,
+                                      exponential_distribution,
+                                      pareto_distribution,
+                                      student_distribution,
+                                      laplace_distribution,
+                                      beta_distribution,
+                                      cauchy_distribution,
+                                      chi_squared_distribution,
+                                      logistic_distribution,
+                                      f_distribution,
+                                      multivariate_normal_distribution,
+                                      wishart_distribution,
+                                      lkj_correlation_distribution,
+                                      multinomial_distribution,
+                                      categorical_distribution,
+                                      dirichlet_distribution,
+                                      dirichlet_multinomial_distribution)
 
 # export constructors
 

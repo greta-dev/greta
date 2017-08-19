@@ -305,18 +305,18 @@ test_that('extract, replace, combine work in models', {
   a = normal(0, 1, dim = c(3, 4))
   a_sub <- a[1:2, 2:3]
   m_a <- model(a_sub)
-  draws_a <- mcmc(m_a, warmup = 3, n_samples = 3, verbose = FALSE)
+  expect_ok( draws_a <- mcmc(m_a, warmup = 3, n_samples = 3, verbose = FALSE) )
 
   # replace
   b <- ones(4, 3)
   b[, 2] <- normal(0, 1, dim = 4)
   m_b <- model(b)
-  draws_b <- mcmc(m_b, warmup = 3, n_samples = 3, verbose = FALSE)
+  expect_ok( draws_b <- mcmc(m_b, warmup = 3, n_samples = 3, verbose = FALSE) )
 
   # combine
   d <- c(normal(0, 1, dim = 2),
          lognormal(0, 1, dim = 3))
   m_d <- model(d)
-  draws_d <- mcmc(m_d, warmup = 3, n_samples = 3, verbose = FALSE)
+  expect_ok( draws_d <- mcmc(m_d, warmup = 3, n_samples = 3, verbose = FALSE) )
 
 })
