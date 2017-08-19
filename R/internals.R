@@ -2,87 +2,44 @@
 #' @aliases .internals
 #' @title internal greta methods
 #'
-#' @description a list of functions and R6 class objects that can be used to
+#' @description A list of functions and R6 class objects that can be used to
 #'   develop extensions to greta. Most users will not need to access these
 #'   methods, and it is not recommended to use them directly in model code.
 #'
 #' @section Usage: \preformatted{
-#'  .internals$tf_functions                 # functions on tensors
-#'             utils                        # simplifying code
-#'             nodes$helpers                # node creation wrappers
-#'                   node_classes           # R6 node classes
+#'  .internals$nodes$constructors           # node creation wrappers
 #'                   distribution_classes   # R6 distribution classes
+#'                   node_classes           # R6 node classes
+#'  .internals$samplers                     # sampler methods
+#'  .internals$tf_functions                 # functions on tensors
+#'  .internals$utils$checks                 # checking function inputs
+#'                   colours                # greta colour scheme
+#'                   dummy_arrays           # mocking up extract/replace
+#'                   misc                   # code simplification etc.
+#'                   samplers               # mcmc helpers
 #' }
 #'
 #' @details
 #'
 #' This help file lists the available internals, but they are not fully
-#' documented and are subject to change and deprecation without warning (care
-#' will be taken not to break dependent CRAN packages). For an overview of how
-#' greta works internally, see the \emph{technical details} vignette. See
+#' documented and are subject to change and deprecation without warning (though
+#' care will be taken not to break dependent packages on CRAN). For an overview
+#' of how greta works internally, see the \emph{technical details} vignette. See
 #' \url{https://github.com/greta-dev} for examples of R packages extending and
-#' building on greta. Please get in contact via GitHub if the behaviour of any
-#' of these functions is unclear.
+#' building on greta.
 #'
-#' The methods are broadly structured into three sections:
-#'
-#' \code{.internals$tf_functions} - functions for operating on TensorFlow's
-#' tensor objects. They are used by node objects to perform calculations.
-#'
-#' \code{.internals$utils} - miscellaneous functions
-#'
-#' \code{.internals$node_class} - R6 generators for the node objects. Their main
-#' method is \code{$new()}, which is used to create a new object of the class.
-#' \code{node} is the base class from which distribution, data, variable and
-#' operation nodes inherit. \code{distribution} contains generators for nodes
-#' representing specific distributions, these inherit from
-#' \code{distribution_node}. \code{.internals$utils$op()},
-#' \code{.internals$utils$vble()}, and \code{.internals$utils$distrib()} are
-#' utility functions to create operation, variable and distribution nodes.
+#' Please get in contact via GitHub if you want to develop an extension to
+#' greta and need more details of how to use these internal functions.
 #'
 #' You can use \code{attach()} to put a sublist in the search path. E.g.
-#' \code{attach(.internals$utils)} will enable you to call \code{op()},
-#' \code{vble()} and \code{distrib()} directly
+#' \code{attach(.internals$nodes$constructors)} will enable you to call
+#' \code{op()}, \code{vble()} and \code{distrib()} directly.
 NULL
 
 #' @export
-.internals <- as_module(tf_functions = tf_functions,
-                        utils = as_module(tf_float,
-                                          fl),
-                        samplers = as_module(dag_class),
-                        nodes = as_module(helpers = as_module(vble,
-                                                              op,
-                                                              distrib),
-                                          node_classes = as_module(node,
-                                                                   distribution_node,
-                                                                   data_node,
-                                                                   variable_node,
-                                                                   operation_node),
-                                          distribution_classes = as_module(uniform_distribution,
-                                                                           normal_distribution,
-                                                                           lognormal_distribution,
-                                                                           bernoulli_distribution,
-                                                                           binomial_distribution,
-                                                                           beta_binomial_distribution,
-                                                                           negative_binomial_distribution,
-                                                                           hypergeometric_distribution,
-                                                                           poisson_distribution,
-                                                                           gamma_distribution,
-                                                                           inverse_gamma_distribution,
-                                                                           weibull_distribution,
-                                                                           exponential_distribution,
-                                                                           pareto_distribution,
-                                                                           student_distribution,
-                                                                           laplace_distribution,
-                                                                           beta_distribution,
-                                                                           cauchy_distribution,
-                                                                           chi_squared_distribution,
-                                                                           logistic_distribution,
-                                                                           f_distribution,
-                                                                           multivariate_normal_distribution,
-                                                                           wishart_distribution,
-                                                                           lkj_correlation_distribution,
-                                                                           multinomial_distribution,
-                                                                           categorical_distribution,
-                                                                           dirichlet_distribution,
-                                                                           dirichlet_multinomial_distribution)))
+.internals <- module(nodes = module(constructors = constructors_module,
+                                    node_classes = node_classes_module,
+                                    distribution_classes = distribution_classes_module),
+                     samplers = module(dag_class),
+                     tf_functions = tf_functions_module,
+                     utils = utilities_module)

@@ -100,11 +100,6 @@ operation_node <- R6Class(
   )
 )
 
-# shorthand to speed up op definitions
-op <- function (...) {
-  as.greta_array(operation_node$new(...))
-}
-
 variable_node <- R6Class (
   'variable_node',
   inherit = node,
@@ -303,15 +298,6 @@ variable_node <- R6Class (
   )
 )
 
-# helper function to create a variable node
-# by default, make x (the node
-# containing the value) a free parameter of the correct dimension
-vble = function (truncation, dim = 1) {
-  if (is.null(truncation)) truncation <- c(-Inf, Inf)
-  variable_node$new(lower = truncation[1], upper = truncation[2], dim = dim)
-}
-
-
 distribution_node <- R6Class (
   'distribution_node',
   inherit = node,
@@ -491,3 +477,45 @@ distribution_node <- R6Class (
   )
 )
 
+# modules for export via .internals
+node_classes_module <- module(node,
+                              distribution_node,
+                              data_node,
+                              variable_node,
+                              operation_node)
+
+
+# shorthand for distribution parameter constructors
+distrib <- function (distribution, ...) {
+
+  # get and initialize the distribution, with a default value node
+  constructor <- get(paste0(distribution, '_distribution'))
+  distrib <- constructor$new(...)
+
+  # return the user-facing representation of the node as a greta array
+  value <- distrib$user_node
+  as.greta_array(value)
+
+}
+
+# shorthand to speed up op definitions
+op <- function (...)
+  as.greta_array(operation_node$new(...))
+
+# helper function to create a variable node
+# by default, make x (the node
+# containing the value) a free parameter of the correct dimension
+vble <- function (truncation, dim = 1) {
+
+  if (is.null(truncation))
+    truncation <- c(-Inf, Inf)
+
+  variable_node$new(lower = truncation[1],
+                    upper = truncation[2],
+                    dim = dim)
+
+}
+
+constructors_module <- module(distrib,
+                              op,
+                              vble)
