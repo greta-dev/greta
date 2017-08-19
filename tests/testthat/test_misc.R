@@ -245,3 +245,20 @@ test_that("double precision works for all jacobians", {
   expect_ok( model(covariance_matrix, precision = "double") )
 
 })
+
+test_that("module works", {
+
+  mod <- module(mean,
+                functions = module(sum,
+                                   exp,
+                                   log))
+
+  # returns a list
+  expect_true(inherits(mod, "list"))
+  expect_true(inherits(mod$functions, "list"))
+
+  # all elements named, and reordered
+  expect_identical(names(mod), c("functions", "mean"))
+  expect_identical(names(mod$functions), c("exp", "log", "sum"))
+
+})
