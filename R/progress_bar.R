@@ -87,3 +87,6 @@ iterate_progress_bar <- function (pb, it, rejects) {
   }
 
 }
+
+progress_bar_module <- module(create_progress_bar,
+                              iterate_progress_bar)

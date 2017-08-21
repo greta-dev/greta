@@ -7,11 +7,14 @@
 #'   methods, and it is not recommended to use them directly in model code.
 #'
 #' @section Usage: \preformatted{
+#'  .internals$greta_arrays$unknowns        # greta array print methods
+#'  .internals$inference$progress_bar       # progress bar tools
+#'                       samplers           # MCMC samplers
+#'                       stash              # stashing MCMC samples
 #'  .internals$nodes$constructors           # node creation wrappers
 #'                   distribution_classes   # R6 distribution classes
 #'                   node_classes           # R6 node classes
-#'  .internals$samplers                     # sampler methods
-#'  .internals$tf_functions                 # functions on tensors
+#'  .internals$tensors                      # functions on tensors
 #'  .internals$utils$checks                 # checking function inputs
 #'                   colours                # greta colour scheme
 #'                   dummy_arrays           # mocking up extract/replace
@@ -37,9 +40,10 @@
 NULL
 
 #' @export
-.internals <- module(nodes = module(constructors = constructors_module,
+.internals <- module(greta_arrays = greta_array_module,
+                     nodes = module(constructors = node_constructors_module,
                                     node_classes = node_classes_module,
                                     distribution_classes = distribution_classes_module),
-                     samplers = module(dag_class),
-                     tf_functions = tf_functions_module,
+                     inference = inference_module,
+                     tensors = tf_functions_module,
                      utils = utilities_module)

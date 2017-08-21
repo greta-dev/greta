@@ -235,3 +235,6 @@ tail.greta_array <- function (x, n = 6L, ...) {
 #' @export
 as.matrix.greta_array <- function (x, ...)
   x$node$value()
+
+greta_array_module <- module(as.greta_array,
+                             unknowns = unknowns_module)
