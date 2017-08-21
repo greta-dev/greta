@@ -55,6 +55,11 @@
 #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
 #'
+#'  # solve an upper or lower triangular system
+#'  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
+#'            transpose = FALSE)
+#'  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
+#'               transpose = FALSE)
 #'  }
 #'
 #' @details TensorFlow only enables rounding to integers, so \code{round()} will
@@ -440,11 +445,99 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
   }
 
   op("sweep",
-     x,
-     STATS,
+     x, STATS,
      operation_args = list(MARGIN = MARGIN,
                            FUN = FUN),
      tf_operation = tf_sweep,
+     dimfun = dimfun)
+
+}
+
+#' @rdname overloaded
+#' @export
+backsolve <- function (r, x, k = ncol(r),
+                       upper.tri = TRUE,
+                       transpose = FALSE) {
+  UseMethod('backsolve', x)
+}
+
+#' @export
+backsolve.default <- function (r, x, k = ncol(r),
+                               upper.tri = TRUE,
+                               transpose = FALSE) {
+  base::backsolve(r, x, k = ncol(r),
+                  upper.tri = TRUE,
+                  transpose = FALSE)
+}
+
+# define this explicitly so CRAN doesn't think we're using .Internal
+#' @export
+backsolve.greta_array <- function(r, x,
+                                  k = ncol(r),
+                                  upper.tri = TRUE,
+                                  transpose = FALSE) {
+  if (k != ncol(r)) {
+    stop ("k must equal ncol(r) for greta arrays",
+          call. = FALSE)
+  }
+
+  if (transpose) {
+    stop ("transpose must be FALSE for greta arrays",
+          call. = FALSE)
+  }
+
+  dimfun <- function (elem_list)
+    dim(elem_list[[2]])
+
+  op("backsolve",
+     r, x,
+     operation_args = list(lower = !upper.tri),
+     tf_operation = tf$matrix_triangular_solve,
+     dimfun = dimfun)
+
+}
+
+#' @rdname overloaded
+#' @export
+forwardsolve <- function (l, x, k = ncol(l),
+                          upper.tri = FALSE,
+                          transpose = FALSE) {
+  UseMethod('forwardsolve', x)
+}
+
+# define this explicitly so CRAN doesn't think we're using .Internal
+#' @export
+forwardsolve.default <- function (l, x, k = ncol(l),
+                                  upper.tri = FALSE,
+                                  transpose = FALSE) {
+
+  base::forwardsolve(l, x, k = ncol(l),
+                     upper.tri = FALSE,
+                     transpose = FALSE)
+}
+
+#' @export
+forwardsolve.greta_array <- function (l, x,
+                                      k = ncol(l),
+                                      upper.tri = FALSE,
+                                      transpose = FALSE) {
+  if (k != ncol(l)) {
+    stop ("k must equal ncol(l) for greta arrays",
+          call. = FALSE)
+  }
+
+  if (transpose) {
+    stop ("transpose must be FALSE for greta arrays",
+          call. = FALSE)
+  }
+
+  dimfun <- function (elem_list)
+    dim(elem_list[[2]])
+
+  op("forwardsolve",
+     l, x,
+     operation_args = list(lower = !upper.tri),
+     tf_operation = tf$matrix_triangular_solve,
      dimfun = dimfun)
 
 }

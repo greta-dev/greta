@@ -8,6 +8,8 @@
 #'   overloaded here. This should not affect normal use of these functions, but
 #'   they need to be documented to satisfy CRAN's check.
 #'
-#' @param x,y,nrow,ncol,MARGIN,STATS,FUN,check.margin,\dots	arguments as in original documentation
+#' @param
+#'   x,y,nrow,ncol,MARGIN,STATS,FUN,check.margin,\dots,r,k,upper.tri,transpose,l
+#'   arguments as in original documentation
 #'
 NULL

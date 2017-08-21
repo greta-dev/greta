@@ -5,6 +5,8 @@
 \alias{\%*\%}
 \alias{diag}
 \alias{sweep}
+\alias{backsolve}
+\alias{forwardsolve}
 \title{Functions overloaded by greta}
 \usage{
 x \%*\% y
@@ -12,9 +14,13 @@ x \%*\% y
 diag(x = 1, nrow, ncol)
 
 sweep(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
+
+backsolve(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE)
+
+forwardsolve(l, x, k = ncol(l), upper.tri = FALSE, transpose = FALSE)
 }
 \arguments{
-\item{x, y, nrow, ncol, MARGIN, STATS, FUN, check.margin, \dots}{arguments as in original documentation}
+\item{x, y, nrow, ncol, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l}{arguments as in original documentation}
 }
 \description{
 greta provides a wide range of methods to apply common R
