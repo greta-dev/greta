@@ -1,5 +1,7 @@
 # test functions
 
+library(tensorflow)
+
 # set the seed before running tests
 set.seed(2017-05-01)
 
