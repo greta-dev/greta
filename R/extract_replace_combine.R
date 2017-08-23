@@ -329,6 +329,9 @@ length.greta_array <- function(x)
     stop ("length-0 dimension vector is invalid",
           call. = FALSE)
 
+  if (length(dims) == 1L)
+    dims <- c(dims, 1L)
+
   if (any(is.na(dims)))
     stop("the dims contain missing values",
          call. = FALSE)
@@ -356,7 +359,7 @@ length.greta_array <- function(x)
 
   op("reshape",
      x,
-     operation_args = list(shape = value),
+     operation_args = list(shape = dims),
      tf_operation = tf$reshape,
      dimfun = dimfun,
      value = new_value)

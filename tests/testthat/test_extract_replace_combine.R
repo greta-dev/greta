@@ -361,3 +361,41 @@ test_that('length and dim work', {
 
 })
 
+test_that('dim<- works', {
+
+  source('helpers.R')
+
+  x <- greta_array(1:12, c(3, 4))
+  new_dim <- c(6L, 2L)
+
+  dim(x) <- new_dim
+  expect_identical(dim(x), new_dim)
+
+  dim(x) <- NULL
+  expect_identical(dim(x), c(12L, 1L))
+
+})
+
+test_that('dim<- works in a model', {
+
+  source('helpers.R')
+
+  y <- rnorm(5)
+
+  x1 <- greta_array(1:12, c(3, 4))
+  dim(x1) <- NULL
+
+  x2 <- greta_array(1:12, c(3, 4))
+  dim(x2) <- 12
+
+  x3 <- greta_array(1:12, c(3, 4))
+  dim(x3) <- c(6, 2)
+
+  z <- x1[6, ] * x2[7, ] * x3[5, 2]
+
+  distribution(y) = normal(z, lognormal(0, 1))
+
+  expect_ok(m <- model(z))
+  expect_ok(mcmc(m, warmup = 0, n_samples = 2))
+
+})
