@@ -40,3 +40,8 @@ unknowns <- function (dims = c(1, 1), data = NA) {
   x <- array(data = data, dim = dims)
   as.unknowns(x)
 }
+
+
+unknowns_module <- module(unknowns,
+                          as.unknowns,
+                          strip_unknown_class)

@@ -327,3 +327,11 @@ banner('lighter',
        edge_width = 2.7)
 dev.off()
 
+png('logos/gravatar.png',
+    height = 3600, width = 3600,
+    pointsize = ptsz)
+banner('white',
+       width = 2.310505,
+       add_logo = FALSE)
+dev.off()
+

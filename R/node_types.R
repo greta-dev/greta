@@ -516,6 +516,6 @@ vble <- function (truncation, dim = 1) {
 
 }
 
-constructors_module <- module(distrib,
+node_constructors_module <- module(distrib,
                               op,
                               vble)

@@ -26,11 +26,14 @@ You can use \code{attach()} to put a sublist in the search path. E.g.
 }
 \section{Usage}{
  \preformatted{
+ .internals$greta_arrays$unknowns        # greta array print methods
+ .internals$inference$progress_bar       # progress bar tools
+                      samplers           # MCMC samplers
+                      stash              # stashing MCMC samples
  .internals$nodes$constructors           # node creation wrappers
                   distribution_classes   # R6 distribution classes
                   node_classes           # R6 node classes
- .internals$samplers                     # sampler methods
- .internals$tf_functions                 # functions on tensors
+ .internals$tensors                      # functions on tensors
  .internals$utils$checks                 # checking function inputs
                   colours                # greta colour scheme
                   dummy_arrays           # mocking up extract/replace

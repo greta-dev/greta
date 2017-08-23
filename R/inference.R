@@ -344,3 +344,11 @@ opt <- function (model,
 
 }
 
+stash_module <- module(greta_stash,
+                       stash_trace,
+                       prepare_draws)
+
+inference_module <- module(dag_class,
+                           progress_bar = progress_bar_module,
+                           samplers = samplers_module,
+                           stash = stash_module)

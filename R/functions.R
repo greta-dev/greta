@@ -55,6 +55,11 @@
 #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
 #'
+#'  # solve an upper or lower triangular system
+#'  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
+#'            transpose = FALSE)
+#'  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
+#'               transpose = FALSE)
 #'  }
 #'
 #' @details TensorFlow only enables rounding to integers, so \code{round()} will
@@ -393,11 +398,125 @@ max.greta_array <- function (..., na.rm = TRUE) {
 
 }
 
+# get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
+rowcol_idx <- function (x, dims, which = c("col", "row")) {
+
+  if (dims < 1L || dims > length(dim(x)) - 1L)
+    stop("invalid 'dims'", call. = FALSE)
+
+  switch(which,
+         row = (dims + 1):length(dim(x)),
+         col = seq_len(dims))
+
+}
+
+# generate dimfun for colSums, rowSums, colMeans, rowMeans
+rowcol_dimfun <- function (dims, which = c("row", "col")) {
+
+  function (elem_list) {
+    x <- elem_list[[1]]
+    idx <- rowcol_idx(x, dims, which)
+    dims <- dim(x)[-idx]
+    if (length(dims) == 1)
+      dims <- c(dims, 1L)
+    dims
+  }
+
+}
 
 #' @rdname overloaded
 #' @export
-sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
+colMeans <- function (x, na.rm = FALSE, dims = 1L)
+  UseMethod("colMeans", x)
+
+#' @export
+colMeans.default <- function (x, na.rm = FALSE, dims = 1L)
+  base::colMeans(x = x, na.rm = na.rm, dims = dims)
+
+#' @export
+colMeans.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
+
+  op("colMeans",
+     x,
+     operation_args = list(dims = dims),
+     tf_operation = tf_colmeans,
+     dimfun = rowcol_dimfun(dims, "col"))
+
+}
+
+#' @rdname overloaded
+#' @export
+rowMeans <- function (x, na.rm = FALSE, dims = 1L)
+  UseMethod("rowMeans", x)
+
+#' @export
+rowMeans.default <- function (x, na.rm = FALSE, dims = 1L)
+  base::rowMeans(x = x, na.rm = na.rm, dims = dims)
+
+#' @export
+rowMeans.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
+
+  dimfun <- function (elem_list)
+    dim(elem_list[[1]])[dims]
+
+  op("rowMeans",
+     x,
+     operation_args = list(dims = dims),
+     tf_operation = tf_rowmeans,
+     dimfun = rowcol_dimfun(dims, "row"))
+
+}
+
+#' @rdname overloaded
+#' @export
+colSums <- function (x, na.rm = FALSE, dims = 1L)
+  UseMethod("colSums", x)
+
+#' @export
+colSums.default <- function (x, na.rm = FALSE, dims = 1L)
+  base::colSums(x = x, na.rm = na.rm, dims = dims)
+
+#' @export
+colSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
+
+  op("colSums",
+     x,
+     operation_args = list(dims = dims),
+     tf_operation = tf_colsums,
+     dimfun = rowcol_dimfun(dims, "col"))
+
+}
+
+#' @rdname overloaded
+#' @export
+rowSums <- function (x, na.rm = FALSE, dims = 1L)
+  UseMethod("rowSums", x)
+
+#' @export
+rowSums.default <- function (x, na.rm = FALSE, dims = 1L)
+  base::rowSums(x = x, na.rm = na.rm, dims = dims)
+
+#' @export
+rowSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
+
+  op("rowSums",
+     x,
+     operation_args = list(dims = dims),
+     tf_operation = tf_rowsums,
+     dimfun = rowcol_dimfun(dims, "row"))
+
+}
+
+#' @rdname overloaded
+#' @export
+sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
+
+  if (inherits(STATS, "greta_array"))
+    x <- as.greta_array(x)
+
   UseMethod('sweep', x)
+
+}
 
 #' @export
 sweep.default <- base::sweep
@@ -440,11 +559,99 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
   }
 
   op("sweep",
-     x,
-     STATS,
+     x, STATS,
      operation_args = list(MARGIN = MARGIN,
                            FUN = FUN),
      tf_operation = tf_sweep,
+     dimfun = dimfun)
+
+}
+
+#' @rdname overloaded
+#' @export
+backsolve <- function (r, x, k = ncol(r),
+                       upper.tri = TRUE,
+                       transpose = FALSE) {
+  UseMethod('backsolve', x)
+}
+
+#' @export
+backsolve.default <- function (r, x, k = ncol(r),
+                               upper.tri = TRUE,
+                               transpose = FALSE) {
+  base::backsolve(r, x, k = ncol(r),
+                  upper.tri = TRUE,
+                  transpose = FALSE)
+}
+
+# define this explicitly so CRAN doesn't think we're using .Internal
+#' @export
+backsolve.greta_array <- function(r, x,
+                                  k = ncol(r),
+                                  upper.tri = TRUE,
+                                  transpose = FALSE) {
+  if (k != ncol(r)) {
+    stop ("k must equal ncol(r) for greta arrays",
+          call. = FALSE)
+  }
+
+  if (transpose) {
+    stop ("transpose must be FALSE for greta arrays",
+          call. = FALSE)
+  }
+
+  dimfun <- function (elem_list)
+    dim(elem_list[[2]])
+
+  op("backsolve",
+     r, x,
+     operation_args = list(lower = !upper.tri),
+     tf_operation = tf$matrix_triangular_solve,
+     dimfun = dimfun)
+
+}
+
+#' @rdname overloaded
+#' @export
+forwardsolve <- function (l, x, k = ncol(l),
+                          upper.tri = FALSE,
+                          transpose = FALSE) {
+  UseMethod('forwardsolve', x)
+}
+
+# define this explicitly so CRAN doesn't think we're using .Internal
+#' @export
+forwardsolve.default <- function (l, x, k = ncol(l),
+                                  upper.tri = FALSE,
+                                  transpose = FALSE) {
+
+  base::forwardsolve(l, x, k = ncol(l),
+                     upper.tri = FALSE,
+                     transpose = FALSE)
+}
+
+#' @export
+forwardsolve.greta_array <- function (l, x,
+                                      k = ncol(l),
+                                      upper.tri = FALSE,
+                                      transpose = FALSE) {
+  if (k != ncol(l)) {
+    stop ("k must equal ncol(l) for greta arrays",
+          call. = FALSE)
+  }
+
+  if (transpose) {
+    stop ("transpose must be FALSE for greta arrays",
+          call. = FALSE)
+  }
+
+  dimfun <- function (elem_list)
+    dim(elem_list[[2]])
+
+  op("forwardsolve",
+     l, x,
+     operation_args = list(lower = !upper.tri),
+     tf_operation = tf$matrix_triangular_solve,
      dimfun = dimfun)
 
 }

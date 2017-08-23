@@ -320,3 +320,102 @@ test_that('extract, replace, combine work in models', {
   expect_ok( draws_d <- mcmc(m_d, warmup = 3, n_samples = 3, verbose = FALSE) )
 
 })
+
+test_that('head and tail work', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- randn(10, 1)
+  b <- randn(10, 4)
+  c <- randn(10, 3, 3)
+
+  check_op(head, a)
+  check_op(tail, a)
+
+  check_op(head, b)
+  check_op(tail, b)
+
+  check_op(head, c)
+  check_op(tail, c)
+
+})
+
+test_that('length and dim work', {
+
+  source('helpers.R')
+
+  ga_data <- as_data(matrix(1:9, nrow = 3))
+  ga_stochastic <- normal(0, 1, dim = c(3, 3))
+  ga_operation <- ga_data * ga_stochastic
+
+  # length
+  expect_identical(length(ga_data), 9L)
+  expect_identical(length(ga_stochastic), 9L)
+  expect_identical(length(ga_operation), 9L)
+
+  # dim
+  expect_identical(dim(ga_data), c(3L, 3L))
+  expect_identical(dim(ga_stochastic), c(3L, 3L))
+  expect_identical(dim(ga_operation), c(3L, 3L))
+
+})
+
+test_that('dim<- works', {
+
+  source('helpers.R')
+
+  x <- greta_array(1:12, c(3, 4))
+  new_dim <- c(6L, 2L)
+
+  dim(x) <- new_dim
+  expect_identical(dim(x), new_dim)
+
+  dim(x) <- NULL
+  expect_identical(dim(x), c(12L, 1L))
+
+})
+
+test_that('dim<- erros as expected', {
+
+  source('helpers.R')
+
+  x <- zeros(3, 4)
+
+  expect_error(dim(x) <- pi[0],
+               "length-0 dimension vector is invalid")
+
+  expect_error(dim(x) <- c(1, NA),
+               "the dims contain missing values")
+
+  expect_error(dim(x) <- c(1, -1),
+               "the dims contain negative values")
+
+  expect_error(dim(x) <- 13,
+               "dims \\[product 13\\] do not match the length of object \\[12\\]")
+
+})
+
+test_that('dim<- works in a model', {
+
+  source('helpers.R')
+
+  y <- rnorm(5)
+
+  x1 <- greta_array(1:12, c(3, 4))
+  dim(x1) <- NULL
+
+  x2 <- greta_array(1:12, c(3, 4))
+  dim(x2) <- 12
+
+  x3 <- greta_array(1:12, c(3, 4))
+  dim(x3) <- c(6, 2)
+
+  z <- x1[6, ] * x2[7, ] * x3[5, 2]
+
+  distribution(y) = normal(z, lognormal(0, 1))
+
+  expect_ok(m <- model(z))
+  expect_ok(mcmc(m, warmup = 0, n_samples = 2))
+
+})
