@@ -174,3 +174,5 @@ hmc <- function (dag,
   trace
 
 }
+
+samplers_module <- module(hmc)

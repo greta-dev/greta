@@ -150,88 +150,10 @@ summary.greta_array <- function (object, ...) {
 
 }
 
-# get dimensions
-#' @export
-dim.greta_array <- function(x)
-  as.integer(x$node$dim)
-
-#' @export
-length.greta_array <- function(x)
-  prod(dim(x))
-
-# head handles matrices differently to arrays, so explicitly handle 2D greta
-# arrays
-#' @export
-#' @importFrom utils head
-head.greta_array <- function (x, n = 6L, ...) {
-
-  stopifnot(length(n) == 1L)
-
-  # if x is matrix-like, take the top n rows
-  if (length(dim(x)) == 2) {
-
-    nrx <- nrow(x)
-    if (n < 0L)
-      n <- max(nrx + n, 0L)
-    else
-      n <- min(n, nrx)
-
-    ans <- x[seq_len(n), , drop = FALSE]
-
-  } else {
-    # otherwise, take thefirst n elements
-
-    if (n < 0L)
-      n <- max(length(x) + n, 0L)
-    else
-      n <- min(n, length(x))
-
-    ans <- x[seq_len(n)]
-
-  }
-
-  ans
-
-}
-
-#' @export
-#' @importFrom utils tail
-tail.greta_array <- function (x, n = 6L, ...) {
-
-  stopifnot(length(n) == 1L)
-
-  # if x is matrix-like, take the top n rows
-  if (length(dim(x)) == 2) {
-
-    nrx <- nrow(x)
-
-    if (n < 0L)
-      n <- max(nrx + n, 0L)
-    else
-      n <- min(n, nrx)
-
-    sel <- as.integer(seq.int(to = nrx, length.out = n))
-    ans <- x[sel, , drop = FALSE]
-
-  } else {
-    # otherwise, take the first n elements
-
-    xlen <- length(x)
-
-    if (n < 0L)
-      n <- max(xlen + n, 0L)
-    else
-      n <- min(n, xlen)
-
-    ans <- x[seq.int(to = xlen, length.out = n)]
-
-  }
-
-  ans
-
-}
-
 # return the unknowns array for this greta array
 #' @export
 as.matrix.greta_array <- function (x, ...)
   x$node$value()
+
+greta_array_module <- module(as.greta_array,
+                             unknowns = unknowns_module)

@@ -75,6 +75,11 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  # miscellaneous operations
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
 
+ # solve an upper or lower triangular system
+ backsolve(r, x, k = ncol(r), upper.tri = TRUE,
+           transpose = FALSE)
+ forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
+              transpose = FALSE)
  }
 }
 
