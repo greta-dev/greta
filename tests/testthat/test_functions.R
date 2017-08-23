@@ -47,6 +47,7 @@ test_that('matrix functions work as expected', {
 
   a <- rWishart(1, 6, diag(5))[, , 1]
   b <- randn(5, 25)
+  c <- chol(a)
 
   check_op(t, b)
   check_op(chol, a)
@@ -54,6 +55,8 @@ test_that('matrix functions work as expected', {
   check_op(`diag<-`, a, 1:5)
   check_op(solve, a)
   check_op(solve, a, b)
+  check_op(forwardsolve, c, b)
+  check_op(backsolve, c, b)
 
 })
 
@@ -168,7 +171,6 @@ test_that('solve and sweep error as expected', {
                '^the number of elements of STATS does not match')
 
 })
-
 
 test_that('colSums etc. error as expected', {
 
