@@ -58,47 +58,6 @@ test_that('print and summary work', {
 
 })
 
-
-test_that('length and dim work', {
-
-  source('helpers.R')
-
-  ga_data <- as_data(matrix(1:9, nrow = 3))
-  ga_stochastic <- normal(0, 1, dim = c(3, 3))
-  ga_operation <- ga_data * ga_stochastic
-
-  # length
-  expect_identical(length(ga_data), 9L)
-  expect_identical(length(ga_stochastic), 9L)
-  expect_identical(length(ga_operation), 9L)
-
-  # dim
-  expect_identical(dim(ga_data), c(3L, 3L))
-  expect_identical(dim(ga_stochastic), c(3L, 3L))
-  expect_identical(dim(ga_operation), c(3L, 3L))
-
-})
-
-test_that('head and tail work', {
-
-  skip_if_not(check_tf_version())
-  source('helpers.R')
-
-  a <- randn(10, 1)
-  b <- randn(10, 4)
-  c <- randn(10, 3, 3)
-
-  check_op(head, a)
-  check_op(tail, a)
-
-  check_op(head, b)
-  check_op(tail, b)
-
-  check_op(head, c)
-  check_op(tail, c)
-
-})
-
 test_that('as.matrix works', {
 
   source('helpers.R')
