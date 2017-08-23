@@ -376,6 +376,26 @@ test_that('dim<- works', {
 
 })
 
+test_that('dim<- erros as expected', {
+
+  source('helpers.R')
+
+  x <- zeros(3, 4)
+
+  expect_error(dim(x) <- pi[0],
+               "length-0 dimension vector is invalid")
+
+  expect_error(dim(x) <- c(1, NA),
+               "the dims contain missing values")
+
+  expect_error(dim(x) <- c(1, -1),
+               "the dims contain negative values")
+
+  expect_error(dim(x) <- 13,
+               "dims \\[product 13\\] do not match the length of object \\[12\\]")
+
+})
+
 test_that('dim<- works in a model', {
 
   source('helpers.R')

@@ -190,6 +190,8 @@ test_that('solve and sweep error as expected', {
 
 test_that('colSums etc. error as expected', {
 
+  source('helpers.R')
+
   x <- as_data(randn(3, 4, 5))
   expect_error(colSums(x, dims = 3),
                "invalid 'dims'")
@@ -199,6 +201,26 @@ test_that('colSums etc. error as expected', {
                "invalid 'dims'")
   expect_error(rowMeans(x, dims = 3),
                "invalid 'dims'")
+
+})
+
+test_that('forwardsolve and backsolve error as expected', {
+
+  source('helpers.R')
+
+  a <- wishart(6, diag(5))
+  b <- as_data(randn(5, 25))
+  c <- chol(a)
+
+  expect_error(forwardsolve(a, b, k = 1),
+               "k must equal ncol\\(l\\) for greta arrays")
+  expect_error(backsolve(a, b, k = 1),
+               "k must equal ncol\\(r\\) for greta arrays")
+
+  expect_error(forwardsolve(a, b, transpose = TRUE),
+               "transpose must be FALSE for greta arrays")
+  expect_error(backsolve(a, b, transpose = TRUE),
+               "transpose must be FALSE for greta arrays")
 
 })
 
