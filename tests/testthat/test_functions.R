@@ -64,11 +64,30 @@ test_that('reducing functions work as expected', {
 
   a <- randn(1, 3)
   b <- randn(5, 25)
+  c <- randn(2, 3, 4)
 
   check_op(sum, a, b)
   check_op(prod, a, b)
   check_op(min, a, b)
   check_op(max, a, b)
+
+  check_op(colSums, b)
+  check_op(rowSums, b)
+  check_op(colMeans, b)
+  check_op(rowMeans, b)
+
+  # default 3D reduction
+  check_op(colSums, c)
+  check_op(rowSums, c)
+  check_op(colMeans, c)
+  check_op(rowMeans, c)
+
+  # weird 3D reduction
+  x <- randn(2, 3, 4)
+  check_expr(colSums(x, dims = 2))
+  check_expr(rowSums(x, dims = 2))
+  check_expr(colMeans(x, dims = 2))
+  check_expr(rowMeans(x, dims = 2))
 
 })
 
@@ -98,7 +117,6 @@ test_that('sweep works as expected', {
   }
 
 })
-
 
 test_that('solve and sweep error as expected', {
 
@@ -150,3 +168,19 @@ test_that('solve and sweep error as expected', {
                '^the number of elements of STATS does not match')
 
 })
+
+
+test_that('colSums etc. error as expected', {
+
+  x <- as_data(randn(3, 4, 5))
+  expect_error(colSums(x, dims = 3),
+               "invalid 'dims'")
+  expect_error(rowSums(x, dims = 3),
+               "invalid 'dims'")
+  expect_error(colMeans(x, dims = 3),
+               "invalid 'dims'")
+  expect_error(rowMeans(x, dims = 3),
+               "invalid 'dims'")
+
+})
+

@@ -398,6 +398,114 @@ max.greta_array <- function (..., na.rm = TRUE) {
 
 }
 
+# get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
+rowcol_idx <- function (x, dims, which = c("col", "row")) {
+
+  if (dims < 1L || dims > length(dim(x)) - 1L)
+    stop("invalid 'dims'", call. = FALSE)
+
+  switch(which,
+         row = (dims + 1):length(dim(x)),
+         col = seq_len(dims))
+
+}
+
+# generate dimfun for colSums, rowSums, colMeans, rowMeans
+rowcol_dimfun <- function (dims, which = c("row", "col")) {
+
+  function (elem_list) {
+    x <- elem_list[[1]]
+    idx <- rowcol_idx(x, dims, which)
+    dims <- dim(x)[-idx]
+    if (length(dims) == 1)
+      dims <- c(dims, 1L)
+    dims
+  }
+
+}
+
+#' @rdname overloaded
+#' @export
+colMeans <- function (x, na.rm = FALSE, dims = 1L)
+  UseMethod("colMeans", x)
+
+#' @export
+colMeans.default <- function (x, na.rm = FALSE, dims = 1L)
+  base::colMeans(x = x, na.rm = na.rm, dims = dims)
+
+#' @export
+colMeans.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
+
+  op("colMeans",
+     x,
+     operation_args = list(dims = dims),
+     tf_operation = tf_colmeans,
+     dimfun = rowcol_dimfun(dims, "col"))
+
+}
+
+#' @rdname overloaded
+#' @export
+rowMeans <- function (x, na.rm = FALSE, dims = 1L)
+  UseMethod("rowMeans", x)
+
+#' @export
+rowMeans.default <- function (x, na.rm = FALSE, dims = 1L)
+  base::rowMeans(x = x, na.rm = na.rm, dims = dims)
+
+#' @export
+rowMeans.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
+
+  dimfun <- function (elem_list)
+    dim(elem_list[[1]])[dims]
+
+  op("rowMeans",
+     x,
+     operation_args = list(dims = dims),
+     tf_operation = tf_rowmeans,
+     dimfun = rowcol_dimfun(dims, "row"))
+
+}
+
+#' @rdname overloaded
+#' @export
+colSums <- function (x, na.rm = FALSE, dims = 1L)
+  UseMethod("colSums", x)
+
+#' @export
+colSums.default <- function (x, na.rm = FALSE, dims = 1L)
+  base::colSums(x = x, na.rm = na.rm, dims = dims)
+
+#' @export
+colSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
+
+  op("colSums",
+     x,
+     operation_args = list(dims = dims),
+     tf_operation = tf_colsums,
+     dimfun = rowcol_dimfun(dims, "col"))
+
+}
+
+#' @rdname overloaded
+#' @export
+rowSums <- function (x, na.rm = FALSE, dims = 1L)
+  UseMethod("rowSums", x)
+
+#' @export
+rowSums.default <- function (x, na.rm = FALSE, dims = 1L)
+  base::rowSums(x = x, na.rm = na.rm, dims = dims)
+
+#' @export
+rowSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
+
+  op("rowSums",
+     x,
+     operation_args = list(dims = dims),
+     tf_operation = tf_rowsums,
+     dimfun = rowcol_dimfun(dims, "row"))
+
+}
 
 #' @rdname overloaded
 #' @export

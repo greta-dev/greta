@@ -105,6 +105,55 @@ tf_flat_to_chol_correl = function (x, dims) {
 tf_chol_to_symmetric <- function (U)
   tf$matmul(tf$transpose(U), U)
 
+tf_colmeans <- function(x, dims) {
+
+  idx <- rowcol_idx(x, dims, "col")
+  y <- tf$reduce_mean(x, axis = idx - 1L)
+
+  if (length(dim(y)) == 1)
+    y <- tf$reshape(y, c(dim(y), 1L))
+
+  y
+
+}
+
+tf_rowmeans <- function(x, dims) {
+
+  idx <- rowcol_idx(x, dims, "row")
+  y <- tf$reduce_mean(x, axis = idx - 1L)
+
+  if (length(dim(y)) == 1)
+    y <- tf$reshape(y, c(dim(y), 1L))
+
+  y
+
+}
+
+tf_colsums <- function(x, dims) {
+
+  idx <- rowcol_idx(x, dims, "col")
+  y <- tf$reduce_sum(x, axis = idx - 1L)
+
+  if (length(dim(y)) == 1)
+    y <- tf$reshape(y, c(dim(y), 1L))
+
+  y
+
+}
+
+tf_rowsums <- function(x, dims) {
+
+  idx <- rowcol_idx(x, dims, "row")
+  y <- tf$reduce_sum(x, axis = idx - 1L)
+
+  if (length(dim(y)) == 1)
+    y <- tf$reshape(y, c(dim(y), 1L))
+
+  y
+
+}
+
+
 # tensorflow version of sweep, based on broadcasting of tf ops
 tf_sweep <- function (x, STATS, MARGIN, FUN) {
 

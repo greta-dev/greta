@@ -4,6 +4,10 @@
 \alias{overloaded}
 \alias{\%*\%}
 \alias{diag}
+\alias{colMeans}
+\alias{rowMeans}
+\alias{colSums}
+\alias{rowSums}
 \alias{sweep}
 \alias{backsolve}
 \alias{forwardsolve}
@@ -13,6 +17,14 @@ x \%*\% y
 
 diag(x = 1, nrow, ncol)
 
+colMeans(x, na.rm = FALSE, dims = 1L)
+
+rowMeans(x, na.rm = FALSE, dims = 1L)
+
+colSums(x, na.rm = FALSE, dims = 1L)
+
+rowSums(x, na.rm = FALSE, dims = 1L)
+
 sweep(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
 
 backsolve(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE)
@@ -20,7 +32,7 @@ backsolve(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE)
 forwardsolve(l, x, k = ncol(l), upper.tri = FALSE, transpose = FALSE)
 }
 \arguments{
-\item{x, y, nrow, ncol, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l}{arguments as in original documentation}
+\item{x, y, nrow, ncol, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, na.rm, dims}{arguments as in original documentation}
 }
 \description{
 greta provides a wide range of methods to apply common R
