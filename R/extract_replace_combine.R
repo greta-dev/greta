@@ -9,6 +9,8 @@
 #' # extract
 #' x[i]
 #' x[i, j, ..., drop = FALSE]
+#' head(x, n = 6L, ...)
+#' tail(x, n = 6L, ...)
 #'
 #' # replace
 #' x[i] <- value
@@ -20,13 +22,22 @@
 #' c(..., recursive = FALSE)
 #' rep(x, times, ..., recursive = FALSE)
 #'
+#' # get and set dimensions
+#' length(x)
+#' dim(x)
+#' dim(x) <- value
 #' }
 #'
+#' @param x a greta array
 #' @param i,j indices specifying elements to extract or replace
-#' @param value a greta array to replace elements
+#' @param n a single integer, as in \code{utils::head()} and
+#'   \code{utils::tail()}
+#' @param value for \code{`[<-`} a greta array to replace elements, for
+#'   \code{`dim<-`} either NULL or a numeric vector of dimensions
 #' @param ... either further indices specifying elements to extract or replace
-#'   (\code{[}), or multiple greta arrays to combine (\code{cbind()}, \code{rbind()} &
-#'   \code{c()}), or additional arguments (\code{rep()})
+#'   (\code{[}), or multiple greta arrays to combine (\code{cbind()},
+#'   \code{rbind()} & \code{c()}), or additional arguments (\code{rep()},
+#'   \code{head()}, \code{tail()})
 #' @param drop,recursive generic arguments that are ignored for greta arrays
 #'
 #' @examples
@@ -292,5 +303,134 @@ rep.greta_array <- function (x, ...) {
 
   # apply (implicitly coercing to a column vector)
   x[idx]
+
+}
+
+
+# get dimensions
+#' @export
+dim.greta_array <- function(x)
+  as.integer(x$node$dim)
+
+#' @export
+length.greta_array <- function(x)
+  prod(dim(x))
+
+# reshape greta arrays
+#' @export
+`dim<-.greta_array` <- function (x, value) {
+
+  dims <- value
+
+  if (is.null(dims))
+    dims <- length(x)
+
+  if (length(dims) == 0L)
+    stop ("length-0 dimension vector is invalid",
+          call. = FALSE)
+
+  if (any(is.na(dims)))
+    stop("the dims contain missing values",
+         call. = FALSE)
+
+  dims <- as.integer(dims)
+
+  if (any(dims < 0L))
+    stop ("the dims contain negative values",
+          call. = FALSE)
+
+  prod_dims <- prod(dims)
+  len <- length(x)
+
+  if (prod_dims != len) {
+    msg <- sprintf("dims [product %i] do not match the length of object [%i]",
+                   prod_dims, len)
+    stop (msg, call. = FALSE)
+  }
+
+  dimfun <- function (elem_list)
+    dims
+
+  new_value <- x$node$value()
+  dim(new_value) <- dims
+
+  op("reshape",
+     x,
+     operation_args = list(shape = value),
+     tf_operation = tf$reshape,
+     dimfun = dimfun,
+     value = new_value)
+
+}
+
+# head handles matrices differently to arrays, so explicitly handle 2D greta
+# arrays
+#' @export
+#' @importFrom utils head
+head.greta_array <- function (x, n = 6L, ...) {
+
+  stopifnot(length(n) == 1L)
+
+  # if x is matrix-like, take the top n rows
+  if (length(dim(x)) == 2) {
+
+    nrx <- nrow(x)
+    if (n < 0L)
+      n <- max(nrx + n, 0L)
+    else
+      n <- min(n, nrx)
+
+    ans <- x[seq_len(n), , drop = FALSE]
+
+  } else {
+    # otherwise, take the first n elements
+
+    if (n < 0L)
+      n <- max(length(x) + n, 0L)
+    else
+      n <- min(n, length(x))
+
+    ans <- x[seq_len(n)]
+
+  }
+
+  ans
+
+}
+
+#' @export
+#' @importFrom utils tail
+tail.greta_array <- function (x, n = 6L, ...) {
+
+  stopifnot(length(n) == 1L)
+
+  # if x is matrix-like, take the top n rows
+  if (length(dim(x)) == 2) {
+
+    nrx <- nrow(x)
+
+    if (n < 0L)
+      n <- max(nrx + n, 0L)
+    else
+      n <- min(n, nrx)
+
+    sel <- as.integer(seq.int(to = nrx, length.out = n))
+    ans <- x[sel, , drop = FALSE]
+
+  } else {
+    # otherwise, take the first n elements
+
+    xlen <- length(x)
+
+    if (n < 0L)
+      n <- max(xlen + n, 0L)
+    else
+      n <- min(n, xlen)
+
+    ans <- x[seq.int(to = xlen, length.out = n)]
+
+  }
+
+  ans
 
 }

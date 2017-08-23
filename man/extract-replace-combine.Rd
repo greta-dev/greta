@@ -10,13 +10,20 @@
 \alias{rep}
 \title{extract, replace and combine greta arrays}
 \arguments{
+\item{x}{a greta array}
+
 \item{i, j}{indices specifying elements to extract or replace}
 
-\item{value}{a greta array to replace elements}
+\item{n}{a single integer, as in \code{utils::head()} and
+\code{utils::tail()}}
+
+\item{value}{for \code{`[<-`} a greta array to replace elements, for
+\code{`dim<-`} either NULL or a numeric vector of dimensions}
 
 \item{...}{either further indices specifying elements to extract or replace
-(\code{[}), or multiple greta arrays to combine (\code{cbind()}, \code{rbind()} &
-\code{c()}), or additional arguments (\code{rep()})}
+(\code{[}), or multiple greta arrays to combine (\code{cbind()},
+\code{rbind()} & \code{c()}), or additional arguments (\code{rep()},
+\code{head()}, \code{tail()})}
 
 \item{drop, recursive}{generic arguments that are ignored for greta arrays}
 }
@@ -29,6 +36,8 @@ Generic methods to extract and replace elements of greta arrays,
 # extract
 x[i]
 x[i, j, ..., drop = FALSE]
+head(x, n = 6L, ...)
+tail(x, n = 6L, ...)
 
 # replace
 x[i] <- value
@@ -40,6 +49,10 @@ rbind(...)
 c(..., recursive = FALSE)
 rep(x, times, ..., recursive = FALSE)
 
+# get and set dimensions
+length(x)
+dim(x)
+dim(x) <- value
 }
 }
 
