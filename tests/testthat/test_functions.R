@@ -121,6 +121,22 @@ test_that('sweep works as expected', {
 
 })
 
+test_that('sweep works for numeric x and greta array STATS', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  STATS <- randn(5)
+  ga_STATS <- as_data(STATS)
+  x <- randn(5, 25)
+
+  res <- sweep(x, 1, STATS, "*")
+  expect_ok(ga_res <- sweep(x, 1, ga_STATS, "*"))
+  diff <- abs(res - grab(ga_res))
+  expect_true(all(diff < 1e-6))
+
+})
+
 test_that('solve and sweep error as expected', {
 
   source('helpers.R')

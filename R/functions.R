@@ -509,8 +509,14 @@ rowSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
 
 #' @rdname overloaded
 #' @export
-sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
+sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
+
+  if (inherits(STATS, "greta_array"))
+    x <- as.greta_array(x)
+
   UseMethod('sweep', x)
+
+}
 
 #' @export
 sweep.default <- base::sweep
