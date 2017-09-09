@@ -21,8 +21,9 @@ stashed_samples <- function () {
     draws <- greta_stash$trace_stash
     draws_clean <- na.omit(draws)
     draws_prepped <- prepare_draws(draws_clean)
+    draws_mcmclist <- mcmc.list(draws_prepped)
 
-    return (draws_prepped)
+    return (draws_mcmclist)
 
   } else {
 
@@ -45,15 +46,16 @@ stash_trace <- function (trace)
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #'
 #' @param model greta_model object
-#' @param method the method used to sample or optimise values. Currently only
+#' @param method method used to sample or optimise values. Currently only
 #'   one method is available for each procedure: \code{hmc} and \code{adagrad}
-#' @param n_samples the number of MCMC samples to draw (after any warm-up, but
+#' @param n_samples number of MCMC samples to draw (after any warm-up, but
 #'   before thinning)
-#' @param thin the MCMC thinning rate; every \code{thin} samples is retained,
+#' @param thin MCMC thinning rate; every \code{thin} samples is retained,
 #'   the rest are discarded
-#' @param warmup the number of samples to spend warming up the mcmc sampler.
+#' @param warmup number of samples to spend warming up the mcmc sampler.
 #'   During this phase the sampler moves toward the highest density area and
 #'   tunes sampler hyperparameters.
+#' @param chains number of MCMC chains to run
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations)
 #' @param control an optional named list of hyperparameters and options to
@@ -117,6 +119,7 @@ mcmc <- function (model,
                   n_samples = 1000,
                   thin = 1,
                   warmup = 100,
+                  chains = 1,
                   verbose = TRUE,
                   pb_update = 10,
                   control = list(),
@@ -194,50 +197,63 @@ mcmc <- function (model,
   method <- switch(method,
                    hmc = hmc)
 
-  # if warmup is required, do that now and update init
-  if (warmup > 0) {
+  chains_list <- list()
+
+  for (chain in seq_len(chains)) {
+
+    if (chains > 1) {
+      msg <- sprintf("\nchain %i/%i\n", chain, chains)
+      cat(msg)
+    }
+
+    # if warmup is required, do that now and update init
+    if (warmup > 0) {
+
+      if (verbose)
+        pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
+      else
+        pb_warmup <- NULL
+
+      # run it
+      warmup_draws <- method(dag = dag,
+                             init = initial_values,
+                             n_samples = warmup,
+                             thin = thin,
+                             verbose = verbose,
+                             pb = pb_warmup,
+                             tune = TRUE,
+                             stash = FALSE,
+                             control = con)
+
+      # use the last draw of the full parameter vector as the init
+      initial_values <- attr(warmup_draws, 'last_x')
+      con <- attr(warmup_draws, 'control')
+
+    }
 
     if (verbose)
-      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
+      pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
     else
-      pb_warmup <- NULL
+      pb_sampling <- NULL
 
-    # run it
-    warmup_draws <- method(dag = dag,
-                           init = initial_values,
-                           n_samples = warmup,
-                           thin = thin,
-                           verbose = verbose,
-                           pb = pb_warmup,
-                           tune = TRUE,
-                           stash = FALSE,
-                           control = con)
+    # run the sampler
+    draws <- method(dag = dag,
+                    init = initial_values,
+                    n_samples = n_samples,
+                    thin = thin,
+                    verbose = verbose,
+                    pb = pb_sampling,
+                    tune = FALSE,
+                    stash = TRUE,
+                    control = con)
 
-    # use the last draw of the full parameter vector as the init
-    initial_values <- attr(warmup_draws, 'last_x')
-    con <- attr(warmup_draws, 'control')
+    # if this was successful, trash the stash, prepare and return the draws
+    rm('trace_stash', envir = greta_stash)
+    chains_list[[chain]] <- prepare_draws(draws)
 
   }
 
-  if (verbose)
-    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
-  else
-    pb_sampling <- NULL
-
-  # run the sampler
-  draws <- method(dag = dag,
-                  init = initial_values,
-                  n_samples = n_samples,
-                  thin = thin,
-                  verbose = verbose,
-                  pb = pb_sampling,
-                  tune = FALSE,
-                  stash = TRUE,
-                  control = con)
-
-  # if this was successful, trash the stash, prepare and return the draws
-  rm('trace_stash', envir = greta_stash)
-  prepare_draws(draws)
+  do.call(mcmc.list, chains_list)
 
 }
 
@@ -245,8 +261,7 @@ mcmc <- function (model,
 prepare_draws <- function (draws) {
   # given a matrix of draws returned by the sampler, prepare it and return
   draws_df <- data.frame(draws)
-  draws_mcmc <- coda::mcmc(draws_df)
-  coda::mcmc.list(draws_mcmc)
+  coda::mcmc(draws_df)
 }
 
 
