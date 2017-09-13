@@ -16,10 +16,10 @@ hmc <- function (dag,
   epsilon <- control$epsilon
 
   # tuning parameters
-  accept_group = 50
-  target_acceptance = 0.651
-  kappa = 0.75
-  gamma = 0.1
+  accept_group <- 50
+  target_acceptance <- 0.651
+  kappa <- 0.75
+  gamma <- 0.1
 
   numerical_rejections <- 0
 
@@ -108,8 +108,8 @@ hmc <- function (dag,
 
       # acceptance ratio
       logprob <- dag$log_density()
-      log_accept_ratio = logprob - p_prod - logprob_old + p_prod_old
-      log_u = log(runif(1))
+      log_accept_ratio <- logprob - p_prod - logprob_old + p_prod_old
+      log_u <- log(runif(1))
 
       if (log_u < log_accept_ratio) {
 
