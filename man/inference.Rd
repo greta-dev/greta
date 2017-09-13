@@ -10,7 +10,7 @@
 stashed_samples()
 
 mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
-  verbose = TRUE, pb_update = 10, control = list(),
+  chains = 1, verbose = TRUE, pb_update = 10, control = list(),
   initial_values = NULL)
 
 opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
@@ -19,18 +19,20 @@ opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
 \arguments{
 \item{model}{greta_model object}
 
-\item{method}{the method used to sample or optimise values. Currently only
+\item{method}{method used to sample or optimise values. Currently only
 one method is available for each procedure: \code{hmc} and \code{adagrad}}
 
-\item{n_samples}{the number of MCMC samples to draw (after any warm-up, but
+\item{n_samples}{number of MCMC samples to draw (after any warm-up, but
 before thinning)}
 
-\item{thin}{the MCMC thinning rate; every \code{thin} samples is retained,
+\item{thin}{MCMC thinning rate; every \code{thin} samples is retained,
 the rest are discarded}
 
-\item{warmup}{the number of samples to spend warming up the mcmc sampler.
+\item{warmup}{number of samples to spend warming up the mcmc sampler.
 During this phase the sampler moves toward the highest density area and
 tunes sampler hyperparameters.}
+
+\item{chains}{number of MCMC chains to run}
 
 \item{verbose}{whether to print progress information to the console}
 
