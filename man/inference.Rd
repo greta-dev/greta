@@ -48,9 +48,9 @@ sampling/optimisation}
 \item{tolerance}{the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level}
 }
 \value{
-\code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object that can be analysed using
-  functions from the coda package. This will contain mcmc samples of the
-  greta arrays used to create \code{model}.
+\code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
+  that can be analysed using functions from the coda package. This will
+  contain mcmc samples of the greta arrays used to create \code{model}.
 
 \code{opt} - a list containing the following named elements:
   \itemize{
@@ -90,17 +90,19 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   (via \code{model}) to have double precision, though this will slow down
   sampling.
 
-  Currently, the only implemented MCMC procedure is static Hamiltonian
-  Monte Carlo (\code{method = "hmc"}). During the warmup iterations, the
-  leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
-  sampler efficiency. The \code{control} argument can be used to specify the
-  initial value for epsilon, along with two other hyperparameters: \code{Lmin}
-  and \code{Lmax}; positive integers (with \code{Lmax > Lmin}) giving the
-  upper and lower limits to the number of leapfrog steps per iteration (from
-  which the number is selected uniformly at random).
+  Currently, the only implemented MCMC procedure is static Hamiltonian Monte
+  Carlo (\code{method = "hmc"}). During the warmup iterations, the leapfrog
+  stepsize hyperparameter \code{epsilon} is tuned to maximise the sampler
+  efficiency, and the posterior marginal standard deviations are estimated
+  \code{diag_sd}. The \code{control} argument can be used to specify the
+  initial value for \code{epsilon}, \code{diag_sd}, and two other
+  hyperparameters: \code{Lmin} and \code{Lmax}; positive integers (with
+  \code{Lmax > Lmin}) giving the upper and lower limits to the number of
+  leapfrog steps per iteration (from which the number is selected uniformly
+  at random).
 
   The default control options for HMC are:
-  \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
+  \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005, diag_sd = 1)}
 
 Currently, the only implemented optimisation algorithm is Adagrad
   (\code{method = "adagrad"}). The \code{control} argument can be used to

@@ -8,18 +8,25 @@ hmc <- function (dag,
                  stash = FALSE,
                  control = list(Lmin = 10,
                                 Lmax = 20,
-                                epsilon = 0.005)) {
+                                epsilon = 0.005,
+                                diag_sd = 1)) {
 
   # unpack options
   Lmin <- control$Lmin
   Lmax <- control$Lmax
   epsilon <- control$epsilon
+  diag_sd <- control$diag_sd
 
   # tuning parameters
   accept_group <- 50
   target_acceptance <- 0.651
   kappa <- 0.75
   gamma <- 0.1
+  diag_sd_update_rate <- 5
+
+  # initialise welford accumulator for marginal variance
+  welford_m <- 0
+  welford_m2 <- 0
 
   numerical_rejections <- 0
 
@@ -76,8 +83,8 @@ hmc <- function (dag,
     for (l in seq_len(n_steps)) {
 
       # step
-      p <- p + 0.5 * epsilon * grad
-      x <- x + epsilon * p
+      p <- p + 0.5 * epsilon * grad * diag_sd
+      x <- x + epsilon * p * diag_sd
 
       # send parameters
       dag$send_parameters(x)
@@ -89,7 +96,7 @@ hmc <- function (dag,
         break()
       }
 
-      p <- p + 0.5 * epsilon * grad
+      p <- p + 0.5 * epsilon * grad * diag_sd
 
     }
 
@@ -161,6 +168,20 @@ hmc <- function (dag,
       # keep track of epsilon
       epsilon_trace[i] <- epsilon
 
+      # update welford accumulator for posterior variance
+      welford_delta <- x - welford_m
+      welford_m <- welford_m + welford_delta / i
+      welford_m2 <- welford_m2 + welford_delta * (x - welford_m)
+
+      # get sample posterior variance and shrink it
+      if (i > 1 & (i %% diag_sd_update_rate == 0)) {
+        sample_var <- welford_m2 / (i - 1)
+        var_shrinkage <- 1 / (i + 5)
+        var_shrunk <- i * var_shrinkage * sample_var + 5e-3 * var_shrinkage
+        diag_sd <- sqrt(var_shrunk)
+
+      }
+
     }
 
   }
@@ -170,6 +191,7 @@ hmc <- function (dag,
     start <- floor(n_samples/2)
     end <- n_samples
     control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
+    control$diag_sd <- diag_sd
   }
 
   attr(trace, 'last_x') <- x
