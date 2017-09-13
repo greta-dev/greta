@@ -55,6 +55,8 @@ hmc <- function (dag,
   # get free parameter dimension
   npar <- length(x)
 
+  L <- Lmin:Lmax
+
   accept_count <- 0
 
   # loop through iterations
@@ -68,8 +70,9 @@ hmc <- function (dag,
 
     # start leapfrog steps
     reject <- FALSE
-    # p <- p_old + 0.5 * epsilon * grad
-    n_steps <- base::sample(Lmin:Lmax, 1)
+    n_steps <- ifelse(length(L) == 1, L,
+                      base::sample(L, 1))
+
     for (l in seq_len(n_steps)) {
 
       # step
