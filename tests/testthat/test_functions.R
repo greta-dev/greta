@@ -94,6 +94,37 @@ test_that('reducing functions work as expected', {
 
 })
 
+test_that('cumulative functions work as expected', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- randn(5)
+
+  check_op(cumsum, a)
+  check_op(cumprod, a)
+
+})
+
+test_that('cumulative functions error as expected', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- as_data(randn(1, 5))
+  b <- as_data(randn(5, 1, 1))
+
+  a_error <- "'x' must be a column vector, but has dimensions 1 x 5"
+  b_error <- "'x' must be a column vector, but has dimensions 5 x 1 x 1"
+
+  expect_error(cumsum(a), a_error)
+  expect_error(cumsum(b), b_error)
+
+  expect_error(cumprod(a), a_error)
+  expect_error(cumprod(b), b_error)
+
+})
+
 test_that('sweep works as expected', {
 
   skip_if_not(check_tf_version())

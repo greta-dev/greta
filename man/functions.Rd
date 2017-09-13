@@ -72,6 +72,10 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  min(..., na.rm = TRUE)
  max(..., na.rm = TRUE)
 
+ # cumulative operations
+ cumsum(x)
+ cumprod(x)
+
  # miscellaneous operations
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
 
