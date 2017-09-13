@@ -17,16 +17,28 @@ hmc <- function (dag,
   epsilon <- control$epsilon
   diag_sd <- control$diag_sd
 
-  # tuning parameters
-  accept_group <- 50
-  target_acceptance <- 0.651
-  kappa <- 0.75
-  gamma <- 0.1
-  diag_sd_update_rate <- 5
+  if (tune) {
 
-  # initialise welford accumulator for marginal variance
-  welford_m <- 0
-  welford_m2 <- 0
+    # when to start and stop each type of tuning, in fractions of the tuning period
+    epsilon_periods <- list(c(0, 0.1), c(0.4, 1))
+    diag_sd_periods <- list(c(0.1, 0.4))
+
+    # epslion tuning parameters
+    accept_group <- 50
+    target_acceptance <- 0.651
+    kappa <- 0.75
+    gamma <- 0.1
+
+
+    # initialise welford accumulator for marginal variance
+    diag_sd_update_rate <- 5
+    welford_m <- 0
+    welford_m2 <- 0
+
+    epsilon_trace <- rep(NA, n_samples)
+
+
+  }
 
   numerical_rejections <- 0
 
@@ -39,9 +51,6 @@ hmc <- function (dag,
   dag$send_parameters(x)
   grad <- dag$gradients()
   logprob <- dag$log_density()
-
-  if (tune)
-    epsilon_trace <- rep(NA, n_samples)
 
   # set up trace store (grab values of target variables from graph to get
   # dimension and names)
@@ -63,8 +72,6 @@ hmc <- function (dag,
   npar <- length(x)
 
   L <- Lmin:Lmax
-
-  accept_count <- 0
 
   # loop through iterations
   for (i in 1:n_samples) {
@@ -123,9 +130,6 @@ hmc <- function (dag,
 
       if (log_u < log_accept_ratio) {
 
-        # on acceptance, iterate the counter and leave the parameters in the dag
-        # to be put in the trace
-        accept_count <- accept_count + 1
         accept_trace[i] <- 1
 
       } else {
@@ -153,32 +157,49 @@ hmc <- function (dag,
     # optionally tune epsilon
     if (tune) {
 
-      # acceptance rate over the last accept_group runs
-      start <- max(1, i - accept_group)
-      end <- i
-      accept_rate <- mean(accept_trace[start:end], na.rm = TRUE)
+      adapt_epsilon <- in_periods(i, n_samples, epsilon_periods)
+      if (adapt_epsilon) {
 
-      # decrease the adaptation rate as we go
-      adapt_rate <- min(1, gamma * i ^ (-kappa))
+        # acceptance rate over the last accept_group runs
+        start <- max(1, i - accept_group)
+        end <- i
+        accept_rate <- mean(accept_trace[start:end], na.rm = TRUE)
 
-      # shift epsilon in the right direction, making sure it never goes negative
-      epsilon <- epsilon + pmax(-(epsilon + sqrt(.Machine$double.eps)),
-                                adapt_rate * (accept_rate - target_acceptance))
+        # decrease the adaptation rate as we go
+        adapt_rate <- min(1, gamma * i ^ (-kappa))
 
-      # keep track of epsilon
-      epsilon_trace[i] <- epsilon
+        # shift epsilon in the right direction, making sure it never goes negative
+        epsilon <- epsilon + pmax(-(epsilon + sqrt(.Machine$double.eps)),
+                                  adapt_rate * (accept_rate - target_acceptance))
 
-      # update welford accumulator for posterior variance
-      welford_delta <- x - welford_m
-      welford_m <- welford_m + welford_delta / i
-      welford_m2 <- welford_m2 + welford_delta * (x - welford_m)
+        # keep track of epsilon
+        epsilon_trace[i] <- epsilon
 
-      # get sample posterior variance and shrink it
-      if (i > 1 & (i %% diag_sd_update_rate == 0)) {
-        sample_var <- welford_m2 / (i - 1)
-        var_shrinkage <- 1 / (i + 5)
-        var_shrunk <- i * var_shrinkage * sample_var + 5e-3 * var_shrinkage
-        diag_sd <- sqrt(var_shrunk)
+      }
+
+      # only adapt diag_sd in the first third of tuning, so that epsilon can
+      # settle in during the second half
+      adapt_diag_sd <- in_periods(i, n_samples, diag_sd_periods)
+      if (adapt_diag_sd) {
+
+        # update welford accumulator for posterior variance
+        n_accepted <- sum(accept_trace)
+
+        # update only if this step was accepted
+        if (accept_trace[i] == 1) {
+          welford_delta <- x - welford_m
+          welford_m <- welford_m + welford_delta / n_accepted
+          welford_m2 <- welford_m2 + welford_delta * (x - welford_m)
+        }
+
+        # if there are samples, and we want to adapt, get the sample posterior
+        # variance and shrink it
+        if (n_accepted > 1 & (i %% diag_sd_update_rate == 0)) {
+          sample_var <- welford_m2 / (n_accepted - 1)
+          var_shrinkage <- 1 / (n_accepted + 5)
+          var_shrunk <- n_accepted * var_shrinkage * sample_var + 5e-3 * var_shrinkage
+          diag_sd <- sqrt(var_shrunk)
+        }
 
       }
 
@@ -196,8 +217,20 @@ hmc <- function (dag,
 
   attr(trace, 'last_x') <- x
   attr(trace, 'control') <- control
+
   trace
 
 }
+
+# determine whether the sampler is within one of the adaptation periods for a given parameter
+in_periods <- function (i, n_samples, periods) {
+  fraction <- 1 / n_samples
+  in_period <- vapply(periods, within, fraction, FUN.VALUE = FALSE)
+  any(in_period)
+}
+
+within <- function (period, fraction)
+  fraction >= period[1] & fraction <= period[2]
+
 
 samplers_module <- module(hmc)
