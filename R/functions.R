@@ -52,6 +52,10 @@
 #'  min(..., na.rm = TRUE)
 #'  max(..., na.rm = TRUE)
 #'
+#'  # cumulative operations
+#'  cumsum(x)
+#'  cumprod(x)
+#'
 #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
 #'
@@ -396,6 +400,27 @@ max.greta_array <- function (..., na.rm = TRUE) {
      dimfun = dimfun,
      tf_operation = tf$reduce_max)
 
+}
+
+check_cum_op <- function (x) {
+  dims <- dim(x)
+  if (length(dims) > 2 | dims[2] != 1) {
+    stop ("'x' must be a column vector, but has dimensions ",
+          paste(dims, collapse = ' x '),
+          call. = FALSE)
+  }
+}
+
+#' @export
+cumsum.greta_array <- function (x) {
+  check_cum_op(x)
+  op("cumsum", x, tf_operation = tf$cumsum)
+}
+
+#' @export
+cumprod.greta_array <- function (x) {
+  check_cum_op(x)
+  op("cumprod", x, tf_operation = tf$cumprod)
 }
 
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
