@@ -597,4 +597,113 @@ hybrid <- function(dag,
   trace
 }
 
+block_slice_discrete <- function(state, dag, slice_par) {
+
+  for (i in seq_along(state)) {
+    width <- slice_par$w_size[i]
+    factor <- slice_par$factors[, i]
+
+    # sample random slice
+    dag$send_parameters(floor(state))
+    logy <- dag$log_density()
+    logt <- logy - rexp(1) # height
+
+    # approximate slice width
+    lower <- -1.0 * w_size * runif(1)
+    upper <- lower + w_size;
+
+    # step out to increase slice width
+    x0 <- state + lower * factor
+    dag$send_parameters(floor(x0))
+    logz <- dag$log_density()
+    while (logt < logy) {
+      slice_par$n_expand[i] <- slice_par$n_expand[i] + 1
+      lower <- lower - w_size
+      x0 <- state + lower * factor
+      dag$send_parameters(floor(x0))
+      logz <- dag$log_density()
+    }
+
+    x0 <- state + upper * factor
+    dag$send_parameters(floor(x0))
+    logz <- dag$log_density()
+    while (logt < logz) {
+      slice_par$n_expand[i] <- slice_par$n_expand[i] + 1
+      upper <- upper + w_size
+      x0 <- state + upper * factor
+      dag$send_parameters(floor(x0))
+      logz <- dag$log_density()
+    }
+
+    # update state using estimated slice
+    xs <- lower + runif(1) * (upper - lower)
+
+    # break is xs is in slice
+    x0 <- state + xs * factor
+    dag$send_parameters(floor(x0))
+    logz <- dag$log_density()
+    if (logt < logz) {
+      state <- state + xs * factor
+      break
+    }
+
+    # shrink interval if proposal rejected
+    slice_par$n_shrink[i] <- slice_par$n_shrink[i] + 1
+
+    lower <- ifelse(xs < 0, xs, lower)
+    upper <- ifelse(xs > 0, xs, upper)
+  }
+
+  slice_par$n_proposal <- slice_par$n_proposal + 1
+  out <- list(state, slice_par)
+  out
+}
+
+tune_factor <- function(slice_par, sample_mean, sample_cov, n_store) {
+  sample_cov_norm <- (1.0 / (n_store - 1)) *
+    (sample_cov - sample_mean %*% t(sample_mean) * (1.0 / n_store))
+
+  # update factors using eigenvectors of sample covariance
+  slice_par$factors <- eigen(sample_cov_norm)$vectors
+
+  #  reset counters
+  slice_par$n_expand <- array(0, c(length(sample_mean), 1))
+  slice_par$n_shrink <- array(0, c(length(sample_mean), 1))
+
+  slice_par$n_iter <- 1
+  slice_par$n_proposal <- 0
+
+  slice_par
+}
+
+tune_factor_heuristic <- function (slice_par, target = 0.5) {
+  for (i in seq_along(slice_par$n_expand)) {
+    denom <- slice_par$n_expand[i] + slice_par$n_shrink[i]
+
+    if (denom > 0) {
+      ratio <- slice_par$nExpands[I] / denom;
+
+      if ( 0.0 == ratio )
+        ratio <- 1.0 / denom;
+
+      multiplier <- (ratio / targetRatio);
+
+      # Modify Initial Interval Width
+      slice_par$intervalWidth[I] <-
+        slice_par$intervalWidth[I] * multiplier;
+    }
+  }
+
+  #  Reset Interval Width Counters
+  ### WTF IS K???
+  slice_par$nExpands   <- array(0,c(K,1))
+  slice_par$nShrinks   <- array(0,c(K,1))
+  slice_par$nProposals <- 0
+
+  # Double Number of Iterations to Next Adaptation
+  slice_par$n_iter <- slice_par$n_iter * 2
+
+  slice_par
+}
+
 samplers_module <- module(hmc, slice, hybrid)
