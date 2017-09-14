@@ -508,18 +508,18 @@ hybrid <- function(dag,
       while((L > lower_bounds[discrete][j]) & (logt > logz)) {
         L <- L - w_size
         L <- ifelse(L > lower_bounds[discrete][j], L, lower_bounds[discrete][j])
-        params[j] <- floor(L)
+        params[discrete][j] <- floor(L)
         dag$send_parameters(params)
         logt <- dag$log_density()
       }
       R <- ifelse(R < upper_bounds[discrete][j], R, upper_bounds[discrete][j])
-      params[j] <- floor(R)
+      params[discrete][j] <- floor(R)
       dag$send_parameters(params)
       logt <- dag$log_density()
       while((R < upper_bounds[discrete][j]) & (logt > logz)) {
         R <- R + w_size
         R <- ifelse(R < upper_bounds[discrete][j], R, upper_bounds[discrete][j])
-        params[j] <- floor(R)
+        params[discrete][j] <- floor(R)
         dag$send_parameters(params)
         logt <- dag$log_density()
       }
@@ -532,12 +532,12 @@ hybrid <- function(dag,
       for (k in seq_len(max_iter)) {
 
         ## SHOULDN'T NEED THIS
-        if (r1 < r0) {
-          r1 <- r0 + slice_eps
-        }
+        #if (r1 < r0) {
+        #  r1 <- r0 + slice_eps
+        #}
 
         xs <- runif(1, r0, r1)
-        params[j] <- floor(xs)
+        params[discrete][j] <- floor(xs)
         dag$send_parameters(params)
         logt <- dag$log_density()
         if (logt > logz)
@@ -553,7 +553,7 @@ hybrid <- function(dag,
         }
       }
       x1 <- xs
-      params[j] <- floor(x1)
+      params[discrete][j] <- floor(x1)
       dag$send_parameters(params)
       logy <- dag$log_density()
     }
