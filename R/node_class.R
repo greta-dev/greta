@@ -228,14 +228,14 @@ node <- R6Class(
       # set sampler bounds for discrete distributions
       if (distribution$discrete) {
         self$sampler_lower <- switch(distribution$distribution_name,
-                                bernoulli = 0,
+                                bernoulli = 0.1,
                                 #binomial = 0,
                                 #categorical = 0,
                                 poisson = 0,
                                 negative_binomial = 0,
                                 -Inf)
         self$sampler_upper <- switch(distribution$distribution_name,
-                                     bernoulli = 2,
+                                     bernoulli = 1.9,
                                      #binomial = ntrials + 1,
                                      #categorical = nstates + 1,
                                      poisson = Inf,

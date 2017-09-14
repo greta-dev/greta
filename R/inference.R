@@ -113,7 +113,7 @@ stash_trace <- function (trace)
 #'               warmup = 10)
 #' }
 mcmc <- function (model,
-                  method = c("hmc"),
+                  method = c("hmc", "slice", "default"),
                   n_samples = 1000,
                   thin = 1,
                   warmup = 100,
