@@ -218,7 +218,8 @@ mcmc <- function (model,
               w_size = 1.0,
               max_iter = 10000,
               epsilon = 0.005,
-              slice_eps = 0.0001)
+              slice_eps = 0.0001,
+              block_slice = FALSE)
 
   # update them with user overrides
   con[names(control)] <- control
