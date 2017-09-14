@@ -225,6 +225,25 @@ node <- R6Class(
       # add it
       self$distribution <- distribution
 
+      # set sampler bounds for discrete distributions
+      if (distribution$discrete) {
+        self$sampler_lower <- switch(distribution$distribution_name,
+                                bernoulli = 0,
+                                #binomial = 0,
+                                #categorical = 0,
+                                poisson = 0,
+                                negative_binomial = 0,
+                                -Inf)
+        self$sampler_upper <- switch(distribution$distribution_name,
+                                     bernoulli = 2,
+                                     #binomial = ntrials + 1,
+                                     #categorical = nstates + 1,
+                                     poisson = Inf,
+                                     negative_binomial = Inf,
+                                     Inf)
+        # add check to error if sampling from discrete distributions with (-Inf, Inf) bounds
+      }
+
     },
 
     # return a string describing this node, for use in print and summary etc.
