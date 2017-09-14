@@ -531,11 +531,6 @@ hybrid <- function(dag,
       xs <- x0
       for (k in seq_len(max_iter)) {
 
-        ## SHOULDN'T NEED THIS
-        #if (r1 < r0) {
-        #  r1 <- r0 + slice_eps
-        #}
-
         xs <- runif(1, r0, r1)
         params[discrete][j] <- floor(xs)
         dag$send_parameters(params)
@@ -556,6 +551,7 @@ hybrid <- function(dag,
       params[discrete][j] <- floor(x1)
       dag$send_parameters(params)
       logy <- dag$log_density()
+
     }
 
     # either way, store density and location of target parameters straight from the graph
