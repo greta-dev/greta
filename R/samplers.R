@@ -175,4 +175,159 @@ hmc <- function (dag,
 
 }
 
-samplers_module <- module(hmc)
+slice <- function(dag,
+                  init,
+                  n_samples,
+                  thin,
+                  verbose,
+                  pb,
+                  tune = FALSE,
+                  stash = FALSE,
+                  control = list(w_size = 1.0,
+                                 max_iter = 10000,
+                                 slice_eps = 0.0001)) {
+  # setup progress bar
+  if (verbose) {
+    greta:::iterate_progress_bar(pb = pb, it = 0, rejects = 0)
+  }
+
+  # initialise parameters
+  params <- init
+  variable_nodes <- dag$node_tf_names[grep("variable", dag$node_tf_names)]
+  if (dag$discrete) {
+    discrete_vars <- sapply(dag$node_list[names(variable_nodes)],
+                            function(x)
+                              x$distribution$discrete)
+    discrete_names <- variable_nodes[which(discrete_vars)]
+    discrete <- grepl(paste(discrete_names, collapse = "|"), names(params))
+  }
+
+  # unpack options
+  w_size <- control$w_size
+  max_iter <- control$max_iter
+  slice_eps <- control$slice_eps
+
+  # setup continuous sampler tuning parameters
+  numerical_rejections <- 0
+
+  # get initial gradients
+  dag$send_parameters(params)
+  logprob <- dag$log_density()
+
+  # set up trace store (grab values of target variables from graph to get
+  # dimension and names)
+  init_trace <- dag$trace_values()
+  n_target <- length(init_trace)
+  trace <- matrix(NA,
+                  nrow = n_samples %/% thin,
+                  ncol = n_target)
+  colnames(trace) <- names(init_trace)
+
+  # track acceptance
+  accept_trace <- rep(0, n_samples)
+
+  # if anything goes awry, stash the trace so far
+  if (stash)
+    on.exit(greta:::stash_trace(trace))
+
+  accept_count <- 0
+
+  # setup bounds for each variable
+  var_nodes <- dag$node_list[dag$node_types == "variable"]
+  var_dims <- apply(sapply(var_nodes,
+                           function(x) x$dim),
+                    2, prod)
+  lower_bounds <- rep(sapply(var_nodes, function(x) x$sampler_lower), times = var_dims)
+  upper_bounds <- rep(sapply(var_nodes, function(x) x$sampler_upper), times = var_dims)
+
+  for (i in seq_len(n_samples)) {
+
+    # update all parameters using a slice sampler
+    for (j in seq_along(params)) {
+
+      # parameter-wise slice sampler
+      x0 <- params[j]
+      dag$send_parameters(params)
+      logy <- dag$log_density()
+
+      # generate auxiliary variable
+      logz <- logy - rexp(1)
+
+      # generate random interval of width w_size
+      L <- x0 - runif(1) * w_size
+      R <- L + w_size
+
+      # stepping out algorithm to find interval width
+      params[j] <- ifelse(dag$discrete, floor(L), L)
+      dag$send_parameters(params)
+      logt <- dag$log_density()
+      while((L > lower_bounds[j]) & (logt > logz)) {
+        L <- L - w_size
+        params[j] <- ifelse(dag$discrete, floor(L), L)
+        dag$send_parameters(params)
+        logt <- dag$log_density()
+      }
+      params[j] <- ifelse(dag$discrete, floor(R), R)
+      dag$send_parameters(params)
+      logt <- dag$log_density()
+      while((R < upper_bounds[j]) & (logt > logz)) {
+        R <- R + w_size
+        params[j] <- ifelse(dag$discrete, floor(R), R)
+        dag$send_parameters(params)
+        logt <- dag$log_density()
+      }
+
+      # make sure interval is within range
+      r0 <- max(L, lower_bounds[j])
+      r1 <- min(R, upper_bounds[j])
+
+      xs <- x0
+      for (i in seq_len(max_iter)) {
+        xs <- runif(1, r0, r1)
+        params[j] <- ifelse(dag$discrete, floor(xs), xs)
+        dag$send_parameters(params)
+        logt <- dag$log_density()
+        if (logt > logz)
+          break
+        if (xs < x0) {
+          r0 <- xs
+        } else {
+          r1 <- xs
+        }
+        if ((r1 - r0) < slice_eps) {
+          xs <- r0
+          break
+        }
+      }
+      x1 <- xs
+      params[j] <- ifelse(dag$discrete, floor(x1), x1)
+      dag$send_parameters(params)
+      logy <- dag$log_density()
+    }
+
+    # either way, store density and location of target parameters straight from the graph
+    # reset dag parameters for extracting the trace
+    if (i %% thin == 0) {
+      dag$send_parameters(params)
+      trace[i / thin, ] <- dag$trace_values()
+    }
+
+    if (verbose)
+      greta:::iterate_progress_bar(pb = pb, it = i, rejects = numerical_rejections)
+
+  }
+
+  # store the tuned epsilon as the mean of the last half
+  if (tune) {
+    start <- floor(n_samples / 2)
+    end <- n_samples
+    control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
+  }
+
+  # return samples
+  attr(trace, 'last_x') <- params
+  attr(trace, 'control') <- control
+  trace
+}
+
+samplers_module <- module(hmc, slice)

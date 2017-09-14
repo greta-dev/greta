@@ -145,20 +145,54 @@ mcmc <- function (model,
   # get the dag containing the target nodes
   dag <- model$dag
 
+  # extract variable nodes
+  variable_nodes <- dag$node_tf_names[grep("variable", dag$node_tf_names)]
+
+  # extract discrete vars if they exist
+  if (dag$discrete) {
+    discrete_vars <- sapply(dag$node_list[names(variable_nodes)],
+                            function(x)
+                              x$distribution$discrete)
+    discrete_names <- variable_nodes[which(discrete_vars)]
+    # check that sampler is OK
+    if (method == "hmc") {
+      is_are <- ifelse(sum(discrete_vars) == 1,
+                       'is a discrete random variable',
+                       'are discrete random variables')
+      bad_greta_arrays <- paste(discrete_names, collapse = ', ')
+      msg <- sprintf("%s %s, discrete random variables cannot be sampled with hmc sampler",
+                     bad_greta_arrays,
+                     is_are)
+      stop(msg, call. = FALSE)
+    }
+  }
+
   # random starting locations
   if (is.null(initial_values)) {
 
     # try several times
     valid <- FALSE
     attempts <- 1
+    initial_values <- dag$example_parameters()
+
+    if (dag$discrete) {
+      # identify discrete parameters
+      discrete <- grepl(paste(discrete_names, collapse = "|"), names(initial_values))
+    }
+
     while (!valid & attempts < 10) {
 
-      initial_values <- dag$example_parameters()
-      # increase the jitter each time
-      initial_values[] <- rnorm(length(initial_values), 0, 1 + attempts / 5)
+      # increase the jitter each time for continuous vars
+      if (dag$discrete) {
+        # set different inits for discrete and continuous variables
+        initial_values[!discrete] <- rnorm(sum(!discrete), 0, 1 + attempts / 5)
+        initial_values[discrete] <- rbinom(sum(discrete), 1, 0.5)
+      } else {
+        initial_values[] <- rnorm(length(initial_values), 0, 1 + attempts / 5)
+      }
 
       # test validity of values
-      valid <- valid_parameters(dag, initial_values)
+      valid <- greta:::valid_parameters(dag, initial_values)
       attempts <- attempts + 1
 
     }
@@ -169,30 +203,31 @@ mcmc <- function (model,
             'initial_values argument to mcmc',
             call. = FALSE)
     }
-
   } else {
-
-    if (!valid_parameters(dag, initial_values)) {
+    if (!greta:::valid_parameters(dag, initial_values)) {
       stop ('The log density and gradients could not be evaluated at these ',
             'initial values.',
             call. = FALSE)
     }
-
   }
 
-
   # get default control options
-  con <- switch(method,
-                hmc = list(Lmin = 10,
-                           Lmax = 20,
-                           epsilon = 0.005))
+  ## tidy this to give method specific options only
+  con <- list(Lmin = 10,
+              Lmax = 20,
+              w_size = 1.0,
+              max_iter = 10000,
+              epsilon = 0.005,
+              slice_eps = 0.0001)
 
   # update them with user overrides
   con[names(control)] <- control
 
   # fetch the algorithm
   method <- switch(method,
-                   hmc = hmc)
+                   hmc = hmc,
+                   slice = slice,
+                   default = hybrid)
 
   # if warmup is required, do that now and update init
   if (warmup > 0) {
