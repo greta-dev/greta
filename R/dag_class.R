@@ -9,6 +9,7 @@ dag_class <- R6Class(
     node_types = NA,
     node_tf_names = NA,
     tf_environment = NA,
+    tf_graph = NA,
     target_nodes = NA,
     parameters_example = NA,
     tf_float = NA,
@@ -27,12 +28,9 @@ dag_class <- R6Class(
       # find the nodes we care about
       self$target_nodes <- lapply(target_greta_arrays, member, 'node')
 
-      # stash the node names, types, and tf names
-      self$node_types <- vapply(self$node_list, node_type, FUN.VALUE = '')
-      self$node_tf_names <- self$make_names()
-
-      # set up the tf environment
+      # set up the tf environment, with a graph
       self$tf_environment <- new.env()
+      self$tf_graph <- tf$Graph()
 
       # stash an example list to relist parameters
       self$parameters_example <- self$example_parameters(flat = FALSE)
@@ -44,6 +42,17 @@ dag_class <- R6Class(
 
     },
 
+    # execute an expression on this dag's tensorflow graph
+    on_graph = function (expr) {
+      with(self$tf_graph$as_default(), expr)
+    },
+
+    # execute an exporession in the tensorflow environment
+    tf_run = function (expr) {
+      self$tf_environment$expr <- substitute(expr)
+      self$on_graph(with(self$tf_environment, eval(expr)))
+    },
+
     # return a list of nodes connected to those in the target node list
     build_dag = function (greta_array_list) {
 
@@ -53,6 +62,10 @@ dag_class <- R6Class(
       for (node in target_node_list) {
         node$register_family(self)
       }
+
+      # stash the node names, types, and tf names
+      self$node_types <- vapply(self$node_list, node_type, FUN.VALUE = '')
+      self$node_tf_names <- self$make_names()
 
     },
 
@@ -85,7 +98,7 @@ dag_class <- R6Class(
     },
 
     # define tf graph in environment
-    define_tf = function () {
+    define_tf = function (log_density = TRUE, gradients = TRUE) {
 
       # temporarily pass float type info to options, so it can be accessed by
       # nodes on definition, without cluncky explicit passing
@@ -107,28 +120,32 @@ dag_class <- R6Class(
               call. = FALSE)
       }
 
-      # define all nodes, node densities and free states in the environment
-      lapply(self$node_list, function (x) x$define_tf(self))
+      # define all nodes, node densities and free states in the environment, and
+      # on the graph
+      self$on_graph(lapply(self$node_list,
+                      function (x) x$define_tf(self)))
+
 
       # define an overall log density and gradients, plus adjusted versions
-      self$define_joint_density()
-      self$define_gradients()
+      if (log_density)
+        self$on_graph(self$define_joint_density())
+
+      if (gradients)
+        self$on_graph(self$define_gradients())
 
       # use core and compilation options to create a config object
-      with(self$tf_environment,
-           {config <- tf$ConfigProto(intra_op_parallelism_threads = self$n_cores,
-                                     inter_op_parallelism_threads = self$n_cores)})
+      self$tf_run(config <- tf$ConfigProto(intra_op_parallelism_threads = self$n_cores,
+                                            inter_op_parallelism_threads = self$n_cores))
 
       if (self$compile) {
-        with(self$tf_environment,
-             {py_set_attr(config$graph_options$optimizer_options,
-                          'global_jit_level',
-                          tf$OptimizerOptions$ON_1)})
+        self$tf_run(py_set_attr(config$graph_options$optimizer_options,
+                                 'global_jit_level',
+                                 tf$OptimizerOptions$ON_1))
       }
 
       # start a session and initialise all variables
-      with(self$tf_environment,
-           {sess <- tf$Session(config = config); sess$run(tf$global_variables_initializer())})
+      self$tf_run(sess <- tf$Session(config = config))
+      self$tf_run(sess$run(tf$global_variables_initializer()))
 
     },
 
@@ -237,8 +254,7 @@ dag_class <- R6Class(
 
       # create a feed dict in the TF environment
       self$tf_environment$parameters <- parameters
-      with(self$tf_environment,
-           parameter_dict <- do.call(dict, parameters))
+      self$tf_run(parameter_dict <- do.call(dict, parameters))
 
     },
 
@@ -246,15 +262,15 @@ dag_class <- R6Class(
     # variable nodes, with or without applying the jacobian adjustment
     log_density = function(adjusted = TRUE) {
 
-      cleanly(with(self$tf_environment,
-                   sess$run(joint_density_adj, feed_dict = parameter_dict)))
+      cleanly(self$tf_run(sess$run(joint_density_adj,
+                                   feed_dict = parameter_dict)))
 
     },
 
     gradients = function (adjusted = TRUE) {
 
-      cleanly(with(self$tf_environment,
-                   sess$run(gradients_adj, feed_dict = parameter_dict)))
+      cleanly(self$tf_run(sess$run(gradients_adj,
+                                   feed_dict = parameter_dict)))
 
     },
 
