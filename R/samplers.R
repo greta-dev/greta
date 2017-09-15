@@ -621,11 +621,11 @@ hybrid <- function(dag,
 
 slice_internal <- function(params, discrete, dag, slice_par) {
 
-  width <- slice_par$w_size
-  lower_bounds <- slice_par$lower_bounds
-  upper_bounds <- slice_par$upper_bounds
-
   for (j in seq_len(sum(discrete))) {
+
+    width <- slice_par$w_size[j]
+    lower_bounds <- slice_par$lower_bounds[j]
+    upper_bounds <- slice_par$upper_bounds[j]
 
     # parameter-wise slice sampler
     x0 <- slice_par$aux_state[j]
@@ -641,34 +641,34 @@ slice_internal <- function(params, discrete, dag, slice_par) {
     R <- L + width
 
     # stepping out algorithm to find interval width
-    L <- ifelse(L > lower_bounds[j], L, lower_bounds[j])
+    L <- ifelse(L > lower_bounds, L, lower_bounds)
     params[discrete][j] <- floor(L)
     dag$send_parameters(params)
     logt <- dag$log_density()
-    while((L > lower_bounds[j]) & (logt > logz)) {
-      slice_par$n_expand[i] <- slice_par$n_expand[i] + 1
+    while((L > lower_bounds) & (logt > logz)) {
+      slice_par$n_expand[j] <- slice_par$n_expand[j] + 1
       L <- L - width
-      L <- ifelse(L > lower_bounds[j], L, lower_bounds[j])
+      L <- ifelse(L > lower_bounds, L, lower_bounds)
       params[discrete][j] <- floor(L)
       dag$send_parameters(params)
       logt <- dag$log_density()
     }
-    R <- ifelse(R < upper_bounds[j], R, upper_bounds[j])
+    R <- ifelse(R < upper_bounds, R, upper_bounds)
     params[discrete][j] <- floor(R)
     dag$send_parameters(params)
     logt <- dag$log_density()
-    while((R < upper_bounds[j]) & (logt > logz)) {
-      slice_par$n_expand[i] <- slice_par$n_expand[i] + 1
+    while((R < upper_bounds) & (logt > logz)) {
+      slice_par$n_expand[j] <- slice_par$n_expand[j] + 1
       R <- R + width
-      R <- ifelse(R < upper_bounds[j], R, upper_bounds[j])
+      R <- ifelse(R < upper_bounds, R, upper_bounds)
       params[discrete][j] <- floor(R)
       dag$send_parameters(params)
       logt <- dag$log_density()
     }
 
     # make sure interval is within range
-    r0 <- max(L, lower_bounds[j])
-    r1 <- min(R, upper_bounds[j])
+    r0 <- max(L, lower_bounds)
+    r1 <- min(R, upper_bounds)
 
     xs <- x0
     for (k in seq_len(slice_par$max_iter)) {
@@ -693,7 +693,7 @@ slice_internal <- function(params, discrete, dag, slice_par) {
 
     }
     x1 <- xs
-    slice_par$aux_state <- x1
+    slice_par$aux_state[j] <- x1
     params[discrete][j] <- floor(x1)
     dag$send_parameters(params)
     logy <- dag$log_density()
