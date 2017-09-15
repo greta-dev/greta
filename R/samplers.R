@@ -8,8 +8,7 @@ hmc <- function (dag,
                  stash = FALSE,
                  control = list(Lmin = 10,
                                 Lmax = 20,
-                                epsilon = 0.005,
-                                block_slice = TRUE)) {
+                                epsilon = 0.005)) {
 
   # unpack options
   Lmin <- control$Lmin
@@ -187,7 +186,7 @@ slice <- function(dag,
                   control = list(w_size = 1.0,
                                  max_iter = 10000,
                                  slice_eps = 0.0001,
-                                 block_slice = TRUE)) {
+                                 block_slice = FALSE)) {
   # setup progress bar
   if (verbose) {
     greta:::iterate_progress_bar(pb = pb, it = 0, rejects = 0)
@@ -375,14 +374,13 @@ hybrid <- function(dag,
   numerical_rejections <- 0
 
   if (block_slice) {
+
     n_dim <- sum(discrete)
 
-    # initialise mean and covariance arrays
-    state_mean <- array(0, c(n_dim, 1))
-    state_sample_cov <- array(0, c(n_dim, n_dim))
-
     # define parameters for block slice sampler
-    slice_par <- list(n_expand = array(0, c(n_dim, 1)),
+    slice_par <- list(aux_state = array(0, c(n_dim, 1)),
+                      aux_covar = array(0, c(n_dim, n_dim)),
+                      n_expand = array(0, c(n_dim, 1)),
                       n_shrink = array(0, c(n_dim, 1)),
                       w_size = array(w_size, c(n_dim, 1)),
                       factors = diag(n_dim),
@@ -391,7 +389,9 @@ hybrid <- function(dag,
                       n_iter_adapt_slice = 1,
                       n_iter_adapt_factor = max(floor(n_samples / 5), 1),
                       lower_bounds = array(-1, c(n_dim, 1)),
-                      upper_bounds = array(1, c(n_dim, 1)))
+                      upper_bounds = array(1, c(n_dim, 1)),
+                      slice_eps = slice_eps,
+                      max_iter = max_iter)
   }
 
   # get initial gradients
@@ -522,16 +522,13 @@ hybrid <- function(dag,
         update <- block_slice_internal(params = params,
                                        discrete = discrete,
                                        dag = dag,
-                                       slice_par = slice_par,
-                                       slice_eps = slice_eps,
-                                       max_iter = max_iter)
+                                       slice_par = slice_par)
         params <- update$params
         slice_par <- update$slice_par
 
         # update mean and covariance arrays
-        state_mean <- state_mean + params[discrete]
-        state_sample_cov <- state_sample_cov +
-          params[discrete] %*% t(params[discrete])
+        slice_par$aux_covar <- slice_par$aux_covar +
+          slice_par$aux_state %*% t(slice_par$aux_state)
         slice_par$n_store <- slice_par$n_store + 1
 
         # optionally tune slice sampler parameters
@@ -540,18 +537,18 @@ hybrid <- function(dag,
             slice_par <- tune_slice_par(slice_par)
 
           if ((slice_par$n_iter_adapt_factor %% i) == 0) {
-            slice_par <- tune_factor(slice_par, state_mean, state_sample_cov)
+            slice_par <- tune_factor(slice_par)
 
             # reset factor parameters
-            state_mean <- array(0, c(n_dim, 1))
-            state_sample_cov <- array(0, c(n_dim, n_dim))
+            slice_par$aux_state <- array(0, c(n_dim, 1))
+            slice_par$aux_covar <- array(0, c(n_dim, n_dim))
           }
         }
     } else {
       for (j in seq_len(sum(discrete))) {
 
         # parameter-wise slice sampler
-        x0 <- params[discrete][j]
+        x0 <- params[discrete][j]  ## FIX THIS: needs to be auxilliary value
         dag$send_parameters(params)
         logy <- dag$log_density()
 
@@ -661,11 +658,10 @@ hybrid <- function(dag,
 }
 
 # factor slice sampler
-block_slice_internal <- function(params, discrete, dag,
-                                 slice_par, slice_eps, max_iter) {
+block_slice_internal <- function(params, discrete, dag, slice_par) {
 
-  state <- params[discrete]
-  for (i in seq_along(state)) {
+  state <- slice_par$aux_state
+  for (i in seq_along(slice_par$w_size)) {
     width <- slice_par$w_size[i]
     factor <- slice_par$factors[, i]
     lower_bounds <- slice_par$lower_bounds[i]
@@ -682,7 +678,12 @@ block_slice_internal <- function(params, discrete, dag,
 
     # step out to increase slice width
     x0 <- state + lower * factor
+
+    ## CURRENTLY only set up for bernoulli variables
+    # need to define a distribution-specific transform
     params[discrete] <- (sign(x0) + 1) / 2
+
+
     dag$send_parameters(params)
     logz <- dag$log_density()
     while ((logt < logz) & (lower > lower_bounds)) {
@@ -712,7 +713,7 @@ block_slice_internal <- function(params, discrete, dag,
     r1 <- min(upper, upper_bounds)
 
     # update state using estimated slice
-    for (k in seq_len(max_iter)) {
+    for (k in seq_len(slice_par$max_iter)) {
 
       xs <- runif(1, r0, r1)
       state_new <- state + xs * factor
@@ -726,7 +727,7 @@ block_slice_internal <- function(params, discrete, dag,
       } else {
         r1 <- xs
       }
-      if ((r1 - r0) < slice_eps) {
+      if ((r1 - r0) < slice_par$slice_eps) {
         xs <- r0
         break
       }
@@ -735,6 +736,7 @@ block_slice_internal <- function(params, discrete, dag,
 
     # set state to final state
     state <- state + xs * factor
+    slice_par$aux_state <- state
     params[discrete] <- (sign(state) + 1) / 2
   }
 
@@ -743,16 +745,16 @@ block_slice_internal <- function(params, discrete, dag,
 }
 
 # tune factors for factor slice sampler
-tune_factor <- function(slice_par, sample_mean, sample_cov) {
+tune_factor <- function(slice_par) {
   sample_cov_norm <- (1.0 / (slice_par$n_store - 1)) *
-    (sample_cov - sample_mean %*% t(sample_mean) * (1.0 / slice_par$n_store))
+    (slice_par$aux_covar - slice_par$aux_state %*% t(slice_par$aux_state) * (1.0 / slice_par$n_store))
 
   # update factors using eigenvectors of sample covariance
   slice_par$factors <- eigen(sample_cov_norm)$vectors
 
   #  reset counters
-  slice_par$n_expand <- array(0, c(length(sample_mean), 1))
-  slice_par$n_shrink <- array(0, c(length(sample_mean), 1))
+  slice_par$n_expand <- array(0, c(length(slice_par$aux_state), 1))
+  slice_par$n_shrink <- array(0, c(length(slice_par$aux_state), 1))
 
   slice_par$n_iter <- 1
   slice_par$n_store <- 1
