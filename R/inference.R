@@ -220,6 +220,10 @@ mcmc <- function (model,
               epsilon = 0.005,
               slice_eps = 0.0001,
               block_slice = FALSE)
+  if (method == "slice")
+    con$factors <- diag(length(discrete))
+  if (method == "default")
+    con$factors <- diag(sum(discrete))
 
   # update them with user overrides
   con[names(control)] <- control

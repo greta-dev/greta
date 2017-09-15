@@ -164,7 +164,7 @@ hmc <- function (dag,
 
   # store the tuned epsilon as the mean of the last half
   if (tune) {
-    start <- floor(n_samples/2)
+    start <- floor(n_samples / 2)
     end <- n_samples
     control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
   }
@@ -186,7 +186,8 @@ slice <- function(dag,
                   control = list(w_size = 1.0,
                                  max_iter = 10000,
                                  slice_eps = 0.0001,
-                                 block_slice = FALSE)) {
+                                 block_slice = FALSE,
+                                 factors = NULL)) {
   # setup progress bar
   if (verbose) {
     greta:::iterate_progress_bar(pb = pb, it = 0, rejects = 0)
@@ -210,6 +211,11 @@ slice <- function(dag,
   max_iter <- control$max_iter
   slice_eps <- control$slice_eps
   block_slice <- control$block_slice
+  if (is.null(control$factors)) {
+    factors <- diag(length(discrete))
+  } else {
+    factors <- control$factors
+  }
 
   # setup continuous sampler tuning parameters
   numerical_rejections <- 0
@@ -236,6 +242,8 @@ slice <- function(dag,
   upper_bounds <- rep(sapply(var_nodes, function(x) x$sampler_upper), times = var_dims)
 
   n_dim <- length(params)
+  if (length(w_size) == 1)
+    w_size <- rep(w_size, n_dim)
 
   if (block_slice) {
 
@@ -244,8 +252,8 @@ slice <- function(dag,
                       aux_covar = matrix(0, nrow = n_dim, ncol = n_dim),
                       n_expand = rep(0, n_dim),
                       n_shrink = rep(0, n_dim),
-                      w_size = rep(w_size, n_dim),
-                      factors = diag(n_dim),
+                      w_size = w_size,
+                      factors = factors,
                       n_proposal = 0,
                       n_store = 1,
                       n_iter_adapt_slice = 1,
@@ -254,13 +262,14 @@ slice <- function(dag,
                       upper_bounds = rep(100, n_dim),
                       slice_eps = slice_eps,
                       max_iter = max_iter)
+
   } else {
 
     # define parameters for parameter-wise slice sampler
     slice_par <- list(aux_state = rep(0, n_dim),
                       n_expand = rep(0, n_dim),
                       n_shrink = rep(0, n_dim),
-                      w_size = rep(w_size, n_dim),
+                      w_size = w_size,
                       n_proposal = 0,
                       n_store = 1,
                       n_iter_adapt_slice = 1,
@@ -334,8 +343,11 @@ slice <- function(dag,
 
   }
 
-  if (tune)
+  if (tune) {
     control$w_size <- slice_par$w_size
+    if (block_slice)
+      control$factors <- slice_par$factors
+  }
 
   # return samples
   attr(trace, 'last_x') <- params
@@ -357,7 +369,8 @@ hybrid <- function(dag,
                                   max_iter = 10000,
                                   epsilon = 0.005,
                                   slice_eps = 0.0001,
-                                  block_slice = TRUE)) {
+                                  block_slice = TRUE,
+                                  factors = NULL)) {
   # setup progress bar
   if (verbose) {
     greta:::iterate_progress_bar(pb = pb, it = 0, rejects = 0)
@@ -382,6 +395,11 @@ hybrid <- function(dag,
   max_iter <- control$max_iter
   slice_eps <- control$slice_eps
   block_slice <- control$block_slice
+  if (is.null(control$factors)) {
+    factors <- diag(sum(discrete))
+  } else {
+    factors <- control$factors
+  }
 
   # setup continuous sampler tuning parameters
   accept_group = 50
@@ -401,14 +419,16 @@ hybrid <- function(dag,
   if (block_slice) {
 
     n_dim <- sum(discrete)
+    if (length(w_size) == 1)
+      w_size <- rep(w_size, n_dim)
 
     # define parameters for block slice sampler
     slice_par <- list(aux_state = rep(0, n_dim),
                       aux_covar = matrix(0, nrow = n_dim, ncol = n_dim),
                       n_expand = rep(0, n_dim),
                       n_shrink = rep(0, n_dim),
-                      w_size = rep(w_size, n_dim),
-                      factors = diag(n_dim),
+                      w_size = w_size,
+                      factors = factors,
                       n_proposal = 0,
                       n_store = 1,
                       n_iter_adapt_slice = 1,
@@ -417,15 +437,18 @@ hybrid <- function(dag,
                       upper_bounds = rep(1, n_dim),
                       slice_eps = slice_eps,
                       max_iter = max_iter)
+
   } else {
 
     n_dim <- sum(discrete)
+    if (length(w_size) == 1)
+      w_size <- rep(w_size, n_dim)
 
     # define parameters for parameter-wise slice sampler
     slice_par <- list(aux_state = rep(0, n_dim),
                       n_expand = rep(0, n_dim),
                       n_shrink = rep(0, n_dim),
-                      w_size = rep(w_size, n_dim),
+                      w_size = w_size,
                       n_proposal = 0,
                       n_store = 1,
                       n_iter_adapt_slice = 1,
@@ -433,6 +456,7 @@ hybrid <- function(dag,
                       upper_bounds = upper_bounds[discrete],
                       slice_eps = slice_eps,
                       max_iter = max_iter)
+
   }
 
   # get initial gradients
@@ -633,6 +657,8 @@ hybrid <- function(dag,
     end <- n_samples
     control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
     control$w_size <- slice_par$w_size
+    if (block_slice)
+      control$factors <- slice_par$factors
   }
 
   # return samples
@@ -747,27 +773,27 @@ block_slice_internal <- function(params, update, discrete, dag, slice_par) {
 
     # step out to increase slice width
     x0 <- state + lower * factor
-    params[update] <- ifelse(discrete, discrete_transform(x0), x0)
+    params[update] <- ifelse(discrete[update], discrete_transform(x0), x0)
     dag$send_parameters(params)
     logz <- dag$log_density()
     while ((logt < logz) & (lower > lower_bounds)) {
       slice_par$n_expand[i] <- slice_par$n_expand[i] + 1
       lower <- lower - width
       x0 <- state + lower * factor
-      params[update] <- ifelse(discrete, discrete_transform(x0), x0)
+      params[update] <- ifelse(discrete[update], discrete_transform(x0), x0)
       dag$send_parameters(params)
       logz <- dag$log_density()
     }
 
     x0 <- state + upper * factor
-    params[update] <- ifelse(discrete, discrete_transform(x0), x0)
+    params[update] <- ifelse(discrete[update], discrete_transform(x0), x0)
     dag$send_parameters(params)
     logz <- dag$log_density()
     while ((logt < logz) && (upper < upper_bounds)) {
       slice_par$n_expand[i] <- slice_par$n_expand[i] + 1
       upper <- upper + width
       x0 <- state + upper * factor
-      params[update] <- ifelse(discrete, discrete_transform(x0), x0)
+      params[update] <- ifelse(discrete[update], discrete_transform(x0), x0)
       dag$send_parameters(params)
       logz <- dag$log_density()
     }
@@ -781,7 +807,7 @@ block_slice_internal <- function(params, update, discrete, dag, slice_par) {
 
       xs <- runif(1, r0, r1)
       state_new <- state + xs * factor
-      params[update] <- ifelse(discrete, discrete_transform(state_new), state_new)
+      params[update] <- ifelse(discrete[update], discrete_transform(state_new), state_new)
       dag$send_parameters(params)
       logz <- dag$log_density()
       if (logt < logz)
@@ -803,7 +829,7 @@ block_slice_internal <- function(params, update, discrete, dag, slice_par) {
     # set state to final state
     state <- state + xs * factor
     slice_par$aux_state <- state
-    params[update] <- ifelse(discrete, discrete_transform(state), state)
+    params[update] <- ifelse(discrete[update], discrete_transform(state), state)
   }
 
   out <- list(params = params, slice_par = slice_par)
@@ -860,7 +886,7 @@ tune_slice_par <- function (slice_par, target = 0.5) {
 }
 
 discrete_transform <- function(x) {
-  (sign(x) + 1) / 2
+  x <- ifelse(x == 0, 0, (sign(x) + 1) / 2)
 }
 
 samplers_module <- module(hmc, slice, hybrid)
