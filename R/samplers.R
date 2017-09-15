@@ -346,7 +346,6 @@ hybrid <- function(dag,
   }
 
   # initialise parameters
-  # initialise parameters
   params <- init
   variable_nodes <- dag$node_tf_names[grep("variable", dag$node_tf_names)]
   if (dag$discrete) {
@@ -392,6 +391,30 @@ hybrid <- function(dag,
                       upper_bounds = array(1, c(n_dim, 1)),
                       slice_eps = slice_eps,
                       max_iter = max_iter)
+  } else {
+
+    n_dim <- sum(discrete)
+
+    # setup bounds for each variable
+    var_nodes <- dag$node_list[dag$node_types == "variable"]
+    var_dims <- apply(sapply(var_nodes,
+                             function(x) x$dim),
+                      2, prod)
+    lower_bounds <- rep(sapply(var_nodes, function(x) x$sampler_lower), times = var_dims)
+    upper_bounds <- rep(sapply(var_nodes, function(x) x$sampler_upper), times = var_dims)
+
+    # define parameters for parameter-wise slice sampler
+    slice_par <- list(aux_state = array(0, c(n_dim, 1)),
+                      n_expand = array(0, c(n_dim, 1)),
+                      n_shrink = array(0, c(n_dim, 1)),
+                      w_size = array(w_size, c(n_dim, 1)),
+                      n_proposal = 0,
+                      n_store = 1,
+                      n_iter_adapt_slice = 1,
+                      lower_bounds = lower_bounds[discrete],
+                      upper_bounds = upper_bounds[discrete],
+                      slice_eps = slice_eps,
+                      max_iter = max_iter)
   }
 
   # get initial gradients
@@ -422,14 +445,6 @@ hybrid <- function(dag,
   # if anything goes awry, stash the trace so far
   if (stash)
     on.exit(greta:::stash_trace(trace))
-
-  # setup bounds for each variable
-  var_nodes <- dag$node_list[dag$node_types == "variable"]
-  var_dims <- apply(sapply(var_nodes,
-                           function(x) x$dim),
-                    2, prod)
-  lower_bounds <- rep(sapply(var_nodes, function(x) x$sampler_lower), times = var_dims)
-  upper_bounds <- rep(sapply(var_nodes, function(x) x$sampler_upper), times = var_dims)
 
   accept_count <- 0
 
@@ -545,73 +560,20 @@ hybrid <- function(dag,
           }
         }
     } else {
-      for (j in seq_len(sum(discrete))) {
 
-        # parameter-wise slice sampler
-        x0 <- params[discrete][j]  ## FIX THIS: needs to be auxilliary value
-        dag$send_parameters(params)
-        logy <- dag$log_density()
+      # run update on each parameter
+      update <- slice_internal(params = params,
+                               discrete = discrete,
+                               dag = dag,
+                               slice_par = slice_par)
+      params <- update$params
+      slice_par <- update$slice_par
 
-        # generate auxiliary variable
-        logz <- logy - rexp(1)
-
-        # generate random interval of width w_size
-        L <- x0 - runif(1) * w_size
-        R <- L + w_size
-
-        # stepping out algorithm to find interval width
-        L <- ifelse(L > lower_bounds[discrete][j], L, lower_bounds[discrete][j])
-        params[discrete][j] <- floor(L)
-        dag$send_parameters(params)
-        logt <- dag$log_density()
-        while((L > lower_bounds[discrete][j]) & (logt > logz)) {
-          L <- L - w_size
-          L <- ifelse(L > lower_bounds[discrete][j], L, lower_bounds[discrete][j])
-          params[discrete][j] <- floor(L)
-          dag$send_parameters(params)
-          logt <- dag$log_density()
-        }
-        R <- ifelse(R < upper_bounds[discrete][j], R, upper_bounds[discrete][j])
-        params[discrete][j] <- floor(R)
-        dag$send_parameters(params)
-        logt <- dag$log_density()
-        while((R < upper_bounds[discrete][j]) & (logt > logz)) {
-          R <- R + w_size
-          R <- ifelse(R < upper_bounds[discrete][j], R, upper_bounds[discrete][j])
-          params[discrete][j] <- floor(R)
-          dag$send_parameters(params)
-          logt <- dag$log_density()
-        }
-
-        # make sure interval is within range
-        r0 <- max(L, lower_bounds[discrete][j])
-        r1 <- min(R, upper_bounds[discrete][j])
-
-        xs <- x0
-        for (k in seq_len(max_iter)) {
-
-          xs <- runif(1, r0, r1)
-          params[discrete][j] <- floor(xs)
-          dag$send_parameters(params)
-          logt <- dag$log_density()
-          if (logt > logz)
-            break
-          if (xs < x0) {
-            r0 <- xs
-          } else {
-            r1 <- xs
-          }
-          if ((r1 - r0) < slice_eps) {
-            xs <- r0
-            break
-          }
-        }
-        x1 <- xs
-        params[discrete][j] <- floor(x1)
-        dag$send_parameters(params)
-        logy <- dag$log_density()
-
+      if (tune) {
+        if ((slice_par$n_iter_adapt_slice %% i) == 0)
+          slice_par <- tune_slice_par(slice_par)
       }
+
     }
 
     # either way, store density and location of target parameters straight from the graph
@@ -657,6 +619,91 @@ hybrid <- function(dag,
   trace
 }
 
+slice_internal <- function(params, discrete, dag, slice_par) {
+
+  width <- slice_par$w_size
+  lower_bounds <- slice_par$lower_bounds
+  upper_bounds <- slice_par$upper_bounds
+
+  for (j in seq_len(sum(discrete))) {
+
+    # parameter-wise slice sampler
+    x0 <- slice_par$aux_state[j]
+    params[discrete][j] <- x0
+    dag$send_parameters(params)
+    logy <- dag$log_density()
+
+    # generate auxiliary variable
+    logz <- logy - rexp(1)
+
+    # generate random interval of width w_size
+    L <- x0 - runif(1) * width
+    R <- L + width
+
+    # stepping out algorithm to find interval width
+    L <- ifelse(L > lower_bounds[j], L, lower_bounds[j])
+    params[discrete][j] <- floor(L)
+    dag$send_parameters(params)
+    logt <- dag$log_density()
+    while((L > lower_bounds[j]) & (logt > logz)) {
+      slice_par$n_expand[i] <- slice_par$n_expand[i] + 1
+      L <- L - width
+      L <- ifelse(L > lower_bounds[j], L, lower_bounds[j])
+      params[discrete][j] <- floor(L)
+      dag$send_parameters(params)
+      logt <- dag$log_density()
+    }
+    R <- ifelse(R < upper_bounds[j], R, upper_bounds[j])
+    params[discrete][j] <- floor(R)
+    dag$send_parameters(params)
+    logt <- dag$log_density()
+    while((R < upper_bounds[j]) & (logt > logz)) {
+      slice_par$n_expand[i] <- slice_par$n_expand[i] + 1
+      R <- R + width
+      R <- ifelse(R < upper_bounds[j], R, upper_bounds[j])
+      params[discrete][j] <- floor(R)
+      dag$send_parameters(params)
+      logt <- dag$log_density()
+    }
+
+    # make sure interval is within range
+    r0 <- max(L, lower_bounds[j])
+    r1 <- min(R, upper_bounds[j])
+
+    xs <- x0
+    for (k in seq_len(slice_par$max_iter)) {
+
+      xs <- runif(1, r0, r1)
+      params[discrete][j] <- floor(xs)
+      dag$send_parameters(params)
+      logt <- dag$log_density()
+      if (logt > logz)
+        break
+      if (xs < x0) {
+        r0 <- xs
+      } else {
+        r1 <- xs
+      }
+      if ((r1 - r0) < slice_par$slice_eps) {
+        xs <- r0
+        break
+      }
+
+      slice_par$n_shrink[j] <- slice_par$n_shrink[j] + 1
+
+    }
+    x1 <- xs
+    slice_par$aux_state <- x1
+    params[discrete][j] <- floor(x1)
+    dag$send_parameters(params)
+    logy <- dag$log_density()
+
+  }
+
+  out <- list(params = params, slice_par = slice_par)
+  out
+}
+
 # factor slice sampler
 block_slice_internal <- function(params, discrete, dag, slice_par) {
 
@@ -682,7 +729,6 @@ block_slice_internal <- function(params, discrete, dag, slice_par) {
     ## CURRENTLY only set up for bernoulli variables
     # need to define a distribution-specific transform
     params[discrete] <- (sign(x0) + 1) / 2
-
 
     dag$send_parameters(params)
     logz <- dag$log_density()
@@ -731,7 +777,9 @@ block_slice_internal <- function(params, discrete, dag, slice_par) {
         xs <- r0
         break
       }
+
       slice_par$n_shrink[i] <- slice_par$n_shrink[i] + 1
+
     }
 
     # set state to final state
