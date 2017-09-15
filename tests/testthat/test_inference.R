@@ -199,11 +199,51 @@ test_that('mcmc works with poisson random variables', {
   source('helpers.R')
 
   x <- rpois(10, lambda = 50)
-  lest <- lognormal(0, 2)
-  mu <- poisson(lambda = lest, dim = 10)
+  mu <- poisson(lambda = mean(x), dim = 1)
   sigma <- lognormal(0, 1)
   distribution(x) = normal(mu, sigma)
-  m <- model(mu, lest)
+  m <- model(mu)
+  expect_ok( mcmc(m,
+                  method = "slice",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = FALSE)) )
+  expect_ok( mcmc(m,
+                  method = "default",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = FALSE)) )
+  expect_ok( mcmc(m,
+                  method = "slice",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = TRUE)) )
+  expect_ok( mcmc(m,
+                  method = "default",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = TRUE)) )
+
+})
+
+test_that('mcmc works with negbin random variables', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- rpois(10, lambda = 50)
+  mu <- negative_binomial(size = mean(x), prob = 0.5, dim = 1)
+  sigma <- lognormal(0, 1)
+  distribution(x) = normal(mu, sigma)
+  m <- model(mu)
   expect_ok( mcmc(m,
                   method = "slice",
                   n_samples = 50,
