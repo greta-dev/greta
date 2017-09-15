@@ -306,6 +306,8 @@ opt <- function (model,
 
   # get the tensorflow environment
   tfe <- model$dag$tf_environment
+  on_graph <- model$dag$on_graph
+  tf_run <- model$dag$tf_run
 
   # get the method
   method <- match.arg(method)
@@ -322,8 +324,8 @@ opt <- function (model,
   con[names(control)] <- control
 
   # set up optimiser
-  tfe$optimiser <- do.call(optimise_fun, con)
-  with(tfe, train <- optimiser$minimize(-joint_density))
+  on_graph(tfe$optimiser <- do.call(optimise_fun, con))
+  tf_run(train <- optimiser$minimize(-joint_density))
 
   # random initial values if unspecified
   if (is.null(initial_values)) {
@@ -332,16 +334,16 @@ opt <- function (model,
   }
 
   # initialize the variables, then set the ones we care about
-  with(tfe, sess$run(tf$global_variables_initializer()))
+  tf_run(sess$run(tf$global_variables_initializer()))
   parameters <- relist_tf(initial_values, model$dag$parameters_example)
 
   for (i in seq_along(parameters)) {
     variable_name <- paste0(names(parameters)[i], '_free')
     vble <- tfe[[variable_name]]
-    init <- tf$constant(parameters[[i]],
-                        shape = vble$shape,
-                        dtype = tf_float())
-    tmp <- tfe$sess$run(vble$assign(init))
+    on_graph( init <- tf$constant(parameters[[i]],
+                                  shape = vble$shape,
+                                  dtype = tf_float()))
+    . <- on_graph(tfe$sess$run(vble$assign(init)))
   }
 
   diff <- old_obj <- Inf
@@ -349,14 +351,14 @@ opt <- function (model,
 
   while (it < max_iterations & diff > tolerance) {
     it <- it + 1
-    with(tfe, sess$run(train))
-    obj <- with(tfe, sess$run(-joint_density))
+    tf_run(sess$run(train))
+    obj <- tf_run(sess$run(-joint_density))
     diff <- abs(old_obj - obj)
     old_obj <- obj
   }
 
   list(par = model$dag$trace_values(),
-       value = with(tfe, sess$run(joint_density)),
+       value = tf_run(sess$run(joint_density)),
        iterations = it,
        convergence = ifelse(it < max_iterations, 0, 1))
 
