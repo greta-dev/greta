@@ -147,3 +147,90 @@ test_that('stashed_samples works', {
   expect_s3_class(ans, 'mcmc.list')
 
 })
+
+test_that('mcmc works with bernoulli random variables', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- matrix(rnorm(20), ncol = 2)
+  y <- x %*% c(0.001, 1.5) + rnorm(10, sd = 0.5)
+  I <- bernoulli(p = 0.5, dim = 2)
+  beta_sd <- I * 100.0 + (1 - I) * 0.01
+  beta <- normal(mean = ones(2), sd = beta_sd, dim = 2)
+  mu <- x %*% beta
+  sigma <- lognormal(mean = 0.0, sd = 1.0)
+  distribution(y) = normal(mu, sd = sigma)
+  m <- model(I, beta, mu)
+  expect_ok( mcmc(m,
+                  method = "slice",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = FALSE)) )
+  expect_ok( mcmc(m,
+                  method = "default",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = FALSE)) )
+  expect_ok( mcmc(m,
+                  method = "slice",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = TRUE)) )
+  expect_ok( mcmc(m,
+                  method = "default",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = TRUE)) )
+
+})
+
+test_that('mcmc works with poisson random variables', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- rpois(10, lambda = 50)
+  lest <- lognormal(0, 2)
+  mu <- poisson(lambda = lest, dim = 10)
+  sigma <- lognormal(0, 1)
+  distribution(x) = normal(mu, sigma)
+  m <- model(mu, lest)
+  expect_ok( mcmc(m,
+                  method = "slice",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = FALSE)) )
+  expect_ok( mcmc(m,
+                  method = "default",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = FALSE)) )
+  expect_ok( mcmc(m,
+                  method = "slice",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = TRUE)) )
+  expect_ok( mcmc(m,
+                  method = "default",
+                  n_samples = 50,
+                  warmup = 50,
+                  control = list(w_size = 1.0,
+                                 max_iter = 100,
+                                 block_slice = TRUE)) )
+
+})
