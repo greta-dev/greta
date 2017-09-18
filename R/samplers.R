@@ -29,14 +29,12 @@ hmc <- function (dag,
     kappa <- 0.75
     gamma <- 0.1
 
-
     # initialise welford accumulator for marginal variance
     diag_sd_update_rate <- 5
     welford_m <- 0
     welford_m2 <- 0
 
     epsilon_trace <- rep(NA, n_samples)
-
 
   }
 
@@ -61,9 +59,15 @@ hmc <- function (dag,
                   ncol = n_target)
   colnames(trace) <- names(init_trace)
 
-  # if anything goes awry, stash the trace so far
+  # also trace the raw values, with the dag attached
+  raw <- matrix(NA,
+                nrow = n_samples %/% thin,
+                ncol = length(x))
+  colnames(raw) <- names(dag$example_parameters())
+
+  # if anything goes awry, stash the trace and raw trace so far
   if (stash)
-    on.exit(stash_trace(trace))
+    on.exit(stash_trace(trace, raw))
 
   # track acceptance
   accept_trace <- rep(0, n_samples)
@@ -149,6 +153,7 @@ hmc <- function (dag,
     if (i %% thin == 0) {
       dag$send_parameters(x)
       trace[i / thin, ] <- dag$trace_values()
+      raw[i / thin, ] <- x
     }
 
     if (verbose)
@@ -215,9 +220,10 @@ hmc <- function (dag,
     control$diag_sd <- diag_sd
   }
 
+  stash_trace(trace, raw)
+  trace <- stashed_samples()
   attr(trace, 'last_x') <- x
   attr(trace, 'control') <- control
-
   trace
 
 }

@@ -9,7 +9,8 @@
 #'
 #' @param target a greta array for which to evaluate the value
 #' @param values a named list giving temporary values of the greta arrays with
-#'   which \code{target} is connected.
+#'   which \code{target} is connected, or an \code{mcmc.list} object returned by
+#'   \code{\link{model}} or \code{\link{raw}}.
 #'
 #' @return A numeric R array with the same dimensions as \code{target}, giving
 #'   the values it would take conditioned on the fixed values given by
@@ -18,10 +19,10 @@
 #' @details The greta arrays named in \code{values} need not be variables, they
 #'   can also be other operations or even data.
 #'
-#'   At present, \code{values} must contain values for \emph{all} of the
-#'   variable greta arrays with which \code{target} is connected, even values are
-#'   given for intermediate operations, or the target doesn't depend on the
-#'   variable. That may be relaxed in a future release.
+#'   At present, if \code{values} is a named list it must contain values for
+#'   \emph{all} of the variable greta arrays with which \code{target} is
+#'   connected, even values are given for intermediate operations, or the target
+#'   doesn't depend on the variable. That may be relaxed in a future release.
 #'
 #' @export
 #'
@@ -35,7 +36,8 @@
 #' y <- sum(x ^ 2) + a
 #' evaluate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
 #'
-#' # define a simple model
+#'
+#' # define a model
 #' alpha = normal(0, 1)
 #' beta = normal(0, 1)
 #' sigma = lognormal(1, 0.1)
@@ -43,14 +45,93 @@
 #' distribution(iris$Petal.Width) = normal(mu, sigma)
 #' m <- model(alpha, beta, sigma)
 #'
-#' # work out what intermediate values would be, given some parameter values
-#' evaluate(mu[1:5], list(alpha = 1, beta = 2))
-#' evaluate(mu[1:5], list(alpha = -1, beta = 0.2))
+#' # evaluate intermediate greta arrays, given some parameter values
+#' evaluate(mu[1:5], list(alpha = 1, beta = 2, sigma = 0.5))
+#' evaluate(mu[1:5], list(alpha = -1, beta = 0.2, sigma = 0.5))
+#'
+#'
+#' # fit the model then evaluate samples at a new greta array
+#' draws <- mcmc(m, n_samples = 500)
+#' petal_length_plot <- seq(min(iris$Petal.Length),
+#'                          max(iris$Petal.Length),
+#'                          length.out = 100)
+#' mu_plot <- alpha + petal_length_plot * beta
+#' mu_plot_draws <- evaluate(mu_plot, draws)
+#'
+#' # plot the draws
+#' mu_est <- colMeans(mu_plot_draws[[1]])
+#' plot(mu_est ~ petal_length_plot, type = "n", ylim = range(mu_plot_draws[[1]]))
+#' apply(mu_plot_draws[[1]], 1, lines, x = petal_length_plot, col = grey(0.8))
+#' lines(mu_est ~ petal_length_plot, lwd = 2)
 #' }
+#'
+#'
 evaluate <- function (target, values) {
+
+  target_name <- deparse(substitute(target))
 
   if (!inherits(target, "greta_array"))
     stop ("greta_array is not a greta array")
+
+  if (inherits(values, "mcmc.list"))
+    evaluate_mcmc.list(target, target_name, values)
+  else
+    evaluate_list(target, values)
+
+}
+
+evaluate_mcmc.list <- function (target, target_name, values) {
+
+  model_info <- attr(values, "model_info")
+
+  if (is.null(model_info)) {
+    stop ("value is an mcmc.list object, but is not associated with any ",
+          "model information, perhaps it wasn't created with ",
+          "greta::model() or greta::raw() ?",
+          call. = FALSE)
+  }
+
+  # copy and refresh the dag
+  dag <- model_info$model$dag$clone()
+  dag$tf_environment <- new.env()
+  dag$tf_graph <- tf$Graph()
+
+  # extend the dag to include this node, as the target
+  dag$build_dag(list(target))
+  self <- dag  # mock for scoping
+  dag$define_tf(log_density = TRUE, gradients = TRUE)
+
+  dag$target_nodes <- list(target$node)
+  names(dag$target_nodes) <- target_name
+
+  # raw draws are either an attribute, or this object
+  draws <- attr(values, "raw_draws")
+  if (is.null(draws))
+    draws <- values
+
+  # trace the target for each draw in each chain
+  trace <- list()
+  for (i in seq_along(draws)) {
+
+    samples <- apply(draws[[i]],
+                     1,
+                     function (x) {
+                       dag$send_parameters(x)
+                       dag$trace_values()
+                     })
+
+    trace[[i]] <- coda::mcmc(t(samples))
+
+  }
+
+  trace <- coda::mcmc.list(trace)
+  attr(trace, "model_info") <- model_info
+  # return this
+  return (trace)
+
+}
+
+evaluate_list <- function(target, values) {
 
   # get the values and their names
   names <- names(values)
@@ -59,7 +140,7 @@ evaluate <- function (target, values) {
   # get the corresponding greta arrays
   fixed_greta_arrays <- lapply(names,
                                get,
-                               envir = parent.frame())
+                               envir = parent.frame(n = 2))
 
   # make sure that's what they are
   are_greta_arrays <- vapply(fixed_greta_arrays,
@@ -127,4 +208,3 @@ assign_dim <- function (value, greta_array) {
   array[] <- value
   array
 }
-

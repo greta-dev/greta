@@ -10,7 +10,8 @@ evaluate(target, values)
 \item{target}{a greta array for which to evaluate the value}
 
 \item{values}{a named list giving temporary values of the greta arrays with
-which \code{target} is connected.}
+which \code{target} is connected, or an \code{mcmc.list} object returned by
+\code{\link{model}} or \code{\link{raw}}.}
 }
 \value{
 A numeric R array with the same dimensions as \code{target}, giving
@@ -27,10 +28,10 @@ Evaluate greta arrays as numeric R arrays, given temporary
 The greta arrays named in \code{values} need not be variables, they
   can also be other operations or even data.
 
-  At present, \code{values} must contain values for \emph{all} of the
-  variable greta arrays with which \code{target} is connected, even values are
-  given for intermediate operations, or the target doesn't depend on the
-  variable. That may be relaxed in a future release.
+  At present, if \code{values} is a named list it must contain values for
+  \emph{all} of the variable greta arrays with which \code{target} is
+  connected, even values are given for intermediate operations, or the target
+  doesn't depend on the variable. That may be relaxed in a future release.
 }
 \examples{
 \dontrun{
@@ -42,7 +43,8 @@ a = lognormal(0, 1)
 y <- sum(x ^ 2) + a
 evaluate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
 
-# define a simple model
+
+# define a model
 alpha = normal(0, 1)
 beta = normal(0, 1)
 sigma = lognormal(1, 0.1)
@@ -50,8 +52,25 @@ mu <- alpha + iris$Petal.Length * beta
 distribution(iris$Petal.Width) = normal(mu, sigma)
 m <- model(alpha, beta, sigma)
 
-# work out what intermediate values would be, given some parameter values
-evaluate(mu[1:5], list(alpha = 1, beta = 2))
-evaluate(mu[1:5], list(alpha = -1, beta = 0.2))
+# evaluate intermediate greta arrays, given some parameter values
+evaluate(mu[1:5], list(alpha = 1, beta = 2, sigma = 0.5))
+evaluate(mu[1:5], list(alpha = -1, beta = 0.2, sigma = 0.5))
+
+
+# fit the model then evaluate samples at a new greta array
+draws <- mcmc(m, n_samples = 500)
+petal_length_plot <- seq(min(iris$Petal.Length),
+                         max(iris$Petal.Length),
+                         length.out = 100)
+mu_plot <- alpha + petal_length_plot * beta
+mu_plot_draws <- evaluate(mu_plot, draws)
+
+# plot the draws
+mu_est <- colMeans(mu_plot_draws[[1]])
+plot(mu_est ~ petal_length_plot, type = "n", ylim = range(mu_plot_draws[[1]]))
+apply(mu_plot_draws[[1]], 1, lines, x = petal_length_plot, col = grey(0.8))
+lines(mu_est ~ petal_length_plot, lwd = 2)
 }
+
+
 }

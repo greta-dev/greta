@@ -140,10 +140,18 @@ test_that('stashed_samples works', {
 
   # mock up a stash
   stash <- greta:::greta_stash
-  assign('trace_stash', as.matrix(rnorm(17)), envir = stash)
+  trace_stash <- list(trace = as.matrix(rnorm(17)),
+                      raw = as.matrix(rnorm(17)))
+  assign('trace_stash', trace_stash, envir = stash)
 
   # should convert to an mcmc.list
   ans <- stashed_samples()
   expect_s3_class(ans, 'mcmc.list')
+
+  # model_info attribute should have raw draws and the model
+  model_info <- attr(ans, "model_info")
+  expect_true(inherits(model_info, "environment"))
+  expect_s3_class(model_info$raw_draws, 'mcmc.list')
+  expect_true(inherits(model_info$model, "greta_model"))
 
 })

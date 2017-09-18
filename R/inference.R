@@ -17,11 +17,22 @@ stashed_samples <- function () {
 
   if (stashed) {
 
+    stash <- greta_stash$trace_stash
+
     # get them, remove the NAs, and return
-    draws <- greta_stash$trace_stash
-    draws_clean <- na.omit(draws)
+    draws_clean <- na.omit(stash$trace)
     draws_prepped <- prepare_draws(draws_clean)
     draws_mcmclist <- mcmc.list(draws_prepped)
+
+    # prep the raw model objects
+    model_info <- new.env()
+    raw_clean <- na.omit(stash$raw)
+    raw_prepped <- prepare_draws(raw_clean)
+    model_info$raw_draws <- mcmc.list(raw_prepped)
+    model_info$model <- greta_stash$model
+
+    # add the raw draws as an attribute
+    attr(draws_mcmclist, "model_info") <- model_info
 
     return (draws_mcmclist)
 
@@ -37,8 +48,12 @@ stashed_samples <- function () {
 # they abort a run
 greta_stash <- new.env()
 
-stash_trace <- function (trace)
-  assign('trace_stash', trace, envir = greta_stash)
+stash_trace <- function (trace, raw) {
+  assign('trace_stash',
+         list(trace = trace,
+              raw = raw),
+         envir = greta_stash)
+}
 
 #' @rdname inference
 #' @export
@@ -129,6 +144,9 @@ mcmc <- function (model,
 
   method <- match.arg(method)
 
+  # store the model
+  greta_stash$model <- model
+
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
   names <- names(target_greta_arrays)
@@ -200,7 +218,7 @@ mcmc <- function (model,
   method <- switch(method,
                    hmc = hmc)
 
-  chains_list <- list()
+  chains_list <- raw_list <- list()
 
   for (chain in seq_len(chains)) {
 
@@ -252,11 +270,17 @@ mcmc <- function (model,
 
     # if this was successful, trash the stash, prepare and return the draws
     rm('trace_stash', envir = greta_stash)
-    chains_list[[chain]] <- prepare_draws(draws)
+    chains_list[[chain]] <- draws[[1]]
+    raw_list[[chain]] <- attr(draws, "model_info")$raw_draws[[1]]
 
   }
 
-  do.call(mcmc.list, chains_list)
+  model_info <- new.env()
+  model_info$raw_draws <- do.call(mcmc.list, raw_list)
+  model_info$model <- greta_stash$model
+  chains <- do.call(mcmc.list, chains_list)
+  attr(chains, "model_info") <- model_info
+  chains
 
 }
 
@@ -366,6 +390,38 @@ opt <- function (model,
        convergence = ifelse(it < max_iterations, 0, 1))
 
 }
+
+#' @rdname inference
+#' @param draws an \code{mcmc.list} object returned by \code{mcmc()} or
+#'   \code{stashed_samples()}
+#'
+#' @details \code{raw()} returns an \code{mcmc.list} object representing samples
+#'   of all of the variables in the model, in their unconstrained form. These
+#'   can be used with \code{evaluate()} to draws samples of new parameters,
+#'   after model fitting.
+#'
+#' @export
+raw <- function (draws) {
+
+  if (!inherits(draws, "mcmc.list")) {
+    stop ("draws must be an mcmc.list object",
+          call. = FALSE)
+  }
+
+  model_info <- attr(draws, "model_info")
+
+  if (is.null(model_info)) {
+    stop ("draws is not associated with any model information, ",
+          "perhaps it wasn't created with greta::model() ?",
+          call. = FALSE)
+  }
+
+  raw_draws <- model_info$raw_draws
+  attr(raw_draws, "model_info") <- model_info
+  raw_draws
+
+}
+
 
 stash_module <- module(greta_stash,
                        stash_trace,

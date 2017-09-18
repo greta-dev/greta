@@ -5,6 +5,7 @@
 \alias{stashed_samples}
 \alias{mcmc}
 \alias{opt}
+\alias{raw}
 \title{statistical inference on greta models}
 \usage{
 stashed_samples()
@@ -15,6 +16,8 @@ mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
 
 opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
   control = list(), initial_values = NULL)
+
+raw(draws)
 }
 \arguments{
 \item{model}{greta_model object}
@@ -48,6 +51,9 @@ sampling/optimisation}
 \item{max_iterations}{the maximum number of iterations before giving up}
 
 \item{tolerance}{the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level}
+
+\item{draws}{an \code{mcmc.list} object returned by \code{mcmc()} or
+\code{stashed_samples()}}
 }
 \value{
 \code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
@@ -114,6 +120,11 @@ Currently, the only implemented optimisation algorithm is Adagrad
   see
   \href{https://www.tensorflow.org/api_docs/python/tf/train/AdagradOptimizer}{the
   TensorFlow docs} for more information
+
+\code{raw()} returns an \code{mcmc.list} object representing samples
+  of all of the variables in the model, in their unconstrained form. These
+  can be used with \code{evaluate()} to draws samples of new parameters,
+  after model fitting.
 }
 \examples{
 \dontrun{
