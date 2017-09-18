@@ -105,9 +105,12 @@ evaluate_mcmc.list <- function (target, target_name, values) {
   names(dag$target_nodes) <- target_name
 
   # raw draws are either an attribute, or this object
-  draws <- attr(values, "raw_draws")
-  if (is.null(draws))
+  model_info <- attr(values, "model_info")
+  if (is.null(model_info$raw_draws)) {
     draws <- values
+  } else {
+    draws <- model_info$raw_draws
+  }
 
   # trace the target for each draw in each chain
   trace <- list()
