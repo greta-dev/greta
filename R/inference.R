@@ -304,6 +304,9 @@ opt <- function (model,
                   control = list(),
                   initial_values = NULL) {
 
+  # mock up some names to avoid CRAN-check note
+  optimiser <- joint_density <- sess <- NULL
+
   # get the tensorflow environment
   tfe <- model$dag$tf_environment
   on_graph <- model$dag$on_graph
