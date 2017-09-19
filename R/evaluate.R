@@ -104,6 +104,9 @@ evaluate_mcmc.list <- function (target, target_name, values) {
   dag$target_nodes <- list(target$node)
   names(dag$target_nodes) <- target_name
 
+  example_values <- dag$trace_values()
+  n_trace <- length(example_values)
+
   # raw draws are either an attribute, or this object
   model_info <- attr(values, "model_info")
   if (is.null(model_info$raw_draws)) {
@@ -123,7 +126,14 @@ evaluate_mcmc.list <- function (target, target_name, values) {
                        dag$trace_values()
                      })
 
-    trace[[i]] <- coda::mcmc(t(samples))
+    samples <- as.matrix(samples)
+
+    if (ncol(samples) != n_trace)
+      samples <- t(samples)
+
+    colnames(samples) <- names(example_values)
+
+    trace[[i]] <- coda::mcmc(samples)
 
   }
 
