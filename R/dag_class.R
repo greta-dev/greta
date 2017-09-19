@@ -134,8 +134,9 @@ dag_class <- R6Class(
         self$on_graph(self$define_gradients())
 
       # use core and compilation options to create a config object
-      self$tf_run(config <- tf$ConfigProto(intra_op_parallelism_threads = self$n_cores,
-                                            inter_op_parallelism_threads = self$n_cores))
+      self$tf_environment$n_cores <- self$n_cores
+      self$tf_run(config <- tf$ConfigProto(inter_op_parallelism_threads = n_cores,
+                                           intra_op_parallelism_threads = n_cores))
 
       if (self$compile) {
         self$tf_run(py_set_attr(config$graph_options$optimizer_options,
