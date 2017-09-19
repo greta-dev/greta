@@ -58,6 +58,7 @@ greta_stash <- new.env()
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom future availableCores plan future_lapply
 #'
 #' @param model greta_model object
 #' @param sampler sampler used to draw values in MCMC. See \code{\link{samplers}} for options.
@@ -123,6 +124,7 @@ mcmc <- function (model,
                   thin = 1,
                   warmup = 1000,
                   chains = 1,
+                  n_cores = NULL,
                   verbose = TRUE,
                   pb_update = 50,
                   initial_values = NULL) {
@@ -171,15 +173,53 @@ mcmc <- function (model,
     samplers[[i]]$chain_number <- i
     samplers[[i]]$n_chains <- chains
   }
+  
+  sequential <- inherits(plan(), "sequential")
+
+  n_cores_detected <- future::availableCores()
+
+  # if the user passed n_cores via model instead (deprecated) use them
+  if (is.null(n_cores) && model$dag$n_cores != 0)
+    n_cores <- model$dag$n_cores
+
+  # check user-provided cores
+  if (!is.null(n_cores) && !n_cores %in% seq_len(n_cores_detected)) {
+
+    warning (n_cores, ' cores were requested, but only ',
+             n_detected, ' cores are available. Using ',
+             n_detected, ' cores.')
+
+    n_cores <- NULL
+
+  }
+
+  if (is.null(n_cores))
+    n_cores <- 0L
+
+  # if in parallel on this machine and n_cores isn't user-specified, set it so
+  # there's no clash between chains
+  if (!sequential & n_cores == 0)
+    n_cores <- n_cores_detected %/% chains
+
+  n_cores <- as.integer(n_cores)
+
+  if (!sequential & chains > 1) {
+    cores_text <- ifelse(n_cores == 1, "1 core", sprintf("up to %i cores", n_cores))
+    cat(sprintf("\nrunning %i chains in parallel, each on %s (progress bar suppressed)\n\n",
+                chains, cores_text))
+    verbose <- FALSE
+  }
 
   # run chains on samplers (return list so we can handle parallelism here)
-  samplers <- lapply(samplers,
+  samplers <- future.apply::future_lapply(samplers,
                      do("run_chain"),
                      n_samples = n_samples,
                      thin = thin,
                      warmup = warmup,
                      verbose = verbose,
-                     pb_update = pb_update)
+                     pb_update = pb_update,
+                     sequential = sequential,
+                     n_cores = n_cores)
 
   # get chains from the samplers, with raw values as an attribute
   draws <- stashed_samples()
@@ -187,18 +227,6 @@ mcmc <- function (model,
   # empty the stash
   rm("samplers", envir = greta_stash)
 
-  # # get raw_draws
-  # raw_list <- lapply(chains_list,
-  #                    function (x) {
-  #                      attr(x, "model_info")$raw_draws[[1]]
-  #                      })
-  # chains_list <- lapply(chains_list, `[[`, 1)
-  #
-  # model_info <- new.env()
-  # model_info$raw_draws <- do.call(mcmc.list, raw_list)
-  # model_info$model <- greta_stash$model
-  # chains <- do.call(mcmc.list, chains_list)
-  # attr(chains, "model_info") <- model_info
   draws
 
 }
@@ -243,6 +271,79 @@ prep_initials <- function (initial_values, n_chains) {
 
   initial_values
 
+}
+
+
+
+run_chain <- function (chain, dag, method, n_samples, thin,
+                       warmup, chains, verbose, pb_update,
+                       control, initial_values, sequential,
+                       n_cores) {
+
+  if (sequential & chains > 1) {
+    msg <- sprintf("\nchain %i/%i\n", chain, chains)
+    cat(msg)
+  }
+
+  # set the number of cores and redefine the tf session
+  dag$n_cores <- n_cores
+  dag$define_tf_session()
+
+  initial_values_chain <- initial_values[[chain]]
+
+  # if warmup is required, do that now and update init
+  if (warmup > 0) {
+
+    if (verbose)
+      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
+    else
+      pb_warmup <- NULL
+
+    # run it
+    warmup_draws <- method(dag = dag,
+                           init = initial_values_chain,
+                           n_samples = warmup,
+                           thin = thin,
+                           verbose = verbose,
+                           pb = pb_warmup,
+                           tune = TRUE,
+                           stash = FALSE,
+                           control = control)
+
+    # use the last draw of the full parameter vector as the init
+    initial_values_chain <- attr(warmup_draws, 'last_x')
+    control <- attr(warmup_draws, 'control')
+
+  }
+
+  if (verbose)
+    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
+  else
+    pb_sampling <- NULL
+
+  # run the sampler
+  draws <- method(dag = dag,
+                  init = initial_values_chain,
+                  n_samples = n_samples,
+                  thin = thin,
+                  verbose = verbose,
+                  pb = pb_sampling,
+                  tune = FALSE,
+                  stash = TRUE,
+                  control = control)
+
+  # if this was successful, trash the stash, prepare and return the draws
+  rm('trace_stash', envir = greta_stash)
+  draws
+
+}
+
+
+#' @importFrom coda mcmc mcmc.list
+prepare_draws <- function (draws) {
+  # given a matrix of draws returned by the sampler, prepare it and return
+  draws_df <- data.frame(draws)
+  coda::mcmc(draws_df)
 }
 
 #' @rdname inference
