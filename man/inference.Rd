@@ -44,9 +44,9 @@ tunes sampler hyperparameters.}
 \item{control}{an optional named list of hyperparameters and options to
 control behaviour of the sampler or optimiser. See Details.}
 
-\item{initial_values}{an optional named vector of initial values for the free
-parameters in the model. These will be used as the starting point for
-sampling/optimisation}
+\item{initial_values}{an optional vector (or list of vectors, for multiple
+chains) of initial values for the free parameters in the model. These will
+be used as the starting point for sampling/optimisation.}
 
 \item{max_iterations}{the maximum number of iterations before giving up}
 

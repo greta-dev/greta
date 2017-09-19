@@ -75,7 +75,7 @@ test_that('rejected mcmc proposals', {
   distribution(x) = normal(z, 1e-12)
   m <- model(z)
   expect_error(mcmc(m, n_samples = 1, warmup = 0),
-               'Could not find reasonable starting values after 10 attempts')
+               'Could not find reasonable starting values after 20 attempts')
 
 })
 

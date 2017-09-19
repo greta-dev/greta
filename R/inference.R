@@ -258,62 +258,28 @@ mcmc <- function (model,
   method <- switch(method,
                    hmc = hmc)
 
-  chains_list <- raw_list <- list()
+  print_chain <- chains > 1
 
-  for (chain in seq_len(chains)) {
+  chains_list <- lapply(seq_len(chains),
+                        run_chain,
+                        dag = dag,
+                        method = method,
+                        n_samples = n_samples,
+                        thin = thin,
+                        warmup = warmup,
+                        chains = chains,
+                        verbose = verbose,
+                        pb_update = pb_update,
+                        control = con,
+                        initial_values = initial_values,
+                        print_chain = print_chain)
 
-    if (chains > 1) {
-      msg <- sprintf("\nchain %i/%i\n", chain, chains)
-      cat(msg)
-    }
-
-    # if warmup is required, do that now and update init
-    if (warmup > 0) {
-
-      if (verbose)
-        pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
-      else
-        pb_warmup <- NULL
-
-      # run it
-      warmup_draws <- method(dag = dag,
-                             init = initial_values,
-                             n_samples = warmup,
-                             thin = thin,
-                             verbose = verbose,
-                             pb = pb_warmup,
-                             tune = TRUE,
-                             stash = FALSE,
-                             control = con)
-
-      # use the last draw of the full parameter vector as the init
-      initial_values <- attr(warmup_draws, 'last_x')
-      con <- attr(warmup_draws, 'control')
-
-    }
-
-    if (verbose)
-      pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
-    else
-      pb_sampling <- NULL
-
-    # run the sampler
-    draws <- method(dag = dag,
-                    init = initial_values,
-                    n_samples = n_samples,
-                    thin = thin,
-                    verbose = verbose,
-                    pb = pb_sampling,
-                    tune = FALSE,
-                    stash = TRUE,
-                    control = con)
-
-    # if this was successful, trash the stash, prepare and return the draws
-    rm('trace_stash', envir = greta_stash)
-    chains_list[[chain]] <- draws[[1]]
-    raw_list[[chain]] <- attr(draws, "model_info")$raw_draws[[1]]
-
-  }
+  # get raw_draws
+  raw_list <- lapply(chains_list,
+                     function (x) {
+                       attr(x, "model_info")$raw_draws[[1]]
+                       })
+  chains_list <- lapply(chains_list, `[[`, 1)
 
   model_info <- new.env()
   model_info$raw_draws <- do.call(mcmc.list, raw_list)
@@ -323,6 +289,66 @@ mcmc <- function (model,
   chains
 
 }
+
+
+run_chain <- function (chain, dag, method, n_samples, thin,
+                       warmup, chains, verbose, pb_update,
+                       control, initial_values, print_chain) {
+
+  if (print_chain) {
+    msg <- sprintf("\nchain %i/%i\n", chain, chains)
+    cat(msg)
+  }
+
+  initial_values_chain <- initial_values[[chain]]
+
+  # if warmup is required, do that now and update init
+  if (warmup > 0) {
+
+    if (verbose)
+      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
+    else
+      pb_warmup <- NULL
+
+    # run it
+    warmup_draws <- method(dag = dag,
+                           init = initial_values_chain,
+                           n_samples = warmup,
+                           thin = thin,
+                           verbose = verbose,
+                           pb = pb_warmup,
+                           tune = TRUE,
+                           stash = FALSE,
+                           control = control)
+
+    # use the last draw of the full parameter vector as the init
+    initial_values_chain <- attr(warmup_draws, 'last_x')
+    con <- attr(warmup_draws, 'control')
+
+  }
+
+  if (verbose)
+    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
+  else
+    pb_sampling <- NULL
+
+  # run the sampler
+  draws <- method(dag = dag,
+                  init = initial_values_chain,
+                  n_samples = n_samples,
+                  thin = thin,
+                  verbose = verbose,
+                  pb = pb_sampling,
+                  tune = FALSE,
+                  stash = TRUE,
+                  control = control)
+
+  # if this was successful, trash the stash, prepare and return the draws
+  rm('trace_stash', envir = greta_stash)
+  draws
+
+}
+
 
 #' @importFrom coda mcmc mcmc.list
 prepare_draws <- function (draws) {
