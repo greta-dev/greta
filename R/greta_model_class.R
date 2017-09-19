@@ -10,7 +10,6 @@ NULL
 
 #' @rdname model
 #' @export
-#' @importFrom parallel detectCores
 #'
 #' @param \dots for \code{model}: \code{greta_array} objects to be tracked by
 #'   the model (i.e. those for which samples will be retained during mcmc). If
@@ -24,9 +23,8 @@ NULL
 #'   should reduce the risk of numerical instability during sampling, but will
 #'   also increase the computation time, particularly for large models.
 #'
-#' @param n_cores the number of cpu cores to use when evaluating this model.
-#'   Defaults to and cannot exceed the number detected by
-#'   \code{parallel::detectCores}.
+#' @param n_cores this argument is deprecated and will be removed in version 0.3. Use the
+#'   \code{n_cores} argument in \code{mcmc()} instead.
 #'
 #' @param compile whether to apply
 #'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
@@ -66,19 +64,18 @@ model <- function (...,
                      double = tf$float64)
 
   # check and set the number of cores
-  n_detected <- parallel::detectCores()
+  n_detected <- future::availableCores()
+
   if (is.null(n_cores)) {
-    n_cores <- n_detected
+    n_cores <- 0L
   } else {
+
+    warning ("n_cores is deprecated and will be removed in version 0.3. ",
+             "use the n_cores argument to greta::mcmc() instead",
+             call. = FALSE)
 
     n_cores <- as.integer(n_cores)
 
-    if (!n_cores %in% seq_len(n_detected)) {
-      warning (n_cores, ' cores were requested, but only ',
-               n_detected, ' cores are available. Using ',
-               n_detected, ' cores.')
-      n_cores <- n_detected
-    }
   }
 
   # nodes required

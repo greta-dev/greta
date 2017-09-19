@@ -27,9 +27,8 @@ model. Switching from \code{'single'} (the default) to \code{'double'}
 should reduce the risk of numerical instability during sampling, but will
 also increase the computation time, particularly for large models.}
 
-\item{n_cores}{the number of cpu cores to use when evaluating this model.
-Defaults to and cannot exceed the number detected by
-\code{parallel::detectCores}.}
+\item{n_cores}{this argument is deprecated and will be removed in version 0.3. Use the
+\code{n_cores} argument in \code{mcmc()} instead.}
 
 \item{compile}{whether to apply
 \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
