@@ -75,9 +75,9 @@ stash_trace <- function (trace, raw) {
 #' @param pb_update how regularly to update the progress bar (in iterations)
 #' @param control an optional named list of hyperparameters and options to
 #'   control behaviour of the sampler or optimiser. See Details.
-#' @param initial_values an optional named vector of initial values for the free
-#'   parameters in the model. These will be used as the starting point for
-#'   sampling/optimisation
+#' @param initial_values an optional vector (or list of vectors, for multiple
+#'   chains) of initial values for the free parameters in the model. These will
+#'   be used as the starting point for sampling/optimisation.
 #'
 #' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
@@ -168,34 +168,74 @@ mcmc <- function (model,
   # get the dag containing the target nodes
   dag <- model$dag
 
+  param <- dag$example_parameters()
+  n_initial <- length(param)
+
   # random starting locations
   if (is.null(initial_values)) {
 
     # try several times
     valid <- FALSE
     attempts <- 1
-    while (!valid & attempts < 10) {
+    while (!valid & attempts < 20) {
 
-      initial_values <- dag$example_parameters()
       # increase the jitter each time
-      initial_values[] <- rnorm(length(initial_values), 0, 1 + attempts / 5)
+      sd <- 1 + attempts / 10
+      initial_values <- replicate(chains,
+                                  rnorm(n_initial, 0, sd),
+                                  simplify = FALSE)
 
       # test validity of values
-      valid <- valid_parameters(dag, initial_values)
+      valid <- valid_parameters(initial_values, dag)
       attempts <- attempts + 1
 
     }
 
     if (!valid) {
-      stop ('Could not find reasonable starting values after ', attempts,
-            ' attempts. Please specify initial values manually via the ',
-            'initial_values argument to mcmc',
+      stop ("Could not find reasonable starting values after ", attempts,
+            " attempts. Please specify initial values manually via the ",
+            "initial_values argument to mcmc",
             call. = FALSE)
     }
 
   } else {
 
-    if (!valid_parameters(dag, initial_values)) {
+    # if they provided a list, check it
+    if (is.list(initial_values)) {
+
+      n_sets <- length(initial_values)
+
+      if (n_sets != chains) {
+        stop (n_sets, " sets of initial values were provided, but there ",
+              ifelse(chains > 1, "are ", "is only "), chains, " chain",
+              ifelse(chains > 1, "s", ""),
+              call. = FALSE)
+      }
+
+      n_param <- vapply(initial_values, length, FUN.VALUE = 0)
+
+      if (!all(n_param == n_initial)) {
+        stop ("each set of initial values must be a vector of length ",
+              n_initial,
+              call. = FALSE)
+      }
+
+    } else {
+
+      # replicate
+      initial_values <- replicate(chains,
+                                  initial_values,
+                                  simplify = FALSE)
+
+      if (chains > 1) {
+        message ("\nonly one set of was initial values given, ",
+                 "and was used for all chains\n")
+      }
+
+    }
+
+    # check they are valid
+    if (!valid_parameters(initial_values, dag)) {
       stop ('The log density and gradients could not be evaluated at these ',
             'initial values.',
             call. = FALSE)
