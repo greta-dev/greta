@@ -179,10 +179,8 @@ mcmc <- function (model,
     attempts <- 1
     while (!valid & attempts < 20) {
 
-      # increase the jitter each time
-      sd <- 1 + attempts / 10
       initial_values <- replicate(chains,
-                                  rnorm(n_initial, 0, sd),
+                                  rnorm(n_initial, 0, 0.5),
                                   simplify = FALSE)
 
       # test validity of values
