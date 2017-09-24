@@ -323,7 +323,7 @@ run_chain <- function (chain, dag, method, n_samples, thin,
 
     # use the last draw of the full parameter vector as the init
     initial_values_chain <- attr(warmup_draws, 'last_x')
-    con <- attr(warmup_draws, 'control')
+    control <- attr(warmup_draws, 'control')
 
   }
 
