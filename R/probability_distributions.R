@@ -1340,7 +1340,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'    \code{weibull} \tab \link[stats:dweibull]{stats::dweibull}\cr
 #'    \code{exponential} \tab \link[stats:dexp]{stats::dexp}\cr
 #'    \code{pareto} \tab \link[extraDistr:dpareto]{extraDistr::dpareto}\cr
-#'    \code{student} \tab \link[extraDistr:dnst]{extraDistr::dnst}\cr
+#'    \code{student} \tab \link[extraDistr:dlst]{extraDistr::dlst}\cr
 #'    \code{laplace} \tab \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr
 #'    \code{beta} \tab \link[stats:dbeta]{stats::dbeta}\cr
 #'    \code{cauchy} \tab \link[stats:dcauchy]{stats::dcauchy}\cr
