@@ -170,6 +170,7 @@ test_that('sweep works for numeric x and greta array STATS', {
 
 test_that('solve and sweep error as expected', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a <- as_data(randn(5, 25))
