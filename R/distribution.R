@@ -17,6 +17,7 @@
 #'
 #' @export
 #' @examples
+#' \dontrun{
 #'
 #' # define a model likelihood
 #'
@@ -31,7 +32,7 @@
 #'
 #' # get the distribution over y
 #' distribution(y)
-#'
+#' }
 `distribution<-` <- function (greta_array, value) {
 
   # stash the old greta array to return

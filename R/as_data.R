@@ -10,6 +10,7 @@
 #'   contain missing (\code{NA}) or infinite (\code{-Inf} or \code{Inf}) values.
 #' @export
 #' @examples
+#' \dontrun{
 #'
 #' # numeric/integer/logical vectors, matrices and arrays can all be coerced to
 #' # data greta arrays
@@ -27,7 +28,7 @@
 #'                  x2 = sample(1L:10L),
 #'                  x3 = sample(c(TRUE, FALSE), 10, replace = TRUE))
 #' (d <- as_data(df))
-#'
+#' }
 as_data <- function (x)
   UseMethod('as_data', x)
 

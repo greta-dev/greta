@@ -84,10 +84,13 @@ TensorFlow only enables rounding to integers, so \code{round()} will
            transpose = FALSE)
  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
               transpose = FALSE)
- }
+
+}
 }
 
 \examples{
+\dontrun{
+
 x = as_data(matrix(1:9, nrow = 3, ncol = 3))
 a = log(exp(x))
 b = log1p(expm1(x))
@@ -100,5 +103,5 @@ diag(x) <- e + 1
 z = t(a)
 
 y = sweep(x, 1, e, '-')
-
+}
 }
