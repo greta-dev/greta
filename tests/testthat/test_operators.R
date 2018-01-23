@@ -89,6 +89,7 @@ test_that('random strings of operators work as expected', {
 
 test_that('%*% errors informatively', {
 
+  skip_if_not(check_tf_version())
   a <- ones(3, 4)
   b <- ones(1, 4)
 
