@@ -115,9 +115,9 @@ sections <- list(list(title = "creating greta arrays",
                  list(title = "modelling",
                       desc = "Define and visualise models and fit them to data",
                       members = c("model.html", "inference.html")),
-                 list(title = "modules",
-                      desc = "Collections of methods for doing more specialist analyses",
-                      members = c("dynamics-module.html")))
+                 list(title = "extending greta",
+                      desc = "Write R packages that extend or use greta",
+                      members = c("internals.html")))
 
 # loop through these, splitting the existing index into these sections
 sections_combined <- lapply(sections, make_section, data_index)
