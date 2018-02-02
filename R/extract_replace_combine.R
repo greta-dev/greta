@@ -42,6 +42,7 @@
 #'
 #' @examples
 #' \dontrun{
+#'
 #'  x = as_data(matrix(1:12, 3, 4))
 #'
 #'  # extract/replace

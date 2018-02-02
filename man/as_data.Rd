@@ -21,6 +21,7 @@ define an object in an R session as a data greta array for use
   contain missing (\code{NA}) or infinite (\code{-Inf} or \code{Inf}) values.
 }
 \examples{
+\dontrun{
 
 # numeric/integer/logical vectors, matrices and arrays can all be coerced to
 # data greta arrays
@@ -38,5 +39,5 @@ df <- data.frame(x1 = rnorm(10),
                  x2 = sample(1L:10L),
                  x3 = sample(c(TRUE, FALSE), 10, replace = TRUE))
 (d <- as_data(df))
-
+}
 }

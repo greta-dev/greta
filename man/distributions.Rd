@@ -175,7 +175,7 @@ The discrete probability distributions (\code{bernoulli},
    \code{weibull} \tab \link[stats:dweibull]{stats::dweibull}\cr
    \code{exponential} \tab \link[stats:dexp]{stats::dexp}\cr
    \code{pareto} \tab \link[extraDistr:dpareto]{extraDistr::dpareto}\cr
-   \code{student} \tab \link[extraDistr:dnst]{extraDistr::dnst}\cr
+   \code{student} \tab \link[extraDistr:dlst]{extraDistr::dlst}\cr
    \code{laplace} \tab \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr
    \code{beta} \tab \link[stats:dbeta]{stats::dbeta}\cr
    \code{cauchy} \tab \link[stats:dcauchy]{stats::dcauchy}\cr
@@ -191,6 +191,8 @@ The discrete probability distributions (\code{bernoulli},
    \code{lkj_correlation} \tab \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}\cr }
 }
 \examples{
+\dontrun{
+
 # a uniform parameter constrained to be between 0 and 1
 phi = uniform(min = 0, max = 1)
 
@@ -225,4 +227,6 @@ theta = multivariate_normal(rep(mu, 4), Sig, dim = 10)
 
 # a Wishart variable with the same covariance parameter
 theta = wishart(df = 5, Sigma = Sig)
+
+}
 }
