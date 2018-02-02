@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -352,9 +354,6 @@ Create a <code>greta_model</code> object representing a statistical model (using
 <pre class="r"><span class='fu'>model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"single"</span>, <span class='st'>"double"</span>), <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
-<span class='fu'>define_model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"single"</span>, <span class='st'>"double"</span>), <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-
 <span class='co'># S3 method for greta_model</span>
 <span class='fu'>print</span>(<span class='no'>x</span>, <span class='no'>...</span>)
 
@@ -398,7 +397,7 @@ unused default argument
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-<code>model()</code> takes greta arrays as arguments, and defines a statistical model by finding all of the other greta arrays on which they depend, or which depend on them. Further arguments to <code>model</code> can be used to configure the tensorflow graph representing the model, to tweak performance. <code>define_model</code> is an alias for <code>model</code>. It is deprecated, and will be removed in version 0.2.
+<code>model()</code> takes greta arrays as arguments, and defines a statistical model by finding all of the other greta arrays on which they depend, or which depend on them. Further arguments to <code>model</code> can be used to configure the tensorflow graph representing the model, to tweak performance.
 </p>
 <p>
 The plot method produces a visual representation of the defined model. It uses the <code>DiagrammeR</code> package, which must be installed first. Here’s a key to the plots: <img src='figures/plotlegend.png' width="100%" />

@@ -32,6 +32,8 @@ or a vector of positive integers. See details.}
  for an example.
 }
 \examples{
+\dontrun{
+
 # a scalar variable
 a <- variable()
 
@@ -45,5 +47,5 @@ c <- variable(lower = 0, upper = 1, dim = c(2, 2, 2))
 min <- as_data(iris$Sepal.Length)
 max <- min ^ 2
 d <- min + variable(0, 1, dim = nrow(iris)) * (max - min)
-
+}
 }

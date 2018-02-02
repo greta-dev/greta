@@ -27,6 +27,7 @@ The extract method returns the greta array if it has a distribution,
   completeness
 }
 \examples{
+\dontrun{
 
 # define a model likelihood
 
@@ -41,5 +42,5 @@ distribution(y) = normal(mu, 1)
 
 # get the distribution over y
 distribution(y)
-
+}
 }

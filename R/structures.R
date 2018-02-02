@@ -15,33 +15,35 @@
 #'   equivalent to \code{as_data(array(data, dim))}.
 #'
 #' @return a greta array object
-NULL
-
-#' @export
-#' @rdname structures
 #' @examples
+#' \dontrun{
+#'
 #' # a 3 row, 4 column greta array of 0s
 #' z <- zeros(3, 4)
 #'
-zeros <- function (...)
-  as.greta_array(array(data = 0, dim = c(...)))
-
-#' @export
-#' @rdname structures
-#' @examples
 #' # a 3x3x3 greta array of 1s
 #' z <- ones(3, 3, 3)
 #'
-ones <- function (...)
-  as.greta_array(array(data = 1, dim = c(...)))
-
-#' @export
-#' @rdname structures
-#' @examples
 #' # a 2x4 greta array filled with pi
 #' z <- greta_array(pi, dim = c(2, 4))
 #'
 #' # a 3x3x3 greta array filled with 1, 2, and 3
 #' z <- greta_array(1:3, dim = c(3, 3, 3))
+#' }
+
+NULL
+
+#' @export
+#' @rdname structures
+zeros <- function (...)
+  as.greta_array(array(data = 0, dim = c(...)))
+
+#' @export
+#' @rdname structures
+ones <- function (...)
+  as.greta_array(array(data = 1, dim = c(...)))
+
+#' @export
+#' @rdname structures
 greta_array <- function (data = 0, dim = length(data))
   as.greta_array(array(data = data, dim = dim))

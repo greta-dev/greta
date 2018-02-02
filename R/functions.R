@@ -52,6 +52,10 @@
 #'  min(..., na.rm = TRUE)
 #'  max(..., na.rm = TRUE)
 #'
+#'  # cumulative operations
+#'  cumsum(x)
+#'  cumprod(x)
+#'
 #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
 #'
@@ -60,7 +64,8 @@
 #'            transpose = FALSE)
 #'  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
 #'               transpose = FALSE)
-#'  }
+#'
+#' }
 #'
 #' @details TensorFlow only enables rounding to integers, so \code{round()} will
 #'   error if \code{digits} is set to anything other than \code{0}.
@@ -79,6 +84,8 @@
 #'   and multiplication.
 #'
 #' @examples
+#' \dontrun{
+#'
 #' x = as_data(matrix(1:9, nrow = 3, ncol = 3))
 #' a = log(exp(x))
 #' b = log1p(expm1(x))
@@ -91,7 +98,7 @@
 #' z = t(a)
 #'
 #' y = sweep(x, 1, e, '-')
-#'
+#' }
 NULL
 
 #' @export
@@ -396,6 +403,27 @@ max.greta_array <- function (..., na.rm = TRUE) {
      dimfun = dimfun,
      tf_operation = tf$reduce_max)
 
+}
+
+check_cum_op <- function (x) {
+  dims <- dim(x)
+  if (length(dims) > 2 | dims[2] != 1) {
+    stop ("'x' must be a column vector, but has dimensions ",
+          paste(dims, collapse = ' x '),
+          call. = FALSE)
+  }
+}
+
+#' @export
+cumsum.greta_array <- function (x) {
+  check_cum_op(x)
+  op("cumsum", x, tf_operation = tf$cumsum)
+}
+
+#' @export
+cumprod.greta_array <- function (x) {
+  check_cum_op(x)
+  op("cumprod", x, tf_operation = tf$cumprod)
 }
 
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans

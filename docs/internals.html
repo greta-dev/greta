@@ -11,7 +11,7 @@
 
 
 
-<title>create data greta arrays</title>
+<title>internal greta methods</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -337,7 +337,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">create data greta arrays</h1>
+<h1 class="title toc-ignore">internal greta methods</h1>
 
 </div>
 
@@ -346,59 +346,43 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-These structures can be used to set up more complex models. For example, scalar parameters can be embedded in a greta array by first creating a greta array with <code>zeros()</code> or <code>ones()</code>, and then embedding the parameter value using greta’s replacement syntax.
+A list of functions and R6 class objects that can be used to develop extensions to greta. Most users will not need to access these methods, and it is not recommended to use them directly in model code.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<pre class="r"><span class='fu'>zeros</span>(<span class='no'>...</span>)
-
-<span class='fu'>ones</span>(<span class='no'>...</span>)
-
-<span class='fu'>greta_array</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'>length</span>(<span class='no'>data</span>)) </pre>
-<h2 class="hasAnchor" id="arguments">
-<a class="anchor" href="#arguments"></a> Arguments
-</h2>
-<code>...</code>
-<p>
-dimensions of the greta arrays to create
-</p>
-<code>data</code>
-<p>
-a vector giving data to fill the greta array. Other object types are coerced by <code>as.vector</code>.
-</p>
-<code>dim</code>
-<p>
-an integer vector giving the dimensions for the greta array to be created.
-</p>
-<h2 class="hasAnchor" id="value">
-<a class="anchor" href="#value"></a>Value
-</h2>
-<p>
-a greta array object
-</p>
 <h2 class="hasAnchor" id="details">
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-<code>greta_array</code> is a convenience function to create an R array with <code>array</code> and then coerce it to a greta array. I.e. it is equivalent to <code>as_data(array(data, dim))</code>.
+This help file lists the available internals, but they are not fully documented and are subject to change and deprecation without warning (though care will be taken not to break dependent packages on CRAN). For an overview of how greta works internally, see the <em>technical details</em> vignette. See <a href = 'https://github.com/greta-dev'>https://github.com/greta-dev</a> for examples of R packages extending and building on greta.
 </p>
-<h2 class="hasAnchor" id="examples">
-<a class="anchor" href="#examples"></a>Examples
+<p>
+Please get in contact via GitHub if you want to develop an extension to greta and need more details of how to use these internal functions.
+</p>
+<p>
+You can use <code>attach()</code> to put a sublist in the search path. E.g. <code>attach(.internals<span class="math inline">\(nodes\)</span>constructors)</code> will enable you to call <code>op()</code>, <code>vble()</code> and <code>distrib()</code> directly.
+</p>
+<h2 class="hasAnchor" id="usage">
+<a class="anchor" href="#usage"></a>Usage
 </h2>
-<pre class="r">
-
-<span class='co'># a 3 row, 4 column greta array of 0s</span>
-<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>zeros</span>(<span class='fl'>3</span>, <span class='fl'>4</span>)
-
-<span class='co'># a 3x3x3 greta array of 1s</span>
-<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>ones</span>(<span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span>)
-
-<span class='co'># a 2x4 greta array filled with pi</span>
-<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>greta_array</span>(<span class='no'>pi</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>2</span>, <span class='fl'>4</span>))
-
-<span class='co'># a 3x3x3 greta array filled with 1, 2, and 3</span>
-<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>greta_array</span>(<span class='fl'>1</span>:<span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span>))</pre>
+<p>
+</p>
+<pre>
+ .internals$greta_arrays$unknowns        # greta array print methods
+ .internals$inference$progress_bar       # progress bar tools
+                      samplers           # MCMC samplers
+                      stash              # stashing MCMC samples
+ .internals$nodes$constructors           # node creation wrappers
+                  distribution_classes   # R6 distribution classes
+                  node_classes           # R6 node classes
+ .internals$tensors                      # functions on tensors
+ .internals$utils$checks                 # checking function inputs
+                  colours                # greta colour scheme
+                  dummy_arrays           # mocking up extract/replace
+                  misc                   # code simplification etc.
+                  samplers               # mcmc helpers
+</pre>
 
 
 

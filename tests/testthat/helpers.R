@@ -338,9 +338,9 @@ dlaplace <- extraDistr::dlaplace
 plaplace <- extraDistr::plaplace
 qlaplace <- extraDistr::qlaplace
 
-dstudent <- extraDistr::dnst
-pstudent <- extraDistr::pnst
-qstudent <- extraDistr::qnst
+dstudent <- extraDistr::dlst
+pstudent <- extraDistr::plst
+qstudent <- extraDistr::qlst
 
 # mock up pareto to have differently named parameters (a and b are use for the
 # truncation)
