@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -352,17 +354,25 @@ Generic methods to extract and replace elements of greta arrays, or to combine g
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
+<code>x</code>
+<p>
+a greta array
+</p>
 <code>i</code>, <code>j</code>
 <p>
 indices specifying elements to extract or replace
 </p>
+<code>n</code>
+<p>
+a single integer, as in <code>utils::head()</code> and <code>utils::tail()</code>
+</p>
 <code>value</code>
 <p>
-a greta array to replace elements
+for <code><code>[&amp;lt;-</code></code> a greta array to replace elements, for <code><code>dim&amp;lt;-</code></code> either NULL or a numeric vector of dimensions
 </p>
 <code>...</code>
 <p>
-either further indices specifying elements to extract or replace (<code>[</code>), or multiple greta arrays to combine (<code>cbind()</code>, <code>rbind()</code> &amp; <code>c()</code>), or additional arguments (<code>rep()</code>)
+either further indices specifying elements to extract or replace (<code>[</code>), or multiple greta arrays to combine (<code>cbind()</code>, <code>rbind()</code> &amp; <code>c()</code>), or additional arguments (<code>rep()</code>, <code>head()</code>, <code>tail()</code>)
 </p>
 <code>drop</code>, <code>recursive</code>
 <p>
@@ -377,6 +387,8 @@ generic arguments that are ignored for greta arrays
 # extract
 x[i]
 x[i, j, ..., drop = FALSE]
+head(x, n = 6L, ...)
+tail(x, n = 6L, ...)
 # replace
 x[i] &lt;- value
 x[i, j, ...] &lt;- value
@@ -385,11 +397,16 @@ cbind(...)
 rbind(...)
 c(..., recursive = FALSE)
 rep(x, times, ..., recursive = FALSE)
+# get and set dimensions
+length(x)
+dim(x)
+dim(x) &lt;- value
 </pre>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
 <pre class="r">
+
  <span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
 
  <span class='co'># extract/replace</span>

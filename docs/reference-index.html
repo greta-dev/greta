@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -411,7 +413,7 @@ div.tocify {
 <hr style="height:0px; visibility:hidden;" />
 <div id="greta-model-objects" class="section level4">
 <h4><a href="model.html">greta model objects</a></h4>
-<p><code>model</code> <code>define_model</code> <code>print</code> <code>plot</code></p>
+<p><code>model</code> <code>print</code> <code>plot</code></p>
 <hr style="height:0px; visibility:hidden;" />
 </div>
 <div id="statistical-inference-on-greta-models" class="section level4">
@@ -421,13 +423,13 @@ div.tocify {
 <hr>
 </div>
 </div>
-<div id="modules" class="section level2">
-<h2>modules</h2>
-<p>Collections of methods for doing more specialist analyses</p>
+<div id="extending-greta" class="section level2">
+<h2>extending greta</h2>
+<p>Write R packages that extend or use greta</p>
 <hr style="height:0px; visibility:hidden;" />
-<div id="methods-for-modelling-structured-dynamical-systems" class="section level4">
-<h4><a href="dynamics-module.html">methods for modelling structured dynamical systems</a></h4>
-<p><code>dynamics-module</code></p>
+<div id="internal-greta-methods" class="section level4">
+<h4><a href="internals.html">internal greta methods</a></h4>
+<p><code>internals</code></p>
 <hr style="height:0px; visibility:hidden;" />
 <hr>
 </div>

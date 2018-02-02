@@ -21,6 +21,8 @@
 #'   1}, \eqn{y \approx x}
 #'
 #' @examples
+#' \dontrun{
+#'
 #'  x = normal(1, 3, dim = 10)
 #'
 #'  # transformation to the unit interval
@@ -31,6 +33,7 @@
 #'
 #'  # and to positive reals
 #'  y <- log1pe(x)
+#' }
 NULL
 
 #' @rdname transforms

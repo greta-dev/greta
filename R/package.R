@@ -49,6 +49,9 @@ NULL
   # warn if TF version is bad
   check_tf_version('startup')
 
+  # switch back to 0-based extraction in tensorflow
+  options(tensorflow.one_based_extract = FALSE)
+
   # default float type
   if (reticulate::py_module_available('tensorflow'))
     options(greta_tf_float = tf$float32)
