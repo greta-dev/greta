@@ -43,6 +43,8 @@ greta does not allow you to state the transformation/link on the
   1}, \eqn{y \approx x}
 }
 \examples{
+\dontrun{
+
  x = normal(1, 3, dim = 10)
 
  # transformation to the unit interval
@@ -53,4 +55,5 @@ greta does not allow you to state the transformation/link on the
 
  # and to positive reals
  y <- log1pe(x)
+}
 }

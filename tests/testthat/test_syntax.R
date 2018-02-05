@@ -38,6 +38,7 @@ test_that('distribution() works', {
 
 test_that('`distribution<-` errors informatively', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   y <- randn(3, 3, 2)

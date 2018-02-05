@@ -2,6 +2,7 @@ context('greta_array class')
 
 test_that('print and summary work', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   ga_data <- as_data(matrix(1:9, nrow = 3))

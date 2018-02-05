@@ -37,6 +37,8 @@ These structures can be used to set up more complex models. For
   equivalent to \code{as_data(array(data, dim))}.
 }
 \examples{
+\dontrun{
+
 # a 3 row, 4 column greta array of 0s
 z <- zeros(3, 4)
 
@@ -48,4 +50,5 @@ z <- greta_array(pi, dim = c(2, 4))
 
 # a 3x3x3 greta array filled with 1, 2, and 3
 z <- greta_array(1:3, dim = c(3, 3, 3))
+}
 }

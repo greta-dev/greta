@@ -284,6 +284,7 @@ test_that('replacement gives informative error messages', {
 
 test_that('stochastic and operation greta arrays can be extracted', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   a = normal(0, 1, dim = c(3, 4))
@@ -343,6 +344,7 @@ test_that('head and tail work', {
 
 test_that('length and dim work', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   ga_data <- as_data(matrix(1:9, nrow = 3))
@@ -363,6 +365,7 @@ test_that('length and dim work', {
 
 test_that('dim<- works', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   x <- greta_array(1:12, c(3, 4))
@@ -376,7 +379,7 @@ test_that('dim<- works', {
 
 })
 
-test_that('dim<- erros as expected', {
+test_that('dim<- errors as expected', {
 
   source('helpers.R')
 
@@ -398,6 +401,7 @@ test_that('dim<- erros as expected', {
 
 test_that('dim<- works in a model', {
 
+  skip_if_not(check_tf_version())
   source('helpers.R')
 
   y <- rnorm(5)

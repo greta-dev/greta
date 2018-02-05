@@ -56,6 +56,7 @@ test_that('tensorflow coercion works', {
 
 test_that('all_greta_arrays works', {
 
+  skip_if_not(check_tf_version())
   env <- new.env()
 
   env$a = normal(0, 1)
@@ -225,6 +226,8 @@ test_that("cleanly() handles TF errors nicely", {
 })
 
 test_that("double precision works for all jacobians", {
+
+  skip_if_not(check_tf_version())
 
   none = normal(0, 1)
   expect_ok( model(none, precision = "double") )
