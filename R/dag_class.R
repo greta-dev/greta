@@ -12,6 +12,7 @@ dag_class <- R6Class(
     target_nodes = NA,
     parameters_example = NA,
     tf_float = NA,
+    discrete = FALSE,
     n_cores = NA,
     compile = NA,
 
@@ -92,19 +93,17 @@ dag_class <- R6Class(
       old_float_type <- options()$greta_tf_float
       on.exit(options(greta_tf_float = old_float_type))
       options(greta_tf_float = self$tf_float)
-
+      
       # check for unfixed discrete distributions
       distributions <- self$node_list[self$node_types == 'distribution']
-      bad_nodes <- vapply(distributions,
-                          function(x) {
-                            x$discrete && !inherits(x$target, 'data_node')
-                          },
-                          FALSE)
-
-      if (any(bad_nodes)) {
-        stop ("model contains a discrete random variable that doesn't have a ",
-              "fixed value, so cannot be sampled from",
-              call. = FALSE)
+      discrete_nodes <- vapply(distributions,
+                               function(x) {
+                                 x$discrete && !inherits(x$target, 'data_node')
+                               },
+                               FALSE)
+      
+      if (any(discrete_nodes)) {
+        self$discrete <- TRUE
       }
 
       # define all nodes, node densities and free states in the environment

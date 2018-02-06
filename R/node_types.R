@@ -108,6 +108,8 @@ variable_node <- R6Class (
     constraint = NULL,
     lower = -Inf,
     upper = Inf,
+    sampler_lower = -Inf,
+    sampler_upper = Inf,
 
     initialize = function (lower = -Inf, upper = Inf, dim = 1) {
 
