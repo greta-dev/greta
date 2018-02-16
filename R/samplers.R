@@ -230,7 +230,7 @@ hmc <- function (dag,
 
 # determine whether the sampler is within one of the adaptation periods for a given parameter
 in_periods <- function (i, n_samples, periods) {
-  fraction <- 1 / n_samples
+  fraction <- i / n_samples
   in_period <- vapply(periods, within, fraction, FUN.VALUE = FALSE)
   any(in_period)
 }
