@@ -1,13 +1,13 @@
-# evaluating values outside inference
+# calculating values outside inference
 
-#' @name evaluate
-#' @title evaluate greta arrays given fixed values
-#' @description Evaluate greta arrays as numeric R arrays, given temporary
-#'   values for the greta arrays on which they depend. This can be used to check
-#'   the behaviour of your model or make predictions to new data after model
-#'   fitting.
+#' @name calculate
+#' @title calculate greta arrays given fixed values
+#' @description Calculate the values that greta arrays would take, given
+#'   temporary values for the greta arrays on which they depend, and return them
+#'   as numeric R arrays. This can be used to check the behaviour of your model
+#'   or make predictions to new data after model fitting.
 #'
-#' @param target a greta array for which to evaluate the value
+#' @param target a greta array for which to calculate the value
 #' @param values a named list giving temporary values of the greta arrays with
 #'   which \code{target} is connected, or an \code{mcmc.list} object returned by
 #'   \code{\link{model}} or \code{\link{raw}}.
@@ -30,11 +30,11 @@
 #' \dontrun{
 #'
 #' # define a variable greta array, and another that is calculated from it
-#' # then evaluate what value y would take for different values of x
+#' # then calculate what value y would take for different values of x
 #' x = normal(0, 1, dim = 3)
 #' a = lognormal(0, 1)
 #' y <- sum(x ^ 2) + a
-#' evaluate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
+#' calculate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
 #'
 #'
 #' # define a model
@@ -45,18 +45,18 @@
 #' distribution(iris$Petal.Width) = normal(mu, sigma)
 #' m <- model(alpha, beta, sigma)
 #'
-#' # evaluate intermediate greta arrays, given some parameter values
-#' evaluate(mu[1:5], list(alpha = 1, beta = 2, sigma = 0.5))
-#' evaluate(mu[1:5], list(alpha = -1, beta = 0.2, sigma = 0.5))
+#' # calculate intermediate greta arrays, given some parameter values
+#' calculate(mu[1:5], list(alpha = 1, beta = 2, sigma = 0.5))
+#' calculate(mu[1:5], list(alpha = -1, beta = 0.2, sigma = 0.5))
 #'
 #'
-#' # fit the model then evaluate samples at a new greta array
+#' # fit the model then calculate samples at a new greta array
 #' draws <- mcmc(m, n_samples = 500)
 #' petal_length_plot <- seq(min(iris$Petal.Length),
 #'                          max(iris$Petal.Length),
 #'                          length.out = 100)
 #' mu_plot <- alpha + petal_length_plot * beta
-#' mu_plot_draws <- evaluate(mu_plot, draws)
+#' mu_plot_draws <- calculate(mu_plot, draws)
 #'
 #' # plot the draws
 #' mu_est <- colMeans(mu_plot_draws[[1]])
@@ -66,7 +66,7 @@
 #' }
 #'
 #'
-evaluate <- function (target, values) {
+calculate <- function (target, values) {
 
   target_name <- deparse(substitute(target))
 
@@ -74,13 +74,13 @@ evaluate <- function (target, values) {
     stop ("greta_array is not a greta array")
 
   if (inherits(values, "mcmc.list"))
-    evaluate_mcmc.list(target, target_name, values)
+    calculate_mcmc.list(target, target_name, values)
   else
-    evaluate_list(target, values)
+    calculate_list(target, values)
 
 }
 
-evaluate_mcmc.list <- function (target, target_name, values) {
+calculate_mcmc.list <- function (target, target_name, values) {
 
   model_info <- attr(values, "model_info")
 
@@ -144,7 +144,7 @@ evaluate_mcmc.list <- function (target, target_name, values) {
 
 }
 
-evaluate_list <- function(target, values) {
+calculate_list <- function(target, values) {
 
   # get the values and their names
   names <- names(values)

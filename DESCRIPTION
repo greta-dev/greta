@@ -40,7 +40,7 @@ Collate:
     'inference.R'
     'install_tensorflow.R'
     'internals.R'
-    'evaluate.R'
+    'calculate.R'
 Imports:
     R6,
     tensorflow,
