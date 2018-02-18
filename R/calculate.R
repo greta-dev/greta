@@ -71,7 +71,7 @@ calculate <- function (target, values) {
   target_name <- deparse(substitute(target))
 
   if (!inherits(target, "greta_array"))
-    stop ("greta_array is not a greta array")
+    stop ("'target' is not a greta array")
 
   if (inherits(values, "mcmc.list"))
     calculate_mcmc.list(target, target_name, values)

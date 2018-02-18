@@ -103,3 +103,20 @@ test_that('calculate errors nicely if required values have incorrect dimensions'
                "different number of elements than the greta array")
 
 })
+
+test_that('calculate errors nicely if not used on a greta array', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- as_data(c(1, 2))
+  a <- normal(0, 1)
+  y <- a * x
+  z <- 1:5
+
+
+  # it should error nicely
+  expect_error(calculate(z, list(a = c(1, 1))),
+               "target' is not a greta array")
+
+})
