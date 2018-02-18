@@ -64,7 +64,6 @@ The plot method produces a visual representation of the defined
   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 }
 \examples{
-
 \dontrun{
 
 # define a simple model
@@ -77,5 +76,4 @@ m <- model(mu, sigma)
 
 plot(m)
 }
-
 }

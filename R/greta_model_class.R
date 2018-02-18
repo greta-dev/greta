@@ -41,7 +41,6 @@ NULL
 #' @return \code{model} - a \code{greta_model} object.
 #'
 #' @examples
-#'
 #' \dontrun{
 #'
 #' # define a simple model
@@ -54,7 +53,6 @@ NULL
 #'
 #' plot(m)
 #' }
-#'
 model <- function (...,
                    precision = c('single', 'double'),
                    n_cores = NULL,
