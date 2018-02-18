@@ -47,7 +47,7 @@ test_that('opt accepts initial values', {
 
 })
 
-test_that('rejected mcmc proposals', {
+test_that('bad mcmc proposals are rejected', {
 
   skip_if_not(check_tf_version())
   source('helpers.R')
@@ -101,7 +101,38 @@ test_that('mcmc works with multiple chains', {
   z = normal(0, 1)
   distribution(x) = normal(z, 1)
   m <- model(z)
+
+  # multiple chains, automatic initial values
   quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2) ))
+
+  # multiple chains, user-specified initial values
+  quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = list(1, 2)) ))
+
+})
+
+test_that('mcmc handles initial values nicely', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- rnorm(10)
+  z = normal(0, 1)
+  distribution(x) = normal(z, 1)
+  m <- model(z)
+
+  # too many sets of initial values
+  expect_error( mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE,
+                     chains = 2, initial_values = list(1)),
+                "sets of initial values were provided, but there are")
+
+  # initial values have the wrong length
+  expect_error( mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE,
+                     chains = 2, initial_values = list(1:2, 2:3)),
+                "each set of initial values must be a vector of length")
+
+  quietly(expect_message(mcmc(m, warmup = 10, n_samples = 10,
+                      chains = 2, initial_values = 1),
+                 "only one set of was initial values given, and was used for all chains"))
 
 })
 
