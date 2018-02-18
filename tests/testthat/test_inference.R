@@ -77,6 +77,12 @@ test_that('bad mcmc proposals are rejected', {
   expect_error(mcmc(m, n_samples = 1, warmup = 0),
                'Could not find reasonable starting values after 20 attempts')
 
+  # proposals that are fine, but rejected anyway (long chain required)
+  z = normal(0, 1)
+  m <- model(z)
+  expect_ok(mcmc(m, n_samples = 5, warmup = 0, verbose = FALSE,
+                 control = list(epsilon = 100, Lmin = 1, Lmax = 1)))
+
 })
 
 test_that('mcmc works with verbosity and warmup', {
