@@ -464,7 +464,7 @@ opt <- function (model,
 #'   can be used with \code{evaluate()} to draws samples of new parameters,
 #'   after model fitting.
 #'
-#' @export
+#' @noRd
 raw <- function (draws) {
 
   if (!inherits(draws, "mcmc.list")) {

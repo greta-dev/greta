@@ -11,7 +11,7 @@ calculate(target, values)
 
 \item{values}{a named list giving temporary values of the greta arrays with
 which \code{target} is connected, or an \code{mcmc.list} object returned by
-\code{\link{model}} or \code{\link{raw}}.}
+\code{\link{mcmc}}.}
 }
 \value{
 A numeric R array with the same dimensions as \code{target}, giving

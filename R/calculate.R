@@ -10,7 +10,7 @@
 #' @param target a greta array for which to calculate the value
 #' @param values a named list giving temporary values of the greta arrays with
 #'   which \code{target} is connected, or an \code{mcmc.list} object returned by
-#'   \code{\link{model}} or \code{\link{raw}}.
+#'   \code{\link{mcmc}}.
 #'
 #' @return A numeric R array with the same dimensions as \code{target}, giving
 #'   the values it would take conditioned on the fixed values given by
@@ -109,11 +109,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
 
   # raw draws are either an attribute, or this object
   model_info <- attr(values, "model_info")
-  if (is.null(model_info$raw_draws)) {
-    draws <- values
-  } else {
-    draws <- model_info$raw_draws
-  }
+  draws <- model_info$raw_draws
 
   # trace the target for each draw in each chain
   trace <- list()
