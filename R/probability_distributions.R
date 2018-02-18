@@ -537,7 +537,7 @@ cauchy_distribution <- R6Class (
       s <- parameters$scale
 
       log_prob = function (x)
-        -tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s)))
+        tf$negative(tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s))))
 
       cdf = function (x)
         fl(1 / pi)  * tf$atan((x - loc) / s) + fl(0.5)
