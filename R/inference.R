@@ -455,38 +455,6 @@ opt <- function (model,
 
 }
 
-#' @rdname inference
-#' @param draws an \code{mcmc.list} object returned by \code{mcmc()} or
-#'   \code{stashed_samples()}
-#'
-#' @details \code{raw()} returns an \code{mcmc.list} object representing samples
-#'   of all of the variables in the model, in their unconstrained form. These
-#'   can be used with \code{evaluate()} to draws samples of new parameters,
-#'   after model fitting.
-#'
-#' @noRd
-raw <- function (draws) {
-
-  if (!inherits(draws, "mcmc.list")) {
-    stop ("draws must be an mcmc.list object",
-          call. = FALSE)
-  }
-
-  model_info <- attr(draws, "model_info")
-
-  if (is.null(model_info)) {
-    stop ("draws is not associated with any model information, ",
-          "perhaps it wasn't created with greta::model() ?",
-          call. = FALSE)
-  }
-
-  raw_draws <- model_info$raw_draws
-  attr(raw_draws, "model_info") <- model_info
-  raw_draws
-
-}
-
-
 stash_module <- module(greta_stash,
                        stash_trace,
                        prepare_draws)

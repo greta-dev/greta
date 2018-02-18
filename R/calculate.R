@@ -87,7 +87,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
   if (is.null(model_info)) {
     stop ("value is an mcmc.list object, but is not associated with any ",
           "model information, perhaps it wasn't created with ",
-          "greta::model() or greta::raw() ?",
+          "greta::mcmc() ?",
           call. = FALSE)
   }
 
