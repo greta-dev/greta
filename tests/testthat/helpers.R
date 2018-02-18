@@ -5,6 +5,9 @@ library(tensorflow)
 # set the seed before running tests
 set.seed(2017-05-01)
 
+quietly <- function (expr)
+  invisible(capture.output(expr))
+
 expect_ok <- function (expr)
   expect_error(expr, NA)
 

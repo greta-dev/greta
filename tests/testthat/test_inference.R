@@ -88,7 +88,20 @@ test_that('mcmc works with verbosity and warmup', {
   z = normal(0, 1)
   distribution(x) = normal(z, 1)
   m <- model(z)
-  expect_ok( mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE) )
+  quietly(expect_ok( mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE) ))
+
+})
+
+test_that('mcmc works with multiple chains', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- rnorm(10)
+  z = normal(0, 1)
+  distribution(x) = normal(z, 1)
+  m <- model(z)
+  quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2) ))
 
 })
 
