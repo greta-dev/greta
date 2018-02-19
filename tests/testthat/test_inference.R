@@ -205,3 +205,16 @@ test_that('stashed_samples works', {
   expect_true(inherits(model_info$model, "greta_model"))
 
 })
+
+
+test_that('model errors nicely', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  # model should give a nice error if passed something other than a greta array
+  a <- 1
+  b <- normal(0, a)
+  expect_error(model(a, b),
+               "^The following object")
+})
