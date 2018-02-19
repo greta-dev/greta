@@ -245,12 +245,12 @@ y <- iris$Sepal.Length
 
 library(greta)
 
-int = normal(0, 5)
-coef = normal(0, 3)
-sd = lognormal(0, 3)
+int <- normal(0, 5)
+coef <- normal(0, 3)
+sd <- lognormal(0, 3)
 
 mean <- int + coef * x
-distribution(y) = normal(mean, sd)
+distribution(y) <- normal(mean, sd)
 
 m <- model(int, coef, sd)
 
