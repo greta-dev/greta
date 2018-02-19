@@ -12,7 +12,7 @@ model(..., precision = c("single", "double"), n_cores = NULL,
 
 \method{print}{greta_model}(x, ...)
 
-\method{plot}{greta_model}(x, y, ...)
+plot.greta_model(x, y, ...)
 }
 \arguments{
 \item{\dots}{for \code{model}: \code{greta_array} objects to be tracked by
