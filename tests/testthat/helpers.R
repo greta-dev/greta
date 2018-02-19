@@ -327,8 +327,7 @@ mock_mcmc <- function (n_samples = 1010) {
 
 dinvgamma <- extraDistr::dinvgamma
 qinvgamma <- extraDistr::qinvgamma
-pinvgamma <- function (q, alpha, beta)
-  ifelse(q < 0, 0, extraDistr::pinvgamma(q, alpha, beta))
+pinvgamma <- extraDistr::pinvgamma
 
 dlaplace <- extraDistr::dlaplace
 plaplace <- extraDistr::plaplace

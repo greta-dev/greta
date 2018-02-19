@@ -213,7 +213,7 @@ coef = normal(0, 3)
 sd = student(3, 0, 1, truncation = c(0, Inf))
 ```
 
-Each of these is a variable greta array, and each is assumed *a priori* (before fitting to data) to follow a different probability distribution. In other wirds, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with proability distributions, it will be clearer to first demonstrate the alternative; variables without probabiltiy distributions.
+Each of these is a variable greta array, and each is assumed *a priori* (before fitting to data) to follow a different probability distribution. In other words, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with proability distributions, it will be clearer to first demonstrate the alternative; variables without probabiltiy distributions.
 
 #### variables without probability distributions
 
