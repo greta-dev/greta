@@ -1,3 +1,17 @@
+### greta 0.2.3
+================
+
+Fixes:
+
+* fixed breaking change in extraDistr API (caused test errors on CRAN builds)
+* added dontrun statements to pass CRAN checks on winbuilder
+* fixed breaking change in tensorflow API (1-based indexing)
+
+New functionality:
+
+* added `cumsum()` and `cumprod()` functions
+
+
 ### greta 0.2.2
 ================
 
