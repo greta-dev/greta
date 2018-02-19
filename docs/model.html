@@ -407,12 +407,11 @@ The plot method produces a visual representation of the defined model. It uses t
 </h2>
 <pre class="r">
 
-
 <span class='co'># define a simple model</span>
-<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='variable.html'>variable</a></span>()
-<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
-<span class='no'>x</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>10</span>)
-<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span>()
+<span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>rnorm</span>(<span class='fl'>10</span>)
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 
 <span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>model</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 

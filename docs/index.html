@@ -415,12 +415,12 @@ basic example
 y &lt;- iris$Sepal.Length</code></pre>
 <pre><code>library(greta)
 
-int = normal(0, 5)
-coef = normal(0, 3)
-sd = lognormal(0, 3)
+int &lt;- normal(0, 5)
+coef &lt;- normal(0, 3)
+sd &lt;- lognormal(0, 3)
 
 mean &lt;- int + coef * x
-distribution(y) = normal(mean, sd)</code></pre>
+distribution(y) &lt;- normal(mean, sd)</code></pre>
 <pre><code>m &lt;- model(int, coef, sd)</code></pre>
 </div>
 <div class="col-md-6">

@@ -762,39 +762,39 @@ reference
 <pre class="r">
 
 <span class='co'># a uniform parameter constrained to be between 0 and 1</span>
-<span class='no'>phi</span> <span class='kw'>=</span> <span class='fu'>uniform</span>(<span class='kw'>min</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='no'>phi</span> <span class='kw'>&lt;-</span> <span class='fu'>uniform</span>(<span class='kw'>min</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>1</span>)
 
 <span class='co'># a length-three variable, with each element following a standard normal</span>
 <span class='co'># distribution</span>
-<span class='no'>alpha</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='no'>alpha</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 
 <span class='co'># a length-three variable of lognormals</span>
-<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 
 <span class='co'># a hierarchical uniform, constrained between alpha and alpha + sigma,</span>
-<span class='no'>eta</span> <span class='kw'>=</span> <span class='no'>alpha</span> + <span class='fu'>uniform</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>) * <span class='no'>sigma</span>
+<span class='no'>eta</span> <span class='kw'>&lt;-</span> <span class='no'>alpha</span> + <span class='fu'>uniform</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>) * <span class='no'>sigma</span>
 
 <span class='co'># a hierarchical distribution</span>
-<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
-<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
-<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 
 <span class='co'># a vector of 3 variables drawn from the same hierarchical distribution</span>
-<span class='no'>thetas</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='no'>thetas</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 
 <span class='co'># a matrix of 12 variables drawn from the same hierarchical distribution</span>
-<span class='no'>thetas</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>4</span>))
+<span class='no'>thetas</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>4</span>))
 
 <span class='co'># a multivariate normal variable, with correlation between two elements</span>
 <span class='no'>Sig</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='fl'>4</span>)
 <span class='no'>Sig</span>[<span class='fl'>3</span>, <span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='no'>Sig</span>[<span class='fl'>4</span>, <span class='fl'>3</span>] <span class='kw'>&lt;-</span> <span class='fl'>0.6</span>
-<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>)
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>)
 
 <span class='co'># 10 independent replicates of that</span>
-<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 
 <span class='co'># a Wishart variable with the same covariance parameter</span>
-<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>wishart</span>(<span class='kw'>df</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Sigma</span> <span class='kw'>=</span> <span class='no'>Sig</span>)</pre>
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>wishart</span>(<span class='kw'>df</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Sigma</span> <span class='kw'>=</span> <span class='no'>Sig</span>)</pre>
 
 
 
