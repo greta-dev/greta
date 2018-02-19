@@ -1,8 +1,10 @@
 # test functions
 
-library(tensorflow)
+library (tensorflow)
 
-# set the seed before running tests
+# set the seed and flush the graph before running tests
+tf <- tensorflow::tf
+tf$reset_default_graph()
 set.seed(2017-05-01)
 
 quietly <- function (expr)

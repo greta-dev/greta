@@ -17,10 +17,10 @@ N <- 8
 
 #### greta code
 ```{r beetles_greta}
-alpha_star = normal(0, 32)
-beta = normal(0, 32)
+alpha_star <- normal(0, 32)
+beta <- normal(0, 32)
 p <- ilogit(alpha_star + beta * (x - mean(x)))
-distribution(r) = binomial(n, p)
+distribution(r) <- binomial(n, p)
 
 alpha <- alpha_star - beta * mean(x)
 rhat <- p * n

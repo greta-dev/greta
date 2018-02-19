@@ -101,7 +101,7 @@ a, a:hover{
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
-set.seed(2017-06-19)
+set.seed(2018-02-17)
 ```
 
 <div id="head">
@@ -222,12 +222,12 @@ y <- iris$Sepal.Length
 ```
 library(greta)
 
-int = normal(0, 5)
-coef = normal(0, 3)
-sd = lognormal(0, 3)
+int <- normal(0, 5)
+coef <- normal(0, 3)
+sd <- lognormal(0, 3)
 
 mean <- int + coef * x
-distribution(y) = normal(mean, sd)
+distribution(y) <- normal(mean, sd)
 ```
 ```
 m <- model(int, coef, sd)
@@ -245,16 +245,16 @@ y <- iris$Sepal.Length
 
 library(greta)
 
-int = normal(0, 5)
-coef = normal(0, 3)
-sd = lognormal(0, 3)
+int <- normal(0, 5)
+coef <- normal(0, 3)
+sd <- lognormal(0, 3)
 
 mean <- int + coef * x
-distribution(y) = normal(mean, sd)
+distribution(y) <- normal(mean, sd)
 
 m <- model(int, coef, sd)
 
-draws <- mcmc(m, n_samples = 1000, chains = 3)
+draws <- mcmc(m, warmup = 1000, n_samples = 1000, chains = 3)
 bayesplot::mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1)) + ggplot2::theme_minimal()
 ```
 

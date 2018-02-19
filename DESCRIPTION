@@ -1,11 +1,11 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.2.3
-Date: 2018-01-23
+Version: 0.2.4
+Date: 2018-02-20
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
-Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://goldingn.github.io/greta> for more information).
+Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://greta-dev.github.io/greta> for more information).
 License: Apache License 2.0
 URL: https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues

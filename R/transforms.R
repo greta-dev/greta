@@ -12,27 +12,37 @@
 #'   modelling languages. That's because the same syntax has a very different
 #'   meaning in R, and can only be applied to objects that are already in
 #'   existence. The inverse forms of the common link functions (prefixed with an
-#'   'i') are therefore more likely to useful in modelling, and these are what
-#'   are provided here.
+#'   'i') can be used instead.
 #'
-#'   The \code{log1pe} inverse link function is equivalent to \code{log(1 + exp(x))},
-#'   yielding a positive transformed parameter. Unlike the log transformation,
-#'   this transformation is approximately linear for x > 1. i.e. when \eqn{x >
-#'   1}, \eqn{y \approx x}
+#'   The \code{log1pe} inverse link function is equivalent to \code{log(1 +
+#'   exp(x))}, yielding a positive transformed parameter. Unlike the log
+#'   transformation, this transformation is approximately linear for x > 1. i.e.
+#'   when \eqn{x > 1}, \eqn{y \approx x}
+#'
+#'   \code{imultilogit} expects an n-by-m greta array, and returns an n-by-(m+1)
+#'   greta array of positive reals whose rows sum to one. This is equivalent
+#'   adding a final column of 0s and then running the softmax function widely
+#'   used in machine learning.
 #'
 #' @examples
 #' \dontrun{
 #'
-#'  x = normal(1, 3, dim = 10)
+#'  x1 <- normal(1, 3, dim = 10)
 #'
 #'  # transformation to the unit interval
-#'  p1 <- iprobit(x)
-#'  p2 <- ilogit(x)
-#'  p3 <- icloglog(x)
-#'  p4 <- icauchit(x)
+#'  p1 <- iprobit(x1)
+#'  p2 <- ilogit(x1)
+#'  p3 <- icloglog(x1)
+#'  p4 <- icauchit(x1)
 #'
 #'  # and to positive reals
-#'  y <- log1pe(x)
+#'  y <- log1pe(x1)
+#'
+#'  # transform from 10x3 to 10x4, where rows are a complete set of
+#'  # probabilities
+#'  x2 <- normal(1, 3, dim = c(10, 3))
+#'  z <- imultilogit(x2)
+#'
 #' }
 NULL
 
@@ -60,3 +70,25 @@ icauchit <- function (x)
 #' @export
 log1pe <- function (x)
   op('log1pe', x, tf_operation = tf$nn$softplus)
+
+#' @rdname transforms
+#' @export
+imultilogit <- function (x) {
+  dimfun <- function (elem_list) {
+
+    dim <- dim(elem_list[[1]])
+
+    # check it's a matrix
+    if (length(dim) != 2) {
+      stop ("imultilogit expects a 2D greta array",
+            call. = FALSE)
+    }
+
+    dim + c(0, 1)
+
+  }
+
+  op('imultilogit', x,
+     dimfun = dimfun,
+     tf_operation = tf_imultilogit)
+}

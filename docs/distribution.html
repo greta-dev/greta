@@ -380,12 +380,12 @@ The extract method returns the greta array if it has a distribution, or <code>NU
 
 <span class='co'># observed data and mean parameter to be estimated</span>
 <span class='co'># (explicitly coerce data to a greta array so we can refer to it later)</span>
-<span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>rnorm</span>(<span class='fl'>5</span>, <span class='fl'>0</span>, <span class='fl'>3</span>))
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>rnorm</span>(<span class='fl'>5</span>, <span class='fl'>0</span>, <span class='fl'>3</span>))
 
-<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>uniform</a></span>(-<span class='fl'>3</span>, <span class='fl'>3</span>)
+<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span>(-<span class='fl'>3</span>, <span class='fl'>3</span>)
 
 <span class='co'># define the distribution over y (the model likelihood)</span>
-<span class='fu'>distribution</span>(<span class='no'>y</span>) <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='fl'>1</span>)
+<span class='fu'>distribution</span>(<span class='no'>y</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='fl'>1</span>)
 
 <span class='co'># get the distribution over y</span>
 <span class='fu'>distribution</span>(<span class='no'>y</span>)</pre>

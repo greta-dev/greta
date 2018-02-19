@@ -118,10 +118,10 @@ Currently, the only implemented optimisation algorithm is Adagrad
 \examples{
 \dontrun{
 # define a simple model
-mu = variable()
-sigma = lognormal(1, 0.1)
-x = rnorm(10)
-distribution(x) = normal(mu, sigma)
+mu <- variable()
+sigma <- lognormal(1, 0.1)
+x <- rnorm(10)
+distribution(x) <- normal(mu, sigma)
 m <- model(mu, sigma)
 
 # carry out mcmc on the model

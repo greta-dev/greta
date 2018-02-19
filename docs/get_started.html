@@ -418,15 +418,15 @@ x &lt;- as_data(iris$Petal.Length)
 y &lt;- as_data(iris$Sepal.Length)
 
 # variables and priors
-int = normal(0, 1)
-coef = normal(0, 3)
-sd = student(3, 0, 1, truncation = c(0, Inf))
+int &lt;- normal(0, 1)
+coef &lt;- normal(0, 3)
+sd &lt;- student(3, 0, 1, truncation = c(0, Inf))
 
 # operations
 mean &lt;- int + coef * x
 
 # likelihood
-distribution(y) = normal(mean, sd)
+distribution(y) &lt;- normal(mean, sd)
 
 # defining the model
 m &lt;- model(int, coef, sd)
@@ -436,7 +436,6 @@ plot(m)
 
 # sampling
 draws &lt;- mcmc(m, n_samples = 1000)</code></pre>
-<p>Throughout this example, and the rest of greta’s documentation, <code>&lt;-</code> is used when assigning <em>deterministic</em> values, and <code>=</code> when assigning variable or <em>stochastic</em> values. This makes the model code a little bit clearer to read, since <code>=</code> corresponds to the <code>~</code> symbol used to define stochastic relationships in BUGS and Stan. However, it doesn’t actually make any difference to the model which assignment operator you use.</p>
 <hr>
 <div id="data" class="section level3">
 <h3>Data</h3>
@@ -507,21 +506,21 @@ y &lt;- as_data(iris$Sepal.Length)</code></pre>
 <div id="variables-and-priors" class="section level3">
 <h3>Variables and priors</h3>
 <p>The second section of the script creates three greta arrays to represent the parameters in our model:</p>
-<pre class="r"><code>int = normal(0, 1)
-coef = normal(0, 3)
-sd = student(3, 0, 1, truncation = c(0, Inf))</code></pre>
-<p>Each of these is a variable greta array, and each is assumed <em>a priori</em> (before fitting to data) to follow a different probability distribution. In other wirds, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with proability distributions, it will be clearer to first demonstrate the alternative; variables without probabiltiy distributions.</p>
+<pre class="r"><code>int &lt;- normal(0, 1)
+coef &lt;- normal(0, 3)
+sd &lt;- student(3, 0, 1, truncation = c(0, Inf))</code></pre>
+<p>Each of these is a variable greta array, and each is assumed <em>a priori</em> (before fitting to data) to follow a different probability distribution. In other words, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with proability distributions, it will be clearer to first demonstrate the alternative; variables without probabiltiy distributions.</p>
 <div id="variables-without-probability-distributions" class="section level4">
 <h4>variables without probability distributions</h4>
 <p>If we were carrying out a frequentist analysis of this model, we could create variable greta arrays (values we want to learn) without probability distributions using the <code>variable()</code> function. E.g. in a frequentist version of the model we could create <code>int</code> with:</p>
-<pre class="r"><code>(int = variable())</code></pre>
+<pre class="r"><code>(int &lt;- variable())</code></pre>
 <pre><code>greta array (variable)
 
      [,1]
 [1,]  ?  </code></pre>
 <p><code>variable()</code> has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of <code>lower = -Inf, upper = Inf</code> meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).</p>
 <p>We can create a variable constrained between two values by specifying <code>lower</code> and <code>upper</code>. So we could have created the positive variable <code>sd</code> (the standard deviation of the likelihood) with:</p>
-<pre class="r"><code>(sd = variable(lower = 0))</code></pre>
+<pre class="r"><code>(sd &lt;- variable(lower = 0))</code></pre>
 <pre><code>greta array (variable)
 
      [,1]
@@ -542,7 +541,7 @@ sd = student(3, 0, 1, truncation = c(0, Inf))</code></pre>
 <div id="variables-with-truncated-distributions" class="section level4">
 <h4>variables with truncated distributions</h4>
 <p>Some of greta’s probability distributions (those that are continous and univariate) can be specified as truncated distributions. By modifying the <code>truncation</code> argument, we can state that the resulting distribution should be truncated between the two truncation bounds. So to create a standard normal distribution truncated between -1 and 1 we can do:</p>
-<pre class="r"><code>(z = normal(0, 1, truncation = c(-1, 1)))</code></pre>
+<pre class="r"><code>(z &lt;- normal(0, 1, truncation = c(-1, 1)))</code></pre>
 <pre><code>greta array (variable following a normal distribution)
 
      [,1]
@@ -596,7 +595,7 @@ dim(z[, 1])</code></pre>
 <pre><code>NULL</code></pre>
 <pre class="r"><code>dim(z[, 1, drop = FALSE])</code></pre>
 <pre><code>[1] 2 1</code></pre>
-<p>greta arrays must always have two dimensions, so greta always acts as though <code>drop=FALSE</code>:</p>
+<p>greta arrays must always have two dimensions, so greta always acts as though <code>drop = FALSE</code>:</p>
 <pre class="r"><code>z_greta &lt;- as_data(z)
 dim(z_greta[, 1])</code></pre>
 <pre><code>[1] 2 1</code></pre>
@@ -620,8 +619,8 @@ atanh(z_greta)</code></pre>
 <h3>Likelihood</h3>
 <p>So far, we have created greta arrays representing the variables in our model (with prior distributions) and created other greta arrays from them and some fixed, <em>independent</em> data. To perform statistical inference on this model, we also need to link it to some observed <em>dependent</em> data. By comparing the sepal lengths predicted under different parameter values with the observed sepal lengths, we can estimate the most plausible values of those parameters. We do that by defining a likelihood for the observed sepal length data <code>y</code>.</p>
 <p>By defining a likelihood over observed data, we are stating that these observed data are actually a random sample from some probability distribution, and we’re trying to work out the parameters of that distribution. In greta we do that with the <code>distribution()</code> assignment function:</p>
-<pre class="r"><code>distribution(y) = normal(mean, sd)</code></pre>
-<p>With the syntax <code>distribution(&lt;lhs&gt;) = &lt;rhs&gt;</code>, we are stating that the data greta array on the left <code>&lt;lhs&gt;</code> has the same distribution as the greta array on the right <code>&lt;rhs&gt;</code>. In this case, we’re temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays <code>mean</code> and <code>sd</code>), but then stating that values of that distribution have been observed (<code>y</code>). In this case both <code>&lt;lhs&gt;</code> (<code>y</code>) and <code>&lt;rhs&gt;</code> are column vectors with the same dimensions, so each element in <code>y</code> has a normal distribution with the corresponding parameters.</p>
+<pre class="r"><code>distribution(y) &lt;- normal(mean, sd)</code></pre>
+<p>With the syntax <code>distribution(&lt;lhs&gt;) &lt;- &lt;rhs&gt;</code>, we are stating that the data greta array on the left <code>&lt;lhs&gt;</code> has the same distribution as the greta array on the right <code>&lt;rhs&gt;</code>. In this case, we’re temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays <code>mean</code> and <code>sd</code>), but then stating that values of that distribution have been observed (<code>y</code>). In this case both <code>&lt;lhs&gt;</code> (<code>y</code>) and <code>&lt;rhs&gt;</code> are column vectors with the same dimensions, so each element in <code>y</code> has a normal distribution with the corresponding parameters.</p>
 <hr>
 </div>
 <div id="defining-the-model" class="section level3">
@@ -644,7 +643,7 @@ atanh(z_greta)</code></pre>
 <img src="figures/plotlegend.png" width="750" />
 </p>
 <p>The fourth type of node (diamonds) represents probability distributions. These have greta arrays as parameters (linked via solid lines), and have other greta arrays as <em>values</em>(linked via dashed lines). Distributions calculate the probability density of the <em>values</em>, given the parameters and their distribution type.</p>
-<p>For example, a plot of just the prior distribution over <code>coef</code> (defined as <code>coef = normal(0, 3)</code>) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution’s value, the variable <code>coef</code>:</p>
+<p>For example, a plot of just the prior distribution over <code>coef</code> (defined as <code>coef &lt;- normal(0, 3)</code>) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution’s value, the variable <code>coef</code>:</p>
 <p>
 <img src="figures/coef_graph.png" width="500" />
 </p>
