@@ -1,3 +1,19 @@
+### greta 0.2.4
+================
+
+Fixes:
+
+* improved error checking/messages in `model()`, `%*%`
+* switched docs and examples to always use `<-` for assignment
+* fixed the `n_cores` argument to `model()`
+
+New functionality:
+
+* added a `calculate()` function to compute the values of greta arrays conditional on provided values for others
+* added `imultilogit()` transform
+* added a `chains` argument to `model()`
+* improved HMC self-tuning, including a diagonal euclidean metric
+
 ### greta 0.2.3
 ================
 
