@@ -80,7 +80,7 @@ imultilogit <- function (x) {
 
     # check it's a matrix
     if (length(dim) != 2) {
-      stop ("imultilogit works expects a 2D greta array",
+      stop ("imultilogit expects a 2D greta array",
             call. = FALSE)
     }
 

@@ -30,3 +30,15 @@ test_that('transformations work as expected', {
 
 })
 
+test_that("imultilogit errors informatively", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- ones(3, 4, 3)
+
+  expect_error(imultilogit(x),
+               "imultilogit expects a 2D greta array")
+
+})
+
