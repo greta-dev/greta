@@ -86,18 +86,18 @@
 #' @examples
 #' \dontrun{
 #'
-#' x = as_data(matrix(1:9, nrow = 3, ncol = 3))
-#' a = log(exp(x))
-#' b = log1p(expm1(x))
-#' c = sign(x - 5)
-#' d = abs(x - 5)
+#' x <- as_data(matrix(1:9, nrow = 3, ncol = 3))
+#' a <- log(exp(x))
+#' b <- log1p(expm1(x))
+#' c <- sign(x - 5)
+#' d <- abs(x - 5)
 #'
-#' e = diag(x)
+#' e <- diag(x)
 #' diag(x) <- e + 1
 #'
-#' z = t(a)
+#' z <- t(a)
 #'
-#' y = sweep(x, 1, e, '-')
+#' y <- sweep(x, 1, e, '-')
 #' }
 NULL
 

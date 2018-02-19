@@ -17,12 +17,24 @@ stashed_samples <- function () {
 
   if (stashed) {
 
-    # get them, remove the NAs, and return
-    draws <- greta_stash$trace_stash
-    draws_clean <- na.omit(draws)
-    draws_prepped <- prepare_draws(draws_clean)
+    stash <- greta_stash$trace_stash
 
-    return (draws_prepped)
+    # get them, remove the NAs, and return
+    draws_clean <- na.omit(stash$trace)
+    draws_prepped <- prepare_draws(draws_clean)
+    draws_mcmclist <- mcmc.list(draws_prepped)
+
+    # prep the raw model objects
+    model_info <- new.env()
+    raw_clean <- na.omit(stash$raw)
+    raw_prepped <- prepare_draws(raw_clean)
+    model_info$raw_draws <- mcmc.list(raw_prepped)
+    model_info$model <- greta_stash$model
+
+    # add the raw draws as an attribute
+    attr(draws_mcmclist, "model_info") <- model_info
+
+    return (draws_mcmclist)
 
   } else {
 
@@ -36,8 +48,12 @@ stashed_samples <- function () {
 # they abort a run
 greta_stash <- new.env()
 
-stash_trace <- function (trace)
-  assign('trace_stash', trace, envir = greta_stash)
+stash_trace <- function (trace, raw) {
+  assign('trace_stash',
+         list(trace = trace,
+              raw = raw),
+         envir = greta_stash)
+}
 
 #' @rdname inference
 #' @export
@@ -45,22 +61,23 @@ stash_trace <- function (trace)
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #'
 #' @param model greta_model object
-#' @param method the method used to sample or optimise values. Currently only
+#' @param method method used to sample or optimise values. Currently only
 #'   one method is available for each procedure: \code{hmc} and \code{adagrad}
-#' @param n_samples the number of MCMC samples to draw (after any warm-up, but
+#' @param n_samples number of MCMC samples to draw (after any warm-up, but
 #'   before thinning)
-#' @param thin the MCMC thinning rate; every \code{thin} samples is retained,
+#' @param thin MCMC thinning rate; every \code{thin} samples is retained,
 #'   the rest are discarded
-#' @param warmup the number of samples to spend warming up the mcmc sampler.
+#' @param warmup number of samples to spend warming up the mcmc sampler.
 #'   During this phase the sampler moves toward the highest density area and
 #'   tunes sampler hyperparameters.
+#' @param chains number of MCMC chains to run
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations)
 #' @param control an optional named list of hyperparameters and options to
 #'   control behaviour of the sampler or optimiser. See Details.
-#' @param initial_values an optional named vector of initial values for the free
-#'   parameters in the model. These will be used as the starting point for
-#'   sampling/optimisation
+#' @param initial_values an optional vector (or list of vectors, for multiple
+#'   chains) of initial values for the free parameters in the model. These will
+#'   be used as the starting point for sampling/optimisation.
 #'
 #' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
@@ -82,29 +99,31 @@ stash_trace <- function (trace)
 #'   (via \code{model}) to have double precision, though this will slow down
 #'   sampling.
 #'
-#'   Currently, the only implemented MCMC procedure is static Hamiltonian
-#'   Monte Carlo (\code{method = "hmc"}). During the warmup iterations, the
-#'   leapfrog stepsize hyperparameter \code{epsilon} is tuned to maximise the
-#'   sampler efficiency. The \code{control} argument can be used to specify the
-#'   initial value for epsilon, along with two other hyperparameters: \code{Lmin}
-#'   and \code{Lmax}; positive integers (with \code{Lmax > Lmin}) giving the
-#'   upper and lower limits to the number of leapfrog steps per iteration (from
-#'   which the number is selected uniformly at random).
+#'   Currently, the only implemented MCMC procedure is static Hamiltonian Monte
+#'   Carlo (\code{method = "hmc"}). During the warmup iterations, the leapfrog
+#'   stepsize hyperparameter \code{epsilon} is tuned to maximise the sampler
+#'   efficiency, and the posterior marginal standard deviations are estimated
+#'   \code{diag_sd}. The \code{control} argument can be used to specify the
+#'   initial value for \code{epsilon}, \code{diag_sd}, and two other
+#'   hyperparameters: \code{Lmin} and \code{Lmax}; positive integers (with
+#'   \code{Lmax > Lmin}) giving the upper and lower limits to the number of
+#'   leapfrog steps per iteration (from which the number is selected uniformly
+#'   at random).
 #'
 #'   The default control options for HMC are:
-#'   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005)}
+#'   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005, diag_sd = 1)}
 #'
-#' @return \code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object that can be analysed using
-#'   functions from the coda package. This will contain mcmc samples of the
-#'   greta arrays used to create \code{model}.
+#' @return \code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
+#'   that can be analysed using functions from the coda package. This will
+#'   contain mcmc samples of the greta arrays used to create \code{model}.
 #'
 #' @examples
 #' \dontrun{
 #' # define a simple model
-#' mu = variable()
-#' sigma = lognormal(1, 0.1)
-#' x = rnorm(10)
-#' distribution(x) = normal(mu, sigma)
+#' mu <- variable()
+#' sigma <- lognormal(1, 0.1)
+#' x <- rnorm(10)
+#' distribution(x) <- normal(mu, sigma)
 #' m <- model(mu, sigma)
 #'
 #' # carry out mcmc on the model
@@ -117,12 +136,16 @@ mcmc <- function (model,
                   n_samples = 1000,
                   thin = 1,
                   warmup = 100,
+                  chains = 1,
                   verbose = TRUE,
                   pb_update = 10,
                   control = list(),
                   initial_values = NULL) {
 
   method <- match.arg(method)
+
+  # store the model
+  greta_stash$model <- model
 
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
@@ -145,34 +168,72 @@ mcmc <- function (model,
   # get the dag containing the target nodes
   dag <- model$dag
 
+  param <- dag$example_parameters()
+  n_initial <- length(param)
+
   # random starting locations
   if (is.null(initial_values)) {
 
     # try several times
     valid <- FALSE
     attempts <- 1
-    while (!valid & attempts < 10) {
+    while (!valid & attempts < 20) {
 
-      initial_values <- dag$example_parameters()
-      # increase the jitter each time
-      initial_values[] <- rnorm(length(initial_values), 0, 1 + attempts / 5)
+      initial_values <- replicate(chains,
+                                  rnorm(n_initial, 0, 0.5),
+                                  simplify = FALSE)
 
       # test validity of values
-      valid <- valid_parameters(dag, initial_values)
+      valid <- valid_parameters(initial_values, dag)
       attempts <- attempts + 1
 
     }
 
     if (!valid) {
-      stop ('Could not find reasonable starting values after ', attempts,
-            ' attempts. Please specify initial values manually via the ',
-            'initial_values argument to mcmc',
+      stop ("Could not find reasonable starting values after ", attempts,
+            " attempts. Please specify initial values manually via the ",
+            "initial_values argument to mcmc",
             call. = FALSE)
     }
 
   } else {
 
-    if (!valid_parameters(dag, initial_values)) {
+    # if they provided a list, check it
+    if (is.list(initial_values)) {
+
+      n_sets <- length(initial_values)
+
+      if (n_sets != chains) {
+        stop (n_sets, " sets of initial values were provided, but there ",
+              ifelse(chains > 1, "are ", "is only "), chains, " chain",
+              ifelse(chains > 1, "s", ""),
+              call. = FALSE)
+      }
+
+      n_param <- vapply(initial_values, length, FUN.VALUE = 0)
+
+      if (!all(n_param == n_initial)) {
+        stop ("each set of initial values must be a vector of length ",
+              n_initial,
+              call. = FALSE)
+      }
+
+    } else {
+
+      # replicate
+      initial_values <- replicate(chains,
+                                  initial_values,
+                                  simplify = FALSE)
+
+      if (chains > 1) {
+        message ("\nonly one set of was initial values given, ",
+                 "and was used for all chains\n")
+      }
+
+    }
+
+    # check they are valid
+    if (!valid_parameters(initial_values, dag)) {
       stop ('The log density and gradients could not be evaluated at these ',
             'initial values.',
             call. = FALSE)
@@ -185,7 +246,8 @@ mcmc <- function (model,
   con <- switch(method,
                 hmc = list(Lmin = 10,
                            Lmax = 20,
-                           epsilon = 0.005))
+                           epsilon = 0.005,
+                           diag_sd = 1))
 
   # update them with user overrides
   con[names(control)] <- control
@@ -193,6 +255,50 @@ mcmc <- function (model,
   # fetch the algorithm
   method <- switch(method,
                    hmc = hmc)
+
+  print_chain <- chains > 1
+
+  chains_list <- lapply(seq_len(chains),
+                        run_chain,
+                        dag = dag,
+                        method = method,
+                        n_samples = n_samples,
+                        thin = thin,
+                        warmup = warmup,
+                        chains = chains,
+                        verbose = verbose,
+                        pb_update = pb_update,
+                        control = con,
+                        initial_values = initial_values,
+                        print_chain = print_chain)
+
+  # get raw_draws
+  raw_list <- lapply(chains_list,
+                     function (x) {
+                       attr(x, "model_info")$raw_draws[[1]]
+                       })
+  chains_list <- lapply(chains_list, `[[`, 1)
+
+  model_info <- new.env()
+  model_info$raw_draws <- do.call(mcmc.list, raw_list)
+  model_info$model <- greta_stash$model
+  chains <- do.call(mcmc.list, chains_list)
+  attr(chains, "model_info") <- model_info
+  chains
+
+}
+
+
+run_chain <- function (chain, dag, method, n_samples, thin,
+                       warmup, chains, verbose, pb_update,
+                       control, initial_values, print_chain) {
+
+  if (print_chain) {
+    msg <- sprintf("\nchain %i/%i\n", chain, chains)
+    cat(msg)
+  }
+
+  initial_values_chain <- initial_values[[chain]]
 
   # if warmup is required, do that now and update init
   if (warmup > 0) {
@@ -204,18 +310,18 @@ mcmc <- function (model,
 
     # run it
     warmup_draws <- method(dag = dag,
-                           init = initial_values,
+                           init = initial_values_chain,
                            n_samples = warmup,
                            thin = thin,
                            verbose = verbose,
                            pb = pb_warmup,
                            tune = TRUE,
                            stash = FALSE,
-                           control = con)
+                           control = control)
 
     # use the last draw of the full parameter vector as the init
-    initial_values <- attr(warmup_draws, 'last_x')
-    con <- attr(warmup_draws, 'control')
+    initial_values_chain <- attr(warmup_draws, 'last_x')
+    control <- attr(warmup_draws, 'control')
 
   }
 
@@ -226,27 +332,27 @@ mcmc <- function (model,
 
   # run the sampler
   draws <- method(dag = dag,
-                  init = initial_values,
+                  init = initial_values_chain,
                   n_samples = n_samples,
                   thin = thin,
                   verbose = verbose,
                   pb = pb_sampling,
                   tune = FALSE,
                   stash = TRUE,
-                  control = con)
+                  control = control)
 
   # if this was successful, trash the stash, prepare and return the draws
   rm('trace_stash', envir = greta_stash)
-  prepare_draws(draws)
+  draws
 
 }
+
 
 #' @importFrom coda mcmc mcmc.list
 prepare_draws <- function (draws) {
   # given a matrix of draws returned by the sampler, prepare it and return
   draws_df <- data.frame(draws)
-  draws_mcmc <- coda::mcmc(draws_df)
-  coda::mcmc.list(draws_mcmc)
+  coda::mcmc(draws_df)
 }
 
 
@@ -286,8 +392,13 @@ opt <- function (model,
                   control = list(),
                   initial_values = NULL) {
 
+  # mock up some names to avoid CRAN-check note
+  optimiser <- joint_density <- sess <- NULL
+
   # get the tensorflow environment
   tfe <- model$dag$tf_environment
+  on_graph <- model$dag$on_graph
+  tf_run <- model$dag$tf_run
 
   # get the method
   method <- match.arg(method)
@@ -304,8 +415,8 @@ opt <- function (model,
   con[names(control)] <- control
 
   # set up optimiser
-  tfe$optimiser <- do.call(optimise_fun, con)
-  with(tfe, train <- optimiser$minimize(-joint_density))
+  on_graph(tfe$optimiser <- do.call(optimise_fun, con))
+  tf_run(train <- optimiser$minimize(-joint_density))
 
   # random initial values if unspecified
   if (is.null(initial_values)) {
@@ -314,16 +425,16 @@ opt <- function (model,
   }
 
   # initialize the variables, then set the ones we care about
-  with(tfe, sess$run(tf$global_variables_initializer()))
+  tf_run(sess$run(tf$global_variables_initializer()))
   parameters <- relist_tf(initial_values, model$dag$parameters_example)
 
   for (i in seq_along(parameters)) {
     variable_name <- paste0(names(parameters)[i], '_free')
     vble <- tfe[[variable_name]]
-    init <- tf$constant(parameters[[i]],
-                        shape = vble$shape,
-                        dtype = tf_float())
-    tmp <- tfe$sess$run(vble$assign(init))
+    on_graph( init <- tf$constant(parameters[[i]],
+                                  shape = vble$shape,
+                                  dtype = tf_float()))
+    . <- on_graph(tfe$sess$run(vble$assign(init)))
   }
 
   diff <- old_obj <- Inf
@@ -331,14 +442,14 @@ opt <- function (model,
 
   while (it < max_iterations & diff > tolerance) {
     it <- it + 1
-    with(tfe, sess$run(train))
-    obj <- with(tfe, sess$run(-joint_density))
+    tf_run(sess$run(train))
+    obj <- tf_run(sess$run(-joint_density))
     diff <- abs(old_obj - obj)
     old_obj <- obj
   }
 
   list(par = model$dag$trace_values(),
-       value = with(tfe, sess$run(joint_density)),
+       value = tf_run(sess$run(joint_density)),
        iterations = it,
        convergence = ifelse(it < max_iterations, 0, 1))
 

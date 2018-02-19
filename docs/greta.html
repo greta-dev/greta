@@ -364,13 +364,13 @@ See the simple example below, and take a look at the <a href = 'https://greta-de
 <span class='co'># a simple Bayesian regression model for the iris data</span>
 
 <span class='co'># priors</span>
-<span class='no'>int</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>5</span>)
-<span class='no'>coef</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
-<span class='no'>sd</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
+<span class='no'>int</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>5</span>)
+<span class='no'>coef</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
+<span class='no'>sd</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
 
 <span class='co'># likelihood</span>
 <span class='no'>mean</span> <span class='kw'>&lt;-</span> <span class='no'>int</span> + <span class='no'>coef</span> * <span class='no'>iris</span>$<span class='no'>Petal.Length</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>iris</span>$<span class='no'>Sepal.Length</span>) <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mean</span>, <span class='no'>sd</span>)
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>iris</span>$<span class='no'>Sepal.Length</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mean</span>, <span class='no'>sd</span>)
 
 <span class='co'># build and sample</span>
 <span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>int</span>, <span class='no'>coef</span>, <span class='no'>sd</span>)

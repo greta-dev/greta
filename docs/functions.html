@@ -425,18 +425,18 @@ Any additional arguments to <code>chol()</code> and <code>solve()</code> will be
 </h2>
 <pre class="r">
 
-<span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>9</span>, <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>3</span>))
-<span class='no'>a</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='fu'>exp</span>(<span class='no'>x</span>))
-<span class='no'>b</span> <span class='kw'>=</span> <span class='fu'>log1p</span>(<span class='fu'>expm1</span>(<span class='no'>x</span>))
-<span class='no'>c</span> <span class='kw'>=</span> <span class='fu'>sign</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
-<span class='no'>d</span> <span class='kw'>=</span> <span class='fu'>abs</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>9</span>, <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>3</span>))
+<span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'>log</span>(<span class='fu'>exp</span>(<span class='no'>x</span>))
+<span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='fu'>log1p</span>(<span class='fu'>expm1</span>(<span class='no'>x</span>))
+<span class='no'>c</span> <span class='kw'>&lt;-</span> <span class='fu'>sign</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
+<span class='no'>d</span> <span class='kw'>&lt;-</span> <span class='fu'>abs</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
 
-<span class='no'>e</span> <span class='kw'>=</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
+<span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
 <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
 
-<span class='no'>z</span> <span class='kw'>=</span> <span class='fu'>t</span>(<span class='no'>a</span>)
+<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>t</span>(<span class='no'>a</span>)
 
-<span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='overloaded.html'>sweep</a></span>(<span class='no'>x</span>, <span class='fl'>1</span>, <span class='no'>e</span>, <span class='st'>'-'</span>)</pre>
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>sweep</a></span>(<span class='no'>x</span>, <span class='fl'>1</span>, <span class='no'>e</span>, <span class='st'>'-'</span>)</pre>
 
 
 

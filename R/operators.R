@@ -40,23 +40,23 @@
 #' @examples
 #' \dontrun{
 #'
-#' x = as_data(-1:12)
+#' x <- as_data(-1:12)
 #'
 #' # arithmetic
-#' a = x + 1
-#' b = 2 * x + 3
-#' c = x %% 2
-#' d = x %/% 5
+#' a <- x + 1
+#' b <- 2 * x + 3
+#' c <- x %% 2
+#' d <- x %/% 5
 #'
 #' # logical
-#' e = (x > 1) | (x < 1)
-#' f = e & (x < 2)
-#' g = !f
+#' e <- (x > 1) | (x < 1)
+#' f <- e & (x < 2)
+#' g <- !f
 #'
 #' # relational
-#' h = x < 1
-#' i = (-x) >= x
-#' j = h == x
+#' h <- x < 1
+#' i <- (-x) >= x
+#' j <- h == x
 #' }
 NULL
 
@@ -145,15 +145,16 @@ NULL
     y <- elem_list[[2]]
 
     # check they're matrices
-    if (length(dim(x)) != 2 | length(dim(x)) != 2)
-      stop ('only two-dimensional greta arrays can be matrix-multiplied',
+    if (length(dim(x)) != 2 | length(dim(y)) != 2) {
+      stop ("only two-dimensional greta arrays can be matrix-multiplied",
             call. = FALSE)
+    }
 
     # check the dimensions match
     if (dim(x)[2] != dim(y)[1]) {
-      msg <- sprintf('incompatible dimensions: %s vs %s',
-                     paste0(dim(x), collapse = 'x'),
-                     paste0(dim(y), collapse = 'x'))
+      msg <- sprintf("incompatible dimensions: %s vs %s",
+                     paste0(dim(x), collapse = "x"),
+                     paste0(dim(y), collapse = "x"))
       stop (msg)
     }
 

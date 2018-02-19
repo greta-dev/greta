@@ -64,18 +64,16 @@ The plot method produces a visual representation of the defined
   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 }
 \examples{
-
 \dontrun{
 
 # define a simple model
-mu = variable()
-sigma = lognormal(1, 0.1)
-x = rnorm(10)
-distribution(x) = normal(mu, sigma)
+mu <- variable()
+sigma <- lognormal(1, 0.1)
+x <- rnorm(10)
+distribution(x) <- normal(mu, sigma)
 
 m <- model(mu, sigma)
 
 plot(m)
 }
-
 }

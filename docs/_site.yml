@@ -1,9 +1,11 @@
 name: greta
-output_dir: "."
-
+output_dir: '.'
 output:
   html_document:
     css: greta.css
-    toc: true
+    toc: yes
     theme: lumen
     highlight: default
+    lib_dir: site_libs
+    self_contained: no
+

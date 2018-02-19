@@ -359,7 +359,9 @@ transformations for greta arrays, which may also be used as inverse link functio
 
 <span class='fu'>icauchit</span>(<span class='no'>x</span>)
 
-<span class='fu'>log1pe</span>(<span class='no'>x</span>) </pre>
+<span class='fu'>log1pe</span>(<span class='no'>x</span>)
+
+<span class='fu'>imultilogit</span>(<span class='no'>x</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
@@ -371,26 +373,34 @@ a real-valued (i.e. values ranging from -Inf to Inf) greta array to transform t
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-greta does not allow you to state the transformation/link on the left hand side of an assignment, as is common in the BUGS and STAN modelling languages. That’s because the same syntax has a very different meaning in R, and can only be applied to objects that are already in existence. The inverse forms of the common link functions (prefixed with an ‘i’) are therefore more likely to useful in modelling, and these are what are provided here.
+greta does not allow you to state the transformation/link on the left hand side of an assignment, as is common in the BUGS and STAN modelling languages. That’s because the same syntax has a very different meaning in R, and can only be applied to objects that are already in existence. The inverse forms of the common link functions (prefixed with an ‘i’) can be used instead.
 </p>
 <p>
-The <code>log1pe</code> inverse link function is equivalent to <code>log(1 + exp(x))</code>, yielding a positive transformed parameter. Unlike the log transformation, this transformation is approximately linear for x &gt; 1. i.e. when <span class="math inline">\(x &amp;gt;  1\)</span>, <span class="math inline">\(y \approx x\)</span>
+The <code>log1pe</code> inverse link function is equivalent to <code>log(1 + exp(x))</code>, yielding a positive transformed parameter. Unlike the log transformation, this transformation is approximately linear for x &gt; 1. i.e. when <span class="math inline">\(x &amp;gt; 1\)</span>, <span class="math inline">\(y \approx x\)</span>
+</p>
+<p>
+<code>imultilogit</code> expects an n-by-m greta array, and returns an n-by-(m+1) greta array of positive reals whose rows sum to one. This is equivalent adding a final column of 0s and then running the softmax function widely used in machine learning.
 </p>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
 <pre class="r">
 
- <span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+ <span class='no'>x1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 
  <span class='co'># transformation to the unit interval</span>
- <span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'>iprobit</span>(<span class='no'>x</span>)
- <span class='no'>p2</span> <span class='kw'>&lt;-</span> <span class='fu'>ilogit</span>(<span class='no'>x</span>)
- <span class='no'>p3</span> <span class='kw'>&lt;-</span> <span class='fu'>icloglog</span>(<span class='no'>x</span>)
- <span class='no'>p4</span> <span class='kw'>&lt;-</span> <span class='fu'>icauchit</span>(<span class='no'>x</span>)
+ <span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'>iprobit</span>(<span class='no'>x1</span>)
+ <span class='no'>p2</span> <span class='kw'>&lt;-</span> <span class='fu'>ilogit</span>(<span class='no'>x1</span>)
+ <span class='no'>p3</span> <span class='kw'>&lt;-</span> <span class='fu'>icloglog</span>(<span class='no'>x1</span>)
+ <span class='no'>p4</span> <span class='kw'>&lt;-</span> <span class='fu'>icauchit</span>(<span class='no'>x1</span>)
 
  <span class='co'># and to positive reals</span>
- <span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>log1pe</span>(<span class='no'>x</span>)</pre>
+ <span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>log1pe</span>(<span class='no'>x1</span>)
+
+ <span class='co'># transform from 10x3 to 10x4, where rows are a complete set of</span>
+ <span class='co'># probabilities</span>
+ <span class='no'>x2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>10</span>, <span class='fl'>3</span>))
+ <span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>imultilogit</span>(<span class='no'>x2</span>)</pre>
 
 
 

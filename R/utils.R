@@ -335,11 +335,19 @@ cleanly <- function (expr) {
 }
 
 # check whether initial values are valid
-valid_parameters <- function (dag, initial_values) {
+valid_parameters <- function (initial_values, dag) {
+
+  if (is.list(initial_values)) {
+    each_valid <- vapply(initial_values, valid_parameters, dag, FUN.VALUE = FALSE)
+    valid <- all(each_valid)
+    return (valid)
+  }
+
   dag$send_parameters(initial_values)
   ld <- dag$log_density()
   grad <- dag$gradients()
   all(is.finite(c(ld, grad)))
+
 }
 
 # unlist and flatten a list of arrays to a vector row-wise

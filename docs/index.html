@@ -242,7 +242,7 @@ body{
   padding-top: 10px;
 }
 pre, pre:not([class]){
-  font-size: 20px;
+  font-size: 18px;
   color: #5a3a78;
   background-color: #f7f7f7;
   border: none;
@@ -410,23 +410,23 @@ basic example
 </h1>
 <div class="row">
 <div class="col-md-6">
-<p>Here’s a Bayesian linear regression model fit to the <code>iris</code> data using greta:</p>
-<pre><code>library(greta)</code></pre>
+<p>Here’s a Bayesian linear regression model for the <code>iris</code> data using greta:</p>
 <pre><code>x &lt;- iris$Petal.Length
-y &lt;- iris$Sepal.Length
+y &lt;- iris$Sepal.Length</code></pre>
+<pre><code>library(greta)
 
-int = normal(0, 5)
-coef = normal(0, 3)
-sd = lognormal(0, 3)
+int &lt;- normal(0, 5)
+coef &lt;- normal(0, 3)
+sd &lt;- lognormal(0, 3)
 
 mean &lt;- int + coef * x
-distribution(y) = normal(mean, sd)</code></pre>
+distribution(y) &lt;- normal(mean, sd)</code></pre>
 <pre><code>m &lt;- model(int, coef, sd)</code></pre>
 </div>
 <div class="col-md-6">
-<pre><code>draws &lt;- mcmc(m, n_samples = 1000)
+<pre><code>draws &lt;- mcmc(m, n_samples = 1000, chains = 3)
 bayesplot::mcmc_trace(draws)</code></pre>
-<p><img src="index_files/figure-html/vis-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p><img src="index_files/figure-html/vis-1.png" width="576" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <p><br></p>

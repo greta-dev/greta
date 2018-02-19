@@ -1,9 +1,14 @@
 # test functions
 
-library(tensorflow)
+library (tensorflow)
 
-# set the seed before running tests
+# set the seed and flush the graph before running tests
+tf <- tensorflow::tf
+tf$reset_default_graph()
 set.seed(2017-05-01)
+
+quietly <- function (expr)
+  invisible(capture.output(expr))
 
 expect_ok <- function (expr)
   expect_error(expr, NA)
@@ -65,8 +70,6 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
 
   # define greta distribution, with fixed values
 
-  tf$reset_default_graph()
-
   parameters_greta <- parameters
   # no dim for wishart
   if (!identical(names(parameters), c('df', 'Sigma')))
@@ -115,8 +118,6 @@ randu <- function (...) {
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
 check_op <- function (op, a, b, greta_op = NULL) {
-
-  tf$reset_default_graph()
 
   if (is.null(greta_op))
     greta_op <- op
@@ -167,8 +168,6 @@ with_greta <- function (call, swap = c('x'), swap_scope = 1) {
 # arrays with results ported back to R
 # e.g. check_expr(a[1:3], swap = 'a')
 check_expr <- function (expr, swap = c('x')) {
-
-  tf$reset_default_graph()
 
   call <- substitute(expr)
 
@@ -240,8 +239,6 @@ compare_truncated_distribution <- function (greta_fun,
   # is a greta array created from a distribution and a constrained variable greta
   # array. 'r_fun' is an r function returning the log density for the same
   # truncated distribution, taking x as its only argument.
-
-  tf$reset_default_graph()
 
   require (truncdist)
 
@@ -332,8 +329,7 @@ mock_mcmc <- function (n_samples = 1010) {
 
 dinvgamma <- extraDistr::dinvgamma
 qinvgamma <- extraDistr::qinvgamma
-pinvgamma <- function (q, alpha, beta)
-  ifelse(q < 0, 0, extraDistr::pinvgamma(q, alpha, beta))
+pinvgamma <- extraDistr::pinvgamma
 
 dlaplace <- extraDistr::dlaplace
 plaplace <- extraDistr::plaplace

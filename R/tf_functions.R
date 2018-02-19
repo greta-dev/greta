@@ -212,6 +212,11 @@ tf_icloglog <- function (x)
 tf_icauchit <- function (x)
   fl(1 / pi) * tf$atan(x) + fl(0.5)
 
+tf_imultilogit <- function (x) {
+  zeros <- tf$zeros(shape(nrow(x), 1L), tf_float())
+  latent <- tf$concat(list(x, zeros), 1L)
+  tf$nn$softmax(latent)
+}
 
 # map R's extract and replace syntax to tensorflow, for use in operation nodes
 # the following arguments are required:
@@ -328,6 +333,7 @@ tf_functions_module <- module(tf_as_logical,
                               tf_iprobit,
                               tf_icloglog,
                               tf_icauchit,
+                              tf_imultilogit,
                               tf_extract,
                               tf_recombine,
                               tf_replace,
