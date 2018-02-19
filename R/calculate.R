@@ -31,18 +31,18 @@
 #'
 #' # define a variable greta array, and another that is calculated from it
 #' # then calculate what value y would take for different values of x
-#' x = normal(0, 1, dim = 3)
-#' a = lognormal(0, 1)
+#' x <- normal(0, 1, dim = 3)
+#' a <- lognormal(0, 1)
 #' y <- sum(x ^ 2) + a
 #' calculate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
 #'
 #'
 #' # define a model
-#' alpha = normal(0, 1)
-#' beta = normal(0, 1)
-#' sigma = lognormal(1, 0.1)
+#' alpha <- normal(0, 1)
+#' beta <- normal(0, 1)
+#' sigma <- lognormal(1, 0.1)
 #' mu <- alpha + iris$Petal.Length * beta
-#' distribution(iris$Petal.Width) = normal(mu, sigma)
+#' distribution(iris$Petal.Width) <- normal(mu, sigma)
 #' m <- model(alpha, beta, sigma)
 #'
 #' # calculate intermediate greta arrays, given some parameter values

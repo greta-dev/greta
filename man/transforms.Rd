@@ -52,7 +52,7 @@ greta does not allow you to state the transformation/link on the
 \examples{
 \dontrun{
 
- x1 = normal(1, 3, dim = 10)
+ x1 <- normal(1, 3, dim = 10)
 
  # transformation to the unit interval
  p1 <- iprobit(x1)

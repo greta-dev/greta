@@ -12,7 +12,7 @@ model(..., precision = c("single", "double"), n_cores = NULL,
 
 \method{print}{greta_model}(x, ...)
 
-plot.greta_model(x, y, ...)
+\method{plot}{greta_model}(x, y, ...)
 }
 \arguments{
 \item{\dots}{for \code{model}: \code{greta_array} objects to be tracked by
@@ -67,10 +67,10 @@ The plot method produces a visual representation of the defined
 \dontrun{
 
 # define a simple model
-mu = variable()
-sigma = lognormal(1, 0.1)
-x = rnorm(10)
-distribution(x) = normal(mu, sigma)
+mu <- variable()
+sigma <- lognormal(1, 0.1)
+x <- rnorm(10)
+distribution(x) <- normal(mu, sigma)
 
 m <- model(mu, sigma)
 
