@@ -81,9 +81,6 @@ model <- function (...,
     }
   }
 
-  # flush all tensors from the default graph
-  tf$reset_default_graph()
-
   # nodes required
   target_greta_arrays <- list(...)
 
