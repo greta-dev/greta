@@ -33,17 +33,17 @@ There are three layers to how greta defines a model: users manipulate *greta arr
 
 ### greta arrays
 
-greta arrays are the user-facing representation of the model. greta arrays are actually just `lists`, but with the classes `greta_array` and `array`.
+greta arrays are the user-facing representation of the model. greta arrays are actually just `environment`s, but with the classes `greta_array` and `array`.
 
 ```{r greta_array1}
 x <- ones(3, 3)
-is.list(x)
+is.environment(x)
 class(x)
 ```
 
 ### nodes
 
-The only list element of a greta array is `node`, an R6 object inheriting from the R6 class 'node', as well as one of the three node types: 'data', 'operation' or 'variable'.
+The only thing in each greta array environment is `node`, an R6 object inheriting from the R6 class 'node', as well as one of the three node types: 'data', 'operation' or 'variable'.
 
 ```{r greta_array2}
 class(x$node)
