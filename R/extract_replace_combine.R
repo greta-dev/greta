@@ -288,8 +288,22 @@ rbind.greta_array <- function (...) {
 #' @export
 c.greta_array <- function (...) {
 
+  args <- list(...)
+
+  # drop NULLs from the list
+  is_null <- vapply(args, is.null, FUN.VALUE = FALSE)
+  args <- args[!is_null]
+
+  # return a list if they aren't all greta arrays
+  is_greta_array <- vapply(args,
+                           inherits, "greta_array",
+                           FUN.VALUE = FALSE)
+
+  if (!all(is_greta_array))
+    return (args)
+
   # loop through arrays, flattening them R-style
-  arrays <- lapply(list(...), flatten)
+  arrays <- lapply(args, flatten)
 
   # get output dimensions
   length_vec <- vapply(arrays, length, FUN.VALUE = 1)

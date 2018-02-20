@@ -425,3 +425,51 @@ test_that('dim<- works in a model', {
   expect_ok(mcmc(m, warmup = 0, n_samples = 2))
 
 })
+
+
+test_that("c handles NULLs and lists", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- normal(0, 1)
+  y <- as_data(3:1)
+
+  # NULLs should be dropped when concatenating
+  z <- c(x, NULL, y)
+  expect_s3_class(z, "greta_array")
+  expect_identical(dim(z), c(4L, 1L))
+
+  # NULLs at the start should return a list
+  z <- c(NULL, y)
+  expect_true(is.list(z))
+  expect_s3_class(z[[1]], "greta_array")
+  expect_identical(dim(z[[1]]), c(3L, 1L))
+
+  # anything at the start should return a list
+  z <- c(1, y)
+  expect_true(is.list(z))
+  expect_s3_class(z[[2]], "greta_array")
+
+  z <- c(mean, y)
+  expect_true(is.list(z))
+  expect_s3_class(z[[2]], "greta_array")
+
+  # NULLs at the end should dissappear
+  z <- c(x, NULL)
+  expect_s3_class(z, "greta_array")
+  expect_identical(dim(z), c(1L, 1L))
+
+  # greta arrays combined with other things should return a list
+  z <- c(x, mean)
+  expect_true(is.list(z))
+  expect_s3_class(z[[1]], "greta_array")
+  expect_identical(dim(z[[1]]), c(1L, 1L))
+
+  # even with a NULL in there
+  z <- c(x, NULL, mean)
+  expect_true(is.list(z))
+  expect_s3_class(z[[1]], "greta_array")
+  expect_identical(dim(z[[1]]), c(1L, 1L))
+
+})
