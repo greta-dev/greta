@@ -236,9 +236,17 @@ blank_banner <- function (width = 8, margin = 0.2) {
 
 # make and save an image of a triangular tesselation GMRF pattern in greta purple
 tesselation_image <- function (ncol = 10, nrow = 10,
+                               max_edge = 0.08,
+                               jitter = 0.1,
+                               thickness = 1,
                                line_col = greta:::greta_col('light'),
-                               ramp_cols = c(greta:::greta_col('lighter'),
-                                             greta:::greta_col('light'))) {
+                               ramp_cols = NULL) {
+
+  if (is.null(ramp_cols)) {
+    cols <- c(greta:::greta_col('lighter'),
+              greta:::greta_col('light'))
+    ramp_cols <- colorRampPalette(cols)(2000)[-(1:1000)]
+  }
 
   require (INLA)
   require (raster)
@@ -263,14 +271,14 @@ tesselation_image <- function (ncol = 10, nrow = 10,
 
   pts <- expand.grid(seq(0, ratio, length.out = 10),
                      seq(0, 1, length.out = 10))
-  pts <- pts + cbind(rnorm(100, 0, 0.1),
-                     rnorm(100, 0, 0.1))
+  pts <- pts + cbind(rnorm(100, 0, jitter),
+                     rnorm(100, 0, jitter))
 
   # make an inla mesh
   sp <- as(extent(image), 'SpatialPolygons')
   mesh <- inla.mesh.2d(loc = pts,
                        boundary = inla.sp2segment(sp),
-                       max.edge = 0.08,
+                       max.edge = max_edge,
                        offset = 0)
 
   # sample GRF at nodes
@@ -285,14 +293,12 @@ tesselation_image <- function (ncol = 10, nrow = 10,
   A2@x[A2@x > 0] <- 1/3
   image[] <- (A2 %*% z)[, 1]
 
-  pal <- colorRampPalette(ramp_cols)
-
   pm <- par("mar")
   on.exit(par(mar = pm))
 
   par(mar = rep(0, 4))
   image(image,
-        col = pal(2000)[-(1:1000)],
+        col = ramp_cols,
         asp = 1,
         axes = FALSE,
         xlab = '',
@@ -300,10 +306,10 @@ tesselation_image <- function (ncol = 10, nrow = 10,
   plot(mesh,
        add = TRUE,
        edge.color = line_col,
-       lwd = 1,
+       lwd = thickness,
        draw.segments = FALSE)
   points(mesh$loc,
          pch = 16,
-         cex = 0.5,
+         cex = 0.5 * sqrt(thickness),
          col = line_col)
 }
