@@ -4,6 +4,9 @@ library(sysfonts)
 font_add_google("Muli")
 attach(greta::.internals$utils$colours)
 
+# load various functions
+source ("logos/logo_functions.R")
+
 # make a hex-shaped mask
 hexd <- data.frame(x = 1 + c(rep(-sqrt(3) / 2, 2), 0, rep(sqrt(3) / 2, 2), 0),
                    y = 1 + c(0.5, -0.5, -1, -0.5, 0.5, 1))
@@ -26,17 +29,39 @@ dev.off()
 # load the hex mask
 mask <- image_read("logos/hex_mask.pdf")
 mask <- image_transparent(mask, "black")
+mask_dim <- as.numeric(image_info(mask)[1, 2:3])
+# create a tesselation figure with the same footprint
+# make a nice GRF tesselation for the header image
+set.seed(2018-02-20)
+dim <- mask_dim * 2
+cols <- c(greta:::greta_col("lighter"),
+          greta:::greta_col("main"))
+ramp_cols <- colorRampPalette(cols)(2000)#[-(1:1000)]
 
-# crop and mask header image to the mask (?)
-bg <- image_read("logos/greta-header.png")
-bg <- image_crop(bg, "498x576+1600+600")
+png("logos/hex_bg.png",
+    width = dim[1],
+    height = dim[2],
+    pointsize = 30)
+tesselation_image(ncol = dim[1], nrow = dim[2],
+                  max_edge = 0.1,
+                  jitter = 0.05,
+                  thickness = 2,
+                  ramp_cols = ramp_cols,
+                  line_col = greta_col("main"))
+dev.off()
+
+
+# crop and mask the pattern to a hexagon
+bg <- image_read("logos/hex_bg.png")
+geometry <- sprintf("%ix%i+%i+%i",
+                    mask_dim[1],
+                    mask_dim[2],
+                    mask_dim[1] %/% 2,
+                    mask_dim[2] %/% 2)
+bg <- image_crop(bg, geometry)
+
 hex_bg <- image_composite(bg, mask, "CopyOpacity")
 image_write(hex_bg, path = "logos/hex_bg.pdf")
-
-# # add the icon and save
-# icon <- image_read("logos/icon_on_light_transparent.png")
-# icon <- image_resize(icon, "15%")
-# hex <- image_composite(hex_bg, icon, offset = "+114+223")
 
 par(pty = "s",
     xpd = NA,
@@ -62,4 +87,5 @@ ggsave(greta_hex, width = 43.9, height = 50.8,
        dpi = 600)
 
 file.remove("logos/hex_bg.pdf")
+file.remove("logos/hex_bg.png")
 file.remove("logos/hex_mask.pdf")
