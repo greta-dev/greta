@@ -24,6 +24,10 @@ TensorFlow only enables rounding to integers, so \code{round()} will
   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
   can only be either 1 or 2), and only for subtraction, addition, division
   and multiplication.
+
+  \code{tapply()} works on column vectors (2D greta arrays with one column),
+  and \code{INDEX} cannot be a greta array. Currently only two functions are
+  available, and arguments passed to \dots are ignored.
 }
 \section{Usage}{
  \preformatted{
@@ -76,14 +80,15 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  cumsum(x)
  cumprod(x)
 
- # miscellaneous operations
- sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-
  # solve an upper or lower triangular system
  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
            transpose = FALSE)
  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
               transpose = FALSE)
+
+ #'  # miscellaneous operations
+ sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+ tapply(X, INDEX, FUN = c("sum", "max"), ...)
 
 }
 }
