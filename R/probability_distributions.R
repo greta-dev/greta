@@ -1418,8 +1418,10 @@ bernoulli <- function (prob, dim = NULL)
 
 #' @rdname distributions
 #' @export
-binomial <- function (size, prob, dim = NULL)
+binomial <- function (size, prob, dim = NULL) {
+  check_in_family("binomial")
   distrib('binomial', size, prob, dim)
+}
 
 #' @rdname distributions
 #' @export
@@ -1438,8 +1440,10 @@ hypergeometric <- function (m, n, k, dim = NULL)
 
 #' @rdname distributions
 #' @export
-poisson <- function (lambda, dim = NULL)
+poisson <- function (lambda, dim = NULL) {
+  check_in_family("poisson")
   distrib('poisson', lambda, dim)
+}
 
 #' @rdname distributions
 #' @export
