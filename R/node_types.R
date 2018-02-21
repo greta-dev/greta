@@ -488,6 +488,8 @@ node_classes_module <- module(node,
 # shorthand for distribution parameter constructors
 distrib <- function (distribution, ...) {
 
+  check_tf_version("error")
+
   # get and initialize the distribution, with a default value node
   constructor <- get(paste0(distribution, '_distribution'))
   distrib <- constructor$new(...)
@@ -499,8 +501,10 @@ distrib <- function (distribution, ...) {
 }
 
 # shorthand to speed up op definitions
-op <- function (...)
+op <- function (...) {
+  check_tf_version("error")
   as.greta_array(operation_node$new(...))
+}
 
 # helper function to create a variable node
 # by default, make x (the node

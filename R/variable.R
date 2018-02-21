@@ -42,6 +42,8 @@
 #' }
 variable <- function (lower = -Inf, upper = Inf, dim = 1) {
 
+  check_tf_version("error")
+
   if (inherits(lower, "greta_array") | inherits(upper, "greta_array"))
     stop ('lower and upper must be fixed, they cannot be another greta array')
 
