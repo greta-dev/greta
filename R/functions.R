@@ -42,8 +42,6 @@
 #'  # matrix operations
 #'  t(x)
 #'  chol(x, ...)
-#'  diag(x, nrow, ncol)
-#'  diag(x) <- value
 #'  solve(a, b, ...)
 #'
 #'  # reducing operations
@@ -74,12 +72,6 @@
 #'   Any additional arguments to \code{chol()} and \code{solve()} will be
 #'   ignored, see the TensorFlow documentation for details of these routines.
 #'
-#'   \code{diag()} can be used to extract or replace the diagonal part of a
-#'   square and two-dimensional greta array, but it cannot be used to create a
-#'   matrix-like greta array from a scalar or vector-like greta array. A static
-#'   diagonal matrix can always be created with e.g. \code{diag(3)}, and then
-#'   converted into a greta array.
-#'
 #'   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
 #'   can only be either 1 or 2), and only for subtraction, addition, division
 #'   and multiplication.
@@ -96,9 +88,6 @@
 #' b <- log1p(expm1(x))
 #' c <- sign(x - 5)
 #' d <- abs(x - 5)
-#'
-#' e <- diag(x)
-#' diag(x) <- e + 1
 #'
 #' z <- t(a)
 #'
@@ -227,41 +216,6 @@ chol.greta_array <- function (x, ...) {
   }
 
   op("chol", x, dimfun = dimfun, tf_operation = tf_chol)
-}
-
-#' @rdname overloaded
-#' @export
-diag <- function (x = 1, nrow, ncol)
-  UseMethod('diag', x)
-
-# wrapper function to avoid a CRAN check warning about using a .Internal() call
-#' @export
-diag.default <- function (...)
-  base::diag(...)
-
-#' @export
-diag.greta_array <- function (x = 1, nrow, ncol) {
-
-  dimfun <- function (elem_list) {
-
-    x <- elem_list[[1]]
-    dim <- dim(x)
-
-    # check the rank isn't too high
-    if (length(dim) != 2)
-      stop ('cannot only extract the diagonal from a node with exactly two dimensions')
-
-    if (dim[1] != dim[2])
-      stop ('diagonal elements can only be extracted from square matrices')
-
-    # return the dimensions
-    c(dim[1], 1)
-
-  }
-
-  # return the extraction op
-  op('diag', x, dimfun = dimfun, tf_operation = tf$diag_part)
-
 }
 
 #' @export

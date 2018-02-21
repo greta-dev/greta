@@ -11,10 +11,12 @@
 #' x[i, j, ..., drop = FALSE]
 #' head(x, n = 6L, ...)
 #' tail(x, n = 6L, ...)
+#' diag(x, nrow, ncol)
 #'
 #' # replace
 #' x[i] <- value
 #' x[i, j, ...] <- value
+#' diag(x) <- value
 #'
 #' # combine
 #' cbind(...)
@@ -32,6 +34,8 @@
 #' @param i,j indices specifying elements to extract or replace
 #' @param n a single integer, as in \code{utils::head()} and
 #'   \code{utils::tail()}
+#' @param nrow,ncol optional dimensions for the resulting greta array when x is
+#'   not a matrix.
 #' @param value for \code{`[<-`} a greta array to replace elements, for
 #'   \code{`dim<-`} either NULL or a numeric vector of dimensions
 #' @param ... either further indices specifying elements to extract or replace
@@ -39,6 +43,12 @@
 #'   \code{rbind()} & \code{c()}), or additional arguments (\code{rep()},
 #'   \code{head()}, \code{tail()})
 #' @param drop,recursive generic arguments that are ignored for greta arrays
+#'
+#' @details \code{diag()} can be used to extract or replace the diagonal part of
+#'   a square and two-dimensional greta array, but it cannot be used to create a
+#'   matrix-like greta array from a scalar or vector-like greta array. A static
+#'   diagonal matrix can always be created with e.g. \code{diag(3)}, and then
+#'   converted into a greta array.
 #'
 #' @examples
 #' \dontrun{
@@ -48,6 +58,8 @@
 #'  # extract/replace
 #'  x[1:3, ]
 #'  x[, 2:4] <- 1:9
+#'  e <- diag(x)
+#'  diag(x) <- e + 1
 #'
 #'  # combine
 #'  cbind(x[, 2], x[, 1])
@@ -436,5 +448,42 @@ tail.greta_array <- function (x, n = 6L, ...) {
   }
 
   ans
+
+}
+
+
+
+#' @rdname overloaded
+#' @export
+diag <- function (x = 1, nrow, ncol)
+  UseMethod('diag', x)
+
+# wrapper function to avoid a CRAN check warning about using a .Internal() call
+#' @export
+diag.default <- function (...)
+  base::diag(...)
+
+#' @export
+diag.greta_array <- function (x = 1, nrow, ncol) {
+
+  dimfun <- function (elem_list) {
+
+    x <- elem_list[[1]]
+    dim <- dim(x)
+
+    # check the rank isn't too high
+    if (length(dim) != 2)
+      stop ('cannot only extract the diagonal from a node with exactly two dimensions')
+
+    if (dim[1] != dim[2])
+      stop ('diagonal elements can only be extracted from square matrices')
+
+    # return the dimensions
+    c(dim[1], 1)
+
+  }
+
+  # return the extraction op
+  op('diag', x, dimfun = dimfun, tf_operation = tf$diag_part)
 
 }
