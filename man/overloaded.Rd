@@ -35,7 +35,7 @@ forwardsolve(l, x, k = ncol(l), upper.tri = FALSE, transpose = FALSE)
 tapply(X, INDEX, FUN, ...)
 }
 \arguments{
-\item{x, y, nrow, ncol, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, na.rm, dims}{arguments as in original documentation}
+\item{x, y, nrow, ncol, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, na.rm, dims, X, INDEX, FUN}{arguments as in original documentation}
 }
 \description{
 greta provides a wide range of methods to apply common R
