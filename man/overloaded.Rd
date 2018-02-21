@@ -11,6 +11,7 @@
 \alias{sweep}
 \alias{backsolve}
 \alias{forwardsolve}
+\alias{tapply}
 \title{Functions overloaded by greta}
 \usage{
 x \%*\% y
@@ -30,6 +31,8 @@ sweep(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
 backsolve(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE)
 
 forwardsolve(l, x, k = ncol(l), upper.tri = FALSE, transpose = FALSE)
+
+tapply(X, INDEX, FUN, ...)
 }
 \arguments{
 \item{x, y, nrow, ncol, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, na.rm, dims}{arguments as in original documentation}
