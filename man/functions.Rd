@@ -15,15 +15,13 @@ TensorFlow only enables rounding to integers, so \code{round()} will
   Any additional arguments to \code{chol()} and \code{solve()} will be
   ignored, see the TensorFlow documentation for details of these routines.
 
-  \code{diag()} can be used to extract or replace the diagonal part of a
-  square and two-dimensional greta array, but it cannot be used to create a
-  matrix-like greta array from a scalar or vector-like greta array. A static
-  diagonal matrix can always be created with e.g. \code{diag(3)}, and then
-  converted into a greta array.
-
   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
   can only be either 1 or 2), and only for subtraction, addition, division
   and multiplication.
+
+  \code{tapply()} works on column vectors (2D greta arrays with one column),
+  and \code{INDEX} cannot be a greta array. Currently only two functions are
+  available, and arguments passed to \dots are ignored.
 }
 \section{Usage}{
  \preformatted{
@@ -62,8 +60,6 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  # matrix operations
  t(x)
  chol(x, ...)
- diag(x, nrow, ncol)
- diag(x) <- value
  solve(a, b, ...)
 
  # reducing operations
@@ -76,14 +72,15 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  cumsum(x)
  cumprod(x)
 
- # miscellaneous operations
- sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-
  # solve an upper or lower triangular system
  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
            transpose = FALSE)
  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
               transpose = FALSE)
+
+ #'  # miscellaneous operations
+ sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+ tapply(X, INDEX, FUN = c("sum", "max"), ...)
 
 }
 }
@@ -96,9 +93,6 @@ a <- log(exp(x))
 b <- log1p(expm1(x))
 c <- sign(x - 5)
 d <- abs(x - 5)
-
-e <- diag(x)
-diag(x) <- e + 1
 
 z <- t(a)
 

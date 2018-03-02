@@ -42,8 +42,6 @@
 #'  # matrix operations
 #'  t(x)
 #'  chol(x, ...)
-#'  diag(x, nrow, ncol)
-#'  diag(x) <- value
 #'  solve(a, b, ...)
 #'
 #'  # reducing operations
@@ -56,14 +54,15 @@
 #'  cumsum(x)
 #'  cumprod(x)
 #'
-#'  # miscellaneous operations
-#'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-#'
 #'  # solve an upper or lower triangular system
 #'  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
 #'            transpose = FALSE)
 #'  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
 #'               transpose = FALSE)
+#'
+#'  #'  # miscellaneous operations
+#'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+#'  tapply(X, INDEX, FUN = c("sum", "max"), ...)
 #'
 #' }
 #'
@@ -73,15 +72,13 @@
 #'   Any additional arguments to \code{chol()} and \code{solve()} will be
 #'   ignored, see the TensorFlow documentation for details of these routines.
 #'
-#'   \code{diag()} can be used to extract or replace the diagonal part of a
-#'   square and two-dimensional greta array, but it cannot be used to create a
-#'   matrix-like greta array from a scalar or vector-like greta array. A static
-#'   diagonal matrix can always be created with e.g. \code{diag(3)}, and then
-#'   converted into a greta array.
-#'
 #'   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
 #'   can only be either 1 or 2), and only for subtraction, addition, division
 #'   and multiplication.
+#'
+#'   \code{tapply()} works on column vectors (2D greta arrays with one column),
+#'   and \code{INDEX} cannot be a greta array. Currently only two functions are
+#'   available, and arguments passed to \dots are ignored.
 #'
 #' @examples
 #' \dontrun{
@@ -91,9 +88,6 @@
 #' b <- log1p(expm1(x))
 #' c <- sign(x - 5)
 #' d <- abs(x - 5)
-#'
-#' e <- diag(x)
-#' diag(x) <- e + 1
 #'
 #' z <- t(a)
 #'
@@ -222,41 +216,6 @@ chol.greta_array <- function (x, ...) {
   }
 
   op("chol", x, dimfun = dimfun, tf_operation = tf_chol)
-}
-
-#' @rdname overloaded
-#' @export
-diag <- function (x = 1, nrow, ncol)
-  UseMethod('diag', x)
-
-# wrapper function to avoid a CRAN check warning about using a .Internal() call
-#' @export
-diag.default <- function (...)
-  base::diag(...)
-
-#' @export
-diag.greta_array <- function (x = 1, nrow, ncol) {
-
-  dimfun <- function (elem_list) {
-
-    x <- elem_list[[1]]
-    dim <- dim(x)
-
-    # check the rank isn't too high
-    if (length(dim) != 2)
-      stop ('cannot only extract the diagonal from a node with exactly two dimensions')
-
-    if (dim[1] != dim[2])
-      stop ('diagonal elements can only be extracted from square matrices')
-
-    # return the dimensions
-    c(dim[1], 1)
-
-  }
-
-  # return the extraction op
-  op('diag', x, dimfun = dimfun, tf_operation = tf$diag_part)
-
 }
 
 #' @export
@@ -680,6 +639,66 @@ forwardsolve.greta_array <- function (l, x,
      l, x,
      operation_args = list(lower = !upper.tri),
      tf_operation = tf$matrix_triangular_solve,
+     dimfun = dimfun)
+
+}
+
+
+#' @rdname overloaded
+#' @export
+tapply <- function (X, INDEX, FUN, ...) {
+  UseMethod('tapply', X)
+}
+
+#' @export
+tapply.default <- function (X, INDEX, FUN = NULL, ...,
+                            default = NA, simplify = TRUE) {
+  base::tapply(X = X,
+               INDEX = INDEX,
+               FUN = FUN,
+               ...,
+               default = default,
+               simplify = simplify)
+}
+
+#' @export
+tapply.greta_array <- function (X, INDEX, FUN = c("sum", "max"), ...) {
+
+  FUN <- match.arg(FUN)
+
+  if (inherits(INDEX, "greta_array")) {
+    stop ("INDEX cannot be a greta array",
+          call. = FALSE)
+  }
+
+  # convert index to successive integers starting at 0
+  groups <- sort(unique(INDEX))
+  id <- match(INDEX, groups) - 1L
+  len <- length(groups)
+
+  # which function
+  tf_fun <- switch(FUN,
+                   sum = tf$unsorted_segment_sum,
+                   max = tf$unsorted_segment_max)
+
+  # dimensions
+  dimfun <- function (elem_list) {
+
+    dim_x <- dim(elem_list[[1]])
+
+    if (!(length(dim_x) == 2L && dim_x[2] == 1L)) {
+      stop ("X must be 2D greta array with one column, but has dimensions ",
+            paste(dim_x, collapse = ' x '),
+            call. = FALSE)
+    }
+
+    c(len, 1)
+  }
+
+  op("tapply",
+     X,
+     operation_args = list(segment_ids = id, num_segments = len),
+     tf_operation = tf_fun,
      dimfun = dimfun)
 
 }
