@@ -171,18 +171,11 @@ variable_node <- R6Class (
 
     tf = function (dag) {
 
-      # make a Variable tensor to hold the free state
-      tf_obj <- tf$Variable(initial_value = self$value(),
-                            dtype = tf_float())
-
-      # assign this as the free state
+      # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
       free_name <- sprintf('%s_free', tf_name)
-      assign(free_name,
-             tf_obj,
-             envir = dag$tf_environment)
 
-      # get the log jacobian adjustment for the free state
+      # create the log jacobian adjustment for the free state
       tf_adj <- self$tf_adjustment(dag)
       adj_name <- sprintf('%s_adj', tf_name)
       assign(adj_name,
@@ -192,6 +185,11 @@ variable_node <- R6Class (
       # map from the free to constrained state in a new tensor
       tf_free <- get(free_name, envir = dag$tf_environment)
       node <- self$tf_from_free(tf_free, dag$tf_environment)
+
+      # reshape the tensor to the match the variable
+      node <- tf$reshape(node, shape = dim(self))
+
+      # assign as constrained variable
       assign(tf_name,
              node,
              envir = dag$tf_environment)

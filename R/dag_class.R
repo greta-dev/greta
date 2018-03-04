@@ -122,6 +122,37 @@ dag_class <- R6Class(
               call. = FALSE)
       }
 
+      # create an overall free state variable
+      params <- self$parameters_example
+      lengths <- vapply(params,
+                        function (x) as.integer(prod(dim(x))),
+                        FUN.VALUE = 1L)
+
+      vals <- as.matrix(unlist(params))
+      assign("free_state_values",
+             vals,
+             envir = self$tf_environment)
+
+      self$tf_run(free_state <- tf$Variable(initial_value = free_state_values,
+                                            dtype = tf_float()))
+
+      rm("free_state_values",
+         envir = self$tf_environment)
+
+
+      # split up into separate free state variables and assign
+      free_state <- get("free_state", envir = self$tf_environment)
+
+      if (length(lengths) > 1) {
+        args <- self$on_graph(tf$split(free_state, lengths))
+      } else {
+        args <- list(free_state)
+      }
+
+      names <- paste0(names(params), "_free")
+      for (i in seq_along(names))
+        assign(names[i], args[[i]], envir = self$tf_environment)
+
       # define all nodes, node densities and free states in the environment, and
       # on the graph
       self$on_graph(lapply(self$node_list,
@@ -279,14 +310,10 @@ dag_class <- R6Class(
 
     },
 
-    send_parameters = function (parameters, flat = TRUE) {
-
-      # convert parameters to a named list and change TF names to free versions
-      parameters <- relist_tf(parameters, self$parameters_example)
-      names(parameters) <- paste0(names(parameters), '_free')
+    send_parameters = function (parameters) {
 
       # create a feed dict in the TF environment
-      self$tf_environment$parameters <- parameters
+      self$tf_environment$parameters <- list(free_state = as.matrix(parameters))
       self$tf_run(parameter_dict <- do.call(dict, parameters))
 
     },
