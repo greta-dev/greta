@@ -118,8 +118,6 @@ model <- function (...,
 
   }
 
-
-
   if (length(target_greta_arrays) == 0) {
     stop ('could not find any non-data greta arrays',
           call. = FALSE)
@@ -174,6 +172,20 @@ model <- function (...,
     if (!('variable' %in% types_sub))
       stop (variable_message, call. = FALSE)
 
+  }
+
+  # check for unfixed discrete distributions
+  distributions <- dag$node_list[dag$node_types == 'distribution']
+  bad_nodes <- vapply(distributions,
+                      function(x) {
+                        x$discrete && !inherits(x$target, 'data_node')
+                      },
+                      FALSE)
+
+  if (any(bad_nodes)) {
+    stop ("model contains a discrete random variable that doesn't have a ",
+          "fixed value, so cannot be sampled from",
+          call. = FALSE)
   }
 
   # define the TF graph
