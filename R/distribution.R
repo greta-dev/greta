@@ -89,6 +89,9 @@
   # also adds distribution_node as this node's distribution
   distribution_node$replace_target(greta_array$node)
 
+  # remove the distribution from the RHS variable greta array
+  value$node$distribution <- NULL
+
   # return greta_array (pre-conversion to a greta array)
   greta_array_tmp
 
