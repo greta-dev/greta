@@ -85,7 +85,7 @@ test_that('calculate errors nicely if not all required values are passed', {
 
   # it should error nicely
   expect_error(calculate(y, list(x = c(2, 1))),
-               "values have not been provided for all variables")
+               "values have not been provided for all greta arrays on which the target depends. Please provide values for the greta array: a")
 
 })
 
