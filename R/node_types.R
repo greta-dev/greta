@@ -356,13 +356,11 @@ distribution_node <- R6Class (
     },
 
     # replace the existing target node with a new one
-    replace_target = function (new_target) {
+    remove_target = function () {
 
       # remove x from children
       self$remove_child(self$target)
-
-      # add the new one in
-      self$add_target(new_target)
+      self$target <- NULL
 
     },
 
@@ -515,5 +513,5 @@ vble <- function (truncation, dim = 1) {
 }
 
 node_constructors_module <- module(distrib,
-                              op,
-                              vble)
+                                   op,
+                                   vble)
