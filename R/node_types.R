@@ -368,14 +368,26 @@ distribution_node <- R6Class (
 
     tf = function (dag) {
 
-      # define a tensor with this node's log density in env
+      # for distributions, tf assigns a *function* to execute the density
+      density <- function (tf_target) {
 
-      # run the TF version of the density function
-      tf_obj <- self$tf_log_density(dag)
+        # fetch inputs
+        tf_parameters <- self$tf_fetch_parameters(dag)
 
-      # assign the result back to env
+        # calculate log density
+        ld <- self$tf_log_density_function(tf_target, tf_parameters)
+
+        # check for truncation
+        if (!is.null(self$truncation))
+          ld <- ld - self$tf_log_density_offset(tf_parameters)
+
+        ld
+
+      }
+
+      # assign the function to the environment
       assign(dag$tf_name(self),
-             tf_obj,
+             density,
              envir = dag$tf_environment)
 
     },
@@ -383,24 +395,6 @@ distribution_node <- R6Class (
     # which node to use af the *tf* target (overwritten by some distributions)
     get_tf_target_node = function () {
       self$target
-    },
-
-    tf_log_density = function (dag) {
-
-      # fetch inputs
-      tf_target_node <- self$get_tf_target_node()
-      tf_target <- get(dag$tf_name(tf_target_node),
-                       envir = dag$tf_environment)
-      tf_parameters <- self$tf_fetch_parameters(dag)
-
-      # calculate log density
-      ld <- self$tf_log_density_function(tf_target, tf_parameters)
-
-      # check for truncation
-      if (!is.null(self$truncation))
-        ld <- ld - self$tf_log_density_offset(tf_parameters)
-
-      ld
     },
 
     tf_fetch_parameters = function (dag) {
