@@ -110,7 +110,9 @@ dag_class <- R6Class(
       distributions <- self$node_list[self$node_types == 'distribution']
       bad_nodes <- vapply(distributions,
                           function(x) {
-                            x$discrete && !inherits(x$target, 'data_node')
+                            fixed <- is.null(x$target) ||
+                              inherits(x$target, 'data_node')
+                            x$discrete && !fixed
                           },
                           FALSE)
 
