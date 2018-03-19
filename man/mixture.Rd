@@ -26,7 +26,7 @@ or a vector of positive integers.}
 The \code{weights} are rescaled to sum to one, and are then used as
   the mixing weights of the distribution. \emph{Ie.} the probability density
   is calculated as a weighted sum of the component probability distributions
-  passed in via \dots
+  passed in via \code{\dots}
 
   The component probability distributions must all be either continuous or
   discrete, and must have the same dimensions.
