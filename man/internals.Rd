@@ -32,6 +32,7 @@ You can use \code{attach()} to put a sublist in the search path. E.g.
                       stash              # stashing MCMC samples
  .internals$nodes$constructors           # node creation wrappers
                   distribution_classes   # R6 distribution classes
+                  mixture_classes        # R6 mixture distribution classes
                   node_classes           # R6 node classes
  .internals$tensors                      # functions on tensors
  .internals$utils$checks                 # checking function inputs
