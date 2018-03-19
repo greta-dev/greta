@@ -1,7 +1,7 @@
 #' @name distribution
 #' @aliases distribution
 #' @title define a distribution over data
-
+#'
 #' @description \code{distribution} defines probability distributions over
 #'   observed data, e.g. to set a model likelihood.
 #'
