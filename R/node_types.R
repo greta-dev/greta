@@ -483,7 +483,8 @@ distrib <- function (distribution, ...) {
   check_tf_version("error")
 
   # get and initialize the distribution, with a default value node
-  constructor <- get(paste0(distribution, '_distribution'))
+  constructor <- get(paste0(distribution, '_distribution'),
+                     envir = parent.frame())
   distrib <- constructor$new(...)
 
   # return the user-facing representation of the node as a greta array
