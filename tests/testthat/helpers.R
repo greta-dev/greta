@@ -86,14 +86,16 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
 
   # create dag
   dag <- greta:::dag_class$new(list(x_))
+  tfe <- dag$tf_environment
 
   # define the tensor in an environment
   distrib_node$define_tf(dag)
 
   # get the log density as a vector
-  tensor_name <- dag$tf_name(distrib_node)
-  tensor <- get(tensor_name, envir = dag$tf_environment)
-  greta_log_density <- as.vector(grab(tensor))
+  target <- get(dag$tf_name(x_$node), envir = tfe)
+  density <- get(dag$tf_name(distrib_node), envir = tfe)
+  result <- density(target)
+  greta_log_density <- as.vector(grab(result))
 
   # get R version
   r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
@@ -266,14 +268,15 @@ compare_truncated_distribution <- function (greta_fun,
 
   # create dag and define the density
   dag <- greta:::dag_class$new(list(x_))
+  tfe <- dag$tf_environment
 
   distrib_node$define_tf(dag)
 
   # get the log density as a vector
-  tensor_name <- dag$tf_name(distrib_node)
-  tensor <- get(tensor_name, envir = dag$tf_environment)
-  greta_log_density <- as.vector(grab(tensor))
-
+  target <- get(dag$tf_name(x_$node), envir = tfe)
+  density <- get(dag$tf_name(distrib_node), envir = tfe)
+  result <- density(target)
+  greta_log_density <- as.vector(grab(result))
 
   # return absolute difference
   abs(greta_log_density - r_log_density)
