@@ -366,6 +366,10 @@ indices specifying elements to extract or replace
 <p>
 a single integer, as in <code>utils::head()</code> and <code>utils::tail()</code>
 </p>
+<code>nrow</code>, <code>ncol</code>
+<p>
+optional dimensions for the resulting greta array when x is not a matrix.
+</p>
 <code>value</code>
 <p>
 for <code><code>[&amp;lt;-</code></code> a greta array to replace elements, for <code><code>dim&amp;lt;-</code></code> either NULL or a numeric vector of dimensions
@@ -378,6 +382,12 @@ either further indices specifying elements to extract or replace (<code>[</code>
 <p>
 generic arguments that are ignored for greta arrays
 </p>
+<h2 class="hasAnchor" id="details">
+<a class="anchor" href="#details"></a>Details
+</h2>
+<p>
+<code>diag()</code> can be used to extract or replace the diagonal part of a square and two-dimensional greta array, but it cannot be used to create a matrix-like greta array from a scalar or vector-like greta array. A static diagonal matrix can always be created with e.g. <code>diag(3)</code>, and then converted into a greta array.
+</p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a>Usage
 </h2>
@@ -389,9 +399,11 @@ x[i]
 x[i, j, ..., drop = FALSE]
 head(x, n = 6L, ...)
 tail(x, n = 6L, ...)
+diag(x, nrow, ncol)
 # replace
 x[i] &lt;- value
 x[i, j, ...] &lt;- value
+diag(x) &lt;- value
 # combine
 cbind(...)
 rbind(...)
@@ -412,6 +424,8 @@ dim(x) &lt;- value
  <span class='co'># extract/replace</span>
  <span class='no'>x</span>[<span class='fl'>1</span>:<span class='fl'>3</span>, ]
  <span class='no'>x</span>[, <span class='fl'>2</span>:<span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>9</span>
+ <span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
+ <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
 
  <span class='co'># combine</span>
  <span class='fu'>cbind</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='no'>x</span>[, <span class='fl'>1</span>])
