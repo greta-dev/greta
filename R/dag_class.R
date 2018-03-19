@@ -153,11 +153,41 @@ dag_class <- R6Class(
     # define tensor for overall log density and gradients
     define_joint_density = function () {
 
-      # get names of densities for all distribution nodes
-      density_names <- self$get_tf_names(types = 'distribution')
+      tfe <- self$tf_environment
 
-      # get TF density tensors for all distribution
-      densities <- lapply(density_names, get, envir = self$tf_environment)
+      # get all distribution nodes
+      distributions <- self$node_list[self$node_types == "distribution"]
+
+      # keep only those with a target node
+      targets <- lapply(distributions, member, "target")
+      has_target <- !vapply(targets, is.null, FUN.VALUE = TRUE)
+
+      distributions <- distributions[has_target]
+      targets <- targets[has_target]
+
+      # find and get these functions
+      density_names <- vapply(distributions,
+                              self$tf_name,
+                              FUN.VALUE = "")
+      target_names <- vapply(targets,
+                             self$tf_name,
+                             FUN.VALUE = "")
+
+      target_tensors <- lapply(target_names,
+                               get,
+                               envir = tfe)
+      density_functions <- lapply(density_names,
+                                  get,
+                                  envir = tfe)
+
+      # make the target names lists, for do.call
+      target_lists <- lapply(target_tensors, list)
+
+      # execute them
+      densities <- mapply(do.call,
+                          density_functions,
+                          target_lists,
+                          MoreArgs = list(envir = tfe))
 
       # reduce_sum them
       summed_densities <- lapply(densities, tf$reduce_sum)
