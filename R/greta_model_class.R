@@ -178,7 +178,9 @@ model <- function (...,
   distributions <- dag$node_list[dag$node_types == 'distribution']
   bad_nodes <- vapply(distributions,
                       function(x) {
-                        x$discrete && !inherits(x$target, 'data_node')
+                        valid_target <- is.null(x$target) ||
+                          inherits(x$target, 'data_node')
+                        x$discrete && !valid_target
                       },
                       FALSE)
 
