@@ -141,7 +141,7 @@ test_that("mixture of Poissons has correct density", {
   mix_r <- function (x, rates, weights) {
     densities <- matrix(NA,
                         nrow = length(x),
-                        ncol = length(means))
+                        ncol = length(rates))
     for (i in seq_along(rates))
       densities[, i] <- dpois(x, rates[i])
 
