@@ -165,6 +165,9 @@ sampler <- R6Class(
     chain_number = 1,
     n_chains = 1,
 
+    # how often to tune during warmup
+    tuning_interval = 5,
+
     run_chain = function (n_samples, thin, warmup, verbose, pb_update) {
 
       self$print_chain_number()
@@ -256,15 +259,9 @@ sampler <- R6Class(
 
       if (warmup) {
 
-        # when to stop for training periods
-        tuning_periods <- unlist(self$tuning_periods)
-
-        if (!is.null(tuning_periods)) {
-
-          changepoints <- c(changepoints,
-                            round(tuning_periods * n_samples))
-
-        }
+        # when to break to update tuning
+        tuning_points <- seq(0, n_samples, by = self$tuning_interval)
+        changepoints <- c(changepoints, tuning_points)
 
       }
 
@@ -292,7 +289,7 @@ hmc_sampler <- R6Class(
                       diag_sd = 1),
 
     # tuning information for these variables
-    batch_accept_trace = 0,
+    accept_trace = NULL,
     sum_epsilon_trace = NULL,
 
     # run the sampler for n_samples (possibly thinning)
@@ -399,7 +396,7 @@ hmc_sampler <- R6Class(
 
       # assign the free state and tuning information at the end of this burst
       self$free_state <- x
-      self$batch_accept_trace <- accept_trace
+      self$accept_trace <- c(self$accept_trace, accept_trace)
 
     },
 
@@ -423,12 +420,15 @@ hmc_sampler <- R6Class(
 
         # epsilon & tuning parameters
         epsilon <- self$parameters$epsilon
+        accept_group <- 50
         target_acceptance <- 0.651
         kappa <- 0.75
         gamma <- 0.1
 
-        # acceptance rate over the last batch
-        accept_rate <- mean(self$batch_accept_trace, na.rm = TRUE)
+        # acceptance rate over the accept_group samples
+        start <- max(1, iterations_completed - accept_group)
+        end <- iterations_completed
+        accept_rate <- mean(self$accept_trace[start:end], na.rm = TRUE)
 
         # decrease the adaptation rate as we go
         adapt_rate <- min(1, gamma * iterations_completed ^ (-kappa))
@@ -445,8 +445,7 @@ hmc_sampler <- R6Class(
         # sizes
         progress_fraction <- iterations_completed / total_iterations
         if (progress_fraction > 0.5) {
-          burst_size <- length(self$batch_accept_trace)
-          self$sum_epsilon_trace <- c(self$epsilon_trace, epsilon * burst_size)
+          self$sum_epsilon_trace <- c(self$epsilon_trace, epsilon * accept_group)
         }
 
         # if this is the end of the warmup, get the averaged epsilon for the
@@ -483,8 +482,8 @@ hmc_sampler <- R6Class(
 
           # get the sample posterior variance and shrink it
           sample_var <- sample_variance(samples)
-          var_shrinkage <- 1 / (n_accepted + 5)
-          var_shrunk <- n_accepted * var_shrinkage * sample_var + 5e-3 * var_shrinkage
+          shrinkage <- 1 / (n_accepted + 5)
+          var_shrunk <- n_accepted * shrinkage * sample_var + 5e-3 * shrinkage
           self$parameters$diag_sd <- sqrt(var_shrunk)
 
         }
