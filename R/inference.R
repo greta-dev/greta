@@ -196,7 +196,7 @@ mcmc <- function (model,
   draws <- stashed_samples()
 
   # empty the stash
-  greta_stash$samplers <- NULL
+  rm("samplers", envir = greta_stash)
 
   # # get raw_draws
   # raw_list <- lapply(chains_list,
