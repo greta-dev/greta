@@ -1,9 +1,18 @@
-#' @rdname samplers
+#' @name samplers
 #'
-#' @title MCMC Samplers
+#' @title MCMC samplers
 #' @description Functions to set up MCMC samplers and change the startng values
-#'   of their parameters, for use in \code{mcmc()}.
+#'   of their parameters, for use in \code{\link{mcmc}()}.
 #'
+#' @details During the warmup iterations of \code{mcmc}, some of these
+#'   sampler parameters will be tuned to improve the efficiency of the sampler,
+#'   so the values provided here are used as starting values.
+#'
+#' @return a \code{sampler} object that can be passed to \code{\link{mcmc}}.
+
+NULL
+
+#' @rdname samplers
 #' @export
 #'
 #' @param Lmin minimum number of leapfrog steps (positive integer, Lmin > Lmax)
@@ -12,16 +21,10 @@
 #' @param diag_sd estimate of the posterior marginal standard deviations
 #'   (positive, will be tuned).
 #'
-#' @details During the warmup iterations of \code{\link{mcmc}()}, some of these
-#'   sampler parameters will be tuned to improve the efficiency of the sampler,
-#'   so the values provided here are used as starting values.
-#'
-#'   For \code{hmc()}, the number of leapfrog steps at each iteration is
+#' @details For \code{hmc()}, the number of leapfrog steps at each iteration is
 #'   selected uniformly at random from between \code{Lmin} and \code{Lmax}.
 #'   \code{diag_sd} is used to rescale the parameter space to make it more
 #'   uniform, and make sampling more efficient.
-#'
-#' @return a \code{sampler} object that can be passed to \code{\link{mcmc}}.
 hmc <- function (Lmin = 10,
                  Lmax = 20,
                  epsilon = 0.005,

@@ -18,7 +18,7 @@ opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
 \arguments{
 \item{model}{greta_model object}
 
-\item{sampler}{sampler used to draw values in MCMC. See \link{samplers} for options.}
+\item{sampler}{sampler used to draw values in MCMC. See \code{\link{samplers}} for options.}
 
 \item{n_samples}{number of MCMC samples to draw (after any warm-up, but
 before thinning)}
@@ -92,20 +92,6 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   part of the parameter space. Alternatively, you could redefine the model
   (via \code{model}) to have double precision, though this will slow down
   sampling.
-
-  Currently, the only implemented MCMC procedure is static Hamiltonian Monte
-  Carlo (\code{method = "hmc"}). During the warmup iterations, the leapfrog
-  stepsize hyperparameter \code{epsilon} is tuned to maximise the sampler
-  efficiency, and the posterior marginal standard deviations are estimated
-  \code{diag_sd}. The \code{control} argument can be used to specify the
-  initial value for \code{epsilon}, \code{diag_sd}, and two other
-  hyperparameters: \code{Lmin} and \code{Lmax}; positive integers (with
-  \code{Lmax > Lmin}) giving the upper and lower limits to the number of
-  leapfrog steps per iteration (from which the number is selected uniformly
-  at random).
-
-  The default control options for HMC are:
-  \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005, diag_sd = 1)}
 
 Currently, the only implemented optimisation algorithm is Adagrad
   (\code{method = "adagrad"}). The \code{control} argument can be used to
