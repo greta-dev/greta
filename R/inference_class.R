@@ -135,29 +135,6 @@ inference <- R6Class(
 
     },
 
-    # given the progress through this warmup phase, and the latest acceptance
-    # information, tune the sampler parameters
-    tune = function (iterations_completed, total_iterations) {
-
-      something_to_tune <- !identical(self$tuning_periods, list())
-
-      if (something_to_tune) {
-
-        tuning_now <- vapply(self$tuning_periods,
-                             self$in_periods,
-                             iterations_completed,
-                             total_iterations,
-                             FUN.VALUE = FALSE)
-
-        parameters_to_tune <- self$tuned_parameters[tuning_now]
-
-        # loop through those parameters, using their tuning method to update the
-        # parameter
-
-      }
-
-    },
-
     # is the sampler in one of the tuning periods for a given parameter
     in_periods = function (periods, i, n_samples) {
 
@@ -182,10 +159,6 @@ sampler <- R6Class(
     numerical_rejections = 0,
     chain_number = 1,
     n_chains = 1,
-
-#     initialize = function (initial_values, model, parameters = list()) {
-#       super$initialize(initial_values, model, parameters)
-#     },
 
     run_chain = function (n_samples, thin, warmup, verbose, pb_update) {
 
@@ -290,6 +263,11 @@ sampler <- R6Class(
       changepoints <- sort(unique(changepoints))
       diff(changepoints)
 
+    },
+
+    # by default, samplers have an empty tuning method
+    tune = function (iterations_completed, total_iterations) {
+      invisible(NULL)
     }
 
   )
@@ -305,26 +283,14 @@ hmc_sampler <- R6Class(
                       epsilon = 0.005,
                       diag_sd = 1),
 
-    # the sections of the warmup period in which to tune each thing: c(start,
-    # stop) as fractions
-    tuning_periods = list(epsilon = list(c(0, 0.1),
-                                         c(0.4, 1)),
-                          diag_sd = list(c(0.1, 0.4))),
-#
-#     initialize = function (initial_values, model, parameters = list()) {
-#       super$initialize(initial_values, model, parameters)
-#     },
-#
-#     run_chain = function (n_samples, thin, warmup, verbose, pb_update) {
-#       super$run_chain(n_samples, thin, warmup, verbose, pb_update)
-#     },
+    # tuning information for these variables
+    batch_accept_trace = 0,
+    sum_epsilon_trace = NULL,
 
     # run the sampler for n_samples (possibly thinning)
     run_burst = function (n_samples, thin) {
 
       self$last_burst_free_states <- matrix(NA, n_samples, self$n_free)
-
-      # method using R HMC (later convert to tensorflow HMC)
 
       # unpack options
       epsilon <- self$parameters$epsilon
@@ -424,8 +390,149 @@ hmc_sampler <- R6Class(
 
       # assign the free state at the end of this burst
       self$free_state <- x
+      self$batch_accept_trace <- accept_trace
+
+    },
+
+    # overall tuning method
+    tune = function(iterations_completed, total_iterations) {
+      self$tune_epsilon(iterations_completed, total_iterations)
+      self$tune_diag_sd(iterations_completed, total_iterations)
+    },
+
+    tune_epsilon = function (iterations_completed, total_iterations) {
+
+
+      # epsilon & tuning parameters
+      epsilon <- self$parameters$epsilon
+      target_acceptance <- 0.651
+      kappa <- 0.75
+      gamma <- 0.1
+
+      # tuning periods for the tunable parameters (first 10%, last 60%)
+      tuning_periods = list(c(0, 0.1), c(0.4, 1))
+
+      # whether we're tuning now
+      tuning_now <- self$in_periods(tuning_periods,
+                                    iterations_completed,
+                                    total_iterations)
+
+      if (tuning_now) {
+
+        # acceptance rate over the last batch
+        accept_rate <- mean(self$batch_accept_trace, na.rm = TRUE)
+
+        # decrease the adaptation rate as we go
+        adapt_rate <- min(1, gamma * iterations_completed ^ (-kappa))
+
+        # shift epsilon in the right direction, making sure it never goes negative
+        new_epsilon <- epsilon + pmax(-(epsilon + sqrt(.Machine$double.eps)),
+                                      adapt_rate * (accept_rate - target_acceptance))
+
+        # update it
+        self$parameters$epsilon <- new_epsilon
+
+        # keep track of the *sum of epsilon* in the second half of warmup so
+        # we can average properly later, accounting for different burst
+        # sizes
+        progress_fraction <- iterations_completed / total_iterations
+        if (progress_fraction > 0.5) {
+          burst_size <- length(self$batch_accept_trace)
+          self$sum_epsilon_trace <- c(self$epsilon_trace, epsilon * burst_size)
+        }
+
+        # if this is the end of the warmup, get the averaged epsilon for the
+        # second half of the warmup and put it back in for the parameter
+        if (progress_fraction == 1) {
+          n_traced <- total_iterations / 2
+          final_epsilon <- self$sum_epsilon_trace / n_traced
+          self$parameters$epsilon <- final_epsilon
+        }
+
+      }
+
+    },
+
+    tune_diag_sd = function (iterations_completed, total_iterations) {
+
+
+      # when, during warmup, to tune this parameter (after epsilon, but stopping
+      # before halfway through)
+      tuning_periods = list(c(0.1, 0.4))
+
+      tuning_now <- self$in_periods(tuning_periods,
+                                    iterations_completed,
+                                    total_iterations)
+
+      if (tuning_now) {
+
+      }
 
     }
 
   )
 )
+
+# if (tune) {
+#
+#   # initialise welford accumulator for marginal variance
+#   diag_sd_update_rate <- 5
+#   welford_m <- 0
+#   welford_m2 <- 0
+#
+# }
+# if (tune) {
+#
+#   # only adapt diag_sd in the first third of tuning, so that epsilon can
+#   # settle in during the second half
+#   adapt_diag_sd <- in_periods(i, n_samples, diag_sd_periods)
+#   if (adapt_diag_sd) {
+#
+#     # update welford accumulator for posterior variance
+#     n_accepted <- sum(accept_trace)
+#
+#     # update only if this step was accepted
+#     if (accept_trace[i] == 1) {
+#       welford_delta <- x - welford_m
+#       welford_m <- welford_m + welford_delta / n_accepted
+#       welford_m2 <- welford_m2 + welford_delta * (x - welford_m)
+#     }
+#
+#     # if there are samples, and we want to adapt, get the sample posterior
+#     # variance and shrink it
+#     if (n_accepted > 1 & (i %% diag_sd_update_rate == 0)) {
+#       sample_var <- welford_m2 / (n_accepted - 1)
+#       var_shrinkage <- 1 / (n_accepted + 5)
+#       var_shrunk <- n_accepted * var_shrinkage * sample_var + 5e-3 * var_shrinkage
+#       diag_sd <- sqrt(var_shrunk)
+#     }
+#
+#   }
+#
+# }
+
+# use welford accumulator for diag_sd
+
+# store the total epsilon in the second half
+# average epsilon over the last half of the warmup
+
+# run_batch needs to track and return the relevant statistics
+
+# for each tunable parameter, have a separate tuning method, taking in the batch
+# id etc. to work out what to do.
+
+# run_batch stores epsilon_trace for the last batch
+
+# tune_epsilon adjusts it and puts it back in place of epsilon
+
+# tune_epsilon also tracks epsilon_final, and if all iterations are completed, drops it back
+# in place of epsilon
+
+
+# # store the tuned epsilon as the mean of the last half
+# if (tune) {
+#   start <- floor(n_samples/2)
+#   end <- n_samples
+#   control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
+#   control$diag_sd <- diag_sd
+# }
