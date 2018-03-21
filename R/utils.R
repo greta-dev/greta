@@ -113,6 +113,16 @@ do <- function(name, ...) {
   }
 }
 
+# efficient calculation of the sample variance
+sample_variance <- function (x) {
+  mu <- colMeans(x)
+  errors <- sweep(x, 2, mu, "-")
+  SS <- colSums(errors ^ 2)
+  n <- nrow(x)
+  var <- SS / (n - 1)
+  var
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -122,7 +132,8 @@ misc_module <- module(module,
                       to_shape,
                       is_scalar,
                       flatten,
-                      do)
+                      do,
+                      sample_variance)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
