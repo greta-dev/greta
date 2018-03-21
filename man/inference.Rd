@@ -9,9 +9,8 @@
 \usage{
 stashed_samples()
 
-mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
-  chains = 1, verbose = TRUE, pb_update = 10, control = list(),
-  initial_values = NULL)
+mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1, warmup = 100,
+  chains = 1, verbose = TRUE, pb_update = 10, initial_values = NULL)
 
 opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
   control = list(), initial_values = NULL)
@@ -19,8 +18,7 @@ opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
 \arguments{
 \item{model}{greta_model object}
 
-\item{method}{method used to sample or optimise values. Currently only
-one method is available for each procedure: \code{hmc} and \code{adagrad}}
+\item{sampler}{sampler used to draw values in MCMC. See \link{samplers} for options.}
 
 \item{n_samples}{number of MCMC samples to draw (after any warm-up, but
 before thinning)}
@@ -38,16 +36,19 @@ tunes sampler hyperparameters.}
 
 \item{pb_update}{how regularly to update the progress bar (in iterations)}
 
-\item{control}{an optional named list of hyperparameters and options to
-control behaviour of the sampler or optimiser. See Details.}
-
 \item{initial_values}{an optional vector (or list of vectors, for multiple
 chains) of initial values for the free parameters in the model. These will
 be used as the starting point for sampling/optimisation.}
 
+\item{method}{method used to optimise values. Currently only \code{adagrad}
+is available}
+
 \item{max_iterations}{the maximum number of iterations before giving up}
 
 \item{tolerance}{the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level}
+
+\item{control}{an optional named list of hyperparameters and options to
+control behaviour of the sampler or optimiser. See Details.}
 }
 \value{
 \code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object

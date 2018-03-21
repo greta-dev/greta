@@ -37,6 +37,7 @@ Collate:
     'dag_class.R'
     'greta_model_class.R'
     'progress_bar.R'
+    'inference_class.R'
     'samplers.R'
     'inference.R'
     'install_tensorflow.R'
