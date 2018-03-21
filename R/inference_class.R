@@ -338,7 +338,6 @@ hmc_sampler <- R6Class(
 
       # track acceptance and numerical rejections
       accept_trace <- rep(0, n_samples)
-      numerical_rejections <- 0
 
       # set initial location, log joint density and gradients
       dag$send_parameters(x)
@@ -382,7 +381,7 @@ hmc_sampler <- R6Class(
         # if the step was bad, reject it out of hand
         if (reject) {
 
-          numerical_rejections <- numerical_rejections + 1
+          self$numerical_rejections <- self$numerical_rejections + 1
           x <- x_old
           logprob <- logprob_old
           grad <- grad_old
