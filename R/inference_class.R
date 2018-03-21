@@ -285,7 +285,10 @@ hmc_sampler <- R6Class(
 
     # tuning information for these variables
     batch_accept_trace = 0,
+    total_acceptances = 0,
     sum_epsilon_trace = NULL,
+    diag_sd_welford_m = 0,
+    diag_sd_welford_m2 = 0,
 
     # run the sampler for n_samples (possibly thinning)
     run_burst = function (n_samples, thin) {
@@ -297,6 +300,10 @@ hmc_sampler <- R6Class(
       diag_sd <- self$parameters$diag_sd
       L <- seq(self$parameters$Lmin,
                self$parameters$Lmax)
+
+      # tuning information
+      welford_m <- self$diag_sd_welford_m
+      welford_m2 <- self$diag_sd_welford_m2
 
       dag <- self$model$dag
       n_free <- self$n_free
@@ -386,11 +393,27 @@ hmc_sampler <- R6Class(
           self$last_burst_free_states[i %/% thin, ] <- x
         }
 
+        # get diag sd welford accumulator info
+
+        # update welford accumulator for posterior variance
+        n_accepted <- sum(accept_trace)
+
+        # update only if this step was accepted
+        if (accept_trace[i] == 1) {
+          welford_delta <- x - welford_m
+          welford_m <- welford_m + welford_delta / n_accepted
+          welford_m2 <- welford_m2 + welford_delta * (x - welford_m)
+        }
+
+
       }
 
-      # assign the free state at the end of this burst
+      # assign the free state and tuning information at the end of this burst
       self$free_state <- x
       self$batch_accept_trace <- accept_trace
+      self$total_acceptances <- self$total_acceptances + sum(accept_trace)
+      self$diag_sd_welford_m <- welford_m
+      self$diag_sd_welford_m2 <- welford_m2
 
     },
 
@@ -402,13 +425,6 @@ hmc_sampler <- R6Class(
 
     tune_epsilon = function (iterations_completed, total_iterations) {
 
-
-      # epsilon & tuning parameters
-      epsilon <- self$parameters$epsilon
-      target_acceptance <- 0.651
-      kappa <- 0.75
-      gamma <- 0.1
-
       # tuning periods for the tunable parameters (first 10%, last 60%)
       tuning_periods = list(c(0, 0.1), c(0.4, 1))
 
@@ -418,6 +434,12 @@ hmc_sampler <- R6Class(
                                     total_iterations)
 
       if (tuning_now) {
+
+        # epsilon & tuning parameters
+        epsilon <- self$parameters$epsilon
+        target_acceptance <- 0.651
+        kappa <- 0.75
+        gamma <- 0.1
 
         # acceptance rate over the last batch
         accept_rate <- mean(self$batch_accept_trace, na.rm = TRUE)
@@ -455,7 +477,6 @@ hmc_sampler <- R6Class(
 
     tune_diag_sd = function (iterations_completed, total_iterations) {
 
-
       # when, during warmup, to tune this parameter (after epsilon, but stopping
       # before halfway through)
       tuning_periods = list(c(0.1, 0.4))
@@ -464,7 +485,24 @@ hmc_sampler <- R6Class(
                                     iterations_completed,
                                     total_iterations)
 
-      if (tuning_now) {
+      n_accepted <- self$total_acceptances
+
+      # provided there have been at least some acceptances
+      if (tuning_now & n_accepted > 1) {
+
+        # diagonal posterior standard deviation and tuning information
+        diag_sd <- self$parameters$diag_sd
+        welford_m <- self$diag_sd_welford_m
+        welford_m2 <- self$diag_sd_welford_m2
+
+        # get the sample posterior variance and shrink it
+        sample_var <- welford_m2 / (n_accepted - 1)
+        var_shrinkage <- 1 / (n_accepted + 5)
+        var_shrunk <- n_accepted * var_shrinkage * sample_var + 5e-3 * var_shrinkage
+        diag_sd <- sqrt(var_shrunk)
+
+        # replace
+        self$parameters$diag_sd <- diag_sd
 
       }
 
@@ -477,8 +515,6 @@ hmc_sampler <- R6Class(
 #
 #   # initialise welford accumulator for marginal variance
 #   diag_sd_update_rate <- 5
-#   welford_m <- 0
-#   welford_m2 <- 0
 #
 # }
 # if (tune) {
@@ -528,11 +564,3 @@ hmc_sampler <- R6Class(
 # tune_epsilon also tracks epsilon_final, and if all iterations are completed, drops it back
 # in place of epsilon
 
-
-# # store the tuned epsilon as the mean of the last half
-# if (tune) {
-#   start <- floor(n_samples/2)
-#   end <- n_samples
-#   control$epsilon <- mean(epsilon_trace[start:end], na.rm = TRUE)
-#   control$diag_sd <- diag_sd
-# }
