@@ -77,11 +77,16 @@ test_that('bad mcmc proposals are rejected', {
   expect_error(mcmc(m, n_samples = 1, warmup = 0),
                'Could not find reasonable starting values after 20 attempts')
 
-  # proposals that are fine, but rejected anyway (long chain required)
+  # proposals that are fine, but rejected anyway
   z = normal(0, 1)
   m <- model(z)
-  expect_ok(mcmc(m, n_samples = 5, warmup = 0, verbose = FALSE,
-                 control = list(epsilon = 100, Lmin = 1, Lmax = 1)))
+  expect_ok(mcmc(m,
+                 hmc(epsilon = 100,
+                     Lmin = 1,
+                     Lmax = 1),
+                 n_samples = 5,
+                 warmup = 0,
+                 verbose = FALSE))
 
 })
 
@@ -190,9 +195,12 @@ test_that('stashed_samples works', {
 
   # mock up a stash
   stash <- greta:::greta_stash
-  trace_stash <- list(trace = as.matrix(rnorm(17)),
-                      raw = as.matrix(rnorm(17)))
-  assign('trace_stash', trace_stash, envir = stash)
+  samplers_stash <- replicate(2,
+                              list(traced_free_state = as.matrix(rnorm(17)),
+                                   traced_values = as.matrix(rnorm(17)),
+                                   model = m),
+                              simplify = FALSE)
+  assign("samplers", samplers_stash, envir = stash)
 
   # should convert to an mcmc.list
   ans <- stashed_samples()
