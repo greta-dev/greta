@@ -384,14 +384,22 @@ dag_class <- R6Class(
 
     # get log density and gradient of joint density w.r.t. free states of all
     # variable nodes, with or without applying the jacobian adjustment
-    log_density = function(adjusted = TRUE) {
+    log_density = function(free_state = NULL, adjusted = TRUE) {
+
+      if (!is.null(free_state)) {
+        self$send_parameters(free_state)
+      }
 
       cleanly(self$tf_run(sess$run(joint_density_adj,
                                    feed_dict = parameter_dict)))
 
     },
 
-    gradients = function (adjusted = TRUE) {
+    gradients = function (free_state = NULL, adjusted = TRUE) {
+
+      if (!is.null(free_state)) {
+        self$send_parameters(free_state)
+      }
 
       cleanly(self$tf_run(sess$run(gradients_adj,
                                    feed_dict = parameter_dict)))
@@ -399,7 +407,11 @@ dag_class <- R6Class(
     },
 
     # return the current values of the traced nodes, as a named vector
-    trace_values = function () {
+    trace_values = function (free_state = NULL) {
+
+      if (!is.null(free_state)) {
+        self$send_parameters(free_state)
+      }
 
       tfe <- self$tf_environment
 

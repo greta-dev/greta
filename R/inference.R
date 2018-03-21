@@ -7,34 +7,40 @@ NULL
 #' @rdname inference
 #' @export
 #' @importFrom stats na.omit
+#' @importFrom coda mcmc.list
 #'
 #' @details If the sampler is aborted before finishing, the samples collected so
 #'   far can be retrieved with \code{stashed_samples()}. Only samples from the
 #'   sampling phase will be returned.
 stashed_samples <- function () {
 
-  stashed <- exists('trace_stash', envir = greta_stash)
+  stashed <- exists("samplers", envir = greta_stash)
 
   if (stashed) {
 
-    stash <- greta_stash$trace_stash
+    samplers <- greta_stash$samplers
 
-    # get them, remove the NAs, and return
-    draws_clean <- na.omit(stash$trace)
-    draws_prepped <- prepare_draws(draws_clean)
-    draws_mcmclist <- mcmc.list(draws_prepped)
+    # get draws as a matrix
+    free_state_draws <- lapply(samplers, member, "traced_free_state")
+    values_draws <- lapply(samplers, member, "traced_values")
+
+    # convert to mcmc objects
+    free_state_draws <- lapply(free_state_draws, prepare_draws)
+    values_draws <- lapply(values_draws, prepare_draws)
+
+    # convert to mcmc.list objects
+    free_state_draws <- coda::mcmc.list(free_state_draws)
+    values_draws <- coda::mcmc.list(values_draws)
 
     # prep the raw model objects
     model_info <- new.env()
-    raw_clean <- na.omit(stash$raw)
-    raw_prepped <- prepare_draws(raw_clean)
-    model_info$raw_draws <- mcmc.list(raw_prepped)
-    model_info$model <- greta_stash$model
+    model_info$raw_draws <- free_state_draws
+    model_info$model <- samplers[[1]]$model
 
     # add the raw draws as an attribute
-    attr(draws_mcmclist, "model_info") <- model_info
+    attr(values_draws, "model_info") <- model_info
 
-    return (draws_mcmclist)
+    return (values_draws)
 
   } else {
 
@@ -48,21 +54,13 @@ stashed_samples <- function () {
 # they abort a run
 greta_stash <- new.env()
 
-stash_trace <- function (trace, raw) {
-  assign('trace_stash',
-         list(trace = trace,
-              raw = raw),
-         envir = greta_stash)
-}
-
 #' @rdname inference
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #'
 #' @param model greta_model object
-#' @param method method used to sample or optimise values. Currently only
-#'   one method is available for each procedure: \code{hmc} and \code{adagrad}
+#' @param sampler sampler used to draw values in MCMC. See \link{samplers} for options.
 #' @param n_samples number of MCMC samples to draw (after any warm-up, but
 #'   before thinning)
 #' @param thin MCMC thinning rate; every \code{thin} samples is retained,
@@ -78,6 +76,8 @@ stash_trace <- function (trace, raw) {
 #' @param initial_values an optional vector (or list of vectors, for multiple
 #'   chains) of initial values for the free parameters in the model. These will
 #'   be used as the starting point for sampling/optimisation.
+#' @param method method used to optimise values. Currently only \code{adagrad}
+#'   is available
 #'
 #' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
@@ -132,20 +132,14 @@ stash_trace <- function (trace, raw) {
 #'               warmup = 10)
 #' }
 mcmc <- function (model,
-                  method = c("hmc"),
+                  sampler = hmc(),
                   n_samples = 1000,
                   thin = 1,
                   warmup = 100,
                   chains = 1,
                   verbose = TRUE,
                   pb_update = 10,
-                  control = list(),
                   initial_values = NULL) {
-
-  method <- match.arg(method)
-
-  # store the model
-  greta_stash$model <- model
 
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
@@ -157,204 +151,110 @@ mcmc <- function (model,
                      FUN.VALUE = FALSE)
 
   if (any(are_data)) {
+
     is_are <- ifelse(sum(are_data) == 1, 'is a data greta array', 'are data greta arrays')
     bad_greta_arrays <- paste(names[are_data], collapse = ', ')
     msg <- sprintf('%s %s, data greta arrays cannot be sampled',
                    bad_greta_arrays,
                    is_are)
     stop (msg, call. = FALSE)
+
   }
 
   # get the dag containing the target nodes
   dag <- model$dag
 
-  param <- dag$example_parameters()
-  n_initial <- length(param)
+  # turn initial values into a list is needed (checking the length)
+  initial_values <- prep_initials(initial_values, chains)
 
-  # random starting locations
-  if (is.null(initial_values)) {
+  # create a sampler object for each chain, using these (possibly NULL) initial
+  # values
+  samplers <- lapply(initial_values,
+                     build_sampler,
+                     sampler,
+                     model)
 
-    # try several times
-    valid <- FALSE
-    attempts <- 1
-    while (!valid & attempts < 20) {
+  # stash the samplers now, to retrieve draws later
+  greta_stash$samplers <- samplers
 
-      initial_values <- replicate(chains,
-                                  rnorm(n_initial, 0, 0.5),
-                                  simplify = FALSE)
+  # add chain info for printing
+  for (i in seq_len(chains)) {
+    samplers[[i]]$chain_number <- i
+    samplers[[i]]$n_chains <- chains
+  }
 
-      # test validity of values
-      valid <- valid_parameters(initial_values, dag)
-      attempts <- attempts + 1
+  # run chains on samplers (return list so we can handle parallelism here)
+  samplers <- lapply(samplers,
+                     do("run_chain"),
+                     n_samples = n_samples,
+                     thin = thin,
+                     warmup = warmup,
+                     verbose = verbose,
+                     pb_update = pb_update)
 
-    }
+  # get chains from the samplers, with raw values as an attribute
+  draws <- stashed_samples()
 
-    if (!valid) {
-      stop ("Could not find reasonable starting values after ", attempts,
-            " attempts. Please specify initial values manually via the ",
-            "initial_values argument to mcmc",
+  # empty the stash
+  greta_stash$samplers <- NULL
+
+  # # get raw_draws
+  # raw_list <- lapply(chains_list,
+  #                    function (x) {
+  #                      attr(x, "model_info")$raw_draws[[1]]
+  #                      })
+  # chains_list <- lapply(chains_list, `[[`, 1)
+  #
+  # model_info <- new.env()
+  # model_info$raw_draws <- do.call(mcmc.list, raw_list)
+  # model_info$model <- greta_stash$model
+  # chains <- do.call(mcmc.list, chains_list)
+  # attr(chains, "model_info") <- model_info
+  draws
+
+}
+
+# convert (possibly NULL) user-specified initial values into a list of the
+# correct length, with nice error messages
+prep_initials <- function (initial_values, n_chains) {
+
+  # if the user provided a list of initial values, check the length
+  if (is.list(initial_values)) {
+
+    n_sets <- length(initial_values)
+
+    if (n_sets != n_chains) {
+      stop (n_sets, " sets of initial values were provided, but there ",
+            ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
+            ifelse(n_chains > 1, "s", ""),
             call. = FALSE)
     }
 
   } else {
 
-    # if they provided a list, check it
-    if (is.list(initial_values)) {
+    # otherwise replicate them for each chain
+    if (is.null(initial_values)) {
 
-      n_sets <- length(initial_values)
-
-      if (n_sets != chains) {
-        stop (n_sets, " sets of initial values were provided, but there ",
-              ifelse(chains > 1, "are ", "is only "), chains, " chain",
-              ifelse(chains > 1, "s", ""),
-              call. = FALSE)
-      }
-
-      n_param <- vapply(initial_values, length, FUN.VALUE = 0)
-
-      if (!all(n_param == n_initial)) {
-        stop ("each set of initial values must be a vector of length ",
-              n_initial,
-              call. = FALSE)
-      }
+      initial_values <- replicate(n_chains, NULL)
 
     } else {
 
-      # replicate
-      initial_values <- replicate(chains,
+      initial_values <- replicate(n_chains,
                                   initial_values,
                                   simplify = FALSE)
 
-      if (chains > 1) {
+      if (n_chains > 1) {
         message ("\nonly one set of was initial values given, ",
                  "and was used for all chains\n")
       }
 
     }
 
-    # check they are valid
-    if (!valid_parameters(initial_values, dag)) {
-      stop ('The log density and gradients could not be evaluated at these ',
-            'initial values.',
-            call. = FALSE)
-    }
-
   }
 
-
-  # get default control options
-  con <- switch(method,
-                hmc = list(Lmin = 10,
-                           Lmax = 20,
-                           epsilon = 0.005,
-                           diag_sd = 1))
-
-  # update them with user overrides
-  con[names(control)] <- control
-
-  # fetch the algorithm
-  method <- switch(method,
-                   hmc = hmc)
-
-  print_chain <- chains > 1
-
-  chains_list <- lapply(seq_len(chains),
-                        run_chain,
-                        dag = dag,
-                        method = method,
-                        n_samples = n_samples,
-                        thin = thin,
-                        warmup = warmup,
-                        chains = chains,
-                        verbose = verbose,
-                        pb_update = pb_update,
-                        control = con,
-                        initial_values = initial_values,
-                        print_chain = print_chain)
-
-  # get raw_draws
-  raw_list <- lapply(chains_list,
-                     function (x) {
-                       attr(x, "model_info")$raw_draws[[1]]
-                       })
-  chains_list <- lapply(chains_list, `[[`, 1)
-
-  model_info <- new.env()
-  model_info$raw_draws <- do.call(mcmc.list, raw_list)
-  model_info$model <- greta_stash$model
-  chains <- do.call(mcmc.list, chains_list)
-  attr(chains, "model_info") <- model_info
-  chains
+  initial_values
 
 }
-
-
-run_chain <- function (chain, dag, method, n_samples, thin,
-                       warmup, chains, verbose, pb_update,
-                       control, initial_values, print_chain) {
-
-  if (print_chain) {
-    msg <- sprintf("\nchain %i/%i\n", chain, chains)
-    cat(msg)
-  }
-
-  initial_values_chain <- initial_values[[chain]]
-
-  # if warmup is required, do that now and update init
-  if (warmup > 0) {
-
-    if (verbose)
-      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
-    else
-      pb_warmup <- NULL
-
-    # run it
-    warmup_draws <- method(dag = dag,
-                           init = initial_values_chain,
-                           n_samples = warmup,
-                           thin = thin,
-                           verbose = verbose,
-                           pb = pb_warmup,
-                           tune = TRUE,
-                           stash = FALSE,
-                           control = control)
-
-    # use the last draw of the full parameter vector as the init
-    initial_values_chain <- attr(warmup_draws, 'last_x')
-    control <- attr(warmup_draws, 'control')
-
-  }
-
-  if (verbose)
-    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
-  else
-    pb_sampling <- NULL
-
-  # run the sampler
-  draws <- method(dag = dag,
-                  init = initial_values_chain,
-                  n_samples = n_samples,
-                  thin = thin,
-                  verbose = verbose,
-                  pb = pb_sampling,
-                  tune = FALSE,
-                  stash = TRUE,
-                  control = control)
-
-  # if this was successful, trash the stash, prepare and return the draws
-  rm('trace_stash', envir = greta_stash)
-  draws
-
-}
-
-
-#' @importFrom coda mcmc mcmc.list
-prepare_draws <- function (draws) {
-  # given a matrix of draws returned by the sampler, prepare it and return
-  draws_df <- data.frame(draws)
-  coda::mcmc(draws_df)
-}
-
 
 #' @rdname inference
 #' @export
@@ -455,11 +355,5 @@ opt <- function (model,
 
 }
 
-stash_module <- module(greta_stash,
-                       stash_trace,
-                       prepare_draws)
-
 inference_module <- module(dag_class,
-                           progress_bar = progress_bar_module,
-                           samplers = samplers_module,
-                           stash = stash_module)
+                           progress_bar = progress_bar_module)

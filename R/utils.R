@@ -103,6 +103,16 @@ is_scalar <- function (x)
 flatten <- function (x)
   x[seq_along(x)]
 
+# helper function to loop through lists of R6 objects with lapply, executing the
+# member function "name" on the arguments in dots. Using the syntax:
+#   lapply(R6_objects, do("member_function"), args)
+# which does R6_objects[[i]]$member_function(args) for each R6 object
+do <- function(name, ...) {
+  function (x, ...) {
+    x[[name]](...)
+  }
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -111,7 +121,8 @@ misc_module <- module(module,
                       fl,
                       to_shape,
                       is_scalar,
-                      flatten)
+                      flatten,
+                      do)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
@@ -349,20 +360,19 @@ cleanly <- function (expr) {
 
 }
 
-# check whether initial values are valid
-valid_parameters <- function (initial_values, dag) {
+# prepare a matrix of draws and return as an mcmc object
+#' @noRd
+#' @importFrom coda mcmc
+prepare_draws <- function (draws) {
+  draws_df <- data.frame(draws)
+  draws_df <- na.omit(draws_df)
+  coda::mcmc(draws_df)
+}
 
-  if (is.list(initial_values)) {
-    each_valid <- vapply(initial_values, valid_parameters, dag, FUN.VALUE = FALSE)
-    valid <- all(each_valid)
-    return (valid)
-  }
-
-  dag$send_parameters(initial_values)
-  ld <- dag$log_density()
-  grad <- dag$gradients()
-  all(is.finite(c(ld, grad)))
-
+build_sampler <- function (initial_values, sampler, model) {
+  sampler$class$new(initial_values,
+                    model,
+                    sampler$parameters)
 }
 
 # unlist and flatten a list of arrays to a vector row-wise
@@ -393,7 +403,8 @@ relist_tf <- function (x, list_template) {
 
 sampler_utils_module <- module(all_greta_arrays,
                                cleanly,
-                               valid_parameters,
+                               build_sampler,
+                               prepare_draws,
                                unlist_tf,
                                relist_tf)
 
