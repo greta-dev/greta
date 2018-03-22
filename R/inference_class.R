@@ -145,7 +145,7 @@ inference <- R6Class(
     in_periods = function (periods, i, n_samples) {
 
       within <- function (period, fraction)
-        fraction >= period[1] & fraction <= period[2]
+        fraction > period[1] & fraction <= period[2]
 
       fraction <- i / n_samples
       in_period <- vapply(periods, within, fraction, FUN.VALUE = FALSE)
@@ -484,7 +484,9 @@ hmc_sampler <- R6Class(
 
         samples <- self$traced_free_state
         dups <- duplicated(samples)
-        samples <- samples[!dups, ]
+        if (length(dups) > 0) {
+          samples <- samples[!dups, , drop = FALSE]
+        }
         n_accepted <- nrow(samples)
 
         # provided there have been at least 5 acceptances in the warmup so far
