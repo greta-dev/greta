@@ -90,22 +90,28 @@ test_that('define and mcmc error informatively', {
 
   # no model with non-probability density greta arrays
   expect_error(model(variable()),
-               'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
+               paste("none of the greta arrays in the model are associated",
+                     "with a probability density,",
+                     "so a model cannot be defined"))
 
   expect_error(model(x),
-               'none of the greta arrays in the model are associated with a probability density, so a model cannot be defined')
+               paste("none of the greta arrays in the model are associated",
+                     "with a probability density,",
+                     "so a model cannot be defined"))
 
   expect_error(model(),
                'could not find any non-data greta arrays')
 
   # can't define a model for an unfixed discrete variable
   expect_error(model(bernoulli(0.5)),
-               "model contains a discrete random variable that doesn't have a fixed value, so cannot be sampled from")
+               paste("model contains a discrete random variable that doesn't",
+                     "have a fixed value, so cannot be sampled from"))
 
   # no parameters here, so define or dag should error
   distribution(x) = normal(0, 1)
   expect_error(model(x),
-               'none of the greta arrays in the model are unknown, so a model cannot be defined')
+               paste("none of the greta arrays in the model are unknown,",
+                     "so a model cannot be defined"))
 
   # a bad number of cores
   a = normal(0, 1)
@@ -136,7 +142,8 @@ test_that('check_dims errors informatively', {
 
   # but not when target_dim is set
   expect_error(greta:::check_dims(a, b, target_dim = dim1),
-               'array dimensions should be 3x3, but input dimensions were 3x3, 1x1')
+               paste("array dimensions should be 3x3, but input dimensions",
+                     "were 3x3, 1x1")
 
   # with both scalar, it should always should work
   expect_equal(greta:::check_dims(b, b),
@@ -166,14 +173,18 @@ test_that('disjoint graphs are checked', {
   c = variable()
 
   expect_error(m <- model(a, b, c),
-               'the model contains 2 disjoint graphs, one or more of these sub-graphs does not contain any greta arrays that are associated with a probability density, so a model cannot be defined')
+               paste("the model contains 2 disjoint graphs, one or more of",
+                     "these sub-graphs does not contain any greta arrays that",
+                     "are associated with a probability density,",
+                     "so a model cannot be defined"))
 
   # d is unrelated and known
   d = as_data(randn(3))
   distribution(d) = normal(0, 1)
   expect_error(m <- model(a, b, d),
-               'the model contains 2 disjoint graphs, one or more of these sub-graphs does not contain any greta arrays that are unknown, so a model cannot be defined')
-
+               paste("the model contains 2 disjoint graphs, one or more of",
+                     "these sub-graphs does not contain any greta arrays that",
+                     "are unknown, so a model cannot be defined"))
 
 })
 

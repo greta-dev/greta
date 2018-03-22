@@ -50,8 +50,8 @@ inference <- R6Class(
         # check they can be be used
         valid <- self$valid_parameters(user_specified)
         if (!valid) {
-          stop ('The log density and gradients could not be evaluated at these ',
-                'initial values.',
+          stop ("The log density and gradients could not be evaluated ",
+                "at these initial values.",
                 call. = FALSE)
         }
 
@@ -116,7 +116,8 @@ inference <- R6Class(
 
       if (values) {
         # calculate the observed values
-        last_burst_values <- self$trace_burst_values(self$last_burst_free_states)
+        last_burst_free_states <- self$last_burst_free_states
+        last_burst_values <- self$trace_burst_values(last_burst_free_states)
         self$traced_values <- rbind(self$traced_values,
                                     last_burst_values)
       }
@@ -179,14 +180,18 @@ sampler <- R6Class(
       if (warmup > 0) {
 
         if (verbose) {
-          pb_warmup <- create_progress_bar("warmup", c(warmup, n_samples), pb_update)
+          pb_warmup <- create_progress_bar("warmup",
+                                           c(warmup, n_samples),
+                                           pb_update)
           iterate_progress_bar(pb_warmup, 0, 0)
         } else {
           pb_warmup <- NULL
         }
 
         # split up warmup iterations into bursts of sampling
-        burst_lengths <- self$burst_lengths(warmup, pb_update, warmup = TRUE)
+        burst_lengths <- self$burst_lengths(warmup,
+                                            pb_update,
+                                            warmup = TRUE)
         completed_iterations <- cumsum(burst_lengths)
 
         for (burst in seq_along(burst_lengths)) {
@@ -210,7 +215,9 @@ sampler <- R6Class(
 
       # main sampling
       if (verbose) {
-        pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
+        pb_sampling <- create_progress_bar('sampling',
+                                           c(warmup, n_samples),
+                                           pb_update)
         iterate_progress_bar(pb_sampling, 0, 0)
       } else {
         pb_sampling <- NULL
@@ -376,8 +383,8 @@ hmc_sampler <- R6Class(
 
           } else {
 
-            # on rejection, reset all the parameters and push old parameters to the
-            # graph for the trace
+            # on rejection, reset all the parameters and push old parameters to
+            # the graph for the trace
             x <- x_old
             logprob <- logprob_old
             grad <- grad_old
@@ -433,9 +440,11 @@ hmc_sampler <- R6Class(
         # decrease the adaptation rate as we go
         adapt_rate <- min(1, gamma * iterations_completed ^ (-kappa))
 
-        # shift epsilon in the right direction, making sure it never goes negative
-        new_epsilon <- epsilon + pmax(-(epsilon + sqrt(.Machine$double.eps)),
-                                      adapt_rate * (accept_rate - target_acceptance))
+        # shift epsilon in the right direction, making sure it never goes
+        # negative
+        neg_eps <- -(epsilon + sqrt(.Machine$double.eps))
+        adaptation <- adapt_rate * (accept_rate - target_acceptance)
+        new_epsilon <- epsilon + pmax(neg_eps, adaptation)
 
         # update it
         self$parameters$epsilon <- new_epsilon
@@ -445,7 +454,8 @@ hmc_sampler <- R6Class(
         # sizes
         progress_fraction <- iterations_completed / total_iterations
         if (progress_fraction > 0.5) {
-          self$sum_epsilon_trace <- c(self$epsilon_trace, epsilon * accept_group)
+          self$sum_epsilon_trace <- c(self$epsilon_trace,
+                                      epsilon * accept_group)
         }
 
         # if this is the end of the warmup, get the averaged epsilon for the

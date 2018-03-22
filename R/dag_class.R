@@ -42,7 +42,8 @@ dag_class <- R6Class(
 
     },
 
-    # execute an expression on this dag's tensorflow graph, with the correct float type
+    # execute an expression on this dag's tensorflow graph, with the correct
+    # float type
     on_graph = function (expr) {
 
       # temporarily pass float type info to options, so it can be accessed by
@@ -162,8 +163,9 @@ dag_class <- R6Class(
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
 
-      self$tf_run(config <- tf$ConfigProto(inter_op_parallelism_threads = n_cores,
-                                           intra_op_parallelism_threads = n_cores))
+      self$tf_run(
+        config <- tf$ConfigProto(inter_op_parallelism_threads = n_cores,
+                                 intra_op_parallelism_threads = n_cores))
 
       if (self$compile) {
         self$tf_run(py_set_attr(config$graph_options$optimizer_options,
@@ -317,7 +319,8 @@ dag_class <- R6Class(
 
     },
 
-    # return a function to obtain the model log probability from a tensor for the free state
+    # return a function to obtain the model log probability from a tensor for
+    # the free state
     generate_log_prob_function = function (adjust = TRUE) {
 
       target <- ifelse (adjust,
@@ -458,7 +461,7 @@ dag_class <- R6Class(
           # loop through the neighbours
           for (neighbour in neighbours) {
             if (!registered[neighbour]) {
-              registered[neighbour] <- TRUE;
+              registered[neighbour] <- TRUE
               membership[neighbour] <- no_of_clusters
             }
           }
@@ -500,8 +503,12 @@ dag_class <- R6Class(
       dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
       rownames(dag_mat) <- colnames(dag_mat) <- node_names
 
-      parents <- lapply(self$node_list, member, 'parent_names(recursive = FALSE)')
-      children <- lapply(self$node_list, member, 'child_names(recursive = FALSE)')
+      parents <- lapply(self$node_list,
+                        member,
+                        'parent_names(recursive = FALSE)')
+      children <- lapply(self$node_list,
+                         member,
+                         'child_names(recursive = FALSE)')
 
       # for distribution nodes, remove target nodes from children, and put them
       # in parents to send the arrow in the opposite direction when plotting

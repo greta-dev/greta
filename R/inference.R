@@ -138,9 +138,12 @@ mcmc <- function (model,
 
   if (any(are_data)) {
 
-    is_are <- ifelse(sum(are_data) == 1, 'is a data greta array', 'are data greta arrays')
-    bad_greta_arrays <- paste(names[are_data], collapse = ', ')
-    msg <- sprintf('%s %s, data greta arrays cannot be sampled',
+    is_are <- ifelse(sum(are_data) == 1,
+                     "is a data greta array",
+                     "are data greta arrays")
+    bad_greta_arrays <- paste(names[are_data],
+                              collapse = ", ")
+    msg <- sprintf("%s %s, data greta arrays cannot be sampled",
                    bad_greta_arrays,
                    is_are)
     stop (msg, call. = FALSE)
@@ -246,25 +249,24 @@ prep_initials <- function (initial_values, n_chains) {
 #' @export
 #'
 #' @param max_iterations the maximum number of iterations before giving up
-#' @param tolerance the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level
+#' @param tolerance the numerical tolerance for the solution, the optimiser
+#'   stops when the (absolute) difference in the joint density between
+#'   successive iterations drops below this level
 #'
 #' @details Currently, the only implemented optimisation algorithm is Adagrad
 #'   (\code{method = "adagrad"}). The \code{control} argument can be used to
 #'   specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
 #'   \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
 #'   (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,
-#'   see
-#'   \href{https://www.tensorflow.org/api_docs/python/tf/train/AdagradOptimizer}{the
+#'   see \href{https://www.tensorflow.org/api_docs/python/tf/train}{the
 #'   TensorFlow docs} for more information
 #'
 #' @return \code{opt} - a list containing the following named elements:
-#'   \itemize{
-#'     \item{par}{the best set of parameters found}
-#'     \item{value}{the log joint density of the model at the parameters par}
-#'     \item{iterations}{the number of iterations taken by the optimiser}
-#'     \item{convergence}{an integer code, 0 indicates successful completion, 1
-#'     indicates the iteration limit max_iterations had been reached}
-#'   }
+#'   \itemize{ \item{par}{the best set of parameters found} \item{value}{the log
+#'   joint density of the model at the parameters par} \item{iterations}{the
+#'   number of iterations taken by the optimiser} \item{convergence}{an integer
+#'   code, 0 indicates successful completion, 1 indicates the iteration limit
+#'   max_iterations had been reached} }
 #'
 #' @examples
 #' \dontrun{

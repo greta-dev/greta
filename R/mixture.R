@@ -130,7 +130,8 @@ mixture_distribution <- R6Class (
       log_prob = function (x) {
         log_probs <- lapply(densities, do.call, list(x))
         log_probs_mat <- tf$concat(log_probs, 1L)
-        weighted_log_probs_mat <- tf$add(log_probs_mat, tf$transpose(log_weights))
+        weighted_log_probs_mat <- tf$add(log_probs_mat,
+                                         tf$transpose(log_weights))
         tf$reduce_logsumexp(weighted_log_probs_mat, 1L, keepdims = TRUE)
       }
 

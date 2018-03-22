@@ -68,7 +68,7 @@ node <- R6Class(
       }
 
       # add to list of children
-      self$children = c(self$children, node)
+      self$children <- c(self$children, node)
       node$add_parent(self)
 
     },
@@ -91,7 +91,7 @@ node <- R6Class(
       }
 
       # add to list of children
-      self$parents = c(self$parents, node)
+      self$parents <- c(self$parents, node)
 
     },
 
@@ -119,7 +119,9 @@ node <- R6Class(
         if (recursive) {
           names <- c(names,
                      unlist(lapply(children,
-                                   function(x) x$child_names(recursive = TRUE))))
+                                   function(x) {
+                                     x$child_names(recursive = TRUE)
+                                   })))
         }
 
         # account for multiple nodes depending on the same nodes
@@ -148,7 +150,9 @@ node <- R6Class(
         if (recursive) {
           names <- c(names,
                      unlist(lapply(parents,
-                                   function(x) x$parent_names(recursive = TRUE))))
+                                   function(x) {
+                                     x$parent_names(recursive = TRUE)
+                                   })))
         }
 
         # account for multiple nodes depending on the same nodes
@@ -169,7 +173,8 @@ node <- R6Class(
       tf_name %in% ls(dag$tf_environment)
     },
 
-    # define this and all descendent objects on tensorflow graph in environment env
+    # define this and all descendent objects on tensorflow graph in environment
+    # env
     define_tf = function (dag) {
 
       # if defined already, skip

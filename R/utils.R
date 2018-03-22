@@ -29,7 +29,11 @@ module <- function (..., sort = TRUE) {
 # check tensorflow is installed and the version of tensorflow is valid. error,
 # warn, or message if not and (if not an error) return an invisible logical
 # saying whether it is valid
-check_tf_version <- function (alert = c('none', 'error', 'warn', 'message', 'startup')) {
+check_tf_version <- function (alert = c("none",
+                                        "error",
+                                        "warn",
+                                        "message",
+                                        "startup")) {
 
   alert <- match.arg(alert)
   text <- NULL
@@ -191,7 +195,8 @@ check_dims <- function (..., target_dim = NULL) {
 
       # error if not
       if (!all(matches_target)) {
-        stop (sprintf('array dimensions should be %s, but input dimensions were %s',
+        stop (sprintf(paste("array dimensions should be %s,",
+                            "but input dimensions were %s"),
                       paste(target_dim, collapse = 'x'),
                       dims_text),
               call. = FALSE)
@@ -450,13 +455,14 @@ chol_to_symmetric <- function (L) {
 
 }
 
-greta_array_operations_module <- module(flat_to_chol,
+greta_array_ops_module <- module(flat_to_chol,
                                         chol_to_symmetric)
 
 # utilities to export via .internals
+
 utilities_module <- module(misc = misc_module,
                            dummy_arrays = dummy_array_module,
-                           greta_array_operations = greta_array_operations_module,
+                           greta_array_operations = greta_array_ops_module,
                            samplers = sampler_utils_module,
                            checks = checks_module,
                            colours = colour_module)
