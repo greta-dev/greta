@@ -59,9 +59,9 @@ test_that('all_greta_arrays works', {
   skip_if_not(check_tf_version())
   env <- new.env()
 
-  env$a = normal(0, 1)
-  env$b = as_data(rnorm(10))
-  env$c = env$a * env$b
+  env$a <- normal(0, 1)
+  env$b <- as_data(rnorm(10))
+  env$c <- env$a * env$b
 
   array_list <- greta:::all_greta_arrays(env)
   array_list_nodata <- greta:::all_greta_arrays(env, include_data = FALSE)
@@ -108,18 +108,18 @@ test_that('define and mcmc error informatively', {
                      "have a fixed value, so cannot be sampled from"))
 
   # no parameters here, so define or dag should error
-  distribution(x) = normal(0, 1)
+  distribution(x) <- normal(0, 1)
   expect_error(model(x),
                paste("none of the greta arrays in the model are unknown,",
                      "so a model cannot be defined"))
 
   # a bad number of cores
-  a = normal(0, 1)
+  a <- normal(0, 1)
   expect_warning(model(a, n_cores = 1000000L),
                'cores were requested, but only')
 
   # can't draw samples of a data greta array
-  z = normal(x, 1)
+  z <- normal(x, 1)
   m <- model(x, z)
   expect_error(mcmc(m),
                'x is a data greta array, data greta arrays cannot be sampled')
@@ -166,11 +166,11 @@ test_that('disjoint graphs are checked', {
 
   # if the target nodes aren't related, they sould be checked separately
 
-  a = uniform(0, 1)
-  b = normal(a, 2)
+  a <- uniform(0, 1)
+  b <- normal(a, 2)
 
   # c is unrelated and has no density
-  c = variable()
+  c <- variable()
 
   expect_error(m <- model(a, b, c),
                paste("the model contains 2 disjoint graphs, one or more of",
@@ -179,8 +179,8 @@ test_that('disjoint graphs are checked', {
                      "so a model cannot be defined"))
 
   # d is unrelated and known
-  d = as_data(randn(3))
-  distribution(d) = normal(0, 1)
+  d <- as_data(randn(3))
+  distribution(d) <- normal(0, 1)
   expect_error(m <- model(a, b, d),
                paste("the model contains 2 disjoint graphs, one or more of",
                      "these sub-graphs does not contain any greta arrays that",
@@ -193,7 +193,7 @@ test_that("plotting models doesn't error", {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  a = uniform(0, 1)
+  a <- uniform(0, 1)
 
   m <- model(a)
 
@@ -240,22 +240,22 @@ test_that("double precision works for all jacobians", {
 
   skip_if_not(check_tf_version())
 
-  none = normal(0, 1)
+  none <- normal(0, 1)
   expect_ok( model(none, precision = "double") )
 
-  high = normal(0, 1, truncation = c(-1, Inf))
+  high <- normal(0, 1, truncation = c(-1, Inf))
   expect_ok( model(high, precision = "double") )
 
-  low = normal(0, 1, truncation = c(-Inf, 1))
+  low <- normal(0, 1, truncation = c(-Inf, 1))
   expect_ok( model(low, precision = "double") )
 
-  both = normal(0, 1, truncation = c(-1, 1))
+  both <- normal(0, 1, truncation = c(-1, 1))
   expect_ok( model(both, precision = "double") )
 
-  correlation_matrix = lkj_correlation(1)
+  correlation_matrix <- lkj_correlation(1)
   expect_ok( model(correlation_matrix, precision = "double") )
 
-  covariance_matrix = wishart(3, diag(2))
+  covariance_matrix <- wishart(3, diag(2))
   expect_ok( model(covariance_matrix, precision = "double") )
 
 })

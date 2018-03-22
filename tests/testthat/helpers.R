@@ -46,7 +46,7 @@ set_distribution <- function(dist, data) {
 get_density <- function (distrib, data) {
 
   x <- as_data(data)
-  distribution(x) = distrib
+  distribution(x) <- distrib
 
   # create dag and define the density
   dag <- greta:::dag_class$new(list(x))
@@ -82,7 +82,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
 
   # set density
   x_ <- as_data(x)
-  distribution(x_) = dist
+  distribution(x_) <- dist
 
   # create dag
   dag <- greta:::dag_class$new(list(x_))
@@ -260,14 +260,14 @@ compare_truncated_distribution <- function (greta_fun,
   r_log_density <- log(r_fun(x))
 
   # create greta array for truncated distribution
-  dist = do.call(greta_fun, c(parameters,
-                              list(dim = 1, truncation = truncation)))
+  dist <- do.call(greta_fun, c(parameters,
+                               list(dim = 1, truncation = truncation)))
 
   distrib_node <- dist$node$distribution
 
   # set data as the target
   x_ <- as_data(x)
-  distribution(x_) = dist
+  distribution(x_) <- dist
 
   # create dag and define the density
   dag <- greta:::dag_class$new(list(x_))

@@ -88,7 +88,7 @@ test_that('as.matrix works', {
   expect_true(inherits(d_mat, 'matrix'))
 
   # variable
-  v = normal(0, 1, dim = 2)
+  v <- normal(0, 1, dim = 2)
   v_mat <- as.matrix(v)
   expect_true(inherits(v_mat, 'matrix'))
 

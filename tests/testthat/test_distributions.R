@@ -485,43 +485,43 @@ test_that('scalar-valued distributions can be defined in models', {
   p <- iprobit(normal(0, 1))
 
   # variable (need to define a likelihood)
-  a = variable()
-  distribution(x) = normal(a, 1)
+  a <- variable()
+  distribution(x) <- normal(a, 1)
   expect_ok( model(a) )
 
   # univariate discrete distributions
-  distribution(y) = bernoulli(p)
+  distribution(y) <- bernoulli(p)
   expect_ok( model(p) )
 
-  distribution(y) = binomial(1, p)
+  distribution(y) <- binomial(1, p)
   expect_ok( model(p) )
 
-  distribution(y) = beta_binomial(1, p, 0.2)
+  distribution(y) <- beta_binomial(1, p, 0.2)
   expect_ok( model(p) )
 
-  distribution(y) = negative_binomial(1, p)
+  distribution(y) <- negative_binomial(1, p)
   expect_ok( model(p) )
 
-  distribution(y) = hypergeometric(5, 5, p)
+  distribution(y) <- hypergeometric(5, 5, p)
   expect_ok( model(p) )
 
-  distribution(y) = poisson(p)
+  distribution(y) <- poisson(p)
   expect_ok( model(p))
 
   # multivariate discrete distributions
   y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = multinomial(4, p)
+  distribution(y) <- multinomial(4, p)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(1, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = categorical(p)
+  distribution(y) <- categorical(p)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) = dirichlet_multinomial(4, alpha)
+  distribution(y) <- dirichlet_multinomial(4, alpha)
   expect_ok( model(alpha) )
 
   # univariate continuous distributions
@@ -564,48 +564,48 @@ test_that('array-valued distributions can be defined in models', {
 
   # variable (need to define a likelihood)
   a <- variable(dim = dim)
-  distribution(x) = normal(a, 1)
+  distribution(x) <- normal(a, 1)
   expect_ok( model(a) )
 
   # univariate discrete distributions
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = bernoulli(p)
+  distribution(y) <- bernoulli(p)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = binomial(1, p)
+  distribution(y) <- binomial(1, p)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = beta_binomial(1, p, 0.2)
+  distribution(y) <- beta_binomial(1, p, 0.2)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = negative_binomial(1, p)
+  distribution(y) <- negative_binomial(1, p)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = hypergeometric(10, 5, p)
+  distribution(y) <- hypergeometric(10, 5, p)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = poisson(p)
+  distribution(y) <- poisson(p)
   expect_ok( model(p) )
 
   # multivariate discrete distributions
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = multinomial(4, p, dim = 5)
+  distribution(y) <- multinomial(4, p, dim = 5)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = categorical(p, dim = 5)
+  distribution(y) <- categorical(p, dim = 5)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) = dirichlet_multinomial(4, alpha, dim = 5)
+  distribution(y) <- dirichlet_multinomial(4, alpha, dim = 5)
   expect_ok( model(alpha) )
 
   # univariate continuous distributions
@@ -645,60 +645,60 @@ test_that('distributions can be sampled from', {
 
   # variable (with a density)
   a <- variable()
-  distribution(x) = normal(a, 1)
+  distribution(x) <- normal(a, 1)
   sample_distribution(a)
 
   b <- variable(lower = -1)
-  distribution(x) = normal(b, 1)
+  distribution(x) <- normal(b, 1)
   sample_distribution(b)
 
   c <- variable(upper = -2)
-  distribution(x) = normal(c, 1)
+  distribution(x) <- normal(c, 1)
   sample_distribution(c)
 
   d <- variable(lower = 1.2, upper = 1.3)
-  distribution(x) = normal(d, 1)
+  distribution(x) <- normal(d, 1)
   sample_distribution(d)
 
   # univariate discrete
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = bernoulli(p)
+  distribution(y) <- bernoulli(p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = binomial(1, p)
+  distribution(y) <- binomial(1, p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = negative_binomial(1, p)
+  distribution(y) <- negative_binomial(1, p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = hypergeometric(10, 5, p)
+  distribution(y) <- hypergeometric(10, 5, p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = poisson(p)
+  distribution(y) <- poisson(p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = beta_binomial(1, p, 0.3)
+  distribution(y) <- beta_binomial(1, p, 0.3)
   sample_distribution(p)
 
   # multivariate discrete
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = multinomial(4, p, dim = 5)
+  distribution(y) <- multinomial(4, p, dim = 5)
   sample_distribution(p)
 
   y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = categorical(p, dim = 5)
+  distribution(y) <- categorical(p, dim = 5)
   sample_distribution(p)
 
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) = dirichlet_multinomial(4, alpha, dim = 5)
+  distribution(y) <- dirichlet_multinomial(4, alpha, dim = 5)
   sample_distribution(alpha)
 
   # univariate continuous

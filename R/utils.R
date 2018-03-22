@@ -96,6 +96,8 @@ fl <- function (x)
   tf$constant(x, dtype = tf_float())
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape arguments
+#' @noRd
+#' @importFrom tensorflow shape
 to_shape <- function (dim)
   do.call(shape, as.list(dim))
 

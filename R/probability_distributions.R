@@ -376,15 +376,15 @@ weibull_distribution <- R6Class (
       a <- parameters$shape
       b <- parameters$scale
 
-      log_prob = function (x) {
+      log_prob <- function (x) {
         log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
       }
 
-      cdf = function (x) {
+      cdf <- function (x) {
         fl(1) - exp(-(x / b) ^ a)
       }
 
-      log_cdf = function (x) {
+      log_cdf <- function (x) {
         log(cdf(x))
       }
 
@@ -537,13 +537,13 @@ cauchy_distribution <- R6Class (
       loc <- parameters$location
       s <- parameters$scale
 
-      log_prob = function (x)
+      log_prob <- function (x)
         tf$negative(tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s))))
 
-      cdf = function (x)
+      cdf <- function (x)
         fl(1 / pi)  * tf$atan((x - loc) / s) + fl(0.5)
 
-      log_cdf = function (x)
+      log_cdf <- function (x)
         tf$log(cdf(x))
 
       list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
@@ -623,7 +623,7 @@ f_distribution <- R6Class (
       tf_lbeta <- function(a, b)
         tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
 
-      log_prob = function (x) {
+      log_prob <- function (x) {
         df1_x <- df1 * x
         la <- df1 * log(df1_x) + df2 * log(df2)
         lb <- (df1 + df2) * log(df1_x + df2)
@@ -631,13 +631,13 @@ f_distribution <- R6Class (
         lnumerator - log(x) - tf_lbeta(df1 / fl(2), df2 / fl(2))
       }
 
-      cdf = function (x) {
+      cdf <- function (x) {
         df1_x <- df1 * x
         ratio <- df1_x / (df1_x + df2)
         tf$betainc(df1 / fl(2), df2 / fl(2), ratio)
       }
 
-      log_cdf = function(x)
+      log_cdf <- function(x)
         log(cdf(x))
 
       list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
@@ -1026,7 +1026,7 @@ multivariate_normal_distribution <- R6Class (
       else
         L <- tf$transpose(parameters$Sigma)
 
-      mu = tf$transpose(parameters$mean)
+      mu <- tf$transpose(parameters$mean)
       tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
                                                       scale_tril = L)
     },
@@ -1077,7 +1077,7 @@ wishart_distribution <- R6Class (
       k <- self$dim[1]
       free_greta_array <- vble(truncation = c(-Inf, Inf),
                                dim = k + k * (k - 1) / 2)
-      free_greta_array$constraint = "covariance_matrix"
+      free_greta_array$constraint <- "covariance_matrix"
 
       # first create a greta array for the cholesky
       chol_greta_array <- flat_to_chol(free_greta_array, self$dim)
@@ -1179,7 +1179,7 @@ lkj_correlation_distribution <- R6Class (
       k <- self$dim[1]
       free_greta_array <- vble(truncation = c(-Inf, Inf),
                                dim = k * (k - 1) / 2)
-      free_greta_array$constraint = "correlation_matrix"
+      free_greta_array$constraint <- "correlation_matrix"
 
       # first create a greta array for the cholesky
       chol_greta_array <- flat_to_chol(free_greta_array,
@@ -1217,7 +1217,7 @@ lkj_correlation_distribution <- R6Class (
       # if the cholesky factor exists, we'll be using that
       is_cholesky <- !is.null(self$target$representations$cholesky_factor)
 
-      log_prob = function (x) {
+      log_prob <- function (x) {
 
         if (!is_cholesky)
           x <- tf$cholesky(x)

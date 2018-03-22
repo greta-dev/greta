@@ -288,7 +288,7 @@ test_that('stochastic and operation greta arrays can be extracted', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  a = normal(0, 1, dim = c(3, 4))
+  a <- normal(0, 1, dim = c(3, 4))
   a_sub <- a[1:2, 2:3]
   expect_identical(dim(a_sub), c(2L, 2L))
 
@@ -304,7 +304,7 @@ test_that('extract, replace, combine work in models', {
   source('helpers.R')
 
   # extract
-  a = normal(0, 1, dim = c(3, 4))
+  a <- normal(0, 1, dim = c(3, 4))
   a_sub <- a[1:2, 2:3]
   m_a <- model(a_sub)
   expect_ok( draws_a <- mcmc(m_a, warmup = 3, n_samples = 3, verbose = FALSE) )
@@ -419,7 +419,7 @@ test_that('dim<- works in a model', {
 
   z <- x1[6, ] * x2[7, ] * x3[5, 2]
 
-  distribution(y) = normal(z, lognormal(0, 1))
+  distribution(y) <- normal(z, lognormal(0, 1))
 
   expect_ok(m <- model(z))
   expect_ok(mcmc(m, warmup = 0, n_samples = 2))

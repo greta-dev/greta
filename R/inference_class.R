@@ -173,8 +173,8 @@ sampler <- R6Class(
 
       self$print_chain_number()
 
-      self$traced_free_state = matrix(NA, 0, self$n_free)
-      self$traced_values = matrix(NA, 0, self$n_traced)
+      self$traced_free_state <- matrix(NA, 0, self$n_free)
+      self$traced_values <- matrix(NA, 0, self$n_traced)
 
       # if warmup is required, do that now
       if (warmup > 0) {
@@ -211,7 +211,7 @@ sampler <- R6Class(
       }
 
       # scrub the free state trace
-      self$traced_free_state = matrix(NA, 0, self$n_free)
+      self$traced_free_state <- matrix(NA, 0, self$n_free)
 
       # main sampling
       if (verbose) {
@@ -416,7 +416,7 @@ hmc_sampler <- R6Class(
     tune_epsilon = function (iterations_completed, total_iterations) {
 
       # tuning periods for the tunable parameters (first 10%, last 60%)
-      tuning_periods = list(c(0, 0.1), c(0.4, 1))
+      tuning_periods <- list(c(0, 0.1), c(0.4, 1))
 
       # whether we're tuning now
       tuning_now <- self$in_periods(tuning_periods,
@@ -474,7 +474,7 @@ hmc_sampler <- R6Class(
 
       # when, during warmup, to tune this parameter (after epsilon, but stopping
       # before halfway through)
-      tuning_periods = list(c(0.1, 0.4))
+      tuning_periods <- list(c(0.1, 0.4))
 
       tuning_now <- self$in_periods(tuning_periods,
                                     iterations_completed,
