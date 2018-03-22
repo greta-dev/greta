@@ -265,8 +265,8 @@ solve.greta_array <- function (a, b, ...) {
 
       # b must have the right number of rows
       if (dim(b)[1] != dim(a)[1]) {
-        stop (sprintf("'b' must have the same number of rows as 'a' (%i), ",
-                      "but has %i rows instead",
+        stop (sprintf(paste("'b' must have the same number of rows as 'a'",
+                            "(%i), but has %i rows instead"),
                       dim(a)[1], dim(b)[1]))
       }
 
