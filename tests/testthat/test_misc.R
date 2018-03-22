@@ -143,7 +143,7 @@ test_that('check_dims errors informatively', {
   # but not when target_dim is set
   expect_error(greta:::check_dims(a, b, target_dim = dim1),
                paste("array dimensions should be 3x3, but input dimensions",
-                     "were 3x3, 1x1")
+                     "were 3x3, 1x1"))
 
   # with both scalar, it should always should work
   expect_equal(greta:::check_dims(b, b),
