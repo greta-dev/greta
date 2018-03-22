@@ -39,8 +39,12 @@ create_progress_bar <- function (phase, iter, pb_update, ...) {
   # add the increment information and return
   pb_update <- round(pb_update)
 
-  if (!is.numeric(pb_update) || length(pb_update) != 1 || !is.finite(pb_update) || pb_update <= 0)
+  if (!is.numeric(pb_update) ||
+      length(pb_update) != 1 ||
+      !is.finite(pb_update) ||
+      pb_update <= 0) {
     stop ("pb_update must be a finite, positive, scalar integer")
+  }
 
   assign("pb_update", pb_update, envir = pb$.__enclos_env__)
 

@@ -66,8 +66,9 @@ uniform_distribution <- R6Class (
       tf_ld <- fl(self$log_density)
 
       # weird hack to make TF see a gradient here
-      log_prob = function (x)
+      log_prob <- function (x) {
         tf_ld + x * fl(0)
+      }
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
@@ -117,18 +118,18 @@ lognormal_distribution <- R6Class (
       sd <- parameters$sdlog
       var <- tf$square(sd)
 
-      log_prob = function (x) {
+      log_prob <- function (x) {
         lx <- tf$log(x)
         fl(-1) * (lx + tf$log(sd) + fl(0.9189385)) +
           fl(-0.5) * tf$square(tf$subtract(lx, mean)) / var
       }
 
-      cdf = function (x) {
+      cdf <- function (x) {
         lx <- tf$log(x)
         fl(0.5) + fl(0.5) * tf$erf((lx - mean) / (fl(sqrt(2)) * sd))
       }
 
-      log_cdf = function (x) {
+      log_cdf <- function (x) {
         log(cdf(x))
       }
 
@@ -660,7 +661,8 @@ dirichlet_distribution <- R6Class (
       if (ncol(alpha) != 1 |
           length(dim(alpha)) != 2) {
 
-        stop ('alpha must be a 2D greta array with one column, but has dimensions ',
+        stop ("alpha must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(alpha), collapse = ' x '),
               call. = FALSE)
 
@@ -688,7 +690,9 @@ dirichlet_distribution <- R6Class (
       # coerce the parameter arguments to nodes and add as children and
       # parameters
       self$bounds <- c(0, Inf)
-      super$initialize('dirichlet', c(dim, length(alpha)), truncation = c(0, Inf))
+      super$initialize('dirichlet',
+                       c(dim, length(alpha)),
+                       truncation = c(0, Inf))
       self$add_parameter(alpha, 'alpha')
 
     },
@@ -730,7 +734,8 @@ dirichlet_multinomial_distribution <- R6Class (
       if (ncol(alpha) != 1 |
           length(dim(alpha)) != 2) {
 
-        stop ('alpha must be a 2D greta array with one column, but has dimensions ',
+        stop ("alpha must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(alpha), collapse = ' x '),
               call. = FALSE)
 
@@ -757,7 +762,9 @@ dirichlet_multinomial_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('dirichlet_multinomial', dim = c(dim, length(alpha)), discrete = TRUE)
+      super$initialize("dirichlet_multinomial",
+                       dim = c(dim, length(alpha)),
+                       discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(alpha, 'alpha')
 
@@ -766,8 +773,9 @@ dirichlet_multinomial_distribution <- R6Class (
     tf_distrib = function (parameters) {
       # transpose and scale probs to get absolute density correct
       alpha <- tf$transpose(parameters$alpha)
-      tf$contrib$distributions$DirichletMultinomial(total_count = parameters$size,
-                                                    concentration = alpha)
+      distrib <- tf$contrib$distributions$DirichletMultinomial
+      distrib(total_count = parameters$size,
+              concentration = alpha)
     },
 
     # no CDF for multivariate distributions
@@ -800,7 +808,8 @@ multinomial_distribution <- R6Class (
       if (ncol(prob) != 1 |
           length(dim(prob)) != 2) {
 
-        stop ('prob must be a 2D greta array with one column, but has dimensions ',
+        stop ("prob must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(prob), collapse = ' x '),
               call. = FALSE)
 
@@ -827,7 +836,9 @@ multinomial_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('multinomial', dim = c(dim, length(prob)), discrete = TRUE)
+      super$initialize("multinomial",
+                       dim = c(dim, length(prob)),
+                       discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(prob, 'prob')
 
@@ -862,7 +873,8 @@ categorical_distribution <- R6Class (
       if (ncol(prob) != 1 |
           length(dim(prob)) != 2) {
 
-        stop ('prob must be a 2D greta array with one column, but has dimensions ',
+        stop ("prob must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(prob), collapse = ' x '),
               call. = FALSE)
 
@@ -889,7 +901,9 @@ categorical_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('categorical', dim = c(dim, length(prob)), discrete = TRUE)
+      super$initialize("categorical",
+                       dim = c(dim, length(prob)),
+                       discrete = TRUE)
       self$add_parameter(prob, 'prob')
 
     },
@@ -924,7 +938,8 @@ multivariate_normal_distribution <- R6Class (
       if (ncol(mean) != 1 |
           length(dim(mean)) != 2) {
 
-        stop ('mean must be a 2D greta array with one column, but has dimensions ',
+        stop ("mean must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(mean), collapse = ' x '),
               call. = FALSE)
 
@@ -934,7 +949,8 @@ multivariate_normal_distribution <- R6Class (
       if (nrow(Sigma) != ncol(Sigma) |
           length(dim(Sigma)) != 2) {
 
-        stop ('Sigma must be a square 2D greta array, but has dimensions ',
+        stop ("Sigma must be a square 2D greta array, ",
+              "but has dimensions ",
               paste(dim(Sigma), collapse = ' x '),
               call. = FALSE)
 
@@ -1081,7 +1097,8 @@ wishart_distribution <- R6Class (
     tf_distrib = function (parameters) {
 
       # if there is a cholesky factor for Sigma,use that
-      is_cholesky <- !is.null(self$parameters$Sigma$representations$cholesky_factor)
+      cf <- self$parameters$Sigma$representations$cholesky_factor
+      is_cholesky <- !is.null(cf)
 
       if (is_cholesky) {
 
@@ -1165,7 +1182,9 @@ lkj_correlation_distribution <- R6Class (
       free_greta_array$constraint = "correlation_matrix"
 
       # first create a greta array for the cholesky
-      chol_greta_array <- flat_to_chol(free_greta_array, self$dim, correl = TRUE)
+      chol_greta_array <- flat_to_chol(free_greta_array,
+                                       self$dim,
+                                       correl = TRUE)
 
       # create symmetric matrix to return as target node
       matrix_greta_array <- chol_to_symmetric(chol_greta_array)

@@ -117,7 +117,8 @@ test_that('mcmc works with multiple chains', {
   quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2) ))
 
   # multiple chains, user-specified initial values
-  quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = list(1, 2)) ))
+  quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2,
+                          initial_values = list(1, 2)) ))
 
 })
 
@@ -143,7 +144,8 @@ test_that('mcmc handles initial values nicely', {
 
   quietly(expect_message(mcmc(m, warmup = 10, n_samples = 10,
                       chains = 2, initial_values = 1),
-                 "only one set of was initial values given, and was used for all chains"))
+                 paste("only one set of was initial values given,",
+                       "and was used for all chains")))
 
 })
 
