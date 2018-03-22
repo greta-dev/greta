@@ -52,10 +52,10 @@ operation_node <- R6Class(
       self$operation <- tf_operation
       self$operation_args <- operation_args
 
-      # work out the dimensions of the new greta array, if NULL assume an elementwise
-      # operation and get the largest number of each dimension, otherwise expect
-      # a function to be passed which will calculate it from the provided list
-      # of nodes arguments
+      # work out the dimensions of the new greta array, if NULL assume an
+      # elementwise operation and get the largest number of each dimension,
+      # otherwise expect a function to be passed which will calculate it from
+      # the provided list of nodes arguments
       if (is.null(dimfun))
         dim <- do.call(pmax, lapply(dots, dim))
       else
@@ -308,7 +308,10 @@ distribution_node <- R6Class (
     truncation = NULL,
     parameters = list(),
 
-    initialize = function (name = 'no distribution', dim = NULL, truncation = NULL, discrete = FALSE) {
+    initialize = function (name = "no distribution",
+                           dim = NULL,
+                           truncation = NULL,
+                           discrete = FALSE) {
 
       super$initialize(dim)
 
@@ -319,7 +322,8 @@ distribution_node <- R6Class (
       # initialize the target values of this distribution
       self$add_target(self$create_target(truncation))
 
-      # if there's a truncation, it's different from the bounds, and it's a truncatable distribution, set the truncation
+      # if there's a truncation, it's different from the bounds, and it's a
+      # truncatable distribution, set the truncation
       if (!is.null(truncation) &
           !identical(truncation, self$bounds) &
           !is.null(self$tf_cdf_function)) {

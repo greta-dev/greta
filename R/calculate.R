@@ -185,7 +185,8 @@ calculate_list <- function(target, values) {
   # find all the nodes depended on by this one
   dependencies <- target$node$child_names(recursive = TRUE)
 
-  # find all the nodes depended on by the new values, and remove them from the list
+  # find all the nodes depended on by the new values, and remove them from the
+  # list
   complete_dependencies <- lapply(fixed_greta_arrays,
                                   function (x)
                                     x$node$child_names(recursive = TRUE))

@@ -278,7 +278,8 @@ test_that('replacement gives informative error messages', {
 
   x <- as_data(randn(2, 2, 2))
   expect_error(x[1:2, , 1] <- seq_len(3),
-               'number of items to replace is not a multiple of replacement length')
+               paste("number of items to replace is not a multiple",
+                     "of replacement length"))
 
 })
 
@@ -395,7 +396,8 @@ test_that('dim<- errors as expected', {
                "the dims contain negative values")
 
   expect_error(dim(x) <- 13,
-               "dims \\[product 13\\] do not match the length of object \\[12\\]")
+               paste("dims \\[product 13\\] do not match the length of",
+                     "object \\[12\\]"))
 
 })
 

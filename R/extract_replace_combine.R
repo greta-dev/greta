@@ -472,11 +472,14 @@ diag.greta_array <- function (x = 1, nrow, ncol) {
     dim <- dim(x)
 
     # check the rank isn't too high
-    if (length(dim) != 2)
-      stop ('cannot only extract the diagonal from a node with exactly two dimensions')
+    if (length(dim) != 2) {
+      stop ("cannot only extract the diagonal from a node ",
+            "with exactly two dimensions")
+    }
 
-    if (dim[1] != dim[2])
+    if (dim[1] != dim[2]) {
       stop ('diagonal elements can only be extracted from square matrices')
+    }
 
     # return the dimensions
     c(dim[1], 1)

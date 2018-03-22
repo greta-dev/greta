@@ -265,7 +265,8 @@ solve.greta_array <- function (a, b, ...) {
 
       # b must have the right number of rows
       if (dim(b)[1] != dim(a)[1]) {
-        stop (sprintf("'b' must have the same number of rows as 'a' (%i), but has %i rows instead",
+        stop (sprintf("'b' must have the same number of rows as 'a' (%i), ",
+                      "but has %i rows instead",
                       dim(a)[1], dim(b)[1]))
       }
 
@@ -510,7 +511,11 @@ sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
 sweep.default <- base::sweep
 
 #' @export
-sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), check.margin = TRUE, ...) {
+sweep.greta_array <- function (x,
+                               MARGIN,
+                               STATS,
+                               FUN = c('-', '+', '/', '*'),
+                               check.margin = TRUE, ...) {
 
   # only allow these four functions
   FUN <- match.arg(FUN)
@@ -533,7 +538,8 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
 
     # STATS must be a column array
     if (!(length(dim(STATS)) == 2 && dim(STATS)[2] == 1)) {
-      stop (sprintf('STATS must be a column vector array, but has dimensions %s',
+      stop (sprintf(paste("STATS must be a column vector array,",
+                          "but has dimensions %s"),
                     paste(dim(STATS), collapse = ' x ')))
     }
 
