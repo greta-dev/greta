@@ -6,8 +6,8 @@ test_that('opt converges', {
   source('helpers.R')
 
   x <- rnorm(5, 2, 0.1)
-  z = variable(dim = 5)
-  distribution(x) = normal(z, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
   o <- opt(m)
@@ -30,8 +30,8 @@ test_that('opt accepts initial values', {
   source('helpers.R')
 
   x <- rnorm(5, 2, 0.1)
-  z = variable(dim = 5)
-  distribution(x) = normal(z, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
   o <- opt(m, initial_values = rnorm(5))
@@ -54,8 +54,8 @@ test_that('bad mcmc proposals are rejected', {
 
   # set up for numerical rejection of initial location
   x <- rnorm(10000, 1e6, 1)
-  z = normal(-1e6, 1e-6)
-  distribution(x) = normal(z, 1e6)
+  z <- normal(-1e6, 1e-6)
+  distribution(x) <- normal(z, 1e6)
   m <- model(z)
 
   with_mock(
@@ -71,14 +71,14 @@ test_that('bad mcmc proposals are rejected', {
 
   # really bad proposals
   x <- rnorm(100000, 1e12, 1)
-  z = normal(-1e12, 1e-12)
-  distribution(x) = normal(z, 1e-12)
+  z <- normal(-1e12, 1e-12)
+  distribution(x) <- normal(z, 1e-12)
   m <- model(z)
   expect_error(mcmc(m, n_samples = 1, warmup = 0),
                'Could not find reasonable starting values after 20 attempts')
 
   # proposals that are fine, but rejected anyway
-  z = normal(0, 1)
+  z <- normal(0, 1)
   m <- model(z)
   expect_ok(mcmc(m,
                  hmc(epsilon = 100,
@@ -96,8 +96,8 @@ test_that('mcmc works with verbosity and warmup', {
   source('helpers.R')
 
   x <- rnorm(10)
-  z = normal(0, 1)
-  distribution(x) = normal(z, 1)
+  z <- normal(0, 1)
+  distribution(x) <- normal(z, 1)
   m <- model(z)
   quietly(expect_ok( mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE) ))
 
@@ -109,8 +109,8 @@ test_that('mcmc works with multiple chains', {
   source('helpers.R')
 
   x <- rnorm(10)
-  z = normal(0, 1)
-  distribution(x) = normal(z, 1)
+  z <- normal(0, 1)
+  distribution(x) <- normal(z, 1)
   m <- model(z)
 
   # multiple chains, automatic initial values
@@ -128,8 +128,8 @@ test_that('mcmc handles initial values nicely', {
   source('helpers.R')
 
   x <- rnorm(10)
-  z = normal(0, 1)
-  distribution(x) = normal(z, 1)
+  z <- normal(0, 1)
+  distribution(x) <- normal(z, 1)
   m <- model(z)
 
   # too many sets of initial values

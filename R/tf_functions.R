@@ -23,7 +23,7 @@ tf_lbeta <- function (a, b)
 # given a flat tensor, convert it into a square symmetric matrix by considering
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
-tf_flat_to_chol = function (x, dims) {
+tf_flat_to_chol <- function (x, dims) {
 
   # indices to the cholesky factor
   L_dummy <- dummy(dims)
@@ -45,7 +45,7 @@ tf_flat_to_chol = function (x, dims) {
 }
 
 # convert an unconstrained vector into symmetric correlation matrix
-tf_flat_to_chol_correl = function (x, dims) {
+tf_flat_to_chol_correl <- function (x, dims) {
 
   # to -1, 1 scale
   y <- tf$tanh(x)
