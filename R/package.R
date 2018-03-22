@@ -18,8 +18,9 @@
 #'   \href{https://greta-dev.github.io/greta/example_models.html}{examples}.
 #'
 #' @docType package
-#' @import tensorflow
-#' @import R6
+#' @importFrom tensorflow tf
+#' @importFrom reticulate py_module_available
+#' @importFrom R6 R6Class
 #' @importFrom grDevices colorRampPalette
 #' @examples
 #' \dontrun{
