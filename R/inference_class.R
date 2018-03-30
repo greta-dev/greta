@@ -299,8 +299,12 @@ hmc_sampler <- R6Class(
     accept_trace = NULL,
     sum_epsilon_trace = NULL,
 
-    # run the sampler for n_samples (possibly thinning)
     run_burst = function (n_samples, thin) {
+      self$r_run_burst(n_samples, thin)
+    },
+
+    # run the sampler for n_samples (possibly thinning)
+    r_run_burst = function (n_samples, thin) {
 
       self$last_burst_free_states <- matrix(NA, n_samples, self$n_free)
 
