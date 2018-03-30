@@ -88,7 +88,18 @@ inference <- R6Class(
     # check whether the model can be evaluated at these parameters
     valid_parameters = function (parameters) {
 
-      self$model$dag$send_parameters(parameters)
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      if (!exists("joint_density_adj", envir = tfe)) {
+        dag$on_graph(dag$define_joint_density())
+      }
+
+      if (!exists("gradients_adj", envir = tfe)) {
+        dag$on_graph(dag$define_gradients())
+      }
+
+      dag$send_parameters(parameters)
       ld <- self$model$dag$log_density()
       grad <- self$model$dag$gradients()
       all(is.finite(c(ld, grad)))
@@ -298,9 +309,105 @@ hmc_sampler <- R6Class(
     # tuning information for these variables
     accept_trace = NULL,
     sum_epsilon_trace = NULL,
+    last_burst_length = 100L,
+
+    initialize = function (initial_values, model, parameters = list()) {
+
+      # initialize the inference method
+      super$initialize(initial_values = initial_values,
+                       model = model,
+                       parameters = parameters)
+
+      # define the draws tensor on the tf graph
+      self$define_tf_hmc_draws(self$last_burst_length,
+                               define_variables = TRUE)
+
+    },
+
+    define_tf_hmc_draws = function (burst_length, define_variables = FALSE) {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      if (define_variables) {
+        # define tensors for the parameters
+        dag$tf_run(hmc_epsilon <- tf$placeholder(dtype = tf_float(),
+                                                 shape = list()))
+        dag$tf_run(hmc_L <- tf$placeholder(dtype = tf$int32,
+                                           shape = list()))
+
+        # and the sampler info
+        dag$tf_run(hmc_thin <- tf$placeholder(dtype = tf$int32,
+                                              shape = list()))
+        tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
+      }
+
+      # change the burst length
+      tfe$hmc_burst_length <- as.integer(burst_length)
+
+      # define the whole draws tensor
+      dag$tf_run(
+        hmc_all_draws <- tf$contrib$bayesflow$hmc$chain(
+          n_iterations = hmc_burst_length,
+          step_size = hmc_epsilon,
+          n_leapfrog_steps = hmc_L,
+          initial_x = tf$reshape(free_state, list(length(free_state))),
+          target_log_prob_fn = log_prob_fun,
+          event_dims = 0L)[[1]]
+      )
+
+      # define the thinned draws tensor
+      dag$tf_run(
+        hmc_thinned_draws <- tf$strided_slice(hmc_all_draws,
+                                              c(0L, 0L),
+                                              tf$constant(c(hmc_burst_length,
+                                                            ncol(hmc_all_draws))),
+                                              tf$stack(list(hmc_thin, 1L)))
+      )
+    },
 
     run_burst = function (n_samples, thin) {
-      self$r_run_burst(n_samples, thin)
+      self$tf_run_burst(n_samples, thin)
+    },
+
+    # run a burst with tensorflow HMC
+    tf_run_burst = function (n_samples, thin) {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      # get parameters
+      Lmin <- self$parameters$Lmin
+      Lmax <- self$parameters$Lmax
+      L <- sample(seq(Lmin, Lmax), 1)
+      epsilon <- self$parameters$epsilon
+
+      # set up dict
+      tfe$hmc_values <- list(free_state = as.matrix(self$free_state),
+                             hmc_L = L,
+                             hmc_epsilon = epsilon,
+                             hmc_thin = thin)
+      dag$tf_run(hmc_dict <- do.call(dict, hmc_values))
+
+      # if the required burst length has changed, redefine the draws
+      if (n_samples != self$last_burst_length) {
+        self$define_tf_hmc_draws(n_samples)
+        self$last_burst_length <- n_samples
+      }
+
+      # run sampler
+      free_state_draws <- dag$tf_run(sess$run(hmc_thinned_draws,
+                                              feed_dict = hmc_dict))
+
+      # get required variables
+      self$last_burst_free_states <- free_state_draws
+      n_draws <- nrow(free_state_draws)
+      self$free_state <- free_state_draws[n_draws, ]
+
+      # was each sample an acceptance or a rejection?
+      accept_trace <- as.numeric(diff(free_state_draws[, 1]) != 0)
+      self$accept_trace <- c(self$accept_trace, accept_trace)
+
     },
 
     # run the sampler for n_samples (possibly thinning)
