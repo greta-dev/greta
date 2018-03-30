@@ -329,9 +329,13 @@ dag_class <- R6Class(
                         "joint_density")
 
       function (free_state) {
+        old_env <- self$tf_environment
+        on.exit(self$tf_environment <- old_env)
+        tfe <- self$tf_environment <- new.env()
+        tfe$free_state <- free_state
         self$define_tf_body()
         self$define_joint_density()
-        self$tf_environment[[target]]
+        tfe[[target]]
       }
 
     },
