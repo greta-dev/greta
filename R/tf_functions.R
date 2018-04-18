@@ -153,6 +153,28 @@ tf_rowsums <- function(x, dims) {
 
 }
 
+#se the tensorflow function as the backend to a greta op, s
+tf_kronecker <- function(X, Y, FUN) {
+  
+  ## DOESN'T WORK CORRECTLY
+  
+  dims <- c(dim(X), dim(Y))
+
+  tensor_tmp <- vector("list", length = (dims[1] * dims[2]))
+  for (i in seq_len(dims[1])) {
+    for (j in seq_len(dims[2])) {
+      tensor_tmp[[(i - 1) * dims[1] + j]] <- X[i, j] * Y
+    }
+  }
+  tensor_out <- vector("list", length = (dims[2]))
+  for (i in seq_len(dims[2])) {
+    tensor_out[[i]] <- do.call("rbind", tensor_tmp[((i - 1) * dims[2] + 1):(i * dims[2])])
+  }
+  tensor_out <- do.call("cbind", tensor_out)
+  
+  tensor_out
+
+}
 
 # tensorflow version of sweep, based on broadcasting of tf ops
 tf_sweep <- function (x, STATS, MARGIN, FUN) {
@@ -315,6 +337,7 @@ tf_functions_module <- module(tf_as_logical,
                               tf_flat_to_chol,
                               tf_flat_to_chol_correl,
                               tf_chol_to_symmetric,
+                              tf_kronecker,
                               tf_sweep,
                               tf_not,
                               tf_and,

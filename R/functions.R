@@ -567,6 +567,44 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
 
 }
 
+#' @export
+kronecker2 <- function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
+  
+  # only allow these four functions
+  FUN <- match.arg(FUN)
+  
+  dimfun <- function (elem_list) {
+    
+    x <- elem_list[[1]]
+    y <- elem_list[[2]]
+    
+    # x must be 2D
+    if (length(dim(x)) != 2) {
+      stop (sprintf('x must be a 2D array, but has %i dimensions',
+                    length(dim(x))))
+    }
+    
+    # y must be 2D
+    if (length(dim(y)) != 2) {
+      stop (sprintf('y must be a 2D array, but has %i dimensions',
+                    length(dim(y))))
+    }
+
+    # return the dimensions of x
+    dim1 <- dim(x)
+    dim2 <- dim(y)
+    dim1 * dim2
+    
+  }
+  
+  op("kronecker2",
+     X, Y,
+     operation_args = list(FUN = FUN),
+     tf_operation = tf_kronecker,
+     dimfun = dimfun)
+  
+}
+
 #' @rdname overloaded
 #' @export
 backsolve <- function (r, x, k = ncol(r),
