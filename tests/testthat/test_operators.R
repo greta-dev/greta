@@ -87,12 +87,19 @@ test_that('random strings of operators work as expected', {
 
 })
 
-test_that('%*% errors informatively', {
+test_that("%*% errors informatively", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
 
   a <- ones(3, 4)
   b <- ones(1, 4)
+  c <- ones(2, 2, 2)
 
   expect_error(a %*% b,
-               'incompatible dimensions: 3x4 vs 1x4')
+               "incompatible dimensions: 3x4 vs 1x4")
+
+  expect_error(a %*% c,
+               "only two-dimensional greta arrays can be matrix-multiplied")
 
 })

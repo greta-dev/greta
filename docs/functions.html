@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -407,24 +409,34 @@ Any additional arguments to <code>chol()</code> and <code>solve()</code> will be
  prod(..., na.rm = TRUE)
  min(..., na.rm = TRUE)
  max(..., na.rm = TRUE)
+# cumulative operations
+ cumsum(x)
+ cumprod(x)
 # miscellaneous operations
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+# solve an upper or lower triangular system
+ backsolve(r, x, k = ncol(r), upper.tri = TRUE,
+           transpose = FALSE)
+ forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
+              transpose = FALSE)
 </pre>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
-<pre class="r"><span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>9</span>, <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>3</span>))
-<span class='no'>a</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='fu'>exp</span>(<span class='no'>x</span>))
-<span class='no'>b</span> <span class='kw'>=</span> <span class='fu'>log1p</span>(<span class='fu'>expm1</span>(<span class='no'>x</span>))
-<span class='no'>c</span> <span class='kw'>=</span> <span class='fu'>sign</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
-<span class='no'>d</span> <span class='kw'>=</span> <span class='fu'>abs</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
+<pre class="r">
 
-<span class='no'>e</span> <span class='kw'>=</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>9</span>, <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>3</span>))
+<span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'>log</span>(<span class='fu'>exp</span>(<span class='no'>x</span>))
+<span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='fu'>log1p</span>(<span class='fu'>expm1</span>(<span class='no'>x</span>))
+<span class='no'>c</span> <span class='kw'>&lt;-</span> <span class='fu'>sign</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
+<span class='no'>d</span> <span class='kw'>&lt;-</span> <span class='fu'>abs</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
+
+<span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
 <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
 
-<span class='no'>z</span> <span class='kw'>=</span> <span class='fu'>t</span>(<span class='no'>a</span>)
+<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>t</span>(<span class='no'>a</span>)
 
-<span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='overloaded.html'>sweep</a></span>(<span class='no'>x</span>, <span class='fl'>1</span>, <span class='no'>e</span>, <span class='st'>'-'</span>)</pre>
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>sweep</a></span>(<span class='no'>x</span>, <span class='fl'>1</span>, <span class='no'>e</span>, <span class='st'>'-'</span>)</pre>
 
 
 

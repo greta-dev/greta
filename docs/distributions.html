@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -467,6 +469,8 @@ Wherever possible, the parameterisation and argument names of greta distribution
 <td>
 greta
 </td>
+</tr>
+<tr>
 <td>
 reference
 </td>
@@ -475,6 +479,8 @@ reference
 <td>
 <code>uniform</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Uniform'>stats::dunif</a>
 </td>
@@ -483,6 +489,8 @@ reference
 <td>
 <code>normal</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Normal'>stats::dnorm</a>
 </td>
@@ -491,6 +499,8 @@ reference
 <td>
 <code>lognormal</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Lognormal'>stats::dlnorm</a>
 </td>
@@ -499,6 +509,8 @@ reference
 <td>
 <code>bernoulli</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/extraDistr/topics/Bernoulli'>extraDistr::dbern</a>
 </td>
@@ -507,6 +519,8 @@ reference
 <td>
 <code>binomial</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Binomial'>stats::dbinom</a>
 </td>
@@ -515,6 +529,8 @@ reference
 <td>
 <code>beta_binomial</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/extraDistr/topics/BetaBinom'>extraDistr::dbbinom</a>
 </td>
@@ -523,6 +539,8 @@ reference
 <td>
 <code>negative_binomial</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/NegBinomial'>stats::dnbinom</a>
 </td>
@@ -531,6 +549,8 @@ reference
 <td>
 <code>hypergeometric</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Hypergeometric'>stats::dhyper</a>
 </td>
@@ -539,6 +559,8 @@ reference
 <td>
 <code>poisson</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Poisson'>stats::dpois</a>
 </td>
@@ -547,6 +569,8 @@ reference
 <td>
 <code>gamma</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/GammaDist'>stats::dgamma</a>
 </td>
@@ -555,6 +579,8 @@ reference
 <td>
 <code>inverse_gamma</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/extraDistr/topics/InvGamma'>extraDistr::dinvgamma</a>
 </td>
@@ -563,6 +589,8 @@ reference
 <td>
 <code>weibull</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Weibull'>stats::dweibull</a>
 </td>
@@ -571,6 +599,8 @@ reference
 <td>
 <code>exponential</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Exponential'>stats::dexp</a>
 </td>
@@ -579,6 +609,8 @@ reference
 <td>
 <code>pareto</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/extraDistr/topics/Pareto'>extraDistr::dpareto</a>
 </td>
@@ -587,14 +619,18 @@ reference
 <td>
 <code>student</code>
 </td>
+</tr>
+<tr>
 <td>
-<a href='http://www.rdocumentation.org/packages/extraDistr/topics/NonStandardT'>extraDistr::dnst</a>
+<a href='http://www.rdocumentation.org/packages/extraDistr/topics/LocationScaleT'>extraDistr::dlst</a>
 </td>
 </tr>
 <tr>
 <td>
 <code>laplace</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/extraDistr/topics/Laplace'>extraDistr::dlaplace</a>
 </td>
@@ -603,6 +639,8 @@ reference
 <td>
 <code>beta</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Beta'>stats::dbeta</a>
 </td>
@@ -611,6 +649,8 @@ reference
 <td>
 <code>cauchy</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Cauchy'>stats::dcauchy</a>
 </td>
@@ -619,6 +659,8 @@ reference
 <td>
 <code>chi_squared</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Chisquare'>stats::dchisq</a>
 </td>
@@ -627,6 +669,8 @@ reference
 <td>
 <code>logistic</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Logistic'>stats::dlogis</a>
 </td>
@@ -635,6 +679,8 @@ reference
 <td>
 <code>f</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Fdist'>stats::df</a>
 </td>
@@ -643,6 +689,8 @@ reference
 <td>
 <code>multivariate_normal</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/mvtnorm/topics/Mvnorm'>mvtnorm::dmvnorm</a>
 </td>
@@ -651,6 +699,8 @@ reference
 <td>
 <code>multinomial</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Multinom'>stats::dmultinom</a>
 </td>
@@ -659,6 +709,8 @@ reference
 <td>
 <code>categorical</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/Multinom'>stats::dmultinom</a> (size = 1)
 </td>
@@ -667,6 +719,8 @@ reference
 <td>
 <code>dirichlet</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/extraDistr/topics/Dirichlet'>extraDistr::ddirichlet</a>
 </td>
@@ -675,6 +729,8 @@ reference
 <td>
 <code>dirichlet_multinomial</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/extraDistr/topics/DirMnom'>extraDistr::ddirmnom</a>
 </td>
@@ -683,6 +739,8 @@ reference
 <td>
 <code>wishart</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href='http://www.rdocumentation.org/packages/stats/topics/rWishart'>stats::rWishart</a>
 </td>
@@ -691,6 +749,8 @@ reference
 <td>
 <code>lkj_correlation</code>
 </td>
+</tr>
+<tr>
 <td>
 <a href = 'https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html'>rethinking::dlkjcorr</a>
 </td>
@@ -699,40 +759,42 @@ reference
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
-<pre class="r"><span class='co'># a uniform parameter constrained to be between 0 and 1</span>
-<span class='no'>phi</span> <span class='kw'>=</span> <span class='fu'>uniform</span>(<span class='kw'>min</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<pre class="r">
+
+<span class='co'># a uniform parameter constrained to be between 0 and 1</span>
+<span class='no'>phi</span> <span class='kw'>&lt;-</span> <span class='fu'>uniform</span>(<span class='kw'>min</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>1</span>)
 
 <span class='co'># a length-three variable, with each element following a standard normal</span>
 <span class='co'># distribution</span>
-<span class='no'>alpha</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='no'>alpha</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 
 <span class='co'># a length-three variable of lognormals</span>
-<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 
 <span class='co'># a hierarchical uniform, constrained between alpha and alpha + sigma,</span>
-<span class='no'>eta</span> <span class='kw'>=</span> <span class='no'>alpha</span> + <span class='fu'>uniform</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>) * <span class='no'>sigma</span>
+<span class='no'>eta</span> <span class='kw'>&lt;-</span> <span class='no'>alpha</span> + <span class='fu'>uniform</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>) * <span class='no'>sigma</span>
 
 <span class='co'># a hierarchical distribution</span>
-<span class='no'>mu</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
-<span class='no'>sigma</span> <span class='kw'>=</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
-<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'>lognormal</span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 
 <span class='co'># a vector of 3 variables drawn from the same hierarchical distribution</span>
-<span class='no'>thetas</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='no'>thetas</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 
 <span class='co'># a matrix of 12 variables drawn from the same hierarchical distribution</span>
-<span class='no'>thetas</span> <span class='kw'>=</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>4</span>))
+<span class='no'>thetas</span> <span class='kw'>&lt;-</span> <span class='fu'>normal</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>4</span>))
 
 <span class='co'># a multivariate normal variable, with correlation between two elements</span>
 <span class='no'>Sig</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='fl'>4</span>)
 <span class='no'>Sig</span>[<span class='fl'>3</span>, <span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='no'>Sig</span>[<span class='fl'>4</span>, <span class='fl'>3</span>] <span class='kw'>&lt;-</span> <span class='fl'>0.6</span>
-<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>)
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>)
 
 <span class='co'># 10 independent replicates of that</span>
-<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 
 <span class='co'># a Wishart variable with the same covariance parameter</span>
-<span class='no'>theta</span> <span class='kw'>=</span> <span class='fu'>wishart</span>(<span class='kw'>df</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Sigma</span> <span class='kw'>=</span> <span class='no'>Sig</span>)</pre>
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>wishart</span>(<span class='kw'>df</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Sigma</span> <span class='kw'>=</span> <span class='no'>Sig</span>)</pre>
 
 
 

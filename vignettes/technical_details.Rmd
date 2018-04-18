@@ -97,7 +97,7 @@ z$node$tf
 Hamiltonian Monte Carlo (HMC) requires all of the parameters to be transformed to a continuous scale for sampling. Variable nodes are therefore converted to tensors by first defining a 'free' (unconstrained) version of themselves as a tensor, and then applying a transformation function to convert them back to the scale of interest.
 
 ```{r free_state}
-a = variable(lower = 0)
+a <- variable(lower = 0)
 class(a$node)
 a$node$tf_from_free
 ```
@@ -107,7 +107,7 @@ a$node$tf_from_free
 distribution nodes are node objects just like the others, but they are not *directly* associated with greta arrays. Instead, greta arrays may have a distribution node in their `distribution` slot to indicate that their values are assumed to follow that distribution. The distribution node will also be listed as a parent node, and likewise the 'target node' will be listed as a child of the distribution. Distribution nodes also have child nodes (data, variables or operations) representing their parameters.
 
 ```{r distributions1}
-b = normal(0, 1)
+b <- normal(0, 1)
 class(b$node)
 class(b$node$distribution)
 # a is the target of its own distribution

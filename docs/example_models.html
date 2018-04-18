@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -365,11 +367,11 @@ J &lt;- 3</code></pre>
 </div>
 <div id="greta-code" class="section level4">
 <h4>greta code</h4>
-<pre class="r"><code>theta = normal(0, 32, dim = 2)
+<pre class="r"><code>theta &lt;- normal(0, 32, dim = 2)
 mu &lt;- alpha + beta * Z
-X = normal(mu, sigma)
+X &lt;- normal(mu, sigma)
 p &lt;- ilogit(theta[1] + theta[2] * X)
-distribution(y) = binomial(n, p)</code></pre>
+distribution(y) &lt;- binomial(n, p)</code></pre>
 </div>
 <div id="bugsjags-code" class="section level4">
 <h4>BUGS/JAGS code</h4>
@@ -434,10 +436,10 @@ N &lt;- 8</code></pre>
 </div>
 <div id="greta-code-1" class="section level4">
 <h4>greta code</h4>
-<pre class="r"><code>alpha_star = normal(0, 32)
-beta = normal(0, 32)
+<pre class="r"><code>alpha_star &lt;- normal(0, 32)
+beta &lt;- normal(0, 32)
 p &lt;- ilogit(alpha_star + beta * (x - mean(x)))
-distribution(r) = binomial(n, p)
+distribution(r) &lt;- binomial(n, p)
 
 alpha &lt;- alpha_star - beta * mean(x)
 rhat &lt;- p * n</code></pre>

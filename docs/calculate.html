@@ -11,7 +11,7 @@
 
 
 
-<title>extract, replace and combine greta arrays</title>
+<title>calculate greta arrays given fixed values</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -337,7 +337,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">extract, replace and combine greta arrays</h1>
+<h1 class="title toc-ignore">calculate greta arrays given fixed values</h1>
 
 </div>
 
@@ -346,78 +346,77 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-Generic methods to extract and replace elements of greta arrays, or to combine greta arrays.
+Calculate the values that greta arrays would take, given temporary values for the greta arrays on which they depend, and return them as numeric R arrays. This can be used to check the behaviour of your model or make predictions to new data after model fitting.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
+<pre class="r"><span class='fu'>calculate</span>(<span class='no'>target</span>, <span class='no'>values</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
-<code>x</code>
+<code>target</code>
 <p>
-a greta array
+a greta array for which to calculate the value
 </p>
-<code>i</code>, <code>j</code>
+<code>values</code>
 <p>
-indices specifying elements to extract or replace
+a named list giving temporary values of the greta arrays with which <code>target</code> is connected, or an <code>mcmc.list</code> object returned by <code><a href='inference.html'>mcmc</a></code>.
 </p>
-<code>n</code>
-<p>
-a single integer, as in <code>utils::head()</code> and <code>utils::tail()</code>
-</p>
-<code>value</code>
-<p>
-for <code><code>[&amp;lt;-</code></code> a greta array to replace elements, for <code><code>dim&amp;lt;-</code></code> either NULL or a numeric vector of dimensions
-</p>
-<code>...</code>
-<p>
-either further indices specifying elements to extract or replace (<code>[</code>), or multiple greta arrays to combine (<code>cbind()</code>, <code>rbind()</code> &amp; <code>c()</code>), or additional arguments (<code>rep()</code>, <code>head()</code>, <code>tail()</code>)
-</p>
-<code>drop</code>, <code>recursive</code>
-<p>
-generic arguments that are ignored for greta arrays
-</p>
-<h2 class="hasAnchor" id="usage">
-<a class="anchor" href="#usage"></a>Usage
+<h2 class="hasAnchor" id="value">
+<a class="anchor" href="#value"></a>Value
 </h2>
 <p>
+A numeric R array with the same dimensions as <code>target</code>, giving the values it would take conditioned on the fixed values given by <code>values</code>.
 </p>
-<pre>
-# extract
-x[i]
-x[i, j, ..., drop = FALSE]
-head(x, n = 6L, ...)
-tail(x, n = 6L, ...)
-# replace
-x[i] &lt;- value
-x[i, j, ...] &lt;- value
-# combine
-cbind(...)
-rbind(...)
-c(..., recursive = FALSE)
-rep(x, times, ..., recursive = FALSE)
-# get and set dimensions
-length(x)
-dim(x)
-dim(x) &lt;- value
-</pre>
+<h2 class="hasAnchor" id="details">
+<a class="anchor" href="#details"></a>Details
+</h2>
+<p>
+The greta arrays named in <code>values</code> need not be variables, they can also be other operations or even data.
+</p>
+<p>
+At present, if <code>values</code> is a named list it must contain values for <em>all</em> of the variable greta arrays with which <code>target</code> is connected, even values are given for intermediate operations, or the target doesn’t depend on the variable. That may be relaxed in a future release.
+</p>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
 </h2>
 <pre class="r">
 
- <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
+<span class='co'># define a variable greta array, and another that is calculated from it</span>
+<span class='co'># then calculate what value y would take for different values of x</span>
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>sum</span>(<span class='no'>x</span> ^ <span class='fl'>2</span>) + <span class='no'>a</span>
+<span class='fu'>calculate</span>(<span class='no'>y</span>, <span class='fu'>list</span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>, <span class='fl'>0.3</span>), <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>2</span>))
 
- <span class='co'># extract/replace</span>
- <span class='no'>x</span>[<span class='fl'>1</span>:<span class='fl'>3</span>, ]
- <span class='no'>x</span>[, <span class='fl'>2</span>:<span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>9</span>
 
- <span class='co'># combine</span>
- <span class='fu'>cbind</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='no'>x</span>[, <span class='fl'>1</span>])
- <span class='fu'>rbind</span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ])
- <span class='fu'>c</span>(<span class='no'>x</span>[, <span class='fl'>1</span>], <span class='no'>x</span>)
- <span class='fu'>rep</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>3</span>)</pre>
+<span class='co'># define a model</span>
+<span class='no'>alpha</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>beta</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
+<span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
+<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='no'>alpha</span> + <span class='no'>iris</span>$<span class='no'>Petal.Length</span> * <span class='no'>beta</span>
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>iris</span>$<span class='no'>Petal.Width</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>alpha</span>, <span class='no'>beta</span>, <span class='no'>sigma</span>)
+
+<span class='co'># calculate intermediate greta arrays, given some parameter values</span>
+<span class='fu'>calculate</span>(<span class='no'>mu</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='fu'>list</span>(<span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>beta</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>0.5</span>))
+<span class='fu'>calculate</span>(<span class='no'>mu</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='fu'>list</span>(<span class='kw'>alpha</span> <span class='kw'>=</span> -<span class='fl'>1</span>, <span class='kw'>beta</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>0.5</span>))
+
+
+<span class='co'># fit the model then calculate samples at a new greta array</span>
+<span class='no'>draws</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>500</span>)
+<span class='no'>petal_length_plot</span> <span class='kw'>&lt;-</span> <span class='fu'>seq</span>(<span class='fu'>min</span>(<span class='no'>iris</span>$<span class='no'>Petal.Length</span>),
+                         <span class='fu'>max</span>(<span class='no'>iris</span>$<span class='no'>Petal.Length</span>),
+                         <span class='kw'>length.out</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='no'>mu_plot</span> <span class='kw'>&lt;-</span> <span class='no'>alpha</span> + <span class='no'>petal_length_plot</span> * <span class='no'>beta</span>
+<span class='no'>mu_plot_draws</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='no'>draws</span>)
+
+<span class='co'># plot the draws</span>
+<span class='no'>mu_est</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>colMeans</a></span>(<span class='no'>mu_plot_draws</span><span class='kw'>[[</span><span class='fl'>1</span>]])
+<span class='fu'>plot</span>(<span class='no'>mu_est</span> ~ <span class='no'>petal_length_plot</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"n"</span>, <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fu'>range</span>(<span class='no'>mu_plot_draws</span><span class='kw'>[[</span><span class='fl'>1</span>]]))
+<span class='fu'>apply</span>(<span class='no'>mu_plot_draws</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='fl'>1</span>, <span class='no'>lines</span>, <span class='kw'>x</span> <span class='kw'>=</span> <span class='no'>petal_length_plot</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='fu'>grey</span>(<span class='fl'>0.8</span>))
+<span class='fu'>lines</span>(<span class='no'>mu_est</span> ~ <span class='no'>petal_length_plot</span>, <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>)</pre>
 
 
 

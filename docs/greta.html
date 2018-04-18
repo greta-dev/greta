@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -362,13 +364,13 @@ See the simple example below, and take a look at the <a href = 'https://greta-de
 <span class='co'># a simple Bayesian regression model for the iris data</span>
 
 <span class='co'># priors</span>
-<span class='no'>int</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>5</span>)
-<span class='no'>coef</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
-<span class='no'>sd</span> <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
+<span class='no'>int</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>5</span>)
+<span class='no'>coef</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
+<span class='no'>sd</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>)
 
 <span class='co'># likelihood</span>
 <span class='no'>mean</span> <span class='kw'>&lt;-</span> <span class='no'>int</span> + <span class='no'>coef</span> * <span class='no'>iris</span>$<span class='no'>Petal.Length</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>iris</span>$<span class='no'>Sepal.Length</span>) <span class='kw'>=</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mean</span>, <span class='no'>sd</span>)
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>iris</span>$<span class='no'>Sepal.Length</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mean</span>, <span class='no'>sd</span>)
 
 <span class='co'># build and sample</span>
 <span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>int</span>, <span class='no'>coef</span>, <span class='no'>sd</span>)

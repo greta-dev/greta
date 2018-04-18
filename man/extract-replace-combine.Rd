@@ -58,7 +58,8 @@ dim(x) <- value
 
 \examples{
 \dontrun{
- x = as_data(matrix(1:12, 3, 4))
+
+ x <- as_data(matrix(1:12, 3, 4))
 
  # extract/replace
  x[1:3, ]

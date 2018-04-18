@@ -537,7 +537,7 @@ cauchy_distribution <- R6Class (
       s <- parameters$scale
 
       log_prob = function (x)
-        -tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s)))
+        tf$negative(tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s))))
 
       cdf = function (x)
         fl(1 / pi)  * tf$atan((x - loc) / s) + fl(0.5)
@@ -1340,7 +1340,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'    \code{weibull} \tab \link[stats:dweibull]{stats::dweibull}\cr
 #'    \code{exponential} \tab \link[stats:dexp]{stats::dexp}\cr
 #'    \code{pareto} \tab \link[extraDistr:dpareto]{extraDistr::dpareto}\cr
-#'    \code{student} \tab \link[extraDistr:dnst]{extraDistr::dnst}\cr
+#'    \code{student} \tab \link[extraDistr:dlst]{extraDistr::dlst}\cr
 #'    \code{laplace} \tab \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr
 #'    \code{beta} \tab \link[stats:dbeta]{stats::dbeta}\cr
 #'    \code{cauchy} \tab \link[stats:dcauchy]{stats::dcauchy}\cr
@@ -1356,40 +1356,44 @@ distribution_classes_module <- module(uniform_distribution,
 #'    \code{lkj_correlation} \tab \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}\cr }
 #'
 #' @examples
+#' \dontrun{
+#'
 #' # a uniform parameter constrained to be between 0 and 1
-#' phi = uniform(min = 0, max = 1)
+#' phi <- uniform(min = 0, max = 1)
 #'
 #' # a length-three variable, with each element following a standard normal
 #' # distribution
-#' alpha = normal(0, 1, dim = 3)
+#' alpha <- normal(0, 1, dim = 3)
 #'
 #' # a length-three variable of lognormals
-#' sigma = lognormal(0, 3, dim = 3)
+#' sigma <- lognormal(0, 3, dim = 3)
 #'
 #' # a hierarchical uniform, constrained between alpha and alpha + sigma,
-#' eta = alpha + uniform(0, 1, dim = 3) * sigma
+#' eta <- alpha + uniform(0, 1, dim = 3) * sigma
 #'
 #' # a hierarchical distribution
-#' mu = normal(0, 1)
-#' sigma = lognormal(0, 1)
-#' theta = normal(mu, sigma)
+#' mu <- normal(0, 1)
+#' sigma <- lognormal(0, 1)
+#' theta <- normal(mu, sigma)
 #'
 #' # a vector of 3 variables drawn from the same hierarchical distribution
-#' thetas = normal(mu, sigma, dim = 3)
+#' thetas <- normal(mu, sigma, dim = 3)
 #'
 #' # a matrix of 12 variables drawn from the same hierarchical distribution
-#' thetas = normal(mu, sigma, dim = c(3, 4))
+#' thetas <- normal(mu, sigma, dim = c(3, 4))
 #'
 #' # a multivariate normal variable, with correlation between two elements
 #' Sig <- diag(4)
 #' Sig[3, 4] <- Sig[4, 3] <- 0.6
-#' theta = multivariate_normal(rep(mu, 4), Sig)
+#' theta <- multivariate_normal(rep(mu, 4), Sig)
 #'
 #' # 10 independent replicates of that
-#' theta = multivariate_normal(rep(mu, 4), Sig, dim = 10)
+#' theta <- multivariate_normal(rep(mu, 4), Sig, dim = 10)
 #'
 #' # a Wishart variable with the same covariance parameter
-#' theta = wishart(df = 5, Sigma = Sig)
+#' theta <- wishart(df = 5, Sigma = Sig)
+#'
+#' }
 NULL
 
 #' @rdname distributions

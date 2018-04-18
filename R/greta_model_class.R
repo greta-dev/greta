@@ -41,20 +41,18 @@ NULL
 #' @return \code{model} - a \code{greta_model} object.
 #'
 #' @examples
-#'
 #' \dontrun{
 #'
 #' # define a simple model
-#' mu = variable()
-#' sigma = lognormal(1, 0.1)
-#' x = rnorm(10)
-#' distribution(x) = normal(mu, sigma)
+#' mu <- variable()
+#' sigma <- lognormal(1, 0.1)
+#' x <- rnorm(10)
+#' distribution(x) <- normal(mu, sigma)
 #'
 #' m <- model(mu, sigma)
 #'
 #' plot(m)
 #' }
-#'
 model <- function (...,
                    precision = c('single', 'double'),
                    n_cores = NULL,
@@ -83,9 +81,6 @@ model <- function (...,
     }
   }
 
-  # flush all tensors from the default graph
-  tf$reset_default_graph()
-
   # nodes required
   target_greta_arrays <- list(...)
 
@@ -103,6 +98,27 @@ model <- function (...,
     names(target_greta_arrays) <- names
 
   }
+
+  # check they are greta arrays
+  are_greta_arrays <- vapply(target_greta_arrays,
+                             inherits, "greta_array",
+                             FUN.VALUE = FALSE)
+
+  if (!all(are_greta_arrays)) {
+
+    unexpected_items <- names(target_greta_arrays)[!are_greta_arrays]
+
+    msg <- ifelse(length(unexpected_items) > 1,
+                  "The following objects passed to model() are not greta arrays: ",
+                  "The following object passed to model() is not a greta array: ")
+
+    stop (msg,
+          paste(unexpected_items, sep = ", "),
+          call. = FALSE)
+
+  }
+
+
 
   if (length(target_greta_arrays) == 0) {
     stop ('could not find any non-data greta arrays',

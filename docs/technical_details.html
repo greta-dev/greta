@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -428,7 +430,7 @@ class(x$node$value())</code></pre>
 <div id="variables-and-free-states" class="section level2">
 <h2>variables and free states</h2>
 <p>Hamiltonian Monte Carlo (HMC) requires all of the parameters to be transformed to a continuous scale for sampling. Variable nodes are therefore converted to tensors by first defining a ‘free’ (unconstrained) version of themselves as a tensor, and then applying a transformation function to convert them back to the scale of interest.</p>
-<pre class="r"><code>a = variable(lower = 0)
+<pre class="r"><code>a &lt;- variable(lower = 0)
 class(a$node)</code></pre>
 <pre><code>[1] &quot;variable_node&quot; &quot;node&quot;          &quot;R6&quot;           </code></pre>
 <pre class="r"><code>a$node$tf_from_free</code></pre>
@@ -443,7 +445,7 @@ class(a$node)</code></pre>
 
       } else if (self$constraint == &#39;both&#39;) {
 
-        y &lt;- tf_ilogit(x) * fl(upper - lower) + fl(lower)
+        y &lt;- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
 
       } else if (self$constraint == &#39;low&#39;) {
 
@@ -462,12 +464,12 @@ class(a$node)</code></pre>
       y
 
     }
-&lt;environment: 0x121afa638&gt;</code></pre>
+&lt;environment: 0x10b5aef78&gt;</code></pre>
 </div>
 <div id="distributions" class="section level2">
 <h2>distributions</h2>
 <p>distribution nodes are node objects just like the others, but they are not <em>directly</em> associated with greta arrays. Instead, greta arrays may have a distribution node in their <code>distribution</code> slot to indicate that their values are assumed to follow that distribution. The distribution node will also be listed as a parent node, and likewise the ‘target node’ will be listed as a child of the distribution. Distribution nodes also have child nodes (data, variables or operations) representing their parameters.</p>
-<pre class="r"><code>b = normal(0, 1)
+<pre class="r"><code>b &lt;- normal(0, 1)
 class(b$node)</code></pre>
 <pre><code>[1] &quot;variable_node&quot; &quot;node&quot;          &quot;R6&quot;           </code></pre>
 <pre class="r"><code>class(b$node$distribution)</code></pre>

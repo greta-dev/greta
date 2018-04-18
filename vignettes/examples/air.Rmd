@@ -21,11 +21,11 @@ J <- 3
 
 #### greta code
 ```{r air_greta}
-theta = normal(0, 32, dim = 2)
+theta <- normal(0, 32, dim = 2)
 mu <- alpha + beta * Z
-X = normal(mu, sigma)
+X <- normal(mu, sigma)
 p <- ilogit(theta[1] + theta[2] * X)
-distribution(y) = binomial(n, p)
+distribution(y) <- binomial(n, p)
 ```
 
 #### BUGS/JAGS code

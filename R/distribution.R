@@ -17,21 +17,22 @@
 #'
 #' @export
 #' @examples
+#' \dontrun{
 #'
 #' # define a model likelihood
 #'
 #' # observed data and mean parameter to be estimated
 #' # (explicitly coerce data to a greta array so we can refer to it later)
-#' y = as_data(rnorm(5, 0, 3))
+#' y <- as_data(rnorm(5, 0, 3))
 #'
-#' mu = uniform(-3, 3)
+#' mu <- uniform(-3, 3)
 #'
 #' # define the distribution over y (the model likelihood)
-#' distribution(y) = normal(mu, 1)
+#' distribution(y) <- normal(mu, 1)
 #'
 #' # get the distribution over y
 #' distribution(y)
-#'
+#' }
 `distribution<-` <- function (greta_array, value) {
 
   # stash the old greta array to return

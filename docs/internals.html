@@ -11,7 +11,7 @@
 
 
 
-<title>extract, replace and combine greta arrays</title>
+<title>internal greta methods</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -337,7 +337,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">extract, replace and combine greta arrays</h1>
+<h1 class="title toc-ignore">internal greta methods</h1>
 
 </div>
 
@@ -346,37 +346,22 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-Generic methods to extract and replace elements of greta arrays, or to combine greta arrays.
+A list of functions and R6 class objects that can be used to develop extensions to greta. Most users will not need to access these methods, and it is not recommended to use them directly in model code.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<h2 class="hasAnchor" id="arguments">
-<a class="anchor" href="#arguments"></a> Arguments
+<h2 class="hasAnchor" id="details">
+<a class="anchor" href="#details"></a>Details
 </h2>
-<code>x</code>
 <p>
-a greta array
+This help file lists the available internals, but they are not fully documented and are subject to change and deprecation without warning (though care will be taken not to break dependent packages on CRAN). For an overview of how greta works internally, see the <em>technical details</em> vignette. See <a href = 'https://github.com/greta-dev'>https://github.com/greta-dev</a> for examples of R packages extending and building on greta.
 </p>
-<code>i</code>, <code>j</code>
 <p>
-indices specifying elements to extract or replace
+Please get in contact via GitHub if you want to develop an extension to greta and need more details of how to use these internal functions.
 </p>
-<code>n</code>
 <p>
-a single integer, as in <code>utils::head()</code> and <code>utils::tail()</code>
-</p>
-<code>value</code>
-<p>
-for <code><code>[&amp;lt;-</code></code> a greta array to replace elements, for <code><code>dim&amp;lt;-</code></code> either NULL or a numeric vector of dimensions
-</p>
-<code>...</code>
-<p>
-either further indices specifying elements to extract or replace (<code>[</code>), or multiple greta arrays to combine (<code>cbind()</code>, <code>rbind()</code> &amp; <code>c()</code>), or additional arguments (<code>rep()</code>, <code>head()</code>, <code>tail()</code>)
-</p>
-<code>drop</code>, <code>recursive</code>
-<p>
-generic arguments that are ignored for greta arrays
+You can use <code>attach()</code> to put a sublist in the search path. E.g. <code>attach(.internals<span class="math inline">\(nodes\)</span>constructors)</code> will enable you to call <code>op()</code>, <code>vble()</code> and <code>distrib()</code> directly.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a>Usage
@@ -384,40 +369,20 @@ generic arguments that are ignored for greta arrays
 <p>
 </p>
 <pre>
-# extract
-x[i]
-x[i, j, ..., drop = FALSE]
-head(x, n = 6L, ...)
-tail(x, n = 6L, ...)
-# replace
-x[i] &lt;- value
-x[i, j, ...] &lt;- value
-# combine
-cbind(...)
-rbind(...)
-c(..., recursive = FALSE)
-rep(x, times, ..., recursive = FALSE)
-# get and set dimensions
-length(x)
-dim(x)
-dim(x) &lt;- value
+ .internals$greta_arrays$unknowns        # greta array print methods
+ .internals$inference$progress_bar       # progress bar tools
+                      samplers           # MCMC samplers
+                      stash              # stashing MCMC samples
+ .internals$nodes$constructors           # node creation wrappers
+                  distribution_classes   # R6 distribution classes
+                  node_classes           # R6 node classes
+ .internals$tensors                      # functions on tensors
+ .internals$utils$checks                 # checking function inputs
+                  colours                # greta colour scheme
+                  dummy_arrays           # mocking up extract/replace
+                  misc                   # code simplification etc.
+                  samplers               # mcmc helpers
 </pre>
-<h2 class="hasAnchor" id="examples">
-<a class="anchor" href="#examples"></a>Examples
-</h2>
-<pre class="r">
-
- <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>matrix</span>(<span class='fl'>1</span>:<span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
-
- <span class='co'># extract/replace</span>
- <span class='no'>x</span>[<span class='fl'>1</span>:<span class='fl'>3</span>, ]
- <span class='no'>x</span>[, <span class='fl'>2</span>:<span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>9</span>
-
- <span class='co'># combine</span>
- <span class='fu'>cbind</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='no'>x</span>[, <span class='fl'>1</span>])
- <span class='fu'>rbind</span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ])
- <span class='fu'>c</span>(<span class='no'>x</span>[, <span class='fl'>1</span>], <span class='no'>x</span>)
- <span class='fu'>rep</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>3</span>)</pre>
 
 
 

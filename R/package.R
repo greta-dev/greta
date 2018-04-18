@@ -26,13 +26,13 @@
 #' # a simple Bayesian regression model for the iris data
 #'
 #' # priors
-#' int = normal(0, 5)
-#' coef = normal(0, 3)
-#' sd = lognormal(0, 3)
+#' int <- normal(0, 5)
+#' coef <- normal(0, 3)
+#' sd <- lognormal(0, 3)
 #'
 #' # likelihood
 #' mean <- int + coef * iris$Petal.Length
-#' distribution(iris$Sepal.Length) = normal(mean, sd)
+#' distribution(iris$Sepal.Length) <- normal(mean, sd)
 #'
 #' # build and sample
 #' m <- model(int, coef, sd)
@@ -48,6 +48,9 @@ NULL
 
   # warn if TF version is bad
   check_tf_version('startup')
+
+  # switch back to 0-based extraction in tensorflow
+  options(tensorflow.one_based_extract = FALSE)
 
   # default float type
   if (reticulate::py_module_available('tensorflow'))

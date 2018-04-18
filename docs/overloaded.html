@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -34,10 +34,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -353,11 +355,23 @@ greta provides a wide range of methods to apply common R functions and operation
 
 <span class='fu'>diag</span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>nrow</span>, <span class='no'>ncol</span>)
 
-<span class='fu'>sweep</span>(<span class='no'>x</span>, <span class='no'>MARGIN</span>, <span class='no'>STATS</span>, <span class='kw'>FUN</span> <span class='kw'>=</span> <span class='st'>"-"</span>, <span class='kw'>check.margin</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>) </pre>
+<span class='fu'>colMeans</span>(<span class='no'>x</span>, <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>dims</span> <span class='kw'>=</span> <span class='fl'>1L</span>)
+
+<span class='fu'>rowMeans</span>(<span class='no'>x</span>, <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>dims</span> <span class='kw'>=</span> <span class='fl'>1L</span>)
+
+<span class='fu'>colSums</span>(<span class='no'>x</span>, <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>dims</span> <span class='kw'>=</span> <span class='fl'>1L</span>)
+
+<span class='fu'>rowSums</span>(<span class='no'>x</span>, <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>dims</span> <span class='kw'>=</span> <span class='fl'>1L</span>)
+
+<span class='fu'>sweep</span>(<span class='no'>x</span>, <span class='no'>MARGIN</span>, <span class='no'>STATS</span>, <span class='kw'>FUN</span> <span class='kw'>=</span> <span class='st'>"-"</span>, <span class='kw'>check.margin</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)
+
+<span class='fu'>backsolve</span>(<span class='no'>r</span>, <span class='no'>x</span>, <span class='kw'>k</span> <span class='kw'>=</span> <span class='fu'>ncol</span>(<span class='no'>r</span>), <span class='kw'>upper.tri</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>transpose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='fu'>forwardsolve</span>(<span class='no'>l</span>, <span class='no'>x</span>, <span class='kw'>k</span> <span class='kw'>=</span> <span class='fu'>ncol</span>(<span class='no'>l</span>), <span class='kw'>upper.tri</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>transpose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
-<code>x</code>, <code>y</code>, <code>nrow</code>, <code>ncol</code>, <code>MARGIN</code>, <code>STATS</code>, <code>FUN</code>, <code>check.margin</code>, <code>...</code>
+<code>x</code>, <code>y</code>, <code>nrow</code>, <code>ncol</code>, <code>MARGIN</code>, <code>STATS</code>, <code>FUN</code>, <code>check.margin</code>, <code>...</code>, <code>r</code>, <code>k</code>, <code>upper.tri</code>, <code>transpose</code>, <code>l</code>, <code>na.rm</code>, <code>dims</code>
 <p>
 arguments as in original documentation
 </p>
