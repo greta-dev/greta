@@ -45,7 +45,7 @@
 #'  diag(x, nrow, ncol)
 #'  diag(x) <- value
 #'  solve(a, b, ...)
-#'  kronecker2(X, Y)
+#'  kronecker(X, Y)
 #'
 #'  # reducing operations
 #'  sum(..., na.rm = TRUE)
