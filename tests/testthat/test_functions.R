@@ -57,6 +57,7 @@ test_that('matrix functions work as expected', {
   check_op(solve, a, b)
   check_op(forwardsolve, c, b)
   check_op(backsolve, c, b)
+  check_op(kronecker, a, c, greta_op = greta:::kronecker2)
 
 })
 
