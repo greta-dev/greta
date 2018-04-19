@@ -45,6 +45,7 @@
 #'  diag(x, nrow, ncol)
 #'  diag(x) <- value
 #'  solve(a, b, ...)
+#'  kronecker2(X, Y)
 #'
 #'  # reducing operations
 #'  sum(..., na.rm = TRUE)
@@ -627,7 +628,6 @@ kronecker2 <- function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
   
   op("kronecker2",
      X, Y,
-     operation_args = list(FUN = FUN),
      tf_operation = tf_kronecker,
      dimfun = dimfun)
   

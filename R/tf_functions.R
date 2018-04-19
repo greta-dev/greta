@@ -153,27 +153,18 @@ tf_rowsums <- function(x, dims) {
 
 }
 
-#se the tensorflow function as the backend to a greta op, s
-tf_kronecker <- function(X, Y, FUN) {
-  
-  ## DOESN'T WORK CORRECTLY
-  
+# calculate kronecker product of two matrices
+tf_kronecker <- function(X, Y) {
+
   dims <- c(dim(X), dim(Y))
+  x_rsh <- tf$reshape(X, c(as.integer(dims[1]), as.integer(1),
+                           as.integer(dims[2]), as.integer(1)))
+  y_rsh <- tf$reshape(Y, c(as.integer(1), as.integer(dims[3]), 
+                           as.integer(1), as.integer(dims[4])))
+  tensor_out <- tf$reshape(x_rsh * y_rsh, c(dims[1] * dims[3], dims[2] * dims[4]))
 
-  tensor_tmp <- vector("list", length = (dims[1] * dims[2]))
-  for (i in seq_len(dims[1])) {
-    for (j in seq_len(dims[2])) {
-      tensor_tmp[[(i - 1) * dims[1] + j]] <- X[i, j] * Y
-    }
-  }
-  tensor_out <- vector("list", length = (dims[2]))
-  for (i in seq_len(dims[2])) {
-    tensor_out[[i]] <- do.call("rbind", tensor_tmp[((i - 1) * dims[2] + 1):(i * dims[2])])
-  }
-  tensor_out <- do.call("cbind", tensor_out)
-  
   tensor_out
-
+  
 }
 
 # tensorflow version of sweep, based on broadcasting of tf ops
