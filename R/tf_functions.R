@@ -157,10 +157,14 @@ tf_rowsums <- function(x, dims) {
 tf_kronecker <- function(X, Y) {
 
   dims <- c(dim(X), dim(Y))
+
+  # expand dimensions of tensors to allow direct multiplication for kronecker prod
   x_rsh <- tf$reshape(X, c(as.integer(dims[1]), as.integer(1),
                            as.integer(dims[2]), as.integer(1)))
   y_rsh <- tf$reshape(Y, c(as.integer(1), as.integer(dims[3]), 
                            as.integer(1), as.integer(dims[4])))
+
+  # multiply tensors and reshape with appropriate dimensions
   tensor_out <- tf$reshape(x_rsh * y_rsh, c(dims[1] * dims[3], dims[2] * dims[4]))
 
   tensor_out
