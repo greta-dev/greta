@@ -632,30 +632,30 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
                dimfun = dimfun)
             
           })
-
-# create block diagonal matrix from list of matrices
-#' @export
-create_block <- function(matrices) {
-  
-  dimfun <- function (elem_list) {
-    
-    dim_set <- lapply(elem_list, dim)
-    if (any(sapply(dim_set, length) == 0)) {
-      dim_set[[which(sapply(dim_set, length) == 0)]] <- c(1, 1)
-    }
-    dim_set <- t(matrix(unlist(dim_set), ncol = 2))
-    
-    # return the dimensions of x
-    apply(dim_set, 1, sum)
-    
-  }
-  
-  op("create_block",
-     matrices,
-     tf_operation = tf_bdiag,
-     dimfun = dimfun)
-  
-}
+#' 
+#' # create block diagonal matrix from list of matrices
+#' #' @export
+#' create_block <- function(matrices) {
+#'   
+#'   dimfun <- function (elem_list) {
+#'     
+#'     dim_set <- lapply(elem_list, dim)
+#'     if (any(sapply(dim_set, length) == 0)) {
+#'       dim_set[[which(sapply(dim_set, length) == 0)]] <- c(1, 1)
+#'     }
+#'     dim_set <- t(matrix(unlist(dim_set), ncol = 2))
+#'     
+#'     # return the dimensions of x
+#'     apply(dim_set, 1, sum)
+#'     
+#'   }
+#'   
+#'   op("create_block",
+#'      matrices,
+#'      tf_operation = tf_bdiag,
+#'      dimfun = dimfun)
+#'   
+#' }
 
 # create block diagonal (non-TF version)
 #' @export
