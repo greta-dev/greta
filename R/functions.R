@@ -596,10 +596,6 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
 
 }
 
-setClass("greta_array")
-setMethod('kronecker', signature(X = "greta_array", Y = "greta_array"),
-          kronecker_greta_internal)
-
 kronecker_greta_internal <- function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
   
   # only allow these four functions
@@ -635,6 +631,10 @@ kronecker_greta_internal <- function (X, Y, FUN = "*", make.dimnames = FALSE, ..
      dimfun = dimfun)
   
 }
+
+setClass("greta_array")
+setMethod('kronecker', signature(X = "greta_array", Y = "greta_array"),
+          kronecker_greta_internal)
 
 #' @rdname overloaded
 #' @export
