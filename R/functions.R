@@ -596,45 +596,42 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
 
 }
 
-kronecker_greta_internal <- function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
-  
-  # only allow these four functions
-  FUN <- match.arg(FUN)
-  
-  dimfun <- function (elem_list) {
-    
-    x <- elem_list[[1]]
-    y <- elem_list[[2]]
-    
-    # x must be 2D
-    if (length(dim(x)) != 2) {
-      stop (sprintf('x must be a 2D array, but has %i dimensions',
-                    length(dim(x))))
-    }
-    
-    # y must be 2D
-    if (length(dim(y)) != 2) {
-      stop (sprintf('y must be a 2D array, but has %i dimensions',
-                    length(dim(y))))
-    }
-
-    # return the dimensions of x
-    dim1 <- dim(x)
-    dim2 <- dim(y)
-    dim1 * dim2
-    
-  }
-  
-  op("kronecker_greta_internal",
-     X, Y,
-     tf_operation = tf_kronecker,
-     dimfun = dimfun)
-  
-}
-
 setClass("greta_array")
-setMethod('kronecker', signature(X = "greta_array", Y = "greta_array"),
-          kronecker_greta_internal)
+setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
+          function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
+            
+            if (FUN != "*") stop("kronecker method must use default 'FUN'")
+
+            dimfun <- function (elem_list) {
+              
+              x <- elem_list[[1]]
+              y <- elem_list[[2]]
+              
+              # x must be 2D
+              if (length(dim(x)) != 2) {
+                stop (sprintf('x must be a 2D array, but has %i dimensions',
+                              length(dim(x))))
+              }
+              
+              # y must be 2D
+              if (length(dim(y)) != 2) {
+                stop (sprintf('y must be a 2D array, but has %i dimensions',
+                              length(dim(y))))
+              }
+              
+              # return the dimensions of x
+              dim1 <- dim(x)
+              dim2 <- dim(y)
+              dim1 * dim2
+              
+            }
+            
+            op("kronecker",
+               X, Y,
+               tf_operation = tf_kronecker,
+               dimfun = dimfun)
+            
+          })
 
 #' @rdname overloaded
 #' @export
