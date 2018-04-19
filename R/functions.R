@@ -596,8 +596,11 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
 
 }
 
-#' @export
-kronecker2 <- function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
+setClass("greta_array")
+setMethod('kronecker', signature(X = "greta_array", Y = "greta_array"),
+          kronecker_greta_internal)
+
+kronecker_greta_internal <- function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
   
   # only allow these four functions
   FUN <- match.arg(FUN)
@@ -626,7 +629,7 @@ kronecker2 <- function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
     
   }
   
-  op("kronecker2",
+  op("kronecker_greta_internal",
      X, Y,
      tf_operation = tf_kronecker,
      dimfun = dimfun)
