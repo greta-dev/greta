@@ -171,6 +171,43 @@ tf_kronecker <- function(X, Y) {
   
 }
 
+# create block diagonal matrix from list of matrices
+tf_bdiag <- function(matrices) {
+  
+  # extract matrix dimensions and give scalars dim = c(1, 1)
+  dim_set <- lapply(matrices, dim)
+  if (any(sapply(dim_set, length) == 0)) {
+    dim_set[[which(sapply(dim_set, length) == 0)]] <- c(1, 1)
+  }
+  dim_set <- t(matrix(unlist(dim_set), ncol = 2))
+  
+  mat_tmp <- vector("list", length = length(matrices))
+  for (i in seq_along(matrices)) {
+    
+    dim_tmp_upper <- sum(dim_set[1:(i - 1), 1])
+    if (i == 1)
+      dim_tmp_upper <- 0
+    dim_tmp_lower <- 0
+    if (i < length(matrices))
+      dim_tmp_lower <- sum(dim_set[length(matrices):(i + 1), 1])
+    
+    paddings_set <- tf$constant(matrix(c(dim_tmp_upper, dim_tmp_lower,
+                                         0, 0),
+                                       ncol = 2,
+                                       byrow = TRUE),
+                                dtype = tf$int32)
+    mat_tmp[[i]] <- tf$pad(tensor = matrices[[i]],
+                           paddings = paddings_set,
+                           mode = "CONSTANT")
+  }
+  
+  blocked <- tf$concat(mat_tmp, as.integer(-1))
+  blocked$set_shape(c(sum(dim_set[, 1]), sum(dim_set[, 2])))
+  
+  blocked
+  
+}
+
 # tensorflow version of sweep, based on broadcasting of tf ops
 tf_sweep <- function (x, STATS, MARGIN, FUN) {
 
