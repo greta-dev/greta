@@ -65,6 +65,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  diag(x, nrow, ncol)
  diag(x) <- value
  solve(a, b, ...)
+ kronecker(X, Y)
 
  # reducing operations
  sum(..., na.rm = TRUE)
