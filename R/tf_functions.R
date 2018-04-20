@@ -159,10 +159,10 @@ tf_kronecker <- function(X, Y) {
   dims <- c(dim(X), dim(Y))
 
   # expand dimensions of tensors to allow direct multiplication for kronecker prod
-  x_rsh <- tf$reshape(X, c(as.integer(dims[1]), as.integer(1),
-                           as.integer(dims[2]), as.integer(1)))
-  y_rsh <- tf$reshape(Y, c(as.integer(1), as.integer(dims[3]), 
-                           as.integer(1), as.integer(dims[4])))
+  x_rsh <- tf$reshape(X, c(as.integer(dims[1]), 1L,
+                           as.integer(dims[2]), 1L))
+  y_rsh <- tf$reshape(Y, c(1L, as.integer(dims[3]), 
+                           1L, as.integer(dims[4])))
 
   # multiply tensors and reshape with appropriate dimensions
   tensor_out <- tf$reshape(x_rsh * y_rsh, c(dims[1] * dims[3], dims[2] * dims[4]))
@@ -177,9 +177,9 @@ tf_bdiag <- function(matrices) {
   # extract matrix dimensions and give scalars dim = c(1, 1)
   dim_set <- lapply(matrices, dim)
   if (any(sapply(dim_set, length) == 0)) {
-    dim_set[[which(sapply(dim_set, length) == 0)]] <- c(1, 1)
+    dim_set[[which(sapply(dim_set, length) == 0)]] <- c(1L, 1L)
   }
-  dim_set <- t(matrix(unlist(dim_set), ncol = 2))
+  dim_set <- t(matrix(unlist(dim_set), ncol = 2L))
   
   mat_tmp <- vector("list", length = length(matrices))
   for (i in seq_along(matrices)) {
@@ -191,19 +191,14 @@ tf_bdiag <- function(matrices) {
     if (i < length(matrices))
       dim_tmp_lower <- sum(dim_set[length(matrices):(i + 1), 1])
     
-    paddings_set <- tf$constant(matrix(c(dim_tmp_upper, dim_tmp_lower,
-                                         0, 0),
-                                       ncol = 2,
-                                       byrow = TRUE),
-                                dtype = tf$int32)
-    mat_tmp[[i]] <- tf$pad(tensor = matrices[[i]],
-                           paddings = paddings_set,
-                           mode = "CONSTANT")
+    mat_tmp[[i]] <- tf_rbind(tf$zeros(as.integer(dim_tmp_upper), dim_set[i, 2]),
+                             matrices[[i]],
+                             tf$zeros(as.integer(dim_tmp_lower), dim_set[i, 2]))
+    
   }
   
-  blocked <- tf$concat(mat_tmp, as.integer(-1))
-  blocked$set_shape(c(sum(dim_set[, 1]), sum(dim_set[, 2])))
-  
+  blocked <- tf_cbind(mat_tmp)
+
   blocked
   
 }
