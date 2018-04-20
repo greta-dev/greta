@@ -46,7 +46,8 @@ Imports:
     tensorflow,
     reticulate,
     progress,
-    coda
+    coda,
+    methods
 Suggests:
     knitr,
     rmarkdown,
