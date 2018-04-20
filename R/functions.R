@@ -631,8 +631,9 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
                tf_operation = tf_kronecker,
                dimfun = dimfun)
             
-          })
-#' 
+          }
+)
+ 
 #' # create block diagonal matrix from list of matrices
 #' #' @export
 #' create_block <- function(matrices) {
