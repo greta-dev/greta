@@ -48,6 +48,7 @@ test_that('matrix functions work as expected', {
   a <- rWishart(1, 6, diag(5))[, , 1]
   b <- randn(5, 25)
   c <- chol(a)
+  d <- c(1, 1)
 
   check_op(t, b)
   check_op(chol, a)
@@ -58,6 +59,7 @@ test_that('matrix functions work as expected', {
   check_op(forwardsolve, c, b)
   check_op(backsolve, c, b)
   check_op(kronecker, a, c)
+  check_op(kronecker, a, d)
 
 })
 
