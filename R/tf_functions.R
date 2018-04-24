@@ -153,6 +153,23 @@ tf_rowsums <- function(x, dims) {
 
 }
 
+# calculate kronecker product of two matrices
+tf_kronecker <- function(X, Y) {
+
+  dims <- c(dim(X), dim(Y))
+
+  # expand dimensions of tensors to allow direct multiplication for kronecker prod
+  x_rsh <- tf$reshape(X, c(as.integer(dims[1]), 1L,
+                           as.integer(dims[2]), 1L))
+  y_rsh <- tf$reshape(Y, c(1L, as.integer(dims[3]), 
+                           1L, as.integer(dims[4])))
+
+  # multiply tensors and reshape with appropriate dimensions
+  tensor_out <- tf$reshape(x_rsh * y_rsh, c(dims[1] * dims[3], dims[2] * dims[4]))
+
+  tensor_out
+  
+}
 
 # tensorflow version of sweep, based on broadcasting of tf ops
 tf_sweep <- function (x, STATS, MARGIN, FUN) {
@@ -320,6 +337,7 @@ tf_functions_module <- module(tf_as_logical,
                               tf_flat_to_chol,
                               tf_flat_to_chol_correl,
                               tf_chol_to_symmetric,
+                              tf_kronecker,
                               tf_sweep,
                               tf_not,
                               tf_and,

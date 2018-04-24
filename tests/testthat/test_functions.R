@@ -48,6 +48,7 @@ test_that('matrix functions work as expected', {
   a <- rWishart(1, 6, diag(5))[, , 1]
   b <- randn(5, 25)
   c <- chol(a)
+  d <- c(1, 1)
 
   check_op(t, b)
   check_op(chol, a)
@@ -57,6 +58,8 @@ test_that('matrix functions work as expected', {
   check_op(solve, a, b)
   check_op(forwardsolve, c, b)
   check_op(backsolve, c, b)
+  check_op(kronecker, a, c)
+  check_op(kronecker, a, d)
 
 })
 
@@ -180,7 +183,7 @@ test_that('sweep works for numeric x and greta array STATS', {
 
 })
 
-test_that('solve and sweep error as expected', {
+test_that('solve and sweep and kronecker error as expected', {
 
   skip_if_not(check_tf_version())
   source('helpers.R')
@@ -230,6 +233,15 @@ test_that('solve and sweep error as expected', {
   expect_error(sweep(a, 2, stats),
                '^the number of elements of STATS does not match')
 
+  # kronecker
+  # X must be 2D
+  expect_error(kronecker(a, b),
+               "^y must be a 2D array, but has . dimensions")
+  
+  # Y must be 2D
+  expect_error(kronecker(b, c),
+               "^x must be a 2D array, but has . dimensions")
+  
 })
 
 test_that('colSums etc. error as expected', {
