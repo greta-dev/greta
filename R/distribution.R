@@ -1,7 +1,7 @@
 #' @name distribution
 #' @aliases distribution
 #' @title define a distribution over data
-
+#'
 #' @description \code{distribution} defines probability distributions over
 #'   observed data, e.g. to set a model likelihood.
 #'
@@ -87,7 +87,11 @@
 
   # assign the new node as the distribution's target
   # also adds distribution_node as this node's distribution
-  distribution_node$replace_target(greta_array$node)
+  distribution_node$remove_target()
+  distribution_node$add_target(greta_array$node)
+
+  # remove the distribution from the RHS variable greta array
+  value$node$distribution <- NULL
 
   # return greta_array (pre-conversion to a greta array)
   greta_array_tmp

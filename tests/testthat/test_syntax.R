@@ -70,7 +70,7 @@ test_that('`distribution<-` errors informatively', {
   y2 <- as_data(y)
   d <- normal(0, 1)
   distribution(y1) = d
-  expect_error({distribution(y2) = d},
+  expect_error({distribution(y2) = y1},
                'right hand side has already been assigned fixed values')
 
   # assignment to a variable

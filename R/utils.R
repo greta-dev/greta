@@ -205,9 +205,24 @@ check_unit <- function (truncation) {
   }
 }
 
+# check whether the function calling this is being used as the 'family' argument
+# of another modelling function
+check_in_family <- function (function_name) {
+  greta_function <- get(function_name, envir = asNamespace("greta"))
+  family <- parent.frame(2)$family
+  if (!is.null(family) && identical(family, greta_function)) {
+    msg <- paste0("It looks like you're using greta's ", function_name,
+                  " function in the family argment of another model.",
+                  " Maybe you want to use 'family = stats::", function_name,
+                  "' instead?")
+    stop (msg, call. = FALSE)
+  }
+}
+
 checks_module <- module(check_dims,
                         check_unit,
-                        check_positive)
+                        check_positive,
+                        check_in_family)
 
 # convert an array to a vector row-wise
 flatten_rowwise <- function (array) {

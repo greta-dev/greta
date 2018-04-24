@@ -24,6 +24,7 @@ Collate:
     'node_types.R'
     'variable.R'
     'probability_distributions.R'
+    'mixture.R'
     'unknowns_class.R'
     'greta_array_class.R'
     'as_data.R'
