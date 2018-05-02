@@ -7,6 +7,9 @@ inference <- R6Class(
 
     model = NULL,
 
+    # RNG seed
+    seed = 1,
+
     # size and current value of the free state
     n_free = 1L,
     free_state = 0,
@@ -25,14 +28,26 @@ inference <- R6Class(
     traced_values = matrix(0),
 
     # where this is in the run
-    initialize = function (initial_values, model, parameters = list()) {
+    initialize = function (initial_values,
+                           model,
+                           parameters = list(),
+                           seed = get_seed()) {
 
       self$parameters <- parameters
       self$model <- model
       self$n_free <- length(model$dag$example_parameters())
       self$free_state <- self$initial_values(initial_values)
       self$n_traced <- length(model$dag$trace_values(self$free_state))
+      self$seed <- seed
 
+    },
+
+    # set RNG seed for a tensorflow graph. Must be done before definition of a
+    # random tensor
+    set_tf_seed = function () {
+      dag <- self$model$dag
+      dag$tf_environment$rng_seed <- self$seed
+      dag$tf_run(tf$set_random_seed(rng_seed))
     },
 
     initial_values = function (user_specified) {
@@ -311,16 +326,22 @@ hmc_sampler <- R6Class(
     sum_epsilon_trace = NULL,
     last_burst_length = 100L,
 
-    initialize = function (initial_values, model, parameters = list()) {
+    initialize = function (initial_values,
+                           model,
+                           parameters = list(),
+                           seed) {
 
       # initialize the inference method
       super$initialize(initial_values = initial_values,
                        model = model,
-                       parameters = parameters)
+                       parameters = parameters,
+                       seed = seed)
 
       # define the draws tensor on the tf graph
+      super$set_tf_seed()
       self$define_tf_hmc_draws(self$last_burst_length,
                                define_variables = TRUE)
+
 
     },
 
