@@ -323,7 +323,6 @@ hmc_sampler <- R6Class(
     # tuning information for these variables
     mean_accept_stat = 0.5,
     sum_epsilon_trace = NULL,
-    last_burst_length = 100L,
     hbar = 0,
     log_epsilon_bar = 0,
 
@@ -349,16 +348,19 @@ hmc_sampler <- R6Class(
       }
 
       # define the draws tensor on the tf graph
-      super$set_tf_seed()
-      self$define_tf_hmc_draws(self$last_burst_length,
-                               define_variables = TRUE)
+      tfe <- model$dag$tf_environment
+      if (!exists("hmc_batch", envir = tfe)) {
+        self$define_tf_hmc_draws(define_variables = TRUE)
+      }
 
     },
 
-    define_tf_hmc_draws = function (burst_length, define_variables = FALSE) {
+    define_tf_hmc_draws = function (define_variables = FALSE) {
 
       dag <- self$model$dag
       tfe <- dag$tf_environment
+
+      super$set_tf_seed()
 
       if (define_variables) {
         # define tensors for the parameters
@@ -371,6 +373,8 @@ hmc_sampler <- R6Class(
         dag$tf_run(hmc_step_sizes <- hmc_epsilon * hmc_diag_sd)
 
         # and the sampler info
+        dag$tf_run(hmc_burst_length <- tf$placeholder(dtype = tf$int32,
+                                                      shape = list()))
         dag$tf_run(hmc_thin <- tf$placeholder(dtype = tf$int32,
                                               shape = list()))
         tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
@@ -384,9 +388,6 @@ hmc_sampler <- R6Class(
           num_leapfrog_steps = hmc_L,
           seed = rng_seed)
       )
-
-      # change the burst length
-      tfe$hmc_burst_length <- as.integer(burst_length)
 
       # define the whole draws tensor
       dag$tf_run(
@@ -422,18 +423,13 @@ hmc_sampler <- R6Class(
                              hmc_L = L,
                              hmc_epsilon = epsilon,
                              hmc_diag_sd = diag_sd,
+                             hmc_burst_length = as.integer(n_samples),
                              hmc_thin = as.integer(thin))
       dag$tf_run(hmc_dict <- do.call(dict, hmc_values))
 
-      # if the required burst length has changed, redefine the draws
-      if (n_samples != self$last_burst_length) {
-        self$define_tf_hmc_draws(n_samples)
-        self$last_burst_length <- n_samples
-      }
-
       # run sampler
       hmc_batch_results <- dag$tf_run(sess$run(hmc_batch,
-                                       feed_dict = hmc_dict))
+                                               feed_dict = hmc_dict))
 
       # get trace of free state
       free_state_draws <- hmc_batch_results[[1]]
