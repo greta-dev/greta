@@ -129,6 +129,11 @@ sample_variance <- function (x) {
   var
 }
 
+# return an integer to pass on as an RNG seed
+get_seed <- function () {
+  sample.int(1e12, 1)
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -139,7 +144,8 @@ misc_module <- module(module,
                       is_scalar,
                       flatten,
                       do,
-                      sample_variance)
+                      sample_variance,
+                      get_seed)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
@@ -387,10 +393,11 @@ prepare_draws <- function (draws) {
   coda::mcmc(draws_df)
 }
 
-build_sampler <- function (initial_values, sampler, model) {
+build_sampler <- function (initial_values, sampler, model, seed = get_seed()) {
   sampler$class$new(initial_values,
                     model,
-                    sampler$parameters)
+                    sampler$parameters,
+                    seed = seed)
 }
 
 # unlist and flatten a list of arrays to a vector row-wise
