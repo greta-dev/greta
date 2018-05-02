@@ -121,10 +121,10 @@ mcmc <- function (model,
                   sampler = hmc(),
                   n_samples = 1000,
                   thin = 1,
-                  warmup = 100,
+                  warmup = 1000,
                   chains = 1,
                   verbose = TRUE,
-                  pb_update = 10,
+                  pb_update = 50,
                   initial_values = NULL) {
 
   # find variable names to label samples
