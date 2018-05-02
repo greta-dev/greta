@@ -41,6 +41,8 @@
 #' }
 NULL
 
+tfp <- NULL
+
 # crate the node list object whenever the package is loaded
 .onLoad <- function (libname, pkgname) {
 
@@ -56,6 +58,10 @@ NULL
   # default float type
   if (reticulate::py_module_available('tensorflow'))
     options(greta_tf_float = tf$float32)
+
+  # load tf probability
+  if (reticulate::py_module_available('tensorflow_probability'))
+    tfp <<- reticulate::import("tensorflow_probability")
 
 }
 

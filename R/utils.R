@@ -465,7 +465,7 @@ chol_to_symmetric <- function (L) {
 }
 
 greta_array_ops_module <- module(flat_to_chol,
-                                        chol_to_symmetric)
+                                 chol_to_symmetric)
 
 # utilities to export via .internals
 
