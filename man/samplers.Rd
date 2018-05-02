@@ -5,7 +5,7 @@
 \alias{hmc}
 \title{MCMC samplers}
 \usage{
-hmc(Lmin = 10, Lmax = 20, epsilon = 0.005, diag_sd = 1)
+hmc(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1)
 }
 \arguments{
 \item{Lmin}{minimum number of leapfrog steps (positive integer, Lmin > Lmax)}
