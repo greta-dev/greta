@@ -78,7 +78,7 @@ inference <- R6Class(
         attempts <- 1
         while (!valid & attempts < 20) {
 
-          initial_values <- rnorm(self$n_free, 0, 0.5)
+          initial_values <- rnorm(self$n_free, 0, 0.1)
 
           # test validity of values
           valid <- self$valid_parameters(initial_values)
@@ -192,7 +192,7 @@ sampler <- R6Class(
     n_chains = 1,
 
     # how often to tune during warmup
-    tuning_interval = 50,
+    tuning_interval = 10,
 
     run_chain = function (n_samples, thin, warmup, verbose, pb_update) {
 

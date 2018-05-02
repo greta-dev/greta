@@ -25,9 +25,9 @@ NULL
 #'   selected uniformly at random from between \code{Lmin} and \code{Lmax}.
 #'   \code{diag_sd} is used to rescale the parameter space to make it more
 #'   uniform, and make sampling more efficient.
-hmc <- function (Lmin = 10,
-                 Lmax = 20,
-                 epsilon = 0.005,
+hmc <- function (Lmin = 5,
+                 Lmax = 10,
+                 epsilon = 0.1,
                  diag_sd = 1) {
 
   obj <- list(parameters = list(Lmin = Lmin,
