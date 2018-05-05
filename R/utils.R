@@ -26,9 +26,11 @@ module <- function (..., sort = TRUE) {
 }
 
 
-# check tensorflow is installed and the version of tensorflow is valid. error,
-# warn, or message if not and (if not an error) return an invisible logical
-# saying whether it is valid
+# check tensorflow and tensorflow-probability are installed and the version of
+# tensorflow is valid. error, warn, or message if not and (if not an error)
+# return an invisible logical saying whether it is valid
+
+#' @importFrom utils compareVersion
 check_tf_version <- function (alert = c("none",
                                         "error",
                                         "warn",
@@ -37,33 +39,50 @@ check_tf_version <- function (alert = c("none",
 
   alert <- match.arg(alert)
   text <- NULL
-  available <- TRUE
+  tf_available <- TRUE
+  tfp_available <- TRUE
 
   if (!reticulate::py_module_available('tensorflow')) {
 
-    text <- "TensorFlow isn't installed."
-    available <- FALSE
+    text <- "TensorFlow isn't installed"
+    tf_available <- FALSE
 
   } else {
 
     tf_version <- tf$`__version__`
-    tf_version_split <- strsplit(tf_version, '.', fixed = TRUE)[[1]]
-    tf_version_valid <- as.numeric(tf_version_split[1]) >= 1
+    tf_version_valid <- utils::compareVersion("1.8", tf_version) != 1
 
     if (!tf_version_valid) {
 
-      text <- paste0("you have version ", tf_version)
-      available <- FALSE
+      text <- paste0("you have TensorFlow version ", tf_version)
+      tf_available <- FALSE
 
     }
 
   }
 
+  if (!reticulate::py_module_available('tensorflow_probability')) {
+
+    text <- paste0(text,
+                   ifelse(is.null(text), "", " and "),
+                   "TensorFlow Probability isn't installed")
+    tfp_available <- FALSE
+
+  }
+
   if (!is.null(text)) {
 
-    text <- paste0("\n\n  greta requires TensorFlow version 1.0.0 or higher, ",
-                   "but ", text, "\n  ",
-                   "Use install_tensorflow() to install the latest version.",
+    install <- sprintf("install_tensorflow(%s) ",
+                       ifelse(tfp_available,
+                              "",
+                              "extra_packages = \"tensorflow-probability\""))
+
+    text <- paste0("\n\n  greta requires TensorFlow version 1.8 or higher ",
+                   "and Tensorflow Probability, ",
+                   "but ", text, ".\n  ",
+                   "Use ",
+                   install,
+                   "to install the latest version.",
                    "\n\n")
     switch(alert,
            error = stop (text, call. = FALSE),
@@ -73,9 +92,11 @@ check_tf_version <- function (alert = c("none",
            none = NULL)
   }
 
-  invisible(available)
+  invisible(tf_available & tfp_available)
 
 }
+
+
 
 # helper for *apply statements on R6 objects
 member <- function (x, method)
