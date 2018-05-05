@@ -59,7 +59,7 @@ get_density <- function (distrib, data) {
 
 }
 
-compare_distribution <- function (greta_fun, r_fun, parameters, x) {
+compare_distribution <- function (greta_fun, r_fun, parameters, x, dim = NULL) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.
   # 'greta_fun' is the greta distribution constructor function (e.g. normal())
@@ -71,9 +71,13 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x) {
   # define greta distribution, with fixed values
 
   parameters_greta <- parameters
+
+  if (is.null(dim))
+    dim <- NROW(x)
+
   # no dim for wishart
   if (!identical(names(parameters), c('df', 'Sigma')))
-    parameters_greta <- c(parameters_greta, dim = NROW(x))
+    parameters_greta <- c(parameters_greta, list(dim = dim))
 
   # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
