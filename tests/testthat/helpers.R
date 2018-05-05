@@ -215,9 +215,10 @@ gen_opfun <- function (n, ops) {
 # support greta array is defined as astochastic in the call, like:
 # sample_distribution(normal(0, 1))
 sample_distribution <- function (greta_array, n = 10,
-                                 lower = -Inf, upper = Inf) {
-  m <- model(greta_array)
-  draws <- mcmc(m, n_samples = n, warmup = 1, verbose = FALSE)
+                                 lower = -Inf, upper = Inf,
+                                 warmup = 1) {
+  m <- model(greta_array, precision = "double")
+  draws <- mcmc(m, n_samples = n, warmup = warmup, verbose = FALSE)
   samples <- as.vector(draws[[1]])
   expect_true(all(samples >= lower & samples <= upper))
 }
