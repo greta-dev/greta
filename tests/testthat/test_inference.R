@@ -61,7 +61,7 @@ test_that('bad mcmc proposals are rejected', {
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     m <- model(z),
-    out <- capture_output(mcmc(m, n_samples = 10, warmup = 0)),
+    out <- capture_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
     expect_match(out, '100% bad')
   )
 
