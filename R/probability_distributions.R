@@ -61,7 +61,7 @@ uniform_distribution <- R6Class (
            dim = self$dim)
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       tf_ld <- fl(self$log_density)
 
@@ -90,7 +90,7 @@ normal_distribution <- R6Class (
       self$add_parameter(sd, 'sd')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Normal(loc = parameters$mean,
                                       scale = parameters$sd)
     }
@@ -112,7 +112,7 @@ lognormal_distribution <- R6Class (
       self$add_parameter(sdlog, 'sdlog')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       mean <- parameters$meanlog
       sd <- parameters$sdlog
@@ -152,7 +152,7 @@ bernoulli_distribution <- R6Class (
       self$add_parameter(prob, 'prob')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Bernoulli(probs = parameters$prob)
     },
 
@@ -178,7 +178,7 @@ binomial_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Binomial(total_count = parameters$size,
                                         probs = parameters$prob)
     },
@@ -205,7 +205,7 @@ beta_binomial_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       size <- parameters$size
       alpha <- parameters$alpha
@@ -240,7 +240,7 @@ poisson_distribution <- R6Class (
       self$add_parameter(lambda, 'lambda')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Poisson(rate = parameters$lambda)
     },
 
@@ -264,7 +264,7 @@ negative_binomial_distribution <- R6Class (
       self$add_parameter(prob, 'prob')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$NegativeBinomial(total_count = parameters$size,
                                                 probs = fl(1) - parameters$prob)
     },
@@ -290,7 +290,7 @@ hypergeometric_distribution <- R6Class (
       self$add_parameter(k, 'k')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       m <- parameters$m
       n <- parameters$n
@@ -325,7 +325,7 @@ gamma_distribution <- R6Class (
       self$add_parameter(rate, 'rate')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Gamma(concentration = parameters$shape,
                                      rate = parameters$rate)
     }
@@ -348,7 +348,7 @@ inverse_gamma_distribution <- R6Class (
       self$add_parameter(beta, 'beta')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$InverseGamma(concentration = parameters$alpha,
                                             rate = parameters$beta)
     }
@@ -371,7 +371,7 @@ weibull_distribution <- R6Class (
       self$add_parameter(scale, 'scale')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       a <- parameters$shape
       b <- parameters$scale
@@ -409,7 +409,7 @@ exponential_distribution <- R6Class (
       self$add_parameter(rate, 'rate')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Exponential(rate = parameters$rate)
     }
 
@@ -431,7 +431,7 @@ pareto_distribution <- R6Class (
       self$add_parameter(b, 'b')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       a <- parameters$a
       b <- parameters$b
@@ -466,7 +466,7 @@ student_distribution <- R6Class (
       self$add_parameter(sigma, 'sigma')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$StudentT(df = parameters$df,
                                         loc = parameters$mu,
                                         scale = parameters$sigma)
@@ -488,7 +488,7 @@ laplace_distribution <- R6Class (
       self$add_parameter(sigma, 'sigma')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Laplace(loc = parameters$mu,
                                        scale = parameters$sigma)
     }
@@ -511,7 +511,7 @@ beta_distribution <- R6Class (
       self$add_parameter(shape2, 'shape2')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Beta(concentration1 = parameters$shape1,
                                     concentration0 = parameters$shape2)
     }
@@ -532,7 +532,7 @@ cauchy_distribution <- R6Class (
       self$add_parameter(scale, 'scale')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       loc <- parameters$location
       s <- parameters$scale
@@ -567,7 +567,7 @@ chi_squared_distribution <- R6Class (
       self$add_parameter(df, 'df')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Chi2(df = parameters$df)
     }
 
@@ -587,7 +587,7 @@ logistic_distribution <- R6Class (
       self$add_parameter(scale, 'scale')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Logistic(loc = parameters$location,
                                         scale = parameters$scale)
     },
@@ -615,7 +615,7 @@ f_distribution <- R6Class (
       self$add_parameter(df2, 'df2')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       df1 <- parameters$df1
       df2 <- parameters$df2
@@ -697,7 +697,7 @@ dirichlet_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       alpha <- tf$transpose(parameters$alpha)
       tf$contrib$distributions$Dirichlet(concentration = alpha)
@@ -770,7 +770,7 @@ dirichlet_multinomial_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       alpha <- tf$transpose(parameters$alpha)
       distrib <- tf$contrib$distributions$DirichletMultinomial
@@ -844,7 +844,7 @@ multinomial_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       probs <- tf$transpose(parameters$prob)
       probs <- probs / tf$reduce_sum(probs)
@@ -908,7 +908,7 @@ categorical_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       probs <- tf$transpose(parameters$prob)
       probs <- probs / tf$reduce_sum(probs)
@@ -1012,7 +1012,7 @@ multivariate_normal_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       # check if Sigma (the node version) has a cholesky factor to use
       cf <- self$parameters$Sigma$representations$cholesky_factor
@@ -1094,7 +1094,7 @@ wishart_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       # if there is a cholesky factor for Sigma,use that
       cf <- self$parameters$Sigma$representations$cholesky_factor
@@ -1116,8 +1116,8 @@ wishart_distribution <- R6Class (
 
     },
 
-    tf_log_density_function = function (x, parameters) {
-      lp <- self$tf_distrib(parameters)$log_prob(x)
+    tf_log_density_function = function (x, parameters, dag) {
+      lp <- self$tf_distrib(parameters, dag)$log_prob(x)
       tf$reshape(lp, shape(1, 1))
     },
 
@@ -1212,7 +1212,7 @@ lkj_correlation_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       eta <- parameters$eta
 
