@@ -1100,14 +1100,16 @@ wishart_distribution <- R6Class (
       cf <- self$parameters$Sigma$representations$cholesky_factor
       is_cholesky <- !is.null(cf)
 
+      df <- tf$squeeze(parameters$df)
+
       if (is_cholesky) {
 
-        tf$contrib$distributions$WishartCholesky(df = parameters$df,
+        tf$contrib$distributions$WishartCholesky(df = df,
                                                  scale = parameters$Sigma)
 
       } else {
 
-        tf$contrib$distributions$WishartFull(df = parameters$df,
+        tf$contrib$distributions$WishartFull(df = df,
                                              scale = parameters$Sigma)
 
       }
