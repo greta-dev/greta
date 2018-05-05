@@ -1096,7 +1096,7 @@ wishart_distribution <- R6Class (
 
     tf_distrib = function (parameters, dag) {
 
-      # if there is a cholesky factor for Sigma,use that
+      # if there is a cholesky factor for Sigma, use that
       cf <- self$parameters$Sigma$representations$cholesky_factor
       is_cholesky <- !is.null(cf)
 
@@ -1104,15 +1104,22 @@ wishart_distribution <- R6Class (
 
       if (is_cholesky) {
 
-        tf$contrib$distributions$WishartCholesky(df = df,
-                                                 scale = parameters$Sigma)
+        # find and use the tensor for the cholesky factor
+        cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
+
+        wish_chol <- tf$contrib$distributions$WishartCholesky
+        distrib <- wish_chol(df = df,
+                             scale = tf$transpose(cholesky_scale))
 
       } else {
 
-        tf$contrib$distributions$WishartFull(df = df,
-                                             scale = parameters$Sigma)
+        wish <- tf$contrib$distributions$WishartFull
+        distrib <- wish(df = df,
+                        scale = parameters$Sigma)
 
       }
+
+      distrib
 
     },
 
