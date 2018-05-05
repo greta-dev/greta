@@ -9,7 +9,7 @@ test_that('check_tf_version works', {
   tf$`__version__` <- "0.9.0"
 
   # expected text
-  expected_message <- "you have version 0.9.0"
+  expected_message <- "you have TensorFlow version 0.9.0"
 
   expect_error(check_tf_version('error'),
                expected_message)
@@ -35,6 +35,7 @@ test_that('check_tf_version works', {
 
 test_that('.onLoad runs', {
 
+  source("helpers.R")
   expect_ok( greta:::.onLoad() )
 
 })
