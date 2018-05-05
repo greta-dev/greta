@@ -723,7 +723,7 @@ test_that('distributions can be sampled from', {
   # multivariate continuous
   sig <- MCMCpack::rwish(4, diag(3))
   sample_distribution(multivariate_normal(rnorm(3), sig))
-  sample_distribution(wishart(4, sig))
+  sample_distribution(wishart(4L, sig), warmup = 0)
   sample_distribution(lkj_correlation(4, dim = 3))
   sample_distribution(dirichlet(runif(3)))
 
@@ -1029,7 +1029,7 @@ test_that('Wishart can use a choleskied Sigma', {
 
   sig <- lkj_correlation(3, dim = 4)
   w <- wishart(5, sig)
-  m <- model(w)
-  expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE) )
+  m <- model(w, precision = "double")
+  expect_ok( draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE) )
 
 })
