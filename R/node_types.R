@@ -375,7 +375,7 @@ distribution_node <- R6Class (
         tf_parameters <- self$tf_fetch_parameters(dag)
 
         # calculate log density
-        ld <- self$tf_log_density_function(tf_target, tf_parameters)
+        ld <- self$tf_log_density_function(tf_target, tf_parameters, dag)
 
         # check for truncation
         if (!is.null(self$truncation))
@@ -450,21 +450,21 @@ distribution_node <- R6Class (
 
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_log_density_function = function (x, parameters, dag) {
 
-      self$tf_distrib(parameters)$log_prob(x)
+      self$tf_distrib(parameters, dag)$log_prob(x)
 
     },
 
     tf_cdf_function = function (x, parameters) {
 
-      self$tf_distrib(parameters)$cdf(x)
+      self$tf_distrib(parameters, dag)$cdf(x)
 
     },
 
     tf_log_cdf_function = function (x, parameters) {
 
-      self$tf_distrib(parameters)$log_cdf(x)
+      self$tf_distrib(parameters, dag)$log_cdf(x)
 
     }
 
