@@ -119,7 +119,7 @@ mixture_distribution <- R6Class (
       self$add_parameter(weights, "weights")
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       densities <- parameters[names(parameters) != "weights"]
       names(densities) <- NULL
