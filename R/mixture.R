@@ -128,11 +128,27 @@ mixture_distribution <- R6Class (
       log_weights <- tf$log(weights)
 
       log_prob <- function (x) {
+
+        # get component densities in an array
         log_probs <- lapply(densities, do.call, list(x))
-        log_probs_mat <- tf$concat(log_probs, 1L)
-        weighted_log_probs_mat <- tf$add(log_probs_mat,
-                                         tf$transpose(log_weights))
-        tf$reduce_logsumexp(weighted_log_probs_mat, 1L, keepdims = TRUE)
+        log_probs_arr <- tf$stack(log_probs)
+
+        # massage log_weights into the same shape as log_probs_arr
+        log_weights <- tf$squeeze(log_weights)
+        extra_dims <- dim(log_probs_arr)[-1]
+        for (dim in extra_dims) {
+          ndim <- length(dim(log_weights))
+          log_weights <- tf$expand_dims(log_weights, ndim)
+          if (dim > 1L) {
+            tiling <- c(rep(1L, ndim), dim)
+            tf_tiling <- tf$constant(tiling, shape = list(ndim + 1))
+            log_weights <- tf$tile(log_weights, tf_tiling)
+          }
+        }
+
+        # do elementwise addition, then collapse along the mixture dimension
+        log_probs_weighted_arr <- log_probs_arr + log_weights
+        tf$reduce_logsumexp(log_probs_weighted_arr, axis = 0L)
       }
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
