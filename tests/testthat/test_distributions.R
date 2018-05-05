@@ -14,6 +14,22 @@ test_that('normal distribution has correct density', {
 
 })
 
+test_that('multidimensional normal distribution has correct density', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::normal,
+                                     stats::dnorm,
+                                     parameters = list(mean = -2, sd = 3),
+                                     x = array(rnorm(100, -2, 3),
+                                               dim =c(10, 2, 5)),
+                                     dim = c(10, 2, 5))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('uniform distribution has correct density', {
 
   skip_if_not(check_tf_version())
