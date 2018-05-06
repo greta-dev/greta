@@ -1,0 +1,29 @@
+title: greta
+url: http://pteetor.github.io/greta-dev
+template:
+  params:
+    bootswatch: cerulean     # Original site used "lumen"
+
+navbar:
+  left:
+    - icon: fa-home
+      href: index.html
+    - text: "get started"
+      href: articles/get_started.html
+    - text: "examples"
+      href: articles/example_models.html
+    - text: "faq"
+      href: articles/faq.html
+  right:
+    - icon: fa-file-code-o
+      text: "functions"
+      href: reference/index.html
+    - icon: fa-flask
+      text: "technical details"
+      href: articles/technical_details.html
+    - icon: fa-newspaper-o
+      text: "news"
+      href: news/index.html
+    - icon: fa-github fa-lg
+      text: "github"
+      href: https://github.com/greta-dev/greta

@@ -1,0 +1,13 @@
+pandoc: 2.1.2
+pkgdown: 1.0.0
+pkgdown_sha: ~
+articles:
+  example_models: example_models.html
+  faq: faq.html
+  get_started: get_started.html
+  greta: greta.html
+  technical_details: technical_details.html
+urls:
+  reference: http://pteetor.github.io/greta-dev/reference
+  article: http://pteetor.github.io/greta-dev/articles
+

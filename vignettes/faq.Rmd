@@ -1,0 +1,54 @@
+---
+title: "greta FAQ"
+author: "Nick Golding"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# About greta
+
+### What is greta?
+### How can I install greta?
+### How does greta compare to . . . 
+### . . . Stan?
+### . . . Edward?
+### . . . JAGS?
+### . . . BUGS and WinBUGS?
+### Why is it called "greta?"
+
+# Defining a model
+
+# Bayesian computation
+
+### Can one use Greta to estimate MAP (maximum a posteriori) probability?  [A: Yes, use the opt() function]
+### How can greta perform Markov Chain Monte Carlo (MCMC)?
+### Can I use multiple cores to run multiple chains in parallel? If so, how?
+### Can I use a Tensorflow cluster to run multiple chains in parallel? If so, how?
+### Can Greta perform variational Bayesian inference (a.k.a. variational inference)?
+
+# Bayesian regression
+
+### How can I perform simple regression?
+### How can I get credible intervals (confidence intervals) for my regression coefficients?
+### How can I perform multi-variate regression?
+### How can I perform logistic regression?
+### How can I define a generalized linear model (GLM)?
+
+# Community
+
+### How can I contribute . . .
+### . . . code?
+### . . . examples?
+### . . . suggestions?
+### How can I report problems?
