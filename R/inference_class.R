@@ -518,7 +518,7 @@ hmc_sampler <- R6Class(
                                                shape = list(length(free_state), 1L)))
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
-      dag$tf_run(hmc_step_sizes <- tf$reshape(hmc_epsilon * hmc_diag_sd,
+      dag$tf_run(hmc_step_sizes <- tf$reshape(hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
                                               shape = list(length(free_state))))
 
       # log probability function
