@@ -198,6 +198,8 @@ sampler <- R6Class(
     log_epsilon_bar = 0,
     tuning_interval = 3,
 
+    accept_target = 0.5,
+
     # sampler kernel information
     parameters = list(),
 
@@ -329,7 +331,6 @@ sampler <- R6Class(
       if (tuning_now) {
 
         # epsilon & tuning parameters
-        target <- 0.651
         kappa <- 0.75
         gamma <- 0.1
         t0 <- 10
@@ -340,7 +341,7 @@ sampler <- R6Class(
         mean_accept_stat <- self$mean_accept_stat
 
         w1 <- 1 / (iter + t0)
-        hbar <- (1 - w1) * hbar + w1 * (target - mean_accept_stat)
+        hbar <- (1 - w1) * hbar + w1 * (self$accept_target - mean_accept_stat)
         log_epsilon <- mu - hbar * sqrt(iter) / gamma
         w2 <- iter ^ -kappa
         log_epsilon_bar <- w2 * log_epsilon + (1 - w2) * log_epsilon_bar
@@ -473,6 +474,8 @@ hmc_sampler <- R6Class(
                       Lmax = 20,
                       epsilon = 0.005,
                       diag_sd = 1),
+
+    accept_target = 0.651,
 
     initialize = function (initial_values,
                            model,
