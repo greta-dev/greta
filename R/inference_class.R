@@ -414,7 +414,8 @@ sampler <- R6Class(
           current_state = tf$reshape(free_state, list(length(free_state))),
           kernel = sampler_kernel,
           num_burnin_steps = 0L,
-          num_steps_between_results = sampler_thin)
+          num_steps_between_results = sampler_thin,
+          parallel_iterations = 1L)
       )
 
     },
