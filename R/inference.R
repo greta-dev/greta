@@ -58,7 +58,8 @@ greta_stash <- new.env()
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom future availableCores plan future_lapply
+#' @importFrom future plan
+#' @importFrom future.apply future_lapply
 #'
 #' @param model greta_model object
 #' @param sampler sampler used to draw values in MCMC. See \code{\link{samplers}} for options.

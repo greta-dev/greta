@@ -49,6 +49,8 @@ Imports:
     tensorflow,
     reticulate,
     progress,
+    future,
+    future.apply,
     coda,
     methods
 Suggests:
