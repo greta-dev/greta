@@ -199,6 +199,7 @@ sampler <- R6Class(
     tuning_interval = 3,
 
     accept_target = 0.5,
+    accept_history = vector(),
 
     # sampler kernel information
     parameters = list(),
@@ -231,8 +232,8 @@ sampler <- R6Class(
         for (burst in seq_along(burst_lengths)) {
 
           self$run_burst(burst_lengths[burst], thin = thin)
-          self$tune(completed_iterations[burst], warmup)
           self$trace(values = FALSE)
+          self$tune(completed_iterations[burst], warmup)
 
           if (verbose) {
             iterate_progress_bar(pb_warmup,
@@ -373,9 +374,8 @@ sampler <- R6Class(
       if (tuning_now) {
 
         samples <- self$traced_free_state
-        dups <- duplicated(samples)
-        if (length(dups) > 0) {
-          samples <- samples[!dups, , drop = FALSE]
+        if (sum(!self$accept_history) > 0) {
+          samples <- samples[self$accept_history, , drop = FALSE]
         }
         n_accepted <- nrow(samples)
 
@@ -446,6 +446,8 @@ sampler <- R6Class(
 
       # log acceptance probability
       log_accept_stats <- batch_results[[2]]$log_accept_ratio
+      is_accepted <- batch_results[[2]]$is_accepted
+      self$accept_history <- c(self$accept_history, is_accepted)
       accept_stats_batch <- pmin(1, exp(log_accept_stats))
       self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
 
