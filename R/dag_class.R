@@ -14,13 +14,12 @@ dag_class <- R6Class(
     target_nodes = NA,
     parameters_example = NA,
     tf_float = NA,
-    n_cores = NA,
+    n_cores = 0L,
     compile = NA,
 
     # create a dag from some target nodes
     initialize = function (target_greta_arrays,
                            tf_float = tf$float32,
-                           n_cores = 2L,
                            compile = FALSE) {
 
       # build the dag
@@ -38,7 +37,6 @@ dag_class <- R6Class(
 
       # store the performance control info
       self$tf_float <- tf_float
-      self$n_cores <- n_cores
       self$compile <- compile
 
     },

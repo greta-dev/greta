@@ -447,12 +447,56 @@ relist_tf <- function (x, list_template) {
 
 }
 
+# check the future execution plan is allowed when doing MCMC
+#' @importFrom future plan
+check_future_plan <- function (allowed_classes = c("multisession", "sequential")) {
+  plan_classes <- class(future::plan())
+  viable <- any(allowed_classes %in% plan_classes)
+  if (!viable) {
+    stop ("greta can only run mcmc chains in parallel ",
+          "with future's 'multisession' or 'sequential' plans",
+          call. = FALSE)
+  }
+}
+
+#' @importFrom future availableCores
+check_n_cores <- function (n_cores, chains, sequential) {
+
+  n_cores_detected <- future::availableCores()
+
+  # check user-provided cores
+  if (!is.null(n_cores) && !n_cores %in% seq_len(n_cores_detected)) {
+
+    warning (n_cores, ' cores were requested, but only ',
+             n_detected, ' cores are available. Using ',
+             n_detected, ' cores.')
+
+    n_cores <- NULL
+
+  }
+
+  if (is.null(n_cores))
+    n_cores <- 0L
+
+  # if in parallel on this machine and n_cores isn't user-specified, set it so
+  # there's no clash between chains
+  if (!sequential & n_cores == 0)
+    n_cores <- n_cores_detected %/% chains
+
+  as.integer(n_cores)
+
+
+}
+
+
 sampler_utils_module <- module(all_greta_arrays,
                                cleanly,
                                build_sampler,
                                prepare_draws,
                                unlist_tf,
-                               relist_tf)
+                               relist_tf,
+                               check_future_plan,
+                               check_n_cores)
 
 flat_to_chol <- function (x, dim, correl = FALSE) {
 

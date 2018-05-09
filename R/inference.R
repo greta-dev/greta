@@ -70,6 +70,7 @@ greta_stash <- new.env()
 #'   During this phase the sampler moves toward the highest density area and
 #'   tunes sampler hyperparameters.
 #' @param chains number of MCMC chains to run
+#' @param n_cores the maximum number of cores used by \emph{each} chain
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations)
 #' @param control an optional named list of hyperparameters and options to
@@ -77,8 +78,6 @@ greta_stash <- new.env()
 #' @param initial_values an optional vector (or list of vectors, for multiple
 #'   chains) of initial values for the free parameters in the model. These will
 #'   be used as the starting point for sampling/optimisation.
-#' @param method method used to optimise values. Currently only \code{adagrad}
-#'   is available
 #'
 #' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
@@ -129,6 +128,8 @@ mcmc <- function (model,
                   pb_update = 50,
                   initial_values = NULL) {
 
+  check_future_plan()
+
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
   names <- names(target_greta_arrays)
@@ -173,35 +174,10 @@ mcmc <- function (model,
     samplers[[i]]$chain_number <- i
     samplers[[i]]$n_chains <- chains
   }
-  
+
   sequential <- inherits(plan(), "sequential")
-
-  n_cores_detected <- future::availableCores()
-
-  # if the user passed n_cores via model instead (deprecated) use them
-  if (is.null(n_cores) && model$dag$n_cores != 0)
-    n_cores <- model$dag$n_cores
-
-  # check user-provided cores
-  if (!is.null(n_cores) && !n_cores %in% seq_len(n_cores_detected)) {
-
-    warning (n_cores, ' cores were requested, but only ',
-             n_detected, ' cores are available. Using ',
-             n_detected, ' cores.')
-
-    n_cores <- NULL
-
-  }
-
-  if (is.null(n_cores))
-    n_cores <- 0L
-
-  # if in parallel on this machine and n_cores isn't user-specified, set it so
-  # there's no clash between chains
-  if (!sequential & n_cores == 0)
-    n_cores <- n_cores_detected %/% chains
-
-  n_cores <- as.integer(n_cores)
+  n_cores <- check_n_cores(n_cores, chains, sequential)
+  float_type <- dag$tf_float$name
 
   if (!sequential & chains > 1) {
     cores_text <- ifelse(n_cores == 1, "1 core", sprintf("up to %i cores", n_cores))
@@ -219,7 +195,14 @@ mcmc <- function (model,
                      verbose = verbose,
                      pb_update = pb_update,
                      sequential = sequential,
-                     n_cores = n_cores)
+                     n_cores = n_cores,
+                     float_type = float_type)
+
+  # if we were running in parallel, we need to put the samplers back in the
+  # stash to return
+  if (!sequential) {
+    greta_stash$samplers <- samplers
+  }
 
   # get chains from the samplers, with raw values as an attribute
   draws <- stashed_samples()

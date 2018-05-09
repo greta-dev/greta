@@ -204,9 +204,32 @@ sampler <- R6Class(
     # sampler kernel information
     parameters = list(),
 
-    run_chain = function (n_samples, thin, warmup, verbose, pb_update) {
+    run_chain = function (n_samples, thin, warmup, verbose, pb_update, sequential, n_cores, float_type) {
 
-      self$print_chain_number()
+      dag <- self$model$dag
+
+      # set the number of cores
+      dag$n_cores <- n_cores
+
+      if (sequential) {
+        self$print_chain_number()
+      }
+
+      # if this is in parallel
+      if (!sequential) {
+
+        # flush the environment
+        dag$tf_environment <- new.env()
+
+        # rebuild the TF graph
+        dag$tf_float <- tf[[float_type]]
+        dag$tf_graph <- tf$Graph()
+        dag$define_tf(FALSE, FALSE)
+
+        # rebuild the TF draws tensor
+        self$define_tf_draws()
+
+      }
 
       self$traced_free_state <- matrix(NA, 0, self$n_free)
       self$traced_values <- matrix(NA, 0, self$n_traced)
@@ -214,7 +237,7 @@ sampler <- R6Class(
       # if warmup is required, do that now
       if (warmup > 0) {
 
-        if (verbose) {
+        if (verbose & sequential) {
           pb_warmup <- create_progress_bar("warmup",
                                            c(warmup, n_samples),
                                            pb_update)
@@ -235,7 +258,7 @@ sampler <- R6Class(
           self$trace(values = FALSE)
           self$tune(completed_iterations[burst], warmup)
 
-          if (verbose) {
+          if (verbose & sequential) {
             iterate_progress_bar(pb_warmup,
                                  it = completed_iterations[burst],
                                  rejects = self$numerical_rejections)
@@ -249,7 +272,7 @@ sampler <- R6Class(
       self$traced_free_state <- matrix(NA, 0, self$n_free)
 
       # main sampling
-      if (verbose) {
+      if (verbose & sequential) {
         pb_sampling <- create_progress_bar('sampling',
                                            c(warmup, n_samples),
                                            pb_update)
@@ -267,7 +290,7 @@ sampler <- R6Class(
         self$run_burst(burst_lengths[burst], thin = thin)
         self$trace()
 
-        if (verbose) {
+        if (verbose & sequential) {
           iterate_progress_bar(pb_sampling,
                                it = completed_iterations[burst],
                                rejects = self$numerical_rejections)
@@ -275,7 +298,8 @@ sampler <- R6Class(
 
       }
 
-      sampler
+      # return self, to send results back when running in parallel
+      self
 
     },
 
