@@ -189,15 +189,15 @@ mcmc <- function (model,
 
   # run chains on samplers (return list so we can handle parallelism here)
   samplers <- future.apply::future_lapply(samplers,
-                     do("run_chain"),
-                     n_samples = n_samples,
-                     thin = thin,
-                     warmup = warmup,
-                     verbose = verbose,
-                     pb_update = pb_update,
-                     sequential = sequential,
-                     n_cores = n_cores,
-                     float_type = float_type)
+                                          do("run_chain"),
+                                          n_samples = n_samples,
+                                          thin = thin,
+                                          warmup = warmup,
+                                          verbose = verbose,
+                                          pb_update = pb_update,
+                                          sequential = sequential,
+                                          n_cores = n_cores,
+                                          float_type = float_type)
 
   # if we were running in parallel, we need to put the samplers back in the
   # stash to return
@@ -257,72 +257,6 @@ prep_initials <- function (initial_values, n_chains) {
 
 }
 
-
-
-run_chain <- function (chain, dag, method, n_samples, thin,
-                       warmup, chains, verbose, pb_update,
-                       control, initial_values, sequential,
-                       n_cores) {
-
-  if (sequential & chains > 1) {
-    msg <- sprintf("\nchain %i/%i\n", chain, chains)
-    cat(msg)
-  }
-
-  # set the number of cores and redefine the tf session
-  dag$n_cores <- n_cores
-  dag$define_tf_session()
-
-  initial_values_chain <- initial_values[[chain]]
-
-  # if warmup is required, do that now and update init
-  if (warmup > 0) {
-
-    if (verbose)
-      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
-    else
-      pb_warmup <- NULL
-
-    # run it
-    warmup_draws <- method(dag = dag,
-                           init = initial_values_chain,
-                           n_samples = warmup,
-                           thin = thin,
-                           verbose = verbose,
-                           pb = pb_warmup,
-                           tune = TRUE,
-                           stash = FALSE,
-                           control = control)
-
-    # use the last draw of the full parameter vector as the init
-    initial_values_chain <- attr(warmup_draws, 'last_x')
-    control <- attr(warmup_draws, 'control')
-
-  }
-
-  if (verbose)
-    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
-  else
-    pb_sampling <- NULL
-
-  # run the sampler
-  draws <- method(dag = dag,
-                  init = initial_values_chain,
-                  n_samples = n_samples,
-                  thin = thin,
-                  verbose = verbose,
-                  pb = pb_sampling,
-                  tune = FALSE,
-                  stash = TRUE,
-                  control = control)
-
-  # if this was successful, trash the stash, prepare and return the draws
-  rm('trace_stash', envir = greta_stash)
-  draws
-
-}
-
-
 #' @importFrom coda mcmc mcmc.list
 prepare_draws <- function (draws) {
   # given a matrix of draws returned by the sampler, prepare it and return
@@ -337,6 +271,8 @@ prepare_draws <- function (draws) {
 #' @param tolerance the numerical tolerance for the solution, the optimiser
 #'   stops when the (absolute) difference in the joint density between
 #'   successive iterations drops below this level
+#' @param method method used to optimise values. Currently only \code{adagrad}
+#'   is available
 #'
 #' @details Currently, the only implemented optimisation algorithm is Adagrad
 #'   (\code{method = "adagrad"}). The \code{control} argument can be used to
@@ -359,11 +295,11 @@ prepare_draws <- function (draws) {
 #' opt_res <- opt(m)
 #' }
 opt <- function (model,
-                  method = c("adagrad"),
-                  max_iterations = 100,
-                  tolerance = 1e-6,
-                  control = list(),
-                  initial_values = NULL) {
+                 method = c("adagrad"),
+                 max_iterations = 100,
+                 tolerance = 1e-6,
+                 control = list(),
+                 initial_values = NULL) {
 
   # mock up some names to avoid CRAN-check note
   optimiser <- joint_density <- sess <- NULL
