@@ -43,6 +43,9 @@ tunes sampler hyperparameters.}
 chains) of initial values for the free parameters in the model. These will
 be used as the starting point for sampling/optimisation.}
 
+\item{method}{method used to optimise values. Currently only \code{adagrad}
+is available}
+
 \item{max_iterations}{the maximum number of iterations before giving up}
 
 \item{tolerance}{the numerical tolerance for the solution, the optimiser
