@@ -116,8 +116,12 @@ test_that('define and mcmc error informatively', {
 
   # a bad number of cores
   a <- normal(0, 1)
-  expect_warning(model(a, n_cores = 1000000L),
-               'cores were requested, but only')
+  m <- model(a)
+  expect_message(mcmc(m,
+                      warmup = 1,
+                      n_samples = 1,
+                      n_cores = 1000000L),
+               "cores were requested, but only")
 
   # can't draw samples of a data greta array
   z <- normal(x, 1)

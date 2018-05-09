@@ -467,9 +467,10 @@ check_n_cores <- function (n_cores, chains, sequential) {
   # check user-provided cores
   if (!is.null(n_cores) && !n_cores %in% seq_len(n_cores_detected)) {
 
-    warning (n_cores, ' cores were requested, but only ',
-             n_detected, ' cores are available. Using ',
-             n_detected, ' cores.')
+    message ("\n\t",
+             n_cores, " cores were requested, but only ",
+             n_cores_detected, " cores are available. Using ",
+             n_cores_detected, " cores.\n")
 
     n_cores <- NULL
 
