@@ -23,9 +23,6 @@ NULL
 #'   should reduce the risk of numerical instability during sampling, but will
 #'   also increase the computation time, particularly for large models.
 #'
-#' @param n_cores this argument is deprecated and will be removed in version 0.3. Use the
-#'   \code{n_cores} argument in \code{mcmc()} instead.
-#'
 #' @param compile whether to apply
 #'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
 #'   the tensorflow graph representing the model. This may slow down model
@@ -53,7 +50,6 @@ NULL
 #' }
 model <- function (...,
                    precision = c('single', 'double'),
-                   n_cores = NULL,
                    compile = TRUE) {
 
   check_tf_version('error')
@@ -62,21 +58,6 @@ model <- function (...,
   tf_float <- switch(match.arg(precision),
                      single = tf$float32,
                      double = tf$float64)
-
-  # check and set the number of cores
-  n_detected <- future::availableCores()
-
-  if (is.null(n_cores)) {
-    n_cores <- 0L
-  } else {
-
-    warning ("n_cores is deprecated and will be removed in version 0.3. ",
-             "use the n_cores argument to greta::mcmc() instead",
-             call. = FALSE)
-
-    n_cores <- as.integer(n_cores)
-
-  }
 
   # nodes required
   target_greta_arrays <- list(...)
@@ -125,7 +106,6 @@ model <- function (...,
   # get the dag containing the target nodes
   dag <- dag_class$new(target_greta_arrays,
                        tf_float = tf_float,
-                       n_cores = n_cores,
                        compile = compile)
 
   # get and check the types

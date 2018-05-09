@@ -33,6 +33,8 @@ tunes sampler hyperparameters.}
 
 \item{chains}{number of MCMC chains to run}
 
+\item{n_cores}{the maximum number of cores used by \emph{each} chain}
+
 \item{verbose}{whether to print progress information to the console}
 
 \item{pb_update}{how regularly to update the progress bar (in iterations)}
@@ -40,9 +42,6 @@ tunes sampler hyperparameters.}
 \item{initial_values}{an optional vector (or list of vectors, for multiple
 chains) of initial values for the free parameters in the model. These will
 be used as the starting point for sampling/optimisation.}
-
-\item{method}{method used to optimise values. Currently only \code{adagrad}
-is available}
 
 \item{max_iterations}{the maximum number of iterations before giving up}
 
