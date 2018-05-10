@@ -1,0 +1,265 @@
+---
+output:
+  html_document:
+    css: greta.css
+    ## theme: lumen
+    highlight: default
+    toc: false
+---
+
+<style type="text/css">
+body{
+  padding-top: 10px;
+}
+pre, pre:not([class]){
+  font-size: 18px;
+  color: #5a3a78;
+  background-color: #f7f7f7;
+  border: none;
+}
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+.main-container {
+    /* max-width: 2732px; */
+    margin-left: 0;
+    margin-right: 0;
+}
+.bullet{
+  color:#8960B3;
+  font-size: 36px;
+}
+.resource,
+.resource > p{
+  color: #8960B3;
+  font-size: 32px;
+}
+a, a:hover{
+  color: #8960B3;
+}
+.col-md-3,
+.col-md-4,
+.col-md-5,
+.col-md-6{
+  padding-top: 25px;
+  padding-bottom: 25px;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+#head {
+  background: #B797D7 url(greta-header.png) 0 45% / cover no-repeat;
+  box-shadow: 0 3px 10px 0 rgba(0,0,0,0.2);
+  max-width: 100%;
+  margin: 0 auto;
+}
+#header-content {
+  max-width: 100%;
+  margin: 0 auto;
+}
+#main-icon {
+  width: 100%;
+  height: auto;
+  margin-right : auto;
+  margin-left : auto;
+  min-width : 210px;
+  max-width : 585px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 45px;
+}
+#main-icon-text{
+  color:#ffffff;
+  font-size: 24px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+}
+#panel1 {
+  background-color: #f7f7f7;
+  box-shadow: 0 0 7px 2px rgba(0,0,0,0.1);
+  max-width: 90%;
+  margin: 0 auto;
+}
+#bullets {
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: 20px;
+  text-align: center;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#example {
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: 20px;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+set.seed(2018-02-17)
+```
+
+<div id="head">
+<p></p>
+<div id="header-content" class="container">
+<div class="row">
+<img id="main-icon" src="images/main-icon.png" />
+</div>
+<div class="row">
+<p id="main-icon-text">simple and scalable statistical modelling in R</p>
+</div>
+</div>
+</div>
+
+<div id="bullets">
+<br><br>
+
+<div class="row">
+
+<div class="col-md-4">
+  <p class="bullet"><b>simple</b></p>
+  <br>
+  greta models are written right in R, so there's no need to learn another language like BUGS or Stan
+</div>
+
+<div class="col-md-4">
+  <p class="bullet"><b>scalable</b></p>
+  <br>
+  greta uses [Google TensorFlow](https://www.tensorflow.org/) so it's fast even on massive datasets, and runs on CPU clusters and GPUs
+</div>
+
+<div class="col-md-4">
+  <p class="bullet"><b>extensible</b></p>
+  <br>
+  it's easy to write your own R functions, modules, and even packages using greta
+</div>
+
+</div>
+<!-- end of row -->
+
+</div>
+<!-- end of 'bullets' -->
+
+<br><br>
+
+<div>
+<div id="panel1" class="resource">
+<div class="container">
+<br>
+<div class="row">
+
+
+<div class="col-md-4">
+  <span class="fa fa-code fa-2x" style="vertical-align:middle;"></span>
+  <a href="#example">basic example</a>
+</div>
+
+
+<div class="col-md-4">
+  <span class="fa fa-arrow-circle-right fa-2x" style="vertical-align:middle;"></span>
+  [get started](get_started.html)
+</div>
+
+</div>
+<!-- end of row -->
+
+<div class="row">
+
+
+<div class="col-md-4">
+  <span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span>
+  [example models](example_models.html)
+</div>
+
+
+<div class="col-md-4">
+  <span class="fa fa-book fa-2x" style="vertical-align:middle;"></span>
+  [package docs](reference-index.html)
+</div>
+
+</div>
+<!-- end of row -->
+<br>
+
+</div>
+<!-- end of container -->
+
+</div>
+<!-- end of 'panel1' -->
+
+<div id="example">
+
+<br />
+<br />
+
+<h1 style="color: #8960B3;">basic example</h1>
+Here's a Bayesian linear regression model for the `iris` data using greta.
+
+<div class="row">
+<div class="col-md-6">
+
+```
+x <- iris$Petal.Length
+y <- iris$Sepal.Length
+```
+```
+library(greta)
+
+int <- normal(0, 5)
+coef <- normal(0, 3)
+sd <- lognormal(0, 3)
+
+mean <- int + coef * x
+distribution(y) <- normal(mean, sd)
+```
+```
+m <- model(int, coef, sd)
+```
+</div>
+<!-- end of column 1 -->
+
+<!-- begin column 2 -->
+<div class="col-md-6">
+
+```
+draws <- mcmc(m, n_samples = 1000, chains = 3)
+bayesplot::mcmc_trace(draws)
+```
+
+```{r vis, echo = FALSE, eval = TRUE, results='hide', message=FALSE, warning=FALSE, fig.height=4, fig.width=6, fig.align="center"}
+
+x <- iris$Petal.Length
+y <- iris$Sepal.Length
+
+library(greta)
+
+int <- normal(0, 5)
+coef <- normal(0, 3)
+sd <- lognormal(0, 3)
+
+mean <- int + coef * x
+distribution(y) <- normal(mean, sd)
+
+m <- model(int, coef, sd)
+
+## TODO: Change warmup and n_samples back to 1000
+draws <- mcmc(m, warmup = 100, n_samples = 100, chains = 3)
+bayesplot::mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1)) + ggplot2::theme_minimal()
+```
+
+</div>
+<!-- end of column 2 -->
+
+</div>
+<!-- end of row -->
+
+</div>
+<!-- end of 'example' -->
+
+</div>
