@@ -6,10 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simple and Scalable Statistical Modelling in R • greta</title>
-<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cerulean/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="jquery.sticky-kit.min.js"></script><script src="pkgdown.js"></script><meta property="og:title" content="Simple and Scalable Statistical Modelling in R">
+<script src="jquery.sticky-kit.min.js"></script><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="Simple and Scalable Statistical Modelling in R">
 <meta property="og:description" content="Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see &lt;https://greta-dev.github.io/greta&gt; for more information).">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
@@ -95,19 +96,197 @@
 
     
     
-<p><img src="README_files/top_banner.png" width="2016"></p>
-<div id="greta-is-an-r-package-for-writing-statistical-models-and-fitting-them-by-mcmc-" class="section level3">
-<h3 class="hasAnchor">
-<a href="#greta-is-an-r-package-for-writing-statistical-models-and-fitting-them-by-mcmc-" class="anchor"></a>greta is an R package for writing statistical models and fitting them by MCMC.</h3>
-<p>greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on.</p>
+<style type="text/css">
+body{
+  padding-top: 10px;
+}
+pre, pre:not([class]){
+  font-size: 18px;
+  color: #5a3a78;
+  background-color: #f7f7f7;
+  border: none;
+}
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+.main-container {
+    /* max-width: 2732px; */
+    margin-left: 0;
+    margin-right: 0;
+}
+.bullet{
+  color:#8960B3;
+  font-size: 36px;
+}
+.resource,
+.resource > p{
+  color: #8960B3;
+  font-size: 32px;
+}
+a, a:hover{
+  color: #8960B3;
+}
+.col-md-3,
+.col-md-4,
+.col-md-5,
+.col-md-6{
+  padding-top: 25px;
+  padding-bottom: 25px;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+#head {
+  background: #B797D7 url(greta-header.png) 0 45% / cover no-repeat;
+  box-shadow: 0 3px 10px 0 rgba(0,0,0,0.2);
+  max-width: 100%;
+  margin: 0 auto;
+}
+#header-content {
+  max-width: 100%;
+  margin: 0 auto;
+}
+#main-icon {
+  width: 100%;
+  height: auto;
+  margin-right : auto;
+  margin-left : auto;
+  min-width : 210px;
+  max-width : 585px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 45px;
+}
+#main-icon-text{
+  color:#ffffff;
+  font-size: 24px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+}
+#panel1 {
+  background-color: #f7f7f7;
+  box-shadow: 0 0 7px 2px rgba(0,0,0,0.1);
+  max-width: 90%;
+  margin: 0 auto;
+}
+#bullets {
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: 20px;
+  text-align: center;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#example {
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: 20px;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+<div id="head">
+<p>
+</p>
+<div id="header-content" class="container">
+<div class="row">
+<p><img id="main-icon" src="images/main-icon.png"></p>
 </div>
-<div id="see-the-website-for-more-information-tutorials-examples-and-package-documentation-" class="section level3">
-<h3 class="hasAnchor">
-<a href="#see-the-website-for-more-information-tutorials-examples-and-package-documentation-" class="anchor"></a>See the <a href="https://greta-dev.github.io/greta/">website</a> for more information, <a href="https://greta-dev.github.io/greta/get_started.html">tutorials</a>, <a href="https://greta-dev.github.io/greta/example_models.html">examples</a>, and <a href="https://greta-dev.github.io/greta/reference-index.html">package documentation</a>.</h3>
-<p>You can install the package from CRAN:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">"greta"</span>)</a></code></pre></div>
-<p>I would love to hear any feedback, bug reports or feature requests via the <a href="https://github.com/greta-dev/greta/issues">issues tracker</a>. I would also be very keen for contributions from anyone with time to spare!</p>
-<p><a href="https://travis-ci.org/greta-dev/greta"><img src="https://travis-ci.org/greta-dev/greta.svg?branch=master" alt="build status"></a> <a href="https://codecov.io/github/greta-dev/greta?branch=master"><img src="https://codecov.io/github/greta-dev/greta/coverage.svg?branch=master" alt="codecov.io"></a> <a href="https://cran.rstudio.com/web/packages/greta"><img src="http://www.r-pkg.org/badges/version/greta" alt="cran version"></a> <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="license"></a> <a href="https://zenodo.org/badge/latestdoi/73758247"><img src="https://zenodo.org/badge/73758247.svg" alt="doi"></a> <img src="README_files/bottom_banner.png" width="470"></p>
+<div class="row">
+<p id="main-icon-text">
+simple and scalable statistical modelling in R
+</p>
+</div>
+</div>
+</div>
+<div id="bullets">
+<p><br><br></p>
+<div class="row">
+<div class="col-md-4">
+<p class="bullet">
+<b>simple</b>
+</p>
+<p><br> greta models are written right in R, so there’s no need to learn another language like BUGS or Stan</p>
+</div>
+<div class="col-md-4">
+<p class="bullet">
+<b>scalable</b>
+</p>
+<p><br> greta uses <a href="https://www.tensorflow.org/">Google TensorFlow</a> so it’s fast even on massive datasets, and runs on CPU clusters and GPUs</p>
+</div>
+<div class="col-md-4">
+<p class="bullet">
+<b>extensible</b>
+</p>
+<p><br> it’s easy to write your own R functions, modules, and even packages using greta</p>
+</div>
+</div>
+<!-- end of row -->
+</div>
+<!-- end of 'bullets' -->
+<p><br><br></p>
+<div>
+<div id="panel1" class="resource">
+<div class="container">
+<br><div class="row">
+<div class="col-md-4">
+<p><span class="fa fa-code fa-2x" style="vertical-align:middle;"></span> <a href="#example">basic example</a></p>
+</div>
+<div class="col-md-4">
+<p><span class="fa fa-arrow-circle-right fa-2x" style="vertical-align:middle;"></span> <a href="get_started.html">get started</a></p>
+</div>
+</div>
+<!-- end of row -->
+<div class="row">
+<div class="col-md-4">
+<p><span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span> <a href="example_models.html">example models</a></p>
+</div>
+<div class="col-md-4">
+<p><span class="fa fa-book fa-2x" style="vertical-align:middle;"></span> <a href="reference-index.html">package docs</a></p>
+</div>
+</div>
+<!-- end of row -->
+<p><br></p>
+</div>
+<!-- end of container -->
+</div>
+<!-- end of 'panel1' -->
+<div id="example">
+<p><br><br></p>
+<div class="page-header"><h1 style="color: #8960B3;" class="hasAnchor">
+<a href="#example" class="anchor"></a>
+basic example
+</h1></div>
+<p>Here’s a Bayesian linear regression model for the <code>iris</code> data using greta.</p>
+<div class="row">
+<div class="col-md-6">
+<pre><code>x &lt;- iris$Petal.Length
+y &lt;- iris$Sepal.Length</code></pre>
+<pre><code>library(greta)
+
+int &lt;- normal(0, 5)
+coef &lt;- normal(0, 3)
+sd &lt;- lognormal(0, 3)
+
+mean &lt;- int + coef * x
+distribution(y) &lt;- normal(mean, sd)</code></pre>
+<pre><code>m &lt;- model(int, coef, sd)</code></pre>
+</div>
+<!-- end of column 1 -->
+<!-- begin column 2 -->
+<div class="col-md-6">
+<pre><code>draws &lt;- mcmc(m, n_samples = 1000, chains = 3)
+bayesplot::mcmc_trace(draws)</code></pre>
+<p><img src="index_files/figure-html/vis-1.png" width="576" style="display: block; margin: auto;"></p>
+</div>
+<!-- end of column 2 -->
+</div>
+<!-- end of row -->
+</div>
+<!-- end of 'example' -->
 </div>
   </div>
 

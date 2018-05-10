@@ -6,10 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>greta FAQ • greta</title>
-<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cerulean/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../jquery.sticky-kit.min.js"></script><script src="../pkgdown.js"></script><meta property="og:title" content="greta FAQ">
+<script src="../jquery.sticky-kit.min.js"></script><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="greta FAQ">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
@@ -95,7 +96,7 @@
       <h1>greta FAQ</h1>
                         <h4 class="author">Nick Golding</h4>
             
-            <h4 class="date">2018-05-07</h4>
+            <h4 class="date">2018-05-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/greta-dev/greta/blob/master/vignettes/faq.Rmd"><code>vignettes/faq.Rmd</code></a></small>
       <div class="hidden name"><code>faq.Rmd</code></div>
@@ -106,66 +107,104 @@
     
 <div id="about-greta" class="section level1">
 <h1 class="hasAnchor">
-<a href="#about-greta" class="anchor"></a>About greta</h1>
+<a href="#about-greta" class="anchor"></a>About <em>greta</em>
+</h1>
 <div id="what-is-greta" class="section level3">
 <h3 class="hasAnchor">
 <a href="#what-is-greta" class="anchor"></a>What is greta?</h3>
+<p><em>greta</em> is a <a href="https://en.wikipedia.org/wiki/Probabilistic_programming_language">probabilistic programming language</a> embedded in <a href="https://www.r-project.org">R</a>. It lets you define a probability model for your data, meaning you give the <em>form</em> of your data’s distribution (e.g., normal, gamma, etc), and you give the <em>distributions</em> of its <a href="https://en.wikipedia.org/wiki/Hyperparameter">hyperparameters</a>. Given the data and your model, <em>greta</em> uses <a href="https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">Markov Chain Monte Carlo</a> to characterize those distributions.</p>
+<p>This documentation includes <a href="/greta/articles/example_models.html">several examples</a> of using <em>greta</em>.</p>
+</div>
+<div id="what-makes-it-cool" class="section level3">
+<h3 class="hasAnchor">
+<a href="#what-makes-it-cool" class="anchor"></a>What makes it cool?</h3>
+<p>First, <em>greta</em> is embedded directly in R, working side by side with your other tools for data, statistics, graphics, and programming. This is more convenient and more powerful than similar systems where the software exists outside R.</p>
+<p>Second, <em>greta</em> uses <a href="https://www.tensorflow.org/">TensorFlow</a>, a powerful framework for mathematical computation. TensorFlow can run either locally or in the cloud, giving you access to tremendous computer power. That is a significant advantage in computationally intensive applications such as MCMC.</p>
 </div>
 <div id="how-can-i-install-greta" class="section level3">
 <h3 class="hasAnchor">
-<a href="#how-can-i-install-greta" class="anchor"></a>How can I install greta?</h3>
+<a href="#how-can-i-install-greta" class="anchor"></a>How can I install <em>greta</em>?</h3>
+<p>At a minimum, you’ll need two components</p>
+<ul>
+<li>Tensorflow</li>
+<li>
+<em>greta</em> package</li>
+</ul>
+<p>Most users, however, will also want the <em>DiagrammeR</em> package in order to plot and check their probability models. I strongly recommend installing it.</p>
+<p><em>Tensorflow</em> - Before you can fit models with <em>greta</em>, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> Python package (version 1.0.0 or higher). <em>greta</em> exports <code><a href="http://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow()</a></code> from the <code>tensorflow</code> R package, which will attempt to install the latest version of TensorFlow from within your R session.</p>
+<pre><code><a href="http://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow()</a></code></pre>
+<p>You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you’re having trouble with this step, <a href="https://tensorflow.rstudio.com/installation.html">this guide</a> may help.</p>
+<p><em>greta package</em> - You can install the stable version of greta from CRAN:</p>
+<pre><code>install.packages("greta")</code></pre>
+<p>Alternatively, you can install the latest release, or the development version, from GitHub using the devtools package:</p>
+<pre><code><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">devtools::install_github("greta-dev/greta")  # latest release
+devtools::install_github("greta-dev/greta@dev")  # development version</a></code></pre>
+<p><em>DiagrammeR package</em> - The <em>greta</em> <a href="#plotting">plotting functionality</a> depends on the <a href="http://rich-iannone.github.io/DiagrammeR/">DiagrammeR package</a>. Because Diagrammer automatically installs a lot of other packages it can take a long time to install, so DiagrammeR isn’t installed automatically with greta. If you want to plot models, you can install DiagrammeR from CRAN.</p>
+<pre><code>install.packages('DiagrammeR')</code></pre>
 </div>
 <div id="how-does-greta-compare-to------" class="section level3">
 <h3 class="hasAnchor">
-<a href="#how-does-greta-compare-to------" class="anchor"></a>How does greta compare to . . .</h3>
-</div>
-<div id="stan" class="section level3">
-<h3 class="hasAnchor">
-<a href="#stan" class="anchor"></a>. . . Stan?</h3>
-</div>
-<div id="edward" class="section level3">
-<h3 class="hasAnchor">
-<a href="#edward" class="anchor"></a>. . . Edward?</h3>
-</div>
-<div id="jags" class="section level3">
-<h3 class="hasAnchor">
-<a href="#jags" class="anchor"></a>. . . JAGS?</h3>
-</div>
-<div id="bugs-and-winbugs" class="section level3">
-<h3 class="hasAnchor">
-<a href="#bugs-and-winbugs" class="anchor"></a>. . . BUGS and WinBUGS?</h3>
+<a href="#how-does-greta-compare-to------" class="anchor"></a>How does <em>greta</em> compare to . . .</h3>
+<p><em>Stan</em> and <em>rstan</em></p>
+<p><em>Edward</em></p>
+<p><em>JAGS</em></p>
+<p><em>BUGS and WinBUGS</em></p>
 </div>
 <div id="why-is-it-called-greta" class="section level3">
 <h3 class="hasAnchor">
-<a href="#why-is-it-called-greta" class="anchor"></a>Why is it called “greta?”</h3>
+<a href="#why-is-it-called-greta" class="anchor"></a>Why is it called “greta”?</h3>
+<p>There’s a recent convention of naming statistical modelling software after pioneers in the field (e.g. <a href="https://en.wikipedia.org/wiki/Stanislaw_Ulam">Stan</a> and <a href="https://en.wikipedia.org/wiki/George_E._P._Box">Edward</a>).</p>
+<p><img style="float: right;" src="https://upload.wikimedia.org/wikipedia/en/e/ea/Grete_Hermann.jpg"></p>
+<p><a href="https://en.wikipedia.org/wiki/Grete_Hermann">Grete Hermann</a> wasn’t a statistician. She wrote <a href="http://dl.acm.org/citation.cfm?id=307342&amp;coll=portal&amp;dl=ACM">the first algorithms</a> for computer algebra; in the 1920s, well before the first electronic computer was built. This work laid the foundations for the computer algebra libraries that enable modern statistical modelling.</p>
+<p>In case that’s not enough reason to admire her, Grete Hermann also <a href="https://arxiv.org/pdf/0812.3986.pdf">disproved a popular theorem in quantum theory</a> and was part of the German resistance against the Nazi regime prior to World War Two.</p>
+<p>Grete (usually said <em>Greh</em>•tuh, like its alternate spelling <em>Greta</em>) can be confusing for non-German speakers to pronounce, so I’ve taken the liberty of naming the package <em>greta</em> instead. You can call it whatever you like.</p>
 </div>
 </div>
 <div id="defining-a-model" class="section level1">
 <h1 class="hasAnchor">
 <a href="#defining-a-model" class="anchor"></a>Defining a model</h1>
+<p><em>TBD</em></p>
+<pre><code>library(greta)
+
+(more)</code></pre>
 </div>
 <div id="bayesian-computation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#bayesian-computation" class="anchor"></a>Bayesian computation</h1>
-<div id="can-one-use-greta-to-estimate-map-maximum-a-posteriori-probability-a-yes-use-the-opt-function" class="section level3">
+<div id="how-do-i-prepare-my-data-for-greta" class="section level3">
 <h3 class="hasAnchor">
-<a href="#can-one-use-greta-to-estimate-map-maximum-a-posteriori-probability-a-yes-use-the-opt-function" class="anchor"></a>Can one use Greta to estimate MAP (maximum a posteriori) probability? [A: Yes, use the opt() function]</h3>
+<a href="#how-do-i-prepare-my-data-for-greta" class="anchor"></a>How do I prepare my data for <em>greta</em>?</h3>
+<p><em>TBA</em></p>
 </div>
-<div id="how-can-greta-perform-markov-chain-monte-carlo-mcmc" class="section level3">
+<div id="can-greta-estimate-the-map-maximum-a-posteriori-probability-of-a-model" class="section level3">
 <h3 class="hasAnchor">
-<a href="#how-can-greta-perform-markov-chain-monte-carlo-mcmc" class="anchor"></a>How can greta perform Markov Chain Monte Carlo (MCMC)?</h3>
+<a href="#can-greta-estimate-the-map-maximum-a-posteriori-probability-of-a-model" class="anchor"></a>Can <em>greta</em> estimate the MAP (maximum a posteriori) probability of a model?</h3>
+<p>Yes. Define your data and model, and then use the <a href="/greta/reference/inference.html">opt</a> function.</p>
+</div>
+<div id="can-greta-perform-markov-chain-monte-carlo-mcmc" class="section level3">
+<h3 class="hasAnchor">
+<a href="#can-greta-perform-markov-chain-monte-carlo-mcmc" class="anchor"></a>Can <em>greta</em> perform Markov Chain Monte Carlo (MCMC)?</h3>
+<p>Yes. Define your data and model, then use the <a href="/reference/inference.html">mcmc</a> function.</p>
 </div>
 <div id="can-i-use-multiple-cores-to-run-multiple-chains-in-parallel-if-so-how" class="section level3">
 <h3 class="hasAnchor">
 <a href="#can-i-use-multiple-cores-to-run-multiple-chains-in-parallel-if-so-how" class="anchor"></a>Can I use multiple cores to run multiple chains in parallel? If so, how?</h3>
+<p><em>TBD</em></p>
 </div>
 <div id="can-i-use-a-tensorflow-cluster-to-run-multiple-chains-in-parallel-if-so-how" class="section level3">
 <h3 class="hasAnchor">
 <a href="#can-i-use-a-tensorflow-cluster-to-run-multiple-chains-in-parallel-if-so-how" class="anchor"></a>Can I use a Tensorflow cluster to run multiple chains in parallel? If so, how?</h3>
+<p><em>TBD</em></p>
+</div>
+<div id="what-tools-are-available-for-evaluating-the-mcmc-results" class="section level3">
+<h3 class="hasAnchor">
+<a href="#what-tools-are-available-for-evaluating-the-mcmc-results" class="anchor"></a>What tools are available for evaluating the MCMC results?</h3>
+<p><em>TBD</em></p>
 </div>
 <div id="can-greta-perform-variational-bayesian-inference-a-k-a--variational-inference" class="section level3">
 <h3 class="hasAnchor">
-<a href="#can-greta-perform-variational-bayesian-inference-a-k-a--variational-inference" class="anchor"></a>Can Greta perform variational Bayesian inference (a.k.a. variational inference)?</h3>
+<a href="#can-greta-perform-variational-bayesian-inference-a-k-a--variational-inference" class="anchor"></a>Can <em>greta</em> perform variational Bayesian inference (a.k.a. variational inference)?</h3>
+<p><a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">Variational inference</a> is not yet implemented.</p>
 </div>
 </div>
 <div id="bayesian-regression" class="section level1">
@@ -174,22 +213,27 @@
 <div id="how-can-i-perform-simple-regression" class="section level3">
 <h3 class="hasAnchor">
 <a href="#how-can-i-perform-simple-regression" class="anchor"></a>How can I perform simple regression?</h3>
+<p><em>TBD</em></p>
 </div>
 <div id="how-can-i-get-credible-intervals-confidence-intervals-for-my-regression-coefficients" class="section level3">
 <h3 class="hasAnchor">
 <a href="#how-can-i-get-credible-intervals-confidence-intervals-for-my-regression-coefficients" class="anchor"></a>How can I get credible intervals (confidence intervals) for my regression coefficients?</h3>
+<p><em>TBD</em></p>
 </div>
 <div id="how-can-i-perform-multi-variate-regression" class="section level3">
 <h3 class="hasAnchor">
 <a href="#how-can-i-perform-multi-variate-regression" class="anchor"></a>How can I perform multi-variate regression?</h3>
+<p><em>TBD</em></p>
 </div>
 <div id="how-can-i-perform-logistic-regression" class="section level3">
 <h3 class="hasAnchor">
 <a href="#how-can-i-perform-logistic-regression" class="anchor"></a>How can I perform logistic regression?</h3>
+<p><em>TBD</em></p>
 </div>
-<div id="how-can-i-define-a-generalized-linear-model-glm" class="section level3">
+<div id="can-i-fit-a-generalized-linear-model-glm" class="section level3">
 <h3 class="hasAnchor">
-<a href="#how-can-i-define-a-generalized-linear-model-glm" class="anchor"></a>How can I define a generalized linear model (GLM)?</h3>
+<a href="#can-i-fit-a-generalized-linear-model-glm" class="anchor"></a>Can I fit a generalized linear model (GLM)?</h3>
+<p><em>TBD</em></p>
 </div>
 </div>
 <div id="community" class="section level1">
@@ -214,6 +258,7 @@
 <div id="how-can-i-report-problems" class="section level3">
 <h3 class="hasAnchor">
 <a href="#how-can-i-report-problems" class="anchor"></a>How can I report problems?</h3>
+<p>There is an <a href="https://github.com/greta-dev/greta/issues">issue tracker</a> for <em>greta</em>. If you are reporting a bug, please include a <a href="https://stackoverflow.com/help/mcve">minimal reproducible example</a>.</p>
 </div>
 </div>
   </div>
@@ -223,7 +268,7 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#about-greta">About greta</a></li>
+<li><a href="#about-greta">About <em>greta</em></a></li>
       <li><a href="#defining-a-model">Defining a model</a></li>
       <li><a href="#bayesian-computation">Bayesian computation</a></li>
       <li><a href="#bayesian-regression">Bayesian regression</a></li>
