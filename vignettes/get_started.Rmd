@@ -191,7 +191,7 @@ greta also provides some convenience functions to generate fixed numeric values.
 ones(1, 3)
 zeros(2, 2)
 ```
-The `greta_array()` function is generalises this to let you create greta arrays with any values, in the same way as R's `array()` function:
+The `greta_array()` function generalises this to let you create greta arrays with any values, in the same way as R's `array()` function:
 
 ```{r greta_array}
 greta_array(pi, dim = c(2, 2))
