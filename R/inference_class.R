@@ -33,6 +33,13 @@ inference <- R6Class(
                            parameters = list(),
                            seed = get_seed()) {
 
+      # flush the environment and redefine the tensorflow graph if needed
+      if (is.null(model$dag$tf_graph$unique_name)) {
+        model$dag$tf_environment <- new.env()
+        model$dag$tf_graph <- tf$Graph()
+        model$dag$define_tf()
+      }
+
       self$parameters <- parameters
       self$model <- model
       self$n_free <- length(model$dag$example_parameters())
@@ -105,11 +112,11 @@ inference <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      if (!exists("joint_density_adj", envir = tfe)) {
+      if (!live_pointer("joint_density_adj", envir = tfe)) {
         dag$on_graph(dag$define_joint_density())
       }
 
-      if (!exists("gradients_adj", envir = tfe)) {
+      if (!live_pointer("joint_density_adj", envir = tfe)) {
         dag$on_graph(dag$define_gradients())
       }
 
@@ -525,7 +532,7 @@ hmc_sampler <- R6Class(
 
       # define the draws tensor on the tf graph
       tfe <- model$dag$tf_environment
-      if (!exists("hmc_batch", envir = tfe)) {
+      if (!live_pointer("hmc_batch", envir = tfe)) {
         self$define_tf_draws()
       }
 
