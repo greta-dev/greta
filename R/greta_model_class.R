@@ -56,8 +56,8 @@ model <- function (...,
 
   # get the floating point precision
   tf_float <- switch(match.arg(precision),
-                     single = tf$float32,
-                     double = tf$float64)
+                     single = "float32",
+                     double = "float64")
 
   # nodes required
   target_greta_arrays <- list(...)

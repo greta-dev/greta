@@ -146,7 +146,7 @@ NULL
      operation_args = list(nelem = nelem,
                            index = index,
                            dims_out = dims_out),
-     tf_operation = tf_extract,
+     tf_operation = "tf_extract",
      value = values)
 
 }
@@ -223,7 +223,7 @@ NULL
      operation_args = list(index = index,
                            dims = dims),
      value = new_value,
-     tf_operation = tf_replace)
+     tf_operation = "tf_replace")
 
 }
 
@@ -252,7 +252,7 @@ cbind.greta_array <- function (...) {
   }
 
   op('cbind', ..., dimfun = dimfun,
-     tf_operation = tf_cbind)
+     tf_operation = "tf_cbind")
 
 }
 
@@ -281,7 +281,7 @@ rbind.greta_array <- function (...) {
   }
 
   op('rbind', ..., dimfun = dimfun,
-     tf_operation = tf_rbind)
+     tf_operation = "tf_rbind")
 
 }
 
@@ -304,7 +304,7 @@ c.greta_array <- function (...) {
           c(operation = 'rbind',
             arrays,
             dimfun = dimfun,
-            tf_operation = tf_rbind))
+            tf_operation = "tf_rbind"))
 
 }
 
@@ -373,7 +373,7 @@ length.greta_array <- function(x)
   op("reshape",
      x,
      operation_args = list(shape = dims),
-     tf_operation = tf$reshape,
+     tf_operation = "tf$reshape",
      dimfun = dimfun,
      value = new_value)
 
@@ -487,6 +487,6 @@ diag.greta_array <- function (x = 1, nrow, ncol) {
   }
 
   # return the extraction op
-  op('diag', x, dimfun = dimfun, tf_operation = tf$diag_part)
+  op('diag', x, dimfun = dimfun, tf_operation = "tf$diag_part")
 
 }
