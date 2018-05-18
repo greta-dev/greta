@@ -158,6 +158,13 @@ get_seed <- function () {
   sample.int(1e12, 1)
 }
 
+# does a pointer exist (as a named object) and is it from the current session
+# use like: live_pointer("joint_density", dag$tf_environment)
+live_pointer <- function (tensor_name, environment = parent.frame()) {
+  exists(tensor_name, envir = environment) &&
+    !is.null(environment[[tensor_name]]$name)
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -169,7 +176,8 @@ misc_module <- module(module,
                       flatten,
                       do,
                       sample_variance,
-                      get_seed)
+                      get_seed,
+                      live_pointer)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
@@ -278,10 +286,53 @@ check_in_family <- function (function_name) {
   }
 }
 
+#' @importFrom future plan
+check_future_plan <- function () {
+
+  plan_info <- future::plan()
+
+  # if running in parallel
+  if (!inherits(plan_info, "sequential")) {
+
+    # if it's a cluster, check there's no forking
+    if (inherits(plan_info, "cluster")) {
+
+      # This stopgap trick from Henrik:
+      # https://github.com/HenrikBengtsson/future/issues/224#issuecomment-388398032
+      f <- future(NULL, lazy = TRUE)
+      workers <- f$workers
+      if (inherits(workers, "cluster")) {
+        worker <- workers[[1]]
+        if (inherits(worker, "forknode")) {
+          stop("parallel mcmc chains cannot be run with a fork cluster",
+               call. = FALSE)
+        }
+      }
+
+    } else {
+
+      # if multi*, check it's multisession
+      if (inherits(plan_info, "multiprocess") && !inherits(plan_info, "multisession")) {
+        stop ("parallel mcmc chains cannot be run with plan(multiprocess) or ",
+              "plan(multicore)",
+              call. = FALSE)
+      }
+
+    }
+
+
+
+
+
+  }
+
+}
+
 checks_module <- module(check_dims,
                         check_unit,
                         check_positive,
-                        check_in_family)
+                        check_in_family,
+                        check_future_plan)
 
 # convert an array to a vector row-wise
 flatten_rowwise <- function (array) {
