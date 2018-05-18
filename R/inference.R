@@ -71,7 +71,7 @@ greta_stash <- new.env()
 #'   During this phase the sampler moves toward the highest density area and
 #'   tunes sampler hyperparameters.
 #' @param chains number of MCMC chains to run
-#' @param n_cores the maximum number of cores used by \emph{each} chain
+#' @param n_cores the maximum number of CPU cores used by \emph{each} chain.
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations)
 #' @param control an optional named list of hyperparameters and options to
@@ -99,6 +99,16 @@ greta_stash <- new.env()
 #'   part of the parameter space. Alternatively, you could redefine the model
 #'   (via \code{model}) to have double precision, though this will slow down
 #'   sampling.
+#'
+#'   Multiple mcmc chains can be run in parallel by setting the execution plan
+#'   with the \code{future} package. Only \code{plan(multisession)} futures or
+#'   \code{plan(cluster)} futures that don't use fork clusters are allowed,
+#'   since forked processes conflict with tensorflow's parallelism.
+#'
+#'   If \code{n_cores = NULL} and mcmc chains are being run sequentially, each
+#'   chain will be allowed to use all CPU cores. If chains are being run in
+#'   parallel, \code{n_cores} will be set so that \code{n_cores * chains} is
+#'   less than the number of CPU cores.
 #'
 #' @return \code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
 #'   that can be analysed using functions from the coda package. This will
@@ -176,7 +186,10 @@ mcmc <- function (model,
     samplers[[i]]$n_chains <- chains
   }
 
-  sequential <- inherits(plan(), "sequential")
+  # check the future plan is valid
+  check_future_plan()
+
+  sequential <- inherits(future::plan(), "sequential")
   n_cores <- check_n_cores(n_cores, chains, sequential)
   float_type <- dag$tf_float
 
@@ -283,11 +296,12 @@ prepare_draws <- function (draws) {
 #'   TensorFlow docs} for more information
 #'
 #' @return \code{opt} - a list containing the following named elements:
-#'   \itemize{ \item{par}{the best set of parameters found} \item{value}{the log
-#'   joint density of the model at the parameters par} \item{iterations}{the
-#'   number of iterations taken by the optimiser} \item{convergence}{an integer
-#'   code, 0 indicates successful completion, 1 indicates the iteration limit
-#'   max_iterations had been reached} }
+#'   \itemize{
+#'    \item{par} {the best set of parameters found}
+#'    \item{value} {the log joint density of the model at the parameters par}
+#'    \item{iterations} {the number of iterations taken by the optimiser}
+#'    \item{convergence} {an integer code, 0 indicates successful completion,
+#'     1 indicates the iteration limit \code{max_iterations} had been reached} }
 #'
 #' @examples
 #' \dontrun{
