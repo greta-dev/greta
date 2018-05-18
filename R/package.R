@@ -57,8 +57,7 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
   options(tensorflow.one_based_extract = FALSE)
 
   # default float type
-  if (reticulate::py_module_available('tensorflow'))
-    options(greta_tf_float = tf$float32)
+  options(greta_tf_float = "float32")
 
 }
 

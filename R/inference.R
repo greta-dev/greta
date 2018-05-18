@@ -178,7 +178,7 @@ mcmc <- function (model,
 
   sequential <- inherits(plan(), "sequential")
   n_cores <- check_n_cores(n_cores, chains, sequential)
-  float_type <- dag$tf_float$name
+  float_type <- dag$tf_float
 
   if (!sequential & chains > 1) {
     cores_text <- ifelse(n_cores == 1, "1 core", sprintf("up to %i cores", n_cores))

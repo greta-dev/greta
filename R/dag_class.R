@@ -19,7 +19,7 @@ dag_class <- R6Class(
 
     # create a dag from some target nodes
     initialize = function (target_greta_arrays,
-                           tf_float = tf$float32,
+                           tf_float = "float32",
                            compile = FALSE) {
 
       # build the dag

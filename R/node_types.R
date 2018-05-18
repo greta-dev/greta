@@ -90,8 +90,11 @@ operation_node <- R6Class(
       if (length(self$operation_args) > 0)
         args <- c(args, self$operation_args)
 
-      # apply function on tensors
-      node <- do.call(self$operation, args)
+      # get the tensorflow function
+      operation <- eval(parse(text = self$operation))
+
+      # apply the function on tensors
+      node <- do.call(operation, args)
 
       # assign it in the environment
       assign(dag$tf_name(self), node, envir = dag$tf_environment)

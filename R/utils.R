@@ -109,12 +109,15 @@ node_type <- function (node) {
 }
 
 # access the float type option
-tf_float <- function ()
-  options()$greta_tf_float
+tf_float <- function () {
+  float_name <- options()$greta_tf_float
+  tf[[float_name]]
+}
 
 # cast an R scalar as a float of the correct type in TF code
-fl <- function (x)
+fl <- function (x) {
   tf$constant(x, dtype = tf_float())
+}
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape arguments
 #' @noRd
@@ -415,6 +418,7 @@ prepare_draws <- function (draws) {
 }
 
 build_sampler <- function (initial_values, sampler, model, seed = get_seed()) {
+
   sampler$class$new(initial_values,
                     model,
                     sampler$parameters,
@@ -505,8 +509,8 @@ flat_to_chol <- function (x, dim, correl = FALSE) {
     dim
 
   fun <- ifelse(correl,
-                tf_flat_to_chol_correl,
-                tf_flat_to_chol)
+                "tf_flat_to_chol_correl",
+                "tf_flat_to_chol")
 
   # sum the elements
   op('flat_to_chol',
@@ -525,7 +529,7 @@ chol_to_symmetric <- function (L) {
   # sum the elements
   op('chol_to_symmetric',
      L,
-     tf_operation = tf_chol_to_symmetric,
+     tf_operation = "tf_chol_to_symmetric",
      dimfun = dimfun)
 
 }
