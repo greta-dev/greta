@@ -1,13 +1,8 @@
 title: greta
-url: http://pteetor.github.io/greta-dev
+url: http://greta-dev.github.io/greta
 
 template:
   yaml: false
-
-# WAS:
-# template:
-#   params:
-#     bootswatch: cerulean     # Original site used "lumen"
 
 navbar:
   left:

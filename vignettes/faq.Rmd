@@ -154,7 +154,10 @@ is not yet implemented.
 ### How can I perform logistic regression?
 *TBD*
 
-### Can I fit a generalized linear model (GLM)?
+### How can I fit a generalized linear model (GLM)?
+*TBD*
+
+### How can I fit a hierarchical model?
 *TBD*
 
 # Community

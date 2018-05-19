@@ -15,6 +15,10 @@ pkgdown::build_site()
 The `build_site` function will write its output to the `docs` directory.
 Commit those file changes to your `git` repository.
 
+Generating the documenation may take several minutes!
+It requires running R code that executes the MCMC algorithm
+with thousands of draws.
+
 *Pro tip:* Do **not** load the pkgdown package (`library(pkgdown)`) and run `build_site`.
 Instead, just use the explicit scope qualifier (`pkgdown::build_site()`)
 to run the function.

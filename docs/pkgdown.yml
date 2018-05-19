@@ -8,6 +8,6 @@ articles:
   greta: greta.html
   technical_details: technical_details.html
 urls:
-  reference: http://pteetor.github.io/greta-dev/reference
-  article: http://pteetor.github.io/greta-dev/articles
+  reference: http://greta-dev.github.io/greta/reference
+  article: http://greta-dev.github.io/greta/articles
 

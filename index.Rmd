@@ -248,8 +248,7 @@ distribution(y) <- normal(mean, sd)
 
 m <- model(int, coef, sd)
 
-## TODO: Change warmup and n_samples back to 1000
-draws <- mcmc(m, warmup = 100, n_samples = 100, chains = 3)
+draws <- mcmc(m, warmup = 100, n_samples = 1000, chains = 3)
 bayesplot::mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1)) + ggplot2::theme_minimal()
 ```
 

@@ -130,10 +130,11 @@
 <h2 class="hasAnchor">
 <a href="#generating-the-documentation" class="anchor"></a>Generating the documentation</h2>
 <p><em>greta</em> uses the <a href="http://pkgdown.r-lib.org/">pkgdown</a> system for creating the package documentation.</p>
-<p>To generate the documentation, change your working directory to the top of the <em>greta</em> repository and use the <code>build_site</code> function.</p>
+<p>To generate the documentation, change your working directory to the top of the <em>greta</em> repository, start R, and use the <code>build_site</code> function.</p>
 <pre><code><a href="http://pkgdown.r-lib.org/reference/build_site.html">pkgdown::build_site()</a></code></pre>
-<p><em>Pro tip:</em> Do <strong>not</strong> load the pkgdown package (<code>library(pkgdown)</code>) and run <code>build_site</code>. Just use the explicit scope qualifier (<code><a href="http://pkgdown.r-lib.org/reference/build_site.html">pkgdown::build_site()</a></code>). Otherwise, you’ll get errors.</p>
-<p>The <code>build_site</code> function will write its output to the <code>docs</code> directory. Commit those changes to your <code>git</code> repository.</p>
+<p>The <code>build_site</code> function will write its output to the <code>docs</code> directory. Commit those file changes to your <code>git</code> repository.</p>
+<p>Generating the documenation may take several minutes! It requires running R code that executes the MCMC algorithm with thousands of draws.</p>
+<p><em>Pro tip:</em> Do <strong>not</strong> load the pkgdown package (<code>library(pkgdown)</code>) and run <code>build_site</code>. Instead, just use the explicit scope qualifier (<code><a href="http://pkgdown.r-lib.org/reference/build_site.html">pkgdown::build_site()</a></code>) to run the function. Otherwise, you’ll get errors.</p>
 </div>
 <div id="simple-updates" class="section level2">
 <h2 class="hasAnchor">
@@ -141,25 +142,25 @@
 <p>Most documentation changes are quite easy. Just edit the appropriate file and re-generate the documentation.</p>
 <table>
 <thead><tr class="header">
-<th>Page</th>
-<th>File to edit</th>
+<th>To change …</th>
+<th>Edit …</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td>Home page</td>
-<td>index.Rmd</td>
+<td><code>index.Rmd</code></td>
 </tr>
 <tr class="even">
 <td>get started</td>
-<td>vignettes/get_started.Rmd</td>
+<td><code>vignettes/get_started.Rmd</code></td>
 </tr>
 <tr class="odd">
 <td>examples</td>
-<td>vignettes/example_models.Rmd</td>
+<td><code>vignettes/example_models.Rmd</code></td>
 </tr>
 <tr class="even">
 <td>FAQ</td>
-<td>vignettes/faq.Rmd</td>
+<td><code>vignettes/faq.Rmd</code></td>
 </tr>
 <tr class="odd">
 <td>functions</td>
@@ -167,11 +168,11 @@
 </tr>
 <tr class="even">
 <td>technical details</td>
-<td>vignettes/technical_details.Rmd</td>
+<td><code>vignettes/technical_details.Rmd</code></td>
 </tr>
 <tr class="odd">
 <td>news</td>
-<td>NEWS.md</td>
+<td><code>NEWS.md</code></td>
 </tr>
 </tbody>
 </table>
@@ -179,11 +180,32 @@
 <div id="adding-a-page" class="section level2">
 <h2 class="hasAnchor">
 <a href="#adding-a-page" class="anchor"></a>Adding a page</h2>
-<p><em>pkgdown</em> refers to each</p>
+<p>To add a new page to the web site,</p>
+<ul>
+<li>Create a new RMarkdown file in the <code>vignettes</code> directory, for example <code>vignettes/myNewPage.Rmd</code>.</li>
+<li>Add the page to the navigation bar by editing the file <code>_pkgdown.yaml</code>. Follow the example of other files (or see the <a href="http://pkgdown.r-lib.org/reference/build_site.html#yaml-config-navbar">documentation</a>).</li>
+<li>A minimal entry defines the <code>text</code> and <code>href</code>. Note that the <code>href</code> refers to the <code>articles</code> subdirectory (under <code>docs</code>), because that’s where <code>pkgdown</code> will write the HTML file.</li>
+</ul>
+<pre><code>    - text: "my new page"
+      href: articles/myNewPage.html</code></pre>
+<ul>
+<li>Add the <code>myNewPage.Rmd</code> file and the <code>myNewPage.html</code> to <em>git</em>. Commit the change to <code>_pkgdown.yaml</code>, too.</li>
+</ul>
 </div>
 <div id="changing-the-theme" class="section level2">
 <h2 class="hasAnchor">
 <a href="#changing-the-theme" class="anchor"></a>Changing the theme</h2>
+<p>The <code>pkgdown</code> system uses the <a href="https://getbootstrap.com/docs/3.3/">Bootstrap 3.3</a> library for styling pages. The Bootstrap library includes a very handy <a href="https://getbootstrap.com/docs/3.3/customize/">configuration editing tool</a>, which you use to adjust the appearance of the <em>greta</em> documentation.</p>
+<p>The configuration is saved in the <code>bootstrap/config.json</code> file, along with the generated CSS and Javascript. To change the configuration (and, hence, the appearance),</p>
+<ul>
+<li>Open the configuration editor in your browser: <a href="https://getbootstrap.com/docs/3.3/customize/" class="uri">https://getbootstrap.com/docs/3.3/customize/</a>
+</li>
+<li>Upload the existing configuration, <code>bootstrap/config.json</code>.</li>
+<li>Change the configuration. (Yes, there are a bewildering number of options.)</li>
+<li>Scroll to the bottom of the page and press <em>Compile and Download</em>.</li>
+<li>Save the downloaded files to the <code>bootstrap</code> directory, overwriting the existing files, especially the <code>bootstrap/config.json</code> file and the <code>bootstrap/css/boostrap.min.css</code> file.</li>
+<li>Commit the updated files to <code>git</code>.</li>
+</ul>
 </div>
 </div>
 
