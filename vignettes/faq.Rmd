@@ -1,0 +1,173 @@
+---
+title: "greta FAQ"
+author: "Nick Golding"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# About *greta*
+
+### What is greta?
+*greta* is a [probabilistic programming language](https://en.wikipedia.org/wiki/Probabilistic_programming_language)
+embedded in [R](https://www.r-project.org).
+It lets you define a probability model for your data, 
+meaning you give the *form* of your data's distribution
+(e.g., normal, gamma, etc),
+and you give the *distributions* of its
+[hyperparameters](https://en.wikipedia.org/wiki/Hyperparameter).
+Given the data and your model, *greta* uses
+[Markov Chain Monte Carlo](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo)
+to characterize those distributions.
+
+This documentation includes [several examples](/greta/articles/example_models.html)
+of using *greta*.
+
+### What makes it cool?
+First, *greta* is embedded directly in R,
+working side by side with your other tools for data, statistics, graphics,
+and programming.
+This is more convenient and more powerful than similar systems
+where the software exists outside R.
+
+Second, *greta* uses [TensorFlow](https://www.tensorflow.org/),
+a powerful framework for mathematical computation.
+TensorFlow can run either locally or in the cloud,
+giving you access to tremendous computer power.
+That is a significant advantage in computationally intensive applications
+such as MCMC.
+
+### How can I install *greta*?
+
+At a minimum, you'll need two components
+
+- Tensorflow
+- *greta* package
+
+Most users, however, will also want the *DiagrammeR* package
+in order to plot and check their probability models.
+I strongly recommend installing it.
+
+*Tensorflow* - Before you can fit models with *greta*, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) Python package (version 1.0.0 or higher). *greta* exports `install_tensorflow()` from the `tensorflow` R package, which will attempt to install the latest version of TensorFlow from within your R session.
+
+```
+install_tensorflow()
+```
+
+You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.
+
+*greta package* - You can install the stable version of greta from CRAN:
+
+```
+install.packages("greta")
+```
+
+Alternatively, you can install the latest release, or the development version, from GitHub using the devtools package:
+
+```
+devtools::install_github("greta-dev/greta")  # latest release
+devtools::install_github("greta-dev/greta@dev")  # development version
+```
+
+*DiagrammeR package* - The *greta* [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because Diagrammer automatically installs a lot of other packages it can take a long time to install, so DiagrammeR isn't installed automatically with greta. If you want to plot models, you can install DiagrammeR from CRAN.
+
+```
+install.packages('DiagrammeR')
+```
+
+### How does *greta* compare to . . . 
+*Stan* and *rstan*
+
+*Edward*
+
+*JAGS*
+
+*BUGS and WinBUGS*
+
+### Why is it called "greta"?
+There's a recent convention of naming statistical modelling software after pioneers in the field (e.g. [Stan](https://en.wikipedia.org/wiki/Stanislaw_Ulam) and [Edward](https://en.wikipedia.org/wiki/George_E._P._Box)).
+
+<img style="float: right;" src="https://upload.wikimedia.org/wikipedia/en/e/ea/Grete_Hermann.jpg">
+
+[Grete Hermann](https://en.wikipedia.org/wiki/Grete_Hermann) wasn't a statistician. She wrote [the first algorithms](http://dl.acm.org/citation.cfm?id=307342&coll=portal&dl=ACM) for computer algebra; in the 1920s, well before the first electronic computer was built. This work laid the foundations for the computer algebra libraries that enable modern statistical modelling.
+
+In case that's not enough reason to admire her, Grete Hermann also [disproved a popular theorem in quantum theory](https://arxiv.org/pdf/0812.3986.pdf) and was part of the German resistance against the Nazi regime prior to World War Two.
+
+Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be confusing for non-German speakers to pronounce, so I've taken the liberty of naming the package *greta* instead. You can call it whatever you like.
+
+# Defining a model
+*TBD*
+
+```
+library(greta)
+
+(more)
+```
+
+# Bayesian computation
+
+### How do I prepare my data for *greta*?
+*TBA*
+
+### Can *greta* estimate the MAP (maximum a posteriori) probability of a model?
+Yes. Define your data and model,
+and then use the [opt](/greta/reference/inference.html) function.
+
+### Can *greta* perform Markov Chain Monte Carlo (MCMC)?
+Yes. Define your data and model,
+then use the [mcmc](/reference/inference.html) function.
+
+### Can I use multiple cores to run multiple chains in parallel? If so, how?
+*TBD*
+
+### Can I use a Tensorflow cluster to run multiple chains in parallel? If so, how?
+*TBD*
+
+### What tools are available for evaluating the MCMC results?
+*TBD*
+
+### Can *greta* perform variational Bayesian inference (a.k.a. variational inference)?
+[Variational inference](https://en.wikipedia.org/wiki/Variational_Bayesian_methods)
+is not yet implemented.
+
+# Bayesian regression
+
+### How can I perform simple regression?
+*TBD*
+
+### How can I get credible intervals (confidence intervals) for my regression coefficients?
+*TBD*
+
+### How can I perform multi-variate regression?
+*TBD*
+
+### How can I perform logistic regression?
+*TBD*
+
+### How can I fit a generalized linear model (GLM)?
+*TBD*
+
+### How can I fit a hierarchical model?
+*TBD*
+
+# Community
+
+### How can I contribute . . .
+### . . . code?
+### . . . examples?
+### . . . suggestions?
+
+### How can I report problems?
+There is an [issue tracker](https://github.com/greta-dev/greta/issues) for *greta*.
+If you are reporting a bug, please include a
+[minimal reproducible example](https://stackoverflow.com/help/mcve).

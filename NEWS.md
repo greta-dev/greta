@@ -1,0 +1,49 @@
+## greta 0.2.4
+
+Fixes:
+
+* improved error checking/messages in `model()`, `%*%`
+* switched docs and examples to always use `<-` for assignment
+* fixed the `n_cores` argument to `model()`
+
+New functionality:
+
+* added a `calculate()` function to compute the values of greta arrays conditional on provided values for others
+* added `imultilogit()` transform
+* added a `chains` argument to `model()`
+* improved HMC self-tuning, including a diagonal euclidean metric
+
+## greta 0.2.3
+
+Fixes:
+
+* fixed breaking change in extraDistr API (caused test errors on CRAN builds)
+* added dontrun statements to pass CRAN checks on winbuilder
+* fixed breaking change in tensorflow API (1-based indexing)
+
+New functionality:
+
+* added `cumsum()` and `cumprod()` functions
+
+
+## greta 0.2.2
+
+New functionality:
+
+* added `forwardsolve()` and `backsolve()`
+* added `colSums()`, `rowSums()`, `colMeans()`, and `rowMeans()`
+* added `dim<-()` to reshape greta arrays
+* `sweep()` now handles greta array `STATS` when `x` is numeric
+
+
+## greta 0.2.1
+
+New functionality:
+
+* export internal functions via `.internals` object to enable extension packages
+
+API changes:
+
+* removed the deprecated `define_model()`, an alias for `model()`
+* removed the dynamics module, to be replaced by the gretaDynamics package
+

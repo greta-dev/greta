@@ -7,11 +7,11 @@ README_cache
 vignettes/example_models_cache
 vignettes/get_started_cache
 vignettes/technical_details_cache
-
 vignettes/figures
-
 *.pdf
 docs/*.Rmd
 docs/examples
 docs/*_cache
 cran-comments.md
+inst/doc
+index_cache/
