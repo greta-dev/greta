@@ -433,8 +433,13 @@ dag_class <- R6Class(
                            tfe$sess$run,
                            feed_dict = tfe$parameter_dict)
 
-      # flatten and return
-      unlist(trace_list)
+      # loop through elements flattening these arrays to vectors and giving the
+      # elements better names
+      trace_list_flat <- lapply(seq_along(trace_list),
+                                flatten_trace,
+                                trace_list)
+
+      unlist(trace_list_flat)
 
     },
 

@@ -463,7 +463,7 @@ cleanly <- function (expr) {
 #' @noRd
 #' @importFrom coda mcmc
 prepare_draws <- function (draws) {
-  draws_df <- data.frame(draws)
+  draws_df <- data.frame(draws, check.names = FALSE)
   draws_df <- na.omit(draws_df)
   coda::mcmc(draws_df)
 }
@@ -502,7 +502,6 @@ relist_tf <- function (x, list_template) {
 
 }
 
-
 #' @importFrom future availableCores
 check_n_cores <- function (n_cores, chains, sequential) {
 
@@ -533,6 +532,31 @@ check_n_cores <- function (n_cores, chains, sequential) {
 
 }
 
+# get better names for the scalar elements of a greta array, for labelling mcmc
+# samples
+get_indices_text <- function (dims, name) {
+  ndim <- prod(dims)
+  if (ndim > 1) {
+    vec <- seq_len(ndim)
+    if (length(vec))
+      indices <- arrayInd(vec, dims)
+    mid_text <- apply(indices, 1, paste, collapse = ",")
+    name <- paste0(name, "[", mid_text, "]")
+  }
+  name
+}
+
+# given a list 'trace_list' of arrays giving the values of the target greta
+# arrays (with their true dimensions), return the ith element, flattened to a
+# vector and with elements given informative names
+flatten_trace <- function (i, trace_list) {
+  object <- names(trace_list)[i]
+  dim <- dim(trace_list[[i]])
+  values <- unlist(trace_list[i])
+  names <- get_indices_text(dim, object)
+  names(values) <- names
+  values
+}
 
 sampler_utils_module <- module(all_greta_arrays,
                                cleanly,
@@ -541,7 +565,9 @@ sampler_utils_module <- module(all_greta_arrays,
                                unlist_tf,
                                relist_tf,
                                check_future_plan,
-                               check_n_cores)
+                               check_n_cores,
+                               get_indices_text,
+                               flatten_trace)
 
 flat_to_chol <- function (x, dim, correl = FALSE) {
 
