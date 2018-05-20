@@ -286,7 +286,7 @@ check_in_family <- function (function_name) {
   }
 }
 
-#' @importFrom future plan
+#' @importFrom future plan future
 check_future_plan <- function () {
 
   plan_info <- future::plan()
@@ -299,7 +299,7 @@ check_future_plan <- function () {
 
       # This stopgap trick from Henrik:
       # https://github.com/HenrikBengtsson/future/issues/224#issuecomment-388398032
-      f <- future(NULL, lazy = TRUE)
+      f <- future::future(NULL, lazy = TRUE)
       workers <- f$workers
       if (inherits(workers, "cluster")) {
         worker <- workers[[1]]
@@ -502,17 +502,6 @@ relist_tf <- function (x, list_template) {
 
 }
 
-# check the future execution plan is allowed when doing MCMC
-#' @importFrom future plan
-check_future_plan <- function (allowed_classes = c("multisession", "sequential")) {
-  plan_classes <- class(future::plan())
-  viable <- any(allowed_classes %in% plan_classes)
-  if (!viable) {
-    stop ("greta can only run mcmc chains in parallel ",
-          "with future's 'multisession' or 'sequential' plans",
-          call. = FALSE)
-  }
-}
 
 #' @importFrom future availableCores
 check_n_cores <- function (n_cores, chains, sequential) {
