@@ -229,7 +229,6 @@ sampler <- R6Class(
         dag$tf_environment <- new.env()
 
         # rebuild the TF graph
-        dag$tf_float <- tf[[float_type]]
         dag$tf_graph <- tf$Graph()
         dag$define_tf(FALSE, FALSE)
 
