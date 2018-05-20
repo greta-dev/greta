@@ -36,8 +36,8 @@ tf_flat_to_chol <- function (x, dims) {
 
   # create an empty vector to fill with the values
   values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
-  values_0_diag <- tf_recombine(values_0, indices_diag, tf$exp(x[x_index_diag]))
-  values_z <- tf_recombine(values_0_diag, indices_offdiag, x[x_index_offdiag])
+  values_0_diag <- tf_recombine(values_0, indices_diag, tf$exp(x[x_index_diag, ]))
+  values_z <- tf_recombine(values_0_diag, indices_offdiag, x[x_index_offdiag, ])
 
   # reshape into lower triangular and return
   tf$reshape(values_z, shape(dims[1], dims[2]))
@@ -46,6 +46,10 @@ tf_flat_to_chol <- function (x, dims) {
 
 # convert an unconstrained vector into symmetric correlation matrix
 tf_flat_to_chol_correl <- function (x, dims) {
+
+  if (length(dim(x)) == 1) {
+    x <- tf$reshape(x, shape(length(x), 1))
+  }
 
   # to -1, 1 scale
   y <- tf$tanh(x)
@@ -63,7 +67,7 @@ tf_flat_to_chol_correl <- function (x, dims) {
 
   # dummy list to store transformed versions of rows
   values_list <- y_index_list
-  values_list[[1]] <- tf$reshape(y[y_index_list[[1]]], shape(k - 1))
+  values_list[[1]] <- tf$reshape(y[y_index_list[[1]], ], shape(k - 1))
   sum_sqs <- tf$square(values_list[[1]])
 
   if (k > 2) {
@@ -72,7 +76,7 @@ tf_flat_to_chol_correl <- function (x, dims) {
       # relevant columns (0-indexed)
       idx <- i:(k - 1) - 1
       # components of z on this row (straight from y)
-      z <- tf$reshape(y[y_index_list[[i]]], shape(k - i))
+      z <- tf$reshape(y[y_index_list[[i]], ], shape(k - i))
       # assign to w, using relevant parts of the sum of squares
       values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs[idx])
       # increment sum of squares
@@ -161,14 +165,14 @@ tf_kronecker <- function(X, Y) {
   # expand dimensions of tensors to allow direct multiplication for kronecker prod
   x_rsh <- tf$reshape(X, c(as.integer(dims[1]), 1L,
                            as.integer(dims[2]), 1L))
-  y_rsh <- tf$reshape(Y, c(1L, as.integer(dims[3]), 
+  y_rsh <- tf$reshape(Y, c(1L, as.integer(dims[3]),
                            1L, as.integer(dims[4])))
 
   # multiply tensors and reshape with appropriate dimensions
   tensor_out <- tf$reshape(x_rsh * y_rsh, c(dims[1] * dims[3], dims[2] * dims[4]))
 
   tensor_out
-  
+
 }
 
 # tensorflow version of sweep, based on broadcasting of tf ops
@@ -257,6 +261,15 @@ tf_extract <- function (x, nelem, index, dims_out) {
 # 0-indexing)
 tf_recombine <- function (ref, index, updates) {
 
+  # expand ref if needed
+  if (length(dim(ref)) == 1) {
+    ref <- tf$reshape(ref, shape(length(ref), 1))
+  }
+
+  if (length(dim(updates)) == 1) {
+    updates <- tf$reshape(updates, shape(length(updates), 1))
+  }
+
   # vector denoting whether an element is being updated
   nelem <- ref$get_shape()$as_list()[1]
   replaced <- rep(0, nelem)
@@ -273,14 +286,14 @@ tf_recombine <- function (ref, index, updates) {
   keep_idx <- which(runs$values == 0)
   keep_list <- lapply(keep_idx, function (i) {
     idx <- starts_old[i] + 0:(runs$lengths[i] - 1) - 1
-    tf$reshape(ref[idx], shape(length(idx), 1))
+    tf$reshape(ref[idx, ], shape(length(idx), 1))
   })
 
   run_id <- runs$values[runs$values != 0]
   update_idx <- match(run_id, runs$values)
   # get them in order increasing order
   update_list <- lapply(run_id, function (i) {
-    tf$reshape(updates[i - 1], shape(1, 1))
+    tf$reshape(updates[i - 1, ], shape(1, 1))
   })
 
   # combine them
