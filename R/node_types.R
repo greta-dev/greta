@@ -262,13 +262,17 @@ variable_node <- R6Class (
 
       ljac_cov_mat <- function (x) {
 
+        if (length(dim(x)) == 1) {
+          x <- tf$reshape(x, shape(length(x), 1))
+        }
+
         # find dimension
         n <- x$get_shape()$as_list()[1]
         K <- (sqrt(8 * n + 1) - 1) / 2
 
         k <- seq_len(K)
         powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = c(K, 1))
-        fl(K * log(2)) + tf$reduce_sum(powers * x[k - 1])
+        fl(K * log(2)) + tf$reduce_sum(powers * x[k - 1, ])
 
       }
 
