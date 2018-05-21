@@ -176,3 +176,8 @@ One important way `greta` models differs from BUGS and Stan code is that it is o
 ```
 
 <hr>
+
+```{r child='examples/8_schools.Rmd'}
+```
+
+<hr>
