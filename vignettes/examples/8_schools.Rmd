@@ -4,7 +4,7 @@
 # https://github.com/stan-dev/example-models/blob/master/ARM/Ch.19/schools.stan
 ```
 
-**8 Schools** is a study of coaching effects from eight schools; it comes from [section 5.5 of Gelman et al (2003) covered in 2.1. Schools data of 'R2WinBUGS: A Package for Running WinBUGS from R'](https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf).
+**8 Schools** is a study of coaching effects from eight schools; it comes from [section 5.5 of Gelman et al. (2003) as covered in 2.1. Schools data of 'R2WinBUGS: A Package for Running WinBUGS from R'](https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf).
 
 The corresponding [TensorFlow Probability](https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245) notebook can be found [here](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
 

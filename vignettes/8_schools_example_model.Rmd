@@ -1,0 +1,86 @@
+---
+title: "8 Schools Example Model"
+output:
+  html_document:
+    css: greta.css
+    toc: yes
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+    theme: lumen
+    highlight: default
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Example models}
+  %\usepackage[utf8]{inputenc}
+---
+
+**8 Schools** is a study of coaching effects from eight schools; it comes from [section 5.5 of Gelman et al. (2003) as covered in 2.1. Schools data of 'R2WinBUGS: A Package for Running WinBUGS from R'](https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf):
+
+> The Scholastic Aptitude Test (SAT) measures the aptitude of high-schoolers in order to help
+colleges to make admissions decisions. It is divided into two parts, verbal (SAT-V) and
+mathematical (SAT-M). Our data comes from the SAT-V (Scholastic Aptitude Test-Verbal)
+on eight different high schools, from an experiment conducted in the late 1970s. SAT-V is a
+standard multiple choice test administered by the Educational Testing Service. This Service
+was interested in the effects of coaching programs for each of the selected schools.
+The study included coached and uncoached pupils, about sixty in each of the eight different
+schools; see Rubin (1981). All of them had already taken the PSAT (Preliminary SAT)
+which results were used as covariates. For each school, the estimated treatment effect and
+the standard error of the effect estimate are given. These are calculated by an analysis of
+covariance adjustment appropriate for a completely randomized experiment (Rubin 1981).
+This example was analyzed using a hierarchical normal model in Rubin (1981) and Gelman,
+Carlin, Stern, and Rubin (2003, Section 5.5).
+
+The corresponding [TensorFlow Probability](https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245) notebook can be found [here](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
+
+
+```{r libraries, warning=FALSE, message=FALSE}
+library(greta)
+library(ggplot2)
+```
+
+```{r 8_schools_data, highlight = FALSE}
+# data
+N <- letters[1:8]
+y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+sigma_y <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)   # treatment_stddevs
+```
+
+```{r}
+schools <- data.frame(N = N,
+                      y = y,
+                      sigma_y = sigma_y)
+
+ggplot(schools, aes(x = N, y = y)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = y - sigma_y, ymax = y + sigma_y), width = 0.5) +
+  labs(x = "School", y = "Treatment effect")
+```
+
+```{r 8_schools_greta}
+# variables and priors
+mu <- normal(0, 10)                                   # avg_effect
+#logtau <- normal(5, 1)                               # avg_stddev
+logtau <- lognormal(5, 1)
+theta_prime <- normal(0, 1, dim = length(N))          # school_effects_standard
+#school_effects <- mu + exp(logtau) * theta_prime     # theta?
+school_effects <- mu + logtau * theta_prime
+
+# likelihood
+distribution(y) <- normal(school_effects, sigma_y)
+
+# defining the model
+m <- model(mu, logtau, theta_prime)
+
+# plotting
+plot(m)
+
+# sampling
+draws <- greta::mcmc(m)
+plot(draws)
+```
+
+```{r}
+sessionInfo()
+```
+
