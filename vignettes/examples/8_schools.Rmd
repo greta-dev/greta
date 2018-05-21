@@ -1,0 +1,50 @@
+### 8 Schools
+
+```{r stan_model, echo=FALSE, eval=FALSE}
+# https://github.com/stan-dev/example-models/blob/master/ARM/Ch.19/schools.stan
+```
+
+**8 Schools** is a study of coaching effects from eight schools; it comes from [section 5.5 of Gelman et al (2003) covered in 2.1. Schools data of 'R2WinBUGS: A Package for Running WinBUGS from R'](https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf).
+
+The corresponding [TensorFlow Probability](https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245) notebook can be found [here](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
+
+#### data
+
+<div class="data">
+```{r 8_schools_data, highlight = FALSE}
+N <- letters[1:8]
+y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+sigma_y <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
+```
+</div>
+
+#### greta code
+```{r 8_schools_greta}
+# variables and priors
+mu <- normal(0, 10)                                   # avg_effect
+logtau <- normal(5, 1)                               # avg_stddev
+theta_prime <- normal(0, 1, dim = length(N))          # school_effects_standard
+school_effects <- mu + exp(logtau) * theta_prime     # theta?
+
+# likelihood
+distribution(y) <- normal(school_effects, sigma_y)
+
+# defining the model
+m <- model(mu, logtau, theta_prime)
+
+# plotting
+plot(m)
+
+# sampling
+draws <- greta::mcmc(m)
+plot(draws)
+```
+
+
+
+
+
+
+
+
+
