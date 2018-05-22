@@ -15,7 +15,8 @@ I would love to hear any feedback, bug reports or feature requests via the [issu
 
 ### Work during rOpenSci Unconference 2018
 Dates: May, 21th-22th 2018
-List of contributors : Matt Mulvahill, Shirin Glander, Michael Quinn, David Smith, Tiphaine Martin
+
+List of contributors : Shirin Glander (www.shirin-glander.de), Tiphaine Martin (https://github.com/TiphaineCMartin), Matt Mulvahill (https://github.com/mmulvahill), Michael Quinn (https://github.com/michaelquinn32), David Smith (https://github.com/revodavid). 
 
 Several vignettes of examples using greta have been added :
 * linear mixed model with one random effect : https://github.com/revodavid/greta-examples/blob/master/milk.R
