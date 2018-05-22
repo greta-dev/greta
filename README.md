@@ -24,14 +24,14 @@ Several vignettes with examples using `greta` have been added :
 * linear mixed model based on an example from a TensorFlow Probability Jupyter notebook and compared to Edward2 HMC: https://github.com/ropenscilabs/greta/blob/unconf/vignettes/8_schools_example_model.Rmd 
 * linear mixed model running in parallel sessions using `future` R package : https://github.com/ropenscilabs/greta/blob/arm-models-election/vignettes/election88.Rmd
 
-Several issues during the development of these examples were documented in the page "get started" (https://github.com/ropenscilabs/greta/blob/unconf/docs/get_started.html)
+Several issues during the development of these examples were documented in the page "get started" (https://github.com/ropenscilabs/greta/blob/unconf/docs/get_started.Rmd)
 * Installation of TensorFlow libraries (`tensorflow_probability`, `tf-nightly`, `tfp-nightly`)
 * Installation of `DiagrammeR` and its dependancies (`igraph`, `XML`) for ubuntu and MacOS
 * Clearing a bunch of tf objects after modification and before plotting and evaluating the models without restarting R session 
 
-A new type of sampler was added for Random Walk Metropolis Hastings.
+A new type of sampler was added for Random Walk Metropolis Hastings (https://github.com/ropenscilabs/greta/tree/samplers).
 
-We also updated the documentation about the `n_samples` option in the `mcmc()` function to inform that the number of samples is given per chain and not total. 
+We also updated the documentation about the `n_samples` option in the `mcmc()` function to inform that the number of samples is given per chain and not total (https://github.com/ropenscilabs/greta/blob/unconf/man/inference.Rd). 
 
 
 [![build status](https://travis-ci.org/greta-dev/greta.svg?branch=master)](https://travis-ci.org/greta-dev/greta) [![codecov.io](https://codecov.io/github/greta-dev/greta/coverage.svg?branch=master)](https://codecov.io/github/greta-dev/greta?branch=master) [![cran version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![doi](https://zenodo.org/badge/73758247.svg)](https://zenodo.org/badge/latestdoi/73758247) <img src="README_files/bottom_banner.png" width="940" />
