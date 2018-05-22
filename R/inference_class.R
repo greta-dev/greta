@@ -589,6 +589,63 @@ hmc_sampler <- R6Class(
   )
 )
 
+random_walk_metropolis_hastings_sampler <- R6Class(
+  "random_walk_metropolis_hastings_sampler",
+  inherit = sampler,
+  public = list(
+    parameters = list(proposal_function = "normal"),
+
+    accept_target = NULL,
+
+    initialize = function(initial_values,
+                          model,
+                          parameters = list(proposal_function = "normal"),
+                          seed) {
+      super$initialize(initial_values = initial_values,
+                       model = model,
+                       parameters = parameters,
+                       seed = seed)
+
+      # define the draws tensor on the tf graph
+      tfe <- model$dag$tf_environment
+      if (!live_pointer("random_walk_metropolis_hastings_batch",
+                        envir = tfe)) {
+        self$define_tf_draws()
+      }
+    },
+
+    define_tf_kernel = function () {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+      rwmh_proposal_function <- switch(
+        self$parameters$proposal_function,
+        normal = tfp$mcmc$random_walk_normal_fn,
+        uniform = tfp$mcmc$random_walk_uniform_fn)
+
+      tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
+
+      tfe$new_state_fn <- rwmh_proposal_function
+
+      # build the kernel
+      dag$tf_run(
+        sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
+          target_log_prob_fn = log_prob_fun,
+          new_state_fn = new_state_fn(),
+          seed = rng_seed)
+      )
+    },
+
+    sampler_parameter_values = function () {
+      list()
+    },
+
+    tune = function(completed, warmup) {
+      NULL
+    }
+  )
+)
+
 optimiser <- R6Class(
   "optimiser",
   inherit = inference,

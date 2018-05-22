@@ -3,9 +3,13 @@
 \name{samplers}
 \alias{samplers}
 \alias{hmc}
+\alias{random_walk_metropolis_hastings}
 \title{MCMC samplers}
 \usage{
 hmc(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1)
+
+random_walk_metropolis_hastings(proposal_function = c("normal",
+  "uniform"))
 }
 \arguments{
 \item{Lmin}{minimum number of leapfrog steps (positive integer, Lmin > Lmax)}
@@ -33,4 +37,10 @@ For \code{hmc()}, the number of leapfrog steps at each iteration is
   selected uniformly at random from between \code{Lmin} and \code{Lmax}.
   \code{diag_sd} is used to rescale the parameter space to make it more
   uniform, and make sampling more efficient.
+
+The Random Walk Metropolis Hastings algorithm is a gradient free
+sampling algorithm that requires no tuning parameters. The algorithm involves
+a proposal generating step `proposal_state = current_state + perturb` by a
+random perturbation, followed by Metropolis-Hastings accept/reject step. The
+class is implemented for uniform and normal proposals.
 }
