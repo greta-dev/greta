@@ -142,7 +142,7 @@ We first define the model by combining the calculated `avg_effect`, `avg_stddev`
 
 It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found [here](https://greta-dev.github.io/greta/get_started.html#plotting).
 
-```{r 8_schools_greta, cache=TRUE}
+```{r 8_schools_greta, cache=FALSE}
 # defining the hierarchical model
 m <- model(avg_effect, avg_stddev, school_effects_standard)
 m
@@ -160,9 +160,9 @@ DiagrammeR::render_graph(plot(m))
 The actual sampling from the model happens with the `mcmc()` function. By default 1000 MCMC samples are drawn after warm-up.
 What we obtain is a probability measure that describes the likelihood of a set of randomly sampled values for the model variables.
 
-```{r cache=TRUE}
+```{r cache=FALSE}
 # sampling
-draws <- greta::mcmc(m)
+draws <- greta::mcmc(m, n_samples = 5000, warmup = 3000)
 ```
 
 ```{r}
@@ -185,9 +185,83 @@ mcmc_acf_bar(draws, facet_args = list(ncol = 3))
 mcmc_hist(draws, facet_args = list(ncol = 3))
 ```
 
+
+#### Use of `calculate()` for transforming estimates to natural scale
+
+
+The `calculate()` function can be used with the transformation function
+used in building the model to get the school-specific posteriors chains.  This
+function is also how you would get posterior predictive values.
+
+```{r backtransform}
+# Calculate school effects on original scale
+school_effects           <- avg_effect + avg_stddev * school_effects_standard
+posterior_school_effects <- calculate(school_effects, draws) 
+```
+
+
+#### Comparison with Edward2 HMC
+
+As a sanity check that we parameterized our model correctly, we can compare the
+back-transformed school-specific estimates to the results from the Edward2
+approach [in the TensorFlow Probability
+documentation](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
+The results are very similar.
+
+```{r schools-edward2}
+
+# Posterior means via Edward2
+edward2_school_means <-
+  data.frame(tool = "Edward2",
+             school = N,
+             #mean_school_effects_standard = c(0.61157268, 0.06430732, -0.25459746,
+             #                                 0.04828103, -0.36940941, -0.23154463,
+             #                                 0.49402338,  0.13042814),
+             mean = c(14.93237686, 7.50939941, 3.07602358, 7.21652555,
+                                     2.0329783, 3.41213799, 12.92509365, 8.36702347),
+             sd = 0)
+
+edward2_pop_mean <- data.frame(tool = "Edward2", 'mean' = 6.48866844177, 'sd' = 0)
+# hmc_mean_avg_stddev <- 2.46163249016
+
+
+posterior_school_effects <- as.data.frame(as.matrix(posterior_school_effects))
+
+# Relabel school measures
+colnames(posterior_school_effects) <- N
+
+# Summarise and combine all chains of interest for plotting
+posterior_summaries <-
+  posterior_school_effects %>%
+  gather(key = school, value = value) %>% 
+  group_by(school) %>%
+  summarise_all(funs(mean, sd)) 
+
+school_summaries <- 
+  posterior_summaries %>% 
+  mutate(tool = "greta") %>%
+  rbind(edward2_school_means)
+
+population_parameters <- 
+  as.data.frame(as.matrix(draws)) %>% 
+  select(avg_effect) %>%
+  summarise_all(funs(mean, sd)) %>%
+  mutate(tool = "greta") %>%
+  rbind(edward2_pop_mean)
+
+ggplot(school_summaries, aes(x = school, y = mean, color = tool, shape = tool)) + 
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+  geom_point() +
+  geom_hline(data = population_parameters, 
+             aes(yintercept = mean, linetype = 'Population mean', color = tool)) +
+  scale_linetype_manual(name = "", values = c(2, 2)) 
+
+
+
+```
+
 ## Session information
 
 ```{r}
 sessionInfo()
 ```
-

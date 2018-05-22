@@ -12,17 +12,17 @@ The corresponding [TensorFlow Probability](https://medium.com/tensorflow/introdu
 
 <div class="data">
 ```{r 8_schools_data, highlight = FALSE}
-N <- letters[1:8]
-y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
-sigma_y <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
+dat_n <- letters[1:8]
+dat_y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+dat_sigma <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
 ```
 </div>
 
 #### greta code
 ```{r 8_schools_greta}
 # variables and priors
-mu <- normal(0, 10)                                   # avg_effect
-logtau <- normal(5, 1)                               # avg_stddev
+avg_effect <- normal(0, 10)                                   # avg_effect
+avg_stddev <- normal(5, 1)                               # avg_stddev
 theta_prime <- normal(0, 1, dim = length(N))          # school_effects_standard
 school_effects <- mu + exp(logtau) * theta_prime     # theta?
 
@@ -44,6 +44,38 @@ plot(draws)
 
 
 
+
+#### The model as implemented in STAN is:
+
+```{r setup, echo=TRUE, eval=FALSE, include=FALSE}
+data {
+  int<lower=0> N;
+  vector[N] y;
+  vector[N] sigma_y;
+} 
+parameters {
+  vector[N] eta;
+  real mu_theta;
+  real<lower=0,upper=100> sigma_eta;
+  real xi;
+} 
+transformed parameters {
+  real<lower=0> sigma_theta;
+  vector[N] theta;
+
+  theta = mu_theta + xi * eta;
+  sigma_theta = fabs(xi) / sigma_eta;
+}
+model {
+  mu_theta ~ normal(0, 100);
+  sigma_eta ~ inv_gamma(1, 1); #prior distribution can be changed to uniform
+
+  eta ~ normal(0, sigma_eta);
+  xi ~ normal(0, 5);
+  y ~ normal(theta,sigma_y);
+}
+
+```
 
 
 
