@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "The 1988 Election Model"
 output: html_notebook
 ---
 
@@ -14,7 +14,7 @@ packageVersion("greta")
 ```
 
 
-### Election 88
+# Introduction
 
 This model appears in chapter 14 of
 [Gelman and Hill](http://www.stat.columbia.edu/~gelman/arm), which is a
@@ -82,7 +82,7 @@ model {
 }
 ```
 
-#### Exploring the data
+# Exploring the data
 
 To begin, we'll plot values for each of the values that we'll be working
 with.
@@ -133,7 +133,7 @@ table(state_recoded)
 ```
 
 
-#### Building the model
+# Building the model
 
 Switching into  `greta`, we'll start by defining the data objects to use in our
 model.
@@ -186,7 +186,7 @@ Let's check out our graph.
 plot(e88_model)
 ```
 
-#### Inference
+# Inference
 
 Model in hand, we can begin sampling. Since we are sampling across multiple
 chains, we'll use the "multisession" future strategy to do everything in
@@ -194,14 +194,14 @@ parallel.
 
 ```{r}
 plan(multisession)
-draws <- mcmc(e88_model, chains = 8, n_samples = 500, warmup = 250)
+draws <- mcmc(e88_model, chains = 8, n_samples = 1000, warmup = 500)
 ```
 
 Time to diagnose. Did the sample chains for our fixed effects mix reasonably?
 For all of the following visualizations, we'll rely on the `bayesplot` package.
 
 ```{r}
-bayesplot::mcmc_trace(draws, pars = c("b1", "b2"))
+bayesplot::mcmc_trace(draws, regex_pars = "b.[12]")
 ```
 
 And what about the random effects? We'll investigate the first 5. Remember,
@@ -209,7 +209,7 @@ we've recoded the previous state vector to remove the levels 2 and 12, which
 didn't have any observations.
 
 ```{r}
-bayesplot::mcmc_trace(draws, pars = paste0("a", 1:5))
+bayesplot::mcmc_trace(draws, regex_pars = "a.[1-5]\\.")
 ```
 
 Understanding our coefficients in their current form is a little hard, since
@@ -221,6 +221,8 @@ object as the second argument. To get the name in an expected manner, we
 will assign the transformation to a local variable first.
 
 ```{r}
+# This function is available within greta, but we will define our own
+# transformation
 logit <- function(vec) exp(vec) / (1 + exp(vec))
 prob <- logit(b)
 as_probs <- calculate(prob, draws)
@@ -229,7 +231,7 @@ as_probs <- calculate(prob, draws)
 And now a plot.
 
 ```{r}
-mcmc_areas(as_probs, pars = c("prob1", "prob2"))
+mcmc_areas(as_probs)
 ```
 
 And the summarized results.
@@ -238,9 +240,15 @@ And the summarized results.
 summary(as_probs)
 ```
 
-#### Wrapping up
+# Wrapping up
 
 We can finally go back to the question posed at this beginning of this example.
 During the 1988 election a black voter, from a randomly selected state, had
 a .25 to .27 probability of voting for Reagan, while women had .48 to .49
 probability of voting for the Republican candidate.
+
+## Session information
+
+```{r}
+sessionInfo()
+```
