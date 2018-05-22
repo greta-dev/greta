@@ -1,0 +1,246 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(bayesplot)
+library(future)
+library(greta)
+
+theme_set(theme_bw())
+packageVersion("greta")
+```
+
+
+### Election 88
+
+This model appears in chapter 14 of
+[Gelman and Hill](http://www.stat.columbia.edu/~gelman/arm), which is a
+discussion state-level voting outcomes. Individual responses (`y`) are labeled
+as 1 for supporters of the Republican candidateand 0 for supporters of the
+Democrat (with undecideds excluded).
+
+To access this data, we'll directly source a script from the `stan-dev` Github
+repo. See the
+[README](https://github.com/stan-dev/example-models/blob/master/ARM/Ch.14/README)
+file for more information on the contents of the script.
+
+```{r}
+root <- "https://raw.githubusercontent.com/stan-dev/example-models/master"
+model_data <- "ARM/Ch.14/election88_full.data.R"
+source(file.path(root, model_data))
+ls()
+```
+
+Using this data, we will look to answer the following: **what effect did race
+and gender have on voting outcomes in the 1988 election**. While we cannot
+answer this question in causal terms without experimental data, we can at least
+answer this data in observational terms.
+
+We'll implement a multi-level model with varying intercepts. In `lme4` syntax,
+that's
+
+```
+glmer(y ~ black + female + (1 | state), family = binomial(link = "logit"))
+```
+
+Where `black` identifies whether or not the respondent is black. 1 for 'yes' and
+0 for 'no'. `female` is a similar flag: 1 for 'yes' and 0 for 'no'. State is
+numerically encoded values, equivalent to the data component of a factor
+variable.
+
+The equivalent Stan model is
+
+```
+data {
+  int<lower=0> N; 
+  int<lower=0> n_state; 
+  vector<lower=0,upper=1>[N] black;
+  vector<lower=0,upper=1>[N] female;
+  int<lower=1,upper=n_state> state[N];
+  int<lower=0,upper=1> y[N];
+} 
+parameters {
+  vector[n_state] a;
+  vector[2] b;
+  real<lower=0,upper=100> sigma_a;
+  real mu_a;
+}
+transformed parameters {
+  vector[N] y_hat;
+
+  for (i in 1:N)
+    y_hat[i] = b[1] * black[i] + b[2] * female[i] + a[state[i]];
+} 
+model {
+  mu_a ~ normal(0, 1);
+  a ~ normal (mu_a, sigma_a);
+  b ~ normal (0, 100);
+  y ~ bernoulli_logit(y_hat);
+}
+```
+
+#### Exploring the data
+
+To begin, we'll plot values for each of the values that we'll be working
+with.
+
+The target (voting outcome):
+
+```{r}
+data.frame(y) %>% 
+  ggplot(aes(y)) +
+  geom_bar() +
+  ggtitle("Distribution of voting outcomes")
+```
+
+Here's the gender indicator.
+
+```{r}
+data.frame(female) %>% 
+  ggplot(aes(female)) +
+  geom_bar() +
+  ggtitle("Distribution of female indicator")
+```
+
+Here's the race indicator.
+
+```{r}
+data.frame(black) %>% 
+  ggplot(aes(black)) +
+  geom_bar() +
+  ggtitle("Distribution of black indicator")
+```
+
+Here's the state variable. We have 51 state codes in the data, which includes
+Washington, DC.
+
+```{r}
+data.frame(state) %>% 
+  ggplot(aes(state)) +
+  geom_bar() +
+  ggtitle("Distribution of values within state")
+```
+
+On the other, there are no observations for states 2 or 12. We'll drop them
+from the model.
+
+```{r}
+state_recoded <- dplyr::dense_rank(state)
+table(state_recoded)
+```
+
+
+#### Building the model
+
+Switching into  `greta`, we'll start by defining the data objects to use in our
+model.
+
+```{r}
+n <- length(y)
+n_states <- max(state_recoded)
+
+y_greta <- as_data(y)
+black_greta <- as_data(black)
+female_greta <- as_data(female)
+state_greta <- as_data(state_recoded)
+```
+
+Now, we'll set up the model components. First, the random effects. To match the
+Stan code above, we'll store all of these in an `a` vector. We specify the
+number of effects using the `dim` parameter below.
+
+```{r}
+mu_a <- normal(0, 1)
+sigma_a <- variable(lower = 0.0, upper = 100.0)
+a <- normal(mu_a, sigma_a, dim = n_states)
+```
+
+We can use a similar approach to get the fixed effects in a single vector. We'll
+have two effects.
+
+```{r}
+b <- normal(0, 100, dim = 2)
+```
+
+We will define the distribution of the outcome variable, `y`, as a
+transformation of a linear combination of the inputs above.
+
+```{r}
+y_hat <- b[1] * black_greta + b[2] * female_greta + a[state_recoded]
+p <- ilogit(y_hat)
+distribution(y_greta) <- binomial(n, p)
+```
+
+And finally, we assemble the components that we wish to sample in a model.
+
+```{r}
+e88_model <- model(b, a, precision = "double")
+```
+
+Let's check out our graph.
+
+```{r}
+plot(e88_model)
+```
+
+#### Inference
+
+Model in hand, we can begin sampling. Since we are sampling across multiple
+chains, we'll use the "multisession" future strategy to do everything in
+parallel.
+
+```{r}
+plan(multisession)
+draws <- mcmc(e88_model, chains = 8, n_samples = 500, warmup = 250)
+```
+
+Time to diagnose. Did the sample chains for our fixed effects mix reasonably?
+For all of the following visualizations, we'll rely on the `bayesplot` package.
+
+```{r}
+bayesplot::mcmc_trace(draws, pars = c("b1", "b2"))
+```
+
+And what about the random effects? We'll investigate the first 5. Remember,
+we've recoded the previous state vector to remove the levels 2 and 12, which
+didn't have any observations.
+
+```{r}
+bayesplot::mcmc_trace(draws, pars = paste0("a", 1:5))
+```
+
+Understanding our coefficients in their current form is a little hard, since
+they are on the logit scale. It would be nicer to work with probabilities. We
+can use `calculate` for this step.
+
+To get every transformed version of our model parameters, we pass the `draws`
+object as the second argument. To get the name in an expected manner, we
+will assign the transformation to a local variable first.
+
+```{r}
+logit <- function(vec) exp(vec) / (1 + exp(vec))
+prob <- logit(b)
+as_probs <- calculate(prob, draws)
+```
+
+And now a plot.
+
+```{r}
+mcmc_areas(as_probs, pars = c("prob1", "prob2"))
+```
+
+And the summarized results.
+
+```{r}
+summary(as_probs)
+```
+
+#### Wrapping up
+
+We can finally go back to the question posed at this beginning of this example.
+During the 1988 election a black voter, from a randomly selected state, had
+a .25 to .27 probability of voting for Reagan, while women had .48 to .49
+probability of voting for the Republican candidate.
