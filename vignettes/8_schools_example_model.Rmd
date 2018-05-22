@@ -162,7 +162,7 @@ What we obtain is a probability measure that describes the likelihood of a set o
 
 ```{r cache=FALSE}
 # sampling
-draws <- greta::mcmc(m, n_samples = 5000, warmup = 3000)
+draws <- greta::mcmc(m, n_samples = 1000, warmup = 1000)
 ```
 
 ```{r}
