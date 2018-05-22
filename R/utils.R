@@ -50,6 +50,10 @@ check_tf_version <- function (alert = c("none",
   } else {
 
     tf_version <- tf$`__version__`
+    if (getOption("greta_use_tfp_nightly", FALSE)) {
+      tf_version <- gsub("-dev.*", "", tf_version)
+    }
+
     tf_version_valid <- utils::compareVersion("1.8", tf_version) != 1
 
     if (!tf_version_valid) {
