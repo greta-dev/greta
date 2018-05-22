@@ -37,7 +37,9 @@ The corresponding [TensorFlow Probability](https://medium.com/tensorflow/introdu
 
 ```{r libraries, warning=FALSE, message=FALSE}
 library(greta)
-library(ggplot2)
+library(tidyverse)
+library(bayesplot)
+color_scheme_set("purple")
 ```
 
 ```{r 8_schools_data, highlight = FALSE}
@@ -47,25 +49,37 @@ treatment_effects <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
 treatment_stddevs <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
 ```
 
-For each the eight schools `N` we have the estimated treatment effect (`treatment_effects`) plus standard error (`treatment_stddevs`).
-Below, we are replicating the barplot from the [TensorFlow Probability example](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb):
- 
 ```{r}
 schools <- data.frame(N = N,
                       treatment_effects = treatment_effects,
-                      treatment_stddevs = treatment_stddevs)
+                      treatment_stddevs = treatment_stddevs) %>%
+  mutate(treatment_effects_p_stddevs = treatment_effects + treatment_stddevs,
+         treatment_effects_m_stddevs = treatment_effects - treatment_stddevs)
+```
 
+For each the eight schools `N` we have the estimated treatment effect (`treatment_effects`) plus standard error (`treatment_stddevs`).
+Below, we are replicating the barplot from the [TensorFlow Probability example](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb) that shows the estimated treatment effects +/- standard error per school:
+
+```{r}
 ggplot(schools, aes(x = N, y = treatment_effects)) +
-  geom_bar(stat = "identity") +
-  geom_errorbar(aes(ymin = treatment_effects - treatment_stddevs, ymax = treatment_effects + treatment_stddevs), width = 0.5) +
-  labs(x = "School", treatment_effects = "Treatment effect",
-       title = "8 schools treatment effects",
+  geom_bar(stat = "identity", fill = "purple", alpha = 0.5) +
+  geom_errorbar(aes(ymin = treatment_effects_m_stddevs, ymax = treatment_effects_p_stddevs), width = 0.3) +
+  labs(x = "school", y = "treatment effect",
+       title = "Barplot of treatment effects for eight schools",
        subtitle = "Error bars represent standard error")
 ```
 
+A different way to plot the estimated effects and their standard errors is to plot the density distribution over the eight schools we have:
+
 ```{r}
-ggplot(schools, aes(x = treatment_effects)) +
-  geom_density(fill = "black", alpha = 0.5)
+schools %>%
+  gather(x, y, treatment_effects, treatment_effects_p_stddevs, treatment_effects_m_stddevs) %>%
+  ggplot(aes(x = y, color = x)) +
+    geom_density(fill = "purple", alpha = 0.5) +
+    scale_color_brewer(palette = "Set1") +
+    labs(x = "treatment effect (+/- standard error)",
+         color = "density curve of",
+         title = "Density plot of treatment effects +/- standard error for eight schools")
 ```
 
 ## Modeling with `greta`
@@ -155,12 +169,12 @@ draws <- greta::mcmc(m)
 summary(draws)
 ```
 
-```{r}
-#as.data.frame(draws[[1]])
+```{r fig.width=10, fig.height=8}
+mcmc_trace(draws, facet_args = list(ncol = 3))
 ```
 
 ```{r}
-plot(draws)
+mcmc_intervals(draws)
 ```
 
 ## Session information
