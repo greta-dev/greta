@@ -22,7 +22,7 @@ opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
 \item{method}{method used to sample or optimise values. Currently only
 one method is available for each procedure: \code{hmc} and \code{adagrad}}
 
-\item{n_samples}{number of MCMC samples to draw (after any warm-up, but
+\item{n_samples}{number of MCMC samples to draw per chain (after any warm-up, but
 before thinning)}
 
 \item{thin}{MCMC thinning rate; every \code{thin} samples is retained,
