@@ -297,8 +297,22 @@ div.tocify {
         <li>
           <a href="get_started.html">get started</a>
         </li>
-        <li>
-          <a href="example_models.html">examples</a>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
         </li>
         <li>
           <a href="reference-index.html">docs</a>
@@ -351,8 +365,7 @@ Create a <code>greta_model</code> object representing a statistical model (using
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<pre class="r"><span class='fu'>model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"single"</span>, <span class='st'>"double"</span>), <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+<pre class="r"><span class='fu'>model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"single"</span>, <span class='st'>"double"</span>), <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
 <span class='co'># S3 method for greta_model</span>
 <span class='fu'>print</span>(<span class='no'>x</span>, <span class='no'>...</span>)
@@ -369,10 +382,6 @@ for <code>model</code>: <code>greta_array</code> objects to be tracked by the mo
 <code>precision</code>
 <p>
 the floating point precision to use when evaluating this model. Switching from <code>‘single’</code> (the default) to <code>‘double’</code> should reduce the risk of numerical instability during sampling, but will also increase the computation time, particularly for large models.
-</p>
-<code>n_cores</code>
-<p>
-the number of cpu cores to use when evaluating this model. Defaults to and cannot exceed the number detected by <code>parallel::detectCores</code>.
 </p>
 <code>compile</code>
 <p>

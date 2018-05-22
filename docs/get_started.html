@@ -297,8 +297,22 @@ div.tocify {
         <li>
           <a href="get_started.html">get started</a>
         </li>
-        <li>
-          <a href="example_models.html">examples</a>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
         </li>
         <li>
           <a href="reference-index.html">docs</a>
@@ -671,16 +685,16 @@ Sample size per chain = 1000
    plus standard error of the mean:
 
        Mean      SD  Naive SE Time-series SE
-int  4.2839 0.08063 0.0025497      0.0022142
-coef 0.4139 0.01952 0.0006172      0.0006316
-sd   0.4097 0.02221 0.0007025      0.0007025
+int  4.2825 0.07876 0.0024906      0.0034742
+coef 0.4141 0.01947 0.0006156      0.0007857
+sd   0.4106 0.02269 0.0007175      0.0007878
 
 2. Quantiles for each variable:
 
        2.5%    25%    50%    75%  97.5%
-int  4.1299 4.2257 4.2793 4.3409 4.4422
-coef 0.3782 0.3997 0.4144 0.4287 0.4490
-sd   0.3717 0.3922 0.4085 0.4255 0.4521</code></pre>
+int  4.1258 4.2307 4.2840 4.3318 4.4340
+coef 0.3754 0.4012 0.4129 0.4275 0.4545
+sd   0.3683 0.3948 0.4099 0.4248 0.4591</code></pre>
 <p>The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates</p>
 <pre class="r"><code>library (bayesplot)
 mcmc_trace(draws)

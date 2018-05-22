@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>The 1988 Election Model</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="greta.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 54px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+
+.section h2 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h3 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h4 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h5 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h6 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+<style type="text/css">
+.logo {
+    display: inline-block;
+    width: 144px;
+    height: 40px;
+    background-image: url(banner-icon.png);
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+</style>
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="logo" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <a href="get_started.html">get started</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="reference-index.html">docs</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            more
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="why_greta.html">why 'greta'?</a>
+            </li>
+            <li>
+              <a href="technical_details.html">technical details</a>
+            </li>
+            <li>
+              <a href="software.html">software</a>
+            </li>
+            <li>
+              <a href="contribute.html">contribute to greta</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="https://github.com/greta-dev/greta">
+            <span class="fa fa-github fa-lg"></span>
+          </a>
+        </li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">The 1988 Election Model</h1>
+
+</div>
+
+
+<pre class="r"><code>library(tidyverse)
+library(bayesplot)
+library(future)
+library(greta)
+
+theme_set(theme_bw())
+packageVersion(&quot;greta&quot;)</code></pre>
+<pre><code>## [1] &#39;0.2.4&#39;</code></pre>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This model appears in chapter 14 of <a href="http://www.stat.columbia.edu/~gelman/arm">Gelman and Hill</a>, which is a discussion state-level voting outcomes. Individual responses (<code>y</code>) are labeled as 1 for supporters of the Republican candidateand 0 for supporters of the Democrat (with undecideds excluded).</p>
+<p>To access this data, we’ll directly source a script from the <code>stan-dev</code> Github repo. See the <a href="https://github.com/stan-dev/example-models/blob/master/ARM/Ch.14/README">README</a> file for more information on the contents of the script.</p>
+<pre class="r"><code>root &lt;- &quot;https://raw.githubusercontent.com/stan-dev/example-models/master&quot;
+model_data &lt;- &quot;ARM/Ch.14/election88_full.data.R&quot;
+source(file.path(root, model_data))
+ls()</code></pre>
+<pre><code>##   [1] &quot;a&quot;                        &quot;a2&quot;                      
+##   [3] &quot;age&quot;                      &quot;age_edu&quot;                 
+##   [5] &quot;alpha&quot;                    &quot;alpha_star&quot;              
+##   [7] &quot;as_probs&quot;                 &quot;as_section_slug&quot;         
+##   [9] &quot;atanh&quot;                    &quot;avg_effect&quot;              
+##  [11] &quot;avg_stddev&quot;               &quot;b&quot;                       
+##  [13] &quot;b0&quot;                       &quot;b1&quot;                      
+##  [15] &quot;b2&quot;                       &quot;b3&quot;                      
+##  [17] &quot;beta&quot;                     &quot;black&quot;                   
+##  [19] &quot;black_greta&quot;              &quot;coef&quot;                    
+##  [21] &quot;data_index&quot;               &quot;data_index_sections&quot;     
+##  [23] &quot;data_list&quot;                &quot;draws&quot;                   
+##  [25] &quot;e88_model&quot;                &quot;edu&quot;                     
+##  [27] &quot;edward2_pop_mean&quot;         &quot;edward2_school_means&quot;    
+##  [29] &quot;err&quot;                      &quot;female&quot;                  
+##  [31] &quot;female_greta&quot;             &quot;fit&quot;                     
+##  [33] &quot;fname&quot;                    &quot;gr&quot;                      
+##  [35] &quot;idx&quot;                      &quot;int&quot;                     
+##  [37] &quot;is_setosa&quot;                &quot;J&quot;                       
+##  [39] &quot;logit&quot;                    &quot;m&quot;                       
+##  [41] &quot;m_coef&quot;                   &quot;m_likelihood&quot;            
+##  [43] &quot;make_section&quot;             &quot;mean&quot;                    
+##  [45] &quot;mean_mpg&quot;                 &quot;model&quot;                   
+##  [47] &quot;model_data&quot;               &quot;mpg_model&quot;               
+##  [49] &quot;mu&quot;                       &quot;mu_a&quot;                    
+##  [51] &quot;n&quot;                        &quot;N&quot;                       
+##  [53] &quot;n_age&quot;                    &quot;n_age_edu&quot;               
+##  [55] &quot;n_edu&quot;                    &quot;n_region_full&quot;           
+##  [57] &quot;n_state&quot;                  &quot;n_states&quot;                
+##  [59] &quot;p&quot;                        &quot;pkg&quot;                     
+##  [61] &quot;population_parameters&quot;    &quot;posterior_school_effects&quot;
+##  [63] &quot;posterior_summaries&quot;      &quot;prob&quot;                    
+##  [65] &quot;r&quot;                        &quot;region_full&quot;             
+##  [67] &quot;rhat&quot;                     &quot;root&quot;                    
+##  [69] &quot;school_effects&quot;           &quot;school_effects_standard&quot; 
+##  [71] &quot;school_summaries&quot;         &quot;schools&quot;                 
+##  [73] &quot;sd&quot;                       &quot;sections&quot;                
+##  [75] &quot;sections_combined&quot;        &quot;sigma&quot;                   
+##  [77] &quot;sigma_a&quot;                  &quot;sigma2&quot;                  
+##  [79] &quot;split_args&quot;               &quot;state&quot;                   
+##  [81] &quot;state_greta&quot;              &quot;state_recoded&quot;           
+##  [83] &quot;tau&quot;                      &quot;theta&quot;                   
+##  [85] &quot;topics&quot;                   &quot;treatment_effects&quot;       
+##  [87] &quot;treatment_stddevs&quot;        &quot;v_prev_full&quot;             
+##  [89] &quot;vignettes&quot;                &quot;write_index&quot;             
+##  [91] &quot;write_topic&quot;              &quot;x&quot;                       
+##  [93] &quot;X&quot;                        &quot;x1_hp&quot;                   
+##  [95] &quot;x2_disp&quot;                  &quot;x3_wt&quot;                   
+##  [97] &quot;y&quot;                        &quot;y_greta&quot;                 
+##  [99] &quot;y_hat&quot;                    &quot;y_mpg&quot;                   
+## [101] &quot;z&quot;                        &quot;Z&quot;                       
+## [103] &quot;z_greta&quot;                  &quot;z2&quot;</code></pre>
+<p>Using this data, we will look to answer the following: <strong>what effect did race and gender have on voting outcomes in the 1988 election</strong>. While we cannot answer this question in causal terms without experimental data, we can at least answer this data in observational terms.</p>
+<p>We’ll implement a multi-level model with varying intercepts. In <code>lme4</code> syntax, that’s</p>
+<pre><code>glmer(y ~ black + female + (1 | state), family = binomial(link = &quot;logit&quot;))</code></pre>
+<p>Where <code>black</code> identifies whether or not the respondent is black. 1 for ‘yes’ and 0 for ‘no’. <code>female</code> is a similar flag: 1 for ‘yes’ and 0 for ‘no’. State is numerically encoded values, equivalent to the data component of a factor variable.</p>
+<p>The equivalent Stan model is</p>
+<pre><code>data {
+  int&lt;lower=0&gt; N; 
+  int&lt;lower=0&gt; n_state; 
+  vector&lt;lower=0,upper=1&gt;[N] black;
+  vector&lt;lower=0,upper=1&gt;[N] female;
+  int&lt;lower=1,upper=n_state&gt; state[N];
+  int&lt;lower=0,upper=1&gt; y[N];
+} 
+parameters {
+  vector[n_state] a;
+  vector[2] b;
+  real&lt;lower=0,upper=100&gt; sigma_a;
+  real mu_a;
+}
+transformed parameters {
+  vector[N] y_hat;
+
+  for (i in 1:N)
+    y_hat[i] = b[1] * black[i] + b[2] * female[i] + a[state[i]];
+} 
+model {
+  mu_a ~ normal(0, 1);
+  a ~ normal (mu_a, sigma_a);
+  b ~ normal (0, 100);
+  y ~ bernoulli_logit(y_hat);
+}</code></pre>
+</div>
+<div id="exploring-the-data" class="section level1">
+<h1>Exploring the data</h1>
+<p>To begin, we’ll plot values for each of the values that we’ll be working with.</p>
+<p>The target (voting outcome):</p>
+<pre class="r"><code>data.frame(y) %&gt;% 
+  ggplot(aes(y)) +
+  geom_bar() +
+  ggtitle(&quot;Distribution of voting outcomes&quot;)</code></pre>
+<p><img src="election88_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Here’s the gender indicator.</p>
+<pre class="r"><code>data.frame(female) %&gt;% 
+  ggplot(aes(female)) +
+  geom_bar() +
+  ggtitle(&quot;Distribution of female indicator&quot;)</code></pre>
+<p><img src="election88_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Here’s the race indicator.</p>
+<pre class="r"><code>data.frame(black) %&gt;% 
+  ggplot(aes(black)) +
+  geom_bar() +
+  ggtitle(&quot;Distribution of black indicator&quot;)</code></pre>
+<p><img src="election88_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Here’s the state variable. We have 51 state codes in the data, which includes Washington, DC.</p>
+<pre class="r"><code>data.frame(state) %&gt;% 
+  ggplot(aes(state)) +
+  geom_bar() +
+  ggtitle(&quot;Distribution of values within state&quot;)</code></pre>
+<p><img src="election88_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>On the other, there are no observations for states 2 or 12. We’ll drop them from the model.</p>
+<pre class="r"><code>state_recoded &lt;- dplyr::dense_rank(state)
+table(state_recoded)</code></pre>
+<pre><code>## state_recoded
+##    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15 
+##  159  168  101 1280  145  134   37   13  641  264   34  479  261  113  127 
+##   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30 
+##  183  169   49  246  325  447  240  189  263   35  102   24   24  363   96 
+##   31   32   33   34   35   36   37   38   39   40   41   42   43   44   45 
+##  777  292   54  521  115  124  517   75  183   56  290  698   69   12  302 
+##   46   47   48   49 
+##  323  109  323   15</code></pre>
+</div>
+<div id="building-the-model" class="section level1">
+<h1>Building the model</h1>
+<p>Switching into <code>greta</code>, we’ll start by defining the data objects to use in our model.</p>
+<pre class="r"><code>n &lt;- length(y)
+n_states &lt;- max(state_recoded)
+
+y_greta &lt;- as_data(y)
+black_greta &lt;- as_data(black)
+female_greta &lt;- as_data(female)
+state_greta &lt;- as_data(state_recoded)</code></pre>
+<p>Now, we’ll set up the model components. First, the random effects. To match the Stan code above, we’ll store all of these in an <code>a</code> vector. We specify the number of effects using the <code>dim</code> parameter below.</p>
+<pre class="r"><code>mu_a &lt;- normal(0, 1)
+sigma_a &lt;- variable(lower = 0.0, upper = 100.0)
+a &lt;- normal(mu_a, sigma_a, dim = n_states)</code></pre>
+<p>We can use a similar approach to get the fixed effects in a single vector. We’ll have two effects.</p>
+<pre class="r"><code>b &lt;- normal(0, 100, dim = 2)</code></pre>
+<p>We will define the distribution of the outcome variable, <code>y</code>, as a transformation of a linear combination of the inputs above.</p>
+<pre class="r"><code>y_hat &lt;- b[1] * black_greta + b[2] * female_greta + a[state_recoded]
+p &lt;- ilogit(y_hat)
+distribution(y_greta) &lt;- binomial(n, p)</code></pre>
+<p>And finally, we assemble the components that we wish to sample in a model.</p>
+<pre class="r"><code>e88_model &lt;- model(b, a, precision = &quot;double&quot;)</code></pre>
+<p>Let’s check out our graph.</p>
+<pre class="r"><code>plot(e88_model)</code></pre>
+</div>
+<div id="inference" class="section level1">
+<h1>Inference</h1>
+<p>Model in hand, we can begin sampling. Since we are sampling across multiple chains, we’ll use the “multisession” future strategy to do everything in parallel.</p>
+<pre class="r"><code>plan(multisession)
+draws &lt;- mcmc(e88_model, chains = 8, n_samples = 1000, warmup = 500)</code></pre>
+<pre><code>## 
+## running 8 chains in parallel, each on up to 0 cores (progress bar suppressed)</code></pre>
+<p>Time to diagnose. Did the sample chains for our fixed effects mix reasonably? For all of the following visualizations, we’ll rely on the <code>bayesplot</code> package.</p>
+<pre class="r"><code>bayesplot::mcmc_trace(draws, regex_pars = &quot;b.[12]&quot;)</code></pre>
+<p><img src="election88_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>And what about the random effects? We’ll investigate the first 5. Remember, we’ve recoded the previous state vector to remove the levels 2 and 12, which didn’t have any observations.</p>
+<pre class="r"><code>bayesplot::mcmc_trace(draws, regex_pars = &quot;a.[1-5]\\.&quot;)</code></pre>
+<p><img src="election88_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>Understanding our coefficients in their current form is a little hard, since they are on the logit scale. It would be nicer to work with probabilities. We can use <code>calculate</code> for this step.</p>
+<p>To get every transformed version of our model parameters, we pass the <code>draws</code> object as the second argument. To get the name in an expected manner, we will assign the transformation to a local variable first.</p>
+<pre class="r"><code># This function is available within greta, but we will define our own
+# transformation
+logit &lt;- function(vec) exp(vec) / (1 + exp(vec))
+prob &lt;- logit(b)
+as_probs &lt;- calculate(prob, draws)</code></pre>
+<p>And now a plot.</p>
+<pre class="r"><code>mcmc_areas(as_probs)</code></pre>
+<p><img src="election88_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>And the summarized results.</p>
+<pre class="r"><code>summary(as_probs)</code></pre>
+<pre><code>## 
+## Iterations = 1:1000
+## Thinning interval = 1 
+## Number of chains = 8 
+## Sample size per chain = 1000 
+## 
+## 1. Empirical mean and standard deviation for each variable,
+##    plus standard error of the mean:
+## 
+##             Mean       SD  Naive SE Time-series SE
+## prob[1,1] 0.2586 0.014415 0.0001612      0.0007054
+## prob[2,1] 0.4870 0.006225 0.0000696      0.0002086
+## 
+## 2. Quantiles for each variable:
+## 
+##             2.5%    25%    50%    75%  97.5%
+## prob[1,1] 0.2302 0.2489 0.2587 0.2684 0.2868
+## prob[2,1] 0.4749 0.4828 0.4871 0.4913 0.4991</code></pre>
+</div>
+<div id="wrapping-up" class="section level1">
+<h1>Wrapping up</h1>
+<p>We can finally go back to the question posed at this beginning of this example. During the 1988 election a black voter, from a randomly selected state, had a .25 to .27 probability of voting for Reagan, while women had .48 to .49 probability of voting for the Republican candidate.</p>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.5.0 (2018-04-23)
+## Platform: x86_64-apple-darwin17.5.0 (64-bit)
+## Running under: macOS High Sierra 10.13.4
+## 
+## Matrix products: default
+## BLAS: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib
+## LAPACK: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libLAPACK.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] future_1.8.1    bindrcpp_0.2.2  bayesplot_1.5.0 forcats_0.3.0  
+##  [5] stringr_1.3.0   dplyr_0.7.5     purrr_0.2.4     readr_1.1.1    
+##  [9] tidyr_0.8.1     tibble_1.4.2    ggplot2_2.2.1   tidyverse_1.2.1
+## [13] greta_0.2.4     nvimcom_0.9-71  crayon_1.3.4   
+## 
+## loaded via a namespace (and not attached):
+##  [1] nlme_3.1-137       lubridate_1.7.4    RColorBrewer_1.1-2
+##  [4] progress_1.1.2     httr_1.3.1         rprojroot_1.3-2   
+##  [7] highlight_0.4.7.2  DiagrammeRsvg_0.1  tools_3.5.0       
+## [10] backports_1.1.2    R6_2.2.2           lazyeval_0.2.1    
+## [13] colorspace_1.3-2   tidyselect_0.2.4   gridExtra_2.3     
+## [16] prettyunits_1.0.2  mnormt_1.5-5       curl_3.2          
+## [19] compiler_3.5.0     cli_1.0.0          rvest_0.3.2       
+## [22] xml2_1.2.0         influenceR_0.1.0   desc_1.2.0        
+## [25] labeling_0.3       scales_0.5.0       mvtnorm_1.0-7     
+## [28] psych_1.8.4        ggridges_0.5.0     tfruns_1.3        
+## [31] pkgdown_0.1.0.9000 commonmark_1.5     digest_0.6.15     
+## [34] foreign_0.8-70     rmarkdown_1.9      extraDistr_1.8.8  
+## [37] base64enc_0.1-3    pkgconfig_2.0.1    htmltools_0.3.6   
+## [40] htmlwidgets_1.2    rlang_0.2.0        readxl_1.1.0      
+## [43] rstudioapi_0.7     bindr_0.1.1        visNetwork_2.0.3  
+## [46] jsonlite_1.5       tensorflow_1.5     rgexf_0.15.3      
+## [49] magrittr_1.5       Matrix_1.2-14      Rcpp_0.12.17      
+## [52] munsell_0.4.3      reticulate_1.7     viridis_0.5.1     
+## [55] stringi_1.2.2      whisker_0.3-2      yaml_2.1.19       
+## [58] plyr_1.8.4         grid_3.5.0         parallel_3.5.0    
+## [61] listenv_0.7.0      lattice_0.20-35    haven_1.1.1       
+## [64] hms_0.4.2          knitr_1.20         pillar_1.2.2      
+## [67] igraph_1.2.1       future.apply_0.2.0 reshape2_1.4.3    
+## [70] codetools_0.2-15   XML_3.98-1.11      glue_1.2.0        
+## [73] evaluate_0.10.1    V8_1.5             downloader_0.4    
+## [76] modelr_0.1.1       cellranger_1.1.0   gtable_0.2.0      
+## [79] assertthat_0.2.0   broom_0.4.4        rsvg_1.3          
+## [82] coda_0.19-1        roxygen2_6.0.1     viridisLite_0.3.0 
+## [85] Rook_1.1-1         DiagrammeR_1.0.0   globals_0.11.0    
+## [88] brew_1.0-6</code></pre>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

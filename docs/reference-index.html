@@ -299,12 +299,18 @@ div.tocify {
         </li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-            example models
+            examples
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" role="menu">
             <li>
-              <a href="example_bugs_models.html">examples</a>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
             </li>
           </ul>
         </li>
@@ -352,106 +358,63 @@ div.tocify {
 
 <hr style="height:5px; visibility:hidden;" />
 <hr>
-<div id="creating-greta-arrays" class="section level2">
-<h2>creating greta arrays</h2>
-<p>Create greta arrays representing observed data or fixed values</p>
+<p>##creating greta arrays Create greta arrays representing observed data or fixed values</p>
 <hr style="height:0px; visibility:hidden;" />
-<div id="create-data-greta-arrays" class="section level4">
-<h4><a href="structures.html">create data greta arrays</a></h4>
+<p>####<a href="structures.html">create data greta arrays</a></p>
 <p><code>zeros</code> <code>ones</code> <code>greta_array</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="convert-other-objects-to-greta-arrays" class="section level4">
-<h4><a href="as_data.html">convert other objects to greta arrays</a></h4>
+<p>####<a href="as_data.html">convert other objects to greta arrays</a></p>
 <p><code>as_data</code></p>
 <hr style="height:0px; visibility:hidden;" />
 <hr>
-</div>
-</div>
-<div id="variables-distributions" class="section level2">
-<h2>variables &amp; distributions</h2>
-<p>Create variables and assign probability distributions over greta arrays</p>
+<p>##variables &amp; distributions Create variables and assign probability distributions over greta arrays</p>
 <hr style="height:0px; visibility:hidden;" />
-<div id="create-greta-variables" class="section level4">
-<h4><a href="variable.html">create greta variables</a></h4>
+<p>####<a href="variable.html">create greta variables</a></p>
 <p><code>variable</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="probability-distributions" class="section level4">
-<h4><a href="distributions.html">probability distributions</a></h4>
+<p>####<a href="distributions.html">probability distributions</a></p>
 <p><code>uniform</code> <code>normal</code> <code>lognormal</code> <code>bernoulli</code> <code>binomial</code> <code>beta_binomial</code> <code>negative_binomial</code> <code>hypergeometric</code> <code>poisson</code> <code>gamma</code> <code>inverse_gamma</code> <code>weibull</code> <code>exponential</code> <code>pareto</code> <code>student</code> <code>laplace</code> <code>beta</code> <code>cauchy</code> <code>chi_squared</code> <code>logistic</code> <code>f</code> <code>multivariate_normal</code> <code>wishart</code> <code>lkj_correlation</code> <code>multinomial</code> <code>categorical</code> <code>dirichlet</code> <code>dirichlet_multinomial</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="define-a-distribution-over-data" class="section level4">
-<h4><a href="distribution.html">define a distribution over data</a></h4>
+<p>####<a href="distribution.html">define a distribution over data</a></p>
 <p><code>distribution&lt;-</code> <code>distribution</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="mixtures-of-probability-distributions" class="section level4">
-<h4><a href="mixture.html">mixtures of probability distributions</a></h4>
+<p>####<a href="mixture.html">mixtures of probability distributions</a></p>
 <p><code>mixture</code></p>
 <hr style="height:0px; visibility:hidden;" />
 <hr>
-</div>
-</div>
-<div id="manipulating-greta-arrays" class="section level2">
-<h2>manipulating greta arrays</h2>
-<p>Functions and operations for modifying greta arrays</p>
+<p>##manipulating greta arrays Functions and operations for modifying greta arrays</p>
 <hr style="height:0px; visibility:hidden;" />
-<div id="arithmetic-logical-and-relational-operators-for-greta-arrays" class="section level4">
-<h4><a href="operators.html">arithmetic, logical and relational operators for greta arrays</a></h4>
+<p>####<a href="operators.html">arithmetic, logical and relational operators for greta arrays</a></p>
 <p><code>operators</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="functions-for-greta-arrays" class="section level4">
-<h4><a href="functions.html">functions for greta arrays</a></h4>
+<p>####<a href="functions.html">functions for greta arrays</a></p>
 <p><code>functions</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="extract-replace-and-combine-greta-arrays" class="section level4">
-<h4><a href="extract-replace-combine.html">extract, replace and combine greta arrays</a></h4>
+<p>####<a href="extract-replace-combine.html">extract, replace and combine greta arrays</a></p>
 <p><code>extract-replace-combine</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="transformation-functions-for-greta-arrays" class="section level4">
-<h4><a href="transforms.html">transformation functions for greta arrays</a></h4>
+<p>####<a href="transforms.html">transformation functions for greta arrays</a></p>
 <p><code>iprobit</code> <code>ilogit</code> <code>icloglog</code> <code>icauchit</code> <code>log1pe</code> <code>imultilogit</code></p>
 <hr style="height:0px; visibility:hidden;" />
 <hr>
-</div>
-</div>
-<div id="modelling" class="section level2">
-<h2>modelling</h2>
-<p>Define and visualise models and fit them to data</p>
+<p>##modelling Define and visualise models and fit them to data</p>
 <hr style="height:0px; visibility:hidden;" />
-<div id="greta-model-objects" class="section level4">
-<h4><a href="model.html">greta model objects</a></h4>
+<p>####<a href="model.html">greta model objects</a></p>
 <p><code>model</code> <code>print</code> <code>plot</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="statistical-inference-on-greta-models" class="section level4">
-<h4><a href="inference.html">statistical inference on greta models</a></h4>
+<p>####<a href="inference.html">statistical inference on greta models</a></p>
 <p><code>stashed_samples</code> <code>mcmc</code> <code>opt</code></p>
 <hr style="height:0px; visibility:hidden;" />
-</div>
-<div id="calculate-greta-arrays-given-fixed-values" class="section level4">
-<h4><a href="calculate.html">calculate greta arrays given fixed values</a></h4>
+<p>####<a href="calculate.html">calculate greta arrays given fixed values</a></p>
 <p><code>calculate</code></p>
 <hr style="height:0px; visibility:hidden;" />
 <hr>
-</div>
-</div>
-<div id="extending-greta" class="section level2">
-<h2>extending greta</h2>
-<p>Write R packages that extend or use greta</p>
+<p>##extending greta Write R packages that extend or use greta</p>
 <hr style="height:0px; visibility:hidden;" />
-<div id="internal-greta-methods" class="section level4">
-<h4><a href="internals.html">internal greta methods</a></h4>
+<p>####<a href="internals.html">internal greta methods</a></p>
 <p><code>internals</code></p>
 <hr style="height:0px; visibility:hidden;" />
 <hr>
-</div>
-</div>
 
 
 

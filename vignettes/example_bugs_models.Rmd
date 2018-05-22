@@ -40,7 +40,3 @@ The following sections provide greta implementations of some of these example mo
 
 <hr>
 
-```{r child='examples/8_schools.Rmd'}
-```
-
-<hr>
