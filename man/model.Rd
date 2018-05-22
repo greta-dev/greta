@@ -7,8 +7,7 @@
 \alias{plot.greta_model}
 \title{greta model objects}
 \usage{
-model(..., precision = c("single", "double"), n_cores = NULL,
-  compile = TRUE)
+model(..., precision = c("single", "double"), compile = TRUE)
 
 \method{print}{greta_model}(x, ...)
 
@@ -26,10 +25,6 @@ ignored).}
 model. Switching from \code{'single'} (the default) to \code{'double'}
 should reduce the risk of numerical instability during sampling, but will
 also increase the computation time, particularly for large models.}
-
-\item{n_cores}{the number of cpu cores to use when evaluating this model.
-Defaults to and cannot exceed the number detected by
-\code{parallel::detectCores}.}
 
 \item{compile}{whether to apply
 \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to

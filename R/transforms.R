@@ -49,27 +49,27 @@ NULL
 #' @rdname transforms
 #' @export
 iprobit <- function (x)
-  op('iprobit', x, tf_operation = tf_iprobit)
+  op('iprobit', x, tf_operation = "tf_iprobit")
 
 #' @rdname transforms
 #' @export
 ilogit <- function (x)
-  op('ilogit', x, tf_operation = tf$nn$sigmoid)
+  op('ilogit', x, tf_operation = "tf$nn$sigmoid")
 
 #' @rdname transforms
 #' @export
 icloglog <- function (x)
-  op('icloglog', x, tf_operation = tf_icloglog)
+  op('icloglog', x, tf_operation = "tf_icloglog")
 
 #' @rdname transforms
 #' @export
 icauchit <- function (x)
-  op('icauchit', x, tf_operation = tf_icauchit)
+  op('icauchit', x, tf_operation = "tf_icauchit")
 
 #' @rdname transforms
 #' @export
 log1pe <- function (x)
-  op('log1pe', x, tf_operation = tf$nn$softplus)
+  op('log1pe', x, tf_operation = "tf$nn$softplus")
 
 #' @rdname transforms
 #' @export
@@ -90,5 +90,5 @@ imultilogit <- function (x) {
 
   op('imultilogit', x,
      dimfun = dimfun,
-     tf_operation = tf_imultilogit)
+     tf_operation = "tf_imultilogit")
 }

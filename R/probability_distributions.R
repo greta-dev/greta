@@ -61,13 +61,14 @@ uniform_distribution <- R6Class (
            dim = self$dim)
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       tf_ld <- fl(self$log_density)
 
       # weird hack to make TF see a gradient here
-      log_prob = function (x)
+      log_prob <- function (x) {
         tf_ld + x * fl(0)
+      }
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
@@ -89,7 +90,7 @@ normal_distribution <- R6Class (
       self$add_parameter(sd, 'sd')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Normal(loc = parameters$mean,
                                       scale = parameters$sd)
     }
@@ -111,24 +112,24 @@ lognormal_distribution <- R6Class (
       self$add_parameter(sdlog, 'sdlog')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       mean <- parameters$meanlog
       sd <- parameters$sdlog
       var <- tf$square(sd)
 
-      log_prob = function (x) {
+      log_prob <- function (x) {
         lx <- tf$log(x)
         fl(-1) * (lx + tf$log(sd) + fl(0.9189385)) +
           fl(-0.5) * tf$square(tf$subtract(lx, mean)) / var
       }
 
-      cdf = function (x) {
+      cdf <- function (x) {
         lx <- tf$log(x)
         fl(0.5) + fl(0.5) * tf$erf((lx - mean) / (fl(sqrt(2)) * sd))
       }
 
-      log_cdf = function (x) {
+      log_cdf <- function (x) {
         log(cdf(x))
       }
 
@@ -151,7 +152,7 @@ bernoulli_distribution <- R6Class (
       self$add_parameter(prob, 'prob')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Bernoulli(probs = parameters$prob)
     },
 
@@ -177,7 +178,7 @@ binomial_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Binomial(total_count = parameters$size,
                                         probs = parameters$prob)
     },
@@ -204,7 +205,7 @@ beta_binomial_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       size <- parameters$size
       alpha <- parameters$alpha
@@ -239,7 +240,7 @@ poisson_distribution <- R6Class (
       self$add_parameter(lambda, 'lambda')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Poisson(rate = parameters$lambda)
     },
 
@@ -263,7 +264,7 @@ negative_binomial_distribution <- R6Class (
       self$add_parameter(prob, 'prob')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$NegativeBinomial(total_count = parameters$size,
                                                 probs = fl(1) - parameters$prob)
     },
@@ -289,7 +290,7 @@ hypergeometric_distribution <- R6Class (
       self$add_parameter(k, 'k')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       m <- parameters$m
       n <- parameters$n
@@ -324,7 +325,7 @@ gamma_distribution <- R6Class (
       self$add_parameter(rate, 'rate')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Gamma(concentration = parameters$shape,
                                      rate = parameters$rate)
     }
@@ -347,7 +348,7 @@ inverse_gamma_distribution <- R6Class (
       self$add_parameter(beta, 'beta')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$InverseGamma(concentration = parameters$alpha,
                                             rate = parameters$beta)
     }
@@ -370,20 +371,20 @@ weibull_distribution <- R6Class (
       self$add_parameter(scale, 'scale')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       a <- parameters$shape
       b <- parameters$scale
 
-      log_prob = function (x) {
+      log_prob <- function (x) {
         log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
       }
 
-      cdf = function (x) {
+      cdf <- function (x) {
         fl(1) - exp(-(x / b) ^ a)
       }
 
-      log_cdf = function (x) {
+      log_cdf <- function (x) {
         log(cdf(x))
       }
 
@@ -408,7 +409,7 @@ exponential_distribution <- R6Class (
       self$add_parameter(rate, 'rate')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Exponential(rate = parameters$rate)
     }
 
@@ -430,7 +431,7 @@ pareto_distribution <- R6Class (
       self$add_parameter(b, 'b')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       a <- parameters$a
       b <- parameters$b
@@ -465,7 +466,7 @@ student_distribution <- R6Class (
       self$add_parameter(sigma, 'sigma')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$StudentT(df = parameters$df,
                                         loc = parameters$mu,
                                         scale = parameters$sigma)
@@ -487,7 +488,7 @@ laplace_distribution <- R6Class (
       self$add_parameter(sigma, 'sigma')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Laplace(loc = parameters$mu,
                                        scale = parameters$sigma)
     }
@@ -510,7 +511,7 @@ beta_distribution <- R6Class (
       self$add_parameter(shape2, 'shape2')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Beta(concentration1 = parameters$shape1,
                                     concentration0 = parameters$shape2)
     }
@@ -531,18 +532,18 @@ cauchy_distribution <- R6Class (
       self$add_parameter(scale, 'scale')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       loc <- parameters$location
       s <- parameters$scale
 
-      log_prob = function (x)
+      log_prob <- function (x)
         tf$negative(tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s))))
 
-      cdf = function (x)
+      cdf <- function (x)
         fl(1 / pi)  * tf$atan((x - loc) / s) + fl(0.5)
 
-      log_cdf = function (x)
+      log_cdf <- function (x)
         tf$log(cdf(x))
 
       list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
@@ -566,7 +567,7 @@ chi_squared_distribution <- R6Class (
       self$add_parameter(df, 'df')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Chi2(df = parameters$df)
     }
 
@@ -586,7 +587,7 @@ logistic_distribution <- R6Class (
       self$add_parameter(scale, 'scale')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       tf$contrib$distributions$Logistic(loc = parameters$location,
                                         scale = parameters$scale)
     },
@@ -614,7 +615,7 @@ f_distribution <- R6Class (
       self$add_parameter(df2, 'df2')
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       df1 <- parameters$df1
       df2 <- parameters$df2
@@ -622,7 +623,7 @@ f_distribution <- R6Class (
       tf_lbeta <- function(a, b)
         tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
 
-      log_prob = function (x) {
+      log_prob <- function (x) {
         df1_x <- df1 * x
         la <- df1 * log(df1_x) + df2 * log(df2)
         lb <- (df1 + df2) * log(df1_x + df2)
@@ -630,13 +631,13 @@ f_distribution <- R6Class (
         lnumerator - log(x) - tf_lbeta(df1 / fl(2), df2 / fl(2))
       }
 
-      cdf = function (x) {
+      cdf <- function (x) {
         df1_x <- df1 * x
         ratio <- df1_x / (df1_x + df2)
         tf$betainc(df1 / fl(2), df2 / fl(2), ratio)
       }
 
-      log_cdf = function(x)
+      log_cdf <- function(x)
         log(cdf(x))
 
       list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
@@ -660,7 +661,8 @@ dirichlet_distribution <- R6Class (
       if (ncol(alpha) != 1 |
           length(dim(alpha)) != 2) {
 
-        stop ('alpha must be a 2D greta array with one column, but has dimensions ',
+        stop ("alpha must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(alpha), collapse = ' x '),
               call. = FALSE)
 
@@ -688,12 +690,14 @@ dirichlet_distribution <- R6Class (
       # coerce the parameter arguments to nodes and add as children and
       # parameters
       self$bounds <- c(0, Inf)
-      super$initialize('dirichlet', c(dim, length(alpha)), truncation = c(0, Inf))
+      super$initialize('dirichlet',
+                       c(dim, length(alpha)),
+                       truncation = c(0, Inf))
       self$add_parameter(alpha, 'alpha')
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       alpha <- tf$transpose(parameters$alpha)
       tf$contrib$distributions$Dirichlet(concentration = alpha)
@@ -730,7 +734,8 @@ dirichlet_multinomial_distribution <- R6Class (
       if (ncol(alpha) != 1 |
           length(dim(alpha)) != 2) {
 
-        stop ('alpha must be a 2D greta array with one column, but has dimensions ',
+        stop ("alpha must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(alpha), collapse = ' x '),
               call. = FALSE)
 
@@ -757,17 +762,20 @@ dirichlet_multinomial_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('dirichlet_multinomial', dim = c(dim, length(alpha)), discrete = TRUE)
+      super$initialize("dirichlet_multinomial",
+                       dim = c(dim, length(alpha)),
+                       discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(alpha, 'alpha')
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       alpha <- tf$transpose(parameters$alpha)
-      tf$contrib$distributions$DirichletMultinomial(total_count = parameters$size,
-                                                    concentration = alpha)
+      distrib <- tf$contrib$distributions$DirichletMultinomial
+      distrib(total_count = parameters$size,
+              concentration = alpha)
     },
 
     # no CDF for multivariate distributions
@@ -800,7 +808,8 @@ multinomial_distribution <- R6Class (
       if (ncol(prob) != 1 |
           length(dim(prob)) != 2) {
 
-        stop ('prob must be a 2D greta array with one column, but has dimensions ',
+        stop ("prob must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(prob), collapse = ' x '),
               call. = FALSE)
 
@@ -827,13 +836,15 @@ multinomial_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('multinomial', dim = c(dim, length(prob)), discrete = TRUE)
+      super$initialize("multinomial",
+                       dim = c(dim, length(prob)),
+                       discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(prob, 'prob')
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       probs <- tf$transpose(parameters$prob)
       probs <- probs / tf$reduce_sum(probs)
@@ -862,7 +873,8 @@ categorical_distribution <- R6Class (
       if (ncol(prob) != 1 |
           length(dim(prob)) != 2) {
 
-        stop ('prob must be a 2D greta array with one column, but has dimensions ',
+        stop ("prob must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(prob), collapse = ' x '),
               call. = FALSE)
 
@@ -889,12 +901,14 @@ categorical_distribution <- R6Class (
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('categorical', dim = c(dim, length(prob)), discrete = TRUE)
+      super$initialize("categorical",
+                       dim = c(dim, length(prob)),
+                       discrete = TRUE)
       self$add_parameter(prob, 'prob')
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       probs <- tf$transpose(parameters$prob)
       probs <- probs / tf$reduce_sum(probs)
@@ -924,7 +938,8 @@ multivariate_normal_distribution <- R6Class (
       if (ncol(mean) != 1 |
           length(dim(mean)) != 2) {
 
-        stop ('mean must be a 2D greta array with one column, but has dimensions ',
+        stop ("mean must be a 2D greta array with one column, ",
+              "but has dimensions ",
               paste(dim(mean), collapse = ' x '),
               call. = FALSE)
 
@@ -934,7 +949,8 @@ multivariate_normal_distribution <- R6Class (
       if (nrow(Sigma) != ncol(Sigma) |
           length(dim(Sigma)) != 2) {
 
-        stop ('Sigma must be a square 2D greta array, but has dimensions ',
+        stop ("Sigma must be a square 2D greta array, ",
+              "but has dimensions ",
               paste(dim(Sigma), collapse = ' x '),
               call. = FALSE)
 
@@ -996,7 +1012,7 @@ multivariate_normal_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       # check if Sigma (the node version) has a cholesky factor to use
       cf <- self$parameters$Sigma$representations$cholesky_factor
@@ -1010,7 +1026,7 @@ multivariate_normal_distribution <- R6Class (
       else
         L <- tf$transpose(parameters$Sigma)
 
-      mu = tf$transpose(parameters$mean)
+      mu <- tf$transpose(parameters$mean)
       tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
                                                       scale_tril = L)
     },
@@ -1061,7 +1077,7 @@ wishart_distribution <- R6Class (
       k <- self$dim[1]
       free_greta_array <- vble(truncation = c(-Inf, Inf),
                                dim = k + k * (k - 1) / 2)
-      free_greta_array$constraint = "covariance_matrix"
+      free_greta_array$constraint <- "covariance_matrix"
 
       # first create a greta array for the cholesky
       chol_greta_array <- flat_to_chol(free_greta_array, self$dim)
@@ -1078,27 +1094,37 @@ wishart_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
-      # if there is a cholesky factor for Sigma,use that
-      is_cholesky <- !is.null(self$parameters$Sigma$representations$cholesky_factor)
+      # if there is a cholesky factor for Sigma, use that
+      cf <- self$parameters$Sigma$representations$cholesky_factor
+      is_cholesky <- !is.null(cf)
+
+      df <- tf$squeeze(parameters$df)
 
       if (is_cholesky) {
 
-        tf$contrib$distributions$WishartCholesky(df = parameters$df,
-                                                 scale = parameters$Sigma)
+        # find and use the tensor for the cholesky factor
+        cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
+
+        wish_chol <- tf$contrib$distributions$WishartCholesky
+        distrib <- wish_chol(df = df,
+                             scale = tf$transpose(cholesky_scale))
 
       } else {
 
-        tf$contrib$distributions$WishartFull(df = parameters$df,
-                                             scale = parameters$Sigma)
+        wish <- tf$contrib$distributions$WishartFull
+        distrib <- wish(df = df,
+                        scale = parameters$Sigma)
 
       }
 
+      distrib
+
     },
 
-    tf_log_density_function = function (x, parameters) {
-      lp <- self$tf_distrib(parameters)$log_prob(x)
+    tf_log_density_function = function (x, parameters, dag) {
+      lp <- self$tf_distrib(parameters, dag)$log_prob(x)
       tf$reshape(lp, shape(1, 1))
     },
 
@@ -1162,10 +1188,12 @@ lkj_correlation_distribution <- R6Class (
       k <- self$dim[1]
       free_greta_array <- vble(truncation = c(-Inf, Inf),
                                dim = k * (k - 1) / 2)
-      free_greta_array$constraint = "correlation_matrix"
+      free_greta_array$constraint <- "correlation_matrix"
 
       # first create a greta array for the cholesky
-      chol_greta_array <- flat_to_chol(free_greta_array, self$dim, correl = TRUE)
+      chol_greta_array <- flat_to_chol(free_greta_array,
+                                       self$dim,
+                                       correl = TRUE)
 
       # create symmetric matrix to return as target node
       matrix_greta_array <- chol_to_symmetric(chol_greta_array)
@@ -1191,14 +1219,14 @@ lkj_correlation_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
 
       eta <- parameters$eta
 
       # if the cholesky factor exists, we'll be using that
       is_cholesky <- !is.null(self$target$representations$cholesky_factor)
 
-      log_prob = function (x) {
+      log_prob <- function (x) {
 
         if (!is_cholesky)
           x <- tf$cholesky(x)
@@ -1258,8 +1286,9 @@ distribution_classes_module <- module(uniform_distribution,
 #' @description These functions can be used to define random variables in a
 #'   greta model. They return a variable greta array that follows the specified
 #'   distribution. This variable greta array can be used to represent a
-#'   parameter with  prior distribution, or used with \code{\link{distribution}}
-#'   to define a distribution over a data greta array.
+#'   parameter with prior distribution, combined into a mixture distribution
+#'   using \code{\link{mixture}}, or used with \code{\link{distribution}} to
+#'   define a distribution over a data greta array.
 #'
 #' @param truncation a length-two vector giving values between which to truncate
 #'   the distribution, similarly to the \code{lower} and \code{upper} arguments
@@ -1418,8 +1447,10 @@ bernoulli <- function (prob, dim = NULL)
 
 #' @rdname distributions
 #' @export
-binomial <- function (size, prob, dim = NULL)
+binomial <- function (size, prob, dim = NULL) {
+  check_in_family("binomial")
   distrib('binomial', size, prob, dim)
+}
 
 #' @rdname distributions
 #' @export
@@ -1438,8 +1469,10 @@ hypergeometric <- function (m, n, k, dim = NULL)
 
 #' @rdname distributions
 #' @export
-poisson <- function (lambda, dim = NULL)
+poisson <- function (lambda, dim = NULL) {
+  check_in_family("poisson")
   distrib('poisson', lambda, dim)
+}
 
 #' @rdname distributions
 #' @export

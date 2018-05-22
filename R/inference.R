@@ -7,34 +7,40 @@ NULL
 #' @rdname inference
 #' @export
 #' @importFrom stats na.omit
+#' @importFrom coda mcmc.list
 #'
 #' @details If the sampler is aborted before finishing, the samples collected so
 #'   far can be retrieved with \code{stashed_samples()}. Only samples from the
 #'   sampling phase will be returned.
 stashed_samples <- function () {
 
-  stashed <- exists('trace_stash', envir = greta_stash)
+  stashed <- exists("samplers", envir = greta_stash)
 
   if (stashed) {
 
-    stash <- greta_stash$trace_stash
+    samplers <- greta_stash$samplers
 
-    # get them, remove the NAs, and return
-    draws_clean <- na.omit(stash$trace)
-    draws_prepped <- prepare_draws(draws_clean)
-    draws_mcmclist <- mcmc.list(draws_prepped)
+    # get draws as a matrix
+    free_state_draws <- lapply(samplers, member, "traced_free_state")
+    values_draws <- lapply(samplers, member, "traced_values")
+
+    # convert to mcmc objects
+    free_state_draws <- lapply(free_state_draws, prepare_draws)
+    values_draws <- lapply(values_draws, prepare_draws)
+
+    # convert to mcmc.list objects
+    free_state_draws <- coda::mcmc.list(free_state_draws)
+    values_draws <- coda::mcmc.list(values_draws)
 
     # prep the raw model objects
     model_info <- new.env()
-    raw_clean <- na.omit(stash$raw)
-    raw_prepped <- prepare_draws(raw_clean)
-    model_info$raw_draws <- mcmc.list(raw_prepped)
-    model_info$model <- greta_stash$model
+    model_info$raw_draws <- free_state_draws
+    model_info$model <- samplers[[1]]$model
 
     # add the raw draws as an attribute
-    attr(draws_mcmclist, "model_info") <- model_info
+    attr(values_draws, "model_info") <- model_info
 
-    return (draws_mcmclist)
+    return (values_draws)
 
   } else {
 
@@ -48,21 +54,15 @@ stashed_samples <- function () {
 # they abort a run
 greta_stash <- new.env()
 
-stash_trace <- function (trace, raw) {
-  assign('trace_stash',
-         list(trace = trace,
-              raw = raw),
-         envir = greta_stash)
-}
-
 #' @rdname inference
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom future plan
+#' @importFrom future.apply future_lapply
 #'
 #' @param model greta_model object
-#' @param method method used to sample or optimise values. Currently only
-#'   one method is available for each procedure: \code{hmc} and \code{adagrad}
+#' @param sampler sampler used to draw values in MCMC. See \code{\link{samplers}} for options.
 #' @param n_samples number of MCMC samples to draw (after any warm-up, but
 #'   before thinning)
 #' @param thin MCMC thinning rate; every \code{thin} samples is retained,
@@ -71,6 +71,7 @@ stash_trace <- function (trace, raw) {
 #'   During this phase the sampler moves toward the highest density area and
 #'   tunes sampler hyperparameters.
 #' @param chains number of MCMC chains to run
+#' @param n_cores the maximum number of CPU cores used by \emph{each} chain.
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations)
 #' @param control an optional named list of hyperparameters and options to
@@ -99,19 +100,15 @@ stash_trace <- function (trace, raw) {
 #'   (via \code{model}) to have double precision, though this will slow down
 #'   sampling.
 #'
-#'   Currently, the only implemented MCMC procedure is static Hamiltonian Monte
-#'   Carlo (\code{method = "hmc"}). During the warmup iterations, the leapfrog
-#'   stepsize hyperparameter \code{epsilon} is tuned to maximise the sampler
-#'   efficiency, and the posterior marginal standard deviations are estimated
-#'   \code{diag_sd}. The \code{control} argument can be used to specify the
-#'   initial value for \code{epsilon}, \code{diag_sd}, and two other
-#'   hyperparameters: \code{Lmin} and \code{Lmax}; positive integers (with
-#'   \code{Lmax > Lmin}) giving the upper and lower limits to the number of
-#'   leapfrog steps per iteration (from which the number is selected uniformly
-#'   at random).
+#'   Multiple mcmc chains can be run in parallel by setting the execution plan
+#'   with the \code{future} package. Only \code{plan(multisession)} futures or
+#'   \code{plan(cluster)} futures that don't use fork clusters are allowed,
+#'   since forked processes conflict with tensorflow's parallelism.
 #'
-#'   The default control options for HMC are:
-#'   \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005, diag_sd = 1)}
+#'   If \code{n_cores = NULL} and mcmc chains are being run sequentially, each
+#'   chain will be allowed to use all CPU cores. If chains are being run in
+#'   parallel, \code{n_cores} will be set so that \code{n_cores * chains} is
+#'   less than the number of CPU cores.
 #'
 #' @return \code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
 #'   that can be analysed using functions from the coda package. This will
@@ -132,20 +129,17 @@ stash_trace <- function (trace, raw) {
 #'               warmup = 10)
 #' }
 mcmc <- function (model,
-                  method = c("hmc"),
+                  sampler = hmc(),
                   n_samples = 1000,
                   thin = 1,
-                  warmup = 100,
+                  warmup = 1000,
                   chains = 1,
+                  n_cores = NULL,
                   verbose = TRUE,
-                  pb_update = 10,
-                  control = list(),
+                  pb_update = 50,
                   initial_values = NULL) {
 
-  method <- match.arg(method)
-
-  # store the model
-  greta_stash$model <- model
+  check_future_plan()
 
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
@@ -157,196 +151,124 @@ mcmc <- function (model,
                      FUN.VALUE = FALSE)
 
   if (any(are_data)) {
-    is_are <- ifelse(sum(are_data) == 1, 'is a data greta array', 'are data greta arrays')
-    bad_greta_arrays <- paste(names[are_data], collapse = ', ')
-    msg <- sprintf('%s %s, data greta arrays cannot be sampled',
+
+    is_are <- ifelse(sum(are_data) == 1,
+                     "is a data greta array",
+                     "are data greta arrays")
+    bad_greta_arrays <- paste(names[are_data],
+                              collapse = ", ")
+    msg <- sprintf("%s %s, data greta arrays cannot be sampled",
                    bad_greta_arrays,
                    is_are)
     stop (msg, call. = FALSE)
+
   }
 
   # get the dag containing the target nodes
   dag <- model$dag
 
-  param <- dag$example_parameters()
-  n_initial <- length(param)
+  # turn initial values into a list is needed (checking the length)
+  initial_values <- prep_initials(initial_values, chains)
 
-  # random starting locations
-  if (is.null(initial_values)) {
+  # create a sampler object for each chain, using these (possibly NULL) initial
+  # values
+  samplers <- lapply(initial_values,
+                     build_sampler,
+                     sampler,
+                     model)
 
-    # try several times
-    valid <- FALSE
-    attempts <- 1
-    while (!valid & attempts < 20) {
+  # stash the samplers now, to retrieve draws later
+  greta_stash$samplers <- samplers
 
-      initial_values <- replicate(chains,
-                                  rnorm(n_initial, 0, 0.5),
-                                  simplify = FALSE)
+  # add chain info for printing
+  for (i in seq_len(chains)) {
+    samplers[[i]]$chain_number <- i
+    samplers[[i]]$n_chains <- chains
+  }
 
-      # test validity of values
-      valid <- valid_parameters(initial_values, dag)
-      attempts <- attempts + 1
+  # check the future plan is valid
+  check_future_plan()
 
-    }
+  sequential <- inherits(future::plan(), "sequential")
+  n_cores <- check_n_cores(n_cores, chains, sequential)
+  float_type <- dag$tf_float
 
-    if (!valid) {
-      stop ("Could not find reasonable starting values after ", attempts,
-            " attempts. Please specify initial values manually via the ",
-            "initial_values argument to mcmc",
+  if (!sequential & chains > 1) {
+    cores_text <- ifelse(n_cores == 1, "1 core", sprintf("up to %i cores", n_cores))
+    cat(sprintf("\nrunning %i chains in parallel, each on %s (progress bar suppressed)\n\n",
+                chains, cores_text))
+    verbose <- FALSE
+  }
+
+  # run chains on samplers (return list so we can handle parallelism here)
+  samplers <- future.apply::future_lapply(samplers,
+                                          do("run_chain"),
+                                          n_samples = n_samples,
+                                          thin = thin,
+                                          warmup = warmup,
+                                          verbose = verbose,
+                                          pb_update = pb_update,
+                                          sequential = sequential,
+                                          n_cores = n_cores,
+                                          float_type = float_type)
+
+  # if we were running in parallel, we need to put the samplers back in the
+  # stash to return
+  if (!sequential) {
+    greta_stash$samplers <- samplers
+  }
+
+  # get chains from the samplers, with raw values as an attribute
+  draws <- stashed_samples()
+
+  # empty the stash
+  rm("samplers", envir = greta_stash)
+
+  draws
+
+}
+
+# convert (possibly NULL) user-specified initial values into a list of the
+# correct length, with nice error messages
+prep_initials <- function (initial_values, n_chains) {
+
+  # if the user provided a list of initial values, check the length
+  if (is.list(initial_values)) {
+
+    n_sets <- length(initial_values)
+
+    if (n_sets != n_chains) {
+      stop (n_sets, " sets of initial values were provided, but there ",
+            ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
+            ifelse(n_chains > 1, "s", ""),
             call. = FALSE)
     }
 
   } else {
 
-    # if they provided a list, check it
-    if (is.list(initial_values)) {
+    # otherwise replicate them for each chain
+    if (is.null(initial_values)) {
 
-      n_sets <- length(initial_values)
-
-      if (n_sets != chains) {
-        stop (n_sets, " sets of initial values were provided, but there ",
-              ifelse(chains > 1, "are ", "is only "), chains, " chain",
-              ifelse(chains > 1, "s", ""),
-              call. = FALSE)
-      }
-
-      n_param <- vapply(initial_values, length, FUN.VALUE = 0)
-
-      if (!all(n_param == n_initial)) {
-        stop ("each set of initial values must be a vector of length ",
-              n_initial,
-              call. = FALSE)
-      }
+      initial_values <- replicate(n_chains, NULL)
 
     } else {
 
-      # replicate
-      initial_values <- replicate(chains,
+      initial_values <- replicate(n_chains,
                                   initial_values,
                                   simplify = FALSE)
 
-      if (chains > 1) {
+      if (n_chains > 1) {
         message ("\nonly one set of was initial values given, ",
                  "and was used for all chains\n")
       }
 
     }
 
-    # check they are valid
-    if (!valid_parameters(initial_values, dag)) {
-      stop ('The log density and gradients could not be evaluated at these ',
-            'initial values.',
-            call. = FALSE)
-    }
-
   }
 
-
-  # get default control options
-  con <- switch(method,
-                hmc = list(Lmin = 10,
-                           Lmax = 20,
-                           epsilon = 0.005,
-                           diag_sd = 1))
-
-  # update them with user overrides
-  con[names(control)] <- control
-
-  # fetch the algorithm
-  method <- switch(method,
-                   hmc = hmc)
-
-  print_chain <- chains > 1
-
-  chains_list <- lapply(seq_len(chains),
-                        run_chain,
-                        dag = dag,
-                        method = method,
-                        n_samples = n_samples,
-                        thin = thin,
-                        warmup = warmup,
-                        chains = chains,
-                        verbose = verbose,
-                        pb_update = pb_update,
-                        control = con,
-                        initial_values = initial_values,
-                        print_chain = print_chain)
-
-  # get raw_draws
-  raw_list <- lapply(chains_list,
-                     function (x) {
-                       attr(x, "model_info")$raw_draws[[1]]
-                       })
-  chains_list <- lapply(chains_list, `[[`, 1)
-
-  model_info <- new.env()
-  model_info$raw_draws <- do.call(mcmc.list, raw_list)
-  model_info$model <- greta_stash$model
-  chains <- do.call(mcmc.list, chains_list)
-  attr(chains, "model_info") <- model_info
-  chains
+  initial_values
 
 }
-
-
-run_chain <- function (chain, dag, method, n_samples, thin,
-                       warmup, chains, verbose, pb_update,
-                       control, initial_values, print_chain) {
-
-  if (print_chain) {
-    msg <- sprintf("\nchain %i/%i\n", chain, chains)
-    cat(msg)
-  }
-
-  initial_values_chain <- initial_values[[chain]]
-
-  # if warmup is required, do that now and update init
-  if (warmup > 0) {
-
-    if (verbose)
-      pb_warmup <- create_progress_bar('warmup', c(warmup, n_samples), pb_update)
-    else
-      pb_warmup <- NULL
-
-    # run it
-    warmup_draws <- method(dag = dag,
-                           init = initial_values_chain,
-                           n_samples = warmup,
-                           thin = thin,
-                           verbose = verbose,
-                           pb = pb_warmup,
-                           tune = TRUE,
-                           stash = FALSE,
-                           control = control)
-
-    # use the last draw of the full parameter vector as the init
-    initial_values_chain <- attr(warmup_draws, 'last_x')
-    control <- attr(warmup_draws, 'control')
-
-  }
-
-  if (verbose)
-    pb_sampling <- create_progress_bar('sampling', c(warmup, n_samples), pb_update)
-  else
-    pb_sampling <- NULL
-
-  # run the sampler
-  draws <- method(dag = dag,
-                  init = initial_values_chain,
-                  n_samples = n_samples,
-                  thin = thin,
-                  verbose = verbose,
-                  pb = pb_sampling,
-                  tune = FALSE,
-                  stash = TRUE,
-                  control = control)
-
-  # if this was successful, trash the stash, prepare and return the draws
-  rm('trace_stash', envir = greta_stash)
-  draws
-
-}
-
 
 #' @importFrom coda mcmc mcmc.list
 prepare_draws <- function (draws) {
@@ -355,30 +277,31 @@ prepare_draws <- function (draws) {
   coda::mcmc(draws_df)
 }
 
-
 #' @rdname inference
 #' @export
 #'
 #' @param max_iterations the maximum number of iterations before giving up
-#' @param tolerance the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level
+#' @param tolerance the numerical tolerance for the solution, the optimiser
+#'   stops when the (absolute) difference in the joint density between
+#'   successive iterations drops below this level
+#' @param method method used to optimise values. Currently only \code{adagrad}
+#'   is available
 #'
 #' @details Currently, the only implemented optimisation algorithm is Adagrad
 #'   (\code{method = "adagrad"}). The \code{control} argument can be used to
 #'   specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
 #'   \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
 #'   (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,
-#'   see
-#'   \href{https://www.tensorflow.org/api_docs/python/tf/train/AdagradOptimizer}{the
+#'   see \href{https://www.tensorflow.org/api_docs/python/tf/train}{the
 #'   TensorFlow docs} for more information
 #'
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
-#'     \item{par}{the best set of parameters found}
-#'     \item{value}{the log joint density of the model at the parameters par}
-#'     \item{iterations}{the number of iterations taken by the optimiser}
-#'     \item{convergence}{an integer code, 0 indicates successful completion, 1
-#'     indicates the iteration limit max_iterations had been reached}
-#'   }
+#'    \item{par} {the best set of parameters found}
+#'    \item{value} {the log joint density of the model at the parameters par}
+#'    \item{iterations} {the number of iterations taken by the optimiser}
+#'    \item{convergence} {an integer code, 0 indicates successful completion,
+#'     1 indicates the iteration limit \code{max_iterations} had been reached} }
 #'
 #' @examples
 #' \dontrun{
@@ -386,11 +309,11 @@ prepare_draws <- function (draws) {
 #' opt_res <- opt(m)
 #' }
 opt <- function (model,
-                  method = c("adagrad"),
-                  max_iterations = 100,
-                  tolerance = 1e-6,
-                  control = list(),
-                  initial_values = NULL) {
+                 method = c("adagrad"),
+                 max_iterations = 100,
+                 tolerance = 1e-6,
+                 control = list(),
+                 initial_values = NULL) {
 
   # mock up some names to avoid CRAN-check note
   optimiser <- joint_density <- sess <- NULL
@@ -455,11 +378,5 @@ opt <- function (model,
 
 }
 
-stash_module <- module(greta_stash,
-                       stash_trace,
-                       prepare_draws)
-
 inference_module <- module(dag_class,
-                           progress_bar = progress_bar_module,
-                           samplers = samplers_module,
-                           stash = stash_module)
+                           progress_bar = progress_bar_module)

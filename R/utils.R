@@ -26,40 +26,63 @@ module <- function (..., sort = TRUE) {
 }
 
 
-# check tensorflow is installed and the version of tensorflow is valid. error,
-# warn, or message if not and (if not an error) return an invisible logical
-# saying whether it is valid
-check_tf_version <- function (alert = c('none', 'error', 'warn', 'message', 'startup')) {
+# check tensorflow and tensorflow-probability are installed and the version of
+# tensorflow is valid. error, warn, or message if not and (if not an error)
+# return an invisible logical saying whether it is valid
+
+#' @importFrom utils compareVersion
+check_tf_version <- function (alert = c("none",
+                                        "error",
+                                        "warn",
+                                        "message",
+                                        "startup")) {
 
   alert <- match.arg(alert)
   text <- NULL
-  available <- TRUE
+  tf_available <- TRUE
+  tfp_available <- TRUE
 
   if (!reticulate::py_module_available('tensorflow')) {
 
-    text <- "TensorFlow isn't installed."
-    available <- FALSE
+    text <- "TensorFlow isn't installed"
+    tf_available <- FALSE
 
   } else {
 
     tf_version <- tf$`__version__`
-    tf_version_split <- strsplit(tf_version, '.', fixed = TRUE)[[1]]
-    tf_version_valid <- as.numeric(tf_version_split[1]) >= 1
+    tf_version_valid <- utils::compareVersion("1.8", tf_version) != 1
 
     if (!tf_version_valid) {
 
-      text <- paste0("you have version ", tf_version)
-      available <- FALSE
+      text <- paste0("you have TensorFlow version ", tf_version)
+      tf_available <- FALSE
 
     }
 
   }
 
+  if (!reticulate::py_module_available('tensorflow_probability')) {
+
+    text <- paste0(text,
+                   ifelse(is.null(text), "", " and "),
+                   "TensorFlow Probability isn't installed")
+    tfp_available <- FALSE
+
+  }
+
   if (!is.null(text)) {
 
-    text <- paste0("\n\n  greta requires TensorFlow version 1.0.0 or higher, ",
-                   "but ", text, "\n  ",
-                   "Use install_tensorflow() to install the latest version.",
+    install <- sprintf("install_tensorflow(%s) ",
+                       ifelse(tfp_available,
+                              "",
+                              "extra_packages = \"tensorflow-probability\""))
+
+    text <- paste0("\n\n  greta requires TensorFlow version 1.8 or higher ",
+                   "and Tensorflow Probability, ",
+                   "but ", text, ".\n  ",
+                   "Use ",
+                   install,
+                   "to install the latest version.",
                    "\n\n")
     switch(alert,
            error = stop (text, call. = FALSE),
@@ -69,9 +92,11 @@ check_tf_version <- function (alert = c('none', 'error', 'warn', 'message', 'sta
            none = NULL)
   }
 
-  invisible(available)
+  invisible(tf_available & tfp_available)
 
 }
+
+
 
 # helper for *apply statements on R6 objects
 member <- function (x, method)
@@ -84,14 +109,19 @@ node_type <- function (node) {
 }
 
 # access the float type option
-tf_float <- function ()
-  options()$greta_tf_float
+tf_float <- function () {
+  float_name <- options()$greta_tf_float
+  tf[[float_name]]
+}
 
 # cast an R scalar as a float of the correct type in TF code
-fl <- function (x)
+fl <- function (x) {
   tf$constant(x, dtype = tf_float())
+}
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape arguments
+#' @noRd
+#' @importFrom tensorflow shape
 to_shape <- function (dim)
   do.call(shape, as.list(dim))
 
@@ -103,6 +133,38 @@ is_scalar <- function (x)
 flatten <- function (x)
   x[seq_along(x)]
 
+# helper function to loop through lists of R6 objects with lapply, executing the
+# member function "name" on the arguments in dots. Using the syntax:
+#   lapply(R6_objects, do("member_function"), args)
+# which does R6_objects[[i]]$member_function(args) for each R6 object
+do <- function(name, ...) {
+  function (x, ...) {
+    x[[name]](...)
+  }
+}
+
+# efficient calculation of the sample variance
+sample_variance <- function (x) {
+  mu <- colMeans(x)
+  errors <- sweep(x, 2, mu, "-")
+  SS <- colSums(errors ^ 2)
+  n <- nrow(x)
+  var <- SS / (n - 1)
+  var
+}
+
+# return an integer to pass on as an RNG seed
+get_seed <- function () {
+  sample.int(1e12, 1)
+}
+
+# does a pointer exist (as a named object) and is it from the current session
+# use like: live_pointer("joint_density", dag$tf_environment)
+live_pointer <- function (tensor_name, environment = parent.frame()) {
+  exists(tensor_name, envir = environment) &&
+    !is.null(environment[[tensor_name]]$name)
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -111,7 +173,11 @@ misc_module <- module(module,
                       fl,
                       to_shape,
                       is_scalar,
-                      flatten)
+                      flatten,
+                      do,
+                      sample_variance,
+                      get_seed,
+                      live_pointer)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
@@ -169,7 +235,8 @@ check_dims <- function (..., target_dim = NULL) {
 
       # error if not
       if (!all(matches_target)) {
-        stop (sprintf('array dimensions should be %s, but input dimensions were %s',
+        stop (sprintf(paste("array dimensions should be %s,",
+                            "but input dimensions were %s"),
                       paste(target_dim, collapse = 'x'),
                       dims_text),
               call. = FALSE)
@@ -205,9 +272,67 @@ check_unit <- function (truncation) {
   }
 }
 
+# check whether the function calling this is being used as the 'family' argument
+# of another modelling function
+check_in_family <- function (function_name) {
+  greta_function <- get(function_name, envir = asNamespace("greta"))
+  family <- parent.frame(2)$family
+  if (!is.null(family) && identical(family, greta_function)) {
+    msg <- paste0("It looks like you're using greta's ", function_name,
+                  " function in the family argment of another model.",
+                  " Maybe you want to use 'family = stats::", function_name,
+                  "' instead?")
+    stop (msg, call. = FALSE)
+  }
+}
+
+#' @importFrom future plan future
+check_future_plan <- function () {
+
+  plan_info <- future::plan()
+
+  # if running in parallel
+  if (!inherits(plan_info, "sequential")) {
+
+    # if it's a cluster, check there's no forking
+    if (inherits(plan_info, "cluster")) {
+
+      # This stopgap trick from Henrik:
+      # https://github.com/HenrikBengtsson/future/issues/224#issuecomment-388398032
+      f <- future::future(NULL, lazy = TRUE)
+      workers <- f$workers
+      if (inherits(workers, "cluster")) {
+        worker <- workers[[1]]
+        if (inherits(worker, "forknode")) {
+          stop("parallel mcmc chains cannot be run with a fork cluster",
+               call. = FALSE)
+        }
+      }
+
+    } else {
+
+      # if multi*, check it's multisession
+      if (inherits(plan_info, "multiprocess") && !inherits(plan_info, "multisession")) {
+        stop ("parallel mcmc chains cannot be run with plan(multiprocess) or ",
+              "plan(multicore)",
+              call. = FALSE)
+      }
+
+    }
+
+
+
+
+
+  }
+
+}
+
 checks_module <- module(check_dims,
                         check_unit,
-                        check_positive)
+                        check_positive,
+                        check_in_family,
+                        check_future_plan)
 
 # convert an array to a vector row-wise
 flatten_rowwise <- function (array) {
@@ -334,20 +459,21 @@ cleanly <- function (expr) {
 
 }
 
-# check whether initial values are valid
-valid_parameters <- function (initial_values, dag) {
+# prepare a matrix of draws and return as an mcmc object
+#' @noRd
+#' @importFrom coda mcmc
+prepare_draws <- function (draws) {
+  draws_df <- data.frame(draws, check.names = FALSE)
+  draws_df <- na.omit(draws_df)
+  coda::mcmc(draws_df)
+}
 
-  if (is.list(initial_values)) {
-    each_valid <- vapply(initial_values, valid_parameters, dag, FUN.VALUE = FALSE)
-    valid <- all(each_valid)
-    return (valid)
-  }
+build_sampler <- function (initial_values, sampler, model, seed = get_seed()) {
 
-  dag$send_parameters(initial_values)
-  ld <- dag$log_density()
-  grad <- dag$gradients()
-  all(is.finite(c(ld, grad)))
-
+  sampler$class$new(initial_values,
+                    model,
+                    sampler$parameters,
+                    seed = seed)
 }
 
 # unlist and flatten a list of arrays to a vector row-wise
@@ -376,11 +502,72 @@ relist_tf <- function (x, list_template) {
 
 }
 
+#' @importFrom future availableCores
+check_n_cores <- function (n_cores, chains, sequential) {
+
+  n_cores_detected <- future::availableCores()
+
+  # check user-provided cores
+  if (!is.null(n_cores) && !n_cores %in% seq_len(n_cores_detected)) {
+
+    message ("\n\t",
+             n_cores, " cores were requested, but only ",
+             n_cores_detected, " cores are available. Using ",
+             n_cores_detected, " cores.\n")
+
+    n_cores <- NULL
+
+  }
+
+  if (is.null(n_cores))
+    n_cores <- 0L
+
+  # if in parallel on this machine and n_cores isn't user-specified, set it so
+  # there's no clash between chains
+  if (!sequential & n_cores == 0)
+    n_cores <- n_cores_detected %/% chains
+
+  as.integer(n_cores)
+
+
+}
+
+# get better names for the scalar elements of a greta array, for labelling mcmc
+# samples
+get_indices_text <- function (dims, name) {
+  ndim <- prod(dims)
+  if (ndim > 1) {
+    vec <- seq_len(ndim)
+    if (length(vec))
+      indices <- arrayInd(vec, dims)
+    mid_text <- apply(indices, 1, paste, collapse = ",")
+    name <- paste0(name, "[", mid_text, "]")
+  }
+  name
+}
+
+# given a list 'trace_list' of arrays giving the values of the target greta
+# arrays (with their true dimensions), return the ith element, flattened to a
+# vector and with elements given informative names
+flatten_trace <- function (i, trace_list) {
+  object <- names(trace_list)[i]
+  dim <- dim(trace_list[[i]])
+  values <- unlist(trace_list[i])
+  names <- get_indices_text(dim, object)
+  names(values) <- names
+  values
+}
+
 sampler_utils_module <- module(all_greta_arrays,
                                cleanly,
-                               valid_parameters,
+                               build_sampler,
+                               prepare_draws,
                                unlist_tf,
-                               relist_tf)
+                               relist_tf,
+                               check_future_plan,
+                               check_n_cores,
+                               get_indices_text,
+                               flatten_trace)
 
 flat_to_chol <- function (x, dim, correl = FALSE) {
 
@@ -388,8 +575,8 @@ flat_to_chol <- function (x, dim, correl = FALSE) {
     dim
 
   fun <- ifelse(correl,
-                tf_flat_to_chol_correl,
-                tf_flat_to_chol)
+                "tf_flat_to_chol_correl",
+                "tf_flat_to_chol")
 
   # sum the elements
   op('flat_to_chol',
@@ -408,18 +595,19 @@ chol_to_symmetric <- function (L) {
   # sum the elements
   op('chol_to_symmetric',
      L,
-     tf_operation = tf_chol_to_symmetric,
+     tf_operation = "tf_chol_to_symmetric",
      dimfun = dimfun)
 
 }
 
-greta_array_operations_module <- module(flat_to_chol,
-                                        chol_to_symmetric)
+greta_array_ops_module <- module(flat_to_chol,
+                                 chol_to_symmetric)
 
 # utilities to export via .internals
+
 utilities_module <- module(misc = misc_module,
                            dummy_arrays = dummy_array_module,
-                           greta_array_operations = greta_array_operations_module,
+                           greta_array_operations = greta_array_ops_module,
                            samplers = sampler_utils_module,
                            checks = checks_module,
                            colours = colour_module)

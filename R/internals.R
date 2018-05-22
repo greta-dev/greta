@@ -13,6 +13,7 @@
 #'                       stash              # stashing MCMC samples
 #'  .internals$nodes$constructors           # node creation wrappers
 #'                   distribution_classes   # R6 distribution classes
+#'                   mixture_classes        # R6 mixture distribution classes
 #'                   node_classes           # R6 node classes
 #'  .internals$tensors                      # functions on tensors
 #'  .internals$utils$checks                 # checking function inputs
@@ -39,11 +40,14 @@
 #' \code{op()}, \code{vble()} and \code{distrib()} directly.
 NULL
 
+nodes_module <- module(constructors = node_constructors_module,
+               node_classes = node_classes_module,
+               distribution_classes = distribution_classes_module,
+               mixture_classes = mixture_module)
+
 #' @export
 .internals <- module(greta_arrays = greta_array_module,
-                     nodes = module(constructors = node_constructors_module,
-                                    node_classes = node_classes_module,
-                                    distribution_classes = distribution_classes_module),
+                     nodes = nodes_module,
                      inference = inference_module,
                      tensors = tf_functions_module,
                      utils = utilities_module)
