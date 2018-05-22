@@ -13,7 +13,8 @@ devtools::install_github("greta-dev/greta")
 ```
 I would love to hear any feedback, bug reports or feature requests via the [issues tracker](https://github.com/greta-dev/greta/issues). I would also be very keen for contributions from anyone with time to spare!
 
-### Work in unconf2018
+### Work during rOpenSci Unconference 2018
+Dates: May, 21th-22th 2018
 List of contributors : Matt Mulvahill, Shirin Glander, Michael Quinn, David Smith, Tiphaine Martin
 
 Several vignettes of examples using greta have been added :
