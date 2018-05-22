@@ -29,6 +29,8 @@ Several issues during the development of these examples were documented in the p
 * Installation of `DiagrammeR` and its dependancies (`igraph`, `XML`) for ubuntu and MacOS
 * Clearing a bunch of tf objects after modification and before plotting and evaluating the models without restarting R session 
 
+A new type of sampler was added for Random Walk Metropolis Hastings.
+
 We also updated the documentation about the `n_samples` option in the `mcmc()` function to inform that the number of samples is given per chain and not total. 
 
 
