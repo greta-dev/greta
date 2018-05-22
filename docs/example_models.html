@@ -302,8 +302,22 @@ div.tocify {
         <li>
           <a href="get_started.html">get started</a>
         </li>
-        <li>
-          <a href="example_models.html">examples</a>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
         </li>
         <li>
           <a href="reference-index.html">docs</a>
@@ -408,29 +422,21 @@ eta &lt;- X %*% beta
 distribution(y) &lt;- poisson(exp(eta))</code></pre>
 <hr>
 </div>
-<div id="multiple-multinomial-regression" class="section level3">
-<h3>Multiple multinomial regression</h3>
-<p>A multi-variable Bayesian linear regression model using the iris data.</p>
+<div id="multiple-categorical-regression" class="section level3">
+<h3>Multiple categorical regression</h3>
+<p>A multi-variable Bayesian categorical regression model using the iris data.</p>
 <div class="data">
 <pre class="r"><code>data(iris)
 
-# Only choose a small subset until categorical takes matrix arguments
-idxs &lt;- c(1:10, 51:60, 101:111)
-n &lt;- length(idxs)
-
-X &lt;- as_data(cbind(1, iris[idxs,1:4]))
-y &lt;- model.matrix(~Species, iris[idxs,])
+X &lt;- as_data(cbind(1, iris[, 1:4]))
+y &lt;- model.matrix(~ Species - 1, iris)
 P &lt;- ncol(X)
 K &lt;- ncol(y)</code></pre>
 </div>
 <pre class="r"><code>beta &lt;- normal(0, 5, dim = c(P, K - 1))
 eta &lt;- X %*% beta
 prob &lt;- imultilogit(eta)
-
-for (i in seq_len(n)) {
-  yi &lt;- t(y[i, ])
-  distribution(yi) &lt;- categorical(t(prob[i, ]))
-}</code></pre>
+distribution(y) &lt;- categorical(prob)</code></pre>
 <hr>
 </div>
 <div id="multiple-linear-regression-with-lasso-prior" class="section level3">
@@ -607,12 +613,11 @@ n_species  &lt;- length(unique(iris$Species))
 species_id &lt;- as.numeric(iris$Species)
 
 Z &lt;- model.matrix(~ Species + Sepal.Length * Species - 1, data = iris)
-gamma &lt;- zeros(n_species * 2)
 
-for (s in unique(species_id)) {
-  gamma_sd &lt;- diag(2)
-  gamma[c(s, s + n_species)] &lt;- multivariate_normal(rep(0, 2), gamma_sd) 
-}
+gamma_matrix &lt;- multivariate_normal(matrix(0, 1, 2),
+                                    diag(2),
+                                    n_realisations = 3) 
+gamma &lt;- c(gamma_matrix)
 
 wi &lt;- as_data(iris$Sepal.Width)
 Z  &lt;- as_data(Z)
@@ -647,7 +652,7 @@ Z &lt;- as_data(Z)
 V &lt;- V + Z %*% G %*% t(Z)
 
 sep &lt;- t(iris$Sepal.Width)
-distribution(sep) &lt;- multivariate_normal(mu, V)</code></pre>
+distribution(sep) &lt;- multivariate_normal(t(mu), V)</code></pre>
 <hr>
 </div>
 <div id="bayesian-neural-network" class="section level3">

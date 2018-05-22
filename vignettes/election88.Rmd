@@ -15,6 +15,7 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
+
 ```{r}
 library(tidyverse)
 library(bayesplot)

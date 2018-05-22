@@ -302,8 +302,22 @@ div.tocify {
         <li>
           <a href="get_started.html">get started</a>
         </li>
-        <li>
-          <a href="example_models.html">examples</a>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
         </li>
         <li>
           <a href="reference-index.html">docs</a>
@@ -351,12 +365,14 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-Functions to set up MCMC samplers and change the startng values of their parameters, for use in <code><a href='inference.html'>mcmc</a>()</code>.
+Functions to set up MCMC samplers and change the starting values of their parameters, for use in <code><a href='inference.html'>mcmc</a>()</code>.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<pre class="r"><span class='fu'>hmc</span>(<span class='kw'>Lmin</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Lmax</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>diag_sd</span> <span class='kw'>=</span> <span class='fl'>1</span>) </pre>
+<pre class="r"><span class='fu'>hmc</span>(<span class='kw'>Lmin</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Lmax</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>diag_sd</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+
+<span class='fu'>rwmh</span>(<span class='kw'>proposal</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"normal"</span>, <span class='st'>"uniform"</span>), <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>diag_sd</span> <span class='kw'>=</span> <span class='fl'>1</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
@@ -376,6 +392,10 @@ leapfrog stepsize hyperparameter (positive, will be tuned)
 <p>
 estimate of the posterior marginal standard deviations (positive, will be tuned).
 </p>
+<code>proposal</code>
+<p>
+the probability distribution used to generate proposal states
+</p>
 <h2 class="hasAnchor" id="value">
 <a class="anchor" href="#value"></a>Value
 </h2>
@@ -390,6 +410,9 @@ During the warmup iterations of <code>mcmc</code>, some of these sampler paramet
 </p>
 <p>
 For <code>hmc()</code>, the number of leapfrog steps at each iteration is selected uniformly at random from between <code>Lmin</code> and <code>Lmax</code>. <code>diag_sd</code> is used to rescale the parameter space to make it more uniform, and make sampling more efficient.
+</p>
+<p>
+The Random Walk Metropolis Hastings algorithm is a gradient free sampling algorithm that requires no tuning parameters. The algorithm involves a proposal generating step <code>proposal_state = current_state +   perturb</code> by a random perturbation, followed by Metropolis-Hastings accept/reject step. The class is implemented for uniform and normal proposals.
 </p>
 
 

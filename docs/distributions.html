@@ -302,8 +302,22 @@ div.tocify {
         <li>
           <a href="get_started.html">get started</a>
         </li>
-        <li>
-          <a href="example_models.html">examples</a>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
         </li>
         <li>
           <a href="reference-index.html">docs</a>
@@ -398,19 +412,21 @@ These functions can be used to define random variables in a greta model. They re
 
 <span class='fu'>f</span>(<span class='no'>df1</span>, <span class='no'>df2</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 
-<span class='fu'>multivariate_normal</span>(<span class='no'>mean</span>, <span class='no'>Sigma</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'>multivariate_normal</span>(<span class='no'>mean</span>, <span class='no'>Sigma</span>, <span class='kw'>n_realisations</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>dimension</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
 <span class='fu'>wishart</span>(<span class='no'>df</span>, <span class='no'>Sigma</span>)
 
-<span class='fu'>lkj_correlation</span>(<span class='no'>eta</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+<span class='fu'>lkj_correlation</span>(<span class='no'>eta</span>, <span class='kw'>dimension</span> <span class='kw'>=</span> <span class='fl'>2</span>)
 
-<span class='fu'>multinomial</span>(<span class='no'>size</span>, <span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'>multinomial</span>(<span class='no'>size</span>, <span class='no'>prob</span>, <span class='kw'>n_realisations</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>dimension</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>categorical</span>(<span class='no'>prob</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'>categorical</span>(<span class='no'>prob</span>, <span class='kw'>n_realisations</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>dimension</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>dirichlet</span>(<span class='no'>alpha</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'>dirichlet</span>(<span class='no'>alpha</span>, <span class='kw'>n_realisations</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>dimension</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>dirichlet_multinomial</span>(<span class='no'>size</span>, <span class='no'>alpha</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>) </pre>
+<span class='fu'>dirichlet_multinomial</span>(<span class='no'>size</span>, <span class='no'>alpha</span>, <span class='kw'>n_realisations</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>dimension</span> <span class='kw'>=</span> <span class='kw'>NULL</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
@@ -445,6 +461,14 @@ positive integer parameter
 <code>Sigma</code>
 <p>
 positive definite variance-covariance matrix parameter
+</p>
+<code>n_realisations</code>
+<p>
+the number of independent realisation of a multivariate distribution
+</p>
+<code>dimension</code>
+<p>
+the dimension of a multivariate distribution
 </p>
 <h2 class="hasAnchor" id="details">
 <a class="anchor" href="#details"></a>Details
@@ -793,10 +817,10 @@ reference
 <span class='co'># a multivariate normal variable, with correlation between two elements</span>
 <span class='no'>Sig</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='fl'>4</span>)
 <span class='no'>Sig</span>[<span class='fl'>3</span>, <span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='no'>Sig</span>[<span class='fl'>4</span>, <span class='fl'>3</span>] <span class='kw'>&lt;-</span> <span class='fl'>0.6</span>
-<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>)
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>multivariate_normal</span>(<span class='fu'>t</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>)), <span class='no'>Sig</span>)
 
 <span class='co'># 10 independent replicates of that</span>
-<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>multivariate_normal</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>), <span class='no'>Sig</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>multivariate_normal</span>(<span class='fu'>t</span>(<span class='fu'><a href='extract-replace-combine.html'>rep</a></span>(<span class='no'>mu</span>, <span class='fl'>4</span>)), <span class='no'>Sig</span>, <span class='kw'>n_realisations</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 
 <span class='co'># a Wishart variable with the same covariance parameter</span>
 <span class='no'>theta</span> <span class='kw'>&lt;-</span> <span class='fu'>wishart</span>(<span class='kw'>df</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Sigma</span> <span class='kw'>=</span> <span class='no'>Sig</span>)</pre>

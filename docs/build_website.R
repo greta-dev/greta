@@ -74,9 +74,19 @@ file.copy('man/figures/plotlegend.png',
           overwrite = TRUE)
 
 # copy vignettes (and examples) over
-vignettes <- list.files('vignettes/',
+vignettes <- list.files('vignettes',
                         pattern = '.Rmd',
                         full.names = TRUE)
+
+# blacklist some (too big or slow for now)
+vignettes_to_skip <- c("8_schools_example_model",
+                       "election88")
+vignettes_to_skip <- paste0("vignettes/",
+                            vignettes_to_skip,
+                            ".Rmd")
+skip_idx <- match(vignettes_to_skip, vignettes)
+vignettes <- vignettes[-skip_idx]
+
 sapply(vignettes,
        file.copy,
        'docs',

@@ -66,6 +66,7 @@ Suggests:
     MCMCpack,
     rmutil,
     extraDistr,
-    truncdist
+    truncdist,
+    tidyverse
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
