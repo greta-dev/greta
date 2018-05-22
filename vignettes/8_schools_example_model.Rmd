@@ -177,6 +177,14 @@ mcmc_trace(draws, facet_args = list(ncol = 3))
 mcmc_intervals(draws)
 ```
 
+```{r fig.width=10, fig.height=8}
+mcmc_acf_bar(draws, facet_args = list(ncol = 3))
+```
+
+```{r}
+mcmc_hist(draws, facet_args = list(ncol = 3))
+```
+
 ## Session information
 
 ```{r}
