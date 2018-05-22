@@ -1,6 +1,18 @@
 ---
 title: "The 1988 Election Model"
-output: html_notebook
+output:
+  html_document:
+    css: greta.css
+    toc: yes
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+    theme: lumen
+    highlight: default
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Example models}
+  %\usepackage[utf8]{inputenc}
 ---
 
 ```{r}
