@@ -359,17 +359,47 @@ devtools::install_github(&quot;greta-dev/greta@dev&quot;)  # development version
 <hr>
 <div id="tensorflow" class="section level3">
 <h3>TensorFlow</h3>
-<p>Before you can fit models with greta, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> python package (version 1.0.0 or higher). greta exports <code>install_tensorflow()</code> from the <code>tensorflow</code> R package, which will attempt to install the latest version of TensorFlow from within your R session.</p>
-<pre class="r"><code>install_tensorflow()</code></pre>
+<p>Before you can fit models with <code>greta</code>, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> python package (version 1.0.0 or higher). greta exports <code>install_tensorflow()</code> from the <code>tensorflow</code> R package, which will attempt to install the latest version of TensorFlow from within your R session. Moreover, you need to install an additional Python package called <a href="https://github.com/tensorflow/probability">tensorflow-probability</a>. <a href="https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245">TensorFlow Probability</a> is a library for probabilistic reasoning and statistical analysis in TensorFlow.</p>
+
+<pre class="r"><code>install_tensorflow(extra_packages=&quot;tensorflow-probability&quot;)</code></pre>
+<pre class="r"><code>tensorflow::install_tensorflow_extras(&quot;tensorflow-probability&quot;)</code></pre>
+
 <p>You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you’re having trouble with this step, <a href="https://tensorflow.rstudio.com/installation.html">this guide</a> may help.</p>
+
+<p><bold>Tip 1:</bold> If you have already installed <code>TensorFlow</code> with <a href="www.anaconda.com/download">Anaconda</a>, you can have some incompatibilities to install <code>tensorflow</code> R package. It is noted that the Anaconda installation is community supported, not officially supported by TensorFlow. You need to uninstall Anaconda before installing <a href="https://www.tensorflow.org/install/">Tensorflow</a> via Virtualenv, "native" pip or Docker in order to be compatibile with the <code>tensorflow</code> R package.</p>
+
+<p><bold>Tip 2:</bold> When you install <code>virtualenv</code> Python library, even if virtualenv is successfully installed, you can have a warning message about two libraries, <code>nose</code> and <code>tornado</code>, for <code>matplotlib</code> library. However, these two Python libraries are currently not used in greta, so you don't need to install them to use greta.</p>
 <hr>
 </div>
+
 <div id="diagrammer" class="section level3">
 <h3>DiagrammeR</h3>
-<p>greta’s <a href="#plotting">plotting functionality</a> depends on the <a href="http://rich-iannone.github.io/DiagrammeR/">DiagrammeR package</a>. Because Diagrammer automatically installs a lot of other packages it can take a long time to install, so DiagrammeR isn’t installed automatically with greta. If you want to plot models, you can install DiagrammeR from CRAN.</p>
+<p>greta’s <a href="#plotting">plotting functionality</a> depends on the <a href="http://rich-iannone.github.io/DiagrammeR/">DiagrammeR</a> R package. Because Diagrammer automatically installs a lot of other packages, it can take a long time to install. So, DiagrammeR isn’t installed automatically with greta. It is noted that to install DiagrammeR, you need to have already installed <a href="http://igraph.org/r/">igraph</a> R package.
+
+If you want to plot models, you can install igraph and DiagrammeR from CRAN.</p>
+<pre class="r"><code>install.packages(&#39;igraph&#39;)</code></pre>
 <pre class="r"><code>install.packages(&#39;DiagrammeR&#39;)</code></pre>
 <hr>
+
+<p><bold>Tip 1:</bold> igraph depends on <a href="https://cran.r-project.org/web/packages/XML/index.html">XML</a> R package. On igraph's website, they inform you that you need to install <code>libxml2</code> library on Linux (and other Unix-like systems, but not on MacOSX). However, you can fail to install XML R package on MacOS.So, you need to:</p>
+<ol>
+    <li>Install libxml2 using the bash command: <code>brew install libxml2</code>;</li>
+    <li>Find where libxml2's configuration file is installed using the bash command: <code>type xml2-config</code></li>
+    <li>Set environment variable for libxml2's configuration folder using the bash command: <code>export LIBXML_INCDIR=my_path_libxml2_configuration_folder</code> using the path from the previous command;</li>
+    <li>Instead to setting environment variable for libxml2's configuration folder using the bash command, you can set environment variable for libxml2's configuration file directly in R session using the R command: <code>Sys.setenv(XML_CONFIG="my_path_libxml2_configuration_file")</code></li>
+    <li>Install to the appropriate XML R package <pre class="r"><code>install.packages(&#39;XML&#39;)</code></pre> and then igraph.</li>
+</ol>
 </div>
+
+<div id="future" class="section level3">
+<h3>Future</h3>
+<p>To be able to have parallel processing of greta R expressions, you need to install <a href="https://cran.r-project.org/web/packages/future/index.html">Future</a> R package and use this R expression<code>plan(multiprocess)</code>. 
+
+If you want to evaluate R expressions asynchronously, you can install future from CRAN.</p>
+<pre class="r"><code>install.packages(&#39;future&#39;)</code></pre>
+<hr>
+</div>
+
 </div>
 <div id="how-greta-works" class="section level2">
 <h2>How greta works</h2>
@@ -643,6 +673,7 @@ atanh(z_greta)</code></pre>
 <img src="figures/full_graph.png" width="800" />
 </p>
 <p>The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; <code>x</code> and <code>y</code>), variables (large circles; <code>int</code>, <code>coef</code>, <code>sd</code>) or the results of operations (small circles; <code>mean</code>). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from. There are also nodes for greta arrays that were <em>implicitly defined</em> in our model. The data nodes (squares) with numbers are the parameters used to define the prior distributions, and there’s also an intermediate operation node (small circle), which was the result of multiplying <code>coef</code> and <code>x</code> (before adding <code>int</code> to create <code>mean</code>).</p>
+
 <p>Here’s a legend for the plot (it’s in the <a href="https://greta-dev.github.io/greta/model.html"><code>?greta::model</code></a> helpfile too):</p>
 <p>
 <img src="figures/plotlegend.png" width="750" />
@@ -656,6 +687,9 @@ atanh(z_greta)</code></pre>
 <p>
 <img src="figures/likelihood_graph.png" width="500" />
 </p>
+
+<p><bold>Tip 1:</bold>: If you modify your model, you need to clear a bunch of tf objects without restarting R using R command <code>tf.reset_default_graph()</code>.</p>
+
 <hr>
 </div>
 <div id="sampling" class="section level3">
