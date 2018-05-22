@@ -359,9 +359,10 @@ devtools::install_github(&quot;greta-dev/greta@dev&quot;)  # development version
 <hr>
 <div id="tensorflow" class="section level3">
 <h3>TensorFlow</h3>
-<p>Before you can fit models with <code>greta</code>, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> python package (version 1.0.0 or higher). greta exports <code>install_tensorflow()</code> from the <code>tensorflow</code> R package, which will attempt to install the latest version of TensorFlow from within your R session. Moreover, you need to install an additional Python package called <a href="https://github.com/tensorflow/probability">tensorflow-probability</a>. <a href="https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245">TensorFlow Probability</a> is a library for probabilistic reasoning and statistical analysis in TensorFlow.</p>
+<p>Before you can fit models with <code>greta</code>, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> python package (version 1.8.0 or higher). greta exports <code>install_tensorflow()</code> from the <code>tensorflow</code> R package, which will attempt to install the latest version of TensorFlow from within your R session. Moreover, you need to install an additional Python package called <a href="https://github.com/tensorflow/probability">tensorflow-probability</a>. <a href="https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245">TensorFlow Probability</a> is a library for probabilistic reasoning and statistical analysis in TensorFlow.
 
-<pre class="r"><code>install_tensorflow(extra_packages=&quot;tensorflow-probability&quot;)</code></pre>
+Example to install Tensorflow version 1.8.0 :</p>
+<pre class="r"><code>install_tensorflow(version=&quot;1.8.0&quot;, extra_packages=&quot;tensorflow-probability&quot;)</code></pre>
 <pre class="r"><code>tensorflow::install_tensorflow_extras(&quot;tensorflow-probability&quot;)</code></pre>
 
 <p>You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you’re having trouble with this step, <a href="https://tensorflow.rstudio.com/installation.html">this guide</a> may help.</p>
@@ -390,6 +391,7 @@ If you want to plot models, you can install igraph and DiagrammeR from CRAN.</p>
     <li>Install to the appropriate XML R package <pre class="r"><code>install.packages(&#39;XML&#39;)</code></pre> and then igraph.</li>
 </ol>
 </div>
+
 
 <div id="future" class="section level3">
 <h3>Future</h3>
