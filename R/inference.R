@@ -92,6 +92,11 @@ mcmc <- function (model,
                   initial_values = NULL) {
 
   check_future_plan()
+  stopifnot(n_samples > 0,
+            thin > 0,
+            warmup > 0,
+            chains > 0,
+            pb_update > 0)
 
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
