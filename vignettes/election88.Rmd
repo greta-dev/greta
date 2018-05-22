@@ -221,10 +221,7 @@ object as the second argument. To get the name in an expected manner, we
 will assign the transformation to a local variable first.
 
 ```{r}
-# This function is available within greta, but we will define our own
-# transformation
-logit <- function(vec) exp(vec) / (1 + exp(vec))
-prob <- logit(b)
+prob <- ilogit(b)
 as_probs <- calculate(prob, draws)
 ```
 
