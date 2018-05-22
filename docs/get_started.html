@@ -365,6 +365,10 @@ Example to install Tensorflow version 1.8.0 :</p>
 <p><bold>Tip 1:</bold> If you have already installed <code>TensorFlow</code> with <a href="www.anaconda.com/download">Anaconda</a>, you can have some incompatibilities to install <code>tensorflow</code> R package. It is noted that the Anaconda installation is community supported, not officially supported by TensorFlow. You need to uninstall Anaconda before installing <a href="https://www.tensorflow.org/install/">Tensorflow</a> via Virtualenv, "native" pip or Docker in order to be compatibile with the <code>tensorflow</code> R package.</p>
 
 <p><bold>Tip 2:</bold> When you install <code>virtualenv</code> Python library, even if virtualenv is successfully installed, you can have a warning message about two libraries, <code>nose</code> and <code>tornado</code>, for <code>matplotlib</code> library. However, these two Python libraries are currently not used in greta, so you don't need to install them to use greta.</p>
+
+<p><bold>Tip 2:</bold> If you want to use probabilistic modeling and statistical inference in TensorFlow, you need to install <a href="https://pypi.org/project/tfp-nightly/">tfp-nightly</a> and <a href="https://pypi.org/project/tf-nightly/">tf-nightly</a>. You may be need to define the version to use, such as </p>
+<pre class="r"><code>pip install tfp-nightly==0.0.1.dev20180515</code></pre>
+<pre class="r"><code>pip install tf-nightly==1.9.0.dev20180515</code></pre>
 <hr>
 </div>
 
