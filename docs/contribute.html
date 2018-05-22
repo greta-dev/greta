@@ -193,8 +193,22 @@ $(document).ready(function () {
         <li>
           <a href="get_started.html">get started</a>
         </li>
-        <li>
-          <a href="example_models.html">examples</a>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
         </li>
         <li>
           <a href="reference-index.html">docs</a>
@@ -243,20 +257,14 @@ body{
   font-size: 18px;
 }
 </style>
-<div id="bugs-and-feature-requests" class="section level3">
-<h3>bugs and feature requests</h3>
+<p>###bugs and feature requests</p>
 <p>I’d be really keen to hear about any bugs you find. Or anything else that doesn’t work as you expected it to. I’d also like to know if there are features you’d like added to greta.</p>
 <p>You report bugs or request features by leaving a message on the <a href="https://github.com/greta-dev/greta/issues">GitHub issue tracker</a></p>
-</div>
-<div id="contributing-code" class="section level3">
-<h3>contributing code</h3>
+<p>###contributing code</p>
 <p>greta is an open source project, and I would welcome contributions from anyone with time to spare!</p>
 <p>The <a href="https://github.com/greta-dev/greta/issues">issues tracker</a> already lists a number of extensions I have planned. If you think you can help implement one of those (or incorporate your own idea), please leave a message there first so we can discuss how to do it, and so that we aren’t duplicating effort.</p>
-</div>
-<div id="modules" class="section level3">
-<h3>modules</h3>
+<p>###modules</p>
 <p>greta has a basic module system to package up more ‘niche’ functionality. The <a href="dynamics-module.html"><code>dynamics</code> module</a> is an example of a module containing functions for analysing stage-structured dynamical models. I would be particularly keen to add modules contributed by other people, to make greta useful to their use cases.</p>
-</div>
 
 
 

@@ -18,8 +18,9 @@
 #'   \href{https://greta-dev.github.io/greta/example_models.html}{examples}.
 #'
 #' @docType package
-#' @import tensorflow
-#' @import R6
+#' @importFrom tensorflow tf
+#' @importFrom reticulate py_module_available
+#' @importFrom R6 R6Class
 #' @importFrom grDevices colorRampPalette
 #' @examples
 #' \dontrun{
@@ -40,6 +41,9 @@
 #' }
 NULL
 
+# load tf probability
+tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
+
 # crate the node list object whenever the package is loaded
 .onLoad <- function (libname, pkgname) {
 
@@ -53,9 +57,7 @@ NULL
   options(tensorflow.one_based_extract = FALSE)
 
   # default float type
-  if (reticulate::py_module_available('tensorflow'))
-    options(greta_tf_float = tf$float32)
+  options(greta_tf_float = "float32")
 
 }
-
 

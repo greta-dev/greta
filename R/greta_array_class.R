@@ -79,7 +79,8 @@ as.greta_array.array <- function (x) {
 #' @export
 as.greta_array.numeric <- function (x) {
   if (any(!is.finite(x)))
-    stop ('cannot convert objects with missing or infinite values to greta_arrays',
+    stop ("cannot convert objects with missing or infinite values ",
+          "to greta_arrays",
           call. = FALSE)
   as.greta_array.node(data_node$new(x))
 }

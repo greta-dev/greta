@@ -297,8 +297,22 @@ div.tocify {
         <li>
           <a href="get_started.html">get started</a>
         </li>
-        <li>
-          <a href="example_models.html">examples</a>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
         </li>
         <li>
           <a href="reference-index.html">docs</a>
@@ -361,10 +375,10 @@ TensorFlow only enables rounding to integers, so <code>round()</code> will error
 Any additional arguments to <code>chol()</code> and <code>solve()</code> will be ignored, see the TensorFlow documentation for details of these routines.
 </p>
 <p>
-<code>diag()</code> can be used to extract or replace the diagonal part of a square and two-dimensional greta array, but it cannot be used to create a matrix-like greta array from a scalar or vector-like greta array. A static diagonal matrix can always be created with e.g. <code>diag(3)</code>, and then converted into a greta array.
+<code>sweep()</code> only works on two-dimensional greta arrays (so <code>MARGIN</code> can only be either 1 or 2), and only for subtraction, addition, division and multiplication.
 </p>
 <p>
-<code>sweep()</code> only works on two-dimensional greta arrays (so <code>MARGIN</code> can only be either 1 or 2), and only for subtraction, addition, division and multiplication.
+<code>tapply()</code> works on column vectors (2D greta arrays with one column), and <code>INDEX</code> cannot be a greta array. Currently only two functions are available, and arguments passed to … are ignored.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a>Usage
@@ -401,9 +415,8 @@ Any additional arguments to <code>chol()</code> and <code>solve()</code> will be
 # matrix operations
  t(x)
  chol(x, ...)
- diag(x, nrow, ncol)
- diag(x) &lt;- value
  solve(a, b, ...)
+ kronecker(X, Y)
 # reducing operations
  sum(..., na.rm = TRUE)
  prod(..., na.rm = TRUE)
@@ -412,13 +425,14 @@ Any additional arguments to <code>chol()</code> and <code>solve()</code> will be
 # cumulative operations
  cumsum(x)
  cumprod(x)
-# miscellaneous operations
- sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
 # solve an upper or lower triangular system
  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
            transpose = FALSE)
  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
               transpose = FALSE)
+#'  # miscellaneous operations
+ sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+ tapply(X, INDEX, FUN = c("sum", "max"), ...)
 </pre>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples
@@ -430,9 +444,6 @@ Any additional arguments to <code>chol()</code> and <code>solve()</code> will be
 <span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='fu'>log1p</span>(<span class='fu'>expm1</span>(<span class='no'>x</span>))
 <span class='no'>c</span> <span class='kw'>&lt;-</span> <span class='fu'>sign</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
 <span class='no'>d</span> <span class='kw'>&lt;-</span> <span class='fu'>abs</span>(<span class='no'>x</span> - <span class='fl'>5</span>)
-
-<span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
-<span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
 
 <span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>t</span>(<span class='no'>a</span>)
 

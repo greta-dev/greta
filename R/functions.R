@@ -42,9 +42,8 @@
 #'  # matrix operations
 #'  t(x)
 #'  chol(x, ...)
-#'  diag(x, nrow, ncol)
-#'  diag(x) <- value
 #'  solve(a, b, ...)
+#'  kronecker(X, Y)
 #'
 #'  # reducing operations
 #'  sum(..., na.rm = TRUE)
@@ -56,14 +55,15 @@
 #'  cumsum(x)
 #'  cumprod(x)
 #'
-#'  # miscellaneous operations
-#'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-#'
 #'  # solve an upper or lower triangular system
 #'  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
 #'            transpose = FALSE)
 #'  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
 #'               transpose = FALSE)
+#'
+#'  #'  # miscellaneous operations
+#'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+#'  tapply(X, INDEX, FUN = c("sum", "max"), ...)
 #'
 #' }
 #'
@@ -73,15 +73,13 @@
 #'   Any additional arguments to \code{chol()} and \code{solve()} will be
 #'   ignored, see the TensorFlow documentation for details of these routines.
 #'
-#'   \code{diag()} can be used to extract or replace the diagonal part of a
-#'   square and two-dimensional greta array, but it cannot be used to create a
-#'   matrix-like greta array from a scalar or vector-like greta array. A static
-#'   diagonal matrix can always be created with e.g. \code{diag(3)}, and then
-#'   converted into a greta array.
-#'
 #'   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
 #'   can only be either 1 or 2), and only for subtraction, addition, division
 #'   and multiplication.
+#'
+#'   \code{tapply()} works on column vectors (2D greta arrays with one column),
+#'   and \code{INDEX} cannot be a greta array. Currently only two functions are
+#'   available, and arguments passed to \dots are ignored.
 #'
 #' @examples
 #' \dontrun{
@@ -92,9 +90,6 @@
 #' c <- sign(x - 5)
 #' d <- abs(x - 5)
 #'
-#' e <- diag(x)
-#' diag(x) <- e + 1
-#'
 #' z <- t(a)
 #'
 #' y <- sweep(x, 1, e, '-')
@@ -103,95 +98,95 @@ NULL
 
 #' @export
 log.greta_array <- function (x, base = exp(1)) {
-  op("log", x, tf_operation = tf$log)
+  op("log", x, tf_operation = "tf$log")
 }
 
 #' @export
 exp.greta_array <- function (x) {
-  op("exp", x, tf_operation = tf$exp)
+  op("exp", x, tf_operation = "tf$exp")
 }
 
 #' @export
 log1p.greta_array <- function (x) {
-  op("log1p", x, tf_operation = tf$log1p)
+  op("log1p", x, tf_operation = "tf$log1p")
 }
 
 #' @export
 expm1.greta_array <- function (x) {
-  op("expm1", x, tf_operation = tf$expm1)
+  op("expm1", x, tf_operation = "tf$expm1")
 }
 
 #' @export
 abs.greta_array <- function (x) {
-  op("abs", x, tf_operation = tf$abs)
+  op("abs", x, tf_operation = "tf$abs")
 }
 
 #' @export
 sqrt.greta_array <- function (x) {
-  op("sqrt", x, tf_operation = tf$sqrt)
+  op("sqrt", x, tf_operation = "tf$sqrt")
 }
 
 #' @export
 sign.greta_array <- function (x) {
-  op("sign", x, tf_operation = tf$sign)
+  op("sign", x, tf_operation = "tf$sign")
 }
 
 #' @export
 ceiling.greta_array <- function (x) {
-  op("ceil", x, tf_operation = tf$ceil)
+  op("ceil", x, tf_operation = "tf$ceil")
 }
 
 #' @export
 floor.greta_array <- function (x) {
-  op("floor", x, tf_operation = tf$floor)
+  op("floor", x, tf_operation = "tf$floor")
 }
 
 #' @export
 round.greta_array <- function (x, digits = 0) {
   if (digits != 0)
     stop("TensorFlow round only supports rounding to integers")
-  op("round", x, tf_operation = tf$round)
+  op("round", x, tf_operation = "tf$round")
 }
 
 # trigonometry functions
 #' @export
 cos.greta_array <- function (x) {
-  op("cos", x, tf_operation = tf$cos)
+  op("cos", x, tf_operation = "tf$cos")
 }
 
 #' @export
 sin.greta_array <- function (x) {
-  op("sin", x, tf_operation = tf$sin)
+  op("sin", x, tf_operation = "tf$sin")
 }
 
 #' @export
 tan.greta_array <- function (x) {
-  op("tan", x, tf_operation = tf$tan)
+  op("tan", x, tf_operation = "tf$tan")
 }
 
 #' @export
 acos.greta_array <- function (x) {
-  op("acos", x, tf_operation = tf$acos)
+  op("acos", x, tf_operation = "tf$acos")
 }
 
 #' @export
 asin.greta_array <- function (x) {
-  op("asin", x, tf_operation = tf$asin)
+  op("asin", x, tf_operation = "tf$asin")
 }
 
 #' @export
 atan.greta_array <- function (x) {
-  op("atan", x, tf_operation = tf$atan)
+  op("atan", x, tf_operation = "tf$atan")
 }
 
 #' @export
 lgamma.greta_array <- function (x) {
-  op("lgamma", x, tf_operation = tf$lgamma)
+  op("lgamma", x, tf_operation = "tf$lgamma")
 }
 
 #' @export
 digamma.greta_array <- function (x) {
-  op("digamma", x, tf_operation = tf$digamma)
+  op("digamma", x, tf_operation = "tf$digamma")
 }
 
 #' @export
@@ -205,7 +200,7 @@ t.greta_array <- function (x) {
     rev(dim(x))
   }
 
-  op("transpose", x, dimfun = dimfun, tf_operation = tf$transpose)
+  op("transpose", x, dimfun = dimfun, tf_operation = "tf$transpose")
 }
 
 #' @export
@@ -221,42 +216,7 @@ chol.greta_array <- function (x, ...) {
     dim
   }
 
-  op("chol", x, dimfun = dimfun, tf_operation = tf_chol)
-}
-
-#' @rdname overloaded
-#' @export
-diag <- function (x = 1, nrow, ncol)
-  UseMethod('diag', x)
-
-# wrapper function to avoid a CRAN check warning about using a .Internal() call
-#' @export
-diag.default <- function (...)
-  base::diag(...)
-
-#' @export
-diag.greta_array <- function (x = 1, nrow, ncol) {
-
-  dimfun <- function (elem_list) {
-
-    x <- elem_list[[1]]
-    dim <- dim(x)
-
-    # check the rank isn't too high
-    if (length(dim) != 2)
-      stop ('cannot only extract the diagonal from a node with exactly two dimensions')
-
-    if (dim[1] != dim[2])
-      stop ('diagonal elements can only be extracted from square matrices')
-
-    # return the dimensions
-    c(dim[1], 1)
-
-  }
-
-  # return the extraction op
-  op('diag', x, dimfun = dimfun, tf_operation = tf$diag_part)
-
+  op("chol", x, dimfun = dimfun, tf_operation = "tf_chol")
 }
 
 #' @export
@@ -286,7 +246,7 @@ solve.greta_array <- function (a, b, ...) {
 
     }
 
-    return (op("solve", a, dimfun = dimfun, tf_operation = tf$matrix_inverse))
+    return (op("solve", a, dimfun = dimfun, tf_operation = "tf$matrix_inverse"))
 
   } else {
 
@@ -305,7 +265,8 @@ solve.greta_array <- function (a, b, ...) {
 
       # b must have the right number of rows
       if (dim(b)[1] != dim(a)[1]) {
-        stop (sprintf("'b' must have the same number of rows as 'a' (%i), but has %i rows instead",
+        stop (sprintf(paste("'b' must have the same number of rows as 'a'",
+                            "(%i), but has %i rows instead"),
                       dim(a)[1], dim(b)[1]))
       }
 
@@ -315,7 +276,7 @@ solve.greta_array <- function (a, b, ...) {
     }
 
     # ... and solve the linear equations
-    return (op("solve", a, b, dimfun = dimfun, tf_operation = tf$matrix_solve))
+    return (op("solve", a, b, dimfun = dimfun, tf_operation = "tf$matrix_solve"))
 
   }
 
@@ -336,7 +297,7 @@ sum.greta_array <- function (..., na.rm = TRUE) {
   op('sum',
      vec,
      dimfun = dimfun,
-     tf_operation = tf$reduce_sum)
+     tf_operation = "tf$reduce_sum")
 
 }
 
@@ -353,7 +314,7 @@ prod.greta_array <- function (..., na.rm = TRUE) {
   op('prod',
      vec,
      dimfun = dimfun,
-     tf_operation = tf$reduce_prod)
+     tf_operation = "tf$reduce_prod")
 
 }
 
@@ -370,7 +331,7 @@ min.greta_array <- function (..., na.rm = TRUE) {
   op('min',
      vec,
      dimfun = dimfun,
-     tf_operation = tf$reduce_min)
+     tf_operation = "tf$reduce_min")
 
 }
 
@@ -384,7 +345,7 @@ mean.greta_array <- function (x, trim = 0, na.rm = TRUE, ...) {
   op('mean',
      x,
      dimfun = dimfun,
-     tf_operation = tf$reduce_mean)
+     tf_operation = "tf$reduce_mean")
 
 }
 
@@ -401,7 +362,7 @@ max.greta_array <- function (..., na.rm = TRUE) {
   op('max',
      vec,
      dimfun = dimfun,
-     tf_operation = tf$reduce_max)
+     tf_operation = "tf$reduce_max")
 
 }
 
@@ -417,13 +378,13 @@ check_cum_op <- function (x) {
 #' @export
 cumsum.greta_array <- function (x) {
   check_cum_op(x)
-  op("cumsum", x, tf_operation = tf$cumsum)
+  op("cumsum", x, tf_operation = "tf$cumsum")
 }
 
 #' @export
 cumprod.greta_array <- function (x) {
   check_cum_op(x)
-  op("cumprod", x, tf_operation = tf$cumprod)
+  op("cumprod", x, tf_operation = "tf$cumprod")
 }
 
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
@@ -467,7 +428,7 @@ colMeans.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
   op("colMeans",
      x,
      operation_args = list(dims = dims),
-     tf_operation = tf_colmeans,
+     tf_operation = "tf_colmeans",
      dimfun = rowcol_dimfun(dims, "col"))
 
 }
@@ -490,7 +451,7 @@ rowMeans.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
   op("rowMeans",
      x,
      operation_args = list(dims = dims),
-     tf_operation = tf_rowmeans,
+     tf_operation = "tf_rowmeans",
      dimfun = rowcol_dimfun(dims, "row"))
 
 }
@@ -510,7 +471,7 @@ colSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
   op("colSums",
      x,
      operation_args = list(dims = dims),
-     tf_operation = tf_colsums,
+     tf_operation = "tf_colsums",
      dimfun = rowcol_dimfun(dims, "col"))
 
 }
@@ -530,7 +491,7 @@ rowSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
   op("rowSums",
      x,
      operation_args = list(dims = dims),
-     tf_operation = tf_rowsums,
+     tf_operation = "tf_rowsums",
      dimfun = rowcol_dimfun(dims, "row"))
 
 }
@@ -550,7 +511,11 @@ sweep <- function (x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
 sweep.default <- base::sweep
 
 #' @export
-sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), check.margin = TRUE, ...) {
+sweep.greta_array <- function (x,
+                               MARGIN,
+                               STATS,
+                               FUN = c('-', '+', '/', '*'),
+                               check.margin = TRUE, ...) {
 
   # only allow these four functions
   FUN <- match.arg(FUN)
@@ -573,7 +538,8 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
 
     # STATS must be a column array
     if (!(length(dim(STATS)) == 2 && dim(STATS)[2] == 1)) {
-      stop (sprintf('STATS must be a column vector array, but has dimensions %s',
+      stop (sprintf(paste("STATS must be a column vector array,",
+                          "but has dimensions %s"),
                     paste(dim(STATS), collapse = ' x ')))
     }
 
@@ -590,10 +556,49 @@ sweep.greta_array <- function (x, MARGIN, STATS, FUN = c('-', '+', '/', '*'), ch
      x, STATS,
      operation_args = list(MARGIN = MARGIN,
                            FUN = FUN),
-     tf_operation = tf_sweep,
+     tf_operation = "tf_sweep",
      dimfun = dimfun)
 
 }
+
+#' @import methods
+setClass("greta_array")
+setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
+          function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
+
+            if (FUN != "*") stop("kronecker method must use default 'FUN'")
+
+            dimfun <- function (elem_list) {
+
+              x <- elem_list[[1]]
+              y <- elem_list[[2]]
+
+              # x must be 2D
+              if (length(dim(x)) != 2) {
+                stop (sprintf('x must be a 2D array, but has %i dimensions',
+                              length(dim(x))))
+              }
+
+              # y must be 2D
+              if (length(dim(y)) != 2) {
+                stop (sprintf('y must be a 2D array, but has %i dimensions',
+                              length(dim(y))))
+              }
+
+              # return the dimensions of x
+              dim1 <- dim(x)
+              dim2 <- dim(y)
+              dim1 * dim2
+
+            }
+
+            op("kronecker",
+               X, Y,
+               tf_operation = "tf_kronecker",
+               dimfun = dimfun)
+
+          }
+)
 
 #' @rdname overloaded
 #' @export
@@ -634,7 +639,7 @@ backsolve.greta_array <- function(r, x,
   op("backsolve",
      r, x,
      operation_args = list(lower = !upper.tri),
-     tf_operation = tf$matrix_triangular_solve,
+     tf_operation = "tf$matrix_triangular_solve",
      dimfun = dimfun)
 
 }
@@ -679,7 +684,67 @@ forwardsolve.greta_array <- function (l, x,
   op("forwardsolve",
      l, x,
      operation_args = list(lower = !upper.tri),
-     tf_operation = tf$matrix_triangular_solve,
+     tf_operation = "tf$matrix_triangular_solve",
+     dimfun = dimfun)
+
+}
+
+
+#' @rdname overloaded
+#' @export
+tapply <- function (X, INDEX, FUN, ...) {
+  UseMethod('tapply', X)
+}
+
+#' @export
+tapply.default <- function (X, INDEX, FUN = NULL, ...,
+                            default = NA, simplify = TRUE) {
+  base::tapply(X = X,
+               INDEX = INDEX,
+               FUN = FUN,
+               ...,
+               default = default,
+               simplify = simplify)
+}
+
+#' @export
+tapply.greta_array <- function (X, INDEX, FUN = c("sum", "max"), ...) {
+
+  FUN <- match.arg(FUN)
+
+  if (inherits(INDEX, "greta_array")) {
+    stop ("INDEX cannot be a greta array",
+          call. = FALSE)
+  }
+
+  # convert index to successive integers starting at 0
+  groups <- sort(unique(INDEX))
+  id <- match(INDEX, groups) - 1L
+  len <- length(groups)
+
+  # which function
+  tf_fun <- switch(FUN,
+                   sum = "tf$unsorted_segment_sum",
+                   max = "tf$unsorted_segment_max")
+
+  # dimensions
+  dimfun <- function (elem_list) {
+
+    dim_x <- dim(elem_list[[1]])
+
+    if (!(length(dim_x) == 2L && dim_x[2] == 1L)) {
+      stop ("X must be 2D greta array with one column, but has dimensions ",
+            paste(dim_x, collapse = ' x '),
+            call. = FALSE)
+    }
+
+    c(len, 1)
+  }
+
+  op("tapply",
+     X,
+     operation_args = list(segment_ids = id, num_segments = len),
+     tf_operation = tf_fun,
      dimfun = dimfun)
 
 }

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>8 Schools Example Model</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.2/htmlwidgets.js"></script>
+<script src="site_libs/viz-0.3/viz.js"></script>
+<link href="site_libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet" />
+<script src="site_libs/grViz-binding-1.0.0/grViz.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="greta.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 54px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+
+.section h2 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h3 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h4 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h5 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+.section h6 {
+  padding-top: 59px;
+  margin-top: -59px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+<style type="text/css">
+.logo {
+    display: inline-block;
+    width: 144px;
+    height: 40px;
+    background-image: url(banner-icon.png);
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+</style>
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="logo" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <a href="get_started.html">get started</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">examples BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="reference-index.html">docs</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            more
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="why_greta.html">why 'greta'?</a>
+            </li>
+            <li>
+              <a href="technical_details.html">technical details</a>
+            </li>
+            <li>
+              <a href="software.html">software</a>
+            </li>
+            <li>
+              <a href="contribute.html">contribute to greta</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="https://github.com/greta-dev/greta">
+            <span class="fa fa-github fa-lg"></span>
+          </a>
+        </li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">8 Schools Example Model</h1>
+
+</div>
+
+
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p><strong>8 Schools</strong> is a study of coaching effects from eight schools; it comes from <a href="https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf">section 5.5 of Gelman et al. (2003) as covered in 2.1. Schools data of ‘R2WinBUGS: A Package for Running WinBUGS from R’</a>:</p>
+<blockquote>
+<p>The Scholastic Aptitude Test (SAT) measures the aptitude of high-schoolers in order to help colleges to make admissions decisions. It is divided into two parts, verbal (SAT-V) and mathematical (SAT-M). Our data comes from the SAT-V (Scholastic Aptitude Test-Verbal) on eight different high schools, from an experiment conducted in the late 1970s. SAT-V is a standard multiple choice test administered by the Educational Testing Service. This Service was interested in the effects of coaching programs for each of the selected schools. The study included coached and uncoached pupils, about sixty in each of the eight different schools; see Rubin (1981). All of them had already taken the PSAT (Preliminary SAT) which results were used as covariates. For each school, the estimated treatment effect and the standard error of the effect estimate are given. These are calculated by an analysis of covariance adjustment appropriate for a completely randomized experiment (Rubin 1981). This example was analyzed using a hierarchical normal model in Rubin (1981) and Gelman, Carlin, Stern, and Rubin (2003, Section 5.5).</p>
+</blockquote>
+<p>The corresponding <a href="https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245">TensorFlow Probability</a> Jupyter notebook can be found <a href="https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb">here</a>.</p>
+<pre class="r"><code>library(greta)
+library(tidyverse)
+library(bayesplot)
+color_scheme_set(&quot;purple&quot;)</code></pre>
+<pre class="text"><code># data
+N &lt;- letters[1:8]
+treatment_effects &lt;- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</code></pre>
+<pre class="r"><code>schools &lt;- data.frame(N = N,
+                      treatment_effects = treatment_effects,
+                      treatment_stddevs = treatment_stddevs) %&gt;%
+  mutate(treatment_effects_p_stddevs = treatment_effects + treatment_stddevs,
+         treatment_effects_m_stddevs = treatment_effects - treatment_stddevs)</code></pre>
+<p>For each the eight schools <code>N</code> we have the estimated treatment effect (<code>treatment_effects</code>) plus standard error (<code>treatment_stddevs</code>). Below, we are replicating the barplot from the <a href="https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb">TensorFlow Probability example</a> that shows the estimated treatment effects +/- standard error per school:</p>
+<pre class="r"><code>ggplot(schools, aes(x = N, y = treatment_effects)) +
+  geom_bar(stat = &quot;identity&quot;, fill = &quot;purple&quot;, alpha = 0.5) +
+  geom_errorbar(aes(ymin = treatment_effects_m_stddevs, ymax = treatment_effects_p_stddevs), width = 0.3) +
+  labs(x = &quot;school&quot;, y = &quot;treatment effect&quot;,
+       title = &quot;Barplot of treatment effects for eight schools&quot;,
+       subtitle = &quot;Error bars represent standard error&quot;)</code></pre>
+<p><img src="8_schools_example_model_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>A different way to plot the estimated effects and their standard errors is to plot the density distribution over the eight schools we have:</p>
+<pre class="r"><code>schools %&gt;%
+  gather(x, y, treatment_effects, treatment_effects_p_stddevs, treatment_effects_m_stddevs) %&gt;%
+  ggplot(aes(x = y, color = x)) +
+    geom_density(fill = &quot;purple&quot;, alpha = 0.5) +
+    scale_color_brewer(palette = &quot;Set1&quot;) +
+    labs(x = &quot;treatment effect (+/- standard error)&quot;,
+         color = &quot;density curve of&quot;,
+         title = &quot;Density plot of treatment effects +/- standard error for eight schools&quot;)</code></pre>
+<p><img src="8_schools_example_model_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="modeling-with-greta" class="section level2">
+<h2>Modeling with <code>greta</code></h2>
+<p>To model the data, we use the same hierarchical normal model as in the <a href="https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb">TensorFlow Probability example</a>.</p>
+<div id="variables-and-priors" class="section level3">
+<h3>Variables and priors</h3>
+<p>First, we create greta arrays that represent the variables and prior distributions in our model and create a greta array for school effect from them. We define the following (random) variables and priors:</p>
+<ul>
+<li><code>avg_effect</code>: normal density function (<code>dnorm</code>) with a mean of <code>0</code> and standard deviation of <code>10</code>; represents the prior average treatment effect.</li>
+</ul>
+<pre class="r"><code>avg_effect &lt;- normal(mean = 0, sd = 10)
+avg_effect</code></pre>
+<pre><code>## greta array (variable following a normal distribution)
+## 
+##      [,1]
+## [1,]  ?</code></pre>
+<ul>
+<li><code>avg_stddev</code>: normal density function (<code>dnorm</code>) with a mean of <code>5</code> and standard deviation of <code>1</code>; controls the amount of variance between schools.</li>
+</ul>
+<pre class="r"><code>avg_stddev &lt;- normal(5, 1)
+avg_stddev</code></pre>
+<pre><code>## greta array (variable following a normal distribution)
+## 
+##      [,1]
+## [1,]  ?</code></pre>
+<ul>
+<li><code>school_effects_standard</code>: normal density function (<code>dnorm</code>) with a mean of <code>0</code>, standard deviation of <code>1</code> and dimension of <code>8</code></li>
+</ul>
+<pre class="r"><code>school_effects_standard &lt;- normal(0, 1, dim = length(N))
+school_effects_standard</code></pre>
+<pre><code>## greta array (variable following a normal distribution)
+## 
+##      [,1]
+## [1,]  ?  
+## [2,]  ?  
+## [3,]  ?  
+## [4,]  ?  
+## [5,]  ?  
+## [6,]  ?  
+## [7,]  ?  
+## [8,]  ?</code></pre>
+<ul>
+<li><code>school_effects</code>: here we multiply the exponential of <code>avg_stddev</code> with <code>school_effects_standard</code> and add <code>avg_effect</code></li>
+</ul>
+<pre class="r"><code>school_effects &lt;- avg_effect + exp(avg_stddev) * school_effects_standard
+school_effects</code></pre>
+<pre><code>## greta array (operation)
+## 
+##      [,1]
+## [1,]  ?  
+## [2,]  ?  
+## [3,]  ?  
+## [4,]  ?  
+## [5,]  ?  
+## [6,]  ?  
+## [7,]  ?  
+## [8,]  ?</code></pre>
+<p>An alternative would be to directly use the <code>lognormal()</code> density function for <code>avg_stddev</code> and use that to calculate <code>school_effect</code>:</p>
+<pre class="r"><code>avg_stddev &lt;- lognormal(5, 1)
+school_effects &lt;- avg_effect + avg_stddev * school_effects_standard</code></pre>
+</div>
+<div id="likelihood" class="section level3">
+<h3>Likelihood</h3>
+<p>Next, we want to link the variables and priors with the observed dependent data - in this case the school estimate <code>treatment_effects</code>. We define the likelihood over our observed estimates <code>treatment_effects</code> given a random sample from the normal probability distribution with mean <code>school_effects</code> and standard deviation <code>treatment_stddevs</code>. From this, we would now like to calculate the parameter of that probability distribution by using the <code>distribution()</code> function:</p>
+<pre class="r"><code>distribution(treatment_effects) &lt;- normal(school_effects, treatment_stddevs)</code></pre>
+</div>
+<div id="bayesian-inference-model" class="section level3">
+<h3>Bayesian inference model</h3>
+<p>Now we have all the prerequisites for building a Hamiltonian Monte Carlo (HMC) to calculate the posterior distribution over the model’s parameters.</p>
+<p>We first define the model by combining the calculated <code>avg_effect</code>, <code>avg_stddev</code> and <code>school_effects_standard</code> variables so that we can sample from them during modeling. The model <code>m</code> we define below contains all our prior distributions and thus represent the combined density of the model.</p>
+<p>It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found <a href="https://greta-dev.github.io/greta/get_started.html#plotting">here</a>.</p>
+<pre class="r"><code># defining the hierarchical model
+m &lt;- model(avg_effect, avg_stddev, school_effects_standard)
+m</code></pre>
+<pre><code>## greta model</code></pre>
+<pre class="r"><code>plot(m)</code></pre>
+<div id="htmlwidget-040c93f505db986a2d73" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-040c93f505db986a2d73">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\",\n       rankdir = \"LR\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"avg_effect\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"2\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"3\" [label = \"0\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"4\" [label = \"10\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"5\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"6\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"7\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"8\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"9\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"10\" [label = \"5\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"11\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"12\" [label = \"school_effects_standard\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"13\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"14\" [label = \"0\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"15\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"16\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"17\" [label = \"school_effects\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"18\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"19\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"20\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"21\" [label = \"avg_stddev\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"22\" [label = \"lognormal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"23\" [label = \"5\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"24\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n\"1\"->\"5\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"1\"->\"17\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"2\"->\"1\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"3\"->\"2\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"4\"->\"2\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"6\"->\"5\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"7\"->\"6\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"8\"->\"7\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"exp\", style = \"solid\"] \n\"9\"->\"8\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"10\"->\"9\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"11\"->\"9\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"12\"->\"6\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"12\"->\"16\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"13\"->\"12\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"14\"->\"13\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"15\"->\"13\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"16\"->\"17\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"17\"->\"18\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"18\"->\"20\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"19\"->\"18\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"21\"->\"16\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"22\"->\"21\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"23\"->\"22\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"meanlog\", style = \"solid\"] \n\"24\"->\"22\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sdlog\", style = \"solid\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p>The actual sampling from the model happens with the <code>mcmc()</code> function. By default 1000 MCMC samples are drawn after warm-up. What we obtain is a probability measure that describes the likelihood of a set of randomly sampled values for the model variables.</p>
+<pre class="r"><code># sampling
+draws &lt;- greta::mcmc(m, n_samples = 1000, warmup = 1000)</code></pre>
+<pre class="r"><code>summary(draws)</code></pre>
+<pre><code>## 
+## Iterations = 1:1000
+## Thinning interval = 1 
+## Number of chains = 1 
+## Sample size per chain = 1000 
+## 
+## 1. Empirical mean and standard deviation for each variable,
+##    plus standard error of the mean:
+## 
+##                                  Mean     SD Naive SE Time-series SE
+## avg_effect                    5.60077 5.4046  0.17091        0.20967
+## avg_stddev                   13.98511 7.4404  0.23529        0.51637
+## school_effects_standard.1.1.  0.65435 0.7805  0.02468        0.03235
+## school_effects_standard.2.1.  0.08568 0.6760  0.02138        0.02376
+## school_effects_standard.3.1. -0.21435 0.7830  0.02476        0.02690
+## school_effects_standard.4.1.  0.07543 0.6942  0.02195        0.02506
+## school_effects_standard.5.1. -0.31580 0.7021  0.02220        0.02722
+## school_effects_standard.6.1. -0.17145 0.6931  0.02192        0.02871
+## school_effects_standard.7.1.  0.54468 0.6825  0.02158        0.02310
+## school_effects_standard.8.1.  0.16472 0.8352  0.02641        0.03040
+## 
+## 2. Quantiles for each variable:
+## 
+##                                 2.5%     25%      50%     75%  97.5%
+## avg_effect                   -5.5642  2.0264  5.75597  9.3114 15.317
+## avg_stddev                    4.2020  8.9502 12.38911 17.1758 32.178
+## school_effects_standard.1.1. -0.9910  0.1814  0.67669  1.1602  2.147
+## school_effects_standard.2.1. -1.3730 -0.3517  0.10942  0.5161  1.383
+## school_effects_standard.3.1. -1.7288 -0.7307 -0.20723  0.2903  1.457
+## school_effects_standard.4.1. -1.2459 -0.3674  0.06403  0.5090  1.489
+## school_effects_standard.5.1. -1.7554 -0.7068 -0.27591  0.1497  1.002
+## school_effects_standard.6.1. -1.5160 -0.6224 -0.18332  0.2772  1.192
+## school_effects_standard.7.1. -0.7783  0.1321  0.53745  0.9188  2.069
+## school_effects_standard.8.1. -1.4992 -0.3680  0.15498  0.6968  1.945</code></pre>
+<pre class="r"><code>mcmc_trace(draws, facet_args = list(ncol = 3))</code></pre>
+<p><img src="8_schools_example_model_files/figure-html/unnamed-chunk-14-1.png" width="960" /></p>
+<pre class="r"><code>mcmc_intervals(draws)</code></pre>
+<p><img src="8_schools_example_model_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>mcmc_acf_bar(draws, facet_args = list(ncol = 3))</code></pre>
+<p><img src="8_schools_example_model_files/figure-html/unnamed-chunk-16-1.png" width="960" /></p>
+<pre class="r"><code>mcmc_hist(draws, facet_args = list(ncol = 3))</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="8_schools_example_model_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<div id="use-of-calculate-for-transforming-estimates-to-natural-scale" class="section level4">
+<h4>Use of <code>calculate()</code> for transforming estimates to natural scale</h4>
+<p>The <code>calculate()</code> function can be used with the transformation function used in building the model to get the school-specific posteriors chains. This function is also how you would get posterior predictive values.</p>
+<pre class="r"><code># Calculate school effects on original scale
+school_effects           &lt;- avg_effect + avg_stddev * school_effects_standard
+posterior_school_effects &lt;- calculate(school_effects, draws) </code></pre>
+</div>
+<div id="comparison-with-edward2-hmc" class="section level4">
+<h4>Comparison with Edward2 HMC</h4>
+<p>As a sanity check that we parameterized our model correctly, we can compare the back-transformed school-specific estimates to the results from the Edward2 approach <a href="https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb">in the TensorFlow Probability documentation</a>. The results are very similar.</p>
+<pre class="r"><code># Posterior means via Edward2
+edward2_school_means &lt;-
+  data.frame(tool = &quot;Edward2&quot;,
+             school = N,
+             #mean_school_effects_standard = c(0.61157268, 0.06430732, -0.25459746,
+             #                                 0.04828103, -0.36940941, -0.23154463,
+             #                                 0.49402338,  0.13042814),
+             mean = c(14.93237686, 7.50939941, 3.07602358, 7.21652555,
+                                     2.0329783, 3.41213799, 12.92509365, 8.36702347),
+             sd = 0)
+
+edward2_pop_mean &lt;- data.frame(tool = &quot;Edward2&quot;, &#39;mean&#39; = 6.48866844177, &#39;sd&#39; = 0)
+# hmc_mean_avg_stddev &lt;- 2.46163249016
+
+
+posterior_school_effects &lt;- as.data.frame(as.matrix(posterior_school_effects))
+
+# Relabel school measures
+colnames(posterior_school_effects) &lt;- N
+
+# Summarise and combine all chains of interest for plotting
+posterior_summaries &lt;-
+  posterior_school_effects %&gt;%
+  gather(key = school, value = value) %&gt;% 
+  group_by(school) %&gt;%
+  summarise_all(funs(mean, sd)) 
+
+school_summaries &lt;- 
+  posterior_summaries %&gt;% 
+  mutate(tool = &quot;greta&quot;) %&gt;%
+  rbind(edward2_school_means)
+
+population_parameters &lt;- 
+  as.data.frame(as.matrix(draws)) %&gt;% 
+  select(avg_effect) %&gt;%
+  summarise_all(funs(mean, sd)) %&gt;%
+  mutate(tool = &quot;greta&quot;) %&gt;%
+  rbind(edward2_pop_mean)
+
+ggplot(school_summaries, aes(x = school, y = mean, color = tool, shape = tool)) + 
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+  geom_point() +
+  geom_hline(data = population_parameters, 
+             aes(yintercept = mean, linetype = &#39;Population mean&#39;, color = tool)) +
+  scale_linetype_manual(name = &quot;&quot;, values = c(2, 2)) </code></pre>
+<p><img src="8_schools_example_model_files/figure-html/schools-edward2-1.png" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.5.0 (2018-04-23)
+## Platform: x86_64-apple-darwin17.5.0 (64-bit)
+## Running under: macOS High Sierra 10.13.4
+## 
+## Matrix products: default
+## BLAS: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib
+## LAPACK: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libLAPACK.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] future_1.8.1    bindrcpp_0.2.2  bayesplot_1.5.0 forcats_0.3.0  
+##  [5] stringr_1.3.0   dplyr_0.7.5     purrr_0.2.4     readr_1.1.1    
+##  [9] tidyr_0.8.1     tibble_1.4.2    ggplot2_2.2.1   tidyverse_1.2.1
+## [13] greta_0.2.4     nvimcom_0.9-71  crayon_1.3.4   
+## 
+## loaded via a namespace (and not attached):
+##  [1] nlme_3.1-137       lubridate_1.7.4    RColorBrewer_1.1-2
+##  [4] progress_1.1.2     httr_1.3.1         rprojroot_1.3-2   
+##  [7] highlight_0.4.7.2  DiagrammeRsvg_0.1  tools_3.5.0       
+## [10] backports_1.1.2    R6_2.2.2           lazyeval_0.2.1    
+## [13] colorspace_1.3-2   tidyselect_0.2.4   gridExtra_2.3     
+## [16] prettyunits_1.0.2  mnormt_1.5-5       curl_3.2          
+## [19] compiler_3.5.0     cli_1.0.0          rvest_0.3.2       
+## [22] xml2_1.2.0         influenceR_0.1.0   desc_1.2.0        
+## [25] labeling_0.3       scales_0.5.0       mvtnorm_1.0-7     
+## [28] psych_1.8.4        ggridges_0.5.0     tfruns_1.3        
+## [31] pkgdown_0.1.0.9000 commonmark_1.5     digest_0.6.15     
+## [34] foreign_0.8-70     rmarkdown_1.9      extraDistr_1.8.8  
+## [37] base64enc_0.1-3    pkgconfig_2.0.1    htmltools_0.3.6   
+## [40] htmlwidgets_1.2    rlang_0.2.0        readxl_1.1.0      
+## [43] rstudioapi_0.7     bindr_0.1.1        visNetwork_2.0.3  
+## [46] jsonlite_1.5       tensorflow_1.5     rgexf_0.15.3      
+## [49] magrittr_1.5       Matrix_1.2-14      Rcpp_0.12.17      
+## [52] munsell_0.4.3      reticulate_1.7     viridis_0.5.1     
+## [55] stringi_1.2.2      whisker_0.3-2      yaml_2.1.19       
+## [58] plyr_1.8.4         grid_3.5.0         parallel_3.5.0    
+## [61] listenv_0.7.0      lattice_0.20-35    haven_1.1.1       
+## [64] hms_0.4.2          knitr_1.20         pillar_1.2.2      
+## [67] igraph_1.2.1       future.apply_0.2.0 reshape2_1.4.3    
+## [70] codetools_0.2-15   XML_3.98-1.11      glue_1.2.0        
+## [73] evaluate_0.10.1    V8_1.5             downloader_0.4    
+## [76] modelr_0.1.1       cellranger_1.1.0   gtable_0.2.0      
+## [79] assertthat_0.2.0   broom_0.4.4        rsvg_1.3          
+## [82] coda_0.19-1        roxygen2_6.0.1     viridisLite_0.3.0 
+## [85] Rook_1.1-1         DiagrammeR_1.0.0   globals_0.11.0    
+## [88] brew_1.0-6</code></pre>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

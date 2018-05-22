@@ -10,7 +10,8 @@ License: Apache License 2.0
 URL: https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
-    TensorFlow (>= 1.0.0; https://www.tensorflow.org/)
+    TensorFlow (>= 1.8; https://www.tensorflow.org/);
+    Tensorflow Probability (>=0.0.1; https://github.com/tensorflow/probability)
 Encoding: UTF-8
 LazyData: true
 Depends:
@@ -24,6 +25,7 @@ Collate:
     'node_types.R'
     'variable.R'
     'probability_distributions.R'
+    'mixture.R'
     'unknowns_class.R'
     'greta_array_class.R'
     'as_data.R'
@@ -36,6 +38,7 @@ Collate:
     'dag_class.R'
     'greta_model_class.R'
     'progress_bar.R'
+    'inference_class.R'
     'samplers.R'
     'inference.R'
     'install_tensorflow.R'
@@ -46,18 +49,23 @@ Imports:
     tensorflow,
     reticulate,
     progress,
-    coda
+    future,
+    future.apply,
+    coda,
+    methods
 Suggests:
     knitr,
     rmarkdown,
     DiagrammeR,
     bayesplot,
+    tidyverse,
     lattice,
     testthat,
     mvtnorm,
     MCMCpack,
     rmutil,
     extraDistr,
-    truncdist
+    truncdist,
+    tidyverse
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1

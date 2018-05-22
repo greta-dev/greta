@@ -52,10 +52,10 @@ operation_node <- R6Class(
       self$operation <- tf_operation
       self$operation_args <- operation_args
 
-      # work out the dimensions of the new greta array, if NULL assume an elementwise
-      # operation and get the largest number of each dimension, otherwise expect
-      # a function to be passed which will calculate it from the provided list
-      # of nodes arguments
+      # work out the dimensions of the new greta array, if NULL assume an
+      # elementwise operation and get the largest number of each dimension,
+      # otherwise expect a function to be passed which will calculate it from
+      # the provided list of nodes arguments
       if (is.null(dimfun))
         dim <- do.call(pmax, lapply(dots, dim))
       else
@@ -90,8 +90,11 @@ operation_node <- R6Class(
       if (length(self$operation_args) > 0)
         args <- c(args, self$operation_args)
 
-      # apply function on tensors
-      node <- do.call(self$operation, args)
+      # get the tensorflow function
+      operation <- eval(parse(text = self$operation))
+
+      # apply the function on tensors
+      node <- do.call(operation, args)
 
       # assign it in the environment
       assign(dag$tf_name(self), node, envir = dag$tf_environment)
@@ -171,18 +174,11 @@ variable_node <- R6Class (
 
     tf = function (dag) {
 
-      # make a Variable tensor to hold the free state
-      tf_obj <- tf$Variable(initial_value = self$value(),
-                            dtype = tf_float())
-
-      # assign this as the free state
+      # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
       free_name <- sprintf('%s_free', tf_name)
-      assign(free_name,
-             tf_obj,
-             envir = dag$tf_environment)
 
-      # get the log jacobian adjustment for the free state
+      # create the log jacobian adjustment for the free state
       tf_adj <- self$tf_adjustment(dag)
       adj_name <- sprintf('%s_adj', tf_name)
       assign(adj_name,
@@ -192,6 +188,11 @@ variable_node <- R6Class (
       # map from the free to constrained state in a new tensor
       tf_free <- get(free_name, envir = dag$tf_environment)
       node <- self$tf_from_free(tf_free, dag$tf_environment)
+
+      # reshape the tensor to the match the variable
+      node <- tf$reshape(node, shape = dim(self))
+
+      # assign as constrained variable
       assign(tf_name,
              node,
              envir = dag$tf_environment)
@@ -261,13 +262,17 @@ variable_node <- R6Class (
 
       ljac_cov_mat <- function (x) {
 
+        if (length(dim(x)) == 1) {
+          x <- tf$reshape(x, shape(length(x), 1))
+        }
+
         # find dimension
         n <- x$get_shape()$as_list()[1]
         K <- (sqrt(8 * n + 1) - 1) / 2
 
         k <- seq_len(K)
         powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = c(K, 1))
-        fl(K * log(2)) + tf$reduce_sum(powers * x[k - 1])
+        fl(K * log(2)) + tf$reduce_sum(powers * x[k - 1, ])
 
       }
 
@@ -310,7 +315,10 @@ distribution_node <- R6Class (
     truncation = NULL,
     parameters = list(),
 
-    initialize = function (name = 'no distribution', dim = NULL, truncation = NULL, discrete = FALSE) {
+    initialize = function (name = "no distribution",
+                           dim = NULL,
+                           truncation = NULL,
+                           discrete = FALSE) {
 
       super$initialize(dim)
 
@@ -321,7 +329,8 @@ distribution_node <- R6Class (
       # initialize the target values of this distribution
       self$add_target(self$create_target(truncation))
 
-      # if there's a truncation, it's different from the bounds, and it's a truncatable distribution, set the truncation
+      # if there's a truncation, it's different from the bounds, and it's a
+      # truncatable distribution, set the truncation
       if (!is.null(truncation) &
           !identical(truncation, self$bounds) &
           !is.null(self$tf_cdf_function)) {
@@ -356,26 +365,36 @@ distribution_node <- R6Class (
     },
 
     # replace the existing target node with a new one
-    replace_target = function (new_target) {
+    remove_target = function () {
 
       # remove x from children
       self$remove_child(self$target)
-
-      # add the new one in
-      self$add_target(new_target)
+      self$target <- NULL
 
     },
 
     tf = function (dag) {
 
-      # define a tensor with this node's log density in env
+      # for distributions, tf assigns a *function* to execute the density
+      density <- function (tf_target) {
 
-      # run the TF version of the density function
-      tf_obj <- self$tf_log_density(dag)
+        # fetch inputs
+        tf_parameters <- self$tf_fetch_parameters(dag)
 
-      # assign the result back to env
+        # calculate log density
+        ld <- self$tf_log_density_function(tf_target, tf_parameters, dag)
+
+        # check for truncation
+        if (!is.null(self$truncation))
+          ld <- ld - self$tf_log_density_offset(tf_parameters)
+
+        ld
+
+      }
+
+      # assign the function to the environment
       assign(dag$tf_name(self),
-             tf_obj,
+             density,
              envir = dag$tf_environment)
 
     },
@@ -383,24 +402,6 @@ distribution_node <- R6Class (
     # which node to use af the *tf* target (overwritten by some distributions)
     get_tf_target_node = function () {
       self$target
-    },
-
-    tf_log_density = function (dag) {
-
-      # fetch inputs
-      tf_target_node <- self$get_tf_target_node()
-      tf_target <- get(dag$tf_name(tf_target_node),
-                       envir = dag$tf_environment)
-      tf_parameters <- self$tf_fetch_parameters(dag)
-
-      # calculate log density
-      ld <- self$tf_log_density_function(tf_target, tf_parameters)
-
-      # check for truncation
-      if (!is.null(self$truncation))
-        ld <- ld - self$tf_log_density_offset(tf_parameters)
-
-      ld
     },
 
     tf_fetch_parameters = function (dag) {
@@ -456,21 +457,21 @@ distribution_node <- R6Class (
 
     },
 
-    tf_log_density_function = function (x, parameters) {
+    tf_log_density_function = function (x, parameters, dag) {
 
-      self$tf_distrib(parameters)$log_prob(x)
+      self$tf_distrib(parameters, dag)$log_prob(x)
 
     },
 
     tf_cdf_function = function (x, parameters) {
 
-      self$tf_distrib(parameters)$cdf(x)
+      self$tf_distrib(parameters, dag)$cdf(x)
 
     },
 
     tf_log_cdf_function = function (x, parameters) {
 
-      self$tf_distrib(parameters)$log_cdf(x)
+      self$tf_distrib(parameters, dag)$log_cdf(x)
 
     }
 
@@ -488,8 +489,11 @@ node_classes_module <- module(node,
 # shorthand for distribution parameter constructors
 distrib <- function (distribution, ...) {
 
+  check_tf_version("error")
+
   # get and initialize the distribution, with a default value node
-  constructor <- get(paste0(distribution, '_distribution'))
+  constructor <- get(paste0(distribution, '_distribution'),
+                     envir = parent.frame())
   distrib <- constructor$new(...)
 
   # return the user-facing representation of the node as a greta array
@@ -499,8 +503,10 @@ distrib <- function (distribution, ...) {
 }
 
 # shorthand to speed up op definitions
-op <- function (...)
+op <- function (...) {
+  check_tf_version("error")
   as.greta_array(operation_node$new(...))
+}
 
 # helper function to create a variable node
 # by default, make x (the node
@@ -517,5 +523,5 @@ vble <- function (truncation, dim = 1) {
 }
 
 node_constructors_module <- module(distrib,
-                              op,
-                              vble)
+                                   op,
+                                   vble)

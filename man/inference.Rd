@@ -9,8 +9,8 @@
 \usage{
 stashed_samples()
 
-mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
-  chains = 1, verbose = TRUE, pb_update = 10, control = list(),
+mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1, warmup = 1000,
+  chains = 1, n_cores = NULL, verbose = TRUE, pb_update = 50,
   initial_values = NULL)
 
 opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
@@ -19,8 +19,7 @@ opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
 \arguments{
 \item{model}{greta_model object}
 
-\item{method}{method used to sample or optimise values. Currently only
-one method is available for each procedure: \code{hmc} and \code{adagrad}}
+\item{sampler}{sampler used to draw values in MCMC. See \code{\link{samplers}} for options.}
 
 \item{n_samples}{number of MCMC samples to draw per chain (after any warm-up, but
 before thinning)}
@@ -34,20 +33,27 @@ tunes sampler hyperparameters.}
 
 \item{chains}{number of MCMC chains to run}
 
+\item{n_cores}{the maximum number of CPU cores used by \emph{each} chain.}
+
 \item{verbose}{whether to print progress information to the console}
 
 \item{pb_update}{how regularly to update the progress bar (in iterations)}
-
-\item{control}{an optional named list of hyperparameters and options to
-control behaviour of the sampler or optimiser. See Details.}
 
 \item{initial_values}{an optional vector (or list of vectors, for multiple
 chains) of initial values for the free parameters in the model. These will
 be used as the starting point for sampling/optimisation.}
 
+\item{method}{method used to optimise values. Currently only \code{adagrad}
+is available}
+
 \item{max_iterations}{the maximum number of iterations before giving up}
 
-\item{tolerance}{the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level}
+\item{tolerance}{the numerical tolerance for the solution, the optimiser
+stops when the (absolute) difference in the joint density between
+successive iterations drops below this level}
+
+\item{control}{an optional named list of hyperparameters and options to
+control behaviour of the sampler or optimiser. See Details.}
 }
 \value{
 \code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
@@ -56,12 +62,11 @@ be used as the starting point for sampling/optimisation.}
 
 \code{opt} - a list containing the following named elements:
   \itemize{
-    \item{par}{the best set of parameters found}
-    \item{value}{the log joint density of the model at the parameters par}
-    \item{iterations}{the number of iterations taken by the optimiser}
-    \item{convergence}{an integer code, 0 indicates successful completion, 1
-    indicates the iteration limit max_iterations had been reached}
-  }
+   \item{par} {the best set of parameters found}
+   \item{value} {the log joint density of the model at the parameters par}
+   \item{iterations} {the number of iterations taken by the optimiser}
+   \item{convergence} {an integer code, 0 indicates successful completion,
+    1 indicates the iteration limit \code{max_iterations} had been reached} }
 }
 \description{
 Carry out statistical inference on greta models by
@@ -92,27 +97,22 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   (via \code{model}) to have double precision, though this will slow down
   sampling.
 
-  Currently, the only implemented MCMC procedure is static Hamiltonian Monte
-  Carlo (\code{method = "hmc"}). During the warmup iterations, the leapfrog
-  stepsize hyperparameter \code{epsilon} is tuned to maximise the sampler
-  efficiency, and the posterior marginal standard deviations are estimated
-  \code{diag_sd}. The \code{control} argument can be used to specify the
-  initial value for \code{epsilon}, \code{diag_sd}, and two other
-  hyperparameters: \code{Lmin} and \code{Lmax}; positive integers (with
-  \code{Lmax > Lmin}) giving the upper and lower limits to the number of
-  leapfrog steps per iteration (from which the number is selected uniformly
-  at random).
+  Multiple mcmc chains can be run in parallel by setting the execution plan
+  with the \code{future} package. Only \code{plan(multisession)} futures or
+  \code{plan(cluster)} futures that don't use fork clusters are allowed,
+  since forked processes conflict with tensorflow's parallelism.
 
-  The default control options for HMC are:
-  \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005, diag_sd = 1)}
+  If \code{n_cores = NULL} and mcmc chains are being run sequentially, each
+  chain will be allowed to use all CPU cores. If chains are being run in
+  parallel, \code{n_cores} will be set so that \code{n_cores * chains} is
+  less than the number of CPU cores.
 
 Currently, the only implemented optimisation algorithm is Adagrad
   (\code{method = "adagrad"}). The \code{control} argument can be used to
   specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
   \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
   (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,
-  see
-  \href{https://www.tensorflow.org/api_docs/python/tf/train/AdagradOptimizer}{the
+  see \href{https://www.tensorflow.org/api_docs/python/tf/train}{the
   TensorFlow docs} for more information
 }
 \examples{

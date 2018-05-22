@@ -188,6 +188,12 @@ set.seed(2018-02-17)
 <div class="col-md-1"></div>
 
 <div class="col-md-5">
+  &thinsp; <span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span> &emsp; [Eight schools example](8_schools_example_model.html)
+</div>
+
+<div class="col-md-1"></div>
+
+<div class="col-md-5">
   &thinsp; <span class="fa fa-book fa-2x" style="vertical-align:middle;"></span> &emsp; [package docs](reference-index.html)
 </div>
 

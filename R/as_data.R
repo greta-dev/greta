@@ -29,8 +29,10 @@
 #'                  x3 = sample(c(TRUE, FALSE), 10, replace = TRUE))
 #' (d <- as_data(df))
 #' }
-as_data <- function (x)
+as_data <- function (x) {
+  check_tf_version("error")
   UseMethod('as_data', x)
+}
 
 # if it's already a *data* greta_array fine, else error
 #' @export
