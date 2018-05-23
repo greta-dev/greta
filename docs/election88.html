@@ -304,7 +304,7 @@ div.tocify {
           </a>
           <ul class="dropdown-menu" role="menu">
             <li>
-              <a href="example_bugs_models.html">examples BUGS models</a>
+              <a href="example_bugs_models.html">Example BUGS models</a>
             </li>
             <li>
               <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
@@ -372,58 +372,29 @@ packageVersion(&quot;greta&quot;)</code></pre>
 model_data &lt;- &quot;ARM/Ch.14/election88_full.data.R&quot;
 source(file.path(root, model_data))
 ls()</code></pre>
-<pre><code>##   [1] &quot;a&quot;                        &quot;a2&quot;                      
-##   [3] &quot;age&quot;                      &quot;age_edu&quot;                 
-##   [5] &quot;alpha&quot;                    &quot;alpha_star&quot;              
-##   [7] &quot;as_probs&quot;                 &quot;as_section_slug&quot;         
-##   [9] &quot;atanh&quot;                    &quot;avg_effect&quot;              
-##  [11] &quot;avg_stddev&quot;               &quot;b&quot;                       
-##  [13] &quot;b0&quot;                       &quot;b1&quot;                      
-##  [15] &quot;b2&quot;                       &quot;b3&quot;                      
-##  [17] &quot;beta&quot;                     &quot;black&quot;                   
-##  [19] &quot;black_greta&quot;              &quot;coef&quot;                    
-##  [21] &quot;data_index&quot;               &quot;data_index_sections&quot;     
-##  [23] &quot;data_list&quot;                &quot;draws&quot;                   
-##  [25] &quot;e88_model&quot;                &quot;edu&quot;                     
-##  [27] &quot;edward2_pop_mean&quot;         &quot;edward2_school_means&quot;    
-##  [29] &quot;err&quot;                      &quot;female&quot;                  
-##  [31] &quot;female_greta&quot;             &quot;fit&quot;                     
-##  [33] &quot;fname&quot;                    &quot;gr&quot;                      
-##  [35] &quot;idx&quot;                      &quot;int&quot;                     
-##  [37] &quot;is_setosa&quot;                &quot;J&quot;                       
-##  [39] &quot;logit&quot;                    &quot;m&quot;                       
-##  [41] &quot;m_coef&quot;                   &quot;m_likelihood&quot;            
-##  [43] &quot;make_section&quot;             &quot;mean&quot;                    
-##  [45] &quot;mean_mpg&quot;                 &quot;model&quot;                   
-##  [47] &quot;model_data&quot;               &quot;mpg_model&quot;               
-##  [49] &quot;mu&quot;                       &quot;mu_a&quot;                    
-##  [51] &quot;n&quot;                        &quot;N&quot;                       
-##  [53] &quot;n_age&quot;                    &quot;n_age_edu&quot;               
-##  [55] &quot;n_edu&quot;                    &quot;n_region_full&quot;           
-##  [57] &quot;n_state&quot;                  &quot;n_states&quot;                
-##  [59] &quot;p&quot;                        &quot;pkg&quot;                     
-##  [61] &quot;population_parameters&quot;    &quot;posterior_school_effects&quot;
-##  [63] &quot;posterior_summaries&quot;      &quot;prob&quot;                    
-##  [65] &quot;r&quot;                        &quot;region_full&quot;             
-##  [67] &quot;rhat&quot;                     &quot;root&quot;                    
-##  [69] &quot;school_effects&quot;           &quot;school_effects_standard&quot; 
-##  [71] &quot;school_summaries&quot;         &quot;schools&quot;                 
-##  [73] &quot;sd&quot;                       &quot;sections&quot;                
-##  [75] &quot;sections_combined&quot;        &quot;sigma&quot;                   
-##  [77] &quot;sigma_a&quot;                  &quot;sigma2&quot;                  
-##  [79] &quot;split_args&quot;               &quot;state&quot;                   
-##  [81] &quot;state_greta&quot;              &quot;state_recoded&quot;           
-##  [83] &quot;tau&quot;                      &quot;theta&quot;                   
-##  [85] &quot;topics&quot;                   &quot;treatment_effects&quot;       
-##  [87] &quot;treatment_stddevs&quot;        &quot;v_prev_full&quot;             
-##  [89] &quot;vignettes&quot;                &quot;write_index&quot;             
-##  [91] &quot;write_topic&quot;              &quot;x&quot;                       
-##  [93] &quot;X&quot;                        &quot;x1_hp&quot;                   
-##  [95] &quot;x2_disp&quot;                  &quot;x3_wt&quot;                   
-##  [97] &quot;y&quot;                        &quot;y_greta&quot;                 
-##  [99] &quot;y_hat&quot;                    &quot;y_mpg&quot;                   
-## [101] &quot;z&quot;                        &quot;Z&quot;                       
-## [103] &quot;z_greta&quot;                  &quot;z2&quot;</code></pre>
+<pre><code>##  [1] &quot;age&quot;                      &quot;age_edu&quot;                 
+##  [3] &quot;as_section_slug&quot;          &quot;avg_effect&quot;              
+##  [5] &quot;avg_stddev&quot;               &quot;black&quot;                   
+##  [7] &quot;data_index&quot;               &quot;data_index_sections&quot;     
+##  [9] &quot;data_list&quot;                &quot;draws&quot;                   
+## [11] &quot;edu&quot;                      &quot;edward2_pop_mean&quot;        
+## [13] &quot;edward2_school_means&quot;     &quot;female&quot;                  
+## [15] &quot;m&quot;                        &quot;make_section&quot;            
+## [17] &quot;model_data&quot;               &quot;N&quot;                       
+## [19] &quot;n_age&quot;                    &quot;n_age_edu&quot;               
+## [21] &quot;n_edu&quot;                    &quot;n_region_full&quot;           
+## [23] &quot;n_state&quot;                  &quot;pkg&quot;                     
+## [25] &quot;population_parameters&quot;    &quot;posterior_school_effects&quot;
+## [27] &quot;posterior_summaries&quot;      &quot;region_full&quot;             
+## [29] &quot;root&quot;                     &quot;school_effects&quot;          
+## [31] &quot;school_effects_standard&quot;  &quot;school_summaries&quot;        
+## [33] &quot;schools&quot;                  &quot;sections&quot;                
+## [35] &quot;sections_combined&quot;        &quot;split_args&quot;              
+## [37] &quot;state&quot;                    &quot;topics&quot;                  
+## [39] &quot;treatment_effects&quot;        &quot;treatment_stddevs&quot;       
+## [41] &quot;v_prev_full&quot;              &quot;vignettes&quot;               
+## [43] &quot;write_index&quot;              &quot;write_topic&quot;             
+## [45] &quot;y&quot;</code></pre>
 <p>Using this data, we will look to answer the following: <strong>what effect did race and gender have on voting outcomes in the 1988 election</strong>. While we cannot answer this question in causal terms without experimental data, we can at least answer this data in observational terms.</p>
 <p>We’ll implement a multi-level model with varying intercepts. In <code>lme4</code> syntax, that’s</p>
 <pre><code>glmer(y ~ black + female + (1 | state), family = binomial(link = &quot;logit&quot;))</code></pre>
@@ -527,7 +498,7 @@ distribution(y_greta) &lt;- binomial(n, p)</code></pre>
 <pre class="r"><code>plan(multisession)
 draws &lt;- mcmc(e88_model, chains = 8, n_samples = 1000, warmup = 500)</code></pre>
 <pre><code>## 
-## running 8 chains in parallel, each on up to 0 cores (progress bar suppressed)</code></pre>
+## running 8 chains in parallel, each on 1 core (progress bar suppressed)</code></pre>
 <p>Time to diagnose. Did the sample chains for our fixed effects mix reasonably? For all of the following visualizations, we’ll rely on the <code>bayesplot</code> package.</p>
 <pre class="r"><code>bayesplot::mcmc_trace(draws, regex_pars = &quot;b.[12]&quot;)</code></pre>
 <p><img src="election88_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
@@ -536,10 +507,7 @@ draws &lt;- mcmc(e88_model, chains = 8, n_samples = 1000, warmup = 500)</code></
 <p><img src="election88_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <p>Understanding our coefficients in their current form is a little hard, since they are on the logit scale. It would be nicer to work with probabilities. We can use <code>calculate</code> for this step.</p>
 <p>To get every transformed version of our model parameters, we pass the <code>draws</code> object as the second argument. To get the name in an expected manner, we will assign the transformation to a local variable first.</p>
-<pre class="r"><code># This function is available within greta, but we will define our own
-# transformation
-logit &lt;- function(vec) exp(vec) / (1 + exp(vec))
-prob &lt;- logit(b)
+<pre class="r"><code>prob &lt;- ilogit(b)
 as_probs &lt;- calculate(prob, draws)</code></pre>
 <p>And now a plot.</p>
 <pre class="r"><code>mcmc_areas(as_probs)</code></pre>
@@ -556,14 +524,14 @@ as_probs &lt;- calculate(prob, draws)</code></pre>
 ##    plus standard error of the mean:
 ## 
 ##             Mean       SD  Naive SE Time-series SE
-## prob[1,1] 0.2586 0.014415 0.0001612      0.0007054
-## prob[2,1] 0.4870 0.006225 0.0000696      0.0002086
+## prob[1,1] 0.2591 0.013674 0.0001529      0.0006817
+## prob[2,1] 0.4879 0.006207 0.0000694      0.0002245
 ## 
 ## 2. Quantiles for each variable:
 ## 
 ##             2.5%    25%    50%    75%  97.5%
-## prob[1,1] 0.2302 0.2489 0.2587 0.2684 0.2868
-## prob[2,1] 0.4749 0.4828 0.4871 0.4913 0.4991</code></pre>
+## prob[1,1] 0.2324 0.2500 0.2593 0.2683 0.2856
+## prob[2,1] 0.4758 0.4837 0.4879 0.4922 0.5001</code></pre>
 </div>
 <div id="wrapping-up" class="section level1">
 <h1>Wrapping up</h1>
@@ -571,9 +539,9 @@ as_probs &lt;- calculate(prob, draws)</code></pre>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>## R version 3.5.0 (2018-04-23)
-## Platform: x86_64-apple-darwin17.5.0 (64-bit)
-## Running under: macOS High Sierra 10.13.4
+<pre><code>## R version 3.4.3 (2017-11-30)
+## Platform: x86_64-apple-darwin16.7.0 (64-bit)
+## Running under: macOS High Sierra 10.13.3
 ## 
 ## Matrix products: default
 ## BLAS: /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib
@@ -583,45 +551,44 @@ as_probs &lt;- calculate(prob, draws)</code></pre>
 ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## [1] stats     graphics  grDevices utils     datasets  base     
 ## 
 ## other attached packages:
-##  [1] future_1.8.1    bindrcpp_0.2.2  bayesplot_1.5.0 forcats_0.3.0  
-##  [5] stringr_1.3.0   dplyr_0.7.5     purrr_0.2.4     readr_1.1.1    
+##  [1] future_1.8.1    bindrcpp_0.2    bayesplot_1.5.0 forcats_0.3.0  
+##  [5] stringr_1.3.1   dplyr_0.7.4     purrr_0.2.4     readr_1.1.1    
 ##  [9] tidyr_0.8.1     tibble_1.4.2    ggplot2_2.2.1   tidyverse_1.2.1
-## [13] greta_0.2.4     nvimcom_0.9-71  crayon_1.3.4   
+## [13] greta_0.2.4    
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] nlme_3.1-137       lubridate_1.7.4    RColorBrewer_1.1-2
+##  [1] nlme_3.1-131       lubridate_1.7.3    RColorBrewer_1.1-2
 ##  [4] progress_1.1.2     httr_1.3.1         rprojroot_1.3-2   
-##  [7] highlight_0.4.7.2  DiagrammeRsvg_0.1  tools_3.5.0       
-## [10] backports_1.1.2    R6_2.2.2           lazyeval_0.2.1    
-## [13] colorspace_1.3-2   tidyselect_0.2.4   gridExtra_2.3     
-## [16] prettyunits_1.0.2  mnormt_1.5-5       curl_3.2          
-## [19] compiler_3.5.0     cli_1.0.0          rvest_0.3.2       
-## [22] xml2_1.2.0         influenceR_0.1.0   desc_1.2.0        
-## [25] labeling_0.3       scales_0.5.0       mvtnorm_1.0-7     
-## [28] psych_1.8.4        ggridges_0.5.0     tfruns_1.3        
-## [31] pkgdown_0.1.0.9000 commonmark_1.5     digest_0.6.15     
-## [34] foreign_0.8-70     rmarkdown_1.9      extraDistr_1.8.8  
-## [37] base64enc_0.1-3    pkgconfig_2.0.1    htmltools_0.3.6   
-## [40] htmlwidgets_1.2    rlang_0.2.0        readxl_1.1.0      
-## [43] rstudioapi_0.7     bindr_0.1.1        visNetwork_2.0.3  
-## [46] jsonlite_1.5       tensorflow_1.5     rgexf_0.15.3      
-## [49] magrittr_1.5       Matrix_1.2-14      Rcpp_0.12.17      
-## [52] munsell_0.4.3      reticulate_1.7     viridis_0.5.1     
-## [55] stringi_1.2.2      whisker_0.3-2      yaml_2.1.19       
-## [58] plyr_1.8.4         grid_3.5.0         parallel_3.5.0    
-## [61] listenv_0.7.0      lattice_0.20-35    haven_1.1.1       
-## [64] hms_0.4.2          knitr_1.20         pillar_1.2.2      
+##  [7] highlight_0.4.7.2  tools_3.4.3        backports_1.1.2   
+## [10] R6_2.2.2           lazyeval_0.2.1     colorspace_1.3-2  
+## [13] tidyselect_0.2.4   gridExtra_2.3      prettyunits_1.0.2 
+## [16] mnormt_1.5-5       compiler_3.4.3     cli_1.0.0         
+## [19] rvest_0.3.2        xml2_1.1.1         influenceR_0.1.0  
+## [22] desc_1.2.0         labeling_0.3       scales_0.5.0      
+## [25] mvtnorm_1.0-7      psych_1.8.3.3      ggridges_0.5.0    
+## [28] tfruns_1.3         pkgdown_0.1.0.9000 commonmark_1.5    
+## [31] digest_0.6.15      foreign_0.8-69     rmarkdown_1.9     
+## [34] extraDistr_1.8.8   base64enc_0.1-3    pkgconfig_2.0.1   
+## [37] htmltools_0.3.6    htmlwidgets_1.2    rlang_0.2.0       
+## [40] readxl_1.0.0       rstudioapi_0.7     bindr_0.1         
+## [43] visNetwork_2.0.3   jsonlite_1.5       tensorflow_1.5    
+## [46] rgexf_0.15.3       magrittr_1.5       Matrix_1.2-12     
+## [49] Rcpp_0.12.17       munsell_0.4.3      reticulate_1.7    
+## [52] viridis_0.5.1      stringi_1.2.2      whisker_0.3-2     
+## [55] yaml_2.1.19        plyr_1.8.4         grid_3.4.3        
+## [58] parallel_3.4.3     listenv_0.7.0      crayon_1.3.4      
+## [61] methods_3.4.3      lattice_0.20-35    haven_1.1.1       
+## [64] hms_0.4.1          knitr_1.20         pillar_1.2.1      
 ## [67] igraph_1.2.1       future.apply_0.2.0 reshape2_1.4.3    
 ## [70] codetools_0.2-15   XML_3.98-1.11      glue_1.2.0        
-## [73] evaluate_0.10.1    V8_1.5             downloader_0.4    
-## [76] modelr_0.1.1       cellranger_1.1.0   gtable_0.2.0      
-## [79] assertthat_0.2.0   broom_0.4.4        rsvg_1.3          
-## [82] coda_0.19-1        roxygen2_6.0.1     viridisLite_0.3.0 
-## [85] Rook_1.1-1         DiagrammeR_1.0.0   globals_0.11.0    
-## [88] brew_1.0-6</code></pre>
+## [73] evaluate_0.10.1    downloader_0.4     modelr_0.1.1      
+## [76] cellranger_1.1.0   gtable_0.2.0       assertthat_0.2.0  
+## [79] broom_0.4.4        coda_0.19-1        roxygen2_6.0.1    
+## [82] viridisLite_0.3.0  Rook_1.1-1         DiagrammeR_1.0.0  
+## [85] globals_0.11.0     brew_1.0-6</code></pre>
 </div>
 </div>
 
