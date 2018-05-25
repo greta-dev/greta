@@ -59,7 +59,6 @@ Suggests:
     rmarkdown,
     DiagrammeR,
     bayesplot,
-    tidyverse,
     lattice,
     testthat,
     mvtnorm,
