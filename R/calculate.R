@@ -82,14 +82,7 @@ calculate <- function (target, values) {
 
 calculate_mcmc.list <- function (target, target_name, values) {
 
-  model_info <- attr(values, "model_info")
-
-  if (is.null(model_info)) {
-    stop ("value is an mcmc.list object, but is not associated with any ",
-          "model information, perhaps it wasn't created with ",
-          "greta::mcmc() ?",
-          call. = FALSE)
-  }
+  model_info <- get_model_info(values)
 
   # copy and refresh the dag
   dag <- model_info$model$dag$clone()

@@ -2,16 +2,20 @@
 % Please edit documentation in R/inference.R
 \name{inference}
 \alias{inference}
-\alias{stashed_samples}
 \alias{mcmc}
+\alias{stashed_samples}
+\alias{extra_samples}
 \alias{opt}
 \title{statistical inference on greta models}
 \usage{
-stashed_samples()
-
 mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1, warmup = 1000,
   chains = 1, n_cores = NULL, verbose = TRUE, pb_update = 50,
   initial_values = NULL)
+
+stashed_samples()
+
+extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
+  verbose = TRUE, pb_update = 50)
 
 opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
   control = list(), initial_values = NULL)
@@ -43,6 +47,9 @@ tunes sampler hyperparameters.}
 chains) of initial values for the free parameters in the model. These will
 be used as the starting point for sampling/optimisation.}
 
+\item{draws}{an mcmc.list object returned by \code{mcmc} or
+\code{stashed_samples}}
+
 \item{method}{method used to optimise values. Currently only \code{adagrad}
 is available}
 
@@ -56,9 +63,10 @@ successive iterations drops below this level}
 control behaviour of the sampler or optimiser. See Details.}
 }
 \value{
-\code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
-  that can be analysed using functions from the coda package. This will
-  contain mcmc samples of the greta arrays used to create \code{model}.
+\code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
+  \code{mcmc.list} object that can be analysed using functions from the coda
+  package. This will contain mcmc samples of the greta arrays used to create
+  \code{model}.
 
 \code{opt} - a list containing the following named elements:
   \itemize{
@@ -73,10 +81,6 @@ Carry out statistical inference on greta models by
   MCMC or likelihood/posterior optimisation.
 }
 \details{
-If the sampler is aborted before finishing, the samples collected so
-  far can be retrieved with \code{stashed_samples()}. Only samples from the
-  sampling phase will be returned.
-
 For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   the number of iterations so far and the expected time to complete the phase
   of model fitting (warmup or sampling). Updating the progress bar regularly
@@ -106,6 +110,16 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   chain will be allowed to use all CPU cores. If chains are being run in
   parallel, \code{n_cores} will be set so that \code{n_cores * chains} is
   less than the number of CPU cores.
+
+If the sampler is aborted before finishing, the samples collected so
+  far can be retrieved with \code{stashed_samples()}. Only samples from the
+  sampling phase will be returned.
+
+Samples returned by \code{mcmc()} and \code{stashed_samples()} can
+  be added to with \code{extra_samples()}. This continues the chain from the
+  last value of the previous chain and uses the same sampler and model as was
+  used to generate the previous samples. It is not possible to change the
+  sampler or extend the warmup period.
 
 Currently, the only implemented optimisation algorithm is Adagrad
   (\code{method = "adagrad"}). The \code{control} argument can be used to

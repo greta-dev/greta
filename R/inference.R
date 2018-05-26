@@ -4,51 +4,6 @@
 #'   MCMC or likelihood/posterior optimisation.
 NULL
 
-#' @rdname inference
-#' @export
-#' @importFrom stats na.omit
-#' @importFrom coda mcmc.list
-#'
-#' @details If the sampler is aborted before finishing, the samples collected so
-#'   far can be retrieved with \code{stashed_samples()}. Only samples from the
-#'   sampling phase will be returned.
-stashed_samples <- function () {
-
-  stashed <- exists("samplers", envir = greta_stash)
-
-  if (stashed) {
-
-    samplers <- greta_stash$samplers
-
-    # get draws as a matrix
-    free_state_draws <- lapply(samplers, member, "traced_free_state")
-    values_draws <- lapply(samplers, member, "traced_values")
-
-    # convert to mcmc objects
-    free_state_draws <- lapply(free_state_draws, prepare_draws)
-    values_draws <- lapply(values_draws, prepare_draws)
-
-    # convert to mcmc.list objects
-    free_state_draws <- coda::mcmc.list(free_state_draws)
-    values_draws <- coda::mcmc.list(values_draws)
-
-    # prep the raw model objects
-    model_info <- new.env()
-    model_info$raw_draws <- free_state_draws
-    model_info$model <- samplers[[1]]$model
-
-    # add the raw draws as an attribute
-    attr(values_draws, "model_info") <- model_info
-
-    return (values_draws)
-
-  } else {
-
-    return (invisible())
-
-  }
-
-}
 
 # create an object stash in greta's namespace, to return traces to the user when
 # they abort a run
@@ -110,9 +65,10 @@ greta_stash <- new.env()
 #'   parallel, \code{n_cores} will be set so that \code{n_cores * chains} is
 #'   less than the number of CPU cores.
 #'
-#' @return \code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
-#'   that can be analysed using functions from the coda package. This will
-#'   contain mcmc samples of the greta arrays used to create \code{model}.
+#' @return \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
+#'   \code{mcmc.list} object that can be analysed using functions from the coda
+#'   package. This will contain mcmc samples of the greta arrays used to create
+#'   \code{model}.
 #'
 #' @examples
 #' \dontrun{
@@ -177,21 +133,43 @@ mcmc <- function (model,
                      sampler,
                      model)
 
-  # stash the samplers now, to retrieve draws later
-  greta_stash$samplers <- samplers
-
   # add chain info for printing
   for (i in seq_len(chains)) {
     samplers[[i]]$chain_number <- i
     samplers[[i]]$n_chains <- chains
   }
 
+  run_samplers(samplers = samplers,
+               n_samples = n_samples,
+               thin = thin,
+               warmup = warmup,
+               verbose = verbose,
+               pb_update = pb_update,
+               n_cores = n_cores,
+               from_scratch = TRUE)
+
+}
+
+run_samplers <- function (samplers,
+                          n_samples,
+                          thin,
+                          warmup,
+                          verbose,
+                          pb_update,
+                          n_cores,
+                          from_scratch) {
+
   # check the future plan is valid
   check_future_plan()
 
+  dag <- samplers[[1]]$model$dag
   sequential <- inherits(future::plan(), "sequential")
+  chains <- samplers[[1]]$n_chains
   n_cores <- check_n_cores(n_cores, chains, sequential)
   float_type <- dag$tf_float
+
+  # stash the samplers now, to retrieve draws later
+  greta_stash$samplers <- samplers
 
   if (!sequential & chains > 1) {
     cores_text <- ifelse(n_cores == 1, "1 core", sprintf("up to %i cores", n_cores))
@@ -199,6 +177,7 @@ mcmc <- function (model,
                 chains, cores_text))
     verbose <- FALSE
   }
+
 
   # run chains on samplers (return list so we can handle parallelism here)
   samplers <- future.apply::future_lapply(samplers,
@@ -210,7 +189,8 @@ mcmc <- function (model,
                                           pb_update = pb_update,
                                           sequential = sequential,
                                           n_cores = n_cores,
-                                          float_type = float_type)
+                                          float_type = float_type,
+                                          from_scratch = from_scratch)
 
   # if we were running in parallel, we need to put the samplers back in the
   # stash to return
@@ -225,6 +205,95 @@ mcmc <- function (model,
   rm("samplers", envir = greta_stash)
 
   draws
+
+}
+
+
+#' @rdname inference
+#' @export
+#' @importFrom stats na.omit
+#' @importFrom coda mcmc.list
+#'
+#' @details If the sampler is aborted before finishing, the samples collected so
+#'   far can be retrieved with \code{stashed_samples()}. Only samples from the
+#'   sampling phase will be returned.
+stashed_samples <- function () {
+
+  stashed <- exists("samplers", envir = greta_stash)
+
+  if (stashed) {
+
+    samplers <- greta_stash$samplers
+
+    # get draws as a matrix
+    free_state_draws <- lapply(samplers, member, "traced_free_state")
+    values_draws <- lapply(samplers, member, "traced_values")
+
+    # convert to mcmc objects
+    free_state_draws <- lapply(free_state_draws, prepare_draws)
+    values_draws <- lapply(values_draws, prepare_draws)
+
+    # convert to mcmc.list objects
+    free_state_draws <- coda::mcmc.list(free_state_draws)
+    values_draws <- coda::mcmc.list(values_draws)
+
+    # prep the raw model objects
+    model_info <- new.env()
+    model_info$raw_draws <- free_state_draws
+    model_info$samplers <- samplers
+    model_info$model <- samplers[[1]]$model
+
+    # add the raw draws as an attribute
+    attr(values_draws, "model_info") <- model_info
+
+    return (values_draws)
+
+  } else {
+
+    return (invisible())
+
+  }
+
+}
+
+#' @rdname inference
+#'
+#' @export
+#'
+#' @param draws an mcmc.list object returned by \code{mcmc} or
+#'   \code{stashed_samples}
+#'
+#' @details Samples returned by \code{mcmc()} and \code{stashed_samples()} can
+#'   be added to with \code{extra_samples()}. This continues the chain from the
+#'   last value of the previous chain and uses the same sampler and model as was
+#'   used to generate the previous samples. It is not possible to change the
+#'   sampler or extend the warmup period.
+#'
+extra_samples <- function (draws,
+                           n_samples = 1000,
+                           thin = 1,
+                           n_cores = NULL,
+                           verbose = TRUE,
+                           pb_update = 50) {
+
+  model_info <- get_model_info(draws)
+  samplers <- model_info$samplers
+
+  # set the last values as the current free state values
+  for (sampler in samplers) {
+    free_state_draws <- sampler$traced_free_state
+    n_draws <- nrow(free_state_draws)
+    sampler$free_state <- free_state_draws[n_draws, ]
+  }
+
+  run_samplers(samplers = samplers,
+               n_samples = n_samples,
+               thin = thin,
+               warmup = 0L,
+               verbose = verbose,
+               pb_update = pb_update,
+               n_cores = n_cores,
+               from_scratch = FALSE)
 
 }
 

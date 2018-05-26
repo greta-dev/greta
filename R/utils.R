@@ -568,6 +568,30 @@ flatten_trace <- function (i, trace_list) {
   values
 }
 
+# extract the model information object from mcmc samples returned by
+# stashed_samples, and error nicely if there's something fishy
+get_model_info <- function (draws, name = "value") {
+
+  if (!inherits(draws, "mcmc.list")) {
+    stop (name, " must be an mcmc.list object created by greta::mcmc(), ",
+          "greta::stashed_samples() or greta::extra_samples()",
+          call. = FALSE)
+  }
+
+  model_info <- attr(draws, "model_info")
+  valid <- !is.null(model_info)
+
+  if (!valid) {
+    stop (name, " is an mcmc.list object, but is not associated with any ",
+          "model information, perhaps it wasn't created by greta::mcmc(), ",
+          "greta::stashed_samples() or greta::extra_samples() ?",
+          call. = FALSE)
+  }
+
+  model_info
+
+}
+
 sampler_utils_module <- module(all_greta_arrays,
                                cleanly,
                                build_sampler,
@@ -577,7 +601,8 @@ sampler_utils_module <- module(all_greta_arrays,
                                check_future_plan,
                                check_n_cores,
                                get_indices_text,
-                               flatten_trace)
+                               flatten_trace,
+                               get_model_info)
 
 flat_to_chol <- function (x, dim, correl = FALSE) {
 
