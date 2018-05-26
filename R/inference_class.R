@@ -207,7 +207,7 @@ sampler <- R6Class(
     # sampler kernel information
     parameters = list(),
 
-    run_chain = function (n_samples, thin, warmup, verbose, pb_update, sequential, n_cores, float_type) {
+    run_chain = function (n_samples, thin, warmup, verbose, pb_update, sequential, n_cores, float_type, from_scratch = TRUE) {
 
       dag <- self$model$dag
 
@@ -233,8 +233,11 @@ sampler <- R6Class(
 
       }
 
-      self$traced_free_state <- matrix(NA, 0, self$n_free)
-      self$traced_values <- matrix(NA, 0, self$n_traced)
+      # create these objects if needed
+      if (from_scratch) {
+        self$traced_free_state <- matrix(NA, 0, self$n_free)
+        self$traced_values <- matrix(NA, 0, self$n_traced)
+      }
 
       # if warmup is required, do that now
       if (warmup > 0) {
