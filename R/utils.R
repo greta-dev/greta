@@ -165,6 +165,15 @@ live_pointer <- function (tensor_name, environment = parent.frame()) {
     !is.null(environment[[tensor_name]]$name)
 }
 
+# apply FUN to rows of matrix X and recombine *without dropping like apply does*
+apply_rows <- function (X, FUN, ...) {
+  rows <- seq_len(nrow(X))
+  input_list <- lapply(rows, function (i) X[i, ])
+  output_list <- lapply(input_list, FUN, ...)
+  output <- do.call(rbind, output_list)
+  output
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -177,7 +186,8 @@ misc_module <- module(module,
                       do,
                       sample_variance,
                       get_seed,
-                      live_pointer)
+                      live_pointer,
+                      apply_rows)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {

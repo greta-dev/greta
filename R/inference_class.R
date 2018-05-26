@@ -160,14 +160,10 @@ inference <- R6Class(
     # greta arrays
     trace_burst_values = function (burst_free_states) {
 
-      values_trace <- apply(burst_free_states, 1, self$model$dag$trace_values)
-
-      # make sure it's a matrix in the correct orientation
-      if (is.matrix(values_trace)) {
-        values_trace <- t(values_trace)
-      } else {
-        values_trace <- matrix(values_trace)
-      }
+      # can't use apply directly, as it will drop the variable name if there's
+      # only one parameter being traced
+      values_trace <- apply_rows(burst_free_states,
+                                 self$model$dag$trace_values)
 
       values_trace
 
