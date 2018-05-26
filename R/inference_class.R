@@ -342,7 +342,6 @@ sampler <- R6Class(
 
     },
 
-
     # overall tuning method
     tune = function(iterations_completed, total_iterations) {
       self$tune_epsilon(iterations_completed, total_iterations)

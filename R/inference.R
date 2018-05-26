@@ -270,13 +270,6 @@ prep_initials <- function (initial_values, n_chains) {
 
 }
 
-#' @importFrom coda mcmc mcmc.list
-prepare_draws <- function (draws) {
-  # given a matrix of draws returned by the sampler, prepare it and return
-  draws_df <- data.frame(draws)
-  coda::mcmc(draws_df)
-}
-
 #' @rdname inference
 #' @export
 #'
