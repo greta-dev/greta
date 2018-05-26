@@ -468,7 +468,9 @@ sampler <- R6Class(
       free_state_draws <- batch_results[[1]]
       self$last_burst_free_states <- free_state_draws
       n_draws <- nrow(free_state_draws)
-      self$free_state <- free_state_draws[n_draws, ]
+      if (n_draws > 0) {
+        self$free_state <- free_state_draws[n_draws, ]
+      }
 
       # log acceptance probability
       log_accept_stats <- batch_results[[2]]$log_accept_ratio
