@@ -70,7 +70,7 @@ test_that("calculate errors nicely if mcmc.list objects missing info", {
 
   # it should error nicely
   expect_error(calculate(y, draws),
-               "perhaps it wasn't created with greta")
+               "perhaps it wasn't created by greta")
 
 })
 
