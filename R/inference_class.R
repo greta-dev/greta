@@ -256,7 +256,7 @@ sampler <- R6Class(
 
         for (burst in seq_along(burst_lengths)) {
 
-          self$run_burst(burst_lengths[burst], thin = thin)
+          self$run_burst(burst_lengths[burst])
           self$trace(values = FALSE)
           self$tune(completed_iterations[burst], warmup)
 
@@ -446,7 +446,7 @@ sampler <- R6Class(
     },
 
     # run a burst of the sampler
-    run_burst = function (n_samples, thin) {
+    run_burst = function (n_samples, thin = 1L) {
 
       dag <- self$model$dag
       tfe <- dag$tf_environment
