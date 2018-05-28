@@ -228,3 +228,32 @@ test_that('model errors nicely', {
   expect_error(model(a, b),
                "^The following object")
 })
+
+test_that("mcmc supports different samplers, normal proposals", {
+
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  expect_ok(draws <- mcmc(m, random_walk_metropolis_hastings(),
+                          n_samples = 100, warmup = 100))
+
+  proposed <- unlist(draws)
+  expected <- rnorm(100)
+  test_stat <- ks.test(proposed, expected)$p.value
+  expect_gt(test_stat, .1)
+})
+
+test_that("mcmc supports different samplers, uniform proposals", {
+
+  skip_if_not(check_tf_version())
+  set.seed(5)
+  x <- uniform(0, 1)
+  m <- model(x)
+  expect_ok(draws <- mcmc(m, random_walk_metropolis_hastings("uniform"),
+                          n_samples = 100, warmup = 100))
+
+  proposed <- unlist(draws)
+  expected <- runif(100)
+  test_stat <- ks.test(proposed, expected)$p.value
+  expect_gt(test_stat, .1)
+})
