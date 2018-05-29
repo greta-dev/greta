@@ -1,0 +1,60 @@
+---
+output: html_document
+---
+### Multilevel
+
+
+#### data
+<div class="data">
+```{r data, highlight = FALSE}
+# make fake data
+n_species <- 10
+n_env <- 3
+n_sites <- 50
+n_traits <- 2
+
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
+traits <- matrix(rnorm(n_species * n_traits), nrow = n_species)
+occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species)
+```
+</div>
+
+#### greta code
+```{r multilevel_greta}
+# load greta
+library(greta)
+
+# data
+X <- as_data(env)
+Y <- as_data(occupancy)
+U <- as_data(traits)
+n_env <- ncol(X)
+n_traits <- ncol(U)
+
+# variables
+a <- normal(0, 10, dim = c(n_traits, 1))
+alpha <- U %*% a
+
+g <- normal(0, 10, dim = c(n_traits, n_env))
+beta <- U %*% g
+
+env_effect <- beta %*% t(X) #note transposed environmental matrix
+
+# matrix addition with `sweep()` create interim variable
+eta <- sweep(env_effect, 1, alpha, FUN = '+')
+
+# ilogit of linear predictor
+p <- ilogit(eta)
+
+# a single observation means our data are bernoulli distributed
+distribution(Y) = bernoulli(p)
+
+# create model object with the things we want samples of
+m <- model(beta, g, alpha)
+
+# plot model structure
+plot(m)
+
+fit <- mcmc(m)
+
+```

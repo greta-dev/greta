@@ -1,0 +1,60 @@
+---
+output: html_document
+---
+### Multispecies
+
+Fitting a multispecies model of normally distributed data
+
+
+#### data
+<div class="data">
+```{r data, highlight = FALSE}
+# make fake data
+n_species <- 3
+n_env <- 1
+n_sites <- 50
+
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
+occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species)
+```
+</div>
+
+#### greta code
+```{r multispecies_partially_pool_greta}
+# load greta
+library(greta)
+
+# data
+X <- as_data(env)
+Y <- as_data(occupancy)
+n_env <- ncol(X)
+
+# variables
+a <- normal(0, 10, dim = 1)
+a_s <- uniform(0, 10, dim = 1) 
+alpha <- normal(a, a_s, dim = n_species)
+
+g <- normal(0, 10, dim = n_env)
+g_s <- uniform(0, 10, dim = n_env)
+beta <- normal(g, g_s, dim = c(n_species, 1))
+
+env_effect <- beta %*% t(X) #not transposed environmental matrix
+
+# matrix addition with `sweep()` create interim variable
+eta <- sweep(env_effect, 1, alpha, FUN = '+')
+
+# ilogit of linear predictor
+p <- ilogit(eta)
+
+# a single observation means our data are bernoulli distributed
+distribution(Y) = bernoulli(p)
+
+# create model object with the things we want samples of
+m <- model(alpha, beta, g, g_s, a, a_s)
+
+# plot model structure
+plot(m)
+
+fit <- mcmc(m)
+
+```
