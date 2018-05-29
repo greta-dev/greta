@@ -11,29 +11,29 @@ Fitting a multispecies model of normally distributed data
 ```{r data, highlight = FALSE}
 # make fake data
 n_species <- 3
-n_env <- 2
+n_env <- 5
 n_sites <- 50
-n_obs <- 1
 
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-occupancy <- matrix(rbinom(n_sites * n_species, n_obs, 0.5), nrow = n_species)
+occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species)
 ```
 </div>
 
 #### greta code
-```{r multispecies_greta}
+```{r multispecies_bernouli_greta}
 # load greta
 library(greta)
 
 # data
 X <- as_data(env)
 Y <- as_data(occupancy)
-n_env<-ncol(X)
+n_env <- ncol(X)
 
 # variables
 alpha <- normal(0,10, dim = c(n_species, 1))
 beta <- normal(0, 10, dim = c(n_species, n_env))
-env_effect <- beta %*% t(X) #not transposed environmental matrix
+
+env_effect <- beta %*% t(X) #note transposed environmental matrix
 
 # matrix addition with `sweep()` create interim variable
 eta <- sweep(env_effect, 1, alpha, FUN = '+')
