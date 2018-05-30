@@ -57,11 +57,11 @@ inference <- R6Class(
     write_trace_to_log_file = function(last_burst_values) {
         if (file.exists(self$trace_log_file)) {
           # Append
-          write.table(last_burst_values, trace_log_file, append = TRUE,
+          write.table(last_burst_values, self$trace_log_file, append = TRUE,
                       row.names = FALSE, col.names = FALSE)
         } else {
           # Create file
-          write.table(last_burst_values, trace_log_file, append = FALSE,
+          write.table(last_burst_values, self$trace_log_file, append = FALSE,
                       row.names = FALSE, col.names = TRUE)
         }
     },
