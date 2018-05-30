@@ -40,6 +40,7 @@ You can use \code{attach()} to put a sublist in the search path. E.g.
                   dummy_arrays           # mocking up extract/replace
                   misc                   # code simplification etc.
                   samplers               # mcmc helpers
+ .internals$greta_stash                  # internal information storage
 }
 }
 

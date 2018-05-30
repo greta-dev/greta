@@ -21,6 +21,7 @@
 #'                   dummy_arrays           # mocking up extract/replace
 #'                   misc                   # code simplification etc.
 #'                   samplers               # mcmc helpers
+#'  .internals$greta_stash                  # internal information storage
 #' }
 #'
 #' @details
@@ -41,13 +42,14 @@
 NULL
 
 nodes_module <- module(constructors = node_constructors_module,
-               node_classes = node_classes_module,
-               distribution_classes = distribution_classes_module,
-               mixture_classes = mixture_module)
+                       node_classes = node_classes_module,
+                       distribution_classes = distribution_classes_module,
+                       mixture_classes = mixture_module)
 
 #' @export
 .internals <- module(greta_arrays = greta_array_module,
                      nodes = nodes_module,
                      inference = inference_module,
                      tensors = tf_functions_module,
-                     utils = utilities_module)
+                     utils = utilities_module,
+                     greta_stash)

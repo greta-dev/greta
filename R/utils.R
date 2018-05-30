@@ -204,8 +204,7 @@ misc_module <- module(module,
                       live_pointer,
                       apply_rows,
                       future_seed,
-                      create_log_file,
-                      greta_stash)
+                      create_log_file)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
