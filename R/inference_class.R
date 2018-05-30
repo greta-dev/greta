@@ -17,6 +17,9 @@ inference <- R6Class(
     # and of the traced values
     n_traced = 1L,
 
+    # where to write the traced values to
+    trace_log_file = NULL,
+
     parameters = list(),
     tuning_periods = list(),
 
@@ -47,6 +50,20 @@ inference <- R6Class(
       self$n_traced <- length(model$dag$trace_values(self$free_state))
       self$seed <- seed
 
+    },
+
+    # Write burst values to log file; appends if the file exists, creates it if
+    # not.
+    write_trace_to_log_file = function(last_burst_values) {
+        if (file.exists(self$trace_log_file)) {
+          # Append
+          write.table(last_burst_values, trace_log_file, append = TRUE,
+                      row.names = FALSE, col.names = FALSE)
+        } else {
+          # Create file
+          write.table(last_burst_values, trace_log_file, append = FALSE,
+                      row.names = FALSE, col.names = TRUE)
+        }
     },
 
     # set RNG seed for a tensorflow graph. Must be done before definition of a
@@ -150,6 +167,9 @@ inference <- R6Class(
         # calculate the observed values
         last_burst_free_states <- self$last_burst_free_states
         last_burst_values <- self$trace_burst_values(last_burst_free_states)
+        if (!is.null(self$trace_log_file)) {
+          self$write_trace_to_log_file(last_burst_values)
+        }
         self$traced_values <- rbind(self$traced_values,
                                     last_burst_values)
       }
@@ -207,7 +227,9 @@ sampler <- R6Class(
     # sampler kernel information
     parameters = list(),
 
-    run_chain = function (n_samples, thin, warmup, verbose, pb_update, sequential, n_cores, float_type, from_scratch = TRUE) {
+    run_chain = function (n_samples, thin, warmup, verbose, pb_update,
+                          sequential, n_cores, float_type, from_scratch = TRUE)
+    {
 
       dag <- self$model$dag
 
