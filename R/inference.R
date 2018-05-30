@@ -14,7 +14,6 @@ greta_stash <- new.env()
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom future plan
-#' @importFrom future.apply future_lapply
 #'
 #' @param model greta_model object
 #' @param sampler sampler used to draw values in MCMC. See \code{\link{samplers}} for options.
@@ -150,6 +149,7 @@ mcmc <- function (model,
 
 }
 
+#' @importFrom future future resolved value
 run_samplers <- function (samplers,
                           n_samples,
                           thin,
@@ -178,19 +178,54 @@ run_samplers <- function (samplers,
     verbose <- FALSE
   }
 
+  chains <- seq_along(samplers)
+  futures <- values <- list()
 
-  # run chains on samplers (return list so we can handle parallelism here)
-  samplers <- future.apply::future_lapply(samplers,
-                                          do("run_chain"),
-                                          n_samples = n_samples,
-                                          thin = thin,
-                                          warmup = warmup,
-                                          verbose = verbose,
-                                          pb_update = pb_update,
-                                          sequential = sequential,
-                                          n_cores = n_cores,
-                                          float_type = float_type,
-                                          from_scratch = from_scratch)
+  # dispatch all the jobs
+  for (chain in chains) {
+    sampler <- samplers[[chain]]
+    futures[[chain]] <- future(sampler$run_chain(n_samples = n_samples,
+                                                 thin = thin,
+                                                 warmup = warmup,
+                                                 verbose = verbose,
+                                                 pb_update = pb_update,
+                                                 sequential = sequential,
+                                                 n_cores = n_cores,
+                                                 float_type = float_type,
+                                                 from_scratch = from_scratch),
+                                seed = future_seed())
+  }
+
+  # if we're non-sequential and there's a callback registered, loop until they are resolved, executing the callback
+  if (!sequential & !is.null(greta_stash$callbacks)) {
+
+    while (!all(vapply(futures, resolved, FALSE))) {
+
+      # loop through callbacks executing them
+      for (callback in greta_stash$callbacks)
+        callback()
+
+      # get some nap time
+      Sys.sleep(0.1)
+
+    }
+  }
+
+  # then retrieve the samplers
+  samplers <- lapply(futures, value)
+
+#   # run chains on samplers (return list so we can handle parallelism here)
+#   samplers <- future.apply::future_lapply(samplers,
+#                                           do("run_chain"),
+#                                           n_samples = n_samples,
+#                                           thin = thin,
+#                                           warmup = warmup,
+#                                           verbose = verbose,
+#                                           pb_update = pb_update,
+#                                           sequential = sequential,
+#                                           n_cores = n_cores,
+#                                           float_type = float_type,
+#                                           from_scratch = from_scratch)
 
   # if we were running in parallel, we need to put the samplers back in the
   # stash to return

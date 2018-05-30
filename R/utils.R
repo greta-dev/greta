@@ -174,6 +174,17 @@ apply_rows <- function (X, FUN, ...) {
   output
 }
 
+# get the next seed as a L'Ecuyer
+future_seed <- function() {
+  okind <- RNGkind()[1]
+  # oseed <- .GlobalEnv$.Random.seed
+  # .GlobalEnv$.Random.seed <- oseed
+  # sample.int(1)
+  on.exit(RNGkind(okind), add = TRUE)
+  RNGkind("L'Ecuyer-CMRG")
+  .GlobalEnv$.Random.seed
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -187,7 +198,8 @@ misc_module <- module(module,
                       sample_variance,
                       get_seed,
                       live_pointer,
-                      apply_rows)
+                      apply_rows,
+                      future_seed)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
