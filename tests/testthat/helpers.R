@@ -5,7 +5,7 @@ library (tensorflow)
 # set the seed and flush the graph before running tests
 tf <- tensorflow::tf
 tf$reset_default_graph()
-set.seed(2017-05-01)
+set.seed(2018-05-30)
 
 quietly <- function (expr)
   invisible(capture.output(expr))
@@ -125,7 +125,7 @@ randu <- function (...) {
 
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
-check_op <- function (op, a, b, greta_op = NULL) {
+check_op <- function (op, a, b, greta_op = NULL, tolerance = 1e-3) {
 
   if (is.null(greta_op))
     greta_op <- op
@@ -140,7 +140,7 @@ check_op <- function (op, a, b, greta_op = NULL) {
 
   greta_out <- grab(greta_array)
   difference <- as.vector(abs(r_out - greta_out))
-  expect_true(all(difference < 1e-4))
+  expect_true(all(difference < tolerance))
 }
 
 # execute a call via greta, swapping the objects named in 'swap' to greta
