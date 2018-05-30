@@ -226,9 +226,10 @@ run_samplers <- function (samplers,
       Sys.sleep(0.1)
 
     }
-  }
 
-  cat("\n")
+    cat("\n")
+
+  }
 
   # then retrieve the samplers
   samplers <- lapply(futures, value)
