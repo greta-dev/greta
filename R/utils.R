@@ -185,6 +185,10 @@ future_seed <- function() {
   .GlobalEnv$.Random.seed
 }
 
+create_log_file <- function () {
+  tempfile(pattern = "greta_trace_log_")
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -199,7 +203,9 @@ misc_module <- module(module,
                       get_seed,
                       live_pointer,
                       apply_rows,
-                      future_seed)
+                      future_seed,
+                      create_log_file,
+                      greta_stash)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {

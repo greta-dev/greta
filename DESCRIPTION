@@ -44,6 +44,7 @@ Collate:
     'install_tensorflow.R'
     'internals.R'
     'calculate.R'
+    'callbacks.R'
 Imports:
     R6,
     tensorflow,

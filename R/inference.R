@@ -171,17 +171,33 @@ run_samplers <- function (samplers,
   # stash the samplers now, to retrieve draws later
   greta_stash$samplers <- samplers
 
+  parallel_reporting <- verbose & !sequential & !is.null(greta_stash$callbacks)
+
   if (!sequential & chains > 1) {
     cores_text <- ifelse(n_cores == 1, "1 core", sprintf("up to %i cores", n_cores))
-    cat(sprintf("\nrunning %i chains in parallel, each on %s (progress bar suppressed)\n\n",
+    cat(sprintf("\nrunning %i chains in parallel, each on %s\n\n",
                 chains, cores_text))
     verbose <- FALSE
   }
 
-  chains <- seq_along(samplers)
-  futures <- values <- list()
+  n_chain <- length(samplers)
+  chains <- seq_len(n_chain)
+
+  # if we're running in parallel and there are callbacks registered,
+  # give the samplers somewhere to write their progress
+  if (parallel_reporting) {
+
+    log_files <- replicate(n_chain, create_log_file())
+    for (chain in chains)
+      samplers[[chain]]$trace_log_file <- log_files[[chain]]
+
+    greta_stash$trace_log_files <- log_files
+    greta_stash$mcmc_info <- list(n_samples = n_samples)
+
+  }
 
   # dispatch all the jobs
+  futures <- list()
   for (chain in chains) {
     sampler <- samplers[[chain]]
     futures[[chain]] <- future(sampler$run_chain(n_samples = n_samples,
@@ -196,8 +212,9 @@ run_samplers <- function (samplers,
                                 seed = future_seed())
   }
 
-  # if we're non-sequential and there's a callback registered, loop until they are resolved, executing the callback
-  if (!sequential & !is.null(greta_stash$callbacks)) {
+  # if we're non-sequential and there's a callback registered,
+  # loop until they are resolved, executing the callbacks
+  if (parallel_reporting) {
 
     while (!all(vapply(futures, resolved, FALSE))) {
 
@@ -211,21 +228,10 @@ run_samplers <- function (samplers,
     }
   }
 
+  cat("\n")
+
   # then retrieve the samplers
   samplers <- lapply(futures, value)
-
-#   # run chains on samplers (return list so we can handle parallelism here)
-#   samplers <- future.apply::future_lapply(samplers,
-#                                           do("run_chain"),
-#                                           n_samples = n_samples,
-#                                           thin = thin,
-#                                           warmup = warmup,
-#                                           verbose = verbose,
-#                                           pb_update = pb_update,
-#                                           sequential = sequential,
-#                                           n_cores = n_cores,
-#                                           float_type = float_type,
-#                                           from_scratch = from_scratch)
 
   # if we were running in parallel, we need to put the samplers back in the
   # stash to return
