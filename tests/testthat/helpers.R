@@ -314,6 +314,11 @@ qt_ls <- function (p, df, location, scale, log.p = FALSE) {
   ans
 }
 
+# mock up the progress bar to force its output to stdout for testing
+cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
+mock_create_progress_bar <- function(...)
+  cpb(..., stream = stdout(), force = TRUE)
+
 # capture messages in testthat block to get the output of the progress bar;
 # copied from progress' test suite:
 # https://github.com/r-lib/progress/blob/master/tests/testthat/helper.R
