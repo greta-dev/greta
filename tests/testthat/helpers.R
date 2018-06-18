@@ -319,6 +319,19 @@ cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
 mock_create_progress_bar <- function(...)
   cpb(..., stream = stdout(), force = TRUE)
 
+# capture messages in testthat block to get the output of the progress bar;
+# copied from progress' test suite:
+# https://github.com/r-lib/progress/blob/master/tests/testthat/helper.R
+get_output <- function(expr) {
+  msgs <- character()
+  i <- 0
+  suppressMessages(withCallingHandlers(
+    expr,
+    message = function(e) msgs[[i <<- i + 1]] <<- conditionMessage(e)))
+  paste0(msgs, collapse = "")
+}
+
+# mock up mcmc progress bar output for neurotic testing
 mock_mcmc <- function (n_samples = 1010) {
   pb <- create_progress_bar('sampling', c(0, n_samples), pb_update = 10)
   # for (i in seq_len(n_samples))

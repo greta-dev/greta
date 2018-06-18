@@ -295,7 +295,7 @@ run_chain <- function (chain, dag, method, n_samples, thin,
 
   if (print_chain) {
     msg <- sprintf("\nchain %i/%i\n", chain, chains)
-    cat(msg)
+    message(msg)
   }
 
   initial_values_chain <- initial_values[[chain]]
