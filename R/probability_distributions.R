@@ -9,11 +9,12 @@ uniform_distribution <- R6Class (
 
     initialize = function (min, max, dim) {
 
+      dim <- check_dims(min, max, target_dim = dim)
+      
       if (inherits(min, "greta_array") | inherits(max, "greta_array"))
         stop ("min and max must be fixed, they cannot be another greta array")
 
-      good_types <- is.numeric(min) && length(min) == 1 &
-        is.numeric(max) && length(max) == 1
+      good_types <- is.numeric(min) & is.numeric(max)
 
       if (!good_types) {
 
@@ -22,26 +23,19 @@ uniform_distribution <- R6Class (
 
       }
 
-      if (!is.finite(min) | !is.finite(max)) {
+      if (!all(is.finite(min)) | !all(is.finite(max))) {
 
         stop ('min and max must finite scalars',
               call. = FALSE)
 
       }
 
-      if (min >= max) {
+      if (any(min >= max)) {
 
         stop ('max must be greater than min',
               call. = FALSE)
 
       }
-
-      # store min and max as numeric scalars (needed in create_target, done in
-      # initialisation)
-      self$min <- min
-      self$max <- max
-
-      self$bounds <- c(min, max)
 
       # initialize the rest
       super$initialize('uniform', dim)
@@ -49,28 +43,12 @@ uniform_distribution <- R6Class (
       # add them as children and greta arrays
       self$add_parameter(min, 'min')
       self$add_parameter(max, 'max')
-
-      # the density is fixed, so calculate it now
-      self$log_density <- -log(max - min)
-
-    },
-
-    # default value (ignore any truncation arguments)
-    create_target = function (...) {
-      vble(truncation = c(self$min, self$max),
-           dim = self$dim)
+      
     },
 
     tf_distrib = function (parameters) {
-
-      tf_ld <- fl(self$log_density)
-
-      # weird hack to make TF see a gradient here
-      log_prob = function (x)
-        tf_ld + x * fl(0)
-
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
-
+      tf$contrib$distributions$Uniform(low = parameters$min,
+                                       high = parameters$max)
     }
 
   )
