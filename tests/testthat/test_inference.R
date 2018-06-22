@@ -6,8 +6,8 @@ test_that('opt converges', {
   source('helpers.R')
 
   x <- rnorm(5, 2, 0.1)
-  z = variable(dim = 5)
-  distribution(x) = normal(z, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
   o <- opt(m)
@@ -30,8 +30,8 @@ test_that('opt accepts initial values', {
   source('helpers.R')
 
   x <- rnorm(5, 2, 0.1)
-  z = variable(dim = 5)
-  distribution(x) = normal(z, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
   o <- opt(m, initial_values = rnorm(5))
@@ -54,14 +54,14 @@ test_that('bad mcmc proposals are rejected', {
 
   # set up for numerical rejection of initial location
   x <- rnorm(10000, 1e6, 1)
-  z = normal(-1e6, 1e-6)
-  distribution(x) = normal(z, 1e6)
+  z <- normal(-1e6, 1e-6)
+  distribution(x) <- normal(z, 1e6)
   m <- model(z)
 
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     m <- model(z),
-    out <- capture_output(mcmc(m, n_samples = 10, warmup = 0)),
+    out <- capture_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
     expect_match(out, '100% bad')
   )
 
@@ -71,17 +71,22 @@ test_that('bad mcmc proposals are rejected', {
 
   # really bad proposals
   x <- rnorm(100000, 1e12, 1)
-  z = normal(-1e12, 1e-12)
-  distribution(x) = normal(z, 1e-12)
+  z <- normal(-1e12, 1e-12)
+  distribution(x) <- normal(z, 1e-12)
   m <- model(z)
   expect_error(mcmc(m, n_samples = 1, warmup = 0),
                'Could not find reasonable starting values after 20 attempts')
 
-  # proposals that are fine, but rejected anyway (long chain required)
-  z = normal(0, 1)
+  # proposals that are fine, but rejected anyway
+  z <- normal(0, 1)
   m <- model(z)
-  expect_ok(mcmc(m, n_samples = 5, warmup = 0, verbose = FALSE,
-                 control = list(epsilon = 100, Lmin = 1, Lmax = 1)))
+  expect_ok(mcmc(m,
+                 hmc(epsilon = 100,
+                     Lmin = 1,
+                     Lmax = 1),
+                 n_samples = 5,
+                 warmup = 0,
+                 verbose = FALSE))
 
 })
 
@@ -91,8 +96,8 @@ test_that('mcmc works with verbosity and warmup', {
   source('helpers.R')
 
   x <- rnorm(10)
-  z = normal(0, 1)
-  distribution(x) = normal(z, 1)
+  z <- normal(0, 1)
+  distribution(x) <- normal(z, 1)
   m <- model(z)
   quietly(expect_ok( mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE) ))
 
@@ -104,15 +109,16 @@ test_that('mcmc works with multiple chains', {
   source('helpers.R')
 
   x <- rnorm(10)
-  z = normal(0, 1)
-  distribution(x) = normal(z, 1)
+  z <- normal(0, 1)
+  distribution(x) <- normal(z, 1)
   m <- model(z)
 
   # multiple chains, automatic initial values
   quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2) ))
 
   # multiple chains, user-specified initial values
-  quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = list(1, 2)) ))
+  quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2,
+                          initial_values = list(1, 2)) ))
 
 })
 
@@ -122,8 +128,8 @@ test_that('mcmc handles initial values nicely', {
   source('helpers.R')
 
   x <- rnorm(10)
-  z = normal(0, 1)
-  distribution(x) = normal(z, 1)
+  z <- normal(0, 1)
+  distribution(x) <- normal(z, 1)
   m <- model(z)
 
   # too many sets of initial values
@@ -138,7 +144,8 @@ test_that('mcmc handles initial values nicely', {
 
   quietly(expect_message(mcmc(m, warmup = 10, n_samples = 10,
                       chains = 2, initial_values = 1),
-                 "only one set of was initial values given, and was used for all chains"))
+                 paste("only one set of was initial values given,",
+                       "and was used for all chains")))
 
 })
 
@@ -190,9 +197,12 @@ test_that('stashed_samples works', {
 
   # mock up a stash
   stash <- greta:::greta_stash
-  trace_stash <- list(trace = as.matrix(rnorm(17)),
-                      raw = as.matrix(rnorm(17)))
-  assign('trace_stash', trace_stash, envir = stash)
+  samplers_stash <- replicate(2,
+                              list(traced_free_state = as.matrix(rnorm(17)),
+                                   traced_values = as.matrix(rnorm(17)),
+                                   model = m),
+                              simplify = FALSE)
+  assign("samplers", samplers_stash, envir = stash)
 
   # should convert to an mcmc.list
   ans <- stashed_samples()

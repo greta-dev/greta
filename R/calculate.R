@@ -82,14 +82,7 @@ calculate <- function (target, values) {
 
 calculate_mcmc.list <- function (target, target_name, values) {
 
-  model_info <- attr(values, "model_info")
-
-  if (is.null(model_info)) {
-    stop ("value is an mcmc.list object, but is not associated with any ",
-          "model information, perhaps it wasn't created with ",
-          "greta::mcmc() ?",
-          call. = FALSE)
-  }
+  model_info <- get_model_info(values)
 
   # copy and refresh the dag
   dag <- model_info$model$dag$clone()
@@ -180,17 +173,77 @@ calculate_list <- function(target, values) {
                           dag$tf_name,
                           FUN.VALUE = "")
 
-  # check that all of the variables are set
-  # list of variable tf names
-  variable_nodes <- dag$node_list[dag$node_types == "variable"]
-  variable_names <- vapply(variable_nodes,
-                           dag$tf_name,
-                           FUN.VALUE = "")
+  # check that there are no unspecified variables on which the target depends
 
-  if (!all(variable_names %in% names(values))) {
-    stop ("values have not been provided for all variables",
+  # find all the nodes depended on by this one
+  dependencies <- target$node$child_names(recursive = TRUE)
+
+  # find all the nodes depended on by the new values, and remove them from the
+  # list
+  complete_dependencies <- lapply(fixed_greta_arrays,
+                                  function (x)
+                                    x$node$child_names(recursive = TRUE))
+  complete_dependencies <- unique(unlist(complete_dependencies))
+
+  unmet_dependencies <- dependencies[!dependencies %in% complete_dependencies]
+
+  # find all of the remaining nodes that are variables
+  unmet_nodes <- dag$node_list[unmet_dependencies]
+  is_variable <- vapply(unmet_nodes, node_type, FUN.VALUE = "") == "variable"
+
+  # if there are any undefined variables
+  if (any(is_variable)) {
+
+    # try to find the associated greta arrays to provide a more informative
+    # error message
+    greta_arrays <- all_greta_arrays(parent.frame(2),
+                                     include_data = FALSE)
+
+    greta_array_node_names <- vapply(greta_arrays,
+                                function (x) x$node$unique_name,
+                                FUN.VALUE = "")
+
+    unmet_variables <- unmet_nodes[is_variable]
+
+    matches <- names(unmet_variables) %in% greta_array_node_names
+
+
+    unmet_names_idx <- greta_array_node_names %in% names(unmet_variables)
+    unmet_names <- names(greta_array_node_names)[unmet_names_idx]
+
+    # build the message
+    msg <- paste("values have not been provided for all greta arrays on which",
+                 "the target depends.")
+
+    if (any(matches)) {
+      names_text <- paste(unmet_names, collapse = ", ")
+      msg <- paste(msg,
+                   sprintf("Please provide values for the greta array%s: %s",
+                           ifelse(length(matches) > 1, "s", ""),
+                           names_text))
+    } else {
+      msg <- paste(msg,
+                   "\nThe names of the missing greta arrays",
+                   "could not be detected")
+    }
+
+    stop (msg,
           call. = FALSE)
   }
+
+  # to find the greta arrays that
+
+  # # check that all of the variables are set
+  # # list of variable tf names
+  # variable_nodes <- dag$node_list[dag$node_types == "variable"]
+  # variable_names <- vapply(variable_nodes,
+  #                          dag$tf_name,
+  #                          FUN.VALUE = "")
+  #
+  # if (!all(variable_names %in% names(values))) {
+  #   stop ("values have not been provided for all variables",
+  #         call. = FALSE)
+  # }
 
   # send it to tf
   assign("eval_list", values, envir = dag$tf_environment)

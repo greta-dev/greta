@@ -1,4 +1,5 @@
 #' @importFrom reticulate py_set_attr
+#' @importFrom tensorflow dict
 
 # create dag class
 dag_class <- R6Class(
@@ -13,13 +14,12 @@ dag_class <- R6Class(
     target_nodes = NA,
     parameters_example = NA,
     tf_float = NA,
-    n_cores = NA,
+    n_cores = 0L,
     compile = NA,
 
     # create a dag from some target nodes
     initialize = function (target_greta_arrays,
-                           tf_float = tf$float32,
-                           n_cores = 2L,
+                           tf_float = "float32",
                            compile = FALSE) {
 
       # build the dag
@@ -37,20 +37,29 @@ dag_class <- R6Class(
 
       # store the performance control info
       self$tf_float <- tf_float
-      self$n_cores <- n_cores
       self$compile <- compile
 
     },
 
-    # execute an expression on this dag's tensorflow graph
+    # execute an expression on this dag's tensorflow graph, with the correct
+    # float type
     on_graph = function (expr) {
+
+      # temporarily pass float type info to options, so it can be accessed by
+      # nodes on definition, without cluncky explicit passing
+      old_float_type <- options()$greta_tf_float
+      on.exit(options(greta_tf_float = old_float_type))
+      options(greta_tf_float = self$tf_float)
+
       with(self$tf_graph$as_default(), expr)
     },
 
     # execute an exporession in the tensorflow environment
     tf_run = function (expr) {
-      self$tf_environment$expr <- substitute(expr)
-      self$on_graph(with(self$tf_environment, eval(expr)))
+      tfe <- self$tf_environment
+      tfe$expr <- substitute(expr)
+      on.exit(rm("expr", envir = tfe))
+      self$on_graph(with(tfe, eval(expr)))
     },
 
     # return a list of nodes connected to those in the target node list
@@ -97,51 +106,70 @@ dag_class <- R6Class(
       self$node_tf_names[node$unique_name]
     },
 
-    # define tf graph in environment
-    define_tf = function (log_density = TRUE, gradients = TRUE) {
+    define_free_state = function () {
 
-      # temporarily pass float type info to options, so it can be accessed by
-      # nodes on definition, without cluncky explicit passing
-      old_float_type <- options()$greta_tf_float
-      on.exit(options(greta_tf_float = old_float_type))
-      options(greta_tf_float = self$tf_float)
+      tfe <- self$tf_environment
 
-      # check for unfixed discrete distributions
-      distributions <- self$node_list[self$node_types == 'distribution']
-      bad_nodes <- vapply(distributions,
-                          function(x) {
-                            x$discrete && !inherits(x$target, 'data_node')
-                          },
-                          FALSE)
+      vals <- as.matrix(self$example_parameters())
 
-      if (any(bad_nodes)) {
-        stop ("model contains a discrete random variable that doesn't have a ",
-              "fixed value, so cannot be sampled from",
-              call. = FALSE)
+      assign("free_state_values",
+             vals,
+             envir = tfe)
+
+      self$tf_run(free_state <- tf$Variable(initial_value = free_state_values,
+                                            dtype = tf_float()))
+
+      rm("free_state_values",
+         envir = tfe)
+    },
+
+    # define the body of the tensorflow graph in the environment env; without
+    # defining the free_state, or the densities etc.
+    define_tf_body = function (target_nodes = self$node_list) {
+
+      tfe <- self$tf_environment
+
+      # split up into separate free state variables and assign
+      free_state <- get("free_state", envir = tfe)
+
+      params <- self$parameters_example
+      lengths <- vapply(params,
+                        function (x) as.integer(prod(dim(x))),
+                        FUN.VALUE = 1L)
+
+      if (length(lengths) > 1) {
+        args <- self$on_graph(tf$split(free_state, lengths))
+      } else {
+        args <- list(free_state)
       }
+
+      names <- paste0(names(params), "_free")
+      for (i in seq_along(names))
+        assign(names[i], args[[i]], envir = tfe)
 
       # define all nodes, node densities and free states in the environment, and
       # on the graph
-      self$on_graph(lapply(self$node_list,
-                      function (x) x$define_tf(self)))
+      self$on_graph(lapply(target_nodes,
+                           function (x) x$define_tf(self)))
 
+      invisible(NULL)
 
-      # define an overall log density and gradients, plus adjusted versions
-      if (log_density)
-        self$on_graph(self$define_joint_density())
+    },
 
-      if (gradients)
-        self$on_graph(self$define_gradients())
+    # use core and compilation options to set up a session in this environment
+    define_tf_session = function () {
 
-      # use core and compilation options to create a config object
-      self$tf_environment$n_cores <- self$n_cores
-      self$tf_run(config <- tf$ConfigProto(inter_op_parallelism_threads = n_cores,
-                                           intra_op_parallelism_threads = n_cores))
+      tfe <- self$tf_environment
+      tfe$n_cores <- self$n_cores
+
+      self$tf_run(
+        config <- tf$ConfigProto(inter_op_parallelism_threads = n_cores,
+                                 intra_op_parallelism_threads = n_cores))
 
       if (self$compile) {
         self$tf_run(py_set_attr(config$graph_options$optimizer_options,
-                                 'global_jit_level',
-                                 tf$OptimizerOptions$ON_1))
+                                'global_jit_level',
+                                tf$OptimizerOptions$ON_1))
       }
 
       # start a session and initialise all variables
@@ -150,24 +178,77 @@ dag_class <- R6Class(
 
     },
 
+    # define tf graph in environment
+    define_tf = function (log_density = TRUE, gradients = TRUE) {
+
+      # define the free state variable
+      self$define_free_state()
+
+      # define the rest fo the graph
+      self$define_tf_body()
+
+      # define an overall log density and gradients, plus adjusted versions
+      if (log_density)
+        self$on_graph(self$define_joint_density())
+
+      if (gradients)
+        self$on_graph(self$define_gradients())
+
+      # set up the tf session, with config setup etc.
+      self$define_tf_session()
+
+    },
+
     # define tensor for overall log density and gradients
     define_joint_density = function () {
 
-      # get names of densities for all distribution nodes
-      density_names <- self$get_tf_names(types = 'distribution')
+      tfe <- self$tf_environment
 
-      # get TF density tensors for all distribution
-      densities <- lapply(density_names, get, envir = self$tf_environment)
+      # get all distribution nodes
+      distributions <- self$node_list[self$node_types == "distribution"]
+
+      # keep only those with a target node
+      targets <- lapply(distributions, member, "target")
+      has_target <- !vapply(targets, is.null, FUN.VALUE = TRUE)
+
+      distributions <- distributions[has_target]
+      targets <- targets[has_target]
+
+      # find and get these functions
+      density_names <- vapply(distributions,
+                              self$tf_name,
+                              FUN.VALUE = "")
+      target_names <- vapply(targets,
+                             self$tf_name,
+                             FUN.VALUE = "")
+
+      target_tensors <- lapply(target_names,
+                               get,
+                               envir = tfe)
+      density_functions <- lapply(density_names,
+                                  get,
+                                  envir = tfe)
+
+      # make the target names lists, for do.call
+      target_lists <- lapply(target_tensors, list)
+
+      # execute them
+      densities <- mapply(do.call,
+                          density_functions,
+                          target_lists,
+                          MoreArgs = list(envir = tfe))
 
       # reduce_sum them
-      summed_densities <- lapply(densities, tf$reduce_sum)
+      self$on_graph(summed_densities <- lapply(densities, tf$reduce_sum))
 
       # remove their names and sum them together
       names(summed_densities) <- NULL
-      joint_density <- tf$add_n(summed_densities)
+      self$on_graph(joint_density <- tf$add_n(summed_densities))
 
       # assign overall density to environment
-      assign('joint_density', joint_density, envir = self$tf_environment)
+      assign('joint_density',
+             joint_density,
+             envir = self$tf_environment)
 
       # define adjusted joint density
 
@@ -179,14 +260,18 @@ dag_class <- R6Class(
 
       # remove their names and sum them together
       names(adj) <- NULL
-      total_adj <- tf$add_n(adj)
+      self$on_graph(total_adj <- tf$add_n(adj))
 
       # assign overall density to environment
-      assign('joint_density_adj', joint_density + total_adj, envir = self$tf_environment)
+      assign('joint_density_adj',
+             joint_density + total_adj,
+             envir = self$tf_environment)
 
     },
 
     define_gradients = function () {
+
+      tfe <- self$tf_environment
 
       # get names of free states for all variable nodes
       variable_tf_names <- self$get_tf_names(types = 'variable')
@@ -201,16 +286,18 @@ dag_class <- R6Class(
         gradient_adj_name <- paste0(name, '_gradient_adj')
 
         # raw gradients
-        gradient <- tf$gradients(self$tf_environment$joint_density,
-                                 self$tf_environment[[free_name]])
-        gradient_reshape <- tf$reshape(gradient, shape(-1))
-        self$tf_environment[[gradient_name]] <- gradient_reshape
+
+        self$on_graph(gradient <- tf$gradients(tfe$joint_density,
+                                 tfe[[free_name]]))
+        self$on_graph(gradient_reshape <- tf$reshape(gradient, shape(-1)))
+        tfe[[gradient_name]] <- gradient_reshape
 
         # adjusted gradients
-        gradient_adj <- tf$gradients(self$tf_environment$joint_density_adj,
-                                 self$tf_environment[[free_name]])
-        gradient_adj_reshape <- tf$reshape(gradient_adj, shape(-1))
-        self$tf_environment[[gradient_adj_name]] <- gradient_adj_reshape
+        self$on_graph(gradient_adj <- tf$gradients(tfe$joint_density_adj,
+                                     tfe[[free_name]]))
+        self$on_graph(gradient_adj_reshape <- tf$reshape(gradient_adj,
+                                                         shape(-1)))
+        tfe[[gradient_adj_name]] <- gradient_adj_reshape
 
       }
 
@@ -218,16 +305,62 @@ dag_class <- R6Class(
       gradient_names <- paste0(variable_tf_names, '_gradient')
       gradient_list <- lapply(gradient_names,
                               get,
-                              envir = self$tf_environment)
-      self$tf_environment$gradients <- tf$concat(gradient_list, 0L)
+                              envir = tfe)
+      self$on_graph(tfe$gradients <- tf$concat(gradient_list, 0L))
 
       # same for adjusted gradients
       gradient_adj_names <- paste0(variable_tf_names, '_gradient_adj')
       gradient_adj_list <- lapply(gradient_adj_names,
                                   get,
-                                  envir = self$tf_environment)
+                                  envir = tfe)
 
-      self$tf_environment$gradients_adj <- tf$concat(gradient_adj_list, 0L)
+      self$on_graph(tfe$gradients_adj <- tf$concat(gradient_adj_list, 0L))
+
+    },
+
+    # return a function to obtain the model log probability from a tensor for
+    # the free state
+    generate_log_prob_function = function (adjust = TRUE) {
+
+      target <- ifelse (adjust,
+                        "joint_density_adj",
+                        "joint_density")
+
+      function (free_state) {
+        old_env <- self$tf_environment
+        on.exit(self$tf_environment <- old_env)
+        tfe <- self$tf_environment <- new.env()
+        tfe$free_state <- free_state
+        self$define_tf_body()
+        self$define_joint_density()
+        tfe[[target]]
+      }
+
+    },
+
+    # return a function to obtain the model log probability and its gradient (in
+    # an unnamed list) from a tensor for the free state
+    generate_log_prob_grad_function = function (adjust = TRUE) {
+
+      target <- ifelse (adjust,
+                        "joint_density_adj",
+                        "joint_density")
+
+      function (free_state) {
+
+        old_tfe <- dag$tf_environment
+        on.exit(dag$tf_environment <- old_tfe)
+        dag$tf_environment <- environment()
+
+        self$define_tf_body()
+        self$define_joint_density()
+
+        log_prob <- self$tf_environment[[target]]
+        grad <- tf$gradients(log_prob, free_state)
+
+        list(log_prob,
+             grad[[1]])
+      }
 
     },
 
@@ -247,28 +380,32 @@ dag_class <- R6Class(
 
     },
 
-    send_parameters = function (parameters, flat = TRUE) {
-
-      # convert parameters to a named list and change TF names to free versions
-      parameters <- relist_tf(parameters, self$parameters_example)
-      names(parameters) <- paste0(names(parameters), '_free')
+    send_parameters = function (parameters) {
 
       # create a feed dict in the TF environment
-      self$tf_environment$parameters <- parameters
+      self$tf_environment$parameters <- list(free_state = as.matrix(parameters))
       self$tf_run(parameter_dict <- do.call(dict, parameters))
 
     },
 
     # get log density and gradient of joint density w.r.t. free states of all
     # variable nodes, with or without applying the jacobian adjustment
-    log_density = function(adjusted = TRUE) {
+    log_density = function(free_state = NULL, adjusted = TRUE) {
+
+      if (!is.null(free_state)) {
+        self$send_parameters(free_state)
+      }
 
       cleanly(self$tf_run(sess$run(joint_density_adj,
                                    feed_dict = parameter_dict)))
 
     },
 
-    gradients = function (adjusted = TRUE) {
+    gradients = function (free_state = NULL, adjusted = TRUE) {
+
+      if (!is.null(free_state)) {
+        self$send_parameters(free_state)
+      }
 
       cleanly(self$tf_run(sess$run(gradients_adj,
                                    feed_dict = parameter_dict)))
@@ -276,22 +413,33 @@ dag_class <- R6Class(
     },
 
     # return the current values of the traced nodes, as a named vector
-    trace_values = function () {
+    trace_values = function (free_state = NULL) {
+
+      if (!is.null(free_state)) {
+        self$send_parameters(free_state)
+      }
+
+      tfe <- self$tf_environment
 
       target_tf_names <- lapply(self$target_nodes,
                                 self$tf_name)
 
       target_tensors <- lapply(target_tf_names,
                                get,
-                               envir = self$tf_environment)
+                               envir = tfe)
 
       # evaluate them in the tensorflow environment
       trace_list <- lapply(target_tensors,
-                           self$tf_environment$sess$run,
-                           feed_dict = self$tf_environment$parameter_dict)
+                           tfe$sess$run,
+                           feed_dict = tfe$parameter_dict)
 
-      # flatten and return
-      unlist(trace_list)
+      # loop through elements flattening these arrays to vectors and giving the
+      # elements better names
+      trace_list_flat <- lapply(seq_along(trace_list),
+                                flatten_trace,
+                                trace_list)
+
+      unlist(trace_list_flat)
 
     },
 
@@ -321,7 +469,7 @@ dag_class <- R6Class(
           # loop through the neighbours
           for (neighbour in neighbours) {
             if (!registered[neighbour]) {
-              registered[neighbour] <- TRUE;
+              registered[neighbour] <- TRUE
               membership[neighbour] <- no_of_clusters
             }
           }
@@ -363,8 +511,12 @@ dag_class <- R6Class(
       dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
       rownames(dag_mat) <- colnames(dag_mat) <- node_names
 
-      parents <- lapply(self$node_list, member, 'parent_names(recursive = FALSE)')
-      children <- lapply(self$node_list, member, 'child_names(recursive = FALSE)')
+      parents <- lapply(self$node_list,
+                        member,
+                        'parent_names(recursive = FALSE)')
+      children <- lapply(self$node_list,
+                         member,
+                         'child_names(recursive = FALSE)')
 
       # for distribution nodes, remove target nodes from children, and put them
       # in parents to send the arrow in the opposite direction when plotting
@@ -392,6 +544,20 @@ dag_class <- R6Class(
       }
 
       dag_mat
+
+    },
+
+    get_log_prob_function = function (adjust = TRUE) {
+
+      target <- ifelse (adjust,
+                        "joint_density_adj",
+                        "joint_density")
+
+      function (free_state) {
+        self$dag$define_tf(define_free_state = FALSE)
+        self$dag$tf_environment[[target]]
+      }
+
 
     }
 

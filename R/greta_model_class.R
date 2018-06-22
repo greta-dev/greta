@@ -10,7 +10,6 @@ NULL
 
 #' @rdname model
 #' @export
-#' @importFrom parallel detectCores
 #'
 #' @param \dots for \code{model}: \code{greta_array} objects to be tracked by
 #'   the model (i.e. those for which samples will be retained during mcmc). If
@@ -23,10 +22,6 @@ NULL
 #'   model. Switching from \code{'single'} (the default) to \code{'double'}
 #'   should reduce the risk of numerical instability during sampling, but will
 #'   also increase the computation time, particularly for large models.
-#'
-#' @param n_cores the number of cpu cores to use when evaluating this model.
-#'   Defaults to and cannot exceed the number detected by
-#'   \code{parallel::detectCores}.
 #'
 #' @param compile whether to apply
 #'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
@@ -55,31 +50,14 @@ NULL
 #' }
 model <- function (...,
                    precision = c('single', 'double'),
-                   n_cores = NULL,
                    compile = TRUE) {
 
   check_tf_version('error')
 
   # get the floating point precision
   tf_float <- switch(match.arg(precision),
-                     single = tf$float32,
-                     double = tf$float64)
-
-  # check and set the number of cores
-  n_detected <- parallel::detectCores()
-  if (is.null(n_cores)) {
-    n_cores <- n_detected
-  } else {
-
-    n_cores <- as.integer(n_cores)
-
-    if (!n_cores %in% seq_len(n_detected)) {
-      warning (n_cores, ' cores were requested, but only ',
-               n_detected, ' cores are available. Using ',
-               n_detected, ' cores.')
-      n_cores <- n_detected
-    }
-  }
+                     single = "float32",
+                     double = "float64")
 
   # nodes required
   target_greta_arrays <- list(...)
@@ -109,16 +87,16 @@ model <- function (...,
     unexpected_items <- names(target_greta_arrays)[!are_greta_arrays]
 
     msg <- ifelse(length(unexpected_items) > 1,
-                  "The following objects passed to model() are not greta arrays: ",
-                  "The following object passed to model() is not a greta array: ")
+                  paste("The following objects passed to model()",
+                        "are not greta arrays: "),
+                  paste("The following object passed to model()",
+                        "is not a greta array: "))
 
     stop (msg,
           paste(unexpected_items, sep = ", "),
           call. = FALSE)
 
   }
-
-
 
   if (length(target_greta_arrays) == 0) {
     stop ('could not find any non-data greta arrays',
@@ -128,7 +106,6 @@ model <- function (...,
   # get the dag containing the target nodes
   dag <- dag_class$new(target_greta_arrays,
                        tf_float = tf_float,
-                       n_cores = n_cores,
                        compile = compile)
 
   # get and check the types
@@ -174,6 +151,22 @@ model <- function (...,
     if (!('variable' %in% types_sub))
       stop (variable_message, call. = FALSE)
 
+  }
+
+  # check for unfixed discrete distributions
+  distributions <- dag$node_list[dag$node_types == 'distribution']
+  bad_nodes <- vapply(distributions,
+                      function(x) {
+                        valid_target <- is.null(x$target) ||
+                          inherits(x$target, 'data_node')
+                        x$discrete && !valid_target
+                      },
+                      FALSE)
+
+  if (any(bad_nodes)) {
+    stop ("model contains a discrete random variable that doesn't have a ",
+          "fixed value, so cannot be sampled from",
+          call. = FALSE)
   }
 
   # define the TF graph
@@ -258,11 +251,15 @@ plot.greta_model <- function (x, y, ...) {
   node_size[types == 'operation'] <- 0.2
 
   # get node labels
-  node_labels <- vapply(x$dag$node_list, member, 'plotting_label()', FUN.VALUE = '')
+  node_labels <- vapply(x$dag$node_list,
+                        member,
+                        "plotting_label()",
+                        FUN.VALUE = "")
 
   #add greta array names where available
   known_nodes <- vapply(x$visible_greta_arrays, member,
-                        'node$unique_name', FUN.VALUE = '')
+                        "node$unique_name",
+                        FUN.VALUE = "")
   known_nodes <- known_nodes[known_nodes %in% names]
   known_idx <- match(known_nodes, names)
   node_labels[known_idx] <- paste(names(known_nodes),
@@ -286,11 +283,16 @@ plot.greta_model <- function (x, y, ...) {
   # for distributions, put the parameter names on the edges
   distrib_to <- which(types == 'distribution')
 
-  parameter_list <- lapply(x$dag$node_list[distrib_to], member, 'parameters')
-  # parameter_names <- lapply(parameter_list, names)
+  parameter_list <- lapply(x$dag$node_list[distrib_to],
+                           member,
+                           "parameters")
+
   node_names <- lapply(parameter_list,
                        function (parameters) {
-                         vapply(parameters, member, 'unique_name', FUN.VALUE = '')
+                         vapply(parameters,
+                                member,
+                                "unique_name",
+                                FUN.VALUE = "")
                        })
 
   # for each distribution
@@ -316,7 +318,10 @@ plot.greta_model <- function (x, y, ...) {
   types <- x$dag$node_types
   distrib_idx <- which(types == 'distribution')
 
-  target_names <- vapply(x$dag$node_list[distrib_idx], member, 'target$unique_name', FUN.VALUE = '')
+  target_names <- vapply(x$dag$node_list[distrib_idx],
+                         member,
+                         "target$unique_name",
+                         FUN.VALUE = "")
   distribution_names <- names(target_names)
   distribution_idx <- match(distribution_names, names)
   target_idx <- match(target_names, names)

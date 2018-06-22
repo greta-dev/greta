@@ -14,6 +14,22 @@ test_that('normal distribution has correct density', {
 
 })
 
+test_that('multidimensional normal distribution has correct density', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  difference <- compare_distribution(greta::normal,
+                                     stats::dnorm,
+                                     parameters = list(mean = -2, sd = 3),
+                                     x = array(rnorm(100, -2, 3),
+                                               dim =c(10, 2, 5)),
+                                     dim = c(10, 2, 5))
+
+  expect_true(all(difference < 1e-4))
+
+})
+
 test_that('uniform distribution has correct density', {
 
   skip_if_not(check_tf_version())
@@ -77,7 +93,9 @@ test_that('beta-binomial distribution has correct density', {
 
   difference <- compare_distribution(greta::beta_binomial,
                                      extraDistr::dbbinom,
-                                     parameters = list(size = 10, alpha = 0.8, beta = 1.2),
+                                     parameters = list(size = 10,
+                                                       alpha = 0.8,
+                                                       beta = 1.2),
                                      x = extraDistr::rbbinom(100, 10, 0.8, 1.2))
 
   expect_true(all(difference < 1e-4))
@@ -162,7 +180,8 @@ test_that('weibull distribution has correct density', {
 
   difference <- compare_distribution(greta::weibull,
                                      dweibull,
-                                     parameters = list(shape = 1.2, scale = 0.9),
+                                     parameters = list(shape = 1.2,
+                                                       scale = 0.9),
                                      x = rweibull(100, 1.2, 0.9))
 
   expect_true(all(difference < 1e-4))
@@ -204,7 +223,9 @@ test_that('student distribution has correct density', {
 
   difference <- compare_distribution(greta::student,
                                      dstudent,
-                                     parameters = list(df = 3, mu = -0.9, sigma = 2),
+                                     parameters = list(df = 3,
+                                                       mu = -0.9,
+                                                       sigma = 2),
                                      x = rnorm(100, -0.9, 2))
 
   expect_true(all(difference < 1e-4))
@@ -232,7 +253,8 @@ test_that('beta distribution has correct density', {
 
   difference <- compare_distribution(greta::beta,
                                      stats::dbeta,
-                                     parameters = list(shape1 = 2.3, shape2 = 3.4),
+                                     parameters = list(shape1 = 2.3,
+                                                       shape2 = 3.4),
                                      x = rbeta(100, 2.3, 3.4))
 
   expect_true(all(difference < 1e-4))
@@ -246,7 +268,8 @@ test_that('cauchy distribution has correct density', {
 
   difference <- compare_distribution(greta::cauchy,
                                      stats::dcauchy,
-                                     parameters = list(location = -1.3, scale = 3.4),
+                                     parameters = list(location = -1.3,
+                                                       scale = 3.4),
                                      x = rcauchy(100, -1.3, 3.4))
 
   expect_true(all(difference < 1e-4))
@@ -341,7 +364,8 @@ test_that('Wishart distribution has correct density', {
   difference <- replicate(10,
                           compare_distribution(greta::wishart,
                                                dwishart,
-                                               parameters = list(df = df, Sigma = sig),
+                                               parameters = list(df = df,
+                                                                 Sigma = sig),
                                                x = MCMCpack::rwish(df, sig)))
 
   expect_true(all(difference < 1e-4))
@@ -397,7 +421,8 @@ test_that('multinomial distribution has correct density', {
 
   difference <- compare_distribution(greta::multinomial,
                                      dmultinom_vec,
-                                     parameters = list(size = size, prob = prob),
+                                     parameters = list(size = size,
+                                                       prob = prob),
                                      x = t(rmultinom(100, size, prob)))
 
   expect_true(all(difference < 1e-4))
@@ -456,8 +481,11 @@ test_that('dirichlet-multinomial distribution has correct density', {
 
   difference <- compare_distribution(greta::dirichlet_multinomial,
                                      extraDistr::ddirmnom,
-                                     parameters = list(size = size, alpha = alpha),
-                                     x = extraDistr::rdirmnom(100, size, alpha))
+                                     parameters = list(size = size,
+                                                       alpha = alpha),
+                                     x = extraDistr::rdirmnom(100,
+                                                              size,
+                                                              alpha))
 
   expect_true(all(difference < 1e-4))
 
@@ -473,43 +501,43 @@ test_that('scalar-valued distributions can be defined in models', {
   p <- iprobit(normal(0, 1))
 
   # variable (need to define a likelihood)
-  a = variable()
-  distribution(x) = normal(a, 1)
+  a <- variable()
+  distribution(x) <- normal(a, 1)
   expect_ok( model(a) )
 
   # univariate discrete distributions
-  distribution(y) = bernoulli(p)
+  distribution(y) <- bernoulli(p)
   expect_ok( model(p) )
 
-  distribution(y) = binomial(1, p)
+  distribution(y) <- binomial(1, p)
   expect_ok( model(p) )
 
-  distribution(y) = beta_binomial(1, p, 0.2)
+  distribution(y) <- beta_binomial(1, p, 0.2)
   expect_ok( model(p) )
 
-  distribution(y) = negative_binomial(1, p)
+  distribution(y) <- negative_binomial(1, p)
   expect_ok( model(p) )
 
-  distribution(y) = hypergeometric(5, 5, p)
+  distribution(y) <- hypergeometric(5, 5, p)
   expect_ok( model(p) )
 
-  distribution(y) = poisson(p)
+  distribution(y) <- poisson(p)
   expect_ok( model(p))
 
   # multivariate discrete distributions
   y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = multinomial(4, p)
+  distribution(y) <- multinomial(4, p)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(1, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = categorical(p)
+  distribution(y) <- categorical(p)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) = dirichlet_multinomial(4, alpha)
+  distribution(y) <- dirichlet_multinomial(4, alpha)
   expect_ok( model(alpha) )
 
   # univariate continuous distributions
@@ -552,48 +580,48 @@ test_that('array-valued distributions can be defined in models', {
 
   # variable (need to define a likelihood)
   a <- variable(dim = dim)
-  distribution(x) = normal(a, 1)
+  distribution(x) <- normal(a, 1)
   expect_ok( model(a) )
 
   # univariate discrete distributions
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = bernoulli(p)
+  distribution(y) <- bernoulli(p)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = binomial(1, p)
+  distribution(y) <- binomial(1, p)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = beta_binomial(1, p, 0.2)
+  distribution(y) <- beta_binomial(1, p, 0.2)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = negative_binomial(1, p)
+  distribution(y) <- negative_binomial(1, p)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = hypergeometric(10, 5, p)
+  distribution(y) <- hypergeometric(10, 5, p)
   expect_ok( model(p) )
 
   p <- iprobit(normal(0, 1, dim = dim))
-  distribution(y) = poisson(p)
+  distribution(y) <- poisson(p)
   expect_ok( model(p) )
 
   # multivariate discrete distributions
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = multinomial(4, p, dim = 5)
+  distribution(y) <- multinomial(4, p, dim = 5)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = categorical(p, dim = 5)
+  distribution(y) <- categorical(p, dim = 5)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) = dirichlet_multinomial(4, alpha, dim = 5)
+  distribution(y) <- dirichlet_multinomial(4, alpha, dim = 5)
   expect_ok( model(alpha) )
 
   # univariate continuous distributions
@@ -633,60 +661,60 @@ test_that('distributions can be sampled from', {
 
   # variable (with a density)
   a <- variable()
-  distribution(x) = normal(a, 1)
+  distribution(x) <- normal(a, 1)
   sample_distribution(a)
 
   b <- variable(lower = -1)
-  distribution(x) = normal(b, 1)
+  distribution(x) <- normal(b, 1)
   sample_distribution(b)
 
   c <- variable(upper = -2)
-  distribution(x) = normal(c, 1)
+  distribution(x) <- normal(c, 1)
   sample_distribution(c)
 
   d <- variable(lower = 1.2, upper = 1.3)
-  distribution(x) = normal(d, 1)
+  distribution(x) <- normal(d, 1)
   sample_distribution(d)
 
   # univariate discrete
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = bernoulli(p)
+  distribution(y) <- bernoulli(p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = binomial(1, p)
+  distribution(y) <- binomial(1, p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = negative_binomial(1, p)
+  distribution(y) <- negative_binomial(1, p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = hypergeometric(10, 5, p)
+  distribution(y) <- hypergeometric(10, 5, p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = poisson(p)
+  distribution(y) <- poisson(p)
   sample_distribution(p)
 
   p <- iprobit(normal(0, 1, dim = 100))
-  distribution(y) = beta_binomial(1, p, 0.3)
+  distribution(y) <- beta_binomial(1, p, 0.3)
   sample_distribution(p)
 
   # multivariate discrete
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = multinomial(4, p, dim = 5)
+  distribution(y) <- multinomial(4, p, dim = 5)
   sample_distribution(p)
 
   y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) = categorical(p, dim = 5)
+  distribution(y) <- categorical(p, dim = 5)
   sample_distribution(p)
 
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) = dirichlet_multinomial(4, alpha, dim = 5)
+  distribution(y) <- dirichlet_multinomial(4, alpha, dim = 5)
   sample_distribution(alpha)
 
   # univariate continuous
@@ -711,7 +739,7 @@ test_that('distributions can be sampled from', {
   # multivariate continuous
   sig <- MCMCpack::rwish(4, diag(3))
   sample_distribution(multivariate_normal(rnorm(3), sig))
-  sample_distribution(wishart(4, sig))
+  sample_distribution(wishart(4L, sig), warmup = 0)
   sample_distribution(lkj_correlation(4, dim = 3))
   sample_distribution(dirichlet(runif(3)))
 
@@ -761,6 +789,20 @@ test_that('uniform distribution errors informatively', {
   # lower >= upper
   expect_error(uniform(min = 1, max = 1),
                'max must be greater than min')
+
+})
+
+test_that('poisson() and binomial() error informatively in glm', {
+
+  source('helpers.R')
+
+  y <- rbinom(10, 1, 0.5)
+  x <- rnorm(10)
+
+  expect_error(glm(y ~ x, family = poisson),
+               "in the family argment of another model.")
+  expect_error(glm(y ~ x, family = binomial),
+               "in the family argment of another model.")
 
 })
 
@@ -835,10 +877,12 @@ test_that('multivariate_normal distribution errors informatively', {
 
   # bad means
   expect_error(multivariate_normal(m_c, a),
-               'mean must be a 2D greta array with one column, but has dimensions 1 x 3')
+               paste("mean must be a 2D greta array with one column,",
+                     "but has dimensions 1 x 3"))
 
   expect_error(multivariate_normal(m_d, a),
-               'mean must be a 2D greta array with one column, but has dimensions 3 x 2')
+               paste("mean must be a 2D greta array with one column,",
+                     "but has dimensions 3 x 2"))
 
   # good sigmas
   expect_true(inherits(multivariate_normal(m_a, a),
@@ -846,9 +890,11 @@ test_that('multivariate_normal distribution errors informatively', {
 
   # bad sigmas
   expect_error(multivariate_normal(m_a, b),
-               'Sigma must be a square 2D greta array, but has dimensions 3 x 3 x 3')
+               paste("Sigma must be a square 2D greta array,",
+                     "but has dimensions 3 x 3 x 3"))
   expect_error(multivariate_normal(m_a, c),
-               'Sigma must be a square 2D greta array, but has dimensions 3 x 2')
+               paste("Sigma must be a square 2D greta array,",
+                     "but has dimensions 3 x 2"))
 
   # mismatched parameters
   expect_error(multivariate_normal(m_a, d),
@@ -856,7 +902,8 @@ test_that('multivariate_normal distribution errors informatively', {
 
   # scalars
   expect_error(multivariate_normal(0, 1),
-               'the multivariate normal distribution is for vectors, but the parameters were scalar')
+               paste("the multivariate normal distribution is for vectors,",
+                     "but the parameters were scalar"))
 
   # bad dim
   expect_error(multivariate_normal(m_a, a, dim = -1),
@@ -879,7 +926,8 @@ test_that('multinomial distribution errors informatively', {
 
   # bad probs
   expect_error(multinomial(10, p_b),
-               'prob must be a 2D greta array with one column, but has dimensions 3 x 2')
+               paste("prob must be a 2D greta array with one column,",
+                     "but has dimensions 3 x 2"))
 
   # bad size
   expect_error(multinomial(c(1, 2), p_a),
@@ -887,7 +935,8 @@ test_that('multinomial distribution errors informatively', {
 
   # scalars
   expect_error(multinomial(c(1), 1),
-               'the multinomial distribution is for vectors, but the parameters were scalar')
+               paste("the multinomial distribution is for vectors,",
+                     "but the parameters were scalar"))
 
   # bad dim
   expect_error(multinomial(10, p_a, dim = -1),
@@ -910,11 +959,13 @@ test_that('categorical distribution errors informatively', {
 
   # bad probs
   expect_error(categorical(p_b),
-               'prob must be a 2D greta array with one column, but has dimensions 3 x 2')
+               paste("prob must be a 2D greta array with one column,",
+                     "but has dimensions 3 x 2"))
 
   # scalars
   expect_error(categorical(c(1), 1),
-               'the categorical distribution is for vectors, but the parameters were scalar')
+               paste("the categorical distribution is for vectors,",
+                     "but the parameters were scalar"))
 
   # bad dim
   expect_error(categorical(p_a, dim = -1),
@@ -937,11 +988,13 @@ test_that('dirichlet distribution errors informatively', {
 
   # bad probs
   expect_error(dirichlet(alpha_b),
-               'alpha must be a 2D greta array with one column, but has dimensions 3 x 2')
+               paste("alpha must be a 2D greta array with one column,",
+                     "but has dimensions 3 x 2"))
 
   # scalars
   expect_error(dirichlet(1),
-               'the dirichlet distribution is for vectors, but the parameters were scalar')
+               paste("the dirichlet distribution is for vectors,",
+                     "but the parameters were scalar"))
 
   # bad dim
   expect_error(dirichlet(alpha_a, dim = -1),
@@ -965,7 +1018,8 @@ test_that('dirichlet-multinomial distribution errors informatively', {
 
   # bad probs
   expect_error(dirichlet_multinomial(size, alpha_b),
-               'alpha must be a 2D greta array with one column, but has dimensions 3 x 2')
+               paste("alpha must be a 2D greta array with one column,",
+                     "but has dimensions 3 x 2"))
 
   # bad size
   expect_error(dirichlet_multinomial(c(1, 2), alpha_a),
@@ -973,7 +1027,8 @@ test_that('dirichlet-multinomial distribution errors informatively', {
 
   # scalars
   expect_error(dirichlet_multinomial(size, alpha = 1),
-               'the dirichlet distribution is for vectors, but the parameters were scalar')
+               paste("the dirichlet distribution is for vectors,",
+                     "but the parameters were scalar"))
 
   # bad dim
   expect_error(dirichlet_multinomial(size, alpha_a, dim = -1),
@@ -990,7 +1045,7 @@ test_that('Wishart can use a choleskied Sigma', {
 
   sig <- lkj_correlation(3, dim = 4)
   w <- wishart(5, sig)
-  m <- model(w)
-  expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE) )
+  m <- model(w, precision = "double")
+  expect_ok( draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE) )
 
 })
