@@ -209,10 +209,10 @@ check_dims <- function (..., target_dim = NULL) {
   # if more than one is non-scalar, need to check them
   if (sum(!scalars) > 1) {
 
-    match_first <- vapply(dim_list,
+    match_first <- vapply(dim_list[!scalars],
                           identical,
                           FUN.VALUE = FALSE,
-                          dim_list[[1]])
+                          dim_list[!scalars][[1]])
 
     # if they're non-scalar, but have the same dimensions, that's fine too
     if (!all(match_first)) {
@@ -238,7 +238,7 @@ check_dims <- function (..., target_dim = NULL) {
     if (!all(scalars)) {
 
       # check all arguments against this
-      matches_target <- vapply(dim_list,
+      matches_target <- vapply(dim_list[!scalars],
                                identical,
                                FUN.VALUE = FALSE,
                                target_dim)
