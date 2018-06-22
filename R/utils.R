@@ -136,7 +136,7 @@ check_dims <- function (..., target_dim = NULL) {
     match_first <- vapply(dim_list[!scalars],
                           identical,
                           FUN.VALUE = FALSE,
-                          dim_list[[1]])
+                          dim_list[!scalars][[1]])
 
     # if they're non-scalar, but have the same dimensions, that's fine too
     if (!all(match_first)) {

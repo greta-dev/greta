@@ -9,11 +9,12 @@ uniform_distribution <- R6Class (
 
     initialize = function (min, max, dim) {
 
+      dim <- check_dims(min, max, target_dim = dim)
+      
       if (inherits(min, "greta_array") | inherits(max, "greta_array"))
         stop ("min and max must be fixed, they cannot be another greta array")
 
-      good_types <- is.numeric(min) && length(min) == 1 &
-        is.numeric(max) && length(max) == 1
+      good_types <- is.numeric(min) & is.numeric(max)
 
       if (!good_types) {
 
