@@ -61,13 +61,14 @@ uniform_distribution <- R6Class (
            dim = self$dim)
     },
     
-    tf_distrib = function (parameters) {
+    tf_distrib = function (parameters, dag) {
       
       tf_ld <- fl(self$log_density)
       
       # weird hack to make TF see a gradient here
-      log_prob = function (x)
+      log_prob <- function (x) {
         tf_ld + x * fl(0)
+      }
       
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
       
