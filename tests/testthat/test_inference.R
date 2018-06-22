@@ -58,10 +58,10 @@ test_that('bad mcmc proposals are rejected', {
   distribution(x) <- normal(z, 1e6)
   m <- model(z)
 
+  # catch badness in the progress bar
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
-    m <- model(z),
-    out <- capture_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
+    out <- get_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
     expect_match(out, '100% bad')
   )
 
@@ -158,15 +158,15 @@ test_that('progress bar gives a range of messages', {
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(1010)),
+    out <- get_output(mcmc(1010)),
     expect_match(out, '<1% bad')
   )
 
-  # 10/500 should be 50%
+  # 10/500 should be 2%
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(500)),
+    out <- get_output(mcmc(500)),
     expect_match(out, '2% bad')
   )
 
@@ -174,7 +174,7 @@ test_that('progress bar gives a range of messages', {
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(10)),
+    out <- get_output(mcmc(10)),
     expect_match(out, '100% bad')
   )
 
