@@ -3,9 +3,11 @@ output: html_document
 ---
 ### Multiple species modelling independently and concurrently
 
-*Multiple species modelled independently and concurrently* This is an example of a simple poisson regression being used to estimate the abundance of a species along a number of environmental gradients. We first simulate some data to model followed by the `greta` code.
+*Multiple species modelled independently and concurrently* This is an example of a simple logistic regression being used to estimate the probability of multiple species' presence along a number of environmental gradients. Although modelled concorrently, the random variables for each species are independent. We first simulate some data to model followed by the `greta` code.
 
-When modelling multiple species (or other grouping factor), we need an extra step in constructing the linear predictor. In order to add multiple `greta` arrays together *for multiple species* we can use the `sweep()` function.
+Where a single observation per species and location would have a bernoulli error distribution, multiple observations for each species and location have a binomial distribution. The small change in the code is commented below.
+
+When modelling multiple species (or other grouping factor), we need an extra step in constructing the linear predictor. In order to add multiple `greta` arrays together *for each species* we can use the `sweep()` function.
 
 #### data
 <div class="data">
@@ -43,6 +45,7 @@ p <- ilogit(linear_predictor)
 
 # a single observation means our data are bernoulli distributed
 distribution(Y) <- bernoulli(p)
+# distribution(Y) <- binomial(n_obs, p) # for n repeat observations per species/ location combination, we can use the binomial error distribution
 
 # create model object with the things we want samples of
 m <- model(alpha, beta)
