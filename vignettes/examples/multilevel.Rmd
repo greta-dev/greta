@@ -1,0 +1,60 @@
+### Multiple species with sub-model for regression coefficients
+
+*Multiple species with sub-model for regression coefficients* This is an example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Instead of assuming independence of species regression coefficients, or partial pooling in shared distributions, we use a sub-model to estimate species regression coefficients. In this case, we're using species traits to estimate their response to different environmental gradients.
+
+Because we're building a sub-model, it's more efficient to simply add a coloumn of ones to dataframes for the base model and sub-model. This is simply to prevent our code fmor becoming too cumbersome. If we didnt want to use our sub-model to estimate the intercept, we would not need to include the coloum of ones in the environemntal dataframe.
+
+We first simulate some data to model followed by the `greta` code.
+
+#### data
+<div class="data">
+```{r data, highlight = FALSE}
+# make fake data
+n_species <- 3
+n_env <- 1
+n_sites <- 5
+n_traits <- 1
+
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) # create n_sites x n_species matrix of environmental variables
+traits <- matrix(rnorm(n_species * n_traits), nrow = n_species) # create n_species * n_traits matix of trait variables
+occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species) # create n_sites * n_species matrix of observed occupancy
+```
+</div>
+
+#### greta code
+```{r multilevel_greta}
+# load greta
+library(greta)
+
+# data wrangling
+traits <- cbind(rep(1, n_species), traits) # include a coloum of 1's for sub-model intercept estimation
+env <- cbind(rep(1, n_sites), env) # include a coloum of 1's for base model intercept estimation
+
+# redefine the n_env and n_traits after adding in coloum of 1's for intercepts
+n_env <- ncol(env)
+n_traits <- ncol(traits)
+
+# create greta dataframes from data matrices
+X <- as_data(env)
+Y <- as_data(occupancy)
+U <- as_data(traits)
+
+# create empty greta dataframes for variables to be estimated
+g <- normal(0, 10, dim = c(n_traits, n_env)) # sub-model parameters are drawn from normal distributions
+beta <- U %*% t(g) # parameters of the base model are a function of the parameters of the sub-model
+
+env_effect <- beta %*% t(X) # transpose environmental matrix X for matrix multiplication
+
+linear_predictor <- env_effect # In this case, env_effect already includes the intercept and so it is equal to the final linear predictor
+# inverse logit of linear predictor
+p <- ilogit(linear_predictor)
+
+# data are bernoulli distributed
+distribution(Y) <- bernoulli(p)
+
+# create model object with the parameters we want samples of
+m <- model(beta, g)
+
+# plot model structure
+plot(m)
+```

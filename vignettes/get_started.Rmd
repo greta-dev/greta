@@ -191,7 +191,7 @@ greta also provides some convenience functions to generate fixed numeric values.
 ones(1, 3)
 zeros(2, 2)
 ```
-The `greta_array()` function is generalises this to let you create greta arrays with any values, in the same way as R's `array()` function:
+The `greta_array()` function generalises this to let you create greta arrays with any values, in the same way as R's `array()` function:
 
 ```{r greta_array}
 greta_array(pi, dim = c(2, 2))
@@ -259,7 +259,7 @@ The third section of the script uses mathematical operators to combine some of o
 mean <- int + coef * x
 ```
 
-Because both `int` and `coef` are both scalars, the resulting greta array `mean` has the same dimensions as `x`; a column vector with 150 elements:
+Because `int` and `coef` are both scalars, the resulting greta array `mean` has the same dimensions as `x`; a column vector with 150 elements:
 
 ```{r mean}
 dim(mean)
@@ -449,7 +449,7 @@ If your model is taking a long time whilst in the sampling phase and you want to
 
 #### Tweaking the sampler
 
-Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about propsals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interstions (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manual set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
+Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about propsals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interations (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manually set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
 
 A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `model()`. Future versions of greta will implement a wider range of MCMC samplers, including some for discrete variables.
 
