@@ -1,8 +1,6 @@
----
-output: html_document
----
 ### Multilevel
 
+*Multilevel* linear regression model with coefficients estimated from sub-model. In this example, we use species as the grouping factor and their traits in the sub-model.
 
 #### data
 <div class="data">
@@ -13,9 +11,9 @@ n_env <- 3
 n_sites <- 50
 n_traits <- 2
 
-env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-traits <- matrix(rnorm(n_species * n_traits), nrow = n_species)
-occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species)
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) # create n_sites x n_species matrix of environmental variables
+traits <- matrix(rnorm(n_species * n_traits), nrow = n_species) # create n_species * n_traits matix of trait variables
+occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species) # create n_sites * n_species matrix of observed occupancy
 ```
 </div>
 
@@ -24,32 +22,34 @@ occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species)
 # load greta
 library(greta)
 
-# data
+# data wrangling
+traits <- cbind(rep(1, n_species), traits) # include a coloum of 1's for sub-model intercept estimation
+env <- cbind(rep(1, n_sites), env) # include a coloum of 1's for base model intercept estimation
+
+n_env <- ncol(env)
+n_traits <- ncol(traits)
+
+# create greta dataframes from data matrices
 X <- as_data(env)
 Y <- as_data(occupancy)
 U <- as_data(traits)
-n_env <- ncol(X)
-n_traits <- ncol(U)
 
-# variables
-a <- normal(0, 10, dim = c(n_traits, 1))
-alpha <- U %*% a
+# create empty greta dataframes for variables to be estimated
+g <- normal(0, 10, dim = c(n_traits, n_env)) # sub-model parameters are drawn from normal distributions
+beta <- U %*% g # parameters of the base model are a function of the parameters of the sub-model
 
-g <- normal(0, 10, dim = c(n_traits, n_env))
-beta <- U %*% g
-
-env_effect <- beta %*% t(X) #note transposed environmental matrix
+env_effect <- beta %*% t(X) # transpose environmental matrix X for matrix multiplication
 
 # matrix addition with `sweep()` create interim variable
 eta <- sweep(env_effect, 1, alpha, FUN = '+')
 
-# ilogit of linear predictor
+# inverse logit of linear predictor
 p <- ilogit(eta)
 
-# a single observation means our data are bernoulli distributed
+# data are bernoulli distributed
 distribution(Y) = bernoulli(p)
 
-# create model object with the things we want samples of
+# create model object with the parameters we want samples of
 m <- model(beta, g, alpha)
 
 # plot model structure
