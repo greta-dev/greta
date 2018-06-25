@@ -1,16 +1,17 @@
 ---
 output: html_document
 ---
-### Multispecies
+### Multiple species with partial pooling of regression coefficients
 
-Fitting a multispecies model of normally distributed data
+*Multiple species with partial pooling of regression coefficients* This is an example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Instead of assumign independence of species regression coefficients, we assume they are drawn from a shared distribution. We partially pool species responses. This gives us not ony the regression coefficients for each species but also a global average coefficient and a measure of variation between species responses to environmental gradients.
 
+We first simulate some data to model followed by the `greta` code.
 
 #### data
 <div class="data">
 ```{r data, highlight = FALSE}
 # make fake data
-n_species <- 3
+n_species <- 5
 n_env <- 1
 n_sites <- 50
 
@@ -25,36 +26,33 @@ occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species)
 library(greta)
 
 # data
-X <- as_data(env)
+X <- as_data(t(env))
 Y <- as_data(occupancy)
-n_env <- ncol(X)
 
 # variables
-a <- normal(0, 10, dim = 1)
-a_s <- uniform(0, 10, dim = 1) 
-alpha <- normal(a, a_s, dim = n_species)
+global_alpha <- normal(0, 10, dim = 1)
+global_alpha_sd <- uniform(0, 10, dim = 1) 
+alpha <- normal(global_alpha, global_alpha_sd, dim = n_species)
 
-g <- normal(0, 10, dim = n_env)
-g_s <- uniform(0, 10, dim = n_env)
-beta <- normal(g, g_s, dim = c(n_species, 1))
+global_betas <- normal(0, 10, dim = n_env)
+global_betas_sd <- uniform(0, 10, dim = n_env)
+beta <- normal(global_betas, global_betas_sd, dim = c(n_species, 1))
 
-env_effect <- beta %*% t(X) #not transposed environmental matrix
+env_effect <- beta %*% X
 
 # matrix addition with `sweep()` create interim variable
-eta <- sweep(env_effect, 1, alpha, FUN = '+')
+linear_predictor <- sweep(env_effect, 1, alpha, FUN = '+')
 
 # ilogit of linear predictor
-p <- ilogit(eta)
+p <- ilogit(linear_predictor)
 
 # a single observation means our data are bernoulli distributed
-distribution(Y) = bernoulli(p)
+distribution(Y) <- bernoulli(p)
 
 # create model object with the things we want samples of
-m <- model(alpha, beta, g, g_s, a, a_s)
+m <- model(alpha, beta, global_alpha, global_alpha_sd, global_betas, global_betas_sd)
 
 # plot model structure
 plot(m)
-
-fit <- mcmc(m)
 
 ```

@@ -69,3 +69,8 @@ Another important aspect to consider is the dimensional compatibility of your `g
 ```
 
 <hr>
+
+```{r child='examples/multispecies_partial_pool.Rmd'}
+```
+
+<hr>

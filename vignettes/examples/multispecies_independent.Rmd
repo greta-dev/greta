@@ -3,7 +3,7 @@ output: html_document
 ---
 ### Multiple species modelling independently and concurrently
 
-*Multiple species modelled independently and concurrently* This is an example of a simple logistic regression being used to estimate the probability of multiple species' presence along a number of environmental gradients. Although modelled concorrently, the random variables for each species are independent. We first simulate some data to model followed by the `greta` code.
+*Multiple species modelled independently and concurrently* This is an example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Although modelled concorrently, the random variables for each species are independent. We first simulate some data to model followed by the `greta` code.
 
 Where a single observation per species and location would have a bernoulli error distribution, multiple observations for each species and location have a binomial distribution. The small change in the code is commented below.
 
@@ -35,7 +35,7 @@ Y <- as_data(occupancy)
 alpha <- normal(0,10, dim = c(n_species, 1))
 beta <- normal(0, 10, dim = c(n_species, n_env))
 
-env_effect <- beta %*% X #not transposed environmental matrix
+env_effect <- beta %*% X
 
 # matrix addition with `sweep()` create interim variable
 linear_predictor <- sweep(env_effect, 1, alpha, FUN = '+')
