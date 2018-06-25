@@ -59,3 +59,13 @@ Another important aspect to consider is the dimensional compatibility of your `g
 ```
 
 <hr>
+
+```{r child='examples/logistic_error_term.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multispecies_independent.Rmd'}
+```
+
+<hr>

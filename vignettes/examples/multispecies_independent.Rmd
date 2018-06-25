@@ -1,0 +1,52 @@
+---
+output: html_document
+---
+### Multiple species modelling independently and concurrently
+
+*Multiple species modelled independently and concurrently* This is an example of a simple poisson regression being used to estimate the abundance of a species along a number of environmental gradients. We first simulate some data to model followed by the `greta` code.
+
+When modelling multiple species (or other grouping factor), we need an extra step in constructing the linear predictor. In order to add multiple `greta` arrays together *for multiple species* we can use the `sweep()` function.
+
+#### data
+<div class="data">
+```{r data, highlight = FALSE}
+# make fake data
+n_species <- 5
+n_env <- 3
+n_sites <- 20
+
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
+occupancy <- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_species)
+```
+</div>
+
+#### greta code
+```{r multispecies_bernoulli_greta}
+# load greta
+library(greta)
+
+# data
+X <- as_data(t(env))
+Y <- as_data(occupancy)
+
+# variables
+alpha <- normal(0,10, dim = c(n_species, 1))
+beta <- normal(0, 10, dim = c(n_species, n_env))
+
+env_effect <- beta %*% X #not transposed environmental matrix
+
+# matrix addition with `sweep()` create interim variable
+linear_predictor <- sweep(env_effect, 1, alpha, FUN = '+')
+
+# ilogit of linear predictor
+p <- ilogit(linear_predictor)
+
+# a single observation means our data are bernoulli distributed
+distribution(Y) <- bernoulli(p)
+
+# create model object with the things we want samples of
+m <- model(alpha, beta)
+
+# plot model structure
+plot(m)
+```

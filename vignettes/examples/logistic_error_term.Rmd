@@ -1,6 +1,6 @@
-### Logistic regression
+### Logistic regression with error term
 
-*Logistic regression* This is an example of a simple logistic regression with observational error modelled explictly. We first simulate some data to model followed by the `greta` code.
+*Logistic regression with observational error term* This is an example of a simple logistic regression with observational error modelled explictly. We first simulate some data to model followed by the `greta` code.
 
 #### data
 <div class="data">
