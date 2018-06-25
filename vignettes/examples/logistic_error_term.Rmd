@@ -1,0 +1,45 @@
+### Logistic regression
+
+*Logistic regression* This is an example of a simple logistic regression with observational error modelled explictly. We first simulate some data to model followed by the `greta` code.
+
+#### data
+<div class="data">
+```{r data, highlight = FALSE}
+# make fake data
+n_env <- 3
+n_sites <- 20
+
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) # create n_sites x n_env matrix of environmental variables
+occupancy <- matrix(rbinom(n_sites, 1, 0.5), nrow = n_sites) # create n_sites observations of species presence or absence
+```
+</div>
+
+#### greta code
+```{r logistic_error_term_greta}
+# load greta
+library(greta)
+
+# create greta dataframes from data matrices
+X <- as_data(t(env))
+Y <- as_data(t(occupancy))
+
+# creat greta arrays for random variables
+alpha <- normal(0, 10)
+beta <- normal(0, 10, dim = c(1, n_env))
+error <- normal(0, 10, dim = c(1, n_sites))
+
+# model
+linear_predictor <- alpha + beta %*% X + error
+p <- ilogit(linear_predictor)
+distribution(Y) <- bernoulli(p)
+
+# create model object with the parameters we want samples of
+m <- model(p, alpha, beta, error)
+
+# plot model structure
+plot(m)
+
+# fit model
+fit <- mcmc(m)
+
+```
