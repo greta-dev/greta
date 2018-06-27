@@ -17,7 +17,7 @@ n_traits <- 1
 
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) # create n_sites x n_species matrix of environmental variables
 traits <- matrix(rnorm(n_species * n_traits), nrow = n_species) # create n_species * n_traits matix of trait variables
-occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_species) # create n_sites * n_species matrix of observed occupancy
+occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites) # create n_sites * n_species matrix of observed occupancy
 ```
 </div>
 
@@ -40,10 +40,10 @@ Y <- as_data(occupancy)
 U <- as_data(traits)
 
 # create empty greta dataframes for variables to be estimated
-g <- normal(0, 10, dim = c(n_traits, n_env)) # sub-model parameters are drawn from normal distributions
-beta <- U %*% t(g) # parameters of the base model are a function of the parameters of the sub-model
+g <- normal(0, 10, dim = c(n_env, n_traits)) # sub-model parameters are drawn from normal distributions
+beta <-  g %*% t(U) # parameters of the base model are a function of the parameters of the sub-model
 
-env_effect <- beta %*% t(X) # transpose environmental matrix X for matrix multiplication
+env_effect <- X %*% beta # transpose environmental matrix X for matrix multiplication
 
 linear_predictor <- env_effect # In this case, env_effect already includes the intercept and so it is equal to the final linear predictor
 # inverse logit of linear predictor
