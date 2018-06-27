@@ -39,3 +39,41 @@ The following sections provide greta implementations of some of these example mo
 ```
 
 <hr>
+
+## Ecological models
+
+Here we provide some examples of common ecological models. We begin with a basic logistic regression often used in species distribution modelling to estimate species probability of presence. We then provide increasingly complex species distribution models, beginning with modelling obervation error directly, and moving on to models for multiple species: independentally but concurrently modelled species, partially pooled coefficients, repeated measures, and sub-models.
+
+One important way `greta` models differs from BUGS and Stan code is that it is often neccessary to set up the linear predictor seperatly to the logistic transformation. This is particulary the case when the dimensions of the data increases, such as when there are multiple species being modelled. We keep this convention in the simpler models for ease of understanding.
+
+<hr>
+
+```{r child='examples/logistic.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/poisson.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/logistic_error_term.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multispecies_independent.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multispecies_partial_pool.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multilevel.Rmd'}
+```
+
+<hr>
