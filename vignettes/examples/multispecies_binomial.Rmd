@@ -16,8 +16,7 @@ n_sites <- 20
 n_obs <- 4
 
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-# occupancy <- array(rep(rbinom(n_sites * n_obs, 1, 0.5),n_species), dim=c(n_sites, n_obs, n_species))
-occupancy <- matrix(rbinom(n_species * n_sites, n_obs, 0.5), nrow = n_species)
+occupancy <- matrix(rbinom(n_species * n_sites, n_obs, 0.5), nrow = n_sites)
 ```
 </div>
 
@@ -32,12 +31,12 @@ Y <- as_data(occupancy)
 n_env <- ncol(X)
 
 # variables
-alpha <- normal(0,10, dim = c(n_species, 1))
-beta <- normal(0, 10, dim = c(n_species, n_env))
-env_effect <- beta %*% t(X) #not transposed environmental matrix
+alpha <- normal(0,10, dim = n_species)
+beta <- normal(0, 10, dim = c(n_env, n_species))
+env_effect <- X %*% beta #not transposed environmental matrix
 
 # matrix addition with `sweep()` create interim variable
-eta <- sweep(env_effect, 1, alpha, FUN = '+')
+eta <- sweep(env_effect, 2, alpha, FUN = '+')
 
 # ilogit of linear predictor
 p <- ilogit(eta)
