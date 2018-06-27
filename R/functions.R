@@ -63,7 +63,7 @@
 #'
 #'  #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-#'  tapply(X, INDEX, FUN = c("sum", "max"), ...)
+#'  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod", "sqrt_n"), ...)
 #'
 #' }
 #'
@@ -78,7 +78,7 @@
 #'   and multiplication.
 #'
 #'   \code{tapply()} works on column vectors (2D greta arrays with one column),
-#'   and \code{INDEX} cannot be a greta array. Currently only two functions are
+#'   and \code{INDEX} cannot be a greta array. Currently six functions are
 #'   available, and arguments passed to \dots are ignored.
 #'
 #' @examples
@@ -725,7 +725,11 @@ tapply.greta_array <- function (X, INDEX, FUN = c("sum", "max"), ...) {
   # which function
   tf_fun <- switch(FUN,
                    sum = "tf$unsorted_segment_sum",
-                   max = "tf$unsorted_segment_max")
+                   max = "tf$unsorted_segment_max",
+                   mean = "tf$unsorted_segment_mean",
+                   min = "tf$unsorted_segment_min",
+                   prod = "tf$unsorted_segment_prod",
+                   sqrt_n = "tf$unsorted_segment_sqrt_n")
 
   # dimensions
   dimfun <- function (elem_list) {
