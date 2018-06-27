@@ -10,7 +10,7 @@ n_env <- 3
 n_sites <- 20
 
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) # create n_sites x n_env matrix of environmental variables
-occupancy <- matrix(rbinom(n_sites, 1, 0.5), nrow = n_sites) # create n_sites observations of species presence or absence
+occupancy <- rbinom(n_sites, 1, 0.5) # create n_sites observations of species presence or absence
 ```
 </div>
 
