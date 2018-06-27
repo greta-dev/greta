@@ -25,7 +25,7 @@ opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
 
 \item{sampler}{sampler used to draw values in MCMC. See \code{\link{samplers}} for options.}
 
-\item{n_samples}{number of MCMC samples to draw (after any warm-up, but
+\item{n_samples}{number of MCMC samples to draw per chain (after any warm-up, but
 before thinning)}
 
 \item{thin}{MCMC thinning rate; every \code{thin} samples is retained,

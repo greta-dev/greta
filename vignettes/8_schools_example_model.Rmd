@@ -1,0 +1,267 @@
+---
+title: "8 Schools Example Model"
+output:
+  html_document:
+    css: greta.css
+    toc: yes
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+    theme: lumen
+    highlight: default
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Example models}
+  %\usepackage[utf8]{inputenc}
+---
+
+## Data
+
+**8 Schools** is a study of coaching effects from eight schools; it comes from [section 5.5 of Gelman et al. (2003) as covered in 2.1. Schools data of 'R2WinBUGS: A Package for Running WinBUGS from R'](https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf):
+
+> The Scholastic Aptitude Test (SAT) measures the aptitude of high-schoolers in order to help
+colleges to make admissions decisions. It is divided into two parts, verbal (SAT-V) and
+mathematical (SAT-M). Our data comes from the SAT-V (Scholastic Aptitude Test-Verbal)
+on eight different high schools, from an experiment conducted in the late 1970s. SAT-V is a
+standard multiple choice test administered by the Educational Testing Service. This Service
+was interested in the effects of coaching programs for each of the selected schools.
+The study included coached and uncoached pupils, about sixty in each of the eight different
+schools; see Rubin (1981). All of them had already taken the PSAT (Preliminary SAT)
+which results were used as covariates. For each school, the estimated treatment effect and
+the standard error of the effect estimate are given. These are calculated by an analysis of
+covariance adjustment appropriate for a completely randomized experiment (Rubin 1981).
+This example was analyzed using a hierarchical normal model in Rubin (1981) and Gelman,
+Carlin, Stern, and Rubin (2003, Section 5.5).
+
+The corresponding [TensorFlow Probability](https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245) Jupyter notebook can be found [here](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
+
+```{r libraries, warning=FALSE, message=FALSE}
+library(greta)
+library(tidyverse)
+library(bayesplot)
+color_scheme_set("purple")
+```
+
+```{r 8_schools_data, highlight = FALSE}
+# data
+N <- letters[1:8]
+treatment_effects <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+treatment_stddevs <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
+```
+
+```{r}
+schools <- data.frame(N = N,
+                      treatment_effects = treatment_effects,
+                      treatment_stddevs = treatment_stddevs) %>%
+  mutate(treatment_effects_p_stddevs = treatment_effects + treatment_stddevs,
+         treatment_effects_m_stddevs = treatment_effects - treatment_stddevs)
+```
+
+For each the eight schools `N` we have the estimated treatment effect (`treatment_effects`) plus standard error (`treatment_stddevs`).
+Below, we are replicating the barplot from the [TensorFlow Probability example](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb) that shows the estimated treatment effects +/- standard error per school:
+
+```{r}
+ggplot(schools, aes(x = N, y = treatment_effects)) +
+  geom_bar(stat = "identity", fill = "purple", alpha = 0.5) +
+  geom_errorbar(aes(ymin = treatment_effects_m_stddevs, ymax = treatment_effects_p_stddevs), width = 0.3) +
+  labs(x = "school", y = "treatment effect",
+       title = "Barplot of treatment effects for eight schools",
+       subtitle = "Error bars represent standard error")
+```
+
+A different way to plot the estimated effects and their standard errors is to plot the density distribution over the eight schools we have:
+
+```{r}
+schools %>%
+  gather(x, y, treatment_effects, treatment_effects_p_stddevs, treatment_effects_m_stddevs) %>%
+  ggplot(aes(x = y, color = x)) +
+    geom_density(fill = "purple", alpha = 0.5) +
+    scale_color_brewer(palette = "Set1") +
+    labs(x = "treatment effect (+/- standard error)",
+         color = "density curve of",
+         title = "Density plot of treatment effects +/- standard error for eight schools")
+```
+
+## Modeling with `greta`
+
+To model the data, we use the same hierarchical normal model as in the [TensorFlow Probability example](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
+
+### Variables and priors
+
+First, we create greta arrays that represent the variables and prior distributions in our model and create a greta array for school effect from them. We define the following (random) variables and priors:
+
+- `avg_effect`: normal density function (`dnorm`) with a mean of `0` and standard deviation of `10`; represents the prior average treatment effect.
+
+```{r}
+avg_effect <- normal(mean = 0, sd = 10)
+avg_effect
+```
+
+- `avg_stddev`: normal density function (`dnorm`) with a mean of `5` and standard deviation of `1`; controls the amount of variance between schools.
+
+```{r}
+avg_stddev <- normal(5, 1)
+avg_stddev
+```
+
+- `school_effects_standard`: normal density function (`dnorm`) with a mean of `0`, standard deviation of `1` and dimension of `8`
+
+```{r}
+school_effects_standard <- normal(0, 1, dim = length(N))
+school_effects_standard
+```
+
+- `school_effects`: here we multiply the exponential of `avg_stddev` with `school_effects_standard` and add `avg_effect`
+
+```{r}
+school_effects <- avg_effect + exp(avg_stddev) * school_effects_standard
+school_effects
+```
+
+An alternative would be to directly use the `lognormal()` density function for `avg_stddev` and use that to calculate `school_effect`: 
+
+```{r}
+avg_stddev <- lognormal(5, 1)
+school_effects <- avg_effect + avg_stddev * school_effects_standard
+```
+
+### Likelihood
+
+Next, we want to link the variables and priors with the observed dependent data - in this case the school estimate `treatment_effects`. 
+We define the likelihood over our observed estimates `treatment_effects` given a random sample from the normal probability distribution with mean `school_effects` and standard deviation `treatment_stddevs`. From this, we would now like to calculate the parameter of that probability distribution by using the `distribution()` function:
+
+```{r}
+distribution(treatment_effects) <- normal(school_effects, treatment_stddevs)
+```
+
+### Bayesian inference model
+
+Now we have all the prerequisites for building a Hamiltonian Monte Carlo (HMC) to calculate the posterior distribution over the model's parameters.
+
+We first define the model by combining the calculated `avg_effect`, `avg_stddev` and `school_effects_standard` variables so that we can sample from them during modeling. The model `m` we define below contains all our prior distributions and thus represent the combined density of the model.
+
+It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found [here](https://greta-dev.github.io/greta/get_started.html#plotting).
+
+```{r 8_schools_greta, cache=FALSE}
+# defining the hierarchical model
+m <- model(avg_effect, avg_stddev, school_effects_standard)
+m
+```
+
+```{r eval=FALSE}
+plot(m)
+```
+
+```{r echo=FALSE}
+# plotting
+DiagrammeR::render_graph(plot(m))
+```
+
+The actual sampling from the model happens with the `mcmc()` function. By default 1000 MCMC samples are drawn after warm-up.
+What we obtain is a probability measure that describes the likelihood of a set of randomly sampled values for the model variables.
+
+```{r cache=FALSE}
+# sampling
+draws <- greta::mcmc(m, n_samples = 1000, warmup = 1000)
+```
+
+```{r}
+summary(draws)
+```
+
+```{r fig.width=10, fig.height=8}
+mcmc_trace(draws, facet_args = list(ncol = 3))
+```
+
+```{r}
+mcmc_intervals(draws)
+```
+
+```{r fig.width=10, fig.height=8}
+mcmc_acf_bar(draws, facet_args = list(ncol = 3))
+```
+
+```{r}
+mcmc_hist(draws, facet_args = list(ncol = 3))
+```
+
+
+#### Use of `calculate()` for transforming estimates to natural scale
+
+
+The `calculate()` function can be used with the transformation function
+used in building the model to get the school-specific posteriors chains.  This
+function is also how you would get posterior predictive values.
+
+```{r backtransform}
+# Calculate school effects on original scale
+school_effects           <- avg_effect + avg_stddev * school_effects_standard
+posterior_school_effects <- calculate(school_effects, draws) 
+```
+
+
+#### Comparison with Edward2 HMC
+
+As a sanity check that we parameterized our model correctly, we can compare the
+back-transformed school-specific estimates to the results from the Edward2
+approach [in the TensorFlow Probability
+documentation](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
+The results are very similar.
+
+```{r schools-edward2}
+
+# Posterior means via Edward2
+edward2_school_means <-
+  data.frame(tool = "Edward2",
+             school = N,
+             #mean_school_effects_standard = c(0.61157268, 0.06430732, -0.25459746,
+             #                                 0.04828103, -0.36940941, -0.23154463,
+             #                                 0.49402338,  0.13042814),
+             mean = c(14.93237686, 7.50939941, 3.07602358, 7.21652555,
+                                     2.0329783, 3.41213799, 12.92509365, 8.36702347),
+             sd = 0)
+
+edward2_pop_mean <- data.frame(tool = "Edward2", 'mean' = 6.48866844177, 'sd' = 0)
+# hmc_mean_avg_stddev <- 2.46163249016
+
+
+posterior_school_effects <- as.data.frame(as.matrix(posterior_school_effects))
+
+# Relabel school measures
+colnames(posterior_school_effects) <- N
+
+# Summarise and combine all chains of interest for plotting
+posterior_summaries <-
+  posterior_school_effects %>%
+  gather(key = school, value = value) %>% 
+  group_by(school) %>%
+  summarise_all(funs(mean, sd)) 
+
+school_summaries <- 
+  posterior_summaries %>% 
+  mutate(tool = "greta") %>%
+  rbind(edward2_school_means)
+
+population_parameters <- 
+  as.data.frame(as.matrix(draws)) %>% 
+  select(avg_effect) %>%
+  summarise_all(funs(mean, sd)) %>%
+  mutate(tool = "greta") %>%
+  rbind(edward2_pop_mean)
+
+ggplot(school_summaries, aes(x = school, y = mean, color = tool, shape = tool)) + 
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+  geom_point() +
+  geom_hline(data = population_parameters, 
+             aes(yintercept = mean, linetype = 'Population mean', color = tool)) +
+  scale_linetype_manual(name = "", values = c(2, 2)) 
+
+
+
+```
+
+## Session information
+
+```{r}
+sessionInfo()
+```

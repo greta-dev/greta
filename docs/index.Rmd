@@ -182,7 +182,7 @@ set.seed(2018-02-17)
 <div class="col-md-1"></div>
 
 <div class="col-md-5">
-  &thinsp; <span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span> &emsp; [example models](example_models.html)
+  &thinsp; <span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span> &emsp; [example models](example_bugs_models.html)
 </div>
 
 <div class="col-md-1"></div>

@@ -297,8 +297,22 @@ div.tocify {
         <li>
           <a href="get_started.html">get started</a>
         </li>
-        <li>
-          <a href="example_models.html">examples</a>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            examples
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="example_bugs_models.html">Example BUGS models</a>
+            </li>
+            <li>
+              <a href="8_schools_example_model.html">8 schools example from Gelman & Hill ARM</a>
+            </li>
+            <li>
+              <a href="election88.html">1988 election example from Gelman & Hill ARM</a>
+            </li>
+          </ul>
         </li>
         <li>
           <a href="reference-index.html">docs</a>
@@ -398,16 +412,10 @@ class(x$node$value())</code></pre>
              tf$constant(self$value(), dtype = tf_float()),
              envir = dag$tf_environment)
     }
-&lt;environment: 0x12526f350&gt;</code></pre>
+&lt;environment: 0x7fb581bfe0a8&gt;</code></pre>
 <p>Because R6 objects are pass-by-reference (rather than pass-by-value), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their children, they can make sure those children are defined as tensors before they are. The <code>define_tf()</code> member function ensures that that happens, enabling operation nodes to use the tensors for their children when defining their own tensor.</p>
 <pre class="r"><code>z$node$tf</code></pre>
 <pre><code>function (dag) {
-
-      # switch out the op for non-sugared variety
-      op &lt;- self$switch_op(self$operation)
-
-      # get the function
-      fun &lt;- eval(parse(text = op))
 
       # fetch the tensors for the environment
       arg_tf_names &lt;- lapply(self$children, dag$tf_name)
@@ -417,14 +425,17 @@ class(x$node$value())</code></pre>
       if (length(self$operation_args) &gt; 0)
         args &lt;- c(args, self$operation_args)
 
-      # apply function on tensors
-      node &lt;- do.call(fun, args)
+      # get the tensorflow function
+      operation &lt;- eval(parse(text = self$operation))
+
+      # apply the function on tensors
+      node &lt;- do.call(operation, args)
 
       # assign it in the environment
       assign(dag$tf_name(self), node, envir = dag$tf_environment)
 
     }
-&lt;environment: 0x11d6bf838&gt;</code></pre>
+&lt;environment: 0x7fb571269f78&gt;</code></pre>
 </div>
 </div>
 <div id="variables-and-free-states" class="section level2">
@@ -464,7 +475,7 @@ class(a$node)</code></pre>
       y
 
     }
-&lt;environment: 0x10b5aef78&gt;</code></pre>
+&lt;environment: 0x7fb570f2c710&gt;</code></pre>
 </div>
 <div id="distributions" class="section level2">
 <h2>distributions</h2>
@@ -480,24 +491,7 @@ class(b$node$distribution$target)</code></pre>
 <pre><code>[1] &quot;variable_node&quot; &quot;node&quot;          &quot;R6&quot;           </code></pre>
 <p>When they define themselves as tensors, distribution nodes define the log density of their target node/tensor given the tensors representing their parameters.</p>
 <pre class="r"><code>b$node$distribution$tf_log_density</code></pre>
-<pre><code>function (dag) {
-
-      # fetch inputs
-      tf_target_node &lt;- self$get_tf_target_node()
-      tf_target &lt;- get(dag$tf_name(tf_target_node),
-                       envir = dag$tf_environment)
-      tf_parameters &lt;- self$tf_fetch_parameters(dag)
-
-      # calculate log density
-      ld &lt;- self$tf_log_density_function(tf_target, tf_parameters)
-
-      # check for truncation
-      if (!is.null(self$truncation))
-        ld &lt;- ld - self$tf_log_density_offset(tf_parameters)
-
-      ld
-    }
-&lt;environment: 0x127249e98&gt;</code></pre>
+<pre><code>NULL</code></pre>
 <p>If the distribution was truncated, the log density is normalised using the cumulative distribution function.</p>
 </div>
 <div id="joint-density" class="section level2">
@@ -506,35 +500,38 @@ class(b$node$distribution$target)</code></pre>
 <p>The <code>dag</code> R6 object contained within the model then exposes methods to send parameters to the TensorFlow graph and return the joint density and gradient.</p>
 <pre class="r"><code>model &lt;- model(b)
 model$dag$send_parameters</code></pre>
-<pre><code>function (parameters, flat = TRUE) {
-
-      # convert parameters to a named list and change TF names to free versions
-      parameters &lt;- relist_tf(parameters, self$parameters_example)
-      names(parameters) &lt;- paste0(names(parameters), &#39;_free&#39;)
+<pre><code>function (parameters) {
 
       # create a feed dict in the TF environment
-      self$tf_environment$parameters &lt;- parameters
-      with(self$tf_environment,
-           parameter_dict &lt;- do.call(dict, parameters))
+      self$tf_environment$parameters &lt;- list(free_state = as.matrix(parameters))
+      self$tf_run(parameter_dict &lt;- do.call(dict, parameters))
 
     }
-&lt;environment: 0x10867c878&gt;</code></pre>
+&lt;environment: 0x7fb561bf8268&gt;</code></pre>
 <pre class="r"><code>model$dag$log_density</code></pre>
-<pre><code>function(adjusted = TRUE) {
+<pre><code>function(free_state = NULL, adjusted = TRUE) {
 
-      cleanly(with(self$tf_environment,
-                   sess$run(joint_density_adj, feed_dict = parameter_dict)))
+      if (!is.null(free_state)) {
+        self$send_parameters(free_state)
+      }
+
+      cleanly(self$tf_run(sess$run(joint_density_adj,
+                                   feed_dict = parameter_dict)))
 
     }
-&lt;environment: 0x10867c878&gt;</code></pre>
+&lt;environment: 0x7fb561bf8268&gt;</code></pre>
 <pre class="r"><code>model$dag$gradients</code></pre>
-<pre><code>function (adjusted = TRUE) {
+<pre><code>function (free_state = NULL, adjusted = TRUE) {
 
-      cleanly(with(self$tf_environment,
-                   sess$run(gradients_adj, feed_dict = parameter_dict)))
+      if (!is.null(free_state)) {
+        self$send_parameters(free_state)
+      }
+
+      cleanly(self$tf_run(sess$run(gradients_adj,
+                                   feed_dict = parameter_dict)))
 
     }
-&lt;environment: 0x10867c878&gt;</code></pre>
+&lt;environment: 0x7fb561bf8268&gt;</code></pre>
 <p>These methods are used by MCMC samplers to explore the model parameters.</p>
 </div>
 
