@@ -47,7 +47,4 @@ distribution(Y) = binomial(n_obs, p)
 
 # create model object with the things we want samples of
 m <- model(alpha, beta)
-
-# plot model structure
-plot(m)
 ```
