@@ -18,7 +18,7 @@ n_env <- 3
 n_sites <- 20
 
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-occupancy <- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_species)
+occupancy <- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_sites)
 ```
 </div>
 
@@ -28,17 +28,17 @@ occupancy <- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_species)
 library(greta)
 
 # data
-X <- as_data(t(env))
+X <- as_data(env)
 Y <- as_data(occupancy)
 
 # variables
-alpha <- normal(0,10, dim = c(n_species, 1))
-beta <- normal(0, 10, dim = c(n_species, n_env))
+alpha <- normal(0,10, dim = n_species)
+beta <- normal(0, 10, dim = c(n_env, n_species))
 
-env_effect <- beta %*% X
+env_effect <- X %*% beta
 
 # matrix addition with `sweep()` create interim variable
-linear_predictor <- sweep(env_effect, 1, alpha, FUN = '+')
+linear_predictor <- sweep(env_effect, 2, alpha, FUN = '+')
 
 # ilogit of linear predictor
 p <- ilogit(linear_predictor)
@@ -49,7 +49,4 @@ distribution(Y) <- bernoulli(p)
 
 # create model object with the things we want samples of
 m <- model(alpha, beta)
-
-# plot model structure
-plot(m)
 ```

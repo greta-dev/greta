@@ -54,7 +54,4 @@ distribution(Y) <- bernoulli(p)
 
 # create model object with the parameters we want samples of
 m <- model(beta, g)
-
-# plot model structure
-plot(m)
 ```

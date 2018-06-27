@@ -52,40 +52,4 @@ distribution(Y) <- bernoulli(p)
 # create model object with the things we want samples of
 m <- model(alpha, beta, global_alpha, global_alpha_sd, global_betas, global_betas_sd)
 
-# plot model structure
-plot(m)
-
-```
-
-
-```{r}
-# make fake data
-n_species <- 5
-n_env <- 1
-n_sites <- 50
-
-env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)
-
-# data
-X <- as_data(env)
-Y <- as_data(occupancy)
-
-# variables
-global_alpha <- normal(0, 10, dim = 1)
-global_alpha_sd <- uniform(0, 10, dim = 1) 
-alpha <- normal(global_alpha, global_alpha_sd, dim = n_species)
-
-global_betas <- normal(0, 10, dim = n_env)
-global_betas_sd <- uniform(0, 10, dim = n_env)
-beta <- normal(global_betas, global_betas_sd, dim = c(n_env, n_species))
-
-env_effect <- X %*% beta
-
-# matrix addition with `sweep()` create interim variable
-linear_predictor <- sweep(env_effect, 2, alpha, FUN = '+')
-
-# ilogit of linear predictor
-p <- ilogit(linear_predictor)
-
 ```

@@ -20,25 +20,19 @@ occupancy <- matrix(rbinom(n_sites, 1, 0.5), nrow = n_sites) # create n_sites ob
 library(greta)
 
 # create greta dataframes from data matrices
-X <- as_data(t(env))
-Y <- as_data(t(occupancy))
+X <- as_data(env)
+Y <- as_data(occupancy)
 
 # creat greta arrays for random variables
 alpha <- normal(0, 10)
-beta <- normal(0, 10, dim = c(1, n_env))
+beta <- normal(0, 10, dim = n_env)
 
 # model
-linear_predictor <- alpha + beta %*% X
+linear_predictor <- alpha + X %*% beta
 p <- ilogit(linear_predictor)
 distribution(Y) <- bernoulli(p)
 
 # create model object with the parameters we want samples of
 m <- model(p, alpha, beta)
-
-# plot model structure
-plot(m)
-
-# fit model
-fit <- mcmc(m)
 
 ```

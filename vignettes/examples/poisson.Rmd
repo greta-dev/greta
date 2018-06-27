@@ -20,25 +20,19 @@ occupancy <- matrix(rpois(n_sites, 5), nrow = n_sites) # create n_sites observat
 library(greta)
 
 # create greta dataframes from data matrices
-X <- as_data(t(env))
-Y <- as_data(t(occupancy))
+X <- as_data(env)
+Y <- as_data(occupancy)
 
 # creat greta arrays for random variables
 alpha <- normal(0, 10)
-beta <- normal(0, 10, dim = c(1, n_env))
+beta <- normal(0, 10, dim = n_env)
 
 # model
-linear_predictor <- alpha + beta %*% X
+linear_predictor <- alpha + X %*% beta
 lambda <- log(linear_predictor)
 distribution(Y) <- poisson(lambda)
 
 # create model object with the parameters we want samples of
 m <- model(lambda, alpha, beta)
-
-# plot model structure
-plot(m)
-
-# fit model
-fit <- mcmc(m)
 
 ```
