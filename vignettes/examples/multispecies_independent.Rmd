@@ -11,7 +11,7 @@ When modelling multiple species (or other grouping factor), we need an extra ste
 
 #### data
 <div class="data">
-```{r data, highlight = FALSE}
+```{r data_multispecies_bernoulli, highlight = FALSE}
 # make fake data
 n_species <- 5
 n_env <- 3

@@ -4,7 +4,7 @@
 
 #### data
 <div class="data">
-```{r data, highlight = FALSE}
+```{r data_poisson, highlight = FALSE}
 # make fake data
 n_env <- 3
 n_sites <- 20

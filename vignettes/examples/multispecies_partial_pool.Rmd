@@ -9,7 +9,7 @@ We first simulate some data to model followed by the `greta` code.
 
 #### data
 <div class="data">
-```{r data, highlight = FALSE}
+```{r data_multispecies_partially_pool, highlight = FALSE}
 # make fake data
 n_species <- 5
 n_env <- 1

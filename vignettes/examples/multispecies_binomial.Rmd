@@ -8,7 +8,7 @@ Fitting a multispecies model of normally distributed data
 
 #### data
 <div class="data">
-```{r data, highlight = FALSE}
+```{r data_multispecies_binomial, highlight = FALSE}
 # make fake data
 n_species <- 10
 n_env <- 3

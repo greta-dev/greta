@@ -8,7 +8,7 @@ We first simulate some data to model followed by the `greta` code.
 
 #### data
 <div class="data">
-```{r data, highlight = FALSE}
+```{r data_multilevel, highlight = FALSE}
 # make fake data
 n_species <- 3
 n_env <- 1
