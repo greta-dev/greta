@@ -3,7 +3,7 @@ output: html_document
 ---
 ### Multiple species with partial pooling of regression coefficients
 
-*Multiple species with partial pooling of regression coefficients* This is an example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Instead of assumign independence of species regression coefficients, we assume they are drawn from a shared distribution. We partially pool species responses. This gives us not ony the regression coefficients for each species but also a global average coefficient and a measure of variation between species responses to environmental gradients.
+An example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Instead of assuming independence of species regression coefficients, we assume they are drawn from a shared distribution. We partially pool species responses. This gives us not ony the regression coefficients for each species but also a global average coefficient and a measure of variation between species responses to environmental gradients.
 
 We first simulate some data to model followed by the `greta` code.
 
@@ -25,7 +25,7 @@ occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)
 # load greta
 library(greta)
 
-# data
+# create matrices to greta arrays
 X <- as_data(env)
 Y <- as_data(occupancy)
 
@@ -48,8 +48,4 @@ p <- ilogit(linear_predictor)
 
 # a single observation means our data are bernoulli distributed
 distribution(Y) <- bernoulli(p)
-
-# create model object with the things we want samples of
-m <- model(alpha, beta, global_alpha, global_alpha_sd, global_betas, global_betas_sd)
-
 ```
