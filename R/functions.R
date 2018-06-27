@@ -708,7 +708,9 @@ tapply.default <- function (X, INDEX, FUN = NULL, ...,
 }
 
 #' @export
-tapply.greta_array <- function (X, INDEX, FUN = c("sum", "max"), ...) {
+tapply.greta_array <- function (X, INDEX,
+                                FUN = c("sum", "max", "mean", "min", "prod", "sqrt_n"),
+                                ...) {
 
   FUN <- match.arg(FUN)
 
