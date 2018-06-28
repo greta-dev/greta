@@ -63,7 +63,7 @@
 #'
 #'  #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-#'  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod", "sqrt_n"), ...)
+#'  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
 #'
 #' }
 #'
@@ -709,7 +709,7 @@ tapply.default <- function (X, INDEX, FUN = NULL, ...,
 
 #' @export
 tapply.greta_array <- function (X, INDEX,
-                                FUN = c("sum", "max", "mean", "min", "prod", "sqrt_n"),
+                                FUN = c("sum", "max", "mean", "min", "prod"),
                                 ...) {
 
   FUN <- match.arg(FUN)
@@ -730,8 +730,7 @@ tapply.greta_array <- function (X, INDEX,
                    max = "tf$unsorted_segment_max",
                    mean = "tf$unsorted_segment_mean",
                    min = "tf$unsorted_segment_min",
-                   prod = "tf$unsorted_segment_prod",
-                   sqrt_n = "tf$unsorted_segment_sqrt_n")
+                   prod = "tf$unsorted_segment_prod")
 
   # dimensions
   dimfun <- function (elem_list) {

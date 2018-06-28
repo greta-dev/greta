@@ -121,12 +121,6 @@ test_that('tapply works as expected', {
   check_expr(tapply(x, rep(1:5, each = 3), "mean"))
   check_expr(tapply(x, rep(1:5, each = 3), "min"))
   check_expr(tapply(x, rep(1:5, each = 3), "prod"))
-  
-  # test geometric mean
-  greta_out <- tapply(x, rep(1:5, each = 3), "sqrt_n")
-  r_out <- eval(tapply(x, rep(1:5, each = 3), function(x) exp(mean(log(x)))))
-  difference <- as.vector(abs(r_out - greta_out))
-  expect_true(all(difference < 1e-4))
 
 })
 
