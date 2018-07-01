@@ -1004,8 +1004,12 @@ multivariate_normal_distribution <- R6Class (
 
       # replace Sigma's tensor with the cholesky factor, if available
       cf <- self$parameters$Sigma$representations$cholesky_factor
+      # replace Sigma's tensor with the precision (inverse v-c), if available
+      prec <- self$parameters$Sigma$representations$inverse_matrix
       if (!is.null(cf))
         tf_names$Sigma <- dag$tf_name(cf)
+      else if(!is.null(prec))
+        tf_names$Sigma <- dag$tf_name(prec)
 
       # fetch tensors
       lapply(tf_names, get, envir = dag$tf_environment)
@@ -1014,21 +1018,27 @@ multivariate_normal_distribution <- R6Class (
 
     tf_distrib = function (parameters, dag) {
 
+      mu <- tf$transpose(parameters$mean)
+
       # check if Sigma (the node version) has a cholesky factor to use
       cf <- self$parameters$Sigma$representations$cholesky_factor
+      # replace Sigma's tensor with the precision (inverse v-c), if available
+      prec <- self$parameters$Sigma$representations$inverse_matrix
 
       # how to make sure that's the value being used as the parameter?
-
       # need to check the parameters definition bit
-
-      if (is.null(cf))
-        L <- tf$cholesky(parameters$Sigma)
-      else
+      d <- tf$contrib$distributions
+      if (!is.null(cf)){
         L <- tf$transpose(parameters$Sigma)
+        d$MultivariateNormalTriL(loc = mu, scale_tril = L)
+      } else if(!is.null(prec)) {
+        L <- tf$matrix_inverse(tf$cholesky(parameters$Sigma))
+        d$MultivariateNormalTriL(loc = mu, scale_tril = L)
+      } else {
+        d$MultivariateNormalFullCovariance(loc = mu,
+                                           covariance_matrix = parameters$Sigma)
+      }
 
-      mu <- tf$transpose(parameters$mean)
-      tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
-                                                      scale_tril = L)
     },
 
     # no CDF for multivariate distributions

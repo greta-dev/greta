@@ -246,7 +246,11 @@ solve.greta_array <- function (a, b, ...) {
 
     }
 
-    return (op("solve", a, dimfun = dimfun, tf_operation = "tf$matrix_inverse"))
+    ga <- op("solve", a, dimfun = dimfun, tf_operation = "tf$matrix_inverse")
+
+    ga$node$representations$inverse_matrix <- a$node
+
+    return (ga)
 
   } else {
 
