@@ -84,15 +84,41 @@ NULL
 #' @export
 `*.greta_array` <- function (e1, e2) {
   check_dims(e1, e2)
-  op("multiply", e1, e2,
-     tf_operation = "tf$multiply")
+  ga <- op("multiply", e1, e2,
+           tf_operation = "tf$multiply")
+
+  # propagate the inverse matrix representation
+  im <- e1$node$representations$inverse_matrix
+
+  if (!is.null(im)) {
+    old_inverse <- as.greta_array(im)
+    new_inverse <- im / e2
+    ga$node$representations$inverse_matrix <- new_inverse$node
+  }
+
+  ga
+
 }
 
 #' @export
 `/.greta_array` <- function (e1, e2) {
+
   check_dims(e1, e2)
-  op("divide", e1, e2,
-     tf_operation = "tf$truediv")
+
+  ga <- op("divide", e1, e2,
+           tf_operation = "tf$truediv")
+
+  # propagate the inverse matrix representation
+  im <- e1$node$representations$inverse_matrix
+
+  if (!is.null(im)) {
+    old_inverse <- as.greta_array(im)
+    new_inverse <- im * e2
+    ga$node$representations$inverse_matrix <- new_inverse$node
+  }
+
+  ga
+
 }
 
 #' @export

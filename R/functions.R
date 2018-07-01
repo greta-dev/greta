@@ -260,8 +260,6 @@ solve.greta_array <- function (a, b, ...) {
                     paste(dim(b), collapse = ' x ')))
     }
 
-
-
     dimfun <- function (elem_list) {
 
       a <- elem_list[[1]]
