@@ -40,6 +40,7 @@ Collate:
     'progress_bar.R'
     'inference_class.R'
     'samplers.R'
+    'optimisers.R'
     'inference.R'
     'install_tensorflow.R'
     'internals.R'

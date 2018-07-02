@@ -17,8 +17,8 @@ stashed_samples()
 extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
   verbose = TRUE, pb_update = 50)
 
-opt(model, method = c("adagrad"), max_iterations = 100,
-  tolerance = 1e-06, control = list(), initial_values = NULL)
+opt(model, optimiser = bfgs(), max_iterations = 100,
+  tolerance = 1e-06, initial_values = NULL)
 }
 \arguments{
 \item{model}{greta_model object}
@@ -50,9 +50,6 @@ be used as the starting point for sampling/optimisation.}
 \item{draws}{an mcmc.list object returned by \code{mcmc} or
 \code{stashed_samples}}
 
-\item{method}{method used to optimise values. Currently only \code{adagrad}
-is available}
-
 \item{max_iterations}{the maximum number of iterations before giving up}
 
 \item{tolerance}{the numerical tolerance for the solution, the optimiser
@@ -61,6 +58,9 @@ successive iterations drops below this level}
 
 \item{control}{an optional named list of hyperparameters and options to
 control behaviour of the sampler or optimiser. See Details.}
+
+\item{method}{method used to optimise values. Currently only \code{adagrad}
+is available}
 }
 \value{
 \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an

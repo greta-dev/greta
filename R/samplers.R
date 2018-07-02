@@ -1,7 +1,7 @@
 #' @name samplers
 #'
 #' @title MCMC samplers
-#' @description Functions to set up MCMC samplers and change the startng values
+#' @description Functions to set up MCMC samplers and change the starting values
 #'   of their parameters, for use in \code{\link{mcmc}()}.
 #'
 #' @details During the warmup iterations of \code{mcmc}, some of these

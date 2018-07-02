@@ -21,7 +21,7 @@ hmc(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1)
 a \code{sampler} object that can be passed to \code{\link{mcmc}}.
 }
 \description{
-Functions to set up MCMC samplers and change the startng values
+Functions to set up MCMC samplers and change the starting values
   of their parameters, for use in \code{\link{mcmc}()}.
 }
 \details{

@@ -369,36 +369,17 @@ prep_initials <- function (initial_values, n_chains) {
 #' opt_res <- opt(m)
 #' }
 opt <- function (model,
-                 method = c("adagrad"),
+                 optimiser = bfgs(),
                  max_iterations = 100,
                  tolerance = 1e-6,
-                 control = list(),
                  initial_values = NULL) {
 
   # mock up some names to avoid CRAN-check note
-  optimiser <- joint_density <- sess <- NULL
+  joint_density <- sess <- NULL
 
   # get the tensorflow environment
   dag <- model$dag
   tfe <- dag$tf_environment
-
-  # get the method
-  method <- match.arg(method)
-  optimise_fun <- switch (method,
-                          adagrad = tf$train$AdagradOptimizer)
-
-  # default control options
-  con <- switch (method,
-                 adagrad = list(learning_rate = 0.8,
-                                initial_accumulator_value = 0.1,
-                                use_locking = TRUE))
-
-  # update them with user overrides
-  con[names(control)] <- control
-
-  # set up optimiser
-  dag$on_graph(tfe$optimiser <- do.call(optimise_fun, con))
-  dag$tf_run(train <- optimiser$minimize(-joint_density))
 
   # random initial values if unspecified
   if (is.null(initial_values)) {
@@ -410,29 +391,61 @@ opt <- function (model,
   dag$build_feed_dict()
 
   # initialize the variables, then set the ones we care about
-  dag$tf_sess_run(tf$global_variables_initializer())
-  parameters <- relist_tf(initial_values, model$dag$parameters_example)
+  tf_sess_run(tf$global_variables_initializer())
 
-  for (i in seq_along(parameters)) {
-    variable_name <- paste0(names(parameters)[i], '_free')
-    vble <- tfe[[variable_name]]
-    dag$on_graph( init <- tf$constant(parameters[[i]],
-                                      shape = vble$shape,
-                                      dtype = tf_float()))
-    . <- dag$on_graph(tfe$sess$run(vble$assign(init)))
+  on_graph( tfe$optimiser_init <- tf$constant(initial_values,
+                                              shape = tfe$free_state$shape,
+                                              dtype = tf_float()))
+
+  . <- tf_run(free_state$assign(optimiser_init))
+
+
+  # set up & run optimiser
+
+  if (optimiser$type == "scipy") {
+
+    opt_fun <- eval(parse(text = "tf$contrib$opt$ScipyOptimizerInterface"))
+
+    args <- list(loss = -tfe$joint_density,
+                 method = optimiser$method,
+                 options = c(maxiter = as.integer(max_iterations),
+                             optimiser$parameters),
+                 tol = tolerance)
+
+    on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
+    out <- tf_run(tf_optimiser$minimize(sess))
+
+    it <- NA
+
+  } else {
+
+    optimise_fun <- eval(parse(text = optimiser$tf_optimiser))
+    on_graph(tfe$tf_optimiser <- do.call(optimise_fun, optimiser$parameters))
+    tf_run(train <- tf_optimiser$minimize(-joint_density))
+
+    # initialize the variables, then set the ones we care about
+    tf_run(sess$run(tf$global_variables_initializer()))
+
+    on_graph( tfe$optimiser_init <- tf$constant(initial_values,
+                                                shape = tfe$free_state$shape,
+                                                dtype = tf_float()))
+
+    . <- tf_run(free_state$assign(optimiser_init))
+
+    diff <- old_obj <- Inf
+    it <- 0
+
+    while (it < max_iterations & diff > tolerance) {
+      it <- it + 1
+      tf_run(sess$run(train))
+      obj <- tf_run(sess$run(-joint_density))
+      diff <- abs(old_obj - obj)
+      old_obj <- obj
+    }
+
   }
 
-  diff <- old_obj <- Inf
-  it <- 0
-
-  while (it < max_iterations & diff > tolerance) {
-    it <- it + 1
-    dag$tf_sess_run(train)
-    obj <- dag$tf_sess_run(-joint_density)
-    diff <- abs(old_obj - obj)
-    old_obj <- obj
-  }
-
+  # return in standardised format
   list(par = model$dag$trace_values(),
        value = dag$tf_sess_run(joint_density),
        iterations = it,
