@@ -20,9 +20,9 @@ greta lets you write your own model like in BUGS, JAGS and Stan, except that you
 
 ### See the [website](https://greta-dev.github.io/greta/) for more information,  [tutorials](https://greta-dev.github.io/greta/get_started.html), [examples](https://greta-dev.github.io/greta/example_models.html), and [package documentation](https://greta-dev.github.io/greta/reference-index.html).
 
-You can install the package from CRAN:
+You can install the current release version of the package (0.2.5) from GitHub:
 ```r
-install.packages("greta")
+devtools::install_github("greta-dev/greta")
 ```
 
 I would love to hear any feedback, bug reports or feature requests via the [issues tracker](https://github.com/greta-dev/greta/issues). I would also be very keen for contributions from anyone with time to spare!
