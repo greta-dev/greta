@@ -22,6 +22,27 @@ knitr::opts_chunk$set(comment = NA,
 library (greta)
 ```
 
+## Common models
+
+Below are a few examples of common statistical models implemented in greta.
+
+<hr>
+
+```{r child='examples/linear.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multiple_linear.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/hierarchical_linear.Rmd'}
+```
+
+<hr>
+
 ## BUGS models
 
 The BUGS project provide a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The [Stan wiki](https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically) provides Stan implementations of these models.

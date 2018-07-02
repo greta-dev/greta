@@ -23,7 +23,7 @@ knitr::opts_chunk$set(echo = TRUE,
                       comment = NA,
                       progress = FALSE)
 
-set.seed(123)
+set.seed(2018-07-02)
 
 library(greta)
 
