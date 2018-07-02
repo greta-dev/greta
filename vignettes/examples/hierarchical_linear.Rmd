@@ -16,6 +16,6 @@ species_effect <- rbind(0, species_offset)
 species_id <- as.numeric(iris$Species)
 
 # model
-mu <- int + coef * iris$Sepal.Width + effect[species_id]
+mu <- int + coef * iris$Sepal.Width + species_effect[species_id]
 distribution(iris$Sepal.Length) <- normal(mu, sd)
 ```
