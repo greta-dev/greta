@@ -22,6 +22,27 @@ knitr::opts_chunk$set(comment = NA,
 library (greta)
 ```
 
+## Common models
+
+Below are a few examples of common statistical models implemented in greta.
+
+<hr>
+
+```{r child='examples/linear.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multiple_linear.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/hierarchical_linear.Rmd'}
+```
+
+<hr>
+
 ## BUGS models
 
 The BUGS project provide a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The [Stan wiki](https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically) provides Stan implementations of these models.
@@ -36,6 +57,44 @@ The following sections provide greta implementations of some of these example mo
 <hr>
 
 ```{r child='examples/beetles.Rmd'}
+```
+
+<hr>
+
+## Ecological models
+
+Here we provide some examples of common ecological models. We begin with a basic logistic regression often used in species distribution modelling to estimate species probability of presence. We then provide increasingly complex species distribution models, beginning with modelling obervation error directly, and moving on to models for multiple species: independentally but concurrently modelled species, partially pooled coefficients, repeated measures, and sub-models.
+
+One important way `greta` models differs from BUGS and Stan code is that it is often neccessary to set up the linear predictor seperatly to the logistic transformation. This is particulary the case when the dimensions of the data increases, such as when there are multiple species being modelled. We keep this convention in the simpler models for ease of understanding.
+
+<hr>
+
+```{r child='examples/logistic.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/poisson.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/logistic_error_term.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multispecies_independent.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multispecies_partial_pool.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multilevel.Rmd'}
 ```
 
 <hr>

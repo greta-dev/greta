@@ -485,7 +485,7 @@ y &lt;- as_data(iris$Sepal.Length)</code></pre>
      [,1] [,2]
 [1,]    0    0
 [2,]    0    0</code></pre>
-<p>The <code>greta_array()</code> function is generalises this to let you create greta arrays with any values, in the same way as R’s <code>array()</code> function:</p>
+<p>The <code>greta_array()</code> function generalises this to let you create greta arrays with any values, in the same way as R’s <code>array()</code> function:</p>
 <pre class="r"><code>greta_array(pi, dim = c(2, 2))</code></pre>
 <pre><code>greta array (data)
 
@@ -554,7 +554,7 @@ sd &lt;- student(3, 0, 1, truncation = c(0, Inf))</code></pre>
 <h3>Operations</h3>
 <p>The third section of the script uses mathematical operators to combine some of our parameters and data, to calculate the predicted sepal lengths, for a given parameter set:</p>
 <pre class="r"><code>mean &lt;- int + coef * x</code></pre>
-<p>Because both <code>int</code> and <code>coef</code> are both scalars, the resulting greta array <code>mean</code> has the same dimensions as <code>x</code>; a column vector with 150 elements:</p>
+<p>Because <code>int</code> and <code>coef</code> are both scalars, the resulting greta array <code>mean</code> has the same dimensions as <code>x</code>; a column vector with 150 elements:</p>
 <pre class="r"><code>dim(mean)</code></pre>
 <pre><code>[1] 150   1</code></pre>
 <pre class="r"><code>head(mean)</code></pre>
@@ -671,16 +671,16 @@ Sample size per chain = 1000
    plus standard error of the mean:
 
        Mean      SD  Naive SE Time-series SE
-int  4.2839 0.08063 0.0025497      0.0022142
-coef 0.4139 0.01952 0.0006172      0.0006316
-sd   0.4097 0.02221 0.0007025      0.0007025
+int  4.2840 0.08100 0.0025613      0.0027875
+coef 0.4142 0.01938 0.0006127      0.0006127
+sd   0.4122 0.02369 0.0007490      0.0009816
 
 2. Quantiles for each variable:
 
        2.5%    25%    50%    75%  97.5%
-int  4.1299 4.2257 4.2793 4.3409 4.4422
-coef 0.3782 0.3997 0.4144 0.4287 0.4490
-sd   0.3717 0.3922 0.4085 0.4255 0.4521</code></pre>
+int  4.1235 4.2303 4.2811 4.3381 4.4330
+coef 0.3742 0.4006 0.4153 0.4280 0.4512
+sd   0.3676 0.3968 0.4099 0.4252 0.4632</code></pre>
 <p>The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates</p>
 <pre class="r"><code>library (bayesplot)
 mcmc_trace(draws)
@@ -689,7 +689,7 @@ mcmc_intervals(draws)</code></pre>
 <p>If your model is taking a long time whilst in the sampling phase and you want to take a look at the samples. You can stop the sampler (e.g. using the stop button in RStudio) and then retrieve the samples drawn so far, by using <code>stashed_samples()</code>. Note that this won’t return anything if you stop the model during the warmup phase (since those aren’t valid posterior samples) or if the sampler completed successfully.</p>
 <div id="tweaking-the-sampler" class="section level4">
 <h4>Tweaking the sampler</h4>
-<p>Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it’s moving too slowly, or if you are getting a lot of messages about propsals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interstions (via the <code>warmup</code> argument). If you’re still getting a lot of rejected samples, it’s often a good idea to manual set the initial values for the sampler (via the <code>initial_values</code> argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.</p>
+<p>Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it’s moving too slowly, or if you are getting a lot of messages about propsals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interations (via the <code>warmup</code> argument). If you’re still getting a lot of rejected samples, it’s often a good idea to manually set the initial values for the sampler (via the <code>initial_values</code> argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.</p>
 <p>A downside of HMC is that it can’t be used to sample discrete variables (e.g. integers), so we can’t specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it’s in the likelihood. If we try to build such a model, greta will give us an error when we run <code>model()</code>. Future versions of greta will implement a wider range of MCMC samplers, including some for discrete variables.</p>
 <hr>
 </div>
