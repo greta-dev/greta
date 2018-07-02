@@ -1,0 +1,21 @@
+### Hierarchical linear regression
+
+A hierarchical, Bayesian linear regression model using the iris data, with random intercepts for each of the three species.
+
+```{r hierarchical_linear_greta}
+# linear model parameters
+int <- normal(0, 10)
+coef <- normal(0, 10)
+sd <- cauchy(0, 3, truncation = c(0, Inf))
+
+# hierarchical model for species effect; use the first species as the baseline
+# like in lm()
+species_sd <- lognormal(0, 1)
+species_offset <- normal(0, species_sd, dim = 2)
+species_effect <- rbind(0, species_offset)
+species_id <- as.numeric(iris$Species)
+
+# model
+mu <- int + coef * iris$Sepal.Width + effect[species_id]
+distribution(iris$Sepal.Length) <- normal(mu, sd)
+```
