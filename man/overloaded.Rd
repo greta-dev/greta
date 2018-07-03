@@ -12,6 +12,7 @@
 \alias{backsolve}
 \alias{forwardsolve}
 \alias{tapply}
+\alias{eigen}
 \alias{diag}
 \title{Functions overloaded by greta}
 \usage{
@@ -32,6 +33,8 @@ backsolve(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE)
 forwardsolve(l, x, k = ncol(l), upper.tri = FALSE, transpose = FALSE)
 
 tapply(X, INDEX, FUN, ...)
+
+eigen(x, symmetric, only.values, EISPACK)
 
 diag(x = 1, nrow, ncol)
 }
