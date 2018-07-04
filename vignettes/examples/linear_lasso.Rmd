@@ -5,7 +5,7 @@ A simple, one-variable Bayesian linear regression model using an exponential-nor
 ```{r linear_greta}
 # variables & priors
 int  <- uniform(-100, 100)
-tau  <- exponential(1, 1)
+tau  <- exponential(0.5)
 coef <- normal(0, tau)
 sd   <- inverse_gamma(1, 1)
 

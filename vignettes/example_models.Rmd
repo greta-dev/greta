@@ -53,6 +53,11 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
+```{r child='examples/multiple_linear_lasso.Rmd'}
+```
+
+<hr>
+
 ```{r child='examples/hierarchical_linear.Rmd'}
 ```
 

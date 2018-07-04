@@ -1,0 +1,21 @@
+### Multiple linear regression
+
+A multi-variable Bayesian linear regression model using an exponential-normal prior.
+
+```{r multiple_linear_greta}
+# the predictors as a matrix
+design <- as.matrix(attitude[, 2:7])
+
+int   <- normal(0, 10)
+tau   <- zeros(ncol(design))
+coefs <- zeros(ncol(design))
+for (i in seq(ncol(design))) {
+  tau[i] <- exponential(.5) 
+  coefs[i] <- normal(0, tau[i])
+}
+sd <- cauchy(0, 3, truncation = c(0, Inf))
+
+mu <- int + design %*% coefs
+
+distribution(attitude$rating) <- normal(mu, sd)
+```
