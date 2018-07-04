@@ -748,3 +748,71 @@ tapply.greta_array <- function (X, INDEX, FUN = c("sum", "max"), ...) {
      dimfun = dimfun)
 
 }
+
+#' @rdname overloaded
+#' @export
+eigen <- function (x, symmetric, only.values, EISPACK) {
+  UseMethod("eigen")
+}
+
+#' @export
+eigen.default <- function (x, symmetric, only.values = FALSE, EISPACK = FALSE) {
+  base::eigen(x = x,
+              symmetric = symmetric,
+              only.values = only.values,
+              EISPACK = EISPACK)
+}
+
+#' @export
+eigen.greta_array <- function (x, symmetric, only.values = FALSE, EISPACK = FALSE) {
+
+  x <- as.greta_array(x)
+
+  if (missing(symmetric)) symmetric <- TRUE
+  dims <- dim(x)
+
+  if (length(dims) != 2 | dims[1] != dims[2] | !symmetric) {
+    stop("only two-dimensional, square, symmetric greta arrays ",
+         "can be eigendecomposed",
+         call. = FALSE)
+  }
+
+  # they just want the eigenvalues, use that tf method
+  if (only.values) {
+
+    dimfun <- function (elem_list) nrow(elem_list[[1]])
+
+    values <- op("eigenvalues", x,
+                 dimfun = dimfun,
+                 tf_operation = "tf_only_eigenvalues")
+
+    vectors <- NULL
+
+  } else {
+
+    # if we're doing the whole eigendecomposition, do it in three operations
+
+    # a wacky greta array which appaarently has the same dimension as x; but in
+    # fact is a list of the two elements. But that's OK so long as the user
+    # never sees it
+    eig <- op("eigen", x,
+              tf_operation = "tf$self_adjoint_eig")
+
+    # get the eigenvalues and vectors as actual, sane greta arrays
+
+    dimfun_values = function (elem_list) {
+      c(nrow(elem_list[[1]]), 1L)
+    }
+
+    values <- op("values", eig, dimfun = dimfun_values,
+                 tf_operation = "tf_extract_eigenvalues")
+
+    vectors <- op("vectors", eig,
+                  tf_operation = "tf_extract_eigenvectors")
+
+  }
+
+  list(values = values,
+       vectors = vectors)
+
+}
