@@ -78,7 +78,7 @@
 #'   and multiplication.
 #'
 #'   \code{tapply()} works on column vectors (2D greta arrays with one column),
-#'   and \code{INDEX} cannot be a greta array. Currently six functions are
+#'   and \code{INDEX} cannot be a greta array. Currently five functions are
 #'   available, and arguments passed to \dots are ignored.
 #'
 #' @examples
