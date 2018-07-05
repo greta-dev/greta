@@ -1,0 +1,28 @@
+### Hierarchical linear regression
+
+A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species.
+The slopes and intercepts for each species are uncorrelated in this example.
+
+```{r hierarchical_linear_greta}
+# linear model parameters
+int <- normal(0, 10)
+coef <- normal(0, 10)
+sd <- cauchy(0, 3, truncation = c(0, Inf))
+
+species_id <- as.numeric(iris$Species)
+
+mu <- zeros(length(species_id))
+
+Z <- as_data(cbind(1, iris$Petal.Width))
+
+# random intercepts
+for (id in unique(species_id)) {
+  Sig <- diag(2)
+  species_random_sd <- wishart(5, Sig)
+  species_random_effect <- multivariate_normal(rep(0, 2), species_random_sd)
+  mu[species_id == id] <- int + coef * iris$Sepal.Width[species_id == id] + Z[species_id == id,] %*% t(species_random_effect)
+}
+
+# model
+distribution(iris$Sepal.Length) <- normal(mu, sd)
+```
