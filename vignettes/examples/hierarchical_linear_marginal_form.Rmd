@@ -4,12 +4,6 @@ A hierarchical, Bayesian linear regression model using the iris data, with rando
 The slopes and intercepts for each species are uncorrelated in this example.
 
 ```{r hierarchical_linear_greta}
-### Hierarchical linear regression
-
-A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species.
-The slopes and intercepts for each species are uncorrelated in this example.
-
-```{r hierarchical_linear_greta}
 # linear model parameters
 int <- normal(0, 10)
 coef <- normal(0, 10)
