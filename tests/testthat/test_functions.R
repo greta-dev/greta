@@ -118,6 +118,9 @@ test_that('tapply works as expected', {
 
   check_expr(tapply(x, rep(1:5, each = 3), "sum"))
   check_expr(tapply(x, rep(1:5, each = 3), "max"))
+  check_expr(tapply(x, rep(1:5, each = 3), "mean"))
+  check_expr(tapply(x, rep(1:5, each = 3), "min"))
+  check_expr(tapply(x, rep(1:5, each = 3), "prod"))
 
 })
 
