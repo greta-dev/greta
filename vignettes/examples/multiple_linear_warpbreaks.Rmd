@@ -1,8 +1,8 @@
 ### Multiple Poisson regression
 
-A hierarchical, Bayesian linear regression model using the `warpbreaks` data.
+A multiple Bayesian linear regression model using the `warpbreaks` data.
 
-```{r hierarchical_linear_greta}
+```{r hierarchical_linear_warpbreaks_greta}
 data("warpbreaks")
 head(warpbreaks)
 

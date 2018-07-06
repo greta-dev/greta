@@ -1,8 +1,8 @@
-### Linear regression
+### Linear regression with ridge prior
 
-A simple, one-variable Bayesian linear regression model using a *ridge* prior.
+A simple, one-variable Bayesian linear regression model that uses a *ridge* prior.
 
-```{r linear_greta}
+```{r linear_ridge_greta}
 # variables & priors
 int  <- variable()
 sd   <- cauchy(0, 3, truncation=c(0, Inf))

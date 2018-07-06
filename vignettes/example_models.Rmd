@@ -58,6 +58,16 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
+```{r child='examples/multiple_linear_warpbreaks.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multiple_linear_multilogit.Rmd'}
+```
+
+<hr>
+
 ```{r child='examples/hierarchical_linear.Rmd'}
 ```
 
@@ -78,12 +88,6 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
-## Stan models
-
-
-```{r child='examples/lightspeed.Rmd'}
-```
-
 ## BUGS models
 
 The BUGS project provide a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The [Stan wiki](https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically) provides Stan implementations of these models.
@@ -98,6 +102,19 @@ The following sections provide greta implementations of some of these example mo
 <hr>
 
 ```{r child='examples/beetles.Rmd'}
+```
+
+<hr>
+
+## Stan models
+
+```{r child='examples/lightspeed.Rmd'}
+```
+
+<hr>
+
+
+```{r child='examples/eight_schools.Rmd'}
 ```
 
 <hr>

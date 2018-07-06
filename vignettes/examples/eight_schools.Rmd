@@ -16,11 +16,11 @@ N       <- length(y)
 #### greta code
 ```{r schools_greta}
 sigma_eta <- inverse_gamma(1, 1)
-eta      <- normal(0, sigma_eta, dim=N)
+eta       <- normal(0, sigma_eta, dim=N)
 
 mu_theta <- normal(0, 100)
-xi <- normal(0, 5)
-theta <- mu_theta + xi * eta
+xi       <- normal(0, 5)
+theta    <- mu_theta + xi * eta
 
 distribution(y) <- normal(theta, sigma_y)
 ```

@@ -1,9 +1,8 @@
-### Normal model of lightspeed
+### Lightspeed
 
-*Lightspeed* estimates a linear normal model without predictors. The data are 66 measurements from Simon Newcomb and represent the time required for light to travis roughly 7500 meters.
+*Lightspeed* estimates a linear normal model without predictors. The data are 66 measurements from Simon Newcomb and represent the time required for light to travel roughly 7500 meters.
 
 See also the [Stan examples](https://github.com/stan-dev/example-models/wiki/ARM-Models-Sorted-by-Type#no-predictors) for details.
-
 
 #### data
 <div class="data">

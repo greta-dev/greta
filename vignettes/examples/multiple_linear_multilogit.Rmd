@@ -1,8 +1,8 @@
 ### Multiple multinomial regression
 
-A multi-variable Bayesian linear regression model using the attitude data
+A multi-variable Bayesian linear regression model using the iris data.
 
-```{r multiple_linear_greta}
+```{r multiple_linear_multilogit_greta}
 data(iris)
 
 library(tensorflow)
