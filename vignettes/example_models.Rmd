@@ -63,6 +63,11 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
+## Stan models
+
+```{r child='examples/lightspeed.Rmd'}
+```
+
 ## BUGS models
 
 The BUGS project provide a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The [Stan wiki](https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically) provides Stan implementations of these models.
