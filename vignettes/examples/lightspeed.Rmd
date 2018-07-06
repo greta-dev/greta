@@ -1,8 +1,8 @@
-### Lightspeed
+### Normal model of lightspeed
 
-*Lightspeed* estimates a linear normal model without predictors.
+*Lightspeed* estimates a linear normal model without predictors. The data are 66 measurements from Simon Newcomb and represent the time required for light to travis roughly 7500 meters.
 
-See [WinBUGS examples volume 2](https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf) (pdf) for details.
+See also the [Stan examples](https://github.com/stan-dev/example-models/wiki/ARM-Models-Sorted-by-Type#no-predictors) for details.
 
 
 #### data
@@ -18,7 +18,7 @@ n <- length(y)
 </div>
 
 #### greta code
-```{r beetles_greta}
+```{r lightspeed_greta}
 beta  <- variable()
 sigma <- variable(lower=0)
 
@@ -27,7 +27,7 @@ distribution(y) <- normal(beta, sigma)
 
 #### Stan code
 <div class="stan">
-```{r beetles_stan, echo = FALSE}
+```{r lightspeed_stan, echo = FALSE}
 cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/master/ARM/Ch.8/lightspeed.stan'), sep = '\n')
 ```
 </div>

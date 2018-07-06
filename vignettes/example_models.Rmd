@@ -63,7 +63,23 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
+```{r child='examples/hierarchical_linear_slopes.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/hierarchical_linear_general.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/hierarchical_linear_marginal.Rmd'}
+```
+
+<hr>
+
 ## Stan models
+
 
 ```{r child='examples/lightspeed.Rmd'}
 ```

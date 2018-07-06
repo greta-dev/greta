@@ -1,4 +1,4 @@
-### Multiple linear regression
+### Multiple linear regression with exponential-normal prior
 
 A multi-variable Bayesian linear regression model using an exponential-normal prior.
 
@@ -9,11 +9,12 @@ design <- as.matrix(attitude[, 2:7])
 int   <- normal(0, 10)
 tau   <- zeros(ncol(design))
 coefs <- zeros(ncol(design))
+sd <- cauchy(0, 3, truncation = c(0, Inf))
+
 for (i in seq(ncol(design))) {
   tau[i] <- exponential(.5) 
   coefs[i] <- normal(0, tau[i])
 }
-sd <- cauchy(0, 3, truncation = c(0, Inf))
 
 mu <- int + design %*% coefs
 
