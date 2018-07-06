@@ -1,18 +1,31 @@
-### Multiple linear regression
+### Multiple multinomial regression
 
 A multi-variable Bayesian linear regression model using the attitude data
 
 ```{r multiple_linear_greta}
-# the predictors as a matrix
-design <- as.matrix(attitude[, 2:7])
+data(iris)
 
-int <- normal(0, 10)
-coefs <- normal(0, 10, dim = ncol(design))
-sd <- cauchy(0, 3, truncation = c(0, Inf))
+library(tensorflow)
+op <- greta::.internals$nodes$constructors$op
+softmax <- function (logits) {
+  op("softmax", logits, tf_operation = tf$nn$softmax)
+}
 
-# matrix multiplication is more efficient than multiplying the coefficients
-# separately
-mu <- int + design %*% coefs
+# Only choose a small subset until categprical takes matrix arguments
+idxs <- c(1:10, 51:60, 101:111)
+n <- length(idxs)
 
-distribution(attitude$rating) <- normal(mu, sd)
+X <- as_data(cbind(1, iris[idxs,1:4]))
+y <- model.matrix(~Species, iris[idxs,])
+P <- ncol(X)
+K <- ncol(y)
+
+beta <-normal(0, 5, dim=c(P, K))
+eta <-  X %*% beta
+prob <- softmax(eta)
+
+for (i in seq_len(n)) {
+  yi <- t(y[i, ])
+  distribution(yi) = categorical(t(prob[i, ]))
+}
 ```
