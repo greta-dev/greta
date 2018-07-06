@@ -1,12 +1,12 @@
 ### Linear regression with uninformative priors
 
-A simple, one-variable Bayesian linear regression model that uses uninformative for with the coefficients.
+A simple, one-variable Bayesian linear regression model that uses flat priors for with the coefficients.
 
 ```{r linear_greta}
 # variables & priors
-int  <- uniform(-100, 100)
-coef <- normal(0, Inf)
-sd   <- inverse_gamma(1, 1)
+int  <- variable()
+coef <- variable()
+sd   <- cauchy(0, 3, truncation = c(0, Inf))
 
 # linear predictor
 mu <- int + coef * attitude$complaints

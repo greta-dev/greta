@@ -1,13 +1,16 @@
 ### Linear regression
 
-A simple, one-variable Bayesian linear regression model using an exponential-normal prior.
+A simple, one-variable Bayesian linear regression model using an exponential-normal prior. 
+A exponential-normal prior can be interpreted as the frequentist LASSO.
 
 ```{r linear_greta}
 # variables & priors
-int  <- uniform(-100, 100)
-tau  <- exponential(0.5)
-coef <- normal(0, tau)
+int  <- variable()
 sd   <- inverse_gamma(1, 1)
+
+lambda <- gamma(1, 1)
+tau  <- exponential(0.5 * lambda**2)
+coef <- normal(0, tau)
 
 # linear predictor
 mu <- int + coef * attitude$complaints
