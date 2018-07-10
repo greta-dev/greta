@@ -17,7 +17,7 @@ G  <- zeros(n.species * 2, n.species * 2)
 for (s in unique(species_id)) {
   Z[species_id == s, s * 2  - 1] <- 1
   Z[species_id == s, s * 2]  <- iris$Sepal.Length[species_id == s]
-  G_sd <- wishart(5, diag(2))
+  G_sd <- diag(2)
   G[(s * 2 - 1):(s * 2), (s * 2 - 1):(s * 2)] <- G_sd
 }
 

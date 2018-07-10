@@ -18,7 +18,7 @@ gamma <- zeros(n.species * 2)
 for (s in unique(species_id)) {
   Z[species_id == s, s * 2  - 1] <- 1
   Z[species_id == s, s * 2]  <- iris$Sepal.Length[species_id == s]
-  ranef_sd <- wishart(5, diag(2))
+  ranef_sd <- diag(2)
   gamma[(s * 2 - 1):(s * 2)] <- multivariate_normal(rep(0, 2), ranef_sd) 
 }
 
