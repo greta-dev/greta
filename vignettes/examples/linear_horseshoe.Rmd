@@ -1,0 +1,22 @@
+### Horseshoe prior
+
+A simple, one-variable Bayesian linear regression model using a horseshoe prior.
+
+```{r linear_horseshoe_greta}
+horseshoe <- function (tau = 1, dim = NULL) {
+  lambda <- cauchy(0, 1, truncation = c(0, Inf), dim = dim)
+  sd <- tau ^ 2 * lambda ^ 2
+  normal(zeros_like(sd), sd, dim = dim)
+}
+
+# variables & priors
+int  <- variable()
+sd   <- inverse_gamma(1, 1)
+coef <- horseshoe()
+
+# linear predictor
+mu <- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) <- normal(mu, sd)
+```

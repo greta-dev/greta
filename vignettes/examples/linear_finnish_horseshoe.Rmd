@@ -1,0 +1,25 @@
+### Regularized horseshoe prior
+
+A simple, one-variable Bayesian linear regression model using an exponential-normal prior. 
+A exponential-normal prior can be interpreted like an equivalent to frequentist LASSO.
+
+```{r linear_finnish_horseshoe_greta}
+regularized_horseshoe <- function (tau = 1,  c = 1, dim = NULL) {
+  stopifnot(c > 0)
+  lambda <- cauchy(0, 1, truncation = c(0, Inf), dim = dim)
+  lambda_tilde <- (c^2 * lambda^2) / (c^2 + tau^2 * lambda^2)
+  sd <- tau ^ 2 * lambda_tilde ^ 2
+  normal(zeros_like(sd), sd, dim = dim)
+}
+
+# variables & priors
+int  <- variable()
+sd   <- inverse_gamma(1, 1)
+coef <- regularized_horseshoe()
+
+# linear predictor
+mu <- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) <- normal(mu, sd)
+```

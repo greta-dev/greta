@@ -1,4 +1,4 @@
-### Linear regression with ridge prior
+### Ridge prior
 
 A simple, one-variable Bayesian linear regression model that uses a *ridge* prior.
 

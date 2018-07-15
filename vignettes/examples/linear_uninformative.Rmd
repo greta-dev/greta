@@ -1,4 +1,4 @@
-### Linear regression with flat priors
+### Improper flat prior
 
 A simple, one-variable Bayesian linear regression model that uses flat priors for the coefficients.
 

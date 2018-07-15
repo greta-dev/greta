@@ -1,7 +1,6 @@
-### Linear regression with LASSO prior
+### Exponential-normal prior
 
-A simple, one-variable Bayesian linear regression model using an exponential-normal prior. 
-A exponential-normal prior can be interpreted like an equivalent to frequentist LASSO.
+A simple, one-variable Bayesian linear regression model using an exponential-normal prior. A exponential-normal prior can be interpreted like an equivalent to frequentist LASSO.
 
 ```{r linear_lasso_greta}
 # variables & priors

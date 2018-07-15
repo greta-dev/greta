@@ -9,10 +9,9 @@ head(warpbreaks)
 X <- as_data(model.matrix(breaks ~ wool + tension, warpbreaks))
 y <- as_data(warpbreaks$breaks)
 
-beta <- zeros(ncol(X))
-beta[1]  <- variable()
-for (i in seq(2, ncol(X)))
-  beta[i] <- normal(0, 5)
+int <- variable()
+coefs <- normal(0, 5, dim = ncol(X) - 1)
+beta <- c(int, coefs)
 
 eta <- X %*% beta
 
