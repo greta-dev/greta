@@ -1,6 +1,6 @@
 ### Exponential-normal prior
 
-A simple, one-variable Bayesian linear regression model using an exponential-normal prior. A exponential-normal prior can be interpreted like an equivalent to frequentist LASSO.
+In this example we infer the parameters of one-variable Bayesian linear regression model using an exponential-normal prior. A compound exponential-normal prior can be interpreted like an equivalent to the frequentist LASSO. The exponential-normal prior yields a posterior that is pooled towards zero. An exponential-normal prior, or equivalently a Laplace prior, is consequently often chosen when a sparse solution is assumed, which, for instance, is a natural scenario in many biological settings.
 
 ```{r linear_lasso_greta}
 # variables & priors

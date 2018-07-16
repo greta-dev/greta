@@ -53,11 +53,6 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
-```{r child='examples/hierarchical_linear.Rmd'}
-```
-
-<hr>
-
 ```{r child='examples/hierarchical_linear_slopes.Rmd'}
 ```
 
@@ -82,11 +77,6 @@ The following examples show some common Bayesian priors of which some induce spa
 
 <hr>
 
-```{r child='examples/linear_spike_and_slab.Rmd'}
-```
-
-<hr>
-
 ```{r child='examples/linear_horseshoe.Rmd'}
 ```
 
@@ -95,12 +85,14 @@ The following examples show some common Bayesian priors of which some induce spa
 ```{r child='examples/linear_finnish_horseshoe.Rmd'}
 ```
 
+## Advanced Bayesian models
+
+Below are some more advanced examples implemented in greta.
+
 <hr>
 
-```{r child='examples/linear_ponyshoe.Rmd'}
+```{r child='examples/hierarchical_linear.Rmd'}
 ```
-
-## Advanced Baysian models
 
 <hr>
 
@@ -138,6 +130,8 @@ The following sections provide greta implementations of some of these example mo
 <hr>
 
 ## Stan models
+
+The following few code examples show how Stan code can be translated in equivalent greta models.
 
 ```{r child='examples/lightspeed.Rmd'}
 ```

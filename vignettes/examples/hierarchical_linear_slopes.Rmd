@@ -12,16 +12,16 @@ sd <- cauchy(0, 3, truncation = c(0, Inf))
 species_id <- as.numeric(iris$Species)
 
 # random intercepts
-species_random_intercept_sd <- lognormal(0, 1)
-species_random_intercept_offset <- normal(0, species_random_intercept_sd, dim = 2)
-species_random_intercept_effect <- rbind(0, species_random_intercept_offset)
+species_int_sd <- lognormal(0, 1)
+species_int <- normal(0, species_int_sd, dim = 2)
+species_int_eff <- rbind(0, species_int)
 
 # random slopes
-species_random_slope_sd <- lognormal(0, 1)
-species_random_slope_slope <- normal(0, species_random_slope_sd, dim = 2)
-species_random_slope_effect <- rbind(0, species_random_slope_slope)
+species_slope_sd <- lognormal(0, 1)
+species_slope <- normal(0, species_slope_sd, dim = 2)
+species_slope_eff <- rbind(0, species_slope)
 
 # model
-mu <- int + coef * iris$Sepal.Width + species_random_intercept_effect[species_id] + iris$Sepal.Width * species_random_slope_effect[species_id]
+mu <- int + coef * iris$Sepal.Width + species_int_eff[species_id] + iris$Sepal.Width * species_slope_eff[species_id]
 distribution(iris$Sepal.Length) <- normal(mu, sd)
 ```

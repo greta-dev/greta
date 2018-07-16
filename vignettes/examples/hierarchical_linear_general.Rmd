@@ -3,7 +3,6 @@
 A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species.
 The slopes and intercepts for each species are *correlated* in this example. We allow every species to have a species specific slope for `Sepal.Length`.
 
-
 ```{r hierarchical_linear_general_greta}
 int  <- normal(0, 10)
 coef <- normal(0, 10)
@@ -12,19 +11,16 @@ sd   <- cauchy(0, 3, truncation = c(0, Inf))
 n_species  <- length(unique(iris$Species))
 species_id <- as.numeric(iris$Species)
 
-Z     <- matrix(0, nrow(iris), n.species * 2)
-gamma <- zeros(n.species * 2)
+Z <- model.matrix(~ Species + Sepal.Length * Species - 1, data = iris)
+gamma <- zeros(n_species * 2)
 
 for (s in unique(species_id)) {
-  Z[species_id == s, s * 2  - 1] <- 1
-  Z[species_id == s, s * 2]  <- iris$Sepal.Length[species_id == s]
-  ranef_sd <- diag(2)
-  gamma[(s * 2 - 1):(s * 2)] <- multivariate_normal(rep(0, 2), ranef_sd) 
+  gamma_sd <- diag(2)
+  gamma[c(s, s + n_species)] <- multivariate_normal(rep(0, 2), gamma_sd) 
 }
 
 wi <- as_data(iris$Sepal.Width)
 Z  <- as_data(Z)
-
 mu <- int + coef * wi + Z %*% gamma
 
 distribution(iris$Sepal.Length) <- normal(mu, sd)

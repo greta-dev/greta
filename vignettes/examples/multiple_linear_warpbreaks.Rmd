@@ -2,13 +2,17 @@
 
 A multiple Bayesian linear regression model using the `warpbreaks` data.
 
-```{r hierarchical_linear_warpbreaks_greta}
+<div class="data">
+```{r multiple_linear_warpbreaks_data}
 data("warpbreaks")
 head(warpbreaks)
 
 X <- as_data(model.matrix(breaks ~ wool + tension, warpbreaks))
 y <- as_data(warpbreaks$breaks)
+```
+</div>
 
+```{r multiple_linear_warpbreaks_greta}
 int <- variable()
 coefs <- normal(0, 5, dim = ncol(X) - 1)
 beta <- c(int, coefs)
