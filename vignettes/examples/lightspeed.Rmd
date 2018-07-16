@@ -19,7 +19,7 @@ n <- length(y)
 #### greta code
 ```{r lightspeed_greta}
 beta  <- variable()
-sigma <- variable(lower=0)
+sigma <- variable(lower = 0)
 
 distribution(y) <- normal(beta, sigma)
 ```

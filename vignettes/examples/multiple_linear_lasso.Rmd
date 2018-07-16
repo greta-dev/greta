@@ -9,13 +9,8 @@ design <- as.matrix(attitude[, 2:7])
 int   <- normal(0, 10)
 sd <- cauchy(0, 3, truncation = c(0, Inf))
 
-tau   <- zeros(ncol(design))
-coefs <- zeros(ncol(design))
-for (i in seq(ncol(design))) {
-  tau[i] <- exponential(.5) 
-  coefs[i] <- normal(0, tau[i])
-}
-
+tau <- exponential(0.5, dim = ncol(design)) 
+coefs <- normal(0, tau)
 mu <- int + design %*% coefs
 
 distribution(attitude$rating) <- normal(mu, sd)

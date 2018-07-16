@@ -38,17 +38,22 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
-```{r child='examples/multiple_linear_lasso.Rmd'}
-```
-
-<hr>
-
 ```{r child='examples/multiple_linear_warpbreaks.Rmd'}
 ```
 
 <hr>
 
 ```{r child='examples/multiple_linear_multilogit.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multiple_linear_lasso.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/hierarchical_linear.Rmd'}
 ```
 
 <hr>
@@ -91,11 +96,6 @@ Below are some more advanced examples implemented in greta.
 
 <hr>
 
-```{r child='examples/hierarchical_linear.Rmd'}
-```
-
-<hr>
-
 ```{r child='examples/hierarchical_linear_general.Rmd'}
 ```
 
@@ -108,8 +108,6 @@ Below are some more advanced examples implemented in greta.
 
 ```{r child='examples/bayesian_neural_network.Rmd'}
 ```
-
-<hr>
 
 ## BUGS models
 
@@ -127,11 +125,11 @@ The following sections provide greta implementations of some of these example mo
 ```{r child='examples/beetles.Rmd'}
 ```
 
-<hr>
-
 ## Stan models
 
 The following few code examples show how Stan code can be translated in equivalent greta models.
+
+<hr>
 
 ```{r child='examples/lightspeed.Rmd'}
 ```
@@ -140,8 +138,6 @@ The following few code examples show how Stan code can be translated in equivale
 
 ```{r child='examples/eight_schools.Rmd'}
 ```
-
-<hr>
 
 ## Ecological models
 

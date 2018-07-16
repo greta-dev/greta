@@ -6,7 +6,7 @@ This time we try to set up the *marginal* model, i.e. when we integrate the cond
 ```{r hierarchical_linear_marginal_greta}
 int  <- variable()
 coef <- normal(0, 5)
-sd   <- cauchy(0, 3, truncation=c(0, Inf))
+sd   <- cauchy(0, 3, truncation = c(0, Inf))
 
 n_species  <- length(unique(iris$Species))
 species_id <- as.numeric(iris$Species)
