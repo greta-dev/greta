@@ -30,8 +30,8 @@ distribution(y) <- normal(neural_network(X), sd)
 
 ```{r}
 m <- model(weights)
-d <- opt(m)
+d <- mcmc(m)
 
 print(beta)
-print(d$par)
+print(summary(d))
 ```

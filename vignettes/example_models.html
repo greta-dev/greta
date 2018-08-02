@@ -246,56 +246,6 @@ mu &lt;- int + coef * attitude$complaints
 distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
 <hr>
 </div>
-<div id="linear-regression-with-uninformative-priors" class="section level3">
-<h3>Linear regression with uninformative priors</h3>
-<p>A simple, one-variable Bayesian linear regression model that uses flat priors for with the coefficients.</p>
-<pre class="r"><code># variables &amp; priors
-int  &lt;- variable()
-coef &lt;- variable()
-sd   &lt;- cauchy(0, 3, truncation = c(0, Inf))
-
-# linear predictor
-mu &lt;- int + coef * attitude$complaints
-
-# observation model
-distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
-<hr>
-</div>
-<div id="linear-regression-1" class="section level3">
-<h3>Linear regression</h3>
-<p>A simple, one-variable Bayesian linear regression model using a <em>ridge</em> prior.</p>
-<pre class="r"><code># variables &amp; priors
-int  &lt;- variable()
-sd   &lt;- cauchy(0, 3, truncation=c(0, Inf))
-
-tau  &lt;- inverse_gamma(1, 1)
-coef &lt;- normal(0, tau)
-
-# linear predictor
-mu &lt;- int + coef * attitude$complaints
-
-# observation model
-distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
-<hr>
-</div>
-<div id="linear-regression-2" class="section level3">
-<h3>Linear regression</h3>
-<p>A simple, one-variable Bayesian linear regression model using an exponential-normal prior. A exponential-normal prior can be interpreted as the frequentist LASSO.</p>
-<pre class="r"><code># variables &amp; priors
-int  &lt;- variable()
-sd   &lt;- inverse_gamma(1, 1)
-
-lambda &lt;- gamma(1, 1)
-tau  &lt;- exponential(0.5 * lambda**2)
-coef &lt;- normal(0, tau)
-
-# linear predictor
-mu &lt;- int + coef * attitude$complaints
-
-# observation model
-distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
-<hr>
-</div>
 <div id="multiple-linear-regression" class="section level3">
 <h3>Multiple linear regression</h3>
 <p>A multi-variable Bayesian linear regression model using the attitude data</p>
@@ -313,30 +263,10 @@ mu &lt;- int + design %*% coefs
 distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
 <hr>
 </div>
-<div id="multiple-linear-regression-with-exponential-normal-prior" class="section level3">
-<h3>Multiple linear regression with exponential-normal prior</h3>
-<p>A multi-variable Bayesian linear regression model using an exponential-normal prior.</p>
-<pre class="r"><code># the predictors as a matrix
-design &lt;- as.matrix(attitude[, 2:7])
-
-int   &lt;- normal(0, 10)
-tau   &lt;- zeros(ncol(design))
-coefs &lt;- zeros(ncol(design))
-sd &lt;- cauchy(0, 3, truncation = c(0, Inf))
-
-for (i in seq(ncol(design))) {
-  tau[i] &lt;- exponential(.5) 
-  coefs[i] &lt;- normal(0, tau[i])
-}
-
-mu &lt;- int + design %*% coefs
-
-distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
-<hr>
-</div>
 <div id="multiple-poisson-regression" class="section level3">
 <h3>Multiple Poisson regression</h3>
-<p>A hierarchical, Bayesian linear regression model using the <code>warpbreaks</code> data.</p>
+<p>A multiple Bayesian linear regression model using the <code>warpbreaks</code> data.</p>
+<div class="data">
 <pre class="r"><code>data(&quot;warpbreaks&quot;)
 head(warpbreaks)</code></pre>
 <pre><code>  breaks wool tension
@@ -347,12 +277,11 @@ head(warpbreaks)</code></pre>
 5     70    A       L
 6     52    A       L</code></pre>
 <pre class="r"><code>X &lt;- as_data(model.matrix(breaks ~ wool + tension, warpbreaks))
-y &lt;- as_data(warpbreaks$breaks)
-
-beta &lt;- zeros(ncol(X))
-beta[1]  &lt;- variable()
-for (i in seq(2, ncol(X)))
-  beta[i] &lt;- normal(0, 5)
+y &lt;- as_data(warpbreaks$breaks)</code></pre>
+</div>
+<pre class="r"><code>int &lt;- variable()
+coefs &lt;- normal(0, 5, dim = ncol(X) - 1)
+beta &lt;- c(int, coefs)
 
 eta &lt;- X %*% beta
 
@@ -361,32 +290,43 @@ distribution(y) &lt;- poisson(exp(eta))</code></pre>
 </div>
 <div id="multiple-multinomial-regression" class="section level3">
 <h3>Multiple multinomial regression</h3>
-<p>A multi-variable Bayesian linear regression model using the attitude data</p>
+<p>A multi-variable Bayesian linear regression model using the iris data.</p>
+<div class="data">
 <pre class="r"><code>data(iris)
 
-library(tensorflow)
-op &lt;- greta::.internals$nodes$constructors$op
-softmax &lt;- function (logits) {
-  op(&quot;softmax&quot;, logits, tf_operation = tf$nn$softmax)
-}
-
-# Only choose a small subset until categprical takes matrix arguments
+# Only choose a small subset until categorical takes matrix arguments
 idxs &lt;- c(1:10, 51:60, 101:111)
 n &lt;- length(idxs)
 
 X &lt;- as_data(cbind(1, iris[idxs,1:4]))
 y &lt;- model.matrix(~Species, iris[idxs,])
 P &lt;- ncol(X)
-K &lt;- ncol(y)
-
-beta &lt;-normal(0, 5, dim=c(P, K))
-eta &lt;-  X %*% beta
-prob &lt;- softmax(eta)
+K &lt;- ncol(y)</code></pre>
+</div>
+<pre class="r"><code>beta &lt;- normal(0, 5, dim = c(P, K - 1))
+eta &lt;- X %*% beta
+prob &lt;- imultilogit(eta)
 
 for (i in seq_len(n)) {
   yi &lt;- t(y[i, ])
-  distribution(yi) = categorical(t(prob[i, ]))
+  distribution(yi) &lt;- categorical(t(prob[i, ]))
 }</code></pre>
+<hr>
+</div>
+<div id="multiple-linear-regression-with-lasso-prior" class="section level3">
+<h3>Multiple linear regression with LASSO prior</h3>
+<p>A multi-variable Bayesian linear regression model using an exponential-normal prior for the coefficients.</p>
+<pre class="r"><code># the predictors as a matrix
+design &lt;- as.matrix(attitude[, 2:7])
+
+int   &lt;- normal(0, 10)
+sd &lt;- cauchy(0, 3, truncation = c(0, Inf))
+
+tau &lt;- exponential(0.5, dim = ncol(design)) 
+coefs &lt;- normal(0, tau)
+mu &lt;- int + design %*% coefs
+
+distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
 <hr>
 </div>
 <div id="hierarchical-linear-regression" class="section level3">
@@ -409,8 +349,8 @@ mu &lt;- int + coef * iris$Sepal.Width + species_effect[species_id]
 distribution(iris$Sepal.Length) &lt;- normal(mu, sd)</code></pre>
 <hr>
 </div>
-<div id="hierarchical-linear-regression-1" class="section level3">
-<h3>Hierarchical linear regression</h3>
+<div id="random-intercept-slope-model" class="section level3">
+<h3>Random intercept-slope model</h3>
 <p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species. The slopes and intercepts for each species are <em>uncorrelated</em> in this example.</p>
 <pre class="r"><code># linear model parameters
 int &lt;- normal(0, 10)
@@ -420,78 +360,209 @@ sd &lt;- cauchy(0, 3, truncation = c(0, Inf))
 species_id &lt;- as.numeric(iris$Species)
 
 # random intercepts
-species_random_intercept_sd &lt;- lognormal(0, 1)
-species_random_intercept_offset &lt;- normal(0, species_random_intercept_sd, dim = 2)
-species_random_intercept_effect &lt;- rbind(0, species_random_intercept_offset)
+species_int_sd &lt;- lognormal(0, 1)
+species_int &lt;- normal(0, species_int_sd, dim = 2)
+species_int_eff &lt;- rbind(0, species_int)
 
 # random slopes
-species_random_slope_sd &lt;- lognormal(0, 1)
-species_random_slope_slope &lt;- normal(0, species_random_slope_sd, dim = 2)
-species_random_slope_effect &lt;- rbind(0, species_random_slope_slope)
+species_slope_sd &lt;- lognormal(0, 1)
+species_slope &lt;- normal(0, species_slope_sd, dim = 2)
+species_slope_eff &lt;- rbind(0, species_slope)
 
 # model
-mu &lt;- int + coef * iris$Sepal.Width + species_random_intercept_effect[species_id] + iris$Sepal.Width * species_random_slope_effect[species_id]
+mu &lt;- int + coef * iris$Sepal.Width + species_int_eff[species_id] + iris$Sepal.Width * species_slope_eff[species_id]
 distribution(iris$Sepal.Length) &lt;- normal(mu, sd)</code></pre>
+</div>
+</div>
+<div id="common-bayesian-priors" class="section level2">
+<h2>Common Bayesian priors</h2>
+<p>The following examples show some common Bayesian priors of which some induce sparsity.</p>
+<hr>
+<div id="improper-flat-prior" class="section level3">
+<h3>Improper flat prior</h3>
+<p>A simple, one-variable Bayesian linear regression model that uses flat priors for the coefficients. A flat prior using <code>variable</code> puts an unbounded uniform distribution on the parameter. With a flat prior the posterior will be proportional to the likelihood and the MAP will normally correspond to the MLE. Flat priors are usually chosen when there is little knowledge about the parameters available.</p>
+<pre class="r"><code># variables &amp; priors
+int  &lt;- variable()
+coef &lt;- variable()
+sd   &lt;- cauchy(0, 3, truncation = c(0, Inf))
+
+# linear predictor
+mu &lt;- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
 <hr>
 </div>
+<div id="ridge-prior" class="section level3">
+<h3>Ridge prior</h3>
+<p>Here we estimate a simple, one-variable Bayesian linear regression model that uses a <em>ridge</em> prior. The ridge prior has a frequentist interpretation where it is used as a penalty for regression coefficients. Among other effects, the penalty shrinks the coefficients towards zero to reduce variance without setting them to zero. The Bayesian version uses a normal distribution for the slopes and a inverse gamma prior for the strength of the penalty. Note that since the prior in our intercept is still improper, the joint prior is also improper.</p>
+<pre class="r"><code># variables &amp; priors
+int  &lt;- variable()
+sd   &lt;- cauchy(0, 3, truncation = c(0, Inf))
+
+tau  &lt;- inverse_gamma(1, 1)
+coef &lt;- normal(0, tau)
+
+# linear predictor
+mu &lt;- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
+<hr>
+</div>
+<div id="exponential-normal-prior" class="section level3">
+<h3>Exponential-normal prior</h3>
+<p>In this example we infer the parameters of one-variable Bayesian linear regression model using an exponential-normal prior. A compound exponential-normal prior can be interpreted like an equivalent to the frequentist LASSO. The exponential-normal prior yields a posterior that is pooled towards zero. An exponential-normal prior, or equivalently a Laplace prior, is consequently often chosen when a sparse solution is assumed, which, for instance, is a natural scenario in many biological settings.</p>
+<pre class="r"><code># variables &amp; priors
+int  &lt;- variable()
+sd   &lt;- inverse_gamma(1, 1)
+
+lambda &lt;- gamma(1, 1)
+tau  &lt;- exponential(0.5 * lambda**2)
+coef &lt;- normal(0, tau)
+
+# linear predictor
+mu &lt;- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
+<hr>
+</div>
+<div id="horseshoe-prior" class="section level3">
+<h3>Horseshoe prior</h3>
+<p>A simple, one-variable Bayesian linear regression model using a horseshoe prior. The horseshoe, just as the LASSO, can be used when the slopes are assumed to be sparse. According to the original <a href="http://proceedings.mlr.press/v5/carvalho09a/carvalho09a.pdf">publication</a> <em>its flat, Cauchy-like tails allow strong signals to remain large […] a posteriori. Yet its infinitely tall spike at the origin provides severe shrinkage for the zero elements of.</em></p>
+<pre class="r"><code>horseshoe &lt;- function (tau = 1, dim = NULL) {
+  lambda &lt;- cauchy(0, 1, truncation = c(0, Inf), dim = dim)
+  sd &lt;- tau ^ 2 * lambda ^ 2
+  normal(0, sd, dim = dim)
+}
+
+# variables &amp; priors
+int  &lt;- variable()
+sd   &lt;- inverse_gamma(1, 1)
+coef &lt;- horseshoe()
+
+# linear predictor
+mu &lt;- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
+<hr>
+</div>
+<div id="regularized-horseshoe-prior" class="section level3">
+<h3>Regularized horseshoe prior</h3>
+<p>The <a href="https://projecteuclid.org/euclid.ejs/1513306866">regularized (finnished) horseshoe</a> remedies a problem of the original horseshoe: large, unregularized values for the coefficients. This is especially problematic in scenarios where the parameters are only weakly identified by the data, as in logistic regression with perfectly seperable data.</p>
+<pre class="r"><code>regularized_horseshoe &lt;- function (tau = 1,  c = 1, dim = NULL) {
+  stopifnot(c &gt; 0)
+  lambda &lt;- cauchy(0, 1, truncation = c(0, Inf), dim = dim)
+  lambda_tilde &lt;- (c^2 * lambda^2) / (c^2 + tau^2 * lambda^2)
+  sd &lt;- tau ^ 2 * lambda_tilde ^ 2
+  normal(0, sd, dim = dim)
+}
+
+# variables &amp; priors
+int  &lt;- variable()
+sd   &lt;- inverse_gamma(1, 1)
+coef &lt;- regularized_horseshoe()
+
+# linear predictor
+mu &lt;- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) &lt;- normal(mu, sd)</code></pre>
+</div>
+</div>
+<div id="advanced-bayesian-models" class="section level2">
+<h2>Advanced Bayesian models</h2>
+<p>Below are some more advanced examples implemented in greta.</p>
+<hr>
 <div id="hierarchical-linear-regression-in-general-conditional-formulation" class="section level3">
 <h3>Hierarchical linear regression in general conditional formulation</h3>
-<p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species. The slopes and intercepts for each species are <em>correlated</em> in this example. We allow every species to have a species specific slope for <code>Sepal.Length</code>. We first compute the random effects design matrix <span class="math inline">\(Z\)</span> and set the random effects prior for every group.</p>
+<p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species. The slopes and intercepts for each species are <em>correlated</em> in this example. We allow every species to have a species specific slope for <code>Sepal.Length</code>.</p>
 <pre class="r"><code>int  &lt;- normal(0, 10)
 coef &lt;- normal(0, 10)
 sd   &lt;- cauchy(0, 3, truncation = c(0, Inf))
 
-n.species  &lt;- length(unique(iris$Species))
+n_species  &lt;- length(unique(iris$Species))
 species_id &lt;- as.numeric(iris$Species)
 
-Z     &lt;- matrix(0, nrow(iris), n.species * 2)
-gamma &lt;- zeros(n.species * 2)
+Z &lt;- model.matrix(~ Species + Sepal.Length * Species - 1, data = iris)
+gamma &lt;- zeros(n_species * 2)
 
 for (s in unique(species_id)) {
-  Z[species_id == s, s * 2  - 1] &lt;- 1
-  Z[species_id == s, s * 2]  &lt;- iris$Sepal.Length[species_id == s]
-  ranef_sd &lt;- wishart(5, diag(2))
-  gamma[(s * 2 - 1):(s * 2)] &lt;- multivariate_normal(rep(0, 2), ranef_sd) 
+  gamma_sd &lt;- diag(2)
+  gamma[c(s, s + n_species)] &lt;- multivariate_normal(rep(0, 2), gamma_sd) 
 }
 
 wi &lt;- as_data(iris$Sepal.Width)
 Z  &lt;- as_data(Z)
-
 mu &lt;- int + coef * wi + Z %*% gamma
 
 distribution(iris$Sepal.Length) &lt;- normal(mu, sd)</code></pre>
 <hr>
 </div>
-<div id="hierarchical-linear-regression-2" class="section level3">
-<h3>Hierarchical linear regression</h3>
-<p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species. This time we try to set up the <em>marginal</em> model, i.e. when we integrate the conditional densities.</p>
-<pre class="r"><code># linear model parameters
-int  &lt;- variable()
+<div id="hierarchical-linear-regression-in-general-marginal-formulation" class="section level3">
+<h3>Hierarchical linear regression in general marginal formulation</h3>
+<p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species. This time we try to set up the <em>marginal</em> model, i.e. when we integrate the conditional density.</p>
+<pre class="r"><code>int  &lt;- variable()
 coef &lt;- normal(0, 5)
-sd &lt;- cauchy(0, 3, truncation=c(0, Inf))
+sd   &lt;- cauchy(0, 3, truncation = c(0, Inf))
 
-n.species  &lt;- length(unique(iris$Species))
+n_species  &lt;- length(unique(iris$Species))
 species_id &lt;- as.numeric(iris$Species)
 
-Z  &lt;- matrix(0, nrow(iris), n.species * 2)
-G  &lt;- zeros(n.species * 2, n.species * 2)
+Z &lt;- model.matrix(~ Species + Sepal.Length * Species - 1, data = iris)
+G  &lt;- zeros(n_species * 2, n_species * 2)
+
 for (s in unique(species_id)) {
-  Z[species_id == s, s * 2  - 1] &lt;- 1
-  Z[species_id == s, s * 2]  &lt;- iris$Sepal.Length[species_id == s]
-  G_sd &lt;- wishart(5, 2)
-  G[(s * 2 - 1):(s * 2), (s * 2 - 1):(s * 2)] &lt;- G_sd
+  G_sd &lt;- diag(2)
+  G[c(s, s + n_species), c(s, s + n_species)] &lt;- G_sd
 }
 
-# model
 mu &lt;- int + coef * iris$Sepal.Width
 V &lt;- zeros(nrow(iris), nrow(iris))
 diag(V) &lt;- sd
+
 Z &lt;- as_data(Z)
 V &lt;- V + Z %*% G %*% t(Z)
 
 sep &lt;- t(iris$Sepal.Width)
 distribution(sep) &lt;- multivariate_normal(mu, V)</code></pre>
 <hr>
+</div>
+<div id="bayesian-neural-network" class="section level3">
+<h3>Bayesian neural network</h3>
+<p><em>Bayesian neural network</em> estimates an easy neural network with a normal prior on the edge weights. For clarity we use an architecture without a hidden layer, such that the weights actually correspond to coefficients in a linear regression model.</p>
+<div class="data">
+<pre class="text"><code>N &lt;- 100
+p &lt;- 10
+
+set.seed(23)  
+X &lt;- matrix(rnorm(N * p), N)
+beta &lt;- rnorm(10)
+y &lt;- X %*% beta + rnorm(N, sd = 0.1)</code></pre>
+</div>
+<pre class="r"><code>neural_network &lt;- function(x)
+{
+  # this can be arbitrarily complex, e.g. multiple hidden layers
+  x %*% weights
+}
+  
+weights &lt;- normal(0, 1, dim = c(p, 1))
+sd &lt;- inverse_gamma(1, 1)
+
+distribution(y) &lt;- normal(neural_network(X), sd)</code></pre>
+<pre class="r"><code>m &lt;- model(weights)
+d &lt;- opt(m)
+
+print(beta)</code></pre>
+<pre><code> [1] -0.73808375  0.34786616 -0.16763053  0.02660026  0.98825290
+ [6] -0.50804771  0.28150890 -1.40528527  0.40781010 -1.99132710</code></pre>
+<pre class="r"><code>print(d$par)</code></pre>
+<pre><code>  weights1   weights2   weights3   weights4   weights5   weights6 
+-0.7403378  0.4616534 -0.2872877 -0.1597871  0.9804759 -0.6335616 
+  weights7   weights8   weights9  weights10 
+ 0.2982879 -1.4901307  0.2775902 -2.0108006 </code></pre>
 </div>
 </div>
 <div id="bugs-models" class="section level2">
@@ -656,15 +727,16 @@ generated quantities {
   alpha &lt;- alpha_star - beta*mean_x;              
 } </code></pre>
 </div>
-<hr>
 </div>
 </div>
 </div>
 <div id="stan-models" class="section level2">
 <h2>Stan models</h2>
-<div id="normal-model-of-lightspeed" class="section level3">
-<h3>Normal model of lightspeed</h3>
-<p><em>Lightspeed</em> estimates a linear normal model without predictors. The data are 66 measurements from Simon Newcomb and represent the time required for light to travis roughly 7500 meters.</p>
+<p>The following few code examples show how Stan code can be translated in equivalent greta models.</p>
+<hr>
+<div id="lightspeed" class="section level3">
+<h3>Lightspeed</h3>
+<p><em>Lightspeed</em> estimates a linear normal model without predictors. The data are 66 measurements from Simon Newcomb and represent the time required for light to travel roughly 7500 meters.</p>
 <p>See also the <a href="https://github.com/stan-dev/example-models/wiki/ARM-Models-Sorted-by-Type#no-predictors">Stan examples</a> for details.</p>
 <div id="data-2" class="section level4">
 <h4>data</h4>
@@ -680,7 +752,7 @@ n &lt;- length(y)</code></pre>
 <div id="greta-code-2" class="section level4">
 <h4>greta code</h4>
 <pre class="r"><code>beta  &lt;- variable()
-sigma &lt;- variable(lower=0)
+sigma &lt;- variable(lower = 0)
 
 distribution(y) &lt;- normal(beta, sigma)</code></pre>
 </div>
@@ -717,11 +789,11 @@ N       &lt;- length(y)</code></pre>
 <div id="greta-code-3" class="section level4">
 <h4>greta code</h4>
 <pre class="r"><code>sigma_eta &lt;- inverse_gamma(1, 1)
-eta      &lt;- normal(0, sigma_eta, dim=N)
+eta       &lt;- normal(0, sigma_eta, dim=N)
 
 mu_theta &lt;- normal(0, 100)
-xi &lt;- normal(0, 5)
-theta &lt;- mu_theta + xi * eta
+xi       &lt;- normal(0, 5)
+theta    &lt;- mu_theta + xi * eta
 
 distribution(y) &lt;- normal(theta, sigma_y)</code></pre>
 </div>
@@ -755,7 +827,6 @@ model {
   y ~ normal(theta,sigma_y);
 }</code></pre>
 </div>
-<hr>
 </div>
 </div>
 </div>
@@ -833,7 +904,7 @@ beta &lt;- normal(0, 10, dim = n_env)
 
 # model
 linear_predictor &lt;- alpha + X %*% beta
-lambda &lt;- log(linear_predictor)
+lambda &lt;- exp(linear_predictor)
 distribution(Y) &lt;- poisson(lambda)</code></pre>
 <hr>
 </div>
