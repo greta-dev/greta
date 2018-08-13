@@ -91,8 +91,8 @@ normal_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Normal(loc = parameters$mean,
-                                      scale = parameters$sd)
+      tfp$distributions$Normal(loc = parameters$mean,
+                               scale = parameters$sd)
     }
 
   )
@@ -153,7 +153,7 @@ bernoulli_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Bernoulli(probs = parameters$prob)
+      tfp$distributions$Bernoulli(probs = parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -179,8 +179,8 @@ binomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Binomial(total_count = parameters$size,
-                                        probs = parameters$prob)
+      tfp$distributions$Binomial(total_count = parameters$size,
+                                 probs = parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -241,7 +241,7 @@ poisson_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Poisson(rate = parameters$lambda)
+      tfp$distributions$Poisson(rate = parameters$lambda)
     },
 
     # no CDF for discrete distributions
@@ -265,8 +265,8 @@ negative_binomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$NegativeBinomial(total_count = parameters$size,
-                                                probs = fl(1) - parameters$prob)
+      tfp$distributions$NegativeBinomial(total_count = parameters$size,
+                                         probs = fl(1) - parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -326,8 +326,8 @@ gamma_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Gamma(concentration = parameters$shape,
-                                     rate = parameters$rate)
+      tfp$distributions$Gamma(concentration = parameters$shape,
+                              rate = parameters$rate)
     }
 
   )
@@ -349,8 +349,8 @@ inverse_gamma_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$InverseGamma(concentration = parameters$alpha,
-                                            rate = parameters$beta)
+      tfp$distributions$InverseGamma(concentration = parameters$alpha,
+                                     rate = parameters$beta)
     }
 
   )
@@ -410,7 +410,7 @@ exponential_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Exponential(rate = parameters$rate)
+      tfp$distributions$Exponential(rate = parameters$rate)
     }
 
   )
@@ -467,9 +467,9 @@ student_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$StudentT(df = parameters$df,
-                                        loc = parameters$mu,
-                                        scale = parameters$sigma)
+      tfp$distributions$StudentT(df = parameters$df,
+                                 loc = parameters$mu,
+                                 scale = parameters$sigma)
     }
 
   )
@@ -489,8 +489,8 @@ laplace_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Laplace(loc = parameters$mu,
-                                       scale = parameters$sigma)
+      tfp$distributions$Laplace(loc = parameters$mu,
+                                scale = parameters$sigma)
     }
 
   )
@@ -512,8 +512,8 @@ beta_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Beta(concentration1 = parameters$shape1,
-                                    concentration0 = parameters$shape2)
+      tfp$distributions$Beta(concentration1 = parameters$shape1,
+                             concentration0 = parameters$shape2)
     }
 
   )
@@ -568,7 +568,7 @@ chi_squared_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Chi2(df = parameters$df)
+      tfp$distributions$Chi2(df = parameters$df)
     }
 
   )
@@ -588,8 +588,8 @@ logistic_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Logistic(loc = parameters$location,
-                                        scale = parameters$scale)
+      tfp$distributions$Logistic(loc = parameters$location,
+                                 scale = parameters$scale)
     },
 
     # log_cdf in tf$cotrib$distributions has the wrong sign :/
@@ -700,7 +700,7 @@ dirichlet_distribution <- R6Class (
     tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       alpha <- tf$transpose(parameters$alpha)
-      tf$contrib$distributions$Dirichlet(concentration = alpha)
+      tfp$distributions$Dirichlet(concentration = alpha)
     },
 
     # no CDF for multivariate distributions
@@ -773,7 +773,7 @@ dirichlet_multinomial_distribution <- R6Class (
     tf_distrib = function (parameters, dag) {
       # transpose and scale probs to get absolute density correct
       alpha <- tf$transpose(parameters$alpha)
-      distrib <- tf$contrib$distributions$DirichletMultinomial
+      distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
               concentration = alpha)
     },
@@ -848,8 +848,8 @@ multinomial_distribution <- R6Class (
       # transpose and scale probs to get absolute density correct
       probs <- tf$transpose(parameters$prob)
       probs <- probs / tf$reduce_sum(probs)
-      tf$contrib$distributions$Multinomial(total_count = parameters$size,
-                                           probs = probs)
+      tfp$distributions$Multinomial(total_count = parameters$size,
+                                    probs = probs)
     },
 
     # no CDF for multivariate distributions
@@ -912,8 +912,8 @@ categorical_distribution <- R6Class (
       # transpose and scale probs to get absolute density correct
       probs <- tf$transpose(parameters$prob)
       probs <- probs / tf$reduce_sum(probs)
-      tf$contrib$distributions$Multinomial(total_count = fl(1),
-                                           probs = probs)
+      tfp$distributions$Multinomial(total_count = fl(1),
+                                    probs = probs)
     },
 
     # no CDF for multivariate distributions
@@ -1027,8 +1027,8 @@ multivariate_normal_distribution <- R6Class (
         L <- tf$transpose(parameters$Sigma)
 
       mu <- tf$transpose(parameters$mean)
-      tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
-                                                      scale_tril = L)
+      tfp$distributions$MultivariateNormalTriL(loc = mu,
+                                               scale_tril = L)
     },
 
     # no CDF for multivariate distributions
@@ -1107,13 +1107,13 @@ wishart_distribution <- R6Class (
         # find and use the tensor for the cholesky factor
         cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
 
-        wish_chol <- tf$contrib$distributions$WishartCholesky
+        wish_chol <- tfp$distributions$WishartCholesky
         distrib <- wish_chol(df = df,
                              scale = tf$transpose(cholesky_scale))
 
       } else {
 
-        wish <- tf$contrib$distributions$WishartFull
+        wish <- tfp$distributions$WishartFull
         distrib <- wish(df = df,
                         scale = parameters$Sigma)
 
