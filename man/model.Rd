@@ -2,7 +2,6 @@
 % Please edit documentation in R/greta_model_class.R
 \name{model}
 \alias{model}
-\alias{model}
 \alias{print.greta_model}
 \alias{plot.greta_model}
 \title{greta model objects}

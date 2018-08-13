@@ -8,17 +8,17 @@
 \alias{opt}
 \title{statistical inference on greta models}
 \usage{
-mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1, warmup = 1000,
-  chains = 1, n_cores = NULL, verbose = TRUE, pb_update = 50,
-  initial_values = NULL)
+mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
+  warmup = 1000, chains = 1, n_cores = NULL, verbose = TRUE,
+  pb_update = 50, initial_values = NULL)
 
 stashed_samples()
 
 extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
   verbose = TRUE, pb_update = 50)
 
-opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
-  control = list(), initial_values = NULL)
+opt(model, method = c("adagrad"), max_iterations = 100,
+  tolerance = 1e-06, control = list(), initial_values = NULL)
 }
 \arguments{
 \item{model}{greta_model object}
