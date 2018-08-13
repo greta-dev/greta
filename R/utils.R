@@ -284,16 +284,34 @@ check_unit <- function (truncation) {
 
 # check whether the function calling this is being used as the 'family' argument
 # of another modelling function
-check_in_family <- function (function_name) {
+check_in_family <- function (function_name, arg) {
+
+  if (missing(arg)) {
+    # if the first argument is missing, the user might be doing
+    # `family = binomial()` or similar
+    arg_is_link <- TRUE
+  } else {
+    # if the first argument is one of these text strings, the user might be doing
+    # `family = binomial("logit")` or similar
+    links <- c("logit", "probit", "cloglog", "cauchit", "log", "identity", "sqrt")
+    arg_is_link <- inherits(arg, "character") && length(arg) == 1 && arg %in% links
+  }
+
+  # if it's being executed in an environment where it's named 'family', the user
+  # might be doing `family = binomial` or similar
   greta_function <- get(function_name, envir = asNamespace("greta"))
   family <- parent.frame(2)$family
-  if (!is.null(family) && identical(family, greta_function)) {
+  function_is_family <- !is.null(family) && identical(family, greta_function)
+
+  # nice user-friendly error message
+  if (arg_is_link | function_is_family) {
     msg <- paste0("It looks like you're using greta's ", function_name,
                   " function in the family argment of another model.",
                   " Maybe you want to use 'family = stats::", function_name,
                   "' instead?")
     stop (msg, call. = FALSE)
   }
+
 }
 
 #' @importFrom future plan future

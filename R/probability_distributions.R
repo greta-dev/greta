@@ -2,78 +2,78 @@ uniform_distribution <- R6Class (
   'uniform_distribution',
   inherit = distribution_node,
   public = list(
-    
+
     min = NA,
     max = NA,
     log_density = NULL,
-    
+
     initialize = function (min, max, dim) {
-      
+
       if (inherits(min, "greta_array") | inherits(max, "greta_array"))
         stop ("min and max must be fixed, they cannot be another greta array")
-      
+
       good_types <- is.numeric(min) && length(min) == 1 &
         is.numeric(max) && length(max) == 1
-      
+
       if (!good_types) {
-        
+
         stop ('min and max must be numeric vectors of length 1',
               call. = FALSE)
-        
+
       }
-      
+
       if (!is.finite(min) | !is.finite(max)) {
-        
+
         stop ('min and max must finite scalars',
               call. = FALSE)
-        
+
       }
-      
+
       if (min >= max) {
-        
+
         stop ('max must be greater than min',
               call. = FALSE)
-        
+
       }
-      
+
       # store min and max as numeric scalars (needed in create_target, done in
       # initialisation)
       self$min <- min
       self$max <- max
-      
+
       self$bounds <- c(min, max)
-      
+
       # initialize the rest
       super$initialize('uniform', dim)
-      
+
       # add them as children and greta arrays
       self$add_parameter(min, 'min')
       self$add_parameter(max, 'max')
-      
+
       # the density is fixed, so calculate it now
       self$log_density <- -log(max - min)
-      
+
     },
-    
+
     # default value (ignore any truncation arguments)
     create_target = function (...) {
       vble(truncation = c(self$min, self$max),
            dim = self$dim)
     },
-    
+
     tf_distrib = function (parameters, dag) {
-      
+
       tf_ld <- fl(self$log_density)
-      
+
       # weird hack to make TF see a gradient here
       log_prob <- function (x) {
         tf_ld + x * fl(0)
       }
-      
+
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
-      
+
     }
-    
+
   )
 )
 
@@ -1448,8 +1448,8 @@ bernoulli <- function (prob, dim = NULL)
 #' @rdname distributions
 #' @export
 binomial <- function (size, prob, dim = NULL) {
-  check_in_family("binomial")
-  distrib('binomial', size, prob, dim)
+  check_in_family("binomial", size)
+  distrib("binomial", size, prob, dim)
 }
 
 #' @rdname distributions
@@ -1470,8 +1470,8 @@ hypergeometric <- function (m, n, k, dim = NULL)
 #' @rdname distributions
 #' @export
 poisson <- function (lambda, dim = NULL) {
-  check_in_family("poisson")
-  distrib('poisson', lambda, dim)
+  check_in_family("poisson", lambda)
+  distrib("poisson", lambda, dim)
 }
 
 #' @rdname distributions

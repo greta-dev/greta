@@ -794,14 +794,18 @@ test_that('uniform distribution errors informatively', {
 
 test_that('poisson() and binomial() error informatively in glm', {
 
-  source('helpers.R')
-
-  y <- rbinom(10, 1, 0.5)
-  x <- rnorm(10)
-
-  expect_error(glm(y ~ x, family = poisson),
+  # if passed as an object
+  expect_error(glm(1 ~ 1, family = poisson),
                "in the family argment of another model.")
-  expect_error(glm(y ~ x, family = binomial),
+  expect_error(glm(1 ~ 1, family = binomial),
+               "in the family argment of another model.")
+
+  # if executed alone
+  expect_error(glm(1 ~ 1, family = poisson()),
+               "in the family argment of another model.")
+
+  # if given a link
+  expect_error(glm(1 ~ 1, family = poisson("sqrt")),
                "in the family argment of another model.")
 
 })
