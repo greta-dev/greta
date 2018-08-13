@@ -1123,11 +1123,6 @@ wishart_distribution <- R6Class (
 
     },
 
-    # tf_log_density_function = function (x, parameters, dag) {
-    #   lp <- self$tf_distrib(parameters, dag)$log_prob(x)
-    #   tf$reshape(lp, shape(1, 1))
-    # },
-
     # no CDF for multivariate distributions
     tf_cdf_function = NULL,
     tf_log_cdf_function = NULL
