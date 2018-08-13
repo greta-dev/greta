@@ -19,9 +19,9 @@ NULL
 #'   ignored).
 #'
 #' @param precision the floating point precision to use when evaluating this
-#'   model. Switching from \code{'single'} (the default) to \code{'double'}
-#'   should reduce the risk of numerical instability during sampling, but will
-#'   also increase the computation time, particularly for large models.
+#'   model. Switching from \code{"double"} (the default) to \code{"single"} may
+#'   decrease the computation time but increase the risk of numerical
+#'   instability during sampling.
 #'
 #' @param compile whether to apply
 #'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
@@ -49,15 +49,15 @@ NULL
 #' plot(m)
 #' }
 model <- function (...,
-                   precision = c('single', 'double'),
+                   precision = c("double", "single"),
                    compile = TRUE) {
 
-  check_tf_version('error')
+  check_tf_version("error")
 
   # get the floating point precision
   tf_float <- switch(match.arg(precision),
-                     single = "float32",
-                     double = "float64")
+                     double = "float64",
+                     single = "float32")
 
   # nodes required
   target_greta_arrays <- list(...)

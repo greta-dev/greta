@@ -97,9 +97,7 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   'bad' (numerically unstable) and therefore rejected.
   If you're getting a lot of numerical instability, you might want to
   manually define starting values to move the sampler into a more reasonable
-  part of the parameter space. Alternatively, you could redefine the model
-  (via \code{model}) to have double precision, though this will slow down
-  sampling.
+  part of the parameter space.
 
   Multiple mcmc chains can be run in parallel by setting the execution plan
   with the \code{future} package. Only \code{plan(multisession)} futures or
