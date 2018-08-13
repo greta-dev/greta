@@ -273,8 +273,9 @@ sampler <- R6Class(
 
       }
 
-      # scrub the free state trace
+      # scrub the free state trace and numerical rejections
       self$traced_free_state <- matrix(NA, 0, self$n_free)
+      self$numerical_rejections <- 0
 
       # main sampling
       if (verbose & sequential) {

@@ -56,7 +56,7 @@ test_that('bad mcmc proposals are rejected', {
   x <- rnorm(10000, 1e6, 1)
   z <- normal(-1e6, 1e-6)
   distribution(x) <- normal(z, 1e6)
-  m <- model(z)
+  m <- model(z, precision = "single")
 
   # catch badness in the progress bar
   with_mock(
@@ -73,13 +73,13 @@ test_that('bad mcmc proposals are rejected', {
   x <- rnorm(100000, 1e12, 1)
   z <- normal(-1e12, 1e-12)
   distribution(x) <- normal(z, 1e-12)
-  m <- model(z)
+  m <- model(z, precision = "single")
   expect_error(mcmc(m, n_samples = 1, warmup = 0),
                'Could not find reasonable starting values after 20 attempts')
 
   # proposals that are fine, but rejected anyway
   z <- normal(0, 1)
-  m <- model(z)
+  m <- model(z, precision = "single")
   expect_ok(mcmc(m,
                  hmc(epsilon = 100,
                      Lmin = 1,

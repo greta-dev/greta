@@ -8,17 +8,17 @@
 \alias{opt}
 \title{statistical inference on greta models}
 \usage{
-mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1, warmup = 1000,
-  chains = 1, n_cores = NULL, verbose = TRUE, pb_update = 50,
-  initial_values = NULL)
+mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
+  warmup = 1000, chains = 1, n_cores = NULL, verbose = TRUE,
+  pb_update = 50, initial_values = NULL)
 
 stashed_samples()
 
 extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
   verbose = TRUE, pb_update = 50)
 
-opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
-  control = list(), initial_values = NULL)
+opt(model, method = c("adagrad"), max_iterations = 100,
+  tolerance = 1e-06, control = list(), initial_values = NULL)
 }
 \arguments{
 \item{model}{greta_model object}
@@ -97,9 +97,7 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   'bad' (numerically unstable) and therefore rejected.
   If you're getting a lot of numerical instability, you might want to
   manually define starting values to move the sampler into a more reasonable
-  part of the parameter space. Alternatively, you could redefine the model
-  (via \code{model}) to have double precision, though this will slow down
-  sampling.
+  part of the parameter space.
 
   Multiple mcmc chains can be run in parallel by setting the execution plan
   with the \code{future} package. Only \code{plan(multisession)} futures or
