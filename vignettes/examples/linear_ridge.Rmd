@@ -1,0 +1,18 @@
+### Ridge prior
+
+Here we estimate a simple, one-variable Bayesian linear regression model that uses a *ridge* prior. The ridge prior has a frequentist interpretation where it is used as a penalty for regression coefficients. Among other effects, the penalty shrinks the coefficients towards zero to reduce variance without setting them to zero. The Bayesian version uses a normal distribution for the slopes and a inverse gamma prior for the strength of the penalty. Note that since the prior in our intercept is still improper, the joint prior is also improper.
+
+```{r linear_ridge_greta}
+# variables & priors
+int  <- variable()
+sd   <- cauchy(0, 3, truncation = c(0, Inf))
+
+tau  <- inverse_gamma(1, 1)
+coef <- normal(0, tau)
+
+# linear predictor
+mu <- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) <- normal(mu, sd)
+```

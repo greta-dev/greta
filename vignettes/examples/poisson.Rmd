@@ -31,6 +31,6 @@ beta <- normal(0, 10, dim = n_env)
 
 # model
 linear_predictor <- alpha + X %*% beta
-lambda <- log(linear_predictor)
+lambda <- exp(linear_predictor)
 distribution(Y) <- poisson(lambda)
 ```

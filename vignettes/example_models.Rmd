@@ -38,10 +38,76 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
+```{r child='examples/multiple_linear_warpbreaks.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multiple_linear_multilogit.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/multiple_linear_lasso.Rmd'}
+```
+
+<hr>
+
 ```{r child='examples/hierarchical_linear.Rmd'}
 ```
 
 <hr>
+
+```{r child='examples/hierarchical_linear_slopes.Rmd'}
+```
+
+## Common Bayesian priors
+
+The following examples show some common Bayesian priors of which some induce sparsity.
+
+<hr>
+
+```{r child='examples/linear_uninformative.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/linear_ridge.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/linear_lasso.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/linear_horseshoe.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/linear_finnish_horseshoe.Rmd'}
+```
+
+## Advanced Bayesian models
+
+Below are some more advanced examples implemented in greta.
+
+<hr>
+
+```{r child='examples/hierarchical_linear_general.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/hierarchical_linear_marginal.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/bayesian_neural_network.Rmd'}
+```
 
 ## BUGS models
 
@@ -59,7 +125,19 @@ The following sections provide greta implementations of some of these example mo
 ```{r child='examples/beetles.Rmd'}
 ```
 
+## Stan models
+
+The following few code examples show how Stan code can be translated in equivalent greta models.
+
 <hr>
+
+```{r child='examples/lightspeed.Rmd'}
+```
+
+<hr>
+
+```{r child='examples/eight_schools.Rmd'}
+```
 
 ## Ecological models
 

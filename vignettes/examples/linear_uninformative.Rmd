@@ -1,0 +1,16 @@
+### Improper flat prior
+
+A simple, one-variable Bayesian linear regression model that uses flat priors for the coefficients. A flat prior using `variable` puts an unbounded uniform distribution on the parameter. With a flat prior the posterior will be proportional to the likelihood and the MAP will normally correspond to the MLE. Flat priors are usually chosen when there is little knowledge about the parameters available.
+
+```{r linear_uninformative_greta}
+# variables & priors
+int  <- variable()
+coef <- variable()
+sd   <- cauchy(0, 3, truncation = c(0, Inf))
+
+# linear predictor
+mu <- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) <- normal(mu, sd)
+```
