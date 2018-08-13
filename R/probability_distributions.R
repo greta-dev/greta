@@ -1123,10 +1123,10 @@ wishart_distribution <- R6Class (
 
     },
 
-    tf_log_density_function = function (x, parameters, dag) {
-      lp <- self$tf_distrib(parameters, dag)$log_prob(x)
-      tf$reshape(lp, shape(1, 1))
-    },
+    # tf_log_density_function = function (x, parameters, dag) {
+    #   lp <- self$tf_distrib(parameters, dag)$log_prob(x)
+    #   tf$reshape(lp, shape(1, 1))
+    # },
 
     # no CDF for multivariate distributions
     tf_cdf_function = NULL,
@@ -1234,7 +1234,8 @@ lkj_correlation_distribution <- R6Class (
         diags <- tf$diag_part(x)
         det <- tf$square(tf$reduce_prod(diags))
         prob <- det ^ (eta - fl(1))
-        tf$log(prob)
+        lp <- tf$log(prob)
+        tf$squeeze(lp)
 
       }
 

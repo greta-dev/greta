@@ -236,7 +236,8 @@ dag_class <- R6Class(
       densities <- mapply(do.call,
                           density_functions,
                           target_lists,
-                          MoreArgs = list(envir = tfe))
+                          MoreArgs = list(envir = tfe),
+                          SIMPLIFY = FALSE)
 
       # reduce_sum them
       self$on_graph(summed_densities <- lapply(densities, tf$reduce_sum))
