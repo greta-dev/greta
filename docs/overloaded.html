@@ -25,7 +25,9 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -94,6 +96,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -368,6 +373,8 @@ greta provides a wide range of methods to apply common R functions and operation
 <span class='fu'>forwardsolve</span>(<span class='no'>l</span>, <span class='no'>x</span>, <span class='kw'>k</span> <span class='kw'>=</span> <span class='fu'>ncol</span>(<span class='no'>l</span>), <span class='kw'>upper.tri</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>transpose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='fu'>tapply</span>(<span class='no'>X</span>, <span class='no'>INDEX</span>, <span class='no'>FUN</span>, <span class='no'>...</span>)
+
+<span class='fu'>eigen</span>(<span class='no'>x</span>, <span class='no'>symmetric</span>, <span class='no'>only.values</span>, <span class='no'>EISPACK</span>)
 
 <span class='fu'>diag</span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>nrow</span>, <span class='no'>ncol</span>) </pre>
 <h2 class="hasAnchor" id="arguments">

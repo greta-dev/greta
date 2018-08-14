@@ -11,7 +11,7 @@
 
 
 
-<title>define a distribution over data</title>
+<title>MCMC samplers</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -342,7 +342,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">define a distribution over data</h1>
+<h1 class="title toc-ignore">MCMC samplers</h1>
 
 </div>
 
@@ -351,49 +351,46 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-<code>distribution</code> defines probability distributions over observed data, e.g. to set a model likelihood.
+Functions to set up MCMC samplers and change the startng values of their parameters, for use in <code><a href='inference.html'>mcmc</a>()</code>.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<pre class="r"><span class='fu'>distribution</span>(<span class='no'>greta_array</span>) <span class='kw'>&lt;-</span> <span class='no'>value</span>
-
-<span class='fu'>distribution</span>(<span class='no'>greta_array</span>) </pre>
+<pre class="r"><span class='fu'>hmc</span>(<span class='kw'>Lmin</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Lmax</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>diag_sd</span> <span class='kw'>=</span> <span class='fl'>1</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
-<code>greta_array</code>
+<code>Lmin</code>
 <p>
-a data greta array. For the assignment method it must not already have a probability distribution assigned
+minimum number of leapfrog steps (positive integer, Lmin &gt; Lmax)
 </p>
-<code>value</code>
+<code>Lmax</code>
 <p>
-a greta array with a distribution (see <code><a href='distributions.html'>distributions</a></code>)
+maximum number of leapfrog steps (positive integer, Lmax &gt; Lmin)
+</p>
+<code>epsilon</code>
+<p>
+leapfrog stepsize hyperparameter (positive, will be tuned)
+</p>
+<code>diag_sd</code>
+<p>
+estimate of the posterior marginal standard deviations (positive, will be tuned).
+</p>
+<h2 class="hasAnchor" id="value">
+<a class="anchor" href="#value"></a>Value
+</h2>
+<p>
+a <code>sampler</code> object that can be passed to <code><a href='inference.html'>mcmc</a></code>.
 </p>
 <h2 class="hasAnchor" id="details">
 <a class="anchor" href="#details"></a>Details
 </h2>
 <p>
-The extract method returns the greta array if it has a distribution, or <code>NULL</code> if it doesn’t. It has no real use-case, but is included for completeness
+During the warmup iterations of <code>mcmc</code>, some of these sampler parameters will be tuned to improve the efficiency of the sampler, so the values provided here are used as starting values.
 </p>
-<h2 class="hasAnchor" id="examples">
-<a class="anchor" href="#examples"></a>Examples
-</h2>
-<pre class="r">
-
-<span class='co'># define a model likelihood</span>
-
-<span class='co'># observed data and mean parameter to be estimated</span>
-<span class='co'># (explicitly coerce data to a greta array so we can refer to it later)</span>
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>rnorm</span>(<span class='fl'>5</span>, <span class='fl'>0</span>, <span class='fl'>3</span>))
-
-<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span>(-<span class='fl'>3</span>, <span class='fl'>3</span>)
-
-<span class='co'># define the distribution over y (the model likelihood)</span>
-<span class='fu'>distribution</span>(<span class='no'>y</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='fl'>1</span>)
-
-<span class='co'># get the distribution over y</span>
-<span class='fu'>distribution</span>(<span class='no'>y</span>)</pre>
+<p>
+For <code>hmc()</code>, the number of leapfrog steps at each iteration is selected uniformly at random from between <code>Lmin</code> and <code>Lmax</code>. <code>diag_sd</code> is used to rescale the parameter space to make it more uniform, and make sampling more efficient.
+</p>
 
 
 

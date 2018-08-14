@@ -25,7 +25,9 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -94,6 +96,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -351,8 +356,7 @@ Create a <code>greta_model</code> object representing a statistical model (using
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
-<pre class="r"><span class='fu'>model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"single"</span>, <span class='st'>"double"</span>), <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+<pre class="r"><span class='fu'>model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"double"</span>, <span class='st'>"single"</span>), <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
 <span class='co'># S3 method for greta_model</span>
 <span class='fu'>print</span>(<span class='no'>x</span>, <span class='no'>...</span>)
@@ -368,11 +372,7 @@ for <code>model</code>: <code>greta_array</code> objects to be tracked by the mo
 </p>
 <code>precision</code>
 <p>
-the floating point precision to use when evaluating this model. Switching from <code>‘single’</code> (the default) to <code>‘double’</code> should reduce the risk of numerical instability during sampling, but will also increase the computation time, particularly for large models.
-</p>
-<code>n_cores</code>
-<p>
-the number of cpu cores to use when evaluating this model. Defaults to and cannot exceed the number detected by <code>parallel::detectCores</code>.
+the floating point precision to use when evaluating this model. Switching from <code>“double”</code> (the default) to <code>“single”</code> may decrease the computation time but increase the risk of numerical instability during sampling.
 </p>
 <code>compile</code>
 <p>
