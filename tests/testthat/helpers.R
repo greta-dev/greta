@@ -227,20 +227,6 @@ sample_distribution <- function (greta_array, n = 10,
   expect_true(all(samples >= lower & samples <= upper))
 }
 
-# R versions of dynamics module methods
-it_lambda <- function (matrix, state, niter) {
-  states <- list(state)
-  for (i in seq_len(niter))
-    states[[i + 1]] <- states[[i]] %*% matrix
-  states[[niter + 1]][1] / states[[niter]][1]
-}
-
-it_state <- function (matrix, state, niter) {
-  for (i in seq_len(niter))
-    state <- state %*% matrix
-  state[1, ]
-}
-
 compare_truncated_distribution <- function (greta_fun,
                                             which,
                                             parameters,

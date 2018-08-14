@@ -24,9 +24,3 @@ You report bugs or request features by leaving a message on the [GitHub issue tr
 greta is an open source project, and I would welcome contributions from anyone with time to spare!
 
 The [issues tracker](https://github.com/greta-dev/greta/issues) already lists a number of extensions I have planned. If you think you can help implement one of those (or incorporate your own idea), please leave a message there first so we can discuss how to do it, and so that we aren't duplicating effort.
-
-###modules
-
-greta has a basic module system to package up more 'niche' functionality.
-The [`dynamics` module](dynamics-module.html) is an example of a module containing functions for analysing stage-structured dynamical models.
-I would be particularly keen to add modules contributed by other people, to make greta useful to their use cases.
