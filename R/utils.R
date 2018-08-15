@@ -381,7 +381,7 @@ check_dimension <- function (vectors = list(),
   if (!is.null(target)) {
 
     # make sure it's a scalar
-    if (length(target) != 1 || target < 1) {
+    if (length(target) != 1 || target < 1 || !is.finite(target)) {
       stop ("'dimension' must be a positive scalar integer ",
             "giving the dimension of the distribution",
             call. = FALSE)

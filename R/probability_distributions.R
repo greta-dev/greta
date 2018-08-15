@@ -659,7 +659,7 @@ dirichlet_distribution <- R6Class (
 
       dim <- check_multivariate_dims(vectors = list(alpha),
                                      n_realisations = n_realisations,
-                                     dimension = dimensions)
+                                     dimension = dimension)
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
@@ -671,8 +671,7 @@ dirichlet_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      # transpose and scale probs to get absolute density correct
-      alpha <- tf$transpose(parameters$alpha)
+      alpha <- parameters$alpha
       tfp$distributions$Dirichlet(concentration = alpha)
     },
 
@@ -698,7 +697,7 @@ dirichlet_multinomial_distribution <- R6Class (
       dim <- check_multivariate_dims(scalars = list(size),
                                      vectors = list(alpha),
                                      n_realisations = n_realisations,
-                                     dimension = dimensions)
+                                     dimension = dimension)
 
 
       # need to handle size as a vector!
@@ -706,15 +705,15 @@ dirichlet_multinomial_distribution <- R6Class (
       # coerce the parameter arguments to nodes and add as children and
       # parameters
       super$initialize("dirichlet_multinomial",
-                       dim = dim)
+                       dim = dim,
+                       discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(alpha, 'alpha')
 
     },
 
     tf_distrib = function (parameters, dag) {
-      # transpose and scale probs to get absolute density correct
-      alpha <- tf$transpose(parameters$alpha)
+      alpha <- parameters$alpha
       distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
               concentration = alpha)
@@ -741,7 +740,7 @@ multinomial_distribution <- R6Class (
       dim <- check_multivariate_dims(scalars = list(size),
                                      vectors = list(prob),
                                      n_realisations = n_realisations,
-                                     dimension = dimensions)
+                                     dimension = dimension)
 
       # need to make sure size is a column vector!
 
@@ -756,8 +755,8 @@ multinomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      # transpose and scale probs to get absolute density correct
-      probs <- tf$transpose(parameters$prob)
+      # scale probs to get absolute density correct
+      probs <- parameters$prob
       probs <- probs / tf$reduce_sum(probs)
       tfp$distributions$Multinomial(total_count = parameters$size,
                                     probs = probs)
@@ -782,7 +781,7 @@ categorical_distribution <- R6Class (
 
       dim <- check_multivariate_dims(vectors = list(prob),
                                      n_realisations = n_realisations,
-                                     dimension = dimensions)
+                                     dimension = dimension)
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
@@ -792,8 +791,8 @@ categorical_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      # transpose and scale probs to get absolute density correct
-      probs <- tf$transpose(parameters$prob)
+      # scale probs to get absolute density correct
+      probs <- parameters$prob
       probs <- probs / tf$reduce_sum(probs)
       tfp$distributions$Multinomial(total_count = fl(1),
                                     probs = probs)
@@ -885,7 +884,7 @@ multivariate_normal_distribution <- R6Class (
       else
         L <- tf$transpose(parameters$Sigma)
 
-      mu <- tf$transpose(parameters$mean)
+      mu <- parameters$mean
       tfp$distributions$MultivariateNormalTriL(loc = mu,
                                                scale_tril = L)
     },
