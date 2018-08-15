@@ -1102,20 +1102,18 @@ wishart_distribution <- R6Class (
 
       df <- tf$squeeze(parameters$df)
 
+      wish <- tfp$distributions$Wishart
+
       if (is_cholesky) {
 
-        # find and use the tensor for the cholesky factor
+        # if it's available, find and use the tensor for the cholesky factor
         cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
-
-        wish_chol <- tfp$distributions$WishartCholesky
-        distrib <- wish_chol(df = df,
-                             scale = tf$transpose(cholesky_scale))
+        t_cholesky_scale <- tf$transpose(cholesky_scale)
+        distrib <- wish(df = df, scale_tril = t_cholesky_scale)
 
       } else {
 
-        wish <- tfp$distributions$WishartFull
-        distrib <- wish(df = df,
-                        scale = parameters$Sigma)
+        distrib <- wish(df = df, scale = parameters$Sigma)
 
       }
 
