@@ -62,7 +62,8 @@ get_density <- function (distrib, data) {
 
 }
 
-compare_distribution <- function (greta_fun, r_fun, parameters, x, dim = NULL) {
+compare_distribution <- function (greta_fun, r_fun, parameters, x,
+                                  dim = NULL, multivariate = FALSE) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.
   # 'greta_fun' is the greta distribution constructor function (e.g. normal())
@@ -78,9 +79,20 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x, dim = NULL) {
   if (is.null(dim))
     dim <- NROW(x)
 
-  # no dim for wishart
-  if (!identical(names(parameters), c('df', 'Sigma')))
-    parameters_greta <- c(parameters_greta, list(dim = dim))
+  # add the output dimension to the arguments list
+  dim_list <- list(dim = dim)
+
+  # if it's a multivariate distribution name it n_realisations
+  if (multivariate)
+    names(dim_list) <- "n_realisations"
+
+  # don't add it for wishart & lkj, which don't mave multiple realisations
+  is_wishart <- identical(names(parameters), c("df", "Sigma"))
+  is_lkj <- identical(names(parameters), c("eta", "dimension"))
+  if (is_wishart | is_lkj)
+    dim_list <- list()
+
+  parameters_greta <- c(parameters_greta, dim_list)
 
   # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
