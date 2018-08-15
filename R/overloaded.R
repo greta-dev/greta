@@ -9,7 +9,7 @@
 #'   they need to be documented to satisfy CRAN's check.
 #'
 #' @param
-#'   x,y,nrow,ncol,MARGIN,STATS,FUN,check.margin,\dots,r,k,upper.tri,transpose,l,na.rm,dims,X,INDEX
+#'   x,y,nrow,ncol,MARGIN,STATS,FUN,check.margin,\dots,r,k,upper.tri,transpose,l,na.rm,dims,X,INDEX,symmetric,only.values,EISPACK
 #'    arguments as in original documentation
 #'
 NULL
