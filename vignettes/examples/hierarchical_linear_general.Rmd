@@ -12,12 +12,11 @@ n_species  <- length(unique(iris$Species))
 species_id <- as.numeric(iris$Species)
 
 Z <- model.matrix(~ Species + Sepal.Length * Species - 1, data = iris)
-gamma <- zeros(n_species * 2)
 
-for (s in unique(species_id)) {
-  gamma_sd <- diag(2)
-  gamma[c(s, s + n_species)] <- multivariate_normal(rep(0, 2), gamma_sd) 
-}
+gamma_matrix <- multivariate_normal(matrix(0, 1, 2),
+                                    diag(2),
+                                    n_realisations = 3) 
+gamma <- c(gamma_matrix)
 
 wi <- as_data(iris$Sepal.Width)
 Z  <- as_data(Z)

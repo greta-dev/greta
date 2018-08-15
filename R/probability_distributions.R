@@ -1263,10 +1263,10 @@ distribution_classes_module <- module(uniform_distribution,
 #' # a multivariate normal variable, with correlation between two elements
 #' Sig <- diag(4)
 #' Sig[3, 4] <- Sig[4, 3] <- 0.6
-#' theta <- multivariate_normal(rep(mu, 4), Sig)
+#' theta <- multivariate_normal(t(rep(mu, 4)), Sig)
 #'
 #' # 10 independent replicates of that
-#' theta <- multivariate_normal(rep(mu, 4), Sig, dim = 10)
+#' theta <- multivariate_normal(t(rep(mu, 4)), Sig, n_realisations = 10)
 #'
 #' # a Wishart variable with the same covariance parameter
 #' theta <- wishart(df = 5, Sigma = Sig)

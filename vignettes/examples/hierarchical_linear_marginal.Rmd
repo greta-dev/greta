@@ -27,5 +27,5 @@ Z <- as_data(Z)
 V <- V + Z %*% G %*% t(Z)
 
 sep <- t(iris$Sepal.Width)
-distribution(sep) <- multivariate_normal(mu, V)
+distribution(sep) <- multivariate_normal(t(mu), V)
 ```
