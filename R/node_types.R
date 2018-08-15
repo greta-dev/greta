@@ -18,9 +18,22 @@ data_node <- R6Class(
     },
 
     tf = function (dag) {
-      assign(dag$tf_name(self),
-             tf$constant(self$value(), dtype = tf_float()),
-             envir = dag$tf_environment)
+
+      tfe <- dag$tf_environment
+      tf_name <- dag$tf_name(self)
+
+      value <- self$value()
+      shape <- to_shape(dim(value))
+
+      # create placeholder
+      assign(tf_name,
+             tf$placeholder(shape = shape,
+                            dtype = tf_float()),
+             envir = tfe)
+
+      # put data in the data list
+      tfe$data_list[[tf_name]] <- value
+
     }
   )
 )

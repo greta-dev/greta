@@ -176,9 +176,14 @@ run_samplers <- function (samplers,
     verbose <- FALSE
   }
 
+  if (chains == 1) {
+    lapply_op <- lapply
+  } else {
+    lapply_op <- future.apply::future_lapply
+  }
 
   # run chains on samplers (return list so we can handle parallelism here)
-  samplers <- future.apply::future_lapply(samplers,
+  samplers <- lapply_op(samplers,
                                           do("run_chain"),
                                           n_samples = n_samples,
                                           thin = thin,

@@ -7,9 +7,11 @@ dag_class <- R6Class(
   public = list (
 
     node_list = list(),
+    data_list = list(),
     node_types = NA,
     node_tf_names = NA,
     tf_environment = NA,
+    tf_environment_temp = NA,
     tf_graph = NA,
     target_nodes = NA,
     parameters_example = NA,
@@ -331,6 +333,7 @@ dag_class <- R6Class(
         old_env <- self$tf_environment
         on.exit(self$tf_environment <- old_env)
         tfe <- self$tf_environment <- new.env()
+        self$tf_environment_temp <- tfe
         tfe$free_state <- free_state
         self$define_tf_body()
         self$define_joint_density()
@@ -385,7 +388,7 @@ dag_class <- R6Class(
 
       # create a feed dict in the TF environment
       self$tf_environment$parameters <- list(free_state = as.matrix(parameters))
-      self$tf_run(parameter_dict <- do.call(dict, parameters))
+      self$tf_run(parameter_dict <- do.call(dict, c(parameters, data_list)))
 
     },
 
