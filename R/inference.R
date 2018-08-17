@@ -391,13 +391,13 @@ opt <- function (model,
   dag$build_feed_dict()
 
   # initialize the variables, then set the ones we care about
-  tf_sess_run(tf$global_variables_initializer())
+  dag$tf_sess_run(tf$global_variables_initializer())
 
-  on_graph( tfe$optimiser_init <- tf$constant(initial_values,
-                                              shape = tfe$free_state$shape,
-                                              dtype = tf_float()))
+  dag$on_graph(tfe$optimiser_init <- tf$constant(initial_values,
+                                                 shape = tfe$free_state$shape,
+                                                 dtype = tf_float()))
 
-  . <- tf_run(free_state$assign(optimiser_init))
+  . <- dag$tf_run(free_state$assign(optimiser_init))
 
 
   # set up & run optimiser
@@ -412,33 +412,48 @@ opt <- function (model,
                              optimiser$parameters),
                  tol = tolerance)
 
-    on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
-    out <- tf_run(tf_optimiser$minimize(sess))
+    dag$on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
 
-    it <- NA
+    # track convergence information via a callback
+    diff <- old_obj <- Inf
+    it <- 0
+
+    tfe$progress <- function (obj) {
+      it <<- it + 1
+      diff <<- abs(old_obj - obj)
+      old_obj <<- obj
+    }
+
+    # run the optimiser
+    out <- dag$tf_run(tf_optimiser$minimize(sess,
+                                            feed_dict = feed_dict,
+                                            loss_callback = progress,
+                                            fetches=list(-joint_density)))
+
 
   } else {
 
     optimise_fun <- eval(parse(text = optimiser$tf_optimiser))
-    on_graph(tfe$tf_optimiser <- do.call(optimise_fun, optimiser$parameters))
-    tf_run(train <- tf_optimiser$minimize(-joint_density))
+    dag$on_graph(tfe$tf_optimiser <- do.call(optimise_fun,
+                                             optimiser$parameters))
+    dag$tf_run(train <- tf_optimiser$minimize(-joint_density))
 
     # initialize the variables, then set the ones we care about
-    tf_run(sess$run(tf$global_variables_initializer()))
+    dag$tf_sess_run(tf$global_variables_initializer())
 
-    on_graph( tfe$optimiser_init <- tf$constant(initial_values,
-                                                shape = tfe$free_state$shape,
-                                                dtype = tf_float()))
+    dag$on_graph(tfe$optimiser_init <- tf$constant(initial_values,
+                                                   shape = tfe$free_state$shape,
+                                                   dtype = tf_float()))
 
-    . <- tf_run(free_state$assign(optimiser_init))
+    . <- dag$tf_run(free_state$assign(optimiser_init))
 
     diff <- old_obj <- Inf
     it <- 0
 
     while (it < max_iterations & diff > tolerance) {
       it <- it + 1
-      tf_run(sess$run(train))
-      obj <- tf_run(sess$run(-joint_density))
+      dag$tf_sess_run(train)
+      obj <- dag$tf_sess_run(-joint_density)
       diff <- abs(old_obj - obj)
       old_obj <- obj
     }
@@ -447,7 +462,7 @@ opt <- function (model,
 
   # return in standardised format
   list(par = model$dag$trace_values(),
-       value = dag$tf_sess_run(joint_density),
+       value = -old_obj,
        iterations = it,
        convergence = ifelse(it < max_iterations, 0, 1))
 
