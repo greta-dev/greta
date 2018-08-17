@@ -14,7 +14,7 @@ expect_ok <- function (expr)
   expect_error(expr, NA)
 
 # evaluate a greta_array, node, or tensor
-grab <- function (x) {
+grab <- function (x, dag = NULL) {
 
   if (inherits(x, "node"))
     x <- as.greta_array(x)
@@ -26,7 +26,10 @@ grab <- function (x) {
              envir = dag$tf_environment)
   }
 
-  tf$Session()$run(x)
+  # generate the feed dict for data
+  dag$tf_run(feed_dict <- do.call(dict, data_list))
+  tf$Session()$run(x,
+                   feed_dict = dag$tf_environment$feed_dict)
 
 }
 
@@ -55,7 +58,7 @@ get_density <- function (distrib, data) {
   # get the log density as a vector
   tensor_name <- dag$tf_name(distrib$node$distribution)
   tensor <- get(tensor_name, envir = dag$tf_environment)
-  as.vector(grab(tensor))
+  as.vector(grab(tensor, dag))
 
 }
 
@@ -99,7 +102,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x, dim = NULL) {
   target <- get(dag$tf_name(x_$node), envir = tfe)
   density <- get(dag$tf_name(distrib_node), envir = tfe)
   result <- density(target)
-  greta_log_density <- as.vector(grab(result))
+  greta_log_density <- as.vector(grab(result, dag))
 
   # get R version
   r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
@@ -270,7 +273,7 @@ compare_truncated_distribution <- function (greta_fun,
   target <- get(dag$tf_name(x_$node), envir = tfe)
   density <- get(dag$tf_name(distrib_node), envir = tfe)
   result <- density(target)
-  greta_log_density <- as.vector(grab(result))
+  greta_log_density <- as.vector(grab(result, dag))
 
   # return absolute difference
   abs(greta_log_density - r_log_density)
