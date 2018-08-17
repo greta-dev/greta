@@ -5,7 +5,7 @@
 #'   maximise the joint density of a model) and change their tuning parameters,
 #'   for use in \code{\link{opt}()}.
 #'
-#' @return an \code{optimiser} object that can be passed to \code{\link{mcmc}}.
+#' @return an \code{optimiser} object that can be passed to \code{\link{opt}}.
 NULL
 
 #' @rdname optimisers

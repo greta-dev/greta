@@ -18,7 +18,7 @@ optimal value}
 tune the algorithm}
 }
 \value{
-an \code{optimiser} object that can be passed to \code{\link{mcmc}}.
+an \code{optimiser} object that can be passed to \code{\link{opt}}.
 }
 \description{
 Functions to set up optimisers (which find parameters that
