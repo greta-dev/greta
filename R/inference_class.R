@@ -461,16 +461,13 @@ sampler <- R6Class(
                              sampler_burst_length = as.integer(n_samples),
                              sampler_thin = as.integer(thin))
 
-      # add the data list (to put in placeholders)
-      tfe$sampler_values <- c(sampler_values,
-                              self$sampler_parameter_values(),
-                              tfe$data_list)
+      sampler_dict_list <- c(sampler_values,
+                             self$sampler_parameter_values())
 
-      dag$tf_run(sampler_dict <- do.call(dict, sampler_values))
+      dag$build_feed_dict(sampler_dict_list)
 
       # run sampler
-      batch_results <- dag$tf_run(sess$run(sampler_batch,
-                                           feed_dict = sampler_dict))
+      batch_results <- dag$tf_sess_run(sampler_batch)
 
       # get trace of free state
       free_state_draws <- batch_results[[1]]

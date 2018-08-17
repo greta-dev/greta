@@ -56,11 +56,31 @@ dag_class <- R6Class(
     },
 
     # execute an exporession in the tensorflow environment
-    tf_run = function (expr) {
+    tf_run = function (expr, as_text = FALSE) {
+
       tfe <- self$tf_environment
-      tfe$expr <- substitute(expr)
+
+      if (as_text)
+        tfe$expr <- parse(text = expr)
+      else
+        tfe$expr <- substitute(expr)
+
       on.exit(rm("expr", envir = tfe))
+
       self$on_graph(with(tfe, eval(expr)))
+
+    },
+
+    # sess$run() an expression in the tensorflow environment, with the feed dict
+    tf_sess_run = function (expr, as_text = FALSE) {
+
+      if (!as_text)
+        expr <- deparse(substitute(expr))
+
+      expr <- paste0("sess$run(", expr, ", feed_dict = feed_dict)")
+
+      self$tf_run(expr, as_text = TRUE)
+
     },
 
     # return a list of nodes connected to those in the target node list
@@ -79,9 +99,8 @@ dag_class <- R6Class(
 
     },
 
+    # create human-readable names for TF tensors
     make_names = function () {
-      # given a vector of node types, create names for TF tensors, sequentially
-      # within each type
 
       types <- self$node_types
 
@@ -394,11 +413,25 @@ dag_class <- R6Class(
 
     },
 
+    build_feed_dict = function (dict_list = list(),
+                                data_list = self$tf_environment$data_list) {
+
+      tfe <- self$tf_environment
+
+      # put the list in the environment temporarily
+      tfe$dict_list <- c(dict_list, data_list)
+      on.exit(rm("dict_list", envir = tfe))
+
+      # roll into a dict in the tf environment
+      self$tf_run(feed_dict <- do.call(dict, dict_list))
+
+    },
+
     send_parameters = function (parameters) {
 
       # create a feed dict in the TF environment
-      self$tf_environment$parameters <- list(free_state = as.matrix(parameters))
-      self$tf_run(parameter_dict <- do.call(dict, c(parameters, data_list)))
+      parameter_list <- list(free_state = as.matrix(parameters))
+      self$build_feed_dict(parameter_list)
 
     },
 
@@ -406,34 +439,31 @@ dag_class <- R6Class(
     # variable nodes, with or without applying the jacobian adjustment
     log_density = function(free_state = NULL, adjusted = TRUE) {
 
-      if (!is.null(free_state)) {
+      if (!is.null(free_state))
         self$send_parameters(free_state)
-      }
 
-      cleanly(self$tf_run(sess$run(joint_density_adj,
-                                   feed_dict = parameter_dict)))
+      cleanly(self$tf_sess_run(joint_density_adj))
 
     },
 
     gradients = function (free_state = NULL, adjusted = TRUE) {
 
-      if (!is.null(free_state)) {
+      if (!is.null(free_state))
         self$send_parameters(free_state)
-      }
 
-      cleanly(self$tf_run(sess$run(gradients_adj,
-                                   feed_dict = parameter_dict)))
+      cleanly(self$tf_sess_run(gradients_adj))
 
     },
 
     # return the current values of the traced nodes, as a named vector
     trace_values = function (free_state = NULL) {
 
+      # either update the parameters & build the feed dict, or just define the
+      # feed dict for data
       if (!is.null(free_state)) {
         self$send_parameters(free_state)
       } else {
-        # otherwise just define the data
-        self$tf_run(parameter_dict <- do.call(dict, data_list))
+        self$build_feed_dict()
       }
 
       tfe <- self$tf_environment
@@ -448,7 +478,7 @@ dag_class <- R6Class(
       # evaluate them in the tensorflow environment
       trace_list <- lapply(target_tensors,
                            tfe$sess$run,
-                           feed_dict = tfe$parameter_dict)
+                           feed_dict = tfe$feed_dict)
 
       # loop through elements flattening these arrays to vectors and giving the
       # elements better names

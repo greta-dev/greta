@@ -407,10 +407,10 @@ opt <- function (model,
   }
 
   # create a feed dict with the data
-  dag$tf_run(parameter_dict <- do.call(dict, data_list))
+  dag$build_feed_dict()
 
   # initialize the variables, then set the ones we care about
-  dag$tf_run(sess$run(tf$global_variables_initializer()))
+  dag$tf_sess_run(tf$global_variables_initializer())
   parameters <- relist_tf(initial_values, model$dag$parameters_example)
 
   for (i in seq_along(parameters)) {
@@ -427,17 +427,14 @@ opt <- function (model,
 
   while (it < max_iterations & diff > tolerance) {
     it <- it + 1
-    dag$tf_run(sess$run(train,
-                        feed_dict = parameter_dict))
-    obj <- dag$tf_run(sess$run(-joint_density,
-                               feed_dict = parameter_dict))
+    dag$tf_sess_run(train)
+    obj <- dag$tf_sess_run(-joint_density)
     diff <- abs(old_obj - obj)
     old_obj <- obj
   }
 
   list(par = model$dag$trace_values(),
-       value = dag$tf_run(sess$run(joint_density,
-                                   feed_dict = parameter_dict)),
+       value = dag$tf_sess_run(joint_density),
        iterations = it,
        convergence = ifelse(it < max_iterations, 0, 1))
 

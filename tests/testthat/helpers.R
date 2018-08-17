@@ -27,7 +27,7 @@ grab <- function (x, dag = NULL) {
   }
 
   # generate the feed dict for data
-  dag$tf_run(feed_dict <- do.call(dict, data_list))
+  dag$build_feed_dict()
   tf$Session()$run(x,
                    feed_dict = dag$tf_environment$feed_dict)
 

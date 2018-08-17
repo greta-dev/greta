@@ -232,35 +232,20 @@ calculate_list <- function(target, values) {
           call. = FALSE)
   }
 
-  # to find the greta arrays that
-
-  # # check that all of the variables are set
-  # # list of variable tf names
-  # variable_nodes <- dag$node_list[dag$node_types == "variable"]
-  # variable_names <- vapply(variable_nodes,
-  #                          dag$tf_name,
-  #                          FUN.VALUE = "")
-  #
-  # if (!all(variable_names %in% names(values))) {
-  #   stop ("values have not been provided for all variables",
-  #         call. = FALSE)
-  # }
-
   # add values or data not specified by the user
   data_list <- tfe$data_list
   missing <- !names(data_list) %in% names(values)
-  sub_data_list <- data_list[missing]
 
   # send list to tf environment and roll into a dict
-  tfe$eval_list <- c(values, sub_data_list)
-  ex <- expression(with_dict <- do.call(dict, eval_list))
-  eval(ex, envir = dag$tf_environment)
+  dag$build_feed_dict(values, data_list = data_list[missing])
 
   # evaluate the target there
-  ex <- sprintf("sess$run(%s, feed_dict = with_dict)",
-                dag$tf_name(target$node))
-  result <- eval(parse(text = ex),
-                 envir = dag$tf_environment)
+  # ex <- sprintf("sess$run(%s, feed_dict = feed_dict)",
+  #               dag$tf_name(target$node))
+  # result <- eval(parse(text = ex),
+  #                envir = dag$tf_environment)
+  name <- dag$tf_name(target$node)
+  result <- dag$tf_sess_run(name, as_text = TRUE)
 
   result
 
