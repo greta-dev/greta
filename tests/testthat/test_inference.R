@@ -10,18 +10,28 @@ test_that('opt converges', {
   distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
-  o <- opt(m)
 
-  # should have converged
-  expect_equal(o$convergence, 0)
+  # loop through all optimisers
 
-  # should be fewer than 100 iterations
-  expect_lte(o$iterations, 100)
+  optimisers <- list(bfgs, adagrad)
 
-  # should be close to the truth
-  expect_true(all(abs(x - o$par) < 1e-3))
+  for (optimiser in optimisers) {
+
+    o <- opt(m, optimiser = optimiser())
+
+    # should have converged in fewer than 100 iterations and be close to truth
+    expect_equal(o$convergence, 0)
+    expect_lte(o$iterations, 100)
+    expect_true(all(abs(x - o$par) < 1e-3))
+
+  }
+
 
 })
+
+
+
+
 
 
 test_that('opt accepts initial values', {
