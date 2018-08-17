@@ -176,14 +176,9 @@ run_samplers <- function (samplers,
     verbose <- FALSE
   }
 
-  if (chains == 1) {
-    lapply_op <- lapply
-  } else {
-    lapply_op <- future.apply::future_lapply
-  }
 
   # run chains on samplers (return list so we can handle parallelism here)
-  samplers <- lapply_op(samplers,
+  samplers <- future.apply::future_lapply(samplers,
                                           do("run_chain"),
                                           n_samples = n_samples,
                                           thin = thin,
@@ -384,9 +379,8 @@ opt <- function (model,
   optimiser <- joint_density <- sess <- NULL
 
   # get the tensorflow environment
-  tfe <- model$dag$tf_environment
-  on_graph <- model$dag$on_graph
-  tf_run <- model$dag$tf_run
+  dag <- model$dag
+  tfe <- dag$tf_environment
 
   # get the method
   method <- match.arg(method)
@@ -403,8 +397,8 @@ opt <- function (model,
   con[names(control)] <- control
 
   # set up optimiser
-  on_graph(tfe$optimiser <- do.call(optimise_fun, con))
-  tf_run(train <- optimiser$minimize(-joint_density))
+  dag$on_graph(tfe$optimiser <- do.call(optimise_fun, con))
+  dag$tf_run(train <- optimiser$minimize(-joint_density))
 
   # random initial values if unspecified
   if (is.null(initial_values)) {
@@ -412,17 +406,20 @@ opt <- function (model,
     initial_values[] <- rnorm(length(initial_values))
   }
 
+  # create a feed dict with the data
+  dag$tf_run(parameter_dict <- do.call(dict, data_list))
+
   # initialize the variables, then set the ones we care about
-  tf_run(sess$run(tf$global_variables_initializer()))
+  dag$tf_run(sess$run(tf$global_variables_initializer()))
   parameters <- relist_tf(initial_values, model$dag$parameters_example)
 
   for (i in seq_along(parameters)) {
     variable_name <- paste0(names(parameters)[i], '_free')
     vble <- tfe[[variable_name]]
-    on_graph( init <- tf$constant(parameters[[i]],
-                                  shape = vble$shape,
-                                  dtype = tf_float()))
-    . <- on_graph(tfe$sess$run(vble$assign(init)))
+    dag$on_graph( init <- tf$constant(parameters[[i]],
+                                      shape = vble$shape,
+                                      dtype = tf_float()))
+    . <- dag$on_graph(tfe$sess$run(vble$assign(init)))
   }
 
   diff <- old_obj <- Inf
@@ -430,14 +427,17 @@ opt <- function (model,
 
   while (it < max_iterations & diff > tolerance) {
     it <- it + 1
-    tf_run(sess$run(train))
-    obj <- tf_run(sess$run(-joint_density))
+    dag$tf_run(sess$run(train,
+                        feed_dict = parameter_dict))
+    obj <- dag$tf_run(sess$run(-joint_density,
+                               feed_dict = parameter_dict))
     diff <- abs(old_obj - obj)
     old_obj <- obj
   }
 
   list(par = model$dag$trace_values(),
-       value = tf_run(sess$run(joint_density)),
+       value = dag$tf_run(sess$run(joint_density,
+                                   feed_dict = parameter_dict)),
        iterations = it,
        convergence = ifelse(it < max_iterations, 0, 1))
 

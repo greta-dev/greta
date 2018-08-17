@@ -163,6 +163,7 @@ calculate_list <- function(target, values) {
   # define the dag and TF graph
   dag <- dag_class$new(all_greta_arrays)
   dag$define_tf(log_density = FALSE, gradients = FALSE)
+  tfe <- dag$tf_environment
 
   # build and send a dict for the fixed values
   fixed_nodes <- lapply(fixed_greta_arrays,
@@ -245,8 +246,13 @@ calculate_list <- function(target, values) {
   #         call. = FALSE)
   # }
 
-  # send it to tf
-  assign("eval_list", values, envir = dag$tf_environment)
+  # add values or data not specified by the user
+  data_list <- tfe$data_list
+  missing <- !names(data_list) %in% names(values)
+  sub_data_list <- data_list[missing]
+
+  # send list to tf environment and roll into a dict
+  tfe$eval_list <- c(values, sub_data_list)
   ex <- expression(with_dict <- do.call(dict, eval_list))
   eval(ex, envir = dag$tf_environment)
 

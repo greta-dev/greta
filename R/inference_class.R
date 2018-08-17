@@ -461,27 +461,10 @@ sampler <- R6Class(
                              sampler_burst_length = as.integer(n_samples),
                              sampler_thin = as.integer(thin))
 
+      # add the data list (to put in placeholders)
       tfe$sampler_values <- c(sampler_values,
                               self$sampler_parameter_values(),
                               tfe$data_list)
-
-      # because the data placeholders were created in a temporary tf environment
-      # (inside the log_prob function created with
-      # dag$generate_log_prob_function()), the placeholders from that
-      # environment need to supercede thise in tf_environment when creating the
-      # dict so that it can link the tensors to their values
-
-      tfe_temp <- dag$tf_environment_temp
-      data_names <- grep("^data_", ls(tfe_temp), value = TRUE)
-      data_names <- data_names[data_names != "data_list"]
-      for (name in data_names)
-        tfe[[name]] <- tfe_temp[[name]]
-
-      # jesus christ what a shitshow. this can be resolved more simply by first
-      # making the data nodes self-define in the environment, and then not
-      # creating a new tfe when defining the body. A certain amount of node
-      # redefinition would need to be done  so that future can distribute
-      # things.
 
       dag$tf_run(sampler_dict <- do.call(dict, sampler_values))
 

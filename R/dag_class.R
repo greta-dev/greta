@@ -7,11 +7,9 @@ dag_class <- R6Class(
   public = list (
 
     node_list = list(),
-    data_list = list(),
     node_types = NA,
     node_tf_names = NA,
     tf_environment = NA,
-    tf_environment_temp = NA,
     tf_graph = NA,
     target_nodes = NA,
     parameters_example = NA,
@@ -33,6 +31,7 @@ dag_class <- R6Class(
       # set up the tf environment, with a graph
       self$tf_environment <- new.env()
       self$tf_graph <- tf$Graph()
+      self$tf_environment$data_list = list()
 
       # stash an example list to relist parameters
       self$parameters_example <- self$example_parameters(flat = FALSE)
@@ -330,14 +329,25 @@ dag_class <- R6Class(
                         "joint_density")
 
       function (free_state) {
-        old_env <- self$tf_environment
-        on.exit(self$tf_environment <- old_env)
+
+        # temporarily define a new environment
+        tfe_old <- self$tf_environment
+        on.exit(self$tf_environment <- tfe_old)
         tfe <- self$tf_environment <- new.env()
-        self$tf_environment_temp <- tfe
+
+        # copy the placeholders over here, so they aren't recreated
+        data_names <- self$get_tf_names(types = "data")
+        for (name in data_names)
+          tfe[[name]] <- tfe_old[[name]]
+
+        # put the free state in the environment, and build out the tf graph
         tfe$free_state <- free_state
         self$define_tf_body()
+
+        # get the density and return
         self$define_joint_density()
         tfe[[target]]
+
       }
 
     },
@@ -421,6 +431,9 @@ dag_class <- R6Class(
 
       if (!is.null(free_state)) {
         self$send_parameters(free_state)
+      } else {
+        # otherwise just define the data
+        self$tf_run(parameter_dict <- do.call(dict, data_list))
       }
 
       tfe <- self$tf_environment
