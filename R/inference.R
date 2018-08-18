@@ -344,16 +344,8 @@ prep_initials <- function (initial_values, n_chains) {
 #' @param tolerance the numerical tolerance for the solution, the optimiser
 #'   stops when the (absolute) difference in the joint density between
 #'   successive iterations drops below this level
-#' @param method method used to optimise values. Currently only \code{adagrad}
-#'   is available
-#'
-#' @details Currently, the only implemented optimisation algorithm is Adagrad
-#'   (\code{method = "adagrad"}). The \code{control} argument can be used to
-#'   specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
-#'   \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
-#'   (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,
-#'   see \href{https://www.tensorflow.org/api_docs/python/tf/train}{the
-#'   TensorFlow docs} for more information
+#' @param optimiser an \code{optimiser} object giving the optimisation algorithm
+#'   and parameters See \code{\link{optimisers}}.
 #'
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
@@ -407,7 +399,7 @@ opt <- function (model,
     opt_fun <- eval(parse(text = "tf$contrib$opt$ScipyOptimizerInterface"))
 
     args <- list(loss = -tfe$joint_density,
-                 method = optimiser$method,
+                 method = optimiser$scipy_method,
                  options = c(maxiter = as.integer(max_iterations),
                              optimiser$parameters),
                  tol = tolerance)
@@ -432,6 +424,38 @@ opt <- function (model,
 
 
   } else {
+
+    # set the dtypes for special cases
+    if ("global_step" %in% names(optimiser$parameters)) {
+      param <- optimiser$parameters[["global_step"]]
+      dag$on_graph(tf_param <- tf$constant(param, dtype = tf$int64))
+      optimiser$parameters[["global_step"]] <- tf_param
+    }
+
+    fussy_optimisers <- c("proximal_gradient_descent", "proximal_adagrad")
+
+    if (optimiser$name == "proximal_gradient_descent") {
+
+      for (name in names(optimiser$parameters)) {
+        param <- optimiser$parameters[[name]]
+        dag$on_graph(tf_param <- tf$constant(param, dtype = tf$float64))
+        optimiser$parameters[[name]] <- tf_param
+      }
+
+    }
+
+    if (optimiser$name == "proximal_adagrad") {
+
+      fussy_params <- c("learning_rate",
+                        "l1_regularization_strength",
+                        "l2_regularization_strength")
+      for (name in fussy_params) {
+        param <- optimiser$parameters[[name]]
+        dag$on_graph(tf_param <- tf$constant(param, dtype = tf$float64))
+        optimiser$parameters[[name]] <- tf_param
+      }
+
+    }
 
     optimise_fun <- eval(parse(text = optimiser$tf_optimiser))
     dag$on_graph(tfe$tf_optimiser <- do.call(optimise_fun,

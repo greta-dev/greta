@@ -11,18 +11,29 @@ test_that('opt converges', {
 
   m <- model(z)
 
-  # loop through all optimisers
+  # loop through optimisers that might be expected to work
+  optimisers <- list(gradient_descent,
+                     adadelta,
+                     adagrad,
+                     adagrad_da,
+                     momentum,
+                     adam,
+                     ftrl,
+                     proximal_gradient_descent,
+                     proximal_adagrad,
+                     rms_prop,
+                     bfgs)
 
-  optimisers <- list(bfgs, adagrad)
+  for (optmr in optimisers) {
 
-  for (optimiser in optimisers) {
+    (o <- opt(m,
+              optimiser = optmr(),
+              max_iterations = 200))
 
-    o <- opt(m, optimiser = optimiser())
-
-    # should have converged in fewer than 100 iterations and be close to truth
+    # should have converged in fewer than 200 iterations and be close to truth
     expect_equal(o$convergence, 0)
-    expect_lte(o$iterations, 100)
-    expect_true(all(abs(x - o$par) < 1e-3))
+    expect_lte(o$iterations, 200)
+    expect_true(all(abs(x - o$par) < 1e-2))
 
   }
 

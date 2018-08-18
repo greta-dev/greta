@@ -2,11 +2,46 @@
 % Please edit documentation in R/optimisers.R
 \name{optimisers}
 \alias{optimisers}
+\alias{gradient_descent}
+\alias{adadelta}
 \alias{adagrad}
+\alias{adagrad_da}
+\alias{momentum}
+\alias{adam}
+\alias{ftrl}
+\alias{proximal_gradient_descent}
+\alias{proximal_adagrad}
+\alias{rms_prop}
 \alias{bfgs}
 \title{optimisation methods}
 \usage{
+gradient_descent(learning_rate = 0.01)
+
+adadelta(learning_rate = 0.001, rho = 1, epsilon = 1e-08)
+
 adagrad(learning_rate = 0.8, initial_accumulator_value = 0.1)
+
+adagrad_da(learning_rate = 0.8, global_step = 1L,
+  initial_gradient_squared_accumulator_value = 0.1,
+  l1_regularization_strength = 0, l2_regularization_strength = 0)
+
+momentum(learning_rate = 0.001, momentum = 0.9, use_nesterov = TRUE)
+
+adam(learning_rate = 0.1, beta1 = 0.9, beta2 = 0.999,
+  epsilon = 1e-08)
+
+ftrl(learning_rate = 1, learning_rate_power = -0.5,
+  initial_accumulator_value = 0.1, l1_regularization_strength = 0,
+  l2_regularization_strength = 0)
+
+proximal_gradient_descent(learning_rate = 0.01,
+  l1_regularization_strength = 0, l2_regularization_strength = 0)
+
+proximal_adagrad(learning_rate = 1, initial_accumulator_value = 0.1,
+  l1_regularization_strength = 0, l2_regularization_strength = 0)
+
+rms_prop(learning_rate = 0.1, decay = 0.9, momentum = 0,
+  epsilon = 1e-10)
 
 bfgs()
 }
@@ -14,8 +49,31 @@ bfgs()
 \item{learning_rate}{the size of steps (in parameter space) towards the
 optimal value}
 
+\item{rho}{the decay rate}
+
+\item{epsilon}{a small constant used to condition gradient updates}
+
 \item{initial_accumulator_value}{initial value of the 'accumulator' used to
 tune the algorithm}
+
+\item{global_step}{the current training step number}
+
+\item{initial_gradient_squared_accumulator_value}{initial value of the accumulators used to
+tune the algorithm}
+
+\item{l1_regularization_strength}{L1 regularisation coefficient (must be 0 or greater)}
+
+\item{l2_regularization_strength}{L2 regularisation coefficient (must be 0 or greater)}
+
+\item{momentum}{the momentum of the algorithm}
+
+\item{use_nesterov}{whether to use Nesterov momentum}
+
+\item{beta1}{exponential decay rate for the 1st moment estimates}
+
+\item{beta2}{exponential decay rate for the 2nd moment estimates}
+
+\item{learning_rate_power}{power on the learning rate, must be 0 or less}
 }
 \value{
 an \code{optimiser} object that can be passed to \code{\link{opt}}.
@@ -23,5 +81,9 @@ an \code{optimiser} object that can be passed to \code{\link{opt}}.
 \description{
 Functions to set up optimisers (which find parameters that
   maximise the joint density of a model) and change their tuning parameters,
-  for use in \code{\link{opt}()}.
+  for use in \code{\link{opt}()}. For details of the algorithms and how to tune them, see the
+  \href{https://www.tensorflow.org/api_guides/python/train#Optimizers}{TensorFlow
+  optimiser docs} or the
+  \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy
+  optimiser docs}.
 }
