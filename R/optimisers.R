@@ -10,6 +10,23 @@
 #'   optimiser docs}.
 #'
 #' @return an \code{optimiser} object that can be passed to \code{\link{opt}}.
+#'
+#' @examples
+#' \dontrun{
+#' # use optimisation to find the mean and sd of some data
+#' x <- rnorm(100, -2, 1.2)
+#' mu <- variable()
+#' sd <- variable(lower = 0)
+#' distribution(x) <- normal(mu, sd)
+#' m <- model(mu, sd)
+#'
+#' # configure optimisers & parameters via 'optimiser' argument to opt
+#' opt_res <- opt(m, optimiser = bfgs())
+#'
+#' # compare results with the analytic solution
+#' opt_res$par
+#' c(mean(x), sd(x))
+#' }
 NULL
 
 # set up an optimiser object
@@ -32,6 +49,110 @@ optimiser <- function (name,
   obj
 
 }
+
+#' @rdname optimisers
+#' @export
+#'
+nelder_mead <- function () {
+  optimiser("nelder_mead",
+            scipy_method = "Nelder-Mead",
+            type = "scipy")
+}
+
+#' @rdname optimisers
+#' @export
+#'
+powell <- function () {
+  optimiser("powell",
+            scipy_method = "Powell",
+            type = "scipy")
+}
+
+#' @rdname optimisers
+#' @export
+#'
+cg <- function () {
+  optimiser("cg",
+            scipy_method = "CG",
+            type = "scipy")
+}
+
+#' @rdname optimisers
+#' @export
+#'
+bfgs <- function () {
+  optimiser("bfgs",
+            scipy_method = "BFGS",
+            type = "scipy")
+}
+
+#' @rdname optimisers
+#' @export
+#'
+newton_cg <- function () {
+  optimiser("newton_cg",
+            scipy_method = "Newton-CG",
+            type = "scipy")
+}
+
+#' @rdname optimisers
+#' @export
+#'
+#' @param maxcor maximum number of 'variable metric corrections' used to define
+#'   the approximation to the hessian matrix
+#' @param maxls maximum number of line search steps per iteration
+#'
+l_bfgs_b <- function (maxcor = 10, maxls = 20) {
+  optimiser("l_bfgs_b",
+            scipy_method = "L-BFGS-B",
+            parameters = list(
+              maxcor = as.integer(maxcor),
+              maxls = as.integer(maxls)
+            ),
+            type = "scipy")
+}
+
+#' @rdname optimisers
+#' @export
+#'
+#' @param max_cg_it maximum number of hessian * vector evaluations per iteration
+#' @param stepmx maximum step for the line search
+#' @param rescale log10 scaling factor used to trigger rescaling of objective
+#'
+tnc <- function (max_cg_it = -1, stepmx = 0, rescale = -1) {
+  optimiser("tnc",
+            scipy_method = "TNC",
+            parameters = list(
+              maxCGit = as.integer(max_cg_it),
+              stepmx = stepmx,
+              rescale = rescale
+            ),
+            type = "scipy")
+}
+
+#' @rdname optimisers
+#' @export
+#'
+#' @param rhobeg reasonable initial changes to the variables
+#'
+cobyla <- function (rhobeg = 1) {
+  optimiser("cobyla",
+            scipy_method = "COBYLA",
+            parameters = list(
+              rhobeg = rhobeg
+            ),
+            type = "scipy")
+}
+
+#' @rdname optimisers
+#' @export
+#'
+slsqp <- function () {
+  optimiser("slsqp",
+            scipy_method = "SLSQP",
+            type = "scipy")
+}
+
 
 #' @rdname optimisers
 #' @export
@@ -220,17 +341,6 @@ rms_prop <- function (learning_rate = 0.1,
               epsilon = epsilon
             ),
             type = "tensorflow")
-}
-
-
-#' @rdname optimisers
-#' @export
-#'
-bfgs <- function () {
-  optimiser("bfgs",
-            parameters = list(),
-            type = "scipy")
-
 }
 
 #' @noRd

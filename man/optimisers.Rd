@@ -2,6 +2,15 @@
 % Please edit documentation in R/optimisers.R
 \name{optimisers}
 \alias{optimisers}
+\alias{nelder_mead}
+\alias{powell}
+\alias{cg}
+\alias{bfgs}
+\alias{newton_cg}
+\alias{l_bfgs_b}
+\alias{tnc}
+\alias{cobyla}
+\alias{slsqp}
 \alias{gradient_descent}
 \alias{adadelta}
 \alias{adagrad}
@@ -12,9 +21,26 @@
 \alias{proximal_gradient_descent}
 \alias{proximal_adagrad}
 \alias{rms_prop}
-\alias{bfgs}
 \title{optimisation methods}
 \usage{
+nelder_mead()
+
+powell()
+
+cg()
+
+bfgs()
+
+newton_cg()
+
+l_bfgs_b(maxcor = 10, maxls = 20)
+
+tnc(max_cg_it = -1, stepmx = 0, rescale = -1)
+
+cobyla(rhobeg = 1)
+
+slsqp()
+
 gradient_descent(learning_rate = 0.01)
 
 adadelta(learning_rate = 0.001, rho = 1, epsilon = 1e-08)
@@ -42,10 +68,21 @@ proximal_adagrad(learning_rate = 1, initial_accumulator_value = 0.1,
 
 rms_prop(learning_rate = 0.1, decay = 0.9, momentum = 0,
   epsilon = 1e-10)
-
-bfgs()
 }
 \arguments{
+\item{maxcor}{maximum number of 'variable metric corrections' used to define
+the approximation to the hessian matrix}
+
+\item{maxls}{maximum number of line search steps per iteration}
+
+\item{max_cg_it}{maximum number of hessian * vector evaluations per iteration}
+
+\item{stepmx}{maximum step for the line search}
+
+\item{rescale}{log10 scaling factor used to trigger rescaling of objective}
+
+\item{rhobeg}{reasonable initial changes to the variables}
+
 \item{learning_rate}{the size of steps (in parameter space) towards the
 optimal value}
 
@@ -86,4 +123,21 @@ Functions to set up optimisers (which find parameters that
   optimiser docs} or the
   \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy
   optimiser docs}.
+}
+\examples{
+\dontrun{
+# use optimisation to find the mean and sd of some data
+x <- rnorm(100, -2, 1.2)
+mu <- variable()
+sd <- variable(lower = 0)
+distribution(x) <- normal(mu, sd)
+m <- model(mu, sd)
+
+# configure optimisers & parameters via 'optimiser' argument to opt
+opt_res <- opt(m, optimiser = bfgs())
+
+# compare results with the analytic solution
+opt_res$par
+c(mean(x), sd(x))
+}
 }

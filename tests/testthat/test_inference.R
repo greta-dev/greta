@@ -1,6 +1,6 @@
 context('inference methods')
 
-test_that('opt converges', {
+test_that('opt converges with TF optimisers', {
 
   skip_if_not(check_tf_version())
   source('helpers.R')
@@ -21,8 +21,7 @@ test_that('opt converges', {
                      ftrl,
                      proximal_gradient_descent,
                      proximal_adagrad,
-                     rms_prop,
-                     bfgs)
+                     rms_prop)
 
   for (optmr in optimisers) {
 
@@ -37,13 +36,44 @@ test_that('opt converges', {
 
   }
 
-
 })
 
+test_that('opt converges with SciPy optimisers', {
 
+  skip_if_not(check_tf_version())
+  source('helpers.R')
 
+  x <- rnorm(5, 2, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, 0.1)
 
+  m <- model(z)
 
+  # loop through optimisers that might be expected to work
+  optimisers <- list(nelder_mead,
+                     powell,
+                     cg,
+                     bfgs,
+                     newton_cg,
+                     l_bfgs_b,
+                     tnc,
+                     cobyla,
+                     slsqp)
+
+  for (optmr in optimisers) {
+
+    (o <- opt(m,
+              optimiser = optmr(),
+              max_iterations = 200))
+
+    # should have converged in fewer than 200 iterations and be close to truth
+    expect_equal(o$convergence, 0)
+    expect_lte(o$iterations, 200)
+    expect_true(all(abs(x - o$par) < 1e-2))
+
+  }
+
+})
 
 test_that('opt accepts initial values', {
 
