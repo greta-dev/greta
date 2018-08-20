@@ -29,8 +29,6 @@ greta_stash <- new.env()
 #' @param n_cores the maximum number of CPU cores used by \emph{each} chain.
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations)
-#' @param control an optional named list of hyperparameters and options to
-#'   control behaviour of the sampler or optimiser. See Details.
 #' @param initial_values an optional vector (or list of vectors, for multiple
 #'   chains) of initial values for the free parameters in the model. These will
 #'   be used as the starting point for sampling/optimisation.

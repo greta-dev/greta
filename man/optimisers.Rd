@@ -113,6 +113,8 @@ greater)}
 \item{beta2}{exponential decay rate for the 2nd moment estimates}
 
 \item{learning_rate_power}{power on the learning rate, must be 0 or less}
+
+\item{decay}{discounting factor for the gradient}
 }
 \value{
 an \code{optimiser} object that can be passed to \code{\link{opt}}.

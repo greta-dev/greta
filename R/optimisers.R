@@ -336,6 +336,8 @@ proximal_adagrad <- function (learning_rate = 1,
 #' @rdname optimisers
 #' @export
 #'
+#' @param decay discounting factor for the gradient
+#'
 rms_prop <- function (learning_rate = 0.1,
                       decay = 0.9,
                       momentum = 0,

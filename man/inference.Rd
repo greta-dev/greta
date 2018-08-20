@@ -58,9 +58,6 @@ and parameters See \code{\link{optimisers}}.}
 \item{tolerance}{the numerical tolerance for the solution, the optimiser
 stops when the (absolute) difference in the joint density between
 successive iterations drops below this level}
-
-\item{control}{an optional named list of hyperparameters and options to
-control behaviour of the sampler or optimiser. See Details.}
 }
 \value{
 \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
