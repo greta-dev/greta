@@ -366,137 +366,18 @@ opt <- function (model,
                  tolerance = 1e-6,
                  initial_values = NULL) {
 
-  # mock up some names to avoid CRAN-check note
-  joint_density <- joint_density_adj <- sess <- NULL
+  # create R6 object of the right type
+  object <- optimiser$class$new(initial_values = initial_values,
+                                model = model,
+                                name = optimiser$name,
+                                method = optimiser$method,
+                                parameters = optimiser$parameters,
+                                other_args = optimiser$other_args,
+                                max_iterations = max_iterations,
+                                tolerance = tolerance)
 
-  # get the tensorflow environment
-  dag <- model$dag
-  tfe <- dag$tf_environment
-
-  # random initial values if unspecified
-  if (is.null(initial_values)) {
-    initial_values <- model$dag$example_parameters()
-    initial_values[] <- rnorm(length(initial_values))
-  }
-
-  # create a feed dict with the data
-  dag$build_feed_dict()
-
-  # initialize the variables, then set the ones we care about
-  dag$tf_sess_run(tf$global_variables_initializer())
-
-  dag$on_graph(tfe$optimiser_init <- tf$constant(initial_values,
-                                                 shape = tfe$free_state$shape,
-                                                 dtype = tf_float()))
-
-  . <- dag$tf_run(free_state$assign(optimiser_init))
-
-
-  # set up & run optimiser
-
-  if (optimiser$type == "scipy") {
-
-    opt_fun <- eval(parse(text = "tf$contrib$opt$ScipyOptimizerInterface"))
-
-    args <- list(loss = -tfe$joint_density_adj,
-                 method = optimiser$scipy_method,
-                 options = c(optimiser$parameters,
-                             maxiter = as.integer(max_iterations)),
-                 tol = tolerance)
-
-    dag$on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
-
-    # track convergence information via callbacks
-    diff <- old_obj <- Inf
-    it <- 0
-
-    tfe$obj_progress <- function (obj) {
-      diff <<- abs(old_obj - obj)
-      old_obj <<- obj
-    }
-
-    tfe$it_progress <- function (obj) {
-      it <<- it + 1
-    }
-
-    # if the optimiser was ignoring the callbacks, we have no idea about the
-    # number of iterations or convergence
-    if (!optimiser$uses_callbacks)
-      it <- NA
-
-    # run the optimiser
-    out <- dag$tf_run(tf_optimiser$minimize(sess,
-                                            feed_dict = feed_dict,
-                                            step_callback = it_progress,
-                                            loss_callback = obj_progress,
-                                            fetches = list(-joint_density_adj)))
-
-  } else {
-
-    # set the dtypes for special cases
-    if ("global_step" %in% names(optimiser$parameters)) {
-      param <- optimiser$parameters[["global_step"]]
-      dag$on_graph(tf_param <- tf$constant(param, dtype = tf$int64))
-      optimiser$parameters[["global_step"]] <- tf_param
-    }
-
-    fussy_optimisers <- c("proximal_gradient_descent", "proximal_adagrad")
-
-    if (optimiser$name == "proximal_gradient_descent") {
-
-      for (name in names(optimiser$parameters)) {
-        param <- optimiser$parameters[[name]]
-        dag$on_graph(tf_param <- tf$constant(param, dtype = tf$float64))
-        optimiser$parameters[[name]] <- tf_param
-      }
-
-    }
-
-    if (optimiser$name == "proximal_adagrad") {
-
-      fussy_params <- c("learning_rate",
-                        "l1_regularization_strength",
-                        "l2_regularization_strength")
-      for (name in fussy_params) {
-        param <- optimiser$parameters[[name]]
-        dag$on_graph(tf_param <- tf$constant(param, dtype = tf$float64))
-        optimiser$parameters[[name]] <- tf_param
-      }
-
-    }
-
-    optimise_fun <- eval(parse(text = optimiser$tf_optimiser))
-    dag$on_graph(tfe$tf_optimiser <- do.call(optimise_fun,
-                                             optimiser$parameters))
-    dag$tf_run(train <- tf_optimiser$minimize(-joint_density_adj))
-
-    # initialize the variables, then set the ones we care about
-    dag$tf_sess_run(tf$global_variables_initializer())
-
-    dag$on_graph(tfe$optimiser_init <- tf$constant(initial_values,
-                                                   shape = tfe$free_state$shape,
-                                                   dtype = tf_float()))
-
-    . <- dag$tf_run(free_state$assign(optimiser_init))
-
-    diff <- old_obj <- Inf
-    it <- 0
-
-    while (it < max_iterations & diff > tolerance) {
-      it <- it + 1
-      dag$tf_sess_run(train)
-      obj <- dag$tf_sess_run(-joint_density_adj)
-      diff <- abs(old_obj - obj)
-      old_obj <- obj
-    }
-
-  }
-
-  # return in standardised format
-  list(par = model$dag$trace_values(),
-       value = dag$tf_sess_run(joint_density),
-       iterations = it,
-       convergence = ifelse(it < max_iterations, 0, 1))
+  # run it
+  object$run()
 
 }
 

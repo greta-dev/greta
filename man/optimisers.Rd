@@ -95,12 +95,14 @@ tune the algorithm}
 
 \item{global_step}{the current training step number}
 
-\item{initial_gradient_squared_accumulator_value}{initial value of the accumulators used to
-tune the algorithm}
+\item{initial_gradient_squared_accumulator_value}{initial value of the
+accumulators used to tune the algorithm}
 
-\item{l1_regularization_strength}{L1 regularisation coefficient (must be 0 or greater)}
+\item{l1_regularization_strength}{L1 regularisation coefficient (must be 0 or
+greater)}
 
-\item{l2_regularization_strength}{L2 regularisation coefficient (must be 0 or greater)}
+\item{l2_regularization_strength}{L2 regularisation coefficient (must be 0 or
+greater)}
 
 \item{momentum}{the momentum of the algorithm}
 
