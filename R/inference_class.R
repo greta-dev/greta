@@ -204,7 +204,32 @@ sampler <- R6Class(
     accept_history = vector(),
 
     # sampler kernel information
-    parameters = list(),
+    parameters = list(epsilon = 0.1,
+                      diag_sd = 1),
+
+    initialize = function (initial_values,
+                           model,
+                           parameters = list(),
+                           seed) {
+
+      # initialize the inference method
+      super$initialize(initial_values = initial_values,
+                       model = model,
+                       parameters = parameters,
+                       seed = seed)
+
+      # duplicate diag_sd if needed
+      n_diag <- length(self$parameters$diag_sd)
+      n_parameters <- length(model$dag$example_parameters())
+      if (n_diag != n_parameters && n_parameters > 1) {
+        diag_sd <- rep(self$parameters$diag_sd[1], n_parameters)
+        self$parameters$diag_sd <- diag_sd
+      }
+
+      # define the draws tensor on the tf graph
+      self$define_tf_draws()
+
+    },
 
     run_chain = function (n_samples, thin, warmup, verbose, pb_update, sequential, n_cores, float_type, from_scratch = TRUE) {
 
@@ -510,33 +535,6 @@ hmc_sampler <- R6Class(
 
     accept_target = 0.651,
 
-    initialize = function (initial_values,
-                           model,
-                           parameters = list(),
-                           seed) {
-
-      # initialize the inference method
-      super$initialize(initial_values = initial_values,
-                       model = model,
-                       parameters = parameters,
-                       seed = seed)
-
-      # duplicate diag_sd if needed
-      n_diag <- length(self$parameters$diag_sd)
-      n_parameters <- length(model$dag$example_parameters())
-      if (n_diag != n_parameters && n_parameters > 1) {
-        diag_sd <- rep(self$parameters$diag_sd[1], n_parameters)
-        self$parameters$diag_sd <- diag_sd
-      }
-
-      # define the draws tensor on the tf graph
-      tfe <- model$dag$tf_environment
-      if (!live_pointer("sampler_batch", envir = tfe)) {
-        self$define_tf_draws()
-      }
-
-    },
-
     define_tf_kernel = function () {
 
       dag <- self$model$dag
@@ -551,8 +549,12 @@ hmc_sampler <- R6Class(
                                                shape = list(length(free_state), 1L)))
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
-      dag$tf_run(hmc_step_sizes <- tf$reshape(hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
-                                              shape = list(length(free_state))))
+      dag$tf_run(
+        hmc_step_sizes <- tf$reshape(
+          hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
+          shape = list(length(free_state))
+        )
+      )
 
       # log probability function
       tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
@@ -595,58 +597,60 @@ rwmh_sampler <- R6Class(
   public = list(
 
     parameters = list(
-      proposal_function = "normal"
+      proposal = "normal",
+      epsilon = 0.1,
+      diag_sd = 1
     ),
 
     accept_target = 0.44,
-
-    initialize = function(initial_values,
-                          model,
-                          parameters = list(proposal_function = "normal"),
-                          seed) {
-
-      super$initialize(initial_values = initial_values,
-                       model = model,
-                       parameters = parameters,
-                       seed = seed)
-
-      # define the draws tensor on the tf graph
-      tfe <- model$dag$tf_environment
-      if (!live_pointer("sampler_batch",
-                        envir = tfe)) {
-        self$define_tf_draws()
-      }
-    },
 
     define_tf_kernel = function () {
 
       dag <- self$model$dag
       tfe <- dag$tf_environment
-      rwmh_proposal_function <- switch(
-        self$parameters$proposal_function,
-        normal = tfp$mcmc$random_walk_normal_fn,
-        uniform = tfp$mcmc$random_walk_uniform_fn)
+      tfe$rwmh_proposal <- switch (self$parameters$proposal,
+                                   normal = tfp$mcmc$random_walk_normal_fn,
+                                   uniform = tfp$mcmc$random_walk_uniform_fn)
 
       tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
 
-      tfe$new_state_fn <- rwmh_proposal_function
+      # tensors for sampler parameters
+      dag$tf_run(rwmh_epsilon <- tf$placeholder(dtype = tf_float()))
+
+      # need to pass in the value for this placeholder as a matrix (shape(n, 1))
+      dag$tf_run(rwmh_diag_sd <- tf$placeholder(dtype = tf_float(),
+                                                shape = list(length(free_state), 1L)))
+
+      # but it step_sizes must be a vector (shape(n, )), so reshape it
+      dag$tf_run(
+        rwmh_step_sizes <- tf$reshape(
+          rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
+          shape = list(length(free_state))
+        )
+      )
+
+      dag$tf_run(new_state_fn <- rwmh_proposal(scale = rwmh_step_sizes))
 
       # build the kernel
       dag$tf_run(
         sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
           target_log_prob_fn = log_prob_fun,
-          new_state_fn = new_state_fn(),
+          new_state_fn = new_state_fn,
           seed = rng_seed)
       )
     },
 
     sampler_parameter_values = function () {
-      list()
-    },
 
-    tune = function(completed, warmup) {
-      NULL
+      epsilon <- self$parameters$epsilon
+      diag_sd <- matrix(self$parameters$diag_sd)
+
+      # return named list for replacing tensors
+      list(rwmh_epsilon = epsilon,
+           rwmh_diag_sd = diag_sd)
+
     }
+
   )
 )
 

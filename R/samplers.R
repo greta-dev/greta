@@ -43,17 +43,24 @@ hmc <- function (Lmin = 5,
 #' @rdname samplers
 #'
 #' @details The Random Walk Metropolis Hastings algorithm is a gradient free
-#' sampling algorithm that requires no tuning parameters. The algorithm involves
-#' a proposal generating step `proposal_state = current_state + perturb` by a
-#' random perturbation, followed by Metropolis-Hastings accept/reject step. The
-#' class is implemented for uniform and normal proposals.
+#'   sampling algorithm that requires no tuning parameters. The algorithm
+#'   involves a proposal generating step `proposal_state = current_state +
+#'   perturb` by a random perturbation, followed by Metropolis-Hastings
+#'   accept/reject step. The class is implemented for uniform and normal
+#'   proposals.
+#'
+#' @param proposal the probability distribution used to generate proposal states
 #'
 #' @export
-rwmh <- function (proposal_function = c("normal", "uniform")) {
+rwmh <- function (proposal = c("normal", "uniform"),
+                  epsilon = 0.1,
+                  diag_sd = 1) {
 
-  proposal_function <- match.arg(proposal_function)
+  proposal <- match.arg(proposal)
 
-  obj <- list(parameters = list(proposal_function = proposal_function),
+  obj <- list(parameters = list(proposal = proposal,
+                                epsilon = epsilon,
+                                diag_sd = diag_sd),
               class = rwmh_sampler)
   class(obj) <- c("rwmh sampler", "sampler")
   obj
