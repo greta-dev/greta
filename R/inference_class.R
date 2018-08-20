@@ -681,7 +681,15 @@ optimiser <- R6Class(
       self$model$dag$build_feed_dict()
       self$set_inits()
       self$run_minimiser()
+      self$fetch_free_state()
       self$return_outputs()
+
+    },
+
+    fetch_free_state = function () {
+
+      # get the free state as a vector
+      self$free_state <- self$model$dag$tf_sess_run(free_state)
 
     },
 
@@ -694,7 +702,7 @@ optimiser <- R6Class(
 
       converged <- self$it < self$max_iterations
 
-      list(par = self$model$dag$trace_values(),
+      list(par = self$model$dag$trace_values(self$free_state),
            value = self$model$dag$tf_sess_run(joint_density),
            iterations = self$it,
            convergence = ifelse(converged, 0, 1))
