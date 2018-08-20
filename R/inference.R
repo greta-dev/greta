@@ -17,7 +17,7 @@ greta_stash <- new.env()
 #'
 #' @param model greta_model object
 #' @param sampler sampler used to draw values in MCMC. See \code{\link{samplers}} for options.
-#' @param n_samples number of MCMC samples to draw (after any warm-up, but
+#' @param n_samples number of MCMC samples to draw per chain (after any warm-up, but
 #'   before thinning)
 #' @param thin MCMC thinning rate; every \code{thin} samples is retained,
 #'   the rest are discarded
