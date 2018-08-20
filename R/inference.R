@@ -400,12 +400,8 @@ opt <- function (model,
 
     args <- list(loss = -tfe$joint_density_adj,
                  method = optimiser$scipy_method,
-                 options = c(maxiter = as.integer(max_iterations),
-                             fatol = tolerance,
-                             ftol = tolerance,
-                             gtol = tolerance,
-                             xtol = tolerance,
-                             optimiser$parameters),
+                 options = c(optimiser$parameters,
+                             maxiter = as.integer(max_iterations)),
                  tol = tolerance)
 
     dag$on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
@@ -423,13 +419,17 @@ opt <- function (model,
       it <<- it + 1
     }
 
+    # if the optimiser was ignoring the callbacks, we have no idea about the
+    # number of iterations or convergence
+    if (!optimiser$uses_callbacks)
+      it <- NA
+
     # run the optimiser
     out <- dag$tf_run(tf_optimiser$minimize(sess,
                                             feed_dict = feed_dict,
                                             step_callback = it_progress,
                                             loss_callback = obj_progress,
-                                            fetches=list(-joint_density_adj)))
-
+                                            fetches = list(-joint_density_adj)))
 
   } else {
 

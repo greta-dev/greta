@@ -3,13 +3,19 @@
 #' @title optimisation methods
 #' @description Functions to set up optimisers (which find parameters that
 #'   maximise the joint density of a model) and change their tuning parameters,
-#'   for use in \code{\link{opt}()}. For details of the algorithms and how to tune them, see the
+#'   for use in \code{\link{opt}()}. For details of the algorithms and how to
+#'   tune them, see the
 #'   \href{https://www.tensorflow.org/api_guides/python/train#Optimizers}{TensorFlow
-#'   optimiser docs} or the
+#'    optimiser docs} or the
 #'   \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy
-#'   optimiser docs}.
+#'    optimiser docs}.
 #'
 #' @return an \code{optimiser} object that can be passed to \code{\link{opt}}.
+#'
+#' @details The TensorFlow interface to SciPy optimisers issues runtime warnings
+#'   that some of these methods (\code{nelder_mead()}, \code{powell()},
+#'   \code{cobyla()}) do not use gradient information and that \code{cobyla()}
+#'   'does not support callback'. These can be safely ignored.
 #'
 #' @examples
 #' \dontrun{
@@ -34,6 +40,7 @@ optimiser <- function (name,
                        tf_optimiser = NULL,
                        scipy_method = name,
                        parameters = list(),
+                       uses_callbacks = TRUE,
                        type = c("tensorflow", "scipy")) {
 
   type <- match.arg(type)
@@ -42,6 +49,7 @@ optimiser <- function (name,
               tf_optimiser = tf_optimiser,
               scipy_method = scipy_method,
               parameters = parameters,
+              uses_callbacks = uses_callbacks,
               type = type)
 
   class_name <- paste0(name, "_optimiser")
@@ -135,12 +143,16 @@ tnc <- function (max_cg_it = -1, stepmx = 0, rescale = -1) {
 #'
 #' @param rhobeg reasonable initial changes to the variables
 #'
+#' @details The \code{cobyla()} does not provide information about the number of
+#'   iterations for convergence, so these values fo the output are set to NA
+#'
 cobyla <- function (rhobeg = 1) {
   optimiser("cobyla",
             scipy_method = "COBYLA",
             parameters = list(
               rhobeg = rhobeg
             ),
+            uses_callbacks = FALSE,
             type = "scipy")
 }
 
