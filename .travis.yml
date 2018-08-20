@@ -17,6 +17,7 @@ r_packages:
   - bayesplot
   - extraDistr
   - devtools
+  - tidyverse
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
