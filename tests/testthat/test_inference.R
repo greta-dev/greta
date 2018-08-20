@@ -290,7 +290,7 @@ test_that("mcmc supports different samplers, normal proposals", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
   m <- model(x)
-  expect_ok(draws <- mcmc(m, random_walk_metropolis_hastings(),
+  expect_ok(draws <- mcmc(m, rwmh("normal"),
                           n_samples = 100, warmup = 100))
 
   proposed <- unlist(draws)
@@ -305,7 +305,7 @@ test_that("mcmc supports different samplers, uniform proposals", {
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
-  expect_ok(draws <- mcmc(m, random_walk_metropolis_hastings("uniform"),
+  expect_ok(draws <- mcmc(m, rwmh("uniform"),
                           n_samples = 100, warmup = 100))
 
   proposed <- unlist(draws)

@@ -3,13 +3,12 @@
 \name{samplers}
 \alias{samplers}
 \alias{hmc}
-\alias{random_walk_metropolis_hastings}
+\alias{rwmh}
 \title{MCMC samplers}
 \usage{
 hmc(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1)
 
-random_walk_metropolis_hastings(proposal_function = c("normal",
-  "uniform"))
+rwmh(proposal_function = c("normal", "uniform"))
 }
 \arguments{
 \item{Lmin}{minimum number of leapfrog steps (positive integer, Lmin > Lmax)}

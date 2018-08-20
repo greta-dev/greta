@@ -49,12 +49,13 @@ hmc <- function (Lmin = 5,
 #' class is implemented for uniform and normal proposals.
 #'
 #' @export
-random_walk_metropolis_hastings <- function(
-    proposal_function = c("normal", "uniform")) {
+rwmh <- function (proposal_function = c("normal", "uniform")) {
+
   proposal_function <- match.arg(proposal_function)
+
   obj <- list(parameters = list(proposal_function = proposal_function),
-              class = random_walk_metropolis_hastings_sampler)
-  class(obj) <- c("random walk metropolis hastings sampler", "sampler")
+              class = rwmh_sampler)
+  class(obj) <- c("rwmh sampler", "sampler")
   obj
 }
 

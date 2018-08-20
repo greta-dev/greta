@@ -531,7 +531,7 @@ hmc_sampler <- R6Class(
 
       # define the draws tensor on the tf graph
       tfe <- model$dag$tf_environment
-      if (!live_pointer("hmc_batch", envir = tfe)) {
+      if (!live_pointer("sampler_batch", envir = tfe)) {
         self$define_tf_draws()
       }
 
@@ -589,18 +589,22 @@ hmc_sampler <- R6Class(
   )
 )
 
-random_walk_metropolis_hastings_sampler <- R6Class(
-  "random_walk_metropolis_hastings_sampler",
+rwmh_sampler <- R6Class(
+  "rwmh_sampler",
   inherit = sampler,
   public = list(
-    parameters = list(proposal_function = "normal"),
 
-    accept_target = NULL,
+    parameters = list(
+      proposal_function = "normal"
+    ),
+
+    accept_target = 0.44,
 
     initialize = function(initial_values,
                           model,
                           parameters = list(proposal_function = "normal"),
                           seed) {
+
       super$initialize(initial_values = initial_values,
                        model = model,
                        parameters = parameters,
@@ -608,7 +612,7 @@ random_walk_metropolis_hastings_sampler <- R6Class(
 
       # define the draws tensor on the tf graph
       tfe <- model$dag$tf_environment
-      if (!live_pointer("random_walk_metropolis_hastings_batch",
+      if (!live_pointer("sampler_batch",
                         envir = tfe)) {
         self$define_tf_draws()
       }
