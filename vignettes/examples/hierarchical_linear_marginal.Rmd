@@ -1,0 +1,31 @@
+### Hierarchical linear regression in general marginal formulation
+
+A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species.
+This time we try to set up the *marginal* model, i.e. when we integrate the conditional density.
+
+```{r hierarchical_linear_marginal_greta}
+int  <- variable()
+coef <- normal(0, 5)
+sd   <- cauchy(0, 3, truncation = c(0, Inf))
+
+n_species  <- length(unique(iris$Species))
+species_id <- as.numeric(iris$Species)
+
+Z <- model.matrix(~ Species + Sepal.Length * Species - 1, data = iris)
+G  <- zeros(n_species * 2, n_species * 2)
+
+for (s in unique(species_id)) {
+  G_sd <- diag(2)
+  G[c(s, s + n_species), c(s, s + n_species)] <- G_sd
+}
+
+mu <- int + coef * iris$Sepal.Width
+V <- zeros(nrow(iris), nrow(iris))
+diag(V) <- sd
+
+Z <- as_data(Z)
+V <- V + Z %*% G %*% t(Z)
+
+sep <- t(iris$Sepal.Width)
+distribution(sep) <- multivariate_normal(t(mu), V)
+```

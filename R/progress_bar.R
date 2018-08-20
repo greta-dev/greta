@@ -11,8 +11,8 @@ create_progress_bar <- function (phase, iter, pb_update, ...) {
 
   # name for formatting
   name <- switch(phase,
-                 warmup = '  warmup',
-                 sampling = 'sampling')
+                 warmup = "  warmup",
+                 sampling = "sampling")
 
   # total iterations for bat
   iter_this <- switch(phase,
@@ -22,7 +22,7 @@ create_progress_bar <- function (phase, iter, pb_update, ...) {
   # pad the frmat so that the width iterations counter is the same for both
   # warmup and sampling
   digit_diff <- nchar(max(iter)) - nchar(iter_this)
-  count_pad <- paste0(rep(' ', 2 * digit_diff), collapse = '')
+  count_pad <- paste0(rep(" ", 2 * digit_diff), collapse = "")
 
   # formatting
   format_text <- sprintf("  %s :bar %s:iter/:total | eta: :eta :rejection",
@@ -31,18 +31,17 @@ create_progress_bar <- function (phase, iter, pb_update, ...) {
 
   pb <- progress::progress_bar$new(format = format_text,
                                    total = iter_this,
-                                   incomplete = ' ',
+                                   incomplete = " ",
                                    clear = FALSE,
+                                   current = "=",
                                    show_after = 0,
                                    ...)
 
   # add the increment information and return
   pb_update <- round(pb_update)
 
-  if (!is.numeric(pb_update) ||
-      length(pb_update) != 1 ||
-      !is.finite(pb_update) ||
-      pb_update <= 0) {
+  if (!is.numeric(pb_update) || length(pb_update) != 1 ||
+      !is.finite(pb_update) || pb_update <= 0) {
     stop ("pb_update must be a finite, positive, scalar integer")
   }
 

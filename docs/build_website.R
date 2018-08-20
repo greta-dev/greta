@@ -74,9 +74,19 @@ file.copy('man/figures/plotlegend.png',
           overwrite = TRUE)
 
 # copy vignettes (and examples) over
-vignettes <- list.files('vignettes/',
+vignettes <- list.files('vignettes',
                         pattern = '.Rmd',
                         full.names = TRUE)
+
+# blacklist some (too big or slow for now)
+vignettes_to_skip <- c("8_schools_example_model",
+                       "election88")
+vignettes_to_skip <- paste0("vignettes/",
+                            vignettes_to_skip,
+                            ".Rmd")
+skip_idx <- match(vignettes_to_skip, vignettes)
+vignettes <- vignettes[-skip_idx]
+
 sapply(vignettes,
        file.copy,
        'docs',
@@ -114,7 +124,7 @@ sections <- list(list(title = "creating greta arrays",
                       members = c("operators.html", "functions.html", "extract-replace-combine.html", "transforms.html")),
                  list(title = "modelling",
                       desc = "Define and visualise models and fit them to data",
-                      members = c("model.html", "inference.html", "calculate.html")),
+                      members = c("model.html", "inference.html", "calculate.html", "samplers.html")),
                  list(title = "extending greta",
                       desc = "Write R packages that extend or use greta",
                       members = c("internals.html")))

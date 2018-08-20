@@ -1,3 +1,5 @@
+*DS_Store
+
 .Rproj.user
 .Rhistory
 .RData
@@ -7,6 +9,7 @@ README_cache
 vignettes/example_models_cache
 vignettes/get_started_cache
 vignettes/technical_details_cache
+vignettes/*_cache
 
 vignettes/figures
 

@@ -326,7 +326,7 @@ test_that('multivariate normal distribution has correct density', {
 
   # parameters to test
   m <- 5
-  mn <- rnorm(m)
+  mn <- t(rnorm(m))
   sig <- MCMCpack::rwish(m + 1, diag(m))
 
   # function converting Sigma to sigma
@@ -336,7 +336,8 @@ test_that('multivariate normal distribution has correct density', {
   difference <- compare_distribution(greta::multivariate_normal,
                                      dmvnorm2,
                                      parameters = list(mean = mn, Sigma = sig),
-                                     x = mvtnorm::rmvnorm(100, mn, sig))
+                                     x = mvtnorm::rmvnorm(100, mn, sig),
+                                     multivariate = TRUE)
 
   expect_true(all(difference < 1e-4))
 
@@ -366,7 +367,8 @@ test_that('Wishart distribution has correct density', {
                                                dwishart,
                                                parameters = list(df = df,
                                                                  Sigma = sig),
-                                               x = MCMCpack::rwish(df, sig)))
+                                               x = MCMCpack::rwish(df, sig),
+                                               multivariate = TRUE))
 
   expect_true(all(difference < 1e-4))
 
@@ -382,7 +384,7 @@ test_that('lkj distribution has correct density', {
   eta <- 3
 
   # lkj  density
-  dlkj_correlation <- function (x, eta, log = FALSE) {
+  dlkj_correlation <- function (x, eta, log = FALSE, dimension = NULL) {
     res <- det(x) ^ (eta - 1)
     if (log) res <- log(res)
     return (res)
@@ -398,8 +400,9 @@ test_that('lkj distribution has correct density', {
   difference <- replicate(10,
                           compare_distribution(greta::lkj_correlation,
                                                dlkj_correlation,
-                                               parameters = list(eta = eta),
-                                               x = rcorrelation(m)))
+                                               parameters = list(eta = eta, dimension = m),
+                                               x = rcorrelation(m),
+                                               multivariate = TRUE))
 
   expect_true(all(difference < 1e-4))
 
@@ -412,7 +415,7 @@ test_that('multinomial distribution has correct density', {
 
   # parameters to test
   m <- 5
-  prob <- runif(m)
+  prob <- t(runif(m))
   size <- 5
 
   # vectorise R's density function
@@ -423,7 +426,8 @@ test_that('multinomial distribution has correct density', {
                                      dmultinom_vec,
                                      parameters = list(size = size,
                                                        prob = prob),
-                                     x = t(rmultinom(100, size, prob)))
+                                     x = t(rmultinom(100, size, prob)),
+                                     multivariate = TRUE)
 
   expect_true(all(difference < 1e-4))
 
@@ -436,7 +440,7 @@ test_that('categorical distribution has correct density', {
 
   # parameters to test
   m <- 5
-  prob <- runif(m)
+  prob <- t(runif(m))
 
   # vectorise R's density function
   dcategorical_vec <- function (x, prob)
@@ -445,7 +449,8 @@ test_that('categorical distribution has correct density', {
   difference <- compare_distribution(greta::categorical,
                                      dcategorical_vec,
                                      parameters = list(prob = prob),
-                                     x = t(rmultinom(100, 1, prob)))
+                                     x = t(rmultinom(100, 1, prob)),
+                                     multivariate = TRUE)
 
   expect_true(all(difference < 1e-4))
 
@@ -458,12 +463,13 @@ test_that('dirichlet distribution has correct density', {
 
   # parameters to test
   m <- 5
-  alpha <- runif(m)
+  alpha <- t(runif(m))
 
   difference <- compare_distribution(greta::dirichlet,
                                      extraDistr::ddirichlet,
                                      parameters = list(alpha = alpha),
-                                     x = extraDistr::rdirichlet(100, alpha))
+                                     x = extraDistr::rdirichlet(100, alpha),
+                                     multivariate = TRUE)
 
   expect_true(all(difference < 1e-4))
 
@@ -475,9 +481,9 @@ test_that('dirichlet-multinomial distribution has correct density', {
   source('helpers.R')
 
   # parameters to test
-  m <- 5
   size <- 10
-  alpha <- runif(m)
+  m <- 5
+  alpha <- t(runif(m))
 
   difference <- compare_distribution(greta::dirichlet_multinomial,
                                      extraDistr::ddirmnom,
@@ -485,7 +491,8 @@ test_that('dirichlet-multinomial distribution has correct density', {
                                                        alpha = alpha),
                                      x = extraDistr::rdirmnom(100,
                                                               size,
-                                                              alpha))
+                                                              alpha),
+                                     multivariate = TRUE)
 
   expect_true(all(difference < 1e-4))
 
@@ -527,17 +534,17 @@ test_that('scalar-valued distributions can be defined in models', {
   # multivariate discrete distributions
   y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) <- multinomial(4, p)
+  distribution(y) <- multinomial(4, t(p))
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(1, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) <- categorical(p)
+  distribution(y) <- categorical(t(p))
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(1, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) <- dirichlet_multinomial(4, alpha)
+  distribution(y) <- dirichlet_multinomial(4, t(alpha))
   expect_ok( model(alpha) )
 
   # univariate continuous distributions
@@ -562,10 +569,10 @@ test_that('scalar-valued distributions can be defined in models', {
   # multivariate continuous distributions
   sig <- MCMCpack::rwish(4, diag(3))
 
-  expect_ok( model(multivariate_normal(rnorm(3), sig)) )
+  expect_ok( model(multivariate_normal(t(rnorm(3)), sig)) )
   expect_ok( model(wishart(4, sig)) )
-  expect_ok( model(lkj_correlation(5, dim = 3)) )
-  expect_ok( model(dirichlet(runif(3))) )
+  expect_ok( model(lkj_correlation(5, dimension = 3)) )
+  expect_ok( model(dirichlet(t(runif(3)))) )
 
 })
 
@@ -611,17 +618,17 @@ test_that('array-valued distributions can be defined in models', {
   # multivariate discrete distributions
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) <- multinomial(4, p, dim = 5)
+  distribution(y) <- multinomial(4, t(p), n_realisations = 5)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) <- categorical(p, dim = 5)
+  distribution(y) <- categorical(t(p), n_realisations = 5)
   expect_ok( model(p) )
 
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) <- dirichlet_multinomial(4, alpha, dim = 5)
+  distribution(y) <- dirichlet_multinomial(4, t(alpha), n_realisations = 5)
   expect_ok( model(alpha) )
 
   # univariate continuous distributions
@@ -644,10 +651,10 @@ test_that('array-valued distributions can be defined in models', {
 
   # multivariate continuous distributions
   sig <- MCMCpack:::rwish(4, diag(3))
-  expect_ok( model(multivariate_normal(rnorm(3), sig, dim = dim[1])) )
-  expect_ok( model(dirichlet(runif(3), dim = dim[1])) )
+  expect_ok( model(multivariate_normal(t(rnorm(3)), sig, n_realisations = dim[1])) )
+  expect_ok( model(dirichlet(t(runif(3)), n_realisations = dim[1])) )
   expect_ok( model(wishart(4, sig)) )
-  expect_ok( model(lkj_correlation(3, dim = dim[1])) )
+  expect_ok( model(lkj_correlation(3, dimension = dim[1])) )
 
 })
 
@@ -704,17 +711,17 @@ test_that('distributions can be sampled from', {
   # multivariate discrete
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) <- multinomial(4, p, dim = 5)
+  distribution(y) <- multinomial(4, t(p), n_realisations = 5)
   sample_distribution(p)
 
   y <- extraDistr::rmnom(5, size = 1, prob = runif(3))
   p <- iprobit(normal(0, 1, dim = 3))
-  distribution(y) <- categorical(p, dim = 5)
+  distribution(y) <- categorical(t(p), n_realisations = 5)
   sample_distribution(p)
 
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
   alpha <- lognormal(0, 1, dim = 3)
-  distribution(y) <- dirichlet_multinomial(4, alpha, dim = 5)
+  distribution(y) <- dirichlet_multinomial(4, t(alpha), n_realisations = 5)
   sample_distribution(alpha)
 
   # univariate continuous
@@ -738,13 +745,12 @@ test_that('distributions can be sampled from', {
 
   # multivariate continuous
   sig <- MCMCpack::rwish(4, diag(3))
-  sample_distribution(multivariate_normal(rnorm(3), sig))
+  sample_distribution(multivariate_normal(t(rnorm(3)), sig))
   sample_distribution(wishart(4L, sig), warmup = 0)
-  sample_distribution(lkj_correlation(4, dim = 3))
-  sample_distribution(dirichlet(runif(3)))
+  sample_distribution(lkj_correlation(4, dimension = 3))
+  sample_distribution(dirichlet(t(runif(3))))
 
 })
-
 
 test_that('variable() errors informatively', {
 
@@ -794,14 +800,18 @@ test_that('uniform distribution errors informatively', {
 
 test_that('poisson() and binomial() error informatively in glm', {
 
-  source('helpers.R')
-
-  y <- rbinom(10, 1, 0.5)
-  x <- rnorm(10)
-
-  expect_error(glm(y ~ x, family = poisson),
+  # if passed as an object
+  expect_error(glm(1 ~ 1, family = poisson),
                "in the family argment of another model.")
-  expect_error(glm(y ~ x, family = binomial),
+  expect_error(glm(1 ~ 1, family = binomial),
+               "in the family argment of another model.")
+
+  # if executed alone
+  expect_error(glm(1 ~ 1, family = poisson()),
+               "in the family argment of another model.")
+
+  # if given a link
+  expect_error(glm(1 ~ 1, family = poisson("sqrt")),
                "in the family argment of another model.")
 
 })
@@ -842,15 +852,14 @@ test_that('lkj_correlation distribution errors informatively', {
   expect_error(lkj_correlation(uniform(0, 1, dim = 2), dim),
                "^eta must be a scalar, but had dimensions")
 
-  expect_error(lkj_correlation(4, dim = -1),
-               "dim must be a scalar integer greater than one, but was:")
+  expect_error(lkj_correlation(4, dimension = -1),
+               "'dimension' must be a positive scalar integer")
 
   expect_error(lkj_correlation(4, dim = c(3, 3)),
-               "dim must be a scalar integer greater than one, but was:")
+               "'dimension' must be a positive scalar integer")
 
   expect_error(lkj_correlation(4, dim = NA),
-               "dim must be a scalar integer greater than one, but was:")
-
+               "'dimension' must be a positive scalar integer")
 
 })
 
@@ -858,10 +867,10 @@ test_that('multivariate_normal distribution errors informatively', {
 
   source('helpers.R')
 
-  m_a <- randn(3)
-  m_b <- randn(3, 1)
-  m_c <- randn(1, 3)
-  m_d <- randn(3, 2)
+  m_a <- randn(1, 3)
+  m_b <- randn(2, 3)
+  m_c <- randn(3)
+  m_d <- randn(3, 1)
 
   a <- randn(3, 3)
   b <- randn(3, 3, 3)
@@ -877,12 +886,10 @@ test_that('multivariate_normal distribution errors informatively', {
 
   # bad means
   expect_error(multivariate_normal(m_c, a),
-               paste("mean must be a 2D greta array with one column,",
-                     "but has dimensions 1 x 3"))
+               paste("the dimension of this distribution must be at least 2"))
 
   expect_error(multivariate_normal(m_d, a),
-               paste("mean must be a 2D greta array with one column,",
-                     "but has dimensions 3 x 2"))
+               paste("the dimension of this distribution must be at least 2"))
 
   # good sigmas
   expect_true(inherits(multivariate_normal(m_a, a),
@@ -890,26 +897,29 @@ test_that('multivariate_normal distribution errors informatively', {
 
   # bad sigmas
   expect_error(multivariate_normal(m_a, b),
-               paste("Sigma must be a square 2D greta array,",
-                     "but has dimensions 3 x 3 x 3"))
+               "cannot have more than two dimensions")
   expect_error(multivariate_normal(m_a, c),
-               paste("Sigma must be a square 2D greta array,",
-                     "but has dimensions 3 x 2"))
+               "expected a 2D square greta array")
 
   # mismatched parameters
   expect_error(multivariate_normal(m_a, d),
-               'mean and Sigma have different dimensions, 3 vs 4')
+               "the distribution dimension should be 3, but")
 
   # scalars
   expect_error(multivariate_normal(0, 1),
-               paste("the multivariate normal distribution is for vectors,",
-                     "but the parameters were scalar"))
+               "the dimension of this distribution must be at least 2")
 
-  # bad dim
-  expect_error(multivariate_normal(m_a, a, dim = -1),
-               'dim must be a scalar positive integer, but was: -1')
-  expect_error(multivariate_normal(m_a, a, dim = c(1, 3)),
-               '^dim must be a scalar positive integer, but was:')
+  # bad n_realisations
+  expect_error(multivariate_normal(m_a, a, n_realisations = -1),
+               "'n_realisations' must be a positive scalar integer")
+  expect_error(multivariate_normal(m_a, a, n_realisations = c(1, 3)),
+               "'n_realisations' must be a positive scalar integer")
+
+  # bad dimension
+  expect_error(multivariate_normal(m_a, a, dimension = -1),
+               "'dimension' must be a positive scalar integer")
+  expect_error(multivariate_normal(m_a, a, dimension = c(1, 3)),
+               "'dimension' must be a positive scalar integer")
 
 })
 
@@ -917,32 +927,39 @@ test_that('multinomial distribution errors informatively', {
 
   source('helpers.R')
 
-  p_a <- randu(3)
-  p_b <- randu(3, 2)
+  p_a <- randu(1, 3)
+  p_b <- randu(2, 3)
 
-  # good size & probs
+  # same size & probs
   expect_true(inherits(multinomial(size = 10, p_a),
-                       'greta_array'))
+                       "greta_array"))
 
-  # bad probs
-  expect_error(multinomial(10, p_b),
-               paste("prob must be a 2D greta array with one column,",
-                     "but has dimensions 3 x 2"))
+  expect_true(inherits(multinomial(size = 1:2, p_b),
+                       "greta_array"))
 
-  # bad size
-  expect_error(multinomial(c(1, 2), p_a),
-               'size must be a scalar, but has dimensions 2 x 1')
+  # n_realisations from prob
+  expect_true(inherits(multinomial(10, p_b),
+                       "greta_array"))
+
+  # n_realisations from size
+  expect_true(inherits(multinomial(c(1, 2), p_a),
+                       "greta_array"))
 
   # scalars
   expect_error(multinomial(c(1), 1),
-               paste("the multinomial distribution is for vectors,",
-                     "but the parameters were scalar"))
+               "the dimension of this distribution must be at least 2")
 
-  # bad dim
-  expect_error(multinomial(10, p_a, dim = -1),
-               'dim must be a scalar positive integer, but was: -1')
-  expect_error(multinomial(10, p_a, dim = c(1, 3)),
-               '^dim must be a scalar positive integer, but was:')
+  # bad n_realisations
+  expect_error(multinomial(10, p_a, n_realisations = -1),
+               "'n_realisations' must be a positive scalar integer")
+  expect_error(multinomial(10, p_a, n_realisations = c(1, 3)),
+               "'n_realisations' must be a positive scalar integer")
+
+  # bad dimension
+  expect_error(multinomial(10, p_a, dimension = -1),
+               "'dimension' must be a positive scalar integer")
+  expect_error(multinomial(10, p_a, dimension = c(1, 3)),
+               "'dimension' must be a positive scalar integer")
 
 })
 
@@ -950,28 +967,31 @@ test_that('categorical distribution errors informatively', {
 
   source('helpers.R')
 
-  p_a <- randu(3)
-  p_b <- randu(3, 2)
+  p_a <- randu(1, 3)
+  p_b <- randu(2, 3)
 
   # good probs
   expect_true(inherits(categorical(p_a),
                        'greta_array'))
 
-  # bad probs
-  expect_error(categorical(p_b),
-               paste("prob must be a 2D greta array with one column,",
-                     "but has dimensions 3 x 2"))
+  expect_true(inherits(categorical(p_b),
+                       'greta_array'))
 
   # scalars
-  expect_error(categorical(c(1), 1),
-               paste("the categorical distribution is for vectors,",
-                     "but the parameters were scalar"))
+  expect_error(categorical(1),
+               "the dimension of this distribution must be at least 2")
 
-  # bad dim
-  expect_error(categorical(p_a, dim = -1),
-               'dim must be a scalar positive integer, but was: -1')
-  expect_error(categorical(p_a, dim = c(1, 3)),
-               '^dim must be a scalar positive integer, but was:')
+  # bad n_realisations
+  expect_error(categorical(p_a, n_realisations = -1),
+               "'n_realisations' must be a positive scalar integer")
+  expect_error(categorical(p_a, n_realisations = c(1, 3)),
+               "'n_realisations' must be a positive scalar integer")
+
+  # bad dimension
+  expect_error(categorical(p_a, dimension = -1),
+               "'dimension' must be a positive scalar integer")
+  expect_error(categorical(p_a, dimension = c(1, 3)),
+               "'dimension' must be a positive scalar integer")
 
 })
 
@@ -979,28 +999,32 @@ test_that('dirichlet distribution errors informatively', {
 
   source('helpers.R')
 
-  alpha_a <- randu(3)
-  alpha_b <- randu(3, 2)
+  alpha_a <- randu(1, 3)
+  alpha_b <- randu(2, 3)
 
   # good alpha
   expect_true(inherits(dirichlet(alpha_a),
                        'greta_array'))
 
-  # bad probs
-  expect_error(dirichlet(alpha_b),
-               paste("alpha must be a 2D greta array with one column,",
-                     "but has dimensions 3 x 2"))
+
+  expect_true(inherits(dirichlet(alpha_b),
+                       'greta_array'))
 
   # scalars
   expect_error(dirichlet(1),
-               paste("the dirichlet distribution is for vectors,",
-                     "but the parameters were scalar"))
+               "the dimension of this distribution must be at least 2")
 
-  # bad dim
-  expect_error(dirichlet(alpha_a, dim = -1),
-               'dim must be a scalar positive integer, but was: -1')
-  expect_error(dirichlet(alpha_a, dim = c(1, 3)),
-               '^dim must be a scalar positive integer, but was:')
+  # bad n_realisations
+  expect_error(dirichlet(alpha_a, n_realisations = -1),
+               "'n_realisations' must be a positive scalar integer")
+  expect_error(dirichlet(alpha_a, n_realisations = c(1, 3)),
+               "'n_realisations' must be a positive scalar integer")
+
+  # bad dimension
+  expect_error(dirichlet(alpha_a, dimension = -1),
+               "'dimension' must be a positive scalar integer")
+  expect_error(dirichlet(alpha_a, dimension = c(1, 3)),
+               "'dimension' must be a positive scalar integer")
 
 })
 
@@ -1008,33 +1032,40 @@ test_that('dirichlet-multinomial distribution errors informatively', {
 
   source('helpers.R')
 
-  size <- 4
-  alpha_a <- randu(3)
-  alpha_b <- randu(3, 2)
+  alpha_a <- randu(1, 3)
+  alpha_b <- randu(2, 3)
 
-  # good alpha
-  expect_true(inherits(dirichlet_multinomial(size, alpha_a),
-                       'greta_array'))
 
-  # bad probs
-  expect_error(dirichlet_multinomial(size, alpha_b),
-               paste("alpha must be a 2D greta array with one column,",
-                     "but has dimensions 3 x 2"))
+  # same size & probs
+  expect_true(inherits(dirichlet_multinomial(size = 10, alpha_a),
+                       "greta_array"))
 
-  # bad size
-  expect_error(dirichlet_multinomial(c(1, 2), alpha_a),
-               'size must be a scalar, but has dimensions 2 x 1')
+  expect_true(inherits(dirichlet_multinomial(size = 1:2, alpha_b),
+                       "greta_array"))
+
+  # n_realisations from alpha
+  expect_true(inherits(dirichlet_multinomial(10, alpha_b),
+                       "greta_array"))
+
+  # n_realisations from size
+  expect_true(inherits(dirichlet_multinomial(c(1, 2), alpha_a),
+                       "greta_array"))
 
   # scalars
-  expect_error(dirichlet_multinomial(size, alpha = 1),
-               paste("the dirichlet distribution is for vectors,",
-                     "but the parameters were scalar"))
+  expect_error(dirichlet_multinomial(c(1), 1),
+               "the dimension of this distribution must be at least 2")
 
-  # bad dim
-  expect_error(dirichlet_multinomial(size, alpha_a, dim = -1),
-               'dim must be a scalar positive integer, but was: -1')
-  expect_error(dirichlet_multinomial(size, alpha_a, dim = c(1, 3)),
-               '^dim must be a scalar positive integer, but was:')
+  # bad n_realisations
+  expect_error(dirichlet_multinomial(10, alpha_a, n_realisations = -1),
+               "'n_realisations' must be a positive scalar integer")
+  expect_error(dirichlet_multinomial(10, alpha_a, n_realisations = c(1, 3)),
+               "'n_realisations' must be a positive scalar integer")
+
+  # bad dimension
+  expect_error(dirichlet_multinomial(10, alpha_a, dimension = -1),
+               "'dimension' must be a positive scalar integer")
+  expect_error(dirichlet_multinomial(10, alpha_a, dimension = c(1, 3)),
+               "'dimension' must be a positive scalar integer")
 
 })
 

@@ -74,19 +74,21 @@ logistic(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 
 f(df1, df2, dim = NULL, truncation = c(0, Inf))
 
-multivariate_normal(mean, Sigma, dim = 1)
+multivariate_normal(mean, Sigma, n_realisations = NULL,
+  dimension = NULL)
 
 wishart(df, Sigma)
 
-lkj_correlation(eta, dim = 2)
+lkj_correlation(eta, dimension = 2)
 
-multinomial(size, prob, dim = 1)
+multinomial(size, prob, n_realisations = NULL, dimension = NULL)
 
-categorical(prob, dim = 1)
+categorical(prob, n_realisations = NULL, dimension = NULL)
 
-dirichlet(alpha, dim = 1)
+dirichlet(alpha, n_realisations = NULL, dimension = NULL)
 
-dirichlet_multinomial(size, alpha, dim = 1)
+dirichlet_multinomial(size, alpha, n_realisations = NULL,
+  dimension = NULL)
 }
 \arguments{
 \item{min, max}{scalar values giving optional limits to \code{uniform}
@@ -112,6 +114,11 @@ to \code{\link{variable}}}
 \item{size, m, n, k}{positive integer parameter}
 
 \item{Sigma}{positive definite variance-covariance matrix parameter}
+
+\item{n_realisations}{the number of independent realisation of a multivariate
+distribution}
+
+\item{dimension}{the dimension of a multivariate distribution}
 }
 \description{
 These functions can be used to define random variables in a
@@ -221,10 +228,10 @@ thetas <- normal(mu, sigma, dim = c(3, 4))
 # a multivariate normal variable, with correlation between two elements
 Sig <- diag(4)
 Sig[3, 4] <- Sig[4, 3] <- 0.6
-theta <- multivariate_normal(rep(mu, 4), Sig)
+theta <- multivariate_normal(t(rep(mu, 4)), Sig)
 
 # 10 independent replicates of that
-theta <- multivariate_normal(rep(mu, 4), Sig, dim = 10)
+theta <- multivariate_normal(t(rep(mu, 4)), Sig, n_realisations = 10)
 
 # a Wishart variable with the same covariance parameter
 theta <- wishart(df = 5, Sigma = Sig)

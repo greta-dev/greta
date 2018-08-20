@@ -1,6 +1,6 @@
 context('inference methods')
 
-test_that('opt converges', {
+test_that('opt converges with TF optimisers', {
 
   skip_if_not(check_tf_version())
   source('helpers.R')
@@ -10,19 +10,75 @@ test_that('opt converges', {
   distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
-  o <- opt(m)
 
-  # should have converged
-  expect_equal(o$convergence, 0)
+  # loop through optimisers that might be expected to work
+  optimisers <- list(gradient_descent,
+                     adadelta,
+                     adagrad,
+                     adagrad_da,
+                     momentum,
+                     adam,
+                     ftrl,
+                     proximal_gradient_descent,
+                     proximal_adagrad,
+                     rms_prop)
 
-  # should be fewer than 100 iterations
-  expect_lte(o$iterations, 100)
+  for (optmr in optimisers) {
 
-  # should be close to the truth
-  expect_true(all(abs(x - o$par) < 1e-3))
+    (o <- opt(m,
+              optimiser = optmr(),
+              max_iterations = 200))
+
+    # should have converged in fewer than 200 iterations and be close to truth
+    expect_equal(o$convergence, 0)
+    expect_lte(o$iterations, 200)
+    expect_true(all(abs(x - o$par) < 1e-2))
+
+  }
 
 })
 
+test_that('opt converges with SciPy optimisers', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- rnorm(5, 2, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, 0.1)
+
+  m <- model(z)
+
+  # loop through optimisers that might be expected to work
+  optimisers <- list(nelder_mead,
+                     powell,
+                     cg,
+                     bfgs,
+                     newton_cg,
+                     l_bfgs_b,
+                     tnc,
+                     cobyla,
+                     slsqp)
+
+  for (optmr in optimisers) {
+
+    (o <- opt(m,
+              optimiser = optmr(),
+              max_iterations = 200))
+
+    # should have converged in fewer than 200 iterations and be close to truth
+
+    # can't tell that from output of cobyla
+    if (!identical(optmr(), cobyla())) {
+      expect_equal(o$convergence, 0)
+      expect_lte(o$iterations, 200)
+    }
+
+    expect_true(all(abs(x - o$par) < 1e-2))
+
+  }
+
+})
 
 test_that('opt accepts initial values', {
 
@@ -56,12 +112,12 @@ test_that('bad mcmc proposals are rejected', {
   x <- rnorm(10000, 1e6, 1)
   z <- normal(-1e6, 1e-6)
   distribution(x) <- normal(z, 1e6)
-  m <- model(z)
+  m <- model(z, precision = "single")
 
+  # catch badness in the progress bar
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
-    m <- model(z),
-    out <- capture_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
+    out <- get_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
     expect_match(out, '100% bad')
   )
 
@@ -73,13 +129,13 @@ test_that('bad mcmc proposals are rejected', {
   x <- rnorm(100000, 1e12, 1)
   z <- normal(-1e12, 1e-12)
   distribution(x) <- normal(z, 1e-12)
-  m <- model(z)
+  m <- model(z, precision = "single")
   expect_error(mcmc(m, n_samples = 1, warmup = 0),
                'Could not find reasonable starting values after 20 attempts')
 
   # proposals that are fine, but rejected anyway
   z <- normal(0, 1)
-  m <- model(z)
+  m <- model(z, precision = "single")
   expect_ok(mcmc(m,
                  hmc(epsilon = 100,
                      Lmin = 1,
@@ -158,15 +214,15 @@ test_that('progress bar gives a range of messages', {
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(1010)),
+    out <- get_output(mcmc(1010)),
     expect_match(out, '<1% bad')
   )
 
-  # 10/500 should be 50%
+  # 10/500 should be 2%
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(500)),
+    out <- get_output(mcmc(500)),
     expect_match(out, '2% bad')
   )
 
@@ -174,7 +230,7 @@ test_that('progress bar gives a range of messages', {
   with_mock(
     `greta:::create_progress_bar` = mock_create_progress_bar,
     `greta:::mcmc` = mock_mcmc,
-    out <- capture_output(mcmc(10)),
+    out <- get_output(mcmc(10)),
     expect_match(out, '100% bad')
   )
 
@@ -227,4 +283,33 @@ test_that('model errors nicely', {
   b <- normal(0, a)
   expect_error(model(a, b),
                "^The following object")
+})
+
+test_that("mcmc supports different samplers, normal proposals", {
+
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  expect_ok(draws <- mcmc(m, rwmh("normal"),
+                          n_samples = 100, warmup = 100))
+
+  proposed <- unlist(draws)
+  expected <- rnorm(100)
+  test_stat <- ks.test(proposed, expected)$p.value
+  expect_gt(test_stat, .1)
+})
+
+test_that("mcmc supports different samplers, uniform proposals", {
+
+  skip_if_not(check_tf_version())
+  set.seed(5)
+  x <- uniform(0, 1)
+  m <- model(x)
+  expect_ok(draws <- mcmc(m, rwmh("uniform"),
+                          n_samples = 100, warmup = 100))
+
+  proposed <- unlist(draws)
+  expected <- runif(100)
+  test_stat <- ks.test(proposed, expected)$p.value
+  expect_gt(test_stat, .1)
 })

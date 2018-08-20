@@ -91,8 +91,8 @@ normal_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Normal(loc = parameters$mean,
-                                      scale = parameters$sd)
+      tfp$distributions$Normal(loc = parameters$mean,
+                               scale = parameters$sd)
     }
 
   )
@@ -153,7 +153,7 @@ bernoulli_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Bernoulli(probs = parameters$prob)
+      tfp$distributions$Bernoulli(probs = parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -179,8 +179,8 @@ binomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Binomial(total_count = parameters$size,
-                                        probs = parameters$prob)
+      tfp$distributions$Binomial(total_count = parameters$size,
+                                 probs = parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -241,7 +241,7 @@ poisson_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Poisson(rate = parameters$lambda)
+      tfp$distributions$Poisson(rate = parameters$lambda)
     },
 
     # no CDF for discrete distributions
@@ -265,8 +265,8 @@ negative_binomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$NegativeBinomial(total_count = parameters$size,
-                                                probs = fl(1) - parameters$prob)
+      tfp$distributions$NegativeBinomial(total_count = parameters$size,
+                                         probs = fl(1) - parameters$prob)
     },
 
     # no CDF for discrete distributions
@@ -326,8 +326,8 @@ gamma_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Gamma(concentration = parameters$shape,
-                                     rate = parameters$rate)
+      tfp$distributions$Gamma(concentration = parameters$shape,
+                              rate = parameters$rate)
     }
 
   )
@@ -349,8 +349,8 @@ inverse_gamma_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$InverseGamma(concentration = parameters$alpha,
-                                            rate = parameters$beta)
+      tfp$distributions$InverseGamma(concentration = parameters$alpha,
+                                     rate = parameters$beta)
     }
 
   )
@@ -410,7 +410,7 @@ exponential_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Exponential(rate = parameters$rate)
+      tfp$distributions$Exponential(rate = parameters$rate)
     }
 
   )
@@ -467,9 +467,9 @@ student_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$StudentT(df = parameters$df,
-                                        loc = parameters$mu,
-                                        scale = parameters$sigma)
+      tfp$distributions$StudentT(df = parameters$df,
+                                 loc = parameters$mu,
+                                 scale = parameters$sigma)
     }
 
   )
@@ -489,8 +489,8 @@ laplace_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Laplace(loc = parameters$mu,
-                                       scale = parameters$sigma)
+      tfp$distributions$Laplace(loc = parameters$mu,
+                                scale = parameters$sigma)
     }
 
   )
@@ -512,8 +512,8 @@ beta_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Beta(concentration1 = parameters$shape1,
-                                    concentration0 = parameters$shape2)
+      tfp$distributions$Beta(concentration1 = parameters$shape1,
+                             concentration0 = parameters$shape2)
     }
 
   )
@@ -568,7 +568,7 @@ chi_squared_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Chi2(df = parameters$df)
+      tfp$distributions$Chi2(df = parameters$df)
     }
 
   )
@@ -588,8 +588,8 @@ logistic_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      tf$contrib$distributions$Logistic(loc = parameters$location,
-                                        scale = parameters$scale)
+      tfp$distributions$Logistic(loc = parameters$location,
+                                 scale = parameters$scale)
     },
 
     # log_cdf in tf$cotrib$distributions has the wrong sign :/
@@ -652,55 +652,27 @@ dirichlet_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (alpha, dim) {
+    initialize = function (alpha, n_realisations, dimension) {
 
       # coerce to greta arrays
       alpha <- as.greta_array(alpha)
 
-      # check dimensions of alpha
-      if (ncol(alpha) != 1 |
-          length(dim(alpha)) != 2) {
-
-        stop ("alpha must be a 2D greta array with one column, ",
-              "but has dimensions ",
-              paste(dim(alpha), collapse = ' x '),
-              call. = FALSE)
-
-      }
-
-      if (length(alpha) == 1) {
-
-        stop ('the dirichlet distribution is for vectors, ',
-              'but the parameters were scalar',
-              call. = FALSE)
-
-      }
-
-      # check dim is a positive scalar integer
-      dim_old <- dim
-      dim <- as.integer(dim)
-      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
-
-        stop ('dim must be a scalar positive integer, but was: ',
-              capture.output(dput(dim_old)),
-              call. = FALSE)
-
-      }
+      dim <- check_multivariate_dims(vectors = list(alpha),
+                                     n_realisations = n_realisations,
+                                     dimension = dimension)
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
       self$bounds <- c(0, Inf)
-      super$initialize('dirichlet',
-                       c(dim, length(alpha)),
+      super$initialize('dirichlet', dim,
                        truncation = c(0, Inf))
       self$add_parameter(alpha, 'alpha')
 
     },
 
     tf_distrib = function (parameters, dag) {
-      # transpose and scale probs to get absolute density correct
-      alpha <- tf$transpose(parameters$alpha)
-      tf$contrib$distributions$Dirichlet(concentration = alpha)
+      alpha <- parameters$alpha
+      tfp$distributions$Dirichlet(concentration = alpha)
     },
 
     # no CDF for multivariate distributions
@@ -716,54 +688,24 @@ dirichlet_multinomial_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (size, alpha, dim) {
+    initialize = function (size, alpha, n_realisations, dimension) {
 
       # coerce to greta arrays
       size <- as.greta_array(size)
       alpha <- as.greta_array(alpha)
 
-      # check dimensions
-      if (length(size) != 1) {
+      dim <- check_multivariate_dims(scalars = list(size),
+                                     vectors = list(alpha),
+                                     n_realisations = n_realisations,
+                                     dimension = dimension)
 
-        stop ('size must be a scalar, but has dimensions ',
-              paste(dim(size), collapse = ' x '),
-              call. = FALSE)
 
-      }
-
-      if (ncol(alpha) != 1 |
-          length(dim(alpha)) != 2) {
-
-        stop ("alpha must be a 2D greta array with one column, ",
-              "but has dimensions ",
-              paste(dim(alpha), collapse = ' x '),
-              call. = FALSE)
-
-      }
-
-      if (length(alpha) == 1) {
-
-        stop ('the dirichlet distribution is for vectors, ',
-              'but the parameters were scalar',
-              call. = FALSE)
-
-      }
-
-      # check dim is a positive scalar integer
-      dim_old <- dim
-      dim <- as.integer(dim)
-      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
-
-        stop ('dim must be a scalar positive integer, but was: ',
-              capture.output(dput(dim_old)),
-              call. = FALSE)
-
-      }
+      # need to handle size as a vector!
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
       super$initialize("dirichlet_multinomial",
-                       dim = c(dim, length(alpha)),
+                       dim = dim,
                        discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(alpha, 'alpha')
@@ -771,9 +713,8 @@ dirichlet_multinomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      # transpose and scale probs to get absolute density correct
-      alpha <- tf$transpose(parameters$alpha)
-      distrib <- tf$contrib$distributions$DirichletMultinomial
+      alpha <- parameters$alpha
+      distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
               concentration = alpha)
     },
@@ -790,54 +731,23 @@ multinomial_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (size, prob, dim) {
+    initialize = function (size, prob, n_realisations, dimension) {
 
       # coerce to greta arrays
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
-      # check dimensions
-      if (length(size) != 1) {
+      dim <- check_multivariate_dims(scalars = list(size),
+                                     vectors = list(prob),
+                                     n_realisations = n_realisations,
+                                     dimension = dimension)
 
-        stop ('size must be a scalar, but has dimensions ',
-              paste(dim(size), collapse = ' x '),
-              call. = FALSE)
-
-      }
-
-      if (ncol(prob) != 1 |
-          length(dim(prob)) != 2) {
-
-        stop ("prob must be a 2D greta array with one column, ",
-              "but has dimensions ",
-              paste(dim(prob), collapse = ' x '),
-              call. = FALSE)
-
-      }
-
-      if (length(prob) == 1) {
-
-        stop ('the multinomial distribution is for vectors, ',
-              'but the parameters were scalar',
-              call. = FALSE)
-
-      }
-
-      # check dim is a positive scalar integer
-      dim_old <- dim
-      dim <- as.integer(dim)
-      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
-
-        stop ('dim must be a scalar positive integer, but was: ',
-              capture.output(dput(dim_old)),
-              call. = FALSE)
-
-      }
+      # need to make sure size is a column vector!
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
       super$initialize("multinomial",
-                       dim = c(dim, length(prob)),
+                       dim = dim,
                        discrete = TRUE)
       self$add_parameter(size, 'size')
       self$add_parameter(prob, 'prob')
@@ -845,11 +755,11 @@ multinomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      # transpose and scale probs to get absolute density correct
-      probs <- tf$transpose(parameters$prob)
+      # scale probs to get absolute density correct
+      probs <- parameters$prob
       probs <- probs / tf$reduce_sum(probs)
-      tf$contrib$distributions$Multinomial(total_count = parameters$size,
-                                           probs = probs)
+      tfp$distributions$Multinomial(total_count = parameters$size,
+                                    probs = probs)
     },
 
     # no CDF for multivariate distributions
@@ -864,56 +774,28 @@ categorical_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (prob, dim) {
+    initialize = function (prob, n_realisations, dimension) {
 
       # coerce to greta arrays
       prob <- as.greta_array(prob)
 
-      # check dimensions of prob
-      if (ncol(prob) != 1 |
-          length(dim(prob)) != 2) {
-
-        stop ("prob must be a 2D greta array with one column, ",
-              "but has dimensions ",
-              paste(dim(prob), collapse = ' x '),
-              call. = FALSE)
-
-      }
-
-      if (length(prob) == 1) {
-
-        stop ('the categorical distribution is for vectors, ',
-              'but the parameters were scalar',
-              call. = FALSE)
-
-      }
-
-      # check dim is a positive scalar integer
-      dim_old <- dim
-      dim <- as.integer(dim)
-      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
-
-        stop ('dim must be a scalar positive integer, but was: ',
-              capture.output(dput(dim_old)),
-              call. = FALSE)
-
-      }
+      dim <- check_multivariate_dims(vectors = list(prob),
+                                     n_realisations = n_realisations,
+                                     dimension = dimension)
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize("categorical",
-                       dim = c(dim, length(prob)),
-                       discrete = TRUE)
+      super$initialize("categorical", dim = dim, discrete = TRUE)
       self$add_parameter(prob, 'prob')
 
     },
 
     tf_distrib = function (parameters, dag) {
-      # transpose and scale probs to get absolute density correct
-      probs <- tf$transpose(parameters$prob)
+      # scale probs to get absolute density correct
+      probs <- parameters$prob
       probs <- probs / tf$reduce_sum(probs)
-      tf$contrib$distributions$Multinomial(total_count = fl(1),
-                                           probs = probs)
+      tfp$distributions$Multinomial(total_count = fl(1),
+                                    probs = probs)
     },
 
     # no CDF for multivariate distributions
@@ -928,22 +810,17 @@ multivariate_normal_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (mean, Sigma, dim) {
+    initialize = function (mean, Sigma, n_realisations, dimension) {
 
       # coerce to greta arrays
       mean <- as.greta_array(mean)
       Sigma <- as.greta_array(Sigma)
 
-      # check dimensions of mean
-      if (ncol(mean) != 1 |
-          length(dim(mean)) != 2) {
-
-        stop ("mean must be a 2D greta array with one column, ",
-              "but has dimensions ",
-              paste(dim(mean), collapse = ' x '),
-              call. = FALSE)
-
-      }
+      # check dim is a positive scalar integer
+      dim <- check_multivariate_dims(vectors = list(mean),
+                                     squares = list(Sigma),
+                                     n_realisations = n_realisations,
+                                     dimension = dimension)
 
       # check dimensions of Sigma
       if (nrow(Sigma) != ncol(Sigma) |
@@ -957,7 +834,7 @@ multivariate_normal_distribution <- R6Class (
       }
 
       # compare possible dimensions
-      dim_mean <- nrow(mean)
+      dim_mean <- ncol(mean)
       dim_Sigma <- nrow(Sigma)
 
       if (dim_mean != dim_Sigma) {
@@ -968,28 +845,9 @@ multivariate_normal_distribution <- R6Class (
 
       }
 
-      if (dim_mean == 1) {
-
-        stop ('the multivariate normal distribution is for vectors, ',
-              'but the parameters were scalar',
-              call. = FALSE)
-
-      }
-
-      # check dim is a positive scalar integer
-      dim_old <- dim
-      dim <- as.integer(dim)
-      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
-
-        stop ('dim must be a scalar positive integer, but was: ',
-              capture.output(dput(dim_old)),
-              call. = FALSE)
-
-      }
-
       # coerce the parameter arguments to nodes and add as children and
       # parameters
-      super$initialize('multivariate_normal', c(dim, dim_mean))
+      super$initialize('multivariate_normal', dim)
       self$add_parameter(mean, 'mean')
       self$add_parameter(Sigma, 'Sigma')
 
@@ -1026,9 +884,9 @@ multivariate_normal_distribution <- R6Class (
       else
         L <- tf$transpose(parameters$Sigma)
 
-      mu <- tf$transpose(parameters$mean)
-      tf$contrib$distributions$MultivariateNormalTriL(loc = mu,
-                                                      scale_tril = L)
+      mu <- parameters$mean
+      tfp$distributions$MultivariateNormalTriL(loc = mu,
+                                               scale_tril = L)
     },
 
     # no CDF for multivariate distributions
@@ -1102,30 +960,23 @@ wishart_distribution <- R6Class (
 
       df <- tf$squeeze(parameters$df)
 
+      wish <- tfp$distributions$Wishart
+
       if (is_cholesky) {
 
-        # find and use the tensor for the cholesky factor
+        # if it's available, find and use the tensor for the cholesky factor
         cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
-
-        wish_chol <- tf$contrib$distributions$WishartCholesky
-        distrib <- wish_chol(df = df,
-                             scale = tf$transpose(cholesky_scale))
+        t_cholesky_scale <- tf$transpose(cholesky_scale)
+        distrib <- wish(df = df, scale_tril = t_cholesky_scale)
 
       } else {
 
-        wish <- tf$contrib$distributions$WishartFull
-        distrib <- wish(df = df,
-                        scale = parameters$Sigma)
+        distrib <- wish(df = df, scale = parameters$Sigma)
 
       }
 
       distrib
 
-    },
-
-    tf_log_density_function = function (x, parameters, dag) {
-      lp <- self$tf_distrib(parameters, dag)$log_prob(x)
-      tf$reshape(lp, shape(1, 1))
     },
 
     # no CDF for multivariate distributions
@@ -1140,18 +991,9 @@ lkj_correlation_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (eta, dim = 2) {
+    initialize = function (eta, dimension = 2) {
 
-      # check dim is a scalar integer greater than 1
-      dim_old <- dim
-      dim <- as.integer(dim)
-      if (length(dim) > 1 || dim <= 1 || !is.finite(dim)) {
-
-        stop ('dim must be a scalar integer greater than one, but was: ',
-              capture.output(dput(dim_old)),
-              call. = FALSE)
-
-      }
+      dimension <- check_dimension(target = dimension)
 
       if (!inherits(eta, "greta_array")) {
 
@@ -1173,11 +1015,12 @@ lkj_correlation_distribution <- R6Class (
 
       }
 
-      super$initialize('lkj_correlation', c(dim, dim))
+      dim <- c(dimension, dimension)
+      super$initialize('lkj_correlation', dim)
       self$add_parameter(eta, 'eta')
 
       # make the initial value PD
-      self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
+      self$value(unknowns(dims = dim, data = diag(dimension)))
 
     },
 
@@ -1234,7 +1077,8 @@ lkj_correlation_distribution <- R6Class (
         diags <- tf$diag_part(x)
         det <- tf$square(tf$reduce_prod(diags))
         prob <- det ^ (eta - fl(1))
-        tf$log(prob)
+        lp <- tf$log(prob)
+        tf$squeeze(lp)
 
       }
 
@@ -1314,6 +1158,11 @@ distribution_classes_module <- module(uniform_distribution,
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
 #'   or a vector of positive integers. See details.
+#'
+#' @param dimension the dimension of a multivariate distribution
+#'
+#' @param n_realisations the number of independent realisation of a multivariate
+#'   distribution
 #'
 #' @details The discrete probability distributions (\code{bernoulli},
 #'   \code{binomial}, \code{negative_binomial}, \code{poisson},
@@ -1414,10 +1263,10 @@ distribution_classes_module <- module(uniform_distribution,
 #' # a multivariate normal variable, with correlation between two elements
 #' Sig <- diag(4)
 #' Sig[3, 4] <- Sig[4, 3] <- 0.6
-#' theta <- multivariate_normal(rep(mu, 4), Sig)
+#' theta <- multivariate_normal(t(rep(mu, 4)), Sig)
 #'
 #' # 10 independent replicates of that
-#' theta <- multivariate_normal(rep(mu, 4), Sig, dim = 10)
+#' theta <- multivariate_normal(t(rep(mu, 4)), Sig, n_realisations = 10)
 #'
 #' # a Wishart variable with the same covariance parameter
 #' theta <- wishart(df = 5, Sigma = Sig)
@@ -1448,8 +1297,8 @@ bernoulli <- function (prob, dim = NULL)
 #' @rdname distributions
 #' @export
 binomial <- function (size, prob, dim = NULL) {
-  check_in_family("binomial")
-  distrib('binomial', size, prob, dim)
+  check_in_family("binomial", size)
+  distrib("binomial", size, prob, dim)
 }
 
 #' @rdname distributions
@@ -1470,8 +1319,8 @@ hypergeometric <- function (m, n, k, dim = NULL)
 #' @rdname distributions
 #' @export
 poisson <- function (lambda, dim = NULL) {
-  check_in_family("poisson")
-  distrib('poisson', lambda, dim)
+  check_in_family("poisson", lambda)
+  distrib("poisson", lambda, dim)
 }
 
 #' @rdname distributions
@@ -1536,8 +1385,12 @@ f <- function (df1, df2, dim = NULL, truncation = c(0, Inf))
 
 #' @rdname distributions
 #' @export
-multivariate_normal <- function (mean, Sigma, dim = 1)
-  distrib('multivariate_normal', mean, Sigma, dim)
+multivariate_normal <- function (mean, Sigma,
+                                 n_realisations = NULL, dimension = NULL) {
+  distrib('multivariate_normal',
+          mean, Sigma,
+          n_realisations, dimension)
+}
 
 #' @rdname distributions
 #' @export
@@ -1546,25 +1399,28 @@ wishart <- function (df, Sigma)
 
 #' @rdname distributions
 #' @export
-lkj_correlation <- function (eta, dim = 2)
-  distrib('lkj_correlation', eta, dim)
+lkj_correlation <- function (eta, dimension = 2)
+  distrib('lkj_correlation', eta, dimension)
 
 #' @rdname distributions
 #' @export
-multinomial <- function (size, prob, dim = 1)
-  distrib('multinomial', size, prob, dim)
+multinomial <- function (size, prob, n_realisations = NULL, dimension = NULL)
+  distrib('multinomial', size, prob, n_realisations, dimension)
 
 #' @rdname distributions
 #' @export
-categorical <- function (prob, dim = 1)
-  distrib('categorical', prob, dim)
+categorical <- function (prob, n_realisations = NULL, dimension = NULL)
+  distrib('categorical', prob, n_realisations, dimension)
 
 #' @rdname distributions
 #' @export
-dirichlet <- function (alpha, dim = 1)
-  distrib('dirichlet', alpha, dim)
+dirichlet <- function (alpha, n_realisations = NULL, dimension = NULL)
+  distrib('dirichlet', alpha, n_realisations, dimension)
 
 #' @rdname distributions
 #' @export
-dirichlet_multinomial <- function (size, alpha, dim = 1)
-  distrib('dirichlet_multinomial', size, alpha, dim)
+dirichlet_multinomial <- function (size, alpha,
+                                   n_realisations = NULL, dimension = NULL) {
+  distrib('dirichlet_multinomial',
+          size, alpha, n_realisations, dimension)
+}

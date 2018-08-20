@@ -1,0 +1,25 @@
+### Horseshoe prior
+
+A simple, one-variable Bayesian linear regression model using a horseshoe prior. The horseshoe, just as the LASSO, can be used when the slopes are assumed to be sparse. According to the original [publication](http://proceedings.mlr.press/v5/carvalho09a/carvalho09a.pdf) 
+*its flat, Cauchy-like tails allow strong signals to remain large [...]
+a posteriori.  Yet its infinitely tall spike at the origin provides
+severe shrinkage for the zero elements of.*
+
+```{r linear_horseshoe_greta}
+horseshoe <- function (tau = 1, dim = NULL) {
+  lambda <- cauchy(0, 1, truncation = c(0, Inf), dim = dim)
+  sd <- tau ^ 2 * lambda ^ 2
+  normal(0, sd, dim = dim)
+}
+
+# variables & priors
+int  <- variable()
+sd   <- inverse_gamma(1, 1)
+coef <- horseshoe()
+
+# linear predictor
+mu <- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) <- normal(mu, sd)
+```

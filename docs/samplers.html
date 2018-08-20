@@ -11,7 +11,7 @@
 
 
 
-<title>methods for modelling structured dynamical systems</title>
+<title>MCMC samplers</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -25,7 +25,9 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -94,6 +96,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -337,7 +342,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">methods for modelling structured dynamical systems</h1>
+<h1 class="title toc-ignore">MCMC samplers</h1>
 
 </div>
 
@@ -346,46 +351,55 @@ div.tocify {
 <a class="anchor" href="#description"></a> Description
 </h2>
 <p>
-A module providing functions specific to dynamical modelling. So far only for iterating Leslie matrices. <code>iterate_lambda</code> iterates a matrix a certain number of times and returns, as a scalar greta array, the terminal growth rate for the first element of the state vector. <code>iterate_state</code> carries out the same procedure, but returns the final state vector. <code>iterate_lambda_vectorised</code> is a vectorised version of <code>iterate_lambda</code> for iterating over multiple matrices, returning a vector of growth rates.
+Functions to set up MCMC samplers and change the starting values of their parameters, for use in <code><a href='inference.html'>mcmc</a>()</code>.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a> Usage
 </h2>
+<pre class="r"><span class='fu'>hmc</span>(<span class='kw'>Lmin</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Lmax</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>diag_sd</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+
+<span class='fu'>rwmh</span>(<span class='kw'>proposal</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"normal"</span>, <span class='st'>"uniform"</span>), <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>diag_sd</span> <span class='kw'>=</span> <span class='fl'>1</span>) </pre>
 <h2 class="hasAnchor" id="arguments">
 <a class="anchor" href="#arguments"></a> Arguments
 </h2>
-<code>matrix</code>
+<code>Lmin</code>
 <p>
-a square, two-dimensional (i.e. matrix-like) greta array representing transition probabilities between states
+minimum number of leapfrog steps (positive integer, Lmin &gt; Lmax)
 </p>
-<code>state</code>
+<code>Lmax</code>
 <p>
-a column vector greta array representing the initial state from which to iterate the matrix
+maximum number of leapfrog steps (positive integer, Lmax &gt; Lmin)
 </p>
-<code>niter</code>
+<code>epsilon</code>
 <p>
-a positive integer giving the number of times to iterate the matrix
+leapfrog stepsize hyperparameter (positive, will be tuned)
 </p>
-<code>matrices</code>
+<code>diag_sd</code>
 <p>
-a rectangular two-dimensional greta array of dimension n x m^2, each row of which gives the rowwise elements of a different m x m matrix to iterate
+estimate of the posterior marginal standard deviations (positive, will be tuned).
 </p>
-<code>n</code>
+<code>proposal</code>
 <p>
-the number of m x m matrices to be iterated (first dimensions of <code>matrices</code>)
+the probability distribution used to generate proposal states
 </p>
-<code>m</code>
-<p>
-the dimension of each matrix to be iterated
-</p>
-<h2 class="hasAnchor" id="usage">
-<a class="anchor" href="#usage"></a>Usage
+<h2 class="hasAnchor" id="value">
+<a class="anchor" href="#value"></a>Value
 </h2>
-<pre>
-  dynamics$iterate_lambda(matrix, state, niter)
-  dynamics$iterate_state(matrix, state, niter)
-  dynamics$iterate_lambda_vectorised(matrices, state, n, m, niter)
-</pre>
+<p>
+a <code>sampler</code> object that can be passed to <code><a href='inference.html'>mcmc</a></code>.
+</p>
+<h2 class="hasAnchor" id="details">
+<a class="anchor" href="#details"></a>Details
+</h2>
+<p>
+During the warmup iterations of <code>mcmc</code>, some of these sampler parameters will be tuned to improve the efficiency of the sampler, so the values provided here are used as starting values.
+</p>
+<p>
+For <code>hmc()</code>, the number of leapfrog steps at each iteration is selected uniformly at random from between <code>Lmin</code> and <code>Lmax</code>. <code>diag_sd</code> is used to rescale the parameter space to make it more uniform, and make sampling more efficient.
+</p>
+<p>
+The Random Walk Metropolis Hastings algorithm is a gradient free sampling algorithm that requires no tuning parameters. The algorithm involves a proposal generating step <code>proposal_state = current_state +   perturb</code> by a random perturbation, followed by Metropolis-Hastings accept/reject step. The class is implemented for uniform and normal proposals.
+</p>
 
 
 

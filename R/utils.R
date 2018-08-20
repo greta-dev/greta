@@ -50,6 +50,10 @@ check_tf_version <- function (alert = c("none",
   } else {
 
     tf_version <- tf$`__version__`
+    if (getOption("greta_use_tfp_nightly", FALSE)) {
+      tf_version <- gsub("-dev.*", "", tf_version)
+    }
+
     tf_version_valid <- utils::compareVersion("1.8", tf_version) != 1
 
     if (!tf_version_valid) {
@@ -226,10 +230,10 @@ check_dims <- function (..., target_dim = NULL) {
   # if more than one is non-scalar, need to check them
   if (sum(!scalars) > 1) {
 
-    match_first <- vapply(dim_list,
+    match_first <- vapply(dim_list[!scalars],
                           identical,
                           FUN.VALUE = FALSE,
-                          dim_list[[1]])
+                          dim_list[!scalars][[1]])
 
     # if they're non-scalar, but have the same dimensions, that's fine too
     if (!all(match_first)) {
@@ -255,7 +259,7 @@ check_dims <- function (..., target_dim = NULL) {
     if (!all(scalars)) {
 
       # check all arguments against this
-      matches_target <- vapply(dim_list,
+      matches_target <- vapply(dim_list[!scalars],
                                identical,
                                FUN.VALUE = FALSE,
                                target_dim)
@@ -284,6 +288,203 @@ check_dims <- function (..., target_dim = NULL) {
 
 }
 
+# make sure a greta array is 2D
+check_2D <- function (x) {
+
+  if (length(dim(x)) != 2L) {
+    stop("parameters of multivariate distributions ",
+         "cannot have more than two dimensions",
+         call. = FALSE)
+  }
+}
+
+check_square <- function (x) {
+  dim <- dim(x)
+  ndim <- length(dim)
+  is_square <- ndim == 2 && dim[1] == dim[2]
+  if (!is_square) {
+    stop ("expected a 2D square greta array, but object had dimension ",
+          paste(dim, collapse = "x"),
+          call. = FALSE)
+  }
+}
+
+# given lists of greta arrays for the vector and scalar parameters (can be
+# matrices and column vectors, respectively, where number of rows implies the
+# number of realisations) and an optional target number of realisations, error
+# if there's a mismatch, and otherwise return the output number of realisations
+check_n_realisations <- function (vectors = list(),
+                                  scalars = list(),
+                                  target = NULL) {
+
+  # get the number of rows in the vector and scalar objects
+  nrows <- lapply(c(vectors, scalars), nrow)
+
+  # which are single rows
+  single_rows <- unlist(nrows) == 1
+
+  # if more than one has multiple rows, need to check them
+  if (sum(!single_rows) > 1) {
+
+    match_first <- vapply(nrows[!single_rows],
+                          identical,
+                          FUN.VALUE = FALSE,
+                          nrows[!single_rows][[1]])
+
+    # if they're non-scalar, but have the same dimensions, that's fine too
+    if (!all(match_first)) {
+
+      # otherwise it's not fine
+      msg <- sprintf('incompatible number of rows: %s',
+                     paste(nrows, collapse = " vs "))
+      stop (msg, call. = FALSE)
+
+    }
+  }
+
+  # if there's a target number of realisations, check it's valid and make sure they all match it
+  if (!is.null(target)) {
+
+    # make sure it's a scalar
+    if (length(target) != 1 || target < 1) {
+      stop ("'n_realisations' must be a positive scalar integer ",
+            "giving the number of rows of the output",
+            call. = FALSE)
+    }
+
+    target <- as.integer(target)
+
+    # if they are all scalars, that's fine too
+    if (!all(single_rows)) {
+
+      # check all arguments against this
+      matches_target <- vapply(nrows[!single_rows],
+                               identical,
+                               FUN.VALUE = FALSE,
+                               target)
+
+      # error if not
+      if (!all(matches_target)) {
+        stop (sprintf(paste("number of realisations should be %s,",
+                            "but arguments had %s rows"),
+                      target,
+                      paste(nrows, collapse = ", ")),
+              call. = FALSE)
+      }
+
+    }
+
+    n_realisations <- target
+
+  } else {
+
+    # otherwise, find the correct output dimension
+    n_realisations <- max(unlist(nrows))
+
+  }
+
+  n_realisations
+
+}
+
+
+# check the dimension of maultivariate parameters matches, and matches the
+# optional target dimension
+check_dimension <- function (vectors = list(),
+                             squares = list(),
+                             target = NULL,
+                             min_dimension = 2L) {
+
+  # get the number of columns in the vector and scalar objects
+  ncols <- lapply(c(vectors, squares), ncol)
+
+  # if there's a target dimension, check then use that:
+  if (!is.null(target)) {
+
+    # make sure it's a scalar
+    if (length(target) != 1 || target < 1 || !is.finite(target)) {
+      stop ("'dimension' must be a positive scalar integer ",
+            "giving the dimension of the distribution",
+            call. = FALSE)
+    }
+
+    dimension <- as.integer(target)
+
+  } else {
+
+    # otherwise, get it from the first parameter
+    dimension <- ncols[[1]]
+
+  }
+
+  # check it's big enough
+  if (dimension < min_dimension) {
+    stop ("the dimension of this distribution must be at least ",
+          min_dimension, " but was ", dimension,
+          call. = FALSE)
+  }
+
+  # make sure all the parameters match this dimension
+  match_dimension <- vapply(ncols, identical, dimension,
+                            FUN.VALUE = FALSE)
+
+  if (!all(match_dimension)) {
+
+    # otherwise it's not fine
+    msg <- sprintf(paste0("the distribution dimension should be %s, ",
+                          "but parameters implied dimensions: %s"),
+                   dimension,
+                   paste(ncols, collapse = " vs "))
+    stop (msg, call. = FALSE)
+
+  }
+
+  dimension
+
+}
+
+# check dimensions of arguments to multivariate distributions
+# if n_realisations isn't given, get it from the objects passed in
+# if dimension isn't given, get it from the objects passed in
+# if n_realisations *is* given, and the objects have one row, replicate them
+# if n_realisations is given, and the onbject have multiple rows, they must
+# match.
+
+# the objects passed in can either be vector-like (like 'mean'),
+# scalar-like (like 'size'), or square (like 'Sigma').
+check_multivariate_dims <- function (vectors = list(),
+                                     scalars = list(),
+                                     squares = list(),
+                                     n_realisations = NULL,
+                                     dimension = NULL,
+                                     min_dimension = 2L) {
+
+  # coerce args to greta arrays
+  vectors <- lapply(vectors, as.greta_array)
+  scalars <- lapply(scalars, as.greta_array)
+  squares <- lapply(squares, as.greta_array)
+
+  # make sure they are all 2D and the squares are square
+  lapply(c(vectors, scalars, squares), check_2D)
+  lapply(squares, check_square)
+
+  # check and return the output number of distribution realisations
+  n_realisations <- check_n_realisations(vectors,
+                                         scalars,
+                                         n_realisations)
+
+  # check and return the distribution dimension
+  dimension <- check_dimension(vectors,
+                               squares,
+                               dimension,
+                               min_dimension)
+
+  # return the output greta array dimension
+  c(n_realisations, dimension)
+
+}
+
+
 # check truncation for different distributions
 check_positive <- function (truncation) {
   if (truncation[1] < 0) {
@@ -301,16 +502,34 @@ check_unit <- function (truncation) {
 
 # check whether the function calling this is being used as the 'family' argument
 # of another modelling function
-check_in_family <- function (function_name) {
+check_in_family <- function (function_name, arg) {
+
+  if (missing(arg)) {
+    # if the first argument is missing, the user might be doing
+    # `family = binomial()` or similar
+    arg_is_link <- TRUE
+  } else {
+    # if the first argument is one of these text strings, the user might be doing
+    # `family = binomial("logit")` or similar
+    links <- c("logit", "probit", "cloglog", "cauchit", "log", "identity", "sqrt")
+    arg_is_link <- inherits(arg, "character") && length(arg) == 1 && arg %in% links
+  }
+
+  # if it's being executed in an environment where it's named 'family', the user
+  # might be doing `family = binomial` or similar
   greta_function <- get(function_name, envir = asNamespace("greta"))
   family <- parent.frame(2)$family
-  if (!is.null(family) && identical(family, greta_function)) {
+  function_is_family <- !is.null(family) && identical(family, greta_function)
+
+  # nice user-friendly error message
+  if (arg_is_link | function_is_family) {
     msg <- paste0("It looks like you're using greta's ", function_name,
                   " function in the family argment of another model.",
                   " Maybe you want to use 'family = stats::", function_name,
                   "' instead?")
     stop (msg, call. = FALSE)
   }
+
 }
 
 #' @importFrom future plan future

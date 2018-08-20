@@ -14,7 +14,7 @@ expect_ok <- function (expr)
   expect_error(expr, NA)
 
 # evaluate a greta_array, node, or tensor
-grab <- function (x) {
+grab <- function (x, dag = NULL) {
 
   if (inherits(x, "node"))
     x <- as.greta_array(x)
@@ -26,7 +26,10 @@ grab <- function (x) {
              envir = dag$tf_environment)
   }
 
-  tf$Session()$run(x)
+  # generate the feed dict for data
+  dag$build_feed_dict()
+  tf$Session()$run(x,
+                   feed_dict = dag$tf_environment$feed_dict)
 
 }
 
@@ -55,11 +58,12 @@ get_density <- function (distrib, data) {
   # get the log density as a vector
   tensor_name <- dag$tf_name(distrib$node$distribution)
   tensor <- get(tensor_name, envir = dag$tf_environment)
-  as.vector(grab(tensor))
+  as.vector(grab(tensor, dag))
 
 }
 
-compare_distribution <- function (greta_fun, r_fun, parameters, x, dim = NULL) {
+compare_distribution <- function (greta_fun, r_fun, parameters, x,
+                                  dim = NULL, multivariate = FALSE) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.
   # 'greta_fun' is the greta distribution constructor function (e.g. normal())
@@ -75,9 +79,20 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x, dim = NULL) {
   if (is.null(dim))
     dim <- NROW(x)
 
-  # no dim for wishart
-  if (!identical(names(parameters), c('df', 'Sigma')))
-    parameters_greta <- c(parameters_greta, list(dim = dim))
+  # add the output dimension to the arguments list
+  dim_list <- list(dim = dim)
+
+  # if it's a multivariate distribution name it n_realisations
+  if (multivariate)
+    names(dim_list) <- "n_realisations"
+
+  # don't add it for wishart & lkj, which don't mave multiple realisations
+  is_wishart <- identical(names(parameters), c("df", "Sigma"))
+  is_lkj <- identical(names(parameters), c("eta", "dimension"))
+  if (is_wishart | is_lkj)
+    dim_list <- list()
+
+  parameters_greta <- c(parameters_greta, dim_list)
 
   # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
@@ -99,7 +114,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x, dim = NULL) {
   target <- get(dag$tf_name(x_$node), envir = tfe)
   density <- get(dag$tf_name(distrib_node), envir = tfe)
   result <- density(target)
-  greta_log_density <- as.vector(grab(result))
+  greta_log_density <- as.vector(grab(result, dag))
 
   # get R version
   r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
@@ -227,20 +242,6 @@ sample_distribution <- function (greta_array, n = 10,
   expect_true(all(samples >= lower & samples <= upper))
 }
 
-# R versions of dynamics module methods
-it_lambda <- function (matrix, state, niter) {
-  states <- list(state)
-  for (i in seq_len(niter))
-    states[[i + 1]] <- states[[i]] %*% matrix
-  states[[niter + 1]][1] / states[[niter]][1]
-}
-
-it_state <- function (matrix, state, niter) {
-  for (i in seq_len(niter))
-    state <- state %*% matrix
-  state[1, ]
-}
-
 compare_truncated_distribution <- function (greta_fun,
                                             which,
                                             parameters,
@@ -284,7 +285,7 @@ compare_truncated_distribution <- function (greta_fun,
   target <- get(dag$tf_name(x_$node), envir = tfe)
   density <- get(dag$tf_name(distrib_node), envir = tfe)
   result <- density(target)
-  greta_log_density <- as.vector(grab(result))
+  greta_log_density <- as.vector(grab(result, dag))
 
   # return absolute difference
   abs(greta_log_density - r_log_density)
@@ -334,6 +335,19 @@ cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
 mock_create_progress_bar <- function(...)
   cpb(..., stream = stdout(), force = TRUE)
 
+# capture messages in testthat block to get the output of the progress bar;
+# copied from progress' test suite:
+# https://github.com/r-lib/progress/blob/master/tests/testthat/helper.R
+get_output <- function(expr) {
+  msgs <- character()
+  i <- 0
+  suppressMessages(withCallingHandlers(
+    expr,
+    message = function(e) msgs[[i <<- i + 1]] <<- conditionMessage(e)))
+  paste0(msgs, collapse = "")
+}
+
+# mock up mcmc progress bar output for neurotic testing
 mock_mcmc <- function (n_samples = 1010) {
   pb <- create_progress_bar('sampling', c(0, n_samples), pb_update = 10)
   # for (i in seq_len(n_samples))

@@ -63,7 +63,7 @@
 #'
 #'  #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-#'  tapply(X, INDEX, FUN = c("sum", "max"), ...)
+#'  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
 #'
 #' }
 #'
@@ -78,7 +78,7 @@
 #'   and multiplication.
 #'
 #'   \code{tapply()} works on column vectors (2D greta arrays with one column),
-#'   and \code{INDEX} cannot be a greta array. Currently only two functions are
+#'   and \code{INDEX} cannot be a greta array. Currently five functions are
 #'   available, and arguments passed to \dots are ignored.
 #'
 #' @examples
@@ -708,7 +708,9 @@ tapply.default <- function (X, INDEX, FUN = NULL, ...,
 }
 
 #' @export
-tapply.greta_array <- function (X, INDEX, FUN = c("sum", "max"), ...) {
+tapply.greta_array <- function (X, INDEX,
+                                FUN = c("sum", "max", "mean", "min", "prod"),
+                                ...) {
 
   FUN <- match.arg(FUN)
 
@@ -725,7 +727,10 @@ tapply.greta_array <- function (X, INDEX, FUN = c("sum", "max"), ...) {
   # which function
   tf_fun <- switch(FUN,
                    sum = "tf$unsorted_segment_sum",
-                   max = "tf$unsorted_segment_max")
+                   max = "tf$unsorted_segment_max",
+                   mean = "tf$unsorted_segment_mean",
+                   min = "tf$unsorted_segment_min",
+                   prod = "tf$unsorted_segment_prod")
 
   # dimensions
   dimfun <- function (elem_list) {
@@ -746,5 +751,73 @@ tapply.greta_array <- function (X, INDEX, FUN = c("sum", "max"), ...) {
      operation_args = list(segment_ids = id, num_segments = len),
      tf_operation = tf_fun,
      dimfun = dimfun)
+
+}
+
+#' @rdname overloaded
+#' @export
+eigen <- function (x, symmetric, only.values, EISPACK) {
+  UseMethod("eigen")
+}
+
+#' @export
+eigen.default <- function (x, symmetric, only.values = FALSE, EISPACK = FALSE) {
+  base::eigen(x = x,
+              symmetric = symmetric,
+              only.values = only.values,
+              EISPACK = EISPACK)
+}
+
+#' @export
+eigen.greta_array <- function (x, symmetric, only.values = FALSE, EISPACK = FALSE) {
+
+  x <- as.greta_array(x)
+
+  if (missing(symmetric)) symmetric <- TRUE
+  dims <- dim(x)
+
+  if (length(dims) != 2 | dims[1] != dims[2] | !symmetric) {
+    stop("only two-dimensional, square, symmetric greta arrays ",
+         "can be eigendecomposed",
+         call. = FALSE)
+  }
+
+  # they just want the eigenvalues, use that tf method
+  if (only.values) {
+
+    dimfun <- function (elem_list) nrow(elem_list[[1]])
+
+    values <- op("eigenvalues", x,
+                 dimfun = dimfun,
+                 tf_operation = "tf_only_eigenvalues")
+
+    vectors <- NULL
+
+  } else {
+
+    # if we're doing the whole eigendecomposition, do it in three operations
+
+    # a wacky greta array which appaarently has the same dimension as x; but in
+    # fact is a list of the two elements. But that's OK so long as the user
+    # never sees it
+    eig <- op("eigen", x,
+              tf_operation = "tf$self_adjoint_eig")
+
+    # get the eigenvalues and vectors as actual, sane greta arrays
+
+    dimfun_values = function (elem_list) {
+      c(nrow(elem_list[[1]]), 1L)
+    }
+
+    values <- op("values", eig, dimfun = dimfun_values,
+                 tf_operation = "tf_extract_eigenvalues")
+
+    vectors <- op("vectors", eig,
+                  tf_operation = "tf_extract_eigenvectors")
+
+  }
+
+  list(values = values,
+       vectors = vectors)
 
 }

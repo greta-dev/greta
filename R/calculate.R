@@ -86,8 +86,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
 
   # copy and refresh the dag
   dag <- model_info$model$dag$clone()
-  dag$tf_environment <- new.env()
-  dag$tf_graph <- tf$Graph()
+  dag$new_tf_environment()
 
   # extend the dag to include this node, as the target
   dag$build_dag(list(target))
@@ -97,7 +96,9 @@ calculate_mcmc.list <- function (target, target_name, values) {
   dag$target_nodes <- list(target$node)
   names(dag$target_nodes) <- target_name
 
-  example_values <- dag$trace_values()
+  param <- dag$example_parameters()
+  param[] <- 0
+  example_values <- dag$trace_values(param)
   n_trace <- length(example_values)
 
   # raw draws are either an attribute, or this object
@@ -111,8 +112,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
     samples <- apply(draws[[i]],
                      1,
                      function (x) {
-                       dag$send_parameters(x)
-                       dag$trace_values()
+                       dag$trace_values(free_state = x)
                      })
 
     samples <- as.matrix(samples)
@@ -163,6 +163,7 @@ calculate_list <- function(target, values) {
   # define the dag and TF graph
   dag <- dag_class$new(all_greta_arrays)
   dag$define_tf(log_density = FALSE, gradients = FALSE)
+  tfe <- dag$tf_environment
 
   # build and send a dict for the fixed values
   fixed_nodes <- lapply(fixed_greta_arrays,
@@ -231,30 +232,20 @@ calculate_list <- function(target, values) {
           call. = FALSE)
   }
 
-  # to find the greta arrays that
+  # add values or data not specified by the user
+  data_list <- tfe$data_list
+  missing <- !names(data_list) %in% names(values)
 
-  # # check that all of the variables are set
-  # # list of variable tf names
-  # variable_nodes <- dag$node_list[dag$node_types == "variable"]
-  # variable_names <- vapply(variable_nodes,
-  #                          dag$tf_name,
-  #                          FUN.VALUE = "")
-  #
-  # if (!all(variable_names %in% names(values))) {
-  #   stop ("values have not been provided for all variables",
-  #         call. = FALSE)
-  # }
-
-  # send it to tf
-  assign("eval_list", values, envir = dag$tf_environment)
-  ex <- expression(with_dict <- do.call(dict, eval_list))
-  eval(ex, envir = dag$tf_environment)
+  # send list to tf environment and roll into a dict
+  dag$build_feed_dict(values, data_list = data_list[missing])
 
   # evaluate the target there
-  ex <- sprintf("sess$run(%s, feed_dict = with_dict)",
-                dag$tf_name(target$node))
-  result <- eval(parse(text = ex),
-                 envir = dag$tf_environment)
+  # ex <- sprintf("sess$run(%s, feed_dict = feed_dict)",
+  #               dag$tf_name(target$node))
+  # result <- eval(parse(text = ex),
+  #                envir = dag$tf_environment)
+  name <- dag$tf_name(target$node)
+  result <- dag$tf_sess_run(name, as_text = TRUE)
 
   result
 

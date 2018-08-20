@@ -118,6 +118,9 @@ test_that('tapply works as expected', {
 
   check_expr(tapply(x, rep(1:5, each = 3), "sum"))
   check_expr(tapply(x, rep(1:5, each = 3), "max"))
+  check_expr(tapply(x, rep(1:5, each = 3), "mean"))
+  check_expr(tapply(x, rep(1:5, each = 3), "min"))
+  check_expr(tapply(x, rep(1:5, each = 3), "prod"))
 
 })
 
@@ -301,3 +304,51 @@ test_that('tapply errors as expected', {
 
 })
 
+test_that("eigen works as expected", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  k <- 4
+  x <- rWishart(1, k + 1, diag(k))[, , 1]
+  x_ga <- as_data(x)
+
+  r_out <- eigen(x)
+  greta_out <- eigen(as_data(x))
+
+  r_out_vals <- eigen(x, only.values = TRUE)
+  greta_out_vals <- eigen(as_data(x), only.values = TRUE)
+
+
+  # values
+  difference <- as.vector(abs(r_out$values - grab(greta_out$values)))
+  expect_true(all(difference < 1e-4))
+
+
+  # only values
+  difference <- as.vector(abs(r_out_vals$values - grab(greta_out_vals$values)))
+  expect_true(all(difference < 1e-4))
+
+  # vectors
+  # these can be inverted, need to loop through columns checking whether they
+  # are right if the other way up
+  column_difference <- function (r_column, greta_column) {
+    pos <- abs(r_column - greta_column)
+    neg <- abs(r_column - (-1 * greta_column))
+    if (sum(pos) < sum(neg))
+      pos
+    else
+      neg
+  }
+
+  greta_vectors <- grab(greta_out$vectors)
+  difference <- vapply(seq_len(k),
+                       function (i) {
+                         column_difference(r_out$vectors[, i],
+                                           greta_vectors[, i])
+                       },
+                       FUN.VALUE = rep(1, k))
+
+  expect_true(all(as.vector(difference) < 1e-4))
+
+})

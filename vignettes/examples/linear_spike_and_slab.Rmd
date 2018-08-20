@@ -1,0 +1,28 @@
+### Spike and slab prior
+
+A simple, one-variable Bayesian linear regression model using a *spike and slab* prior.
+
+```{r linear_spike_and_slab_greta}
+# this is smoothed-out approximation to the true spike-and-slab prior that
+# replaces the discrete indicator variable with a continuous variable.
+# 'spikiness' sets the amount of spike on this, values closer to 0 should be
+# closer to the discrete version, but may take longer to converge. Values
+# greater than 1 will break everything. Don't do that.
+spike_and_slab <- function (spikiness = 0.1, slabiness = 10, dim = NULL) {
+  stopifnot(spikiness < 1)
+  slab <- normal(0, slabiness, dim = dim)
+  spike <- gamma(spikiness, spikiness, dim = dim)
+  spike * slab
+}
+
+# variables & priors
+int  <- variable()
+sd   <- inverse_gamma(1, 1)
+coef <- spike_and_slab()
+
+# linear predictor
+mu <- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) <- normal(mu, sd)
+```

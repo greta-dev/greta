@@ -38,8 +38,7 @@ inference <- R6Class(
 
       # flush the environment and redefine the tensorflow graph if needed
       if (is.null(model$dag$tf_graph$unique_name)) {
-        model$dag$tf_environment <- new.env()
-        model$dag$tf_graph <- tf$Graph()
+        model$dag$new_tf_environment()
         model$dag$define_tf()
       }
 
@@ -225,7 +224,32 @@ sampler <- R6Class(
     accept_history = vector(),
 
     # sampler kernel information
-    parameters = list(),
+    parameters = list(epsilon = 0.1,
+                      diag_sd = 1),
+
+    initialize = function (initial_values,
+                           model,
+                           parameters = list(),
+                           seed) {
+
+      # initialize the inference method
+      super$initialize(initial_values = initial_values,
+                       model = model,
+                       parameters = parameters,
+                       seed = seed)
+
+      # duplicate diag_sd if needed
+      n_diag <- length(self$parameters$diag_sd)
+      n_parameters <- length(model$dag$example_parameters())
+      if (n_diag != n_parameters && n_parameters > 1) {
+        diag_sd <- rep(self$parameters$diag_sd[1], n_parameters)
+        self$parameters$diag_sd <- diag_sd
+      }
+
+      # define the draws tensor on the tf graph
+      self$define_tf_draws()
+
+    },
 
     run_chain = function (n_samples, thin, warmup, verbose, pb_update,
                           sequential, n_cores, float_type, from_scratch = TRUE)
@@ -244,10 +268,9 @@ sampler <- R6Class(
       if (!sequential) {
 
         # flush the environment
-        dag$tf_environment <- new.env()
+        dag$new_tf_environment()
 
         # rebuild the TF graph
-        dag$tf_graph <- tf$Graph()
         dag$define_tf(FALSE, FALSE)
 
         # rebuild the TF draws tensor
@@ -295,8 +318,9 @@ sampler <- R6Class(
 
       }
 
-      # scrub the free state trace
+      # scrub the free state trace and numerical rejections
       self$traced_free_state <- matrix(NA, 0, self$n_free)
+      self$numerical_rejections <- 0
 
       # main sampling
       if (verbose & sequential) {
@@ -481,13 +505,14 @@ sampler <- R6Class(
       sampler_values <- list(free_state = matrix(self$free_state),
                              sampler_burst_length = as.integer(n_samples),
                              sampler_thin = as.integer(thin))
-      tfe$sampler_values <- c(sampler_values,
-                              self$sampler_parameter_values())
-      dag$tf_run(sampler_dict <- do.call(dict, sampler_values))
+
+      sampler_dict_list <- c(sampler_values,
+                             self$sampler_parameter_values())
+
+      dag$build_feed_dict(sampler_dict_list)
 
       # run sampler
-      batch_results <- dag$tf_run(sess$run(sampler_batch,
-                                           feed_dict = sampler_dict))
+      batch_results <- dag$tf_sess_run(sampler_batch)
 
       # get trace of free state
       free_state_draws <- batch_results[[1]]
@@ -532,33 +557,6 @@ hmc_sampler <- R6Class(
 
     accept_target = 0.651,
 
-    initialize = function (initial_values,
-                           model,
-                           parameters = list(),
-                           seed) {
-
-      # initialize the inference method
-      super$initialize(initial_values = initial_values,
-                       model = model,
-                       parameters = parameters,
-                       seed = seed)
-
-      # duplicate diag_sd if needed
-      n_diag <- length(self$parameters$diag_sd)
-      n_parameters <- length(model$dag$example_parameters())
-      if (n_diag != n_parameters && n_parameters > 1) {
-        diag_sd <- rep(self$parameters$diag_sd[1], n_parameters)
-        self$parameters$diag_sd <- diag_sd
-      }
-
-      # define the draws tensor on the tf graph
-      tfe <- model$dag$tf_environment
-      if (!live_pointer("hmc_batch", envir = tfe)) {
-        self$define_tf_draws()
-      }
-
-    },
-
     define_tf_kernel = function () {
 
       dag <- self$model$dag
@@ -573,8 +571,12 @@ hmc_sampler <- R6Class(
                                                shape = list(length(free_state), 1L)))
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
-      dag$tf_run(hmc_step_sizes <- tf$reshape(hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
-                                              shape = list(length(free_state))))
+      dag$tf_run(
+        hmc_step_sizes <- tf$reshape(
+          hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
+          shape = list(length(free_state))
+        )
+      )
 
       # log probability function
       tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
@@ -611,3 +613,290 @@ hmc_sampler <- R6Class(
   )
 )
 
+rwmh_sampler <- R6Class(
+  "rwmh_sampler",
+  inherit = sampler,
+  public = list(
+
+    parameters = list(
+      proposal = "normal",
+      epsilon = 0.1,
+      diag_sd = 1
+    ),
+
+    accept_target = 0.44,
+
+    define_tf_kernel = function () {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+      tfe$rwmh_proposal <- switch (self$parameters$proposal,
+                                   normal = tfp$mcmc$random_walk_normal_fn,
+                                   uniform = tfp$mcmc$random_walk_uniform_fn)
+
+      tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
+
+      # tensors for sampler parameters
+      dag$tf_run(rwmh_epsilon <- tf$placeholder(dtype = tf_float()))
+
+      # need to pass in the value for this placeholder as a matrix (shape(n, 1))
+      dag$tf_run(rwmh_diag_sd <- tf$placeholder(dtype = tf_float(),
+                                                shape = list(length(free_state), 1L)))
+
+      # but it step_sizes must be a vector (shape(n, )), so reshape it
+      dag$tf_run(
+        rwmh_step_sizes <- tf$reshape(
+          rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
+          shape = list(length(free_state))
+        )
+      )
+
+      dag$tf_run(new_state_fn <- rwmh_proposal(scale = rwmh_step_sizes))
+
+      # build the kernel
+      dag$tf_run(
+        sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
+          target_log_prob_fn = log_prob_fun,
+          new_state_fn = new_state_fn,
+          seed = rng_seed)
+      )
+    },
+
+    sampler_parameter_values = function () {
+
+      epsilon <- self$parameters$epsilon
+      diag_sd <- matrix(self$parameters$diag_sd)
+
+      # return named list for replacing tensors
+      list(rwmh_epsilon = epsilon,
+           rwmh_diag_sd = diag_sd)
+
+    }
+
+  )
+)
+
+optimiser <- R6Class(
+  "optimiser",
+  inherit = inference,
+  public = list(
+
+    # optimiser information
+    name = "",
+    method = "method",
+    parameters = list(),
+    other_args = list(),
+    max_iterations = 100L,
+    tolerance = 1e-6,
+    uses_callbacks = TRUE,
+
+    # modified during optimisation
+    it = 0,
+    old_obj = Inf,
+    diff = Inf,
+
+    # set up the model
+    initialize = function (initial_values,
+                           model,
+                           name,
+                           method,
+                           parameters,
+                           other_args,
+                           max_iterations,
+                           tolerance) {
+
+      super$initialize(initial_values,
+                       model,
+                       parameters = list(),
+                       seed = get_seed())
+
+      self$name <- name
+      self$method <- method
+      self$parameters <- parameters
+      self$other_args <- other_args
+      self$max_iterations <- as.integer(max_iterations)
+      self$tolerance <- tolerance
+
+      if ("uses_callbacks" %in% names(other_args))
+        self$uses_callbacks <- other_args$uses_callbacks
+
+      self$create_tf_minimiser()
+
+    },
+
+    parameter_names = function () {
+      names(self$parameters)
+    },
+
+    set_dtype = function (parameter_name, dtype) {
+
+      params <- self$parameters
+      param_names <- self$parameter_names()
+
+      if (parameter_name %in% param_names) {
+        param <- params[[parameter_name]]
+        self$model$dag$on_graph(
+          tf_param <- tf$constant(param, dtype = dtype)
+        )
+        params[[parameter_name]] <- tf_param
+      }
+
+      self$parameters <- params
+
+    },
+
+    # initialize the variables, then set the ones we care about
+    set_inits = function () {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      dag$tf_sess_run(tf$global_variables_initializer())
+
+      dag$on_graph(
+        tfe$optimiser_init <- tf$constant(self$free_state,
+                                          shape = tfe$free_state$shape,
+                                          dtype = tf_float())
+      )
+
+      dag$tf_run(free_state$assign(optimiser_init))
+
+    },
+
+    run = function () {
+
+      self$model$dag$build_feed_dict()
+      self$set_inits()
+      self$run_minimiser()
+      self$fetch_free_state()
+      self$return_outputs()
+
+    },
+
+    fetch_free_state = function () {
+
+      # get the free state as a vector
+      self$free_state <- self$model$dag$tf_sess_run(free_state)
+
+    },
+
+    return_outputs = function () {
+
+      # if the optimiser was ignoring the callbacks, we have no idea about the
+      # number of iterations or convergence
+      if (!self$uses_callbacks)
+        self$it <- NA
+
+      converged <- self$it < self$max_iterations
+
+      list(par = self$model$dag$trace_values(self$free_state),
+           value = self$model$dag$tf_sess_run(joint_density),
+           iterations = self$it,
+           convergence = ifelse(converged, 0, 1))
+
+    }
+
+  )
+)
+
+tf_optimiser <- R6Class(
+  "tf_optimiser",
+  inherit = optimiser,
+  public = list(
+
+    # some of the optimisers are very fussy about dtypes, so convert them now
+    sanitise_dtypes = function () {
+
+      self$set_dtype("global_step", tf$int64)
+
+      if (self$name == "proximal_gradient_descent")
+        lapply(self$parameter_names(), self$set_dtype, tf$float64)
+
+      if (self$name == "proximal_adagrad") {
+
+        fussy_params <- c("learning_rate",
+                          "l1_regularization_strength",
+                          "l2_regularization_strength")
+
+        lapply(fussy_params, self$set_dtype, tf$float64)
+
+      }
+
+    },
+
+    # create an op to minimise the objective
+    create_tf_minimiser = function () {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      self$sanitise_dtypes()
+
+      optimise_fun <- eval(parse(text = self$method))
+      dag$on_graph(tfe$tf_optimiser <- do.call(optimise_fun,
+                                                    self$parameters))
+      dag$tf_run(train <- tf_optimiser$minimize(-joint_density_adj))
+
+    },
+
+    # minimise the objective function
+    run_minimiser = function () {
+
+      self$set_inits()
+
+      while (self$it < self$max_iterations &
+             self$diff > self$tolerance) {
+        self$it <- self$it + 1
+        self$model$dag$tf_sess_run(train)
+        obj <- self$model$dag$tf_sess_run(-joint_density_adj)
+        self$diff <- abs(self$old_obj - obj)
+        self$old_obj <- obj
+      }
+
+    }
+  )
+)
+
+scipy_optimiser <- R6Class(
+  "scipy_optimiser",
+  inherit = optimiser,
+  public = list(
+
+    create_tf_minimiser = function () {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      opt_fun <- eval(parse(text = "tf$contrib$opt$ScipyOptimizerInterface"))
+
+      args <- list(loss = -tfe$joint_density_adj,
+                   method = self$method,
+                   options = c(self$parameters,
+                               maxiter = self$max_iterations),
+                   tol = self$tolerance)
+
+      dag$on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
+
+    },
+
+    obj_progress = function (obj) {
+      self$diff <- abs(self$old_obj - obj)
+      self$old_obj <- obj
+    },
+
+    it_progress = function (obj) {
+      self$it <- self$it + 1
+    },
+
+    run_minimiser = function () {
+
+      # run the optimiser
+      self$model$dag$tf_run(tf_optimiser$minimize(sess,
+                                            feed_dict = feed_dict,
+                                            step_callback = self$it_progress,
+                                            loss_callback = self$obj_progress,
+                                            fetches = list(-joint_density_adj)))
+
+    }
+  )
+)

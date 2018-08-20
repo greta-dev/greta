@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.2.4
-Date: 2018-02-20
+Version: 0.2.5
+Date: 2018-06-18
 Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
     email = "nick.golding.research@gmail.com")
 Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://greta-dev.github.io/greta> for more information).
@@ -40,6 +40,7 @@ Collate:
     'progress_bar.R'
     'inference_class.R'
     'samplers.R'
+    'optimisers.R'
     'inference.R'
     'install_tensorflow.R'
     'internals.R'
@@ -65,6 +66,7 @@ Suggests:
     MCMCpack,
     rmutil,
     extraDistr,
-    truncdist
+    truncdist,
+    tidyverse
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

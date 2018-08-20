@@ -25,7 +25,9 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -94,6 +96,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -364,7 +369,7 @@ Any additional arguments to <code>chol()</code> and <code>solve()</code> will be
 <code>sweep()</code> only works on two-dimensional greta arrays (so <code>MARGIN</code> can only be either 1 or 2), and only for subtraction, addition, division and multiplication.
 </p>
 <p>
-<code>tapply()</code> works on column vectors (2D greta arrays with one column), and <code>INDEX</code> cannot be a greta array. Currently only two functions are available, and arguments passed to … are ignored.
+<code>tapply()</code> works on column vectors (2D greta arrays with one column), and <code>INDEX</code> cannot be a greta array. Currently five functions are available, and arguments passed to … are ignored.
 </p>
 <h2 class="hasAnchor" id="usage">
 <a class="anchor" href="#usage"></a>Usage
@@ -402,6 +407,7 @@ Any additional arguments to <code>chol()</code> and <code>solve()</code> will be
  t(x)
  chol(x, ...)
  solve(a, b, ...)
+ kronecker(X, Y)
 # reducing operations
  sum(..., na.rm = TRUE)
  prod(..., na.rm = TRUE)
@@ -417,7 +423,7 @@ Any additional arguments to <code>chol()</code> and <code>solve()</code> will be
               transpose = FALSE)
 #'  # miscellaneous operations
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
- tapply(X, INDEX, FUN = c("sum", "max"), ...)
+ tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
 </pre>
 <h2 class="hasAnchor" id="examples">
 <a class="anchor" href="#examples"></a>Examples

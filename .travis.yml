@@ -17,6 +17,7 @@ r_packages:
   - bayesplot
   - extraDistr
   - devtools
+  - tidyverse
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
@@ -41,7 +42,8 @@ addons:
 
 before_install:
   - pip install --user numpy
-  - pip install --user 'tensorflow==1.8'
+  - pip install --user scipy
+  - pip install --user 'tensorflow==1.10'
   - pip install --user 'tensorflow-probability'
 
 after_success:

@@ -28,8 +28,6 @@ greta_stash <- new.env()
 #' @param n_cores the maximum number of CPU cores used by \emph{each} chain.
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations)
-#' @param control an optional named list of hyperparameters and options to
-#'   control behaviour of the sampler or optimiser. See Details.
 #' @param initial_values an optional vector (or list of vectors, for multiple
 #'   chains) of initial values for the free parameters in the model. These will
 #'   be used as the starting point for sampling/optimisation.
@@ -50,9 +48,7 @@ greta_stash <- new.env()
 #'   'bad' (numerically unstable) and therefore rejected.
 #'   If you're getting a lot of numerical instability, you might want to
 #'   manually define starting values to move the sampler into a more reasonable
-#'   part of the parameter space. Alternatively, you could redefine the model
-#'   (via \code{model}) to have double precision, though this will slow down
-#'   sampling.
+#'   part of the parameter space.
 #'
 #'   Multiple mcmc chains can be run in parallel by setting the execution plan
 #'   with the \code{future} package. Only \code{plan(multisession)} futures or
@@ -388,16 +384,8 @@ prep_initials <- function (initial_values, n_chains) {
 #' @param tolerance the numerical tolerance for the solution, the optimiser
 #'   stops when the (absolute) difference in the joint density between
 #'   successive iterations drops below this level
-#' @param method method used to optimise values. Currently only \code{adagrad}
-#'   is available
-#'
-#' @details Currently, the only implemented optimisation algorithm is Adagrad
-#'   (\code{method = "adagrad"}). The \code{control} argument can be used to
-#'   specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
-#'   \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
-#'   (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,
-#'   see \href{https://www.tensorflow.org/api_docs/python/tf/train}{the
-#'   TensorFlow docs} for more information
+#' @param optimiser an \code{optimiser} object giving the optimisation algorithm
+#'   and parameters See \code{\link{optimisers}}.
 #'
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
@@ -413,72 +401,23 @@ prep_initials <- function (initial_values, n_chains) {
 #' opt_res <- opt(m)
 #' }
 opt <- function (model,
-                 method = c("adagrad"),
+                 optimiser = bfgs(),
                  max_iterations = 100,
                  tolerance = 1e-6,
-                 control = list(),
                  initial_values = NULL) {
 
-  # mock up some names to avoid CRAN-check note
-  optimiser <- joint_density <- sess <- NULL
+  # create R6 object of the right type
+  object <- optimiser$class$new(initial_values = initial_values,
+                                model = model,
+                                name = optimiser$name,
+                                method = optimiser$method,
+                                parameters = optimiser$parameters,
+                                other_args = optimiser$other_args,
+                                max_iterations = max_iterations,
+                                tolerance = tolerance)
 
-  # get the tensorflow environment
-  tfe <- model$dag$tf_environment
-  on_graph <- model$dag$on_graph
-  tf_run <- model$dag$tf_run
-
-  # get the method
-  method <- match.arg(method)
-  optimise_fun <- switch (method,
-                          adagrad = tf$train$AdagradOptimizer)
-
-  # default control options
-  con <- switch (method,
-                 adagrad = list(learning_rate = 0.8,
-                                initial_accumulator_value = 0.1,
-                                use_locking = TRUE))
-
-  # update them with user overrides
-  con[names(control)] <- control
-
-  # set up optimiser
-  on_graph(tfe$optimiser <- do.call(optimise_fun, con))
-  tf_run(train <- optimiser$minimize(-joint_density))
-
-  # random initial values if unspecified
-  if (is.null(initial_values)) {
-    initial_values <- model$dag$example_parameters()
-    initial_values[] <- rnorm(length(initial_values))
-  }
-
-  # initialize the variables, then set the ones we care about
-  tf_run(sess$run(tf$global_variables_initializer()))
-  parameters <- relist_tf(initial_values, model$dag$parameters_example)
-
-  for (i in seq_along(parameters)) {
-    variable_name <- paste0(names(parameters)[i], '_free')
-    vble <- tfe[[variable_name]]
-    on_graph( init <- tf$constant(parameters[[i]],
-                                  shape = vble$shape,
-                                  dtype = tf_float()))
-    . <- on_graph(tfe$sess$run(vble$assign(init)))
-  }
-
-  diff <- old_obj <- Inf
-  it <- 0
-
-  while (it < max_iterations & diff > tolerance) {
-    it <- it + 1
-    tf_run(sess$run(train))
-    obj <- tf_run(sess$run(-joint_density))
-    diff <- abs(old_obj - obj)
-    old_obj <- obj
-  }
-
-  list(par = model$dag$trace_values(),
-       value = tf_run(sess$run(joint_density)),
-       iterations = it,
-       convergence = ifelse(it < max_iterations, 0, 1))
+  # run it
+  object$run()
 
 }
 

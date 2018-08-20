@@ -2,12 +2,11 @@
 % Please edit documentation in R/greta_model_class.R
 \name{model}
 \alias{model}
-\alias{model}
 \alias{print.greta_model}
 \alias{plot.greta_model}
 \title{greta model objects}
 \usage{
-model(..., precision = c("single", "double"), compile = TRUE)
+model(..., precision = c("double", "single"), compile = TRUE)
 
 \method{print}{greta_model}(x, ...)
 
@@ -22,9 +21,9 @@ calling environment will be tracked. For \code{print} and
 ignored).}
 
 \item{precision}{the floating point precision to use when evaluating this
-model. Switching from \code{'single'} (the default) to \code{'double'}
-should reduce the risk of numerical instability during sampling, but will
-also increase the computation time, particularly for large models.}
+model. Switching from \code{"double"} (the default) to \code{"single"} may
+decrease the computation time but increase the risk of numerical
+instability during sampling.}
 
 \item{compile}{whether to apply
 \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
