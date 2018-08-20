@@ -213,7 +213,7 @@ Time to diagnose. Did the sample chains for our fixed effects mix reasonably?
 For all of the following visualizations, we'll rely on the `bayesplot` package.
 
 ```{r}
-bayesplot::mcmc_trace(draws, regex_pars = "b.[12]")
+bayesplot::mcmc_trace(draws, regex_pars = "b\\[[.[12]")
 ```
 
 And what about the random effects? We'll investigate the first 5. Remember,
@@ -221,7 +221,7 @@ we've recoded the previous state vector to remove the levels 2 and 12, which
 didn't have any observations.
 
 ```{r}
-bayesplot::mcmc_trace(draws, regex_pars = "a.[1-5]\\.")
+bayesplot::mcmc_trace(draws, regex_pars = "a\\[[1-5]\\,")
 ```
 
 Understanding our coefficients in their current form is a little hard, since
