@@ -86,8 +86,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
 
   # copy and refresh the dag
   dag <- model_info$model$dag$clone()
-  dag$tf_environment <- new.env()
-  dag$tf_graph <- tf$Graph()
+  dag$new_tf_environment()
 
   # extend the dag to include this node, as the target
   dag$build_dag(list(target))
@@ -97,7 +96,9 @@ calculate_mcmc.list <- function (target, target_name, values) {
   dag$target_nodes <- list(target$node)
   names(dag$target_nodes) <- target_name
 
-  example_values <- dag$trace_values()
+  param <- dag$example_parameters()
+  param[] <- 0
+  example_values <- dag$trace_values(param)
   n_trace <- length(example_values)
 
   # raw draws are either an attribute, or this object
@@ -111,8 +112,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
     samples <- apply(draws[[i]],
                      1,
                      function (x) {
-                       dag$send_parameters(x)
-                       dag$trace_values()
+                       dag$trace_values(free_state = x)
                      })
 
     samples <- as.matrix(samples)

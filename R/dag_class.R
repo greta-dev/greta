@@ -29,9 +29,7 @@ dag_class <- R6Class(
       self$target_nodes <- lapply(target_greta_arrays, member, 'node')
 
       # set up the tf environment, with a graph
-      self$tf_environment <- new.env()
-      self$tf_graph <- tf$Graph()
-      self$tf_environment$data_list = list()
+      self$new_tf_environment()
 
       # stash an example list to relist parameters
       self$parameters_example <- self$example_parameters(flat = FALSE)
@@ -39,6 +37,14 @@ dag_class <- R6Class(
       # store the performance control info
       self$tf_float <- tf_float
       self$compile <- compile
+
+    },
+
+    new_tf_environment = function () {
+
+      self$tf_environment <- new.env()
+      self$tf_graph <- tf$Graph()
+      self$tf_environment$data_list <- list()
 
     },
 
@@ -456,15 +462,10 @@ dag_class <- R6Class(
     },
 
     # return the current values of the traced nodes, as a named vector
-    trace_values = function (free_state = NULL) {
+    trace_values = function (free_state) {
 
-      # either update the parameters & build the feed dict, or just define the
-      # feed dict for data
-      if (!is.null(free_state)) {
-        self$send_parameters(free_state)
-      } else {
-        self$build_feed_dict()
-      }
+      # update the parameters & build the feed dict
+      self$send_parameters(free_state)
 
       tfe <- self$tf_environment
 

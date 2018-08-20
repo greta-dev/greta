@@ -35,8 +35,7 @@ inference <- R6Class(
 
       # flush the environment and redefine the tensorflow graph if needed
       if (is.null(model$dag$tf_graph$unique_name)) {
-        model$dag$tf_environment <- new.env()
-        model$dag$tf_graph <- tf$Graph()
+        model$dag$new_tf_environment()
         model$dag$define_tf()
       }
 
@@ -222,10 +221,9 @@ sampler <- R6Class(
       if (!sequential) {
 
         # flush the environment
-        dag$tf_environment <- new.env()
+        dag$new_tf_environment()
 
         # rebuild the TF graph
-        dag$tf_graph <- tf$Graph()
         dag$define_tf(FALSE, FALSE)
 
         # rebuild the TF draws tensor
