@@ -293,10 +293,6 @@ test_that("mcmc supports different samplers, normal proposals", {
   expect_ok(draws <- mcmc(m, rwmh("normal"),
                           n_samples = 100, warmup = 100))
 
-  proposed <- unlist(draws)
-  expected <- rnorm(100)
-  test_stat <- ks.test(proposed, expected)$p.value
-  expect_gt(test_stat, .1)
 })
 
 test_that("mcmc supports different samplers, uniform proposals", {
@@ -308,8 +304,4 @@ test_that("mcmc supports different samplers, uniform proposals", {
   expect_ok(draws <- mcmc(m, rwmh("uniform"),
                           n_samples = 100, warmup = 100))
 
-  proposed <- unlist(draws)
-  expected <- runif(100)
-  test_stat <- ks.test(proposed, expected)$p.value
-  expect_gt(test_stat, .1)
 })
