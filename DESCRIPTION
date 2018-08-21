@@ -50,7 +50,7 @@ Imports:
     R6,
     tensorflow,
     reticulate,
-    progress,
+    progress (>= 1.2.0),
     future,
     future.apply,
     coda,
