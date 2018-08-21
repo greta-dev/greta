@@ -800,10 +800,9 @@ check_n_cores <- function (n_cores, chains, sequential) {
   # if in parallel on this machine and n_cores isn't user-specified, set it so
   # there's no clash between chains
   if (!sequential & n_cores == 0)
-    n_cores <- n_cores_detected %/% chains
+    n_cores <- ceiling(n_cores_detected / chains)
 
   as.integer(n_cores)
-
 
 }
 
