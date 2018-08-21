@@ -118,7 +118,7 @@ mcmc <- function (model,
   # get the dag containing the target nodes
   dag <- model$dag
 
-  # turn initial values into a list is needed (checking the length)
+  # turn initial values into a list if needed (checking the length)
   initial_values <- prep_initials(initial_values, chains)
 
   # create a sampler object for each chain, using these (possibly NULL) initial
@@ -170,10 +170,12 @@ run_samplers <- function (samplers,
   parallel_reporting <- verbose & !sequential & !is.null(greta_stash$callbacks)
 
   if (!sequential & chains > 1) {
-    cores_text <- ifelse(n_cores == 1, "1 core", sprintf("up to %i cores", n_cores))
-    cat(sprintf("\nrunning %i chains in parallel, each on %s\n\n",
-                chains, cores_text))
-    verbose <- FALSE
+    cores_text <- ifelse(n_cores == 1,
+                         "1 core",
+                         sprintf("up to %i cores", n_cores))
+    msg <- sprintf("\nrunning %i chains in parallel, each on %s\n\n",
+                   chains, cores_text)
+    message(msg)
   }
 
   n_chain <- length(samplers)
@@ -183,11 +185,24 @@ run_samplers <- function (samplers,
   # give the samplers somewhere to write their progress
   if (parallel_reporting) {
 
-    log_files <- replicate(n_chain, create_log_file())
-    for (chain in chains)
-      samplers[[chain]]$trace_log_file <- log_files[[chain]]
+    trace_log_files <- replicate(n_chain, create_log_file())
+    progress_bar_log_files <- replicate(n_chain, create_log_file(TRUE))
 
-    greta_stash$trace_log_files <- log_files
+    pb_width <- bar_width(n_chain)
+    for (chain in chains) {
+
+      # set the log files
+      sampler <- samplers[[chain]]
+      sampler$trace_log_file <- trace_log_files[[chain]]
+      sampler$pb_file <- progress_bar_log_files[[chain]]
+
+      # set the progress bar widths for writing
+      sampler$pb_width <- pb_width
+
+    }
+
+    greta_stash$trace_log_files <- trace_log_files
+    greta_stash$progress_bar_log_files <- progress_bar_log_files
     greta_stash$mcmc_info <- list(n_samples = n_samples)
 
   }
@@ -205,7 +220,7 @@ run_samplers <- function (samplers,
                                                  n_cores = n_cores,
                                                  float_type = float_type,
                                                  from_scratch = from_scratch),
-                                seed = future_seed())
+                               seed = future_seed())
   }
 
   # if we're non-sequential and there's a callback registered,

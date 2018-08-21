@@ -8,6 +8,14 @@ read_trace_log_file <- function (filename) {
   ans
 }
 
+read_progress_bar_log_file <- function (filename) {
+  ans <- ""
+  if (file.exists(filename)) {
+    ans <- suppressWarnings(readLines(filename)[-1])
+  }
+  ans
+}
+
 percentages <- function () {
   reads <- lapply(greta_stash$trace_log_files, read_trace_log_file)
   some_results <- !all(vapply(reads, is.null, FALSE))
@@ -36,8 +44,26 @@ percentages <- function () {
 
 }
 
+progress_bars <- function () {
+  reads <- lapply(greta_stash$progress_bar_log_files,
+                  read_progress_bar_log_file)
+  reads <- unlist(reads)
+  some_results <- any(nchar(reads) > 0)
+
+  if (some_results) {
+
+    msg <- paste(reads, collapse = "  ")
+
+    message("\r", appendLF = FALSE)
+    message(msg, appendLF = FALSE)
+    flush.console()
+
+  }
+
+}
+
 # register some
-greta_stash$callbacks <- list(percentages)
+greta_stash$callbacks <- list(progress_bars)
 
 # the default callback should be the progress bars, having each sampler write
 # its progress bar to a progress stream if running in parallel (using existing

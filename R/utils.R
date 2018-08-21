@@ -189,8 +189,35 @@ future_seed <- function() {
   .GlobalEnv$.Random.seed
 }
 
-create_log_file <- function () {
-  tempfile(pattern = "greta_trace_log_")
+create_log_file <- function (create = FALSE) {
+  filename <- tempfile(pattern = "greta_log_")
+  if (create)
+    file.create(filename)
+  filename
+}
+
+# given a number of bars to be printed at the same time, determine the width of
+# sub process bars, so they all fit on the same line
+bar_width <- function (n_bars) {
+
+  terminal_width <- options()$width
+
+  # a space between each bar, divide up the remainder and add 2 spaces to each
+  total_width <- terminal_width - (n_bars - 1)
+  bar_width <- total_width %/% n_bars
+  bar_width - 2
+
+}
+
+# record the messages produced by the expression in the file
+record <- function (expr, file) {
+  if (!is.null(file)) {
+    msg <- capture.output(out <- eval(expr), type = "message")
+    writeLines(msg, file)
+  } else {
+    out <- eval(expr)
+  }
+  invisible(out)
 }
 
 misc_module <- module(module,
@@ -208,7 +235,9 @@ misc_module <- module(module,
                       live_pointer,
                       apply_rows,
                       future_seed,
-                      create_log_file)
+                      create_log_file,
+                      bar_width,
+                      record)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {

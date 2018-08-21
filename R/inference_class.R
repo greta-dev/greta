@@ -227,6 +227,10 @@ sampler <- R6Class(
     parameters = list(epsilon = 0.1,
                       diag_sd = 1),
 
+    # progress bar reporting
+    pb_file = NULL,
+    pb_width = options()$width,
+
     initialize = function (initial_values,
                            model,
                            parameters = list(),
@@ -284,14 +288,18 @@ sampler <- R6Class(
         self$traced_values <- matrix(NA, 0, self$n_traced)
       }
 
+
+
       # if warmup is required, do that now
       if (warmup > 0) {
 
-        if (verbose & sequential) {
+        if (verbose) {
           pb_warmup <- create_progress_bar("warmup",
                                            c(warmup, n_samples),
-                                           pb_update)
-          iterate_progress_bar(pb_warmup, 0, 0)
+                                           pb_update,
+                                           self$pb_width)
+
+          iterate_progress_bar(pb_warmup, 0, 0, self$pb_file)
         } else {
           pb_warmup <- NULL
         }
@@ -308,10 +316,11 @@ sampler <- R6Class(
           self$trace(values = FALSE)
           self$tune(completed_iterations[burst], warmup)
 
-          if (verbose & sequential) {
+          if (verbose) {
             iterate_progress_bar(pb_warmup,
                                  it = completed_iterations[burst],
-                                 rejects = self$numerical_rejections)
+                                 rejects = self$numerical_rejections,
+                                 file = self$pb_file)
           }
 
         }
@@ -323,11 +332,12 @@ sampler <- R6Class(
       self$numerical_rejections <- 0
 
       # main sampling
-      if (verbose & sequential) {
+      if (verbose) {
         pb_sampling <- create_progress_bar('sampling',
                                            c(warmup, n_samples),
-                                           pb_update)
-        iterate_progress_bar(pb_sampling, 0, 0)
+                                           pb_update,
+                                           self$pb_width)
+        iterate_progress_bar(pb_sampling, 0, 0, self$pb_file)
       } else {
         pb_sampling <- NULL
       }
@@ -341,10 +351,11 @@ sampler <- R6Class(
         self$run_burst(burst_lengths[burst], thin = thin)
         self$trace()
 
-        if (verbose & sequential) {
+        if (verbose) {
           iterate_progress_bar(pb_sampling,
                                it = completed_iterations[burst],
-                               rejects = self$numerical_rejections)
+                               rejects = self$numerical_rejections,
+                               file = self$pb_file)
         }
 
       }
@@ -361,7 +372,7 @@ sampler <- R6Class(
         msg <- sprintf("\nchain %i/%i\n",
                        self$chain_number,
                        self$n_chains)
-        cat(msg)
+        message(msg)
       }
 
     },

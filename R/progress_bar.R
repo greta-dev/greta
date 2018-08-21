@@ -7,7 +7,7 @@
 # 'iter' must be a length-two vector giving the total warmup and sampling
 #   iterations respectively
 # 'pb_update' gives the number of iterations between updates of the progress bar
-create_progress_bar <- function (phase, iter, pb_update, ...) {
+create_progress_bar <- function (phase, iter, pb_update, width) {
 
   # name for formatting
   name <- switch(phase,
@@ -31,11 +31,12 @@ create_progress_bar <- function (phase, iter, pb_update, ...) {
 
   pb <- progress::progress_bar$new(format = format_text,
                                    total = iter_this,
+                                   width = width,
                                    incomplete = " ",
                                    clear = FALSE,
                                    current = "=",
                                    show_after = 0,
-                                   ...)
+                                   force = TRUE)
 
   # add the increment information and return
   pb_update <- round(pb_update)
@@ -57,7 +58,7 @@ create_progress_bar <- function (phase, iter, pb_update, ...) {
 # 'pb' is a progress_bar R6 object created by create_progress_bar
 # 'it' is the current iteration
 # 'rejects' is the total number of rejections so far due to numerical instability
-iterate_progress_bar <- function (pb, it, rejects) {
+iterate_progress_bar <- function (pb, it, rejects, file = NULL) {
 
   increment <- pb$.__enclos_env__$pb_update
 
@@ -83,9 +84,13 @@ iterate_progress_bar <- function (pb, it, rejects) {
     iter_pretty <- prettyNum(it, width = nchar(total))
 
     amount <- ifelse(it > 0, increment, 0)
-    invisible(pb$tick(amount,
-                      tokens = list(iter = iter_pretty,
-                                    rejection = reject_text)))
+
+    # tick the progess bar and record the output message
+    # (or print it if file = NULL)
+    record(pb$tick(amount,
+                   tokens = list(iter = iter_pretty,
+                                 rejection = reject_text)),
+           file = file)
 
   }
 
