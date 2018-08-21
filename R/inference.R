@@ -181,6 +181,14 @@ run_samplers <- function (samplers,
   n_chain <- length(samplers)
   chains <- seq_len(n_chain)
 
+  # detemine the type of progress information
+  if (bar_width(n_chain) < 42)
+    progress_callback <- percentages
+  else
+    progress_callback <- progress_bars
+
+  greta_stash$callbacks$parallel_progress <- progress_callback
+
   # if we're running in parallel and there are callbacks registered,
   # give the samplers somewhere to write their progress
   if (parallel_reporting) {

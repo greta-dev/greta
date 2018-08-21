@@ -32,11 +32,11 @@ percentages <- function () {
                   0L)
     n_samples <- greta_stash$mcmc_info$n_samples
     percentages <- round(100 * its / n_samples)
-    percentages_text <- sprintf("chain %i: %3i%%",
+    percentages_text <- sprintf("%i: %3i%%",
                                 chains,
                                 percentages)
 
-    msg <- paste(percentages_text, collapse = "\t\t")
+    msg <- paste(percentages_text, collapse = "  ")
     cat("\r", msg)
     flush.console()
 
@@ -52,7 +52,7 @@ progress_bars <- function () {
 
   if (some_results) {
 
-    msg <- paste(reads, collapse = "  ")
+    msg <- paste(reads, collapse = " ")
 
     message("\r", appendLF = FALSE)
     message(msg, appendLF = FALSE)
@@ -63,7 +63,7 @@ progress_bars <- function () {
 }
 
 # register some
-greta_stash$callbacks <- list(progress_bars)
+greta_stash$callbacks <- list(parallel_progress = progress_bars)
 
 # the default callback should be the progress bars, having each sampler write
 # its progress bar to a progress stream if running in parallel (using existing
