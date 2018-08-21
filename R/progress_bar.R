@@ -7,7 +7,7 @@
 # 'iter' must be a length-two vector giving the total warmup and sampling
 #   iterations respectively
 # 'pb_update' gives the number of iterations between updates of the progress bar
-create_progress_bar <- function (phase, iter, pb_update, width) {
+create_progress_bar <- function (phase, iter, pb_update, width, ...) {
 
   # name for formatting
   name <- switch(phase,
@@ -36,7 +36,8 @@ create_progress_bar <- function (phase, iter, pb_update, width) {
                                    clear = FALSE,
                                    current = "=",
                                    show_after = 0,
-                                   force = TRUE)
+                                   force = TRUE,
+                                   ...)
 
   # add the increment information and return
   pb_update <- round(pb_update)

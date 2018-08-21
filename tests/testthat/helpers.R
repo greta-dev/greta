@@ -333,7 +333,7 @@ qt_ls <- function (p, df, location, scale, log.p = FALSE) {
 # mock up the progress bar to force its output to stdout for testing
 cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
 mock_create_progress_bar <- function(...)
-  cpb(..., stream = stdout(), force = TRUE)
+  cpb(..., stream = stdout())
 
 # capture messages in testthat block to get the output of the progress bar;
 # copied from progress' test suite:
@@ -349,7 +349,7 @@ get_output <- function(expr) {
 
 # mock up mcmc progress bar output for neurotic testing
 mock_mcmc <- function (n_samples = 1010) {
-  pb <- create_progress_bar('sampling', c(0, n_samples), pb_update = 10)
+  pb <- create_progress_bar('sampling', c(0, n_samples), pb_update = 10, width = 50)
   # for (i in seq_len(n_samples))
   iterate_progress_bar(pb, n_samples, rejects = 10)
 }
