@@ -167,8 +167,7 @@ calculate_list <- function(target, values) {
 
   # build and send a dict for the fixed values
   fixed_nodes <- lapply(fixed_greta_arrays,
-                        member,
-                        'node')
+                        get_node)
 
   names(values) <- vapply(fixed_nodes,
                           dag$tf_name,
