@@ -522,8 +522,8 @@ sampler <- R6Class(
 
       dag$build_feed_dict(sampler_dict_list)
 
-      # run sampler
-      batch_results <- dag$tf_sess_run(sampler_batch)
+      # run the sampler, handling numerical errors
+      batch_results <- self$sample_carefully(n_samples)
 
       # get trace of free state
       free_state_draws <- batch_results[[1]]
@@ -543,6 +543,46 @@ sampler <- R6Class(
       # numerical rejections parameter sets
       bad <- sum(!is.finite(log_accept_stats))
       self$numerical_rejections <- self$numerical_rejections + bad
+
+    },
+
+    sample_carefully = function (n_samples) {
+
+      # tryCatch handling for numerical errors
+      dag <- self$model$dag
+      result <- cleanly(dag$tf_sess_run(sampler_batch))
+
+      # if it's fine, batch_results is the output
+      # if it's a non-numerical error, it will error
+      # if it's a numerical error, batch_results will be an error object
+      if (inherits(result, "error")) {
+
+        # simple case that this is a single bad sample. Mock up a result and
+        # pass it back
+        if (n_samples == 1L) {
+
+          result <- list(t(matrix(self$free_state)),
+                         list(log_accept_ratio = -Inf,
+                              is_accepted = FALSE))
+
+
+        } else {
+
+          # otherwise, *one* of these multiple samples was bad. The sampler
+          # won't be valid if we just restart, so we need to error here,
+          # informing the user how to run one sample at a time
+
+          stop ("TensorFlow hit a numerical problem that caused it to error. ",
+                "greta can handle these as bad proposals if you rerun mcmc() ",
+                "with the argument 'pb_update = 1'. ",
+                "This will slow down the sampler slightly.",
+                "\n\n", result, call. = FALSE)
+
+        }
+
+      }
+
+      result
 
     },
 

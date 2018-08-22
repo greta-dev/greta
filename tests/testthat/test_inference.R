@@ -305,3 +305,24 @@ test_that("mcmc supports different samplers, uniform proposals", {
                           n_samples = 100, warmup = 100))
 
 })
+
+test_that("numerical issues are handled in mcmc", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  # this should have a cholesky decomposition problem at some point
+  k <- 2
+  Sigma <- wishart(k + 1, diag(k))
+  m <- model(Sigma)
+
+  # running with bursts should error informatively
+  expect_error(draws <- mcmc(m, verbose = FALSE),
+               "TensorFlow hit a numerical problem")
+
+  # setting pb_update = 1 should handle those errors as bad samples
+  expect_ok(draws <- mcmc(m, verbose = FALSE,
+                          pb_update = 1,
+                          warmup = 100, n_samples = 10))
+
+})

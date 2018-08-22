@@ -723,9 +723,7 @@ cleanly <- function (expr) {
                                FUN.VALUE = 0) == 1
 
     # if it was just a numerical error, quietly return a bad value
-    if (any(numerical_errors))
-      res <- NA
-    else
+    if (!any(numerical_errors))
       stop ("greta hit a tensorflow error:\n\n", res, call. = FALSE)
 
   }
