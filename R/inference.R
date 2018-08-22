@@ -28,6 +28,9 @@ greta_stash <- new.env()
 #' @param n_cores the maximum number of CPU cores used by \emph{each} chain.
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations)
+#' @param one_by_one whether to run TensorFlow MCMC code one iteration at a
+#'   time, so that greta can handle numerical errors as 'bad' proposals (see
+#'   below).
 #' @param initial_values an optional vector (or list of vectors, for multiple
 #'   chains) of initial values for the free parameters in the model. These will
 #'   be used as the starting point for sampling/optimisation.
@@ -44,7 +47,7 @@ greta_stash <- new.env()
 #'   (I.e. the log density or its gradient is \code{NA}, \code{Inf} or
 #'   \code{-Inf}); normally because the log joint density is so low that it
 #'   can't be represented as a floating point number. When this happens, the
-#'   progress bar will also display the proportion of samples so far that were
+#'   progress bar will also display the proportion of proposals so far that were
 #'   'bad' (numerically unstable) and therefore rejected.
 #'   If you're getting a lot of numerical instability, you might want to
 #'   manually define starting values to move the sampler into a more reasonable
@@ -88,6 +91,7 @@ mcmc <- function (model,
                   n_cores = NULL,
                   verbose = TRUE,
                   pb_update = 50,
+                  one_by_one = FALSE,
                   initial_values = NULL) {
 
   check_future_plan()
@@ -140,6 +144,7 @@ mcmc <- function (model,
                warmup = warmup,
                verbose = verbose,
                pb_update = pb_update,
+               one_by_one = one_by_one,
                n_cores = n_cores,
                from_scratch = TRUE)
 
@@ -152,6 +157,7 @@ run_samplers <- function (samplers,
                           warmup,
                           verbose,
                           pb_update,
+                          one_by_one,
                           n_cores,
                           from_scratch) {
 
@@ -224,6 +230,7 @@ run_samplers <- function (samplers,
                                                  warmup = warmup,
                                                  verbose = verbose,
                                                  pb_update = pb_update,
+                                                 one_by_one = one_by_one,
                                                  sequential = sequential,
                                                  n_cores = n_cores,
                                                  float_type = float_type,

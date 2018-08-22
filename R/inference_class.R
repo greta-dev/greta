@@ -255,9 +255,10 @@ sampler <- R6Class(
 
     },
 
-    run_chain = function (n_samples, thin, warmup, verbose, pb_update,
-                          sequential, n_cores, float_type, from_scratch = TRUE)
-    {
+    run_chain = function (n_samples, thin, warmup,
+                          verbose, pb_update,
+                          one_by_one, sequential, n_cores, float_type,
+                          from_scratch = TRUE) {
 
       dag <- self$model$dag
 
@@ -288,7 +289,8 @@ sampler <- R6Class(
         self$traced_values <- matrix(NA, 0, self$n_traced)
       }
 
-
+      # how big would we like the bursts to be
+      ideal_burst_size <- ifelse(one_by_one, 1L, pb_update)
 
       # if warmup is required, do that now
       if (warmup > 0) {
@@ -306,7 +308,7 @@ sampler <- R6Class(
 
         # split up warmup iterations into bursts of sampling
         burst_lengths <- self$burst_lengths(warmup,
-                                            pb_update,
+                                            ideal_burst_size,
                                             warmup = TRUE)
         completed_iterations <- cumsum(burst_lengths)
 
@@ -343,7 +345,7 @@ sampler <- R6Class(
       }
 
       # split up warmup iterations into bursts of sampling
-      burst_lengths <- self$burst_lengths(n_samples, pb_update)
+      burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
       completed_iterations <- cumsum(burst_lengths)
 
       for (burst in seq_along(burst_lengths)) {
@@ -574,7 +576,7 @@ sampler <- R6Class(
 
           stop ("TensorFlow hit a numerical problem that caused it to error. ",
                 "greta can handle these as bad proposals if you rerun mcmc() ",
-                "with the argument 'pb_update = 1'. ",
+                "with the argument one_by_one = TRUE. ",
                 "This will slow down the sampler slightly.",
                 "\n\n", result, call. = FALSE)
 

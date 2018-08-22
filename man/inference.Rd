@@ -10,7 +10,7 @@
 \usage{
 mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
   warmup = 1000, chains = 1, n_cores = NULL, verbose = TRUE,
-  pb_update = 50, initial_values = NULL)
+  pb_update = 50, one_by_one = FALSE, initial_values = NULL)
 
 stashed_samples()
 
@@ -42,6 +42,10 @@ tunes sampler hyperparameters.}
 \item{verbose}{whether to print progress information to the console}
 
 \item{pb_update}{how regularly to update the progress bar (in iterations)}
+
+\item{one_by_one}{whether to run TensorFlow MCMC code one iteration at a
+time, so that greta can handle numerical errors as 'bad' proposals (see
+below).}
 
 \item{initial_values}{an optional vector (or list of vectors, for multiple
 chains) of initial values for the free parameters in the model. These will
@@ -90,7 +94,7 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   (I.e. the log density or its gradient is \code{NA}, \code{Inf} or
   \code{-Inf}); normally because the log joint density is so low that it
   can't be represented as a floating point number. When this happens, the
-  progress bar will also display the proportion of samples so far that were
+  progress bar will also display the proportion of proposals so far that were
   'bad' (numerically unstable) and therefore rejected.
   If you're getting a lot of numerical instability, you might want to
   manually define starting values to move the sampler into a more reasonable
