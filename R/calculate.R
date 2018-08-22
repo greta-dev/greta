@@ -93,7 +93,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
   self <- dag  # mock for scoping
   dag$define_tf(log_density = TRUE, gradients = TRUE)
 
-  dag$target_nodes <- list(target$node)
+  dag$target_nodes <- list(get_node(target))
   names(dag$target_nodes) <- target_name
 
   param <- dag$example_parameters()
@@ -177,13 +177,13 @@ calculate_list <- function(target, values) {
   # check that there are no unspecified variables on which the target depends
 
   # find all the nodes depended on by this one
-  dependencies <- target$node$child_names(recursive = TRUE)
+  dependencies <- get_node(target)$child_names(recursive = TRUE)
 
   # find all the nodes depended on by the new values, and remove them from the
   # list
   complete_dependencies <- lapply(fixed_greta_arrays,
                                   function (x)
-                                    x$node$child_names(recursive = TRUE))
+                                    get_node(x)$child_names(recursive = TRUE))
   complete_dependencies <- unique(unlist(complete_dependencies))
 
   unmet_dependencies <- dependencies[!dependencies %in% complete_dependencies]
@@ -201,7 +201,7 @@ calculate_list <- function(target, values) {
                                      include_data = FALSE)
 
     greta_array_node_names <- vapply(greta_arrays,
-                                function (x) x$node$unique_name,
+                                function (x) get_node(x)$unique_name,
                                 FUN.VALUE = "")
 
     unmet_variables <- unmet_nodes[is_variable]
@@ -241,10 +241,10 @@ calculate_list <- function(target, values) {
 
   # evaluate the target there
   # ex <- sprintf("sess$run(%s, feed_dict = feed_dict)",
-  #               dag$tf_name(target$node))
+  #               dag$tf_name(get_node(target)))
   # result <- eval(parse(text = ex),
   #                envir = dag$tf_environment)
-  name <- dag$tf_name(target$node)
+  name <- dag$tf_name(get_node(target))
   result <- dag$tf_sess_run(name, as_text = TRUE)
 
   result
@@ -253,7 +253,7 @@ calculate_list <- function(target, values) {
 
 # coerce value to have the correct dimensions
 assign_dim <- function (value, greta_array) {
-  array <- strip_unknown_class(greta_array$node$value())
+  array <- strip_unknown_class(get_node(greta_array)$value())
   if (length(array) != length(value)) {
     stop ("a provided value has different number of elements",
           " than the greta array", call. = FALSE)

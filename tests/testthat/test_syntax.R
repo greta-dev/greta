@@ -7,7 +7,7 @@ test_that('`distribution<-` works in models', {
 
   # with a distribution parameter
   y <- as_data(randn(5))
-  expect_equal(node_type(y$node), 'data')
+  expect_equal(node_type(get_node(y)), 'data')
 
   # data
   mu <- normal(0, 1)

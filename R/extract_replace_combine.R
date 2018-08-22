@@ -93,10 +93,11 @@ NULL
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
   rm('._dummy_in', envir = pf)
 
+  node <- get_node(x)
   # if this is a data node, also subset the values and pass on
-  if (inherits(x$node, 'data_node')) {
+  if (inherits(node, 'data_node')) {
 
-    values_in <- x$node$value()
+    values_in <- node$value()
     call_list <- as.list(call)[-1]
     call_list[[1]] <- as.name("._values_in")
     call_list$drop <- FALSE
@@ -155,7 +156,9 @@ NULL
 #' @export
 `[<-.greta_array` <- function(x, ..., value) {
 
-  if (inherits(x$node, 'variable_node')) {
+  node <- get_node(x)
+
+  if (inherits(node, 'variable_node')) {
     stop ('cannot replace values in a variable greta array',
          call. = FALSE)
   }
@@ -204,8 +207,8 @@ NULL
     dims
 
   # do replace on the values (unknowns or arrays)
-  x_value <- x$node$value()
-  replacement_value <- replacement$node$value()
+  x_value <- node$value()
+  replacement_value <- get_node(replacement)$value()
 
   new_value <- x_value
   r_index <- match(index, dummy)
@@ -337,7 +340,7 @@ rep.greta_array <- function (x, ...) {
 # get dimensions
 #' @export
 dim.greta_array <- function(x)
-  as.integer(x$node$dim)
+  as.integer(get_node(x)$dim)
 
 #' @export
 length.greta_array <- function(x)
@@ -381,7 +384,7 @@ length.greta_array <- function(x)
   dimfun <- function (elem_list)
     dims
 
-  new_value <- x$node$value()
+  new_value <- get_node(x)$value()
   dim(new_value) <- dims
 
   op("reshape",

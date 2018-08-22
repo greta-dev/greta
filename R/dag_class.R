@@ -26,7 +26,7 @@ dag_class <- R6Class(
       self$build_dag(target_greta_arrays)
 
       # find the nodes we care about
-      self$target_nodes <- lapply(target_greta_arrays, member, 'node')
+      self$target_nodes <- lapply(target_greta_arrays, get_node)
 
       # set up the tf environment, with a graph
       self$new_tf_environment()
@@ -92,7 +92,7 @@ dag_class <- R6Class(
     # return a list of nodes connected to those in the target node list
     build_dag = function (greta_array_list) {
 
-      target_node_list <- lapply(greta_array_list, member, "node")
+      target_node_list <- lapply(greta_array_list, get_node)
 
       # loop through the target nodes, recursively registering them to this dag
       for (node in target_node_list) {

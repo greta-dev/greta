@@ -291,7 +291,7 @@ to_node <- function (x) {
     if (is.numeric(x))
       x <- data_node$new(x)
     else if (inherits(x, "greta_array"))
-      x <- x$node
+      x <- get_node(x)
     else
       stop ("cannot coerce object to a node")
   }

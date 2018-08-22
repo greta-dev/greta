@@ -41,14 +41,16 @@
   # coerce to a greta array (converts numerics to data arrays)
   greta_array <- as.greta_array(greta_array)
 
+  node <- get_node(greta_array)
+
   # only for greta arrays without distributions
-  if (!is.null(greta_array$node$distribution)) {
+  if (!is.null(node$distribution)) {
     stop ("left hand side already has a distribution assigned",
           call. = FALSE)
   }
 
   # only for data greta arrays
-  if (node_type(greta_array$node) != 'data') {
+  if (node_type(node) != 'data') {
     stop ("distributions can only be assigned to data greta arrays",
           call. = FALSE)
   }
@@ -60,7 +62,8 @@
   }
 
   # ... that have distributions
-  distribution_node <- value$node$distribution
+  value_node <- get_node(value)
+  distribution_node <- value_node$distribution
 
   if (!inherits(distribution_node, 'distribution_node')) {
     stop ('right hand side must have a distribution',
@@ -88,10 +91,10 @@
   # assign the new node as the distribution's target
   # also adds distribution_node as this node's distribution
   distribution_node$remove_target()
-  distribution_node$add_target(greta_array$node)
+  distribution_node$add_target(node)
 
   # remove the distribution from the RHS variable greta array
-  value$node$distribution <- NULL
+  value_node$distribution <- NULL
 
   # return greta_array (pre-conversion to a greta array)
   greta_array_tmp
@@ -109,7 +112,7 @@ distribution <- function (greta_array) {
   }
 
   # if greta_array has a distribution, return this greta array
-  if (inherits(greta_array$node$distribution, 'distribution_node')) {
+  if (inherits(get_node(greta_array)$distribution, 'distribution_node')) {
 
     distrib <- greta_array
 

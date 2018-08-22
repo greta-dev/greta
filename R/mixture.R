@@ -91,12 +91,14 @@ mixture_distribution <- R6Class (
 
       }
 
+      dot_nodes <- lapply(dots, get_node)
+
       # get the distributions and strip away their variables
-      distribs <- lapply(dots, function (x) x$node$distribution)
+      distribs <- lapply(dot_nodes, member, "distribution")
       lapply(distribs, function(x) x$remove_target())
 
       # also strip the distributions from the variables
-      lapply(dots, function (x) x$node$distribution <- NULL)
+      lapply(dot_nodes, function (x) x$distribution <- NULL)
 
       # check the distributions are all either discrete or continuous
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)

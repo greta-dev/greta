@@ -695,7 +695,7 @@ all_greta_arrays <- function (env = parent.frame(),
   if (!include_data) {
 
     is_data <- vapply(all_arrays,
-                      function (x) inherits(x$node, 'data_node'),
+                      function (x) inherits(get_node(x), 'data_node'),
                       FUN.VALUE = FALSE)
     all_arrays <- all_arrays[!is_data]
 

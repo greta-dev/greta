@@ -87,8 +87,8 @@ as.greta_array.numeric <- function (x) {
 # node method (only one that does anything)
 #' @export
 as.greta_array.node <- function (x, ...) {
-  ga <- new.env()
-  ga$node <- x
+  ga <- x$value()
+  attr(ga, "node") <- x
   class(ga) <- c("greta_array", "array")
   ga
 }
@@ -106,19 +106,23 @@ as.greta_array.default <- function (x) {
 #' @export
 print.greta_array <- function (x, ...) {
 
+  node <- get_node(x)
   text <- sprintf("greta array (%s)\n\n",
-                  x$node$description())
+                  node$description())
 
   cat(text)
-  print(x$node$value(), ...)
+  print(node$value(), ...)
 }
 
 # summary method
 #' @export
 summary.greta_array <- function (object, ...) {
+
+  node <- get_node(object)
+
   # array type
   type_text <- sprintf("'%s' greta array",
-                       node_type(object$node))
+                       node_type(node))
 
   len <- length(object)
   if (len == 1) {
@@ -131,9 +135,9 @@ summary.greta_array <- function (object, ...) {
   }
 
   # distribution info
-  if (inherits(object$node$distribution, 'distribution_node')) {
+  if (inherits(node$distribution, 'distribution_node')) {
     distribution_text <- sprintf("following a %s distribution",
-                                 object$node$distribution$distribution_name)
+                                 node$distribution$distribution_name)
 
   } else {
     distribution_text <- ""
@@ -141,7 +145,7 @@ summary.greta_array <- function (object, ...) {
 
   cat(type_text, shape_text, distribution_text, "\n")
 
-  values <- object$node$value()
+  values <- node$value()
   if (inherits(values, "unknowns")) {
     cat("\n  (values currently unknown)")
   } else {
@@ -154,7 +158,13 @@ summary.greta_array <- function (object, ...) {
 # return the unknowns array for this greta array
 #' @export
 as.matrix.greta_array <- function (x, ...)
-  x$node$value()
+  get_node(x)$value()
+
+# extract the node from a greta array
+get_node <- function (x) {
+  attr(x, "node")
+}
 
 greta_array_module <- module(as.greta_array,
+                             get_node,
                              unknowns = unknowns_module)

@@ -20,9 +20,11 @@ grab <- function (x, dag = NULL) {
     x <- as.greta_array(x)
 
   if (inherits(x, "greta_array")) {
+    node <- get_node(x)
+
     dag <- dag_class$new(list(x))
-    x$node$define_tf(dag)
-    x <- get(dag$tf_name(x$node),
+    node$define_tf(dag)
+    x <- get(dag$tf_name(node),
              envir = dag$tf_environment)
   }
 
@@ -38,11 +40,13 @@ is.greta_array <- function(x)
 
 set_distribution <- function(dist, data) {
   # fix the value of dist
-  distrib <- dist$node$distribution
-  distrib$value(data$node$value())
+  dist_node <- get_node(dist)
+  data_node <- get_node(data)
+  distrib <- dist_node$distribution
+  distrib$value(data_node$value())
   distrib$.fixed_value <- TRUE
-  data$node$set_distribution(distrib)
-  data$node$register()
+  data_node$set_distribution(distrib)
+  data_node$register()
 }
 
 # evaluate the (unadjusted) density of distribution greta array at some data
@@ -53,10 +57,10 @@ get_density <- function (distrib, data) {
 
   # create dag and define the density
   dag <- greta:::dag_class$new(list(x))
-  x$node$distribution$define_tf(dag)
+  get_node(x)$distribution$define_tf(dag)
 
   # get the log density as a vector
-  tensor_name <- dag$tf_name(distrib$node$distribution)
+  tensor_name <- dag$tf_name(get_node(distrib)$distribution)
   tensor <- get(tensor_name, envir = dag$tf_environment)
   as.vector(grab(tensor, dag))
 
@@ -97,7 +101,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x,
   # evaluate greta distribution
   dist <- do.call(greta_fun, parameters_greta)
 
-  distrib_node <- dist$node$distribution
+  distrib_node <- get_node(dist)$distribution
 
   # set density
   x_ <- as_data(x)
@@ -111,7 +115,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x,
   distrib_node$define_tf(dag)
 
   # get the log density as a vector
-  target <- get(dag$tf_name(x_$node), envir = tfe)
+  target <- get(dag$tf_name(get_node(x_)), envir = tfe)
   density <- get(dag$tf_name(distrib_node), envir = tfe)
   result <- density(target)
   greta_log_density <- as.vector(grab(result, dag))
@@ -269,7 +273,7 @@ compare_truncated_distribution <- function (greta_fun,
   dist <- do.call(greta_fun, c(parameters,
                                list(dim = 1, truncation = truncation)))
 
-  distrib_node <- dist$node$distribution
+  distrib_node <- get_node(dist)$distribution
 
   # set data as the target
   x_ <- as_data(x)
@@ -282,7 +286,7 @@ compare_truncated_distribution <- function (greta_fun,
   distrib_node$define_tf(dag)
 
   # get the log density as a vector
-  target <- get(dag$tf_name(x_$node), envir = tfe)
+  target <- get(dag$tf_name(get_node(x_)), envir = tfe)
   density <- get(dag$tf_name(distrib_node), envir = tfe)
   result <- density(target)
   greta_log_density <- as.vector(grab(result, dag))

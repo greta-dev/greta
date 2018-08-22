@@ -102,7 +102,7 @@ mcmc <- function (model,
 
   # check they're not data nodes, provide a useful error message if they are
   are_data <- vapply(target_greta_arrays,
-                     function (x) inherits(x$node, 'data_node'),
+                     function (x) inherits(get_node(x), 'data_node'),
                      FUN.VALUE = FALSE)
 
   if (any(are_data)) {
