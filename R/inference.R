@@ -181,13 +181,13 @@ run_samplers <- function (samplers,
                          sprintf("up to %i cores", n_cores))
     msg <- sprintf("\nrunning %i chains in parallel, each on %s\n\n",
                    chains, cores_text)
-    message(msg)
+    message(msg, appendLF = FALSE)
   }
 
   n_chain <- length(samplers)
   chains <- seq_len(n_chain)
 
-  # detemine the type of progress information
+  # determine the type of progress information
   if (bar_width(n_chain) < 42)
     progress_callback <- percentages
   else
@@ -200,6 +200,7 @@ run_samplers <- function (samplers,
   if (parallel_reporting) {
 
     trace_log_files <- replicate(n_chain, create_log_file())
+    percentage_log_files <- replicate(n_chain, create_log_file(TRUE))
     progress_bar_log_files <- replicate(n_chain, create_log_file(TRUE))
 
     pb_width <- bar_width(n_chain)
@@ -208,6 +209,7 @@ run_samplers <- function (samplers,
       # set the log files
       sampler <- samplers[[chain]]
       sampler$trace_log_file <- trace_log_files[[chain]]
+      sampler$percentage_file <- percentage_log_files[[chain]]
       sampler$pb_file <- progress_bar_log_files[[chain]]
 
       # set the progress bar widths for writing
@@ -216,6 +218,7 @@ run_samplers <- function (samplers,
     }
 
     greta_stash$trace_log_files <- trace_log_files
+    greta_stash$percentage_log_files <- percentage_log_files
     greta_stash$progress_bar_log_files <- progress_bar_log_files
     greta_stash$mcmc_info <- list(n_samples = n_samples)
 

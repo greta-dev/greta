@@ -65,6 +65,15 @@ inference <- R6Class(
         }
     },
 
+    # write the percentage progress to a file
+    write_percentage_log = function (total, completed, stage) {
+      percentage <- round(100 * completed / total)
+      msg <- sprintf("%s %i%%",
+                     stage,
+                     percentage)
+      writeLines(msg, self$percentage_file)
+    },
+
     # set RNG seed for a tensorflow graph. Must be done before definition of a
     # random tensor
     set_tf_seed = function () {
@@ -227,7 +236,8 @@ sampler <- R6Class(
     parameters = list(epsilon = 0.1,
                       diag_sd = 1),
 
-    # progress bar reporting
+    # parallel progress reporting
+    percentage_file = NULL,
     pb_file = NULL,
     pb_width = options()$width,
 
@@ -319,10 +329,17 @@ sampler <- R6Class(
           self$tune(completed_iterations[burst], warmup)
 
           if (verbose) {
+
+            # update the progress bar/percentage log
             iterate_progress_bar(pb_warmup,
                                  it = completed_iterations[burst],
                                  rejects = self$numerical_rejections,
                                  file = self$pb_file)
+
+            self$write_percentage_log(warmup,
+                                      completed_iterations[burst],
+                                      stage = "warmup")
+
           }
 
         }
@@ -354,10 +371,17 @@ sampler <- R6Class(
         self$trace()
 
         if (verbose) {
+
+          # update the progress bar/percentage log
           iterate_progress_bar(pb_sampling,
                                it = completed_iterations[burst],
                                rejects = self$numerical_rejections,
                                file = self$pb_file)
+
+          self$write_percentage_log(n_samples,
+                                    completed_iterations[burst],
+                                    stage = "sampling")
+
         }
 
       }
