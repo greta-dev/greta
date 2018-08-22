@@ -440,21 +440,6 @@ test_that("c handles NULLs and lists", {
   expect_s3_class(z, "greta_array")
   expect_identical(dim(z), c(4L, 1L))
 
-  # NULLs at the start should return a list
-  z <- c(NULL, y)
-  expect_true(is.list(z))
-  expect_s3_class(z[[1]], "greta_array")
-  expect_identical(dim(z[[1]]), c(3L, 1L))
-
-  # anything at the start should return a list
-  z <- c(1, y)
-  expect_true(is.list(z))
-  expect_s3_class(z[[2]], "greta_array")
-
-  z <- c(mean, y)
-  expect_true(is.list(z))
-  expect_s3_class(z[[2]], "greta_array")
-
   # NULLs at the end should dissappear
   z <- c(x, NULL)
   expect_s3_class(z, "greta_array")

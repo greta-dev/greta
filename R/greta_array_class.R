@@ -173,9 +173,8 @@ as.matrix.greta_array <- function (x, ...)
   get_node(x)$value()
 
 # extract the node from a greta array
-get_node <- function (x) {
+get_node <- function (x)
   attr(x, "node")
-}
 
 greta_array_module <- module(as.greta_array,
                              get_node,
