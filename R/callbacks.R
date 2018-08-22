@@ -26,7 +26,11 @@ render_progress <- function (reads) {
   some_results <- any(nchar(reads) > 0)
   if (some_results) {
 
-    msg <- paste(c("", reads, ""), collapse = "  |  ")
+    # optionally add blanks to put lines at the edges
+    if (length(reads) > 1)
+      reads <- c("", reads, "")
+
+    msg <- paste(reads, collapse = "  |  ")
 
     message("\r", appendLF = FALSE)
     message(msg, appendLF = FALSE)

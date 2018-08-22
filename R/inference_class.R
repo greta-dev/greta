@@ -67,11 +67,14 @@ inference <- R6Class(
 
     # write the percentage progress to a file
     write_percentage_log = function (total, completed, stage) {
-      percentage <- round(100 * completed / total)
-      msg <- sprintf("%s %i%%",
-                     stage,
-                     percentage)
-      writeLines(msg, self$percentage_file)
+      if (!is.null(self$percentage_file)) {
+        percentage <- round(100 * completed / total)
+        msg <- sprintf("%s %i%%",
+                       stage,
+                       percentage)
+        writeLines(msg, self$percentage_file)
+
+      }
     },
 
     # set RNG seed for a tensorflow graph. Must be done before definition of a
