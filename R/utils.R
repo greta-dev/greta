@@ -210,6 +210,7 @@ bar_width <- function (n_bars) {
 }
 
 # record the messages produced by the expression in the file
+#' @importFrom utils capture.output
 record <- function (expr, file) {
   if (!is.null(file)) {
     msg <- capture.output(out <- eval(expr), type = "message")

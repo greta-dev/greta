@@ -157,6 +157,7 @@ summary.greta_array <- function (object, ...) {
 
 # str method
 #' @export
+#' @importFrom utils str
 str.greta_array <- function (object, ...) {
   value <- get_node(object)$value()
   array <- unclass(value)

@@ -1,5 +1,6 @@
 # functions to be run whilst samplers are running in parallel
 
+#' @importFrom utils read.table
 read_trace_log_file <- function (filename) {
   ans <- NULL
   if (file.exists(filename)) {
@@ -19,6 +20,7 @@ read_progress_log_file <- function (filename, skip = 0) {
 }
 
 # generic rendering of progress text straight from a set of files
+#' @importFrom utils flush.console
 render_progress <- function (reads) {
 
   reads <- unlist(reads)
