@@ -345,7 +345,8 @@ extra_samples <- function (draws,
                            thin = 1,
                            n_cores = NULL,
                            verbose = TRUE,
-                           pb_update = 50) {
+                           pb_update = 50,
+                           one_by_one = FALSE) {
 
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
@@ -363,6 +364,7 @@ extra_samples <- function (draws,
                warmup = 0L,
                verbose = verbose,
                pb_update = pb_update,
+               one_by_one = one_by_one,
                n_cores = n_cores,
                from_scratch = FALSE)
 
