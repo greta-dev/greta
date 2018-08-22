@@ -288,10 +288,10 @@ dim.node <- function (x)
 # coerce an object to a node
 to_node <- function (x) {
   if (!inherits(x, "node")) {
-    if (is.numeric(x))
-      x <- data_node$new(x)
-    else if (inherits(x, "greta_array"))
+    if (inherits(x, "greta_array"))
       x <- get_node(x)
+    else if (is.numeric(x))
+      x <- data_node$new(x)
     else
       stop ("cannot coerce object to a node")
   }
