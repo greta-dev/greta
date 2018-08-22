@@ -448,7 +448,10 @@ dag_class <- R6Class(
       if (!is.null(free_state))
         self$send_parameters(free_state)
 
-      cleanly(self$tf_sess_run(joint_density_adj))
+      res <- cleanly(self$tf_sess_run(joint_density_adj))
+      if (inherits(res, "error"))
+        res <- NA
+      res
 
     },
 
@@ -457,8 +460,10 @@ dag_class <- R6Class(
       if (!is.null(free_state))
         self$send_parameters(free_state)
 
-      cleanly(self$tf_sess_run(gradients_adj))
-
+      res <- cleanly(self$tf_sess_run(gradients_adj))
+      if (inherits(res, "error"))
+        res <- NA
+      res
     },
 
     # return the current values of the traced nodes, as a named vector
