@@ -155,6 +155,17 @@ summary.greta_array <- function (object, ...) {
 
 }
 
+# str method
+#' @export
+str.greta_array <- function (object, ...) {
+  value <- get_node(object)$value()
+  array <- unclass(value)
+  string <- capture.output(str(array))
+  string <- gsub("NA", "?", string)
+  string <- paste("'greta_array'", string)
+  cat(string)
+}
+
 # return the unknowns array for this greta array
 #' @export
 as.matrix.greta_array <- function (x, ...)
