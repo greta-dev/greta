@@ -15,7 +15,7 @@ mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
 stashed_samples()
 
 extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
-  verbose = TRUE, pb_update = 50)
+  verbose = TRUE, pb_update = 50, one_by_one = FALSE)
 
 opt(model, optimiser = bfgs(), max_iterations = 100,
   tolerance = 1e-06, initial_values = NULL)

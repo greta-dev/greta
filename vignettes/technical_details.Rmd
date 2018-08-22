@@ -33,20 +33,20 @@ There are three layers to how greta defines a model: users manipulate *greta arr
 
 ### greta arrays
 
-greta arrays are the user-facing representation of the model. greta arrays are actually just `environment`s, but with the classes `greta_array` and `array`.
+greta arrays are the user-facing representation of the model. greta arrays extend R arrays and have the classes `greta_array` and `array`.
 
 ```{r greta_array1}
 x <- ones(3, 3)
-is.environment(x)
 class(x)
 ```
 
 ### nodes
 
-The only thing in each greta array environment is `node`, an R6 object inheriting from the R6 class 'node', as well as one of the three node types: 'data', 'operation' or 'variable'.
+The main difference between greta arrays and R arrays is that greta array has a `node` attribute; an R6 object inheriting from the R6 class 'node', as well as one of the three node types: 'data', 'operation' or 'variable'.
 
 ```{r greta_array2}
-class(x$node)
+x_node <- attr(x, "node")
+class(x_node)
 ```
 
 There is a fourth node type: 'distribution', but these are never directly associated with greta arrays.
@@ -56,24 +56,25 @@ When created, each node points to its 'child' nodes - the nodes for the greta ar
 
 ```{r nodes1}
 # data nodes have no children
-length(x$node$children)
+length(x_node$children)
 
 # operation nodes have one or more children
 z <- x * 3
-length(z$node$children)
+z_node <- attr(z, "node")
+length(z_node$children)
 ```
 
 Each node also has a list of its parents, the nodes that have been created from this one.
 
 When `model()` is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.
 
-Nodes also have a value member, which is an array for data nodes or an 'unknowns' object for other node types. The unknowns class is a thin wrapper around arrays, which prints the question marks. Generic functions for working on arrays (e.g. `dim`, `length`, `print`) make use these node values to return something familiar to the user.
+Nodes also have a value member, which is an array for data nodes or an 'unknowns' object for other node types. The unknowns class is a thin wrapper around arrays, which prints the question marks. Generic functions for working on arrays (e.g. `dim`, `length`, `print`) use these node values to return something familiar to the user.
 ```{r nodes2}
-x$node$value()
+x_node$value()
 # R calls this a matrix because it's 2d, but it's an array
-class(x$node$value())
-z$node$value()
-class(z$node$value())
+class(x_node$value())
+z_node$value()
+class(z_node$value())
 ```
 
 ### Tensors
@@ -83,13 +84,13 @@ In addition to remembering their shape and size and where they are in the DAG, e
 The node `tf()` method takes the dag as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.
 
 ```{r tensors1}
-x$node$tf
+x_node$tf
 ```
 
 Because R6 objects are pass-by-reference (rather than pass-by-value), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their children, they can make sure those children are defined as tensors before they are. The `define_tf()` member function ensures that that happens, enabling operation nodes to use the tensors for their children when defining their own tensor.
 
 ```{r tensors2}
-z$node$tf
+x_node$define_tf
 ```
 
 ## variables and free states
@@ -98,8 +99,9 @@ Hamiltonian Monte Carlo (HMC) requires all of the parameters to be transformed t
 
 ```{r free_state}
 a <- variable(lower = 0)
-class(a$node)
-a$node$tf_from_free
+a_node <- attr(a, "node")
+class(a_node)
+a_node$tf_from_free
 ```
 
 ## distributions
@@ -108,16 +110,17 @@ distribution nodes are node objects just like the others, but they are not *dire
 
 ```{r distributions1}
 b <- normal(0, 1)
-class(b$node)
-class(b$node$distribution)
-# a is the target of its own distribution
-class(b$node$distribution$target)
+b_node <- attr(b, "node")
+class(b_node)
+class(b_node$distribution)
+# b is the target of its own distribution
+class(b_node$distribution$target)
 ```
 
 When they define themselves as tensors, distribution nodes define the log density of their target node/tensor given the tensors representing their parameters.
 
 ```{r distributions2}
-b$node$distribution$tf_log_density
+b_node$distribution$tf
 ```
 
 If the distribution was truncated, the log density is normalised using the cumulative distribution function.
@@ -136,4 +139,7 @@ model$dag$log_density
 model$dag$gradients
 ```
 
-These methods are used by MCMC samplers to explore the model parameters.
+These methods are used to check the validity of initial values, sampling is now done using samplers from tensorflow probability, which require a function mapping from the overall free state to the joint log density. That's created with the `generate_log_prob_function` method:
+```{r dag2}
+model$dag$generate_log_prob_function
+```
