@@ -233,8 +233,8 @@ test_that("cleanly() handles TF errors nicely", {
   other_stop <- function ()
     stop ("Fetchez la vache!")
 
-  expect_equal(cleanly(inversion_stop()), NA)
-  expect_equal(cleanly(cholesky_stop()), NA)
+  expect_s3_class(cleanly(inversion_stop()), "error")
+  expect_s3_class(cleanly(cholesky_stop()), "error")
   expect_error(cleanly(other_stop()),
                "greta hit a tensorflow error:")
 
