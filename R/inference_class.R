@@ -839,7 +839,7 @@ optimiser <- R6Class(
                                           dtype = tf_float())
       )
 
-      dag$tf_run(free_state$assign(optimiser_init))
+      . <- dag$tf_sess_run(free_state$assign(optimiser_init))
 
     },
 
