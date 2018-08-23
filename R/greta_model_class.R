@@ -200,6 +200,8 @@ print.greta_model <- function (x, ...) {
 
 #' @rdname model
 #' @param y unused default argument
+#' @param color base color used for plotting. Defaults to \code{greta} colors
+#'  in violet.
 #'
 #' @details The plot method produces a visual representation of the defined
 #'   model. It uses the \code{DiagrammeR} package, which must be installed
@@ -210,7 +212,10 @@ print.greta_model <- function (x, ...) {
 #' @return \code{plot} - a \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object (invisibly).
 #'
 #' @export
-plot.greta_model <- function (x, y, ...) {
+plot.greta_model <- function (x,
+                              y,
+                              color = NULL,
+                              ...) {
 
   if (!requireNamespace('DiagrammeR', quietly = TRUE)) {
     stop ('the DiagrammeR package must be installed to plot greta models',
@@ -237,12 +242,12 @@ plot.greta_model <- function (x, y, ...) {
   node_shapes[types == 'distribution'] <- 'diamond'
   node_shapes[types == 'operation'] <- 'circle'
 
-  node_edge_colours <- rep(greta_col('lighter'), n_nodes)
-  node_edge_colours[types == 'distribution'] <- greta_col('light')
+  node_edge_colours <- rep(greta_col('lighter', color), n_nodes)
+  node_edge_colours[types == 'distribution'] <- greta_col('light', color)
   node_edge_colours[types == 'operation'] <- 'lightgray'
 
-  node_colours <- rep(greta_col('super_light'), n_nodes)
-  node_colours[types == 'distribution'] <- greta_col('lighter')
+  node_colours <- rep(greta_col('super_light', color), n_nodes)
+  node_colours[types == 'distribution'] <- greta_col('lighter', color)
   node_colours[types == 'operation'] <- 'lightgray'
   node_colours[types == 'data'] <- 'white'
 
@@ -348,7 +353,7 @@ plot.greta_model <- function (x, y, ...) {
 
   # node options
   gr$nodes_df$type <- 'lower'
-  gr$nodes_df$fontcolor <- greta_col('dark')
+  gr$nodes_df$fontcolor <- greta_col('dark', color.palette)
   gr$nodes_df$fontsize <- 12
   gr$nodes_df$penwidth <- 2
 
