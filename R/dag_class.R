@@ -16,6 +16,7 @@ dag_class <- R6Class(
     tf_float = NA,
     n_cores = 0L,
     compile = NA,
+    adjacency_matrix = NULL,
 
     # create a dag from some target nodes
     initialize = function (target_greta_arrays,
@@ -27,6 +28,9 @@ dag_class <- R6Class(
 
       # find the nodes we care about
       self$target_nodes <- lapply(target_greta_arrays, get_node)
+
+      # create an adjacency matrix
+      self$build_adjacency_matrix()
 
       # set up the tf environment, with a graph
       self$new_tf_environment()
@@ -559,7 +563,7 @@ dag_class <- R6Class(
 
     },
 
-    adjacency_matrix = function () {
+    build_adjacency_matrix = function () {
 
       # make dag matrix
       n_node <- length(self$node_list)
@@ -600,7 +604,7 @@ dag_class <- R6Class(
         dag_mat[children[[i]], i] <- 1
       }
 
-      dag_mat
+      self$adjacency_matrix <- dag_mat
 
     },
 

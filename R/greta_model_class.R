@@ -212,12 +212,13 @@ print.greta_model <- function (x, ...) {
 #' @export
 plot.greta_model <- function (x, y, ...) {
 
-  if (!requireNamespace('DiagrammeR', quietly = TRUE))
+  if (!requireNamespace('DiagrammeR', quietly = TRUE)) {
     stop ('the DiagrammeR package must be installed to plot greta models',
           call. = FALSE)
+  }
 
   # set up graph
-  dag_mat <- x$dag$adjacency_matrix()
+  dag_mat <- x$dag$adjacency_matrix
 
   gr <- DiagrammeR::from_adj_matrix(dag_mat,
                                     mode = 'directed',
