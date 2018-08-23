@@ -549,14 +549,18 @@ dag_class <- R6Class(
         own_name <- node_names[i]
         target_name <- self$node_list[[i]]$target$unique_name
 
-        # switch the target from child to parent of the distribution
-        children[[i]] <- children[[i]][children[[i]] != target_name]
-        parents[[i]] <- c(parents[[i]], target_name)
+        if (!is.null(target_name)) {
 
-        # switch the distribution from parent to child of the target
-        idx <- match(target_name, node_names)
-        parents[[idx]] <- parents[[idx]][parents[[idx]] != own_name]
-        children[[idx]] <- c(children[[idx]], own_name)
+          # switch the target from child to parent of the distribution
+          children[[i]] <- children[[i]][children[[i]] != target_name]
+          parents[[i]] <- c(parents[[i]], target_name)
+
+          # switch the distribution from parent to child of the target
+          idx <- match(target_name, node_names)
+          parents[[idx]] <- parents[[idx]][parents[[idx]] != own_name]
+          children[[idx]] <- c(children[[idx]], own_name)
+
+        }
 
       }
 

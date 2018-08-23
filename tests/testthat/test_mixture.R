@@ -74,7 +74,7 @@ test_that("incorrectly-shaped weights errors", {
 
 })
 
-test_that("mixtures with unsufficient distributions errors", {
+test_that("mixtures with insufficient distributions errors", {
 
   skip_if_not(check_tf_version())
   source('helpers.R')

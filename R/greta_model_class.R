@@ -321,6 +321,15 @@ plot.greta_model <- function (x, y, ...) {
   types <- x$dag$node_types
   distrib_idx <- which(types == 'distribution')
 
+  # find those with targets
+  targets <- lapply(x$dag$node_list[distrib_idx],
+                    member,
+                    "target")
+
+  keep <- !vapply(targets, is.null, TRUE)
+  distrib_idx <- distrib_idx[keep]
+
+
   target_names <- vapply(x$dag$node_list[distrib_idx],
                          member,
                          "target$unique_name",
