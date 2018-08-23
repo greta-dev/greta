@@ -43,8 +43,8 @@ test_that('opt converges with SciPy optimisers', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  x <- rnorm(5, 2, 0.1)
-  z <- variable(dim = 5)
+  x <- rnorm(3, 2, 0.1)
+  z <- variable(dim = 3)
   distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
