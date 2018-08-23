@@ -964,17 +964,24 @@ scipy_optimiser <- R6Class(
       self$old_obj <- obj
     },
 
-    it_progress = function (obj) {
+    it_progress = function (...) {
       self$it <- self$it + 1
     },
 
     run_minimiser = function () {
 
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+      tfe$it_progress <- self$it_progress
+      tfe$obj_progress <- self$obj_progress
+
+      self$set_inits()
+
       # run the optimiser
-      self$model$dag$tf_run(tf_optimiser$minimize(sess,
+      dag$tf_run(tf_optimiser$minimize(sess,
                                             feed_dict = feed_dict,
-                                            step_callback = self$it_progress,
-                                            loss_callback = self$obj_progress,
+                                            step_callback = it_progress,
+                                            loss_callback = obj_progress,
                                             fetches = list(-joint_density_adj)))
 
     }
