@@ -385,32 +385,6 @@ dag_class <- R6Class(
 
     },
 
-    # return a function to obtain the model log probability and its gradient (in
-    # an unnamed list) from a tensor for the free state
-    generate_log_prob_grad_function = function (adjust = TRUE) {
-
-      target <- ifelse (adjust,
-                        "joint_density_adj",
-                        "joint_density")
-
-      function (free_state) {
-
-        old_tfe <- dag$tf_environment
-        on.exit(dag$tf_environment <- old_tfe)
-        dag$tf_environment <- environment()
-
-        self$define_tf_body()
-        self$define_joint_density()
-
-        log_prob <- self$tf_environment[[target]]
-        grad <- tf$gradients(log_prob, free_state)
-
-        list(log_prob,
-             grad[[1]])
-      }
-
-    },
-
     # return the expected free parameter format either in list or vector form
     example_parameters = function (flat = TRUE) {
 
@@ -516,9 +490,9 @@ dag_class <- R6Class(
       A <- self$adjacency_matrix
       S <- (A + t(A)) > 0
 
-      # loop through to build a block diagonal matrix of connected components (ususlly
-      # only takes a few iterations, max out at 100)
-      maxit <- 100
+      # loop through to build a block diagonal matrix of connected components
+      # (usually only takes a few iterations)
+      maxit <- 1000
       it <- 0
       P <- R <- S
       while (it < maxit) {
@@ -548,23 +522,6 @@ dag_class <- R6Class(
       # name them
       names(cluster_id) <- rownames(A)
       cluster_id
-
-    },
-
-    find_node_neighbours = function () {
-
-      # loop through each node in this dag, finding all members of its sub-graph
-      sub_dags <- lapply(self$node_list,
-                         function (x) dag_class$new(list(as.greta_array(x))))
-      sub_node_lists <- lapply(sub_dags, member, 'node_list')
-
-      # get their names
-      names <- lapply(sub_node_lists, function (node_list) {
-        vapply(node_list, member, 'unique_name', FUN.VALUE = '')})
-
-      # convert these to indices against this dag's node list
-      original_names <- names(self$node_list)
-      lapply(names, match, original_names)
 
     },
 
