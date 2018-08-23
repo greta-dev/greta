@@ -867,7 +867,7 @@ optimiser <- R6Class(
       if (!self$uses_callbacks)
         self$it <- NA
 
-      converged <- self$it < self$max_iterations
+      converged <- self$it < (self$max_iterations - 1)
 
       list(par = self$model$dag$trace_values(self$free_state),
            value = self$model$dag$tf_sess_run(joint_density),
