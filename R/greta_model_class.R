@@ -353,7 +353,7 @@ plot.greta_model <- function (x,
 
   # node options
   gr$nodes_df$type <- 'lower'
-  gr$nodes_df$fontcolor <- greta_col('dark', color.palette)
+  gr$nodes_df$fontcolor <- greta_col('dark', color)
   gr$nodes_df$fontsize <- 12
   gr$nodes_df$penwidth <- 2
 

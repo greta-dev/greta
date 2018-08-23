@@ -1,0 +1,44 @@
+### Factor analysis
+
+Factor analysis is a linear latent model used for finding a lower-dimensional probabilistic description of a data set with observations $\mathbf{x}_i \in \mathbb{R}^p$. We assume the data are generated according to
+$$
+\mathbf{x}_i = \mathbf{W} \mathbf{z}_i + \boldsymbol \mu + \epsilon_i
+$$
+where the noise $\epsilon$ is normally distributed with zero mean and diagonal covariance matrix $\Psi = \mathrm{diag}(\psi_1, \dots, \psi_p)$. The goal of factor analysis is to estimate the latent variables  $\mathbf{z}_i \mathbb{R}^q$. 
+
+In this example we take the mean vector $\boldsymbol \mu$ to be zero.
+
+<div class="data">
+```{r factor_analysis_data, highlight = FALSE}
+generate.data <- function(n = 100, p = 5, q = 2, psi = diag(rgamma(p, 1, 1)))
+{
+  W  <- matrix(rnorm(p * q, 1), p, q)
+  Z  <- matrix(rnorm(q * n, 2), q, n)
+  WZ <- W %*% Z
+  
+  X  <- matrix(0, n, p)
+  for (i in seq_len(n)) {
+    X[i, ] <- MASS::mvrnorm(1, WZ[, i], psi)
+  }
+  
+  list(X = X, W = W, Z = Z, psi = psi)
+}
+
+n <- 100
+p <- 5
+q <- 2
+data <- generate.data(n = n, p = p, q = q)
+X <- data$X
+```
+</div>
+
+```{r factor_analysis}
+W <- normal(0, 1, dim = c(p, q))
+Z <- normal(0, 1, dim = c(q, n))
+psi <- zeros(p, p)
+diag(psi) <- inverse_gamma(1, 1, dim = p)
+
+X <- as_data(X)
+distribution(X) <- multivariate_normal(t(W %*% Z), psi)
+```
+
