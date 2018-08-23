@@ -136,7 +136,11 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      vals <- as.matrix(self$example_parameters())
+      # tf$Variable seems to have trouble assigning values, if created with
+      # numeric (rather than logical) NAs ¯\_(ツ)_/¯
+      vals <- self$example_parameters()
+      vals <- as.logical(vals)
+      vals <- as.matrix(vals)
 
       assign("free_state_values",
              vals,
