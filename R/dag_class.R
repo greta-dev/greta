@@ -507,42 +507,47 @@ dag_class <- R6Class(
     # for all the nodes in this dag, return a vector of membership to sub-graphs
     subgraph_membership = function () {
 
-      neighbour_list <- self$find_node_neighbours()
+      # convert adjacency matrix into absolute connectedness matrix using matrix
+      # powers. Inspired by Method 2 here:
+      # http://raphael.candelier.fr/?blog=Adj2cluster
 
-      n_node <- length(neighbour_list)
-      no_of_clusters <- 1
-      registered <- rep(FALSE, n_node)
-      membership <- rep(NA, n_node)
 
-      # loop through all nodes
-      for (node in seq_len(n_node)) {
+      # convert adjacency to a symmetric, logical matrix
+      A <- self$adjacency_matrix
+      S <- (A + t(A)) > 0
 
-        # if they haven't been registered
-        if (!registered[node]) {
-
-          # add this one to the register, with cluster membership
-          registered[node] <- TRUE
-          membership[node] <- no_of_clusters
-
-          # get this node's neighbours (numeric vector, indexing nodes)
-          neighbours <- neighbour_list[[node]]
-
-          # loop through the neighbours
-          for (neighbour in neighbours) {
-            if (!registered[neighbour]) {
-              registered[neighbour] <- TRUE
-              membership[neighbour] <- no_of_clusters
-            }
-          }
-
-          # increment cluster ID
-          no_of_clusters <- no_of_clusters + 1
-
+      # loop through to build a block diagonal matrix of connected components (ususlly
+      # only takes a few iterations, max out at 100)
+      maxit <- 100
+      it <- 0
+      P <- R <- S
+      while (it < maxit) {
+        P <- P %*% S
+        T <- (R + P) > 0
+        if (any(T != R)) {
+          R <- T
+          it <- it + 1
+        } else {
+          break()
         }
       }
 
-      names(membership) <- names(neighbour_list)
-      membership
+      # check we didn't time out
+      if (it == maxit) {
+        stop ("could not determine the number of independent models ",
+              "in a reasonable amount of time",
+              call. = FALSE)
+      }
+
+      # find the cluster IDs
+      n <- nrow(R)
+      neighbours <- lapply(seq_len(n), function (i) which(R[i, ]))
+      cluster_names <- vapply(neighbours, paste, collapse = "_", FUN.VALUE = "")
+      cluster_id <- match(cluster_names, unique(cluster_names))
+
+      # name them
+      names(cluster_id) <- rownames(A)
+      cluster_id
 
     },
 
