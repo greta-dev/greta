@@ -92,7 +92,7 @@ mcmc <- function (model,
                   verbose = TRUE,
                   pb_update = 50,
                   one_by_one = FALSE,
-                  initial_values = NULL) {
+                  initial_values = initials()) {
 
   check_future_plan()
 
@@ -122,8 +122,9 @@ mcmc <- function (model,
   # get the dag containing the target nodes
   dag <- model$dag
 
-  # turn initial values into a list if needed (checking the length)
-  initial_values <- prep_initials(initial_values, chains)
+  # turn initial values into a list if needed (checking the length), and convert
+  # from a named list on the constrained scale to free state vectors
+  initial_values <- prep_initials(initial_values, chains, dag)
 
   # create a sampler object for each chain, using these (possibly NULL) initial
   # values
@@ -370,43 +371,105 @@ extra_samples <- function (draws,
 
 }
 
+# convert some 'data' values form the constrained to the free state, for a given
+# 'node'
+to_free <- function (node, data) {
+  lower <- node$lower
+  upper <- node$upper
+  fun <- switch(node$constraint,
+                none = function (x) x,
+                high = function (x) log(x - lower),
+                low = function (x) log(upper - x),
+                both = function(x) qlogis((y - lower) / (upper - lower)))
+  fun(data)
+}
+
+# convert a named list of initial values into the corresponding vector of values
+# on the free state
+parse_initial_values <- function (initials, dag) {
+
+  # line up greta array names with tf names
+  greta_names <- names(dag$parameters_example)
+  tf_names <- vapply(names(initials),
+                     function(name) {
+                       ga <- get(name)
+                       node <- get_node(ga)
+                       dag$tf_name(node)
+                     },
+                     "")
+  order <- match(greta_names, tf_names)
+
+  # reorder the inits, and transform them to the free scale
+  initials <- initials[order]
+  initials <- lapply(initials, as.array)
+  nodes <- dag$node_list[match(tf_names, dag$node_tf_names)]
+  inits_free <- mapply(to_free, nodes, initials)
+
+  # flatten into tensorflow's expected order
+  unlist_tf(inits_free)
+
+}
+
 # convert (possibly NULL) user-specified initial values into a list of the
 # correct length, with nice error messages
-prep_initials <- function (initial_values, n_chains) {
+prep_initials <- function (initial_values, n_chains, dag) {
 
-  # if the user provided a list of initial values, check the length
-  if (is.list(initial_values)) {
+  # if the user passed a single set of initial values, repeat them for all
+  # chains
+  if (inherits(initial_values, "initials")) {
 
-    n_sets <- length(initial_values)
+    initial_values <- replicate(n_chains,
+                                initial_values,
+                                simplify = FALSE)
 
-    if (n_sets != n_chains) {
-      stop (n_sets, " sets of initial values were provided, but there ",
-            ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
-            ifelse(n_chains > 1, "s", ""),
-            call. = FALSE)
+    is_blank <- identical(initial_values, initials())
+
+    if (is_blank & n_chains > 1) {
+      message ("only one set of initial values was provided, and was ",
+               "used for all chains")
+    }
+
+  } else if (is.list(initial_values)) {
+
+    # if the user provided a list of initial values, check elements and the length
+    are_initials <- lapply(initial_values, inherits, "initials")
+
+    if (all(are_initials)) {
+
+      n_sets <- length(initial_values)
+
+      if (n_sets != n_chains) {
+        stop (n_sets, " sets of initial values were provided, but there ",
+              ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
+              ifelse(n_chains > 1, "s", ""),
+              call. = FALSE)
+      }
+
+    } else {
+
+      initial_values <- NULL
+
     }
 
   } else {
 
-    # otherwise replicate them for each chain
-    if (is.null(initial_values)) {
-
-      initial_values <- replicate(n_chains, NULL)
-
-    } else {
-
-      initial_values <- replicate(n_chains,
-                                  initial_values,
-                                  simplify = FALSE)
-
-      if (n_chains > 1) {
-        message ("\nonly one set of was initial values given, ",
-                 "and was used for all chains\n")
-      }
-
-    }
+    initial_values <- NULL
 
   }
+
+  # error on a bad object
+  if (is.null(initial_values)) {
+
+    stop ("initial_values must an initials object created with initials(), ",
+          "or a simple list of initials objects",
+          call. = FALSE)
+
+  }
+
+  # convert them to free state vectors
+  initial_values <- lapply(initial_values,
+                           parse_initial_values,
+                           dag)
 
   initial_values
 
@@ -439,7 +502,7 @@ opt <- function (model,
                  optimiser = bfgs(),
                  max_iterations = 100,
                  tolerance = 1e-6,
-                 initial_values = NULL) {
+                 initial_values = initials()) {
 
   # create R6 object of the right type
   object <- optimiser$class$new(initial_values = initial_values,

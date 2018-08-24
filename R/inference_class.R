@@ -86,7 +86,7 @@ inference <- R6Class(
 
     initial_values = function (user_specified) {
 
-      # check user-provided initial values
+      # check user-provided initial values (on free state scale)
       if (!is.null(user_specified)) {
 
         # check their length
