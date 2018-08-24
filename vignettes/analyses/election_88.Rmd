@@ -9,23 +9,8 @@ output:
     toc_depth: 3
     theme: lumen
     highlight: default
-vignette: >
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Example models}
-  %\usepackage[utf8]{inputenc}
+author: Shirin Glander, Tiphaine Martin, Matt Mulvahill, Michael Quinn, David Smith
 ---
-
-
-```{r}
-library(tidyverse)
-library(bayesplot)
-library(future)
-library(greta)
-
-theme_set(theme_bw())
-packageVersion("greta")
-```
-
 
 # Introduction
 
@@ -34,6 +19,18 @@ This model appears in chapter 14 of
 discussion state-level voting outcomes. Individual responses (`y`) are labeled
 as 1 for supporters of the Republican candidateand 0 for supporters of the
 Democrat (with undecideds excluded).
+
+```{r, results='hide', message=FALSE}
+library(tidyverse)
+library(bayesplot)
+library(future)
+library(greta)
+theme_set(theme_bw())
+```
+
+```{r}
+packageVersion("greta")
+```
 
 To access this data, we'll directly source a script from the `stan-dev` Github
 repo. See the
@@ -205,9 +202,9 @@ Model in hand, we can begin sampling. Since we are sampling across multiple
 chains, we'll use the "multisession" future strategy to do everything in
 parallel.
 
-```{r}
+```{r results='hide', message=FALSE}
 plan(multisession)
-draws <- mcmc(e88_model, chains = 8, n_samples = 1000, warmup = 500)
+draws <- mcmc(e88_model, chains = 4, n_samples = 1000, warmup = 500)
 ```
 
 Time to diagnose. Did the sample chains for our fixed effects mix reasonably?
@@ -259,6 +256,9 @@ probability of voting for the Republican candidate.
 
 ## Session information
 
+<div class="fold o">
 ```{r}
 sessionInfo()
 ```
+</div>
+

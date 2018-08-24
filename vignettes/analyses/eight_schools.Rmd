@@ -1,5 +1,5 @@
 ---
-title: "8 Schools Example Model"
+title: "Eight Schools Example Analysis"
 output:
   html_document:
     css: greta.css
@@ -9,15 +9,12 @@ output:
     toc_depth: 3
     theme: lumen
     highlight: default
-vignette: >
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Example models}
-  %\usepackage[utf8]{inputenc}
+author: Shirin Glander, Tiphaine Martin, Matt Mulvahill, Michael Quinn, David Smith
 ---
 
 ## Data
 
-**8 Schools** is a study of coaching effects from eight schools; it comes from [section 5.5 of Gelman et al. (2003) as covered in 2.1. Schools data of 'R2WinBUGS: A Package for Running WinBUGS from R'](https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf):
+**Eight Schools** is a study of coaching effects from eight schools; it comes from [section 5.5 of Gelman et al. (2003) as covered in 2.1. Schools data of 'R2WinBUGS: A Package for Running WinBUGS from R'](https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf):
 
 > The Scholastic Aptitude Test (SAT) measures the aptitude of high-schoolers in order to help
 colleges to make admissions decisions. It is divided into two parts, verbal (SAT-V) and
@@ -160,7 +157,7 @@ DiagrammeR::render_graph(plot(m))
 The actual sampling from the model happens with the `mcmc()` function. By default 1000 MCMC samples are drawn after warm-up.
 What we obtain is a probability measure that describes the likelihood of a set of randomly sampled values for the model variables.
 
-```{r cache=FALSE}
+```{r cache=FALSE, results='hide', message=FALSE}
 # sampling
 draws <- greta::mcmc(m, n_samples = 1000, warmup = 1000)
 ```
@@ -262,6 +259,9 @@ ggplot(school_summaries, aes(x = school, y = mean, color = tool, shape = tool)) 
 
 ## Session information
 
+<div class="fold o">
 ```{r}
 sessionInfo()
 ```
+</div>
+

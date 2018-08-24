@@ -38,5 +38,7 @@ Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be co
 
 </div>
 <div class="column-right">
-[![](http://www.uni-bremen.de/fileadmin/_processed_/csm_Portrait-Henry_rgb_cdc2a34979.jpg)](http://www.uni-bremen.de/de/unispitzen/professorinnen-im-portrait/grete-henry-hermann.html)
+```{r image, out.width = "280px", echo = FALSE}
+knitr::include_graphics("https://consulting.qa.com/media/uploads/Grete-Hermann.jpg")
+```
 </div>

@@ -28,37 +28,37 @@ Below are a few examples of common statistical models implemented in greta.
 
 <hr>
 
-```{r child='examples/linear.Rmd'}
+```{r child='../inst/examples/linear.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/multiple_linear.Rmd'}
+```{r child='../inst/examples/multiple_linear.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/multiple_linear_warpbreaks.Rmd'}
+```{r child='../inst/examples/multiple_linear_warpbreaks.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/multiple_linear_multilogit.Rmd'}
+```{r child='../inst/examples/multiple_linear_multilogit.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/multiple_linear_lasso.Rmd'}
+```{r child='../inst/examples/multiple_linear_lasso.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/hierarchical_linear.Rmd'}
+```{r child='../inst/examples/hierarchical_linear.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/hierarchical_linear_slopes.Rmd'}
+```{r child='../inst/examples/hierarchical_linear_slopes.Rmd'}
 ```
 
 ## Common Bayesian priors
@@ -67,27 +67,27 @@ The following examples show some common Bayesian priors of which some induce spa
 
 <hr>
 
-```{r child='examples/linear_uninformative.Rmd'}
+```{r child='../inst/examples/linear_uninformative.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/linear_ridge.Rmd'}
+```{r child='../inst/examples/linear_ridge.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/linear_lasso.Rmd'}
+```{r child='../inst/examples/linear_lasso.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/linear_horseshoe.Rmd'}
+```{r child='../inst/examples/linear_horseshoe.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/linear_finnish_horseshoe.Rmd'}
+```{r child='../inst/examples/linear_finnish_horseshoe.Rmd'}
 ```
 
 ## Advanced Bayesian models
@@ -96,17 +96,17 @@ Below are some more advanced examples implemented in greta.
 
 <hr>
 
-```{r child='examples/hierarchical_linear_general.Rmd'}
+```{r child='../inst/examples/hierarchical_linear_general.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/hierarchical_linear_marginal.Rmd'}
+```{r child='../inst/examples/hierarchical_linear_marginal.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/bayesian_neural_network.Rmd'}
+```{r child='../inst/examples/bayesian_neural_network.Rmd'}
 ```
 
 <hr>
@@ -122,12 +122,12 @@ The following sections provide greta implementations of some of these example mo
 
 <hr>
 
-```{r child='examples/air.Rmd'}
+```{r child='../inst/examples/air.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/beetles.Rmd'}
+```{r child='../inst/examples/beetles.Rmd'}
 ```
 
 ## Stan models
@@ -136,12 +136,12 @@ The following few code examples show how Stan code can be translated in equivale
 
 <hr>
 
-```{r child='examples/lightspeed.Rmd'}
+```{r child='../inst/examples/lightspeed.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/eight_schools.Rmd'}
+```{r child='../inst/examples/eight_schools.Rmd'}
 ```
 
 ## Ecological models
@@ -152,32 +152,32 @@ One important way `greta` models differs from BUGS and Stan code is that it is o
 
 <hr>
 
-```{r child='examples/logistic.Rmd'}
+```{r child='../inst/examples/logistic.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/poisson.Rmd'}
+```{r child='../inst/examples/poisson.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/logistic_error_term.Rmd'}
+```{r child='../inst/examples/logistic_error_term.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/multispecies_independent.Rmd'}
+```{r child='../inst/examples/multispecies_independent.Rmd'}
+```
+
+<hr>
+devtools::
+```{r child='../inst/examples/multispecies_partial_pool.Rmd'}
 ```
 
 <hr>
 
-```{r child='examples/multispecies_partial_pool.Rmd'}
-```
-
-<hr>
-
-```{r child='examples/multilevel.Rmd'}
+```{r child='../inst/examples/multilevel.Rmd'}
 ```
 
 <hr>
