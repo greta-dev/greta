@@ -1,6 +1,8 @@
 ^CODE_OF_CONDUCT\.md$
 ^\.github$
 ^.netlify$
+^docs$
+^_pkgdown\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 LICENSE
@@ -14,9 +16,12 @@ docs
 man/figures/plot_greta_legend.R
 cran-comments.md
 vignettes/build_vignettes.R
-vignettes/example_models_cache
-vignettes/get_started_cache
-vignettes/technical_details_cache
+vignettes/*_cache
 vignettes/get_started_files
-vignettes/election88.Rmd
-vignettes/8_schools_example_model.Rmd
+
+_index.Rmd
+index_files
+index_cache
+index.md
+vignettes/webpages
+vignettes/analyses
