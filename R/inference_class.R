@@ -84,39 +84,25 @@ inference <- R6Class(
       dag$tf_environment$rng_seed <- self$seed
     },
 
-    initial_values = function (user_specified) {
+    # check and set initial values (single vector on free state scale)
+    initial_values = function (inits) {
 
-      # check user-provided initial values (on free state scale)
-      if (!is.null(user_specified)) {
+      undefined <- is.na(inits)
 
-        # check their length
-        if (length(user_specified) != self$n_free) {
-          stop ("each set of initial values must be a vector of length ",
-                self$n_free,
-                call. = FALSE)
-        }
+      # try to fill in any that weren't specified
+      if (any(undefined)) {
 
-        # check they can be be used
-        valid <- self$valid_parameters(user_specified)
-        if (!valid) {
-          stop ("The log density and gradients could not be evaluated ",
-                "at these initial values.",
-                call. = FALSE)
-        }
+        n_missing <- sum(undefined)
 
-        initial_values <- user_specified
-
-      } else {
-
-        # otherwise, try several times to generate some
         valid <- FALSE
         attempts <- 1
         while (!valid & attempts < 20) {
 
-          initial_values <- rnorm(self$n_free, 0, 0.1)
+          inits[undefined] <- rnorm(n_missing, 0, 0.1)
 
           # test validity of values
-          valid <- self$valid_parameters(initial_values)
+
+          valid <- self$valid_parameters(inits)
           attempts <- attempts + 1
 
         }
@@ -124,13 +110,26 @@ inference <- R6Class(
         if (!valid) {
           stop ("Could not find reasonable starting values after ", attempts,
                 " attempts. Please specify initial values manually via the ",
-                "initial_values argument to mcmc",
+                "initial_values argument",
                 call. = FALSE)
         }
+
+      } else {
+
+        # if they were all provided, check they can be be used
+        valid <- self$valid_parameters(inits)
+        if (!valid) {
+          stop ("The log density and gradients could not be evaluated ",
+                "at these initial values.\nTry using calculate() with these ",
+                "initial values to see if they lead to values of other ",
+                "greta arrays in the model.",
+                call. = FALSE)
+        }
+
       }
 
       # set them as the state
-      self$free_state <- initial_values
+      self$free_state <- inits
 
     },
 
