@@ -456,5 +456,52 @@ opt <- function (model,
 
 }
 
+# simple class system for initial values
+
+#' @rdname inference
+#' @export
+#' @param ... named numeric values, with names giving the greta arrays to which
+#'   they correspond
+initials <- function (...) {
+
+  values <- list(...)
+  names <- names(values)
+
+  if (length(names) != length(values)) {
+    stop ("all initial values must be named",
+          call. = FALSE)
+  }
+
+  values <- lapply(values, as.array)
+
+  are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
+  if (!all(are_numeric)) {
+    stop ("initial values must be numeric",
+          call. = FALSE)
+  }
+
+  class(values) <- c("initials", class(values))
+  values
+}
+
+#' @export
+print.initials <- function (x, ...) {
+
+  if (identical(x, initials())) {
+
+    msg <- "an empty greta initials object"
+
+  } else {
+
+    cat("a greta initials object with values:\n\n")
+    print(unclass(x))
+
+  }
+
+  invisible(x)
+
+}
+
+
 inference_module <- module(dag_class,
                            progress_bar = progress_bar_module)

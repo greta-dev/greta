@@ -6,6 +6,7 @@
 \alias{stashed_samples}
 \alias{extra_samples}
 \alias{opt}
+\alias{initials}
 \title{statistical inference on greta models}
 \usage{
 mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
@@ -62,6 +63,9 @@ and parameters See \code{\link{optimisers}}.}
 \item{tolerance}{the numerical tolerance for the solution, the optimiser
 stops when the (absolute) difference in the joint density between
 successive iterations drops below this level}
+
+\item{...}{named numeric values, with names giving the greta arrays to which
+they correspond}
 }
 \value{
 \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
