@@ -38,7 +38,6 @@ Z <- normal(0, 1, dim = c(q, n))
 psi <- zeros(p, p)
 diag(psi) <- inverse_gamma(1, 1, dim = p)
 
-X <- as_data(X)
 distribution(X) <- multivariate_normal(t(W %*% Z), psi)
 ```
 

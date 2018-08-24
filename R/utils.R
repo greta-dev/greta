@@ -658,21 +658,18 @@ greta_col <- function (which = c('main',
                                  'light',
                                  'lighter',
                                  'super_light'),
-                       color = NULL) {
-
-  if (is.null(color))
-    color <- '#996bc7'
+                       colour = '#996bc7') {
 
   # tests if a color encoded as string can be converted to RGB
   tryCatch(
-    is.matrix(col2rgb(color)),
+    is.matrix(col2rgb(colour)),
     error = function(e) {
-        stop(paste("Invalid color:", color), call. = FALSE)
+        stop(paste("Invalid color:", colour), call. = FALSE)
     }
   )
 
   which <- match.arg(which)
-  pal <- palettize(color)
+  pal <- palettize(colour)
   switch (which,
           dark = pal(0.45),  #45%
           main = pal(0.55),  #55%
