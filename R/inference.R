@@ -614,7 +614,7 @@ print.initials <- function (x, ...) {
 
   if (identical(x, initials())) {
 
-    msg <- "an empty greta initials object"
+    cat ("an empty greta initials object")
 
   } else {
 
