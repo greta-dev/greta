@@ -479,21 +479,22 @@ prep_initials <- function (initial_values, n_chains, dag) {
   # chains
   if (inherits(initial_values, "initials")) {
 
-    initial_values <- replicate(n_chains,
-                                initial_values,
-                                simplify = FALSE)
-
     is_blank <- identical(initial_values, initials())
 
-    if (is_blank & n_chains > 1) {
+    if (!is_blank & n_chains > 1) {
       message ("only one set of initial values was provided, and was ",
                "used for all chains")
     }
 
+    initial_values <- replicate(n_chains,
+                                initial_values,
+                                simplify = FALSE)
+
   } else if (is.list(initial_values)) {
 
     # if the user provided a list of initial values, check elements and the length
-    are_initials <- lapply(initial_values, inherits, "initials")
+    are_initials <- vapply(initial_values, inherits, "initials",
+                           FUN.VALUE = FALSE)
 
     if (all(are_initials)) {
 
@@ -565,8 +566,12 @@ opt <- function (model,
                  tolerance = 1e-6,
                  initial_values = initials()) {
 
+  # check initial values. Can up the number of chains in the future to handle
+  # random restarts
+  initial_values_list <- prep_initials(initial_values, 1, model$dag)
+
   # create R6 object of the right type
-  object <- optimiser$class$new(initial_values = initial_values,
+  object <- optimiser$class$new(initial_values = initial_values_list[[1]],
                                 model = model,
                                 name = optimiser$name,
                                 method = optimiser$method,

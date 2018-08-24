@@ -277,7 +277,7 @@ sampler <- R6Class(
       # set the number of cores
       dag$n_cores <- n_cores
 
-      if (sequential) {
+      if (sequential & verbose) {
         self$print_chain_number()
       }
 

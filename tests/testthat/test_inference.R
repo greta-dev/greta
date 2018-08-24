@@ -90,7 +90,7 @@ test_that('opt accepts initial values', {
   distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
-  o <- opt(m, initial_values = rnorm(5))
+  o <- opt(m, initial_values = initials(z = rnorm(5)))
 
   # should have converged
   expect_equal(o$convergence, 0)
@@ -122,7 +122,8 @@ test_that('bad mcmc proposals are rejected', {
   )
 
   # bad initial values
-  expect_error(mcmc(m, n_samples = 1, warmup = 0, initial_values = 1e20),
+  expect_error(mcmc(m, n_samples = 1, warmup = 0,
+                    initial_values = initials(z = 1e20)),
                'could not be evaluated at these initial values')
 
   # really bad proposals
@@ -173,8 +174,9 @@ test_that('mcmc works with multiple chains', {
   quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2) ))
 
   # multiple chains, user-specified initial values
+  inits <- list(initials(z = 1), initials(z = 2))
   quietly(expect_ok( mcmc(m, warmup = 10, n_samples = 10, chains = 2,
-                          initial_values = list(1, 2)) ))
+                          initial_values = inits)))
 
 })
 
@@ -189,19 +191,22 @@ test_that('mcmc handles initial values nicely', {
   m <- model(z)
 
   # too many sets of initial values
+  inits <- replicate(3, initials(z = rnorm(1)), simplify = FALSE)
   expect_error( mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE,
-                     chains = 2, initial_values = list(1)),
+                     chains = 2, initial_values = inits),
                 "sets of initial values were provided, but there are")
 
   # initial values have the wrong length
+  inits <- replicate(2, initials(z = rnorm(2)), simplify = FALSE)
   expect_error( mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE,
-                     chains = 2, initial_values = list(1:2, 2:3)),
-                "each set of initial values must be a vector of length")
+                     chains = 2, initial_values = inits),
+                "initial values provided have different dimensions")
 
+  inits <- initials(z = rnorm(1))
   quietly(expect_message(mcmc(m, warmup = 10, n_samples = 10,
-                      chains = 2, initial_values = 1),
-                 paste("only one set of was initial values given,",
-                       "and was used for all chains")))
+                              chains = 2, initial_values = inits,
+                              verbose = FALSE),
+                         "only one set of initial values was provided"))
 
 })
 
