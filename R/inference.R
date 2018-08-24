@@ -441,6 +441,16 @@ parse_initial_values <- function (initials, dag) {
   # distribution, so needs to find the corresponding variable), and check the
   # provided values are in the support of the (constrained scale of the) variable
 
+  # find the corresponding nodes and check they are variable nodes
+  nodes <- dag$node_list[match(tf_names, dag$node_tf_names)]
+  types <- lapply(nodes, node_type)
+  are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
+
+  if (!all(are_variables)) {
+    stop ("initial values can only be set for variable greta arrays",
+          call. = FALSE)
+  }
+
   target_dims <- lapply(params[idx], dim)
   replacement_dims <- lapply(initials, dim)
   same_dims <- mapply(identical, target_dims, replacement_dims)
@@ -449,16 +459,6 @@ parse_initial_values <- function (initials, dag) {
     mismatches <- which(!same_dims)
     stop ("the initial values provided have different dimensions ",
           "than the named greta arrays",
-          call. = FALSE)
-  }
-
-  # find the corresponding nodes and check they are variable nodes
-  nodes <- dag$node_list[match(tf_names, dag$node_tf_names)]
-  types <- lapply(nodes, node_type)
-  are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
-
-  if (!all(are_variables)) {
-    stop ("initial values can only be set for variable greta arrays",
           call. = FALSE)
   }
 
