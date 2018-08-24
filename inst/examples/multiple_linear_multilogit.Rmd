@@ -2,7 +2,6 @@
 
 A multi-variable Bayesian categorical regression model using the iris data.
 
-<div class="data">
 ```{r multiple_linear_multilogit_data}
 data(iris)
 
@@ -11,7 +10,6 @@ y <- model.matrix(~ Species - 1, iris)
 P <- ncol(X)
 K <- ncol(y)
 ```
-</div>
 
 ```{r multiple_linear_multilogit_greta}
 beta <- normal(0, 5, dim = c(P, K - 1))

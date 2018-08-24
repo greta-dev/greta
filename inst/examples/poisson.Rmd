@@ -3,7 +3,6 @@
 An example of a simple poisson regression being used to estimate the abundance of a species along a number of environmental gradients. We first simulate some data to model followed by the `greta` code.
 
 #### data
-<div class="data">
 ```{r data_poisson, highlight = FALSE}
 # make fake data
 n_env <- 3
@@ -14,7 +13,6 @@ env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_sites observations of species abundance
 occupancy <- rpois(n_sites, 5) 
 ```
-</div>
 
 #### greta code
 ```{r poisson_greta}

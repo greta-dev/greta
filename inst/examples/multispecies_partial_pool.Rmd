@@ -8,7 +8,6 @@ An example of a logistic regression being used to estimate the probability of mu
 We first simulate some data to model followed by the `greta` code.
 
 #### data
-<div class="data">
 ```{r data_multispecies_partially_pool, highlight = FALSE}
 # make fake data
 n_species <- 5
@@ -18,7 +17,6 @@ n_sites <- 50
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)
 ```
-</div>
 
 #### greta code
 ```{r multispecies_partially_pool_greta}

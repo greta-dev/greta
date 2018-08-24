@@ -2,7 +2,6 @@
 
 A multiple Bayesian linear regression model using the `warpbreaks` data.
 
-<div class="data">
 ```{r multiple_linear_warpbreaks_data}
 data("warpbreaks")
 head(warpbreaks)
@@ -10,7 +9,6 @@ head(warpbreaks)
 X <- as_data(model.matrix(breaks ~ wool + tension, warpbreaks))
 y <- as_data(warpbreaks$breaks)
 ```
-</div>
 
 ```{r multiple_linear_warpbreaks_greta}
 int <- variable()

@@ -7,7 +7,6 @@ Because we're building a sub-model, it's more efficient to simply add a coloumn 
 We first simulate some data to model followed by the `greta` code.
 
 #### data
-<div class="data">
 ```{r data_multilevel, highlight = FALSE}
 # make fake data
 n_species <- 3
@@ -22,7 +21,6 @@ traits <- matrix(rnorm(n_species * n_traits), nrow = n_species)
 # n_sites * n_species matrix of observed occupancy
 occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)
 ```
-</div>
 
 #### greta code
 ```{r multilevel_greta}

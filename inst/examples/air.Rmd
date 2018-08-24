@@ -5,7 +5,6 @@
 See [WinBUGS examples volume 2](https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf) (pdf) for details.
 
 #### data
-<div class="data">
 ```{r air_data, highlight = FALSE}
 y <- c(21, 20, 15)
 n <- c(48, 34, 21)
@@ -17,7 +16,6 @@ sigma <- sqrt(sigma2)
 tau <- 1 / sigma2
 J <- 3
 ```
-</div>
 
 #### greta code
 ```{r air_greta}

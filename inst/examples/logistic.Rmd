@@ -3,7 +3,6 @@
 *Logistic regression* This is an example of a simple logistic regression being used to estimate the probability of species presence along a number of environmental gradients. We first simulate some data to model followed by the `greta` code.
 
 #### data
-<div class="data">
 ```{r data_logistic, highlight = FALSE}
 # make fake data
 n_env <- 3
@@ -14,7 +13,6 @@ env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_sites observations of species presence or absence
 occupancy <- rbinom(n_sites, 1, 0.5) 
 ```
-</div>
 
 #### greta code
 ```{r logistic_greta}

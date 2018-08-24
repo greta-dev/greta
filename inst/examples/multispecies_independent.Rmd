@@ -10,7 +10,6 @@ Where a single observation per species and location would have a bernoulli error
 When modelling multiple species (or other grouping factor), we need an extra step in constructing the linear predictor. In order to add multiple `greta` arrays together *for each species* we can use the `sweep()` function.
 
 #### data
-<div class="data">
 ```{r data_multispecies_bernoulli, highlight = FALSE}
 # make fake data
 n_species <- 5
@@ -20,7 +19,6 @@ n_sites <- 20
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 occupancy <- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_sites)
 ```
-</div>
 
 #### greta code
 ```{r multispecies_bernoulli_greta}

@@ -3,7 +3,6 @@
 *Logistic regression with observational error term* This is an example of a simple logistic regression with an extra observation-level error term We first simulate some data to model followed by the `greta` code.
 
 #### data
-<div class="data">
 ```{r data_logistic_error_term_greta, highlight = FALSE}
 # make fake data
 n_env <- 3
@@ -14,7 +13,6 @@ env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_sites observations of species presence or absence
 occupancy <- rbinom(n_sites, 1, 0.5)
 ```
-</div>
 
 #### greta code
 ```{r logistic_error_term_greta}

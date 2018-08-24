@@ -5,7 +5,6 @@ output: html_document
 
 Need to use greta.multivariate. This model and model evolving saved for later.
 #### data
-<div class="data">
 ```{r data, highlight = FALSE}
 # make fake data
 n_species <- 1
@@ -14,7 +13,6 @@ n_obs <- 10
 
 occupancy <- matrix(rbinom(n_sites * n_obs, 1, 0.5), nrow = n_sites)
 ```
-</div>
 
 #### greta code
 ```{r null_occdet_greta}

@@ -7,7 +7,6 @@ Fitting a multispecies model of normally distributed data
 
 
 #### data
-<div class="data">
 ```{r data_multispecies_binomial, highlight = FALSE}
 # make fake data
 n_species <- 10
@@ -18,7 +17,6 @@ n_obs <- 4
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 occupancy <- matrix(rbinom(n_species * n_sites, n_obs, 0.5), nrow = n_sites)
 ```
-</div>
 
 #### greta code
 ```{r multispecies_binomial_greta}
