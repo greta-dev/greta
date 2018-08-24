@@ -374,39 +374,100 @@ extra_samples <- function (draws,
 # convert some 'data' values form the constrained to the free state, for a given
 # 'node'
 to_free <- function (node, data) {
+
   lower <- node$lower
   upper <- node$upper
+
+  unsupported_error <- function () {
+    stop ("some provided initial values are outside the range of values ",
+          "their variables can take",
+          call. = FALSE)
+  }
+
+  high <- function (x) {
+    if (any(x <= lower))
+      unsupported_error()
+    log(x - lower)
+  }
+
+  low <- function (x) {
+    if (any(x >= upper))
+      unsupported_error()
+    log(upper - x)
+  }
+
+  both <- function(x) {
+    if (any(x >= upper | x <= lower))
+      unsupported_error()
+    qlogis((x - lower) / (upper - lower))
+  }
+
   fun <- switch(node$constraint,
-                none = function (x) x,
-                high = function (x) log(x - lower),
-                low = function (x) log(upper - x),
-                both = function(x) qlogis((y - lower) / (upper - lower)))
+                none = identity,
+                high = high,
+                low = low,
+                both = both)
+
   fun(data)
+
 }
 
 # convert a named list of initial values into the corresponding vector of values
 # on the free state
 parse_initial_values <- function (initials, dag) {
 
-  # line up greta array names with tf names
-  greta_names <- names(dag$parameters_example)
+  # skip if no inits provided
+  if (identical(initials, initials())) {
+
+    return (dag$example_parameters(flat = TRUE))
+
+  }
+
+  # find the elements we have been given initial values for
   tf_names <- vapply(names(initials),
-                     function(name) {
-                       ga <- get(name)
+                     function(name, env) {
+                       ga <- get(name, envir = env)
                        node <- get_node(ga)
                        dag$tf_name(node)
                      },
-                     "")
-  order <- match(greta_names, tf_names)
+                     env = parent.frame(4),
+                     FUN.VALUE = "")
 
-  # reorder the inits, and transform them to the free scale
-  initials <- initials[order]
-  initials <- lapply(initials, as.array)
+  params <- dag$example_parameters(flat = FALSE)
+  idx <- match(tf_names, names(params))
+
+  # make nodes do this conversion and checking in the future also make them
+  # handle more complex situations (like Wishart, which is an operation with a
+  # distribution, so needs to find the corresponding variable), and check the
+  # provided values are in the support of the (constrained scale of the) variable
+
+  target_dims <- lapply(params[idx], dim)
+  replacement_dims <- lapply(initials, dim)
+  same_dims <- mapply(identical, target_dims, replacement_dims)
+
+  if (!all(same_dims)) {
+    mismatches <- which(!same_dims)
+    stop ("the initial values provided have different dimensions ",
+          "than the named greta arrays",
+          call. = FALSE)
+  }
+
+  # find the corresponding nodes and check they are variable nodes
   nodes <- dag$node_list[match(tf_names, dag$node_tf_names)]
-  inits_free <- mapply(to_free, nodes, initials)
+  types <- lapply(nodes, node_type)
+  are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
 
-  # flatten into tensorflow's expected order
-  unlist_tf(inits_free)
+  if (!all(are_variables)) {
+    stop ("initial values can only be set for variable greta arrays",
+          call. = FALSE)
+  }
+
+  # convert the initial values to their free states
+  inits_free <- mapply(to_free, nodes, initials, SIMPLIFY = FALSE)
+
+  # set them in the list and flatten to a vector in the same order as tensorflow
+  params[idx] <- inits_free
+  unlist_tf(params)
 
 }
 
@@ -535,7 +596,8 @@ initials <- function (...) {
           call. = FALSE)
   }
 
-  values <- lapply(values, as.array)
+  # coerce to greta-array-like shape
+  values <- lapply(values, as_2D_array)
 
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
@@ -564,7 +626,6 @@ print.initials <- function (x, ...) {
   invisible(x)
 
 }
-
 
 inference_module <- module(dag_class,
                            progress_bar = progress_bar_module)

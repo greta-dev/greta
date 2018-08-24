@@ -5,12 +5,8 @@ data_node <- R6Class(
 
     initialize = function (data) {
 
-      # coerce data from common formats to an unknown array here
-      data <- as.array(data)
-
-      # coerce 1D arrays to column vectors
-      if (length(dim(data)) == 1)
-        dim(data) <- c(dim(data), 1)
+      # coerce to an array with 2+ dimensions
+      data <- as_2D_array(data)
 
       # update and store array and store dimension
       super$initialize(dim = dim(data), value = data)

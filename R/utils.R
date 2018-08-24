@@ -221,6 +221,19 @@ record <- function (expr, file) {
   invisible(out)
 }
 
+# convert an assumed numeric to an array with at least 2 dimensions
+as_2D_array <- function (x) {
+
+  # coerce data from common formats to an array here
+  x <- as.array(x)
+
+  # coerce 1D arrays to column vectors
+  if (length(dim(x)) == 1)
+    dim(x) <- c(dim(x), 1)
+
+  x
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -238,7 +251,8 @@ misc_module <- module(module,
                       future_seed,
                       create_log_file,
                       bar_width,
-                      record)
+                      record,
+                      as_2D_array)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
