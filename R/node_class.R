@@ -61,12 +61,6 @@ node <- R6Class(
 
     add_child = function (node) {
 
-      # if the node is already listed as a child, clone and re-register it to a
-      # new name
-      if (node$unique_name %in% self$child_names()) {
-        node <- node$clone()
-      }
-
       # add to list of children
       self$children <- c(self$children, node)
       node$add_parent(self)
@@ -76,19 +70,13 @@ node <- R6Class(
     remove_child = function (node) {
 
       # remove node from list of children
-      rem_idx <- which(self$child_names() == node$unique_name)
+      rem_idx <- which(self$child_names(recursive = FALSE) == node$unique_name)
       self$children <- self$children[-rem_idx]
       node$remove_parent(self)
 
     },
 
     add_parent = function (node) {
-
-      # if the node is already listed as a parent, clone and re-register it to a
-      # new name
-      if (node$unique_name %in% self$parent_names()) {
-        node <- node$clone()
-      }
 
       # add to list of children
       self$parents <- c(self$parents, node)
@@ -106,7 +94,7 @@ node <- R6Class(
     # return the names of all child nodes, and if recursive = TRUE, all nodes
     # lower in this graph. If type is a character, only nodes with that type
     # (from the type public object)  will  be listed
-    child_names = function (recursive = TRUE) {
+    child_names = function (recursive = FALSE) {
 
       children <- self$children
 
@@ -137,7 +125,7 @@ node <- R6Class(
 
     },
 
-    parent_names = function (recursive = TRUE) {
+    parent_names = function () {
 
       parents <- self$parents
 
@@ -146,14 +134,6 @@ node <- R6Class(
         names <- vapply(parents,
                         function(x) x$unique_name,
                         '')
-
-        if (recursive) {
-          names <- c(names,
-                     unlist(lapply(parents,
-                                   function(x) {
-                                     x$parent_names(recursive = TRUE)
-                                   })))
-        }
 
         # account for multiple nodes depending on the same nodes
         names <- unique(names)

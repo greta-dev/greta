@@ -536,7 +536,7 @@ dag_class <- R6Class(
 
       parents <- lapply(self$node_list,
                         member,
-                        'parent_names(recursive = FALSE)')
+                        'parent_names()')
       children <- lapply(self$node_list,
                          member,
                          'child_names(recursive = FALSE)')
