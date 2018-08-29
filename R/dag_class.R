@@ -464,9 +464,8 @@ dag_class <- R6Class(
                                envir = tfe)
 
       # evaluate them in the tensorflow environment
-      trace_list <- lapply(target_tensors,
-                           tfe$sess$run,
-                           feed_dict = tfe$feed_dict)
+      trace_list <- tfe$sess$run(target_tensors,
+                                 feed_dict = tfe$feed_dict)
 
       # loop through elements flattening these arrays to vectors and giving the
       # elements better names

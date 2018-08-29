@@ -175,8 +175,7 @@ inference <- R6Class(
 
       if (values) {
         # calculate the observed values
-        last_burst_free_states <- self$last_burst_free_states
-        last_burst_values <- self$trace_burst_values(last_burst_free_states)
+        last_burst_values <- self$trace_burst_values()
         if (!is.null(self$trace_log_file)) {
           self$write_trace_to_log_file(last_burst_values)
         }
@@ -188,11 +187,11 @@ inference <- R6Class(
 
     # given a matrix of free state values, get a matrix of values of the target
     # greta arrays
-    trace_burst_values = function (burst_free_states) {
+    trace_burst_values = function (free_states = self$last_burst_free_states) {
 
       # can't use apply directly, as it will drop the variable name if there's
       # only one parameter being traced
-      values_trace <- apply_rows(burst_free_states,
+      values_trace <- apply_rows(free_states,
                                  self$model$dag$trace_values)
 
       values_trace
