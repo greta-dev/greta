@@ -213,22 +213,11 @@ dag_class <- R6Class(
     },
 
     # define tf graph in environment
-    define_tf = function (log_density = TRUE, gradients = TRUE) {
+    define_tf = function () {
 
-      # define the free state variable
+      # define the free state variable, rest of the graph, and the session
       self$define_free_state()
-
-      # define the rest fo the graph
       self$define_tf_body()
-
-      # define an overall log density and gradients, plus adjusted versions
-      if (log_density)
-        self$on_graph(self$define_joint_density())
-
-      if (gradients)
-        self$on_graph(self$define_gradients())
-
-      # set up the tf session, with config setup etc.
       self$define_tf_session()
 
     },
@@ -304,55 +293,6 @@ dag_class <- R6Class(
 
     },
 
-    define_gradients = function () {
-
-      tfe <- self$tf_environment
-
-      # get names of free states for all variable nodes
-      variable_tf_names <- self$get_tf_names(types = 'variable')
-
-      # loop through them, defining the gradient of the joint density w.r.t. the
-      # free state
-      for (name in variable_tf_names) {
-
-        # names of tensors
-        free_name <- paste0(name, '_free')
-        gradient_name <- paste0(name, '_gradient')
-        gradient_adj_name <- paste0(name, '_gradient_adj')
-
-        # raw gradients
-
-        self$on_graph(gradient <- tf$gradients(tfe$joint_density,
-                                 tfe[[free_name]]))
-        self$on_graph(gradient_reshape <- tf$reshape(gradient, shape(-1)))
-        tfe[[gradient_name]] <- gradient_reshape
-
-        # adjusted gradients
-        self$on_graph(gradient_adj <- tf$gradients(tfe$joint_density_adj,
-                                     tfe[[free_name]]))
-        self$on_graph(gradient_adj_reshape <- tf$reshape(gradient_adj,
-                                                         shape(-1)))
-        tfe[[gradient_adj_name]] <- gradient_adj_reshape
-
-      }
-
-      # combine the gradients into one tensor
-      gradient_names <- paste0(variable_tf_names, '_gradient')
-      gradient_list <- lapply(gradient_names,
-                              get,
-                              envir = tfe)
-      self$on_graph(tfe$gradients <- tf$concat(gradient_list, 0L))
-
-      # same for adjusted gradients
-      gradient_adj_names <- paste0(variable_tf_names, '_gradient_adj')
-      gradient_adj_list <- lapply(gradient_adj_names,
-                                  get,
-                                  envir = tfe)
-
-      self$on_graph(tfe$gradients_adj <- tf$concat(gradient_adj_list, 0L))
-
-    },
-
     # return a function to obtain the model log probability from a tensor for
     # the free state
     generate_log_prob_function = function (adjust = TRUE) {
@@ -423,29 +363,16 @@ dag_class <- R6Class(
 
     },
 
-    # get log density and gradient of joint density w.r.t. free states of all
-    # variable nodes, with or without applying the jacobian adjustment
-    log_density = function(free_state = NULL, adjusted = TRUE) {
-
-      if (!is.null(free_state))
-        self$send_parameters(free_state)
+    # get adjusted joint log density across the whole dag
+    log_density = function() {
 
       res <- cleanly(self$tf_sess_run(joint_density_adj))
+
       if (inherits(res, "error"))
         res <- NA
+
       res
 
-    },
-
-    gradients = function (free_state = NULL, adjusted = TRUE) {
-
-      if (!is.null(free_state))
-        self$send_parameters(free_state)
-
-      res <- cleanly(self$tf_sess_run(gradients_adj))
-      if (inherits(res, "error"))
-        res <- NA
-      res
     },
 
     # return the current values of the traced nodes, as a named vector
@@ -570,20 +497,6 @@ dag_class <- R6Class(
       }
 
       self$adjacency_matrix <- dag_mat
-
-    },
-
-    get_log_prob_function = function (adjust = TRUE) {
-
-      target <- ifelse (adjust,
-                        "joint_density_adj",
-                        "joint_density")
-
-      function (free_state) {
-        self$dag$define_tf(define_free_state = FALSE)
-        self$dag$tf_environment[[target]]
-      }
-
 
     }
 

@@ -91,7 +91,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
   # extend the dag to include this node, as the target
   dag$build_dag(list(target))
   self <- dag  # mock for scoping
-  dag$define_tf(log_density = TRUE, gradients = TRUE)
+  dag$define_tf()
 
   dag$target_nodes <- list(get_node(target))
   names(dag$target_nodes) <- target_name
@@ -162,7 +162,7 @@ calculate_list <- function(target, values) {
 
   # define the dag and TF graph
   dag <- dag_class$new(all_greta_arrays)
-  dag$define_tf(log_density = FALSE, gradients = FALSE)
+  dag$define_tf()
   tfe <- dag$tf_environment
 
   # build and send a dict for the fixed values

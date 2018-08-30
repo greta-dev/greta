@@ -119,9 +119,9 @@ inference <- R6Class(
         # if they were all provided, check they can be be used
         valid <- self$valid_parameters(inits)
         if (!valid) {
-          stop ("The log density and gradients could not be evaluated ",
-                "at these initial values.\nTry using calculate() with these ",
-                "initial values to see if they lead to values of other ",
+          stop ("The log density could not be evaluated at these ",
+                "initial values.\nTry using calculate() ",
+                "see whether they lead to values of other ",
                 "greta arrays in the model.",
                 call. = FALSE)
         }
@@ -143,14 +143,9 @@ inference <- R6Class(
         dag$on_graph(dag$define_joint_density())
       }
 
-      if (!live_pointer("joint_density_adj", envir = tfe)) {
-        dag$on_graph(dag$define_gradients())
-      }
-
       dag$send_parameters(parameters)
       ld <- self$model$dag$log_density()
-      grad <- self$model$dag$gradients()
-      all(is.finite(c(ld, grad)))
+      is.finite(ld)
 
     },
 
@@ -287,7 +282,7 @@ sampler <- R6Class(
         dag$new_tf_environment()
 
         # rebuild the TF graph
-        dag$define_tf(FALSE, FALSE)
+        dag$define_tf()
 
         # rebuild the TF draws tensor
         self$define_tf_draws()
