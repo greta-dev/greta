@@ -78,9 +78,7 @@ greta_stash <- new.env()
 #' m <- model(mu, sigma)
 #'
 #' # carry out mcmc on the model
-#' draws <- mcmc(m,
-#'               n_samples = 100,
-#'               warmup = 10)
+#' draws <- mcmc(m, n_samples = 100)
 #'
 #' # add some more samples
 #' draws <- extra_samples(draws, 200)
