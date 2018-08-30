@@ -70,8 +70,8 @@ greta_stash <- new.env()
 #'
 #' @examples
 #' \dontrun{
-#' # define a simple model
-#' mu <- variable()
+#' # define a simple Bayesian model
+#' mu <- normal(0, 5)
 #' sigma <- lognormal(1, 0.1)
 #' x <- rnorm(10)
 #' distribution(x) <- normal(mu, sigma)
@@ -81,6 +81,28 @@ greta_stash <- new.env()
 #' draws <- mcmc(m,
 #'               n_samples = 100,
 #'               warmup = 10)
+#'
+#' # add some more samples
+#' draws <- extra_samples(draws, 200)
+#'
+#' # or find the MAP estimate
+#' opt_res <- opt(m)
+#'
+#' # get the MLE of the normal variance
+#' mu <- variable()
+#' variance <- variable(lower = 0)
+#' distribution(x) <- normal(mu, sqrt(variance))
+#' m2 <- model(variance)
+#'
+#' # adjust = FALSE skips the jacobian adjustments used in MAP estimation, to
+#' # give the true maximum likelihood estimates
+#' o <- opt(m2, adjust = FALSE)
+#'
+#' # the MLE corresponds to the *unadjusted* sample variance, but differs
+#' # from the sample variance
+#' o$par
+#' mean((x - mean(x)) ^ 2)  # same
+#' var(x)  # different
 #' }
 mcmc <- function (model,
                   sampler = hmc(),
@@ -546,25 +568,24 @@ prep_initials <- function (initial_values, n_chains, dag) {
 #'   successive iterations drops below this level
 #' @param optimiser an \code{optimiser} object giving the optimisation algorithm
 #'   and parameters See \code{\link{optimisers}}.
+#' @param adjust whether to account for log jacobian adjustments in the joint
+#'   density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
+#'   estimates, or \code{TRUE} for maximum \emph{a priori} estimates.
 #'
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
 #'    \item{par} {the best set of parameters found}
-#'    \item{value} {the log joint density of the model at the parameters par}
+#'    \item{value} {the (unadjusted) log joint density of the model at the parameters 'par'}
 #'    \item{iterations} {the number of iterations taken by the optimiser}
 #'    \item{convergence} {an integer code, 0 indicates successful completion,
 #'     1 indicates the iteration limit \code{max_iterations} had been reached} }
 #'
-#' @examples
-#' \dontrun{
-#' # find the MAP estimate
-#' opt_res <- opt(m)
-#' }
 opt <- function (model,
                  optimiser = bfgs(),
                  max_iterations = 100,
                  tolerance = 1e-6,
-                 initial_values = initials()) {
+                 initial_values = initials(),
+                 adjust = TRUE) {
 
   # check initial values. Can up the number of chains in the future to handle
   # random restarts
@@ -578,7 +599,8 @@ opt <- function (model,
                                 parameters = optimiser$parameters,
                                 other_args = optimiser$other_args,
                                 max_iterations = max_iterations,
-                                tolerance = tolerance)
+                                tolerance = tolerance,
+                                adjust = adjust)
 
   # run it
   object$run()

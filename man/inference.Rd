@@ -19,7 +19,7 @@ extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
   verbose = TRUE, pb_update = 50, one_by_one = FALSE)
 
 opt(model, optimiser = bfgs(), max_iterations = 100,
-  tolerance = 1e-06, initial_values = initials())
+  tolerance = 1e-06, initial_values = initials(), adjust = TRUE)
 
 initials(...)
 }
@@ -66,6 +66,10 @@ and parameters See \code{\link{optimisers}}.}
 stops when the (absolute) difference in the joint density between
 successive iterations drops below this level}
 
+\item{adjust}{whether to account for log jacobian adjustments in the joint
+density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
+estimates, or \code{TRUE} for maximum \emph{a priori} estimates.}
+
 \item{...}{named numeric values, with names giving the greta arrays to which
 they correspond}
 }
@@ -78,7 +82,7 @@ they correspond}
 \code{opt} - a list containing the following named elements:
   \itemize{
    \item{par} {the best set of parameters found}
-   \item{value} {the log joint density of the model at the parameters par}
+   \item{value} {the (unadjusted) log joint density of the model at the parameters 'par'}
    \item{iterations} {the number of iterations taken by the optimiser}
    \item{convergence} {an integer code, 0 indicates successful completion,
     1 indicates the iteration limit \code{max_iterations} had been reached} }
@@ -128,8 +132,8 @@ Samples returned by \code{mcmc()} and \code{stashed_samples()} can
 }
 \examples{
 \dontrun{
-# define a simple model
-mu <- variable()
+# define a simple Bayesian model
+mu <- normal(0, 5)
 sigma <- lognormal(1, 0.1)
 x <- rnorm(10)
 distribution(x) <- normal(mu, sigma)
@@ -139,9 +143,27 @@ m <- model(mu, sigma)
 draws <- mcmc(m,
               n_samples = 100,
               warmup = 10)
-}
-\dontrun{
-# find the MAP estimate
+
+# add some more samples
+draws <- extra_samples(draws, 200)
+
+# or find the MAP estimate
 opt_res <- opt(m)
+
+# get the MLE of the normal variance
+mu <- variable()
+variance <- variable(lower = 0)
+distribution(x) <- normal(mu, sqrt(variance))
+m2 <- model(variance)
+
+# adjust = FALSE skips the jacobian adjustments used in MAP estimation, to
+# give the true maximum likelihood estimates
+o <- opt(m2, adjust = FALSE)
+
+# the MLE corresponds to the *unadjusted* sample variance, but differs
+# from the sample variance
+o$par
+mean((x - mean(x)) ^ 2)  # same
+var(x)  # different
 }
 }

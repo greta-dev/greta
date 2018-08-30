@@ -767,6 +767,7 @@ optimiser <- R6Class(
     max_iterations = 100L,
     tolerance = 1e-6,
     uses_callbacks = TRUE,
+    adjust = TRUE,
 
     # modified during optimisation
     it = 0,
@@ -781,7 +782,8 @@ optimiser <- R6Class(
                            parameters,
                            other_args,
                            max_iterations,
-                           tolerance) {
+                           tolerance,
+                           adjust) {
 
       super$initialize(initial_values,
                        model,
@@ -794,6 +796,7 @@ optimiser <- R6Class(
       self$other_args <- other_args
       self$max_iterations <- as.integer(max_iterations)
       self$tolerance <- tolerance
+      self$adjust <- adjust
 
       if ("uses_callbacks" %in% names(other_args))
         self$uses_callbacks <- other_args$uses_callbacks
@@ -913,7 +916,12 @@ tf_optimiser <- R6Class(
       optimise_fun <- eval(parse(text = self$method))
       dag$on_graph(tfe$tf_optimiser <- do.call(optimise_fun,
                                                     self$parameters))
-      dag$tf_run(train <- tf_optimiser$minimize(-joint_density_adj))
+
+      if (self$adjust) {
+        dag$tf_run(train <- tf_optimiser$minimize(-joint_density_adj))
+      } else {
+        dag$tf_run(train <- tf_optimiser$minimize(-joint_density))
+      }
 
     },
 
@@ -926,7 +934,11 @@ tf_optimiser <- R6Class(
              self$diff > self$tolerance) {
         self$it <- self$it + 1
         self$model$dag$tf_sess_run(train)
-        obj <- self$model$dag$tf_sess_run(-joint_density_adj)
+        if (self$adjust) {
+          obj <- self$model$dag$tf_sess_run(-joint_density_adj)
+        } else {
+          obj <- self$model$dag$tf_sess_run(-joint_density)
+        }
         self$diff <- abs(self$old_obj - obj)
         self$old_obj <- obj
       }
@@ -947,7 +959,13 @@ scipy_optimiser <- R6Class(
 
       opt_fun <- eval(parse(text = "tf$contrib$opt$ScipyOptimizerInterface"))
 
-      args <- list(loss = -tfe$joint_density_adj,
+      if (self$adjust) {
+        loss  <- -tfe$joint_density_adj
+      } else {
+        loss  <- -tfe$joint_density
+      }
+
+      args <- list(loss = loss,
                    method = self$method,
                    options = c(self$parameters,
                                maxiter = self$max_iterations),
