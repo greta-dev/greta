@@ -144,7 +144,7 @@ dag_class <- R6Class(
       # numeric (rather than logical) NAs ¯\_(ツ)_/¯
       vals <- self$example_parameters()
       vals <- as.logical(vals)
-      vals <- as.matrix(vals)
+      vals <- t(as.matrix(vals))
 
       assign("free_state_values",
              vals,
@@ -172,7 +172,7 @@ dag_class <- R6Class(
                         FUN.VALUE = 1L)
 
       if (length(lengths) > 1) {
-        args <- self$on_graph(tf$split(free_state, lengths))
+        args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
       } else {
         args <- list(free_state)
       }
@@ -358,7 +358,8 @@ dag_class <- R6Class(
     send_parameters = function (parameters) {
 
       # create a feed dict in the TF environment
-      parameter_list <- list(free_state = as.matrix(parameters))
+      parameter_list <- list(free_state = add_first_dim(parameters))
+
       self$build_feed_dict(parameter_list)
 
     },

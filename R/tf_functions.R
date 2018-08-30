@@ -248,10 +248,10 @@ tf_imultilogit <- function (x) {
 tf_extract <- function (x, nelem, index, dims_out) {
 
   # flatten tensor, gather using index, reshape to output dimension
-  tensor_in_flat <- tf$reshape(x, shape(nelem))
+  tensor_in_flat <- tf$reshape(x, shape(1L, nelem))
   tf_index <- tf$constant(as.integer(index), dtype = tf$int32)
-  tensor_out_flat <- tf$gather(tensor_in_flat, tf_index)
-  tensor_out <- tf$reshape(tensor_out_flat, to_shape(dims_out))
+  tensor_out_flat <- tf$gather(tensor_in_flat, tf_index, axis = 1L)
+  tensor_out <- tf$reshape(tensor_out_flat, to_shape(c(1L, dims_out)))
   tensor_out
 
 }
@@ -305,7 +305,9 @@ tf_recombine <- function (ref, index, updates) {
   result <- tf$concat(full_list, 0L)
 
   # rotate it
-  result <- tf$reshape(result, shape(result$get_shape()$as_list()[1]))
+  dims <- result$get_shape()$as_list()[1]
+  dims <- shape(c(1, dims))
+  result <- tf$reshape(result, dims)
   result
 
 }
@@ -315,7 +317,7 @@ tf_replace <- function (x, replacement, index, dims) {
 
   # flatten original tensor and new values
   nelem <- prod(dims)
-  x_flat <- tf$reshape(x, shape(nelem))
+  x_flat <- tf$squeeze(x)
   replacement_flat <- tf$reshape(replacement, shape(length(index)))
 
   # update the values into a new tensor
@@ -324,7 +326,7 @@ tf_replace <- function (x, replacement, index, dims) {
                               updates = replacement_flat)
 
   # reshape the result
-  result <- tf$reshape(result_flat, to_shape(dims))
+  result <- tf$reshape(result_flat, to_shape(c(1, dims)))
   result
 
 }
@@ -332,12 +334,12 @@ tf_replace <- function (x, replacement, index, dims) {
 # mapping of cbind and rbind to tf$concat
 tf_cbind <- function (...) {
   elem_list <- list(...)
-  tf$concat(elem_list, 1L)
+  tf$concat(elem_list, axis = 2L)
 }
 
 tf_rbind <- function (...) {
   elem_list <- list(...)
-  tf$concat(elem_list, 0L)
+  tf$concat(elem_list, axis = 1L)
 }
 
 tf_only_eigenvalues <- function (x) {

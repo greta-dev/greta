@@ -28,9 +28,13 @@ grab <- function (x, dag = NULL, ...) {
   }
 
   # generate the feed dict for data
+  if (!identical(dots, list()))
+    dots <- lapply(dots, add_first_dim)
+
   dag$build_feed_dict(dots)
-  tf$Session()$run(x,
-                   feed_dict = dag$tf_environment$feed_dict)
+  out <- tf$Session()$run(x,
+                          feed_dict = dag$tf_environment$feed_dict)
+  drop_first_dim(out)
 
 }
 

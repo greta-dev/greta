@@ -19,7 +19,7 @@ data_node <- R6Class(
       tf_name <- dag$tf_name(self)
 
       value <- self$value()
-      shape <- to_shape(dim(value))
+      shape <- to_shape(c(1, dim(value)))
 
       # create placeholder
       assign(tf_name,
@@ -28,7 +28,7 @@ data_node <- R6Class(
              envir = tfe)
 
       # put data in the data list
-      tfe$data_list[[tf_name]] <- value
+      tfe$data_list[[tf_name]] <- add_first_dim(value)
 
     }
   )
@@ -199,7 +199,7 @@ variable_node <- R6Class (
       node <- self$tf_from_free(tf_free, dag$tf_environment)
 
       # reshape the tensor to the match the variable
-      node <- tf$reshape(node, shape = dim(self))
+      node <- tf$reshape(node, shape = c(1L, dim(self)))
 
       # assign as constrained variable
       assign(tf_name,

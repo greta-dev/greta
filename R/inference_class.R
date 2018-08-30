@@ -535,7 +535,7 @@ sampler <- R6Class(
 
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
-      sampler_values <- list(free_state = matrix(self$free_state),
+      sampler_values <- list(free_state = add_first_dim(self$free_state),
                              sampler_burst_length = as.integer(n_samples),
                              sampler_thin = as.integer(thin))
 

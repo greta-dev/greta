@@ -234,6 +234,18 @@ as_2D_array <- function (x) {
   x
 }
 
+# add an additional dimension at the beginning of an array
+add_first_dim <- function (x) {
+  x <- as.array(x)
+  array(x, dim = c(1, dim(x)))
+}
+
+# drop the additional dimension at the beginning of an array
+drop_first_dim <- function (x) {
+  x <- as.array(x)
+  array(x, dim = dim(x)[-1])
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -252,7 +264,8 @@ misc_module <- module(module,
                       create_log_file,
                       bar_width,
                       record,
-                      as_2D_array)
+                      as_2D_array,
+                      add_first_dim)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
