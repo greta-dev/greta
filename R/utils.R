@@ -720,6 +720,14 @@ all_greta_arrays <- function (env = parent.frame(),
 
 }
 
+# suppress the R or python output of R expressions
+quietly <- function (expr) {
+  py_out <- reticulate::py_capture_output(
+    r_out <- capture.output(expr))
+  out <- c(py_out, r_out)
+  invisible(out)
+}
+
 # evaluate expressions (dag density or gradient), capturing numerical errors
 # like matrix inversions as bad samples, and erroring otherwise
 cleanly <- function (expr) {

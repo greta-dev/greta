@@ -5,17 +5,12 @@
 #'   maximise the joint density of a model) and change their tuning parameters,
 #'   for use in \code{\link{opt}()}. For details of the algorithms and how to
 #'   tune them, see the
-#'   \href{https://www.tensorflow.org/api_guides/python/train#Optimizers}{TensorFlow
-#'    optimiser docs} or the
 #'   \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy
+#'    optimiser docs} or the
+#'   \href{https://www.tensorflow.org/api_guides/python/train#Optimizers}{TensorFlow
 #'    optimiser docs}.
 #'
 #' @return an \code{optimiser} object that can be passed to \code{\link{opt}}.
-#'
-#' @details The TensorFlow interface to SciPy optimisers issues runtime warnings
-#'   that some of these methods (\code{nelder_mead()}, \code{powell()},
-#'   \code{cobyla()}) do not use gradient information and that \code{cobyla()}
-#'   'does not support callback'. These can be safely ignored.
 #'
 #' @examples
 #' \dontrun{

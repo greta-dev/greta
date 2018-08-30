@@ -7,9 +7,6 @@ tf <- tensorflow::tf
 tf$reset_default_graph()
 set.seed(2018-05-30)
 
-quietly <- function (expr)
-  invisible(capture.output(expr))
-
 expect_ok <- function (expr)
   expect_error(expr, NA)
 

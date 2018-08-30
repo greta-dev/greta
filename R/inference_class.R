@@ -988,12 +988,14 @@ scipy_optimiser <- R6Class(
 
       self$set_inits()
 
-      # run the optimiser
-      dag$tf_run(tf_optimiser$minimize(sess,
-                                            feed_dict = feed_dict,
-                                            step_callback = it_progress,
-                                            loss_callback = obj_progress,
-                                            fetches = list(-joint_density_adj)))
+      # run the optimiser, suppressing python yammering
+      quietly(
+        dag$tf_run(tf_optimiser$minimize(sess,
+                                         feed_dict = feed_dict,
+                                         step_callback = it_progress,
+                                         loss_callback = obj_progress,
+                                         fetches = list(-joint_density_adj)))
+      )
 
     }
   )
