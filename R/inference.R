@@ -568,7 +568,7 @@ prep_initials <- function (initial_values, n_chains, dag) {
 #'   and parameters See \code{\link{optimisers}}.
 #' @param adjust whether to account for log jacobian adjustments in the joint
 #'   density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
-#'   estimates, or \code{TRUE} for maximum \emph{a priori} estimates.
+#'   estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.
 #'
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{

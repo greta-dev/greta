@@ -68,7 +68,7 @@ successive iterations drops below this level}
 
 \item{adjust}{whether to account for log jacobian adjustments in the joint
 density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
-estimates, or \code{TRUE} for maximum \emph{a priori} estimates.}
+estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.}
 
 \item{...}{named numeric values, with names giving the greta arrays to which
 they correspond}
