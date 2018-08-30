@@ -34,6 +34,17 @@ grab <- function (x, dag = NULL, ...) {
 
 }
 
+# get the value of the target greta array, by passing values for the named
+# variable greta arrays via the free state parameter
+grab_via_free_state <- function(target, values) {
+  dag <- dag_class$new(list(target))
+  dag$define_tf()
+  inits <- do.call(initials, values)
+  inits_flat <- prep_initials(inits, 1, dag)[[1]]
+  vals <- dag$trace_values(inits_flat)
+  array(vals, dim = dim(target))
+}
+
 is.greta_array <- function(x)
   inherits(x, "greta_array")
 
@@ -200,11 +211,16 @@ run_greta_op <- function (greta_op, a, b,
     out <- greta_op(g_a, g_b)
   }
 
-  # squash the values if these are data greta arrays
-  if (type == "data")
-    values <- list()
+  if (type == "data") {
+    # data greta arrays should provide their own values
+    result <- calculate(out, list())
+  } else if (type == "variable") {
+    result <- grab_via_free_state(out, values)
+  } else{
+    result <- calculate(out, values)
+  }
 
-  calculate(out, values)
+  result
 
 }
 
