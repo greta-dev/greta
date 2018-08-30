@@ -116,8 +116,6 @@ mcmc <- function (model,
                   one_by_one = FALSE,
                   initial_values = initials()) {
 
-  check_future_plan()
-
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
   names <- names(target_greta_arrays)
@@ -143,6 +141,8 @@ mcmc <- function (model,
 
   # get the dag containing the target nodes
   dag <- model$dag
+
+  chains <- check_positive_integer(chains, "chains")
 
   # turn initial values into a list if needed (checking the length), and convert
   # from a named list on the constrained scale to free state vectors

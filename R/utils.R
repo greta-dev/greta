@@ -798,10 +798,16 @@ check_n_cores <- function (n_cores, chains, sequential) {
   # check user-provided cores
   if (!is.null(n_cores) && !n_cores %in% seq_len(n_cores_detected)) {
 
-    message ("\n\t",
-             n_cores, " cores were requested, but only ",
-             n_cores_detected, " cores are available. Using ",
-             n_cores_detected, " cores.\n")
+    check_positive_integer(n_cores, "n_cores")
+
+    message ("\n", n_cores, " cores were requested, but only ",
+             n_cores_detected, " are available.")
+
+    # if in parallel, these will be divided up and messaged about
+    if (sequential) {
+      message ("Running each chain on up to ",
+               n_cores_detected, " cores.\n")
+    }
 
     n_cores <- NULL
 
@@ -813,9 +819,25 @@ check_n_cores <- function (n_cores, chains, sequential) {
   # if in parallel on this machine and n_cores isn't user-specified, set it so
   # there's no clash between chains
   if (!sequential & n_cores == 0)
-    n_cores <- ceiling(n_cores_detected / chains)
+    n_cores <- floor(n_cores_detected / chains)
+
+  # ake sure there's at least 1
+  n_cores <- max(n_cores, 1)
 
   as.integer(n_cores)
+
+}
+
+check_positive_integer <- function (x, name = "") {
+
+  suppressWarnings(x <- as.integer(x))
+
+  if (length(x) != 1 | is.na(x) | x < 1) {
+    stop (name, " must be a positive integer",
+          call. = FALSE)
+  }
+
+  x
 
 }
 
@@ -877,6 +899,7 @@ sampler_utils_module <- module(all_greta_arrays,
                                relist_tf,
                                check_future_plan,
                                check_n_cores,
+                               check_positive_integer,
                                get_indices_text,
                                flatten_trace,
                                get_model_info)
