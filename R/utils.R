@@ -465,6 +465,8 @@ check_dimension <- function (vectors = list(),
   if (dimension < min_dimension) {
     stop ("the dimension of this distribution must be at least ",
           min_dimension, " but was ", dimension,
+          "\n\nmultivariate distributions treat each *row* as a separate ",
+          "realisation - perhaps you need to transpose something?",
           call. = FALSE)
   }
 
@@ -476,7 +478,10 @@ check_dimension <- function (vectors = list(),
 
     # otherwise it's not fine
     msg <- sprintf(paste0("the distribution dimension should be %s, ",
-                          "but parameters implied dimensions: %s"),
+                          "but parameters implied dimensions: %s",
+                          "\n\nmultivariate distributions treat each *row* as a ",
+                          "separate realisation - perhaps you need to ",
+                          "transpose something?"),
                    dimension,
                    paste(ncols, collapse = " vs "))
     stop (msg, call. = FALSE)
@@ -491,7 +496,7 @@ check_dimension <- function (vectors = list(),
 # if n_realisations isn't given, get it from the objects passed in
 # if dimension isn't given, get it from the objects passed in
 # if n_realisations *is* given, and the objects have one row, replicate them
-# if n_realisations is given, and the onbject have multiple rows, they must
+# if n_realisations is given, and the objects have multiple rows, they must
 # match.
 
 # the objects passed in can either be vector-like (like 'mean'),

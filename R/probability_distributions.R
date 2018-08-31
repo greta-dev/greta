@@ -1146,8 +1146,10 @@ distribution_classes_module <- module(uniform_distribution,
 #'
 #' @param mean,meanlog,location,mu unconstrained parameters
 #'
-#' @param sd,sdlog,sigma,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b,eta
-#'   positive parameters, \code{alpha} must be a vector for \code{dirichlet} and \code{dirichlet_multinomial}.
+#' @param
+#'   sd,sdlog,sigma,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b,eta
+#'    positive parameters, \code{alpha} must be a vector for \code{dirichlet}
+#'   and \code{dirichlet_multinomial}.
 #'
 #' @param size,m,n,k positive integer parameter
 #'
@@ -1177,13 +1179,15 @@ distribution_classes_module <- module(uniform_distribution,
 #'   from the dimensions of the parameters (provided they are compatible with
 #'   one another).
 #'
-#'   For \code{multivariate_normal()}, \code{multinomial()}, and
-#'   \code{categorical()} \code{dim} must be a scalar giving the number of rows
-#'   in the resulting greta array, each row being (independently) distributed
-#'   according to the multivariate normal distribution. The number of columns
-#'   will always be the dimension of the distribution, determined from the
-#'   parameters specified. \code{wishart()} always returns a single square, 2D
-#'   greta array, with dimension determined from the parameter \code{Sigma}.
+#'   For multivariate distributions (\code{multivariate_normal()},
+#'   \code{multinomial()}, \code{categorical()}, \code{dirichlet()}, and
+#'   \code{dirichlet_multinomial()}) each row of the output and parameters
+#'   corresponds to an independent realisation. If a single realisation or
+#'   parameter value is specified, it must therefore be a row vector (see
+#'   example). \code{n_realisations} gives the number of rows/realisations, and
+#'   \code{dimension} gives the dimension of the distribution. Ie. a bivariate
+#'   normal distribution would be produced with \code{multivariate_normal(...,
+#'   dimension = 2)}. The dimension can usually be detected from the parameters.
 #'
 #'   \code{multinomial()} does not check that observed values sum to
 #'   \code{size}, and \code{categorical()} does not check that only one of the
@@ -1194,8 +1198,8 @@ distribution_classes_module <- module(uniform_distribution,
 #'   ensures these values can always be transformed to a continuous scale to run
 #'   the samplers efficiently. However, a hierarchical \code{uniform} parameter
 #'   can always be created by defining a \code{uniform} variable constrained
-#'   between 0 and 1, and then transforming it to the required scale. See
-#'   below for an example.
+#'   between 0 and 1, and then transforming it to the required scale. See below
+#'   for an example.
 #'
 #'   Wherever possible, the parameterisation and argument names of greta
 #'   distributions matches commonly used R functions for distributions, such as
@@ -1203,35 +1207,37 @@ distribution_classes_module <- module(uniform_distribution,
 #'   table states the distribution function to which greta's implementation
 #'   corresponds:
 #'
-#'   \tabular{ll}{ greta \tab reference\cr
-#'    \code{uniform} \tab \link[stats:dunif]{stats::dunif}\cr
-#'    \code{normal} \tab \link[stats:dnorm]{stats::dnorm}\cr
-#'    \code{lognormal} \tab \link[stats:dlnorm]{stats::dlnorm}\cr
-#'    \code{bernoulli} \tab \link[extraDistr:dbern]{extraDistr::dbern}\cr
-#'    \code{binomial} \tab \link[stats:dbinom]{stats::dbinom}\cr
-#'    \code{beta_binomial} \tab \link[extraDistr:dbbinom]{extraDistr::dbbinom}\cr
-#'    \code{negative_binomial} \tab \link[stats:dnbinom]{stats::dnbinom}\cr
-#'    \code{hypergeometric} \tab \link[stats:dhyper]{stats::dhyper}\cr
-#'    \code{poisson} \tab \link[stats:dpois]{stats::dpois}\cr
-#'    \code{gamma} \tab \link[stats:dgamma]{stats::dgamma}\cr
-#'    \code{inverse_gamma} \tab \link[extraDistr:dinvgamma]{extraDistr::dinvgamma}\cr
-#'    \code{weibull} \tab \link[stats:dweibull]{stats::dweibull}\cr
-#'    \code{exponential} \tab \link[stats:dexp]{stats::dexp}\cr
-#'    \code{pareto} \tab \link[extraDistr:dpareto]{extraDistr::dpareto}\cr
-#'    \code{student} \tab \link[extraDistr:dlst]{extraDistr::dlst}\cr
-#'    \code{laplace} \tab \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr
-#'    \code{beta} \tab \link[stats:dbeta]{stats::dbeta}\cr
-#'    \code{cauchy} \tab \link[stats:dcauchy]{stats::dcauchy}\cr
-#'    \code{chi_squared} \tab \link[stats:dchisq]{stats::dchisq}\cr
-#'    \code{logistic} \tab \link[stats:dlogis]{stats::dlogis}\cr
-#'    \code{f} \tab \link[stats:df]{stats::df}\cr
-#'    \code{multivariate_normal} \tab \link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}\cr
-#'    \code{multinomial} \tab \link[stats:dmultinom]{stats::dmultinom}\cr
-#'    \code{categorical} \tab {\link[stats:dmultinom]{stats::dmultinom} (size = 1)}\cr
-#'    \code{dirichlet} \tab \link[extraDistr:ddirichlet]{extraDistr::ddirichlet}\cr
-#'    \code{dirichlet_multinomial} \tab \link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr
-#'    \code{wishart} \tab \link[stats:rWishart]{stats::rWishart}\cr
-#'    \code{lkj_correlation} \tab \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}\cr }
+#'   \tabular{ll}{ greta \tab reference\cr \code{uniform} \tab
+#'   \link[stats:dunif]{stats::dunif}\cr \code{normal} \tab
+#'   \link[stats:dnorm]{stats::dnorm}\cr \code{lognormal} \tab
+#'   \link[stats:dlnorm]{stats::dlnorm}\cr \code{bernoulli} \tab
+#'   \link[extraDistr:dbern]{extraDistr::dbern}\cr \code{binomial} \tab
+#'   \link[stats:dbinom]{stats::dbinom}\cr \code{beta_binomial} \tab
+#'   \link[extraDistr:dbbinom]{extraDistr::dbbinom}\cr \code{negative_binomial}
+#'   \tab \link[stats:dnbinom]{stats::dnbinom}\cr \code{hypergeometric} \tab
+#'   \link[stats:dhyper]{stats::dhyper}\cr \code{poisson} \tab
+#'   \link[stats:dpois]{stats::dpois}\cr \code{gamma} \tab
+#'   \link[stats:dgamma]{stats::dgamma}\cr \code{inverse_gamma} \tab
+#'   \link[extraDistr:dinvgamma]{extraDistr::dinvgamma}\cr \code{weibull} \tab
+#'   \link[stats:dweibull]{stats::dweibull}\cr \code{exponential} \tab
+#'   \link[stats:dexp]{stats::dexp}\cr \code{pareto} \tab
+#'   \link[extraDistr:dpareto]{extraDistr::dpareto}\cr \code{student} \tab
+#'   \link[extraDistr:dlst]{extraDistr::dlst}\cr \code{laplace} \tab
+#'   \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr \code{beta} \tab
+#'   \link[stats:dbeta]{stats::dbeta}\cr \code{cauchy} \tab
+#'   \link[stats:dcauchy]{stats::dcauchy}\cr \code{chi_squared} \tab
+#'   \link[stats:dchisq]{stats::dchisq}\cr \code{logistic} \tab
+#'   \link[stats:dlogis]{stats::dlogis}\cr \code{f} \tab
+#'   \link[stats:df]{stats::df}\cr \code{multivariate_normal} \tab
+#'   \link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}\cr \code{multinomial} \tab
+#'   \link[stats:dmultinom]{stats::dmultinom}\cr \code{categorical} \tab
+#'   {\link[stats:dmultinom]{stats::dmultinom} (size = 1)}\cr \code{dirichlet}
+#'   \tab \link[extraDistr:ddirichlet]{extraDistr::ddirichlet}\cr
+#'   \code{dirichlet_multinomial} \tab
+#'   \link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr \code{wishart} \tab
+#'   \link[stats:rWishart]{stats::rWishart}\cr \code{lkj_correlation} \tab
+#'   \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}\cr
+#'   }
 #'
 #' @examples
 #' \dontrun{
@@ -1261,12 +1267,19 @@ distribution_classes_module <- module(uniform_distribution,
 #' thetas <- normal(mu, sigma, dim = c(3, 4))
 #'
 #' # a multivariate normal variable, with correlation between two elements
+#' # note that the parameter must be a row vector
 #' Sig <- diag(4)
 #' Sig[3, 4] <- Sig[4, 3] <- 0.6
 #' theta <- multivariate_normal(t(rep(mu, 4)), Sig)
 #'
 #' # 10 independent replicates of that
 #' theta <- multivariate_normal(t(rep(mu, 4)), Sig, n_realisations = 10)
+#'
+#' # 10 multivariate normal replicates, each with a different mean vector,
+#' # but the same covariance matrix
+#' means <- matrix(rnorm(40), 10, 4)
+#' theta <- multivariate_normal(means, Sig, n_realisations = 10)
+#' dim(theta)
 #'
 #' # a Wishart variable with the same covariance parameter
 #' theta <- wishart(df = 5, Sigma = Sig)
