@@ -357,8 +357,11 @@ dag_class <- R6Class(
 
     send_parameters = function (parameters) {
 
+      # reshape to a row vector
+      params <- array(parameters, dim = c(1, length(parameters)))
+
       # create a feed dict in the TF environment
-      parameter_list <- list(free_state = add_first_dim(parameters))
+      parameter_list <- list(free_state = params)
 
       self$build_feed_dict(parameter_list)
 
