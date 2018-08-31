@@ -109,6 +109,11 @@ Below are some more advanced examples implemented in greta.
 ```{r child='examples/bayesian_neural_network.Rmd'}
 ```
 
+<hr>
+
+```{r child='examples/factor_analysis.Rmd'}
+```
+
 ## BUGS models
 
 The BUGS project provide a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The [Stan wiki](https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically) provides Stan implementations of these models.

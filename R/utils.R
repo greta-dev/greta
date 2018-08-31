@@ -664,7 +664,7 @@ greta_col <- function (which = c('main',
   tryCatch(
     is.matrix(col2rgb(colour)),
     error = function(e) {
-        stop(paste("Invalid color:", colour), call. = FALSE)
+        stop(paste("Invalid colour:", colour), call. = FALSE)
     }
   )
 
