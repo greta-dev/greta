@@ -93,20 +93,20 @@ tf_flat_to_chol <- function (x, dims) {
   x_index_offdiag <- length(indices_diag) + seq_along(indices_offdiag) - 1
 
   # create an empty vector to fill with the values
-  values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
-  values_0_diag <- tf_recombine(values_0, indices_diag, tf$exp(x[x_index_diag, ]))
-  values_z <- tf_recombine(values_0_diag, indices_offdiag, x[x_index_offdiag, ])
+  values_0 <- tf$zeros(shape(1, prod(dims), 1), dtype = tf_float())
+  values_0_diag <- tf_recombine(values_0, indices_diag, tf$exp(x[, x_index_diag, ]))
+  values_z <- tf_recombine(values_0_diag, indices_offdiag, x[, x_index_offdiag, ])
 
   # reshape into lower triangular and return
-  tf$reshape(values_z, shape(dims[1], dims[2]))
+  tf$reshape(values_z, shape(1, dims[1], dims[2]))
 
 }
 
 # convert an unconstrained vector into symmetric correlation matrix
 tf_flat_to_chol_correl <- function (x, dims) {
 
-  if (length(dim(x)) == 1) {
-    x <- tf$reshape(x, shape(length(x), 1))
+  if (length(dim(x)) < 3) {
+    x <- tf$reshape(x, shape(1L, ncol(x), 1))
   }
 
   # to -1, 1 scale
@@ -125,7 +125,7 @@ tf_flat_to_chol_correl <- function (x, dims) {
 
   # dummy list to store transformed versions of rows
   values_list <- y_index_list
-  values_list[[1]] <- tf$reshape(y[y_index_list[[1]], ], shape(k - 1))
+  values_list[[1]] <- tf$reshape(y[, y_index_list[[1]], ], shape(1, k - 1, 1))
   sum_sqs <- tf$square(values_list[[1]])
 
   if (k > 2) {
@@ -134,11 +134,12 @@ tf_flat_to_chol_correl <- function (x, dims) {
       # relevant columns (0-indexed)
       idx <- i:(k - 1) - 1
       # components of z on this row (straight from y)
-      z <- tf$reshape(y[y_index_list[[i]], ], shape(k - i))
+      z <- tf$reshape(y[, y_index_list[[i]], ], shape(1, k - i, 1))
       # assign to w, using relevant parts of the sum of squares
-      values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs[idx])
+      sum_sqs_i <- sum_sqs[, idx, , drop = FALSE]
+      values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs_i)
       # increment sum of squares
-      sum_sqs_part <- tf$square(values_list[[i]]) + sum_sqs[idx]
+      sum_sqs_part <- tf$square(values_list[[i]]) + sum_sqs_i
       sum_sqs <- tf_recombine(sum_sqs, idx, sum_sqs_part)
     }
 
@@ -150,17 +151,17 @@ tf_flat_to_chol_correl <- function (x, dims) {
   indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
 
   # diagonal & off-diagonal elements
-  values_diag <- tf$concat(list(tf$ones(1L, dtype = tf_float()),
-                                sqrt(fl(1) - sum_sqs)), 0L)
-  values_offdiag <- tf$concat(values_list, 0L)
+  values_diag <- tf$concat(list(tf$ones(shape(1, 1, 1), dtype = tf_float()),
+                                sqrt(fl(1) - sum_sqs)), 1L)
+  values_offdiag <- tf$concat(values_list, 1L)
 
   # plug elements into a vector of 0s
-  values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
+  values_0 <- tf$zeros(shape(1, prod(dims), 1), dtype = tf_float())
   values_0_diag <- tf_recombine(values_0, indices_diag, values_diag)
   values_z <- tf_recombine(values_0_diag, indices_offdiag, values_offdiag)
 
   # reshape into cholesky and return
-  tf$reshape(values_z, shape(dims[1], dims[2]))
+  tf$reshape(values_z, shape(1, dims[1], dims[2]))
 
 }
 
