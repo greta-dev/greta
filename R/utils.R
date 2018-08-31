@@ -615,10 +615,6 @@ check_future_plan <- function () {
 
     }
 
-
-
-
-
   }
 
 }
@@ -680,9 +676,19 @@ greta_col <- function (which = c('main',
                                  'dark',
                                  'light',
                                  'lighter',
-                                 'super_light')) {
+                                 'super_light'),
+                       colour = '#996bc7') {
+
+  # tests if a color encoded as string can be converted to RGB
+  tryCatch(
+    is.matrix(col2rgb(colour)),
+    error = function(e) {
+        stop(paste("Invalid colour:", colour), call. = FALSE)
+    }
+  )
+
   which <- match.arg(which)
-  pal <- palettize('#996bc7')
+  pal <- palettize(colour)
   switch (which,
           dark = pal(0.45),  #45%
           main = pal(0.55),  #55%
@@ -692,7 +698,7 @@ greta_col <- function (which = c('main',
 }
 
 colour_module <- module(palettize,
-                       greta_col)
+                        greta_col)
 
 # look in the environment specified by env, and return a named list of all greta
 # arrays in that environment
