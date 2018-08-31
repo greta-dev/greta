@@ -504,6 +504,6 @@ diag.greta_array <- function (x = 1, nrow, ncol) {
   }
 
   # return the extraction op
-  op('diag', x, dimfun = dimfun, tf_operation = "tf$diag_part")
+  op('diag', x, dimfun = dimfun, tf_operation = "tf$matrix_diag_part")
 
 }

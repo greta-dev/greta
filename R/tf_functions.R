@@ -20,6 +20,41 @@ tf_lchoose <- function (n, k) {
 tf_lbeta <- function (a, b)
   tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
 
+# set up the tf$reduce_* functions to ignore the first dimension
+
+skip_dim <- function (op_name, x) {
+  n_dim <- length(dim(x))
+  reduction_dims <- seq_len(n_dim - 1)
+  tf[[op_name]](x, axis = reduction_dims)
+}
+
+tf_sum <- function(x) {
+  skip_dim("reduce_sum", x)
+}
+
+tf_prod <- function(x) {
+  skip_dim("reduce_prod", x)
+}
+
+tf_min <- function(x) {
+  skip_dim("reduce_min", x)
+}
+
+tf_mean <- function(x) {
+  skip_dim("reduce_mean", x)
+}
+
+tf_max <- function(x) {
+  skip_dim("reduce_max", x)
+}
+
+# skip the first index when transposing
+tf_transpose <- function (x) {
+  nelem <- length(dim(x))
+  perm <- c(0L, (nelem - 1):1)
+  tf$transpose(x, perm = perm)
+}
+
 # given a flat tensor, convert it into a square symmetric matrix by considering
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
@@ -107,7 +142,7 @@ tf_flat_to_chol_correl <- function (x, dims) {
 }
 
 tf_chol_to_symmetric <- function (U)
-  tf$matmul(tf$transpose(U), U)
+  tf$matmul(tf_transpose(U), U)
 
 tf_colmeans <- function(x, dims) {
 
@@ -180,13 +215,13 @@ tf_sweep <- function (x, STATS, MARGIN, FUN) {
 
   # if the second margin, transpose before and after
   if (MARGIN == 2)
-    x <- tf$transpose(x)
+    x <- tf_transpose(x)
 
   # apply the function rowwise
   result <- do.call(FUN, list(x, STATS))
 
   if (MARGIN == 2)
-    result <- tf$transpose(result)
+    result <- tf_transpose(result)
 
   result
 
@@ -194,7 +229,7 @@ tf_sweep <- function (x, STATS, MARGIN, FUN) {
 
 # transpose and get the right matrix, like R
 tf_chol <- function (x)
-  tf$transpose(tf$cholesky(x))
+  tf_transpose(tf$cholesky(x))
 
 tf_not <- function(x)
   tf_as_float(!tf_as_logical(x))

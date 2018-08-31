@@ -200,7 +200,11 @@ t.greta_array <- function (x) {
     rev(dim(x))
   }
 
-  op("transpose", x, dimfun = dimfun, tf_operation = "tf$transpose")
+  op("transpose",
+     x,
+     dimfun = dimfun,
+     tf_operation = "tf_transpose")
+
 }
 
 #' @export
@@ -297,7 +301,7 @@ sum.greta_array <- function (..., na.rm = TRUE) {
   op('sum',
      vec,
      dimfun = dimfun,
-     tf_operation = "tf$reduce_sum")
+     tf_operation = "tf_sum")
 
 }
 
@@ -314,7 +318,7 @@ prod.greta_array <- function (..., na.rm = TRUE) {
   op('prod',
      vec,
      dimfun = dimfun,
-     tf_operation = "tf$reduce_prod")
+     tf_operation = "tf_prod")
 
 }
 
@@ -331,7 +335,7 @@ min.greta_array <- function (..., na.rm = TRUE) {
   op('min',
      vec,
      dimfun = dimfun,
-     tf_operation = "tf$reduce_min")
+     tf_operation = "tf_min")
 
 }
 
@@ -345,7 +349,7 @@ mean.greta_array <- function (x, trim = 0, na.rm = TRUE, ...) {
   op('mean',
      x,
      dimfun = dimfun,
-     tf_operation = "tf$reduce_mean")
+     tf_operation = "tf_mean")
 
 }
 
@@ -362,7 +366,7 @@ max.greta_array <- function (..., na.rm = TRUE) {
   op('max',
      vec,
      dimfun = dimfun,
-     tf_operation = "tf$reduce_max")
+     tf_operation = "tf_max")
 
 }
 
