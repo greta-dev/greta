@@ -243,7 +243,10 @@ add_first_dim <- function (x) {
 # drop the additional dimension at the beginning of an array
 drop_first_dim <- function (x) {
   x <- as.array(x)
-  array(x, dim = dim(x)[-1])
+  if (length(dim(x)) > 1) {
+    x <- array(x, dim = dim(x)[-1])
+  }
+  x
 }
 
 misc_module <- module(module,

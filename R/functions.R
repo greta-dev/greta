@@ -394,8 +394,9 @@ cumprod.greta_array <- function (x) {
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
 rowcol_idx <- function (x, dims, which = c("col", "row")) {
 
-  if (dims < 1L || dims > length(dim(x)) - 1L)
-    stop("invalid 'dims'", call. = FALSE)
+  if (dims < 1L || dims > length(dim(x)) - 1L) {
+    stop ("invalid 'dims'", call. = FALSE)
+  }
 
   switch(which,
          row = (dims + 1):length(dim(x)),

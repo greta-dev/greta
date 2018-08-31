@@ -147,9 +147,9 @@ tf_chol_to_symmetric <- function (U)
 tf_colmeans <- function(x, dims) {
 
   idx <- rowcol_idx(x, dims, "col")
-  y <- tf$reduce_mean(x, axis = idx - 1L)
+  y <- tf$reduce_mean(x, axis = idx)
 
-  if (length(dim(y)) == 1)
+  if (length(dim(y)) == 2)
     y <- tf$reshape(y, c(dim(y), 1L))
 
   y
@@ -159,9 +159,10 @@ tf_colmeans <- function(x, dims) {
 tf_rowmeans <- function(x, dims) {
 
   idx <- rowcol_idx(x, dims, "row")
-  y <- tf$reduce_mean(x, axis = idx - 1L)
+  idx <- idx[-length(idx)]
+  y <- tf$reduce_mean(x, axis = idx)
 
-  if (length(dim(y)) == 1)
+  if (length(dim(y)) == 2)
     y <- tf$reshape(y, c(dim(y), 1L))
 
   y
@@ -171,9 +172,9 @@ tf_rowmeans <- function(x, dims) {
 tf_colsums <- function(x, dims) {
 
   idx <- rowcol_idx(x, dims, "col")
-  y <- tf$reduce_sum(x, axis = idx - 1L)
+  y <- tf$reduce_sum(x, axis = idx)
 
-  if (length(dim(y)) == 1)
+  if (length(dim(y)) == 2)
     y <- tf$reshape(y, c(dim(y), 1L))
 
   y
@@ -183,9 +184,10 @@ tf_colsums <- function(x, dims) {
 tf_rowsums <- function(x, dims) {
 
   idx <- rowcol_idx(x, dims, "row")
-  y <- tf$reduce_sum(x, axis = idx - 1L)
+  idx <- idx[-length(idx)]
+  y <- tf$reduce_sum(x, axis = idx)
 
-  if (length(dim(y)) == 1)
+  if (length(dim(y)) == 2)
     y <- tf$reshape(y, c(dim(y), 1L))
 
   y
@@ -195,16 +197,16 @@ tf_rowsums <- function(x, dims) {
 # calculate kronecker product of two matrices
 tf_kronecker <- function(X, Y) {
 
-  dims <- c(dim(X), dim(Y))
+  # switch this to NULL later
+  base_dim <- 1L
+  dims <- c(dim(X)[-1], dim(Y)[-1])
 
   # expand dimensions of tensors to allow direct multiplication for kronecker prod
-  x_rsh <- tf$reshape(X, c(as.integer(dims[1]), 1L,
-                           as.integer(dims[2]), 1L))
-  y_rsh <- tf$reshape(Y, c(1L, as.integer(dims[3]),
-                           1L, as.integer(dims[4])))
+  x_rsh <- tf$reshape(X, shape(base_dim, dims[1], 1L, dims[2], 1L))
+  y_rsh <- tf$reshape(Y, shape(base_dim, 1L, dims[3], 1L, dims[4]))
 
   # multiply tensors and reshape with appropriate dimensions
-  tensor_out <- tf$reshape(x_rsh * y_rsh, c(dims[1] * dims[3], dims[2] * dims[4]))
+  tensor_out <- tf$reshape(x_rsh * y_rsh, shape(base_dim, dims[1] * dims[3], dims[2] * dims[4]))
 
   tensor_out
 
@@ -341,7 +343,7 @@ tf_recombine <- function (ref, index, updates) {
 
   # rotate it
   dims <- result$get_shape()$as_list()[1]
-  dims <- shape(c(1, dims))
+  dims <- shape(1, dims)
   result <- tf$reshape(result, dims)
   result
 
@@ -352,7 +354,7 @@ tf_replace <- function (x, replacement, index, dims) {
 
   # flatten original tensor and new values
   nelem <- prod(dims)
-  x_flat <- tf$squeeze(x)
+  x_flat <- tf$reshape(x, shape(length(x)))
   replacement_flat <- tf$reshape(replacement, shape(length(index)))
 
   # update the values into a new tensor

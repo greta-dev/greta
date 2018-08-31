@@ -241,7 +241,6 @@ calculate_list <- function(target, values) {
 
   name <- dag$tf_name(get_node(target))
   result <- dag$tf_sess_run(name, as_text = TRUE)
-
   drop_first_dim(result)
 
 }
