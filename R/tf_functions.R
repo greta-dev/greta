@@ -322,16 +322,16 @@ tf_extract <- function (x, nelem, index, dims_out) {
 tf_recombine <- function (ref, index, updates) {
 
   # expand ref if needed
-  if (length(dim(ref)) == 1) {
-    ref <- tf$reshape(ref, shape(length(ref), 1))
+  if (length(dim(ref)) < 3) {
+    ref <- tf$reshape(ref, shape(1, ncol(ref), 1))
   }
 
-  if (length(dim(updates)) == 1) {
-    updates <- tf$reshape(updates, shape(length(updates), 1))
+  if (length(dim(updates)) < 3) {
+    updates <- tf$reshape(updates, shape(1, ncol(updates), 1))
   }
 
   # vector denoting whether an element is being updated
-  nelem <- ref$get_shape()$as_list()[1]
+  nelem <- ref$get_shape()$as_list()[2]
   replaced <- rep(0, nelem)
   replaced[index + 1] <- seq_along(index)
   runs <- rle(replaced)
@@ -346,14 +346,14 @@ tf_recombine <- function (ref, index, updates) {
   keep_idx <- which(runs$values == 0)
   keep_list <- lapply(keep_idx, function (i) {
     idx <- starts_old[i] + 0:(runs$lengths[i] - 1) - 1
-    tf$reshape(ref[idx, ], shape(length(idx), 1))
+    tf$reshape(ref[, idx, ], shape(1, length(idx), 1))
   })
 
   run_id <- runs$values[runs$values != 0]
   update_idx <- match(run_id, runs$values)
-  # get them in order increasing order
+  # get them in  increasing order
   update_list <- lapply(run_id, function (i) {
-    tf$reshape(updates[i - 1, ], shape(1, 1))
+    tf$reshape(updates[, i - 1, ], shape(1, 1, 1))
   })
 
   # combine them
@@ -362,12 +362,8 @@ tf_recombine <- function (ref, index, updates) {
   full_list[update_idx] <- update_list
 
   # concatenate the vectors
-  result <- tf$concat(full_list, 0L)
+  result <- tf$concat(full_list, 1L)
 
-  # rotate it
-  dims <- result$get_shape()$as_list()[1]
-  dims <- shape(1, dims)
-  result <- tf$reshape(result, dims)
   result
 
 }
@@ -377,8 +373,8 @@ tf_replace <- function (x, replacement, index, dims) {
 
   # flatten original tensor and new values
   nelem <- prod(dims)
-  x_flat <- tf$reshape(x, shape(length(x)))
-  replacement_flat <- tf$reshape(replacement, shape(length(index)))
+  x_flat <- tf$reshape(x, shape(1L, nelem, 1L))
+  replacement_flat <- tf$reshape(replacement, shape(1L, length(index), 1L))
 
   # update the values into a new tensor
   result_flat <- tf_recombine(ref = x_flat,
@@ -386,7 +382,7 @@ tf_replace <- function (x, replacement, index, dims) {
                               updates = replacement_flat)
 
   # reshape the result
-  result <- tf$reshape(result_flat, to_shape(c(1, dims)))
+  result <- tf$reshape(result_flat, to_shape(c(1L, dims)))
   result
 
 }
