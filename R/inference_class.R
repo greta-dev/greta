@@ -518,7 +518,7 @@ sampler <- R6Class(
       dag$tf_run(
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = sampler_burst_length %/% sampler_thin,
-          current_state = tf$reshape(free_state, list(length(free_state))),
+          current_state = free_state,
           kernel = sampler_kernel,
           num_burnin_steps = 0L,
           num_steps_between_results = sampler_thin,
@@ -547,9 +547,11 @@ sampler <- R6Class(
       # run the sampler, handling numerical errors
       batch_results <- self$sample_carefully(n_samples)
 
-      # get trace of free state
+      # get trace of free state and drop the null dimension
       free_state_draws <- batch_results[[1]]
+      dim(free_state_draws) <- dim(free_state_draws)[-2]
       self$last_burst_free_states <- free_state_draws
+
       n_draws <- nrow(free_state_draws)
       if (n_draws > 0) {
         self$free_state <- free_state_draws[n_draws, ]
