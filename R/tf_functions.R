@@ -48,12 +48,35 @@ tf_max <- function(x) {
   skip_dim("reduce_max", x)
 }
 
+tf_cumsum <- function(x) {
+  tf$cumsum(x, axis = 1L)
+}
+
+tf_cumprod <- function(x) {
+  tf$cumprod(x, axis = 1L)
+}
+
 # skip the first index when transposing
 tf_transpose <- function (x) {
   nelem <- length(dim(x))
   perm <- c(0L, (nelem - 1):1)
   tf$transpose(x, perm = perm)
 }
+
+# permute the tensor to get the non-batch dim first, do the relevant "unsorted_segment_*" op, then permute it back
+tf_tapply <- function (x, segment_ids, num_segments, op_name) {
+
+  op_name <- paste0("unsorted_segment_", op_name)
+
+  x <- tf$transpose(x, perm = c(1:2, 0L))
+  x <- tf[[op_name]](x,
+                     segment_ids = segment_ids,
+                     num_segments = num_segments)
+  x <- tf$transpose(x, perm = c(2L, 0:1))
+  x
+
+}
+
 
 # given a flat tensor, convert it into a square symmetric matrix by considering
 # it  as the non-zero elements of the lower-triangular decomposition of the

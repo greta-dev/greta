@@ -382,13 +382,13 @@ check_cum_op <- function (x) {
 #' @export
 cumsum.greta_array <- function (x) {
   check_cum_op(x)
-  op("cumsum", x, tf_operation = "tf$cumsum")
+  op("cumsum", x, tf_operation = "tf_cumsum")
 }
 
 #' @export
 cumprod.greta_array <- function (x) {
   check_cum_op(x)
-  op("cumprod", x, tf_operation = "tf$cumprod")
+  op("cumprod", x, tf_operation = "tf_cumprod")
 }
 
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
@@ -729,14 +729,6 @@ tapply.greta_array <- function (X, INDEX,
   id <- match(INDEX, groups) - 1L
   len <- length(groups)
 
-  # which function
-  tf_fun <- switch(FUN,
-                   sum = "tf$unsorted_segment_sum",
-                   max = "tf$unsorted_segment_max",
-                   mean = "tf$unsorted_segment_mean",
-                   min = "tf$unsorted_segment_min",
-                   prod = "tf$unsorted_segment_prod")
-
   # dimensions
   dimfun <- function (elem_list) {
 
@@ -753,8 +745,10 @@ tapply.greta_array <- function (X, INDEX,
 
   op("tapply",
      X,
-     operation_args = list(segment_ids = id, num_segments = len),
-     tf_operation = tf_fun,
+     operation_args = list(segment_ids = id,
+                           num_segments = len,
+                           op_name = FUN),
+     tf_operation = "tf_tapply",
      dimfun = dimfun)
 
 }
