@@ -966,7 +966,7 @@ wishart_distribution <- R6Class (
 
         # if it's available, find and use the tensor for the cholesky factor
         cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
-        t_cholesky_scale <- tf$transpose(cholesky_scale)
+        t_cholesky_scale <- tf_transpose(cholesky_scale)
         distrib <- wish(df = df, scale_tril = t_cholesky_scale)
 
       } else {
