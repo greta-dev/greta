@@ -295,8 +295,8 @@ tf_icauchit <- function (x)
   fl(1 / pi) * tf$atan(x) + fl(0.5)
 
 tf_imultilogit <- function (x) {
-  zeros <- tf$zeros(shape(nrow(x), 1L), tf_float())
-  latent <- tf$concat(list(x, zeros), 1L)
+  zeros <- tf$zeros(shape(1, ncol(x), 1), tf_float())
+  latent <- tf$concat(list(x, zeros), 2L)
   tf$nn$softmax(latent)
 }
 
