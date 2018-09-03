@@ -389,7 +389,7 @@ length.greta_array <- function(x)
 
   op("reshape",
      x,
-     operation_args = list(shape = dims),
+     operation_args = list(shape = c(-1L, dims)),
      tf_operation = "tf$reshape",
      dimfun = dimfun,
      value = new_value)
