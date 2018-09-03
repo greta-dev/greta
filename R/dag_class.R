@@ -228,7 +228,7 @@ dag_class <- R6Class(
     define_tf = function () {
 
       # define the free state variable, rest of the graph, and the session
-      self$define_free_state()
+      self$define_free_state("placeholder", "free_state")
       self$define_tf_body()
       self$define_tf_session()
 

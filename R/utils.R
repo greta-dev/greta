@@ -268,7 +268,8 @@ misc_module <- module(module,
                       bar_width,
                       record,
                       as_2D_array,
-                      add_first_dim)
+                      add_first_dim,
+                      drop_first_dim)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {

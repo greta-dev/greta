@@ -549,7 +549,10 @@ sampler <- R6Class(
 
       # get trace of free state and drop the null dimension
       free_state_draws <- batch_results[[1]]
-      dim(free_state_draws) <- dim(free_state_draws)[-2]
+      dims <- dim(free_state_draws)
+      if (length(dims) > 2) {
+        dim(free_state_draws) <- dims[-2]
+      }
       self$last_burst_free_states <- free_state_draws
 
       n_draws <- nrow(free_state_draws)
@@ -642,14 +645,16 @@ hmc_sampler <- R6Class(
       dag$tf_run(hmc_L <- tf$placeholder(dtype = tf$int32))
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
-      dag$tf_run(hmc_diag_sd <- tf$placeholder(dtype = tf_float(),
-                                               shape = list(length(free_state), 1L)))
+      dag$tf_run(
+        hmc_diag_sd <- tf$placeholder(dtype = tf_float(),
+                                      shape = shape(dim(free_state)[[2]], 1))
+      )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
       dag$tf_run(
         hmc_step_sizes <- tf$reshape(
           hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
-          shape = list(length(free_state))
+          shape = shape(dim(free_state)[[2]])
         )
       )
 
@@ -716,13 +721,13 @@ rwmh_sampler <- R6Class(
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
       dag$tf_run(rwmh_diag_sd <- tf$placeholder(dtype = tf_float(),
-                                                shape = list(length(free_state), 1L)))
+                                                shape = shape(dim(free_state)[[2]], 1)))
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
       dag$tf_run(
         rwmh_step_sizes <- tf$reshape(
           rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
-          shape = list(length(free_state))
+          shape = shape(dim(free_state)[[2]])
         )
       )
 

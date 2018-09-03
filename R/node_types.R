@@ -19,7 +19,8 @@ data_node <- R6Class(
       tf_name <- dag$tf_name(self)
 
       value <- self$value()
-      shape <- to_shape(c(1, dim(value)))
+      shape <- c(list(NULL), to_shape(dim(value)))
+      # shape <- to_shape(dim(value))
 
       # create placeholder
       assign(tf_name,
@@ -29,6 +30,7 @@ data_node <- R6Class(
 
       # put data in the data list
       tfe$data_list[[tf_name]] <- add_first_dim(value)
+      # tfe$data_list[[tf_name]] <- value
 
     }
   )
@@ -199,7 +201,8 @@ variable_node <- R6Class (
       node <- self$tf_from_free(tf_free, dag$tf_environment)
 
       # reshape the tensor to the match the variable
-      node <- tf$reshape(node, shape = c(1L, dim(self)))
+      node <- tf$reshape(node,
+                         shape = to_shape(c(-1, dim(self))))
 
       # assign as constrained variable
       assign(tf_name,
@@ -256,7 +259,7 @@ variable_node <- R6Class (
       ljac_corr_mat <- function (x) {
 
         # find dimension
-        n <- x$get_shape()$as_list()[1]
+        n <- dim(x)[[2]]
         K <- (1 + sqrt(8 * n + 1)) / 2
 
         # draw the rest of the owl
@@ -276,7 +279,7 @@ variable_node <- R6Class (
         }
 
         # find dimension
-        n <- x$get_shape()$as_list()[1]
+        n <- dim(x)[[2]]
         K <- (sqrt(8 * n + 1) - 1) / 2
 
         k <- seq_len(K)
