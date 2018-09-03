@@ -311,7 +311,8 @@ test_that('extract, replace, combine work in models', {
 
   # replace
   b <- ones(4, 3)
-  b[, 2] <- normal(0, 1, dim = 4)
+  x <- normal(0, 1, dim = 4)
+  b[, 2] <- x
   m_b <- model(b)
   expect_ok( draws_b <- mcmc(m_b, warmup = 3, n_samples = 3, verbose = FALSE) )
 

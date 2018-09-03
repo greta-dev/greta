@@ -890,10 +890,13 @@ get_indices_text <- function (dims, name) {
 # vector and with elements given informative names
 flatten_trace <- function (i, trace_list) {
   object <- names(trace_list)[i]
-  dim <- dim(trace_list[[i]])
-  values <- unlist(trace_list[i])
-  names <- get_indices_text(dim, object)
-  names(values) <- names
+  values <- trace_list[[i]]
+  dim_in <- dim(values)
+  dim_slice <- dim_in[-1]
+  dim_out <- c(dim_in[1], prod(dim_slice))
+  dim(values) <- dim_out
+  names <- get_indices_text(dim_slice, object)
+  colnames(values) <- names
   values
 }
 

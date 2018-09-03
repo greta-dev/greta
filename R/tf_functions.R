@@ -334,7 +334,7 @@ tf_extract <- function (x, nelem, index, dims_out) {
   tensor_out_flat <- tf$gather(tensor_in_flat, tf_index, axis = 1L)
 
   # reshape, handling unknown dimensions even whenthe output has 0-dimension
-  batch_size <- tf$shape(x)[0]
+  batch_size <- tf$shape(x)[[0]]
   shape_list <- c(list(batch_size), to_shape(dims_out))
   shape_out <- tf$stack(shape_list)
   tensor_out <- tf$reshape(tensor_out_flat, shape_out)
@@ -346,6 +346,8 @@ tf_extract <- function (x, nelem, index, dims_out) {
 # values, a tensor `updates` at the elements given by the R vector `index` (in
 # 0-indexing)
 tf_recombine <- function (ref, index, updates) {
+
+  batch_size <-
 
   # expand ref if needed
   if (length(dim(ref)) < 3) {
@@ -359,7 +361,7 @@ tf_recombine <- function (ref, index, updates) {
   }
 
   # vector denoting whether an element is being updated
-  nelem <- ref$get_shape()$as_list()[2]
+  nelem <- ref$get_shape()$as_list()[[2]]
   replaced <- rep(0, nelem)
   replaced[index + 1] <- seq_along(index)
   runs <- rle(replaced)

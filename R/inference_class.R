@@ -160,7 +160,7 @@ inference <- R6Class(
 
     # store the free state, and/or corresponding values of the target greta
     # arrays for the latest batch of raw draws
-    trace = function (values = TRUE, free_state = TRUE) {
+    trace = function (free_state = TRUE, values = FALSE) {
 
       if (free_state) {
         # append the free state trace
@@ -321,7 +321,7 @@ sampler <- R6Class(
         for (burst in seq_along(burst_lengths)) {
 
           self$run_burst(burst_lengths[burst])
-          self$trace(values = FALSE)
+          self$trace()
           self$tune(completed_iterations[burst], warmup)
 
           if (verbose) {
@@ -346,37 +346,41 @@ sampler <- R6Class(
       self$traced_free_state <- matrix(NA, 0, self$n_free)
       self$numerical_rejections <- 0
 
-      # main sampling
-      if (verbose) {
-        pb_sampling <- create_progress_bar('sampling',
-                                           c(warmup, n_samples),
-                                           pb_update,
-                                           self$pb_width)
-        iterate_progress_bar(pb_sampling, 0, 0, self$pb_file)
-      } else {
-        pb_sampling <- NULL
-      }
+      if (n_samples > 0) {
 
-      # split up warmup iterations into bursts of sampling
-      burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
-      completed_iterations <- cumsum(burst_lengths)
-
-      for (burst in seq_along(burst_lengths)) {
-
-        self$run_burst(burst_lengths[burst], thin = thin)
-        self$trace()
-
+        # main sampling
         if (verbose) {
+          pb_sampling <- create_progress_bar('sampling',
+                                             c(warmup, n_samples),
+                                             pb_update,
+                                             self$pb_width)
+          iterate_progress_bar(pb_sampling, 0, 0, self$pb_file)
+        } else {
+          pb_sampling <- NULL
+        }
 
-          # update the progress bar/percentage log
-          iterate_progress_bar(pb_sampling,
-                               it = completed_iterations[burst],
-                               rejects = self$numerical_rejections,
-                               file = self$pb_file)
+        # split up warmup iterations into bursts of sampling
+        burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
+        completed_iterations <- cumsum(burst_lengths)
 
-          self$write_percentage_log(n_samples,
-                                    completed_iterations[burst],
-                                    stage = "sampling")
+        for (burst in seq_along(burst_lengths)) {
+
+          self$run_burst(burst_lengths[burst], thin = thin)
+          self$trace()
+
+          if (verbose) {
+
+            # update the progress bar/percentage log
+            iterate_progress_bar(pb_sampling,
+                                 it = completed_iterations[burst],
+                                 rejects = self$numerical_rejections,
+                                 file = self$pb_file)
+
+            self$write_percentage_log(n_samples,
+                                      completed_iterations[burst],
+                                      stage = "sampling")
+
+          }
 
         }
 
