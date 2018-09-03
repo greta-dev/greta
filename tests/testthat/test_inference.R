@@ -64,14 +64,14 @@ test_that('opt converges with SciPy optimisers', {
 
     (o <- opt(m,
               optimiser = optmr(),
-              max_iterations = 200))
+              max_iterations = 500))
 
-    # should have converged in fewer than 200 iterations and be close to truth
+    # should have converged in fewer than 500 iterations and be close to truth
 
     # can't tell that from output of cobyla
     if (!identical(optmr(), cobyla())) {
       expect_equal(o$convergence, 0)
-      expect_lte(o$iterations, 200)
+      expect_lte(o$iterations, 500)
     }
 
     expect_true(all(abs(x - o$par) < 1e-2))

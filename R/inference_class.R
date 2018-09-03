@@ -654,7 +654,7 @@ hmc_sampler <- R6Class(
       )
 
       # log probability function
-      tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
+      tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # build the kernel
       dag$tf_run(
@@ -709,7 +709,7 @@ rwmh_sampler <- R6Class(
                                    normal = tfp$mcmc$random_walk_normal_fn,
                                    uniform = tfp$mcmc$random_walk_uniform_fn)
 
-      tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
+      tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # tensors for sampler parameters
       dag$tf_run(rwmh_epsilon <- tf$placeholder(dtype = tf_float()))
@@ -798,6 +798,7 @@ optimiser <- R6Class(
       if ("uses_callbacks" %in% names(other_args))
         self$uses_callbacks <- other_args$uses_callbacks
 
+      self$create_optimiser_objective()
       self$create_tf_minimiser()
 
     },
@@ -831,13 +832,44 @@ optimiser <- R6Class(
 
       dag$tf_sess_run(tf$global_variables_initializer())
 
+      shape <- tfe$optimiser_free_state$shape
       dag$on_graph(
         tfe$optimiser_init <- tf$constant(self$free_state,
-                                          shape = tfe$free_state$shape,
+                                          shape = shape,
                                           dtype = tf_float())
       )
 
-      . <- dag$tf_sess_run(free_state$assign(optimiser_init))
+      . <- dag$tf_sess_run(optimiser_free_state$assign(optimiser_init))
+
+    },
+
+    # create a separate free state variable and objective, since optimisers must
+    # use variables
+    create_optimiser_objective = function () {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      # define a *variable* free state object
+      if (!live_pointer("optimiser_free_state", envir = tfe)) {
+        dag$define_free_state("variable", name = "optimiser_free_state")
+      }
+
+      # use the log prob function to define objectives from the variable
+      if (!live_pointer("optimiser_objective_adj", envir = tfe)) {
+
+        log_prob_fun <- dag$generate_log_prob_function(which = "both")
+        dag$on_graph(objectives <- log_prob_fun(tfe$optimiser_free_state))
+
+        assign("optimiser_objective_adj",
+               -objectives$adjusted,
+               envir = tfe)
+
+        assign("optimiser_objective",
+               -objectives$unadjusted,
+               envir = tfe)
+
+      }
 
     },
 
@@ -854,11 +886,13 @@ optimiser <- R6Class(
     fetch_free_state = function () {
 
       # get the free state as a vector
-      self$free_state <- self$model$dag$tf_sess_run(free_state)
+      self$free_state <- self$model$dag$tf_sess_run(optimiser_free_state)
 
     },
 
     return_outputs = function () {
+
+      dag <- self$model$dag
 
       # if the optimiser was ignoring the callbacks, we have no idea about the
       # number of iterations or convergence
@@ -867,8 +901,8 @@ optimiser <- R6Class(
 
       converged <- self$it < (self$max_iterations - 1)
 
-      list(par = self$model$dag$trace_values(self$free_state),
-           value = self$model$dag$tf_sess_run(joint_density),
+      list(par = dag$trace_values(self$free_state),
+           value = dag$tf_sess_run(joint_density),
            iterations = self$it,
            convergence = ifelse(converged, 0, 1))
 
@@ -912,12 +946,12 @@ tf_optimiser <- R6Class(
 
       optimise_fun <- eval(parse(text = self$method))
       dag$on_graph(tfe$tf_optimiser <- do.call(optimise_fun,
-                                                    self$parameters))
+                                               self$parameters))
 
       if (self$adjust) {
-        dag$tf_run(train <- tf_optimiser$minimize(-joint_density_adj))
+        dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
       } else {
-        dag$tf_run(train <- tf_optimiser$minimize(-joint_density))
+        dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
       }
 
     },
@@ -932,9 +966,9 @@ tf_optimiser <- R6Class(
         self$it <- self$it + 1
         self$model$dag$tf_sess_run(train)
         if (self$adjust) {
-          obj <- self$model$dag$tf_sess_run(-joint_density_adj)
+          obj <- self$model$dag$tf_sess_run(optimiser_objective_adj)
         } else {
-          obj <- self$model$dag$tf_sess_run(-joint_density)
+          obj <- self$model$dag$tf_sess_run(optimiser_objective)
         }
         self$diff <- abs(self$old_obj - obj)
         self$old_obj <- obj
@@ -957,9 +991,9 @@ scipy_optimiser <- R6Class(
       opt_fun <- eval(parse(text = "tf$contrib$opt$ScipyOptimizerInterface"))
 
       if (self$adjust) {
-        loss  <- -tfe$joint_density_adj
+        loss  <- tfe$optimiser_objective_adj
       } else {
-        loss  <- -tfe$joint_density
+        loss  <- tfe$optimiser_objective
       }
 
       args <- list(loss = loss,
@@ -990,13 +1024,15 @@ scipy_optimiser <- R6Class(
 
       self$set_inits()
 
-      # run the optimiser, suppressing python yammering
+      # run the optimiser, suppressing python's yammering
       quietly(
-        dag$tf_run(tf_optimiser$minimize(sess,
-                                         feed_dict = feed_dict,
-                                         step_callback = it_progress,
-                                         loss_callback = obj_progress,
-                                         fetches = list(-joint_density_adj)))
+        dag$tf_run(
+          tf_optimiser$minimize(sess,
+                                feed_dict = feed_dict,
+                                step_callback = it_progress,
+                                loss_callback = obj_progress,
+                                fetches = list(optimiser_objective_adj))
+        )
       )
 
     }
