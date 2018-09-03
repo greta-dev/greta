@@ -332,8 +332,12 @@ tf_extract <- function (x, nelem, index, dims_out) {
   tensor_in_flat <- tf$reshape(x, shape(-1, nelem))
   tf_index <- tf$constant(as.integer(index), dtype = tf$int32)
   tensor_out_flat <- tf$gather(tensor_in_flat, tf_index, axis = 1L)
-  tensor_out <- tf$reshape(tensor_out_flat,
-                           to_shape(c(-1, dims_out)))
+
+  # reshape, handling unknown dimensions even whenthe output has 0-dimension
+  batch_size <- tf$shape(x)[0]
+  shape_list <- c(list(batch_size), to_shape(dims_out))
+  shape_out <- tf$stack(shape_list)
+  tensor_out <- tf$reshape(tensor_out_flat, shape_out)
   tensor_out
 
 }
