@@ -325,7 +325,7 @@ test_that("numerical issues are handled in mcmc", {
   expect_error(draws <- mcmc(m, verbose = FALSE),
                "TensorFlow hit a numerical problem")
 
-  # setting pb_update = 1 should handle those errors as bad samples
+  # setting one_by_one = TRUE should handle those errors as bad samples
   expect_ok(draws <- mcmc(m, warmup = 100, n_samples = 10,
                           one_by_one = TRUE,
                           verbose = FALSE))

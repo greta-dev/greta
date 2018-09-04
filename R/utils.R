@@ -178,6 +178,15 @@ apply_rows <- function (X, FUN, ...) {
   output
 }
 
+# apply FUN to rows of matrix X and recombine *without dropping like apply does*
+apply_rows <- function (X, FUN, ...) {
+  rows <- seq_len(nrow(X))
+  input_list <- lapply(rows, function (i) X[i, ])
+  output_list <- lapply(input_list, FUN, ...)
+  output <- do.call(rbind, output_list)
+  output
+}
+
 # get the next seed as a L'Ecuyer
 future_seed <- function() {
   okind <- RNGkind()[1]
@@ -287,6 +296,24 @@ match_batches <- function(values) {
 
 }
 
+
+# split a 3D array of n_samples * n_chains * n_parameters posterior samples into
+# a list of n_chains 2D arrays of dimension n_samples * n_parameters
+split_chains <- function (samples_array) {
+
+  dims_in <- dim(samples_array)
+  dims_out <- dims_in[-2]
+  n_chains <- dims_in[2]
+
+  lapply(seq_len(n_chains),
+         function (i) {
+           x <- samples_array[, i, , drop = FALSE]
+           dim(x) <- dims_out
+           x
+         })
+
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -310,7 +337,8 @@ misc_module <- module(module,
                       drop_first_dim,
                       expand_to_batch,
                       has_batch,
-                      match_batches)
+                      match_batches,
+                      split_chains)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {

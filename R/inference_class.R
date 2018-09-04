@@ -24,11 +24,11 @@ inference <- R6Class(
     tuning_periods = list(),
 
     # free state values for the last burst
-    last_burst_free_states = matrix(0),
+    last_burst_free_states = list(),
     # all recorded free state values
-    traced_free_state = matrix(0),
+    traced_free_state = list(),
     # all recorded greta array values
-    traced_values = matrix(0),
+    traced_values = list(),
 
     # where this is in the run
     initialize = function (initial_values,
@@ -45,7 +45,8 @@ inference <- R6Class(
       self$parameters <- parameters
       self$model <- model
       self$n_free <- length(model$dag$example_parameters())
-      self$free_state <- self$initial_values(initial_values)
+      self$set_initial_values(initial_values)
+      self$n_chains <- nrow(self$free_state)
       self$n_traced <- length(model$dag$trace_values(self$free_state))
       self$seed <- seed
 
@@ -84,8 +85,9 @@ inference <- R6Class(
       dag$tf_environment$rng_seed <- self$seed
     },
 
-    # check and set initial values (single vector on free state scale)
-    initial_values = function (inits) {
+    # check and try to autofill a single set of initial values (single vector on
+    # free state scale)
+    check_initial_values = function (inits) {
 
       undefined <- is.na(inits)
 
@@ -128,6 +130,19 @@ inference <- R6Class(
 
       }
 
+      inits
+
+    },
+
+    # check and set a list of initial values
+    set_initial_values = function (init_list) {
+
+      # check/autofill them
+      init_list <- lapply(init_list, self$check_initial_values)
+
+      # combine into a matrix
+      inits <- do.call(rbind, init_list)
+
       # set them as the state
       self$free_state <- inits
 
@@ -163,9 +178,12 @@ inference <- R6Class(
     trace = function (free_state = TRUE, values = FALSE) {
 
       if (free_state) {
-        # append the free state trace
-        self$traced_free_state <- rbind(self$traced_free_state,
-                                        self$last_burst_free_states)
+
+        # append the free state trace for each chain
+        self$traced_free_state <- mapply(rbind,
+                                         self$traced_free_state,
+                                         self$last_burst_free_states,
+                                         SIMPLIFY = FALSE)
       }
 
       if (values) {
@@ -174,9 +192,19 @@ inference <- R6Class(
         if (!is.null(self$trace_log_file)) {
           self$write_trace_to_log_file(last_burst_values)
         }
-        self$traced_values <- rbind(self$traced_values,
-                                    last_burst_values)
+        self$traced_values <- mapply(rbind,
+                                     self$traced_values,
+                                     last_burst_values,
+                                     SIMPLIFY = FALSE)
       }
+
+    },
+
+    # convert traced free state to the traced values
+    trace_values = function () {
+
+      dag <- self$model$dag
+      self$traced_values <- dag$trace_values(self$traced_free_state)
 
     },
 
@@ -186,8 +214,8 @@ inference <- R6Class(
 
       # can't use apply directly, as it will drop the variable name if there's
       # only one parameter being traced
-      values_trace <- apply_rows(free_states,
-                                 self$model$dag$trace_values)
+      values_trace <- lapply(free_states,
+                             self$model$dag$trace_values)
 
       values_trace
 
@@ -214,7 +242,8 @@ sampler <- R6Class(
   public = list(
 
     # sampler information
-    chain_number = 1,
+    sampler_number = 1,
+    n_samplers = 1,
     n_chains = 1,
     numerical_rejections = 0,
 
@@ -272,7 +301,7 @@ sampler <- R6Class(
       dag$n_cores <- n_cores
 
       if (sequential & verbose) {
-        self$print_chain_number()
+        self$print_sampler_number()
       }
 
       # if this is in parallel
@@ -291,8 +320,14 @@ sampler <- R6Class(
 
       # create these objects if needed
       if (from_scratch) {
-        self$traced_free_state <- matrix(NA, 0, self$n_free)
-        self$traced_values <- matrix(NA, 0, self$n_traced)
+
+        self$traced_free_state <- replicate(self$n_chains,
+                                            matrix(NA, 0, self$n_free),
+                                            simplify = FALSE)
+
+        self$traced_values <- replicate(self$n_chains,
+                                        matrix(NA, 0, self$n_traced),
+                                        simplify = FALSE)
       }
 
       # how big would we like the bursts to be
@@ -343,7 +378,9 @@ sampler <- R6Class(
       }
 
       # scrub the free state trace and numerical rejections
-      self$traced_free_state <- matrix(NA, 0, self$n_free)
+      self$traced_free_state <- replicate(self$n_chains,
+                                          matrix(NA, 0, self$n_free),
+                                          simplify = FALSE)
       self$numerical_rejections <- 0
 
       if (n_samples > 0) {
@@ -351,10 +388,7 @@ sampler <- R6Class(
         # on exiting during the main sampling period (even if killed by the
         # user) trace the free state values
 
-        on.exit({
-          self$traced_values <- dag$trace_values(self$traced_free_state)
-        }, add = TRUE, after = FALSE)
-
+        on.exit(self$trace_values(), add = TRUE, after = FALSE)
 
         # main sampling
         if (verbose) {
@@ -399,13 +433,22 @@ sampler <- R6Class(
 
     },
 
-    # print the chain number (if relevant)
-    print_chain_number = function () {
+    # convert traced free state to the traced values, accounting for
+    # chain dimension
+    trace_values = function () {
 
-      if (self$n_chains > 1) {
-        msg <- sprintf("\nchain %i/%i\n",
-                       self$chain_number,
-                       self$n_chains)
+      self$traced_values <- lapply(self$traced_free_state,
+                                   self$model$dag$trace_values)
+
+    },
+
+    # print the sampler number (if relevant)
+    print_sampler_number = function () {
+
+      if (self$n_samplers > 1) {
+        msg <- sprintf("\nsampler %i/%i\n",
+                       self$sampler_number,
+                       self$n_samplers)
         message(msg)
       }
 
@@ -492,11 +535,18 @@ sampler <- R6Class(
 
       if (tuning_now) {
 
-        samples <- self$traced_free_state
-        if (sum(!self$accept_history) > 0) {
-          samples <- samples[self$accept_history, , drop = FALSE]
+        n_accepted <- sum(!self$accept_history)
+
+        # get a combined vector of samples so far, from all cahins
+        if (n_accepted > 0) {
+
+          samples <- lapply(self$traced_free_state,
+                            function(x) {
+                              x[self$accept_history, , drop = FALSE]
+                            })
+          samples <- do.call(rbind, samples)
+
         }
-        n_accepted <- nrow(samples)
 
         # provided there have been at least 5 acceptances in the warmup so far
         if (n_accepted > 5) {
@@ -547,7 +597,7 @@ sampler <- R6Class(
 
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
-      sampler_values <- list(free_state = add_first_dim(self$free_state),
+      sampler_values <- list(free_state = self$free_state,
                              sampler_burst_length = as.integer(n_samples),
                              sampler_thin = as.integer(thin))
 
@@ -561,15 +611,14 @@ sampler <- R6Class(
 
       # get trace of free state and drop the null dimension
       free_state_draws <- batch_results[[1]]
-      dims <- dim(free_state_draws)
-      if (length(dims) > 2) {
-        dim(free_state_draws) <- dims[-2]
-      }
-      self$last_burst_free_states <- free_state_draws
+
+      self$last_burst_free_states <- split_chains(free_state_draws)
 
       n_draws <- nrow(free_state_draws)
       if (n_draws > 0) {
-        self$free_state <- free_state_draws[n_draws, ]
+        free_state <- free_state_draws[n_draws, , , drop = FALSE]
+        dim(free_state) <- dim(free_state)[-1]
+        self$free_state <- free_state
       }
 
       # log acceptance probability
@@ -600,7 +649,7 @@ sampler <- R6Class(
         # pass it back
         if (n_samples == 1L) {
 
-          result <- list(t(matrix(self$free_state)),
+          result <- list(self$free_state,
                          list(log_accept_ratio = -Inf,
                               is_accepted = FALSE))
 

@@ -13,7 +13,7 @@ greta_stash <- new.env()
 #' @export
 #' @importFrom stats rnorm runif
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom future plan
+#' @importFrom future plan nbrOfWorkers
 #'
 #' @param model greta_model object
 #' @param sampler sampler used to draw values in MCMC. See \code{\link{samplers}} for options.
@@ -146,17 +146,27 @@ mcmc <- function (model,
   # from a named list on the constrained scale to free state vectors
   initial_values <- prep_initials(initial_values, chains, dag)
 
-  # create a sampler object for each chain, using these (possibly NULL) initial
-  # values
-  samplers <- lapply(initial_values,
+  # determine the number of separate samplers to spin up, based on the future plan
+  n_samplers <- future::nbrOfWorkers()
+
+  # divide chains up between the workers
+  chain_assignment <- sort(rep(seq_len(n_samplers),
+                               length.out = chains))
+
+  # divide the initial values between them
+  initial_values_split <- split(initial_values, chain_assignment)
+
+  # create a sampler object for each parallel job, using these (possibly NULL)
+  # initial values
+  samplers <- lapply(initial_values_split,
                      build_sampler,
                      sampler,
                      model)
 
   # add chain info for printing
-  for (i in seq_len(chains)) {
-    samplers[[i]]$chain_number <- i
-    samplers[[i]]$n_chains <- chains
+  for (i in seq_len(n_samplers)) {
+    samplers[[i]]$sampler_number <- i
+    samplers[[i]]$n_samplers <- n_samplers
   }
 
   run_samplers(samplers = samplers,
@@ -317,9 +327,18 @@ stashed_samples <- function () {
 
     samplers <- greta_stash$samplers
 
-    # get draws as a matrix
+    trace_names <- samplers[[1]]$model$dag$trace_names
+
+    # get draws as 3D arrays for each sampler
     free_state_draws <- lapply(samplers, member, "traced_free_state")
     values_draws <- lapply(samplers, member, "traced_values")
+
+    # split along chain dimension, to get a list of chains
+    free_state_draws <- unlist(free_state_draws, recursive = FALSE)
+    values_draws <- unlist(values_draws, recursive = FALSE)
+
+    # apply the trace names back to them
+    values_draws <- lapply(values_draws, `colnames<-`, trace_names)
 
     # if there are no samples, return a list of NULLs
     if (nrow(values_draws[[1]]) == 0) {

@@ -17,6 +17,7 @@ dag_class <- R6Class(
     n_cores = 0L,
     compile = NA,
     adjacency_matrix = NULL,
+    trace_names = NULL,
 
     # create a dag from some target nodes
     initialize = function (target_greta_arrays,
@@ -428,7 +429,10 @@ dag_class <- R6Class(
                                 flatten_trace,
                                 trace_list)
 
-      do.call(cbind, trace_list_flat)
+
+      out <- do.call(cbind, trace_list_flat)
+      self$trace_names <- colnames(out)
+      out
 
     },
 
