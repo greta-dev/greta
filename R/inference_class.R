@@ -30,7 +30,6 @@ inference <- R6Class(
     # all recorded greta array values
     traced_values = list(),
 
-    # where this is in the run
     initialize = function (initial_values,
                            model,
                            parameters = list(),
@@ -594,8 +593,6 @@ sampler <- R6Class(
       # and the sampler info
       dag$tf_run(sampler_burst_length <- tf$placeholder(dtype = tf$int32))
       dag$tf_run(sampler_thin <- tf$placeholder(dtype = tf$int32))
-      tfe$n_cores <- dag$n_cores
-
 
       # define the whole draws tensor
       dag$tf_run(
@@ -604,8 +601,7 @@ sampler <- R6Class(
           current_state = free_state,
           kernel = sampler_kernel,
           num_burnin_steps = 0L,
-          num_steps_between_results = sampler_thin,
-          parallel_iterations = n_cores)
+          num_steps_between_results = sampler_thin)
       )
 
     },
