@@ -445,11 +445,30 @@ sampler <- R6Class(
     # print the sampler number (if relevant)
     print_sampler_number = function () {
 
+      msg <- ""
+
       if (self$n_samplers > 1) {
-        msg <- sprintf("\nsampler %i/%i\n",
+        msg <- sprintf("\nsampler %i/%i",
                        self$sampler_number,
                        self$n_samplers)
-        message(msg)
+      }
+
+      if (self$n_chains > 1) {
+
+        n_cores <- self$model$dag$n_cores
+
+        cores_text <- ifelse(n_cores == 1,
+                             "1 core",
+                             sprintf("up to %i cores", n_cores))
+
+        msg <- sprintf("\nrunning %i chains simultaneously on %s",
+                       self$n_chains,
+                       cores_text)
+
+      }
+
+      if (!identical(msg, "")) {
+        message(msg, "\n")
       }
 
     },
@@ -575,6 +594,8 @@ sampler <- R6Class(
       # and the sampler info
       dag$tf_run(sampler_burst_length <- tf$placeholder(dtype = tf$int32))
       dag$tf_run(sampler_thin <- tf$placeholder(dtype = tf$int32))
+      tfe$n_cores <- dag$n_cores
+
 
       # define the whole draws tensor
       dag$tf_run(
@@ -584,7 +605,7 @@ sampler <- R6Class(
           kernel = sampler_kernel,
           num_burnin_steps = 0L,
           num_steps_between_results = sampler_thin,
-          parallel_iterations = 1L)
+          parallel_iterations = n_cores)
       )
 
     },

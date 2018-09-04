@@ -106,8 +106,8 @@ mcmc <- function (model,
                   sampler = hmc(),
                   n_samples = 1000,
                   thin = 1,
-                  warmup = 2000,
-                  chains = 1,
+                  warmup = 1000,
+                  chains = 4,
                   n_cores = NULL,
                   verbose = TRUE,
                   pb_update = 50,
@@ -200,7 +200,7 @@ run_samplers <- function (samplers,
   dag <- samplers[[1]]$model$dag
   sequential <- inherits(future::plan(), "sequential")
   chains <- samplers[[1]]$n_chains
-  n_cores <- check_n_cores(n_cores, chains, sequential)
+  n_cores <- check_n_cores(n_cores, length(samplers), sequential)
   float_type <- dag$tf_float
 
   # stash the samplers now, to retrieve draws later

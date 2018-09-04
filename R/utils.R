@@ -896,7 +896,7 @@ relist_tf <- function (x, list_template) {
 }
 
 #' @importFrom future availableCores
-check_n_cores <- function (n_cores, chains, sequential) {
+check_n_cores <- function (n_cores, samplers, sequential) {
 
   n_cores_detected <- future::availableCores()
 
@@ -919,12 +919,12 @@ check_n_cores <- function (n_cores, chains, sequential) {
   }
 
   if (is.null(n_cores))
-    n_cores <- 0L
+    n_cores <- n_cores_detected
 
   # if in parallel on this machine and n_cores isn't user-specified, set it so
-  # there's no clash between chains
+  # there's no clash between samplers
   if (!sequential & n_cores == 0)
-    n_cores <- floor(n_cores_detected / chains)
+    n_cores <- floor(n_cores_detected / samplers)
 
   # ake sure there's at least 1
   n_cores <- max(n_cores, 1)
