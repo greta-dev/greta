@@ -236,17 +236,13 @@ calculate_list <- function(target, values) {
   missing <- !names(data_list) %in% names(values)
 
   # send list to tf environment and roll into a dict
+  values <- lapply(values, add_first_dim)
   dag$build_feed_dict(values, data_list = data_list[missing])
 
-  # evaluate the target there
-  # ex <- sprintf("sess$run(%s, feed_dict = feed_dict)",
-  #               dag$tf_name(get_node(target)))
-  # result <- eval(parse(text = ex),
-  #                envir = dag$tf_environment)
   name <- dag$tf_name(get_node(target))
   result <- dag$tf_sess_run(name, as_text = TRUE)
 
-  result
+  drop_first_dim(result)
 
 }
 

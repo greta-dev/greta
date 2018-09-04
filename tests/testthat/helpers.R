@@ -11,7 +11,9 @@ expect_ok <- function (expr)
   expect_error(expr, NA)
 
 # evaluate a greta_array, node, or tensor
-grab <- function (x, dag = NULL) {
+grab <- function (x, dag = NULL, ...) {
+
+  dots <- list(...)
 
   if (inherits(x, "node"))
     x <- as.greta_array(x)
@@ -26,10 +28,25 @@ grab <- function (x, dag = NULL) {
   }
 
   # generate the feed dict for data
-  dag$build_feed_dict()
-  tf$Session()$run(x,
-                   feed_dict = dag$tf_environment$feed_dict)
+  # if (!identical(dots, list()))
+  #   dots <- lapply(dots, add_first_dim)
 
+  dag$build_feed_dict(dots)
+  out <- tf$Session()$run(x,
+                          feed_dict = dag$tf_environment$feed_dict)
+  drop_first_dim(out)
+
+}
+
+# get the value of the target greta array, by passing values for the named
+# variable greta arrays via the free state parameter
+grab_via_free_state <- function(target, values) {
+  dag <- dag_class$new(list(target))
+  dag$define_tf()
+  inits <- do.call(initials, values)
+  inits_flat <- prep_initials(inits, 1, dag)[[1]]
+  vals <- dag$trace_values(inits_flat)
+  array(vals, dim = dim(target))
 }
 
 is.greta_array <- function(x)
@@ -139,24 +156,76 @@ randu <- function (...) {
   array(runif(prod(dim)), dim = dim)
 }
 
+# create a variable with the same dimensions as as_data(x)
+as_variable <- function (x) {
+  x <- as_2D_array(x)
+  variable(dim = dim(x))
+}
+
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
-check_op <- function (op, a, b, greta_op = NULL, tolerance = 1e-3) {
+check_op <- function (op, a, b, greta_op = NULL,
+                      tolerance = 1e-3,
+                      only = c("data", "variable")) {
 
   if (is.null(greta_op))
     greta_op <- op
 
-  if (missing(b)) {
-    r_out <- op(a)
-    greta_array <- greta_op(as_data(a))
-  } else {
-    r_out <- op(a, b)
-    greta_array <- greta_op(as_data(a), as_data(b))
+  r_out <- run_r_op(op, a, b)
+
+  for (type in only) {
+    # compare with ops on data greta arrays
+    greta_out <- run_greta_op(greta_op, a, b, type)
+    compare_op(r_out, greta_out, tolerance)
   }
 
-  greta_out <- grab(greta_array)
+}
+
+compare_op <- function(r_out, greta_out, tolerance = 1e-3) {
   difference <- as.vector(abs(r_out - greta_out))
   expect_true(all(difference < tolerance))
+}
+
+run_r_op <- function(op, a, b) {
+  if (missing(b)) {
+    out <- op(a)
+  } else {
+    out <- op(a, b)
+  }
+  out
+}
+
+run_greta_op <- function (greta_op, a, b,
+                          type = c("data", "variable")) {
+
+  type <- match.arg(type)
+
+  converter <- switch(type,
+                      data = as_data,
+                      variable = as_variable)
+
+  g_a <- converter(a)
+
+  if (missing(b)) {
+    out <- greta_op(g_a)
+    values <- list(g_a = a)
+  } else {
+    g_b <- converter(b)
+    values <- list(g_a = a, g_b = b)
+    out <- greta_op(g_a, g_b)
+  }
+
+  if (type == "data") {
+    # data greta arrays should provide their own values
+    result <- calculate(out, list())
+  } else if (type == "variable") {
+    result <- grab_via_free_state(out, values)
+  } else{
+    result <- calculate(out, values)
+  }
+
+  result
+
 }
 
 # execute a call via greta, swapping the objects named in 'swap' to greta

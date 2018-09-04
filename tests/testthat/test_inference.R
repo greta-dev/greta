@@ -64,14 +64,14 @@ test_that('opt converges with SciPy optimisers', {
 
     (o <- opt(m,
               optimiser = optmr(),
-              max_iterations = 200))
+              max_iterations = 500))
 
-    # should have converged in fewer than 200 iterations and be close to truth
+    # should have converged in fewer than 500 iterations and be close to truth
 
     # can't tell that from output of cobyla
     if (!identical(optmr(), cobyla())) {
       expect_equal(o$convergence, 0)
-      expect_lte(o$iterations, 200)
+      expect_lte(o$iterations, 500)
     }
 
     expect_true(all(abs(x - o$par) < 1e-2))
@@ -329,5 +329,30 @@ test_that("numerical issues are handled in mcmc", {
   expect_ok(draws <- mcmc(m, warmup = 100, n_samples = 10,
                           one_by_one = TRUE,
                           verbose = FALSE))
+
+})
+
+test_that("mcmc works in parallel", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  m <- model(normal(0, 1))
+
+  library(future)
+  op <- plan()
+  plan(multisession)
+
+  # one chain
+  expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10,
+                           verbose = FALSE) )
+
+  # multiple chains
+  expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10,
+                           chains = 2,
+                           verbose = FALSE) )
+
+  # put the future plan back as we found it
+  plan(op)
 
 })

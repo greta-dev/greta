@@ -136,25 +136,37 @@ dag_class <- R6Class(
       self$node_tf_names[node$unique_name]
     },
 
-    define_free_state = function () {
+    define_free_state = function (type = c("variable", "placeholder"),
+                                  name = "free_state") {
+
+      type <- match.arg(type)
 
       tfe <- self$tf_environment
 
-      # tf$Variable seems to have trouble assigning values, if created with
-      # numeric (rather than logical) NAs ¯\_(ツ)_/¯
       vals <- self$example_parameters()
-      vals <- as.logical(vals)
-      vals <- as.matrix(vals)
 
-      assign("free_state_values",
-             vals,
+
+      if (type == "variable") {
+
+        # tf$Variable seems to have trouble assigning values, if created with
+        # numeric (rather than logical) NAs ¯\_(ツ)_/¯
+        vals <- as.logical(vals)
+        vals <- t(as.matrix(vals))
+
+        self$on_graph(free_state <- tf$Variable(initial_value = vals,
+                                                dtype = tf_float()))
+      } else {
+
+        shape <- shape(NULL, length(vals))
+        self$on_graph(free_state <- tf$placeholder(dtype = tf_float(),
+                                                   shape = shape))
+
+      }
+
+      assign(name,
+             free_state,
              envir = tfe)
 
-      self$tf_run(free_state <- tf$Variable(initial_value = free_state_values,
-                                            dtype = tf_float()))
-
-      rm("free_state_values",
-         envir = tfe)
     },
 
     # define the body of the tensorflow graph in the environment env; without
@@ -172,7 +184,7 @@ dag_class <- R6Class(
                         FUN.VALUE = 1L)
 
       if (length(lengths) > 1) {
-        args <- self$on_graph(tf$split(free_state, lengths))
+        args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
       } else {
         args <- list(free_state)
       }
@@ -216,7 +228,7 @@ dag_class <- R6Class(
     define_tf = function () {
 
       # define the free state variable, rest of the graph, and the session
-      self$define_free_state()
+      self$define_free_state("placeholder", "free_state")
       self$define_tf_body()
       self$define_tf_session()
 
@@ -295,11 +307,11 @@ dag_class <- R6Class(
 
     # return a function to obtain the model log probability from a tensor for
     # the free state
-    generate_log_prob_function = function (adjust = TRUE) {
+    generate_log_prob_function = function (which = c("adjusted",
+                                                     "unadjusted",
+                                                     "both")) {
 
-      target <- ifelse (adjust,
-                        "joint_density_adj",
-                        "joint_density")
+      which <- match.arg(which)
 
       function (free_state) {
 
@@ -317,9 +329,19 @@ dag_class <- R6Class(
         tfe$free_state <- free_state
         self$define_tf_body()
 
-        # get the density and return
+        # define the densities
         self$define_joint_density()
-        tfe[[target]]
+
+        objectives <- list(adjusted = tfe$joint_density_adj,
+                           unadjusted = tfe$joint_density)
+
+        # return either of the densities, or a list of both
+        result <- switch(which,
+                         adjusted = objectives$adjusted,
+                         unadjusted = objectives$unadjusted,
+                         both = objectives)
+
+        result
 
       }
 
@@ -357,8 +379,14 @@ dag_class <- R6Class(
 
     send_parameters = function (parameters) {
 
+      # reshape to a row vector if needed
+      if (is.null(dim(parameters))) {
+        parameters <- array(parameters, dim = c(1, length(parameters)))
+      }
+
       # create a feed dict in the TF environment
-      parameter_list <- list(free_state = as.matrix(parameters))
+      parameter_list <- list(free_state = parameters)
+
       self$build_feed_dict(parameter_list)
 
     },
@@ -400,7 +428,7 @@ dag_class <- R6Class(
                                 flatten_trace,
                                 trace_list)
 
-      unlist(trace_list_flat)
+      do.call(cbind, trace_list_flat)
 
     },
 

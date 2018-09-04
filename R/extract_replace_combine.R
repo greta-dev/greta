@@ -389,7 +389,7 @@ length.greta_array <- function(x)
 
   op("reshape",
      x,
-     operation_args = list(shape = dims),
+     operation_args = list(shape = c(-1L, dims)),
      tf_operation = "tf$reshape",
      dimfun = dimfun,
      value = new_value)
@@ -504,6 +504,6 @@ diag.greta_array <- function (x = 1, nrow, ncol) {
   }
 
   # return the extraction op
-  op('diag', x, dimfun = dimfun, tf_operation = "tf$diag_part")
+  op('diag', x, dimfun = dimfun, tf_operation = "tf$matrix_diag_part")
 
 }

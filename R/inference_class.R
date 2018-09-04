@@ -160,7 +160,7 @@ inference <- R6Class(
 
     # store the free state, and/or corresponding values of the target greta
     # arrays for the latest batch of raw draws
-    trace = function (values = TRUE, free_state = TRUE) {
+    trace = function (free_state = TRUE, values = FALSE) {
 
       if (free_state) {
         # append the free state trace
@@ -321,7 +321,7 @@ sampler <- R6Class(
         for (burst in seq_along(burst_lengths)) {
 
           self$run_burst(burst_lengths[burst])
-          self$trace(values = FALSE)
+          self$trace()
           self$tune(completed_iterations[burst], warmup)
 
           if (verbose) {
@@ -346,37 +346,49 @@ sampler <- R6Class(
       self$traced_free_state <- matrix(NA, 0, self$n_free)
       self$numerical_rejections <- 0
 
-      # main sampling
-      if (verbose) {
-        pb_sampling <- create_progress_bar('sampling',
-                                           c(warmup, n_samples),
-                                           pb_update,
-                                           self$pb_width)
-        iterate_progress_bar(pb_sampling, 0, 0, self$pb_file)
-      } else {
-        pb_sampling <- NULL
-      }
+      if (n_samples > 0) {
 
-      # split up warmup iterations into bursts of sampling
-      burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
-      completed_iterations <- cumsum(burst_lengths)
+        # on exiting during the main sampling period (even if killed by the
+        # user) trace the free state values
 
-      for (burst in seq_along(burst_lengths)) {
+        on.exit({
+          self$traced_values <- dag$trace_values(self$traced_free_state)
+        }, add = TRUE, after = FALSE)
 
-        self$run_burst(burst_lengths[burst], thin = thin)
-        self$trace()
 
+        # main sampling
         if (verbose) {
+          pb_sampling <- create_progress_bar('sampling',
+                                             c(warmup, n_samples),
+                                             pb_update,
+                                             self$pb_width)
+          iterate_progress_bar(pb_sampling, 0, 0, self$pb_file)
+        } else {
+          pb_sampling <- NULL
+        }
 
-          # update the progress bar/percentage log
-          iterate_progress_bar(pb_sampling,
-                               it = completed_iterations[burst],
-                               rejects = self$numerical_rejections,
-                               file = self$pb_file)
+        # split up warmup iterations into bursts of sampling
+        burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
+        completed_iterations <- cumsum(burst_lengths)
 
-          self$write_percentage_log(n_samples,
-                                    completed_iterations[burst],
-                                    stage = "sampling")
+        for (burst in seq_along(burst_lengths)) {
+
+          self$run_burst(burst_lengths[burst], thin = thin)
+          self$trace()
+
+          if (verbose) {
+
+            # update the progress bar/percentage log
+            iterate_progress_bar(pb_sampling,
+                                 it = completed_iterations[burst],
+                                 rejects = self$numerical_rejections,
+                                 file = self$pb_file)
+
+            self$write_percentage_log(n_samples,
+                                      completed_iterations[burst],
+                                      stage = "sampling")
+
+          }
 
         }
 
@@ -518,7 +530,7 @@ sampler <- R6Class(
       dag$tf_run(
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = sampler_burst_length %/% sampler_thin,
-          current_state = tf$reshape(free_state, list(length(free_state))),
+          current_state = free_state,
           kernel = sampler_kernel,
           num_burnin_steps = 0L,
           num_steps_between_results = sampler_thin,
@@ -535,7 +547,7 @@ sampler <- R6Class(
 
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
-      sampler_values <- list(free_state = matrix(self$free_state),
+      sampler_values <- list(free_state = add_first_dim(self$free_state),
                              sampler_burst_length = as.integer(n_samples),
                              sampler_thin = as.integer(thin))
 
@@ -547,9 +559,14 @@ sampler <- R6Class(
       # run the sampler, handling numerical errors
       batch_results <- self$sample_carefully(n_samples)
 
-      # get trace of free state
+      # get trace of free state and drop the null dimension
       free_state_draws <- batch_results[[1]]
+      dims <- dim(free_state_draws)
+      if (length(dims) > 2) {
+        dim(free_state_draws) <- dims[-2]
+      }
       self$last_burst_free_states <- free_state_draws
+
       n_draws <- nrow(free_state_draws)
       if (n_draws > 0) {
         self$free_state <- free_state_draws[n_draws, ]
@@ -640,19 +657,21 @@ hmc_sampler <- R6Class(
       dag$tf_run(hmc_L <- tf$placeholder(dtype = tf$int32))
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
-      dag$tf_run(hmc_diag_sd <- tf$placeholder(dtype = tf_float(),
-                                               shape = list(length(free_state), 1L)))
+      dag$tf_run(
+        hmc_diag_sd <- tf$placeholder(dtype = tf_float(),
+                                      shape = shape(dim(free_state)[[2]], 1))
+      )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
       dag$tf_run(
         hmc_step_sizes <- tf$reshape(
           hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
-          shape = list(length(free_state))
+          shape = shape(dim(free_state)[[2]])
         )
       )
 
       # log probability function
-      tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
+      tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # build the kernel
       dag$tf_run(
@@ -707,20 +726,20 @@ rwmh_sampler <- R6Class(
                                    normal = tfp$mcmc$random_walk_normal_fn,
                                    uniform = tfp$mcmc$random_walk_uniform_fn)
 
-      tfe$log_prob_fun <- dag$generate_log_prob_function(adjust = TRUE)
+      tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # tensors for sampler parameters
       dag$tf_run(rwmh_epsilon <- tf$placeholder(dtype = tf_float()))
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
       dag$tf_run(rwmh_diag_sd <- tf$placeholder(dtype = tf_float(),
-                                                shape = list(length(free_state), 1L)))
+                                                shape = shape(dim(free_state)[[2]], 1)))
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
       dag$tf_run(
         rwmh_step_sizes <- tf$reshape(
           rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
-          shape = list(length(free_state))
+          shape = shape(dim(free_state)[[2]])
         )
       )
 
@@ -796,6 +815,7 @@ optimiser <- R6Class(
       if ("uses_callbacks" %in% names(other_args))
         self$uses_callbacks <- other_args$uses_callbacks
 
+      self$create_optimiser_objective()
       self$create_tf_minimiser()
 
     },
@@ -829,13 +849,44 @@ optimiser <- R6Class(
 
       dag$tf_sess_run(tf$global_variables_initializer())
 
+      shape <- tfe$optimiser_free_state$shape
       dag$on_graph(
         tfe$optimiser_init <- tf$constant(self$free_state,
-                                          shape = tfe$free_state$shape,
+                                          shape = shape,
                                           dtype = tf_float())
       )
 
-      . <- dag$tf_sess_run(free_state$assign(optimiser_init))
+      . <- dag$tf_sess_run(optimiser_free_state$assign(optimiser_init))
+
+    },
+
+    # create a separate free state variable and objective, since optimisers must
+    # use variables
+    create_optimiser_objective = function () {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      # define a *variable* free state object
+      if (!live_pointer("optimiser_free_state", envir = tfe)) {
+        dag$define_free_state("variable", name = "optimiser_free_state")
+      }
+
+      # use the log prob function to define objectives from the variable
+      if (!live_pointer("optimiser_objective_adj", envir = tfe)) {
+
+        log_prob_fun <- dag$generate_log_prob_function(which = "both")
+        dag$on_graph(objectives <- log_prob_fun(tfe$optimiser_free_state))
+
+        assign("optimiser_objective_adj",
+               -objectives$adjusted,
+               envir = tfe)
+
+        assign("optimiser_objective",
+               -objectives$unadjusted,
+               envir = tfe)
+
+      }
 
     },
 
@@ -852,11 +903,13 @@ optimiser <- R6Class(
     fetch_free_state = function () {
 
       # get the free state as a vector
-      self$free_state <- self$model$dag$tf_sess_run(free_state)
+      self$free_state <- self$model$dag$tf_sess_run(optimiser_free_state)
 
     },
 
     return_outputs = function () {
+
+      dag <- self$model$dag
 
       # if the optimiser was ignoring the callbacks, we have no idea about the
       # number of iterations or convergence
@@ -865,8 +918,8 @@ optimiser <- R6Class(
 
       converged <- self$it < (self$max_iterations - 1)
 
-      list(par = self$model$dag$trace_values(self$free_state),
-           value = self$model$dag$tf_sess_run(joint_density),
+      list(par = dag$trace_values(self$free_state),
+           value = dag$tf_sess_run(joint_density),
            iterations = self$it,
            convergence = ifelse(converged, 0, 1))
 
@@ -910,12 +963,12 @@ tf_optimiser <- R6Class(
 
       optimise_fun <- eval(parse(text = self$method))
       dag$on_graph(tfe$tf_optimiser <- do.call(optimise_fun,
-                                                    self$parameters))
+                                               self$parameters))
 
       if (self$adjust) {
-        dag$tf_run(train <- tf_optimiser$minimize(-joint_density_adj))
+        dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
       } else {
-        dag$tf_run(train <- tf_optimiser$minimize(-joint_density))
+        dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
       }
 
     },
@@ -930,9 +983,9 @@ tf_optimiser <- R6Class(
         self$it <- self$it + 1
         self$model$dag$tf_sess_run(train)
         if (self$adjust) {
-          obj <- self$model$dag$tf_sess_run(-joint_density_adj)
+          obj <- self$model$dag$tf_sess_run(optimiser_objective_adj)
         } else {
-          obj <- self$model$dag$tf_sess_run(-joint_density)
+          obj <- self$model$dag$tf_sess_run(optimiser_objective)
         }
         self$diff <- abs(self$old_obj - obj)
         self$old_obj <- obj
@@ -955,9 +1008,9 @@ scipy_optimiser <- R6Class(
       opt_fun <- eval(parse(text = "tf$contrib$opt$ScipyOptimizerInterface"))
 
       if (self$adjust) {
-        loss  <- -tfe$joint_density_adj
+        loss  <- tfe$optimiser_objective_adj
       } else {
-        loss  <- -tfe$joint_density
+        loss  <- tfe$optimiser_objective
       }
 
       args <- list(loss = loss,
@@ -988,13 +1041,15 @@ scipy_optimiser <- R6Class(
 
       self$set_inits()
 
-      # run the optimiser, suppressing python yammering
+      # run the optimiser, suppressing python's yammering
       quietly(
-        dag$tf_run(tf_optimiser$minimize(sess,
-                                         feed_dict = feed_dict,
-                                         step_callback = it_progress,
-                                         loss_callback = obj_progress,
-                                         fetches = list(-joint_density_adj)))
+        dag$tf_run(
+          tf_optimiser$minimize(sess,
+                                feed_dict = feed_dict,
+                                step_callback = it_progress,
+                                loss_callback = obj_progress,
+                                fetches = list(optimiser_objective_adj))
+        )
       )
 
     }

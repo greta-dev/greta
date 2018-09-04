@@ -321,24 +321,33 @@ stashed_samples <- function () {
     free_state_draws <- lapply(samplers, member, "traced_free_state")
     values_draws <- lapply(samplers, member, "traced_values")
 
-    # convert to mcmc objects
-    free_state_draws <- lapply(free_state_draws, prepare_draws)
-    values_draws <- lapply(values_draws, prepare_draws)
+    # if there are no samples, return a list of NULLs
+    if (nrow(values_draws[[1]]) == 0) {
 
-    # convert to mcmc.list objects
-    free_state_draws <- coda::mcmc.list(free_state_draws)
-    values_draws <- coda::mcmc.list(values_draws)
+      return (replicate(length(samplers), NULL))
 
-    # prep the raw model objects
-    model_info <- new.env()
-    model_info$raw_draws <- free_state_draws
-    model_info$samplers <- samplers
-    model_info$model <- samplers[[1]]$model
+    } else {
 
-    # add the raw draws as an attribute
-    attr(values_draws, "model_info") <- model_info
+      # convert to mcmc objects
+      free_state_draws <- lapply(free_state_draws, prepare_draws)
+      values_draws <- lapply(values_draws, prepare_draws)
 
-    return (values_draws)
+      # convert to mcmc.list objects
+      free_state_draws <- coda::mcmc.list(free_state_draws)
+      values_draws <- coda::mcmc.list(values_draws)
+
+      # prep the raw model objects
+      model_info <- new.env()
+      model_info$raw_draws <- free_state_draws
+      model_info$samplers <- samplers
+      model_info$model <- samplers[[1]]$model
+
+      # add the raw draws as an attribute
+      attr(values_draws, "model_info") <- model_info
+
+      return (values_draws)
+
+    }
 
   } else {
 

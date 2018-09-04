@@ -757,7 +757,7 @@ multinomial_distribution <- R6Class (
     tf_distrib = function (parameters, dag) {
       # scale probs to get absolute density correct
       probs <- parameters$prob
-      probs <- probs / tf$reduce_sum(probs)
+      probs <- probs / tf_sum(probs)
       tfp$distributions$Multinomial(total_count = parameters$size,
                                     probs = probs)
     },
@@ -793,7 +793,7 @@ categorical_distribution <- R6Class (
     tf_distrib = function (parameters, dag) {
       # scale probs to get absolute density correct
       probs <- parameters$prob
-      probs <- probs / tf$reduce_sum(probs)
+      probs <- probs / tf_sum(probs)
       tfp$distributions$Multinomial(total_count = fl(1),
                                     probs = probs)
     },
@@ -882,7 +882,7 @@ multivariate_normal_distribution <- R6Class (
       if (is.null(cf))
         L <- tf$cholesky(parameters$Sigma)
       else
-        L <- tf$transpose(parameters$Sigma)
+        L <- tf_transpose(parameters$Sigma)
 
       mu <- parameters$mean
       tfp$distributions$MultivariateNormalTriL(loc = mu,
@@ -966,7 +966,7 @@ wishart_distribution <- R6Class (
 
         # if it's available, find and use the tensor for the cholesky factor
         cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
-        t_cholesky_scale <- tf$transpose(cholesky_scale)
+        t_cholesky_scale <- tf_transpose(cholesky_scale)
         distrib <- wish(df = df, scale_tril = t_cholesky_scale)
 
       } else {
@@ -1074,8 +1074,8 @@ lkj_correlation_distribution <- R6Class (
         if (!is_cholesky)
           x <- tf$cholesky(x)
 
-        diags <- tf$diag_part(x)
-        det <- tf$square(tf$reduce_prod(diags))
+        diags <- tf$matrix_diag_part(x)
+        det <- tf$square(tf_prod(diags))
         prob <- det ^ (eta - fl(1))
         lp <- tf$log(prob)
         tf$squeeze(lp)
