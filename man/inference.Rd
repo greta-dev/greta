@@ -10,7 +10,7 @@
 \title{statistical inference on greta models}
 \usage{
 mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
-  warmup = 1000, chains = 1, n_cores = NULL, verbose = TRUE,
+  warmup = 2000, chains = 1, n_cores = NULL, verbose = TRUE,
   pb_update = 50, one_by_one = FALSE, initial_values = initials())
 
 stashed_samples()
