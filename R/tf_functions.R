@@ -21,7 +21,6 @@ tf_lbeta <- function (a, b)
   tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
 
 # set up the tf$reduce_* functions to ignore the first dimension
-
 skip_dim <- function (op_name, x) {
   n_dim <- length(dim(x))
   reduction_dims <- seq_len(n_dim - 1)
@@ -93,12 +92,13 @@ tf_flat_to_chol <- function (x, dims) {
   x_index_offdiag <- length(indices_diag) + seq_along(indices_offdiag) - 1
 
   # create an empty vector to fill with the values
-  batch_size <- tf$shape(x)[[0]]
-  shape <- tf$stack(list(batch_size, as.integer(prod(dims)), 1L))
-  values_0 <- tf$zeros(shape, dtype = tf_float())
-
-  values_0_diag <- tf_recombine(values_0, indices_diag, tf$exp(x[, x_index_diag, ]))
-  values_z <- tf_recombine(values_0_diag, indices_offdiag, x[, x_index_offdiag, ])
+  values_0 <- tf$zeros(shape(1, prod(dims), 1), dtype = tf_float())
+  values_0_diag <- tf_recombine(values_0,
+                                indices_diag,
+                                tf$exp(x[, x_index_diag, , drop = FALSE]))
+  values_z <- tf_recombine(values_0_diag,
+                           indices_offdiag,
+                           x[, x_index_offdiag, , drop = FALSE])
 
   # reshape into lower triangular and return
   tf$reshape(values_z, shape(-1, dims[1], dims[2]))
@@ -128,7 +128,7 @@ tf_flat_to_chol_correl <- function (x, dims) {
 
   # dummy list to store transformed versions of rows
   values_list <- y_index_list
-  values_list[[1]] <- tf$reshape(y[, y_index_list[[1]], ],
+  values_list[[1]] <- tf$reshape(y[, y_index_list[[1]], , drop = FALSE],
                                  shape(-1, k - 1, 1))
   sum_sqs <- tf$square(values_list[[1]])
 
@@ -156,18 +156,13 @@ tf_flat_to_chol_correl <- function (x, dims) {
   indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
 
   # diagonal & off-diagonal elements
-  batch_size <- tf$shape(x)[[0]]
-  shape <- tf$stack(list(batch_size, 1L, 1L))
-  values_diag <- tf$concat(list(tf$ones(shape,
+  values_diag <- tf_concat(list(tf$ones(shape(1, 1, 1),
                                         dtype = tf_float()),
                                 sqrt(fl(1) - sum_sqs)), 1L)
-  values_offdiag <- tf$concat(values_list, 1L)
+  values_offdiag <- tf_concat(values_list, 1L)
 
   # plug elements into a vector of 0s
-  shape <- tf$stack(list(batch_size,
-                         as.integer(prod(dims)),
-                         1L))
-  values_0 <- tf$zeros(shape, dtype = tf_float())
+  values_0 <- tf$zeros(shape(1, prod(dims), 1), dtype = tf_float())
   values_0_diag <- tf_recombine(values_0, indices_diag, values_diag)
   values_z <- tf_recombine(values_0_diag, indices_offdiag, values_offdiag)
 
@@ -313,11 +308,16 @@ tf_icauchit <- function (x)
   fl(1 / pi) * tf$atan(x) + fl(0.5)
 
 tf_imultilogit <- function (x) {
-  batch_size <- tf$shape(x)[[0]]
-  shape <- tf$stack(list(batch_size, dim(x)[[2]], 1L))
-  zeros <- tf$zeros(shape, tf_float())
+  zeros <- tf$zeros(shape(1, dim(x)[[2]], 1L), tf_float())
   latent <- tf$concat(list(x, zeros), 2L)
   tf$nn$softmax(latent)
+}
+
+# a version of tf$concat that automatically expands out the first dimension if
+# necessary
+tf_concat <- function (values, axis) {
+  values <- match_batches(values)
+  tf$concat(values = values, axis = axis)
 }
 
 # map R's extract and replace syntax to tensorflow, for use in operation nodes
@@ -333,7 +333,8 @@ tf_extract <- function (x, nelem, index, dims_out) {
   tf_index <- tf$constant(as.integer(index), dtype = tf$int32)
   tensor_out_flat <- tf$gather(tensor_in_flat, tf_index, axis = 1L)
 
-  # reshape, handling unknown dimensions even whenthe output has 0-dimension
+  # reshape, handling unknown dimensions even when the output has 0-dimension
+  # (which prevents us from just using -1 on the first dimension)
   batch_size <- tf$shape(x)[[0]]
   shape_list <- c(list(batch_size), to_shape(dims_out))
   shape_out <- tf$stack(shape_list)
@@ -347,21 +348,13 @@ tf_extract <- function (x, nelem, index, dims_out) {
 # 0-indexing)
 tf_recombine <- function (ref, index, updates) {
 
-  batch_size <-
-
-  # expand ref if needed
-  if (length(dim(ref)) < 3) {
-    ref <- tf$reshape(ref,
-                      shape(-1, ncol(ref), 1))
-  }
-
-  if (length(dim(updates)) < 3) {
-    updates <- tf$reshape(updates,
-                          shape(-1, ncol(updates), 1))
-  }
+  # expand out any data to match the batch dimensions
+  out_list <- match_batches(list(ref, updates))
+  ref <- out_list[[1]]
+  updates <- out_list[[2]]
 
   # vector denoting whether an element is being updated
-  nelem <- ref$get_shape()$as_list()[[2]]
+  nelem <- dim(ref)[[2]]
   replaced <- rep(0, nelem)
   replaced[index + 1] <- seq_along(index)
   runs <- rle(replaced)

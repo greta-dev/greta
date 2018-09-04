@@ -19,8 +19,7 @@ data_node <- R6Class(
       tf_name <- dag$tf_name(self)
 
       value <- self$value()
-      shape <- c(list(NULL), to_shape(dim(value)))
-      # shape <- to_shape(dim(value))
+      shape <- to_shape(c(1, dim(value)))
 
       # create placeholder
       assign(tf_name,
@@ -30,7 +29,6 @@ data_node <- R6Class(
 
       # put data in the data list
       tfe$data_list[[tf_name]] <- add_first_dim(value)
-      # tfe$data_list[[tf_name]] <- value
 
     }
   )

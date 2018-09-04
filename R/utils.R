@@ -249,6 +249,44 @@ drop_first_dim <- function (x) {
   x
 }
 
+# where x is a tensor with no batch dimension, and y is a tensor with a batch
+# dimension, tile x to have first dimension matching y (dimension determined at
+# run time)
+expand_to_batch <- function(x, y) {
+  batch_size <- tf$shape(y)[[0]]
+  shape <- tf$stack(c(batch_size, dim(x)[-1]))
+  tf$tile(x, c(batch_size, 1L, 1L))
+}
+
+# does this tensor have a batch dimension (of unknown size) as its first
+# dimension?
+has_batch <- function (x) is.null(dim(x)[[1]])
+
+# given a list of tensors, if none or all of them have a batch dimension, return
+# the list. If any (but not all) of them has a batch dimension, tile the
+# unbatched ones (which are assumed to have first dimension 1) to match the
+# dimension of the batched ones dimension
+match_batches <- function(values) {
+
+  have_batches <- vapply(values, has_batch, FUN.VALUE = TRUE)
+
+  # if any, but not all, have a batch, dimension, tile the others to match the
+  # batch
+  if (!all(have_batches) & any(have_batches)) {
+
+    target_id <- which(have_batches)[1]
+    target <- values[[target_id]]
+
+    for (i in which(!have_batches)) {
+      values[[i]] <- expand_to_batch(values[[i]], target)
+    }
+
+  }
+
+  values
+
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -269,7 +307,10 @@ misc_module <- module(module,
                       record,
                       as_2D_array,
                       add_first_dim,
-                      drop_first_dim)
+                      drop_first_dim,
+                      expand_to_batch,
+                      has_batch,
+                      match_batches)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
