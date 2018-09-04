@@ -35,13 +35,19 @@ NULL
 
 #' @export
 #' @rdname structures
-zeros <- function (...)
-  as.greta_array(array(data = 0, dim = c(...)))
+zeros <- function (...) {
+  dims <- c(...)
+  names(dims) <- NULL
+  greta_array(0, dims)
+}
 
 #' @export
 #' @rdname structures
-ones <- function (...)
-  as.greta_array(array(data = 1, dim = c(...)))
+ones <- function (...) {
+  dims <- c(...)
+  names(dims) <- NULL
+  greta_array(1, dims)
+}
 
 #' @export
 #' @rdname structures
