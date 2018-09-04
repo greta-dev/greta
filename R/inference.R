@@ -618,7 +618,7 @@ opt <- function (model,
   initial_values_list <- prep_initials(initial_values, 1, model$dag)
 
   # create R6 object of the right type
-  object <- optimiser$class$new(initial_values = initial_values_list[[1]],
+  object <- optimiser$class$new(initial_values = initial_values_list[1],
                                 model = model,
                                 name = optimiser$name,
                                 method = optimiser$method,

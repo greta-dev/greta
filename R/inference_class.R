@@ -46,7 +46,6 @@ inference <- R6Class(
       self$model <- model
       self$n_free <- length(model$dag$example_parameters())
       self$set_initial_values(initial_values)
-      self$n_chains <- nrow(self$free_state)
       self$n_traced <- length(model$dag$trace_values(self$free_state))
       self$seed <- seed
 
@@ -103,7 +102,6 @@ inference <- R6Class(
           inits[undefined] <- rnorm(n_missing, 0, 0.1)
 
           # test validity of values
-
           valid <- self$valid_parameters(inits)
           attempts <- attempts + 1
 
@@ -276,6 +274,8 @@ sampler <- R6Class(
                        model = model,
                        parameters = parameters,
                        seed = seed)
+
+      self$n_chains <- nrow(self$free_state)
 
       # duplicate diag_sd if needed
       n_diag <- length(self$parameters$diag_sd)
