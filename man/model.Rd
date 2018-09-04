@@ -10,7 +10,7 @@ model(..., precision = c("double", "single"), compile = TRUE)
 
 \method{print}{greta_model}(x, ...)
 
-\method{plot}{greta_model}(x, y, ...)
+\method{plot}{greta_model}(x, y, colour = "#996bc7", ...)
 }
 \arguments{
 \item{\dots}{for \code{model}: \code{greta_array} objects to be tracked by
@@ -33,6 +33,9 @@ definition, and speed up model evaluation.}
 \item{x}{a \code{greta_model} object}
 
 \item{y}{unused default argument}
+
+\item{colour}{base colour used for plotting. Defaults to \code{greta}
+colours in violet.}
 }
 \value{
 \code{model} - a \code{greta_model} object.
