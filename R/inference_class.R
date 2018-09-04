@@ -612,6 +612,12 @@ sampler <- R6Class(
       # get trace of free state and drop the null dimension
       free_state_draws <- batch_results[[1]]
 
+      # if there is one sample at a time, and it's rejected, conversion from
+      # python back to R can dropa dimension, so handle that here. Ugh.
+      if (length(dim(free_state_draws)) != 3) {
+        dim(free_state_draws) <- c(1, dim(free_state_draws))
+      }
+
       self$last_burst_free_states <- split_chains(free_state_draws)
 
       n_draws <- nrow(free_state_draws)
