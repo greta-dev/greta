@@ -348,6 +348,14 @@ sampler <- R6Class(
 
       if (n_samples > 0) {
 
+        # on exiting during the main sampling period (even if killed by the
+        # user) trace the free state values
+
+        on.exit({
+          self$traced_values <- dag$trace_values(self$traced_free_state)
+        }, add = TRUE, after = FALSE)
+
+
         # main sampling
         if (verbose) {
           pb_sampling <- create_progress_bar('sampling',

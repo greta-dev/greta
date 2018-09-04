@@ -316,11 +316,10 @@ stashed_samples <- function () {
   if (stashed) {
 
     samplers <- greta_stash$samplers
-    trace_fun <- samplers[[1]]$model$dag$trace_values
 
     # get draws as a matrix
     free_state_draws <- lapply(samplers, member, "traced_free_state")
-    values_draws <- lapply(free_state_draws, trace_fun)
+    values_draws <- lapply(samplers, member, "traced_values")
 
     # if there are no samples, return a list of NULLs
     if (nrow(values_draws[[1]]) == 0) {

@@ -331,3 +331,28 @@ test_that("numerical issues are handled in mcmc", {
                           verbose = FALSE))
 
 })
+
+test_that("mcmc works in parallel", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  m <- model(normal(0, 1))
+
+  library(future)
+  op <- plan()
+  plan(multisession)
+
+  # one chain
+  expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10,
+                           verbose = FALSE) )
+
+  # multiple chains
+  expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10,
+                           chains = 2,
+                           verbose = FALSE) )
+
+  # put the future plan back as we found it
+  plan(op)
+
+})
