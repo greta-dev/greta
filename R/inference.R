@@ -147,14 +147,16 @@ mcmc <- function (model,
   initial_values <- prep_initials(initial_values, chains, dag)
 
   # determine the number of separate samplers to spin up, based on the future plan
-  n_samplers <- future::nbrOfWorkers()
+  max_samplers <- future::nbrOfWorkers()
 
   # divide chains up between the workers
-  chain_assignment <- sort(rep(seq_len(n_samplers),
+  chain_assignment <- sort(rep(seq_len(max_samplers),
                                length.out = chains))
 
   # divide the initial values between them
   initial_values_split <- split(initial_values, chain_assignment)
+
+  n_samplers <- length(initial_values_split)
 
   # create a sampler object for each parallel job, using these (possibly NULL)
   # initial values

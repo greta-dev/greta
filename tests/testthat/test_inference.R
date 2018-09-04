@@ -259,11 +259,12 @@ test_that('stashed_samples works', {
   # mock up a stash
   stash <- greta:::greta_stash
   samplers_stash <- replicate(2,
-                              list(traced_free_state = as.matrix(rnorm(17)),
-                                   traced_values = as.matrix(rnorm(17)),
+                              list(traced_free_state = list(as.matrix(rnorm(17))),
+                                   traced_values = list(as.matrix(rnorm(17))),
                                    model = m),
                               simplify = FALSE)
   assign("samplers", samplers_stash, envir = stash)
+
 
   # should convert to an mcmc.list
   ans <- stashed_samples()
