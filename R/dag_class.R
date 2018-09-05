@@ -132,9 +132,13 @@ dag_class <- R6Class(
       names
     },
 
-    # look up the TF name for a singe node
+    # look up the TF name for a single node
     tf_name = function (node) {
-      self$node_tf_names[node$unique_name]
+      name <- self$node_tf_names[node$unique_name]
+      if (length(name) == 0) {
+        name <- ""
+      }
+      name
     },
 
     define_free_state = function (type = c("variable", "placeholder"),
