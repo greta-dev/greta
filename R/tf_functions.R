@@ -81,6 +81,10 @@ tf_tapply <- function (x, segment_ids, num_segments, op_name) {
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
 tf_flat_to_chol <- function (x, dims) {
+  # # drop trailing dimension, and biject forward to an upper triangular matrix
+  # x <- tf_flatten(x)
+  # b <- tfp$bijectors$FillTriangular(upper = TRUE)
+  # b$forward(x)
 
   # indices to the cholesky factor
   L_dummy <- dummy(dims)

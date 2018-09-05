@@ -105,26 +105,9 @@ calculate_mcmc.list <- function (target, target_name, values) {
   model_info <- attr(values, "model_info")
   draws <- model_info$raw_draws
 
-  # trace the target for each draw in each chain
-  trace <- list()
-  for (i in seq_along(draws)) {
-
-    samples <- apply(draws[[i]],
-                     1,
-                     function (x) {
-                       dag$trace_values(free_state = x)
-                     })
-
-    samples <- as.matrix(samples)
-
-    if (ncol(samples) != n_trace)
-      samples <- t(samples)
-
-    colnames(samples) <- names(example_values)
-
-    trace[[i]] <- coda::mcmc(samples)
-
-  }
+  # trace the target for each chain
+  values <- lapply(draws, dag$trace_values)
+  trace <- lapply(values, coda::mcmc)
 
   trace <- coda::mcmc.list(trace)
   attr(trace, "model_info") <- model_info
