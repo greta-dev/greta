@@ -243,15 +243,18 @@ variable_node <- R6Class (
     # adjustments for univariate variables
     tf_log_jacobian_adjustment = function (free) {
 
-      ljac_none <- function (x)
-        fl(0)
+      ljac_none <- function (x) {
+        zero <- tf$constant(0, dtype = tf_float(), shape = shape(1))
+        tf$tile(zero, multiples = list(tf$shape(x)[[0]]))
+      }
 
-      ljac_exp <- function (x)
-        tf$reduce_sum(x)
+      ljac_exp <- function (x) {
+        tf_sum(x)
+      }
 
       ljac_logistic <- function (x) {
         lrange <- log(self$upper - self$lower)
-        tf$reduce_sum(x - fl(2) * tf$nn$softplus(x) + lrange)
+        tf_sum(x - fl(2) * tf$nn$softplus(x) + lrange)
       }
 
       ljac_corr_mat <- function (x) {
@@ -265,24 +268,20 @@ variable_node <- R6Class (
         i <- rep(1:(K - 1), (K - 1):1)
         powers <- tf$constant(K - i - 1,
                               dtype = tf_float(),
-                              shape = shape(length(i), 1))
-        fl(0.5) * tf$reduce_sum(powers * l1mz2) + tf$reduce_sum(l1mz2)
+                              shape = shape(length(i)))
+        fl(0.5) * tf_sum(powers * l1mz2) + tf_sum(l1mz2)
 
       }
 
       ljac_cov_mat <- function (x) {
-
-        if (length(dim(x)) == 1) {
-          x <- tf$reshape(x, shape(length(x), 1))
-        }
 
         # find dimension
         n <- dim(x)[[2]]
         K <- (sqrt(8 * n + 1) - 1) / 2
 
         k <- seq_len(K)
-        powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = c(K, 1))
-        fl(K * log(2)) + tf$reduce_sum(powers * x[k - 1, ])
+        powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = shape(K))
+        fl(K * log(2)) + tf_sum(powers * x[, k - 1])
 
       }
 

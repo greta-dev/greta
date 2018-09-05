@@ -67,7 +67,7 @@ uniform_distribution <- R6Class (
 
       # weird hack to make TF see a gradient here
       log_prob <- function (x) {
-        tf_ld + x * fl(0)
+        tf_ld + tf_flatten(x) * fl(0)
       }
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
@@ -113,28 +113,8 @@ lognormal_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-
-      mean <- parameters$meanlog
-      sd <- parameters$sdlog
-      var <- tf$square(sd)
-
-      log_prob <- function (x) {
-        lx <- tf$log(x)
-        fl(-1) * (lx + tf$log(sd) + fl(0.9189385)) +
-          fl(-0.5) * tf$square(tf$subtract(lx, mean)) / var
-      }
-
-      cdf <- function (x) {
-        lx <- tf$log(x)
-        fl(0.5) + fl(0.5) * tf$erf((lx - mean) / (fl(sqrt(2)) * sd))
-      }
-
-      log_cdf <- function (x) {
-        log(cdf(x))
-      }
-
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
-
+      tfp$distributions$LogNormal(loc = parameters$meanlog,
+                               scale = parameters$sdlog)
     }
 
   )
@@ -296,8 +276,11 @@ hypergeometric_distribution <- R6Class (
       n <- parameters$n
       k <- parameters$k
 
-      log_prob <- function (x)
-        tf_lchoose(m, x) + tf_lchoose(n, k - x) - tf_lchoose(m + n, k)
+      log_prob <- function (x) {
+        tf_lchoose(m, x) +
+          tf_lchoose(n, k - x) -
+          tf_lchoose(m + n, k)
+      }
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
@@ -958,7 +941,7 @@ wishart_distribution <- R6Class (
       cf <- self$parameters$Sigma$representations$cholesky_factor
       is_cholesky <- !is.null(cf)
 
-      df <- tf$squeeze(parameters$df)
+      df <- tf$reshape(parameters$df, shape(-1))
 
       wish <- tfp$distributions$Wishart
 
@@ -971,6 +954,7 @@ wishart_distribution <- R6Class (
 
       } else {
 
+        # df <- expand_to_batch(df, parameters$Sigma)
         distrib <- wish(df = df, scale = parameters$Sigma)
 
       }
@@ -1076,9 +1060,9 @@ lkj_correlation_distribution <- R6Class (
 
         diags <- tf$matrix_diag_part(x)
         det <- tf$square(tf_prod(diags))
+        eta <- tf$reshape(eta, shape(-1))
         prob <- det ^ (eta - fl(1))
         lp <- tf$log(prob)
-        tf$squeeze(lp)
 
       }
 

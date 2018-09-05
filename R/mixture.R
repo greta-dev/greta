@@ -125,8 +125,8 @@ mixture_distribution <- R6Class (
 
       densities <- parameters[names(parameters) != "weights"]
       names(densities) <- NULL
-      weights <- parameters$weights
-      weights <- weights / tf$reduce_sum(weights)
+      weights <- tf_flatten(parameters$weights, 1)
+      weights <- weights / tf_sum(weights)
       log_weights <- tf$log(weights)
 
       log_prob <- function (x) {
@@ -136,7 +136,6 @@ mixture_distribution <- R6Class (
         log_probs_arr <- tf$stack(log_probs, 1L)
 
         # massage log_weights into the same shape as log_probs_arr
-        log_weights <- tf$squeeze(log_weights, axis = -1L)
         extra_dims <- unlist(dim(log_probs_arr)[-(1:2)])
         for (dim in extra_dims) {
           ndim <- length(dim(log_weights))

@@ -391,14 +391,20 @@ tf_recombine <- function (ref, index, updates) {
 
 }
 
+# flatten a tensor x, ignoring the first (batch) dimension, and optionally
+# adding a trailing 1 to make it an explicit column vector
+tf_flatten <- function (x, extra_ones = 0) {
+  nelem <- prod(unlist(dim(x)[-1]))
+  out_dim <- c(-1, nelem, rep(1, extra_ones))
+  tf$reshape(x, to_shape(out_dim))
+}
+
 # replace elements in a tensor with another tensor
 tf_replace <- function (x, replacement, index, dims) {
 
   # flatten original tensor and new values
-  nelem <- prod(dims)
-  x_flat <- tf$reshape(x, shape(-1, nelem, 1))
-  replacement_flat <- tf$reshape(replacement,
-                                 shape(-1, length(index), 1))
+  x_flat <- tf_flatten(x, 1)
+  replacement_flat <- tf_flatten(replacement, 1)
 
   # update the values into a new tensor
   result_flat <- tf_recombine(ref = x_flat,
