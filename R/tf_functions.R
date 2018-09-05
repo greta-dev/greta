@@ -21,30 +21,30 @@ tf_lbeta <- function (a, b)
   tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
 
 # set up the tf$reduce_* functions to ignore the first dimension
-skip_dim <- function (op_name, x) {
+skip_dim <- function (op_name, x, drop = FALSE) {
   n_dim <- length(dim(x))
   reduction_dims <- seq_len(n_dim - 1)
-  tf[[op_name]](x, axis = reduction_dims)
+  tf[[op_name]](x, axis = reduction_dims, keepdims = !drop)
 }
 
-tf_sum <- function(x) {
-  skip_dim("reduce_sum", x)
+tf_sum <- function(x, drop = FALSE) {
+  skip_dim("reduce_sum", x, drop)
 }
 
-tf_prod <- function(x) {
-  skip_dim("reduce_prod", x)
+tf_prod <- function(x, drop = FALSE) {
+  skip_dim("reduce_prod", x, drop)
 }
 
-tf_min <- function(x) {
-  skip_dim("reduce_min", x)
+tf_min <- function(x, drop = FALSE) {
+  skip_dim("reduce_min", x, drop)
 }
 
-tf_mean <- function(x) {
-  skip_dim("reduce_mean", x)
+tf_mean <- function(x, drop = FALSE) {
+  skip_dim("reduce_mean", x, drop)
 }
 
-tf_max <- function(x) {
-  skip_dim("reduce_max", x)
+tf_max <- function(x, drop = FALSE) {
+  skip_dim("reduce_max", x, drop)
 }
 
 tf_cumsum <- function(x) {

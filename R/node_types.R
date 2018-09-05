@@ -249,12 +249,13 @@ variable_node <- R6Class (
       }
 
       ljac_exp <- function (x) {
-        tf_sum(x)
+        tf_sum(x, drop = TRUE)
       }
 
       ljac_logistic <- function (x) {
         lrange <- log(self$upper - self$lower)
-        tf_sum(x - fl(2) * tf$nn$softplus(x) + lrange)
+        tf_sum(x - fl(2) * tf$nn$softplus(x) + lrange,
+               drop = TRUE)
       }
 
       ljac_corr_mat <- function (x) {
@@ -269,7 +270,9 @@ variable_node <- R6Class (
         powers <- tf$constant(K - i - 1,
                               dtype = tf_float(),
                               shape = shape(length(i)))
-        fl(0.5) * tf_sum(powers * l1mz2) + tf_sum(l1mz2)
+        fl(0.5) *
+          tf_sum(powers * l1mz2, drop = TRUE) +
+          tf_sum(l1mz2, drop = TRUE)
 
       }
 
@@ -281,7 +284,7 @@ variable_node <- R6Class (
 
         k <- seq_len(K)
         powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = shape(K))
-        fl(K * log(2)) + tf_sum(powers * x[, k - 1])
+        fl(K * log(2)) + tf_sum(powers * x[, k - 1], drop = TRUE)
 
       }
 

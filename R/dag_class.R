@@ -280,7 +280,7 @@ dag_class <- R6Class(
                           SIMPLIFY = FALSE)
 
       # reduce_sum them
-      self$on_graph(summed_densities <- lapply(densities, tf_sum))
+      self$on_graph(summed_densities <- lapply(densities, tf_sum, drop = TRUE))
 
       # remove their names and sum them together
       names(summed_densities) <- NULL

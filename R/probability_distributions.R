@@ -696,10 +696,11 @@ dirichlet_multinomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-      alpha <- parameters$alpha
+      parameters <- match_batches(parameters)
+      parameters$size <- tf_flatten(parameters$size)
       distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
-              concentration = alpha)
+              concentration = parameters$alpha)
     },
 
     # no CDF for multivariate distributions
@@ -738,11 +739,14 @@ multinomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
+
+      parameters <- match_batches(parameters)
+      parameters$size <- tf_flatten(parameters$size)
       # scale probs to get absolute density correct
-      probs <- parameters$prob
-      probs <- probs / tf_sum(probs)
+      parameters$prob <- parameters$prob / tf_sum(parameters$prob)
+
       tfp$distributions$Multinomial(total_count = parameters$size,
-                                    probs = probs)
+                                    probs = parameters$prob)
     },
 
     # no CDF for multivariate distributions

@@ -710,7 +710,7 @@ test_that('distributions can be sampled from', {
 
   # multivariate discrete
   y <- extraDistr::rmnom(5, size = 4, prob = runif(3))
-  p <- iprobit(normal(0, 1, dim = 3))
+  p <- uniform(0, 1, dim = 3)
   distribution(y) <- multinomial(4, t(p), n_realisations = 5)
   sample_distribution(p)
 
