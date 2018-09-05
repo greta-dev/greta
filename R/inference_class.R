@@ -374,13 +374,14 @@ sampler <- R6Class(
 
         }
 
+        # scrub the free state trace and numerical rejections
+        self$traced_free_state <- replicate(self$n_chains,
+                                            matrix(NA, 0, self$n_free),
+                                            simplify = FALSE)
+        self$numerical_rejections <- 0
+
       }
 
-      # scrub the free state trace and numerical rejections
-      self$traced_free_state <- replicate(self$n_chains,
-                                          matrix(NA, 0, self$n_free),
-                                          simplify = FALSE)
-      self$numerical_rejections <- 0
 
       if (n_samples > 0) {
 
