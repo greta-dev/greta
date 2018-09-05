@@ -941,41 +941,49 @@ wishart_distribution <- R6Class (
 
     tf_distrib = function (parameters, dag) {
 
-      parameters <- match_batches(parameters)
-
-      # if there is a cholesky factor for Sigma, use that
-      cf <- self$parameters$Sigma$representations$cholesky_factor
-      is_cholesky <- !is.null(cf)
-
-      parameters$df <- tf_flatten(parameters$df)
-      parameters$Sigma <- tf$expand_dims(parameters$Sigma, 1L)
-
-      wish <- tfp$distributions$Wishart
-
-      if (is_cholesky) {
-
-        # if it's available, find and use the tensor for the cholesky factor
-        cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
-        # make sure it has the batch dimension, and a data dimension
-        cholesky_scale <- expand_to_batch(cholesky_scale, parameters$Sigma)
-        cholesky_scale <- tf$expand_dims(cholesky_scale, 1L)
-
-        # then transpose it to match tf style
-        t_cholesky_scale <- tf_transpose(cholesky_scale)
-
-        distrib <- wish(df = parameters$df, scale_tril = t_cholesky_scale)
-
-      } else {
-
-        distrib <- wish(df = parameters$df, scale = parameters$Sigma)
-
-      }
-
-      distrib
+      # this is a mess, because we want ot use the tfp wishart, but can't define
+      # the density without knowing the batch dimension, which only be on x
+      # (fixed parameters of the wishart)
 
       log_prob <- function (x) {
+
+        # ensure x and the parameters are expanded to have batch dimension
+        x_params <- c(list(x), parameters)
+        x_params <- match_batches(x_params)
+        x <- x_params[[1]]
+        parameters <- x_params[-1]
+
+        # reshape the dimensions
+        parameters$df <- tf_flatten(parameters$df)
+        parameters$Sigma <- tf$expand_dims(parameters$Sigma, 1L)
         x <- tf$expand_dims(x, 1L)
+
+        # if there is a cholesky factor for Sigma, use that
+        cf <- self$parameters$Sigma$representations$cholesky_factor
+
+        if (!is.null(cf)) {
+
+          # if it's available, find and use the tensor for the cholesky factor
+          cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
+
+          # make sure it has a data dimension & transpose it to match tf style
+          cholesky_scale <- tf$expand_dims(cholesky_scale, 1L)
+
+          t_cholesky_scale <- tf$matrix_transpose(cholesky_scale)
+
+          distrib <- tfp$distributions$Wishart(df = parameters$df,
+                                               scale_tril = t_cholesky_scale)
+
+        } else {
+
+          # otherwise just use sigma (which will be Choleskied internally)
+          distrib <- tfp$distributions$Wishart(df = parameters$df,
+                                               scale = parameters$Sigma)
+
+        }
+
         distrib$log_prob(x)
+
       }
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
