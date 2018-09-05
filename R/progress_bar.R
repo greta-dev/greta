@@ -59,14 +59,14 @@ create_progress_bar <- function (phase, iter, pb_update, width, ...) {
 # 'pb' is a progress_bar R6 object created by create_progress_bar
 # 'it' is the current iteration
 # 'rejects' is the total number of rejections so far due to numerical instability
-iterate_progress_bar <- function (pb, it, rejects, file = NULL) {
+iterate_progress_bar <- function (pb, it, rejects, chains, file = NULL) {
 
   increment <- pb$.__enclos_env__$pb_update
 
   if (it %% increment == 0) {
 
     if (rejects > 0) {
-      reject_perc <- 100 * rejects / it
+      reject_perc <- 100 * rejects / (it * chains)
       if (reject_perc < 1) {
         reject_perc_string <- '<1'
       } else {

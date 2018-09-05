@@ -341,7 +341,7 @@ sampler <- R6Class(
                                            pb_update,
                                            self$pb_width)
 
-          iterate_progress_bar(pb_warmup, 0, 0, self$pb_file)
+          iterate_progress_bar(pb_warmup, 0, 0, self$n_chains, self$pb_file)
         } else {
           pb_warmup <- NULL
         }
@@ -364,6 +364,7 @@ sampler <- R6Class(
             iterate_progress_bar(pb_warmup,
                                  it = completed_iterations[burst],
                                  rejects = self$numerical_rejections,
+                                 chains = self$n_chains,
                                  file = self$pb_file)
 
             self$write_percentage_log(warmup,
@@ -396,7 +397,7 @@ sampler <- R6Class(
                                              c(warmup, n_samples),
                                              pb_update,
                                              self$pb_width)
-          iterate_progress_bar(pb_sampling, 0, 0, self$pb_file)
+          iterate_progress_bar(pb_sampling, 0, 0, self$n_chains, self$pb_file)
         } else {
           pb_sampling <- NULL
         }
@@ -416,6 +417,7 @@ sampler <- R6Class(
             iterate_progress_bar(pb_sampling,
                                  it = completed_iterations[burst],
                                  rejects = self$numerical_rejections,
+                                 chains = self$n_chains,
                                  file = self$pb_file)
 
             self$write_percentage_log(n_samples,
