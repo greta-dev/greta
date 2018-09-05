@@ -122,7 +122,7 @@ test_that('bad mcmc proposals are rejected', {
   )
 
   # bad initial values
-  expect_error(mcmc(m, n_samples = 1, warmup = 0,
+  expect_error(mcmc(m, chains = 1, n_samples = 1, warmup = 0,
                     initial_values = initials(z = 1e20)),
                'could not be evaluated at these initial values')
 
@@ -131,7 +131,7 @@ test_that('bad mcmc proposals are rejected', {
   z <- normal(-1e12, 1e-12)
   distribution(x) <- normal(z, 1e-12)
   m <- model(z, precision = "single")
-  expect_error(mcmc(m, n_samples = 1, warmup = 0),
+  expect_error(mcmc(m, chains = 1, n_samples = 1, warmup = 0),
                'Could not find reasonable starting values after 20 attempts')
 
   # proposals that are fine, but rejected anyway
@@ -141,6 +141,7 @@ test_that('bad mcmc proposals are rejected', {
                  hmc(epsilon = 100,
                      Lmin = 1,
                      Lmax = 1),
+                 chains = 1,
                  n_samples = 5,
                  warmup = 0,
                  verbose = FALSE))

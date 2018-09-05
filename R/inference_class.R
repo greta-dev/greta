@@ -252,7 +252,7 @@ sampler <- R6Class(
     tuning_interval = 3,
 
     accept_target = 0.5,
-    accept_history = vector(),
+    accept_history = NULL,
 
     # sampler kernel information
     parameters = list(epsilon = 0.1,
@@ -561,11 +561,12 @@ sampler <- R6Class(
         # get a combined vector of samples so far, from all cahins
         if (n_accepted > 0) {
 
-          samples <- lapply(self$traced_free_state,
-                            function(x) {
-                              x[self$accept_history, , drop = FALSE]
-                            })
-          samples <- do.call(rbind, samples)
+          samples <- matrix(NA, 0, self$n_free)
+          for (i in seq_along(self$traced_free_state)) {
+            x <- self$traced_free_state[[i]]
+            x <- x[self$accept_history[, i], , drop = FALSE]
+            samples <- rbind(samples, x)
+          }
 
         }
 
@@ -650,7 +651,7 @@ sampler <- R6Class(
       # log acceptance probability
       log_accept_stats <- batch_results[[2]]$log_accept_ratio
       is_accepted <- batch_results[[2]]$is_accepted
-      self$accept_history <- c(self$accept_history, is_accepted)
+      self$accept_history <- rbind(self$accept_history, is_accepted)
       accept_stats_batch <- pmin(1, exp(log_accept_stats))
       self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
 
