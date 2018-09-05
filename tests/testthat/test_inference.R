@@ -347,6 +347,7 @@ test_that("mcmc works in parallel", {
 
   # one chain
   expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10,
+                           chains = 1,
                            verbose = FALSE) )
 
   # multiple chains

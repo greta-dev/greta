@@ -263,8 +263,8 @@ drop_first_dim <- function (x) {
 # run time)
 expand_to_batch <- function(x, y) {
   batch_size <- tf$shape(y)[[0]]
-  shape <- tf$stack(c(batch_size, dim(x)[-1]))
-  tf$tile(x, c(batch_size, 1L, 1L))
+  ndim <- length(dim(x))
+  tf$tile(x, c(batch_size, rep(1L, ndim - 1)))
 }
 
 # does this tensor have a batch dimension (of unknown size) as its first
@@ -277,20 +277,26 @@ has_batch <- function (x) is.null(dim(x)[[1]])
 # dimension of the batched ones dimension
 match_batches <- function(values) {
 
-  have_batches <- vapply(values, has_batch, FUN.VALUE = TRUE)
+  is_tensor <- vapply(values, inherits, "tensorflow.tensor", FUN.VALUE = FALSE)
+
+  values_mutable <- values[is_tensor]
+
+  have_batches <- vapply(values_mutable, has_batch, FUN.VALUE = TRUE)
 
   # if any, but not all, have a batch, dimension, tile the others to match the
   # batch
   if (!all(have_batches) & any(have_batches)) {
 
     target_id <- which(have_batches)[1]
-    target <- values[[target_id]]
+    target <- values_mutable[[target_id]]
 
     for (i in which(!have_batches)) {
-      values[[i]] <- expand_to_batch(values[[i]], target)
+      values_mutable[[i]] <- expand_to_batch(values_mutable[[i]], target)
     }
 
   }
+
+  values[is_tensor] <- values_mutable
 
   values
 

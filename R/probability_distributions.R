@@ -941,17 +941,10 @@ wishart_distribution <- R6Class (
 
     tf_distrib = function (parameters, dag) {
 
-      # this is a mess, because we want ot use the tfp wishart, but can't define
-      # the density without knowing the batch dimension, which only be on x
-      # (fixed parameters of the wishart)
+      # this is a mess, we want to use the tfp wishart, but can't define the
+      # density without expanding the dimension of x
 
       log_prob <- function (x) {
-
-        # ensure x and the parameters are expanded to have batch dimension
-        x_params <- c(list(x), parameters)
-        x_params <- match_batches(x_params)
-        x <- x_params[[1]]
-        parameters <- x_params[-1]
 
         # reshape the dimensions
         parameters$df <- tf_flatten(parameters$df)

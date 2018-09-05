@@ -634,7 +634,7 @@ sampler <- R6Class(
       free_state_draws <- batch_results[[1]]
 
       # if there is one sample at a time, and it's rejected, conversion from
-      # python back to R can dropa dimension, so handle that here. Ugh.
+      # python back to R can drop a dimension, so handle that here. Ugh.
       if (length(dim(free_state_draws)) != 3) {
         dim(free_state_draws) <- c(1, dim(free_state_draws))
       }

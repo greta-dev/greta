@@ -393,6 +393,12 @@ distribution_node <- R6Class (
         # fetch inputs
         tf_parameters <- self$tf_fetch_parameters(dag)
 
+        # ensure x and the parameters are all expanded to have the n_chains batch
+        # dimension, if any have it
+        target_params <- match_batches(c(list(tf_target), tf_parameters))
+        tf_target <- target_params[[1]]
+        tf_parameters <- target_params[-1]
+
         # calculate log density
         ld <- self$tf_log_density_function(tf_target, tf_parameters, dag)
 

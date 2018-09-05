@@ -125,7 +125,7 @@ mixture_distribution <- R6Class (
 
       densities <- parameters[names(parameters) != "weights"]
       names(densities) <- NULL
-      weights <- tf_flatten(parameters$weights, 1)
+      weights <- tf_flatten(parameters$weights)
       weights <- weights / tf_sum(weights)
       log_weights <- tf$log(weights)
 
