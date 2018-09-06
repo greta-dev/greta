@@ -250,6 +250,7 @@ sampler <- R6Class(
     hbar = 0,
     log_epsilon_bar = 0,
     tuning_interval = 3,
+    uses_metropolis = TRUE,
 
     accept_target = 0.5,
     accept_history = NULL,
@@ -487,6 +488,12 @@ sampler <- R6Class(
 
         # when to break to update tuning
         tuning_points <- seq(0, n_samples, by = self$tuning_interval)
+
+        # handle infinite tuning interval (for non-tuned mcmc)
+        if (all(is.na(tuning_points))) {
+          tuning_points <- c(0, n_samples)
+        }
+
         changepoints <- c(changepoints, tuning_points)
 
       }
@@ -648,16 +655,20 @@ sampler <- R6Class(
         self$free_state <- free_state
       }
 
-      # log acceptance probability
-      log_accept_stats <- batch_results[[2]]$log_accept_ratio
-      is_accepted <- batch_results[[2]]$is_accepted
-      self$accept_history <- rbind(self$accept_history, is_accepted)
-      accept_stats_batch <- pmin(1, exp(log_accept_stats))
-      self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
+      if (self$uses_metropolis) {
 
-      # numerical rejections parameter sets
-      bad <- sum(!is.finite(log_accept_stats))
-      self$numerical_rejections <- self$numerical_rejections + bad
+        # log acceptance probability
+        log_accept_stats <- batch_results[[2]]$log_accept_ratio
+        is_accepted <- batch_results[[2]]$is_accepted
+        self$accept_history <- rbind(self$accept_history, is_accepted)
+        accept_stats_batch <- pmin(1, exp(log_accept_stats))
+        self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
+
+        # numerical rejections parameter sets
+        bad <- sum(!is.finite(log_accept_stats))
+        self$numerical_rejections <- self$numerical_rejections + bad
+
+      }
 
     },
 
@@ -844,6 +855,45 @@ rwmh_sampler <- R6Class(
            rwmh_diag_sd = diag_sd)
 
     }
+
+  )
+)
+
+slice_sampler <- R6Class(
+  "slice_sampler",
+  inherit = sampler,
+  public = list(
+
+    parameters = list(),
+    tuning_interval = Inf,
+    uses_metropolis = FALSE,
+
+    define_tf_kernel = function () {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      if (dag$tf_float != "float32") {
+        stop ("slice sampler can only currently be used for models defined ",
+              "with single precision, set model(..., precision = 'single') ",
+              "instead",
+              call. = FALSE)
+      }
+
+      tfe$log_prob_fun <- dag$generate_log_prob_function()
+
+      # build the kernel
+      dag$tf_run(
+        sampler_kernel <- tfp$mcmc$SliceSampler(
+          target_log_prob_fn = log_prob_fun,
+          step_size = fl(1),
+          max_doublings = 5L,
+          seed = rng_seed)
+      )
+    },
+
+    # no additional here tuning
+    tune = function (iterations_completed, total_iterations) {}
 
   )
 )

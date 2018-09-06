@@ -292,24 +292,47 @@ test_that('model errors nicely', {
                "^The following object")
 })
 
-test_that("mcmc supports different samplers, normal proposals", {
+test_that("mcmc supports rwmh sampler with normal proposals", {
 
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
   m <- model(x)
-  expect_ok(draws <- mcmc(m, rwmh("normal"),
+  expect_ok(draws <- mcmc(m, sampler = rwmh("normal"),
                           n_samples = 100, warmup = 100))
 
 })
 
-test_that("mcmc supports different samplers, uniform proposals", {
+test_that("mcmc supports rwmh sampler with uniform proposals", {
 
   skip_if_not(check_tf_version())
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
-  expect_ok(draws <- mcmc(m, rwmh("uniform"),
+  expect_ok(draws <- mcmc(m, sampler = rwmh("uniform"),
                           n_samples = 100, warmup = 100))
+
+})
+
+test_that("mcmc supports slice sampler with single precision models", {
+
+  skip_if_not(check_tf_version())
+  set.seed(5)
+  x <- uniform(0, 1)
+  m <- model(x, precision = "single")
+  expect_ok(draws <- mcmc(m, sampler = slice(),
+                          n_samples = 100, warmup = 100))
+
+})
+
+test_that("mcmc doesn't support slice sampler with double precision models", {
+
+  skip_if_not(check_tf_version())
+  set.seed(5)
+  x <- uniform(0, 1)
+  m <- model(x, precision = "double")
+  expect_error(draws <- mcmc(m, sampler = slice(),
+                          n_samples = 100, warmup = 100),
+               "models defined with single precision")
 
 })
 

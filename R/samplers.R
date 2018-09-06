@@ -42,12 +42,11 @@ hmc <- function (Lmin = 5,
 
 #' @rdname samplers
 #'
-#' @details The Random Walk Metropolis Hastings algorithm is a gradient free
-#'   sampling algorithm that requires no tuning parameters. The algorithm
-#'   involves a proposal generating step `proposal_state = current_state +
-#'   perturb` by a random perturbation, followed by Metropolis-Hastings
-#'   accept/reject step. The class is implemented for uniform and normal
-#'   proposals.
+#' @details \code{rwmh()} creates a random walk Metropolis-Hastings sampler;  a
+#'   a gradient-free sampling algorithm. The algorithm involves a proposal
+#'   generating step `proposal_state = current_state + perturb` by a random
+#'   perturbation, followed by Metropolis-Hastings accept/reject step. The class
+#'   is implemented for uniform and normal proposals.
 #'
 #' @param proposal the probability distribution used to generate proposal states
 #'
@@ -63,6 +62,21 @@ rwmh <- function (proposal = c("normal", "uniform"),
                                 diag_sd = diag_sd),
               class = rwmh_sampler)
   class(obj) <- c("rwmh sampler", "sampler")
+  obj
+}
+
+#' @rdname samplers
+#'
+#' @details \code{slice()} implements a multivariate slice sampling algorithm,
+#'   which has no tuning parameters. Currently this algorithm can only be used
+#'   with single-precision models (set using the \code{precision} argument to
+#'   \code{\link{model}}).
+#'
+#' @export
+slice <- function () {
+  obj <- list(parameters = list(),
+              class = slice_sampler)
+  class(obj) <- c("slice sampler", "sampler")
   obj
 }
 
