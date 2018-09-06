@@ -665,7 +665,11 @@ sampler <- R6Class(
 
       # tryCatch handling for numerical errors
       dag <- self$model$dag
-      result <- cleanly(dag$tf_sess_run(sampler_batch))
+      tfe <- dag$tf_environment
+
+      # don't use dag$tf_sess_run, to avoid the overhead on parsing expressions
+      result <- cleanly(tfe$sess$run(tfe$sampler_batch,
+                                     feed_dict = tfe$feed_dict))
 
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
