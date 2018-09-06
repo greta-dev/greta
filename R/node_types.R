@@ -99,6 +99,9 @@ operation_node <- R6Class(
       if (length(self$operation_args) > 0)
         args <- c(args, self$operation_args)
 
+      # if there are multiple args, reconcile batch dimensions now
+      args <- match_batches(args)
+
       # get the tensorflow function
       operation <- eval(parse(text = self$operation))
 
