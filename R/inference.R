@@ -210,6 +210,15 @@ mcmc <- function (model,
     samplers[[i]]$n_samplers <- n_samplers
   }
 
+
+  # if verbose = FALSE, make pb_update as big as possible to speed up sampling
+  if (!verbose) {
+    pb_update <- Inf
+  }
+
+  # now make it finite
+  pb_update <- min(pb_update, max(warmup, n_samples))
+
   run_samplers(samplers = samplers,
                n_samples = n_samples,
                thin = thin,
