@@ -4,11 +4,14 @@
 \alias{samplers}
 \alias{hmc}
 \alias{rwmh}
+\alias{slice}
 \title{MCMC samplers}
 \usage{
 hmc(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1)
 
 rwmh(proposal = c("normal", "uniform"), epsilon = 0.1, diag_sd = 1)
+
+slice(max_doublings = 5)
 }
 \arguments{
 \item{Lmin}{minimum number of leapfrog steps (positive integer, Lmin > Lmax)}
@@ -21,6 +24,9 @@ rwmh(proposal = c("normal", "uniform"), epsilon = 0.1, diag_sd = 1)
 (positive, will be tuned).}
 
 \item{proposal}{the probability distribution used to generate proposal states}
+
+\item{max_doublings}{the maximum number of iterations of the 'doubling'
+algorithm used to adapt the size of the slice}
 }
 \value{
 a \code{sampler} object that can be passed to \code{\link{mcmc}}.
@@ -39,10 +45,14 @@ For \code{hmc()}, the number of leapfrog steps at each iteration is
   \code{diag_sd} is used to rescale the parameter space to make it more
   uniform, and make sampling more efficient.
 
-The Random Walk Metropolis Hastings algorithm is a gradient free
-  sampling algorithm that requires no tuning parameters. The algorithm
-  involves a proposal generating step `proposal_state = current_state +
-  perturb` by a random perturbation, followed by Metropolis-Hastings
-  accept/reject step. The class is implemented for uniform and normal
-  proposals.
+\code{rwmh()} creates a random walk Metropolis-Hastings sampler;  a
+  a gradient-free sampling algorithm. The algorithm involves a proposal
+  generating step `proposal_state = current_state + perturb` by a random
+  perturbation, followed by Metropolis-Hastings accept/reject step. The class
+  is implemented for uniform and normal proposals.
+
+\code{slice()} implements a multivariate slice sampling algorithm.
+  Currently this algorithm can only be used with single-precision models (set
+  using the \code{precision} argument to \code{\link{model}}). The parameter
+  \code{max_doublings} is not tuned during warmup.
 }

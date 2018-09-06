@@ -864,7 +864,9 @@ slice_sampler <- R6Class(
   inherit = sampler,
   public = list(
 
-    parameters = list(),
+    parameters = list(
+      max_doublings = NA
+    ),
     tuning_interval = Inf,
     uses_metropolis = FALSE,
 
@@ -881,15 +883,25 @@ slice_sampler <- R6Class(
       }
 
       tfe$log_prob_fun <- dag$generate_log_prob_function()
+      dag$tf_run(slice_max_doublings <- tf$placeholder(dtype = tf$int32))
 
       # build the kernel
       dag$tf_run(
         sampler_kernel <- tfp$mcmc$SliceSampler(
           target_log_prob_fn = log_prob_fun,
           step_size = fl(1),
-          max_doublings = 5L,
+          max_doublings = slice_max_doublings,
           seed = rng_seed)
       )
+    },
+
+    sampler_parameter_values = function () {
+
+      max_doublings <- as.integer(self$parameters$max_doublings)
+
+      # return named list for replacing tensors
+      list(slice_max_doublings = max_doublings)
+
     },
 
     # no additional here tuning
