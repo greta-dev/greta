@@ -390,7 +390,7 @@ sampler <- R6Class(
         # on exiting during the main sampling period (even if killed by the
         # user) trace the free state values
 
-        on.exit(self$trace_values(), add = TRUE, after = FALSE)
+        on.exit(self$trace_values(), add = TRUE)
 
         # main sampling
         if (verbose) {
