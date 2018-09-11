@@ -124,7 +124,7 @@ test_that('opt returns hessians', {
   expect_true(identical(dim(hess), c(5L, 5L)))
 
   # the model density is IID normal, so we should be able to recover the SD
-  approx_sd <- 1 / sqrt(-diag(hess))
+  approx_sd <- sqrt(diag(solve(hess)))
   expect_true(all(abs(approx_sd - sd) < 1e-9))
 
 })

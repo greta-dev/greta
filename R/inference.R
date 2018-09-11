@@ -737,14 +737,14 @@ print.initials <- function (x, ...) {
 #'   \itemize{
 #'    \item{\code{par}} {a named list of the optimal values for the greta arrays
 #'     specified in \code{model}}
-#'    \item{\code{value}} {the (unadjusted) log joint density of the model at
-#'     the parameters 'par'}
+#'    \item{\code{value}} {the (unadjusted) negative log joint density of the
+#'    model at the parameters 'par'}
 #'    \item{\code{iterations}} {the number of iterations taken by the optimiser}
 #'    \item{\code{convergence}} {an integer code, 0 indicates successful
 #'     completion, 1 indicates the iteration limit \code{max_iterations} had been
 #'     reached}
 #'   \item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
-#'    matrices/arrays for the parameters}
+#'    matrices/arrays for the parameters (w.r.t. \code{value})}
 #'  }
 #'
 opt <- function (model,
@@ -774,9 +774,12 @@ opt <- function (model,
   object$run()
   outputs <- object$return_outputs()
 
-  # optionally evaluate the hessians at these parameters
+  # optionally evaluate the hessians at these parameters (return as hessian for
+  # objective function)
   if (hessian) {
-    outputs$hessian <- model$dag$hessians()
+    hessians <- model$dag$hessians()
+    hessians <- lapply(hessians, `*`, -1)
+    outputs$hessian <- hessians
   }
 
   outputs
