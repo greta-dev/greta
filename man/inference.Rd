@@ -85,6 +85,20 @@ Hessian arrays for the parameters}
   \code{mcmc.list} object that can be analysed using functions from the coda
   package. This will contain mcmc samples of the greta arrays used to create
   \code{model}.
+
+\code{opt} - a list containing the following named elements:
+  \itemize{
+   \item{\code{par}} {a named list of the optimal values for the greta arrays
+    specified in \code{model}}
+   \item{\code{value}} {the (unadjusted) log joint density of the model at
+    the parameters 'par'}
+   \item{\code{iterations}} {the number of iterations taken by the optimiser}
+   \item{\code{convergence}} {an integer code, 0 indicates successful
+    completion, 1 indicates the iteration limit \code{max_iterations} had been
+    reached}
+  \item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
+   matrices/arrays for the parameters}
+ }
 }
 \description{
 Carry out statistical inference on greta models by

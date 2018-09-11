@@ -735,14 +735,17 @@ print.initials <- function (x, ...) {
 #'
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
-#'    \item{par} {a named list of the optimal values for the greta arrays
+#'    \item{\code{par}} {a named list of the optimal values for the greta arrays
 #'     specified in \code{model}}
-#'    \item{value} {the (unadjusted) log joint density of the model at the parameters 'par'}
-#'    \item{iterations} {the number of iterations taken by the optimiser}
-#'    \item{convergence} {an integer code, 0 indicates successful completion,
-#'     1 indicates the iteration limit \code{max_iterations} had been reached} }
-#'    \item{hessian} {(if \code{hessian = TRUE}) a named list of hessian
-#'     matrices/arrays for the parameters} }
+#'    \item{\code{value}} {the (unadjusted) log joint density of the model at
+#'     the parameters 'par'}
+#'    \item{\code{iterations}} {the number of iterations taken by the optimiser}
+#'    \item{\code{convergence}} {an integer code, 0 indicates successful
+#'     completion, 1 indicates the iteration limit \code{max_iterations} had been
+#'     reached}
+#'   \item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
+#'    matrices/arrays for the parameters}
+#'  }
 #'
 opt <- function (model,
                  optimiser = bfgs(),
