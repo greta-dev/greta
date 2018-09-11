@@ -74,7 +74,7 @@ test_that('opt converges with SciPy optimisers', {
       expect_lte(o$iterations, 500)
     }
 
-    expect_true(all(abs(x - o$par) < 1e-2))
+    expect_true(all(abs(x - o$par$z) < 1e-2))
 
   }
 
@@ -99,7 +99,7 @@ test_that('opt accepts initial values', {
   expect_lte(o$iterations, 100)
 
   # should be close to the truth
-  expect_true(all(abs(x - o$par) < 1e-3))
+  expect_true(all(abs(x - o$par$z) < 1e-3))
 
 })
 
