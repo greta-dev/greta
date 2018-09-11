@@ -252,6 +252,10 @@ sampler <- R6Class(
     tuning_interval = 3,
     uses_metropolis = TRUE,
 
+    welford_state = list(count = 0,
+                         mean = 0,
+                         m2 = 0),
+
     accept_target = 0.5,
     accept_history = NULL,
 
@@ -357,6 +361,7 @@ sampler <- R6Class(
 
           self$run_burst(burst_lengths[burst])
           self$trace()
+          self$update_welford()
           self$tune(completed_iterations[burst], warmup)
 
           if (verbose) {
@@ -383,7 +388,6 @@ sampler <- R6Class(
         self$numerical_rejections <- 0
 
       }
-
 
       if (n_samples > 0) {
 
@@ -434,6 +438,41 @@ sampler <- R6Class(
       # return self, to send results back when running in parallel
       self
 
+    },
+
+    # update the welford accumulator for summary statistics of the posterior,
+    # used for tuning
+    update_welford = function () {
+
+      # unlist the states into a matrix
+      trace_matrix <- do.call(rbind, self$last_burst_free_states)
+
+      count <- self$welford_state$count
+      mean <- self$welford_state$mean
+      m2 <- self$welford_state$m2
+
+      for (i in 1:nrow(trace_matrix)) {
+
+        new_value <- trace_matrix[i, ]
+
+        count <- count + 1
+        delta <- new_value - mean
+        mean <- mean + delta / count
+        delta2 <- new_value - mean
+        m2 <- m2 + delta * delta2
+
+      }
+
+      self$welford_state <- list(count = count,
+                                 mean = mean,
+                                 m2 = m2)
+
+    },
+
+    sample_variance = function () {
+      count <- self$welford_state$count
+      m2 <- self$welford_state$m2
+      m2 / (count - 1)
     },
 
     # convert traced free state to the traced values, accounting for
@@ -565,23 +604,11 @@ sampler <- R6Class(
 
         n_accepted <- sum(!self$accept_history)
 
-        # get a combined vector of samples so far, from all cahins
-        if (n_accepted > 0) {
-
-          samples <- matrix(NA, 0, self$n_free)
-          for (i in seq_along(self$traced_free_state)) {
-            x <- self$traced_free_state[[i]]
-            x <- x[self$accept_history[, i], , drop = FALSE]
-            samples <- rbind(samples, x)
-          }
-
-        }
-
         # provided there have been at least 5 acceptances in the warmup so far
         if (n_accepted > 5) {
 
           # get the sample posterior variance and shrink it
-          sample_var <- sample_variance(samples)
+          sample_var <- self$sample_variance()
           shrinkage <- 1 / (n_accepted + 5)
           var_shrunk <- n_accepted * shrinkage * sample_var + 5e-3 * shrinkage
           self$parameters$diag_sd <- sqrt(var_shrunk)

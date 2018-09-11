@@ -147,16 +147,6 @@ do <- function(name, ...) {
   }
 }
 
-# efficient calculation of the sample variance
-sample_variance <- function (x) {
-  mu <- colMeans(x)
-  errors <- sweep(x, 2, mu, "-")
-  SS <- colSums(errors ^ 2)
-  n <- nrow(x)
-  var <- SS / (n - 1)
-  var
-}
-
 # return an integer to pass on as an RNG seed
 get_seed <- function () {
   sample.int(1e12, 1)
@@ -330,7 +320,6 @@ misc_module <- module(module,
                       is_scalar,
                       flatten,
                       do,
-                      sample_variance,
                       get_seed,
                       live_pointer,
                       apply_rows,
