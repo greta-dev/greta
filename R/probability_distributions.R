@@ -739,7 +739,6 @@ multinomial_distribution <- R6Class (
     },
 
     tf_distrib = function (parameters, dag) {
-
       parameters <- match_batches(parameters)
       parameters$size <- tf_flatten(parameters$size)
       # scale probs to get absolute density correct
@@ -862,14 +861,14 @@ multivariate_normal_distribution <- R6Class (
       # check if Sigma (the node version) has a cholesky factor to use
       cf <- self$parameters$Sigma$representations$cholesky_factor
 
-      # how to make sure that's the value being used as the parameter?
-
-      # need to check the parameters definition bit
-
       if (is.null(cf))
         L <- tf$cholesky(parameters$Sigma)
       else
         L <- tf_transpose(parameters$Sigma)
+
+      # add an extra dimension for the observation batch size (otherwise tfp
+      # will try to use the n_chains batch dimension)
+      L <- tf$expand_dims(L, 1L)
 
       mu <- parameters$mean
       tfp$distributions$MultivariateNormalTriL(loc = mu,

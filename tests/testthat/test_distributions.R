@@ -1080,3 +1080,51 @@ test_that('Wishart can use a choleskied Sigma', {
   expect_ok( draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE) )
 
 })
+
+test_that('multivariate distributions with matrix parameters can be sampled from', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  n <- 10
+  k <- 3
+
+  # multivariate normal
+  x <- randn(n, k)
+  mu <- normal(0, 1, dim = c(n, k))
+  distribution(x) <- multivariate_normal(mu, diag(k))
+  m <- model(mu)
+  expect_ok( draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE) )
+
+  # multinomial
+  size <- 5
+  x <- t(rmultinom(n, size, runif(k)))
+  p <- uniform(0, 1, dim = c(n, k))
+  distribution(x) <- multinomial(size, p)
+  m <- model(p)
+  expect_ok( draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE) )
+
+  # categorical
+  x <- t(rmultinom(n, 1, runif(k)))
+  p <- uniform(0, 1, dim = c(n, k))
+  distribution(x) <- categorical(p)
+  m <- model(p)
+  expect_ok( draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE) )
+
+  # dirichlet
+  x <- randu(n, k)
+  x <- sweep(x, 1, rowSums(x), "/")
+  a <- normal(0, 1, dim = c(n, k))
+  distribution(x) <- dirichlet(a)
+  m <- model(a)
+  expect_ok( draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE) )
+
+  # dirichlet-multinomial
+  size <- 5
+  x <- t(rmultinom(n, size, runif(k)))
+  a <- normal(0, 1, dim = c(n, k))
+  distribution(x) <- dirichlet_multinomial(size, a)
+  m <- model(a)
+  expect_ok( draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE) )
+
+})
