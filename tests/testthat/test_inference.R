@@ -103,6 +103,32 @@ test_that('opt accepts initial values', {
 
 })
 
+test_that('opt returns hessians', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  sd <- runif(5)
+  x <- rnorm(5, 2, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, sd)
+
+  m <- model(z)
+  o <- opt(m, hessian = TRUE)
+
+  hess <- o$hessian$z
+
+  # should be a 5x5 numeric matrix
+  expect_true(inherits(hess, "matrix"))
+  expect_true(is.numeric(hess))
+  expect_true(identical(dim(hess), c(5L, 5L)))
+
+  # the model density is IID normal, so we should be able to recover the SD
+  approx_sd <- 1 / sqrt(-diag(hess))
+  expect_true(all(abs(approx_sd - sd) < 1e-9))
+
+})
+
 test_that('bad mcmc proposals are rejected', {
 
   skip_if_not(check_tf_version())
