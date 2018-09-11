@@ -723,25 +723,26 @@ print.initials <- function (x, ...) {
 #' @param hessian whether to return a list of \emph{analytically} differentiated
 #'   Hessian arrays for the parameters
 #'
-#' @details The \code{hessians} argument to \code{opt()} behaves slightly
-#'   differently than the \code{hessian} argument to
-#'   \code{\link[base:optim]{optim()}}. Since \code{opt()} acts on a list of
-#'   greta arrays with possibly varying dimension, greta returns a list of
-#'   hessian matrices (or possibly higher-dimensional arrays) for each of those
-#'   greta arrays. To return a hessian matrix covering all model parameters, the
-#'   user must construct their model so that all parameters are in a vector,
-#'   then split the vector up before using the parameters in their model. See
-#'   example.
+#' @details Because \code{opt()} acts on a list of greta arrays with possibly
+#'   varying dimension, the \code{par} and \code{hessian} objects returned by
+#'   \code{opt()} are named lists, rather than a vector (\code{par}) and a
+#'   matrix (\code{hessian}), as returned by \code{\link[base:optim]{optim()}}.
+#'   Because greta arrays may not be vectors, the hessians may not be matrices,
+#'   but could be higher-dimensional arrays. To return a hessian matrix covering
+#'   multiple model parameters, you can construct your model so that all those
+#'   parameters are in a vector, then split the vector up to define the model.
+#'   The parameter vector can then be passed to model. See example.
 #'
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
-#'    \item{par} {the best set of parameters found}
+#'    \item{par} {a named list of the optimal values for the greta arrays
+#'     specified in \code{model}}
 #'    \item{value} {the (unadjusted) log joint density of the model at the parameters 'par'}
 #'    \item{iterations} {the number of iterations taken by the optimiser}
 #'    \item{convergence} {an integer code, 0 indicates successful completion,
 #'     1 indicates the iteration limit \code{max_iterations} had been reached} }
-#'    \item{hessians} {a named list of hessian arrays for the parameters (if
-#'     \code{hessian = TRUE}) or \code{NULL}} }
+#'    \item{hessian} {(if \code{hessian = TRUE}) a named list of hessian
+#'     matrices/arrays for the parameters} }
 #'
 opt <- function (model,
                  optimiser = bfgs(),
@@ -749,7 +750,7 @@ opt <- function (model,
                  tolerance = 1e-6,
                  initial_values = initials(),
                  adjust = TRUE,
-                 hessians = FALSE) {
+                 hessian = FALSE) {
 
   # check initial values. Can up the number of chains in the future to handle
   # random restarts
@@ -771,8 +772,8 @@ opt <- function (model,
   outputs <- object$return_outputs()
 
   # optionally evaluate the hessians at these parameters
-  if (hessians) {
-    outputs$hessians <- model$dag$hessians()
+  if (hessian) {
+    outputs$hessian <- model$dag$hessians()
   }
 
   outputs

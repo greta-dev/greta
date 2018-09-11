@@ -22,7 +22,7 @@ initials(...)
 
 opt(model, optimiser = bfgs(), max_iterations = 100,
   tolerance = 1e-06, initial_values = initials(), adjust = TRUE,
-  hessians = FALSE)
+  hessian = FALSE)
 }
 \arguments{
 \item{model}{greta_model object}
@@ -150,15 +150,15 @@ Samples returned by \code{mcmc()} and \code{stashed_samples()} can
   used to generate the previous samples. It is not possible to change the
   sampler or extend the warmup period.
 
-The \code{hessians} argument to \code{opt()} behaves slightly
-  differently than the \code{hessian} argument to
-  \code{\link[base:optim]{optim()}}. Since \code{opt()} acts on a list of
-  greta arrays with possibly varying dimension, greta returns a list of
-  hessian matrices (or possibly higher-dimensional arrays) for each of those
-  greta arrays. To return a hessian matrix covering all model parameters, the
-  user must construct their model so that all parameters are in a vector,
-  then split the vector up before using the parameters in their model. See
-  example.
+Because \code{opt()} acts on a list of greta arrays with possibly
+  varying dimension, the \code{par} and \code{hessian} objects returned by
+  \code{opt()} are named lists, rather than a vector (\code{par}) and a
+  matrix (\code{hessian}), as returned by \code{\link[base:optim]{optim()}}.
+  Because greta arrays may not be vectors, the hessians may not be matrices,
+  but could be higher-dimensional arrays. To return a hessian matrix covering
+  multiple model parameters, you can construct your model so that all those
+  parameters are in a vector, then split the vector up to define the model.
+  The parameter vector can then be passed to model. See example.
 }
 \examples{
 \dontrun{
@@ -211,12 +211,13 @@ var(x)  # different
 # initial values can also be passed to optimisers:
 o <- opt(m2, initial_values = initials(variance = 1))
 
-# a list of the hessians for each of these parameters can be returned
+# and you can return a list of the hessians for each of these parameters
 o <- opt(m2, hessians = TRUE)
 o$hessians
 
-# to get a hessian matrix across multiple parameters, you must combine them
-# first in your model then split them up for use in the model (so that the
+
+# to get a hessian matrix across multiple greta arrays, you must first
+# combine them and then split them up for use in the model (so that the
 # combined vector is part of the model) and pass that vector to model:
 params <- c(variable(), variable(lower = 0))
 mu <- params[1]

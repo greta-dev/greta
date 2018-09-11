@@ -248,6 +248,15 @@ drop_first_dim <- function (x) {
   x
 }
 
+# if x is an R matrix representing a column vector, make it a plain R vector
+drop_column_dim <- function (x) {
+  dims <- dim(x)
+  if (length(dims) == 2 && dims[2] == 1L) {
+    x <- as.vector(x)
+  }
+  x
+}
+
 # where x is a tensor with no batch dimension, and y is a tensor with a batch
 # dimension, tile x to have first dimension matching y (dimension determined at
 # run time)
@@ -291,7 +300,6 @@ match_batches <- function(values) {
   values
 
 }
-
 
 # split a 3D array of n_samples * n_chains * n_parameters posterior samples into
 # a list of n_chains 2D arrays of dimension n_samples * n_parameters
@@ -340,6 +348,7 @@ misc_module <- module(module,
                       as_2D_array,
                       add_first_dim,
                       drop_first_dim,
+                      drop_column_dim,
                       expand_to_batch,
                       has_batch,
                       match_batches,

@@ -1086,7 +1086,7 @@ optimiser <- R6Class(
 
       converged <- self$it < (self$max_iterations - 1)
 
-      list(par = dag$trace_values(self$free_state),
+      list(par = dag$trace_values(self$free_state, flatten = FALSE),
            value = dag$tf_sess_run(joint_density),
            iterations = self$it,
            convergence = ifelse(converged, 0, 1))

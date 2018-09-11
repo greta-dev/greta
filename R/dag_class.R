@@ -442,7 +442,7 @@ dag_class <- R6Class(
     },
 
     # return the current values of the traced nodes, as a named vector
-    trace_values = function (free_state) {
+    trace_values = function (free_state, flatten = TRUE) {
 
       # update the parameters & build the feed dict
       self$send_parameters(free_state)
@@ -460,15 +460,28 @@ dag_class <- R6Class(
       trace_list <- tfe$sess$run(target_tensors,
                                  feed_dict = tfe$feed_dict)
 
-      # loop through elements flattening these arrays to vectors and giving the
-      # elements better names
-      trace_list_flat <- lapply(seq_along(trace_list),
-                                flatten_trace,
-                                trace_list)
+      # if they are flattened, e.g. for MCMC tracing
+      if (flatten) {
+        # loop through elements flattening these arrays to vectors and giving the
+        # elements better names
+        trace_list_flat <- lapply(seq_along(trace_list),
+                                  flatten_trace,
+                                  trace_list)
+
+        out <- do.call(cbind, trace_list_flat)
+        self$trace_names <- colnames(out)
+
+      } else {
+
+        # prepare for return to R
+        trace_list <- lapply(trace_list, drop_first_dim)
+        trace_list <- lapply(trace_list, drop_column_dim)
+
+        out <- trace_list
+
+      }
 
 
-      out <- do.call(cbind, trace_list_flat)
-      self$trace_names <- colnames(out)
       out
 
     },
