@@ -408,6 +408,39 @@ dag_class <- R6Class(
 
     },
 
+    hessians = function () {
+
+      tfe <- self$tf_environment
+      nodes <- self$target_nodes
+
+      # get names and dimensions of target greta arrays
+      ga_names <- names(nodes)
+      ga_dims <- lapply(nodes, member, "dim")
+
+      # build the hessian tensors if needed
+      if (!exists("hessian_list", envir = tfe)) {
+
+        tf_names <- vapply(nodes, self$tf_name, FUN.VALUE = "")
+        y <- tfe$joint_density
+        xs <- lapply(tf_names, get, tfe)
+        names(xs) <- NULL
+        tfe$hessian_list <- self$on_graph(tf$hessians(y, xs))
+
+      }
+
+      # evaluate at the current free state and assign
+      hessian_list <- self$tf_sess_run(hessian_list)
+
+      # reshape from tensor to R dimensions
+      dims <- lapply(ga_dims, hessian_dims)
+      hessian_list <- mapply(array, hessian_list, dims, SIMPLIFY = FALSE)
+
+      # assign names and return
+      names(hessian_list) <- ga_names
+      hessian_list
+
+    },
+
     # return the current values of the traced nodes, as a named vector
     trace_values = function (free_state) {
 

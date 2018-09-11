@@ -1065,7 +1065,6 @@ optimiser <- R6Class(
       self$set_inits()
       self$run_minimiser()
       self$fetch_free_state()
-      self$return_outputs()
 
     },
 

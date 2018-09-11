@@ -21,7 +21,8 @@ extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
 initials(...)
 
 opt(model, optimiser = bfgs(), max_iterations = 100,
-  tolerance = 1e-06, initial_values = initials(), adjust = TRUE)
+  tolerance = 1e-06, initial_values = initials(), adjust = TRUE,
+  hessians = FALSE)
 }
 \arguments{
 \item{model}{greta_model object}
@@ -75,20 +76,15 @@ successive iterations drops below this level}
 \item{adjust}{whether to account for log jacobian adjustments in the joint
 density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
 estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.}
+
+\item{hessian}{whether to return a list of \emph{analytically} differentiated
+Hessian arrays for the parameters}
 }
 \value{
 \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
   \code{mcmc.list} object that can be analysed using functions from the coda
   package. This will contain mcmc samples of the greta arrays used to create
   \code{model}.
-
-\code{opt} - a list containing the following named elements:
-  \itemize{
-   \item{par} {the best set of parameters found}
-   \item{value} {the (unadjusted) log joint density of the model at the parameters 'par'}
-   \item{iterations} {the number of iterations taken by the optimiser}
-   \item{convergence} {an integer code, 0 indicates successful completion,
-    1 indicates the iteration limit \code{max_iterations} had been reached} }
 }
 \description{
 Carry out statistical inference on greta models by
@@ -153,6 +149,16 @@ Samples returned by \code{mcmc()} and \code{stashed_samples()} can
   last value of the previous chain and uses the same sampler and model as was
   used to generate the previous samples. It is not possible to change the
   sampler or extend the warmup period.
+
+The \code{hessians} argument to \code{opt()} behaves slightly
+  differently than the \code{hessian} argument to
+  \code{\link[base:optim]{optim()}}. Since \code{opt()} acts on a list of
+  greta arrays with possibly varying dimension, greta returns a list of
+  hessian matrices (or possibly higher-dimensional arrays) for each of those
+  greta arrays. To return a hessian matrix covering all model parameters, the
+  user must construct their model so that all parameters are in a vector,
+  then split the vector up before using the parameters in their model. See
+  example.
 }
 \examples{
 \dontrun{
@@ -204,5 +210,20 @@ var(x)  # different
 
 # initial values can also be passed to optimisers:
 o <- opt(m2, initial_values = initials(variance = 1))
+
+# a list of the hessians for each of these parameters can be returned
+o <- opt(m2, hessians = TRUE)
+o$hessians
+
+# to get a hessian matrix across multiple parameters, you must combine them
+# first in your model then split them up for use in the model (so that the
+# combined vector is part of the model) and pass that vector to model:
+params <- c(variable(), variable(lower = 0))
+mu <- params[1]
+variance <- params[2]
+distribution(x) <- normal(mu, sqrt(variance))
+m3 <- model(params)
+o <- opt(m3, hessians = TRUE)
+o$hessians
 }
 }

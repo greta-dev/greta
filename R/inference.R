@@ -140,6 +140,22 @@ greta_stash <- new.env()
 #'
 #' # initial values can also be passed to optimisers:
 #' o <- opt(m2, initial_values = initials(variance = 1))
+#'
+#' # and you can return a list of the hessians for each of these parameters
+#' o <- opt(m2, hessians = TRUE)
+#' o$hessians
+#'
+#'
+#' # to get a hessian matrix across multiple greta arrays, you must first
+#' # combine them and then split them up for use in the model (so that the
+#' # combined vector is part of the model) and pass that vector to model:
+#' params <- c(variable(), variable(lower = 0))
+#' mu <- params[1]
+#' variance <- params[2]
+#' distribution(x) <- normal(mu, sqrt(variance))
+#' m3 <- model(params)
+#' o <- opt(m3, hessians = TRUE)
+#' o$hessians
 #' }
 mcmc <- function (model,
                   sampler = hmc(),
@@ -704,6 +720,18 @@ print.initials <- function (x, ...) {
 #' @param adjust whether to account for log jacobian adjustments in the joint
 #'   density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
 #'   estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.
+#' @param hessian whether to return a list of \emph{analytically} differentiated
+#'   Hessian arrays for the parameters
+#'
+#' @details The \code{hessians} argument to \code{opt()} behaves slightly
+#'   differently than the \code{hessian} argument to
+#'   \code{\link[base:optim]{optim()}}. Since \code{opt()} acts on a list of
+#'   greta arrays with possibly varying dimension, greta returns a list of
+#'   hessian matrices (or possibly higher-dimensional arrays) for each of those
+#'   greta arrays. To return a hessian matrix covering all model parameters, the
+#'   user must construct their model so that all parameters are in a vector,
+#'   then split the vector up before using the parameters in their model. See
+#'   example.
 #'
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
@@ -712,13 +740,16 @@ print.initials <- function (x, ...) {
 #'    \item{iterations} {the number of iterations taken by the optimiser}
 #'    \item{convergence} {an integer code, 0 indicates successful completion,
 #'     1 indicates the iteration limit \code{max_iterations} had been reached} }
+#'    \item{hessians} {a named list of hessian arrays for the parameters (if
+#'     \code{hessian = TRUE}) or \code{NULL}} }
 #'
 opt <- function (model,
                  optimiser = bfgs(),
                  max_iterations = 100,
                  tolerance = 1e-6,
                  initial_values = initials(),
-                 adjust = TRUE) {
+                 adjust = TRUE,
+                 hessians = FALSE) {
 
   # check initial values. Can up the number of chains in the future to handle
   # random restarts
@@ -735,11 +766,18 @@ opt <- function (model,
                                 tolerance = tolerance,
                                 adjust = adjust)
 
-  # run it
+  # run it and get the outputs
   object$run()
+  outputs <- object$return_outputs()
+
+  # optionally evaluate the hessians at these parameters
+  if (hessians) {
+    outputs$hessians <- model$dag$hessians()
+  }
+
+  outputs
 
 }
-
 
 inference_module <- module(dag_class,
                            progress_bar = progress_bar_module)

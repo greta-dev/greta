@@ -310,6 +310,16 @@ split_chains <- function (samples_array) {
 
 }
 
+# take a greta array dimension and return the dimension of the hessian to return
+# to the user
+hessian_dims <- function (dim) {
+  if (length(dim) == 2 && dim[2] == 1L) {
+    dim <- dim[1]
+  }
+  rep(dim, 2)
+}
+
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -333,7 +343,8 @@ misc_module <- module(module,
                       expand_to_batch,
                       has_batch,
                       match_batches,
-                      split_chains)
+                      split_chains,
+                      hessian_dims)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
