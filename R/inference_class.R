@@ -719,8 +719,8 @@ sampler <- R6Class(
         if (n_samples == 1L) {
 
           result <- list(self$free_state,
-                         list(log_accept_ratio = -Inf,
-                              is_accepted = FALSE))
+                         list(log_accept_ratio = rep(-Inf, self$n_chains),
+                              is_accepted = rep(FALSE, self$n_chains)))
 
 
         } else {
