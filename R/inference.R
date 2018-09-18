@@ -321,28 +321,33 @@ run_samplers <- function (samplers,
 
   }
 
+  if (sequential) {
+    dispatch <- function (expr, ...) expr
+  } else {
+    dispatch <- future::future
+  }
+
   # dispatch all the jobs
-  futures <- list()
   for (chain in chains) {
     sampler <- samplers[[chain]]
-    futures[[chain]] <- future(sampler$run_chain(n_samples = n_samples,
-                                                 thin = thin,
-                                                 warmup = warmup,
-                                                 verbose = verbose,
-                                                 pb_update = pb_update,
-                                                 one_by_one = one_by_one,
-                                                 sequential = sequential,
-                                                 n_cores = n_cores,
-                                                 float_type = float_type,
-                                                 from_scratch = from_scratch),
-                               seed = future_seed())
+    samplers[[chain]] <- dispatch(sampler$run_chain(n_samples = n_samples,
+                                                   thin = thin,
+                                                   warmup = warmup,
+                                                   verbose = verbose,
+                                                   pb_update = pb_update,
+                                                   one_by_one = one_by_one,
+                                                   sequential = sequential,
+                                                   n_cores = n_cores,
+                                                   float_type = float_type,
+                                                   from_scratch = from_scratch),
+                                 seed = future_seed())
   }
 
   # if we're non-sequential and there's a callback registered,
   # loop until they are resolved, executing the callbacks
   if (parallel_reporting) {
 
-    while (!all(vapply(futures, resolved, FALSE))) {
+    while (!all(vapply(samplers, resolved, FALSE))) {
 
       # loop through callbacks executing them
       for (callback in greta_stash$callbacks)
@@ -357,12 +362,11 @@ run_samplers <- function (samplers,
 
   }
 
-  # then retrieve the samplers
-  samplers <- lapply(futures, value)
 
-  # if we were running in parallel, we need to put the samplers back in the
-  # stash to return
+  # if we were running in parallel, retrieve the samplers and put them back in
+  # the stash to return
   if (!sequential) {
+    samplers <- lapply(samplers, future::value)
     greta_stash$samplers <- samplers
   }
 
