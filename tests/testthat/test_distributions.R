@@ -383,7 +383,7 @@ test_that('lkj distribution has correct density', {
   m <- 5
   eta <- 3
 
-  # normalising component of the lkj distribution (depends on eta, so can be ignored if that's constant)
+  # normalising component of lkj (depends only on eta and dimension)
   lkj_normalising <- function (eta, n) {
     if (eta == 1) {
       result <- sum(lgamma(2 * 1:((n - 1) / 2 + 1)))
@@ -416,18 +416,15 @@ test_that('lkj distribution has correct density', {
     return (res)
   }
 
-  rcorrelation <- function (m) {
-    wish <- MCMCpack::rwish(m + 1, diag(m))
-    iwish <- solve(wish)
-    cov2cor(iwish)
-  }
+  rlkj_correlation <- function (m)
+    rethinking::rlkjcorr(1, K = m, eta = 1)
 
   # no vectorised lkj, so loop through all of these
   difference <- replicate(10,
                           compare_distribution(greta::lkj_correlation,
                                                dlkj_correlation,
                                                parameters = list(eta = eta, dimension = m),
-                                               x = rcorrelation(m),
+                                               x = rlkj_correlation(m),
                                                multivariate = TRUE))
 
   expect_true(all(difference < 1e-4))

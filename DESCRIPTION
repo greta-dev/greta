@@ -67,6 +67,7 @@ Suggests:
     rmutil,
     extraDistr,
     truncdist,
-    tidyverse
+    tidyverse,
+    rethinking
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0

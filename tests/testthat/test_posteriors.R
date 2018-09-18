@@ -83,7 +83,7 @@ test_that("samplers are unbiased for LKJ", {
 
   x <- lkj_correlation(3, 2)[1, 2]
   iid <- function(n)
-    replicate(n, rcorvine(2, 3)[1, 2])
+    rethinking::rlkjcorr(n, 2, 3)[, 1, 2]
 
   check_samples(x, iid, hmc())
   check_samples(x, iid, rwmh())
