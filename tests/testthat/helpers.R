@@ -447,7 +447,7 @@ qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 
 # is this a release candidate?
 skip_if_not_release <- function () {
-  if (identical(Sys.getenv("GRETA_RELEASE"), "true")) {
+  if (identical(Sys.getenv("RELEASE_CANDIDATE"), "true")) {
     return(invisible(TRUE))
   }
   skip("Not a Release Candidate")
