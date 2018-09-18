@@ -651,3 +651,42 @@ check_mvn_samples <- function (sampler, n_effective = 3000) {
   expect_lte(max(errors), qnorm(0.99))
 
 }
+
+# sample values of greta array 'x' (which must follow a distribution), and
+# compare the samples with iid samples returned by iid_function (which takes the
+# number of arguments as its sole argument), producing a labelled qqplot, and
+# running a KS test for differences between the two samples
+check_samples <- function (x,
+                           iid_function,
+                           sampler,
+                           n_effective = 3000,
+                           title = NULL,
+                           one_by_one = FALSE) {
+
+  m <- model(x, precision = "single")
+  draws <- get_enough_draws(m,
+                            sampler = sampler,
+                            n_effective = n_effective,
+                            verbose = FALSE,
+                            one_by_one = one_by_one)
+
+  neff <- coda::effectiveSize(draws)
+  iid_samples <- iid_function(neff)
+  mcmc_samples <- as.matrix(draws)
+
+  # plot
+  if (is.null(title)) {
+    distrib <- get_node(x)$distribution$distribution_name
+    sampler_name <- class(sampler)[1]
+    title <- paste(distrib, "with", sampler_name)
+  }
+
+  qqplot(mcmc_samples, iid_samples, main = title)
+  abline(0, 1)
+
+  # do a formal hypothesis test
+  suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
+  testthat::expect_gte(stat$p.value, 0.01)
+
+}
+

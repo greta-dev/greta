@@ -47,6 +47,67 @@ test_that("samplers are unbiased for bivariate normals", {
 
 })
 
+test_that("samplers are unbiased for chi-squared", {
+
+  source("helpers.R")
+  skip_if_not_release()
+
+  df <- 5
+  x <- chi_squared(df)
+  iid <- function (n) rchisq(n, df)
+
+  check_samples(x, iid, hmc())
+  check_samples(x, iid, rwmh())
+  check_samples(x, iid, slice())
+
+})
+
+test_that("samplers are unbiased for standard uniform", {
+
+  source("helpers.R")
+  skip_if_not_release()
+
+  x <- uniform(0, 1)
+  iid <- runif
+
+  check_samples(x, iid, hmc())
+  check_samples(x, iid, rwmh())
+  check_samples(x, iid, slice())
+
+})
+
+test_that("samplers are unbiased for LKJ", {
+
+  source("helpers.R")
+  skip_if_not_release()
+
+  x <- lkj_correlation(3, 2)[1, 2]
+  iid <- function(n)
+    replicate(n, rcorvine(2, 3)[1, 2])
+
+  check_samples(x, iid, hmc())
+  check_samples(x, iid, rwmh())
+  check_samples(x, iid, slice())
+
+})
+
+test_that("samplers are unbiased for Wishart", {
+
+  source("helpers.R")
+  skip_if_not_release()
+
+  sigma <- matrix(c(1.2, 0.7, 0.7, 2.3),
+                  2, 2)
+  df <- 4
+  x <- wishart(df, sigma)[1, 2]
+  iid <- function(n)
+    rWishart(n, df, sigma)[1, 2, ]
+
+  check_samples(x, iid, hmc(), one_by_one = TRUE)
+  check_samples(x, iid, rwmh(), one_by_one = TRUE)
+  check_samples(x, iid, slice(), one_by_one = TRUE)
+
+})
 
 test_that("samplers pass geweke tests", {
 
