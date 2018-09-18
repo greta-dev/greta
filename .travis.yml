@@ -3,6 +3,10 @@ language: r
 warnings_are_errors: false
 dist: trusty
 
+# enable this to run (slow & fragile) tests of sampler validity before releases
+env:
+  - RELEASE_CANDIDATE=false
+
 r_packages:
   - reticulate
   - tensorflow

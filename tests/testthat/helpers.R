@@ -444,3 +444,203 @@ preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
 dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
 ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
 qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
+
+# is this a release candidate?
+skip_if_not_release <- function () {
+  if (identical(Sys.getenv("GRETA_RELEASE"), "true")) {
+    return(invisible(TRUE))
+  }
+  skip("Not a Release Candidate")
+}
+
+# run a geweke test on a greta model, providing: 'sampler' a greta sampler (e.g.
+# hmc()), a greta 'model', a 'data' greta array used as the target in the model,
+# the two IID random number generators for the data generating function
+# ('p_theta' = generator for the prior, 'p_x_bar_theta' = generator for the
+# likelihood), 'niter' the number of MCMC samples to compare
+check_geweke <- function (sampler, model, data,
+                          p_theta, p_x_bar_theta,
+                          niter = 2000, title = "Geweke test") {
+
+  # sample independently
+  target_theta <- p_theta(niter)
+
+  # sample with Markov chain
+  greta_theta <- p_theta_greta(niter = niter,
+                               model = model,
+                               data = data,
+                               p_theta = p_theta,
+                               p_x_bar_theta = p_x_bar_theta,
+                               sampler = sampler)
+
+  # visualise correspondence
+  quants <- (1:99) / 100
+  plot(quantile(target_theta, quants) ~ quantile(greta_theta, quants))
+  abline(0, 1)
+
+  # do a formal hypothesis test
+  suppressWarnings(stat <- ks.test(target_theta, greta_theta))
+  testthat::expect_gte(stat$p.value, 0.01)
+
+}
+
+# sample from a prior on theta the long way round, fro use in a Geweke test:
+# gibbs sampling the posterior p(theta | x) and the data generating function p(x
+# | theta). Only retain the samples of theta from the joint distribution,
+p_theta_greta <- function (niter, model, data, p_theta, p_x_bar_theta, sampler = hmc()) {
+
+  # set up and initialize trace
+  theta <- rep(NA, niter)
+  theta[1] <- p_theta(1)
+
+  # set up and tune sampler
+  draws <- mcmc(model,
+                n_samples = 1,
+                chains = 1,
+                sampler = sampler,
+                verbose = FALSE)
+
+  # now loop through, sampling and updating x and returning theta
+  for (i in 2:niter)  {
+
+    # sample x given theta
+    x <- p_x_bar_theta(theta[i - 1])
+
+    # put x in the data list
+    dag <- model$dag
+    target_name <- dag$tf_name(get_node(data))
+    x_array <-  array(x, dim = c(1, dim(data)))
+    dag$tf_environment$data_list[[target_name]] <- x_array
+
+    # put theta in the free state
+    sampler <- attr(draws, "model_info")$samplers[[1]]
+    sampler$free_state <- as.matrix(theta[i - 1])
+
+    draws <- extra_samples(draws,
+                           n_samples = 1,
+                           verbose = FALSE)
+
+    # bayesplot::mcmc_trace(draws)
+    theta[i] <- tail(as.numeric(draws[[1]]), 1)
+
+  }
+
+  theta
+
+}
+
+# test mcmc for models with analytic posteriors
+
+not_finished <- function (draws, target_samples = 5000) {
+  neff <- coda::effectiveSize(draws)
+  converged <- all(coda::gelman.diag(draws)$psrf[, 1] < 1.01)
+  enough_samples <- all(neff >= target_samples)
+  !(converged & enough_samples)
+}
+
+new_samples <- function (draws, target_samples = 5000) {
+  neff <- min(coda::effectiveSize(draws))
+  efficiency <- neff / coda::niter(draws)
+  1.2 * (target_samples - neff) / efficiency
+}
+
+not_timed_out <- function (start_time, time_limit = 300) {
+  elapsed <- Sys.time() - start_time
+  elapsed < time_limit
+}
+
+get_enough_draws <- function (model,
+                              sampler = sampler,
+                              n_effective = 5000,
+                              time_limit = 300,
+                              verbose = TRUE) {
+
+  start_time <- Sys.time()
+  draws <- mcmc(model, sampler = sampler, verbose = verbose)
+
+  while (not_finished(draws, n_effective) &
+         not_timed_out(start_time, time_limit)) {
+
+    n_samples <- new_samples(draws, n_effective)
+    draws <- extra_samples(draws, n_samples, verbose = verbose)
+
+  }
+
+  if (not_finished(draws, n_effective)) {
+    stop ("could not draws enough effective samples within the time limit")
+  }
+
+  draws
+
+}
+
+# Monte Carlo standard error (using batch means)
+mcse <- function (draws) {
+  n <- nrow(draws)
+  b <- floor(sqrt(n))
+  a <- floor(n / b)
+
+  group <- function (k) {
+    idx <- ((k - 1) * b + 1):(k * b)
+    colMeans(draws[idx, , drop = FALSE])
+  }
+
+  bm <- vapply(seq_len(a),
+               group,
+               draws[1, ])
+
+  if (is.null(dim(bm)))
+    bm <- t(bm)
+
+  mu_hat <- as.matrix(colMeans(draws))
+  ss <- sweep(t(bm), 2, mu_hat, '-') ^ 2
+  var_hat <- b * colSums(ss) / (a - 1)
+  sqrt(var_hat / n)
+}
+
+# absolute error of the estimate, scaled by the Monte Carlo standard error
+scaled_error <- function (draws, expectation) {
+  draws <- as.matrix(draws)
+  se <- mcse(draws)
+  est <- colMeans(draws)
+  abs(est - expectation) / se
+}
+
+# given a sampler (e.g. hmc()) and minimum number of effective samples, ensure
+# that the sampler can draw correct samples from a bivariate normal distribution
+check_mvn_samples <- function (sampler, n_effective = 3000) {
+
+  # get multivariate normal samples
+  mu <- as_data(t(rnorm(2, 0, 5)))
+  Sigma <- rWishart(1, 3, diag(2))[, , 1]
+  x <- multivariate_normal(mu, Sigma)
+  m <- model(x, precision = "single")
+
+  draws <- get_enough_draws(m,
+                            sampler = sampler,
+                            n_effective = n_effective,
+                            verbose = FALSE)
+
+  # get MCMC samples for statistics of the samples (value, variance and
+  # correlation of error wrt mean)
+  err <- x - mu
+  var <- (err) ^ 2
+  corr <- prod(err) / prod(sqrt(diag(Sigma)))
+  err_var_corr <- c(err, var, corr)
+  stat_draws <- calculate(err_var_corr, draws)
+
+  # get true values of these - on average the error should be 0, and the
+  # variance and correlation of the errors should encoded in Sigma
+  stat_truth <- c(rep(0, 2),
+                  diag(Sigma),
+                  cov2cor(Sigma)[1, 2])
+
+  # get absolute errors between posterior means and true values, and scale them
+  # by time-series Monte Carlo standard errors (the expected amount of
+  # uncertainty in the MCMC estimate), to give the number of standard errors
+  # away from truth. There's a 1/100 chance of any one of these scaled errors
+  # being greater than qnorm(0.99) if the sampler is correct
+  errors <- scaled_error(stat_draws, stat_truth)
+  expect_lte(max(errors), qnorm(0.99))
+
+}
