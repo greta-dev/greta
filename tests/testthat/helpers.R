@@ -533,7 +533,8 @@ p_theta_greta <- function (niter, model, data, p_theta, p_x_bar_theta, sampler =
 
 not_finished <- function (draws, target_samples = 5000) {
   neff <- coda::effectiveSize(draws)
-  converged <- all(coda::gelman.diag(draws)$psrf[, 1] < 1.01)
+  rhats <- coda::gelman.diag(draws, multivariate = FALSE)$psrf[, 1]
+  converged <- all(rhats < 1.01)
   enough_samples <- all(neff >= target_samples)
   !(converged & enough_samples)
 }
@@ -553,16 +554,22 @@ get_enough_draws <- function (model,
                               sampler = sampler,
                               n_effective = 5000,
                               time_limit = 300,
-                              verbose = TRUE) {
+                              verbose = TRUE,
+                              one_by_one = FALSE) {
 
   start_time <- Sys.time()
-  draws <- mcmc(model, sampler = sampler, verbose = verbose)
+  draws <- mcmc(model,
+                sampler = sampler,
+                verbose = verbose,
+                one_by_one = one_by_one)
 
   while (not_finished(draws, n_effective) &
          not_timed_out(start_time, time_limit)) {
 
     n_samples <- new_samples(draws, n_effective)
-    draws <- extra_samples(draws, n_samples, verbose = verbose)
+    draws <- extra_samples(draws, n_samples,
+                           verbose = verbose,
+                           one_by_one = one_by_one)
 
   }
 

@@ -14,7 +14,7 @@ test_that("posterior is correct (binomial)", {
   distribution(pos) <- binomial(N, theta)
   m <- model(theta)
 
-  draws <- get_enough_draws(m, 2000, verbose = FALSE)
+  draws <- get_enough_draws(m, hmc(), 2000, verbose = FALSE)
 
   samples <- as.matrix(draws)
 
