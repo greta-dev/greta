@@ -1074,14 +1074,21 @@ lkj_correlation_distribution <- R6Class (
 
       log_prob <- function (x) {
 
+        n <- self$dim[1]
+
+        # normalising constant
+        k <- 1:n
+        a <- fl(-(n - 1)) * tf$lgamma(eta + fl(0.5 * (n - 1)))
+        b <- tf_sum(fl(0.5 * k * log(pi)) + tf$lgamma(eta + fl(0.5 * (n - 1 - k))))
+        norm <- a + b
+
         if (!is_cholesky)
           x <- tf$cholesky(x)
 
         diags <- tf$matrix_diag_part(x)
         det <- tf$square(tf_prod(diags))
-        eta <- tf$reshape(eta, shape(-1))
-        prob <- det ^ (eta - fl(1))
-        lp <- tf$log(prob)
+
+        (eta - fl(1)) * tf$log(det) + norm
 
       }
 
