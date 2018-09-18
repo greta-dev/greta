@@ -261,6 +261,11 @@ run_samplers <- function (samplers,
   # check the future plan is valid
   check_future_plan()
 
+  # coerce the iterations to integer
+  n_samples <- as.integer(n_samples)
+  warmup <- as.integer(warmup)
+  thin <- as.integer(thin)
+
   dag <- samplers[[1]]$model$dag
   sequential <- inherits(future::plan(), "sequential")
   chains <- samplers[[1]]$n_chains
