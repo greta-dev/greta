@@ -658,7 +658,7 @@ check_mvn_samples <- function (sampler, n_effective = 3000) {
 # running a KS test for differences between the two samples
 check_samples <- function (x,
                            iid_function,
-                           sampler,
+                           sampler = hmc(),
                            n_effective = 3000,
                            title = NULL,
                            one_by_one = FALSE) {

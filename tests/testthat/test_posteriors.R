@@ -56,9 +56,7 @@ test_that("samplers are unbiased for chi-squared", {
   x <- chi_squared(df)
   iid <- function (n) rchisq(n, df)
 
-  check_samples(x, iid, hmc())
-  check_samples(x, iid, rwmh())
-  check_samples(x, iid, slice())
+  check_samples(x, iid)
 
 })
 
@@ -70,9 +68,7 @@ test_that("samplers are unbiased for standard uniform", {
   x <- uniform(0, 1)
   iid <- runif
 
-  check_samples(x, iid, hmc())
-  check_samples(x, iid, rwmh())
-  check_samples(x, iid, slice())
+  check_samples(x, iid)
 
 })
 
@@ -85,9 +81,7 @@ test_that("samplers are unbiased for LKJ", {
   iid <- function(n)
     rethinking::rlkjcorr(n, 2, 3)[, 1, 2]
 
-  check_samples(x, iid, hmc())
-  check_samples(x, iid, rwmh())
-  check_samples(x, iid, slice())
+  check_samples(x, iid, hmc(), one_by_one = TRUE)
 
 })
 
@@ -103,9 +97,7 @@ test_that("samplers are unbiased for Wishart", {
   iid <- function(n)
     rWishart(n, df, sigma)[1, 2, ]
 
-  check_samples(x, iid, hmc(), one_by_one = TRUE)
-  check_samples(x, iid, rwmh(), one_by_one = TRUE)
-  check_samples(x, iid, slice(), one_by_one = TRUE)
+  check_samples(x, iid, one_by_one = TRUE)
 
 })
 
