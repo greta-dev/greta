@@ -66,7 +66,7 @@ test_that('random strings of operators work as expected', {
     # generate a 5-deep random function of operations
     fun <- gen_opfun(5,
                      ops = c('+', '-', '*',
-                             '/', '%/%', '&',
+                             '/', '&',
                              '|', '<', '>'))
 
     r_out <- fun(a, b)
