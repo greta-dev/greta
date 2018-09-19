@@ -1082,7 +1082,7 @@ lkj_correlation_distribution <- R6Class (
         b <- tf_sum(fl(0.5 * k * log(pi)) + tf$lgamma(eta + fl(0.5 * (n - 1 - k))))
         norm <- a + b
 
-        if (!is_cholesky)
+        # if (!is_cholesky)
           x <- tf$cholesky(x)
 
         diags <- tf$matrix_diag_part(x)
