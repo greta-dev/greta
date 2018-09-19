@@ -25,6 +25,7 @@ r_packages:
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
+  - rmcelreath/rethinking
 
 cache:
   packages: true
