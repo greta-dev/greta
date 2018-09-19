@@ -10,7 +10,6 @@ env:
 # these are dependencies of suggested packagesi for which there are binaries,
 # add them here to try to reduce installation time
 r_binary_packages:
-  - class
   - coda
   - codetools
   - colorspace
@@ -19,14 +18,12 @@ r_binary_packages:
   - foreign
   - ggplot2
   - inline
-  - KernSmooth
   - lattice
   - MASS
   - MCMCpack
   - mgcv
   - mvtnorm
   - nlme
-  - nnet
   - plyr
   - Rcpp
   - rpart
