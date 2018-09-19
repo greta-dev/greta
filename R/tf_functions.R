@@ -109,69 +109,139 @@ tf_flat_to_chol <- function (x, dims) {
 
 }
 
+# given a (batched, column) vector tensor of elements, corresponding to the
+# correlation-constrained (between -1 and 1) free state of a single row of the
+# cholesky factor of a correlation matrix, return the (upper-triangular
+# elements, including the diagonal, of the) row of the choleskied correlation
+# matrix. Or return the log jacobian of this transformation. When which =
+# "values", the output vector has one more element than the input, since the
+# diagonal element depends deterministically on the other elements.
+tf_corrmat_row <- function(z, which = c("values", "ljac")) {
+
+  which <- match.arg(which)
+
+  n <- dim(z)[[2]]
+
+  # use a tensorflow while loop to do the recursion:
+  # lp <- lp + 0.5 * log(1 - sumsq)
+  # x[i] <- x[i] + z[i] * sqrt(1 - sumsq)
+  # sumsq <- sumsq + x[i] ^ 2
+  # dropping irrelevant terms for the value/jacobian cases
+
+  body_values <- function(z, x, sumsq, lp, iter, maxiter) {
+    x_new <- z[, iter] * tf$sqrt(fl(1) - sumsq)
+    sumsq <- sumsq + tf$square(x_new)
+    x_new <- tf$expand_dims(x_new, 1L)
+    x <- tf$concat(list(x, x_new), axis = 1L)
+    list(z, x, sumsq, lp, iter + 1L, maxiter)
+  }
+
+  # body for the log jacobian adjustment
+  body_ljac <- function(z, x, sumsq, lp, iter, maxiter) {
+    lp <- lp + fl(0.5) * log(fl(1) - sumsq)
+    x_new <- z[, iter] * tf$sqrt(fl(1) - sumsq)
+    sumsq <- sumsq + tf$square(x_new)
+    list(z, x, sumsq, lp, iter + 1L, maxiter)
+  }
+
+  # initial sum of squares is from the first element
+  z_0 <- z[, 0]
+  sumsq <- z_0 ^ 2
+  x <- tf$expand_dims(z_0, 1L)
+  lp <- tf$zeros(shape(1), tf_float())
+  lp <- expand_to_batch(lp, z)
+
+  # x has no elements yet, append them
+  values <- list(z,
+                 x,
+                 sumsq,
+                 lp,
+                 tf$constant(1L),
+                 tf$constant(n))
+
+  cond <- function (z, x, sumsq, lp, iter, maxiter)
+    tf$less(iter, maxiter)
+
+  shapes <- list(tf$TensorShape(shape(NULL, n)),
+                 tf$TensorShape(shape(NULL, NULL)),
+                 tf$TensorShape(shape(NULL)),
+                 tf$TensorShape(shape(NULL)),
+                 tf$TensorShape(shape()),
+                 tf$TensorShape(shape()))
+
+  body <- switch(which,
+                 values = body_values,
+                 ljac = body_ljac)
+
+  out <- tf$while_loop(cond,
+                       body,
+                       values,
+                       shape_invariants = shapes)
+
+  if (which == "values") {
+
+    x <- out[[2]]
+    sumsq <- out[[3]]
+    final_x <- tf$sqrt(fl(1) - sumsq)
+    final_x <- tf$expand_dims(final_x, 1L)
+    x <- tf$concat(list(x, final_x), axis = 1L)
+    return (x)
+
+  } else {
+
+    lp <- out[[4]]
+    return (lp)
+
+  }
+
+}
+
 # convert an unconstrained vector into symmetric correlation matrix
 tf_flat_to_chol_correl <- function (x, dims) {
 
-  if (length(dim(x)) < 3) {
-    x <- tf$reshape(x, shape(-1, ncol(x), 1))
+  dims <- dim(x)
+  K <- dims[[2]]
+  n <- (1 + sqrt(8 * K + 1)) / 2
+
+  # drop the third dimension
+  if (length(dims) == 3) {
+    x <- tf$squeeze(x, axis = 2L)
   }
 
-  # to -1, 1 scale
-  y <- tf$tanh(x)
+  # convert to -1, 1 scale
+  z <- tf$tanh(x)
 
-  k <- dims[1]
+  # split z up into rows
+  z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
 
-  # list of indices mapping relevant part of each row to an element of y
-  y_index_list <- list()
-  count <- 0
-  for (i in 1:(k - 1)) {
-    nelem <- k - i
-    y_index_list[[i]] <- count + seq_len(nelem) - 1
-    count <- count + nelem
-  }
+  # accumulate sum of squares within each row
+  x_rows <- lapply(z_rows, tf_corrmat_row)
 
-  # dummy list to store transformed versions of rows
-  values_list <- y_index_list
-  values_list[[1]] <- tf$reshape(y[, y_index_list[[1]], , drop = FALSE],
-                                 shape(-1, k - 1, 1))
-  sum_sqs <- tf$square(values_list[[1]])
+  # append 0s to all rows for the empty triangle
+  zero_rows <- lapply((n - 2):0,
+                      function(n) {
+                        zeros <- tf$constant(rep(0, n),
+                                             dtype = tf_float(),
+                                             shape = shape(1, n))
+                        expand_to_batch(zeros, x)
+                      })
 
-  if (k > 2) {
+  lists <- mapply(list, x_rows, zero_rows, SIMPLIFY = FALSE)
+  rows <- lapply(lists, tf$concat, axis = 1L)
 
-    for (i in 2:(k - 1)) {
-      # relevant columns (0-indexed)
-      idx <- i:(k - 1) - 1
-      # components of z on this row (straight from y)
-      z <- tf$reshape(y[, y_index_list[[i]], ],
-                      shape(-1, k - i, 1))
-      # assign to w, using relevant parts of the sum of squares
-      sum_sqs_i <- sum_sqs[, idx, , drop = FALSE]
-      values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs_i)
-      # increment sum of squares
-      sum_sqs_part <- tf$square(values_list[[i]]) + sum_sqs_i
-      sum_sqs <- tf_recombine(sum_sqs, idx, sum_sqs_part)
-    }
+  # add a fixed first row
+  row_one <- tf$constant(c(1, rep(0, n - 1)),
+                         dtype = tf_float(),
+                         shape = shape(1, n))
+  row_one <- expand_to_batch(row_one, x)
+  rows <- c(row_one, rows)
 
-  }
+  rows <- lapply(rows, tf$expand_dims, 2L)
 
-  # dummy array to find the indices
-  L_dummy <- dummy(dims)
-  indices_diag <- diag(L_dummy)
-  indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
+  # combine into upper-triangular matrix
+  mat <- tf$concat(rows, axis = 2L)
 
-  # diagonal & off-diagonal elements
-  values_diag <- tf_concat(list(tf$ones(shape(1, 1, 1),
-                                        dtype = tf_float()),
-                                sqrt(fl(1) - sum_sqs)), 1L)
-  values_offdiag <- tf_concat(values_list, 1L)
-
-  # plug elements into a vector of 0s
-  values_0 <- tf$zeros(shape(1, prod(dims), 1), dtype = tf_float())
-  values_0_diag <- tf_recombine(values_0, indices_diag, values_diag)
-  values_z <- tf_recombine(values_0_diag, indices_offdiag, values_offdiag)
-
-  # reshape into cholesky and return
-  tf$reshape(values_z, shape(-1, dims[1], dims[2]))
+  mat
 
 }
 
@@ -461,6 +531,7 @@ tf_functions_module <- module(tf_as_logical,
                               tf_lbeta,
                               tf_chol,
                               tf_flat_to_chol,
+                              tf_corrmat_row,
                               tf_flat_to_chol_correl,
                               tf_chol_to_symmetric,
                               tf_kronecker,

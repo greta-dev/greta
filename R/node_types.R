@@ -264,18 +264,23 @@ variable_node <- R6Class (
       ljac_corr_mat <- function (x) {
 
         # find dimension
-        n <- dim(x)[[2]]
-        K <- (1 + sqrt(8 * n + 1)) / 2
+        K <- dim(x)[[2]]
+        n <- (1 + sqrt(8 * K + 1)) / 2
 
-        # draw the rest of the owl
-        l1mz2 <- tf$log(fl(1) - tf$square(tf$tanh(x)))
-        i <- rep(1:(K - 1), (K - 1):1)
-        powers <- tf$constant(K - i - 1,
-                              dtype = tf_float(),
-                              shape = shape(length(i)))
-        fl(0.5) *
-          tf_sum(powers * l1mz2, drop = TRUE) +
-          tf_sum(l1mz2, drop = TRUE)
+        # convert to correlation-scale (-1, 1) & get log jacobian
+        z <- tf$tanh(x)
+
+        free_to_correl_lp <- tf_sum(log(fl(1) - tf$square(z)))
+        free_to_correl_lp <- tf$squeeze(free_to_correl_lp, 1L)
+
+        # split z up into rows
+        z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
+
+        # accumulate log prob within each row
+        lps <- lapply(z_rows, tf_corrmat_row, which = "ljac")
+        correl_to_mat_lp <- tf$add_n(lps)
+
+        free_to_correl_lp + correl_to_mat_lp
 
       }
 
