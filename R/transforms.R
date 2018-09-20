@@ -53,8 +53,10 @@ iprobit <- function (x)
 
 #' @rdname transforms
 #' @export
-ilogit <- function (x)
-  op('ilogit', x, tf_operation = "tf$nn$sigmoid")
+ilogit <- function (x) {
+  op('ilogit', x, tf_operation = "tf$nn$sigmoid",
+     representations = list(logit = x))
+}
 
 #' @rdname transforms
 #' @export

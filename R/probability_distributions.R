@@ -83,6 +83,10 @@ normal_distribution <- R6Class (
   public = list(
 
     initialize = function (mean, sd, dim, truncation) {
+
+      mean <- as.greta_array(mean)
+      sd <- as.greta_array(sd)
+
       # add the nodes as children and parameters
       dim <- check_dims(mean, sd, target_dim = dim)
       super$initialize('normal', dim, truncation)
@@ -104,6 +108,10 @@ lognormal_distribution <- R6Class (
   public = list(
 
     initialize = function (meanlog, sdlog, dim, truncation) {
+
+      meanlog <- as.greta_array(meanlog)
+      sdlog <- as.greta_array(sdlog)
+
       dim <- check_dims(meanlog, sdlog, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -125,21 +133,33 @@ bernoulli_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
+    prob_is_logit = FALSE,
+
     initialize = function (prob, dim) {
+
+      prob <- as.greta_array(prob)
+
       # add the nodes as children and parameters
       dim <- check_dims(prob, target_dim = dim)
       super$initialize('bernoulli', dim, discrete = TRUE)
+      if (has_representation(prob, "logit")) {
+        prob <- representation(prob, "logit")
+        self$prob_is_logit <- TRUE
+      }
       self$add_parameter(prob, 'prob')
     },
 
     tf_distrib = function (parameters, dag) {
-      tfp$distributions$Bernoulli(probs = parameters$prob)
+      if (self$prob_is_logit) {
+        tfp$distributions$Bernoulli(logits = parameters$prob)
+      } else {
+        tfp$distributions$Bernoulli(probs = parameters$prob)
+      }
     },
 
     # no CDF for discrete distributions
     tf_cdf_function = NULL,
     tf_log_cdf_function = NULL
-
 
   )
 )
@@ -149,18 +169,33 @@ binomial_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
+    prob_is_logit = FALSE,
+
     initialize = function (size, prob, dim) {
+
+      size <- as.greta_array(size)
+      prob <- as.greta_array(prob)
+
       # add the nodes as children and parameters
       dim <- check_dims(size, prob, target_dim = dim)
       super$initialize('binomial', dim, discrete = TRUE)
-      self$add_parameter(size, 'size')
+      if (has_representation(prob, "logit")) {
+        prob <- representation(prob, "logit")
+        self$prob_is_logit <- TRUE
+      }
       self$add_parameter(prob, 'prob')
+      self$add_parameter(size, 'size')
 
     },
 
     tf_distrib = function (parameters, dag) {
-      tfp$distributions$Binomial(total_count = parameters$size,
-                                 probs = parameters$prob)
+      if (self$prob_is_logit) {
+        tfp$distributions$Binomial(total_count = parameters$size,
+                                   logits = parameters$prob)
+      } else {
+        tfp$distributions$Binomial(total_count = parameters$size,
+                                   probs = parameters$prob)
+      }
     },
 
     # no CDF for discrete distributions
@@ -176,6 +211,11 @@ beta_binomial_distribution <- R6Class (
   public = list(
 
     initialize = function (size, alpha, beta, dim) {
+
+      size <- as.greta_array(size)
+      alpha <- as.greta_array(alpha)
+      beta <- as.greta_array(beta)
+
       # add the nodes as children and parameters
       dim <- check_dims(size, alpha, beta, target_dim = dim)
       super$initialize('beta_binomial', dim, discrete = TRUE)
@@ -213,15 +253,33 @@ poisson_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
+    lambda_is_log = FALSE,
+
     initialize = function (lambda, dim) {
+
+      lambda <- as.greta_array(lambda)
+
       # add the nodes as children and parameters
       dim <- check_dims(lambda, target_dim = dim)
       super$initialize('poisson', dim, discrete = TRUE)
+
+      if (has_representation(lambda, "log")) {
+        lambda <- representation(lambda, "log")
+        self$lambda_is_log <- TRUE
+      }
       self$add_parameter(lambda, 'lambda')
     },
 
     tf_distrib = function (parameters, dag) {
-      tfp$distributions$Poisson(rate = parameters$lambda)
+
+      if (self$lambda_is_log) {
+        log_lambda <- parameters$lambda
+      } else {
+        log_lambda <- tf$log(parameters$lambda)
+      }
+
+      tfp$distributions$Poisson(log_rate = log_lambda)
+
     },
 
     # no CDF for discrete distributions
@@ -237,6 +295,10 @@ negative_binomial_distribution <- R6Class (
   public = list(
 
     initialize = function (size, prob, dim) {
+
+      size <- as.greta_array(size)
+      prob <- as.greta_array(prob)
+
       # add the nodes as children and parameters
       dim <- check_dims(size, prob, target_dim = dim)
       super$initialize('negative_binomial', dim, discrete = TRUE)
@@ -262,6 +324,11 @@ hypergeometric_distribution <- R6Class (
   public = list(
 
     initialize = function (m, n, k, dim) {
+
+      m <- as.greta_array(m)
+      n <- as.greta_array(n)
+      k <- as.greta_array(k)
+
       # add the nodes as children and parameters
       dim <- check_dims(m, n, k, target_dim = dim)
       super$initialize('hypergeometric', dim, discrete = TRUE)
@@ -299,6 +366,10 @@ gamma_distribution <- R6Class (
   public = list(
 
     initialize = function (shape, rate, dim, truncation) {
+
+      shape <- as.greta_array(shape)
+      rate <- as.greta_array(rate)
+
       # add the nodes as children and parameters
       dim <- check_dims(shape, rate, target_dim = dim)
       check_positive(truncation)
@@ -322,6 +393,10 @@ inverse_gamma_distribution <- R6Class (
   public = list(
 
     initialize = function (alpha, beta, dim, truncation) {
+
+      alpha <- as.greta_array(alpha)
+      beta <- as.greta_array(beta)
+
       # add the nodes as children and parameters
       dim <- check_dims(alpha, beta, target_dim = dim)
       check_positive(truncation)
@@ -345,6 +420,10 @@ weibull_distribution <- R6Class (
   public = list(
 
     initialize = function (shape, scale, dim, truncation) {
+
+      shape <- as.greta_array(shape)
+      scale <- as.greta_array(scale)
+
       # add the nodes as children and parameters
       dim <- check_dims(shape, scale, target_dim = dim)
       check_positive(truncation)
@@ -384,6 +463,9 @@ exponential_distribution <- R6Class (
   public = list(
 
     initialize = function (rate, dim, truncation) {
+
+      rate <- as.greta_array(rate)
+
       # add the nodes as children and parameters
       dim <- check_dims(rate, target_dim = dim)
       check_positive(truncation)
@@ -405,6 +487,9 @@ pareto_distribution <- R6Class (
   public = list(
 
     initialize = function (a, b, dim, truncation) {
+      a <- as.greta_array(a)
+      b <- as.greta_array(b)
+
       # add the nodes as children and parameters
       dim <- check_dims(a, b, target_dim = dim)
       check_positive(truncation)
@@ -441,6 +526,11 @@ student_distribution <- R6Class (
   public = list(
 
     initialize = function (df, mu, sigma, dim, truncation) {
+
+      df <- as.greta_array(df)
+      mu <- as.greta_array(mu)
+      sigma <- as.greta_array(sigma)
+
       # add the nodes as children and parameters
       dim <- check_dims(df, mu, sigma, target_dim = dim)
       super$initialize('student', dim, truncation)
@@ -464,6 +554,10 @@ laplace_distribution <- R6Class (
   public = list(
 
     initialize = function (mu, sigma, dim, truncation) {
+
+      mu <- as.greta_array(mu)
+      sigma <- as.greta_array(sigma)
+
       # add the nodes as children and parameters
       dim <- check_dims(mu, sigma, target_dim = dim)
       super$initialize('laplace', dim, truncation)
@@ -485,6 +579,10 @@ beta_distribution <- R6Class (
   public = list(
 
     initialize = function (shape1, shape2, dim, truncation) {
+
+      shape1 <- as.greta_array(shape1)
+      shape2 <- as.greta_array(shape2)
+
       # add the nodes as children and parameters
       dim <- check_dims(shape1, shape2, target_dim = dim)
       check_unit(truncation)
@@ -508,6 +606,10 @@ cauchy_distribution <- R6Class (
   public = list(
 
     initialize = function (location, scale, dim, truncation) {
+
+      location <- as.greta_array(location)
+      scale <- as.greta_array(scale)
+
       # add the nodes as children and parameters
       dim <- check_dims(location, scale, target_dim = dim)
       super$initialize('cauchy', dim, truncation)
@@ -542,6 +644,9 @@ chi_squared_distribution <- R6Class (
   public = list(
 
     initialize = function (df, dim, truncation) {
+
+      df <- as.greta_array(df)
+
       # add the nodes as children and parameters
       dim <- check_dims(df, target_dim = dim)
       check_positive(truncation)
@@ -563,6 +668,10 @@ logistic_distribution <- R6Class (
   public = list(
 
     initialize = function (location, scale, dim, truncation) {
+
+      location <- as.greta_array(location)
+      scale <- as.greta_array(scale)
+
       # add the nodes as children and parameters
       dim <- check_dims(location, scale, target_dim = dim)
       super$initialize('logistic', dim, truncation)
@@ -589,6 +698,10 @@ f_distribution <- R6Class (
   public = list(
 
     initialize = function (df1, df2, dim, truncation) {
+
+      df1 <- as.greta_array(df1)
+      df2 <- as.greta_array(df2)
+
       # add the nodes as children and parameters
       dim <- check_dims(df1, df2, target_dim = dim)
       check_positive(truncation)
@@ -636,6 +749,8 @@ dirichlet_distribution <- R6Class (
   public = list(
 
     initialize = function (alpha, n_realisations, dimension) {
+
+      alpha <- as.greta_array(alpha)
 
       # coerce to greta arrays
       alpha <- as.greta_array(alpha)
@@ -798,8 +913,7 @@ multivariate_normal_distribution <- R6Class (
 
     Sigma_is_cholesky = FALSE,
 
-    initialize = function (mean, Sigma, n_realisations, dimension,
-                           Sigma_is_cholesky = FALSE) {
+    initialize = function (mean, Sigma, n_realisations, dimension) {
 
       # coerce to greta arrays
       mean <- as.greta_array(mean)
@@ -837,11 +951,13 @@ multivariate_normal_distribution <- R6Class (
       # coerce the parameter arguments to nodes and add as children and
       # parameters
       super$initialize('multivariate_normal', dim)
+
+      if (has_representation(Sigma, "cholesky")) {
+        Sigma <- representation(Sigma, "cholesky")
+        self$Sigma_is_cholesky <- TRUE
+      }
       self$add_parameter(mean, 'mean')
       self$add_parameter(Sigma, 'Sigma')
-
-      # set representations info
-      self$Sigma_is_cholesky <- Sigma_is_cholesky
 
     },
 
@@ -883,7 +999,7 @@ wishart_distribution <- R6Class (
     # set when defining the graph
     target_is_cholesky = FALSE,
 
-    initialize = function (df, Sigma, Sigma_is_cholesky = FALSE) {
+    initialize = function (df, Sigma) {
       # add the nodes as children and parameters
 
       df <- as.greta_array(df)
@@ -905,10 +1021,12 @@ wishart_distribution <- R6Class (
       super$initialize('wishart', dim(Sigma))
 
       # set parameters
+      if (has_representation(Sigma, "cholesky")) {
+        Sigma <- representation(Sigma, "cholesky")
+        self$Sigma_is_cholesky <- TRUE
+      }
       self$add_parameter(df, 'df')
       self$add_parameter(Sigma, 'Sigma')
-
-      self$Sigma_is_cholesky <- Sigma_is_cholesky
 
       # make the initial value PD (no idea whether this does anything)
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
@@ -1425,8 +1543,7 @@ f <- function (df1, df2, dim = NULL, truncation = c(0, Inf))
 #' @export
 multivariate_normal <- function (mean, Sigma,
                                  n_realisations = NULL, dimension = NULL) {
-  distrib('multivariate_normal',
-          mean, Sigma,
+  distrib('multivariate_normal', mean, Sigma,
           n_realisations, dimension)
 }
 
