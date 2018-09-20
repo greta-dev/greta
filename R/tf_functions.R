@@ -344,6 +344,29 @@ tf_sweep <- function (x, STATS, MARGIN, FUN) {
 tf_chol <- function (x)
   tf_transpose(tf$cholesky(x))
 
+tf_chol2inv <- function(U) {
+  n <- dim(U)[[2]]
+  eye <- fl(add_first_dim(diag(n)))
+  eye <- expand_to_batch(eye, U)
+  L <- tf$matrix_transpose(U)
+  tf$cholesky_solve(L, eye)
+}
+
+tf_cov2cor <- function (V) {
+  # sweep out variances
+  diag <- tf$matrix_diag_part(V)
+  diag <- tf$expand_dims(diag, 2L)
+  Is <- tf$sqrt(fl(1) / diag)
+  V <- Is * V
+  V <- tf_transpose(V)
+  V <- V * Is
+  # set diagonals to 1
+  n <- dim(V)[[2]]
+  new_diag <- fl(t(rep(1, n)))
+  new_diag <- expand_to_batch(new_diag, V)
+  tf$matrix_set_diag(V, new_diag)
+}
+
 tf_not <- function(x)
   tf_as_float(!tf_as_logical(x))
 
@@ -530,6 +553,7 @@ tf_functions_module <- module(tf_as_logical,
                               tf_lchoose,
                               tf_lbeta,
                               tf_chol,
+                              tf_chol2inv,
                               tf_flat_to_chol,
                               tf_corrmat_row,
                               tf_flat_to_chol_correl,

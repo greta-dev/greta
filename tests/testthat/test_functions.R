@@ -52,6 +52,8 @@ test_that('matrix functions work as expected', {
 
   check_op(t, b)
   check_op(chol, a)
+  check_op(chol2inv, c)
+  check_op(cov2cor, a)
   check_op(diag, a)
   check_op(`diag<-`, a, 1:5, only = "data")
   check_op(solve, a)

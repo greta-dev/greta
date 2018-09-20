@@ -4,16 +4,17 @@
 \alias{functions}
 \title{functions for greta arrays}
 \description{
-This is a list of functions in base R that are currently
-  implemented to transform greta arrays. Also see \link{operators} and
-  \link{transforms}.
+This is a list of functions (mostly from base R) that are
+  currently implemented to transform greta arrays. Also see \link{operators}
+  and \link{transforms}.
 }
 \details{
 TensorFlow only enables rounding to integers, so \code{round()} will
   error if \code{digits} is set to anything other than \code{0}.
 
-  Any additional arguments to \code{chol()} and \code{solve()} will be
-  ignored, see the TensorFlow documentation for details of these routines.
+  Any additional arguments to \code{chol()}, \code{chol2inv}, and
+  \code{solve()} will be ignored, see the TensorFlow documentation for
+  details of these routines.
 
   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
   can only be either 1 or 2), and only for subtraction, addition, division
@@ -60,6 +61,8 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  # matrix operations
  t(x)
  chol(x, ...)
+ chol2inv(x, ...)
+ cov2cor(V)
  solve(a, b, ...)
  kronecker(X, Y)
 

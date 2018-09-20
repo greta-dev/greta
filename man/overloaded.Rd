@@ -4,6 +4,8 @@
 \name{overloaded}
 \alias{overloaded}
 \alias{\%*\%}
+\alias{chol2inv}
+\alias{cov2cor}
 \alias{identity}
 \alias{colMeans}
 \alias{rowMeans}
@@ -18,6 +20,10 @@
 \title{Functions overloaded by greta}
 \usage{
 x \%*\% y
+
+chol2inv(x, size = NCOL(x), LINPACK = FALSE)
+
+cov2cor(V)
 
 identity(x)
 
