@@ -227,14 +227,20 @@ chol.greta_array <- function (x, ...) {
   if (!identical(list(), list(...)))
     warning ('chol() options are ignored by TensorFlow')
 
-  dimfun <- function (elem_list) {
-    dim <- dim(elem_list[[1]])
-    if ( !(length(dim) == 2 && dim[1] == dim[2]) )
-      stop ('only 2D, square greta arrays can be Cholesky decomposed')
-    dim
+  if (has_representation(x, "cholesky")) {
+    result <- copy_representation(x, "cholesky")
+  } else {
+    dimfun <- function (elem_list) {
+      dim <- dim(elem_list[[1]])
+      if ( !(length(dim) == 2 && dim[1] == dim[2]) )
+        stop ('only 2D, square greta arrays can be Cholesky decomposed')
+      dim
+    }
+    result <- op("chol", x, dimfun = dimfun, tf_operation = "tf_chol")
   }
 
-  op("chol", x, dimfun = dimfun, tf_operation = "tf_chol")
+  result
+
 }
 
 #' @export

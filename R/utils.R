@@ -1054,7 +1054,8 @@ chol_to_symmetric <- function (L) {
   op('chol_to_symmetric',
      L,
      tf_operation = "tf_chol_to_symmetric",
-     dimfun = dimfun)
+     dimfun = dimfun,
+     representations = list(cholesky = L))
 
 }
 

@@ -390,7 +390,14 @@ distribution_node <- R6Class (
       # give self to x as its distribution
       self$target$set_distribution(self)
 
+      # optionally reset any distribution flags relating to the previous target
+      self$reset_target_flags()
+
     },
+
+    # optional function to reset the flags for target representations whenever a
+    # target is changed
+    reset_target_flags = function() {},
 
     # replace the existing target node with a new one
     remove_target = function () {
@@ -433,7 +440,7 @@ distribution_node <- R6Class (
 
     },
 
-    # which node to use af the *tf* target (overwritten by some distributions)
+    # which node to use as the *tf* target (overwritten by some distributions)
     get_tf_target_node = function () {
       self$target
     },

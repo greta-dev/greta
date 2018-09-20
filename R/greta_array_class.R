@@ -177,19 +177,23 @@ get_node <- function (x)
   attr(x, "node")
 
 # check for and get representations
-has_representation <- function (x, name) {
-  repr <- representation(x, name, error = FALSE)
-  !is.null(repr)
-}
-
 representation <- function (x, name, error = TRUE) {
-  x_node <- get_node(x)
+  if (inherits(x, "greta_array")) {
+    x_node <- get_node(x)
+  } else {
+    x_node <- x
+  }
   repr <- x_node$representations[[name]]
   if (error && is.null(repr)) {
     stop ("greta array has no representation '",
           name, "'", call. = FALSE)
   }
   repr
+}
+
+has_representation <- function (x, name) {
+  repr <- representation(x, name, error = FALSE)
+  !is.null(repr)
 }
 
 # helper function to make a copy of the greta array & tensor

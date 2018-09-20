@@ -877,7 +877,11 @@ wishart_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
+    # set when defining the distribution
     Sigma_is_cholesky = FALSE,
+
+    # set when defining the graph
+    target_is_cholesky = FALSE,
 
     initialize = function (df, Sigma, Sigma_is_cholesky = FALSE) {
       # add the nodes as children and parameters
@@ -897,44 +901,61 @@ wishart_distribution <- R6Class (
 
       dim <- nrow(Sigma)
 
+      # initialize with a cholesky factor
       super$initialize('wishart', dim(Sigma))
+
+      # set parameters
       self$add_parameter(df, 'df')
       self$add_parameter(Sigma, 'Sigma')
 
       self$Sigma_is_cholesky <- Sigma_is_cholesky
 
-      # make the initial value PD
+      # make the initial value PD (no idea whether this does anything)
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
 
     },
 
-    # default value, cholesky factor (ignores truncation)
+    # create a variable, and transform to a symmetric matrix (with cholesky
+    # factor representation)
     create_target = function (truncation) {
 
-      # handle reshaping via a greta array
+      # create a flat variable greta array
       k <- self$dim[1]
       free_greta_array <- vble(truncation = c(-Inf, Inf),
                                dim = k + k * (k - 1) / 2)
       free_greta_array$constraint <- "covariance_matrix"
 
-      # first create a greta array for the cholesky
+      # reshape to a cholesky factor and then to a symmetric matrix (which
+      # retains the cholesky representation)
       chol_greta_array <- flat_to_chol(free_greta_array, self$dim)
-
-      # create symmetric matrix to return as target node
       matrix_greta_array <- chol_to_symmetric(chol_greta_array)
+
+      # return the node for the symmetric matrix
       target_node <- get_node(matrix_greta_array)
-
-      # assign the cholesky factor as a representation of it
-      target_node$representations$cholesky_factor <- get_node(chol_greta_array)
-
-      # return the symmetric node
       target_node
 
     },
 
+    # get a cholesky factor for the target if possible
+    get_tf_target_node = function () {
+      target <- self$target
+      if (has_representation(target, "cholesky")) {
+        chol <- representation(target, "cholesky")
+        target <- get_node(chol)
+        self$target_is_cholesky <- TRUE
+      }
+      target
+    },
+
+    # if the target is changed, make sure target_is_cholesky is reset to FALSE
+    # (can be resent on graph definition)
+    reset_target_flags = function () {
+      self$target_is_cholesky <- FALSE
+    },
+
     tf_distrib = function (parameters, dag) {
 
-      # this is a mess, we want to use the tfp wishart, but can't define the
+      # this is messy, we want to use the tfp wishart, but can't define the
       # density without expanding the dimension of x
 
       log_prob <- function (x) {
@@ -944,25 +965,26 @@ wishart_distribution <- R6Class (
         Sigma <- tf$expand_dims(parameters$Sigma, 1L)
         x <- tf$expand_dims(x, 1L)
 
-        # come back to tidy this up later - explicitly cholesky Sigma and pass
-        # as scale_tril
-
+        # get the cholesky factor of Sigma in tf orientation
         if (self$Sigma_is_cholesky) {
-
-          # transpose it to match tf style
-          t_cholesky_scale <- tf$matrix_transpose(Sigma)
-
-          distrib <- tfp$distributions$Wishart(df = df,
-                                               scale_tril = t_cholesky_scale)
+          Sigma_chol <- tf$matrix_transpose(Sigma)
         } else {
-
-          # otherwise just use Sigma (which will be Choleskied internally)
-          distrib <- tfp$distributions$Wishart(df = df,
-                                               scale = Sigma)
-
+          Sigma_chol <- tf$cholesky(Sigma)
         }
 
-        distrib$log_prob(x)
+        # get the cholesky factor of the target in tf_orientation
+        if (self$target_is_cholesky) {
+          x_chol <- tf$matrix_transpose(x)
+        } else {
+          x_chol <- tf$cholesky(x)
+        }
+
+        # use the density for choleskied x, with choleskied Sigma
+        distrib <- tfp$distributions$Wishart(df = df,
+                                             scale_tril = Sigma_chol,
+                                             input_output_cholesky = TRUE)
+
+        distrib$log_prob(x_chol)
 
       }
 
@@ -981,6 +1003,9 @@ lkj_correlation_distribution <- R6Class (
   'lkj_correlation_distribution',
   inherit = distribution_node,
   public = list(
+
+    # set when defining the graph
+    target_is_cholesky = FALSE,
 
     initialize = function (eta, dimension = 2) {
 
@@ -1024,41 +1049,39 @@ lkj_correlation_distribution <- R6Class (
                                dim = k * (k - 1) / 2)
       free_greta_array$constraint <- "correlation_matrix"
 
-      # first create a greta array for the cholesky
+      # reshape to a cholesky factor and then to a symmetric correlation matrix
+      # (which retains the cholesky representation)
       chol_greta_array <- flat_to_chol(free_greta_array,
                                        self$dim,
                                        correl = TRUE)
-
-      # create symmetric matrix to return as target node
       matrix_greta_array <- chol_to_symmetric(chol_greta_array)
+
+      # return the node for the symmetric matrix
       target_node <- get_node(matrix_greta_array)
-
-      # assign the cholesky factor as a representation of it
-      target_node$representations$cholesky_factor <- get_node(chol_greta_array)
-
-      # return the symmetric node
       target_node
 
     },
 
-    # if the target has a cholesky factor, use that
+    # get a cholesky factor for the target if possible
     get_tf_target_node = function () {
+      target <- self$target
+      if (has_representation(target, "cholesky")) {
+        chol <- representation(target, "cholesky")
+        target <- get_node(chol)
+        self$target_is_cholesky <- TRUE
+      }
+      target
+    },
 
-      tf_target_node <- self$target$representations$cholesky_factor
-
-      if (is.null(tf_target_node))
-        tf_target_node <- self$target
-
-      tf_target_node
-
+    # if the target is changed, make sure target_is_cholesky is reset to FALSE
+    # (can be resent on graph definition)
+    reset_target_flags = function () {
+      self$target_is_cholesky <- FALSE
     },
 
     tf_distrib = function (parameters, dag) {
 
       eta <- parameters$eta
-
-      # if the cholesky factor exists, we'll be using that
-      is_cholesky <- !is.null(self$target$representations$cholesky_factor)
 
       log_prob <- function (x) {
 
@@ -1070,10 +1093,14 @@ lkj_correlation_distribution <- R6Class (
         b <- tf_sum(fl(0.5 * k * log(pi)) + tf$lgamma(eta + fl(0.5 * (n - 1 - k))))
         norm <- a + b
 
-        # if (!is_cholesky)
-          x <- tf$cholesky(x)
+        # get the cholesky factor of the target in tf_orientation
+        if (self$target_is_cholesky) {
+          x_chol <- tf$matrix_transpose(x)
+        } else {
+          x_chol <- tf$cholesky(x)
+        }
 
-        diags <- tf$matrix_diag_part(x)
+        diags <- tf$matrix_diag_part(x_chol)
         det <- tf$square(tf_prod(diags))
 
         (eta - fl(1)) * tf$log(det) + norm
