@@ -45,12 +45,19 @@ operation_node <- R6Class(
     operation_args = NA,
     arguments = list(),
 
+    # named greta arrays giving different representations of the greta array
+    # represented by this node that have already been calculated, to be used for
+    # computational speedups or numerical stability. E.g. a logarithm or a
+    # cholesky factor
+    representations = list(),
+
     initialize = function (operation,
                            ...,
                            dimfun = NULL,
                            operation_args = list(),
                            tf_operation = NULL,
-                           value = NULL) {
+                           value = NULL,
+                           representations = list()) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
@@ -60,6 +67,7 @@ operation_node <- R6Class(
       self$operation_name <- operation
       self$operation <- tf_operation
       self$operation_args <- operation_args
+      self$representations <- representations
 
       # work out the dimensions of the new greta array, if NULL assume an
       # elementwise operation and get the largest number of each dimension,
@@ -342,7 +350,7 @@ distribution_node <- R6Class (
 
       super$initialize(dim)
 
-      # for all distributions, set name, store dims and set whether discrete
+      # for all distributions, set name, store dims, and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
 

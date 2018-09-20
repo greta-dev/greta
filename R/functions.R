@@ -98,12 +98,26 @@ NULL
 
 #' @export
 log.greta_array <- function (x, base = exp(1)) {
-  op("log", x, tf_operation = "tf$log")
+  if (has_representation(x, "log")) {
+    result <- copy_representation(x, "log")
+  } else {
+    result <- op("log", x, tf_operation = "tf$log",
+                 representations = list(exp = x))
+  }
+  result
 }
 
 #' @export
 exp.greta_array <- function (x) {
-  op("exp", x, tf_operation = "tf$exp")
+  # if this already has an exp representation, use that
+  if (has_representation(x, "exp")) {
+    result <- copy_representation(x, "exp")
+  } else {
+    # otherwise exponentiate it, and store the log representation
+    result <- op("exp", x, tf_operation = "tf$exp",
+                 representations = list(log = x))
+  }
+  result
 }
 
 #' @export
@@ -416,6 +430,23 @@ rowcol_dimfun <- function (dims, which = c("row", "col")) {
     dims
   }
 
+}
+
+#' @rdname overloaded
+#' @export
+identity <- function (x) {
+  UseMethod("identity", x)
+}
+
+#' @export
+identity.default <- function (x) {
+  base::identity(x)
+}
+
+#' @export
+identity.greta_array <- function (x) {
+  # make a copy
+  op("identity", x, tf_operation = "tf$identity")
 }
 
 #' @rdname overloaded

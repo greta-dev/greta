@@ -4,6 +4,7 @@
 \name{overloaded}
 \alias{overloaded}
 \alias{\%*\%}
+\alias{identity}
 \alias{colMeans}
 \alias{rowMeans}
 \alias{colSums}
@@ -17,6 +18,8 @@
 \title{Functions overloaded by greta}
 \usage{
 x \%*\% y
+
+identity(x)
 
 colMeans(x, na.rm = FALSE, dims = 1L)
 

@@ -796,7 +796,10 @@ multivariate_normal_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (mean, Sigma, n_realisations, dimension) {
+    Sigma_is_cholesky = FALSE,
+
+    initialize = function (mean, Sigma, n_realisations, dimension,
+                           Sigma_is_cholesky = FALSE) {
 
       # coerce to greta arrays
       mean <- as.greta_array(mean)
@@ -837,34 +840,21 @@ multivariate_normal_distribution <- R6Class (
       self$add_parameter(mean, 'mean')
       self$add_parameter(Sigma, 'Sigma')
 
-    },
-
-    # fetch the tensors for the parameters, using the cholesky factor of Sigma
-    # if available
-    tf_fetch_parameters = function (dag) {
-
-      # find names
-      tf_names <- lapply(self$parameters, dag$tf_name)
-
-      # replace Sigma's tensor with the cholesky factor, if available
-      cf <- self$parameters$Sigma$representations$cholesky_factor
-      if (!is.null(cf))
-        tf_names$Sigma <- dag$tf_name(cf)
-
-      # fetch tensors
-      lapply(tf_names, get, envir = dag$tf_environment)
+      # set representations info
+      self$Sigma_is_cholesky <- Sigma_is_cholesky
 
     },
 
     tf_distrib = function (parameters, dag) {
 
-      # check if Sigma (the node version) has a cholesky factor to use
-      cf <- self$parameters$Sigma$representations$cholesky_factor
+      # if Sigma is a cholesky factor transpose it to tensorflow expoectation,
+      # otherwise decompose it
 
-      if (is.null(cf))
-        L <- tf$cholesky(parameters$Sigma)
-      else
+      if (self$Sigma_is_cholesky) {
         L <- tf_transpose(parameters$Sigma)
+      } else{
+        L <- tf$cholesky(parameters$Sigma)
+      }
 
       # add an extra dimension for the observation batch size (otherwise tfp
       # will try to use the n_chains batch dimension)
@@ -887,7 +877,9 @@ wishart_distribution <- R6Class (
   inherit = distribution_node,
   public = list(
 
-    initialize = function (df, Sigma) {
+    Sigma_is_cholesky = FALSE,
+
+    initialize = function (df, Sigma, Sigma_is_cholesky = FALSE) {
       # add the nodes as children and parameters
 
       df <- as.greta_array(df)
@@ -908,6 +900,8 @@ wishart_distribution <- R6Class (
       super$initialize('wishart', dim(Sigma))
       self$add_parameter(df, 'df')
       self$add_parameter(Sigma, 'Sigma')
+
+      self$Sigma_is_cholesky <- Sigma_is_cholesky
 
       # make the initial value PD
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
@@ -946,31 +940,25 @@ wishart_distribution <- R6Class (
       log_prob <- function (x) {
 
         # reshape the dimensions
-        parameters$df <- tf_flatten(parameters$df)
-        parameters$Sigma <- tf$expand_dims(parameters$Sigma, 1L)
+        df <- tf_flatten(parameters$df)
+        Sigma <- tf$expand_dims(parameters$Sigma, 1L)
         x <- tf$expand_dims(x, 1L)
 
-        # if there is a cholesky factor for Sigma, use that
-        cf <- self$parameters$Sigma$representations$cholesky_factor
+        # come back to tidy this up later - explicitly cholesky Sigma and pass
+        # as scale_tril
 
-        if (!is.null(cf)) {
+        if (self$Sigma_is_cholesky) {
 
-          # if it's available, find and use the tensor for the cholesky factor
-          cholesky_scale <- get(dag$tf_name(cf), envir = dag$tf_environment)
+          # transpose it to match tf style
+          t_cholesky_scale <- tf$matrix_transpose(Sigma)
 
-          # make sure it has a data dimension & transpose it to match tf style
-          cholesky_scale <- tf$expand_dims(cholesky_scale, 1L)
-
-          t_cholesky_scale <- tf$matrix_transpose(cholesky_scale)
-
-          distrib <- tfp$distributions$Wishart(df = parameters$df,
+          distrib <- tfp$distributions$Wishart(df = df,
                                                scale_tril = t_cholesky_scale)
-
         } else {
 
-          # otherwise just use sigma (which will be Choleskied internally)
-          distrib <- tfp$distributions$Wishart(df = parameters$df,
-                                               scale = parameters$Sigma)
+          # otherwise just use Sigma (which will be Choleskied internally)
+          distrib <- tfp$distributions$Wishart(df = df,
+                                               scale = Sigma)
 
         }
 

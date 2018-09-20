@@ -176,6 +176,31 @@ as.matrix.greta_array <- function (x, ...)
 get_node <- function (x)
   attr(x, "node")
 
+# check for and get representations
+has_representation <- function (x, name) {
+  repr <- representation(x, name, error = FALSE)
+  !is.null(repr)
+}
+
+representation <- function (x, name, error = TRUE) {
+  x_node <- get_node(x)
+  repr <- x_node$representations[[name]]
+  if (error && is.null(repr)) {
+    stop ("greta array has no representation '",
+          name, "'", call. = FALSE)
+  }
+  repr
+}
+
+# helper function to make a copy of the greta array & tensor
+copy_representation <- function (x, name) {
+  repr <- representation(x, name)
+  identity(repr)
+}
+
 greta_array_module <- module(as.greta_array,
                              get_node,
+                             has_representation,
+                             representation,
+                             copy_representation,
                              unknowns = unknowns_module)
