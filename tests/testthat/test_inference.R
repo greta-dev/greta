@@ -369,8 +369,9 @@ test_that("numerical issues are handled in mcmc", {
 
   # this should have a cholesky decomposition problem at some point
   k <- 2
-  Sigma <- wishart(k + 1, diag(k))
-  m <- model(Sigma, precision = "single")
+  Sigma <- lkj_correlation(1, k)
+  x <- wishart(k + 1, Sigma)
+  m <- model(x, precision = "single")
 
   # running with bursts should error informatively
   expect_error(draws <- mcmc(m, verbose = FALSE),
