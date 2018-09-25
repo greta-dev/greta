@@ -225,7 +225,10 @@ NULL
 #' @export
 cbind.greta_array <- function (...) {
 
-  dims <- lapply(list(...), dim)
+  dots <- list(...)
+  dots <- lapply(dots, as.greta_array)
+
+  dims <- lapply(dots, dim)
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2))
     stop ('all greta arrays must be two-dimensional')
@@ -251,7 +254,10 @@ cbind.greta_array <- function (...) {
 #' @export
 rbind.greta_array <- function (...) {
 
-  dims <- lapply(list(...), dim)
+  dots <- list(...)
+  dots <- lapply(dots, as.greta_array)
+
+  dims <- lapply(dots, dim)
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2))
     stop ('all greta arrays must be two-dimensional')
@@ -282,6 +288,9 @@ c.greta_array <- function (...) {
   # drop NULLs from the list
   is_null <- vapply(args, is.null, FUN.VALUE = FALSE)
   args <- args[!is_null]
+
+  # try to coerce to greta arrays
+  args <- lapply(args, as.greta_array, optional = TRUE)
 
   # return a list if they aren't all greta arrays
   is_greta_array <- vapply(args,

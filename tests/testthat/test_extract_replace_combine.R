@@ -247,6 +247,33 @@ test_that('rbind, cbind and c work like R', {
 
 })
 
+
+test_that('rbind and cbind can prepend R arrays to greta arrays', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- randn(5, 1)
+  b <- ones(5, 1)
+
+  z <- rbind(a, b)
+  expect_s3_class(z, "greta_array")
+  expect_identical(dim(z), c(10L, 1L))
+
+  z <- rbind(b, a)
+  expect_s3_class(z, "greta_array")
+  expect_identical(dim(z), c(10L, 1L))
+
+  z <- cbind(a, b)
+  expect_s3_class(z, "greta_array")
+  expect_identical(dim(z), c(5L, 2L))
+
+  z <- cbind(b, a)
+  expect_s3_class(z, "greta_array")
+  expect_identical(dim(z), c(5L, 2L))
+
+})
+
 test_that('assign errors on variable greta arrays', {
 
   source('helpers.R')
@@ -427,7 +454,6 @@ test_that('dim<- works in a model', {
 
 })
 
-
 test_that("c handles NULLs and lists", {
 
   skip_if_not(check_tf_version())
@@ -445,6 +471,12 @@ test_that("c handles NULLs and lists", {
   z <- c(x, NULL)
   expect_s3_class(z, "greta_array")
   expect_identical(dim(z), c(1L, 1L))
+
+  # greta arrays combined with things coercible to greta arrays should return a
+  # greta array
+  z <- c(x, 0, FALSE)
+  expect_s3_class(z, "greta_array")
+  expect_identical(dim(z), c(3L, 1L))
 
   # greta arrays combined with other things should return a list
   z <- c(x, mean)
