@@ -915,3 +915,85 @@ eigen.greta_array <- function (x, symmetric, only.values = FALSE, EISPACK = FALS
        vectors = vectors)
 
 }
+
+
+#' @rdname overloaded
+#' @export
+rdist <- function (x1, x2 = NULL, compact = FALSE) {
+  UseMethod("rdist")
+}
+
+#' @export
+rdist.default <- function (x1, x2 = NULL, compact = FALSE) {
+  # error nicely if they don't have fields installed
+  fields_installed <- requireNamespace("fields", quietly = TRUE)
+  if (!fields_installed) {
+    stop ("rdist is being called on R arrays (not greta arrays), ",
+          "but the fields package is not installed",
+          call. = FALSE)
+  }
+  fields::rdist(x1 = x1,
+                x2 = x2,
+                compact = compact)
+}
+
+#' @export
+rdist.greta_array <- function (x1, x2 = NULL, compact = FALSE) {
+
+  if (!identical(compact, FALSE)) {
+    warning("'compact' is ignored for greta arrays")
+  }
+
+  x1 <- as.greta_array(x1)
+
+  # like rdist, convert to a column vector if it has too many dimensions
+  if (length(dim(x1)) != 2) {
+    x1 <- flatten(x1)
+  }
+
+  # square self-distance matrix
+  if (is.null(x2)) {
+
+    dimfun <- function (elem_list) {
+      n1 <- nrow(elem_list[[1]])
+      c(n1, n1)
+    }
+
+    op("rdist", x1,
+       tf_operation = "tf_self_distance",
+       dimfun = dimfun)
+
+  } else {
+
+    # possibly non-square pairwise distance matrix
+
+    x2 <- as.greta_array(x2)
+
+    if (length(dim(x2)) != 2) {
+      x2 <- flatten(x2)
+    }
+
+    # error if they have different number of columns. fields::rdist allows
+    # different numbers of columns, takes the number of columns from x1,and
+    # sometimes gives nonsense results
+    if (ncol(x1) != ncol(x2)) {
+
+      stop ("x1 and x2 must have the same number of columns, but had ",
+            ncol(x1), " and ", ncol(x2), " columns",
+            call. = FALSE)
+
+    }
+
+    dimfun <- function (elem_list) {
+      n1 <- nrow(elem_list[[1]])
+      n2 <- nrow(elem_list[[2]])
+      c(n1, n2)
+    }
+
+    op("rdist", x1, x2,
+       tf_operation = "tf_distance",
+       dimfun = dimfun)
+
+  }
+
+}

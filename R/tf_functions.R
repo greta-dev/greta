@@ -546,6 +546,27 @@ tf_extract_eigenvalues <- function (x) {
   tf$reverse(vals, dim)
 }
 
+tf_self_distance <- function (x1) {
+  tf_distance(x1, x1)
+}
+
+tf_distance <- function (x1, x2) {
+
+  n1 <- dim(x1)[[2]]
+  n2 <- dim(x2)[[2]]
+
+  x1 <- tf$tile(tf$expand_dims(x1, 3L), list(1L, 1L, 1L, n2))
+  x2 <- tf$transpose(x2, perm = c(0L, 2L, 1L))
+  x2 <- tf$tile(tf$expand_dims(x2, 1L), list(1L, n1, 1L, 1L))
+
+  dists <- (x1 - x2) ^ 2
+  dist <- tf$reduce_sum(dists, axis = 2L)
+  dist <- tf$sqrt(dist)
+
+  dist
+
+}
+
 # combine as module for export via internals
 tf_functions_module <- module(tf_as_logical,
                               tf_as_float,
@@ -577,4 +598,9 @@ tf_functions_module <- module(tf_as_logical,
                               tf_recombine,
                               tf_replace,
                               tf_cbind,
-                              tf_rbind)
+                              tf_rbind,
+                              tf_only_eigenvalues,
+                              tf_extract_eigenvectors,
+                              tf_extract_eigenvalues,
+                              tf_self_distance,
+                              tf_distance)

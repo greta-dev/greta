@@ -68,6 +68,7 @@ Suggests:
     extraDistr,
     truncdist,
     tidyverse,
-    rethinking
+    rethinking,
+    fields
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0

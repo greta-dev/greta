@@ -49,6 +49,8 @@ test_that('matrix functions work as expected', {
   b <- randn(5, 25)
   c <- chol(a)
   d <- c(1, 1)
+  e <- randn(10, 25)
+
 
   check_op(t, b)
   check_op(chol, a)
@@ -62,6 +64,8 @@ test_that('matrix functions work as expected', {
   check_op(backsolve, c, b)
   check_op(kronecker, a, c)
   check_op(kronecker, a, d)
+  check_op(rdist, b)
+  check_op(rdist, b, e)
 
 })
 
