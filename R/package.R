@@ -50,9 +50,6 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
   # silence TF's CPU instructions message
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL=2)
 
-  # enable using tfp (for dev)
-  options(greta_use_tfp_nightly = TRUE)
-
   # warn if TF version is bad
   check_tf_version('startup')
 
