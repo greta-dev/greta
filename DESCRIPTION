@@ -69,6 +69,7 @@ Suggests:
     truncdist,
     tidyverse,
     rethinking,
-    fields
+    fields,
+    MASS
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0

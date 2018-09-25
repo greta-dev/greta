@@ -331,13 +331,11 @@ chol2inv.default <- function (x, size = NCOL(x), LINPACK = FALSE) {
 chol2inv.greta_array <- function (x, size = NCOL(x), LINPACK = FALSE) {
 
   if (!identical(LINPACK, FALSE)) {
-    stop("'LINPACK' is ignored for greta arrays",
-         call. = FALSE)
+    warning("'LINPACK' is ignored for greta arrays")
   }
 
   if (!identical(size, NCOL(x))) {
-    stop("'size' is ignored for greta arrays",
-         call. = FALSE)
+    warning("'size' is ignored for greta arrays")
   }
 
   op("chol2inv",

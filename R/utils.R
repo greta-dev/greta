@@ -773,6 +773,7 @@ palettize <- function (base_colour) {
 }
 
 # colour scheme for plotting
+#' @importFrom grDevices col2rgb
 greta_col <- function (which = c('main',
                                  'dark',
                                  'light',
@@ -782,7 +783,7 @@ greta_col <- function (which = c('main',
 
   # tests if a color encoded as string can be converted to RGB
   tryCatch(
-    is.matrix(col2rgb(colour)),
+    is.matrix(grDevices::col2rgb(colour)),
     error = function(e) {
         stop(paste("Invalid colour:", colour), call. = FALSE)
     }

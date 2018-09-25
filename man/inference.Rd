@@ -167,7 +167,7 @@ Samples returned by \code{mcmc()} and \code{stashed_samples()} can
 Because \code{opt()} acts on a list of greta arrays with possibly
   varying dimension, the \code{par} and \code{hessian} objects returned by
   \code{opt()} are named lists, rather than a vector (\code{par}) and a
-  matrix (\code{hessian}), as returned by \code{\link[base:optim]{optim()}}.
+  matrix (\code{hessian}), as returned by \code{\link[stats:optim]{optim()}}.
   Because greta arrays may not be vectors, the hessians may not be matrices,
   but could be higher-dimensional arrays. To return a hessian matrix covering
   multiple model parameters, you can construct your model so that all those

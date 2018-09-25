@@ -16,6 +16,7 @@
 \alias{forwardsolve}
 \alias{tapply}
 \alias{eigen}
+\alias{rdist}
 \alias{diag}
 \title{Functions overloaded by greta}
 \usage{
@@ -45,10 +46,12 @@ tapply(X, INDEX, FUN, ...)
 
 eigen(x, symmetric, only.values, EISPACK)
 
+rdist(x1, x2 = NULL, compact = FALSE)
+
 diag(x = 1, nrow, ncol)
 }
 \arguments{
-\item{x, y, nrow, ncol, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, na.rm, dims, X, INDEX, symmetric, only.values, EISPACK}{arguments as in original documentation}
+\item{x, y, size, LINPACK, V, na.rm, dims, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, X, INDEX, symmetric, only.values, EISPACK, x1, x2, compact, nrow, ncol}{arguments as in original documentation}
 }
 \description{
 greta provides a wide range of methods to apply common R
