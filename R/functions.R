@@ -209,17 +209,14 @@ digamma.greta_array <- function (x) {
 #' @export
 t.greta_array <- function (x) {
 
-  # reverse the dimensions
-  dimfun <- function (elem_list) {
-    x <- elem_list[[1]]
-    if (length(dim(x)) != 2)
-      stop ('only 2D arrays can be transposed')
-    rev(dim(x))
-  }
+  if (length(dim(x)) != 2)
+    stop ('only 2D arrays can be transposed')
+
+  dims <- rev(dim(x))
 
   op("transpose",
      x,
-     dimfun = dimfun,
+     dim = dims,
      tf_operation = "tf_transpose")
 
 }
@@ -233,13 +230,14 @@ chol.greta_array <- function (x, ...) {
   if (has_representation(x, "cholesky")) {
     result <- copy_representation(x, "cholesky")
   } else {
-    dimfun <- function (elem_list) {
-      dim <- dim(elem_list[[1]])
-      if ( !(length(dim) == 2 && dim[1] == dim[2]) )
-        stop ('only 2D, square greta arrays can be Cholesky decomposed')
-      dim
-    }
-    result <- op("chol", x, dimfun = dimfun, tf_operation = "tf_chol")
+    dim <- dim(x)
+
+    if ( !(length(dim) == 2 && dim[1] == dim[2]) )
+      stop ('only 2D, square greta arrays can be Cholesky decomposed')
+
+    result <- op("chol", x,
+                 dim = dim,
+                 tf_operation = "tf_chol")
   }
 
   result
@@ -264,20 +262,11 @@ solve.greta_array <- function (a, b, ...) {
   # if they just want the matrix inverse, do that
   if (missing(b)) {
 
-    dimfun <- function (elem_list) {
-
-      a <- elem_list[[1]]
-
-      # return the dimensions
-      dim(a)
-
-    }
-
     if (has_representation(a, "cholesky")) {
       U <- representation(a, "cholesky")
       result <- chol2inv(U)
     } else {
-      result <- op("solve", a, dimfun = dimfun,
+      result <- op("solve", a,
                    tf_operation = "tf$matrix_inverse")
     }
 
@@ -289,25 +278,16 @@ solve.greta_array <- function (a, b, ...) {
                     paste(dim(b), collapse = ' x ')))
     }
 
-    dimfun <- function (elem_list) {
-
-      a <- elem_list[[1]]
-      b <- elem_list[[2]]
-
-      # b must have the right number of rows
-      if (dim(b)[1] != dim(a)[1]) {
-        stop (sprintf(paste("'b' must have the same number of rows as 'a'",
-                            "(%i), but has %i rows instead"),
-                      dim(a)[1], dim(b)[1]))
-      }
-
-      # return the dimensions
-      dim(b)
-
+    # b must have the right number of rows
+    if (dim(b)[1] != dim(a)[1]) {
+      stop (sprintf(paste("'b' must have the same number of rows as 'a'",
+                          "(%i), but has %i rows instead"),
+                    dim(a)[1], dim(b)[1]))
     }
 
     # ... and solve the linear equations
-    result <- op("solve", a, b, dimfun = dimfun,
+    result <- op("solve", a, b,
+                 dim = dim(b),
                  tf_operation = "tf$matrix_solve")
 
   }
@@ -338,12 +318,10 @@ chol2inv.greta_array <- function (x, size = NCOL(x), LINPACK = FALSE) {
     warning("'size' is ignored for greta arrays")
   }
 
-  op("chol2inv",
-     x,
+  op("chol2inv", x,
      tf_operation = "tf_chol2inv")
 
 }
-
 
 #' @rdname overloaded
 #' @export
@@ -370,13 +348,9 @@ sum.greta_array <- function (..., na.rm = TRUE) {
   # combine all elements into a column vector
   vec <- c(...)
 
-  # results will be 1 x 1
-  dimfun <- function (x) c(1, 1)
-
   # sum the elements
-  op('sum',
-     vec,
-     dimfun = dimfun,
+  op('sum', vec,
+     dim = c(1, 1),
      tf_operation = "tf_sum")
 
 }
@@ -387,13 +361,9 @@ prod.greta_array <- function (..., na.rm = TRUE) {
   # combine all elements into a column vector
   vec <- c(...)
 
-  # results will be 1 x 1
-  dimfun <- function (x) c(1, 1)
-
   # sum the elements
-  op('prod',
-     vec,
-     dimfun = dimfun,
+  op('prod', vec,
+     dim = c(1, 1),
      tf_operation = "tf_prod")
 
 }
@@ -404,13 +374,9 @@ min.greta_array <- function (..., na.rm = TRUE) {
   # combine all elements into a column vector
   vec <- c(...)
 
-  # results will be 1 x 1
-  dimfun <- function (x) c(1, 1)
-
   # sum the elements
-  op('min',
-     vec,
-     dimfun = dimfun,
+  op('min', vec,
+     dim = c(1, 1),
      tf_operation = "tf_min")
 
 }
@@ -418,13 +384,9 @@ min.greta_array <- function (..., na.rm = TRUE) {
 #' @export
 mean.greta_array <- function (x, trim = 0, na.rm = TRUE, ...) {
 
-  # results will be 1 x 1
-  dimfun <- function (x) c(1, 1)
-
   # sum the elements
-  op('mean',
-     x,
-     dimfun = dimfun,
+  op('mean', x,
+     dim = c(1, 1),
      tf_operation = "tf_mean")
 
 }
@@ -435,13 +397,9 @@ max.greta_array <- function (..., na.rm = TRUE) {
   # combine all elements into a column vector
   vec <- c(...)
 
-  # results will be 1 x 1
-  dimfun <- function (x) c(1, 1)
-
   # sum the elements
-  op('max',
-     vec,
-     dimfun = dimfun,
+  op('max', vec,
+     dim = c(1, 1),
      tf_operation = "tf_max")
 
 }
@@ -480,18 +438,13 @@ rowcol_idx <- function (x, dims, which = c("col", "row")) {
 
 }
 
-# generate dimfun for colSums, rowSums, colMeans, rowMeans
-rowcol_dimfun <- function (dims, which = c("row", "col")) {
-
-  function (elem_list) {
-    x <- elem_list[[1]]
-    idx <- rowcol_idx(x, dims, which)
-    dims <- dim(x)[-idx]
-    if (length(dims) == 1)
-      dims <- c(dims, 1L)
-    dims
-  }
-
+# get output dimension for colSums, rowSums, colMeans, rowMeans
+rowcol_dim <- function (x, dims, which = c("row", "col")) {
+  idx <- rowcol_idx(x, dims, which)
+  dims <- dim(x)[-idx]
+  if (length(dims) == 1)
+    dims <- c(dims, 1L)
+  dims
 }
 
 #' @rdname overloaded
@@ -523,11 +476,10 @@ colMeans.default <- function (x, na.rm = FALSE, dims = 1L)
 #' @export
 colMeans.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
 
-  op("colMeans",
-     x,
+  op("colMeans", x,
      operation_args = list(dims = dims),
      tf_operation = "tf_colmeans",
-     dimfun = rowcol_dimfun(dims, "col"))
+     dim = rowcol_dim(x, dims, "col"))
 
 }
 
@@ -543,14 +495,10 @@ rowMeans.default <- function (x, na.rm = FALSE, dims = 1L)
 #' @export
 rowMeans.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
 
-  dimfun <- function (elem_list)
-    dim(elem_list[[1]])[dims]
-
-  op("rowMeans",
-     x,
+  op("rowMeans", x,
      operation_args = list(dims = dims),
      tf_operation = "tf_rowmeans",
-     dimfun = rowcol_dimfun(dims, "row"))
+     dim = rowcol_dim(x, dims, "row"))
 
 }
 
@@ -566,11 +514,10 @@ colSums.default <- function (x, na.rm = FALSE, dims = 1L)
 #' @export
 colSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
 
-  op("colSums",
-     x,
+  op("colSums", x,
      operation_args = list(dims = dims),
      tf_operation = "tf_colsums",
-     dimfun = rowcol_dimfun(dims, "col"))
+     dim = rowcol_dim(x, dims, "col"))
 
 }
 
@@ -586,11 +533,10 @@ rowSums.default <- function (x, na.rm = FALSE, dims = 1L)
 #' @export
 rowSums.greta_array <- function (x, na.rm = FALSE, dims = 1L) {
 
-  op("rowSums",
-     x,
+  op("rowSums", x,
      operation_args = list(dims = dims),
      tf_operation = "tf_rowsums",
-     dimfun = rowcol_dimfun(dims, "row"))
+     dim = rowcol_dim(x, dims, "row"))
 
 }
 
@@ -623,39 +569,28 @@ sweep.greta_array <- function (x,
   if (!MARGIN %in% seq_len(2))
     stop ('MARGIN can only be 1 or 2')
 
-  dimfun <- function (elem_list) {
-
-    x <- elem_list[[1]]
-    STATS <- elem_list[[2]]
-
-    # x must be 2D
-    if (length(dim(x)) != 2) {
-      stop (sprintf('x must be a 2D array, but has %i dimensions',
-                    length(dim(x))))
-    }
-
-    # STATS must be a column array
-    if (!(length(dim(STATS)) == 2 && dim(STATS)[2] == 1)) {
-      stop (sprintf(paste("STATS must be a column vector array,",
-                          "but has dimensions %s"),
-                    paste(dim(STATS), collapse = ' x ')))
-    }
-
-    # STATS must have the same dimension as the correct dim of x
-    if (dim(x)[MARGIN] != dim(STATS)[1])
-      stop ('the number of elements of STATS does not match dim(x)[MARGIN]')
-
-    # return the dimensions of x
-    dim(x)
-
+  # x must be 2D
+  if (length(dim(x)) != 2) {
+    stop (sprintf('x must be a 2D array, but has %i dimensions',
+                  length(dim(x))))
   }
 
-  op("sweep",
-     x, STATS,
-     operation_args = list(MARGIN = MARGIN,
-                           FUN = FUN),
+  # STATS must be a column array
+  if (!(length(dim(STATS)) == 2 && dim(STATS)[2] == 1)) {
+    stop (sprintf(paste("STATS must be a column vector array,",
+                        "but has dimensions %s"),
+                  paste(dim(STATS), collapse = ' x ')))
+  }
+
+  # STATS must have the same dimension as the correct dim of x
+  if (dim(x)[MARGIN] != dim(STATS)[1])
+    stop ('the number of elements of STATS does not match dim(x)[MARGIN]')
+
+  op("sweep", x, STATS,
+     operation_args = list(MARGIN = MARGIN, FUN = FUN),
      tf_operation = "tf_sweep",
-     dimfun = dimfun)
+     dim = dim(x)
+)
 
 }
 
@@ -666,34 +601,21 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
 
             if (FUN != "*") stop("kronecker method must use default 'FUN'")
 
-            dimfun <- function (elem_list) {
-
-              x <- elem_list[[1]]
-              y <- elem_list[[2]]
-
-              # x must be 2D
-              if (length(dim(x)) != 2) {
-                stop (sprintf('x must be a 2D array, but has %i dimensions',
-                              length(dim(x))))
-              }
-
-              # y must be 2D
-              if (length(dim(y)) != 2) {
-                stop (sprintf('y must be a 2D array, but has %i dimensions',
-                              length(dim(y))))
-              }
-
-              # return the dimensions of x
-              dim1 <- dim(x)
-              dim2 <- dim(y)
-              dim1 * dim2
-
+            # X must be 2D
+            if (length(dim(X)) != 2) {
+              stop (sprintf('X must be a 2D array, but has %i dimensions',
+                            length(dim(X))))
             }
 
-            op("kronecker",
-               X, Y,
+            # Y must be 2D
+            if (length(dim(Y)) != 2) {
+              stop (sprintf('Y must be a 2D array, but has %i dimensions',
+                            length(dim(X))))
+            }
+
+            op("kronecker", X, Y,
                tf_operation = "tf_kronecker",
-               dimfun = dimfun)
+               dim = dim(X) * dim(Y))
 
           }
 )
@@ -731,14 +653,10 @@ backsolve.greta_array <- function(r, x,
           call. = FALSE)
   }
 
-  dimfun <- function (elem_list)
-    dim(elem_list[[2]])
-
-  op("backsolve",
-     r, x,
+  op("backsolve", r, x,
      operation_args = list(lower = !upper.tri),
      tf_operation = "tf$matrix_triangular_solve",
-     dimfun = dimfun)
+     dim = dim(x))
 
 }
 
@@ -776,14 +694,10 @@ forwardsolve.greta_array <- function (l, x,
           call. = FALSE)
   }
 
-  dimfun <- function (elem_list)
-    dim(elem_list[[2]])
-
-  op("forwardsolve",
-     l, x,
+  op("forwardsolve", l, x,
      operation_args = list(lower = !upper.tri),
      tf_operation = "tf$matrix_triangular_solve",
-     dimfun = dimfun)
+     dim = dim(x))
 
 }
 
@@ -822,27 +736,19 @@ tapply.greta_array <- function (X, INDEX,
   id <- match(INDEX, groups) - 1L
   len <- length(groups)
 
-  # dimensions
-  dimfun <- function (elem_list) {
-
-    dim_x <- dim(elem_list[[1]])
-
-    if (!(length(dim_x) == 2L && dim_x[2] == 1L)) {
-      stop ("X must be 2D greta array with one column, but has dimensions ",
-            paste(dim_x, collapse = ' x '),
-            call. = FALSE)
-    }
-
-    c(len, 1)
+  dim_x <- dim(X)
+  if (!(length(dim_x) == 2L && dim_x[2] == 1L)) {
+    stop ("X must be 2D greta array with one column, but has dimensions ",
+          paste(dim_x, collapse = ' x '),
+          call. = FALSE)
   }
 
-  op("tapply",
-     X,
+  op("tapply", X,
      operation_args = list(segment_ids = id,
                            num_segments = len,
                            op_name = FUN),
      tf_operation = "tf_tapply",
-     dimfun = dimfun)
+     dim = c(len, 1))
 
 }
 
@@ -877,10 +783,8 @@ eigen.greta_array <- function (x, symmetric, only.values = FALSE, EISPACK = FALS
   # they just want the eigenvalues, use that tf method
   if (only.values) {
 
-    dimfun <- function (elem_list) nrow(elem_list[[1]])
-
     values <- op("eigenvalues", x,
-                 dimfun = dimfun,
+                 dim = nrow(x),
                  tf_operation = "tf_only_eigenvalues")
 
     vectors <- NULL
@@ -889,19 +793,14 @@ eigen.greta_array <- function (x, symmetric, only.values = FALSE, EISPACK = FALS
 
     # if we're doing the whole eigendecomposition, do it in three operations
 
-    # a wacky greta array which appaarently has the same dimension as x; but in
+    # a wacky greta array which apparently has the same dimension as x; but in
     # fact is a list of the two elements. But that's OK so long as the user
     # never sees it
     eig <- op("eigen", x,
               tf_operation = "tf$self_adjoint_eig")
 
     # get the eigenvalues and vectors as actual, sane greta arrays
-
-    dimfun_values = function (elem_list) {
-      c(nrow(elem_list[[1]]), 1L)
-    }
-
-    values <- op("values", eig, dimfun = dimfun_values,
+    values <- op("values", eig, dim = c(nrow(eig), 1L),
                  tf_operation = "tf_extract_eigenvalues")
 
     vectors <- op("vectors", eig,
@@ -949,17 +848,14 @@ rdist.greta_array <- function (x1, x2 = NULL, compact = FALSE) {
     x1 <- flatten(x1)
   }
 
+  n1 <- nrow(x1)
+
   # square self-distance matrix
   if (is.null(x2)) {
 
-    dimfun <- function (elem_list) {
-      n1 <- nrow(elem_list[[1]])
-      c(n1, n1)
-    }
-
     op("rdist", x1,
        tf_operation = "tf_self_distance",
-       dimfun = dimfun)
+       dim = c(n1, n1))
 
   } else {
 
@@ -982,15 +878,11 @@ rdist.greta_array <- function (x1, x2 = NULL, compact = FALSE) {
 
     }
 
-    dimfun <- function (elem_list) {
-      n1 <- nrow(elem_list[[1]])
-      n2 <- nrow(elem_list[[2]])
-      c(n1, n2)
-    }
+    n2 <- nrow(x2)
 
     op("rdist", x1, x2,
        tf_operation = "tf_distance",
-       dimfun = dimfun)
+       dim = c(n1, n2))
 
   }
 

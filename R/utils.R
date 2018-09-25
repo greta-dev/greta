@@ -1030,32 +1030,23 @@ sampler_utils_module <- module(all_greta_arrays,
 
 flat_to_chol <- function (x, dim, correl = FALSE) {
 
-  dimfun <- function (elem_list)
-    dim
-
   fun <- ifelse(correl,
                 "tf_flat_to_chol_correl",
                 "tf_flat_to_chol")
 
   # sum the elements
-  op('flat_to_chol',
-     x,
+  op('flat_to_chol', x,
      operation_args = list(dims = dim),
      tf_operation = fun,
-     dimfun = dimfun)
+     dim = dim)
 
 }
 
 chol_to_symmetric <- function (L) {
 
-  dimfun <- function (elem_list)
-    dim(elem_list[[1]])
-
   # sum the elements
-  op('chol_to_symmetric',
-     L,
+  op('chol_to_symmetric', L,
      tf_operation = "tf_chol_to_symmetric",
-     dimfun = dimfun,
      representations = list(cholesky = L))
 
 }
@@ -1064,7 +1055,6 @@ greta_array_ops_module <- module(flat_to_chol,
                                  chol_to_symmetric)
 
 # utilities to export via .internals
-
 utilities_module <- module(misc = misc_module,
                            dummy_arrays = dummy_array_module,
                            greta_array_operations = greta_array_ops_module,

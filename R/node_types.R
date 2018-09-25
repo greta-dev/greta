@@ -53,7 +53,7 @@ operation_node <- R6Class(
 
     initialize = function (operation,
                            ...,
-                           dimfun = NULL,
+                           dim = NULL,
                            operation_args = list(),
                            tf_operation = NULL,
                            value = NULL,
@@ -73,10 +73,8 @@ operation_node <- R6Class(
       # elementwise operation and get the largest number of each dimension,
       # otherwise expect a function to be passed which will calculate it from
       # the provided list of nodes arguments
-      if (is.null(dimfun))
+      if (is.null(dim))
         dim <- do.call(pmax, lapply(dots, dim))
-      else
-        dim <- dimfun(dots)
 
       # assign empty value of the right dimension, or the values passed via the
       # operation

@@ -136,14 +136,10 @@ NULL
   # get the index in flat python format, as a tensor
   index <- flatten_rowwise(dummy_out)
 
-  # function to return dimensions of output
-  dimfun <- function (elem_list)
-    dims_out
-
   # create operation node, passing call and dims as additional arguments
   op('extract',
      x,
-     dimfun = dimfun,
+     dim = dims_out,
      operation_args = list(nelem = nelem,
                            index = index,
                            dims_out = dims_out),
@@ -202,10 +198,6 @@ NULL
     }
   }
 
-  # function to return dimensions of output
-  dimfun <- function (elem_list)
-    dims
-
   # do replace on the values (unknowns or arrays)
   x_value <- node$value()
   replacement_value <- get_node(replacement)$value()
@@ -222,7 +214,7 @@ NULL
   op('replace',
      x,
      replacement,
-     dimfun = dimfun,
+     dim = dims,
      operation_args = list(index = index,
                            dims = dims),
      value = new_value,
@@ -233,28 +225,25 @@ NULL
 #' @export
 cbind.greta_array <- function (...) {
 
-  dimfun <- function (elem_list) {
+  dims <- lapply(list(...), dim)
+  ndims <- vapply(dims, length, FUN.VALUE = 1)
+  if (!all(ndims == 2))
+    stop ('all greta arrays must be two-dimensional')
 
-    dims <- lapply(elem_list, dim)
-    ndims <- vapply(dims, length, FUN.VALUE = 1)
-    if (!all(ndims == 2))
-      stop ('all greta arrays must be two-dimensional')
+  # dimensions
+  rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
+  cols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
 
-    # dimensions
-    rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
-    cols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
+  # check all the same
+  if (!all(rows == rows[1]))
+    stop ('all greta arrays must be have the same number of rows',
+          call. = FALSE)
 
-    # check all the same
-    if (!all(rows == rows[1]))
-      stop ('all greta arrays must be have the same number of rows',
-            call. = FALSE)
+  # output dimensions
+  dims <- c(rows[1], sum(cols))
 
-    # output dimensions
-    c(rows[1], sum(cols))
-
-  }
-
-  op('cbind', ..., dimfun = dimfun,
+  op('cbind', ...,
+     dim = dims,
      tf_operation = "tf_cbind")
 
 }
@@ -262,28 +251,25 @@ cbind.greta_array <- function (...) {
 #' @export
 rbind.greta_array <- function (...) {
 
-  dimfun <- function (elem_list) {
+  dims <- lapply(list(...), dim)
+  ndims <- vapply(dims, length, FUN.VALUE = 1)
+  if (!all(ndims == 2))
+    stop ('all greta arrays must be two-dimensional')
 
-    dims <- lapply(elem_list, dim)
-    ndims <- vapply(dims, length, FUN.VALUE = 1)
-    if (!all(ndims == 2))
-      stop ('all greta arrays must be two-dimensional')
+  # dimensions
+  rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
+  cols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
 
-    # dimensions
-    rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
-    cols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
+  # check all the same
+  if (!all(cols == cols[1]))
+    stop ('all greta arrays must be have the same number of columns',
+          call. = FALSE)
 
-    # check all the same
-    if (!all(cols == cols[1]))
-      stop ('all greta arrays must be have the same number of columns',
-            call. = FALSE)
+  # output dimensions
+  dims <- c(sum(rows), cols[1])
 
-    # output dimensions
-    c(sum(rows), cols[1])
-
-  }
-
-  op('rbind', ..., dimfun = dimfun,
+  op('rbind', ...,
+     dim = dims,
      tf_operation = "tf_rbind")
 
 }
@@ -312,15 +298,11 @@ c.greta_array <- function (...) {
   length_vec <- vapply(arrays, length, FUN.VALUE = 1)
   dim_out <- c(sum(length_vec), 1L)
 
-  # get the output dimension
-  dimfun <- function (elem_list)
-    dim_out
-
   # create the op, expanding 'arrays' out to match op()'s dots input
   do.call(op,
           c(operation = 'rbind',
             arrays,
-            dimfun = dimfun,
+            dim = list(dim_out),
             tf_operation = "tf_rbind"))
 
 }
@@ -381,9 +363,6 @@ length.greta_array <- function(x)
     stop (msg, call. = FALSE)
   }
 
-  dimfun <- function (elem_list)
-    dims
-
   new_value <- get_node(x)$value()
   dim(new_value) <- dims
 
@@ -391,7 +370,7 @@ length.greta_array <- function(x)
      x,
      operation_args = list(shape = c(-1L, dims)),
      tf_operation = "tf$reshape",
-     dimfun = dimfun,
+     dim = dims,
      value = new_value)
 
 }
@@ -483,27 +462,24 @@ diag.default <- function (...)
 #' @export
 diag.greta_array <- function (x = 1, nrow, ncol) {
 
-  dimfun <- function (elem_list) {
+  dim <- dim(x)
 
-    x <- elem_list[[1]]
-    dim <- dim(x)
-
-    # check the rank isn't too high
-    if (length(dim) != 2) {
-      stop ("cannot only extract the diagonal from a node ",
-            "with exactly two dimensions")
-    }
-
-    if (dim[1] != dim[2]) {
-      stop ('diagonal elements can only be extracted from square matrices')
-    }
-
-    # return the dimensions
-    c(dim[1], 1)
-
+  # check the rank isn't too high
+  if (length(dim) != 2) {
+    stop ("cannot only extract the diagonal from a node ",
+          "with exactly two dimensions")
   }
 
+  if (dim[1] != dim[2]) {
+    stop ('diagonal elements can only be extracted from square matrices')
+  }
+
+  # return the dimensions
+  dims <- c(dim[1], 1)
+
   # return the extraction op
-  op('diag', x, dimfun = dimfun, tf_operation = "tf$matrix_diag_part")
+  op('diag', x,
+     dim = dims,
+     tf_operation = "tf$matrix_diag_part")
 
 }

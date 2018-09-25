@@ -138,32 +138,22 @@ NULL
 #' @export
 `%*%.greta_array` <- function(x, y) {
 
-  # define a function to get the dimensions of the result
-  dimfun <- function (elem_list) {
-
-    x <- elem_list[[1]]
-    y <- elem_list[[2]]
-
-    # check they're matrices
-    if (length(dim(x)) != 2 | length(dim(y)) != 2) {
-      stop ("only two-dimensional greta arrays can be matrix-multiplied",
-            call. = FALSE)
-    }
-
-    # check the dimensions match
-    if (dim(x)[2] != dim(y)[1]) {
-      msg <- sprintf("incompatible dimensions: %s vs %s",
-                     paste0(dim(x), collapse = "x"),
-                     paste0(dim(y), collapse = "x"))
-      stop (msg)
-    }
-
-    # dimensions of the result
-    c(dim(x)[1], dim(y)[2])
-
+  # check they're matrices
+  if (length(dim(x)) != 2 | length(dim(y)) != 2) {
+    stop ("only two-dimensional greta arrays can be matrix-multiplied",
+          call. = FALSE)
   }
 
-  op("matrix multiply", x, y, dimfun = dimfun,
+  # check the dimensions match
+  if (dim(x)[2] != dim(y)[1]) {
+    msg <- sprintf("incompatible dimensions: %s vs %s",
+                   paste0(dim(x), collapse = "x"),
+                   paste0(dim(y), collapse = "x"))
+    stop (msg)
+  }
+
+  op("matrix multiply", x, y,
+     dim = c(nrow(x), ncol(y)),
      tf_operation = "tf$matmul")
 
 }

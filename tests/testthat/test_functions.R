@@ -245,11 +245,11 @@ test_that('solve and sweep and kronecker error as expected', {
   # kronecker
   # X must be 2D
   expect_error(kronecker(a, b),
-               "^y must be a 2D array, but has . dimensions")
+               "^Y must be a 2D array, but has . dimensions")
 
   # Y must be 2D
   expect_error(kronecker(b, c),
-               "^x must be a 2D array, but has . dimensions")
+               "^X must be a 2D array, but has . dimensions")
 
 })
 
