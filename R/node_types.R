@@ -20,15 +20,28 @@ data_node <- R6Class(
 
       value <- self$value()
       shape <- to_shape(c(1, dim(value)))
+      value <- add_first_dim(value)
+
+      # under some circumstances we define data as constants, but normally as
+      # placeholders
+      using_constants <- !is.null(greta_stash$data_as_constants)
+
+      if (using_constants) {
+
+        tensor <- tf$constant(value = value,
+                              dtype = tf_float(),
+                              shape = shape)
+
+      } else {
+
+        tensor <- tf$placeholder(shape = shape,
+                                 dtype = tf_float())
+        tfe$data_list[[tf_name]] <- value
+
+      }
 
       # create placeholder
-      assign(tf_name,
-             tf$placeholder(shape = shape,
-                            dtype = tf_float()),
-             envir = tfe)
-
-      # put data in the data list
-      tfe$data_list[[tf_name]] <- add_first_dim(value)
+      assign(tf_name, tensor, envir = tfe)
 
     }
   )

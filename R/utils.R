@@ -755,9 +755,15 @@ dummy <- function (dims) {
   unflatten_rowwise(vec, dims)
 }
 
+# create a greta array of zeros with the correct dimensions
+dummy_greta_array <- function (x) {
+  do.call(zeros, list(dim(x)))
+}
+
 dummy_array_module <- module(flatten_rowwise,
                              unflatten_rowwise,
-                             dummy)
+                             dummy,
+                             dummy_greta_array)
 
 # given a base colour, return a function taking a value between 0 and 1 and
 # returning a colour linearly interpolated between black, the colour and white,
@@ -1051,8 +1057,54 @@ chol_to_symmetric <- function (L) {
 
 }
 
+# convert a function on greta arrays into a function on corresponding tensors,
+# given the greta arrays for inputs. When executed, this needs to be wrapped in
+# dag$on_graph() to get the tensors connected up with the rest of the graph
+as_tf_function <- function (r_fun, ...) {
+
+  # run the operation on isolated greta arrays, so nothing gets attached to the
+  # model real greta arrays in dots
+  ga_dummies <- lapply(list(...), dummy_greta_array)
+  ga_out <- do.call(r_fun, ga_dummies)
+
+  function (...) {
+
+    tensor_inputs <- list(...)
+
+    # create a sub-dag for these operations, from ga_dummies to ga_out
+    targets <- c(list(ga_out), ga_dummies)
+    sub_dag <- dag_class$new(targets)
+
+    # use the default graph, so that it can be overwritten when this is called?
+    # alternatively fetch from above, or put it in greta_stash?
+    sub_dag$tf_graph <- tf$get_default_graph()
+    sub_tfe <- sub_dag$tf_environment
+
+    # set the input tensors as the values for the dummy greta arrays in the new
+    # tf_environment
+    node_dummies <- lapply(ga_dummies, get_node)
+    tf_names <- lapply(node_dummies, sub_dag$tf_name)
+    for (i in seq_along(tf_names))
+      assign(tf_names[[i]], tensor_inputs[[i]], envir = sub_tfe)
+
+    # have output node define_tf in the new environment, with data defined as
+    # constants
+    greta_stash$data_as_constants <- TRUE
+    on.exit(greta_stash$data_as_constants <- NULL)
+    node_out <- get_node(ga_out)
+    node_out$define_tf(sub_dag)
+
+    # get the tensor for the output
+    tf_out <- sub_tfe[[sub_dag$tf_name(node_out)]]
+    tf_out
+
+  }
+
+}
+
 greta_array_ops_module <- module(flat_to_chol,
-                                 chol_to_symmetric)
+                                 chol_to_symmetric,
+                                 as_tf_function)
 
 # utilities to export via .internals
 utilities_module <- module(misc = misc_module,
