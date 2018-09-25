@@ -27,10 +27,6 @@ grab <- function (x, dag = NULL, ...) {
              envir = dag$tf_environment)
   }
 
-  # generate the feed dict for data
-  # if (!identical(dots, list()))
-  #   dots <- lapply(dots, add_first_dim)
-
   dag$build_feed_dict(dots)
   out <- tf$Session()$run(x,
                           feed_dict = dag$tf_environment$feed_dict)
@@ -39,13 +35,19 @@ grab <- function (x, dag = NULL, ...) {
 }
 
 # get the value of the target greta array, by passing values for the named
-# variable greta arrays via the free state parameter
-grab_via_free_state <- function(target, values) {
+# variable greta arrays via the free state parameter, optionally with batches
+grab_via_free_state <- function(target, values, batches = 1) {
   dag <- dag_class$new(list(target))
   dag$define_tf()
   inits <- do.call(initials, values)
   inits_flat <- prep_initials(inits, 1, dag)[[1]]
-  vals <- dag$trace_values(inits_flat)
+  if (batches > 1) {
+    inits_list <- replicate(batches, inits_flat, simplify = FALSE)
+    inits_flat <- do.call(rbind, inits_list)
+    vals <- dag$trace_values(inits_flat)[1, ]
+  } else {
+    vals <- dag$trace_values(inits_flat)
+  }
   array(vals, dim = dim(target))
 }
 
@@ -166,7 +168,7 @@ as_variable <- function (x) {
 # e.g. check_op(sum, randn(100, 3))
 check_op <- function (op, a, b, greta_op = NULL,
                       tolerance = 1e-3,
-                      only = c("data", "variable")) {
+                      only = c("data", "variable", "batched")) {
 
   if (is.null(greta_op))
     greta_op <- op
@@ -196,13 +198,14 @@ run_r_op <- function(op, a, b) {
 }
 
 run_greta_op <- function (greta_op, a, b,
-                          type = c("data", "variable")) {
+                          type = c("data", "variable", "batched")) {
 
   type <- match.arg(type)
 
   converter <- switch(type,
                       data = as_data,
-                      variable = as_variable)
+                      variable = as_variable,
+                      batched = as_variable)
 
   g_a <- converter(a)
 
@@ -220,7 +223,9 @@ run_greta_op <- function (greta_op, a, b,
     result <- calculate(out, list())
   } else if (type == "variable") {
     result <- grab_via_free_state(out, values)
-  } else{
+  } else if (type == "batched") {
+    result <- grab_via_free_state(out, values, batches = 3)
+  } else {
     result <- calculate(out, values)
   }
 
