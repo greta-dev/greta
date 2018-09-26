@@ -679,16 +679,24 @@ check_in_family <- function (function_name, arg) {
 
 }
 
+# get & return information about the future plan, and error nicely if invalid
+
 #' @importFrom future plan future
 check_future_plan <- function () {
 
   plan_info <- future::plan()
 
+  plan_is <- list(parallel = !inherits(plan_info, "sequential"),
+                  cluster = inherits(plan_info, "cluster"),
+                  multiprocess = inherits(plan_info, "multiprocess"),
+                  multisession = inherits(plan_info, "multisession"),
+                  local = TRUE)
+
   # if running in parallel
-  if (!inherits(plan_info, "sequential")) {
+  if (plan_is$parallel) {
 
     # if it's a cluster, check there's no forking
-    if (inherits(plan_info, "cluster")) {
+    if (plan_is$cluster) {
 
       # This stopgap trick from Henrik:
       # https://github.com/HenrikBengtsson/future/issues/224#issuecomment-388398032
@@ -697,16 +705,22 @@ check_future_plan <- function () {
       if (inherits(workers, "cluster")) {
         worker <- workers[[1]]
         if (inherits(worker, "forknode")) {
-          stop("parallel mcmc chains cannot be run with a fork cluster",
+          stop("parallel mcmc samplers cannot be run with a fork cluster",
                call. = FALSE)
         }
+      }
+
+      # check whether the cluster is local
+      if (!is.null(worker$host)) {
+        localhosts <- c("localhost", "127.0.0.1", Sys.info()[["nodename"]])
+        plan_is$local <- worker$host %in% localhosts
       }
 
     } else {
 
       # if multi*, check it's multisession
-      if (inherits(plan_info, "multiprocess") && !inherits(plan_info, "multisession")) {
-        stop ("parallel mcmc chains cannot be run with plan(multiprocess) or ",
+      if (plan_is$multiprocess && !plan_is$multisession) {
+        stop ("parallel mcmc samplers cannot be run with plan(multiprocess) or ",
               "plan(multicore)",
               call. = FALSE)
       }
@@ -714,6 +728,8 @@ check_future_plan <- function () {
     }
 
   }
+
+  plan_is
 
 }
 
@@ -915,37 +931,35 @@ relist_tf <- function (x, list_template) {
 }
 
 #' @importFrom future availableCores
-check_n_cores <- function (n_cores, samplers, sequential) {
+check_n_cores <- function (n_cores, samplers, plan_is) {
+
+  # if the plan is remote, and the user hasn't specificed the number of cores,
+  # leave it as all of them
+  if (is.null(n_cores) & !plan_is$local) {
+    return (NULL)
+  }
 
   n_cores_detected <- future::availableCores()
+  allowed_n_cores <- seq_len(n_cores_detected)
 
   # check user-provided cores
-  if (!is.null(n_cores) && !n_cores %in% seq_len(n_cores_detected)) {
+  if (!is.null(n_cores) && !n_cores %in% allowed_n_cores) {
 
     check_positive_integer(n_cores, "n_cores")
 
     message ("\n", n_cores, " cores were requested, but only ",
              n_cores_detected, " are available.")
 
-    # if in parallel, these will be divided up and messaged about
-    if (sequential) {
-      message ("Running each chain on up to ",
-               n_cores_detected, " cores.\n")
-    }
-
     n_cores <- NULL
 
   }
 
-  if (is.null(n_cores))
-    n_cores <- n_cores_detected
-
-  # if in parallel on this machine and n_cores isn't user-specified, set it so
+  # if n_cores isn't user-specified, set it so
   # there's no clash between samplers
-  if (!sequential & n_cores == 0)
+  if (is.null(n_cores))
     n_cores <- floor(n_cores_detected / samplers)
 
-  # ake sure there's at least 1
+  # make sure there's at least 1
   n_cores <- max(n_cores, 1)
 
   as.integer(n_cores)

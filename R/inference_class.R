@@ -296,7 +296,7 @@ sampler <- R6Class(
 
     run_chain = function (n_samples, thin, warmup,
                           verbose, pb_update,
-                          one_by_one, sequential, n_cores, float_type,
+                          one_by_one, plan_is, n_cores, float_type,
                           from_scratch = TRUE) {
 
       dag <- self$model$dag
@@ -304,12 +304,11 @@ sampler <- R6Class(
       # set the number of cores
       dag$n_cores <- n_cores
 
-      if (sequential & verbose) {
+      if (!plan_is$parallel & verbose) {
         self$print_sampler_number()
       }
 
-      # if this is in parallel
-      if (!sequential) {
+      if (plan_is$parallel) {
 
         # flush the environment
         dag$new_tf_environment()

@@ -258,8 +258,8 @@ run_samplers <- function (samplers,
                           n_cores,
                           from_scratch) {
 
-  # check the future plan is valid
-  check_future_plan()
+  # check the future plan is valid, and get information about it
+  plan_is <- check_future_plan()
 
   # coerce the iterations to integer
   n_samples <- as.integer(n_samples)
@@ -267,22 +267,35 @@ run_samplers <- function (samplers,
   thin <- as.integer(thin)
 
   dag <- samplers[[1]]$model$dag
-  sequential <- inherits(future::plan(), "sequential")
   chains <- samplers[[1]]$n_chains
-  n_cores <- check_n_cores(n_cores, length(samplers), sequential)
+  n_cores <- check_n_cores(n_cores, length(samplers), plan_is)
   float_type <- dag$tf_float
 
   # stash the samplers now, to retrieve draws later
   greta_stash$samplers <- samplers
 
-  parallel_reporting <- verbose & !sequential & !is.null(greta_stash$callbacks)
+  parallel_reporting <- verbose &
+    plan_is$parallel &
+    plan_is$local &
+    !is.null(greta_stash$callbacks)
 
-  if (!sequential & chains > 1) {
+  if (plan_is$parallel & plan_is$local & chains > 1) {
     cores_text <- ifelse(n_cores == 1,
                          "1 core",
                          sprintf("up to %i cores", n_cores))
-    msg <- sprintf("\nrunning %i chains in parallel, each on %s\n\n",
-                   chains, cores_text)
+    msg <- sprintf("\nrunning %i samplers in parallel, each on %s\n\n",
+                   length(samplers),
+                   cores_text)
+    message(msg, appendLF = FALSE)
+  }
+
+  if (plan_is$parallel & !plan_is$local) {
+    sampler_text <- ifelse(length(samplers) > 1,
+                           "samplers on remote machines",
+                           "sampler on a remote machine")
+    msg <- sprintf("\nrunning %i %s\n\n",
+                   length(samplers),
+                   sampler_text)
     message(msg, appendLF = FALSE)
   }
 
@@ -326,26 +339,27 @@ run_samplers <- function (samplers,
 
   }
 
-  if (sequential) {
-    dispatch <- function (expr, ...) expr
-  } else {
+  if (plan_is$parallel) {
     dispatch <- future::future
+  } else {
+    dispatch <- function (expr, ...) expr
   }
 
   # dispatch all the jobs
   for (chain in chains) {
     sampler <- samplers[[chain]]
-    samplers[[chain]] <- dispatch(sampler$run_chain(n_samples = n_samples,
-                                                   thin = thin,
-                                                   warmup = warmup,
-                                                   verbose = verbose,
-                                                   pb_update = pb_update,
-                                                   one_by_one = one_by_one,
-                                                   sequential = sequential,
-                                                   n_cores = n_cores,
-                                                   float_type = float_type,
-                                                   from_scratch = from_scratch),
-                                 seed = future_seed())
+    samplers[[chain]] <- dispatch(
+      sampler$run_chain(n_samples = n_samples,
+                        thin = thin,
+                        warmup = warmup,
+                        verbose = verbose,
+                        pb_update = pb_update,
+                        one_by_one = one_by_one,
+                        plan_is = plan_is,
+                        n_cores = n_cores,
+                        float_type = float_type,
+                        from_scratch = from_scratch),
+      seed = future_seed())
   }
 
   # if we're non-sequential and there's a callback registered,
@@ -370,7 +384,7 @@ run_samplers <- function (samplers,
 
   # if we were running in parallel, retrieve the samplers and put them back in
   # the stash to return
-  if (!sequential) {
+  if (plan_is$parallel) {
     samplers <- lapply(samplers, future::value)
     greta_stash$samplers <- samplers
   }
