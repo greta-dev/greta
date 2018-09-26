@@ -32,10 +32,10 @@ greta_stash <- new.env()
 #' @param one_by_one whether to run TensorFlow MCMC code one iteration at a
 #'   time, so that greta can handle numerical errors as 'bad' proposals (see
 #'   below).
-#' @param initial_values an optional \code{initials} object (or list of length
-#'   \code{chains}) giving initial values for some or all of the variables in
-#'   the model. These will be used as the starting point for
-#'   sampling/optimisation.
+#' @param initial_values an optional \code{initials} object (or list of
+#'   \code{initials} objects of length \code{chains}) giving initial values for
+#'   some or all of the variables in the model. These will be used as the
+#'   starting point for sampling/optimisation.
 #'
 #' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase

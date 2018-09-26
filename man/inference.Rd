@@ -52,10 +52,10 @@ details).}
 time, so that greta can handle numerical errors as 'bad' proposals (see
 below).}
 
-\item{initial_values}{an optional \code{initials} object (or list of length
-\code{chains}) giving initial values for some or all of the variables in
-the model. These will be used as the starting point for
-sampling/optimisation.}
+\item{initial_values}{an optional \code{initials} object (or list of
+\code{initials} objects of length \code{chains}) giving initial values for
+some or all of the variables in the model. These will be used as the
+starting point for sampling/optimisation.}
 
 \item{draws}{an mcmc.list object returned by \code{mcmc} or
 \code{stashed_samples}}
