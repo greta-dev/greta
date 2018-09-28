@@ -383,7 +383,7 @@ plot.greta_model <- function (x,
                                       attr_type = 'graph'))
 
 
-  print(DiagrammeR::render_graph(gr))
+  print(DiagrammeR::render_graph(gr), view = TRUE)
 
   invisible(gr)
 
