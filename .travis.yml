@@ -10,6 +10,7 @@ env:
 # these are dependencies of suggested packagesi for which there are binaries,
 # add them here to try to reduce installation time
 r_binary_packages:
+  - abind
   - coda
   - codetools
   - colorspace

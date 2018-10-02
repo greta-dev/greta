@@ -17,6 +17,7 @@
 \alias{tapply}
 \alias{eigen}
 \alias{rdist}
+\alias{abind}
 \alias{diag}
 \title{Functions overloaded by greta}
 \usage{
@@ -48,10 +49,15 @@ eigen(x, symmetric, only.values, EISPACK)
 
 rdist(x1, x2 = NULL, compact = FALSE)
 
+abind(..., along = N, rev.along = NULL, new.names = NULL,
+  force.array = TRUE, make.names = use.anon.names,
+  use.anon.names = FALSE, use.first.dimnames = FALSE,
+  hier.names = FALSE, use.dnns = FALSE)
+
 diag(x = 1, nrow, ncol)
 }
 \arguments{
-\item{x, y, size, LINPACK, V, na.rm, dims, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, X, INDEX, symmetric, only.values, EISPACK, x1, x2, compact, nrow, ncol}{arguments as in original documentation}
+\item{x, y, size, LINPACK, V, na.rm, dims, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, X, INDEX, symmetric, only.values, EISPACK, x1, x2, compact, along, rev.along, new.names, force.array, make.names, use.anon.names, use.first.dimnames, hier.names, use.dnns, nrow, ncol}{arguments as in original documentation}
 }
 \description{
 greta provides a wide range of methods to apply common R

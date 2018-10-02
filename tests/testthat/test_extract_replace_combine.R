@@ -247,6 +247,37 @@ test_that('rbind, cbind and c work like R', {
 
 })
 
+test_that('abind works like R', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- randn(5, 1, 3)
+  b <- randn(1, 1, 3)
+  c <- randn(5, 1, 1)
+
+  check_op(abind, a, b, other_args = list(along = 1))
+  check_op(abind, a, c)
+  check_op(abind, a, a, other_args = list(along = 0))
+  check_op(abind, a, a, other_args = list(along = 4))
+
+})
+
+test_that("abind errors informatively", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- ones(5, 1, 3)
+  b <- ones(1, 1, 3)
+  c <- ones(5, 1, 1)
+
+  expect_error(abind(a, b),
+               "dimension 1 had varying sizes")
+  expect_error(abind(a, c, along = 5),
+               "along must be between 0 and 4")
+
+})
 
 test_that('rbind and cbind can prepend R arrays to greta arrays', {
 

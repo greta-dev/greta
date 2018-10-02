@@ -528,6 +528,11 @@ tf_rbind <- function (...) {
   tf$concat(elem_list, axis = 1L)
 }
 
+tf_abind <- function (..., axis) {
+  elem_list <- list(...)
+  tf$concat(elem_list, axis = axis)
+}
+
 tf_only_eigenvalues <- function (x) {
   vals <- tf$self_adjoint_eigvals(x)
   dim <- tf$constant(1L, shape = list(1))

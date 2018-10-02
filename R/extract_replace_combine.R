@@ -21,6 +21,7 @@
 #' # combine
 #' cbind(...)
 #' rbind(...)
+#' abind(...)
 #' c(..., recursive = FALSE)
 #' rep(x, times, ..., recursive = FALSE)
 #'
@@ -64,6 +65,7 @@
 #'  # combine
 #'  cbind(x[, 2], x[, 1])
 #'  rbind(x[1, ], x[3, ])
+#'  abind(x[1, ], x[3, ], along = 1)
 #'  c(x[, 1], x)
 #'  rep(x[, 2], times = 3)
 #' }
@@ -280,6 +282,126 @@ rbind.greta_array <- function (...) {
 
 }
 
+#' @rdname overloaded
+#' @export
+abind <- function (...,
+                   along = N, rev.along = NULL, new.names = NULL,
+                   force.array = TRUE, make.names = use.anon.names,
+                   use.anon.names = FALSE, use.first.dimnames = FALSE,
+                   hier.names = FALSE, use.dnns = FALSE) {
+  UseMethod("abind")
+}
+
+#' @export
+abind.default <- function (...,
+                           along = N, rev.along = NULL, new.names = NULL,
+                           force.array = TRUE, make.names = use.anon.names,
+                           use.anon.names = FALSE, use.first.dimnames = FALSE,
+                           hier.names = FALSE, use.dnns = FALSE) {
+
+  # error nicely if they don't have abind installed
+  abind_installed <- requireNamespace("abind", quietly = TRUE)
+  if (!abind_installed) {
+    stop ("abind is being called on R arrays (not greta arrays), ",
+          "but the abind package is not installed",
+          call. = FALSE)
+  }
+
+  call <- sys.call()
+  call_list <- as.list(call)[-1]
+  do.call(abind::abind, call_list)
+
+}
+
+#' @export
+abind.greta_array <- function (...,
+                               along = N, rev.along = NULL, new.names = NULL,
+                               force.array = TRUE, make.names = use.anon.names,
+                               use.anon.names = FALSE, use.first.dimnames = FALSE,
+                               hier.names = FALSE, use.dnns = FALSE) {
+
+  # warn if any of the arguments have been changed
+  user_set_args <- !is.null(rev.along) |
+    !is.null(new.names) |
+    !isTRUE(force.array) |
+    !identical(make.names, FALSE) |
+    !identical(use.anon.names, FALSE) |
+    !identical(use.first.dimnames, FALSE) |
+    !identical(hier.names, FALSE) |
+    !identical(use.dnns, FALSE)
+
+  if (user_set_args) {
+    warning("only the argument 'along' is supported when using abind ",
+            "with greta arrays, any other arguments will be ignored")
+  }
+
+  arg.list <- list(...)
+
+  # drop any NULLs
+  to_discard <- vapply(arg.list, is.null, FUN.VALUE = FALSE)
+  if (any(to_discard))  {
+    arg.list <- arg.list[!to_discard]
+  }
+
+  # get N first, in case they used the default value for along
+  dims <- lapply(arg.list, dim)
+  N <- max(vapply(dims, length, FUN.VALUE = 1L))
+  along <- as.integer(force(along))
+
+  # rationalise along, and pad N if we're prepending/appending a dimension
+  if (along < 1 || along > N || (along > floor(along) &&
+                                 along < ceiling(along))) {
+    N <- N + 1
+    along <- max(1, min(N + 1, ceiling(along)))
+  }
+
+  if (!along %in% 0:N) {
+    stop ("along must be between 0 and ", N, call. = FALSE)
+  }
+
+  pre <- seq(from = 1, len = along - 1)
+  post <- seq(to = N - 1, len = N - along)
+
+
+  # rationalise the dimensions
+  arg.list <- arg.list
+
+  # loop though all elements of arg.list padding if necessary:
+  arg.list <- lapply(arg.list,
+                     function (x) {
+                       dim <- dim(x)
+                       if (length(dim) == N - 1)
+                         dim(x) <- c(dim[pre], 1, dim[post])
+                       x
+                       })
+
+  # check the non-binding dimensions match
+  dims <- lapply(arg.list, dim)
+  dim_out <- rep(NA, N)
+  for (dim in seq_len(N)[-along]) {
+    this_dim <- vapply(dims, `[`, dim, FUN.VALUE = 1L)
+    if (!all(this_dim == this_dim[1])) {
+      stop ("all greta arrays must have the same dimensions ",
+            "except on the 'along' dimension, but dimension ", dim,
+            " had varying sizes: ", paste(this_dim, collapse = ", "),
+            call. = FALSE)
+    } else {
+      dim_out[dim] <- this_dim[1]
+    }
+  }
+
+  bind_dims <- vapply(dims, `[`, along, FUN.VALUE = 1L)
+  dim_out[along] <- sum(bind_dims)
+
+  do.call(op,
+          c(operation = 'abind',
+            arg.list,
+            dim = list(dim_out),
+            operation_args = list(list(axis = as.integer(along))),
+            tf_operation = "tf_abind"))
+
+}
+
 #' @export
 c.greta_array <- function (...) {
 
@@ -326,7 +448,6 @@ rep.greta_array <- function (x, ...) {
   x[idx]
 
 }
-
 
 # get dimensions
 #' @export
@@ -455,8 +576,6 @@ tail.greta_array <- function (x, n = 6L, ...) {
   ans
 
 }
-
-
 
 #' @rdname overloaded
 #' @export

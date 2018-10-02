@@ -167,17 +167,18 @@ as_variable <- function (x) {
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
 check_op <- function (op, a, b, greta_op = NULL,
+                      other_args = list(),
                       tolerance = 1e-3,
                       only = c("data", "variable", "batched")) {
 
   if (is.null(greta_op))
     greta_op <- op
 
-  r_out <- run_r_op(op, a, b)
+  r_out <- run_r_op(op, a, b, other_args)
 
   for (type in only) {
     # compare with ops on data greta arrays
-    greta_out <- run_greta_op(greta_op, a, b, type)
+    greta_out <- run_greta_op(greta_op, a, b, other_args, type)
     compare_op(r_out, greta_out, tolerance)
   }
 
@@ -188,16 +189,18 @@ compare_op <- function(r_out, greta_out, tolerance = 1e-3) {
   expect_true(all(difference < tolerance))
 }
 
-run_r_op <- function(op, a, b) {
-  if (missing(b)) {
-    out <- op(a)
-  } else {
-    out <- op(a, b)
+run_r_op <- function(op, a, b, other_args) {
+
+  arg_list <- list(a)
+  if (!missing(b)) {
+    arg_list <- c(arg_list, list(b))
   }
-  out
+  arg_list <- c(arg_list, other_args)
+  do.call(op, arg_list)
+
 }
 
-run_greta_op <- function (greta_op, a, b,
+run_greta_op <- function (greta_op, a, b, other_args,
                           type = c("data", "variable", "batched")) {
 
   type <- match.arg(type)
@@ -209,14 +212,17 @@ run_greta_op <- function (greta_op, a, b,
 
   g_a <- converter(a)
 
-  if (missing(b)) {
-    out <- greta_op(g_a)
-    values <- list(g_a = a)
-  } else {
+  arg_list <- list(g_a)
+  values <- list(g_a = a)
+
+  if (!missing(b)) {
     g_b <- converter(b)
-    values <- list(g_a = a, g_b = b)
-    out <- greta_op(g_a, g_b)
+    arg_list <- c(arg_list, list(g_b))
+    values <- c(values, list(g_b = b))
   }
+
+  arg_list <- c(arg_list, other_args)
+  out <- do.call(greta_op, arg_list)
 
   if (type == "data") {
     # data greta arrays should provide their own values

@@ -58,6 +58,7 @@ diag(x) <- value
 # combine
 cbind(...)
 rbind(...)
+abind(...)
 c(..., recursive = FALSE)
 rep(x, times, ..., recursive = FALSE)
 
@@ -82,6 +83,7 @@ dim(x) <- value
  # combine
  cbind(x[, 2], x[, 1])
  rbind(x[1, ], x[3, ])
+ abind(x[1, ], x[3, ], along = 1)
  c(x[, 1], x)
  rep(x[, 2], times = 3)
 }

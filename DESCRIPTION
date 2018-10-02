@@ -70,6 +70,7 @@ Suggests:
     tidyverse,
     rethinking,
     fields,
-    MASS
+    MASS,
+    abind
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
