@@ -397,14 +397,22 @@ test_that('dim<- works', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  x <- greta_array(1:12, c(3, 4))
-  new_dim <- c(6L, 2L)
+  x <- variable(dim = c(3, 4))
 
+  new_dim <- c(3L, 4L, 1L)
   dim(x) <- new_dim
   expect_identical(dim(x), new_dim)
+  expect_ok(print(x))
+  # need to be able to print unknowns after reshaping
+
+  new_dim <- c(6L, 2L)
+  dim(x) <- new_dim
+  expect_identical(dim(x), new_dim)
+  expect_ok(print(x))
 
   dim(x) <- NULL
   expect_identical(dim(x), c(12L, 1L))
+  expect_ok(print(x))
 
 })
 

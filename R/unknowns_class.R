@@ -41,6 +41,12 @@ unknowns <- function (dims = c(1, 1), data = as.numeric(NA)) {
   as.unknowns(x)
 }
 
+# set dims like on a matrix/array
+`dim<-.unknowns` <- function (x, value) {
+  x <- strip_unknown_class(x)
+  dim(x) <- value
+  as.unknowns(x)
+}
 
 unknowns_module <- module(unknowns,
                           as.unknowns,
