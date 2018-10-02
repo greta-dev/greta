@@ -4,7 +4,7 @@
 \alias{calculate}
 \title{calculate greta arrays given fixed values}
 \usage{
-calculate(target, values)
+calculate(target, values = list(), precision = c("double", "single"))
 }
 \arguments{
 \item{target}{a greta array for which to calculate the value}
@@ -12,6 +12,8 @@ calculate(target, values)
 \item{values}{a named list giving temporary values of the greta arrays with
 which \code{target} is connected, or an \code{mcmc.list} object returned by
 \code{\link{mcmc}}.}
+
+\item{precision}{the floating point precision to use when calculating values.}
 }
 \value{
 A numeric R array with the same dimensions as \code{target}, giving
@@ -43,6 +45,11 @@ a <- lognormal(0, 1)
 y <- sum(x ^ 2) + a
 calculate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
 
+# if the greta array only depends on data,
+# you can pass an empty list to values (this is the default)
+x <- ones(3, 3)
+y <- sum(x)
+calculate(y)
 
 # define a model
 alpha <- normal(0, 1)

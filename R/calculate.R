@@ -11,6 +11,7 @@
 #' @param values a named list giving temporary values of the greta arrays with
 #'   which \code{target} is connected, or an \code{mcmc.list} object returned by
 #'   \code{\link{mcmc}}.
+#' @param precision the floating point precision to use when calculating values.
 #'
 #' @return A numeric R array with the same dimensions as \code{target}, giving
 #'   the values it would take conditioned on the fixed values given by
@@ -36,6 +37,11 @@
 #' y <- sum(x ^ 2) + a
 #' calculate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
 #'
+#' # if the greta array only depends on data,
+#' # you can pass an empty list to values (this is the default)
+#' x <- ones(3, 3)
+#' y <- sum(x)
+#' calculate(y)
 #'
 #' # define a model
 #' alpha <- normal(0, 1)
@@ -66,27 +72,33 @@
 #' }
 #'
 #'
-calculate <- function (target, values) {
+calculate <- function (target, values = list(), precision = c("double", "single")) {
 
   target_name <- deparse(substitute(target))
+  tf_float <- switch(match.arg(precision),
+                     double = "float64",
+                     single = "float32")
 
   if (!inherits(target, "greta_array"))
     stop ("'target' is not a greta array")
 
   if (inherits(values, "mcmc.list"))
-    calculate_mcmc.list(target, target_name, values)
+    calculate_mcmc.list(target, target_name, values, tf_float)
   else
-    calculate_list(target, values)
+    calculate_list(target, values, tf_float)
 
 }
 
-calculate_mcmc.list <- function (target, target_name, values) {
+calculate_mcmc.list <- function (target, target_name, values, tf_float) {
 
   model_info <- get_model_info(values)
 
   # copy and refresh the dag
   dag <- model_info$model$dag$clone()
   dag$new_tf_environment()
+
+  # set the precision in the dag
+  dag$tf_float <- tf_float
 
   # extend the dag to include this node, as the target
   dag$build_dag(list(target))
@@ -116,7 +128,7 @@ calculate_mcmc.list <- function (target, target_name, values) {
 
 }
 
-calculate_list <- function(target, values) {
+calculate_list <- function(target, values, tf_float) {
 
   # get the values and their names
   names <- names(values)
@@ -144,7 +156,7 @@ calculate_list <- function(target, values) {
   all_greta_arrays <- c(fixed_greta_arrays, list(target))
 
   # define the dag and TF graph
-  dag <- dag_class$new(all_greta_arrays)
+  dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
   dag$define_tf()
   tfe <- dag$tf_environment
 
