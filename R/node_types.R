@@ -57,6 +57,7 @@ operation_node <- R6Class(
     operation = NA,
     operation_args = NA,
     arguments = list(),
+    tf_function_env = NA,
 
     # named greta arrays giving different representations of the greta array
     # represented by this node that have already been calculated, to be used for
@@ -70,7 +71,8 @@ operation_node <- R6Class(
                            operation_args = list(),
                            tf_operation = NULL,
                            value = NULL,
-                           representations = list()) {
+                           representations = list(),
+                           tf_function_env = parent.frame(3)) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
@@ -81,6 +83,7 @@ operation_node <- R6Class(
       self$operation <- tf_operation
       self$operation_args <- operation_args
       self$representations <- representations
+      self$tf_function_env <- tf_function_env
 
       # work out the dimensions of the new greta array, if NULL assume an
       # elementwise operation and get the largest number of each dimension,
@@ -122,7 +125,8 @@ operation_node <- R6Class(
       args <- match_batches(args)
 
       # get the tensorflow function
-      operation <- eval(parse(text = self$operation))
+      operation <- eval(parse(text = self$operation),
+                        envir = self$tf_function_env)
 
       # apply the function on tensors
       node <- do.call(operation, args)
