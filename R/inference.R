@@ -9,6 +9,9 @@ NULL
 # they abort a run
 greta_stash <- new.env()
 
+greta_stash$numerical_messages <- c("is not invertible",
+                                    "Cholesky decomposition was not successful")
+
 #' @rdname inference
 #' @export
 #' @importFrom stats rnorm runif

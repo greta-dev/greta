@@ -869,10 +869,8 @@ cleanly <- function (expr) {
   # if it errored
   if (inherits(res, 'error')) {
 
-    numerical_messages <- c("is not invertible",
-                            "Cholesky decomposition was not successful")
-
-    numerical_errors <- vapply(numerical_messages,
+    # check for known numerical errors
+    numerical_errors <- vapply(greta_stash$numerical_messages,
                                grepl,
                                res$message,
                                FUN.VALUE = 0) == 1
