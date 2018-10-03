@@ -31,9 +31,8 @@ p <- beta(1, 1, dim = n_time)
 chi <- ones(n_time)
 chi[n_time] <- 0.99999
 for (i in seq_len(n_time - 1)) {
-  time <- n_time - i
-  time_next <- time_curr + 1
-  chi[time] <- (1 - phi[time]) + phi[time] * (1 - p[time_next]) * chi[time_next]
+  tn <- n_time - i
+  chi[tn] <- (1 - phi[tn]) + phi[tn] * (1 - p[tn + 1]) * chi[tn + 1]
 }
 
 # dummy variables
