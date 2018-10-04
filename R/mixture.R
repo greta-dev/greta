@@ -8,17 +8,18 @@
 #'   \code{\link{distributions}}); the component distributions in a mixture
 #'   distribution.
 #'
-#' @param weights a column vector greta array with as many elements as
-#'   probability distributions. The elements must be positive, but need not sum
-#'   to one.
+#' @param weights a column vector or array of mixture weights, which must be
+#'   positive, but need not sum to one. The first dimension must be the number
+#'   of distributions, the remaining dimensions must either be 1 or match the
+#'   distribution dimension.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
 #'   or a vector of positive integers.
 #'
-#' @details The \code{weights} are rescaled to sum to one, and are then used as
-#'   the mixing weights of the distribution. \emph{Ie.} the probability density
-#'   is calculated as a weighted sum of the component probability distributions
-#'   passed in via \code{\dots}
+#' @details The \code{weights} are rescaled to sum to one along the first
+#'   dimension, and are then used as the mixing weights of the distribution.
+#'   \emph{Ie.} the probability density is calculated as a weighted sum of the
+#'   component probability distributions passed in via \code{\dots}
 #'
 #'   The component probability distributions must all be either continuous or
 #'   discrete, and must have the same dimensions.
@@ -56,6 +57,14 @@
 #' # get the posterior means
 #' summary(draws_rates)$statistics[, "Mean"]
 #' summary(draws_weights)$statistics[, "Mean"]
+#'
+#' # weights can also be an array, giving different mixing weights
+#' # for each observation (first dimension must be number of components)
+#' dim <- c(5, 4)
+#' weights <- uniform(0, 1, dim = c(2, dim))
+#' b <- mixture(normal(1, 1, dim = dim),
+#'              normal(-1, 1, dim = dim),
+#'              weights = weights)
 #' }
 mixture <- function(..., weights, dim = NULL)
   distrib("mixture", list(...), weights, dim)
@@ -78,17 +87,32 @@ mixture_distribution <- R6Class (
       dim <- do.call(check_dims, c(dots, target_dim = dim))
 
       weights <- as.greta_array(weights)
+      weights_dim <- dim(weights)
 
-      # check dimensions of weights
-      if (ncol(weights) != 1 |
-          length(dim(weights)) != 2 |
-          length(weights) != n_distributions) {
-
-        stop ("weights must be a 2D greta array with one column, ",
-              "and as many rows as distributions, but has dimensions ",
-              paste(dim(weights), collapse = " x "),
+      # weights should have n_distributions as the first dimension
+      if (weights_dim[1] != n_distributions) {
+        stop ("the first dimension of weights must be the number of ",
+              "distributions in the mixture (", n_distributions, "), ",
+              "but was " , weights_dim[1],
               call. = FALSE)
+      }
 
+      # drop a trailing 1 from dim, so user doesn't need to deal with it
+      # Ugh, need to get rid of column vector thing soon.
+      weights_extra_dim <- dim
+      n_extra_dim <- length(weights_extra_dim)
+      if (weights_extra_dim[n_extra_dim] == 1){
+        weights_extra_dim <- weights_extra_dim[-n_extra_dim]
+      }
+
+      # remainder should be 1 or match weights_extra_dim
+      w_dim <- weights_dim[-1]
+      if (!((length(w_dim == 1) && w_dim == 1) |
+            all(w_dim == weights_extra_dim))) {
+        stop ("the dimension of weights must be either ", n_distributions,
+              " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
+              " but was ", paste(weights_dim, collapse = " x "),
+              call. = FALSE)
       }
 
       dot_nodes <- lapply(dots, get_node)
@@ -125,8 +149,10 @@ mixture_distribution <- R6Class (
 
       densities <- parameters[names(parameters) != "weights"]
       names(densities) <- NULL
-      weights <- tf_flatten(parameters$weights)
-      weights <- weights / tf_sum(weights)
+      weights <- parameters$weights
+      # weights <- tf_flatten(parameters$weights)
+      weights_sum <- tf$reduce_sum(weights, 1L, keepdims = TRUE)
+      weights <- weights / weights_sum
       log_weights <- tf$log(weights)
 
       log_prob <- function (x) {
@@ -136,7 +162,8 @@ mixture_distribution <- R6Class (
         log_probs_arr <- tf$stack(log_probs, 1L)
 
         # massage log_weights into the same shape as log_probs_arr
-        extra_dims <- unlist(dim(log_probs_arr)[-(1:2)])
+        dim_weights <- dim(log_weights)
+        extra_dims <- unlist(dim(log_probs_arr)[-seq_along(dim_weights)])
         for (dim in extra_dims) {
           ndim <- length(dim(log_weights))
           log_weights <- tf$expand_dims(log_weights, ndim)

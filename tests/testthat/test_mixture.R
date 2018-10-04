@@ -70,7 +70,7 @@ test_that("incorrectly-shaped weights errors", {
   expect_error(mixture(normal(0, 1),
                        normal(0, 2),
                        weights = weights),
-               "weights must be a 2D greta array with one column")
+               "first dimension of weights must be the number of distributions")
 
 })
 
@@ -155,5 +155,49 @@ test_that("mixture of Poissons has correct density", {
                        mix_r,
                        parameters = params,
                        x = rpois(100, 3))
+
+})
+
+test_that("mixture of normals with varying weights has correct density", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  mix_greta <- function (means, sds, weights, dim) {
+    mixture(normal(means[1], sds[1], dim),
+            normal(means[2], sds[2], dim),
+            normal(means[3], sds[3], dim),
+            weights = weights)
+  }
+
+  mix_r <- function (x, means, sds, weights) {
+    out_dim <- dim(x)
+    densities <- array(NA, c(length(means), prod(out_dim)))
+    for (i in seq_along(means))
+      densities[i, ] <- dnorm(x, means[i], sds[i])
+    dim(weights) <- dim(densities)
+    densities <- colSums(densities * weights)
+    dim(densities) <- out_dim
+    densities
+  }
+
+  dim <- c(10, 5, 4)
+  n <- prod(dim)
+
+  weights <- matrix(runif(n * 3), 3, n)
+  weights <- sweep(weights, 2, colSums(weights), "/")
+  dim(weights) <- c(3, dim)
+
+  x <- array(rnorm(n, -2, 3), dim)
+
+  params <- list(means = c(-2, 2, 5),
+                 sds = c(3, 0.5, 1),
+                 weights = weights)
+
+  compare_distribution(mix_greta,
+                       mix_r,
+                       parameters = params,
+                       x = x,
+                       dim = dim)
 
 })
