@@ -2,14 +2,14 @@
 
 *Cormack-Jolly-Seber* (CJS) models estimate probabilities of survival and recapture from mark-recapture data. These models assume that we can only ever see individuals that have been initially marked and released or recaptured following release (i.e. individuals do not exist until first observed). The two key parameters are survival, $\phi$, and probability of recapture, $p$. There is an additional derived parameter, $\chi$, which is the probability that an individual is not recaptured following its final capture. $\chi$ marginalises over multiple scenarios in which the individual is not observed either because it has died or because it is alive but not detected.
 
-See [something](https://www.somewhere.com) (pdf) for details.
+The [introductory book](http://www.phidot.org/software/mark/docs/book/) to the program MARK has a lot of information on mark-recapture models, including CJS models (starting in Ch. 1) and the broader class of Jolly-Seber models (Ch. 12). There is also a section on mark-recapture models in the [Stan language manual](http://mc-stan.org/users/documentation/), which goes through the derivation of the parameter $\chi$.
 
 #### data
 <div class="data">
 ```{r cjs_data, highlight = FALSE}
 n_obs <- 100
 n_time <- 20
-y <- matrix(sample(c(0, 1), size = (n_obs * n_time)), ncol = n_time)
+y <- matrix(sample(c(0, 1), size = (n_obs * n_time), replace = TRUE), ncol = n_time)
 ```
 </div>
 
@@ -29,7 +29,8 @@ p <- beta(1, 1, dim = n_time)
 
 # derived parameter
 chi <- ones(n_time)
-chi[n_time] <- 0.99999
+eps <- .Machine$double.eps
+chi[n_time] <- chi[n_time] - eps
 for (i in seq_len(n_time - 1)) {
   tn <- n_time - i
   chi[tn] <- (1 - phi[tn]) + phi[tn] * (1 - p[tn + 1]) * chi[tn + 1]
