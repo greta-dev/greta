@@ -156,24 +156,6 @@ live_pointer <- function (tensor_name, environment = parent.frame()) {
     !is.null(environment[[tensor_name]]$name)
 }
 
-# apply FUN to rows of matrix X and recombine *without dropping like apply does*
-apply_rows <- function (X, FUN, ...) {
-  rows <- seq_len(nrow(X))
-  input_list <- lapply(rows, function (i) X[i, ])
-  output_list <- lapply(input_list, FUN, ...)
-  output <- do.call(rbind, output_list)
-  output
-}
-
-# apply FUN to rows of matrix X and recombine *without dropping like apply does*
-apply_rows <- function (X, FUN, ...) {
-  rows <- seq_len(nrow(X))
-  input_list <- lapply(rows, function (i) X[i, ])
-  output_list <- lapply(input_list, FUN, ...)
-  output <- do.call(rbind, output_list)
-  output
-}
-
 # get the next seed as a L'Ecuyer
 future_seed <- function() {
   okind <- RNGkind()[1]
@@ -337,7 +319,6 @@ misc_module <- module(module,
                       do,
                       get_seed,
                       live_pointer,
-                      apply_rows,
                       future_seed,
                       create_log_file,
                       bar_width,
