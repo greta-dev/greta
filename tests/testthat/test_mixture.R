@@ -117,12 +117,10 @@ test_that("mixture of normals has correct density", {
                  sds = c(3, 0.5, 1),
                  weights = c(0.3, 0.6, 0.1))
 
-  difference <- compare_distribution(mix_greta,
-                                     mix_r,
-                                     parameters = params,
-                                     x = rnorm(100, -2, 3))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(mix_greta,
+                       mix_r,
+                       parameters = params,
+                       x = rnorm(100, -2, 3))
 
 })
 
@@ -153,11 +151,9 @@ test_that("mixture of Poissons has correct density", {
   params <- list(rates = c(0.1, 2, 5),
                  weights = c(0.3, 0.6, 0.1))
 
-  difference <- compare_distribution(mix_greta,
-                                     mix_r,
-                                     parameters = params,
-                                     x = rpois(100, 3))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(mix_greta,
+                       mix_r,
+                       parameters = params,
+                       x = rpois(100, 3))
 
 })

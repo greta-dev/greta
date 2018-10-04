@@ -167,8 +167,7 @@ test_that('sweep works as expected', {
       greta_array <- sweep(as_data(x), dim, as_data(stats), FUN = fun)
       greta_out <- grab(greta_array)
 
-      difference <- as.vector(abs(r_out - greta_out))
-      expect_true(all(difference < 1e-4))
+      compare_op(r_out, greta_out)
 
     }
 
@@ -327,13 +326,10 @@ test_that("eigen works as expected", {
 
 
   # values
-  difference <- as.vector(abs(r_out$values - grab(greta_out$values)))
-  expect_true(all(difference < 1e-4))
-
+  compare_op(r_out$values, grab(greta_out$values))
 
   # only values
-  difference <- as.vector(abs(r_out_vals$values - grab(greta_out_vals$values)))
-  expect_true(all(difference < 1e-4))
+  compare_op(r_out_vals$values, grab(greta_out_vals$values))
 
   # vectors
   # these can be inverted, need to loop through columns checking whether they

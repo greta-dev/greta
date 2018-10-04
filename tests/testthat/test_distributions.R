@@ -5,12 +5,10 @@ test_that('normal distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::normal,
-                                     stats::dnorm,
-                                     parameters = list(mean = -2, sd = 3),
-                                     x = rnorm(100, -2, 3))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::normal,
+                       stats::dnorm,
+                       parameters = list(mean = -2, sd = 3),
+                       x = rnorm(100, -2, 3))
 
 })
 
@@ -19,14 +17,12 @@ test_that('multidimensional normal distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::normal,
-                                     stats::dnorm,
-                                     parameters = list(mean = -2, sd = 3),
-                                     x = array(rnorm(100, -2, 3),
-                                               dim =c(10, 2, 5)),
-                                     dim = c(10, 2, 5))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::normal,
+                       stats::dnorm,
+                       parameters = list(mean = -2, sd = 3),
+                       x = array(rnorm(100, -2, 3),
+                                 dim =c(10, 2, 5)),
+                       dim = c(10, 2, 5))
 
 })
 
@@ -35,12 +31,10 @@ test_that('uniform distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::uniform,
-                                     stats::dunif,
-                                     parameters = list(min = -2.1, max = -1.2),
-                                     x = runif(100, -2.1, -1.2))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::uniform,
+                       stats::dunif,
+                       parameters = list(min = -2.1, max = -1.2),
+                       x = runif(100, -2.1, -1.2))
 
 })
 
@@ -49,12 +43,10 @@ test_that('lognormal distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::lognormal,
-                                     stats::dlnorm,
-                                     parameters = list(meanlog = 1, sdlog = 3),
-                                     x = rlnorm(100, 1, 3))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::lognormal,
+                       stats::dlnorm,
+                       parameters = list(meanlog = 1, sdlog = 3),
+                       x = rlnorm(100, 1, 3))
 
 })
 
@@ -63,12 +55,10 @@ test_that('bernoulli distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::bernoulli,
-                                     extraDistr::dbern,
-                                     parameters = list(prob = 0.3),
-                                     x = rbinom(100, 1, 0.3))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::bernoulli,
+                       extraDistr::dbern,
+                       parameters = list(prob = 0.3),
+                       x = rbinom(100, 1, 0.3))
 
 })
 
@@ -77,12 +67,10 @@ test_that('binomial distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::binomial,
-                                     stats::dbinom,
-                                     parameters = list(size = 10, prob = 0.8),
-                                     x = rbinom(100, 10, 0.8))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::binomial,
+                       stats::dbinom,
+                       parameters = list(size = 10, prob = 0.8),
+                       x = rbinom(100, 10, 0.8))
 
 })
 
@@ -91,14 +79,12 @@ test_that('beta-binomial distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::beta_binomial,
-                                     extraDistr::dbbinom,
-                                     parameters = list(size = 10,
-                                                       alpha = 0.8,
-                                                       beta = 1.2),
-                                     x = extraDistr::rbbinom(100, 10, 0.8, 1.2))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::beta_binomial,
+                       extraDistr::dbbinom,
+                       parameters = list(size = 10,
+                                         alpha = 0.8,
+                                         beta = 1.2),
+                       x = extraDistr::rbbinom(100, 10, 0.8, 1.2))
 
 })
 
@@ -107,12 +93,10 @@ test_that('negative binomial distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::negative_binomial,
-                                     stats::dnbinom,
-                                     parameters = list(size = 3.3, prob = 0.2),
-                                     x = rnbinom(100, 3.3, 0.2))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::negative_binomial,
+                       stats::dnbinom,
+                       parameters = list(size = 3.3, prob = 0.2),
+                       x = rnbinom(100, 3.3, 0.2))
 
 })
 
@@ -121,12 +105,10 @@ test_that('hypergeometric distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::hypergeometric,
-                                     stats::dhyper,
-                                     parameters = list(m = 11, n = 8, k = 5),
-                                     x = rhyper(100, 11, 8, 5))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::hypergeometric,
+                       stats::dhyper,
+                       parameters = list(m = 11, n = 8, k = 5),
+                       x = rhyper(100, 11, 8, 5))
 
 })
 
@@ -135,12 +117,10 @@ test_that('poisson distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::poisson,
-                                     stats::dpois,
-                                     parameters = list(lambda = 17.2),
-                                     x = rpois(100, 17.2))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::poisson,
+                       stats::dpois,
+                       parameters = list(lambda = 17.2),
+                       x = rpois(100, 17.2))
 
 })
 
@@ -149,12 +129,10 @@ test_that('gamma distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::gamma,
-                                     stats::dgamma,
-                                     parameters = list(shape = 1.2, rate = 2.3),
-                                     x = rgamma(100, 1.2, 2.3))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::gamma,
+                       stats::dgamma,
+                       parameters = list(shape = 1.2, rate = 2.3),
+                       x = rgamma(100, 1.2, 2.3))
 
 })
 
@@ -164,12 +142,10 @@ test_that('inverse gamma distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::inverse_gamma,
-                                     extraDistr::dinvgamma,
-                                     parameters = list(alpha = 1.2, beta = 0.9),
-                                     x = extraDistr::rinvgamma(100, 1.2, 0.9))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::inverse_gamma,
+                       extraDistr::dinvgamma,
+                       parameters = list(alpha = 1.2, beta = 0.9),
+                       x = extraDistr::rinvgamma(100, 1.2, 0.9))
 
 })
 
@@ -178,13 +154,11 @@ test_that('weibull distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::weibull,
-                                     dweibull,
-                                     parameters = list(shape = 1.2,
-                                                       scale = 0.9),
-                                     x = rweibull(100, 1.2, 0.9))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::weibull,
+                       dweibull,
+                       parameters = list(shape = 1.2,
+                                         scale = 0.9),
+                       x = rweibull(100, 1.2, 0.9))
 
 })
 
@@ -193,12 +167,10 @@ test_that('exponential distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::exponential,
-                                     stats::dexp,
-                                     parameters = list(rate = 1.9),
-                                     x = rexp(100, 1.9))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::exponential,
+                       stats::dexp,
+                       parameters = list(rate = 1.9),
+                       x = rexp(100, 1.9))
 
 })
 
@@ -207,12 +179,10 @@ test_that('pareto distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::pareto,
-                                     extraDistr::dpareto,
-                                     parameters = list(a = 1.9, b = 2.3),
-                                     x = extraDistr::rpareto(100, 1.9, 2.3))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::pareto,
+                       extraDistr::dpareto,
+                       parameters = list(a = 1.9, b = 2.3),
+                       x = extraDistr::rpareto(100, 1.9, 2.3))
 
 })
 
@@ -221,14 +191,12 @@ test_that('student distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::student,
-                                     dstudent,
-                                     parameters = list(df = 3,
-                                                       mu = -0.9,
-                                                       sigma = 2),
-                                     x = rnorm(100, -0.9, 2))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::student,
+                       dstudent,
+                       parameters = list(df = 3,
+                                         mu = -0.9,
+                                         sigma = 2),
+                       x = rnorm(100, -0.9, 2))
 
 })
 
@@ -237,12 +205,10 @@ test_that('laplace distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::laplace,
-                                     extraDistr::dlaplace,
-                                     parameters = list(mu = -0.9, sigma = 2),
-                                     x = extraDistr::rlaplace(100, -0.9, 2))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::laplace,
+                       extraDistr::dlaplace,
+                       parameters = list(mu = -0.9, sigma = 2),
+                       x = extraDistr::rlaplace(100, -0.9, 2))
 
 })
 
@@ -251,13 +217,11 @@ test_that('beta distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::beta,
-                                     stats::dbeta,
-                                     parameters = list(shape1 = 2.3,
-                                                       shape2 = 3.4),
-                                     x = rbeta(100, 2.3, 3.4))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::beta,
+                       stats::dbeta,
+                       parameters = list(shape1 = 2.3,
+                                         shape2 = 3.4),
+                       x = rbeta(100, 2.3, 3.4))
 
 })
 
@@ -266,13 +230,11 @@ test_that('cauchy distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::cauchy,
-                                     stats::dcauchy,
-                                     parameters = list(location = -1.3,
-                                                       scale = 3.4),
-                                     x = rcauchy(100, -1.3, 3.4))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::cauchy,
+                       stats::dcauchy,
+                       parameters = list(location = -1.3,
+                                         scale = 3.4),
+                       x = rcauchy(100, -1.3, 3.4))
 
 })
 
@@ -281,13 +243,11 @@ test_that('logistic distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::logistic,
-                                     stats::dlogis,
-                                     parameters = list(location = -1.3,
-                                                       scale = 2.1),
-                                     x = rlogis(100, -1.3, 2.1))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::logistic,
+                       stats::dlogis,
+                       parameters = list(location = -1.3,
+                                         scale = 2.1),
+                       x = rlogis(100, -1.3, 2.1))
 
 })
 
@@ -296,12 +256,10 @@ test_that('f distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::f,
-                                     df,
-                                     parameters = list(df1 = 5.9, df2 = 2),
-                                     x = rf(100, 5.9, 2))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::f,
+                       df,
+                       parameters = list(df1 = 5.9, df2 = 2),
+                       x = rf(100, 5.9, 2))
 
 })
 
@@ -310,12 +268,10 @@ test_that('chi squared distribution has correct density', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  difference <- compare_distribution(greta::chi_squared,
-                                     stats::dchisq,
-                                     parameters = list(df = 9.3),
-                                     x = rchisq(100, 9.3))
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::chi_squared,
+                       stats::dchisq,
+                       parameters = list(df = 9.3),
+                       x = rchisq(100, 9.3))
 
 })
 
@@ -333,13 +289,11 @@ test_that('multivariate normal distribution has correct density', {
   dmvnorm2 <- function (x, mean, Sigma, log = FALSE)
     mvtnorm::dmvnorm(x = x, mean = mean, sigma = Sigma, log = log)
 
-  difference <- compare_distribution(greta::multivariate_normal,
-                                     dmvnorm2,
-                                     parameters = list(mean = mn, Sigma = sig),
-                                     x = mvtnorm::rmvnorm(100, mn, sig),
-                                     multivariate = TRUE)
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::multivariate_normal,
+                       dmvnorm2,
+                       parameters = list(mean = mn, Sigma = sig),
+                       x = mvtnorm::rmvnorm(100, mn, sig),
+                       multivariate = TRUE)
 
 })
 
@@ -362,15 +316,13 @@ test_that('Wishart distribution has correct density', {
   }
 
   # no vectorised wishart, so loop through all of these
-  difference <- replicate(10,
-                          compare_distribution(greta::wishart,
-                                               dwishart,
-                                               parameters = list(df = df,
-                                                                 Sigma = sig),
-                                               x = MCMCpack::rwish(df, sig),
-                                               multivariate = TRUE))
-
-  expect_true(all(difference < 1e-4))
+  replicate(10,
+            compare_distribution(greta::wishart,
+                                 dwishart,
+                                 parameters = list(df = df,
+                                                   Sigma = sig),
+                                 x = MCMCpack::rwish(df, sig),
+                                 multivariate = TRUE))
 
 })
 
@@ -420,14 +372,12 @@ test_that('lkj distribution has correct density', {
     rethinking::rlkjcorr(1, K = m, eta = 1)
 
   # no vectorised lkj, so loop through all of these
-  difference <- replicate(10,
-                          compare_distribution(greta::lkj_correlation,
-                                               dlkj_correlation,
-                                               parameters = list(eta = eta, dimension = m),
-                                               x = rlkj_correlation(m),
-                                               multivariate = TRUE))
-
-  expect_true(all(difference < 1e-4))
+  replicate(10,
+            compare_distribution(greta::lkj_correlation,
+                                 dlkj_correlation,
+                                 parameters = list(eta = eta, dimension = m),
+                                 x = rlkj_correlation(m),
+                                 multivariate = TRUE))
 
 })
 
@@ -445,14 +395,12 @@ test_that('multinomial distribution has correct density', {
   dmultinom_vec <- function (x, size, prob)
     apply(x, 1, stats::dmultinom, size = size, prob = prob)
 
-  difference <- compare_distribution(greta::multinomial,
-                                     dmultinom_vec,
-                                     parameters = list(size = size,
-                                                       prob = prob),
-                                     x = t(rmultinom(100, size, prob)),
-                                     multivariate = TRUE)
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::multinomial,
+                       dmultinom_vec,
+                       parameters = list(size = size,
+                                         prob = prob),
+                       x = t(rmultinom(100, size, prob)),
+                       multivariate = TRUE)
 
 })
 
@@ -469,13 +417,11 @@ test_that('categorical distribution has correct density', {
   dcategorical_vec <- function (x, prob)
     apply(x, 1, stats::dmultinom, size = 1, prob = prob)
 
-  difference <- compare_distribution(greta::categorical,
-                                     dcategorical_vec,
-                                     parameters = list(prob = prob),
-                                     x = t(rmultinom(100, 1, prob)),
-                                     multivariate = TRUE)
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::categorical,
+                       dcategorical_vec,
+                       parameters = list(prob = prob),
+                       x = t(rmultinom(100, 1, prob)),
+                       multivariate = TRUE)
 
 })
 
@@ -488,13 +434,11 @@ test_that('dirichlet distribution has correct density', {
   m <- 5
   alpha <- t(runif(m))
 
-  difference <- compare_distribution(greta::dirichlet,
-                                     extraDistr::ddirichlet,
-                                     parameters = list(alpha = alpha),
-                                     x = extraDistr::rdirichlet(100, alpha),
-                                     multivariate = TRUE)
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::dirichlet,
+                       extraDistr::ddirichlet,
+                       parameters = list(alpha = alpha),
+                       x = extraDistr::rdirichlet(100, alpha),
+                       multivariate = TRUE)
 
 })
 
@@ -508,16 +452,14 @@ test_that('dirichlet-multinomial distribution has correct density', {
   m <- 5
   alpha <- t(runif(m))
 
-  difference <- compare_distribution(greta::dirichlet_multinomial,
-                                     extraDistr::ddirmnom,
-                                     parameters = list(size = size,
-                                                       alpha = alpha),
-                                     x = extraDistr::rdirmnom(100,
-                                                              size,
-                                                              alpha),
-                                     multivariate = TRUE)
-
-  expect_true(all(difference < 1e-4))
+  compare_distribution(greta::dirichlet_multinomial,
+                       extraDistr::ddirmnom,
+                       parameters = list(size = size,
+                                         alpha = alpha),
+                       x = extraDistr::rdirmnom(100,
+                                                size,
+                                                alpha),
+                       multivariate = TRUE)
 
 })
 

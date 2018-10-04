@@ -169,8 +169,7 @@ test_that('replace works like R', {
   x[1:6, ] <- x[6:1, ]
   ga_x[1:6, ] <- ga_x[6:1, ]
   greta_out <- as.vector(grab(ga_x))
-  difference <- abs(x - greta_out)
-  expect_true(all(difference < 1e4))
+  compare_op(x, greta_out)
 
 })
 

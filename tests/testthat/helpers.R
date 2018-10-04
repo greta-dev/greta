@@ -83,7 +83,8 @@ get_density <- function (distrib, data) {
 }
 
 compare_distribution <- function (greta_fun, r_fun, parameters, x,
-                                  dim = NULL, multivariate = FALSE) {
+                                  dim = NULL, multivariate = FALSE,
+                                  tolerance = 1e-4) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.
   # 'greta_fun' is the greta distribution constructor function (e.g. normal())
@@ -93,8 +94,20 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x,
   # x is the vector of values at which to evaluate the log density
 
   # define greta distribution, with fixed values
+  greta_log_density <- greta_density(greta_fun, parameters, x,
+                                     dim, multivariate)
+  # get R version
+  r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
 
-  parameters_greta <- parameters
+  # return absolute difference
+  compare_op(r_log_density, greta_log_density, tolerance)
+
+}
+
+# evaluate the log density of x, given 'parameters' and a distribution
+# constructor function 'fun'
+greta_density <- function (fun, parameters, x,
+                           dim = NULL, multivariate = FALSE) {
 
   if (is.null(dim))
     dim <- NROW(x)
@@ -112,10 +125,10 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x,
   if (is_wishart | is_lkj)
     dim_list <- list()
 
-  parameters_greta <- c(parameters_greta, dim_list)
+  parameters <- c(parameters, dim_list)
 
   # evaluate greta distribution
-  dist <- do.call(greta_fun, parameters_greta)
+  dist <- do.call(fun, parameters)
 
   distrib_node <- get_node(dist)$distribution
 
@@ -134,13 +147,7 @@ compare_distribution <- function (greta_fun, r_fun, parameters, x,
   target <- get(dag$tf_name(get_node(x_)), envir = tfe)
   density <- get(dag$tf_name(distrib_node), envir = tfe)
   result <- density(target)
-  greta_log_density <- as.vector(grab(result, dag))
-
-  # get R version
-  r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
-
-  # return absolute difference
-  abs(greta_log_density - r_log_density)
+  as.vector(grab(result, dag))
 
 }
 
@@ -184,7 +191,7 @@ check_op <- function (op, a, b, greta_op = NULL,
 
 }
 
-compare_op <- function(r_out, greta_out, tolerance = 1e-3) {
+compare_op <- function(r_out, greta_out, tolerance = 1e-4) {
   difference <- as.vector(abs(r_out - greta_out))
   expect_true(all(difference < tolerance))
 }
@@ -271,7 +278,7 @@ with_greta <- function (call, swap = c('x'), swap_scope = 1) {
 # check an expression is equivalent when done in R, and when done on greta
 # arrays with results ported back to R
 # e.g. check_expr(a[1:3], swap = 'a')
-check_expr <- function (expr, swap = c('x')) {
+check_expr <- function (expr, swap = c('x'), tolerance = 1e-4) {
 
   call <- substitute(expr)
 
@@ -280,8 +287,7 @@ check_expr <- function (expr, swap = c('x')) {
                           swap = swap,
                           swap_scope = 2)
 
-  difference <- as.vector(abs(r_out - greta_out))
-  expect_true(all(difference < 1e-4))
+  compare_op(r_out, greta_out, tolerance)
 
 }
 
@@ -326,7 +332,8 @@ sample_distribution <- function (greta_array, n = 10,
 compare_truncated_distribution <- function (greta_fun,
                                             which,
                                             parameters,
-                                            truncation) {
+                                            truncation,
+                                            tolerance = 1e-4) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark, for an implied truncated distribution 'greta_array'
   # is a greta array created from a distribution and a constrained variable
@@ -369,7 +376,7 @@ compare_truncated_distribution <- function (greta_fun,
   greta_log_density <- as.vector(grab(result, dag))
 
   # return absolute difference
-  abs(greta_log_density - r_log_density)
+  compare_op(r_log_density, greta_log_density, tolerance)
 
 }
 
