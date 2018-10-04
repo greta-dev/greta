@@ -133,8 +133,9 @@ greta_density <- function (fun, parameters, x,
   distrib_node <- get_node(dist)$distribution
 
   # set density
-  x_ <- as_data(x)
-  distribution(x_) <- dist
+  x_ <- as.greta_array(x)
+  distrib_node$remove_target()
+  distrib_node$add_target(get_node(x_))
 
   # create dag
   dag <- greta:::dag_class$new(list(x_))

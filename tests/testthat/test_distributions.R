@@ -283,7 +283,7 @@ test_that('multivariate normal distribution has correct density', {
   # parameters to test
   m <- 5
   mn <- t(rnorm(m))
-  sig <- MCMCpack::rwish(m + 1, diag(m))
+  sig <- rWishart(1, m + 1, diag(m))[, , 1]
 
   # function converting Sigma to sigma
   dmvnorm2 <- function (x, mean, Sigma, log = FALSE)
@@ -305,7 +305,7 @@ test_that('Wishart distribution has correct density', {
   # parameters to test
   m <- 5
   df <- m + 1
-  sig <- MCMCpack::rwish(df, diag(m))
+  sig <- rWishart(1, df, diag(m))[, , 1]
 
   # wrapper for argument names
   dwishart <- function (x, df, Sigma, log = FALSE) {
@@ -321,7 +321,7 @@ test_that('Wishart distribution has correct density', {
                                  dwishart,
                                  parameters = list(df = df,
                                                    Sigma = sig),
-                                 x = MCMCpack::rwish(df, sig),
+                                 x = rWishart(1, df, sig)[, , 1],
                                  multivariate = TRUE))
 
 })
@@ -532,7 +532,7 @@ test_that('scalar-valued distributions can be defined in models', {
   expect_ok( model(uniform(-13, 2.4)) )
 
   # multivariate continuous distributions
-  sig <- MCMCpack::rwish(4, diag(3))
+  sig <- rWishart(1, 4, diag(3))[, , 1]
 
   expect_ok( model(multivariate_normal(t(rnorm(3)), sig)) )
   expect_ok( model(wishart(4, sig)) )
@@ -615,7 +615,7 @@ test_that('array-valued distributions can be defined in models', {
   expect_ok( model(f(24.3, 2.4, dim = dim)) )
 
   # multivariate continuous distributions
-  sig <- MCMCpack:::rwish(4, diag(3))
+  sig <- rWishart(1, 4, diag(3))[, , 1]
   expect_ok( model(multivariate_normal(t(rnorm(3)), sig, n_realisations = dim[1])) )
   expect_ok( model(dirichlet(t(runif(3)), n_realisations = dim[1])) )
   expect_ok( model(wishart(4, sig)) )
@@ -709,7 +709,7 @@ test_that('distributions can be sampled from', {
   sample_distribution(uniform(-13, 2.4), lower = -13, upper = 2.4)
 
   # multivariate continuous
-  sig <- MCMCpack::rwish(4, diag(3))
+  sig <- rWishart(1, 4, diag(3))[, , 1]
   sample_distribution(multivariate_normal(t(rnorm(3)), sig))
   sample_distribution(wishart(4L, sig), warmup = 0)
   sample_distribution(lkj_correlation(4, dimension = 3))
