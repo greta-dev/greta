@@ -1080,8 +1080,21 @@ as_tf_function <- function (r_fun, ...) {
 
     tensor_inputs <- list(...)
 
+    # if any of these are shapeless, make them into greta scalars (3D)
+    tensor_inputs <- lapply(tensor_inputs,
+                            function (x) {
+                              if (identical(dim(x), list()))
+                                x <- tf$reshape(x, shape(1, 1, 1))
+                              x
+                            })
+
+    # transfer batch dimensions if needed
+    tensor_inputs <- match_batches(tensor_inputs)
+
     # create a sub-dag for these operations, from ga_dummies to ga_out
-    targets <- c(list(ga_out), ga_dummies)
+    if (!is.list(ga_out))
+      ga_out <- list(ga_out)
+    targets <- c(ga_out, ga_dummies)
     sub_dag <- dag_class$new(targets)
 
     # use the default graph, so that it can be overwritten when this is called?
@@ -1100,11 +1113,22 @@ as_tf_function <- function (r_fun, ...) {
     # constants
     greta_stash$data_as_constants <- TRUE
     on.exit(greta_stash$data_as_constants <- NULL)
-    node_out <- get_node(ga_out)
-    node_out$define_tf(sub_dag)
 
-    # get the tensor for the output
-    tf_out <- sub_tfe[[sub_dag$tf_name(node_out)]]
+    tf_out <- list()
+    for (i in seq_along(ga_out)) {
+
+      # define the output nodes
+      node_out <- get_node(ga_out[[i]])
+      node_out$define_tf(sub_dag)
+
+      # get the tensors for the outputs
+      tf_out[[i]] <- sub_tfe[[sub_dag$tf_name(node_out)]]
+    }
+
+    if (length(tf_out) == 1) {
+      tf_out <- tf_out[[1]]
+    }
+
     tf_out
 
   }
