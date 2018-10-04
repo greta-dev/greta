@@ -134,6 +134,7 @@ bernoulli_distribution <- R6Class (
   public = list(
 
     prob_is_logit = FALSE,
+    prob_is_probit = FALSE,
 
     initialize = function (prob, dim) {
 
@@ -142,18 +143,42 @@ bernoulli_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(prob, target_dim = dim)
       super$initialize('bernoulli', dim, discrete = TRUE)
+
       if (has_representation(prob, "logit")) {
         prob <- representation(prob, "logit")
         self$prob_is_logit <- TRUE
+      } else if (has_representation(prob, "probit")) {
+        prob <- representation(prob, "probit")
+        self$prob_is_probit <- TRUE
       }
+
       self$add_parameter(prob, 'prob')
     },
 
     tf_distrib = function (parameters, dag) {
       if (self$prob_is_logit) {
+
         tfp$distributions$Bernoulli(logits = parameters$prob)
+
+      } else if (self$prob_is_probit) {
+
+        # in the probit case, get the log probability of success and compute the
+        # log prob directly
+        probit <- parameters$prob
+        d <- tfp$distributions$Normal(fl(0), fl(1))
+        lprob <- d$log_cdf(probit)
+        lprobnot <- d$log_cdf(-probit)
+
+        log_prob <- function (x) {
+          x * lprob + (fl(1) - x) * lprobnot
+        }
+
+        list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
       } else {
+
         tfp$distributions$Bernoulli(probs = parameters$prob)
+
       }
     },
 
@@ -170,6 +195,7 @@ binomial_distribution <- R6Class (
   public = list(
 
     prob_is_logit = FALSE,
+    prob_is_probit = FALSE,
 
     initialize = function (size, prob, dim) {
 
@@ -179,10 +205,15 @@ binomial_distribution <- R6Class (
       # add the nodes as children and parameters
       dim <- check_dims(size, prob, target_dim = dim)
       super$initialize('binomial', dim, discrete = TRUE)
+
       if (has_representation(prob, "logit")) {
         prob <- representation(prob, "logit")
         self$prob_is_logit <- TRUE
+      } else if (has_representation(prob, "probit")) {
+        prob <- representation(prob, "probit")
+        self$prob_is_probit <- TRUE
       }
+
       self$add_parameter(prob, 'prob')
       self$add_parameter(size, 'size')
 
@@ -192,6 +223,25 @@ binomial_distribution <- R6Class (
       if (self$prob_is_logit) {
         tfp$distributions$Binomial(total_count = parameters$size,
                                    logits = parameters$prob)
+      } else if (self$prob_is_probit) {
+
+        # in the probit case, get the log probability of success and compute the
+        # log prob directly
+        size <- parameters$size
+        probit <- parameters$prob
+        d <- tfp$distributions$Normal(fl(0), fl(1))
+        lprob <- d$log_cdf(probit)
+        lprobnot <- d$log_cdf(-probit)
+
+        log_prob <- function (x) {
+          log_choose <- tf$lgamma(size + fl(1)) -
+            tf$lgamma(x + fl(1)) -
+            tf$lgamma(size - x + fl(1))
+          log_choose + x * lprob + (size - x) * lprobnot
+        }
+
+        list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
       } else {
         tfp$distributions$Binomial(total_count = parameters$size,
                                    probs = parameters$prob)

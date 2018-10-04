@@ -49,7 +49,8 @@ NULL
 #' @rdname transforms
 #' @export
 iprobit <- function (x)
-  op('iprobit', x, tf_operation = "tf_iprobit")
+  op('iprobit', x, tf_operation = "tf_iprobit",
+     representations = list(probit = x))
 
 #' @rdname transforms
 #' @export
