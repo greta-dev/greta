@@ -45,7 +45,7 @@
 #'  chol2inv(x, ...)
 #'  cov2cor(V)
 #'  solve(a, b, ...)
-#'  kronecker(X, Y, FUN = "*")
+#'  kronecker(X, Y, FUN = c('*', '/', '+', '-'))
 #'
 #'  # reducing operations
 #'  sum(..., na.rm = TRUE)
@@ -624,9 +624,9 @@ sweep.greta_array <- function (x,
 #' @import methods
 setClass("greta_array")
 setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
-          function (X, Y, FUN = "*", make.dimnames = FALSE, ...) {
+          function (X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE, ...) {
 
-            if (FUN != "*") stop("kronecker method must use default 'FUN'")
+            FUN <- match.arg(FUN)
 
             # X must be 2D
             if (length(dim(X)) != 2) {
@@ -640,8 +640,15 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
                             length(dim(X))))
             }
 
+            tf_fun_name <- switch(FUN,
+                                  `*` = "multiply",
+                                  `/` = "truediv",
+                                  `+` = "add",
+                                  `-` = "subtract")
+
             op("kronecker", X, Y,
                tf_operation = "tf_kronecker",
+               operation_args = list(tf_fun_name = tf_fun_name),
                dim = dim(X) * dim(Y))
 
           }

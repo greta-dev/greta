@@ -63,6 +63,10 @@ test_that('matrix functions work as expected', {
   check_op(backsolve, c, b)
   check_op(kronecker, a, c)
   check_op(kronecker, a, d)
+  check_op(kronecker, a, a, other_args = list(FUN = "*"))
+  check_op(kronecker, a, a, other_args = list(FUN = "+"))
+  check_op(kronecker, a, a, other_args = list(FUN = "-"))
+  check_op(kronecker, a, a, other_args = list(FUN = "/"))
   check_op(rdist, b)
   check_op(rdist, b, e)
 

@@ -334,7 +334,9 @@ tf_rowsums <- function(x, dims) {
 }
 
 # calculate kronecker product of two matrices
-tf_kronecker <- function(X, Y) {
+tf_kronecker <- function(X, Y, tf_fun_name) {
+
+  tf_function <- tf[[tf_fun_name]]
 
   dims <- unlist(c(dim(X)[-1], dim(Y)[-1]))
 
@@ -343,8 +345,9 @@ tf_kronecker <- function(X, Y) {
   y_rsh <- tf$reshape(Y, shape(-1, 1L, dims[3], 1L, dims[4]))
 
   # multiply tensors and reshape with appropriate dimensions
-  tensor_out <- tf$reshape(x_rsh * y_rsh,
-                           shape(-1, dims[1] * dims[3], dims[2] * dims[4]))
+  z <- tf_function(x_rsh, y_rsh)
+  shape_out <- shape(-1, dims[1] * dims[3], dims[2] * dims[4])
+  tensor_out <- tf$reshape(z, shape_out)
 
   tensor_out
 
