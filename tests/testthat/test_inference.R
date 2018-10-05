@@ -573,3 +573,26 @@ test_that("parse_initial_values errors informatively", {
                "not associated with the model: e")
 
 })
+
+
+
+
+test_that("samplers print informatively", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  out <- capture_output(hmc(), TRUE)
+  expect_match(out, "hmc sampler")
+
+  out <- capture_output(rwmh(), TRUE)
+  expect_match(out, "rwmh sampler")
+
+  out <- capture_output(slice(), TRUE)
+  expect_match(out, "slice sampler")
+
+  # check print sees changed parameters
+  out <- capture_output(hmc(Lmin = 1), TRUE)
+  expect_match(out, "Lmin = 1")
+
+})
