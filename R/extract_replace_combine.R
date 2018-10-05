@@ -496,10 +496,10 @@ length.greta_array <- function(x)
   new_value <- get_node(x)$value()
   dim(new_value) <- dims
 
-  op("reshape",
+  op("set_dim",
      x,
-     operation_args = list(shape = c(-1L, dims)),
-     tf_operation = "tf$reshape",
+     operation_args = list(dims = dims),
+     tf_operation = "tf_set_dim",
      dim = dims,
      value = new_value)
 

@@ -427,22 +427,16 @@ test_that('dim<- works', {
   skip_if_not(check_tf_version())
   source('helpers.R')
 
-  x <- variable(dim = c(3, 4))
+  x <- randn(3, 4, 2)
 
-  new_dim <- c(3L, 4L, 1L)
-  dim(x) <- new_dim
-  expect_identical(dim(x), new_dim)
-  capture.output(expect_ok(print(x)))
-  # need to be able to print unknowns after reshaping
+  new_dim <- c(2, 2, 6)
+  check_op(`dim<-`, x, other_args = list(value = new_dim))
 
-  new_dim <- c(6L, 2L)
-  dim(x) <- new_dim
-  expect_identical(dim(x), new_dim)
-  capture.output(expect_ok(print(x)))
+  new_dim <- c(12, 2)
+  check_op(`dim<-`, x, other_args = list(value = new_dim))
 
-  dim(x) <- NULL
-  expect_identical(dim(x), c(12L, 1L))
-  capture.output(expect_ok(print(x)))
+  new_dim <- NULL
+  check_op(`dim<-`, x, other_args = list(value = new_dim))
 
 })
 

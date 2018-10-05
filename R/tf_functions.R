@@ -55,6 +55,23 @@ tf_cumprod <- function(x) {
   tf$cumprod(x, axis = 1L)
 }
 
+# set the dimensions of a tensor, reshaping in the same way (column-major) as R
+tf_set_dim <- function (x, dims) {
+
+  # transpose to do work in row-major order
+  perm_old <- c(0L, rev(seq_along(dim(x)[-1])))
+  x <- tf$transpose(x, perm_old)
+
+  # reshape (with transposed shape) as row-major
+  x <- tf$reshape(x, shape = c(-1L, rev(dims)))
+
+  # transpose back
+  perm_new <- c(0L, rev(seq_along(dims)))
+  x <- tf$transpose(x, perm_new)
+  x
+
+}
+
 # skip the first index when transposing
 tf_transpose <- function (x) {
   nelem <- length(dim(x))
