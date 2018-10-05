@@ -772,11 +772,14 @@ apply.greta_array <- function (X, MARGIN,
   # handle output dimensions
   reducing <- !FUN %in% c("cumsum", "cumprod")
 
+  # set final and intermediate dimensions
   if (reducing) {
-    dim <- d[MARGIN]
-    if (length(dim) == 1)
-      dim <- c(dim, 1L)
+    dim_out <- d[MARGIN]
+    if (length(dim_out) == 1)
+      dim_out <- c(dim_out, 1L)
+    dim <- c(prod(dim_out), 1)
   } else {
+    dim_out <- c(prod(d[-MARGIN]), d[MARGIN])
     dim <- dim(newX)
   }
 
@@ -785,20 +788,18 @@ apply.greta_array <- function (X, MARGIN,
     tf_fun_name <- paste("reduce", tf_fun_name, sep = "_")
   }
 
-  # remove additional aperm step later, and do equivalent tf$transpose on the tensorflow side
-
   out <- op("apply", newX,
             operation_args = list(axis = -2L,
                                   tf_fun_name = tf_fun_name),
             tf_operation = "tf_apply",
             dim = dim)
 
-  if (!reducing) {
-    dim(out) <- c(prod(d[-MARGIN]), d[MARGIN])
+  # need to reshape when MARGIN is a vector, or when not reducing
+  if (!reducing | length(MARGIN) > 1) {
+    dim(out) <- dim_out
   }
 
   out
-
 
 }
 

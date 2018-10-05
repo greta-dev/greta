@@ -147,10 +147,10 @@ test_that('apply works as expected', {
   a <- randu(5, 4, 3, 2, 1)
 
   single_margins <- as.list(1:5)
-  # multi_margins <- list(c(1, 4), c(2, 5), c(3, 4, 5))
-  # margins <- c(single_margins, multi_margins)
+  multi_margins <- list(c(1, 4), c(2, 5), c(3, 4, 5))
+  margins <- c(single_margins, multi_margins)
 
-  for (margin in single_margins) {
+  for (margin in margins) {
     check_apply(a, margin, "sum")
     check_apply(a, margin, "max")
     check_apply(a, margin, "mean")
