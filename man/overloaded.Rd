@@ -14,6 +14,7 @@
 \alias{sweep}
 \alias{backsolve}
 \alias{forwardsolve}
+\alias{apply}
 \alias{tapply}
 \alias{eigen}
 \alias{rdist}
@@ -42,6 +43,8 @@ sweep(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
 backsolve(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE)
 
 forwardsolve(l, x, k = ncol(l), upper.tri = FALSE, transpose = FALSE)
+
+apply(X, MARGIN, FUN, ...)
 
 tapply(X, INDEX, FUN, ...)
 
