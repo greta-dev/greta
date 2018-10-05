@@ -438,6 +438,7 @@ test_that("mcmc works in parallel", {
 test_that("mcmc errors for invalid parallel plans", {
 
   skip_if_not(check_tf_version())
+  skip_on_travis()
   source('helpers.R')
 
   m <- model(normal(0, 1))
@@ -513,69 +514,39 @@ test_that("prep_initials errors informatively", {
 
   a <- normal(0, 1)
   b <- uniform(0, 1)
-  c <- lognormal(0, 1)
-  d <- variable(upper = -1)
-  e <- ones(1)
-  z <- a * b * c * d * e
-  dag <- model(z)$dag
+  d <- lognormal(0, 1)
+  e <- variable(upper = -1)
+  f <- ones(1)
+  z <- a * b * d * e * f
+  m <- model(z)
 
   # bad objects:
-  expect_error(prep_initials(FALSE, 1, dag),
+  expect_error(mcmc(m, initial_values = FALSE),
                "must be an initials object created with initials()")
 
-  expect_error(prep_initials(list(FALSE), 1, dag),
+  expect_error(mcmc(m, initial_values = list(FALSE)),
                "must be an initials object created with initials()")
 
   # an unrelated greta array
-  f <- normal(0, 1)
-  expect_error(prep_initials(initials(f = 1), 1, dag),
-               "not associated with the model: f")
+  g <- normal(0, 1)
+  expect_error(mcmc(m, chains = 1, initial_values = initials(g = 1)),
+               "not associated with the model: g")
 
   # non-variable greta arrays
-  expect_error(prep_initials(initials(e = 1), 1, dag),
+  expect_error(mcmc(m, chains = 1, initial_values = initials(f = 1)),
                "can only be set for variable greta arrays")
-  expect_error(prep_initials(initials(z = 1), 1, dag),
+  expect_error(mcmc(m, chains = 1, initial_values = initials(z = 1)),
                "can only be set for variable greta arrays")
-
 
   # out of bounds errors
-  expect_error(prep_initials(initials(b = -1), 1, dag),
+  expect_error(mcmc(m, chains = 1, initial_values = initials(b = -1)),
                "outside the range of values")
-  expect_error(prep_initials(initials(c = -1), 1, dag),
+  expect_error(mcmc(m, chains = 1, initial_values = initials(d = -1)),
                "outside the range of values")
-  expect_error(prep_initials(initials(d = 2), 1, dag),
+  expect_error(mcmc(m, chains = 1, initial_values = initials(e = 2)),
                "outside the range of values")
 
 })
-
-test_that("parse_initial_values errors informatively", {
-
-  skip_if_not(check_tf_version())
-  source('helpers.R')
-
-  a <- normal(0, 1)
-  b <- uniform(0, 1)
-  c <- lognormal(0, 1)
-  d <- variable(upper = -1)
-  z <- a * b * c * d
-  dag <- model(z)$dag
-
-  # bad objects:
-  expect_error(prep_initials(FALSE, 1, dag),
-               "must be an initials object created with initials()")
-
-  expect_error(prep_initials(list(FALSE), 1, dag),
-               "must be an initials object created with initials()")
-
-  # an unrelated greta array
-  e <- normal(0, 1)
-  expect_error(prep_initials(initials(e = 1), 1, dag),
-               "not associated with the model: e")
-
-})
-
-
-
 
 test_that("samplers print informatively", {
 
