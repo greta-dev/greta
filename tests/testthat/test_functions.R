@@ -50,6 +50,7 @@ test_that('matrix functions work as expected', {
   c <- chol(a)
   d <- c(1, 1)
   e <- randn(10, 25)
+  f <- randn(3, 4, 2)
 
   check_op(t, b)
   check_op(chol, a)
@@ -69,6 +70,7 @@ test_that('matrix functions work as expected', {
   check_op(kronecker, a, a, other_args = list(FUN = "/"))
   check_op(rdist, b)
   check_op(rdist, b, e)
+  check_op(rdist, f, f)
 
 })
 
@@ -405,3 +407,58 @@ test_that("eigen works as expected", {
   expect_true(all(as.vector(difference) < 1e-4))
 
 })
+
+test_that("ignored options are errored/warned about", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- ones(3, 3)
+  expect_error(round(x, 2),
+               "digits argument cannot be set")
+
+  expect_warning(chol(x, pivot = TRUE),
+                 "ignored for greta arrays")
+
+  expect_warning(chol2inv(x, LINPACK = TRUE),
+                 "ignored for greta arrays")
+
+  expect_warning(chol2inv(x, size = 1),
+                 "ignored for greta arrays")
+
+  expect_warning(rdist(x, compact = TRUE),
+                 "ignored for greta arrays")
+
+})
+
+
+test_that("incorrect dimensions are errored about", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  x <- ones(3, 3, 3)
+  y <- ones(3, 4)
+
+  expect_error(t(x),
+               "only 2D arrays can be transposed")
+
+  expect_error(aperm(x, 2:1),
+               "must be a reordering of the dimensions")
+
+  expect_error(chol(x),
+               "only two-dimensional, square, symmetric greta arrays")
+
+  expect_error(chol(y),
+               "only two-dimensional, square, symmetric greta arrays")
+
+  expect_error(eigen(x),
+               "only two-dimensional, square, symmetric greta arrays")
+
+  expect_error(eigen(y),
+               "only two-dimensional, square, symmetric greta arrays")
+
+  expect_error(rdist(x, y),
+               "must have the same number of columns")
+
+  })

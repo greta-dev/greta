@@ -25,7 +25,7 @@ test_that('log and exp function representations work', {
 
 })
 
-test_that('chol function representation works', {
+test_that('chol & chol2inv function representation works', {
 
   skip_if_not(check_tf_version())
   source('helpers.R')
@@ -45,8 +45,10 @@ test_that('chol function representation works', {
   compare_op(calculate(chol(W)),
              calculate(chol(W2)))
 
-})
+  compare_op(calculate(chol2inv(W)),
+             calculate(chol2inv(W2)))
 
+})
 
 test_that('bernoulli prob representations have correct density', {
 

@@ -164,7 +164,8 @@ floor.greta_array <- function (x) {
 #' @export
 round.greta_array <- function (x, digits = 0) {
   if (digits != 0)
-    stop("TensorFlow round only supports rounding to integers")
+    stop("greta arrays can only be rounded to the nearest integer, ",
+         "the digits argument cannot be set")
   op("round", x, tf_operation = "tf$round")
 }
 
@@ -236,7 +237,7 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
 
   if (!identical(sort(perm), dimnums)) {
     stop ("perm must be a reordering of the dimensions: ",
-          paste(dimnums, collapse = ", "), "but was: ",
+          paste(dimnums, collapse = ", "), " but was: ",
           paste(perm, collapse = ", "),
           call. = FALSE)
   }
@@ -252,15 +253,17 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
 chol.greta_array <- function (x, ...) {
 
   if (!identical(list(), list(...)))
-    warning ('chol() options are ignored by TensorFlow')
+    warning ("chol() options are ignored for greta arrays")
 
   if (has_representation(x, "cholesky")) {
     result <- copy_representation(x, "cholesky")
   } else {
     dim <- dim(x)
 
-    if ( !(length(dim) == 2 && dim[1] == dim[2]) )
-      stop ('only 2D, square greta arrays can be Cholesky decomposed')
+    if ( !(length(dim) == 2 && dim[1] == dim[2]) ) {
+      stop ("only two-dimensional, square, symmetric greta arrays ",
+            "can be Cholesky decomposed")
+    }
 
     result <- op("chol", x,
                  dim = dim,
