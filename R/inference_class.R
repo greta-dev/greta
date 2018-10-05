@@ -197,14 +197,6 @@ inference <- R6Class(
 
     },
 
-    # convert traced free state to the traced values
-    trace_values = function () {
-
-      dag <- self$model$dag
-      self$traced_values <- dag$trace_values(self$traced_free_state)
-
-    },
-
     # given a matrix of free state values, get a matrix of values of the target
     # greta arrays
     trace_burst_values = function (free_states = self$last_burst_free_states) {
