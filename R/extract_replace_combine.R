@@ -292,6 +292,10 @@ abind <- function (...,
   UseMethod("abind")
 }
 
+# clear CRAN checks spotting floating global variables
+#' @importFrom utils globalVariables
+utils::globalVariables("N", "greta")
+
 #' @export
 abind.default <- function (...,
                            along = N, rev.along = NULL, new.names = NULL,
