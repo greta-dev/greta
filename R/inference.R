@@ -282,7 +282,7 @@ run_samplers <- function (samplers,
     plan_is$local &
     !is.null(greta_stash$callbacks)
 
-  if (plan_is$parallel & plan_is$local & chains > 1) {
+  if (plan_is$parallel & plan_is$local & length(samplers) > 1) {
     cores_text <- ifelse(n_cores == 1,
                          "1 core",
                          sprintf("up to %i cores", n_cores))
@@ -673,7 +673,7 @@ prep_initials <- function (initial_values, n_chains, dag) {
   # error on a bad object
   if (is.null(initial_values)) {
 
-    stop ("initial_values must an initials object created with initials(), ",
+    stop ("initial_values must be an initials object created with initials(), ",
           "or a simple list of initials objects",
           call. = FALSE)
 

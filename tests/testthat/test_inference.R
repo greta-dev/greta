@@ -268,6 +268,25 @@ test_that('progress bar gives a range of messages', {
 
 })
 
+test_that('extra_samples works', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  # set up model
+  a <- normal(0, 1)
+  m <- model(a)
+
+  draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE)
+
+  more_draws <- extra_samples(draws, 20, verbose = FALSE)
+
+  expect_true(inherits(more_draws, "mcmc.list"))
+  expect_true(coda::niter(more_draws) == 30)
+  expect_true(coda::nchain(more_draws) == 4)
+
+})
+
 test_that('stashed_samples works', {
 
   skip_if_not(check_tf_version())
@@ -304,7 +323,6 @@ test_that('stashed_samples works', {
   expect_true(inherits(model_info$model, "greta_model"))
 
 })
-
 
 test_that('model errors nicely', {
 
@@ -400,12 +418,158 @@ test_that("mcmc works in parallel", {
                            chains = 1,
                            verbose = FALSE) )
 
+  expect_true(inherits(draws, "mcmc.list"))
+  expect_true(coda::niter(draws) == 10)
+  rm(draws)
+
   # multiple chains
   expect_ok( draws <- mcmc(m, warmup = 10, n_samples = 10,
                            chains = 2,
                            verbose = FALSE) )
 
+  expect_true(inherits(draws, "mcmc.list"))
+  expect_true(coda::niter(draws) == 10)
+
   # put the future plan back as we found it
   plan(op)
+
+})
+
+test_that("mcmc errors for invalid parallel plans", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  m <- model(normal(0, 1))
+
+  library(future)
+  op <- plan()
+
+  # handle handle forks, so only accept multisession, or multi session clusters
+  plan(multiprocess)
+  expect_error(draws <- mcmc(m),
+               "parallel mcmc samplers cannot be run with")
+
+  plan(multicore)
+  expect_error(draws <- mcmc(m),
+               "parallel mcmc samplers cannot be run with")
+
+  cl <- parallel::makeForkCluster(2L)
+  plan(cluster, workers = cl)
+  expect_error(draws <- mcmc(m),
+               "parallel mcmc samplers cannot be run with")
+
+  # put the future plan back as we found it
+  plan(op)
+
+})
+
+test_that("parallel reporting works", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  m <- model(normal(0, 1))
+
+  library(future)
+  op <- plan()
+  plan(multisession)
+
+  # should report each sampler's progress with a percentage
+  out <- get_output( . <- mcmc(m, warmup = 50, n_samples = 50, chains = 2) )
+  expect_match(out, "2 samplers in parallel")
+  expect_match(out, "100%")
+
+  # put the future plan back as we found it
+  plan(op)
+
+})
+
+test_that("initials works", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  # errors on bad objects
+  expect_error(initials(a = FALSE),
+               "must be numeric")
+
+  expect_error(initials(FALSE),
+               "must be named")
+
+  # prints nicely
+  init <- initials(a = 3)
+  out <- capture.output(print(init))
+  out <- paste(out, collapse = "\n")
+  expect_match(out, "a greta initials object")
+  expect_match(out, "\\$a")
+
+})
+
+test_that("prep_initials errors informatively", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- normal(0, 1)
+  b <- uniform(0, 1)
+  c <- lognormal(0, 1)
+  d <- variable(upper = -1)
+  e <- ones(1)
+  z <- a * b * c * d * e
+  dag <- model(z)$dag
+
+  # bad objects:
+  expect_error(prep_initials(FALSE, 1, dag),
+               "must be an initials object created with initials()")
+
+  expect_error(prep_initials(list(FALSE), 1, dag),
+               "must be an initials object created with initials()")
+
+  # an unrelated greta array
+  f <- normal(0, 1)
+  expect_error(prep_initials(initials(f = 1), 1, dag),
+               "not associated with the model: f")
+
+  # non-variable greta arrays
+  expect_error(prep_initials(initials(e = 1), 1, dag),
+               "can only be set for variable greta arrays")
+  expect_error(prep_initials(initials(z = 1), 1, dag),
+               "can only be set for variable greta arrays")
+
+
+  # out of bounds errors
+  expect_error(prep_initials(initials(b = -1), 1, dag),
+               "outside the range of values")
+  expect_error(prep_initials(initials(c = -1), 1, dag),
+               "outside the range of values")
+  expect_error(prep_initials(initials(d = 2), 1, dag),
+               "outside the range of values")
+
+})
+
+test_that("parse_initial_values errors informatively", {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- normal(0, 1)
+  b <- uniform(0, 1)
+  c <- lognormal(0, 1)
+  d <- variable(upper = -1)
+  z <- a * b * c * d
+  dag <- model(z)$dag
+
+  # bad objects:
+  expect_error(prep_initials(FALSE, 1, dag),
+               "must be an initials object created with initials()")
+
+  expect_error(prep_initials(list(FALSE), 1, dag),
+               "must be an initials object created with initials()")
+
+  # an unrelated greta array
+  e <- normal(0, 1)
+  expect_error(prep_initials(initials(e = 1), 1, dag),
+               "not associated with the model: e")
 
 })
