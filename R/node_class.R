@@ -229,12 +229,7 @@ node <- R6Class(
     },
 
     get_unique_name = function () {
-
-      name <- capture.output(self$.__enclos_env__)
-      name <- gsub('<environment: ', 'node_', name)
-      name <- gsub('>', '', name)
-      self$unique_name <- name
-
+      self$unique_name <- paste0("node_", rhex())
     },
 
     plotting_label = function () {

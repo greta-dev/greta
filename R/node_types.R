@@ -560,7 +560,6 @@ distrib <- function (distribution, ...) {
 
 # shorthand to speed up op definitions
 op <- function (...) {
-  check_tf_version("error")
   as.greta_array(operation_node$new(...))
 }
 

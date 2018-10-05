@@ -306,6 +306,10 @@ hessian_dims <- function (dim) {
   rep(dim, 2)
 }
 
+# generate a random 8-digit hexadecimal string
+rhex <- function ()
+  paste(as.raw(sample.int(256L, 4, TRUE) - 1L), collapse = "")
+
 
 misc_module <- module(module,
                       check_tf_version,
@@ -331,7 +335,8 @@ misc_module <- module(module,
                       has_batch,
                       match_batches,
                       split_chains,
-                      hessian_dims)
+                      hessian_dims,
+                      rhex)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function (..., target_dim = NULL) {
