@@ -725,6 +725,83 @@ forwardsolve.greta_array <- function (l, x,
 
 }
 
+#' @rdname overloaded
+#' @export
+apply <- function (X, MARGIN, FUN, ...) {
+  UseMethod('apply', X)
+}
+
+#' @export
+apply.default <- function (X, MARGIN, FUN, ...) {
+  base::apply(X = X,
+              MARGIN = MARGIN,
+              FUN = FUN,
+              ...)
+}
+
+#' @export
+apply.greta_array <- function (X, MARGIN,
+                               FUN = c("sum", "max", "mean", "min", "prod",
+                                       "cumsum", "cumprod"),
+                               ...) {
+
+  FUN <- match.arg(FUN)
+
+  if (inherits(MARGIN, "greta_array")) {
+    stop ("MARGIN cannot be a greta array",
+          call. = FALSE)
+  }
+
+  MARGIN <- as.integer(MARGIN)
+
+  # permute as in base::apply
+  d <- dim(X)
+  ds <- seq_along(d)
+
+  s.call <- ds[-MARGIN]
+  s.ans <- ds[MARGIN]
+
+  d.call <- d[-MARGIN]
+  d.ans <- d[MARGIN]
+
+  d2 <- prod(d.ans)
+
+  newX <- aperm(X, c(s.call, s.ans))
+  dim(newX) <- c(prod(d.call), d2)
+
+  # handle output dimensions
+  reducing <- !FUN %in% c("cumsum", "cumprod")
+
+  if (reducing) {
+    dim <- d[MARGIN]
+    if (length(dim) == 1)
+      dim <- c(dim, 1L)
+  } else {
+    dim <- dim(newX)
+  }
+
+  tf_fun_name <- FUN
+  if (reducing) {
+    tf_fun_name <- paste("reduce", tf_fun_name, sep = "_")
+  }
+
+  # remove additional aperm step later, and do equivalent tf$transpose on the tensorflow side
+
+  out <- op("apply", newX,
+            operation_args = list(axis = -2L,
+                                  tf_fun_name = tf_fun_name),
+            tf_operation = "tf_apply",
+            dim = dim)
+
+  if (!reducing) {
+    dim(out) <- c(prod(d[-MARGIN]), d[MARGIN])
+  }
+
+  out
+
+
+}
+
 
 #' @rdname overloaded
 #' @export

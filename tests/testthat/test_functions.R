@@ -132,6 +132,36 @@ test_that('cumulative functions work as expected', {
 
 })
 
+test_that('apply works as expected', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  # check apply.greta_array works like R's apply for X
+  check_apply <- function (X, MARGIN, FUN) {
+    check_op(apply, a,
+             other_args = list(MARGIN = MARGIN,
+                               FUN = FUN))
+  }
+
+  a <- randu(5, 4, 3, 2, 1)
+
+  single_margins <- as.list(1:5)
+  # multi_margins <- list(c(1, 4), c(2, 5), c(3, 4, 5))
+  # margins <- c(single_margins, multi_margins)
+
+  for (margin in single_margins) {
+    check_apply(a, margin, "sum")
+    check_apply(a, margin, "max")
+    check_apply(a, margin, "mean")
+    check_apply(a, margin, "min")
+    check_apply(a, margin, "prod")
+    check_apply(a, margin, "cumsum")
+    check_apply(a, margin, "cumprod")
+  }
+
+})
+
 test_that('tapply works as expected', {
 
   skip_if_not(check_tf_version())

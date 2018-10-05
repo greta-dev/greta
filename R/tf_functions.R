@@ -79,6 +79,16 @@ tf_transpose <- function (x) {
   tf$transpose(x, perm = perm)
 }
 
+tf_apply <- function (x, axis, tf_fun_name) {
+  fun <- tf[[tf_fun_name]]
+  out <- fun(x, axis = axis)
+  # if we reduced we lost a dimension, make sure we have enough
+  if (length(dim(out)) < 3) {
+    out <- tf$expand_dims(out, 2L)
+  }
+  out
+}
+
 # permute the tensor to get the non-batch dim first, do the relevant "unsorted_segment_*" op, then permute it back
 tf_tapply <- function (x, segment_ids, num_segments, op_name) {
 
