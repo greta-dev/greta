@@ -51,7 +51,6 @@ test_that('matrix functions work as expected', {
   d <- c(1, 1)
   e <- randn(10, 25)
 
-
   check_op(t, b)
   check_op(chol, a)
   check_op(chol2inv, c)
@@ -66,6 +65,24 @@ test_that('matrix functions work as expected', {
   check_op(kronecker, a, d)
   check_op(rdist, b)
   check_op(rdist, b, e)
+
+})
+
+test_that('aperm works as expected', {
+
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+
+  a <- randn(5, 4, 3, 2, 1)
+
+  # default is to reverse dims
+  check_op(aperm, a)
+
+  # random permutations
+  perms <- replicate(5, sample.int(5), simplify = FALSE)
+  for (perm in perms) {
+    check_op(aperm, a, other_args = list(perm = perm))
+  }
 
 })
 

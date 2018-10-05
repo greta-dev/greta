@@ -222,6 +222,30 @@ t.greta_array <- function (x) {
 }
 
 #' @export
+aperm.greta_array <- function(a, perm = NULL, ...) {
+
+  dimnums <- seq_along(dim(a))
+
+  if (is.null(perm))
+    perm <- rev(dimnums)
+
+  perm <- as.integer(perm)
+
+  if (!identical(sort(perm), dimnums)) {
+    stop ("perm must be a reordering of the dimensions: ",
+          paste(dimnums, collapse = ", "), "but was: ",
+          paste(perm, collapse = ", "),
+          call. = FALSE)
+  }
+
+  op("aperm", a,
+     dim = dim(a)[perm],
+     tf_operation = "tf$transpose",
+     operation_args = list(perm = c(0L, perm)))
+
+}
+
+#' @export
 chol.greta_array <- function (x, ...) {
 
   if (!identical(list(), list(...)))
