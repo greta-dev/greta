@@ -134,16 +134,6 @@ is_scalar <- function (x)
 flatten <- function (x)
   x[seq_along(x)]
 
-# helper function to loop through lists of R6 objects with lapply, executing the
-# member function "name" on the arguments in dots. Using the syntax:
-#   lapply(R6_objects, do("member_function"), args)
-# which does R6_objects[[i]]$member_function(args) for each R6 object
-do <- function(name, ...) {
-  function (x, ...) {
-    x[[name]](...)
-  }
-}
-
 # return an integer to pass on as an RNG seed
 get_seed <- function () {
   sample.int(1e12, 1)
@@ -320,7 +310,6 @@ misc_module <- module(module,
                       to_shape,
                       is_scalar,
                       flatten,
-                      do,
                       get_seed,
                       live_pointer,
                       future_seed,
@@ -895,25 +884,6 @@ unlist_tf <- function (x) {
   do.call(c, x)
 }
 
-# relist a vector into a list of arrays row-wise
-relist_tf <- function (x, list_template) {
-
-  # get expected dimensions of arrays and number of elements
-  dims <- lapply(list_template, dim)
-  lengths <- vapply(dims, prod, 1)
-  runs <- rep(seq_along(lengths), lengths)
-
-  # chop up vector into shorter lengths
-  vectors <- split(x, runs)
-  names(vectors) <- NULL
-
-  # loop through vectors coercing into arrays
-  list <- mapply(unflatten_rowwise, vectors, dims, SIMPLIFY = FALSE)
-  names(list) <- names(list_template)
-  list
-
-}
-
 #' @importFrom future availableCores
 check_n_cores <- function (n_cores, samplers, plan_is) {
 
@@ -1021,7 +991,6 @@ sampler_utils_module <- module(all_greta_arrays,
                                build_sampler,
                                prepare_draws,
                                unlist_tf,
-                               relist_tf,
                                check_future_plan,
                                check_n_cores,
                                check_positive_integer,
