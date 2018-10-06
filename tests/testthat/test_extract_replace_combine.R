@@ -333,10 +333,30 @@ test_that('replacement gives informative error messages', {
 
   source('helpers.R')
 
-  x <- as_data(randn(2, 2, 2))
+  x <- ones(2, 2, 2)
   expect_error(x[1:2, , 1] <- seq_len(3),
-               paste("number of items to replace is not a multiple",
-                     "of replacement length"))
+               "not a multiple of replacement length")
+
+  expect_error(x[1, 1, 3] <- 1,
+               "subscript out of bounds")
+
+  x <- ones(2)
+  expect_error(x[3] <- 1,
+               "subscript out of bounds")
+
+})
+
+test_that('extraction gives informative error messages', {
+
+  source('helpers.R')
+
+  x <- ones(2, 2, 2)
+  expect_error(x[1, 1, 3],
+               "subscript out of bounds")
+
+  x <- ones(2)
+  expect_error(x[3],
+               "subscript out of bounds")
 
 })
 

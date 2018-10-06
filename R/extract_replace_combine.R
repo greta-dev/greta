@@ -95,6 +95,11 @@ NULL
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
   rm('._dummy_in', envir = pf)
 
+  if (any(is.na(dummy_out))) {
+    stop ("subscript out of bounds",
+          call. = FALSE)
+  }
+
   node <- get_node(x)
   # if this is a data node, also subset the values and pass on
   if (inherits(node, 'data_node')) {
@@ -183,6 +188,11 @@ NULL
   assign('._dummy_in', dummy, envir = pf)
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
   rm('._dummy_in', envir = pf)
+
+  if (any(is.na(dummy_out))) {
+    stop ("subscript out of bounds",
+          call. = FALSE)
+  }
 
   index <- as.vector(dummy_out)
 
