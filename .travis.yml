@@ -51,6 +51,7 @@ r_packages:
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
   - rmcelreath/rethinking
+  - jimhester/lintr
 
 cache:
   packages: true
@@ -78,6 +79,7 @@ before_install:
 
 after_success:
   - Rscript -e "covr::codecov()"
+  - Rscript -e "lintr::lint_package()"
 
 email:
   on_success: change
