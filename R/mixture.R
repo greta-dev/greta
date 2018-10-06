@@ -107,8 +107,8 @@ mixture_distribution <- R6Class(
 
       # remainder should be 1 or match weights_extra_dim
       w_dim <- weights_dim[-1]
-      if (!((length(w_dim == 1) && w_dim == 1) |
-            all(w_dim == weights_extra_dim))) {
+      if (!( (length(w_dim == 1) && w_dim == 1) |
+            all(w_dim == weights_extra_dim)) ) {
         stop("the dimension of weights must be either ", n_distributions,
              " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
              " but was ", paste(weights_dim, collapse = " x "),
@@ -150,7 +150,6 @@ mixture_distribution <- R6Class(
       densities <- parameters[names(parameters) != "weights"]
       names(densities) <- NULL
       weights <- parameters$weights
-      # weights <- tf_flatten(parameters$weights)
       weights_sum <- tf$reduce_sum(weights, 1L, keepdims = TRUE)
       weights <- weights / weights_sum
       log_weights <- tf$log(weights)

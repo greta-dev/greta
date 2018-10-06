@@ -462,8 +462,8 @@ dag_class <- R6Class(
 
       # if they are flattened, e.g. for MCMC tracing
       if (flatten) {
-        # loop through elements flattening these arrays to vectors and giving the
-        # elements better names
+        # loop through elements flattening these arrays to vectors and giving
+        # the elements better names
         trace_list_flat <- lapply(seq_along(trace_list),
                                   flatten_trace,
                                   trace_list)
@@ -510,7 +510,7 @@ dag_class <- R6Class(
           R <- T
           it <- it + 1
         } else {
-          break()
+          break ()
         }
       }
 

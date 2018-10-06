@@ -23,7 +23,8 @@ as.greta_array.logical <- function(x, optional = FALSE, original_x = x, ...) {
 # coerce dataframes if all columns can safely be converted to numeric, error
 # otherwise
 #' @export
-as.greta_array.data.frame <- function(x, optional = FALSE, original_x = x, ...) {
+as.greta_array.data.frame <- function(x, optional = FALSE,
+                                      original_x = x, ...) {
   classes <- vapply(x, class, "")
   valid <- classes %in% c("numeric", "integer", "logical")
 

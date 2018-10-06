@@ -338,19 +338,19 @@ test_that("lkj distribution has correct density", {
   # normalising component of lkj (depends only on eta and dimension)
   lkj_normalising <- function(eta, n) {
     if (eta == 1) {
-      result <- sum(lgamma(2 * 1:((n - 1) / 2 + 1)))
+      result <- sum(lgamma(2 * 1:( (n - 1) / 2 + 1 )))
       if (n %% 2 == 1) {
-        add <- (0.25 * (n^2 - 1) * log(pi)
-                - 0.25 * (n - 1)^2 * log(2)
-                - (n - 1) * lgamma((n + 1) / 2))
+        add <- (0.25 * (n ^ 2 - 1) * log(pi)
+                - 0.25 * (n - 1) ^ 2 * log(2)
+                - (n - 1) * lgamma( (n + 1) / 2 ))
       } else {
         add <- (0.25 * n * (n - 2) * log(pi)
-                + 0.25 * (3 * n^2 - 4 * n) * log(2)
+                + 0.25 * (3 * n ^ 2 - 4 * n) * log(2)
                 + n * lgamma(n / 2) - (n - 1) * lgamma(n))
       }
       result <- result + add
     } else {
-      result <- -(n - 1) * lgamma(eta + 0.5 * (n - 1))
+      result <- (1 - n) * lgamma(eta + 0.5 * (n - 1))
       k <- 1:n
       result <- result + sum(0.5 * k * log(pi)
                              + lgamma(eta + 0.5 * (n - 1 - k)))
@@ -616,7 +616,9 @@ test_that("array-valued distributions can be defined in models", {
 
   # multivariate continuous distributions
   sig <- rWishart(1, 4, diag(3))[, , 1]
-  expect_ok(model(multivariate_normal(t(rnorm(3)), sig, n_realisations = dim[1])))
+  expect_ok(
+    model(multivariate_normal(t(rnorm(3)), sig, n_realisations = dim[1]))
+  )
   expect_ok(model(dirichlet(t(runif(3)), n_realisations = dim[1])))
   expect_ok(model(wishart(4, sig)))
   expect_ok(model(lkj_correlation(3, dimension = dim[1])))
@@ -735,7 +737,7 @@ test_that("variable() errors informatively", {
   expect_error(variable(upper = -Inf),
                "^lower and upper must either be")
 
-  # lower >= upper
+  # lower not below upper
   expect_error(variable(lower = 1, upper = 1),
                "upper bound must be greater than lower bound")
 
@@ -757,7 +759,7 @@ test_that("uniform distribution errors informatively", {
   expect_error(uniform(min = -Inf, max = Inf),
                "min and max must finite scalars")
 
-  # lower >= upper
+  # lower not below upper
   expect_error(uniform(min = 1, max = 1),
                "max must be greater than min")
 
@@ -1046,7 +1048,7 @@ test_that("Wishart can use a choleskied Sigma", {
 
 })
 
-test_that("multivariate distributions with matrix parameters can be sampled from", {
+test_that("multivariate distribs with matrix params can be sampled from", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -1084,7 +1086,7 @@ test_that("multivariate distributions with matrix parameters can be sampled from
   m <- model(a)
   expect_ok(draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE))
 
-  # dirichlet-multinomial
+  # dirichlet multinomial
   size <- 5
   x <- t(rmultinom(n, size, runif(k)))
   a <- normal(0, 1, dim = c(n, k))

@@ -107,8 +107,8 @@ test_that("samplers pass geweke tests", {
   skip_if_not_release()
 
   # run geweke tests on this model:
-  # theta ~ normal(mu1, sd1)
-  # x[i] ~ normal(theta, sd2)
+  # theta ~~ normal(mu1, sd1)
+  # x_i ~~ normal(theta, sd2)
   # for i in N
 
   N <- 10

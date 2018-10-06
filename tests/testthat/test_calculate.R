@@ -43,7 +43,7 @@ test_that("calculate works with mcmc.list objects", {
   expect_true(all(is.finite(as.vector(y_values[[1]]))))
 
   # with a new greta array, based on a different element in the model
-  new_values <- calculate(a^2, draws)
+  new_values <- calculate(a ^ 2, draws)
   # correct class
   expect_s3_class(new_values, "mcmc.list")
   # correct dimensions

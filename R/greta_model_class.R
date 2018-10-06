@@ -230,7 +230,6 @@ plot.greta_model <- function(x,
                                     use_diag = FALSE)
 
   n_nodes <- nrow(gr$nodes_df)
-  n_edges <- nrow(gr$edges_df)
 
   names <- names(x$dag$node_list)
   types <- x$dag$node_types

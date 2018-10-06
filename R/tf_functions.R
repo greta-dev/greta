@@ -108,10 +108,7 @@ tf_tapply <- function(x, segment_ids, num_segments, op_name) {
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
 tf_flat_to_chol <- function(x, dims) {
-  # # drop trailing dimension, and biject forward to an upper triangular matrix
-  # x <- tf_flatten(x)
-  # b <- tfp$bijectors$FillTriangular(upper = TRUE)
-  # b$forward(x)
+  # drop trailing dimension, and biject forward to an upper triangular matrix
 
   # indices to the cholesky factor
   L_dummy <- dummy(dims)
@@ -150,11 +147,6 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
   n <- dim(z)[[2]]
 
   # use a tensorflow while loop to do the recursion:
-  # lp <- lp + 0.5 * log(1 - sumsq)
-  # x[i] <- x[i] + z[i] * sqrt(1 - sumsq)
-  # sumsq <- sumsq + x[i] ^ 2
-  # dropping irrelevant terms for the value/jacobian cases
-
   body_values <- function(z, x, sumsq, lp, iter, maxiter) {
     x_new <- z[, iter] * tf$sqrt(fl(1) - sumsq)
     sumsq <- sumsq + tf$square(x_new)
@@ -173,7 +165,7 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
 
   # initial sum of squares is from the first element
   z_0 <- z[, 0]
-  sumsq <- z_0^2
+  sumsq <- z_0 ^ 2
   x <- tf$expand_dims(z_0, 1L)
   lp <- tf$zeros(shape(1), tf_float())
   lp <- expand_to_batch(lp, z)
@@ -245,7 +237,7 @@ tf_flat_to_chol_correl <- function(x, dims) {
   x_rows <- lapply(z_rows, tf_corrmat_row)
 
   # append 0s to all rows for the empty triangle
-  zero_rows <- lapply((n - 2):0,
+  zero_rows <- lapply( (n - 2):0,
                       function(n) {
                         zeros <- tf$constant(rep(0, n),
                                              dtype = tf_float(),
@@ -340,7 +332,8 @@ tf_kronecker <- function(X, Y, tf_fun_name) {
 
   dims <- unlist(c(dim(X)[-1], dim(Y)[-1]))
 
-  # expand dimensions of tensors to allow direct multiplication for kronecker prod
+  # expand dimensions of tensors to allow direct multiplication for kronecker
+  # prod
   x_rsh <- tf$reshape(X, shape(-1, dims[1], 1L, dims[2], 1L))
   y_rsh <- tf$reshape(Y, shape(-1, 1L, dims[3], 1L, dims[4]))
 
@@ -594,7 +587,7 @@ tf_distance <- function(x1, x2) {
   x2 <- tf$transpose(x2, perm = c(0L, 2L, 1L))
   x2 <- tf$tile(tf$expand_dims(x2, 1L), list(1L, n1, 1L, 1L))
 
-  dists <- (x1 - x2)^2
+  dists <- (x1 - x2) ^ 2
   dist <- tf$reduce_sum(dists, axis = 2L)
   dist <- tf$sqrt(dist)
 

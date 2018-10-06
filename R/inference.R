@@ -204,7 +204,8 @@ mcmc <- function(model,
   # from a named list on the constrained scale to free state vectors
   initial_values <- prep_initials(initial_values, chains, dag)
 
-  # determine the number of separate samplers to spin up, based on the future plan
+  # determine the number of separate samplers to spin up, based on the future
+  # plan
   max_samplers <- future::nbrOfWorkers()
 
   # divide chains up between the workers
@@ -541,7 +542,7 @@ to_free <- function(node, data) {
   both <- function(x) {
     if (any(x >= upper | x <= lower))
       unsupported_error()
-    stats::qlogis((x - lower) / (upper - lower))
+    stats::qlogis( (x - lower) / (upper - lower) )
   }
 
   fun <- switch(node$constraint,
@@ -590,7 +591,8 @@ parse_initial_values <- function(initials, dag) {
   # make nodes do this conversion and checking in the future also make them
   # handle more complex situations (like Wishart, which is an operation with a
   # distribution, so needs to find the corresponding variable), and check the
-  # provided values are in the support of the (constrained scale of the) variable
+  # provided values are in the support of the (constrained scale of the)
+  # variable
 
   # find the corresponding nodes and check they are variable nodes
   nodes <- dag$node_list[match(tf_names, dag$node_tf_names)]
@@ -607,7 +609,6 @@ parse_initial_values <- function(initials, dag) {
   same_dims <- mapply(identical, target_dims, replacement_dims)
 
   if (!all(same_dims)) {
-    mismatches <- which(!same_dims)
     stop("the initial values provided have different dimensions ",
          "than the named greta arrays",
          call. = FALSE)
@@ -643,7 +644,8 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
   } else if (is.list(initial_values)) {
 
-    # if the user provided a list of initial values, check elements and the length
+    # if the user provided a list of initial values, check elements and the
+    # length
     are_initials <- vapply(initial_values, inherits, "initials",
                            FUN.VALUE = FALSE)
 

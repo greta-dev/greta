@@ -164,7 +164,7 @@ test_that("as_data errors informatively", {
 
   # non-data greta arrays
   stoch <- normal(0, 1, dim = c(2, 3))
-  op <- stoch^2
+  op <- stoch ^ 2
 
   expect_error(as_data(stoch),
                "cannot coerce a non-data greta_array to data")

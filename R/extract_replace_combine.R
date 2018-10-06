@@ -198,7 +198,7 @@ NULL
 
   if (length(index) != length(replacement)) {
 
-    if ((length(index) %% length(replacement)) != 0) {
+    if (length(index) %% length(replacement) != 0) {
 
       stop("number of items to replace is not a multiple of ",
            "replacement length")
@@ -331,8 +331,9 @@ abind.default <- function(...,
 abind.greta_array <- function(...,
                               along = N, rev.along = NULL, new.names = NULL,
                               force.array = TRUE, make.names = use.anon.names,
-                              use.anon.names = FALSE, use.first.dimnames = FALSE,
-                              hier.names = FALSE, use.dnns = FALSE) {
+                              use.anon.names = FALSE,
+                              use.first.dimnames = FALSE, hier.names = FALSE,
+                              use.dnns = FALSE) {
 
   # warn if any of the arguments have been changed
   user_set_args <- !is.null(rev.along) |

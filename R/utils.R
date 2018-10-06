@@ -149,9 +149,6 @@ live_pointer <- function(tensor_name, environment = parent.frame()) {
 # get the next seed as a L'Ecuyer
 future_seed <- function() {
   okind <- RNGkind()[1]
-  # oseed <- .GlobalEnv$.Random.seed
-  # .GlobalEnv$.Random.seed <- oseed
-  # sample.int(1)
   on.exit(RNGkind(okind), add = TRUE)
   RNGkind("L'Ecuyer-CMRG")
   .GlobalEnv$.Random.seed
@@ -459,7 +456,8 @@ check_n_realisations <- function(vectors = list(),
     }
   }
 
-  # if there's a target number of realisations, check it's valid and make sure they all match it
+  # if there's a target number of realisations, check it's valid and make sure
+  # they all match it
   if (!is.null(target)) {
 
     # make sure it's a scalar
@@ -551,8 +549,8 @@ check_dimension <- function(vectors = list(),
 
     # otherwise it's not fine
     msg <- sprintf(paste0("the distribution dimension should be %s, ",
-                          "but parameters implied dimensions: %s",
-                          "\n\nmultivariate distributions treat each *row* as a ",
+                          "but parameters implied dimensions: %s\n\n",
+                          "multivariate distributions treat each *row* as a ",
                           "separate realisation - perhaps you need to ",
                           "transpose something?"),
                    dimension,
@@ -631,10 +629,12 @@ check_in_family <- function(function_name, arg) {
     # `family = binomial()` or similar
     arg_is_link <- TRUE
   } else {
-    # if the first argument is one of these text strings, the user might be doing
-    # `family = binomial("logit")` or similar
-    links <- c("logit", "probit", "cloglog", "cauchit", "log", "identity", "sqrt")
-    arg_is_link <- inherits(arg, "character") && length(arg) == 1 && arg %in% links
+    # if the first argument is one of these text strings, the user might be
+    # doing `family = binomial("logit")` or similar
+    links <- c("logit", "probit", "cloglog", "cauchit",
+               "log", "identity", "sqrt")
+    arg_is_link <- inherits(arg, "character") &&
+      length(arg) == 1 && arg %in% links
   }
 
   # if it's being executed in an environment where it's named 'family', the user
@@ -673,8 +673,7 @@ check_future_plan <- function() {
     # if it's a cluster, check there's no forking
     if (plan_is$cluster) {
 
-      # This stopgap trick from Henrik:
-      # https://github.com/HenrikBengtsson/future/issues/224#issuecomment-388398032
+      # This stopgap trick from Henrik on github:
       f <- future::future(NULL, lazy = TRUE)
       workers <- f$workers
       if (inherits(workers, "cluster")) {
@@ -1030,6 +1029,7 @@ as_tf_function <- function(r_fun, ...) {
   # model real greta arrays in dots
   ga_dummies <- lapply(list(...), dummy_greta_array)
   ga_out <- do.call(r_fun, ga_dummies)
+  ga_out
 
   function(...) {
 

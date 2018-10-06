@@ -84,8 +84,8 @@ joint_distribution <- R6Class(
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)
 
       if (!all(discrete) & !all(!discrete)) {
-        stop("cannot construct a joint distribution from a combination of discrete ",
-             "and continuous distributions",
+        stop("cannot construct a joint distribution from a combination ",
+             "of discrete and continuous distributions",
              call. = FALSE)
       }
 
@@ -107,7 +107,8 @@ joint_distribution <- R6Class(
 
       log_prob <- function(x) {
 
-        # split x on the joint dimension, and loop through computing the densities
+        # split x on the joint dimension, and loop through computing the
+        # densities
         last_dim <- length(dim(x)) - 1L
         x_vals <- tf$split(x, length(densities), axis = last_dim)
         log_probs <- list()

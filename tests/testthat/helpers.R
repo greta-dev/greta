@@ -319,8 +319,7 @@ gen_opfun <- function(n, ops) {
 }
 
 # sample n values from a distribution by HMC, check they all have the correct
-# support greta array is defined as astochastic in the call, like:
-# sample_distribution(normal(0, 1))
+# support greta array is defined as a stochastic in the call
 sample_distribution <- function(greta_array, n = 10,
                                 lower = -Inf, upper = Inf,
                                 warmup = 1) {
@@ -399,14 +398,14 @@ truncfun <- function(which = "norm", parameters, truncation) {
 
 # R distribution functions for the location-scale Student T distribution
 dt_ls <- function(x, df, location, scale, log = FALSE) {
-  ans <- stats::dt((x - location) / scale, df) / scale
+  ans <- stats::dt( (x - location) / scale, df ) / scale
   if (log)
     ans <- log(ans)
   ans
 }
 
 pt_ls <- function(q, df, location, scale, log.p = FALSE) {
-  ans <- stats::pt((q - location) / scale, df)
+  ans <- stats::pt( (q - location) / scale, df )
   if (log.p)
     ans <- log(ans)
   ans
@@ -438,8 +437,8 @@ get_output <- function(expr) {
 
 # mock up mcmc progress bar output for neurotic testing
 mock_mcmc <- function(n_samples = 1010) {
-  pb <- create_progress_bar("sampling", c(0, n_samples), pb_update = 10, width = 50)
-  # for (i in seq_len(n_samples))
+  pb <- create_progress_bar("sampling", c(0, n_samples),
+                            pb_update = 10, width = 50)
   iterate_progress_bar(pb, n_samples, rejects = 10, chains = 1)
 }
 
@@ -494,7 +493,9 @@ check_geweke <- function(sampler, model, data,
 
   # visualise correspondence
   quants <- (1:99) / 100
-  plot(quantile(target_theta, quants) ~ quantile(greta_theta, quants))
+  q1 <- quantile(target_theta, quants)
+  q2 <- quantile(greta_theta, quants)
+  plot(q2, q1)
   abline(0, 1)
 
   # do a formal hypothesis test
@@ -506,7 +507,9 @@ check_geweke <- function(sampler, model, data,
 # sample from a prior on theta the long way round, fro use in a Geweke test:
 # gibbs sampling the posterior p(theta | x) and the data generating function p(x
 # | theta). Only retain the samples of theta from the joint distribution,
-p_theta_greta <- function(niter, model, data, p_theta, p_x_bar_theta, sampler = hmc()) {
+p_theta_greta <- function(niter, model, data,
+                          p_theta, p_x_bar_theta,
+                          sampler = hmc()) {
 
   # set up and initialize trace
   theta <- rep(NA, niter)
@@ -539,7 +542,6 @@ p_theta_greta <- function(niter, model, data, p_theta, p_x_bar_theta, sampler = 
                            n_samples = 1,
                            verbose = FALSE)
 
-    # bayesplot::mcmc_trace(draws)
     theta[i] <- tail(as.numeric(draws[[1]]), 1)
 
   }
@@ -607,7 +609,7 @@ mcse <- function(draws) {
   a <- floor(n / b)
 
   group <- function(k) {
-    idx <- ((k - 1) * b + 1):(k * b)
+    idx <- ( (k - 1) * b + 1 ):(k * b)
     colMeans(draws[idx, , drop = FALSE])
   }
 
@@ -619,7 +621,7 @@ mcse <- function(draws) {
     bm <- t(bm)
 
   mu_hat <- as.matrix(colMeans(draws))
-  ss <- sweep(t(bm), 2, mu_hat, "-")^2
+  ss <- sweep(t(bm), 2, mu_hat, "-") ^ 2
   var_hat <- b * colSums(ss) / (a - 1)
   sqrt(var_hat / n)
 }
@@ -650,7 +652,7 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   # get MCMC samples for statistics of the samples (value, variance and
   # correlation of error wrt mean)
   err <- x - mu
-  var <- (err)^2
+  var <- (err) ^ 2
   corr <- prod(err) / prod(sqrt(diag(Sigma)))
   err_var_corr <- c(err, var, corr)
   stat_draws <- calculate(err_var_corr, draws)

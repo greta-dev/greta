@@ -105,6 +105,7 @@ calculate_mcmc.list <- function (target, target_name, values, tf_float) {
   dag$build_dag(list(target))
 
   self <- dag  # mock for scoping
+  self
   dag$define_tf()
 
   dag$target_nodes <- list(get_node(target))
@@ -112,7 +113,6 @@ calculate_mcmc.list <- function (target, target_name, values, tf_float) {
 
   param <- dag$example_parameters()
   param[] <- 0
-  example_values <- dag$trace_values(param)
 
   # raw draws are either an attribute, or this object
   model_info <- attr(values, "model_info")

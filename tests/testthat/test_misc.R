@@ -25,7 +25,9 @@ test_that("check_tf_version works", {
   expected_message <- "isn't installed"
 
   with_mock(
-    `reticulate::py_module_available` = function(x) {FALSE},
+    `reticulate::py_module_available` = function(x) {
+      FALSE
+    },
     expect_error(check_tf_version("error"), expected_message),
     expect_warning(check_tf_version("warn"), expected_message),
     expect_message(check_tf_version("message"), expected_message)

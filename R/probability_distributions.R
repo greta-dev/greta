@@ -489,11 +489,11 @@ weibull_distribution <- R6Class(
       b <- parameters$scale
 
       log_prob <- function(x) {
-        log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b)^a
+        log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
       }
 
       cdf <- function(x) {
-        fl(1) - exp(-(x / b)^a)
+        fl(1) - exp(-(x / b) ^ a)
       }
 
       log_cdf <- function(x) {
@@ -558,7 +558,7 @@ pareto_distribution <- R6Class(
         log(a) + a * log(b) - (a + 1) * log(x)
 
       cdf <- function(x)
-        1 - (b / x)^a
+        1 - (b / x) ^ a
 
       log_cdf <- function(x)
         log(cdf(x))
@@ -673,10 +673,10 @@ cauchy_distribution <- R6Class(
       s <- parameters$scale
 
       log_prob <- function(x)
-        tf$negative(tf$log(fl(pi) * s * (fl(1) + tf$square((x - loc) / s))))
+        tf$negative(tf$log(fl(pi) * s * (fl(1) + tf$square( (x - loc) / s ))))
 
       cdf <- function(x)
-        fl(1 / pi) * tf$atan((x - loc) / s) + fl(0.5)
+        fl(1 / pi) * tf$atan( (x - loc) / s ) + fl(0.5)
 
       log_cdf <- function(x)
         tf$log(cdf(x))
@@ -1257,8 +1257,9 @@ lkj_correlation_distribution <- R6Class(
 
         # normalising constant
         k <- 1:n
-        a <- fl(-(n - 1)) * tf$lgamma(eta + fl(0.5 * (n - 1)))
-        b <- tf_sum(fl(0.5 * k * log(pi)) + tf$lgamma(eta + fl(0.5 * (n - 1 - k))))
+        a <- fl(1 - n) * tf$lgamma(eta + fl(0.5 * (n - 1)))
+        b <- tf_sum(fl(0.5 * k * log(pi)) +
+                      tf$lgamma(eta + fl(0.5 * (n - 1 - k))))
         norm <- a + b
 
         # get the cholesky factor of the target in tf_orientation

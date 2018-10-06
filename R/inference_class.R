@@ -564,7 +564,7 @@ sampler <- R6Class(
         w1 <- 1 / (iter + t0)
         hbar <- (1 - w1) * hbar + w1 * (self$accept_target - mean_accept_stat)
         log_epsilon <- mu - hbar * sqrt(iter) / gamma
-        w2 <- iter^-kappa
+        w2 <- iter ^ -kappa
         log_epsilon_bar <- w2 * log_epsilon + (1 - w2) * log_epsilon_bar
 
         self$hbar <- hbar
@@ -838,11 +838,15 @@ rwmh_sampler <- R6Class(
       tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # tensors for sampler parameters
-      dag$tf_run(rwmh_epsilon <- tf$placeholder(dtype = tf_float()))
+      dag$tf_run(
+        rwmh_epsilon <- tf$placeholder(dtype = tf_float())
+      )
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
-      dag$tf_run(rwmh_diag_sd <- tf$placeholder(dtype = tf_float(),
-                                                shape = shape(dim(free_state)[[2]], 1)))
+      dag$tf_run(
+        rwmh_diag_sd <- tf$placeholder(dtype = tf_float(),
+                                       shape = shape(dim(free_state)[[2]], 1))
+      )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
       dag$tf_run(
@@ -852,7 +856,9 @@ rwmh_sampler <- R6Class(
         )
       )
 
-      dag$tf_run(new_state_fn <- rwmh_proposal(scale = rwmh_step_sizes))
+      dag$tf_run(
+        new_state_fn <- rwmh_proposal(scale = rwmh_step_sizes)
+      )
 
       # build the kernel
       dag$tf_run(
@@ -901,7 +907,9 @@ slice_sampler <- R6Class(
       }
 
       tfe$log_prob_fun <- dag$generate_log_prob_function()
-      dag$tf_run(slice_max_doublings <- tf$placeholder(dtype = tf$int32))
+      dag$tf_run(
+        slice_max_doublings <- tf$placeholder(dtype = tf$int32)
+      )
 
       # build the kernel
       dag$tf_run(
@@ -923,7 +931,9 @@ slice_sampler <- R6Class(
     },
 
     # no additional here tuning
-    tune = function(iterations_completed, total_iterations) {}
+    tune = function(iterations_completed, total_iterations) {
+
+    }
 
   )
 )

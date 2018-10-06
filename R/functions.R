@@ -627,7 +627,8 @@ sweep.greta_array <- function(x,
 #' @import methods
 setClass("greta_array")
 setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
-          function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE, ...) {
+          function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
+                   ...) {
 
             FUN <- match.arg(FUN)
 
@@ -779,8 +780,8 @@ apply.greta_array <- function(X, MARGIN,
 
   d2 <- prod(d.ans)
 
-  newX <- aperm(X, c(s.call, s.ans))
-  dim(newX) <- c(prod(d.call), d2)
+  new_x <- aperm(X, c(s.call, s.ans))
+  dim(new_x) <- c(prod(d.call), d2)
 
   # handle output dimensions
   reducing <- !FUN %in% c("cumsum", "cumprod")
@@ -793,7 +794,7 @@ apply.greta_array <- function(X, MARGIN,
     dim <- c(prod(dim_out), 1)
   } else {
     dim_out <- c(prod(d[-MARGIN]), d[MARGIN])
-    dim <- dim(newX)
+    dim <- dim(new_x)
   }
 
   tf_fun_name <- FUN
@@ -801,7 +802,7 @@ apply.greta_array <- function(X, MARGIN,
     tf_fun_name <- paste("reduce", tf_fun_name, sep = "_")
   }
 
-  out <- op("apply", newX,
+  out <- op("apply", new_x,
             operation_args = list(axis = -2L,
                                   tf_fun_name = tf_fun_name),
             tf_operation = "tf_apply",
@@ -874,7 +875,8 @@ eigen <- function(x, symmetric, only.values, EISPACK) {
 }
 
 #' @export
-eigen.default <- function(x, symmetric, only.values = FALSE, EISPACK = FALSE) {
+eigen.default <- function(x, symmetric,
+                          only.values = FALSE, EISPACK = FALSE) {
   base::eigen(x = x,
               symmetric = symmetric,
               only.values = only.values,
@@ -882,7 +884,8 @@ eigen.default <- function(x, symmetric, only.values = FALSE, EISPACK = FALSE) {
 }
 
 #' @export
-eigen.greta_array <- function(x, symmetric, only.values = FALSE, EISPACK = FALSE) {
+eigen.greta_array <- function(x, symmetric,
+                              only.values = FALSE, EISPACK = FALSE) {
 
   x <- as.greta_array(x)
 
