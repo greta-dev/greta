@@ -1,5 +1,6 @@
 ^CODE_OF_CONDUCT\.md$
 ^\.github$
+^.netlify$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 LICENSE
