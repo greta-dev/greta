@@ -56,7 +56,7 @@
 #'
 #'  x <- as_data(matrix(1:12, 3, 4))
 #'
-#'  # extract/replace
+#'  # extract and replace
 #'  x[1:3, ]
 #'  x[, 2:4] <- 1:9
 #'  e <- diag(x)
@@ -292,6 +292,7 @@ rbind.greta_array <- function(...) {
 
 }
 
+# Begin Exclude Linting
 #' @rdname overloaded
 #' @export
 abind <- function(...,
@@ -301,11 +302,13 @@ abind <- function(...,
                   hier.names = FALSE, use.dnns = FALSE) {
   UseMethod("abind")
 }
+# End Exclude Linting
 
 # clear CRAN checks spotting floating global variables
 #' @importFrom utils globalVariables
 utils::globalVariables("N", "greta")
 
+# Begin Exclude Linting
 #' @export
 abind.default <- function(...,
                           along = N, rev.along = NULL, new.names = NULL,
@@ -313,6 +316,7 @@ abind.default <- function(...,
                           use.anon.names = FALSE, use.first.dimnames = FALSE,
                           hier.names = FALSE, use.dnns = FALSE) {
 
+  # End Exclude Linting
   # error nicely if they don't have abind installed
   abind_installed <- requireNamespace("abind", quietly = TRUE)
   if (!abind_installed) {
@@ -327,6 +331,7 @@ abind.default <- function(...,
 
 }
 
+# Begin Exclude Linting
 #' @export
 abind.greta_array <- function(...,
                               along = N, rev.along = NULL, new.names = NULL,
@@ -344,6 +349,8 @@ abind.greta_array <- function(...,
     !identical(use.first.dimnames, FALSE) |
     !identical(hier.names, FALSE) |
     !identical(use.dnns, FALSE)
+
+  # End Exclude Linting
 
   if (user_set_args) {
     warning("only the argument 'along' is supported when using abind ",

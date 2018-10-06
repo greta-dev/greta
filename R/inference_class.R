@@ -783,6 +783,7 @@ hmc_sampler <- R6Class(
       tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # build the kernel
+      # Begin Exclude Linting
       dag$tf_run(
         sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
           target_log_prob_fn = log_prob_fun,
@@ -790,6 +791,7 @@ hmc_sampler <- R6Class(
           num_leapfrog_steps = hmc_L,
           seed = rng_seed)
       )
+      # End Exclude Linting
 
     },
 
@@ -861,12 +863,14 @@ rwmh_sampler <- R6Class(
       )
 
       # build the kernel
+      # Begin Exclude Linting
       dag$tf_run(
         sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
           target_log_prob_fn = log_prob_fun,
           new_state_fn = new_state_fn,
           seed = rng_seed)
       )
+      # End Exclude Linting
     },
 
     sampler_parameter_values = function() {
@@ -912,6 +916,7 @@ slice_sampler <- R6Class(
       )
 
       # build the kernel
+      # Begin Exclude Linting
       dag$tf_run(
         sampler_kernel <- tfp$mcmc$SliceSampler(
           target_log_prob_fn = log_prob_fun,
@@ -919,6 +924,7 @@ slice_sampler <- R6Class(
           max_doublings = slice_max_doublings,
           seed = rng_seed)
       )
+      # End Exclude Linting
     },
 
     sampler_parameter_values = function() {

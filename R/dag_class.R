@@ -212,7 +212,7 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
-
+      # Begin Exclude Linting
       self$tf_run(
         config <- tf$ConfigProto(inter_op_parallelism_threads = n_cores,
                                  intra_op_parallelism_threads = n_cores))
@@ -222,6 +222,7 @@ dag_class <- R6Class(
                                 "global_jit_level",
                                 tf$OptimizerOptions$ON_1))
       }
+      # End Exclude Linting
 
       # start a session and initialise all variables
       self$tf_run(sess <- tf$Session(config = config))

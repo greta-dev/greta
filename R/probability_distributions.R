@@ -120,10 +120,12 @@ lognormal_distribution <- R6Class(
       self$add_parameter(sdlog, "sdlog")
     },
 
+    # Begin Exclude Linting
     tf_distrib = function(parameters, dag) {
       tfp$distributions$LogNormal(loc = parameters$meanlog,
                                   scale = parameters$sdlog)
     }
+    # End Exclude Linting
 
   )
 )
@@ -356,10 +358,12 @@ negative_binomial_distribution <- R6Class(
       self$add_parameter(prob, "prob")
     },
 
+    # Begin Exclude Linting
     tf_distrib = function(parameters, dag) {
       tfp$distributions$NegativeBinomial(total_count = parameters$size,
                                          probs = fl(1) - parameters$prob)
     },
+    # End Exclude Linting
 
     # no CDF for discrete distributions
     tf_cdf_function = NULL,
@@ -456,10 +460,12 @@ inverse_gamma_distribution <- R6Class(
       self$add_parameter(beta, "beta")
     },
 
+    # Begin Exclude Linting
     tf_distrib = function(parameters, dag) {
       tfp$distributions$InverseGamma(concentration = parameters$alpha,
                                      rate = parameters$beta)
     }
+    # End Exclude Linting
 
   )
 )
@@ -493,7 +499,7 @@ weibull_distribution <- R6Class(
       }
 
       cdf <- function(x) {
-        fl(1) - exp(-(x / b) ^ a)
+        fl(1) - exp(-1 * (x / b) ^ a)
       }
 
       log_cdf <- function(x) {
@@ -589,11 +595,13 @@ student_distribution <- R6Class(
       self$add_parameter(sigma, "sigma")
     },
 
+    # Begin Exclude Linting
     tf_distrib = function(parameters, dag) {
       tfp$distributions$StudentT(df = parameters$df,
                                  loc = parameters$mu,
                                  scale = parameters$sigma)
     }
+    # End Exclude Linting
 
   )
 )
@@ -860,6 +868,7 @@ dirichlet_multinomial_distribution <- R6Class(
 
     },
 
+    # Begin Exclude Linting
     tf_distrib = function(parameters, dag) {
       parameters <- match_batches(parameters)
       parameters$size <- tf_flatten(parameters$size)
@@ -867,6 +876,7 @@ dirichlet_multinomial_distribution <- R6Class(
       distrib(total_count = parameters$size,
               concentration = parameters$alpha)
     },
+    # End Exclude Linting
 
     # no CDF for multivariate distributions
     tf_cdf_function = NULL,
@@ -1027,8 +1037,10 @@ multivariate_normal_distribution <- R6Class(
       L <- tf$expand_dims(L, 1L)
 
       mu <- parameters$mean
+      # Begin Exclude Linting
       tfp$distributions$MultivariateNormalTriL(loc = mu,
                                                scale_tril = L)
+      # End Exclude Linting
     },
 
     # no CDF for multivariate distributions

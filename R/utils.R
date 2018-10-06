@@ -146,6 +146,7 @@ live_pointer <- function(tensor_name, environment = parent.frame()) {
     !is.null(environment[[tensor_name]]$name)
 }
 
+# Begin Exclude Linting
 # get the next seed as a L'Ecuyer
 future_seed <- function() {
   okind <- RNGkind()[1]
@@ -153,6 +154,7 @@ future_seed <- function() {
   RNGkind("L'Ecuyer-CMRG")
   .GlobalEnv$.Random.seed
 }
+# End Exclude Linting
 
 create_log_file <- function(create = FALSE) {
   filename <- tempfile(pattern = "greta_log_")

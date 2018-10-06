@@ -209,6 +209,7 @@ adagrad <- function(learning_rate = 0.8,
                       ))
 }
 
+# Begin Exclude Linting
 #' @rdname optimisers
 #' @export
 #'
@@ -236,6 +237,7 @@ adagrad_da <- function(learning_rate = 0.8,
                         l2_regularization_strength = l2_regularization_strength
                       ))
 }
+# End Exclude Linting
 
 #' @rdname optimisers
 #' @export
