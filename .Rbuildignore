@@ -1,3 +1,5 @@
+^CODE_OF_CONDUCT\.md$
+^\.github$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 LICENSE
