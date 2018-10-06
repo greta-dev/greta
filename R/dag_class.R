@@ -3,8 +3,8 @@
 
 # create dag class
 dag_class <- R6Class(
-  'dag_class',
-  public = list (
+  "dag_class",
+  public = list(
 
     node_list = list(),
     node_types = NA,
@@ -20,9 +20,9 @@ dag_class <- R6Class(
     trace_names = NULL,
 
     # create a dag from some target nodes
-    initialize = function (target_greta_arrays,
-                           tf_float = "float32",
-                           compile = FALSE) {
+    initialize = function(target_greta_arrays,
+                          tf_float = "float32",
+                          compile = FALSE) {
 
       # build the dag
       self$build_dag(target_greta_arrays)
@@ -45,7 +45,7 @@ dag_class <- R6Class(
 
     },
 
-    new_tf_environment = function () {
+    new_tf_environment = function() {
 
       self$tf_environment <- new.env()
       self$tf_graph <- tf$Graph()
@@ -55,7 +55,7 @@ dag_class <- R6Class(
 
     # execute an expression on this dag's tensorflow graph, with the correct
     # float type
-    on_graph = function (expr) {
+    on_graph = function(expr) {
 
       # temporarily pass float type info to options, so it can be accessed by
       # nodes on definition, without cluncky explicit passing
@@ -67,7 +67,7 @@ dag_class <- R6Class(
     },
 
     # execute an exporession in the tensorflow environment
-    tf_run = function (expr, as_text = FALSE) {
+    tf_run = function(expr, as_text = FALSE) {
 
       tfe <- self$tf_environment
 
@@ -83,7 +83,7 @@ dag_class <- R6Class(
     },
 
     # sess$run() an expression in the tensorflow environment, with the feed dict
-    tf_sess_run = function (expr, as_text = FALSE) {
+    tf_sess_run = function(expr, as_text = FALSE) {
 
       if (!as_text)
         expr <- deparse(substitute(expr))
@@ -95,7 +95,7 @@ dag_class <- R6Class(
     },
 
     # return a list of nodes connected to those in the target node list
-    build_dag = function (greta_array_list) {
+    build_dag = function(greta_array_list) {
 
       target_node_list <- lapply(greta_array_list, get_node)
 
@@ -105,19 +105,19 @@ dag_class <- R6Class(
       }
 
       # stash the node names, types, and tf names
-      self$node_types <- vapply(self$node_list, node_type, FUN.VALUE = '')
+      self$node_types <- vapply(self$node_list, node_type, FUN.VALUE = "")
       self$node_tf_names <- self$make_names()
 
     },
 
     # create human-readable names for TF tensors
-    make_names = function () {
+    make_names = function() {
 
       types <- self$node_types
 
-      for (type in c('variable', 'data', 'operation', 'distribution')) {
+      for (type in c("variable", "data", "operation", "distribution")) {
         idx <- which(types == type)
-        types[idx] <- paste(type, seq_along(idx), sep = '_')
+        types[idx] <- paste(type, seq_along(idx), sep = "_")
       }
 
       self$node_tf_names <- types
@@ -125,7 +125,7 @@ dag_class <- R6Class(
     },
 
     # get the TF names for different node types
-    get_tf_names = function (types = NULL) {
+    get_tf_names = function(types = NULL) {
       names <- self$node_tf_names
       if (!is.null(types))
         names <- names[which(self$node_types %in% types)]
@@ -133,7 +133,7 @@ dag_class <- R6Class(
     },
 
     # look up the TF name for a single node
-    tf_name = function (node) {
+    tf_name = function(node) {
       name <- self$node_tf_names[node$unique_name]
       if (length(name) == 0) {
         name <- ""
@@ -141,8 +141,8 @@ dag_class <- R6Class(
       name
     },
 
-    define_free_state = function (type = c("variable", "placeholder"),
-                                  name = "free_state") {
+    define_free_state = function(type = c("variable", "placeholder"),
+                                 name = "free_state") {
 
       type <- match.arg(type)
 
@@ -176,7 +176,7 @@ dag_class <- R6Class(
 
     # define the body of the tensorflow graph in the environment env; without
     # defining the free_state, or the densities etc.
-    define_tf_body = function (target_nodes = self$node_list) {
+    define_tf_body = function(target_nodes = self$node_list) {
 
       tfe <- self$tf_environment
 
@@ -185,7 +185,7 @@ dag_class <- R6Class(
 
       params <- self$parameters_example
       lengths <- vapply(params,
-                        function (x) as.integer(prod(dim(x))),
+                        function(x) as.integer(prod(dim(x))),
                         FUN.VALUE = 1L)
 
       if (length(lengths) > 1) {
@@ -201,14 +201,14 @@ dag_class <- R6Class(
       # define all nodes, node densities and free states in the environment, and
       # on the graph
       self$on_graph(lapply(target_nodes,
-                           function (x) x$define_tf(self)))
+                           function(x) x$define_tf(self)))
 
       invisible(NULL)
 
     },
 
     # use core and compilation options to set up a session in this environment
-    define_tf_session = function () {
+    define_tf_session = function() {
 
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
@@ -219,7 +219,7 @@ dag_class <- R6Class(
 
       if (self$compile) {
         self$tf_run(py_set_attr(config$graph_options$optimizer_options,
-                                'global_jit_level',
+                                "global_jit_level",
                                 tf$OptimizerOptions$ON_1))
       }
 
@@ -230,7 +230,7 @@ dag_class <- R6Class(
     },
 
     # define tf graph in environment
-    define_tf = function () {
+    define_tf = function() {
 
       # define the free state variable, rest of the graph, and the session
       self$define_free_state("placeholder", "free_state")
@@ -240,7 +240,7 @@ dag_class <- R6Class(
     },
 
     # define tensor for overall log density and gradients
-    define_joint_density = function () {
+    define_joint_density = function() {
 
       tfe <- self$tf_environment
 
@@ -287,14 +287,14 @@ dag_class <- R6Class(
       self$on_graph(joint_density <- tf$add_n(summed_densities))
 
       # assign overall density to environment
-      assign('joint_density',
+      assign("joint_density",
              joint_density,
              envir = self$tf_environment)
 
       # define adjusted joint density
 
       # get names of adjustment tensors for all variable nodes
-      adj_names <- paste0(self$get_tf_names(types = 'variable'), '_adj')
+      adj_names <- paste0(self$get_tf_names(types = "variable"), "_adj")
 
       # get TF density tensors for all distribution
       adj <- lapply(adj_names, get, envir = self$tf_environment)
@@ -304,7 +304,7 @@ dag_class <- R6Class(
       self$on_graph(total_adj <- tf$add_n(adj))
 
       # assign overall density to environment
-      assign('joint_density_adj',
+      assign("joint_density_adj",
              joint_density + total_adj,
              envir = self$tf_environment)
 
@@ -312,13 +312,13 @@ dag_class <- R6Class(
 
     # return a function to obtain the model log probability from a tensor for
     # the free state
-    generate_log_prob_function = function (which = c("adjusted",
-                                                     "unadjusted",
-                                                     "both")) {
+    generate_log_prob_function = function(which = c("adjusted",
+                                                    "unadjusted",
+                                                    "both")) {
 
       which <- match.arg(which)
 
-      function (free_state) {
+      function(free_state) {
 
         # temporarily define a new environment
         tfe_old <- self$tf_environment
@@ -353,12 +353,12 @@ dag_class <- R6Class(
     },
 
     # return the expected free parameter format either in list or vector form
-    example_parameters = function (flat = TRUE) {
+    example_parameters = function(flat = TRUE) {
 
       # find all variable nodes in the graph and get their values
-      nodes <- self$node_list[self$node_types == 'variable']
-      names(nodes) <- self$get_tf_names(types = 'variable')
-      current_parameters <- lapply(nodes, member, 'value()')
+      nodes <- self$node_list[self$node_types == "variable"]
+      names(nodes) <- self$get_tf_names(types = "variable")
+      current_parameters <- lapply(nodes, member, "value()")
 
       # optionally flatten them
       if (flat)
@@ -368,8 +368,8 @@ dag_class <- R6Class(
 
     },
 
-    build_feed_dict = function (dict_list = list(),
-                                data_list = self$tf_environment$data_list) {
+    build_feed_dict = function(dict_list = list(),
+                               data_list = self$tf_environment$data_list) {
 
       tfe <- self$tf_environment
 
@@ -382,7 +382,7 @@ dag_class <- R6Class(
 
     },
 
-    send_parameters = function (parameters) {
+    send_parameters = function(parameters) {
 
       # reshape to a row vector if needed
       if (is.null(dim(parameters))) {
@@ -408,7 +408,7 @@ dag_class <- R6Class(
 
     },
 
-    hessians = function () {
+    hessians = function() {
 
       tfe <- self$tf_environment
       nodes <- self$target_nodes
@@ -442,7 +442,7 @@ dag_class <- R6Class(
     },
 
     # return the current values of the traced nodes, as a named vector
-    trace_values = function (free_state, flatten = TRUE) {
+    trace_values = function(free_state, flatten = TRUE) {
 
       # update the parameters & build the feed dict
       self$send_parameters(free_state)
@@ -487,7 +487,7 @@ dag_class <- R6Class(
     },
 
     # for all the nodes in this dag, return a vector of membership to sub-graphs
-    subgraph_membership = function () {
+    subgraph_membership = function() {
 
       # convert adjacency matrix into absolute connectedness matrix using matrix
       # powers. Inspired by Method 2 here:
@@ -516,14 +516,14 @@ dag_class <- R6Class(
 
       # check we didn't time out
       if (it == maxit) {
-        stop ("could not determine the number of independent models ",
-              "in a reasonable amount of time",
-              call. = FALSE)
+        stop("could not determine the number of independent models ",
+             "in a reasonable amount of time",
+             call. = FALSE)
       }
 
       # find the cluster IDs
       n <- nrow(R)
-      neighbours <- lapply(seq_len(n), function (i) which(R[i, ]))
+      neighbours <- lapply(seq_len(n), function(i) which(R[i, ]))
       cluster_names <- vapply(neighbours, paste, collapse = "_", FUN.VALUE = "")
       cluster_id <- match(cluster_names, unique(cluster_names))
 
@@ -533,7 +533,7 @@ dag_class <- R6Class(
 
     },
 
-    build_adjacency_matrix = function () {
+    build_adjacency_matrix = function() {
 
       # make dag matrix
       n_node <- length(self$node_list)
@@ -544,14 +544,14 @@ dag_class <- R6Class(
 
       parents <- lapply(self$node_list,
                         member,
-                        'parent_names()')
+                        "parent_names()")
       children <- lapply(self$node_list,
                          member,
-                         'child_names(recursive = FALSE)')
+                         "child_names(recursive = FALSE)")
 
       # for distribution nodes, remove target nodes from children, and put them
       # in parents to send the arrow in the opposite direction when plotting
-      distribs <- which(node_types == 'distribution')
+      distribs <- which(node_types == "distribution")
       for (i in distribs) {
 
         own_name <- node_names[i]

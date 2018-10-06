@@ -64,12 +64,11 @@ greta_stash$callbacks <- list(parallel_progress = progress_bars)
 # gist)
 
 # other packages, such as greta.live, can then create new modifier functions
-# that create and register callbacks with this mechanism. E.g.:
-# greta.live::use_dashboard()
+# that create and register callbacks with this mechanism.
+# E.g.: greta.live::use_dashboard()
 # which would add a callback to greta::.internals$misc$greta_stash$callbacks
 # to update a shiny flex dashboard with convergence diagnostic plots,
 # dynamic traces (in 1D or 2D), coloured-in summary stats
 # (with crayon, bolder if they are more certain)
 
 # then use ropenscilabs/ssh to scp progress information from the remote servers
-

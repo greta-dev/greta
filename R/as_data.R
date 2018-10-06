@@ -31,14 +31,14 @@
 #' }
 as_data <- function (x) {
   check_tf_version("error")
-  UseMethod('as_data', x)
+  UseMethod("as_data", x)
 }
 
 # if it's already a *data* greta_array fine, else error
 #' @export
 as_data.greta_array <- function (x) {
-  if (!inherits(get_node(x), 'data_node')) {
-    stop ('cannot coerce a non-data greta_array to data',
+  if (!inherits(get_node(x), "data_node")) {
+    stop ("cannot coerce a non-data greta_array to data",
           call. = FALSE)
   }
   x

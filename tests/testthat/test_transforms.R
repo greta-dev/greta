@@ -1,20 +1,20 @@
-context('transformations')
+context("transformations")
 
-test_that('transformations work as expected', {
+test_that("transformations work as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- randn(25, 4)
 
 
-  r_icloglog <- function (x)
+  r_icloglog <- function(x)
     1 - exp(-1 * exp(x))
 
-  r_log1pe <- function (x)
+  r_log1pe <- function(x)
     log1p(exp(x))
 
-  r_imultilogit <- function (x) {
+  r_imultilogit <- function(x) {
     x <- cbind(x, 0)
     x <- exp(x)
     x <- sweep(x, 1, rowSums(x), "/")
@@ -33,7 +33,7 @@ test_that('transformations work as expected', {
 test_that("imultilogit errors informatively", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- ones(3, 4, 3)
 
@@ -41,4 +41,3 @@ test_that("imultilogit errors informatively", {
                "imultilogit expects a 2D greta array")
 
 })
-

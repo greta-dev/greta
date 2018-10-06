@@ -46,18 +46,18 @@
 joint <- function(..., dim = NULL)
   distrib("joint", list(...), dim)
 
-joint_distribution <- R6Class (
-  'joint_distribution',
+joint_distribution <- R6Class(
+  "joint_distribution",
   inherit = distribution_node,
   public = list(
 
-    initialize = function (dots, dim) {
+    initialize = function(dots, dim) {
 
       n_distributions <- length(dots)
 
       if (n_distributions < 2) {
-        stop ("joint must be passed at least two distributions",
-              call. = FALSE)
+        stop("joint must be passed at least two distributions",
+             call. = FALSE)
       }
 
       # check the dimensions of the variables in dots
@@ -78,20 +78,20 @@ joint_distribution <- R6Class (
       lapply(distribs, function(x) x$remove_target())
 
       # also strip the distributions from the variables
-      lapply(dot_nodes, function (x) x$distribution <- NULL)
+      lapply(dot_nodes, function(x) x$distribution <- NULL)
 
       # check the distributions are all either discrete or continuous
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)
 
       if (!all(discrete) & !all(!discrete)) {
-        stop ("cannot construct a joint distribution from a combination of discrete ",
-              "and continuous distributions",
-              call. = FALSE)
+        stop("cannot construct a joint distribution from a combination of discrete ",
+             "and continuous distributions",
+             call. = FALSE)
       }
 
       # for any discrete ones, tell them they are fixed
 
-      super$initialize('joint', dim, discrete = discrete[1])
+      super$initialize("joint", dim, discrete = discrete[1])
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
@@ -100,12 +100,12 @@ joint_distribution <- R6Class (
 
     },
 
-    tf_distrib = function (parameters, dag) {
+    tf_distrib = function(parameters, dag) {
 
       densities <- parameters
       names(densities) <- NULL
 
-      log_prob <- function (x) {
+      log_prob <- function(x) {
 
         # split x on the joint dimension, and loop through computing the densities
         last_dim <- length(dim(x)) - 1L

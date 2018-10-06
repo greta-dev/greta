@@ -1,9 +1,9 @@
-context('functions')
+context("functions")
 
-test_that('simple functions work as expected', {
+test_that("simple functions work as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- randn(25, 4)
   n <- 10
@@ -40,10 +40,10 @@ test_that('simple functions work as expected', {
 
 })
 
-test_that('matrix functions work as expected', {
+test_that("matrix functions work as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- rWishart(1, 6, diag(5))[, , 1]
   b <- randn(5, 25)
@@ -74,10 +74,10 @@ test_that('matrix functions work as expected', {
 
 })
 
-test_that('aperm works as expected', {
+test_that("aperm works as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- randn(5, 4, 3, 2, 1)
 
@@ -92,10 +92,10 @@ test_that('aperm works as expected', {
 
 })
 
-test_that('reducing functions work as expected', {
+test_that("reducing functions work as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- randn(1, 3)
   b <- randn(5, 25)
@@ -126,10 +126,10 @@ test_that('reducing functions work as expected', {
 
 })
 
-test_that('cumulative functions work as expected', {
+test_that("cumulative functions work as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- randn(5)
 
@@ -138,13 +138,13 @@ test_that('cumulative functions work as expected', {
 
 })
 
-test_that('apply works as expected', {
+test_that("apply works as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   # check apply.greta_array works like R's apply for X
-  check_apply <- function (X, MARGIN, FUN) {
+  check_apply <- function(X, MARGIN, FUN) {
     check_op(apply, a,
              other_args = list(MARGIN = MARGIN,
                                FUN = FUN))
@@ -168,10 +168,10 @@ test_that('apply works as expected', {
 
 })
 
-test_that('tapply works as expected', {
+test_that("tapply works as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- randn(15, 1)
 
@@ -183,10 +183,10 @@ test_that('tapply works as expected', {
 
 })
 
-test_that('cumulative functions error as expected', {
+test_that("cumulative functions error as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- as_data(randn(1, 5))
   b <- as_data(randn(5, 1, 1))
@@ -202,16 +202,16 @@ test_that('cumulative functions error as expected', {
 
 })
 
-test_that('sweep works as expected', {
+test_that("sweep works as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   stats_list <- list(randn(5), randn(25))
   x <- randn(5, 25)
 
   for (dim in c(1, 2)) {
-    for (fun in c('-', '+', '/', '*')) {
+    for (fun in c("-", "+", "/", "*")) {
 
       stats <- stats_list[[dim]]
 
@@ -228,10 +228,10 @@ test_that('sweep works as expected', {
 
 })
 
-test_that('sweep works for numeric x and greta array STATS', {
+test_that("sweep works for numeric x and greta array STATS", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   STATS <- randn(5)
   ga_STATS <- as_data(STATS)
@@ -244,10 +244,10 @@ test_that('sweep works for numeric x and greta array STATS', {
 
 })
 
-test_that('solve and sweep and kronecker error as expected', {
+test_that("solve and sweep and kronecker error as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- as_data(randn(5, 25))
   b <- as_data(randn(5, 25, 2))
@@ -277,22 +277,22 @@ test_that('solve and sweep and kronecker error as expected', {
   # sweep
   # x must be 2D
   expect_error(sweep(b, 1, stats),
-               '^x must be a 2D array, but has')
+               "^x must be a 2D array, but has")
 
   # dim must be either 1 or 2
   expect_error(sweep(a, 3, stats),
-               'MARGIN can only be 1 or 2')
+               "MARGIN can only be 1 or 2")
 
   # stats must have the correct number of elements
   expect_error(sweep(a, 1, c(stats, stats)),
-               '^the number of elements of STATS does not match')
+               "^the number of elements of STATS does not match")
 
   # stats must be a column vector
   expect_error(sweep(a, 1, t(stats)),
-               '^STATS must be a column vector array, but has dimensions')
+               "^STATS must be a column vector array, but has dimensions")
 
   expect_error(sweep(a, 2, stats),
-               '^the number of elements of STATS does not match')
+               "^the number of elements of STATS does not match")
 
   # kronecker
   # X must be 2D
@@ -305,10 +305,10 @@ test_that('solve and sweep and kronecker error as expected', {
 
 })
 
-test_that('colSums etc. error as expected', {
+test_that("colSums etc. error as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- as_data(randn(3, 4, 5))
   expect_error(colSums(x, dims = 3),
@@ -322,10 +322,10 @@ test_that('colSums etc. error as expected', {
 
 })
 
-test_that('forwardsolve and backsolve error as expected', {
+test_that("forwardsolve and backsolve error as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- wishart(6, diag(5))
   b <- as_data(randn(5, 25))
@@ -343,10 +343,10 @@ test_that('forwardsolve and backsolve error as expected', {
 
 })
 
-test_that('tapply errors as expected', {
+test_that("tapply errors as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   group <- sample.int(5, 10, replace = TRUE)
   a <- ones(10, 1)
@@ -365,7 +365,7 @@ test_that('tapply errors as expected', {
 test_that("eigen works as expected", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   k <- 4
   x <- rWishart(1, k + 1, diag(k))[, , 1]
@@ -387,7 +387,7 @@ test_that("eigen works as expected", {
   # vectors
   # these can be inverted, need to loop through columns checking whether they
   # are right if the other way up
-  column_difference <- function (r_column, greta_column) {
+  column_difference <- function(r_column, greta_column) {
     pos <- abs(r_column - greta_column)
     neg <- abs(r_column - (-1 * greta_column))
     if (sum(pos) < sum(neg))
@@ -398,7 +398,7 @@ test_that("eigen works as expected", {
 
   greta_vectors <- grab(greta_out$vectors)
   difference <- vapply(seq_len(k),
-                       function (i) {
+                       function(i) {
                          column_difference(r_out$vectors[, i],
                                            greta_vectors[, i])
                        },
@@ -411,7 +411,7 @@ test_that("eigen works as expected", {
 test_that("ignored options are errored/warned about", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- ones(3, 3)
   expect_error(round(x, 2),
@@ -435,7 +435,7 @@ test_that("ignored options are errored/warned about", {
 test_that("incorrect dimensions are errored about", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- ones(3, 3, 3)
   y <- ones(3, 4)
@@ -461,4 +461,4 @@ test_that("incorrect dimensions are errored about", {
   expect_error(rdist(x, y),
                "must have the same number of columns")
 
-  })
+})

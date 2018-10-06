@@ -40,7 +40,7 @@ NULL
 
 #' @export
 #' @rdname structures
-zeros <- function (...) {
+zeros <- function(...) {
   dims <- c(...)
   names(dims) <- NULL
   greta_array(0, dims)
@@ -48,7 +48,7 @@ zeros <- function (...) {
 
 #' @export
 #' @rdname structures
-ones <- function (...) {
+ones <- function(...) {
   dims <- c(...)
   names(dims) <- NULL
   greta_array(1, dims)
@@ -57,12 +57,12 @@ ones <- function (...) {
 #' @export
 #' @rdname structures
 greta_array <- function(data = 0, dim = length(data))
-  UseMethod ("greta_array")
+  UseMethod("greta_array")
 
 
 # safely handle self-coersion, possibly with reshaping
 #' @export
-greta_array.greta_array <- function (data = 0, dim = length(data)) {
+greta_array.greta_array <- function(data = 0, dim = length(data)) {
 
   # reshape if necessary (apparently users expect this functionality)
   dim <- as.integer(dim)
@@ -79,6 +79,6 @@ greta_array.greta_array <- function (data = 0, dim = length(data)) {
 
 # else try to coerce to a greta array
 #' @export
-greta_array.default <- function (data = 0, dim = length(data)) {
+greta_array.default <- function(data = 0, dim = length(data)) {
   as.greta_array(array(data = data, dim = dim))
 }

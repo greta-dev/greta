@@ -1,13 +1,13 @@
-context('joint distributions')
+context("joint distributions")
 
 test_that("continuous joint variables can be sampled from", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- joint(normal(0, 1),
-               normal(0, 2),
-               normal(0, 3))
+             normal(0, 2),
+             normal(0, 3))
 
   sample_distribution(x)
 
@@ -16,7 +16,7 @@ test_that("continuous joint variables can be sampled from", {
 test_that("fixed continuous joint distributions can be sampled from", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   obs <- matrix(rnorm(300, 0, 2), 100, 3)
   mu <- variable(dim = 3)
@@ -32,14 +32,14 @@ test_that("fixed continuous joint distributions can be sampled from", {
 test_that("fixed discrete joint distributions can be sampled from", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   obs <- matrix(rbinom(300, 1, 0.5), 100, 3)
   probs <- variable(0, 1, dim = 3)
   distribution(obs) <- joint(bernoulli(probs[1]),
-                               bernoulli(probs[2]),
-                               bernoulli(probs[3]),
-                               dim = 100)
+                             bernoulli(probs[2]),
+                             bernoulli(probs[3]),
+                             dim = 100)
 
   sample_distribution(probs)
 
@@ -48,10 +48,10 @@ test_that("fixed discrete joint distributions can be sampled from", {
 test_that("joint of fixed and continuous distributions errors", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   expect_error(joint(bernoulli(0.5),
-                       normal(0, 1)),
+                     normal(0, 1)),
                "combination of discrete and continuous")
 
 })
@@ -59,7 +59,7 @@ test_that("joint of fixed and continuous distributions errors", {
 test_that("joint with insufficient distributions errors", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   expect_error(joint(normal(0, 2)),
                "at least two distributions")
@@ -72,16 +72,16 @@ test_that("joint with insufficient distributions errors", {
 test_that("joint of normals has correct density", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
-  joint_greta <- function (means, sds, dim) {
+  joint_greta <- function(means, sds, dim) {
     joint(normal(means[1], sds[1]),
-            normal(means[2], sds[2]),
-            normal(means[3], sds[3]),
+          normal(means[2], sds[2]),
+          normal(means[3], sds[3]),
           dim = dim)
   }
 
-  joint_r <- function (x, means, sds) {
+  joint_r <- function(x, means, sds) {
     densities <- matrix(NA,
                         nrow = length(x),
                         ncol = length(means))
@@ -104,16 +104,16 @@ test_that("joint of normals has correct density", {
 test_that("joint of Poissons has correct density", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
-  joint_greta <- function (rates, dim) {
+  joint_greta <- function(rates, dim) {
     joint(poisson(rates[1]),
           poisson(rates[2]),
           poisson(rates[3]),
           dim = dim)
   }
 
-  joint_r <- function (x, rates) {
+  joint_r <- function(x, rates) {
     densities <- matrix(NA,
                         nrow = length(x),
                         ncol = length(rates))

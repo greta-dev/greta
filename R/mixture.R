@@ -69,18 +69,18 @@
 mixture <- function(..., weights, dim = NULL)
   distrib("mixture", list(...), weights, dim)
 
-mixture_distribution <- R6Class (
-  'mixture_distribution',
+mixture_distribution <- R6Class(
+  "mixture_distribution",
   inherit = distribution_node,
   public = list(
 
-    initialize = function (dots, weights, dim) {
+    initialize = function(dots, weights, dim) {
 
       n_distributions <- length(dots)
 
       if (n_distributions < 2) {
-        stop ("mixture must be passed at least two distributions",
-              call. = FALSE)
+        stop("mixture must be passed at least two distributions",
+             call. = FALSE)
       }
 
       # check the dimensions of the variables in dots
@@ -91,17 +91,17 @@ mixture_distribution <- R6Class (
 
       # weights should have n_distributions as the first dimension
       if (weights_dim[1] != n_distributions) {
-        stop ("the first dimension of weights must be the number of ",
-              "distributions in the mixture (", n_distributions, "), ",
-              "but was " , weights_dim[1],
-              call. = FALSE)
+        stop("the first dimension of weights must be the number of ",
+             "distributions in the mixture (", n_distributions, "), ",
+             "but was ", weights_dim[1],
+             call. = FALSE)
       }
 
       # drop a trailing 1 from dim, so user doesn't need to deal with it
       # Ugh, need to get rid of column vector thing soon.
       weights_extra_dim <- dim
       n_extra_dim <- length(weights_extra_dim)
-      if (weights_extra_dim[n_extra_dim] == 1){
+      if (weights_extra_dim[n_extra_dim] == 1) {
         weights_extra_dim <- weights_extra_dim[-n_extra_dim]
       }
 
@@ -109,10 +109,10 @@ mixture_distribution <- R6Class (
       w_dim <- weights_dim[-1]
       if (!((length(w_dim == 1) && w_dim == 1) |
             all(w_dim == weights_extra_dim))) {
-        stop ("the dimension of weights must be either ", n_distributions,
-              " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
-              " but was ", paste(weights_dim, collapse = " x "),
-              call. = FALSE)
+        stop("the dimension of weights must be either ", n_distributions,
+             " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
+             " but was ", paste(weights_dim, collapse = " x "),
+             call. = FALSE)
       }
 
       dot_nodes <- lapply(dots, get_node)
@@ -122,20 +122,20 @@ mixture_distribution <- R6Class (
       lapply(distribs, function(x) x$remove_target())
 
       # also strip the distributions from the variables
-      lapply(dot_nodes, function (x) x$distribution <- NULL)
+      lapply(dot_nodes, function(x) x$distribution <- NULL)
 
       # check the distributions are all either discrete or continuous
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)
 
       if (!all(discrete) & !all(!discrete)) {
-        stop ("cannot construct a mixture from a combination of discrete ",
-              "and continuous distributions",
-              call. = FALSE)
+        stop("cannot construct a mixture from a combination of discrete ",
+             "and continuous distributions",
+             call. = FALSE)
       }
 
       # for any discrete ones, tell them they are fixed
 
-      super$initialize('mixture', dim, discrete = discrete[1])
+      super$initialize("mixture", dim, discrete = discrete[1])
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
@@ -145,7 +145,7 @@ mixture_distribution <- R6Class (
       self$add_parameter(weights, "weights")
     },
 
-    tf_distrib = function (parameters, dag) {
+    tf_distrib = function(parameters, dag) {
 
       densities <- parameters[names(parameters) != "weights"]
       names(densities) <- NULL
@@ -155,7 +155,7 @@ mixture_distribution <- R6Class (
       weights <- weights / weights_sum
       log_weights <- tf$log(weights)
 
-      log_prob <- function (x) {
+      log_prob <- function(x) {
 
         # get component densities in an array
         log_probs <- lapply(densities, do.call, list(x))

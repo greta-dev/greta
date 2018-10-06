@@ -72,7 +72,8 @@
 #' }
 #'
 #'
-calculate <- function (target, values = list(), precision = c("double", "single")) {
+calculate <- function (target, values = list(),
+                       precision = c("double", "single")) {
 
   target_name <- deparse(substitute(target))
   tf_float <- switch(match.arg(precision),
@@ -102,6 +103,7 @@ calculate_mcmc.list <- function (target, target_name, values, tf_float) {
 
   # extend the dag to include this node, as the target
   dag$build_dag(list(target))
+
   self <- dag  # mock for scoping
   dag$define_tf()
 
@@ -111,7 +113,6 @@ calculate_mcmc.list <- function (target, target_name, values, tf_float) {
   param <- dag$example_parameters()
   param[] <- 0
   example_values <- dag$trace_values(param)
-  n_trace <- length(example_values)
 
   # raw draws are either an attribute, or this object
   model_info <- attr(values, "model_info")

@@ -1,9 +1,9 @@
-context('mixtures')
+context("mixtures")
 
 test_that("continuous mixture variables can be sampled from", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   weights <- uniform(0, 1, 3)
   x <- mixture(normal(0, 1),
@@ -18,7 +18,7 @@ test_that("continuous mixture variables can be sampled from", {
 test_that("fixed continuous mixture distributions can be sampled from", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   weights <- uniform(0, 1, 3)
   obs <- rnorm(100, 0, 2)
@@ -35,7 +35,7 @@ test_that("fixed continuous mixture distributions can be sampled from", {
 test_that("fixed discrete mixture distributions can be sampled from", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   weights <- uniform(0, 1, 3)
   obs <- rbinom(100, 1, 0.5)
@@ -51,7 +51,7 @@ test_that("fixed discrete mixture distributions can be sampled from", {
 test_that("mixtures of fixed and continuous distributions errors", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   weights <- uniform(0, 1, dim = 2)
   expect_error(mixture(bernoulli(0.5),
@@ -64,7 +64,7 @@ test_that("mixtures of fixed and continuous distributions errors", {
 test_that("incorrectly-shaped weights errors", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   weights <- uniform(0, 1, dim = c(1, 2))
   expect_error(mixture(normal(0, 1),
@@ -77,7 +77,7 @@ test_that("incorrectly-shaped weights errors", {
 test_that("mixtures with insufficient distributions errors", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   weights <- uniform(0, 1)
   expect_error(mixture(normal(0, 2),
@@ -92,16 +92,16 @@ test_that("mixtures with insufficient distributions errors", {
 test_that("mixture of normals has correct density", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
-  mix_greta <- function (means, sds, weights, dim) {
+  mix_greta <- function(means, sds, weights, dim) {
     mixture(normal(means[1], sds[1], dim),
             normal(means[2], sds[2], dim),
             normal(means[3], sds[3], dim),
             weights = weights)
   }
 
-  mix_r <- function (x, means, sds, weights) {
+  mix_r <- function(x, means, sds, weights) {
     densities <- matrix(NA,
                         nrow = length(x),
                         ncol = length(means))
@@ -127,16 +127,16 @@ test_that("mixture of normals has correct density", {
 test_that("mixture of Poissons has correct density", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
-  mix_greta <- function (rates, weights, dim) {
+  mix_greta <- function(rates, weights, dim) {
     mixture(poisson(rates[1], dim),
             poisson(rates[2], dim),
             poisson(rates[3], dim),
             weights = weights)
   }
 
-  mix_r <- function (x, rates, weights) {
+  mix_r <- function(x, rates, weights) {
     densities <- matrix(NA,
                         nrow = length(x),
                         ncol = length(rates))
@@ -161,16 +161,16 @@ test_that("mixture of Poissons has correct density", {
 test_that("mixture of normals with varying weights has correct density", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
-  mix_greta <- function (means, sds, weights, dim) {
+  mix_greta <- function(means, sds, weights, dim) {
     mixture(normal(means[1], sds[1], dim),
             normal(means[2], sds[2], dim),
             normal(means[3], sds[3], dim),
             weights = weights)
   }
 
-  mix_r <- function (x, means, sds, weights) {
+  mix_r <- function(x, means, sds, weights) {
     out_dim <- dim(x)
     densities <- array(NA, c(length(means), prod(out_dim)))
     for (i in seq_along(means))

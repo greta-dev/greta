@@ -1,9 +1,9 @@
 data_node <- R6Class(
-  'data_node',
+  "data_node",
   inherit = node,
   public = list(
 
-    initialize = function (data) {
+    initialize = function(data) {
 
       # coerce to an array with 2+ dimensions
       data <- as_2D_array(data)
@@ -13,7 +13,7 @@ data_node <- R6Class(
 
     },
 
-    tf = function (dag) {
+    tf = function(dag) {
 
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
@@ -49,7 +49,7 @@ data_node <- R6Class(
 
 # a node for applying operations to values
 operation_node <- R6Class(
-  'operation_node',
+  "operation_node",
   inherit = node,
   public = list(
 
@@ -65,14 +65,14 @@ operation_node <- R6Class(
     # cholesky factor
     representations = list(),
 
-    initialize = function (operation,
-                           ...,
-                           dim = NULL,
-                           operation_args = list(),
-                           tf_operation = NULL,
-                           value = NULL,
-                           representations = list(),
-                           tf_function_env = parent.frame(3)) {
+    initialize = function(operation,
+                          ...,
+                          dim = NULL,
+                          operation_args = list(),
+                          tf_operation = NULL,
+                          value = NULL,
+                          representations = list(),
+                          tf_function_env = parent.frame(3)) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
@@ -97,13 +97,13 @@ operation_node <- R6Class(
       if (is.null(value))
         value <- unknowns(dim = dim)
       else if (!all.equal(dim(value), dim))
-        stop ('values have the wrong dimension so cannot be used')
+        stop("values have the wrong dimension so cannot be used")
 
       super$initialize(dim, value)
 
     },
 
-    add_argument = function (argument) {
+    add_argument = function(argument) {
 
       # guess at a name, coerce to a node, and add as a child
       parameter <- to_node(argument)
@@ -111,7 +111,7 @@ operation_node <- R6Class(
 
     },
 
-    tf = function (dag) {
+    tf = function(dag) {
 
       # fetch the tensors for the environment
       arg_tf_names <- lapply(self$children, dag$tf_name)
@@ -138,8 +138,8 @@ operation_node <- R6Class(
   )
 )
 
-variable_node <- R6Class (
-  'variable_node',
+variable_node <- R6Class(
+  "variable_node",
   inherit = node,
   public = list(
 
@@ -147,15 +147,15 @@ variable_node <- R6Class (
     lower = -Inf,
     upper = Inf,
 
-    initialize = function (lower = -Inf, upper = Inf, dim = 1) {
+    initialize = function(lower = -Inf, upper = Inf, dim = 1) {
 
       good_types <- is.numeric(lower) && length(lower) == 1 &
         is.numeric(upper) && length(upper) == 1
 
       if (!good_types) {
 
-        stop ('lower and upper must be numeric vectors of length 1',
-              call. = FALSE)
+        stop("lower and upper must be numeric vectors of length 1",
+             call. = FALSE)
 
       }
 
@@ -165,38 +165,38 @@ variable_node <- R6Class (
       # find constraint type
       if (lower == -Inf & upper == Inf) {
 
-        self$constraint <- 'none'
+        self$constraint <- "none"
         bad_limits <- FALSE
 
       } else if (lower == -Inf & upper != Inf) {
 
-        self$constraint <- 'low'
+        self$constraint <- "low"
         bad_limits <- !is.finite(upper)
 
       } else if (lower != -Inf & upper == Inf) {
 
-        self$constraint <- 'high'
+        self$constraint <- "high"
         bad_limits <- !is.finite(lower)
 
       } else if (lower != -Inf & upper != Inf) {
 
-        self$constraint <- 'both'
+        self$constraint <- "both"
         bad_limits <- !is.finite(lower) | !is.finite(upper)
 
       }
 
       if (bad_limits) {
 
-        stop ('lower and upper must either be -Inf (lower only), ',
-              'Inf (upper only) or finite scalars',
-              call. = FALSE)
+        stop("lower and upper must either be -Inf (lower only), ",
+             "Inf (upper only) or finite scalars",
+             call. = FALSE)
 
       }
 
       if (lower >= upper) {
 
-        stop ('upper bound must be greater than lower bound',
-              call. = FALSE)
+        stop("upper bound must be greater than lower bound",
+             call. = FALSE)
 
       }
 
@@ -207,15 +207,15 @@ variable_node <- R6Class (
 
     },
 
-    tf = function (dag) {
+    tf = function(dag) {
 
       # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
-      free_name <- sprintf('%s_free', tf_name)
+      free_name <- sprintf("%s_free", tf_name)
 
       # create the log jacobian adjustment for the free state
       tf_adj <- self$tf_adjustment(dag)
-      adj_name <- sprintf('%s_adj', tf_name)
+      adj_name <- sprintf("%s_adj", tf_name)
       assign(adj_name,
              tf_adj,
              envir = dag$tf_environment)
@@ -235,24 +235,24 @@ variable_node <- R6Class (
 
     },
 
-    tf_from_free = function (x, env) {
+    tf_from_free = function(x, env) {
 
       upper <- self$upper
       lower <- self$lower
 
-      if (self$constraint == 'none') {
+      if (self$constraint == "none") {
 
         y <- x
 
-      } else if (self$constraint == 'both') {
+      } else if (self$constraint == "both") {
 
         y <- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
 
-      } else if (self$constraint == 'low') {
+      } else if (self$constraint == "low") {
 
         y <- fl(upper) - tf$exp(x)
 
-      } else if (self$constraint == 'high') {
+      } else if (self$constraint == "high") {
 
         y <- tf$exp(x) + fl(lower)
 
@@ -267,24 +267,24 @@ variable_node <- R6Class (
     },
 
     # adjustments for univariate variables
-    tf_log_jacobian_adjustment = function (free) {
+    tf_log_jacobian_adjustment = function(free) {
 
-      ljac_none <- function (x) {
+      ljac_none <- function(x) {
         zero <- tf$constant(0, dtype = tf_float(), shape = shape(1))
         tf$tile(zero, multiples = list(tf$shape(x)[[0]]))
       }
 
-      ljac_exp <- function (x) {
+      ljac_exp <- function(x) {
         tf_sum(x, drop = TRUE)
       }
 
-      ljac_logistic <- function (x) {
+      ljac_logistic <- function(x) {
         lrange <- log(self$upper - self$lower)
         tf_sum(x - fl(2) * tf$nn$softplus(x) + lrange,
                drop = TRUE)
       }
 
-      ljac_corr_mat <- function (x) {
+      ljac_corr_mat <- function(x) {
 
         # find dimension
         K <- dim(x)[[2]]
@@ -307,7 +307,7 @@ variable_node <- R6Class (
 
       }
 
-      ljac_cov_mat <- function (x) {
+      ljac_cov_mat <- function(x) {
 
         # find dimension
         n <- dim(x)[[2]]
@@ -319,23 +319,23 @@ variable_node <- R6Class (
 
       }
 
-      fun <- switch (self$constraint,
-                     none = ljac_none,
-                     high = ljac_exp,
-                     low = ljac_exp,
-                     both = ljac_logistic,
-                     correlation_matrix = ljac_corr_mat,
-                     covariance_matrix = ljac_cov_mat)
+      fun <- switch(self$constraint,
+                    none = ljac_none,
+                    high = ljac_exp,
+                    low = ljac_exp,
+                    both = ljac_logistic,
+                    correlation_matrix = ljac_corr_mat,
+                    covariance_matrix = ljac_cov_mat)
 
       fun(free)
 
     },
 
     # create a tensor giving the log jacobian adjustment for this variable
-    tf_adjustment = function (dag) {
+    tf_adjustment = function(dag) {
 
       # find free version of node
-      free_tensor_name <- paste0(dag$tf_name(self), '_free')
+      free_tensor_name <- paste0(dag$tf_name(self), "_free")
       free_tensor <- get(free_tensor_name, envir = dag$tf_environment)
 
       # apply jacobian adjustment to it
@@ -346,11 +346,11 @@ variable_node <- R6Class (
   )
 )
 
-distribution_node <- R6Class (
-  'distribution_node',
+distribution_node <- R6Class(
+  "distribution_node",
   inherit = node,
   public = list(
-    distribution_name = 'no distribution',
+    distribution_name = "no distribution",
     discrete = NA,
     target = NULL,
     user_node = NULL,
@@ -358,10 +358,10 @@ distribution_node <- R6Class (
     truncation = NULL,
     parameters = list(),
 
-    initialize = function (name = "no distribution",
-                           dim = NULL,
-                           truncation = NULL,
-                           discrete = FALSE) {
+    initialize = function(name = "no distribution",
+                          dim = NULL,
+                          truncation = NULL,
+                          discrete = FALSE) {
 
       super$initialize(dim)
 
@@ -388,12 +388,12 @@ distribution_node <- R6Class (
     },
 
     # create a target variable node (unconstrained by default)
-    create_target = function (truncation) {
+    create_target = function(truncation) {
       vble(truncation, dim = self$dim)
     },
 
     # create target node, add as a child, and give it this distribution
-    add_target = function (new_target) {
+    add_target = function(new_target) {
 
       # add as x and as a child
       self$target <- new_target
@@ -415,7 +415,7 @@ distribution_node <- R6Class (
     reset_target_flags = function() {},
 
     # replace the existing target node with a new one
-    remove_target = function () {
+    remove_target = function() {
 
       # remove x from children
       self$remove_child(self$target)
@@ -423,10 +423,10 @@ distribution_node <- R6Class (
 
     },
 
-    tf = function (dag) {
+    tf = function(dag) {
 
       # for distributions, tf assigns a *function* to execute the density
-      density <- function (tf_target) {
+      density <- function(tf_target) {
 
         # fetch inputs
         tf_parameters <- self$tf_fetch_parameters(dag)
@@ -456,11 +456,11 @@ distribution_node <- R6Class (
     },
 
     # which node to use as the *tf* target (overwritten by some distributions)
-    get_tf_target_node = function () {
+    get_tf_target_node = function() {
       self$target
     },
 
-    tf_fetch_parameters = function (dag) {
+    tf_fetch_parameters = function(dag) {
       # fetch the tensors corresponding to this node's parameters from the
       # environment, and return them in a named list
 
@@ -472,7 +472,7 @@ distribution_node <- R6Class (
 
     },
 
-    tf_log_density_offset = function (parameters) {
+    tf_log_density_offset = function(parameters) {
 
       # calculate the log-adjustment to the truncation term of the density
       # function i.e. the density of a distribution, truncated between a and b,
@@ -505,7 +505,7 @@ distribution_node <- R6Class (
 
     },
 
-    add_parameter = function (parameter, name) {
+    add_parameter = function(parameter, name) {
 
       parameter <- to_node(parameter)
       self$add_child(parameter)
@@ -513,19 +513,19 @@ distribution_node <- R6Class (
 
     },
 
-    tf_log_density_function = function (x, parameters, dag) {
+    tf_log_density_function = function(x, parameters, dag) {
 
       self$tf_distrib(parameters, dag)$log_prob(x)
 
     },
 
-    tf_cdf_function = function (x, parameters) {
+    tf_cdf_function = function(x, parameters) {
 
       self$tf_distrib(parameters, dag)$cdf(x)
 
     },
 
-    tf_log_cdf_function = function (x, parameters) {
+    tf_log_cdf_function = function(x, parameters) {
 
       self$tf_distrib(parameters, dag)$log_cdf(x)
 
@@ -543,12 +543,12 @@ node_classes_module <- module(node,
 
 
 # shorthand for distribution parameter constructors
-distrib <- function (distribution, ...) {
+distrib <- function(distribution, ...) {
 
   check_tf_version("error")
 
   # get and initialize the distribution, with a default value node
-  constructor <- get(paste0(distribution, '_distribution'),
+  constructor <- get(paste0(distribution, "_distribution"),
                      envir = parent.frame())
   distrib <- constructor$new(...)
 
@@ -559,14 +559,14 @@ distrib <- function (distribution, ...) {
 }
 
 # shorthand to speed up op definitions
-op <- function (...) {
+op <- function(...) {
   as.greta_array(operation_node$new(...))
 }
 
 # helper function to create a variable node
 # by default, make x (the node
 # containing the value) a free parameter of the correct dimension
-vble <- function (truncation, dim = 1) {
+vble <- function(truncation, dim = 1) {
 
   if (is.null(truncation))
     truncation <- c(-Inf, Inf)

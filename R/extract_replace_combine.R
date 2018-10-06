@@ -91,18 +91,18 @@ NULL
   # put dummy_in in the parent environment & execute there (to evaluate any
   # promises using variables in that environment), then remove
   pf <- parent.frame()
-  assign('._dummy_in', dummy_in, envir = pf)
+  assign("._dummy_in", dummy_in, envir = pf)
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
-  rm('._dummy_in', envir = pf)
+  rm("._dummy_in", envir = pf)
 
   if (any(is.na(dummy_out))) {
-    stop ("subscript out of bounds",
-          call. = FALSE)
+    stop("subscript out of bounds",
+         call. = FALSE)
   }
 
   node <- get_node(x)
   # if this is a data node, also subset the values and pass on
-  if (inherits(node, 'data_node')) {
+  if (inherits(node, "data_node")) {
 
     values_in <- node$value()
     call_list <- as.list(call)[-1]
@@ -112,9 +112,9 @@ NULL
     # put values_in in the parent environment & execute there (to evaluate any
     # promises using variables in that environment), then remove
     pf <- parent.frame()
-    assign('._values_in', values_in, envir = pf)
+    assign("._values_in", values_in, envir = pf)
     values_out <- do.call(.Primitive("["), call_list, envir = pf)
-    rm('._values_in', envir = pf)
+    rm("._values_in", envir = pf)
 
     # make sure it's an array
     values <- as.array(values_out)
@@ -144,7 +144,7 @@ NULL
   index <- flatten_rowwise(dummy_out)
 
   # create operation node, passing call and dims as additional arguments
-  op('extract',
+  op("extract",
      x,
      dim = dims_out,
      operation_args = list(nelem = nelem,
@@ -161,8 +161,8 @@ NULL
 
   node <- get_node(x)
 
-  if (inherits(node, 'variable_node')) {
-    stop ('cannot replace values in a variable greta array',
+  if (inherits(node, "variable_node")) {
+    stop("cannot replace values in a variable greta array",
          call. = FALSE)
   }
 
@@ -185,13 +185,13 @@ NULL
   # put dummy in the parent environment & execute there (to evaluate any
   # promises using variables in that environment), then remove
   pf <- parent.frame()
-  assign('._dummy_in', dummy, envir = pf)
+  assign("._dummy_in", dummy, envir = pf)
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
-  rm('._dummy_in', envir = pf)
+  rm("._dummy_in", envir = pf)
 
   if (any(is.na(dummy_out))) {
-    stop ("subscript out of bounds",
-          call. = FALSE)
+    stop("subscript out of bounds",
+         call. = FALSE)
   }
 
   index <- as.vector(dummy_out)
@@ -200,8 +200,8 @@ NULL
 
     if ((length(index) %% length(replacement)) != 0) {
 
-      stop ('number of items to replace is not a multiple of ',
-            'replacement length')
+      stop("number of items to replace is not a multiple of ",
+           "replacement length")
 
     } else {
 
@@ -219,11 +219,11 @@ NULL
   new_value[r_index] <- replacement_value
 
   # if either parent has an unknowns array as a value, coerce this to unknowns
-  if (inherits(x_value, 'unknowns') | inherits(replacement_value, 'unknowns'))
+  if (inherits(x_value, "unknowns") | inherits(replacement_value, "unknowns"))
     new_value <- as.unknowns(new_value)
 
   # create operation node, passing call and dims as additional arguments
-  op('replace',
+  op("replace",
      x,
      replacement,
      dim = dims,
@@ -235,7 +235,7 @@ NULL
 }
 
 #' @export
-cbind.greta_array <- function (...) {
+cbind.greta_array <- function(...) {
 
   dots <- list(...)
   dots <- lapply(dots, as.greta_array)
@@ -243,7 +243,7 @@ cbind.greta_array <- function (...) {
   dims <- lapply(dots, dim)
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2))
-    stop ('all greta arrays must be two-dimensional')
+    stop("all greta arrays must be two-dimensional")
 
   # dimensions
   rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
@@ -251,20 +251,20 @@ cbind.greta_array <- function (...) {
 
   # check all the same
   if (!all(rows == rows[1]))
-    stop ('all greta arrays must be have the same number of rows',
-          call. = FALSE)
+    stop("all greta arrays must be have the same number of rows",
+         call. = FALSE)
 
   # output dimensions
   dims <- c(rows[1], sum(cols))
 
-  op('cbind', ...,
+  op("cbind", ...,
      dim = dims,
      tf_operation = "tf_cbind")
 
 }
 
 #' @export
-rbind.greta_array <- function (...) {
+rbind.greta_array <- function(...) {
 
   dots <- list(...)
   dots <- lapply(dots, as.greta_array)
@@ -272,7 +272,7 @@ rbind.greta_array <- function (...) {
   dims <- lapply(dots, dim)
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2))
-    stop ('all greta arrays must be two-dimensional')
+    stop("all greta arrays must be two-dimensional")
 
   # dimensions
   rows <- vapply(dims, `[`, 1, FUN.VALUE = 1)
@@ -280,13 +280,13 @@ rbind.greta_array <- function (...) {
 
   # check all the same
   if (!all(cols == cols[1]))
-    stop ('all greta arrays must be have the same number of columns',
-          call. = FALSE)
+    stop("all greta arrays must be have the same number of columns",
+         call. = FALSE)
 
   # output dimensions
   dims <- c(sum(rows), cols[1])
 
-  op('rbind', ...,
+  op("rbind", ...,
      dim = dims,
      tf_operation = "tf_rbind")
 
@@ -294,11 +294,11 @@ rbind.greta_array <- function (...) {
 
 #' @rdname overloaded
 #' @export
-abind <- function (...,
-                   along = N, rev.along = NULL, new.names = NULL,
-                   force.array = TRUE, make.names = use.anon.names,
-                   use.anon.names = FALSE, use.first.dimnames = FALSE,
-                   hier.names = FALSE, use.dnns = FALSE) {
+abind <- function(...,
+                  along = N, rev.along = NULL, new.names = NULL,
+                  force.array = TRUE, make.names = use.anon.names,
+                  use.anon.names = FALSE, use.first.dimnames = FALSE,
+                  hier.names = FALSE, use.dnns = FALSE) {
   UseMethod("abind")
 }
 
@@ -307,18 +307,18 @@ abind <- function (...,
 utils::globalVariables("N", "greta")
 
 #' @export
-abind.default <- function (...,
-                           along = N, rev.along = NULL, new.names = NULL,
-                           force.array = TRUE, make.names = use.anon.names,
-                           use.anon.names = FALSE, use.first.dimnames = FALSE,
-                           hier.names = FALSE, use.dnns = FALSE) {
+abind.default <- function(...,
+                          along = N, rev.along = NULL, new.names = NULL,
+                          force.array = TRUE, make.names = use.anon.names,
+                          use.anon.names = FALSE, use.first.dimnames = FALSE,
+                          hier.names = FALSE, use.dnns = FALSE) {
 
   # error nicely if they don't have abind installed
   abind_installed <- requireNamespace("abind", quietly = TRUE)
   if (!abind_installed) {
-    stop ("abind is being called on R arrays (not greta arrays), ",
-          "but the abind package is not installed",
-          call. = FALSE)
+    stop("abind is being called on R arrays (not greta arrays), ",
+         "but the abind package is not installed",
+         call. = FALSE)
   }
 
   call <- sys.call()
@@ -328,11 +328,11 @@ abind.default <- function (...,
 }
 
 #' @export
-abind.greta_array <- function (...,
-                               along = N, rev.along = NULL, new.names = NULL,
-                               force.array = TRUE, make.names = use.anon.names,
-                               use.anon.names = FALSE, use.first.dimnames = FALSE,
-                               hier.names = FALSE, use.dnns = FALSE) {
+abind.greta_array <- function(...,
+                              along = N, rev.along = NULL, new.names = NULL,
+                              force.array = TRUE, make.names = use.anon.names,
+                              use.anon.names = FALSE, use.first.dimnames = FALSE,
+                              hier.names = FALSE, use.dnns = FALSE) {
 
   # warn if any of the arguments have been changed
   user_set_args <- !is.null(rev.along) |
@@ -353,7 +353,7 @@ abind.greta_array <- function (...,
 
   # drop any NULLs
   to_discard <- vapply(arg.list, is.null, FUN.VALUE = FALSE)
-  if (any(to_discard))  {
+  if (any(to_discard)) {
     arg.list <- arg.list[!to_discard]
   }
 
@@ -370,7 +370,7 @@ abind.greta_array <- function (...,
   }
 
   if (!along %in% 0:N) {
-    stop ("along must be between 0 and ", N, call. = FALSE)
+    stop("along must be between 0 and ", N, call. = FALSE)
   }
 
   pre <- seq(from = 1, len = along - 1)
@@ -382,12 +382,12 @@ abind.greta_array <- function (...,
 
   # loop though all elements of arg.list padding if necessary:
   arg.list <- lapply(arg.list,
-                     function (x) {
+                     function(x) {
                        dim <- dim(x)
                        if (length(dim) == N - 1)
                          dim(x) <- c(dim[pre], 1, dim[post])
                        x
-                       })
+                     })
 
   # check the non-binding dimensions match
   dims <- lapply(arg.list, dim)
@@ -395,10 +395,10 @@ abind.greta_array <- function (...,
   for (dim in seq_len(N)[-along]) {
     this_dim <- vapply(dims, `[`, dim, FUN.VALUE = 1L)
     if (!all(this_dim == this_dim[1])) {
-      stop ("all greta arrays must have the same dimensions ",
-            "except on the 'along' dimension, but dimension ", dim,
-            " had varying sizes: ", paste(this_dim, collapse = ", "),
-            call. = FALSE)
+      stop("all greta arrays must have the same dimensions ",
+           "except on the 'along' dimension, but dimension ", dim,
+           " had varying sizes: ", paste(this_dim, collapse = ", "),
+           call. = FALSE)
     } else {
       dim_out[dim] <- this_dim[1]
     }
@@ -408,7 +408,7 @@ abind.greta_array <- function (...,
   dim_out[along] <- sum(bind_dims)
 
   do.call(op,
-          c(operation = 'abind',
+          c(operation = "abind",
             arg.list,
             dim = list(dim_out),
             operation_args = list(list(axis = as.integer(along))),
@@ -417,7 +417,7 @@ abind.greta_array <- function (...,
 }
 
 #' @export
-c.greta_array <- function (...) {
+c.greta_array <- function(...) {
 
   args <- list(...)
 
@@ -434,7 +434,7 @@ c.greta_array <- function (...) {
                            FUN.VALUE = FALSE)
 
   if (!all(is_greta_array))
-    return (args)
+    return(args)
 
   # loop through arrays, flattening them R-style
   arrays <- lapply(args, flatten)
@@ -445,7 +445,7 @@ c.greta_array <- function (...) {
 
   # create the op, expanding 'arrays' out to match op()'s dots input
   do.call(op,
-          c(operation = 'rbind',
+          c(operation = "rbind",
             arrays,
             dim = list(dim_out),
             tf_operation = "tf_rbind"))
@@ -453,7 +453,7 @@ c.greta_array <- function (...) {
 }
 
 #' @export
-rep.greta_array <- function (x, ...) {
+rep.greta_array <- function(x, ...) {
 
   # get the index
   idx <- rep(seq_along(x), ...)
@@ -474,7 +474,7 @@ length.greta_array <- function(x)
 
 # reshape greta arrays
 #' @export
-`dim<-.greta_array` <- function (x, value) {
+`dim<-.greta_array` <- function(x, value) {
 
   dims <- value
 
@@ -482,8 +482,8 @@ length.greta_array <- function(x)
     dims <- length(x)
 
   if (length(dims) == 0L)
-    stop ("length-0 dimension vector is invalid",
-          call. = FALSE)
+    stop("length-0 dimension vector is invalid",
+         call. = FALSE)
 
   if (length(dims) == 1L)
     dims <- c(dims, 1L)
@@ -495,8 +495,8 @@ length.greta_array <- function(x)
   dims <- as.integer(dims)
 
   if (any(dims < 0L))
-    stop ("the dims contain negative values",
-          call. = FALSE)
+    stop("the dims contain negative values",
+         call. = FALSE)
 
   prod_dims <- prod(dims)
   len <- length(x)
@@ -504,7 +504,7 @@ length.greta_array <- function(x)
   if (prod_dims != len) {
     msg <- sprintf("dims [product %i] do not match the length of object [%i]",
                    prod_dims, len)
-    stop (msg, call. = FALSE)
+    stop(msg, call. = FALSE)
   }
 
   new_value <- get_node(x)$value()
@@ -523,7 +523,7 @@ length.greta_array <- function(x)
 # arrays
 #' @export
 #' @importFrom utils head
-head.greta_array <- function (x, n = 6L, ...) {
+head.greta_array <- function(x, n = 6L, ...) {
 
   stopifnot(length(n) == 1L)
 
@@ -556,7 +556,7 @@ head.greta_array <- function (x, n = 6L, ...) {
 
 #' @export
 #' @importFrom utils tail
-tail.greta_array <- function (x, n = 6L, ...) {
+tail.greta_array <- function(x, n = 6L, ...) {
 
   stopifnot(length(n) == 1L)
 
@@ -593,34 +593,34 @@ tail.greta_array <- function (x, n = 6L, ...) {
 
 #' @rdname overloaded
 #' @export
-diag <- function (x = 1, nrow, ncol)
-  UseMethod('diag', x)
+diag <- function(x = 1, nrow, ncol)
+  UseMethod("diag", x)
 
 # wrapper function to avoid a CRAN check warning about using a .Internal() call
 #' @export
-diag.default <- function (...)
+diag.default <- function(...)
   base::diag(...)
 
 #' @export
-diag.greta_array <- function (x = 1, nrow, ncol) {
+diag.greta_array <- function(x = 1, nrow, ncol) {
 
   dim <- dim(x)
 
   # check the rank isn't too high
   if (length(dim) != 2) {
-    stop ("cannot only extract the diagonal from a node ",
-          "with exactly two dimensions")
+    stop("cannot only extract the diagonal from a node ",
+         "with exactly two dimensions")
   }
 
   if (dim[1] != dim[2]) {
-    stop ('diagonal elements can only be extracted from square matrices')
+    stop("diagonal elements can only be extracted from square matrices")
   }
 
   # return the dimensions
   dims <- c(dim[1], 1)
 
   # return the extraction op
-  op('diag', x,
+  op("diag", x,
      dim = dims,
      tf_operation = "tf$matrix_diag_part")
 

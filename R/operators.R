@@ -77,7 +77,7 @@ NULL
   } else {
     check_dims(e1, e2)
     op("subtract", e1, e2,
-     tf_operation = "tf$subtract")
+       tf_operation = "tf$subtract")
   }
 }
 

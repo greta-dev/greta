@@ -1,8 +1,8 @@
-context('as_data')
+context("as_data")
 
-test_that('as_data coerces correctly', {
+test_that("as_data coerces correctly", {
 
-  source('helpers.R')
+  source("helpers.R")
 
   # logical, integer and numeric
   # vector, matrix, array, dataframe
@@ -106,10 +106,10 @@ test_that('as_data coerces correctly', {
 
 })
 
-test_that('as_data errors informatively', {
+test_that("as_data errors informatively", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   # wrong class of object
   expect_error(as_data(NULL),
@@ -164,11 +164,11 @@ test_that('as_data errors informatively', {
 
   # non-data greta arrays
   stoch <- normal(0, 1, dim = c(2, 3))
-  op <- stoch ^ 2
+  op <- stoch^2
 
   expect_error(as_data(stoch),
-               'cannot coerce a non-data greta_array to data')
+               "cannot coerce a non-data greta_array to data")
   expect_error(as_data(op),
-               'cannot coerce a non-data greta_array to data')
+               "cannot coerce a non-data greta_array to data")
 
 })

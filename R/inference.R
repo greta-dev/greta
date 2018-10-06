@@ -160,17 +160,17 @@ greta_stash$numerical_messages <- c("is not invertible",
 #' o <- opt(m3, hessians = TRUE)
 #' o$hessians
 #' }
-mcmc <- function (model,
-                  sampler = hmc(),
-                  n_samples = 1000,
-                  thin = 1,
-                  warmup = 1000,
-                  chains = 4,
-                  n_cores = NULL,
-                  verbose = TRUE,
-                  pb_update = 50,
-                  one_by_one = FALSE,
-                  initial_values = initials()) {
+mcmc <- function(model,
+                 sampler = hmc(),
+                 n_samples = 1000,
+                 thin = 1,
+                 warmup = 1000,
+                 chains = 4,
+                 n_cores = NULL,
+                 verbose = TRUE,
+                 pb_update = 50,
+                 one_by_one = FALSE,
+                 initial_values = initials()) {
 
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
@@ -178,7 +178,7 @@ mcmc <- function (model,
 
   # check they're not data nodes, provide a useful error message if they are
   are_data <- vapply(target_greta_arrays,
-                     function (x) inherits(get_node(x), 'data_node'),
+                     function(x) inherits(get_node(x), "data_node"),
                      FUN.VALUE = FALSE)
 
   if (any(are_data)) {
@@ -191,7 +191,7 @@ mcmc <- function (model,
     msg <- sprintf("%s %s, data greta arrays cannot be sampled",
                    bad_greta_arrays,
                    is_are)
-    stop (msg, call. = FALSE)
+    stop(msg, call. = FALSE)
 
   }
 
@@ -251,15 +251,15 @@ mcmc <- function (model,
 }
 
 #' @importFrom future future resolved value
-run_samplers <- function (samplers,
-                          n_samples,
-                          thin,
-                          warmup,
-                          verbose,
-                          pb_update,
-                          one_by_one,
-                          n_cores,
-                          from_scratch) {
+run_samplers <- function(samplers,
+                         n_samples,
+                         thin,
+                         warmup,
+                         verbose,
+                         pb_update,
+                         one_by_one,
+                         n_cores,
+                         from_scratch) {
 
   # check the future plan is valid, and get information about it
   plan_is <- check_future_plan()
@@ -345,7 +345,7 @@ run_samplers <- function (samplers,
   if (plan_is$parallel) {
     dispatch <- future::future
   } else {
-    dispatch <- function (expr, ...) expr
+    dispatch <- function(expr, ...) expr
   }
 
   # dispatch all the jobs
@@ -411,7 +411,7 @@ run_samplers <- function (samplers,
 #'   parallelism isn't being used), the samples collected so far can be
 #'   retrieved with \code{stashed_samples()}. Only samples from the sampling
 #'   phase will be returned.
-stashed_samples <- function () {
+stashed_samples <- function() {
 
   stashed <- exists("samplers", envir = greta_stash)
 
@@ -435,7 +435,7 @@ stashed_samples <- function () {
     # if there are no samples, return a list of NULLs
     if (nrow(values_draws[[1]]) == 0) {
 
-      return (replicate(length(samplers), NULL))
+      return(replicate(length(samplers), NULL))
 
     } else {
 
@@ -456,13 +456,13 @@ stashed_samples <- function () {
       # add the raw draws as an attribute
       attr(values_draws, "model_info") <- model_info
 
-      return (values_draws)
+      return(values_draws)
 
     }
 
   } else {
 
-    return (invisible())
+    return(invisible())
 
   }
 
@@ -481,13 +481,13 @@ stashed_samples <- function () {
 #'   used to generate the previous samples. It is not possible to change the
 #'   sampler or extend the warmup period.
 #'
-extra_samples <- function (draws,
-                           n_samples = 1000,
-                           thin = 1,
-                           n_cores = NULL,
-                           verbose = TRUE,
-                           pb_update = 50,
-                           one_by_one = FALSE) {
+extra_samples <- function(draws,
+                          n_samples = 1000,
+                          thin = 1,
+                          n_cores = NULL,
+                          verbose = TRUE,
+                          pb_update = 50,
+                          one_by_one = FALSE) {
 
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
@@ -515,24 +515,24 @@ extra_samples <- function (draws,
 # convert some 'data' values form the constrained to the free state, for a given
 # 'node'
 #' @importFrom stats qlogis
-to_free <- function (node, data) {
+to_free <- function(node, data) {
 
   lower <- node$lower
   upper <- node$upper
 
-  unsupported_error <- function () {
-    stop ("some provided initial values are outside the range of values ",
-          "their variables can take",
-          call. = FALSE)
+  unsupported_error <- function() {
+    stop("some provided initial values are outside the range of values ",
+         "their variables can take",
+         call. = FALSE)
   }
 
-  high <- function (x) {
+  high <- function(x) {
     if (any(x <= lower))
       unsupported_error()
     log(x - lower)
   }
 
-  low <- function (x) {
+  low <- function(x) {
     if (any(x >= upper))
       unsupported_error()
     log(upper - x)
@@ -556,12 +556,12 @@ to_free <- function (node, data) {
 
 # convert a named list of initial values into the corresponding vector of values
 # on the free state
-parse_initial_values <- function (initials, dag) {
+parse_initial_values <- function(initials, dag) {
 
   # skip if no inits provided
   if (identical(initials, initials())) {
 
-    return (dag$example_parameters(flat = TRUE))
+    return(dag$example_parameters(flat = TRUE))
 
   }
 
@@ -578,10 +578,10 @@ parse_initial_values <- function (initials, dag) {
   missing_names <- is.na(tf_names)
   if (any(missing_names)) {
     bad <- names(tf_names)[missing_names]
-    stop ("some greta arrays passed to initials() ",
-          "are not associated with the model: ",
-          paste(bad, collapse = ", "),
-          call. = FALSE)
+    stop("some greta arrays passed to initials() ",
+         "are not associated with the model: ",
+         paste(bad, collapse = ", "),
+         call. = FALSE)
   }
 
   params <- dag$example_parameters(flat = FALSE)
@@ -598,8 +598,8 @@ parse_initial_values <- function (initials, dag) {
   are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
 
   if (!all(are_variables)) {
-    stop ("initial values can only be set for variable greta arrays",
-          call. = FALSE)
+    stop("initial values can only be set for variable greta arrays",
+         call. = FALSE)
   }
 
   target_dims <- lapply(params[idx], dim)
@@ -608,9 +608,9 @@ parse_initial_values <- function (initials, dag) {
 
   if (!all(same_dims)) {
     mismatches <- which(!same_dims)
-    stop ("the initial values provided have different dimensions ",
-          "than the named greta arrays",
-          call. = FALSE)
+    stop("the initial values provided have different dimensions ",
+         "than the named greta arrays",
+         call. = FALSE)
   }
 
   # convert the initial values to their free states
@@ -624,7 +624,7 @@ parse_initial_values <- function (initials, dag) {
 
 # convert (possibly NULL) user-specified initial values into a list of the
 # correct length, with nice error messages
-prep_initials <- function (initial_values, n_chains, dag) {
+prep_initials <- function(initial_values, n_chains, dag) {
 
   # if the user passed a single set of initial values, repeat them for all
   # chains
@@ -633,8 +633,8 @@ prep_initials <- function (initial_values, n_chains, dag) {
     is_blank <- identical(initial_values, initials())
 
     if (!is_blank & n_chains > 1) {
-      message ("only one set of initial values was provided, and was ",
-               "used for all chains")
+      message("only one set of initial values was provided, and was ",
+              "used for all chains")
     }
 
     initial_values <- replicate(n_chains,
@@ -652,10 +652,10 @@ prep_initials <- function (initial_values, n_chains, dag) {
       n_sets <- length(initial_values)
 
       if (n_sets != n_chains) {
-        stop (n_sets, " sets of initial values were provided, but there ",
-              ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
-              ifelse(n_chains > 1, "s", ""),
-              call. = FALSE)
+        stop(n_sets, " sets of initial values were provided, but there ",
+             ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
+             ifelse(n_chains > 1, "s", ""),
+             call. = FALSE)
       }
 
     } else {
@@ -673,9 +673,9 @@ prep_initials <- function (initial_values, n_chains, dag) {
   # error on a bad object
   if (is.null(initial_values)) {
 
-    stop ("initial_values must be an initials object created with initials(), ",
-          "or a simple list of initials objects",
-          call. = FALSE)
+    stop("initial_values must be an initials object created with initials(), ",
+         "or a simple list of initials objects",
+         call. = FALSE)
 
   }
 
@@ -694,14 +694,14 @@ prep_initials <- function (initial_values, n_chains, dag) {
 #'   variables in the model (unnamed variables will be automatically
 #'   initialised)
 #'
-initials <- function (...) {
+initials <- function(...) {
 
   values <- list(...)
   names <- names(values)
 
   if (length(names) != length(values)) {
-    stop ("all initial values must be named",
-          call. = FALSE)
+    stop("all initial values must be named",
+         call. = FALSE)
   }
 
   # coerce to greta-array-like shape
@@ -709,8 +709,8 @@ initials <- function (...) {
 
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
-    stop ("initial values must be numeric",
-          call. = FALSE)
+    stop("initial values must be numeric",
+         call. = FALSE)
   }
 
   class(values) <- c("initials", class(values))
@@ -718,11 +718,11 @@ initials <- function (...) {
 }
 
 #' @export
-print.initials <- function (x, ...) {
+print.initials <- function(x, ...) {
 
   if (identical(x, initials())) {
 
-    cat ("an empty greta initials object")
+    cat("an empty greta initials object")
 
   } else {
 
@@ -774,13 +774,13 @@ print.initials <- function (x, ...) {
 #'    matrices/arrays for the parameters (w.r.t. \code{value})}
 #'  }
 #'
-opt <- function (model,
-                 optimiser = bfgs(),
-                 max_iterations = 100,
-                 tolerance = 1e-6,
-                 initial_values = initials(),
-                 adjust = TRUE,
-                 hessian = FALSE) {
+opt <- function(model,
+                optimiser = bfgs(),
+                max_iterations = 100,
+                tolerance = 1e-6,
+                initial_values = initials(),
+                adjust = TRUE,
+                hessian = FALSE) {
 
   # check initial values. Can up the number of chains in the future to handle
   # random restarts

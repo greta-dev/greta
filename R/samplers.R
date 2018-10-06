@@ -25,10 +25,10 @@ NULL
 #'   selected uniformly at random from between \code{Lmin} and \code{Lmax}.
 #'   \code{diag_sd} is used to rescale the parameter space to make it more
 #'   uniform, and make sampling more efficient.
-hmc <- function (Lmin = 5,
-                 Lmax = 10,
-                 epsilon = 0.1,
-                 diag_sd = 1) {
+hmc <- function(Lmin = 5,
+                Lmax = 10,
+                epsilon = 0.1,
+                diag_sd = 1) {
 
   obj <- list(parameters = list(Lmin = Lmin,
                                 Lmax = Lmax,
@@ -51,9 +51,9 @@ hmc <- function (Lmin = 5,
 #' @param proposal the probability distribution used to generate proposal states
 #'
 #' @export
-rwmh <- function (proposal = c("normal", "uniform"),
-                  epsilon = 0.1,
-                  diag_sd = 1) {
+rwmh <- function(proposal = c("normal", "uniform"),
+                 epsilon = 0.1,
+                 diag_sd = 1) {
 
   proposal <- match.arg(proposal)
 
@@ -76,7 +76,7 @@ rwmh <- function (proposal = c("normal", "uniform"),
 #'   algorithm used to adapt the size of the slice
 #'
 #' @export
-slice <- function (max_doublings = 5) {
+slice <- function(max_doublings = 5) {
   obj <- list(parameters = list(max_doublings = as.integer(max_doublings)[1]),
               class = slice_sampler)
   class(obj) <- c("slice sampler", "sampler")
@@ -85,12 +85,12 @@ slice <- function (max_doublings = 5) {
 
 #' @noRd
 #' @export
-print.sampler <- function (x, ...) {
+print.sampler <- function(x, ...) {
 
   values_text <- paste(names(x$parameters),
-                           prettyNum(x$parameters),
-                           sep = " = ",
-                           collapse = ", ")
+                       prettyNum(x$parameters),
+                       sep = " = ",
+                       collapse = ", ")
 
   if (!nzchar(values_text)) values_text <- "None"
 
