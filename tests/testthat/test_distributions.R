@@ -365,7 +365,7 @@ test_that("lkj distribution has correct density", {
     res <- lkj_normalising(eta, ncol(x)) + (eta - 1) * log(det(x))
     if (!log)
       res <- exp(res)
-    return(res)
+    res
   }
 
   rlkj_correlation <- function(m)

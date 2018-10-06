@@ -1,4 +1,4 @@
-linters: with_defaults(commas_linter = NULL)
+linters: with_defaults(commas_linter = NULL, object_usage_linter = NULL)
 exclude: "# Exclude Linting"
 exclude_start: "# Begin Exclude Linting"
 exclude_end: "# End Exclude Linting"

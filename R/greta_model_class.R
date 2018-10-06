@@ -30,8 +30,9 @@ NULL
 #'
 #' @details \code{model()} takes greta arrays as arguments, and defines a
 #'   statistical model by finding all of the other greta arrays on which they
-#'   depend, or which depend on them. Further arguments to \code{model} can be used to configure the tensorflow
-#'   graph representing the model, to tweak performance.
+#'   depend, or which depend on them. Further arguments to \code{model} can be
+#'   used to configure the tensorflow graph representing the model, to tweak
+#'   performance.
 #'
 #' @return \code{model} - a \code{greta_model} object.
 #'
@@ -209,7 +210,9 @@ print.greta_model <- function(x, ...) {
 #'   \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
 #'   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 #'
-#' @return \code{plot} - a \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object (invisibly).
+#' @return \code{plot} - a
+#'   \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object
+#'   (invisibly).
 #'
 #' @export
 plot.greta_model <- function(x,

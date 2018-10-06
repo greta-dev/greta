@@ -47,11 +47,11 @@ r_packages:
   - extraDistr
   - devtools
   - tidyverse
+  - lintr
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
   - rmcelreath/rethinking
-  - jimhester/lintr
 
 cache:
   packages: true
