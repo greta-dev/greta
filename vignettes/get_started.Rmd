@@ -44,11 +44,10 @@ You can install the stable version of greta from CRAN:
 install.packages("greta")
 ```
 
-Alternatively, you can install the latest release, or the development version, from GitHub using the devtools package:
+or the development version from GitHub using devtools:
 
 ```{r install_greta_github, eval = FALSE}
-devtools::install_github("greta-dev/greta")  # latest release
-devtools::install_github("greta-dev/greta@dev")  # development version
+devtools::install_github("greta-dev/greta")
 ```
 
 ```{r load}
@@ -61,10 +60,8 @@ library(greta)
 
 Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.8.0 or higher). greta exports `install_tensorflow()` from the `tensorflow` R package, which will attempt to install the latest version of TensorFlow from within your R session.Moreover, you need to install an additional Python package called [tensorflow-probability](https://github.com/tensorflow/probability). [TensorFlow Probability](https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245) is a library for probabilistic reasoning and statistical analysis in TensorFlow.
 
-Example to install Tensorflow version 1.8.0 :
 ```{r install_tensorflow, eval = FALSE}
-tensorflow::install_tensorflow(version="1.8.0", extra_packages="tensorflow-probability")
-tensorflow::install_tensorflow_extras("tensorflow-probability")
+tensorflow::install_tensorflow(extra_packages="tensorflow-probability")
 ```
 
 You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.

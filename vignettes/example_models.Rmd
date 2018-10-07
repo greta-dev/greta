@@ -111,7 +111,7 @@ Below are some more advanced examples implemented in greta.
 
 <hr>
 
-```{r child='examples/factor_analysis.Rmd'}
+```{r child='../inst/examples/factor_analysis.Rmd'}
 ```
 
 ## BUGS models

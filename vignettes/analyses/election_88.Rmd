@@ -12,6 +12,12 @@ output:
 author: Shirin Glander, Tiphaine Martin, Matt Mulvahill, Michael Quinn, David Smith
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = greta:::check_tf_version("message"),
+                      cache = TRUE)
+set.seed(1)
+```
+
 # Introduction
 
 This model appears in chapter 14 of
@@ -203,8 +209,7 @@ chains, we'll use the "multisession" future strategy to do everything in
 parallel.
 
 ```{r results='hide', message=FALSE}
-plan(multisession)
-draws <- mcmc(e88_model, chains = 4, n_samples = 1000, warmup = 500)
+draws <- mcmc(e88_model, warmup = 1000, n_samples = 1000, chains = 4)
 ```
 
 Time to diagnose. Did the sample chains for our fixed effects mix reasonably?

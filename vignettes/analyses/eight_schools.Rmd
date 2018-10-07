@@ -12,6 +12,12 @@ output:
 author: Shirin Glander, Tiphaine Martin, Matt Mulvahill, Michael Quinn, David Smith
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = greta:::check_tf_version("message"),
+                      cache = TRUE)
+set.seed(1)
+```
+
 ## Data
 
 **Eight Schools** is a study of coaching effects from eight schools; it comes from [section 5.5 of Gelman et al. (2003) as covered in 2.1. Schools data of 'R2WinBUGS: A Package for Running WinBUGS from R'](https://www.jstatsoft.org/article/view/v012i03/v12i03.pdf):
@@ -139,7 +145,7 @@ We first define the model by combining the calculated `avg_effect`, `avg_stddev`
 
 It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found [here](https://greta-dev.github.io/greta/get_started.html#plotting).
 
-```{r 8_schools_greta, cache=FALSE}
+```{r 8_schools_greta}
 # defining the hierarchical model
 m <- model(avg_effect, avg_stddev, school_effects_standard)
 m
@@ -157,9 +163,9 @@ DiagrammeR::render_graph(plot(m))
 The actual sampling from the model happens with the `mcmc()` function. By default 1000 MCMC samples are drawn after warm-up.
 What we obtain is a probability measure that describes the likelihood of a set of randomly sampled values for the model variables.
 
-```{r cache=FALSE, results='hide', message=FALSE}
+```{r results='hide', message=FALSE}
 # sampling
-draws <- greta::mcmc(m, n_samples = 1000, warmup = 1000)
+draws <- greta::mcmc(m, n_samples = 1000, warmup = 1000, chains = 4)
 ```
 
 ```{r}
@@ -175,7 +181,7 @@ mcmc_intervals(draws)
 ```
 
 ```{r fig.width=10, fig.height=8}
-mcmc_acf_bar(draws, facet_args = list(ncol = 3))
+mcmc_acf_bar(draws)
 ```
 
 ```{r}
