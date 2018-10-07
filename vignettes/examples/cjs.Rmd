@@ -29,21 +29,20 @@ p <- beta(1, 1, dim = n_time)
 
 # derived parameter
 chi <- ones(n_time)
-eps <- .Machine$double.eps
-chi[n_time] <- chi[n_time] - eps
 for (i in seq_len(n_time - 1)) {
   tn <- n_time - i
   chi[tn] <- (1 - phi[tn]) + phi[tn] * (1 - p[tn + 1]) * chi[tn + 1]
 }
 
 # dummy variables
-alive_data <- ones(length(obs_id))   # definitely alive
-final_observation <- ones(n_obs)     # final observation
+alive_data <- ones(length(obs_id))            # definitely alive
+not_seen_last <- final_obs != 20              # ignore observations in last timestep
+final_observation <- ones(sum(not_seen_last)) # final observation
 
 # set likelihoods
 distribution(alive_data) <- bernoulli(phi[obs_id - 1])
 distribution(capture_vec) <- bernoulli(p[obs_id])
-distribution(final_observation) <- bernoulli(chi[final_obs])
+distribution(final_observation) <- bernoulli(chi[final_obs[not_seen_last]])
 ```
 
 #### BUGS/JAGS code
@@ -72,6 +71,6 @@ model {
 #### Stan code
 <div class="stan">
 ```{r cjs_stan, echo = FALSE}
-cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/blob/master/misc/ecology/mark-recapture/cjs-K.stan'), sep = '\n')
+cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/master/misc/ecology/mark-recapture/cjs-K.stan'), sep = '\n')
 ```
 </div>
