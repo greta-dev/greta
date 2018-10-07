@@ -16,6 +16,7 @@ body, pre, .r {
   font-size: 17px;
 }
 .data pre{
+  background-color: #fafafa;
   border: none;
   color: #8080809;
 }
@@ -41,16 +42,18 @@ hr {
 }
 code {
   background-color: #f4f0f9;
-  color: #696969;
-}
-code a, pre a {
-  color: #696969;
 }
 h1, p{
   margin-bottom: 25px;
 }
 h2, h3 {
   margin-bottom: 15px;
+}
+#tocnav {
+  position: fixed;
+}
+nav {
+  position: fixed;
 }
 .navbar,
 .navbar-default,
@@ -60,7 +63,7 @@ h2, h3 {
   font-size: 15px;
   line-height: 25px;
   height: auto;
-  min-height: 50px;
+  min-height: 40px;
   padding-top: 0;
   margin-bottom: 0;
 }

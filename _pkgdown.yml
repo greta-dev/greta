@@ -2,10 +2,16 @@ template:
   path: inst/pkgdown/templates
   assets: inst/pkgdown/assets
   default_assets: false
+  params:
+    docsearch:
+      api_key: API_KEY
+      index_name: INDEX_NAME
+
+url: https://greta-stats.org
 
 reference:
-  - title: creating greta arrays 
-    desc: Create greta arrays representing observed data or fixed values 
+  - title: creating greta arrays
+    desc: Create greta arrays representing observed data or fixed values
     contents:
       - structures
       - as_data
@@ -24,7 +30,7 @@ reference:
       - extract-replace-combine
       - transforms
   - title: modelling
-    desc: Define and visualise models and fit them to data 
+    desc: Define and visualise models and fit them to data
     contents:
       - model
       - inference
@@ -38,8 +44,8 @@ reference:
 
 navbar:
   structure:
-    left:
-    right: [get_started, models, analyses, docs, more, github]
+    left: [get_started, docs, models, analyses, more]
+    right: [forum, twitter, github]
   components:
     home: ~
     reference: ~
@@ -71,4 +77,9 @@ navbar:
          href: articles/webpages/software.html
        - text: contribute to greta
          href: articles/webpages/contribute.html
-
+    twitter:
+      icon: fa-lg fa-twitter
+      href: http://twitter.com/greta_stats
+    forum:
+      icon: fa-lg fa-comments
+      href: https://forum.greta-stats.org

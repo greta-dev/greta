@@ -1,18 +1,10 @@
-<hr style="height:5px; visibility:hidden;" />
-
 <div class="row">
-  
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <ul class="nav nav-pills nav-stacked">
-    {{#sections}}
-      <li><a href="#{{slug}}">{{title}}</a></li>
-    {{/sections}}
-    </ul>
-  </div>
+
+  <hr style="height:5px; visibility:hidden;" />
   
   <div class="contents col-md-9">
     <div class="page-header">
-      <h1>package documentation</h1>
+      <h1>Function reference</h1>
     </div>
 
     <table class="ref-index">
@@ -40,6 +32,16 @@
       </tr>{{/contents}}
     </tbody>{{/sections}}
     </table>
+  </div>
+  
+  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+    <hr style="height:0px; visibility:hidden;" />
+
+    <ul class="nav nav-pills nav-stacked">
+    {{#sections}}
+      <li><a href="#{{slug}}">{{title}}</a></li>
+    {{/sections}}
+    </ul>
   </div>
 
 </div>

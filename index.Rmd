@@ -1,10 +1,6 @@
 ---
 output:
-  html_document:
-    css: greta.css
-    theme: lumen
-    highlight: default
-    toc: false
+  md_document
 ---
 
 <style type="text/css">
