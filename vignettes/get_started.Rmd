@@ -104,19 +104,6 @@ install.packages('XML')
 
 <hr>
 
-### future
-To be able to have parallel processing of greta R expressions, you need to install [Future](https://cran.r-project.org/web/packages/future/index.html) R package and use this R expression
-```{r multiple_Session, eval = FALSE}
-plan(multisession)
-```
-
-If you want to evaluate R expressions asynchronously, you can install future from CRAN.
-```{r install_future, eval = FALSE}
-install.packages('future')
-```
-
-<hr>
-
 ## How greta works
 
 greta lets us build statistical models interactively in R, and then sample from them by MCMC. We build greta models with *greta array* objects, which behave much like R's array, matrix and vector objects for numeric data. Like those numeric data objects, greta arrays can be manipulated with functions and mathematical operators to create new greta arrays.
