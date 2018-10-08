@@ -1,3 +1,8 @@
+.page-header {
+  padding-bottom: 0px;
+  margin: 40px 0 20px;
+  border-bottom: 0px;
+}
 body{
   font-family: "Roboto", "Source Sans Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
 }

@@ -43,7 +43,7 @@ a, a:hover{
   padding-right: 25px;
 }
 #head {
-  background: #B797D7 url(greta-header.png) 0 45% / cover no-repeat;
+  background: #B797D7 url(../logos/greta-header.png) 0 45% / cover no-repeat;
   box-shadow: 0 3px 10px 0 rgba(0,0,0,0.2);
   max-width: 100%;
   margin: 0 auto;
@@ -96,7 +96,8 @@ a, a:hover{
 </style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+knitr::opts_chunk$set(cache = TRUE,
+                      fig.path = "man/figures/")
 set.seed(2018-02-17)
 ```
 
@@ -106,7 +107,7 @@ set.seed(2018-02-17)
 
 <div class="row">
 
-<img id="main-icon" src="main-icon.png" />
+<img id="main-icon" src="../logos/main_icon.png" />
 
 </div>
 
@@ -141,7 +142,7 @@ set.seed(2018-02-17)
 <div class="col-md-4">
   <p class="bullet"><b>extensible</b></p>
   <br>
-  it's easy to write your own R functions, modules, and even packages using greta
+  it's easy to write your own R functions and packages using greta
 </div>
 
 </div>
@@ -231,26 +232,20 @@ m <- model(int, coef, sd)
 </div>
 <div class="col-md-6">
 ```
-draws <- mcmc(m, n_samples = 1000, chains = 3)
+draws <- mcmc(m, n_samples = 1000, chains = 4)
 bayesplot::mcmc_trace(draws)
 ```
 ```{r vis, echo = FALSE, eval = TRUE, results='hide', message=FALSE, warning=FALSE, fig.height=4, fig.width=6, fig.align="center"}
-
 x <- iris$Petal.Length
 y <- iris$Sepal.Length
-
 library(greta)
-
 int <- normal(0, 5)
 coef <- normal(0, 3)
 sd <- lognormal(0, 3)
-
 mean <- int + coef * x
 distribution(y) <- normal(mean, sd)
-
 m <- model(int, coef, sd)
-
-draws <- mcmc(m, warmup = 1000, n_samples = 1000, chains = 3)
+draws <- mcmc(m, n_samples = 1000, chains = 4)
 bayesplot::mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1)) + ggplot2::theme_minimal()
 ```
 
