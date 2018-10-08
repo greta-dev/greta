@@ -171,13 +171,17 @@ One important way `greta` models differs from BUGS and Stan code is that it is o
 ```
 
 <hr>
-devtools::
 ```{r child='../inst/examples/multispecies_partial_pool.Rmd'}
 ```
 
 <hr>
 
 ```{r child='../inst/examples/multilevel.Rmd'}
+```
+
+<hr>
+
+```{r child='../inst/examples/cjs.Rmd'}
 ```
 
 <hr>
