@@ -1,11 +1,13 @@
 ^CODE_OF_CONDUCT\.md$
 ^\.github$
 ^.netlify$
+^.lintr$
 ^docs$
 ^_pkgdown\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 LICENSE
+index.Rmd
 README.Rmd
 README.md
 README_files
@@ -17,6 +19,7 @@ man/figures/plot_greta_legend.R
 cran-comments.md
 vignettes/build_vignettes.R
 vignettes/*_cache
+vignettes/example_models_cache
 vignettes/get_started_files
 
 _index.Rmd

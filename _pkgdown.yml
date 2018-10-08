@@ -22,6 +22,7 @@ reference:
       - distributions
       - distribution
       - mixture
+      - joint
   - title: manipulating greta arrays
     desc: Functions and operations for modifying greta arrays
     contents:

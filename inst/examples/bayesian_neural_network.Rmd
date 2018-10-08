@@ -25,11 +25,3 @@ sd <- inverse_gamma(1, 1)
 
 distribution(y) <- normal(neural_network(X), sd)
 ```
-
-```{r}
-m <- model(weights)
-d <- mcmc(m)
-
-print(beta)
-print(summary(d))
-```
