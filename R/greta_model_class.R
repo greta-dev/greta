@@ -201,8 +201,8 @@ print.greta_model <- function(x, ...) {
 
 #' @rdname model
 #' @param y unused default argument
-#' @param colour base colour used for plotting. Defaults to \code{greta}
-#'  colours in violet.
+#' @param colour base colour used for plotting. Defaults to \code{greta} colours
+#'   in violet.
 #'
 #' @details The plot method produces a visual representation of the defined
 #'   model. It uses the \code{DiagrammeR} package, which must be installed
@@ -211,8 +211,7 @@ print.greta_model <- function(x, ...) {
 #'   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 #'
 #' @return \code{plot} - a
-#'   \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object
-#'   (invisibly).
+#'   \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}} object.
 #'
 #' @export
 plot.greta_model <- function(x,

@@ -388,19 +388,9 @@ m <- model(int, coef, sd)
 ### Plotting
 
 greta provides a plot function for greta models to help you visualise and check the model before sampling from it.
-```{r plot, eval = FALSE}
+```{r plot}
 plot(m)
 ```
-```{r plot_hidden, echo = FALSE, results = "hide"}
-gr <- plot(m)
-fname <- "figures/full_graph.png"
-DiagrammeR::export_graph(gr,
-                         file_name = fname,
-                         file_type = 'png',
-                         width = 958 * 2,
-                         height = 450 * 2)
-```
-<p><img src="figures/full_graph.png" width="800" /></p>
 
 The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; `x` and `y`), variables (large circles;  `int`, `coef`, `sd`) or the results of operations (small circles; `mean`). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from.
 There are also nodes for greta arrays that were *implicitly defined* in our model. The data nodes (squares) with numbers are the parameters used to define the prior distributions, and there's also an intermediate operation node (small circle), which was the result of multiplying `coef` and `x` (before adding `int` to create `mean`).
@@ -413,48 +403,21 @@ The fourth type of node (diamonds) represents probability distributions. These h
 
 For example, a plot of just the prior distribution over `coef` (defined as `coef <- normal(0, 3)`) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution's value, the variable `coef`:
 
-```{r plot_coef, echo = FALSE, results = "hide"}
+```{r plot_coef, echo = FALSE}
 coef <- normal(0, 3)
 m_coef <- model(coef)
-gr <- plot(m_coef)
-fname <- "figures/coef_graph.png"
-DiagrammeR::export_graph(gr,
-                         file_name = fname,
-                         file_type = 'png',
-                         width = 325 * 2,
-                         height = 123 * 2)
+plot(m_coef)
 ```
-<p><img src="figures/coef_graph.png" width="500" /></p>
 
 It's the same for the model likelihood, but this time the distribution's parameters are a variable (`sd`) and the result of an operation (`mean`), and the distribution's value is given by data (the observed sepal lengths `y`):
 
-```{r plot_likelihood, echo = FALSE, results = "hide"}
+```{r plot_likelihood, echo = FALSE}
 sd <- variable()
 y <- as_data(iris$Sepal.Length)
 mean <- ones(150)
 distribution(y) <- normal(mean, sd)
 m_likelihood <- model(sd)
-gr <- plot(m_likelihood)
-idx <- which(gr$nodes_df$label == 'mean\n')
-gr$nodes_df$shape[idx] <- 'circle'
-gr$nodes_df$fillcolor[idx] <- 'lightgray'
-gr$nodes_df$color[idx] <- 'lightgray'
-gr$nodes_df$width[idx] <- 0.2
-gr$nodes_df$height[idx] <- 0.2
-gr$nodes_df <- gr$nodes_df[c(3, 1, 2, 4), ]
-fname <- "figures/likelihood_graph.png"
-DiagrammeR::export_graph(gr,
-                         file_name = fname,
-                         file_type = "png",
-                         width = 325 * 2,
-                         height = 105 * 2)
-```
-<p><img src="figures/likelihood_graph.png" width="500" /></p>
-
-
-**Tip 1**: If you modify your model, you need to clear a bunch of tf objects without restarting R using R command 
-```{r clear_tf_objects, eval = FALSE}
-tf.reset_default_graph()
+plot(m_likelihood)
 ```
 
 <hr>
