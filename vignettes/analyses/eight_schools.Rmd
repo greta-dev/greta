@@ -151,13 +151,8 @@ m <- model(avg_effect, avg_stddev, school_effects_standard)
 m
 ```
 
-```{r eval=FALSE}
+```{r}
 plot(m)
-```
-
-```{r echo=FALSE}
-# plotting
-DiagrammeR::render_graph(plot(m))
 ```
 
 The actual sampling from the model happens with the `mcmc()` function. By default 1000 MCMC samples are drawn after warm-up.
