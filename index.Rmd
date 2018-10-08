@@ -168,7 +168,7 @@ set.seed(2018-02-17)
 <div class="col-md-1"></div>
 
 <div class="col-md-5">
-&thinsp; <span class="fa fa-arrow-circle-right fa-2x" style="vertical-align:middle;"></span>&emsp; [get started](get_started.html)
+&thinsp; <span class="fa fa-arrow-circle-right fa-2x" style="vertical-align:middle;"></span>&emsp; [get started](articles/get_started.html)
 </div>
 
 </div>
@@ -178,13 +178,13 @@ set.seed(2018-02-17)
 <div class="col-md-1"></div>
 
 <div class="col-md-5">
-  &thinsp; <span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span> &emsp; [example models](example_bugs_models.html)
+  &thinsp; <span class="fa fa-file-code-o fa-2x" style="vertical-align:middle;"></span> &emsp; [example models](example_models.html)
 </div>
 
 <div class="col-md-1"></div>
 
 <div class="col-md-5">
-  &thinsp; <span class="fa fa-book fa-2x" style="vertical-align:middle;"></span> &emsp; [package docs](reference-index.html)
+  &thinsp; <span class="fa fa-book fa-2x" style="vertical-align:middle;"></span> &emsp; [package docs](reference/index.html)
 </div>
 
 </div>

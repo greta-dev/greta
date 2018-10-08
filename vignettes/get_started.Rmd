@@ -34,8 +34,6 @@ file.copy('../man/figures/plotlegend.png',
           'figures/plotlegend.png')
 ```
 
-<hr>
-
 ## Installation
 
 You can install the stable version of greta from CRAN:
