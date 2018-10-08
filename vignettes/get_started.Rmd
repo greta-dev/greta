@@ -27,11 +27,11 @@ set.seed(2018-07-02)
 
 library(greta)
 
-if (!file.exists('figures'))
-  dir.create('figures')
+if (!file.exists("figures"))
+  dir.create("figures")
 
-file.copy('../man/figures/plotlegend.png',
-          'figures/plotlegend.png')
+file.copy("../man/figures/plotlegend.png",
+          "figures/plotlegend.png")
 ```
 
 ## Installation
@@ -77,16 +77,16 @@ You can use this function to install different versions of TensorFlow, including
 
 ### DiagrammeR
 
-greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because Diagrammer automatically installs a lot of other packages, it can take a long time to install. So, DiagrammeR isn’t installed automatically with greta. It is noted that to install DiagrammeR, you need to have already installed [igraph](http://igraph.org/r/) R package. If you want to plot models, you can install igraph and DiagrammeR from CRAN.
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](http://igraph.org/r/) package, which contains a large amount of code tthat needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to ploti greta models, you can install igraph and DiagrammeR from CRAN.
 
 ```{r install_diagrammer, eval = FALSE}
-install.packages('igraph')
-install.packages('DiagrammeR')
+install.packages("igraph")
+install.packages("DiagrammeR")
 ```
 
-**Tip 1**: igraph depends on [XML](https://cran.r-project.org/web/packages/XML/index.html) R package. On igraph's website, they inform you that you need to install <code>libxml2</code> library on Linux (and other Unix-like systems, but not on MacOSX). However, you can fail to install XML R package on MacOS. So, you need to:
+**Tip 1**: igraph depends on [XML](https://cran.r-project.org/web/packages/XML/index.html) R package. On igraph's website, they inform you that you need to install <code>libxml2</code> library on Linux (and other Unix-like systems, but not on MacOSX). However, installing XML sometimes fails on MacOS too. Here's a workaround:
 
-1. Install libxml2 using the bash command: `brew install libxml2`;
+1. Install libxml2 using homebrew, with the command: `brew install libxml2`;
 2. Find where libxml2's configuration file is installed using the bash command: `type xml2-config`
 3. Set environment variable for libxml2's configuration folder using the bash command: `export LIBXML_INCDIR=my_path_libxml2_configuration_folder` using the path from the previous command;
 4. Instead to setting environment variable for libxml2's configuration folder using the bash command, you can set environment variable for libxml2's configuration file directly in R session using the R command: 
@@ -95,10 +95,10 @@ install.packages('DiagrammeR')
 ```
 5. Install to the appropriate XML R package and then igraph
 ```{r install_XML, eval = FALSE}
-install.packages('XML')
+install.packages("XML")
 ```
 
-**Tip 2**: You can have some issues to install igraph on Ubuntu 16.04 (Issue with libgfortran.so.4 not found). Workaround is to install gfortran-7 as described [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-). 
+**Tip 2**: Installing igraph can be problematic with some linux installations, with `libgfortran.so.4` not being found. A workaround is to install gfortran-7 as described [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-). 
 
 <hr>
 
@@ -191,7 +191,7 @@ as_data(iris[1:5, 1:4])
 Whenever `as_data()` converts logical values to greta arrays, it converts them to 1s (for `TRUE`) and 0s (for `FALSE`). E.g. if we first convert the last column of `iris` from a factor into a logical vector, we can see this:
 
 ```{r logical_data}
-(is_setosa <- iris$Species[c(1, 41, 81, 121)] == 'setosa')
+(is_setosa <- iris$Species[c(1, 41, 81, 121)] == "setosa")
 as_data(is_setosa)
 ```
 
@@ -414,7 +414,7 @@ Now we have a greta model that will give us the joint density for a candidate se
 draws <- mcmc(m, n_samples = 1000)
 ```
 
-Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm, which uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 100 iterations 'warming up' (tuning the sampler parameters) and 'burning in' (moving to the area of highest probability) the sampler.
+Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm on each of 4 separate chains, giving us 4000 samples. HMC uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 1000 iterations on each chain 'warming up' (tuning the sampler parameters) and 'burning in' (moving to the area of highest probability) the sampler.
 
 `draws` is an `mcmc.list` object, from the coda R package. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.
 
@@ -439,7 +439,7 @@ If your model is taking a long time whilst in the sampling phase and you want to
 
 #### Tweaking the sampler
 
-Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about proposals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interations (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manually set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
+greta's default sampler is (static) Hamiltonian Monte Carlo. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about proposals being rejected, the first thing to try is increasing the length of the warmup period from its default of 1000 interations (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manually set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
 
 A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `model()`. Future versions of greta will implement a wider range of MCMC samplers, including some for discrete variables.
 
