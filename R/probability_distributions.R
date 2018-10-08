@@ -1407,8 +1407,8 @@ distribution_classes_module <- module(uniform_distribution,
 #'   between 0 and 1, and then transforming it to the required scale. See below
 #'   for an example.
 #'
-#'   Wherever possible, the parameterisation and argument names of greta
-#'   distributions matches commonly used R functions for distributions, such as
+#'   Wherever possible, the parameterisations and argument names of greta
+#'   distributions match commonly used R functions for distributions, such as
 #'   those in the \code{stats} or \code{extraDistr} packages. The following
 #'   table states the distribution function to which greta's implementation
 #'   corresponds:
@@ -1442,7 +1442,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'   \code{dirichlet_multinomial} \tab
 #'   \link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr \code{wishart} \tab
 #'   \link[stats:rWishart]{stats::rWishart}\cr \code{lkj_correlation} \tab
-#'   \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}\cr
+#'   \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}
 #'   }
 #'
 #' @examples
