@@ -74,7 +74,7 @@ dim(x) <- value
 
  x <- as_data(matrix(1:12, 3, 4))
 
- # extract/replace
+ # extract and replace
  x[1:3, ]
  x[, 2:4] <- 1:9
  e <- diag(x)

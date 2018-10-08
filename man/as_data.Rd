@@ -14,11 +14,12 @@ define an object in an R session as a data greta array for use
   as data in a greta model.
 }
 \details{
-\code{as_data()} can currently convert R objects to greta_arrays if they are
-  numeric or logical vectors, matrices or arrays; or if they are dataframes
-  with only numeric (including integer) or logical elements. Logical elements
-  are always converted to numerics. R objects cannot be converted if they
-  contain missing (\code{NA}) or infinite (\code{-Inf} or \code{Inf}) values.
+\code{as_data()} can currently convert R objects to greta_arrays if
+  they are numeric or logical vectors, matrices or arrays; or if they are
+  dataframes with only numeric (including integer) or logical elements.
+  Logical elements are always converted to numerics. R objects cannot be
+  converted if they contain missing (\code{NA}) or infinite (\code{-Inf} or
+  \code{Inf}) values.
 }
 \examples{
 \dontrun{
@@ -28,7 +29,8 @@ define an object in an R session as a data greta array for use
 
 vec <- rnorm(10)
 mat <- matrix(seq_len(3 * 4), nrow = 3)
-arr <- array(sample(c(TRUE, FALSE), 2 * 2 * 2, replace = TRUE), dim = c(2, 2, 2))
+arr <- array(sample(c(TRUE, FALSE), 2 * 2 * 2, replace = TRUE),
+             dim = c(2, 2, 2))
 (a <- as_data(vec))
 (b <- as_data(mat))
 (c <- as_data(arr))

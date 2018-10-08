@@ -74,8 +74,10 @@ mu_plot_draws <- calculate(mu_plot, draws)
 
 # plot the draws
 mu_est <- colMeans(mu_plot_draws[[1]])
-plot(mu_est ~ petal_length_plot, type = "n", ylim = range(mu_plot_draws[[1]]))
-apply(mu_plot_draws[[1]], 1, lines, x = petal_length_plot, col = grey(0.8))
+plot(mu_est ~ petal_length_plot, type = "n",
+     ylim = range(mu_plot_draws[[1]]))
+apply(mu_plot_draws[[1]], 1, lines,
+      x = petal_length_plot, col = grey(0.8))
 lines(mu_est ~ petal_length_plot, lwd = 2)
 }
 

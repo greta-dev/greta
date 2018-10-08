@@ -34,13 +34,14 @@ definition, and speed up model evaluation.}
 
 \item{y}{unused default argument}
 
-\item{colour}{base colour used for plotting. Defaults to \code{greta}
-colours in violet.}
+\item{colour}{base colour used for plotting. Defaults to \code{greta} colours
+in violet.}
 }
 \value{
 \code{model} - a \code{greta_model} object.
 
-\code{plot} - a \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object (invisibly).
+\code{plot} - a
+  \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}} object.
 }
 \description{
 Create a \code{greta_model} object representing a statistical
@@ -51,8 +52,9 @@ Create a \code{greta_model} object representing a statistical
 \details{
 \code{model()} takes greta arrays as arguments, and defines a
   statistical model by finding all of the other greta arrays on which they
-  depend, or which depend on them. Further arguments to \code{model} can be used to configure the tensorflow
-  graph representing the model, to tweak performance.
+  depend, or which depend on them. Further arguments to \code{model} can be
+  used to configure the tensorflow graph representing the model, to tweak
+  performance.
 
 The plot method produces a visual representation of the defined
   model. It uses the \code{DiagrammeR} package, which must be installed
