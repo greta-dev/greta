@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>define a distribution over data — distribution • greta</title>
+<title>define joint distributions — joint • greta</title>
 
 <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 
@@ -38,10 +38,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="define a distribution over data — distribution" />
+<meta property="og:title" content="define joint distributions — joint" />
 
-<meta property="og:description" content="distribution defines probability distributions over
-  observed data, e.g. to set a model likelihood." />
+<meta property="og:description" content="joint combines univariate probability distributions
+  together into a multivariate (and a priori independent between
+  dimensions) joint distribution, either over a variable, or for fixed data." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -171,59 +172,65 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>define a distribution over data</h1>
-    <small class="dont-index">Source: <a href='https://github.com/greta-dev/greta/blob/master/R/distribution.R'><code>R/distribution.R</code></a></small>
-    <div class="hidden name"><code>distribution.Rd</code></div>
+    <h1>define joint distributions</h1>
+    <small class="dont-index">Source: <a href='https://github.com/greta-dev/greta/blob/master/R/joint.R'><code>R/joint.R</code></a></small>
+    <div class="hidden name"><code>joint.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p><code>distribution</code> defines probability distributions over
-  observed data, e.g. to set a model likelihood.</p>
+    <p><code>joint</code> combines univariate probability distributions
+  together into a multivariate (and <em>a priori</em> independent between
+  dimensions) joint distribution, either over a variable, or for fixed data.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>distribution</span>(<span class='no'>greta_array</span>) <span class='kw'>&lt;-</span> <span class='no'>value</span>
-
-<span class='fu'>distribution</span>(<span class='no'>greta_array</span>)</pre>
+    <pre class="usage"><span class='fu'>joint</span>(<span class='no'>...</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>greta_array</th>
-      <td><p>a data greta array. For the assignment method it must not
-already have a probability distribution assigned</p></td>
+      <th>...</th>
+      <td><p>variable greta arrays following probability distributions (see
+<code><a href='distributions.html'>distributions</a></code>); the components of the joint distribution.</p></td>
     </tr>
     <tr>
-      <th>value</th>
-      <td><p>a greta array with a distribution (see
-<code><a href='distributions.html'>distributions</a></code>)</p></td>
+      <th>dim</th>
+      <td><p>the dimensions of the greta array to be returned, either a scalar
+or a vector of positive integers. The final dimension of the greta array
+returned will be determined by the number of component distributions</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The extract method returns the greta array if it has a distribution,
-  or <code>NULL</code> if it doesn't. It has no real use-case, but is included for
-  completeness</p>
+    <p>The component probability distributions must all be either
+  continuous or discrete, and must have the same dimensions.</p>
+<p>This functionality is unlikely to be useful in most models, since the same
+  result can usually be achieved by combining variables with separate
+  distributions. It is included for situations where it is more convenient to
+  consider these as a single distribution, e.g. for use with
+  <code>distribution</code> or <code>mixture</code>.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='co'># define a model likelihood</span>
+<span class='co'># an uncorrelated bivariate normal</span>
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>joint</span>(<span class='fu'><a href='distributions.html'>normal</a></span>(-<span class='fl'>3</span>, <span class='fl'>0.5</span>), <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>3</span>, <span class='fl'>0.5</span>))
+<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>x</span>)
+<span class='fu'>plot</span>(<span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>500</span>))
 
-<span class='co'># observed data and mean parameter to be estimated</span>
-<span class='co'># (explicitly coerce data to a greta array so we can refer to it later)</span>
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'>rnorm</span>(<span class='fl'>5</span>, <span class='fl'>0</span>, <span class='fl'>3</span>))
-
-<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span>(-<span class='fl'>3</span>, <span class='fl'>3</span>)
-
-<span class='co'># define the distribution over y (the model likelihood)</span>
-<span class='fu'>distribution</span>(<span class='no'>y</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='fl'>1</span>)
-
-<span class='co'># get the distribution over y</span>
-<span class='fu'>distribution</span>(<span class='no'>y</span>)
+<span class='co'># joint distributions can be used to define densities over data</span>
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='extract-replace-combine.html'>cbind</a></span>(<span class='fu'>rnorm</span>(<span class='fl'>10</span>, <span class='fl'>2</span>, <span class='fl'>0.5</span>), <span class='fu'>rbeta</span>(<span class='fl'>10</span>, <span class='fl'>3</span>, <span class='fl'>3</span>))
+<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>10</span>)
+<span class='no'>sd</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
+<span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
+<span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='fu'>joint</span>(<span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sd</span>), <span class='fu'><a href='distributions.html'>beta</a></span>(<span class='no'>a</span>, <span class='no'>b</span>),
+                         <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>mu</span>, <span class='no'>sd</span>, <span class='no'>a</span>, <span class='no'>b</span>)
+<span class='fu'>plot</span>(<span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>))
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

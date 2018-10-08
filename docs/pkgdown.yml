@@ -1,4 +1,4 @@
-pandoc: 1.19.2.4
+pandoc: '2.3'
 pkgdown: 1.1.0.9000
 pkgdown_sha: ~
 articles:
@@ -10,4 +10,7 @@ articles:
   software: webpages/software.html
   technical_details: webpages/technical_details.html
   why_greta: webpages/why_greta.html
+urls:
+  reference: https://greta-stats.org/reference
+  article: https://greta-stats.org/articles
 

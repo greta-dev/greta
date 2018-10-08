@@ -15,7 +15,7 @@ README_cache
 logos
 .travis.yml
 docs
-man/figures/plot_greta_legend.R
+man/figures/
 cran-comments.md
 vignettes/build_vignettes.R
 vignettes/*_cache
