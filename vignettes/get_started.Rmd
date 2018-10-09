@@ -70,28 +70,14 @@ Unfortunately, TensorFlow Probability isn't available from the Anaconda version 
 
 ### DiagrammeR
 
-greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](http://igraph.org/r/) package, which contains a large amount of code tthat needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to ploti greta models, you can install igraph and DiagrammeR from CRAN.
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](http://igraph.org/r/) package, which contains a large amount of code tthat needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
 
 ```{r install_diagrammer, eval = FALSE}
 install.packages("igraph")
 install.packages("DiagrammeR")
 ```
 
-**Tip 1**: igraph depends on [XML](https://cran.r-project.org/web/packages/XML/index.html) R package. On igraph's website, they inform you that you need to install <code>libxml2</code> library on Linux (and other Unix-like systems, but not on MacOSX). However, installing XML sometimes fails on MacOS too. Here's a workaround:
-
-1. Install libxml2 using homebrew, with the command: `brew install libxml2`;
-2. Find where libxml2's configuration file is installed using the bash command: `type xml2-config`
-3. Set environment variable for libxml2's configuration folder using the bash command: `export LIBXML_INCDIR=my_path_libxml2_configuration_folder` using the path from the previous command;
-4. Instead to setting environment variable for libxml2's configuration folder using the bash command, you can set environment variable for libxml2's configuration file directly in R session using the R command: 
-```{r define_XML_variable, eval = FALSE}
- Sys.setenv(XML_CONFIG="my_path_libxml2_configuration_file")
-```
-5. Install to the appropriate XML R package and then igraph
-```{r install_XML, eval = FALSE}
-install.packages("XML")
-```
-
-**Tip 2**: Installing igraph can be problematic with some linux installations, with `libgfortran.so.4` not being found. A workaround is to install gfortran-7 as described [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-). 
+igraph can be difficult to install on some machines, due to dependencies on the [XML](https://cran.r-project.org/web/packages/XML/index.html) R package and libxml2 and gfortran software libraries. There are workarounds to these issues (e.g. [here](http://r.789695.n4.nabble.com/Problem-installing-libxml2-under-Homebrew-td4748381.html) and  [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-)) but if you can't get it to work, you can still use greta for everything except plotting models.
 
 <hr>
 
