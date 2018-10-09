@@ -56,7 +56,7 @@ library(greta)
 
 ### TensorFlow
 
-Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.8.0 or higher). greta exports `install_tensorflow()` from the `tensorflow` R package, which will attempt to install the latest version of TensorFlow from within your R session.Moreover, you need to install an additional Python package called [tensorflow-probability](https://github.com/tensorflow/probability). [TensorFlow Probability](https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245) is a library for probabilistic reasoning and statistical analysis in TensorFlow.
+Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.8.0 or higher) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package. greta exports `install_tensorflow()` from the `tensorflow` R package, which you can use to install the latest versions of these packages from within your R session:
 
 ```{r install_tensorflow, eval = FALSE}
 tensorflow::install_tensorflow(extra_packages="tensorflow-probability")
@@ -64,14 +64,7 @@ tensorflow::install_tensorflow(extra_packages="tensorflow-probability")
 
 You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.
 
-**Tip 1**: If you have already installed `TensorFlow` with [Anaconda](www.anaconda.com/download), you can have some incompatibilities to install `tensorflow` R package. It is noted that the Anaconda installation is community supported, not officially supported by TensorFlow. You need to uninstall Anaconda before installing [Tensorflow](https://www.tensorflow.org/install/) via Virtualenv, "native" pip or Docker in order to be compatibile with the `tensorflow` R package.
-
-**Tip 2**: When you install `virtualenv` Python library, even if virtualenv is successfully installed, you can have a warning message about two libraries, `nose<` and `tornado`, for `matplotlib` library. However, these two Python libraries are currently not used in greta, so you don't need to install them to use greta.
-
-**Tip 3**: If you want to use probabilistic modeling and statistical inference in TensorFlow, you need to install [tfp-nightly](https://pypi.org/project/tfp-nightly/) and [tf-nightly](https://pypi.org/project/tf-nightly/). You may be need to define the version to use, such as:
-
-`pip install tfp-nightly==0.0.1.dev20180515`
-`pip install tf-nightly==1.9.0.dev20180515`
+Unfortunately, TensorFlow Probability isn't available from the Anaconda version control system, so if you are using Anaconda, you will need to install TensorFlow Probability separately.
 
 <hr>
 
