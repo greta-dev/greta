@@ -168,7 +168,7 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</code><
 <a class="sourceLine" id="cb4-4" data-line-number="4"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">"school"</span>, <span class="dt">y =</span> <span class="st">"treatment effect"</span>,</a>
 <a class="sourceLine" id="cb4-5" data-line-number="5">       <span class="dt">title =</span> <span class="st">"Barplot of treatment effects for eight schools"</span>,</a>
 <a class="sourceLine" id="cb4-6" data-line-number="6">       <span class="dt">subtitle =</span> <span class="st">"Error bars represent standard error"</span>)</a></code></pre></div>
-<p><img src="../../docs/articles/analyses/eight_schools_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
+<p><img src="eight_schools_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 <p>A different way to plot the estimated effects and their standard errors is to plot the density distribution over the eight schools we have:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">schools <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="st">  </span><span class="kw">gather</span>(x, y, treatment_effects, treatment_effects_p_stddevs, treatment_effects_m_stddevs) <span class="op">%&gt;%</span></a>
@@ -178,7 +178,7 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</code><
 <a class="sourceLine" id="cb5-6" data-line-number="6"><span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">"treatment effect (+/- standard error)"</span>,</a>
 <a class="sourceLine" id="cb5-7" data-line-number="7">         <span class="dt">color =</span> <span class="st">"density curve of"</span>,</a>
 <a class="sourceLine" id="cb5-8" data-line-number="8">         <span class="dt">title =</span> <span class="st">"Density plot of treatment effects +/- standard error for eight schools"</span>)</a></code></pre></div>
-<p><img src="../../docs/articles/analyses/eight_schools_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
+<p><img src="eight_schools_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
 </div>
 <div id="modeling-with-greta" class="section level2">
 <h2 class="hasAnchor">
@@ -306,14 +306,14 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</code><
 ## school_effects_standard[8,1] -1.4581 -0.38927  0.17397  0.7153  1.7875
 ## avg_effect                   -5.1900  2.38110  5.92440  9.6904 16.8460</code></pre>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1"><span class="kw"><a href="http://www.rdocumentation.org/packages/bayesplot/topics/MCMC-traces">mcmc_trace</a></span>(draws, <span class="dt">facet_args =</span> <span class="kw">list</span>(<span class="dt">ncol =</span> <span class="dv">3</span>))</a></code></pre></div>
-<p><img src="../../docs/articles/analyses/eight_schools_files/figure-html/unnamed-chunk-13-1.png" width="960"></p>
+<p><img src="eight_schools_files/figure-html/unnamed-chunk-13-1.png" width="960"></p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1"><span class="kw"><a href="http://www.rdocumentation.org/packages/bayesplot/topics/MCMC-intervals">mcmc_intervals</a></span>(draws)</a></code></pre></div>
-<p><img src="../../docs/articles/analyses/eight_schools_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<p><img src="eight_schools_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw"><a href="http://www.rdocumentation.org/packages/bayesplot/topics/MCMC-diagnostics">mcmc_acf_bar</a></span>(draws)</a></code></pre></div>
-<p><img src="../../docs/articles/analyses/eight_schools_files/figure-html/unnamed-chunk-15-1.png" width="960"></p>
+<p><img src="eight_schools_files/figure-html/unnamed-chunk-15-1.png" width="960"></p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1"><span class="kw"><a href="http://www.rdocumentation.org/packages/bayesplot/topics/MCMC-distributions">mcmc_hist</a></span>(draws, <span class="dt">facet_args =</span> <span class="kw">list</span>(<span class="dt">ncol =</span> <span class="dv">3</span>))</a></code></pre></div>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<p><img src="../../docs/articles/analyses/eight_schools_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
+<p><img src="eight_schools_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
 <div id="use-of-calculate-for-transforming-estimates-to-natural-scale" class="section level4">
 <h4 class="hasAnchor">
 <a href="#use-of-calculate-for-transforming-estimates-to-natural-scale" class="anchor"></a>Use of <code><a href="../../reference/calculate.html">calculate()</a></code> for transforming estimates to natural scale</h4>
@@ -371,7 +371,7 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</code><
 <a class="sourceLine" id="cb28-43" data-line-number="43"><span class="st">  </span><span class="kw">geom_hline</span>(<span class="dt">data =</span> population_parameters, </a>
 <a class="sourceLine" id="cb28-44" data-line-number="44">             <span class="kw">aes</span>(<span class="dt">yintercept =</span> mean, <span class="dt">linetype =</span> <span class="st">'Population mean'</span>, <span class="dt">color =</span> tool)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb28-45" data-line-number="45"><span class="st">  </span><span class="kw">scale_linetype_manual</span>(<span class="dt">name =</span> <span class="st">""</span>, <span class="dt">values =</span> <span class="kw"><a href="../../reference/extract-replace-combine.html">c</a></span>(<span class="dv">2</span>, <span class="dv">2</span>)) </a></code></pre></div>
-<p><img src="../../docs/articles/analyses/eight_schools_files/figure-html/schools-edward2-1.png" width="700"></p>
+<p><img src="eight_schools_files/figure-html/schools-edward2-1.png" width="700"></p>
 </div>
 </div>
 </div>
@@ -453,8 +453,8 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</code><
   docsearch({
     
     
-    apiKey: 'API_KEY',
-    indexName: 'INDEX_NAME',
+    apiKey: 'fa1406e0044eae29be11408a723039e7',
+    indexName: 'greta',
     inputSelector: 'input#search-input.form-control',
     transformData: function(hits) {
       return hits.map(function (hit) {

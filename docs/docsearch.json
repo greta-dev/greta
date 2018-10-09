@@ -1,5 +1,5 @@
 {
-  "index_name": "INDEX_NAME",
+  "index_name": "greta",
   "start_urls": [
     {
       "url": "https://greta-stats.org/index.html",

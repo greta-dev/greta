@@ -4,8 +4,8 @@ template:
   default_assets: false
   params:
     docsearch:
-      api_key: API_KEY
-      index_name: INDEX_NAME
+      api_key: fa1406e0044eae29be11408a723039e7
+      index_name: greta
 
 url: https://greta-stats.org
 
