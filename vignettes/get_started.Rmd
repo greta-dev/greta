@@ -48,6 +48,8 @@ or the development version from GitHub using devtools:
 devtools::install_github("greta-dev/greta")
 ```
 
+then load the package
+
 ```{r load}
 library(greta)
 ```
@@ -59,7 +61,7 @@ library(greta)
 Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.8.0 or higher) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package. greta exports `install_tensorflow()` from the `tensorflow` R package, which you can use to install the latest versions of these packages from within your R session:
 
 ```{r install_tensorflow, eval = FALSE}
-tensorflow::install_tensorflow(extra_packages="tensorflow-probability")
+install_tensorflow(extra_packages="tensorflow-probability")
 ```
 
 You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.
@@ -402,13 +404,7 @@ summary(draws)
 ```
 The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates
 
-```{r mcmcvis_public, eval = FALSE}
-library (bayesplot)
-mcmc_trace(draws)
-mcmc_intervals(draws)
-```
-
-```{r mcmcvis, echo = FALSE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
+```{r mcmcvis, echo = TRUE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
 library (bayesplot)
 mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1))
 mcmc_intervals(draws)

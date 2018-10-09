@@ -293,27 +293,27 @@
     <br><br><div class="page-header"><h1 style="color: #8960B3;" class="hasAnchor">
 <a href="#example" class="anchor"></a>basic example</h1></div>
 
-    <div class="row">
-    <div class="col-md-6">
-    <p>Here’s a Bayesian linear regression model for the <code>iris</code> data using greta:</p>
-    <pre><code>x &lt;- iris$Petal.Length
-    y &lt;- iris$Sepal.Length</code></pre>
-    <pre><code>library(greta)
-    
-    int &lt;- normal(0, 5)
-    coef &lt;- normal(0, 3)
-    sd &lt;- lognormal(0, 3)
-    
-    mean &lt;- int + coef * x
-    distribution(y) &lt;- normal(mean, sd)</code></pre>
-    <pre><code>m &lt;- model(int, coef, sd)</code></pre>
-    </div>
-    <div class="col-md-6">
-    <pre><code>draws &lt;- mcmc(m, n_samples = 1000, chains = 4)
-    bayesplot::mcmc_trace(draws)</code></pre>
-    <p><img src="reference/figures/vis-1.png" width="576" style="display: block; margin: auto;"></p>
-    </div>
-    </div>
+<div class="row">
+<div class="col-md-6">
+<p>Here’s a Bayesian linear regression model for the <code>iris</code> data using greta:</p>
+<pre class="text"><code>x &lt;- iris$Petal.Length
+y &lt;- iris$Sepal.Length</code></pre>
+<pre class="text"><code>library(greta)
+  
+int &lt;- normal(0, 5)
+coef &lt;- normal(0, 3)
+sd &lt;- lognormal(0, 3)
+  
+mean &lt;- int + coef * x
+distribution(y) &lt;- normal(mean, sd)</code></pre>
+<pre class="text"><code>m &lt;- model(int, coef, sd)</code></pre>
+</div>
+<div class="col-md-6">
+<pre class="text"><code>draws &lt;- mcmc(m, n_samples = 1000, chains = 4)
+bayesplot::mcmc_trace(draws)</code></pre>
+<p><img src="reference/figures/vis-1.png" width="528" style="display: block; margin: auto;"></p>
+</div>
+</div>
 
     <br>
 </div>

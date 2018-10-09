@@ -146,13 +146,14 @@
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">"greta"</span>)</a></code></pre></div>
 <p>or the development version from GitHub using devtools:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"greta-dev/greta"</span>)</a></code></pre></div>
+<p>then load the package</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">library</span>(greta)</a></code></pre></div>
 <hr>
 <div id="tensorflow" class="section level3">
 <h3 class="hasAnchor">
 <a href="#tensorflow" class="anchor"></a>TensorFlow</h3>
 <p>Before you can fit models with greta, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> python package (version 1.8.0 or higher) and the <a href="https://github.com/tensorflow/probability">tensorflow-probability</a> python package. greta exports <code><a href="http://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow()</a></code> from the <code>tensorflow</code> R package, which you can use to install the latest versions of these packages from within your R session:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">tensorflow<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow</a></span>(<span class="dt">extra_packages=</span><span class="st">"tensorflow-probability"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="http://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow</a></span>(<span class="dt">extra_packages=</span><span class="st">"tensorflow-probability"</span>)</a></code></pre></div>
 <p>You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you’re having trouble with this step, <a href="https://tensorflow.rstudio.com/installation.html">this guide</a> may help.</p>
 <p>Unfortunately, TensorFlow Probability isn’t available from the Anaconda version control system, so if you are using Anaconda, you will need to install TensorFlow Probability separately.</p>
 <hr>
@@ -493,7 +494,7 @@ sd   0.3668 0.3933 0.4090 0.4259 0.4616
 coef 0.3774 0.4021 0.4143 0.4272 0.4516</code></pre>
 <p>The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates</p>
 <div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb64-1" data-line-number="1"><span class="kw">library</span> (bayesplot)</a>
-<a class="sourceLine" id="cb64-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/bayesplot/topics/MCMC-traces">mcmc_trace</a></span>(draws)</a>
+<a class="sourceLine" id="cb64-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/bayesplot/topics/MCMC-traces">mcmc_trace</a></span>(draws, <span class="dt">facet_args =</span> <span class="kw">list</span>(<span class="dt">nrow =</span> <span class="dv">3</span>, <span class="dt">ncol =</span> <span class="dv">1</span>))</a>
 <a class="sourceLine" id="cb64-3" data-line-number="3"><span class="kw"><a href="http://www.rdocumentation.org/packages/bayesplot/topics/MCMC-intervals">mcmc_intervals</a></span>(draws)</a></code></pre></div>
 <p><img src="get_started_files/figure-html/mcmcvis-1.png" width="400px"><img src="get_started_files/figure-html/mcmcvis-2.png" width="400px"></p>
 <p>If your model is taking a long time whilst in the sampling phase and you want to take a look at the samples. You can stop the sampler (e.g. using the stop button in RStudio) and then retrieve the samples drawn so far, by using <code><a href="../reference/inference.html">stashed_samples()</a></code>. Note that this won’t return anything if you stop the model during the warmup phase (since those aren’t valid posterior samples) or if the sampler completed successfully.</p>

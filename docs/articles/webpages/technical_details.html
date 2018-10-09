@@ -224,7 +224,7 @@
       assign(tf_name, tensor, envir = tfe)
 
     }
-&lt;environment: 0x7fd329a77028&gt;</code></pre>
+&lt;environment: 0x7f8a500c6238&gt;</code></pre>
 <p>Because R6 objects are pass-by-reference (rather than pass-by-value), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their children, they can make sure those children are defined as tensors before they are. The <code>define_tf()</code> member function ensures that that happens, enabling operation nodes to use the tensors for their children when defining their own tensor.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1">x_node<span class="op">$</span>define_tf</a></code></pre></div>
 <pre><code>function(dag) {
@@ -248,7 +248,7 @@
       }
 
     }
-&lt;environment: 0x7fd329a790d0&gt;</code></pre>
+&lt;environment: 0x7f8a500c82e0&gt;</code></pre>
 </div>
 </div>
 <div id="variables-and-free-states" class="section level2">
@@ -290,7 +290,7 @@
       y
 
     }
-&lt;environment: 0x7fd3280cd460&gt;</code></pre>
+&lt;environment: 0x7f8a4bc7e148&gt;</code></pre>
 </div>
 <div id="distributions" class="section level2">
 <h2 class="hasAnchor">
@@ -339,7 +339,7 @@
              envir = dag$tf_environment)
 
     }
-&lt;environment: 0x7fd32880c2e0&gt;</code></pre>
+&lt;environment: 0x7f8a4be1ef58&gt;</code></pre>
 <p>If the distribution was truncated, the log density is normalised using the cumulative distribution function.</p>
 </div>
 <div id="joint-density" class="section level2">
@@ -362,7 +362,7 @@
       self$build_feed_dict(parameter_list)
 
     }
-&lt;environment: 0x7fd326a42c10&gt;</code></pre>
+&lt;environment: 0x7f8a4d226848&gt;</code></pre>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1">model<span class="op">$</span>dag<span class="op">$</span>log_density</a></code></pre></div>
 <pre><code>function() {
 
@@ -374,7 +374,7 @@
       res
 
     }
-&lt;environment: 0x7fd326a42c10&gt;</code></pre>
+&lt;environment: 0x7f8a4d226848&gt;</code></pre>
 <div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" data-line-number="1">model<span class="op">$</span>dag<span class="op">$</span>gradients</a></code></pre></div>
 <pre><code>NULL</code></pre>
 <p>These methods are used to check the validity of initial values, sampling is now done using samplers from tensorflow probability, which require a function mapping from the overall free state to the joint log density. That’s created with the <code>generate_log_prob_function</code> method:</p>
@@ -418,7 +418,7 @@
       }
 
     }
-&lt;environment: 0x7fd326a42c10&gt;</code></pre>
+&lt;environment: 0x7f8a4d226848&gt;</code></pre>
 </div>
   </div>
 
