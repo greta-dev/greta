@@ -13,15 +13,14 @@ body{
 }
 </style>
 
-###bugs and feature requests
+### bugs and feature requests
 
 I'd be really keen to hear about any bugs you find. Or anything else that doesn't work as you expected it to. I'd also like to know if there are features you'd like added to greta.
+You can report bugs or request features by leaving a message on the [GitHub issue tracker](https://github.com/greta-dev/greta/issues)
 
-You report bugs or request features by leaving a message on the [GitHub issue tracker](https://github.com/greta-dev/greta/issues)
+If you have a question about how to use greta, or how to fit a particular type of statistical model, please don't post a GitHub issue. Open a post on the [greta forum](https://forum.greta-stats.org) instead.
 
-If you have a question about how to use greta, or how to fit a particular type of statistical model, please don't post a gitHub issue. Open a post on the [greta forum](https://forum.greta-stats.org) instead.
-
-###contributing to greta
+### contributing to greta
 
 greta is an open source project and we would welcome contributions of code of example models or analyses from anyone with time to spare!
 
