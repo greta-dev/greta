@@ -19,8 +19,12 @@ I'd be really keen to hear about any bugs you find. Or anything else that doesn'
 
 You report bugs or request features by leaving a message on the [GitHub issue tracker](https://github.com/greta-dev/greta/issues)
 
-###contributing code
+If you have a question about how to use greta, or how to fit a particular type of statistical model, please don't post a gitHub issue. Open a post on the [greta forum](https://forum.greta-stats.org) instead.
 
-greta is an open source project, and I would welcome contributions from anyone with time to spare!
+###contributing to greta
 
-The [issues tracker](https://github.com/greta-dev/greta/issues) already lists a number of extensions I have planned. If you think you can help implement one of those (or incorporate your own idea), please leave a message there first so we can discuss how to do it, and so that we aren't duplicating effort.
+greta is an open source project and we would welcome contributions of code of example models or analyses from anyone with time to spare!
+
+If you'd like to contribute an [example model](articles/example_models.html) or an [analysis case study](articles/analyses/eight_schools.html), please first [open an issue]() to discuss it with a package maintainer. The [EDIT_WEBSITE](https://github.com/greta-dev/greta/blob/master/EDIT_WEBSITE.md) file contains details of how to prepare an example. You'll need to fork the package on GitHub, follow those instructions, and then submit a pull request to incorporate them into the main website.
+
+If you'd like to contribute to the core package, please take a look at the [issues tracker](https://github.com/greta-dev/greta/issues) which lists a number of extensions I have planned. If you think you can help implement one of those (or incorporate your own idea), please leave a message there first so we can discuss how to do it, and so that we aren't duplicating effort.
