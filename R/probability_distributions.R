@@ -826,6 +826,20 @@ dirichlet_distribution <- R6Class(
 
     },
 
+    create_target = function(truncation) {
+
+      # handle simplex via a greta array
+      free_greta_array <- variable(lower = 0, upper = 1, dim = self$dim)
+
+      sums <- rowSums(free_greta_array)
+      simplex_greta_array <- sweep(free_greta_array, 1, sums, "/")
+
+      # return the node for the simplex
+      target_node <- get_node(simplex_greta_array)
+      target_node
+
+    },
+
     tf_distrib = function(parameters, dag) {
       alpha <- parameters$alpha
       tfp$distributions$Dirichlet(concentration = alpha)

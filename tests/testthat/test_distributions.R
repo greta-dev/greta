@@ -995,6 +995,22 @@ test_that("dirichlet distribution errors informatively", {
 
 })
 
+
+test_that("dirichlet values sum to one", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  alpha <- uniform(0, 10, dim = c(1, 5))
+  x <- dirichlet(alpha)
+  m <- model(x)
+  draws <- mcmc(m, n_samples = 100, warmup = 100, verbose = FALSE)
+
+  sums <- rowSums(as.matrix(draws))
+  compare_op(sums, 1)
+
+})
+
 test_that("dirichlet-multinomial distribution errors informatively", {
 
   source("helpers.R")
