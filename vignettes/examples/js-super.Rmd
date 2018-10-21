@@ -4,7 +4,7 @@
 
 The [introductory book](http://www.phidot.org/software/mark/docs/book/) to the program MARK has a lot of information on mark-recapture models, including CJS models (starting in Ch. 1) and the broader class of Jolly-Seber models (Ch. 12). There is also a section on mark-recapture models in the [Stan language manual](http://mc-stan.org/users/documentation/), which goes through the derivation of the parameter $\chi$. The parameters $\xi$ and $\nu$ are derived through the same recursive approach used for $\chi$.
 
-Total population size can be estimated from the posterior estimates of $\psi$, $\phi$, $b$, and $p$. This calculation is included in the `generated quantities` block of the Stan code, below.
+Total population size, abundance at each time $t$, and the number of recruits can be estimated from the posterior estimates of $\psi$, $\phi$, $b$, and $p$. This calculation is included in the `generated quantities` block of the Stan code, below.
 
 #### data
 <div class="data">
