@@ -66,6 +66,7 @@
 #'  #'  # miscellaneous operations
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
 #'  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
+#'  hist(x, ...)
 #'
 #' }
 #'
@@ -886,4 +887,35 @@ rdist.greta_array <- function (x1, x2 = NULL, compact = FALSE) {
 
   }
 
+}
+
+#' @export
+hist.greta_array <- function(x, ...) {
+  
+  settings <- list(...)
+  
+  breaks <- settings$breaks
+  
+  # does x have appropriate dimensions?
+  dims <- dim(x)
+  if (length(dims) != 2 | dims[2] != 1) 
+    stop("x must be a n x 1 column vector")
+
+  # are breaks provided?
+  if (is.null(breaks))
+    stop("breaks must be provided", call. = FALSE)
+  
+  nbreak <- as.integer(length(breaks))
+  
+  # are the breaks appropriate integers?
+  raw_breaks <- seq(min(breaks), max(breaks), by = 1)
+  if (nbreak != length(raw_breaks))
+    stop("breaks must be sequential integers", call. = FALSE)
+    
+  op("hist",
+     x,
+     operation_args = list(nbreak = nbreak),
+     tf_operation = "tf_hist",
+     dim = c(nbreak, 1))
+  
 }

@@ -85,6 +85,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  #'  # miscellaneous operations
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
+ hist(x, ...)
 
 }
 }

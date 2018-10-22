@@ -358,3 +358,40 @@ test_that("eigen works as expected", {
   expect_true(all(as.vector(difference) < 1e-4))
 
 })
+
+test_that('hist errors correctly and gives informative warnings', {
+  
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+  
+  group <- sample.int(5, 10, replace = TRUE)
+  a <- ones(10, 1)
+  b <- ones(10, 2)
+  
+  # X must be a column vector
+  expect_error(tapply(b, group, "sum"),
+               "X must be 2D greta array with one column")
+  
+  # INDEX can't be a greta array
+  expect_error(tapply(a, as_data(group), "sum"),
+               "INDEX cannot be a greta array")
+  
+})
+
+test_that('hist gives correct outputs', {
+  
+  skip_if_not(check_tf_version())
+  source('helpers.R')
+  
+  a <- normal(0, 1, 100)
+
+  # should work as long as breaks are provided
+  expect_silent(hist_tmp <- hist(a, breaks = -10:10))
+  
+  # should give one output for each integer bin
+  expect_equal(length(hist_tmp), length(-10:10))
+
+  # should give one output for each integer bin
+  expect_equal(length(hist_tmp), length(-10:10))
+  
+})

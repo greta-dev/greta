@@ -572,6 +572,15 @@ tf_distance <- function (x1, x2) {
 
 }
 
+tf_hist <- function(x, nbreak) {
+
+  tf$histogram_fixed_width(x,
+                           value_range = tf$constant(c(0L, nbreak), dtype = tf$float64),
+                           nbins = nbreak,
+                           dtype = tf$int64)
+  
+}
+
 # combine as module for export via internals
 tf_functions_module <- module(tf_as_logical,
                               tf_as_float,
@@ -613,4 +622,5 @@ tf_functions_module <- module(tf_as_logical,
                               tf_extract_eigenvectors,
                               tf_extract_eigenvalues,
                               tf_self_distance,
-                              tf_distance)
+                              tf_distance,
+                              tf_hist)
