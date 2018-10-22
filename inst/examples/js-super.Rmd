@@ -1,0 +1,151 @@
+### Jolly-Seber superpopulation model
+
+*Jolly-Seber* (JS) models estimate probabilities of survival and recapture from mark-recapture data. These models assume that individuals can enter the population at any time, even if not observed until some later time. The superpopulation parameterization uses a set of individuals that are never observed to estimate the true population abundance. The four key parameters are survival, $\phi$, probability of recapture, $p$, probability of entering the population, $b$, and the probability that an unobserved individual is part of the population, $\psi$. There are three additional derived parameters, $\chi$, which is the probability that an individual is not recaptured following its final capture, $\xi$, which is the probability that an individual is first observed at time $t$, and $\nu$, the probability that an individual is never observed at any time. $\chi$ marginalises over multiple scenarios in which an individual is not observed either because it has died or because it is alive but not detected. $\xi$ marginalises over multiple scenarios in which an individual is observed at time $t$ but recruits at or before time $t$. $\nu$ marginalises over the multiple scenarios in which an individual is never observed at any time because it either is not there or was undetected.
+
+The [introductory book](http://www.phidot.org/software/mark/docs/book/) to the program MARK has a lot of information on mark-recapture models, including CJS models (starting in Ch. 1) and the broader class of Jolly-Seber models (Ch. 12). There is also a section on mark-recapture models in the [Stan language manual](http://mc-stan.org/users/documentation/), which goes through the derivation of the parameter $\chi$. The parameters $\xi$ and $\nu$ are derived through the same recursive approach used for $\chi$.
+
+Total population size, abundance at each time $t$, and the number of recruits can be estimated from the posterior estimates of $\psi$, $\phi$, $b$, and $p$. This calculation is included in the `generated quantities` block of the Stan code, below.
+
+#### data
+<div class="data">
+```{r js_data, highlight = FALSE}
+n_obs <- 100
+n_time <- 20
+n_super <- 1000
+y <- matrix(sample(c(0, 1), size = (n_obs * n_time), replace = TRUE), ncol = n_time)
+```
+</div>
+
+#### greta code
+```{r js_greta}
+# data summaries
+first_obs <- apply(y, 1, function(x) min(which(x > 0)))
+final_obs <- apply(y, 1, function(x) max(which(x > 0)))
+obs_id <- apply(y, 1, function(x) seq(min(which(x > 0)), max(which(x > 0)), by = 1)[-1])
+obs_id <- unlist(obs_id)
+capture_vec <- apply(y, 1, function(x) x[min(which(x > 0)):max(which(x > 0))][-1])
+capture_vec <- unlist(capture_vec)
+
+# priors
+phi <- beta(1, 1, dim = n_time)
+p <- beta(1, 1, dim = n_time)
+b <- beta(1, 1, dim = n_time)
+psi <- beta(1, 1, dim = 1)
+
+# derived parameters (chi, xi)
+chi <- ones(n_time)
+not_phi <- 1 - phi
+not_p <- 1 - p
+phi_not_p <- phi[-n_time] * not_p[-1]
+for (t in seq_len(n_time - 1)) {
+  tn <- n_time - t
+  chi[tn] <- not_phi[tn] + phi_not_p[tn] * chi[tn + 1]
+}
+alpha_xi <- ones(n_time)
+beta_xi <- ones(n_time)
+xi <- ones(n_time)
+not_p <- 1 - p
+phi_not_p_aligned <- phi * not_p
+not_b <- 1 - b
+alpha_xi[1] <- b[1] * phi_not_p_aligned[1]
+beta_xi[1] <- not_b[1]
+p_b <- p * b
+xi[1] <- p_b[1]
+for (t in seq_len(n_time - 1)) {
+  xi[t + 1] <- p[t + 1] * alpha_xi[t] + p_b[t + 1] * beta_xi[t]
+  alpha_xi[t + 1] <- phi_not_p_aligned[t + 1] * (alpha_xi[t] + beta_xi[t] * b[t + 1])
+  beta_xi[t + 1] <- beta_xi[t] * not_b[t + 1]
+}
+not_psi <- 1 - psi
+psi_not_p <- psi * not_p
+nu <- psi_not_p[n_time] * (alpha_xi[n_time - 1] + beta_xi[n_time - 1] * b[n_time]) + psi * beta_xi[n_time] + not_psi
+
+# dummy variables
+included <- ones(n_obs)                              # observed at least once
+first_observation <- ones(length(first_obs))         # first time seen
+alive_data <- ones(length(obs_id))                   # definitely alive
+not_seen_last <- final_obs != n_time
+final_observation <- ones(sum(not_seen_last))        # final time seen
+super_obs_data <- ones(n_super)                      # never observed
+
+# set likelihoods
+distribution(first_observation) <- bernoulli(xi[first_obs])
+distribution(alive_data) <- bernoulli(phi[obs_id - 1])
+distribution(capture_vec) <- bernoulli(p[obs_id])
+distribution(final_observation) <- bernoulli(chi[final_obs[not_seen_last]])
+distribution(included) <- bernoulli(psi)
+distribution(super_obs_data) <- bernoulli(nu)
+```
+
+#### BUGS/JAGS code
+<div class="bugs">
+```
+# `y` includes `nsuper` rows of zeros and `n_obs <- nrow(y)`
+model {
+for (j in 1:(n_time - 1)) {
+  phi0[j] ~ dunif(0, 1)
+  lphi[j] <- log(phi0[j] / (1 - phi0[j]))
+}
+ptmp[1] <- 1
+ptmp[n_time] <- 1
+for (i in 2:(n_time - 1)) {
+  ptmp[i] ~ dunif(0, 1)
+}
+sigma ~ dunif(0, 10)
+tau <- 1 / (sigma * sigma)
+for (j in 1:n_obs) {
+  eta[j] ~ dnorm(0, tau)
+  for (i in 1:(n_time - 1)) {
+    logit(phi[j, i]) <- lphi[i] + eta[j]
+  }
+}
+for (i in 1:n_time) {
+  gamma[i] ~ dbeta(1.0, 1.0)
+  lgamma[i] <- log(gamma[i] / (1 - gamma[i]))
+  gammaSA[i] <- cprob[i] / psi.imp
+}
+c_tmp[1] <- 1.0
+for (i in 2:n_time) {
+  c_tmp[i] <- (1.0 - gamma[i - 1]) * c_tmp[i - 1]
+  cprob[i] <- gamma[i] * c_tmp[i]
+}
+psi.imp <- sum(cprob[1:n_time])
+for (i in 1:n_obs) {
+  z[i, 1] ~ dbern(gamma[1])
+  mu[i] <- z[i, 1] * ptmp[1]
+  y[i, 1] ~ dbern(mu[i])
+  recruitable[i, 1] <- 1
+  for (j in 2:n_time) {
+    survived[i, j] <- phi[i, j - 1] * z[i, j - 1]
+    recruitable[i, j] <- recruitable[i, (j - 1)] * (1 - z[i, j - 1])
+    muz[i, j] <- survived[i, j] + gamma[j] * recruitable[i, j] 
+    z[i, j] ~ dbern(muz[i, j])
+    muy[i, j] <- z[i, j] * ptmp[j]
+    y[i, j] ~ dbern(muy[i, j])
+  }
+} 
+for (j in 1:n_obs) {
+  recruit[j, 1] <- z[j, 1]
+  for (i in 2:n_time) {
+    recruit[j, i] <- z[j, i - 1] * (1 - z[j, i])
+  }
+}
+for (i in 1:n_time) {
+  N[i] <- sum(z[1:n_obs, i])
+  B[i] <- sum(recruit[1:n_obs, i])
+}
+for (i in 1:n_obs) {
+  Nind[i] <- sum(z[i, 1:n_time])
+  Nalive[i] <- 1 - equals(Nind[i], 0)
+}
+Nsuper <- sum(Nalive[1:n_obs])
+}
+```
+</div>
+
+#### Stan code
+<div class="stan">
+```{r js_stan, echo = FALSE}
+cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/blob/master/BPA/Ch.10/js_super.stan'), sep = '\n')
+```
+</div>
