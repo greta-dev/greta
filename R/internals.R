@@ -44,7 +44,8 @@ NULL
 nodes_module <- module(constructors = node_constructors_module,
                        node_classes = node_classes_module,
                        distribution_classes = distribution_classes_module,
-                       mixture_classes = mixture_module)
+                       mixture_classes = mixture_module,
+                       joint_classes = joint_module)
 
 #' @export
 .internals <- module(greta_arrays = greta_array_module,

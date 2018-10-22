@@ -1,0 +1,47 @@
+### Beetles
+
+*Beetles* considers dose-response data from an experiment applying carbon disulphide to 8 beetles. The original example compares three different link functions; the logit, probit and complementary log-log. Here, only the code for the logit link is shown. You can implement the other two link functions in greta by changing `ilogit` to `iprobit` or `icloglog`.
+
+See [WinBUGS examples volume 2](https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf) (pdf) for details.
+
+
+#### data
+```{r beetles_data, highlight = FALSE}
+x <- c(1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839)
+n <- c(59, 60, 62, 56, 63, 59, 62, 60)
+r <- c(6, 13, 18, 28, 52, 53, 61, 60)
+N <- 8
+```
+
+#### greta code
+```{r beetles_greta}
+alpha_star <- normal(0, 32)
+beta <- normal(0, 32)
+p <- ilogit(alpha_star + beta * (x - mean(x)))
+distribution(r) <- binomial(n, p)
+
+alpha <- alpha_star - beta * mean(x)
+rhat <- p * n
+```
+
+#### BUGS/JAGS code
+<div class="bugs">
+```
+for( i in 1 : N ) {
+  r[i] ~ dbin(p[i],n[i])
+  logit(p[i]) <- alpha.star + beta * (x[i] - mean(x[]))
+  rhat[i] <- n[i] * p[i]
+  culmative.r[i] <- culmative(r[i], r[i])
+}
+alpha <- alpha.star - beta * mean(x[])
+beta ~ dnorm(0.0,0.001)
+alpha.star ~ dnorm(0.0,0.001)
+```
+</div>
+
+#### Stan code
+<div class="stan">
+```{r beetles_stan, echo = FALSE}
+cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/master/bugs_examples/vol2/beetles/beetles_logit.stan'), sep = '\n')
+```
+</div>

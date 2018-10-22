@@ -66,13 +66,16 @@
 #'
 #' # plot the draws
 #' mu_est <- colMeans(mu_plot_draws[[1]])
-#' plot(mu_est ~ petal_length_plot, type = "n", ylim = range(mu_plot_draws[[1]]))
-#' apply(mu_plot_draws[[1]], 1, lines, x = petal_length_plot, col = grey(0.8))
+#' plot(mu_est ~ petal_length_plot, type = "n",
+#'      ylim = range(mu_plot_draws[[1]]))
+#' apply(mu_plot_draws[[1]], 1, lines,
+#'       x = petal_length_plot, col = grey(0.8))
 #' lines(mu_est ~ petal_length_plot, lwd = 2)
 #' }
 #'
 #'
-calculate <- function (target, values = list(), precision = c("double", "single")) {
+calculate <- function(target, values = list(),
+                      precision = c("double", "single")) {
 
   target_name <- deparse(substitute(target))
   tf_float <- switch(match.arg(precision),
@@ -80,7 +83,7 @@ calculate <- function (target, values = list(), precision = c("double", "single"
                      single = "float32")
 
   if (!inherits(target, "greta_array"))
-    stop ("'target' is not a greta array")
+    stop("'target' is not a greta array")
 
   if (inherits(values, "mcmc.list"))
     calculate_mcmc.list(target, target_name, values, tf_float)
@@ -89,7 +92,7 @@ calculate <- function (target, values = list(), precision = c("double", "single"
 
 }
 
-calculate_mcmc.list <- function (target, target_name, values, tf_float) {
+calculate_mcmc.list <- function(target, target_name, values, tf_float) {
 
   model_info <- get_model_info(values)
 
@@ -102,7 +105,9 @@ calculate_mcmc.list <- function (target, target_name, values, tf_float) {
 
   # extend the dag to include this node, as the target
   dag$build_dag(list(target))
+
   self <- dag  # mock for scoping
+  self
   dag$define_tf()
 
   dag$target_nodes <- list(get_node(target))
@@ -110,8 +115,6 @@ calculate_mcmc.list <- function (target, target_name, values, tf_float) {
 
   param <- dag$example_parameters()
   param[] <- 0
-  example_values <- dag$trace_values(param)
-  n_trace <- length(example_values)
 
   # raw draws are either an attribute, or this object
   model_info <- attr(values, "model_info")
@@ -123,8 +126,7 @@ calculate_mcmc.list <- function (target, target_name, values, tf_float) {
 
   trace <- coda::mcmc.list(trace)
   attr(trace, "model_info") <- model_info
-  # return this
-  return (trace)
+  trace
 
 }
 
@@ -176,7 +178,7 @@ calculate_list <- function(target, values, tf_float) {
   # find all the nodes depended on by the new values, and remove them from the
   # list
   complete_dependencies <- lapply(fixed_greta_arrays,
-                                  function (x)
+                                  function(x)
                                     get_node(x)$child_names(recursive = TRUE))
   complete_dependencies <- unique(unlist(complete_dependencies))
 
@@ -195,7 +197,7 @@ calculate_list <- function(target, values, tf_float) {
                                      include_data = FALSE)
 
     greta_array_node_names <- vapply(greta_arrays,
-                                function (x) get_node(x)$unique_name,
+                                function(x) get_node(x)$unique_name,
                                 FUN.VALUE = "")
 
     unmet_variables <- unmet_nodes[is_variable]
@@ -222,8 +224,8 @@ calculate_list <- function(target, values, tf_float) {
                    "could not be detected")
     }
 
-    stop (msg,
-          call. = FALSE)
+    stop(msg,
+         call. = FALSE)
   }
 
   # add values or data not specified by the user
@@ -242,11 +244,11 @@ calculate_list <- function(target, values, tf_float) {
 }
 
 # coerce value to have the correct dimensions
-assign_dim <- function (value, greta_array) {
+assign_dim <- function(value, greta_array) {
   array <- strip_unknown_class(get_node(greta_array)$value())
   if (length(array) != length(value)) {
-    stop ("a provided value has different number of elements",
-          " than the greta array", call. = FALSE)
+    stop("a provided value has different number of elements",
+         " than the greta array", call. = FALSE)
   }
   array[] <- value
   array

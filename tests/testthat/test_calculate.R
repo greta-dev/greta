@@ -1,9 +1,9 @@
-context('calculate')
+context("calculate")
 
-test_that('calculate works with correct lists', {
+test_that("calculate works with correct lists", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   # unknown variable
   x <- as_data(c(1, 2))
@@ -21,10 +21,10 @@ test_that('calculate works with correct lists', {
 
 })
 
-test_that('calculate works with mcmc.list objects', {
+test_that("calculate works with mcmc.list objects", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   samples <- 10
   x <- as_data(c(1, 2))
@@ -56,7 +56,7 @@ test_that('calculate works with mcmc.list objects', {
 test_that("calculate errors nicely if mcmc.list objects missing info", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   samples <- 10
   x <- as_data(c(1, 2))
@@ -74,10 +74,10 @@ test_that("calculate errors nicely if mcmc.list objects missing info", {
 
 })
 
-test_that('calculate errors nicely if not all required values are passed', {
+test_that("calculate errors nicely if not all required values are passed", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
@@ -91,10 +91,10 @@ test_that('calculate errors nicely if not all required values are passed', {
 
 })
 
-test_that('calculate errors nicely if values have incorrect dimensions', {
+test_that("calculate errors nicely if values have incorrect dimensions", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
@@ -106,10 +106,10 @@ test_that('calculate errors nicely if values have incorrect dimensions', {
 
 })
 
-test_that('calculate errors nicely if not used on a greta array', {
+test_that("calculate errors nicely if not used on a greta array", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- as_data(c(1, 2))
   a <- normal(0, 1)

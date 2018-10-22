@@ -1,7 +1,7 @@
 # functions to be run whilst samplers are running in parallel
 
 #' @importFrom utils read.table
-read_trace_log_file <- function (filename) {
+read_trace_log_file <- function(filename) {
   ans <- NULL
   if (file.exists(filename)) {
     ans <- read.table(filename)
@@ -9,7 +9,7 @@ read_trace_log_file <- function (filename) {
   ans
 }
 
-read_progress_log_file <- function (filename, skip = 0) {
+read_progress_log_file <- function(filename, skip = 0) {
   ans <- ""
   if (file.exists(filename)) {
     ans <- suppressWarnings(readLines(filename))
@@ -21,7 +21,7 @@ read_progress_log_file <- function (filename, skip = 0) {
 
 # generic rendering of progress text straight from a set of files
 #' @importFrom utils flush.console
-render_progress <- function (reads) {
+render_progress <- function(reads) {
 
   reads <- unlist(reads)
   reads[is.na(reads)] <- ""
@@ -42,34 +42,18 @@ render_progress <- function (reads) {
 }
 
 # callback functions
-percentages <- function () {
+percentages <- function() {
   reads <- lapply(greta_stash$percentage_log_files,
                   read_progress_log_file)
   render_progress(reads)
 }
 
-progress_bars <- function () {
+progress_bars <- function() {
   reads <- lapply(greta_stash$progress_bar_log_files,
                   read_progress_log_file,
                   skip = 1)
   render_progress(reads)
-
 }
 
 # register some
 greta_stash$callbacks <- list(parallel_progress = progress_bars)
-
-# the default callback should be the progress bars, having each sampler write
-# its progress bar to a progress stream if running in parallel (using existing
-# gist)
-
-# other packages, such as greta.live, can then create new modifier functions
-# that create and register callbacks with this mechanism. E.g.:
-# greta.live::use_dashboard()
-# which would add a callback to greta::.internals$misc$greta_stash$callbacks
-# to update a shiny flex dashboard with convergence diagnostic plots,
-# dynamic traces (in 1D or 2D), coloured-in summary stats
-# (with crayon, bolder if they are more certain)
-
-# then use ropenscilabs/ssh to scp progress information from the remote servers
-

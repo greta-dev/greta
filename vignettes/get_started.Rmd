@@ -27,14 +27,12 @@ set.seed(2018-07-02)
 
 library(greta)
 
-if (!file.exists('figures'))
-  dir.create('figures')
+if (!file.exists("figures"))
+  dir.create("figures")
 
-file.copy('../man/figures/plotlegend.png',
-          'figures/plotlegend.png')
+file.copy("../man/figures/plotlegend.png",
+          "figures/plotlegend.png")
 ```
-
-<hr>
 
 ## Installation
 
@@ -44,12 +42,13 @@ You can install the stable version of greta from CRAN:
 install.packages("greta")
 ```
 
-Alternatively, you can install the latest release, or the development version, from GitHub using the devtools package:
+or the development version from GitHub using devtools:
 
 ```{r install_greta_github, eval = FALSE}
-devtools::install_github("greta-dev/greta")  # latest release
-devtools::install_github("greta-dev/greta@dev")  # development version
+devtools::install_github("greta-dev/greta")
 ```
+
+then load the package
 
 ```{r load}
 library(greta)
@@ -59,64 +58,28 @@ library(greta)
 
 ### TensorFlow
 
-Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.8.0 or higher). greta exports `install_tensorflow()` from the `tensorflow` R package, which will attempt to install the latest version of TensorFlow from within your R session.Moreover, you need to install an additional Python package called [tensorflow-probability](https://github.com/tensorflow/probability). [TensorFlow Probability](https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245) is a library for probabilistic reasoning and statistical analysis in TensorFlow.
+Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.8.0 or higher) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package. greta exports `install_tensorflow()` from the `tensorflow` R package, which you can use to install the latest versions of these packages from within your R session:
 
-Example to install Tensorflow version 1.8.0 :
 ```{r install_tensorflow, eval = FALSE}
-tensorflow::install_tensorflow(version="1.8.0", extra_packages="tensorflow-probability")
-tensorflow::install_tensorflow_extras("tensorflow-probability")
+install_tensorflow(extra_packages="tensorflow-probability")
 ```
 
 You can use this function to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.
 
-**Tip 1**: If you have already installed `TensorFlow` with [Anaconda](www.anaconda.com/download), you can have some incompatibilities to install `tensorflow` R package. It is noted that the Anaconda installation is community supported, not officially supported by TensorFlow. You need to uninstall Anaconda before installing [Tensorflow](https://www.tensorflow.org/install/) via Virtualenv, "native" pip or Docker in order to be compatibile with the `tensorflow` R package.
-
-**Tip 2**: When you install `virtualenv` Python library, even if virtualenv is successfully installed, you can have a warning message about two libraries, `nose<` and `tornado`, for `matplotlib` library. However, these two Python libraries are currently not used in greta, so you don't need to install them to use greta.
-
-**Tip 3**: If you want to use probabilistic modeling and statistical inference in TensorFlow, you need to install [tfp-nightly](https://pypi.org/project/tfp-nightly/) and [tf-nightly](https://pypi.org/project/tf-nightly/). You may be need to define the version to use, such as:
-
-`pip install tfp-nightly==0.0.1.dev20180515`
-`pip install tf-nightly==1.9.0.dev20180515`
+Unfortunately, TensorFlow Probability isn't available from the Anaconda version control system, so if you are using Anaconda, you will need to install TensorFlow Probability separately.
 
 <hr>
 
 ### DiagrammeR
 
-greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because Diagrammer automatically installs a lot of other packages, it can take a long time to install. So, DiagrammeR isn’t installed automatically with greta. It is noted that to install DiagrammeR, you need to have already installed [igraph](http://igraph.org/r/) R package. If you want to plot models, you can install igraph and DiagrammeR from CRAN.
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](http://igraph.org/r/) package, which contains a large amount of code tthat needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
 
 ```{r install_diagrammer, eval = FALSE}
-install.packages('igraph')
-install.packages('DiagrammeR')
+install.packages("igraph")
+install.packages("DiagrammeR")
 ```
 
-**Tip 1**: igraph depends on [XML](https://cran.r-project.org/web/packages/XML/index.html) R package. On igraph's website, they inform you that you need to install <code>libxml2</code> library on Linux (and other Unix-like systems, but not on MacOSX). However, you can fail to install XML R package on MacOS. So, you need to:
-
-1. Install libxml2 using the bash command: `brew install libxml2`;
-2. Find where libxml2's configuration file is installed using the bash command: `type xml2-config`
-3. Set environment variable for libxml2's configuration folder using the bash command: `export LIBXML_INCDIR=my_path_libxml2_configuration_folder` using the path from the previous command;
-4. Instead to setting environment variable for libxml2's configuration folder using the bash command, you can set environment variable for libxml2's configuration file directly in R session using the R command: 
-```{r define_XML_variable, eval = FALSE}
- Sys.setenv(XML_CONFIG="my_path_libxml2_configuration_file")
-```
-5. Install to the appropriate XML R package and then igraph
-```{r install_XML, eval = FALSE}
-install.packages('XML')
-```
-
-**Tip 2**: You can have some issues to install igraph on Ubuntu 16.04 (Issue with libgfortran.so.4 not found). Workaround is to install gfortran-7 as described [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-). 
-
-<hr>
-
-### future
-To be able to have parallel processing of greta R expressions, you need to install [Future](https://cran.r-project.org/web/packages/future/index.html) R package and use this R expression
-```{r multiple_Session, eval = FALSE}
-plan(multisession)
-```
-
-If you want to evaluate R expressions asynchronously, you can install future from CRAN.
-```{r install_future, eval = FALSE}
-install.packages('future')
-```
+igraph can be difficult to install on some machines, due to dependencies on the [XML](https://cran.r-project.org/web/packages/XML/index.html) R package and libxml2 and gfortran software libraries. There are workarounds to these issues (e.g. [here](http://r.789695.n4.nabble.com/Problem-installing-libxml2-under-Homebrew-td4748381.html) and  [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-)) but if you can't get it to work, you can still use greta for everything except plotting models.
 
 <hr>
 
@@ -209,7 +172,7 @@ as_data(iris[1:5, 1:4])
 Whenever `as_data()` converts logical values to greta arrays, it converts them to 1s (for `TRUE`) and 0s (for `FALSE`). E.g. if we first convert the last column of `iris` from a factor into a logical vector, we can see this:
 
 ```{r logical_data}
-(is_setosa <- iris$Species[c(1, 41, 81, 121)] == 'setosa')
+(is_setosa <- iris$Species[c(1, 41, 81, 121)] == "setosa")
 as_data(is_setosa)
 ```
 
@@ -388,19 +351,9 @@ m <- model(int, coef, sd)
 ### Plotting
 
 greta provides a plot function for greta models to help you visualise and check the model before sampling from it.
-```{r plot, eval = FALSE}
+```{r plot}
 plot(m)
 ```
-```{r plot_hidden, echo = FALSE, results = "hide"}
-gr <- plot(m)
-fname <- "figures/full_graph.png"
-DiagrammeR::export_graph(gr,
-                         file_name = fname,
-                         file_type = 'png',
-                         width = 958 * 2,
-                         height = 450 * 2)
-```
-<p><img src="figures/full_graph.png" width="800" /></p>
 
 The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; `x` and `y`), variables (large circles;  `int`, `coef`, `sd`) or the results of operations (small circles; `mean`). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from.
 There are also nodes for greta arrays that were *implicitly defined* in our model. The data nodes (squares) with numbers are the parameters used to define the prior distributions, and there's also an intermediate operation node (small circle), which was the result of multiplying `coef` and `x` (before adding `int` to create `mean`).
@@ -413,48 +366,21 @@ The fourth type of node (diamonds) represents probability distributions. These h
 
 For example, a plot of just the prior distribution over `coef` (defined as `coef <- normal(0, 3)`) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution's value, the variable `coef`:
 
-```{r plot_coef, echo = FALSE, results = "hide"}
+```{r plot_coef, echo = FALSE}
 coef <- normal(0, 3)
 m_coef <- model(coef)
-gr <- plot(m_coef)
-fname <- "figures/coef_graph.png"
-DiagrammeR::export_graph(gr,
-                         file_name = fname,
-                         file_type = 'png',
-                         width = 325 * 2,
-                         height = 123 * 2)
+plot(m_coef)
 ```
-<p><img src="figures/coef_graph.png" width="500" /></p>
 
 It's the same for the model likelihood, but this time the distribution's parameters are a variable (`sd`) and the result of an operation (`mean`), and the distribution's value is given by data (the observed sepal lengths `y`):
 
-```{r plot_likelihood, echo = FALSE, results = "hide"}
+```{r plot_likelihood, echo = FALSE}
 sd <- variable()
 y <- as_data(iris$Sepal.Length)
 mean <- ones(150)
 distribution(y) <- normal(mean, sd)
 m_likelihood <- model(sd)
-gr <- plot(m_likelihood)
-idx <- which(gr$nodes_df$label == 'mean\n')
-gr$nodes_df$shape[idx] <- 'circle'
-gr$nodes_df$fillcolor[idx] <- 'lightgray'
-gr$nodes_df$color[idx] <- 'lightgray'
-gr$nodes_df$width[idx] <- 0.2
-gr$nodes_df$height[idx] <- 0.2
-gr$nodes_df <- gr$nodes_df[c(3, 1, 2, 4), ]
-fname <- "figures/likelihood_graph.png"
-DiagrammeR::export_graph(gr,
-                         file_name = fname,
-                         file_type = "png",
-                         width = 325 * 2,
-                         height = 105 * 2)
-```
-<p><img src="figures/likelihood_graph.png" width="500" /></p>
-
-
-**Tip 1**: If you modify your model, you need to clear a bunch of tf objects without restarting R using R command 
-```{r clear_tf_objects, eval = FALSE}
-tf.reset_default_graph()
+plot(m_likelihood)
 ```
 
 <hr>
@@ -469,7 +395,7 @@ Now we have a greta model that will give us the joint density for a candidate se
 draws <- mcmc(m, n_samples = 1000)
 ```
 
-Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm, which uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 100 iterations 'warming up' (tuning the sampler parameters) and 'burning in' (moving to the area of highest probability) the sampler.
+Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm on each of 4 separate chains, giving us 4000 samples. HMC uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 1000 iterations on each chain 'warming up' (tuning the sampler parameters) and 'burning in' (moving to the area of highest probability) the sampler.
 
 `draws` is an `mcmc.list` object, from the coda R package. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.
 
@@ -478,13 +404,7 @@ summary(draws)
 ```
 The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates
 
-```{r mcmcvis_public, eval = FALSE}
-library (bayesplot)
-mcmc_trace(draws)
-mcmc_intervals(draws)
-```
-
-```{r mcmcvis, echo = FALSE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
+```{r mcmcvis, echo = TRUE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
 library (bayesplot)
 mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1))
 mcmc_intervals(draws)
@@ -494,7 +414,7 @@ If your model is taking a long time whilst in the sampling phase and you want to
 
 #### Tweaking the sampler
 
-Static HMC is currently the only sampling algorithm available in greta. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about proposals being rejected, the first thing to try is increasing the length of the warmup period from its default of 100 interations (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manually set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
+greta's default sampler is (static) Hamiltonian Monte Carlo. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about proposals being rejected, the first thing to try is increasing the length of the warmup period from its default of 1000 interations (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manually set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
 
 A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `model()`. Future versions of greta will implement a wider range of MCMC samplers, including some for discrete variables.
 

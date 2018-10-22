@@ -64,7 +64,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  chol2inv(x, ...)
  cov2cor(V)
  solve(a, b, ...)
- kronecker(X, Y)
+ kronecker(X, Y, FUN = c('*', '/', '+', '-'))
 
  # reducing operations
  sum(..., na.rm = TRUE)
@@ -83,6 +83,9 @@ TensorFlow only enables rounding to integers, so \code{round()} will
               transpose = FALSE)
 
  #'  # miscellaneous operations
+ aperm(x, perm)
+ apply(x, MARGIN, FUN = c("sum", "max", "mean", "min",
+                          "prod", "cumsum", "cumprod"))
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
  hist(x, ...)

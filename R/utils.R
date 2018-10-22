@@ -1,7 +1,7 @@
 # utility functions
 
 # create a named list
-module <- function (..., sort = TRUE) {
+module <- function(..., sort = TRUE) {
 
   dots <- list(...)
   names <- names(dots)
@@ -31,18 +31,18 @@ module <- function (..., sort = TRUE) {
 # return an invisible logical saying whether it is valid
 
 #' @importFrom utils compareVersion
-check_tf_version <- function (alert = c("none",
-                                        "error",
-                                        "warn",
-                                        "message",
-                                        "startup")) {
+check_tf_version <- function(alert = c("none",
+                                       "error",
+                                       "warn",
+                                       "message",
+                                       "startup")) {
 
   alert <- match.arg(alert)
   text <- NULL
   tf_available <- TRUE
   tfp_available <- TRUE
 
-  if (!reticulate::py_module_available('tensorflow')) {
+  if (!reticulate::py_module_available("tensorflow")) {
 
     text <- "TensorFlow isn't installed"
     tf_available <- FALSE
@@ -62,7 +62,7 @@ check_tf_version <- function (alert = c("none",
 
   }
 
-  if (!reticulate::py_module_available('tensorflow_probability')) {
+  if (!reticulate::py_module_available("tensorflow_probability")) {
 
     text <- paste0(text,
                    ifelse(is.null(text), "", " and "),
@@ -86,8 +86,8 @@ check_tf_version <- function (alert = c("none",
                    "to install the latest version.",
                    "\n\n")
     switch(alert,
-           error = stop (text, call. = FALSE),
-           warn = warning (text, call. = FALSE),
+           error = stop(text, call. = FALSE),
+           warn = warning(text, call. = FALSE),
            message = message(text),
            startup = packageStartupMessage(text),
            none = NULL)
@@ -100,92 +100,63 @@ check_tf_version <- function (alert = c("none",
 
 
 # helper for *apply statements on R6 objects
-member <- function (x, method)
-  eval(parse(text = paste0('x$', method)))
+member <- function(x, method)
+  eval(parse(text = paste0("x$", method)))
 
-node_type <- function (node) {
+node_type <- function(node) {
   classes <- class(node)
-  type <- grep('*_node', classes, value = TRUE)
-  gsub('_node', '', type)
+  type <- grep("*_node", classes, value = TRUE)
+  gsub("_node", "", type)
 }
 
 # access the float type option
-tf_float <- function () {
+tf_float <- function() {
   float_name <- options()$greta_tf_float
   tf[[float_name]]
 }
 
 # cast an R scalar as a float of the correct type in TF code
-fl <- function (x) {
+fl <- function(x) {
   tf$constant(x, dtype = tf_float())
 }
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape arguments
 #' @noRd
 #' @importFrom tensorflow shape
-to_shape <- function (dim)
+to_shape <- function(dim)
   do.call(shape, as.list(dim))
 
 # is this greta_array actually a scalar?
-is_scalar <- function (x)
+is_scalar <- function(x)
   identical(dim(x), c(1L, 1L))
 
 # flatten a greta array into a column vector in column-major order
-flatten <- function (x)
+flatten <- function(x)
   x[seq_along(x)]
 
-# helper function to loop through lists of R6 objects with lapply, executing the
-# member function "name" on the arguments in dots. Using the syntax:
-#   lapply(R6_objects, do("member_function"), args)
-# which does R6_objects[[i]]$member_function(args) for each R6 object
-do <- function(name, ...) {
-  function (x, ...) {
-    x[[name]](...)
-  }
-}
-
 # return an integer to pass on as an RNG seed
-get_seed <- function () {
+get_seed <- function() {
   sample.int(1e12, 1)
 }
 
 # does a pointer exist (as a named object) and is it from the current session
 # use like: live_pointer("joint_density", dag$tf_environment)
-live_pointer <- function (tensor_name, environment = parent.frame()) {
+live_pointer <- function(tensor_name, environment = parent.frame()) {
   exists(tensor_name, envir = environment) &&
     !is.null(environment[[tensor_name]]$name)
 }
 
-# apply FUN to rows of matrix X and recombine *without dropping like apply does*
-apply_rows <- function (X, FUN, ...) {
-  rows <- seq_len(nrow(X))
-  input_list <- lapply(rows, function (i) X[i, ])
-  output_list <- lapply(input_list, FUN, ...)
-  output <- do.call(rbind, output_list)
-  output
-}
-
-# apply FUN to rows of matrix X and recombine *without dropping like apply does*
-apply_rows <- function (X, FUN, ...) {
-  rows <- seq_len(nrow(X))
-  input_list <- lapply(rows, function (i) X[i, ])
-  output_list <- lapply(input_list, FUN, ...)
-  output <- do.call(rbind, output_list)
-  output
-}
-
+# Begin Exclude Linting
 # get the next seed as a L'Ecuyer
 future_seed <- function() {
   okind <- RNGkind()[1]
-  # oseed <- .GlobalEnv$.Random.seed
-  # .GlobalEnv$.Random.seed <- oseed
-  # sample.int(1)
   on.exit(RNGkind(okind), add = TRUE)
   RNGkind("L'Ecuyer-CMRG")
   .GlobalEnv$.Random.seed
 }
+# End Exclude Linting
 
-create_log_file <- function (create = FALSE) {
+create_log_file <- function(create = FALSE) {
   filename <- tempfile(pattern = "greta_log_")
   if (create)
     file.create(filename)
@@ -194,7 +165,7 @@ create_log_file <- function (create = FALSE) {
 
 # given a number of bars to be printed at the same time, determine the width of
 # sub process bars, so they all fit on the same line
-bar_width <- function (n_bars) {
+bar_width <- function(n_bars) {
 
   terminal_width <- options()$width
 
@@ -207,7 +178,7 @@ bar_width <- function (n_bars) {
 
 # record the messages produced by the expression in the file
 #' @importFrom utils capture.output
-record <- function (expr, file) {
+record <- function(expr, file) {
   if (!is.null(file)) {
     msg <- capture.output(out <- eval(expr), type = "message")
     writeLines(msg, file)
@@ -218,7 +189,7 @@ record <- function (expr, file) {
 }
 
 # convert an assumed numeric to an array with at least 2 dimensions
-as_2D_array <- function (x) {
+as_2D_array <- function(x) {
 
   # coerce data from common formats to an array here
   x <- as.array(x)
@@ -231,13 +202,13 @@ as_2D_array <- function (x) {
 }
 
 # add an additional dimension at the beginning of an array
-add_first_dim <- function (x) {
+add_first_dim <- function(x) {
   x <- as.array(x)
   array(x, dim = c(1, dim(x)))
 }
 
 # drop the additional dimension at the beginning of an array
-drop_first_dim <- function (x) {
+drop_first_dim <- function(x) {
   x <- as.array(x)
   if (length(dim(x)) > 1) {
     x <- array(x, dim = dim(x)[-1])
@@ -246,7 +217,7 @@ drop_first_dim <- function (x) {
 }
 
 # if x is an R matrix representing a column vector, make it a plain R vector
-drop_column_dim <- function (x) {
+drop_column_dim <- function(x) {
   dims <- dim(x)
   if (length(dims) == 2 && dims[2] == 1L) {
     x <- as.vector(x)
@@ -265,7 +236,7 @@ expand_to_batch <- function(x, y) {
 
 # does this tensor have a batch dimension (of unknown size) as its first
 # dimension?
-has_batch <- function (x) is.null(dim(x)[[1]])
+has_batch <- function(x) is.null(dim(x)[[1]])
 
 # given a list of tensors, if none or all of them have a batch dimension, return
 # the list. If any (but not all) of them has a batch dimension, tile the
@@ -300,14 +271,14 @@ match_batches <- function(values) {
 
 # split a 3D array of n_samples * n_chains * n_parameters posterior samples into
 # a list of n_chains 2D arrays of dimension n_samples * n_parameters
-split_chains <- function (samples_array) {
+split_chains <- function(samples_array) {
 
   dims_in <- dim(samples_array)
   dims_out <- dims_in[-2]
   n_chains <- dims_in[2]
 
   lapply(seq_len(n_chains),
-         function (i) {
+         function(i) {
            x <- samples_array[, i, , drop = FALSE]
            dim(x) <- dims_out
            x
@@ -317,12 +288,16 @@ split_chains <- function (samples_array) {
 
 # take a greta array dimension and return the dimension of the hessian to return
 # to the user
-hessian_dims <- function (dim) {
+hessian_dims <- function(dim) {
   if (length(dim) == 2 && dim[2] == 1L) {
     dim <- dim[1]
   }
   rep(dim, 2)
 }
+
+# generate a random 8-digit hexadecimal string
+rhex <- function()
+  paste(as.raw(sample.int(256L, 4, TRUE) - 1L), collapse = "")
 
 
 misc_module <- module(module,
@@ -334,10 +309,8 @@ misc_module <- module(module,
                       to_shape,
                       is_scalar,
                       flatten,
-                      do,
                       get_seed,
                       live_pointer,
-                      apply_rows,
                       future_seed,
                       create_log_file,
                       bar_width,
@@ -350,10 +323,11 @@ misc_module <- module(module,
                       has_batch,
                       match_batches,
                       split_chains,
-                      hessian_dims)
+                      hessian_dims,
+                      rhex)
 
 # check dimensions of arguments to ops, and return the maximum dimension
-check_dims <- function (..., target_dim = NULL) {
+check_dims <- function(..., target_dim = NULL) {
 
   # coerce args to greta arrays
   elem_list <- list(...)
@@ -363,8 +337,8 @@ check_dims <- function (..., target_dim = NULL) {
   dim_list <- lapply(elem_list, dim)
 
   # as text, for printing
-  dims_paste <- vapply(dim_list, paste, '', collapse= 'x')
-  dims_text <- paste(dims_paste, collapse = ', ')
+  dims_paste <- vapply(dim_list, paste, "", collapse = "x")
+  dims_text <- paste(dims_paste, collapse = ", ")
 
   # which are scalars
   scalars <- vapply(elem_list, is_scalar, FALSE)
@@ -381,9 +355,9 @@ check_dims <- function (..., target_dim = NULL) {
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- sprintf('incompatible dimensions: %s',
+      msg <- sprintf("incompatible dimensions: %s",
                      dims_text)
-      stop (msg, call. = FALSE)
+      stop(msg, call. = FALSE)
 
     }
   }
@@ -408,11 +382,11 @@ check_dims <- function (..., target_dim = NULL) {
 
       # error if not
       if (!all(matches_target)) {
-        stop (sprintf(paste("array dimensions should be %s,",
-                            "but input dimensions were %s"),
-                      paste(target_dim, collapse = 'x'),
-                      dims_text),
-              call. = FALSE)
+        stop(sprintf(paste("array dimensions should be %s,",
+                           "but input dimensions were %s"),
+                     paste(target_dim, collapse = "x"),
+                     dims_text),
+             call. = FALSE)
       }
 
     }
@@ -431,7 +405,7 @@ check_dims <- function (..., target_dim = NULL) {
 }
 
 # make sure a greta array is 2D
-check_2D <- function (x) {
+check_2D <- function(x) {
 
   if (length(dim(x)) != 2L) {
     stop("parameters of multivariate distributions ",
@@ -440,14 +414,14 @@ check_2D <- function (x) {
   }
 }
 
-check_square <- function (x) {
+check_square <- function(x) {
   dim <- dim(x)
   ndim <- length(dim)
   is_square <- ndim == 2 && dim[1] == dim[2]
   if (!is_square) {
-    stop ("expected a 2D square greta array, but object had dimension ",
-          paste(dim, collapse = "x"),
-          call. = FALSE)
+    stop("expected a 2D square greta array, but object had dimension ",
+         paste(dim, collapse = "x"),
+         call. = FALSE)
   }
 }
 
@@ -455,9 +429,9 @@ check_square <- function (x) {
 # matrices and column vectors, respectively, where number of rows implies the
 # number of realisations) and an optional target number of realisations, error
 # if there's a mismatch, and otherwise return the output number of realisations
-check_n_realisations <- function (vectors = list(),
-                                  scalars = list(),
-                                  target = NULL) {
+check_n_realisations <- function(vectors = list(),
+                                 scalars = list(),
+                                 target = NULL) {
 
   # get the number of rows in the vector and scalar objects
   nrows <- lapply(c(vectors, scalars), nrow)
@@ -477,21 +451,22 @@ check_n_realisations <- function (vectors = list(),
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- sprintf('incompatible number of rows: %s',
+      msg <- sprintf("incompatible number of rows: %s",
                      paste(nrows, collapse = " vs "))
-      stop (msg, call. = FALSE)
+      stop(msg, call. = FALSE)
 
     }
   }
 
-  # if there's a target number of realisations, check it's valid and make sure they all match it
+  # if there's a target number of realisations, check it's valid and make sure
+  # they all match it
   if (!is.null(target)) {
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1) {
-      stop ("'n_realisations' must be a positive scalar integer ",
-            "giving the number of rows of the output",
-            call. = FALSE)
+      stop("'n_realisations' must be a positive scalar integer ",
+           "giving the number of rows of the output",
+           call. = FALSE)
     }
 
     target <- as.integer(target)
@@ -507,11 +482,11 @@ check_n_realisations <- function (vectors = list(),
 
       # error if not
       if (!all(matches_target)) {
-        stop (sprintf(paste("number of realisations should be %s,",
-                            "but arguments had %s rows"),
-                      target,
-                      paste(nrows, collapse = ", ")),
-              call. = FALSE)
+        stop(sprintf(paste("number of realisations should be %s,",
+                           "but arguments had %s rows"),
+                     target,
+                     paste(nrows, collapse = ", ")),
+             call. = FALSE)
       }
 
     }
@@ -532,10 +507,10 @@ check_n_realisations <- function (vectors = list(),
 
 # check the dimension of maultivariate parameters matches, and matches the
 # optional target dimension
-check_dimension <- function (vectors = list(),
-                             squares = list(),
-                             target = NULL,
-                             min_dimension = 2L) {
+check_dimension <- function(vectors = list(),
+                            squares = list(),
+                            target = NULL,
+                            min_dimension = 2L) {
 
   # get the number of columns in the vector and scalar objects
   ncols <- lapply(c(vectors, squares), ncol)
@@ -545,9 +520,9 @@ check_dimension <- function (vectors = list(),
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1 || !is.finite(target)) {
-      stop ("'dimension' must be a positive scalar integer ",
-            "giving the dimension of the distribution",
-            call. = FALSE)
+      stop("'dimension' must be a positive scalar integer ",
+           "giving the dimension of the distribution",
+           call. = FALSE)
     }
 
     dimension <- as.integer(target)
@@ -561,11 +536,11 @@ check_dimension <- function (vectors = list(),
 
   # check it's big enough
   if (dimension < min_dimension) {
-    stop ("the dimension of this distribution must be at least ",
-          min_dimension, " but was ", dimension,
-          "\n\nmultivariate distributions treat each *row* as a separate ",
-          "realisation - perhaps you need to transpose something?",
-          call. = FALSE)
+    stop("the dimension of this distribution must be at least ",
+         min_dimension, " but was ", dimension,
+         "\n\nmultivariate distributions treat each *row* as a separate ",
+         "realisation - perhaps you need to transpose something?",
+         call. = FALSE)
   }
 
   # make sure all the parameters match this dimension
@@ -576,13 +551,13 @@ check_dimension <- function (vectors = list(),
 
     # otherwise it's not fine
     msg <- sprintf(paste0("the distribution dimension should be %s, ",
-                          "but parameters implied dimensions: %s",
-                          "\n\nmultivariate distributions treat each *row* as a ",
+                          "but parameters implied dimensions: %s\n\n",
+                          "multivariate distributions treat each *row* as a ",
                           "separate realisation - perhaps you need to ",
                           "transpose something?"),
                    dimension,
                    paste(ncols, collapse = " vs "))
-    stop (msg, call. = FALSE)
+    stop(msg, call. = FALSE)
 
   }
 
@@ -599,12 +574,12 @@ check_dimension <- function (vectors = list(),
 
 # the objects passed in can either be vector-like (like 'mean'),
 # scalar-like (like 'size'), or square (like 'Sigma').
-check_multivariate_dims <- function (vectors = list(),
-                                     scalars = list(),
-                                     squares = list(),
-                                     n_realisations = NULL,
-                                     dimension = NULL,
-                                     min_dimension = 2L) {
+check_multivariate_dims <- function(vectors = list(),
+                                    scalars = list(),
+                                    squares = list(),
+                                    n_realisations = NULL,
+                                    dimension = NULL,
+                                    min_dimension = 2L) {
 
   # coerce args to greta arrays
   vectors <- lapply(vectors, as.greta_array)
@@ -633,33 +608,35 @@ check_multivariate_dims <- function (vectors = list(),
 
 
 # check truncation for different distributions
-check_positive <- function (truncation) {
+check_positive <- function(truncation) {
   if (truncation[1] < 0) {
-    stop ("lower bound must be 0 or higher",
-          call. = FALSE)
+    stop("lower bound must be 0 or higher",
+         call. = FALSE)
   }
 }
 
-check_unit <- function (truncation) {
+check_unit <- function(truncation) {
   if (truncation[1] < 0 | truncation[2] > 1) {
-    stop ("lower and upper bounds must be between 0 and 1",
-          call. = FALSE)
+    stop("lower and upper bounds must be between 0 and 1",
+         call. = FALSE)
   }
 }
 
 # check whether the function calling this is being used as the 'family' argument
 # of another modelling function
-check_in_family <- function (function_name, arg) {
+check_in_family <- function(function_name, arg) {
 
   if (missing(arg)) {
     # if the first argument is missing, the user might be doing
     # `family = binomial()` or similar
     arg_is_link <- TRUE
   } else {
-    # if the first argument is one of these text strings, the user might be doing
-    # `family = binomial("logit")` or similar
-    links <- c("logit", "probit", "cloglog", "cauchit", "log", "identity", "sqrt")
-    arg_is_link <- inherits(arg, "character") && length(arg) == 1 && arg %in% links
+    # if the first argument is one of these text strings, the user might be
+    # doing `family = binomial("logit")` or similar
+    links <- c("logit", "probit", "cloglog", "cauchit",
+               "log", "identity", "sqrt")
+    arg_is_link <- inherits(arg, "character") &&
+      length(arg) == 1 && arg %in% links
   }
 
   # if it's being executed in an environment where it's named 'family', the user
@@ -674,7 +651,7 @@ check_in_family <- function (function_name, arg) {
                   " function in the family argment of another model.",
                   " Maybe you want to use 'family = stats::", function_name,
                   "' instead?")
-    stop (msg, call. = FALSE)
+    stop(msg, call. = FALSE)
   }
 
 }
@@ -682,7 +659,7 @@ check_in_family <- function (function_name, arg) {
 # get & return information about the future plan, and error nicely if invalid
 
 #' @importFrom future plan future
-check_future_plan <- function () {
+check_future_plan <- function() {
 
   plan_info <- future::plan()
 
@@ -698,8 +675,7 @@ check_future_plan <- function () {
     # if it's a cluster, check there's no forking
     if (plan_is$cluster) {
 
-      # This stopgap trick from Henrik:
-      # https://github.com/HenrikBengtsson/future/issues/224#issuecomment-388398032
+      # This stopgap trick from Henrik on github:
       f <- future::future(NULL, lazy = TRUE)
       workers <- f$workers
       if (inherits(workers, "cluster")) {
@@ -720,9 +696,9 @@ check_future_plan <- function () {
 
       # if multi*, check it's multisession
       if (plan_is$multiprocess && !plan_is$multisession) {
-        stop ("parallel mcmc samplers cannot be run with plan(multiprocess) or ",
-              "plan(multicore)",
-              call. = FALSE)
+        stop("parallel mcmc samplers cannot be run with plan(multiprocess) or ",
+             "plan(multicore)",
+             call. = FALSE)
       }
 
     }
@@ -740,7 +716,7 @@ checks_module <- module(check_dims,
                         check_future_plan)
 
 # convert an array to a vector row-wise
-flatten_rowwise <- function (array) {
+flatten_rowwise <- function(array) {
   dim <- dim(array)
   array <- aperm(array, rev(seq_along(dim)))
   dim(array) <- NULL
@@ -748,7 +724,7 @@ flatten_rowwise <- function (array) {
 }
 
 # convert an vector to an array row-wise
-unflatten_rowwise <- function (array, dim) {
+unflatten_rowwise <- function(array, dim) {
 
   array <- as.array(array)
   # if any dim has length 1, make it a column vector
@@ -763,13 +739,13 @@ unflatten_rowwise <- function (array, dim) {
 
 # create an array with the same dimensions as tensor and fill it with
 # consecutive increasing integers in python order
-dummy <- function (dims) {
+dummy <- function(dims) {
   vec <- seq_len(prod(dims)) - 1
   unflatten_rowwise(vec, dims)
 }
 
 # create a greta array of zeros with the correct dimensions
-dummy_greta_array <- function (x) {
+dummy_greta_array <- function(x) {
   do.call(zeros, list(dim(x)))
 }
 
@@ -782,9 +758,9 @@ dummy_array_module <- module(flatten_rowwise,
 # returning a colour linearly interpolated between black, the colour and white,
 # so that values close to 0.5 match the base colour, values close to 0 are
 # nearer black, and values close to 1 are nearer white
-palettize <- function (base_colour) {
-  pal <- colorRampPalette(c('#000000', base_colour, '#ffffff'))
-  function (val) {
+palettize <- function(base_colour) {
+  pal <- colorRampPalette(c("#000000", base_colour, "#ffffff"))
+  function(val) {
     stopifnot(val > 0 & val < 1)
     cols <- pal(1001)
     cols[round(val * 1000 + 1)]
@@ -793,29 +769,29 @@ palettize <- function (base_colour) {
 
 # colour scheme for plotting
 #' @importFrom grDevices col2rgb
-greta_col <- function (which = c('main',
-                                 'dark',
-                                 'light',
-                                 'lighter',
-                                 'super_light'),
-                       colour = '#996bc7') {
+greta_col <- function(which = c("main",
+                                "dark",
+                                "light",
+                                "lighter",
+                                "super_light"),
+                      colour = "#996bc7") {
 
   # tests if a color encoded as string can be converted to RGB
   tryCatch(
     is.matrix(grDevices::col2rgb(colour)),
     error = function(e) {
-        stop(paste("Invalid colour:", colour), call. = FALSE)
+      stop(paste("Invalid colour:", colour), call. = FALSE)
     }
   )
 
   which <- match.arg(which)
   pal <- palettize(colour)
-  switch (which,
-          dark = pal(0.45),  #45%
-          main = pal(0.55),  #55%
-          light = pal(0.65),  #65%ish
-          lighter = pal(0.85),  #85%ish
-          super_light = pal(0.95))  #95%ish
+  switch(which,
+         dark = pal(0.45), # 45%
+         main = pal(0.55), # 55%
+         light = pal(0.65), # 65%ish
+         lighter = pal(0.85), # 85%ish
+         super_light = pal(0.95)) # 95%ish
 }
 
 colour_module <- module(palettize,
@@ -823,8 +799,8 @@ colour_module <- module(palettize,
 
 # look in the environment specified by env, and return a named list of all greta
 # arrays in that environment
-all_greta_arrays <- function (env = parent.frame(),
-                              include_data = TRUE) {
+all_greta_arrays <- function(env = parent.frame(),
+                             include_data = TRUE) {
 
   # all objects in that environment as a named list
   all_object_names <- ls(envir = env)
@@ -842,7 +818,7 @@ all_greta_arrays <- function (env = parent.frame(),
   if (!include_data) {
 
     is_data <- vapply(all_arrays,
-                      function (x) inherits(get_node(x), 'data_node'),
+                      function(x) inherits(get_node(x), "data_node"),
                       FUN.VALUE = FALSE)
     all_arrays <- all_arrays[!is_data]
 
@@ -853,7 +829,7 @@ all_greta_arrays <- function (env = parent.frame(),
 }
 
 # suppress the R or python output of R expressions
-quietly <- function (expr) {
+quietly <- function(expr) {
   py_out <- reticulate::py_capture_output(
     r_out <- capture.output(expr))
   out <- c(py_out, r_out)
@@ -862,24 +838,22 @@ quietly <- function (expr) {
 
 # evaluate expressions (dag density or gradient), capturing numerical errors
 # like matrix inversions as bad samples, and erroring otherwise
-cleanly <- function (expr) {
+cleanly <- function(expr) {
 
-  res <- tryCatch(expr, error = function (e) e)
+  res <- tryCatch(expr, error = function(e) e)
 
   # if it errored
-  if (inherits(res, 'error')) {
+  if (inherits(res, "error")) {
 
-    numerical_messages <- c("is not invertible",
-                            "Cholesky decomposition was not successful")
-
-    numerical_errors <- vapply(numerical_messages,
+    # check for known numerical errors
+    numerical_errors <- vapply(greta_stash$numerical_messages,
                                grepl,
                                res$message,
                                FUN.VALUE = 0) == 1
 
     # if it was just a numerical error, quietly return a bad value
     if (!any(numerical_errors))
-      stop ("greta hit a tensorflow error:\n\n", res, call. = FALSE)
+      stop("greta hit a tensorflow error:\n\n", res, call. = FALSE)
 
   }
 
@@ -890,13 +864,13 @@ cleanly <- function (expr) {
 # prepare a matrix of draws and return as an mcmc object
 #' @noRd
 #' @importFrom coda mcmc
-prepare_draws <- function (draws) {
+prepare_draws <- function(draws) {
   draws_df <- data.frame(draws, check.names = FALSE)
   draws_df <- na.omit(draws_df)
   coda::mcmc(draws_df)
 }
 
-build_sampler <- function (initial_values, sampler, model, seed = get_seed()) {
+build_sampler <- function(initial_values, sampler, model, seed = get_seed()) {
 
   sampler$class$new(initial_values,
                     model,
@@ -905,38 +879,19 @@ build_sampler <- function (initial_values, sampler, model, seed = get_seed()) {
 }
 
 # unlist and flatten a list of arrays to a vector row-wise
-unlist_tf <- function (x) {
+unlist_tf <- function(x) {
   # flatten each element row-wise and concatenate
   x <- lapply(x, flatten_rowwise)
   do.call(c, x)
 }
 
-# relist a vector into a list of arrays row-wise
-relist_tf <- function (x, list_template) {
-
-  # get expected dimensions of arrays and number of elements
-  dims <- lapply(list_template, dim)
-  lengths <- vapply(dims, prod, 1)
-  runs <- rep(seq_along(lengths), lengths)
-
-  # chop up vector into shorter lengths
-  vectors <- split(x, runs)
-  names(vectors) <- NULL
-
-  # loop through vectors coercing into arrays
-  list <- mapply(unflatten_rowwise, vectors, dims, SIMPLIFY = FALSE)
-  names(list) <- names(list_template)
-  list
-
-}
-
 #' @importFrom future availableCores
-check_n_cores <- function (n_cores, samplers, plan_is) {
+check_n_cores <- function(n_cores, samplers, plan_is) {
 
   # if the plan is remote, and the user hasn't specificed the number of cores,
   # leave it as all of them
   if (is.null(n_cores) & !plan_is$local) {
-    return (NULL)
+    return(NULL)
   }
 
   n_cores_detected <- future::availableCores()
@@ -947,8 +902,8 @@ check_n_cores <- function (n_cores, samplers, plan_is) {
 
     check_positive_integer(n_cores, "n_cores")
 
-    message ("\n", n_cores, " cores were requested, but only ",
-             n_cores_detected, " are available.")
+    message("\n", n_cores, " cores were requested, but only ",
+            n_cores_detected, " are available.")
 
     n_cores <- NULL
 
@@ -966,13 +921,13 @@ check_n_cores <- function (n_cores, samplers, plan_is) {
 
 }
 
-check_positive_integer <- function (x, name = "") {
+check_positive_integer <- function(x, name = "") {
 
   suppressWarnings(x <- as.integer(x))
 
   if (length(x) != 1 | is.na(x) | x < 1) {
-    stop (name, " must be a positive integer",
-          call. = FALSE)
+    stop(name, " must be a positive integer",
+         call. = FALSE)
   }
 
   x
@@ -981,7 +936,7 @@ check_positive_integer <- function (x, name = "") {
 
 # get better names for the scalar elements of a greta array, for labelling mcmc
 # samples
-get_indices_text <- function (dims, name) {
+get_indices_text <- function(dims, name) {
   ndim <- prod(dims)
   if (ndim > 1) {
     vec <- seq_len(ndim)
@@ -996,7 +951,7 @@ get_indices_text <- function (dims, name) {
 # given a list 'trace_list' of arrays giving the values of the target greta
 # arrays (with their true dimensions), return the ith element, flattened to a
 # vector and with elements given informative names
-flatten_trace <- function (i, trace_list) {
+flatten_trace <- function(i, trace_list) {
   object <- names(trace_list)[i]
   values <- trace_list[[i]]
   dim_in <- dim(values)
@@ -1010,22 +965,22 @@ flatten_trace <- function (i, trace_list) {
 
 # extract the model information object from mcmc samples returned by
 # stashed_samples, and error nicely if there's something fishy
-get_model_info <- function (draws, name = "value") {
+get_model_info <- function(draws, name = "value") {
 
   if (!inherits(draws, "mcmc.list")) {
-    stop (name, " must be an mcmc.list object created by greta::mcmc(), ",
-          "greta::stashed_samples() or greta::extra_samples()",
-          call. = FALSE)
+    stop(name, " must be an mcmc.list object created by greta::mcmc(), ",
+         "greta::stashed_samples() or greta::extra_samples()",
+         call. = FALSE)
   }
 
   model_info <- attr(draws, "model_info")
   valid <- !is.null(model_info)
 
   if (!valid) {
-    stop (name, " is an mcmc.list object, but is not associated with any ",
-          "model information, perhaps it wasn't created by greta::mcmc(), ",
-          "greta::stashed_samples() or greta::extra_samples() ?",
-          call. = FALSE)
+    stop(name, " is an mcmc.list object, but is not associated with any ",
+         "model information, perhaps it wasn't created by greta::mcmc(), ",
+         "greta::stashed_samples() or greta::extra_samples() ?",
+         call. = FALSE)
   }
 
   model_info
@@ -1037,7 +992,6 @@ sampler_utils_module <- module(all_greta_arrays,
                                build_sampler,
                                prepare_draws,
                                unlist_tf,
-                               relist_tf,
                                check_future_plan,
                                check_n_cores,
                                check_positive_integer,
@@ -1045,24 +999,24 @@ sampler_utils_module <- module(all_greta_arrays,
                                flatten_trace,
                                get_model_info)
 
-flat_to_chol <- function (x, dim, correl = FALSE) {
+flat_to_chol <- function(x, dim, correl = FALSE) {
 
   fun <- ifelse(correl,
                 "tf_flat_to_chol_correl",
                 "tf_flat_to_chol")
 
   # sum the elements
-  op('flat_to_chol', x,
+  op("flat_to_chol", x,
      operation_args = list(dims = dim),
      tf_operation = fun,
      dim = dim)
 
 }
 
-chol_to_symmetric <- function (L) {
+chol_to_symmetric <- function(L) {
 
   # sum the elements
-  op('chol_to_symmetric', L,
+  op("chol_to_symmetric", L,
      tf_operation = "tf_chol_to_symmetric",
      representations = list(cholesky = L))
 
@@ -1071,19 +1025,33 @@ chol_to_symmetric <- function (L) {
 # convert a function on greta arrays into a function on corresponding tensors,
 # given the greta arrays for inputs. When executed, this needs to be wrapped in
 # dag$on_graph() to get the tensors connected up with the rest of the graph
-as_tf_function <- function (r_fun, ...) {
+as_tf_function <- function(r_fun, ...) {
 
   # run the operation on isolated greta arrays, so nothing gets attached to the
   # model real greta arrays in dots
   ga_dummies <- lapply(list(...), dummy_greta_array)
   ga_out <- do.call(r_fun, ga_dummies)
+  ga_out
 
-  function (...) {
+  function(...) {
 
     tensor_inputs <- list(...)
 
+    # if any of these are shapeless, make them into greta scalars (3D)
+    tensor_inputs <- lapply(tensor_inputs,
+                            function(x) {
+                              if (identical(dim(x), list()))
+                                x <- tf$reshape(x, shape(1, 1, 1))
+                              x
+                            })
+
+    # transfer batch dimensions if needed
+    tensor_inputs <- match_batches(tensor_inputs)
+
     # create a sub-dag for these operations, from ga_dummies to ga_out
-    targets <- c(list(ga_out), ga_dummies)
+    if (!is.list(ga_out))
+      ga_out <- list(ga_out)
+    targets <- c(ga_out, ga_dummies)
     sub_dag <- dag_class$new(targets)
 
     # use the default graph, so that it can be overwritten when this is called?
@@ -1102,11 +1070,22 @@ as_tf_function <- function (r_fun, ...) {
     # constants
     greta_stash$data_as_constants <- TRUE
     on.exit(greta_stash$data_as_constants <- NULL)
-    node_out <- get_node(ga_out)
-    node_out$define_tf(sub_dag)
 
-    # get the tensor for the output
-    tf_out <- sub_tfe[[sub_dag$tf_name(node_out)]]
+    tf_out <- list()
+    for (i in seq_along(ga_out)) {
+
+      # define the output nodes
+      node_out <- get_node(ga_out[[i]])
+      node_out$define_tf(sub_dag)
+
+      # get the tensors for the outputs
+      tf_out[[i]] <- sub_tfe[[sub_dag$tf_name(node_out)]]
+    }
+
+    if (length(tf_out) == 1) {
+      tf_out <- tf_out[[1]]
+    }
+
     tf_out
 
   }

@@ -1,0 +1,28 @@
+---
+title: "contribute to greta"
+output:
+  html_document:
+    css: greta.css
+    toc: no
+    theme: lumen
+---
+
+<style type="text/css">
+body{
+  font-size: 18px;
+}
+</style>
+
+### bugs and feature requests
+
+We'd be really keen to hear about any bugs you find, or anything that doesn't work as you expected it to. We'd also like to know if there are features you'd like added to greta. You can report bugs or request features by leaving a message on the [GitHub issue tracker](https://github.com/greta-dev/greta/issues)
+
+If you have a question about how to use greta, or how to fit a particular type of statistical model, please don't post a GitHub issue. Open a post on the [greta forum](https://forum.greta-stats.org) instead.
+
+### contributing to greta
+
+greta is an open source project and we would welcome contributions of code, example models or analyses from anyone with time to spare!
+
+If you'd like to contribute an [example model](../example_models.html) or an [analysis case study](../analyses/eight_schools.html), please first [open an issue](https://github.com/greta-dev/greta/issues/new) to discuss it with a package maintainer. The <a href=https://github.com/greta-dev/greta/blob/master/.EDIT_WEBSITE%2Emd>.EDIT_WEBSITE.md</a> file contains details of how to prepare an example. You'll need to fork the package on GitHub, follow those instructions, and then submit a pull request to incorporate them into the main website.
+
+If you'd like to contribute to the core package, please take a look at the [issues tracker](https://github.com/greta-dev/greta/issues) which lists a number of extensions I have planned. If you think you can help implement one of those (or incorporate your own idea), please leave a message there first so we can discuss how to do it, and so that we aren't duplicating effort.

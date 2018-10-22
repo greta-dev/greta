@@ -1,6 +1,6 @@
-context('miscellaneous methods')
+context("miscellaneous methods")
 
-test_that('check_tf_version works', {
+test_that("check_tf_version works", {
 
   skip_if_not(check_tf_version())
 
@@ -11,11 +11,11 @@ test_that('check_tf_version works', {
   # expected text
   expected_message <- "you have TensorFlow version 0.9.0"
 
-  expect_error(check_tf_version('error'),
+  expect_error(check_tf_version("error"),
                expected_message)
-  expect_warning(check_tf_version('warn'),
+  expect_warning(check_tf_version("warn"),
                  expected_message)
-  expect_message(check_tf_version('message'),
+  expect_message(check_tf_version("message"),
                  expected_message)
 
   # reset the true version
@@ -25,22 +25,24 @@ test_that('check_tf_version works', {
   expected_message <- "isn't installed"
 
   with_mock(
-    `reticulate::py_module_available` = function(x) {FALSE},
-    expect_error(check_tf_version('error'), expected_message),
-    expect_warning(check_tf_version('warn'), expected_message),
-    expect_message(check_tf_version('message'), expected_message)
+    `reticulate::py_module_available` = function(x) {
+      FALSE
+    },
+    expect_error(check_tf_version("error"), expected_message),
+    expect_warning(check_tf_version("warn"), expected_message),
+    expect_message(check_tf_version("message"), expected_message)
   )
 
 })
 
-test_that('.onLoad runs', {
+test_that(".onLoad runs", {
 
   source("helpers.R")
-  expect_ok( greta:::.onLoad() )
+  expect_ok(greta:::.onLoad())
 
 })
 
-test_that('tensorflow coercion works', {
+test_that("tensorflow coercion works", {
 
   skip_if_not(check_tf_version())
 
@@ -50,12 +52,12 @@ test_that('tensorflow coercion works', {
 
   float_type <- options()$greta_tf_float
   expect_equal(float$dtype$name, float_type)
-  expect_equal(integer$dtype$name, 'int32')
-  expect_equal(logical$dtype$name, 'bool')
+  expect_equal(integer$dtype$name, "int32")
+  expect_equal(logical$dtype$name, "bool")
 
 })
 
-test_that('all_greta_arrays works', {
+test_that("all_greta_arrays works", {
 
   skip_if_not(check_tf_version())
   env <- new.env()
@@ -67,25 +69,25 @@ test_that('all_greta_arrays works', {
   array_list <- greta:::all_greta_arrays(env)
   array_list_nodata <- greta:::all_greta_arrays(env, include_data = FALSE)
 
-  expect_identical(names(array_list), c('a', 'b', 'c'))
-  expect_identical(names(array_list_nodata), c('a', 'c'))
+  expect_identical(names(array_list), c("a", "b", "c"))
+  expect_identical(names(array_list_nodata), c("a", "c"))
 
 })
 
-test_that('greta_model objects print', {
+test_that("greta_model objects print", {
 
   skip_if_not(check_tf_version())
 
   m <- model(normal(0, 1))
   message <- capture.output(print(m))
-  expect_equal(message, 'greta model')
+  expect_equal(message, "greta model")
 
 })
 
-test_that('define and mcmc error informatively', {
+test_that("define and mcmc error informatively", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- as_data(randn(10))
 
@@ -101,7 +103,7 @@ test_that('define and mcmc error informatively', {
                      "so a model cannot be defined"))
 
   expect_error(model(),
-               'could not find any non-data greta arrays')
+               "could not find any non-data greta arrays")
 
   # can't define a model for an unfixed discrete variable
   expect_error(model(bernoulli(0.5)),
@@ -121,19 +123,19 @@ test_that('define and mcmc error informatively', {
                       warmup = 1,
                       n_samples = 1,
                       n_cores = 1000000L),
-               "cores were requested, but only")
+                 "cores were requested, but only")
 
   # can't draw samples of a data greta array
   z <- normal(x, 1)
   m <- model(x, z)
   expect_error(mcmc(m),
-               'x is a data greta array, data greta arrays cannot be sampled')
+               "x is a data greta array, data greta arrays cannot be sampled")
 
 })
 
-test_that('check_dims errors informatively', {
+test_that("check_dims errors informatively", {
 
-  source('helpers.R')
+  source("helpers.R")
 
   a <- ones(3, 3)
   b <- ones(1)
@@ -155,7 +157,7 @@ test_that('check_dims errors informatively', {
 
   # with two differently shaped arrays it shouldn't
   expect_error(greta:::check_dims(a, c),
-               'incompatible dimensions: 3x3, 2x2')
+               "incompatible dimensions: 3x3, 2x2")
 
   # with two scalars and a target dimension, just return the target dimension
   expect_equal(greta:::check_dims(b, b, target_dim = dim1),
@@ -163,10 +165,10 @@ test_that('check_dims errors informatively', {
 
 })
 
-test_that('disjoint graphs are checked', {
+test_that("disjoint graphs are checked", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   # if the target nodes aren't related, they sould be checked separately
 
@@ -195,20 +197,20 @@ test_that('disjoint graphs are checked', {
 test_that("plotting models doesn't error", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- uniform(0, 1)
 
   m <- model(a)
 
-  expect_ok( plot(m) )
+  expect_ok(plot(m))
 
 })
 
 test_that("structures work correctly", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   a <- ones(2, 2)
   b <- zeros(2)
@@ -222,16 +224,16 @@ test_that("structures work correctly", {
 
 test_that("cleanly() handles TF errors nicely", {
 
-  source('helpers.R')
+  source("helpers.R")
 
-  inversion_stop <- function ()
-    stop ("this non-invertible thing is not invertible")
+  inversion_stop <- function()
+    stop("this non-invertible thing is not invertible")
 
-  cholesky_stop <- function ()
-    stop ("Cholesky decomposition was not successful")
+  cholesky_stop <- function()
+    stop("Cholesky decomposition was not successful")
 
-  other_stop <- function ()
-    stop ("Fetchez la vache!")
+  other_stop <- function()
+    stop("Fetchez la vache!")
 
   expect_s3_class(cleanly(inversion_stop()), "error")
   expect_s3_class(cleanly(cholesky_stop()), "error")
@@ -245,22 +247,22 @@ test_that("double precision works for all jacobians", {
   skip_if_not(check_tf_version())
 
   none <- normal(0, 1)
-  expect_ok( model(none, precision = "double") )
+  expect_ok(model(none, precision = "double"))
 
   high <- normal(0, 1, truncation = c(-1, Inf))
-  expect_ok( model(high, precision = "double") )
+  expect_ok(model(high, precision = "double"))
 
   low <- normal(0, 1, truncation = c(-Inf, 1))
-  expect_ok( model(low, precision = "double") )
+  expect_ok(model(low, precision = "double"))
 
   both <- normal(0, 1, truncation = c(-1, 1))
-  expect_ok( model(both, precision = "double") )
+  expect_ok(model(both, precision = "double"))
 
   correlation_matrix <- lkj_correlation(1)
-  expect_ok( model(correlation_matrix, precision = "double") )
+  expect_ok(model(correlation_matrix, precision = "double"))
 
   covariance_matrix <- wishart(3, diag(2))
-  expect_ok( model(covariance_matrix, precision = "double") )
+  expect_ok(model(covariance_matrix, precision = "double"))
 
 })
 

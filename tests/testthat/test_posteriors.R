@@ -54,7 +54,7 @@ test_that("samplers are unbiased for chi-squared", {
 
   df <- 5
   x <- chi_squared(df)
-  iid <- function (n) rchisq(n, df)
+  iid <- function(n) rchisq(n, df)
 
   check_samples(x, iid)
 
@@ -106,10 +106,12 @@ test_that("samplers pass geweke tests", {
   source("helpers.R")
   skip_if_not_release()
 
+  # Begin Exclude Linting
   # run geweke tests on this model:
   # theta ~ normal(mu1, sd1)
   # x[i] ~ normal(theta, sd2)
   # for i in N
+  # End Exclude Linting
 
   N <- 10
   mu1 <- rnorm(1, 0, 3)
@@ -117,11 +119,11 @@ test_that("samplers pass geweke tests", {
   sd2 <- rlnorm(1)
 
   # prior (n draws)
-  p_theta <- function (n)
+  p_theta <- function(n)
     rnorm(n, mu1, sd1)
 
   # likelihood
-  p_x_bar_theta <- function (theta)
+  p_x_bar_theta <- function(theta)
     rnorm(N, theta, sd2)
 
   # define the greta model (single precision for slice sampler)
@@ -153,4 +155,3 @@ test_that("samplers pass geweke tests", {
                title = "slice sampler Geweke test")
 
 })
-

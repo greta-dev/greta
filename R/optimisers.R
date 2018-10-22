@@ -31,10 +31,10 @@
 NULL
 
 # set up an optimiser object
-define_scipy_optimiser <- function (name,
-                                    method,
-                                    parameters = list(),
-                                    other_args = list(uses_callbacks = TRUE)) {
+define_scipy_optimiser <- function(name,
+                                   method,
+                                   parameters = list(),
+                                   other_args = list(uses_callbacks = TRUE)) {
 
   obj <- list(name = name,
               method = method,
@@ -48,10 +48,10 @@ define_scipy_optimiser <- function (name,
 
 }
 
-define_tf_optimiser <- function (name,
-                                 method,
-                                 parameters = list(),
-                                 other_args = list()) {
+define_tf_optimiser <- function(name,
+                                method,
+                                parameters = list(),
+                                other_args = list()) {
 
   obj <- list(name = name,
               method = method,
@@ -68,7 +68,7 @@ define_tf_optimiser <- function (name,
 #' @rdname optimisers
 #' @export
 #'
-nelder_mead <- function () {
+nelder_mead <- function() {
   define_scipy_optimiser("nelder_mead",
                          method = "Nelder-Mead")
 }
@@ -76,7 +76,7 @@ nelder_mead <- function () {
 #' @rdname optimisers
 #' @export
 #'
-powell <- function () {
+powell <- function() {
   define_scipy_optimiser("powell",
                          method = "Powell")
 }
@@ -84,7 +84,7 @@ powell <- function () {
 #' @rdname optimisers
 #' @export
 #'
-cg <- function () {
+cg <- function() {
   define_scipy_optimiser("cg",
                          method = "CG")
 }
@@ -92,7 +92,7 @@ cg <- function () {
 #' @rdname optimisers
 #' @export
 #'
-bfgs <- function () {
+bfgs <- function() {
   define_scipy_optimiser("bfgs",
                          method = "BFGS")
 }
@@ -100,7 +100,7 @@ bfgs <- function () {
 #' @rdname optimisers
 #' @export
 #'
-newton_cg <- function () {
+newton_cg <- function() {
   define_scipy_optimiser("newton_cg",
                          method = "Newton-CG")
 }
@@ -112,7 +112,7 @@ newton_cg <- function () {
 #'   the approximation to the hessian matrix
 #' @param maxls maximum number of line search steps per iteration
 #'
-l_bfgs_b <- function (maxcor = 10, maxls = 20) {
+l_bfgs_b <- function(maxcor = 10, maxls = 20) {
   define_scipy_optimiser("l_bfgs_b",
                          method = "L-BFGS-B",
                          parameters = list(
@@ -128,7 +128,7 @@ l_bfgs_b <- function (maxcor = 10, maxls = 20) {
 #' @param stepmx maximum step for the line search
 #' @param rescale log10 scaling factor used to trigger rescaling of objective
 #'
-tnc <- function (max_cg_it = -1, stepmx = 0, rescale = -1) {
+tnc <- function(max_cg_it = -1, stepmx = 0, rescale = -1) {
   define_scipy_optimiser("tnc",
                          method = "TNC",
                          parameters = list(
@@ -146,7 +146,7 @@ tnc <- function (max_cg_it = -1, stepmx = 0, rescale = -1) {
 #' @details The \code{cobyla()} does not provide information about the number of
 #'   iterations for convergence, so these values fo the output are set to NA
 #'
-cobyla <- function (rhobeg = 1) {
+cobyla <- function(rhobeg = 1) {
   define_scipy_optimiser("cobyla",
                          method = "COBYLA",
                          parameters = list(
@@ -158,7 +158,7 @@ cobyla <- function (rhobeg = 1) {
 #' @rdname optimisers
 #' @export
 #'
-slsqp <- function () {
+slsqp <- function() {
   define_scipy_optimiser("slsqp",
                          method = "SLSQP")
 }
@@ -169,7 +169,7 @@ slsqp <- function () {
 #'
 #' @param learning_rate the size of steps (in parameter space) towards the
 #'   optimal value
-gradient_descent <- function (learning_rate = 0.01) {
+gradient_descent <- function(learning_rate = 0.01) {
   define_tf_optimiser("gradient_descent",
                       method = "tf$train$GradientDescentOptimizer",
                       parameters = list(
@@ -183,7 +183,7 @@ gradient_descent <- function (learning_rate = 0.01) {
 #'
 #' @param rho the decay rate
 #' @param epsilon a small constant used to condition gradient updates
-adadelta <- function (learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
+adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
   define_tf_optimiser("adadelta",
                       method = "tf$train$AdadeltaOptimizer",
                       parameters = list(
@@ -199,8 +199,8 @@ adadelta <- function (learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
 #' @param initial_accumulator_value initial value of the 'accumulator' used to
 #'   tune the algorithm
 #'
-adagrad <- function (learning_rate = 0.8,
-                     initial_accumulator_value = 0.1) {
+adagrad <- function(learning_rate = 0.8,
+                    initial_accumulator_value = 0.1) {
   define_tf_optimiser("adagrad",
                       method = "tf$train$AdagradOptimizer",
                       parameters = list(
@@ -209,6 +209,7 @@ adagrad <- function (learning_rate = 0.8,
                       ))
 }
 
+# Begin Exclude Linting
 #' @rdname optimisers
 #' @export
 #'
@@ -220,11 +221,11 @@ adagrad <- function (learning_rate = 0.8,
 #' @param l2_regularization_strength L2 regularisation coefficient (must be 0 or
 #'   greater)
 #'
-adagrad_da <- function (learning_rate = 0.8,
-                        global_step = 1L,
-                        initial_gradient_squared_accumulator_value = 0.1,
-                        l1_regularization_strength = 0,
-                        l2_regularization_strength = 0) {
+adagrad_da <- function(learning_rate = 0.8,
+                       global_step = 1L,
+                       initial_gradient_squared_accumulator_value = 0.1,
+                       l1_regularization_strength = 0,
+                       l2_regularization_strength = 0) {
   define_tf_optimiser("adagrad_da",
                       method = "tf$train$AdagradDAOptimizer",
                       parameters = list(
@@ -236,6 +237,7 @@ adagrad_da <- function (learning_rate = 0.8,
                         l2_regularization_strength = l2_regularization_strength
                       ))
 }
+# End Exclude Linting
 
 #' @rdname optimisers
 #' @export
@@ -243,9 +245,9 @@ adagrad_da <- function (learning_rate = 0.8,
 #' @param momentum the momentum of the algorithm
 #' @param use_nesterov whether to use Nesterov momentum
 #'
-momentum <- function (learning_rate = 0.001,
-                      momentum = 0.9,
-                      use_nesterov = TRUE) {
+momentum <- function(learning_rate = 0.001,
+                     momentum = 0.9,
+                     use_nesterov = TRUE) {
   define_tf_optimiser("momentum",
                       method = "tf$train$MomentumOptimizer",
                       parameters = list(
@@ -261,10 +263,10 @@ momentum <- function (learning_rate = 0.001,
 #' @param beta1 exponential decay rate for the 1st moment estimates
 #' @param beta2 exponential decay rate for the 2nd moment estimates
 #'
-adam <- function (learning_rate = 0.1,
-                  beta1 = 0.9,
-                  beta2 = 0.999,
-                  epsilon = 1e-08) {
+adam <- function(learning_rate = 0.1,
+                 beta1 = 0.9,
+                 beta2 = 0.999,
+                 epsilon = 1e-08) {
   define_tf_optimiser("adam",
                       method = "tf$train$AdamOptimizer",
                       parameters = list(
@@ -280,11 +282,11 @@ adam <- function (learning_rate = 0.1,
 #'
 #' @param learning_rate_power power on the learning rate, must be 0 or less
 #'
-ftrl <- function (learning_rate = 1,
-                  learning_rate_power = -0.5,
-                  initial_accumulator_value = 0.1,
-                  l1_regularization_strength = 0,
-                  l2_regularization_strength = 0) {
+ftrl <- function(learning_rate = 1,
+                 learning_rate_power = -0.5,
+                 initial_accumulator_value = 0.1,
+                 l1_regularization_strength = 0,
+                 l2_regularization_strength = 0) {
   define_tf_optimiser("ftrl",
                       method = "tf$train$FtrlOptimizer",
                       parameters = list(
@@ -299,9 +301,9 @@ ftrl <- function (learning_rate = 1,
 #' @rdname optimisers
 #' @export
 #'
-proximal_gradient_descent <- function (learning_rate = 0.01,
-                                       l1_regularization_strength = 0,
-                                       l2_regularization_strength = 0) {
+proximal_gradient_descent <- function(learning_rate = 0.01,
+                                      l1_regularization_strength = 0,
+                                      l2_regularization_strength = 0) {
   define_tf_optimiser("proximal_gradient_descent",
                       method = "tf$train$ProximalGradientDescentOptimizer",
                       parameters = list(
@@ -314,10 +316,10 @@ proximal_gradient_descent <- function (learning_rate = 0.01,
 #' @rdname optimisers
 #' @export
 #'
-proximal_adagrad <- function (learning_rate = 1,
-                              initial_accumulator_value = 0.1,
-                              l1_regularization_strength = 0,
-                              l2_regularization_strength = 0) {
+proximal_adagrad <- function(learning_rate = 1,
+                             initial_accumulator_value = 0.1,
+                             l1_regularization_strength = 0,
+                             l2_regularization_strength = 0) {
   define_tf_optimiser("proximal_adagrad",
                       method = "tf$train$ProximalAdagradOptimizer",
                       parameters = list(
@@ -333,10 +335,10 @@ proximal_adagrad <- function (learning_rate = 1,
 #'
 #' @param decay discounting factor for the gradient
 #'
-rms_prop <- function (learning_rate = 0.1,
-                      decay = 0.9,
-                      momentum = 0,
-                      epsilon = 1e-10) {
+rms_prop <- function(learning_rate = 0.1,
+                     decay = 0.9,
+                     momentum = 0,
+                     epsilon = 1e-10) {
   define_tf_optimiser("rms_prop",
                       method = "tf$train$RMSPropOptimizer",
                       parameters = list(

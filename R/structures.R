@@ -11,8 +11,13 @@
 #'   created.
 #'
 #' @details \code{greta_array} is a convenience function to create an R array
-#'   with \code{\link{array}} and then coerce it to a greta array. I.e. it is
-#'   equivalent to \code{as_data(array(data, dim))}.
+#'   with \code{\link{array}} and then coerce it to a greta array. I.e. when
+#'   passed something that can be coerced to a numeric array, it is equivalent
+#'   to \code{as_data(array(data, dim))}.
+#'
+#'   If \code{data} is a greta array and
+#'   dim is different than \code{dim(data)}, a reshaped greta array is returned.
+#'   This is equivalent to: \code{dim(data) <- dim}.
 #'
 #' @return a greta array object
 #' @examples
@@ -35,7 +40,7 @@ NULL
 
 #' @export
 #' @rdname structures
-zeros <- function (...) {
+zeros <- function(...) {
   dims <- c(...)
   names(dims) <- NULL
   greta_array(0, dims)
@@ -43,7 +48,7 @@ zeros <- function (...) {
 
 #' @export
 #' @rdname structures
-ones <- function (...) {
+ones <- function(...) {
   dims <- c(...)
   names(dims) <- NULL
   greta_array(1, dims)
@@ -51,5 +56,29 @@ ones <- function (...) {
 
 #' @export
 #' @rdname structures
-greta_array <- function (data = 0, dim = length(data))
+greta_array <- function(data = 0, dim = length(data))
+  UseMethod("greta_array")
+
+
+# safely handle self-coersion, possibly with reshaping
+#' @export
+greta_array.greta_array <- function(data = 0, dim = length(data)) {
+
+  # reshape if necessary (apparently users expect this functionality)
+  dim <- as.integer(dim)
+  if (length(dim) == 1)
+    dim <- c(dim, 1L)
+
+  if (!identical(dim, dim(data))) {
+    dim(data) <- dim
+  }
+
+  data
+
+}
+
+# else try to coerce to a greta array
+#' @export
+greta_array.default <- function(data = 0, dim = length(data)) {
   as.greta_array(array(data = data, dim = dim))
+}

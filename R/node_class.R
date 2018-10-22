@@ -1,8 +1,8 @@
 # base node class
 node <- R6Class(
-  'node',
+  "node",
   public = list(
-    unique_name = '',
+    unique_name = "",
     children = list(),
     parents = list(),
     representations = list(),
@@ -10,7 +10,7 @@ node <- R6Class(
     dim = NA,
     distribution = NULL,
 
-    initialize = function (dim = NULL, value = NULL) {
+    initialize = function(dim = NULL, value = NULL) {
 
       if (is.null(dim))
         dim <- c(1, 1)
@@ -27,15 +27,15 @@ node <- R6Class(
 
     },
 
-    register = function (dag) {
-      if (! (self$unique_name %in% names(dag$node_list)))
+    register = function(dag) {
+      if (!(self$unique_name %in% names(dag$node_list)))
         dag$node_list[[self$unique_name]] <- self
     },
 
     # recursively register self and family
-    register_family = function (dag) {
+    register_family = function(dag) {
 
-      if (! (self$unique_name %in% names(dag$node_list))) {
+      if (!(self$unique_name %in% names(dag$node_list))) {
 
         # add self to list
         self$register(dag)
@@ -44,11 +44,11 @@ node <- R6Class(
         family <- c(self$parents, self$children)
 
         # get and assign their names
-        family_names <- vapply(family, member, 'unique_name', FUN.VALUE = '')
+        family_names <- vapply(family, member, "unique_name", FUN.VALUE = "")
         names(family) <- family_names
 
         # find the unregistered ones
-        unregistered_idx <- which(! (family_names %in% names(dag$node_list)))
+        unregistered_idx <- which(!(family_names %in% names(dag$node_list)))
         unregistered <- family[unregistered_idx]
 
         # add them to the node list
@@ -59,7 +59,7 @@ node <- R6Class(
 
     },
 
-    add_child = function (node) {
+    add_child = function(node) {
 
       # add to list of children
       self$children <- c(self$children, node)
@@ -67,7 +67,7 @@ node <- R6Class(
 
     },
 
-    remove_child = function (node) {
+    remove_child = function(node) {
 
       # remove node from list of children
       rem_idx <- which(self$child_names(recursive = FALSE) == node$unique_name)
@@ -76,14 +76,14 @@ node <- R6Class(
 
     },
 
-    add_parent = function (node) {
+    add_parent = function(node) {
 
       # add to list of children
       self$parents <- c(self$parents, node)
 
     },
 
-    remove_parent = function (node) {
+    remove_parent = function(node) {
 
       # remove node from list of children
       rem_idx <- which(self$parent_names() == node$unique_name)
@@ -94,7 +94,7 @@ node <- R6Class(
     # return the names of all child nodes, and if recursive = TRUE, all nodes
     # lower in this graph. If type is a character, only nodes with that type
     # (from the type public object)  will  be listed
-    child_names = function (recursive = FALSE) {
+    child_names = function(recursive = FALSE) {
 
       children <- self$children
 
@@ -102,7 +102,7 @@ node <- R6Class(
 
         names <- vapply(children,
                         function(x) x$unique_name,
-                        '')
+                        "")
 
         if (recursive) {
           names <- c(names,
@@ -125,7 +125,7 @@ node <- R6Class(
 
     },
 
-    parent_names = function () {
+    parent_names = function() {
 
       parents <- self$parents
 
@@ -133,7 +133,7 @@ node <- R6Class(
 
         names <- vapply(parents,
                         function(x) x$unique_name,
-                        '')
+                        "")
 
         # account for multiple nodes depending on the same nodes
         names <- unique(names)
@@ -148,14 +148,14 @@ node <- R6Class(
 
     },
 
-    defined = function (dag) {
+    defined = function(dag) {
       tf_name <- dag$tf_name(self)
       tf_name %in% ls(dag$tf_environment)
     },
 
     # define this and all descendent objects on tensorflow graph in environment
     # env
-    define_tf = function (dag) {
+    define_tf = function(dag) {
 
       # if defined already, skip
       if (!self$defined(dag)) {
@@ -178,7 +178,7 @@ node <- R6Class(
     },
 
     # get or set this nodes' current value
-    value = function (new_value = NULL, ...) {
+    value = function(new_value = NULL, ...) {
 
       if (is.null(new_value)) {
 
@@ -201,11 +201,11 @@ node <- R6Class(
       }
     },
 
-    set_distribution = function (distribution) {
+    set_distribution = function(distribution) {
 
       # check it
-      if (!inherits(distribution, 'distribution_node'))
-        stop ('invalid distribution')
+      if (!inherits(distribution, "distribution_node"))
+        stop("invalid distribution")
 
       # add it
       self$distribution <- distribution
@@ -213,40 +213,35 @@ node <- R6Class(
     },
 
     # return a string describing this node, for use in print and summary etc.
-    description = function () {
+    description = function() {
 
       text <- node_type(self)
 
       if (!is.null(self$distribution)) {
         text <- paste(text,
-                      'following a',
+                      "following a",
                       self$distribution$distribution_name,
-                      'distribution')
+                      "distribution")
       }
 
       text
 
     },
 
-    get_unique_name = function () {
-
-      name <- capture.output(self$.__enclos_env__)
-      name <- gsub('<environment: ', 'node_', name)
-      name <- gsub('>', '', name)
-      self$unique_name <- name
-
+    get_unique_name = function() {
+      self$unique_name <- paste0("node_", rhex())
     },
 
-    plotting_label = function () {
-      label <- ''
+    plotting_label = function() {
+      label <- ""
       type <- node_type(self)
 
       # replace distributions with more info
-      if (type == 'distribution')
+      if (type == "distribution")
         label <- self$distribution_name
 
       # if it's data and scalar, just put the value
-      if (type == 'data' & is_scalar(self)) {
+      if (type == "data" & is_scalar(self)) {
 
         val <- as.numeric(self$value())
         val <- round(val, 2)
@@ -262,18 +257,18 @@ node <- R6Class(
   ))
 
 # generic to grab dimensions
-dim.node <- function (x)
+dim.node <- function(x)
   x$dim
 
 # coerce an object to a node
-to_node <- function (x) {
+to_node <- function(x) {
   if (!inherits(x, "node")) {
     if (inherits(x, "greta_array"))
       x <- get_node(x)
     else if (is.numeric(x))
       x <- data_node$new(x)
     else
-      stop ("cannot coerce object to a node")
+      stop("cannot coerce object to a node")
   }
   x
 }

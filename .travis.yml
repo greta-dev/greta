@@ -3,9 +3,10 @@ language: r
 warnings_are_errors: false
 dist: trusty
 
-# enable this to run (slow & fragile) tests of sampler validity before releases
+# enable RELEASE_CANDIDATE to run (slow & fragile) tests of sampler validity before releases
 env:
   - RELEASE_CANDIDATE=false
+  - LINTR_COMMENT_BOT=false
 
 # these are dependencies of suggested packagesi for which there are binaries,
 # add them here to try to reduce installation time
@@ -47,6 +48,7 @@ r_packages:
   - extraDistr
   - devtools
   - tidyverse
+  - lintr
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
@@ -78,6 +80,7 @@ before_install:
 
 after_success:
   - Rscript -e "covr::codecov()"
+  - Rscript -e "lintr::lint_package()"
 
 email:
   on_success: change
