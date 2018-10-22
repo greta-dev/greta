@@ -572,11 +572,11 @@ tf_distance <- function (x1, x2) {
 
 }
 
-tf_hist <- function(x, nbreak) {
+tf_hist <- function(x, nbins, breaks_range) {
 
   tf$histogram_fixed_width(x,
-                           value_range = tf$constant(c(0L, nbreak), dtype = tf$float64),
-                           nbins = nbreak,
+                           value_range = tf$constant(breaks_range, dtype = tf$float64),
+                           nbins = nbins,
                            dtype = tf$int64)
   
 }

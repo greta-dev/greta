@@ -364,17 +364,20 @@ test_that('hist errors correctly and gives informative warnings', {
   skip_if_not(check_tf_version())
   source('helpers.R')
   
-  group <- sample.int(5, 10, replace = TRUE)
-  a <- ones(10, 1)
-  b <- ones(10, 2)
+  a <- normal(0, 1, 100)
+
+  # needs breaks fixed
+  expect_error(hist(a),
+               "breaks must be provided")
   
-  # X must be a column vector
-  expect_error(tapply(b, group, "sum"),
-               "X must be 2D greta array with one column")
+  # breaks must contain every integer in the range
+  expect_error(hist(a, breaks = seq(-10, 10, by = 2)),
+               "breaks must be sequential integers")
   
-  # INDEX can't be a greta array
-  expect_error(tapply(a, as_data(group), "sum"),
-               "INDEX cannot be a greta array")
+  # must be colvec (2D greta_array with dim(x)[2] == 1)
+  a2 <- normal(0, 1, c(10, 50))
+  expect_error(hist(a2, breaks = -10:10),
+               "x must be a n x 1 column vector")
   
 })
 
@@ -384,6 +387,7 @@ test_that('hist gives correct outputs', {
   source('helpers.R')
   
   a <- normal(0, 1, 100)
+  a_sim <- rnorm(100)
 
   # should work as long as breaks are provided
   expect_silent(hist_tmp <- hist(a, breaks = -10:10))
@@ -391,7 +395,9 @@ test_that('hist gives correct outputs', {
   # should give one output for each integer bin
   expect_equal(length(hist_tmp), length(-10:10))
 
-  # should give one output for each integer bin
-  expect_equal(length(hist_tmp), length(-10:10))
+  # should match hist() outputs
+  hist_outputs <- hist(a_sim, breaks = -10:10)
+  tf_hist_outputs <- calculate(hist_tmp, initials(a = a_sim))
+  expect_equal(c(hist_outputs$counts), c(tf_hist_outputs))
   
 })

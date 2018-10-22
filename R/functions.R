@@ -906,6 +906,10 @@ hist.greta_array <- function(x, ...) {
     stop("breaks must be provided", call. = FALSE)
   
   nbreak <- as.integer(length(breaks))
+  nbins <- nbreak - 1L
+    
+  # we need the lower and upper bounds
+  breaks_range <- c(min(breaks), max(breaks))
   
   # are the breaks appropriate integers?
   raw_breaks <- seq(min(breaks), max(breaks), by = 1)
@@ -914,8 +918,8 @@ hist.greta_array <- function(x, ...) {
     
   op("hist",
      x,
-     operation_args = list(nbreak = nbreak),
+     operation_args = list(nbins = nbins, breaks_range = breaks_range),
      tf_operation = "tf_hist",
-     dim = c(nbreak, 1))
+     dim = c(nbreak - 1L, 1))
   
 }
