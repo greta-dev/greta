@@ -369,7 +369,7 @@ test_that("lkj distribution has correct density", {
   }
 
   rlkj_correlation <- function(m)
-    rethinking::rlkjcorr(1, K = m, eta = 1)
+    rlkjcorr(1, K = m, eta = 1)
 
   # no vectorised lkj, so loop through all of these
   replicate(10,

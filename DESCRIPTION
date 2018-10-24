@@ -83,7 +83,6 @@ Suggests:
     extraDistr,
     truncdist,
     tidyverse,
-    rethinking,
     fields,
     MASS,
     abind

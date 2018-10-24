@@ -463,6 +463,49 @@ dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
 ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
 qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 
+# random lkj draws, code from the rethinking package (can't load the package
+# because of stan*Travis*compiler issues)
+rlkjcorr <- function (n, K, eta = 1) {
+
+  stopifnot(is.numeric(K), K >= 2, K == as.integer(K))
+  stopifnot(eta > 0)
+
+  f <- function() {
+
+    alpha <- eta + (K - 2) / 2
+    r12 <- 2 * rbeta(1, alpha, alpha) - 1
+    R <- matrix(0, K, K)
+    R[1, 1] <- 1
+    R[1, 2] <- r12
+    R[2, 2] <- sqrt(1 - r12 ^ 2)
+
+    if (K > 2) {
+      for (m in 2:(K - 1)) {
+        alpha <- alpha - 0.5
+        y <- rbeta(1, m/2, alpha)
+        z <- rnorm(m, 0, 1)
+        z <- z/sqrt(crossprod(z)[1])
+        R[1:m, m + 1] <- sqrt(y) * z
+        R[m + 1, m + 1] <- sqrt(1 - y)
+      }
+    }
+
+    crossprod(R)
+
+  }
+
+  R <- replicate(n, f())
+
+  if (dim(R)[3] == 1) {
+    R <- R[, , 1]
+  } else {
+    R <- aperm(R, c(3, 1, 2))
+  }
+
+  R
+
+}
+
 # is this a release candidate?
 skip_if_not_release <- function() {
   if (identical(Sys.getenv("RELEASE_CANDIDATE"), "true")) {
