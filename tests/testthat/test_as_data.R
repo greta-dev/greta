@@ -2,6 +2,7 @@ context("as_data")
 
 test_that("as_data coerces correctly", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   # logical, integer and numeric

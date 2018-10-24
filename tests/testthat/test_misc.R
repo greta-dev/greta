@@ -37,6 +37,7 @@ test_that("check_tf_version works", {
 
 test_that(".onLoad runs", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
   expect_ok(greta:::.onLoad())
 
@@ -135,6 +136,7 @@ test_that("define and mcmc error informatively", {
 
 test_that("check_dims errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   a <- ones(3, 3)
@@ -224,6 +226,7 @@ test_that("structures work correctly", {
 
 test_that("cleanly() handles TF errors nicely", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   inversion_stop <- function()

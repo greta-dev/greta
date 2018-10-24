@@ -18,6 +18,7 @@ test_that("`distribution<-` works in models", {
 
 test_that("distribution() works", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   a <- normal(0, 1)
@@ -92,6 +93,7 @@ test_that("`distribution<-` errors informatively", {
 
 test_that("distribution() errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   y <- randn(3)

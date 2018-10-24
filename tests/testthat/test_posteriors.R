@@ -2,6 +2,7 @@ context("posteriors")
 
 test_that("posterior is correct (binomial)", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
   skip_if_not_release()
 
@@ -38,6 +39,7 @@ test_that("posterior is correct (binomial)", {
 
 test_that("samplers are unbiased for bivariate normals", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
   skip_if_not_release()
 
@@ -49,6 +51,7 @@ test_that("samplers are unbiased for bivariate normals", {
 
 test_that("samplers are unbiased for chi-squared", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
   skip_if_not_release()
 
@@ -62,6 +65,7 @@ test_that("samplers are unbiased for chi-squared", {
 
 test_that("samplers are unbiased for standard uniform", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
   skip_if_not_release()
 
@@ -74,6 +78,7 @@ test_that("samplers are unbiased for standard uniform", {
 
 test_that("samplers are unbiased for LKJ", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
   skip_if_not_release()
 
@@ -87,6 +92,7 @@ test_that("samplers are unbiased for LKJ", {
 
 test_that("samplers are unbiased for Wishart", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
   skip_if_not_release()
 
@@ -103,6 +109,7 @@ test_that("samplers are unbiased for Wishart", {
 
 test_that("samplers pass geweke tests", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
   skip_if_not_release()
 

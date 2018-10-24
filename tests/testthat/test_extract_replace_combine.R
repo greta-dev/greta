@@ -438,6 +438,7 @@ test_that("rbind and cbind can prepend R arrays to greta arrays", {
 
 test_that("assign errors on variable greta arrays", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   z <- normal(0, 1, dim = 5)
@@ -448,6 +449,7 @@ test_that("assign errors on variable greta arrays", {
 
 test_that("rbind and cbind give informative error messages", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   a <- as_data(randn(5, 1))
@@ -463,6 +465,7 @@ test_that("rbind and cbind give informative error messages", {
 
 test_that("replacement gives informative error messages", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   x <- ones(2, 2, 2)
@@ -480,6 +483,7 @@ test_that("replacement gives informative error messages", {
 
 test_that("extraction gives informative error messages", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   x <- ones(2, 2, 2)
@@ -622,6 +626,7 @@ test_that("greta_array() reshapes greta arrays like array", {
 
 test_that("dim<- errors as expected", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   x <- zeros(3, 4)

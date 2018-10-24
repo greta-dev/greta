@@ -721,6 +721,7 @@ test_that("distributions can be sampled from", {
 
 test_that("variable() errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   # bad types
@@ -745,6 +746,7 @@ test_that("variable() errors informatively", {
 
 test_that("uniform distribution errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   # bad types
@@ -767,6 +769,8 @@ test_that("uniform distribution errors informatively", {
 
 test_that("poisson() and binomial() error informatively in glm", {
 
+  skip_if_not(check_tf_version())
+
   # if passed as an object
   expect_error(glm(1 ~ 1, family = poisson),
                "in the family argment of another model.")
@@ -785,6 +789,7 @@ test_that("poisson() and binomial() error informatively in glm", {
 
 test_that("wishart distribution errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   a <- randn(3, 3)
@@ -803,6 +808,7 @@ test_that("wishart distribution errors informatively", {
 
 test_that("lkj_correlation distribution errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   dim <- 3
@@ -832,6 +838,7 @@ test_that("lkj_correlation distribution errors informatively", {
 
 test_that("multivariate_normal distribution errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   m_a <- randn(1, 3)
@@ -892,6 +899,7 @@ test_that("multivariate_normal distribution errors informatively", {
 
 test_that("multinomial distribution errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   p_a <- randu(1, 3)
@@ -932,6 +940,7 @@ test_that("multinomial distribution errors informatively", {
 
 test_that("categorical distribution errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   p_a <- randu(1, 3)
@@ -964,6 +973,7 @@ test_that("categorical distribution errors informatively", {
 
 test_that("dirichlet distribution errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   alpha_a <- randu(1, 3)
@@ -1013,6 +1023,7 @@ test_that("dirichlet values sum to one", {
 
 test_that("dirichlet-multinomial distribution errors informatively", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   alpha_a <- randu(1, 3)

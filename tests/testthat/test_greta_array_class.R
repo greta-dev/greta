@@ -80,6 +80,7 @@ test_that("print and summary work", {
 
 test_that("as.matrix works", {
 
+  skip_if_not(check_tf_version())
   source("helpers.R")
 
   # data
