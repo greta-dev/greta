@@ -25,10 +25,36 @@ module <- function(..., sort = TRUE) {
 
 }
 
+# find out whether the usr has conda installed and visible
+#' @importFrom reticulate conda_binary
+have_conda <- function () {
+  conda_bin <- tryCatch(reticulate::conda_binary("auto"),
+                        error = function(e) NULL)
+  !is.null(conda_bin)
+}
 
-# check tensorflow and tensorflow-probability are installed and the version of
-# tensorflow is valid. error, warn, or message if not and (if not an error)
-# return an invisible logical saying whether it is valid
+have_virtualenv <- function () {
+
+  answer <- FALSE
+
+  if (identical(.Platform$OS.type, "unix")) {
+
+    locations <- file.path(c("/usr/bin",
+                             "/usr/local/bin",
+                             path.expand("~/.local/bin")),
+                           "virtualenv")
+
+    answer <- any(file.exists(locations))
+
+  }
+
+  answer
+
+}
+
+# check tensorflow and tensorflow-probability are installed and have valid
+# versions. error, warn, or message if not and (if not an error) return an
+# invisible logical saying whether it is valid
 
 #' @importFrom utils compareVersion
 check_tf_version <- function(alert = c("none",
@@ -42,6 +68,7 @@ check_tf_version <- function(alert = c("none",
   tf_available <- TRUE
   tfp_available <- TRUE
 
+  # check TF installation
   if (!reticulate::py_module_available("tensorflow")) {
 
     text <- "TensorFlow isn't installed"
@@ -50,18 +77,16 @@ check_tf_version <- function(alert = c("none",
   } else {
 
     tf_version <- tf$`__version__`
-
     tf_version_valid <- utils::compareVersion("1.8", tf_version) != 1
 
     if (!tf_version_valid) {
-
       text <- paste0("you have TensorFlow version ", tf_version)
       tf_available <- FALSE
-
     }
 
   }
 
+  # check TFP installation
   if (!reticulate::py_module_available("tensorflow_probability")) {
 
     text <- paste0(text,
@@ -69,28 +94,57 @@ check_tf_version <- function(alert = c("none",
                    "TensorFlow Probability isn't installed")
     tfp_available <- FALSE
 
+  } else {
+
+    pkg <- reticulate::import("pkg_resources")
+    tfp_version <- pkg$get_distribution("tensorflow_probability")$version
+    tfp_version_valid <- utils::compareVersion("0.3.0", tfp_version) != 1
+
+    if (!tfp_version_valid) {
+      text <- paste0("you have TensorFlow Probability version ", tfp_version)
+      tfp_available <- FALSE
+    }
+
   }
 
   if (!is.null(text)) {
 
-    install <- sprintf("install_tensorflow(%s) ",
-                       ifelse(tfp_available,
-                              "",
-                              "extra_packages = \"tensorflow-probability\""))
+    # conda-specific installation instructions, to handle conda not having TFP
+    if (have_conda() & !have_virtualenv()) {
 
-    text <- paste0("\n\n  greta requires TensorFlow version 1.8 or higher ",
-                   "and Tensorflow Probability, ",
-                   "but ", text, ".\n  ",
-                   "Use ",
+      if (!tf_available) {
+        tf_install <- '    install_tensorflow(method = "conda")\n'
+      }
+
+      if (!tfp_available) {
+        tfp_install <- '   reticulate::conda_install("r-tensorflow", "tensorflow-probability", pip = TRUE)\n'
+      }
+
+      install <- paste(tf_install, tfp_install, collapse = "\n")
+
+    } else {
+      # non-conda installation instructions
+      install <- sprintf("install_tensorflow(%s) ",
+                         ifelse(tfp_available,
+                                "",
+                                "extra_packages = \"tensorflow-probability\""))
+    }
+
+    # combine the problem and solution messages
+    text <- paste0("\n\ngreta requires TensorFlow (>=1.8) or higher ",
+                   "and Tensorflow Probability (>=0.3.0), ",
+                   "but ", text, ". Use:\n\n",
                    install,
-                   "to install the latest version.",
+                   "\nto install the latest version.",
                    "\n\n")
+
     switch(alert,
            error = stop(text, call. = FALSE),
            warn = warning(text, call. = FALSE),
            message = message(text),
            startup = packageStartupMessage(text),
            none = NULL)
+
   }
 
   invisible(tf_available & tfp_available)
