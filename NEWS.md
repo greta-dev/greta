@@ -72,6 +72,11 @@ This is a very large update which adds a number of features and major speed impr
 * added tests of the validity of posterior samples drawn by MCMC (for known distributions and with Geweke tests)
 
 
+# greta 0.2.5
+
+Minor patch to handle an API change in the progress package. No changes in functionality.
+
+
 # greta 0.2.4
 
 ## Fixes:

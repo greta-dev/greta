@@ -283,7 +283,7 @@ successive iterations drops below this level</p></td>
     </tr>
     <tr>
       <th>adjust</th>
-      <td><p>whether to account for log jacobian adjustments in the joint
+      <td><p>whether to account for Jacobian adjustments in the joint
 density. Set to <code>FALSE</code> (and do not use priors) for maximum likelihood
 estimates, or <code>TRUE</code> for maximum <em>a posteriori</em> estimates.</p></td>
     </tr>
@@ -334,7 +334,7 @@ Hessian arrays for the parameters</p></td>
   <code><a href='calculate.html'>calculate</a>()</code> to evaluate the values of greta arrays, given
   fixed values of model parameters, and checking the results are what you
   expect.</p>
-<p>greta runs multiple chains simultaneously with a singler sampler,
+<p>greta runs multiple chains simultaneously with a single sampler,
   vectorising all operations across the chains. E.g. a scalar addition in
   your model is computed as an elementwise vector addition (with vectors
   having length <code>chains</code>), a vector addition is computed as a matrix
@@ -345,7 +345,7 @@ Hessian arrays for the parameters</p></td>
   chains) can also be run in parallel by setting the execution plan with the
   <code>future</code> package. Only <code>plan(multisession)</code> futures or
   <code>plan(cluster)</code> futures that don't use fork clusters are allowed,
-  since forked processes conflict with tensorflow's parallelism. Explicitly
+  since forked processes conflict with TensorFlow's parallelism. Explicitly
   parallelising chains on a local machine with <code>plan(multisession)</code> will
   probably be slower than running multiple chains simultaneously in a single
   sampler (with <code>plan(sequential)</code>, the default) because of the overhead

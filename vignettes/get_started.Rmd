@@ -80,7 +80,6 @@ If you installed python without Anaconda, you can install the latest versions of
 install_tensorflow(extra_packages = "tensorflow-probability")
 ```
 
-#### 
 
 You can also use `install_tensorflow()` to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.
 

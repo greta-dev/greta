@@ -218,7 +218,7 @@ instability during sampling.</p></td>
       <th>compile</th>
       <td><p>whether to apply
 <a href='https://www.tensorflow.org/performance/xla/'>XLA JIT compilation</a> to
-the tensorflow graph representing the model. This may slow down model
+the TensorFlow graph representing the model. This may slow down model
 definition, and speed up model evaluation.</p></td>
     </tr>
     <tr>
@@ -247,7 +247,7 @@ in violet.</p></td>
     <p><code>model()</code> takes greta arrays as arguments, and defines a
   statistical model by finding all of the other greta arrays on which they
   depend, or which depend on them. Further arguments to <code>model</code> can be
-  used to configure the tensorflow graph representing the model, to tweak
+  used to configure the TensorFlow graph representing the model, to tweak
   performance.</p>
 <p>The plot method produces a visual representation of the defined
   model. It uses the <code>DiagrammeR</code> package, which must be installed
@@ -259,7 +259,7 @@ in violet.</p></td>
     <pre class="examples"><span class='co'># NOT RUN {</span>
 <span class='co'># define a simple model</span>
 <span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span>()
-<span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
+<span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>rnorm</span>(<span class='fl'>10</span>)
 <span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 

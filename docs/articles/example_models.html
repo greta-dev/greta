@@ -147,42 +147,42 @@
 <h3 class="hasAnchor">
 <a href="#linear-regression" class="anchor"></a>Linear regression</h3>
 <p>A simple, one-variable Bayesian linear regression model using the attitude data</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># variables &amp; priors</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2">int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4">sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co"># linear predictor</span></a>
-<a class="sourceLine" id="cb1-7" data-line-number="7">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints</a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co"># observation model</span></a>
-<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># variables &amp; priors</span>
+int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+<span class="co"># linear predictor</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints
+
+<span class="co"># observation model</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="multiple-linear-regression" class="section level3">
 <h3 class="hasAnchor">
 <a href="#multiple-linear-regression" class="anchor"></a>Multiple linear regression</h3>
 <p>A multi-variable Bayesian linear regression model using the attitude data</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># the predictors as a matrix</span></a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">design &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(attitude[, <span class="dv">2</span><span class="op">:</span><span class="dv">7</span>])</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">coefs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="kw">ncol</span>(design))</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="co"># matrix multiplication is more efficient than multiplying the coefficients</span></a>
-<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="co"># separately</span></a>
-<a class="sourceLine" id="cb2-10" data-line-number="10">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>design <span class="op">%*%</span><span class="st"> </span>coefs</a>
-<a class="sourceLine" id="cb2-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># the predictors as a matrix</span>
+design &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(attitude[, <span class="dv">2</span><span class="op">:</span><span class="dv">7</span>])
+
+int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+coefs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="kw">ncol</span>(design))
+sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+<span class="co"># matrix multiplication is more efficient than multiplying the coefficients</span>
+<span class="co"># separately</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>design <span class="op">%*%</span><span class="st"> </span>coefs
+
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="multiple-poisson-regression" class="section level3">
 <h3 class="hasAnchor">
 <a href="#multiple-poisson-regression" class="anchor"></a>Multiple Poisson regression</h3>
 <p>A multiple Bayesian linear regression model using the <code>warpbreaks</code> data.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">data</span>(<span class="st">"warpbreaks"</span>)</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">head</span>(warpbreaks)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">"warpbreaks"</span>)
+<span class="kw">head</span>(warpbreaks)</code></pre></div>
 <pre><code>  breaks wool tension
 1     26    A       L
 2     30    A       L
@@ -190,95 +190,95 @@
 4     25    A       L
 5     70    A       L
 6     52    A       L</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(<span class="kw">model.matrix</span>(breaks <span class="op">~</span><span class="st"> </span>wool <span class="op">+</span><span class="st"> </span>tension, warpbreaks))</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(warpbreaks<span class="op">$</span>breaks)</a></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb6-2" data-line-number="2">coefs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dt">dim =</span> <span class="kw">ncol</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb6-3" data-line-number="3">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(int, coefs)</a>
-<a class="sourceLine" id="cb6-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb6-5" data-line-number="5">eta &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta</a>
-<a class="sourceLine" id="cb6-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">poisson</a></span>(<span class="kw">exp</span>(eta))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(<span class="kw">model.matrix</span>(breaks <span class="op">~</span><span class="st"> </span>wool <span class="op">+</span><span class="st"> </span>tension, warpbreaks))
+y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(warpbreaks<span class="op">$</span>breaks)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+coefs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dt">dim =</span> <span class="kw">ncol</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)
+beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(int, coefs)
+
+eta &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta
+
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">poisson</a></span>(<span class="kw">exp</span>(eta))</code></pre></div>
 <hr>
 </div>
 <div id="multiple-categorical-regression" class="section level3">
 <h3 class="hasAnchor">
 <a href="#multiple-categorical-regression" class="anchor"></a>Multiple categorical regression</h3>
 <p>A multi-variable Bayesian categorical regression model using the iris data.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">data</span>(iris)</a>
-<a class="sourceLine" id="cb7-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb7-3" data-line-number="3">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(<span class="kw"><a href="../reference/extract-replace-combine.html">cbind</a></span>(<span class="dv">1</span>, iris[, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]))</a>
-<a class="sourceLine" id="cb7-4" data-line-number="4">y &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span><span class="st"> </span>Species <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, iris)</a>
-<a class="sourceLine" id="cb7-5" data-line-number="5">P &lt;-<span class="st"> </span><span class="kw">ncol</span>(X)</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6">K &lt;-<span class="st"> </span><span class="kw">ncol</span>(y)</a></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(P, K <span class="op">-</span><span class="st"> </span><span class="dv">1</span>))</a>
-<a class="sourceLine" id="cb8-2" data-line-number="2">eta &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta</a>
-<a class="sourceLine" id="cb8-3" data-line-number="3">prob &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">imultilogit</a></span>(eta)</a>
-<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">categorical</a></span>(prob)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(iris)
+
+X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(<span class="kw"><a href="../reference/extract-replace-combine.html">cbind</a></span>(<span class="dv">1</span>, iris[, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]))
+y &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span><span class="st"> </span>Species <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, iris)
+P &lt;-<span class="st"> </span><span class="kw">ncol</span>(X)
+K &lt;-<span class="st"> </span><span class="kw">ncol</span>(y)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(P, K <span class="op">-</span><span class="st"> </span><span class="dv">1</span>))
+eta &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta
+prob &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">imultilogit</a></span>(eta)
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">categorical</a></span>(prob)</code></pre></div>
 <hr>
 </div>
 <div id="multiple-linear-regression-with-lasso-prior" class="section level3">
 <h3 class="hasAnchor">
 <a href="#multiple-linear-regression-with-lasso-prior" class="anchor"></a>Multiple linear regression with LASSO prior</h3>
 <p>A multi-variable Bayesian linear regression model using an exponential-normal prior for the coefficients.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co"># the predictors as a matrix</span></a>
-<a class="sourceLine" id="cb9-2" data-line-number="2">design &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(attitude[, <span class="dv">2</span><span class="op">:</span><span class="dv">7</span>])</a>
-<a class="sourceLine" id="cb9-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb9-4" data-line-number="4">int   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb9-5" data-line-number="5">sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb9-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb9-7" data-line-number="7">tau &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">exponential</a></span>(<span class="fl">0.5</span>, <span class="dt">dim =</span> <span class="kw">ncol</span>(design)) </a>
-<a class="sourceLine" id="cb9-8" data-line-number="8">coefs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, tau)</a>
-<a class="sourceLine" id="cb9-9" data-line-number="9">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>design <span class="op">%*%</span><span class="st"> </span>coefs</a>
-<a class="sourceLine" id="cb9-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb9-11" data-line-number="11"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># the predictors as a matrix</span>
+design &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(attitude[, <span class="dv">2</span><span class="op">:</span><span class="dv">7</span>])
+
+int   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+tau &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">exponential</a></span>(<span class="fl">0.5</span>, <span class="dt">dim =</span> <span class="kw">ncol</span>(design)) 
+coefs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, tau)
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>design <span class="op">%*%</span><span class="st"> </span>coefs
+
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="hierarchical-linear-regression" class="section level3">
 <h3 class="hasAnchor">
 <a href="#hierarchical-linear-regression" class="anchor"></a>Hierarchical linear regression</h3>
 <p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts for each of the three species.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># linear model parameters</span></a>
-<a class="sourceLine" id="cb10-2" data-line-number="2">int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb10-3" data-line-number="3">coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb10-4" data-line-number="4">sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb10-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb10-6" data-line-number="6"><span class="co"># hierarchical model for species effect; use the first species as the baseline</span></a>
-<a class="sourceLine" id="cb10-7" data-line-number="7"><span class="co"># like in lm()</span></a>
-<a class="sourceLine" id="cb10-8" data-line-number="8">species_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">lognormal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb10-9" data-line-number="9">species_offset &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, species_sd, <span class="dt">dim =</span> <span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb10-10" data-line-number="10">species_effect &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">rbind</a></span>(<span class="dv">0</span>, species_offset)</a>
-<a class="sourceLine" id="cb10-11" data-line-number="11">species_id &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(iris<span class="op">$</span>Species)</a>
-<a class="sourceLine" id="cb10-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb10-13" data-line-number="13"><span class="co"># model</span></a>
-<a class="sourceLine" id="cb10-14" data-line-number="14">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>iris<span class="op">$</span>Sepal.Width <span class="op">+</span><span class="st"> </span>species_effect[species_id]</a>
-<a class="sourceLine" id="cb10-15" data-line-number="15"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(iris<span class="op">$</span>Sepal.Length) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># linear model parameters</span>
+int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+<span class="co"># hierarchical model for species effect; use the first species as the baseline</span>
+<span class="co"># like in lm()</span>
+species_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">lognormal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)
+species_offset &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, species_sd, <span class="dt">dim =</span> <span class="dv">2</span>)
+species_effect &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">rbind</a></span>(<span class="dv">0</span>, species_offset)
+species_id &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(iris<span class="op">$</span>Species)
+
+<span class="co"># model</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>iris<span class="op">$</span>Sepal.Width <span class="op">+</span><span class="st"> </span>species_effect[species_id]
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(iris<span class="op">$</span>Sepal.Length) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="random-intercept-slope-model" class="section level3">
 <h3 class="hasAnchor">
 <a href="#random-intercept-slope-model" class="anchor"></a>Random intercept-slope model</h3>
 <p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species. The slopes and intercepts for each species are <em>uncorrelated</em> in this example.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co"># linear model parameters</span></a>
-<a class="sourceLine" id="cb11-2" data-line-number="2">int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb11-3" data-line-number="3">coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb11-4" data-line-number="4">sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb11-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb11-6" data-line-number="6">species_id &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(iris<span class="op">$</span>Species)</a>
-<a class="sourceLine" id="cb11-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb11-8" data-line-number="8"><span class="co"># random intercepts</span></a>
-<a class="sourceLine" id="cb11-9" data-line-number="9">species_int_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">lognormal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb11-10" data-line-number="10">species_int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, species_int_sd, <span class="dt">dim =</span> <span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb11-11" data-line-number="11">species_int_eff &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">rbind</a></span>(<span class="dv">0</span>, species_int)</a>
-<a class="sourceLine" id="cb11-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb11-13" data-line-number="13"><span class="co"># random slopes</span></a>
-<a class="sourceLine" id="cb11-14" data-line-number="14">species_slope_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">lognormal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb11-15" data-line-number="15">species_slope &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, species_slope_sd, <span class="dt">dim =</span> <span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb11-16" data-line-number="16">species_slope_eff &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">rbind</a></span>(<span class="dv">0</span>, species_slope)</a>
-<a class="sourceLine" id="cb11-17" data-line-number="17"></a>
-<a class="sourceLine" id="cb11-18" data-line-number="18"><span class="co"># model</span></a>
-<a class="sourceLine" id="cb11-19" data-line-number="19">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>iris<span class="op">$</span>Sepal.Width <span class="op">+</span><span class="st"> </span>species_int_eff[species_id] <span class="op">+</span><span class="st"> </span>iris<span class="op">$</span>Sepal.Width <span class="op">*</span><span class="st"> </span>species_slope_eff[species_id]</a>
-<a class="sourceLine" id="cb11-20" data-line-number="20"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(iris<span class="op">$</span>Sepal.Length) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># linear model parameters</span>
+int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+species_id &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(iris<span class="op">$</span>Species)
+
+<span class="co"># random intercepts</span>
+species_int_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">lognormal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)
+species_int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, species_int_sd, <span class="dt">dim =</span> <span class="dv">2</span>)
+species_int_eff &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">rbind</a></span>(<span class="dv">0</span>, species_int)
+
+<span class="co"># random slopes</span>
+species_slope_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">lognormal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)
+species_slope &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, species_slope_sd, <span class="dt">dim =</span> <span class="dv">2</span>)
+species_slope_eff &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">rbind</a></span>(<span class="dv">0</span>, species_slope)
+
+<span class="co"># model</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>iris<span class="op">$</span>Sepal.Width <span class="op">+</span><span class="st"> </span>species_int_eff[species_id] <span class="op">+</span><span class="st"> </span>iris<span class="op">$</span>Sepal.Width <span class="op">*</span><span class="st"> </span>species_slope_eff[species_id]
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(iris<span class="op">$</span>Sepal.Length) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 </div>
 </div>
 <div id="common-bayesian-priors" class="section level2">
@@ -290,99 +290,99 @@
 <h3 class="hasAnchor">
 <a href="#improper-flat-prior" class="anchor"></a>Improper flat prior</h3>
 <p>A simple, one-variable Bayesian linear regression model that uses flat priors for the coefficients. A flat prior using <code>variable</code> puts an unbounded uniform distribution on the parameter. With a flat prior the posterior will be proportional to the likelihood and the MAP will normally correspond to the MLE. Flat priors are usually chosen when there is little knowledge about the parameters available.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co"># variables &amp; priors</span></a>
-<a class="sourceLine" id="cb12-2" data-line-number="2">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb12-3" data-line-number="3">coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb12-4" data-line-number="4">sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb12-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb12-6" data-line-number="6"><span class="co"># linear predictor</span></a>
-<a class="sourceLine" id="cb12-7" data-line-number="7">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints</a>
-<a class="sourceLine" id="cb12-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb12-9" data-line-number="9"><span class="co"># observation model</span></a>
-<a class="sourceLine" id="cb12-10" data-line-number="10"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># variables &amp; priors</span>
+int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+<span class="co"># linear predictor</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints
+
+<span class="co"># observation model</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="ridge-prior" class="section level3">
 <h3 class="hasAnchor">
 <a href="#ridge-prior" class="anchor"></a>Ridge prior</h3>
 <p>Here we estimate a simple, one-variable Bayesian linear regression model that uses a <em>ridge</em> prior. The ridge prior has a frequentist interpretation where it is used as a penalty for regression coefficients. Among other effects, the penalty shrinks the coefficients towards zero to reduce variance without setting them to zero. The Bayesian version uses a normal distribution for the slopes and a inverse gamma prior for the strength of the penalty. Note that since the prior in our intercept is still improper, the joint prior is also improper.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="co"># variables &amp; priors</span></a>
-<a class="sourceLine" id="cb13-2" data-line-number="2">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb13-3" data-line-number="3">sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb13-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb13-5" data-line-number="5">tau  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb13-6" data-line-number="6">coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, tau)</a>
-<a class="sourceLine" id="cb13-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb13-8" data-line-number="8"><span class="co"># linear predictor</span></a>
-<a class="sourceLine" id="cb13-9" data-line-number="9">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints</a>
-<a class="sourceLine" id="cb13-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb13-11" data-line-number="11"><span class="co"># observation model</span></a>
-<a class="sourceLine" id="cb13-12" data-line-number="12"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># variables &amp; priors</span>
+int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+tau  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)
+coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, tau)
+
+<span class="co"># linear predictor</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints
+
+<span class="co"># observation model</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="exponential-normal-prior" class="section level3">
 <h3 class="hasAnchor">
 <a href="#exponential-normal-prior" class="anchor"></a>Exponential-normal prior</h3>
 <p>In this example we infer the parameters of one-variable Bayesian linear regression model using an exponential-normal prior. A compound exponential-normal prior can be interpreted like an equivalent to the frequentist LASSO. The exponential-normal prior yields a posterior that is pooled towards zero. An exponential-normal prior, or equivalently a Laplace prior, is consequently often chosen when a sparse solution is assumed, which, for instance, is a natural scenario in many biological settings.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co"># variables &amp; priors</span></a>
-<a class="sourceLine" id="cb14-2" data-line-number="2">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb14-3" data-line-number="3">sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb14-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb14-5" data-line-number="5">lambda &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb14-6" data-line-number="6">tau  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">exponential</a></span>(<span class="fl">0.5</span> <span class="op">*</span><span class="st"> </span>lambda<span class="op">**</span><span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb14-7" data-line-number="7">coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, tau)</a>
-<a class="sourceLine" id="cb14-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb14-9" data-line-number="9"><span class="co"># linear predictor</span></a>
-<a class="sourceLine" id="cb14-10" data-line-number="10">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints</a>
-<a class="sourceLine" id="cb14-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb14-12" data-line-number="12"><span class="co"># observation model</span></a>
-<a class="sourceLine" id="cb14-13" data-line-number="13"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># variables &amp; priors</span>
+int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)
+
+lambda &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)
+tau  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">exponential</a></span>(<span class="fl">0.5</span> <span class="op">*</span><span class="st"> </span>lambda<span class="op">**</span><span class="dv">2</span>)
+coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, tau)
+
+<span class="co"># linear predictor</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints
+
+<span class="co"># observation model</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="horseshoe-prior" class="section level3">
 <h3 class="hasAnchor">
 <a href="#horseshoe-prior" class="anchor"></a>Horseshoe prior</h3>
 <p>A simple, one-variable Bayesian linear regression model using a horseshoe prior. The horseshoe, just as the LASSO, can be used when the slopes are assumed to be sparse. According to the original <a href="http://proceedings.mlr.press/v5/carvalho09a/carvalho09a.pdf">publication</a> <em>its flat, Cauchy-like tails allow strong signals to remain large […] a posteriori. Yet its infinitely tall spike at the origin provides severe shrinkage for the zero elements of.</em></p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1">horseshoe &lt;-<span class="st"> </span><span class="cf">function</span> (<span class="dt">tau =</span> <span class="dv">1</span>, <span class="dt">dim =</span> <span class="ot">NULL</span>) {</a>
-<a class="sourceLine" id="cb15-2" data-line-number="2">  lambda &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>), <span class="dt">dim =</span> dim)</a>
-<a class="sourceLine" id="cb15-3" data-line-number="3">  sd &lt;-<span class="st"> </span>tau <span class="op">^</span><span class="st"> </span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>lambda <span class="op">^</span><span class="st"> </span><span class="dv">2</span></a>
-<a class="sourceLine" id="cb15-4" data-line-number="4">  <span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, sd, <span class="dt">dim =</span> dim)</a>
-<a class="sourceLine" id="cb15-5" data-line-number="5">}</a>
-<a class="sourceLine" id="cb15-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb15-7" data-line-number="7"><span class="co"># variables &amp; priors</span></a>
-<a class="sourceLine" id="cb15-8" data-line-number="8">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb15-9" data-line-number="9">sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb15-10" data-line-number="10">coef &lt;-<span class="st"> </span><span class="kw">horseshoe</span>()</a>
-<a class="sourceLine" id="cb15-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb15-12" data-line-number="12"><span class="co"># linear predictor</span></a>
-<a class="sourceLine" id="cb15-13" data-line-number="13">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints</a>
-<a class="sourceLine" id="cb15-14" data-line-number="14"></a>
-<a class="sourceLine" id="cb15-15" data-line-number="15"><span class="co"># observation model</span></a>
-<a class="sourceLine" id="cb15-16" data-line-number="16"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">horseshoe &lt;-<span class="st"> </span><span class="cf">function</span> (<span class="dt">tau =</span> <span class="dv">1</span>, <span class="dt">dim =</span> <span class="ot">NULL</span>) {
+  lambda &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>), <span class="dt">dim =</span> dim)
+  sd &lt;-<span class="st"> </span>tau <span class="op">^</span><span class="st"> </span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>lambda <span class="op">^</span><span class="st"> </span><span class="dv">2</span>
+  <span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, sd, <span class="dt">dim =</span> dim)
+}
+
+<span class="co"># variables &amp; priors</span>
+int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)
+coef &lt;-<span class="st"> </span><span class="kw">horseshoe</span>()
+
+<span class="co"># linear predictor</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints
+
+<span class="co"># observation model</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="regularized-horseshoe-prior" class="section level3">
 <h3 class="hasAnchor">
 <a href="#regularized-horseshoe-prior" class="anchor"></a>Regularized horseshoe prior</h3>
 <p>The <a href="https://projecteuclid.org/euclid.ejs/1513306866">regularized (finnished) horseshoe</a> remedies a problem of the original horseshoe: large, unregularized values for the coefficients. This is especially problematic in scenarios where the parameters are only weakly identified by the data, as in logistic regression with perfectly seperable data.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">regularized_horseshoe &lt;-<span class="st"> </span><span class="cf">function</span> (<span class="dt">tau =</span> <span class="dv">1</span>,  <span class="dt">c =</span> <span class="dv">1</span>, <span class="dt">dim =</span> <span class="ot">NULL</span>) {</a>
-<a class="sourceLine" id="cb16-2" data-line-number="2">  <span class="kw">stopifnot</span>(c <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</a>
-<a class="sourceLine" id="cb16-3" data-line-number="3">  lambda &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>), <span class="dt">dim =</span> dim)</a>
-<a class="sourceLine" id="cb16-4" data-line-number="4">  lambda_tilde &lt;-<span class="st"> </span>(c<span class="op">^</span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>lambda<span class="op">^</span><span class="dv">2</span>) <span class="op">/</span><span class="st"> </span>(c<span class="op">^</span><span class="dv">2</span> <span class="op">+</span><span class="st"> </span>tau<span class="op">^</span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>lambda<span class="op">^</span><span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb16-5" data-line-number="5">  sd &lt;-<span class="st"> </span>tau <span class="op">^</span><span class="st"> </span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>lambda_tilde <span class="op">^</span><span class="st"> </span><span class="dv">2</span></a>
-<a class="sourceLine" id="cb16-6" data-line-number="6">  <span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, sd, <span class="dt">dim =</span> dim)</a>
-<a class="sourceLine" id="cb16-7" data-line-number="7">}</a>
-<a class="sourceLine" id="cb16-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb16-9" data-line-number="9"><span class="co"># variables &amp; priors</span></a>
-<a class="sourceLine" id="cb16-10" data-line-number="10">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb16-11" data-line-number="11">sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb16-12" data-line-number="12">coef &lt;-<span class="st"> </span><span class="kw">regularized_horseshoe</span>()</a>
-<a class="sourceLine" id="cb16-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb16-14" data-line-number="14"><span class="co"># linear predictor</span></a>
-<a class="sourceLine" id="cb16-15" data-line-number="15">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints</a>
-<a class="sourceLine" id="cb16-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb16-17" data-line-number="17"><span class="co"># observation model</span></a>
-<a class="sourceLine" id="cb16-18" data-line-number="18"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">regularized_horseshoe &lt;-<span class="st"> </span><span class="cf">function</span> (<span class="dt">tau =</span> <span class="dv">1</span>,  <span class="dt">c =</span> <span class="dv">1</span>, <span class="dt">dim =</span> <span class="ot">NULL</span>) {
+  <span class="kw">stopifnot</span>(c <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)
+  lambda &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>), <span class="dt">dim =</span> dim)
+  lambda_tilde &lt;-<span class="st"> </span>(c<span class="op">^</span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>lambda<span class="op">^</span><span class="dv">2</span>) <span class="op">/</span><span class="st"> </span>(c<span class="op">^</span><span class="dv">2</span> <span class="op">+</span><span class="st"> </span>tau<span class="op">^</span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>lambda<span class="op">^</span><span class="dv">2</span>)
+  sd &lt;-<span class="st"> </span>tau <span class="op">^</span><span class="st"> </span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>lambda_tilde <span class="op">^</span><span class="st"> </span><span class="dv">2</span>
+  <span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, sd, <span class="dt">dim =</span> dim)
+}
+
+<span class="co"># variables &amp; priors</span>
+int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)
+coef &lt;-<span class="st"> </span><span class="kw">regularized_horseshoe</span>()
+
+<span class="co"># linear predictor</span>
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>attitude<span class="op">$</span>complaints
+
+<span class="co"># observation model</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(attitude<span class="op">$</span>rating) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 </div>
 </div>
 <div id="advanced-bayesian-models" class="section level2">
@@ -394,55 +394,55 @@
 <h3 class="hasAnchor">
 <a href="#hierarchical-linear-regression-in-general-conditional-formulation" class="anchor"></a>Hierarchical linear regression in general conditional formulation</h3>
 <p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species. The slopes and intercepts for each species are <em>correlated</em> in this example. We allow every species to have a species specific slope for <code>Sepal.Length</code>.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb17-2" data-line-number="2">coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb17-3" data-line-number="3">sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb17-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb17-5" data-line-number="5">n_species  &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">unique</span>(iris<span class="op">$</span>Species))</a>
-<a class="sourceLine" id="cb17-6" data-line-number="6">species_id &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(iris<span class="op">$</span>Species)</a>
-<a class="sourceLine" id="cb17-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb17-8" data-line-number="8">Z &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span><span class="st"> </span>Species <span class="op">+</span><span class="st"> </span>Sepal.Length <span class="op">*</span><span class="st"> </span>Species <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> iris)</a>
-<a class="sourceLine" id="cb17-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb17-10" data-line-number="10">gamma_matrix &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">multivariate_normal</a></span>(<span class="kw">matrix</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>),</a>
-<a class="sourceLine" id="cb17-11" data-line-number="11">                                    <span class="kw"><a href="../reference/overloaded.html">diag</a></span>(<span class="dv">2</span>),</a>
-<a class="sourceLine" id="cb17-12" data-line-number="12">                                    <span class="dt">n_realisations =</span> <span class="dv">3</span>) </a>
-<a class="sourceLine" id="cb17-13" data-line-number="13">gamma &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(gamma_matrix)</a>
-<a class="sourceLine" id="cb17-14" data-line-number="14"></a>
-<a class="sourceLine" id="cb17-15" data-line-number="15">wi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(iris<span class="op">$</span>Sepal.Width)</a>
-<a class="sourceLine" id="cb17-16" data-line-number="16">Z  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(Z)</a>
-<a class="sourceLine" id="cb17-17" data-line-number="17">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>wi <span class="op">+</span><span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>gamma</a>
-<a class="sourceLine" id="cb17-18" data-line-number="18"></a>
-<a class="sourceLine" id="cb17-19" data-line-number="19"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(iris<span class="op">$</span>Sepal.Length) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+n_species  &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">unique</span>(iris<span class="op">$</span>Species))
+species_id &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(iris<span class="op">$</span>Species)
+
+Z &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span><span class="st"> </span>Species <span class="op">+</span><span class="st"> </span>Sepal.Length <span class="op">*</span><span class="st"> </span>Species <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> iris)
+
+gamma_matrix &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">multivariate_normal</a></span>(<span class="kw">matrix</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>),
+                                    <span class="kw"><a href="../reference/overloaded.html">diag</a></span>(<span class="dv">2</span>),
+                                    <span class="dt">n_realisations =</span> <span class="dv">3</span>) 
+gamma &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(gamma_matrix)
+
+wi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(iris<span class="op">$</span>Sepal.Width)
+Z  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(Z)
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>wi <span class="op">+</span><span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>gamma
+
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(iris<span class="op">$</span>Sepal.Length) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sd)</code></pre></div>
 <hr>
 </div>
 <div id="hierarchical-linear-regression-in-general-marginal-formulation" class="section level3">
 <h3 class="hasAnchor">
 <a href="#hierarchical-linear-regression-in-general-marginal-formulation" class="anchor"></a>Hierarchical linear regression in general marginal formulation</h3>
 <p>A hierarchical, Bayesian linear regression model using the iris data, with random intercepts and slopes for each of the three species. This time we try to set up the <em>marginal</em> model, i.e. when we integrate the conditional density.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb18-2" data-line-number="2">coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3">sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</a>
-<a class="sourceLine" id="cb18-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb18-5" data-line-number="5">n_species  &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">unique</span>(iris<span class="op">$</span>Species))</a>
-<a class="sourceLine" id="cb18-6" data-line-number="6">species_id &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(iris<span class="op">$</span>Species)</a>
-<a class="sourceLine" id="cb18-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb18-8" data-line-number="8">Z &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span><span class="st"> </span>Species <span class="op">+</span><span class="st"> </span>Sepal.Length <span class="op">*</span><span class="st"> </span>Species <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> iris)</a>
-<a class="sourceLine" id="cb18-9" data-line-number="9">G  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">zeros</a></span>(n_species <span class="op">*</span><span class="st"> </span><span class="dv">2</span>, n_species <span class="op">*</span><span class="st"> </span><span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb18-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb18-11" data-line-number="11"><span class="cf">for</span> (s <span class="cf">in</span> <span class="kw">unique</span>(species_id)) {</a>
-<a class="sourceLine" id="cb18-12" data-line-number="12">  G_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">diag</a></span>(<span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb18-13" data-line-number="13">  G[<span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(s, s <span class="op">+</span><span class="st"> </span>n_species), <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(s, s <span class="op">+</span><span class="st"> </span>n_species)] &lt;-<span class="st"> </span>G_sd</a>
-<a class="sourceLine" id="cb18-14" data-line-number="14">}</a>
-<a class="sourceLine" id="cb18-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb18-16" data-line-number="16">mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>iris<span class="op">$</span>Sepal.Width</a>
-<a class="sourceLine" id="cb18-17" data-line-number="17">V &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">zeros</a></span>(<span class="kw">nrow</span>(iris), <span class="kw">nrow</span>(iris))</a>
-<a class="sourceLine" id="cb18-18" data-line-number="18"><span class="kw"><a href="../reference/overloaded.html">diag</a></span>(V) &lt;-<span class="st"> </span>sd</a>
-<a class="sourceLine" id="cb18-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb18-20" data-line-number="20">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(Z)</a>
-<a class="sourceLine" id="cb18-21" data-line-number="21">V &lt;-<span class="st"> </span>V <span class="op">+</span><span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>G <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(Z)</a>
-<a class="sourceLine" id="cb18-22" data-line-number="22"></a>
-<a class="sourceLine" id="cb18-23" data-line-number="23">sep &lt;-<span class="st"> </span><span class="kw">t</span>(iris<span class="op">$</span>Sepal.Width)</a>
-<a class="sourceLine" id="cb18-24" data-line-number="24"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(sep) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">multivariate_normal</a></span>(<span class="kw">t</span>(mu), V)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">int  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">5</span>)
+sd   &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">cauchy</a></span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))
+
+n_species  &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">unique</span>(iris<span class="op">$</span>Species))
+species_id &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(iris<span class="op">$</span>Species)
+
+Z &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span><span class="st"> </span>Species <span class="op">+</span><span class="st"> </span>Sepal.Length <span class="op">*</span><span class="st"> </span>Species <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> iris)
+G  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">zeros</a></span>(n_species <span class="op">*</span><span class="st"> </span><span class="dv">2</span>, n_species <span class="op">*</span><span class="st"> </span><span class="dv">2</span>)
+
+<span class="cf">for</span> (s <span class="cf">in</span> <span class="kw">unique</span>(species_id)) {
+  G_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">diag</a></span>(<span class="dv">2</span>)
+  G[<span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(s, s <span class="op">+</span><span class="st"> </span>n_species), <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(s, s <span class="op">+</span><span class="st"> </span>n_species)] &lt;-<span class="st"> </span>G_sd
+}
+
+mu &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>iris<span class="op">$</span>Sepal.Width
+V &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">zeros</a></span>(<span class="kw">nrow</span>(iris), <span class="kw">nrow</span>(iris))
+<span class="kw"><a href="../reference/overloaded.html">diag</a></span>(V) &lt;-<span class="st"> </span>sd
+
+Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(Z)
+V &lt;-<span class="st"> </span>V <span class="op">+</span><span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>G <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(Z)
+
+sep &lt;-<span class="st"> </span><span class="kw">t</span>(iris<span class="op">$</span>Sepal.Width)
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(sep) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">multivariate_normal</a></span>(<span class="kw">t</span>(mu), V)</code></pre></div>
 <hr>
 </div>
 <div id="bayesian-neural-network" class="section level3">
@@ -456,16 +456,16 @@ set.seed(23)
 X &lt;- matrix(rnorm(N * p), N)
 beta &lt;- rnorm(10)
 y &lt;- X %*% beta + rnorm(N, sd = 0.1)</code></pre>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1">neural_network &lt;-<span class="st"> </span><span class="cf">function</span>(x)</a>
-<a class="sourceLine" id="cb20-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb20-3" data-line-number="3">  <span class="co"># this can be arbitrarily complex, e.g. multiple hidden layers</span></a>
-<a class="sourceLine" id="cb20-4" data-line-number="4">  x <span class="op">%*%</span><span class="st"> </span>weights</a>
-<a class="sourceLine" id="cb20-5" data-line-number="5">}</a>
-<a class="sourceLine" id="cb20-6" data-line-number="6">  </a>
-<a class="sourceLine" id="cb20-7" data-line-number="7">weights &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(p, <span class="dv">1</span>))</a>
-<a class="sourceLine" id="cb20-8" data-line-number="8">sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb20-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb20-10" data-line-number="10"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="kw">neural_network</span>(X), sd)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">neural_network &lt;-<span class="st"> </span><span class="cf">function</span>(x)
+{
+  <span class="co"># this can be arbitrarily complex, e.g. multiple hidden layers</span>
+  x <span class="op">%*%</span><span class="st"> </span>weights
+}
+  
+weights &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(p, <span class="dv">1</span>))
+sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)
+
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="kw">neural_network</span>(X), sd)</code></pre></div>
 <hr>
 </div>
 <div id="factor-analysis" class="section level3">
@@ -496,12 +496,12 @@ q &lt;- 2
 data &lt;- generate.data(n = n, p = p, q = q)
 X &lt;- data$X</code></pre>
 </div>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">W &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(p, q))</a>
-<a class="sourceLine" id="cb22-2" data-line-number="2">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(q, n))</a>
-<a class="sourceLine" id="cb22-3" data-line-number="3">psi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">zeros</a></span>(p, p)</a>
-<a class="sourceLine" id="cb22-4" data-line-number="4"><span class="kw"><a href="../reference/overloaded.html">diag</a></span>(psi) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dt">dim =</span> p)</a>
-<a class="sourceLine" id="cb22-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb22-6" data-line-number="6"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(X) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">multivariate_normal</a></span>(<span class="kw">t</span>(W <span class="op">%*%</span><span class="st"> </span>Z), psi)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">W &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(p, q))
+Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(q, n))
+psi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">zeros</a></span>(p, p)
+<span class="kw"><a href="../reference/overloaded.html">diag</a></span>(psi) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dt">dim =</span> p)
+
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(X) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">multivariate_normal</a></span>(<span class="kw">t</span>(W <span class="op">%*%</span><span class="st"> </span>Z), psi)</code></pre></div>
 </div>
 </div>
 <div id="bugs-models" class="section level2">
@@ -531,11 +531,11 @@ J &lt;- 3</code></pre>
 <div id="greta-code" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1">theta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">32</span>, <span class="dt">dim =</span> <span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb24-2" data-line-number="2">mu &lt;-<span class="st"> </span>alpha <span class="op">+</span><span class="st"> </span>beta <span class="op">*</span><span class="st"> </span>Z</a>
-<a class="sourceLine" id="cb24-3" data-line-number="3">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sigma)</a>
-<a class="sourceLine" id="cb24-4" data-line-number="4">p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(theta[<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>theta[<span class="dv">2</span>] <span class="op">*</span><span class="st"> </span>X)</a>
-<a class="sourceLine" id="cb24-5" data-line-number="5"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">binomial</a></span>(n, p)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">theta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">32</span>, <span class="dt">dim =</span> <span class="dv">2</span>)
+mu &lt;-<span class="st"> </span>alpha <span class="op">+</span><span class="st"> </span>beta <span class="op">*</span><span class="st"> </span>Z
+X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mu, sigma)
+p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(theta[<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>theta[<span class="dv">2</span>] <span class="op">*</span><span class="st"> </span>X)
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">binomial</a></span>(n, p)</code></pre></div>
 </div>
 <div id="bugsjags-code" class="section level4">
 <h4 class="hasAnchor">
@@ -603,13 +603,13 @@ N &lt;- 8</code></pre>
 <div id="greta-code-1" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-1" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1">alpha_star &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">32</span>)</a>
-<a class="sourceLine" id="cb28-2" data-line-number="2">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">32</span>)</a>
-<a class="sourceLine" id="cb28-3" data-line-number="3">p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(alpha_star <span class="op">+</span><span class="st"> </span>beta <span class="op">*</span><span class="st"> </span>(x <span class="op">-</span><span class="st"> </span><span class="kw">mean</span>(x)))</a>
-<a class="sourceLine" id="cb28-4" data-line-number="4"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(r) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">binomial</a></span>(n, p)</a>
-<a class="sourceLine" id="cb28-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb28-6" data-line-number="6">alpha &lt;-<span class="st"> </span>alpha_star <span class="op">-</span><span class="st"> </span>beta <span class="op">*</span><span class="st"> </span><span class="kw">mean</span>(x)</a>
-<a class="sourceLine" id="cb28-7" data-line-number="7">rhat &lt;-<span class="st"> </span>p <span class="op">*</span><span class="st"> </span>n</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">alpha_star &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">32</span>)
+beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">32</span>)
+p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(alpha_star <span class="op">+</span><span class="st"> </span>beta <span class="op">*</span><span class="st"> </span>(x <span class="op">-</span><span class="st"> </span><span class="kw">mean</span>(x)))
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(r) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">binomial</a></span>(n, p)
+
+alpha &lt;-<span class="st"> </span>alpha_star <span class="op">-</span><span class="st"> </span>beta <span class="op">*</span><span class="st"> </span><span class="kw">mean</span>(x)
+rhat &lt;-<span class="st"> </span>p <span class="op">*</span><span class="st"> </span>n</code></pre></div>
 </div>
 <div id="bugsjags-code-1" class="section level4">
 <h4 class="hasAnchor">
@@ -699,10 +699,10 @@ n &lt;- length(y)</code></pre>
 <div id="greta-code-2" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-2" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">beta  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()</a>
-<a class="sourceLine" id="cb32-2" data-line-number="2">sigma &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>(<span class="dt">lower =</span> <span class="dv">0</span>)</a>
-<a class="sourceLine" id="cb32-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb32-4" data-line-number="4"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(beta, sigma)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">beta  &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>()
+sigma &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>(<span class="dt">lower =</span> <span class="dv">0</span>)
+
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(beta, sigma)</code></pre></div>
 </div>
 <div id="stan-code-2" class="section level4">
 <h4 class="hasAnchor">
@@ -738,14 +738,14 @@ N       &lt;- length(y)</code></pre>
 <div id="greta-code-3" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-3" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1">sigma_eta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb35-2" data-line-number="2">eta       &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, sigma_eta, <span class="dt">dim=</span>N)</a>
-<a class="sourceLine" id="cb35-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb35-4" data-line-number="4">mu_theta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">100</span>)</a>
-<a class="sourceLine" id="cb35-5" data-line-number="5">xi       &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb35-6" data-line-number="6">theta    &lt;-<span class="st"> </span>mu_theta <span class="op">+</span><span class="st"> </span>xi <span class="op">*</span><span class="st"> </span>eta</a>
-<a class="sourceLine" id="cb35-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb35-8" data-line-number="8"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(theta, sigma_y)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sigma_eta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">inverse_gamma</a></span>(<span class="dv">1</span>, <span class="dv">1</span>)
+eta       &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, sigma_eta, <span class="dt">dim=</span>N)
+
+mu_theta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">100</span>)
+xi       &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">5</span>)
+theta    &lt;-<span class="st"> </span>mu_theta <span class="op">+</span><span class="st"> </span>xi <span class="op">*</span><span class="st"> </span>eta
+
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(theta, sigma_y)</code></pre></div>
 </div>
 <div id="stan-code-3" class="section level4">
 <h4 class="hasAnchor">
@@ -784,8 +784,7 @@ model {
 <div id="ecological-models" class="section level2">
 <h2 class="hasAnchor">
 <a href="#ecological-models" class="anchor"></a>Ecological models</h2>
-<p>Here we provide some examples of common ecological models. We begin with a basic logistic regression often used in species distribution modelling to estimate species probability of presence. We then provide increasingly complex species distribution models, beginning with modelling obervation error directly, and moving on to models for multiple species: independentally but concurrently modelled species, partially pooled coefficients, repeated measures, and sub-models.</p>
-<p>One important way <code>greta</code> models differs from BUGS and Stan code is that it is often neccessary to set up the linear predictor seperatly to the logistic transformation. This is particulary the case when the dimensions of the data increases, such as when there are multiple species being modelled. We keep this convention in the simpler models for ease of understanding.</p>
+<p>Here we provide some examples of common ecological models. We begin with a basic logistic regression often used in species distribution modelling to estimate species probability of presence. We then provide increasingly complex species distribution models, beginning with modelling observation error directly, and moving on to models for multiple species: independently but concurrently modelled species, partially pooled coefficients, repeated measures, and sub-models.</p>
 <hr>
 <div id="logistic-regression" class="section level3">
 <h3 class="hasAnchor">
@@ -806,23 +805,23 @@ occupancy &lt;- rbinom(n_sites, 1, 0.5) </code></pre>
 <div id="greta-code-4" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-4" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1"><span class="co"># load greta</span></a>
-<a class="sourceLine" id="cb38-2" data-line-number="2"><span class="kw">library</span>(greta)</a>
-<a class="sourceLine" id="cb38-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb38-4" data-line-number="4"><span class="co"># create matrices to greta arrays</span></a>
-<a class="sourceLine" id="cb38-5" data-line-number="5">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)</a>
-<a class="sourceLine" id="cb38-6" data-line-number="6">Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)</a>
-<a class="sourceLine" id="cb38-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb38-8" data-line-number="8"><span class="co"># create greta arrays for random variables</span></a>
-<a class="sourceLine" id="cb38-9" data-line-number="9">alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb38-10" data-line-number="10">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)</a>
-<a class="sourceLine" id="cb38-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb38-12" data-line-number="12"><span class="co"># logit-linear model</span></a>
-<a class="sourceLine" id="cb38-13" data-line-number="13">linear_predictor &lt;-<span class="st"> </span>alpha <span class="op">+</span><span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta</a>
-<a class="sourceLine" id="cb38-14" data-line-number="14">p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)</a>
-<a class="sourceLine" id="cb38-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb38-16" data-line-number="16"><span class="co"># distribution (likelihood) over observed values</span></a>
-<a class="sourceLine" id="cb38-17" data-line-number="17"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load greta</span>
+<span class="kw">library</span>(greta)
+
+<span class="co"># create matrices to greta arrays</span>
+X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)
+Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)
+
+<span class="co"># create greta arrays for random variables</span>
+alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)
+
+<span class="co"># logit-linear model</span>
+linear_predictor &lt;-<span class="st"> </span>alpha <span class="op">+</span><span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta
+p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)
+
+<span class="co"># distribution (likelihood) over observed values</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</code></pre></div>
 <hr>
 </div>
 </div>
@@ -845,21 +844,21 @@ occupancy &lt;- rpois(n_sites, 5) </code></pre>
 <div id="greta-code-5" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-5" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1"><span class="co"># load greta</span></a>
-<a class="sourceLine" id="cb40-2" data-line-number="2"><span class="kw">library</span>(greta)</a>
-<a class="sourceLine" id="cb40-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb40-4" data-line-number="4"><span class="co"># create matrices to greta arrays</span></a>
-<a class="sourceLine" id="cb40-5" data-line-number="5">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)</a>
-<a class="sourceLine" id="cb40-6" data-line-number="6">Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)</a>
-<a class="sourceLine" id="cb40-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb40-8" data-line-number="8"><span class="co"># create greta arrays for random variables</span></a>
-<a class="sourceLine" id="cb40-9" data-line-number="9">alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb40-10" data-line-number="10">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)</a>
-<a class="sourceLine" id="cb40-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb40-12" data-line-number="12"><span class="co"># model</span></a>
-<a class="sourceLine" id="cb40-13" data-line-number="13">linear_predictor &lt;-<span class="st"> </span>alpha <span class="op">+</span><span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta</a>
-<a class="sourceLine" id="cb40-14" data-line-number="14">lambda &lt;-<span class="st"> </span><span class="kw">exp</span>(linear_predictor)</a>
-<a class="sourceLine" id="cb40-15" data-line-number="15"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">poisson</a></span>(lambda)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load greta</span>
+<span class="kw">library</span>(greta)
+
+<span class="co"># create matrices to greta arrays</span>
+X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)
+Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)
+
+<span class="co"># create greta arrays for random variables</span>
+alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)
+
+<span class="co"># model</span>
+linear_predictor &lt;-<span class="st"> </span>alpha <span class="op">+</span><span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta
+lambda &lt;-<span class="st"> </span><span class="kw">exp</span>(linear_predictor)
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">poisson</a></span>(lambda)</code></pre></div>
 <hr>
 </div>
 </div>
@@ -882,24 +881,24 @@ occupancy &lt;- rbinom(n_sites, 1, 0.5)</code></pre>
 <div id="greta-code-6" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-6" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1"><span class="co"># load greta</span></a>
-<a class="sourceLine" id="cb42-2" data-line-number="2"><span class="kw">library</span>(greta)</a>
-<a class="sourceLine" id="cb42-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb42-4" data-line-number="4"><span class="co"># create matrices to greta arrays</span></a>
-<a class="sourceLine" id="cb42-5" data-line-number="5">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)</a>
-<a class="sourceLine" id="cb42-6" data-line-number="6">Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)</a>
-<a class="sourceLine" id="cb42-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb42-8" data-line-number="8"><span class="co"># create greta arrays for random variables</span></a>
-<a class="sourceLine" id="cb42-9" data-line-number="9">alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb42-10" data-line-number="10">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)</a>
-<a class="sourceLine" id="cb42-11" data-line-number="11">error &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_sites)</a>
-<a class="sourceLine" id="cb42-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb42-13" data-line-number="13"><span class="co"># logit-linear model with extra variation</span></a>
-<a class="sourceLine" id="cb42-14" data-line-number="14">linear_predictor &lt;-<span class="st"> </span>alpha <span class="op">+</span><span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta <span class="op">+</span><span class="st"> </span>error</a>
-<a class="sourceLine" id="cb42-15" data-line-number="15">p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)</a>
-<a class="sourceLine" id="cb42-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb42-17" data-line-number="17"><span class="co"># distribution (likelihood) over observed values</span></a>
-<a class="sourceLine" id="cb42-18" data-line-number="18"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load greta</span>
+<span class="kw">library</span>(greta)
+
+<span class="co"># create matrices to greta arrays</span>
+X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)
+Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)
+
+<span class="co"># create greta arrays for random variables</span>
+alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>)
+beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)
+error &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_sites)
+
+<span class="co"># logit-linear model with extra variation</span>
+linear_predictor &lt;-<span class="st"> </span>alpha <span class="op">+</span><span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta <span class="op">+</span><span class="st"> </span>error
+p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)
+
+<span class="co"># distribution (likelihood) over observed values</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</code></pre></div>
 <hr>
 </div>
 </div>
@@ -923,30 +922,30 @@ occupancy &lt;- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_sites)</cod
 <div id="greta-code-7" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-7" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" data-line-number="1"><span class="co"># load greta</span></a>
-<a class="sourceLine" id="cb44-2" data-line-number="2"><span class="kw">library</span>(greta)</a>
-<a class="sourceLine" id="cb44-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb44-4" data-line-number="4"><span class="co"># create matrices to greta arrays</span></a>
-<a class="sourceLine" id="cb44-5" data-line-number="5">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)</a>
-<a class="sourceLine" id="cb44-6" data-line-number="6">Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)</a>
-<a class="sourceLine" id="cb44-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb44-8" data-line-number="8"><span class="co"># variables</span></a>
-<a class="sourceLine" id="cb44-9" data-line-number="9">alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>,<span class="dv">10</span>, <span class="dt">dim =</span> n_species)</a>
-<a class="sourceLine" id="cb44-10" data-line-number="10">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(n_env, n_species))</a>
-<a class="sourceLine" id="cb44-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb44-12" data-line-number="12">env_effect &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta</a>
-<a class="sourceLine" id="cb44-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb44-14" data-line-number="14"><span class="co"># matrix addition with `sweep()` create interim variable</span></a>
-<a class="sourceLine" id="cb44-15" data-line-number="15">linear_predictor &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">sweep</a></span>(env_effect, <span class="dv">2</span>, alpha, <span class="dt">FUN =</span> <span class="st">'+'</span>)</a>
-<a class="sourceLine" id="cb44-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb44-17" data-line-number="17"><span class="co"># ilogit of linear predictor</span></a>
-<a class="sourceLine" id="cb44-18" data-line-number="18">p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)</a>
-<a class="sourceLine" id="cb44-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb44-20" data-line-number="20"><span class="co"># a single observation means our data are bernoulli distributed</span></a>
-<a class="sourceLine" id="cb44-21" data-line-number="21"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</a>
-<a class="sourceLine" id="cb44-22" data-line-number="22"><span class="co"># for n_obs repeat observations per species/location, we could use the binomial</span></a>
-<a class="sourceLine" id="cb44-23" data-line-number="23"><span class="co"># distribution:</span></a>
-<a class="sourceLine" id="cb44-24" data-line-number="24"><span class="co"># distribution(Y) &lt;- binomial(n_obs, p) </span></a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load greta</span>
+<span class="kw">library</span>(greta)
+
+<span class="co"># create matrices to greta arrays</span>
+X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)
+Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)
+
+<span class="co"># variables</span>
+alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>,<span class="dv">10</span>, <span class="dt">dim =</span> n_species)
+beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(n_env, n_species))
+
+env_effect &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta
+
+<span class="co"># matrix addition with `sweep()` create interim variable</span>
+linear_predictor &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">sweep</a></span>(env_effect, <span class="dv">2</span>, alpha, <span class="dt">FUN =</span> <span class="st">'+'</span>)
+
+<span class="co"># ilogit of linear predictor</span>
+p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)
+
+<span class="co"># a single observation means our data are bernoulli distributed</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)
+<span class="co"># for n_obs repeat observations per species/location, we could use the binomial</span>
+<span class="co"># distribution:</span>
+<span class="co"># distribution(Y) &lt;- binomial(n_obs, p) </span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -969,32 +968,32 @@ occupancy &lt;- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)</cod
 <div id="greta-code-8" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-8" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" data-line-number="1"><span class="co"># load greta</span></a>
-<a class="sourceLine" id="cb46-2" data-line-number="2"><span class="kw">library</span>(greta)</a>
-<a class="sourceLine" id="cb46-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb46-4" data-line-number="4"><span class="co"># create matrices to greta arrays</span></a>
-<a class="sourceLine" id="cb46-5" data-line-number="5">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)</a>
-<a class="sourceLine" id="cb46-6" data-line-number="6">Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)</a>
-<a class="sourceLine" id="cb46-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb46-8" data-line-number="8"><span class="co"># variables</span></a>
-<a class="sourceLine" id="cb46-9" data-line-number="9">global_alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb46-10" data-line-number="10">global_alpha_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">uniform</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="dv">1</span>) </a>
-<a class="sourceLine" id="cb46-11" data-line-number="11">alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(global_alpha, global_alpha_sd, <span class="dt">dim =</span> n_species)</a>
-<a class="sourceLine" id="cb46-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb46-13" data-line-number="13">global_betas &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)</a>
-<a class="sourceLine" id="cb46-14" data-line-number="14">global_betas_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">uniform</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)</a>
-<a class="sourceLine" id="cb46-15" data-line-number="15">beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(global_betas, global_betas_sd, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(n_env, n_species))</a>
-<a class="sourceLine" id="cb46-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb46-17" data-line-number="17">env_effect &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta</a>
-<a class="sourceLine" id="cb46-18" data-line-number="18"></a>
-<a class="sourceLine" id="cb46-19" data-line-number="19"><span class="co"># matrix addition with `sweep()` create interim variable</span></a>
-<a class="sourceLine" id="cb46-20" data-line-number="20">linear_predictor &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">sweep</a></span>(env_effect, <span class="dv">2</span>, alpha, <span class="dt">FUN =</span> <span class="st">'+'</span>)</a>
-<a class="sourceLine" id="cb46-21" data-line-number="21"></a>
-<a class="sourceLine" id="cb46-22" data-line-number="22"><span class="co"># ilogit of linear predictor</span></a>
-<a class="sourceLine" id="cb46-23" data-line-number="23">p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)</a>
-<a class="sourceLine" id="cb46-24" data-line-number="24"></a>
-<a class="sourceLine" id="cb46-25" data-line-number="25"><span class="co"># a single observation means our data are bernoulli distributed</span></a>
-<a class="sourceLine" id="cb46-26" data-line-number="26"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load greta</span>
+<span class="kw">library</span>(greta)
+
+<span class="co"># create matrices to greta arrays</span>
+X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)
+Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)
+
+<span class="co"># variables</span>
+global_alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="dv">1</span>)
+global_alpha_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">uniform</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="dv">1</span>) 
+alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(global_alpha, global_alpha_sd, <span class="dt">dim =</span> n_species)
+
+global_betas &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)
+global_betas_sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">uniform</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> n_env)
+beta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(global_betas, global_betas_sd, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(n_env, n_species))
+
+env_effect &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta
+
+<span class="co"># matrix addition with `sweep()` create interim variable</span>
+linear_predictor &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">sweep</a></span>(env_effect, <span class="dv">2</span>, alpha, <span class="dt">FUN =</span> <span class="st">'+'</span>)
+
+<span class="co"># ilogit of linear predictor</span>
+p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)
+
+<span class="co"># a single observation means our data are bernoulli distributed</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</code></pre></div>
 <hr>
 </div>
 </div>
@@ -1023,38 +1022,38 @@ occupancy &lt;- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)</cod
 <div id="greta-code-9" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-9" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" data-line-number="1"><span class="co"># load greta</span></a>
-<a class="sourceLine" id="cb48-2" data-line-number="2"><span class="kw">library</span>(greta)</a>
-<a class="sourceLine" id="cb48-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb48-4" data-line-number="4"><span class="co"># data wrangling</span></a>
-<a class="sourceLine" id="cb48-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb48-6" data-line-number="6"><span class="co"># include a column of 1's for intercept estimation in the sub-model (traits) and base model</span></a>
-<a class="sourceLine" id="cb48-7" data-line-number="7">traits &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">cbind</a></span>(<span class="kw"><a href="../reference/extract-replace-combine.html">rep</a></span>(<span class="dv">1</span>, n_species), traits)</a>
-<a class="sourceLine" id="cb48-8" data-line-number="8">env &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">cbind</a></span>(<span class="kw"><a href="../reference/extract-replace-combine.html">rep</a></span>(<span class="dv">1</span>, n_sites), env)</a>
-<a class="sourceLine" id="cb48-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb48-10" data-line-number="10"><span class="co"># redefine the n_env and n_traits after adding in coloum of 1's for intercepts</span></a>
-<a class="sourceLine" id="cb48-11" data-line-number="11">n_env &lt;-<span class="st"> </span><span class="kw">ncol</span>(env)</a>
-<a class="sourceLine" id="cb48-12" data-line-number="12">n_traits &lt;-<span class="st"> </span><span class="kw">ncol</span>(traits)</a>
-<a class="sourceLine" id="cb48-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb48-14" data-line-number="14"><span class="co"># create matrices to greta arrays</span></a>
-<a class="sourceLine" id="cb48-15" data-line-number="15">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)</a>
-<a class="sourceLine" id="cb48-16" data-line-number="16">Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)</a>
-<a class="sourceLine" id="cb48-17" data-line-number="17">U &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(traits)</a>
-<a class="sourceLine" id="cb48-18" data-line-number="18"></a>
-<a class="sourceLine" id="cb48-19" data-line-number="19"><span class="co"># greta arrays for variables to be estimated</span></a>
-<a class="sourceLine" id="cb48-20" data-line-number="20"><span class="co"># sub-model parameters have normal prior distributions</span></a>
-<a class="sourceLine" id="cb48-21" data-line-number="21">g &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(n_env, n_traits))</a>
-<a class="sourceLine" id="cb48-22" data-line-number="22"><span class="co"># parameters of the base model are a function of the parameters of the sub-model</span></a>
-<a class="sourceLine" id="cb48-23" data-line-number="23">beta &lt;-<span class="st">  </span>g <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(U) </a>
-<a class="sourceLine" id="cb48-24" data-line-number="24"></a>
-<a class="sourceLine" id="cb48-25" data-line-number="25"><span class="co"># use the coefficients to get the model linear predictor</span></a>
-<a class="sourceLine" id="cb48-26" data-line-number="26">linear_predictor &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta </a>
-<a class="sourceLine" id="cb48-27" data-line-number="27"></a>
-<a class="sourceLine" id="cb48-28" data-line-number="28"><span class="co"># use the logit link to get probabilities of occupancy</span></a>
-<a class="sourceLine" id="cb48-29" data-line-number="29">p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)</a>
-<a class="sourceLine" id="cb48-30" data-line-number="30"></a>
-<a class="sourceLine" id="cb48-31" data-line-number="31"><span class="co"># data are bernoulli distributed</span></a>
-<a class="sourceLine" id="cb48-32" data-line-number="32"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load greta</span>
+<span class="kw">library</span>(greta)
+
+<span class="co"># data wrangling</span>
+
+<span class="co"># include a column of 1's for intercept estimation in the sub-model (traits) and base model</span>
+traits &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">cbind</a></span>(<span class="kw"><a href="../reference/extract-replace-combine.html">rep</a></span>(<span class="dv">1</span>, n_species), traits)
+env &lt;-<span class="st"> </span><span class="kw"><a href="../reference/extract-replace-combine.html">cbind</a></span>(<span class="kw"><a href="../reference/extract-replace-combine.html">rep</a></span>(<span class="dv">1</span>, n_sites), env)
+
+<span class="co"># redefine the n_env and n_traits after adding in coloum of 1's for intercepts</span>
+n_env &lt;-<span class="st"> </span><span class="kw">ncol</span>(env)
+n_traits &lt;-<span class="st"> </span><span class="kw">ncol</span>(traits)
+
+<span class="co"># create matrices to greta arrays</span>
+X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(env)
+Y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(occupancy)
+U &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(traits)
+
+<span class="co"># greta arrays for variables to be estimated</span>
+<span class="co"># sub-model parameters have normal prior distributions</span>
+g &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(n_env, n_traits))
+<span class="co"># parameters of the base model are a function of the parameters of the sub-model</span>
+beta &lt;-<span class="st">  </span>g <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(U) 
+
+<span class="co"># use the coefficients to get the model linear predictor</span>
+linear_predictor &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>beta 
+
+<span class="co"># use the logit link to get probabilities of occupancy</span>
+p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/transforms.html">ilogit</a></span>(linear_predictor)
+
+<span class="co"># data are bernoulli distributed</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(Y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p)</code></pre></div>
 <hr>
 </div>
 </div>
@@ -1075,34 +1074,34 @@ y &lt;- matrix(sample(c(0, 1), size = (n_obs * n_time), replace = TRUE), ncol = 
 <div id="greta-code-10" class="section level4">
 <h4 class="hasAnchor">
 <a href="#greta-code-10" class="anchor"></a>greta code</h4>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" data-line-number="1"><span class="co"># data summaries</span></a>
-<a class="sourceLine" id="cb50-2" data-line-number="2">first_obs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">apply</a></span>(y, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="kw">min</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)))</a>
-<a class="sourceLine" id="cb50-3" data-line-number="3">final_obs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">apply</a></span>(y, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="kw">max</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)))</a>
-<a class="sourceLine" id="cb50-4" data-line-number="4">obs_id &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">apply</a></span>(y, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="kw">seq</span>(<span class="kw">min</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)), <span class="kw">max</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)), <span class="dt">by =</span> <span class="dv">1</span>)[<span class="op">-</span><span class="dv">1</span>])</a>
-<a class="sourceLine" id="cb50-5" data-line-number="5">obs_id &lt;-<span class="st"> </span><span class="kw">unlist</span>(obs_id)</a>
-<a class="sourceLine" id="cb50-6" data-line-number="6">capture_vec &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">apply</a></span>(y, <span class="dv">1</span>, <span class="cf">function</span>(x) x[<span class="kw">min</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>))<span class="op">:</span><span class="kw">max</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>))][<span class="op">-</span><span class="dv">1</span>])</a>
-<a class="sourceLine" id="cb50-7" data-line-number="7">capture_vec &lt;-<span class="st"> </span><span class="kw">unlist</span>(capture_vec)</a>
-<a class="sourceLine" id="cb50-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb50-9" data-line-number="9"><span class="co"># priors</span></a>
-<a class="sourceLine" id="cb50-10" data-line-number="10">phi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">beta</a></span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dt">dim =</span> n_time)</a>
-<a class="sourceLine" id="cb50-11" data-line-number="11">p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">beta</a></span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dt">dim =</span> n_time)</a>
-<a class="sourceLine" id="cb50-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb50-13" data-line-number="13"><span class="co"># derived parameter</span></a>
-<a class="sourceLine" id="cb50-14" data-line-number="14">chi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">ones</a></span>(n_time)</a>
-<a class="sourceLine" id="cb50-15" data-line-number="15"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(n_time <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)) {</a>
-<a class="sourceLine" id="cb50-16" data-line-number="16">  tn &lt;-<span class="st"> </span>n_time <span class="op">-</span><span class="st"> </span>i</a>
-<a class="sourceLine" id="cb50-17" data-line-number="17">  chi[tn] &lt;-<span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>phi[tn]) <span class="op">+</span><span class="st"> </span>phi[tn] <span class="op">*</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>p[tn <span class="op">+</span><span class="st"> </span><span class="dv">1</span>]) <span class="op">*</span><span class="st"> </span>chi[tn <span class="op">+</span><span class="st"> </span><span class="dv">1</span>]</a>
-<a class="sourceLine" id="cb50-18" data-line-number="18">}</a>
-<a class="sourceLine" id="cb50-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb50-20" data-line-number="20"><span class="co"># dummy variables</span></a>
-<a class="sourceLine" id="cb50-21" data-line-number="21">alive_data &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">ones</a></span>(<span class="kw">length</span>(obs_id))            <span class="co"># definitely alive</span></a>
-<a class="sourceLine" id="cb50-22" data-line-number="22">not_seen_last &lt;-<span class="st"> </span>final_obs <span class="op">!=</span><span class="st"> </span><span class="dv">20</span>              <span class="co"># ignore observations in last timestep</span></a>
-<a class="sourceLine" id="cb50-23" data-line-number="23">final_observation &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">ones</a></span>(<span class="kw">sum</span>(not_seen_last)) <span class="co"># final observation</span></a>
-<a class="sourceLine" id="cb50-24" data-line-number="24"></a>
-<a class="sourceLine" id="cb50-25" data-line-number="25"><span class="co"># set likelihoods</span></a>
-<a class="sourceLine" id="cb50-26" data-line-number="26"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(alive_data) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(phi[obs_id <span class="op">-</span><span class="st"> </span><span class="dv">1</span>])</a>
-<a class="sourceLine" id="cb50-27" data-line-number="27"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(capture_vec) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p[obs_id])</a>
-<a class="sourceLine" id="cb50-28" data-line-number="28"><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(final_observation) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(chi[final_obs[not_seen_last]])</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># data summaries</span>
+first_obs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">apply</a></span>(y, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="kw">min</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)))
+final_obs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">apply</a></span>(y, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="kw">max</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)))
+obs_id &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">apply</a></span>(y, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="kw">seq</span>(<span class="kw">min</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)), <span class="kw">max</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)), <span class="dt">by =</span> <span class="dv">1</span>)[<span class="op">-</span><span class="dv">1</span>])
+obs_id &lt;-<span class="st"> </span><span class="kw">unlist</span>(obs_id)
+capture_vec &lt;-<span class="st"> </span><span class="kw"><a href="../reference/overloaded.html">apply</a></span>(y, <span class="dv">1</span>, <span class="cf">function</span>(x) x[<span class="kw">min</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>))<span class="op">:</span><span class="kw">max</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>))][<span class="op">-</span><span class="dv">1</span>])
+capture_vec &lt;-<span class="st"> </span><span class="kw">unlist</span>(capture_vec)
+
+<span class="co"># priors</span>
+phi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">beta</a></span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dt">dim =</span> n_time)
+p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">beta</a></span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dt">dim =</span> n_time)
+
+<span class="co"># derived parameter</span>
+chi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">ones</a></span>(n_time)
+<span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(n_time <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)) {
+  tn &lt;-<span class="st"> </span>n_time <span class="op">-</span><span class="st"> </span>i
+  chi[tn] &lt;-<span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>phi[tn]) <span class="op">+</span><span class="st"> </span>phi[tn] <span class="op">*</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>p[tn <span class="op">+</span><span class="st"> </span><span class="dv">1</span>]) <span class="op">*</span><span class="st"> </span>chi[tn <span class="op">+</span><span class="st"> </span><span class="dv">1</span>]
+}
+
+<span class="co"># dummy variables</span>
+alive_data &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">ones</a></span>(<span class="kw">length</span>(obs_id))            <span class="co"># definitely alive</span>
+not_seen_last &lt;-<span class="st"> </span>final_obs <span class="op">!=</span><span class="st"> </span><span class="dv">20</span>              <span class="co"># ignore observations in last timestep</span>
+final_observation &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">ones</a></span>(<span class="kw">sum</span>(not_seen_last)) <span class="co"># final observation</span>
+
+<span class="co"># set likelihoods</span>
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(alive_data) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(phi[obs_id <span class="op">-</span><span class="st"> </span><span class="dv">1</span>])
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(capture_vec) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(p[obs_id])
+<span class="kw"><a href="../reference/distribution.html">distribution</a></span>(final_observation) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">bernoulli</a></span>(chi[final_obs[not_seen_last]])</code></pre></div>
 </div>
 <div id="bugsjags-code-2" class="section level4">
 <h4 class="hasAnchor">

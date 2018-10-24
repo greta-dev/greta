@@ -51,6 +51,7 @@ navbar:
     home: ~
     reference: ~
     articles: ~
+    news: ~
     get_started:
       text: get started
       href: articles/get_started.html
