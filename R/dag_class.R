@@ -154,7 +154,7 @@ dag_class <- R6Class(
       if (type == "variable") {
 
         # tf$Variable seems to have trouble assigning values, if created with
-        # numeric (rather than logical) NAs ¯\_(ツ)_/¯
+        # numeric (rather than logical) NAs
         vals <- as.logical(vals)
         vals <- t(as.matrix(vals))
 
