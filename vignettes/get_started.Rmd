@@ -95,7 +95,7 @@ install.packages("igraph")
 install.packages("DiagrammeR")
 ```
 
-igraph can be difficult to install on some machines, due to dependencies on the [XML](https://cran.r-project.org/web/packages/XML/index.html) R package and libxml2 and gfortran software libraries. There are workarounds to these issues (e.g. [here](http://r.789695.n4.nabble.com/Problem-installing-libxml2-under-Homebrew-td4748381.html) and  [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-)) but if you can't get it to work, you can still use greta for everything except plotting models.
+igraph can be difficult to install on some machines, due to dependencies on the [XML](https://CRAN.R-project.org/package=XML) R package and libxml2 and gfortran software libraries. There are workarounds to these issues (e.g. [here](http://r.789695.n4.nabble.com/Problem-installing-libxml2-under-Homebrew-td4748381.html) and  [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-)) but if you can't get it to work, you can still use greta for everything except plotting models.
 
 <hr>
 

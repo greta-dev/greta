@@ -8,7 +8,6 @@
 ^\.Rproj\.user$
 logos
 docs
-man/figures/
 CODE_OF_CONDUCT.md
 .EDIT_WEBSITE.md
 LICENSE

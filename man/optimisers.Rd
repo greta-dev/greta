@@ -126,7 +126,7 @@ Functions to set up optimisers (which find parameters that
   tune them, see the
   \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy
    optimiser docs} or the
-  \href{https://www.tensorflow.org/api_guides/python/train#Optimizers}{TensorFlow
+  \href{https://www.tensorflow.org/api_docs/python/tf/contrib/opt}{TensorFlow
    optimiser docs}.
 }
 \details{
