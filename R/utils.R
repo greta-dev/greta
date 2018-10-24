@@ -112,7 +112,9 @@ check_tf_version <- function(alert = c("none",
     # conda-specific installation instructions, to handle conda not having TFP
     if (have_conda() & !have_virtualenv()) {
 
-      if (!tf_available) {
+      tf_install <- tfp_install <- ""
+
+      if (!tf_available | !tfp_available) {
         tf_install <- '    install_tensorflow(method = "conda")\n'
       }
 

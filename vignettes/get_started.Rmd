@@ -65,7 +65,7 @@ If you don't yet have these installed, the startup message for the greta package
 #### Anaconda installation
 
 If you installed Python with Anaconda, you can install tensorflow with: 
-```{r install_tensorflow_conda, eval = FALSE}
+```{r install_tf_conda, eval = FALSE}
 install_tensorflow(method = "conda")
 ```
 Anaconda doesn't have a binary for TensorFlow Probability, but you can install it with the following command:
