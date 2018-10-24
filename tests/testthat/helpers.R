@@ -482,9 +482,9 @@ rlkjcorr <- function (n, K, eta = 1) {
     if (K > 2) {
       for (m in 2:(K - 1)) {
         alpha <- alpha - 0.5
-        y <- rbeta(1, m/2, alpha)
+        y <- rbeta(1, m / 2, alpha)
         z <- rnorm(m, 0, 1)
-        z <- z/sqrt(crossprod(z)[1])
+        z <- z / sqrt(crossprod(z)[1])
         R[1:m, m + 1] <- sqrt(y) * z
         R[m + 1, m + 1] <- sqrt(1 - y)
       }

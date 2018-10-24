@@ -38,11 +38,12 @@ have_virtualenv <- function () {
   answer <- FALSE
 
   if (identical(.Platform$OS.type, "unix")) {
-
+    # Begin Exclude Linting
     locations <- file.path(c("/usr/bin",
                              "/usr/local/bin",
                              path.expand("~/.local/bin")),
                            "virtualenv")
+    # End Exclude Linting
 
     answer <- any(file.exists(locations))
 
@@ -119,7 +120,8 @@ check_tf_version <- function(alert = c("none",
       }
 
       if (!tfp_available) {
-        tfp_install <- '   reticulate::conda_install("r-tensorflow", "tensorflow-probability", pip = TRUE)\n'
+        tfp_install <- paste0('   reticulate::conda_install("r-tensorflow", ',
+                              '"tensorflow-probability", pip = TRUE)\n')
       }
 
       install <- paste(tf_install, tfp_install, collapse = "\n")
