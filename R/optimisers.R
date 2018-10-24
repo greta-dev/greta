@@ -144,7 +144,7 @@ tnc <- function(max_cg_it = -1, stepmx = 0, rescale = -1) {
 #' @param rhobeg reasonable initial changes to the variables
 #'
 #' @details The \code{cobyla()} does not provide information about the number of
-#'   iterations for convergence, so these values fo the output are set to NA
+#'   iterations nor convergence, so these elements of the output are set to NA
 #'
 cobyla <- function(rhobeg = 1) {
   define_scipy_optimiser("cobyla",

@@ -88,7 +88,7 @@ You can also use `install_tensorflow()` to install different versions of TensorF
 
 ### DiagrammeR
 
-greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](http://igraph.org/r/) package, which contains a large amount of code tthat needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](http://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
 
 ```{r install_diagrammer, eval = FALSE}
 install.packages("igraph")
@@ -229,7 +229,7 @@ coef <- normal(0, 3)
 sd <- student(3, 0, 1, truncation = c(0, Inf))
 ```
 
-Each of these is a variable greta array, and each is assumed *a priori* (before fitting to data) to follow a different probability distribution. In other words, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with proability distributions, it will be clearer to first demonstrate the alternative; variables without probabiltiy distributions.
+Each of these is a variable greta array, and each is assumed *a priori* (before fitting to data) to follow a different probability distribution. In other words, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with probability distributions, it will be clearer to first demonstrate the alternative; variables without probabiltiy distributions.
 
 #### variables without probability distributions
 
@@ -256,11 +256,11 @@ variable(lower = 0, dim = c(2, 3))
 
 In our example script, when we created the variables `int`, `coef` and `sd`, we simultaneously stated the prior distributions for them using some of greta's probability distribution functions. You can see a list of the currently available distributions in the [`?greta::distributions`](https://greta-dev.github.io/greta/distributions.html) helpfile. Each of these distribution functions takes as arguments the distribution's parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions arguments at their default value to create scalar greta arrays.
 
-Both `int` and `coef` were given zero-mean normal distributions, which are a common choice of prior for unconstrained variables in Bayesian analyses. For the strictly positive parameter `sd`, we chose a slightly unconvential option, a positive-truncated (non-standard) student's t distribution, which we create using greta's built-in support for truncated distributions.
+Both `int` and `coef` were given zero-mean normal distributions, which are a common choice of prior for unconstrained variables in Bayesian analyses. For the strictly positive parameter `sd`, we chose a slightly unconventional option, a positive-truncated (non-standard) student's t distribution, which we create using greta's built-in support for truncated distributions.
 
 #### variables with truncated distributions
 
-Some of greta's probability distributions (those that are continous and univariate) can be specified as truncated distributions. By modifying the `truncation` argument, we can state that the resulting distribution should be truncated between the two truncation bounds. So to create a standard normal distribution truncated between -1 and 1 we can do:
+Some of greta's probability distributions (those that are continuous and univariate) can be specified as truncated distributions. By modifying the `truncation` argument, we can state that the resulting distribution should be truncated between the two truncation bounds. So to create a standard normal distribution truncated between -1 and 1 we can do:
 
 ```{r truncated1}
 (z <- normal(0, 1, truncation = c(-1, 1)))
@@ -284,7 +284,7 @@ dim(mean)
 head(mean)
 ```
 
-greta arrays can be manipulated using R's standard arithmetic, logical and relational operators; including `+`, `*` and many others. The [`?greta::operators`](https://greta-dev.github.io/greta/operators.html) helpfile lists the operators that are implemeneted for greta arrays. You can also use a lot of common R functions for numeric data, such as `sum()`, `log()` and others. the available functions are listed in the [`?greta::functions`](https://greta-dev.github.io/greta/functions.html) helpfile. All of these mathematical manipulations of greta arrays produce 'operation' greta arrays.
+greta arrays can be manipulated using R's standard arithmetic, logical and relational operators; including `+`, `*` and many others. The [`?greta::operators`](https://greta-dev.github.io/greta/operators.html) help file lists the operators that are implemented for greta arrays. You can also use a lot of common R functions for numeric data, such as `sum()`, `log()` and others. the available functions are listed in the [`?greta::functions`](https://greta-dev.github.io/greta/functions.html) helpfile. All of these mathematical manipulations of greta arrays produce 'operation' greta arrays.
 
 #### Extract and replace
 
@@ -430,7 +430,7 @@ If your model is taking a long time whilst in the sampling phase and you want to
 
 #### Tweaking the sampler
 
-greta's default sampler is (static) Hamiltonian Monte Carlo. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about proposals being rejected, the first thing to try is increasing the length of the warmup period from its default of 1000 interations (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manually set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
+greta's default sampler is (static) Hamiltonian Monte Carlo. The sampler will automatically tune itself during the warmup phase, to make it as efficient as possible. If the chain looks like it's moving too slowly, or if you are getting a lot of messages about proposals being rejected, the first thing to try is increasing the length of the warmup period from its default of 1000 iterations (via the `warmup` argument). If you're still getting a lot of rejected samples, it's often a good idea to manually set the initial values for the sampler (via the `initial_values` argument). This is often the case when you have lots of data; the more information there is, the more extreme the log probability, and the higher the risk of numerical problems.
 
 A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `model()`. Future versions of greta will implement a wider range of MCMC samplers, including some for discrete variables.
 

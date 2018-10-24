@@ -131,7 +131,7 @@ Functions to set up optimisers (which find parameters that
 }
 \details{
 The \code{cobyla()} does not provide information about the number of
-  iterations for convergence, so these values fo the output are set to NA
+  iterations nor convergence, so these elements of the output are set to NA
 }
 \examples{
 \dontrun{

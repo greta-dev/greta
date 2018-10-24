@@ -73,7 +73,7 @@ and parameters See \code{\link{optimisers}}.}
 stops when the (absolute) difference in the joint density between
 successive iterations drops below this level}
 
-\item{adjust}{whether to account for log jacobian adjustments in the joint
+\item{adjust}{whether to account for Jacobian adjustments in the joint
 density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
 estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.}
 
@@ -124,7 +124,7 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   fixed values of model parameters, and checking the results are what you
   expect.
 
-  greta runs multiple chains simultaneously with a singler sampler,
+  greta runs multiple chains simultaneously with a single sampler,
   vectorising all operations across the chains. E.g. a scalar addition in
   your model is computed as an elementwise vector addition (with vectors
   having length \code{chains}), a vector addition is computed as a matrix
@@ -136,7 +136,7 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   chains) can also be run in parallel by setting the execution plan with the
   \code{future} package. Only \code{plan(multisession)} futures or
   \code{plan(cluster)} futures that don't use fork clusters are allowed,
-  since forked processes conflict with tensorflow's parallelism. Explicitly
+  since forked processes conflict with TensorFlow's parallelism. Explicitly
   parallelising chains on a local machine with \code{plan(multisession)} will
   probably be slower than running multiple chains simultaneously in a single
   sampler (with \code{plan(sequential)}, the default) because of the overhead

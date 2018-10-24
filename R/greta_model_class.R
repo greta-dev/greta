@@ -25,13 +25,13 @@ NULL
 #'
 #' @param compile whether to apply
 #'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
-#'   the tensorflow graph representing the model. This may slow down model
+#'   the TensorFlow graph representing the model. This may slow down model
 #'   definition, and speed up model evaluation.
 #'
 #' @details \code{model()} takes greta arrays as arguments, and defines a
 #'   statistical model by finding all of the other greta arrays on which they
 #'   depend, or which depend on them. Further arguments to \code{model} can be
-#'   used to configure the tensorflow graph representing the model, to tweak
+#'   used to configure the TensorFlow graph representing the model, to tweak
 #'   performance.
 #'
 #' @return \code{model} - a \code{greta_model} object.
