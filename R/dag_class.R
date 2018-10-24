@@ -66,7 +66,7 @@ dag_class <- R6Class(
       with(self$tf_graph$as_default(), expr)
     },
 
-    # execute an exporession in the tensorflow environment
+    # execute an expression in the tensorflow environment
     tf_run = function(expr, as_text = FALSE) {
 
       tfe <- self$tf_environment

@@ -5,7 +5,7 @@
 as.greta_array <- function(x, optional = FALSE, original_x = x, ...)
   UseMethod("as.greta_array", x)
 
-# safely handle self-coersion
+# safely handle self-coercion
 #' @export
 as.greta_array.greta_array <- function(x, optional = FALSE, original_x = x, ...)
   x
