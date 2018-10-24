@@ -56,6 +56,6 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
   options(tensorflow.extract.warn_tensors_passed_asis = FALSE)
 
   # default float type
-  options(greta_tf_float = "float32")
+  options(greta_tf_float = "float64")
 
 }
