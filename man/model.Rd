@@ -67,7 +67,7 @@ The plot method produces a visual representation of the defined
 
 # define a simple model
 mu <- variable()
-sigma <- lognormal(1, 0.1)
+sigma <- normal(0, 3, truncation = c(0, Inf))
 x <- rnorm(10)
 distribution(x) <- normal(mu, sigma)
 
