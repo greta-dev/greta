@@ -19,9 +19,6 @@
 #'
 #' @docType package
 #' @importFrom tensorflow tf
-#' @importFrom reticulate py_module_available
-#' @importFrom R6 R6Class
-#' @importFrom grDevices colorRampPalette
 #' @examples
 #' \dontrun{
 #' # a simple Bayesian regression model for the iris data

@@ -1,5 +1,6 @@
 #' @importFrom reticulate py_set_attr
 #' @importFrom tensorflow dict
+#' @importFrom R6 R6Class
 
 # create dag class
 dag_class <- R6Class(
