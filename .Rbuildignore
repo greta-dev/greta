@@ -6,13 +6,15 @@
 ^docs$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-logos
-docs
 
 CODE_OF_CONDUCT.md
 .EDIT_WEBSITE.md
 LICENSE
 cran-comments.md
+
+logos
+docs
+inst/pkgdown
 
 index.Rmd
 index_files
@@ -28,3 +30,5 @@ vignettes/get_started_cache
 vignettes/example_models_cache
 vignettes/webpages
 vignettes/analyses
+
+man/figures/vis-1.png
