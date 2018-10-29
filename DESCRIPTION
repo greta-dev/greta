@@ -11,7 +11,7 @@ Authors@R: c(
   person("Adam", "Fleischhacker", role = "ctb"),
   person("Shirin", "Glander", role = "ctb"),
   person("Martin", "Ingram", role = "ctb"),
-  person("Lee", "Martin", role = "ctb"),
+  person("Lee", "Hazel", role = "ctb"),
   person("Tiphaine", "Martin", role = "ctb"),
   person("Matt", "Mulvahill", role = "ctb"),
   person("Michael", "Quinn", role = "ctb"),
