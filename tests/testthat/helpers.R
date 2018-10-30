@@ -3,8 +3,9 @@
 library(tensorflow)
 
 # set the seed and flush the graph before running tests
-tf <- tensorflow::tf
-tf$reset_default_graph()
+if (greta:::check_tf_version())
+  tf$reset_default_graph()
+
 set.seed(2018 - 05 - 30)
 
 expect_ok <- function(expr)
