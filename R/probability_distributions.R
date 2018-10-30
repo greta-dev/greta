@@ -499,7 +499,7 @@ weibull_distribution <- R6Class(
       }
 
       cdf <- function(x) {
-        fl(1) - exp(-1 * (x / b) ^ a)
+        fl(1) - exp(fl(-1) * (x / b) ^ a)
       }
 
       log_cdf <- function(x) {
@@ -561,10 +561,10 @@ pareto_distribution <- R6Class(
       b <- parameters$b
 
       log_prob <- function(x)
-        log(a) + a * log(b) - (a + 1) * log(x)
+        log(a) + a * log(b) - (a + fl(1)) * log(x)
 
       cdf <- function(x)
-        1 - (b / x) ^ a
+        fl(1) - (b / x) ^ a
 
       log_cdf <- function(x)
         log(cdf(x))
