@@ -33,8 +33,13 @@ These structures can be used to set up more complex models. For
 }
 \details{
 \code{greta_array} is a convenience function to create an R array
-  with \code{\link{array}} and then coerce it to a greta array. I.e. it is
-  equivalent to \code{as_data(array(data, dim))}.
+  with \code{\link{array}} and then coerce it to a greta array. I.e. when
+  passed something that can be coerced to a numeric array, it is equivalent
+  to \code{as_data(array(data, dim))}.
+
+  If \code{data} is a greta array and
+  dim is different than \code{dim(data)}, a reshaped greta array is returned.
+  This is equivalent to: \code{dim(data) <- dim}.
 }
 \examples{
 \dontrun{

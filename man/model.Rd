@@ -2,17 +2,15 @@
 % Please edit documentation in R/greta_model_class.R
 \name{model}
 \alias{model}
-\alias{model}
 \alias{print.greta_model}
 \alias{plot.greta_model}
 \title{greta model objects}
 \usage{
-model(..., precision = c("single", "double"), n_cores = NULL,
-  compile = TRUE)
+model(..., precision = c("double", "single"), compile = TRUE)
 
 \method{print}{greta_model}(x, ...)
 
-\method{plot}{greta_model}(x, y, ...)
+\method{plot}{greta_model}(x, y, colour = "#996bc7", ...)
 }
 \arguments{
 \item{\dots}{for \code{model}: \code{greta_array} objects to be tracked by
@@ -23,27 +21,29 @@ calling environment will be tracked. For \code{print} and
 ignored).}
 
 \item{precision}{the floating point precision to use when evaluating this
-model. Switching from \code{'single'} (the default) to \code{'double'}
-should reduce the risk of numerical instability during sampling, but will
-also increase the computation time, particularly for large models.}
-
-\item{n_cores}{the number of cpu cores to use when evaluating this model.
-Defaults to and cannot exceed the number detected by
-\code{parallel::detectCores}.}
+model. Switching from \code{"double"} (the default) to \code{"single"} may
+decrease the computation time but increase the risk of numerical
+instability during sampling.}
 
 \item{compile}{whether to apply
 \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
-the tensorflow graph representing the model. This may slow down model
+the TensorFlow graph representing the model. This may slow down model
 definition, and speed up model evaluation.}
 
 \item{x}{a \code{greta_model} object}
 
 \item{y}{unused default argument}
+
+\item{colour}{base colour used for plotting. Defaults to \code{greta} colours
+in violet.}
 }
 \value{
 \code{model} - a \code{greta_model} object.
 
-\code{plot} - a \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object (invisibly).
+\code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}}
+  object, with the
+  \code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph}} object used to
+  create it as an attribute \code{"dgr_graph"}.
 }
 \description{
 Create a \code{greta_model} object representing a statistical
@@ -54,8 +54,9 @@ Create a \code{greta_model} object representing a statistical
 \details{
 \code{model()} takes greta arrays as arguments, and defines a
   statistical model by finding all of the other greta arrays on which they
-  depend, or which depend on them. Further arguments to \code{model} can be used to configure the tensorflow
-  graph representing the model, to tweak performance.
+  depend, or which depend on them. Further arguments to \code{model} can be
+  used to configure the TensorFlow graph representing the model, to tweak
+  performance.
 
 The plot method produces a visual representation of the defined
   model. It uses the \code{DiagrammeR} package, which must be installed
@@ -68,7 +69,7 @@ The plot method produces a visual representation of the defined
 
 # define a simple model
 mu <- variable()
-sigma <- lognormal(1, 0.1)
+sigma <- normal(0, 3, truncation = c(0, Inf))
 x <- rnorm(10)
 distribution(x) <- normal(mu, sigma)
 

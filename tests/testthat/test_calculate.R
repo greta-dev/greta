@@ -1,9 +1,9 @@
-context('calculate')
+context("calculate")
 
-test_that('calculate works with correct lists', {
+test_that("calculate works with correct lists", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   # unknown variable
   x <- as_data(c(1, 2))
@@ -21,10 +21,10 @@ test_that('calculate works with correct lists', {
 
 })
 
-test_that('calculate works with mcmc.list objects', {
+test_that("calculate works with mcmc.list objects", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   samples <- 10
   x <- as_data(c(1, 2))
@@ -53,10 +53,10 @@ test_that('calculate works with mcmc.list objects', {
 
 })
 
-test_that('calculate errors nicely if mcmc.list objects aren missing crucial info', {
+test_that("calculate errors nicely if mcmc.list objects missing info", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   samples <- 10
   x <- as_data(c(1, 2))
@@ -70,14 +70,14 @@ test_that('calculate errors nicely if mcmc.list objects aren missing crucial inf
 
   # it should error nicely
   expect_error(calculate(y, draws),
-               "perhaps it wasn't created with greta")
+               "perhaps it wasn't created by greta")
 
 })
 
-test_that('calculate errors nicely if not all required values are passed', {
+test_that("calculate errors nicely if not all required values are passed", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
@@ -85,14 +85,16 @@ test_that('calculate errors nicely if not all required values are passed', {
 
   # it should error nicely
   expect_error(calculate(y, list(x = c(2, 1))),
-               "values have not been provided for all variables")
+               paste("values have not been provided for all greta arrays on",
+                     "which the target depends. Please provide values for the",
+                     "greta array: a"))
 
 })
 
-test_that('calculate errors nicely if required values have incorrect dimensions', {
+test_that("calculate errors nicely if values have incorrect dimensions", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
@@ -104,10 +106,10 @@ test_that('calculate errors nicely if required values have incorrect dimensions'
 
 })
 
-test_that('calculate errors nicely if not used on a greta array', {
+test_that("calculate errors nicely if not used on a greta array", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   x <- as_data(c(1, 2))
   a <- normal(0, 1)

@@ -1,0 +1,44 @@
+---
+title: "why 'greta'?"
+output:
+  html_document:
+    css: greta.css
+    toc: no
+    theme: lumen
+---
+
+<style type="text/css">
+body{
+  font-size: 18px;
+}
+.column-left{
+  float: left;
+  width: 70%;
+  text-align: left;
+}
+.column-right{
+  float: right;
+  width: 30%;
+  padding-left: 40px;
+  text-align: right;
+}
+</style>
+
+<div class="column-left">
+
+There's a recent convention of naming statistical modelling software after pioneers in the field (e.g. [Stan](https://en.wikipedia.org/wiki/Stanislaw_Ulam) and [Edward](https://en.wikipedia.org/wiki/George_E._P._Box)).
+
+[Grete Hermann](https://en.wikipedia.org/wiki/Grete_Hermann) wasn't a statistician. She wrote [the first algorithms](http://dl.acm.org/citation.cfm?id=307342&coll=portal&dl=ACM) for computer algebra; in the 1920s, well before the first electronic computer was built. This work laid the foundations for the computer algebra libraries that enable modern statistical modelling.
+
+In case that's not enough reason to admire her, Grete Hermann also [disproved a popular theorem in quantum theory](https://arxiv.org/pdf/0812.3986.pdf) and was part of the German resistance against the Nazi regime prior to World War Two.
+
+<hr>
+
+Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be confusing for non-German speakers to pronounce, so I've taken the liberty of naming the package greta instead. You can call it whatever you like.
+
+</div>
+<div class="column-right">
+```{r image, out.width = "280px", echo = FALSE}
+knitr::include_graphics("https://consulting.qa.com/media/uploads/Grete-Hermann.jpg")
+```
+</div>

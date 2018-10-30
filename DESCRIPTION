@@ -1,16 +1,31 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.2.5
-Date: 2018-06-18
-Authors@R: person("Nick", "Golding", role = c("aut", "cre"),
-    email = "nick.golding.research@gmail.com")
+Version: 0.3.0
+Date: 2018-10-30
+Authors@R: c(
+  person("Nick", "Golding", role = c("aut", "cre"),
+         email = "nick.golding.research@gmail.com",
+         comment = c(ORCID = "0000-0001-8916-5570")),
+  person("Simon", "Dirmeier", role = "ctb"),
+  person("Adam", "Fleischhacker", role = "ctb"),
+  person("Shirin", "Glander", role = "ctb"),
+  person("Martin", "Ingram", role = "ctb"),
+  person("Lee", "Hazel", role = "ctb"),
+  person("Tiphaine", "Martin", role = "ctb"),
+  person("Matt", "Mulvahill", role = "ctb"),
+  person("Michael", "Quinn", role = "ctb"),
+  person("David", "Smith", role = "ctb"),
+  person("Paul", "Teetor", role = "ctb"),
+  person("Jian", "Yen", role = "ctb")
+  )
 Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://greta-dev.github.io/greta> for more information).
 License: Apache License 2.0
 URL: https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
-    TensorFlow (>= 1.0.0; https://www.tensorflow.org/)
+    TensorFlow (>= 1.10; https://www.tensorflow.org/);
+    Tensorflow Probability (>=0.3.0; https://www.tensorflow.org/probability/)
 Encoding: UTF-8
 LazyData: true
 Depends:
@@ -24,6 +39,8 @@ Collate:
     'node_types.R'
     'variable.R'
     'probability_distributions.R'
+    'mixture.R'
+    'joint.R'
     'unknowns_class.R'
     'greta_array_class.R'
     'as_data.R'
@@ -36,17 +53,22 @@ Collate:
     'dag_class.R'
     'greta_model_class.R'
     'progress_bar.R'
+    'inference_class.R'
     'samplers.R'
+    'optimisers.R'
     'inference.R'
     'install_tensorflow.R'
     'internals.R'
     'calculate.R'
+    'callbacks.R'
 Imports:
     R6,
     tensorflow,
     reticulate,
-    progress,
-    coda
+    progress (>= 1.2.0),
+    future,
+    coda,
+    methods
 Suggests:
     knitr,
     rmarkdown,
@@ -58,6 +80,10 @@ Suggests:
     MCMCpack,
     rmutil,
     extraDistr,
-    truncdist
+    truncdist,
+    tidyverse,
+    fields,
+    MASS,
+    abind
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

@@ -18,9 +18,7 @@
 #'   \href{https://greta-dev.github.io/greta/example_models.html}{examples}.
 #'
 #' @docType package
-#' @import tensorflow
-#' @import R6
-#' @importFrom grDevices colorRampPalette
+#' @importFrom tensorflow tf
 #' @examples
 #' \dontrun{
 #' # a simple Bayesian regression model for the iris data
@@ -40,22 +38,24 @@
 #' }
 NULL
 
+# load tf probability
+tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
+
 # crate the node list object whenever the package is loaded
-.onLoad <- function (libname, pkgname) {
+.onLoad <- function(libname, pkgname) {
 
   # silence TF's CPU instructions message
-  Sys.setenv(TF_CPP_MIN_LOG_LEVEL=2)
+  Sys.setenv(TF_CPP_MIN_LOG_LEVEL = 2)
 
   # warn if TF version is bad
-  check_tf_version('startup')
+  check_tf_version("startup")
 
-  # switch back to 0-based extraction in tensorflow
+  # switch back to 0-based extraction in tensorflow, and don't warn about
+  # indexing with tensors
   options(tensorflow.one_based_extract = FALSE)
+  options(tensorflow.extract.warn_tensors_passed_asis = FALSE)
 
   # default float type
-  if (reticulate::py_module_available('tensorflow'))
-    options(greta_tf_float = tf$float32)
+  options(greta_tf_float = "float64")
 
 }
-
-

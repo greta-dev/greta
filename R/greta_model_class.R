@@ -10,7 +10,6 @@ NULL
 
 #' @rdname model
 #' @export
-#' @importFrom parallel detectCores
 #'
 #' @param \dots for \code{model}: \code{greta_array} objects to be tracked by
 #'   the model (i.e. those for which samples will be retained during mcmc). If
@@ -20,23 +19,20 @@ NULL
 #'   ignored).
 #'
 #' @param precision the floating point precision to use when evaluating this
-#'   model. Switching from \code{'single'} (the default) to \code{'double'}
-#'   should reduce the risk of numerical instability during sampling, but will
-#'   also increase the computation time, particularly for large models.
-#'
-#' @param n_cores the number of cpu cores to use when evaluating this model.
-#'   Defaults to and cannot exceed the number detected by
-#'   \code{parallel::detectCores}.
+#'   model. Switching from \code{"double"} (the default) to \code{"single"} may
+#'   decrease the computation time but increase the risk of numerical
+#'   instability during sampling.
 #'
 #' @param compile whether to apply
 #'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
-#'   the tensorflow graph representing the model. This may slow down model
+#'   the TensorFlow graph representing the model. This may slow down model
 #'   definition, and speed up model evaluation.
 #'
 #' @details \code{model()} takes greta arrays as arguments, and defines a
 #'   statistical model by finding all of the other greta arrays on which they
-#'   depend, or which depend on them. Further arguments to \code{model} can be used to configure the tensorflow
-#'   graph representing the model, to tweak performance.
+#'   depend, or which depend on them. Further arguments to \code{model} can be
+#'   used to configure the TensorFlow graph representing the model, to tweak
+#'   performance.
 #'
 #' @return \code{model} - a \code{greta_model} object.
 #'
@@ -45,7 +41,7 @@ NULL
 #'
 #' # define a simple model
 #' mu <- variable()
-#' sigma <- lognormal(1, 0.1)
+#' sigma <- normal(0, 3, truncation = c(0, Inf))
 #' x <- rnorm(10)
 #' distribution(x) <- normal(mu, sigma)
 #'
@@ -53,33 +49,16 @@ NULL
 #'
 #' plot(m)
 #' }
-model <- function (...,
-                   precision = c('single', 'double'),
-                   n_cores = NULL,
-                   compile = TRUE) {
+model <- function(...,
+                  precision = c("double", "single"),
+                  compile = TRUE) {
 
-  check_tf_version('error')
+  check_tf_version("error")
 
   # get the floating point precision
   tf_float <- switch(match.arg(precision),
-                     single = tf$float32,
-                     double = tf$float64)
-
-  # check and set the number of cores
-  n_detected <- parallel::detectCores()
-  if (is.null(n_cores)) {
-    n_cores <- n_detected
-  } else {
-
-    n_cores <- as.integer(n_cores)
-
-    if (!n_cores %in% seq_len(n_detected)) {
-      warning (n_cores, ' cores were requested, but only ',
-               n_detected, ' cores are available. Using ',
-               n_detected, ' cores.')
-      n_cores <- n_detected
-    }
-  }
+                     double = "float64",
+                     single = "float32")
 
   # nodes required
   target_greta_arrays <- list(...)
@@ -94,7 +73,7 @@ model <- function (...,
 
     # otherwise, find variable names for the provided nodes
     names <- substitute(list(...))[-1]
-    names <- vapply(names, deparse, '')
+    names <- vapply(names, deparse, "")
     names(target_greta_arrays) <- names
 
   }
@@ -109,26 +88,25 @@ model <- function (...,
     unexpected_items <- names(target_greta_arrays)[!are_greta_arrays]
 
     msg <- ifelse(length(unexpected_items) > 1,
-                  "The following objects passed to model() are not greta arrays: ",
-                  "The following object passed to model() is not a greta array: ")
+                  paste("The following objects passed to model()",
+                        "are not greta arrays: "),
+                  paste("The following object passed to model()",
+                        "is not a greta array: "))
 
-    stop (msg,
-          paste(unexpected_items, sep = ", "),
-          call. = FALSE)
+    stop(msg,
+         paste(unexpected_items, sep = ", "),
+         call. = FALSE)
 
   }
 
-
-
   if (length(target_greta_arrays) == 0) {
-    stop ('could not find any non-data greta arrays',
-          call. = FALSE)
+    stop("could not find any non-data greta arrays",
+         call. = FALSE)
   }
 
   # get the dag containing the target nodes
   dag <- dag_class$new(target_greta_arrays,
                        tf_float = tf_float,
-                       n_cores = n_cores,
                        compile = compile)
 
   # get and check the types
@@ -145,21 +123,21 @@ model <- function (...,
 
   # separate messages to avoid the subgraphs issue for beginners
   if (n_graphs == 1) {
-    density_message <- paste('none of the greta arrays in the model are',
-                             'associated with a probability density, so a',
-                             'model cannot be defined')
-    variable_message <- paste('none of the greta arrays in the model are',
-                              'unknown, so a model cannot be defined')
+    density_message <- paste("none of the greta arrays in the model are",
+                             "associated with a probability density, so a",
+                             "model cannot be defined")
+    variable_message <- paste("none of the greta arrays in the model are",
+                              "unknown, so a model cannot be defined")
   } else {
-    density_message <- paste('the model contains', n_graphs, 'disjoint graphs,',
-                             'one or more of these sub-graphs does not contain',
-                             'any greta arrays that are associated with a',
-                             'probability density, so a model cannot be',
-                             'defined')
-    variable_message <- paste('the model contains', n_graphs, 'disjoint',
-                              'graphs, one or more of these sub-graphs does',
-                              'not contain any greta arrays that are unknown,',
-                              'so a model cannot be defined')
+    density_message <- paste("the model contains", n_graphs, "disjoint graphs,",
+                             "one or more of these sub-graphs does not contain",
+                             "any greta arrays that are associated with a",
+                             "probability density, so a model cannot be",
+                             "defined")
+    variable_message <- paste("the model contains", n_graphs, "disjoint",
+                              "graphs, one or more of these sub-graphs does",
+                              "not contain any greta arrays that are unknown,",
+                              "so a model cannot be defined")
   }
 
   for (graph in graphs) {
@@ -167,13 +145,29 @@ model <- function (...,
     types_sub <- types[graph_id == graph]
 
     # check they have a density among them
-    if (!('distribution' %in% types_sub))
-      stop (density_message, call. = FALSE)
+    if (!("distribution" %in% types_sub))
+      stop(density_message, call. = FALSE)
 
     # check they have a variable node among them
-    if (!('variable' %in% types_sub))
-      stop (variable_message, call. = FALSE)
+    if (!("variable" %in% types_sub))
+      stop(variable_message, call. = FALSE)
 
+  }
+
+  # check for unfixed discrete distributions
+  distributions <- dag$node_list[dag$node_types == "distribution"]
+  bad_nodes <- vapply(distributions,
+                      function(x) {
+                        valid_target <- is.null(x$target) ||
+                          inherits(x$target, "data_node")
+                        x$discrete && !valid_target
+                      },
+                      FALSE)
+
+  if (any(bad_nodes)) {
+    stop("model contains a discrete random variable that doesn't have a ",
+         "fixed value, so cannot be sampled from",
+         call. = FALSE)
   }
 
   # define the TF graph
@@ -190,23 +184,25 @@ model <- function (...,
 
 # register generic method to coerce objects to a greta model
 as.greta_model <- function(x, ...)
-  UseMethod('as.greta_model', x)
+  UseMethod("as.greta_model", x)
 
-as.greta_model.dag_class <- function (x, ...) {
+as.greta_model.dag_class <- function(x, ...) {
   ans <- list(dag = x)
-  class(ans) <- 'greta_model'
+  class(ans) <- "greta_model"
   ans
 }
 
 #' @rdname model
 #' @param x a \code{greta_model} object
 #' @export
-print.greta_model <- function (x, ...) {
-  cat('greta model')
+print.greta_model <- function(x, ...) {
+  cat("greta model")
 }
 
 #' @rdname model
 #' @param y unused default argument
+#' @param colour base colour used for plotting. Defaults to \code{greta} colours
+#'   in violet.
 #'
 #' @details The plot method produces a visual representation of the defined
 #'   model. It uses the \code{DiagrammeR} package, which must be installed
@@ -214,83 +210,100 @@ print.greta_model <- function (x, ...) {
 #'   \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
 #'   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 #'
-#' @return \code{plot} - a \code{\link[DiagrammeR:create_graph]{DiagrammeR::gdr_graph}} object (invisibly).
+#' @return \code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}}
+#'   object, with the
+#'   \code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph}} object used to
+#'   create it as an attribute \code{"dgr_graph"}.
 #'
 #' @export
-plot.greta_model <- function (x, y, ...) {
+plot.greta_model <- function(x,
+                             y,
+                             colour = "#996bc7",
+                             ...) {
 
-  if (!requireNamespace('DiagrammeR', quietly = TRUE))
-    stop ('the DiagrammeR package must be installed to plot greta models',
-          call. = FALSE)
+  if (!requireNamespace("DiagrammeR", quietly = TRUE)) {
+    stop("the DiagrammeR package must be installed to plot greta models",
+         call. = FALSE)
+  }
 
   # set up graph
-  dag_mat <- x$dag$adjacency_matrix()
+  dag_mat <- x$dag$adjacency_matrix
 
   gr <- DiagrammeR::from_adj_matrix(dag_mat,
-                                    mode = 'directed',
+                                    mode = "directed",
                                     use_diag = FALSE)
 
   n_nodes <- nrow(gr$nodes_df)
-  n_edges <- nrow(gr$edges_df)
 
   names <- names(x$dag$node_list)
   types <- x$dag$node_types
   to <- gr$edges_df$to
   from <- gr$edges_df$from
 
-  node_shapes <- rep('square', n_nodes)
-  node_shapes[types == 'variable'] <- 'circle'
-  node_shapes[types == 'distribution'] <- 'diamond'
-  node_shapes[types == 'operation'] <- 'circle'
+  node_shapes <- rep("square", n_nodes)
+  node_shapes[types == "variable"] <- "circle"
+  node_shapes[types == "distribution"] <- "diamond"
+  node_shapes[types == "operation"] <- "circle"
 
-  node_edge_colours <- rep(greta_col('lighter'), n_nodes)
-  node_edge_colours[types == 'distribution'] <- greta_col('light')
-  node_edge_colours[types == 'operation'] <- 'lightgray'
+  node_edge_colours <- rep(greta_col("lighter", colour), n_nodes)
+  node_edge_colours[types == "distribution"] <- greta_col("light", colour)
+  node_edge_colours[types == "operation"] <- "lightgray"
 
-  node_colours <- rep(greta_col('super_light'), n_nodes)
-  node_colours[types == 'distribution'] <- greta_col('lighter')
-  node_colours[types == 'operation'] <- 'lightgray'
-  node_colours[types == 'data'] <- 'white'
+  node_colours <- rep(greta_col("super_light", colour), n_nodes)
+  node_colours[types == "distribution"] <- greta_col("lighter", colour)
+  node_colours[types == "operation"] <- "lightgray"
+  node_colours[types == "data"] <- "white"
 
   node_size <- rep(1, length(types))
-  node_size[types == 'variable'] <- 0.6
-  node_size[types == 'data'] <- 0.5
-  node_size[types == 'operation'] <- 0.2
+  node_size[types == "variable"] <- 0.6
+  node_size[types == "data"] <- 0.5
+  node_size[types == "operation"] <- 0.2
 
   # get node labels
-  node_labels <- vapply(x$dag$node_list, member, 'plotting_label()', FUN.VALUE = '')
+  node_labels <- vapply(x$dag$node_list,
+                        member,
+                        "plotting_label()",
+                        FUN.VALUE = "")
 
-  #add greta array names where available
-  known_nodes <- vapply(x$visible_greta_arrays, member,
-                        'node$unique_name', FUN.VALUE = '')
+  # add greta array names where available
+  visible_nodes <- lapply(x$visible_greta_arrays, get_node)
+  known_nodes <- vapply(visible_nodes,
+                        member,
+                        "unique_name",
+                        FUN.VALUE = "")
   known_nodes <- known_nodes[known_nodes %in% names]
   known_idx <- match(known_nodes, names)
   node_labels[known_idx] <- paste(names(known_nodes),
                                   node_labels[known_idx],
-                                  sep = '\n')
+                                  sep = "\n")
 
   # for the operation nodes, add the operation to the edges
-  op_idx <- which(types == 'operation')
+  op_idx <- which(types == "operation")
   op_names <- vapply(x$dag$node_list[op_idx],
                      member,
-                     'operation_name',
-                     FUN.VALUE = '')
-  op_names <- gsub('`', '', op_names)
+                     "operation_name",
+                     FUN.VALUE = "")
+  op_names <- gsub("`", "", op_names)
 
-  ops <- rep('', length(types))
+  ops <- rep("", length(types))
   ops[op_idx] <- op_names
 
   # get ops as tf operations
   edge_labels <- ops[to]
 
   # for distributions, put the parameter names on the edges
-  distrib_to <- which(types == 'distribution')
+  distrib_to <- which(types == "distribution")
 
-  parameter_list <- lapply(x$dag$node_list[distrib_to], member, 'parameters')
-  # parameter_names <- lapply(parameter_list, names)
+  parameter_list <- lapply(x$dag$node_list[distrib_to],
+                           member,
+                           "parameters")
+
   node_names <- lapply(parameter_list,
-                       function (parameters) {
-                         vapply(parameters, member, 'unique_name', FUN.VALUE = '')
+                       function(parameters) {
+                         vapply(parameters,
+                                member,
+                                "unique_name",
+                                FUN.VALUE = "")
                        })
 
   # for each distribution
@@ -308,15 +321,27 @@ plot.greta_model <- function (x, y, ...) {
 
   }
 
-  edge_style <- rep('solid', length(to))
+  edge_style <- rep("solid", length(to))
 
   # put dashed line between target and distribution
   # for distributions, put the parameter names on the edges
   names <- names(x$dag$node_list)
   types <- x$dag$node_types
-  distrib_idx <- which(types == 'distribution')
+  distrib_idx <- which(types == "distribution")
 
-  target_names <- vapply(x$dag$node_list[distrib_idx], member, 'target$unique_name', FUN.VALUE = '')
+  # find those with targets
+  targets <- lapply(x$dag$node_list[distrib_idx],
+                    member,
+                    "target")
+
+  keep <- !vapply(targets, is.null, TRUE)
+  distrib_idx <- distrib_idx[keep]
+
+
+  target_names <- vapply(x$dag$node_list[distrib_idx],
+                         member,
+                         "target$unique_name",
+                         FUN.VALUE = "")
   distribution_names <- names(target_names)
   distribution_idx <- match(distribution_names, names)
   target_idx <- match(target_names, names)
@@ -325,13 +350,13 @@ plot.greta_model <- function (x, y, ...) {
   for (i in seq_along(distribution_idx)) {
 
     idx <- which(to == target_idx[i] & from == distribution_idx[i])
-    edge_style[idx] <- 'dashed'
+    edge_style[idx] <- "dashed"
 
   }
 
   # node options
-  gr$nodes_df$type <- 'lower'
-  gr$nodes_df$fontcolor <- greta_col('dark')
+  gr$nodes_df$type <- "lower"
+  gr$nodes_df$fontcolor <- greta_col("dark", colour)
   gr$nodes_df$fontsize <- 12
   gr$nodes_df$penwidth <- 2
 
@@ -343,9 +368,9 @@ plot.greta_model <- function (x, y, ...) {
   gr$nodes_df$label <- node_labels
 
   # edge options
-  gr$edges_df$color <- 'Gainsboro'
-  gr$edges_df$fontname <- 'Helvetica'
-  gr$edges_df$fontcolor <- 'gray'
+  gr$edges_df$color <- "Gainsboro"
+  gr$edges_df$fontname <- "Helvetica"
+  gr$edges_df$fontcolor <- "gray"
   gr$edges_df$fontsize <- 11
   gr$edges_df$penwidth <- 3
 
@@ -353,17 +378,16 @@ plot.greta_model <- function (x, y, ...) {
   gr$edges_df$style <- edge_style
 
   # set the layout type
-  gr$global_attrs$value[gr$global_attrs$attr == 'layout'] <- 'dot'
+  gr$global_attrs$value[gr$global_attrs$attr == "layout"] <- "dot"
   # make it horizontal
   gr$global_attrs <- rbind(gr$global_attrs,
-                           data.frame(attr = 'rankdir',
-                                      value = 'LR',
-                                      attr_type = 'graph'))
+                           data.frame(attr = "rankdir",
+                                      value = "LR",
+                                      attr_type = "graph"))
 
 
-  print(DiagrammeR::render_graph(gr))
-
-  invisible(gr)
+  grViz <- DiagrammeR::render_graph(gr)
+  attr(grViz, "dgr_graph") <- gr
+  grViz
 
 }
-

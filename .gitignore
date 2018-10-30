@@ -5,15 +5,12 @@
 .RData
 .Ruserdata
 
-README_cache
-vignettes/example_models_cache
-vignettes/get_started_cache
-vignettes/technical_details_cache
+*_cache
+*_files
 
-vignettes/figures
+vignette/figures
 
 *.pdf
 docs/*.Rmd
 docs/examples
-docs/*_cache
 cran-comments.md

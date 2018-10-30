@@ -1,0 +1,24 @@
+### Regularized horseshoe prior
+
+The [regularized ('Finnish') horseshoe](https://projecteuclid.org/euclid.ejs/1513306866) remedies a problem of the original horseshoe: large, unregularized values for the coefficients. This is especially problematic in scenarios where the parameters are only weakly identified by the data, as in logistic regression with perfectly seperable data.
+
+```{r linear_finnish_horseshoe_greta}
+regularized_horseshoe <- function (tau = 1,  c = 1, dim = NULL) {
+  stopifnot(c > 0)
+  lambda <- cauchy(0, 1, truncation = c(0, Inf), dim = dim)
+  lambda_tilde <- (c^2 * lambda^2) / (c^2 + tau^2 * lambda^2)
+  sd <- tau ^ 2 * lambda_tilde ^ 2
+  normal(0, sd, dim = dim)
+}
+
+# variables & priors
+int <- variable()
+sd <- inverse_gamma(1, 1)
+coef <- regularized_horseshoe()
+
+# linear predictor
+mu <- int + coef * attitude$complaints
+
+# observation model
+distribution(attitude$rating) <- normal(mu, sd)
+```

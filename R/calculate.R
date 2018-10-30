@@ -11,6 +11,7 @@
 #' @param values a named list giving temporary values of the greta arrays with
 #'   which \code{target} is connected, or an \code{mcmc.list} object returned by
 #'   \code{\link{mcmc}}.
+#' @param precision the floating point precision to use when calculating values.
 #'
 #' @return A numeric R array with the same dimensions as \code{target}, giving
 #'   the values it would take conditioned on the fixed values given by
@@ -36,6 +37,11 @@
 #' y <- sum(x ^ 2) + a
 #' calculate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
 #'
+#' # if the greta array only depends on data,
+#' # you can pass an empty list to values (this is the default)
+#' x <- ones(3, 3)
+#' y <- sum(x)
+#' calculate(y)
 #'
 #' # define a model
 #' alpha <- normal(0, 1)
@@ -60,87 +66,71 @@
 #'
 #' # plot the draws
 #' mu_est <- colMeans(mu_plot_draws[[1]])
-#' plot(mu_est ~ petal_length_plot, type = "n", ylim = range(mu_plot_draws[[1]]))
-#' apply(mu_plot_draws[[1]], 1, lines, x = petal_length_plot, col = grey(0.8))
+#' plot(mu_est ~ petal_length_plot, type = "n",
+#'      ylim = range(mu_plot_draws[[1]]))
+#' apply(mu_plot_draws[[1]], 1, lines,
+#'       x = petal_length_plot, col = grey(0.8))
 #' lines(mu_est ~ petal_length_plot, lwd = 2)
 #' }
 #'
 #'
-calculate <- function (target, values) {
+calculate <- function(target, values = list(),
+                      precision = c("double", "single")) {
 
   target_name <- deparse(substitute(target))
+  tf_float <- switch(match.arg(precision),
+                     double = "float64",
+                     single = "float32")
 
   if (!inherits(target, "greta_array"))
-    stop ("'target' is not a greta array")
+    stop("'target' is not a greta array")
 
   if (inherits(values, "mcmc.list"))
-    calculate_mcmc.list(target, target_name, values)
+    calculate_mcmc.list(target, target_name, values, tf_float)
   else
-    calculate_list(target, values)
+    calculate_list(target, values, tf_float)
 
 }
 
-calculate_mcmc.list <- function (target, target_name, values) {
+calculate_mcmc.list <- function(target, target_name, values, tf_float) {
 
-  model_info <- attr(values, "model_info")
-
-  if (is.null(model_info)) {
-    stop ("value is an mcmc.list object, but is not associated with any ",
-          "model information, perhaps it wasn't created with ",
-          "greta::mcmc() ?",
-          call. = FALSE)
-  }
+  model_info <- get_model_info(values)
 
   # copy and refresh the dag
   dag <- model_info$model$dag$clone()
-  dag$tf_environment <- new.env()
-  dag$tf_graph <- tf$Graph()
+  dag$new_tf_environment()
+
+  # set the precision in the dag
+  dag$tf_float <- tf_float
 
   # extend the dag to include this node, as the target
   dag$build_dag(list(target))
-  self <- dag  # mock for scoping
-  dag$define_tf(log_density = TRUE, gradients = TRUE)
 
-  dag$target_nodes <- list(target$node)
+  self <- dag  # mock for scoping
+  self
+  dag$define_tf()
+
+  dag$target_nodes <- list(get_node(target))
   names(dag$target_nodes) <- target_name
 
-  example_values <- dag$trace_values()
-  n_trace <- length(example_values)
+  param <- dag$example_parameters()
+  param[] <- 0
 
   # raw draws are either an attribute, or this object
   model_info <- attr(values, "model_info")
   draws <- model_info$raw_draws
 
-  # trace the target for each draw in each chain
-  trace <- list()
-  for (i in seq_along(draws)) {
-
-    samples <- apply(draws[[i]],
-                     1,
-                     function (x) {
-                       dag$send_parameters(x)
-                       dag$trace_values()
-                     })
-
-    samples <- as.matrix(samples)
-
-    if (ncol(samples) != n_trace)
-      samples <- t(samples)
-
-    colnames(samples) <- names(example_values)
-
-    trace[[i]] <- coda::mcmc(samples)
-
-  }
+  # trace the target for each chain
+  values <- lapply(draws, dag$trace_values)
+  trace <- lapply(values, coda::mcmc)
 
   trace <- coda::mcmc.list(trace)
   attr(trace, "model_info") <- model_info
-  # return this
-  return (trace)
+  trace
 
 }
 
-calculate_list <- function(target, values) {
+calculate_list <- function(target, values, tf_float) {
 
   # get the values and their names
   names <- names(values)
@@ -168,51 +158,97 @@ calculate_list <- function(target, values) {
   all_greta_arrays <- c(fixed_greta_arrays, list(target))
 
   # define the dag and TF graph
-  dag <- dag_class$new(all_greta_arrays)
-  dag$define_tf(log_density = FALSE, gradients = FALSE)
+  dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
+  dag$define_tf()
+  tfe <- dag$tf_environment
 
   # build and send a dict for the fixed values
   fixed_nodes <- lapply(fixed_greta_arrays,
-                        member,
-                        'node')
+                        get_node)
 
   names(values) <- vapply(fixed_nodes,
                           dag$tf_name,
                           FUN.VALUE = "")
 
-  # check that all of the variables are set
-  # list of variable tf names
-  variable_nodes <- dag$node_list[dag$node_types == "variable"]
-  variable_names <- vapply(variable_nodes,
-                           dag$tf_name,
-                           FUN.VALUE = "")
+  # check that there are no unspecified variables on which the target depends
 
-  if (!all(variable_names %in% names(values))) {
-    stop ("values have not been provided for all variables",
-          call. = FALSE)
+  # find all the nodes depended on by this one
+  dependencies <- get_node(target)$child_names(recursive = TRUE)
+
+  # find all the nodes depended on by the new values, and remove them from the
+  # list
+  complete_dependencies <- lapply(fixed_greta_arrays,
+                                  function(x)
+                                    get_node(x)$child_names(recursive = TRUE))
+  complete_dependencies <- unique(unlist(complete_dependencies))
+
+  unmet_dependencies <- dependencies[!dependencies %in% complete_dependencies]
+
+  # find all of the remaining nodes that are variables
+  unmet_nodes <- dag$node_list[unmet_dependencies]
+  is_variable <- vapply(unmet_nodes, node_type, FUN.VALUE = "") == "variable"
+
+  # if there are any undefined variables
+  if (any(is_variable)) {
+
+    # try to find the associated greta arrays to provide a more informative
+    # error message
+    greta_arrays <- all_greta_arrays(parent.frame(2),
+                                     include_data = FALSE)
+
+    greta_array_node_names <- vapply(greta_arrays,
+                                function(x) get_node(x)$unique_name,
+                                FUN.VALUE = "")
+
+    unmet_variables <- unmet_nodes[is_variable]
+
+    matches <- names(unmet_variables) %in% greta_array_node_names
+
+
+    unmet_names_idx <- greta_array_node_names %in% names(unmet_variables)
+    unmet_names <- names(greta_array_node_names)[unmet_names_idx]
+
+    # build the message
+    msg <- paste("values have not been provided for all greta arrays on which",
+                 "the target depends.")
+
+    if (any(matches)) {
+      names_text <- paste(unmet_names, collapse = ", ")
+      msg <- paste(msg,
+                   sprintf("Please provide values for the greta array%s: %s",
+                           ifelse(length(matches) > 1, "s", ""),
+                           names_text))
+    } else {
+      msg <- paste(msg,
+                   "\nThe names of the missing greta arrays",
+                   "could not be detected")
+    }
+
+    stop(msg,
+         call. = FALSE)
   }
 
-  # send it to tf
-  assign("eval_list", values, envir = dag$tf_environment)
-  ex <- expression(with_dict <- do.call(dict, eval_list))
-  eval(ex, envir = dag$tf_environment)
+  # add values or data not specified by the user
+  data_list <- tfe$data_list
+  missing <- !names(data_list) %in% names(values)
 
-  # evaluate the target there
-  ex <- sprintf("sess$run(%s, feed_dict = with_dict)",
-                dag$tf_name(target$node))
-  result <- eval(parse(text = ex),
-                 envir = dag$tf_environment)
+  # send list to tf environment and roll into a dict
+  values <- lapply(values, add_first_dim)
+  dag$build_feed_dict(values, data_list = data_list[missing])
 
-  result
+  name <- dag$tf_name(get_node(target))
+  result <- dag$tf_sess_run(name, as_text = TRUE)
+
+  drop_first_dim(result)
 
 }
 
 # coerce value to have the correct dimensions
-assign_dim <- function (value, greta_array) {
-  array <- strip_unknown_class(greta_array$node$value())
+assign_dim <- function(value, greta_array) {
+  array <- strip_unknown_class(get_node(greta_array)$value())
   if (length(array) != length(value)) {
-    stop ("a provided value has different number of elements",
-          " than the greta array", call. = FALSE)
+    stop("a provided value has different number of elements",
+         " than the greta array", call. = FALSE)
   }
   array[] <- value
   array

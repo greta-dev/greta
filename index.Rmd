@@ -1,0 +1,47 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE,
+                      fig.path = "man/figures/")
+set.seed(2018-02-17)
+```
+
+<div class="row">
+  <div class="col-md-6">
+    
+Here's a Bayesian linear regression model for the `iris` data using greta:
+  
+```{r, highlight = FALSE}
+x <- iris$Petal.Length
+y <- iris$Sepal.Length
+```
+
+```{r, highlight = FALSE, message = FALSE}
+library(greta)
+  
+int <- normal(0, 5)
+coef <- normal(0, 3)
+sd <- lognormal(0, 3)
+  
+mean <- int + coef * x
+distribution(y) <- normal(mean, sd)
+```
+
+```{r, highlight = FALSE}
+m <- model(int, coef, sd)
+```
+
+  </div>
+  <div class="col-md-6">
+  
+```{r, highlight = FALSE, eval = FALSE}
+draws <- mcmc(m, n_samples = 1000, chains = 4)
+bayesplot::mcmc_trace(draws)
+```
+
+```{r vis, echo = FALSE, eval = TRUE, results = "hide", message = FALSE, fig.height = 3.8, fig.width = 5.5, fig.align = "center"}
+draws <- mcmc(m, n_samples = 1000, chains = 4)
+bayesplot::mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1)) + ggplot2::theme_minimal()
+```
+
+  </div>
+</div>

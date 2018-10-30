@@ -2,135 +2,243 @@
 % Please edit documentation in R/inference.R
 \name{inference}
 \alias{inference}
-\alias{stashed_samples}
 \alias{mcmc}
+\alias{stashed_samples}
+\alias{extra_samples}
+\alias{initials}
 \alias{opt}
 \title{statistical inference on greta models}
 \usage{
+mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
+  warmup = 1000, chains = 4, n_cores = NULL, verbose = TRUE,
+  pb_update = 50, one_by_one = FALSE, initial_values = initials())
+
 stashed_samples()
 
-mcmc(model, method = c("hmc"), n_samples = 1000, thin = 1, warmup = 100,
-  chains = 1, verbose = TRUE, pb_update = 10, control = list(),
-  initial_values = NULL)
+extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
+  verbose = TRUE, pb_update = 50, one_by_one = FALSE)
 
-opt(model, method = c("adagrad"), max_iterations = 100, tolerance = 1e-06,
-  control = list(), initial_values = NULL)
+initials(...)
+
+opt(model, optimiser = bfgs(), max_iterations = 100,
+  tolerance = 1e-06, initial_values = initials(), adjust = TRUE,
+  hessian = FALSE)
 }
 \arguments{
 \item{model}{greta_model object}
 
-\item{method}{method used to sample or optimise values. Currently only
-one method is available for each procedure: \code{hmc} and \code{adagrad}}
+\item{sampler}{sampler used to draw values in MCMC. See
+\code{\link{samplers}} for options.}
 
-\item{n_samples}{number of MCMC samples to draw (after any warm-up, but
-before thinning)}
+\item{n_samples}{number of MCMC samples to draw per chain (after any warm-up,
+but before thinning)}
 
-\item{thin}{MCMC thinning rate; every \code{thin} samples is retained,
-the rest are discarded}
+\item{thin}{MCMC thinning rate; every \code{thin} samples is retained, the
+rest are discarded}
 
-\item{warmup}{number of samples to spend warming up the mcmc sampler.
-During this phase the sampler moves toward the highest density area and
-tunes sampler hyperparameters.}
+\item{warmup}{number of samples to spend warming up the mcmc sampler (moving
+chains toward the highest density area and tuning sampler hyperparameters).}
 
 \item{chains}{number of MCMC chains to run}
+
+\item{n_cores}{the maximum number of CPU cores used by each sampler (see
+details).}
 
 \item{verbose}{whether to print progress information to the console}
 
 \item{pb_update}{how regularly to update the progress bar (in iterations)}
 
-\item{control}{an optional named list of hyperparameters and options to
-control behaviour of the sampler or optimiser. See Details.}
+\item{one_by_one}{whether to run TensorFlow MCMC code one iteration at a
+time, so that greta can handle numerical errors as 'bad' proposals (see
+below).}
 
-\item{initial_values}{an optional vector (or list of vectors, for multiple
-chains) of initial values for the free parameters in the model. These will
-be used as the starting point for sampling/optimisation.}
+\item{initial_values}{an optional \code{initials} object (or list of
+\code{initials} objects of length \code{chains}) giving initial values for
+some or all of the variables in the model. These will be used as the
+starting point for sampling/optimisation.}
+
+\item{draws}{an mcmc.list object returned by \code{mcmc} or
+\code{stashed_samples}}
+
+\item{...}{named numeric values, giving initial values of some or all of the
+variables in the model (unnamed variables will be automatically
+initialised)}
+
+\item{optimiser}{an \code{optimiser} object giving the optimisation algorithm
+and parameters See \code{\link{optimisers}}.}
 
 \item{max_iterations}{the maximum number of iterations before giving up}
 
-\item{tolerance}{the numerical tolerance for the solution, the optimiser stops when the (absolute) difference in the joint density between successive iterations drops below this level}
+\item{tolerance}{the numerical tolerance for the solution, the optimiser
+stops when the (absolute) difference in the joint density between
+successive iterations drops below this level}
+
+\item{adjust}{whether to account for Jacobian adjustments in the joint
+density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
+estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.}
+
+\item{hessian}{whether to return a list of \emph{analytically} differentiated
+Hessian arrays for the parameters}
 }
 \value{
-\code{mcmc} & \code{stashed_samples} - an \code{mcmc.list} object
-  that can be analysed using functions from the coda package. This will
-  contain mcmc samples of the greta arrays used to create \code{model}.
+\code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
+  \code{mcmc.list} object that can be analysed using functions from the coda
+  package. This will contain mcmc samples of the greta arrays used to create
+  \code{model}.
 
 \code{opt} - a list containing the following named elements:
   \itemize{
-    \item{par}{the best set of parameters found}
-    \item{value}{the log joint density of the model at the parameters par}
-    \item{iterations}{the number of iterations taken by the optimiser}
-    \item{convergence}{an integer code, 0 indicates successful completion, 1
-    indicates the iteration limit max_iterations had been reached}
-  }
+   \item{\code{par}} {a named list of the optimal values for the greta arrays
+    specified in \code{model}}
+   \item{\code{value}} {the (unadjusted) negative log joint density of the
+   model at the parameters 'par'}
+   \item{\code{iterations}} {the number of iterations taken by the optimiser}
+   \item{\code{convergence}} {an integer code, 0 indicates successful
+    completion, 1 indicates the iteration limit \code{max_iterations} had been
+    reached}
+  \item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
+   matrices/arrays for the parameters (w.r.t. \code{value})}
+ }
 }
 \description{
 Carry out statistical inference on greta models by
   MCMC or likelihood/posterior optimisation.
 }
 \details{
-If the sampler is aborted before finishing, the samples collected so
-  far can be retrieved with \code{stashed_samples()}. Only samples from the
-  sampling phase will be returned.
-
 For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   the number of iterations so far and the expected time to complete the phase
-  of model fitting (warmup or sampling). Updating the progress bar regularly
-  slows down sampling, by as much as 9 seconds per 1000 updates. So if you
-  want the sampler to run faster, you can change \code{pb_update} to increase
-  the number of iterations between updates of the progress bar, or turn the
-  progress bar off altogether by setting \code{verbose = FALSE}.
+  of model fitting (warmup or sampling). Occasionally, a proposed set of
+  parameters can cause numerical instability (I.e. the log density or its
+  gradient is \code{NA}, \code{Inf} or \code{-Inf}); normally because the log
+  joint density is so low that it can't be represented as a floating point
+  number. When this happens, the progress bar will also display the
+  proportion of proposals so far that were 'bad' (numerically unstable) and
+  therefore rejected. Some numerical instability during the warmup phase is
+  normal, but 'bad' samples during the sampling phase can lead to bias in
+  your posterior sample. If you only have a few bad samples (<10\\%), you can
+  usually resolve this with a longer warmup period or by manually defining
+  starting values to move the sampler into a more reasonable part of the
+  parameter space. If you have more samples than that, it may be that your
+  model is misspecified. You can often diagnose this by using
+  \code{\link{calculate}()} to evaluate the values of greta arrays, given
+  fixed values of model parameters, and checking the results are what you
+  expect.
 
-  Occasionally, a proposed set of parameters can cause numerical instability
-  (I.e. the log density or its gradient is \code{NA}, \code{Inf} or
-  \code{-Inf}); normally because the log joint density is so low that it
-  can't be represented as a floating point number. When this happens, the
-  progress bar will also display the proportion of samples so far that were
-  'bad' (numerically unstable) and therefore rejected.
-  If you're getting a lot of numerical instability, you might want to
-  manually define starting values to move the sampler into a more reasonable
-  part of the parameter space. Alternatively, you could redefine the model
-  (via \code{model}) to have double precision, though this will slow down
-  sampling.
+  greta runs multiple chains simultaneously with a single sampler,
+  vectorising all operations across the chains. E.g. a scalar addition in
+  your model is computed as an elementwise vector addition (with vectors
+  having length \code{chains}), a vector addition is computed as a matrix
+  addition etc. TensorFlow is able to parallelise these operations, and this
+  approach reduced computational overheads, so this is the most efficient of
+  computing on multiple chains.
 
-  Currently, the only implemented MCMC procedure is static Hamiltonian Monte
-  Carlo (\code{method = "hmc"}). During the warmup iterations, the leapfrog
-  stepsize hyperparameter \code{epsilon} is tuned to maximise the sampler
-  efficiency, and the posterior marginal standard deviations are estimated
-  \code{diag_sd}. The \code{control} argument can be used to specify the
-  initial value for \code{epsilon}, \code{diag_sd}, and two other
-  hyperparameters: \code{Lmin} and \code{Lmax}; positive integers (with
-  \code{Lmax > Lmin}) giving the upper and lower limits to the number of
-  leapfrog steps per iteration (from which the number is selected uniformly
-  at random).
+  Multiple mcmc samplers (each of which can simultaneously run multiple
+  chains) can also be run in parallel by setting the execution plan with the
+  \code{future} package. Only \code{plan(multisession)} futures or
+  \code{plan(cluster)} futures that don't use fork clusters are allowed,
+  since forked processes conflict with TensorFlow's parallelism. Explicitly
+  parallelising chains on a local machine with \code{plan(multisession)} will
+  probably be slower than running multiple chains simultaneously in a single
+  sampler (with \code{plan(sequential)}, the default) because of the overhead
+  required to start new sessions. However, \code{plan(cluster)} can be used
+  to run chains on a cluster of machines on a local or remote network. See
+  \code{\link[future:cluster]{future::cluster}} for details, and the
+  \code{future.batchtools} package to set up plans on clusters with job
+  schedulers.
 
-  The default control options for HMC are:
-  \code{control = list(Lmin = 10, Lmax = 20, epsilon = 0.005, diag_sd = 1)}
+  If \code{n_cores = NULL} and mcmc samplers are being run sequentially, each
+  sampler will be allowed to use all CPU cores (possibly to compute multiple
+  chains sequentially). If samplers are being run in parallel with the
+  \code{future} package, \code{n_cores} will be set so that \code{n_cores *
+  \link[future:nbrOfWorkers]{future::nbrOfWorkers}} is less than the number
+  of CPU cores.
 
-Currently, the only implemented optimisation algorithm is Adagrad
-  (\code{method = "adagrad"}). The \code{control} argument can be used to
-  specify the optimiser hyperparameters: \code{learning_rate} (default 0.8),
-  \code{initial_accumulator_value} (default 0.1) and \code{use_locking}
-  (default \code{TRUE}). The are passed directly to TensorFlow's optimisers,
-  see
-  \href{https://www.tensorflow.org/api_docs/python/tf/train/AdagradOptimizer}{the
-  TensorFlow docs} for more information
+If the sampler is aborted before finishing (and \code{future}
+  parallelism isn't being used), the samples collected so far can be
+  retrieved with \code{stashed_samples()}. Only samples from the sampling
+  phase will be returned.
+
+Samples returned by \code{mcmc()} and \code{stashed_samples()} can
+  be added to with \code{extra_samples()}. This continues the chain from the
+  last value of the previous chain and uses the same sampler and model as was
+  used to generate the previous samples. It is not possible to change the
+  sampler or extend the warmup period.
+
+Because \code{opt()} acts on a list of greta arrays with possibly
+  varying dimension, the \code{par} and \code{hessian} objects returned by
+  \code{opt()} are named lists, rather than a vector (\code{par}) and a
+  matrix (\code{hessian}), as returned by \code{\link[stats:optim]{optim()}}.
+  Because greta arrays may not be vectors, the hessians may not be matrices,
+  but could be higher-dimensional arrays. To return a hessian matrix covering
+  multiple model parameters, you can construct your model so that all those
+  parameters are in a vector, then split the vector up to define the model.
+  The parameter vector can then be passed to model. See example.
 }
 \examples{
 \dontrun{
-# define a simple model
-mu <- variable()
-sigma <- lognormal(1, 0.1)
+# define a simple Bayesian model
 x <- rnorm(10)
+mu <- normal(0, 5)
+sigma <- lognormal(1, 0.1)
 distribution(x) <- normal(mu, sigma)
 m <- model(mu, sigma)
 
 # carry out mcmc on the model
-draws <- mcmc(m,
-              n_samples = 100,
-              warmup = 10)
-}
-\dontrun{
-# find the MAP estimate
+draws <- mcmc(m, n_samples = 100)
+
+# add some more samples
+draws <- extra_samples(draws, 200)
+
+#' # initial values can be passed for some or all model variables
+draws <- mcmc(m, chains = 1, initial_values = initials(mu = -1))
+
+# if there are multiple chains, a list of initial values should be passed,
+# othewise the same initial values will be used for all chains
+inits <- list(initials(sigma = 0.5), initials(sigma = 1))
+draws <- mcmc(m, chains = 2, initial_values = inits)
+
+# you can auto-generate a list of initials with something like this:
+inits <- replicate(4,
+                   initials(mu = rnorm(1), sigma = runif(1)),
+                   simplify = FALSE)
+draws <- mcmc(m, chains = 4, initial_values = inits)
+
+# or find the MAP estimate
 opt_res <- opt(m)
+
+# get the MLE of the normal variance
+mu <- variable()
+variance <- variable(lower = 0)
+distribution(x) <- normal(mu, sqrt(variance))
+m2 <- model(variance)
+
+# adjust = FALSE skips the jacobian adjustments used in MAP estimation, to
+# give the true maximum likelihood estimates
+o <- opt(m2, adjust = FALSE)
+
+# the MLE corresponds to the *unadjusted* sample variance, but differs
+# from the sample variance
+o$par
+mean((x - mean(x)) ^ 2)  # same
+var(x)  # different
+
+# initial values can also be passed to optimisers:
+o <- opt(m2, initial_values = initials(variance = 1))
+
+# and you can return a list of the hessians for each of these parameters
+o <- opt(m2, hessians = TRUE)
+o$hessians
+
+
+# to get a hessian matrix across multiple greta arrays, you must first
+# combine them and then split them up for use in the model (so that the
+# combined vector is part of the model) and pass that vector to model:
+params <- c(variable(), variable(lower = 0))
+mu <- params[1]
+variance <- params[2]
+distribution(x) <- normal(mu, sqrt(variance))
+m3 <- model(params)
+o <- opt(m3, hessians = TRUE)
+o$hessians
 }
 }

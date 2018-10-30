@@ -4,26 +4,25 @@
 \alias{functions}
 \title{functions for greta arrays}
 \description{
-This is a list of functions in base R that are currently
-  implemented to transform greta arrays. Also see \link{operators} and
-  \link{transforms}.
+This is a list of functions (mostly from base R) that are
+  currently implemented to transform greta arrays. Also see \link{operators}
+  and \link{transforms}.
 }
 \details{
 TensorFlow only enables rounding to integers, so \code{round()} will
   error if \code{digits} is set to anything other than \code{0}.
 
-  Any additional arguments to \code{chol()} and \code{solve()} will be
-  ignored, see the TensorFlow documentation for details of these routines.
-
-  \code{diag()} can be used to extract or replace the diagonal part of a
-  square and two-dimensional greta array, but it cannot be used to create a
-  matrix-like greta array from a scalar or vector-like greta array. A static
-  diagonal matrix can always be created with e.g. \code{diag(3)}, and then
-  converted into a greta array.
+  Any additional arguments to \code{chol()}, \code{chol2inv}, and
+  \code{solve()} will be ignored, see the TensorFlow documentation for
+  details of these routines.
 
   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
   can only be either 1 or 2), and only for subtraction, addition, division
   and multiplication.
+
+  \code{tapply()} works on column vectors (2D greta arrays with one column),
+  and \code{INDEX} cannot be a greta array. Currently five functions are
+  available, and arguments passed to \dots are ignored.
 }
 \section{Usage}{
  \preformatted{
@@ -62,9 +61,10 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  # matrix operations
  t(x)
  chol(x, ...)
- diag(x, nrow, ncol)
- diag(x) <- value
+ chol2inv(x, ...)
+ cov2cor(V)
  solve(a, b, ...)
+ kronecker(X, Y, FUN = c('*', '/', '+', '-'))
 
  # reducing operations
  sum(..., na.rm = TRUE)
@@ -76,14 +76,18 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  cumsum(x)
  cumprod(x)
 
- # miscellaneous operations
- sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-
  # solve an upper or lower triangular system
  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
            transpose = FALSE)
  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
               transpose = FALSE)
+
+ #'  # miscellaneous operations
+ aperm(x, perm)
+ apply(x, MARGIN, FUN = c("sum", "max", "mean", "min",
+                          "prod", "cumsum", "cumprod"))
+ sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
+ tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
 
 }
 }
@@ -96,9 +100,6 @@ a <- log(exp(x))
 b <- log1p(expm1(x))
 c <- sign(x - 5)
 d <- abs(x - 5)
-
-e <- diag(x)
-diag(x) <- e + 1
 
 z <- t(a)
 

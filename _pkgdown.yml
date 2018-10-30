@@ -1,0 +1,87 @@
+template:
+  path: inst/pkgdown/templates
+  assets: inst/pkgdown/assets
+  default_assets: false
+  params:
+    docsearch:
+      api_key: fa1406e0044eae29be11408a723039e7
+      index_name: greta
+
+url: https://greta-stats.org
+
+reference:
+  - title: creating greta arrays
+    desc: Create greta arrays representing observed data or fixed values
+    contents:
+      - structures
+      - as_data
+  - title: variables & distributions
+    desc: Create variables and assign probability distributions over greta arrays
+    contents:
+      - variable
+      - distributions
+      - distribution
+      - mixture
+      - joint
+  - title: manipulating greta arrays
+    desc: Functions and operations for modifying greta arrays
+    contents:
+      - operators
+      - functions
+      - extract-replace-combine
+      - transforms
+  - title: modelling
+    desc: Define and visualise models and fit them to data
+    contents:
+      - model
+      - inference
+      - calculate
+      - samplers
+      - optimisers
+  - title: extending greta
+    desc:  Write R packages that extend or use greta
+    contents:
+      - internals
+
+navbar:
+  structure:
+    left: [get_started, docs, examples, analyses, more]
+    right: [forum, twitter, github]
+  components:
+    home: ~
+    reference: ~
+    articles: ~
+    news: ~
+    get_started:
+      text: get started
+      href: articles/get_started.html
+    examples:
+      text: examples
+      href: articles/example_models.html
+    analyses:
+      text: analyses
+      menu:
+       - text: eight schools
+         href: articles/analyses/eight_schools.html
+       - text: election 88
+         href: articles/analyses/election_88.html
+    docs:
+      text: docs
+      href: reference/index.html
+    more:
+      text: more
+      menu:
+       - text: why 'greta'?
+         href: articles/webpages/why_greta.html
+       - text: technical details
+         href: articles/webpages/technical_details.html
+       - text: software
+         href: articles/webpages/software.html
+       - text: contribute to greta
+         href: articles/webpages/contribute.html
+    twitter:
+      icon: fa-lg fa-twitter
+      href: http://twitter.com/greta_stats
+    forum:
+      icon: fa-lg fa-comments
+      href: https://forum.greta-stats.org

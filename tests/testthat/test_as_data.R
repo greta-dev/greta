@@ -1,8 +1,9 @@
-context('as_data')
+context("as_data")
 
-test_that('as_data coerces correctly', {
+test_that("as_data coerces correctly", {
 
-  source('helpers.R')
+  skip_if_not(check_tf_version())
+  source("helpers.R")
 
   # logical, integer and numeric
   # vector, matrix, array, dataframe
@@ -106,10 +107,10 @@ test_that('as_data coerces correctly', {
 
 })
 
-test_that('as_data errors informatively', {
+test_that("as_data errors informatively", {
 
   skip_if_not(check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   # wrong class of object
   expect_error(as_data(NULL),
@@ -128,13 +129,21 @@ test_that('as_data errors informatively', {
   expect_error(as_data(cha_vec),
                "objects of class character cannot be coerced to greta arrays")
   expect_error(as_data(cha_mat),
-               "cannot convert a matrix to a greta_array unless it is numeric, integer or logical. This matrix had type: character")
+               paste("cannot convert a matrix to a greta_array unless it is",
+                     "numeric, integer or logical.",
+                     "This matrix had type: character"))
   expect_error(as_data(cha_arr),
-               "cannot convert an array to a greta_array unless it is numeric, integer or logical. This array had type: character")
+               paste("cannot convert an array to a greta_array unless it is",
+                     "numeric, integer or logical.",
+                     "This array had type: character"))
   expect_error(as_data(cha_df),
-               "cannot coerce a dataframe to a greta_array unless all columns are numeric, integer or logical. This dataframe had columns of type: character")
+               paste("cannot coerce a dataframe to a greta_array unless all",
+                     "columns are numeric, integer or logical.",
+                     "This dataframe had columns of type: character"))
   expect_error(as_data(cha_df2),
-               "cannot coerce a dataframe to a greta_array unless all columns are numeric, integer or logical. This dataframe had columns of type: factor")
+               paste("cannot coerce a dataframe to a greta_array unless all",
+                     "columns are numeric, integer or logical.",
+                     "This dataframe had columns of type: factor"))
 
   # correct class and type but infinite or missing values
   arr_inf <- randn(3, 3)
@@ -145,19 +154,22 @@ test_that('as_data errors informatively', {
   arr_na[1, 3] <- NA
 
   expect_error(as_data(arr_inf),
-               'cannot convert objects with missing or infinite values to greta_arrays')
+               paste("cannot convert objects with missing or",
+                     "infinite values to greta_arrays"))
   expect_error(as_data(arr_minf),
-               'cannot convert objects with missing or infinite values to greta_arrays')
+               paste("cannot convert objects with missing or",
+                     "infinite values to greta_arrays"))
   expect_error(as_data(arr_na),
-               'cannot convert objects with missing or infinite values to greta_arrays')
+               paste("cannot convert objects with missing or",
+                     "infinite values to greta_arrays"))
 
   # non-data greta arrays
   stoch <- normal(0, 1, dim = c(2, 3))
   op <- stoch ^ 2
 
   expect_error(as_data(stoch),
-               'cannot coerce a non-data greta_array to data')
+               "cannot coerce a non-data greta_array to data")
   expect_error(as_data(op),
-               'cannot coerce a non-data greta_array to data')
+               "cannot coerce a non-data greta_array to data")
 
 })

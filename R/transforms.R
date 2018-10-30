@@ -48,47 +48,45 @@ NULL
 
 #' @rdname transforms
 #' @export
-iprobit <- function (x)
-  op('iprobit', x, tf_operation = tf_iprobit)
+iprobit <- function(x)
+  op("iprobit", x, tf_operation = "tf_iprobit",
+     representations = list(probit = x))
 
 #' @rdname transforms
 #' @export
-ilogit <- function (x)
-  op('ilogit', x, tf_operation = tf$nn$sigmoid)
+ilogit <- function(x) {
+  op("ilogit", x, tf_operation = "tf$nn$sigmoid",
+     representations = list(logit = x))
+}
 
 #' @rdname transforms
 #' @export
-icloglog <- function (x)
-  op('icloglog', x, tf_operation = tf_icloglog)
+icloglog <- function(x)
+  op("icloglog", x, tf_operation = "tf_icloglog")
 
 #' @rdname transforms
 #' @export
-icauchit <- function (x)
-  op('icauchit', x, tf_operation = tf_icauchit)
+icauchit <- function(x)
+  op("icauchit", x, tf_operation = "tf_icauchit")
 
 #' @rdname transforms
 #' @export
-log1pe <- function (x)
-  op('log1pe', x, tf_operation = tf$nn$softplus)
+log1pe <- function(x)
+  op("log1pe", x, tf_operation = "tf$nn$softplus")
 
 #' @rdname transforms
 #' @export
-imultilogit <- function (x) {
-  dimfun <- function (elem_list) {
+imultilogit <- function(x) {
 
-    dim <- dim(elem_list[[1]])
+  dim <- dim(x)
 
-    # check it's a matrix
-    if (length(dim) != 2) {
-      stop ("imultilogit expects a 2D greta array",
-            call. = FALSE)
-    }
-
-    dim + c(0, 1)
-
+  # check it's a matrix
+  if (length(dim) != 2) {
+    stop("imultilogit expects a 2D greta array",
+         call. = FALSE)
   }
 
-  op('imultilogit', x,
-     dimfun = dimfun,
-     tf_operation = tf_imultilogit)
+  op("imultilogit", x,
+     dim = dim + c(0, 1),
+     tf_operation = "tf_imultilogit")
 }

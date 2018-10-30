@@ -1,29 +1,114 @@
 # tensorflow functions
 
 # convert Tensor to logical
-tf_as_logical <- function (x)
+tf_as_logical <- function(x)
   tf$cast(x, tf$bool)
 
 # and to float
-tf_as_float <- function (x)
+tf_as_float <- function(x)
   tf$cast(x, tf_float())
 
 # and to integer
-tf_as_integer <- function (x)
+tf_as_integer <- function(x)
   tf$cast(x, tf$int32)
 
-tf_lchoose <- function (n, k) {
+tf_lchoose <- function(n, k) {
   one <- fl(1)
   -tf$lgamma(one + n - k) - tf$lgamma(one + k) + tf$lgamma(one + n)
 }
 
-tf_lbeta <- function (a, b)
+tf_lbeta <- function(a, b)
   tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
+
+# set up the tf$reduce_* functions to ignore the first dimension
+skip_dim <- function(op_name, x, drop = FALSE) {
+  n_dim <- length(dim(x))
+  reduction_dims <- seq_len(n_dim - 1)
+  tf[[op_name]](x, axis = reduction_dims, keepdims = !drop)
+}
+
+tf_sum <- function(x, drop = FALSE) {
+  skip_dim("reduce_sum", x, drop)
+}
+
+tf_prod <- function(x, drop = FALSE) {
+  skip_dim("reduce_prod", x, drop)
+}
+
+tf_min <- function(x, drop = FALSE) {
+  skip_dim("reduce_min", x, drop)
+}
+
+tf_mean <- function(x, drop = FALSE) {
+  skip_dim("reduce_mean", x, drop)
+}
+
+tf_max <- function(x, drop = FALSE) {
+  skip_dim("reduce_max", x, drop)
+}
+
+tf_cumsum <- function(x) {
+  tf$cumsum(x, axis = 1L)
+}
+
+tf_cumprod <- function(x) {
+  tf$cumprod(x, axis = 1L)
+}
+
+# set the dimensions of a tensor, reshaping in the same way (column-major) as R
+tf_set_dim <- function(x, dims) {
+
+  # transpose to do work in row-major order
+  perm_old <- c(0L, rev(seq_along(dim(x)[-1])))
+  x <- tf$transpose(x, perm_old)
+
+  # reshape (with transposed shape) as row-major
+  x <- tf$reshape(x, shape = c(-1L, rev(dims)))
+
+  # transpose back
+  perm_new <- c(0L, rev(seq_along(dims)))
+  x <- tf$transpose(x, perm_new)
+  x
+
+}
+
+# skip the first index when transposing
+tf_transpose <- function(x) {
+  nelem <- length(dim(x))
+  perm <- c(0L, (nelem - 1):1)
+  tf$transpose(x, perm = perm)
+}
+
+tf_apply <- function(x, axis, tf_fun_name) {
+  fun <- tf[[tf_fun_name]]
+  out <- fun(x, axis = axis)
+  # if we reduced we lost a dimension, make sure we have enough
+  if (length(dim(out)) < 3) {
+    out <- tf$expand_dims(out, 2L)
+  }
+  out
+}
+
+# permute the tensor to get the non-batch dim first, do the relevant "unsorted_segment_*" op, then permute it back
+tf_tapply <- function(x, segment_ids, num_segments, op_name) {
+
+  op_name <- paste0("unsorted_segment_", op_name)
+
+  x <- tf$transpose(x, perm = c(1:2, 0L))
+  x <- tf[[op_name]](x,
+                     segment_ids = segment_ids,
+                     num_segments = num_segments)
+  x <- tf$transpose(x, perm = c(2L, 0:1))
+  x
+
+}
+
 
 # given a flat tensor, convert it into a square symmetric matrix by considering
 # it  as the non-zero elements of the lower-triangular decomposition of the
 # square matrix
-tf_flat_to_chol = function (x, dims) {
+tf_flat_to_chol <- function(x, dims) {
+  # drop trailing dimension, and biject forward to an upper triangular matrix
 
   # indices to the cholesky factor
   L_dummy <- dummy(dims)
@@ -35,83 +120,164 @@ tf_flat_to_chol = function (x, dims) {
   x_index_offdiag <- length(indices_diag) + seq_along(indices_offdiag) - 1
 
   # create an empty vector to fill with the values
-  values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
-  values_0_diag <- tf_recombine(values_0, indices_diag, tf$exp(x[x_index_diag]))
-  values_z <- tf_recombine(values_0_diag, indices_offdiag, x[x_index_offdiag])
+  values_0 <- tf$zeros(shape(1, prod(dims), 1), dtype = tf_float())
+  values_0_diag <- tf_recombine(values_0,
+                                indices_diag,
+                                tf$exp(x[, x_index_diag, , drop = FALSE]))
+  values_z <- tf_recombine(values_0_diag,
+                           indices_offdiag,
+                           x[, x_index_offdiag, , drop = FALSE])
 
   # reshape into lower triangular and return
-  tf$reshape(values_z, shape(dims[1], dims[2]))
+  tf$reshape(values_z, shape(-1, dims[1], dims[2]))
+
+}
+
+# given a (batched, column) vector tensor of elements, corresponding to the
+# correlation-constrained (between -1 and 1) free state of a single row of the
+# cholesky factor of a correlation matrix, return the (upper-triangular
+# elements, including the diagonal, of the) row of the choleskied correlation
+# matrix. Or return the log jacobian of this transformation. When which =
+# "values", the output vector has one more element than the input, since the
+# diagonal element depends deterministically on the other elements.
+tf_corrmat_row <- function(z, which = c("values", "ljac")) {
+
+  which <- match.arg(which)
+
+  n <- dim(z)[[2]]
+
+  # use a tensorflow while loop to do the recursion:
+  body_values <- function(z, x, sumsq, lp, iter, maxiter) {
+    x_new <- z[, iter] * tf$sqrt(fl(1) - sumsq)
+    sumsq <- sumsq + tf$square(x_new)
+    x_new <- tf$expand_dims(x_new, 1L)
+    x <- tf$concat(list(x, x_new), axis = 1L)
+    list(z, x, sumsq, lp, iter + 1L, maxiter)
+  }
+
+  # body for the log jacobian adjustment
+  body_ljac <- function(z, x, sumsq, lp, iter, maxiter) {
+    lp <- lp + fl(0.5) * log(fl(1) - sumsq)
+    x_new <- z[, iter] * tf$sqrt(fl(1) - sumsq)
+    sumsq <- sumsq + tf$square(x_new)
+    list(z, x, sumsq, lp, iter + 1L, maxiter)
+  }
+
+  # initial sum of squares is from the first element
+  z_0 <- z[, 0]
+  sumsq <- z_0 ^ 2
+  x <- tf$expand_dims(z_0, 1L)
+  lp <- tf$zeros(shape(1), tf_float())
+  lp <- expand_to_batch(lp, z)
+
+  # x has no elements yet, append them
+  values <- list(z,
+                 x,
+                 sumsq,
+                 lp,
+                 tf$constant(1L),
+                 tf$constant(n))
+
+  cond <- function(z, x, sumsq, lp, iter, maxiter)
+    tf$less(iter, maxiter)
+
+  # Begin Exclude Linting
+  shapes <- list(tf$TensorShape(shape(NULL, n)),
+                 tf$TensorShape(shape(NULL, NULL)),
+                 tf$TensorShape(shape(NULL)),
+                 tf$TensorShape(shape(NULL)),
+                 tf$TensorShape(shape()),
+                 tf$TensorShape(shape()))
+  # End Exclude Linting
+
+  body <- switch(which,
+                 values = body_values,
+                 ljac = body_ljac)
+
+  out <- tf$while_loop(cond,
+                       body,
+                       values,
+                       shape_invariants = shapes)
+
+  if (which == "values") {
+
+    x <- out[[2]]
+    sumsq <- out[[3]]
+    final_x <- tf$sqrt(fl(1) - sumsq)
+    final_x <- tf$expand_dims(final_x, 1L)
+    x <- tf$concat(list(x, final_x), axis = 1L)
+    return(x)
+
+  } else {
+
+    lp <- out[[4]]
+    return(lp)
+
+  }
 
 }
 
 # convert an unconstrained vector into symmetric correlation matrix
-tf_flat_to_chol_correl = function (x, dims) {
+tf_flat_to_chol_correl <- function(x, dims) {
 
-  # to -1, 1 scale
-  y <- tf$tanh(x)
+  dims <- dim(x)
+  K <- dims[[2]]
+  n <- (1 + sqrt(8 * K + 1)) / 2
 
-  k <- dims[1]
-
-  # list of indices mapping relevant part of each row to an element of y
-  y_index_list <- list()
-  count <- 0
-  for (i in 1:(k - 1)) {
-    nelem <- k - i
-    y_index_list[[i]] <- count + seq_len(nelem) - 1
-    count <- count + nelem
+  # drop the third dimension
+  if (length(dims) == 3) {
+    x <- tf$squeeze(x, axis = 2L)
   }
 
-  # dummy list to store transformed versions of rows
-  values_list <- y_index_list
-  values_list[[1]] <- tf$reshape(y[y_index_list[[1]]], shape(k - 1))
-  sum_sqs <- tf$square(values_list[[1]])
+  # convert to -1, 1 scale
+  z <- tf$tanh(x)
 
-  if (k > 2) {
+  # split z up into rows
+  z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
 
-    for (i in 2:(k - 1)) {
-      # relevant columns (0-indexed)
-      idx <- i:(k - 1) - 1
-      # components of z on this row (straight from y)
-      z <- tf$reshape(y[y_index_list[[i]]], shape(k - i))
-      # assign to w, using relevant parts of the sum of squares
-      values_list[[i]] <- z * tf$sqrt(fl(1) - sum_sqs[idx])
-      # increment sum of squares
-      sum_sqs_part <- tf$square(values_list[[i]]) + sum_sqs[idx]
-      sum_sqs <- tf_recombine(sum_sqs, idx, sum_sqs_part)
-    }
+  # accumulate sum of squares within each row
+  x_rows <- lapply(z_rows, tf_corrmat_row)
 
-  }
+  # append 0s to all rows for the empty triangle
+  zero_rows <- lapply( (n - 2):0,
+                      function(n) {
+                        zeros <- tf$constant(rep(0, n),
+                                             dtype = tf_float(),
+                                             shape = shape(1, n))
+                        expand_to_batch(zeros, x)
+                      })
 
-  # dummy array to find the indices
-  L_dummy <- dummy(dims)
-  indices_diag <- diag(L_dummy)
-  indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
+  lists <- mapply(list, x_rows, zero_rows, SIMPLIFY = FALSE)
+  rows <- lapply(lists, tf$concat, axis = 1L)
 
-  # diagonal & off-diagonal elements
-  values_diag <- tf$concat(list(tf$ones(1L, dtype = tf_float()),
-                                sqrt(fl(1) - sum_sqs)), 0L)
-  values_offdiag <- tf$concat(values_list, 0L)
+  # add a fixed first row
+  row_one <- tf$constant(c(1, rep(0, n - 1)),
+                         dtype = tf_float(),
+                         shape = shape(1, n))
+  row_one <- expand_to_batch(row_one, x)
+  rows <- c(row_one, rows)
 
-  # plug elements into a vector of 0s
-  values_0 <- tf$zeros(shape(prod(dims), 1), dtype = tf_float())
-  values_0_diag <- tf_recombine(values_0, indices_diag, values_diag)
-  values_z <- tf_recombine(values_0_diag, indices_offdiag, values_offdiag)
+  rows <- lapply(rows, tf$expand_dims, 2L)
 
-  # reshape into cholesky and return
-  tf$reshape(values_z, shape(dims[1], dims[2]))
+  # combine into upper-triangular matrix
+  mat <- tf$concat(rows, axis = 2L)
+
+  mat
 
 }
 
-tf_chol_to_symmetric <- function (U)
-  tf$matmul(tf$transpose(U), U)
+tf_chol_to_symmetric <- function(U)
+  tf$matmul(tf_transpose(U), U)
 
 tf_colmeans <- function(x, dims) {
 
   idx <- rowcol_idx(x, dims, "col")
-  y <- tf$reduce_mean(x, axis = idx - 1L)
+  y <- tf$reduce_mean(x, axis = idx)
 
-  if (length(dim(y)) == 1)
-    y <- tf$reshape(y, c(dim(y), 1L))
+  if (length(dim(y)) == 2) {
+    dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
+    y <- tf$reshape(y, dims_out)
+  }
 
   y
 
@@ -120,10 +286,13 @@ tf_colmeans <- function(x, dims) {
 tf_rowmeans <- function(x, dims) {
 
   idx <- rowcol_idx(x, dims, "row")
-  y <- tf$reduce_mean(x, axis = idx - 1L)
+  idx <- idx[-length(idx)]
+  y <- tf$reduce_mean(x, axis = idx)
 
-  if (length(dim(y)) == 1)
-    y <- tf$reshape(y, c(dim(y), 1L))
+  if (length(dim(y)) == 2) {
+    dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
+    y <- tf$reshape(y, dims_out)
+  }
 
   y
 
@@ -132,10 +301,12 @@ tf_rowmeans <- function(x, dims) {
 tf_colsums <- function(x, dims) {
 
   idx <- rowcol_idx(x, dims, "col")
-  y <- tf$reduce_sum(x, axis = idx - 1L)
+  y <- tf$reduce_sum(x, axis = idx)
 
-  if (length(dim(y)) == 1)
-    y <- tf$reshape(y, c(dim(y), 1L))
+  if (length(dim(y)) == 2) {
+    dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
+    y <- tf$reshape(y, dims_out)
+  }
 
   y
 
@@ -144,36 +315,82 @@ tf_colsums <- function(x, dims) {
 tf_rowsums <- function(x, dims) {
 
   idx <- rowcol_idx(x, dims, "row")
-  y <- tf$reduce_sum(x, axis = idx - 1L)
+  idx <- idx[-length(idx)]
+  y <- tf$reduce_sum(x, axis = idx)
 
-  if (length(dim(y)) == 1)
-    y <- tf$reshape(y, c(dim(y), 1L))
+  if (length(dim(y)) == 2) {
+    dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
+    y <- tf$reshape(y, dims_out)
+  }
 
   y
 
 }
 
+# calculate kronecker product of two matrices
+tf_kronecker <- function(X, Y, tf_fun_name) {
+
+  tf_function <- tf[[tf_fun_name]]
+
+  dims <- unlist(c(dim(X)[-1], dim(Y)[-1]))
+
+  # expand dimensions of tensors to allow direct multiplication for kronecker
+  # prod
+  x_rsh <- tf$reshape(X, shape(-1, dims[1], 1L, dims[2], 1L))
+  y_rsh <- tf$reshape(Y, shape(-1, 1L, dims[3], 1L, dims[4]))
+
+  # multiply tensors and reshape with appropriate dimensions
+  z <- tf_function(x_rsh, y_rsh)
+  shape_out <- shape(-1, dims[1] * dims[3], dims[2] * dims[4])
+  tensor_out <- tf$reshape(z, shape_out)
+
+  tensor_out
+
+}
 
 # tensorflow version of sweep, based on broadcasting of tf ops
-tf_sweep <- function (x, STATS, MARGIN, FUN) {
+tf_sweep <- function(x, STATS, MARGIN, FUN) {
 
   # if the second margin, transpose before and after
   if (MARGIN == 2)
-    x <- tf$transpose(x)
+    x <- tf_transpose(x)
 
   # apply the function rowwise
   result <- do.call(FUN, list(x, STATS))
 
   if (MARGIN == 2)
-    result <- tf$transpose(result)
+    result <- tf_transpose(result)
 
   result
 
 }
 
 # transpose and get the right matrix, like R
-tf_chol <- function (x)
-  tf$transpose(tf$cholesky(x))
+tf_chol <- function(x)
+  tf_transpose(tf$cholesky(x))
+
+tf_chol2inv <- function(U) {
+  n <- dim(U)[[2]]
+  eye <- fl(add_first_dim(diag(n)))
+  eye <- expand_to_batch(eye, U)
+  L <- tf$matrix_transpose(U)
+  tf$cholesky_solve(L, eye)
+}
+
+tf_cov2cor <- function(V) {
+  # sweep out variances
+  diag <- tf$matrix_diag_part(V)
+  diag <- tf$expand_dims(diag, 2L)
+  Is <- tf$sqrt(fl(1) / diag)
+  V <- Is * V
+  V <- tf_transpose(V)
+  V <- V * Is
+  # set diagonals to 1
+  n <- dim(V)[[2]]
+  new_diag <- fl(t(rep(1, n)))
+  new_diag <- expand_to_batch(new_diag, V)
+  tf$matrix_set_diag(V, new_diag)
+}
 
 tf_not <- function(x)
   tf_as_float(!tf_as_logical(x))
@@ -203,19 +420,28 @@ tf_neq <- function(x, y)
   tf_as_float(x != y)
 
 # inverse link functions in tensorflow
-tf_iprobit <- function (x)
+tf_iprobit <- function(x)
   (tf$erf(x / fl(sqrt(2))) + fl(1)) / fl(2)
 
-tf_icloglog <- function (x)
+tf_icloglog <- function(x)
   fl(1) - tf$exp(-tf$exp(x))
 
-tf_icauchit <- function (x)
+tf_icauchit <- function(x)
   fl(1 / pi) * tf$atan(x) + fl(0.5)
 
-tf_imultilogit <- function (x) {
-  zeros <- tf$zeros(shape(nrow(x), 1L), tf_float())
-  latent <- tf$concat(list(x, zeros), 1L)
+tf_imultilogit <- function(x) {
+  batch_size <- tf$shape(x)[[0]]
+  shape <- c(batch_size, dim(x)[[2]], 1L)
+  zeros <- tf$zeros(shape, tf_float())
+  latent <- tf$concat(list(x, zeros), 2L)
   tf$nn$softmax(latent)
+}
+
+# a version of tf$concat that automatically expands out the first dimension if
+# necessary
+tf_concat <- function(values, axis) {
+  values <- match_batches(values)
+  tf$concat(values = values, axis = axis)
 }
 
 # map R's extract and replace syntax to tensorflow, for use in operation nodes
@@ -224,13 +450,19 @@ tf_imultilogit <- function (x) {
 #   tf_index - rank 1 tensor giving index to subsetted elements in flattened
 #     input tensor
 #   dims_out - dimension of output array
-tf_extract <- function (x, nelem, index, dims_out) {
+tf_extract <- function(x, nelem, index, dims_out) {
 
   # flatten tensor, gather using index, reshape to output dimension
-  tensor_in_flat <- tf$reshape(x, shape(nelem))
+  tensor_in_flat <- tf$reshape(x, shape(-1, nelem))
   tf_index <- tf$constant(as.integer(index), dtype = tf$int32)
-  tensor_out_flat <- tf$gather(tensor_in_flat, tf_index)
-  tensor_out <- tf$reshape(tensor_out_flat, to_shape(dims_out))
+  tensor_out_flat <- tf$gather(tensor_in_flat, tf_index, axis = 1L)
+
+  # reshape, handling unknown dimensions even when the output has 0-dimension
+  # (which prevents us from just using -1 on the first dimension)
+  batch_size <- tf$shape(x)[[0]]
+  shape_list <- c(list(batch_size), to_shape(dims_out))
+  shape_out <- tf$stack(shape_list)
+  tensor_out <- tf$reshape(tensor_out_flat, shape_out)
   tensor_out
 
 }
@@ -238,10 +470,15 @@ tf_extract <- function (x, nelem, index, dims_out) {
 # using tf$concat, update the elements of a tensor `ref`, putting the new
 # values, a tensor `updates` at the elements given by the R vector `index` (in
 # 0-indexing)
-tf_recombine <- function (ref, index, updates) {
+tf_recombine <- function(ref, index, updates) {
+
+  # expand out any data to match the batch dimensions
+  out_list <- match_batches(list(ref, updates))
+  ref <- out_list[[1]]
+  updates <- out_list[[2]]
 
   # vector denoting whether an element is being updated
-  nelem <- ref$get_shape()$as_list()[1]
+  nelem <- dim(ref)[[2]]
   replaced <- rep(0, nelem)
   replaced[index + 1] <- seq_along(index)
   runs <- rle(replaced)
@@ -254,16 +491,16 @@ tf_recombine <- function (ref, index, updates) {
 
   # list of non-updated values
   keep_idx <- which(runs$values == 0)
-  keep_list <- lapply(keep_idx, function (i) {
+  keep_list <- lapply(keep_idx, function(i) {
     idx <- starts_old[i] + 0:(runs$lengths[i] - 1) - 1
-    tf$reshape(ref[idx], shape(length(idx), 1))
+    tf$reshape(ref[, idx, ], shape(-1, length(idx), 1))
   })
 
   run_id <- runs$values[runs$values != 0]
   update_idx <- match(run_id, runs$values)
-  # get them in order increasing order
-  update_list <- lapply(run_id, function (i) {
-    tf$reshape(updates[i - 1], shape(1, 1))
+  # get them in  increasing order
+  update_list <- lapply(run_id, function(i) {
+    tf$reshape(updates[, i - 1, ], shape(-1, 1, 1))
   })
 
   # combine them
@@ -272,21 +509,26 @@ tf_recombine <- function (ref, index, updates) {
   full_list[update_idx] <- update_list
 
   # concatenate the vectors
-  result <- tf$concat(full_list, 0L)
+  result <- tf$concat(full_list, 1L)
 
-  # rotate it
-  result <- tf$reshape(result, shape(result$get_shape()$as_list()[1]))
   result
 
 }
 
+# flatten a tensor x, ignoring the first (batch) dimension, and optionally
+# adding a trailing 1 to make it an explicit column vector
+tf_flatten <- function(x, extra_ones = 0) {
+  nelem <- prod(unlist(dim(x)[-1]))
+  out_dim <- c(-1, nelem, rep(1, extra_ones))
+  tf$reshape(x, to_shape(out_dim))
+}
+
 # replace elements in a tensor with another tensor
-tf_replace <- function (x, replacement, index, dims) {
+tf_replace <- function(x, replacement, index, dims) {
 
   # flatten original tensor and new values
-  nelem <- prod(dims)
-  x_flat <- tf$reshape(x, shape(nelem))
-  replacement_flat <- tf$reshape(replacement, shape(length(index)))
+  x_flat <- tf_flatten(x, 1)
+  replacement_flat <- tf_flatten(replacement, 1)
 
   # update the values into a new tensor
   result_flat <- tf_recombine(ref = x_flat,
@@ -294,20 +536,65 @@ tf_replace <- function (x, replacement, index, dims) {
                               updates = replacement_flat)
 
   # reshape the result
-  result <- tf$reshape(result_flat, to_shape(dims))
+  result <- tf$reshape(result_flat,
+                       to_shape(c(-1, dims)))
   result
 
 }
 
 # mapping of cbind and rbind to tf$concat
-tf_cbind <- function (...) {
+tf_cbind <- function(...) {
   elem_list <- list(...)
-  tf$concat(elem_list, 1L)
+  tf$concat(elem_list, axis = 2L)
 }
 
-tf_rbind <- function (...) {
+tf_rbind <- function(...) {
   elem_list <- list(...)
-  tf$concat(elem_list, 0L)
+  tf$concat(elem_list, axis = 1L)
+}
+
+tf_abind <- function(..., axis) {
+  elem_list <- list(...)
+  tf$concat(elem_list, axis = axis)
+}
+
+tf_only_eigenvalues <- function(x) {
+  vals <- tf$self_adjoint_eigvals(x)
+  dim <- tf$constant(1L, shape = list(1))
+  tf$reverse(vals, dim)
+}
+
+tf_extract_eigenvectors <- function(x) {
+  vecs <- x[[2]]
+  dim <- tf$constant(2L, shape = list(1))
+  tf$reverse(vecs, dim)
+}
+
+tf_extract_eigenvalues <- function(x) {
+  vals <- x[[1]]
+  dim <- tf$constant(1L, shape = list(1))
+  tf$reverse(vals, dim)
+}
+
+tf_self_distance <- function(x1) {
+  tf_distance(x1, x1)
+}
+
+tf_distance <- function(x1, x2) {
+
+  n1 <- dim(x1)[[2]]
+  n2 <- dim(x2)[[2]]
+
+  x1 <- tf$tile(tf$expand_dims(x1, 3L), list(1L, 1L, 1L, n2))
+  x2 <- tf$transpose(x2, perm = c(0L, 2L, 1L))
+  x2 <- tf$tile(tf$expand_dims(x2, 1L), list(1L, n1, 1L, 1L))
+
+  dists <- (x1 - x2) ^ 2
+  dist <- tf$reduce_sum(dists, axis = 2L)
+  dist <- tf$sqrt(dist)
+
+  dist
+
 }
 
 # combine as module for export via internals
@@ -317,9 +604,16 @@ tf_functions_module <- module(tf_as_logical,
                               tf_lchoose,
                               tf_lbeta,
                               tf_chol,
+                              tf_chol2inv,
                               tf_flat_to_chol,
+                              tf_corrmat_row,
                               tf_flat_to_chol_correl,
                               tf_chol_to_symmetric,
+                              tf_colmeans,
+                              tf_rowmeans,
+                              tf_colsums,
+                              tf_rowsums,
+                              tf_kronecker,
                               tf_sweep,
                               tf_not,
                               tf_and,
@@ -336,6 +630,12 @@ tf_functions_module <- module(tf_as_logical,
                               tf_imultilogit,
                               tf_extract,
                               tf_recombine,
+                              tf_flatten,
                               tf_replace,
                               tf_cbind,
-                              tf_rbind)
+                              tf_rbind,
+                              tf_only_eigenvalues,
+                              tf_extract_eigenvectors,
+                              tf_extract_eigenvalues,
+                              tf_self_distance,
+                              tf_distance)

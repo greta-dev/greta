@@ -3,7 +3,6 @@
 \name{distribution}
 \alias{distribution}
 \alias{distribution<-}
-\alias{distribution}
 \title{define a distribution over data}
 \usage{
 distribution(greta_array) <- value
