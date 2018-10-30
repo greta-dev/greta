@@ -2,10 +2,12 @@
 
 A multi-variable Bayesian linear regression model using the attitude data
 
-```{r multiple_linear_greta}
-# the predictors as a matrix
+```{r multiple_linear_data}
+data(attitude)
 design <- as.matrix(attitude[, 2:7])
+```
 
+```{r multiple_linear_greta}
 int <- normal(0, 10)
 coefs <- normal(0, 10, dim = ncol(design))
 sd <- cauchy(0, 3, truncation = c(0, Inf))

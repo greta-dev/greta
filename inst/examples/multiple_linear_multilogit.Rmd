@@ -4,7 +4,6 @@ A multi-variable Bayesian categorical regression model using the iris data.
 
 ```{r multiple_linear_multilogit_data}
 data(iris)
-
 X <- as_data(cbind(1, iris[, 1:4]))
 y <- model.matrix(~ Species - 1, iris)
 P <- ncol(X)

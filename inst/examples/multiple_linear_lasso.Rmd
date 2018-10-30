@@ -2,11 +2,13 @@
 
 A multi-variable Bayesian linear regression model using an exponential-normal prior for the coefficients.
 
-```{r multiple_linear_lasso_greta}
-# the predictors as a matrix
+```{r multiple_linear_lasso_data}
+data(attitude)
 design <- as.matrix(attitude[, 2:7])
+```
 
-int   <- normal(0, 10)
+```{r multiple_linear_lasso_greta}
+int <- normal(0, 10)
 sd <- cauchy(0, 3, truncation = c(0, Inf))
 
 tau <- exponential(0.5, dim = ncol(design)) 

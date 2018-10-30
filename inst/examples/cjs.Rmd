@@ -9,7 +9,8 @@ The [introductory book](http://www.phidot.org/software/mark/docs/book/) to the p
 ```{r cjs_data, highlight = FALSE}
 n_obs <- 100
 n_time <- 20
-y <- matrix(sample(c(0, 1), size = (n_obs * n_time), replace = TRUE), ncol = n_time)
+y <- matrix(sample(c(0, 1), size = (n_obs * n_time), replace = TRUE),
+            ncol = n_time)
 ```
 </div>
 

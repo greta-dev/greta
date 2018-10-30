@@ -5,7 +5,7 @@ output: html_document
 
 An example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Although modelled concurrently, the random variables for each species are independent. We first simulate some data to model followed by the `greta` code.
 
-Where a single observation per species and location would have a bernoulli error distribution, multiple observations for each species and location have a binomial distribution. The small change in the code is commented below.
+Where a single observation per species and location would have a bernoulli error distribution, multiple observations for each species and location have a binomial distribution.
 
 When modelling multiple species (or other grouping factor), we need an extra step in constructing the linear predictor. In order to add multiple `greta` arrays together *for each species* we can use the `sweep()` function.
 
@@ -22,28 +22,17 @@ occupancy <- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_sites)
 
 #### greta code
 ```{r multispecies_bernoulli_greta}
-# load greta
-library(greta)
-
-# create matrices to greta arrays
-X <- as_data(env)
-Y <- as_data(occupancy)
-
-# variables
-alpha <- normal(0,10, dim = n_species)
+alpha <- normal(0, 10, dim = n_species)
 beta <- normal(0, 10, dim = c(n_env, n_species))
 
-env_effect <- X %*% beta
+env_effect <- env %*% beta
 
-# matrix addition with `sweep()` create interim variable
+# add intercepts for all species
 linear_predictor <- sweep(env_effect, 2, alpha, FUN = '+')
 
 # ilogit of linear predictor
 p <- ilogit(linear_predictor)
 
 # a single observation means our data are bernoulli distributed
-distribution(Y) <- bernoulli(p)
-# for n_obs repeat observations per species/location, we could use the binomial
-# distribution:
-# distribution(Y) <- binomial(n_obs, p) 
+distribution(occupancy) <- bernoulli(p)
 ```

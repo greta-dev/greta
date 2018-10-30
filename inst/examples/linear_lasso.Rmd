@@ -4,11 +4,11 @@ In this example we infer the parameters of one-variable Bayesian linear regressi
 
 ```{r linear_lasso_greta}
 # variables & priors
-int  <- variable()
-sd   <- inverse_gamma(1, 1)
+int <- variable()
+sd <- inverse_gamma(1, 1)
 
 lambda <- gamma(1, 1)
-tau  <- exponential(0.5 * lambda**2)
+tau <- exponential(0.5 * lambda**2)
 coef <- normal(0, tau)
 
 # linear predictor

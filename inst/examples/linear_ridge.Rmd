@@ -4,10 +4,10 @@ Here we estimate a simple, one-variable Bayesian linear regression model that us
 
 ```{r linear_ridge_greta}
 # variables & priors
-int  <- variable()
-sd   <- cauchy(0, 3, truncation = c(0, Inf))
+int <- variable()
+sd <- cauchy(0, 3, truncation = c(0, Inf))
 
-tau  <- inverse_gamma(1, 1)
+tau <- inverse_gamma(1, 1)
 coef <- normal(0, tau)
 
 # linear predictor

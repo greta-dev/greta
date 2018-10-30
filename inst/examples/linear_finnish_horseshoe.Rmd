@@ -1,6 +1,6 @@
 ### Regularized horseshoe prior
 
-The [regularized (finnished) horseshoe](https://projecteuclid.org/euclid.ejs/1513306866) remedies a problem of the original horseshoe: large, unregularized values for the coefficients. This is especially problematic in scenarios where the parameters are only weakly identified by the data, as in logistic regression with perfectly seperable data.
+The [regularized ('Finnish') horseshoe](https://projecteuclid.org/euclid.ejs/1513306866) remedies a problem of the original horseshoe: large, unregularized values for the coefficients. This is especially problematic in scenarios where the parameters are only weakly identified by the data, as in logistic regression with perfectly seperable data.
 
 ```{r linear_finnish_horseshoe_greta}
 regularized_horseshoe <- function (tau = 1,  c = 1, dim = NULL) {
@@ -12,8 +12,8 @@ regularized_horseshoe <- function (tau = 1,  c = 1, dim = NULL) {
 }
 
 # variables & priors
-int  <- variable()
-sd   <- inverse_gamma(1, 1)
+int <- variable()
+sd <- inverse_gamma(1, 1)
 coef <- regularized_horseshoe()
 
 # linear predictor

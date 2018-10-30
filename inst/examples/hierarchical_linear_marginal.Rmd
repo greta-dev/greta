@@ -15,8 +15,7 @@ Z <- model.matrix(~ Species + Sepal.Length * Species - 1, data = iris)
 G  <- zeros(n_species * 2, n_species * 2)
 
 for (s in unique(species_id)) {
-  G_sd <- diag(2)
-  G[c(s, s + n_species), c(s, s + n_species)] <- G_sd
+  G[c(s, s + n_species), c(s, s + n_species)] <- diag(2)
 }
 
 mu <- int + coef * iris$Sepal.Width

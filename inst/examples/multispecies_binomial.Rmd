@@ -3,8 +3,7 @@ output: html_document
 ---
 ### Multispecies
 
-Fitting a multispecies model of normally distributed data
-
+Fitting a multispecies model of binomially-distributed data
 
 #### data
 ```{r data_multispecies_binomial, highlight = FALSE}
@@ -20,18 +19,9 @@ occupancy <- matrix(rbinom(n_species * n_sites, n_obs, 0.5), nrow = n_sites)
 
 #### greta code
 ```{r multispecies_binomial_greta}
-# load greta
-library(greta)
-
-# data
-X <- as_data(env)
-Y <- as_data(occupancy)
-n_env <- ncol(X)
-
-# variables
 alpha <- normal(0,10, dim = n_species)
 beta <- normal(0, 10, dim = c(n_env, n_species))
-env_effect <- X %*% beta #not transposed environmental matrix
+env_effect <- env %*% beta
 
 # matrix addition with `sweep()` create interim variable
 eta <- sweep(env_effect, 2, alpha, FUN = '+')
@@ -39,9 +29,5 @@ eta <- sweep(env_effect, 2, alpha, FUN = '+')
 # ilogit of linear predictor
 p <- ilogit(eta)
 
-# a single observation means our data are bernoulli distributed
-distribution(Y) = binomial(n_obs, p)
-
-# create model object with the things we want samples of
-m <- model(alpha, beta)
+distribution(occupancy) <- binomial(n_obs, p)
 ```

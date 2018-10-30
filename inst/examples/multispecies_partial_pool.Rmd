@@ -5,8 +5,6 @@ output: html_document
 
 An example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Instead of assuming independence of species regression coefficients, we assume they are drawn from a shared distribution. We partially pool species responses. This gives us not ony the regression coefficients for each species but also a global average coefficient and a measure of variation between species responses to environmental gradients.
 
-We first simulate some data to model followed by the `greta` code.
-
 #### data
 ```{r data_multispecies_partially_pool, highlight = FALSE}
 # make fake data
@@ -20,14 +18,6 @@ occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)
 
 #### greta code
 ```{r multispecies_partially_pool_greta}
-# load greta
-library(greta)
-
-# create matrices to greta arrays
-X <- as_data(env)
-Y <- as_data(occupancy)
-
-# variables
 global_alpha <- normal(0, 10, dim = 1)
 global_alpha_sd <- uniform(0, 10, dim = 1) 
 alpha <- normal(global_alpha, global_alpha_sd, dim = n_species)
@@ -36,14 +26,13 @@ global_betas <- normal(0, 10, dim = n_env)
 global_betas_sd <- uniform(0, 10, dim = n_env)
 beta <- normal(global_betas, global_betas_sd, dim = c(n_env, n_species))
 
-env_effect <- X %*% beta
+env_effect <- env %*% beta
 
-# matrix addition with `sweep()` create interim variable
+# add intercepts for all species
 linear_predictor <- sweep(env_effect, 2, alpha, FUN = '+')
 
 # ilogit of linear predictor
 p <- ilogit(linear_predictor)
 
-# a single observation means our data are bernoulli distributed
-distribution(Y) <- bernoulli(p)
+distribution(occupancy) <- bernoulli(p)
 ```
