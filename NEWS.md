@@ -57,8 +57,7 @@ This is a very large update which adds a number of features and major speed impr
 
 ### misc
 
-* `plot.greta_model()` now returns a `DiagrammeR::grViz` object (thanks to @flyaflya). This is less modifiable, but renders the plot more much consistently across different environments and notebook types.
-
+* `plot.greta_model()` now returns a `DiagrammeR::grViz` object (thanks to @flyaflya). This is less modifiable, but renders the plot more much consistently across different environments and notebook types. The `DiagrammeR` `dgr_graph` object use to create the `grViz` object is included as an attribute of this object, named `"dgr_graph"`.
 
 ## documentation
 

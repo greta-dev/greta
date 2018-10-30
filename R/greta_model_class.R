@@ -210,8 +210,10 @@ print.greta_model <- function(x, ...) {
 #'   \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
 #'   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 #'
-#' @return \code{plot} - a
-#'   \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}} object.
+#' @return \code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}}
+#'   object, with the
+#'   \code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph}} object used to
+#'   create it as an attribute \code{"dgr_graph"}.
 #'
 #' @export
 plot.greta_model <- function(x,
@@ -384,6 +386,8 @@ plot.greta_model <- function(x,
                                       attr_type = "graph"))
 
 
-  DiagrammeR::render_graph(gr)
+  grViz <- DiagrammeR::render_graph(gr)
+  attr(grViz, "dgr_graph") <- gr
+  grViz
 
 }

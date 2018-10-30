@@ -40,8 +40,10 @@ in violet.}
 \value{
 \code{model} - a \code{greta_model} object.
 
-\code{plot} - a
-  \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}} object.
+\code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}}
+  object, with the
+  \code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph}} object used to
+  create it as an attribute \code{"dgr_graph"}.
 }
 \description{
 Create a \code{greta_model} object representing a statistical
