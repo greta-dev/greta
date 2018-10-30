@@ -1,14 +1,6 @@
 ---
 title: "Get started with greta"
-output:
-  html_document:
-    css: greta.css
-    toc: yes
-    toc_float:
-      collapsed: false
-      toc_depth: 4
-    theme: lumen
-    highlight: default
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Get started with greta}
@@ -58,7 +50,7 @@ library(greta)
 
 ### TensorFlow
 
-Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.8.0 or higher) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package (version 0.3.0 or higher). greta exports `install_tensorflow()` from the `tensorflow` R package, which you can use to install the latest versions of these packages from within your R session. The best way to install these differs depending on how you installed Python.
+Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.10.0 or higher) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package (version 0.3.0 or higher). greta exports `install_tensorflow()` from the `tensorflow` R package, which you can use to install the latest versions of these packages from within your R session. The best way to install these differs depending on how you installed Python.
 
 If you don't yet have these installed, the startup message for the greta package provides instructions on how to install them for your system. If in doubt just follow those. If you want greta to run as fast as possible on your computer's CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel's MKL routines, which provide a 2-8 fold sampling speedup on most models. 
 

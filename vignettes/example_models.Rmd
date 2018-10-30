@@ -1,14 +1,6 @@
 ---
 title: "Example models"
-output:
-  html_document:
-    css: greta.css
-    toc: yes
-    toc_float:
-      collapsed: false
-    toc_depth: 3
-    theme: lumen
-    highlight: default
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Example models}
