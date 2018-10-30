@@ -7,28 +7,30 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 
-CODE_OF_CONDUCT.md
-.EDIT_WEBSITE.md
-LICENSE
-cran-comments.md
+^CODE_OF_CONDUCT\.md$
+^\.EDIT_WEBSITE\.md$
+^LICENSE$
+^cran-comments\.md$
 
-logos
-docs
-inst/pkgdown
+^logos$
+^inst/pkgdown$
 
-index.Rmd
-index_files
-index_cache
-index.md
+^index\.Rmd$
+^index_files$
+^index_cache$
+^index\.md$
 
-README.Rmd
-README.md
-README_files
-README_cache
+^README\.Rmd$
+^\.README\.Rmd$
+^README\.md$
+^README_files$
+^README_cache$
 
-vignettes/get_started_cache
-vignettes/example_models_cache
-vignettes/webpages
-vignettes/analyses
+^vignettes/get_started_cache$
+^vignettes/example_models_cache$
+^vignettes/webpages$
+^vignettes/analyses$
 
-man/figures/vis-1.png
+^man/figures/vis-1\.png$
+^man/figures/plot_greta_legend\.R$
+
