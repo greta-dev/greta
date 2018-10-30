@@ -45,7 +45,7 @@ reference:
 
 navbar:
   structure:
-    left: [get_started, docs, models, analyses, more]
+    left: [get_started, docs, examples, analyses, more]
     right: [forum, twitter, github]
   components:
     home: ~
@@ -55,8 +55,8 @@ navbar:
     get_started:
       text: get started
       href: articles/get_started.html
-    models:
-      text: models
+    examples:
+      text: examples
       href: articles/example_models.html
     analyses:
       text: analyses

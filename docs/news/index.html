@@ -88,7 +88,7 @@
   <a href="../reference/index.html">docs</a>
 </li>
 <li>
-  <a href="../articles/example_models.html">models</a>
+  <a href="../articles/example_models.html">examples</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -263,7 +263,7 @@
 <a href="#misc-1" class="anchor"></a>misc</h3>
 <ul>
 <li>
-<code><a href="../reference/model.html">plot.greta_model()</a></code> now returns a <code><a href="http://www.rdocumentation.org/packages/DiagrammeR/topics/grViz">DiagrammeR::grViz</a></code> object (thanks to <a href='http://github.com/flyaflya'>@flyaflya</a>). This is less modifiable, but renders the plot more much consistently across different environments and notebook types.</li>
+<code><a href="../reference/model.html">plot.greta_model()</a></code> now returns a <code><a href="http://www.rdocumentation.org/packages/DiagrammeR/topics/grViz">DiagrammeR::grViz</a></code> object (thanks to <a href='http://github.com/flyaflya'>@flyaflya</a>). This is less modifiable, but renders the plot more much consistently across different environments and notebook types. The <code>DiagrammeR</code> <code>dgr_graph</code> object use to create the <code>grViz</code> object is included as an attribute of this object, named <code>"dgr_graph"</code>.</li>
 </ul>
 </div>
 </div>
@@ -283,6 +283,12 @@
 <li>added tests of the validity of posterior samples drawn by MCMC (for known distributions and with Geweke tests)</li>
 </ul>
 </div>
+</div>
+    <div id="greta-0-2-5" class="section level1">
+<h1 class="page-header">
+<a href="#greta-0-2-5" class="anchor"></a>greta 0.2.5<small> Unreleased </small>
+</h1>
+<p>Minor patch to handle an API change in the progress package. No changes in functionality.</p>
 </div>
     <div id="greta-0-2-4" class="section level1">
 <h1 class="page-header">
@@ -375,6 +381,7 @@
       <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
         <li><a href="#greta-0-3-0-in-development">0.3.0</a></li>
+        <li><a href="#greta-0-2-5">0.2.5</a></li>
         <li><a href="#greta-0-2-4">0.2.4</a></li>
         <li><a href="#greta-0-2-3">0.2.3</a></li>
         <li><a href="#greta-0-2-2">0.2.2</a></li>
