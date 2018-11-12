@@ -629,8 +629,9 @@ sampler <- R6Class(
           num_results = sampler_burst_length %/% sampler_thin,
           current_state = free_state,
           kernel = sampler_kernel,
-          num_burnin_steps = 0L,
-          num_steps_between_results = sampler_thin)
+          num_burnin_steps = tf$constant(0L, dtype = tf$int64),
+          num_steps_between_results = tf$cast(sampler_thin, tf$int64),
+          parallel_iterations = 1L)
       )
 
     },
@@ -763,7 +764,7 @@ hmc_sampler <- R6Class(
 
       # tensors for sampler parameters
       dag$tf_run(hmc_epsilon <- tf$placeholder(dtype = tf_float()))
-      dag$tf_run(hmc_L <- tf$placeholder(dtype = tf$int32))
+      dag$tf_run(hmc_L <- tf$placeholder(dtype = tf$int64))
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
       dag$tf_run(

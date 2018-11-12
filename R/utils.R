@@ -134,7 +134,7 @@ check_tf_version <- function(alert = c("none",
 
       pkg <- reticulate::import("pkg_resources")
       tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-      tfp_version_valid <- utils::compareVersion("0.3.0", tfp_version) != 1
+      tfp_version_valid <- utils::compareVersion("0.5.0", tfp_version) != 1
 
       if (!tfp_version_valid) {
         text <- paste0("you have TensorFlow Probability version ", tfp_version)
@@ -172,7 +172,7 @@ check_tf_version <- function(alert = c("none",
 
       # combine the problem and solution messages
       text <- paste0("\n\ngreta requires TensorFlow (>=1.10.0) ",
-                     "and Tensorflow Probability (>=0.3.0), ",
+                     "and Tensorflow Probability (>=0.5.0), ",
                      "but ", text, ". Use:\n\n",
                      install,
                      "\nto install the latest version.",

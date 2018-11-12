@@ -1,3 +1,8 @@
+# greta 0.3.0.9001
+
+* mcmc now works with TensorFlow Probability version 0.5.0 (#248)
+
+
 # greta 0.3.0
 
 This is a very large update which adds a number of features and major speed improvements. We now depend on the TensorFlow Probability Python package, and use functionality in that package wherever possible. Sampling a simple model now takes ~10s, rather than ~2m (>10x speedup).
