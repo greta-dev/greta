@@ -658,6 +658,17 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
           }
 )
 
+setMethod(kronecker, signature(X = "array", Y = "greta_array"),
+            function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
+                   ...) {
+
+              kronecker(as.greta_array(X), Y, FUN, make.dimnames = FALSE)
+
+          }
+)
+
+
+
 #' @rdname overloaded
 #' @export
 backsolve <- function(r, x, k = ncol(r),
