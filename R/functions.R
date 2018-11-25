@@ -658,6 +658,7 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
           }
 )
 
+#' @import methods
 setMethod(kronecker, signature(X = "array", Y = "greta_array"),
             function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
                    ...) {
@@ -667,6 +668,7 @@ setMethod(kronecker, signature(X = "array", Y = "greta_array"),
           }
 )
 
+#' @import methods
 setMethod(kronecker, signature(X = "greta_array", Y = "array"),
             function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
                    ...) {
@@ -675,8 +677,6 @@ setMethod(kronecker, signature(X = "greta_array", Y = "array"),
 
           }
 )
-
-
 
 #' @rdname overloaded
 #' @export
