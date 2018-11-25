@@ -667,6 +667,15 @@ setMethod(kronecker, signature(X = "array", Y = "greta_array"),
           }
 )
 
+setMethod(kronecker, signature(X = "greta_array", Y = "array"),
+            function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
+                   ...) {
+
+              kronecker(X, as.greta_array(Y), FUN, make.dimnames = FALSE)
+
+          }
+)
+
 
 
 #' @rdname overloaded
