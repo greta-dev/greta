@@ -74,6 +74,11 @@ test_that("matrix functions work as expected", {
 
 })
 
+test_that("kronecker works with greta/base array arguments", {
+
+    
+})
+
 test_that("aperm works as expected", {
 
   skip_if_not(check_tf_version())
