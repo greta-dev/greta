@@ -90,9 +90,7 @@ test_that("kronecker works with greta/base array arguments", {
 
     compare_op(base_out, grab(greta_out1))
     compare_op(base_out, grab(greta_out2))
-
-
-
+    
 })
 
 test_that("aperm works as expected", {
