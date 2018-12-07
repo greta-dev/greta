@@ -75,8 +75,17 @@ test_that("matrix functions work as expected", {
 })
 
 test_that("kronecker works with greta/base array arguments", {
+    a <- rWishart(1, 6, diag(5))[, , 1]
+    b <- chol(a)
+    a_greta <- as_data(a)
+    b_greta <- as_data(b)
 
-    
+    base_out <- kronecker(a, b)
+    greta_out1 <- kronecker(a_greta, b)
+    greta_out2 <- kronecker(a, b_greta)
+
+    compare_op(base_out, grab(greta_out1))
+    compare_op(base_out, grab(greta_out2))
 })
 
 test_that("aperm works as expected", {
