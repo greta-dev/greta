@@ -71,13 +71,7 @@ marginalise <- function(fun, variable, method) {
     stop ("'variable' must be a variable greta array with a distribution")
   }
 
-  # handle case when the method is passed like: `laplace_approximation`, rather
-  # than `laplace_approximation()`
-  if (is.function(method)) {
-    method <- method()
-  }
-
-  if (!inherits(method, "marginalisation_method")) {
+  if (!inherits(method, "marginaliser")) {
     stop ("'method' must be a valid marginalisation method. ",
           "See ?marginalise for options")
   }
@@ -106,8 +100,14 @@ marginalise <- function(fun, variable, method) {
 #'   the distribution, that approximation error will be minimal.
 discrete_marginalisation <- function(values) {
 
-  if (inherits(values, "greta_array")) {
-    stop ("'values' must be an R numeric vector, not a greta array")
+  if (!is.vector(values) | !is.numeric(values)) {
+    msg <- "'values' must be an R numeric vector"
+
+    if (inherits(values, "greta_array")) {
+      msg <- paste0(msg, ", not a greta array")
+    }
+
+    stop (msg)
   }
 
   # define the marginalisation function
@@ -123,9 +123,11 @@ discrete_marginalisation <- function(values) {
 }
 
 # check that the distribution is discrete
-discrete_check <- function(node) {
+discrete_check <- function(distrib) {
   if (!distrib$discrete) {
-    stop ("this marginalisation method can only be used with discrete distributions")
+    stop ("this marginalisation method can only be used ",
+          "with discrete distributions",
+          call. = FALSE)
   }
 }
 
