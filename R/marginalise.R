@@ -86,7 +86,7 @@ marginalise <- function(fun, variable, method) {
 #' @rdname marginalisation
 #' @export
 #'
-#' @param fun an R vector giving values at which to evaluate the function for a
+#' @param values an R vector giving values at which to evaluate the function for a
 #'   discrete marginalisation
 #'
 #' @details \code{discrete_marginalisation} can only be used with discrete

@@ -21,7 +21,7 @@ random variable to marginalise}
 \item{method}{a \code{marginaliser} object giving the method for carrying out
 the marginalisation}
 
-\item{fun}{an R vector giving values at which to evaluate the function for a
+\item{values}{an R vector giving values at which to evaluate the function for a
 discrete marginalisation}
 }
 \value{
