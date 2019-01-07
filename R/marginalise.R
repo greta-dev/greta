@@ -31,9 +31,9 @@
 #' #   mu <- theta ^ n
 #' #   distribution(y) <- normal(mu, sd)
 #'
-#' # the function to marginalise over
-#' # (only the variable to marginalise is passed in)
-#' fun <- function (n) {
+#' # the function to marginalise over - the variable to marginalise
+#' # must be first, others must be passed to marginalise()
+#' fun <- function (n, theta, mu, sd) {
 #'   mu <- theta ^ n
 #'   distribution(y) <- normal(mu, sd)
 #' }
@@ -41,7 +41,10 @@
 #' # integrate the function values w.r.t. the poisson distribution
 #' marginalise(fun,
 #'             poisson(lambda),
-#'             method = discrete_marginalisation(values = 0:10))
+#'             method = discrete_marginalisation(values = 0:10),
+#'             theta = theta,
+#'             mu = mu,
+#'             sd = sd)
 #'
 #' m <- model(lambda)
 #' draws <- mcmc(m, hmc())
@@ -52,19 +55,29 @@ NULL
 #' @export
 #'
 #' @param fun an R function to integrate with respect to the random variable.
-#'   Must take a single argument - a greta array giving the value of the random
-#'   variable
+#'   The first argument must be - a greta array giving the value of the random
+#'   variable, any subsequent arguments must passed in via the \dots argument.
 #' @param variable a variable greta array with a distribution, representing the
 #'   random variable to marginalise
 #' @param method a \code{marginaliser} object giving the method for carrying out
 #'   the marginalisation
-marginalise <- function(fun, variable, method) {
+#' @param \dots named greta arrays to be passed to \code{fun}
+marginalise <- function(fun, variable, method, ...) {
 
+  # get the distribution for the random variable
   distrib <- get_node(variable)$distribution
 
   # check the inputs
   if (!is.function(fun)) {
     stop ("'fun' must be an R function")
+  }
+
+  # check the additional arguments to fun are given in dots
+  dots <- list(...)
+  dot_names <- names(dots)
+  expected_names <- names(formals(fun)[-1])
+  if (!all(expected_names %in% dot_names)) {
+    stop ("all arguments to 'fun' must be passed, named, to marginalise")
   }
 
   if (!inherits(distrib, "distribution_node")) {
@@ -79,9 +92,97 @@ marginalise <- function(fun, variable, method) {
   # check the distribution is compatible with the method
   method$distribution_check(distrib)
 
+  # excise the variable from the distribution
+  distrib$remove_target()
+
   stop ("not yet implemented")
 
+  # turn the greta function into a TF conditional density function; doing
+  # something very similar to as_tf_function(), but giving a function that
+  # returns a tensorflow scalar for the density
+  conditional_joint_density <- as_conditional_density(fun)
+
+  # get a tf function from the method which will turn that conditional density
+  # function into a marginal density (conditional on the inputs to the
+  # distribution) to be added to the overall model density
+  method$tf_marginaliser
+
+  # pass the conditional density function and the marginaliser TF function to a
+  # marginalisation distribution (needs an R6 class)
+
+  # create the distribution
+  vble <- distrib(
+    "marginalisation",
+    marginaliser = method,
+    conditional_density_fun = conditional_joint_density,
+    distribution = distrib,
+    dots = dots
+  )
+
+  # excise the variable from the marginalisation distribution
+  distrib <- get_node(variable)$distribution
+  distrib$remove_target()
+
+  # return nothing
+  invisible(NULL)
+
 }
+
+marginalisation_distribution <- R6Class(
+  "marginalisation_distribution",
+  inherit = distribution_node,
+  public = list(
+
+    tf_marginaliser = NULL,
+    conditional_density_fun = NULL,
+
+    initialize = function(marginaliser,
+                          conditional_density_fun,
+                          distribution,
+                          dots) {
+
+      # initialize class, and add methods
+      super$initialize("marginalisation")
+      self$tf_marginaliser <- marginaliser$tf_marginaliser
+      self$conditional_density_fun <- conditional_density_fun
+
+      # add the dots (extra inputs to conditional_density_fun) as parameters
+      dot_nodes <- lapply(dots, get_node)
+      for (i in seq_len(dot_nodes)) {
+        self$add_parameter(dot_nodes[[i]],
+                           paste("input", i))
+      }
+
+      # add the distribution as a parameter
+      self$add_parameter(distribution, "distribution")
+
+    },
+
+    tf_distrib = function(parameters, dag) {
+
+      # do the marginalisation
+
+      # but it has no target!!
+      # should we handle distributions with no targets as a special case?
+      # or should this not be a distribution after all?
+
+      log_prob <- function(x) {
+
+        self$tf_marginaliser(self$conditional_density_fun,
+                             parameters$distribution,
+                             parameters[names(parameters) != "distribution"])
+
+      }
+
+      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+
+    },
+
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+
+  )
+)
 
 #' @rdname marginalisation
 #' @export
@@ -111,12 +212,21 @@ discrete_marginalisation <- function(values) {
   }
 
   # define the marginalisation function
-  marginalisation_function <- function() {
+  tf_marginaliser <- function(conditional_density_fun,
+                              distribution,
+                              other_args) {
+    # base this on mixture;
+    # 1. get weights from the distribution (use its log_pdf tf method on the
+    #   values)
+    # 2. compute the conditional joint density for each value (passing in
+    #   other_args)
+    # 3. compute a weighted sum with tf_reduce_log_sum_exp()
+
     stop ("not yet implemented")
   }
 
   as_marginaliser(name = "discrete",
-                  method = marginalisation_function,
+                  tf_marginaliser = tf_marginaliser,
                   parameters = list(values = values),
                   distribution_check = discrete_check)
 

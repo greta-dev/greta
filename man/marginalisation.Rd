@@ -6,20 +6,22 @@
 \alias{discrete_marginalisation}
 \title{direct marginalisation of random variables}
 \usage{
-marginalise(fun, variable, method)
+marginalise(fun, variable, method, ...)
 
 discrete_marginalisation(values)
 }
 \arguments{
 \item{fun}{an R function to integrate with respect to the random variable.
-Must take a single argument - a greta array giving the value of the random
-variable}
+The first argument must be - a greta array giving the value of the random
+variable, any subsequent arguments must passed in via the \dots argument.}
 
 \item{variable}{a variable greta array with a distribution, representing the
 random variable to marginalise}
 
 \item{method}{a \code{marginaliser} object giving the method for carrying out
 the marginalisation}
+
+\item{\dots}{named greta arrays to be passed to \code{fun}}
 
 \item{values}{an R vector giving values at which to evaluate the function for a
 discrete marginalisation}
@@ -65,9 +67,9 @@ sd <- lognormal(0, 1)
 #   mu <- theta ^ n
 #   distribution(y) <- normal(mu, sd)
 
-# the function to marginalise over
-# (only the variable to marginalise is passed in)
-fun <- function (n) {
+# the function to marginalise over - the variable to marginalise
+# must be first, others must be passed to marginalise()
+fun <- function (n, theta, mu, sd) {
   mu <- theta ^ n
   distribution(y) <- normal(mu, sd)
 }
@@ -75,7 +77,10 @@ fun <- function (n) {
 # integrate the function values w.r.t. the poisson distribution
 marginalise(fun,
             poisson(lambda),
-            method = discrete_marginalisation(values = 0:10))
+            method = discrete_marginalisation(values = 0:10),
+            theta = theta,
+            mu = mu,
+            sd = sd)
 
 m <- model(lambda)
 draws <- mcmc(m, hmc())
