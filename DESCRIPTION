@@ -61,6 +61,7 @@ Collate:
     'internals.R'
     'calculate.R'
     'callbacks.R'
+    'marginalise.R'
 Imports:
     R6,
     tensorflow,
@@ -86,4 +87,4 @@ Suggests:
     MASS,
     abind
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
