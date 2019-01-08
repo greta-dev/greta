@@ -55,13 +55,18 @@ NULL
 #' @export
 #'
 #' @param fun an R function to integrate with respect to the random variable.
-#'   The first argument must be - a greta array giving the value of the random
-#'   variable, any subsequent arguments must passed in via the \dots argument.
+#'   The first argument must be a greta array for the random variable, any
+#'   subsequent arguments must passed in via the \dots argument.
 #' @param variable a variable greta array with a distribution, representing the
 #'   random variable to marginalise
 #' @param method a \code{marginaliser} object giving the method for carrying out
 #'   the marginalisation
 #' @param \dots named greta arrays to be passed to \code{fun}
+#'
+#' @details The code in \code{fun} must define at least one distribution over
+#'   data (ie. a model likelihood), and cannot create any new variables. Any
+#'   variables must be created outide this function, and passed in via the \dots
+#'   argument.
 marginalise <- function(fun, variable, method, ...) {
 
   # get the distribution for the random variable
@@ -95,20 +100,19 @@ marginalise <- function(fun, variable, method, ...) {
   # excise the variable from the distribution
   distrib$remove_target()
 
-  stop ("not yet implemented")
-
   # turn the greta function into a TF conditional density function; doing
   # something very similar to as_tf_function(), but giving a function that
-  # returns a tensorflow scalar for the density
-  conditional_joint_density <- as_conditional_density(fun)
+  # returns a tensorflow scalar for the density (unadjusted since there will be
+  # no new variables)
+  args <- c(list(variable), dots)
+  conditional_joint_density <- as_conditional_density(fun, args)
 
   # get a tf function from the method which will turn that conditional density
   # function into a marginal density (conditional on the inputs to the
   # distribution) to be added to the overall model density
-  method$tf_marginaliser
 
-  # pass the conditional density function and the marginaliser TF function to a
-  # marginalisation distribution (needs an R6 class)
+  # pass the conditional density function and the marginaliser to a
+  # marginalisation distribution
 
   # create the distribution
   vble <- distrib(
@@ -119,11 +123,7 @@ marginalise <- function(fun, variable, method, ...) {
     dots = dots
   )
 
-  # excise the variable from the marginalisation distribution
-  distrib <- get_node(variable)$distribution
-  distrib$remove_target()
-
-  # return nothing
+  # return nothing (users can't have distribution nodes on their own)
   invisible(NULL)
 
 }
@@ -153,24 +153,22 @@ marginalisation_distribution <- R6Class(
                            paste("input", i))
       }
 
-      # add the distribution as a parameter
-      self$add_parameter(distribution, "distribution")
+      # make the distribution the target
+      self$remove_target()
+      self$add_target(distribution)
 
     },
 
     tf_distrib = function(parameters, dag) {
 
-      # do the marginalisation
-
-      # but it has no target!!
-      # should we handle distributions with no targets as a special case?
-      # or should this not be a distribution after all?
-
+      # the marginal density implied by the function
       log_prob <- function(x) {
 
+        # x will be the target; a tf function for the distribution being
+        # marginalised
         self$tf_marginaliser(self$conditional_density_fun,
-                             parameters$distribution,
-                             parameters[names(parameters) != "distribution"])
+                             tf_distribution_log_pdf = x,
+                             parameters)
 
       }
 
@@ -212,17 +210,37 @@ discrete_marginalisation <- function(values) {
   }
 
   # define the marginalisation function
-  tf_marginaliser <- function(conditional_density_fun,
-                              distribution,
+  tf_marginaliser <- function(tf_conditional_density_fun,
+                              tf_distribution_log_pdf,
                               other_args) {
-    # base this on mixture;
-    # 1. get weights from the distribution (use its log_pdf tf method on the
-    #   values)
-    # 2. compute the conditional joint density for each value (passing in
-    #   other_args)
-    # 3. compute a weighted sum with tf_reduce_log_sum_exp()
 
-    stop ("not yet implemented")
+    values_list <- as.list(values)
+
+    # 1. get weights from the distribution log pdf
+
+    # assuming values is a list, get tensors for the weights
+    weights_list <- lapply(values_list, tf_distribution_log_pdf)
+    weights_list <- lapply(weights_list, tf_sum)
+
+    # convert to a vector and make them sum to 1
+    weights_vec <- tf$concat(weights_list, axis = 1L)
+    weights_vec <- weights_vec / tf_sum(weights_vec)
+    log_weights_vec <- tf$log(weights_vec)
+
+    # 2. compute the conditional joint density for each value (passing in
+    # other_args)
+    log_density_list <- lapply(
+      values_list,
+      tf_conditional_density_fun,
+      other_args
+    )
+
+    log_density_vec <- tf$concat(log_density_list, axis = 1L)
+
+    # 3. compute a weighted sum
+    log_density_weighted_vec <- log_density_vec + log_weights_vec
+    tf$reduce_logsumexp(log_density_weighted_vec, axis = 1L)
+
   }
 
   as_marginaliser(name = "discrete",
@@ -242,10 +260,10 @@ discrete_check <- function(distrib) {
 }
 
 # helper to contruct marginalisers
-as_marginaliser <- function (name, method, parameters, distribution_check) {
+as_marginaliser <- function (name, tf_marginaliser, parameters, distribution_check) {
 
   obj <- list(name = name,
-              method = method,
+              tf_marginaliser = tf_marginaliser,
               parameters = parameters,
               distribution_check = distribution_check)
 
@@ -260,4 +278,82 @@ as_marginaliser <- function (name, method, parameters, distribution_check) {
 print.marginaliser <- function(x, ...) {
   msg <- paste(x$name, "marginaliser object")
   cat(msg)
+}
+
+# turn the greta function into a TF conditional density function; doing
+# something very similar to as_tf_function(), but giving a function that
+# returns a tensorflow scalar for the density
+as_conditional_density <- function(r_fun, args) {
+
+  # run the operation on isolated greta arrays, so nothing gets attached to the
+  # model. Real greta arrays in args
+  ga_dummies <- lapply(args, dummy_greta_array)
+  out <- do.call(r_fun, ga_dummies)
+
+  # we don't want to rely on the function returning a greta array that depends
+  # on everything internally. instead, we want to grab any densities defined in
+  # the function.
+
+  # this function will take in tensors corresponding to the things in args
+  function(...) {
+
+    tensor_inputs <- list(...)
+
+    # if any of these are shapeless, make them into greta scalars (3D)
+    tensor_inputs <- lapply(tensor_inputs,
+                            function(x) {
+                              if (identical(dim(x), list()))
+                                x <- tf$reshape(x, shape(1, 1, 1))
+                              x
+                            })
+
+    # transfer batch dimensions if needed
+    tensor_inputs <- match_batches(tensor_inputs)
+
+    # create a sub-dag for everything connected to the inputs
+    sub_dag <- dag_class$new(ga_dummies)
+
+    # check there are distributions
+    if (!any(sub_dag$node_types == "distribution")) {
+      stop ("'fun' must constain at least one distribution over data",
+            call. = FALSE)
+    }
+
+    # check there are no variables
+    if (any(sub_dag$node_types == "variable")) {
+      stop ("'fun' must not create any new variables; ",
+            "variables can be passed in as arguments",
+            call. = FALSE)
+    }
+
+    # use the default graph, so that it can be overwritten when this is called
+    # (using on_graph())
+    sub_dag$tf_graph <- tf$get_default_graph()
+    sub_tfe <- sub_dag$tf_environment
+
+    # set the input tensors as the values for the dummy greta arrays in the new
+    # tf_environment
+    node_dummies <- lapply(ga_dummies, get_node)
+    tf_names <- lapply(node_dummies, sub_dag$tf_name)
+    for (i in seq_along(tf_names))
+      assign(tf_names[[i]], tensor_inputs[[i]], envir = sub_tfe)
+
+    # have any new data defined as constants, to avoid placeholding issues in
+    # the wider model
+    greta_stash$data_as_constants <- TRUE
+    on.exit(greta_stash$data_as_constants <- NULL)
+
+    # define all nodes (only data, operation and distribution) in the
+    # environment, and on the graph
+    sub_dag$on_graph(lapply(sub_dag$node_list,
+                            function(x) x$define_tf(self)))
+
+    # define and return the joint density tensor (no variables, so no need for
+    # log jacobian adjustment)
+    sub_dag$define_joint_density()
+
+    sub_tfe$joint_density
+
+  }
+
 }
