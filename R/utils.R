@@ -1151,7 +1151,8 @@ as_tf_function <- function(r_fun, ...) {
     if (!is.list(ga_out))
       ga_out <- list(ga_out)
     targets <- c(ga_out, ga_dummies)
-    sub_dag <- dag_class$new(targets)
+    sub_dag <- dag_class$new(targets,
+                             tf_float = options()$greta_tf_float)
 
     # use the default graph, so that it can be overwritten when this is called?
     # alternatively fetch from above, or put it in greta_stash?
