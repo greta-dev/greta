@@ -74,17 +74,16 @@ sd <- lognormal(0, 1)
 
 # the function to marginalise over - the variable to marginalise
 # must be first, others must be passed to marginalise()
-fun <- function (n, theta, mu, sd) {
+likelihood <- function (n, theta, sd) {
   mu <- theta ^ n
   distribution(y) <- normal(mu, sd)
 }
 
 # integrate the function values w.r.t. the poisson distribution
-marginalise(fun,
+marginalise(likelihood,
             poisson(lambda),
             method = discrete_marginalisation(values = 0:10),
             theta = theta,
-            mu = mu,
             sd = sd)
 
 m <- model(lambda)

@@ -33,17 +33,16 @@
 #'
 #' # the function to marginalise over - the variable to marginalise
 #' # must be first, others must be passed to marginalise()
-#' fun <- function (n, theta, mu, sd) {
+#' likelihood <- function (n, theta, sd) {
 #'   mu <- theta ^ n
 #'   distribution(y) <- normal(mu, sd)
 #' }
 #'
 #' # integrate the function values w.r.t. the poisson distribution
-#' marginalise(fun,
-#'             poisson(lambda),
+#' marginalise(fun = likelihood,
+#'             variable = poisson(lambda),
 #'             method = discrete_marginalisation(values = 0:10),
 #'             theta = theta,
-#'             mu = mu,
 #'             sd = sd)
 #'
 #' m <- model(lambda)
@@ -213,6 +212,7 @@ discrete_marginalisation <- function(values) {
   tf_marginaliser <- function(tf_conditional_density_fun,
                               tf_distribution_log_pdf,
                               other_args) {
+
     # convert these into a list of constant tensors with the correct dimensions
     # and float types
     values_list <- as.list(values)
@@ -225,8 +225,9 @@ discrete_marginalisation <- function(values) {
     weights_list <- lapply(values_list, tf_distribution_log_pdf)
     weights_list <- lapply(weights_list, tf_sum)
 
-    # convert to a vector and make them sum to 1
+    # convert to a vector of discrete probabilities and make them sum to 1
     weights_vec <- tf$concat(weights_list, axis = 1L)
+    weights_vec <- tf$exp(weights_vec)
     weights_vec <- weights_vec / tf_sum(weights_vec)
     log_weights_vec <- tf$log(weights_vec)
 
