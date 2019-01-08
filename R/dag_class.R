@@ -242,7 +242,7 @@ dag_class <- R6Class(
     },
 
     # define tensor for overall log density and gradients
-    define_joint_density = function() {
+    define_joint_density = function(adjusted = TRUE) {
 
       tfe <- self$tf_environment
 
@@ -293,22 +293,26 @@ dag_class <- R6Class(
              joint_density,
              envir = self$tf_environment)
 
-      # define adjusted joint density
+      if (adjusted) {
 
-      # get names of adjustment tensors for all variable nodes
-      adj_names <- paste0(self$get_tf_names(types = "variable"), "_adj")
+        # optionally define adjusted joint density
 
-      # get TF density tensors for all distribution
-      adj <- lapply(adj_names, get, envir = self$tf_environment)
+        # get names of adjustment tensors for all variable nodes
+        adj_names <- paste0(self$get_tf_names(types = "variable"), "_adj")
 
-      # remove their names and sum them together
-      names(adj) <- NULL
-      self$on_graph(total_adj <- tf$add_n(adj))
+        # get TF density tensors for all distribution
+        adj <- lapply(adj_names, get, envir = self$tf_environment)
 
-      # assign overall density to environment
-      assign("joint_density_adj",
-             joint_density + total_adj,
-             envir = self$tf_environment)
+        # remove their names and sum them together
+        names(adj) <- NULL
+        self$on_graph(total_adj <- tf$add_n(adj))
+
+        # assign overall density to environment
+        assign("joint_density_adj",
+               joint_density + total_adj,
+               envir = self$tf_environment)
+
+      }
 
     },
 

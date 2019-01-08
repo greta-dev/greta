@@ -12,8 +12,8 @@ discrete_marginalisation(values)
 }
 \arguments{
 \item{fun}{an R function to integrate with respect to the random variable.
-The first argument must be - a greta array giving the value of the random
-variable, any subsequent arguments must passed in via the \dots argument.}
+The first argument must be a greta array for the random variable, any
+subsequent arguments must passed in via the \dots argument.}
 
 \item{variable}{a variable greta array with a distribution, representing the
 random variable to marginalise}
@@ -41,6 +41,11 @@ Inference on many statistical models requires marginalisation of
   marginalisation within a greta model, using one of the available marginalisation methods.
 }
 \details{
+The code in \code{fun} must define at least one distribution over
+  data (ie. a model likelihood), and cannot create any new variables. Any
+  variables must be created outide this function, and passed in via the \dots
+  argument.
+
 \code{discrete_marginalisation} can only be used with discrete
   probability distributions, e.g. those defined with \code{poisson()} and
   \code{binomial()}. For discrete distributions with finite support (such as

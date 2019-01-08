@@ -70,7 +70,7 @@ NULL
 marginalise <- function(fun, variable, method, ...) {
 
   # get the distribution for the random variable
-  distrib <- get_node(variable)$distribution
+  distr <- get_node(variable)$distribution
 
   # check the inputs
   if (!is.function(fun)) {
@@ -85,7 +85,7 @@ marginalise <- function(fun, variable, method, ...) {
     stop ("all arguments to 'fun' must be passed, named, to marginalise")
   }
 
-  if (!inherits(distrib, "distribution_node")) {
+  if (!inherits(distr, "distribution_node")) {
     stop ("'variable' must be a variable greta array with a distribution")
   }
 
@@ -95,10 +95,10 @@ marginalise <- function(fun, variable, method, ...) {
   }
 
   # check the distribution is compatible with the method
-  method$distribution_check(distrib)
+  method$distribution_check(distr)
 
   # excise the variable from the distribution
-  distrib$remove_target()
+  distr$remove_target()
 
   # turn the greta function into a TF conditional density function; doing
   # something very similar to as_tf_function(), but giving a function that
@@ -116,10 +116,10 @@ marginalise <- function(fun, variable, method, ...) {
 
   # create the distribution
   vble <- distrib(
-    "marginalisation",
+    distribution = "marginalisation",
     marginaliser = method,
     conditional_density_fun = conditional_joint_density,
-    distribution = distrib,
+    target_distribution = distr,
     dots = dots
   )
 
@@ -138,7 +138,7 @@ marginalisation_distribution <- R6Class(
 
     initialize = function(marginaliser,
                           conditional_density_fun,
-                          distribution,
+                          target_distribution,
                           dots) {
 
       # initialize class, and add methods
@@ -148,14 +148,14 @@ marginalisation_distribution <- R6Class(
 
       # add the dots (extra inputs to conditional_density_fun) as parameters
       dot_nodes <- lapply(dots, get_node)
-      for (i in seq_len(dot_nodes)) {
+      for (i in seq_along(dot_nodes)) {
         self$add_parameter(dot_nodes[[i]],
                            paste("input", i))
       }
 
       # make the distribution the target
       self$remove_target()
-      self$add_target(distribution)
+      self$add_target(target_distribution)
 
     },
 
@@ -213,11 +213,14 @@ discrete_marginalisation <- function(values) {
   tf_marginaliser <- function(tf_conditional_density_fun,
                               tf_distribution_log_pdf,
                               other_args) {
-
+    # convert these into a list of constant tensors with the correct dimensions
+    # and float types
     values_list <- as.list(values)
+    values_list <- lapply(values_list, as_2D_array)
+    values_list <- lapply(values_list, add_first_dim)
+    values_list <- lapply(values_list, fl)
 
     # 1. get weights from the distribution log pdf
-
     # assuming values is a list, get tensors for the weights
     weights_list <- lapply(values_list, tf_distribution_log_pdf)
     weights_list <- lapply(weights_list, tf_sum)
@@ -229,12 +232,14 @@ discrete_marginalisation <- function(values) {
 
     # 2. compute the conditional joint density for each value (passing in
     # other_args)
-    log_density_list <- lapply(
-      values_list,
-      tf_conditional_density_fun,
-      other_args
-    )
+    log_density_list <- list()
+    for (i in seq_along(values_list)) {
+      args <- c(list(values_list[[i]]), other_args)
+      log_density_list[[i]] <- do.call(tf_conditional_density_fun, args)
+    }
 
+    log_density_list <- lapply(log_density_list, tf$expand_dims, 1L)
+    log_density_list <- lapply(log_density_list, tf$expand_dims, 2L)
     log_density_vec <- tf$concat(log_density_list, axis = 1L)
 
     # 3. compute a weighted sum
@@ -311,7 +316,7 @@ as_conditional_density <- function(r_fun, args) {
     tensor_inputs <- match_batches(tensor_inputs)
 
     # create a sub-dag for everything connected to the inputs
-    sub_dag <- dag_class$new(ga_dummies)
+    sub_dag <- dag_class$new(ga_dummies, tf_float = options()$greta_tf_float)
 
     # check there are distributions
     if (!any(sub_dag$node_types == "distribution")) {
@@ -321,7 +326,7 @@ as_conditional_density <- function(r_fun, args) {
 
     # check there are no variables
     if (any(sub_dag$node_types == "variable")) {
-      stop ("'fun' must not create any new variables; ",
+      stop ("'fun' must not create any new variables, ",
             "variables can be passed in as arguments",
             call. = FALSE)
     }
@@ -346,11 +351,11 @@ as_conditional_density <- function(r_fun, args) {
     # define all nodes (only data, operation and distribution) in the
     # environment, and on the graph
     sub_dag$on_graph(lapply(sub_dag$node_list,
-                            function(x) x$define_tf(self)))
+                            function(x) x$define_tf(sub_dag)))
 
     # define and return the joint density tensor (no variables, so no need for
     # log jacobian adjustment)
-    sub_dag$define_joint_density()
+    sub_dag$define_joint_density(adjusted = FALSE)
 
     sub_tfe$joint_density
 
