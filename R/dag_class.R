@@ -281,6 +281,11 @@ dag_class <- R6Class(
                           MoreArgs = list(envir = tfe),
                           SIMPLIFY = FALSE)
 
+      # assign the un-reduced densities, for use in marginalisation
+      assign("component_densities",
+             densities,
+             envir = self$tf_environment)
+
       # reduce_sum them
       self$on_graph(summed_densities <- lapply(densities, tf_sum, drop = TRUE))
 

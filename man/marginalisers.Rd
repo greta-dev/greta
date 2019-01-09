@@ -8,8 +8,8 @@
 \usage{
 discrete_marginalisation(values)
 
-laplace_approximation(stepsize = 0.1, tolerance = 1e-06,
-  max_iterations = 50, warm_start = TRUE)
+laplace_approximation(stepsize = 0.05, tolerance = 1e-06,
+  max_iterations = 50)
 }
 \arguments{
 \item{values}{an R vector giving values at which to evaluate the function for a
@@ -21,10 +21,6 @@ mode of the random variable}
 
 \item{max_iterations}{the (positive) integer-like maximum number of iterations of
 the Newton-Raphson optimisation algorithm}
-
-\item{warm_start}{whether to start the Newton-Raphson optimisation algorithm
-at the optimal value from the last iteration of model inference (if
-\code{TRUE}), or to randomly re-initialise it.}
 
 \item{stepsize}{the (positive) numerical convergence tolerance (in units of
 the log conditional posterior density) of the Newton-Raphson optimisation

@@ -162,10 +162,13 @@ marginalisation_distribution <- R6Class(
       log_prob <- function(x) {
 
         # x will be the target; a tf function for the distribution being
-        # marginalised
+        # marginalised. Pass in the distribution node and the dag too, in case
+        # the marginalisers need them.
         self$tf_marginaliser(self$conditional_density_fun,
                              tf_distribution_log_pdf = x,
-                             parameters)
+                             other_args = parameters,
+                             dag = dag,
+                             distribution_node = self$target)
 
       }
 
@@ -194,7 +197,7 @@ as_conditional_density <- function(r_fun, args) {
   # the function.
 
   # this function will take in tensors corresponding to the things in args
-  function(...) {
+  function(..., reduce = TRUE) {
 
     tensor_inputs <- list(...)
 
@@ -251,7 +254,20 @@ as_conditional_density <- function(r_fun, args) {
     # log jacobian adjustment)
     sub_dag$define_joint_density(adjusted = FALSE)
 
-    sub_tfe$joint_density
+    # whether to reduce_sum the densities, or sum them elementwise
+    if (reduce) {
+      result <- sub_tfe$joint_density
+    } else {
+      densities <- sub_tfe$component_densities
+      if (length(densities) > 1) {
+        names(densities) <- NULL
+        result <- tf$add_n(densities)
+      } else {
+        result <- densities[[1]]
+      }
+    }
+
+    result
 
   }
 

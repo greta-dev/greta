@@ -49,7 +49,9 @@ discrete_marginalisation <- function(values) {
   # define the marginalisation function
   tf_marginaliser <- function(tf_conditional_density_fun,
                               tf_distribution_log_pdf,
-                              other_args) {
+                              other_args,
+                              dag,
+                              distribution_node) {
 
     # convert these into a list of constant tensors with the correct dimensions
     # and float types
@@ -108,10 +110,6 @@ discrete_marginalisation <- function(values) {
 #' @param max_iterations the (positive) integer-like maximum number of iterations of
 #'   the Newton-Raphson optimisation algorithm
 #'
-#' @param warm_start whether to start the Newton-Raphson optimisation algorithm
-#'   at the optimal value from the last iteration of model inference (if
-#'   \code{TRUE}), or to randomly re-initialise it.
-#'
 #' @details \code{laplace_approximation} can only be used to marginalise
 #'   variables following a multivariate normal distribution. In addition, the
 #'   function to be marginalised must \emph{factorise}; ie. it must return a
@@ -119,15 +117,13 @@ discrete_marginalisation <- function(values) {
 #'   marginalised, and each of element of the density must depend only on the
 #'   corresponding element of the variable vector. This is the responsibility of
 #'   the user, and is not checked.
-laplace_approximation <- function(stepsize = 0.1,
+laplace_approximation <- function(stepsize = 0.05,
                                   tolerance = 1e-6,
-                                  max_iterations = 50,
-                                  warm_start = TRUE) {
-
-  # to do:
-  #  - get tensors for parameters of the distribution
+                                  max_iterations = 50) {
 
   # in future:
+  #  - enable warm starts for subsequent steps of the outer inference algorithm
+  # do linesearch in the Newton-Raphson iterations
   #  - enable a non-factorising version (have the user say whether it is
   # factorising)
   #  - handle an iid normal distribution too.
@@ -154,27 +150,31 @@ laplace_approximation <- function(stepsize = 0.1,
     stop ("'max_iterations' must be a positive, scalar integer value")
   }
 
-  if (!(is.logical(warm_start) && warm_start %in% c(TRUE, FALSE))) {
-    stop ("'warm_start' must be either TRUE or FALSE")
-  }
-
   # define the marginalisation function
   tf_marginaliser <- function(tf_conditional_density_fun,
                               tf_distribution_log_pdf,
-                              other_args) {
+                              other_args,
+                              dag,
+                              distribution_node) {
 
-    # get the first and second derivatives of the conditional density function,
+    # simpler interface to conditional density. If reduce = TRUE, it does reduce_sum on component densities
+    d0 <- function (z, reduce = TRUE) {
+      args <- c(list(z), other_args, list(reduce = reduce))
+      do.call(tf_conditional_density_fun, args)
+    }
+
+    # get the vectors of first and second derivatives of the conditional density function,
     # w.r.t. the variable being marginalised
     derivs <- function (z) {
-      y <- tf_conditional_density_fun(z)
+      y <- d0(z, reduce = FALSE)
       d1 <- tf$gradients(y, z)[[1]]
       d2 <- tf$gradients(d1, z)[[1]]
       list(d1, d2)
     }
 
     # negative log-posterior for the current value of z under MVN assumption
-    psi <- function (a, z, mu, d0) {
-      fl(0.5) * t(a) %*% (z - mu) - tf_sum(tf_conditional_density_fun(z))
+    psi <- function (a, z, mu) {
+      fl(0.5) * tf$matmul(tf_transpose(a), (z - mu)) - d0(z)
     }
 
     # # compute psi for different values of the stepsize (s)
@@ -185,33 +185,26 @@ laplace_approximation <- function(stepsize = 0.1,
     #   psi(a, z, mu, d0)
     # }
 
-    # dimension of the MVN distribution - how to pass in this and the parameters?
-    n <- ?
+    # tensors for parameters of MVN distribution (make mu column vector now)
+    mu_node <- distribution_node$parameters$mean
+    mu <- dag$tf_environment[[dag$tf_name(mu_node)]]
+    mu <- tf_transpose(mu)
+    Sigma_node <- distribution_node$parameters$Sigma
+    Sigma <- dag$tf_environment[[dag$tf_name(Sigma_node)]]
 
-    # if the user wants hot starts, stash the last estimate of z, so we can
-    # start there in the next iteration of the outer inference algorithm.
-    z <- NULL
-    if (warm_start) {
-      z <- greta_stash$laplace_z_est
-    }
+    # dimension of the MVN distribution
+    n <- dim(mu)[[2]]
 
-    # otherwise randomly initialise
-    if (is.null(z)) {
-      z_value <- add_first_dim(as_2D_array(rnorm(n)))
-      z <- tf$constant(z_value, dtype = tf_float())
-    }
-
-    # get parameters of MVN distribution
-    mu <- ?
-    Sigma <- ?
+    # randomly initialise z, and expand to batch (warm starts will need some TF
+    # trickery)
+    z_value <- add_first_dim(as_2D_array(rnorm(n)))
+    z <- tf$constant(z_value, dtype = tf_float())
 
     # Newton-Raphson parameters
-    tolerance <- add_first_dim(as_2D_array(tolerance))
-    tol <- tf$constant(tolerance, tf_float())
-    obj_old <- tf$constant(-Inf, tf_float(), shape(1, 1, 1))
-    obj <- -tf_sum(tf_conditional_density_fun(z))
+    tol <- tf$constant(tolerance, tf_float(), shape(1))
+    obj_old <- tf$constant(-Inf, tf_float(), shape(1))
     iter <- tf$constant(0L)
-    maxiter <- tf$constant(as.integer(max_iterations))
+    maxiter <- tf$constant(max_iterations)
 
     # other objects
     a_value <- add_first_dim(as_2D_array(rep(0, n)))
@@ -220,17 +213,26 @@ laplace_approximation <- function(stepsize = 0.1,
     U <- tf$constant(U_value, tf_float())
     eye <- tf$constant(add_first_dim(diag(n)),
                        dtype = tf_float())
+    stepsize <- fl(stepsize)
 
+    # match batches on everything going into the loop that will have a batch
+    # dimension
+    z <- expand_to_batch(z, mu)
+    a <- expand_to_batch(a, mu)
+    U <- expand_to_batch(U, mu)
+    obj_old <- expand_to_batch(obj_old, mu)
+    tol <- expand_to_batch(tol, mu)
 
-    # need tensorflow while loop to do Newton-Raphson iterations
+    obj <- -d0(z)
 
+    # tensorflow while loop to do Newton-Raphson iterations
     body <- function(z, a, U, obj_old, obj, tol, iter, maxiter) {
 
       obj.old <- obj
 
       deriv <- derivs(z)
-      d1 <- deriv[[2]]
-      d2 <- deriv[[3]]
+      d1 <- deriv[[1]]
+      d2 <- deriv[[2]]
 
       # curvature of the likelihood
       W <- -d2
@@ -240,13 +242,13 @@ laplace_approximation <- function(stepsize = 0.1,
       cf <- z - mu
 
       # approximate posterior covariance & cholesky factor
-      mat1 <- rW %*% t(rW) * Sigma + eye
+      mat1 <- tf$matmul(rW, tf_transpose(rW)) * Sigma + eye
       U <- tf$cholesky(mat1)
       L <- tf_transpose(U)
 
       # compute Newton-Raphson update direction
       b <- W * cf + d1
-      mat2 <- rW * (Sigma %*% b)
+      mat2 <- rW * tf$matmul(Sigma, b)
       mat3 <- tf$matrix_triangular_solve(U, mat2)
       adiff <- b - rW * tf$matrix_triangular_solve(L, mat3, lower = FALSE) - a
 
@@ -256,15 +258,18 @@ laplace_approximation <- function(stepsize = 0.1,
 
       # do the update and compute new z and objective
       a_new <- a + stepsize * adiff
-      z_new <- Sigma %*% a_new + mu
+      z_new <- tf$matmul(Sigma, a_new) + mu
       obj <- psi(a_new, z_new, mu)
+      obj <- tf$squeeze(obj, 1:2)
 
-      list(z_new, a_new, U, obj_old, obj, tol, iter + 1, maxiter)
+      list(z_new, a_new, U, obj_old, obj, tol, iter + 1L, maxiter)
 
     }
 
     cond <- function(z, a, U, obj_old, obj, tol, iter, maxiter) {
-        tf$less(iter, maxiter) & tf$greater(obj_old - obj, tol)
+      none_converged <- tf$reduce_any(tf$greater(obj_old - obj, tol))
+      in_time <- tf$less(iter, maxiter)
+      in_time & none_converged
     }
 
     values <- list(z,
@@ -279,19 +284,17 @@ laplace_approximation <- function(stepsize = 0.1,
     # run the Newton-Raphson optimisation to find the posterior mode of z
     out <- tf$while_loop(cond, body, values)
 
-    z <- out$z
-    a <- out$a
-    U <- out$U
-
-    # store the estimate in the stash as an R vector (this will break with nested laplace
-    # approximations!)
-    greta_stash$laplace_z_est <- z
+    z <- out[[1]]
+    a <- out[[2]]
+    U <- out[[3]]
 
     # the approximate marginal conditional posterior
-    lp <- tf_sum(tf_conditional_density_fun(z))
-    mnll <- (a %*% (z - mu)) / fl(2) - lp + tf_sum(tf$log(tf$matrix_diag_part(U)))
+    lp <- d0(z)
+    p1 <- tf$matmul(tf_transpose(a), z - mu) / fl(2)
+    p2 <- tf_sum(tf$log(tf$matrix_diag_part(U)))
+    nmcp <- tf$squeeze(p1, 1:2) - lp + tf$squeeze(p2, 1)
 
-    -mnll
+    -nmcp
 
   }
 
