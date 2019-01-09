@@ -3,12 +3,9 @@
 \name{marginalisation}
 \alias{marginalisation}
 \alias{marginalise}
-\alias{discrete_marginalisation}
 \title{direct marginalisation of random variables}
 \usage{
 marginalise(fun, variable, method, ...)
-
-discrete_marginalisation(values)
 }
 \arguments{
 \item{fun}{an R function to integrate with respect to the random variable.
@@ -22,13 +19,6 @@ random variable to marginalise}
 the marginalisation}
 
 \item{\dots}{named greta arrays to be passed to \code{fun}}
-
-\item{values}{an R vector giving values at which to evaluate the function for a
-discrete marginalisation}
-}
-\value{
-\code{discrete_marginalisation} - a \code{marginaliser} object that
-  can be passed to \code{marginalise}.
 }
 \description{
 Inference on many statistical models requires marginalisation of
@@ -38,23 +28,14 @@ Inference on many statistical models requires marginalisation of
   within a larger model; e.g. for random variables where marginalisation by
   MCMC is inefficient, impossible, or when an approximate marginalisation is
   substantially more efficient. \code{marginalise()} performs direct
-  marginalisation within a greta model, using one of the available marginalisation methods.
+  marginalisation within a greta model, using one of the available
+  marginalisation methods, detailed in \link{marginalisers}.
 }
 \details{
 The code in \code{fun} must define at least one distribution over
   data (ie. a model likelihood), and cannot create any new variables. Any
   variables must be created outide this function, and passed in via the \dots
   argument.
-
-\code{discrete_marginalisation} can only be used with discrete
-  probability distributions, e.g. those defined with \code{poisson()} and
-  \code{binomial()}. For discrete distributions with finite support (such as
-  \code{bernoulli()}) the marginalisation will be exact, so long as
-  \code{values} includes all possible values of the variable. For discrete
-  distributions with non-finite support (such as \code{poisson()}, which has
-  no upper bound), the marginalisation can only ever be approximate. However
-  if \code{values} cover a range of values with sufficiently high support in
-  the distribution, that approximation error will be minimal.
 }
 \examples{
 \dontrun{
@@ -80,8 +61,8 @@ likelihood <- function (n, theta, sd) {
 }
 
 # integrate the function values w.r.t. the poisson distribution
-marginalise(likelihood,
-            poisson(lambda),
+marginalise(fun = likelihood,
+            variable = poisson(lambda),
             method = discrete_marginalisation(values = 0:10),
             theta = theta,
             sd = sd)

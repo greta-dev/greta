@@ -62,6 +62,7 @@ Collate:
     'calculate.R'
     'callbacks.R'
     'marginalise.R'
+    'marginalisers.R'
 Imports:
     R6,
     tensorflow,
