@@ -3,13 +3,32 @@
 \name{marginalisers}
 \alias{marginalisers}
 \alias{discrete_marginalisation}
+\alias{laplace_approximation}
 \title{marginalisation methods}
 \usage{
 discrete_marginalisation(values)
+
+laplace_approximation(stepsize = 0.1, tolerance = 1e-06,
+  max_iterations = 50, warm_start = TRUE)
 }
 \arguments{
 \item{values}{an R vector giving values at which to evaluate the function for a
 discrete marginalisation}
+
+\item{stepsize}{the (positive) size of steps in the Newton-Raphson
+optimisation algorithm used to find the approximate conditional posterior
+mode of the random variable}
+
+\item{max_iterations}{the (positive) integer-like maximum number of iterations of
+the Newton-Raphson optimisation algorithm}
+
+\item{warm_start}{whether to start the Newton-Raphson optimisation algorithm
+at the optimal value from the last iteration of model inference (if
+\code{TRUE}), or to randomly re-initialise it.}
+
+\item{stepsize}{the (positive) numerical convergence tolerance (in units of
+the log conditional posterior density) of the Newton-Raphson optimisation
+algorithm}
 }
 \value{
 a \code{marginaliser} object that can be passed to
@@ -19,6 +38,14 @@ a \code{marginaliser} object that can be passed to
 Functions to set up marginalisers (which explicitly integrate
   out random variables) and modify their behaviour, for use in
   \code{\link{marginalise}()}.
+
+  \code{discrete_marginalisation} marginalises discrete random variables via
+  a Riemann sum over a range of plausible values.
+
+  \code{laplace_approximation} marginalises random variables (with
+  multivariate normal priors) approximately, using by Newton-Raphson
+  optimisation and assuming the posterior follows a multivariate normal
+  distribution.
 }
 \details{
 \code{discrete_marginalisation} can only be used with discrete
@@ -30,4 +57,12 @@ Functions to set up marginalisers (which explicitly integrate
   no upper bound), the marginalisation can only ever be approximate. However
   if \code{values} cover a range of values with sufficiently high support in
   the distribution, that approximation error will be minimal.
+
+\code{laplace_approximation} can only be used to marginalise
+  variables following a multivariate normal distribution. In addition, the
+  function to be marginalised must \emph{factorise}; ie. it must return a
+  vector-valued density with as many elements as the vector variable being
+  marginalised, and each of element of the density must depend only on the
+  corresponding element of the variable vector. This is the responsibility of
+  the user, and is not checked.
 }
