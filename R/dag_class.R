@@ -281,6 +281,7 @@ dag_class <- R6Class(
                           MoreArgs = list(envir = tfe),
                           SIMPLIFY = FALSE)
 
+      names(densities) <- NULL
       # assign the un-reduced densities, for use in marginalisation
       assign("component_densities",
              densities,

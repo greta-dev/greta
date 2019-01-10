@@ -216,14 +216,19 @@ laplace_approximation <- function(stepsize = 0.05,
     stepsize <- fl(stepsize)
 
     # match batches on everything going into the loop that will have a batch
-    # dimension
-    z <- expand_to_batch(z, mu)
-    a <- expand_to_batch(a, mu)
-    U <- expand_to_batch(U, mu)
-    obj_old <- expand_to_batch(obj_old, mu)
-    tol <- expand_to_batch(tol, mu)
+    # dimension later
+    objects <- list(mu, Sigma, z, a, U, obj_old, tol)
+    objects <- greta:::match_batches(objects)
+    mu <- objects[[1]]
+    Sigma <- objects[[2]]
+    z <- objects[[3]]
+    a <- objects[[4]]
+    U <- objects[[5]]
+    obj_old <- objects[[6]]
+    tol <- objects[[7]]
 
     obj <- -d0(z)
+
 
     # tensorflow while loop to do Newton-Raphson iterations
     body <- function(z, a, U, obj_old, obj, tol, iter, maxiter) {
@@ -284,9 +289,13 @@ laplace_approximation <- function(stepsize = 0.05,
     # run the Newton-Raphson optimisation to find the posterior mode of z
     out <- tf$while_loop(cond, body, values)
 
-    z <- out[[1]]
-    a <- out[[2]]
-    U <- out[[3]]
+    # get the two components, preventing the gradient from being computed through the optimisation
+    a <- tf$stop_gradient(out[[2]])
+    U <- tf$stop_gradient(out[[3]])
+
+    # recompute z (gradient of z w.r.t. the free state should include this op,
+    # but not optimisation)
+    z <- tf$matmul(Sigma, a) + mu
 
     # the approximate marginal conditional posterior
     lp <- d0(z)
