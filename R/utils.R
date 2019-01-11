@@ -398,6 +398,87 @@ rhex <- function()
   paste(as.raw(sample.int(256L, 4, TRUE) - 1L), collapse = "")
 
 
+# vectorised golden section search algorithm for linesearch (1D constrained
+# minimisation) function must accept and return a 1D tensor of values, and
+# return a a tensor of the same shape returning objectives; this can therefore
+# run linesearch for multiple chains simultaneously. The batch dimension must be
+# known in advance however.
+gss <- function(func,
+                batch_dim = 1,
+                lower = 0,
+                upper = 1,
+                max_iterations = 50,
+                tolerance = 1e-32) {
+
+  lower <- tf$constant(lower, tf_float(), shape(1))
+  upper <- tf$constant(upper, tf_float(), shape(1))
+  maxiter <- tf$constant(as.integer(max_iterations), tf$int32)
+  tol <- fl(tolerance)
+  iter <- tf$constant(1L, tf$int32)
+
+  phi <- (1 + sqrt(5)) / 2
+  phim1 <- fl(phi - 1)
+  twomphi <- fl(2.0 - phi)
+
+  # expand out to batch dimensions
+  if (!inherits(batch_dim, "tensorflow.tensor")) {
+    batch_dim <- as.integer(batch_dim)
+    batch_dim <- tf$constant(batch_dim, tf$int32, shape(1))
+  }
+
+  left <- tf$tile(lower, batch_dim)
+  right <- tf$tile(upper, batch_dim)
+  width <- right - left
+  optimum <- tf$zeros(batch_dim, tf_float())
+
+  # status of the multiple consecutive searches; three columns, for left, right
+  # and optimum
+  status <- tf$stack(list(left, right, optimum), axis = 1L)
+
+  # start loop
+  body <- function (left, right, optimum, width, iter) {
+
+    d <- phim1 * width
+
+    # find evaluation points
+    a <- left + d
+    b <- right - d
+
+    # prep reordered matrices for whether steps are above or below
+    # if func(a) < func(b)
+    above <- tf$stack(list(left, b, a), axis = 1L)
+    # else
+    not_above <- tf$stack(list(a, right, b), axis = 1L)
+
+    status <- tf$where(tf$less(func(b), func(a)), above, not_above)
+
+    left <- status[, 0]
+    right <- status[, 1]
+    optimum <- status[, 2]
+
+    width <- right - left
+
+    list(left, right, optimum, width, iter + 1L)
+  }
+
+  cond <- function (left, right, optimum, width, iter) {
+    err <- twomphi * tf$abs(width / optimum)
+    not_converged <- tf$less(tol, err)
+    not_all_converged <- tf$reduce_any(not_converged)
+    in_time <- tf$less(iter, maxiter)
+    in_time & not_all_converged
+  }
+
+  values <- list(left, right, optimum, width, iter)
+
+  out <- tf$while_loop(cond, body, values)
+
+  result <- out[3:5]
+  names(result) <- c("minimum", "width", "iterations")
+  result
+
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -422,7 +503,8 @@ misc_module <- module(module,
                       match_batches,
                       split_chains,
                       hessian_dims,
-                      rhex)
+                      rhex,
+                      gss)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function(..., target_dim = NULL) {

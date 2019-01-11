@@ -159,7 +159,9 @@ laplace_approximation <- function(stepsize = 0.05,
 
     # simpler interface to conditional density. If reduce = TRUE, it does reduce_sum on component densities
     d0 <- function (z, reduce = TRUE) {
-      args <- c(list(z), other_args, list(reduce = reduce))
+      # transpose z to a row vector, which the dag is expecting
+      t_z <- tf_transpose(z)
+      args <- c(list(t_z), other_args, list(reduce = reduce))
       do.call(tf_conditional_density_fun, args)
     }
 
@@ -174,16 +176,9 @@ laplace_approximation <- function(stepsize = 0.05,
 
     # negative log-posterior for the current value of z under MVN assumption
     psi <- function (a, z, mu) {
-      fl(0.5) * tf$matmul(tf_transpose(a), (z - mu)) - d0(z)
+      p1 <- tf$matmul(tf_transpose(a), z - mu)
+      fl(0.5) * tf$squeeze(p1, 1:2) - d0(z)
     }
-
-    # # compute psi for different values of the stepsize (s)
-    # # to be added later, if I can work out how to nest/recode this linesearch optimisation
-    # psiline <- function (s, adiff, a, K, mu, d0) {
-    #   a <- a + s * as.vector(adiff)
-    #   z <- K %*% a + mu
-    #   psi(a, z, mu, d0)
-    # }
 
     # tensors for parameters of MVN distribution (make mu column vector now)
     mu_node <- distribution_node$parameters$mean
@@ -197,12 +192,15 @@ laplace_approximation <- function(stepsize = 0.05,
 
     # randomly initialise z, and expand to batch (warm starts will need some TF
     # trickery)
+
+    # here z is a *column vector* to simplify later calculations, it needs to be
+    # transposed to a row vector before feeding into the likelihood function(s)
     z_value <- add_first_dim(as_2D_array(rnorm(n)))
     z <- tf$constant(z_value, dtype = tf_float())
 
     # Newton-Raphson parameters
     tol <- tf$constant(tolerance, tf_float(), shape(1))
-    obj_old <- tf$constant(-Inf, tf_float(), shape(1))
+    obj_old <- tf$constant(Inf, tf_float(), shape(1))
     iter <- tf$constant(0L)
     maxiter <- tf$constant(max_iterations)
 
@@ -213,11 +211,12 @@ laplace_approximation <- function(stepsize = 0.05,
     U <- tf$constant(U_value, tf_float())
     eye <- tf$constant(add_first_dim(diag(n)),
                        dtype = tf_float())
-    stepsize <- fl(stepsize)
+
+    stepsize <- fl(add_first_dim(as_2D_array(stepsize)))
 
     # match batches on everything going into the loop that will have a batch
     # dimension later
-    objects <- list(mu, Sigma, z, a, U, obj_old, tol)
+    objects <- list(mu, Sigma, z, a, U, obj_old, tol, stepsize)
     objects <- greta:::match_batches(objects)
     mu <- objects[[1]]
     Sigma <- objects[[2]]
@@ -226,14 +225,18 @@ laplace_approximation <- function(stepsize = 0.05,
     U <- objects[[5]]
     obj_old <- objects[[6]]
     tol <- objects[[7]]
+    stepsize <- objects[[8]]
 
     obj <- -d0(z)
 
+    # get the batch dim explicitly, for the step size optimisation
+    batch_dim <- tf$shape(mu)[[0]]
+    batch_dim <- tf$expand_dims(batch_dim, 0L)
 
     # tensorflow while loop to do Newton-Raphson iterations
     body <- function(z, a, U, obj_old, obj, tol, iter, maxiter) {
 
-      obj.old <- obj
+      obj_old <- obj
 
       deriv <- derivs(z)
       d1 <- deriv[[1]]
@@ -257,24 +260,32 @@ laplace_approximation <- function(stepsize = 0.05,
       mat3 <- tf$matrix_triangular_solve(U, mat2)
       adiff <- b - rW * tf$matrix_triangular_solve(L, mat3, lower = FALSE) - a
 
-      # # find the optimal stepsize in that dimension (to be added later)
-      # res <- optimise(psiline, c(0, 2), adiff, a, Sigma, mu)
-      # stepsize <- res$minimum
+      # use golden section search to find the optimum distance to step in this
+      # direction, for each batch simultaneously
+      psiline <- function (s) {
+        a_new <- a + s * adiff
+        z_new <- tf$matmul(Sigma, a) + mu
+        psi(a_new, z_new, mu)
+      }
+
+      ls_results <- gss(psiline, batch_dim)
+      stepsize <- ls_results$minimum
+      stepsize <- tf$expand_dims(stepsize, 1L)
+      stepsize <- tf$expand_dims(stepsize, 2L)
 
       # do the update and compute new z and objective
       a_new <- a + stepsize * adiff
       z_new <- tf$matmul(Sigma, a_new) + mu
       obj <- psi(a_new, z_new, mu)
-      obj <- tf$squeeze(obj, 1:2)
 
       list(z_new, a_new, U, obj_old, obj, tol, iter + 1L, maxiter)
 
     }
 
     cond <- function(z, a, U, obj_old, obj, tol, iter, maxiter) {
-      none_converged <- tf$reduce_any(tf$greater(obj_old - obj, tol))
+      not_all_converged <- tf$reduce_any(tf$less(tol, obj_old - obj))
       in_time <- tf$less(iter, maxiter)
-      in_time & none_converged
+      in_time & not_all_converged
     }
 
     values <- list(z,
@@ -289,19 +300,13 @@ laplace_approximation <- function(stepsize = 0.05,
     # run the Newton-Raphson optimisation to find the posterior mode of z
     out <- tf$while_loop(cond, body, values)
 
-    # get the two components, preventing the gradient from being computed through the optimisation
-    a <- tf$stop_gradient(out[[2]])
-    U <- tf$stop_gradient(out[[3]])
-
-    # recompute z (gradient of z w.r.t. the free state should include this op,
-    # but not optimisation)
-    z <- tf$matmul(Sigma, a) + mu
+    z <- out[[1]]
+    a <- out[[2]]
+    U <- out[[3]]
 
     # the approximate marginal conditional posterior
-    lp <- d0(z)
-    p1 <- tf$matmul(tf_transpose(a), z - mu) / fl(2)
-    p2 <- tf_sum(tf$log(tf$matrix_diag_part(U)))
-    nmcp <- tf$squeeze(p1, 1:2) - lp + tf$squeeze(p2, 1)
+    logdet <- tf_sum(tf$log(tf$matrix_diag_part(U)))
+    nmcp <- psi(a, z, mu) + tf$squeeze(logdet, 1)
 
     -nmcp
 
