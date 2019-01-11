@@ -246,6 +246,8 @@ laplace_approximation <- function(tolerance = 1e-6,
       # use golden section search to find the optimum distance to step in this
       # direction, for each batch simultaneously
       psiline <- function (s) {
+        s <- tf$expand_dims(s, 1L)
+        s <- tf$expand_dims(s, 2L)
         a_new <- a + s * adiff
         z_new <- tf$matmul(Sigma, a) + mu
         psi(a_new, z_new, mu)
@@ -283,9 +285,27 @@ laplace_approximation <- function(tolerance = 1e-6,
     # run the Newton-Raphson optimisation to find the posterior mode of z
     out <- tf$while_loop(cond, body, values)
 
-    z <- out[[1]]
     a <- out[[2]]
-    U <- out[[3]]
+
+    # apparently we need to redefine z and U here, or the backprop errors
+
+    # lots of duplicated code; this could be tidied up, but I ran out of time!
+    z <- tf$matmul(Sigma, a) + mu
+
+    deriv <- derivs(z)
+    d1 <- deriv[[1]]
+    d2 <- deriv[[2]]
+
+    # curvature of the likelihood
+    W <- -d2
+    rW <- sqrt(W)
+
+    # decentred values of z
+    cf <- z - mu
+
+    # approximate posterior covariance & cholesky factor
+    mat1 <- tf$matmul(rW, tf_transpose(rW)) * Sigma + eye
+    U <- tf$cholesky(mat1)
 
     # the approximate marginal conditional posterior
     logdet <- tf_sum(tf$log(tf$matrix_diag_part(U)))

@@ -144,3 +144,65 @@ test_that("discrete marginalisation gives correct densities", {
   compare_op(expected, observed)
 
 })
+
+
+test_that("laplace_approximation errors nicely", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # bad tolerance
+  expect_error(
+    laplace_approximation(tolerance = -1),
+    "must be a positive, scalar numeric value"
+  )
+
+  # bad max iterations
+  expect_error(
+    laplace_approximation(max_iterations = 0),
+    "must be a positive, scalar integer value"
+  )
+
+  # mismatch with distribution
+  expect_error(
+    marginalise(I, normal(0, 1), laplace_approximation()),
+    "can only be used with a multivariate normal distribution"
+  )
+
+})
+
+
+test_that("inference runs with laplace approximation", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # the eight schools model
+  N <- letters[1:8]
+  treatment_effects <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+  treatment_stddevs <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
+
+  int <- variable()
+  sd <- variable(lower = 0)
+  lik <- function (theta) {
+    distribution(treatment_effects) <- normal(t(theta), treatment_stddevs)
+  }
+
+  # mock up as a multivariate normal distribution
+  Sigma <- diag(8) * sd ^ 2
+  mu <- ones(1, 8) * int
+  marginalise(lik,
+              multivariate_normal(mu, Sigma),
+              laplace_approximation())
+
+  m <- model(int, sd)
+
+  expect_ok(o <- opt(m))
+  expect_ok(draws <- mcmc(m, warmup = 20, n_samples = 20,
+                          verbose = FALSE))
+
+  # the optimisation result should be similar to a very long run of
+
+})
+
+
