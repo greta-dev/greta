@@ -8,23 +8,18 @@
 \usage{
 discrete_marginalisation(values)
 
-laplace_approximation(stepsize = 0.05, tolerance = 1e-06,
-  max_iterations = 50)
+laplace_approximation(tolerance = 1e-06, max_iterations = 50)
 }
 \arguments{
 \item{values}{an R vector giving values at which to evaluate the function for a
 discrete marginalisation}
 
-\item{stepsize}{the (positive) size of steps in the Newton-Raphson
-optimisation algorithm used to find the approximate conditional posterior
-mode of the random variable}
+\item{tolerance}{the (positive) numerical convergence tolerance (in units of
+the log conditional posterior density) of the Newton-Raphson optimisation
+algorithm}
 
 \item{max_iterations}{the (positive) integer-like maximum number of iterations of
 the Newton-Raphson optimisation algorithm}
-
-\item{stepsize}{the (positive) numerical convergence tolerance (in units of
-the log conditional posterior density) of the Newton-Raphson optimisation
-algorithm}
 }
 \value{
 a \code{marginaliser} object that can be passed to

@@ -99,11 +99,7 @@ discrete_marginalisation <- function(values) {
 #' @rdname marginalisers
 #' @export
 #'
-#' @param stepsize the (positive) size of steps in the Newton-Raphson
-#'   optimisation algorithm used to find the approximate conditional posterior
-#'   mode of the random variable
-#'
-#' @param stepsize the (positive) numerical convergence tolerance (in units of
+#' @param tolerance the (positive) numerical convergence tolerance (in units of
 #'   the log conditional posterior density) of the Newton-Raphson optimisation
 #'   algorithm
 #'
@@ -117,24 +113,14 @@ discrete_marginalisation <- function(values) {
 #'   marginalised, and each of element of the density must depend only on the
 #'   corresponding element of the variable vector. This is the responsibility of
 #'   the user, and is not checked.
-laplace_approximation <- function(stepsize = 0.05,
-                                  tolerance = 1e-6,
+laplace_approximation <- function(tolerance = 1e-6,
                                   max_iterations = 50) {
 
   # in future:
   #  - enable warm starts for subsequent steps of the outer inference algorithm
-  # do linesearch in the Newton-Raphson iterations
   #  - enable a non-factorising version (have the user say whether it is
   # factorising)
   #  - handle an iid normal distribution too.
-
-  # check arguments, Newton-Raphson iterations etc.
-  if (!(is.numeric(stepsize) &&
-        is.vector(stepsize) &&
-        length(stepsize) == 1 &&
-        stepsize > 0)) {
-    stop ("'stepsize' must be a positive, scalar numeric value")
-  }
 
   if (!(is.numeric(tolerance) &&
         is.vector(tolerance) &&
@@ -212,11 +198,9 @@ laplace_approximation <- function(stepsize = 0.05,
     eye <- tf$constant(add_first_dim(diag(n)),
                        dtype = tf_float())
 
-    stepsize <- fl(add_first_dim(as_2D_array(stepsize)))
-
     # match batches on everything going into the loop that will have a batch
     # dimension later
-    objects <- list(mu, Sigma, z, a, U, obj_old, tol, stepsize)
+    objects <- list(mu, Sigma, z, a, U, obj_old, tol)
     objects <- greta:::match_batches(objects)
     mu <- objects[[1]]
     Sigma <- objects[[2]]
@@ -225,7 +209,6 @@ laplace_approximation <- function(stepsize = 0.05,
     U <- objects[[5]]
     obj_old <- objects[[6]]
     tol <- objects[[7]]
-    stepsize <- objects[[8]]
 
     obj <- -d0(z)
 
