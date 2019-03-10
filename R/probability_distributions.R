@@ -677,11 +677,8 @@ cauchy_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      loc <- parameters$location
-      s <- parameters$scale
-
-      tfp$distributions$Cauchy(loc = parameters$loc,
-                               s   = parameters$s)
+      tfp$distributions$Cauchy(loc = parameters$location,
+                               scale = parameters$scale)
     }
 
   )
