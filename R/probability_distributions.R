@@ -680,17 +680,8 @@ cauchy_distribution <- R6Class(
       loc <- parameters$location
       s <- parameters$scale
 
-      log_prob <- function(x)
-        tf$negative(tf$log(fl(pi) * s * (fl(1) + tf$square( (x - loc) / s ))))
-
-      cdf <- function(x)
-        fl(1 / pi) * tf$atan( (x - loc) / s ) + fl(0.5)
-
-      log_cdf <- function(x)
-        tf$log(cdf(x))
-
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
-
+      tfp$distributions$Cauchy(loc = parameters$loc,
+                               s   = parameters$s)
     }
 
   )
