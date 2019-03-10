@@ -557,20 +557,9 @@ pareto_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      a <- parameters$a
-      b <- parameters$b
-
-      log_prob <- function(x)
-        log(a) + a * log(b) - (a + fl(1)) * log(x)
-
-      cdf <- function(x)
-        fl(1) - (b / x) ^ a
-
-      log_cdf <- function(x)
-        log(cdf(x))
-
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
-
+      # a is shape, b is scale
+      tfp$distributions$Pareto(concentration = parameters$a,
+                               scale = parameters$b)
     }
 
   )
