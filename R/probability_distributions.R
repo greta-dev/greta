@@ -1290,6 +1290,36 @@ lkj_correlation_distribution <- R6Class(
   )
 )
 
+zero_inflated_distribution <- R6Class(
+  "zero_inflated_distribution",
+  inherit = distribution_node,
+  public = list(
+    initialize = function(prob, rate, dim) {
+      prob <- as.greta_array(prob)
+      rate <- as.greta_array(rate)
+      # add the nodes as children and parameters
+      dim <- check_dims(prob, rate, target_dim = dim)
+      super$initialize("zero_inflated", dim, discrete = TRUE)
+      self$add_parameter(prob, "prob")
+      self$add_parameter(rate, "rate")
+    },
+    
+    tf_distrib = function(parameters, dag) {
+      prob <- parameters$prob
+      rate <- parameters$rate
+      log_prob <- function(x) {
+        
+        tf$log(prob * tf$cast(tf$nn$relu(fl(1) - x), tf$float64) + (fl(1) - prob) * tf$pow(rate, x) * tf$exp(-rate) / tf$exp(tf$lgamma(x + fl(1))))
+      }
+      
+      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+    },
+    
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+  )
+)
+
 # module for export via .internals
 distribution_classes_module <- module(uniform_distribution,
                                       normal_distribution,
@@ -1318,7 +1348,8 @@ distribution_classes_module <- module(uniform_distribution,
                                       multinomial_distribution,
                                       categorical_distribution,
                                       dirichlet_distribution,
-                                      dirichlet_multinomial_distribution)
+                                      dirichlet_multinomial_distribution,
+                                      zero_inflated_distribution)
 
 # export constructors
 
@@ -1633,3 +1664,4 @@ dirichlet_multinomial <- function(size, alpha,
   distrib("dirichlet_multinomial",
           size, alpha, n_realisations, dimension)
 }
+
