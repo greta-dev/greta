@@ -1667,6 +1667,5 @@ dirichlet_multinomial <- function(size, alpha,
 
 #' @rdname distributions
 #' @export
-zero_inflated <- function (prob, rate, dim = NULL) {
+zero_inflated <- function (prob, rate, dim = NULL) 
   distrib("zero_inflated", prob, rate, dim)
-}
