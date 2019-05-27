@@ -238,6 +238,7 @@ mcmc <- function(model,
 
   # now make it finite
   pb_update <- min(pb_update, max(warmup, n_samples))
+  pb_update <- max(pb_update, thin + 1)
 
   run_samplers(samplers = samplers,
                n_samples = n_samples,
