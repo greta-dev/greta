@@ -46,7 +46,10 @@ details).}
 
 \item{verbose}{whether to print progress information to the console}
 
-\item{pb_update}{how regularly to update the progress bar (in iterations)}
+\item{pb_update}{how regularly to update the progress bar (in iterations).
+If \code{pb_update} is less than or equal to \code{thin}, it will be set
+to \code{thin + 1} to ensure at least one saved iteration per
+\code{pb_update} iterations.}
 
 \item{one_by_one}{whether to run TensorFlow MCMC code one iteration at a
 time, so that greta can handle numerical errors as 'bad' proposals (see
