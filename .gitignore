@@ -14,3 +14,4 @@ vignette/figures
 docs/*.Rmd
 docs/examples
 cran-comments.md
+paper/paper.html
