@@ -45,23 +45,15 @@ medication using data provided in the MASS R package (@mass, distributed
 with R) and analysed in the corresponding book.
 
 
-```{r setup, echo = FALSE, cache = FALSE}
-knitr::opts_chunk$set(
-  message = FALSE,
-  warning = FALSE,
-  dev = c('png'),
-  cache = TRUE
-)
 
-set.seed(2019-06-27)
-```
 
 Before we specify the greta model, we format the data to make out lives
 easier; adding a numeric version of the treatment type and making a vector of
 the (8-week) baseline counts for each subject (these counts are replicated in
 the epil object).
 
-```{r epil}
+
+```r
 library(MASS)
 epil$trt_id <- as.numeric(epil$trt)
 baseline_y <- epil$base[!duplicated(epil$subject)]
@@ -72,7 +64,8 @@ intercept model for the baseline (log-)seizure rates, to account for the fact
 that each individual will have a different seizure rate, irrespective of
 the treatment they receive.
 
-```{r baseline}
+
+```r
 library(greta)
 
 # priors
@@ -91,7 +84,8 @@ so must be positive), and centre them at 1 to represent a prior expectation of
 no effect. We multiply these effects by the baseline rates to get the
 post-treatment rates for each observation in the dataset.
 
-```{r treatment}
+
+```r
 # prior
 treatment_effects <- normal(1, 1, dim = 2, truncation = c(0, Inf))
 post_treatment_rates <- treatment_effects[epil$trt_id] * baseline_rates[epil$subject]
@@ -103,7 +97,8 @@ each of the post-treatment counts (over 2 week periods). We multiply our
 modelled weekly rates by the number of weeks the counts represent to get the
 appropriate rate for that period.
 
-```{r distributions}
+
+```r
 distribution(baseline_y) <- poisson(baseline_rates * 8)
 distribution(epil$y) <- poisson(post_treatment_rates * 2)
 ```
@@ -112,7 +107,8 @@ Now we can create a model object using these greta arrays, naming the
 parameters that we are most interested in, and then run an MCMC sampler on the
 model.
 
-```{r mcmc}
+
+```r
 m <- model(treatment_effects, subject_sd)
 draws <- mcmc(m)
 ```
@@ -123,17 +119,44 @@ summarise the posterior samples. Here' we'll use the bayesplot package
 [@bayesplot] to create trace plots for the parameters of interest, and the
 coda package to get $\hat{R}$ statistics to assess convergence of these parameters.
 
-```{r diagnostics}
+
+```r
 bayesplot::mcmc_trace(draws)
+```
+
+![](paper_files/figure-html/diagnostics-1.png)<!-- -->
+
+```r
 coda::gelman.diag(draws)
+```
+
+```
+## Potential scale reduction factors:
+## 
+##                        Point est. Upper C.I.
+## treatment_effects[1,1]          1       1.01
+## treatment_effects[2,1]          1       1.00
+## subject_sd                      1       1.01
+## 
+## Multivariate psrf
+## 
+## 1
 ```
 
 We can summarise the posterior samples to get the treatment effect estimates
 for placebo and progabide, the first and second elements of
 `treatment_effects` respectively.
 
-```{r summary}
+
+```r
 summary(draws)$statistics
+```
+
+```
+##                             Mean         SD     Naive SE Time-series SE
+## treatment_effects[1,1] 1.1176199 0.05278737 0.0008346416   0.0011645811
+## treatment_effects[2,1] 1.0107183 0.04462845 0.0007056378   0.0008762349
+## subject_sd             0.7991257 0.07826540 0.0012374846   0.0014946363
 ```
 
 These parameter estimates tell us the ratio of seizures rates during and
@@ -143,11 +166,17 @@ between the drug treatment and the placebo. We didn't include that term in our
 model, but fortunately there's no need to re-fit the model. greta's
 `calculate()` function lets us compute model quantities after model fitting.
 
-```{r calculate}
+
+```r
 # create a drug effect greta array and calculate posterior samples of this
 drug_effect <- treatment_effects[2] / treatment_effects[1]
 drug_effect_draws <- calculate(drug_effect, draws)
 summary(drug_effect_draws)$statistics
+```
+
+```
+##           Mean             SD       Naive SE Time-series SE 
+##   0.9063622467   0.0585752902   0.0009261567   0.0012205338
 ```
 
 `calculate()` can also be used for posterior prediction, enabling greta to be
