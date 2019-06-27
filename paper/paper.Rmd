@@ -24,11 +24,13 @@ output:
 
 # Summary
 
-Statistical modelling useful throughout the sciences. Often a need to write custom models that cannot be fitted using off-the shelf statistical software (such as software for for fitting mixed effects models). Hence writing out the model in a modelling language and fitting them by MCMC or maximum likelihood. This lets the user focus on the statistical nature of the model, rather than implementation details and inference procedures. This has lead to the development of software including BUGS, JAGS and NIMBLE [@openbugs; @jags; @nimble]. In these software packages, users typically write out models in a domain-specific language which is then compiled into computational code - though see the Python packages PyMC and Edward [@pymc; @edward].
+Statistical modelling is used throughout science. There is often a need to write custom models that cannot be fitted using off-the shelf statistical software. These models can be specified in domain specific modelling languages that are fit with methods such as MCMC and maximum likelihood. The development of these modelling languages lets users focus on the statistical nature of the model, rather than implementation details, and inference procedures. There has been a burgeoning of software created to perform custom statistical modelling, including BUGS, JAGS and NIMBLE [@openbugs; @jags; @nimble]. In these software packages, users typically write out models in a domain-specific language, which is then compiled into computational code - though see the Python packages PyMC and Edward [@pymc; @edward].
 
-With increasing quantitites of data and increasing complexity and realism of the statistical models that users wish to buiold with these software, ther is a push for software that scales better with data size and model complexity. Therefore using Hamiltonian Monte Carlo rather than Gibbs samplers, and paying particular attention to computational efficiency (Stan) [@stan].
+With increasing quantities of data, complexity, and realism of statistical models that users wish to build with these software, there is a push for software that scales better with data size, and model complexity. Methods such as Hamiltonian Monte Carlo rather than Gibbs samplers have seen development, which pay particular attention to computational efficiency. This can be seen for example in the development of Stan [@stan].
 
-greta is an R package for statistical modelling that has three core differences to commonly used statistical modelling software packages:
+(note: consider introducing these three ideas you mention here above? Or leave as is - only a minor point.)
+
+greta is an package for statistical modelling in R [@Rcore] that has three core differences to commonly used statistical modelling software packages:
 
   1. greta models are written interactively in R code rather than in a compiled domain specific language.
   2. greta can be extended by other R packages; providing a fully-featured package management system for extensions.
@@ -36,7 +38,11 @@ greta is an R package for statistical modelling that has three core differences 
   
 greta can be used to construct both Bayesian and non-Bayesian statistical models, and perform inference via MCMC or optimisation (for maximum likelihood or maximum *a posteriori* estimation). The default MCMC algorithm is Hamiltonian Monte Carlo, which is generally very efficient for Bayesian models with large numbers of parameters or highly-correlated posteriors.
 
-The project website [https://greta-stats.org/]() hosts a *getting started* guide, worked examples of analyses using greta, a catalogue of example models, documentation, and a user forum.
+The project website [https://greta-stats.org/](https://greta-stats.org/) hosts a *getting started* guide, worked examples of analyses using greta, a catalogue of example models, documentation, and a user forum.
+
+Note: 
+* Tell me why it is called greta?
+* Tell me what the rest of the paper is - why use an example?
 
 ## Example
 
@@ -56,7 +62,7 @@ knitr::opts_chunk$set(
 set.seed(2019-06-27)
 ```
 
-Before we specify the greta model, we format the data to make out lives
+Before we specify the greta model, we format the data to make our lives
 easier; adding a numeric version of the treatment type and making a vector of
 the (8-week) baseline counts for each subject (these counts are replicated in
 the epil object).
@@ -84,7 +90,7 @@ subject_effects <- normal(subject_mean, subject_sd, dim = 59)
 baseline_rates <- exp(subject_effects)
 ```
 
-Next we build model for the effects (the ratio of post-treatment to
+Next we build a model for the effects (the ratio of post-treatment to
 pre-treatment seizure rates) of the two treatments: placebo and progabide. We
 give these positive-truncated normal priors (they are multiplicative effects,
 so must be positive), and centre them at 1 to represent a prior expectation of
@@ -117,9 +123,9 @@ m <- model(treatment_effects, subject_sd)
 draws <- mcmc(m)
 ```
 
-The ``draws`` object contains posterior samples in an `mcmc.list` object from
+The `draws` object contains posterior samples in an `mcmc.list` object from
 the coda package [@coda], for which there are many packages and utilities to
-summarise the posterior samples. Here' we'll use the bayesplot package
+summarise the posterior samples. Here we'll use the `bayesplot` package
 [@bayesplot] to create trace plots for the parameters of interest, and the
 coda package to get $\hat{R}$ statistics to assess convergence of these parameters.
 
@@ -130,7 +136,7 @@ coda::gelman.diag(draws)
 
 We can summarise the posterior samples to get the treatment effect estimates
 for placebo and progabide, the first and second elements of
-`treatment_effects` respectively.
+`treatment_effects`, respectively.
 
 ```{r summary}
 summary(draws)$statistics
@@ -147,7 +153,9 @@ drug_effect_draws <- calculate(drug_effect, draws)
 summary(drug_effect_draws)$statistics
 ```
 
-`calculate()` can also be used for posterior prediction: we can reuse greta arrays for model parameters in combination with predictor variables to make a greta array for the predicted values of the new observations, then use `calculate()` to compute the posterior samples for these predictions. This means that  greta can be used in a predictive modelling workflow in which the data to predict to isn't available before model fitting, and without having to hand-code the predictions for all posterior samples.
+(note: you have mentioned greta arrays here but define them in full later - perhaps might be worthwhile to discuss earlier?)
+
+`calculate()` can also be used for posterior prediction: we can reuse greta arrays for model parameters in combination with predictor variables to make a greta array for the predicted values of the new observations, then use `calculate()` to compute the posterior samples for these predictions. This means greta can be used in a predictive modelling workflow in which the data to predict to isn't available before model fitting, and without having to hand-code the predictions for all posterior samples.
 
 ## Implementation
 
@@ -157,13 +165,15 @@ Internally, each of these greta arrays is represented by an R6 object [@r6], wit
 
 ## Parallelisation
 
-Whereas most MCMC software packages enable parallelisation by running each MCMC chain to run on a separate CPU, greta's use of TensorFlow means it can parallelise MCMC on a single chain across an arbitrary number of CPUs. By installing the appropriate version of TensorFlow, greta models can also be run on Graphics Processing Units (GPUs). greta is also integrated with the future R package [@future] for remote and parallel processing, providing a simple interface to run inference for each chain of MCMC on a separate, remote machines. As a consequence, inference on greta models can be scaled up to make use of modern high-performance conpute systems.
+Whereas most MCMC software packages enable parallelisation by running each MCMC chain to run on a separate CPU, greta's use of TensorFlow means it can parallelise MCMC on a single chain across an arbitrary number of CPUs. By installing the appropriate version of TensorFlow, greta models can also be run on Graphics Processing Units (GPUs). greta is also integrated with the future R package [@future] for remote and parallel processing, providing a simple interface to run inference for each chain of MCMC on a separate, remote machines. As a consequence, inference on greta models can be scaled up to make use of modern high-performance compute systems.
 
 ## Extending greta
 
-greta is not only designed to be extensible, but makes a deliberately distinction between the API for *users* who construct statistical models using existing functionality, and *developers* who add new functionality. Rather than letting users directly modify the inference target within a model, new probability distributions and operations are created using a developer user interface, exposed via the `.internals` object. Once developed in this way, it becomes simple to distribute this new functionality to other users via an R package that extends greta. Linking to the well established R package mechanism means that ``greta`` extensions automatically come with a  fully-featured package management system, with tooling for development and distribution via CRAN or code sharing platforms.
+greta is not only designed to be extensible, but makes a deliberately distinction between the API for *users* who construct statistical models using existing functionality, and *developers* who add new functionality. Rather than letting users directly modify the inference target within a model, new probability distributions and operations are created using a developer user interface, exposed via the `.internals` object. Once developed in this way, it becomes simple to distribute this new functionality to other users via an R package that extends greta. Linking to the well established R package mechanism means that greta extensions automatically come with a  fully-featured package management system, with tooling for development and distribution via CRAN or code sharing platforms.
 
-Whilst anyone can write and distribute their own extension package, an aim of the greta project is to maintain a set of extension packages that meet software quality standards and are completely interoperable, in a similar way to the 'tidyverse' of R packages [@tidyverse] for data manipulation. These packages will be hosted on both the project GitHub organisation at [https://github.com/greta-dev/]() and on CRAN. There are currently a number of extensions in prototype form hosted on the GitHub organisation, including extensions to facilitate Gaussian process modelling (greta.gp), modelling dynamic systems (greta.dynamics) and generalised additive modelling (greta.gam).
+Whilst anyone can write and distribute their own extension package, an aim of the greta project is to maintain a set of extension packages that meet software quality standards and are completely interoperable, in a similar way to the 'tidyverse' of R packages [@tidyverse] for data manipulation. These packages will be hosted on both the project GitHub organisation at [https://github.com/greta-dev/](https://github.com/greta-dev/) and on CRAN. There are currently a number of extensions in prototype form hosted on the GitHub organisation, including extensions to facilitate Gaussian process modelling (greta.gp), modelling dynamic systems (greta.dynamics) and generalised additive modelling (greta.gam).
+
+Note: Did you want to link to references for `greta.gp`, `greta.gam` etc?
 
 ## Future work
 
