@@ -19,6 +19,7 @@ bibliography: paper.bib
 output:
   html_document:
     keep_md: yes
+  pdf_document: default
 ---
 
 # Summary
@@ -37,13 +38,12 @@ greta can be used to construct both Bayesian and non-Bayesian statistical models
 
 The project website [https://greta-stats.org/]() hosts a *getting started* guide, worked examples of analyses using greta, a catalogue of example models, documentation, and a user forum.
 
-# demonstration
+## Example
 
 The following illustrates a typical modelling session with greta, using a
 Bayesian hierarchical model to estimate the treatment effect of epilepsy
 medication using data provided in the MASS R package (@mass, distributed
 with R) and analysed in the corresponding book.
-
 
 
 
@@ -161,14 +161,11 @@ summary(draws)$statistics
 
 These parameter estimates tell us the ratio of seizures rates during and
 before the treatment period for both the drug and placebo treatments. To
-calculate the drug effect, we would take the ratio of the seizure rates
-between the drug treatment and the placebo. We didn't include that term in our
-model, but fortunately there's no need to re-fit the model. greta's
-`calculate()` function lets us compute model quantities after model fitting.
+calculate the effect of the drug relative to the placebo, we would take the ratio of the seizure rates between the drug treatment and the placebo treatment. We didn't include that term in our model, but fortunately there's no need to re-fit the model. greta's `calculate()` function lets us compute model quantities after model fitting.
 
 
 ```r
-# create a drug effect greta array and calculate posterior samples of this
+# create a drug effect greta array and calculate posterior samples
 drug_effect <- treatment_effects[2] / treatment_effects[1]
 drug_effect_draws <- calculate(drug_effect, draws)
 summary(drug_effect_draws)$statistics
@@ -179,40 +176,38 @@ summary(drug_effect_draws)$statistics
 ##   0.9063622467   0.0585752902   0.0009261567   0.0012205338
 ```
 
-`calculate()` can also be used for posterior prediction, enabling greta to be
-used in a predictive modelling workflow without knowing the prediction data
-before model fitting, or having to hand-code the predictions for all posterior
-samples.
+`calculate()` can also be used for posterior prediction: we can reuse greta arrays for model parameters in combination with predictor variables to make a greta array for the predicted values of the new observations, then use `calculate()` to compute the posterior samples for these predictions. This means that  greta can be used in a predictive modelling workflow in which the data to predict to isn't available before model fitting, and without having to hand-code the predictions for all posterior samples.
 
-# Implementation
+## Implementation
 
-R front end, extending existing R functions.
-using R6 objects internally to build up a DAG
-Using the DAG to construct a likelihood function using TensorFlow
-Using TensorFlow [@tf] and TensorFlow Probability [@tfp] via reticulate and the tensorflow R API [@reticulate; @r_tf] functionality for the core computational part of inference.
-Whereas most MCMC software packages enable each MCMC chain to run on a separate CPU, greta can parallelise MCMC on a single chain across an arbitrary number of CPUs by parallelising 
-By simply installing the appropriate version of TensorFlow, greta models can also be run on Graphics Processing Units (GPUs).
-greta is also integrated with the future R package [@future] for remote and parallel processing, providing a simple interface to run inference for each chain of MCMC on a separate, remote machines.
+As in the example above, users of greta build up their models by creating and manipulating `greta_array` objects representing parameters of other quantities in the model. `greta_array`s behave like R's arrays, vectors and scalars, but with unknown values. greta extends a number of R's mathematical functions and other operations to work with greta arrays, so users can manipulate them as they would any other numeric object in R.
 
-# extending greta
+Internally, each of these greta arrays is represented by an R6 object [@r6], with information on the greta arrays from which they were created, or which re created with them. Together, these R6 objects constitute a directed acyclic graph (DAG), combining data, operations, variables, and probability densities. This DAG is then used to construct a function in TensorFlow code representing the joint density of the model. This core computational functionality, including optimisers and MCMC samplers, is provided by the TensorFlow and TensorFlow Probability python packages [@tf; @tfp], accessed from R via the tensorflow and reticulate R packages [@r_tf; @reticulate].
+
+## Parallelisation
+
+Whereas most MCMC software packages enable parallelisation by running each MCMC chain to run on a separate CPU, greta's use of TensorFlow means it can parallelise MCMC on a single chain across an arbitrary number of CPUs. By installing the appropriate version of TensorFlow, greta models can also be run on Graphics Processing Units (GPUs). greta is also integrated with the future R package [@future] for remote and parallel processing, providing a simple interface to run inference for each chain of MCMC on a separate, remote machines. As a consequence, inference on greta models can be scaled up to make use of modern high-performance conpute systems.
+
+## Extending greta
 
 greta is not only designed to be extensible, but makes a deliberately distinction between the API for *users* who construct statistical models using existing functionality, and *developers* who add new functionality. Rather than letting users directly modify the inference target within a model, new probability distributions and operations are created using a developer user interface, exposed via the `.internals` object. Once developed in this way, it becomes simple to distribute this new functionality to other users via an R package that extends greta. Linking to the well established R package mechanism means that ``greta`` extensions automatically come with a  fully-featured package management system, with tooling for development and distribution via CRAN or code sharing platforms.
 
-This developer API is under active development to make the process of extending greta simpler. Whilst anyone can write and distribute their own extension package, an aim of the greta project is to maintain a set of extension packages that meet software quality standards and are completely interoperable, in a similar way to the 'tidyverse' of R packages [@tidyverse] for data manipulation. These packages will be hosted on both the project GitHub organisation at [https://github.com/greta-dev/]() and on CRAN.
-There are currently a number of extensions in prototype form hosted on the GitHub organisation, including extensions to facilitate Gaussian process modelling (greta.gp), modelling dynamic systems (greta.dynamics) and generalised additive modelling (greta.gam).
+Whilst anyone can write and distribute their own extension package, an aim of the greta project is to maintain a set of extension packages that meet software quality standards and are completely interoperable, in a similar way to the 'tidyverse' of R packages [@tidyverse] for data manipulation. These packages will be hosted on both the project GitHub organisation at [https://github.com/greta-dev/]() and on CRAN. There are currently a number of extensions in prototype form hosted on the GitHub organisation, including extensions to facilitate Gaussian process modelling (greta.gp), modelling dynamic systems (greta.dynamics) and generalised additive modelling (greta.gam).
 
-# future work
+## Future work
 
-### discrete parameters
+greta is under active development, and a range of of new features will be added to the core package and extension packages in the near future. Two of the most significant expected changes are the ability to perform inference on discrete-valued parameters, and to include direct or approximate marginalisation of parameters as part of a model.
+
+### Discrete parameters
 
 greta currently only handles models with exclusively continuous-valued parameters, since these models are compatible with the most commonly used optimisation routines and the efficient HMC sampler that is used by default. In the near future, greta will be extended to enable users to perform inference on models with discrete-valued parameters as required, in combination with the (typically less efficient) samplers with which these models are compatible.
 
-### marginalisation
+### Marginalisation
 
 Many common statistical modelling approaches, such as hierarchical models, use unobserved *latent* variables whose posterior distributions must be integrated over in order to perform inference on parameters of interest. Whilst MCMC is a general-purpose method for marginalising these parameters, other methods are often better suited to the task in specific models. For example where those latent variables are discrete-valued and efficient samplers cannot be used, or when deterministic numerical approximations such as a Laplace approximation are more computationally-efficient. A simple user interface to specifying these marginalisation schemes within a greta model is planned. This will enable users to experiment with combinations of different inference approaches without the need delve into nuances of implementation.
 
 # Acknowledgements
 
-I'd like to acknowledge direct contributions from Simon Dirmeier, Adam Fleischhacker, Shirin Glander, Martin Ingram, Lee Hazel, Tiphaine Martin, Matt Mulvahill, Michael Quinn, David Smith, Paul Teetor, and Jian Yen, as well as Jeffrey Pullin and many others who have provided feedback and suggestions on greta and its extensions. ``greta`` was developed with support from both a McKenzie fellowship from the University of Melbourne, and a DECRA fellowship from the Australian Research Council (DE180100635).
+I'd like to acknowledge direct contributions from Simon Dirmeier, Adam Fleischhacker, Shirin Glander, Martin Ingram, Lee Hazel, Tiphaine Martin, Matt Mulvahill, Michael Quinn, David Smith, Paul Teetor, and Jian Yen, as well as Jeffrey Pullin and many others who have provided feedback and suggestions on greta and its extensions. greta was developed with support from both a McKenzie fellowship from the University of Melbourne, and a DECRA fellowship from the Australian Research Council (DE180100635).
 
 # References
