@@ -123,7 +123,7 @@ summarise the posterior samples. Here' we'll use the bayesplot package
 [@bayesplot] to create trace plots for the parameters of interest, and the
 coda package to get $\hat{R}$ statistics to assess convergence of these parameters.
 
-```{r diagnostics, fig.height = 2}
+```{r diagnostics, fig.height = 2, dpi = 600}
 bayesplot::mcmc_trace(draws)
 coda::gelman.diag(draws)
 ```
