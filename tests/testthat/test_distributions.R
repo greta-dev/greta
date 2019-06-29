@@ -704,7 +704,7 @@ test_that("distributions can be sampled from", {
   sample_distribution(beta(6.3, 5.9), lower = 0, upper = 1)
   sample_distribution(inverse_gamma(0.9, 1.3), lower = 0)
   sample_distribution(weibull(2, 1.1), lower = 0)
-  sample_distribution(pareto(2.4, 1.5), lower = 0)
+  sample_distribution(pareto(2.4, 0.1), lower = 0.1)
   sample_distribution(chi_squared(4.3), lower = 0)
   sample_distribution(f(24.3, 2.4), lower = 0)
 
