@@ -31,7 +31,10 @@ greta_stash$numerical_messages <- c("is not invertible",
 #' @param n_cores the maximum number of CPU cores used by each sampler (see
 #'   details).
 #' @param verbose whether to print progress information to the console
-#' @param pb_update how regularly to update the progress bar (in iterations)
+#' @param pb_update how regularly to update the progress bar (in iterations).
+#'   If \code{pb_update} is less than or equal to \code{thin}, it will be set
+#'   to \code{thin + 1} to ensure at least one saved iteration per
+#'   \code{pb_update} iterations.
 #' @param one_by_one whether to run TensorFlow MCMC code one iteration at a
 #'   time, so that greta can handle numerical errors as 'bad' proposals (see
 #'   below).
@@ -238,6 +241,7 @@ mcmc <- function(model,
 
   # now make it finite
   pb_update <- min(pb_update, max(warmup, n_samples))
+  pb_update <- max(pb_update, thin + 1)
 
   run_samplers(samplers = samplers,
                n_samples = n_samples,

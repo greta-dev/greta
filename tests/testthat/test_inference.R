@@ -566,3 +566,14 @@ test_that("samplers print informatively", {
   expect_match(out, "Lmin = 1")
 
 })
+
+test_that("pb_update is greater than thin to avoid bursts with no saved iterations", {
+  
+  skip_if_not(check_tf_version())
+  set.seed(5)
+  x <- uniform(0, 1)
+  m <- model(x)
+  expect_ok(draws <- mcmc(m, n_samples = 100, warmup = 100,
+                          thin = 3, pb_update = 2))
+  
+})
