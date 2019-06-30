@@ -14,9 +14,7 @@ r_binary_packages:
   - abind
   - coda
   - codetools
-  - colorspace
   - DBI
-  - digest
   - foreign
   - ggplot2
   - inline
@@ -26,13 +24,10 @@ r_binary_packages:
   - mgcv
   - mvtnorm
   - nlme
-  - plyr
   - Rcpp
   - rpart
-  - rstan
   - stringr
   - survival
-  - XML
 
 r_packages:
   - reticulate
@@ -49,6 +44,10 @@ r_packages:
   - devtools
   - tidyverse
   - lintr
+  - colorspace
+  - digest
+  - XML
+  - plyr
 
 r_github_packages:
   - rich-iannone/DiagrammeRsvg
@@ -74,8 +73,8 @@ addons:
 before_install:
   - pip install --user numpy
   - pip install --user scipy
-  - pip install --user 'tensorflow==1.10'
-  - pip install --user 'tensorflow-probability'
+  - pip install --user 'tensorflow==1.12'
+  - pip install --user 'tensorflow-probability==0.5.0'
 
 after_success:
   - Rscript -e "covr::codecov()"
