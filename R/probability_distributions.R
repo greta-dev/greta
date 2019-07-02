@@ -765,7 +765,7 @@ f_distribution <- R6Class(
       cdf <- function(x) {
         df1_x <- df1 * x
         ratio <- df1_x / (df1_x + df2)
-        tf$betainc(df1 / fl(2), df2 / fl(2), ratio)
+        tf$math$betainc(df1 / fl(2), df2 / fl(2), ratio)
       }
 
       log_cdf <- function(x)
