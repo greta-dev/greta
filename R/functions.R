@@ -107,7 +107,7 @@ log.greta_array <- function(x, base = exp(1)) {
   if (has_representation(x, "log")) {
     result <- copy_representation(x, "log")
   } else {
-    result <- op("log", x, tf_operation = "tf$log",
+    result <- op("log", x, tf_operation = "tf$math$log",
                  representations = list(exp = x))
   }
   result
@@ -120,7 +120,7 @@ exp.greta_array <- function(x) {
     result <- copy_representation(x, "exp")
   } else {
     # otherwise exponentiate it, and store the log representation
-    result <- op("exp", x, tf_operation = "tf$exp",
+    result <- op("exp", x, tf_operation = "tf$math$exp",
                  representations = list(log = x))
   }
   result
@@ -128,12 +128,12 @@ exp.greta_array <- function(x) {
 
 #' @export
 log1p.greta_array <- function(x) {
-  op("log1p", x, tf_operation = "tf$log1p")
+  op("log1p", x, tf_operation = "tf$math$log1p")
 }
 
 #' @export
 expm1.greta_array <- function(x) {
-  op("expm1", x, tf_operation = "tf$expm1")
+  op("expm1", x, tf_operation = "tf$math$expm1")
 }
 
 #' @export
@@ -153,7 +153,7 @@ sign.greta_array <- function(x) {
 
 #' @export
 ceiling.greta_array <- function(x) {
-  op("ceil", x, tf_operation = "tf$ceil")
+  op("ceil", x, tf_operation = "tf$math$ceil")
 }
 
 #' @export
@@ -202,12 +202,12 @@ atan.greta_array <- function(x) {
 
 #' @export
 lgamma.greta_array <- function(x) {
-  op("lgamma", x, tf_operation = "tf$lgamma")
+  op("lgamma", x, tf_operation = "tf$math$lgamma")
 }
 
 #' @export
 digamma.greta_array <- function(x) {
-  op("digamma", x, tf_operation = "tf$digamma")
+  op("digamma", x, tf_operation = "tf$math$digamma")
 }
 
 #' @export
@@ -297,7 +297,7 @@ solve.greta_array <- function(a, b, ...) {
       result <- chol2inv(U)
     } else {
       result <- op("solve", a,
-                   tf_operation = "tf$matrix_inverse")
+                   tf_operation = "tf$linalg$inv")
     }
 
   } else {
@@ -318,7 +318,7 @@ solve.greta_array <- function(a, b, ...) {
     # ... and solve the linear equations
     result <- op("solve", a, b,
                  dim = dim(b),
-                 tf_operation = "tf$matrix_solve")
+                 tf_operation = "tf$linalg$solve")
 
   }
 
@@ -693,7 +693,7 @@ backsolve.greta_array <- function(r, x,
 
   op("backsolve", r, x,
      operation_args = list(lower = !upper.tri),
-     tf_operation = "tf$matrix_triangular_solve",
+     tf_operation = "tf$linalg$triangular_solve",
      dim = dim(x))
 
 }
@@ -734,7 +734,7 @@ forwardsolve.greta_array <- function(l, x,
 
   op("forwardsolve", l, x,
      operation_args = list(lower = !upper.tri),
-     tf_operation = "tf$matrix_triangular_solve",
+     tf_operation = "tf$linalg$triangular_solve",
      dim = dim(x))
 
 }
@@ -915,7 +915,7 @@ eigen.greta_array <- function(x, symmetric,
     # fact is a list of the two elements. But that's OK so long as the user
     # never sees it
     eig <- op("eigen", x,
-              tf_operation = "tf$self_adjoint_eig")
+              tf_operation = "tf$linalg$eigh")
 
     # get the eigenvalues and vectors as actual, sane greta arrays
     values <- op("values", eig, dim = c(nrow(eig), 1L),
