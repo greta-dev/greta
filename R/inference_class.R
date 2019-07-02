@@ -630,11 +630,12 @@ sampler <- R6Class(
       # define the whole draws tensor
       dag$tf_run(
         sampler_batch <- tfp$mcmc$sample_chain(
-          num_results = sampler_burst_length %/% sampler_thin,
+          num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
           current_state = free_state,
           kernel = sampler_kernel,
-          num_burnin_steps = tf$constant(0L, dtype = tf$int64),
-          num_steps_between_results = tf$cast(sampler_thin, tf$int64),
+          trace_fn = function (current_state, kernel_results) {kernel_results},
+          num_burnin_steps = tf$constant(0L, dtype = tf$int32),
+          num_steps_between_results = sampler_thin,
           parallel_iterations = 1L)
       )
 
@@ -661,11 +662,12 @@ sampler <- R6Class(
       batch_results <- self$sample_carefully(n_samples)
 
       # get trace of free state and drop the null dimension
-      free_state_draws <- batch_results[[1]]
+      free_state_draws <- batch_results$all_states
 
       # if there is one sample at a time, and it's rejected, conversion from
       # python back to R can drop a dimension, so handle that here. Ugh.
       if (length(dim(free_state_draws)) != 3) {
+
         dim(free_state_draws) <- c(1, dim(free_state_draws))
       }
 
@@ -681,8 +683,8 @@ sampler <- R6Class(
       if (self$uses_metropolis) {
 
         # log acceptance probability
-        log_accept_stats <- batch_results[[2]]$log_accept_ratio
-        is_accepted <- batch_results[[2]]$is_accepted
+        log_accept_stats <- batch_results$trace$log_accept_ratio
+        is_accepted <- batch_results$trace$is_accepted
         self$accept_history <- rbind(self$accept_history, is_accepted)
         accept_stats_batch <- pmin(1, exp(log_accept_stats))
         self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
@@ -714,10 +716,9 @@ sampler <- R6Class(
         # pass it back
         if (n_samples == 1L) {
 
-          result <- list(self$free_state,
-                         list(log_accept_ratio = rep(-Inf, self$n_chains),
-                              is_accepted = rep(FALSE, self$n_chains)))
-
+          result <- list(all_states = self$free_state,
+                         trace = list(log_accept_ratio = rep(-Inf, self$n_chains),
+                                      is_accepted = rep(FALSE, self$n_chains)))
 
         } else {
 
