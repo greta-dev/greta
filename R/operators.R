@@ -106,14 +106,14 @@ NULL
 `%%.greta_array` <- function(e1, e2) {
   check_dims(e1, e2)
   op("`modulo`", e1, e2,
-     tf_operation = "tf$mod")
+     tf_operation = "tf$math$mod")
 }
 
 #' @export
 `%/%.greta_array` <- function(e1, e2) {
   check_dims(e1, e2)
   op("`integer divide`", e1, e2,
-     tf_operation = "tf$floordiv")
+     tf_operation = "tf$math$floordiv")
 }
 
 # overload %*% as an S3 generic

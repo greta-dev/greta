@@ -171,7 +171,7 @@ slsqp <- function() {
 #'   optimal value
 gradient_descent <- function(learning_rate = 0.01) {
   define_tf_optimiser("gradient_descent",
-                      method = "tf$train$GradientDescentOptimizer",
+                      method = "tf$compat$v1$train$GradientDescentOptimizer",
                       parameters = list(
                         learning_rate = learning_rate
                       ))
@@ -185,7 +185,7 @@ gradient_descent <- function(learning_rate = 0.01) {
 #' @param epsilon a small constant used to condition gradient updates
 adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
   define_tf_optimiser("adadelta",
-                      method = "tf$train$AdadeltaOptimizer",
+                      method = "tf$compat$v1$train$AdadeltaOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         rho = rho,
@@ -202,7 +202,7 @@ adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
 adagrad <- function(learning_rate = 0.8,
                     initial_accumulator_value = 0.1) {
   define_tf_optimiser("adagrad",
-                      method = "tf$train$AdagradOptimizer",
+                      method = "tf$compat$v1$train$AdagradOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         initial_accumulator_value = initial_accumulator_value
@@ -227,7 +227,7 @@ adagrad_da <- function(learning_rate = 0.8,
                        l1_regularization_strength = 0,
                        l2_regularization_strength = 0) {
   define_tf_optimiser("adagrad_da",
-                      method = "tf$train$AdagradDAOptimizer",
+                      method = "tf$compat$v1$train$AdagradDAOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         global_step = global_step,
@@ -249,7 +249,7 @@ momentum <- function(learning_rate = 0.001,
                      momentum = 0.9,
                      use_nesterov = TRUE) {
   define_tf_optimiser("momentum",
-                      method = "tf$train$MomentumOptimizer",
+                      method = "tf$compat$v1$train$MomentumOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         momentum = momentum,
@@ -268,7 +268,7 @@ adam <- function(learning_rate = 0.1,
                  beta2 = 0.999,
                  epsilon = 1e-08) {
   define_tf_optimiser("adam",
-                      method = "tf$train$AdamOptimizer",
+                      method = "tf$compat$v1$train$AdamOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         beta1 = beta1,
@@ -288,7 +288,7 @@ ftrl <- function(learning_rate = 1,
                  l1_regularization_strength = 0,
                  l2_regularization_strength = 0) {
   define_tf_optimiser("ftrl",
-                      method = "tf$train$FtrlOptimizer",
+                      method = "tf$compat$v1$train$FtrlOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         learning_rate_power = learning_rate_power,
@@ -305,7 +305,7 @@ proximal_gradient_descent <- function(learning_rate = 0.01,
                                       l1_regularization_strength = 0,
                                       l2_regularization_strength = 0) {
   define_tf_optimiser("proximal_gradient_descent",
-                      method = "tf$train$ProximalGradientDescentOptimizer",
+                      method = "tf$compat$v1$train$ProximalGradientDescentOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         l1_regularization_strength = l1_regularization_strength,
@@ -321,7 +321,7 @@ proximal_adagrad <- function(learning_rate = 1,
                              l1_regularization_strength = 0,
                              l2_regularization_strength = 0) {
   define_tf_optimiser("proximal_adagrad",
-                      method = "tf$train$ProximalAdagradOptimizer",
+                      method = "tf$compat$v1$train$ProximalAdagradOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         initial_accumulator_value = initial_accumulator_value,
@@ -340,7 +340,7 @@ rms_prop <- function(learning_rate = 0.1,
                      momentum = 0,
                      epsilon = 1e-10) {
   define_tf_optimiser("rms_prop",
-                      method = "tf$train$RMSPropOptimizer",
+                      method = "tf$compat$v1$train$RMSPropOptimizer",
                       parameters = list(
                         learning_rate = learning_rate,
                         decay = decay,

@@ -152,7 +152,7 @@ mixture_distribution <- R6Class(
       weights <- parameters$weights
       weights_sum <- tf$reduce_sum(weights, 1L, keepdims = TRUE)
       weights <- weights / weights_sum
-      log_weights <- tf$log(weights)
+      log_weights <- tf$math$log(weights)
 
       log_prob <- function(x) {
 
