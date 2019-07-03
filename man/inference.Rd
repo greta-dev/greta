@@ -171,8 +171,8 @@ Because \code{opt()} acts on a list of greta arrays with possibly
   varying dimension, the \code{par} and \code{hessian} objects returned by
   \code{opt()} are named lists, rather than a vector (\code{par}) and a
   matrix (\code{hessian}), as returned by \code{\link[stats:optim]{optim()}}.
-  Because greta arrays may not be vectors, the hessians may not be matrices,
-  but could be higher-dimensional arrays. To return a hessian matrix covering
+  Because greta arrays may not be vectors, the Hessians may not be matrices,
+  but could be higher-dimensional arrays. To return a Hessian matrix covering
   multiple model parameters, you can construct your model so that all those
   parameters are in a vector, then split the vector up to define the model.
   The parameter vector can then be passed to model. See example.
@@ -228,7 +228,7 @@ var(x)  # different
 # initial values can also be passed to optimisers:
 o <- opt(m2, initial_values = initials(variance = 1))
 
-# and you can return a list of the hessians for each of these parameters
+# and you can return a list of the Hessians for each of these parameters
 o <- opt(m2, hessians = TRUE)
 o$hessians
 
