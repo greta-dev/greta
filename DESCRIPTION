@@ -1,7 +1,7 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.3.0.9007
+Version: 0.3.0.9008
 Date: 2019-06-03
 Authors@R: c(
   person("Nick", "Golding", role = c("aut", "cre"),
@@ -63,7 +63,7 @@ Collate:
     'callbacks.R'
 Imports:
     R6,
-    tensorflow,
+    tensorflow (>= 1.13.0),
     reticulate,
     progress (>= 1.2.0),
     future,
