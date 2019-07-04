@@ -1140,7 +1140,7 @@ as_tf_function <- function(r_fun, ...) {
 
     # use the default graph, so that it can be overwritten when this is called?
     # alternatively fetch from above, or put it in greta_stash?
-    sub_dag$tf_graph <- tf$get_default_graph()
+    sub_dag$tf_graph <- tf$compat$v1$get_default_graph()
     sub_tfe <- sub_dag$tf_environment
 
     # set the input tensors as the values for the dummy greta arrays in the new
