@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.3.0.9002
-Date: 2018-11-12
+Version: 0.3.0.9008
+Date: 2019-06-03
 Authors@R: c(
   person("Nick", "Golding", role = c("aut", "cre"),
          email = "nick.golding.research@gmail.com",
@@ -24,8 +24,8 @@ License: Apache License 2.0
 URL: https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
-    TensorFlow (>= 1.10; https://www.tensorflow.org/);
-    Tensorflow Probability (>=0.5.0; https://www.tensorflow.org/probability/)
+    TensorFlow (v1.14; https://www.tensorflow.org/);
+    Tensorflow Probability (v0.7.0; https://www.tensorflow.org/probability/)
 Encoding: UTF-8
 LazyData: true
 Depends:
@@ -63,7 +63,7 @@ Collate:
     'callbacks.R'
 Imports:
     R6,
-    tensorflow,
+    tensorflow (>= 1.13.0),
     reticulate,
     progress (>= 1.2.0),
     future,

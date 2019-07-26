@@ -4,7 +4,7 @@ library(tensorflow)
 
 # set the seed and flush the graph before running tests
 if (greta:::check_tf_version())
-  tf$reset_default_graph()
+  tf$compat$v1$reset_default_graph()
 
 set.seed(2018 - 05 - 30)
 
@@ -29,8 +29,8 @@ grab <- function(x, dag = NULL, ...) {
   }
 
   dag$build_feed_dict(dots)
-  out <- tf$Session()$run(x,
-                          feed_dict = dag$tf_environment$feed_dict)
+  out <- tf$compat$v1$Session()$run(x,
+                                    feed_dict = dag$tf_environment$feed_dict)
   drop_first_dim(out)
 
 }

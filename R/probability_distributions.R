@@ -236,9 +236,9 @@ binomial_distribution <- R6Class(
         lprobnot <- d$log_cdf(-probit)
 
         log_prob <- function(x) {
-          log_choose <- tf$lgamma(size + fl(1)) -
-            tf$lgamma(x + fl(1)) -
-            tf$lgamma(size - x + fl(1))
+          log_choose <- tf$math$lgamma(size + fl(1)) -
+            tf$math$lgamma(x + fl(1)) -
+            tf$math$lgamma(size - x + fl(1))
           log_choose + x * lprob + (size - x) * lprobnot
         }
 
@@ -327,7 +327,7 @@ poisson_distribution <- R6Class(
       if (self$lambda_is_log) {
         log_lambda <- parameters$lambda
       } else {
-        log_lambda <- tf$log(parameters$lambda)
+        log_lambda <- tf$math$log(parameters$lambda)
       }
 
       tfp$distributions$Poisson(log_rate = log_lambda)
@@ -721,7 +721,7 @@ logistic_distribution <- R6Class(
 
     # log_cdf in tf$cotrib$distributions has the wrong sign :/
     tf_log_cdf_function = function(x, parameters) {
-      tf$log(self$tf_cdf_function(x, parameters))
+      tf$math$log(self$tf_cdf_function(x, parameters))
     }
 
   )
@@ -752,7 +752,7 @@ f_distribution <- R6Class(
       df2 <- parameters$df2
 
       tf_lbeta <- function(a, b)
-        tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
+        tf$math$lgamma(a) + tf$math$lgamma(b) - tf$math$lgamma(a + b)
 
       log_prob <- function(x) {
         df1_x <- df1 * x
@@ -765,7 +765,7 @@ f_distribution <- R6Class(
       cdf <- function(x) {
         df1_x <- df1 * x
         ratio <- df1_x / (df1_x + df2)
-        tf$betainc(df1 / fl(2), df2 / fl(2), ratio)
+        tf$math$betainc(df1 / fl(2), df2 / fl(2), ratio)
       }
 
       log_cdf <- function(x)
@@ -1020,7 +1020,7 @@ multivariate_normal_distribution <- R6Class(
       if (self$Sigma_is_cholesky) {
         L <- tf_transpose(parameters$Sigma)
       } else {
-        L <- tf$cholesky(parameters$Sigma)
+        L <- tf$linalg$cholesky(parameters$Sigma)
       }
 
       # add an extra dimension for the observation batch size (otherwise tfp
@@ -1138,16 +1138,16 @@ wishart_distribution <- R6Class(
 
         # get the cholesky factor of Sigma in tf orientation
         if (self$Sigma_is_cholesky) {
-          Sigma_chol <- tf$matrix_transpose(Sigma)
+          Sigma_chol <- tf$linalg$matrix_transpose(Sigma)
         } else {
-          Sigma_chol <- tf$cholesky(Sigma)
+          Sigma_chol <- tf$linalg$cholesky(Sigma)
         }
 
         # get the cholesky factor of the target in tf_orientation
         if (self$target_is_cholesky) {
-          x_chol <- tf$matrix_transpose(x)
+          x_chol <- tf$linalg$matrix_transpose(x)
         } else {
-          x_chol <- tf$cholesky(x)
+          x_chol <- tf$linalg$cholesky(x)
         }
 
         # use the density for choleskied x, with choleskied Sigma
@@ -1260,22 +1260,22 @@ lkj_correlation_distribution <- R6Class(
 
         # normalising constant
         k <- 1:n
-        a <- fl(1 - n) * tf$lgamma(eta + fl(0.5 * (n - 1)))
+        a <- fl(1 - n) * tf$math$lgamma(eta + fl(0.5 * (n - 1)))
         b <- tf_sum(fl(0.5 * k * log(pi)) +
-                      tf$lgamma(eta + fl(0.5 * (n - 1 - k))))
+                      tf$math$lgamma(eta + fl(0.5 * (n - 1 - k))))
         norm <- a + b
 
         # get the cholesky factor of the target in tf_orientation
         if (self$target_is_cholesky) {
-          x_chol <- tf$matrix_transpose(x)
+          x_chol <- tf$linalg$matrix_transpose(x)
         } else {
-          x_chol <- tf$cholesky(x)
+          x_chol <- tf$linalg$cholesky(x)
         }
 
-        diags <- tf$matrix_diag_part(x_chol)
+        diags <- tf$linalg$diag_part(x_chol)
         det <- tf$square(tf_prod(diags))
 
-        (eta - fl(1)) * tf$log(det) + norm
+        (eta - fl(1)) * tf$math$log(det) + norm
 
       }
 

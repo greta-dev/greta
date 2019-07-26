@@ -34,8 +34,8 @@ data_node <- R6Class(
 
       } else {
 
-        tensor <- tf$placeholder(shape = shape,
-                                 dtype = tf_float())
+        tensor <- tf$compat$v1$placeholder(shape = shape,
+                                           dtype = tf_float())
         tfe$data_list[[tf_name]] <- value
 
       }
@@ -493,13 +493,14 @@ distribution_node <- R6Class(
       } else if (upper == self$bounds[2]) {
 
         # if only lower is constrained, get the log of the integral above it
-        offset <- tf$log(fl(1) - self$tf_cdf_function(fl(lower), parameters))
+        offset <- tf$math$log(fl(1) - self$tf_cdf_function(fl(lower),
+                                                           parameters))
 
       } else {
 
         # if both are constrained, get the log of the integral between them
-        offset <- tf$log(self$tf_cdf_function(fl(upper), parameters) -
-                           self$tf_cdf_function(fl(lower), parameters))
+        offset <- tf$math$log(self$tf_cdf_function(fl(upper), parameters) -
+                                self$tf_cdf_function(fl(lower), parameters))
 
       }
 

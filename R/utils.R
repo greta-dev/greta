@@ -113,7 +113,7 @@ check_tf_version <- function(alert = c("none",
     } else {
 
       tf_version <- tf$`__version__`
-      tf_version_valid <- utils::compareVersion("1.10.0", tf_version) != 1
+      tf_version_valid <- utils::compareVersion("1.14.0", tf_version) != 1
 
       if (!tf_version_valid) {
         text <- paste0("you have TensorFlow version ", tf_version)
@@ -134,7 +134,7 @@ check_tf_version <- function(alert = c("none",
 
       pkg <- reticulate::import("pkg_resources")
       tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-      tfp_version_valid <- utils::compareVersion("0.5.0", tfp_version) != 1
+      tfp_version_valid <- utils::compareVersion("0.7.0", tfp_version) != 1
 
       if (!tfp_version_valid) {
         text <- paste0("you have TensorFlow Probability version ", tfp_version)
@@ -146,37 +146,22 @@ check_tf_version <- function(alert = c("none",
     # if there was a problem, append the solution
     if (!tf_available | !tfp_available) {
 
-      # conda-specific installation instructions, to handle conda not having TFP
-      if (have_conda() & !have_virtualenv()) {
-
-        tf_install <- tfp_install <- ""
-
-        if (!tf_available | !tfp_available) {
-          tf_install <- '    install_tensorflow(method = "conda")\n'
-        }
-
-        if (!tfp_available) {
-          tfp_install <- paste0('   reticulate::conda_install("r-tensorflow", ',
-                                '"tensorflow-probability", pip = TRUE)\n')
-        }
-
-        install <- paste(tf_install, tfp_install, collapse = "\n")
-
-      } else {
-        # non-conda installation instructions
-        install <- sprintf("install_tensorflow(%s) ",
-                           ifelse(tfp_available,
-                                  "",
-                                  "extra_packages = \"tensorflow-probability\""))
-      }
+      install <- paste0(
+        '  install_tensorflow(\n',
+        ifelse(have_conda(), '    method = "conda",\n', ''),
+        '    version = "1.14.0",\n',
+        '    extra_packages = "tensorflow-probability"\n',
+        '  )'
+      )
 
       # combine the problem and solution messages
-      text <- paste0("\n\ngreta requires TensorFlow (>=1.10.0) ",
-                     "and Tensorflow Probability (>=0.5.0), ",
-                     "but ", text, ". Use:\n\n",
-                     install,
-                     "\nto install the latest version.",
-                     "\n\n")
+      text <- paste0(
+        "\n\n",
+        "This version of greta requires TensorFlow v1.14.0 ",
+        "and TensorFlow Probability v0.7.0, but ", text, ". ",
+        "To install the correct versions do:\n\n", install,
+        "\n"
+      )
 
     }
 

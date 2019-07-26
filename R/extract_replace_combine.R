@@ -630,6 +630,6 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
   # return the extraction op
   op("diag", x,
      dim = dims,
-     tf_operation = "tf$matrix_diag_part")
+     tf_operation = "tf$linalg$diag_part")
 
 }
