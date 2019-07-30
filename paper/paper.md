@@ -88,7 +88,8 @@ We multiply these effects by the baseline rates to get the post-treatment rates 
 ```r
 # prior
 treatment_effects <- normal(1, 1, dim = 2, truncation = c(0, Inf))
-post_treatment_rates <- treatment_effects[epil$trt_id] * baseline_rates[epil$subject]
+post_treatment_rates <- treatment_effects[epil$trt_id] *
+  baseline_rates[epil$subject]
 ```
 
 Finally we specify the distributions over the observed data.
