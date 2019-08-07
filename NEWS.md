@@ -1,4 +1,4 @@
-# greta 0.3.0.9001
+# greta (development version)
 
 * mcmc now works with TensorFlow Probability version 0.5.0 (#248)
 
