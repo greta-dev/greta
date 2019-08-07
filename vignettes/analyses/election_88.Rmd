@@ -22,8 +22,8 @@ set.seed(1)
 
 This model appears in chapter 14 of
 [Gelman and Hill](http://www.stat.columbia.edu/~gelman/arm), which is a
-discussion state-level voting outcomes. Individual responses (`y`) are labeled
-as 1 for supporters of the Republican candidateand 0 for supporters of the
+discussion state-level voting outcomes. Individual responses (`y`) are labelled
+as 1 for supporters of the Republican candidate and 0 for supporters of the
 Democrat (with undecideds excluded).
 
 ```{r, results='hide', message=FALSE}
@@ -38,7 +38,7 @@ theme_set(theme_bw())
 packageVersion("greta")
 ```
 
-To access this data, we'll directly source a script from the `stan-dev` Github
+To access this data, we'll directly source a script from the `stan-dev` GitHub
 repo. See the
 [README](https://github.com/stan-dev/example-models/blob/master/ARM/Ch.14/README)
 file for more information on the contents of the script.
