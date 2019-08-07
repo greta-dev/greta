@@ -86,7 +86,6 @@ We multiply these effects by the baseline rates to get the post-treatment rates 
 
 
 ```r
-# prior
 treatment_effects <- normal(1, 1, dim = 2, truncation = c(0, Inf))
 post_treatment_rates <- treatment_effects[epil$trt_id] *
   baseline_rates[epil$subject]
@@ -98,7 +97,8 @@ We multiply our modelled weekly rates by the number of weeks the counts represen
 
 
 ```r
-distribution(baseline_y) <- poisson(baseline_rates * 8)
+# likelihood
+distribution(baseline_y) <- poisson(baseline_rates * 8)  
 distribution(epil$y) <- poisson(post_treatment_rates * 2)
 ```
 

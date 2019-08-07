@@ -36,7 +36,7 @@ With increasing quantities of data, complexity, and realism of statistical model
 More recently, custom statistical modelling software has focussed on methods such as Hamiltonian Monte Carlo (rather than Gibbs samplers) in order to improve to computational efficiency.
 This can be seen for example in the development of Stan [@stan].
 
-greta is an package for statistical modelling in R [@Rcore] that has three core differences to commonly used statistical modelling software packages:
+greta is a package for statistical modelling in R [@Rcore] that has three core differences to commonly used statistical modelling software packages:
 
   1. greta models are written interactively in R code rather than in a compiled domain specific language.
   2. greta can be extended by other R packages; providing a fully-featured package management system for extensions.
@@ -92,7 +92,6 @@ We give these positive-truncated normal priors (they are multiplicative effects,
 We multiply these effects by the baseline rates to get the post-treatment rates for each observation in the dataset.
 
 ```{r treatment}
-# prior
 treatment_effects <- normal(1, 1, dim = 2, truncation = c(0, Inf))
 post_treatment_rates <- treatment_effects[epil$trt_id] *
   baseline_rates[epil$subject]
@@ -103,7 +102,8 @@ Here we use two likelihoods: one for the baseline count (over an 8 week period) 
 We multiply our modelled weekly rates by the number of weeks the counts represent to get the appropriate rate for that period.
 
 ```{r distributions}
-distribution(baseline_y) <- poisson(baseline_rates * 8)
+# likelihood
+distribution(baseline_y) <- poisson(baseline_rates * 8)  
 distribution(epil$y) <- poisson(post_treatment_rates * 2)
 ```
 
@@ -145,11 +145,11 @@ This means greta can be used in a predictive modelling workflow in which the dat
 
 ## Implementation
 
-As in the example above, users of greta build up their models by creating and manipulating `greta_array` objects representing parameters of other quantities in the model.
-`greta_array`s behave like R's arrays, vectors and scalars, but with unknown values.
+As in the example above, users of greta build up their models by creating and manipulating greta arrays (`greta_array` objects) representing parameters of other quantities in the model.
+greta arrays behave like R's arrays, vectors and scalars, but with unknown values.
 greta extends a number of R's mathematical functions and other operations to work with greta arrays, so users can manipulate them as they would any other numeric object in R.
 
-Internally, each of these greta arrays is represented by an R6 object [@r6], with information on the greta arrays from which they were created, or which re created with them.
+Internally, each of these greta arrays is represented by an R6 object [@r6], with links to the greta arrays from which they were created, and the greta arrays which were created from them.
 Together, these R6 objects constitute a directed acyclic graph (DAG), combining data, operations, variables, and probability densities.
 This DAG is then used to construct a function in TensorFlow code representing the joint density of the model.
 This core computational functionality, including optimisers and MCMC samplers, is provided by the TensorFlow and TensorFlow Probability Python packages [@tf; @tfp], accessed from R via the tensorflow and reticulate R packages [@r_tf; @reticulate].
