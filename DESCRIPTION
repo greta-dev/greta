@@ -21,7 +21,7 @@ Authors@R: c(
   )
 Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://greta-dev.github.io/greta> for more information).
 License: Apache License 2.0
-URL: https://github.com/greta-dev/greta
+URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
     TensorFlow (v1.14; https://www.tensorflow.org/);
