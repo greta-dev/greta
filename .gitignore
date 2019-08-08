@@ -5,10 +5,8 @@
 .RData
 .Ruserdata
 
-*_cache
-*_files
-
-vignette/figures
+vignettes/**/*_files/
+*_cache/
 
 *.pdf
 docs/*.Rmd
