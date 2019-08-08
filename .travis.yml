@@ -67,6 +67,10 @@ before_install:
 - pip install --user scipy
 - pip install --user 'tensorflow==1.14'
 - pip install --user 'tensorflow-probability==0.7.0'
+script: 
+  - |
+    R CMD build .
+    travis_wait 30 R CMD check greta*tar.gz
 after_success:
 - Rscript -e "covr::codecov()"
 - Rscript -e "lintr::lint_package()"
