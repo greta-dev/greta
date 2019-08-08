@@ -72,7 +72,7 @@ script:
     R CMD build .
     travis_wait 30 R CMD check greta*tar.gz
 after_success:
-- Rscript -e "covr::codecov()"
+- Rtravis_wait 30 script -e "covr::codecov()"
 - Rscript -e "lintr::lint_package()"
 email:
   on_success: change
