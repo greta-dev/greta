@@ -522,7 +522,8 @@ skip_if_not_release <- function() {
 # likelihood), 'niter' the number of MCMC samples to compare
 check_geweke <- function(sampler, model, data,
                          p_theta, p_x_bar_theta,
-                         niter = 2000, title = "Geweke test") {
+                         niter = 2000, warmup = 1000,
+                         title = "Geweke test") {
 
   # sample independently
   target_theta <- p_theta(niter)
@@ -533,13 +534,14 @@ check_geweke <- function(sampler, model, data,
                                data = data,
                                p_theta = p_theta,
                                p_x_bar_theta = p_x_bar_theta,
-                               sampler = sampler)
+                               sampler = sampler,
+                               warmup = warmup)
 
   # visualise correspondence
   quants <- (1:99) / 100
   q1 <- quantile(target_theta, quants)
   q2 <- quantile(greta_theta, quants)
-  plot(q2, q1)
+  plot(q2, q1, main = title)
   abline(0, 1)
 
   # do a formal hypothesis test
@@ -553,7 +555,8 @@ check_geweke <- function(sampler, model, data,
 # | theta). Only retain the samples of theta from the joint distribution,
 p_theta_greta <- function(niter, model, data,
                           p_theta, p_x_bar_theta,
-                          sampler = hmc()) {
+                          sampler = hmc(),
+                          warmup = 1000) {
 
   # set up and initialize trace
   theta <- rep(NA, niter)
@@ -561,6 +564,7 @@ p_theta_greta <- function(niter, model, data,
 
   # set up and tune sampler
   draws <- mcmc(model,
+                warmup = warmup,
                 n_samples = 1,
                 chains = 1,
                 sampler = sampler,
