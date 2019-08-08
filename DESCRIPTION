@@ -19,7 +19,7 @@ Authors@R: c(
   person("Paul", "Teetor", role = "ctb"),
   person("Jian", "Yen", role = "ctb")
   )
-Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://greta-dev.github.io/greta> for more information).
+Description: Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow.
 License: Apache License 2.0
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues

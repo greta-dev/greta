@@ -143,7 +143,7 @@ Now we have all the prerequisites for building a Hamiltonian Monte Carlo (HMC) t
 
 We first define the model by combining the calculated `avg_effect`, `avg_stddev` and `school_effects_standard` variables so that we can sample from them during modelling. The model `m` we define below contains all our prior distributions and thus represent the combined density of the model.
 
-It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found [here](https://greta-dev.github.io/greta/get_started.html#plotting).
+It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found [here](https://greta-stats.org/articles/get_started.html#plotting).
 
 ```{r 8_schools_greta}
 # defining the hierarchical model

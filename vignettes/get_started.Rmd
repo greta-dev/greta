@@ -245,7 +245,7 @@ variable(lower = 0, dim = c(2, 3))
 
 #### variables with probability distributions
 
-In our example script, when we created the variables `int`, `coef` and `sd`, we simultaneously stated the prior distributions for them using some of greta's probability distribution functions. You can see a list of the currently available distributions in the [`?greta::distributions`](https://greta-dev.github.io/greta/distributions.html) helpfile. Each of these distribution functions takes as arguments the distribution's parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions arguments at their default value to create scalar greta arrays.
+In our example script, when we created the variables `int`, `coef` and `sd`, we simultaneously stated the prior distributions for them using some of greta's probability distribution functions. You can see a list of the currently available distributions in the [`?greta::distributions`](https://greta-stats.org/reference/distributions.html) helpfile. Each of these distribution functions takes as arguments the distribution's parameters (either as numbers or other greta arrays), as well as the dimensions of the resulting greta array. As before, we left the dimensions arguments at their default value to create scalar greta arrays.
 
 Both `int` and `coef` were given zero-mean normal distributions, which are a common choice of prior for unconstrained variables in Bayesian analyses. For the strictly positive parameter `sd`, we chose a slightly unconventional option, a positive-truncated (non-standard) student's t distribution, which we create using greta's built-in support for truncated distributions.
 
@@ -275,7 +275,7 @@ dim(mean)
 head(mean)
 ```
 
-greta arrays can be manipulated using R's standard arithmetic, logical and relational operators; including `+`, `*` and many others. The [`?greta::operators`](https://greta-dev.github.io/greta/operators.html) help file lists the operators that are implemented for greta arrays. You can also use a lot of common R functions for numeric data, such as `sum()`, `log()` and others. the available functions are listed in the [`?greta::functions`](https://greta-dev.github.io/greta/functions.html) helpfile. All of these mathematical manipulations of greta arrays produce 'operation' greta arrays.
+greta arrays can be manipulated using R's standard arithmetic, logical and relational operators; including `+`, `*` and many others. The [`?greta::operators`](https://greta-stats.org/reference/operators.html) help file lists the operators that are implemented for greta arrays. You can also use a lot of common R functions for numeric data, such as `sum()`, `log()` and others. the available functions are listed in the [`?greta::functions`](https://greta-stats.org/reference/functions.html) helpfile. All of these mathematical manipulations of greta arrays produce 'operation' greta arrays.
 
 #### Extract and replace
 
@@ -374,7 +374,7 @@ DiagrammeR::export_graph(attr(gr, "dgr_graph"),
 The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; `x` and `y`), variables (large circles;  `int`, `coef`, `sd`) or the results of operations (small circles; `mean`). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from.
 There are also nodes for greta arrays that were *implicitly defined* in our model. The data nodes (squares) with numbers are the parameters used to define the prior distributions, and there's also an intermediate operation node (small circle), which was the result of multiplying `coef` and `x` (before adding `int` to create `mean`).
 
-Here's a legend for the plot (it's in the [`?greta::model`](https://greta-dev.github.io/greta/model.html) helpfile too):
+Here's a legend for the plot (it's in the [`?greta::model`](https://greta-stats.org/reference/model.html) helpfile too):
 
 <p><img src="figures/plotlegend.png" width="750" /></p>
 

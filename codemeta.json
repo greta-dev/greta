@@ -5,7 +5,7 @@
   ],
   "@type": "SoftwareSourceCode",
   "identifier": "greta",
-  "description": "Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow (see <https://greta-dev.github.io/greta> for more information).",
+  "description": "Write statistical models in R and fit them by MCMC on CPUs and GPUs, using Google TensorFlow.",
   "name": "greta: Simple and Scalable Statistical Modelling in R",
   "codeRepository": "https://greta-stats.org",
   "issueTracker": "https://github.com/greta-dev/greta/issues",
@@ -388,7 +388,7 @@
   ],
   "releaseNotes": "https://github.com/dill/greta/blob/master/NEWS.md",
   "readme": "https://github.com/dill/greta/blob/master/README.md",
-  "fileSize": "474.825KB",
+  "fileSize": "474.863KB",
   "contIntegration": [
     "https://travis-ci.org/greta-dev/greta",
     "https://codecov.io/github/greta-dev/greta?branch=master"
