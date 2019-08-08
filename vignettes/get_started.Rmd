@@ -118,8 +118,8 @@ This allows us to create a wide range of models, like in the general-purpose mod
 greta also lets us declare that a greta array follows a probability distribution, allowing us to train models using observed data, and to define prior distributions over our parameters, for Bayesian analyses.
 
 The rest of this vignette walks through an example of fitting a model using greta.
-If you'd like to see examples of some common models fitted in greta and with equivalent BUGS and Stan code, take a look at [Example models](example_models.html).
-If you'd like more technical details about how greta works under the hood, check out [Technical details](technical_details.html).
+If you'd like to see examples of some common models fitted in greta and with equivalent BUGS and Stan code, take a look at [Example models](https://greta-stats.org/articles/example_models.html).
+If you'd like more technical details about how greta works under the hood, check out [Technical details](https://greta-stats.org/articles/webpages/technical_details.html).
 
 <hr>
 
