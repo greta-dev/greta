@@ -546,7 +546,7 @@ check_geweke <- function(sampler, model, data,
 
   # do a formal hypothesis test
   suppressWarnings(stat <- ks.test(target_theta, greta_theta))
-  testthat::expect_gte(stat$p.value, 0.01)
+  testthat::expect_gte(stat$p.value, 0.05)
 
 }
 
