@@ -63,7 +63,7 @@ test_that("opt converges with SciPy optimisers", {
   )
 
   # check that the right ones warn about deprecation
-  deprecated_optimisers <- list(
+  deprecated <- list(
     powell,
     cg,
     newton_cg,
@@ -76,7 +76,7 @@ test_that("opt converges with SciPy optimisers", {
   for (optmr in optimisers) {
 
     # see if it's a deprecated optimiser
-    matches <- vapply(deprecated_optimisers, identical, optmr, FUN.VALUE = logical(1))
+    matches <- vapply(deprecated, identical, optmr, FUN.VALUE = logical(1))
     msg <- ifelse(any(matches), "deprecated", NA)
 
     expect_warning(

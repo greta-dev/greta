@@ -495,7 +495,6 @@ dag_class <- R6Class(
       # powers. Inspired by Method 2 here:
       # http://raphael.candelier.fr/?blog=Adj2cluster
 
-
       # convert adjacency to a symmetric, logical matrix
       A <- self$adjacency_matrix
       S <- (A + t(A)) > 0

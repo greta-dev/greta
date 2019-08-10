@@ -315,8 +315,8 @@ abind.default <- function(...,
                           force.array = TRUE, make.names = use.anon.names,
                           use.anon.names = FALSE, use.first.dimnames = FALSE,
                           hier.names = FALSE, use.dnns = FALSE) {
+# End Exclude Linting
 
-  # End Exclude Linting
   # error nicely if they don't have abind installed
   abind_installed <- requireNamespace("abind", quietly = TRUE)
   if (!abind_installed) {
@@ -339,8 +339,10 @@ abind.greta_array <- function(...,
                               use.anon.names = FALSE,
                               use.first.dimnames = FALSE, hier.names = FALSE,
                               use.dnns = FALSE) {
+# End Exclude Linting
 
   # warn if any of the arguments have been changed
+  # Begin Exclude Linting
   user_set_args <- !is.null(rev.along) |
     !is.null(new.names) |
     !isTRUE(force.array) |
@@ -349,7 +351,6 @@ abind.greta_array <- function(...,
     !identical(use.first.dimnames, FALSE) |
     !identical(hier.names, FALSE) |
     !identical(use.dnns, FALSE)
-
   # End Exclude Linting
 
   if (user_set_args) {
@@ -357,16 +358,16 @@ abind.greta_array <- function(...,
             "with greta arrays, any other arguments will be ignored")
   }
 
-  arg.list <- list(...)
+  arg_list <- list(...)
 
   # drop any NULLs
-  to_discard <- vapply(arg.list, is.null, FUN.VALUE = FALSE)
+  to_discard <- vapply(arg_list, is.null, FUN.VALUE = FALSE)
   if (any(to_discard)) {
-    arg.list <- arg.list[!to_discard]
+    arg_list <- arg_list[!to_discard]
   }
 
   # get N first, in case they used the default value for along
-  dims <- lapply(arg.list, dim)
+  dims <- lapply(arg_list, dim)
   N <- max(vapply(dims, length, FUN.VALUE = 1L))
   along <- as.integer(force(along))
 
@@ -384,12 +385,8 @@ abind.greta_array <- function(...,
   pre <- seq(from = 1, len = along - 1)
   post <- seq(to = N - 1, len = N - along)
 
-
-  # rationalise the dimensions
-  arg.list <- arg.list
-
-  # loop though all elements of arg.list padding if necessary:
-  arg.list <- lapply(arg.list,
+  # loop though all elements of arg_list padding if necessary:
+  arg_list <- lapply(arg_list,
                      function(x) {
                        dim <- dim(x)
                        if (length(dim) == N - 1)
@@ -398,7 +395,7 @@ abind.greta_array <- function(...,
                      })
 
   # check the non-binding dimensions match
-  dims <- lapply(arg.list, dim)
+  dims <- lapply(arg_list, dim)
   dim_out <- rep(NA, N)
   for (dim in seq_len(N)[-along]) {
     this_dim <- vapply(dims, `[`, dim, FUN.VALUE = 1L)
@@ -417,7 +414,7 @@ abind.greta_array <- function(...,
 
   do.call(op,
           c(operation = "abind",
-            arg.list,
+            arg_list,
             dim = list(dim_out),
             operation_args = list(list(axis = as.integer(along))),
             tf_operation = "tf_abind"))

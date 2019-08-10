@@ -92,7 +92,9 @@ calculate <- function(target, values = list(),
 
 }
 
+# Begin Exclude Linting
 calculate_mcmc.list <- function(target, target_name, values, tf_float) {
+# End Exclude Linting
 
   model_info <- get_model_info(values)
 

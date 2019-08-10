@@ -4,16 +4,23 @@ as.unknowns <- function(x) {
   UseMethod("as.unknowns")
 }
 
-as.unknowns.unknowns <- function(x)
+# Begin Exclude Linting
+as.unknowns.unknowns <- function(x) {
+# End Exclude Linting
   x
-
+}
+# Begin Exclude Linting
 as.unknowns.array <- function(x) {
+# End Exclude Linting
   class(x) <- c("unknowns", class(x))
   x
 }
 
-as.unknowns.matrix <- function(x)
+# Begin Exclude Linting
+as.unknowns.matrix <- function(x) {
   as.unknowns.array(x)
+}
+# End Exclude Linting
 
 strip_unknown_class <- function(x) {
   classes <- class(x)

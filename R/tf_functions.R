@@ -14,7 +14,9 @@ tf_as_integer <- function(x)
 
 tf_lchoose <- function(n, k) {
   one <- fl(1)
-  -tf$math$lgamma(one + n - k) - tf$math$lgamma(one + k) + tf$math$lgamma(one + n)
+  -tf$math$lgamma(one + n - k) -
+    tf$math$lgamma(one + k) +
+    tf$math$lgamma(one + n)
 }
 
 tf_lbeta <- function(a, b)
