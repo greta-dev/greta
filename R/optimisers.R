@@ -10,6 +10,11 @@
 #'   \href{https://www.tensorflow.org/api_docs/python/tf/contrib/opt}{TensorFlow
 #'    optimiser docs}.
 #'
+#' @details The optimisers \code{powell()}, \code{cg()}, \code{newton_cg()},
+#'   \code{l_bfgs_b()}, \code{tnc()}, \code{cobyla()}, and \code{slsqp()} are
+#'   deprecated. They will be removed in greta 0.4.0, since they will no longer
+#'   be available in TensorFlow 2.0, on which that version of greta will depend.
+#'
 #' @return an \code{optimiser} object that can be passed to \code{\link{opt}}.
 #'
 #' @examples
@@ -29,6 +34,13 @@
 #' c(mean(x), sd(x))
 #' }
 NULL
+
+# deprecate some optimisers
+optimiser_deprecation_warning <- function () {
+  warning ("This optimiser is deprecated and will be removed in greta 0.4.0. ",
+           "Please use a different optimiser.",
+           call. = FALSE)
+}
 
 # set up an optimiser object
 define_scipy_optimiser <- function(name,
@@ -77,6 +89,7 @@ nelder_mead <- function() {
 #' @export
 #'
 powell <- function() {
+  optimiser_deprecation_warning()
   define_scipy_optimiser("powell",
                          method = "Powell")
 }
@@ -85,6 +98,7 @@ powell <- function() {
 #' @export
 #'
 cg <- function() {
+  optimiser_deprecation_warning()
   define_scipy_optimiser("cg",
                          method = "CG")
 }
@@ -101,6 +115,7 @@ bfgs <- function() {
 #' @export
 #'
 newton_cg <- function() {
+  optimiser_deprecation_warning()
   define_scipy_optimiser("newton_cg",
                          method = "Newton-CG")
 }
@@ -113,6 +128,7 @@ newton_cg <- function() {
 #' @param maxls maximum number of line search steps per iteration
 #'
 l_bfgs_b <- function(maxcor = 10, maxls = 20) {
+  optimiser_deprecation_warning()
   define_scipy_optimiser("l_bfgs_b",
                          method = "L-BFGS-B",
                          parameters = list(
@@ -129,6 +145,7 @@ l_bfgs_b <- function(maxcor = 10, maxls = 20) {
 #' @param rescale log10 scaling factor used to trigger rescaling of objective
 #'
 tnc <- function(max_cg_it = -1, stepmx = 0, rescale = -1) {
+  optimiser_deprecation_warning()
   define_scipy_optimiser("tnc",
                          method = "TNC",
                          parameters = list(
@@ -147,6 +164,7 @@ tnc <- function(max_cg_it = -1, stepmx = 0, rescale = -1) {
 #'   iterations nor convergence, so these elements of the output are set to NA
 #'
 cobyla <- function(rhobeg = 1) {
+  optimiser_deprecation_warning()
   define_scipy_optimiser("cobyla",
                          method = "COBYLA",
                          parameters = list(
@@ -159,6 +177,7 @@ cobyla <- function(rhobeg = 1) {
 #' @export
 #'
 slsqp <- function() {
+  optimiser_deprecation_warning()
   define_scipy_optimiser("slsqp",
                          method = "SLSQP")
 }

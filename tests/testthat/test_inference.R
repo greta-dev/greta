@@ -50,26 +50,44 @@ test_that("opt converges with SciPy optimisers", {
   m <- model(z)
 
   # loop through optimisers that might be expected to work
-  optimisers <- list(nelder_mead,
-                     powell,
-                     cg,
-                     bfgs,
-                     newton_cg,
-                     l_bfgs_b,
-                     tnc,
-                     cobyla,
-                     slsqp)
+  optimisers <- list(
+    nelder_mead,
+    powell,
+    cg,
+    bfgs,
+    newton_cg,
+    l_bfgs_b,
+    tnc,
+    cobyla,
+    slsqp
+  )
+
+  # check that the right ones warn about deprecation
+  deprecated_optimisers <- list(
+    powell,
+    cg,
+    newton_cg,
+    l_bfgs_b,
+    tnc,
+    cobyla,
+    slsqp
+  )
 
   for (optmr in optimisers) {
 
-    (o <- opt(m,
-              optimiser = optmr(),
-              max_iterations = 500))
+    # see if it's a deprecated optimiser
+    matches <- vapply(deprecated_optimisers, identical, optmr, FUN.VALUE = logical(1))
+    msg <- ifelse(any(matches), "deprecated", NA)
+
+    expect_warning(
+      o <- opt(m, optimiser = optmr(), max_iterations = 500),
+      msg
+    )
 
     # should have converged in fewer than 500 iterations and be close to truth
 
     # can't tell that from output of cobyla
-    if (!identical(optmr(), cobyla())) {
+    if (!identical(optmr, cobyla)) {
       expect_equal(o$convergence, 0)
       expect_lte(o$iterations, 500)
     }
@@ -568,12 +586,12 @@ test_that("samplers print informatively", {
 })
 
 test_that("pb_update is greater than thin to avoid bursts with no saved iterations", {
-  
+
   skip_if_not(check_tf_version())
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
   expect_ok(draws <- mcmc(m, n_samples = 100, warmup = 100,
                           thin = 3, pb_update = 2))
-  
+
 })
