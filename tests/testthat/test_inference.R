@@ -463,6 +463,10 @@ test_that("mcmc errors for invalid parallel plans", {
   library(future)
   op <- plan()
 
+  # silence future's warning about multicore support
+  old_option <- Sys.getenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE")
+  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
+
   # handle handle forks, so only accept multisession, or multi session clusters
   plan(multiprocess)
   expect_error(draws <- mcmc(m),
@@ -479,6 +483,9 @@ test_that("mcmc errors for invalid parallel plans", {
 
   # put the future plan back as we found it
   plan(op)
+
+  # reset warning setting
+  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = old_option)
 
 })
 
