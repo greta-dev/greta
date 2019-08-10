@@ -164,8 +164,8 @@ dag_class <- R6Class(
       } else {
 
         shape <- shape(NULL, length(vals))
-        self$on_graph(free_state <- tf$placeholder(dtype = tf_float(),
-                                                   shape = shape))
+        self$on_graph(free_state <- tf$compat$v1$placeholder(dtype = tf_float(),
+                                                             shape = shape))
 
       }
 
@@ -215,19 +215,19 @@ dag_class <- R6Class(
       tfe$n_cores <- self$n_cores
       # Begin Exclude Linting
       self$tf_run(
-        config <- tf$ConfigProto(inter_op_parallelism_threads = n_cores,
+        config <- tf$compat$v1$ConfigProto(inter_op_parallelism_threads = n_cores,
                                  intra_op_parallelism_threads = n_cores))
 
       if (self$compile) {
         self$tf_run(py_set_attr(config$graph_options$optimizer_options,
                                 "global_jit_level",
-                                tf$OptimizerOptions$ON_1))
+                                tf$compat$v1$OptimizerOptions$ON_1))
       }
       # End Exclude Linting
 
       # start a session and initialise all variables
-      self$tf_run(sess <- tf$Session(config = config))
-      self$tf_run(sess$run(tf$global_variables_initializer()))
+      self$tf_run(sess <- tf$compat$v1$Session(config = config))
+      self$tf_run(sess$run(tf$compat$v1$global_variables_initializer()))
 
     },
 

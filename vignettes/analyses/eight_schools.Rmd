@@ -33,7 +33,7 @@ schools; see Rubin (1981). All of them had already taken the PSAT (Preliminary S
 which results were used as covariates. For each school, the estimated treatment effect and
 the standard error of the effect estimate are given. These are calculated by an analysis of
 covariance adjustment appropriate for a completely randomized experiment (Rubin 1981).
-This example was analyzed using a hierarchical normal model in Rubin (1981) and Gelman,
+This example was analysed using a hierarchical normal model in Rubin (1981) and Gelman,
 Carlin, Stern, and Rubin (2003, Section 5.5).
 
 The corresponding [TensorFlow Probability](https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245) Jupyter notebook can be found [here](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
@@ -85,7 +85,7 @@ schools %>%
          title = "Density plot of treatment effects +/- standard error for eight schools")
 ```
 
-## Modeling with `greta`
+## Modelling with `greta`
 
 To model the data, we use the same hierarchical normal model as in the [TensorFlow Probability example](https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb).
 
@@ -141,9 +141,9 @@ distribution(treatment_effects) <- normal(school_effects, treatment_stddevs)
 
 Now we have all the prerequisites for building a Hamiltonian Monte Carlo (HMC) to calculate the posterior distribution over the model's parameters.
 
-We first define the model by combining the calculated `avg_effect`, `avg_stddev` and `school_effects_standard` variables so that we can sample from them during modeling. The model `m` we define below contains all our prior distributions and thus represent the combined density of the model.
+We first define the model by combining the calculated `avg_effect`, `avg_stddev` and `school_effects_standard` variables so that we can sample from them during modelling. The model `m` we define below contains all our prior distributions and thus represent the combined density of the model.
 
-It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found [here](https://greta-dev.github.io/greta/get_started.html#plotting).
+It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found [here](https://greta-stats.org/articles/get_started.html#plotting).
 
 ```{r 8_schools_greta}
 # defining the hierarchical model

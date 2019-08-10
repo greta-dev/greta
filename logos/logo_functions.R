@@ -1,6 +1,6 @@
 # functions for creating logos etc.
 
-# get the coordinates nd links to tile the logo 'repeats' times.
+# get the coordinates and links to tile the logo 'repeats' times.
 # x_start and y_start give the position of the first node
 logo_shape <- function (x_start = 0, y_range = c(0, 1)) {
 

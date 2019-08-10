@@ -15,13 +15,13 @@ body{
 
 greta relies on, and was inspired by some pretty incredible pieces of software which deserve recognition.
 
-### Google Tensorflow
+### Google TensorFlow
 
-greta wouldn't be possible without [TensorFlow](https://www.tensorflow.org/), Googles computation engine for large-scale machine learning. Tensorflow runs all of greta's calculations, enables distributed computations on multi-core and GPU systems, and carries out automatic differentiation efficiently, enabling greta to use efficient inference algorithms like Hamiltonian Monte Carlo.
+greta wouldn't be possible without [TensorFlow](https://www.tensorflow.org/), Googles computation engine for large-scale machine learning. TensoFlow runs all of greta's calculations, enables distributed computations on multi-core and GPU systems, and carries out automatic differentiation efficiently, enabling greta to use efficient inference algorithms like Hamiltonian Monte Carlo.
 
 ### R packages
 
-Tensorflow is implemented in C++ and Python. [Rstudio's](https://www.rstudio.com/) [reticulate](https://github.com/rstudio/reticulate) and [tensorflow](https://rstudio.github.io/tensorflow/) packages provide the magic that bring TensorFlow and all things python to R.
+TensorFlow is implemented in C++ and Python. [RStudio's](https://www.rstudio.com/) [reticulate](https://github.com/rstudio/reticulate) and [tensorflow](https://rstudio.github.io/tensorflow/) packages provide the magic that bring TensorFlow and all things python to R.
 Under the hood, greta also uses Winston Chang's [R6](https://github.com/wch/R6) object system, and greta's model plotting functionality is made possible by [DiagrammeR](http://rich-iannone.github.io/DiagrammeR/).
 
 ### MCMC software

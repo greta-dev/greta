@@ -5,12 +5,11 @@
 .RData
 .Ruserdata
 
-*_cache
-*_files
-
-vignette/figures
+vignettes/**/*_files/
+*_cache/
 
 *.pdf
 docs/*.Rmd
 docs/examples
 cran-comments.md
+paper/paper.html

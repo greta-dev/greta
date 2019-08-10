@@ -81,7 +81,7 @@ class(z_node$value())
 
 In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn't happen until the user runs `model()`, which creates a 'dag_class' object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.
 
-The node `tf()` method takes the dag as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.
+The node `tf()` method takes the DAG as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.
 
 ```{r tensors1}
 x_node$tf

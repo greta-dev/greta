@@ -8,10 +8,10 @@
 
 <title>convert other objects to greta arrays — as_data • greta</title>
 
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
 
 <!-- jquery -->
-<script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -21,7 +21,7 @@
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js" integrity="sha256-hIvIxeqhGZF+VVeM55k0mJvWpQ6gTkWk3Emc+NmowYA=" crossorigin="anonymous"></script>
 
 <!-- sticky kit -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
@@ -49,7 +49,7 @@
 
 
 <!-- mathjax -->
-<script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -149,7 +149,7 @@
 </li>
 <li>
   <a href="https://github.com/greta-dev/greta">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fa fa-lg fa-github"></span>
      
   </a>
 </li>
@@ -174,7 +174,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>convert other objects to greta arrays</h1>
-    <small class="dont-index">Source: <a href='https://github.com/greta-dev/greta/blob/master/R/as_data.R'><code>R/as_data.R</code></a></small>
+    
     <div class="hidden name"><code>as_data.Rd</code></div>
     </div>
 
@@ -202,7 +202,7 @@
   they are numeric or logical vectors, matrices or arrays; or if they are
   dataframes with only numeric (including integer) or logical elements.
   Logical elements are always converted to numerics. R objects cannot be
-  converted if they contain missing (<code>NA</code>) or infinite (<code>-Inf</code> or
+  converted if they contain missing (<code>NA</code>) or infinite (<code><a href='https://www.rdocumentation.org/packages/base/topics/Arithmetic'>-Inf</a></code> or
   <code>Inf</code>) values.</p>
     
 
@@ -211,9 +211,9 @@
 <span class='co'># numeric/integer/logical vectors, matrices and arrays can all be coerced to</span>
 <span class='co'># data greta arrays</span>
 
-<span class='no'>vec</span> <span class='kw'>&lt;-</span> <span class='fu'>rnorm</span>(<span class='fl'>10</span>)
-<span class='no'>mat</span> <span class='kw'>&lt;-</span> <span class='fu'>matrix</span>(<span class='fu'>seq_len</span>(<span class='fl'>3</span> * <span class='fl'>4</span>), <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>)
-<span class='no'>arr</span> <span class='kw'>&lt;-</span> <span class='fu'>array</span>(<span class='fu'>sample</span>(<span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>TRUE</span>, <span class='fl'>FALSE</span>), <span class='fl'>2</span> * <span class='fl'>2</span> * <span class='fl'>2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>),
+<span class='no'>vec</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>10</span>)
+<span class='no'>mat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq_len</a></span>(<span class='fl'>3</span> * <span class='fl'>4</span>), <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='no'>arr</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/array'>array</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>TRUE</span>, <span class='fl'>FALSE</span>), <span class='fl'>2</span> * <span class='fl'>2</span> * <span class='fl'>2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>),
              <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>2</span>))
 (<span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'>as_data</span>(<span class='no'>vec</span>))
 (<span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='fu'>as_data</span>(<span class='no'>mat</span>))
@@ -221,9 +221,9 @@
 
 <span class='co'># dataframes can also be coerced, provided all the columns are numeric,</span>
 <span class='co'># integer or logical</span>
-<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'>data.frame</span>(<span class='kw'>x1</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>10</span>),
-                 <span class='kw'>x2</span> <span class='kw'>=</span> <span class='fu'>sample</span>(<span class='fl'>1L</span>:<span class='fl'>10L</span>),
-                 <span class='kw'>x3</span> <span class='kw'>=</span> <span class='fu'>sample</span>(<span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>TRUE</span>, <span class='fl'>FALSE</span>), <span class='fl'>10</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>))
+<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/data.frame'>data.frame</a></span>(<span class='kw'>x1</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>10</span>),
+                 <span class='kw'>x2</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fl'>1L</span>:<span class='fl'>10L</span>),
+                 <span class='kw'>x3</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>TRUE</span>, <span class='fl'>FALSE</span>), <span class='fl'>10</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>))
 (<span class='no'>d</span> <span class='kw'>&lt;-</span> <span class='fu'>as_data</span>(<span class='no'>df</span>))
 <span class='co'># }</span></pre>
   </div>

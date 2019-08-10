@@ -152,6 +152,7 @@ test_that("samplers pass geweke tests", {
                data = x,
                p_theta = p_theta,
                p_x_bar_theta = p_x_bar_theta,
+               warmup = 2000,
                title = "RWMH Geweke test")
 
   check_geweke(sampler = slice(),
