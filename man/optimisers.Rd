@@ -130,6 +130,11 @@ Functions to set up optimisers (which find parameters that
    optimiser docs}.
 }
 \details{
+The optimisers \code{powell()}, \code{cg()}, \code{newton_cg()},
+  \code{l_bfgs_b()}, \code{tnc()}, \code{cobyla()}, and \code{slsqp()} are
+  deprecated. They will be removed in greta 0.4.0, since they will no longer
+  be available in TensorFlow 2.0, on which that version of greta will depend.
+
 The \code{cobyla()} does not provide information about the number of
   iterations nor convergence, so these elements of the output are set to NA
 }
