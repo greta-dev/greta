@@ -382,6 +382,13 @@ hessian_dims <- function(dim) {
 rhex <- function()
   paste(as.raw(sample.int(256L, 4, TRUE) - 1L), collapse = "")
 
+# stop TensorFlow messaging about deprecations etc.
+#' @importFrom reticulate py_set_attr import
+disable_tensorflow_logging <- function (disable = TRUE) {
+  logging <- reticulate::import("logging")
+  logger <- logging$getLogger("tensorflow")
+  reticulate::py_set_attr(logger, "disabled", disable)
+}
 
 misc_module <- module(module,
                       check_tf_version,
@@ -407,7 +414,8 @@ misc_module <- module(module,
                       match_batches,
                       split_chains,
                       hessian_dims,
-                      rhex)
+                      rhex,
+                      disable_tensorflow_logging)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function(..., target_dim = NULL) {
