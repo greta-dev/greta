@@ -45,8 +45,7 @@ r_packages:
 - digest
 - XML
 - plyr
-r_github_packages:
-- rich-iannone/DiagrammeRsvg
+- DiagrammeRsvg
 cache:
   packages: true
   directories:
