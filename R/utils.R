@@ -366,7 +366,9 @@ rhex <- function()
 #' @importFrom reticulate py_set_attr import
 disable_tensorflow_logging <- function (disable = TRUE) {
   logging <- reticulate::import("logging")
+  # Begin Exclude Linting
   logger <- logging$getLogger("tensorflow")
+  # End Exclude Linting
   reticulate::py_set_attr(logger, "disabled", disable)
 }
 
