@@ -33,26 +33,6 @@ have_conda <- function () {
   !is.null(conda_bin)
 }
 
-have_virtualenv <- function () {
-
-  answer <- FALSE
-
-  if (identical(.Platform$OS.type, "unix")) {
-    # Begin Exclude Linting
-    locations <- file.path(c("/usr/bin",
-                             "/usr/local/bin",
-                             path.expand("~/.local/bin")),
-                           "virtualenv")
-    # End Exclude Linting
-
-    answer <- any(file.exists(locations))
-
-  }
-
-  answer
-
-}
-
 #' @importFrom reticulate py_available
 have_python <- function () {
   tryCatch(reticulate::py_available(initialize = TRUE),
