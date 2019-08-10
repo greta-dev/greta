@@ -1,5 +1,7 @@
 # define a greta_array S3 class for the objects users manipulate
 
+# Begin Exclude Linting
+
 # coerce to greta_array class if optional = TRUE don't error if we fail, just
 # return original x, which we pass along explicitly
 as.greta_array <- function(x, optional = FALSE, original_x = x, ...)
@@ -197,6 +199,8 @@ str.greta_array <- function(object, ...) {
 #' @export
 as.matrix.greta_array <- function(x, ...)
   get_node(x)$value()
+
+# End Exclude Linting
 
 # extract the node from a greta array
 get_node <- function(x)

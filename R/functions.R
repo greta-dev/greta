@@ -494,6 +494,8 @@ identity.greta_array <- function(x) {
   op("identity", x, tf_operation = "tf$identity")
 }
 
+# Begin Exclude Linting
+
 #' @rdname overloaded
 #' @export
 colMeans <- function(x, na.rm = FALSE, dims = 1L)
@@ -569,6 +571,8 @@ rowSums.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
      dim = rowcol_dim(x, dims, "row"))
 
 }
+# End Exclude Linting
+
 
 #' @rdname overloaded
 #' @export

@@ -633,7 +633,9 @@ sampler <- R6Class(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
           current_state = free_state,
           kernel = sampler_kernel,
-          trace_fn = function (current_state, kernel_results) {kernel_results},
+          trace_fn = function (current_state, kernel_results) {
+            kernel_results
+          },
           num_burnin_steps = tf$constant(0L, dtype = tf$int32),
           num_steps_between_results = sampler_thin,
           parallel_iterations = 1L)
@@ -715,9 +717,13 @@ sampler <- R6Class(
         # pass it back
         if (n_samples == 1L) {
 
-          result <- list(all_states = self$free_state,
-                         trace = list(log_accept_ratio = rep(-Inf, self$n_chains),
-                                      is_accepted = rep(FALSE, self$n_chains)))
+          result <- list(
+            all_states = self$free_state,
+            trace = list(
+              log_accept_ratio = rep(-Inf, self$n_chains),
+              is_accepted = rep(FALSE, self$n_chains)
+            )
+          )
 
         } else {
 

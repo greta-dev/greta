@@ -147,11 +147,11 @@ check_tf_version <- function(alert = c("none",
     if (!tf_available | !tfp_available) {
 
       install <- paste0(
-        '  install_tensorflow(\n',
-        ifelse(have_conda(), '    method = "conda",\n', ''),
-        '    version = "1.14.0",\n',
-        '    extra_packages = "tensorflow-probability"\n',
-        '  )'
+        "  install_tensorflow(\n",
+        ifelse(have_conda(), "    method = \"conda\",\n", ""),
+        "    version = \"1.14.0\",\n",
+        "    extra_packages = \"tensorflow-probability\"\n",
+        "  )"
       )
 
       # combine the problem and solution messages

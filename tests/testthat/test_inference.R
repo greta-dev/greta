@@ -585,7 +585,7 @@ test_that("samplers print informatively", {
 
 })
 
-test_that("pb_update is greater than thin to avoid bursts with no saved iterations", {
+test_that("pb_update > thin to avoid bursts with no saved iterations", {
 
   skip_if_not(check_tf_version())
   set.seed(5)

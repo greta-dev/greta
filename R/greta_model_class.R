@@ -186,11 +186,13 @@ model <- function(...,
 as.greta_model <- function(x, ...)
   UseMethod("as.greta_model", x)
 
+# Begin Exclude Linting
 as.greta_model.dag_class <- function(x, ...) {
   ans <- list(dag = x)
   class(ans) <- "greta_model"
   ans
 }
+# End Exclude Linting
 
 #' @rdname model
 #' @param x a \code{greta_model} object
@@ -386,8 +388,8 @@ plot.greta_model <- function(x,
                                       attr_type = "graph"))
 
 
-  grViz <- DiagrammeR::render_graph(gr)
-  attr(grViz, "dgr_graph") <- gr
-  grViz
+  widget <- DiagrammeR::render_graph(gr)
+  attr(widget, "dgr_graph") <- gr
+  widget
 
 }
