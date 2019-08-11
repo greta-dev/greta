@@ -46,6 +46,7 @@ r_packages:
 - XML
 - plyr
 - DiagrammeRsvg
+- spelling
 cache:
   packages: true
   directories:
@@ -68,6 +69,7 @@ before_install:
 - pip install --user 'tensorflow-probability==0.7.0'
 after_success:
 - Rscript -e "covr::codecov()"
+- Rscript -e "spelling::spell_check_package('.')"
 - Rscript -e "lintr::lint_package()"
 email:
   on_success: change
