@@ -1382,7 +1382,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'   corresponds to an independent realisation. If a single realisation or
 #'   parameter value is specified, it must therefore be a row vector (see
 #'   example). \code{n_realisations} gives the number of rows/realisations, and
-#'   \code{dimension} gives the dimension of the distribution. Ie. a bivariate
+#'   \code{dimension} gives the dimension of the distribution. I.e. a bivariate
 #'   normal distribution would be produced with \code{multivariate_normal(...,
 #'   dimension = 2)}. The dimension can usually be detected from the parameters.
 #'
