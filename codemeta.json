@@ -10,14 +10,14 @@
   "codeRepository": "https://greta-stats.org",
   "issueTracker": "https://github.com/greta-dev/greta/issues",
   "license": "https://spdx.org/licenses/Apache-2.0",
-  "version": "0.3.1.9000",
+  "version": "0.3.1.9001",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
-    "version": "3.6.0",
+    "version": "3.6.1",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 3.6.0 (2019-04-26)",
+  "runtimePlatform": "R version 3.6.1 (2019-07-05)",
   "provider": {
     "@id": "https://cran.r-project.org",
     "@type": "Organization",
@@ -388,9 +388,38 @@
   ],
   "releaseNotes": "https://github.com/dill/greta/blob/master/NEWS.md",
   "readme": "https://github.com/dill/greta/blob/master/README.md",
-  "fileSize": "475.042KB",
+  "fileSize": "476.014KB",
   "contIntegration": [
     "https://travis-ci.org/greta-dev/greta",
     "https://codecov.io/github/greta-dev/greta?branch=master"
+  ],
+  "citation": [
+    {
+      "@type": "ScholarlyArticle",
+      "datePublished": "2019",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Nick",
+          "familyName": "Golding"
+        }
+      ],
+      "name": "{greta}: simple and scalable statistical modelling in R",
+      "identifier": "10.21105/joss.01601",
+      "url": "http://dx.doi.org/10.21105/joss.01601",
+      "paginiation": "1601",
+      "@id": "https://doi.org/10.21105/joss.01601",
+      "sameAs": "https://doi.org/10.21105/joss.01601",
+      "isPartOf": {
+        "@type": "PublicationIssue",
+        "issueNumber": "40",
+        "datePublished": "2019",
+        "isPartOf": {
+          "@type": ["PublicationVolume", "Periodical"],
+          "volumeNumber": "4",
+          "name": "Journal of Open Source Software"
+        }
+      }
+    }
   ]
 }
