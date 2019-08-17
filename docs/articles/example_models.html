@@ -6,16 +6,17 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Example models • greta</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><!-- docsearch --><script src="../docsearch.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.1/docsearch.min.css" integrity="sha256-QOSRU/ra9ActyXkIBbiIB144aDBdtvXBcNc3OTNuX/Q=" crossorigin="anonymous">
+<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js" integrity="sha256-hIvIxeqhGZF+VVeM55k0mJvWpQ6gTkWk3Emc+NmowYA=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<script src="../pkgdown.js"></script><!-- docsearch --><script src="../docsearch.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css">
 <link href="../docsearch.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script><meta property="og:title" content="Example models">
 <meta property="og:description" content="">
 <meta property="og:image" content="https://greta-stats.org/logo.png">
 <meta name="twitter:card" content="summary">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
+<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
@@ -437,13 +438,13 @@
 <h3 class="hasAnchor">
 <a href="#bayesian-neural-network" class="anchor"></a>Bayesian neural network</h3>
 <p><em>Bayesian neural network</em> estimates an easy neural network with a normal prior on the edge weights. For clarity we use an architecture without a hidden layer, such that the weights actually correspond to coefficients in a linear regression model.</p>
-<pre class="text"><code>N &lt;- 100
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">N &lt;- 100
 p &lt;- 10
 
 set.seed(23)  
 X &lt;- matrix(rnorm(N * p), N)
 beta &lt;- rnorm(10)
-y &lt;- X %*% beta + rnorm(N, sd = 0.1)</code></pre>
+y &lt;- X %*% beta + rnorm(N, sd = 0.1)</a></code></pre>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>neural_network &lt;-<span class="st"> </span><span class="cf">function</span>(x)</span>
 <span id="cb20-2"><a href="#cb20-2"></a>{</span>
 <span id="cb20-3"><a href="#cb20-3"></a>  <span class="co"># this can be arbitrarily complex, e.g. multiple hidden layers</span></span>
@@ -464,7 +465,7 @@ y &lt;- X %*% beta + rnorm(N, sd = 0.1)</code></pre>
 \]</span> where the noise <span class="math inline">\(\epsilon\)</span> is normally distributed with zero mean and diagonal covariance matrix <span class="math inline">\(\Psi = \mathrm{diag}(\psi_1, \dots, \psi_p)\)</span>. The goal of factor analysis is to estimate the latent variables <span class="math inline">\(\mathbf{z}_i \mathbb{R}^q\)</span>.</p>
 <p>In this example we take the mean vector <span class="math inline">\(\boldsymbol \mu\)</span> to be zero.</p>
 <div class="data">
-<pre class="text"><code>generate.data &lt;- function(n = 100, p = 5, q = 2, psi = diag(rgamma(p, 1, 1)))
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">generate.data &lt;- function(n = 100, p = 5, q = 2, psi = diag(rgamma(p, 1, 1)))
 {
   W  &lt;- matrix(rnorm(p * q, 1), p, q)
   Z  &lt;- matrix(rnorm(q * n, 2), q, n)
@@ -482,7 +483,7 @@ n &lt;- 100
 p &lt;- 5
 q &lt;- 2
 data &lt;- generate.data(n = n, p = p, q = q)
-X &lt;- data$X</code></pre>
+X &lt;- data$X</a></code></pre>
 </div>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>W &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(p, q))</span>
 <span id="cb22-2"><a href="#cb22-2"></a>Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(q, n))</span>
@@ -506,7 +507,7 @@ X &lt;- data$X</code></pre>
 <div id="data" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data" class="anchor"></a>data</h4>
-<pre class="text"><code>y &lt;- c(21, 20, 15)
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">y &lt;- c(21, 20, 15)
 n &lt;- c(48, 34, 21)
 Z &lt;- c(10, 30, 50)
 alpha &lt;- 4.48
@@ -514,7 +515,7 @@ beta &lt;- 0.76
 sigma2 &lt;- 81.14
 sigma &lt;- sqrt(sigma2)
 tau &lt;- 1 / sigma2
-J &lt;- 3</code></pre>
+J &lt;- 3</a></code></pre>
 </div>
 <div id="greta-code" class="section level4">
 <h4 class="hasAnchor">
@@ -529,14 +530,14 @@ J &lt;- 3</code></pre>
 <h4 class="hasAnchor">
 <a href="#bugsjags-code" class="anchor"></a>BUGS/JAGS code</h4>
 <div class="bugs">
-<pre><code>for(j in 1 : J) {
+<pre><code><a href="https://www.rdocumentation.org/packages/base/topics/Control">for(j in 1 : J) {
    y[j] ~ dbin(p[j], n[j])
    logit(p[j]) &lt;- theta[1] + theta[2] * X[j]
    X[j] ~ dnorm(mu[j], tau)
    mu[j] &lt;- alpha + beta * Z[j]
 }
 theta[1] ~ dnorm(0.0, 0.001)
-theta[2] ~ dnorm(0.0, 0.001)</code></pre>
+theta[2] ~ dnorm(0.0, 0.001)</a></code></pre>
 </div>
 </div>
 <div id="stan-code" class="section level4">
@@ -583,10 +584,10 @@ model {
 <div id="data-1" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-1" class="anchor"></a>data</h4>
-<pre class="text"><code>x &lt;- c(1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839)
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">x &lt;- c(1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839)
 n &lt;- c(59, 60, 62, 56, 63, 59, 62, 60)
 r &lt;- c(6, 13, 18, 28, 52, 53, 61, 60)
-N &lt;- 8</code></pre>
+N &lt;- 8</a></code></pre>
 </div>
 <div id="greta-code-1" class="section level4">
 <h4 class="hasAnchor">
@@ -603,7 +604,7 @@ N &lt;- 8</code></pre>
 <h4 class="hasAnchor">
 <a href="#bugsjags-code-1" class="anchor"></a>BUGS/JAGS code</h4>
 <div class="bugs">
-<pre><code>for( i in 1 : N ) {
+<pre><code><a href="https://www.rdocumentation.org/packages/base/topics/Control">for( i in 1 : N ) {
   r[i] ~ dbin(p[i],n[i])
   logit(p[i]) &lt;- alpha.star + beta * (x[i] - mean(x[]))
   rhat[i] &lt;- n[i] * p[i]
@@ -611,7 +612,7 @@ N &lt;- 8</code></pre>
 }
 alpha &lt;- alpha.star - beta * mean(x[])
 beta ~ dnorm(0.0,0.001)
-alpha.star ~ dnorm(0.0,0.001)</code></pre>
+alpha.star ~ dnorm(0.0,0.001)</a></code></pre>
 </div>
 </div>
 <div id="stan-code-1" class="section level4">
@@ -677,12 +678,12 @@ generated quantities {
 <div id="data-2" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-2" class="anchor"></a>data</h4>
-<pre class="text"><code>y &lt;- c(28, 26, 33, 24, 34, -44, 27, 16, 40, -2, 29, 22, 24, 21, 25, 
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">y &lt;- c(28, 26, 33, 24, 34, -44, 27, 16, 40, -2, 29, 22, 24, 21, 25, 
        30, 23, 29, 31, 19, 24, 20, 36, 32, 36, 28, 25, 21, 28, 29, 
        37, 25, 28, 26, 30, 32, 36, 26, 30, 22, 36, 23, 27, 27, 28, 
        27, 31, 27, 26, 33, 26, 32, 32, 24, 39, 28, 24, 25, 32, 25, 
        29, 27, 28, 29, 16, 23)
-n &lt;- length(y)</code></pre>
+n &lt;- length(y)</a></code></pre>
 </div>
 <div id="greta-code-2" class="section level4">
 <h4 class="hasAnchor">
@@ -719,9 +720,9 @@ model {
 <div id="data-3" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-3" class="anchor"></a>data</h4>
-<pre class="text"><code>y &lt;- c(28,  8, -3,  7, -1,  1, 18, 12)
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">y &lt;- c(28,  8, -3,  7, -1,  1, 18, 12)
 sigma_y &lt;- c(15, 10, 16, 11,  9, 11, 10, 18)
-N  &lt;- length(y)</code></pre>
+N  &lt;- length(y)</a></code></pre>
 </div>
 <div id="greta-code-3" class="section level4">
 <h4 class="hasAnchor">
@@ -781,14 +782,14 @@ model {
 <div id="data-4" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-4" class="anchor"></a>data</h4>
-<pre class="text"><code># make fake data
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps"># make fake data
 n_env &lt;- 3
 n_sites &lt;- 20
 
 # n_sites x n_env matrix of environmental variables
 env &lt;- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
 # n_sites observations of species presence or absence
-occupancy &lt;- rbinom(n_sites, 1, 0.5) </code></pre>
+occupancy &lt;- rbinom(n_sites, 1, 0.5) </a></code></pre>
 </div>
 <div id="greta-code-4" class="section level4">
 <h4 class="hasAnchor">
@@ -812,14 +813,14 @@ occupancy &lt;- rbinom(n_sites, 1, 0.5) </code></pre>
 <div id="data-5" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-5" class="anchor"></a>data</h4>
-<pre class="text"><code># make fake data
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps"># make fake data
 n_env &lt;- 3
 n_sites &lt;- 20
 
 # n_sites x n_env matrix of environmental variables
 env &lt;- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
 # n_sites observations of species abundance
-occupancy &lt;- rpois(n_sites, 5) </code></pre>
+occupancy &lt;- rpois(n_sites, 5) </a></code></pre>
 </div>
 <div id="greta-code-5" class="section level4">
 <h4 class="hasAnchor">
@@ -839,7 +840,7 @@ occupancy &lt;- rpois(n_sites, 5) </code></pre>
 <div id="data-6" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-6" class="anchor"></a>data</h4>
-<pre class="text"><code># make fake data
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps"># make fake data
 n_env &lt;- 3
 n_sites &lt;- 20
 n_obs &lt;- 5
@@ -847,7 +848,7 @@ n_obs &lt;- 5
 # n_sites x n_env matrix of environmental variables
 env &lt;- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
 # n_sites observations of species presence or absence over n_obs visits
-occupancy &lt;- rbinom(n_sites, n_obs, 0.5)</code></pre>
+occupancy &lt;- rbinom(n_sites, n_obs, 0.5)</a></code></pre>
 </div>
 <div id="greta-code-6" class="section level4">
 <h4 class="hasAnchor">
@@ -874,13 +875,13 @@ occupancy &lt;- rbinom(n_sites, n_obs, 0.5)</code></pre>
 <div id="data-7" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-7" class="anchor"></a>data</h4>
-<pre class="text"><code># make fake data
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps"># make fake data
 n_species &lt;- 5
 n_env &lt;- 3
 n_sites &lt;- 20
 
 env &lt;- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-occupancy &lt;- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_sites)</code></pre>
+occupancy &lt;- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_sites)</a></code></pre>
 </div>
 <div id="greta-code-7" class="section level4">
 <h4 class="hasAnchor">
@@ -908,13 +909,13 @@ occupancy &lt;- matrix(rbinom(n_species * n_sites, 1, 0.5), nrow = n_sites)</cod
 <div id="data-8" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-8" class="anchor"></a>data</h4>
-<pre class="text"><code># make fake data
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps"># make fake data
 n_species &lt;- 5
 n_env &lt;- 1
 n_sites &lt;- 50
 
 env &lt;- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-occupancy &lt;- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)</code></pre>
+occupancy &lt;- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)</a></code></pre>
 </div>
 <div id="greta-code-8" class="section level4">
 <h4 class="hasAnchor">
@@ -947,7 +948,7 @@ occupancy &lt;- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)</cod
 <div id="data-9" class="section level4">
 <h4 class="hasAnchor">
 <a href="#data-9" class="anchor"></a>data</h4>
-<pre class="text"><code># make fake data
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps"># make fake data
 n_species &lt;- 3
 n_env &lt;- 1
 n_sites &lt;- 5
@@ -958,7 +959,7 @@ env &lt;- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_species * n_traits matix of trait variables
 traits &lt;- matrix(rnorm(n_species * n_traits), nrow = n_species)
 # n_sites * n_species matrix of observed occupancy
-occupancy &lt;- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)</code></pre>
+occupancy &lt;- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)</a></code></pre>
 </div>
 <div id="greta-code-9" class="section level4">
 <h4 class="hasAnchor">
@@ -996,10 +997,10 @@ occupancy &lt;- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)</cod
 <h4 class="hasAnchor">
 <a href="#data-10" class="anchor"></a>data</h4>
 <div class="data">
-<pre class="text"><code>n_obs &lt;- 100
+<pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">n_obs &lt;- 100
 n_time &lt;- 20
 y &lt;- matrix(sample(c(0, 1), size = (n_obs * n_time), replace = TRUE),
-            ncol = n_time)</code></pre>
+            ncol = n_time)</a></code></pre>
 </div>
 </div>
 <div id="greta-code-10" class="section level4">
@@ -1165,7 +1166,7 @@ generated quantities {
 </div>
 
   
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.1/docsearch.min.js" integrity="sha256-GKvGqXDznoRYHCwKXGnuchvKSwmx9SRMrZOTh2g4Sb0=" crossorigin="anonymous"></script><script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.js"></script><script>
   docsearch({
     
     
