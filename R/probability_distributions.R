@@ -97,7 +97,7 @@ normal_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Normal(loc = parameters$mean,
                                scale = parameters$sd)
-    }
+    },
 
     tf_sample = function() {
       parameters <- lapply(self$parameters, function(x) x$value())
