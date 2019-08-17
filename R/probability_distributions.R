@@ -46,7 +46,7 @@ uniform_distribution <- R6Class(
       # initialize the rest
       super$initialize("uniform", dim)
 
-      # add them as children and greta arrays
+      # add them as parents and greta arrays
       self$add_parameter(min, "min")
       self$add_parameter(max, "max")
 
@@ -87,7 +87,7 @@ normal_distribution <- R6Class(
       mean <- as.greta_array(mean)
       sd <- as.greta_array(sd)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(mean, sd, target_dim = dim)
       super$initialize("normal", dim, truncation)
       self$add_parameter(mean, "mean")
@@ -142,7 +142,7 @@ bernoulli_distribution <- R6Class(
 
       prob <- as.greta_array(prob)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(prob, target_dim = dim)
       super$initialize("bernoulli", dim, discrete = TRUE)
 
@@ -204,7 +204,7 @@ binomial_distribution <- R6Class(
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(size, prob, target_dim = dim)
       super$initialize("binomial", dim, discrete = TRUE)
 
@@ -268,7 +268,7 @@ beta_binomial_distribution <- R6Class(
       alpha <- as.greta_array(alpha)
       beta <- as.greta_array(beta)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(size, alpha, beta, target_dim = dim)
       super$initialize("beta_binomial", dim, discrete = TRUE)
       self$add_parameter(size, "size")
@@ -311,7 +311,7 @@ poisson_distribution <- R6Class(
 
       lambda <- as.greta_array(lambda)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(lambda, target_dim = dim)
       super$initialize("poisson", dim, discrete = TRUE)
 
@@ -351,7 +351,7 @@ negative_binomial_distribution <- R6Class(
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(size, prob, target_dim = dim)
       super$initialize("negative_binomial", dim, discrete = TRUE)
       self$add_parameter(size, "size")
@@ -383,7 +383,7 @@ hypergeometric_distribution <- R6Class(
       n <- as.greta_array(n)
       k <- as.greta_array(k)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(m, n, k, target_dim = dim)
       super$initialize("hypergeometric", dim, discrete = TRUE)
       self$add_parameter(m, "m")
@@ -424,7 +424,7 @@ gamma_distribution <- R6Class(
       shape <- as.greta_array(shape)
       rate <- as.greta_array(rate)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(shape, rate, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -451,7 +451,7 @@ inverse_gamma_distribution <- R6Class(
       alpha <- as.greta_array(alpha)
       beta <- as.greta_array(beta)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(alpha, beta, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -480,7 +480,7 @@ weibull_distribution <- R6Class(
       shape <- as.greta_array(shape)
       scale <- as.greta_array(scale)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(shape, scale, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -522,7 +522,7 @@ exponential_distribution <- R6Class(
 
       rate <- as.greta_array(rate)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(rate, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -546,7 +546,7 @@ pareto_distribution <- R6Class(
       a <- as.greta_array(a)
       b <- as.greta_array(b)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(a, b, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -576,7 +576,7 @@ student_distribution <- R6Class(
       mu <- as.greta_array(mu)
       sigma <- as.greta_array(sigma)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(df, mu, sigma, target_dim = dim)
       super$initialize("student", dim, truncation)
       self$add_parameter(df, "df")
@@ -605,7 +605,7 @@ laplace_distribution <- R6Class(
       mu <- as.greta_array(mu)
       sigma <- as.greta_array(sigma)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(mu, sigma, target_dim = dim)
       super$initialize("laplace", dim, truncation)
       self$add_parameter(mu, "mu")
@@ -630,7 +630,7 @@ beta_distribution <- R6Class(
       shape1 <- as.greta_array(shape1)
       shape2 <- as.greta_array(shape2)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(shape1, shape2, target_dim = dim)
       check_unit(truncation)
       self$bounds <- c(0, 1)
@@ -657,7 +657,7 @@ cauchy_distribution <- R6Class(
       location <- as.greta_array(location)
       scale <- as.greta_array(scale)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(location, scale, target_dim = dim)
       super$initialize("cauchy", dim, truncation)
       self$add_parameter(location, "location")
@@ -682,7 +682,7 @@ chi_squared_distribution <- R6Class(
 
       df <- as.greta_array(df)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(df, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -707,7 +707,7 @@ logistic_distribution <- R6Class(
       location <- as.greta_array(location)
       scale <- as.greta_array(scale)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(location, scale, target_dim = dim)
       super$initialize("logistic", dim, truncation)
       self$add_parameter(location, "location")
@@ -737,7 +737,7 @@ f_distribution <- R6Class(
       df1 <- as.greta_array(df1)
       df2 <- as.greta_array(df2)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(df1, df2, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -794,7 +794,7 @@ dirichlet_distribution <- R6Class(
                                      n_realisations = n_realisations,
                                      dimension = dimension)
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       self$bounds <- c(0, Inf)
       super$initialize("dirichlet", dim,
@@ -849,7 +849,7 @@ dirichlet_multinomial_distribution <- R6Class(
 
       # need to handle size as a vector!
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("dirichlet_multinomial",
                        dim = dim,
@@ -894,7 +894,7 @@ multinomial_distribution <- R6Class(
 
       # need to make sure size is a column vector!
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("multinomial",
                        dim = dim,
@@ -935,7 +935,7 @@ categorical_distribution <- R6Class(
                                      n_realisations = n_realisations,
                                      dimension = dimension)
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("categorical", dim = dim, discrete = TRUE)
       self$add_parameter(prob, "prob")
@@ -999,7 +999,7 @@ multivariate_normal_distribution <- R6Class(
 
       }
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("multivariate_normal", dim)
 
@@ -1053,7 +1053,7 @@ wishart_distribution <- R6Class(
     target_is_cholesky = FALSE,
 
     initialize = function(df, Sigma) {
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
 
       df <- as.greta_array(df)
       Sigma <- as.greta_array(Sigma)
@@ -1191,7 +1191,7 @@ lkj_correlation_distribution <- R6Class(
 
       }
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       eta <- as.greta_array(eta)
 
       if (!is_scalar(eta)) {

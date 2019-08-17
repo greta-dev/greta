@@ -3,8 +3,8 @@ node <- R6Class(
   "node",
   public = list(
     unique_name = "",
-    children = list(),
     parents = list(),
+    children = list(),
     representations = list(),
     .value = array(NA),
     dim = NA,
@@ -41,7 +41,7 @@ node <- R6Class(
         self$register(dag)
 
         # find my immediate family (not including self)
-        family <- c(self$parents, self$children)
+        family <- c(self$children, self$parents)
 
         # get and assign their names
         family_names <- vapply(family, member, "unique_name", FUN.VALUE = "")
@@ -59,56 +59,56 @@ node <- R6Class(
 
     },
 
-    add_child = function(node) {
-
-      # add to list of children
-      self$children <- c(self$children, node)
-      node$add_parent(self)
-
-    },
-
-    remove_child = function(node) {
-
-      # remove node from list of children
-      rem_idx <- which(self$child_names(recursive = FALSE) == node$unique_name)
-      self$children <- self$children[-rem_idx]
-      node$remove_parent(self)
-
-    },
-
     add_parent = function(node) {
 
-      # add to list of children
+      # add to list of parents
       self$parents <- c(self$parents, node)
+      node$add_child(self)
 
     },
 
     remove_parent = function(node) {
 
-      # remove node from list of children
-      rem_idx <- which(self$parent_names() == node$unique_name)
+      # remove node from list of parents
+      rem_idx <- which(self$parent_names(recursive = FALSE) == node$unique_name)
       self$parents <- self$parents[-rem_idx]
+      node$remove_child(self)
 
     },
 
-    # return the names of all child nodes, and if recursive = TRUE, all nodes
+    add_child = function(node) {
+
+      # add to list of children
+      self$children <- c(self$children, node)
+
+    },
+
+    remove_child = function(node) {
+
+      # remove node from list of parents
+      rem_idx <- which(self$child_names() == node$unique_name)
+      self$children <- self$children[-rem_idx]
+
+    },
+
+    # return the names of all parent nodes, and if recursive = TRUE, all nodes
     # lower in this graph. If type is a character, only nodes with that type
     # (from the type public object)  will  be listed
-    child_names = function(recursive = FALSE) {
+    parent_names = function(recursive = FALSE) {
 
-      children <- self$children
+      parents <- self$parents
 
-      if (length(children) > 0) {
+      if (length(parents) > 0) {
 
-        names <- vapply(children,
+        names <- vapply(parents,
                         function(x) x$unique_name,
                         "")
 
         if (recursive) {
           names <- c(names,
-                     unlist(lapply(children,
+                     unlist(lapply(parents,
                                    function(x) {
-                                     x$child_names(recursive = TRUE)
+                                     x$parent_names(recursive = TRUE)
                                    })))
         }
 
@@ -125,13 +125,13 @@ node <- R6Class(
 
     },
 
-    parent_names = function() {
+    child_names = function() {
 
-      parents <- self$parents
+      children <- self$children
 
-      if (length(parents) > 0) {
+      if (length(children) > 0) {
 
-        names <- vapply(parents,
+        names <- vapply(children,
                         function(x) x$unique_name,
                         "")
 
@@ -160,13 +160,13 @@ node <- R6Class(
       # if defined already, skip
       if (!self$defined(dag)) {
 
-        # make sure children are defined
-        children_defined <- vapply(self$children,
+        # make sure parents are defined
+        parents_defined <- vapply(self$parents,
                                    function(x) x$defined(dag),
                                    FUN.VALUE = FALSE)
 
-        if (any(!children_defined)) {
-          lapply(self$children[which(!children_defined)],
+        if (any(!parents_defined)) {
+          lapply(self$parents[which(!parents_defined)],
                  function(x) x$define_tf(dag))
         }
 
