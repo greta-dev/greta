@@ -105,16 +105,16 @@ operation_node <- R6Class(
 
     add_argument = function(argument) {
 
-      # guess at a name, coerce to a node, and add as a child
+      # guess at a name, coerce to a node, and add as a parent
       parameter <- to_node(argument)
-      self$add_child(parameter)
+      self$add_parent(parameter)
 
     },
 
     tf = function(dag) {
 
       # fetch the tensors for the environment
-      arg_tf_names <- lapply(self$children, dag$tf_name)
+      arg_tf_names <- lapply(self$parents, dag$tf_name)
       args <- lapply(arg_tf_names, get, envir = dag$tf_environment)
 
       # fetch additional (non-tensor) arguments, if any
@@ -392,12 +392,12 @@ distribution_node <- R6Class(
       vble(truncation, dim = self$dim)
     },
 
-    # create target node, add as a child, and give it this distribution
+    # create target node, add as a parent, and give it this distribution
     add_target = function(new_target) {
 
-      # add as x and as a child
+      # add as x and as a parent
       self$target <- new_target
-      self$add_child(new_target)
+      self$add_parent(new_target)
 
       # get its values
       self$value(new_target$value())
@@ -419,8 +419,8 @@ distribution_node <- R6Class(
     # replace the existing target node with a new one
     remove_target = function() {
 
-      # remove x from children
-      self$remove_child(self$target)
+      # remove x from parents
+      self$remove_parent(self$target)
       self$target <- NULL
 
     },
@@ -511,7 +511,7 @@ distribution_node <- R6Class(
     add_parameter = function(parameter, name) {
 
       parameter <- to_node(parameter)
-      self$add_child(parameter)
+      self$add_parent(parameter)
       self$parameters[[name]] <- parameter
 
     },

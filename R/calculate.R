@@ -175,13 +175,13 @@ calculate_list <- function(target, values, tf_float) {
   # check that there are no unspecified variables on which the target depends
 
   # find all the nodes depended on by this one
-  dependencies <- get_node(target)$child_names(recursive = TRUE)
+  dependencies <- get_node(target)$parent_names(recursive = TRUE)
 
   # find all the nodes depended on by the new values, and remove them from the
   # list
   complete_dependencies <- lapply(fixed_greta_arrays,
                                   function(x)
-                                    get_node(x)$child_names(recursive = TRUE))
+                                    get_node(x)$parent_names(recursive = TRUE))
   complete_dependencies <- unique(unlist(complete_dependencies))
 
   unmet_dependencies <- dependencies[!dependencies %in% complete_dependencies]
