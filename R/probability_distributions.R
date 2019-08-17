@@ -99,6 +99,11 @@ normal_distribution <- R6Class(
                                scale = parameters$sd)
     }
 
+    tf_sample = function() {
+      parameters <- lapply(self$parameters, function(x) x$value())
+      self$tf_distrib(parameters, NULL)$sample(self$dim)
+    }
+
   )
 )
 
