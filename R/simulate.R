@@ -85,20 +85,20 @@ simulate.greta_model <- function (
   ...
 ) {
 
+  # check the model can be sampled
 
-  # if an RNG seed was provided
+  # error if there are variables withut distributions that aren't named in values
+
+  # error if there are distributions without sampling methods
+
+  # check nsim is valid
+  nsim <- check_positive_integer(nsim)
+
+  # if an RNG seed was provided use it and reset the RNG on exiting
   if (!is.null(seed)) {
-
-    # # make sure there's an RNG state
-    # if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-    #   runif(1)
-    # }
-
-    # use it and reset the RNG on exiting
     R.seed <- get(".Random.seed", envir = .GlobalEnv)
     on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
     set.seed(seed)
-
   }
 
   # fetch the nodes for the target greta arrays

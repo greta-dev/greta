@@ -194,15 +194,12 @@ test_that("simulate errors nicely if nsim is invalid", {
   m <- model(x)
 
   expect_error(simulate(m, nsim = 0),
-               "must be a positive integer scalar")
+               "must be a positive integer")
 
   expect_error(simulate(m, nsim = -1),
-               "must be a positive integer scalar")
-
-  expect_error(simulate(m, nsim = matrix(1, 1)),
-               "must be a positive integer scalar")
+               "must be a positive integer")
 
   expect_error(simulate(m, nsim = "five"),
-               "must be a positive integer scalar")
+               "must be a positive integer")
 
 })
