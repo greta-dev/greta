@@ -96,9 +96,15 @@ simulate.greta_model <- function (
 
   # if an RNG seed was provided use it and reset the RNG on exiting
   if (!is.null(seed)) {
+
+    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+      runif(1)
+    }
+
     R.seed <- get(".Random.seed", envir = .GlobalEnv)
     on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
     set.seed(seed)
+
   }
 
   # fetch the nodes for the target greta arrays
@@ -110,39 +116,58 @@ simulate.greta_model <- function (
     target_nodes <- object$dag$target_nodes
   }
 
+  # switch the dag to sampling mode for the duration of this function (on.exit
+  # reverts even if this function errors)
+  dag <- object$dag
+  old_mode <- dag$mode
+  on.exit(dag$mode <- old_mode, add = TRUE)
+  dag$mode <- "sampling"
+
+  # flush and redefine the tf sampling graph, so that the RNG seed can change between runs
+  sampling_tensors <- grep("^sampling_", ls(dag$tf_environment), value = TRUE)
+  sampling_tensors <- sampling_tensors[sampling_tensors != "sampling_data_list"]
+  do.call(rm, c(as.list(sampling_tensors), list(envir = dag$tf_environment)))
+  dag$define_tf(target_nodes = target_nodes)
+
+  # look up the tf names of the target greta arrays (under sampling)
+  # create an object in the environment that's a list of these, and sample that
+  target_names_list <- lapply(target_nodes, dag$tf_name)
+  target_tensor_list <- lapply(target_names_list, get, envir = dag$tf_environment)
+  assign("sampling_target_tensor_list", target_tensor_list, envir = dag$tf_environment)
+
   if (inherits(values, "mcmc.list")) {
 
-    simulate_mcmc.list(
-      model = object,
+    result_list <- simulate_mcmc.list(
+      dag = dag,
       nsim = nsim,
-      seed = seed,
-      target_nodes = target_nodes,
       values = values
     )
 
   } else {
 
-    simulate_list(
-      model = object,
+    result_list <- simulate_list(
+      dag = dag,
       nsim = nsim,
-      seed = seed,
-      target_nodes = target_nodes,
       values = values,
       env = parent.frame()
     )
 
   }
 
+  # tidy up the results and return
+  result_list <- lapply(result_list, drop)
+  result_list
+
 }
 
 
-simulate_mcmc.list <- function(model, nsim, seed, target_nodes, values, tf_float) {
+simulate_mcmc.list <- function(dag, nsim, values) {
   stop ("not implemented yet")
 }
 
-simulate_list <- function(model, nsim, seed, target_nodes, values, tf_float, env) {
+simulate_list <- function(dag, nsim, values, env) {
 
-  # check and parse the values iif needed
+  # check and parse the values if needed
   if (!identical(values, list())) {
 
     # check the list of values makes sense, and return these and the corresponding
@@ -151,31 +176,11 @@ simulate_list <- function(model, nsim, seed, target_nodes, values, tf_float, env
     fixed_greta_arrays <- values_list$fixed_greta_arrays
     values <- values_list$values
 
-    # build and send a dict for the fixed values
+    # convert to nodes, and add tensor names to values
     fixed_nodes <- lapply(fixed_greta_arrays, get_node)
-
-  } else {
-
-    fixed_nodes <- list()
+    names(values) <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
 
   }
-
-  dag <- model$dag
-
-  # switch the dag to sampling mode for the duration of this function (on.exit
-  # reverts even if this function errors)
-  old_mode <- dag$mode
-  on.exit(dag$mode <- old_mode)
-  dag$mode <- "sampling"
-
-  # flush and redefine the tf sampling graph, so that the RNG seed can change between runs
-  sampling_tensors <- grep("^sampling_", ls(dag$tf_environment), value = TRUE)
-  sampling_tensors <- sampling_tensors[sampling_tensors != "sampling_data_list"]
-  do.call(rm, c(as.list(sampling_tensors), list(envir = dag$tf_environment)))
-
-  dag$define_tf(target_nodes = target_nodes)
-
-  names(values) <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
 
   # add values or data not specified by the user
   data_list <- dag$get_tf_data_list()
@@ -186,17 +191,7 @@ simulate_list <- function(model, nsim, seed, target_nodes, values, tf_float, env
   values <- c(values, list(batch_size = as.integer(nsim)))
   dag$build_feed_dict(values, data_list = data_list[missing])
 
-  # look up the tf names of the target greta arrays (under sampling)
-  # create an object in the environment that's a list of these, and sample that
-  target_names_list <- lapply(target_nodes, dag$tf_name)
-  target_tensor_list <- lapply(target_names_list, get, envir = dag$tf_environment)
-  assign("sampling_target_tensor_list", target_tensor_list, envir = dag$tf_environment)
-
   # run the sampling
-  result_list <- dag$tf_sess_run("sampling_target_tensor_list", as_text = TRUE)
-
-  # tidy up the results and return
-  result_list <- lapply(result_list, drop)
-  result_list
+  dag$tf_sess_run("sampling_target_tensor_list", as_text = TRUE)
 
 }
