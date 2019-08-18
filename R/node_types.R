@@ -662,7 +662,7 @@ distribution_node <- R6Class(
 
     tf_sample = function(parameters, dag) {
 
-      self$tf_distrib(parameters, dag)$sample()
+      self$tf_distrib(parameters, dag)$sample(seed = get_seed())
 
     }
 

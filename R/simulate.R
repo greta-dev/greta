@@ -85,9 +85,20 @@ simulate.greta_model <- function (
   ...
 ) {
 
-  # get the next RNG seed if one wasn't provided in
-  if (is.null(seed)) {
-    seed <- get_seed()
+
+  # if an RNG seed was provided
+  if (!is.null(seed)) {
+
+    # # make sure there's an RNG state
+    # if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+    #   runif(1)
+    # }
+
+    # use it and reset the RNG on exiting
+    R.seed <- get(".Random.seed", envir = .GlobalEnv)
+    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    set.seed(seed)
+
   }
 
   # fetch the nodes for the target greta arrays
@@ -157,7 +168,11 @@ simulate_list <- function(model, nsim, seed, target_nodes, values, tf_float, env
   on.exit(dag$mode <- old_mode)
   dag$mode <- "sampling"
 
-  # (re-)define the tf sampling graph
+  # flush and redefine the tf sampling graph, so that the RNG seed can change between runs
+  sampling_tensors <- grep("^sampling_", ls(dag$tf_environment), value = TRUE)
+  sampling_tensors <- sampling_tensors[sampling_tensors != "sampling_data_list"]
+  do.call(rm, c(as.list(sampling_tensors), list(envir = dag$tf_environment)))
+
   dag$define_tf(target_nodes = target_nodes)
 
   names(values) <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
@@ -176,12 +191,6 @@ simulate_list <- function(model, nsim, seed, target_nodes, values, tf_float, env
   target_names_list <- lapply(target_nodes, dag$tf_name)
   target_tensor_list <- lapply(target_names_list, get, envir = dag$tf_environment)
   assign("sampling_target_tensor_list", target_tensor_list, envir = dag$tf_environment)
-
-  # set the RNG seed in TensorFlow
-  dag$tf_environment$rng_seed <- seed
-  dag$tf_run(
-    tf$compat$v1$random$set_random_seed(rng_seed)
-  )
 
   # run the sampling
   result_list <- dag$tf_sess_run("sampling_target_tensor_list", as_text = TRUE)
