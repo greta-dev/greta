@@ -51,7 +51,8 @@ dag_class <- R6Class(
 
       self$tf_environment <- new.env()
       self$tf_graph <- tf$Graph()
-      self$tf_environment$data_list <- list()
+      self$tf_environment$forward_data_list <- list()
+      self$tf_environment$sampling_data_list <- list()
 
     },
 
@@ -424,8 +425,22 @@ dag_class <- R6Class(
 
     },
 
+    get_tf_data_list = function() {
+
+      data_list_name <- paste0(self$mode, "_data_list")
+      self$tf_environment[[data_list_name]]
+
+    },
+
+    set_tf_data_list = function(element_name, value) {
+
+      data_list_name <- paste0(self$mode, "_data_list")
+      self$tf_environment[[data_list_name]][[element_name]] <- value
+
+    },
+
     build_feed_dict = function(dict_list = list(),
-                               data_list = self$tf_environment$data_list) {
+                               data_list = self$get_tf_data_list()) {
 
       tfe <- self$tf_environment
 

@@ -85,6 +85,11 @@ simulate.greta_model <- function (
   ...
 ) {
 
+  # get the next RNG seed if one wasn't provided in
+  if (is.null(seed)) {
+    seed <- get_seed()
+  }
+
   # fetch the nodes for the target greta arrays
   if (!identical(targets, list())) {
     # get_target_greta_arrays does validity checks
@@ -95,26 +100,54 @@ simulate.greta_model <- function (
   }
 
   if (inherits(values, "mcmc.list")) {
-    simulate_mcmc.list(object, nsim, seed, target_nodes, values)
+
+    simulate_mcmc.list(
+      model = object,
+      nsim = nsim,
+      seed = seed,
+      target_nodes = target_nodes,
+      values = values
+    )
+
   } else {
-    simulate_list(object, nsim, seed, target_nodes, values, env = parent.frame())
+
+    simulate_list(
+      model = object,
+      nsim = nsim,
+      seed = seed,
+      target_nodes = target_nodes,
+      values = values,
+      env = parent.frame()
+    )
+
   }
 
 }
 
 
-simulate_mcmc.list <- function(model, nsim, target_nodes, values, tf_float) {
+simulate_mcmc.list <- function(model, nsim, seed, target_nodes, values, tf_float) {
   stop ("not implemented yet")
 }
 
-simulate_list <- function(model, nsim, target_nodes, values, tf_float, env) {
+simulate_list <- function(model, nsim, seed, target_nodes, values, tf_float, env) {
 
-  # check the list of values makes sense, and return these and the corresponding
-  # greta arrays (looked up by name in environment env)
-  values_list <- check_values_list(values, env)
-  fixed_greta_arrays <- values_list$fixed_greta_arrays
-  values <- values_list$values
+  # check and parse the values iif needed
+  if (!identical(values, list())) {
 
+    # check the list of values makes sense, and return these and the corresponding
+    # greta arrays (looked up by name in environment env)
+    values_list <- check_values_list(values, env)
+    fixed_greta_arrays <- values_list$fixed_greta_arrays
+    values <- values_list$values
+
+    # build and send a dict for the fixed values
+    fixed_nodes <- lapply(fixed_greta_arrays, get_node)
+
+  } else {
+
+    fixed_nodes <- list()
+
+  }
 
   dag <- model$dag
 
@@ -127,17 +160,10 @@ simulate_list <- function(model, nsim, target_nodes, values, tf_float, env) {
   # (re-)define the tf sampling graph
   dag$define_tf(target_nodes = target_nodes)
 
-  # build and send a dict for the fixed values
-  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
-
-  names(values) <- vapply(
-    fixed_nodes,
-    dag$tf_name,
-    FUN.VALUE = ""
-  )
+  names(values) <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
 
   # add values or data not specified by the user
-  data_list <- dag$tf_environment$data_list
+  data_list <- dag$get_tf_data_list()
   missing <- !names(data_list) %in% names(values)
 
   # send list to tf environment and roll into a dict
@@ -146,14 +172,20 @@ simulate_list <- function(model, nsim, target_nodes, values, tf_float, env) {
 
   # look up the tf names of the target greta arrays (under sampling)
   # create an object in the environment that's a list of these, and sample that
-  stop ("not implemented yet")
-  # name <- dag$tf_name(get_node(target))
+  target_names_list <- lapply(target_nodes, dag$tf_name)
+  target_tensor_list <- lapply(target_names_list, get, envir = dag$tf_environment)
+  assign("sampling_target_tensor_list", target_tensor_list, envir = dag$tf_environment)
+
+  # set the RNG seed in TensorFlow
+  dag$tf_environment$rng_seed <- seed
+  dag$tf_run(
+    tf$compat$v1$random$set_random_seed(rng_seed)
+  )
 
   # run the sampling
-  result_list <- dag$tf_sess_run(name, as_text = TRUE)
+  result_list <- dag$tf_sess_run("sampling_target_tensor_list", as_text = TRUE)
 
   # tidy up the results and return
-  names(result_list) <- names(targets)
   result_list <- lapply(result_list, drop)
   result_list
 

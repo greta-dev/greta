@@ -160,7 +160,7 @@ calculate_list <- function(target, values, tf_float, env) {
   check_dependencies_satisfied(target, fixed_greta_arrays, dag, env)
 
   # add values or data not specified by the user
-  data_list <- tfe$data_list
+  data_list <- dag$get_tf_data_list()
   missing <- !names(data_list) %in% names(values)
 
   # send list to tf environment and roll into a dict

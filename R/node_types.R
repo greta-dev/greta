@@ -36,7 +36,7 @@ data_node <- R6Class(
 
         tensor <- tf$compat$v1$placeholder(shape = shape,
                                            dtype = tf_float())
-        tfe$data_list[[tf_name]] <- value
+        dag$set_tf_data_list(tf_name, value)
 
       }
 
@@ -563,8 +563,10 @@ distribution_node <- R6Class(
         # size, if any have it
         batch_dummy <- self$tfe$batch_dummy
         dummy_params <- match_batches(c(list(batch_dummy), tf_parameters))
-        tf_parameters <- target_params[-1]
-        self$tf_sample(tf_parameters)
+        tf_parameters <- dummy_params[-1]
+
+        # sample
+        self$tf_sample(tf_parameters, dag)
 
       }
 
@@ -646,21 +648,21 @@ distribution_node <- R6Class(
 
     },
 
-    tf_cdf_function = function(x, parameters) {
+    tf_cdf_function = function(x, parameters, dag) {
 
       self$tf_distrib(parameters, dag)$cdf(x)
 
     },
 
-    tf_log_cdf_function = function(x, parameters) {
+    tf_log_cdf_function = function(x, parameters, dag) {
 
       self$tf_distrib(parameters, dag)$log_cdf(x)
 
     },
 
-    tf_sample = function(x, parameters) {
+    tf_sample = function(parameters, dag) {
 
-      self$tf_distrib(parameters, dag)$sample(x)
+      self$tf_distrib(parameters, dag)$sample()
 
     }
 
