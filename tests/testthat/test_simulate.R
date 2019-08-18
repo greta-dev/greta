@@ -95,7 +95,7 @@ test_that("simulate works if distribution-free variables are fixed", {
   source("helpers.R")
 
   # fix variable
-  a <- variable
+  a <- variable()
   y <- normal(a, 1)
   m <- model(y)
   sims <- simulate(m, values = list(a = 100))
@@ -112,11 +112,26 @@ test_that("simulate errors if distribution-free variables are not fixed", {
   source("helpers.R")
 
   # fix variable
-  a <- variable
+  a <- variable()
   y <- normal(a, 1)
   m <- model(y)
   expect_error(sims <- simulate(m),
                "specified in values")
+
+})
+
+
+test_that("simulate errors if a distribution cannot be sampled from", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # fix variable
+  a <- lkj_correlation(3)
+  y <- normal(a, 1)
+  m <- model(y)
+  expect_error(sims <- simulate(m),
+               "sampling is not implemented")
 
 })
 
