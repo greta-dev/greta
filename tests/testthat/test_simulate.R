@@ -1,4 +1,4 @@
-context("calculate")
+context("simulate")
 
 test_that("simulate works with correct value lists", {
 
