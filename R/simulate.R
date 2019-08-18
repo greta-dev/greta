@@ -13,7 +13,6 @@
 #' @param values a named list giving fixed values of greta arrays in the model
 #'   to hold constant, or an \code{mcmc.list} object returned by
 #'   \code{\link{mcmc}}.
-#' @param precision the floating point precision to use when calculating values
 #' @param ... optional additional arguments, none are used at present
 #'
 #' @details If the values argument is not provided, \code{simulate()} draws
@@ -83,10 +82,72 @@ simulate.greta_model <- function (
   seed = NULL,
   targets = list(),
   values = list(),
-  precision = c("double", "single"),
   ...
 ) {
 
-  stop ("not implemented yet")
+  # fetch the nodes for the target greta arrays
+  if (!identical(targets, list())) {
+    # get_target_greta_arrays does validity checks
+    target_greta_arrays <- check_greta_arrays(targets, "simulate")
+    target_nodes <- lapply(target_greta_arrays, get_node)
+  } else {
+    target_nodes <- object$dag$target_nodes
+  }
 
+  if (inherits(values, "mcmc.list")) {
+    simulate_mcmc.list(object, nsim, seed, target_nodes, values)
+  } else {
+    simulate_list(object, nsim, seed, target_nodes, values, env = parent.frame())
+  }
+
+}
+
+
+simulate_mcmc.list <- function(model, nsim, target_nodes, values, tf_float) {
+  stop ("not implemented yet")
+}
+
+simulate_list <- function(model, nsim, target_nodes, values, tf_float, env) {
+
+  # check the list of values makes sense, and return these and the corresponding
+  # greta arrays (looked up by name in environment env)
+  values_list <- check_values_list(values, env)
+  fixed_greta_arrays <- values_list$fixed_greta_arrays
+  values <- values_list$values
+
+  # define the dag and TF graph
+  dag <- model$dag
+  dag$define_tf(mode = "sampling", target_nodes = target_nodes)
+  tfe <- dag$tf_environment
+
+  # build and send a dict for the fixed values
+  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
+
+  names(values) <- vapply(
+    fixed_nodes,
+    dag$tf_name,
+    mode = "sampling",
+    FUN.VALUE = ""
+  )
+
+  # add values or data not specified by the user
+  data_list <- tfe$data_list
+  missing <- !names(data_list) %in% names(values)
+
+  # send list to tf environment and roll into a dict
+  values <- lapply(values, add_first_dim)
+  dag$build_feed_dict(values, data_list = data_list[missing])
+
+  # look up the tf names of the target greta arrays (under sampling)
+  # create an object in the environment that's a list of these, and sample that
+  stop ("not implemented yet")
+  # name <- dag$tf_name(get_node(target))
+
+  # run the sampling
+  result_list <- dag$tf_sess_run(name, as_text = TRUE)
+
+  # tidy up the results
+  result_list <- lapply(result_list, drop_first_dim)
+  names(result_list) <- names(targets)
+  result_list
 }
