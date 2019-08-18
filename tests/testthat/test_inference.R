@@ -351,6 +351,7 @@ test_that("model errors nicely", {
   b <- normal(0, a)
   expect_error(model(a, b),
                "^The following object")
+
 })
 
 test_that("mcmc supports rwmh sampler with normal proposals", {

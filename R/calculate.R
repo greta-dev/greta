@@ -85,10 +85,11 @@ calculate <- function(target, values = list(),
   if (!inherits(target, "greta_array"))
     stop("'target' is not a greta array")
 
-  if (inherits(values, "mcmc.list"))
+  if (inherits(values, "mcmc.list")) {
     calculate_mcmc.list(target, target_name, values, tf_float)
-  else
-    calculate_list(target, values, tf_float)
+  } else {
+    calculate_list(target, values, tf_float, env = parent.frame())
+  }
 
 }
 
@@ -132,30 +133,13 @@ calculate_mcmc.list <- function(target, target_name, values, tf_float) {
 
 }
 
-calculate_list <- function(target, values, tf_float) {
+calculate_list <- function(target, values, tf_float, env) {
 
-  # get the values and their names
-  names <- names(values)
-  stopifnot(length(names) == length(values))
-
-  # get the corresponding greta arrays
-  fixed_greta_arrays <- lapply(names,
-                               get,
-                               envir = parent.frame(n = 2))
-
-  # make sure that's what they are
-  are_greta_arrays <- vapply(fixed_greta_arrays,
-                             inherits,
-                             "greta_array",
-                             FUN.VALUE = FALSE)
-
-  stopifnot(all(are_greta_arrays))
-
-  # make sure the values have the correct dimensions
-  values <- mapply(assign_dim,
-                   values,
-                   fixed_greta_arrays,
-                   SIMPLIFY = FALSE)
+  # check the list of values makes sense, and return these and the corresponding
+  # greta arrays (looked up by name in environment env)
+  values_list <- check_values_list(values, env)
+  fixed_greta_arrays <- values_list$fixed_greta_arrays
+  values <- values_list$values
 
   all_greta_arrays <- c(fixed_greta_arrays, list(target))
 
@@ -173,62 +157,7 @@ calculate_list <- function(target, values, tf_float) {
                           FUN.VALUE = "")
 
   # check that there are no unspecified variables on which the target depends
-
-  # find all the nodes depended on by this one
-  dependencies <- get_node(target)$parent_names(recursive = TRUE)
-
-  # find all the nodes depended on by the new values, and remove them from the
-  # list
-  complete_dependencies <- lapply(fixed_greta_arrays,
-                                  function(x)
-                                    get_node(x)$parent_names(recursive = TRUE))
-  complete_dependencies <- unique(unlist(complete_dependencies))
-
-  unmet_dependencies <- dependencies[!dependencies %in% complete_dependencies]
-
-  # find all of the remaining nodes that are variables
-  unmet_nodes <- dag$node_list[unmet_dependencies]
-  is_variable <- vapply(unmet_nodes, node_type, FUN.VALUE = "") == "variable"
-
-  # if there are any undefined variables
-  if (any(is_variable)) {
-
-    # try to find the associated greta arrays to provide a more informative
-    # error message
-    greta_arrays <- all_greta_arrays(parent.frame(2),
-                                     include_data = FALSE)
-
-    greta_array_node_names <- vapply(greta_arrays,
-                                function(x) get_node(x)$unique_name,
-                                FUN.VALUE = "")
-
-    unmet_variables <- unmet_nodes[is_variable]
-
-    matches <- names(unmet_variables) %in% greta_array_node_names
-
-
-    unmet_names_idx <- greta_array_node_names %in% names(unmet_variables)
-    unmet_names <- names(greta_array_node_names)[unmet_names_idx]
-
-    # build the message
-    msg <- paste("values have not been provided for all greta arrays on which",
-                 "the target depends.")
-
-    if (any(matches)) {
-      names_text <- paste(unmet_names, collapse = ", ")
-      msg <- paste(msg,
-                   sprintf("Please provide values for the greta array%s: %s",
-                           ifelse(length(matches) > 1, "s", ""),
-                           names_text))
-    } else {
-      msg <- paste(msg,
-                   "\nThe names of the missing greta arrays",
-                   "could not be detected")
-    }
-
-    stop(msg,
-         call. = FALSE)
-  }
+  check_dependencies_satisfied(target, fixed_greta_arrays, dag, env)
 
   # add values or data not specified by the user
   data_list <- tfe$data_list
@@ -245,13 +174,3 @@ calculate_list <- function(target, values, tf_float) {
 
 }
 
-# coerce value to have the correct dimensions
-assign_dim <- function(value, greta_array) {
-  array <- strip_unknown_class(get_node(greta_array)$value())
-  if (length(array) != length(value)) {
-    stop("a provided value has different number of elements",
-         " than the greta array", call. = FALSE)
-  }
-  array[] <- value
-  array
-}
