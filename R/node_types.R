@@ -211,27 +211,59 @@ variable_node <- R6Class(
 
       # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
-      free_name <- sprintf("%s_free", tf_name)
 
-      # create the log jacobian adjustment for the free state
-      tf_adj <- self$tf_adjustment(dag)
-      adj_name <- sprintf("%s_adj", tf_name)
-      assign(adj_name,
-             tf_adj,
-             envir = dag$tf_environment)
+      if (dag$mode == "sampling") {
 
-      # map from the free to constrained state in a new tensor
-      tf_free <- get(free_name, envir = dag$tf_environment)
-      node <- self$tf_from_free(tf_free, dag$tf_environment)
+        distrib_node <- self$distribution
 
-      # reshape the tensor to the match the variable
-      node <- tf$reshape(node,
-                         shape = to_shape(c(-1, dim(self))))
+        if (is.null(distrib_node)) {
 
-      # assign as constrained variable
+          # if the variable has no distribution create a placeholder instead
+          # (the value must be passed in via values when using simulate)
+          shape <- to_shape(c(1, self$dim))
+          tensor <- tf$compat$v1$placeholder(shape = shape, dtype = tf_float())
+
+        } else {
+
+          # otherwise find the sampling function for the distribution, and apply it to
+          # get the tensor for the sample
+          distrib_tf_name <- dag$tf_name(distrib_node)
+          sampling <- get(distrib_tf_name, envir = dag$tf_environment)
+          tensor <- sampling()
+
+        }
+
+      }
+
+      # if we're defining the forward mode graph, get the free state, transform,
+      # and compute any transformation density
+      if (dag$mode == "forward") {
+
+        free_name <- sprintf("%s_free", tf_name)
+
+        # create the log jacobian adjustment for the free state
+        tf_adj <- self$tf_adjustment(dag)
+        adj_name <- sprintf("%s_adj", tf_name)
+        assign(adj_name,
+               tf_adj,
+               envir = dag$tf_environment)
+
+        # map from the free to constrained state in a new tensor
+        tf_free <- get(free_name, envir = dag$tf_environment)
+        tensor <- self$tf_from_free(tf_free, dag$tf_environment)
+
+        # reshape the tensor to the match the variable
+        tensor <- tf$reshape(tensor,
+                             shape = to_shape(c(-1, dim(self))))
+
+      }
+
+      # assign to environment variable
       assign(tf_name,
-             node,
+             tensor,
              envir = dag$tf_environment)
+
+
 
     },
 
@@ -427,14 +459,17 @@ distribution_node <- R6Class(
 
     tf = function(dag) {
 
-      # for distributions, tf assigns a *function* to execute the density
+      # for distributions, tf assigns a *function* to execute either the density
+      # or sampling
+
+      # log density of the distribution, given parameter values
       density <- function(tf_target) {
 
         # fetch inputs
         tf_parameters <- self$tf_fetch_parameters(dag)
 
-        # ensure x and the parameters are all expanded to have the n_chains
-        # batch dimension, if any have it
+        # ensure x and the parameters are all expanded to have the correct batch
+        # size, if any have it
         target_params <- match_batches(c(list(tf_target), tf_parameters))
         tf_target <- target_params[[1]]
         tf_parameters <- target_params[-1]
@@ -450,9 +485,30 @@ distribution_node <- R6Class(
 
       }
 
+      # random sample of the variable from the distribution
+      sampling <- function () {
+
+        # fetch inputs
+        tf_parameters <- self$tf_fetch_parameters(dag)
+
+        # ensure the parameters are all expanded to have the correct batch
+        # size, if any have it
+        batch_dummy <- self$tfe$batch_dummy
+        dummy_params <- match_batches(c(list(batch_dummy), tf_parameters))
+        tf_parameters <- target_params[-1]
+        self$tf_sample(tf_parameters)
+
+      }
+
+      fun <- switch(
+        dag$mode,
+        forward = density,
+        sampling = sampling
+      )
+
       # assign the function to the environment
       assign(dag$tf_name(self),
-             density,
+             fun,
              envir = dag$tf_environment)
 
     },
@@ -531,6 +587,12 @@ distribution_node <- R6Class(
     tf_log_cdf_function = function(x, parameters) {
 
       self$tf_distrib(parameters, dag)$log_cdf(x)
+
+    },
+
+    tf_sample = function(x, parameters) {
+
+      self$tf_distrib(parameters, dag)$sample(x)
 
     }
 

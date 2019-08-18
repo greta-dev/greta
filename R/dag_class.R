@@ -7,6 +7,7 @@ dag_class <- R6Class(
   "dag_class",
   public = list(
 
+    mode = "forward",
     node_list = list(),
     node_types = NA,
     node_tf_names = NA,
@@ -111,7 +112,8 @@ dag_class <- R6Class(
 
     },
 
-    # create human-readable names for TF tensors
+    # create human-readable base names for TF tensors. these will actually be
+    # defined prepended with "forward_" or "sampling"
     make_names = function() {
 
       types <- self$node_types
@@ -127,19 +129,51 @@ dag_class <- R6Class(
 
     # get the TF names for different node types
     get_tf_names = function(types = NULL) {
+
+      # get tf basenames
       names <- self$node_tf_names
       if (!is.null(types))
         names <- names[which(self$node_types %in% types)]
-      names
+
+      # prepend mode
+      if (length(names) > 0) {
+        names <- paste(self$mode, names, sep = "_")
+      }
+
     },
 
     # look up the TF name for a single node
     tf_name = function(node) {
+
+      # get tf basename from node name
       name <- self$node_tf_names[node$unique_name]
       if (length(name) == 0) {
         name <- ""
       }
+
+      # prepend mode
+      if (!is.na(name)) {
+        name <- paste(self$mode, name, sep = "_")
+      }
+
       name
+
+    },
+
+    define_batch_size = function () {
+
+      tfe <- self$tf_environment
+      self$on_graph(
+        batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
+      )
+
+      # a dummy tensor, just to extract the batch size more easily with
+      # match_batches (remove this in a later refactor, and use the batch size
+      # there!)
+      self$on_graph(
+        batch_dummy <- tf$ones(list(batch_size, 1L, 1L))
+      )
+
     },
 
     define_free_state = function(type = c("variable", "placeholder"),
@@ -181,28 +215,33 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      # split up into separate free state variables and assign
-      free_state <- get("free_state", envir = tfe)
+      # if in forward mode, split up the free state
+      if (self$mode == "forward") {
 
-      params <- self$parameters_example
-      lengths <- vapply(params,
-                        function(x) as.integer(prod(dim(x))),
-                        FUN.VALUE = 1L)
+        # split up into separate free state variables and assign
+        free_state <- get("free_state", envir = tfe)
 
-      if (length(lengths) > 1) {
-        args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
-      } else {
-        args <- list(free_state)
+        params <- self$parameters_example
+        lengths <- vapply(params,
+                          function(x) as.integer(prod(dim(x))),
+                          FUN.VALUE = 1L)
+
+        if (length(lengths) > 1) {
+          args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
+        } else {
+          args <- list(free_state)
+        }
+
+        names <- paste0(names(params), "_free")
+        for (i in seq_along(names))
+          assign(names[i], args[[i]], envir = tfe)
+
       }
 
-      names <- paste0(names(params), "_free")
-      for (i in seq_along(names))
-        assign(names[i], args[[i]], envir = tfe)
-
-      # define all nodes, node densities and free states in the environment, and
-      # on the graph
-      self$on_graph(lapply(target_nodes,
-                           function(x) x$define_tf(self)))
+      # define all nodes in the environment and on the graph
+      self$on_graph(
+        lapply(target_nodes, function(x) x$define_tf(self))
+      )
 
       invisible(NULL)
 
@@ -213,15 +252,23 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
+
       # Begin Exclude Linting
       self$tf_run(
-        config <- tf$compat$v1$ConfigProto(inter_op_parallelism_threads = n_cores,
-                                 intra_op_parallelism_threads = n_cores))
+        config <- tf$compat$v1$ConfigProto(
+          inter_op_parallelism_threads = n_cores,
+          intra_op_parallelism_threads = n_cores
+        )
+      )
 
       if (self$compile) {
-        self$tf_run(py_set_attr(config$graph_options$optimizer_options,
-                                "global_jit_level",
-                                tf$compat$v1$OptimizerOptions$ON_1))
+        self$tf_run(
+          py_set_attr(
+            config$graph_options$optimizer_options,
+            "global_jit_level",
+            tf$compat$v1$OptimizerOptions$ON_1
+          )
+        )
       }
       # End Exclude Linting
 
@@ -231,12 +278,19 @@ dag_class <- R6Class(
 
     },
 
-    # define tf graph in environment
-    define_tf = function() {
+    # define tf graph in environment; either for forward-mode computation from a
+    # free state variable, or for sampling
+    define_tf = function(target_nodes = self$node_list) {
 
-      # define the free state variable, rest of the graph, and the session
-      self$define_free_state("placeholder", "free_state")
-      self$define_tf_body()
+      # define the free state variable or batch size depending on the mode
+      switch(
+        self$mode,
+        forward = self$define_free_state("placeholder", "free_state"),
+        sampling = self$define_batch_size()
+      )
+
+      # define the body of the graph (depending on the mode) and the session
+      self$define_tf_body(target_nodes = target_nodes)
       self$define_tf_session()
 
     },

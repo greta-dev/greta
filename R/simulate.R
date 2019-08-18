@@ -115,10 +115,17 @@ simulate_list <- function(model, nsim, target_nodes, values, tf_float, env) {
   fixed_greta_arrays <- values_list$fixed_greta_arrays
   values <- values_list$values
 
-  # define the dag and TF graph
+
   dag <- model$dag
-  dag$define_tf(mode = "sampling", target_nodes = target_nodes)
-  tfe <- dag$tf_environment
+
+  # switch the dag to sampling mode for the duration of this function (on.exit
+  # reverts even if this function errors)
+  old_mode <- dag$mode
+  on.exit(dag$mode <- old_mode)
+  dag$mode <- "sampling"
+
+  # (re-)define the tf sampling graph
+  dag$define_tf(target_nodes = target_nodes)
 
   # build and send a dict for the fixed values
   fixed_nodes <- lapply(fixed_greta_arrays, get_node)
@@ -126,12 +133,11 @@ simulate_list <- function(model, nsim, target_nodes, values, tf_float, env) {
   names(values) <- vapply(
     fixed_nodes,
     dag$tf_name,
-    mode = "sampling",
     FUN.VALUE = ""
   )
 
   # add values or data not specified by the user
-  data_list <- tfe$data_list
+  data_list <- dag$tf_environment$data_list
   missing <- !names(data_list) %in% names(values)
 
   # send list to tf environment and roll into a dict
@@ -146,8 +152,9 @@ simulate_list <- function(model, nsim, target_nodes, values, tf_float, env) {
   # run the sampling
   result_list <- dag$tf_sess_run(name, as_text = TRUE)
 
-  # tidy up the results
-  result_list <- lapply(result_list, drop_first_dim)
+  # tidy up the results and return
   names(result_list) <- names(targets)
+  result_list <- lapply(result_list, drop)
   result_list
+
 }
