@@ -561,7 +561,7 @@ distribution_node <- R6Class(
 
         # ensure the parameters are all expanded to have the correct batch
         # size, if any have it
-        batch_dummy <- self$tfe$batch_dummy
+        batch_dummy <- dag$tf_environment$batch_dummy
         dummy_params <- match_batches(c(list(batch_dummy), tf_parameters))
         tf_parameters <- dummy_params[-1]
 

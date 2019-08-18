@@ -168,6 +168,7 @@ simulate_list <- function(model, nsim, seed, target_nodes, values, tf_float, env
 
   # send list to tf environment and roll into a dict
   values <- lapply(values, add_first_dim)
+  values <- c(values, list(batch_size = as.integer(nsim)))
   dag$build_feed_dict(values, data_list = data_list[missing])
 
   # look up the tf names of the target greta arrays (under sampling)

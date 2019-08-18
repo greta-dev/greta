@@ -164,14 +164,14 @@ dag_class <- R6Class(
     define_batch_size = function () {
 
       tfe <- self$tf_environment
-      self$on_graph(
+      self$tf_run(
         batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
       )
 
       # a dummy tensor, just to extract the batch size more easily with
       # match_batches (remove this in a later refactor, and use the batch size
       # there!)
-      self$on_graph(
+      self$tf_run(
         batch_dummy <- tf$ones(list(batch_size, 1L, 1L))
       )
 
