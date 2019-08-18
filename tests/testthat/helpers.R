@@ -8,6 +8,10 @@ if (greta:::check_tf_version())
 
 set.seed(2018 - 05 - 30)
 
+rng_seed <- function () {
+  get(".Random.seed", envir = .GlobalEnv)
+}
+
 expect_ok <- function(expr)
   expect_error(expr, NA)
 
