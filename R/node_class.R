@@ -41,7 +41,7 @@ node <- R6Class(
         self$register(dag)
 
         # find my immediate family (not including self)
-        family <- c(self$children, self$parents)
+        family <- c(self$list_children(dag), self$list_parents(dag))
 
         # get and assign their names
         family_names <- vapply(family, member, "unique_name", FUN.VALUE = "")
@@ -76,6 +76,12 @@ node <- R6Class(
 
     },
 
+    list_parents = function (dag) {
+
+      self$parents
+
+    },
+
     add_child = function(node) {
 
       # add to list of children
@@ -91,25 +97,33 @@ node <- R6Class(
 
     },
 
+    list_children = function (dag) {
+
+      self$children
+
+    },
+
     # return the names of all parent nodes, and if recursive = TRUE, all nodes
     # lower in this graph. If type is a character, only nodes with that type
     # (from the type public object)  will  be listed
+    # NB. this is the true, forward parentage and is unaffected by the dag mode!
     parent_names = function(recursive = FALSE) {
 
       parents <- self$parents
 
       if (length(parents) > 0) {
 
-        names <- vapply(parents,
-                        function(x) x$unique_name,
-                        "")
+        names <- vapply(parents, function(x) {x$unique_name}, FUN.VALUE = "")
 
         if (recursive) {
-          names <- c(names,
-                     unlist(lapply(parents,
-                                   function(x) {
-                                     x$parent_names(recursive = TRUE)
-                                   })))
+
+          their_parents <- function(x) {
+            x$parent_names(recursive = TRUE)
+          }
+
+          grandparents <- lapply(parents, their_parents)
+          names <- c(names, unlist(grandparents))
+
         }
 
         # account for multiple nodes depending on the same nodes
@@ -161,12 +175,13 @@ node <- R6Class(
       if (!self$defined(dag)) {
 
         # make sure parents are defined
-        parents_defined <- vapply(self$parents,
+        parents_defined <- vapply(self$list_parents(dag),
                                    function(x) x$defined(dag),
                                    FUN.VALUE = FALSE)
 
         if (any(!parents_defined)) {
-          lapply(self$parents[which(!parents_defined)],
+          parents <- self$list_parents(dag)
+          lapply(parents[which(!parents_defined)],
                  function(x) x$define_tf(dag))
         }
 

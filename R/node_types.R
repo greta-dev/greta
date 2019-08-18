@@ -114,7 +114,7 @@ operation_node <- R6Class(
     tf = function(dag) {
 
       # fetch the tensors for the environment
-      arg_tf_names <- lapply(self$parents, dag$tf_name)
+      arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
       args <- lapply(arg_tf_names, get, envir = dag$tf_environment)
 
       # fetch additional (non-tensor) arguments, if any
@@ -204,6 +204,40 @@ variable_node <- R6Class(
       super$initialize(dim)
       self$lower <- lower
       self$upper <- upper
+
+    },
+
+    # flip the distribution node from being a child to a parent if sampling
+    list_parents = function(dag) {
+
+      parents <- self$parents
+      distribution_node <- self$distribution
+
+      # if we're in sampling mode and this variable has a distribution, consider
+      # that a parent node too
+      if (dag$mode == "sampling" & !is.null(distribution_node)) {
+        parents <- c(parents, list(distribution_node))
+      }
+
+      parents
+
+    },
+
+    # flip the distribution node from being a child to a parent if sampling
+    list_children = function(dag) {
+
+      children <- self$children
+      distribution_node <- self$distribution
+
+      # if we're in sampling mode and this variable has a distribution, do not consider
+      # that a child node
+      if (dag$mode == "sampling" & !is.null(distribution_node)) {
+        child_names <- vapply(children, member, "unique_name", FUN.VALUE = character(1))
+        keep <- child_names != distribution_node$unique_name
+        children <- children[keep]
+      }
+
+      children
 
     },
 
@@ -422,6 +456,40 @@ distribution_node <- R6Class(
     # create a target variable node (unconstrained by default)
     create_target = function(truncation) {
       vble(truncation, dim = self$dim)
+    },
+
+    # flip the target node from being a parent to a child when sampling
+    list_parents = function(dag) {
+
+      parents <- self$parents
+      target_node <- self$target
+
+      # if we're in sampling mode and this variable has a target, do not consider
+      # that a parent node
+      if (dag$mode == "sampling" & !is.null(target_node)) {
+        parent_names <- vapply(parents, member, "unique_name", FUN.VALUE = character(1))
+        keep <- parent_names != target_node$unique_name
+        parents <- parents[keep]
+      }
+
+      parents
+
+    },
+
+    # flip the target node from being a parent to a child when sampling
+    list_children = function(dag) {
+
+      children <- self$children
+      target_node <- self$distribution
+
+      # if we're in sampling mode and this variable has a target, consider
+      # that a child node too
+      if (dag$mode == "sampling" & !is.null(target_node)) {
+        children <- c(children, list(target_node))
+      }
+
+      children
+
     },
 
     # create target node, add as a parent, and give it this distribution
