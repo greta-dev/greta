@@ -148,38 +148,56 @@ summary.greta_array <- function(object, ...) {
 
   node <- get_node(object)
 
+  sry <- list(
+    type = node_type(node),
+    length = length(object),
+    dim = dim(object),
+    distribution_name = node$distribution$distribution_name,
+    values = node$value()
+  )
+
+  class(sry) <- "summary.greta_array"
+  sry
+
+}
+
+# summary print method
+#' @export
+#' @method print summary.greta_array
+print.summary.greta_array <- function (x, ...) {
+
   # array type
   type_text <- sprintf("'%s' greta array",
-                       node_type(node))
+                       x$type)
 
-  len <- length(object)
-  if (len == 1) {
+  if (x$length == 1) {
     shape_text <- "with 1 element"
   } else {
-    dim_text <- paste(dim(object), collapse = " x ")
+    dim_text <- paste(x$dim, collapse = " x ")
     shape_text <- sprintf("with %i elements (%s)",
-                          len,
+                          x$length,
                           dim_text)
   }
 
   # distribution info
-  if (inherits(node$distribution, "distribution_node")) {
+  if (!is.null(x$distribution_name)) {
     distribution_text <- sprintf("following a %s distribution",
-                                 node$distribution$distribution_name)
-
+                                 x$distribution_name)
   } else {
     distribution_text <- ""
   }
 
-  cat(type_text, shape_text, distribution_text, "\n")
-
-  values <- node$value()
-  if (inherits(values, "unknowns")) {
-    cat("\n  (values currently unknown)")
+  if (inherits(x$values, "unknowns")) {
+    values_text <- "\n  (values currently unknown)"
   } else {
-    cat("\n")
-    print(summary(values))
+    values_print <- capture.output(summary(x$values))
+    values_text <- paste0("\n", paste(values_print, collapse = "\n"))
   }
+
+  text <- paste(type_text, shape_text, distribution_text, paste0("\n",
+                values_text))
+  cat(text)
+  invisible(x)
 
 }
 

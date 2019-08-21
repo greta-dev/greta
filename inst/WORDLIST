@@ -22,7 +22,6 @@ greta's
 gretaDynamics
 Grete
 HMC
-Ie
 igraph
 Inf
 io
@@ -49,7 +48,6 @@ SciPy
 softmax
 speedup
 st
-TensoFlow
 tensorflow
 TensorFlow
 TensorFlow's
