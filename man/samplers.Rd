@@ -3,11 +3,14 @@
 \name{samplers}
 \alias{samplers}
 \alias{hmc}
+\alias{nuts}
 \alias{rwmh}
 \alias{slice}
 \title{MCMC samplers}
 \usage{
 hmc(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1)
+
+nuts(epsilon = 0.1, diag_sd = 1)
 
 rwmh(proposal = c("normal", "uniform"), epsilon = 0.1, diag_sd = 1)
 
@@ -27,6 +30,11 @@ slice(max_doublings = 5)
 
 \item{max_doublings}{the maximum number of iterations of the 'doubling'
 algorithm used to adapt the size of the slice}
+
+\item{epsilon}{leapfrog stepsize hyperparameter (positive, will be tuned)}
+
+\item{diag_sd}{estimate of the posterior marginal standard deviations
+(positive, will be tuned).}
 }
 \value{
 a \code{sampler} object that can be passed to \code{\link{mcmc}}.
@@ -41,9 +49,9 @@ During the warmup iterations of \code{mcmc}, some of these
   so the values provided here are used as starting values.
 
 For \code{hmc()}, the number of leapfrog steps at each iteration is
-  selected uniformly at random from between \code{Lmin} and \code{Lmax}.
-  \code{diag_sd} is used to rescale the parameter space to make it more
-  uniform, and make sampling more efficient.
+  selected uniformly at random from between \code{Lmin} and \code{Lmax}. For
+  \code{hmc()} and \code{nuts()}, \code{diag_sd} is used to rescale the
+  parameter space to make it more uniform, and make sampling more efficient.
 
 \code{rwmh()} creates a random walk Metropolis-Hastings sampler;  a
   a gradient-free sampling algorithm. The algorithm involves a proposal

@@ -833,6 +833,72 @@ hmc_sampler <- R6Class(
   )
 )
 
+nuts_sampler <- R6Class(
+  "nuts_sampler",
+  inherit = sampler,
+  public = list(
+
+    parameters = list(epsilon = 0.005,
+                      diag_sd = 1),
+
+    accept_target = 0.651,
+
+    define_tf_kernel = function() {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      # tensors for sampler parameters
+      dag$tf_run(
+        nuts_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
+      )
+
+      # need to pass in the value for this placeholder as a matrix (shape(n, 1))
+      dag$tf_run(
+        nuts_diag_sd <- tf$compat$v1$placeholder(
+          dtype = tf_float(),
+          shape = shape(dim(free_state)[[2]], 1)
+        )
+      )
+
+      # but it step_sizes must be a vector (shape(n, )), so reshape it
+      dag$tf_run(
+        nuts_step_sizes <- tf$reshape(
+          nuts_epsilon * (nuts_diag_sd / tf$reduce_sum(nuts_diag_sd)),
+          shape = shape(dim(free_state)[[2]])
+        )
+      )
+
+      # log probability function
+      tfe$log_prob_fun <- dag$generate_log_prob_function()
+
+      # build the kernel
+      # Begin Exclude Linting
+      dag$tf_run(
+        sampler_kernel <- tfp$mcmc$NoUTurnSampler(
+          target_log_prob_fn = log_prob_fun,
+          step_size = nuts_step_sizes,
+          seed = rng_seed)
+      )
+      # End Exclude Linting
+
+    },
+
+    sampler_parameter_values = function() {
+
+      epsilon <- self$parameters$epsilon
+      diag_sd <- matrix(self$parameters$diag_sd)
+
+      # return named list for replacing tensors
+      list(nuts_epsilon = epsilon,
+           nuts_diag_sd = diag_sd)
+
+    }
+
+
+  )
+)
+
 rwmh_sampler <- R6Class(
   "rwmh_sampler",
   inherit = sampler,

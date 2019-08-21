@@ -22,9 +22,9 @@ NULL
 #'   (positive, will be tuned).
 #'
 #' @details For \code{hmc()}, the number of leapfrog steps at each iteration is
-#'   selected uniformly at random from between \code{Lmin} and \code{Lmax}.
-#'   \code{diag_sd} is used to rescale the parameter space to make it more
-#'   uniform, and make sampling more efficient.
+#'   selected uniformly at random from between \code{Lmin} and \code{Lmax}. For
+#'   \code{hmc()} and \code{nuts()}, \code{diag_sd} is used to rescale the
+#'   parameter space to make it more uniform, and make sampling more efficient.
 hmc <- function(Lmin = 5,
                 Lmax = 10,
                 epsilon = 0.1,
@@ -36,6 +36,23 @@ hmc <- function(Lmin = 5,
                                 diag_sd = diag_sd),
               class = hmc_sampler)
   class(obj) <- c("hmc sampler", "sampler")
+  obj
+
+}
+
+#' @rdname samplers
+#' @export
+#'
+#' @param epsilon leapfrog stepsize hyperparameter (positive, will be tuned)
+#' @param diag_sd estimate of the posterior marginal standard deviations
+#'   (positive, will be tuned).
+#'
+nuts <- function(epsilon = 0.1, diag_sd = 1) {
+
+  obj <- list(parameters = list(epsilon = epsilon,
+                                diag_sd = diag_sd),
+              class = nuts_sampler)
+  class(obj) <- c("nuts sampler", "sampler")
   obj
 
 }
