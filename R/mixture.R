@@ -18,7 +18,7 @@
 #'
 #' @details The \code{weights} are rescaled to sum to one along the first
 #'   dimension, and are then used as the mixing weights of the distribution.
-#'   \emph{Ie.} the probability density is calculated as a weighted sum of the
+#'   I.e. the probability density is calculated as a weighted sum of the
 #'   component probability distributions passed in via \code{\dots}
 #'
 #'   The component probability distributions must all be either continuous or
@@ -107,8 +107,9 @@ mixture_distribution <- R6Class(
 
       # remainder should be 1 or match weights_extra_dim
       w_dim <- weights_dim[-1]
-      if (!( (length(w_dim == 1) && w_dim == 1) |
-            all(w_dim == weights_extra_dim)) ) {
+      dim_1 <- length(w_dim) == 1 && w_dim == 1
+      dim_same <- all(w_dim == weights_extra_dim)
+      if ( !(dim_1 | dim_same) ) {
         stop("the dimension of weights must be either ", n_distributions,
              " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
              " but was ", paste(weights_dim, collapse = " x "),
@@ -134,7 +135,6 @@ mixture_distribution <- R6Class(
       }
 
       # for any discrete ones, tell them they are fixed
-
       super$initialize("mixture", dim, discrete = discrete[1])
 
       for (i in seq_len(n_distributions)) {
@@ -152,7 +152,7 @@ mixture_distribution <- R6Class(
       weights <- parameters$weights
       weights_sum <- tf$reduce_sum(weights, 1L, keepdims = TRUE)
       weights <- weights / weights_sum
-      log_weights <- tf$log(weights)
+      log_weights <- tf$math$log(weights)
 
       log_prob <- function(x) {
 

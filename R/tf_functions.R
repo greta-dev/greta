@@ -14,11 +14,13 @@ tf_as_integer <- function(x)
 
 tf_lchoose <- function(n, k) {
   one <- fl(1)
-  -tf$lgamma(one + n - k) - tf$lgamma(one + k) + tf$lgamma(one + n)
+  -tf$math$lgamma(one + n - k) -
+    tf$math$lgamma(one + k) +
+    tf$math$lgamma(one + n)
 }
 
 tf_lbeta <- function(a, b)
-  tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
+  tf$math$lgamma(a) + tf$math$lgamma(b) - tf$math$lgamma(a + b)
 
 # set up the tf$reduce_* functions to ignore the first dimension
 skip_dim <- function(op_name, x, drop = FALSE) {
@@ -48,11 +50,11 @@ tf_max <- function(x, drop = FALSE) {
 }
 
 tf_cumsum <- function(x) {
-  tf$cumsum(x, axis = 1L)
+  tf$math$cumsum(x, axis = 1L)
 }
 
 tf_cumprod <- function(x) {
-  tf$cumprod(x, axis = 1L)
+  tf$math$cumprod(x, axis = 1L)
 }
 
 # set the dimensions of a tensor, reshaping in the same way (column-major) as R
@@ -80,7 +82,7 @@ tf_transpose <- function(x) {
 }
 
 tf_apply <- function(x, axis, tf_fun_name) {
-  fun <- tf[[tf_fun_name]]
+  fun <- tf$math[[tf_fun_name]]
   out <- fun(x, axis = axis)
   # if we reduced we lost a dimension, make sure we have enough
   if (length(dim(out)) < 3) {
@@ -95,7 +97,7 @@ tf_tapply <- function(x, segment_ids, num_segments, op_name) {
   op_name <- paste0("unsorted_segment_", op_name)
 
   x <- tf$transpose(x, perm = c(1:2, 0L))
-  x <- tf[[op_name]](x,
+  x <- tf$math[[op_name]](x,
                      segment_ids = segment_ids,
                      num_segments = num_segments)
   x <- tf$transpose(x, perm = c(2L, 0:1))
@@ -367,19 +369,19 @@ tf_sweep <- function(x, STATS, MARGIN, FUN) {
 
 # transpose and get the right matrix, like R
 tf_chol <- function(x)
-  tf_transpose(tf$cholesky(x))
+  tf_transpose(tf$linalg$cholesky(x))
 
 tf_chol2inv <- function(U) {
   n <- dim(U)[[2]]
   eye <- fl(add_first_dim(diag(n)))
   eye <- expand_to_batch(eye, U)
-  L <- tf$matrix_transpose(U)
-  tf$cholesky_solve(L, eye)
+  L <- tf$linalg$matrix_transpose(U)
+  tf$linalg$cholesky_solve(L, eye)
 }
 
 tf_cov2cor <- function(V) {
   # sweep out variances
-  diag <- tf$matrix_diag_part(V)
+  diag <- tf$linalg$diag_part(V)
   diag <- tf$expand_dims(diag, 2L)
   Is <- tf$sqrt(fl(1) / diag)
   V <- Is * V
@@ -389,7 +391,7 @@ tf_cov2cor <- function(V) {
   n <- dim(V)[[2]]
   new_diag <- fl(t(rep(1, n)))
   new_diag <- expand_to_batch(new_diag, V)
-  tf$matrix_set_diag(V, new_diag)
+  tf$linalg$set_diag(V, new_diag)
 }
 
 tf_not <- function(x)
@@ -421,7 +423,7 @@ tf_neq <- function(x, y)
 
 # inverse link functions in tensorflow
 tf_iprobit <- function(x)
-  (tf$erf(x / fl(sqrt(2))) + fl(1)) / fl(2)
+  (tf$math$erf(x / fl(sqrt(2))) + fl(1)) / fl(2)
 
 tf_icloglog <- function(x)
   fl(1) - tf$exp(-tf$exp(x))
@@ -559,7 +561,7 @@ tf_abind <- function(..., axis) {
 }
 
 tf_only_eigenvalues <- function(x) {
-  vals <- tf$self_adjoint_eigvals(x)
+  vals <- tf$linalg$eigvalsh(x)
   dim <- tf$constant(1L, shape = list(1))
   tf$reverse(vals, dim)
 }

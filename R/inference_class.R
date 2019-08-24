@@ -620,17 +620,24 @@ sampler <- R6Class(
       self$define_tf_kernel()
 
       # and the sampler info
-      dag$tf_run(sampler_burst_length <- tf$placeholder(dtype = tf$int32))
-      dag$tf_run(sampler_thin <- tf$placeholder(dtype = tf$int32))
+      dag$tf_run(
+        sampler_burst_length <- tf$compat$v1$placeholder(dtype = tf$int32)
+      )
+      dag$tf_run(
+        sampler_thin <- tf$compat$v1$placeholder(dtype = tf$int32)
+      )
 
       # define the whole draws tensor
       dag$tf_run(
         sampler_batch <- tfp$mcmc$sample_chain(
-          num_results = sampler_burst_length %/% sampler_thin,
+          num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
           current_state = free_state,
           kernel = sampler_kernel,
-          num_burnin_steps = tf$constant(0L, dtype = tf$int64),
-          num_steps_between_results = tf$cast(sampler_thin, tf$int64),
+          trace_fn = function (current_state, kernel_results) {
+            kernel_results
+          },
+          num_burnin_steps = tf$constant(0L, dtype = tf$int32),
+          num_steps_between_results = sampler_thin,
           parallel_iterations = 1L)
       )
 
@@ -657,7 +664,7 @@ sampler <- R6Class(
       batch_results <- self$sample_carefully(n_samples)
 
       # get trace of free state and drop the null dimension
-      free_state_draws <- batch_results[[1]]
+      free_state_draws <- batch_results$all_states
 
       # if there is one sample at a time, and it's rejected, conversion from
       # python back to R can drop a dimension, so handle that here. Ugh.
@@ -677,8 +684,8 @@ sampler <- R6Class(
       if (self$uses_metropolis) {
 
         # log acceptance probability
-        log_accept_stats <- batch_results[[2]]$log_accept_ratio
-        is_accepted <- batch_results[[2]]$is_accepted
+        log_accept_stats <- batch_results$trace$log_accept_ratio
+        is_accepted <- batch_results$trace$is_accepted
         self$accept_history <- rbind(self$accept_history, is_accepted)
         accept_stats_batch <- pmin(1, exp(log_accept_stats))
         self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
@@ -710,10 +717,13 @@ sampler <- R6Class(
         # pass it back
         if (n_samples == 1L) {
 
-          result <- list(self$free_state,
-                         list(log_accept_ratio = rep(-Inf, self$n_chains),
-                              is_accepted = rep(FALSE, self$n_chains)))
-
+          result <- list(
+            all_states = self$free_state,
+            trace = list(
+              log_accept_ratio = rep(-Inf, self$n_chains),
+              is_accepted = rep(FALSE, self$n_chains)
+            )
+          )
 
         } else {
 
@@ -763,13 +773,19 @@ hmc_sampler <- R6Class(
       tfe <- dag$tf_environment
 
       # tensors for sampler parameters
-      dag$tf_run(hmc_epsilon <- tf$placeholder(dtype = tf_float()))
-      dag$tf_run(hmc_L <- tf$placeholder(dtype = tf$int64))
+      dag$tf_run(
+        hmc_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
+      )
+      dag$tf_run(
+        hmc_L <- tf$compat$v1$placeholder(dtype = tf$int64)
+      )
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
       dag$tf_run(
-        hmc_diag_sd <- tf$placeholder(dtype = tf_float(),
-                                      shape = shape(dim(free_state)[[2]], 1))
+        hmc_diag_sd <- tf$compat$v1$placeholder(
+          dtype = tf_float(),
+          shape = shape(dim(free_state)[[2]], 1)
+        )
       )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
@@ -842,13 +858,15 @@ rwmh_sampler <- R6Class(
 
       # tensors for sampler parameters
       dag$tf_run(
-        rwmh_epsilon <- tf$placeholder(dtype = tf_float())
+        rwmh_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
       )
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
       dag$tf_run(
-        rwmh_diag_sd <- tf$placeholder(dtype = tf_float(),
-                                       shape = shape(dim(free_state)[[2]], 1))
+        rwmh_diag_sd <- tf$compat$v1$placeholder(
+          dtype = tf_float(),
+          shape = shape(dim(free_state)[[2]], 1)
+        )
       )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
@@ -913,7 +931,7 @@ slice_sampler <- R6Class(
 
       tfe$log_prob_fun <- dag$generate_log_prob_function()
       dag$tf_run(
-        slice_max_doublings <- tf$placeholder(dtype = tf$int32)
+        slice_max_doublings <- tf$compat$v1$placeholder(dtype = tf$int32)
       )
 
       # build the kernel
@@ -1024,7 +1042,7 @@ optimiser <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      dag$tf_sess_run(tf$global_variables_initializer())
+      dag$tf_sess_run(tf$compat$v1$global_variables_initializer())
 
       shape <- tfe$optimiser_free_state$shape
       dag$on_graph(

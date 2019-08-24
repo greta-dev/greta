@@ -46,7 +46,7 @@ uniform_distribution <- R6Class(
       # initialize the rest
       super$initialize("uniform", dim)
 
-      # add them as children and greta arrays
+      # add them as parents and greta arrays
       self$add_parameter(min, "min")
       self$add_parameter(max, "max")
 
@@ -87,7 +87,7 @@ normal_distribution <- R6Class(
       mean <- as.greta_array(mean)
       sd <- as.greta_array(sd)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(mean, sd, target_dim = dim)
       super$initialize("normal", dim, truncation)
       self$add_parameter(mean, "mean")
@@ -142,7 +142,7 @@ bernoulli_distribution <- R6Class(
 
       prob <- as.greta_array(prob)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(prob, target_dim = dim)
       super$initialize("bernoulli", dim, discrete = TRUE)
 
@@ -204,7 +204,7 @@ binomial_distribution <- R6Class(
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(size, prob, target_dim = dim)
       super$initialize("binomial", dim, discrete = TRUE)
 
@@ -236,9 +236,9 @@ binomial_distribution <- R6Class(
         lprobnot <- d$log_cdf(-probit)
 
         log_prob <- function(x) {
-          log_choose <- tf$lgamma(size + fl(1)) -
-            tf$lgamma(x + fl(1)) -
-            tf$lgamma(size - x + fl(1))
+          log_choose <- tf$math$lgamma(size + fl(1)) -
+            tf$math$lgamma(x + fl(1)) -
+            tf$math$lgamma(size - x + fl(1))
           log_choose + x * lprob + (size - x) * lprobnot
         }
 
@@ -268,7 +268,7 @@ beta_binomial_distribution <- R6Class(
       alpha <- as.greta_array(alpha)
       beta <- as.greta_array(beta)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(size, alpha, beta, target_dim = dim)
       super$initialize("beta_binomial", dim, discrete = TRUE)
       self$add_parameter(size, "size")
@@ -311,7 +311,7 @@ poisson_distribution <- R6Class(
 
       lambda <- as.greta_array(lambda)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(lambda, target_dim = dim)
       super$initialize("poisson", dim, discrete = TRUE)
 
@@ -327,7 +327,7 @@ poisson_distribution <- R6Class(
       if (self$lambda_is_log) {
         log_lambda <- parameters$lambda
       } else {
-        log_lambda <- tf$log(parameters$lambda)
+        log_lambda <- tf$math$log(parameters$lambda)
       }
 
       tfp$distributions$Poisson(log_rate = log_lambda)
@@ -351,7 +351,7 @@ negative_binomial_distribution <- R6Class(
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(size, prob, target_dim = dim)
       super$initialize("negative_binomial", dim, discrete = TRUE)
       self$add_parameter(size, "size")
@@ -383,7 +383,7 @@ hypergeometric_distribution <- R6Class(
       n <- as.greta_array(n)
       k <- as.greta_array(k)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(m, n, k, target_dim = dim)
       super$initialize("hypergeometric", dim, discrete = TRUE)
       self$add_parameter(m, "m")
@@ -424,7 +424,7 @@ gamma_distribution <- R6Class(
       shape <- as.greta_array(shape)
       rate <- as.greta_array(rate)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(shape, rate, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -451,7 +451,7 @@ inverse_gamma_distribution <- R6Class(
       alpha <- as.greta_array(alpha)
       beta <- as.greta_array(beta)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(alpha, beta, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -480,7 +480,7 @@ weibull_distribution <- R6Class(
       shape <- as.greta_array(shape)
       scale <- as.greta_array(scale)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(shape, scale, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -522,7 +522,7 @@ exponential_distribution <- R6Class(
 
       rate <- as.greta_array(rate)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(rate, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -546,7 +546,7 @@ pareto_distribution <- R6Class(
       a <- as.greta_array(a)
       b <- as.greta_array(b)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(a, b, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -557,20 +557,9 @@ pareto_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      a <- parameters$a
-      b <- parameters$b
-
-      log_prob <- function(x)
-        log(a) + a * log(b) - (a + fl(1)) * log(x)
-
-      cdf <- function(x)
-        fl(1) - (b / x) ^ a
-
-      log_cdf <- function(x)
-        log(cdf(x))
-
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
-
+      # a is shape, b is scale
+      tfp$distributions$Pareto(concentration = parameters$a,
+                               scale = parameters$b)
     }
 
   )
@@ -587,7 +576,7 @@ student_distribution <- R6Class(
       mu <- as.greta_array(mu)
       sigma <- as.greta_array(sigma)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(df, mu, sigma, target_dim = dim)
       super$initialize("student", dim, truncation)
       self$add_parameter(df, "df")
@@ -616,7 +605,7 @@ laplace_distribution <- R6Class(
       mu <- as.greta_array(mu)
       sigma <- as.greta_array(sigma)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(mu, sigma, target_dim = dim)
       super$initialize("laplace", dim, truncation)
       self$add_parameter(mu, "mu")
@@ -641,7 +630,7 @@ beta_distribution <- R6Class(
       shape1 <- as.greta_array(shape1)
       shape2 <- as.greta_array(shape2)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(shape1, shape2, target_dim = dim)
       check_unit(truncation)
       self$bounds <- c(0, 1)
@@ -668,7 +657,7 @@ cauchy_distribution <- R6Class(
       location <- as.greta_array(location)
       scale <- as.greta_array(scale)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(location, scale, target_dim = dim)
       super$initialize("cauchy", dim, truncation)
       self$add_parameter(location, "location")
@@ -677,20 +666,8 @@ cauchy_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      loc <- parameters$location
-      s <- parameters$scale
-
-      log_prob <- function(x)
-        tf$negative(tf$log(fl(pi) * s * (fl(1) + tf$square( (x - loc) / s ))))
-
-      cdf <- function(x)
-        fl(1 / pi) * tf$atan( (x - loc) / s ) + fl(0.5)
-
-      log_cdf <- function(x)
-        tf$log(cdf(x))
-
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
-
+      tfp$distributions$Cauchy(loc = parameters$location,
+                               scale = parameters$scale)
     }
 
   )
@@ -705,7 +682,7 @@ chi_squared_distribution <- R6Class(
 
       df <- as.greta_array(df)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(df, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -730,7 +707,7 @@ logistic_distribution <- R6Class(
       location <- as.greta_array(location)
       scale <- as.greta_array(scale)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(location, scale, target_dim = dim)
       super$initialize("logistic", dim, truncation)
       self$add_parameter(location, "location")
@@ -744,7 +721,7 @@ logistic_distribution <- R6Class(
 
     # log_cdf in tf$cotrib$distributions has the wrong sign :/
     tf_log_cdf_function = function(x, parameters) {
-      tf$log(self$tf_cdf_function(x, parameters))
+      tf$math$log(self$tf_cdf_function(x, parameters))
     }
 
   )
@@ -760,7 +737,7 @@ f_distribution <- R6Class(
       df1 <- as.greta_array(df1)
       df2 <- as.greta_array(df2)
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       dim <- check_dims(df1, df2, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
@@ -775,7 +752,7 @@ f_distribution <- R6Class(
       df2 <- parameters$df2
 
       tf_lbeta <- function(a, b)
-        tf$lgamma(a) + tf$lgamma(b) - tf$lgamma(a + b)
+        tf$math$lgamma(a) + tf$math$lgamma(b) - tf$math$lgamma(a + b)
 
       log_prob <- function(x) {
         df1_x <- df1 * x
@@ -788,7 +765,7 @@ f_distribution <- R6Class(
       cdf <- function(x) {
         df1_x <- df1 * x
         ratio <- df1_x / (df1_x + df2)
-        tf$betainc(df1 / fl(2), df2 / fl(2), ratio)
+        tf$math$betainc(df1 / fl(2), df2 / fl(2), ratio)
       }
 
       log_cdf <- function(x)
@@ -817,7 +794,7 @@ dirichlet_distribution <- R6Class(
                                      n_realisations = n_realisations,
                                      dimension = dimension)
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       self$bounds <- c(0, Inf)
       super$initialize("dirichlet", dim,
@@ -872,7 +849,7 @@ dirichlet_multinomial_distribution <- R6Class(
 
       # need to handle size as a vector!
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("dirichlet_multinomial",
                        dim = dim,
@@ -917,7 +894,7 @@ multinomial_distribution <- R6Class(
 
       # need to make sure size is a column vector!
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("multinomial",
                        dim = dim,
@@ -958,7 +935,7 @@ categorical_distribution <- R6Class(
                                      n_realisations = n_realisations,
                                      dimension = dimension)
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("categorical", dim = dim, discrete = TRUE)
       self$add_parameter(prob, "prob")
@@ -1022,7 +999,7 @@ multivariate_normal_distribution <- R6Class(
 
       }
 
-      # coerce the parameter arguments to nodes and add as children and
+      # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("multivariate_normal", dim)
 
@@ -1043,7 +1020,7 @@ multivariate_normal_distribution <- R6Class(
       if (self$Sigma_is_cholesky) {
         L <- tf_transpose(parameters$Sigma)
       } else {
-        L <- tf$cholesky(parameters$Sigma)
+        L <- tf$linalg$cholesky(parameters$Sigma)
       }
 
       # add an extra dimension for the observation batch size (otherwise tfp
@@ -1076,7 +1053,7 @@ wishart_distribution <- R6Class(
     target_is_cholesky = FALSE,
 
     initialize = function(df, Sigma) {
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
 
       df <- as.greta_array(df)
       Sigma <- as.greta_array(Sigma)
@@ -1161,16 +1138,16 @@ wishart_distribution <- R6Class(
 
         # get the cholesky factor of Sigma in tf orientation
         if (self$Sigma_is_cholesky) {
-          Sigma_chol <- tf$matrix_transpose(Sigma)
+          Sigma_chol <- tf$linalg$matrix_transpose(Sigma)
         } else {
-          Sigma_chol <- tf$cholesky(Sigma)
+          Sigma_chol <- tf$linalg$cholesky(Sigma)
         }
 
         # get the cholesky factor of the target in tf_orientation
         if (self$target_is_cholesky) {
-          x_chol <- tf$matrix_transpose(x)
+          x_chol <- tf$linalg$matrix_transpose(x)
         } else {
-          x_chol <- tf$cholesky(x)
+          x_chol <- tf$linalg$cholesky(x)
         }
 
         # use the density for choleskied x, with choleskied Sigma
@@ -1214,7 +1191,7 @@ lkj_correlation_distribution <- R6Class(
 
       }
 
-      # add the nodes as children and parameters
+      # add the nodes as parents and parameters
       eta <- as.greta_array(eta)
 
       if (!is_scalar(eta)) {
@@ -1283,22 +1260,22 @@ lkj_correlation_distribution <- R6Class(
 
         # normalising constant
         k <- 1:n
-        a <- fl(1 - n) * tf$lgamma(eta + fl(0.5 * (n - 1)))
+        a <- fl(1 - n) * tf$math$lgamma(eta + fl(0.5 * (n - 1)))
         b <- tf_sum(fl(0.5 * k * log(pi)) +
-                      tf$lgamma(eta + fl(0.5 * (n - 1 - k))))
+                      tf$math$lgamma(eta + fl(0.5 * (n - 1 - k))))
         norm <- a + b
 
         # get the cholesky factor of the target in tf_orientation
         if (self$target_is_cholesky) {
-          x_chol <- tf$matrix_transpose(x)
+          x_chol <- tf$linalg$matrix_transpose(x)
         } else {
-          x_chol <- tf$cholesky(x)
+          x_chol <- tf$linalg$cholesky(x)
         }
 
-        diags <- tf$matrix_diag_part(x_chol)
+        diags <- tf$linalg$diag_part(x_chol)
         det <- tf$square(tf_prod(diags))
 
-        (eta - fl(1)) * tf$log(det) + norm
+        (eta - fl(1)) * tf$math$log(det) + norm
 
       }
 
@@ -1405,7 +1382,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'   corresponds to an independent realisation. If a single realisation or
 #'   parameter value is specified, it must therefore be a row vector (see
 #'   example). \code{n_realisations} gives the number of rows/realisations, and
-#'   \code{dimension} gives the dimension of the distribution. Ie. a bivariate
+#'   \code{dimension} gives the dimension of the distribution. I.e. a bivariate
 #'   normal distribution would be produced with \code{multivariate_normal(...,
 #'   dimension = 2)}. The dimension can usually be detected from the parameters.
 #'

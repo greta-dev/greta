@@ -80,7 +80,7 @@ test_that("greta_model objects print", {
   skip_if_not(check_tf_version())
 
   m <- model(normal(0, 1))
-  message <- capture.output(print(m))
+  message <- capture_output(print(m))
   expect_equal(message, "greta model")
 
 })

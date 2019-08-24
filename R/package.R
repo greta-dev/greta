@@ -12,10 +12,10 @@
 #'   clusters or on GPUs.
 #'
 #'   See the simple example below, and take a look at the
-#'   \href{https://greta-dev.github.io/greta}{greta website} for more information
+#'   \href{https://greta-stats.org}{greta website} for more information
 #'   including
-#'   \href{https://greta-dev.github.io/greta/get_started.html}{tutorials} and
-#'   \href{https://greta-dev.github.io/greta/example_models.html}{examples}.
+#'   \href{https://greta-stats.org/articles/get_started.html}{tutorials} and
+#'   \href{https://greta-stats.org/articles/example_models.html}{examples}.
 #'
 #' @docType package
 #' @importFrom tensorflow tf
@@ -46,6 +46,9 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 
   # silence TF's CPU instructions message
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL = 2)
+
+  # silence messages about deprecation etc.
+  disable_tensorflow_logging()
 
   # warn if TF version is bad
   check_tf_version("startup")

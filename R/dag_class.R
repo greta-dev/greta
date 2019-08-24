@@ -164,8 +164,8 @@ dag_class <- R6Class(
       } else {
 
         shape <- shape(NULL, length(vals))
-        self$on_graph(free_state <- tf$placeholder(dtype = tf_float(),
-                                                   shape = shape))
+        self$on_graph(free_state <- tf$compat$v1$placeholder(dtype = tf_float(),
+                                                             shape = shape))
 
       }
 
@@ -215,19 +215,19 @@ dag_class <- R6Class(
       tfe$n_cores <- self$n_cores
       # Begin Exclude Linting
       self$tf_run(
-        config <- tf$ConfigProto(inter_op_parallelism_threads = n_cores,
+        config <- tf$compat$v1$ConfigProto(inter_op_parallelism_threads = n_cores,
                                  intra_op_parallelism_threads = n_cores))
 
       if (self$compile) {
         self$tf_run(py_set_attr(config$graph_options$optimizer_options,
                                 "global_jit_level",
-                                tf$OptimizerOptions$ON_1))
+                                tf$compat$v1$OptimizerOptions$ON_1))
       }
       # End Exclude Linting
 
       # start a session and initialise all variables
-      self$tf_run(sess <- tf$Session(config = config))
-      self$tf_run(sess$run(tf$global_variables_initializer()))
+      self$tf_run(sess <- tf$compat$v1$Session(config = config))
+      self$tf_run(sess$run(tf$compat$v1$global_variables_initializer()))
 
     },
 
@@ -505,7 +505,6 @@ dag_class <- R6Class(
       # powers. Inspired by Method 2 here:
       # http://raphael.candelier.fr/?blog=Adj2cluster
 
-
       # convert adjacency to a symmetric, logical matrix
       A <- self$adjacency_matrix
       S <- (A + t(A)) > 0
@@ -554,15 +553,15 @@ dag_class <- R6Class(
       dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
       rownames(dag_mat) <- colnames(dag_mat) <- node_names
 
-      parents <- lapply(self$node_list,
-                        member,
-                        "parent_names()")
       children <- lapply(self$node_list,
+                        member,
+                        "child_names()")
+      parents <- lapply(self$node_list,
                          member,
-                         "child_names(recursive = FALSE)")
+                         "parent_names(recursive = FALSE)")
 
-      # for distribution nodes, remove target nodes from children, and put them
-      # in parents to send the arrow in the opposite direction when plotting
+      # for distribution nodes, remove target nodes from parents, and put them
+      # in children to send the arrow in the opposite direction when plotting
       distribs <- which(node_types == "distribution")
       for (i in distribs) {
 
@@ -572,22 +571,22 @@ dag_class <- R6Class(
         if (!is.null(target_name)) {
 
           # switch the target from child to parent of the distribution
-          children[[i]] <- children[[i]][children[[i]] != target_name]
-          parents[[i]] <- c(parents[[i]], target_name)
+          parents[[i]] <- parents[[i]][parents[[i]] != target_name]
+          children[[i]] <- c(children[[i]], target_name)
 
           # switch the distribution from parent to child of the target
           idx <- match(target_name, node_names)
-          parents[[idx]] <- parents[[idx]][parents[[idx]] != own_name]
-          children[[idx]] <- c(children[[idx]], own_name)
+          children[[idx]] <- children[[idx]][children[[idx]] != own_name]
+          parents[[idx]] <- c(parents[[idx]], own_name)
 
         }
 
       }
 
-      # children in the lower left, parents in the upper right
+      # parents in the lower left, children in the upper right
       for (i in seq_len(n_node)) {
-        dag_mat[i, parents[[i]]] <- 1
-        dag_mat[children[[i]], i] <- 1
+        dag_mat[i, children[[i]]] <- 1
+        dag_mat[parents[[i]], i] <- 1
       }
 
       self$adjacency_matrix <- dag_mat

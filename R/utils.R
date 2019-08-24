@@ -33,26 +33,6 @@ have_conda <- function () {
   !is.null(conda_bin)
 }
 
-have_virtualenv <- function () {
-
-  answer <- FALSE
-
-  if (identical(.Platform$OS.type, "unix")) {
-    # Begin Exclude Linting
-    locations <- file.path(c("/usr/bin",
-                             "/usr/local/bin",
-                             path.expand("~/.local/bin")),
-                           "virtualenv")
-    # End Exclude Linting
-
-    answer <- any(file.exists(locations))
-
-  }
-
-  answer
-
-}
-
 #' @importFrom reticulate py_available
 have_python <- function () {
   tryCatch(reticulate::py_available(initialize = TRUE),
@@ -113,7 +93,7 @@ check_tf_version <- function(alert = c("none",
     } else {
 
       tf_version <- tf$`__version__`
-      tf_version_valid <- utils::compareVersion("1.10.0", tf_version) != 1
+      tf_version_valid <- utils::compareVersion("1.14.0", tf_version) != 1
 
       if (!tf_version_valid) {
         text <- paste0("you have TensorFlow version ", tf_version)
@@ -134,7 +114,7 @@ check_tf_version <- function(alert = c("none",
 
       pkg <- reticulate::import("pkg_resources")
       tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-      tfp_version_valid <- utils::compareVersion("0.5.0", tfp_version) != 1
+      tfp_version_valid <- utils::compareVersion("0.7.0", tfp_version) != 1
 
       if (!tfp_version_valid) {
         text <- paste0("you have TensorFlow Probability version ", tfp_version)
@@ -146,37 +126,22 @@ check_tf_version <- function(alert = c("none",
     # if there was a problem, append the solution
     if (!tf_available | !tfp_available) {
 
-      # conda-specific installation instructions, to handle conda not having TFP
-      if (have_conda() & !have_virtualenv()) {
-
-        tf_install <- tfp_install <- ""
-
-        if (!tf_available | !tfp_available) {
-          tf_install <- '    install_tensorflow(method = "conda")\n'
-        }
-
-        if (!tfp_available) {
-          tfp_install <- paste0('   reticulate::conda_install("r-tensorflow", ',
-                                '"tensorflow-probability", pip = TRUE)\n')
-        }
-
-        install <- paste(tf_install, tfp_install, collapse = "\n")
-
-      } else {
-        # non-conda installation instructions
-        install <- sprintf("install_tensorflow(%s) ",
-                           ifelse(tfp_available,
-                                  "",
-                                  "extra_packages = \"tensorflow-probability\""))
-      }
+      install <- paste0(
+        "  install_tensorflow(\n",
+        ifelse(have_conda(), "    method = \"conda\",\n", ""),
+        "    version = \"1.14.0\",\n",
+        "    extra_packages = \"tensorflow-probability\"\n",
+        "  )"
+      )
 
       # combine the problem and solution messages
-      text <- paste0("\n\ngreta requires TensorFlow (>=1.10.0) ",
-                     "and Tensorflow Probability (>=0.5.0), ",
-                     "but ", text, ". Use:\n\n",
-                     install,
-                     "\nto install the latest version.",
-                     "\n\n")
+      text <- paste0(
+        "\n\n",
+        "This version of greta requires TensorFlow v1.14.0 ",
+        "and TensorFlow Probability v0.7.0, but ", text, ". ",
+        "To install the correct versions do:\n\n", install,
+        "\n"
+      )
 
     }
 
@@ -397,6 +362,15 @@ hessian_dims <- function(dim) {
 rhex <- function()
   paste(as.raw(sample.int(256L, 4, TRUE) - 1L), collapse = "")
 
+# stop TensorFlow messaging about deprecations etc.
+#' @importFrom reticulate py_set_attr import
+disable_tensorflow_logging <- function (disable = TRUE) {
+  logging <- reticulate::import("logging")
+  # Begin Exclude Linting
+  logger <- logging$getLogger("tensorflow")
+  # End Exclude Linting
+  reticulate::py_set_attr(logger, "disabled", disable)
+}
 
 # vectorised golden section search algorithm for linesearch (1D constrained
 # minimisation) function must accept and return a 1D tensor of values, and
@@ -504,7 +478,8 @@ misc_module <- module(module,
                       split_chains,
                       hessian_dims,
                       rhex,
-                      gss)
+                      gss,
+                      disable_tensorflow_logging)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function(..., target_dim = NULL) {
@@ -1238,7 +1213,7 @@ as_tf_function <- function(r_fun, ...) {
 
     # use the default graph, so that it can be overwritten when this is called?
     # alternatively fetch from above, or put it in greta_stash?
-    sub_dag$tf_graph <- tf$get_default_graph()
+    sub_dag$tf_graph <- tf$compat$v1$get_default_graph()
     sub_tfe <- sub_dag$tf_environment
 
     # set the input tensors as the values for the dummy greta arrays in the new

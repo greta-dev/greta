@@ -52,19 +52,19 @@ class(x_node)
 There is a fourth node type: 'distribution', but these are never directly associated with greta arrays.
 
 These R6 node objects are where the magic happens.
-When created, each node points to its 'child' nodes - the nodes for the greta arrays that were used to create this one.
+When created, each node points to its 'parent' nodes - the nodes for the greta arrays that were used to create this one.
 
 ```{r nodes1}
-# data nodes have no children
-length(x_node$children)
+# data nodes have no parents
+length(x_node$parents)
 
-# operation nodes have one or more children
+# operation nodes have one or more parents
 z <- x * 3
 z_node <- attr(z, "node")
-length(z_node$children)
+length(z_node$parents)
 ```
 
-Each node also has a list of its parents, the nodes that have been created from this one.
+Each node also has a list of its children, the nodes that have been created from this one.
 
 When `model()` is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.
 
@@ -81,13 +81,13 @@ class(z_node$value())
 
 In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn't happen until the user runs `model()`, which creates a 'dag_class' object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.
 
-The node `tf()` method takes the dag as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.
+The node `tf()` method takes the DAG as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.
 
 ```{r tensors1}
 x_node$tf
 ```
 
-Because R6 objects are pass-by-reference (rather than pass-by-value), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their children, they can make sure those children are defined as tensors before they are. The `define_tf()` member function ensures that that happens, enabling operation nodes to use the tensors for their children when defining their own tensor.
+Because R6 objects are pass-by-reference (rather than pass-by-value), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their parents, they can make sure those parents are defined as tensors before they are. The `define_tf()` member function ensures that that happens, enabling operation nodes to use the tensors for their parents when defining their own tensor.
 
 ```{r tensors2}
 x_node$define_tf
@@ -106,7 +106,7 @@ a_node$tf_from_free
 
 ## distributions
 
-distribution nodes are node objects just like the others, but they are not *directly* associated with greta arrays. Instead, greta arrays may have a distribution node in their `distribution` slot to indicate that their values are assumed to follow that distribution. The distribution node will also be listed as a parent node, and likewise the 'target node' will be listed as a child of the distribution. Distribution nodes also have child nodes (data, variables or operations) representing their parameters.
+distribution nodes are node objects just like the others, but they are not *directly* associated with greta arrays. Instead, greta arrays may have a distribution node in their `distribution` slot to indicate that their values are assumed to follow that distribution. The distribution node will also be listed as a child node, and likewise the 'target node' will be listed as a child of the distribution. Distribution nodes also have child nodes (data, variables or operations) representing their parameters.
 
 ```{r distributions1}
 b <- normal(0, 1)

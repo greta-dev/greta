@@ -85,3 +85,6 @@ navbar:
     forum:
       icon: fa-lg fa-comments
       href: https://forum.greta-stats.org
+    github:
+      icon: fa-lg fa-github
+      href: https://github.com/greta-dev/greta 
