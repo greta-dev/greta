@@ -74,6 +74,8 @@ mixture_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
+    weights_is_log = FALSE,
+
     initialize = function(dots, weights, dim) {
 
       n_distributions <- length(dots)
@@ -88,6 +90,12 @@ mixture_distribution <- R6Class(
 
       weights <- as.greta_array(weights)
       weights_dim <- dim(weights)
+
+      # use log weights if available
+      if (has_representation(weights, "log")) {
+        weights <- representation(weights, "log")
+        self$weights_is_log <- TRUE
+      }
 
       # weights should have n_distributions as the first dimension
       if (weights_dim[1] != n_distributions) {
@@ -150,9 +158,17 @@ mixture_distribution <- R6Class(
       densities <- parameters[names(parameters) != "weights"]
       names(densities) <- NULL
       weights <- parameters$weights
-      weights_sum <- tf$reduce_sum(weights, 1L, keepdims = TRUE)
-      weights <- weights / weights_sum
-      log_weights <- tf$math$log(weights)
+
+      # use log weights if available
+      if (self$weights_is_log) {
+        log_weights <- weights
+      } else {
+        log_weights <- tf$math$log(weights)
+      }
+
+      # normalise weights on log scale
+      log_weights_sum <- tf$reduce_logsumexp(log_weights, axis = 1L, keepdims = TRUE)
+      log_weights <- log_weights - log_weights_sum
 
       log_prob <- function(x) {
 
