@@ -167,7 +167,11 @@ mixture_distribution <- R6Class(
       }
 
       # normalise weights on log scale
-      log_weights_sum <- tf$reduce_logsumexp(log_weights, axis = 1L, keepdims = TRUE)
+      log_weights_sum <- tf$reduce_logsumexp(
+        log_weights,
+        axis = 1L,
+        keepdims = TRUE
+      )
       log_weights <- log_weights - log_weights_sum
 
       log_prob <- function(x) {
