@@ -93,7 +93,9 @@ check_tf_version <- function(alert = c("none",
     } else {
 
       tf_version <- tf$`__version__`
-      tf_version_valid <- utils::compareVersion("1.14.0", tf_version) != 1
+      # strip out the dev version bit
+      tf_version <- strsplit(tf_version, "-")[[1]][1]
+      tf_version_valid <- utils::compareVersion("1.15.0", tf_version) != 1
 
       if (!tf_version_valid) {
         text <- paste0("you have TensorFlow version ", tf_version)
