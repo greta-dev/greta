@@ -463,7 +463,7 @@ inverse_gamma_distribution <- R6Class(
     # Begin Exclude Linting
     tf_distrib = function(parameters, dag) {
       tfp$distributions$InverseGamma(concentration = parameters$alpha,
-                                     rate = parameters$beta)
+                                     scale = parameters$beta)
     }
     # End Exclude Linting
 
