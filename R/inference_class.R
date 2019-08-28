@@ -621,10 +621,10 @@ sampler <- R6Class(
 
       # and the sampler info
       dag$tf_run(
-        sampler_burst_length <- tf$compat$v1$placeholder(dtype = tf$int32)
+        sampler_burst_length <- placeholder(dtype = tf$int32)
       )
       dag$tf_run(
-        sampler_thin <- tf$compat$v1$placeholder(dtype = tf$int32)
+        sampler_thin <- placeholder(dtype = tf$int32)
       )
 
       # define the whole draws tensor
@@ -774,18 +774,15 @@ hmc_sampler <- R6Class(
 
       # tensors for sampler parameters
       dag$tf_run(
-        hmc_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
+        hmc_epsilon <- placeholder()
       )
       dag$tf_run(
-        hmc_L <- tf$compat$v1$placeholder(dtype = tf$int64)
+        hmc_L <- placeholder(dtype = tf$int64)
       )
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
       dag$tf_run(
-        hmc_diag_sd <- tf$compat$v1$placeholder(
-          dtype = tf_float(),
-          shape = shape(dim(free_state)[[2]], 1)
-        )
+        hmc_diag_sd <- placeholder(shape(dim(free_state)[[2]], 1))
       )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
@@ -850,15 +847,12 @@ nuts_sampler <- R6Class(
 
       # tensors for sampler parameters
       dag$tf_run(
-        nuts_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
+        nuts_epsilon <- placeholder()
       )
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
       dag$tf_run(
-        nuts_diag_sd <- tf$compat$v1$placeholder(
-          dtype = tf_float(),
-          shape = shape(dim(free_state)[[2]], 1)
-        )
+        nuts_diag_sd <- placeholder(shape(dim(free_state)[[2]], 1))
       )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
@@ -924,15 +918,12 @@ rwmh_sampler <- R6Class(
 
       # tensors for sampler parameters
       dag$tf_run(
-        rwmh_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
+        rwmh_epsilon <- placeholder()
       )
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
       dag$tf_run(
-        rwmh_diag_sd <- tf$compat$v1$placeholder(
-          dtype = tf_float(),
-          shape = shape(dim(free_state)[[2]], 1)
-        )
+        rwmh_diag_sd <- placeholder(shape(dim(free_state)[[2]], 1))
       )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
@@ -997,7 +988,7 @@ slice_sampler <- R6Class(
 
       tfe$log_prob_fun <- dag$generate_log_prob_function()
       dag$tf_run(
-        slice_max_doublings <- tf$compat$v1$placeholder(dtype = tf$int32)
+        slice_max_doublings <- placeholder(dtype = tf$int32)
       )
 
       # build the kernel

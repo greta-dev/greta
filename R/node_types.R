@@ -34,8 +34,7 @@ data_node <- R6Class(
 
       } else {
 
-        tensor <- tf$compat$v1$placeholder(shape = shape,
-                                           dtype = tf_float())
+        tensor <- placeholder(shape)
         tfe$data_list[[tf_name]] <- value
 
       }

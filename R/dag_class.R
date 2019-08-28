@@ -164,8 +164,9 @@ dag_class <- R6Class(
       } else {
 
         shape <- shape(NULL, length(vals))
-        self$on_graph(free_state <- tf$compat$v1$placeholder(dtype = tf_float(),
-                                                             shape = shape))
+        self$on_graph(
+          free_state <- placeholder(shape)
+        )
 
       }
 

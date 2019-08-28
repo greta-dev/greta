@@ -374,6 +374,21 @@ disable_tensorflow_logging <- function (disable = TRUE) {
   reticulate::py_set_attr(logger, "disabled", disable)
 }
 
+# given a shape (a list of integers or NULLs) return a shape setting any NULL
+# dimensions to 4
+as_default_shape <- function (shape) {
+  dynamic_dims <- vapply(shape, is.null, logical(1))
+  if (any(dynamic_dims))
+    shape[dynamic_dims] <- 4L
+  shape
+}
+
+# create and return up a placeholder (with default) with the stated shape
+placeholder <- function (shape = tensorflow::shape(), dtype = tf_float()) {
+  default <- tf$ones(as_default_shape(shape), dtype = dtype)
+  tf$compat$v1$placeholder_with_default(default, shape)
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -399,7 +414,9 @@ misc_module <- module(module,
                       split_chains,
                       hessian_dims,
                       rhex,
-                      disable_tensorflow_logging)
+                      disable_tensorflow_logging,
+                      as_default_shape,
+                      placeholder)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function(..., target_dim = NULL) {
