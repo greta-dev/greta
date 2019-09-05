@@ -519,10 +519,13 @@ skip_if_not_release <- function() {
 # hmc()), a greta 'model', a 'data' greta array used as the target in the model,
 # the two IID random number generators for the data generating function
 # ('p_theta' = generator for the prior, 'p_x_bar_theta' = generator for the
-# likelihood), 'niter' the number of MCMC samples to compare
+# likelihood), 'niter' the number of MCMC samples to compare. 'bias' can be set
+# (e.g. to 0.01) to impose a bias on the sampler (at each iteration, theta is
+# multiplied by 1 - bias) to examine the sensitivity of this test to bias.
 check_geweke <- function(sampler, model, data,
                          p_theta, p_x_bar_theta,
-                         niter = 2000, warmup = 1000,
+                         niter = 5000, warmup = 1000,
+                         bias = 0,
                          title = "Geweke test") {
 
   # sample independently
@@ -535,7 +538,8 @@ check_geweke <- function(sampler, model, data,
                                p_theta = p_theta,
                                p_x_bar_theta = p_x_bar_theta,
                                sampler = sampler,
-                               warmup = warmup)
+                               warmup = warmup,
+                               bias = bias)
 
   # visualise correspondence
   quants <- (1:99) / 100
@@ -556,7 +560,8 @@ check_geweke <- function(sampler, model, data,
 p_theta_greta <- function(niter, model, data,
                           p_theta, p_x_bar_theta,
                           sampler = hmc(),
-                          warmup = 1000) {
+                          warmup = 1000,
+                          bias = 0) {
 
   # set up and initialize trace
   theta <- rep(NA, niter)
@@ -590,7 +595,7 @@ p_theta_greta <- function(niter, model, data,
                            n_samples = 1,
                            verbose = FALSE)
 
-    theta[i] <- tail(as.numeric(draws[[1]]), 1)
+    theta[i] <- tail(as.numeric(draws[[1]]), 1) * (1 + bias)
 
   }
 

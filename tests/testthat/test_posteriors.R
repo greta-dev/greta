@@ -44,6 +44,7 @@ test_that("samplers are unbiased for bivariate normals", {
   skip_if_not_release()
 
   check_mvn_samples(hmc())
+  check_mvn_samples(nuts())
   check_mvn_samples(rwmh())
   check_mvn_samples(slice())
 
@@ -121,9 +122,9 @@ test_that("samplers pass geweke tests", {
   # End Exclude Linting
 
   N <- 10
-  mu1 <- rnorm(1, 0, 3)
-  sd1 <- rlnorm(1)
-  sd2 <- rlnorm(1)
+  mu1 <- 1
+  sd1 <- 0.5
+  sd2 <- 0.5
 
   # prior (n draws)
   p_theta <- function(n)
@@ -146,6 +147,13 @@ test_that("samplers pass geweke tests", {
                p_theta = p_theta,
                p_x_bar_theta = p_x_bar_theta,
                title = "HMC Geweke test")
+
+  check_geweke(sampler = nuts(),
+               model = model,
+               data = x,
+               p_theta = p_theta,
+               p_x_bar_theta = p_x_bar_theta,
+               title = "NUTS Geweke test")
 
   check_geweke(sampler = rwmh(),
                model = model,
