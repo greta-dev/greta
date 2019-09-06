@@ -580,6 +580,9 @@ test_that("samplers print informatively", {
   out <- capture_output(hmc(), TRUE)
   expect_match(out, "hmc sampler")
 
+  out <- capture_output(nuts(), TRUE)
+  expect_match(out, "nuts sampler")
+
   out <- capture_output(rwmh(), TRUE)
   expect_match(out, "rwmh sampler")
 
