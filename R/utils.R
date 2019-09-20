@@ -131,7 +131,7 @@ check_tf_version <- function(alert = c("none",
       install <- paste0(
         "  install_tensorflow(\n",
         ifelse(have_conda(), "    method = \"conda\",\n", ""),
-        "    version = \"1.14.0\",\n",
+        "    version = \"1.15.0\",\n",
         "    extra_packages = \"tensorflow-probability\"\n",
         "  )"
       )
@@ -139,7 +139,7 @@ check_tf_version <- function(alert = c("none",
       # combine the problem and solution messages
       text <- paste0(
         "\n\n",
-        "This version of greta requires TensorFlow v1.14.0 ",
+        "This version of greta requires TensorFlow v1.15.0 ",
         "and TensorFlow Probability v0.7.0, but ", text, ". ",
         "To install the correct versions do:\n\n", install,
         "\n"
