@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.3.1.9005
-Date: 2019-10-05
+Version: 0.3.1.9006
+Date: 2020-01-09
 Authors@R: c(
   person("Nick", "Golding", role = c("aut", "cre"),
          email = "nick.golding.research@gmail.com",
