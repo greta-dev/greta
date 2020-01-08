@@ -15,6 +15,7 @@
 <!-- Bootstrap -->
 
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -38,14 +39,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="functions for greta arrays — functions" />
 
+<meta property="og:title" content="functions for greta arrays — functions" />
 <meta property="og:description" content="This is a list of functions (mostly from base R) that are
   currently implemented to transform greta arrays. Also see operators
   and transforms." />
-
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -134,7 +135,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://forum.greta-stats.org">
@@ -180,14 +180,13 @@
     </div>
 
     <div class="ref-description">
-    
     <p>This is a list of functions (mostly from base R) that are
   currently implemented to transform greta arrays. Also see <a href='operators.html'>operators</a>
   and <a href='transforms.html'>transforms</a>.</p>
-    
     </div>
 
-        
+
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>TensorFlow only enables rounding to integers, so <code><a href='https://www.rdocumentation.org/packages/base/topics/Round'>round()</a></code> will
@@ -201,7 +200,6 @@
 <p><code><a href='overloaded.html'>tapply()</a></code> works on column vectors (2D greta arrays with one column),
   and <code>INDEX</code> cannot be a greta array. Currently five functions are
   available, and arguments passed to &#8230; are ignored.</p>
-    
     <h2 class="hasAnchor" id="usage"><a class="anchor" href="#usage"></a>Usage</h2>
 
     <p></p><pre>
@@ -258,7 +256,6 @@
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
     </pre>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -275,11 +272,8 @@
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
-      
       <li><a href="#details">Details</a></li>
-
       <li><a href="#usage">Usage</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 

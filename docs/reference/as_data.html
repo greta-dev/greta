@@ -15,6 +15,7 @@
 <!-- Bootstrap -->
 
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -38,13 +39,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="convert other objects to greta arrays — as_data" />
 
+<meta property="og:title" content="convert other objects to greta arrays — as_data" />
 <meta property="og:description" content="define an object in an R session as a data greta array for use
   as data in a greta model." />
-
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -133,7 +134,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://forum.greta-stats.org">
@@ -179,14 +179,12 @@
     </div>
 
     <div class="ref-description">
-    
     <p>define an object in an R session as a data greta array for use
   as data in a greta model.</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>as_data</span>(<span class='no'>x</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -195,7 +193,7 @@
       <td><p>an R object that can be coerced to a greta_array (see details).</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code>as_data()</code> can currently convert R objects to greta_arrays if
@@ -204,7 +202,6 @@
   Logical elements are always converted to numerics. R objects cannot be
   converted if they contain missing (<code>NA</code>) or infinite (<code><a href='https://www.rdocumentation.org/packages/base/topics/Arithmetic'>-Inf</a></code> or
   <code>Inf</code>) values.</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -230,9 +227,7 @@
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#details">Details</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 
