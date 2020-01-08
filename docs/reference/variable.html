@@ -15,6 +15,7 @@
 <!-- Bootstrap -->
 
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -38,16 +39,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="create greta variables — variable" />
 
+<meta property="og:title" content="create greta variables — variable" />
 <meta property="og:description" content="variable() creates greta arrays representing unknown
   parameters, to be learned during model fitting. These parameters are not
   associated with a probability distribution. To create a variable greta
   array following a specific probability distribution, see
   distributions." />
-
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -136,7 +137,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://forum.greta-stats.org">
@@ -182,17 +182,15 @@
     </div>
 
     <div class="ref-description">
-    
     <p><code>variable()</code> creates greta arrays representing unknown
   parameters, to be learned during model fitting. These parameters are not
   associated with a probability distribution. To create a variable greta
   array following a specific probability distribution, see
   <code><a href='distributions.html'>distributions</a></code>.</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>variable</span>(<span class='kw'>lower</span> <span class='kw'>=</span> -<span class='fl'>Inf</span>, <span class='kw'>upper</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -210,16 +208,15 @@ details for a workaround). They can be set to <code><a href='https://www.rdocume
 or a vector of positive integers. See details.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p><code>lower</code> and <code>upper</code> must be fixed, they cannot be greta arrays.
- This ensures these values can always be transformed to a continuous scale to
- run the samplers efficiently. However, a variable parameter with dynamic
- limits can always be created by first defining a variable constrained
- between 0 and 1, and then transforming it to the required scale. See below
- for an example.</p>
-    
+    <p><code>lower</code> and <code>upper</code> must be fixed, they cannot be greta
+  arrays. This ensures these values can always be transformed to a continuous
+  scale to run the samplers efficiently. However, a variable parameter with
+  dynamic limits can always be created by first defining a variable
+  constrained between 0 and 1, and then transforming it to the required
+  scale. See below for an example.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -241,9 +238,7 @@ or a vector of positive integers. See details.</p></td>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#details">Details</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 
