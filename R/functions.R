@@ -293,8 +293,8 @@ solve.greta_array <- function(a, b, ...) {
   if (missing(b)) {
 
     if (has_representation(a, "cholesky")) {
-      U <- representation(a, "cholesky")
-      result <- chol2inv(U)
+      u <- representation(a, "cholesky")
+      result <- chol2inv(u)
     } else {
       result <- op("solve", a,
                    tf_operation = "tf$linalg$inv")
@@ -326,6 +326,7 @@ solve.greta_array <- function(a, b, ...) {
 
 }
 
+# Begin Exclude Linting
 #' @rdname overloaded
 #' @export
 chol2inv <- function(x, size = NCOL(x), LINPACK = FALSE) {
@@ -352,20 +353,21 @@ chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
      tf_operation = "tf_chol2inv")
 
 }
+# End Exclude Linting
 
 #' @rdname overloaded
 #' @export
-cov2cor <- function(V) {
+cov2cor <- function(V) {  # Exclude Linting
   UseMethod("cov2cor", V)
 }
 
 #' @export
-cov2cor.default <- function(V) {
+cov2cor.default <- function(V) {  # Exclude Linting
   stats::cov2cor(V)
 }
 
 #' @export
-cov2cor.greta_array <- function(V) {
+cov2cor.greta_array <- function(V) {  # Exclude Linting
   op("cov2cor", V,
      tf_operation = "tf_cov2cor")
 }
@@ -373,7 +375,7 @@ cov2cor.greta_array <- function(V) {
 # sum, prod, min, mean, max
 
 #' @export
-sum.greta_array <- function(..., na.rm = TRUE) {
+sum.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
 
   # combine all elements into a column vector
   vec <- c(...)
@@ -386,7 +388,7 @@ sum.greta_array <- function(..., na.rm = TRUE) {
 }
 
 #' @export
-prod.greta_array <- function(..., na.rm = TRUE) {
+prod.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
 
   # combine all elements into a column vector
   vec <- c(...)
@@ -399,7 +401,7 @@ prod.greta_array <- function(..., na.rm = TRUE) {
 }
 
 #' @export
-min.greta_array <- function(..., na.rm = TRUE) {
+min.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
 
   # combine all elements into a column vector
   vec <- c(...)
@@ -412,7 +414,7 @@ min.greta_array <- function(..., na.rm = TRUE) {
 }
 
 #' @export
-mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) {
+mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) {  # Exclude Linting
 
   # sum the elements
   op("mean", x,
@@ -422,7 +424,7 @@ mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) {
 }
 
 #' @export
-max.greta_array <- function(..., na.rm = TRUE) {
+max.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
 
   # combine all elements into a column vector
   vec <- c(...)
@@ -571,13 +573,14 @@ rowSums.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
      dim = rowcol_dim(x, dims, "row"))
 
 }
+
 # End Exclude Linting
 
-
+# Begin Exclude Linting
 #' @rdname overloaded
 #' @export
 sweep <- function(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
-
+# End Exclude Linting
   if (inherits(STATS, "greta_array"))
     x <- as.greta_array(x)
 
@@ -588,19 +591,21 @@ sweep <- function(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
 #' @export
 sweep.default <- base::sweep
 
+# Begin Exclude Linting
 #' @export
 sweep.greta_array <- function(x,
                               MARGIN,
                               STATS,
                               FUN = c("-", "+", "/", "*"),
                               check.margin = TRUE, ...) {
+# End Exclude Linting
 
   # only allow these four functions
-  FUN <- match.arg(FUN)
+  fun <- match.arg(FUN)
+  stats <- as.greta_array(STATS)
+  margin <- MARGIN
 
-  STATS <- as.greta_array(STATS)
-
-  if (!MARGIN %in% seq_len(2))
+  if (!margin %in% seq_len(2))
     stop("MARGIN can only be 1 or 2")
 
   # x must be 2D
@@ -610,31 +615,32 @@ sweep.greta_array <- function(x,
   }
 
   # STATS must be a column array
-  if (!(length(dim(STATS)) == 2 && dim(STATS)[2] == 1)) {
+  if (!(length(dim(stats)) == 2 && dim(stats)[2] == 1)) {
     stop(sprintf(paste("STATS must be a column vector array,",
                        "but has dimensions %s"),
-                 paste(dim(STATS), collapse = " x ")))
+                 paste(dim(stats), collapse = " x ")))
   }
 
   # STATS must have the same dimension as the correct dim of x
-  if (dim(x)[MARGIN] != dim(STATS)[1])
+  if (dim(x)[margin] != dim(stats)[1])
     stop("the number of elements of STATS does not match dim(x)[MARGIN]")
 
-  op("sweep", x, STATS,
-     operation_args = list(MARGIN = MARGIN, FUN = FUN),
+  op("sweep", x, stats,
+     operation_args = list(margin = margin, fun = fun),
      tf_operation = "tf_sweep",
      dim = dim(x)
   )
 
 }
 
+# Begin Exclude Linting
 #' @import methods
 setClass("greta_array")
 setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
           function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
                    ...) {
-
-            FUN <- match.arg(FUN)
+# End Exclude Linting
+            fun <- match.arg(FUN)
 
             # X must be 2D
             if (length(dim(X)) != 2) {
@@ -648,7 +654,7 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
                            length(dim(X))))
             }
 
-            tf_fun_name <- switch(FUN,
+            tf_fun_name <- switch(fun,
                                   `*` = "multiply",
                                   `/` = "truediv",
                                   `+` = "add",
@@ -662,49 +668,57 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
           }
 )
 
+# Begin Exclude Linting
 #' @import methods
 setMethod(kronecker, signature(X = "array", Y = "greta_array"),
             function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
                    ...) {
-
+# End Exclude Linting
               kronecker(as.greta_array(X), Y, FUN, make.dimnames = FALSE)
 
           }
 )
 
+# Begin Exclude Linting
 #' @import methods
 setMethod(kronecker, signature(X = "greta_array", Y = "array"),
             function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
                    ...) {
-
+# End Exclude Linting
               kronecker(X, as.greta_array(Y), FUN, make.dimnames = FALSE)
 
           }
 )
 
+# Begin Exclude Linting
 #' @rdname overloaded
 #' @export
 backsolve <- function(r, x, k = ncol(r),
                       upper.tri = TRUE,
                       transpose = FALSE) {
+# End Exclude Linting
   UseMethod("backsolve", x)
 }
 
+# Begin Exclude Linting
 #' @export
 backsolve.default <- function(r, x, k = ncol(r),
                               upper.tri = TRUE,
                               transpose = FALSE) {
+# End Exclude Linting
   base::backsolve(r, x, k = ncol(r),
                   upper.tri = TRUE,
                   transpose = FALSE)
 }
 
 # define this explicitly so CRAN doesn't think we're using .Internal
+# Begin Exclude Linting
 #' @export
 backsolve.greta_array <- function(r, x,
                                   k = ncol(r),
                                   upper.tri = TRUE,
                                   transpose = FALSE) {
+# End Exclude Linting
   if (k != ncol(r)) {
     stop("k must equal ncol(r) for greta arrays",
          call. = FALSE)
@@ -722,30 +736,35 @@ backsolve.greta_array <- function(r, x,
 
 }
 
+# Begin Exclude Linting
 #' @rdname overloaded
 #' @export
 forwardsolve <- function(l, x, k = ncol(l),
                          upper.tri = FALSE,
                          transpose = FALSE) {
+# End Exclude Linting
   UseMethod("forwardsolve", x)
 }
 
 # define this explicitly so CRAN doesn't think we're using .Internal
+# Begin Exclude Linting
 #' @export
 forwardsolve.default <- function(l, x, k = ncol(l),
                                  upper.tri = FALSE,
                                  transpose = FALSE) {
-
+# End Exclude Linting
   base::forwardsolve(l, x, k = ncol(l),
                      upper.tri = FALSE,
                      transpose = FALSE)
 }
 
+# Begin Exclude Linting
 #' @export
 forwardsolve.greta_array <- function(l, x,
                                      k = ncol(l),
                                      upper.tri = FALSE,
                                      transpose = FALSE) {
+# End Exclude Linting
   if (k != ncol(l)) {
     stop("k must equal ncol(l) for greta arrays",
          call. = FALSE)
@@ -763,65 +782,67 @@ forwardsolve.greta_array <- function(l, x,
 
 }
 
+
 #' @rdname overloaded
 #' @export
-apply <- function(X, MARGIN, FUN, ...) {
+apply <- function(X, MARGIN, FUN, ...) {  # Exclude Linting
   UseMethod("apply", X)
 }
 
 #' @export
-apply.default <- function(X, MARGIN, FUN, ...) {
+apply.default <- function(X, MARGIN, FUN, ...) {  # Exclude Linting
   base::apply(X = X,
               MARGIN = MARGIN,
               FUN = FUN,
               ...)
 }
 
+# Begin Exclude Linting
 #' @export
 apply.greta_array <- function(X, MARGIN,
                               FUN = c("sum", "max", "mean", "min", "prod",
                                       "cumsum", "cumprod"),
                               ...) {
-
-  FUN <- match.arg(FUN)
+# End Exclude Linting
+  fun <- match.arg(FUN)
 
   if (inherits(MARGIN, "greta_array")) {
     stop("MARGIN cannot be a greta array",
          call. = FALSE)
   }
 
-  MARGIN <- as.integer(MARGIN)
+  margin <- as.integer(MARGIN)
 
   # permute as in base::apply
   d <- dim(X)
   ds <- seq_along(d)
 
-  s.call <- ds[-MARGIN]
-  s.ans <- ds[MARGIN]
+  s_call <- ds[-margin]
+  s_ans <- ds[margin]
 
-  d.call <- d[-MARGIN]
-  d.ans <- d[MARGIN]
+  d_call <- d[-margin]
+  d_ans <- d[margin]
 
-  d2 <- prod(d.ans)
+  d2 <- prod(d_ans)
 
-  new_x <- aperm(X, c(s.call, s.ans))
-  dim(new_x) <- c(prod(d.call), d2)
+  new_x <- aperm(X, c(s_call, s_ans))
+  dim(new_x) <- c(prod(d_call), d2)
 
   # handle output dimensions
-  reducing <- !FUN %in% c("cumsum", "cumprod")
+  reducing <- !fun %in% c("cumsum", "cumprod")
 
   # set final and intermediate dimensions
   if (reducing) {
-    dim_out <- d[MARGIN]
+    dim_out <- d[margin]
     if (length(dim_out) == 1)
       dim_out <- c(dim_out, 1L)
     dim <- c(prod(dim_out), 1)
   } else {
-    dim_out <- c(prod(d[-MARGIN]), d[MARGIN])
+    dim_out <- c(prod(d[-margin]), d[margin])
     dim <- dim(new_x)
   }
 
-  tf_fun_name <- FUN
+  tf_fun_name <- fun
   if (reducing) {
     tf_fun_name <- paste("reduce", tf_fun_name, sep = "_")
   }
@@ -832,8 +853,8 @@ apply.greta_array <- function(X, MARGIN,
             tf_operation = "tf_apply",
             dim = dim)
 
-  # need to reshape when MARGIN is a vector, or when not reducing
-  if (!reducing | length(MARGIN) > 1) {
+  # need to reshape when margin is a vector, or when not reducing
+  if (!reducing | length(margin) > 1) {
     dim(out) <- dim_out
   }
 
@@ -844,13 +865,15 @@ apply.greta_array <- function(X, MARGIN,
 
 #' @rdname overloaded
 #' @export
-tapply <- function(X, INDEX, FUN, ...) {
+tapply <- function(X, INDEX, FUN, ...) {  # Exclude Linting
   UseMethod("tapply", X)
 }
 
+# Begin Exclude Linting
 #' @export
 tapply.default <- function(X, INDEX, FUN = NULL, ...,
                            default = NA, simplify = TRUE) {
+# End Exclude Linting
   base::tapply(X = X,
                INDEX = INDEX,
                FUN = FUN,
@@ -859,34 +882,38 @@ tapply.default <- function(X, INDEX, FUN = NULL, ...,
                simplify = simplify)
 }
 
+# Begin Exclude Linting
 #' @export
 tapply.greta_array <- function(X, INDEX,
                                FUN = c("sum", "max", "mean", "min", "prod"),
                                ...) {
+# End Exclude Linting
 
-  FUN <- match.arg(FUN)
+  x <- X
+  index <- INDEX
+  fun <- match.arg(FUN)
 
-  if (inherits(INDEX, "greta_array")) {
+  if (inherits(index, "greta_array")) {
     stop("INDEX cannot be a greta array",
          call. = FALSE)
   }
 
   # convert index to successive integers starting at 0
-  groups <- sort(unique(INDEX))
-  id <- match(INDEX, groups) - 1L
+  groups <- sort(unique(index))
+  id <- match(index, groups) - 1L
   len <- length(groups)
 
-  dim_x <- dim(X)
+  dim_x <- dim(x)
   if (!(length(dim_x) == 2L && dim_x[2] == 1L)) {
     stop("X must be 2D greta array with one column, but has dimensions ",
          paste(dim_x, collapse = " x "),
          call. = FALSE)
   }
 
-  op("tapply", X,
+  op("tapply", x,
      operation_args = list(segment_ids = id,
                            num_segments = len,
-                           op_name = FUN),
+                           op_name = fun),
      tf_operation = "tf_tapply",
      dim = c(len, 1))
 
@@ -894,23 +921,26 @@ tapply.greta_array <- function(X, INDEX,
 
 #' @rdname overloaded
 #' @export
-eigen <- function(x, symmetric, only.values, EISPACK) {
+eigen <- function(x, symmetric, only.values, EISPACK) {  # Exclude Linting
   UseMethod("eigen")
 }
 
+# Begin Exclude Linting
 #' @export
 eigen.default <- function(x, symmetric,
                           only.values = FALSE, EISPACK = FALSE) {
+# End Exclude Linting
   base::eigen(x = x,
               symmetric = symmetric,
               only.values = only.values,
               EISPACK = EISPACK)
 }
 
+# Begin Exclude Linting
 #' @export
 eigen.greta_array <- function(x, symmetric,
                               only.values = FALSE, EISPACK = FALSE) {
-
+# End Exclude Linting
   x <- as.greta_array(x)
 
   if (missing(symmetric)) symmetric <- TRUE

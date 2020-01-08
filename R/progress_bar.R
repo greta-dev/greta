@@ -58,7 +58,8 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
 # to numerical instability
 # 'pb' is a progress_bar R6 object created by create_progress_bar
 # 'it' is the current iteration
-# 'rejects' is the total number of rejections so far due to numerical instability
+# 'rejects' is the total number of rejections so far due to numerical
+#   instability
 iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
 
   increment <- pb$.__enclos_env__$pb_update

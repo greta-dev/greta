@@ -117,7 +117,7 @@ mixture_distribution <- R6Class(
       w_dim <- weights_dim[-1]
       dim_1 <- length(w_dim) == 1 && w_dim == 1
       dim_same <- all(w_dim == weights_extra_dim)
-      if ( !(dim_1 | dim_same) ) {
+      if (!(dim_1 | dim_same)) {
         stop("the dimension of weights must be either ", n_distributions,
              " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
              " but was ", paste(weights_dim, collapse = " x "),

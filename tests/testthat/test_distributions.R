@@ -286,7 +286,7 @@ test_that("multivariate normal distribution has correct density", {
   sig <- rWishart(1, m + 1, diag(m))[, , 1]
 
   # function converting Sigma to sigma
-  dmvnorm2 <- function(x, mean, Sigma, log = FALSE)
+  dmvnorm2 <- function(x, mean, Sigma, log = FALSE)  # Exclude Linting
     mvtnorm::dmvnorm(x = x, mean = mean, sigma = Sigma, log = log)
 
   compare_distribution(greta::multivariate_normal,
@@ -308,7 +308,7 @@ test_that("Wishart distribution has correct density", {
   sig <- rWishart(1, df, diag(m))[, , 1]
 
   # wrapper for argument names
-  dwishart <- function(x, df, Sigma, log = FALSE) {
+  dwishart <- function(x, df, Sigma, log = FALSE) {  # Exclude Linting
     ans <- MCMCpack::dwish(W = x, v = df, S = Sigma)
     if (log)
       ans <- log(ans)
@@ -338,11 +338,11 @@ test_that("lkj distribution has correct density", {
   # normalising component of lkj (depends only on eta and dimension)
   lkj_normalising <- function(eta, n) {
     if (eta == 1) {
-      result <- sum(lgamma(2 * 1:( (n - 1) / 2 + 1 )))
+      result <- sum(lgamma(2 * 1:((n - 1) / 2 + 1)))
       if (n %% 2 == 1) {
         add <- (0.25 * (n ^ 2 - 1) * log(pi)
                 - 0.25 * (n - 1) ^ 2 * log(2)
-                - (n - 1) * lgamma( (n + 1) / 2 ))
+                - (n - 1) * lgamma((n + 1) / 2))
       } else {
         add <- (0.25 * n * (n - 2) * log(pi)
                 + 0.25 * (3 * n ^ 2 - 4 * n) * log(2)
@@ -369,7 +369,7 @@ test_that("lkj distribution has correct density", {
   }
 
   rlkj_correlation <- function(m)
-    rlkjcorr(1, K = m, eta = 1)
+    rlkjcorr(1, k = m, eta = 1)
 
   # no vectorised lkj, so loop through all of these
   replicate(10,

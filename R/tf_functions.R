@@ -91,7 +91,8 @@ tf_apply <- function(x, axis, tf_fun_name) {
   out
 }
 
-# permute the tensor to get the non-batch dim first, do the relevant "unsorted_segment_*" op, then permute it back
+# permute the tensor to get the non-batch dim first, do the relevant
+# "unsorted_segment_*" op, then permute it back
 tf_tapply <- function(x, segment_ids, num_segments, op_name) {
 
   op_name <- paste0("unsorted_segment_", op_name)
@@ -113,9 +114,9 @@ tf_flat_to_chol <- function(x, dims) {
   # drop trailing dimension, and biject forward to an upper triangular matrix
 
   # indices to the cholesky factor
-  L_dummy <- dummy(dims)
-  indices_diag <- diag(L_dummy)
-  indices_offdiag <- sort(L_dummy[upper.tri(L_dummy, diag = FALSE)])
+  l_dummy <- dummy(dims)
+  indices_diag <- diag(l_dummy)
+  indices_offdiag <- sort(l_dummy[upper.tri(l_dummy, diag = FALSE)])
 
   # indices to the free state
   x_index_diag <- seq_along(indices_diag) - 1
@@ -223,8 +224,8 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
 tf_flat_to_chol_correl <- function(x, dims) {
 
   dims <- dim(x)
-  K <- dims[[2]]
-  n <- (1 + sqrt(8 * K + 1)) / 2
+  k <- dims[[2]]
+  n <- (1 + sqrt(8 * k + 1)) / 2
 
   # drop the third dimension
   if (length(dims) == 3) {
@@ -241,7 +242,7 @@ tf_flat_to_chol_correl <- function(x, dims) {
   x_rows <- lapply(z_rows, tf_corrmat_row)
 
   # append 0s to all rows for the empty triangle
-  zero_rows <- lapply( (n - 2):0,
+  zero_rows <- lapply((n - 2):0,
                       function(n) {
                         zeros <- tf$constant(rep(0, n),
                                              dtype = tf_float(),
@@ -268,8 +269,8 @@ tf_flat_to_chol_correl <- function(x, dims) {
 
 }
 
-tf_chol_to_symmetric <- function(U)
-  tf$matmul(tf_transpose(U), U)
+tf_chol_to_symmetric <- function(u)
+  tf$matmul(tf_transpose(u), u)
 
 tf_colmeans <- function(x, dims) {
 
@@ -330,16 +331,16 @@ tf_rowsums <- function(x, dims) {
 }
 
 # calculate kronecker product of two matrices
-tf_kronecker <- function(X, Y, tf_fun_name) {
+tf_kronecker <- function(x, y, tf_fun_name) {
 
   tf_function <- tf[[tf_fun_name]]
 
-  dims <- unlist(c(dim(X)[-1], dim(Y)[-1]))
+  dims <- unlist(c(dim(x)[-1], dim(y)[-1]))
 
   # expand dimensions of tensors to allow direct multiplication for kronecker
   # prod
-  x_rsh <- tf$reshape(X, shape(-1, dims[1], 1L, dims[2], 1L))
-  y_rsh <- tf$reshape(Y, shape(-1, 1L, dims[3], 1L, dims[4]))
+  x_rsh <- tf$reshape(x, shape(-1, dims[1], 1L, dims[2], 1L))
+  y_rsh <- tf$reshape(y, shape(-1, 1L, dims[3], 1L, dims[4]))
 
   # multiply tensors and reshape with appropriate dimensions
   z <- tf_function(x_rsh, y_rsh)
@@ -351,16 +352,16 @@ tf_kronecker <- function(X, Y, tf_fun_name) {
 }
 
 # tensorflow version of sweep, based on broadcasting of tf ops
-tf_sweep <- function(x, STATS, MARGIN, FUN) {
+tf_sweep <- function(x, stats, margin, fun) {
 
   # if the second margin, transpose before and after
-  if (MARGIN == 2)
+  if (margin == 2)
     x <- tf_transpose(x)
 
   # apply the function rowwise
-  result <- do.call(FUN, list(x, STATS))
+  result <- do.call(fun, list(x, stats))
 
-  if (MARGIN == 2)
+  if (margin == 2)
     result <- tf_transpose(result)
 
   result
@@ -371,27 +372,27 @@ tf_sweep <- function(x, STATS, MARGIN, FUN) {
 tf_chol <- function(x)
   tf_transpose(tf$linalg$cholesky(x))
 
-tf_chol2inv <- function(U) {
-  n <- dim(U)[[2]]
+tf_chol2inv <- function(u) {
+  n <- dim(u)[[2]]
   eye <- fl(add_first_dim(diag(n)))
-  eye <- expand_to_batch(eye, U)
-  L <- tf$linalg$matrix_transpose(U)
-  tf$linalg$cholesky_solve(L, eye)
+  eye <- expand_to_batch(eye, u)
+  l <- tf$linalg$matrix_transpose(u)
+  tf$linalg$cholesky_solve(l, eye)
 }
 
-tf_cov2cor <- function(V) {
+tf_cov2cor <- function(v) {
   # sweep out variances
-  diag <- tf$linalg$diag_part(V)
+  diag <- tf$linalg$diag_part(v)
   diag <- tf$expand_dims(diag, 2L)
-  Is <- tf$sqrt(fl(1) / diag)
-  V <- Is * V
-  V <- tf_transpose(V)
-  V <- V * Is
+  eyes <- tf$sqrt(fl(1) / diag)
+  v <- eyes * v
+  v <- tf_transpose(v)
+  v <- v * eyes
   # set diagonals to 1
-  n <- dim(V)[[2]]
+  n <- dim(v)[[2]]
   new_diag <- fl(t(rep(1, n)))
-  new_diag <- expand_to_batch(new_diag, V)
-  tf$linalg$set_diag(V, new_diag)
+  new_diag <- expand_to_batch(new_diag, v)
+  tf$linalg$set_diag(v, new_diag)
 }
 
 tf_not <- function(x)

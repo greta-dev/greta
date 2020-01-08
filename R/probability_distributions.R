@@ -962,39 +962,39 @@ multivariate_normal_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
-    Sigma_is_cholesky = FALSE,
-
+    sigma_is_cholesky = FALSE,
+    # Begin Exclude Linting
     initialize = function(mean, Sigma, n_realisations, dimension) {
-
+    # End Exclude Linting
       # coerce to greta arrays
       mean <- as.greta_array(mean)
-      Sigma <- as.greta_array(Sigma)
+      sigma <- as.greta_array(Sigma)
 
       # check dim is a positive scalar integer
       dim <- check_multivariate_dims(vectors = list(mean),
-                                     squares = list(Sigma),
+                                     squares = list(sigma),
                                      n_realisations = n_realisations,
                                      dimension = dimension)
 
       # check dimensions of Sigma
-      if (nrow(Sigma) != ncol(Sigma) |
-          length(dim(Sigma)) != 2) {
+      if (nrow(sigma) != ncol(sigma) |
+          length(dim(sigma)) != 2) {
 
         stop("Sigma must be a square 2D greta array, ",
              "but has dimensions ",
-             paste(dim(Sigma), collapse = " x "),
+             paste(dim(sigma), collapse = " x "),
              call. = FALSE)
 
       }
 
       # compare possible dimensions
       dim_mean <- ncol(mean)
-      dim_Sigma <- nrow(Sigma)
+      dim_sigma <- nrow(sigma)
 
-      if (dim_mean != dim_Sigma) {
+      if (dim_mean != dim_sigma) {
 
         stop("mean and Sigma have different dimensions, ",
-             dim_mean, " vs ", dim_Sigma,
+             dim_mean, " vs ", dim_sigma,
              call. = FALSE)
 
       }
@@ -1003,12 +1003,12 @@ multivariate_normal_distribution <- R6Class(
       # parameters
       super$initialize("multivariate_normal", dim)
 
-      if (has_representation(Sigma, "cholesky")) {
-        Sigma <- representation(Sigma, "cholesky")
-        self$Sigma_is_cholesky <- TRUE
+      if (has_representation(sigma, "cholesky")) {
+        sigma <- representation(sigma, "cholesky")
+        self$sigma_is_cholesky <- TRUE
       }
       self$add_parameter(mean, "mean")
-      self$add_parameter(Sigma, "Sigma")
+      self$add_parameter(sigma, "sigma")
 
     },
 
@@ -1017,20 +1017,20 @@ multivariate_normal_distribution <- R6Class(
       # if Sigma is a cholesky factor transpose it to tensorflow expoectation,
       # otherwise decompose it
 
-      if (self$Sigma_is_cholesky) {
-        L <- tf_transpose(parameters$Sigma)
+      if (self$sigma_is_cholesky) {
+        l <- tf_transpose(parameters$sigma)
       } else {
-        L <- tf$linalg$cholesky(parameters$Sigma)
+        l <- tf$linalg$cholesky(parameters$sigma)
       }
 
       # add an extra dimension for the observation batch size (otherwise tfp
       # will try to use the n_chains batch dimension)
-      L <- tf$expand_dims(L, 1L)
+      l <- tf$expand_dims(l, 1L)
 
       mu <- parameters$mean
       # Begin Exclude Linting
       tfp$distributions$MultivariateNormalTriL(loc = mu,
-                                               scale_tril = L)
+                                               scale_tril = l)
       # End Exclude Linting
     },
 
@@ -1047,39 +1047,39 @@ wishart_distribution <- R6Class(
   public = list(
 
     # set when defining the distribution
-    Sigma_is_cholesky = FALSE,
+    sigma_is_cholesky = FALSE,
 
     # set when defining the graph
     target_is_cholesky = FALSE,
 
-    initialize = function(df, Sigma) {
+    initialize = function(df, Sigma) {  # Exclude Linting
       # add the nodes as parents and parameters
 
       df <- as.greta_array(df)
-      Sigma <- as.greta_array(Sigma)
+      sigma <- as.greta_array(Sigma)
 
       # check dimensions of Sigma
-      if (nrow(Sigma) != ncol(Sigma) |
-          length(dim(Sigma)) != 2) {
+      if (nrow(sigma) != ncol(sigma) |
+          length(dim(sigma)) != 2) {
 
         stop("Sigma must be a square 2D greta array, but has dimensions ",
-             paste(dim(Sigma), collapse = " x "),
+             paste(dim(sigma), collapse = " x "),
              call. = FALSE)
 
       }
 
-      dim <- nrow(Sigma)
+      dim <- nrow(sigma)
 
       # initialize with a cholesky factor
-      super$initialize("wishart", dim(Sigma))
+      super$initialize("wishart", dim(sigma))
 
       # set parameters
-      if (has_representation(Sigma, "cholesky")) {
-        Sigma <- representation(Sigma, "cholesky")
-        self$Sigma_is_cholesky <- TRUE
+      if (has_representation(sigma, "cholesky")) {
+        sigma <- representation(sigma, "cholesky")
+        self$sigma_is_cholesky <- TRUE
       }
       self$add_parameter(df, "df")
-      self$add_parameter(Sigma, "Sigma")
+      self$add_parameter(sigma, "sigma")
 
       # make the initial value PD (no idea whether this does anything)
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
@@ -1133,14 +1133,14 @@ wishart_distribution <- R6Class(
 
         # reshape the dimensions
         df <- tf_flatten(parameters$df)
-        Sigma <- tf$expand_dims(parameters$Sigma, 1L)
+        sigma <- tf$expand_dims(parameters$sigma, 1L)
         x <- tf$expand_dims(x, 1L)
 
         # get the cholesky factor of Sigma in tf orientation
-        if (self$Sigma_is_cholesky) {
-          Sigma_chol <- tf$linalg$matrix_transpose(Sigma)
+        if (self$sigma_is_cholesky) {
+          sigma_chol <- tf$linalg$matrix_transpose(sigma)
         } else {
-          Sigma_chol <- tf$linalg$cholesky(Sigma)
+          sigma_chol <- tf$linalg$cholesky(sigma)
         }
 
         # get the cholesky factor of the target in tf_orientation
@@ -1152,7 +1152,7 @@ wishart_distribution <- R6Class(
 
         # use the density for choleskied x, with choleskied Sigma
         distrib <- tfp$distributions$Wishart(df = df,
-                                             scale_tril = Sigma_chol,
+                                             scale_tril = sigma_chol,
                                              input_output_cholesky = TRUE)
 
         distrib$log_prob(x_chol)
@@ -1322,6 +1322,7 @@ distribution_classes_module <- module(uniform_distribution,
 
 # export constructors
 
+# Begin Exclude Linting
 #' @name distributions
 #' @title probability distributions
 #' @description These functions can be used to define random variables in a
@@ -1483,6 +1484,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'
 #' }
 NULL
+# End Exclude Linting
 
 #' @rdname distributions
 #' @export
@@ -1593,17 +1595,19 @@ logistic <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 f <- function(df1, df2, dim = NULL, truncation = c(0, Inf))
   distrib("f", df1, df2, dim, truncation)
 
+# Begin Exclude Linting
 #' @rdname distributions
 #' @export
 multivariate_normal <- function(mean, Sigma,
                                 n_realisations = NULL, dimension = NULL) {
+# End Exclude Linting
   distrib("multivariate_normal", mean, Sigma,
           n_realisations, dimension)
 }
 
 #' @rdname distributions
 #' @export
-wishart <- function(df, Sigma)
+wishart <- function(df, Sigma)  # Exclude Linting
   distrib("wishart", df, Sigma)
 
 #' @rdname distributions

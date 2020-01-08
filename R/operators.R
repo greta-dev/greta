@@ -110,7 +110,7 @@ NULL
 }
 
 #' @export
-`%/%.greta_array` <- function(e1, e2) {
+`%/%.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("`integer divide`", e1, e2,
      tf_operation = "tf$math$floordiv")
@@ -120,23 +120,23 @@ NULL
 # would rather get S4 version working properly, but uuurgh S4.
 
 #' @export
-`%*%.default` <- function(x, y)
+`%*%.default` <- function(x, y)  # Exclude Linting
   .Primitive("%*%")(x, y)
 
 #' @rdname overloaded
 #' @export
-`%*%` <- function(x, y) {
+`%*%` <- function(x, y) {  # Exclude Linting
 
   # if y is a greta array, coerce x before dispatch
   if (inherits(y, "greta_array") & !inherits(x, "greta_array"))
     as_data(x) %*% y
   else
-    UseMethod ("%*%", x)
+    UseMethod("%*%", x)
 
 }
 
 #' @export
-`%*%.greta_array` <- function(x, y) {
+`%*%.greta_array` <- function(x, y) {  # Exclude Linting
 
   # check they're matrices
   if (length(dim(x)) != 2 | length(dim(y)) != 2) {
@@ -166,14 +166,14 @@ NULL
 }
 
 #' @export
-`&.greta_array` <- function(e1, e2) {
+`&.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("and", e1, e2,
      tf_operation = "tf_and")
 }
 
 #' @export
-`|.greta_array` <- function(e1, e2) {
+`|.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("or", e1, e2,
      tf_operation = "tf_or")
@@ -182,42 +182,42 @@ NULL
 # relational operators
 
 #' @export
-`<.greta_array` <- function(e1, e2) {
+`<.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("less", e1, e2,
      tf_operation = "tf_lt")
 }
 
 #' @export
-`>.greta_array` <- function(e1, e2) {
+`>.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("greater", e1, e2,
      tf_operation = "tf_gt")
 }
 
 #' @export
-`<=.greta_array` <- function(e1, e2) {
+`<=.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("less/equal", e1, e2,
      tf_operation = "tf_lte")
 }
 
 #' @export
-`>=.greta_array` <- function(e1, e2) {
+`>=.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("greater/equal", e1, e2,
      tf_operation = "tf_gte")
 }
 
 #' @export
-`==.greta_array` <- function(e1, e2) {
+`==.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("equal", e1, e2,
      tf_operation = "tf_eq")
 }
 
 #' @export
-`!=.greta_array` <- function(e1, e2) {
+`!=.greta_array` <- function(e1, e2) {  # Exclude Linting
   check_dims(e1, e2)
   op("not equal", e1, e2,
      tf_operation = "tf_neq")

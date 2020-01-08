@@ -6,7 +6,7 @@ data_node <- R6Class(
     initialize = function(data) {
 
       # coerce to an array with 2+ dimensions
-      data <- as_2D_array(data)
+      data <- as_2d_array(data)
 
       # update and store array and store dimension
       super$initialize(dim = dim(data), value = data)
@@ -287,8 +287,8 @@ variable_node <- R6Class(
       ljac_corr_mat <- function(x) {
 
         # find dimension
-        K <- dim(x)[[2]]
-        n <- (1 + sqrt(8 * K + 1)) / 2
+        k <- dim(x)[[2]]
+        n <- (1 + sqrt(8 * k + 1)) / 2
 
         # convert to correlation-scale (-1, 1) & get log jacobian
         z <- tf$tanh(x)
@@ -311,11 +311,12 @@ variable_node <- R6Class(
 
         # find dimension
         n <- dim(x)[[2]]
-        K <- (sqrt(8 * n + 1) - 1) / 2
+        k <- (sqrt(8 * n + 1) - 1) / 2
 
-        k <- seq_len(K)
-        powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = shape(K))
-        fl(K * log(2)) + tf_sum(powers * x[, k - 1], drop = TRUE)
+        k_seq <- seq_len(k)
+        powers <- tf$constant(k - k_seq + 2, dtype = tf_float(),
+                              shape = shape(k))
+        fl(k * log(2)) + tf_sum(powers * x[, k_seq - 1], drop = TRUE)
 
       }
 
