@@ -404,8 +404,8 @@ test_that("numerical issues are handled in mcmc", {
 
   # this should have a cholesky decomposition problem at some point
   k <- 2
-  Sigma <- lkj_correlation(1, k)
-  x <- wishart(k + 1, Sigma)
+  sigma <- lkj_correlation(1, k)
+  x <- wishart(k + 1, sigma)
   m <- model(x, precision = "single")
 
   # running with bursts should error informatively

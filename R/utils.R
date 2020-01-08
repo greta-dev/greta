@@ -27,25 +27,25 @@ module <- function(..., sort = TRUE) {
 
 # find out whether the usr has conda installed and visible
 #' @importFrom reticulate conda_binary
-have_conda <- function () {
+have_conda <- function() {
   conda_bin <- tryCatch(reticulate::conda_binary("auto"),
                         error = function(e) NULL)
   !is.null(conda_bin)
 }
 
 #' @importFrom reticulate py_available
-have_python <- function () {
+have_python <- function() {
   tryCatch(reticulate::py_available(initialize = TRUE),
                         error = function(e) FALSE)
 }
 
 #' @importFrom reticulate py_module_available
-have_tfp <- function () {
+have_tfp <- function() {
   reticulate::py_module_available("tensorflow_probability")
 }
 
 #' @importFrom reticulate py_module_available
-have_tf <- function () {
+have_tf <- function() {
   reticulate::py_module_available("tensorflow")
 }
 
@@ -183,7 +183,8 @@ fl <- function(x) {
   tf$constant(x, dtype = tf_float())
 }
 
-# coerce an integer(ish) vector to a list as expected in tensorflow shape arguments
+# coerce an integer(ish) vector to a list as expected in tensorflow shape
+# arguments
 #' @noRd
 #' @importFrom tensorflow shape
 to_shape <- function(dim)
@@ -252,7 +253,7 @@ record <- function(expr, file) {
 }
 
 # convert an assumed numeric to an array with at least 2 dimensions
-as_2D_array <- function(x) {
+as_2d_array <- function(x) {
 
   # coerce data from common formats to an array here
   x <- as.array(x)
@@ -364,7 +365,7 @@ rhex <- function()
 
 # stop TensorFlow messaging about deprecations etc.
 #' @importFrom reticulate py_set_attr import
-disable_tensorflow_logging <- function (disable = TRUE) {
+disable_tensorflow_logging <- function(disable = TRUE) {
   logging <- reticulate::import("logging")
   # Begin Exclude Linting
   logger <- logging$getLogger("tensorflow")
@@ -387,7 +388,7 @@ misc_module <- module(module,
                       create_log_file,
                       bar_width,
                       record,
-                      as_2D_array,
+                      as_2d_array,
                       add_first_dim,
                       drop_first_dim,
                       drop_column_dim,
@@ -478,7 +479,7 @@ check_dims <- function(..., target_dim = NULL) {
 }
 
 # make sure a greta array is 2D
-check_2D <- function(x) {
+check_2d <- function(x) {
 
   if (length(dim(x)) != 2L) {
     stop("parameters of multivariate distributions ",
@@ -660,7 +661,7 @@ check_multivariate_dims <- function(vectors = list(),
   squares <- lapply(squares, as.greta_array)
 
   # make sure they are all 2D and the squares are square
-  lapply(c(vectors, scalars, squares), check_2D)
+  lapply(c(vectors, scalars, squares), check_2d)
   lapply(squares, check_square)
 
   # check and return the output number of distribution realisations
@@ -1087,12 +1088,12 @@ flat_to_chol <- function(x, dim, correl = FALSE) {
 
 }
 
-chol_to_symmetric <- function(L) {
+chol_to_symmetric <- function(l) {
 
   # sum the elements
-  op("chol_to_symmetric", L,
+  op("chol_to_symmetric", l,
      tf_operation = "tf_chol_to_symmetric",
-     representations = list(cholesky = L))
+     representations = list(cholesky = l))
 
 }
 

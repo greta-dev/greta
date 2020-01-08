@@ -16,12 +16,12 @@
 #' @param dim the dimensions of the greta array to be returned, either a scalar
 #'  or a vector of positive integers. See details.
 #'
-#' @details \code{lower} and \code{upper} must be fixed, they cannot be greta arrays.
-#'  This ensures these values can always be transformed to a continuous scale to
-#'  run the samplers efficiently. However, a variable parameter with dynamic
-#'  limits can always be created by first defining a variable constrained
-#'  between 0 and 1, and then transforming it to the required scale. See below
-#'  for an example.
+#' @details \code{lower} and \code{upper} must be fixed, they cannot be greta
+#'   arrays. This ensures these values can always be transformed to a continuous
+#'   scale to run the samplers efficiently. However, a variable parameter with
+#'   dynamic limits can always be created by first defining a variable
+#'   constrained between 0 and 1, and then transforming it to the required
+#'   scale. See below for an example.
 #'
 #' @examples
 #' \dontrun{

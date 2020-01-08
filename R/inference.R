@@ -546,7 +546,7 @@ to_free <- function(node, data) {
   both <- function(x) {
     if (any(x >= upper | x <= lower))
       unsupported_error()
-    stats::qlogis( (x - lower) / (upper - lower) )
+    stats::qlogis((x - lower) / (upper - lower))
   }
 
   fun <- switch(node$constraint,
@@ -711,7 +711,7 @@ initials <- function(...) {
   }
 
   # coerce to greta-array-like shape
-  values <- lapply(values, as_2D_array)
+  values <- lapply(values, as_2d_array)
 
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
@@ -766,18 +766,19 @@ print.initials <- function(x, ...) {
 #'   parameters are in a vector, then split the vector up to define the model.
 #'   The parameter vector can then be passed to model. See example.
 #'
+
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
 #'    \item{\code{par}} {a named list of the optimal values for the greta arrays
 #'     specified in \code{model}}
 #'    \item{\code{value}} {the (unadjusted) negative log joint density of the
-#'    model at the parameters 'par'}
+#'     model at the parameters 'par'}
 #'    \item{\code{iterations}} {the number of iterations taken by the optimiser}
 #'    \item{\code{convergence}} {an integer code, 0 indicates successful
-#'     completion, 1 indicates the iteration limit \code{max_iterations} had been
-#'     reached}
+#'     completion, 1 indicates the iteration limit \code{max_iterations} had
+#'     been reached}
 #'   \item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
-#'    matrices/arrays for the parameters (w.r.t. \code{value})}
+#'     matrices/arrays for the parameters (w.r.t. \code{value})}
 #'  }
 #'
 opt <- function(model,

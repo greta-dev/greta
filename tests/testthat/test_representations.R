@@ -32,21 +32,21 @@ test_that("chol & chol2inv function representation works", {
 
   # get symmetric matrix
   m <- 10
-  W <- rWishart(1, m + 1, diag(m))[, , 1]
-  U <- chol(W)
+  w <- rWishart(1, m + 1, diag(m))[, , 1]
+  u <- chol(w)
 
   # convert to greta arrays
-  W <- as_data(W)
-  U <- as_data(U)
+  w <- as_data(w)
+  u <- as_data(u)
 
   # get representation version of W
-  W2 <- chol_to_symmetric(U)
+  w2 <- chol_to_symmetric(u)
 
-  compare_op(calculate(chol(W)),
-             calculate(chol(W2)))
+  compare_op(calculate(chol(w)),
+             calculate(chol(w2)))
 
-  compare_op(calculate(chol2inv(W)),
-             calculate(chol2inv(W2)))
+  compare_op(calculate(chol2inv(w)),
+             calculate(chol2inv(w2)))
 
 })
 
@@ -147,8 +147,8 @@ test_that("mvn Sigma representation has correct density", {
 
   # greta arrays with and without representation
   sigs <- as_data(sig)
-  U <- as_data(chol(sig))
-  chol_sigs <- chol_to_symmetric(U)
+  u <- as_data(chol(sig))
+  chol_sigs <- chol_to_symmetric(u)
 
   sigs_dens <- greta_density(greta::multivariate_normal,
                              list(mean = mn,
@@ -177,8 +177,8 @@ test_that("wishart target and Sigma representations have correct density", {
 
   # greta arrays for Sigma with and without representation
   sigs <- as_data(sig)
-  U <- as_data(chol(sig))
-  chol_sigs <- chol_to_symmetric(U)
+  u <- as_data(chol(sig))
+  chol_sigs <- chol_to_symmetric(u)
 
   sigs_dens <- greta_density(greta::wishart,
                              list(df = m + 1,
@@ -196,8 +196,8 @@ test_that("wishart target and Sigma representations have correct density", {
 
   # greta arrays for x with and without representation
   xs <- as_data(x)
-  Ux <- as_data(chol(x))
-  chol_xs <- chol_to_symmetric(Ux)
+  ux <- as_data(chol(x))
+  chol_xs <- chol_to_symmetric(ux)
 
   xs_dens <- greta_density(greta::wishart,
                            list(df = m + 1,
@@ -227,8 +227,8 @@ test_that("lkj target representation has correct density", {
 
   # greta arrays for x with and without representation
   xs <- as_data(x)
-  Ux <- as_data(chol(x))
-  chol_xs <- chol_to_symmetric(Ux)
+  ux <- as_data(chol(x))
+  chol_xs <- chol_to_symmetric(ux)
 
   xs_dens <- greta_density(greta::lkj_correlation,
                            list(eta = eta),

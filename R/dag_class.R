@@ -496,19 +496,19 @@ dag_class <- R6Class(
       # http://raphael.candelier.fr/?blog=Adj2cluster
 
       # convert adjacency to a symmetric, logical matrix
-      A <- self$adjacency_matrix
-      S <- (A + t(A)) > 0
+      adj <- self$adjacency_matrix
+      sym <- (adj + t(adj)) > 0
 
       # loop through to build a block diagonal matrix of connected components
       # (usually only takes a few iterations)
       maxit <- 1000
       it <- 0
-      P <- R <- S
+      p <- r <- sym
       while (it < maxit) {
-        P <- P %*% S
-        T <- (R + P) > 0
-        if (any(T != R)) {
-          R <- T
+        p <- p %*% sym
+        t <- (r + p) > 0
+        if (any(t != r)) {
+          r <- t
           it <- it + 1
         } else {
           break ()
@@ -523,13 +523,13 @@ dag_class <- R6Class(
       }
 
       # find the cluster IDs
-      n <- nrow(R)
-      neighbours <- lapply(seq_len(n), function(i) which(R[i, ]))
+      n <- nrow(r)
+      neighbours <- lapply(seq_len(n), function(i) which(r[i, ]))
       cluster_names <- vapply(neighbours, paste, collapse = "_", FUN.VALUE = "")
       cluster_id <- match(cluster_names, unique(cluster_names))
 
       # name them
-      names(cluster_id) <- rownames(A)
+      names(cluster_id) <- rownames(adj)
       cluster_id
 
     },

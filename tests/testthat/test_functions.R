@@ -167,7 +167,7 @@ test_that("apply works as expected", {
   source("helpers.R")
 
   # check apply.greta_array works like R's apply for X
-  check_apply <- function(X, MARGIN, FUN) {
+  check_apply <- function(X, MARGIN, FUN) {  # Exclude Linting
     check_op(apply, a,
              other_args = list(MARGIN = MARGIN,
                                FUN = FUN))
@@ -256,12 +256,12 @@ test_that("sweep works for numeric x and greta array STATS", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  STATS <- randn(5)
-  ga_STATS <- as_data(STATS)
+  stats <- randn(5)
+  ga_stats <- as_data(stats)
   x <- randn(5, 25)
 
-  res <- sweep(x, 1, STATS, "*")
-  expect_ok(ga_res <- sweep(x, 1, ga_STATS, "*"))
+  res <- sweep(x, 1, stats, "*")
+  expect_ok(ga_res <- sweep(x, 1, ga_stats, "*"))
   diff <- abs(res - grab(ga_res))
   expect_true(all(diff < 1e-6))
 

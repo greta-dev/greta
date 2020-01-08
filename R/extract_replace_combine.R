@@ -157,7 +157,7 @@ NULL
 
 # replace syntax for greta array objects
 #' @export
-`[<-.greta_array` <- function(x, ..., value) {
+`[<-.greta_array` <- function(x, ..., value) {  # Exclude Linting
 
   node <- get_node(x)
 
@@ -368,36 +368,39 @@ abind.greta_array <- function(...,
 
   # get N first, in case they used the default value for along
   dims <- lapply(arg_list, dim)
-  N <- max(vapply(dims, length, FUN.VALUE = 1L))
+  n <- max(vapply(dims, length, FUN.VALUE = 1L))
+
+  # needed to keep the same formals as abind
+  N <- n  # Exclude Linting
   along <- as.integer(force(along))
 
   # rationalise along, and pad N if we're prepending/appending a dimension
-  if (along < 1 || along > N || (along > floor(along) &&
+  if (along < 1 || along > n || (along > floor(along) &&
                                  along < ceiling(along))) {
-    N <- N + 1
-    along <- max(1, min(N + 1, ceiling(along)))
+    n <- n + 1
+    along <- max(1, min(n + 1, ceiling(along)))
   }
 
-  if (!along %in% 0:N) {
-    stop("along must be between 0 and ", N, call. = FALSE)
+  if (!along %in% 0:n) {
+    stop("along must be between 0 and ", n, call. = FALSE)
   }
 
   pre <- seq(from = 1, len = along - 1)
-  post <- seq(to = N - 1, len = N - along)
+  post <- seq(to = n - 1, len = n - along)
 
   # loop though all elements of arg_list padding if necessary:
   arg_list <- lapply(arg_list,
                      function(x) {
                        dim <- dim(x)
-                       if (length(dim) == N - 1)
+                       if (length(dim) == n - 1)
                          dim(x) <- c(dim[pre], 1, dim[post])
                        x
                      })
 
   # check the non-binding dimensions match
   dims <- lapply(arg_list, dim)
-  dim_out <- rep(NA, N)
-  for (dim in seq_len(N)[-along]) {
+  dim_out <- rep(NA, n)
+  for (dim in seq_len(n)[-along]) {
     this_dim <- vapply(dims, `[`, dim, FUN.VALUE = 1L)
     if (!all(this_dim == this_dim[1])) {
       stop("all greta arrays must have the same dimensions ",
@@ -479,7 +482,7 @@ length.greta_array <- function(x)
 
 # reshape greta arrays
 #' @export
-`dim<-.greta_array` <- function(x, value) {
+`dim<-.greta_array` <- function(x, value) {  # Exclude Linting
 
   dims <- value
 
@@ -528,7 +531,7 @@ length.greta_array <- function(x)
 # arrays
 #' @export
 #' @importFrom utils head
-head.greta_array <- function(x, n = 6L, ...) {
+head.greta_array <- function(x, n = 6L, ...) {  # Exclude Linting
 
   stopifnot(length(n) == 1L)
 
@@ -561,7 +564,7 @@ head.greta_array <- function(x, n = 6L, ...) {
 
 #' @export
 #' @importFrom utils tail
-tail.greta_array <- function(x, n = 6L, ...) {
+tail.greta_array <- function(x, n = 6L, ...) {  # Exclude Linting
 
   stopifnot(length(n) == 1L)
 
