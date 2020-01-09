@@ -151,7 +151,7 @@ calculate_mcmc.list <- function(target, target_name, values, tf_float, trace_bat
   trace <- lapply(values, coda::mcmc)
 
   trace <- coda::mcmc.list(trace)
-  attr(trace, "model_info") <- model_info
+  trace <- as_greta_mcmc_list(trace, model_info)
   trace
 
 }

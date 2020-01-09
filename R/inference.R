@@ -476,8 +476,7 @@ stashed_samples <- function() {
       model_info$samplers <- samplers
       model_info$model <- samplers[[1]]$model
 
-      # add the raw draws as an attribute
-      attr(values_draws, "model_info") <- model_info
+      values_draws <- as_greta_mcmc_list(values_draws, model_info)
 
       return(values_draws)
 
