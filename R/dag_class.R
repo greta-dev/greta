@@ -443,11 +443,10 @@ dag_class <- R6Class(
 
     },
 
-    # return the current values of the traced nodes, as a named vector
-    trace_values = function(free_state, flatten = TRUE) {
+    trace_values_batch = function(free_state_batch) {
 
       # update the parameters & build the feed dict
-      self$send_parameters(free_state)
+      self$send_parameters(free_state_batch)
 
       tfe <- self$tf_environment
 
@@ -461,6 +460,34 @@ dag_class <- R6Class(
       # evaluate them in the tensorflow environment
       trace_list <- tfe$sess$run(target_tensors,
                                  feed_dict = tfe$feed_dict)
+
+      trace_list
+
+    },
+
+    # return the current values of the traced nodes, as a named vector
+    trace_values = function(free_state, flatten = TRUE, trace_batch_size = Inf) {
+
+      # get the number of samples to trace
+      n_samples <- nrow(free_state)
+      indices <- seq_len(n_samples)
+      splits <- split(indices, (indices - 1) %/% trace_batch_size)
+      names(splits) <- NULL
+
+      # split the free state up into batches
+      get_rows <- function(rows, x) x[rows, , drop = FALSE]
+      free_state_batches <- lapply(splits, get_rows, free_state)
+
+      # loop through them
+      trace_list_batches <- lapply(free_state_batches, self$trace_values_batch)
+
+      # loop through each of the elements in the lists, and stack them
+      stack_elements <- function(name, list) {
+        elems <- lapply(trace_list_batches, `[[`, name)
+        do.call(abind::abind, c(elems, list(along = 1)))
+      }
+      elements <- seq_along(trace_list_batches[[1]])
+      trace_list <- lapply(elements, stack_elements, trace_list_batches)
 
       # if they are flattened, e.g. for MCMC tracing
       if (flatten) {

@@ -260,6 +260,9 @@ sampler <- R6Class(
     pb_file = NULL,
     pb_width = options()$width,
 
+    # batch sizes for tracing
+    trace_batch_size = 100,
+
     initialize = function(initial_values,
                           model,
                           parameters = list(),
@@ -289,6 +292,7 @@ sampler <- R6Class(
     run_chain = function(n_samples, thin, warmup,
                          verbose, pb_update,
                          one_by_one, plan_is, n_cores, float_type,
+                         trace_batch_size,
                          from_scratch = TRUE) {
 
       dag <- self$model$dag
@@ -385,7 +389,7 @@ sampler <- R6Class(
         # on exiting during the main sampling period (even if killed by the
         # user) trace the free state values
 
-        on.exit(self$trace_values(), add = TRUE)
+        on.exit(self$trace_values(trace_batch_size), add = TRUE)
 
         # main sampling
         if (verbose) {
@@ -468,10 +472,11 @@ sampler <- R6Class(
 
     # convert traced free state to the traced values, accounting for
     # chain dimension
-    trace_values = function() {
+    trace_values = function(trace_batch_size) {
 
       self$traced_values <- lapply(self$traced_free_state,
-                                   self$model$dag$trace_values)
+                                   self$model$dag$trace_values,
+                                   trace_batch_size = trace_batch_size)
 
     },
 
