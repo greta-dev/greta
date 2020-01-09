@@ -623,7 +623,11 @@ parse_initial_values <- function(initials, dag) {
 
   # set them in the list and flatten to a vector in the same order as tensorflow
   params[idx] <- inits_free
-  unlist_tf(params)
+  params <- unlist_tf(params)
+
+  # force them to be row vectors and return
+  params <- matrix(params, nrow = 1)
+  params
 
 }
 
