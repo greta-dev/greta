@@ -1009,6 +1009,17 @@ check_positive_integer <- function(x, name = "") {
 
 }
 
+# batch sizes must be positive numerics, rounded off to integers
+check_trace_batch_size <- function(x) {
+  valid <- is.numeric(x) && length(x) == 1 && x >= 1
+  if (!valid) {
+    stop("trace_batch_size must be a single numeric value ",
+         "greater than or equal to 1",
+         call. = FALSE)
+  }
+  x
+}
+
 # get better names for the scalar elements of a greta array, for labelling mcmc
 # samples
 get_indices_text <- function(dims, name) {

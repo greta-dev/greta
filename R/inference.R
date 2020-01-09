@@ -42,6 +42,9 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   \code{initials} objects of length \code{chains}) giving initial values for
 #'   some or all of the variables in the model. These will be used as the
 #'   starting point for sampling/optimisation.
+#' @param trace_batch_size the number of posterior samples to process at a time
+#'   when tracing the parameters of interest; reduce this to reduce memory
+#'   demands
 #'
 #' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
@@ -90,6 +93,14 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   \code{future} package, \code{n_cores} will be set so that \code{n_cores *
 #'   \link[future:nbrOfWorkers]{future::nbrOfWorkers}} is less than the number
 #'   of CPU cores.
+#'
+#'   After carrying out mcmc on all the model parameters, \code{mcmc()}
+#'   calculates the values of (i.e. traces) the parameters of interest for each
+#'   of these samples, similarly to \code{\linl[calculate]{calculate}}. Multiple
+#'   posterior samples can be traced simulataneously, though this can require
+#'   large amounts of memory for large models. As in \code{calculate}, the
+#'   argument \code{trace_batch_size} can be modified to trade-off speed against
+#'   memory usage.
 #'
 #' @return \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
 #'   \code{mcmc.list} object that can be analysed using functions from the coda
@@ -173,7 +184,11 @@ mcmc <- function(model,
                  verbose = TRUE,
                  pb_update = 50,
                  one_by_one = FALSE,
-                 initial_values = initials()) {
+                 initial_values = initials(),
+                 trace_batch_size = 100) {
+
+  # check the trace batch size
+  trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
@@ -227,7 +242,7 @@ mcmc <- function(model,
                      sampler,
                      model)
 
-  # add chain info for printing
+  # add chain info for printing, and set trace batch size
   for (i in seq_len(n_samplers)) {
     samplers[[i]]$sampler_number <- i
     samplers[[i]]$n_samplers <- n_samplers
@@ -251,7 +266,8 @@ mcmc <- function(model,
                pb_update = pb_update,
                one_by_one = one_by_one,
                n_cores = n_cores,
-               from_scratch = TRUE)
+               from_scratch = TRUE,
+               trace_batch_size = trace_batch_size)
 
 }
 
@@ -264,7 +280,8 @@ run_samplers <- function(samplers,
                          pb_update,
                          one_by_one,
                          n_cores,
-                         from_scratch) {
+                         from_scratch,
+                         trace_batch_size) {
 
   # check the future plan is valid, and get information about it
   plan_is <- check_future_plan()
@@ -366,6 +383,7 @@ run_samplers <- function(samplers,
                         plan_is = plan_is,
                         n_cores = n_cores,
                         float_type = float_type,
+                        trace_batch_size = trace_batch_size,
                         from_scratch = from_scratch),
       seed = future_seed())
   }
@@ -492,7 +510,8 @@ extra_samples <- function(draws,
                           n_cores = NULL,
                           verbose = TRUE,
                           pb_update = 50,
-                          one_by_one = FALSE) {
+                          one_by_one = FALSE,
+                          trace_batch_size = 100) {
 
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
@@ -513,7 +532,8 @@ extra_samples <- function(draws,
                pb_update = pb_update,
                one_by_one = one_by_one,
                n_cores = n_cores,
-               from_scratch = FALSE)
+               from_scratch = FALSE,
+               trace_batch_size = trace_batch_size)
 
 }
 
@@ -623,7 +643,11 @@ parse_initial_values <- function(initials, dag) {
 
   # set them in the list and flatten to a vector in the same order as tensorflow
   params[idx] <- inits_free
-  unlist_tf(params)
+  params <- unlist_tf(params)
+
+  # force them to be row vectors and return
+  params <- matrix(params, nrow = 1)
+  params
 
 }
 

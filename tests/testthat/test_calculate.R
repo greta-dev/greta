@@ -122,3 +122,55 @@ test_that("calculate errors nicely if not used on a greta array", {
                "target' is not a greta array")
 
 })
+
+test_that("calculate works with variable batch sizes", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  samples <- 100
+  x <- as_data(c(1, 2))
+  a <- normal(0, 1)
+  y <- a * x
+  m <- model(y)
+  draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
+
+  # variable valid batch sizes
+  val_1 <- calculate(y, draws, trace_batch_size = 1)
+  val_10 <- calculate(y, draws, trace_batch_size = 10)
+  val_100 <- calculate(y, draws, trace_batch_size = 100)
+  val_inf <- calculate(y, draws, trace_batch_size = Inf)
+
+  # check the first one
+  expect_s3_class(val_1, "mcmc.list")
+  expect_equal(dim(val_1[[1]]), c(100, 2))
+  expect_true(all(is.finite(as.vector(val_1[[1]]))))
+
+  # check the others are the same
+  expect_identical(val_10, val_1)
+  expect_identical(val_100, val_1)
+  expect_identical(val_inf, val_1)
+
+})
+
+test_that("calculate errors nicely with invalid batch sizes", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  samples <- 100
+  x <- as_data(c(1, 2))
+  a <- normal(0, 1)
+  y <- a * x
+  m <- model(y)
+  draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
+
+  # variable valid batch sizes
+  expect_error(calculate(y, draws, trace_batch_size = 0),
+               "greater than or equal to 1")
+  expect_error(calculate(y, draws, trace_batch_size = NULL),
+               "greater than or equal to 1")
+  expect_error(calculate(y, draws, trace_batch_size = NA),
+               "greater than or equal to 1")
+
+})
