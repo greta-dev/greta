@@ -305,6 +305,25 @@ test_that("extra_samples works", {
 
 })
 
+test_that("trace_batch_size works", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # set up model
+  a <- normal(0, 1)
+  m <- model(a)
+
+  draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE, trace_batch_size = 3)
+
+  more_draws <- extra_samples(draws, 20, verbose = FALSE, trace_batch_size = 6)
+
+  expect_true(inherits(more_draws, "mcmc.list"))
+  expect_true(coda::niter(more_draws) == 30)
+  expect_true(coda::nchain(more_draws) == 4)
+
+})
+
 test_that("stashed_samples works", {
 
   skip_if_not(check_tf_version())
