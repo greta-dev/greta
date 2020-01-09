@@ -314,7 +314,14 @@ test_that("trace_batch_size works", {
   a <- normal(0, 1)
   m <- model(a)
 
-  draws <- mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE, trace_batch_size = 3)
+  draws <-
+    mcmc(
+      m,
+      warmup = 10,
+      n_samples = 10,
+      verbose = FALSE,
+      trace_batch_size = 3
+    )
 
   more_draws <- extra_samples(draws, 20, verbose = FALSE, trace_batch_size = 6)
 

@@ -466,7 +466,9 @@ dag_class <- R6Class(
     },
 
     # return the current values of the traced nodes, as a named vector
-    trace_values = function(free_state, flatten = TRUE, trace_batch_size = Inf) {
+    trace_values = function(free_state,
+                            flatten = TRUE,
+                            trace_batch_size = Inf) {
 
       # get the number of samples to trace
       n_samples <- nrow(free_state)

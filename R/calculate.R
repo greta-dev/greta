@@ -12,9 +12,9 @@
 #'   which \code{target} is connected, or an \code{mcmc.list} object returned by
 #'   \code{\link{mcmc}}.
 #' @param precision the floating point precision to use when calculating values.
-#' @param trace_batch_size the number of posterior samples to process at a time when
-#'   \code{target} is an \code{mcmc.list} object; reduce this to reduce memory
-#'   demands
+#' @param trace_batch_size the number of posterior samples to process at a time
+#'   when \code{target} is an \code{mcmc.list} object; reduce this to reduce
+#'   memory demands
 #'
 #' @return A numeric R array with the same dimensions as \code{target}, giving
 #'   the values it would take conditioned on the fixed values given by
