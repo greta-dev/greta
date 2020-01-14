@@ -1,4 +1,5 @@
-# define a new S3 class of the output of greta::mcmc(), inheriting from coda's mcmc.list
+# define a new S3 class of the output of greta::mcmc(), inheriting from coda's
+# mcmc.list
 
 as_greta_mcmc_list <- function(x, model_info) {
 
@@ -12,14 +13,17 @@ as_greta_mcmc_list <- function(x, model_info) {
 # for window (and any other function that modifies the object), apply the same
 # to the free state draws
 
+# Begin Exclude Linting
 #' @export
 #' @noRd
 window.greta_mcmc_list <- function(x, start, end, thin, ...) {
+# End Exclude Linting %>%
   model_info <- attr(x, "model_info")
   model_info$raw_draws <- window(model_info$raw_draws, start, end, thin, ...)
   x <- NextMethod(x)
   as_greta_mcmc_list(x, model_info)
 }
 
-# add new methods for these generics, to make them look nicer and be more user-friendly:
+# add new methods for these generics, to make them look nicer and be more
+# user-friendly:
 # print, plot, summary

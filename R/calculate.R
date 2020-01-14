@@ -114,6 +114,7 @@ calculate <- function(target, values = list(),
 }
 
 # Begin Exclude Linting
+#' @importFrom coda thin
 calculate_mcmc.list <- function(target, target_name, values, tf_float, trace_batch_size) {
 # End Exclude Linting
 
@@ -148,8 +149,15 @@ calculate_mcmc.list <- function(target, target_name, values, tf_float, trace_bat
 
   # trace the target for each chain
   values <- lapply(draws, dag$trace_values, trace_batch_size = trace_batch_size)
-  trace <- lapply(values, coda::mcmc)
 
+  # convert to a greta_mcmc_list object, retaining windowing info
+  trace <- lapply(
+    values,
+    coda::mcmc,
+    start = start(draws),
+    end = end(draws),
+    thin = coda::thin(draws)
+  )
   trace <- coda::mcmc.list(trace)
   trace <- as_greta_mcmc_list(trace, model_info)
   trace
