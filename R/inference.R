@@ -102,10 +102,10 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   argument \code{trace_batch_size} can be modified to trade-off speed against
 #'   memory usage.
 #'
-#' @return \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
-#'   \code{mcmc.list} object that can be analysed using functions from the coda
-#'   package. This will contain mcmc samples of the greta arrays used to create
-#'   \code{model}.
+#' @return \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - a
+#'   \code{greta_mcmc_list} object that can be analysed using functions from the
+#'   coda package. This will contain mcmc samples of the greta arrays used to
+#'   create \code{model}.
 #'
 #' @examples
 #' \dontrun{
@@ -462,9 +462,17 @@ stashed_samples <- function() {
 
     } else {
 
-      # convert to mcmc objects
-      free_state_draws <- lapply(free_state_draws, prepare_draws)
-      values_draws <- lapply(values_draws, prepare_draws)
+      thins <- lapply(samplers, member, "thin")
+
+      # convert to mcmc objects, passing on thinning
+      free_state_draws <- mapply(prepare_draws,
+                                 draws = free_state_draws,
+                                 thin = thins,
+                                 SIMPLIFY = FALSE)
+      values_draws <- mapply(prepare_draws,
+                             draws = values_draws,
+                             thin = thins,
+                             SIMPLIFY = FALSE)
 
       # convert to mcmc.list objects
       free_state_draws <- coda::mcmc.list(free_state_draws)
@@ -476,8 +484,7 @@ stashed_samples <- function() {
       model_info$samplers <- samplers
       model_info$model <- samplers[[1]]$model
 
-      # add the raw draws as an attribute
-      attr(values_draws, "model_info") <- model_info
+      values_draws <- as_greta_mcmc_list(values_draws, model_info)
 
       return(values_draws)
 
@@ -495,7 +502,7 @@ stashed_samples <- function() {
 #'
 #' @export
 #'
-#' @param draws an mcmc.list object returned by \code{mcmc} or
+#' @param draws a greta_mcmc_list object returned by \code{mcmc} or
 #'   \code{stashed_samples}
 #'
 #' @details Samples returned by \code{mcmc()} and \code{stashed_samples()} can

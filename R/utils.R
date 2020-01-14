@@ -939,10 +939,10 @@ cleanly <- function(expr) {
 # prepare a matrix of draws and return as an mcmc object
 #' @noRd
 #' @importFrom coda mcmc
-prepare_draws <- function(draws) {
+prepare_draws <- function(draws, thin = 1) {
   draws_df <- data.frame(draws, check.names = FALSE)
   draws_df <- na.omit(draws_df)
-  coda::mcmc(draws_df)
+  coda::mcmc(draws_df, thin = thin)
 }
 
 build_sampler <- function(initial_values, sampler, model, seed = get_seed()) {
@@ -1053,8 +1053,8 @@ flatten_trace <- function(i, trace_list) {
 # stashed_samples, and error nicely if there's something fishy
 get_model_info <- function(draws, name = "value") {
 
-  if (!inherits(draws, "mcmc.list")) {
-    stop(name, " must be an mcmc.list object created by greta::mcmc(), ",
+  if (!inherits(draws, "greta_mcmc_list")) {
+    stop(name, " must be an greta_mcmc_list object created by greta::mcmc(), ",
          "greta::stashed_samples() or greta::extra_samples()",
          call. = FALSE)
   }

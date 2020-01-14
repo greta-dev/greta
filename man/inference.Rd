@@ -11,12 +11,14 @@
 \usage{
 mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
   warmup = 1000, chains = 4, n_cores = NULL, verbose = TRUE,
-  pb_update = 50, one_by_one = FALSE, initial_values = initials())
+  pb_update = 50, one_by_one = FALSE, initial_values = initials(),
+  trace_batch_size = 100)
 
 stashed_samples()
 
 extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
-  verbose = TRUE, pb_update = 50, one_by_one = FALSE)
+  verbose = TRUE, pb_update = 50, one_by_one = FALSE,
+  trace_batch_size = 100)
 
 initials(...)
 
@@ -60,7 +62,11 @@ below).}
 some or all of the variables in the model. These will be used as the
 starting point for sampling/optimisation.}
 
-\item{draws}{an mcmc.list object returned by \code{mcmc} or
+\item{trace_batch_size}{the number of posterior samples to process at a time
+when tracing the parameters of interest; reduce this to reduce memory
+demands}
+
+\item{draws}{a greta_mcmc_list object returned by \code{mcmc} or
 \code{stashed_samples}}
 
 \item{...}{named numeric values, giving initial values of some or all of the
@@ -84,10 +90,10 @@ estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.}
 Hessian arrays for the parameters}
 }
 \value{
-\code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
-  \code{mcmc.list} object that can be analysed using functions from the coda
-  package. This will contain mcmc samples of the greta arrays used to create
-  \code{model}.
+\code{mcmc}, \code{stashed_samples} & \code{extra_samples} - a
+  \code{greta_mcmc_list} object that can be analysed using functions from the
+  coda package. This will contain mcmc samples of the greta arrays used to
+  create \code{model}.
 
 \code{opt} - a list containing the following named elements:
   \itemize{
@@ -155,6 +161,14 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
   \code{future} package, \code{n_cores} will be set so that \code{n_cores *
   \link[future:nbrOfWorkers]{future::nbrOfWorkers}} is less than the number
   of CPU cores.
+
+  After carrying out mcmc on all the model parameters, \code{mcmc()}
+  calculates the values of (i.e. traces) the parameters of interest for each
+  of these samples, similarly to \code{\linl[calculate]{calculate}}. Multiple
+  posterior samples can be traced simulataneously, though this can require
+  large amounts of memory for large models. As in \code{calculate}, the
+  argument \code{trace_batch_size} can be modified to trade-off speed against
+  memory usage.
 
 If the sampler is aborted before finishing (and \code{future}
   parallelism isn't being used), the samples collected so far can be

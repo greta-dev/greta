@@ -185,12 +185,14 @@
 
     <pre class="usage"><span class='fu'>mcmc</span>(<span class='no'>model</span>, <span class='kw'>sampler</span> <span class='kw'>=</span> <span class='fu'><a href='samplers.html'>hmc</a></span>(), <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>50</span>, <span class='kw'>one_by_one</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='fu'>initials</span>())
+  <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>50</span>, <span class='kw'>one_by_one</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='fu'>initials</span>(),
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
 <span class='fu'>stashed_samples</span>()
 
 <span class='fu'>extra_samples</span>(<span class='no'>draws</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>50</span>, <span class='kw'>one_by_one</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>50</span>, <span class='kw'>one_by_one</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
 <span class='fu'>initials</span>(<span class='no'>...</span>)
 
@@ -259,8 +261,14 @@ some or all of the variables in the model. These will be used as the
 starting point for sampling/optimisation.</p></td>
     </tr>
     <tr>
+      <th>trace_batch_size</th>
+      <td><p>the number of posterior samples to process at a time
+when tracing the parameters of interest; reduce this to reduce memory
+demands</p></td>
+    </tr>
+    <tr>
       <th>draws</th>
-      <td><p>an mcmc.list object returned by <code>mcmc</code> or
+      <td><p>a greta_mcmc_list object returned by <code>mcmc</code> or
 <code>stashed_samples</code></p></td>
     </tr>
     <tr>
@@ -299,10 +307,10 @@ Hessian arrays for the parameters</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><code>mcmc</code>, <code>stashed_samples</code> &amp; <code>extra_samples</code> - an
-  <code>mcmc.list</code> object that can be analysed using functions from the coda
-  package. This will contain mcmc samples of the greta arrays used to create
-  <code>model</code>.</p>
+    <p><code>mcmc</code>, <code>stashed_samples</code> &amp; <code>extra_samples</code> - a
+  <code>greta_mcmc_list</code> object that can be analysed using functions from the
+  coda package. This will contain mcmc samples of the greta arrays used to
+  create <code>model</code>.</p>
 <p><code>opt</code> - a list containing the following named elements:</p><ul>
 <li><p><code>par</code> a named list of the optimal values for the greta arrays
     specified in <code>model</code></p></li>
@@ -362,6 +370,13 @@ Hessian arrays for the parameters</p></td>
   <code>future</code> package, <code>n_cores</code> will be set so that <code>n_cores *
   <a href='https://www.rdocumentation.org/packages/future/topics/nbrOfWorkers'>future::nbrOfWorkers</a></code> is less than the number
   of CPU cores.</p>
+<p>After carrying out mcmc on all the model parameters, <code>mcmc()</code>
+  calculates the values of (i.e. traces) the parameters of interest for each
+  of these samples, similarly to <code>[calculate]{calculate}</code>. Multiple
+  posterior samples can be traced simulataneously, though this can require
+  large amounts of memory for large models. As in <code>calculate</code>, the
+  argument <code>trace_batch_size</code> can be modified to trade-off speed against
+  memory usage.</p>
 <p>If the sampler is aborted before finishing (and <code>future</code>
   parallelism isn't being used), the samples collected so far can be
   retrieved with <code>stashed_samples()</code>. Only samples from the sampling

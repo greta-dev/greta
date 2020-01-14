@@ -21,7 +21,7 @@ test_that("calculate works with correct lists", {
 
 })
 
-test_that("calculate works with mcmc.list objects", {
+test_that("calculate works with greta_mcmc_list objects", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -36,7 +36,7 @@ test_that("calculate works with mcmc.list objects", {
   # with an existing greta array
   y_values <- calculate(y, draws)
   # correct class
-  expect_s3_class(y_values, "mcmc.list")
+  expect_s3_class(y_values, "greta_mcmc_list")
   # correct dimensions
   expect_equal(dim(y_values[[1]]), c(10, 2))
   # all valid values
@@ -45,7 +45,7 @@ test_that("calculate works with mcmc.list objects", {
   # with a new greta array, based on a different element in the model
   new_values <- calculate(a ^ 2, draws)
   # correct class
-  expect_s3_class(new_values, "mcmc.list")
+  expect_s3_class(new_values, "greta_mcmc_list")
   # correct dimensions
   expect_equal(dim(new_values[[1]]), c(10, 1))
   # all valid values
@@ -53,7 +53,7 @@ test_that("calculate works with mcmc.list objects", {
 
 })
 
-test_that("calculate errors nicely if mcmc.list objects missing info", {
+test_that("calculate errors nicely if greta_mcmc_list objects missing info", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -142,7 +142,7 @@ test_that("calculate works with variable batch sizes", {
   val_inf <- calculate(y, draws, trace_batch_size = Inf)
 
   # check the first one
-  expect_s3_class(val_1, "mcmc.list")
+  expect_s3_class(val_1, "greta_mcmc_list")
   expect_equal(dim(val_1[[1]]), c(100, 2))
   expect_true(all(is.finite(as.vector(val_1[[1]]))))
 
