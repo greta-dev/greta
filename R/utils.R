@@ -939,10 +939,10 @@ cleanly <- function(expr) {
 # prepare a matrix of draws and return as an mcmc object
 #' @noRd
 #' @importFrom coda mcmc
-prepare_draws <- function(draws) {
+prepare_draws <- function(draws, thin = 1) {
   draws_df <- data.frame(draws, check.names = FALSE)
   draws_df <- na.omit(draws_df)
-  coda::mcmc(draws_df)
+  coda::mcmc(draws_df, thin = thin)
 }
 
 build_sampler <- function(initial_values, sampler, model, seed = get_seed()) {

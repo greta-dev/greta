@@ -235,6 +235,7 @@ sampler <- R6Class(
     n_samplers = 1,
     n_chains = 1,
     numerical_rejections = 0,
+    thin = 1,
 
     # tuning information
     mean_accept_stat = 0.5,
@@ -295,6 +296,7 @@ sampler <- R6Class(
                          trace_batch_size,
                          from_scratch = TRUE) {
 
+      self$thin <- thin
       dag <- self$model$dag
 
       # set the number of cores

@@ -462,9 +462,17 @@ stashed_samples <- function() {
 
     } else {
 
-      # convert to mcmc objects
-      free_state_draws <- lapply(free_state_draws, prepare_draws)
-      values_draws <- lapply(values_draws, prepare_draws)
+      thins <- lapply(samplers, member, "thin")
+
+      # convert to mcmc objects, passing on thinning
+      free_state_draws <- mapply(prepare_draws,
+                                 draws = free_state_draws,
+                                 thin = thins,
+                                 SIMPLIFY = FALSE)
+      values_draws <- mapply(prepare_draws,
+                             draws = values_draws,
+                             thin = thins,
+                             SIMPLIFY = FALSE)
 
       # convert to mcmc.list objects
       free_state_draws <- coda::mcmc.list(free_state_draws)

@@ -626,5 +626,6 @@ test_that("pb_update > thin to avoid bursts with no saved iterations", {
   m <- model(x)
   expect_ok(draws <- mcmc(m, n_samples = 100, warmup = 100,
                           thin = 3, pb_update = 2))
+  expect_identical(thin(draws), 3)
 
 })
