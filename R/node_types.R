@@ -72,18 +72,11 @@ operation_node <- R6Class(
                           tf_operation = NULL,
                           value = NULL,
                           representations = list(),
-                          tf_function_env = parent.frame(3)) {
+                          tf_function_env = parent.frame(3),
+                          expand_scalars = FALSE) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
-      for (greta_array in dots)
-        self$add_argument(get_node(greta_array))
-
-      self$operation_name <- operation
-      self$operation <- tf_operation
-      self$operation_args <- operation_args
-      self$representations <- representations
-      self$tf_function_env <- tf_function_env
 
       # work out the dimensions of the new greta array, if NULL assume an
       # elementwise operation and get the largest number of each dimension,
@@ -95,6 +88,21 @@ operation_node <- R6Class(
         dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
         dim <- do.call(pmax, dim_list)
       }
+
+      # expand scalar arguments to match dim if needed
+      if (!identical(dim, c(1L, 1L)) & expand_scalars) {
+        dots <- lapply(dots, `dim<-`, dim)
+      }
+
+      for (greta_array in dots) {
+        self$add_argument(get_node(greta_array))
+      }
+
+      self$operation_name <- operation
+      self$operation <- tf_operation
+      self$operation_args <- operation_args
+      self$representations <- representations
+      self$tf_function_env <- tf_function_env
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
