@@ -11,14 +11,14 @@ calculate(target, values = list(), precision = c("double", "single"),
 \item{target}{a greta array for which to calculate the value}
 
 \item{values}{a named list giving temporary values of the greta arrays with
-which \code{target} is connected, or an \code{mcmc.list} object returned by
-\code{\link{mcmc}}.}
+which \code{target} is connected, or a \code{greta_mcmc_list} object
+returned by \code{\link{mcmc}}.}
 
 \item{precision}{the floating point precision to use when calculating values.}
 
 \item{trace_batch_size}{the number of posterior samples to process at a time
-when \code{target} is an \code{mcmc.list} object; reduce this to reduce
-memory demands}
+when \code{target} is a \code{greta_mcmc_list} object; reduce this to
+reduce memory demands}
 }
 \value{
 A numeric R array with the same dimensions as \code{target}, giving

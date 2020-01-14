@@ -9,12 +9,12 @@
 #'
 #' @param target a greta array for which to calculate the value
 #' @param values a named list giving temporary values of the greta arrays with
-#'   which \code{target} is connected, or an \code{mcmc.list} object returned by
-#'   \code{\link{mcmc}}.
+#'   which \code{target} is connected, or a \code{greta_mcmc_list} object
+#'   returned by \code{\link{mcmc}}.
 #' @param precision the floating point precision to use when calculating values.
 #' @param trace_batch_size the number of posterior samples to process at a time
-#'   when \code{target} is an \code{mcmc.list} object; reduce this to reduce
-#'   memory demands
+#'   when \code{target} is a \code{greta_mcmc_list} object; reduce this to
+#'   reduce memory demands
 #'
 #' @return A numeric R array with the same dimensions as \code{target}, giving
 #'   the values it would take conditioned on the fixed values given by
@@ -96,8 +96,8 @@ calculate <- function(target, values = list(),
   if (!inherits(target, "greta_array"))
     stop("'target' is not a greta array")
 
-  if (inherits(values, "mcmc.list")) {
-    calculate_mcmc.list(
+  if (inherits(values, "greta_mcmc_list")) {
+    calculate_greta_mcmc_list(
       target = target,
       target_name = target_name,
       values = values,
@@ -113,10 +113,12 @@ calculate <- function(target, values = list(),
 
 }
 
-# Begin Exclude Linting
 #' @importFrom coda thin
-calculate_mcmc.list <- function(target, target_name, values, tf_float, trace_batch_size) {
-# End Exclude Linting
+calculate_greta_mcmc_list <- function(target,
+                                      target_name,
+                                      values,
+                                      tf_float,
+                                      trace_batch_size) {
 
   # check trace_batch_size is valid
   trace_batch_size <- check_trace_batch_size(trace_batch_size)

@@ -1053,8 +1053,8 @@ flatten_trace <- function(i, trace_list) {
 # stashed_samples, and error nicely if there's something fishy
 get_model_info <- function(draws, name = "value") {
 
-  if (!inherits(draws, "mcmc.list")) {
-    stop(name, " must be an mcmc.list object created by greta::mcmc(), ",
+  if (!inherits(draws, "greta_mcmc_list")) {
+    stop(name, " must be an greta_mcmc_list object created by greta::mcmc(), ",
          "greta::stashed_samples() or greta::extra_samples()",
          call. = FALSE)
   }

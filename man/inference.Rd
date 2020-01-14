@@ -66,7 +66,7 @@ starting point for sampling/optimisation.}
 when tracing the parameters of interest; reduce this to reduce memory
 demands}
 
-\item{draws}{an mcmc.list object returned by \code{mcmc} or
+\item{draws}{a greta_mcmc_list object returned by \code{mcmc} or
 \code{stashed_samples}}
 
 \item{...}{named numeric values, giving initial values of some or all of the
@@ -90,10 +90,10 @@ estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.}
 Hessian arrays for the parameters}
 }
 \value{
-\code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
-  \code{mcmc.list} object that can be analysed using functions from the coda
-  package. This will contain mcmc samples of the greta arrays used to create
-  \code{model}.
+\code{mcmc}, \code{stashed_samples} & \code{extra_samples} - a
+  \code{greta_mcmc_list} object that can be analysed using functions from the
+  coda package. This will contain mcmc samples of the greta arrays used to
+  create \code{model}.
 
 \code{opt} - a list containing the following named elements:
   \itemize{

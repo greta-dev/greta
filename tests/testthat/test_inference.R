@@ -299,7 +299,7 @@ test_that("extra_samples works", {
 
   more_draws <- extra_samples(draws, 20, verbose = FALSE)
 
-  expect_true(inherits(more_draws, "mcmc.list"))
+  expect_true(inherits(more_draws, "greta_mcmc_list"))
   expect_true(coda::niter(more_draws) == 30)
   expect_true(coda::nchain(more_draws) == 4)
 
@@ -325,7 +325,7 @@ test_that("trace_batch_size works", {
 
   more_draws <- extra_samples(draws, 20, verbose = FALSE, trace_batch_size = 6)
 
-  expect_true(inherits(more_draws, "mcmc.list"))
+  expect_true(inherits(more_draws, "greta_mcmc_list"))
   expect_true(coda::niter(more_draws) == 30)
   expect_true(coda::nchain(more_draws) == 4)
 
@@ -355,9 +355,9 @@ test_that("stashed_samples works", {
   ), simplify = FALSE)
   assign("samplers", samplers_stash, envir = stash)
 
-  # should convert to an mcmc.list
+  # should convert to a greta_mcmc_list
   ans <- stashed_samples()
-  expect_s3_class(ans, "mcmc.list")
+  expect_s3_class(ans, "greta_mcmc_list")
 
   # model_info attribute should have raw draws and the model
   model_info <- attr(ans, "model_info")
@@ -461,7 +461,7 @@ test_that("mcmc works in parallel", {
                           chains = 1,
                           verbose = FALSE))
 
-  expect_true(inherits(draws, "mcmc.list"))
+  expect_true(inherits(draws, "greta_mcmc_list"))
   expect_true(coda::niter(draws) == 10)
   rm(draws)
 
@@ -470,7 +470,7 @@ test_that("mcmc works in parallel", {
                           chains = 2,
                           verbose = FALSE))
 
-  expect_true(inherits(draws, "mcmc.list"))
+  expect_true(inherits(draws, "greta_mcmc_list"))
   expect_true(coda::niter(draws) == 10)
 
   # put the future plan back as we found it
