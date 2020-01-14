@@ -1,5 +1,12 @@
 # greta (development version)
 
+
+* `mcmc()`, `stashed_samples()`, and `calculate()` now return objects of class `greta_mcmc_list` which inherit from `coda`'s `mcmc.list` class, but enable custom greta S3 methods, including a `window()` function.
+
+* `mcmc()` and `calculate()` now have a `trace_batch_size` argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays.
+
+* a number of optimiser methods are now deprecated, since they will be unavailable when greta moves to using TensorFlow v2.0: `powell()`, `cg()`, `newton_cg()`, `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()`.
+
 # greta 0.3.1
 
 This release is predominantly a patch to make greta work with recent versions of TensorFlow and TensorFlow Probability, which were not backward compatible with the versions on which greta previously depended. From this release forward, greta will depend on specific (rather than minimum) versions of these two pieces of software to avoid it breaking if more changes are made to the APIS of these packages.
