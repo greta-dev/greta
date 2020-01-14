@@ -74,6 +74,30 @@ tf_set_dim <- function(x, dims) {
 
 }
 
+# expand the dimensions of a scalar tensor, reshaping in the same way
+# (column-major) as R
+tf_expand_dim <- function(x, dims) {
+
+  # prepend a batch dimension to dims (a 1 so we can tile with it)
+  dims <- c(1L, dims)
+
+  # pad/shrink x to have the correct number of dimensions
+  x_dims <- length(dim(x))
+  target_dims <- length(dims)
+
+  # add extra dimensions at the end
+  if (target_dims > x_dims) {
+    extra_dims <- target_dims - x_dims
+    for (i in seq_len(extra_dims)) {
+      x <- tf$expand_dims(x, -1L)
+    }
+  }
+
+  # tile x to match target dimensions
+  tf$tile(x, dims)
+
+}
+
 # skip the first index when transposing
 tf_transpose <- function(x) {
   nelem <- length(dim(x))

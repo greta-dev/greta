@@ -509,21 +509,42 @@ length.greta_array <- function(x)
   prod_dims <- prod(dims)
   len <- length(x)
 
-  if (prod_dims != len) {
+  # if x isn't a scalar and the numbers of elements don't match, error
+  if (len != 1 && prod_dims != len) {
     msg <- sprintf("dims [product %i] do not match the length of object [%i]",
                    prod_dims, len)
     stop(msg, call. = FALSE)
   }
 
+  # change the values similarly
   new_value <- get_node(x)$value()
-  dim(new_value) <- dims
+  new_value <- array(new_value, dim = dims)
 
-  op("set_dim",
-     x,
-     operation_args = list(dims = dims),
-     tf_operation = "tf_set_dim",
-     dim = dims,
-     value = new_value)
+  if (!identical(dim(x), dims) && len == 1) {
+
+    # if the dims don't match, but x is a scalar, expand it to the required
+    # dimension
+    op("expand_dim",
+       x,
+       operation_args = list(dims = dims),
+       tf_operation = "tf_expand_dim",
+       dim = dims,
+       value = new_value)
+
+  } else {
+    # otherwise, if the dimensions don't match, but the number of elements do,
+    # just change the dimensions
+    op("set_dim",
+       x,
+       operation_args = list(dims = dims),
+       tf_operation = "tf_set_dim",
+       dim = dims,
+       value = new_value)
+  }
+
+
+  # otherwise just reorder them
+
 
 }
 

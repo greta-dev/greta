@@ -509,7 +509,13 @@ distribution_node <- R6Class(
 
     },
 
-    add_parameter = function(parameter, name) {
+    add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
+
+      # expand out a scalar parameter if needed
+      if (!is.null(expand_scalar_to) &&
+          is_scalar(parameter) & !identical(expand_scalar_to, c(1L, 1L))) {
+        parameter <- greta_array(parameter, dim = expand_scalar_to)
+      }
 
       parameter <- to_node(parameter)
       self$add_parent(parameter)
