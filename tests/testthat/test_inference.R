@@ -351,6 +351,7 @@ test_that("stashed_samples works", {
   samplers_stash <- replicate(2, list(
     traced_free_state = list(as.matrix(rnorm(17))),
     traced_values = list(as.matrix(rnorm(17))),
+    thin = 1,
     model = m
   ), simplify = FALSE)
   assign("samplers", samplers_stash, envir = stash)
