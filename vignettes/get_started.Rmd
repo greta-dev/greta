@@ -435,7 +435,7 @@ draws <- mcmc(m, n_samples = 1000)
 
 Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm on each of 4 separate chains, giving us 4000 samples. HMC uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 1000 iterations on each chain 'warming up' (tuning the sampler parameters) and 'burning in' (moving to the area of highest probability) the sampler.
 
-`draws` is a `greta_mcmc_list` object, which inherits form the coda R package's `mcmc.list` object. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.
+`draws` is a `greta_mcmc_list` object, which inherits from the coda R package's `mcmc.list` object. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.
 
 ```{r coda_summary}
 summary(draws)
