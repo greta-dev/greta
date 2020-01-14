@@ -147,7 +147,8 @@ mixture_distribution <- R6Class(
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
-                           paste("distribution", i))
+                           paste("distribution", i),
+                           expand_scalar_to = NULL)
       }
 
       self$add_parameter(weights, "weights")

@@ -72,25 +72,37 @@ operation_node <- R6Class(
                           tf_operation = NULL,
                           value = NULL,
                           representations = list(),
-                          tf_function_env = parent.frame(3)) {
+                          tf_function_env = parent.frame(3),
+                          expand_scalars = FALSE) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
-      for (greta_array in dots)
+
+      # work out the dimensions of the new greta array, if NULL assume an
+      # elementwise operation and get the largest number of each dimension,
+      # otherwise expect a function to be passed which will calculate it from
+      # the provided list of nodes arguments
+      if (is.null(dim)) {
+        dim_list <- lapply(dots, dim)
+        dim_lengths <- vapply(dim_list, length, numeric(1))
+        dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
+        dim <- do.call(pmax, dim_list)
+      }
+
+      # expand scalar arguments to match dim if needed
+      if (!identical(dim, c(1L, 1L)) & expand_scalars) {
+        dots <- lapply(dots, `dim<-`, dim)
+      }
+
+      for (greta_array in dots) {
         self$add_argument(get_node(greta_array))
+      }
 
       self$operation_name <- operation
       self$operation <- tf_operation
       self$operation_args <- operation_args
       self$representations <- representations
       self$tf_function_env <- tf_function_env
-
-      # work out the dimensions of the new greta array, if NULL assume an
-      # elementwise operation and get the largest number of each dimension,
-      # otherwise expect a function to be passed which will calculate it from
-      # the provided list of nodes arguments
-      if (is.null(dim))
-        dim <- do.call(pmax, lapply(dots, dim))
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
@@ -509,7 +521,13 @@ distribution_node <- R6Class(
 
     },
 
-    add_parameter = function(parameter, name) {
+    add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
+
+      # expand out a scalar parameter if needed
+      if (!is.null(expand_scalar_to) &&
+          is_scalar(parameter) & !identical(expand_scalar_to, c(1L, 1L))) {
+        parameter <- greta_array(parameter, dim = expand_scalar_to)
+      }
 
       parameter <- to_node(parameter)
       self$add_parent(parameter)

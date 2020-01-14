@@ -20,6 +20,24 @@ test_that("arithmetic operators work as expected", {
 
 })
 
+test_that("arithmetic operators work as expected with arrays and scalars", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  a <- randn(2, 1, 1)
+  b <- 4
+
+  check_op(`-`, a, b)
+  check_op(`+`, a, b)
+  check_op(`*`, a, b)
+  check_op(`/`, a, b)
+  check_op(`^`, abs(a), b)
+  check_op(`%%`, a, b)
+  check_op(`%/%`, a, b)
+
+})
+
 test_that("logical operators work as expected", {
 
   skip_if_not(check_tf_version())

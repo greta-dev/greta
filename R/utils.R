@@ -373,6 +373,15 @@ disable_tensorflow_logging <- function(disable = TRUE) {
   reticulate::py_set_attr(logger, "disabled", disable)
 }
 
+
+pad_vector <- function(x, to_length, with = 1) {
+  pad_by <- to_length - length(x)
+  if (pad_by > 0) {
+    x <- c(x, rep(with, pad_by))
+  }
+  x
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -398,7 +407,8 @@ misc_module <- module(module,
                       split_chains,
                       hessian_dims,
                       rhex,
-                      disable_tensorflow_logging)
+                      disable_tensorflow_logging,
+                      pad_vector)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function(..., target_dim = NULL) {
@@ -470,6 +480,8 @@ check_dims <- function(..., target_dim = NULL) {
   } else {
 
     # otherwise, find the correct output dimension
+    dim_lengths <- vapply(dim_list, length, numeric(1))
+    dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
     output_dim <- do.call(pmax, dim_list)
 
   }
