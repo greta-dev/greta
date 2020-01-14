@@ -89,8 +89,12 @@ operation_node <- R6Class(
       # elementwise operation and get the largest number of each dimension,
       # otherwise expect a function to be passed which will calculate it from
       # the provided list of nodes arguments
-      if (is.null(dim))
-        dim <- do.call(pmax, lapply(dots, dim))
+      if (is.null(dim)) {
+        dim_list <- lapply(dots, dim)
+        dim_lengths <- vapply(dim_list, length, numeric(1))
+        dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
+        dim <- do.call(pmax, dim_list)
+      }
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
