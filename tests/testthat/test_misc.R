@@ -4,6 +4,12 @@ test_that("check_tf_version works", {
 
   skip_if_not(check_tf_version())
 
+  # when running in greta's CI environment (indicated by the environment
+  # variable GRETA_CI being 'true'), this check_tf_version always returns TRUE,
+  # so that w can test greta against incorrect versions if needed. Temporarily
+  # pretend we aren't in CI, so this function acts normally
+  Sys.setenv(GRETA_CI = "false")
+
   # record the true version and forge an old version
   true_version <- tf$`__version__`
   tf$`__version__` <- "0.9.0"  # Exclude Linting
@@ -32,6 +38,9 @@ test_that("check_tf_version works", {
     expect_warning(check_tf_version("warn"), expected_message),
     expect_message(check_tf_version("message"), expected_message)
   )
+
+  # turn it back again
+  Sys.setenv(GRETA_CI = "true")
 
 })
 

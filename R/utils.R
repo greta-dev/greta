@@ -60,6 +60,12 @@ check_tf_version <- function(alert = c("none",
                                        "message",
                                        "startup")) {
 
+  # skip this if running in greta's continuous integration environment - we want
+  # to be able to test it against incorrect versions
+  if (in_greta_ci()) {
+    return(invisible(TRUE))
+  }
+
   alert <- match.arg(alert)
 
   py_available <- TRUE
@@ -382,6 +388,11 @@ pad_vector <- function(x, to_length, with = 1) {
   x
 }
 
+# see if we are running in greta's continuous integration environment
+in_greta_ci <- function () {
+  isTRUE(as.logical(Sys.getenv("GRETA_CI")))
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -408,7 +419,8 @@ misc_module <- module(module,
                       hessian_dims,
                       rhex,
                       disable_tensorflow_logging,
-                      pad_vector)
+                      pad_vector,
+                      in_greta_ci)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function(..., target_dim = NULL) {
