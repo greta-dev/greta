@@ -36,3 +36,4 @@
 ^man/figures/main_icon\.png$
 ^man/figures/greta-header\.png$
 ^man/figures/logo\.png$
+^\.github/workflows/R-CMD-check\.yaml$
