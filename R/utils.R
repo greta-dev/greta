@@ -389,7 +389,7 @@ pad_vector <- function(x, to_length, with = 1) {
 }
 
 # see if we are running in greta's continuous integration environment
-in_greta_ci <- function () {
+in_greta_ci <- function() {
   isTRUE(as.logical(Sys.getenv("GRETA_CI")))
 }
 
