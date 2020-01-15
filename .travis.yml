@@ -4,6 +4,8 @@ warnings_are_errors: false
 dist: trusty
 env:
   global:
+  - TF_VERSION="1.14"
+  - TFP_VERSION="0.7.0"
   - GRETA_CI=true
   - RELEASE_CANDIDATE=false
   - LINTR_COMMENT_BOT=true
@@ -65,8 +67,8 @@ addons:
 before_install:
 - pip install --user numpy
 - pip install --user scipy
-- pip install --user 'tensorflow==1.14'
-- pip install --user 'tensorflow-probability==0.7.0'
+- pip install --user 'tensorflow==$TF_VERSION'
+- pip install --user 'tensorflow-probability==$TFP_VERSION'
 after_success:
 - Rscript -e "covr::codecov()"
 - Rscript -e "lintr::lint_package()"
