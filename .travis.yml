@@ -70,7 +70,7 @@ before_install:
 - pip install --user numpy
 - pip install --user scipy
 - pip install --user "$TF_VERSION"
-- pip install --user "$TFP_VERSION"
+- pip install --user --upgrade "$TFP_VERSION"
 after_success:
 - Rscript -e "covr::codecov()"
 - Rscript -e "lintr::lint_package()"
