@@ -1,5 +1,36 @@
 # tensorflow functions
 
+tf_log10 <- function(x) {
+  tf$math$log(x) / fl(log(10))
+}
+
+tf_log2 <- function(x) {
+  tf$math$log(x) / fl(log(2))
+}
+
+# TF doesn't have the clever efficient & stable versions of these, so do them
+# the slow way
+tf_cospi <- function(x) {
+  tf$math$cos(x * fl(pi))
+}
+
+tf_sinpi <- function(x) {
+  tf$math$sin(x * fl(pi))
+}
+
+tf_tanpi <- function(x) {
+  tf$math$tan(x * fl(pi))
+}
+
+tf_gamma_fun <- function(x) {
+  log_gamma <-  tf$math$lgamma(x)
+  tf$math$exp(log_gamma)
+}
+
+tf_trigamma <- function(x) {
+  tf$math$polygamma(fl(1), x)
+}
+
 # convert Tensor to logical
 tf_as_logical <- function(x)
   tf$cast(x, tf$bool)

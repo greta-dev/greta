@@ -23,6 +23,12 @@ TensorFlow only enables rounding to integers, so \code{round()} will
   \code{tapply()} works on column vectors (2D greta arrays with one column),
   and \code{INDEX} cannot be a greta array. Currently five functions are
   available, and arguments passed to \dots are ignored.
+
+  \code{cospi()}, \code{sinpi()}, and \code{tanpi()} do not use the
+  computationally more stable routines to compute \code{cos(x * pi)} etc.
+  that are available in R under some operating systems. Similarly
+  \code{trigamma()} uses tensorflows polygamma function, resulting in lower
+  precision than R's equivalent.
 }
 \section{Usage}{
  \preformatted{
@@ -51,10 +57,20 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  acos(x)
  asin(x)
  atan(x)
+ cosh(x)
+ sinh(x)
+ tanh(x)
+ acosh(x)
+ asinh(x)
+ atanh(x)
+ cospi(x)
+ sinpi(x)
+ tanpi(x)
 
  # special mathematical functions
  lgamma(x)
  digamma(x)
+ trigamma(x)
  choose(n, k)
  lchoose(n, k)
 
@@ -75,6 +91,8 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  # cumulative operations
  cumsum(x)
  cumprod(x)
+ cummax(x)
+ cummin(x)
 
  # solve an upper or lower triangular system
  backsolve(r, x, k = ncol(r), upper.tri = TRUE,

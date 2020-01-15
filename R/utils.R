@@ -795,11 +795,28 @@ check_future_plan <- function() {
 
 }
 
+check_cum_op <- function(x) {
+  dims <- dim(x)
+  if (length(dims) > 2 | dims[2] != 1) {
+    stop("'x' must be a column vector, but has dimensions ",
+         paste(dims, collapse = " x "),
+         call. = FALSE)
+  }
+}
+
+complex_error <- function(x) {
+  stop("greta does not yet support complex numbers",
+       call. = FALSE)
+}
+
+
 checks_module <- module(check_dims,
                         check_unit,
                         check_positive,
                         check_in_family,
-                        check_future_plan)
+                        check_future_plan,
+                        check_cum_op,
+                        complex_error)
 
 # convert an array to a vector row-wise
 flatten_rowwise <- function(array) {
