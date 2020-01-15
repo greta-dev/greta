@@ -32,10 +32,20 @@
 #'  acos(x)
 #'  asin(x)
 #'  atan(x)
+#'  cosh(x)
+#'  sinh(x)
+#'  tanh(x)
+#'  acosh(x)
+#'  asinh(x)
+#'  atanh(x)
+#'  cospi(x)
+#'  sinpi(x)
+#'  tanpi(x)
 #'
 #'  # special mathematical functions
 #'  lgamma(x)
 #'  digamma(x)
+#'  trigamma(x)
 #'  choose(n, k)
 #'  lchoose(n, k)
 #'
@@ -56,6 +66,8 @@
 #'  # cumulative operations
 #'  cumsum(x)
 #'  cumprod(x)
+#'  cummax(x)
+#'  cummin(x)
 #'
 #'  # solve an upper or lower triangular system
 #'  backsolve(r, x, k = ncol(r), upper.tri = TRUE,
@@ -86,6 +98,12 @@
 #'   \code{tapply()} works on column vectors (2D greta arrays with one column),
 #'   and \code{INDEX} cannot be a greta array. Currently five functions are
 #'   available, and arguments passed to \dots are ignored.
+#'
+#'   \code{cospi()}, \code{sinpi()}, and \code{tanpi()} do not use the
+#'   computationally more stable routines to compute \code{cos(x * pi)} etc.
+#'   that are available in R under some operating systems. Similarly
+#'   \code{trigamma()} uses tensorflows polygamma function, resulting in lower
+#'   precision than R's equivalent.
 #'
 #' @examples
 #' \dontrun{
@@ -134,6 +152,16 @@ log1p.greta_array <- function(x) {
 #' @export
 expm1.greta_array <- function(x) {
   op("expm1", x, tf_operation = "tf$math$expm1")
+}
+
+#' @export
+log10.greta_array <- function(x) {
+  op("log10", x, tf_operation = "tf_log10")
+}
+
+#' @export
+log2.greta_array <- function(x) {
+  op("log2", x, tf_operation = "tf_log2")
 }
 
 #' @export
@@ -201,6 +229,51 @@ atan.greta_array <- function(x) {
 }
 
 #' @export
+cosh.greta_array <- function(x) {
+  op("cosh", x, tf_operation = "tf$math$cosh")
+}
+
+#' @export
+sinh.greta_array <- function(x) {
+  op("sinh", x, tf_operation = "tf$math$sinh")
+}
+
+#' @export
+tanh.greta_array <- function(x) {
+  op("tanh", x, tf_operation = "tf$math$tanh")
+}
+
+#' @export
+acosh.greta_array <- function(x) {
+  op("acosh", x, tf_operation = "tf$math$acosh")
+}
+
+#' @export
+asinh.greta_array <- function(x) {
+  op("asinh", x, tf_operation = "tf$math$asinh")
+}
+
+#' @export
+atanh.greta_array <- function(x) {
+  op("atanh", x, tf_operation = "tf$math$atanh")
+}
+
+#' @export
+cospi.greta_array <- function(x) {
+  op("cospi", x, tf_operation = "tf_cospi")
+}
+
+#' @export
+sinpi.greta_array <- function(x) {
+  op("sinpi", x, tf_operation = "tf_sinpi")
+}
+
+#' @export
+tanpi.greta_array <- function(x) {
+  op("tanpi", x, tf_operation = "tf_tanpi")
+}
+
+#' @export
 lgamma.greta_array <- function(x) {
   op("lgamma", x, tf_operation = "tf$math$lgamma")
 }
@@ -208,6 +281,11 @@ lgamma.greta_array <- function(x) {
 #' @export
 digamma.greta_array <- function(x) {
   op("digamma", x, tf_operation = "tf$math$digamma")
+}
+
+#' @export
+trigamma.greta_array <- function(x) {
+  op("trigamma", x, tf_operation = "tf_trigamma")
 }
 
 #' @export
@@ -436,15 +514,6 @@ max.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
 
 }
 
-check_cum_op <- function(x) {
-  dims <- dim(x)
-  if (length(dims) > 2 | dims[2] != 1) {
-    stop("'x' must be a column vector, but has dimensions ",
-         paste(dims, collapse = " x "),
-         call. = FALSE)
-  }
-}
-
 #' @export
 cumsum.greta_array <- function(x) {
   check_cum_op(x)
@@ -456,6 +525,32 @@ cumprod.greta_array <- function(x) {
   check_cum_op(x)
   op("cumprod", x, tf_operation = "tf_cumprod")
 }
+
+# these primitives are not yet supported:
+#' @export
+cummax.greta_array <- function(x) {
+  stop("cummax not yet implemented for greta")
+}
+
+#' @export
+cummin.greta_array <- function(x) {
+  stop("cummin not yet implemented for greta")
+}
+
+#' @export
+Im.greta_array <- complex_error
+
+#' @export
+Re.greta_array <- complex_error
+
+#' @export
+Arg.greta_array <- complex_error
+
+#' @export
+Conj.greta_array <- complex_error
+
+#' @export
+Mod.greta_array <- complex_error
 
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
 rowcol_idx <- function(x, dims, which = c("col", "row")) {
