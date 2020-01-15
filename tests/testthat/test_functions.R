@@ -40,6 +40,58 @@ test_that("simple functions work as expected", {
 
 })
 
+
+test_that("primitive functions work as expected", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  real <- randn(25, 4)
+  pos <- exp(real)
+  posp1 <- pos + 1
+  m1p1 <- 2 * pnorm(real) - 1
+  n <- 10
+  k <- 5
+
+  check_op(log10, pos)
+  check_op(log2, pos)
+  check_op(cosh, real)
+  check_op(sinh, real)
+  check_op(tanh, real)
+  check_op(acosh, posp1)
+  check_op(asinh, posp1)
+  check_op(atanh, m1p1)
+  check_op(cospi, real)
+  check_op(sinpi, real)
+  check_op(tanpi, real)
+  check_op(trigamma, real)
+
+  # gamma is renamed, so check carefully
+  gamma_fun <- base::gamma
+  check_op(gamma_fun, real)
+
+  # cumulative functions
+  real_seq <- randn(10)
+  check_op(cummax, real_seq)
+  check_op(cummin, real_seq)
+
+})
+
+test_that("complex number functions error informatively", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  complex_funs <- list(Im, Re, Arg, Conj, Mod)
+  x <- randn(25, 4)
+
+  for (fun in complex_funs) {
+    expect_error(fun(x),
+                 "greta does not support complex numbers (yet)")
+  }
+
+})
+
 test_that("matrix functions work as expected", {
 
   skip_if_not(check_tf_version())
