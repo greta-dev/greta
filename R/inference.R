@@ -96,7 +96,7 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'
 #'   After carrying out mcmc on all the model parameters, \code{mcmc()}
 #'   calculates the values of (i.e. traces) the parameters of interest for each
-#'   of these samples, similarly to \code{\linl[calculate]{calculate}}. Multiple
+#'   of these samples, similarly to \code{\link{calculate}}. Multiple
 #'   posterior samples can be traced simulataneously, though this can require
 #'   large amounts of memory for large models. As in \code{calculate}, the
 #'   argument \code{trace_batch_size} can be modified to trade-off speed against

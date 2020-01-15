@@ -4,6 +4,7 @@
 \name{reexports}
 \alias{reexports}
 \alias{install_tensorflow}
+\alias{window}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -11,6 +12,8 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
+  \item{stats}{\code{\link[stats]{window}}}
+
   \item{tensorflow}{\code{\link[tensorflow]{install_tensorflow}}}
 }}
 

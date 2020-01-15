@@ -35,6 +35,8 @@ TensorFlow only enables rounding to integers, so \code{round()} will
 
  # logarithms and exponentials
  log(x)
+ log10(x)
+ log2(x)
  exp(x)
  log1p(x)
  expm1(x)

@@ -16,6 +16,7 @@ as_greta_mcmc_list <- function(x, model_info) {
 # Begin Exclude Linting
 #' @export
 #' @noRd
+#' @importFrom stats window
 window.greta_mcmc_list <- function(x, start, end, thin, ...) {
 # End Exclude Linting %>%
   model_info <- attr(x, "model_info")
