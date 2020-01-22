@@ -352,27 +352,10 @@ compare_truncated_distribution <- function(greta_fun,
   r_fun <- truncfun(which, parameters, truncation)
   r_log_density <- log(r_fun(x))
 
-  # create greta array for truncated distribution
-  dist <- do.call(greta_fun, c(parameters,
-                               list(dim = 1, truncation = truncation)))
-
-  distrib_node <- get_node(dist)$distribution
-
-  # set data as the target
-  x_ <- as_data(x)
-  distribution(x_) <- dist
-
-  # create dag and define the density
-  dag <- greta:::dag_class$new(list(x_))
-  tfe <- dag$tf_environment
-
-  distrib_node$define_tf(dag)
-
-  # get the log density as a vector
-  target <- get(dag$tf_name(get_node(x_)), envir = tfe)
-  density <- get(dag$tf_name(distrib_node), envir = tfe)
-  result <- density(target)
-  greta_log_density <- as.vector(grab(result, dag))
+  greta_log_density <- greta_density(greta_fun,
+                                     c(parameters, list(truncation = truncation)),
+                                     x = x,
+                                     dim = 1)
 
   # return absolute difference
   compare_op(r_log_density, greta_log_density, tolerance)

@@ -338,13 +338,13 @@ dag_class <- R6Class(
         } else if (upper == bounds[2]) {
 
           # if only lower is constrained, get the log of the integral above it
-          offset <- tf$math$log(fl(1) - tfp_distribution$log_cdf(fl(lower)))
+          offset <- tf$math$log(fl(1) - tfp_distribution$cdf(fl(lower)))
 
         } else {
 
           # if both are constrained, get the log of the integral between them
-          offset <- tf$math$log(tfp_distribution$log_cdf(fl(upper)) -
-                                  tfp_distribution$log_cdf(fl(lower)))
+          offset <- tf$math$log(tfp_distribution$cdf(fl(upper)) -
+                                  tfp_distribution$cdf(fl(lower)))
 
         }
 
