@@ -246,45 +246,23 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      # get all distribution nodes
-      distributions <- self$node_list[self$node_types == "distribution"]
+      # get all distribution nodes that have a target
+      distribution_nodes <- self$node_list[self$node_types == "distribution"]
+      target_nodes <- lapply(distribution_nodes, member, "get_tf_target_node()")
+      has_target <- !vapply(target_nodes, is.null, FUN.VALUE = TRUE)
+      distribution_nodes <- distribution_nodes[has_target]
+      target_nodes <- target_nodes[has_target]
 
-      # keep only those with a target node
-      targets <- lapply(distributions, member, "get_tf_target_node()")
-      has_target <- !vapply(targets, is.null, FUN.VALUE = TRUE)
-
-      distributions <- distributions[has_target]
-      targets <- targets[has_target]
-
-      # find and get these functions
-      density_names <- vapply(distributions,
-                              self$tf_name,
-                              FUN.VALUE = "")
-      target_names <- vapply(targets,
-                             self$tf_name,
-                             FUN.VALUE = "")
-
-      target_tensors <- lapply(target_names,
-                               get,
-                               envir = tfe)
-      density_functions <- lapply(density_names,
-                                  get,
-                                  envir = tfe)
-
-      # make the target names lists, for do.call
-      target_lists <- lapply(target_tensors, list)
-
-      # execute them
-      densities <- mapply(do.call,
-                          density_functions,
-                          target_lists,
-                          MoreArgs = list(envir = tfe),
+      # get the densities, evaluated at these targets
+      densities <- mapply(self$evaluate_density,
+                          distribution_nodes,
+                          target_nodes,
                           SIMPLIFY = FALSE)
 
-      # reduce_sum them
+      # reduce_sum each of them (skipping the batch dimension)
       self$on_graph(summed_densities <- lapply(densities, tf_sum, drop = TRUE))
 
-      # remove their names and sum them together
+      # sum them together
       names(summed_densities) <- NULL
       self$on_graph(joint_density <- tf$add_n(summed_densities))
 
@@ -295,7 +273,7 @@ dag_class <- R6Class(
 
       # define adjusted joint density
 
-      # get names of adjustment tensors for all variable nodes
+      # get names of Jacobian adjustment tensors for all variable nodes
       adj_names <- paste0(self$get_tf_names(types = "variable"), "_adj")
 
       # get TF density tensors for all distribution
@@ -310,6 +288,79 @@ dag_class <- R6Class(
              joint_density + total_adj,
              envir = self$tf_environment)
 
+    },
+
+    # evaluate the (truncation-corrected) density of a tfp distribution on its target tensor
+    evaluate_density = function(distribution_node, target_node) {
+
+      tfe <- self$tf_environment
+
+      parameter_nodes <- distribution_node$parameters
+
+      # get the tensorflow objects for these
+      distrib_constructor <- self$get_tf_object(distribution_node)
+      tf_target <- self$get_tf_object(target_node)
+      tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
+
+      # execute the distribution constructor functions to return a tfp distribution object
+      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
+
+      self$tf_evaluate_density(tfp_distribution,
+                               tf_target,
+                               truncation = distribution_node$truncation,
+                               bounds = distribution_node$bounds)
+
+    },
+
+    tf_evaluate_density = function(tfp_distribution,
+                                   tf_target,
+                                   truncation = NULL,
+                                   bounds = NULL) {
+
+      # get the uncorrected log density
+      ld <- tfp_distribution$log_prob(tf_target)
+
+      # if required, calculate the log-adjustment to the truncation term of
+      # the density function i.e. the density of a distribution, truncated
+      # between a and b, is the non truncated density, divided by the integral
+      # of the density function between the truncation bounds. This can be
+      # calculated from the distribution's CDF
+      if (!is.null(truncation)) {
+
+        lower <- truncation[1]
+        upper <- truncation[2]
+
+        if (lower == bounds[1]) {
+
+          # if only upper is constrained, just need the cdf at the upper
+          offset <- tfp_distribution$log_cdf(fl(upper))
+
+        } else if (upper == bounds[2]) {
+
+          # if only lower is constrained, get the log of the integral above it
+          offset <- tf$math$log(fl(1) - tfp_distribution$log_cdf(fl(lower)))
+
+        } else {
+
+          # if both are constrained, get the log of the integral between them
+          offset <- tf$math$log(tfp_distribution$log_cdf(fl(upper)) -
+                                  tfp_distribution$log_cdf(fl(lower)))
+
+        }
+
+        ld <- ld - offset
+
+      }
+
+
+      ld
+
+
+    },
+
+    # get the tf object in envir correpsonding to 'node'
+    get_tf_object = function(node) {
+      get(self$tf_name(node), envir = self$tf_environment)
     },
 
     # return a function to obtain the model log probability from a tensor for

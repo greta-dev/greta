@@ -146,9 +146,7 @@ greta_density <- function(fun, parameters, x,
   distrib_node$define_tf(dag)
 
   # get the log density as a vector
-  target <- get(dag$tf_name(get_node(x_)), envir = tfe)
-  density <- get(dag$tf_name(distrib_node), envir = tfe)
-  result <- density(target)
+  result <- dag$evaluate_density(distrib_node, get_node(x_))
   as.vector(grab(result, dag))
 
 }

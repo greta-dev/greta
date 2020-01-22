@@ -717,11 +717,6 @@ logistic_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Logistic(loc = parameters$location,
                                  scale = parameters$scale)
-    },
-
-    # log_cdf in tf$cotrib$distributions has the wrong sign :/
-    tf_log_cdf_function = function(x, parameters) {
-      tf$math$log(self$tf_cdf_function(x, parameters))
     }
 
   )
@@ -1125,7 +1120,6 @@ wishart_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-
       # this is messy, we want to use the tfp wishart, but can't define the
       # density without expanding the dimension of x
 
@@ -1254,7 +1248,7 @@ lkj_correlation_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      eta <- parameters$eta
+      eta <- tf$squeeze(parameters$eta, 1L)
 
       log_prob <- function(x) {
 

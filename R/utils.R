@@ -160,8 +160,6 @@ check_tf_version <- function(alert = c("none",
 
 }
 
-
-
 # helper for *apply statements on R6 objects
 member <- function(x, method)
   eval(parse(text = paste0("x$", method)))

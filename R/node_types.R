@@ -438,34 +438,14 @@ distribution_node <- R6Class(
 
     },
 
+    # change this to instead assign the distribution object, with the density
+    # being defined by the dag class
+
     tf = function(dag) {
 
-      # for distributions, tf assigns a *function* to execute the density
-      density <- function(tf_target) {
-
-        # fetch inputs
-        tf_parameters <- self$tf_fetch_parameters(dag)
-
-        # ensure x and the parameters are all expanded to have the n_chains
-        # batch dimension, if any have it
-        target_params <- match_batches(c(list(tf_target), tf_parameters))
-        tf_target <- target_params[[1]]
-        tf_parameters <- target_params[-1]
-
-        # calculate log density
-        ld <- self$tf_log_density_function(tf_target, tf_parameters, dag)
-
-        # check for truncation
-        if (!is.null(self$truncation))
-          ld <- ld - self$tf_log_density_offset(tf_parameters)
-
-        ld
-
-      }
-
-      # assign the function to the environment
+      # assign the distribution object constructor function to the environment
       assign(dag$tf_name(self),
-             density,
+             self$tf_distrib,
              envir = dag$tf_environment)
 
     },
@@ -475,51 +455,18 @@ distribution_node <- R6Class(
       self$target
     },
 
-    tf_fetch_parameters = function(dag) {
-      # fetch the tensors corresponding to this node's parameters from the
-      # environment, and return them in a named list
+    # tf_fetch_parameters = function(dag) {
+    #   # fetch the tensors corresponding to this node's parameters from the
+    #   # environment, and return them in a named list
+    #
+    #   # find names
+    #   tf_names <- lapply(self$parameters, dag$tf_name)
+    #
+    #   # fetch tensors
+    #   lapply(tf_names, get, envir = dag$tf_environment)
+    #
+    # },
 
-      # find names
-      tf_names <- lapply(self$parameters, dag$tf_name)
-
-      # fetch tensors
-      lapply(tf_names, get, envir = dag$tf_environment)
-
-    },
-
-    tf_log_density_offset = function(parameters) {
-
-      # calculate the log-adjustment to the truncation term of the density
-      # function i.e. the density of a distribution, truncated between a and b,
-      # is the non truncated density, divided by the integral of the density
-      # function between the truncation bounds. This can be calculated from the
-      # distribution's CDF
-
-      lower <- self$truncation[1]
-      upper <- self$truncation[2]
-
-      if (lower == self$bounds[1]) {
-
-        # if only upper is constrained, just need the cdf at the upper
-        offset <- self$tf_log_cdf_function(fl(upper), parameters)
-
-      } else if (upper == self$bounds[2]) {
-
-        # if only lower is constrained, get the log of the integral above it
-        offset <- tf$math$log(fl(1) - self$tf_cdf_function(fl(lower),
-                                                           parameters))
-
-      } else {
-
-        # if both are constrained, get the log of the integral between them
-        offset <- tf$math$log(self$tf_cdf_function(fl(upper), parameters) -
-                                self$tf_cdf_function(fl(lower), parameters))
-
-      }
-
-      offset
-
-    },
 
     add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
 
