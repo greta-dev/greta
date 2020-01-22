@@ -365,6 +365,8 @@ distribution_node <- R6Class(
   public = list(
     distribution_name = "no distribution",
     discrete = NA,
+    multivariate = NA,
+    truncatable = NA,
     target = NULL,
     user_node = NULL,
     bounds = c(-Inf, Inf),
@@ -374,7 +376,9 @@ distribution_node <- R6Class(
     initialize = function(name = "no distribution",
                           dim = NULL,
                           truncation = NULL,
-                          discrete = FALSE) {
+                          discrete = FALSE,
+                          multivariate = FALSE,
+                          truncatable = TRUE) {
 
       super$initialize(dim)
 
@@ -385,11 +389,14 @@ distribution_node <- R6Class(
       # initialize the target values of this distribution
       self$add_target(self$create_target(truncation))
 
-      # if there's a truncation, it's different from the bounds, and it's a
-      # truncatable distribution, set the truncation
+      # if there's a truncation, it's different from the bounds, and it's
+      # truncatable (currently that's only univariate and continuous-discrete
+      # distributions) set the truncation
+      can_be_truncated <- !self$multivariate & !self$discrete & self$truncatable
+
       if (!is.null(truncation) &
           !identical(truncation, self$bounds) &
-          !is.null(self$tf_cdf_function)) {
+          can_be_truncated) {
 
         self$truncation <- truncation
 
@@ -455,19 +462,6 @@ distribution_node <- R6Class(
       self$target
     },
 
-    # tf_fetch_parameters = function(dag) {
-    #   # fetch the tensors corresponding to this node's parameters from the
-    #   # environment, and return them in a named list
-    #
-    #   # find names
-    #   tf_names <- lapply(self$parameters, dag$tf_name)
-    #
-    #   # fetch tensors
-    #   lapply(tf_names, get, envir = dag$tf_environment)
-    #
-    # },
-
-
     add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
 
       # expand out a scalar parameter if needed
@@ -479,24 +473,6 @@ distribution_node <- R6Class(
       parameter <- to_node(parameter)
       self$add_parent(parameter)
       self$parameters[[name]] <- parameter
-
-    },
-
-    tf_log_density_function = function(x, parameters, dag) {
-
-      self$tf_distrib(parameters, dag)$log_prob(x)
-
-    },
-
-    tf_cdf_function = function(x, parameters) {
-
-      self$tf_distrib(parameters, dag)$cdf(x)
-
-    },
-
-    tf_log_cdf_function = function(x, parameters) {
-
-      self$tf_distrib(parameters, dag)$log_cdf(x)
 
     }
 

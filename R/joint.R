@@ -144,11 +144,7 @@ joint_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
-
+    }
   )
 )
 

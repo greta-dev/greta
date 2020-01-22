@@ -182,11 +182,7 @@ bernoulli_distribution <- R6Class(
         tfp$distributions$Bernoulli(probs = parameters$prob)
 
       }
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -248,11 +244,7 @@ binomial_distribution <- R6Class(
         tfp$distributions$Binomial(total_count = parameters$size,
                                    probs = parameters$prob)
       }
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -291,11 +283,7 @@ beta_binomial_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -332,11 +320,7 @@ poisson_distribution <- R6Class(
 
       tfp$distributions$Poisson(log_rate = log_lambda)
 
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -362,12 +346,8 @@ negative_binomial_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$NegativeBinomial(total_count = parameters$size,
                                          probs = fl(1) - parameters$prob)
-    },
+    }
     # End Exclude Linting
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
 
   )
 )
@@ -405,11 +385,7 @@ hypergeometric_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -793,7 +769,8 @@ dirichlet_distribution <- R6Class(
       # parameters
       self$bounds <- c(0, Inf)
       super$initialize("dirichlet", dim,
-                       truncation = c(0, Inf))
+                       truncation = c(0, Inf),
+                       multivariate = TRUE)
       self$add_parameter(alpha, "alpha")
 
     },
@@ -815,15 +792,10 @@ dirichlet_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       alpha <- parameters$alpha
       tfp$distributions$Dirichlet(concentration = alpha)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
-
 
 dirichlet_multinomial_distribution <- R6Class(
   "dirichlet_multinomial_distribution",
@@ -848,7 +820,8 @@ dirichlet_multinomial_distribution <- R6Class(
       # parameters
       super$initialize("dirichlet_multinomial",
                        dim = dim,
-                       discrete = TRUE)
+                       discrete = TRUE,
+                       multivariate = TRUE)
       self$add_parameter(size, "size", expand_scalar_to = NULL)
       self$add_parameter(alpha, "alpha")
 
@@ -861,12 +834,8 @@ dirichlet_multinomial_distribution <- R6Class(
       distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
               concentration = parameters$alpha)
-    },
+    }
     # End Exclude Linting
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
 
   )
 )
@@ -893,7 +862,8 @@ multinomial_distribution <- R6Class(
       # parameters
       super$initialize("multinomial",
                        dim = dim,
-                       discrete = TRUE)
+                       discrete = TRUE,
+                       multivariate = TRUE)
       self$add_parameter(size, "size", expand_scalar_to = NULL)
       self$add_parameter(prob, "prob")
 
@@ -907,11 +877,7 @@ multinomial_distribution <- R6Class(
 
       tfp$distributions$Multinomial(total_count = parameters$size,
                                     probs = parameters$prob)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -932,7 +898,10 @@ categorical_distribution <- R6Class(
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("categorical", dim = dim, discrete = TRUE)
+      super$initialize("categorical",
+                       dim = dim,
+                       discrete = TRUE,
+                       multivariate = TRUE)
       self$add_parameter(prob, "prob")
 
     },
@@ -943,11 +912,7 @@ categorical_distribution <- R6Class(
       probs <- probs / tf_sum(probs)
       tfp$distributions$Multinomial(total_count = fl(1),
                                     probs = probs)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -996,7 +961,7 @@ multivariate_normal_distribution <- R6Class(
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("multivariate_normal", dim)
+      super$initialize("multivariate_normal", dim, multivariate = TRUE)
 
       if (has_representation(sigma, "cholesky")) {
         sigma <- representation(sigma, "cholesky")
@@ -1027,11 +992,7 @@ multivariate_normal_distribution <- R6Class(
       tfp$distributions$MultivariateNormalTriL(loc = mu,
                                                scale_tril = l)
       # End Exclude Linting
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -1066,7 +1027,7 @@ wishart_distribution <- R6Class(
       dim <- nrow(sigma)
 
       # initialize with a cholesky factor
-      super$initialize("wishart", dim(sigma))
+      super$initialize("wishart", dim(sigma), multivariate = TRUE)
 
       # set parameters
       if (has_representation(sigma, "cholesky")) {
@@ -1155,11 +1116,7 @@ wishart_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -1197,7 +1154,7 @@ lkj_correlation_distribution <- R6Class(
       }
 
       dim <- c(dimension, dimension)
-      super$initialize("lkj_correlation", dim)
+      super$initialize("lkj_correlation", dim, multivariate = TRUE)
 
       # don't try to expand scalar eta out to match the target size
       self$add_parameter(eta, "eta", expand_scalar_to = NULL)
@@ -1277,11 +1234,7 @@ lkj_correlation_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
