@@ -385,6 +385,8 @@ distribution_node <- R6Class(
       # for all distributions, set name, store dims, and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
+      self$multivariate <- multivariate
+      self$truncatable <- truncatable
 
       # initialize the target values of this distribution
       self$add_target(self$create_target(truncation))
