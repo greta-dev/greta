@@ -1205,34 +1205,15 @@ lkj_correlation_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      eta <- tf$squeeze(parameters$eta, 1L)
+      eta <- tf$squeeze(parameters$eta, 1:2)
 
-      log_prob <- function(x) {
+      tfp$distributions$LKJ(
+        dimension = self$dim[1],
+        concentration = eta,
+        input_output_cholesky = self$target_is_cholesky
+      )
 
-        n <- self$dim[1]
-
-        # normalising constant
-        k <- 1:n
-        a <- fl(1 - n) * tf$math$lgamma(eta + fl(0.5 * (n - 1)))
-        b <- tf_sum(fl(0.5 * k * log(pi)) +
-                      tf$math$lgamma(eta + fl(0.5 * (n - 1 - k))))
-        norm <- a + b
-
-        # get the cholesky factor of the target in tf_orientation
-        if (self$target_is_cholesky) {
-          x_chol <- tf$linalg$matrix_transpose(x)
-        } else {
-          x_chol <- tf$linalg$cholesky(x)
-        }
-
-        diags <- tf$linalg$diag_part(x_chol)
-        det <- tf$square(tf_prod(diags))
-
-        (eta - fl(1)) * tf$math$log(det) + norm
-
-      }
-
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      # input_output_cholesky argument will need to be dealt with for RNG stuff
 
     }
 
