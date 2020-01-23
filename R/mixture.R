@@ -74,7 +74,7 @@ mixture_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
-    weights_is_log = FALSE,
+    weights_is_logit = FALSE,
 
     initialize = function(dots, weights, dim) {
 
@@ -91,10 +91,10 @@ mixture_distribution <- R6Class(
       weights <- as.greta_array(weights)
       weights_dim <- dim(weights)
 
-      # use log weights if available
-      if (has_representation(weights, "log")) {
-        weights <- representation(weights, "log")
-        self$weights_is_log <- TRUE
+      # use logit representation if available
+      if (has_representation(weights, "logit")) {
+        weights <- representation(weights, "logit")
+        self$weights_is_logit <- TRUE
       }
 
       # weights should have n_distributions as the first dimension
@@ -191,12 +191,16 @@ mixture_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
+      weights <- parameters$weights
+
       # get parameter nodes, truncations, and bounds of component distributions
       distribution_nodes <- self$parameters[names(self$parameters) != "weights"]
       truncations <- lapply(distribution_nodes, member, "truncation")
       bounds <- lapply(distribution_nodes, member, "bounds")
       distribution_parameters <-
         lapply(distribution_nodes, member, "parameters")
+
+browser()
 
       # in this case, 'parameters' are functions to construct tfp distributions,
       # so evaluate them on their own parameters to get the tfp distributions
@@ -210,60 +214,28 @@ mixture_distribution <- R6Class(
         tf_parameter_list <-
           lapply(distribution_parameters[[i]], dag$get_tf_object)
 
+        tf_parameter_list <- match_batches(c(list(weights), tf_parameter_list))[-1]
+
         # use them to construct the tfp distribution object
         tfp_distributions[[i]] <- constructor(tf_parameter_list, dag = dag)
 
       }
 
-      weights <- parameters$weights
-
-      # use log weights if available
-      if (self$weights_is_log) {
-        log_weights <- weights
+      # use logit weights if available (no need to normalise)
+      if (self$weights_is_logit) {
+        logit_weights <- weights
       } else {
-        log_weights <- tf$math$log(weights)
+        logit_weights <- tf$nn$sigmoid(weights)
       }
 
-      # normalise weights on log scale
-      log_weights_sum <- tf$reduce_logsumexp(
-        log_weights,
-        axis = 1L,
-        keepdims = TRUE
+      # build a tfp categorical distribution for the weights
+      cat <- tfp$distributions$Categorical(logits = logit_weights)
+
+      # build a tfp mixture distribution
+      tfp$distributions$Mixture(
+        cat = cat,
+        components = tfp_distributions
       )
-      log_weights <- log_weights - log_weights_sum
-
-      log_prob <- function(x) {
-
-        # get component densities in an array
-        log_probs <- mapply(
-          dag$tf_evaluate_density,
-          tfp_distribution = tfp_distributions,
-          truncation = truncations,
-          bounds = bounds,
-          MoreArgs = list(tf_target = x),
-          SIMPLIFY = FALSE
-        )
-        log_probs_arr <- tf$stack(log_probs, 1L)
-
-        # massage log_weights into the same shape as log_probs_arr
-        dim_weights <- dim(log_weights)
-        extra_dims <- unlist(dim(log_probs_arr)[-seq_along(dim_weights)])
-        for (dim in extra_dims) {
-          ndim <- length(dim(log_weights))
-          log_weights <- tf$expand_dims(log_weights, ndim)
-          if (dim > 1L) {
-            tiling <- c(rep(1L, ndim), dim)
-            tf_tiling <- tf$constant(tiling, shape = list(ndim + 1))
-            log_weights <- tf$tile(log_weights, tf_tiling)
-          }
-        }
-
-        # do elementwise addition, then collapse along the mixture dimension
-        log_probs_weighted_arr <- log_probs_arr + log_weights
-        tf$reduce_logsumexp(log_probs_weighted_arr, axis = 1L)
-      }
-
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
     }
 
