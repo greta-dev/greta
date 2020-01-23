@@ -336,33 +336,20 @@ test_that("lkj distribution has correct density", {
   eta <- 3
 
   # normalising component of lkj (depends only on eta and dimension)
-  lkj_normalising <- function(eta, n) {
-    if (eta == 1) {
-      result <- sum(lgamma(2 * 1:((n - 1) / 2 + 1)))
-      if (n %% 2 == 1) {
-        add <- (0.25 * (n ^ 2 - 1) * log(pi)
-                - 0.25 * (n - 1) ^ 2 * log(2)
-                - (n - 1) * lgamma((n + 1) / 2))
-      } else {
-        add <- (0.25 * n * (n - 2) * log(pi)
-                + 0.25 * (3 * n ^ 2 - 4 * n) * log(2)
-                + n * lgamma(n / 2) - (n - 1) * lgamma(n))
-      }
-      result <- result + add
-    } else {
-      result <- (1 - n) * lgamma(eta + 0.5 * (n - 1))
-      k <- 1:n
-      result <- result + sum(0.5 * k * log(pi)
-                             + lgamma(eta + 0.5 * (n - 1 - k)))
+  lkj_log_normalising <- function(eta, n) {
+    log_pi <- log(pi)
+    ans <- 0
+    for (k in 1:(n - 1)) {
+      ans <- ans + log_pi * (k / 2)
+      ans <- ans + lgamma(eta + (n - 1 - k) / 2)
+      ans <- ans - lgamma(eta + (n - 1) / 2)
     }
-
-    result
-
+    ans
   }
 
   # lkj density
   dlkj_correlation <- function(x, eta, log = FALSE, dimension = NULL) {
-    res <- lkj_normalising(eta, ncol(x)) + (eta - 1) * log(det(x))
+    res <- (eta - 1) * log(det(x)) - lkj_log_normalising(eta, ncol(x))
     if (!log)
       res <- exp(res)
     res
