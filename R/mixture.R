@@ -74,7 +74,7 @@ mixture_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
-    weights_is_logit = FALSE,
+    weights_is_log = FALSE,
 
     initialize = function(dots, weights, dim) {
 
@@ -91,10 +91,10 @@ mixture_distribution <- R6Class(
       weights <- as.greta_array(weights)
       weights_dim <- dim(weights)
 
-      # use logit representation if available
-      if (has_representation(weights, "logit")) {
-        weights <- representation(weights, "logit")
-        self$weights_is_logit <- TRUE
+      # use log representation if available
+      if (has_representation(weights, "log")) {
+        weights <- representation(weights, "log")
+        self$weights_is_log <- TRUE
       }
 
       # weights should have n_distributions as the first dimension
@@ -191,72 +191,89 @@ mixture_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      weights <- parameters$weights
+      # use log weights - no need to normalise then
+      if (self$weights_is_log) {
+        log_weights <- parameters$weights
+      } else {
+        log_weights <- tf$math$log(parameters$weights)
+      }
 
-      # get parameter nodes, truncations, and bounds of component distributions
+      # get parameter *nodes*, truncations, and bounds of component distributions
       distribution_nodes <- self$parameters[names(self$parameters) != "weights"]
       truncations <- lapply(distribution_nodes, member, "truncation")
       bounds <- lapply(distribution_nodes, member, "bounds")
       distribution_parameters <-
         lapply(distribution_nodes, member, "parameters")
 
-      # in this case, 'parameters' are functions to construct tfp distributions,
-      # so evaluate them on their own parameters to get the tfp distributions
+      # 'parameters' is a list of functions to construct tfp distributions, so
+      # evaluate them on their own parameters to get the distribution objects
       constructors <- parameters[names(parameters) != "weights"]
-      tfp_distributions <- list()
-      for (i in seq_along(constructors)) {
 
-        constructor <- constructors[[i]]
+      tfp_distributions <- list()
+
+      for (i in seq_along(constructors)) {
 
         # get the tensors for the parameters of this component distribution
         tf_parameter_list <-
           lapply(distribution_parameters[[i]], dag$get_tf_object)
 
-        tf_parameter_list <- match_batches(c(list(weights), tf_parameter_list))[-1]
+        # match the batch dimension with weights
+        tf_parameter_list <- match_batches(
+          c(list(log_weights), tf_parameter_list)
+        )[-1]
 
         # use them to construct the tfp distribution object
-        tfp_distributions[[i]] <- constructor(tf_parameter_list, dag = dag)
+        tfp_distributions[[i]] <- constructors[[i]](
+          parameters = tf_parameter_list,
+          dag = dag
+        )
 
       }
 
-      # use logit weights if available (no need to normalise)
-      if (self$weights_is_logit) {
-        logit_weights <- weights
-      } else {
-        logit_weights <- tf$nn$sigmoid(weights)
-      }
+      # match batches on log_weights too
+      log_weights <- match_batches(
+        list(log_weights, tf_parameter_list[[1]])
+      )[[1]]
 
-      # match batches on logit_weights
-      logit_weights <- match_batches(list(logit_weights, tf_parameter_list[[1]]))[[1]]
+      # There's no dispatching on the dimensions of the categorical and
+      # component distributions, so we need to explicitly expand weights to
+      # match the dimensions of the components, but with the number of
+      # components in an additional final dimension
 
-      # transpose weights so the number of components (second dim) is last
-      weights_dim <- dim(logit_weights)
+      # transpose weights so the number of components (second dim) is last,
+      # rather than first
+      weights_dim <- dim(log_weights)
       permutation <- seq_along(weights_dim) - 1L
       permutation <- c(permutation[-2], permutation[2])
-      logit_weights <- tf$transpose(logit_weights, permutation)
-      # do this, accounting for larget batch dimension - i.e. just permute index
-      # 1L to the last place
+      log_weights <- tf$transpose(log_weights, permutation)
 
-      # need to pad the logit weights to have one more dimensions than
-      # the components, but with the batch dimension first, the number of
-      # components last, and the intermediate ones padded with ones
+      # pad the log weights to have one more dimensions than the components, but
+      # with the batch dimension first, the number of components last, and the
+      # intermediate ones padded with ones
       component_dim <- tfp_distributions[[1]]$batch_shape$as_list()
-      weights_dim <- dim(logit_weights)
+      weights_dim <- dim(log_weights)
       dims_needed <- length(component_dim) + 1 - length(weights_dim)
       for (i in seq_len(dims_needed)) {
-        logit_weights <- tf$expand_dims(logit_weights, 1L)
+        log_weights <- tf$expand_dims(log_weights, 1L)
       }
 
-      # now tile this to match the dimensions of the component distributions
-      expandable <- vapply(dim(logit_weights), identical, 1L, FUN.VALUE = logical(1))
+      # If necessary, tile this to match the dimensions of the component
+      # distributions
+      expandable <- vapply(
+        X = dim(log_weights),
+        FUN = identical,
+        y = 1L,
+        FUN.VALUE = logical(1)
+      )
       expansion <- c(1L, component_dim[-1], 1L)
       expansion[!expandable] <- 1L
+
       if(!all(expansion == 1L)) {
-        logit_weights <- tf$tile(logit_weights, expansion)
+        log_weights <- tf$tile(log_weights, expansion)
       }
 
       # build a tfp categorical distribution for the weights
-      cat <- tfp$distributions$Categorical(logits = logit_weights)
+      cat <- tfp$distributions$Categorical(logits = log_weights)
 
       # build a tfp mixture distribution
       tfp$distributions$Mixture(
