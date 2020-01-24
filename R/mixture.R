@@ -175,7 +175,10 @@ mixture_distribution <- R6Class(
       }
 
       # for any discrete ones, tell them they are fixed
-      super$initialize("mixture", dim, discrete = discrete[1])
+      super$initialize("mixture", dim, discrete = discrete[1],
+                       truncation = truncation)
+
+      self$bounds <- bounds
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
