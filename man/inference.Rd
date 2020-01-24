@@ -9,22 +9,45 @@
 \alias{opt}
 \title{statistical inference on greta models}
 \usage{
-mcmc(model, sampler = hmc(), n_samples = 1000, thin = 1,
-  warmup = 1000, chains = 4, n_cores = NULL, verbose = TRUE,
-  pb_update = 50, one_by_one = FALSE, initial_values = initials(),
-  trace_batch_size = 100)
+mcmc(
+  model,
+  sampler = hmc(),
+  n_samples = 1000,
+  thin = 1,
+  warmup = 1000,
+  chains = 4,
+  n_cores = NULL,
+  verbose = TRUE,
+  pb_update = 50,
+  one_by_one = FALSE,
+  initial_values = initials(),
+  trace_batch_size = 100
+)
 
 stashed_samples()
 
-extra_samples(draws, n_samples = 1000, thin = 1, n_cores = NULL,
-  verbose = TRUE, pb_update = 50, one_by_one = FALSE,
-  trace_batch_size = 100)
+extra_samples(
+  draws,
+  n_samples = 1000,
+  thin = 1,
+  n_cores = NULL,
+  verbose = TRUE,
+  pb_update = 50,
+  one_by_one = FALSE,
+  trace_batch_size = 100
+)
 
 initials(...)
 
-opt(model, optimiser = bfgs(), max_iterations = 100,
-  tolerance = 1e-06, initial_values = initials(), adjust = TRUE,
-  hessian = FALSE)
+opt(
+  model,
+  optimiser = bfgs(),
+  max_iterations = 100,
+  tolerance = 1e-06,
+  initial_values = initials(),
+  adjust = TRUE,
+  hessian = FALSE
+)
 }
 \arguments{
 \item{model}{greta_model object}
@@ -164,7 +187,7 @@ For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
 
   After carrying out mcmc on all the model parameters, \code{mcmc()}
   calculates the values of (i.e. traces) the parameters of interest for each
-  of these samples, similarly to \code{\linl[calculate]{calculate}}. Multiple
+  of these samples, similarly to \code{\link{calculate}}. Multiple
   posterior samples can be traced simulataneously, though this can require
   large amounts of memory for large models. As in \code{calculate}, the
   argument \code{trace_batch_size} can be modified to trade-off speed against

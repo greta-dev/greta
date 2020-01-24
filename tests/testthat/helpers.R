@@ -352,10 +352,11 @@ compare_truncated_distribution <- function(greta_fun,
   r_fun <- truncfun(which, parameters, truncation)
   r_log_density <- log(r_fun(x))
 
-  greta_log_density <- greta_density(greta_fun,
-                                     c(parameters, list(truncation = truncation)),
-                                     x = x,
-                                     dim = 1)
+  greta_log_density <- greta_density(
+    fun = greta_fun,
+    parameters = c(parameters, list(truncation = truncation)),
+    x = x,
+    dim = 1)
 
   # return absolute difference
   compare_op(r_log_density, greta_log_density, tolerance)

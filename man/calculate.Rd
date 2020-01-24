@@ -4,8 +4,12 @@
 \alias{calculate}
 \title{calculate greta arrays given fixed values}
 \usage{
-calculate(target, values = list(), precision = c("double", "single"),
-  trace_batch_size = 100)
+calculate(
+  target,
+  values = list(),
+  precision = c("double", "single"),
+  trace_batch_size = 100
+)
 }
 \arguments{
 \item{target}{a greta array for which to calculate the value}

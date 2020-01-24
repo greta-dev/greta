@@ -290,7 +290,8 @@ dag_class <- R6Class(
 
     },
 
-    # evaluate the (truncation-corrected) density of a tfp distribution on its target tensor
+    # evaluate the (truncation-corrected) density of a tfp distribution on its
+    # target tensor
     evaluate_density = function(distribution_node, target_node) {
 
       tfe <- self$tf_environment
@@ -302,7 +303,8 @@ dag_class <- R6Class(
       tf_target <- self$get_tf_object(target_node)
       tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
 
-      # execute the distribution constructor functions to return a tfp distribution object
+      # execute the distribution constructor functions to return a tfp
+      # distribution object
       tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
 
       self$tf_evaluate_density(tfp_distribution,

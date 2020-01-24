@@ -104,7 +104,8 @@ joint_distribution <- R6Class(
       distribution_nodes <- self$parameters
       truncations <- lapply(distribution_nodes, member, "truncation")
       bounds <- lapply(distribution_nodes, member, "bounds")
-      distribution_parameters <- lapply(distribution_nodes, member, "parameters")
+      distribution_parameters <-
+        lapply(distribution_nodes, member, "parameters")
 
       # in this case, 'parameters' are functions to construct tfp distributions,
       # so evaluate them on their own parameters to get the tfp distributions
@@ -114,7 +115,8 @@ joint_distribution <- R6Class(
         constructor <- parameters[[i]]
 
         # get the tensors for the parameters of this component distribution
-        tf_parameter_list <- lapply(distribution_parameters[[i]], dag$get_tf_object)
+        tf_parameter_list <-
+          lapply(distribution_parameters[[i]], dag$get_tf_object)
 
         # use them to construct the tfp distribution object
         tfp_distributions[[i]] <- constructor(tf_parameter_list, dag = dag)
