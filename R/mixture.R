@@ -142,6 +142,38 @@ mixture_distribution <- R6Class(
              call. = FALSE)
       }
 
+      # ensure the support and bounds of each of the distributions is the same
+      truncations <- lapply(distribs, member, "truncation")
+      bounds <- lapply(distribs, member, "bounds")
+
+      truncated <- !vapply(truncations, is.null, logical(1))
+      supports <- bounds
+      supports[truncated] <- truncations[truncated]
+
+      n_supports <- length(unique(supports))
+      if (n_supports != 1) {
+        supports_text <- vapply(
+          X = unique(supports),
+          FUN = paste,
+          collapse = " to ",
+          FUN.VALUE = character(1)
+        )
+        stop("component distributions have different support: ",
+              paste(supports_text, collapse = " vs. "))
+      }
+
+      # get the maximal bounds for all component distributions
+      bounds <- c(do.call(min, bounds),
+                 do.call(max, bounds))
+
+      # if the support is smaller than this, treat the distribution as truncated
+      support <- supports[[1]]
+      if (identical(support, bounds)) {
+        truncation <- NULL
+      } else {
+        truncation <- support
+      }
+
       # for any discrete ones, tell them they are fixed
       super$initialize("mixture", dim, discrete = discrete[1])
 
