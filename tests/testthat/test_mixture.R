@@ -61,6 +61,27 @@ test_that("mixtures of fixed and continuous distributions errors", {
 
 })
 
+test_that("mixtures of supports errors", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  weights <- c(0.5, 0.5)
+
+  # due to truncation
+  expect_error(mixture(normal(0, 1, truncation = c(0, Inf)),
+                       normal(0, 1),
+                       weights = weights),
+               "component distributions have different support")
+
+  # due to bounds
+  expect_error(mixture(lognormal(0, 1),
+                       normal(0, 1),
+                       weights = weights),
+               "component distributions have different support")
+
+})
+
 test_that("incorrectly-shaped weights errors", {
 
   skip_if_not(check_tf_version())
@@ -121,6 +142,50 @@ test_that("mixture of normals has correct density", {
                        mix_r,
                        parameters = params,
                        x = rnorm(100, -2, 3))
+
+})
+
+test_that("mixture of truncated normals has correct density", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  mix_greta <- function(means, sds, weights, dim) {
+    mixture(normal(means[1], sds[1], dim, truncation = c(0, Inf)),
+            normal(means[2], sds[2], dim, truncation = c(0, Inf)),
+            normal(means[3], sds[3], dim, truncation = c(0, Inf)),
+            weights = weights)
+  }
+
+  mix_r <- function(x, means, sds, weights) {
+    densities <- matrix(NA,
+                        nrow = length(x),
+                        ncol = length(means))
+
+    for (i in seq_along(means)) {
+      densities[, i] <- truncdist::dtrunc(
+        x = x,
+        spec = "norm",
+        a = 0,
+        b = Inf,
+        mean = means[i],
+        sd = sds[i]
+      )
+    }
+
+    densities <- sweep(densities, 2, weights, "*")
+    rowSums(densities)
+
+  }
+
+  params <- list(means = c(-2, 2, 5),
+                 sds = c(3, 0.5, 1),
+                 weights = c(0.3, 0.6, 0.1))
+
+  compare_distribution(mix_greta,
+                       mix_r,
+                       parameters = params,
+                       x = abs(rnorm(100, -2, 3)))
 
 })
 
