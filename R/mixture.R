@@ -200,8 +200,6 @@ mixture_distribution <- R6Class(
       distribution_parameters <-
         lapply(distribution_nodes, member, "parameters")
 
-browser()
-
       # in this case, 'parameters' are functions to construct tfp distributions,
       # so evaluate them on their own parameters to get the tfp distributions
       constructors <- parameters[names(parameters) != "weights"]
@@ -226,6 +224,35 @@ browser()
         logit_weights <- weights
       } else {
         logit_weights <- tf$nn$sigmoid(weights)
+      }
+
+      # match batches on logit_weights
+      logit_weights <- match_batches(list(logit_weights, tf_parameter_list[[1]]))[[1]]
+
+      # transpose weights so the number of components (second dim) is last
+      weights_dim <- dim(logit_weights)
+      permutation <- seq_along(weights_dim) - 1L
+      permutation <- c(permutation[-2], permutation[2])
+      logit_weights <- tf$transpose(logit_weights, permutation)
+      # do this, accounting for larget batch dimension - i.e. just permute index
+      # 1L to the last place
+
+      # need to pad the logit weights to have one more dimensions than
+      # the components, but with the batch dimension first, the number of
+      # components last, and the intermediate ones padded with ones
+      component_dim <- tfp_distributions[[1]]$batch_shape$as_list()
+      weights_dim <- dim(logit_weights)
+      dims_needed <- length(component_dim) + 1 - length(weights_dim)
+      for (i in seq_len(dims_needed)) {
+        logit_weights <- tf$expand_dims(logit_weights, 1L)
+      }
+
+      # now tile this to match the dimensions of the component distributions
+      expandable <- vapply(dim(logit_weights), identical, 1L, FUN.VALUE = logical(1))
+      expansion <- c(1L, component_dim[-1], 1L)
+      expansion[!expandable] <- 1L
+      if(!all(expansion == 1L)) {
+        logit_weights <- tf$tile(logit_weights, expansion)
       }
 
       # build a tfp categorical distribution for the weights
