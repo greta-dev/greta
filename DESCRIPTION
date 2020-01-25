@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.3.1.9007
-Date: 2020-01-14
+Version: 0.3.1.9008
+Date: 2020-01-25
 Authors@R: c(
   person("Nick", "Golding", role = c("aut", "cre"),
          email = "nick.golding.research@gmail.com",
@@ -91,5 +91,5 @@ Suggests:
     abind,
     spelling
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Language: en-GB

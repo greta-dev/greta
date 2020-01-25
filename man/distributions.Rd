@@ -74,8 +74,7 @@ logistic(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 
 f(df1, df2, dim = NULL, truncation = c(0, Inf))
 
-multivariate_normal(mean, Sigma, n_realisations = NULL,
-  dimension = NULL)
+multivariate_normal(mean, Sigma, n_realisations = NULL, dimension = NULL)
 
 wishart(df, Sigma)
 
@@ -87,8 +86,7 @@ categorical(prob, n_realisations = NULL, dimension = NULL)
 
 dirichlet(alpha, n_realisations = NULL, dimension = NULL)
 
-dirichlet_multinomial(size, alpha, n_realisations = NULL,
-  dimension = NULL)
+dirichlet_multinomial(size, alpha, n_realisations = NULL, dimension = NULL)
 }
 \arguments{
 \item{min, max}{scalar values giving optional limits to \code{uniform}

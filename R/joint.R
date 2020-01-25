@@ -100,19 +100,44 @@ joint_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      densities <- parameters
-      names(densities) <- NULL
+      # get parameter nodes, truncations, and bounds of component distributions
+      distribution_nodes <- self$parameters
+      truncations <- lapply(distribution_nodes, member, "truncation")
+      bounds <- lapply(distribution_nodes, member, "bounds")
+      distribution_parameters <-
+        lapply(distribution_nodes, member, "parameters")
+
+      # in this case, 'parameters' are functions to construct tfp distributions,
+      # so evaluate them on their own parameters to get the tfp distributions
+      tfp_distributions <- list()
+      for (i in seq_along(parameters)) {
+
+        constructor <- parameters[[i]]
+
+        # get the tensors for the parameters of this component distribution
+        tf_parameter_list <-
+          lapply(distribution_parameters[[i]], dag$get_tf_object)
+
+        # use them to construct the tfp distribution object
+        tfp_distributions[[i]] <- constructor(tf_parameter_list, dag = dag)
+
+      }
 
       log_prob <- function(x) {
 
         # split x on the joint dimension, and loop through computing the
         # densities
         last_dim <- length(dim(x)) - 1L
-        x_vals <- tf$split(x, length(densities), axis = last_dim)
-        log_probs <- list()
-        for (i in seq_along(densities)) {
-          log_probs[[i]] <- densities[[i]](x_vals[[i]])
-        }
+        x_vals <- tf$split(x, length(tfp_distributions), axis = last_dim)
+
+        log_probs <- mapply(
+          dag$tf_evaluate_density,
+          tfp_distributions,
+          x_vals,
+          truncations,
+          bounds,
+          SIMPLIFY = FALSE
+        )
 
         # sum them elementwise
         tf$add_n(log_probs)
@@ -121,11 +146,7 @@ joint_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
-
+    }
   )
 )
 
