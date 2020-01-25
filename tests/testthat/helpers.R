@@ -584,7 +584,12 @@ p_theta_greta <- function(niter, model, data,
 
 not_finished <- function(draws, target_samples = 5000) {
   neff <- coda::effectiveSize(draws)
-  rhats <- coda::gelman.diag(draws, multivariate = FALSE)$psrf[, 1]
+  rhats <- coda::gelman.diag(
+    x = draws,
+    multivariate = FALSE,
+    autoburnin = FALSE
+  )
+  rhats <- rhats$psrf[, 1]
   converged <- all(rhats < 1.01)
   enough_samples <- all(neff >= target_samples)
   !(converged & enough_samples)
