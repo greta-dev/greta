@@ -10,7 +10,7 @@
   "codeRepository": "https://greta-stats.org",
   "issueTracker": "https://github.com/greta-dev/greta/issues",
   "license": "https://spdx.org/licenses/Apache-2.0",
-  "version": "0.3.1.9007",
+  "version": "0.3.1.9008",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -393,7 +393,7 @@
   ],
   "releaseNotes": "https://github.com/dill/greta/blob/master/NEWS.md",
   "readme": "https://github.com/dill/greta/blob/master/README.md",
-  "fileSize": "480.908KB",
+  "fileSize": "481.117KB",
   "contIntegration": [
     "https://travis-ci.org/greta-dev/greta",
     "https://codecov.io/github/greta-dev/greta?branch=master"
