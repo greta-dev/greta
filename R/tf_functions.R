@@ -655,6 +655,44 @@ tf_distance <- function(x1, x2) {
 
 }
 
+tf_identity_bijector <- tfb$Identity
+
+tf_scalar_pos_bijector <- function (lower) {
+
+  steps <- list(
+    tfb$AffineScalar(shift = fl(lower)),
+    tfb$Exp()
+  )
+  tfb$Chain(steps)
+
+}
+
+tf_scalar_neg_bijector <- function (upper) {
+
+  steps <- list(
+    tfb$AffineScalar(
+      shift = fl(upper),
+      scale = fl(-1)
+    ),
+    tfb$Exp()
+  )
+  tfb$Chain(steps)
+
+}
+
+tf_scalar_neg_pos_bijector <- function (lower, upper) {
+
+  steps <- list(
+    tfb$AffineScalar(
+      shift = fl(lower),
+      scale = fl(upper - lower)
+    ),
+    tfb$Sigmoid()
+  )
+  tfb$Chain(steps)
+
+}
+
 # combine as module for export via internals
 tf_functions_module <- module(tf_as_logical,
                               tf_as_float,
@@ -696,4 +734,8 @@ tf_functions_module <- module(tf_as_logical,
                               tf_extract_eigenvectors,
                               tf_extract_eigenvalues,
                               tf_self_distance,
-                              tf_distance)
+                              tf_distance,
+                              tf_identity_bijector,
+                              tf_scalar_neg_bijector,
+                              tf_scalar_pos_bijector,
+                              tf_scalar_neg_pos_bijector)

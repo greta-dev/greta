@@ -155,6 +155,7 @@ variable_node <- R6Class(
   inherit = node,
   public = list(
 
+    tf_bijector = NULL,
     constraint = NULL,
     lower = -Inf,
     upper = Inf,
@@ -190,12 +191,25 @@ variable_node <- R6Class(
         self$constraint <- "high"
         bad_limits <- !is.finite(lower)
 
-      } else if (lower != -Inf & upper != Inf) {
+        lower_limit <- lower != -Inf
+        upper_limit <- upper != Inf
 
-        self$constraint <- "both"
-        bad_limits <- !is.finite(lower) | !is.finite(upper)
+        if (!lower_limit & !upper_limit)
+          self$constraint <- "none"
+        else if (!lower_limit & upper_limit)
+          self$constraint <- "all_low"
+        else if (lower_limit & !upper_limit)
+          self$constraint <- "all_high"
+        else if (lower_limit & upper_limit)
+          self$constraint <- "all_both"
 
       }
+
+      bad_limits <- switch(self$constraint,
+                           low = !is.finite(upper),
+                           high = !is.finite(lower),
+                           both = !is.finite(lower) | !is.finite(upper),
+                           FALSE)
 
       if (bad_limits) {
 
@@ -232,49 +246,45 @@ variable_node <- R6Class(
              tf_adj,
              envir = dag$tf_environment)
 
-      # map from the free to constrained state in a new tensor
-      tf_free <- get(free_name, envir = dag$tf_environment)
-      node <- self$tf_from_free(tf_free, dag$tf_environment)
+      # reshape the free tensor to the match the variable
+      tf_free_flat <- get(free_name, envir = dag$tf_environment)
+      tf_free <- tf$reshape(tf_free_flat,
+                            shape = to_shape(c(-1, dim(self))))
 
-      # reshape the tensor to the match the variable
-      node <- tf$reshape(node,
-                         shape = to_shape(c(-1, dim(self))))
+      # map from the free to constrained state in a new tensor
+      tf_transformed <- self$tf_from_free(tf_free)
 
       # assign as constrained variable
       assign(tf_name,
-             node,
+             tf_transformed,
              envir = dag$tf_environment)
 
     },
 
-    tf_from_free = function(x, env) {
+    create_bijector_if_needed = function() {
 
-      upper <- self$upper
-      lower <- self$lower
+      # if the bijector isn't defined do so now
+      if (is.null(self$tf_bijector)) {
 
-      if (self$constraint == "none") {
-
-        y <- x
-
-      } else if (self$constraint == "both") {
-
-        y <- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
-
-      } else if (self$constraint == "low") {
-
-        y <- fl(upper) - tf$exp(x)
-
-      } else if (self$constraint == "high") {
-
-        y <- tf$exp(x) + fl(lower)
-
-      } else {
-
-        y <- x
+        self$tf_bijector <- switch(
+          self$constraint,
+          none = tf_identity_bijector(),
+          all_low = tf_scalar_neg_bijector(self$upper),
+          all_high = tf_scalar_pos_bijector(self$lower),
+          all_both = tf_scalar_neg_pos_bijector(self$lower, self$upper),
+          mixed = tf_scalar_neg_pos_bijector(self$lower, self$upper),
+          tf_identity_bijector()
+        )
 
       }
 
-      y
+    },
+
+    tf_from_free = function(x) {
+
+      # if the bijector isn't defined, define it now
+      self$create_bijector_if_needed()
+      self$tf_bijector$forward(x)
 
     },
 
@@ -334,9 +344,9 @@ variable_node <- R6Class(
 
       fun <- switch(self$constraint,
                     none = ljac_none,
-                    high = ljac_exp,
-                    low = ljac_exp,
-                    both = ljac_logistic,
+                    all_high = ljac_exp,
+                    all_low = ljac_exp,
+                    all_both = ljac_logistic,
                     correlation_matrix = ljac_corr_mat,
                     covariance_matrix = ljac_cov_mat)
 

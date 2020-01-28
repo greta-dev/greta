@@ -40,6 +40,7 @@ NULL
 
 # load tf probability
 tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
+tfb <- tfp$bijectors
 
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname) {  # Exclude Linting
