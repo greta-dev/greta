@@ -655,41 +655,43 @@ tf_distance <- function(x1, x2) {
 
 }
 
-tf_identity_bijector <- tfb$Identity
+tf_identity_bijector <- function() {
+  tfp$bijectors$Identity()
+}
 
 tf_scalar_pos_bijector <- function (lower) {
 
   steps <- list(
-    tfb$AffineScalar(shift = fl(lower)),
-    tfb$Exp()
+    tfp$bijectors$AffineScalar(shift = fl(lower)),
+    tfp$bijectors$Exp()
   )
-  tfb$Chain(steps)
+  tfp$bijectors$Chain(steps)
 
 }
 
 tf_scalar_neg_bijector <- function (upper) {
 
   steps <- list(
-    tfb$AffineScalar(
+    tfp$bijectors$AffineScalar(
       shift = fl(upper),
       scale = fl(-1)
     ),
-    tfb$Exp()
+    tfp$bijectors$Exp()
   )
-  tfb$Chain(steps)
+  tfp$bijectors$Chain(steps)
 
 }
 
 tf_scalar_neg_pos_bijector <- function (lower, upper) {
 
   steps <- list(
-    tfb$AffineScalar(
+    tfp$bijectors$AffineScalar(
       shift = fl(lower),
       scale = fl(upper - lower)
     ),
-    tfb$Sigmoid()
+    tfp$bijectors$Sigmoid()
   )
-  tfb$Chain(steps)
+  tfp$bijectors$Chain(steps)
 
 }
 

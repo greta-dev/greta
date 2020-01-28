@@ -263,8 +263,20 @@ variable_node <- R6Class(
 
     create_bijector_if_needed = function() {
 
+
+      # determine whether we need to (re-)create the bijector, by trying to use it
+      # the handles bijector being NULL (not created yet) or from a previous session
+      result <- tryCatch(self$tf_bijector$forward(0), error = function(e) e)
+      expected_messages <- c(
+        paste("Unable to access object (object is from previous session and ",
+              "is now invalid)"),
+        "attempt to apply non-function"
+      )
+
+      need_to_recreate <- inherits(result, "error") && result$message %in% expected_messages
+
       # if the bijector isn't defined do so now
-      if (is.null(self$tf_bijector)) {
+      if (need_to_recreate) {
 
         self$tf_bijector <- switch(
           self$constraint,

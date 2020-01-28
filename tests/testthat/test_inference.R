@@ -527,10 +527,10 @@ test_that("parallel reporting works", {
   op <- plan()
   plan(multisession)
 
-  # should report each sampler's progress with a percentage
+  # should report each sampler's progress with a fraction
   out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
   expect_match(out, "2 samplers in parallel")
-  expect_match(out, "100%")
+  expect_match(out, "50/50")
 
   # put the future plan back as we found it
   plan(op)

@@ -578,9 +578,9 @@ to_free <- function(node, data) {
 
   fun <- switch(node$constraint,
                 none = identity,
-                high = high,
-                low = low,
-                both = both)
+                all_high = high,
+                all_low = low,
+                all_both = both)
 
   fun(data)
 
