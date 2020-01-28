@@ -160,36 +160,24 @@ variable_node <- R6Class(
     lower = -Inf,
     upper = Inf,
 
-    initialize = function(lower = -Inf, upper = Inf, dim = 1) {
+    initialize = function(lower = -Inf, upper = Inf, dim = NULL) {
 
-      good_types <- is.numeric(lower) && length(lower) == 1 &
-        is.numeric(upper) && length(upper) == 1
+      if (!is.numeric(lower) | ! is.numeric(upper)) {
 
-      if (!good_types) {
-
-        stop("lower and upper must be numeric vectors of length 1",
+        stop("lower and upper must be numeric",
              call. = FALSE)
 
       }
 
       # check and assign limits
-      bad_limits <- TRUE
+      universal_limits <- length(lower) == 1 & length(upper) == 1
 
-      # find constraint type
-      if (lower == -Inf & upper == Inf) {
+      # find constraint type if they are all the same
+      if (!universal_limits) {
 
-        self$constraint <- "none"
-        bad_limits <- FALSE
+        self$constraint <- "mixed"
 
-      } else if (lower == -Inf & upper != Inf) {
-
-        self$constraint <- "low"
-        bad_limits <- !is.finite(upper)
-
-      } else if (lower != -Inf & upper == Inf) {
-
-        self$constraint <- "high"
-        bad_limits <- !is.finite(lower)
+      } else {
 
         lower_limit <- lower != -Inf
         upper_limit <- upper != Inf
@@ -214,17 +202,26 @@ variable_node <- R6Class(
       if (bad_limits) {
 
         stop("lower and upper must either be -Inf (lower only), ",
-             "Inf (upper only) or finite scalars",
+             "Inf (upper only) or finite",
              call. = FALSE)
 
       }
 
-      if (lower >= upper) {
+      if (any(lower >= upper)) {
 
-        stop("upper bound must be greater than lower bound",
+        stop("upper bounds must be greater than lower bounds",
              call. = FALSE)
 
       }
+
+      # replace values of lower and upper with finite values for dimension
+      # checking (this is pain, but necessary because check_dims coerces to
+      # greta arrays, which must be finite)
+      lower_for_dim <- lower
+      lower_for_dim[] <- 0
+      upper_for_dim <- upper
+      upper_for_dim[] <- 0
+      dim <- check_dims(lower_for_dim, upper_for_dim, target_dim = dim)
 
       # add parameters
       super$initialize(dim)
@@ -293,6 +290,7 @@ variable_node <- R6Class(
     },
 
     tf_from_free = function(x) {
+
 
       # if the bijector isn't defined, define it now
       self$create_bijector_if_needed()

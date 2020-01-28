@@ -7,11 +7,10 @@
 #'   array following a specific probability distribution, see
 #'   \code{\link{distributions}}.
 #'
-#' @param lower,upper scalar values giving optional limits to variables. These
-#'  must be specified as numerics, they cannot be greta arrays (though see
-#'  details for a workaround). They can be set to \code{-Inf} (\code{lower}) or
-#'  \code{Inf} (\code{upper}), though \code{lower} must always be less than
-#'  \code{upper}.
+#' @param lower,upper optional limits to variables. These must be specified as
+#'   numerics, they cannot be greta arrays (though see details for a
+#'   workaround). They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
+#'   (\code{upper}), though \code{lower} must always be less than \code{upper}.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
 #'  or a vector of positive integers. See details.
@@ -40,7 +39,7 @@
 #' max <- min ^ 2
 #' d <- min + variable(0, 1, dim = nrow(iris)) * (max - min)
 #' }
-variable <- function(lower = -Inf, upper = Inf, dim = 1) {
+variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
 
   check_tf_version("error")
 

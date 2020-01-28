@@ -713,9 +713,9 @@ test_that("variable() errors informatively", {
 
   # bad types
   expect_error(variable(upper = NA),
-               "lower and upper must be numeric vectors")
+               "lower and upper must be numeric")
   expect_error(variable(upper = head),
-               "lower and upper must be numeric vectors")
+               "lower and upper must be numeric")
 
   # good types, bad values
   expect_error(variable(lower = Inf),
@@ -727,7 +727,7 @@ test_that("variable() errors informatively", {
 
   # lower not below upper
   expect_error(variable(lower = 1, upper = 1),
-               "upper bound must be greater than lower bound")
+               "upper bounds must be greater than lower bounds")
 
 })
 
