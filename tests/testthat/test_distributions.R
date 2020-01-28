@@ -713,21 +713,44 @@ test_that("variable() errors informatively", {
 
   # bad types
   expect_error(variable(upper = NA),
-               "lower and upper must be numeric vectors of length 1")
+               "lower and upper must be numeric vectors")
   expect_error(variable(upper = head),
-               "lower and upper must be numeric vectors of length 1")
-  expect_error(variable(lower = 1:3),
-               "lower and upper must be numeric vectors of length 1")
+               "lower and upper must be numeric vectors")
 
   # good types, bad values
   expect_error(variable(lower = Inf),
                "^lower and upper must either be")
   expect_error(variable(upper = -Inf),
                "^lower and upper must either be")
+  expect_error(variable(lower = 0:2),
+               "^lower and upper must either b")
 
   # lower not below upper
   expect_error(variable(lower = 1, upper = 1),
                "upper bound must be greater than lower bound")
+
+})
+
+test_that("variable() with vectorised bounds can be sampled correctly", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x <- rnorm(5, 0, 10)
+  lower <- c(-3, -1, 2)
+  upper <- c(0, 2, 3)
+  mu <- variable(lower = lower,
+                 upper = upper)
+  distribution(x) <- normal(mu, 1)
+  m <- model(x)
+  draws <- mcmc(m, n_samples = 100, warmup = 1, verbose = FALSE)
+
+  samples <- as.matrix(draws)
+  above_lower <- sweep(samples, 2, lower, `>=`)
+  below_upper <- sweep(samples, 2, upper, `<=`)
+
+  expect_true(all(above_lower & below_upper))
+
 
 })
 

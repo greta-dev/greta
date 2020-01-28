@@ -35,7 +35,7 @@ test_that("uniform joint variables can be sampled from", {
              uniform(0, 2),
              uniform(-1, 0))
 
-  sample_distribution(x, lower = -1, upper = 2)
+  sample_distribution(x, lower = c(0, 0, -1), upper = c(1, 2, 0))
 
 })
 
