@@ -13,6 +13,32 @@ test_that("continuous joint variables can be sampled from", {
 
 })
 
+test_that("truncated continuous joint variables can be sampled from", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x <- joint(normal(0, 1, truncation = c(0, Inf)),
+             normal(0, 2, truncation = c(0, Inf)),
+             normal(0, 3, truncation = c(0, Inf)))
+
+  sample_distribution(x, lower = 0, upper = Inf)
+
+})
+
+test_that("uniform joint variables can be sampled from", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x <- joint(uniform(0, 1),
+             uniform(0, 2),
+             uniform(-1, 0))
+
+  sample_distribution(x, lower = -1, upper = 2)
+
+})
+
 test_that("fixed continuous joint distributions can be sampled from", {
 
   skip_if_not(check_tf_version())
@@ -98,6 +124,84 @@ test_that("joint of normals has correct density", {
                        joint_r,
                        parameters = params,
                        x = matrix(rnorm(300, -2, 3), 100, 3))
+
+})
+
+test_that("joint of truncated normals has correct density", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  joint_greta <- function(means, sds, lower, upper, dim) {
+    joint(normal(means[1], sds[1], truncation = c(lower[1], upper[1])),
+          normal(means[2], sds[2], truncation = c(lower[2], upper[2])),
+          normal(means[3], sds[3], truncation = c(lower[3], upper[3])),
+          dim = dim)
+  }
+
+  joint_r <- function(x, means, sds, lower, upper) {
+    densities <- matrix(NA,
+                        nrow = length(x),
+                        ncol = length(means))
+    for (i in seq_along(means)) {
+      densities[, i] <- truncdist::dtrunc(x[, i],
+                               "norm",
+                               a = lower[i],
+                               b = upper[i],
+                               mean = means[i],
+                               sd = sds[i])
+    }
+    densities <- log(densities)
+
+    exp(rowSums(densities))
+  }
+
+  params <- list(means = c(-2, 2, 5),
+                 sds = c(3, 0.5, 1),
+                 lower = c(0, -1, -Inf),
+                 upper = c(Inf, 1, 0))
+
+  compare_distribution(joint_greta,
+                       joint_r,
+                       parameters = params,
+                       x = matrix(rnorm(300, -2, 3), 100, 3))
+
+})
+
+test_that("joint of uniforms has correct density", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  joint_greta <- function(lower, upper, dim) {
+    joint(uniform(lower[1], upper[1]),
+          uniform(lower[2], upper[2]),
+          uniform(lower[3], upper[3]),
+          dim = dim)
+  }
+
+  joint_r <- function(x, lower, upper) {
+    densities <- matrix(NA,
+                        nrow = length(x),
+                        ncol = length(lower))
+    for (i in seq_along(lower))
+      densities[, i] <- dunif(x[, i], lower[i], upper[i], log = TRUE)
+
+    exp(rowSums(densities))
+  }
+
+  params <- list(lower = c(-2, 0.5, 1),
+                 upper = c(3, 2, 5))
+
+  fun <- function(lower, upper) {
+    runif(100, lower, upper)
+  }
+  x <- mapply(fun, params$lower, params$upper)
+
+  compare_distribution(joint_greta,
+                       joint_r,
+                       parameters = params,
+                       x = x)
 
 })
 
