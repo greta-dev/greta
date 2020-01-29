@@ -39,6 +39,19 @@ test_that("uniform joint variables can be sampled from", {
 
 })
 
+test_that("joint normals with different truncation types can be sampled", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x <- joint(normal(0, 1, truncation = c(0, Inf)),
+             normal(0, 2, truncation = c(-Inf, 0)),
+             normal(-1, 0, truncation = c(1, 2)))
+
+  sample_distribution(x, lower = c(0, 0, -1), upper = c(1, 2, 0))
+
+})
+
 test_that("fixed continuous joint distributions can be sampled from", {
 
   skip_if_not(check_tf_version())
