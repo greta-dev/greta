@@ -544,10 +544,12 @@ extra_samples <- function(draws,
 
 }
 
-# convert some 'data' values form the constrained to the free state, for a given
+# convert some 'data' values from the constrained to the free state, for a given
 # 'node'
 #' @importFrom stats qlogis
 to_free <- function(node, data) {
+
+  # use reverse mode of bijectors!
 
   lower <- node$lower
   upper <- node$upper
@@ -577,10 +579,10 @@ to_free <- function(node, data) {
   }
 
   fun <- switch(node$constraint,
-                none = identity,
-                all_high = high,
-                all_low = low,
-                all_both = both)
+                scalar_none = identity,
+                scalar_all_high = high,
+                scalar_all_low = low,
+                scalar_all_low_high = both)
 
   fun(data)
 

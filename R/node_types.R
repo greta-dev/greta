@@ -155,7 +155,6 @@ variable_node <- R6Class(
   inherit = node,
   public = list(
 
-    tf_bijector = NULL,
     constraint = NULL,
     lower = -Inf,
     upper = Inf,
@@ -176,7 +175,7 @@ variable_node <- R6Class(
       # find constraint type if they are all the same
       if (!universal_limits) {
 
-        self$constraint <- "mixed"
+        self$constraint <- "scalar_mixed"
 
       } else {
 
@@ -184,13 +183,13 @@ variable_node <- R6Class(
         upper_limit <- upper != Inf
 
         if (!lower_limit & !upper_limit)
-          self$constraint <- "none"
+          self$constraint <- "scalar_none"
         else if (!lower_limit & upper_limit)
-          self$constraint <- "all_low"
+          self$constraint <- "scalar_all_low"
         else if (lower_limit & !upper_limit)
-          self$constraint <- "all_high"
+          self$constraint <- "scalar_all_high"
         else if (lower_limit & upper_limit)
-          self$constraint <- "all_both"
+          self$constraint <- "scalar_all_low_high"
 
       }
 
@@ -279,109 +278,69 @@ variable_node <- R6Class(
 
     },
 
-    create_bijector_if_needed = function() {
+    create_tf_bijector = function() {
 
-
-      # determine whether we need to (re-)create the bijector, by trying to use it
-      # the handles bijector being NULL (not created yet) or from a previous session
-      result <- tryCatch(self$tf_bijector$forward(0), error = function(e) e)
-      expected_messages <- c(
-        paste("Unable to access object (object is from previous session and ",
-              "is now invalid)"),
-        "attempt to apply non-function"
+      switch(
+        self$constraint,
+          scalar_none = tf_scalar_bijector(
+          self$dim
+        ),
+        scalar_all_low = tf_scalar_neg_bijector(
+          self$dim,
+          self$upper
+        ),
+        scalar_all_high = tf_scalar_pos_bijector(
+          self$dim,
+          self$lower
+        ),
+        scalar_all_low_high = tf_scalar_neg_pos_bijector(
+          self$dim,
+          self$lower,
+          self$upper
+        ),
+        scalar_mixed = tf_scalar_neg_pos_bijector(
+          self$dim,
+          self$lower,
+          self$upper
+        ),
+        correlation_matrix = tf_correlation_cholesky_bijector(),
+        covariance_matrix = tf_covariance_cholesky_bijector()
       )
-
-      need_to_recreate <- inherits(result, "error") && result$message %in% expected_messages
-
-      # if the bijector isn't defined do so now
-      if (need_to_recreate) {
-
-        self$tf_bijector <- switch(
-          self$constraint,
-          none = tf_identity_bijector(),
-          all_low = tf_scalar_neg_bijector(self$upper),
-          all_high = tf_scalar_pos_bijector(self$lower),
-          all_both = tf_scalar_neg_pos_bijector(self$lower, self$upper),
-          mixed = tf_scalar_neg_pos_bijector(self$lower, self$upper),
-          tf_identity_bijector()
-        )
-
-      }
 
     },
 
     tf_from_free = function(x) {
 
-
-      # if the bijector isn't defined, define it now
-      self$create_bijector_if_needed()
-      self$tf_bijector$forward(x)
+      tf_bijector <- self$create_tf_bijector()
+      tf_bijector$forward(x)
 
     },
 
     # adjustments for univariate variables
     tf_log_jacobian_adjustment = function(free) {
 
-      ljac_none <- function(x) {
-        zero <- tf$constant(0, dtype = tf_float(), shape = shape(1))
-        tf$tile(zero, multiples = list(tf$shape(x)[[0]]))
+      tf_bijector <- self$create_tf_bijector()
+
+      event_ndims <- tf_bijector$forward_min_event_ndims
+      ljd <- tf_bijector$forward_log_det_jacobian(
+        x = free,
+        event_ndims = event_ndims
+      )
+
+      # sum across all dimensions of jacobian
+      already_summed <-
+        identical(dim(ljd), list(NULL)) | identical(dim(ljd), list())
+
+      if (!already_summed) {
+        ljd <- tf_sum(ljd, drop = TRUE)
       }
 
-      ljac_exp <- function(x) {
-        tf_sum(x, drop = TRUE)
+      # make sure there's something in the batch dimension
+      if (identical(dim(ljd), list())) {
+        ljd <- tf$expand_dims(ljd, 0L)
       }
 
-      ljac_logistic <- function(x) {
-        lrange <- log(self$upper - self$lower)
-        tf_sum(x - fl(2) * tf$nn$softplus(x) + lrange,
-               drop = TRUE)
-      }
-
-      ljac_corr_mat <- function(x) {
-
-        # find dimension
-        k <- dim(x)[[2]]
-        n <- (1 + sqrt(8 * k + 1)) / 2
-
-        # convert to correlation-scale (-1, 1) & get log jacobian
-        z <- tf$tanh(x)
-
-        free_to_correl_lp <- tf_sum(log(fl(1) - tf$square(z)))
-        free_to_correl_lp <- tf$squeeze(free_to_correl_lp, 1L)
-
-        # split z up into rows
-        z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
-
-        # accumulate log prob within each row
-        lps <- lapply(z_rows, tf_corrmat_row, which = "ljac")
-        correl_to_mat_lp <- tf$add_n(lps)
-
-        free_to_correl_lp + correl_to_mat_lp
-
-      }
-
-      ljac_cov_mat <- function(x) {
-
-        # find dimension
-        n <- dim(x)[[2]]
-        k <- (sqrt(8 * n + 1) - 1) / 2
-
-        k_seq <- seq_len(k)
-        powers <- tf$constant(k - k_seq + 2, dtype = tf_float(),
-                              shape = shape(k))
-        fl(k * log(2)) + tf_sum(powers * x[, k_seq - 1], drop = TRUE)
-
-      }
-
-      fun <- switch(self$constraint,
-                    none = ljac_none,
-                    all_high = ljac_exp,
-                    all_low = ljac_exp,
-                    all_both = ljac_logistic,
-                    correlation_matrix = ljac_corr_mat,
-                    covariance_matrix = ljac_cov_mat)
-
-      fun(free)
+      ljd
 
     },
 
