@@ -161,17 +161,6 @@ tf_tapply <- function(x, segment_ids, num_segments, op_name) {
 
 }
 
-
-# given a flat tensor, convert it into a square symmetric matrix by considering
-# it  as the non-zero elements of the lower-triangular decomposition of the
-# square matrix
-tf_flat_to_chol <- function(x, dims) {
-
-  bijector <- tf_covariance_cholesky_bijector()
-  bijector$forward(x)
-
-}
-
 # given a (batched, column) vector tensor of elements, corresponding to the
 # correlation-constrained (between -1 and 1) free state of a single row of the
 # cholesky factor of a correlation matrix, return the (upper-triangular
@@ -253,14 +242,6 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
     return(lp)
 
   }
-
-}
-
-# convert an unconstrained vector into symmetric correlation matrix
-tf_flat_to_chol_correl <- function(x, dims) {
-
-  bijector <- tf_correlation_cholesky_bijector()
-  bijector$forward(x)
 
 }
 
@@ -706,9 +687,7 @@ tf_functions_module <- module(tf_as_logical,
                               tf_lbeta,
                               tf_chol,
                               tf_chol2inv,
-                              tf_flat_to_chol,
                               tf_corrmat_row,
-                              tf_flat_to_chol_correl,
                               tf_chol_to_symmetric,
                               tf_colmeans,
                               tf_rowmeans,
