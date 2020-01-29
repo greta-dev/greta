@@ -13,7 +13,6 @@ dag_class <- R6Class(
     tf_environment = NA,
     tf_graph = NA,
     target_nodes = NA,
-    parameters_example = NA,
     tf_float = NA,
     n_cores = 0L,
     compile = NA,
@@ -36,9 +35,6 @@ dag_class <- R6Class(
 
       # set up the tf environment, with a graph
       self$new_tf_environment()
-
-      # stash an example list to relist parameters
-      self$parameters_example <- self$example_parameters(free = FALSE)
 
       # store the performance control info
       self$tf_float <- tf_float
@@ -149,8 +145,8 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      vals <- self$example_parameters()
-
+      vals <- self$example_parameters(free = TRUE)
+      vals <- unlist_tf(vals)
 
       if (type == "variable") {
 
@@ -184,11 +180,10 @@ dag_class <- R6Class(
       # split up into separate free state variables and assign
       free_state <- get("free_state", envir = tfe)
 
-      params <- self$parameters_example
+      params <- self$example_parameters(free = TRUE)
       lengths <- vapply(params,
-                        function(x) as.integer(prod(dim(x))),
+                        function(x) length(x),
                         FUN.VALUE = 1L)
-
       if (length(lengths) > 1) {
         args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
       } else {
@@ -279,8 +274,9 @@ dag_class <- R6Class(
       # get TF density tensors for all distribution
       adj <- lapply(adj_names, get, envir = self$tf_environment)
 
-      # remove their names and sum them together
+      # remove their names and sum them together (accounting for tfp bijectors sometimes returning a scalar tensor)
       names(adj) <- NULL
+      adj <- match_batches(adj)
       self$on_graph(total_adj <- tf$add_n(adj))
 
       # assign overall density to environment
@@ -416,8 +412,7 @@ dag_class <- R6Class(
 
       # get their values in either free of non-free form
       if (free) {
-        free_parameters <- lapply(nodes, member, "value(free = TRUE)")
-        parameters <- unlist_tf(free_parameters)
+        parameters <- lapply(nodes, member, "value(free = TRUE)")
       } else {
         parameters <- lapply(nodes, member, "value()")
       }

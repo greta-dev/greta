@@ -593,7 +593,9 @@ parse_initial_values <- function(initials, dag) {
   # skip if no inits provided
   if (identical(initials, initials())) {
 
-    return(dag$example_parameters(free = TRUE))
+    free_parameters <- dag$example_parameters(free = TRUE)
+    free_parameters <- unlist_tf(free_parameters)
+    return(free_parameters)
 
   }
 

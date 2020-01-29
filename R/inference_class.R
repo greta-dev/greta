@@ -43,7 +43,9 @@ inference <- R6Class(
 
       self$parameters <- parameters
       self$model <- model
-      self$n_free <- length(model$dag$example_parameters())
+      free_parameters <- model$dag$example_parameters(free = TRUE)
+      free_parameters <- unlist_tf(free_parameters)
+      self$n_free <- length(free_parameters)
       self$set_initial_values(initial_values)
       self$n_traced <- length(model$dag$trace_values(self$free_state))
       self$seed <- seed
@@ -279,7 +281,7 @@ sampler <- R6Class(
 
       # duplicate diag_sd if needed
       n_diag <- length(self$parameters$diag_sd)
-      n_parameters <- length(model$dag$example_parameters())
+      n_parameters <- self$n_free
       if (n_diag != n_parameters && n_parameters > 1) {
         diag_sd <- rep(self$parameters$diag_sd[1], n_parameters)
         self$parameters$diag_sd <- diag_sd

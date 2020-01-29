@@ -266,12 +266,10 @@ variable_node <- R6Class(
              tf_adj,
              envir = dag$tf_environment)
 
-      # reshape the free tensor to the match the variable
-      tf_free_flat <- get(free_name, envir = dag$tf_environment)
-      tf_free <- tf$reshape(tf_free_flat,
-                            shape = to_shape(c(-1, dim(self))))
+      # get the free tensor
+      tf_free <- get(free_name, envir = dag$tf_environment)
 
-      # map from the free to constrained state in a new tensor
+      # map from the free to constrained state (including reshaping) in a new tensor
       tf_transformed <- self$tf_from_free(tf_free)
 
       # assign as constrained variable

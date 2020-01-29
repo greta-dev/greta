@@ -142,7 +142,8 @@ calculate_greta_mcmc_list <- function(target,
   dag$target_nodes <- list(get_node(target))
   names(dag$target_nodes) <- target_name
 
-  param <- dag$example_parameters()
+  param <- dag$example_parameters(free = TRUE)
+  param <- unlist_tf(param)
   param[] <- 0
 
   # raw draws are either an attribute, or this object
