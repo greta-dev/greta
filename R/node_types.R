@@ -159,8 +159,9 @@ variable_node <- R6Class(
     constraint = NULL,
     lower = -Inf,
     upper = Inf,
+    free_value = NULL,
 
-    initialize = function(lower = -Inf, upper = Inf, dim = NULL) {
+    initialize = function(lower = -Inf, upper = Inf, dim = NULL, free_dim = prod(dim)) {
 
       if (!is.numeric(lower) | ! is.numeric(upper)) {
 
@@ -227,6 +228,28 @@ variable_node <- R6Class(
       super$initialize(dim)
       self$lower <- lower
       self$upper <- upper
+
+      # set the free state version of value
+      self$free_value <- unknowns(dim = free_dim)
+
+    },
+
+    # handle two types of value for variables
+    value = function(new_value = NULL, free = FALSE, ...) {
+
+      if (free) {
+
+        if (is.null(new_value)) {
+          self$free_value
+        } else {
+          self$free_value <- new_value
+        }
+
+      } else {
+
+        super$value(new_value, ...)
+
+      }
 
     },
 
@@ -533,14 +556,15 @@ op <- function(...) {
 # helper function to create a variable node
 # by default, make x (the node
 # containing the value) a free parameter of the correct dimension
-vble <- function(truncation, dim = 1) {
+vble <- function(truncation, dim = 1, free_dim = prod(dim)) {
 
   if (is.null(truncation))
     truncation <- c(-Inf, Inf)
 
   variable_node$new(lower = truncation[1],
                     upper = truncation[2],
-                    dim = dim)
+                    dim = dim,
+                    free_dim = free_dim)
 
 }
 

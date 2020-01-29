@@ -50,3 +50,31 @@ variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
   as.greta_array(node)
 
 }
+
+# to be exported later = a cholesky factor variable (possibly for a correlation matrix)
+cholesky_variable <- function (dim, correlation = FALSE) {
+
+  # dimension of the free state version
+  free_dim <- ifelse(correlation,
+                     dim * (dim - 1) / 2,
+                     dim + dim * (dim - 1) / 2)
+
+  # create variable node
+  node <- vble(truncation = c(-Inf, Inf),
+               dim = c(dim, dim),
+               free_dim = free_dim)
+
+  # set the constraint, to enable transformation
+  node$constraint <- ifelse(correlation,
+                            "correlation_matrix",
+                            "covariance_matrix")
+
+  # set the printed value to be nicer
+  cholesky_value <- unknowns(c(dim, dim))
+  cholesky_value[lower.tri(cholesky_value, )] <- 0
+  node$value(cholesky_value)
+
+  # reeturn as a greta array
+  as.greta_array(node)
+
+}

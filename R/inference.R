@@ -593,7 +593,7 @@ parse_initial_values <- function(initials, dag) {
   # skip if no inits provided
   if (identical(initials, initials())) {
 
-    return(dag$example_parameters(flat = TRUE))
+    return(dag$example_parameters(free = TRUE))
 
   }
 
@@ -616,7 +616,7 @@ parse_initial_values <- function(initials, dag) {
          call. = FALSE)
   }
 
-  params <- dag$example_parameters(flat = FALSE)
+  params <- dag$example_parameters(free = FALSE)
   idx <- match(tf_names, names(params))
 
   # make nodes do this conversion and checking in the future also make them

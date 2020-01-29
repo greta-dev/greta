@@ -38,7 +38,7 @@ dag_class <- R6Class(
       self$new_tf_environment()
 
       # stash an example list to relist parameters
-      self$parameters_example <- self$example_parameters(flat = FALSE)
+      self$parameters_example <- self$example_parameters(free = FALSE)
 
       # store the performance control info
       self$tf_float <- tf_float
@@ -407,19 +407,22 @@ dag_class <- R6Class(
 
     },
 
-    # return the expected free parameter format either in list or vector form
-    example_parameters = function(flat = TRUE) {
+    # return the expected parameter format either in free state vector form, or list of transformed parameters
+    example_parameters = function(free = TRUE) {
 
-      # find all variable nodes in the graph and get their values
+      # find all variable nodes in the graph
       nodes <- self$node_list[self$node_types == "variable"]
       names(nodes) <- self$get_tf_names(types = "variable")
-      current_parameters <- lapply(nodes, member, "value()")
 
-      # optionally flatten them
-      if (flat)
-        current_parameters <- unlist_tf(current_parameters)
+      # get their values in either free of non-free form
+      if (free) {
+        free_parameters <- lapply(nodes, member, "value(free = TRUE)")
+        parameters <- unlist_tf(free_parameters)
+      } else {
+        parameters <- lapply(nodes, member, "value()")
+      }
 
-      current_parameters
+      parameters
 
     },
 
