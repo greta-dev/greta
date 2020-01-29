@@ -274,7 +274,8 @@ dag_class <- R6Class(
       # get TF density tensors for all distribution
       adj <- lapply(adj_names, get, envir = self$tf_environment)
 
-      # remove their names and sum them together (accounting for tfp bijectors sometimes returning a scalar tensor)
+      # remove their names and sum them together (accounting for tfp bijectors
+      # sometimes returning a scalar tensor)
       names(adj) <- NULL
       adj <- match_batches(adj)
       self$on_graph(total_adj <- tf$add_n(adj))
@@ -405,7 +406,8 @@ dag_class <- R6Class(
 
     },
 
-    # return the expected parameter format either in free state vector form, or list of transformed parameters
+    # return the expected parameter format either in free state vector form, or
+    # list of transformed parameters
     example_parameters = function(free = TRUE) {
 
       # find all variable nodes in the graph

@@ -5,8 +5,9 @@
 #'   together into a multivariate (and \emph{a priori} independent between
 #'   dimensions) joint distribution, either over a variable, or for fixed data.
 #'
-#' @param ... scalar variable greta arrays following probability distributions (see
-#'   \code{\link{distributions}}); the components of the joint distribution.
+#' @param ... scalar variable greta arrays following probability distributions
+#'   (see \code{\link{distributions}}); the components of the joint
+#'   distribution.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
 #'   or a vector of positive integers. The final dimension of the greta array
@@ -74,7 +75,7 @@ joint_distribution <- R6Class(
       # check they are all scalar
       are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
       if (!all(are_scalar)) {
-        stop ("joint only accepts probability distributions over scalars",
+        stop("joint only accepts probability distributions over scalars",
               call. = FALSE)
       }
 

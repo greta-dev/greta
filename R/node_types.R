@@ -161,7 +161,11 @@ variable_node <- R6Class(
     upper = Inf,
     free_value = NULL,
 
-    initialize = function(lower = -Inf, upper = Inf, dim = NULL, free_dim = prod(dim)) {
+    initialize = function(lower = -Inf,
+                          upper = Inf,
+                          dim = NULL,
+                          free_dim = prod(dim)) {
+
 
       if (!is.numeric(lower) | ! is.numeric(upper)) {
 
@@ -193,17 +197,19 @@ variable_node <- R6Class(
       constraint_array[lower_limit & upper_limit] <- "both"
 
       # pass a string depending on whether they are all the same
-      if(all(constraint_array == constraint_array[1])) {
+      if (all(constraint_array == constraint_array[1])) {
         self$constraint <- paste0("scalar_all_", constraint_array[1])
       } else {
         self$constraint <- "scalar_mixed"
       }
 
-      bad_limits <- switch(self$constraint,
-                           scalar_all_low = any(!is.finite(upper)),
-                           scalar_all_high = any(!is.finite(lower)),
-                           scalar_all_both = any(!is.finite(lower)) | any(!is.finite(upper)),
-                           FALSE)
+      bad_limits <- switch(
+        self$constraint,
+        scalar_all_low = any(!is.finite(upper)),
+        scalar_all_high = any(!is.finite(lower)),
+        scalar_all_both = any(!is.finite(lower)) | any(!is.finite(upper)),
+        FALSE
+      )
 
       if (bad_limits) {
 
@@ -264,7 +270,8 @@ variable_node <- R6Class(
       # get the free tensor
       tf_free <- get(free_name, envir = dag$tf_environment)
 
-      # map from the free to constrained state (including reshaping) in a new tensor
+      # map from the free to constrained state (including reshaping) in a new
+      # tensor
       tf_transformed <- self$tf_from_free(tf_free)
 
       # assign as constrained variable

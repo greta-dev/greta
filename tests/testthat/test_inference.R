@@ -430,10 +430,13 @@ test_that("numerical issues are handled in mcmc", {
   source("helpers.R")
 
   # this should have a cholesky decomposition problem at some point
-  k <- 2
-  sigma <- lkj_correlation(1, k)
-  x <- wishart(k + 1, sigma)
-  m <- model(x, precision = "single")
+  alpha <- normal(0, 1)
+  x <- matrix(rnorm(6), 3, 2)
+  y <- t(rnorm(3))
+  z <- alpha * x
+  sigma <- z %*% t(z)
+  distribution(y) <- multivariate_normal(zeros(1, 3), sigma)
+  m <- model(alpha)
 
   # running with bursts should error informatively
   expect_error(draws <- mcmc(m, verbose = FALSE),

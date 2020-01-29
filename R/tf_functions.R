@@ -623,7 +623,7 @@ tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
 
 tf_scalar_mixed_bijector <- function(dim, lower, upper) {
 
-  stop ("not yet implemented", call. = FALSE)
+  stop("not yet implemented", call. = FALSE)
 
 }
 
@@ -670,7 +670,7 @@ tf_covariance_cholesky_bijector <- function() {
   tfp$bijectors$FillTriangular(upper = TRUE)
 }
 
-tf_simplex_bijector <- function (dim) {
+tf_simplex_bijector <- function(dim) {
 
   n_dim <- length(dim)
   last_dim <- dim[n_dim]

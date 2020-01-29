@@ -1074,7 +1074,7 @@ test_that("Wishart can use a choleskied Sigma", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  sig <- lkj_correlation(3, dim = 4)
+  sig <- lkj_correlation(3, dim = 3)
   w <- wishart(5, sig)
   m <- model(w, precision = "double")
   expect_ok(draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE))
