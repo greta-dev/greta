@@ -44,7 +44,7 @@ test_that("fixed continuous joint distributions can be sampled from", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  obs <- matrix(rnorm(300, 0, 2), 100, 3)
+  obs <- matrix(rnorm(3, 0, 2), 100, 3)
   mu <- variable(dim = 3)
   distribution(obs) <- joint(normal(mu[1], 1),
                              normal(mu[2], 2),
@@ -92,6 +92,17 @@ test_that("joint with insufficient distributions errors", {
 
   expect_error(joint(),
                "at least two distributions")
+
+})
+
+test_that("joint with non-scalar distributions errors", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  expect_error(joint(normal(0, 2, dim = 3),
+                     normal(0, 1, dim = 3)),
+               "probability distributions over scalars")
 
 })
 
@@ -161,10 +172,15 @@ test_that("joint of truncated normals has correct density", {
                  lower = c(0, -1, -Inf),
                  upper = c(Inf, 1, 0))
 
+  fun <- function(mean, sd, lower, upper) {
+    truncdist::rtrunc(100, "norm", lower, upper, mean = mean, sd = sd)
+  }
+  x <- mapply(fun, params$means, params$sds, params$lower, params$upper)
+
   compare_distribution(joint_greta,
                        joint_r,
                        parameters = params,
-                       x = matrix(rnorm(300, -2, 3), 100, 3))
+                       x = x)
 
 })
 

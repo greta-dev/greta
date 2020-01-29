@@ -5,7 +5,7 @@
 #'   together into a multivariate (and \emph{a priori} independent between
 #'   dimensions) joint distribution, either over a variable, or for fixed data.
 #'
-#' @param ... variable greta arrays following probability distributions (see
+#' @param ... scalar variable greta arrays following probability distributions (see
 #'   \code{\link{distributions}}); the components of the joint distribution.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
@@ -58,9 +58,10 @@ joint_distribution <- R6Class(
       }
 
       # check the dimensions of the variables in dots
-      dim <- do.call(check_dims, c(dots, target_dim = dim))
+      single_dim <- do.call(check_dims, c(dots, target_dim = dim))
 
       # add the joint dimension as the last dimension
+      dim <- single_dim
       ndim <- length(dim)
       if (dim[ndim] == 1) {
         dim[ndim] <- n_distributions
@@ -69,6 +70,13 @@ joint_distribution <- R6Class(
       }
 
       dot_nodes <- lapply(dots, get_node)
+
+      # check they are all scalar
+      are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
+      if (!all(are_scalar)) {
+        stop ("joint only accepts probability distributions over scalars",
+              call. = FALSE)
+      }
 
       # get the distributions and strip away their variables
       distribs <- lapply(dot_nodes, member, "distribution")
@@ -85,11 +93,15 @@ joint_distribution <- R6Class(
              "of discrete and continuous distributions",
              call. = FALSE)
       }
+      n_components <- length(dot_nodes)
 
       # work out the support of the resulting distribution, and add as the
       # bounds of this one, to use when creating target variable
       lower <- lapply(dot_nodes, member, "lower")
+      lower <- lapply(lower, array, dim = single_dim)
       upper <- lapply(dot_nodes, member, "upper")
+      upper <- lapply(upper, array, dim = single_dim)
+
       self$bounds <- list(
         lower = do.call(abind::abind, lower),
         upper = do.call(abind::abind, upper)
