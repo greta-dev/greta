@@ -579,10 +579,10 @@ to_free <- function(node, data) {
   }
 
   fun <- switch(node$constraint,
-                scalar_none = identity,
+                scalar_all_none = identity,
                 scalar_all_high = high,
                 scalar_all_low = low,
-                scalar_all_low_high = both)
+                scalar_all_both = both)
 
   fun(data)
 

@@ -156,6 +156,7 @@ variable_node <- R6Class(
   public = list(
 
     constraint = NULL,
+    constraint_array = NULL,
     lower = -Inf,
     upper = Inf,
     free_value = NULL,
@@ -178,34 +179,30 @@ variable_node <- R6Class(
       upper_for_dim[] <- 0
       dim <- check_dims(lower_for_dim, upper_for_dim, target_dim = dim)
 
-      # check and assign limits
-      universal_limits <- all(lower == lower[1]) & all(upper == upper[1])
+      # vectorise these tests, to get a matrix of constraint types - then test
+      # at the end whether it's mixed
 
-      # find constraint type if they are all the same
-      if (!universal_limits) {
+      lower_limit <- lower != -Inf
+      upper_limit <- upper != Inf
 
-        self$constraint <- "scalar_mixed"
+      # create a matrix of elemntwise constraints
+      constraint_array <- array(NA, check_dims(lower_for_dim, upper_for_dim))
+      constraint_array[!lower_limit & !upper_limit] <- "none"
+      constraint_array[!lower_limit & upper_limit] <- "low"
+      constraint_array[lower_limit & !upper_limit] <- "high"
+      constraint_array[lower_limit & upper_limit] <- "both"
 
+      # pass a string depending on whether they are all the same
+      if(all(constraint_array == constraint_array[1])) {
+        self$constraint <- paste0("scalar_all_", constraint_array[1])
       } else {
-
-        lower_limit <- lower[1] != -Inf
-        upper_limit <- upper[1] != Inf
-
-        if (!lower_limit & !upper_limit)
-          self$constraint <- "scalar_none"
-        else if (!lower_limit & upper_limit)
-          self$constraint <- "scalar_all_low"
-        else if (lower_limit & !upper_limit)
-          self$constraint <- "scalar_all_high"
-        else if (lower_limit & upper_limit)
-          self$constraint <- "scalar_all_low_high"
-
+        self$constraint <- "scalar_mixed"
       }
 
       bad_limits <- switch(self$constraint,
-                           low = !is.finite(upper),
-                           high = !is.finite(lower),
-                           both = !is.finite(lower) | !is.finite(upper),
+                           scalar_all_low = any(!is.finite(upper)),
+                           scalar_all_high = any(!is.finite(lower)),
+                           scalar_all_both = any(!is.finite(lower)) | any(!is.finite(upper)),
                            FALSE)
 
       if (bad_limits) {
@@ -227,8 +224,7 @@ variable_node <- R6Class(
       super$initialize(dim)
       self$lower <- array(lower, dim)
       self$upper <- array(upper, dim)
-
-      # set the free state version of value
+      self$constraint_array <- constraint_array
       self$free_value <- unknowns(dim = free_dim)
 
     },
@@ -282,7 +278,7 @@ variable_node <- R6Class(
 
       switch(
         self$constraint,
-          scalar_none = tf_scalar_bijector(
+          scalar_all_none = tf_scalar_bijector(
           self$dim
         ),
         scalar_all_low = tf_scalar_neg_bijector(
@@ -293,7 +289,7 @@ variable_node <- R6Class(
           self$dim,
           self$lower
         ),
-        scalar_all_low_high = tf_scalar_neg_pos_bijector(
+        scalar_all_both = tf_scalar_neg_pos_bijector(
           self$dim,
           self$lower,
           self$upper
