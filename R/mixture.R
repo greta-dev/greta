@@ -174,6 +174,8 @@ mixture_distribution <- R6Class(
         truncation <- support
       }
 
+      self$bounds <- support
+
       # for any discrete ones, tell them they are fixed
       super$initialize("mixture", dim, discrete = discrete[1])
 
@@ -184,6 +186,10 @@ mixture_distribution <- R6Class(
       }
 
       self$add_parameter(weights, "weights")
+    },
+
+    create_target = function(truncation) {
+      vble(self$bounds, dim = self$dim)
     },
 
     tf_distrib = function(parameters, dag) {
