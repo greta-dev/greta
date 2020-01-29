@@ -159,7 +159,8 @@ mixture_distribution <- R6Class(
           FUN.VALUE = character(1)
         )
         stop("component distributions have different support: ",
-              paste(supports_text, collapse = " vs. "))
+              paste(supports_text, collapse = " vs. "),
+             call. = FALSE)
       }
 
       # get the maximal bounds for all component distributions
