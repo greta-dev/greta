@@ -621,6 +621,12 @@ tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
 
 }
 
+tf_scalar_mixed_bijector <- function(dim, lower, upper) {
+
+  stop ("not yet implemented", call. = FALSE)
+
+}
+
 tf_correlation_cholesky_bijector <- function() {
 
   steps <- list(

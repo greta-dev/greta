@@ -86,7 +86,14 @@ joint_distribution <- R6Class(
              call. = FALSE)
       }
 
-      # for any discrete ones, tell them they are fixed
+      # work out the support of the resulting distribution, and add as the
+      # bounds of this one, to use when creating target variable
+      lower <- lapply(dot_nodes, member, "lower")
+      upper <- lapply(dot_nodes, member, "upper")
+      self$bounds <- list(
+        lower = do.call(abind::abind, lower),
+        upper = do.call(abind::abind, upper)
+      )
 
       super$initialize("joint", dim, discrete = discrete[1])
 
@@ -96,6 +103,10 @@ joint_distribution <- R6Class(
                            expand_scalar_to = NULL)
       }
 
+    },
+
+    create_target = function(truncation) {
+      vble(self$bounds, dim = self$dim)
     },
 
     tf_distrib = function(parameters, dag) {

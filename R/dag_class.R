@@ -325,15 +325,15 @@ dag_class <- R6Class(
       # calculated from the distribution's CDF
       if (!is.null(truncation)) {
 
-        lower <- truncation[1]
-        upper <- truncation[2]
+        lower <- truncation[[1]]
+        upper <- truncation[[2]]
 
-        if (lower == bounds[1]) {
+        if (all(lower == bounds[1])) {
 
           # if only upper is constrained, just need the cdf at the upper
           offset <- tfp_distribution$log_cdf(fl(upper))
 
-        } else if (upper == bounds[2]) {
+        } else if (all(upper == bounds[2])) {
 
           # if only lower is constrained, get the log of the integral above it
           offset <- tf$math$log(fl(1) - tfp_distribution$cdf(fl(lower)))
@@ -345,6 +345,8 @@ dag_class <- R6Class(
                                   tfp_distribution$cdf(fl(lower)))
 
         }
+
+        offset <- tf_sum(offset, drop = TRUE)
 
         ld <- ld - offset
 

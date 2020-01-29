@@ -169,8 +169,17 @@ variable_node <- R6Class(
 
       }
 
+      # replace values of lower and upper with finite values for dimension
+      # checking (this is pain, but necessary because check_dims coerces to
+      # greta arrays, which must be finite)
+      lower_for_dim <- lower
+      lower_for_dim[] <- 0
+      upper_for_dim <- upper
+      upper_for_dim[] <- 0
+      dim <- check_dims(lower_for_dim, upper_for_dim, target_dim = dim)
+
       # check and assign limits
-      universal_limits <- length(lower) == 1 & length(upper) == 1
+      universal_limits <- all(lower == lower[1]) & all(upper == upper[1])
 
       # find constraint type if they are all the same
       if (!universal_limits) {
@@ -179,8 +188,8 @@ variable_node <- R6Class(
 
       } else {
 
-        lower_limit <- lower != -Inf
-        upper_limit <- upper != Inf
+        lower_limit <- lower[1] != -Inf
+        upper_limit <- upper[1] != Inf
 
         if (!lower_limit & !upper_limit)
           self$constraint <- "scalar_none"
@@ -214,19 +223,10 @@ variable_node <- R6Class(
 
       }
 
-      # replace values of lower and upper with finite values for dimension
-      # checking (this is pain, but necessary because check_dims coerces to
-      # greta arrays, which must be finite)
-      lower_for_dim <- lower
-      lower_for_dim[] <- 0
-      upper_for_dim <- upper
-      upper_for_dim[] <- 0
-      dim <- check_dims(lower_for_dim, upper_for_dim, target_dim = dim)
-
       # add parameters
       super$initialize(dim)
-      self$lower <- lower
-      self$upper <- upper
+      self$lower <- array(lower, dim)
+      self$upper <- array(upper, dim)
 
       # set the free state version of value
       self$free_value <- unknowns(dim = free_dim)
@@ -298,7 +298,7 @@ variable_node <- R6Class(
           self$lower,
           self$upper
         ),
-        scalar_mixed = tf_scalar_neg_pos_bijector(
+        scalar_mixed = tf_scalar_mixed_bijector(
           self$dim,
           self$lower,
           self$upper
@@ -519,8 +519,10 @@ vble <- function(truncation, dim = 1, free_dim = prod(dim)) {
   if (is.null(truncation))
     truncation <- c(-Inf, Inf)
 
-  variable_node$new(lower = truncation[1],
-                    upper = truncation[2],
+  truncation <- as.list(truncation)
+
+  variable_node$new(lower = truncation[[1]],
+                    upper = truncation[[2]],
                     dim = dim,
                     free_dim = free_dim)
 
