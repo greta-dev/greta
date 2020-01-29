@@ -683,6 +683,21 @@ tf_covariance_cholesky_bijector <- function() {
   tfp$bijectors$FillTriangular(upper = TRUE)
 }
 
+tf_simplex_bijector <- function (dim) {
+
+  n_dim <- length(dim)
+  last_dim <- dim[n_dim]
+  raw_dim <- dim
+  raw_dim[n_dim] <- last_dim - 1L
+
+  steps <- list(
+    tfp$bijectors$IteratedSigmoidCentered(),
+    tfp$bijectors$Reshape(raw_dim)
+  )
+  tfp$bijectors$Chain(steps)
+
+}
+
 # combine as module for export via internals
 tf_functions_module <- module(tf_as_logical,
                               tf_as_float,

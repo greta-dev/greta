@@ -52,7 +52,7 @@ variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
 }
 
 # to be exported later = a cholesky factor variable (possibly for a correlation matrix)
-cholesky_variable <- function (dim, correlation = FALSE) {
+cholesky_variable <- function(dim, correlation = FALSE) {
 
   # dimension of the free state version
   free_dim <- ifelse(correlation,
@@ -73,6 +73,35 @@ cholesky_variable <- function (dim, correlation = FALSE) {
   cholesky_value <- unknowns(c(dim, dim))
   cholesky_value[lower.tri(cholesky_value, )] <- 0
   node$value(cholesky_value)
+
+  # reeturn as a greta array
+  as.greta_array(node)
+
+}
+
+# to be exported later = a simplex variable
+simplex_variable <- function(dim) {
+
+  # dimension of the free state version
+  n_dim <- length(dim)
+  last_dim <- dim[n_dim]
+  if (!last_dim > 1) {
+    stop ("the final dimension of a simplex variable must have ",
+          "more than one element",
+          call. = FALSE)
+  }
+
+  raw_dim <- dim
+  raw_dim[n_dim] <- last_dim - 1
+  free_dim <- prod(raw_dim)
+
+  # create variable node
+  node <- vble(truncation = c(-Inf, Inf),
+               dim = dim,
+               free_dim = free_dim)
+
+  # set the constraint, to enable transformation
+  node$constraint <- "simplex"
 
   # reeturn as a greta array
   as.greta_array(node)

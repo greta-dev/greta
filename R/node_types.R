@@ -304,7 +304,8 @@ variable_node <- R6Class(
           self$upper
         ),
         correlation_matrix = tf_correlation_cholesky_bijector(),
-        covariance_matrix = tf_covariance_cholesky_bijector()
+        covariance_matrix = tf_covariance_cholesky_bijector(),
+        simplex = tf_simplex_bijector(self$dim)
       )
 
     },
