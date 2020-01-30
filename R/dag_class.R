@@ -347,8 +347,6 @@ dag_class <- R6Class(
 
         }
 
-        offset <- tf_sum(offset, drop = TRUE)
-
         ld <- ld - offset
 
       }
