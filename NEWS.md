@@ -2,7 +2,7 @@
 
 ## Fixes:
 
-* joint distributions of uniform variables now have the correct constraints when samplingi (#377)
+* joint distributions of uniform variables now have the correct constraints when sampling (#377)
 
 * array-scalar dispatch with 3D arrays is now less buggy (#298)
 

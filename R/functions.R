@@ -107,7 +107,7 @@
 #'   \code{cospi()}, \code{sinpi()}, and \code{tanpi()} do not use the
 #'   computationally more stable routines to compute \code{cos(x * pi)} etc.
 #'   that are available in R under some operating systems. Similarly
-#'   \code{trigamma()} uses tensorflows polygamma function, resulting in lower
+#'   \code{trigamma()} uses tensorflow's polygamma function, resulting in lower
 #'   precision than R's equivalent.
 #'
 #' @examples
