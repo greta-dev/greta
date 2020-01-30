@@ -368,6 +368,29 @@ test_that("stashed_samples works", {
 
 })
 
+test_that("samples has object names", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  a <- normal(0, 1)
+  b <- normal(a, 1, dim = 3)
+  m <- model(a, b)
+
+  # mcmc should give the right names
+  draws <- mcmc(m, warmup = 2, n_samples = 10)
+  names <- rownames(summary(draws)$statistics)
+  expect_identical(names, c("a", "b[1,1]", "b[2,1]", "b[3,1]"))
+
+  # so should calculate
+  c <- b ^ 2
+  c_draws <- calculate(c, draws)
+  names <- rownames(summary(c_draws)$statistics)
+  expect_identical(names, c("c[1,1]", "c[2,1]", "c[3,1]"))
+
+})
+
+
 test_that("model errors nicely", {
 
   skip_if_not(check_tf_version())

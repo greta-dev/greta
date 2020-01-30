@@ -543,6 +543,7 @@ dag_class <- R6Class(
       }
       elements <- seq_along(trace_list_batches[[1]])
       trace_list <- lapply(elements, stack_elements, trace_list_batches)
+      names(trace_list) <- names(trace_list_batches[[1]])
 
       # if they are flattened, e.g. for MCMC tracing
       if (flatten) {
