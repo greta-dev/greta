@@ -65,6 +65,7 @@ Collate:
     'internals.R'
     'calculate.R'
     'callbacks.R'
+    'chol2symm.R'
 Imports:
     R6,
     tensorflow (>= 1.13.0),

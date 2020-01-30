@@ -16,10 +16,6 @@ TensorFlow only enables rounding to integers, so \code{round()} will
   \code{solve()} will be ignored, see the TensorFlow documentation for
   details of these routines.
 
-  \code{chol2symm(x)} evaluates \code{t(x) \%*\% x} efficiently, where
-  \code{x} is a square, upper triangular matrix representing the Cholesky
-  factor of a square matrix; i.e. it is the inverse of \code{chol}.
-
   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
   can only be either 1 or 2), and only for subtraction, addition, division
   and multiplication.
@@ -31,7 +27,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
   \code{cospi()}, \code{sinpi()}, and \code{tanpi()} do not use the
   computationally more stable routines to compute \code{cos(x * pi)} etc.
   that are available in R under some operating systems. Similarly
-  \code{trigamma()} uses tensorflow's polygamma function, resulting in lower
+  \code{trigamma()} uses TensorFlow's polygamma function, resulting in lower
   precision than R's equivalent.
 }
 \section{Usage}{
@@ -82,7 +78,6 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  t(x)
  chol(x, ...)
  chol2inv(x, ...)
- chol2symm(x)
  cov2cor(V)
  solve(a, b, ...)
  kronecker(X, Y, FUN = c('*', '/', '+', '-'))

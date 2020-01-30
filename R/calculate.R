@@ -114,6 +114,7 @@ calculate <- function(target, values = list(),
 }
 
 #' @importFrom coda thin
+#' @importFrom stats start end
 calculate_greta_mcmc_list <- function(target,
                                       target_name,
                                       values,
@@ -157,8 +158,8 @@ calculate_greta_mcmc_list <- function(target,
   trace <- lapply(
     values,
     coda::mcmc,
-    start = start(draws),
-    end = end(draws),
+    start = stats::start(draws),
+    end = stats::end(draws),
     thin = coda::thin(draws)
   )
   trace <- coda::mcmc.list(trace)
