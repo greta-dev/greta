@@ -652,11 +652,16 @@ tf_scalar_mixed_bijector <- function(dim, lower, upper, constraints) {
   n_blocks <- length(rle$lengths)
   dims <- replicate(n_blocks, NULL, simplify = FALSE)
   block_parameters <- mapply(list, dims, lowers, uppers, SIMPLIFY = FALSE)
-  block_parameters <- lapply(block_parameters, `names<-`, c("dim", "lower", "upper"))
+  block_parameters <- lapply(block_parameters,
+                             `names<-`,
+                             c("dim", "lower", "upper"))
 
   # create bijectors for each block
   names(block_constructors) <- NULL
-  bijectors <- mapply(do.call, block_constructors, block_parameters, SIMPLIFY = FALSE)
+  bijectors <- mapply(do.call,
+                      block_constructors,
+                      block_parameters,
+                      SIMPLIFY = FALSE)
 
   # roll into single bijector
   tf_scalar_biject(
