@@ -13,7 +13,6 @@ dag_class <- R6Class(
     tf_environment = NA,
     tf_graph = NA,
     target_nodes = NA,
-    parameters_example = NA,
     tf_float = NA,
     n_cores = 0L,
     compile = NA,
@@ -36,9 +35,6 @@ dag_class <- R6Class(
 
       # set up the tf environment, with a graph
       self$new_tf_environment()
-
-      # stash an example list to relist parameters
-      self$parameters_example <- self$example_parameters(flat = FALSE)
 
       # store the performance control info
       self$tf_float <- tf_float
@@ -149,8 +145,8 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      vals <- self$example_parameters()
-
+      vals <- self$example_parameters(free = TRUE)
+      vals <- unlist_tf(vals)
 
       if (type == "variable") {
 
@@ -184,11 +180,10 @@ dag_class <- R6Class(
       # split up into separate free state variables and assign
       free_state <- get("free_state", envir = tfe)
 
-      params <- self$parameters_example
+      params <- self$example_parameters(free = TRUE)
       lengths <- vapply(params,
-                        function(x) as.integer(prod(dim(x))),
+                        function(x) length(x),
                         FUN.VALUE = 1L)
-
       if (length(lengths) > 1) {
         args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
       } else {
@@ -279,8 +274,10 @@ dag_class <- R6Class(
       # get TF density tensors for all distribution
       adj <- lapply(adj_names, get, envir = self$tf_environment)
 
-      # remove their names and sum them together
+      # remove their names and sum them together (accounting for tfp bijectors
+      # sometimes returning a scalar tensor)
       names(adj) <- NULL
+      adj <- match_batches(adj)
       self$on_graph(total_adj <- tf$add_n(adj))
 
       # assign overall density to environment
@@ -329,15 +326,15 @@ dag_class <- R6Class(
       # calculated from the distribution's CDF
       if (!is.null(truncation)) {
 
-        lower <- truncation[1]
-        upper <- truncation[2]
+        lower <- truncation[[1]]
+        upper <- truncation[[2]]
 
-        if (lower == bounds[1]) {
+        if (all(lower == bounds[1])) {
 
           # if only upper is constrained, just need the cdf at the upper
           offset <- tfp_distribution$log_cdf(fl(upper))
 
-        } else if (upper == bounds[2]) {
+        } else if (all(upper == bounds[2])) {
 
           # if only lower is constrained, get the log of the integral above it
           offset <- tf$math$log(fl(1) - tfp_distribution$cdf(fl(lower)))
@@ -407,19 +404,22 @@ dag_class <- R6Class(
 
     },
 
-    # return the expected free parameter format either in list or vector form
-    example_parameters = function(flat = TRUE) {
+    # return the expected parameter format either in free state vector form, or
+    # list of transformed parameters
+    example_parameters = function(free = TRUE) {
 
-      # find all variable nodes in the graph and get their values
+      # find all variable nodes in the graph
       nodes <- self$node_list[self$node_types == "variable"]
       names(nodes) <- self$get_tf_names(types = "variable")
-      current_parameters <- lapply(nodes, member, "value()")
 
-      # optionally flatten them
-      if (flat)
-        current_parameters <- unlist_tf(current_parameters)
+      # get their values in either free of non-free form
+      if (free) {
+        parameters <- lapply(nodes, member, "value(free = TRUE)")
+      } else {
+        parameters <- lapply(nodes, member, "value()")
+      }
 
-      current_parameters
+      parameters
 
     },
 

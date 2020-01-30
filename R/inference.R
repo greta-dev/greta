@@ -544,10 +544,12 @@ extra_samples <- function(draws,
 
 }
 
-# convert some 'data' values form the constrained to the free state, for a given
+# convert some 'data' values from the constrained to the free state, for a given
 # 'node'
 #' @importFrom stats qlogis
 to_free <- function(node, data) {
+
+  # use reverse mode of bijectors!
 
   lower <- node$lower
   upper <- node$upper
@@ -577,10 +579,10 @@ to_free <- function(node, data) {
   }
 
   fun <- switch(node$constraint,
-                none = identity,
-                high = high,
-                low = low,
-                both = both)
+                scalar_all_none = identity,
+                scalar_all_high = high,
+                scalar_all_low = low,
+                scalar_all_both = both)
 
   fun(data)
 
@@ -593,7 +595,9 @@ parse_initial_values <- function(initials, dag) {
   # skip if no inits provided
   if (identical(initials, initials())) {
 
-    return(dag$example_parameters(flat = TRUE))
+    free_parameters <- dag$example_parameters(free = TRUE)
+    free_parameters <- unlist_tf(free_parameters)
+    return(free_parameters)
 
   }
 
@@ -616,7 +620,7 @@ parse_initial_values <- function(initials, dag) {
          call. = FALSE)
   }
 
-  params <- dag$example_parameters(flat = FALSE)
+  params <- dag$example_parameters(free = FALSE)
   idx <- match(tf_names, names(params))
 
   # make nodes do this conversion and checking in the future also make them

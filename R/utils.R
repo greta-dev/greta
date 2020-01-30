@@ -1112,20 +1112,6 @@ sampler_utils_module <- module(all_greta_arrays,
                                flatten_trace,
                                get_model_info)
 
-flat_to_chol <- function(x, dim, correl = FALSE) {
-
-  fun <- ifelse(correl,
-                "tf_flat_to_chol_correl",
-                "tf_flat_to_chol")
-
-  # sum the elements
-  op("flat_to_chol", x,
-     operation_args = list(dims = dim),
-     tf_operation = fun,
-     dim = dim)
-
-}
-
 chol_to_symmetric <- function(l) {
 
   # sum the elements
@@ -1205,8 +1191,7 @@ as_tf_function <- function(r_fun, ...) {
 
 }
 
-greta_array_ops_module <- module(flat_to_chol,
-                                 chol_to_symmetric,
+greta_array_ops_module <- module(chol_to_symmetric,
                                  as_tf_function)
 
 # utilities to export via .internals

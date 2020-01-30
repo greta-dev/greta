@@ -156,66 +156,100 @@ variable_node <- R6Class(
   public = list(
 
     constraint = NULL,
+    constraint_array = NULL,
     lower = -Inf,
     upper = Inf,
+    free_value = NULL,
 
-    initialize = function(lower = -Inf, upper = Inf, dim = 1) {
+    initialize = function(lower = -Inf,
+                          upper = Inf,
+                          dim = NULL,
+                          free_dim = prod(dim)) {
 
-      good_types <- is.numeric(lower) && length(lower) == 1 &
-        is.numeric(upper) && length(upper) == 1
+      if (!is.numeric(lower) | ! is.numeric(upper)) {
 
-      if (!good_types) {
-
-        stop("lower and upper must be numeric vectors of length 1",
+        stop("lower and upper must be numeric",
              call. = FALSE)
 
       }
 
-      # check and assign limits
-      bad_limits <- TRUE
+      # replace values of lower and upper with finite values for dimension
+      # checking (this is pain, but necessary because check_dims coerces to
+      # greta arrays, which must be finite)
+      lower_for_dim <- lower
+      lower_for_dim[] <- 0
+      upper_for_dim <- upper
+      upper_for_dim[] <- 0
+      dim <- check_dims(lower_for_dim, upper_for_dim, target_dim = dim)
 
-      # find constraint type
-      if (lower == -Inf & upper == Inf) {
+      # vectorise these tests, to get a matrix of constraint types - then test
+      # at the end whether it's mixed
 
-        self$constraint <- "none"
-        bad_limits <- FALSE
+      lower_limit <- lower != -Inf
+      upper_limit <- upper != Inf
 
-      } else if (lower == -Inf & upper != Inf) {
+      # create a matrix of elemntwise constraints
+      constraint_array <- array(NA, check_dims(lower_for_dim, upper_for_dim))
+      constraint_array[!lower_limit & !upper_limit] <- "none"
+      constraint_array[!lower_limit & upper_limit] <- "low"
+      constraint_array[lower_limit & !upper_limit] <- "high"
+      constraint_array[lower_limit & upper_limit] <- "both"
 
-        self$constraint <- "low"
-        bad_limits <- !is.finite(upper)
-
-      } else if (lower != -Inf & upper == Inf) {
-
-        self$constraint <- "high"
-        bad_limits <- !is.finite(lower)
-
-      } else if (lower != -Inf & upper != Inf) {
-
-        self$constraint <- "both"
-        bad_limits <- !is.finite(lower) | !is.finite(upper)
-
+      # pass a string depending on whether they are all the same
+      if (all(constraint_array == constraint_array[1])) {
+        self$constraint <- paste0("scalar_all_", constraint_array[1])
+      } else {
+        self$constraint <- "scalar_mixed"
       }
+
+      bad_limits <- switch(
+        self$constraint,
+        scalar_all_low = any(!is.finite(upper)),
+        scalar_all_high = any(!is.finite(lower)),
+        scalar_all_both = any(!is.finite(lower)) | any(!is.finite(upper)),
+        FALSE
+      )
 
       if (bad_limits) {
 
         stop("lower and upper must either be -Inf (lower only), ",
-             "Inf (upper only) or finite scalars",
+             "Inf (upper only) or finite",
              call. = FALSE)
 
       }
 
-      if (lower >= upper) {
+      if (any(lower >= upper)) {
 
-        stop("upper bound must be greater than lower bound",
+        stop("upper bounds must be greater than lower bounds",
              call. = FALSE)
 
       }
 
       # add parameters
       super$initialize(dim)
-      self$lower <- lower
-      self$upper <- upper
+      self$lower <- array(lower, dim)
+      self$upper <- array(upper, dim)
+      self$constraint_array <- constraint_array
+      self$free_value <- unknowns(dim = free_dim)
+
+    },
+
+    # handle two types of value for variables
+    value = function(new_value = NULL, free = FALSE, ...) {
+
+      if (free) {
+
+        if (is.null(new_value)) {
+          self$free_value
+        } else {
+          self$free_value <- new_value
+        }
+
+      } else {
+
+        super$value(new_value, ...)
+
+      }
 
     },
 
@@ -232,115 +266,78 @@ variable_node <- R6Class(
              tf_adj,
              envir = dag$tf_environment)
 
-      # map from the free to constrained state in a new tensor
+      # get the free tensor
       tf_free <- get(free_name, envir = dag$tf_environment)
-      node <- self$tf_from_free(tf_free, dag$tf_environment)
 
-      # reshape the tensor to the match the variable
-      node <- tf$reshape(node,
-                         shape = to_shape(c(-1, dim(self))))
+      # map from the free to constrained state (including reshaping) in a new
+      # tensor
+      tf_transformed <- self$tf_from_free(tf_free)
 
       # assign as constrained variable
       assign(tf_name,
-             node,
+             tf_transformed,
              envir = dag$tf_environment)
 
     },
 
-    tf_from_free = function(x, env) {
+    create_tf_bijector = function() {
 
-      upper <- self$upper
-      lower <- self$lower
+      dim <- self$dim
+      lower <- flatten_rowwise(self$lower)
+      upper <- flatten_rowwise(self$upper)
+      constraints <- flatten_rowwise(self$constraint_array)
 
-      if (self$constraint == "none") {
+      switch(
+        self$constraint,
+        scalar_all_none = tf_scalar_bijector(dim),
+        scalar_all_low = tf_scalar_neg_bijector(dim, upper = upper),
+        scalar_all_high = tf_scalar_pos_bijector(dim, lower = lower),
+        scalar_all_both = tf_scalar_neg_pos_bijector(dim,
+                                                     lower = lower,
+                                                     upper = upper),
+        scalar_mixed = tf_scalar_mixed_bijector(dim,
+                                                lower = lower,
+                                                upper = upper,
+                                                constraints = constraints),
+        correlation_matrix = tf_correlation_cholesky_bijector(),
+        covariance_matrix = tf_covariance_cholesky_bijector(),
+        simplex = tf_simplex_bijector(dim)
+      )
 
-        y <- x
+    },
 
-      } else if (self$constraint == "both") {
+    tf_from_free = function(x) {
 
-        y <- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
-
-      } else if (self$constraint == "low") {
-
-        y <- fl(upper) - tf$exp(x)
-
-      } else if (self$constraint == "high") {
-
-        y <- tf$exp(x) + fl(lower)
-
-      } else {
-
-        y <- x
-
-      }
-
-      y
+      tf_bijector <- self$create_tf_bijector()
+      tf_bijector$forward(x)
 
     },
 
     # adjustments for univariate variables
     tf_log_jacobian_adjustment = function(free) {
 
-      ljac_none <- function(x) {
-        zero <- tf$constant(0, dtype = tf_float(), shape = shape(1))
-        tf$tile(zero, multiples = list(tf$shape(x)[[0]]))
+      tf_bijector <- self$create_tf_bijector()
+
+      event_ndims <- tf_bijector$forward_min_event_ndims
+      ljd <- tf_bijector$forward_log_det_jacobian(
+        x = free,
+        event_ndims = event_ndims
+      )
+
+      # sum across all dimensions of jacobian
+      already_summed <-
+        identical(dim(ljd), list(NULL)) | identical(dim(ljd), list())
+
+      if (!already_summed) {
+        ljd <- tf_sum(ljd, drop = TRUE)
       }
 
-      ljac_exp <- function(x) {
-        tf_sum(x, drop = TRUE)
+      # make sure there's something in the batch dimension
+      if (identical(dim(ljd), list())) {
+        ljd <- tf$expand_dims(ljd, 0L)
       }
 
-      ljac_logistic <- function(x) {
-        lrange <- log(self$upper - self$lower)
-        tf_sum(x - fl(2) * tf$nn$softplus(x) + lrange,
-               drop = TRUE)
-      }
-
-      ljac_corr_mat <- function(x) {
-
-        # find dimension
-        k <- dim(x)[[2]]
-        n <- (1 + sqrt(8 * k + 1)) / 2
-
-        # convert to correlation-scale (-1, 1) & get log jacobian
-        z <- tf$tanh(x)
-
-        free_to_correl_lp <- tf_sum(log(fl(1) - tf$square(z)))
-        free_to_correl_lp <- tf$squeeze(free_to_correl_lp, 1L)
-
-        # split z up into rows
-        z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
-
-        # accumulate log prob within each row
-        lps <- lapply(z_rows, tf_corrmat_row, which = "ljac")
-        correl_to_mat_lp <- tf$add_n(lps)
-
-        free_to_correl_lp + correl_to_mat_lp
-
-      }
-
-      ljac_cov_mat <- function(x) {
-
-        # find dimension
-        n <- dim(x)[[2]]
-        k <- (sqrt(8 * n + 1) - 1) / 2
-
-        k_seq <- seq_len(k)
-        powers <- tf$constant(k - k_seq + 2, dtype = tf_float(),
-                              shape = shape(k))
-        fl(k * log(2)) + tf_sum(powers * x[, k_seq - 1], drop = TRUE)
-
-      }
-
-      fun <- switch(self$constraint,
-                    none = ljac_none,
-                    high = ljac_exp,
-                    low = ljac_exp,
-                    both = ljac_logistic,
-                    correlation_matrix = ljac_corr_mat,
-                    covariance_matrix = ljac_cov_mat)
-
-      fun(free)
+      ljd
 
     },
 
@@ -513,14 +510,17 @@ op <- function(...) {
 # helper function to create a variable node
 # by default, make x (the node
 # containing the value) a free parameter of the correct dimension
-vble <- function(truncation, dim = 1) {
+vble <- function(truncation, dim = 1, free_dim = prod(dim)) {
 
   if (is.null(truncation))
     truncation <- c(-Inf, Inf)
 
-  variable_node$new(lower = truncation[1],
-                    upper = truncation[2],
-                    dim = dim)
+  truncation <- as.list(truncation)
+
+  variable_node$new(lower = truncation[[1]],
+                    upper = truncation[[2]],
+                    dim = dim,
+                    free_dim = free_dim)
 
 }
 

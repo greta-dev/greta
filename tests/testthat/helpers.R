@@ -140,7 +140,6 @@ greta_density <- function(fun, parameters, x,
 
   # create dag
   dag <- greta:::dag_class$new(list(x_))
-  tfe <- dag$tf_environment
 
   # define the tensor in an environment
   distrib_node$define_tf(dag)
@@ -324,8 +323,18 @@ sample_distribution <- function(greta_array, n = 10,
                                 warmup = 1) {
   m <- model(greta_array, precision = "double")
   draws <- mcmc(m, n_samples = n, warmup = warmup, verbose = FALSE)
-  samples <- as.vector(draws[[1]])
-  expect_true(all(samples >= lower & samples <= upper))
+  samples <- as.matrix(draws)
+  vectorised <- length(lower) > 1 | length(upper) > 1
+
+  if (vectorised) {
+    above_lower <- sweep(samples, 2, lower, `>=`)
+    below_upper <- sweep(samples, 2, upper, `<=`)
+  } else {
+    above_lower <- samples >= lower
+    below_upper <- samples <= upper
+  }
+
+  expect_true(all(above_lower & below_upper))
 }
 
 compare_truncated_distribution <- function(greta_fun,

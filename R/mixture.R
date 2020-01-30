@@ -159,7 +159,8 @@ mixture_distribution <- R6Class(
           FUN.VALUE = character(1)
         )
         stop("component distributions have different support: ",
-              paste(supports_text, collapse = " vs. "))
+              paste(supports_text, collapse = " vs. "),
+             call. = FALSE)
       }
 
       # get the maximal bounds for all component distributions
@@ -174,6 +175,8 @@ mixture_distribution <- R6Class(
         truncation <- support
       }
 
+      self$bounds <- support
+
       # for any discrete ones, tell them they are fixed
       super$initialize("mixture", dim, discrete = discrete[1])
 
@@ -184,6 +187,10 @@ mixture_distribution <- R6Class(
       }
 
       self$add_parameter(weights, "weights")
+    },
+
+    create_target = function(truncation) {
+      vble(self$bounds, dim = self$dim)
     },
 
     tf_distrib = function(parameters, dag) {

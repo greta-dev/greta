@@ -777,11 +777,7 @@ dirichlet_distribution <- R6Class(
 
     create_target = function(truncation) {
 
-      # handle simplex via a greta array
-      free_greta_array <- variable(lower = 0, upper = 1, dim = self$dim)
-
-      sums <- rowSums(free_greta_array)
-      simplex_greta_array <- sweep(free_greta_array, 1, sums, "/")
+      simplex_greta_array <- simplex_variable(self$dim)
 
       # return the node for the simplex
       target_node <- get_node(simplex_greta_array)
@@ -1046,15 +1042,10 @@ wishart_distribution <- R6Class(
     # factor representation)
     create_target = function(truncation) {
 
-      # create a flat variable greta array
-      k <- self$dim[1]
-      free_greta_array <- vble(truncation = c(-Inf, Inf),
-                               dim = k + k * (k - 1) / 2)
-      free_greta_array$constraint <- "covariance_matrix"
+      # create cholesky factor variable greta array
+      chol_greta_array <- cholesky_variable(self$dim[1])
 
-      # reshape to a cholesky factor and then to a symmetric matrix (which
-      # retains the cholesky representation)
-      chol_greta_array <- flat_to_chol(free_greta_array, self$dim)
+      # reshape to a symmetric matrix (retaining cholesky representation)
       matrix_greta_array <- chol_to_symmetric(chol_greta_array)
 
       # return the node for the symmetric matrix
@@ -1167,17 +1158,10 @@ lkj_correlation_distribution <- R6Class(
     # default (cholesky factor, ignores truncation)
     create_target = function(truncation) {
 
-      # handle reshaping via a greta array
-      k <- self$dim[1]
-      free_greta_array <- vble(truncation = c(-Inf, Inf),
-                               dim = k * (k - 1) / 2)
-      free_greta_array$constraint <- "correlation_matrix"
+      # create (correlation matrix) cholesky factor variable greta array
+      chol_greta_array <- cholesky_variable(self$dim[1], correlation = TRUE)
 
-      # reshape to a cholesky factor and then to a symmetric correlation matrix
-      # (which retains the cholesky representation)
-      chol_greta_array <- flat_to_chol(free_greta_array,
-                                       self$dim,
-                                       correl = TRUE)
+      # reshape to a symmetric matrix (retaining cholesky representation)
       matrix_greta_array <- chol_to_symmetric(chol_greta_array)
 
       # return the node for the symmetric matrix
