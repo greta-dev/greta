@@ -802,7 +802,7 @@ check_cum_op <- function(x) {
   }
 }
 
-complex_error <- function(x) {
+complex_error <- function(z) {
   stop("greta does not yet support complex numbers",
        call. = FALSE)
 }
@@ -1112,15 +1112,6 @@ sampler_utils_module <- module(all_greta_arrays,
                                flatten_trace,
                                get_model_info)
 
-chol_to_symmetric <- function(l) {
-
-  # sum the elements
-  op("chol_to_symmetric", l,
-     tf_operation = "tf_chol_to_symmetric",
-     representations = list(cholesky = l))
-
-}
-
 # convert a function on greta arrays into a function on corresponding tensors,
 # given the greta arrays for inputs. When executed, this needs to be wrapped in
 # dag$on_graph() to get the tensors connected up with the rest of the graph
@@ -1191,8 +1182,7 @@ as_tf_function <- function(r_fun, ...) {
 
 }
 
-greta_array_ops_module <- module(chol_to_symmetric,
-                                 as_tf_function)
+greta_array_ops_module <- module(as_tf_function)
 
 # utilities to export via .internals
 utilities_module <- module(misc = misc_module,

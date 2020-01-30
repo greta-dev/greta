@@ -245,8 +245,9 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
 
 }
 
-tf_chol_to_symmetric <- function(u)
-  tf$matmul(tf_transpose(u), u)
+tf_chol2symm <- function(x) {
+  tf$matmul(x, x, adjoint_a = TRUE)
+}
 
 tf_colmeans <- function(x, dims) {
 
@@ -729,6 +730,16 @@ tf_simplex_bijector <- function(dim) {
 
 }
 
+tf_ordered_bijector <- function(dim) {
+
+  steps <- list(
+    tfp$bijectors$Invert(tfp$bijectors$Ordered()),
+    tfp$bijectors$Reshape(dim)
+  )
+  tfp$bijectors$Chain(steps)
+
+}
+
 # combine as module for export via internals
 tf_functions_module <- module(tf_as_logical,
                               tf_as_float,
@@ -738,7 +749,7 @@ tf_functions_module <- module(tf_as_logical,
                               tf_chol,
                               tf_chol2inv,
                               tf_corrmat_row,
-                              tf_chol_to_symmetric,
+                              tf_chol2symm,
                               tf_colmeans,
                               tf_rowmeans,
                               tf_colsums,

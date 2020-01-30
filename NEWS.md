@@ -2,7 +2,7 @@
 
 ## Fixes:
 
-* joint distributions of uniform variables now have the correct constraints when samplingi (#377)
+* joint distributions of uniform variables now have the correct constraints when sampling (#377)
 
 * array-scalar dispatch with 3D arrays is now less buggy (#298)
 
@@ -16,7 +16,12 @@
 
 ## Features:
 
+
 * `variable()` now accepts arrays for `upper` and `lower`, enabling users to define variables with different constraints
+
+* There are three new variable constructor functions: `cholesky_variable()`, `simplex_variable()`, and `ordered_variable()`, for variables with these constraints but no probability distribution.
+
+* a new function `chol2symm()` - the inverse of `chol()`
 
 * `mcmc()`, `stashed_samples()`, and `calculate()` now return objects of class `greta_mcmc_list` which inherit from `coda`'s `mcmc.list` class, but enable custom greta methods for manipulating mcmc outputs, including a `window()` function
 

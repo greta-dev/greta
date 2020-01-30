@@ -40,7 +40,7 @@ test_that("chol & chol2inv function representation works", {
   u <- as_data(u)
 
   # get representation version of W
-  w2 <- chol_to_symmetric(u)
+  w2 <- chol2symm(u)
 
   compare_op(calculate(chol(w)),
              calculate(chol(w2)))
@@ -148,7 +148,7 @@ test_that("mvn Sigma representation has correct density", {
   # greta arrays with and without representation
   sigs <- as_data(sig)
   u <- as_data(chol(sig))
-  chol_sigs <- chol_to_symmetric(u)
+  chol_sigs <- chol2symm(u)
 
   sigs_dens <- greta_density(greta::multivariate_normal,
                              list(mean = mn,
@@ -178,7 +178,7 @@ test_that("wishart target and Sigma representations have correct density", {
   # greta arrays for Sigma with and without representation
   sigs <- as_data(sig)
   u <- as_data(chol(sig))
-  chol_sigs <- chol_to_symmetric(u)
+  chol_sigs <- chol2symm(u)
 
   sigs_dens <- greta_density(greta::wishart,
                              list(df = m + 1,
@@ -197,7 +197,7 @@ test_that("wishart target and Sigma representations have correct density", {
   # greta arrays for x with and without representation
   xs <- as_data(x)
   ux <- as_data(chol(x))
-  chol_xs <- chol_to_symmetric(ux)
+  chol_xs <- chol2symm(ux)
 
   xs_dens <- greta_density(greta::wishart,
                            list(df = m + 1,
@@ -228,7 +228,7 @@ test_that("lkj target representation has correct density", {
   # greta arrays for x with and without representation
   xs <- as_data(x)
   ux <- as_data(chol(x))
-  chol_xs <- chol_to_symmetric(ux)
+  chol_xs <- chol2symm(ux)
 
   xs_dens <- greta_density(greta::lkj_correlation,
                            list(eta = eta),

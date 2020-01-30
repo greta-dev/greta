@@ -27,7 +27,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
   \code{cospi()}, \code{sinpi()}, and \code{tanpi()} do not use the
   computationally more stable routines to compute \code{cos(x * pi)} etc.
   that are available in R under some operating systems. Similarly
-  \code{trigamma()} uses tensorflows polygamma function, resulting in lower
+  \code{trigamma()} uses TensorFlow's polygamma function, resulting in lower
   precision than R's equivalent.
 }
 \section{Usage}{
@@ -100,7 +100,7 @@ TensorFlow only enables rounding to integers, so \code{round()} will
  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
               transpose = FALSE)
 
- #'  # miscellaneous operations
+ # miscellaneous operations
  aperm(x, perm)
  apply(x, MARGIN, FUN = c("sum", "max", "mean", "min",
                           "prod", "cumsum", "cumprod"))

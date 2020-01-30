@@ -13,7 +13,7 @@
 #'   (\code{upper}), though \code{lower} must always be less than \code{upper}.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
-#'  or a vector of positive integers. See details.
+#'   or a vector of positive integers. See details.
 #'
 #' @details \code{lower} and \code{upper} must be fixed, they cannot be greta
 #'   arrays. This ensures these values can always be transformed to a continuous
@@ -21,6 +21,10 @@
 #'   dynamic limits can always be created by first defining a variable
 #'   constrained between 0 and 1, and then transforming it to the required
 #'   scale. See below for an example.
+#'
+#'   The constraints in \code{simplex_variable()} and \code{ordered_variable()}
+#'   operate on the final dimension, which must have more than 1 element.
+#'   Passing in a scalar value for \code{dim} therefore results in a row-vector.
 #'
 #' @examples
 #' \dontrun{
@@ -51,18 +55,47 @@ variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
 
 }
 
-# to be exported later = a cholesky factor variable (possibly for a correlation
-# matrix)
+#' @export
+#' @rdname variable
+#'
+#' @param correlation whether to return a cholesky factor corresponding to a
+#'   correlation matrix (diagonal elements equalling 1, off-diagonal elements
+#'   between -1 and 1).
+#'
+#' @examples
+#' # 4x4 cholesky factor variables for covariance and correlation matrices
+#' e_cov <- cholesky_variable(dim = 4)
+#' e_correl <- cholesky_variable(dim = 4, correlation = TRUE)
+#'
+#' # these can be converted to symmetic matrices with chol2symm
+#' # (equivalent to t(e_cov) %*% e_cov, but more efficient)
+#' cov <- chol2symm(e_cov)
+#' correl <- chol2symm(e_correl)
 cholesky_variable <- function(dim, correlation = FALSE) {
+
+  n_dim <- length(dim)
+  if (n_dim == 1) {
+    dim <- c(dim, dim)
+  } else if (n_dim == 2) {
+    if (dim[1] != dim[2]) {
+      stop("cholesky variables must be square, but dim was ",
+           paste(dim, collapse = " x "), call. = FALSE)
+    }
+  } else {
+    stop("dim can either be a scalar or a vector of length 2",
+         call. = FALSE)
+  }
+
+  k <- dim[1]
 
   # dimension of the free state version
   free_dim <- ifelse(correlation,
-                     dim * (dim - 1) / 2,
-                     dim + dim * (dim - 1) / 2)
+                     k * (k - 1) / 2,
+                     k + k * (k - 1) / 2)
 
   # create variable node
   node <- vble(truncation = c(-Inf, Inf),
-               dim = c(dim, dim),
+               dim = dim,
                free_dim = free_dim)
 
   # set the constraint, to enable transformation
@@ -71,7 +104,7 @@ cholesky_variable <- function(dim, correlation = FALSE) {
                             "covariance_matrix")
 
   # set the printed value to be nicer
-  cholesky_value <- unknowns(c(dim, dim))
+  cholesky_value <- unknowns(dim)
   cholesky_value[lower.tri(cholesky_value, )] <- 0
   node$value(cholesky_value)
 
@@ -80,16 +113,30 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 
 }
 
-# to be exported later = a simplex variable
+#' @export
+#' @rdname variable
+#'
+#' @examples
+#' # a 4D simplex (sums to 1, all values positive)
+#' f <- simplex_variable(4)
+#'
+#' # a 4D simplex on the final dimension
+#' g <- simplex_variable(dim = c(2, 3, 4))
 simplex_variable <- function(dim) {
+
+  # for scalar dims, return a row vector
+  if (length(dim) == 1)
+    dim <- c(1, dim)
+
+  dim <- check_dims(target_dim = dim)
 
   # dimension of the free state version
   n_dim <- length(dim)
   last_dim <- dim[n_dim]
   if (!last_dim > 1) {
     stop("the final dimension of a simplex variable must have ",
-          "more than one element",
-          call. = FALSE)
+         "more than one element",
+         call. = FALSE)
   }
 
   raw_dim <- dim
@@ -103,6 +150,42 @@ simplex_variable <- function(dim) {
 
   # set the constraint, to enable transformation
   node$constraint <- "simplex"
+
+  # reeturn as a greta array
+  as.greta_array(node)
+
+}
+
+#' @export
+#' @rdname variable
+#' @examples
+#' # a 2D variable with each element higher than the one in the cell to the left
+#' h <- ordered_variable(dim = c(3, 4))
+#'
+#' # more constraints can be added with monotonic transformations, e.g. an
+#' # ordered positive variable
+#' i <- exp(ordered_variable(5))
+ordered_variable <- function(dim) {
+
+  # for scalar dims, return a row vector
+  if (length(dim) == 1)
+    dim <- c(1, dim)
+
+  dim <- check_dims(target_dim = dim)
+
+  # dimension of the free state version
+  n_dim <- length(dim)
+  if (!dim[n_dim] > 1) {
+    stop("the final dimension of an ordered variable must have ",
+         "more than one element",
+         call. = FALSE)
+  }
+
+  # create variable node
+  node <- vble(truncation = c(-Inf, Inf), dim = dim)
+
+  # set the constraint, to enable transformation
+  node$constraint <- "ordered"
 
   # reeturn as a greta array
   as.greta_array(node)

@@ -706,50 +706,6 @@ test_that("distributions can be sampled from", {
 
 })
 
-test_that("variable() errors informatively", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  # bad types
-  expect_error(variable(upper = NA),
-               "lower and upper must be numeric")
-  expect_error(variable(upper = head),
-               "lower and upper must be numeric")
-
-  # good types, bad values
-  expect_error(variable(lower = 0:2, upper = 1:2),
-               "incompatible dimensions")
-
-  # lower not below upper
-  expect_error(variable(lower = 1, upper = 1),
-               "upper bounds must be greater than lower bounds")
-
-})
-
-test_that("variable() with vectorised bounds can be sampled correctly", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  x <- rnorm(3, 0, 10)
-  lower <- c(-3, -1, 2)
-  upper <- c(0, 2, 3)
-  mu <- variable(lower = lower,
-                 upper = upper)
-  distribution(x) <- normal(mu, 1)
-  m <- model(mu)
-  draws <- mcmc(m, n_samples = 100, warmup = 1, verbose = FALSE)
-
-  samples <- as.matrix(draws)
-  above_lower <- sweep(samples, 2, lower, `>=`)
-  below_upper <- sweep(samples, 2, upper, `<=`)
-
-  expect_true(all(above_lower & below_upper))
-
-
-})
-
 test_that("uniform distribution errors informatively", {
 
   skip_if_not(check_tf_version())
