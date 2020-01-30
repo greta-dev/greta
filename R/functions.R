@@ -53,6 +53,7 @@
 #'  t(x)
 #'  chol(x, ...)
 #'  chol2inv(x, ...)
+#'  chol2symm(x)
 #'  cov2cor(V)
 #'  solve(a, b, ...)
 #'  kronecker(X, Y, FUN = c('*', '/', '+', '-'))
@@ -75,7 +76,7 @@
 #'  forwardsolve(l, x, k = ncol(l), upper.tri = FALSE,
 #'               transpose = FALSE)
 #'
-#'  #'  # miscellaneous operations
+#'  # miscellaneous operations
 #'  aperm(x, perm)
 #'  apply(x, MARGIN, FUN = c("sum", "max", "mean", "min",
 #'                           "prod", "cumsum", "cumprod"))
@@ -90,6 +91,10 @@
 #'   Any additional arguments to \code{chol()}, \code{chol2inv}, and
 #'   \code{solve()} will be ignored, see the TensorFlow documentation for
 #'   details of these routines.
+#'
+#'   \code{chol2symm(x)} evaluates \code{t(x) \%*\% x} efficiently, where
+#'   \code{x} is a square, upper triangular matrix representing the Cholesky
+#'   factor of a square matrix; i.e. it is the inverse of \code{chol}.
 #'
 #'   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
 #'   can only be either 1 or 2), and only for subtraction, addition, division
@@ -1152,5 +1157,41 @@ rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
        dim = c(n1, n2))
 
   }
+
+}
+
+#' @export
+chol2symm <- function(x) {
+  UseMethod("chol2symm")
+}
+
+#' @export
+chol2symm.default <- function (x) {
+
+  dim <- dim(x)
+  if (length(dim) != 2 || dim[1] != dim[2]) {
+    stop("x must be a square symmetric matrix, assumed to be upper triangular",
+         call. = FALSE)
+  }
+
+  t(x) %*% x
+
+}
+
+#' @export
+chol2symm.greta_array <- function(x) {
+
+  x <- as.greta_array(x)
+  dim <- dim(x)
+  if (length(dim) != 2 || dim[1] != dim[2]) {
+    stop("only two-dimensional, square, upper-triangular greta arrays ",
+         "can be used by chol2symm",
+         call. = FALSE)
+  }
+
+  # sum the elements
+  op("chol2symm", x,
+     tf_operation = "tf_chol2symm",
+     representations = list(cholesky = x))
 
 }

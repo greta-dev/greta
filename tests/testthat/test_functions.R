@@ -111,6 +111,7 @@ test_that("matrix functions work as expected", {
   check_op(t, b)
   check_op(chol, a)
   check_op(chol2inv, c)
+  check_op(chol2symm, c)
   check_op(cov2cor, a)
   check_op(diag, a)
   check_op(`diag<-`, a, 1:5, only = "data")
@@ -531,6 +532,12 @@ test_that("incorrect dimensions are errored about", {
   expect_error(chol(y),
                "only two-dimensional, square, symmetric greta arrays")
 
+  expect_error(chol2symm(x),
+               "only two-dimensional, square, upper-triangular greta arrays")
+
+  expect_error(chol2symm(y),
+               "only two-dimensional, square, upper-triangular greta arrays")
+
   expect_error(eigen(x),
                "only two-dimensional, square, symmetric greta arrays")
 
@@ -539,5 +546,22 @@ test_that("incorrect dimensions are errored about", {
 
   expect_error(rdist(x, y),
                "must have the same number of columns")
+
+})
+
+test_that("chol2symm inverts chol", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x <- rWishart(1, 10, diag(9))[, , 1]
+  u <- chol(x)
+
+  # check the R version
+  expect_equal(x, chol2symm(u))
+
+  # check the greta version
+  x2 <- calculate(chol2symm(as_data(u)))
+  expect_equal(x2, x)
 
 })
