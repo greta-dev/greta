@@ -245,8 +245,9 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
 
 }
 
-tf_chol2symm <- function(u)
-  tf$matmul(tf_transpose(u), u)
+tf_chol2symm <- function(x) {
+  tf$matmul(x, x, adjoint_a = TRUE)
+}
 
 tf_colmeans <- function(x, dims) {
 
