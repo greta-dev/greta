@@ -140,7 +140,6 @@ greta_density <- function(fun, parameters, x,
 
   # create dag
   dag <- greta:::dag_class$new(list(x_))
-  tfe <- dag$tf_environment
 
   # define the tensor in an environment
   distrib_node$define_tf(dag)
