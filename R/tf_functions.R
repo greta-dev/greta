@@ -576,54 +576,93 @@ tf_distance <- function(x1, x2) {
 
 }
 
-tf_scalar_bijector <- function(dim) {
-  steps <- list(
-    tfp$bijectors$Identity(),
-    tfp$bijectors$Reshape(dim)
-  )
+# common construction of a chained bijector for scalars, optionally adding a
+# final reshaping step
+tf_scalar_biject <- function(..., dim) {
+
+  steps <- list(...)
+
+  if (!is.null(dim)) {
+    steps <- c(tfp$bijectors$Reshape(dim), steps)
+  }
+
   tfp$bijectors$Chain(steps)
+
 }
 
-tf_scalar_pos_bijector <- function(dim, lower) {
-  steps <- list(
+tf_scalar_bijector <- function(dim, lower, upper) {
+
+  tf_scalar_biject(
+    tfp$bijectors$Identity(),
+    dim = dim
+  )
+
+}
+
+tf_scalar_pos_bijector <- function(dim, lower, upper) {
+
+  tf_scalar_biject(
     tfp$bijectors$AffineScalar(shift = fl(lower)),
     tfp$bijectors$Exp(),
-    tfp$bijectors$Reshape(dim)
+    dim = dim
   )
-  tfp$bijectors$Chain(steps)
+
 }
 
-tf_scalar_neg_bijector <- function(dim, upper) {
+tf_scalar_neg_bijector <- function(dim, lower, upper) {
 
-  steps <- list(
-    tfp$bijectors$AffineScalar(
-      shift = fl(upper),
-      scale = fl(-1)
-    ),
+  tf_scalar_biject(
+    tfp$bijectors$AffineScalar(shift = fl(upper), scale = fl(-1)),
     tfp$bijectors$Exp(),
-    tfp$bijectors$Reshape(dim)
+    dim = dim
   )
-  tfp$bijectors$Chain(steps)
 
 }
 
 tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
 
-  steps <- list(
-    tfp$bijectors$AffineScalar(
-      shift = fl(lower),
-      scale = fl(upper - lower)
-    ),
+  tf_scalar_biject(
+    tfp$bijectors$AffineScalar(shift = fl(lower), scale = fl(upper - lower)),
     tfp$bijectors$Sigmoid(),
-    tfp$bijectors$Reshape(dim)
+    dim = dim
   )
-  tfp$bijectors$Chain(steps)
 
 }
 
-tf_scalar_mixed_bijector <- function(dim, lower, upper) {
+# a blockwise combination of other transformations, with final reshaping
+tf_scalar_mixed_bijector <- function(dim, lower, upper, constraints) {
 
-  stop("not yet implemented", call. = FALSE)
+  constructors <-
+    list(
+      none = tf_scalar_bijector,
+      low = tf_scalar_neg_bijector,
+      high = tf_scalar_pos_bijector,
+      both = tf_scalar_neg_pos_bijector
+    )
+
+  # get the constructors, lower and upper bounds for each block
+  rle <- rle(constraints)
+  blocks <- rep(seq_along(rle$lengths), rle$lengths)
+  constructor_idx <- match(rle$values, names(constructors))
+  block_constructors <- constructors[constructor_idx]
+  lowers <- split(lower, blocks)
+  uppers <- split(upper, blocks)
+
+  # combine into lists of arguments
+  n_blocks <- length(rle$lengths)
+  dims <- replicate(n_blocks, NULL, simplify = FALSE)
+  block_parameters <- mapply(list, dims, lowers, uppers, SIMPLIFY = FALSE)
+  block_parameters <- lapply(block_parameters, `names<-`, c("dim", "lower", "upper"))
+
+  # create bijectors for each block
+  names(block_constructors) <- NULL
+  bijectors <- mapply(do.call, block_constructors, block_parameters, SIMPLIFY = FALSE)
+
+  # roll into single bijector
+  tf_scalar_biject(
+    tfp$bijectors$Blockwise(bijectors, block_sizes = rle$lengths),
+    dim = dim
+  )
 
 }
 

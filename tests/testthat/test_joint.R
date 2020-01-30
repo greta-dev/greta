@@ -46,9 +46,9 @@ test_that("joint normals with different truncation types can be sampled", {
 
   x <- joint(normal(0, 1, truncation = c(0, Inf)),
              normal(0, 2, truncation = c(-Inf, 0)),
-             normal(-1, 0, truncation = c(1, 2)))
+             normal(-1, 1, truncation = c(1, 2)))
 
-  sample_distribution(x, lower = c(0, 0, -1), upper = c(1, 2, 0))
+  sample_distribution(x, lower = c(0, -Inf, 1), upper = c(Inf, 0, 2))
 
 })
 

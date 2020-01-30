@@ -166,7 +166,6 @@ variable_node <- R6Class(
                           dim = NULL,
                           free_dim = prod(dim)) {
 
-
       if (!is.numeric(lower) | ! is.numeric(upper)) {
 
         stop("lower and upper must be numeric",
@@ -283,32 +282,26 @@ variable_node <- R6Class(
 
     create_tf_bijector = function() {
 
+      dim <- self$dim
+      lower <- flatten_rowwise(self$lower)
+      upper <- flatten_rowwise(self$upper)
+      constraints <- flatten_rowwise(self$constraint_array)
+
       switch(
         self$constraint,
-          scalar_all_none = tf_scalar_bijector(
-          self$dim
-        ),
-        scalar_all_low = tf_scalar_neg_bijector(
-          self$dim,
-          self$upper
-        ),
-        scalar_all_high = tf_scalar_pos_bijector(
-          self$dim,
-          self$lower
-        ),
-        scalar_all_both = tf_scalar_neg_pos_bijector(
-          self$dim,
-          self$lower,
-          self$upper
-        ),
-        scalar_mixed = tf_scalar_mixed_bijector(
-          self$dim,
-          self$lower,
-          self$upper
-        ),
+        scalar_all_none = tf_scalar_bijector(dim),
+        scalar_all_low = tf_scalar_neg_bijector(dim, upper = upper),
+        scalar_all_high = tf_scalar_pos_bijector(dim, lower = lower),
+        scalar_all_both = tf_scalar_neg_pos_bijector(dim,
+                                                     lower = lower,
+                                                     upper = upper),
+        scalar_mixed = tf_scalar_mixed_bijector(dim,
+                                                lower = lower,
+                                                upper = upper,
+                                                constraints = constraints),
         correlation_matrix = tf_correlation_cholesky_bijector(),
         covariance_matrix = tf_covariance_cholesky_bijector(),
-        simplex = tf_simplex_bijector(self$dim)
+        simplex = tf_simplex_bijector(dim)
       )
 
     },
