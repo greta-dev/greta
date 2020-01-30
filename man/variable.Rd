@@ -69,7 +69,7 @@ e_cov <- cholesky_variable(dim = 4)
 e_correl <- cholesky_variable(dim = 4, correlation = TRUE)
 
 # these can be converted to symmetic matrices with chol2symm
-(equivalent to t(e_cov) \%*\% e_cov, but more efficient)
+# (equivalent to t(e_cov) \%*\% e_cov, but more efficient)
 cov <- chol2symm(e_cov)
 correl <- chol2symm(e_correl)
 # a 4D simplex (sums to 1, all values positive)

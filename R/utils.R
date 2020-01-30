@@ -802,7 +802,7 @@ check_cum_op <- function(x) {
   }
 }
 
-complex_error <- function(x) {
+complex_error <- function(z) {
   stop("greta does not yet support complex numbers",
        call. = FALSE)
 }
