@@ -1,5 +1,32 @@
 # greta (development version)
 
+## Fixes:
+
+* joint distributions of uniform variables now have the correct constraints when sampling (#377)
+
+* array-scalar dispatch with 3D arrays is now less buggy (#298)
+
+* greta now provides R versions of all of R's primitive functions (I think), to prevent them from silently not executing (#317)
+
+## API changes:
+
+* a number of optimiser methods are now deprecated, since they will be unavailable when greta moves to using TensorFlow v2.0: `powell()`, `cg()`, `newton_cg()`, `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()`.
+
+* `dirichlet()` now returns a variable (rather than an operation) greta array, and the graphs created by `lkj_correlation()` and `wishart()` are now simpler as cholesky-shaped variables are now available internally.
+
+## Features:
+
+
+* `variable()` now accepts arrays for `upper` and `lower`, enabling users to define variables with different constraints
+
+* There are three new variable constructor functions: `cholesky_variable()`, `simplex_variable()`, and `ordered_variable()`, for variables with these constraints but no probability distribution.
+
+* a new function `chol2symm()` - the inverse of `chol()`
+
+* `mcmc()`, `stashed_samples()`, and `calculate()` now return objects of class `greta_mcmc_list` which inherit from `coda`'s `mcmc.list` class, but enable custom greta methods for manipulating mcmc outputs, including a `window()` function
+
+* `mcmc()` and `calculate()` now have a `trace_batch_size` argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays (#236)
+
 # greta 0.3.1
 
 This release is predominantly a patch to make greta work with recent versions of TensorFlow and TensorFlow Probability, which were not backward compatible with the versions on which greta previously depended. From this release forward, greta will depend on specific (rather than minimum) versions of these two pieces of software to avoid it breaking if more changes are made to the APIS of these packages.

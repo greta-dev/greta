@@ -1,26 +1,20 @@
 # Create objects of class 'unknowns' to nicely print ? valued arrays
 
-as.unknowns <- function(x) {
+as.unknowns <- function(x) {  # Exclude Linting
   UseMethod("as.unknowns")
 }
 
-# Begin Exclude Linting
-as.unknowns.unknowns <- function(x) {
-# End Exclude Linting
+as.unknowns.unknowns <- function(x) {  # Exclude Linting
   x
 }
-# Begin Exclude Linting
-as.unknowns.array <- function(x) {
-# End Exclude Linting
+as.unknowns.array <- function(x) {  # Exclude Linting
   class(x) <- c("unknowns", class(x))
   x
 }
 
-# Begin Exclude Linting
-as.unknowns.matrix <- function(x) {
+as.unknowns.matrix <- function(x) {  # Exclude Linting
   as.unknowns.array(x)
 }
-# End Exclude Linting
 
 strip_unknown_class <- function(x) {
   classes <- class(x)
@@ -49,7 +43,7 @@ unknowns <- function(dims = c(1, 1), data = as.numeric(NA)) {
 }
 
 # set dims like on a matrix/array
-`dim<-.unknowns` <- function(x, value) {
+`dim<-.unknowns` <- function(x, value) {  # Exclude Linting
   x <- strip_unknown_class(x)
   dim(x) <- value
   as.unknowns(x)

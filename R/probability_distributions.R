@@ -182,11 +182,7 @@ bernoulli_distribution <- R6Class(
         tfp$distributions$Bernoulli(probs = parameters$prob)
 
       }
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -248,11 +244,7 @@ binomial_distribution <- R6Class(
         tfp$distributions$Binomial(total_count = parameters$size,
                                    probs = parameters$prob)
       }
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -291,11 +283,7 @@ beta_binomial_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -332,11 +320,7 @@ poisson_distribution <- R6Class(
 
       tfp$distributions$Poisson(log_rate = log_lambda)
 
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -362,12 +346,8 @@ negative_binomial_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$NegativeBinomial(total_count = parameters$size,
                                          probs = fl(1) - parameters$prob)
-    },
+    }
     # End Exclude Linting
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
 
   )
 )
@@ -405,11 +385,7 @@ hypergeometric_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -717,11 +693,6 @@ logistic_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Logistic(loc = parameters$location,
                                  scale = parameters$scale)
-    },
-
-    # log_cdf in tf$cotrib$distributions has the wrong sign :/
-    tf_log_cdf_function = function(x, parameters) {
-      tf$math$log(self$tf_cdf_function(x, parameters))
     }
 
   )
@@ -798,18 +769,15 @@ dirichlet_distribution <- R6Class(
       # parameters
       self$bounds <- c(0, Inf)
       super$initialize("dirichlet", dim,
-                       truncation = c(0, Inf))
+                       truncation = c(0, Inf),
+                       multivariate = TRUE)
       self$add_parameter(alpha, "alpha")
 
     },
 
     create_target = function(truncation) {
 
-      # handle simplex via a greta array
-      free_greta_array <- variable(lower = 0, upper = 1, dim = self$dim)
-
-      sums <- rowSums(free_greta_array)
-      simplex_greta_array <- sweep(free_greta_array, 1, sums, "/")
+      simplex_greta_array <- simplex_variable(self$dim)
 
       # return the node for the simplex
       target_node <- get_node(simplex_greta_array)
@@ -820,15 +788,10 @@ dirichlet_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       alpha <- parameters$alpha
       tfp$distributions$Dirichlet(concentration = alpha)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
-
 
 dirichlet_multinomial_distribution <- R6Class(
   "dirichlet_multinomial_distribution",
@@ -853,8 +816,9 @@ dirichlet_multinomial_distribution <- R6Class(
       # parameters
       super$initialize("dirichlet_multinomial",
                        dim = dim,
-                       discrete = TRUE)
-      self$add_parameter(size, "size")
+                       discrete = TRUE,
+                       multivariate = TRUE)
+      self$add_parameter(size, "size", expand_scalar_to = NULL)
       self$add_parameter(alpha, "alpha")
 
     },
@@ -866,12 +830,8 @@ dirichlet_multinomial_distribution <- R6Class(
       distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
               concentration = parameters$alpha)
-    },
+    }
     # End Exclude Linting
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
 
   )
 )
@@ -898,8 +858,9 @@ multinomial_distribution <- R6Class(
       # parameters
       super$initialize("multinomial",
                        dim = dim,
-                       discrete = TRUE)
-      self$add_parameter(size, "size")
+                       discrete = TRUE,
+                       multivariate = TRUE)
+      self$add_parameter(size, "size", expand_scalar_to = NULL)
       self$add_parameter(prob, "prob")
 
     },
@@ -912,11 +873,7 @@ multinomial_distribution <- R6Class(
 
       tfp$distributions$Multinomial(total_count = parameters$size,
                                     probs = parameters$prob)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -937,7 +894,10 @@ categorical_distribution <- R6Class(
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("categorical", dim = dim, discrete = TRUE)
+      super$initialize("categorical",
+                       dim = dim,
+                       discrete = TRUE,
+                       multivariate = TRUE)
       self$add_parameter(prob, "prob")
 
     },
@@ -948,11 +908,7 @@ categorical_distribution <- R6Class(
       probs <- probs / tf_sum(probs)
       tfp$distributions$Multinomial(total_count = fl(1),
                                     probs = probs)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -962,53 +918,53 @@ multivariate_normal_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
-    Sigma_is_cholesky = FALSE,
-
+    sigma_is_cholesky = FALSE,
+    # Begin Exclude Linting
     initialize = function(mean, Sigma, n_realisations, dimension) {
-
+    # End Exclude Linting
       # coerce to greta arrays
       mean <- as.greta_array(mean)
-      Sigma <- as.greta_array(Sigma)
+      sigma <- as.greta_array(Sigma)
 
       # check dim is a positive scalar integer
       dim <- check_multivariate_dims(vectors = list(mean),
-                                     squares = list(Sigma),
+                                     squares = list(sigma),
                                      n_realisations = n_realisations,
                                      dimension = dimension)
 
       # check dimensions of Sigma
-      if (nrow(Sigma) != ncol(Sigma) |
-          length(dim(Sigma)) != 2) {
+      if (nrow(sigma) != ncol(sigma) |
+          length(dim(sigma)) != 2) {
 
         stop("Sigma must be a square 2D greta array, ",
              "but has dimensions ",
-             paste(dim(Sigma), collapse = " x "),
+             paste(dim(sigma), collapse = " x "),
              call. = FALSE)
 
       }
 
       # compare possible dimensions
       dim_mean <- ncol(mean)
-      dim_Sigma <- nrow(Sigma)
+      dim_sigma <- nrow(sigma)
 
-      if (dim_mean != dim_Sigma) {
+      if (dim_mean != dim_sigma) {
 
         stop("mean and Sigma have different dimensions, ",
-             dim_mean, " vs ", dim_Sigma,
+             dim_mean, " vs ", dim_sigma,
              call. = FALSE)
 
       }
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("multivariate_normal", dim)
+      super$initialize("multivariate_normal", dim, multivariate = TRUE)
 
-      if (has_representation(Sigma, "cholesky")) {
-        Sigma <- representation(Sigma, "cholesky")
-        self$Sigma_is_cholesky <- TRUE
+      if (has_representation(sigma, "cholesky")) {
+        sigma <- representation(sigma, "cholesky")
+        self$sigma_is_cholesky <- TRUE
       }
       self$add_parameter(mean, "mean")
-      self$add_parameter(Sigma, "Sigma")
+      self$add_parameter(sigma, "sigma")
 
     },
 
@@ -1017,26 +973,22 @@ multivariate_normal_distribution <- R6Class(
       # if Sigma is a cholesky factor transpose it to tensorflow expoectation,
       # otherwise decompose it
 
-      if (self$Sigma_is_cholesky) {
-        L <- tf_transpose(parameters$Sigma)
+      if (self$sigma_is_cholesky) {
+        l <- tf_transpose(parameters$sigma)
       } else {
-        L <- tf$linalg$cholesky(parameters$Sigma)
+        l <- tf$linalg$cholesky(parameters$sigma)
       }
 
       # add an extra dimension for the observation batch size (otherwise tfp
       # will try to use the n_chains batch dimension)
-      L <- tf$expand_dims(L, 1L)
+      l <- tf$expand_dims(l, 1L)
 
       mu <- parameters$mean
       # Begin Exclude Linting
       tfp$distributions$MultivariateNormalTriL(loc = mu,
-                                               scale_tril = L)
+                                               scale_tril = l)
       # End Exclude Linting
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -1047,39 +999,39 @@ wishart_distribution <- R6Class(
   public = list(
 
     # set when defining the distribution
-    Sigma_is_cholesky = FALSE,
+    sigma_is_cholesky = FALSE,
 
     # set when defining the graph
     target_is_cholesky = FALSE,
 
-    initialize = function(df, Sigma) {
+    initialize = function(df, Sigma) {  # Exclude Linting
       # add the nodes as parents and parameters
 
       df <- as.greta_array(df)
-      Sigma <- as.greta_array(Sigma)
+      sigma <- as.greta_array(Sigma)
 
       # check dimensions of Sigma
-      if (nrow(Sigma) != ncol(Sigma) |
-          length(dim(Sigma)) != 2) {
+      if (nrow(sigma) != ncol(sigma) |
+          length(dim(sigma)) != 2) {
 
         stop("Sigma must be a square 2D greta array, but has dimensions ",
-             paste(dim(Sigma), collapse = " x "),
+             paste(dim(sigma), collapse = " x "),
              call. = FALSE)
 
       }
 
-      dim <- nrow(Sigma)
+      dim <- nrow(sigma)
 
       # initialize with a cholesky factor
-      super$initialize("wishart", dim(Sigma))
+      super$initialize("wishart", dim(sigma), multivariate = TRUE)
 
       # set parameters
-      if (has_representation(Sigma, "cholesky")) {
-        Sigma <- representation(Sigma, "cholesky")
-        self$Sigma_is_cholesky <- TRUE
+      if (has_representation(sigma, "cholesky")) {
+        sigma <- representation(sigma, "cholesky")
+        self$sigma_is_cholesky <- TRUE
       }
-      self$add_parameter(df, "df")
-      self$add_parameter(Sigma, "Sigma")
+      self$add_parameter(df, "df", expand_scalar_to = NULL)
+      self$add_parameter(sigma, "sigma")
 
       # make the initial value PD (no idea whether this does anything)
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
@@ -1090,16 +1042,11 @@ wishart_distribution <- R6Class(
     # factor representation)
     create_target = function(truncation) {
 
-      # create a flat variable greta array
-      k <- self$dim[1]
-      free_greta_array <- vble(truncation = c(-Inf, Inf),
-                               dim = k + k * (k - 1) / 2)
-      free_greta_array$constraint <- "covariance_matrix"
+      # create cholesky factor variable greta array
+      chol_greta_array <- cholesky_variable(self$dim[1])
 
-      # reshape to a cholesky factor and then to a symmetric matrix (which
-      # retains the cholesky representation)
-      chol_greta_array <- flat_to_chol(free_greta_array, self$dim)
-      matrix_greta_array <- chol_to_symmetric(chol_greta_array)
+      # reshape to a symmetric matrix (retaining cholesky representation)
+      matrix_greta_array <- chol2symm(chol_greta_array)
 
       # return the node for the symmetric matrix
       target_node <- get_node(matrix_greta_array)
@@ -1125,7 +1072,6 @@ wishart_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-
       # this is messy, we want to use the tfp wishart, but can't define the
       # density without expanding the dimension of x
 
@@ -1133,14 +1079,14 @@ wishart_distribution <- R6Class(
 
         # reshape the dimensions
         df <- tf_flatten(parameters$df)
-        Sigma <- tf$expand_dims(parameters$Sigma, 1L)
+        sigma <- tf$expand_dims(parameters$sigma, 1L)
         x <- tf$expand_dims(x, 1L)
 
         # get the cholesky factor of Sigma in tf orientation
-        if (self$Sigma_is_cholesky) {
-          Sigma_chol <- tf$linalg$matrix_transpose(Sigma)
+        if (self$sigma_is_cholesky) {
+          sigma_chol <- tf$linalg$matrix_transpose(sigma)
         } else {
-          Sigma_chol <- tf$linalg$cholesky(Sigma)
+          sigma_chol <- tf$linalg$cholesky(sigma)
         }
 
         # get the cholesky factor of the target in tf_orientation
@@ -1152,7 +1098,7 @@ wishart_distribution <- R6Class(
 
         # use the density for choleskied x, with choleskied Sigma
         distrib <- tfp$distributions$Wishart(df = df,
-                                             scale_tril = Sigma_chol,
+                                             scale_tril = sigma_chol,
                                              input_output_cholesky = TRUE)
 
         distrib$log_prob(x_chol)
@@ -1161,11 +1107,7 @@ wishart_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -1203,8 +1145,10 @@ lkj_correlation_distribution <- R6Class(
       }
 
       dim <- c(dimension, dimension)
-      super$initialize("lkj_correlation", dim)
-      self$add_parameter(eta, "eta")
+      super$initialize("lkj_correlation", dim, multivariate = TRUE)
+
+      # don't try to expand scalar eta out to match the target size
+      self$add_parameter(eta, "eta", expand_scalar_to = NULL)
 
       # make the initial value PD
       self$value(unknowns(dims = dim, data = diag(dimension)))
@@ -1214,18 +1158,11 @@ lkj_correlation_distribution <- R6Class(
     # default (cholesky factor, ignores truncation)
     create_target = function(truncation) {
 
-      # handle reshaping via a greta array
-      k <- self$dim[1]
-      free_greta_array <- vble(truncation = c(-Inf, Inf),
-                               dim = k * (k - 1) / 2)
-      free_greta_array$constraint <- "correlation_matrix"
+      # create (correlation matrix) cholesky factor variable greta array
+      chol_greta_array <- cholesky_variable(self$dim[1], correlation = TRUE)
 
-      # reshape to a cholesky factor and then to a symmetric correlation matrix
-      # (which retains the cholesky representation)
-      chol_greta_array <- flat_to_chol(free_greta_array,
-                                       self$dim,
-                                       correl = TRUE)
-      matrix_greta_array <- chol_to_symmetric(chol_greta_array)
+      # reshape to a symmetric matrix (retaining cholesky representation)
+      matrix_greta_array <- chol2symm(chol_greta_array)
 
       # return the node for the symmetric matrix
       target_node <- get_node(matrix_greta_array)
@@ -1252,40 +1189,17 @@ lkj_correlation_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      eta <- parameters$eta
+      eta <- tf$squeeze(parameters$eta, 1:2)
 
-      log_prob <- function(x) {
+      tfp$distributions$LKJ(
+        dimension = self$dim[1],
+        concentration = eta,
+        input_output_cholesky = self$target_is_cholesky
+      )
 
-        n <- self$dim[1]
+      # input_output_cholesky argument will need to be dealt with for RNG stuff
 
-        # normalising constant
-        k <- 1:n
-        a <- fl(1 - n) * tf$math$lgamma(eta + fl(0.5 * (n - 1)))
-        b <- tf_sum(fl(0.5 * k * log(pi)) +
-                      tf$math$lgamma(eta + fl(0.5 * (n - 1 - k))))
-        norm <- a + b
-
-        # get the cholesky factor of the target in tf_orientation
-        if (self$target_is_cholesky) {
-          x_chol <- tf$linalg$matrix_transpose(x)
-        } else {
-          x_chol <- tf$linalg$cholesky(x)
-        }
-
-        diags <- tf$linalg$diag_part(x_chol)
-        det <- tf$square(tf_prod(diags))
-
-        (eta - fl(1)) * tf$math$log(det) + norm
-
-      }
-
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
-
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -1322,6 +1236,7 @@ distribution_classes_module <- module(uniform_distribution,
 
 # export constructors
 
+# Begin Exclude Linting
 #' @name distributions
 #' @title probability distributions
 #' @description These functions can be used to define random variables in a
@@ -1382,7 +1297,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'   corresponds to an independent realisation. If a single realisation or
 #'   parameter value is specified, it must therefore be a row vector (see
 #'   example). \code{n_realisations} gives the number of rows/realisations, and
-#'   \code{dimension} gives the dimension of the distribution. Ie. a bivariate
+#'   \code{dimension} gives the dimension of the distribution. I.e. a bivariate
 #'   normal distribution would be produced with \code{multivariate_normal(...,
 #'   dimension = 2)}. The dimension can usually be detected from the parameters.
 #'
@@ -1483,6 +1398,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'
 #' }
 NULL
+# End Exclude Linting
 
 #' @rdname distributions
 #' @export
@@ -1593,17 +1509,19 @@ logistic <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 f <- function(df1, df2, dim = NULL, truncation = c(0, Inf))
   distrib("f", df1, df2, dim, truncation)
 
+# Begin Exclude Linting
 #' @rdname distributions
 #' @export
 multivariate_normal <- function(mean, Sigma,
                                 n_realisations = NULL, dimension = NULL) {
+# End Exclude Linting
   distrib("multivariate_normal", mean, Sigma,
           n_realisations, dimension)
 }
 
 #' @rdname distributions
 #' @export
-wishart <- function(df, Sigma)
+wishart <- function(df, Sigma)  # Exclude Linting
   distrib("wishart", df, Sigma)
 
 #' @rdname distributions

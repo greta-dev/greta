@@ -18,7 +18,7 @@
 #'
 #' @details The \code{weights} are rescaled to sum to one along the first
 #'   dimension, and are then used as the mixing weights of the distribution.
-#'   \emph{Ie.} the probability density is calculated as a weighted sum of the
+#'   I.e. the probability density is calculated as a weighted sum of the
 #'   component probability distributions passed in via \code{\dots}
 #'
 #'   The component probability distributions must all be either continuous or
@@ -74,6 +74,8 @@ mixture_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
+    weights_is_log = FALSE,
+
     initialize = function(dots, weights, dim) {
 
       n_distributions <- length(dots)
@@ -88,6 +90,12 @@ mixture_distribution <- R6Class(
 
       weights <- as.greta_array(weights)
       weights_dim <- dim(weights)
+
+      # use log weights if available
+      if (has_representation(weights, "log")) {
+        weights <- representation(weights, "log")
+        self$weights_is_log <- TRUE
+      }
 
       # weights should have n_distributions as the first dimension
       if (weights_dim[1] != n_distributions) {
@@ -109,7 +117,7 @@ mixture_distribution <- R6Class(
       w_dim <- weights_dim[-1]
       dim_1 <- length(w_dim) == 1 && w_dim == 1
       dim_same <- all(w_dim == weights_extra_dim)
-      if ( !(dim_1 | dim_same) ) {
+      if (!(dim_1 | dim_same)) {
         stop("the dimension of weights must be either ", n_distributions,
              " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
              " but was ", paste(weights_dim, collapse = " x "),
@@ -134,30 +142,111 @@ mixture_distribution <- R6Class(
              call. = FALSE)
       }
 
+      # ensure the support and bounds of each of the distributions is the same
+      truncations <- lapply(distribs, member, "truncation")
+      bounds <- lapply(distribs, member, "bounds")
+
+      truncated <- !vapply(truncations, is.null, logical(1))
+      supports <- bounds
+      supports[truncated] <- truncations[truncated]
+
+      n_supports <- length(unique(supports))
+      if (n_supports != 1) {
+        supports_text <- vapply(
+          X = unique(supports),
+          FUN = paste,
+          collapse = " to ",
+          FUN.VALUE = character(1)
+        )
+        stop("component distributions have different support: ",
+              paste(supports_text, collapse = " vs. "),
+             call. = FALSE)
+      }
+
+      # get the maximal bounds for all component distributions
+      bounds <- c(do.call(min, bounds),
+                 do.call(max, bounds))
+
+      # if the support is smaller than this, treat the distribution as truncated
+      support <- supports[[1]]
+      if (identical(support, bounds)) {
+        truncation <- NULL
+      } else {
+        truncation <- support
+      }
+
+      self$bounds <- support
+
       # for any discrete ones, tell them they are fixed
       super$initialize("mixture", dim, discrete = discrete[1])
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
-                           paste("distribution", i))
+                           paste("distribution", i),
+                           expand_scalar_to = NULL)
       }
 
       self$add_parameter(weights, "weights")
     },
 
+    create_target = function(truncation) {
+      vble(self$bounds, dim = self$dim)
+    },
+
     tf_distrib = function(parameters, dag) {
 
-      densities <- parameters[names(parameters) != "weights"]
-      names(densities) <- NULL
+      # get parameter nodes, truncations, and bounds of component distributions
+      distribution_nodes <- self$parameters[names(self$parameters) != "weights"]
+      truncations <- lapply(distribution_nodes, member, "truncation")
+      bounds <- lapply(distribution_nodes, member, "bounds")
+      distribution_parameters <-
+        lapply(distribution_nodes, member, "parameters")
+
+      # in this case, 'parameters' are functions to construct tfp distributions,
+      # so evaluate them on their own parameters to get the tfp distributions
+      constructors <- parameters[names(parameters) != "weights"]
+      tfp_distributions <- list()
+      for (i in seq_along(constructors)) {
+
+        constructor <- constructors[[i]]
+
+        # get the tensors for the parameters of this component distribution
+        tf_parameter_list <-
+          lapply(distribution_parameters[[i]], dag$get_tf_object)
+
+        # use them to construct the tfp distribution object
+        tfp_distributions[[i]] <- constructor(tf_parameter_list, dag = dag)
+
+      }
+
       weights <- parameters$weights
-      weights_sum <- tf$reduce_sum(weights, 1L, keepdims = TRUE)
-      weights <- weights / weights_sum
-      log_weights <- tf$math$log(weights)
+
+      # use log weights if available
+      if (self$weights_is_log) {
+        log_weights <- weights
+      } else {
+        log_weights <- tf$math$log(weights)
+      }
+
+      # normalise weights on log scale
+      log_weights_sum <- tf$reduce_logsumexp(
+        log_weights,
+        axis = 1L,
+        keepdims = TRUE
+      )
+      log_weights <- log_weights - log_weights_sum
 
       log_prob <- function(x) {
 
         # get component densities in an array
-        log_probs <- lapply(densities, do.call, list(x))
+        log_probs <- mapply(
+          dag$tf_evaluate_density,
+          tfp_distribution = tfp_distributions,
+          truncation = truncations,
+          bounds = bounds,
+          MoreArgs = list(tf_target = x),
+          SIMPLIFY = FALSE
+        )
         log_probs_arr <- tf$stack(log_probs, 1L)
 
         # massage log_weights into the same shape as log_probs_arr
@@ -180,10 +269,7 @@ mixture_distribution <- R6Class(
 
       list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
 
-    },
-
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )

@@ -56,7 +56,7 @@ grab_via_free_state <- function(target, values, batches = 1) {
   array(vals, dim = dim(target))
 }
 
-is.greta_array <- function(x)
+is.greta_array <- function(x)  # Exclude Linting
   inherits(x, "greta_array")
 
 set_distribution <- function(dist, data) {
@@ -144,15 +144,12 @@ greta_density <- function(fun, parameters, x,
 
   # create dag
   dag <- greta:::dag_class$new(list(x_))
-  tfe <- dag$tf_environment
 
   # define the tensor in an environment
   distrib_node$define_tf(dag)
 
   # get the log density as a vector
-  target <- get(dag$tf_name(get_node(x_)), envir = tfe)
-  density <- get(dag$tf_name(distrib_node), envir = tfe)
-  result <- density(target)
+  result <- dag$evaluate_density(distrib_node, get_node(x_))
   as.vector(grab(result, dag))
 
 }
@@ -173,7 +170,7 @@ randu <- function(...) {
 
 # create a variable with the same dimensions as as_data(x)
 as_variable <- function(x) {
-  x <- as_2D_array(x)
+  x <- as_2d_array(x)
   variable(dim = dim(x))
 }
 
@@ -330,8 +327,18 @@ sample_distribution <- function(greta_array, n = 10,
                                 warmup = 1) {
   m <- model(greta_array, precision = "double")
   draws <- mcmc(m, n_samples = n, warmup = warmup, verbose = FALSE)
-  samples <- as.vector(draws[[1]])
-  expect_true(all(samples >= lower & samples <= upper))
+  samples <- as.matrix(draws)
+  vectorised <- length(lower) > 1 | length(upper) > 1
+
+  if (vectorised) {
+    above_lower <- sweep(samples, 2, lower, `>=`)
+    below_upper <- sweep(samples, 2, upper, `<=`)
+  } else {
+    above_lower <- samples >= lower
+    below_upper <- samples <= upper
+  }
+
+  expect_true(all(above_lower & below_upper))
 }
 
 compare_truncated_distribution <- function(greta_fun,
@@ -358,27 +365,11 @@ compare_truncated_distribution <- function(greta_fun,
   r_fun <- truncfun(which, parameters, truncation)
   r_log_density <- log(r_fun(x))
 
-  # create greta array for truncated distribution
-  dist <- do.call(greta_fun, c(parameters,
-                               list(dim = 1, truncation = truncation)))
-
-  distrib_node <- get_node(dist)$distribution
-
-  # set data as the target
-  x_ <- as_data(x)
-  distribution(x_) <- dist
-
-  # create dag and define the density
-  dag <- greta:::dag_class$new(list(x_))
-  tfe <- dag$tf_environment
-
-  distrib_node$define_tf(dag)
-
-  # get the log density as a vector
-  target <- get(dag$tf_name(get_node(x_)), envir = tfe)
-  density <- get(dag$tf_name(distrib_node), envir = tfe)
-  result <- density(target)
-  greta_log_density <- as.vector(grab(result, dag))
+  greta_log_density <- greta_density(
+    fun = greta_fun,
+    parameters = c(parameters, list(truncation = truncation)),
+    x = x,
+    dim = 1)
 
   # return absolute difference
   compare_op(r_log_density, greta_log_density, tolerance)
@@ -403,14 +394,14 @@ truncfun <- function(which = "norm", parameters, truncation) {
 
 # R distribution functions for the location-scale Student T distribution
 dt_ls <- function(x, df, location, scale, log = FALSE) {
-  ans <- stats::dt( (x - location) / scale, df ) / scale
+  ans <- stats::dt((x - location) / scale, df) / scale
   if (log)
     ans <- log(ans)
   ans
 }
 
 pt_ls <- function(q, df, location, scale, log.p = FALSE) {
-  ans <- stats::pt( (q - location) / scale, df )
+  ans <- stats::pt((q - location) / scale, df)
   if (log.p)
     ans <- log(ans)
   ans
@@ -470,44 +461,44 @@ qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 
 # random lkj draws, code from the rethinking package (can't load the package
 # because of stan*Travis*compiler issues)
-rlkjcorr <- function (n, K, eta = 1) {
+rlkjcorr <- function(n, k, eta = 1) {
 
-  stopifnot(is.numeric(K), K >= 2, K == as.integer(K))
+  stopifnot(is.numeric(k), k >= 2, k == as.integer(k))
   stopifnot(eta > 0)
 
   f <- function() {
 
-    alpha <- eta + (K - 2) / 2
+    alpha <- eta + (k - 2) / 2
     r12 <- 2 * rbeta(1, alpha, alpha) - 1
-    R <- matrix(0, K, K)
-    R[1, 1] <- 1
-    R[1, 2] <- r12
-    R[2, 2] <- sqrt(1 - r12 ^ 2)
+    r <- matrix(0, k, k)
+    r[1, 1] <- 1
+    r[1, 2] <- r12
+    r[2, 2] <- sqrt(1 - r12 ^ 2)
 
-    if (K > 2) {
-      for (m in 2:(K - 1)) {
+    if (k > 2) {
+      for (m in 2:(k - 1)) {
         alpha <- alpha - 0.5
         y <- rbeta(1, m / 2, alpha)
         z <- rnorm(m, 0, 1)
         z <- z / sqrt(crossprod(z)[1])
-        R[1:m, m + 1] <- sqrt(y) * z
-        R[m + 1, m + 1] <- sqrt(1 - y)
+        r[1:m, m + 1] <- sqrt(y) * z
+        r[m + 1, m + 1] <- sqrt(1 - y)
       }
     }
 
-    crossprod(R)
+    crossprod(r)
 
   }
 
-  R <- replicate(n, f())
+  r <- replicate(n, f())
 
-  if (dim(R)[3] == 1) {
-    R <- R[, , 1]
+  if (dim(r)[3] == 1) {
+    r <- r[, , 1]
   } else {
-    R <- aperm(R, c(3, 1, 2))
+    r <- aperm(r, c(3, 1, 2))
   }
 
-  R
+  r
 
 }
 
@@ -606,7 +597,12 @@ p_theta_greta <- function(niter, model, data,
 
 not_finished <- function(draws, target_samples = 5000) {
   neff <- coda::effectiveSize(draws)
-  rhats <- coda::gelman.diag(draws, multivariate = FALSE)$psrf[, 1]
+  rhats <- coda::gelman.diag(
+    x = draws,
+    multivariate = FALSE,
+    autoburnin = FALSE
+  )
+  rhats <- rhats$psrf[, 1]
   converged <- all(rhats < 1.01)
   enough_samples <- all(neff >= target_samples)
   !(converged & enough_samples)
@@ -661,7 +657,7 @@ mcse <- function(draws) {
   a <- floor(n / b)
 
   group <- function(k) {
-    idx <- ( (k - 1) * b + 1 ):(k * b)
+    idx <- ((k - 1) * b + 1):(k * b)
     colMeans(draws[idx, , drop = FALSE])
   }
 
@@ -692,8 +688,8 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
 
   # get multivariate normal samples
   mu <- as_data(t(rnorm(2, 0, 5)))
-  Sigma <- rWishart(1, 3, diag(2))[, , 1]
-  x <- multivariate_normal(mu, Sigma)
+  sigma <- rWishart(1, 3, diag(2))[, , 1]
+  x <- multivariate_normal(mu, sigma)
   m <- model(x, precision = "single")
 
   draws <- get_enough_draws(m,
@@ -705,15 +701,15 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   # correlation of error wrt mean)
   err <- x - mu
   var <- (err) ^ 2
-  corr <- prod(err) / prod(sqrt(diag(Sigma)))
+  corr <- prod(err) / prod(sqrt(diag(sigma)))
   err_var_corr <- c(err, var, corr)
   stat_draws <- calculate(err_var_corr, draws)
 
   # get true values of these - on average the error should be 0, and the
   # variance and correlation of the errors should encoded in Sigma
   stat_truth <- c(rep(0, 2),
-                  diag(Sigma),
-                  cov2cor(Sigma)[1, 2])
+                  diag(sigma),
+                  cov2cor(sigma)[1, 2])
 
   # get absolute errors between posterior means and true values, and scale them
   # by time-series Monte Carlo standard errors (the expected amount of

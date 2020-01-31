@@ -2,19 +2,31 @@
 % Please edit documentation in R/variable.R
 \name{variable}
 \alias{variable}
+\alias{cholesky_variable}
+\alias{simplex_variable}
+\alias{ordered_variable}
 \title{create greta variables}
 \usage{
-variable(lower = -Inf, upper = Inf, dim = 1)
+variable(lower = -Inf, upper = Inf, dim = NULL)
+
+cholesky_variable(dim, correlation = FALSE)
+
+simplex_variable(dim)
+
+ordered_variable(dim)
 }
 \arguments{
-\item{lower, upper}{scalar values giving optional limits to variables. These
-must be specified as numerics, they cannot be greta arrays (though see
-details for a workaround). They can be set to \code{-Inf} (\code{lower}) or
-\code{Inf} (\code{upper}), though \code{lower} must always be less than
-\code{upper}.}
+\item{lower, upper}{optional limits to variables. These must be specified as
+numerics, they cannot be greta arrays (though see details for a
+workaround). They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
+(\code{upper}), though \code{lower} must always be less than \code{upper}.}
 
 \item{dim}{the dimensions of the greta array to be returned, either a scalar
 or a vector of positive integers. See details.}
+
+\item{correlation}{whether to return a cholesky factor corresponding to a
+correlation matrix (diagonal elements equalling 1, off-diagonal elements
+between -1 and 1).}
 }
 \description{
 \code{variable()} creates greta arrays representing unknown
@@ -24,12 +36,16 @@ or a vector of positive integers. See details.}
   \code{\link{distributions}}.
 }
 \details{
-\code{lower} and \code{upper} must be fixed, they cannot be greta arrays.
- This ensures these values can always be transformed to a continuous scale to
- run the samplers efficiently. However, a variable parameter with dynamic
- limits can always be created by first defining a variable constrained
- between 0 and 1, and then transforming it to the required scale. See below
- for an example.
+\code{lower} and \code{upper} must be fixed, they cannot be greta
+  arrays. This ensures these values can always be transformed to a continuous
+  scale to run the samplers efficiently. However, a variable parameter with
+  dynamic limits can always be created by first defining a variable
+  constrained between 0 and 1, and then transforming it to the required
+  scale. See below for an example.
+
+  The constraints in \code{simplex_variable()} and \code{ordered_variable()}
+  operate on the final dimension, which must have more than 1 element.
+  Passing in a scalar value for \code{dim} therefore results in a row-vector.
 }
 \examples{
 \dontrun{
@@ -48,4 +64,23 @@ min <- as_data(iris$Sepal.Length)
 max <- min ^ 2
 d <- min + variable(0, 1, dim = nrow(iris)) * (max - min)
 }
+# 4x4 cholesky factor variables for covariance and correlation matrices
+e_cov <- cholesky_variable(dim = 4)
+e_correl <- cholesky_variable(dim = 4, correlation = TRUE)
+
+# these can be converted to symmetic matrices with chol2symm
+# (equivalent to t(e_cov) \%*\% e_cov, but more efficient)
+cov <- chol2symm(e_cov)
+correl <- chol2symm(e_correl)
+# a 4D simplex (sums to 1, all values positive)
+f <- simplex_variable(4)
+
+# a 4D simplex on the final dimension
+g <- simplex_variable(dim = c(2, 3, 4))
+# a 2D variable with each element higher than the one in the cell to the left
+h <- ordered_variable(dim = c(3, 4))
+
+# more constraints can be added with monotonic transformations, e.g. an
+# ordered positive variable
+i <- exp(ordered_variable(5))
 }

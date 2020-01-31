@@ -3,7 +3,6 @@
 \docType{package}
 \name{greta}
 \alias{greta}
-\alias{greta-package}
 \title{greta: simple and scalable statistical modelling in R}
 \description{
 greta lets you write statistical models interactively in native

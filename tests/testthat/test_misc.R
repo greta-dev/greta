@@ -6,7 +6,7 @@ test_that("check_tf_version works", {
 
   # record the true version and forge an old version
   true_version <- tf$`__version__`
-  tf$`__version__` <- "0.9.0"
+  tf$`__version__` <- "0.9.0"  # Exclude Linting
 
   # expected text
   expected_message <- "you have TensorFlow version 0.9.0"
@@ -19,7 +19,7 @@ test_that("check_tf_version works", {
                  expected_message)
 
   # reset the true version
-  tf$`__version__` <- true_version
+  tf$`__version__` <- true_version  # Exclude Linting
 
   # forge a missing installation
   expected_message <- "isn't installed"
@@ -80,7 +80,7 @@ test_that("greta_model objects print", {
   skip_if_not(check_tf_version())
 
   m <- model(normal(0, 1))
-  message <- capture.output(print(m))
+  message <- capture_output(print(m))
   expect_equal(message, "greta model")
 
 })

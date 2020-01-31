@@ -22,7 +22,6 @@ greta's
 gretaDynamics
 Grete
 HMC
-Ie
 igraph
 Inf
 io
@@ -40,6 +39,7 @@ parameterisations
 pkgdown
 poisson
 Poisson
+polygamma
 PSAT
 R's
 RStudio
@@ -49,7 +49,6 @@ SciPy
 softmax
 speedup
 st
-TensoFlow
 tensorflow
 TensorFlow
 TensorFlow's

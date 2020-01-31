@@ -15,6 +15,7 @@
 <!-- Bootstrap -->
 
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -38,14 +39,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="internal greta methods — internals" />
 
+<meta property="og:title" content="internal greta methods — internals" />
 <meta property="og:description" content="A list of functions and R6 class objects that can be used to
   develop extensions to greta. Most users will not need to access these
   methods, and it is not recommended to use them directly in model code." />
-
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -134,7 +135,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://forum.greta-stats.org">
@@ -180,14 +180,13 @@
     </div>
 
     <div class="ref-description">
-    
     <p>A list of functions and R6 class objects that can be used to
   develop extensions to greta. Most users will not need to access these
   methods, and it is not recommended to use them directly in model code.</p>
-    
     </div>
 
-        
+
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>This help file lists the available internals, but they are not fully
@@ -201,7 +200,6 @@ greta and need more details of how to use these internal functions.</p>
 <p>You can use <code><a href='https://www.rdocumentation.org/packages/base/topics/attach'>attach()</a></code> to put a sublist in the search path. E.g.
 <code><a href='https://www.rdocumentation.org/packages/base/topics/attach'>attach(.internals$nodes$constructors)</a></code> will enable you to call
 <code>op()</code>, <code>vble()</code> and <code>distrib()</code> directly.</p>
-    
     <h2 class="hasAnchor" id="usage"><a class="anchor" href="#usage"></a>Usage</h2>
 
     <p></p><pre>
@@ -221,16 +219,13 @@ greta and need more details of how to use these internal functions.</p>
                   samplers               # mcmc helpers
  .internals$greta_stash                  # internal information storage
 </pre>
-    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
-      
       <li><a href="#details">Details</a></li>
-
       <li><a href="#usage">Usage</a></li>
-          </ul>
+    </ul>
 
   </div>
 </div>

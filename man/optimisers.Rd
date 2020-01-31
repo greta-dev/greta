@@ -47,27 +47,40 @@ adadelta(learning_rate = 0.001, rho = 1, epsilon = 1e-08)
 
 adagrad(learning_rate = 0.8, initial_accumulator_value = 0.1)
 
-adagrad_da(learning_rate = 0.8, global_step = 1L,
+adagrad_da(
+  learning_rate = 0.8,
+  global_step = 1L,
   initial_gradient_squared_accumulator_value = 0.1,
-  l1_regularization_strength = 0, l2_regularization_strength = 0)
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+)
 
 momentum(learning_rate = 0.001, momentum = 0.9, use_nesterov = TRUE)
 
-adam(learning_rate = 0.1, beta1 = 0.9, beta2 = 0.999,
-  epsilon = 1e-08)
+adam(learning_rate = 0.1, beta1 = 0.9, beta2 = 0.999, epsilon = 1e-08)
 
-ftrl(learning_rate = 1, learning_rate_power = -0.5,
-  initial_accumulator_value = 0.1, l1_regularization_strength = 0,
-  l2_regularization_strength = 0)
+ftrl(
+  learning_rate = 1,
+  learning_rate_power = -0.5,
+  initial_accumulator_value = 0.1,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+)
 
-proximal_gradient_descent(learning_rate = 0.01,
-  l1_regularization_strength = 0, l2_regularization_strength = 0)
+proximal_gradient_descent(
+  learning_rate = 0.01,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+)
 
-proximal_adagrad(learning_rate = 1, initial_accumulator_value = 0.1,
-  l1_regularization_strength = 0, l2_regularization_strength = 0)
+proximal_adagrad(
+  learning_rate = 1,
+  initial_accumulator_value = 0.1,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+)
 
-rms_prop(learning_rate = 0.1, decay = 0.9, momentum = 0,
-  epsilon = 1e-10)
+rms_prop(learning_rate = 0.1, decay = 0.9, momentum = 0, epsilon = 1e-10)
 }
 \arguments{
 \item{maxcor}{maximum number of 'variable metric corrections' used to define

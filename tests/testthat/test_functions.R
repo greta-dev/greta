@@ -40,6 +40,62 @@ test_that("simple functions work as expected", {
 
 })
 
+
+test_that("primitive functions work as expected", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  real <- randn(25, 4)
+  pos <- exp(real)
+  posp1 <- pos + 1
+  m1p1 <- 2 * pnorm(real) - 1
+
+  check_op(log10, pos)
+  check_op(log2, pos)
+  check_op(cosh, real)
+  check_op(sinh, real)
+  check_op(tanh, real)
+  check_op(acosh, posp1)
+  check_op(asinh, posp1)
+  check_op(atanh, m1p1)
+  check_op(cospi, real)
+  check_op(sinpi, real)
+  check_op(tanpi, real)
+  check_op(trigamma, real, tolerance = 1e-2)
+
+})
+
+test_that("cummax and cummin functions error informatively", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  cumulative_funs <- list(cummax, cummin)
+  x <- as_data(randn(10))
+
+  for (fun in cumulative_funs) {
+    expect_error(fun(x),
+                 "not yet implemented")
+  }
+
+})
+
+test_that("complex number functions error informatively", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  complex_funs <- list(Im, Re, Arg, Conj, Mod)
+  x <- as_data(randn(25, 4))
+
+  for (fun in complex_funs) {
+    expect_error(fun(x),
+                 "greta does not yet support complex numbers")
+  }
+
+})
+
 test_that("matrix functions work as expected", {
 
   skip_if_not(check_tf_version())
@@ -55,6 +111,7 @@ test_that("matrix functions work as expected", {
   check_op(t, b)
   check_op(chol, a)
   check_op(chol2inv, c)
+  check_op(chol2symm, c)
   check_op(cov2cor, a)
   check_op(diag, a)
   check_op(`diag<-`, a, 1:5, only = "data")
@@ -167,7 +224,7 @@ test_that("apply works as expected", {
   source("helpers.R")
 
   # check apply.greta_array works like R's apply for X
-  check_apply <- function(X, MARGIN, FUN) {
+  check_apply <- function(X, MARGIN, FUN) {  # Exclude Linting
     check_op(apply, a,
              other_args = list(MARGIN = MARGIN,
                                FUN = FUN))
@@ -256,12 +313,12 @@ test_that("sweep works for numeric x and greta array STATS", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  STATS <- randn(5)
-  ga_STATS <- as_data(STATS)
+  stats <- randn(5)
+  ga_stats <- as_data(stats)
   x <- randn(5, 25)
 
-  res <- sweep(x, 1, STATS, "*")
-  expect_ok(ga_res <- sweep(x, 1, ga_STATS, "*"))
+  res <- sweep(x, 1, stats, "*")
+  expect_ok(ga_res <- sweep(x, 1, ga_stats, "*"))
   diff <- abs(res - grab(ga_res))
   expect_true(all(diff < 1e-6))
 
@@ -475,6 +532,12 @@ test_that("incorrect dimensions are errored about", {
   expect_error(chol(y),
                "only two-dimensional, square, symmetric greta arrays")
 
+  expect_error(chol2symm(x),
+               "only two-dimensional, square, upper-triangular greta arrays")
+
+  expect_error(chol2symm(y),
+               "only two-dimensional, square, upper-triangular greta arrays")
+
   expect_error(eigen(x),
                "only two-dimensional, square, symmetric greta arrays")
 
@@ -483,5 +546,22 @@ test_that("incorrect dimensions are errored about", {
 
   expect_error(rdist(x, y),
                "must have the same number of columns")
+
+})
+
+test_that("chol2symm inverts chol", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x <- rWishart(1, 10, diag(9))[, , 1]
+  u <- chol(x)
+
+  # check the R version
+  expect_equal(x, chol2symm(u))
+
+  # check the greta version
+  x2 <- calculate(chol2symm(as_data(u)))
+  expect_equal(x2, x)
 
 })

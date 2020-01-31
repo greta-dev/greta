@@ -53,6 +53,11 @@ Below are a few examples of common statistical models implemented in greta.
 ```{r child='../inst/examples/hierarchical_linear_slopes.Rmd'}
 ```
 
+<hr>
+
+```{r child='../inst/examples/hierarchical_linear_slopes_corr.Rmd'}
+```
+
 ## Common Bayesian priors
 
 The following examples show some common Bayesian priors of which some induce sparsity.

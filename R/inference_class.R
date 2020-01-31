@@ -43,7 +43,9 @@ inference <- R6Class(
 
       self$parameters <- parameters
       self$model <- model
-      self$n_free <- length(model$dag$example_parameters())
+      free_parameters <- model$dag$example_parameters(free = TRUE)
+      free_parameters <- unlist_tf(free_parameters)
+      self$n_free <- length(free_parameters)
       self$set_initial_values(initial_values)
       self$n_traced <- length(model$dag$trace_values(self$free_state))
       self$seed <- seed
@@ -235,6 +237,7 @@ sampler <- R6Class(
     n_samplers = 1,
     n_chains = 1,
     numerical_rejections = 0,
+    thin = 1,
 
     # tuning information
     mean_accept_stat = 0.5,
@@ -260,6 +263,9 @@ sampler <- R6Class(
     pb_file = NULL,
     pb_width = options()$width,
 
+    # batch sizes for tracing
+    trace_batch_size = 100,
+
     initialize = function(initial_values,
                           model,
                           parameters = list(),
@@ -275,7 +281,7 @@ sampler <- R6Class(
 
       # duplicate diag_sd if needed
       n_diag <- length(self$parameters$diag_sd)
-      n_parameters <- length(model$dag$example_parameters())
+      n_parameters <- self$n_free
       if (n_diag != n_parameters && n_parameters > 1) {
         diag_sd <- rep(self$parameters$diag_sd[1], n_parameters)
         self$parameters$diag_sd <- diag_sd
@@ -289,8 +295,10 @@ sampler <- R6Class(
     run_chain = function(n_samples, thin, warmup,
                          verbose, pb_update,
                          one_by_one, plan_is, n_cores, float_type,
+                         trace_batch_size,
                          from_scratch = TRUE) {
 
+      self$thin <- thin
       dag <- self$model$dag
 
       # set the number of cores
@@ -385,7 +393,7 @@ sampler <- R6Class(
         # on exiting during the main sampling period (even if killed by the
         # user) trace the free state values
 
-        on.exit(self$trace_values(), add = TRUE)
+        on.exit(self$trace_values(trace_batch_size), add = TRUE)
 
         # main sampling
         if (verbose) {
@@ -442,7 +450,7 @@ sampler <- R6Class(
       mean <- self$welford_state$mean
       m2 <- self$welford_state$m2
 
-      for (i in 1:nrow(trace_matrix)) {
+      for (i in seq_len(nrow(trace_matrix))) {
 
         new_value <- trace_matrix[i, ]
 
@@ -468,10 +476,11 @@ sampler <- R6Class(
 
     # convert traced free state to the traced values, accounting for
     # chain dimension
-    trace_values = function() {
+    trace_values = function(trace_batch_size) {
 
       self$traced_values <- lapply(self$traced_free_state,
-                                   self$model$dag$trace_values)
+                                   self$model$dag$trace_values,
+                                   trace_batch_size = trace_batch_size)
 
     },
 
@@ -633,7 +642,7 @@ sampler <- R6Class(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
           current_state = free_state,
           kernel = sampler_kernel,
-          trace_fn = function (current_state, kernel_results) {
+          trace_fn = function(current_state, kernel_results) {
             kernel_results
           },
           num_burnin_steps = tf$constant(0L, dtype = tf$int32),
@@ -777,7 +786,7 @@ hmc_sampler <- R6Class(
         hmc_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
       )
       dag$tf_run(
-        hmc_L <- tf$compat$v1$placeholder(dtype = tf$int64)
+        hmc_l <- tf$compat$v1$placeholder(dtype = tf$int64)
       )
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
@@ -805,7 +814,7 @@ hmc_sampler <- R6Class(
         sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
           target_log_prob_fn = log_prob_fun,
           step_size = hmc_step_sizes,
-          num_leapfrog_steps = hmc_L,
+          num_leapfrog_steps = hmc_l,
           seed = rng_seed)
       )
       # End Exclude Linting
@@ -815,15 +824,15 @@ hmc_sampler <- R6Class(
     sampler_parameter_values = function() {
 
       # random number of integration steps
-      Lmin <- self$parameters$Lmin
-      Lmax <- self$parameters$Lmax
-      L <- sample(seq(Lmin, Lmax), 1)
+      l_min <- self$parameters$Lmin
+      l_max <- self$parameters$Lmax
+      l <- sample(seq(l_min, l_max), 1)
 
       epsilon <- self$parameters$epsilon
       diag_sd <- matrix(self$parameters$diag_sd)
 
       # return named list for replacing tensors
-      list(hmc_L = L,
+      list(hmc_l = l,
            hmc_epsilon = epsilon,
            hmc_diag_sd = diag_sd)
 

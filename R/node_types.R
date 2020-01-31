@@ -6,7 +6,7 @@ data_node <- R6Class(
     initialize = function(data) {
 
       # coerce to an array with 2+ dimensions
-      data <- as_2D_array(data)
+      data <- as_2d_array(data)
 
       # update and store array and store dimension
       super$initialize(dim = dim(data), value = data)
@@ -72,25 +72,37 @@ operation_node <- R6Class(
                           tf_operation = NULL,
                           value = NULL,
                           representations = list(),
-                          tf_function_env = parent.frame(3)) {
+                          tf_function_env = parent.frame(3),
+                          expand_scalars = FALSE) {
 
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
-      for (greta_array in dots)
+
+      # work out the dimensions of the new greta array, if NULL assume an
+      # elementwise operation and get the largest number of each dimension,
+      # otherwise expect a function to be passed which will calculate it from
+      # the provided list of nodes arguments
+      if (is.null(dim)) {
+        dim_list <- lapply(dots, dim)
+        dim_lengths <- vapply(dim_list, length, numeric(1))
+        dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
+        dim <- do.call(pmax, dim_list)
+      }
+
+      # expand scalar arguments to match dim if needed
+      if (!identical(dim, c(1L, 1L)) & expand_scalars) {
+        dots <- lapply(dots, `dim<-`, dim)
+      }
+
+      for (greta_array in dots) {
         self$add_argument(get_node(greta_array))
+      }
 
       self$operation_name <- operation
       self$operation <- tf_operation
       self$operation_args <- operation_args
       self$representations <- representations
       self$tf_function_env <- tf_function_env
-
-      # work out the dimensions of the new greta array, if NULL assume an
-      # elementwise operation and get the largest number of each dimension,
-      # otherwise expect a function to be passed which will calculate it from
-      # the provided list of nodes arguments
-      if (is.null(dim))
-        dim <- do.call(pmax, lapply(dots, dim))
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
@@ -144,66 +156,100 @@ variable_node <- R6Class(
   public = list(
 
     constraint = NULL,
+    constraint_array = NULL,
     lower = -Inf,
     upper = Inf,
+    free_value = NULL,
 
-    initialize = function(lower = -Inf, upper = Inf, dim = 1) {
+    initialize = function(lower = -Inf,
+                          upper = Inf,
+                          dim = NULL,
+                          free_dim = prod(dim)) {
 
-      good_types <- is.numeric(lower) && length(lower) == 1 &
-        is.numeric(upper) && length(upper) == 1
+      if (!is.numeric(lower) | ! is.numeric(upper)) {
 
-      if (!good_types) {
-
-        stop("lower and upper must be numeric vectors of length 1",
+        stop("lower and upper must be numeric",
              call. = FALSE)
 
       }
 
-      # check and assign limits
-      bad_limits <- TRUE
+      # replace values of lower and upper with finite values for dimension
+      # checking (this is pain, but necessary because check_dims coerces to
+      # greta arrays, which must be finite)
+      lower_for_dim <- lower
+      lower_for_dim[] <- 0
+      upper_for_dim <- upper
+      upper_for_dim[] <- 0
+      dim <- check_dims(lower_for_dim, upper_for_dim, target_dim = dim)
 
-      # find constraint type
-      if (lower == -Inf & upper == Inf) {
+      # vectorise these tests, to get a matrix of constraint types - then test
+      # at the end whether it's mixed
 
-        self$constraint <- "none"
-        bad_limits <- FALSE
+      lower_limit <- lower != -Inf
+      upper_limit <- upper != Inf
 
-      } else if (lower == -Inf & upper != Inf) {
+      # create a matrix of elemntwise constraints
+      constraint_array <- array(NA, check_dims(lower_for_dim, upper_for_dim))
+      constraint_array[!lower_limit & !upper_limit] <- "none"
+      constraint_array[!lower_limit & upper_limit] <- "low"
+      constraint_array[lower_limit & !upper_limit] <- "high"
+      constraint_array[lower_limit & upper_limit] <- "both"
 
-        self$constraint <- "low"
-        bad_limits <- !is.finite(upper)
-
-      } else if (lower != -Inf & upper == Inf) {
-
-        self$constraint <- "high"
-        bad_limits <- !is.finite(lower)
-
-      } else if (lower != -Inf & upper != Inf) {
-
-        self$constraint <- "both"
-        bad_limits <- !is.finite(lower) | !is.finite(upper)
-
+      # pass a string depending on whether they are all the same
+      if (all(constraint_array == constraint_array[1])) {
+        self$constraint <- paste0("scalar_all_", constraint_array[1])
+      } else {
+        self$constraint <- "scalar_mixed"
       }
+
+      bad_limits <- switch(
+        self$constraint,
+        scalar_all_low = any(!is.finite(upper)),
+        scalar_all_high = any(!is.finite(lower)),
+        scalar_all_both = any(!is.finite(lower)) | any(!is.finite(upper)),
+        FALSE
+      )
 
       if (bad_limits) {
 
         stop("lower and upper must either be -Inf (lower only), ",
-             "Inf (upper only) or finite scalars",
+             "Inf (upper only) or finite",
              call. = FALSE)
 
       }
 
-      if (lower >= upper) {
+      if (any(lower >= upper)) {
 
-        stop("upper bound must be greater than lower bound",
+        stop("upper bounds must be greater than lower bounds",
              call. = FALSE)
 
       }
 
       # add parameters
       super$initialize(dim)
-      self$lower <- lower
-      self$upper <- upper
+      self$lower <- array(lower, dim)
+      self$upper <- array(upper, dim)
+      self$constraint_array <- constraint_array
+      self$free_value <- unknowns(dim = free_dim)
+
+    },
+
+    # handle two types of value for variables
+    value = function(new_value = NULL, free = FALSE, ...) {
+
+      if (free) {
+
+        if (is.null(new_value)) {
+          self$free_value
+        } else {
+          self$free_value <- new_value
+        }
+
+      } else {
+
+        super$value(new_value, ...)
+
+      }
 
     },
 
@@ -259,11 +305,24 @@ variable_node <- R6Class(
 
         } else {
 
-          # otherwise find the sampling function for the distribution, and apply it to
-          # get the tensor for the sample
-          distrib_tf_name <- dag$tf_name(distrib_node)
-          sampling <- get(distrib_tf_name, envir = dag$tf_environment)
-          tensor <- sampling()
+          # otherwise build the tfp distribution object for the distribution,
+          # and use it to get the tensor for the sample
+
+          distrib_constructor <- dag$get_tf_object(distrib_node)
+          parameter_nodes <- distrib_node$parameters
+          tf_parameter_list <- lapply(parameter_nodes, dag$get_tf_object)
+
+          # match parameters' batches with the batch size so we can draw
+          # multiple samples
+          batch_dummy <- dag$tf_environment$batch_dummy
+          dummy_params <- match_batches(c(list(batch_dummy), tf_parameter_list))
+          tf_parameter_list <- dummy_params[-1]
+
+          # execute the distribution constructor functions to return a tfp
+          # distribution object
+          tfp_distribution <- distrib_constructor(tf_parameter_list, dag = dag)
+
+          tensor <- tfp_distribution$sample(seed = get_seed())
 
         }
 
@@ -284,11 +343,7 @@ variable_node <- R6Class(
 
         # map from the free to constrained state in a new tensor
         tf_free <- get(free_name, envir = dag$tf_environment)
-        tensor <- self$tf_from_free(tf_free, dag$tf_environment)
-
-        # reshape the tensor to the match the variable
-        tensor <- tf$reshape(tensor,
-                             shape = to_shape(c(-1, dim(self))))
+        tensor <- self$tf_from_free(tf_free)
 
       }
 
@@ -297,103 +352,67 @@ variable_node <- R6Class(
              tensor,
              envir = dag$tf_environment)
 
+    },
 
+    create_tf_bijector = function() {
+
+      dim <- self$dim
+      lower <- flatten_rowwise(self$lower)
+      upper <- flatten_rowwise(self$upper)
+      constraints <- flatten_rowwise(self$constraint_array)
+
+      switch(
+        self$constraint,
+        scalar_all_none = tf_scalar_bijector(dim),
+        scalar_all_low = tf_scalar_neg_bijector(dim, upper = upper),
+        scalar_all_high = tf_scalar_pos_bijector(dim, lower = lower),
+        scalar_all_both = tf_scalar_neg_pos_bijector(dim,
+                                                     lower = lower,
+                                                     upper = upper),
+        scalar_mixed = tf_scalar_mixed_bijector(dim,
+                                                lower = lower,
+                                                upper = upper,
+                                                constraints = constraints),
+        correlation_matrix = tf_correlation_cholesky_bijector(),
+        covariance_matrix = tf_covariance_cholesky_bijector(),
+        simplex = tf_simplex_bijector(dim),
+        ordered = tf_ordered_bijector(dim)
+      )
 
     },
 
-    tf_from_free = function(x, env) {
+    tf_from_free = function(x) {
 
-      upper <- self$upper
-      lower <- self$lower
-
-      if (self$constraint == "none") {
-
-        y <- x
-
-      } else if (self$constraint == "both") {
-
-        y <- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
-
-      } else if (self$constraint == "low") {
-
-        y <- fl(upper) - tf$exp(x)
-
-      } else if (self$constraint == "high") {
-
-        y <- tf$exp(x) + fl(lower)
-
-      } else {
-
-        y <- x
-
-      }
-
-      y
+      tf_bijector <- self$create_tf_bijector()
+      tf_bijector$forward(x)
 
     },
 
     # adjustments for univariate variables
     tf_log_jacobian_adjustment = function(free) {
 
-      ljac_none <- function(x) {
-        zero <- tf$constant(0, dtype = tf_float(), shape = shape(1))
-        tf$tile(zero, multiples = list(tf$shape(x)[[0]]))
+      tf_bijector <- self$create_tf_bijector()
+
+      event_ndims <- tf_bijector$forward_min_event_ndims
+      ljd <- tf_bijector$forward_log_det_jacobian(
+        x = free,
+        event_ndims = event_ndims
+      )
+
+      # sum across all dimensions of jacobian
+      already_summed <-
+        identical(dim(ljd), list(NULL)) | identical(dim(ljd), list())
+
+      if (!already_summed) {
+        ljd <- tf_sum(ljd, drop = TRUE)
       }
 
-      ljac_exp <- function(x) {
-        tf_sum(x, drop = TRUE)
+      # make sure there's something in the batch dimension
+      if (identical(dim(ljd), list())) {
+        ljd <- tf$expand_dims(ljd, 0L)
       }
 
-      ljac_logistic <- function(x) {
-        lrange <- log(self$upper - self$lower)
-        tf_sum(x - fl(2) * tf$nn$softplus(x) + lrange,
-               drop = TRUE)
-      }
-
-      ljac_corr_mat <- function(x) {
-
-        # find dimension
-        K <- dim(x)[[2]]
-        n <- (1 + sqrt(8 * K + 1)) / 2
-
-        # convert to correlation-scale (-1, 1) & get log jacobian
-        z <- tf$tanh(x)
-
-        free_to_correl_lp <- tf_sum(log(fl(1) - tf$square(z)))
-        free_to_correl_lp <- tf$squeeze(free_to_correl_lp, 1L)
-
-        # split z up into rows
-        z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
-
-        # accumulate log prob within each row
-        lps <- lapply(z_rows, tf_corrmat_row, which = "ljac")
-        correl_to_mat_lp <- tf$add_n(lps)
-
-        free_to_correl_lp + correl_to_mat_lp
-
-      }
-
-      ljac_cov_mat <- function(x) {
-
-        # find dimension
-        n <- dim(x)[[2]]
-        K <- (sqrt(8 * n + 1) - 1) / 2
-
-        k <- seq_len(K)
-        powers <- tf$constant(K - k + 2, dtype = tf_float(), shape = shape(K))
-        fl(K * log(2)) + tf_sum(powers * x[, k - 1], drop = TRUE)
-
-      }
-
-      fun <- switch(self$constraint,
-                    none = ljac_none,
-                    high = ljac_exp,
-                    low = ljac_exp,
-                    both = ljac_logistic,
-                    correlation_matrix = ljac_corr_mat,
-                    covariance_matrix = ljac_cov_mat)
-
-      fun(free)
+      ljd
 
     },
 
@@ -418,6 +437,8 @@ distribution_node <- R6Class(
   public = list(
     distribution_name = "no distribution",
     discrete = NA,
+    multivariate = NA,
+    truncatable = NA,
     target = NULL,
     user_node = NULL,
     bounds = c(-Inf, Inf),
@@ -427,22 +448,29 @@ distribution_node <- R6Class(
     initialize = function(name = "no distribution",
                           dim = NULL,
                           truncation = NULL,
-                          discrete = FALSE) {
+                          discrete = FALSE,
+                          multivariate = FALSE,
+                          truncatable = TRUE) {
 
       super$initialize(dim)
 
       # for all distributions, set name, store dims, and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
+      self$multivariate <- multivariate
+      self$truncatable <- truncatable
 
       # initialize the target values of this distribution
       self$add_target(self$create_target(truncation))
 
-      # if there's a truncation, it's different from the bounds, and it's a
-      # truncatable distribution, set the truncation
+      # if there's a truncation, it's different from the bounds, and it's
+      # truncatable (currently that's only univariate and continuous-discrete
+      # distributions) set the truncation
+      can_be_truncated <- !self$multivariate & !self$discrete & self$truncatable
+
       if (!is.null(truncation) &
           !identical(truncation, self$bounds) &
-          !is.null(self$tf_cdf_function)) {
+          can_be_truncated) {
 
         self$truncation <- truncation
 
@@ -527,58 +555,9 @@ distribution_node <- R6Class(
 
     tf = function(dag) {
 
-      # for distributions, tf assigns a *function* to execute either the density
-      # or sampling
-
-      # log density of the distribution, given parameter values
-      density <- function(tf_target) {
-
-        # fetch inputs
-        tf_parameters <- self$tf_fetch_parameters(dag)
-
-        # ensure x and the parameters are all expanded to have the correct batch
-        # size, if any have it
-        target_params <- match_batches(c(list(tf_target), tf_parameters))
-        tf_target <- target_params[[1]]
-        tf_parameters <- target_params[-1]
-
-        # calculate log density
-        ld <- self$tf_log_density_function(tf_target, tf_parameters, dag)
-
-        # check for truncation
-        if (!is.null(self$truncation))
-          ld <- ld - self$tf_log_density_offset(tf_parameters)
-
-        ld
-
-      }
-
-      # random sample of the variable from the distribution
-      sampling <- function () {
-
-        # fetch inputs
-        tf_parameters <- self$tf_fetch_parameters(dag)
-
-        # ensure the parameters are all expanded to have the correct batch
-        # size, if any have it
-        batch_dummy <- dag$tf_environment$batch_dummy
-        dummy_params <- match_batches(c(list(batch_dummy), tf_parameters))
-        tf_parameters <- dummy_params[-1]
-
-        # sample
-        self$tf_sample(tf_parameters, dag)
-
-      }
-
-      fun <- switch(
-        dag$mode,
-        forward = density,
-        sampling = sampling
-      )
-
-      # assign the function to the environment
+      # assign the distribution object constructor function to the environment
       assign(dag$tf_name(self),
-             fun,
+             self$tf_distrib,
              envir = dag$tf_environment)
 
     },
@@ -588,81 +567,17 @@ distribution_node <- R6Class(
       self$target
     },
 
-    tf_fetch_parameters = function(dag) {
-      # fetch the tensors corresponding to this node's parameters from the
-      # environment, and return them in a named list
+    add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
 
-      # find names
-      tf_names <- lapply(self$parameters, dag$tf_name)
-
-      # fetch tensors
-      lapply(tf_names, get, envir = dag$tf_environment)
-
-    },
-
-    tf_log_density_offset = function(parameters) {
-
-      # calculate the log-adjustment to the truncation term of the density
-      # function i.e. the density of a distribution, truncated between a and b,
-      # is the non truncated density, divided by the integral of the density
-      # function between the truncation bounds. This can be calculated from the
-      # distribution's CDF
-
-      lower <- self$truncation[1]
-      upper <- self$truncation[2]
-
-      if (lower == self$bounds[1]) {
-
-        # if only upper is constrained, just need the cdf at the upper
-        offset <- self$tf_log_cdf_function(fl(upper), parameters)
-
-      } else if (upper == self$bounds[2]) {
-
-        # if only lower is constrained, get the log of the integral above it
-        offset <- tf$math$log(fl(1) - self$tf_cdf_function(fl(lower),
-                                                           parameters))
-
-      } else {
-
-        # if both are constrained, get the log of the integral between them
-        offset <- tf$math$log(self$tf_cdf_function(fl(upper), parameters) -
-                                self$tf_cdf_function(fl(lower), parameters))
-
+      # expand out a scalar parameter if needed
+      if (!is.null(expand_scalar_to) &&
+          is_scalar(parameter) & !identical(expand_scalar_to, c(1L, 1L))) {
+        parameter <- greta_array(parameter, dim = expand_scalar_to)
       }
-
-      offset
-
-    },
-
-    add_parameter = function(parameter, name) {
 
       parameter <- to_node(parameter)
       self$add_parent(parameter)
       self$parameters[[name]] <- parameter
-
-    },
-
-    tf_log_density_function = function(x, parameters, dag) {
-
-      self$tf_distrib(parameters, dag)$log_prob(x)
-
-    },
-
-    tf_cdf_function = function(x, parameters, dag) {
-
-      self$tf_distrib(parameters, dag)$cdf(x)
-
-    },
-
-    tf_log_cdf_function = function(x, parameters, dag) {
-
-      self$tf_distrib(parameters, dag)$log_cdf(x)
-
-    },
-
-    tf_sample = function(parameters, dag) {
-
-      self$tf_distrib(parameters, dag)$sample(seed = get_seed())
 
     }
 
@@ -701,14 +616,17 @@ op <- function(...) {
 # helper function to create a variable node
 # by default, make x (the node
 # containing the value) a free parameter of the correct dimension
-vble <- function(truncation, dim = 1) {
+vble <- function(truncation, dim = 1, free_dim = prod(dim)) {
 
   if (is.null(truncation))
     truncation <- c(-Inf, Inf)
 
-  variable_node$new(lower = truncation[1],
-                    upper = truncation[2],
-                    dim = dim)
+  truncation <- as.list(truncation)
+
+  variable_node$new(lower = truncation[[1]],
+                    upper = truncation[[2]],
+                    dim = dim,
+                    free_dim = free_dim)
 
 }
 

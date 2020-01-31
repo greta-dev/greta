@@ -596,12 +596,41 @@ test_that("dim<- works", {
 
 })
 
-test_that("greta_array() reshapes greta arrays like array", {
+test_that("greta_array() reshapes array-like greta arrays like array", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
 
   x_ <- randu(3, 4, 2)
+  x <- as_data(x_)
+  new_dim <- c(12, 2)
+
+  # for data greta arrays
+  y_ <- as_data(array(x_, dim = new_dim))
+  y <- greta_array(x, dim = new_dim)
+  compare_op(calculate(y), calculate(y_))
+
+  # for operation greta arrays
+  x <- abs(x)
+  y_ <- as_data(array(x_, dim = new_dim))
+  y <- greta_array(x, dim = new_dim)
+  compare_op(calculate(y), calculate(y_))
+
+  # for variable greta arrays
+  x <- variable(dim = dim(x))
+  y_ <- as_data(array(x_, dim = new_dim))
+  y <- greta_array(x, dim = new_dim)
+  compare_op(calculate(y, list(x = x_)), calculate(y_))
+
+})
+
+
+test_that("greta_array() reshapes scalar greta arrays like array", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x_ <- randu(1)
   x <- as_data(x_)
   new_dim <- c(12, 2)
 

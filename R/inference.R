@@ -42,6 +42,9 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   \code{initials} objects of length \code{chains}) giving initial values for
 #'   some or all of the variables in the model. These will be used as the
 #'   starting point for sampling/optimisation.
+#' @param trace_batch_size the number of posterior samples to process at a time
+#'   when tracing the parameters of interest; reduce this to reduce memory
+#'   demands
 #'
 #' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
@@ -91,10 +94,18 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   \link[future:nbrOfWorkers]{future::nbrOfWorkers}} is less than the number
 #'   of CPU cores.
 #'
-#' @return \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - an
-#'   \code{mcmc.list} object that can be analysed using functions from the coda
-#'   package. This will contain mcmc samples of the greta arrays used to create
-#'   \code{model}.
+#'   After carrying out mcmc on all the model parameters, \code{mcmc()}
+#'   calculates the values of (i.e. traces) the parameters of interest for each
+#'   of these samples, similarly to \code{\link{calculate}}. Multiple
+#'   posterior samples can be traced simultaneously, though this can require
+#'   large amounts of memory for large models. As in \code{calculate}, the
+#'   argument \code{trace_batch_size} can be modified to trade-off speed against
+#'   memory usage.
+#'
+#' @return \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - a
+#'   \code{greta_mcmc_list} object that can be analysed using functions from the
+#'   coda package. This will contain mcmc samples of the greta arrays used to
+#'   create \code{model}.
 #'
 #' @examples
 #' \dontrun{
@@ -173,7 +184,11 @@ mcmc <- function(model,
                  verbose = TRUE,
                  pb_update = 50,
                  one_by_one = FALSE,
-                 initial_values = initials()) {
+                 initial_values = initials(),
+                 trace_batch_size = 100) {
+
+  # check the trace batch size
+  trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
@@ -227,7 +242,7 @@ mcmc <- function(model,
                      sampler,
                      model)
 
-  # add chain info for printing
+  # add chain info for printing, and set trace batch size
   for (i in seq_len(n_samplers)) {
     samplers[[i]]$sampler_number <- i
     samplers[[i]]$n_samplers <- n_samplers
@@ -251,7 +266,8 @@ mcmc <- function(model,
                pb_update = pb_update,
                one_by_one = one_by_one,
                n_cores = n_cores,
-               from_scratch = TRUE)
+               from_scratch = TRUE,
+               trace_batch_size = trace_batch_size)
 
 }
 
@@ -264,7 +280,8 @@ run_samplers <- function(samplers,
                          pb_update,
                          one_by_one,
                          n_cores,
-                         from_scratch) {
+                         from_scratch,
+                         trace_batch_size) {
 
   # check the future plan is valid, and get information about it
   plan_is <- check_future_plan()
@@ -366,6 +383,7 @@ run_samplers <- function(samplers,
                         plan_is = plan_is,
                         n_cores = n_cores,
                         float_type = float_type,
+                        trace_batch_size = trace_batch_size,
                         from_scratch = from_scratch),
       seed = future_seed())
   }
@@ -444,9 +462,17 @@ stashed_samples <- function() {
 
     } else {
 
-      # convert to mcmc objects
-      free_state_draws <- lapply(free_state_draws, prepare_draws)
-      values_draws <- lapply(values_draws, prepare_draws)
+      thins <- lapply(samplers, member, "thin")
+
+      # convert to mcmc objects, passing on thinning
+      free_state_draws <- mapply(prepare_draws,
+                                 draws = free_state_draws,
+                                 thin = thins,
+                                 SIMPLIFY = FALSE)
+      values_draws <- mapply(prepare_draws,
+                             draws = values_draws,
+                             thin = thins,
+                             SIMPLIFY = FALSE)
 
       # convert to mcmc.list objects
       free_state_draws <- coda::mcmc.list(free_state_draws)
@@ -458,8 +484,7 @@ stashed_samples <- function() {
       model_info$samplers <- samplers
       model_info$model <- samplers[[1]]$model
 
-      # add the raw draws as an attribute
-      attr(values_draws, "model_info") <- model_info
+      values_draws <- as_greta_mcmc_list(values_draws, model_info)
 
       return(values_draws)
 
@@ -477,7 +502,7 @@ stashed_samples <- function() {
 #'
 #' @export
 #'
-#' @param draws an mcmc.list object returned by \code{mcmc} or
+#' @param draws a greta_mcmc_list object returned by \code{mcmc} or
 #'   \code{stashed_samples}
 #'
 #' @details Samples returned by \code{mcmc()} and \code{stashed_samples()} can
@@ -492,7 +517,8 @@ extra_samples <- function(draws,
                           n_cores = NULL,
                           verbose = TRUE,
                           pb_update = 50,
-                          one_by_one = FALSE) {
+                          one_by_one = FALSE,
+                          trace_batch_size = 100) {
 
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
@@ -513,14 +539,17 @@ extra_samples <- function(draws,
                pb_update = pb_update,
                one_by_one = one_by_one,
                n_cores = n_cores,
-               from_scratch = FALSE)
+               from_scratch = FALSE,
+               trace_batch_size = trace_batch_size)
 
 }
 
-# convert some 'data' values form the constrained to the free state, for a given
+# convert some 'data' values from the constrained to the free state, for a given
 # 'node'
 #' @importFrom stats qlogis
 to_free <- function(node, data) {
+
+  # use reverse mode of bijectors!
 
   lower <- node$lower
   upper <- node$upper
@@ -546,14 +575,14 @@ to_free <- function(node, data) {
   both <- function(x) {
     if (any(x >= upper | x <= lower))
       unsupported_error()
-    stats::qlogis( (x - lower) / (upper - lower) )
+    stats::qlogis((x - lower) / (upper - lower))
   }
 
   fun <- switch(node$constraint,
-                none = identity,
-                high = high,
-                low = low,
-                both = both)
+                scalar_all_none = identity,
+                scalar_all_high = high,
+                scalar_all_low = low,
+                scalar_all_both = both)
 
   fun(data)
 
@@ -566,7 +595,9 @@ parse_initial_values <- function(initials, dag) {
   # skip if no inits provided
   if (identical(initials, initials())) {
 
-    return(dag$example_parameters(flat = TRUE))
+    free_parameters <- dag$example_parameters(free = TRUE)
+    free_parameters <- unlist_tf(free_parameters)
+    return(free_parameters)
 
   }
 
@@ -589,7 +620,7 @@ parse_initial_values <- function(initials, dag) {
          call. = FALSE)
   }
 
-  params <- dag$example_parameters(flat = FALSE)
+  params <- dag$example_parameters(free = FALSE)
   idx <- match(tf_names, names(params))
 
   # make nodes do this conversion and checking in the future also make them
@@ -624,7 +655,11 @@ parse_initial_values <- function(initials, dag) {
 
   # set them in the list and flatten to a vector in the same order as tensorflow
   params[idx] <- inits_free
-  unlist_tf(params)
+  params <- unlist_tf(params)
+
+  # force them to be row vectors and return
+  params <- matrix(params, nrow = 1)
+  params
 
 }
 
@@ -712,7 +747,7 @@ initials <- function(...) {
   }
 
   # coerce to greta-array-like shape
-  values <- lapply(values, as_2D_array)
+  values <- lapply(values, as_2d_array)
 
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
@@ -767,18 +802,19 @@ print.initials <- function(x, ...) {
 #'   parameters are in a vector, then split the vector up to define the model.
 #'   The parameter vector can then be passed to model. See example.
 #'
+
 #' @return \code{opt} - a list containing the following named elements:
 #'   \itemize{
 #'    \item{\code{par}} {a named list of the optimal values for the greta arrays
 #'     specified in \code{model}}
 #'    \item{\code{value}} {the (unadjusted) negative log joint density of the
-#'    model at the parameters 'par'}
+#'     model at the parameters 'par'}
 #'    \item{\code{iterations}} {the number of iterations taken by the optimiser}
 #'    \item{\code{convergence}} {an integer code, 0 indicates successful
-#'     completion, 1 indicates the iteration limit \code{max_iterations} had been
-#'     reached}
+#'     completion, 1 indicates the iteration limit \code{max_iterations} had
+#'     been reached}
 #'   \item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
-#'    matrices/arrays for the parameters (w.r.t. \code{value})}
+#'     matrices/arrays for the parameters (w.r.t. \code{value})}
 #'  }
 #'
 opt <- function(model,

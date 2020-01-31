@@ -1,3 +1,4 @@
+# Begin Exclude Linting
 #' @name optimisers
 #'
 #' @title optimisation methods
@@ -34,12 +35,13 @@
 #' c(mean(x), sd(x))
 #' }
 NULL
+# End Exclude Linting
 
 # deprecate some optimisers
-optimiser_deprecation_warning <- function () {
-  warning ("This optimiser is deprecated and will be removed in greta 0.4.0. ",
-           "Please use a different optimiser.",
-           call. = FALSE)
+optimiser_deprecation_warning <- function() {
+  warning("This optimiser is deprecated and will be removed in greta 0.4.0. ",
+          "Please use a different optimiser.",
+          call. = FALSE)
 }
 
 # set up an optimiser object

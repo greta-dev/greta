@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.3.1.9002
-Date: 2019-08-17
+Version: 0.3.1.9010
+Date: 2020-01-30
 Authors@R: c(
   person("Nick", "Golding", role = c("aut", "cre"),
          email = "nick.golding.research@gmail.com",
@@ -12,6 +12,7 @@ Authors@R: c(
   person("Shirin", "Glander", role = "ctb"),
   person("Martin", "Ingram", role = "ctb"),
   person("Lee", "Hazel", role = "ctb"),
+  person("Lionel", "Hertzog", role = "ctb"),
   person("Tiphaine", "Martin", role = "ctb"),
   person("Matt", "Mulvahill", role = "ctb"),
   person("Michael", "Quinn", role = "ctb"),
@@ -35,6 +36,7 @@ Depends:
 Collate:
     'package.R'
     'utils.R'
+    'greta_mcmc_list.R'
     'tf_functions.R'
     'overloaded.R'
     'node_class.R'
@@ -64,6 +66,7 @@ Collate:
     'calculate.R'
     'callbacks.R'
     'simulate.R'
+    'chol2symm.R'
 Imports:
     R6,
     tensorflow (>= 1.13.0),
@@ -90,5 +93,5 @@ Suggests:
     abind,
     spelling
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Language: en-GB

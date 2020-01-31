@@ -299,7 +299,33 @@ test_that("extra_samples works", {
 
   more_draws <- extra_samples(draws, 20, verbose = FALSE)
 
-  expect_true(inherits(more_draws, "mcmc.list"))
+  expect_true(inherits(more_draws, "greta_mcmc_list"))
+  expect_true(coda::niter(more_draws) == 30)
+  expect_true(coda::nchain(more_draws) == 4)
+
+})
+
+test_that("trace_batch_size works", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # set up model
+  a <- normal(0, 1)
+  m <- model(a)
+
+  draws <-
+    mcmc(
+      m,
+      warmup = 10,
+      n_samples = 10,
+      verbose = FALSE,
+      trace_batch_size = 3
+    )
+
+  more_draws <- extra_samples(draws, 20, verbose = FALSE, trace_batch_size = 6)
+
+  expect_true(inherits(more_draws, "greta_mcmc_list"))
   expect_true(coda::niter(more_draws) == 30)
   expect_true(coda::nchain(more_draws) == 4)
 
@@ -325,13 +351,14 @@ test_that("stashed_samples works", {
   samplers_stash <- replicate(2, list(
     traced_free_state = list(as.matrix(rnorm(17))),
     traced_values = list(as.matrix(rnorm(17))),
+    thin = 1,
     model = m
   ), simplify = FALSE)
   assign("samplers", samplers_stash, envir = stash)
 
-  # should convert to an mcmc.list
+  # should convert to a greta_mcmc_list
   ans <- stashed_samples()
-  expect_s3_class(ans, "mcmc.list")
+  expect_s3_class(ans, "greta_mcmc_list")
 
   # model_info attribute should have raw draws and the model
   model_info <- attr(ans, "model_info")
@@ -340,6 +367,29 @@ test_that("stashed_samples works", {
   expect_true(inherits(model_info$model, "greta_model"))
 
 })
+
+test_that("samples has object names", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  a <- normal(0, 1)
+  b <- normal(a, 1, dim = 3)
+  m <- model(a, b)
+
+  # mcmc should give the right names
+  draws <- mcmc(m, warmup = 2, n_samples = 10)
+  names <- rownames(summary(draws)$statistics)
+  expect_identical(names, c("a", "b[1,1]", "b[2,1]", "b[3,1]"))
+
+  # so should calculate
+  c <- b ^ 2
+  c_draws <- calculate(c, draws)
+  names <- rownames(summary(c_draws)$statistics)
+  expect_identical(names, c("c[1,1]", "c[2,1]", "c[3,1]"))
+
+})
+
 
 test_that("model errors nicely", {
 
@@ -404,10 +454,13 @@ test_that("numerical issues are handled in mcmc", {
   source("helpers.R")
 
   # this should have a cholesky decomposition problem at some point
-  k <- 2
-  Sigma <- lkj_correlation(1, k)
-  x <- wishart(k + 1, Sigma)
-  m <- model(x, precision = "single")
+  alpha <- normal(0, 1)
+  x <- matrix(rnorm(6), 3, 2)
+  y <- t(rnorm(3))
+  z <- alpha * x
+  sigma <- z %*% t(z)
+  distribution(y) <- multivariate_normal(zeros(1, 3), sigma)
+  m <- model(alpha)
 
   # running with bursts should error informatively
   expect_error(draws <- mcmc(m, verbose = FALSE),
@@ -436,7 +489,7 @@ test_that("mcmc works in parallel", {
                           chains = 1,
                           verbose = FALSE))
 
-  expect_true(inherits(draws, "mcmc.list"))
+  expect_true(inherits(draws, "greta_mcmc_list"))
   expect_true(coda::niter(draws) == 10)
   rm(draws)
 
@@ -445,7 +498,7 @@ test_that("mcmc works in parallel", {
                           chains = 2,
                           verbose = FALSE))
 
-  expect_true(inherits(draws, "mcmc.list"))
+  expect_true(inherits(draws, "greta_mcmc_list"))
   expect_true(coda::niter(draws) == 10)
 
   # put the future plan back as we found it
@@ -501,10 +554,10 @@ test_that("parallel reporting works", {
   op <- plan()
   plan(multisession)
 
-  # should report each sampler's progress with a percentage
+  # should report each sampler's progress with a fraction
   out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
   expect_match(out, "2 samplers in parallel")
-  expect_match(out, "100%")
+  expect_match(out, "50/50")
 
   # put the future plan back as we found it
   plan(op)
@@ -601,5 +654,6 @@ test_that("pb_update > thin to avoid bursts with no saved iterations", {
   m <- model(x)
   expect_ok(draws <- mcmc(m, n_samples = 100, warmup = 100,
                           thin = 3, pb_update = 2))
+  expect_identical(thin(draws), 3)
 
 })

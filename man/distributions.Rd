@@ -74,8 +74,7 @@ logistic(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 
 f(df1, df2, dim = NULL, truncation = c(0, Inf))
 
-multivariate_normal(mean, Sigma, n_realisations = NULL,
-  dimension = NULL)
+multivariate_normal(mean, Sigma, n_realisations = NULL, dimension = NULL)
 
 wishart(df, Sigma)
 
@@ -87,8 +86,7 @@ categorical(prob, n_realisations = NULL, dimension = NULL)
 
 dirichlet(alpha, n_realisations = NULL, dimension = NULL)
 
-dirichlet_multinomial(size, alpha, n_realisations = NULL,
-  dimension = NULL)
+dirichlet_multinomial(size, alpha, n_realisations = NULL, dimension = NULL)
 }
 \arguments{
 \item{min, max}{scalar values giving optional limits to \code{uniform}
@@ -149,7 +147,7 @@ The discrete probability distributions (\code{bernoulli},
   corresponds to an independent realisation. If a single realisation or
   parameter value is specified, it must therefore be a row vector (see
   example). \code{n_realisations} gives the number of rows/realisations, and
-  \code{dimension} gives the dimension of the distribution. Ie. a bivariate
+  \code{dimension} gives the dimension of the distribution. I.e. a bivariate
   normal distribution would be produced with \code{multivariate_normal(...,
   dimension = 2)}. The dimension can usually be detected from the parameters.
 

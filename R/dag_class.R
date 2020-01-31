@@ -14,7 +14,6 @@ dag_class <- R6Class(
     tf_environment = NA,
     tf_graph = NA,
     target_nodes = NA,
-    parameters_example = NA,
     tf_float = NA,
     n_cores = 0L,
     compile = NA,
@@ -37,9 +36,6 @@ dag_class <- R6Class(
 
       # set up the tf environment, with a graph
       self$new_tf_environment()
-
-      # stash an example list to relist parameters
-      self$parameters_example <- self$example_parameters(flat = FALSE)
 
       # store the performance control info
       self$tf_float <- tf_float
@@ -184,8 +180,8 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      vals <- self$example_parameters()
-
+      vals <- self$example_parameters(free = TRUE)
+      vals <- unlist_tf(vals)
 
       if (type == "variable") {
 
@@ -219,12 +215,13 @@ dag_class <- R6Class(
       # if in forward mode, split up the free state
       if (self$mode == "forward") {
 
+
         # split up into separate free state variables and assign
         free_state <- get("free_state", envir = tfe)
 
-        params <- self$parameters_example
+        params <- self$example_parameters(free = TRUE)
         lengths <- vapply(params,
-                          function(x) as.integer(prod(dim(x))),
+                          function(x) length(x),
                           FUN.VALUE = 1L)
 
         if (length(lengths) > 1) {
@@ -301,45 +298,23 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      # get all distribution nodes
-      distributions <- self$node_list[self$node_types == "distribution"]
+      # get all distribution nodes that have a target
+      distribution_nodes <- self$node_list[self$node_types == "distribution"]
+      target_nodes <- lapply(distribution_nodes, member, "get_tf_target_node()")
+      has_target <- !vapply(target_nodes, is.null, FUN.VALUE = TRUE)
+      distribution_nodes <- distribution_nodes[has_target]
+      target_nodes <- target_nodes[has_target]
 
-      # keep only those with a target node
-      targets <- lapply(distributions, member, "get_tf_target_node()")
-      has_target <- !vapply(targets, is.null, FUN.VALUE = TRUE)
-
-      distributions <- distributions[has_target]
-      targets <- targets[has_target]
-
-      # find and get these functions
-      density_names <- vapply(distributions,
-                              self$tf_name,
-                              FUN.VALUE = "")
-      target_names <- vapply(targets,
-                             self$tf_name,
-                             FUN.VALUE = "")
-
-      target_tensors <- lapply(target_names,
-                               get,
-                               envir = tfe)
-      density_functions <- lapply(density_names,
-                                  get,
-                                  envir = tfe)
-
-      # make the target names lists, for do.call
-      target_lists <- lapply(target_tensors, list)
-
-      # execute them
-      densities <- mapply(do.call,
-                          density_functions,
-                          target_lists,
-                          MoreArgs = list(envir = tfe),
+      # get the densities, evaluated at these targets
+      densities <- mapply(self$evaluate_density,
+                          distribution_nodes,
+                          target_nodes,
                           SIMPLIFY = FALSE)
 
-      # reduce_sum them
+      # reduce_sum each of them (skipping the batch dimension)
       self$on_graph(summed_densities <- lapply(densities, tf_sum, drop = TRUE))
 
-      # remove their names and sum them together
+      # sum them together
       names(summed_densities) <- NULL
       self$on_graph(joint_density <- tf$add_n(summed_densities))
 
@@ -350,14 +325,16 @@ dag_class <- R6Class(
 
       # define adjusted joint density
 
-      # get names of adjustment tensors for all variable nodes
+      # get names of Jacobian adjustment tensors for all variable nodes
       adj_names <- paste0(self$get_tf_names(types = "variable"), "_adj")
 
       # get TF density tensors for all distribution
       adj <- lapply(adj_names, get, envir = self$tf_environment)
 
-      # remove their names and sum them together
+      # remove their names and sum them together (accounting for tfp bijectors
+      # sometimes returning a scalar tensor)
       names(adj) <- NULL
+      adj <- match_batches(adj)
       self$on_graph(total_adj <- tf$add_n(adj))
 
       # assign overall density to environment
@@ -365,6 +342,81 @@ dag_class <- R6Class(
              joint_density + total_adj,
              envir = self$tf_environment)
 
+    },
+
+    # evaluate the (truncation-corrected) density of a tfp distribution on its
+    # target tensor
+    evaluate_density = function(distribution_node, target_node) {
+
+      tfe <- self$tf_environment
+
+      parameter_nodes <- distribution_node$parameters
+
+      # get the tensorflow objects for these
+      distrib_constructor <- self$get_tf_object(distribution_node)
+      tf_target <- self$get_tf_object(target_node)
+      tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
+
+      # execute the distribution constructor functions to return a tfp
+      # distribution object
+      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
+
+      self$tf_evaluate_density(tfp_distribution,
+                               tf_target,
+                               truncation = distribution_node$truncation,
+                               bounds = distribution_node$bounds)
+
+    },
+
+    tf_evaluate_density = function(tfp_distribution,
+                                   tf_target,
+                                   truncation = NULL,
+                                   bounds = NULL) {
+
+      # get the uncorrected log density
+      ld <- tfp_distribution$log_prob(tf_target)
+
+      # if required, calculate the log-adjustment to the truncation term of
+      # the density function i.e. the density of a distribution, truncated
+      # between a and b, is the non truncated density, divided by the integral
+      # of the density function between the truncation bounds. This can be
+      # calculated from the distribution's CDF
+      if (!is.null(truncation)) {
+
+        lower <- truncation[[1]]
+        upper <- truncation[[2]]
+
+        if (all(lower == bounds[1])) {
+
+          # if only upper is constrained, just need the cdf at the upper
+          offset <- tfp_distribution$log_cdf(fl(upper))
+
+        } else if (all(upper == bounds[2])) {
+
+          # if only lower is constrained, get the log of the integral above it
+          offset <- tf$math$log(fl(1) - tfp_distribution$cdf(fl(lower)))
+
+        } else {
+
+          # if both are constrained, get the log of the integral between them
+          offset <- tf$math$log(tfp_distribution$cdf(fl(upper)) -
+                                  tfp_distribution$cdf(fl(lower)))
+
+        }
+
+        ld <- ld - offset
+
+      }
+
+
+      ld
+
+
+    },
+
+    # get the tf object in envir correpsonding to 'node'
+    get_tf_object = function(node) {
+      get(self$tf_name(node), envir = self$tf_environment)
     },
 
     # return a function to obtain the model log probability from a tensor for
@@ -409,19 +461,22 @@ dag_class <- R6Class(
 
     },
 
-    # return the expected free parameter format either in list or vector form
-    example_parameters = function(flat = TRUE) {
+    # return the expected parameter format either in free state vector form, or
+    # list of transformed parameters
+    example_parameters = function(free = TRUE) {
 
-      # find all variable nodes in the graph and get their values
+      # find all variable nodes in the graph
       nodes <- self$node_list[self$node_types == "variable"]
       names(nodes) <- self$get_tf_names(types = "variable")
-      current_parameters <- lapply(nodes, member, "value()")
 
-      # optionally flatten them
-      if (flat)
-        current_parameters <- unlist_tf(current_parameters)
+      # get their values in either free of non-free form
+      if (free) {
+        parameters <- lapply(nodes, member, "value(free = TRUE)")
+      } else {
+        parameters <- lapply(nodes, member, "value()")
+      }
 
-      current_parameters
+      parameters
 
     },
 
@@ -512,11 +567,10 @@ dag_class <- R6Class(
 
     },
 
-    # return the current values of the traced nodes, as a named vector
-    trace_values = function(free_state, flatten = TRUE) {
+    trace_values_batch = function(free_state_batch) {
 
       # update the parameters & build the feed dict
-      self$send_parameters(free_state)
+      self$send_parameters(free_state_batch)
 
       tfe <- self$tf_environment
 
@@ -530,6 +584,37 @@ dag_class <- R6Class(
       # evaluate them in the tensorflow environment
       trace_list <- tfe$sess$run(target_tensors,
                                  feed_dict = tfe$feed_dict)
+
+      trace_list
+
+    },
+
+    # return the current values of the traced nodes, as a named vector
+    trace_values = function(free_state,
+                            flatten = TRUE,
+                            trace_batch_size = Inf) {
+
+      # get the number of samples to trace
+      n_samples <- nrow(free_state)
+      indices <- seq_len(n_samples)
+      splits <- split(indices, (indices - 1) %/% trace_batch_size)
+      names(splits) <- NULL
+
+      # split the free state up into batches
+      get_rows <- function(rows, x) x[rows, , drop = FALSE]
+      free_state_batches <- lapply(splits, get_rows, free_state)
+
+      # loop through them
+      trace_list_batches <- lapply(free_state_batches, self$trace_values_batch)
+
+      # loop through each of the elements in the lists, and stack them
+      stack_elements <- function(name, list) {
+        elems <- lapply(trace_list_batches, `[[`, name)
+        do.call(abind::abind, c(elems, list(along = 1)))
+      }
+      elements <- seq_along(trace_list_batches[[1]])
+      trace_list <- lapply(elements, stack_elements, trace_list_batches)
+      names(trace_list) <- names(trace_list_batches[[1]])
 
       # if they are flattened, e.g. for MCMC tracing
       if (flatten) {
@@ -565,19 +650,19 @@ dag_class <- R6Class(
       # http://raphael.candelier.fr/?blog=Adj2cluster
 
       # convert adjacency to a symmetric, logical matrix
-      A <- self$adjacency_matrix
-      S <- (A + t(A)) > 0
+      adj <- self$adjacency_matrix
+      sym <- (adj + t(adj)) > 0
 
       # loop through to build a block diagonal matrix of connected components
       # (usually only takes a few iterations)
       maxit <- 1000
       it <- 0
-      P <- R <- S
+      p <- r <- sym
       while (it < maxit) {
-        P <- P %*% S
-        T <- (R + P) > 0
-        if (any(T != R)) {
-          R <- T
+        p <- p %*% sym
+        t <- (r + p) > 0
+        if (any(t != r)) {
+          r <- t
           it <- it + 1
         } else {
           break ()
@@ -592,13 +677,13 @@ dag_class <- R6Class(
       }
 
       # find the cluster IDs
-      n <- nrow(R)
-      neighbours <- lapply(seq_len(n), function(i) which(R[i, ]))
+      n <- nrow(r)
+      neighbours <- lapply(seq_len(n), function(i) which(r[i, ]))
       cluster_names <- vapply(neighbours, paste, collapse = "_", FUN.VALUE = "")
       cluster_id <- match(cluster_names, unique(cluster_names))
 
       # name them
-      names(cluster_id) <- rownames(A)
+      names(cluster_id) <- rownames(adj)
       cluster_id
 
     },

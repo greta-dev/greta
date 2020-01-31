@@ -9,9 +9,12 @@
 #'
 #' @param target a greta array for which to calculate the value
 #' @param values a named list giving temporary values of the greta arrays with
-#'   which \code{target} is connected, or an \code{mcmc.list} object returned by
-#'   \code{\link{mcmc}}.
+#'   which \code{target} is connected, or a \code{greta_mcmc_list} object
+#'   returned by \code{\link{mcmc}}.
 #' @param precision the floating point precision to use when calculating values.
+#' @param trace_batch_size the number of posterior samples to process at a time
+#'   when \code{target} is a \code{greta_mcmc_list} object; reduce this to
+#'   reduce memory demands
 #'
 #' @return A numeric R array with the same dimensions as \code{target}, giving
 #'   the values it would take conditioned on the fixed values given by
@@ -71,11 +74,19 @@
 #' apply(mu_plot_draws[[1]], 1, lines,
 #'       x = petal_length_plot, col = grey(0.8))
 #' lines(mu_est ~ petal_length_plot, lwd = 2)
+#'
+#' # trace_batch_size can be changed to trade off speed against memory usage
+#' # when calculating. These all produce the same result, but have increasing
+#' # memory requirements:
+#' mu_plot_draws_1 <- calculate(mu_plot, draws, trace_batch_size = 1)
+#' mu_plot_draws_10 <- calculate(mu_plot, draws, trace_batch_size = 10)
+#' mu_plot_draws_inf <- calculate(mu_plot, draws, trace_batch_size = Inf)
 #' }
 #'
 #'
 calculate <- function(target, values = list(),
-                      precision = c("double", "single")) {
+                      precision = c("double", "single"),
+                      trace_batch_size = 100) {
 
   target_name <- deparse(substitute(target))
   tf_float <- switch(match.arg(precision),
@@ -85,17 +96,34 @@ calculate <- function(target, values = list(),
   if (!inherits(target, "greta_array"))
     stop("'target' is not a greta array")
 
-  if (inherits(values, "mcmc.list")) {
-    calculate_mcmc.list(target, target_name, values, tf_float)
-  } else {
-    calculate_list(target, values, tf_float, env = parent.frame())
+  if (inherits(values, "greta_mcmc_list")) {
+    calculate_greta_mcmc_list(
+      target = target,
+      target_name = target_name,
+      values = values,
+      tf_float = tf_float,
+      trace_batch_size = trace_batch_size
+    )
+  }
+  else {
+    calculate_list(target = target,
+                   values = values,
+                   tf_float = tf_float,
+                   env = parent.frame())
   }
 
 }
 
-# Begin Exclude Linting
-calculate_mcmc.list <- function(target, target_name, values, tf_float) {
-# End Exclude Linting
+#' @importFrom coda thin
+#' @importFrom stats start end
+calculate_greta_mcmc_list <- function(target,
+                                      target_name,
+                                      values,
+                                      tf_float,
+                                      trace_batch_size) {
+
+  # check trace_batch_size is valid
+  trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
   model_info <- get_model_info(values)
 
@@ -116,7 +144,8 @@ calculate_mcmc.list <- function(target, target_name, values, tf_float) {
   dag$target_nodes <- list(get_node(target))
   names(dag$target_nodes) <- target_name
 
-  param <- dag$example_parameters()
+  param <- dag$example_parameters(free = TRUE)
+  param <- unlist_tf(param)
   param[] <- 0
 
   # raw draws are either an attribute, or this object
@@ -124,11 +153,18 @@ calculate_mcmc.list <- function(target, target_name, values, tf_float) {
   draws <- model_info$raw_draws
 
   # trace the target for each chain
-  values <- lapply(draws, dag$trace_values)
-  trace <- lapply(values, coda::mcmc)
+  values <- lapply(draws, dag$trace_values, trace_batch_size = trace_batch_size)
 
+  # convert to a greta_mcmc_list object, retaining windowing info
+  trace <- lapply(
+    values,
+    coda::mcmc,
+    start = stats::start(draws),
+    end = stats::end(draws),
+    thin = coda::thin(draws)
+  )
   trace <- coda::mcmc.list(trace)
-  attr(trace, "model_info") <- model_info
+  trace <- as_greta_mcmc_list(trace, model_info)
   trace
 
 }
