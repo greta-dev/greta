@@ -130,123 +130,226 @@
 #' mu_plot_draws_inf <- calculate(mu_plot, draws, trace_batch_size = Inf)
 #'
 #' }
-calculate <- function(target, values = list(),
+calculate <- function(target,
+                      values = list(),
                       nsim = NULL,
                       precision = c("double", "single"),
                       trace_batch_size = 100,
                       seed = NULL) {
 
-  # check nsim is valid
-  nsim <- check_positive_integer(nsim)
-
-  # if an RNG seed was provided use it and reset the RNG on exiting
-  if (!is.null(seed)) {
-
-    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-      runif(1)
-    }
-
-    R.seed <- get(".Random.seed", envir = .GlobalEnv)
-    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
-    set.seed(seed)
-
+  # convert target to a list, recording whether to convert back at the end
+  single_target <- !is.list(target)
+  if (single_target) {
+    # convert the  the names of the thing passed in, and convert to a list
+    target_name <- deparse(substitute(target))
+    target <- list(target)
+    names(target) <- target_name
   }
 
-  # need to enable lists of targets
+  # check we now have a list of greta arrays
+  are_greta_arrays <- vapply(target, is.greta_array, FUN.VALUE = logical(1))
+  if (!all(are_greta_arrays)) {
+    stop("'target' must be either a greta array or a list of greta arrays",
+         call. = FALSE)
+  }
 
-  target_name <- deparse(substitute(target))
+  # checks and RNG seed setting if we're sampling
+  if (!is.null(nsim)) {
+
+    # check nsim is valid
+    nsim <- check_positive_integer(nsim)
+
+    # if an RNG seed was provided use it and reset the RNG on exiting
+    if (!is.null(seed)) {
+
+      if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+        runif(1)
+      }
+
+      R.seed <- get(".Random.seed", envir = .GlobalEnv)
+      on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+      set.seed(seed)
+
+    }
+  }
+
+  # set precision
   tf_float <- switch(match.arg(precision),
                      double = "float64",
                      single = "float32")
 
-  if (!inherits(target, "greta_array"))
-    stop("'target' is not a greta array")
-
   if (inherits(values, "greta_mcmc_list")) {
-    calculate_greta_mcmc_list(
+
+    result <- calculate_greta_mcmc_list(
       target = target,
-      target_name = target_name,
       values = values,
+      nsim = nsim,
       tf_float = tf_float,
       trace_batch_size = trace_batch_size
     )
+
+  } else {
+
+    result <- calculate_list(target = target,
+                             values = values,
+                             nsim = nsim,
+                             tf_float = tf_float,
+                             env = parent.frame())
+
   }
-  else {
-    calculate_list(target = target,
-                   values = values,
-                   tf_float = tf_float,
-                   env = parent.frame())
+
+  # strip list if the target was a single greta array
+  if (single_target) {
+    result <- unlist(result, recursive = FALSE)
   }
+
+  result
 
 }
 
 #' @importFrom coda thin
 #' @importFrom stats start end
 calculate_greta_mcmc_list <- function(target,
-                                      target_name,
                                       values,
+                                      nsim,
                                       tf_float,
                                       trace_batch_size) {
+
+  stochastic <- !is.null(nsim)
 
   # check trace_batch_size is valid
   trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
-  model_info <- get_model_info(values)
+  # can we use a brand new dag, or do we need this one to line up the values?
 
-  # copy and refresh the dag
+  # copy and refresh the dag from the samples
+  model_info <- get_model_info(values)
   dag <- model_info$model$dag$clone()
   dag$new_tf_environment()
 
-  # set the precision in the dag
+  # set the precision
   dag$tf_float <- tf_float
 
-  # extend the dag to include this node, as the target
-  dag$build_dag(list(target))
+  # temporarily set the mode (either forward or sampling)
+  old_mode <- dag$mode
+  on.exit(dag$mode <- old_mode, add = TRUE)
+  dag$mode <- ifelse(stochastic, "sampling", "forward")
+
+  # extend it dag to include this node as the target
+  dag$build_dag(target)
 
   self <- dag  # mock for scoping
   self
   dag$define_tf()
 
-  dag$target_nodes <- list(get_node(target))
-  names(dag$target_nodes) <- target_name
+  dag$target_nodes <- lapply(target, get_node)
+  names(dag$target_nodes) <- names(target)
 
-  param <- dag$example_parameters(free = TRUE)
-  param <- unlist_tf(param)
-  param[] <- 0
-
-  # raw draws are either an attribute, or this object
+  # get draws of the free state
   model_info <- attr(values, "model_info")
   draws <- model_info$raw_draws
 
-  # trace the target for each chain
-  values <- lapply(draws, dag$trace_values, trace_batch_size = trace_batch_size)
+  # if we're doing stochastic sampling, subsample the draws
+  if (stochastic) {
 
-  # convert to a greta_mcmc_list object, retaining windowing info
-  trace <- lapply(
-    values,
-    coda::mcmc,
-    start = stats::start(draws),
-    end = stats::end(draws),
-    thin = coda::thin(draws)
-  )
-  trace <- coda::mcmc.list(trace)
-  trace <- as_greta_mcmc_list(trace, model_info)
+    draws <- as.matrix(draws)
+    n_samples <- nrow(draws)
+
+    # if nsim is greater than the number of samples, sample with replacement and warn
+    replace <- FALSE
+    if (nsim > n_samples) {
+      replace <- TRUE
+      warning("nsim was greater than the number of posterior samples in ",
+              "values, so posterior samples had to be drawn with replacement",
+              call. = FALSE)
+    }
+
+    rows <- sample.int(n_samples, nsim, replace = replace)
+    draws <- draws[rows, , drop = FALSE]
+
+    stop ("not yet implemented")
+
+    # need to work out how to use free state values for some tensors, and sample
+    # others from their distributions
+
+    # forward mode (as used for inference), just pushed forward from the free
+    # state. There are no stochastic elements, and data is observed
+
+    # full sampling mode does not use the free state, but defines all variables
+    # (and data with distributions?) with a stochastic tensor
+
+    # we need an hybrid mode for this, where the free state is provided and
+    # should be used, but some variables exist that are not linked to the free
+    # state (either data, or new variables), so should be sampled. Can determine
+    # those based on the old dag (difference between those in the node list for
+    # the old dag, and those in the new dag, and thosee that are data). When the
+    # dag asks them to define theemselves, it needs to differentially tell these
+    # what to do. Label them somehow?
+
+    # variable_node$tf() switches based on dag$mode, instead, give dag a member
+    # function to tell this node what to do, used like:
+    #   mode <- dag$how_to_define(self)
+    #   if (mode == "sampling") { ... }
+    #   if (mode == "forward") { ... }
+    # give dag a list of nodes covered by the free state or data list.
+    # For these, it can define them in forward mode. For the others, it can
+    # define them in sampling mode, or error if they don't have a distribution
+    # from which to be sampled.
+
+    trace <- dag$trace_values(draws, trace_batch_size = trace_batch_size)
+
+    # hopefully values is already a list of the correct dimensions...
+
+  } else {
+
+    # for deterministic posterior prediction, just trace the target for each
+    # chain
+    values <- lapply(draws,
+                     dag$trace_values,
+                     trace_batch_size = trace_batch_size)
+
+    # convert to a greta_mcmc_list object, retaining windowing info
+    trace <- lapply(
+      values,
+      coda::mcmc,
+      start = stats::start(draws),
+      end = stats::end(draws),
+      thin = coda::thin(draws)
+    )
+    trace <- coda::mcmc.list(trace)
+    trace <- as_greta_mcmc_list(trace, model_info)
+  }
+
   trace
 
 }
 
-calculate_list <- function(target, values, tf_float, env) {
+calculate_list <- function(target, values, nsim, tf_float, env) {
 
-  # check the list of values makes sense, and return these and the corresponding
-  # greta arrays (looked up by name in environment env)
-  values_list <- check_values_list(values, env)
-  fixed_greta_arrays <- values_list$fixed_greta_arrays
-  values <- values_list$values
+  stochastic <- !is.null(nsim)
+
+  if (!identical(values, list())) {
+
+    # check the list of values makes sense, and return these and the corresponding
+    # greta arrays (looked up by name in environment env)
+    values_list <- check_values_list(values, env)
+    fixed_greta_arrays <- values_list$fixed_greta_arrays
+    values <- values_list$values
+
+    # convert to nodes, and add tensor names to values
+    fixed_nodes <- lapply(fixed_greta_arrays, get_node)
+    names(values) <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
+
+  }
 
   all_greta_arrays <- c(fixed_greta_arrays, list(target))
 
   # define the dag and TF graph
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
+
+  # change dag mode to sampling
+  dag$mode <- "sampling"
+
   dag$define_tf()
   tfe <- dag$tf_environment
 
@@ -267,12 +370,11 @@ calculate_list <- function(target, values, tf_float, env) {
 
   # send list to tf environment and roll into a dict
   values <- lapply(values, add_first_dim)
+  values <- c(values, list(batch_size = as.integer(nsim)))
   dag$build_feed_dict(values, data_list = data_list[missing])
 
-  name <- dag$tf_name(get_node(target))
-  result <- dag$tf_sess_run(name, as_text = TRUE)
-
-  drop_first_dim(result)
+  # run the sampling
+  dag$tf_sess_run("sampling_target_tensor_list", as_text = TRUE)
 
 }
 
