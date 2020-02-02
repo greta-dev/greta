@@ -82,73 +82,6 @@ test_that("simulate uses the local RNG seed", {
 
 })
 
-test_that("simulate works with correct value lists", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  # fix variable
-  a <- normal(0, 1)
-  y <- normal(a, 1)
-  m <- model(y)
-  sims <- simulate(m, nsim = 100, values = list(a = 100))
-
-  # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
-  # ( pnorm(90, 100, 1) = 7e-24 )
-  expect_true(all(sims$y > 90))
-
-  # fix variable and new data
-  x <- as_data(1)
-  a <- normal(0, 1)
-  y <- normal(a * x, 1)
-  m <- model(y)
-  sims <- simulate(m, nsim = 100, values = list(a = 50, x = 2))
-
-  expect_true(all(sims$y > 90))
-
-})
-
-test_that("simulate works with greta_mcmc_list objects", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  samples <- 10
-
-  n <- 100
-  y <- as_data(rnorm(n))
-  x <- as_data(1)
-  a <- normal(0, 1)
-  distribution(y) <- normal(a, x)
-  m <- model(a)
-  draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
-
-  sims <- simulate(m, values = draws)
-
-  # correct dimensions
-  expect_equal(dim(sims$a), c(samples, 1))
-  # all valid values
-  expect_true(all(is.finite(sims$a)))
-
-})
-
-test_that("simulate works if distribution-free variables are fixed", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  # fix variable
-  a <- variable()
-  y <- normal(a, 1)
-  m <- model(y)
-  sims <- simulate(m, values = list(a = 100))
-
-  # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
-  # ( pnorm(90, 100, 1) = 7e-24 )
-  expect_true(all(sims$y > 90))
-
-})
-
 test_that("simulate errors if distribution-free variables are not fixed", {
 
   skip_if_not(check_tf_version())
@@ -159,7 +92,7 @@ test_that("simulate errors if distribution-free variables are not fixed", {
   y <- normal(a, 1)
   m <- model(y)
   expect_error(sims <- simulate(m),
-               "specified in values")
+               "do not have a distribution")
 
 })
 
