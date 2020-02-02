@@ -1,6 +1,6 @@
 context("calculate")
 
-test_that("calculate works with correct lists", {
+test_that("deterministic calculate works with correct lists", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -21,7 +21,31 @@ test_that("calculate works with correct lists", {
 
 })
 
-test_that("calculate works with greta_mcmc_list objects", {
+test_that("stochastic calculate works with correct lists", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # fix variable
+  a <- normal(0, 1)
+  y <- normal(a, 1)
+  sims <- calculate(list(a, y), nsim = 100, values = list(a = 100))
+
+  # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
+  # ( pnorm(90, 100, 1) = 7e-24 )
+  expect_true(all(sims$y > 90))
+
+  # fix variable and new data
+  x <- as_data(1)
+  a <- normal(0, 1)
+  y <- normal(a * x, 1)
+  sims <- calculate(list(a, y), nsim = 100, values = list(a = 50, x = 2))
+
+  expect_true(all(sims$y > 90))
+
+})
+
+test_that("deterministic calculate works with greta_mcmc_list objects", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -53,6 +77,69 @@ test_that("calculate works with greta_mcmc_list objects", {
 
 })
 
+test_that("stochastic calculate works with greta_mcmc_list objects", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  samples <- 10
+  chains <- 2
+
+  n <- 100
+  y <- as_data(rnorm(n))
+  x <- as_data(1)
+  a <- normal(0, 1)
+  distribution(y) <- normal(a, x)
+  m <- model(a)
+  draws <- mcmc(
+    m,
+    warmup = 0,
+    n_samples = samples,
+    chains = chains,
+    verbose = FALSE
+  )
+
+  sims <- calculate(list(a, y), values = draws)
+
+  # correct class
+  expect_s3_class(sims, "greta_mcmc_list")
+
+  # correct dimensions
+  a_matrix <- as.matrix(sims[, "a"])
+  expect_equal(dim(a_matrix), c(samples * chains, 1))
+  # all valid values
+  expect_true(all(is.finite(as.matrix(sims[, "a"]))))
+
+
+  # for a subset of draws it should return (a list of) arrays
+  nsim <- 5
+
+  # a single array with these nsim observations
+  sims <- calculate(y, values = draws, nsim = nsim)
+
+  expect_true(is.numeric(sims))
+  expect_equal(dim(sims), c(nsim, 1))
+  expect_true(all(is.finite(sims)))
+
+  # a list of greta arrays, each with these nsim observations
+  sims <- calculate(list(a, y), values = draws, nsim = nsim)
+
+  expect_true(is.list(sims))
+  expect_equal(names(sims), c("a", "y"))
+  expect_equal(lapply(sims, dim),
+               list(a = c(nsim, 1),
+                    y = c(nsim, 1)))
+
+  expect_true(all(vapply(sims, is.finite, FUN.VALUE = logical(nsim))))
+
+
+  # warn about resampling if nsim is greater than the number of elemnts in draws
+  expect_warning(calculate(y, values = draws, nsim = samples * chains + 1),
+                 "posterior samples drawn with replacement")
+
+
+})
+
 test_that("calculate errors nicely if greta_mcmc_list objects missing info", {
 
   skip_if_not(check_tf_version())
@@ -74,7 +161,7 @@ test_that("calculate errors nicely if greta_mcmc_list objects missing info", {
 
 })
 
-test_that("calculate errors nicely if not all required values are passed", {
+test_that("calculate errors nicely if values for stochastics not passed", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -88,6 +175,9 @@ test_that("calculate errors nicely if not all required values are passed", {
                paste("values have not been provided for all greta arrays on",
                      "which the target depends. Please provide values for the",
                      "greta array: a"))
+
+  # but is should work fine is nsim is set
+  expect_ok(calculate(y, list(x = c(2, 1))), nsim = 1)
 
 })
 
@@ -172,5 +262,176 @@ test_that("calculate errors nicely with invalid batch sizes", {
                "greater than or equal to 1")
   expect_error(calculate(y, draws, trace_batch_size = NA),
                "greater than or equal to 1")
+
+})
+
+test_that("calculate returns a list or array based on target", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  a <- as_data(randn(3))
+  b <- a ^ 2
+  c <- sqrt(b)
+
+  # if target is a single greta array, the output should be a single numeric
+  result <- calculate(b, nsim = 10)
+  expect_false(is.list(result))
+  expect_true(is.numeric(result))
+
+  # if target is a list, the output should be a list of numerics
+  result <- calculate(list(b, c), nsim = 10)
+  expect_true(is.list(result))
+
+  # check contents
+  are_numeric <- vapply(result, is.numeric, FUN.VALUE = numeric(1))
+  expect_true(all(are_numeric))
+
+  # check names
+  names <- vapply(result, is.numeric, FUN.VALUE = numeric(1))
+  expect_true(identical(names, c("b", "c")))
+
+})
+
+test_that("calculate produces the right number of samples", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # fix variable
+  a <- normal(0, 1)
+  y <- normal(a, 1, dim = c(1, 3))
+
+  # should be vectors
+  a_sims <- calculate(a, nsim = 1)
+  expect_true(identical(length(a_sims), 1L))
+
+  a_sims <- calculate(a, nsim = 17)
+  expect_true(identical(length(a_sims), 17L))
+
+  y_sims <- calculate(y, nsim = 1)
+  expect_true(identical(length(y_sims), 3L))
+
+  y_sims <- calculate(y, nsim = 19)
+  expect_true(identical(dim(y_sims), c(19L, 3L)))
+
+  # the global RNG seed should not change if the seed *is* specified
+  before <- rng_seed()
+  a_sims <- calculate(y, nsim = 1, seed = 12345)
+  after <- rng_seed()
+  expect_identical(before, after)
+
+  # the samples should differ if the seed is *not* specified
+  one <- calculate(y, nsim = 1)
+  two <- calculate(y, nsim = 1)
+  expect_false(identical(one, two))
+
+  # the samples should differ if the seeds are specified differently
+  one <- calculate(y, nsim = 1, seed = 12345)
+  two <- calculate(y, nsim = 1, seed = 54321)
+  expect_false(identical(one, two))
+
+  # the samples should be the same if the seed is the same
+  one <- calculate(y, nsim = 1, seed = 12345)
+  two <- calculate(y, nsim = 1, seed = 12345)
+  expect_identical(one, two)
+
+})
+
+test_that("calculate uses the local RNG seed", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # fix variable
+  a <- normal(0, 1)
+  y <- normal(a, 1)
+
+  # the global RNG seed should change if the seed is *not* specified
+  before <- rng_seed()
+  sims <- calculate(y, nsim = 1)
+  after <- rng_seed()
+  expect_false(identical(before, after))
+
+  # the global RNG seed should not change if the seed *is* specified
+  before <- rng_seed()
+  sims <- calculate(y, nsim = 1, seed = 12345)
+  after <- rng_seed()
+  expect_identical(before, after)
+
+  # the samples should differ if the seed is *not* specified
+  one <- calculate(y, nsim = 1)
+  two <- calculate(y, nsim = 1)
+  expect_false(identical(one, two))
+
+  # the samples should differ if the seeds are specified differently
+  one <- calculate(y, nsim = 1, seed = 12345)
+  two <- calculate(y, nsim = 1, seed = 54321)
+  expect_false(identical(one, two))
+
+  # the samples should be the same if the seed is the same
+  one <- calculate(y, nsim = 1, seed = 12345)
+  two <- calculate(y, nsim = 1, seed = 12345)
+  expect_identical(one, two)
+
+})
+
+test_that("calculate works if distribution-free variables are fixed", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # fix variable
+  a <- variable()
+  y <- normal(a, 1)
+  sims <- calculate(list(a, y), nsim = 1, values = list(a = 100))
+
+  # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
+  # ( pnorm(90, 100, 1) = 7e-24 )
+  expect_true(all(sims$y > 90))
+
+})
+
+test_that("calculate errors if distribution-free variables are not fixed", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # fix variable
+  a <- variable()
+  y <- normal(a, 1)
+  expect_error(sims <- calculate(m, nsim = 1),
+               "specified in values")
+
+})
+
+test_that("calculate errors if a distribution cannot be sampled from", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # fix variable
+  a <- lkj_correlation(3)
+  y <- normal(a, 1)
+  expect_error(sims <- calculate(y, nsim = 1),
+               "sampling is not implemented")
+
+})
+
+test_that("calculate errors nicely if nsim is invalid", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x <- normal(0, 1)
+
+  expect_error(calculate(x, nsim = 0),
+               "must be a positive integer")
+
+  expect_error(calculate(x, nsim = -1),
+               "must be a positive integer")
+
+  expect_error(calculate(x, nsim = "five"),
+               "must be a positive integer")
 
 })

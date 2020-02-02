@@ -108,7 +108,7 @@ test_that("simulate works with correct value lists", {
 
 })
 
-test_that("simulate works with mcmc.list objects", {
+test_that("simulate works with greta_mcmc_list objects", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -175,56 +175,6 @@ test_that("simulate errors if a distribution cannot be sampled from", {
   m <- model(y)
   expect_error(sims <- simulate(m),
                "sampling is not implemented")
-
-})
-
-test_that("simulate errors nicely if mcmc.list objects missing info", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  samples <- 10
-  a <- normal(0, 1)
-  y <- normal(a, 1)
-  m <- model(y)
-  draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
-
-  # scrub the model info
-  attr(draws, "model_info") <- NULL
-
-  # it should error nicely
-  expect_error(simulate(m, values = draws),
-               "perhaps it wasn't created by greta")
-
-})
-
-test_that("simulate errors nicely if values have incorrect dimensions", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  a <- normal(0, 1)
-  y <- normal(a, 1)
-  m <- model(y)
-
-  # it should error nicely
-  expect_error(simulate(m, values = list(a = c(1, 1))),
-               "different number of elements than the greta array")
-
-})
-
-test_that("simulate errors nicely if target contains non-greta arrays", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  z <- 1
-  x <- normal(0, 1)
-  m <- model(x)
-
-  # it should error nicely
-  expect_error(simulate(m, targets = list(z)),
-               "element of 'targets' is not a greta array")
 
 })
 
