@@ -99,44 +99,32 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
     verbose = FALSE
   )
 
-  sims <- calculate(list(a, y), values = draws)
+  # this should error without nsim being specified (y is stochastic)
+  expect_error(calculate(list(a, y), values = draws),
+               "values have not been provided for all greta arrays on",
+               "which the target depends")
 
-  # correct class
-  expect_s3_class(sims, "greta_mcmc_list")
+  # for a list of targets, the result should be a list
+  nsim <- 10
+  sims <- calculate(list(a, y), values = draws, nsim = nsim)
 
-  # correct dimensions
-  a_matrix <- as.matrix(sims[, "a"])
-  expect_equal(dim(a_matrix), c(samples * chains, 1))
-  # all valid values
-  expect_true(all(is.finite(as.matrix(sims[, "a"]))))
-
-
-  # for a subset of draws it should return (a list of) arrays
-  nsim <- 5
+  # correct class, dimensions, and valid values
+  expect_true(is.list(sims))
+  expect_equal(names(sims), c("a", "y"))
+  expect_equal(dim(sims$a), c(nsim, 1))
+  expect_equal(dim(sims$y), c(nsim, n, 1))
+  expect_true(all(is.finite(sims$a)) & all(is.finite(sims$y)))
 
   # a single array with these nsim observations
   sims <- calculate(y, values = draws, nsim = nsim)
 
   expect_true(is.numeric(sims))
-  expect_equal(dim(sims), c(nsim, 1))
+  expect_equal(dim(sims), c(nsim, n, 1))
   expect_true(all(is.finite(sims)))
 
-  # a list of greta arrays, each with these nsim observations
-  sims <- calculate(list(a, y), values = draws, nsim = nsim)
-
-  expect_true(is.list(sims))
-  expect_equal(names(sims), c("a", "y"))
-  expect_equal(lapply(sims, dim),
-               list(a = c(nsim, 1),
-                    y = c(nsim, 1)))
-
-  expect_true(all(vapply(sims, is.finite, FUN.VALUE = logical(nsim))))
-
-
-  # warn about resampling if nsim is greater than the number of elemnts in draws
+  # warn about resampling if nsim is greater than the number of elements in draws
   expect_warning(calculate(y, values = draws, nsim = samples * chains + 1),
                  "posterior samples drawn with replacement")
-
 
 })
 

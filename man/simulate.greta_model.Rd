@@ -4,55 +4,40 @@
 \alias{simulate.greta_model}
 \title{Simulate Responses From \code{greta_model} Object}
 \usage{
-\method{simulate}{greta_model}(object, nsim = 1, seed = NULL,
-  targets = list(), values = list(), precision = c("double",
-  "single"), ...)
+\method{simulate}{greta_model}(object, nsim = 1, precision = c("double", "single"), seed = NULL, ...)
 }
 \arguments{
 \item{object}{a \code{\link{greta_model}} object}
 
 \item{nsim}{positive integer scalar - the number of responses to simulate}
 
+\item{precision}{the floating point precision to use when calculating values.}
+
 \item{seed}{an optional seed to be used in set.seed immediately before the
 simulation so as to generate a reproducible sample}
-
-\item{targets}{an optional list of greta arrays for which to generate
-samples. If not specified, the greta arrays named in the call to model will
-be used.}
-
-\item{values}{a named list giving fixed values of greta arrays in the model
-to hold constant, or an \code{mcmc.list} object returned by
-\code{\link{mcmc}}.}
-
-\item{precision}{the floating point precision to use when calculating values}
 
 \item{...}{optional additional arguments, none are used at present}
 }
 \value{
 A named list of vectors, matrices or arrays containing independent
-  samples of the named greta arrays. The number of samples will be prepended
-  as the first dimension of the greta array, so that a vector fo samples is
-  returned for each scalar greta array, and a matrix is returned for each
-  vector greta array etc.
+  samples of the greta arrays associated with the model. The number of
+  samples will be prepended as the first dimension of the greta array, so
+  that a vector of samples is returned for each scalar greta array, and a
+  matrix is returned for each vector greta array, etc.
 }
 \description{
-Simulate responses from a “greta_array” model object, either
-  from the prior or conditioned on the posterior or some fixed values.
+Simulate values of all named greta arrays associated with a
+  greta model from the model priors, including the response variable.
 }
 \details{
-If the values argument is not provided, \code{simulate()} draws
-  \code{nsim} independent samples from the model prior for all of the target
-  greta arrays - either those named in the call to \code{\link{model}} or
-  those in \code{targets}, if provided.
+This is essentially a wrapper around \code{\link{calculate()}} that
+  inds all relevant greta arrays. See that function for more functionality,
+  including simulation conditional on fixed values or posterior samples.
 
-  If \code{values} are provided, samples of the target values will be
-  independent, conditional on these provided values. If \code{values} is a
-  named list of values for some greta arrays, each of the \code{nsim}
-  independent samples of the target greta arrays will be drawn conditional on
-  those fixed values. If an \code{mcmc.list} object (created by fitting a
-  greta model with \code{\link{mcmc}}) is passed to values, then \code{nsim}
-  samples of the target greta arrays will be returned, each of them
-  conditioned on a different, randomly selected posterior sample from values.
+  To simulate values of the response variable, it must be both a named object
+  (in the calling environment) and be a greta array. If you don't see it
+  showing up in the output, you may need to use \code{as_data} to convert it
+  to a greta array before defining the model.
 }
 \examples{
 \dontrun{
@@ -67,30 +52,11 @@ mu <- normal(0, 1, dim = n)
 distribution(y) <- normal(mu, sd)
 m <- model(mu, sd)
 
-# prior simulation:
-
-# simulate one random draw of mu and sd from the model prior:
+# simulate one random draw of y, mu and sd from the model prior:
 sims <- simulate(m)
 
-# 100 simulations of mu and sd)
+# 100 simulations of y, mu and sd
 sims <- simulate(m, nsim = 100)
 
-# 100 simulations of y and mu (greta arrays names in targets)
-# NB: y must be a greta array here
-sims <- simulate(m, nsim = 100, targets = list(y, mu))
-
-# conditional prior simulation:
-
-# 100 simulations of y and mu, with sd fixed at 3
-sims <- simulate(m, nsim = 100, targets = list(y, mu), values = list(sd = 3))
-
-# posterior simulation:
-
-# generate posterior samples from the model as usual
-draws <- mcmc(m)
-
-# draw 100 simulations of y, conditioned on 100 random posterior
-# samples of all the model parameters
-sims <- simulate(m, nsim = 100, targets = list(y), values = draws)
 }
 }
