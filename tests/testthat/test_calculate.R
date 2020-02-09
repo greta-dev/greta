@@ -29,19 +29,19 @@ test_that("stochastic calculate works with correct lists", {
   # fix variable
   a <- normal(0, 1)
   y <- normal(a, 1)
-  sims <- calculate(list(a, y), nsim = 100, values = list(a = 100))
+  y_sims <- calculate(y, nsim = 100, values = list(a = 100))
 
   # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
   # ( pnorm(90, 100, 1) = 7e-24 )
-  expect_true(all(sims$y > 90))
+  expect_true(all(y_sims > 90))
 
   # fix variable and new data
   x <- as_data(1)
   a <- normal(0, 1)
   y <- normal(a * x, 1)
-  sims <- calculate(list(a, y), nsim = 100, values = list(a = 50, x = 2))
+  y_sims <- calculate(y, nsim = 100, values = list(a = 50, x = 2))
 
-  expect_true(all(sims$y > 90))
+  expect_true(all(y_sims > 90))
 
 })
 

@@ -323,15 +323,15 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     fixed_greta_arrays <- values_list$fixed_greta_arrays
     values <- values_list$values
 
-    # convert to nodes, and add tensor names to values
-    fixed_nodes <- lapply(fixed_greta_arrays, get_node)
-    names(values) <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
-
   }
 
   all_greta_arrays <- c(fixed_greta_arrays, target)
   # define the dag and TF graph
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
+
+  # convert to nodes, and add tensor names to values
+  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
+  names(values) <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
 
   # change dag mode to sampling
   dag$mode <- "all_sampling"
@@ -359,6 +359,9 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   target_tensor_list <- lapply(target_names_list, get, envir = dag$tf_environment)
   assign("calculate_target_tensor_list", target_tensor_list, envir = dag$tf_environment)
 
+  # add the batch size to the data list
+  dag$set_tf_data_list("batch_size", as.integer(nsim))
+
   # add values or data not specified by the user
   data_list <- dag$get_tf_data_list()
   missing <- !names(data_list) %in% names(values)
@@ -369,7 +372,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   # send list to tf environment and roll into a dict
   values <- lapply(values, add_first_dim)
-  dag$tf_environment$batch_size <- as.integer(nsim)
   dag$build_feed_dict(values, data_list = data_list[missing])
 
   # run the sampling

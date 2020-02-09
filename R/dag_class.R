@@ -164,16 +164,30 @@ dag_class <- R6Class(
     # version of itself)
     how_to_define = function(node) {
 
-      # if we're doing all sampling or all forward, define the node as such
-      node_mode <- switch(self$mode,
-                          all_sampling = "sampling",
-                          all_forward = "forward")
+      node_type <- node_type(node)
+      node_has_distribution <- has_distribution(node)
+
+      # never sample in forward mode (computing the joint density)
+      if (self$mode == "all_forward") {
+        node_mode <- "forward"
+      }
+
+      # when sampling from the model prior, sample everything except
+      # data/operations without distributions
+      if (self$mode == "all_sampling") {
+
+        node_mode <- switch(
+          node_type,
+          data = ifelse(node_has_distribution, "sampling", "forward"),
+          operation = ifelse(node_has_distribution, "sampling", "forward"),
+          "sampling"
+        )
+
+      }
 
       # if we're in hybrid mode (some nodes defined forward from the free state
       # or data, others sampled), decide which way this node should be defined
       if (self$mode == "hybrid") {
-
-        node_type <- node_type(node)
 
         # the names of variable nodes not connected to the free state in this dag
         stateless_names <- names(self$variables_without_free_state)
@@ -181,17 +195,25 @@ dag_class <- R6Class(
         # if the node is data, use sampling mode if it has a distribution and
         # forward mode if not
         if (node_type == "data") {
-          node_mode <- ifelse(is.null(node$distribution),
-                              "forward",
-                              "sampling")
+          node_mode <- ifelse(node_has_distribution, "sampling", "forward")
         }
 
         # if the node is a variable, use forward mode if it has a free state,
         # and sampling mode if not
         if (node_type == "variable") {
-          node_mode <- ifelse(node$unique_name %in% stateless_names,
-                              "sampling",
-                              "forward")
+          to_sample <- node$unique_name %in% stateless_names
+          node_mode <- ifelse(to_sample, "sampling", "forward")
+        }
+
+        # if it's an operation, see if it has a distribution (for lkj and
+        # wishart) and get mode based on whether the parent has a free state
+        if (node_type == "operation") {
+
+          parent_name <- node$parents[[1]]$unique_name
+          parent_stateless <- parent_name %in% stateless_names
+          to_sample <- node_has_distribution & parent_stateless
+          node_mode <- ifelse(to_sample, "sampling", "forward")
+
         }
 
         # if the node is a distribution, decide based on its target
@@ -201,7 +223,7 @@ dag_class <- R6Class(
           target_type <- node_type(target)
 
           # if it has no target (e.g. for a mixture distribution), define it in
-          # sampling mode (so it defined before the things that depend on it)
+          # sampling mode (so it defines before the things that depend on it)
           if (is.null(target)) {
             node_mode <- "sampling"
           }
@@ -214,9 +236,8 @@ dag_class <- R6Class(
           # if the target is a variable, use forward mode if it has a free
           # state, and sampling mode if not
           if (target_type == "variable") {
-            node_mode <- ifelse(target$unique_name %in% stateless_names,
-                                "sampling",
-                                "forward")
+            to_sample <- target$unique_name %in% stateless_names
+            node_mode <- ifelse(to_sample, "sampling", "forward")
 
           }
 
@@ -224,23 +245,9 @@ dag_class <- R6Class(
           # parent that is a variable, and see if that has a free state
           if (target_type == "operation") {
 
-            # get the (first) parent of this target
-            has_single_parent <- length(target$parents) == 1
-            target_parent <- target$parents[[1]]
-            target_parent_name <- target_parent$unique_name
-
-            # assuming it's a transformed variable (LKJ or Wishart), see
-            # whether that variable has a free state
-            if (has_single_parent && node_type(target_parent) == "variable") {
-              node_mode <- ifelse(target_parent_name %in% stateless_names,
-                                  "sampling",
-                                  "forward")
-            } else {
-              # if there are multiple parents, or this parent is not a variable,
-              # we don't know what to do here
-              stop ("greta cannot yet do conditional sampling with this type of model",
-                    call. = FALSE)
-            }
+            target_parent_name <- target$parents[[1]]$unique_name
+            target_parent_stateless <- target_parent_name %in% stateless_names
+            node_mode <- ifelse(target_parent_stateless, "sampling", "forward")
 
           }
 
@@ -838,9 +845,7 @@ dag_class <- R6Class(
     },
 
     # get the tfp distribution object for a distribution node
-    get_tfp_distribution = function (distrib_node, dim = NULL) {
-
-warning("need to make this use non-null 'dim' to scale up parameters so that samples have the right shape (needed for sampling observed data)")
+    get_tfp_distribution = function (distrib_node) {
 
       # build the tfp distribution object for the distribution, and use it
       # to get the tensor for the sample
