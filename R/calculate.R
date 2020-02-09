@@ -272,38 +272,18 @@ calculate_greta_mcmc_list <- function(target,
     rows <- sample.int(n_samples, nsim, replace = replace)
     draws <- draws[rows, , drop = FALSE]
 
-    stop ("not yet implemented")
+    # add the batch size to the data list
+    dag$set_tf_data_list("batch_size", as.integer(nsim))
 
-    # need to work out how to use free state values for some tensors, and sample
-    # others from their distributions
+    # when data nodes define themselves as sampling, make them be sampled from
+    # their distributions
+    warning ("this probably doesn't work yet")
 
-    # forward mode (as used for inference), just pushes forward from the free
-    # state. There are no stochastic elements, and data is observed
-
-    # full sampling mode does not use the free state, but defines all variables
-    # (and data with distributions?) with a stochastic tensor
-
-    # we need a hybrid mode for this, where the free state is provided and
-    # should be used, but some variables exist that are not linked to the free
-    # state (either data, or new variables), so should be sampled. Can determine
-    # those based on the old dag (difference between those in the node list for
-    # the old dag, and those in the new dag, and those that are data). When the
-    # dag asks them to define theemselves, it needs to differentially tell these
-    # what to do. Label them somehow?
-
-    # variable_node$tf() switches based on dag$mode, instead, give dag a member
-    # function to tell this node what to do, used like:
-    #   mode <- dag$how_to_define(self)
-    #   if (mode == "sampling") { ... }
-    #   if (mode == "forward") { ... }
-    # give dag a list of nodes covered by the free state or data list.
-    # For these, it can define them in forward mode. For the others, it can
-    # define them in sampling mode, or error if they don't have a distribution
-    # from which to be sampled.
-
-    trace <- dag$trace_values(draws, trace_batch_size = trace_batch_size)
+    # pass these values in as the free state
+    trace <- dag$trace_values(draws, trace_batch_size = trace_batch_size, flatten = FALSE)
 
     # hopefully values is already a list of the correct dimensions...
+
 
   } else {
 
@@ -368,7 +348,9 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
                           FUN.VALUE = "")
 
   # check that there are no unspecified variables on which the target depends
-  lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
+  if (!stochastic) {
+    lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
+  }
 
   # look up the tf names of the target greta arrays (under sampling)
   # create an object in the environment that's a list of these, and sample that
@@ -381,9 +363,13 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   data_list <- dag$get_tf_data_list()
   missing <- !names(data_list) %in% names(values)
 
+  # when stochastic is TRUE remove values from feed dict for data nodes with
+  # distributions, so that they are sampled
+  warning ("this probably doesn't work yet")
+
   # send list to tf environment and roll into a dict
   values <- lapply(values, add_first_dim)
-  values <- c(values, list(batch_size = as.integer(nsim)))
+  dag$tf_environment$batch_size <- as.integer(nsim)
   dag$build_feed_dict(values, data_list = data_list[missing])
 
   # run the sampling

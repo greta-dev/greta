@@ -918,7 +918,7 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
 
     # build the message
     msg <- paste("values have not been provided for all greta arrays on which",
-                 "the target depends.")
+                 "the target depends, and nsim has not been set.")
 
     if (any(matches)) {
       names_text <- paste(unmet_names, collapse = ", ")

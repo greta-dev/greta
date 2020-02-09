@@ -577,6 +577,12 @@ dag_class <- R6Class(
 
     },
 
+    get_tf_batch_size = function() {
+
+      self$tf_environment$batch_size
+
+    },
+
     get_tf_data_list = function() {
 
       data_list_name <- paste0(self$mode, "_data_list")
@@ -592,6 +598,7 @@ dag_class <- R6Class(
     },
 
     build_feed_dict = function(dict_list = list(),
+                               batch_size = self$get_tf_batch_size(),
                                data_list = self$get_tf_data_list()) {
 
       tfe <- self$tf_environment
@@ -726,10 +733,6 @@ dag_class <- R6Class(
 
       } else {
 
-        # prepare for return to R
-        trace_list <- lapply(trace_list, drop_first_dim)
-        trace_list <- lapply(trace_list, drop_column_dim)
-
         out <- trace_list
 
       }
@@ -831,6 +834,29 @@ dag_class <- R6Class(
       }
 
       self$adjacency_matrix <- dag_mat
+
+    },
+
+    # get the tfp distribution object for a distribution node
+    get_tfp_distribution = function (distrib_node, dim = NULL) {
+
+warning("need to make this use non-null 'dim' to scale up parameters so that samples have the right shape (needed for sampling observed data)")
+
+      # build the tfp distribution object for the distribution, and use it
+      # to get the tensor for the sample
+      distrib_constructor <- self$get_tf_object(distrib_node)
+      parameter_nodes <- distrib_node$parameters
+      tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
+
+      # match parameters' batches with the batch size so we can draw
+      # multiple samples
+      batch_dummy <- self$tf_environment$batch_dummy
+      dummy_params <- match_batches(c(list(batch_dummy), tf_parameter_list))
+      tf_parameter_list <- dummy_params[-1]
+
+      # execute the distribution constructor functions to return a tfp
+      # distribution object
+      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = dag)
 
     }
 

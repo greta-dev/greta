@@ -18,29 +18,45 @@ data_node <- R6Class(
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
 
-      value <- self$value()
-      shape <- to_shape(c(1, dim(value)))
-      value <- add_first_dim(value)
+      mode <- dag$how_to_define(self)
 
-      # under some circumstances we define data as constants, but normally as
-      # placeholders
-      using_constants <- !is.null(greta_stash$data_as_constants)
+      # if we're in sampling mode, get the distribution constructor and sample this node
+      if (mode == "sampling") {
 
-      if (using_constants) {
-
-        tensor <- tf$constant(value = value,
-                              dtype = tf_float(),
-                              shape = shape)
-
-      } else {
-
-        tensor <- tf$compat$v1$placeholder(shape = shape,
-                                           dtype = tf_float())
-        dag$set_tf_data_list(tf_name, value)
+        tfp_distribution <- dag$get_tfp_distribution(self$distribution)
+        tensor <- tfp_distribution$sample(sample_shape = self$dim[1], seed = get_seed())
 
       }
 
-      # create placeholder
+      # if we're defining the forward mode graph, create either a constant or a
+      # placeholder
+      if (mode == "forward") {
+
+        value <- self$value()
+        shape <- to_shape(c(1, dim(value)))
+        value <- add_first_dim(value)
+
+        # under some circumstances we define data as constants, but normally as
+        # placeholders
+        using_constants <- !is.null(greta_stash$data_as_constants)
+
+        if (using_constants) {
+
+          tensor <- tf$constant(value = value,
+                                dtype = tf_float(),
+                                shape = shape)
+
+        } else {
+
+          tensor <- tf$compat$v1$placeholder(shape = shape,
+                                             dtype = tf_float())
+          dag$set_tf_data_list(tf_name, value)
+
+        }
+
+      }
+
+      # put tensor in environment
       assign(tf_name, tensor, envir = tfe)
 
     }
@@ -125,26 +141,41 @@ operation_node <- R6Class(
 
     tf = function(dag) {
 
-      # fetch the tensors for the environment
-      arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
-      args <- lapply(arg_tf_names, get, envir = dag$tf_environment)
+      tfe <- dag$tf_environment
+      tf_name <- dag$tf_name(self)
+      mode <- dag$how_to_define(self)
 
-      # fetch additional (non-tensor) arguments, if any
-      if (length(self$operation_args) > 0)
-        args <- c(args, self$operation_args)
+      # if we're in sampling mode, get the distribution constructor and sample this node
+      if (mode == "sampling") {
 
-      # if there are multiple args, reconcile batch dimensions now
-      args <- match_batches(args)
+        tfp_distribution <- dag$get_tfp_distribution(self$distribution)
+        tensor <- tfp_distribution$sample(seed = get_seed())
 
-      # get the tensorflow function
-      operation <- eval(parse(text = self$operation),
-                        envir = self$tf_function_env)
+      }
 
-      # apply the function on tensors
-      node <- do.call(operation, args)
+      if (mode == "forward") {
+
+        # fetch the tensors for the environment
+        arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
+        tf_args <- lapply(arg_tf_names, get, envir = tfe)
+
+        # fetch additional (non-tensor) arguments, if any
+        if (length(self$operation_args) > 0)
+          tf_args <- c(tf_args, self$operation_args)
+
+        # if there are multiple args, reconcile batch dimensions now
+        tf_args <- match_batches(tf_args)
+
+        # get the tensorflow function and apply it to the args
+        operation <- eval(parse(text = self$operation),
+                          envir = self$tf_function_env)
+
+        tensor <- do.call(operation, tf_args)
+
+      }
 
       # assign it in the environment
-      assign(dag$tf_name(self), node, envir = dag$tf_environment)
+      assign(tf_name, tensor, envir = dag$tf_environment)
 
     }
   )
@@ -253,44 +284,6 @@ variable_node <- R6Class(
 
     },
 
-    # flip the distribution node from being a child to a parent if sampling
-    list_parents = function(dag) {
-
-      parents <- self$parents
-      distribution_node <- self$distribution
-
-      mode <- dag$how_to_define(self)
-
-      # if we're in sampling mode and this variable has a distribution, consider
-      # that a parent node too
-      if (mode == "sampling" & !is.null(distribution_node)) {
-        parents <- c(parents, list(distribution_node))
-      }
-
-      parents
-
-    },
-
-    # flip the distribution node from being a child to a parent if sampling
-    list_children = function(dag) {
-
-      children <- self$children
-      distribution_node <- self$distribution
-
-      mode <- dag$how_to_define(self)
-
-      # if we're in sampling mode and this variable has a distribution, do not consider
-      # that a child node
-      if (mode == "sampling" & !is.null(distribution_node)) {
-        child_names <- vapply(children, member, "unique_name", FUN.VALUE = character(1))
-        keep <- child_names != distribution_node$unique_name
-        children <- children[keep]
-      }
-
-      children
-
-    },
-
     tf = function(dag) {
 
       # get the names of the variable and (already-defined) free state version
@@ -311,23 +304,7 @@ variable_node <- R6Class(
 
         } else {
 
-          # otherwise build the tfp distribution object for the distribution,
-          # and use it to get the tensor for the sample
-
-          distrib_constructor <- dag$get_tf_object(distrib_node)
-          parameter_nodes <- distrib_node$parameters
-          tf_parameter_list <- lapply(parameter_nodes, dag$get_tf_object)
-
-          # match parameters' batches with the batch size so we can draw
-          # multiple samples
-          batch_dummy <- dag$tf_environment$batch_dummy
-          dummy_params <- match_batches(c(list(batch_dummy), tf_parameter_list))
-          tf_parameter_list <- dummy_params[-1]
-
-          # execute the distribution constructor functions to return a tfp
-          # distribution object
-          tfp_distribution <- distrib_constructor(tf_parameter_list, dag = dag)
-
+          tfp_distribution <- dag$get_tfp_distribution(self$distribution)
           tensor <- tfp_distribution$sample(seed = get_seed())
 
         }
@@ -492,19 +469,16 @@ distribution_node <- R6Class(
       vble(truncation, dim = self$dim)
     },
 
-    # flip the target node from being a parent to a child when sampling
     list_parents = function(dag) {
 
       parents <- self$parents
-      target_node <- self$target
 
+      # if this node is being used for sampling and has a target, do not
+      # consider that a parent node
       mode <- dag$how_to_define(self)
-
-      # if we're in sampling mode and this variable has a target, do not consider
-      # that a parent node
-      if (mode == "sampling" & !is.null(target_node)) {
+      if (mode == "sampling" & !is.null(self$target)) {
         parent_names <- vapply(parents, member, "unique_name", FUN.VALUE = character(1))
-        keep <- parent_names != target_node$unique_name
+        keep <- parent_names != self$target$unique_name
         parents <- parents[keep]
       }
 
@@ -512,18 +486,15 @@ distribution_node <- R6Class(
 
     },
 
-    # flip the target node from being a parent to a child when sampling
     list_children = function(dag) {
 
       children <- self$children
-      target_node <- self$distribution
 
+      # if this node is being used for sampling and has a target, consider that
+      # a child node
       mode <- dag$how_to_define(self)
-
-      # if we're in sampling mode and this variable has a target, consider
-      # that a child node too
-      if (mode == "sampling" & !is.null(target_node)) {
-        children <- c(children, list(target_node))
+      if (mode == "sampling" & !is.null(self$target)) {
+        children <- c(children, list(self$target))
       }
 
       children

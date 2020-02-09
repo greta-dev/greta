@@ -76,9 +76,18 @@ node <- R6Class(
 
     },
 
-    list_parents = function (dag) {
+    list_parents = function(dag) {
 
-      self$parents
+      parents <- self$parents
+
+      # if this node is being sampled and has a distribution, consider
+      # that a parent node too
+      mode <- dag$how_to_define(self)
+      if (mode == "sampling" & !is.null(self$distribution)) {
+        parents <- c(parents, list(self$distribution))
+      }
+
+      parents
 
     },
 
@@ -97,9 +106,20 @@ node <- R6Class(
 
     },
 
-    list_children = function (dag) {
+    list_children = function(dag) {
 
-      self$children
+      children <- self$children
+
+      # if this node is being sampled and has a distribution, do not consider
+      # that a child node
+      mode <- dag$how_to_define(self)
+      if (mode == "sampling" & !is.null(self$distribution)) {
+        child_names <- vapply(children, member, "unique_name", FUN.VALUE = character(1))
+        keep <- child_names != self$distribution$unique_name
+        children <- children[keep]
+      }
+
+      children
 
     },
 

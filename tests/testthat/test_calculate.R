@@ -101,8 +101,7 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 
   # this should error without nsim being specified (y is stochastic)
   expect_error(calculate(list(a, y), values = draws),
-               paste("values have not been provided for all greta arrays on",
-                     "which the target depends"))
+               "values have not been provided")
 
   # for a list of targets, the result should be a list
   nsim <- 10
