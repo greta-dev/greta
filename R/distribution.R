@@ -44,7 +44,7 @@
   node <- get_node(greta_array)
 
   # only for greta arrays without distributions
-  if (!is.null(node$distribution)) {
+  if (has_distribution(node)) {
     stop("left hand side already has a distribution assigned",
          call. = FALSE)
   }

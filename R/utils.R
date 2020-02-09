@@ -380,6 +380,10 @@ pad_vector <- function(x, to_length, with = 1) {
   x
 }
 
+has_distribution <- function (node) {
+  !is.null(node$distribution)
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,

@@ -83,7 +83,7 @@ node <- R6Class(
       # if this node is being sampled and has a distribution, consider
       # that a parent node too
       mode <- dag$how_to_define(self)
-      if (mode == "sampling" & !is.null(self$distribution)) {
+      if (mode == "sampling" & has_distribution(self)) {
         parents <- c(parents, list(self$distribution))
       }
 
@@ -113,7 +113,7 @@ node <- R6Class(
       # if this node is being sampled and has a distribution, do not consider
       # that a child node
       mode <- dag$how_to_define(self)
-      if (mode == "sampling" & !is.null(self$distribution)) {
+      if (mode == "sampling" & has_distribution(self)) {
         child_names <- vapply(children, member, "unique_name", FUN.VALUE = character(1))
         keep <- child_names != self$distribution$unique_name
         children <- children[keep]
@@ -252,7 +252,7 @@ node <- R6Class(
 
       text <- node_type(self)
 
-      if (!is.null(self$distribution)) {
+      if (has_distribution(self)) {
         text <- paste(text,
                       "following a",
                       self$distribution$distribution_name,
