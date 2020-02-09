@@ -198,9 +198,19 @@ calculate <- function(target,
 
   }
 
-  # strip list if the target was a single greta array
-  if (single_target) {
-    result <- unlist(result, recursive = FALSE)
+  # if the result wasn't a greta array, prepare the outputs
+  if (!inherits(result, "greta_mcmc_list")) {
+
+    # if we aren't simulating, drop the batch dimension)
+    if (is.null(nsim)) {
+      result <- lapply(result, drop_first_dim)
+    }
+
+    # if the target was a single greta array, dtrip the list
+    if (single_target) {
+      result <- result[[1]]
+    }
+
   }
 
   result
@@ -220,11 +230,13 @@ calculate_greta_mcmc_list <- function(target,
   # check trace_batch_size is valid
   trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
-  # get the old dag from the samples
+  # get the free state draws and old dag from the samples
   model_info <- get_model_info(values)
   mcmc_dag <- model_info$model$dag
+  draws <- model_info$raw_draws
 
-  # build a new dag from the targets and set the mode
+  # build a new dag from the targets and set the mode (whether we also need to
+  # IID sample some nodes)
   dag <- dag_class$new(target, tf_float = tf_float)
   dag$mode <- ifelse(stochastic, "hybrid", "all_forward")
 
@@ -241,10 +253,6 @@ calculate_greta_mcmc_list <- function(target,
 
   dag$target_nodes <- lapply(target, get_node)
   names(dag$target_nodes) <- names(target)
-
-  # get draws of the free state
-  model_info <- attr(values, "model_info")
-  draws <- model_info$raw_draws
 
   # if we're doing stochastic sampling, subsample the draws
   if (stochastic) {
@@ -325,6 +333,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   stochastic <- !is.null(nsim)
 
+  fixed_greta_arrays <- list()
+
   if (!identical(values, list())) {
 
     # check the list of values makes sense, and return these and the corresponding
@@ -339,8 +349,7 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   }
 
-  all_greta_arrays <- c(fixed_greta_arrays, list(target))
-
+  all_greta_arrays <- c(fixed_greta_arrays, target)
   # define the dag and TF graph
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
 
@@ -359,7 +368,14 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
                           FUN.VALUE = "")
 
   # check that there are no unspecified variables on which the target depends
-  check_dependencies_satisfied(target, fixed_greta_arrays, dag, env)
+  lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
+
+  # look up the tf names of the target greta arrays (under sampling)
+  # create an object in the environment that's a list of these, and sample that
+  target_nodes <- lapply(target, get_node)
+  target_names_list <- lapply(target_nodes, dag$tf_name)
+  target_tensor_list <- lapply(target_names_list, get, envir = dag$tf_environment)
+  assign("calculate_target_tensor_list", target_tensor_list, envir = dag$tf_environment)
 
   # add values or data not specified by the user
   data_list <- dag$get_tf_data_list()
@@ -371,7 +387,7 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   dag$build_feed_dict(values, data_list = data_list[missing])
 
   # run the sampling
-  dag$tf_sess_run("sampling_target_tensor_list", as_text = TRUE)
+  dag$tf_sess_run("calculate_target_tensor_list", as_text = TRUE)
 
 }
 

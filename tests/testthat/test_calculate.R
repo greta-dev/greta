@@ -101,8 +101,8 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 
   # this should error without nsim being specified (y is stochastic)
   expect_error(calculate(list(a, y), values = draws),
-               "values have not been provided for all greta arrays on",
-               "which the target depends")
+               paste("values have not been provided for all greta arrays on",
+                     "which the target depends"))
 
   # for a list of targets, the result should be a list
   nsim <- 10
@@ -164,8 +164,8 @@ test_that("calculate errors nicely if values for stochastics not passed", {
                      "which the target depends. Please provide values for the",
                      "greta array: a"))
 
-  # but is should work fine is nsim is set
-  expect_ok(calculate(y, list(x = c(2, 1))), nsim = 1)
+  # but is should work fine if nsim is set
+  expect_ok(calculate(y, list(x = c(2, 1)), nsim = 1))
 
 })
 
@@ -194,10 +194,9 @@ test_that("calculate errors nicely if not used on a greta array", {
   y <- a * x
   z <- 1:5
 
-
   # it should error nicely
   expect_error(calculate(z, list(a = c(1, 1))),
-               "target' is not a greta array")
+               "'target' must be either a greta array")
 
 })
 
@@ -272,12 +271,11 @@ test_that("calculate returns a list or array based on target", {
   expect_true(is.list(result))
 
   # check contents
-  are_numeric <- vapply(result, is.numeric, FUN.VALUE = numeric(1))
+  are_numeric <- vapply(result, is.numeric, FUN.VALUE = logical(1))
   expect_true(all(are_numeric))
 
   # check names
-  names <- vapply(result, is.numeric, FUN.VALUE = numeric(1))
-  expect_true(identical(names, c("b", "c")))
+  expect_true(identical(names(result), c("b", "c")))
 
 })
 

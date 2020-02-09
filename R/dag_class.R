@@ -7,7 +7,7 @@ dag_class <- R6Class(
   "dag_class",
   public = list(
 
-    mode = "forward",
+    mode = "all_forward",
     node_list = list(),
     variables_without_free_state = list(),
     node_types = NA,
@@ -48,8 +48,9 @@ dag_class <- R6Class(
 
       self$tf_environment <- new.env()
       self$tf_graph <- tf$Graph()
-      self$tf_environment$forward_data_list <- list()
-      self$tf_environment$sampling_data_list <- list()
+      self$tf_environment$all_forward_data_list <- list()
+      self$tf_environment$all_sampling_data_list <- list()
+      self$tf_environment$hybrid_data_list <- list()
 
     },
 
@@ -170,7 +171,7 @@ dag_class <- R6Class(
 
       # if we're in hybrid mode (some nodes defined forward from the free state
       # or data, others sampled), decide which way this node should be defined
-      if (self$mode == hybrid) {
+      if (self$mode == "hybrid") {
 
         node_type <- node_type(node)
 
@@ -306,9 +307,8 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      # if in forward mode, split up the free state
-      if (self$mode == "forward") {
-
+      # if in forward or hybrid mode, split up the free state
+      if (self$mode %in% c("all_forward", "hybrid")) {
 
         # split up into separate free state variables and assign
         free_state <- get("free_state", envir = tfe)
@@ -374,12 +374,15 @@ dag_class <- R6Class(
     # free state variable, or for sampling
     define_tf = function(target_nodes = self$node_list) {
 
-      # define the free state variable or batch size depending on the mode
-      switch(
-        self$mode,
-        forward = self$define_free_state("placeholder", "free_state"),
-        sampling = self$define_batch_size()
-      )
+      # define the free state variable and/or batch size depending on the mode
+
+      if (self$mode %in% c("all_forward", "hybrid")) {
+        self$define_free_state("placeholder", "free_state")
+      }
+
+      if (self$mode %in% c("all_sampling", "hybrid")) {
+        self$define_batch_size()
+      }
 
       # define the body of the graph (depending on the mode) and the session
       self$define_tf_body(target_nodes = target_nodes)
