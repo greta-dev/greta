@@ -220,24 +220,21 @@ calculate_greta_mcmc_list <- function(target,
   # check trace_batch_size is valid
   trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
-  # can we use a brand new dag, or do we need this one to line up the values?
-
-  # copy and refresh the dag from the samples
+  # get the old dag from the samples
   model_info <- get_model_info(values)
-  dag <- model_info$model$dag$clone()
-  dag$new_tf_environment()
+  mcmc_dag <- model_info$model$dag
 
-  # set the precision
-  dag$tf_float <- tf_float
+  # build a new dag from the targets and set the mode
+  dag <- dag_class$new(target, tf_float = tf_float)
+  dag$mode <- ifelse(stochastic, "hybrid", "all_forward")
 
-  # temporarily set the mode (either forward or sampling)
-  old_mode <- dag$mode
-  on.exit(dag$mode <- old_mode, add = TRUE)
-  dag$mode <- ifelse(stochastic, "sampling", "forward")
+  # find variable nodes in the new dag that don't have a free state in the old one.
+  mcmc_dag_variables <- mcmc_dag$node_list[mcmc_dag$node_types == "variable"]
+  dag_variables <- dag$node_list[dag$node_types == "variable"]
+  stateless_names <- setdiff(names(dag_variables), names(mcmc_dag_variables))
+  dag$variables_without_free_state <- dag_variables[stateless_names]
 
-  # extend it dag to include this node as the target
-  dag$build_dag(target)
-
+  # is this still needed?
   self <- dag  # mock for scoping
   self
   dag$define_tf()
@@ -272,17 +269,17 @@ calculate_greta_mcmc_list <- function(target,
     # need to work out how to use free state values for some tensors, and sample
     # others from their distributions
 
-    # forward mode (as used for inference), just pushed forward from the free
+    # forward mode (as used for inference), just pushes forward from the free
     # state. There are no stochastic elements, and data is observed
 
     # full sampling mode does not use the free state, but defines all variables
     # (and data with distributions?) with a stochastic tensor
 
-    # we need an hybrid mode for this, where the free state is provided and
+    # we need a hybrid mode for this, where the free state is provided and
     # should be used, but some variables exist that are not linked to the free
     # state (either data, or new variables), so should be sampled. Can determine
     # those based on the old dag (difference between those in the node list for
-    # the old dag, and those in the new dag, and thosee that are data). When the
+    # the old dag, and those in the new dag, and those that are data). When the
     # dag asks them to define theemselves, it needs to differentially tell these
     # what to do. Label them somehow?
 
@@ -348,7 +345,7 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
 
   # change dag mode to sampling
-  dag$mode <- "sampling"
+  dag$mode <- "all_sampling"
 
   dag$define_tf()
   tfe <- dag$tf_environment

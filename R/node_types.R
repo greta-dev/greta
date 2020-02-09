@@ -259,9 +259,11 @@ variable_node <- R6Class(
       parents <- self$parents
       distribution_node <- self$distribution
 
+      mode <- dag$how_to_define(self)
+
       # if we're in sampling mode and this variable has a distribution, consider
       # that a parent node too
-      if (dag$mode == "sampling" & !is.null(distribution_node)) {
+      if (mode == "sampling" & !is.null(distribution_node)) {
         parents <- c(parents, list(distribution_node))
       }
 
@@ -275,9 +277,11 @@ variable_node <- R6Class(
       children <- self$children
       distribution_node <- self$distribution
 
+      mode <- dag$how_to_define(self)
+
       # if we're in sampling mode and this variable has a distribution, do not consider
       # that a child node
-      if (dag$mode == "sampling" & !is.null(distribution_node)) {
+      if (mode == "sampling" & !is.null(distribution_node)) {
         child_names <- vapply(children, member, "unique_name", FUN.VALUE = character(1))
         keep <- child_names != distribution_node$unique_name
         children <- children[keep]
@@ -292,7 +296,9 @@ variable_node <- R6Class(
       # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
 
-      if (dag$mode == "sampling") {
+      mode <- dag$how_to_define(self)
+
+      if (mode == "sampling") {
 
         distrib_node <- self$distribution
 
@@ -330,7 +336,7 @@ variable_node <- R6Class(
 
       # if we're defining the forward mode graph, get the free state, transform,
       # and compute any transformation density
-      if (dag$mode == "forward") {
+      if (mode == "forward") {
 
         free_name <- sprintf("%s_free", tf_name)
 
@@ -492,9 +498,11 @@ distribution_node <- R6Class(
       parents <- self$parents
       target_node <- self$target
 
+      mode <- dag$how_to_define(self)
+
       # if we're in sampling mode and this variable has a target, do not consider
       # that a parent node
-      if (dag$mode == "sampling" & !is.null(target_node)) {
+      if (mode == "sampling" & !is.null(target_node)) {
         parent_names <- vapply(parents, member, "unique_name", FUN.VALUE = character(1))
         keep <- parent_names != target_node$unique_name
         parents <- parents[keep]
@@ -510,9 +518,11 @@ distribution_node <- R6Class(
       children <- self$children
       target_node <- self$distribution
 
+      mode <- dag$how_to_define(self)
+
       # if we're in sampling mode and this variable has a target, consider
       # that a child node too
-      if (dag$mode == "sampling" & !is.null(target_node)) {
+      if (mode == "sampling" & !is.null(target_node)) {
         children <- c(children, list(target_node))
       }
 

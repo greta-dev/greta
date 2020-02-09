@@ -96,7 +96,6 @@ test_that("simulate errors if distribution-free variables are not fixed", {
 
 })
 
-
 test_that("simulate errors if a distribution cannot be sampled from", {
 
   skip_if_not(check_tf_version())

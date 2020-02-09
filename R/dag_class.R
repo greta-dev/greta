@@ -9,6 +9,7 @@ dag_class <- R6Class(
 
     mode = "forward",
     node_list = list(),
+    variables_without_free_state = list(),
     node_types = NA,
     node_tf_names = NA,
     tf_environment = NA,
@@ -110,7 +111,7 @@ dag_class <- R6Class(
     },
 
     # create human-readable base names for TF tensors. these will actually be
-    # defined prepended with "forward_" or "sampling"
+    # defined prepended with "all_forward_" or "all_sampling" or "hybrid_
     make_names = function() {
 
       types <- self$node_types
@@ -157,7 +158,100 @@ dag_class <- R6Class(
 
     },
 
-    define_batch_size = function () {
+    # tell a node whether to define itself in forward mode (deterministically
+    # from an existing free state), or in sampling mode (generate a random
+    # version of itself)
+    how_to_define = function(node) {
+
+      # if we're doing all sampling or all forward, define the node as such
+      node_mode <- switch(self$mode,
+                          all_sampling = "sampling",
+                          all_forward = "forward")
+
+      # if we're in hybrid mode (some nodes defined forward from the free state
+      # or data, others sampled), decide which way this node should be defined
+      if (self$mode == hybrid) {
+
+        node_type <- node_type(node)
+
+        # the names of variable nodes not connected to the free state in this dag
+        stateless_names <- names(self$variables_without_free_state)
+
+        # if the node is data, use sampling mode if it has a distribution and
+        # forward mode if not
+        if (node_type == "data") {
+          node_mode <- ifelse(is.null(node$distribution),
+                              "forward",
+                              "sampling")
+        }
+
+        # if the node is a variable, use forward mode if it has a free state,
+        # and sampling mode if not
+        if (node_type == "variable") {
+          node_mode <- ifelse(node$unique_name %in% stateless_names,
+                              "sampling",
+                              "forward")
+        }
+
+        # if the node is a distribution, decide based on its target
+        if (node_type == "distribution") {
+
+          target <- node$target
+          target_type <- node_type(target)
+
+          # if it has no target (e.g. for a mixture distribution), define it in
+          # sampling mode (so it defined before the things that depend on it)
+          if (is.null(target)) {
+            node_mode <- "sampling"
+          }
+
+          # if the target is data, use sampling mode
+          if (target_type == "data") {
+            node_mode <- "sampling"
+          }
+
+          # if the target is a variable, use forward mode if it has a free
+          # state, and sampling mode if not
+          if (target_type == "variable") {
+            node_mode <- ifelse(target$unique_name %in% stateless_names,
+                                "sampling",
+                                "forward")
+
+          }
+
+          # if the target is an operation, see if that operation has a single
+          # parent that is a variable, and see if that has a free state
+          if (target_type == "operation") {
+
+            # get the (first) parent of this target
+            has_single_parent <- length(target$parents) == 1
+            target_parent <- target$parents[[1]]
+            target_parent_name <- target_parent$unique_name
+
+            # assuming it's a transformed variable (LKJ or Wishart), see
+            # whether that variable has a free state
+            if (has_single_parent && node_type(target_parent) == "variable") {
+              node_mode <- ifelse(target_parent_name %in% stateless_names,
+                                  "sampling",
+                                  "forward")
+            } else {
+              # if there are multiple parents, or this parent is not a variable,
+              # we don't know what to do here
+              stop ("greta cannot yet do conditional sampling with this type of model",
+                    call. = FALSE)
+            }
+
+          }
+
+        }
+
+      }
+
+      node_mode
+
+    },
+
+    define_batch_size = function() {
 
       tfe <- self$tf_environment
       self$tf_run(
