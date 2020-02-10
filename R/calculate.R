@@ -206,7 +206,7 @@ calculate <- function(target,
       result <- lapply(result, drop_first_dim)
     }
 
-    # if the target was a single greta array, dtrip the list
+    # if the target was a single greta array, strip the list
     if (single_target) {
       result <- result[[1]]
     }
@@ -365,10 +365,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   # add values or data not specified by the user
   data_list <- dag$get_tf_data_list()
   missing <- !names(data_list) %in% names(values)
-
-  # when stochastic is TRUE remove values from feed dict for data nodes with
-  # distributions, so that they are sampled
-  warning ("this probably doesn't work yet")
 
   # send list to tf environment and roll into a dict
   values <- lapply(values, add_first_dim)

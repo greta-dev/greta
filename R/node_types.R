@@ -24,7 +24,7 @@ data_node <- R6Class(
       if (mode == "sampling") {
 
         tfp_distribution <- dag$get_tfp_distribution(self$distribution)
-        tensor <- tfp_distribution$sample(sample_shape = self$dim[1], seed = get_seed())
+        tensor <- tfp_distribution$sample(seed = get_seed())
 
       }
 
@@ -427,6 +427,7 @@ distribution_node <- R6Class(
     bounds = c(-Inf, Inf),
     truncation = NULL,
     parameters = list(),
+    parameters_expandable = logical(),
 
     initialize = function(name = "no distribution",
                           dim = NULL,
@@ -504,7 +505,7 @@ distribution_node <- R6Class(
     # create target node, add as a parent, and give it this distribution
     add_target = function(new_target) {
 
-      # add as x and as a parent
+      # add as target and as a parent
       self$target <- new_target
       self$add_parent(new_target)
 
@@ -550,10 +551,14 @@ distribution_node <- R6Class(
 
     add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
 
-      # expand out a scalar parameter if needed
-      if (!is.null(expand_scalar_to) &&
-          is_scalar(parameter) & !identical(expand_scalar_to, c(1L, 1L))) {
+      # can the scalar parameter be expanded?
+      expandable <- !is.null(expand_scalar_to) & is_scalar(parameter)
+      self$parameters_expandable[[name]] <- expandable
+
+      # expand now if needed (and remove flag)
+      if (expandable & !identical(expand_scalar_to, c(1L, 1L))) {
         parameter <- greta_array(parameter, dim = expand_scalar_to)
+        self$parameters_expandable[[name]] <- FALSE
       }
 
       parameter <- to_node(parameter)

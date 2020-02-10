@@ -630,7 +630,7 @@ parse_initial_values <- function(initials, dag) {
   # variable
 
   # find the corresponding nodes and check they are variable nodes
-  forward_names <- paste0("forward_", dag$node_tf_names)
+  forward_names <- paste0("all_forward_", dag$node_tf_names)
   nodes <- dag$node_list[match(tf_names, forward_names)]
   types <- lapply(nodes, node_type)
   are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)

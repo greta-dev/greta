@@ -110,7 +110,7 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   # correct class, dimensions, and valid values
   expect_true(is.list(sims))
   expect_equal(names(sims), c("a", "y"))
-  expect_equal(dim(sims$a), c(nsim, 1))
+  expect_equal(dim(sims$a), c(nsim, 1, 1))
   expect_equal(dim(sims$y), c(nsim, n, 1))
   expect_true(all(is.finite(sims$a)) & all(is.finite(sims$y)))
 
@@ -123,7 +123,7 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 
   # warn about resampling if nsim is greater than the number of elements in draws
   expect_warning(calculate(y, values = draws, nsim = samples * chains + 1),
-                 "posterior samples drawn with replacement")
+                 "posterior samples had to be drawn with replacement")
 
 })
 
@@ -160,8 +160,8 @@ test_that("calculate errors nicely if values for stochastics not passed", {
   # it should error nicely
   expect_error(calculate(y, list(x = c(2, 1))),
                paste("values have not been provided for all greta arrays on",
-                     "which the target depends. Please provide values for the",
-                     "greta array: a"))
+                     "which the target depends, and nsim has not been set.",
+                     "Please provide values for the greta array: a"))
 
   # but is should work fine if nsim is set
   expect_ok(calculate(y, list(x = c(2, 1)), nsim = 1))
@@ -289,16 +289,16 @@ test_that("calculate produces the right number of samples", {
 
   # should be vectors
   a_sims <- calculate(a, nsim = 1)
-  expect_true(identical(length(a_sims), 1L))
+  expect_equal(dim(a_sims), c(1, dim(a)))
 
   a_sims <- calculate(a, nsim = 17)
-  expect_true(identical(length(a_sims), 17L))
+  expect_equal(dim(a_sims), c(17, dim(a)))
 
   y_sims <- calculate(y, nsim = 1)
-  expect_true(identical(length(y_sims), 3L))
+  expect_equal(dim(y_sims), c(1, dim(y)))
 
   y_sims <- calculate(y, nsim = 19)
-  expect_true(identical(dim(y_sims), c(19L, 3L)))
+  expect_equal(dim(y_sims), c(19, dim(y)))
 
   # the global RNG seed should not change if the seed *is* specified
   before <- rng_seed()
@@ -385,7 +385,7 @@ test_that("calculate errors if distribution-free variables are not fixed", {
   # fix variable
   a <- variable()
   y <- normal(a, 1)
-  expect_error(sims <- calculate(m, nsim = 1),
+  expect_error(calculate(list(a, y), nsim = 1),
                "specified in values")
 
 })
