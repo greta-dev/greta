@@ -23,8 +23,7 @@ data_node <- R6Class(
       # if we're in sampling mode, get the distribution constructor and sample this node
       if (mode == "sampling") {
 
-        tfp_distribution <- dag$get_tfp_distribution(self$distribution)
-        tensor <- tfp_distribution$sample(seed = get_seed())
+        tensor <- dag$draw_sample(self$distribution)
 
       }
 
@@ -148,8 +147,7 @@ operation_node <- R6Class(
       # if we're in sampling mode, get the distribution constructor and sample this node
       if (mode == "sampling") {
 
-        tfp_distribution <- dag$get_tfp_distribution(self$distribution)
-        tensor <- tfp_distribution$sample(seed = get_seed())
+        tensor <- dag$draw_sample(self$distribution)
 
       }
 

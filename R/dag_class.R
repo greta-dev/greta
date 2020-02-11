@@ -863,6 +863,23 @@ dag_class <- R6Class(
       # distribution object
       tfp_distribution <- distrib_constructor(tf_parameter_list, dag = dag)
 
+    },
+
+    # try to draw a random sample from a distribution node
+    draw_sample = function (distribution_node) {
+
+      tfp_distribution <- self$get_tfp_distribution(distribution_node)
+      sample <- tfp_distribution$sample
+
+      if (is.null(sample)) {
+        stop ("sampling is not yet implemented for ",
+              distribution_node$distribution_name,
+              " distributions",
+              call. = FALSE)
+      }
+
+      sample(seed = get_seed())
+
     }
 
   )
