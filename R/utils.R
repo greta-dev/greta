@@ -798,12 +798,21 @@ check_future_plan <- function() {
 }
 
 # check a list of greta arrays and return a list with names scraped from call
-check_greta_arrays <- function(greta_array_list, fun_name) {
+check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
 
   # check they are greta arrays
   are_greta_arrays <- vapply(greta_array_list,
                              inherits, "greta_array",
                              FUN.VALUE = FALSE)
+
+
+  msg <- NULL
+
+  if (length(greta_array_list) == 0) {
+
+    msg <- "could not find any non-data greta arrays"
+
+  }
 
   if (!all(are_greta_arrays)) {
 
@@ -815,15 +824,14 @@ check_greta_arrays <- function(greta_array_list, fun_name) {
                     paste0("The following object passed to ",
                            fun_name, "() is not a greta array: "))
 
-    stop(msg,
-         paste(unexpected_items, sep = ", "),
-         call. = FALSE)
+    msg <- paste(msg, paste(unexpected_items, sep = ", "))
 
   }
 
-  if (length(greta_array_list) == 0) {
-    stop("could not find any non-data greta arrays",
-         call. = FALSE)
+
+
+  if (!is.null(msg)) {
+    stop(msg, hint, call. = FALSE)
   }
 
   greta_array_list

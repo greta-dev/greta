@@ -1,6 +1,6 @@
 context("simulate")
 
-test_that("simulate prodices the right number of samples", {
+test_that("simulate produces the right number of samples", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -11,35 +11,13 @@ test_that("simulate prodices the right number of samples", {
   m <- model(y, a)
 
   # should be vectors
-  a_sims <- simulate(m)$a
-  expect_true(identical(length(a_sims), 1L))
+  sims <- simulate(m)
+  expect_equal(dim(sims$a), c(1, dim(a)))
+  expect_equal(dim(sims$y), c(1, dim(y)))
 
-  a_sims <- simulate(m, 17)$a
-  expect_true(identical(length(a_sims), 17L))
-
-  y_sims <- simulate(m)$y
-  expect_true(identical(length(y_sims), 3L))
-
-  # the global RNG seed should not change if the seed *is* specified
-  before <- rng_seed()
-  sims <- simulate(m, seed = 12345)
-  after <- rng_seed()
-  expect_identical(before, after)
-
-  # the samples should differ if the seed is *not* specified
-  one <- simulate(m)
-  two <- simulate(m)
-  expect_false(identical(one, two))
-
-  # the samples should differ if the seeds are specified differently
-  one <- simulate(m, seed = 12345)
-  two <- simulate(m, seed = 54321)
-  expect_false(identical(one, two))
-
-  # the samples should be the same if the seed is the same
-  one <- simulate(m, seed = 12345)
-  two <- simulate(m, seed = 12345)
-  expect_identical(one, two)
+  sims <- simulate(m, 17)
+  expect_equal(dim(sims$a), c(17, dim(a)))
+  expect_equal(dim(sims$y), c(17, dim(y)))
 
 })
 

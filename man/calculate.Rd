@@ -5,7 +5,7 @@
 \title{calculate greta arrays given fixed values}
 \usage{
 calculate(
-  target,
+  ...,
   values = list(),
   nsim = NULL,
   precision = c("double", "single"),
@@ -14,8 +14,7 @@ calculate(
 )
 }
 \arguments{
-\item{target}{a greta array or list of greta arrays for which to calculate
-the value}
+\item{...}{one or more greta_arrays for which to calculate the value}
 
 \item{values}{a named list giving temporary values of the greta arrays with
 which \code{target} is connected, or a \code{greta_mcmc_list} object
@@ -34,17 +33,15 @@ reduce memory demands}
 simulation so as to generate a reproducible sample}
 }
 \value{
-Values of the greta array(s) in \code{target} calculated given values
-  of the greeta arrays on which they depend ( either specified in
-  \code{values} or sampled from their priors). Structured either as a numeric
-  R array (if \code{target} is a single greta array), a named list of numeric
-  R arrays (if \code{target} is a list of greta arrays), or a
-  \code{\link[mcmc]{greta_mcmc_list}} object of posterior samples (if
-  \code{values} is a \code{greta_mcmc_list} and \code{nsim = NULL}). If
-  \code{nsim = NULL} the dimensions of returned numeric R arrays will be the
-  same as the corresponding greta arrays, otherwise an additional dimension
-  with \code{nsim} elements will be prepended, to represent multiple
-  simulations.
+Values of the target greta array(s), given values of the greta arrays
+  on which they depend (either specified in \code{values} or sampled from
+  their priors). If \code{values} is a  \code{\link[mcmc]{greta_mcmc_list}}
+  and \code{nsim = NULL}, this will be a \code{greta_mcmc_list} object of
+  posterior samples for the target greta arrays. Otherwise, the result will
+  be a named list of numeric R arrays. If \code{nsim = NULL} the dimensions
+  of returned numeric R arrays will be the same as the corresponding greta
+  arrays, otherwise an additional dimension with \code{nsim} elements will be
+  prepended, to represent multiple simulations.
 }
 \description{
 Calculate the values that greta arrays would take, given
@@ -83,13 +80,13 @@ The greta arrays named in \code{values} need not be variables, they
 x <- normal(0, 1, dim = 3)
 a <- lognormal(0, 1)
 y <- sum(x ^ 2) + a
-calculate(y, list(x = c(0.1, 0.2, 0.3), a = 2))
+calculate(y, values = list(x = c(0.1, 0.2, 0.3), a = 2))
 
 # by setting nsim, you can also sample values from their priors
 calculate(y, nsim = 3)
 
 # you can combine sampling and fixed values
-calculate(y, list(a = 2), nsim = 3)
+calculate(y, values = list(a = 2), nsim = 3)
 
 # if the greta array only depends on data,
 # you can pass an empty list to values (this is the default)
@@ -109,22 +106,22 @@ m <- model(alpha, beta, sigma)
 # sample values of the parameters, or different observation data (y), from
 # the priors (useful for prior # predictive checking) - see also
 # ?simulate.greta_model
-calculate(list(alpha, beta, sigma), nsim = 100)
+calculate(alpha, beta, sigma, nsim = 100)
 calculate(y, nsim = 100)
 
 # calculate intermediate greta arrays, given some parameter values (useful
 # for debugging models)
-calculate(mu[1:5], list(alpha = 1, beta = 2, sigma = 0.5))
-calculate(mu[1:5], list(alpha = -1, beta = 0.2, sigma = 0.5))
+calculate(mu[1:5], values = list(alpha = 1, beta = 2, sigma = 0.5))
+calculate(mu[1:5], values = list(alpha = -1, beta = 0.2, sigma = 0.5))
 
 # simulate datasets given fixed parameter values
-calculate(y, list(alpha = -1, beta = 0.2, sigma = 0.5), nsim = 10)
+calculate(y, values = list(alpha = -1, beta = 0.2, sigma = 0.5), nsim = 10)
 
 # you can use calculate in conjunction with posterior samples from MCMC, e.g.
 # sampling different observation datasets, given a random set of these
 # posterior samples - useful for posterior predictive model checks
 draws <- mcmc(m, n_samples = 500)
-calculate(y, draws, nsim = 100)
+calculate(y, values = draws, nsim = 100)
 
 # you can use calculate on greta arrays created even after the inference on
 # the model - e.g. to plot response curves
@@ -132,7 +129,7 @@ petal_length_plot <- seq(min(iris$Petal.Length),
                          max(iris$Petal.Length),
                          length.out = 100)
 mu_plot <- alpha + petal_length_plot * beta
-mu_plot_draws <- calculate(mu_plot, draws)
+mu_plot_draws <- calculate(mu_plot, values = draws)
 mu_est <- colMeans(mu_plot_draws[[1]])
 plot(mu_est ~ petal_length_plot, type = "n",
      ylim = range(mu_plot_draws[[1]]))
@@ -143,9 +140,9 @@ lines(mu_est ~ petal_length_plot, lwd = 2)
 # trace_batch_size can be changed to trade off speed against memory usage
 # when calculating. These all produce the same result, but have increasing
 # memory requirements:
-mu_plot_draws_1 <- calculate(mu_plot, draws, trace_batch_size = 1)
-mu_plot_draws_10 <- calculate(mu_plot, draws, trace_batch_size = 10)
-mu_plot_draws_inf <- calculate(mu_plot, draws, trace_batch_size = Inf)
+mu_plot_draws_1 <- calculate(mu_plot, values = draws, trace_batch_size = 1)
+mu_plot_draws_10 <- calculate(mu_plot, values = draws, trace_batch_size = 10)
+mu_plot_draws_inf <- calculate(mu_plot, values = draws, trace_batch_size = Inf)
 
 }
 }

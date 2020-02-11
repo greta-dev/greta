@@ -9,15 +9,15 @@ test_that("deterministic calculate works with correct lists", {
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
   y <- a * x
-  y_value <- calculate(y, list(a = 3))
-  expect_equal(y_value, matrix(c(3, 6)))
+  vals <- calculate(y, values = list(a = 3))
+  expect_equal(vals$y, matrix(c(3, 6)))
 
   # unknown variable and new data
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
   y <- a * x
-  y_value <- calculate(y, list(a = 6, x = c(2, 1)))
-  expect_equal(y_value, matrix(c(12, 6)))
+  vals <- calculate(y, values = list(a = 6, x = c(2, 1)))
+  expect_equal(vals$y, matrix(c(12, 6)))
 
 })
 
@@ -26,22 +26,52 @@ test_that("stochastic calculate works with correct lists", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
+  # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
+  # ( pnorm(90, 100, 1) = 7e-24 )
+
+  nsim <- 97
+
   # fix variable
   a <- normal(0, 1)
   y <- normal(a, 1)
-  y_sims <- calculate(y, nsim = 100, values = list(a = 100))
+  sims <- calculate(y, nsim = nsim, values = list(a = 100))
+  expect_true(all(sims$y > 90))
+  expect_equal(dim(sims$y), c(nsim, dim(y)))
 
-  # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
-  # ( pnorm(90, 100, 1) = 7e-24 )
-  expect_true(all(y_sims > 90))
+  # fix variable with more dims on y
+  a <- normal(0, 1)
+  y <- normal(a, 1, dim = c(3, 3, 3))
+  sims <- calculate(y, nsim = nsim, values = list(a = 100))
+  expect_true(all(sims$y > 90))
+  expect_equal(dim(sims$y), c(nsim, dim(y)))
 
   # fix variable and new data
   x <- as_data(1)
   a <- normal(0, 1)
   y <- normal(a * x, 1)
-  y_sims <- calculate(y, nsim = 100, values = list(a = 50, x = 2))
+  sims <- calculate(y, nsim = nsim, values = list(a = 50, x = 2))
+  expect_true(all(sims$y > 90))
+  expect_equal(dim(sims$y), c(nsim, dim(y)))
 
-  expect_true(all(y_sims > 90))
+  # data with distribution
+  x <- as_data(1)
+  y <- as_data(randn(10))
+  a <- normal(0, 1)
+  distribution(y) <- normal(a * x, 1)
+  sims <- calculate(y, nsim = nsim, values = list(a = 50, x = 2))
+  expect_true(all(sims$y > 90))
+  expect_equal(dim(sims$y), c(nsim, dim(y)))
+
+  # multivariate data with distribution
+  n <- 10
+  k <- 3
+  x <- ones(1, k)
+  y <- as_data(randn(n, k))
+  a <- normal(0, 1)
+  distribution(y) <- multivariate_normal(a * x, diag(k), n_realisations = n)
+  sims <- calculate(y, nsim = nsim, values = list(a = 50, x = rep(2, k)))
+  expect_true(all(sims$y > 90))
+  expect_equal(dim(sims$y), c(nsim, dim(y)))
 
 })
 
@@ -58,7 +88,7 @@ test_that("deterministic calculate works with greta_mcmc_list objects", {
   draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
 
   # with an existing greta array
-  y_values <- calculate(y, draws)
+  y_values <- calculate(y, values = draws)
   # correct class
   expect_s3_class(y_values, "greta_mcmc_list")
   # correct dimensions
@@ -67,7 +97,7 @@ test_that("deterministic calculate works with greta_mcmc_list objects", {
   expect_true(all(is.finite(as.vector(y_values[[1]]))))
 
   # with a new greta array, based on a different element in the model
-  new_values <- calculate(a ^ 2, draws)
+  new_values <- calculate(a ^ 2, values = draws)
   # correct class
   expect_s3_class(new_values, "greta_mcmc_list")
   # correct dimensions
@@ -100,12 +130,12 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   )
 
   # this should error without nsim being specified (y is stochastic)
-  expect_error(calculate(list(a, y), values = draws),
+  expect_error(calculate(a, y, values = draws),
                "values have not been provided")
 
   # for a list of targets, the result should be a list
   nsim <- 10
-  sims <- calculate(list(a, y), values = draws, nsim = nsim)
+  sims <- calculate(a, y, values = draws, nsim = nsim)
 
   # correct class, dimensions, and valid values
   expect_true(is.list(sims))
@@ -117,9 +147,9 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   # a single array with these nsim observations
   sims <- calculate(y, values = draws, nsim = nsim)
 
-  expect_true(is.numeric(sims))
-  expect_equal(dim(sims), c(nsim, n, 1))
-  expect_true(all(is.finite(sims)))
+  expect_true(is.numeric(sims$y))
+  expect_equal(dim(sims$y), c(nsim, n, 1))
+  expect_true(all(is.finite(sims$y)))
 
   # warn about resampling if nsim is greater than the number of elements in draws
   expect_warning(calculate(y, values = draws, nsim = samples * chains + 1),
@@ -127,24 +157,22 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 
 })
 
-test_that("calculate errors nicely if greta_mcmc_list objects missing info", {
+test_that("calculate errors nicely if non-greta arrays are passed", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  samples <- 10
-  x <- as_data(c(1, 2))
+  x <- c(1, 2)
   a <- normal(0, 1)
   y <- a * x
-  m <- model(y)
-  draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
-
-  # scrub the model info
-  attr(draws, "model_info") <- NULL
 
   # it should error nicely
-  expect_error(calculate(y, draws),
-               "perhaps it wasn't created by greta")
+  expect_error(calculate(y, x, values = list(x = c(2, 1))),
+               regexp = "not greta arrays:  x")
+
+  # and a hint for this common error
+  expect_error(calculate(y, list(x = c(2, 1))),
+               "Perhaps you forgot to explicitly name other arguments?")
 
 })
 
@@ -158,13 +186,13 @@ test_that("calculate errors nicely if values for stochastics not passed", {
   y <- a * x
 
   # it should error nicely
-  expect_error(calculate(y, list(x = c(2, 1))),
+  expect_error(calculate(y, values = list(x = c(2, 1))),
                paste("values have not been provided for all greta arrays on",
                      "which the target depends, and nsim has not been set.",
                      "Please provide values for the greta array: a"))
 
   # but is should work fine if nsim is set
-  expect_ok(calculate(y, list(x = c(2, 1)), nsim = 1))
+  expect_ok(calculate(y, values = list(x = c(2, 1)), nsim = 1))
 
 })
 
@@ -178,24 +206,8 @@ test_that("calculate errors nicely if values have incorrect dimensions", {
   y <- a * x
 
   # it should error nicely
-  expect_error(calculate(y, list(a = c(1, 1))),
+  expect_error(calculate(y, values = list(a = c(1, 1))),
                "different number of elements than the greta array")
-
-})
-
-test_that("calculate errors nicely if not used on a greta array", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  x <- as_data(c(1, 2))
-  a <- normal(0, 1)
-  y <- a * x
-  z <- 1:5
-
-  # it should error nicely
-  expect_error(calculate(z, list(a = c(1, 1))),
-               "'target' must be either a greta array")
 
 })
 
@@ -212,10 +224,10 @@ test_that("calculate works with variable batch sizes", {
   draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
 
   # variable valid batch sizes
-  val_1 <- calculate(y, draws, trace_batch_size = 1)
-  val_10 <- calculate(y, draws, trace_batch_size = 10)
-  val_100 <- calculate(y, draws, trace_batch_size = 100)
-  val_inf <- calculate(y, draws, trace_batch_size = Inf)
+  val_1 <- calculate(y, values = draws, trace_batch_size = 1)
+  val_10 <- calculate(y, values = draws, trace_batch_size = 10)
+  val_100 <- calculate(y, values = draws, trace_batch_size = 100)
+  val_inf <- calculate(y, values = draws, trace_batch_size = Inf)
 
   # check the first one
   expect_s3_class(val_1, "greta_mcmc_list")
@@ -242,16 +254,16 @@ test_that("calculate errors nicely with invalid batch sizes", {
   draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
 
   # variable valid batch sizes
-  expect_error(calculate(y, draws, trace_batch_size = 0),
+  expect_error(calculate(y, values = draws, trace_batch_size = 0),
                "greater than or equal to 1")
-  expect_error(calculate(y, draws, trace_batch_size = NULL),
+  expect_error(calculate(y, values = draws, trace_batch_size = NULL),
                "greater than or equal to 1")
-  expect_error(calculate(y, draws, trace_batch_size = NA),
+  expect_error(calculate(y, values = draws, trace_batch_size = NA),
                "greater than or equal to 1")
 
 })
 
-test_that("calculate returns a list or array based on target", {
+test_that("calculate returns a named list", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -262,11 +274,11 @@ test_that("calculate returns a list or array based on target", {
 
   # if target is a single greta array, the output should be a single numeric
   result <- calculate(b, nsim = 10)
-  expect_false(is.list(result))
-  expect_true(is.numeric(result))
+  expect_true(is.list(result))
+  expect_true(is.numeric(result$b))
 
   # if target is a list, the output should be a list of numerics
-  result <- calculate(list(b, c), nsim = 10)
+  result <- calculate(b, c, nsim = 10)
   expect_true(is.list(result))
 
   # check contents
@@ -288,21 +300,21 @@ test_that("calculate produces the right number of samples", {
   y <- normal(a, 1, dim = c(1, 3))
 
   # should be vectors
-  a_sims <- calculate(a, nsim = 1)
-  expect_equal(dim(a_sims), c(1, dim(a)))
+  sims <- calculate(a, nsim = 1)
+  expect_equal(dim(sims$a), c(1, dim(a)))
 
-  a_sims <- calculate(a, nsim = 17)
-  expect_equal(dim(a_sims), c(17, dim(a)))
+  sims <- calculate(a, nsim = 17)
+  expect_equal(dim(sims$a), c(17, dim(a)))
 
-  y_sims <- calculate(y, nsim = 1)
-  expect_equal(dim(y_sims), c(1, dim(y)))
+  sims <- calculate(y, nsim = 1)
+  expect_equal(dim(sims$y), c(1, dim(y)))
 
-  y_sims <- calculate(y, nsim = 19)
-  expect_equal(dim(y_sims), c(19, dim(y)))
+  sims <- calculate(y, nsim = 19)
+  expect_equal(dim(sims$y), c(19, dim(y)))
 
   # the global RNG seed should not change if the seed *is* specified
   before <- rng_seed()
-  a_sims <- calculate(y, nsim = 1, seed = 12345)
+  sims <- calculate(y, nsim = 1, seed = 12345)
   after <- rng_seed()
   expect_identical(before, after)
 
@@ -369,7 +381,7 @@ test_that("calculate works if distribution-free variables are fixed", {
   # fix variable
   a <- variable()
   y <- normal(a, 1)
-  sims <- calculate(list(a, y), nsim = 1, values = list(a = 100))
+  sims <- calculate(a, y, nsim = 1, values = list(a = 100))
 
   # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
   # ( pnorm(90, 100, 1) = 7e-24 )
@@ -385,7 +397,7 @@ test_that("calculate errors if distribution-free variables are not fixed", {
   # fix variable
   a <- variable()
   y <- normal(a, 1)
-  expect_error(calculate(list(a, y), nsim = 1),
+  expect_error(calculate(a, y, nsim = 1),
                "specified in values")
 
 })
