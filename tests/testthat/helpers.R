@@ -6,7 +6,7 @@ library(tensorflow)
 if (greta:::check_tf_version())
   tf$compat$v1$reset_default_graph()
 
-set.seed(2018 - 05 - 30)
+set.seed(2020 - 02 - 11)
 
 rng_seed <- function () {
   get(".Random.seed", envir = .GlobalEnv)

@@ -61,8 +61,8 @@ test_that("primitive functions work as expected", {
   check_op(atanh, m1p1)
   check_op(cospi, real)
   check_op(sinpi, real)
-  check_op(tanpi, real)
-  check_op(trigamma, real, tolerance = 1e-2)
+  check_op(tanpi, real, tolerance = 1e-2)
+  check_op(trigamma, real, tolerance = 2e-2)
 
 })
 
