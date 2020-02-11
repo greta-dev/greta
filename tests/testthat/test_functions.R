@@ -561,7 +561,7 @@ test_that("chol2symm inverts chol", {
   expect_equal(x, chol2symm(u))
 
   # check the greta version
-  x2 <- calculate(chol2symm(as_data(u)))
+  x2 <- calculate(chol2symm(as_data(u)))[[1]]
   expect_equal(x2, x)
 
 })

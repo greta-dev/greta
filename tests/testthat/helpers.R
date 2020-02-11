@@ -236,13 +236,13 @@ run_greta_op <- function(greta_op, a, b, other_args,
 
   if (type == "data") {
     # data greta arrays should provide their own values
-    result <- calculate(out, list())
+    result <- calculate(out, values = list())[[1]]
   } else if (type == "variable") {
     result <- grab_via_free_state(out, values)
   } else if (type == "batched") {
     result <- grab_via_free_state(out, values, batches = 3)
   } else {
-    result <- calculate(out, values)
+    result <- calculate(out, values = values)[[1]]
   }
 
   result
@@ -703,7 +703,7 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   var <- (err) ^ 2
   corr <- prod(err) / prod(sqrt(diag(sigma)))
   err_var_corr <- c(err, var, corr)
-  stat_draws <- calculate(err_var_corr, draws)
+  stat_draws <- calculate(err_var_corr, values = draws)
 
   # get true values of these - on average the error should be 0, and the
   # variance and correlation of the errors should encoded in Sigma

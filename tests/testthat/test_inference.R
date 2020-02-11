@@ -384,7 +384,7 @@ test_that("samples has object names", {
 
   # so should calculate
   c <- b ^ 2
-  c_draws <- calculate(c, draws)
+  c_draws <- calculate(c, values = draws)
   names <- rownames(summary(c_draws)$statistics)
   expect_identical(names, c("c[1,1]", "c[2,1]", "c[3,1]"))
 

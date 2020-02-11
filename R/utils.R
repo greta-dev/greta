@@ -192,6 +192,11 @@ to_shape <- function(dim)
 is_scalar <- function(x)
   identical(dim(x), c(1L, 1L))
 
+# is it a row vector?
+is_row <- function(x) {
+  length(dim(x) == 1) && dim(x)[1] == 1L
+}
+
 # flatten a greta array into a column vector in column-major order
 flatten <- function(x)
   x[seq_along(x)]

@@ -33,7 +33,7 @@ test_that("window works", {
 
   # calculate should retain this info too
   z2 <- z ^ 2
-  z2_draws_sub <- calculate(z2, draws_sub)
+  z2_draws_sub <- calculate(z2, values = draws_sub)
 
   expect_s3_class(z2_draws_sub, "greta_mcmc_list")
   expect_identical(start(z2_draws_sub), start)

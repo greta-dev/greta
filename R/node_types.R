@@ -425,7 +425,7 @@ distribution_node <- R6Class(
     bounds = c(-Inf, Inf),
     truncation = NULL,
     parameters = list(),
-    parameters_expandable = logical(),
+    parameter_shape_matches_output = logical(),
 
     initialize = function(name = "no distribution",
                           dim = NULL,
@@ -547,21 +547,85 @@ distribution_node <- R6Class(
       self$target
     },
 
-    add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
+    # shape_matches_output indicates whether the array for the parameter can
+    # have the same shape as the output (e.g. this is true for binomial's prob
+    # parameter, but not for size)
+    # by default, assume a scalar (row) parameter can be expanded up to the distribution size
+    add_parameter = function(parameter,
+                             name,
+                             shape_matches_output = TRUE,
+                             expand_now = TRUE) {
 
-      # can the scalar parameter be expanded?
-      expandable <- !is.null(expand_scalar_to) & is_scalar(parameter)
-      self$parameters_expandable[[name]] <- expandable
+      # record whether this parameter can be scaled up
+      self$parameter_shape_matches_output[[name]] <- shape_matches_output
 
-      # expand now if needed (and remove flag)
-      if (expandable & !identical(expand_scalar_to, c(1L, 1L))) {
-        parameter <- greta_array(parameter, dim = expand_scalar_to)
-        self$parameters_expandable[[name]] <- FALSE
+      # try to do it now if required
+      if (shape_matches_output & expand_now) {
+        parameter <- self$expand_parameter(parameter, self$dim)
       }
 
+      # record it in the right places
       parameter <- to_node(parameter)
       self$add_parent(parameter)
       self$parameters[[name]] <- parameter
+
+    },
+
+    # try to expand a greta array for a parameter up to the required dimension
+    expand_parameter = function (parameter, dim) {
+
+      # can this realisation of the parameter be expanded?
+      expandable_shape <- ifelse(self$multivariate,
+                                 is_row(parameter),
+                                 is_scalar(parameter))
+
+      # should we expand it now?
+      expanded_target <- ifelse(self$multivariate,
+                               !identical(dim[1], 1L),
+                               !identical(dim, c(1L, 1L)))
+
+      # expand now if needed (and remove flag)
+      if (expandable_shape & expanded_target) {
+
+        if (self$multivariate) {
+
+          n_realisations <- self$dim[1]
+          reps <- replicate(n_realisations, parameter, simplify = FALSE)
+          parameter <- do.call(rbind, reps)
+
+        } else {
+
+          parameter <- greta_array(parameter, dim = self$dim)
+
+        }
+
+      }
+
+      parameter
+
+    },
+
+    # try to expand all expandable (scalar for univariate, or row for multivariate)
+    # parameters to the required dimension
+    expand_parameters_to = function(dim) {
+
+      parameter_names <- names(self$parameters)
+
+      for (name in parameter_names) {
+
+        if (self$parameter_shape_matches_output[[name]]) {
+
+          parameter <- as.greta_array(self$parameters[[name]])
+          expanded <- self$expand_parameter(parameter, dim)
+
+          self$add_parameter(expanded,
+                             name,
+                             self$parameter_shape_matches_output[[name]],
+                             expand_now = FALSE)
+
+        }
+
+      }
 
     }
 

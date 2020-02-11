@@ -818,7 +818,7 @@ dirichlet_multinomial_distribution <- R6Class(
                        dim = dim,
                        discrete = TRUE,
                        multivariate = TRUE)
-      self$add_parameter(size, "size", expand_scalar_to = NULL)
+      self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(alpha, "alpha")
 
     },
@@ -860,7 +860,7 @@ multinomial_distribution <- R6Class(
                        dim = dim,
                        discrete = TRUE,
                        multivariate = TRUE)
-      self$add_parameter(size, "size", expand_scalar_to = NULL)
+      self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(prob, "prob")
 
     },
@@ -1030,7 +1030,7 @@ wishart_distribution <- R6Class(
         sigma <- representation(sigma, "cholesky")
         self$sigma_is_cholesky <- TRUE
       }
-      self$add_parameter(df, "df", expand_scalar_to = NULL)
+      self$add_parameter(df, "df", shape_matches_output = FALSE)
       self$add_parameter(sigma, "sigma")
 
       # make the initial value PD (no idea whether this does anything)
@@ -1148,7 +1148,7 @@ lkj_correlation_distribution <- R6Class(
       super$initialize("lkj_correlation", dim, multivariate = TRUE)
 
       # don't try to expand scalar eta out to match the target size
-      self$add_parameter(eta, "eta", expand_scalar_to = NULL)
+      self$add_parameter(eta, "eta", shape_matches_output = FALSE)
 
       # make the initial value PD
       self$value(unknowns(dims = dim, data = diag(dimension)))

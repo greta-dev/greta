@@ -95,15 +95,7 @@
 
   # if possible, expand the dimensions of the distribution's parameters to match
   # the target
-  params <- names(distribution_node$parameters)
-  for (param in params) {
-    expandable <- distribution_node$parameters_expandable[[param]]
-    if (expandable) {
-      ga <- as.greta_array(distribution_node$parameters[[param]])
-      ga <- greta_array(ga, dim = node$dim)
-      distribution_node$add_parameter(ga, param, expand_scalar_to = NULL)
-    }
-  }
+  distribution_node$expand_parameters_to(node$dim)
 
   # remove the distribution from the RHS variable greta array
   value_node$distribution <- NULL
