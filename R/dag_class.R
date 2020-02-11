@@ -279,7 +279,6 @@ dag_class <- R6Class(
                                  name = "free_state") {
 
       type <- match.arg(type)
-
       tfe <- self$tf_environment
 
       vals <- self$example_parameters(free = TRUE)
@@ -579,6 +578,13 @@ dag_class <- R6Class(
       } else {
         parameters <- lapply(nodes, member, "value()")
       }
+
+      # remove any of these that don't need a free state here (for calculate())
+      stateless_names <- vapply(self$variables_without_free_state,
+                                self$tf_name,
+                                FUN.VALUE = character(1))
+      keep <- !names(parameters) %in% stateless_names
+      parameters <- parameters[keep]
 
       parameters
 
