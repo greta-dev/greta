@@ -242,12 +242,11 @@ mcmc <- function(model,
                      sampler,
                      model)
 
-  # add chain info for printing, and set trace batch size
+  # add chain info for printing
   for (i in seq_len(n_samplers)) {
     samplers[[i]]$sampler_number <- i
     samplers[[i]]$n_samplers <- n_samplers
   }
-
 
   # if verbose = FALSE, make pb_update as big as possible to speed up sampling
   if (!verbose) {

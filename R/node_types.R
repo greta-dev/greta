@@ -17,13 +17,14 @@ data_node <- R6Class(
 
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
+      unbatched_name <- paste0(tf_name, "_unbatched")
 
       mode <- dag$how_to_define(self)
 
-      # if we're in sampling mode, get the distribution constructor and sample this node
+      # if we're in sampling mode, get the distribution constructor and sample
       if (mode == "sampling") {
 
-        tensor <- dag$draw_sample(self$distribution)
+        batched_tensor <- dag$draw_sample(self$distribution)
 
       }
 
@@ -41,22 +42,28 @@ data_node <- R6Class(
 
         if (using_constants) {
 
-          tensor <- tf$constant(value = value,
-                                dtype = tf_float(),
-                                shape = shape)
+          unbatched_tensor <- tf$constant(value = value,
+                                          dtype = tf_float(),
+                                          shape = shape)
 
         } else {
 
-          tensor <- tf$compat$v1$placeholder(shape = shape,
-                                             dtype = tf_float())
-          dag$set_tf_data_list(tf_name, value)
+          unbatched_tensor <- tf$compat$v1$placeholder(shape = shape,
+                                                       dtype = tf_float())
+          dag$set_tf_data_list(unbatched_name, value)
 
         }
 
+        # expand up to batch size
+        batched_tensor <- expand_to_batch(unbatched_tensor, tfe$batch_dummy)
+
+        # put unbatched tensor in environment so it can be set
+        assign(unbatched_name, unbatched_tensor, envir = tfe)
+
       }
 
-      # put tensor in environment
-      assign(tf_name, tensor, envir = tfe)
+      assign(tf_name, batched_tensor, envir = tfe)
+
 
     }
   )

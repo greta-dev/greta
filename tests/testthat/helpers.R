@@ -16,25 +16,21 @@ expect_ok <- function(expr)
   expect_error(expr, NA)
 
 # evaluate a greta_array, node, or tensor
-grab <- function(x, dag = NULL, ...) {
+grab <- function(x, dag = NULL) {
 
-  dots <- list(...)
-
-  if (inherits(x, "node"))
+  if (inherits(x, "node")){
     x <- as.greta_array(x)
+  }
 
   if (inherits(x, "greta_array")) {
     node <- get_node(x)
-
     dag <- dag_class$new(list(x))
-    node$define_tf(dag)
-    x <- get(dag$tf_name(node),
-             envir = dag$tf_environment)
+    dag$define_tf()
   }
 
-  dag$build_feed_dict(dots)
-  out <- tf$compat$v1$Session()$run(x,
-                                    feed_dict = dag$tf_environment$feed_dict)
+  dag$set_tf_data_list("batch_size", 1L)
+  dag$build_feed_dict()
+  out <- dag$tf_sess_run(dag$tf_name(node), as_text = TRUE)
   drop_first_dim(out)
 
 }
@@ -134,7 +130,6 @@ greta_density <- function(fun, parameters, x,
 
   # evaluate greta distribution
   dist <- do.call(fun, parameters)
-
   distrib_node <- get_node(dist)$distribution
 
   # set density
@@ -144,13 +139,18 @@ greta_density <- function(fun, parameters, x,
 
   # create dag
   dag <- greta:::dag_class$new(list(x_))
-
-  # define the tensor in an environment
-  distrib_node$define_tf(dag)
+  dag$define_tf()
+  dag$set_tf_data_list("batch_size", 1L)
+  dag$build_feed_dict()
 
   # get the log density as a vector
-  result <- dag$evaluate_density(distrib_node, get_node(x_))
-  as.vector(grab(result, dag))
+  dag$on_graph(
+    result <- dag$evaluate_density(distrib_node, get_node(x_))
+  )
+  assign("test_density", result, dag$tf_environment)
+
+  density <- dag$tf_sess_run(test_density)
+  as.vector(density)
 
 }
 

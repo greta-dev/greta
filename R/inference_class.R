@@ -313,6 +313,9 @@ sampler <- R6Class(
         # flush the environment
         dag$new_tf_environment()
 
+        # set the batch size for multiple chains
+        dag$set_tf_data_list("batch_size", self$n_chains)
+
         # rebuild the TF graph
         dag$define_tf()
 
@@ -667,6 +670,7 @@ sampler <- R6Class(
       sampler_dict_list <- c(sampler_values,
                              self$sampler_parameter_values())
 
+      dag$set_tf_data_list("batch_size", nrow(self$free_state))
       dag$build_feed_dict(sampler_dict_list)
 
       # run the sampler, handling numerical errors

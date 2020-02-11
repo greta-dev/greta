@@ -107,7 +107,7 @@ test_that("binomial prob representations have correct density", {
                               x)
 
   compare_op(prob_dens, probit_dens)
-  compare_op(prob_dens, logit_dens)
+  compare_op(prob_dens, logit_dens, tolerance = 1e-3)
 
 })
 

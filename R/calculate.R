@@ -438,7 +438,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   assign("calculate_target_tensor_list", target_tensor_list, envir = dag$tf_environment)
 
   # add the batch size to the data list
-  dag$set_tf_data_list("batch_size", as.integer(nsim))
+  batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
+  dag$set_tf_data_list("batch_size", batch_size)
 
   # add values or data not specified by the user
   data_list <- dag$get_tf_data_list()
@@ -446,6 +447,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   # send list to tf environment and roll into a dict
   values <- lapply(values, add_first_dim)
+  values <- lapply(values, tile_first_dim, batch_size)
+
   dag$build_feed_dict(values, data_list = data_list[missing])
 
   # run the sampling

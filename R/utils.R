@@ -283,6 +283,13 @@ drop_first_dim <- function(x) {
   x
 }
 
+# given an R array with first dimension of size 1, tile it to have size 'times'
+# on that dimension
+tile_first_dim <- function(x, times) {
+  x_list <- replicate(times, x, simplify = FALSE)
+  do.call(abind::abind, c(x_list, list(along = 1)))
+}
+
 # if x is an R matrix representing a column vector, make it a plain R vector
 drop_column_dim <- function(x) {
   dims <- dim(x)
@@ -407,6 +414,7 @@ misc_module <- module(module,
                       as_2d_array,
                       add_first_dim,
                       drop_first_dim,
+                      tile_first_dim,
                       drop_column_dim,
                       expand_to_batch,
                       has_batch,

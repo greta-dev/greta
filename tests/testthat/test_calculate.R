@@ -73,6 +73,20 @@ test_that("stochastic calculate works with correct lists", {
   expect_true(all(sims$y > 90))
   expect_equal(dim(sims$y), c(nsim, dim(y)))
 
+  # weird multivariate data with distribution
+  n <- 10
+  k <- 3
+  x <- ones(1, k)
+  y <- matrix(0, n, k)
+  idx <- sample.int(k, n, replace = TRUE)
+  y[cbind(seq_len(n), idx)] <- 1
+  y <- as_data(y)
+  a <- normal(0, 1, dim = c(1, k))
+  distribution(y) <- categorical(ilogit(a * x), n_realisations = n)
+  sims <- calculate(y, nsim = nsim, values = list(a = c(50, 5, 0.5), x = rep(2, k)))
+  expect_true(all(apply(sims$y, 1:2, sum) == 1))
+  expect_equal(dim(sims$y), c(nsim, dim(y)))
+
 })
 
 test_that("deterministic calculate works with greta_mcmc_list objects", {

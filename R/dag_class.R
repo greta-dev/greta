@@ -380,17 +380,13 @@ dag_class <- R6Class(
     # free state variable, or for sampling
     define_tf = function(target_nodes = self$node_list) {
 
-      # define the free state variable and/or batch size depending on the mode
-
+      # define the free state variable
       if (self$mode %in% c("all_forward", "hybrid")) {
-        self$define_free_state("placeholder", "free_state")
-      }
-
-      if (self$mode %in% c("all_sampling", "hybrid")) {
-        self$define_batch_size()
+        self$define_free_state("placeholder")
       }
 
       # define the body of the graph (depending on the mode) and the session
+      self$define_batch_size()
       self$define_tf_body(target_nodes = target_nodes)
       self$define_tf_session()
 
@@ -590,12 +586,6 @@ dag_class <- R6Class(
 
     },
 
-    get_tf_batch_size = function() {
-
-      self$tf_environment$batch_size
-
-    },
-
     get_tf_data_list = function() {
 
       data_list_name <- paste0(self$mode, "_data_list")
@@ -611,7 +601,6 @@ dag_class <- R6Class(
     },
 
     build_feed_dict = function(dict_list = list(),
-                               batch_size = self$get_tf_batch_size(),
                                data_list = self$get_tf_data_list()) {
 
       tfe <- self$tf_environment
@@ -634,6 +623,9 @@ dag_class <- R6Class(
 
       # create a feed dict in the TF environment
       parameter_list <- list(free_state = parameters)
+
+      # set the batch size to match parameters
+      self$set_tf_data_list("batch_size", nrow(parameters))
 
       self$build_feed_dict(parameter_list)
 
