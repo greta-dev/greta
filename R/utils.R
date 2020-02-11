@@ -884,7 +884,7 @@ check_values_list <- function(values, env) {
 }
 
 # check that all the variable greta arrays on which the target greta array
-# depends are in the list fixed_greta_arrays (for use in calculate)
+# depends are in the list fixed_greta_arrays (for use in calculate_list)
 check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
 
   dependency_names <- function(x) {

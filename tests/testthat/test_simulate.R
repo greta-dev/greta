@@ -70,7 +70,7 @@ test_that("simulate errors if distribution-free variables are not fixed", {
   y <- normal(a, 1)
   m <- model(y)
   expect_error(sims <- simulate(m),
-               "do not have a distribution")
+               "do not have distributions so cannot be sampled")
 
 })
 

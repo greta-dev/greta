@@ -263,7 +263,7 @@ calculate_greta_mcmc_list <- function(target,
     new_types <- dag$node_types[!connected_to_draws]
     if (any(new_types == "variable")) {
       stop ("the target greta arrays are related to new variables ",
-            "that are not in the MCMC samples so cannot be calulated ",
+            "that are not in the MCMC samples so cannot be calculated ",
             "from the samples alone. Set 'nsim' if you want to sample them ",
             "conditionally on the MCMC samples",
             call. = FALSE)
@@ -393,9 +393,41 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
                           dag$tf_name,
                           FUN.VALUE = "")
 
-  # check that there are no unspecified variables on which the target depends
-  if (!stochastic) {
+  # check we can do the calculation
+  if (stochastic) {
+
+    # check there are no variables without distributions (or whose children have
+    # distributions - for lkj & wishart) that aren't given fixed values
+    variables <- dag$node_list[dag$node_types == "variable"]
+    have_distributions <- vapply(variables, has_distribution, FUN.VALUE = logical(1))
+    any_child_has_distribution <- function (variable) {
+      have_distributions <- vapply(variable$children,
+                                   has_distribution,
+                                   FUN.VALUE = logical(1))
+      any(have_distributions)
+    }
+    children_have_distributions <- vapply(variables,
+                                          any_child_has_distribution,
+                                          FUN.VALUE = logical(1))
+
+    unsampleable <- !have_distributions & !children_have_distributions
+    fixed_node_names <- vapply(fixed_nodes,
+                               member,
+                               "unique_name",
+                               FUN.VALUE = character(1))
+    unfixed <- !names(variables) %in% fixed_node_names
+
+    if (any(unsampleable & unfixed)) {
+      stop ("the target greta arrays are related to variables ",
+            "that do not have distributions so cannot be sampled",
+            call. = FALSE)
+    }
+
+  } else {
+
+    # check there are no unspecified variables on which the target depends
     lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
+
   }
 
   # look up the tf names of the target greta arrays (under sampling)

@@ -479,7 +479,7 @@ test_that("calculate errors if distribution-free variables are not fixed", {
   a <- variable()
   y <- normal(a, 1)
   expect_error(calculate(a, y, nsim = 1),
-               "specified in values")
+               "do not have distributions so cannot be sampled")
 
 })
 
