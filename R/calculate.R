@@ -247,6 +247,55 @@ calculate_greta_mcmc_list <- function(target,
   stateless_names <- setdiff(names(dag_variables), names(mcmc_dag_variables))
   dag$variables_without_free_state <- dag_variables[stateless_names]
 
+  # check there's some commonality between the two dags
+  connected_to_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
+  if (!any(connected_to_draws)) {
+    stop ("the target greta arrays do not appear to be connected ",
+          "to those in the greta_mcmc_list object",
+          call. = FALSE)
+  }
+
+  # if they didn't specify nsim, check we can deterministically compute the
+  # targets from the draws
+  if (!stochastic) {
+
+    # see if the new dag introduces any new variables
+    new_types <- dag$node_types[!connected_to_draws]
+    if (any(new_types == "variable")) {
+      stop ("the target greta arrays are related to new variables ",
+            "that are not in the MCMC samples so cannot be calulated ",
+            "from the samples alone. Set 'nsim' if you want to sample them ",
+            "conditionally on the MCMC samples",
+            call. = FALSE)
+    }
+
+    # see if any of the targets are stochastic and not sampled in the mcmc
+    target_nodes <- lapply(target, get_node)
+    target_node_names <- vapply(target_nodes,
+                                member,
+                                "unique_name",
+                                FUN.VALUE = character(1))
+    existing_variables <- target_node_names %in% names(mcmc_dag_variables)
+    have_distributions <- vapply(target_nodes,
+                                 has_distribution,
+                                 FUN.VALUE = logical(1))
+    new_stochastics <- have_distributions & !existing_variables
+    if (any(new_stochastics)) {
+      n_stoch <- sum(new_stochastics)
+      stop ("the greta array",
+            ngettext(n_stoch, " ", "s "),
+            paste(names(target)[new_stochastics], collapse = ", "),
+            ngettext(n_stoch,
+                     " has a distribution and is ",
+                     " have distributions and are"),
+            "not in the MCMC samples, so cannot be calculated ",
+            "from the samples alone. Set 'nsim' if you want to sample them ",
+            "conditionally on the MCMC samples",
+            call. = FALSE)
+    }
+
+  }
+
   # is this still needed?
   self <- dag  # mock for scoping
   self

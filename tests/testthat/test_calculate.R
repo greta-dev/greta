@@ -131,7 +131,7 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 
   # this should error without nsim being specified (y is stochastic)
   expect_error(calculate(a, y, values = draws),
-               "values have not been provided")
+               "y has a distribution and is not in the MCMC samples")
 
   # this should be OK
   sims <- calculate(y, values = draws, nsim = 10)
@@ -162,6 +162,35 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 })
 
 
+test_that("calculate errors if the greta_mcmc_list is unrelated to the target(s)", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  samples <- 10
+  chains <- 2
+
+  n <- 100
+  y <- as_data(rnorm(n))
+  x <- as_data(1)
+  a <- normal(0, 1)
+  distribution(y) <- normal(a, x)
+  m <- model(a)
+  draws <- mcmc(
+    m,
+    warmup = 0,
+    n_samples = samples,
+    chains = chains,
+    verbose = FALSE
+  )
+
+  c <- normal(0, 1)
+
+  expect_error(calculate(c, values = draws),
+               "do not appear to be connected")
+
+})
+
 test_that("stochastic calculate works with greta_mcmc_list objects and new stochastics", {
 
   skip_if_not(check_tf_version())
@@ -189,7 +218,7 @@ test_that("stochastic calculate works with greta_mcmc_list objects and new stoch
 
   # this should error without nsim being specified (b is stochastic and not given by draws)
   expect_error(calculate(b, values = draws),
-               "values have not been provided")
+               "new variables that are not in the MCMC samples")
 
   sims <- calculate(b, values = draws, nsim = 10)
   expect_equal(dim(sims$b), c(10, dim(b)))
