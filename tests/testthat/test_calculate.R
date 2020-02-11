@@ -133,6 +133,10 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   expect_error(calculate(a, y, values = draws),
                "values have not been provided")
 
+  # this should be OK
+  sims <- calculate(y, values = draws, nsim = 10)
+  expect_equal(dim(sims$y), c(10, dim(y)))
+
   # for a list of targets, the result should be a list
   nsim <- 10
   sims <- calculate(a, y, values = draws, nsim = nsim)
@@ -154,6 +158,42 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   # warn about resampling if nsim is greater than the number of elements in draws
   expect_warning(calculate(y, values = draws, nsim = samples * chains + 1),
                  "posterior samples had to be drawn with replacement")
+
+})
+
+
+test_that("stochastic calculate works with greta_mcmc_list objects and new stochastics", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  samples <- 10
+  chains <- 2
+
+  n <- 100
+  y <- as_data(rnorm(n))
+  x <- as_data(1)
+  a <- normal(0, 1)
+  distribution(y) <- normal(a, x)
+  m <- model(a)
+  draws <- mcmc(
+    m,
+    warmup = 0,
+    n_samples = samples,
+    chains = chains,
+    verbose = FALSE
+  )
+
+  # new stochastic greta array
+  b <- lognormal(a, 1)
+
+  # this should error without nsim being specified (b is stochastic and not given by draws)
+  expect_error(calculate(b, values = draws),
+               "values have not been provided")
+
+  sims <- calculate(b, values = draws, nsim = 10)
+  expect_equal(dim(sims$b), c(10, dim(b)))
+  expect_true(all(sims$b > 0))
 
 })
 
