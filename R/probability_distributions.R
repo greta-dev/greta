@@ -5,7 +5,6 @@ uniform_distribution <- R6Class(
 
     min = NA,
     max = NA,
-    log_density = NULL,
 
     initialize = function(min, max, dim) {
 
@@ -40,18 +39,16 @@ uniform_distribution <- R6Class(
       # initialisation)
       self$min <- min
       self$max <- max
-
       self$bounds <- c(min, max)
 
       # initialize the rest
       super$initialize("uniform", dim)
 
       # add them as parents and greta arrays
+      min <- as.greta_array(min)
+      max <- as.greta_array(max)
       self$add_parameter(min, "min")
       self$add_parameter(max, "max")
-
-      # the density is fixed, so calculate it now
-      self$log_density <- -log(max - min)
 
     },
 
@@ -63,14 +60,10 @@ uniform_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      tf_ld <- fl(self$log_density)
-
-      # weird hack to make TF see a gradient here
-      log_prob <- function(x) {
-        tf_ld + tf_flatten(x) * fl(0)
-      }
-
-      list(log_prob = log_prob)
+      tfp$distributions$Uniform(
+        low = parameters$min,
+        high = parameters$max
+      )
 
     }
 

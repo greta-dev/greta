@@ -5,6 +5,10 @@ test_that("univariate samples are correct", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
+  compare_iid_samples(uniform,
+                      runif,
+                      parameters = list(min = -2, max = 3))
+
   compare_iid_samples(normal,
                       rnorm,
                       parameters = list(mean = -2, sd = 3))
@@ -157,12 +161,6 @@ test_that("distributions without RNG error nicely", {
   source("helpers.R")
 
   # univariate
-  expect_error(
-    compare_iid_samples(uniform,
-                        runif,
-                        parameters = list(min = -2, max = 3)),
-    "sampling is not yet implemented"
-  )
 
   expect_error(
     compare_iid_samples(beta_binomial,
