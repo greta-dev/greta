@@ -80,7 +80,7 @@ test_that("simulate errors if a distribution cannot be sampled from", {
   source("helpers.R")
 
   # fix variable
-  a <- wishart(3, diag(2))
+  a <- lkj_correlation(3, dim = 2)
   y <- normal(a, 1)
   m <- model(y)
   expect_error(sims <- simulate(m),
