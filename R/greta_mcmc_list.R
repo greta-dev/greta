@@ -13,12 +13,12 @@ as_greta_mcmc_list <- function(x, model_info) {
 # for window (and any other function that modifies the object), apply the same
 # to the free state draws
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 #' @importFrom stats window
 #' @noRd
 window.greta_mcmc_list <- function(x, start, end, thin, ...) {
-# End Exclude Linting %>%
+  # nolint end
   model_info <- attr(x, "model_info")
   model_info$raw_draws <- window(model_info$raw_draws, start, end, thin, ...)
   x <- NextMethod(x)

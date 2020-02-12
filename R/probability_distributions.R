@@ -120,12 +120,12 @@ lognormal_distribution <- R6Class(
       self$add_parameter(sdlog, "sdlog")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$LogNormal(loc = parameters$meanlog,
                                   scale = parameters$sdlog)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -342,12 +342,12 @@ negative_binomial_distribution <- R6Class(
       self$add_parameter(prob, "prob")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$NegativeBinomial(total_count = parameters$size,
                                          probs = fl(1) - parameters$prob)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -436,12 +436,12 @@ inverse_gamma_distribution <- R6Class(
       self$add_parameter(beta, "beta")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$InverseGamma(concentration = parameters$alpha,
                                      rate = parameters$beta)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -560,13 +560,13 @@ student_distribution <- R6Class(
       self$add_parameter(sigma, "sigma")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$StudentT(df = parameters$df,
                                  loc = parameters$mu,
                                  scale = parameters$sigma)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -823,14 +823,14 @@ dirichlet_multinomial_distribution <- R6Class(
 
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       parameters$size <- tf_flatten(parameters$size)
       distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
               concentration = parameters$alpha)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -917,9 +917,9 @@ multivariate_normal_distribution <- R6Class(
   public = list(
 
     sigma_is_cholesky = FALSE,
-    # Begin Exclude Linting
+    # nolint start
     initialize = function(mean, Sigma, n_realisations, dimension) {
-    # End Exclude Linting
+    # nolint end
       # coerce to greta arrays
       mean <- as.greta_array(mean)
       sigma <- as.greta_array(Sigma)
@@ -982,10 +982,10 @@ multivariate_normal_distribution <- R6Class(
       l <- tf$expand_dims(l, 1L)
 
       mu <- parameters$mean
-      # Begin Exclude Linting
+      # nolint start
       tfp$distributions$MultivariateNormalTriL(loc = mu,
                                                scale_tril = l)
-      # End Exclude Linting
+      # nolint end
     }
 
   )
@@ -1002,7 +1002,7 @@ wishart_distribution <- R6Class(
     # set when defining the graph
     target_is_cholesky = FALSE,
 
-    initialize = function(df, Sigma) {  # Exclude Linting
+    initialize = function(df, Sigma) {  # nolint
       # add the nodes as parents and parameters
 
       df <- as.greta_array(df)
@@ -1238,7 +1238,7 @@ distribution_classes_module <- module(uniform_distribution,
 
 # export constructors
 
-# Begin Exclude Linting
+# nolint start
 #' @name distributions
 #' @title probability distributions
 #' @description These functions can be used to define random variables in a
@@ -1400,7 +1400,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'
 #' }
 NULL
-# End Exclude Linting
+# nolint end
 
 #' @rdname distributions
 #' @export
@@ -1511,19 +1511,19 @@ logistic <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 f <- function(df1, df2, dim = NULL, truncation = c(0, Inf))
   distrib("f", df1, df2, dim, truncation)
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname distributions
 #' @export
 multivariate_normal <- function(mean, Sigma,
                                 n_realisations = NULL, dimension = NULL) {
-# End Exclude Linting
+# nolint end
   distrib("multivariate_normal", mean, Sigma,
           n_realisations, dimension)
 }
 
 #' @rdname distributions
 #' @export
-wishart <- function(df, Sigma)  # Exclude Linting
+wishart <- function(df, Sigma)  # nolint
   distrib("wishart", df, Sigma)
 
 #' @rdname distributions

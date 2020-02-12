@@ -52,7 +52,7 @@ grab_via_free_state <- function(target, values, batches = 1) {
   array(vals, dim = dim(target))
 }
 
-is.greta_array <- function(x)  # Exclude Linting
+is.greta_array <- function(x)  # nolint
   inherits(x, "greta_array")
 
 set_distribution <- function(dist, data) {

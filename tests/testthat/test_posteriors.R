@@ -113,12 +113,12 @@ test_that("samplers pass geweke tests", {
   source("helpers.R")
   skip_if_not_release()
 
-  # Begin Exclude Linting
+  # nolint start
   # run geweke tests on this model:
   # theta ~ normal(mu1, sd1)
   # x[i] ~ normal(theta, sd2)
   # for i in N
-  # End Exclude Linting
+  # nolint end
 
   n <- 10
   mu1 <- rnorm(1, 0, 3)

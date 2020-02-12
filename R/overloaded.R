@@ -1,4 +1,4 @@
-# Begin Exclude Linting
+# nolint start
 #' @name overloaded
 #'
 #' @title Functions overloaded by greta
@@ -14,4 +14,4 @@
 #'    arguments as in original documentation
 #'
 NULL
-# End Exclude Linting
+# nolint end

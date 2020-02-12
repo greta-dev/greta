@@ -26,10 +26,10 @@ test_that("stochastic calculate works with correct lists", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  # Begin Exclude Linting
+  # nolint start
   # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
   # ( pnorm(90, 100, 1) = 7e-24 )
-  # End Exclude Linting
+  # nolint end
 
   nsim <- 97
 

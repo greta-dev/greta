@@ -224,7 +224,7 @@ test_that("apply works as expected", {
   source("helpers.R")
 
   # check apply.greta_array works like R's apply for X
-  check_apply <- function(X, MARGIN, FUN) {  # Exclude Linting
+  check_apply <- function(X, MARGIN, FUN) {  # nolint
     check_op(apply, a,
              other_args = list(MARGIN = MARGIN,
                                FUN = FUN))

@@ -356,7 +356,7 @@ dag_class <- R6Class(
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
 
-      # Begin Exclude Linting
+      # nolint start
       self$tf_run(
         config <- tf$compat$v1$ConfigProto(
           inter_op_parallelism_threads = n_cores,
@@ -373,7 +373,7 @@ dag_class <- R6Class(
           )
         )
       }
-      # End Exclude Linting
+      # nolint end
 
       # start a session and initialise all variables
       self$tf_run(sess <- tf$compat$v1$Session(config = config))

@@ -404,7 +404,7 @@ solve.greta_array <- function(a, b, ...) {
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname overloaded
 #' @export
 chol2inv <- function(x, size = NCOL(x), LINPACK = FALSE) {
@@ -431,21 +431,21 @@ chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
      tf_operation = "tf_chol2inv")
 
 }
-# End Exclude Linting
+# nolint end
 
 #' @rdname overloaded
 #' @export
-cov2cor <- function(V) {  # Exclude Linting
+cov2cor <- function(V) {  # nolint
   UseMethod("cov2cor", V)
 }
 
 #' @export
-cov2cor.default <- function(V) {  # Exclude Linting
+cov2cor.default <- function(V) {  # nolint
   stats::cov2cor(V)
 }
 
 #' @export
-cov2cor.greta_array <- function(V) {  # Exclude Linting
+cov2cor.greta_array <- function(V) {  # nolint
   op("cov2cor", V,
      tf_operation = "tf_cov2cor")
 }
@@ -453,7 +453,7 @@ cov2cor.greta_array <- function(V) {  # Exclude Linting
 # sum, prod, min, mean, max
 
 #' @export
-sum.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
+sum.greta_array <- function(..., na.rm = TRUE) {  # nolint
 
   # combine all elements into a column vector
   vec <- c(...)
@@ -466,7 +466,7 @@ sum.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
 }
 
 #' @export
-prod.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
+prod.greta_array <- function(..., na.rm = TRUE) {  # nolint
 
   # combine all elements into a column vector
   vec <- c(...)
@@ -479,7 +479,7 @@ prod.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
 }
 
 #' @export
-min.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
+min.greta_array <- function(..., na.rm = TRUE) {  # nolint
 
   # combine all elements into a column vector
   vec <- c(...)
@@ -492,7 +492,7 @@ min.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
 }
 
 #' @export
-mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) {  # Exclude Linting
+mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) {  # nolint
 
   # sum the elements
   op("mean", x,
@@ -502,7 +502,7 @@ mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) {  # Exclude Lintin
 }
 
 #' @export
-max.greta_array <- function(..., na.rm = TRUE) {  # Exclude Linting
+max.greta_array <- function(..., na.rm = TRUE) {  # nolint
 
   # combine all elements into a column vector
   vec <- c(...)
@@ -591,7 +591,7 @@ identity.greta_array <- function(x) {
   op("identity", x, tf_operation = "tf$identity")
 }
 
-# Begin Exclude Linting
+# nolint start
 
 #' @rdname overloaded
 #' @export
@@ -669,13 +669,13 @@ rowSums.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
 
 }
 
-# End Exclude Linting
+# nolint end
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname overloaded
 #' @export
 sweep <- function(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
-# End Exclude Linting
+# nolint end
   if (inherits(STATS, "greta_array"))
     x <- as.greta_array(x)
 
@@ -686,14 +686,14 @@ sweep <- function(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
 #' @export
 sweep.default <- base::sweep
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 sweep.greta_array <- function(x,
                               MARGIN,
                               STATS,
                               FUN = c("-", "+", "/", "*"),
                               check.margin = TRUE, ...) {
-# End Exclude Linting
+# nolint end
 
   # only allow these four functions
   fun <- match.arg(FUN)
@@ -728,13 +728,13 @@ sweep.greta_array <- function(x,
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @import methods
 setClass("greta_array")
 setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
           function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
                    ...) {
-# End Exclude Linting
+# nolint end
             fun <- match.arg(FUN)
 
             # X must be 2D
@@ -763,57 +763,57 @@ setMethod("kronecker", signature(X = "greta_array", Y = "greta_array"),
           }
 )
 
-# Begin Exclude Linting
+# nolint start
 #' @import methods
 setMethod(kronecker, signature(X = "array", Y = "greta_array"),
             function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
                    ...) {
-# End Exclude Linting
+# nolint end
               kronecker(as.greta_array(X), Y, FUN, make.dimnames = FALSE)
 
           }
 )
 
-# Begin Exclude Linting
+# nolint start
 #' @import methods
 setMethod(kronecker, signature(X = "greta_array", Y = "array"),
             function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
                    ...) {
-# End Exclude Linting
+# nolint end
               kronecker(X, as.greta_array(Y), FUN, make.dimnames = FALSE)
 
           }
 )
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname overloaded
 #' @export
 backsolve <- function(r, x, k = ncol(r),
                       upper.tri = TRUE,
                       transpose = FALSE) {
-# End Exclude Linting
+# nolint end
   UseMethod("backsolve", x)
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 backsolve.default <- function(r, x, k = ncol(r),
                               upper.tri = TRUE,
                               transpose = FALSE) {
-# End Exclude Linting
+# nolint end
   base::backsolve(r, x, k = ncol(r),
                   upper.tri = TRUE,
                   transpose = FALSE)
 }
 
 # define this explicitly so CRAN doesn't think we're using .Internal
-# Begin Exclude Linting
+# nolint start
 #' @export
 backsolve.greta_array <- function(r, x,
                                   k = ncol(r),
                                   upper.tri = TRUE,
                                   transpose = FALSE) {
-# End Exclude Linting
+# nolint end
   if (k != ncol(r)) {
     stop("k must equal ncol(r) for greta arrays",
          call. = FALSE)
@@ -831,35 +831,35 @@ backsolve.greta_array <- function(r, x,
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname overloaded
 #' @export
 forwardsolve <- function(l, x, k = ncol(l),
                          upper.tri = FALSE,
                          transpose = FALSE) {
-# End Exclude Linting
+# nolint end
   UseMethod("forwardsolve", x)
 }
 
 # define this explicitly so CRAN doesn't think we're using .Internal
-# Begin Exclude Linting
+# nolint start
 #' @export
 forwardsolve.default <- function(l, x, k = ncol(l),
                                  upper.tri = FALSE,
                                  transpose = FALSE) {
-# End Exclude Linting
+# nolint end
   base::forwardsolve(l, x, k = ncol(l),
                      upper.tri = FALSE,
                      transpose = FALSE)
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 forwardsolve.greta_array <- function(l, x,
                                      k = ncol(l),
                                      upper.tri = FALSE,
                                      transpose = FALSE) {
-# End Exclude Linting
+# nolint end
   if (k != ncol(l)) {
     stop("k must equal ncol(l) for greta arrays",
          call. = FALSE)
@@ -880,25 +880,25 @@ forwardsolve.greta_array <- function(l, x,
 
 #' @rdname overloaded
 #' @export
-apply <- function(X, MARGIN, FUN, ...) {  # Exclude Linting
+apply <- function(X, MARGIN, FUN, ...) {  # nolint
   UseMethod("apply", X)
 }
 
 #' @export
-apply.default <- function(X, MARGIN, FUN, ...) {  # Exclude Linting
+apply.default <- function(X, MARGIN, FUN, ...) {  # nolint
   base::apply(X = X,
               MARGIN = MARGIN,
               FUN = FUN,
               ...)
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 apply.greta_array <- function(X, MARGIN,
                               FUN = c("sum", "max", "mean", "min", "prod",
                                       "cumsum", "cumprod"),
                               ...) {
-# End Exclude Linting
+# nolint end
   fun <- match.arg(FUN)
 
   if (inherits(MARGIN, "greta_array")) {
@@ -960,15 +960,15 @@ apply.greta_array <- function(X, MARGIN,
 
 #' @rdname overloaded
 #' @export
-tapply <- function(X, INDEX, FUN, ...) {  # Exclude Linting
+tapply <- function(X, INDEX, FUN, ...) {  # nolint
   UseMethod("tapply", X)
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 tapply.default <- function(X, INDEX, FUN = NULL, ...,
                            default = NA, simplify = TRUE) {
-# End Exclude Linting
+# nolint end
   base::tapply(X = X,
                INDEX = INDEX,
                FUN = FUN,
@@ -977,12 +977,12 @@ tapply.default <- function(X, INDEX, FUN = NULL, ...,
                simplify = simplify)
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 tapply.greta_array <- function(X, INDEX,
                                FUN = c("sum", "max", "mean", "min", "prod"),
                                ...) {
-# End Exclude Linting
+# nolint end
 
   x <- X
   index <- INDEX
@@ -1016,26 +1016,26 @@ tapply.greta_array <- function(X, INDEX,
 
 #' @rdname overloaded
 #' @export
-eigen <- function(x, symmetric, only.values, EISPACK) {  # Exclude Linting
+eigen <- function(x, symmetric, only.values, EISPACK) {  # nolint
   UseMethod("eigen")
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 eigen.default <- function(x, symmetric,
                           only.values = FALSE, EISPACK = FALSE) {
-# End Exclude Linting
+# nolint end
   base::eigen(x = x,
               symmetric = symmetric,
               only.values = only.values,
               EISPACK = EISPACK)
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 eigen.greta_array <- function(x, symmetric,
                               only.values = FALSE, EISPACK = FALSE) {
-# End Exclude Linting
+# nolint end
   x <- as.greta_array(x)
 
   if (missing(symmetric)) symmetric <- TRUE

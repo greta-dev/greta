@@ -209,14 +209,14 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
   cond <- function(z, x, sumsq, lp, iter, maxiter)
     tf$less(iter, maxiter)
 
-  # Begin Exclude Linting
+  # nolint start
   shapes <- list(tf$TensorShape(shape(NULL, n)),
                  tf$TensorShape(shape(NULL, NULL)),
                  tf$TensorShape(shape(NULL)),
                  tf$TensorShape(shape(NULL)),
                  tf$TensorShape(shape()),
                  tf$TensorShape(shape()))
-  # End Exclude Linting
+  # nolint end
 
   body <- switch(which,
                  values = body_values,

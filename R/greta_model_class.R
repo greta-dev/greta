@@ -159,10 +159,10 @@ model <- function(...,
 }
 
 # register generic method to coerce objects to a greta model
-as.greta_model <- function(x, ...)  # Exclude Linting
+as.greta_model <- function(x, ...)  # nolint
   UseMethod("as.greta_model", x)
 
-as.greta_model.dag_class <- function(x, ...) {  # Exclude Linting
+as.greta_model.dag_class <- function(x, ...) {  # nolint
   ans <- list(dag = x)
   class(ans) <- "greta_model"
   ans

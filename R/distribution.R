@@ -33,7 +33,7 @@
 #' # get the distribution over y
 #' distribution(y)
 #' }
-`distribution<-` <- function(greta_array, value) {  # Exclude Linting
+`distribution<-` <- function(greta_array, value) {  # nolint
 
   # stash the old greta array to return
   greta_array_tmp <- greta_array

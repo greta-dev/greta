@@ -287,8 +287,9 @@ test_that("multivariate normal distribution has correct density", {
   sig <- rWishart(1, m + 1, diag(m))[, , 1]
 
   # function converting Sigma to sigma
-  dmvnorm2 <- function(x, mean, Sigma, log = FALSE)  # Exclude Linting
+  dmvnorm2 <- function(x, mean, Sigma, log = FALSE) {  # nolint
     mvtnorm::dmvnorm(x = x, mean = mean, sigma = Sigma, log = log)
+  }
 
   compare_distribution(greta::multivariate_normal,
                        dmvnorm2,
@@ -309,7 +310,7 @@ test_that("Wishart distribution has correct density", {
   sig <- rWishart(1, df, diag(m))[, , 1]
 
   # wrapper for argument names
-  dwishart <- function(x, df, Sigma, log = FALSE) {  # Exclude Linting
+  dwishart <- function(x, df, Sigma, log = FALSE) {  # nolint
     ans <- MCMCpack::dwish(W = x, v = df, S = Sigma)
     if (log)
       ans <- log(ans)

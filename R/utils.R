@@ -213,7 +213,7 @@ live_pointer <- function(tensor_name, environment = parent.frame()) {
     !is.null(environment[[tensor_name]]$name)
 }
 
-# Begin Exclude Linting
+# nolint start
 # get the next seed as a L'Ecuyer
 future_seed <- function() {
   okind <- RNGkind()[1]
@@ -221,7 +221,7 @@ future_seed <- function() {
   RNGkind("L'Ecuyer-CMRG")
   .GlobalEnv$.Random.seed
 }
-# End Exclude Linting
+# nolint end
 
 create_log_file <- function(create = FALSE) {
   filename <- tempfile(pattern = "greta_log_")
@@ -377,9 +377,9 @@ rhex <- function()
 #' @importFrom reticulate py_set_attr import
 disable_tensorflow_logging <- function(disable = TRUE) {
   logging <- reticulate::import("logging")
-  # Begin Exclude Linting
+  # nolint start
   logger <- logging$getLogger("tensorflow")
-  # End Exclude Linting
+  # nolint end
   reticulate::py_set_attr(logger, "disabled", disable)
 }
 

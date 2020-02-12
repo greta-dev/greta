@@ -48,7 +48,7 @@
 #' sims <- simulate(m, nsim = 100)
 #'
 #' }
-# Begin Exclude Linting
+# nolint start
 simulate.greta_model <- function(
   object,
   nsim = 1,
@@ -56,7 +56,7 @@ simulate.greta_model <- function(
   precision = c("double", "single"),
   ...
 ) {
-# End Exclude Linting
+  # nolint end
   # find all the greta arrays in the calling environment
   target_greta_arrays <- all_greta_arrays(parent.frame())
 
