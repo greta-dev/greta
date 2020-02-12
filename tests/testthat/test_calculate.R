@@ -472,18 +472,6 @@ test_that("calculate works if distribution-free variables are fixed", {
 
 })
 
-test_that("calculate works for strangely shaped distributions", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  a <- lkj_correlation(3)
-  y <- normal(a, 1)
-  sims <- calculate(y, nsim = 1)
-  expect_equal(dim(sims$y), c(1, dim(y)))
-
-})
-
 test_that("calculate errors if distribution-free variables are not fixed", {
 
   skip_if_not(check_tf_version())

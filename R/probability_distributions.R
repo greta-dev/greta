@@ -1189,11 +1189,15 @@ lkj_correlation_distribution <- R6Class(
 
       eta <- tf$squeeze(parameters$eta, 1:2)
 
-      tfp$distributions$LKJ(
+      distrib <- tfp$distributions$LKJ(
         dimension = self$dim[1],
         concentration = eta,
         input_output_cholesky = self$target_is_cholesky
       )
+
+      # we can't yet sample from this, as the implement can't detect the output
+      # size with dynamic shape, so suppress sampling for now.
+      list(log_prob = distrib$log_prob)
 
       # input_output_cholesky argument will need to be dealt with for RNG stuff
 
