@@ -31,7 +31,7 @@ Simulate values of all named greta arrays associated with a
 }
 \details{
 This is essentially a wrapper around \code{\link{calculate()}} that
-  inds all relevant greta arrays. See that function for more functionality,
+  finds all relevant greta arrays. See that function for more functionality,
   including simulation conditional on fixed values or posterior samples.
 
   To simulate values of the response variable, it must be both a named object

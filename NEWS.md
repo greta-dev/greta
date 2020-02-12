@@ -10,7 +10,7 @@
 
 ## API changes:
 
-* `calculate()` now accepts multiple greta arrays for which to calculate values, via the `...` argument. As a conseequence any other arguments must now be named.
+* `calculate()` now accepts multiple greta arrays for which to calculate values, via the `...` argument. As a consequence any other arguments must now be named.
 
 * a number of optimiser methods are now deprecated, since they will be unavailable when greta moves to using TensorFlow v2.0: `powell()`, `cg()`, `newton_cg()`, `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()`.
 

@@ -11,7 +11,7 @@
 #' @param ... optional additional arguments, none are used at present
 #'
 #' @details This is essentially a wrapper around \code{\link{calculate()}} that
-#'   inds all relevant greta arrays. See that function for more functionality,
+#'   finds all relevant greta arrays. See that function for more functionality,
 #'   including simulation conditional on fixed values or posterior samples.
 #'
 #'   To simulate values of the response variable, it must be both a named object
@@ -25,6 +25,7 @@
 #'   that a vector of samples is returned for each scalar greta array, and a
 #'   matrix is returned for each vector greta array, etc.
 #'
+#' @importFrom stats simulate
 #' @export
 #'
 #' @examples
