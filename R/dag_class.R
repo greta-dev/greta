@@ -890,26 +890,24 @@ dag_class <- R6Class(
         # function
 
         cdf <- tfp_distribution$cdf
-        inverse_cdf <- tfp_distribution$quantile
+        quantile <- tfp_distribution$quantile
 
-        if (is.null(cdf) | is.null(inverse_cdf)) {
+        if (is.null(cdf) | is.null(quantile)) {
           stop("sampling is not yet implemented for truncated ",
                distribution_node$distribution_name,
                " distributions",
                call. = FALSE)
         }
 
-        # generate a random uniform sample of the correct shape
-        uniform <- tfp$distributions$Uniform(low = fl(0), high = fl(1))
-        shape <- c(self$tf_environment$batch_size, as.list(distribution_node$dim))
-        u <- uniform$sample(sample_shape = shape, seed = get_seed())
+        # generate a random uniform sample of the correct shape and transform
+        # through truncated inverse CDF to get draws on truncated scale
+        u <- tf_randu(distribution_node$dim, self)
 
-        # transform through truncated inverse CDF to get draws on truncated scale
         lower <- cdf(fl(truncation[1]))
         upper <- cdf(fl(truncation[2]))
         range <- upper - lower
 
-        tensor <- inverse_cdf(lower + u * range)
+        tensor <- quantile(lower + u * range)
 
       }
 

@@ -490,17 +490,15 @@ weibull_distribution <- R6Class(
         log(cdf(x))
       }
 
-      inverse_cdf <- function(x) {
+      quantile <- function(x) {
         bijector$inverse(x)
       }
 
       sample <- function(seed) {
 
-        # sample by pushing through the inverse cdf
-        uniform <- tfp$distributions$Uniform(low = fl(0), high = fl(1))
-        shape <- c(dag$tf_environment$batch_size, as.list(self$dim))
-        u <- uniform$sample(sample_shape = shape, seed = get_seed())
-        inverse_cdf(u)
+        # sample by pushing standard uniforms through the inverse cdf
+        u <- tf_randu(self$dim, dag)
+        quantile(u)
 
       }
 
@@ -508,7 +506,7 @@ weibull_distribution <- R6Class(
         log_prob = log_prob,
         cdf = cdf,
         log_cdf = log_cdf,
-        quantile = inverse_cdf,
+        quantile = quantile,
         sample = sample
       )
 
@@ -770,7 +768,25 @@ f_distribution <- R6Class(
       log_cdf <- function(x)
         log(cdf(x))
 
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+      sample <- function(seed) {
+
+        # sample as the ratio of two scaled chi squared distributions
+        d1 <- tfp$distributions$Chi2(df = df1)
+        d2 <- tfp$distributions$Chi2(df = df2)
+
+        u1 <- d1$sample(seed = seed)
+        u2 <- d2$sample(seed = seed)
+
+        (u1 / df1) / (u2 / df2)
+
+      }
+
+      list(
+        log_prob = log_prob,
+        cdf = cdf,
+        log_cdf = log_cdf,
+        sample = sample
+      )
 
     }
 

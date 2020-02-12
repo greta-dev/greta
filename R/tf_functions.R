@@ -728,6 +728,14 @@ tf_ordered_bijector <- function(dim) {
 
 }
 
+# generate an array of random standard uniform tensors with a given shape,
+# including the batch dimension
+tf_randu <- function(dim, dag) {
+  uniform <- tfp$distributions$Uniform(low = fl(0), high = fl(1))
+  shape <- c(dag$tf_environment$batch_size, as.list(dim))
+  uniform$sample(sample_shape = shape, seed = get_seed())
+}
+
 # combine as module for export via internals
 tf_functions_module <- module(tf_as_logical,
                               tf_as_float,

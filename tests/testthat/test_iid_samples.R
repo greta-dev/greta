@@ -81,6 +81,10 @@ test_that("univariate samples are correct", {
                       rlogis,
                       parameters = list(location = -2, scale = 1.3))
 
+  compare_iid_samples(f,
+                      rf,
+                      parameters = list(df1 = 4, df2 = 1))
+
 })
 
 test_that("truncated univariate samples are correct", {
@@ -188,13 +192,6 @@ test_that("distributions without RNG error nicely", {
     "sampling is not yet implemented"
   )
 
-  expect_error(
-    compare_iid_samples(f,
-                        rf,
-                        parameters = list(df1 = 4, df2 = 1)),
-    "sampling is not yet implemented"
-  )
-
   # multivariate
   expect_error(
     compare_iid_samples(lkj_correlation,
@@ -214,6 +211,18 @@ test_that("distributions without RNG error nicely", {
   expect_error(
     calculate(d, nsim = 100),
     "sampling is not yet implemented"
+  )
+
+  # truncated RNG not implemented
+  expect_error(
+    compare_iid_samples(f,
+                        rtf,
+                        parameters = list(
+                          df1 = 4,
+                          df2 = 1,
+                          truncation = c(2, 3)
+                        )),
+    "sampling is not yet implemented for truncated"
   )
 
 })

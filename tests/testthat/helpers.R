@@ -555,6 +555,17 @@ rtweibull <- function(n, shape, scale, truncation) {
   )
 }
 
+rtf <- function(n, df1, df2, truncation) {
+  truncdist::rtrunc(
+    n,
+    "f",
+    a = truncation[1],
+    b = truncation[2],
+    df1 = df1,
+    df2 = df2
+  )
+}
+
 # a form of two-sample chi squared test for discrete multivariate distributions
 combined_chisq_test <- function(x, y) {
   chisq.test(x = colSums(x),
