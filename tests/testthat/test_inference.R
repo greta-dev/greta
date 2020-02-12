@@ -360,12 +360,6 @@ test_that("stashed_samples works", {
   ans <- stashed_samples()
   expect_s3_class(ans, "greta_mcmc_list")
 
-  # model_info attribute should have raw draws and the model
-  model_info <- attr(ans, "model_info")
-  expect_true(inherits(model_info, "environment"))
-  expect_s3_class(model_info$raw_draws, "mcmc.list")
-  expect_true(inherits(model_info$model, "greta_model"))
-
 })
 
 test_that("samples has object names", {
