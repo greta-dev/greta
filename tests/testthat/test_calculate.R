@@ -26,8 +26,10 @@ test_that("stochastic calculate works with correct lists", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
+  # Begin Exclude Linting
   # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
   # ( pnorm(90, 100, 1) = 7e-24 )
+  # End Exclude Linting
 
   nsim <- 97
 
@@ -83,7 +85,10 @@ test_that("stochastic calculate works with correct lists", {
   y <- as_data(y)
   a <- normal(0, 1, dim = c(1, k))
   distribution(y) <- categorical(ilogit(a * x), n_realisations = n)
-  sims <- calculate(y, nsim = nsim, values = list(a = c(50, 5, 0.5), x = rep(2, k)))
+  sims <- calculate(y,
+                    nsim = nsim,
+                    values = list(a = c(50, 5, 0.5),
+                                  x = rep(2, k)))
   expect_true(all(apply(sims$y, 1:2, sum) == 1))
   expect_equal(dim(sims$y), c(nsim, dim(y)))
 
@@ -169,14 +174,14 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   expect_equal(dim(sims$y), c(nsim, n, 1))
   expect_true(all(is.finite(sims$y)))
 
-  # warn about resampling if nsim is greater than the number of elements in draws
+  # warn about resampling if nsim is greater than elements in draws
   expect_warning(calculate(y, values = draws, nsim = samples * chains + 1),
                  "posterior samples had to be drawn with replacement")
 
 })
 
 
-test_that("calculate errors if the greta_mcmc_list is unrelated to the target(s)", {
+test_that("calculate errors if the mcmc samples unrelated to target", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -205,7 +210,7 @@ test_that("calculate errors if the greta_mcmc_list is unrelated to the target(s)
 
 })
 
-test_that("stochastic calculate works with greta_mcmc_list objects and new stochastics", {
+test_that("stochastic calculate works with mcmc samples & new stochastics", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -230,7 +235,8 @@ test_that("stochastic calculate works with greta_mcmc_list objects and new stoch
   # new stochastic greta array
   b <- lognormal(a, 1)
 
-  # this should error without nsim being specified (b is stochastic and not given by draws)
+  # this should error without nsim being specified (b is stochastic and not
+  # given by draws)
   expect_error(calculate(b, values = draws),
                "new variables that are not in the MCMC samples")
 
@@ -369,7 +375,7 @@ test_that("calculate returns a named list", {
   expect_true(all(are_numeric))
 
   # check names
-  expect_true(identical(names(result), c("b", "c")))
+  expect_equal(names(result), c("b", "c"))
 
 })
 
@@ -466,8 +472,6 @@ test_that("calculate works if distribution-free variables are fixed", {
   y <- normal(a, 1)
   sims <- calculate(a, y, nsim = 1, values = list(a = 100))
 
-  # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
-  # ( pnorm(90, 100, 1) = 7e-24 )
   expect_true(all(sims$y > 90))
 
 })

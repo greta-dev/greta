@@ -8,9 +8,9 @@ calculate(
   ...,
   values = list(),
   nsim = NULL,
+  seed = NULL,
   precision = c("double", "single"),
-  trace_batch_size = 100,
-  seed = NULL
+  trace_batch_size = 100
 )
 }
 \arguments{
@@ -21,27 +21,29 @@ which \code{target} is connected, or a \code{greta_mcmc_list} object
 returned by \code{\link{mcmc}}.}
 
 \item{nsim}{an optional positive integer scalar for the number of responses
-to simulate if stochastic greta arrays are present in the model - see Details.}
+to simulate if stochastic greta arrays are present in the model - see
+Details.}
+
+\item{seed}{an optional seed to be used in set.seed immediately before the
+simulation so as to generate a reproducible sample}
 
 \item{precision}{the floating point precision to use when calculating values.}
 
 \item{trace_batch_size}{the number of posterior samples to process at a time
 when \code{target} is a \code{greta_mcmc_list} object; reduce this to
 reduce memory demands}
-
-\item{seed}{an optional seed to be used in set.seed immediately before the
-simulation so as to generate a reproducible sample}
 }
 \value{
 Values of the target greta array(s), given values of the greta arrays
   on which they depend (either specified in \code{values} or sampled from
-  their priors). If \code{values} is a  \code{\link[mcmc]{greta_mcmc_list}}
-  and \code{nsim = NULL}, this will be a \code{greta_mcmc_list} object of
-  posterior samples for the target greta arrays. Otherwise, the result will
-  be a named list of numeric R arrays. If \code{nsim = NULL} the dimensions
-  of returned numeric R arrays will be the same as the corresponding greta
-  arrays, otherwise an additional dimension with \code{nsim} elements will be
-  prepended, to represent multiple simulations.
+  their priors). If \code{values} is a
+  \code{\link[greta:mcmc]{greta_mcmc_list}} and \code{nsim = NULL}, this will
+  be a \code{greta_mcmc_list} object of posterior samples for the target
+  greta arrays. Otherwise, the result will be a named list of numeric R
+  arrays. If \code{nsim = NULL} the dimensions of returned numeric R arrays
+  will be the same as the corresponding greta arrays, otherwise an additional
+  dimension with \code{nsim} elements will be prepended, to represent
+  multiple simulations.
 }
 \description{
 Calculate the values that greta arrays would take, given
@@ -140,9 +142,15 @@ lines(mu_est ~ petal_length_plot, lwd = 2)
 # trace_batch_size can be changed to trade off speed against memory usage
 # when calculating. These all produce the same result, but have increasing
 # memory requirements:
-mu_plot_draws_1 <- calculate(mu_plot, values = draws, trace_batch_size = 1)
-mu_plot_draws_10 <- calculate(mu_plot, values = draws, trace_batch_size = 10)
-mu_plot_draws_inf <- calculate(mu_plot, values = draws, trace_batch_size = Inf)
+mu_plot_draws_1 <- calculate(mu_plot,
+                             values = draws,
+                             trace_batch_size = 1)
+mu_plot_draws_10 <- calculate(mu_plot,
+                              values = draws,
+                              trace_batch_size = 10)
+mu_plot_draws_inf <- calculate(mu_plot,
+                               values = draws,
+                               trace_batch_size = Inf)
 
 }
 }

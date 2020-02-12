@@ -114,7 +114,10 @@ node <- R6Class(
       # that a child node
       mode <- dag$how_to_define(self)
       if (mode == "sampling" & has_distribution(self)) {
-        child_names <- vapply(children, member, "unique_name", FUN.VALUE = character(1))
+        child_names <- vapply(children,
+                              member,
+                              "unique_name",
+                              FUN.VALUE = character(1))
         keep <- child_names != self$distribution$unique_name
         children <- children[keep]
       }
@@ -133,7 +136,10 @@ node <- R6Class(
 
       if (length(parents) > 0) {
 
-        names <- vapply(parents, function(x) {x$unique_name}, FUN.VALUE = "")
+        names <- vapply(parents,
+                        member,
+                        "unique_name",
+                        FUN.VALUE = character(1))
 
         if (recursive) {
 
@@ -196,8 +202,8 @@ node <- R6Class(
 
         # make sure parents are defined
         parents_defined <- vapply(self$list_parents(dag),
-                                   function(x) x$defined(dag),
-                                   FUN.VALUE = FALSE)
+                                  function(x) x$defined(dag),
+                                  FUN.VALUE = FALSE)
 
         if (any(!parents_defined)) {
           parents <- self$list_parents(dag)

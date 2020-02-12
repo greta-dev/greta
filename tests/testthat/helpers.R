@@ -8,7 +8,7 @@ if (greta:::check_tf_version())
 
 set.seed(2020 - 02 - 11)
 
-rng_seed <- function () {
+rng_seed <- function() {
   get(".Random.seed", envir = .GlobalEnv)
 }
 
@@ -18,7 +18,7 @@ expect_ok <- function(expr)
 # evaluate a greta_array, node, or tensor
 grab <- function(x, dag = NULL) {
 
-  if (inherits(x, "node")){
+  if (inherits(x, "node")) {
     x <- as.greta_array(x)
   }
 

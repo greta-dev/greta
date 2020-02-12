@@ -3,14 +3,14 @@
 #' @description Simulate values of all named greta arrays associated with a
 #'   greta model from the model priors, including the response variable.
 #'
-#' @param object a \code{\link{greta_model}} object
+#' @param object a \code{\link[greta:model]{greta_model}} object
 #' @param nsim positive integer scalar - the number of responses to simulate
-#' @param precision the floating point precision to use when calculating values.
 #' @param seed an optional seed to be used in set.seed immediately before the
 #'   simulation so as to generate a reproducible sample
+#' @param precision the floating point precision to use when calculating values.
 #' @param ... optional additional arguments, none are used at present
 #'
-#' @details This is essentially a wrapper around \code{\link{calculate()}} that
+#' @details This is essentially a wrapper around \code{\link{calculate}()} that
 #'   finds all relevant greta arrays. See that function for more functionality,
 #'   including simulation conditional on fixed values or posterior samples.
 #'
@@ -48,14 +48,15 @@
 #' sims <- simulate(m, nsim = 100)
 #'
 #' }
-simulate.greta_model <- function (
+# Begin Exclude Linting
+simulate.greta_model <- function(
   object,
   nsim = 1,
-  precision = c("double", "single"),
   seed = NULL,
+  precision = c("double", "single"),
   ...
 ) {
-
+# End Exclude Linting
   # find all the greta arrays in the calling environment
   target_greta_arrays <- all_greta_arrays(parent.frame())
 

@@ -392,7 +392,7 @@ pad_vector <- function(x, to_length, with = 1) {
   x
 }
 
-has_distribution <- function (node) {
+has_distribution <- function(node) {
   !is.null(node$distribution)
 }
 
@@ -869,9 +869,9 @@ check_values_list <- function(values, env) {
                              FUN.VALUE = FALSE)
 
   if (!all(are_greta_arrays)) {
-    stop ("the names of arguments to values must all correspond to named ",
-          "greta arrays",
-          call. = FALSE)
+    stop("the names of arguments to values must all correspond to named ",
+         "greta arrays",
+         call. = FALSE)
   }
 
   # coerce value to have the correct dimensions

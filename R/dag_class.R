@@ -86,8 +86,9 @@ dag_class <- R6Class(
     # sess$run() an expression in the tensorflow environment, with the feed dict
     tf_sess_run = function(expr, as_text = FALSE) {
 
-      if (!as_text)
+      if (!as_text) {
         expr <- deparse(substitute(expr))
+      }
 
       expr <- paste0("sess$run(", expr, ", feed_dict = feed_dict)")
 
@@ -159,103 +160,109 @@ dag_class <- R6Class(
 
     },
 
-    # tell a node whether to define itself in forward mode (deterministically
-    # from an existing free state), or in sampling mode (generate a random
-    # version of itself)
-    how_to_define = function(node) {
+    # how to define a node if the sampling mode is hybrid (this is quite knotty,
+    # so gets its own function)
+    how_to_define_hybrid = function(node) {
 
       node_type <- node_type(node)
-      node_has_distribution <- has_distribution(node)
 
-      # never sample in forward mode (computing the joint density)
-      if (self$mode == "all_forward") {
-        node_mode <- "forward"
+      # names of variable nodes not connected to the free state in this dag
+      stateless_names <- names(self$variables_without_free_state)
+
+      # if the node is data, use sampling mode if it has a distribution and
+      # forward mode if not
+      if (node_type == "data") {
+        node_mode <- ifelse(has_distribution(node), "sampling", "forward")
       }
 
-      # when sampling from the model prior, sample everything except
-      # data/operations without distributions
-      if (self$mode == "all_sampling") {
+      # if the node is a variable, use forward mode if it has a free state,
+      # and sampling mode if not
+      if (node_type == "variable") {
+        to_sample <- node$unique_name %in% stateless_names
+        node_mode <- ifelse(to_sample, "sampling", "forward")
+      }
 
-        node_mode <- switch(
-          node_type,
-          data = ifelse(node_has_distribution, "sampling", "forward"),
-          operation = ifelse(node_has_distribution, "sampling", "forward"),
-          "sampling"
-        )
+      # if it's an operation, see if it has a distribution (for lkj and
+      # wishart) and get mode based on whether the parent has a free state
+      if (node_type == "operation") {
+
+        parent_name <- node$parents[[1]]$unique_name
+        parent_stateless <- parent_name %in% stateless_names
+        to_sample <- has_distribution(node) & parent_stateless
+        node_mode <- ifelse(to_sample, "sampling", "forward")
 
       }
 
-      # if we're in hybrid mode (some nodes defined forward from the free state
-      # or data, others sampled), decide which way this node should be defined
-      if (self$mode == "hybrid") {
+      # if the node is a distribution, decide based on its target
+      if (node_type == "distribution") {
 
-        # the names of variable nodes not connected to the free state in this dag
-        stateless_names <- names(self$variables_without_free_state)
+        target <- node$target
+        target_type <- node_type(target)
 
-        # if the node is data, use sampling mode if it has a distribution and
-        # forward mode if not
-        if (node_type == "data") {
-          node_mode <- ifelse(node_has_distribution, "sampling", "forward")
+        # if it has no target (e.g. for a mixture distribution), define it in
+        # sampling mode (so it defines before the things that depend on it)
+        if (is.null(target)) {
+          node_mode <- "sampling"
         }
 
-        # if the node is a variable, use forward mode if it has a free state,
-        # and sampling mode if not
-        if (node_type == "variable") {
-          to_sample <- node$unique_name %in% stateless_names
-          node_mode <- ifelse(to_sample, "sampling", "forward")
+        # if the target is data, use sampling mode
+        if (target_type == "data") {
+          node_mode <- "sampling"
         }
 
-        # if it's an operation, see if it has a distribution (for lkj and
-        # wishart) and get mode based on whether the parent has a free state
-        if (node_type == "operation") {
-
-          parent_name <- node$parents[[1]]$unique_name
-          parent_stateless <- parent_name %in% stateless_names
-          to_sample <- node_has_distribution & parent_stateless
+        # if the target is a variable, use forward mode if it has a free
+        # state, and sampling mode if not
+        if (target_type == "variable") {
+          to_sample <- target$unique_name %in% stateless_names
           node_mode <- ifelse(to_sample, "sampling", "forward")
 
         }
 
-        # if the node is a distribution, decide based on its target
-        if (node_type == "distribution") {
+        # if the target is an operation, see if that operation has a single
+        # parent that is a variable, and see if that has a free state
+        if (target_type == "operation") {
 
-          target <- node$target
-          target_type <- node_type(target)
-
-          # if it has no target (e.g. for a mixture distribution), define it in
-          # sampling mode (so it defines before the things that depend on it)
-          if (is.null(target)) {
-            node_mode <- "sampling"
-          }
-
-          # if the target is data, use sampling mode
-          if (target_type == "data") {
-            node_mode <- "sampling"
-          }
-
-          # if the target is a variable, use forward mode if it has a free
-          # state, and sampling mode if not
-          if (target_type == "variable") {
-            to_sample <- target$unique_name %in% stateless_names
-            node_mode <- ifelse(to_sample, "sampling", "forward")
-
-          }
-
-          # if the target is an operation, see if that operation has a single
-          # parent that is a variable, and see if that has a free state
-          if (target_type == "operation") {
-
-            target_parent_name <- target$parents[[1]]$unique_name
-            target_parent_stateless <- target_parent_name %in% stateless_names
-            node_mode <- ifelse(target_parent_stateless, "sampling", "forward")
-
-          }
+          target_parent_name <- target$parents[[1]]$unique_name
+          target_parent_stateless <- target_parent_name %in% stateless_names
+          node_mode <- ifelse(target_parent_stateless, "sampling", "forward")
 
         }
 
       }
 
       node_mode
+
+    },
+
+    # how to define the node if we're sampling everything (no free state)
+    how_to_define_all_sampling = function(node) {
+
+
+      switch(node_type(node),
+             data = ifelse(has_distribution(node), "sampling", "forward"),
+             operation = ifelse(has_distribution(node), "sampling", "forward"),
+             "sampling"
+      )
+    },
+
+    # tell a node whether to define itself in forward mode (deterministically
+    # from an existing free state), or in sampling mode (generate a random
+    # version of itself)
+    how_to_define = function(node) {
+
+      switch(
+        self$mode,
+
+        # if doing inference, everything is push-forward
+        all_forward = "forward",
+
+        # sampling from prior most nodes are in sampling mode
+        all_sampling = self$how_to_define_all_sampling(node),
+
+        # sampling from posterior some nodes defined forward, others sampled
+        hybrid = self$how_to_define_hybrid(node)
+
+      )
 
     },
 
@@ -299,33 +306,39 @@ dag_class <- R6Class(
 
     },
 
+    # split the overall free state vector into free versions of variables
+    split_free_state = function() {
+
+      tfe <- self$tf_environment
+
+      free_state <- get("free_state", envir = tfe)
+
+      params <- self$example_parameters(free = TRUE)
+      lengths <- vapply(params,
+                        function(x) length(x),
+                        FUN.VALUE = 1L)
+
+      if (length(lengths) > 1) {
+        args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
+      } else {
+        args <- list(free_state)
+      }
+
+      names <- paste0(names(params), "_free")
+
+      for (i in seq_along(names)) {
+        assign(names[i], args[[i]], envir = tfe)
+      }
+
+    },
+
     # define the body of the tensorflow graph in the environment env; without
     # defining the free_state, or the densities etc.
     define_tf_body = function(target_nodes = self$node_list) {
 
-      tfe <- self$tf_environment
-
       # if in forward or hybrid mode, split up the free state
       if (self$mode %in% c("all_forward", "hybrid")) {
-
-        # split up into separate free state variables and assign
-        free_state <- get("free_state", envir = tfe)
-
-        params <- self$example_parameters(free = TRUE)
-        lengths <- vapply(params,
-                          function(x) length(x),
-                          FUN.VALUE = 1L)
-
-        if (length(lengths) > 1) {
-          args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
-        } else {
-          args <- list(free_state)
-        }
-
-        names <- paste0(names(params), "_free")
-        for (i in seq_along(names))
-          assign(names[i], args[[i]], envir = tfe)
-
+        self$split_free_state()
       }
 
       # define all nodes in the environment and on the graph
@@ -835,7 +848,7 @@ dag_class <- R6Class(
     },
 
     # get the tfp distribution object for a distribution node
-    get_tfp_distribution = function (distrib_node) {
+    get_tfp_distribution = function(distrib_node) {
 
       # build the tfp distribution object for the distribution, and use it
       # to get the tensor for the sample
@@ -850,16 +863,16 @@ dag_class <- R6Class(
     },
 
     # try to draw a random sample from a distribution node
-    draw_sample = function (distribution_node) {
+    draw_sample = function(distribution_node) {
 
       tfp_distribution <- self$get_tfp_distribution(distribution_node)
       sample <- tfp_distribution$sample
 
       if (is.null(sample)) {
-        stop ("sampling is not yet implemented for ",
-              distribution_node$distribution_name,
-              " distributions",
-              call. = FALSE)
+        stop("sampling is not yet implemented for ",
+             distribution_node$distribution_name,
+             " distributions",
+             call. = FALSE)
       }
 
       sample(seed = get_seed())

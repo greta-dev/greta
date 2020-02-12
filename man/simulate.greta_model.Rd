@@ -4,17 +4,17 @@
 \alias{simulate.greta_model}
 \title{Simulate Responses From \code{greta_model} Object}
 \usage{
-\method{simulate}{greta_model}(object, nsim = 1, precision = c("double", "single"), seed = NULL, ...)
+\method{simulate}{greta_model}(object, nsim = 1, seed = NULL, precision = c("double", "single"), ...)
 }
 \arguments{
-\item{object}{a \code{\link{greta_model}} object}
+\item{object}{a \code{\link[greta:model]{greta_model}} object}
 
 \item{nsim}{positive integer scalar - the number of responses to simulate}
 
-\item{precision}{the floating point precision to use when calculating values.}
-
 \item{seed}{an optional seed to be used in set.seed immediately before the
 simulation so as to generate a reproducible sample}
+
+\item{precision}{the floating point precision to use when calculating values.}
 
 \item{...}{optional additional arguments, none are used at present}
 }
@@ -30,7 +30,7 @@ Simulate values of all named greta arrays associated with a
   greta model from the model priors, including the response variable.
 }
 \details{
-This is essentially a wrapper around \code{\link{calculate()}} that
+This is essentially a wrapper around \code{\link{calculate}()} that
   finds all relevant greta arrays. See that function for more functionality,
   including simulation conditional on fixed values or posterior samples.
 

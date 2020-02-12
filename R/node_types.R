@@ -153,7 +153,7 @@ operation_node <- R6Class(
       tf_name <- dag$tf_name(self)
       mode <- dag$how_to_define(self)
 
-      # if we're in sampling mode, get the distribution constructor and sample this node
+      # if sampling get the distribution constructor and sample this
       if (mode == "sampling") {
 
         tensor <- dag$draw_sample(self$distribution)
@@ -482,7 +482,10 @@ distribution_node <- R6Class(
       # consider that a parent node
       mode <- dag$how_to_define(self)
       if (mode == "sampling" & !is.null(self$target)) {
-        parent_names <- vapply(parents, member, "unique_name", FUN.VALUE = character(1))
+        parent_names <- vapply(parents,
+                               member,
+                               "unique_name",
+                               FUN.VALUE = character(1))
         keep <- parent_names != self$target$unique_name
         parents <- parents[keep]
       }
@@ -555,8 +558,8 @@ distribution_node <- R6Class(
 
     # shape_matches_output indicates whether the array for the parameter can
     # have the same shape as the output (e.g. this is true for binomial's prob
-    # parameter, but not for size)
-    # by default, assume a scalar (row) parameter can be expanded up to the distribution size
+    # parameter, but not for size) by default, assume a scalar (row) parameter
+    # can be expanded up to the distribution size
     add_parameter = function(parameter,
                              name,
                              shape_matches_output = TRUE,
@@ -578,7 +581,7 @@ distribution_node <- R6Class(
     },
 
     # try to expand a greta array for a parameter up to the required dimension
-    expand_parameter = function (parameter, dim) {
+    expand_parameter = function(parameter, dim) {
 
       # can this realisation of the parameter be expanded?
       expandable_shape <- ifelse(self$multivariate,
@@ -611,8 +614,8 @@ distribution_node <- R6Class(
 
     },
 
-    # try to expand all expandable (scalar for univariate, or row for multivariate)
-    # parameters to the required dimension
+    # try to expand all expandable (scalar for univariate, or row for
+    # multivariate) parameters to the required dimension
     expand_parameters_to = function(dim) {
 
       parameter_names <- names(self$parameters)
