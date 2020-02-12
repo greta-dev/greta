@@ -122,8 +122,13 @@ test_that("multivariate samples are correct", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
+  Sigma <- rwish(1, 5, diag(4))[1, , ]
   prob <- t(runif(4))
   prob <- prob / sum(prob)
+
+  compare_iid_samples(multivariate_normal,
+                      rmvnorm,
+                      parameters = list(mean = t(rnorm(4)), Sigma = Sigma))
 
   compare_iid_samples(multinomial,
                       rmultinom,
@@ -188,15 +193,6 @@ test_that("distributions without RNG error nicely", {
   )
 
   # multivariate
-  Sigma <- rwish(1, 5, diag(4))[1, , ]
-
-  expect_error(
-    compare_iid_samples(multivariate_normal,
-                      rmvnorm,
-                      parameters = list(mean = t(rnorm(4)), Sigma = Sigma)),
-    "sampling is not yet implemented"
-  )
-
   expect_error(
     compare_iid_samples(wishart,
                         rwish,
