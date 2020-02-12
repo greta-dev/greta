@@ -1075,6 +1075,7 @@ wishart_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
+
       # this is messy, we want to use the tfp wishart, but can't define the
       # density without expanding the dimension of x
 
@@ -1108,7 +1109,33 @@ wishart_distribution <- R6Class(
 
       }
 
-      list(log_prob = log_prob)
+      sample <- function(seed) {
+
+        df <- tf$squeeze(parameters$df, 1:2)
+        sigma <- parameters$sigma
+
+        # get the cholesky factor of Sigma in tf orientation
+        if (self$sigma_is_cholesky) {
+          sigma_chol <- tf$linalg$matrix_transpose(sigma)
+        } else {
+          sigma_chol <- tf$linalg$cholesky(sigma)
+        }
+
+        # use the density for choleskied x, with choleskied Sigma
+        distrib <- tfp$distributions$Wishart(df = df,
+                                             scale_tril = sigma_chol)
+
+        draws <- distrib$sample(seed = seed)
+
+        if (self$target_is_cholesky) {
+          draws <- tf_chol(draws)
+        }
+
+        draws
+
+      }
+
+      list(log_prob = log_prob, sample = sample)
 
     }
 

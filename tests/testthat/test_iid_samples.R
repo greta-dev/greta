@@ -154,6 +154,10 @@ test_that("multivariate samples are correct", {
                       extraDistr::rdirmnom,
                       parameters = list(size = 3, alpha = t(runif(4))))
 
+  compare_iid_samples(wishart,
+                      rwish,
+                      parameters = list(df = 7, Sigma = Sigma))
+
 })
 
 
@@ -187,15 +191,6 @@ test_that("distributions without RNG error nicely", {
   )
 
   # multivariate
-  Sigma <- rwish(1, 5, diag(4))[1, , ]
-
-  expect_error(
-    compare_iid_samples(wishart,
-                        rwish,
-                        parameters = list(df = 7, Sigma = Sigma)),
-    "sampling is not yet implemented"
-  )
-
   expect_error(
     compare_iid_samples(lkj_correlation,
                         rlkjcorr,

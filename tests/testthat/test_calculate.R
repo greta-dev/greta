@@ -495,7 +495,7 @@ test_that("calculate errors if a distribution cannot be sampled from", {
   source("helpers.R")
 
   # fix variable
-  a <- wishart(3, diag(2))
+  a <- lkj_correlation(3, dim = 2)
   y <- normal(a, 1)
   expect_error(sims <- calculate(y, nsim = 1),
                "sampling is not yet implemented")

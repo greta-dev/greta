@@ -561,6 +561,11 @@ combined_chisq_test <- function(x, y) {
              y = colSums(y))
 }
 
+# flatten unique part of a symmetric matrix
+get_upper_tri <- function(x, diag) {
+  x[upper.tri(x, diag = diag)]
+}
+
 # compare iid samples from a greta distribution (using calculate) against a
 # comparison R RNG function
 compare_iid_samples <- function(greta_fun,
@@ -571,20 +576,36 @@ compare_iid_samples <- function(greta_fun,
 
   greta_array <- do.call(greta_fun, parameters)
 
-  # autodetect if the distribution is multivariate
-  node <- get_node(greta_array)
-  multivariate <- node$distribution$multivariate
-  discrete <- node$distribution$discrete
+  # get information about distribution
+  distribution <- get_node(greta_array)$distribution
+  multivariate <- distribution$multivariate
+  discrete <- distribution$discrete
+  name <- distribution$distribution_name
 
   greta_samples <- calculate(greta_array, nsim = nsim)[[1]]
   r_samples <- do.call(r_fun, c(n = nsim, parameters))
 
   # reshape to matrix or vector
   if (multivariate) {
-    dim <- dim(greta_samples)
-    new_dim <- c(dim[1], dim[2] * dim[3])
-    dim(greta_samples) <- new_dim
-    dim(r_samples) <- new_dim
+
+    # if it's a symmetric matrix, take only a triangle and flatten it
+    if (name %in% c("wishart", "lkj_correlation")) {
+
+      include_diag <- name == "wishart"
+      t_greta_samples <- apply(greta_samples, 1, get_upper_tri, include_diag)
+      t_r_samples <- apply(r_samples, 1, get_upper_tri, include_diag)
+      greta_samples <- t(t_greta_samples)
+      r_samples <- t(t_r_samples)
+
+    } else {
+
+      dim <- dim(greta_samples)
+      new_dim <- c(dim[1], dim[2] * dim[3])
+      dim(greta_samples) <- new_dim
+      dim(r_samples) <- new_dim
+
+    }
+
   } else {
     greta_samples <- as.vector(greta_samples)
   }
