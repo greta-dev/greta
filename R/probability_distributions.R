@@ -825,7 +825,6 @@ dirichlet_multinomial_distribution <- R6Class(
 
     # Begin Exclude Linting
     tf_distrib = function(parameters, dag) {
-      parameters <- match_batches(parameters)
       parameters$size <- tf_flatten(parameters$size)
       distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
@@ -866,7 +865,6 @@ multinomial_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-      parameters <- match_batches(parameters)
       parameters$size <- tf_flatten(parameters$size)
       # scale probs to get absolute density correct
       parameters$prob <- parameters$prob / tf_sum(parameters$prob)

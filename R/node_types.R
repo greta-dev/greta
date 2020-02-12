@@ -33,6 +33,7 @@ data_node <- R6Class(
       if (mode == "forward") {
 
         value <- self$value()
+        ndim <- length(dim(value))
         shape <- to_shape(c(1, dim(value)))
         value <- add_first_dim(value)
 
@@ -55,7 +56,8 @@ data_node <- R6Class(
         }
 
         # expand up to batch size
-        batched_tensor <- expand_to_batch(unbatched_tensor, tfe$batch_dummy)
+        tiling <- c(tfe$batch_size, rep(1L, ndim))
+        batched_tensor <- tf$tile(unbatched_tensor, tiling)
 
         # put unbatched tensor in environment so it can be set
         assign(unbatched_name, unbatched_tensor, envir = tfe)
@@ -167,9 +169,6 @@ operation_node <- R6Class(
         # fetch additional (non-tensor) arguments, if any
         if (length(self$operation_args) > 0)
           tf_args <- c(tf_args, self$operation_args)
-
-        # if there are multiple args, reconcile batch dimensions now
-        tf_args <- match_batches(tf_args)
 
         # get the tensorflow function and apply it to the args
         operation <- eval(parse(text = self$operation),

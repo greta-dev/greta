@@ -434,8 +434,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   # create an object in the environment that's a list of these, and sample that
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
-  target_tensor_list <- lapply(target_names_list, get, envir = dag$tf_environment)
-  assign("calculate_target_tensor_list", target_tensor_list, envir = dag$tf_environment)
+  target_tensor_list <- lapply(target_names_list, get, envir = tfe)
+  assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)
 
   # add the batch size to the data list
   batch_size <- ifelse(stochastic, as.integer(nsim), 1L)

@@ -1306,9 +1306,6 @@ as_tf_function <- function(r_fun, ...) {
                               x
                             })
 
-    # transfer batch dimensions if needed
-    tensor_inputs <- match_batches(tensor_inputs)
-
     # create a sub-dag for these operations, from ga_dummies to ga_out
     if (!is.list(ga_out))
       ga_out <- list(ga_out)

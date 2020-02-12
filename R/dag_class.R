@@ -261,16 +261,8 @@ dag_class <- R6Class(
 
     define_batch_size = function() {
 
-      tfe <- self$tf_environment
       self$tf_run(
         batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
-      )
-
-      # a dummy tensor, just to extract the batch size more easily with
-      # match_batches (remove this in a later refactor, and use the batch size
-      # there!)
-      self$tf_run(
-        batch_dummy <- tf$ones(list(batch_size, 1L, 1L))
       )
 
     },
@@ -850,12 +842,6 @@ dag_class <- R6Class(
       distrib_constructor <- self$get_tf_object(distrib_node)
       parameter_nodes <- distrib_node$parameters
       tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
-
-      # match parameters' batches with the batch size so we can draw
-      # multiple samples
-      batch_dummy <- self$tf_environment$batch_dummy
-      dummy_params <- match_batches(c(list(batch_dummy), tf_parameter_list))
-      tf_parameter_list <- dummy_params[-1]
 
       # execute the distribution constructor functions to return a tfp
       # distribution object

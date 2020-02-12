@@ -417,13 +417,6 @@ tf_imultilogit <- function(x) {
   tf$nn$softmax(latent)
 }
 
-# a version of tf$concat that automatically expands out the first dimension if
-# necessary
-tf_concat <- function(values, axis) {
-  values <- match_batches(values)
-  tf$concat(values = values, axis = axis)
-}
-
 # map R's extract and replace syntax to tensorflow, for use in operation nodes
 # the following arguments are required:
 #   nelem - number of elements in the original array,
@@ -451,11 +444,6 @@ tf_extract <- function(x, nelem, index, dims_out) {
 # values, a tensor `updates` at the elements given by the R vector `index` (in
 # 0-indexing)
 tf_recombine <- function(ref, index, updates) {
-
-  # expand out any data to match the batch dimensions
-  out_list <- match_batches(list(ref, updates))
-  ref <- out_list[[1]]
-  updates <- out_list[[2]]
 
   # vector denoting whether an element is being updated
   nelem <- dim(ref)[[2]]
