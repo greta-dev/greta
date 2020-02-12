@@ -712,7 +712,7 @@ f_distribution <- R6Class(
       dim <- check_dims(df1, df2, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
-      super$initialize("d", dim, truncation)
+      super$initialize("f", dim, truncation)
       self$add_parameter(df1, "df1")
       self$add_parameter(df2, "df2")
     },
