@@ -866,6 +866,7 @@ dag_class <- R6Class(
     draw_sample = function(distribution_node) {
 
       tfp_distribution <- self$get_tfp_distribution(distribution_node)
+
       sample <- tfp_distribution$sample
 
       if (is.null(sample)) {
@@ -875,7 +876,44 @@ dag_class <- R6Class(
              call. = FALSE)
       }
 
-      sample(seed = get_seed())
+      truncation <- distribution_node$truncation
+
+      if (is.null(truncation)) {
+
+        # if we're not dealing with truncation, sample directly
+        tensor <- sample(seed = get_seed())
+
+      } else {
+
+        # if we're dealing with truncation (therefore univariate and continuous)
+        # sample a random uniform (tensor), and pass through the truncated survival
+        # function
+
+        cdf <- tfp_distribution$cdf
+        inverse_cdf <- tfp_distribution$quantile
+
+        if (is.null(cdf) | is.null(inverse_cdf)) {
+          stop("sampling is not yet implemented for truncated ",
+               distribution_node$distribution_name,
+               " distributions",
+               call. = FALSE)
+        }
+
+        # generate a random uniform sample of the correct shape
+        uniform <- tfp$distributions$Uniform(low = fl(0), high = fl(1))
+        shape <- c(self$tf_environment$batch_size, as.list(distribution_node$dim))
+        u <- uniform$sample(sample_shape = shape, seed = get_seed())
+
+        # transform through truncated inverse CDF to get draws on truncated scale
+        lower <- cdf(fl(truncation[1]))
+        upper <- cdf(fl(truncation[2]))
+        range <- upper - lower
+
+        tensor <- inverse_cdf(lower + u * range)
+
+      }
+
+      tensor
 
     }
 
