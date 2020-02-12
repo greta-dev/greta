@@ -611,7 +611,7 @@ test_that("array-valued distributions can be defined in models", {
 
 })
 
-test_that("distributions can be sampled from", {
+test_that("distributions can be sampled from by MCMC", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")

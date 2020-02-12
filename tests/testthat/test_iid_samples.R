@@ -45,6 +45,10 @@ test_that("univariate samples are correct", {
                       extraDistr::rinvgamma,
                       parameters = list(alpha = 3, beta = 1.2))
 
+  compare_iid_samples(weibull,
+                      rweibull,
+                      parameters = list(shape = 1.2, scale = 3.2))
+
   compare_iid_samples(exponential,
                       rexp,
                       parameters = list(rate = 0.54))
@@ -123,6 +127,14 @@ test_that("truncated univariate samples are correct", {
                         truncation = c(2, 3)
                       ))
 
+  compare_iid_samples(weibull,
+                      rtweibull,
+                      parameters = list(
+                        shape = 1.2,
+                        scale = 3.2,
+                        truncation = c(2, 3)
+                      ))
+
 })
 
 test_that("multivariate samples are correct", {
@@ -173,13 +185,6 @@ test_that("distributions without RNG error nicely", {
     compare_iid_samples(hypergeometric,
                         rhyper,
                         parameters = list(m = 11, n = 8, k = 5)),
-    "sampling is not yet implemented"
-  )
-
-  expect_error(
-    compare_iid_samples(weibull,
-                        rweibull,
-                        parameters = list(shape = 1.2, scale = 3.2)),
     "sampling is not yet implemented"
   )
 

@@ -475,19 +475,42 @@ weibull_distribution <- R6Class(
       a <- parameters$shape
       b <- parameters$scale
 
+      # use the TFP Weibull CDF bijector
+      bijector <- tfp$bijectors$Weibull(scale = b, concentration = a)
+
       log_prob <- function(x) {
         log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
       }
 
       cdf <- function(x) {
-        fl(1) - exp(fl(-1) * (x / b) ^ a)
+        bijector$forward(x)
       }
 
       log_cdf <- function(x) {
         log(cdf(x))
       }
 
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+      inverse_cdf <- function(x) {
+        bijector$inverse(x)
+      }
+
+      sample <- function(seed) {
+
+        # sample by pushing through the inverse cdf
+        uniform <- tfp$distributions$Uniform(low = fl(0), high = fl(1))
+        shape <- c(dag$tf_environment$batch_size, as.list(self$dim))
+        u <- uniform$sample(sample_shape = shape, seed = get_seed())
+        inverse_cdf(u)
+
+      }
+
+      list(
+        log_prob = log_prob,
+        cdf = cdf,
+        log_cdf = log_cdf,
+        quantile = inverse_cdf,
+        sample = sample
+      )
 
     }
 
