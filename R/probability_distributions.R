@@ -70,7 +70,7 @@ uniform_distribution <- R6Class(
         tf_ld + tf_flatten(x) * fl(0)
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = log_prob)
 
     }
 
@@ -175,7 +175,7 @@ bernoulli_distribution <- R6Class(
           x * lprob + (fl(1) - x) * lprobnot
         }
 
-        list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+        list(log_prob = log_prob)
 
       } else {
 
@@ -238,7 +238,7 @@ binomial_distribution <- R6Class(
           log_choose + x * lprob + (size - x) * lprobnot
         }
 
-        list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+        list(log_prob = log_prob)
 
       } else {
         tfp$distributions$Binomial(total_count = parameters$size,
@@ -281,7 +281,7 @@ beta_binomial_distribution <- R6Class(
           tf_lbeta(alpha, beta)
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = log_prob)
 
     }
 
@@ -383,7 +383,7 @@ hypergeometric_distribution <- R6Class(
           tf_lchoose(m + n, k)
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = log_prob)
 
     }
 
@@ -1103,7 +1103,7 @@ wishart_distribution <- R6Class(
 
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = log_prob)
 
     }
 
