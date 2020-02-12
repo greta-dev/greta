@@ -217,11 +217,19 @@ calculate <- function(...,
 
   }
 
-  # if the result wasn't mcmcsamples or simulations, drop the batch dimension
-  if (!inherits(result, "greta_mcmc_list") & is.null(nsim)) {
-      result <- lapply(result, drop_first_dim)
-  }
+  if (!inherits(result, "greta_mcmc_list")) {
 
+    # if it's not mcmc samples, make sure the results are in the right order
+    # (tensorflow order seems to be platform specific?!?)
+    order <- match(names(result), names(target))
+    result <- result[order]
+
+    # if the result wasn't mcmc samples or simulations, drop the batch dimension
+    if (is.null(nsim)) {
+      result <- lapply(result, drop_first_dim)
+    }
+
+  }
   result
 
 }
