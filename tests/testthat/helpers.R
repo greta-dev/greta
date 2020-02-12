@@ -461,10 +461,11 @@ qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 
 # random lkj draws, code from the rethinking package (can't load the package
 # because of stan*Travis*compiler issues)
-rlkjcorr <- function(n, k, eta = 1) {
+rlkjcorr <- function(n, eta = 1, dimension = 2) {
 
-  stopifnot(is.numeric(k), k >= 2, k == as.integer(k))
+  stopifnot(is.numeric(dimension), dimension >= 2, dimension == as.integer(dimension))
   stopifnot(eta > 0)
+  k <- dimension
 
   f <- function() {
 
@@ -499,6 +500,92 @@ rlkjcorr <- function(n, k, eta = 1) {
   }
 
   r
+
+}
+
+# helper RNG functions
+rmvnorm <- function(n, mean, Sigma) {
+  mvtnorm::rmvnorm(n = n, mean = mean, sigma = Sigma)
+}
+
+rcat <- function (n, prob) {
+  rmultinom(n, 1, prob)
+}
+
+rwish <- function(n, df, Sigma) {
+  draws <- rWishart(n = n, df = df, Sigma = Sigma)
+  aperm(draws, c(3, 1, 2))
+}
+
+rtnorm <- function(n, mean, sd, truncation) {
+  truncdist::rtrunc(
+    n,
+    "norm",
+    a = truncation[1],
+    b = truncation[2],
+    mean = mean,
+    sd = sd
+  )
+}
+
+rtlnorm <- function(n, meanlog, sdlog, truncation) {
+  truncdist::rtrunc(
+    n,
+    "lnorm",
+    a = truncation[1],
+    b = truncation[2],
+    meanlog = meanlog,
+    sdlog = sdlog
+  )
+}
+
+rtweibull <- function(n, shape, scale, truncation) {
+  truncdist::rtrunc(
+    n,
+    "weibull",
+    a = truncation[1],
+    b = truncation[2],
+    shape = shape,
+    scale = scale
+  )
+}
+
+# compare iid samples from a greta distribution (using calculate) against a
+# comparison R RNG function
+compare_iid_samples <- function(greta_fun,
+                                r_fun,
+                                parameters,
+                                nsim = 100,
+                                multivariate = NULL,
+                                p_value_threshold = 0.01) {
+
+  greta_array <- do.call(greta_fun, parameters)
+
+  # autodetect if the distribution is multivariate
+  if (is.null(multivariate)) {
+    node <- get_node(greta_array)
+    multivariate <- node$distribution$multivariate
+  }
+
+  greta_samples <- calculate(greta_array, nsim = nsim)[[1]]
+
+  if (!multivariate) {
+    greta_samples <- as.vector(greta_samples)
+  }
+
+  r_samples <- do.call(r_fun, c(n = nsim, parameters))
+
+  if (multivariate) {
+
+    stop("not implemented yet")
+
+  } else {
+
+    # do Kolmogorov Smirnov test on samples
+    suppressWarnings(test <- ks.test(greta_samples, r_samples))
+    expect_gte(test$p.value, p_value_threshold)
+
+  }
 
 }
 

@@ -84,7 +84,7 @@ test_that("samplers are unbiased for LKJ", {
 
   x <- lkj_correlation(3, 2)[1, 2]
   iid <- function(n)
-    rlkjcorr(n, 2, 3)[, 1, 2]
+    rlkjcorr(n, 3, 2)[, 1, 2]
 
   check_samples(x, iid, hmc(), one_by_one = TRUE)
 

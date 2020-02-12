@@ -357,15 +357,12 @@ test_that("lkj distribution has correct density", {
     res
   }
 
-  rlkj_correlation <- function(m)
-    rlkjcorr(1, k = m, eta = 1)
-
   # no vectorised lkj, so loop through all of these
   replicate(10,
             compare_distribution(greta::lkj_correlation,
                                  dlkj_correlation,
                                  parameters = list(eta = eta, dimension = m),
-                                 x = rlkj_correlation(m),
+                                 x = rlkjcorr(1, eta = 1, dimension = m),
                                  multivariate = TRUE))
 
 })
