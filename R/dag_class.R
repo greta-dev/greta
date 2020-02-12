@@ -858,7 +858,7 @@ dag_class <- R6Class(
 
       # execute the distribution constructor functions to return a tfp
       # distribution object
-      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = dag)
+      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
 
     },
 

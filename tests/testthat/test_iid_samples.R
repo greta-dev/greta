@@ -5,10 +5,6 @@ test_that("univariate samples are correct", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  compare_iid_samples(uniform,
-                      runif,
-                      parameters = list(min = -2, max = 3))
-
   compare_iid_samples(normal,
                       rnorm,
                       parameters = list(mean = -2, sd = 3))
@@ -25,17 +21,9 @@ test_that("univariate samples are correct", {
                       rbinom,
                       parameters = list(size = 12, prob = 0.3))
 
-  compare_iid_samples(beta_binomial,
-                      extraDistr::rbbinom,
-                      parameters = list(size = 12, alpha = 4, beta = 2))
-
   compare_iid_samples(negative_binomial,
                       rnbinom,
                       parameters = list(size = 12, prob = 0.3))
-
-  compare_iid_samples(hypergeometric,
-                      rhyper,
-                      parameters = list(m = 11, n = 8, k = 5))
 
   compare_iid_samples(poisson,
                       rpois,
@@ -48,10 +36,6 @@ test_that("univariate samples are correct", {
   compare_iid_samples(inverse_gamma,
                       extraDistr::rinvgamma,
                       parameters = list(alpha = 3, beta = 1.2))
-
-  compare_iid_samples(weibull,
-                      rweibull,
-                      parameters = list(shape = 1.2, scale = 3.2))
 
   compare_iid_samples(exponential,
                       rexp,
@@ -84,10 +68,6 @@ test_that("univariate samples are correct", {
   compare_iid_samples(logistic,
                       rlogis,
                       parameters = list(location = -2, scale = 1.3))
-
-  compare_iid_samples(f,
-                      rf,
-                      parameters = list(df1 = 4, df2 = 1))
 
 })
 
@@ -125,21 +105,13 @@ test_that("truncated univariate samples are correct", {
                         truncation = c(-3, 10)
                       ))
 
-  # originally constrained distributions
+  # originally constrained distribution
 
   compare_iid_samples(lognormal,
                       rtlnorm,
                       parameters = list(
                         mean = -2,
                         sd = 3,
-                        truncation = c(2, 3)
-                      ))
-
-  compare_iid_samples(weibull,
-                      rtweibull,
-                      parameters = list(
-                        shape = 1.2,
-                        scale = 3.2,
                         truncation = c(2, 3)
                       ))
 
@@ -174,12 +146,75 @@ test_that("multivariate samples are correct", {
                       extraDistr::rdirmnom,
                       parameters = list(size = 12, alpha = t(runif(4))))
 
-  compare_iid_samples(wishart,
-                      rwish,
-                      parameters = list(df = 7, Sigma = Sigma))
+})
 
-  compare_iid_samples(lkj_correlation,
-                      rlkjcorr,
-                      parameters = list(eta = 6.5, dimension = 4))
+
+test_that("distributions without RNG error nicely", {
+
+  # (move these into other tests as they get implemented)
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  expect_error(
+    compare_iid_samples(uniform,
+                        runif,
+                        parameters = list(min = -2, max = 3)),
+    "sampling is not yet implemented"
+  )
+
+  expect_error(
+    compare_iid_samples(beta_binomial,
+                        extraDistr::rbbinom,
+                        parameters = list(size = 12, alpha = 4, beta = 2)),
+    "sampling is not yet implemented"
+  )
+
+  expect_error(
+    compare_iid_samples(hypergeometric,
+                        rhyper,
+                        parameters = list(m = 11, n = 8, k = 5)),
+    "sampling is not yet implemented"
+  )
+
+  expect_error(
+    compare_iid_samples(weibull,
+                        rweibull,
+                        parameters = list(shape = 1.2, scale = 3.2)),
+    "sampling is not yet implemented"
+  )
+
+  expect_error(
+    compare_iid_samples(f,
+                        rf,
+                        parameters = list(df1 = 4, df2 = 1)),
+    "sampling is not yet implemented"
+  )
+
+  expect_error(
+    compare_iid_samples(wishart,
+                        rwish,
+                        parameters = list(df = 7, Sigma = Sigma)),
+    "sampling is not yet implemented"
+  )
+
+  expect_error(
+    compare_iid_samples(lkj_correlation,
+                        rlkjcorr,
+                        parameters = list(eta = 6.5, dimension = 4)),
+    "sampling is not yet implemented"
+  )
+
+  d <- mixture(normal(0, 1), normal(0, 2), weights = c(0.3, 0.7))
+  expect_error(
+    calculate(d, nsim = 100),
+    "sampling is not yet implemented"
+  )
+
+  d <- joint(normal(0, 1), normal(0, 2))
+  expect_error(
+    calculate(d, nsim = 100),
+    "sampling is not yet implemented"
+  )
 
 })

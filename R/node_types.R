@@ -308,8 +308,7 @@ variable_node <- R6Class(
 
         } else {
 
-          tfp_distribution <- dag$get_tfp_distribution(self$distribution)
-          tensor <- tfp_distribution$sample(seed = get_seed())
+          tensor <- dag$draw_sample(self$distribution)
 
         }
 
