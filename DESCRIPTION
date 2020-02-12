@@ -87,6 +87,7 @@ Suggests:
     rmutil,
     extraDistr,
     truncdist,
+    cramer,
     tidyverse,
     fields,
     MASS,

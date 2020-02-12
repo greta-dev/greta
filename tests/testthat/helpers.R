@@ -508,13 +508,18 @@ rmvnorm <- function(n, mean, Sigma) {
   mvtnorm::rmvnorm(n = n, mean = mean, sigma = Sigma)
 }
 
-rcat <- function (n, prob) {
-  rmultinom(n, 1, prob)
-}
-
 rwish <- function(n, df, Sigma) {
   draws <- rWishart(n = n, df = df, Sigma = Sigma)
   aperm(draws, c(3, 1, 2))
+}
+
+rmulti <- function(n, size, prob) {
+  draws <- rmultinom(n = n, size = size, prob = prob)
+  t(draws)
+}
+
+rcat <- function (n, prob) {
+  rmulti(n, 1, prob)
 }
 
 rtnorm <- function(n, mean, sd, truncation) {
@@ -550,42 +555,50 @@ rtweibull <- function(n, shape, scale, truncation) {
   )
 }
 
+# a form of two-sample chi squared test for discrete multivariate distributions
+combined_chisq_test <- function(x, y) {
+  chisq.test(x = colSums(x),
+             y = colSums(y))
+}
+
 # compare iid samples from a greta distribution (using calculate) against a
 # comparison R RNG function
 compare_iid_samples <- function(greta_fun,
                                 r_fun,
                                 parameters,
                                 nsim = 100,
-                                multivariate = NULL,
                                 p_value_threshold = 0.01) {
 
   greta_array <- do.call(greta_fun, parameters)
 
   # autodetect if the distribution is multivariate
-  if (is.null(multivariate)) {
-    node <- get_node(greta_array)
-    multivariate <- node$distribution$multivariate
-  }
+  node <- get_node(greta_array)
+  multivariate <- node$distribution$multivariate
+  discrete <- node$distribution$discrete
 
   greta_samples <- calculate(greta_array, nsim = nsim)[[1]]
+  r_samples <- do.call(r_fun, c(n = nsim, parameters))
 
-  if (!multivariate) {
+  # reshape to matrix or vector
+  if (multivariate) {
+    dim <- dim(greta_samples)
+    new_dim <- c(dim[1], dim[2] * dim[3])
+    dim(greta_samples) <- new_dim
+    dim(r_samples) <- new_dim
+  } else {
     greta_samples <- as.vector(greta_samples)
   }
 
-  r_samples <- do.call(r_fun, c(n = nsim, parameters))
-
-  if (multivariate) {
-
-    stop("not implemented yet")
-
+  # find a vaguely appropriate test
+  if (discrete) {
+    test <- ifelse(multivariate, combined_chisq_test, chisq.test)
   } else {
-
-    # do Kolmogorov Smirnov test on samples
-    suppressWarnings(test <- ks.test(greta_samples, r_samples))
-    expect_gte(test$p.value, p_value_threshold)
-
+    test <- ifelse(multivariate, cramer::cramer.test, ks.test)
   }
+
+  # do Kolmogorov Smirnov test on samples
+  suppressWarnings(test_result <- test(greta_samples, r_samples))
+  expect_gte(test_result$p.value, p_value_threshold)
 
 }
 

@@ -131,7 +131,7 @@ test_that("multivariate samples are correct", {
                       parameters = list(mean = t(rnorm(4)), Sigma = Sigma))
 
   compare_iid_samples(multinomial,
-                      rmultinom,
+                      rmulti,
                       parameters = list(size = 12, prob = prob))
 
   compare_iid_samples(categorical,
@@ -144,7 +144,7 @@ test_that("multivariate samples are correct", {
 
   compare_iid_samples(dirichlet_multinomial,
                       extraDistr::rdirmnom,
-                      parameters = list(size = 12, alpha = t(runif(4))))
+                      parameters = list(size = 3, alpha = t(runif(4))))
 
 })
 
@@ -193,6 +193,8 @@ test_that("distributions without RNG error nicely", {
   )
 
   # multivariate
+  Sigma <- rwish(1, 5, diag(4))[1, , ]
+
   expect_error(
     compare_iid_samples(wishart,
                         rwish,
