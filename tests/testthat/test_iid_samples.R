@@ -25,6 +25,10 @@ test_that("univariate samples are correct", {
                       rbinom,
                       parameters = list(size = 12, prob = 0.3))
 
+  compare_iid_samples(beta_binomial,
+                      extraDistr::rbbinom,
+                      parameters = list(size = 12, alpha = 4, beta = 2))
+
   compare_iid_samples(negative_binomial,
                       rnbinom,
                       parameters = list(size = 12, prob = 0.3))
@@ -161,14 +165,6 @@ test_that("distributions without RNG error nicely", {
   source("helpers.R")
 
   # univariate
-
-  expect_error(
-    compare_iid_samples(beta_binomial,
-                        extraDistr::rbbinom,
-                        parameters = list(size = 12, alpha = 4, beta = 2)),
-    "sampling is not yet implemented"
-  )
-
   expect_error(
     compare_iid_samples(hypergeometric,
                         rhyper,

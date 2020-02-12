@@ -274,7 +274,19 @@ beta_binomial_distribution <- R6Class(
           tf_lbeta(alpha, beta)
       }
 
-      list(log_prob = log_prob)
+      # generate a beta, then a binomial
+      sample <- function(seed) {
+
+        beta <- tfp$distributions$Beta(concentration1 = alpha,
+                                       concentration0 = beta)
+        probs <- beta$sample(seed = seed)
+        binomial <- tfp$distributions$Binomial(total_count = size,
+                                               probs = probs)
+        binomial$sample(seed = seed)
+
+      }
+
+      list(log_prob = log_prob, sample = sample)
 
     }
 
