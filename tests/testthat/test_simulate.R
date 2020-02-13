@@ -80,8 +80,10 @@ test_that("simulate errors if a distribution cannot be sampled from", {
   source("helpers.R")
 
   # fix variable
-  a <- lkj_correlation(3, dim = 2)
-  y <- normal(a, 1)
+  y_ <- rhyper(10, 5, 3, 2)
+  y <- as_data(y_)
+  m <- lognormal(0, 1)
+  distribution(y) <- hypergeometric(m, 3, 2)
   m <- model(y)
   expect_error(sims <- simulate(m),
                "sampling is not yet implemented")

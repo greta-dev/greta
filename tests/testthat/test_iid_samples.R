@@ -174,6 +174,10 @@ test_that("multivariate samples are correct", {
                       rwish,
                       parameters = list(df = 7, Sigma = Sigma))
 
+  compare_iid_samples(lkj_correlation,
+                      rlkjcorr,
+                      parameters = list(eta = 6.5, dimension = 4))
+
 })
 
 test_that("joint samples are correct", {
@@ -264,14 +268,6 @@ test_that("distributions without RNG error nicely", {
     compare_iid_samples(hypergeometric,
                         rhyper,
                         parameters = list(m = 11, n = 8, k = 5)),
-    "sampling is not yet implemented"
-  )
-
-  # multivariate
-  expect_error(
-    compare_iid_samples(lkj_correlation,
-                        rlkjcorr,
-                        parameters = list(eta = 6.5, dimension = 4)),
     "sampling is not yet implemented"
   )
 

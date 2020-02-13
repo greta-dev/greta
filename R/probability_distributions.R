@@ -1259,18 +1259,37 @@ lkj_correlation_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
 
       eta <- tf$squeeze(parameters$eta, 1:2)
+      dim <- self$dim[1]
 
       distrib <- tfp$distributions$LKJ(
-        dimension = self$dim[1],
+        dimension = dim,
         concentration = eta,
         input_output_cholesky = self$target_is_cholesky
       )
 
-      # we can't yet sample from this, as the implement can't detect the output
-      # size with dynamic shape, so suppress sampling for now.
-      list(log_prob = distrib$log_prob)
+      # tfp's lkj sampling can't detect the size of the output from eta, for
+      # some reason. But we can use map_fun to apply their simulation to each
+      # element of eta.
+      sample <- function(seed) {
 
-      # input_output_cholesky argument will need to be dealt with for RNG stuff
+        sample_once <- function(eta) {
+
+          d <- tfp$distributions$LKJ(
+            dimension = dim,
+            concentration = eta,
+            input_output_cholesky = self$target_is_cholesky
+          )
+
+          d$sample(seed = seed)
+
+        }
+
+        tf$map_fn(sample_once, eta)
+
+      }
+
+      list(log_prob = distrib$log_prob,
+           sample = sample)
 
     }
 
