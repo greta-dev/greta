@@ -168,7 +168,15 @@ joint_distribution <- R6Class(
 
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      sample <- function(seed) {
+
+        samples <- lapply(distribution_nodes, dag$draw_sample)
+        names(samples) <- NULL
+        tf$concat(samples, axis = 2L)
+
+      }
+
+      list(log_prob = log_prob, sample = sample)
 
     }
   )

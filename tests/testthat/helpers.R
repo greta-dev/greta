@@ -566,6 +566,28 @@ rtf <- function(n, df1, df2, truncation) {
   )
 }
 
+
+# joint testing functions
+joint_normals <- function(...) {
+  params_list <- list(...)
+  components <- lapply(params_list, function(par) do.call(normal, par))
+  do.call(joint, components)
+}
+
+rjnorm <- function(n, ...) {
+  params_list <- list(...)
+  args_list <- lapply(params_list, function(par) c(n, par))
+  sims <- lapply(args_list, function(par) do.call(rnorm, par))
+  do.call(cbind, sims)
+}
+
+rjtnorm <- function(n, ...) {
+  params_list <- list(...)
+  args_list <- lapply(params_list, function(par) c(n, par))
+  sims <- lapply(args_list, function(par) do.call(rtnorm, par))
+  do.call(cbind, sims)
+}
+
 # a form of two-sample chi squared test for discrete multivariate distributions
 combined_chisq_test <- function(x, y) {
   chisq.test(x = colSums(x),

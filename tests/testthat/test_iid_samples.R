@@ -176,6 +176,32 @@ test_that("multivariate samples are correct", {
 
 })
 
+test_that("joint samples are correct", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # joint of normal distributions
+  params <- list(
+    list(mean = 0, sd = 1),
+    list(mean = 0, sd = 2)
+  )
+  compare_iid_samples(joint_normals,
+                      rjnorm,
+                      parameters = params)
+
+
+  # joint of truncated normal distributions
+  params <- list(
+    list(mean = 0, sd = 1, truncation = c(-1, Inf)),
+    list(mean = 0, sd = 2, truncation = c(-Inf, 2)),
+    list(mean = 0, sd = 3, truncation = c(-2, 1))
+  )
+  compare_iid_samples(joint_normals,
+                      rjtnorm,
+                      parameters = params)
+
+})
 
 test_that("distributions without RNG error nicely", {
 
@@ -202,12 +228,6 @@ test_that("distributions without RNG error nicely", {
 
   # weird
   d <- mixture(normal(0, 1), normal(0, 2), weights = c(0.3, 0.7))
-  expect_error(
-    calculate(d, nsim = 100),
-    "sampling is not yet implemented"
-  )
-
-  d <- joint(normal(0, 1), normal(0, 2))
   expect_error(
     calculate(d, nsim = 100),
     "sampling is not yet implemented"
