@@ -463,9 +463,9 @@ qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 # because of stan*Travis*compiler issues)
 rlkjcorr <- function(n, eta = 1, dimension = 2) {
 
-  stopifnot(is.numeric(dimension), dimension >= 2, dimension == as.integer(dimension))
-  stopifnot(eta > 0)
   k <- dimension
+  stopifnot(is.numeric(k), k >= 2, k == as.integer(k))
+  stopifnot(eta > 0)
 
   f <- function() {
 
@@ -504,11 +504,11 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
 }
 
 # helper RNG functions
-rmvnorm <- function(n, mean, Sigma) {
+rmvnorm <- function(n, mean, Sigma) {  # nolint
   mvtnorm::rmvnorm(n = n, mean = mean, sigma = Sigma)
 }
 
-rwish <- function(n, df, Sigma) {
+rwish <- function(n, df, Sigma) {  # nolint
   draws <- rWishart(n = n, df = df, Sigma = Sigma)
   aperm(draws, c(3, 1, 2))
 }
@@ -518,7 +518,7 @@ rmulti <- function(n, size, prob) {
   t(draws)
 }
 
-rcat <- function (n, prob) {
+rcat <- function(n, prob) {
   rmulti(n, 1, prob)
 }
 
@@ -601,7 +601,10 @@ mixture_multivariate_normals <- function(...) {
   args <- list(...)
   is_weights <- names(args) == "weights"
   params_list <- args[!is_weights]
-  components <- lapply(params_list, function(par) do.call(multivariate_normal, par))
+  components <- lapply(params_list,
+                       function(par) {
+                         do.call(multivariate_normal, par)
+                       })
   do.call(mixture, c(components, args[is_weights]))
 }
 

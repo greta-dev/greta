@@ -213,7 +213,7 @@ mixture_distribution <- R6Class(
       # get information from the *nodes* for component distributions, not the tf
       # objects passed in here
 
-      # get tfp distributions, truncations, and bounds of component distributions
+      # get tfp distributions, truncations, & bounds of component distributions
       distribution_nodes <- self$parameters[names(self$parameters) != "weights"]
       truncations <- lapply(distribution_nodes, member, "truncation")
       bounds <- lapply(distribution_nodes, member, "bounds")
@@ -295,7 +295,7 @@ mixture_distribution <- R6Class(
 
         # how many dimensions to consider a batch differs beetween multivariate
         # and univariate
-        collapse_axis = ndim + 1L
+        collapse_axis <- ndim + 1L
         n_batches <- ifelse(self$multivariate, 1L, collapse_axis)
 
         # combine the random components on an extra last dimension

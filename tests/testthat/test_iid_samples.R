@@ -146,13 +146,13 @@ test_that("multivariate samples are correct", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  Sigma <- rwish(1, 5, diag(4))[1, , ]
+  sigma <- rwish(1, 5, diag(4))[1, , ]
   prob <- t(runif(4))
   prob <- prob / sum(prob)
 
   compare_iid_samples(multivariate_normal,
                       rmvnorm,
-                      parameters = list(mean = t(rnorm(4)), Sigma = Sigma))
+                      parameters = list(mean = t(rnorm(4)), Sigma = sigma))
 
   compare_iid_samples(multinomial,
                       rmulti,

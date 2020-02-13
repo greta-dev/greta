@@ -886,8 +886,8 @@ dag_class <- R6Class(
       } else {
 
         # if we're dealing with truncation (therefore univariate and continuous)
-        # sample a random uniform (tensor), and pass through the truncated survival
-        # function
+        # sample a random uniform (tensor), and pass through the truncated
+        # quantile (inverse cdf) function
 
         cdf <- tfp_distribution$cdf
         quantile <- tfp_distribution$quantile
