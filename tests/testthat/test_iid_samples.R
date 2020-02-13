@@ -172,7 +172,7 @@ test_that("multivariate samples are correct", {
 
   compare_iid_samples(wishart,
                       rwish,
-                      parameters = list(df = 7, Sigma = Sigma))
+                      parameters = list(df = 7, Sigma = sigma))
 
   compare_iid_samples(lkj_correlation,
                       rlkjcorr,
