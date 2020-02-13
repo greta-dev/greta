@@ -495,8 +495,7 @@ test_that("calculate errors if a distribution cannot be sampled from", {
   source("helpers.R")
 
   # fix variable
-  a <- lkj_correlation(3, dim = 2)
-  y <- normal(a, 1)
+  y <- hypergeometric(5, 3, 2)
   expect_error(sims <- calculate(y, nsim = 1),
                "sampling is not yet implemented")
 
