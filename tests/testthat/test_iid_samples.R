@@ -203,6 +203,55 @@ test_that("joint samples are correct", {
 
 })
 
+
+test_that("mixture samples are correct", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # mixture of normal distributions
+  weights <- runif(3)
+  weights <- weights / sum(weights)
+
+  params <- list(
+    list(mean = 0, sd = 1),
+    list(mean = 0, sd = 2),
+    list(mean = 10, sd = 1),
+    weights = weights
+  )
+
+  compare_iid_samples(mixture_normals,
+                      rmixnorm,
+                      parameters = params)
+
+  # mixture of truncated normal distributions
+  params <- list(
+    list(mean = 0, sd = 1, truncation = c(-1, Inf)),
+    list(mean = 0, sd = 2, truncation = c(-1, Inf)),
+    list(mean = 0, sd = 3, truncation = c(-1, Inf)),
+    weights = weights
+  )
+
+  compare_iid_samples(mixture_normals,
+                      rmixtnorm,
+                      parameters = params)
+
+  # mixture of multivariate normal distributions
+  sigma <- diag(4) * 0.1
+  params <- list(
+    list(mean = matrix(10, 1, 4), Sigma = sigma),
+    list(mean = matrix(0, 1, 4), Sigma = sigma),
+    list(mean = matrix(-10, 1, 4), Sigma = sigma),
+    weights = weights
+  )
+
+  compare_iid_samples(mixture_multivariate_normals,
+                      rmixmvnorm,
+                      parameters = params)
+
+
+})
+
 test_that("distributions without RNG error nicely", {
 
   # (move these into other tests as they get implemented)
@@ -223,13 +272,6 @@ test_that("distributions without RNG error nicely", {
     compare_iid_samples(lkj_correlation,
                         rlkjcorr,
                         parameters = list(eta = 6.5, dimension = 4)),
-    "sampling is not yet implemented"
-  )
-
-  # weird
-  d <- mixture(normal(0, 1), normal(0, 2), weights = c(0.3, 0.7))
-  expect_error(
-    calculate(d, nsim = 100),
     "sampling is not yet implemented"
   )
 

@@ -61,6 +61,20 @@ test_that("mixtures of fixed and continuous distributions errors", {
 
 })
 
+
+test_that("mixtures of multivariate and univariate errors", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  weights <- uniform(0, 1, dim = 2)
+  expect_error(mixture(multivariate_normal(zeros(1, 3), diag(3)),
+                       normal(0, 1, dim = c(1, 3)),
+                       weights = weights),
+               "combination of multivariate and univariate")
+
+})
+
 test_that("mixtures of supports errors", {
 
   skip_if_not(check_tf_version())

@@ -588,6 +588,73 @@ rjtnorm <- function(n, ...) {
   do.call(cbind, sims)
 }
 
+# mixture testing functions
+mixture_normals <- function(...) {
+  args <- list(...)
+  is_weights <- names(args) == "weights"
+  params_list <- args[!is_weights]
+  components <- lapply(params_list, function(par) do.call(normal, par))
+  do.call(mixture, c(components, args[is_weights]))
+}
+
+mixture_multivariate_normals <- function(...) {
+  args <- list(...)
+  is_weights <- names(args) == "weights"
+  params_list <- args[!is_weights]
+  components <- lapply(params_list, function(par) do.call(multivariate_normal, par))
+  do.call(mixture, c(components, args[is_weights]))
+}
+
+rmixnorm <- function(n, ...) {
+  args <- list(...)
+  is_weights <- names(args) == "weights"
+  params_list <- args[!is_weights]
+  weights <- args[[which(is_weights)]]
+  args_list <- lapply(params_list, function(par) c(n, par))
+  sims <- lapply(args_list, function(par) do.call(rnorm, par))
+  draws <- do.call(cbind, sims)
+  components <- sample.int(length(sims), n, prob = weights, replace = TRUE)
+  idx <- cbind(seq_len(n), components)
+  draws[idx]
+}
+
+rmixtnorm <- function(n, ...) {
+  args <- list(...)
+  is_weights <- names(args) == "weights"
+  params_list <- args[!is_weights]
+  weights <- args[[which(is_weights)]]
+  args_list <- lapply(params_list, function(par) c(n, par))
+  sims <- lapply(args_list, function(par) do.call(rtnorm, par))
+  draws <- do.call(cbind, sims)
+  components <- sample.int(length(sims), n, prob = weights, replace = TRUE)
+  idx <- cbind(seq_len(n), components)
+  draws[idx]
+}
+
+rmixmvnorm <- function(n, ...) {
+
+  args <- list(...)
+  is_weights <- names(args) == "weights"
+  params_list <- args[!is_weights]
+  weights <- args[[which(is_weights)]]
+  args_list <- lapply(params_list, function(par) c(n, par))
+  sims <- lapply(args_list, function(par) do.call(rmvnorm, par))
+
+  components <- sample.int(length(sims), n, prob = weights, replace = TRUE)
+
+  # loop through the n observations, pulling out the corresponding slice
+  draws_out <- array(NA, dim(sims[[1]]))
+  for (i in seq_len(n)) {
+    draws_out[i, ] <- sims[[components[i]]][i, ]
+  }
+  draws_out
+
+}
+
+
+
+
+
 # a form of two-sample chi squared test for discrete multivariate distributions
 combined_chisq_test <- function(x, y) {
   chisq.test(x = colSums(x),

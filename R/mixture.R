@@ -134,11 +134,23 @@ mixture_distribution <- R6Class(
       lapply(dot_nodes, function(x) x$distribution <- NULL)
 
       # check the distributions are all either discrete or continuous
-      discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)
+      discrete <- vapply(distribs, member, "discrete", FUN.VALUE = logical(1))
 
       if (!all(discrete) & !all(!discrete)) {
         stop("cannot construct a mixture from a combination of discrete ",
              "and continuous distributions",
+             call. = FALSE)
+      }
+
+      # check the distributions are all either multivariate or univariate
+      multivariate <- vapply(distribs,
+                             member,
+                             "multivariate",
+                             FUN.VALUE = logical(1))
+
+      if (!all(multivariate) & !all(!multivariate)) {
+        stop("cannot construct a mixture from a combination of multivariate ",
+             "and univariate distributions",
              call. = FALSE)
       }
 
@@ -178,7 +190,10 @@ mixture_distribution <- R6Class(
       self$bounds <- support
 
       # for any discrete ones, tell them they are fixed
-      super$initialize("mixture", dim, discrete = discrete[1])
+      super$initialize("mixture",
+                       dim,
+                       discrete = discrete[1],
+                       multivariate = multivariate[1])
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
@@ -253,7 +268,53 @@ mixture_distribution <- R6Class(
         tf$reduce_logsumexp(log_probs_weighted_arr, axis = 1L)
       }
 
-      list(log_prob = log_prob)
+      sample <- function(seed) {
+
+        # draw samples from each component
+        samples <- lapply(distribution_nodes, dag$draw_sample)
+        names(samples) <- NULL
+
+        ndim <- length(self$dim)
+
+        # in univariate case, tile log_weights to match dim, so each element can
+        # be selected independently (otherwise each row is kept together)
+        log_weights <- tf$squeeze(log_weights, 2L)
+
+        if (!self$multivariate) {
+
+          for (i in seq_len(ndim)) {
+            log_weights <- tf$expand_dims(log_weights, 1L)
+          }
+          log_weights <- tf$tile(log_weights, c(1L, self$dim, 1L))
+
+        }
+
+        # for each observation, select a random component to sample from
+        cat <- tfp$distributions$Categorical(logits = log_weights)
+        indices <- cat$sample(seed = seed)
+
+        # how many dimensions to consider a batch differs beetween multivariate
+        # and univariate
+        collapse_axis = ndim + 1L
+        n_batches <- ifelse(self$multivariate, 1L, collapse_axis)
+
+        # combine the random components on an extra last dimension
+        samples_padded <- lapply(samples, tf$expand_dims, axis = collapse_axis)
+        samples_array <- tf$concat(samples_padded, axis = collapse_axis)
+
+        # extract the relevant component
+        indices <- tf$expand_dims(indices, n_batches)
+        draws <- tf$gather(samples_array,
+                           indices,
+                           axis = collapse_axis,
+                           batch_dims = n_batches)
+        draws <- tf$squeeze(draws, collapse_axis)
+
+        draws
+
+      }
+
+      list(log_prob = log_prob, sample = sample)
 
     }
 
