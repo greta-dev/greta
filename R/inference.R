@@ -478,10 +478,11 @@ stashed_samples <- function() {
       values_draws <- coda::mcmc.list(values_draws)
 
       # prep the raw model objects
-      model_info <- new.env()
-      model_info$raw_draws <- free_state_draws
-      model_info$samplers <- samplers
-      model_info$model <- samplers[[1]]$model
+      model_info <- list(
+        raw_draws = free_state_draws,
+        samplers = samplers,
+        model = samplers[[1]]$model
+      )
 
       values_draws <- as_greta_mcmc_list(values_draws, model_info)
 

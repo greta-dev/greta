@@ -10,6 +10,19 @@ as_greta_mcmc_list <- function(x, model_info) {
 
 }
 
+# Begin Exclude Linting
+#' @export
+#' @importFrom coda as.mcmc.list
+#' @noRd
+as.mcmc.list.greta_mcmc_list <- function(x, ...) {
+  # End Exclude Linting
+  attr(x, "model_info") <- NULL
+  classes <- class(x)
+  class(x) <- classes[classes != "greta_mcmc_list"]
+  x
+}
+
+
 # for window (and any other function that modifies the object), apply the same
 # to the free state draws
 
