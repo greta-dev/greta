@@ -126,6 +126,29 @@ test_that("deterministic calculate works with greta_mcmc_list objects", {
 
 })
 
+test_that("calculate with greta_mcmc_list doesn't mix up variables", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  a <- normal(-100, 0.001)
+  b <- normal(100, 0.001)
+  c <- normal(0, 0.001)
+  result <- b * c + a
+
+  model <- model(a, b)
+  draws <- mcmc(model, warmup = 100, n_samples = 100, verbose = FALSE)
+
+  result_draws <- calculate(result, values = draws)
+  vals <- as.vector(as.matrix(result_draws))
+
+  # the values should be around -100 if the variables aren't mixed up, or a long
+  # way off if they are
+  expect_gt(min(vals), -105)
+  expect_lt(max(vals), -95)
+
+})
+
 test_that("stochastic calculate works with greta_mcmc_list objects", {
 
   skip_if_not(check_tf_version())
@@ -179,7 +202,6 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
                  "posterior samples had to be drawn with replacement")
 
 })
-
 
 test_that("calculate errors if the mcmc samples unrelated to target", {
 
