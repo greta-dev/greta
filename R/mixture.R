@@ -195,29 +195,15 @@ mixture_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      # get parameter nodes, truncations, and bounds of component distributions
+      # get information from the *nodes* for component distributions, not the tf
+      # objects passed in here
+
+      # get tfp distributions, truncations, and bounds of component distributions
       distribution_nodes <- self$parameters[names(self$parameters) != "weights"]
       truncations <- lapply(distribution_nodes, member, "truncation")
       bounds <- lapply(distribution_nodes, member, "bounds")
-      distribution_parameters <-
-        lapply(distribution_nodes, member, "parameters")
-
-      # in this case, 'parameters' are functions to construct tfp distributions,
-      # so evaluate them on their own parameters to get the tfp distributions
-      constructors <- parameters[names(parameters) != "weights"]
-      tfp_distributions <- list()
-      for (i in seq_along(constructors)) {
-
-        constructor <- constructors[[i]]
-
-        # get the tensors for the parameters of this component distribution
-        tf_parameter_list <-
-          lapply(distribution_parameters[[i]], dag$get_tf_object)
-
-        # use them to construct the tfp distribution object
-        tfp_distributions[[i]] <- constructor(tf_parameter_list, dag = dag)
-
-      }
+      tfp_distributions <- lapply(distribution_nodes, dag$get_tfp_distribution)
+      names(tfp_distributions) <- NULL
 
       weights <- parameters$weights
 
@@ -267,7 +253,7 @@ mixture_distribution <- R6Class(
         tf$reduce_logsumexp(log_probs_weighted_arr, axis = 1L)
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = log_prob)
 
     }
 
