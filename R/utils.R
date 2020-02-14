@@ -1077,8 +1077,13 @@ all_greta_arrays <- function(env = parent.frame(),
 
   # all objects in that environment as a named list
   all_object_names <- ls(envir = env)
-  all_objects <- lapply(all_object_names, get, envir = env)
-  names(all_objects) <- all_object_names
+
+  # loop carefully in case there are unfulfilled promises
+  all_objects <- list()
+  for (name in all_object_names) {
+    all_objects[[name]] <- tryCatch(get(name, envir = env),
+                                    error = function(e) NULL)
+  }
 
   # find the greta arrays
   is_greta_array <- vapply(all_objects,
