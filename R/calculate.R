@@ -259,7 +259,8 @@ calculate_greta_mcmc_list <- function(target,
   # rearrange the nodes in the dag so that any mcmc dag variables are first and
   # in the right order (otherwise the free state will be incorrectly defined)
   in_draws <- names(dag$node_list)  %in% names(mcmc_dag$node_list)
-  order <- order(match(names(dag$node_list[in_draws]), names(mcmc_dag$node_list)))
+  order <- order(match(names(dag$node_list[in_draws]),
+                       names(mcmc_dag$node_list)))
   dag$node_list <- c(dag$node_list[in_draws][order], dag$node_list[!in_draws])
 
   # find variable nodes in the new dag without a free state in the old one.
