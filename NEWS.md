@@ -2,6 +2,8 @@
 
 ## Fixes:
 
+* greta_mcmc_list objects (returned by mcmc()) are now no longer modified by operations (like code::gelman.diag()). 
+
 * joint distributions of uniform variables now have the correct constraints when sampling (#377).
 
 * array-scalar dispatch with 3D arrays is now less buggy (#298).
