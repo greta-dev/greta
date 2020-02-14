@@ -32,7 +32,9 @@ test_that("marginalise errors nicely", {
   # the following can only be assessed on final model definition
 
   # function adds variables
-  fun <- function (x) {x + normal(0, 1)}
+  fun <- function(x) {
+    x + normal(0, 1)
+  }
   lambda <- variable()
   marginalise(fun, poisson(lambda), discrete_marginalisation(0:2))
   expect_error(
@@ -41,7 +43,9 @@ test_that("marginalise errors nicely", {
   )
 
   # function has no distribution
-  fun <- function (x) {x * 2}
+  fun <- function(x) {
+    x * 2
+  }
   lambda <- variable()
   marginalise(fun, poisson(lambda), discrete_marginalisation(0:2))
   expect_error(
@@ -90,7 +94,7 @@ test_that("inference runs with discrete marginalisation", {
   p <- variable(lower = 0, upper = 1)
   alpha <- variable()
   beta <- variable()
-  likelihood <- function (z, alpha, beta) {
+  likelihood <- function(z, alpha, beta) {
     eta <- alpha + beta * x * z
     lambda <- exp(eta)
     distribution(y) <- poisson(lambda)
@@ -116,7 +120,7 @@ test_that("discrete marginalisation gives correct densities", {
   # no constraints to no adjustment to account for
   lambda <- variable()
   y <- rnorm(100)
-  likelihood <- function (z) {
+  likelihood <- function(z) {
     distribution(y) <- normal(z, 1)
   }
   values <- 0:5
@@ -178,21 +182,20 @@ test_that("inference runs with laplace approximation", {
   source("helpers.R")
 
   # the eight schools model
-  N <- letters[1:8]
   treatment_effects <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
   treatment_stddevs <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
 
   int <- variable()
   sd <- variable(lower = 0)
-  lik <- function (theta) {
+  lik <- function(theta) {
     distribution(treatment_effects) <- normal(t(theta), treatment_stddevs)
   }
 
   # mock up as a multivariate normal distribution
-  Sigma <- diag(8) * sd ^ 2
+  sigma <- diag(8) * sd ^ 2
   mu <- ones(1, 8) * int
   marginalise(lik,
-              multivariate_normal(mu, Sigma),
+              multivariate_normal(mu, sigma),
               laplace_approximation())
 
   m <- model(int, sd)
@@ -204,5 +207,3 @@ test_that("inference runs with laplace approximation", {
   # the optimisation result should be similar to a very long run of
 
 })
-
-

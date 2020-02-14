@@ -71,7 +71,7 @@ marginalise <- function(fun, variable, method, ...) {
 
   # check the inputs
   if (!is.function(fun)) {
-    stop ("'fun' must be an R function")
+    stop("'fun' must be an R function")
   }
 
   # check the additional arguments to fun are given in dots
@@ -79,16 +79,16 @@ marginalise <- function(fun, variable, method, ...) {
   dot_names <- names(dots)
   expected_names <- names(formals(fun)[-1])
   if (!all(expected_names %in% dot_names)) {
-    stop ("all arguments to 'fun' must be passed, named, to marginalise")
+    stop("all arguments to 'fun' must be passed, named, to marginalise")
   }
 
   if (!inherits(distr, "distribution_node")) {
-    stop ("'variable' must be a variable greta array with a distribution")
+    stop("'variable' must be a variable greta array with a distribution")
   }
 
   if (!inherits(method, "marginaliser")) {
-    stop ("'method' must be a valid marginalisation method. ",
-          "See ?marginalise for options")
+    stop("'method' must be a valid marginalisation method. ",
+         "See ?marginalise for options")
   }
 
   # check the distribution is compatible with the method
@@ -217,15 +217,15 @@ as_conditional_density <- function(r_fun, args) {
 
     # check there are distributions
     if (!any(sub_dag$node_types == "distribution")) {
-      stop ("'fun' must constain at least one distribution over data",
-            call. = FALSE)
+      stop("'fun' must constain at least one distribution over data",
+           call. = FALSE)
     }
 
     # check there are no variables
     if (any(sub_dag$node_types == "variable")) {
-      stop ("'fun' must not create any new variables, ",
-            "variables can be passed in as arguments",
-            call. = FALSE)
+      stop("'fun' must not create any new variables, ",
+           "variables can be passed in as arguments",
+           call. = FALSE)
     }
 
     # use the default graph, so that it can be overwritten when this is called

@@ -421,7 +421,7 @@ gss <- function(func,
   status <- tf$stack(list(left, right, optimum), axis = 1L)
 
   # start loop
-  body <- function (left, right, optimum, width, iter) {
+  body <- function(left, right, optimum, width, iter) {
 
     d <- phim1 * width
 
@@ -446,7 +446,7 @@ gss <- function(func,
     list(left, right, optimum, width, iter + 1L)
   }
 
-  cond <- function (left, right, optimum, width, iter) {
+  cond <- function(left, right, optimum, width, iter) {
     err <- twomphi * tf$abs(width / optimum)
     not_converged <- tf$less(tol, err)
     not_all_converged <- tf$reduce_any(not_converged)

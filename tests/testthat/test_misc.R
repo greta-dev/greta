@@ -294,7 +294,7 @@ test_that("golden section search works", {
   n_batch <- 4
 
   # simple quadratic function with different optima for each batch
-  func <- function (x) {
+  func <- function(x) {
     (x - locs) ^ 2
   }
 
