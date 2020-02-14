@@ -12,6 +12,7 @@
 
 NULL
 
+# nolint start
 #' @rdname samplers
 #' @export
 #'
@@ -29,7 +30,7 @@ hmc <- function(Lmin = 5,
                 Lmax = 10,
                 epsilon = 0.1,
                 diag_sd = 1) {
-
+  # nolint end
   obj <- list(parameters = list(Lmin = Lmin,
                                 Lmax = Lmax,
                                 epsilon = epsilon,

@@ -15,6 +15,7 @@
 <!-- Bootstrap -->
 
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -38,8 +39,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="optimisation methods — optimisers" />
 
+<meta property="og:title" content="optimisation methods — optimisers" />
 <meta property="og:description" content="Functions to set up optimisers (which find parameters that
   maximise the joint density of a model) and change their tuning parameters,
   for use in opt(). For details of the algorithms and how to
@@ -48,9 +49,9 @@
    optimiser docs or the
   TensorFlow
    optimiser docs." />
-
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -139,7 +140,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://forum.greta-stats.org">
@@ -185,7 +185,6 @@
     </div>
 
     <div class="ref-description">
-    
     <p>Functions to set up optimisers (which find parameters that
   maximise the joint density of a model) and change their tuning parameters,
   for use in <code><a href='inference.html'>opt</a>()</code>. For details of the algorithms and how to
@@ -194,7 +193,6 @@
    optimiser docs</a> or the
   <a href='https://www.tensorflow.org/api_docs/python/tf/contrib/opt'>TensorFlow
    optimiser docs</a>.</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>nelder_mead</span>()
@@ -242,7 +240,7 @@
 
 <span class='fu'>rms_prop</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>decay</span> <span class='kw'>=</span> <span class='fl'>0.9</span>, <span class='kw'>momentum</span> <span class='kw'>=</span> <span class='fl'>0</span>,
   <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>1e-10</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -333,11 +331,10 @@ greater)</p></td>
       <td><p>discounting factor for the gradient</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>an <code>optimiser</code> object that can be passed to <code><a href='inference.html'>opt</a></code>.</p>
-    
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The optimisers <code>powell()</code>, <code>cg()</code>, <code>newton_cg()</code>,
@@ -346,7 +343,6 @@ greater)</p></td>
   be available in TensorFlow 2.0, on which that version of greta will depend.</p>
 <p>The <code>cobyla()</code> does not provide information about the number of
   iterations nor convergence, so these elements of the output are set to NA</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -368,11 +364,8 @@ greater)</p></td>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#value">Value</a></li>
-
       <li><a href="#details">Details</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 

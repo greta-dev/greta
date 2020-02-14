@@ -42,7 +42,7 @@ greta does not allow you to state the transformation/link on the
   The \code{log1pe} inverse link function is equivalent to \code{log(1 +
   exp(x))}, yielding a positive transformed parameter. Unlike the log
   transformation, this transformation is approximately linear for x > 1. i.e.
-  when \eqn{x > 1}, \eqn{y \approx x}
+  when \eqn{x > 1}, \eqn{y} is approximately \eqn{x}
 
   \code{imultilogit} expects an n-by-m greta array, and returns an n-by-(m+1)
   greta array of positive reals whose rows sum to one. This is equivalent

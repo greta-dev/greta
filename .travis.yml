@@ -37,6 +37,7 @@ r_packages:
 - rmarkdown
 - rsvg
 - bayesplot
+- cramer
 - extraDistr
 - devtools
 - tidyverse

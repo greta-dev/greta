@@ -27,25 +27,25 @@ module <- function(..., sort = TRUE) {
 
 # find out whether the usr has conda installed and visible
 #' @importFrom reticulate conda_binary
-have_conda <- function () {
+have_conda <- function() {
   conda_bin <- tryCatch(reticulate::conda_binary("auto"),
                         error = function(e) NULL)
   !is.null(conda_bin)
 }
 
 #' @importFrom reticulate py_available
-have_python <- function () {
+have_python <- function() {
   tryCatch(reticulate::py_available(initialize = TRUE),
                         error = function(e) FALSE)
 }
 
 #' @importFrom reticulate py_module_available
-have_tfp <- function () {
+have_tfp <- function() {
   reticulate::py_module_available("tensorflow_probability")
 }
 
 #' @importFrom reticulate py_module_available
-have_tf <- function () {
+have_tf <- function() {
   reticulate::py_module_available("tensorflow")
 }
 
@@ -130,7 +130,7 @@ check_tf_version <- function(alert = c("none",
         "  install_tensorflow(\n",
         ifelse(have_conda(), "    method = \"conda\",\n", ""),
         "    version = \"1.14.0\",\n",
-        "    extra_packages = \"tensorflow-probability\"\n",
+        "    extra_packages = \"tensorflow-probability==0.7.0\"\n",
         "  )"
       )
 
@@ -160,8 +160,6 @@ check_tf_version <- function(alert = c("none",
 
 }
 
-
-
 # helper for *apply statements on R6 objects
 member <- function(x, method)
   eval(parse(text = paste0("x$", method)))
@@ -183,7 +181,8 @@ fl <- function(x) {
   tf$constant(x, dtype = tf_float())
 }
 
-# coerce an integer(ish) vector to a list as expected in tensorflow shape arguments
+# coerce an integer(ish) vector to a list as expected in tensorflow shape
+# arguments
 #' @noRd
 #' @importFrom tensorflow shape
 to_shape <- function(dim)
@@ -192,6 +191,11 @@ to_shape <- function(dim)
 # is this greta_array actually a scalar?
 is_scalar <- function(x)
   identical(dim(x), c(1L, 1L))
+
+# is it a row vector?
+is_row <- function(x) {
+  length(dim(x) == 1) && dim(x)[1] == 1L
+}
 
 # flatten a greta array into a column vector in column-major order
 flatten <- function(x)
@@ -209,7 +213,7 @@ live_pointer <- function(tensor_name, environment = parent.frame()) {
     !is.null(environment[[tensor_name]]$name)
 }
 
-# Begin Exclude Linting
+# nolint start
 # get the next seed as a L'Ecuyer
 future_seed <- function() {
   okind <- RNGkind()[1]
@@ -217,7 +221,7 @@ future_seed <- function() {
   RNGkind("L'Ecuyer-CMRG")
   .GlobalEnv$.Random.seed
 }
-# End Exclude Linting
+# nolint end
 
 create_log_file <- function(create = FALSE) {
   filename <- tempfile(pattern = "greta_log_")
@@ -252,7 +256,7 @@ record <- function(expr, file) {
 }
 
 # convert an assumed numeric to an array with at least 2 dimensions
-as_2D_array <- function(x) {
+as_2d_array <- function(x) {
 
   # coerce data from common formats to an array here
   x <- as.array(x)
@@ -277,6 +281,13 @@ drop_first_dim <- function(x) {
     x <- array(x, dim = dim(x)[-1])
   }
   x
+}
+
+# given an R array with first dimension of size 1, tile it to have size 'times'
+# on that dimension
+tile_first_dim <- function(x, times) {
+  x_list <- replicate(times, x, simplify = FALSE)
+  do.call(abind::abind, c(x_list, list(along = 1)))
 }
 
 # if x is an R matrix representing a column vector, make it a plain R vector
@@ -364,11 +375,11 @@ rhex <- function()
 
 # stop TensorFlow messaging about deprecations etc.
 #' @importFrom reticulate py_set_attr import
-disable_tensorflow_logging <- function (disable = TRUE) {
+disable_tensorflow_logging <- function(disable = TRUE) {
   logging <- reticulate::import("logging")
-  # Begin Exclude Linting
+  # nolint start
   logger <- logging$getLogger("tensorflow")
-  # End Exclude Linting
+  # nolint end
   reticulate::py_set_attr(logger, "disabled", disable)
 }
 
@@ -453,6 +464,19 @@ gss <- function(func,
 
 }
 
+
+pad_vector <- function(x, to_length, with = 1) {
+  pad_by <- to_length - length(x)
+  if (pad_by > 0) {
+    x <- c(x, rep(with, pad_by))
+  }
+  x
+}
+
+has_distribution <- function(node) {
+  !is.null(node$distribution)
+}
+
 misc_module <- module(module,
                       check_tf_version,
                       member,
@@ -468,9 +492,10 @@ misc_module <- module(module,
                       create_log_file,
                       bar_width,
                       record,
-                      as_2D_array,
+                      as_2d_array,
                       add_first_dim,
                       drop_first_dim,
+                      tile_first_dim,
                       drop_column_dim,
                       expand_to_batch,
                       has_batch,
@@ -479,7 +504,8 @@ misc_module <- module(module,
                       hessian_dims,
                       rhex,
                       gss,
-                      disable_tensorflow_logging)
+                      disable_tensorflow_logging,
+                      pad_vector)
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function(..., target_dim = NULL) {
@@ -551,6 +577,8 @@ check_dims <- function(..., target_dim = NULL) {
   } else {
 
     # otherwise, find the correct output dimension
+    dim_lengths <- vapply(dim_list, length, numeric(1))
+    dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
     output_dim <- do.call(pmax, dim_list)
 
   }
@@ -560,7 +588,7 @@ check_dims <- function(..., target_dim = NULL) {
 }
 
 # make sure a greta array is 2D
-check_2D <- function(x) {
+check_2d <- function(x) {
 
   if (length(dim(x)) != 2L) {
     stop("parameters of multivariate distributions ",
@@ -742,7 +770,7 @@ check_multivariate_dims <- function(vectors = list(),
   squares <- lapply(squares, as.greta_array)
 
   # make sure they are all 2D and the squares are square
-  lapply(c(vectors, scalars, squares), check_2D)
+  lapply(c(vectors, scalars, squares), check_2d)
   lapply(squares, check_square)
 
   # check and return the output number of distribution realisations
@@ -864,11 +892,182 @@ check_future_plan <- function() {
 
 }
 
+# check a list of greta arrays and return a list with names scraped from call
+check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
+
+  # check they are greta arrays
+  are_greta_arrays <- vapply(greta_array_list,
+                             inherits, "greta_array",
+                             FUN.VALUE = FALSE)
+
+
+  msg <- NULL
+
+  if (length(greta_array_list) == 0) {
+
+    msg <- "could not find any non-data greta arrays"
+
+  }
+
+  if (!all(are_greta_arrays)) {
+
+    unexpected_items <- names(greta_array_list)[!are_greta_arrays]
+
+    msg <- ngettext(length(unexpected_items),
+                    paste0("The following objects passed to ",
+                           fun_name, "() are not greta arrays: "),
+                    paste0("The following object passed to ",
+                           fun_name, "() is not a greta array: "))
+
+    msg <- paste(msg, paste(unexpected_items, sep = ", "))
+
+  }
+
+
+
+  if (!is.null(msg)) {
+    stop(msg, hint, call. = FALSE)
+  }
+
+  greta_array_list
+
+}
+
+# check the provided list of greta array fixed values (as used in calculate and
+# simulate) is valid
+check_values_list <- function(values, env) {
+
+  # get the values and their names
+  names <- names(values)
+  stopifnot(length(names) == length(values))
+
+  # get the corresponding greta arrays
+  fixed_greta_arrays <- lapply(names, get, envir = env)
+
+  # make sure that's what they are
+  are_greta_arrays <- vapply(fixed_greta_arrays,
+                             inherits,
+                             "greta_array",
+                             FUN.VALUE = FALSE)
+
+  if (!all(are_greta_arrays)) {
+    stop("the names of arguments to values must all correspond to named ",
+         "greta arrays",
+         call. = FALSE)
+  }
+
+  # coerce value to have the correct dimensions
+  assign_dim <- function(value, greta_array) {
+    array <- strip_unknown_class(get_node(greta_array)$value())
+    if (length(array) != length(value)) {
+      stop("a provided value has different number of elements",
+           " than the greta array", call. = FALSE)
+    }
+    array[] <- value
+    array
+  }
+
+  # make sure the values have the correct dimensions
+  values <- mapply(assign_dim,
+                   values,
+                   fixed_greta_arrays,
+                   SIMPLIFY = FALSE)
+
+  list(fixed_greta_arrays = fixed_greta_arrays,
+       values = values)
+
+}
+
+# check that all the variable greta arrays on which the target greta array
+# depends are in the list fixed_greta_arrays (for use in calculate_list)
+check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
+
+  dependency_names <- function(x) {
+    get_node(x)$parent_names(recursive = TRUE)
+  }
+
+  # find all the nodes depended on by this one
+  dependencies <- dependency_names(target)
+
+  # find all the nodes depended on by the new values, and remove them from the
+  # list
+  complete_dependencies <- vapply(
+    fixed_greta_arrays,
+    dependency_names,
+    FUN.VALUE = character(1)
+  )
+
+  unmet <- !dependencies %in% complete_dependencies
+  unmet_dependencies <- dependencies[unmet]
+
+  # find all of the remaining nodes that are variables
+  unmet_nodes <- dag$node_list[unmet_dependencies]
+  unmet_node_types <- vapply(unmet_nodes, node_type, FUN.VALUE = "")
+  is_variable <- unmet_node_types == "variable"
+
+  # if there are any undefined variables
+  if (any(is_variable)) {
+
+    # try to find the associated greta arrays to provide a more informative
+    # error message
+    greta_arrays <- all_greta_arrays(env, include_data = FALSE)
+
+    greta_array_node_names <- vapply(greta_arrays,
+                                     function(x) get_node(x)$unique_name,
+                                     FUN.VALUE = "")
+
+    unmet_variables <- unmet_nodes[is_variable]
+
+    matches <- names(unmet_variables) %in% greta_array_node_names
+
+    unmet_names_idx <- greta_array_node_names %in% names(unmet_variables)
+    unmet_names <- names(greta_array_node_names)[unmet_names_idx]
+
+    # build the message
+    msg <- paste("values have not been provided for all greta arrays on which",
+                 "the target depends, and nsim has not been set.")
+
+    if (any(matches)) {
+      names_text <- paste(unmet_names, collapse = ", ")
+      msg <- paste(msg,
+                   sprintf("Please provide values for the greta array%s: %s",
+                           ifelse(length(matches) > 1, "s", ""),
+                           names_text))
+    } else {
+      msg <- paste(msg,
+                   "\nThe names of the missing greta arrays",
+                   "could not be detected")
+    }
+
+    stop(msg,
+         call. = FALSE)
+  }
+}
+
+check_cum_op <- function(x) {
+  dims <- dim(x)
+  if (length(dims) > 2 | dims[2] != 1) {
+    stop("'x' must be a column vector, but has dimensions ",
+         paste(dims, collapse = " x "),
+         call. = FALSE)
+  }
+}
+
+complex_error <- function(z) {
+  stop("greta does not yet support complex numbers",
+       call. = FALSE)
+}
+
 checks_module <- module(check_dims,
                         check_unit,
                         check_positive,
                         check_in_family,
-                        check_future_plan)
+                        check_future_plan,
+                        check_greta_arrays,
+                        check_values_list,
+                        check_dependencies_satisfied,
+                        check_cum_op,
+                        complex_error)
 
 # convert an array to a vector row-wise
 flatten_rowwise <- function(array) {
@@ -1020,10 +1219,10 @@ cleanly <- function(expr) {
 # prepare a matrix of draws and return as an mcmc object
 #' @noRd
 #' @importFrom coda mcmc
-prepare_draws <- function(draws) {
+prepare_draws <- function(draws, thin = 1) {
   draws_df <- data.frame(draws, check.names = FALSE)
   draws_df <- na.omit(draws_df)
-  coda::mcmc(draws_df)
+  coda::mcmc(draws_df, thin = thin)
 }
 
 build_sampler <- function(initial_values, sampler, model, seed = get_seed()) {
@@ -1090,6 +1289,17 @@ check_positive_integer <- function(x, name = "") {
 
 }
 
+# batch sizes must be positive numerics, rounded off to integers
+check_trace_batch_size <- function(x) {
+  valid <- is.numeric(x) && length(x) == 1 && x >= 1
+  if (!valid) {
+    stop("trace_batch_size must be a single numeric value ",
+         "greater than or equal to 1",
+         call. = FALSE)
+  }
+  x
+}
+
 # get better names for the scalar elements of a greta array, for labelling mcmc
 # samples
 get_indices_text <- function(dims, name) {
@@ -1123,8 +1333,8 @@ flatten_trace <- function(i, trace_list) {
 # stashed_samples, and error nicely if there's something fishy
 get_model_info <- function(draws, name = "value") {
 
-  if (!inherits(draws, "mcmc.list")) {
-    stop(name, " must be an mcmc.list object created by greta::mcmc(), ",
+  if (!inherits(draws, "greta_mcmc_list")) {
+    stop(name, " must be an greta_mcmc_list object created by greta::mcmc(), ",
          "greta::stashed_samples() or greta::extra_samples()",
          call. = FALSE)
   }
@@ -1155,29 +1365,6 @@ sampler_utils_module <- module(all_greta_arrays,
                                flatten_trace,
                                get_model_info)
 
-flat_to_chol <- function(x, dim, correl = FALSE) {
-
-  fun <- ifelse(correl,
-                "tf_flat_to_chol_correl",
-                "tf_flat_to_chol")
-
-  # sum the elements
-  op("flat_to_chol", x,
-     operation_args = list(dims = dim),
-     tf_operation = fun,
-     dim = dim)
-
-}
-
-chol_to_symmetric <- function(L) {
-
-  # sum the elements
-  op("chol_to_symmetric", L,
-     tf_operation = "tf_chol_to_symmetric",
-     representations = list(cholesky = L))
-
-}
-
 # convert a function on greta arrays into a function on corresponding tensors,
 # given the greta arrays for inputs. When executed, this needs to be wrapped in
 # dag$on_graph() to get the tensors connected up with the rest of the graph
@@ -1200,9 +1387,6 @@ as_tf_function <- function(r_fun, ...) {
                                 x <- tf$reshape(x, shape(1, 1, 1))
                               x
                             })
-
-    # transfer batch dimensions if needed
-    tensor_inputs <- match_batches(tensor_inputs)
 
     # create a sub-dag for these operations, from ga_dummies to ga_out
     if (!is.list(ga_out))
@@ -1249,9 +1433,7 @@ as_tf_function <- function(r_fun, ...) {
 
 }
 
-greta_array_ops_module <- module(flat_to_chol,
-                                 chol_to_symmetric,
-                                 as_tf_function)
+greta_array_ops_module <- module(as_tf_function)
 
 # utilities to export via .internals
 utilities_module <- module(misc = misc_module,

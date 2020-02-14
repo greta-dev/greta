@@ -18,10 +18,10 @@ test_that("log and exp function representations work", {
   x2 <- log(y)
 
   # compare versions with/without representations
-  compare_op(calculate(log(y)),
-             calculate(log(y2)))
-  compare_op(calculate(exp(x)),
-             calculate(exp(x2)))
+  compare_op(calculate(log(y))[[1]],
+             calculate(log(y2))[[1]])
+  compare_op(calculate(exp(x))[[1]],
+             calculate(exp(x2))[[1]])
 
 })
 
@@ -32,21 +32,21 @@ test_that("chol & chol2inv function representation works", {
 
   # get symmetric matrix
   m <- 10
-  W <- rWishart(1, m + 1, diag(m))[, , 1]
-  U <- chol(W)
+  w <- rWishart(1, m + 1, diag(m))[, , 1]
+  u <- chol(w)
 
   # convert to greta arrays
-  W <- as_data(W)
-  U <- as_data(U)
+  w <- as_data(w)
+  u <- as_data(u)
 
   # get representation version of W
-  W2 <- chol_to_symmetric(U)
+  w2 <- chol2symm(u)
 
-  compare_op(calculate(chol(W)),
-             calculate(chol(W2)))
+  compare_op(calculate(chol(w))[[1]],
+             calculate(chol(w2))[[1]])
 
-  compare_op(calculate(chol2inv(W)),
-             calculate(chol2inv(W2)))
+  compare_op(calculate(chol2inv(w))[[1]],
+             calculate(chol2inv(w2))[[1]])
 
 })
 
@@ -107,7 +107,7 @@ test_that("binomial prob representations have correct density", {
                               x)
 
   compare_op(prob_dens, probit_dens)
-  compare_op(prob_dens, logit_dens)
+  compare_op(prob_dens, logit_dens, tolerance = 1e-3)
 
 })
 
@@ -147,8 +147,8 @@ test_that("mvn Sigma representation has correct density", {
 
   # greta arrays with and without representation
   sigs <- as_data(sig)
-  U <- as_data(chol(sig))
-  chol_sigs <- chol_to_symmetric(U)
+  u <- as_data(chol(sig))
+  chol_sigs <- chol2symm(u)
 
   sigs_dens <- greta_density(greta::multivariate_normal,
                              list(mean = mn,
@@ -177,8 +177,8 @@ test_that("wishart target and Sigma representations have correct density", {
 
   # greta arrays for Sigma with and without representation
   sigs <- as_data(sig)
-  U <- as_data(chol(sig))
-  chol_sigs <- chol_to_symmetric(U)
+  u <- as_data(chol(sig))
+  chol_sigs <- chol2symm(u)
 
   sigs_dens <- greta_density(greta::wishart,
                              list(df = m + 1,
@@ -196,8 +196,8 @@ test_that("wishart target and Sigma representations have correct density", {
 
   # greta arrays for x with and without representation
   xs <- as_data(x)
-  Ux <- as_data(chol(x))
-  chol_xs <- chol_to_symmetric(Ux)
+  ux <- as_data(chol(x))
+  chol_xs <- chol2symm(ux)
 
   xs_dens <- greta_density(greta::wishart,
                            list(df = m + 1,
@@ -227,8 +227,8 @@ test_that("lkj target representation has correct density", {
 
   # greta arrays for x with and without representation
   xs <- as_data(x)
-  Ux <- as_data(chol(x))
-  chol_xs <- chol_to_symmetric(Ux)
+  ux <- as_data(chol(x))
+  chol_xs <- chol2symm(ux)
 
   xs_dens <- greta_density(greta::lkj_correlation,
                            list(eta = eta),

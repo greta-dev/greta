@@ -1,3 +1,4 @@
+# nolint start
 #' @name overloaded
 #'
 #' @title Functions overloaded by greta
@@ -13,3 +14,4 @@
 #'    arguments as in original documentation
 #'
 NULL
+# nolint end

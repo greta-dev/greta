@@ -1,3 +1,4 @@
+# nolint start
 #' @name optimisers
 #'
 #' @title optimisation methods
@@ -34,12 +35,13 @@
 #' c(mean(x), sd(x))
 #' }
 NULL
+# nolint end
 
 # deprecate some optimisers
-optimiser_deprecation_warning <- function () {
-  warning ("This optimiser is deprecated and will be removed in greta 0.4.0. ",
-           "Please use a different optimiser.",
-           call. = FALSE)
+optimiser_deprecation_warning <- function() {
+  warning("This optimiser is deprecated and will be removed in greta 0.4.0. ",
+          "Please use a different optimiser.",
+          call. = FALSE)
 }
 
 # set up an optimiser object
@@ -283,7 +285,7 @@ adagrad <- function(learning_rate = 0.8,
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname optimisers
 #' @export
 #'
@@ -315,7 +317,7 @@ adagrad_da <- function(learning_rate = 0.8,
   )
 
 }
-# End Exclude Linting
+# nolint end
 
 #' @rdname optimisers
 #' @export

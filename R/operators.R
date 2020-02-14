@@ -65,7 +65,8 @@ NULL
 `+.greta_array` <- function(e1, e2) {
   check_dims(e1, e2)
   op("add", e1, e2,
-     tf_operation = "tf$add")
+     tf_operation = "tf$add",
+     expand_scalars = TRUE)
 }
 
 #' @export
@@ -77,7 +78,8 @@ NULL
   } else {
     check_dims(e1, e2)
     op("subtract", e1, e2,
-       tf_operation = "tf$subtract")
+       tf_operation = "tf$subtract",
+       expand_scalars = TRUE)
   }
 }
 
@@ -85,58 +87,63 @@ NULL
 `*.greta_array` <- function(e1, e2) {
   check_dims(e1, e2)
   op("multiply", e1, e2,
-     tf_operation = "tf$multiply")
+     tf_operation = "tf$multiply",
+     expand_scalars = TRUE)
 }
 
 #' @export
 `/.greta_array` <- function(e1, e2) {
   check_dims(e1, e2)
   op("divide", e1, e2,
-     tf_operation = "tf$truediv")
+     tf_operation = "tf$truediv",
+     expand_scalars = TRUE)
 }
 
 #' @export
 `^.greta_array` <- function(e1, e2) {
   check_dims(e1, e2)
   op("power", e1, e2,
-     tf_operation = "tf$pow")
+     tf_operation = "tf$pow",
+     expand_scalars = TRUE)
 }
 
 #' @export
 `%%.greta_array` <- function(e1, e2) {
   check_dims(e1, e2)
   op("`modulo`", e1, e2,
-     tf_operation = "tf$math$mod")
+     tf_operation = "tf$math$mod",
+     expand_scalars = TRUE)
 }
 
 #' @export
-`%/%.greta_array` <- function(e1, e2) {
+`%/%.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("`integer divide`", e1, e2,
-     tf_operation = "tf$math$floordiv")
+     tf_operation = "tf$math$floordiv",
+     expand_scalars = TRUE)
 }
 
 # overload %*% as an S3 generic
 # would rather get S4 version working properly, but uuurgh S4.
 
 #' @export
-`%*%.default` <- function(x, y)
+`%*%.default` <- function(x, y)  # nolint
   .Primitive("%*%")(x, y)
 
 #' @rdname overloaded
 #' @export
-`%*%` <- function(x, y) {
+`%*%` <- function(x, y) {  # nolint
 
   # if y is a greta array, coerce x before dispatch
   if (inherits(y, "greta_array") & !inherits(x, "greta_array"))
     as_data(x) %*% y
   else
-    UseMethod ("%*%", x)
+    UseMethod("%*%", x)
 
 }
 
 #' @export
-`%*%.greta_array` <- function(x, y) {
+`%*%.greta_array` <- function(x, y) {  # nolint
 
   # check they're matrices
   if (length(dim(x)) != 2 | length(dim(y)) != 2) {
@@ -166,59 +173,67 @@ NULL
 }
 
 #' @export
-`&.greta_array` <- function(e1, e2) {
+`&.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("and", e1, e2,
-     tf_operation = "tf_and")
+     tf_operation = "tf_and",
+     expand_scalars = TRUE)
 }
 
 #' @export
-`|.greta_array` <- function(e1, e2) {
+`|.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("or", e1, e2,
-     tf_operation = "tf_or")
+     tf_operation = "tf_or",
+     expand_scalars = TRUE)
 }
 
 # relational operators
 
 #' @export
-`<.greta_array` <- function(e1, e2) {
+`<.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("less", e1, e2,
-     tf_operation = "tf_lt")
+     tf_operation = "tf_lt",
+     expand_scalars = TRUE)
 }
 
 #' @export
-`>.greta_array` <- function(e1, e2) {
+`>.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("greater", e1, e2,
-     tf_operation = "tf_gt")
+     tf_operation = "tf_gt",
+     expand_scalars = TRUE)
 }
 
 #' @export
-`<=.greta_array` <- function(e1, e2) {
+`<=.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("less/equal", e1, e2,
-     tf_operation = "tf_lte")
+     tf_operation = "tf_lte",
+     expand_scalars = TRUE)
 }
 
 #' @export
-`>=.greta_array` <- function(e1, e2) {
+`>=.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("greater/equal", e1, e2,
-     tf_operation = "tf_gte")
+     tf_operation = "tf_gte",
+     expand_scalars = TRUE)
 }
 
 #' @export
-`==.greta_array` <- function(e1, e2) {
+`==.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("equal", e1, e2,
-     tf_operation = "tf_eq")
+     tf_operation = "tf_eq",
+     expand_scalars = TRUE)
 }
 
 #' @export
-`!=.greta_array` <- function(e1, e2) {
+`!=.greta_array` <- function(e1, e2) {  # nolint
   check_dims(e1, e2)
   op("not equal", e1, e2,
-     tf_operation = "tf_neq")
+     tf_operation = "tf_neq",
+     expand_scalars = TRUE)
 }

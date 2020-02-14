@@ -15,6 +15,7 @@
 <!-- Bootstrap -->
 
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -38,15 +39,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="calculate greta arrays given fixed values — calculate" />
 
+<meta property="og:title" content="calculate greta arrays given fixed values — calculate" />
 <meta property="og:description" content="Calculate the values that greta arrays would take, given
   temporary values for the greta arrays on which they depend, and return them
   as numeric R arrays. This can be used to check the behaviour of your model
   or make predictions to new data after model fitting." />
-
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -135,7 +136,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://forum.greta-stats.org">
@@ -181,16 +181,15 @@
     </div>
 
     <div class="ref-description">
-    
     <p>Calculate the values that greta arrays would take, given
   temporary values for the greta arrays on which they depend, and return them
   as numeric R arrays. This can be used to check the behaviour of your model
   or make predictions to new data after model fitting.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>calculate</span>(<span class='no'>target</span>, <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(), <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"double"</span>, <span class='st'>"single"</span>))</pre>
-    
+    <pre class="usage"><span class='fu'>calculate</span>(<span class='no'>target</span>, <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(), <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"double"</span>, <span class='st'>"single"</span>),
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -201,21 +200,26 @@
     <tr>
       <th>values</th>
       <td><p>a named list giving temporary values of the greta arrays with
-which <code>target</code> is connected, or an <code>mcmc.list</code> object returned by
-<code><a href='inference.html'>mcmc</a></code>.</p></td>
+which <code>target</code> is connected, or a <code>greta_mcmc_list</code> object
+returned by <code><a href='inference.html'>mcmc</a></code>.</p></td>
     </tr>
     <tr>
       <th>precision</th>
       <td><p>the floating point precision to use when calculating values.</p></td>
     </tr>
+    <tr>
+      <th>trace_batch_size</th>
+      <td><p>the number of posterior samples to process at a time
+when <code>target</code> is a <code>greta_mcmc_list</code> object; reduce this to
+reduce memory demands</p></td>
+    </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A numeric R array with the same dimensions as <code>target</code>, giving
   the values it would take conditioned on the fixed values given by
   <code>values</code>.</p>
-    
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The greta arrays named in <code>values</code> need not be variables, they
@@ -224,7 +228,6 @@ which <code>target</code> is connected, or an <code>mcmc.list</code> object retu
   <em>all</em> of the variable greta arrays with which <code>target</code> is
   connected, even values are given for intermediate operations, or the target
   doesn't depend on the variable. That may be relaxed in a future release.</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -269,6 +272,13 @@ which <code>target</code> is connected, or an <code>mcmc.list</code> object retu
 <span class='fu'><a href='overloaded.html'>apply</a></span>(<span class='no'>mu_plot_draws</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='fl'>1</span>, <span class='no'>lines</span>,
       <span class='kw'>x</span> <span class='kw'>=</span> <span class='no'>petal_length_plot</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/grDevices/topics/gray'>grey</a></span>(<span class='fl'>0.8</span>))
 <span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/lines'>lines</a></span>(<span class='no'>mu_est</span> ~ <span class='no'>petal_length_plot</span>, <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+
+<span class='co'># trace_batch_size can be changed to trade off speed against memory usage</span>
+<span class='co'># when calculating. These all produce the same result, but have increasing</span>
+<span class='co'># memory requirements:</span>
+<span class='no'>mu_plot_draws_1</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='no'>draws</span>, <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='no'>mu_plot_draws_10</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='no'>draws</span>, <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='no'>mu_plot_draws_inf</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='no'>draws</span>, <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)
 <span class='co'># }</span><div class='input'>
 
 </div></pre>
@@ -276,11 +286,8 @@ which <code>target</code> is connected, or an <code>mcmc.list</code> object retu
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#value">Value</a></li>
-
       <li><a href="#details">Details</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 

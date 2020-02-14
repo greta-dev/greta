@@ -8,11 +8,11 @@ test_that("posterior is correct (binomial)", {
 
   # analytic solution to the posterior of the paramter of a binomial
   # distribution, with uniform prior
-  N <- 100
-  pos <- rbinom(1, N, runif(1))
+  n <- 100
+  pos <- rbinom(1, n, runif(1))
   library(greta)
   theta <- uniform(0, 1)
-  distribution(pos) <- binomial(N, theta)
+  distribution(pos) <- binomial(n, theta)
   m <- model(theta)
 
   draws <- get_enough_draws(m, hmc(), 2000, verbose = FALSE)
@@ -21,7 +21,7 @@ test_that("posterior is correct (binomial)", {
 
   # analytic solution to posterior is beta(1 + pos, 1 + N - pos)
   shape1 <- 1 + pos
-  shape2 <- 1 + N - pos
+  shape2 <- 1 + n - pos
 
   # qq plot against true quantiles
   quants <- (1:99) / 100
@@ -84,7 +84,7 @@ test_that("samplers are unbiased for LKJ", {
 
   x <- lkj_correlation(3, 2)[1, 2]
   iid <- function(n)
-    rlkjcorr(n, 2, 3)[, 1, 2]
+    rlkjcorr(n, 3, 2)[, 1, 2]
 
   check_samples(x, iid, hmc(), one_by_one = TRUE)
 
@@ -113,14 +113,14 @@ test_that("samplers pass geweke tests", {
   source("helpers.R")
   skip_if_not_release()
 
-  # Begin Exclude Linting
+  # nolint start
   # run geweke tests on this model:
   # theta ~ normal(mu1, sd1)
   # x[i] ~ normal(theta, sd2)
   # for i in N
-  # End Exclude Linting
+  # nolint end
 
-  N <- 10
+  n <- 10
   mu1 <- rnorm(1, 0, 3)
   sd1 <- rlnorm(1)
   sd2 <- rlnorm(1)
@@ -131,10 +131,10 @@ test_that("samplers pass geweke tests", {
 
   # likelihood
   p_x_bar_theta <- function(theta)
-    rnorm(N, theta, sd2)
+    rnorm(n, theta, sd2)
 
   # define the greta model (single precision for slice sampler)
-  x <- as_data(rep(0, N))
+  x <- as_data(rep(0, n))
   greta_theta <- normal(mu1, sd1)
   distribution(x) <- normal(greta_theta, sd2)
   model <- model(greta_theta, precision = "single")

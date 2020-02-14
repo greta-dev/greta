@@ -38,10 +38,10 @@ as_data <- function(x) {
 
 
 # if it's already a *data* greta_array fine, else error
-# Begin Exclude Linting
+# nolint start
 #' @export
 as_data.greta_array <- function(x) {
-# End Exclude Linting
+  # nolint end
   if (!inherits(get_node(x), "data_node")) {
     stop("cannot coerce a non-data greta_array to data",
          call. = FALSE)
@@ -50,9 +50,9 @@ as_data.greta_array <- function(x) {
 }
 
 # otherwise try to coerce to a greta array
-# Begin Exclude Linting
+# nolint start
 #' @export
 as_data.default <- function(x) {
-# End Exclude Linting
+  # nolint end
   as.greta_array(x)
 }
