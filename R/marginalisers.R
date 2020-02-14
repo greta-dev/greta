@@ -56,7 +56,7 @@ discrete_marginalisation <- function(values) {
     # convert these into a list of constant tensors with the correct dimensions
     # and float types
     values_list <- as.list(values)
-    values_list <- lapply(values_list, as_2D_array)
+    values_list <- lapply(values_list, as_2d_array)
     values_list <- lapply(values_list, add_first_dim)
     values_list <- lapply(values_list, fl)
 
@@ -182,7 +182,7 @@ laplace_approximation <- function(tolerance = 1e-6,
 
     # here z is a *column vector* to simplify later calculations, it needs to be
     # transposed to a row vector before feeding into the likelihood function(s)
-    z_value <- add_first_dim(as_2D_array(rnorm(n)))
+    z_value <- add_first_dim(as_2d_array(rnorm(n)))
     z <- tf$constant(z_value, dtype = tf_float())
 
     # Newton-Raphson parameters
@@ -192,7 +192,7 @@ laplace_approximation <- function(tolerance = 1e-6,
     maxiter <- tf$constant(max_iterations)
 
     # other objects
-    a_value <- add_first_dim(as_2D_array(rep(0, n)))
+    a_value <- add_first_dim(as_2d_array(rep(0, n)))
     a <- tf$constant(a_value, dtype = tf_float())
     u_value <- add_first_dim(diag(n))
     u <- tf$constant(u_value, tf_float())
@@ -236,13 +236,13 @@ laplace_approximation <- function(tolerance = 1e-6,
       # approximate posterior covariance & cholesky factor
       mat1 <- tf$matmul(rw, tf_transpose(rw)) * sigma + eye
       u <- tf$cholesky(mat1)
-      L <- tf_transpose(u)
+      l <- tf_transpose(u)
 
       # compute Newton-Raphson update direction
       b <- w * cf + d1
       mat2 <- rw * tf$matmul(sigma, b)
       mat3 <- tf$matrix_triangular_solve(u, mat2)
-      adiff <- b - rw * tf$matrix_triangular_solve(L, mat3, lower = FALSE) - a
+      adiff <- b - rw * tf$matrix_triangular_solve(l, mat3, lower = FALSE) - a
 
       # use golden section search to find the optimum distance to step in this
       # direction, for each batch simultaneously
