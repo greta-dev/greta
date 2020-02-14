@@ -252,18 +252,15 @@ calculate_greta_mcmc_list <- function(target,
   mcmc_dag <- model_info$model$dag
   draws <- model_info$raw_draws
 
-  # clone and extend the existing dag (so current variables have the right
-  # names)
-  dag <- mcmc_dag$clone()
+  # build a new dag from the targets
+  dag <- dag_class$new(target, tf_float = tf_float)
   dag$mode <- ifelse(stochastic, "hybrid", "all_forward")
 
-  dag$new_tf_environment()
-
-  # set the precision in the dag
-  dag$tf_float <- tf_float
-
-  # extend the dag to include this node, as the target
-  dag$build_dag(target)
+  # rearrange the nodes in the dag so that any mcmc dag variables are first and
+  # in the right order (otherwise the free state will be incorrectly defined)
+  in_draws <- names(dag$node_list)  %in% names(mcmc_dag$node_list)
+  order <- order(match(names(dag$node_list[in_draws]), names(mcmc_dag$node_list)))
+  dag$node_list <- c(dag$node_list[in_draws][order], dag$node_list[!in_draws])
 
   # find variable nodes in the new dag without a free state in the old one.
   mcmc_dag_variables <- mcmc_dag$node_list[mcmc_dag$node_types == "variable"]
@@ -271,19 +268,9 @@ calculate_greta_mcmc_list <- function(target,
   stateless_names <- setdiff(names(dag_variables), names(mcmc_dag_variables))
   dag$variables_without_free_state <- dag_variables[stateless_names]
 
-  # check whether the draws are even connected to the target
-  dag$build_adjacency_matrix()
-  graph_id <- dag$subgraph_membership()
-  target_nodes <- lapply(target, get_node)
-  target_nodes_names <- lapply(target_nodes, member, "unique_name")
-  target_graphs <- unique(
-    graph_id[names(graph_id) %in% target_nodes_names]
-  )
-  draws_graphs <- unique(
-    graph_id[names(graph_id) %in% names(mcmc_dag$node_list)]
-  )
-
-  if (!any(target_graphs %in% draws_graphs)) {
+  # check there's some commonality between the two dags
+  connected_to_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
+  if (!any(connected_to_draws)) {
     stop("the target greta arrays do not appear to be connected ",
          "to those in the greta_mcmc_list object",
          call. = FALSE)
@@ -294,7 +281,6 @@ calculate_greta_mcmc_list <- function(target,
   if (!stochastic) {
 
     # see if the new dag introduces any new variables
-    connected_to_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
     new_types <- dag$node_types[!connected_to_draws]
     if (any(new_types == "variable")) {
       stop("the target greta arrays are related to new variables ",

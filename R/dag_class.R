@@ -5,20 +5,19 @@
 # create dag class
 dag_class <- R6Class(
   "dag_class",
+
   public = list(
 
     mode = "all_forward",
     node_list = list(),
+    target_nodes = list(),
     variables_without_free_state = list(),
-    node_types = NA,
-    node_tf_names = NA,
     tf_environment = NA,
     tf_graph = NA,
-    target_nodes = NA,
+
     tf_float = NA,
     n_cores = 0L,
     compile = NA,
-    adjacency_matrix = NULL,
     trace_names = NULL,
 
     # create a dag from some target nodes
@@ -31,9 +30,6 @@ dag_class <- R6Class(
 
       # find the nodes we care about
       self$target_nodes <- lapply(target_greta_arrays, get_node)
-
-      # create an adjacency matrix
-      self$build_adjacency_matrix()
 
       # set up the tf environment, with a graph
       self$new_tf_environment()
@@ -105,25 +101,6 @@ dag_class <- R6Class(
       for (node in target_node_list) {
         node$register_family(self)
       }
-
-      # stash the node names, types, and tf names
-      self$node_types <- vapply(self$node_list, node_type, FUN.VALUE = "")
-      self$node_tf_names <- self$make_names()
-
-    },
-
-    # create human-readable base names for TF tensors. these will actually be
-    # defined prepended with "all_forward_" or "all_sampling" or "hybrid_
-    make_names = function() {
-
-      types <- self$node_types
-
-      for (type in c("variable", "data", "operation", "distribution")) {
-        idx <- which(types == type)
-        types[idx] <- paste(type, seq_along(idx), sep = "_")
-      }
-
-      self$node_tf_names <- types
 
     },
 
@@ -798,55 +775,6 @@ dag_class <- R6Class(
 
     },
 
-    build_adjacency_matrix = function() {
-
-      # make dag matrix
-      n_node <- length(self$node_list)
-      node_names <- names(self$node_list)
-      node_types <- self$node_types
-      dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
-      rownames(dag_mat) <- colnames(dag_mat) <- node_names
-
-      children <- lapply(self$node_list,
-                        member,
-                        "child_names()")
-      parents <- lapply(self$node_list,
-                         member,
-                         "parent_names(recursive = FALSE)")
-
-      # for distribution nodes, remove target nodes from parents, and put them
-      # in children to send the arrow in the opposite direction when plotting
-      distribs <- which(node_types == "distribution")
-      for (i in distribs) {
-
-        own_name <- node_names[i]
-        target_name <- self$node_list[[i]]$target$unique_name
-
-        if (!is.null(target_name)) {
-
-          # switch the target from child to parent of the distribution
-          parents[[i]] <- parents[[i]][parents[[i]] != target_name]
-          children[[i]] <- c(children[[i]], target_name)
-
-          # switch the distribution from parent to child of the target
-          idx <- match(target_name, node_names)
-          children[[idx]] <- children[[idx]][children[[idx]] != own_name]
-          parents[[idx]] <- c(parents[[idx]], own_name)
-
-        }
-
-      }
-
-      # parents in the lower left, children in the upper right
-      for (i in seq_len(n_node)) {
-        dag_mat[i, children[[i]]] <- 1
-        dag_mat[parents[[i]], i] <- 1
-      }
-
-      self$adjacency_matrix <- dag_mat
-
-    },
-
     # get the tfp distribution object for a distribution node
     get_tfp_distribution = function(distrib_node) {
 
@@ -915,5 +843,75 @@ dag_class <- R6Class(
 
     }
 
+  ),
+
+  active = list(
+
+    node_types = function(value) {
+      vapply(self$node_list, node_type, FUN.VALUE = "")
+    },
+
+    # create human-readable base names for TF tensors. these will actually be
+    # defined prepended with "all_forward_" or "all_sampling" or "hybrid_
+    node_tf_names = function(value) {
+
+      types <- self$node_types
+
+      for (type in c("variable", "data", "operation", "distribution")) {
+        idx <- which(types == type)
+        types[idx] <- paste(type, seq_along(idx), sep = "_")
+      }
+
+      types
+
+    },
+
+    adjacency_matrix = function(value) {
+
+      # make dag matrix
+      n_node <- length(self$node_list)
+      node_names <- names(self$node_list)
+      node_types <- self$node_types
+      dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
+      rownames(dag_mat) <- colnames(dag_mat) <- node_names
+
+      children <- lapply(self$node_list,
+                         member,
+                         "child_names()")
+      parents <- lapply(self$node_list,
+                        member,
+                        "parent_names(recursive = FALSE)")
+
+      # for distribution nodes, remove target nodes from parents, and put them
+      # in children to send the arrow in the opposite direction when plotting
+      distribs <- which(node_types == "distribution")
+      for (i in distribs) {
+
+        own_name <- node_names[i]
+        target_name <- self$node_list[[i]]$target$unique_name
+
+        if (!is.null(target_name)) {
+
+          # switch the target from child to parent of the distribution
+          parents[[i]] <- parents[[i]][parents[[i]] != target_name]
+          children[[i]] <- c(children[[i]], target_name)
+
+          # switch the distribution from parent to child of the target
+          idx <- match(target_name, node_names)
+          children[[idx]] <- children[[idx]][children[[idx]] != own_name]
+          parents[[idx]] <- c(parents[[idx]], own_name)
+
+        }
+
+      }
+
+      # parents in the lower left, children in the upper right
+      for (i in seq_len(n_node)) {
+        dag_mat[i, children[[i]]] <- 1
+        dag_mat[parents[[i]], i] <- 1
+      }
+
+      dag_mat
+    }
   )
 )
