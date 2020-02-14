@@ -62,7 +62,7 @@ test_that("windowing does not have spooky effects", {
   expect_equal(dim(as.matrix(raw_draws)), c(n_samples, 1))
 
   # drop the first half of the chain in this other object
-  draws_2 <- window(draws, start = end(draws)/2 + 1)
+  draws_2 <- window(draws, start = end(draws) / 2 + 1)
   raw_draws_2 <- get_model_info(draws_2)$raw_draws
   half_samples <- n_samples / 2
   expect_equal(dim(as.matrix(draws_2)), c(half_samples, 1))

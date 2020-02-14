@@ -252,7 +252,8 @@ calculate_greta_mcmc_list <- function(target,
   mcmc_dag <- model_info$model$dag
   draws <- model_info$raw_draws
 
-  # clone and extend the existing dag (so current variables have the right names)
+  # clone and extend the existing dag (so current variables have the right
+  # names)
   dag <- mcmc_dag$clone()
   dag$mode <- ifelse(stochastic, "hybrid", "all_forward")
 
@@ -275,8 +276,12 @@ calculate_greta_mcmc_list <- function(target,
   graph_id <- dag$subgraph_membership()
   target_nodes <- lapply(target, get_node)
   target_nodes_names <- lapply(target_nodes, member, "unique_name")
-  target_graphs <- unique(graph_id[names(graph_id) %in% target_nodes_names])
-  draws_graphs <- unique(graph_id[names(graph_id) %in% names(mcmc_dag$node_list)])
+  target_graphs <- unique(
+    graph_id[names(graph_id) %in% target_nodes_names]
+  )
+  draws_graphs <- unique(
+    graph_id[names(graph_id) %in% names(mcmc_dag$node_list)]
+  )
 
   if (!any(target_graphs %in% draws_graphs)) {
     stop("the target greta arrays do not appear to be connected ",
