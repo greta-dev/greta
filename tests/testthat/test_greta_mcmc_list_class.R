@@ -1,6 +1,5 @@
 context("greta_mcmc_list class")
 
-
 test_that("window works", {
 
   skip_if_not(check_tf_version())

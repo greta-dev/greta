@@ -149,6 +149,25 @@ test_that("calculate with greta_mcmc_list doesn't mix up variables", {
 
 })
 
+test_that("calculate with greta_mcmc_list doesn't lose track of new nodes", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  z <- normal(0, 1)
+  m <- model(z)
+  draws <- mcmc(m, warmup = 100, n_samples = 100, verbose = FALSE)
+
+  x <- z ^ 2
+  expect_ok(x_draws <- calculate(x, values = draws))
+  expect_equal(as.matrix(x_draws)[, 1], as.matrix(draws)[, 1] ^ 2)
+
+  y <- z * 2
+  expect_ok(y_draws <- calculate(y, values = draws))
+  expect_equal(as.matrix(y_draws)[, 1], as.matrix(draws)[, 1] * 2)
+
+})
+
 test_that("stochastic calculate works with greta_mcmc_list objects", {
 
   skip_if_not(check_tf_version())
