@@ -318,9 +318,6 @@ calculate_greta_mcmc_list <- function(target,
 
   }
 
-  # is this still needed?
-  self <- dag  # mock for scoping
-  self
   dag$define_tf()
 
   dag$target_nodes <- lapply(target, get_node)
