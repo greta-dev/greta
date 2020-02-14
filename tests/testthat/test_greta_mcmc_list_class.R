@@ -1,5 +1,36 @@
 context("greta_mcmc_list class")
 
+test_that("draws and raw draws should have the right iteration numbering", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  samples <- 1000
+  warmup <- 100
+  z <- normal(0, 1)
+  m <- model(z)
+  draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
+
+  expect_equal(start(draws), 1)
+  expect_equal(end(draws), samples)
+
+  raw_draws <- get_model_info(draws)$raw_draws
+  expect_equal(start(raw_draws), 1)
+  expect_equal(end(raw_draws), samples)
+
+  # same after calculating
+  y <- z ^ 2
+
+  y_draws <- calculate(y, values = draws)
+  expect_equal(start(y_draws), 1)
+  expect_equal(end(y_draws), samples)
+
+  raw_draws <- get_model_info(y_draws)$raw_draws
+  expect_equal(start(raw_draws), 1)
+  expect_equal(end(raw_draws), samples)
+
+})
+
 test_that("window works", {
 
   skip_if_not(check_tf_version())
@@ -7,7 +38,7 @@ test_that("window works", {
 
   z <- normal(0, 1)
   m <- model(z)
-  draws <- mcmc(m)
+  draws <- mcmc(m, warmup = 100, verbose = FALSE)
 
   # should have correct class
   expect_s3_class(draws, "greta_mcmc_list")
