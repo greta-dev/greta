@@ -41,7 +41,7 @@ node <- R6Class(
         self$register(dag)
 
         # find my immediate family (not including self)
-        family <- c(self$children, self$parents)
+        family <- c(self$list_children(dag), self$list_parents(dag))
 
         # get and assign their names
         family_names <- vapply(family, member, "unique_name", FUN.VALUE = "")
@@ -76,6 +76,21 @@ node <- R6Class(
 
     },
 
+    list_parents = function(dag) {
+
+      parents <- self$parents
+
+      # if this node is being sampled and has a distribution, consider
+      # that a parent node too
+      mode <- dag$how_to_define(self)
+      if (mode == "sampling" & has_distribution(self)) {
+        parents <- c(parents, list(self$distribution))
+      }
+
+      parents
+
+    },
+
     add_child = function(node) {
 
       # add to list of children
@@ -91,9 +106,30 @@ node <- R6Class(
 
     },
 
+    list_children = function(dag) {
+
+      children <- self$children
+
+      # if this node is being sampled and has a distribution, do not consider
+      # that a child node
+      mode <- dag$how_to_define(self)
+      if (mode == "sampling" & has_distribution(self)) {
+        child_names <- vapply(children,
+                              member,
+                              "unique_name",
+                              FUN.VALUE = character(1))
+        keep <- child_names != self$distribution$unique_name
+        children <- children[keep]
+      }
+
+      children
+
+    },
+
     # return the names of all parent nodes, and if recursive = TRUE, all nodes
     # lower in this graph. If type is a character, only nodes with that type
     # (from the type public object)  will  be listed
+    # NB. this is the true, forward parentage and is unaffected by the dag mode!
     parent_names = function(recursive = FALSE) {
 
       parents <- self$parents
@@ -101,15 +137,19 @@ node <- R6Class(
       if (length(parents) > 0) {
 
         names <- vapply(parents,
-                        function(x) x$unique_name,
-                        "")
+                        member,
+                        "unique_name",
+                        FUN.VALUE = character(1))
 
         if (recursive) {
-          names <- c(names,
-                     unlist(lapply(parents,
-                                   function(x) {
-                                     x$parent_names(recursive = TRUE)
-                                   })))
+
+          their_parents <- function(x) {
+            x$parent_names(recursive = TRUE)
+          }
+
+          grandparents <- lapply(parents, their_parents)
+          names <- c(names, unlist(grandparents))
+
         }
 
         # account for multiple nodes depending on the same nodes
@@ -161,12 +201,13 @@ node <- R6Class(
       if (!self$defined(dag)) {
 
         # make sure parents are defined
-        parents_defined <- vapply(self$parents,
-                                   function(x) x$defined(dag),
-                                   FUN.VALUE = FALSE)
+        parents_defined <- vapply(self$list_parents(dag),
+                                  function(x) x$defined(dag),
+                                  FUN.VALUE = FALSE)
 
         if (any(!parents_defined)) {
-          lapply(self$parents[which(!parents_defined)],
+          parents <- self$list_parents(dag)
+          lapply(parents[which(!parents_defined)],
                  function(x) x$define_tf(dag))
         }
 
@@ -217,7 +258,7 @@ node <- R6Class(
 
       text <- node_type(self)
 
-      if (!is.null(self$distribution)) {
+      if (has_distribution(self)) {
         text <- paste(text,
                       "following a",
                       self$distribution$distribution_name,

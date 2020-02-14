@@ -121,7 +121,7 @@ test_that("cholesky_variable() correlation can be sampled correctly", {
   correlations <- sigma[upper.tri(sigma, diag = FALSE)]
   m <- model(variances)
   variance_draws <- mcmc(m, n_samples = 100, warmup = 100, verbose = FALSE)
-  correlation_draws <- calculate(correlations, variance_draws)
+  correlation_draws <- calculate(correlations, values = variance_draws)
 
   variance_samples <- as.matrix(variance_draws)
   correlation_samples <- as.matrix(correlation_draws)
@@ -153,7 +153,7 @@ test_that("simplex_variable() can be sampled correctly", {
 
   samples <- as.matrix(draws)
   positive <- samples > 0
-  sum_to_one <- rowSums(samples) == 1
+  sum_to_one <- abs(rowSums(samples) - 1) < 1e-6
   expect_true(all(positive) & all(sum_to_one))
 
 })

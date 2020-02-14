@@ -14,10 +14,10 @@
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
-    "version": "3.6.1",
+    "version": "3.6.2",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 3.6.1 (2019-07-05)",
+  "runtimePlatform": "R version 3.6.2 (2019-12-12)",
   "provider": {
     "@id": "https://cran.r-project.org",
     "@type": "Organization",
@@ -241,6 +241,18 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "cramer",
+      "name": "cramer",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=cramer"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "tidyverse",
       "name": "tidyverse",
       "provider": {
@@ -393,7 +405,7 @@
   ],
   "releaseNotes": "https://github.com/dill/greta/blob/master/NEWS.md",
   "readme": "https://github.com/dill/greta/blob/master/README.md",
-  "fileSize": "484.946KB",
+  "fileSize": "493.191KB",
   "contIntegration": [
     "https://travis-ci.org/greta-dev/greta",
     "https://codecov.io/github/greta-dev/greta?branch=master"

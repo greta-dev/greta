@@ -1,4 +1,4 @@
-# Begin Exclude Linting
+# nolint start
 #' @name optimisers
 #'
 #' @title optimisation methods
@@ -35,7 +35,7 @@
 #' c(mean(x), sd(x))
 #' }
 NULL
-# End Exclude Linting
+# nolint end
 
 # deprecate some optimisers
 optimiser_deprecation_warning <- function() {
@@ -285,7 +285,7 @@ adagrad <- function(learning_rate = 0.8,
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname optimisers
 #' @export
 #'
@@ -317,7 +317,7 @@ adagrad_da <- function(learning_rate = 0.8,
   )
 
 }
-# End Exclude Linting
+# nolint end
 
 #' @rdname optimisers
 #' @export

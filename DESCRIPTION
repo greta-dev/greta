@@ -65,6 +65,7 @@ Collate:
     'internals.R'
     'calculate.R'
     'callbacks.R'
+    'simulate.R'
     'chol2symm.R'
 Imports:
     R6,
@@ -86,6 +87,7 @@ Suggests:
     rmutil,
     extraDistr,
     truncdist,
+    cramer,
     tidyverse,
     fields,
     MASS,

@@ -61,8 +61,8 @@ test_that("primitive functions work as expected", {
   check_op(atanh, m1p1)
   check_op(cospi, real)
   check_op(sinpi, real)
-  check_op(tanpi, real)
-  check_op(trigamma, real, tolerance = 1e-2)
+  check_op(tanpi, real, tolerance = 1e-2)
+  check_op(trigamma, real, tolerance = 2e-2)
 
 })
 
@@ -224,7 +224,7 @@ test_that("apply works as expected", {
   source("helpers.R")
 
   # check apply.greta_array works like R's apply for X
-  check_apply <- function(X, MARGIN, FUN) {  # Exclude Linting
+  check_apply <- function(X, MARGIN, FUN) {  # nolint
     check_op(apply, a,
              other_args = list(MARGIN = MARGIN,
                                FUN = FUN))
@@ -561,7 +561,7 @@ test_that("chol2symm inverts chol", {
   expect_equal(x, chol2symm(u))
 
   # check the greta version
-  x2 <- calculate(chol2symm(as_data(u)))
+  x2 <- calculate(chol2symm(as_data(u)))[[1]]
   expect_equal(x2, x)
 
 })

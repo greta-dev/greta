@@ -18,10 +18,10 @@ test_that("log and exp function representations work", {
   x2 <- log(y)
 
   # compare versions with/without representations
-  compare_op(calculate(log(y)),
-             calculate(log(y2)))
-  compare_op(calculate(exp(x)),
-             calculate(exp(x2)))
+  compare_op(calculate(log(y))[[1]],
+             calculate(log(y2))[[1]])
+  compare_op(calculate(exp(x))[[1]],
+             calculate(exp(x2))[[1]])
 
 })
 
@@ -42,11 +42,11 @@ test_that("chol & chol2inv function representation works", {
   # get representation version of W
   w2 <- chol2symm(u)
 
-  compare_op(calculate(chol(w)),
-             calculate(chol(w2)))
+  compare_op(calculate(chol(w))[[1]],
+             calculate(chol(w2))[[1]])
 
-  compare_op(calculate(chol2inv(w)),
-             calculate(chol2inv(w2)))
+  compare_op(calculate(chol2inv(w))[[1]],
+             calculate(chol2inv(w2))[[1]])
 
 })
 
@@ -107,7 +107,7 @@ test_that("binomial prob representations have correct density", {
                               x)
 
   compare_op(prob_dens, probit_dens)
-  compare_op(prob_dens, logit_dens)
+  compare_op(prob_dens, logit_dens, tolerance = 1e-3)
 
 })
 

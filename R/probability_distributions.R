@@ -5,7 +5,6 @@ uniform_distribution <- R6Class(
 
     min = NA,
     max = NA,
-    log_density = NULL,
 
     initialize = function(min, max, dim) {
 
@@ -40,18 +39,16 @@ uniform_distribution <- R6Class(
       # initialisation)
       self$min <- min
       self$max <- max
-
       self$bounds <- c(min, max)
 
       # initialize the rest
       super$initialize("uniform", dim)
 
       # add them as parents and greta arrays
+      min <- as.greta_array(min)
+      max <- as.greta_array(max)
       self$add_parameter(min, "min")
       self$add_parameter(max, "max")
-
-      # the density is fixed, so calculate it now
-      self$log_density <- -log(max - min)
 
     },
 
@@ -63,14 +60,10 @@ uniform_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      tf_ld <- fl(self$log_density)
-
-      # weird hack to make TF see a gradient here
-      log_prob <- function(x) {
-        tf_ld + tf_flatten(x) * fl(0)
-      }
-
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      tfp$distributions$Uniform(
+        low = parameters$min,
+        high = parameters$max
+      )
 
     }
 
@@ -120,12 +113,12 @@ lognormal_distribution <- R6Class(
       self$add_parameter(sdlog, "sdlog")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$LogNormal(loc = parameters$meanlog,
                                   scale = parameters$sdlog)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -175,7 +168,7 @@ bernoulli_distribution <- R6Class(
           x * lprob + (fl(1) - x) * lprobnot
         }
 
-        list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+        list(log_prob = log_prob)
 
       } else {
 
@@ -238,7 +231,7 @@ binomial_distribution <- R6Class(
           log_choose + x * lprob + (size - x) * lprobnot
         }
 
-        list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+        list(log_prob = log_prob)
 
       } else {
         tfp$distributions$Binomial(total_count = parameters$size,
@@ -281,7 +274,19 @@ beta_binomial_distribution <- R6Class(
           tf_lbeta(alpha, beta)
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      # generate a beta, then a binomial
+      sample <- function(seed) {
+
+        beta <- tfp$distributions$Beta(concentration1 = alpha,
+                                       concentration0 = beta)
+        probs <- beta$sample(seed = seed)
+        binomial <- tfp$distributions$Binomial(total_count = size,
+                                               probs = probs)
+        binomial$sample(seed = seed)
+
+      }
+
+      list(log_prob = log_prob, sample = sample)
 
     }
 
@@ -342,12 +347,12 @@ negative_binomial_distribution <- R6Class(
       self$add_parameter(prob, "prob")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$NegativeBinomial(total_count = parameters$size,
                                          probs = fl(1) - parameters$prob)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -383,7 +388,7 @@ hypergeometric_distribution <- R6Class(
           tf_lchoose(m + n, k)
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = log_prob)
 
     }
 
@@ -436,12 +441,12 @@ inverse_gamma_distribution <- R6Class(
       self$add_parameter(beta, "beta")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$InverseGamma(concentration = parameters$alpha,
                                      rate = parameters$beta)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -470,19 +475,40 @@ weibull_distribution <- R6Class(
       a <- parameters$shape
       b <- parameters$scale
 
+      # use the TFP Weibull CDF bijector
+      bijector <- tfp$bijectors$Weibull(scale = b, concentration = a)
+
       log_prob <- function(x) {
         log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
       }
 
       cdf <- function(x) {
-        fl(1) - exp(fl(-1) * (x / b) ^ a)
+        bijector$forward(x)
       }
 
       log_cdf <- function(x) {
         log(cdf(x))
       }
 
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+      quantile <- function(x) {
+        bijector$inverse(x)
+      }
+
+      sample <- function(seed) {
+
+        # sample by pushing standard uniforms through the inverse cdf
+        u <- tf_randu(self$dim, dag)
+        quantile(u)
+
+      }
+
+      list(
+        log_prob = log_prob,
+        cdf = cdf,
+        log_cdf = log_cdf,
+        quantile = quantile,
+        sample = sample
+      )
 
     }
 
@@ -560,13 +586,13 @@ student_distribution <- R6Class(
       self$add_parameter(sigma, "sigma")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$StudentT(df = parameters$df,
                                  loc = parameters$mu,
                                  scale = parameters$sigma)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -712,7 +738,7 @@ f_distribution <- R6Class(
       dim <- check_dims(df1, df2, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
-      super$initialize("d", dim, truncation)
+      super$initialize("f", dim, truncation)
       self$add_parameter(df1, "df1")
       self$add_parameter(df2, "df2")
     },
@@ -742,7 +768,25 @@ f_distribution <- R6Class(
       log_cdf <- function(x)
         log(cdf(x))
 
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+      sample <- function(seed) {
+
+        # sample as the ratio of two scaled chi squared distributions
+        d1 <- tfp$distributions$Chi2(df = df1)
+        d2 <- tfp$distributions$Chi2(df = df2)
+
+        u1 <- d1$sample(seed = seed)
+        u2 <- d2$sample(seed = seed)
+
+        (u1 / df1) / (u2 / df2)
+
+      }
+
+      list(
+        log_prob = log_prob,
+        cdf = cdf,
+        log_cdf = log_cdf,
+        sample = sample
+      )
 
     }
 
@@ -818,20 +862,19 @@ dirichlet_multinomial_distribution <- R6Class(
                        dim = dim,
                        discrete = TRUE,
                        multivariate = TRUE)
-      self$add_parameter(size, "size", expand_scalar_to = NULL)
+      self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(alpha, "alpha")
 
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
-      parameters <- match_batches(parameters)
       parameters$size <- tf_flatten(parameters$size)
       distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
               concentration = parameters$alpha)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -860,13 +903,12 @@ multinomial_distribution <- R6Class(
                        dim = dim,
                        discrete = TRUE,
                        multivariate = TRUE)
-      self$add_parameter(size, "size", expand_scalar_to = NULL)
+      self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(prob, "prob")
 
     },
 
     tf_distrib = function(parameters, dag) {
-      parameters <- match_batches(parameters)
       parameters$size <- tf_flatten(parameters$size)
       # scale probs to get absolute density correct
       parameters$prob <- parameters$prob / tf_sum(parameters$prob)
@@ -919,9 +961,9 @@ multivariate_normal_distribution <- R6Class(
   public = list(
 
     sigma_is_cholesky = FALSE,
-    # Begin Exclude Linting
+    # nolint start
     initialize = function(mean, Sigma, n_realisations, dimension) {
-    # End Exclude Linting
+    # nolint end
       # coerce to greta arrays
       mean <- as.greta_array(mean)
       sigma <- as.greta_array(Sigma)
@@ -984,10 +1026,10 @@ multivariate_normal_distribution <- R6Class(
       l <- tf$expand_dims(l, 1L)
 
       mu <- parameters$mean
-      # Begin Exclude Linting
+      # nolint start
       tfp$distributions$MultivariateNormalTriL(loc = mu,
                                                scale_tril = l)
-      # End Exclude Linting
+      # nolint end
     }
 
   )
@@ -1004,7 +1046,7 @@ wishart_distribution <- R6Class(
     # set when defining the graph
     target_is_cholesky = FALSE,
 
-    initialize = function(df, Sigma) {  # Exclude Linting
+    initialize = function(df, Sigma) {  # nolint
       # add the nodes as parents and parameters
 
       df <- as.greta_array(df)
@@ -1030,7 +1072,7 @@ wishart_distribution <- R6Class(
         sigma <- representation(sigma, "cholesky")
         self$sigma_is_cholesky <- TRUE
       }
-      self$add_parameter(df, "df", expand_scalar_to = NULL)
+      self$add_parameter(df, "df", shape_matches_output = FALSE)
       self$add_parameter(sigma, "sigma")
 
       # make the initial value PD (no idea whether this does anything)
@@ -1072,6 +1114,7 @@ wishart_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
+
       # this is messy, we want to use the tfp wishart, but can't define the
       # density without expanding the dimension of x
 
@@ -1105,7 +1148,33 @@ wishart_distribution <- R6Class(
 
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      sample <- function(seed) {
+
+        df <- tf$squeeze(parameters$df, 1:2)
+        sigma <- parameters$sigma
+
+        # get the cholesky factor of Sigma in tf orientation
+        if (self$sigma_is_cholesky) {
+          sigma_chol <- tf$linalg$matrix_transpose(sigma)
+        } else {
+          sigma_chol <- tf$linalg$cholesky(sigma)
+        }
+
+        # use the density for choleskied x, with choleskied Sigma
+        distrib <- tfp$distributions$Wishart(df = df,
+                                             scale_tril = sigma_chol)
+
+        draws <- distrib$sample(seed = seed)
+
+        if (self$target_is_cholesky) {
+          draws <- tf_chol(draws)
+        }
+
+        draws
+
+      }
+
+      list(log_prob = log_prob, sample = sample)
 
     }
 
@@ -1148,7 +1217,7 @@ lkj_correlation_distribution <- R6Class(
       super$initialize("lkj_correlation", dim, multivariate = TRUE)
 
       # don't try to expand scalar eta out to match the target size
-      self$add_parameter(eta, "eta", expand_scalar_to = NULL)
+      self$add_parameter(eta, "eta", shape_matches_output = FALSE)
 
       # make the initial value PD
       self$value(unknowns(dims = dim, data = diag(dimension)))
@@ -1190,14 +1259,37 @@ lkj_correlation_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
 
       eta <- tf$squeeze(parameters$eta, 1:2)
+      dim <- self$dim[1]
 
-      tfp$distributions$LKJ(
-        dimension = self$dim[1],
+      distrib <- tfp$distributions$LKJ(
+        dimension = dim,
         concentration = eta,
         input_output_cholesky = self$target_is_cholesky
       )
 
-      # input_output_cholesky argument will need to be dealt with for RNG stuff
+      # tfp's lkj sampling can't detect the size of the output from eta, for
+      # some reason. But we can use map_fun to apply their simulation to each
+      # element of eta.
+      sample <- function(seed) {
+
+        sample_once <- function(eta) {
+
+          d <- tfp$distributions$LKJ(
+            dimension = dim,
+            concentration = eta,
+            input_output_cholesky = self$target_is_cholesky
+          )
+
+          d$sample(seed = seed)
+
+        }
+
+        tf$map_fn(sample_once, eta)
+
+      }
+
+      list(log_prob = distrib$log_prob,
+           sample = sample)
 
     }
 
@@ -1236,7 +1328,7 @@ distribution_classes_module <- module(uniform_distribution,
 
 # export constructors
 
-# Begin Exclude Linting
+# nolint start
 #' @name distributions
 #' @title probability distributions
 #' @description These functions can be used to define random variables in a
@@ -1398,7 +1490,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'
 #' }
 NULL
-# End Exclude Linting
+# nolint end
 
 #' @rdname distributions
 #' @export
@@ -1509,19 +1601,19 @@ logistic <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 f <- function(df1, df2, dim = NULL, truncation = c(0, Inf))
   distrib("f", df1, df2, dim, truncation)
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname distributions
 #' @export
 multivariate_normal <- function(mean, Sigma,
                                 n_realisations = NULL, dimension = NULL) {
-# End Exclude Linting
+# nolint end
   distrib("multivariate_normal", mean, Sigma,
           n_realisations, dimension)
 }
 
 #' @rdname distributions
 #' @export
-wishart <- function(df, Sigma)  # Exclude Linting
+wishart <- function(df, Sigma)  # nolint
   distrib("wishart", df, Sigma)
 
 #' @rdname distributions

@@ -78,31 +78,7 @@ model <- function(...,
 
   }
 
-  # check they are greta arrays
-  are_greta_arrays <- vapply(target_greta_arrays,
-                             inherits, "greta_array",
-                             FUN.VALUE = FALSE)
-
-  if (!all(are_greta_arrays)) {
-
-    unexpected_items <- names(target_greta_arrays)[!are_greta_arrays]
-
-    msg <- ifelse(length(unexpected_items) > 1,
-                  paste("The following objects passed to model()",
-                        "are not greta arrays: "),
-                  paste("The following object passed to model()",
-                        "is not a greta array: "))
-
-    stop(msg,
-         paste(unexpected_items, sep = ", "),
-         call. = FALSE)
-
-  }
-
-  if (length(target_greta_arrays) == 0) {
-    stop("could not find any non-data greta arrays",
-         call. = FALSE)
-  }
+  target_greta_arrays <- check_greta_arrays(target_greta_arrays, "model")
 
   # get the dag containing the target nodes
   dag <- dag_class$new(target_greta_arrays,
@@ -183,10 +159,10 @@ model <- function(...,
 }
 
 # register generic method to coerce objects to a greta model
-as.greta_model <- function(x, ...)  # Exclude Linting
+as.greta_model <- function(x, ...)  # nolint
   UseMethod("as.greta_model", x)
 
-as.greta_model.dag_class <- function(x, ...) {  # Exclude Linting
+as.greta_model.dag_class <- function(x, ...) {  # nolint
   ans <- list(dag = x)
   class(ans) <- "greta_model"
   ans

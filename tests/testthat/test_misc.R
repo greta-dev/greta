@@ -6,7 +6,7 @@ test_that("check_tf_version works", {
 
   # record the true version and forge an old version
   true_version <- tf$`__version__`
-  tf$`__version__` <- "0.9.0"  # Exclude Linting
+  tf$`__version__` <- "0.9.0"  # nolint
 
   # expected text
   expected_message <- "you have TensorFlow version 0.9.0"
@@ -19,7 +19,7 @@ test_that("check_tf_version works", {
                  expected_message)
 
   # reset the true version
-  tf$`__version__` <- true_version  # Exclude Linting
+  tf$`__version__` <- true_version  # nolint
 
   # forge a missing installation
   expected_message <- "isn't installed"

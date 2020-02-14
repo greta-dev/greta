@@ -242,12 +242,11 @@ mcmc <- function(model,
                      sampler,
                      model)
 
-  # add chain info for printing, and set trace batch size
+  # add chain info for printing
   for (i in seq_len(n_samplers)) {
     samplers[[i]]$sampler_number <- i
     samplers[[i]]$n_samplers <- n_samplers
   }
-
 
   # if verbose = FALSE, make pb_update as big as possible to speed up sampling
   if (!verbose) {
@@ -479,10 +478,11 @@ stashed_samples <- function() {
       values_draws <- coda::mcmc.list(values_draws)
 
       # prep the raw model objects
-      model_info <- new.env()
-      model_info$raw_draws <- free_state_draws
-      model_info$samplers <- samplers
-      model_info$model <- samplers[[1]]$model
+      model_info <- list(
+        raw_draws = free_state_draws,
+        samplers = samplers,
+        model = samplers[[1]]$model
+      )
 
       values_draws <- as_greta_mcmc_list(values_draws, model_info)
 
@@ -630,7 +630,8 @@ parse_initial_values <- function(initials, dag) {
   # variable
 
   # find the corresponding nodes and check they are variable nodes
-  nodes <- dag$node_list[match(tf_names, dag$node_tf_names)]
+  forward_names <- paste0("all_forward_", dag$node_tf_names)
+  nodes <- dag$node_list[match(tf_names, forward_names)]
   types <- lapply(nodes, node_type)
   are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
 

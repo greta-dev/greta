@@ -157,7 +157,7 @@ NULL
 
 # replace syntax for greta array objects
 #' @export
-`[<-.greta_array` <- function(x, ..., value) {  # Exclude Linting
+`[<-.greta_array` <- function(x, ..., value) {  # nolint
 
   node <- get_node(x)
 
@@ -292,7 +292,7 @@ rbind.greta_array <- function(...) {
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname overloaded
 #' @export
 abind <- function(...,
@@ -302,20 +302,20 @@ abind <- function(...,
                   hier.names = FALSE, use.dnns = FALSE) {
   UseMethod("abind")
 }
-# End Exclude Linting
+# nolint end
 
 # clear CRAN checks spotting floating global variables
 #' @importFrom utils globalVariables
 utils::globalVariables("N", "greta")
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 abind.default <- function(...,
                           along = N, rev.along = NULL, new.names = NULL,
                           force.array = TRUE, make.names = use.anon.names,
                           use.anon.names = FALSE, use.first.dimnames = FALSE,
                           hier.names = FALSE, use.dnns = FALSE) {
-# End Exclude Linting
+# nolint end
 
   # error nicely if they don't have abind installed
   abind_installed <- requireNamespace("abind", quietly = TRUE)
@@ -331,7 +331,7 @@ abind.default <- function(...,
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 abind.greta_array <- function(...,
                               along = N, rev.along = NULL, new.names = NULL,
@@ -339,10 +339,10 @@ abind.greta_array <- function(...,
                               use.anon.names = FALSE,
                               use.first.dimnames = FALSE, hier.names = FALSE,
                               use.dnns = FALSE) {
-# End Exclude Linting
+# nolint end
 
   # warn if any of the arguments have been changed
-  # Begin Exclude Linting
+  # nolint start
   user_set_args <- !is.null(rev.along) |
     !is.null(new.names) |
     !isTRUE(force.array) |
@@ -351,7 +351,7 @@ abind.greta_array <- function(...,
     !identical(use.first.dimnames, FALSE) |
     !identical(hier.names, FALSE) |
     !identical(use.dnns, FALSE)
-  # End Exclude Linting
+  # nolint end
 
   if (user_set_args) {
     warning("only the argument 'along' is supported when using abind ",
@@ -371,7 +371,7 @@ abind.greta_array <- function(...,
   n <- max(vapply(dims, length, FUN.VALUE = 1L))
 
   # needed to keep the same formals as abind
-  N <- n  # Exclude Linting
+  N <- n  # nolint
   along <- as.integer(force(along))
 
   # rationalise along, and pad N if we're prepending/appending a dimension
@@ -482,7 +482,7 @@ length.greta_array <- function(x)
 
 # reshape greta arrays
 #' @export
-`dim<-.greta_array` <- function(x, value) {  # Exclude Linting
+`dim<-.greta_array` <- function(x, value) {  # nolint
 
   dims <- value
 
@@ -552,7 +552,7 @@ length.greta_array <- function(x)
 # arrays
 #' @export
 #' @importFrom utils head
-head.greta_array <- function(x, n = 6L, ...) {  # Exclude Linting
+head.greta_array <- function(x, n = 6L, ...) {  # nolint
 
   stopifnot(length(n) == 1L)
 
@@ -585,7 +585,7 @@ head.greta_array <- function(x, n = 6L, ...) {  # Exclude Linting
 
 #' @export
 #' @importFrom utils tail
-tail.greta_array <- function(x, n = 6L, ...) {  # Exclude Linting
+tail.greta_array <- function(x, n = 6L, ...) {  # nolint
 
   stopifnot(length(n) == 1L)
 

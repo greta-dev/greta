@@ -17,31 +17,55 @@ data_node <- R6Class(
 
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
+      unbatched_name <- paste0(tf_name, "_unbatched")
 
-      value <- self$value()
-      shape <- to_shape(c(1, dim(value)))
-      value <- add_first_dim(value)
+      mode <- dag$how_to_define(self)
 
-      # under some circumstances we define data as constants, but normally as
-      # placeholders
-      using_constants <- !is.null(greta_stash$data_as_constants)
+      # if we're in sampling mode, get the distribution constructor and sample
+      if (mode == "sampling") {
 
-      if (using_constants) {
-
-        tensor <- tf$constant(value = value,
-                              dtype = tf_float(),
-                              shape = shape)
-
-      } else {
-
-        tensor <- tf$compat$v1$placeholder(shape = shape,
-                                           dtype = tf_float())
-        tfe$data_list[[tf_name]] <- value
+        batched_tensor <- dag$draw_sample(self$distribution)
 
       }
 
-      # create placeholder
-      assign(tf_name, tensor, envir = tfe)
+      # if we're defining the forward mode graph, create either a constant or a
+      # placeholder
+      if (mode == "forward") {
+
+        value <- self$value()
+        ndim <- length(dim(value))
+        shape <- to_shape(c(1, dim(value)))
+        value <- add_first_dim(value)
+
+        # under some circumstances we define data as constants, but normally as
+        # placeholders
+        using_constants <- !is.null(greta_stash$data_as_constants)
+
+        if (using_constants) {
+
+          unbatched_tensor <- tf$constant(value = value,
+                                          dtype = tf_float(),
+                                          shape = shape)
+
+        } else {
+
+          unbatched_tensor <- tf$compat$v1$placeholder(shape = shape,
+                                                       dtype = tf_float())
+          dag$set_tf_data_list(unbatched_name, value)
+
+        }
+
+        # expand up to batch size
+        tiling <- c(tfe$batch_size, rep(1L, ndim))
+        batched_tensor <- tf$tile(unbatched_tensor, tiling)
+
+        # put unbatched tensor in environment so it can be set
+        assign(unbatched_name, unbatched_tensor, envir = tfe)
+
+      }
+
+      assign(tf_name, batched_tensor, envir = tfe)
+
 
     }
   )
@@ -125,26 +149,37 @@ operation_node <- R6Class(
 
     tf = function(dag) {
 
-      # fetch the tensors for the environment
-      arg_tf_names <- lapply(self$parents, dag$tf_name)
-      args <- lapply(arg_tf_names, get, envir = dag$tf_environment)
+      tfe <- dag$tf_environment
+      tf_name <- dag$tf_name(self)
+      mode <- dag$how_to_define(self)
 
-      # fetch additional (non-tensor) arguments, if any
-      if (length(self$operation_args) > 0)
-        args <- c(args, self$operation_args)
+      # if sampling get the distribution constructor and sample this
+      if (mode == "sampling") {
 
-      # if there are multiple args, reconcile batch dimensions now
-      args <- match_batches(args)
+        tensor <- dag$draw_sample(self$distribution)
 
-      # get the tensorflow function
-      operation <- eval(parse(text = self$operation),
-                        envir = self$tf_function_env)
+      }
 
-      # apply the function on tensors
-      node <- do.call(operation, args)
+      if (mode == "forward") {
+
+        # fetch the tensors for the environment
+        arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
+        tf_args <- lapply(arg_tf_names, get, envir = tfe)
+
+        # fetch additional (non-tensor) arguments, if any
+        if (length(self$operation_args) > 0)
+          tf_args <- c(tf_args, self$operation_args)
+
+        # get the tensorflow function and apply it to the args
+        operation <- eval(parse(text = self$operation),
+                          envir = self$tf_function_env)
+
+        tensor <- do.call(operation, tf_args)
+
+      }
 
       # assign it in the environment
-      assign(dag$tf_name(self), node, envir = dag$tf_environment)
+      assign(tf_name, tensor, envir = dag$tf_environment)
 
     }
   )
@@ -257,25 +292,50 @@ variable_node <- R6Class(
 
       # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
-      free_name <- sprintf("%s_free", tf_name)
 
-      # create the log jacobian adjustment for the free state
-      tf_adj <- self$tf_adjustment(dag)
-      adj_name <- sprintf("%s_adj", tf_name)
-      assign(adj_name,
-             tf_adj,
-             envir = dag$tf_environment)
+      mode <- dag$how_to_define(self)
 
-      # get the free tensor
-      tf_free <- get(free_name, envir = dag$tf_environment)
+      if (mode == "sampling") {
 
-      # map from the free to constrained state (including reshaping) in a new
-      # tensor
-      tf_transformed <- self$tf_from_free(tf_free)
+        distrib_node <- self$distribution
 
-      # assign as constrained variable
+        if (is.null(distrib_node)) {
+
+          # if the variable has no distribution create a placeholder instead
+          # (the value must be passed in via values when using simulate)
+          shape <- to_shape(c(1, self$dim))
+          tensor <- tf$compat$v1$placeholder(shape = shape, dtype = tf_float())
+
+        } else {
+
+          tensor <- dag$draw_sample(self$distribution)
+
+        }
+
+      }
+
+      # if we're defining the forward mode graph, get the free state, transform,
+      # and compute any transformation density
+      if (mode == "forward") {
+
+        free_name <- sprintf("%s_free", tf_name)
+
+        # create the log jacobian adjustment for the free state
+        tf_adj <- self$tf_adjustment(dag)
+        adj_name <- sprintf("%s_adj", tf_name)
+        assign(adj_name,
+               tf_adj,
+               envir = dag$tf_environment)
+
+        # map from the free to constrained state in a new tensor
+        tf_free <- get(free_name, envir = dag$tf_environment)
+        tensor <- self$tf_from_free(tf_free)
+
+      }
+
+      # assign to environment variable
       assign(tf_name,
-             tf_transformed,
+             tensor,
              envir = dag$tf_environment)
 
     },
@@ -370,6 +430,7 @@ distribution_node <- R6Class(
     bounds = c(-Inf, Inf),
     truncation = NULL,
     parameters = list(),
+    parameter_shape_matches_output = logical(),
 
     initialize = function(name = "no distribution",
                           dim = NULL,
@@ -412,10 +473,45 @@ distribution_node <- R6Class(
       vble(truncation, dim = self$dim)
     },
 
+    list_parents = function(dag) {
+
+      parents <- self$parents
+
+      # if this node is being used for sampling and has a target, do not
+      # consider that a parent node
+      mode <- dag$how_to_define(self)
+      if (mode == "sampling" & !is.null(self$target)) {
+        parent_names <- vapply(parents,
+                               member,
+                               "unique_name",
+                               FUN.VALUE = character(1))
+        keep <- parent_names != self$target$unique_name
+        parents <- parents[keep]
+      }
+
+      parents
+
+    },
+
+    list_children = function(dag) {
+
+      children <- self$children
+
+      # if this node is being used for sampling and has a target, consider that
+      # a child node
+      mode <- dag$how_to_define(self)
+      if (mode == "sampling" & !is.null(self$target)) {
+        children <- c(children, list(self$target))
+      }
+
+      children
+
+    },
+
     # create target node, add as a parent, and give it this distribution
     add_target = function(new_target) {
 
-      # add as x and as a parent
+      # add as target and as a parent
       self$target <- new_target
       self$add_parent(new_target)
 
@@ -445,9 +541,6 @@ distribution_node <- R6Class(
 
     },
 
-    # change this to instead assign the distribution object, with the density
-    # being defined by the dag class
-
     tf = function(dag) {
 
       # assign the distribution object constructor function to the environment
@@ -462,17 +555,85 @@ distribution_node <- R6Class(
       self$target
     },
 
-    add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
+    # shape_matches_output indicates whether the array for the parameter can
+    # have the same shape as the output (e.g. this is true for binomial's prob
+    # parameter, but not for size) by default, assume a scalar (row) parameter
+    # can be expanded up to the distribution size
+    add_parameter = function(parameter,
+                             name,
+                             shape_matches_output = TRUE,
+                             expand_now = TRUE) {
 
-      # expand out a scalar parameter if needed
-      if (!is.null(expand_scalar_to) &&
-          is_scalar(parameter) & !identical(expand_scalar_to, c(1L, 1L))) {
-        parameter <- greta_array(parameter, dim = expand_scalar_to)
+      # record whether this parameter can be scaled up
+      self$parameter_shape_matches_output[[name]] <- shape_matches_output
+
+      # try to do it now if required
+      if (shape_matches_output & expand_now) {
+        parameter <- self$expand_parameter(parameter, self$dim)
       }
 
+      # record it in the right places
       parameter <- to_node(parameter)
       self$add_parent(parameter)
       self$parameters[[name]] <- parameter
+
+    },
+
+    # try to expand a greta array for a parameter up to the required dimension
+    expand_parameter = function(parameter, dim) {
+
+      # can this realisation of the parameter be expanded?
+      expandable_shape <- ifelse(self$multivariate,
+                                 is_row(parameter),
+                                 is_scalar(parameter))
+
+      # should we expand it now?
+      expanded_target <- ifelse(self$multivariate,
+                               !identical(dim[1], 1L),
+                               !identical(dim, c(1L, 1L)))
+
+      # expand now if needed (and remove flag)
+      if (expandable_shape & expanded_target) {
+
+        if (self$multivariate) {
+
+          n_realisations <- self$dim[1]
+          reps <- replicate(n_realisations, parameter, simplify = FALSE)
+          parameter <- do.call(rbind, reps)
+
+        } else {
+
+          parameter <- greta_array(parameter, dim = self$dim)
+
+        }
+
+      }
+
+      parameter
+
+    },
+
+    # try to expand all expandable (scalar for univariate, or row for
+    # multivariate) parameters to the required dimension
+    expand_parameters_to = function(dim) {
+
+      parameter_names <- names(self$parameters)
+
+      for (name in parameter_names) {
+
+        if (self$parameter_shape_matches_output[[name]]) {
+
+          parameter <- as.greta_array(self$parameters[[name]])
+          expanded <- self$expand_parameter(parameter, dim)
+
+          self$add_parameter(expanded,
+                             name,
+                             self$parameter_shape_matches_output[[name]],
+                             expand_now = FALSE)
+
+        }
+
+      }
 
     }
 

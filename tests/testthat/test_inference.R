@@ -362,7 +362,7 @@ test_that("stashed_samples works", {
 
   # model_info attribute should have raw draws and the model
   model_info <- attr(ans, "model_info")
-  expect_true(inherits(model_info, "environment"))
+  expect_true(inherits(model_info, "list"))
   expect_s3_class(model_info$raw_draws, "mcmc.list")
   expect_true(inherits(model_info$model, "greta_model"))
 
@@ -384,7 +384,7 @@ test_that("samples has object names", {
 
   # so should calculate
   c <- b ^ 2
-  c_draws <- calculate(c, draws)
+  c_draws <- calculate(c, values = draws)
   names <- rownames(summary(c_draws)$statistics)
   expect_identical(names, c("c[1,1]", "c[2,1]", "c[3,1]"))
 
@@ -401,6 +401,7 @@ test_that("model errors nicely", {
   b <- normal(0, a)
   expect_error(model(a, b),
                "^The following object")
+
 })
 
 test_that("mcmc supports rwmh sampler with normal proposals", {
