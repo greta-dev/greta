@@ -835,7 +835,7 @@ not_finished <- function(draws, target_samples = 5000) {
 new_samples <- function(draws, target_samples = 5000) {
   neff <- min(coda::effectiveSize(draws))
   efficiency <- neff / coda::niter(draws)
-  1.2 * (target_samples - neff) / efficiency
+  1.5 * (target_samples - neff) / efficiency
 }
 
 not_timed_out <- function(start_time, time_limit = 300) {
@@ -844,15 +844,17 @@ not_timed_out <- function(start_time, time_limit = 300) {
 }
 
 get_enough_draws <- function(model,
-                             sampler = sampler,
                              n_effective = 5000,
+                             sampler = hmc(),
                              time_limit = 300,
-                             verbose = TRUE,
+                             chains = 50,
+                             verbose = FALSE,
                              one_by_one = FALSE) {
 
   start_time <- Sys.time()
   draws <- mcmc(model,
                 sampler = sampler,
+                chains = chains,
                 verbose = verbose,
                 one_by_one = one_by_one)
 
@@ -917,8 +919,8 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   m <- model(x, precision = "single")
 
   draws <- get_enough_draws(m,
-                            sampler = sampler,
                             n_effective = n_effective,
+                            sampler = sampler,
                             verbose = FALSE)
 
   # get MCMC samples for statistics of the samples (value, variance and
@@ -938,10 +940,10 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   # get absolute errors between posterior means and true values, and scale them
   # by time-series Monte Carlo standard errors (the expected amount of
   # uncertainty in the MCMC estimate), to give the number of standard errors
-  # away from truth. There's a 1/100 chance of any one of these scaled errors
-  # being greater than qnorm(0.99) if the sampler is correct
+  # away from truth. There's a 1/200 chance of any one of these scaled errors
+  # being greater than qnorm(1 - 0.005) if the sampler is correct
   errors <- scaled_error(stat_draws, stat_truth)
-  expect_lte(max(errors), qnorm(0.99))
+  expect_lte(max(errors), qnorm(1 - 0.005))
 
 }
 
@@ -958,8 +960,8 @@ check_samples <- function(x,
 
   m <- model(x, precision = "single")
   draws <- get_enough_draws(m,
-                            sampler = sampler,
                             n_effective = n_effective,
+                            sampler = sampler,
                             verbose = FALSE,
                             one_by_one = one_by_one)
 
@@ -979,6 +981,6 @@ check_samples <- function(x,
 
   # do a formal hypothesis test
   suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
-  testthat::expect_gte(stat$p.value, 0.01)
+  testthat::expect_gte(stat$p.value, 0.005)
 
 }

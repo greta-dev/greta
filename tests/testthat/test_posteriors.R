@@ -4,7 +4,6 @@ test_that("posterior is correct (binomial)", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
-  skip_if_not_release()
 
   # analytic solution to the posterior of the paramter of a binomial
   # distribution, with uniform prior
@@ -15,7 +14,7 @@ test_that("posterior is correct (binomial)", {
   distribution(pos) <- binomial(n, theta)
   m <- model(theta)
 
-  draws <- get_enough_draws(m, hmc(), 2000, verbose = FALSE)
+  draws <- get_enough_draws(m, n_effective = 5000)
 
   samples <- as.matrix(draws)
 
@@ -33,7 +32,61 @@ test_that("posterior is correct (binomial)", {
   n_draws <- round(coda::effectiveSize(draws))
   comparison <- rbeta(n_draws, shape1, shape2)
   suppressWarnings(test <- ks.test(samples, comparison))
-  expect_gte(test$p.value, 0.01)
+  expect_gte(test$p.value, 0.05)
+
+})
+
+test_that("posterior is correct (normal)", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # test vs analytic posterior on 8 schools data with no pooling:
+  #   y_i ~ N(theta_i, obs_sd_i ^ 2)
+  #   theta_i ~ N(mu, sd ^ 2)
+
+  # eight schools data
+  y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+  obs_sd <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
+
+  # prior parameters for int, and fixed variance of theta
+  mu <- rnorm(1)
+  sd <- abs(rnorm(1))
+
+  # Bayes theorum gives:
+  #   p(theta | y) \propto p(y|theta) p(theta)
+  # which with normal densities is:
+  #   p(theta_i | y_i) \propto N(y_i | theta_i, obs_sd_i ^ 2) * N(theta_i | mu, sd ^ 2)
+  # which is equivalent to:
+  #   p(theta_i | y_i) \propto N(theta_mu_i, theta_var_i)
+  #   theta_var_i = 1 / (1 / sd ^ 2 + 1 / obs_sd_i ^ 2)
+  #   theta_mu_i = (mu / sd ^ 2 + y_i / obs_sd_i ^ 2) * theta_var_i
+  # conjugate prior, see Wikipedia conjugate prior table
+
+  obs_prec <- 1 / (obs_sd ^ 2)
+  prec <- 1 / (sd ^ 2)
+  theta_var <- 1 / (obs_prec + prec)
+  theta_mu <- (y * obs_prec  + mu * prec) * theta_var
+  analytic <- cbind(mean = theta_mu, sd = sqrt(theta_var))
+
+  # mcmc solution:
+  theta <- normal(mu, sd, dim = 8)
+  distribution(y) <- normal(theta, obs_sd)
+  m <- model(theta)
+
+  # draw at least 5000 effective samples of each parameter from the posterior
+  draws <- get_enough_draws(m, n_effective = 5000)
+
+  mcmc_stats <- summary(draws)$statistics
+  mcmc <- mcmc_stats[, 1:2]
+  error <- abs(mcmc - analytic)
+  mcmc_se <- mcmc_stats[, 4]
+
+  # ratio of error to that expected due to Monte Carlo noise
+  error_multiples <- error / cbind(mcmc_se, mcmc_se)
+
+  within_error_margin <- error_multiples < qnorm(1 - 0.005)
+  expect_true(all(within_error_margin))
 
 })
 
@@ -41,7 +94,6 @@ test_that("samplers are unbiased for bivariate normals", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
-  skip_if_not_release()
 
   check_mvn_samples(hmc())
   check_mvn_samples(rwmh())
@@ -53,7 +105,6 @@ test_that("samplers are unbiased for chi-squared", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
-  skip_if_not_release()
 
   df <- 5
   x <- chi_squared(df)
@@ -67,7 +118,6 @@ test_that("samplers are unbiased for standard uniform", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
-  skip_if_not_release()
 
   x <- uniform(0, 1)
   iid <- runif
@@ -80,13 +130,12 @@ test_that("samplers are unbiased for LKJ", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
-  skip_if_not_release()
 
   x <- lkj_correlation(3, 2)[1, 2]
   iid <- function(n)
     rlkjcorr(n, 3, 2)[, 1, 2]
 
-  check_samples(x, iid, hmc(), one_by_one = TRUE)
+  check_samples(x, iid)
 
 })
 
