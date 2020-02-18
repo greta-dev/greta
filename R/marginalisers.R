@@ -112,15 +112,23 @@ discrete_marginalisation <- function(values) {
 #' @param max_iterations the (positive) integer-like maximum number of
 #'   iterations of the Newton-Raphson optimisation algorithm
 #'
+#' @param diagonal_hessian whether the Hessian matrix should be assumed to be
+#'   diagonal, to speed up computations. See Details.
+#'
 #' @details \code{laplace_approximation} can only be used to marginalise
-#'   variables following a multivariate normal distribution. In addition, the
-#'   function to be marginalised must \emph{factorise}; ie. it must return a
-#'   vector-valued density with as many elements as the vector variable being
-#'   marginalised, and each of element of the density must depend only on the
-#'   corresponding element of the variable vector. This is the responsibility of
-#'   the user, and is not checked.
+#'   variables following a multivariate normal distribution.
+#'
+#'  The argument \code{diagonal_hessian} can be used to state that the
+#'  conditional density factorises along the elements of the variable being
+#'  marginalised, and therefore the Hessian matrix of this function can be
+#'  assumed to be diagonal. A conditional density function factorises if each
+#'  observation in the conditional density depends only on the corresponding per
+#'  element of the variable being marginalised. If this is not the case and you
+#'  set \code{diagonal_hessian = TRUE}, your inferences will be incorrect.
+#'
 laplace_approximation <- function(tolerance = 1e-6,
-                                  max_iterations = 50) {
+                                  max_iterations = 50,
+                                  diagonal_hessian = FALSE) {
 
   # in future:
   #  - enable warm starts for subsequent steps of the outer inference algorithm
@@ -161,10 +169,19 @@ laplace_approximation <- function(tolerance = 1e-6,
     # get the vectors of first and second derivatives of the conditional density
     # function, w.r.t. the variable being marginalised
     derivs <- function(z) {
+
       y <- d0(z, reduce = FALSE)
       d1 <- tf$gradients(y, z)[[1]]
-      d2 <- tf$gradients(d1, z)[[1]]
+
+      if (diagonal_hessian) {
+        d2 <- tf$map_fn(tf$gradients, list(d1, z))[[1]]
+      } else {
+        stop ("inference with non-diagonal hessians not yet implemented")
+        d2 <- tf$hessians(y, z)[[1]]
+      }
+
       list(d1, d2)
+
     }
 
     # negative log-posterior for the current value of z under MVN assumption
