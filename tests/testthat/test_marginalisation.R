@@ -55,7 +55,6 @@ test_that("marginalise errors nicely", {
 
 })
 
-
 test_that("discrete_marginalisation errors nicely", {
 
   skip_if_not(check_tf_version())
@@ -175,7 +174,6 @@ test_that("laplace_approximation errors nicely", {
 
 })
 
-
 test_that("inference runs with laplace approximation", {
 
   skip_if_not(check_tf_version())
@@ -204,6 +202,63 @@ test_that("inference runs with laplace approximation", {
   expect_ok(draws <- mcmc(m, warmup = 20, n_samples = 20,
                           verbose = FALSE))
 
-  # the optimisation result should be similar to a very long run of
+})
+
+test_that("laplace approximation converges on correct posterior", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  # test vs analytic posterior on 8 schools data with no pooling:
+  #   y_i ~ N(theta_i, obs_sd_i ^ 2)
+  #   theta_i ~ N(mu, sd ^ 2)
+  # the posterior for theta is normal, so laplace should be exact
+
+  # eight schools data
+  y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+  obs_sd <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
+
+  # prior parameters for int, and fixed variance of theta
+  mu <- rnorm(1)
+  sd <- abs(rnorm(1))
+
+  # analytic solution:
+
+  # Marginalising int we can write:
+  # Bayes theorum gives:
+  #   p(theta | y) \propto p(y|theta) p(theta)
+  # which with normal densities is:
+  #   p(theta_i | y_i) \propto N(y_i | theta_i, obs_sd_i ^ 2) * N(theta_i | mu, sd ^ 2)
+  # which is equivalent to:
+  #   p(theta_i | y_i) \propto N(theta_mu_i, theta_var_i)
+  #   theta_var_i = 1 / (1 / sd ^ 2 + 1 / obs_sd_i ^ 2)
+  #   theta_mu_i = (mu / sd ^ 2 + y_i / obs_sd_i ^ 2) * theta_var_i
+  # conjugate prior, see Wikipedia conjugate prior table
+
+  obs_prec <- 1 / (obs_sd ^ 2)
+  prec <- 1 / (sd ^ 2)
+  theta_var <- 1 / (obs_prec + prec)
+  theta_mu <- (y * obs_prec  + mu * prec) * theta_var
+  theta_sd <- sqrt(theta_var)
+
+  # Laplace solution:
+  lik <- function(theta) {
+    distribution(y) <- normal(t(theta), obs_sd)
+  }
+
+  # mock up as a multivariate normal distribution
+  mean <- ones(1, 8) * mu
+  sigma <- diag(8) * sd ^ 2
+  out <- marginalise(lik,
+                     multivariate_normal(mean, sigma),
+                     laplace_approximation())
+  theta_mu_est <- calculate(out$mean)
+  theta_var_est <- calculate(diag(out$Sigma))
+
+  analytic <- cbind(mean = theta_mu, sd = sqrt(theta_var))
+  laplace <- cbind(mean = theta_mu_est, sd = sqrt(theta_var_est))
+
+  # compare these to within a tolerance
+  compare_op(analytic, laplace)
 
 })
