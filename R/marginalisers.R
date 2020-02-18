@@ -62,14 +62,20 @@ discrete_marginalisation <- function(values) {
 
     # 1. get weights from the distribution log pdf
     # assuming values is a list, get tensors for the weights
-    weights_list <- lapply(values_list, tfp_distribution$log_prob)
-    weights_list <- lapply(weights_list, tf_sum)
+    log_weights_list <- lapply(values_list, tfp_distribution$log_prob)
+    log_weights_list <- lapply(log_weights_list, tf_sum)
 
-    # convert to a vector of discrete probabilities and make them sum to 1
-    weights_vec <- tf$concat(weights_list, axis = 1L)
-    weights_vec <- tf$exp(weights_vec)
-    weights_vec <- weights_vec / tf_sum(weights_vec)
-    log_weights_vec <- tf$log(weights_vec)
+    # convert to a vector of discrete probabilities and make them sum to 1,
+    # whilst staying on the log scale
+    log_weights <- tf$concat(log_weights_list, axis = 1L)
+
+    # normalise weights on log scale
+    log_weights_sum <- tf$reduce_logsumexp(
+      log_weights,
+      axis = 1L,
+      keepdims = TRUE
+    )
+    log_weights <- log_weights - log_weights_sum
 
     # 2. compute the conditional joint density for each value (passing in
     # other_args and the outer dag)
@@ -84,7 +90,7 @@ discrete_marginalisation <- function(values) {
     log_density_vec <- tf$concat(log_density_list, axis = 1L)
 
     # 3. compute a weighted sum
-    log_density_weighted_vec <- log_density_vec + log_weights_vec
+    log_density_weighted_vec <- log_density_vec + log_weights
     tf$reduce_logsumexp(log_density_weighted_vec, axis = 1L)
 
   }
