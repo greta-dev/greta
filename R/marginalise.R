@@ -158,26 +158,31 @@ marginalisation_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
+      self$target
+
+      # build the tfp distribution for the marginalisation distribution
+      parameter_nodes <- self$target$parameters
+      distrib_constructor <- dag$get_tf_object(self$target)
+      tf_parameter_list <- lapply(parameter_nodes, dag$get_tf_object)
+      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = dag)
+
       # the marginal density implied by the function
       log_prob <- function(x) {
 
-        # x will be the target; a tf function for the distribution being
+        # x will be the target; a tf constructor function for the distribution being
         # marginalised. Pass in the distribution node and the dag too, in case
         # the marginalisers need them.
         self$tf_marginaliser(self$conditional_density_fun,
-                             tf_distribution_log_pdf = x,
+                             tfp_distribution = tfp_distribution,
                              other_args = parameters,
                              dag = dag,
                              distribution_node = self$target)
 
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = log_prob)
 
-    },
-
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -197,7 +202,7 @@ as_conditional_density <- function(r_fun, args) {
   # the function.
 
   # this function will take in tensors corresponding to the things in args
-  function(..., reduce = TRUE) {
+  function(..., reduce = TRUE, dag = NULL) {
 
     tensor_inputs <- list(...)
 
@@ -232,6 +237,9 @@ as_conditional_density <- function(r_fun, args) {
     # (using on_graph())
     sub_dag$tf_graph <- tf$get_default_graph()
     sub_tfe <- sub_dag$tf_environment
+
+    # pass on the batch size, used when defining data
+    sub_tfe$batch_size <- dag$tf_environment$batch_size
 
     # set the input tensors as the values for the dummy greta arrays in the new
     # tf_environment

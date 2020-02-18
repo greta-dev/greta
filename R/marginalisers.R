@@ -48,7 +48,7 @@ discrete_marginalisation <- function(values) {
 
   # define the marginalisation function
   tf_marginaliser <- function(tf_conditional_density_fun,
-                              tf_distribution_log_pdf,
+                              tfp_distribution,
                               other_args,
                               dag,
                               distribution_node) {
@@ -62,7 +62,7 @@ discrete_marginalisation <- function(values) {
 
     # 1. get weights from the distribution log pdf
     # assuming values is a list, get tensors for the weights
-    weights_list <- lapply(values_list, tf_distribution_log_pdf)
+    weights_list <- lapply(values_list, tfp_distribution$log_prob)
     weights_list <- lapply(weights_list, tf_sum)
 
     # convert to a vector of discrete probabilities and make them sum to 1
@@ -72,10 +72,10 @@ discrete_marginalisation <- function(values) {
     log_weights_vec <- tf$log(weights_vec)
 
     # 2. compute the conditional joint density for each value (passing in
-    # other_args)
+    # other_args and the outer dag)
     log_density_list <- list()
     for (i in seq_along(values_list)) {
-      args <- c(list(values_list[[i]]), other_args)
+      args <- c(list(values_list[[i]]), other_args, dag = dag)
       log_density_list[[i]] <- do.call(tf_conditional_density_fun, args)
     }
 
@@ -138,7 +138,7 @@ laplace_approximation <- function(tolerance = 1e-6,
 
   # define the marginalisation function
   tf_marginaliser <- function(tf_conditional_density_fun,
-                              tf_distribution_log_pdf,
+                              tfp_distribution,
                               other_args,
                               dag,
                               distribution_node) {
@@ -148,7 +148,7 @@ laplace_approximation <- function(tolerance = 1e-6,
     d0 <- function(z, reduce = TRUE) {
       # transpose z to a row vector, which the dag is expecting
       t_z <- tf_transpose(z)
-      args <- c(list(t_z), other_args, list(reduce = reduce))
+      args <- c(list(t_z), other_args, list(reduce = reduce, dag = dag))
       do.call(tf_conditional_density_fun, args)
     }
 
@@ -171,7 +171,7 @@ laplace_approximation <- function(tolerance = 1e-6,
     mu_node <- distribution_node$parameters$mean
     mu <- dag$tf_environment[[dag$tf_name(mu_node)]]
     mu <- tf_transpose(mu)
-    sigma_node <- distribution_node$parameters$Sigma
+    sigma_node <- distribution_node$parameters$sigma
     sigma <- dag$tf_environment[[dag$tf_name(sigma_node)]]
 
     # dimension of the MVN distribution

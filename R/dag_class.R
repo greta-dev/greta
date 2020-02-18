@@ -530,6 +530,9 @@ dag_class <- R6Class(
         for (name in data_names)
           tfe[[name]] <- tfe_old[[name]]
 
+        # copy the batch size over
+        tfe$batch_size <- tfe_old$batch_size
+
         # put the free state in the environment, and build out the tf graph
         tfe$free_state <- free_state
         self$define_tf_body()

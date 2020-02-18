@@ -107,7 +107,7 @@ test_that("inference runs with discrete marginalisation", {
   m <- model(alpha, beta, p)
 
   expect_ok(o <- opt(m))
-  expect_ok(draws <- mcmc(m, warmup = 20, n_samples = 20))
+  expect_ok(draws <- mcmc(m, warmup = 20, n_samples = 20, verbose = FALSE))
 
 })
 
