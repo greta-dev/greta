@@ -23,7 +23,8 @@ test_that("univariate samples are correct", {
 
   compare_iid_samples(binomial,
                       rbinom,
-                      parameters = list(size = 12, prob = 0.3))
+                      parameters = list(size = 5, prob = 0.3),
+                      nsim = 1000)
 
   compare_iid_samples(beta_binomial,
                       extraDistr::rbbinom,

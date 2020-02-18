@@ -6,6 +6,7 @@ CRAN's
 dag
 DAGs
 devtools
+diag
 DiagrammeR
 dlkjcorr
 doi
@@ -13,6 +14,7 @@ dontrun
 etc
 extraDistr
 Gelman
+gelman
 Geweke
 gfortran
 github
