@@ -299,13 +299,19 @@ drop_column_dim <- function(x) {
   x
 }
 
+# given a tensor (with batch dimension of size 1) and a batch size tensor, tile
+# the tensor to match the batch size
+tile_to_batch <- function(x, batch_size) {
+  ndim <- length(dim(x))
+  tf$tile(x, c(batch_size, rep(1L, ndim - 1)))
+}
+
 # where x is a tensor with no batch dimension, and y is a tensor with a batch
 # dimension, tile x to have first dimension matching y (dimension determined at
 # run time)
 expand_to_batch <- function(x, y) {
   batch_size <- tf$shape(y)[[0]]
-  ndim <- length(dim(x))
-  tf$tile(x, c(batch_size, rep(1L, ndim - 1)))
+  tile_to_batch(x, batch_size)
 }
 
 # does this tensor have a batch dimension (of unknown size) as its first
@@ -497,6 +503,7 @@ misc_module <- module(module,
                       drop_first_dim,
                       tile_first_dim,
                       drop_column_dim,
+                      tile_to_batch,
                       expand_to_batch,
                       has_batch,
                       match_batches,
