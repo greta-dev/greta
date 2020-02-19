@@ -439,18 +439,8 @@ dag_class <- R6Class(
     # target tensor
     evaluate_density = function(distribution_node, target_node) {
 
-      tfe <- self$tf_environment
-
-      parameter_nodes <- distribution_node$parameters
-
-      # get the tensorflow objects for these
-      distrib_constructor <- self$get_tf_object(distribution_node)
+      tfp_distribution <- self$get_tf_object(distribution_node)
       tf_target <- self$get_tf_object(target_node)
-      tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
-
-      # execute the distribution constructor functions to return a tfp
-      # distribution object
-      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
 
       self$tf_evaluate_density(tfp_distribution,
                                tf_target,
@@ -788,25 +778,10 @@ dag_class <- R6Class(
 
     },
 
-    # get the tfp distribution object for a distribution node
-    get_tfp_distribution = function(distrib_node) {
-
-      # build the tfp distribution object for the distribution, and use it
-      # to get the tensor for the sample
-      distrib_constructor <- self$get_tf_object(distrib_node)
-      parameter_nodes <- distrib_node$parameters
-      tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
-
-      # execute the distribution constructor functions to return a tfp
-      # distribution object
-      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
-
-    },
-
     # try to draw a random sample from a distribution node
     draw_sample = function(distribution_node) {
 
-      tfp_distribution <- self$get_tfp_distribution(distribution_node)
+      tfp_distribution <- self$get_tf_object(distribution_node)
 
       sample <- tfp_distribution$sample
 

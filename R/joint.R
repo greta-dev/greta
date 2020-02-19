@@ -124,15 +124,15 @@ joint_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      # get information from the *nodes* for component distributions, not the tf
-      # objects passed in here
+      # get tfp distributions
+      tfp_distributions <- parameters
+      names(tfp_distributions) <- NULL
 
-      # get tfp distributions, truncations, & bounds of component distributions
+      # get information on truncations, & bounds of component distributions from
+      # the *nodes* for component distributions
       distribution_nodes <- self$parameters
       truncations <- lapply(distribution_nodes, member, "truncation")
       bounds <- lapply(distribution_nodes, member, "bounds")
-      tfp_distributions <- lapply(distribution_nodes, dag$get_tfp_distribution)
-      names(tfp_distributions) <- NULL
 
       log_prob <- function(x) {
 

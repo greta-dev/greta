@@ -543,9 +543,13 @@ distribution_node <- R6Class(
 
     tf = function(dag) {
 
-      # assign the distribution object constructor function to the environment
+      # build a tfp distribution object
+      tf_parameter_list <- lapply(self$parameters, dag$get_tf_object)
+      tfp_distribution <- self$tf_distrib(tf_parameter_list, dag = dag)
+
+      # assign it to the environment
       assign(dag$tf_name(self),
-             self$tf_distrib,
+             tfp_distribution,
              envir = dag$tf_environment)
 
     },
