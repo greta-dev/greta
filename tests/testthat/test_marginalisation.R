@@ -206,10 +206,12 @@ test_that("laplace approximation converges on correct posterior", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
+  # nolint start
   # test vs analytic posterior on 8 schools data with no pooling:
   #   y_i ~ N(theta_i, obs_sd_i ^ 2)
   #   theta_i ~ N(mu, sd ^ 2)
   # the posterior for theta is normal, so laplace should be exact
+  # nolint end
 
   # eight schools data
   y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
@@ -221,16 +223,19 @@ test_that("laplace approximation converges on correct posterior", {
 
   # analytic solution:
 
+  # nolint start
   # Marginalising int we can write:
   # Bayes theorum gives:
   #   p(theta | y) \propto p(y|theta) p(theta)
   # which with normal densities is:
-  #   p(theta_i | y_i) \propto N(y_i | theta_i, obs_sd_i ^ 2) * N(theta_i | mu, sd ^ 2)
+  #   p(theta_i | y_i) \propto N(y_i | theta_i, obs_sd_i ^ 2) *
+  #         N(theta_i | mu, sd ^ 2)
   # which is equivalent to:
   #   p(theta_i | y_i) \propto N(theta_mu_i, theta_var_i)
   #   theta_var_i = 1 / (1 / sd ^ 2 + 1 / obs_sd_i ^ 2)
   #   theta_mu_i = (mu / sd ^ 2 + y_i / obs_sd_i ^ 2) * theta_var_i
   # conjugate prior, see Wikipedia conjugate prior table
+  # nolint end
 
   obs_prec <- 1 / (obs_sd ^ 2)
   prec <- 1 / (sd ^ 2)

@@ -54,8 +54,8 @@ dag_class <- R6Class(
     # float type
     on_graph = function(expr) {
 
-      # temporarily pass float type and batch size info to options, so it can be accessed by
-      # nodes on definition, without clunky explicit passing
+      # temporarily pass float type and batch size info to options, so it can be
+      # accessed by nodes on definition, without clunky explicit passing
       old_float_type <- options()$greta_tf_float
       old_batch_size <- options()$greta_batch_size
 

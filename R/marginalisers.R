@@ -74,13 +74,14 @@ discrete_marginalisation <- function(values) {
 
   }
 
-  # return a named list of operation greta arrays for the marginalisation parameters
+  # return a named list of operation greta arrays for the marginalisation
+  # parameters
   compute_parameters <- function(conditional_density_fun,
                                  distribution_node,
                                  dots,
                                  marginaliser) {
 
-    # get a list of parameters in a mock greta array (just representing a tf list)
+    # list of parameters in a mock greta array (just representing a tf list)
     args <- c(operation = "marginalisation_log_weights",
               distribution_node,
               values_list,
@@ -370,7 +371,7 @@ laplace_approximation <- function(tolerance = 1e-6,
 
   }
 
-  # return a named list of operation greta arrays for the marginalisation parameters
+  # named list of operation greta arrays for the marginalisation parameters
   compute_parameters <- function(conditional_density_fun,
                                  distribution_node,
                                  dots,
@@ -468,8 +469,10 @@ laplace_approximation <- function(tolerance = 1e-6,
   }
 
   return_list_function <- function(parameters) {
+
     list(mean = parameters$z - parameters$mu,
          sigma = chol2symm(parameters$u))
+
   }
 
   as_marginaliser(name = "laplace",

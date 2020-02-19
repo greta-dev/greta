@@ -8,18 +8,25 @@
 \usage{
 discrete_marginalisation(values)
 
-laplace_approximation(tolerance = 1e-06, max_iterations = 50)
+laplace_approximation(
+  tolerance = 1e-06,
+  max_iterations = 50,
+  diagonal_hessian = FALSE
+)
 }
 \arguments{
-\item{values}{an R vector giving values at which to evaluate the function for a
-discrete marginalisation}
+\item{values}{an R vector giving values at which to evaluate the function for
+a discrete marginalisation}
 
 \item{tolerance}{the (positive) numerical convergence tolerance (in units of
 the log conditional posterior density) of the Newton-Raphson optimisation
 algorithm}
 
-\item{max_iterations}{the (positive) integer-like maximum number of iterations of
-the Newton-Raphson optimisation algorithm}
+\item{max_iterations}{the (positive) integer-like maximum number of
+iterations of the Newton-Raphson optimisation algorithm}
+
+\item{diagonal_hessian}{whether the Hessian matrix should be assumed to be
+diagonal, to speed up computations. See Details.}
 }
 \value{
 a \code{marginaliser} object that can be passed to
@@ -50,10 +57,13 @@ Functions to set up marginalisers (which explicitly integrate
   the distribution, that approximation error will be minimal.
 
 \code{laplace_approximation} can only be used to marginalise
-  variables following a multivariate normal distribution. In addition, the
-  function to be marginalised must \emph{factorise}; ie. it must return a
-  vector-valued density with as many elements as the vector variable being
-  marginalised, and each of element of the density must depend only on the
-  corresponding element of the variable vector. This is the responsibility of
-  the user, and is not checked.
+  variables following a multivariate normal distribution.
+
+ The argument \code{diagonal_hessian} can be used to state that the
+ conditional density factorises along the elements of the variable being
+ marginalised, and therefore the Hessian matrix of this function can be
+ assumed to be diagonal. A conditional density function factorises if each
+ observation in the conditional density depends only on the corresponding per
+ element of the variable being marginalised. If this is not the case and you
+ set \code{diagonal_hessian = TRUE}, your inferences will be incorrect.
 }

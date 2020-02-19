@@ -101,7 +101,8 @@ marginalise <- function(fun, variable, method, ...) {
   # something very similar to as_tf_function(), but giving a function that
   # returns a tensorflow scalar for the density (unadjusted since there will be
   # no new variables)
-  conditional_joint_density <- as_conditional_density(fun, c(list(variable), dots))
+  conditional_joint_density <- as_conditional_density(fun,
+                                                      c(list(variable), dots))
 
   # get a list of greta arrays for the marginalisation parameters:
   parameters <- method$compute_parameters(
@@ -124,8 +125,8 @@ marginalise <- function(fun, variable, method, ...) {
     dots = dots
   )
 
-  # return a list of the greta arrays computed during the marginalisation, and any other
-  # things from the method
+  # return a list of the greta arrays computed during the marginalisation, and
+  # any other things from the method
   output <- method$return_list(parameters)
   invisible(output)
 
@@ -181,11 +182,11 @@ marginalisation_distribution <- R6Class(
       # the marginal density implied by the function
       log_prob <- function(x) {
 
-        marginal_density <- self$marginaliser$tf_marginalisation_density
-        marginal_density(parameters = parameters,
-                         tf_conditional_density_fun = self$conditional_density_fun,
-                         dots = dots,
-                         other_args = self$marginaliser$other_args)
+        density <- self$marginaliser$tf_marginalisation_density
+        density(parameters = parameters,
+                tf_conditional_density_fun = self$conditional_density_fun,
+                dots = dots,
+                other_args = self$marginaliser$other_args)
 
       }
 
