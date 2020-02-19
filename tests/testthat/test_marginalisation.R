@@ -80,7 +80,6 @@ test_that("discrete_marginalisation errors nicely", {
 
 })
 
-
 test_that("inference runs with discrete marginalisation", {
 
   skip_if_not(check_tf_version())
@@ -109,7 +108,6 @@ test_that("inference runs with discrete marginalisation", {
   expect_ok(draws <- mcmc(m, warmup = 20, n_samples = 20, verbose = FALSE))
 
 })
-
 
 test_that("discrete marginalisation gives correct densities", {
 
@@ -147,7 +145,6 @@ test_that("discrete marginalisation gives correct densities", {
   compare_op(expected, observed)
 
 })
-
 
 test_that("laplace_approximation errors nicely", {
 
@@ -194,7 +191,7 @@ test_that("inference runs with laplace approximation", {
   mu <- ones(1, 8) * int
   marginalise(lik,
               multivariate_normal(mu, sigma),
-              laplace_approximation())
+              laplace_approximation(diagonal_hessian = TRUE))
 
   m <- model(int, sd)
 
@@ -251,9 +248,9 @@ test_that("laplace approximation converges on correct posterior", {
   sigma <- diag(8) * sd ^ 2
   out <- marginalise(lik,
                      multivariate_normal(mean, sigma),
-                     laplace_approximation())
-  theta_mu_est <- calculate(out$mean)
-  theta_var_est <- calculate(diag(out$Sigma))
+                     laplace_approximation(diagonal_hessian = TRUE))
+  theta_mu_est <- t(calculate(out$mean)[[1]])
+  theta_var_est <- calculate(diag(out$sigma))[[1]]
 
   analytic <- cbind(mean = theta_mu, sd = sqrt(theta_var))
   laplace <- cbind(mean = theta_mu_est, sd = sqrt(theta_var_est))

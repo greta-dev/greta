@@ -46,22 +46,16 @@ discrete_marginalisation <- function(values) {
     stop(msg)
   }
 
-  # define the marginalisation function
-  tf_marginaliser <- function(tf_conditional_density_fun,
-                              tfp_distribution,
-                              other_args,
-                              dag,
-                              distribution_node) {
+  # convert values to a list of data greta arrays
+  values_list <- as.list(values)
+  values_list <- lapply(values_list, as_data)
+  names(values_list) <- paste0("value_", seq_along(values_list))
 
-    # convert these into a list of constant tensors with the correct dimensions
-    # and float types
-    values_list <- as.list(values)
-    values_list <- lapply(values_list, as_2d_array)
-    values_list <- lapply(values_list, add_first_dim)
-    values_list <- lapply(values_list, fl)
+  # function to compute the parameter (log probabilities) of the marginalisation
+  tf_compute_log_weights <- function(tfp_distribution, ...) {
 
-    # 1. get weights from the distribution log pdf
-    # assuming values is a list, get tensors for the weights
+    # and compute log probabilities for the values
+    values_list <- list(...)
     log_weights_list <- lapply(values_list, tfp_distribution$log_prob)
     log_weights_list <- lapply(log_weights_list, tf_sum)
 
@@ -75,30 +69,69 @@ discrete_marginalisation <- function(values) {
       axis = 1L,
       keepdims = TRUE
     )
-    log_weights <- log_weights - log_weights_sum
 
-    # 2. compute the conditional joint density for each value (passing in
-    # other_args and the outer dag)
+    log_weights - log_weights_sum
+
+  }
+
+  # return a named list of operation greta arrays for the marginalisation parameters
+  compute_parameters <- function(conditional_density_fun,
+                                 distribution_node,
+                                 dots,
+                                 marginaliser) {
+
+    # get a list of parameters in a mock greta array (just representing a tf list)
+    args <- c(operation = "marginalisation_log_weights",
+              distribution_node,
+              values_list,
+              tf_operation = "tf_compute_log_weights",
+              list(dim = c(length(values_list), 1L)))
+    log_weights <- do.call(op, args)
+
+    list(log_weights = log_weights)
+
+  }
+
+  # compute the marginal joint density
+  tf_marginalisation_density <- function(parameters,
+                                         tf_conditional_density_fun,
+                                         dots,
+                                         other_args) {
+
+    # unpack the parameters
+    log_weights <- parameters$log_weights
+    values_list <- parameters[names(parameters) != "log_weights"]
+
+    # compute the conditional joint density for each value (passing in
+    # dots too)
     log_density_list <- list()
     for (i in seq_along(values_list)) {
-      args <- c(list(values_list[[i]]), other_args, dag = dag)
+      args <- c(list(values_list[[i]]), dots)
       log_density_list[[i]] <- do.call(tf_conditional_density_fun, args)
     }
 
+    # expand and combine the densities
     log_density_list <- lapply(log_density_list, tf$expand_dims, 1L)
     log_density_list <- lapply(log_density_list, tf$expand_dims, 2L)
     log_density_vec <- tf$concat(log_density_list, axis = 1L)
 
-    # 3. compute a weighted sum
+    # compute a weighted sum
     log_density_weighted_vec <- log_density_vec + log_weights
-    tf$reduce_logsumexp(log_density_weighted_vec, axis = 1L)
+    density <- tf$reduce_logsumexp(log_density_weighted_vec, axis = 1L)
+    density
 
   }
 
+  return_list_function <- function(parameters) {
+    list(probabilities = exp(parameters$log_weights))
+  }
+
   as_marginaliser(name = "discrete",
-                  tf_marginaliser = tf_marginaliser,
-                  parameters = list(values = values),
-                  distribution_check = discrete_check)
+                  compute_parameters = compute_parameters,
+                  tf_marginalisation_density = tf_marginalisation_density,
+                  return_list = return_list_function,
+                  distribution_check = discrete_check,
+                  other_parameters = values_list)
 
 }
 
@@ -150,38 +183,45 @@ laplace_approximation <- function(tolerance = 1e-6,
     stop("'max_iterations' must be a positive, scalar integer value")
   }
 
+  # function to compute the parameter (log probabilities) of the marginalisation
   # define the marginalisation function
-  tf_marginaliser <- function(tf_conditional_density_fun,
-                              tfp_distribution,
-                              other_args,
-                              dag,
-                              distribution_node) {
+  tf_compute_laplace_parameters <- function(mu,
+                                            sigma,
+                                            ...,
+                                            tf_conditional_density_fun,
+                                            diagonal_hessian) {
+
+    dots <- list(...)
 
     # simpler interface to conditional density. If reduce = TRUE, it does
     # reduce_sum on component densities
     d0 <- function(z, reduce = TRUE) {
       # transpose z to a row vector, which the dag is expecting
       t_z <- tf_transpose(z)
-      args <- c(list(t_z), other_args, list(reduce = reduce, dag = dag))
+      args <- c(list(t_z), dots, list(reduce = reduce))
       do.call(tf_conditional_density_fun, args)
     }
 
     # get the vectors of first and second derivatives of the conditional density
     # function, w.r.t. the variable being marginalised
-    derivs <- function(z) {
-
-      y <- d0(z, reduce = FALSE)
-      d1 <- tf$gradients(y, z)[[1]]
-
-      if (diagonal_hessian) {
-        d2 <- tf$map_fn(tf$gradients, list(d1, z))[[1]]
-      } else {
-        stop ("inference with non-diagonal hessians not yet implemented")
-        d2 <- tf$hessians(y, z)[[1]]
+    if (diagonal_hessian) {
+      derivs <- function(z) {
+        y <- d0(z, reduce = FALSE)
+        d1 <- tf$gradients(y, z)[[1]]
+        d2 <- tf$gradients(d1, z)[[1]]
+        list(d1, d2)
       }
+    } else {
 
-      list(d1, d2)
+      stop("inference with non-diagonal hessians is not yet implemented",
+           call. = FALSE)
 
+      derivs <- function(z) {
+        y <- d0(z, reduce = FALSE)
+        d1 <- tf$gradients(y, z)[[1]]
+        d2 <- tf$hessians(y, z)[[1]]
+        list(d1, d2)
+      }
     }
 
     # negative log-posterior for the current value of z under MVN assumption
@@ -191,11 +231,7 @@ laplace_approximation <- function(tolerance = 1e-6,
     }
 
     # tensors for parameters of MVN distribution (make mu column vector now)
-    mu_node <- distribution_node$parameters$mean
-    mu <- dag$tf_environment[[dag$tf_name(mu_node)]]
     mu <- tf_transpose(mu)
-    sigma_node <- distribution_node$parameters$sigma
-    sigma <- dag$tf_environment[[dag$tf_name(sigma_node)]]
 
     # dimension of the MVN distribution
     n <- dim(mu)[[2]]
@@ -316,33 +352,132 @@ laplace_approximation <- function(tolerance = 1e-6,
     # lots of duplicated code; this could be tidied up, but I ran out of time!
     z <- tf$matmul(sigma, a) + mu
 
+    # curvature of the likelihood at the mode
     deriv <- derivs(z)
-    d1 <- deriv[[1]]
     d2 <- deriv[[2]]
-
-    # curvature of the likelihood
     w <- -d2
     rw <- sqrt(w)
-
-    # decentred values of z
-    cf <- z - mu
 
     # approximate posterior covariance & cholesky factor
     mat1 <- tf$matmul(rw, tf_transpose(rw)) * sigma + eye
     u <- tf$cholesky(mat1)
 
+    # return a list of these things
+    list(z = z,
+         mu = mu,
+         a = a,
+         u = u)
+
+  }
+
+  # return a named list of operation greta arrays for the marginalisation parameters
+  compute_parameters <- function(conditional_density_fun,
+                                 distribution_node,
+                                 dots,
+                                 marginaliser) {
+
+    # get greta arrays for parameters of distribution node
+    mean <- distribution_node$parameters$mean
+    sigma <- distribution_node$parameters$sigma
+
+    # run the laplace approximation fitting and get a list of parameters in a
+    # mock greta array (just representing a tf list)
+    args <- c(operation = "marginalisation_parameters",
+              mu = mean,
+              sigma = sigma,
+              dots,
+              list(
+                operation_args = list(
+                  tf_conditional_density_fun = conditional_density_fun,
+                  diagonal_hessian = marginaliser$other_args$diagonal_hessian
+                ),
+                tf_operation = "tf_compute_laplace_parameters",
+                dim = 1
+              ))
+
+    parameter_list <- do.call(op, args)
+
+    # extract the elements to operation greta arrays with the correct shapes
+    z <- op("z",
+            parameter_list,
+            dim = dim(mean),
+            tf_operation = "get_element",
+            operation_args = list("z"))
+
+    a <- op("a",
+            parameter_list,
+            dim = dim(mean),
+            tf_operation = "get_element",
+            operation_args = list("a"))
+
+    mu <- op("mu",
+            parameter_list,
+            dim = dim(mean),
+            tf_operation = "get_element",
+            operation_args = list("mu"))
+
+    u <- op("chol_sigma",
+            parameter_list,
+            dim = dim(sigma),
+            tf_operation = "get_element",
+            operation_args = list("u"))
+
+
+    # pull out the elements
+    list(z = z,
+         a = a,
+         mu = mu,
+         u = u)
+
+  }
+
+  tf_marginalisation_density <- function(parameters,
+                                         tf_conditional_density_fun,
+                                         dots,
+                                         other_args) {
+
+    diagonal_hessian <- other_args$diagonal_hessian
+
+    # simpler interface to conditional density. If reduce = TRUE, it does
+    # reduce_sum on component densities
+    d0 <- function(z, reduce = TRUE) {
+      # transpose z to a row vector, which the dag is expecting
+      t_z <- tf_transpose(z)
+      args <- c(list(t_z), dots, list(reduce = reduce))
+      do.call(tf_conditional_density_fun, args)
+    }
+
+    # negative log-posterior for the current value of z under MVN assumption
+    psi <- function(a, z, mu) {
+      p1 <- tf$matmul(tf_transpose(a), z - mu)
+      fl(0.5) * tf$squeeze(p1, 1:2) - d0(z)
+    }
+
+    mu <- parameters$mu
+    u <- parameters$u
+    z <- parameters$z
+    a <- parameters$a
+
     # the approximate marginal conditional posterior
-    logdet <- tf_sum(tf$log(tf$matrix_diag_part(u)))
+    u_diag <- tf$matrix_diag_part(u)
+    logdet <- tf_sum(tf$log(u_diag))
     nmcp <- psi(a, z, mu) + tf$squeeze(logdet, 1)
 
     -nmcp
 
   }
 
+  return_list_function <- function(parameters) {
+    list(mean = parameters$z - parameters$mu,
+         sigma = chol2symm(parameters$u))
+  }
+
   as_marginaliser(name = "laplace",
-                  tf_marginaliser = tf_marginaliser,
-                  parameters = list(),
-                  distribution_check = multivariate_normal_check)
+                  compute_parameters = compute_parameters,
+                  tf_marginalisation_density = tf_marginalisation_density,
+                  return_list = return_list_function,
+                  distribution_check = multivariate_normal_check,
+                  other_args = list(diagonal_hessian = diagonal_hessian))
 
 }
 
@@ -366,14 +501,20 @@ multivariate_normal_check <- function(distrib) {
 
 # helper to contruct marginalisers
 as_marginaliser <- function(name,
-                            tf_marginaliser,
-                            parameters,
-                            distribution_check) {
+                            compute_parameters,
+                            tf_marginalisation_density,
+                            distribution_check,
+                            return_list,
+                            other_parameters = list(),
+                            other_args = list()) {
 
   obj <- list(name = name,
-              tf_marginaliser = tf_marginaliser,
-              parameters = parameters,
-              distribution_check = distribution_check)
+              compute_parameters = compute_parameters,
+              tf_marginalisation_density = tf_marginalisation_density,
+              distribution_check = distribution_check,
+              return_list = return_list,
+              other_args = other_args,
+              other_parameters = other_parameters)
 
   class_name <- paste0(name, "_marginaliser")
   class(obj) <- c(class_name, "marginaliser")

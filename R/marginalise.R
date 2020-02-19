@@ -67,7 +67,7 @@ NULL
 marginalise <- function(fun, variable, method, ...) {
 
   # get the distribution for the random variable
-  distr <- get_node(variable)$distribution
+  distribution_node <- get_node(variable)$distribution
 
   # check the inputs
   if (!is.function(fun)) {
@@ -82,7 +82,7 @@ marginalise <- function(fun, variable, method, ...) {
     stop("all arguments to 'fun' must be passed, named, to marginalise")
   }
 
-  if (!inherits(distr, "distribution_node")) {
+  if (!inherits(distribution_node, "distribution_node")) {
     stop("'variable' must be a variable greta array with a distribution")
   }
 
@@ -92,36 +92,42 @@ marginalise <- function(fun, variable, method, ...) {
   }
 
   # check the distribution is compatible with the method
-  method$distribution_check(distr)
+  method$distribution_check(distribution_node)
 
   # excise the variable from the distribution
-  distr$remove_target()
+  distribution_node$remove_target()
 
   # turn the greta function into a TF conditional density function; doing
   # something very similar to as_tf_function(), but giving a function that
   # returns a tensorflow scalar for the density (unadjusted since there will be
   # no new variables)
-  args <- c(list(variable), dots)
-  conditional_joint_density <- as_conditional_density(fun, args)
+  conditional_joint_density <- as_conditional_density(fun, c(list(variable), dots))
 
-  # get a tf function from the method which will turn that conditional density
-  # function into a marginal density (conditional on the inputs to the
-  # distribution) to be added to the overall model density
+  # get a list of greta arrays for the marginalisation parameters:
+  parameters <- method$compute_parameters(
+    conditional_density_fun = conditional_joint_density,
+    distribution_node = distribution_node,
+    dots = dots,
+    marginaliser = method
+  )
 
-  # pass the conditional density function and the marginaliser to a
-  # marginalisation distribution
+  # add on any pre-computed parameters
+  parameters <- c(parameters, method$other_parameters)
 
   # create the distribution
-  vble <- distrib(
+  distribution <- distrib(
     distribution = "marginalisation",
     marginaliser = method,
+    parameters = parameters,
     conditional_density_fun = conditional_joint_density,
-    target_distribution = distr,
+    distribution_node = distribution_node,
     dots = dots
   )
 
-  # return nothing (users can't have distribution nodes on their own)
-  invisible(NULL)
+  # return a list of the greta arrays computed during the marginalisation, and any other
+  # things from the method
+  output <- method$return_list(parameters)
+  invisible(output)
 
 }
 
@@ -130,18 +136,27 @@ marginalisation_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
-    tf_marginaliser = NULL,
+    marginaliser = NULL,
+    tf_marginalisation_density = NULL,
     conditional_density_fun = NULL,
 
     initialize = function(marginaliser,
+                          parameters = parameters,
                           conditional_density_fun,
-                          target_distribution,
+                          distribution_node,
                           dots) {
 
       # initialize class, and add methods
       super$initialize("marginalisation")
-      self$tf_marginaliser <- marginaliser$tf_marginaliser
+      self$marginaliser <- marginaliser
       self$conditional_density_fun <- conditional_density_fun
+
+      # add the parameters
+      parameter_names <- names(parameters)
+      for (i in seq_along(parameters)) {
+        self$add_parameter(parameters[[i]],
+                           parameter_names[i])
+      }
 
       # add the dots (extra inputs to conditional_density_fun) as parameters
       dot_nodes <- lapply(dots, get_node)
@@ -152,33 +167,28 @@ marginalisation_distribution <- R6Class(
 
       # make the distribution the target
       self$remove_target()
-      self$add_target(target_distribution)
+      self$add_target(distribution_node)
 
     },
 
     tf_distrib = function(parameters, dag) {
 
-      self$target
-
-      # build the tfp distribution for the marginalisation distribution
-      parameter_nodes <- self$target$parameters
-      distrib_constructor <- dag$get_tf_object(self$target)
-      tf_parameter_list <- lapply(parameter_nodes, dag$get_tf_object)
-      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = dag)
+      # unpack the parameters here
+      are_dots <- grepl("^input ", names(parameters))
+      dots <- parameters[are_dots]
+      parameters <- parameters[!are_dots]
 
       # the marginal density implied by the function
       log_prob <- function(x) {
 
-        # x will be the target; a tf constructor function for the distribution being
-        # marginalised. Pass in the distribution node and the dag too, in case
-        # the marginalisers need them.
-        self$tf_marginaliser(self$conditional_density_fun,
-                             tfp_distribution = tfp_distribution,
-                             other_args = parameters,
-                             dag = dag,
-                             distribution_node = self$target)
+        marginal_density <- self$marginaliser$tf_marginalisation_density
+        marginal_density(parameters = parameters,
+                         tf_conditional_density_fun = self$conditional_density_fun,
+                         dots = dots,
+                         other_args = self$marginaliser$other_args)
 
       }
+
 
       list(log_prob = log_prob)
 
@@ -202,7 +212,7 @@ as_conditional_density <- function(r_fun, args) {
   # the function.
 
   # this function will take in tensors corresponding to the things in args
-  function(..., reduce = TRUE, dag = NULL) {
+  function(..., reduce = TRUE) {
 
     tensor_inputs <- list(...)
 
@@ -239,7 +249,7 @@ as_conditional_density <- function(r_fun, args) {
     sub_tfe <- sub_dag$tf_environment
 
     # pass on the batch size, used when defining data
-    sub_tfe$batch_size <- dag$tf_environment$batch_size
+    sub_tfe$batch_size <- get_batch_size()
 
     # set the input tensors as the values for the dummy greta arrays in the new
     # tf_environment
