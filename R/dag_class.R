@@ -54,11 +54,16 @@ dag_class <- R6Class(
     # float type
     on_graph = function(expr) {
 
-      # temporarily pass float type info to options, so it can be accessed by
-      # nodes on definition, without cluncky explicit passing
+      # temporarily pass float type and batch size info to options, so it can be accessed by
+      # nodes on definition, without clunky explicit passing
       old_float_type <- options()$greta_tf_float
-      on.exit(options(greta_tf_float = old_float_type))
-      options(greta_tf_float = self$tf_float)
+      old_batch_size <- options()$greta_batch_size
+
+      on.exit(options(greta_tf_float = old_float_type,
+                      greta_batch_size = old_batch_size))
+
+      options(greta_tf_float = self$tf_float,
+              greta_batch_size = self$tf_environment$batch_size)
 
       with(self$tf_graph$as_default(), expr)
     },

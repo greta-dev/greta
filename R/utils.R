@@ -164,6 +164,10 @@ check_tf_version <- function(alert = c("none",
 member <- function(x, method)
   eval(parse(text = paste0("x$", method)))
 
+get_element <- function(x, element) {
+  x[[element]]
+}
+
 node_type <- function(node) {
   classes <- class(node)
   type <- grep("*_node", classes, value = TRUE)
@@ -179,6 +183,12 @@ tf_float <- function() {
 # cast an R scalar as a float of the correct type in TF code
 fl <- function(x) {
   tf$constant(x, dtype = tf_float())
+}
+
+# get the tensor for the batch size in the dag currently defining (since it's
+# not alway possible to pass the dag in)
+get_batch_size <- function() {
+  options()$greta_batch_size
 }
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape
