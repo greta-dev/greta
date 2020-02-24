@@ -293,17 +293,17 @@ test_that("golden section search works", {
 
   n_batch <- 4
 
+  # random optima
+  locs <- runif(n_batch)
+
   # simple quadratic function with different optima for each batch
   func <- function(x) {
     (x - locs) ^ 2
   }
 
-  # random optima
-  locs <- runif(n_batch, 0.2, 0.8)
-
   # run the minimisation
   ss <- gss(func, n_batch)
   result <- tf$Session()$run(ss)
-  compare_op(result$minimum, locs, tolerance = 0.2)
+  compare_op(result$minimum, locs)
 
 })

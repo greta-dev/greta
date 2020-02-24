@@ -409,17 +409,14 @@ gss <- function(func,
                 lower = 0,
                 upper = 1,
                 max_iterations = 50,
-                tolerance = 1e-32) {
+                tolerance = 1e-8) {
 
   lower <- tf$constant(lower, tf_float(), shape(1))
   upper <- tf$constant(upper, tf_float(), shape(1))
   maxiter <- tf$constant(as.integer(max_iterations), tf$int32)
   tol <- fl(tolerance)
-  iter <- tf$constant(1L, tf$int32)
-
-  phi <- (1 + sqrt(5)) / 2
-  phim1 <- fl(phi - 1)
-  twomphi <- fl(2.0 - phi)
+  iter <- tf$constant(0L, tf$int32)
+  golden_ratio <- fl(2 / (sqrt(5) + 1))
 
   # expand out to batch dimensions
   if (!inherits(batch_dim, "tensorflow.tensor")) {
@@ -427,56 +424,78 @@ gss <- function(func,
     batch_dim <- tf$constant(batch_dim, tf$int32, shape(1))
   }
 
+  # initial evaluation points
   left <- tf$tile(lower, batch_dim)
   right <- tf$tile(upper, batch_dim)
   width <- right - left
-  optimum <- tf$zeros(batch_dim, tf_float())
+  d <- golden_ratio * width
+  x1 <- right - d
+  x2 <- left + d
 
-  # status of the multiple consecutive searches; three columns, for left, right
-  # and optimum
-  status <- tf$stack(list(left, right, optimum), axis = 1L)
+  values <- list(left, right, x1, x2, width, iter)
 
   # start loop
-  body <- function(left, right, optimum, width, iter) {
+  body <- function(left, right, x1, x2, width, iter) {
 
-    d <- phim1 * width
+    # prep lists of vectors for whether steps are above x1 or below x2
 
-    # find evaluation points
-    a <- left + d
-    b <- right - d
+    # order: lower, upper, x1, x2, width
 
-    # prep reordered matrices for whether steps are above or below
-    # if func(a) < func(b)
-    above <- tf$stack(list(left, b, a), axis = 1L)
-    # else
-    not_above <- tf$stack(list(a, right, b), axis = 1L)
+    # if the minimum is below x2, shift the bounds and reuse x1 as the new x2
+    below_width <- x2 - left
+    below <- list(
+      left,
+      x2,
+      x2 - golden_ratio * below_width,
+      x1,
+      below_width
+    )
 
-    status <- tf$where(tf$less(func(b), func(a)), above, not_above)
+    # if the minimum is above x1, shift the bounds and reuse x2 as the new x1
+    above_width <- right - x1
+    above <- list(
+      x1,
+      right,
+      x2,
+      x1 + golden_ratio * above_width,
+      above_width
+    )
+
+    # convert to matrices
+    below <- tf$stack(below, axis = 1L)
+    above <- tf$stack(above, axis = 1L)
+
+    # can we stash and reuse these and reduce the number of function evaluations?
+    f1 <- func(x1)
+    f2 <- func(x2)
+
+    status <- tf$where(tf$greater(f2, f1), below, above)
 
     left <- status[, 0]
     right <- status[, 1]
-    optimum <- status[, 2]
+    x1 <- status[, 2]
+    x2 <- status[, 3]
+    width <- status[, 4]
 
-    width <- right - left
-
-    list(left, right, optimum, width, iter + 1L)
+    list(left, right, x1, x2, width, iter + 1L)
   }
 
-  cond <- function(left, right, optimum, width, iter) {
-    err <- twomphi * tf$abs(width / optimum)
-    not_converged <- tf$less(tol, err)
+  cond <- function(left, right, x1, x2, width, iter) {
+    not_converged <- tf$less(tol, tf$abs(width))
     not_all_converged <- tf$reduce_any(not_converged)
     in_time <- tf$less(iter, maxiter)
     in_time & not_all_converged
   }
 
-  values <- list(left, right, optimum, width, iter)
-
   out <- tf$while_loop(cond, body, values)
 
-  result <- out[3:5]
-  names(result) <- c("minimum", "width", "iterations")
-  result
+  # get minimum value
+  width <- out[[5]]
+  min <- out[[1]] + width / fl(2)
+
+  list(minimum = min,
+       width = width,
+       iterations = out[[6]])
 
 }
 
