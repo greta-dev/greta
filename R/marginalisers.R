@@ -343,7 +343,7 @@ laplace_approximation <- function(tolerance = 1e-6,
 
     a <- out[[2]]
 
-    # apparently we need to redefine z and u here, or the backprop errors
+    # apparently we need to redefine z etc. here, or the backprop errors
 
     # lots of duplicated code; this could be tidied up, but I ran out of time!
     z <- tf$matmul(sigma, a) + mu
@@ -353,18 +353,14 @@ laplace_approximation <- function(tolerance = 1e-6,
     d2 <- deriv[[2]]
     w <- -d2
     rw <- sqrt(w)
+    hessian <- tf$linalg$diag(tf$squeeze(w, 2L))
 
     # approximate posterior covariance
-    # do we need the eye?
-    mat1 <- tf$matmul(rw, tf_transpose(rw)) * sigma + eye
-    l <- tf$cholesky(mat1)
-    v <- tf$linalg$triangular_solve(matrix = l,
-                                    rhs = sigma * rw,
-                                    lower = TRUE,
-                                    adjoint = TRUE)
-    covar <- sigma - tf$linalg$matmul(v, v, transpose_b = TRUE)
+    covar <- tf$linalg$inv(tf$linalg$inv(sigma) + hessian)
 
     # log-determinant of l
+    mat1 <- tf$matmul(rw, tf_transpose(rw)) * sigma + eye
+    l <- tf$cholesky(mat1)
     l_diag <- tf$matrix_diag_part(l)
     logdet <- tf_sum(tf$log(l_diag))
 
