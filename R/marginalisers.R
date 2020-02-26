@@ -354,9 +354,19 @@ laplace_approximation <- function(tolerance = 1e-6,
     w <- -d2
     rw <- sqrt(w)
 
-    # approximate posterior covariance & cholesky factor
+    # approximate posterior covariance
+    # do we need the eye?
     mat1 <- tf$matmul(rw, tf_transpose(rw)) * sigma + eye
-    u <- tf$cholesky(mat1)
+    l <- tf$cholesky(mat1)
+    v <- tf$linalg$triangular_solve(matrix = l,
+                                    rhs = sigma * rw,
+                                    lower = TRUE,
+                                    adjoint = TRUE)
+    covar <- sigma - tf$linalg$matmul(v, v, transpose_b = TRUE)
+
+    # log-determinant of l
+    l_diag <- tf$matrix_diag_part(l)
+    logdet <- tf_sum(tf$log(l_diag))
 
     # convergence information
     iter <- out[[7]]
@@ -366,7 +376,8 @@ laplace_approximation <- function(tolerance = 1e-6,
     list(z = z,
          mu = mu,
          a = a,
-         u = u,
+         logdet = logdet,
+         covar = covar,
          iterations = iter,
          converged = converged)
 
@@ -418,11 +429,16 @@ laplace_approximation <- function(tolerance = 1e-6,
             tf_operation = "get_element",
             operation_args = list("mu"))
 
-    u <- op("chol_sigma",
-            parameter_list,
-            dim = dim(sigma),
-            tf_operation = "get_element",
-            operation_args = list("u"))
+    logdet <- op("log determinant",
+                parameter_list,
+                tf_operation = "get_element",
+                operation_args = list("logdet"))
+
+    covar <- op("covar",
+                parameter_list,
+                dim = dim(sigma),
+                tf_operation = "get_element",
+                operation_args = list("covar"))
 
     iterations <- op("iterations",
                      parameter_list,
@@ -438,7 +454,8 @@ laplace_approximation <- function(tolerance = 1e-6,
     list(z = z,
          a = a,
          mu = mu,
-         u = u,
+         logdet = logdet,
+         covar = covar,
          iterations = iterations,
          converged = converged)
 
@@ -467,14 +484,12 @@ laplace_approximation <- function(tolerance = 1e-6,
     }
 
     mu <- parameters$mu
-    u <- parameters$u
+    logdet <- parameters$logdet
     z <- parameters$z
     a <- parameters$a
 
     # the approximate marginal conditional posterior
-    u_diag <- tf$matrix_diag_part(u)
-    logdet <- tf_sum(tf$log(u_diag))
-    nmcp <- psi(a, z, mu) + tf$squeeze(logdet, 1)
+    nmcp <- psi(a, z, mu) + tf$squeeze(u_logdet, 1)
 
     -nmcp
 
@@ -483,7 +498,7 @@ laplace_approximation <- function(tolerance = 1e-6,
   return_list_function <- function(parameters) {
 
     list(mean = t(parameters$z),
-         sigma = chol2symm(parameters$u),
+         sigma = parameters$covar,
          iterations = parameters$iterations,
          converged = parameters$converged)
 

@@ -243,14 +243,12 @@ test_that("laplace approximation converges on correct posterior", {
   theta_mu <- (y * obs_prec  + mu * prec) * theta_var
   theta_sd <- sqrt(theta_var)
 
-  # Laplace solution:
-  lik <- function(theta) {
-    distribution(y) <- normal(t(theta), obs_sd)
-  }
-
   # mock up as a multivariate normal distribution
   mean <- ones(1, 8) * mu
   sigma <- diag(8) * sd ^ 2
+  lik <- function(theta) {
+    distribution(y) <- normal(t(theta), obs_sd)
+  }
   out <- marginalise(lik,
                      multivariate_normal(mean, sigma),
                      laplace_approximation(diagonal_hessian = TRUE))
@@ -264,6 +262,5 @@ test_that("laplace approximation converges on correct posterior", {
   # compare these to within a tolerance
   compare_op(analytic, laplace)
 
-  # modes are right, sds are not!
 
 })
