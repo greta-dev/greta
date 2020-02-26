@@ -170,6 +170,30 @@ laplace_approximation <- function(tolerance = 1e-6,
   # factorising)
   #  - handle an iid normal distribution too.
 
+  # the following algorithm for a univariate normal distribution is derived
+  # from LA in Rasmussen & Williams for diagonal Hessian & diagonal prior
+  # it neeeds checking!
+
+  # nolint start
+
+  # with univariate normal and diagonal hessian, iteration is:
+  #   z_new = mu + (w * (z - mu) + d1(z)) / (1 / sd + w)
+
+  # instead work with decentred variable a where z = a * sd ^ 2 + mu
+  #   l = sqrt(1 + w * sd)
+  #   b = w * (z - mu) * d1(z)
+  #   a_diff = b − (w * sd * b) / l ^ 2 - a
+  #   a_new = a + s * a_diff
+  #   z_new = a_new * sd ^ 2 + mu
+
+  # estimated sd at mode is:
+  #   sqrt(1 / (1 / sd + w))
+
+  # the approximated negative marginal density is:
+  #   nmcp = 0.5 * sum((z - mu) ^ 2 / sd) - d0(z) + 0.5 * sum(log1p(w * sd))
+
+  # nolint end
+
   if (!(is.numeric(tolerance) &&
         is.vector(tolerance) &&
         length(tolerance) == 1 &&
@@ -288,7 +312,8 @@ laplace_approximation <- function(tolerance = 1e-6,
       # decentred values of z
       cf <- z - mu
 
-      # approximate posterior covariance & cholesky factor
+      # approximate posterior covariance & cholesky factor (using the matrix inverse
+      # lemma for numerical stability)
       mat1 <- tf$matmul(rw, tf_transpose(rw)) * sigma + eye
       u <- tf$cholesky(mat1)
       l <- tf_transpose(u)
@@ -485,7 +510,7 @@ laplace_approximation <- function(tolerance = 1e-6,
     a <- parameters$a
 
     # the approximate marginal conditional posterior
-    nmcp <- psi(a, z, mu) + tf$squeeze(u_logdet, 1)
+    nmcp <- psi(a, z, mu) + tf$squeeze(logdet, 1)
 
     -nmcp
 
