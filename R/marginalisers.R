@@ -7,12 +7,13 @@ marginaliser <- R6Class(
   public = list(
 
     name = "marginaliser",
+    distribution = NULL,
 
     other_parameters = list(),
     other_args = list(),
 
-    initialize = function(...) {
-      invisible(NULL)
+    initialize = function(distribution, ...) {
+      self$distribution <- distribution
     },
 
     return_list = function(parameters) {
@@ -27,19 +28,15 @@ discrete_marginaliser <- R6Class(
   inherit = marginaliser,
   public = list(
 
-    initialize = function(values) {
+    initialize = function(distribution, values) {
 
-      super$initialize()
-
-      if (!is.vector(values) | !is.numeric(values)) {
-        msg <- "'values' must be an R numeric vector"
-
-        if (inherits(values, "greta_array")) {
-          msg <- paste0(msg, ", not a greta array")
-        }
-
-        stop(msg)
+      if (!distribution$discrete) {
+        stop("this marginalisation method can only be used ",
+             "with discrete distributions",
+             call. = FALSE)
       }
+
+      super$initialize(distribution)
 
       # convert values to a list of data greta arrays
       values_list <- as.list(values)
@@ -52,7 +49,6 @@ discrete_marginaliser <- R6Class(
     # return a named list of operation greta arrays for the marginalisation
     # parameters
     compute_parameters = function(conditional_density_fun,
-                                  distribution_node,
                                   dots) {
 
       # function to compute the parameter (log probabilities) of the marginalisation
@@ -80,7 +76,7 @@ discrete_marginaliser <- R6Class(
 
       # list of parameters in a mock greta array (just representing a tf list)
       args <- c(operation = "marginalisation_log_weights",
-                distribution_node,
+                self$distribution,
                 self$other_parameters,
                 tf_operation = "tf_compute_log_weights",
                 list(dim = c(length(self$other_parameters), 1L)))
@@ -122,15 +118,6 @@ discrete_marginaliser <- R6Class(
 
     return_list = function(parameters) {
       list(probabilities = exp(parameters$log_weights))
-    },
-
-    # check that the distribution is discrete
-    distribution_check = function(distrib) {
-      if (!distrib$discrete) {
-        stop("this marginalisation method can only be used ",
-             "with discrete distributions",
-             call. = FALSE)
-      }
     }
 
   )
@@ -146,11 +133,19 @@ laplace_marginaliser <- R6Class(
     diagonal_hessian = NULL,
     multivariate = FALSE,
 
-    initialize = function(tolerance,
+    initialize = function(distribution,
+                          tolerance,
                           max_iterations,
                           diagonal_hessian) {
 
-      super$initialize()
+      name <- distribution$distribution_name
+      if (!name %in% c("normal", "multivariate_normal")) {
+        stop("the Laplace approximation can only be used ",
+             "with a normal or multivariate normal distribution",
+             call. = FALSE)
+      }
+
+      super$initialize(distribution)
 
       # in future:
       #  - enable warm starts for subsequent steps of the outer inference algorithm
@@ -182,20 +177,6 @@ laplace_marginaliser <- R6Class(
 
       # nolint end
 
-      if (!(is.numeric(tolerance) &&
-            is.vector(tolerance) &&
-            length(tolerance) == 1 &&
-            tolerance > 0)) {
-        stop("'tolerance' must be a positive, scalar numeric value")
-      }
-
-      max_iterations <- as.integer(max_iterations)
-      if (!(is.vector(max_iterations) &&
-            length(max_iterations) == 1 &&
-            max_iterations > 0)) {
-        stop("'max_iterations' must be a positive, scalar integer value")
-      }
-
       self$other_args <- list(tolerance = tolerance,
                               max_iterations = max_iterations,
                               diagonal_hessian = diagonal_hessian)
@@ -203,9 +184,7 @@ laplace_marginaliser <- R6Class(
     },
 
     # named list of operation greta arrays for the marginalisation parameters
-    compute_parameters = function(conditional_density_fun,
-                                   distribution_node,
-                                   dots) {
+    compute_parameters = function(conditional_density_fun, dots) {
 
       # function to compute the parameter (log probabilities) of the marginalisation
       # define the marginalisation function
@@ -406,8 +385,8 @@ laplace_marginaliser <- R6Class(
       }
 
       # get greta arrays for parameters of distribution node
-      mean <- distribution_node$parameters$mean
-      sigma <- distribution_node$parameters$sigma
+      mean <- self$distribution$parameters$mean
+      sigma <- self$distribution$parameters$sigma
 
       # run the laplace approximation fitting and get a list of parameters in a
       # mock greta array (just representing a tf list)
@@ -518,16 +497,6 @@ laplace_marginaliser <- R6Class(
            iterations = parameters$iterations,
            converged = parameters$converged)
 
-    },
-
-    # check that the distribution is normal
-    distribution_check = function(distrib) {
-      name <- distrib$distribution_name
-      if (!name %in% c("multivariate_normal")) {
-        stop("the Laplace approximation can only be used ",
-             "with a multivariate normal distribution",
-             call. = FALSE)
-      }
     }
 
   )
@@ -569,6 +538,16 @@ NULL
 #'   the distribution, that approximation error will be minimal.
 discrete_marginalisation <- function(values) {
 
+  if (!is.vector(values) | !is.numeric(values)) {
+    msg <- "'values' must be an R numeric vector"
+
+    if (inherits(values, "greta_array")) {
+      msg <- paste0(msg, ", not a greta array")
+    }
+
+    stop(msg)
+  }
+
   as_marginaliser(values = values,
                   class = discrete_marginaliser)
 
@@ -602,6 +581,20 @@ laplace_approximation <- function(tolerance = 1e-6,
                                   max_iterations = 50,
                                   diagonal_hessian = FALSE) {
 
+  if (!(is.numeric(tolerance) &&
+        is.vector(tolerance) &&
+        length(tolerance) == 1 &&
+        tolerance > 0)) {
+    stop("'tolerance' must be a positive, scalar numeric value")
+  }
+
+  max_iterations <- as.integer(max_iterations)
+  if (!(is.vector(max_iterations) &&
+        length(max_iterations) == 1 &&
+        max_iterations > 0)) {
+    stop("'max_iterations' must be a positive, scalar integer value")
+  }
+
   as_marginaliser(tolerance = tolerance,
                   max_iterations = max_iterations,
                   diagonal_hessian = diagonal_hessian,
@@ -612,7 +605,7 @@ laplace_approximation <- function(tolerance = 1e-6,
 # helper to contruct marginalisers
 as_marginaliser <- function(..., class) {
 
-  obj <- list(..., class = class)
+  obj <- list(class = class, args = list(...))
   class_name <- class$classname
   class(obj) <- c(class_name, "marginaliser")
   obj

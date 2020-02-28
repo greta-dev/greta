@@ -91,27 +91,22 @@ marginalise <- function(fun, variable, method, ...) {
          "See ?marginalise for options")
   }
 
-  # construct the marginaliser
-  method_args <- method[which(names(method) != "class")]
-  marginaliser <- do.call(method$class$new, method_args)
-
-  # check the distribution is compatible with the method
-  marginaliser$distribution_check(distribution_node)
-
   # excise the variable from the distribution
   distribution_node$remove_target()
+
+  # construct the marginaliser
+  marginaliser <- do.call(method$class$new, c(distribution_node, method$args))
 
   # turn the greta function into a TF conditional density function; doing
   # something very similar to as_tf_function(), but giving a function that
   # returns a tensorflow scalar for the density (unadjusted since there will be
   # no new variables)
-  conditional_joint_density <- as_conditional_density(fun,
-                                                      c(list(variable), dots))
+  args <- c(list(variable), dots)
+  conditional_joint_density <- as_conditional_density(fun, args)
 
   # get a list of greta arrays for the marginalisation parameters:
   parameters <- marginaliser$compute_parameters(
     conditional_density_fun = conditional_joint_density,
-    distribution_node = distribution_node,
     dots = dots
   )
 
@@ -124,7 +119,6 @@ marginalise <- function(fun, variable, method, ...) {
     marginaliser = marginaliser,
     parameters = parameters,
     conditional_density_fun = conditional_joint_density,
-    distribution_node = distribution_node,
     dots = dots
   )
 
@@ -147,7 +141,6 @@ marginalisation_distribution <- R6Class(
     initialize = function(marginaliser,
                           parameters = parameters,
                           conditional_density_fun,
-                          distribution_node,
                           dots) {
 
       # initialize class, and add methods
@@ -171,7 +164,7 @@ marginalisation_distribution <- R6Class(
 
       # make the distribution the target
       self$remove_target()
-      self$add_target(distribution_node)
+      self$add_target(marginaliser$distribution)
 
     },
 

@@ -60,24 +60,15 @@ test_that("discrete_marginalisation errors nicely", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  y <- 1:3
-  fun <- function(x) {
-    distribution(y) <- normal(x)
-  }
-
   # greta array, not a numeric
   expect_error(
-    marginalise(fun,
-                poisson(3),
-                discrete_marginalisation(values = variable())),
+    discrete_marginalisation(values = variable()),
     "must be an R numeric vector, not a greta array"
   )
 
   # not a numeric
   expect_error(
-    marginalise(fun,
-                poisson(3),
-                discrete_marginalisation(values = c("apple", "banana"))),
+    discrete_marginalisation(values = c("apple", "banana")),
     "must be an R numeric vector$"
   )
 
@@ -160,31 +151,22 @@ test_that("laplace_approximation errors nicely", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  y <- 1:3
-  fun <- function(x) {
-    distribution(y) <- normal(x)
-  }
-
   # bad tolerance
   expect_error(
-    marginalise(fun,
-                normal(0, 1, dim = 3),
-                laplace_approximation(tolerance = -1)),
+    laplace_approximation(tolerance = -1),
     "must be a positive, scalar numeric value"
   )
 
   # bad max iterations
   expect_error(
-    marginalise(fun,
-                normal(0, 1, dim = 3),
-                laplace_approximation(max_iterations = 0)),
+    laplace_approximation(max_iterations = 0),
     "must be a positive, scalar integer value"
   )
 
   # mismatch with distribution
   expect_error(
     marginalise(I, beta(2, 2), laplace_approximation()),
-    "can only be used with a multivariate normal distribution"
+    "can only be used with a normal or multivariate normal distribution"
   )
 
 })
@@ -256,6 +238,17 @@ test_that("laplace approximation has correct posterior for univariate normal", {
   theta_mu <- (y * obs_prec  + mu * prec) * theta_var
   theta_sd <- sqrt(theta_var)
   analytic <- cbind(mean = theta_mu, sd = sqrt(theta_var))
+
+  # analyse as univariate normal
+  lik <- function(theta) {
+    distribution(y) <- normal(theta, obs_sd)
+  }
+  out <- marginalise(lik,
+                     normal(mu, sd, dim = 8),
+                     laplace_approximation(diagonal_hessian = TRUE))
+  res <- do.call(calculate, out)
+  laplace_uni <- cbind(mean = res$mean, sd = res$sd)
+  compare_op(analytic, laplace_uni)
 
   # analyse as multivariate normal
   lik <- function(theta) {
