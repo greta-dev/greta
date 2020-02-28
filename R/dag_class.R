@@ -54,11 +54,16 @@ dag_class <- R6Class(
     # float type
     on_graph = function(expr) {
 
-      # temporarily pass float type info to options, so it can be accessed by
-      # nodes on definition, without cluncky explicit passing
+      # temporarily pass float type and batch size info to options, so it can be
+      # accessed by nodes on definition, without clunky explicit passing
       old_float_type <- options()$greta_tf_float
-      on.exit(options(greta_tf_float = old_float_type))
-      options(greta_tf_float = self$tf_float)
+      old_batch_size <- options()$greta_batch_size
+
+      on.exit(options(greta_tf_float = old_float_type,
+                      greta_batch_size = old_batch_size))
+
+      options(greta_tf_float = self$tf_float,
+              greta_batch_size = self$tf_environment$batch_size)
 
       with(self$tf_graph$as_default(), expr)
     },
@@ -375,7 +380,7 @@ dag_class <- R6Class(
     },
 
     # define tensor for overall log density and gradients
-    define_joint_density = function() {
+    define_joint_density = function(adjusted = TRUE) {
 
       tfe <- self$tf_environment
 
@@ -392,6 +397,12 @@ dag_class <- R6Class(
                           target_nodes,
                           SIMPLIFY = FALSE)
 
+      # assign the un-reduced densities, for use in marginalisation
+      names(densities) <- NULL
+      assign("component_densities",
+             densities,
+             envir = self$tf_environment)
+
       # reduce_sum each of them (skipping the batch dimension)
       self$on_graph(summed_densities <- lapply(densities, tf_sum, drop = TRUE))
 
@@ -404,24 +415,28 @@ dag_class <- R6Class(
              joint_density,
              envir = self$tf_environment)
 
-      # define adjusted joint density
+      if (adjusted) {
 
-      # get names of Jacobian adjustment tensors for all variable nodes
-      adj_names <- paste0(self$get_tf_names(types = "variable"), "_adj")
+        # get names of adjustment tensors for all variable nodes
+        adj_names <- paste0(self$get_tf_names(types = "variable"), "_adj")
 
-      # get TF density tensors for all distribution
-      adj <- lapply(adj_names, get, envir = self$tf_environment)
+        # get TF density tensors for all distribution
+        adj <- lapply(adj_names, get, envir = self$tf_environment)
 
-      # remove their names and sum them together (accounting for tfp bijectors
-      # sometimes returning a scalar tensor)
-      names(adj) <- NULL
-      adj <- match_batches(adj)
-      self$on_graph(total_adj <- tf$add_n(adj))
+        # remove their names and sum them together (accounting for tfp bijectors
+        # sometimes returning a scalar tensor)
+        adj <- match_batches(adj)
 
-      # assign overall density to environment
-      assign("joint_density_adj",
-             joint_density + total_adj,
-             envir = self$tf_environment)
+        # remove their names and sum them together
+        names(adj) <- NULL
+        self$on_graph(total_adj <- tf$add_n(adj))
+
+        # assign overall density to environment
+        assign("joint_density_adj",
+               joint_density + total_adj,
+               envir = self$tf_environment)
+
+      }
 
     },
 
@@ -429,18 +444,8 @@ dag_class <- R6Class(
     # target tensor
     evaluate_density = function(distribution_node, target_node) {
 
-      tfe <- self$tf_environment
-
-      parameter_nodes <- distribution_node$parameters
-
-      # get the tensorflow objects for these
-      distrib_constructor <- self$get_tf_object(distribution_node)
+      tfp_distribution <- self$get_tf_object(distribution_node)
       tf_target <- self$get_tf_object(target_node)
-      tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
-
-      # execute the distribution constructor functions to return a tfp
-      # distribution object
-      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
 
       self$tf_evaluate_density(tfp_distribution,
                                tf_target,
@@ -519,6 +524,9 @@ dag_class <- R6Class(
         data_names <- self$get_tf_names(types = "data")
         for (name in data_names)
           tfe[[name]] <- tfe_old[[name]]
+
+        # copy the batch size over
+        tfe$batch_size <- tfe_old$batch_size
 
         # put the free state in the environment, and build out the tf graph
         tfe$free_state <- free_state
@@ -775,25 +783,10 @@ dag_class <- R6Class(
 
     },
 
-    # get the tfp distribution object for a distribution node
-    get_tfp_distribution = function(distrib_node) {
-
-      # build the tfp distribution object for the distribution, and use it
-      # to get the tensor for the sample
-      distrib_constructor <- self$get_tf_object(distrib_node)
-      parameter_nodes <- distrib_node$parameters
-      tf_parameter_list <- lapply(parameter_nodes, self$get_tf_object)
-
-      # execute the distribution constructor functions to return a tfp
-      # distribution object
-      tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
-
-    },
-
     # try to draw a random sample from a distribution node
     draw_sample = function(distribution_node) {
 
-      tfp_distribution <- self$get_tfp_distribution(distribution_node)
+      tfp_distribution <- self$get_tf_object(distribution_node)
 
       sample <- tfp_distribution$sample
 

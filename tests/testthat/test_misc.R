@@ -285,3 +285,25 @@ test_that("module works", {
   expect_identical(names(mod$functions), c("exp", "log", "sum"))
 
 })
+
+test_that("golden section search works", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  n_batch <- 4
+
+  # random optima
+  locs <- runif(n_batch)
+
+  # simple quadratic function with different optima for each batch
+  func <- function(x) {
+    (x - locs) ^ 2
+  }
+
+  # run the minimisation
+  ss <- gss(func, n_batch)
+  result <- tf$Session()$run(ss)
+  compare_op(result$minimum, locs)
+
+})

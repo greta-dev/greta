@@ -405,7 +405,7 @@
   ],
   "releaseNotes": "https://github.com/dill/greta/blob/master/NEWS.md",
   "readme": "https://github.com/dill/greta/blob/master/README.md",
-  "fileSize": "494.678KB",
+  "fileSize": "504.898KB",
   "contIntegration": [
     "https://travis-ci.org/greta-dev/greta",
     "https://codecov.io/github/greta-dev/greta?branch=master"

@@ -65,6 +65,8 @@ Collate:
     'internals.R'
     'calculate.R'
     'callbacks.R'
+    'marginalise.R'
+    'marginalisers.R'
     'simulate.R'
     'chol2symm.R'
 Imports:

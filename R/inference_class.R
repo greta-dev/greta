@@ -46,8 +46,6 @@ inference <- R6Class(
       free_parameters <- model$dag$example_parameters(free = TRUE)
       free_parameters <- unlist_tf(free_parameters)
       self$n_free <- length(free_parameters)
-      self$set_initial_values(initial_values)
-      self$n_traced <- length(model$dag$trace_values(self$free_state))
       self$seed <- seed
 
     },
@@ -277,8 +275,6 @@ sampler <- R6Class(
                        parameters = parameters,
                        seed = seed)
 
-      self$n_chains <- nrow(self$free_state)
-
       # duplicate diag_sd if needed
       n_diag <- length(self$parameters$diag_sd)
       n_parameters <- self$n_free
@@ -289,6 +285,8 @@ sampler <- R6Class(
 
       # define the draws tensor on the tf graph
       self$define_tf_draws()
+      self$set_initial_values(initial_values)
+      self$n_chains <- nrow(self$free_state)
 
     },
 
@@ -1025,6 +1023,8 @@ optimiser <- R6Class(
 
       self$create_optimiser_objective()
       self$create_tf_minimiser()
+      self$set_initial_values(initial_values)
+      self$n_traced <- length(model$dag$trace_values(self$free_state))
 
     },
 

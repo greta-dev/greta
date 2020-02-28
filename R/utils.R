@@ -164,6 +164,10 @@ check_tf_version <- function(alert = c("none",
 member <- function(x, method)
   eval(parse(text = paste0("x$", method)))
 
+get_element <- function(x, element) {
+  x[[element]]
+}
+
 node_type <- function(node) {
   classes <- class(node)
   type <- grep("*_node", classes, value = TRUE)
@@ -179,6 +183,12 @@ tf_float <- function() {
 # cast an R scalar as a float of the correct type in TF code
 fl <- function(x) {
   tf$constant(x, dtype = tf_float())
+}
+
+# get the tensor for the batch size in the dag currently defining (since it's
+# not alway possible to pass the dag in)
+get_batch_size <- function() {
+  options()$greta_batch_size
 }
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape
@@ -299,13 +309,19 @@ drop_column_dim <- function(x) {
   x
 }
 
+# given a tensor (with batch dimension of size 1) and a batch size tensor, tile
+# the tensor to match the batch size
+tile_to_batch <- function(x, batch_size) {
+  ndim <- length(dim(x))
+  tf$tile(x, c(batch_size, rep(1L, ndim - 1)))
+}
+
 # where x is a tensor with no batch dimension, and y is a tensor with a batch
 # dimension, tile x to have first dimension matching y (dimension determined at
 # run time)
 expand_to_batch <- function(x, y) {
   batch_size <- tf$shape(y)[[0]]
-  ndim <- length(dim(x))
-  tf$tile(x, c(batch_size, rep(1L, ndim - 1)))
+  tile_to_batch(x, batch_size)
 }
 
 # does this tensor have a batch dimension (of unknown size) as its first
@@ -383,6 +399,113 @@ disable_tensorflow_logging <- function(disable = TRUE) {
   reticulate::py_set_attr(logger, "disabled", disable)
 }
 
+# vectorised golden section search algorithm for linesearch (1D constrained
+# minimisation) function must accept and return a 1D tensor of values, and
+# return a a tensor of the same shape returning objectives; this can therefore
+# run linesearch for multiple chains simultaneously. The batch dimension must be
+# known in advance however.
+gss <- function(func,
+                batch_dim = 1,
+                lower = 0,
+                upper = 1,
+                max_iterations = 50,
+                tolerance = .Machine$double.eps ^ 0.25) {
+
+  lower <- tf$constant(lower, tf_float(), shape(1))
+  upper <- tf$constant(upper, tf_float(), shape(1))
+  maxiter <- tf$constant(as.integer(max_iterations), tf$int32)
+  tol <- fl(tolerance)
+  iter <- tf$constant(0L, tf$int32)
+  golden_ratio <- fl(2 / (sqrt(5) + 1))
+
+  # expand out to batch dimensions
+  if (!inherits(batch_dim, "tensorflow.tensor")) {
+    batch_dim <- as.integer(batch_dim)
+    batch_dim <- tf$constant(batch_dim, tf$int32, shape(1))
+  }
+
+  # initial evaluation points
+  left <- tf$tile(lower, batch_dim)
+  right <- tf$tile(upper, batch_dim)
+  width <- right - left
+  d <- golden_ratio * width
+  x1 <- right - d
+  x2 <- left + d
+  f1 <- func(x1)
+  f2 <- func(x2)
+
+  values <- list(left, right, x1, x2, f1, f2, width, iter)
+
+  # start loop
+  body <- function(left, right, x1, x2, f1, f2, width, iter) {
+
+    # prep lists of vectors for whether steps are above x1 or below x2
+    # order: lower, upper, x1, x2, width
+
+    # if the minimum is below x2, shift the bounds and reuse x1 as the new x2
+    below_width <- x2 - left
+    below <- list(
+      left,
+      x2,
+      x2 - golden_ratio * below_width,
+      x1,
+      below_width
+    )
+
+    # if the minimum is above x1, shift the bounds and reuse x2 as the new x1
+    above_width <- right - x1
+    above <- list(
+      x1,
+      right,
+      x2,
+      x1 + golden_ratio * above_width,
+      above_width
+    )
+
+    # convert to matrices
+    below <- tf$stack(below, axis = 1L)
+    above <- tf$stack(above, axis = 1L)
+
+    is_below <- tf$greater(f2, f1)
+    status <- tf$where(is_below, below, above)
+
+    left <- status[, 0]
+    right <- status[, 1]
+    x1 <- status[, 2]
+    x2 <- status[, 3]
+    width <- status[, 4]
+
+    # either recompute f1 (f2) at new location, or use f2 (f1) in its place
+
+    # this is a bit convoluted, but ensures function calls don't need to be
+    # duplicated, whilst maintaining the vectorisation
+    x_to_evaluate <- tf$where(is_below, x1, x2)
+    new_f <- func(x_to_evaluate)
+    new_f1 <- tf$where(is_below, new_f, f2)
+    new_f2 <- tf$where(is_below, f1, new_f)
+
+    list(left, right, x1, x2, new_f1, new_f2, width, iter + 1L)
+  }
+
+  cond <- function(left, right, x1, x2, f1, f2, width, iter) {
+    not_converged <- tf$less(tol, tf$abs(width))
+    not_all_converged <- tf$reduce_any(not_converged)
+    in_time <- tf$less(iter, maxiter)
+    in_time & not_all_converged
+  }
+
+  out <- tf$while_loop(cond, body, values)
+
+  # get minimum value
+  width <- out[[7]]
+  min <- out[[1]] + width / fl(2)
+
+  list(minimum = min,
+       width = width,
+       iterations = out[[8]])
+
+}
+
 
 pad_vector <- function(x, to_length, with = 1) {
   pad_by <- to_length - length(x)
@@ -416,12 +539,14 @@ misc_module <- module(module,
                       drop_first_dim,
                       tile_first_dim,
                       drop_column_dim,
+                      tile_to_batch,
                       expand_to_batch,
                       has_batch,
                       match_batches,
                       split_chains,
                       hessian_dims,
                       rhex,
+                      gss,
                       disable_tensorflow_logging,
                       pad_vector)
 
@@ -1315,7 +1440,8 @@ as_tf_function <- function(r_fun, ...) {
     if (!is.list(ga_out))
       ga_out <- list(ga_out)
     targets <- c(ga_out, ga_dummies)
-    sub_dag <- dag_class$new(targets)
+    sub_dag <- dag_class$new(targets,
+                             tf_float = options()$greta_tf_float)
 
     # use the default graph, so that it can be overwritten when this is called?
     # alternatively fetch from above, or put it in greta_stash?

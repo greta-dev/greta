@@ -56,8 +56,7 @@ data_node <- R6Class(
         }
 
         # expand up to batch size
-        tiling <- c(tfe$batch_size, rep(1L, ndim))
-        batched_tensor <- tf$tile(unbatched_tensor, tiling)
+        batched_tensor <- tile_to_batch(unbatched_tensor, tfe$batch_size)
 
         # put unbatched tensor in environment so it can be set
         assign(unbatched_name, unbatched_tensor, envir = tfe)
@@ -543,9 +542,13 @@ distribution_node <- R6Class(
 
     tf = function(dag) {
 
-      # assign the distribution object constructor function to the environment
+      # build a tfp distribution object
+      tf_parameter_list <- lapply(self$parameters, dag$get_tf_object)
+      tfp_distribution <- self$tf_distrib(tf_parameter_list, dag = dag)
+
+      # assign it to the environment
       assign(dag$tf_name(self),
-             self$tf_distrib,
+             tfp_distribution,
              envir = dag$tf_environment)
 
     },

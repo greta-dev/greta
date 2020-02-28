@@ -210,17 +210,16 @@ mixture_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      # get information from the *nodes* for component distributions, not the tf
-      # objects passed in here
+      # get tfp distributions and mixture weights
+      weights <- parameters$weights
+      tfp_distributions <- parameters[names(parameters) != "weights"]
+      names(tfp_distributions) <- NULL
 
-      # get tfp distributions, truncations, & bounds of component distributions
+      # get information on truncations, & bounds of component distributions from
+      # the *nodes* for component distributions
       distribution_nodes <- self$parameters[names(self$parameters) != "weights"]
       truncations <- lapply(distribution_nodes, member, "truncation")
       bounds <- lapply(distribution_nodes, member, "bounds")
-      tfp_distributions <- lapply(distribution_nodes, dag$get_tfp_distribution)
-      names(tfp_distributions) <- NULL
-
-      weights <- parameters$weights
 
       # use log weights if available
       if (self$weights_is_log) {

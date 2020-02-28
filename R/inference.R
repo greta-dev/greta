@@ -291,7 +291,6 @@ run_samplers <- function(samplers,
   thin <- as.integer(thin)
 
   dag <- samplers[[1]]$model$dag
-  chains <- samplers[[1]]$n_chains
   n_cores <- check_n_cores(n_cores, length(samplers), plan_is)
   float_type <- dag$tf_float
 
