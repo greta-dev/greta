@@ -91,8 +91,12 @@ marginalise <- function(fun, variable, method, ...) {
          "See ?marginalise for options")
   }
 
+  # construct the marginaliser
+  method_args <- method[which(names(method) != "class")]
+  marginaliser <- do.call(method$class$new, method_args)
+
   # check the distribution is compatible with the method
-  method$distribution_check(distribution_node)
+  marginaliser$distribution_check(distribution_node)
 
   # excise the variable from the distribution
   distribution_node$remove_target()
@@ -105,20 +109,19 @@ marginalise <- function(fun, variable, method, ...) {
                                                       c(list(variable), dots))
 
   # get a list of greta arrays for the marginalisation parameters:
-  parameters <- method$compute_parameters(
+  parameters <- marginaliser$compute_parameters(
     conditional_density_fun = conditional_joint_density,
     distribution_node = distribution_node,
-    dots = dots,
-    marginaliser = method
+    dots = dots
   )
 
   # add on any pre-computed parameters
-  parameters <- c(parameters, method$other_parameters)
+  parameters <- c(parameters, marginaliser$other_parameters)
 
   # create the distribution
   distribution <- distrib(
     distribution = "marginalisation",
-    marginaliser = method,
+    marginaliser = marginaliser,
     parameters = parameters,
     conditional_density_fun = conditional_joint_density,
     distribution_node = distribution_node,
@@ -127,7 +130,7 @@ marginalise <- function(fun, variable, method, ...) {
 
   # return a list of the greta arrays computed during the marginalisation, and
   # any other things from the method
-  output <- method$return_list(parameters)
+  output <- marginaliser$return_list(parameters)
   invisible(output)
 
 }

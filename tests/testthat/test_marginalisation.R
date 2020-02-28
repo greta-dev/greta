@@ -60,15 +60,24 @@ test_that("discrete_marginalisation errors nicely", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
+  y <- 1:3
+  fun <- function(x) {
+    distribution(y) <- normal(x)
+  }
+
   # greta array, not a numeric
   expect_error(
-    discrete_marginalisation(values = variable()),
+    marginalise(fun,
+                poisson(3),
+                discrete_marginalisation(values = variable())),
     "must be an R numeric vector, not a greta array"
   )
 
   # not a numeric
   expect_error(
-    discrete_marginalisation(values = c("apple", "banana")),
+    marginalise(fun,
+                poisson(3),
+                discrete_marginalisation(values = c("apple", "banana"))),
     "must be an R numeric vector$"
   )
 
@@ -151,21 +160,30 @@ test_that("laplace_approximation errors nicely", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
+  y <- 1:3
+  fun <- function(x) {
+    distribution(y) <- normal(x)
+  }
+
   # bad tolerance
   expect_error(
-    laplace_approximation(tolerance = -1),
+    marginalise(fun,
+                normal(0, 1, dim = 3),
+                laplace_approximation(tolerance = -1)),
     "must be a positive, scalar numeric value"
   )
 
   # bad max iterations
   expect_error(
-    laplace_approximation(max_iterations = 0),
+    marginalise(fun,
+                normal(0, 1, dim = 3),
+                laplace_approximation(max_iterations = 0)),
     "must be a positive, scalar integer value"
   )
 
   # mismatch with distribution
   expect_error(
-    marginalise(I, normal(0, 1), laplace_approximation()),
+    marginalise(I, beta(2, 2), laplace_approximation()),
     "can only be used with a multivariate normal distribution"
   )
 
@@ -239,19 +257,10 @@ test_that("laplace approximation has correct posterior for univariate normal", {
   theta_sd <- sqrt(theta_var)
   analytic <- cbind(mean = theta_mu, sd = sqrt(theta_var))
 
+  # analyse as multivariate normal
   lik <- function(theta) {
     distribution(y) <- normal(t(theta), obs_sd)
   }
-
-  # analyse as univariate normal
-  out <- marginalise(lik,
-                     normal(mu, sd, dim = 8),
-                     laplace_approximation(diagonal_hessian = TRUE))
-  res <- do.call(calculate, out)
-  laplace_uni <- cbind(mean = res$mean, sd = res$sd)
-  compare_op(analytic, laplace_uni)
-
-  # analyse as multivariate normal
   mean <- ones(1, 8) * mu
   sigma <- diag(8) * sd ^ 2
   out <- marginalise(lik,
@@ -273,12 +282,6 @@ test_that("laplace approximation has correct posterior for multivariate normal",
   #   y_i ~ N(theta_i, obs_sd_i ^ 2)
   #   theta ~ MVN(mu, sigma)
   # the posterior for theta is multivariate normal, so laplace should be exact
-  # Bayes theorum gives:
-  #   p(theta | y) \propto p(y|theta) p(theta)
-  # which with normal densities is:
-  #   p(theta_i | y_i) \propto N(y_i | theta_i, obs_sd_i ^ 2) *
-  #         N(theta_i | mu, sd ^ 2)
-  # which is equivalent to:
   #   p(theta | y) \propto MNN(theta_mu, theta_sigma)
   #   theta_sigma = (sigma^-1 + diag(1 /obs_sd^2))^-1
   #   theta_mu = theta_sigma (sigma^-1 mu + diag(1 /obs_sd^2) mean(y))^-1
