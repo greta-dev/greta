@@ -211,19 +211,6 @@ test_that("laplace approximation has correct posterior for univariate normal", {
   #   y_i ~ N(theta_i, obs_sd_i ^ 2)
   #   theta_i ~ N(mu, sd ^ 2)
   # the posterior for theta is normal, so laplace should be exact
-  # nolint end
-
-  # eight schools data
-  y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
-  obs_sd <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
-
-  # prior parameters for int, and fixed variance of theta
-  mu <- rnorm(1)
-  sd <- abs(rnorm(1))
-
-  # analytic solution:
-
-  # nolint start
   # Bayes theorum gives:
   #   p(theta | y) \propto p(y|theta) p(theta)
   # which with normal densities is:
@@ -236,30 +223,43 @@ test_that("laplace approximation has correct posterior for univariate normal", {
   # conjugate prior, see Wikipedia conjugate prior table
   # nolint end
 
+  # eight schools data
+  y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+  obs_sd <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
+
+  # prior parameters for int, and fixed variance of theta
+  mu <- rnorm(1)
+  sd <- abs(rnorm(1))
+
+  # analytic solution
   obs_prec <- 1 / (obs_sd ^ 2)
   prec <- 1 / (sd ^ 2)
   theta_var <- 1 / (obs_prec + prec)
   theta_mu <- (y * obs_prec  + mu * prec) * theta_var
   theta_sd <- sqrt(theta_var)
+  analytic <- cbind(mean = theta_mu, sd = sqrt(theta_var))
 
-  # mock up as a multivariate normal distribution
-  mean <- ones(1, 8) * mu
-  sigma <- diag(8) * sd ^ 2
   lik <- function(theta) {
     distribution(y) <- normal(t(theta), obs_sd)
   }
+
+  # analyse as univariate normal
+  out <- marginalise(lik,
+                     normal(mu, sd, dim = 8),
+                     laplace_approximation(diagonal_hessian = TRUE))
+  res <- do.call(calculate, out)
+  laplace_uni <- cbind(mean = res$mean, sd = res$sd)
+  compare_op(analytic, laplace_uni)
+
+  # analyse as multivariate normal
+  mean <- ones(1, 8) * mu
+  sigma <- diag(8) * sd ^ 2
   out <- marginalise(lik,
                      multivariate_normal(mean, sigma),
                      laplace_approximation(diagonal_hessian = TRUE))
-  res <- calculate(mean =  t(out$mean), diag_sigma = diag(out$sigma))
-  theta_mu_est <- res$mean
-  theta_var_est <- res$diag_sigma
-
-  analytic <- cbind(mean = theta_mu, sd = sqrt(theta_var))
-  laplace <- cbind(mean = theta_mu_est, sd = sqrt(theta_var_est))
-
-  # compare these to within a tolerance
-  compare_op(analytic, laplace)
+  res <- do.call(calculate, out)
+  laplace_multi <- cbind(mean = res$mean[1, ], sd = sqrt(diag(res$sigma)))
+  compare_op(analytic, laplace_multi)
 
 })
 
@@ -273,19 +273,6 @@ test_that("laplace approximation has correct posterior for multivariate normal",
   #   y_i ~ N(theta_i, obs_sd_i ^ 2)
   #   theta ~ MVN(mu, sigma)
   # the posterior for theta is multivariate normal, so laplace should be exact
-  # nolint end
-
-  # eight schools data
-  y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
-  obs_sd <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
-
-  # prior parameters for mu and sigma
-  mu <- rnorm(8)
-  sigma <- rwish(1, 9, diag(8))[1, , ]
-
-  # analytic solution:
-
-  # nolint start
   # Bayes theorum gives:
   #   p(theta | y) \propto p(y|theta) p(theta)
   # which with normal densities is:
@@ -298,10 +285,18 @@ test_that("laplace approximation has correct posterior for multivariate normal",
   # conjugate prior, see Wikipedia conjugate prior table
   # nolint end
 
-  i_obs_sigma <- diag(1 / (obs_sd ^ 2))
-  i_sigma <- solve(sigma)
-  theta_sigma <- solve(i_sigma + i_obs_sigma)
-  theta_mu <- theta_sigma %*% (i_sigma %*% mu + i_obs_sigma %*% y)
+  # eight schools data
+  y <- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
+  obs_sd <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
+
+  # prior parameters for mu and sigma
+  mu <- rnorm(8)
+  sigma <- rwish(1, 9, diag(8))[1, , ]
+
+  obs_prec <- diag(1 / (obs_sd ^ 2))
+  prec <- solve(sigma)
+  theta_sigma <- solve(prec + obs_prec)
+  theta_mu <- theta_sigma %*% (prec %*% mu + obs_prec %*% y)
   theta_sigma_flat <- theta_sigma[upper.tri(theta_sigma, diag = TRUE)]
 
   lik <- function(theta) {
