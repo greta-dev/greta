@@ -19,6 +19,15 @@ test_that("deterministic calculate works with correct lists", {
   vals <- calculate(y, values = list(a = 6, x = c(2, 1)))
   expect_equal(vals$y, matrix(c(12, 6)))
 
+  # fixed value depending on multiple variables
+  x <- as_data(c(1, 2))
+  a1 <- normal(0, 1)
+  a2 <- normal(0, 1, truncation = c(0, Inf))
+  a <- a1 * a2
+  y <- a * x
+  vals <- calculate(y, values = list(a = 6, x = c(2, 1)))
+  expect_equal(vals$y, matrix(c(12, 6)))
+
 })
 
 test_that("stochastic calculate works with correct lists", {
