@@ -909,10 +909,11 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
 
   # find all the nodes depended on by the new values, and remove them from the
   # list
-  complete_dependencies <- vapply(
-    fixed_greta_arrays,
-    dependency_names,
-    FUN.VALUE = character(1)
+  complete_dependencies <- unlist(
+    lapply(
+      fixed_greta_arrays,
+      dependency_names
+    )
   )
 
   unmet <- !dependencies %in% complete_dependencies
