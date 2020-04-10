@@ -181,6 +181,12 @@ fl <- function(x) {
   tf$constant(x, dtype = tf_float())
 }
 
+# get the tensor for the batch size in the dag currently defining (since it's
+# not alway possible to pass the dag in)
+get_batch_size <- function() {
+  options()$greta_batch_size
+}
+
 # coerce an integer(ish) vector to a list as expected in tensorflow shape
 # arguments
 #' @noRd
@@ -1322,6 +1328,9 @@ as_tf_function <- function(r_fun, ...) {
     # alternatively fetch from above, or put it in greta_stash?
     sub_dag$tf_graph <- tf$compat$v1$get_default_graph()
     sub_tfe <- sub_dag$tf_environment
+
+    # pass on the batch size, used when defining data
+    sub_tfe$batch_size <- get_batch_size()
 
     # set the input tensors as the values for the dummy greta arrays in the new
     # tf_environment
