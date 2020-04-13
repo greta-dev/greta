@@ -524,6 +524,7 @@ dag_class <- R6Class(
         data_names <- self$get_tf_names(types = "data")
         for (name in data_names)
           tfe[[name]] <- tfe_old[[name]]
+        tfe$batch_size <- tfe_old$batch_size
 
         # put the free state in the environment, and build out the tf graph
         tfe$free_state <- free_state
