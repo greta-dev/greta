@@ -74,6 +74,7 @@ Imports:
     progress (>= 1.2.0),
     future,
     coda,
+    abind,
     methods
 Suggests:
     knitr,
@@ -91,8 +92,7 @@ Suggests:
     tidyverse,
     fields,
     MASS,
-    abind,
     spelling
 VignetteBuilder: knitr
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Language: en-GB
