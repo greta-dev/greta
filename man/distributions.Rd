@@ -11,6 +11,7 @@
 \alias{negative_binomial}
 \alias{hypergeometric}
 \alias{poisson}
+\alias{zero_inflated_poisson}
 \alias{gamma}
 \alias{inverse_gamma}
 \alias{weibull}
@@ -49,6 +50,8 @@ negative_binomial(size, prob, dim = NULL)
 hypergeometric(m, n, k, dim = NULL)
 
 poisson(lambda, dim = NULL)
+
+zero_inflated_poisson(theta, lambda, dim = NULL)
 
 gamma(shape, rate, dim = NULL, truncation = c(0, Inf))
 

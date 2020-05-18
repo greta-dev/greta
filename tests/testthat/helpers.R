@@ -982,3 +982,14 @@ check_samples <- function(x,
   testthat::expect_gte(stat$p.value, 0.01)
 
 }
+
+# zero-inflated distribution from rethinking package
+dzipois <- function(x , theta , lambda , log=FALSE ) {
+  ll <- ifelse( x==0 , theta + (1-theta)*exp(-lambda) , (1-theta)*dpois(x,lambda,FALSE) )
+  if(log){
+    return(log(ll))
+  }
+  else {
+    return(ll)
+  }
+}

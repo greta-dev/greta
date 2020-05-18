@@ -101,6 +101,18 @@ test_that("negative binomial distribution has correct density", {
 
 })
 
+test_that("zero inflated poisson distribution has correct density", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  compare_distribution(zero_inflated_poisson,
+                       dzipois,
+                       parameters = list(theta = 0.2, lambda = 2),
+                       x = rpois(100, 2))
+
+})
+
 test_that("hypergeometric distribution has correct density", {
 
   skip_if_not(check_tf_version())
