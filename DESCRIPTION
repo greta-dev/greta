@@ -92,7 +92,9 @@ Suggests:
     fields,
     MASS,
     abind,
-    spelling
+    spelling,
+    clipr,
+    usethis
 VignetteBuilder: knitr
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Language: en-GB
