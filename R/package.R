@@ -55,7 +55,7 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
   disable_tensorflow_logging()
 
   # warn if TF version is bad
-  check_tf_version("startup")
+  # check_tf_version("startup")
 
   # switch back to 0-based extraction in tensorflow, and don't warn about
   # indexing with tensors
