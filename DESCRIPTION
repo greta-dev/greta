@@ -100,6 +100,13 @@ Roxygen: list(markdown = TRUE)
 Config/reticulate:
   list(
     packages = list(
+      list(package = "h5py", version = "2.8", pip = TRUE),
+      list(package = "numpy", version = "1.16", pip = TRUE),
+      list(package = "Pillow", pip = TRUE),
+      list(package = "pip", version = "3.7", pip = TRUE),
+      list(package = "python", version = "3.7", pip = TRUE),
+      list(package = "pyyaml", pip = TRUE),
+      list(package = "requests", pip = TRUE),
       list(package = "tensorflow-probability", version = "0.7", pip = TRUE),
       list(package = "tensorflow", version = "1.14", pip = TRUE)
     )
