@@ -245,7 +245,9 @@ cbind.greta_array <- function(...) {
   dims <- lapply(dots, dim)
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2)) {
-    stop("all greta arrays must be two-dimensional")
+    stop("all greta arrays must be two-dimensional",
+      call. = FALSE
+    )
   }
 
   # dimensions
@@ -276,7 +278,9 @@ rbind.greta_array <- function(...) {
   dims <- lapply(dots, dim)
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2)) {
-    stop("all greta arrays must be two-dimensional")
+    stop("all greta arrays must be two-dimensional",
+      call. = FALSE
+    )
   }
 
   # dimensions
@@ -666,12 +670,15 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
   if (length(dim) != 2) {
     stop(
       "cannot only extract the diagonal from a node ",
-      "with exactly two dimensions"
+      "with exactly two dimensions",
+      call. = FALSE
     )
   }
 
   if (dim[1] != dim[2]) {
-    stop("diagonal elements can only be extracted from square matrices")
+    stop("diagonal elements can only be extracted from square matrices",
+      call. = FALSE
+    )
   }
 
   # return the dimensions
