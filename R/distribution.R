@@ -2,17 +2,17 @@
 #' @aliases distribution
 #' @title define a distribution over data
 #'
-#' @description \code{distribution} defines probability distributions over
+#' @description `distribution` defines probability distributions over
 #'   observed data, e.g. to set a model likelihood.
 #'
 #' @param greta_array a data greta array. For the assignment method it must not
 #'   already have a probability distribution assigned
 #'
 #' @param value a greta array with a distribution (see
-#'   \code{\link{distributions}})
+#'   [distributions()])
 #'
 #' @details The extract method returns the greta array if it has a distribution,
-#'   or \code{NULL} if it doesn't. It has no real use-case, but is included for
+#'   or `NULL` if it doesn't. It has no real use-case, but is included for
 #'   completeness
 #'
 #' @export

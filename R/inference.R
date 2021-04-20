@@ -20,10 +20,10 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'
 #' @param model greta_model object
 #' @param sampler sampler used to draw values in MCMC. See
-#'   \code{\link{samplers}} for options.
+#'   [samplers()] for options.
 #' @param n_samples number of MCMC samples to draw per chain (after any warm-up,
 #'   but before thinning)
-#' @param thin MCMC thinning rate; every \code{thin} samples is retained, the
+#' @param thin MCMC thinning rate; every `thin` samples is retained, the
 #'   rest are discarded
 #' @param warmup number of samples to spend warming up the mcmc sampler (moving
 #'   chains toward the highest density area and tuning sampler hyperparameters).
@@ -32,25 +32,25 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   details).
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations).
-#'   If \code{pb_update} is less than or equal to \code{thin}, it will be set
-#'   to \code{thin + 1} to ensure at least one saved iteration per
-#'   \code{pb_update} iterations.
+#'   If `pb_update` is less than or equal to `thin`, it will be set
+#'   to `thin + 1` to ensure at least one saved iteration per
+#'   `pb_update` iterations.
 #' @param one_by_one whether to run TensorFlow MCMC code one iteration at a
 #'   time, so that greta can handle numerical errors as 'bad' proposals (see
 #'   below).
-#' @param initial_values an optional \code{initials} object (or list of
-#'   \code{initials} objects of length \code{chains}) giving initial values for
+#' @param initial_values an optional `initials` object (or list of
+#'   `initials` objects of length `chains`) giving initial values for
 #'   some or all of the variables in the model. These will be used as the
 #'   starting point for sampling/optimisation.
 #' @param trace_batch_size the number of posterior samples to process at a time
 #'   when tracing the parameters of interest; reduce this to reduce memory
 #'   demands
 #'
-#' @details For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
+#' @details For `mcmc()` if `verbose = TRUE`, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
 #'   of model fitting (warmup or sampling). Occasionally, a proposed set of
 #'   parameters can cause numerical instability (I.e. the log density or its
-#'   gradient is \code{NA}, \code{Inf} or \code{-Inf}); normally because the log
+#'   gradient is `NA`, `Inf` or `-Inf`); normally because the log
 #'   joint density is so low that it can't be represented as a floating point
 #'   number. When this happens, the progress bar will also display the
 #'   proportion of proposals so far that were 'bad' (numerically unstable) and
@@ -61,51 +61,51 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   starting values to move the sampler into a more reasonable part of the
 #'   parameter space. If you have more samples than that, it may be that your
 #'   model is misspecified. You can often diagnose this by using
-#'   \code{\link{calculate}()} to evaluate the values of greta arrays, given
+#'   [calculate()] to evaluate the values of greta arrays, given
 #'   fixed values of model parameters, and checking the results are what you
 #'   expect.
 #'
 #'   greta runs multiple chains simultaneously with a single sampler,
 #'   vectorising all operations across the chains. E.g. a scalar addition in
 #'   your model is computed as an elementwise vector addition (with vectors
-#'   having length \code{chains}), a vector addition is computed as a matrix
+#'   having length `chains`), a vector addition is computed as a matrix
 #'   addition etc. TensorFlow is able to parallelise these operations, and this
 #'   approach reduced computational overheads, so this is the most efficient of
 #'   computing on multiple chains.
 #'
 #'   Multiple mcmc samplers (each of which can simultaneously run multiple
 #'   chains) can also be run in parallel by setting the execution plan with the
-#'   \code{future} package. Only \code{plan(multisession)} futures or
-#'   \code{plan(cluster)} futures that don't use fork clusters are allowed,
+#'   `future` package. Only `plan(multisession)` futures or
+#'   `plan(cluster)` futures that don't use fork clusters are allowed,
 #'   since forked processes conflict with TensorFlow's parallelism. Explicitly
-#'   parallelising chains on a local machine with \code{plan(multisession)} will
+#'   parallelising chains on a local machine with `plan(multisession)` will
 #'   probably be slower than running multiple chains simultaneously in a single
-#'   sampler (with \code{plan(sequential)}, the default) because of the overhead
-#'   required to start new sessions. However, \code{plan(cluster)} can be used
+#'   sampler (with `plan(sequential)`, the default) because of the overhead
+#'   required to start new sessions. However, `plan(cluster)` can be used
 #'   to run chains on a cluster of machines on a local or remote network. See
-#'   \code{\link[future:cluster]{future::cluster}} for details, and the
-#'   \code{future.batchtools} package to set up plans on clusters with job
+#'   [future::cluster()] for details, and the
+#'   `future.batchtools` package to set up plans on clusters with job
 #'   schedulers.
 #'
-#'   If \code{n_cores = NULL} and mcmc samplers are being run sequentially, each
+#'   If `n_cores = NULL` and mcmc samplers are being run sequentially, each
 #'   sampler will be allowed to use all CPU cores (possibly to compute multiple
 #'   chains sequentially). If samplers are being run in parallel with the
-#'   \code{future} package, \code{n_cores} will be set so that \code{n_cores *
-#'   \link[future:nbrOfWorkers]{future::nbrOfWorkers}} is less than the number
+#'   `future` package, `n_cores` will be set so that `n_cores *
+#'   [future::nbrOfWorkers]` is less than the number
 #'   of CPU cores.
 #'
-#'   After carrying out mcmc on all the model parameters, \code{mcmc()}
+#'   After carrying out mcmc on all the model parameters, `mcmc()`
 #'   calculates the values of (i.e. traces) the parameters of interest for each
-#'   of these samples, similarly to \code{\link{calculate}}. Multiple
+#'   of these samples, similarly to [calculate()]. Multiple
 #'   posterior samples can be traced simultaneously, though this can require
-#'   large amounts of memory for large models. As in \code{calculate}, the
-#'   argument \code{trace_batch_size} can be modified to trade-off speed against
+#'   large amounts of memory for large models. As in `calculate`, the
+#'   argument `trace_batch_size` can be modified to trade-off speed against
 #'   memory usage.
 #'
-#' @return \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - a
-#'   \code{greta_mcmc_list} object that can be analysed using functions from the
+#' @return `mcmc`, `stashed_samples` & `extra_samples` - a
+#'   `greta_mcmc_list` object that can be analysed using functions from the
 #'   coda package. This will contain mcmc samples of the greta arrays used to
-#'   create \code{model}.
+#'   create `model`.
 #'
 #' @examples
 #' \dontrun{
@@ -429,9 +429,9 @@ run_samplers <- function(samplers,
 #' @importFrom stats na.omit
 #' @importFrom coda mcmc.list
 #'
-#' @details If the sampler is aborted before finishing (and \code{future}
+#' @details If the sampler is aborted before finishing (and `future`
 #'   parallelism isn't being used), the samples collected so far can be
-#'   retrieved with \code{stashed_samples()}. Only samples from the sampling
+#'   retrieved with `stashed_samples()`. Only samples from the sampling
 #'   phase will be returned.
 stashed_samples <- function() {
 
@@ -502,11 +502,11 @@ stashed_samples <- function() {
 #'
 #' @export
 #'
-#' @param draws a greta_mcmc_list object returned by \code{mcmc} or
-#'   \code{stashed_samples}
+#' @param draws a greta_mcmc_list object returned by `mcmc` or
+#'   `stashed_samples`
 #'
-#' @details Samples returned by \code{mcmc()} and \code{stashed_samples()} can
-#'   be added to with \code{extra_samples()}. This continues the chain from the
+#' @details Samples returned by `mcmc()` and `stashed_samples()` can
+#'   be added to with `extra_samples()`. This continues the chain from the
 #'   last value of the previous chain and uses the same sampler and model as was
 #'   used to generate the previous samples. It is not possible to change the
 #'   sampler or extend the warmup period.
@@ -784,18 +784,18 @@ print.initials <- function(x, ...) {
 #' @param tolerance the numerical tolerance for the solution, the optimiser
 #'   stops when the (absolute) difference in the joint density between
 #'   successive iterations drops below this level
-#' @param optimiser an \code{optimiser} object giving the optimisation algorithm
-#'   and parameters See \code{\link{optimisers}}.
+#' @param optimiser an `optimiser` object giving the optimisation algorithm
+#'   and parameters See [optimisers()].
 #' @param adjust whether to account for Jacobian adjustments in the joint
-#'   density. Set to \code{FALSE} (and do not use priors) for maximum likelihood
-#'   estimates, or \code{TRUE} for maximum \emph{a posteriori} estimates.
-#' @param hessian whether to return a list of \emph{analytically} differentiated
+#'   density. Set to `FALSE` (and do not use priors) for maximum likelihood
+#'   estimates, or `TRUE` for maximum *a posteriori* estimates.
+#' @param hessian whether to return a list of *analytically* differentiated
 #'   Hessian arrays for the parameters
 #'
-#' @details Because \code{opt()} acts on a list of greta arrays with possibly
-#'   varying dimension, the \code{par} and \code{hessian} objects returned by
-#'   \code{opt()} are named lists, rather than a vector (\code{par}) and a
-#'   matrix (\code{hessian}), as returned by \code{\link[stats:optim]{optim()}}.
+#' @details Because `opt()` acts on a list of greta arrays with possibly
+#'   varying dimension, the `par` and `hessian` objects returned by
+#'   `opt()` are named lists, rather than a vector (`par`) and a
+#'   matrix (`hessian`), as returned by [stats::optim()].
 #'   Because greta arrays may not be vectors, the Hessians may not be matrices,
 #'   but could be higher-dimensional arrays. To return a Hessian matrix covering
 #'   multiple model parameters, you can construct your model so that all those
@@ -803,18 +803,18 @@ print.initials <- function(x, ...) {
 #'   The parameter vector can then be passed to model. See example.
 #'
 
-#' @return \code{opt} - a list containing the following named elements:
+#' @return `opt` - a list containing the following named elements:
 #'   \itemize{
-#'    \item{\code{par}} {a named list of the optimal values for the greta arrays
-#'     specified in \code{model}}
-#'    \item{\code{value}} {the (unadjusted) negative log joint density of the
+#'    \item{`par`} {a named list of the optimal values for the greta arrays
+#'     specified in `model`}
+#'    \item{`value`} {the (unadjusted) negative log joint density of the
 #'     model at the parameters 'par'}
-#'    \item{\code{iterations}} {the number of iterations taken by the optimiser}
-#'    \item{\code{convergence}} {an integer code, 0 indicates successful
-#'     completion, 1 indicates the iteration limit \code{max_iterations} had
+#'    \item{`iterations`} {the number of iterations taken by the optimiser}
+#'    \item{`convergence`} {an integer code, 0 indicates successful
+#'     completion, 1 indicates the iteration limit `max_iterations` had
 #'     been reached}
-#'   \item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
-#'     matrices/arrays for the parameters (w.r.t. \code{value})}
+#'   \item{`hessian`} {(if `hessian = TRUE`) a named list of hessian
+#'     matrices/arrays for the parameters (w.r.t. `value`)}
 #'  }
 #'
 opt <- function(model,

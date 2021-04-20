@@ -14,16 +14,16 @@ distribution(greta_array)
 already have a probability distribution assigned}
 
 \item{value}{a greta array with a distribution (see
-\code{\link{distributions}})}
+\code{\link[=distributions]{distributions()}})}
 }
 \description{
 \code{distribution} defines probability distributions over
-  observed data, e.g. to set a model likelihood.
+observed data, e.g. to set a model likelihood.
 }
 \details{
 The extract method returns the greta array if it has a distribution,
-  or \code{NULL} if it doesn't. It has no real use-case, but is included for
-  completeness
+or \code{NULL} if it doesn't. It has no real use-case, but is included for
+completeness
 }
 \examples{
 \dontrun{

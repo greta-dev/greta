@@ -1,12 +1,12 @@
 #' @name joint
 #' @title define joint distributions
 #'
-#' @description \code{joint} combines univariate probability distributions
-#'   together into a multivariate (and \emph{a priori} independent between
+#' @description `joint` combines univariate probability distributions
+#'   together into a multivariate (and *a priori* independent between
 #'   dimensions) joint distribution, either over a variable, or for fixed data.
 #'
 #' @param ... scalar variable greta arrays following probability distributions
-#'   (see \code{\link{distributions}}); the components of the joint
+#'   (see [distributions()]); the components of the joint
 #'   distribution.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
@@ -20,7 +20,7 @@
 #'   result can usually be achieved by combining variables with separate
 #'   distributions. It is included for situations where it is more convenient to
 #'   consider these as a single distribution, e.g. for use with
-#'   \code{distribution} or \code{mixture}.
+#'   `distribution` or `mixture`.
 #'
 #' @export
 #' @examples

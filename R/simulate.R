@@ -1,22 +1,22 @@
-#' @title Simulate Responses From \code{greta_model} Object
+#' @title Simulate Responses From `greta_model` Object
 #'
 #' @description Simulate values of all named greta arrays associated with a
 #'   greta model from the model priors, including the response variable.
 #'
-#' @param object a \code{\link[greta:model]{greta_model}} object
+#' @param object a [`greta_model()`][greta::model] object
 #' @param nsim positive integer scalar - the number of responses to simulate
 #' @param seed an optional seed to be used in set.seed immediately before the
 #'   simulation so as to generate a reproducible sample
 #' @param precision the floating point precision to use when calculating values.
 #' @param ... optional additional arguments, none are used at present
 #'
-#' @details This is essentially a wrapper around \code{\link{calculate}()} that
+#' @details This is essentially a wrapper around [calculate()] that
 #'   finds all relevant greta arrays. See that function for more functionality,
 #'   including simulation conditional on fixed values or posterior samples.
 #'
 #'   To simulate values of the response variable, it must be both a named object
 #'   (in the calling environment) and be a greta array. If you don't see it
-#'   showing up in the output, you may need to use \code{as_data} to convert it
+#'   showing up in the output, you may need to use `as_data` to convert it
 #'   to a greta array before defining the model.
 #'
 #' @return A named list of vectors, matrices or arrays containing independent

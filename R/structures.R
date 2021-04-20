@@ -2,22 +2,22 @@
 #' @title create data greta arrays
 #' @description These structures can be used to set up more complex models. For
 #'   example, scalar parameters can be embedded in a greta array by first
-#'   creating a greta array with \code{zeros()} or \code{ones()}, and then
+#'   creating a greta array with `zeros()` or `ones()`, and then
 #'   embedding the parameter value using greta's replacement syntax.
 #' @param ... dimensions of the greta arrays to create
 #' @param data a vector giving data to fill the greta array. Other object types
-#'   are coerced by \code{\link{as.vector}}.
+#'   are coerced by [as.vector()].
 #' @param dim an integer vector giving the dimensions for the greta array to be
 #'   created.
 #'
-#' @details \code{greta_array} is a convenience function to create an R array
-#'   with \code{\link{array}} and then coerce it to a greta array. I.e. when
+#' @details `greta_array` is a convenience function to create an R array
+#'   with [array()] and then coerce it to a greta array. I.e. when
 #'   passed something that can be coerced to a numeric array, it is equivalent
-#'   to \code{as_data(array(data, dim))}.
+#'   to `as_data(array(data, dim))`.
 #'
-#'   If \code{data} is a greta array and
-#'   dim is different than \code{dim(data)}, a reshaped greta array is returned.
-#'   This is equivalent to: \code{dim(data) <- dim}.
+#'   If `data` is a greta array and
+#'   dim is different than `dim(data)`, a reshaped greta array is returned.
+#'   This is equivalent to: `dim(data) <- dim`.
 #'
 #' @return a greta array object
 #' @examples

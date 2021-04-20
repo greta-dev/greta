@@ -29,25 +29,24 @@ transform to a constrained value}
 }
 \description{
 transformations for greta arrays, which may also be used as
-  inverse link functions. Also see \link{operators} and \link{functions}.
+inverse link functions. Also see \link{operators} and \link{functions}.
 }
 \details{
 greta does not allow you to state the transformation/link on the
-  left hand side of an assignment, as is common in the BUGS and STAN
-  modelling languages. That's because the same syntax has a very different
-  meaning in R, and can only be applied to objects that are already in
-  existence. The inverse forms of the common link functions (prefixed with an
-  'i') can be used instead.
+left hand side of an assignment, as is common in the BUGS and STAN
+modelling languages. That's because the same syntax has a very different
+meaning in R, and can only be applied to objects that are already in
+existence. The inverse forms of the common link functions (prefixed with an
+'i') can be used instead.
 
-  The \code{log1pe} inverse link function is equivalent to \code{log(1 +
-  exp(x))}, yielding a positive transformed parameter. Unlike the log
-  transformation, this transformation is approximately linear for x > 1. i.e.
-  when \eqn{x > 1}, \eqn{y} is approximately \eqn{x}
+The \code{log1pe} inverse link function is equivalent to \code{log(1 + exp(x))}, yielding a positive transformed parameter. Unlike the log
+transformation, this transformation is approximately linear for x > 1. i.e.
+when \eqn{x > 1}, \eqn{y} is approximately \eqn{x}
 
-  \code{imultilogit} expects an n-by-m greta array, and returns an n-by-(m+1)
-  greta array of positive reals whose rows sum to one. This is equivalent
-  adding a final column of 0s and then running the softmax function widely
-  used in machine learning.
+\code{imultilogit} expects an n-by-m greta array, and returns an n-by-(m+1)
+greta array of positive reals whose rows sum to one. This is equivalent
+adding a final column of 0s and then running the softmax function widely
+used in machine learning.
 }
 \examples{
 \dontrun{

@@ -3,8 +3,8 @@
 #' @title functions for greta arrays
 #'
 #' @description This is a list of functions (mostly from base R) that are
-#'   currently implemented to transform greta arrays. Also see \link{operators}
-#'   and \link{transforms}.
+#'   currently implemented to transform greta arrays. Also see [operators]
+#'   and [transforms].
 #'
 #' @section Usage: \preformatted{
 #'
@@ -84,25 +84,25 @@
 #'
 #' }
 #'
-#' @details TensorFlow only enables rounding to integers, so \code{round()} will
-#'   error if \code{digits} is set to anything other than \code{0}.
+#' @details TensorFlow only enables rounding to integers, so `round()` will
+#'   error if `digits` is set to anything other than `0`.
 #'
-#'   Any additional arguments to \code{chol()}, \code{chol2inv}, and
-#'   \code{solve()} will be ignored, see the TensorFlow documentation for
+#'   Any additional arguments to `chol()`, `chol2inv`, and
+#'   `solve()` will be ignored, see the TensorFlow documentation for
 #'   details of these routines.
 #'
-#'   \code{sweep()} only works on two-dimensional greta arrays (so \code{MARGIN}
+#'   `sweep()` only works on two-dimensional greta arrays (so `MARGIN`
 #'   can only be either 1 or 2), and only for subtraction, addition, division
 #'   and multiplication.
 #'
-#'   \code{tapply()} works on column vectors (2D greta arrays with one column),
-#'   and \code{INDEX} cannot be a greta array. Currently five functions are
+#'   `tapply()` works on column vectors (2D greta arrays with one column),
+#'   and `INDEX` cannot be a greta array. Currently five functions are
 #'   available, and arguments passed to \dots are ignored.
 #'
-#'   \code{cospi()}, \code{sinpi()}, and \code{tanpi()} do not use the
-#'   computationally more stable routines to compute \code{cos(x * pi)} etc.
+#'   `cospi()`, `sinpi()`, and `tanpi()` do not use the
+#'   computationally more stable routines to compute `cos(x * pi)` etc.
 #'   that are available in R under some operating systems. Similarly
-#'   \code{trigamma()} uses TensorFlow's polygamma function, resulting in lower
+#'   `trigamma()` uses TensorFlow's polygamma function, resulting in lower
 #'   precision than R's equivalent.
 #'
 #' @examples

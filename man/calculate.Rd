@@ -18,7 +18,7 @@ calculate(
 
 \item{values}{a named list giving temporary values of the greta arrays with
 which \code{target} is connected, or a \code{greta_mcmc_list} object
-returned by \code{\link{mcmc}}.}
+returned by \code{\link[=mcmc]{mcmc()}}.}
 
 \item{nsim}{an optional positive integer scalar for the number of responses
 to simulate if stochastic greta arrays are present in the model - see
@@ -35,44 +35,44 @@ reduce memory demands}
 }
 \value{
 Values of the target greta array(s), given values of the greta arrays
-  on which they depend (either specified in \code{values} or sampled from
-  their priors). If \code{values} is a
-  \code{\link[greta:mcmc]{greta_mcmc_list}} and \code{nsim = NULL}, this will
-  be a \code{greta_mcmc_list} object of posterior samples for the target
-  greta arrays. Otherwise, the result will be a named list of numeric R
-  arrays. If \code{nsim = NULL} the dimensions of returned numeric R arrays
-  will be the same as the corresponding greta arrays, otherwise an additional
-  dimension with \code{nsim} elements will be prepended, to represent
-  multiple simulations.
+on which they depend (either specified in \code{values} or sampled from
+their priors). If \code{values} is a
+\code{\link[=mcmc]{greta_mcmc_list()}} and \code{nsim = NULL}, this will
+be a \code{greta_mcmc_list} object of posterior samples for the target
+greta arrays. Otherwise, the result will be a named list of numeric R
+arrays. If \code{nsim = NULL} the dimensions of returned numeric R arrays
+will be the same as the corresponding greta arrays, otherwise an additional
+dimension with \code{nsim} elements will be prepended, to represent
+multiple simulations.
 }
 \description{
 Calculate the values that greta arrays would take, given
-  temporary, or simulated values for the greta arrays on which they depend.
-  This can be used to check the behaviour of your model, make predictions to
-  new data after model fitting, or simulate datasets from either the prior or
-  posterior of your model.
+temporary, or simulated values for the greta arrays on which they depend.
+This can be used to check the behaviour of your model, make predictions to
+new data after model fitting, or simulate datasets from either the prior or
+posterior of your model.
 }
 \details{
 The greta arrays named in \code{values} need not be variables, they
-  can also be other operations or even data.
+can also be other operations or even data.
 
-  At present, if \code{values} is a named list it must contain values for
-  \emph{all} of the variable greta arrays with which \code{target} is
-  connected, even values are given for intermediate operations, or the target
-  doesn't depend on the variable. That may be relaxed in a future release.
+At present, if \code{values} is a named list it must contain values for
+\emph{all} of the variable greta arrays with which \code{target} is
+connected, even values are given for intermediate operations, or the target
+doesn't depend on the variable. That may be relaxed in a future release.
 
-  If the model contains stochastic greta arrays; those with a distribution,
-  calculate can be used to sample from these distributions (and all greta
-  arrays that depend on them) by setting the \code{nsim} argument to a
-  positive integer for the required number of samples. If \code{values} is
-  specified (either as a list of fixed values or as draws), those values will
-  be used, and remaining variables will be sampled conditional on them.
-  Observed data with distributions (i.e. response variables defined with
-  \code{distribution()} can also be sampled, provided they are defined as
-  greta arrays. This behaviour can be used for a number of tasks, like
-  simulating datasets for known parameter sets, simulating parameters and
-  data from a set of priors, or simulating datasets from a model posterior.
-  See some examples of these below.
+If the model contains stochastic greta arrays; those with a distribution,
+calculate can be used to sample from these distributions (and all greta
+arrays that depend on them) by setting the \code{nsim} argument to a
+positive integer for the required number of samples. If \code{values} is
+specified (either as a list of fixed values or as draws), those values will
+be used, and remaining variables will be sampled conditional on them.
+Observed data with distributions (i.e. response variables defined with
+\code{distribution()} can also be sampled, provided they are defined as
+greta arrays. This behaviour can be used for a number of tasks, like
+simulating datasets for known parameter sets, simulating parameters and
+data from a set of priors, or simulating datasets from a model posterior.
+See some examples of these below.
 }
 \examples{
 \dontrun{

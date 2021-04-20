@@ -1,8 +1,8 @@
 #' @title Cholesky Factor to Symmetric Matrix
 #'
-#' @description Evaluate \code{t(x) \%*\% x} efficiently, where \code{x} is the
+#' @description Evaluate `t(x) \%*\% x` efficiently, where `x` is the
 #'   (upper-triangular) Cholesky factor of a symmetric, positive definite square
-#'   matrix. I.e. it is the inverse of \code{chol}.
+#'   matrix. I.e. it is the inverse of `chol`.
 #'
 #' @param x a square, upper triangular matrix representing the Cholesky
 #'   factor of a symmetric, positive definite square matrix

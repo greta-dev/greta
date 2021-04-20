@@ -20,8 +20,8 @@
 \item{nrow, ncol}{optional dimensions for the resulting greta array when x is
 not a matrix.}
 
-\item{value}{for \code{`[<-`} a greta array to replace elements, for
-\code{`dim<-`} either NULL or a numeric vector of dimensions}
+\item{value}{for \verb{[<-} a greta array to replace elements, for
+\verb{dim<-} either NULL or a numeric vector of dimensions}
 
 \item{...}{either further indices specifying elements to extract or replace
 (\code{[}), or multiple greta arrays to combine (\code{cbind()},
@@ -32,14 +32,14 @@ not a matrix.}
 }
 \description{
 Generic methods to extract and replace elements of greta arrays,
-  or to combine greta arrays.
+or to combine greta arrays.
 }
 \details{
 \code{diag()} can be used to extract or replace the diagonal part of
-  a square and two-dimensional greta array, but it cannot be used to create a
-  matrix-like greta array from a scalar or vector-like greta array. A static
-  diagonal matrix can always be created with e.g. \code{diag(3)}, and then
-  converted into a greta array.
+a square and two-dimensional greta array, but it cannot be used to create a
+matrix-like greta array from a scalar or vector-like greta array. A static
+diagonal matrix can always be created with e.g. \code{diag(3)}, and then
+converted into a greta array.
 }
 \section{Usage}{
  \preformatted{

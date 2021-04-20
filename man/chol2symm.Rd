@@ -11,9 +11,9 @@ chol2symm(x)
 factor of a symmetric, positive definite square matrix}
 }
 \description{
-Evaluate \code{t(x) \%*\% x} efficiently, where \code{x} is the
-  (upper-triangular) Cholesky factor of a symmetric, positive definite square
-  matrix. I.e. it is the inverse of \code{chol}.
+Evaluate \verb{t(x) \\\%*\\\% x} efficiently, where \code{x} is the
+(upper-triangular) Cholesky factor of a symmetric, positive definite square
+matrix. I.e. it is the inverse of \code{chol}.
 }
 \examples{
 # a symmetric, positive definite square matrix

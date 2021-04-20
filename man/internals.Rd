@@ -6,8 +6,8 @@
 \title{internal greta methods}
 \description{
 A list of functions and R6 class objects that can be used to
-  develop extensions to greta. Most users will not need to access these
-  methods, and it is not recommended to use them directly in model code.
+develop extensions to greta. Most users will not need to access these
+methods, and it is not recommended to use them directly in model code.
 }
 \details{
 This help file lists the available internals, but they are not fully
