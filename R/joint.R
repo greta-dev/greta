@@ -120,11 +120,9 @@ joint_distribution <- R6Class(
         )
       }
     },
-
     create_target = function(truncation) {
       vble(self$bounds, dim = self$dim)
     },
-
     tf_distrib = function(parameters, dag) {
 
       # get information from the *nodes* for component distributions, not the tf

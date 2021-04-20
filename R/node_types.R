@@ -10,7 +10,6 @@ data_node <- R6Class(
       # update and store array and store dimension
       super$initialize(dim = dim(data), value = data)
     },
-
     tf = function(dag) {
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
@@ -78,7 +77,6 @@ operation_node <- R6Class(
     # computational speedups or numerical stability. E.g. a logarithm or a
     # cholesky factor
     representations = list(),
-
     initialize = function(operation,
                           ...,
                           dim = NULL,
@@ -128,14 +126,12 @@ operation_node <- R6Class(
 
       super$initialize(dim, value)
     },
-
     add_argument = function(argument) {
 
       # guess at a name, coerce to a node, and add as a parent
       parameter <- to_node(argument)
       self$add_parent(parameter)
     },
-
     tf = function(dag) {
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
@@ -180,7 +176,6 @@ variable_node <- R6Class(
     lower = -Inf,
     upper = Inf,
     free_value = NULL,
-
     initialize = function(lower = -Inf,
                           upper = Inf,
                           dim = NULL,
@@ -220,8 +215,7 @@ variable_node <- R6Class(
         self$constraint <- "scalar_mixed"
       }
 
-      bad_limits <- switch(
-        self$constraint,
+      bad_limits <- switch(self$constraint,
         scalar_all_low = any(!is.finite(upper)),
         scalar_all_high = any(!is.finite(lower)),
         scalar_all_both = any(!is.finite(lower)) | any(!is.finite(upper)),
@@ -261,7 +255,6 @@ variable_node <- R6Class(
         super$value(new_value, ...)
       }
     },
-
     tf = function(dag) {
 
       # get the names of the variable and (already-defined) free state version
@@ -307,15 +300,13 @@ variable_node <- R6Class(
         envir = dag$tf_environment
       )
     },
-
     create_tf_bijector = function() {
       dim <- self$dim
       lower <- flatten_rowwise(self$lower)
       upper <- flatten_rowwise(self$upper)
       constraints <- flatten_rowwise(self$constraint_array)
 
-      switch(
-        self$constraint,
+      switch(self$constraint,
         scalar_all_none = tf_scalar_bijector(dim),
         scalar_all_low = tf_scalar_neg_bijector(dim, upper = upper),
         scalar_all_high = tf_scalar_pos_bijector(dim, lower = lower),
@@ -334,7 +325,6 @@ variable_node <- R6Class(
         ordered = tf_ordered_bijector(dim)
       )
     },
-
     tf_from_free = function(x) {
       tf_bijector <- self$create_tf_bijector()
       tf_bijector$forward(x)
@@ -393,7 +383,6 @@ distribution_node <- R6Class(
     truncation = NULL,
     parameters = list(),
     parameter_shape_matches_output = logical(),
-
     initialize = function(name = "no distribution",
                           dim = NULL,
                           truncation = NULL,
@@ -430,7 +419,6 @@ distribution_node <- R6Class(
     create_target = function(truncation) {
       vble(truncation, dim = self$dim)
     },
-
     list_parents = function(dag) {
       parents <- self$parents
 
@@ -449,7 +437,6 @@ distribution_node <- R6Class(
 
       parents
     },
-
     list_children = function(dag) {
       children <- self$children
 
@@ -493,7 +480,6 @@ distribution_node <- R6Class(
       self$remove_parent(self$target)
       self$target <- NULL
     },
-
     tf = function(dag) {
 
       # assign the distribution object constructor function to the environment

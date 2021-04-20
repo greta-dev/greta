@@ -12,7 +12,6 @@ dag_class <- R6Class(
     variables_without_free_state = list(),
     tf_environment = NA,
     tf_graph = NA,
-
     tf_float = NA,
     n_cores = 0L,
     compile = NA,
@@ -36,7 +35,6 @@ dag_class <- R6Class(
       self$tf_float <- tf_float
       self$compile <- compile
     },
-
     new_tf_environment = function() {
       self$tf_environment <- new.env()
       self$tf_graph <- tf$Graph()
@@ -213,8 +211,7 @@ dag_class <- R6Class(
     # from an existing free state), or in sampling mode (generate a random
     # version of itself)
     how_to_define = function(node) {
-      switch(
-        self$mode,
+      switch(self$mode,
 
         # if doing inference, everything is push-forward
         all_forward = "forward",
@@ -226,13 +223,11 @@ dag_class <- R6Class(
         hybrid = self$how_to_define_hybrid(node)
       )
     },
-
     define_batch_size = function() {
       self$tf_run(
         batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
       )
     },
-
     define_free_state = function(type = c("variable", "placeholder"),
                                  name = "free_state") {
       type <- match.arg(type)
@@ -426,7 +421,6 @@ dag_class <- R6Class(
         bounds = distribution_node$bounds
       )
     },
-
     tf_evaluate_density = function(tfp_distribution,
                                    tf_target,
                                    truncation = NULL,
@@ -542,17 +536,14 @@ dag_class <- R6Class(
 
       parameters
     },
-
     get_tf_data_list = function() {
       data_list_name <- paste0(self$mode, "_data_list")
       self$tf_environment[[data_list_name]]
     },
-
     set_tf_data_list = function(element_name, value) {
       data_list_name <- paste0(self$mode, "_data_list")
       self$tf_environment[[data_list_name]][[element_name]] <- value
     },
-
     build_feed_dict = function(dict_list = list(),
                                data_list = self$get_tf_data_list()) {
       tfe <- self$tf_environment
@@ -564,7 +555,6 @@ dag_class <- R6Class(
       # roll into a dict in the tf environment
       self$tf_run(feed_dict <- do.call(dict, dict_list))
     },
-
     send_parameters = function(parameters) {
 
       # reshape to a row vector if needed
@@ -591,7 +581,6 @@ dag_class <- R6Class(
 
       res
     },
-
     hessians = function() {
       tfe <- self$tf_environment
       nodes <- self$target_nodes
@@ -620,7 +609,6 @@ dag_class <- R6Class(
       names(hessian_list) <- ga_names
       hessian_list
     },
-
     trace_values_batch = function(free_state_batch) {
 
       # update the parameters & build the feed dict
@@ -804,7 +792,6 @@ dag_class <- R6Class(
       tensor
     }
   ),
-
   active = list(
     node_types = function(value) {
       vapply(self$node_list, node_type, FUN.VALUE = "")
@@ -822,7 +809,6 @@ dag_class <- R6Class(
 
       types
     },
-
     adjacency_matrix = function(value) {
 
       # make dag matrix

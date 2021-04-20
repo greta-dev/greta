@@ -48,8 +48,7 @@
 #' sims <- simulate(m, nsim = 100)
 #' }
 #' # nolint start
-simulate.greta_model <- function(
-                                 object,
+simulate.greta_model <- function(object,
                                  nsim = 1,
                                  seed = NULL,
                                  precision = c("double", "single"),

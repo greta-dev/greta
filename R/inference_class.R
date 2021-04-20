@@ -18,7 +18,6 @@ inference <- R6Class(
 
     # where to write the traced values to
     trace_log_file = NULL,
-
     parameters = list(),
     tuning_periods = list(),
 
@@ -28,7 +27,6 @@ inference <- R6Class(
     traced_free_state = list(),
     # all recorded greta array values
     traced_values = list(),
-
     initialize = function(initial_values,
                           model,
                           parameters = list(),
@@ -239,13 +237,11 @@ sampler <- R6Class(
     log_epsilon_bar = 0,
     tuning_interval = 3,
     uses_metropolis = TRUE,
-
     welford_state = list(
       count = 0,
       mean = 0,
       m2 = 0
     ),
-
     accept_target = 0.5,
     accept_history = NULL,
 
@@ -262,7 +258,6 @@ sampler <- R6Class(
 
     # batch sizes for tracing
     trace_batch_size = 100,
-
     initialize = function(initial_values,
                           model,
                           parameters = list(),
@@ -289,7 +284,6 @@ sampler <- R6Class(
       # define the draws tensor on the tf graph
       self$define_tf_draws()
     },
-
     run_chain = function(n_samples, thin, warmup,
                          verbose, pb_update,
                          one_by_one, plan_is, n_cores, float_type,
@@ -466,7 +460,6 @@ sampler <- R6Class(
         m2 = m2
       )
     },
-
     sample_variance = function() {
       count <- self$welford_state$count
       m2 <- self$welford_state$m2
@@ -544,7 +537,6 @@ sampler <- R6Class(
       self$tune_epsilon(iterations_completed, total_iterations)
       self$tune_diag_sd(iterations_completed, total_iterations)
     },
-
     tune_epsilon = function(iter, total) {
 
       # tuning periods for the tunable parameters (first 10%, last 60%)
@@ -586,7 +578,6 @@ sampler <- R6Class(
         }
       }
     },
-
     tune_diag_sd = function(iterations_completed, total_iterations) {
 
       # when, during warmup, to tune this parameter (after epsilon, but stopping
@@ -613,7 +604,6 @@ sampler <- R6Class(
         }
       }
     },
-
     define_tf_draws = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -702,7 +692,6 @@ sampler <- R6Class(
         self$numerical_rejections <- self$numerical_rejections + bad
       }
     },
-
     sample_carefully = function(n_samples) {
 
       # tryCatch handling for numerical errors
@@ -747,7 +736,6 @@ sampler <- R6Class(
 
       result
     },
-
     sampler_parameter_values = function() {
 
       # random number of integration steps
@@ -766,9 +754,7 @@ hmc_sampler <- R6Class(
       epsilon = 0.005,
       diag_sd = 1
     ),
-
     accept_target = 0.651,
-
     define_tf_kernel = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -812,7 +798,6 @@ hmc_sampler <- R6Class(
       )
       # nolint end
     },
-
     sampler_parameter_values = function() {
 
       # random number of integration steps
@@ -842,9 +827,7 @@ rwmh_sampler <- R6Class(
       epsilon = 0.1,
       diag_sd = 1
     ),
-
     accept_target = 0.44,
-
     define_tf_kernel = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -891,7 +874,6 @@ rwmh_sampler <- R6Class(
       )
       # nolint end
     },
-
     sampler_parameter_values = function() {
       epsilon <- self$parameters$epsilon
       diag_sd <- matrix(self$parameters$diag_sd)
@@ -914,7 +896,6 @@ slice_sampler <- R6Class(
     ),
     tuning_interval = Inf,
     uses_metropolis = FALSE,
-
     define_tf_kernel = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -944,7 +925,6 @@ slice_sampler <- R6Class(
       )
       # nolint end
     },
-
     sampler_parameter_values = function() {
       max_doublings <- as.integer(self$parameters$max_doublings)
 
@@ -1010,11 +990,9 @@ optimiser <- R6Class(
       self$create_optimiser_objective()
       self$create_tf_minimiser()
     },
-
     parameter_names = function() {
       names(self$parameters)
     },
-
     set_dtype = function(parameter_name, dtype) {
       params <- self$parameters
       param_names <- self$parameter_names()
@@ -1075,20 +1053,17 @@ optimiser <- R6Class(
         )
       }
     },
-
     run = function() {
       self$model$dag$build_feed_dict()
       self$set_inits()
       self$run_minimiser()
       self$fetch_free_state()
     },
-
     fetch_free_state = function() {
 
       # get the free state as a vector
       self$free_state <- self$model$dag$tf_sess_run(optimiser_free_state)
     },
-
     return_outputs = function() {
       dag <- self$model$dag
 
@@ -1205,16 +1180,13 @@ scipy_optimiser <- R6Class(
 
       dag$on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
     },
-
     obj_progress = function(obj) {
       self$diff <- abs(self$old_obj - obj)
       self$old_obj <- obj
     },
-
     it_progress = function(...) {
       self$it <- self$it + 1
     },
-
     run_minimiser = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment

@@ -4,7 +4,6 @@ uniform_distribution <- R6Class(
   public = list(
     min = NA,
     max = NA,
-
     initialize = function(min, max, dim) {
       if (inherits(min, "greta_array") | inherits(max, "greta_array")) {
         stop("min and max must be fixed, they cannot be another greta array")
@@ -54,7 +53,6 @@ uniform_distribution <- R6Class(
         dim = self$dim
       )
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Uniform(
         low = parameters$min,
@@ -78,7 +76,6 @@ normal_distribution <- R6Class(
       self$add_parameter(mean, "mean")
       self$add_parameter(sd, "sd")
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Normal(
         loc = parameters$mean,
@@ -121,7 +118,6 @@ bernoulli_distribution <- R6Class(
   public = list(
     prob_is_logit = FALSE,
     prob_is_probit = FALSE,
-
     initialize = function(prob, dim) {
       prob <- as.greta_array(prob)
 
@@ -139,7 +135,6 @@ bernoulli_distribution <- R6Class(
 
       self$add_parameter(prob, "prob")
     },
-
     tf_distrib = function(parameters, dag) {
       if (self$prob_is_logit) {
         tfp$distributions$Bernoulli(logits = parameters$prob)
@@ -170,7 +165,6 @@ binomial_distribution <- R6Class(
   public = list(
     prob_is_logit = FALSE,
     prob_is_probit = FALSE,
-
     initialize = function(size, prob, dim) {
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
@@ -190,7 +184,6 @@ binomial_distribution <- R6Class(
       self$add_parameter(prob, "prob")
       self$add_parameter(size, "size")
     },
-
     tf_distrib = function(parameters, dag) {
       if (self$prob_is_logit) {
         tfp$distributions$Binomial(
@@ -241,7 +234,6 @@ beta_binomial_distribution <- R6Class(
       self$add_parameter(alpha, "alpha")
       self$add_parameter(beta, "beta")
     },
-
     tf_distrib = function(parameters, dag) {
       size <- parameters$size
       alpha <- parameters$alpha
@@ -277,7 +269,6 @@ poisson_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     lambda_is_log = FALSE,
-
     initialize = function(lambda, dim) {
       lambda <- as.greta_array(lambda)
 
@@ -291,7 +282,6 @@ poisson_distribution <- R6Class(
       }
       self$add_parameter(lambda, "lambda")
     },
-
     tf_distrib = function(parameters, dag) {
       if (self$lambda_is_log) {
         log_lambda <- parameters$lambda
@@ -346,7 +336,6 @@ hypergeometric_distribution <- R6Class(
       self$add_parameter(n, "n")
       self$add_parameter(k, "k")
     },
-
     tf_distrib = function(parameters, dag) {
       m <- parameters$m
       n <- parameters$n
@@ -379,7 +368,6 @@ gamma_distribution <- R6Class(
       self$add_parameter(shape, "shape")
       self$add_parameter(rate, "rate")
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Gamma(
         concentration = parameters$shape,
@@ -433,7 +421,6 @@ weibull_distribution <- R6Class(
       self$add_parameter(shape, "shape")
       self$add_parameter(scale, "scale")
     },
-
     tf_distrib = function(parameters, dag) {
       a <- parameters$shape
       b <- parameters$scale
@@ -489,7 +476,6 @@ exponential_distribution <- R6Class(
       super$initialize("exponential", dim, truncation)
       self$add_parameter(rate, "rate")
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Exponential(rate = parameters$rate)
     }
@@ -512,7 +498,6 @@ pareto_distribution <- R6Class(
       self$add_parameter(a, "a")
       self$add_parameter(b, "b")
     },
-
     tf_distrib = function(parameters, dag) {
 
       # a is shape, b is scale
@@ -567,7 +552,6 @@ laplace_distribution <- R6Class(
       self$add_parameter(mu, "mu")
       self$add_parameter(sigma, "sigma")
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Laplace(
         loc = parameters$mu,
@@ -593,7 +577,6 @@ beta_distribution <- R6Class(
       self$add_parameter(shape1, "shape1")
       self$add_parameter(shape2, "shape2")
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Beta(
         concentration1 = parameters$shape1,
@@ -617,7 +600,6 @@ cauchy_distribution <- R6Class(
       self$add_parameter(location, "location")
       self$add_parameter(scale, "scale")
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Cauchy(
         loc = parameters$location,
@@ -641,7 +623,6 @@ chi_squared_distribution <- R6Class(
       super$initialize("chi_squared", dim, truncation)
       self$add_parameter(df, "df")
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Chi2(df = parameters$df)
     }
@@ -662,7 +643,6 @@ logistic_distribution <- R6Class(
       self$add_parameter(location, "location")
       self$add_parameter(scale, "scale")
     },
-
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Logistic(
         loc = parameters$location,
@@ -688,7 +668,6 @@ f_distribution <- R6Class(
       self$add_parameter(df1, "df1")
       self$add_parameter(df2, "df2")
     },
-
     tf_distrib = function(parameters, dag) {
       df1 <- parameters$df1
       df2 <- parameters$df2
@@ -762,7 +741,6 @@ dirichlet_distribution <- R6Class(
       )
       self$add_parameter(alpha, "alpha")
     },
-
     create_target = function(truncation) {
       simplex_greta_array <- simplex_variable(self$dim)
 
@@ -770,7 +748,6 @@ dirichlet_distribution <- R6Class(
       target_node <- get_node(simplex_greta_array)
       target_node
     },
-
     tf_distrib = function(parameters, dag) {
       alpha <- parameters$alpha
       tfp$distributions$Dirichlet(concentration = alpha)
@@ -851,7 +828,6 @@ multinomial_distribution <- R6Class(
       self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(prob, "prob")
     },
-
     tf_distrib = function(parameters, dag) {
       parameters$size <- tf_flatten(parameters$size)
       # scale probs to get absolute density correct
@@ -889,7 +865,6 @@ categorical_distribution <- R6Class(
       )
       self$add_parameter(prob, "prob")
     },
-
     tf_distrib = function(parameters, dag) {
       # scale probs to get absolute density correct
       probs <- parameters$prob
@@ -954,7 +929,6 @@ multivariate_normal_distribution <- R6Class(
       self$add_parameter(mean, "mean")
       self$add_parameter(sigma, "sigma")
     },
-
     tf_distrib = function(parameters, dag) {
 
       # if Sigma is a cholesky factor transpose it to tensorflow expoectation,
@@ -991,7 +965,6 @@ wishart_distribution <- R6Class(
 
     # set when defining the graph
     target_is_cholesky = FALSE,
-
     initialize = function(df, Sigma) { # nolint
       # add the nodes as parents and parameters
 
@@ -1055,7 +1028,6 @@ wishart_distribution <- R6Class(
     reset_target_flags = function() {
       self$target_is_cholesky <- FALSE
     },
-
     tf_distrib = function(parameters, dag) {
 
       # this is messy, we want to use the tfp wishart, but can't define the
@@ -1130,7 +1102,6 @@ lkj_correlation_distribution <- R6Class(
 
     # set when defining the graph
     target_is_cholesky = FALSE,
-
     initialize = function(eta, dimension = 2) {
       dimension <- check_dimension(target = dimension)
 
@@ -1192,7 +1163,6 @@ lkj_correlation_distribution <- R6Class(
     reset_target_flags = function() {
       self$target_is_cholesky <- FALSE
     },
-
     tf_distrib = function(parameters, dag) {
       eta <- tf$squeeze(parameters$eta, 1:2)
       dim <- self$dim[1]

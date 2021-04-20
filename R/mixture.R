@@ -80,7 +80,6 @@ mixture_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     weights_is_log = FALSE,
-
     initialize = function(dots, weights, dim) {
       n_distributions <- length(dots)
 
@@ -218,11 +217,9 @@ mixture_distribution <- R6Class(
 
       self$add_parameter(weights, "weights")
     },
-
     create_target = function(truncation) {
       vble(self$bounds, dim = self$dim)
     },
-
     tf_distrib = function(parameters, dag) {
 
       # get information from the *nodes* for component distributions, not the tf

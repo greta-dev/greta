@@ -9,7 +9,6 @@ node <- R6Class(
     .value = array(NA),
     dim = NA,
     distribution = NULL,
-
     initialize = function(dim = NULL, value = NULL) {
       if (is.null(dim)) {
         dim <- c(1, 1)
@@ -26,7 +25,6 @@ node <- R6Class(
       self$value(value)
       self$get_unique_name()
     },
-
     register = function(dag) {
       if (!(self$unique_name %in% names(dag$node_list))) {
         dag$node_list[[self$unique_name]] <- self
@@ -57,14 +55,12 @@ node <- R6Class(
         }
       }
     },
-
     add_parent = function(node) {
 
       # add to list of parents
       self$parents <- c(self$parents, node)
       node$add_child(self)
     },
-
     remove_parent = function(node) {
 
       # remove node from list of parents
@@ -72,7 +68,6 @@ node <- R6Class(
       self$parents <- self$parents[-rem_idx]
       node$remove_child(self)
     },
-
     list_parents = function(dag) {
       parents <- self$parents
 
@@ -85,20 +80,17 @@ node <- R6Class(
 
       parents
     },
-
     add_child = function(node) {
 
       # add to list of children
       self$children <- c(self$children, node)
     },
-
     remove_child = function(node) {
 
       # remove node from list of parents
       rem_idx <- which(self$child_names() == node$unique_name)
       self$children <- self$children[-rem_idx]
     },
-
     list_children = function(dag) {
       children <- self$children
 
@@ -151,7 +143,6 @@ node <- R6Class(
 
       names
     },
-
     child_names = function() {
       children <- self$children
 
@@ -172,7 +163,6 @@ node <- R6Class(
 
       names
     },
-
     defined = function(dag) {
       tf_name <- dag$tf_name(self)
       tf_name %in% ls(dag$tf_environment)
@@ -225,7 +215,6 @@ node <- R6Class(
         self$.value <- new_value
       }
     },
-
     set_distribution = function(distribution) {
 
       # check it
@@ -252,11 +241,9 @@ node <- R6Class(
 
       text
     },
-
     get_unique_name = function() {
       self$unique_name <- paste0("node_", rhex())
     },
-
     plotting_label = function() {
       label <- ""
       type <- node_type(self)
