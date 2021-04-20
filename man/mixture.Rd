@@ -21,16 +21,16 @@ or a vector of positive integers.}
 }
 \description{
 \code{mixture} combines other probability distributions into a
-  single mixture distribution, either over a variable, or for fixed data.
+single mixture distribution, either over a variable, or for fixed data.
 }
 \details{
 The \code{weights} are rescaled to sum to one along the first
-  dimension, and are then used as the mixing weights of the distribution.
-  I.e. the probability density is calculated as a weighted sum of the
-  component probability distributions passed in via \code{\dots}
+dimension, and are then used as the mixing weights of the distribution.
+I.e. the probability density is calculated as a weighted sum of the
+component probability distributions passed in via \code{\dots}
 
-  The component probability distributions must all be either continuous or
-  discrete, and must have the same dimensions.
+The component probability distributions must all be either continuous or
+discrete, and must have the same dimensions.
 }
 \examples{
 \dontrun{

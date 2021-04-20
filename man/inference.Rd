@@ -114,105 +114,105 @@ Hessian arrays for the parameters}
 }
 \value{
 \code{mcmc}, \code{stashed_samples} & \code{extra_samples} - a
-  \code{greta_mcmc_list} object that can be analysed using functions from the
-  coda package. This will contain mcmc samples of the greta arrays used to
-  create \code{model}.
+\code{greta_mcmc_list} object that can be analysed using functions from the
+coda package. This will contain mcmc samples of the greta arrays used to
+create \code{model}.
 
 \code{opt} - a list containing the following named elements:
-  \itemize{
-   \item{\code{par}} {a named list of the optimal values for the greta arrays
-    specified in \code{model}}
-   \item{\code{value}} {the (unadjusted) negative log joint density of the
-    model at the parameters 'par'}
-   \item{\code{iterations}} {the number of iterations taken by the optimiser}
-   \item{\code{convergence}} {an integer code, 0 indicates successful
-    completion, 1 indicates the iteration limit \code{max_iterations} had
-    been reached}
-  \item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
-    matrices/arrays for the parameters (w.r.t. \code{value})}
- }
+\itemize{
+\item{\code{par}} {a named list of the optimal values for the greta arrays
+specified in \code{model}}
+\item{\code{value}} {the (unadjusted) negative log joint density of the
+model at the parameters 'par'}
+\item{\code{iterations}} {the number of iterations taken by the optimiser}
+\item{\code{convergence}} {an integer code, 0 indicates successful
+completion, 1 indicates the iteration limit \code{max_iterations} had
+been reached}
+\item{\code{hessian}} {(if \code{hessian = TRUE}) a named list of hessian
+matrices/arrays for the parameters (w.r.t. \code{value})}
+}
 }
 \description{
 Carry out statistical inference on greta models by
-  MCMC or likelihood/posterior optimisation.
+MCMC or likelihood/posterior optimisation.
 }
 \details{
 For \code{mcmc()} if \code{verbose = TRUE}, the progress bar shows
-  the number of iterations so far and the expected time to complete the phase
-  of model fitting (warmup or sampling). Occasionally, a proposed set of
-  parameters can cause numerical instability (I.e. the log density or its
-  gradient is \code{NA}, \code{Inf} or \code{-Inf}); normally because the log
-  joint density is so low that it can't be represented as a floating point
-  number. When this happens, the progress bar will also display the
-  proportion of proposals so far that were 'bad' (numerically unstable) and
-  therefore rejected. Some numerical instability during the warmup phase is
-  normal, but 'bad' samples during the sampling phase can lead to bias in
-  your posterior sample. If you only have a few bad samples (<10\\%), you can
-  usually resolve this with a longer warmup period or by manually defining
-  starting values to move the sampler into a more reasonable part of the
-  parameter space. If you have more samples than that, it may be that your
-  model is misspecified. You can often diagnose this by using
-  \code{\link{calculate}()} to evaluate the values of greta arrays, given
-  fixed values of model parameters, and checking the results are what you
-  expect.
+the number of iterations so far and the expected time to complete the phase
+of model fitting (warmup or sampling). Occasionally, a proposed set of
+parameters can cause numerical instability (I.e. the log density or its
+gradient is \code{NA}, \code{Inf} or \code{-Inf}); normally because the log
+joint density is so low that it can't be represented as a floating point
+number. When this happens, the progress bar will also display the
+proportion of proposals so far that were 'bad' (numerically unstable) and
+therefore rejected. Some numerical instability during the warmup phase is
+normal, but 'bad' samples during the sampling phase can lead to bias in
+your posterior sample. If you only have a few bad samples (<10\\\%), you can
+usually resolve this with a longer warmup period or by manually defining
+starting values to move the sampler into a more reasonable part of the
+parameter space. If you have more samples than that, it may be that your
+model is misspecified. You can often diagnose this by using
+\code{\link{calculate}()} to evaluate the values of greta arrays, given
+fixed values of model parameters, and checking the results are what you
+expect.
 
-  greta runs multiple chains simultaneously with a single sampler,
-  vectorising all operations across the chains. E.g. a scalar addition in
-  your model is computed as an elementwise vector addition (with vectors
-  having length \code{chains}), a vector addition is computed as a matrix
-  addition etc. TensorFlow is able to parallelise these operations, and this
-  approach reduced computational overheads, so this is the most efficient of
-  computing on multiple chains.
+greta runs multiple chains simultaneously with a single sampler,
+vectorising all operations across the chains. E.g. a scalar addition in
+your model is computed as an elementwise vector addition (with vectors
+having length \code{chains}), a vector addition is computed as a matrix
+addition etc. TensorFlow is able to parallelise these operations, and this
+approach reduced computational overheads, so this is the most efficient of
+computing on multiple chains.
 
-  Multiple mcmc samplers (each of which can simultaneously run multiple
-  chains) can also be run in parallel by setting the execution plan with the
-  \code{future} package. Only \code{plan(multisession)} futures or
-  \code{plan(cluster)} futures that don't use fork clusters are allowed,
-  since forked processes conflict with TensorFlow's parallelism. Explicitly
-  parallelising chains on a local machine with \code{plan(multisession)} will
-  probably be slower than running multiple chains simultaneously in a single
-  sampler (with \code{plan(sequential)}, the default) because of the overhead
-  required to start new sessions. However, \code{plan(cluster)} can be used
-  to run chains on a cluster of machines on a local or remote network. See
-  \code{\link[future:cluster]{future::cluster}} for details, and the
-  \code{future.batchtools} package to set up plans on clusters with job
-  schedulers.
+Multiple mcmc samplers (each of which can simultaneously run multiple
+chains) can also be run in parallel by setting the execution plan with the
+\code{future} package. Only \code{plan(multisession)} futures or
+\code{plan(cluster)} futures that don't use fork clusters are allowed,
+since forked processes conflict with TensorFlow's parallelism. Explicitly
+parallelising chains on a local machine with \code{plan(multisession)} will
+probably be slower than running multiple chains simultaneously in a single
+sampler (with \code{plan(sequential)}, the default) because of the overhead
+required to start new sessions. However, \code{plan(cluster)} can be used
+to run chains on a cluster of machines on a local or remote network. See
+\code{\link[future:cluster]{future::cluster}} for details, and the
+\code{future.batchtools} package to set up plans on clusters with job
+schedulers.
 
-  If \code{n_cores = NULL} and mcmc samplers are being run sequentially, each
-  sampler will be allowed to use all CPU cores (possibly to compute multiple
-  chains sequentially). If samplers are being run in parallel with the
-  \code{future} package, \code{n_cores} will be set so that \code{n_cores *
+If \code{n_cores = NULL} and mcmc samplers are being run sequentially, each
+sampler will be allowed to use all CPU cores (possibly to compute multiple
+chains sequentially). If samplers are being run in parallel with the
+\code{future} package, \code{n_cores} will be set so that \code{n_cores *
   \link[future:nbrOfWorkers]{future::nbrOfWorkers}} is less than the number
-  of CPU cores.
+of CPU cores.
 
-  After carrying out mcmc on all the model parameters, \code{mcmc()}
-  calculates the values of (i.e. traces) the parameters of interest for each
-  of these samples, similarly to \code{\link{calculate}}. Multiple
-  posterior samples can be traced simultaneously, though this can require
-  large amounts of memory for large models. As in \code{calculate}, the
-  argument \code{trace_batch_size} can be modified to trade-off speed against
-  memory usage.
+After carrying out mcmc on all the model parameters, \code{mcmc()}
+calculates the values of (i.e. traces) the parameters of interest for each
+of these samples, similarly to \code{\link{calculate}}. Multiple
+posterior samples can be traced simultaneously, though this can require
+large amounts of memory for large models. As in \code{calculate}, the
+argument \code{trace_batch_size} can be modified to trade-off speed against
+memory usage.
 
 If the sampler is aborted before finishing (and \code{future}
-  parallelism isn't being used), the samples collected so far can be
-  retrieved with \code{stashed_samples()}. Only samples from the sampling
-  phase will be returned.
+parallelism isn't being used), the samples collected so far can be
+retrieved with \code{stashed_samples()}. Only samples from the sampling
+phase will be returned.
 
 Samples returned by \code{mcmc()} and \code{stashed_samples()} can
-  be added to with \code{extra_samples()}. This continues the chain from the
-  last value of the previous chain and uses the same sampler and model as was
-  used to generate the previous samples. It is not possible to change the
-  sampler or extend the warmup period.
+be added to with \code{extra_samples()}. This continues the chain from the
+last value of the previous chain and uses the same sampler and model as was
+used to generate the previous samples. It is not possible to change the
+sampler or extend the warmup period.
 
 Because \code{opt()} acts on a list of greta arrays with possibly
-  varying dimension, the \code{par} and \code{hessian} objects returned by
-  \code{opt()} are named lists, rather than a vector (\code{par}) and a
-  matrix (\code{hessian}), as returned by \code{\link[stats:optim]{optim()}}.
-  Because greta arrays may not be vectors, the Hessians may not be matrices,
-  but could be higher-dimensional arrays. To return a Hessian matrix covering
-  multiple model parameters, you can construct your model so that all those
-  parameters are in a vector, then split the vector up to define the model.
-  The parameter vector can then be passed to model. See example.
+varying dimension, the \code{par} and \code{hessian} objects returned by
+\code{opt()} are named lists, rather than a vector (\code{par}) and a
+matrix (\code{hessian}), as returned by \code{\link[stats:optim]{optim()}}.
+Because greta arrays may not be vectors, the Hessians may not be matrices,
+but could be higher-dimensional arrays. To return a Hessian matrix covering
+multiple model parameters, you can construct your model so that all those
+parameters are in a vector, then split the vector up to define the model.
+The parameter vector can then be passed to model. See example.
 }
 \examples{
 \dontrun{

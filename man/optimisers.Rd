@@ -134,22 +134,22 @@ an \code{optimiser} object that can be passed to \code{\link{opt}}.
 }
 \description{
 Functions to set up optimisers (which find parameters that
-  maximise the joint density of a model) and change their tuning parameters,
-  for use in \code{\link{opt}()}. For details of the algorithms and how to
-  tune them, see the
-  \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy
-   optimiser docs} or the
-  \href{https://www.tensorflow.org/api_docs/python/tf/contrib/opt}{TensorFlow
-   optimiser docs}.
+maximise the joint density of a model) and change their tuning parameters,
+for use in \code{\link{opt}()}. For details of the algorithms and how to
+tune them, see the
+\href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy
+optimiser docs} or the
+\href{https://www.tensorflow.org/api_docs/python/tf/contrib/opt}{TensorFlow
+optimiser docs}.
 }
 \details{
 The optimisers \code{powell()}, \code{cg()}, \code{newton_cg()},
-  \code{l_bfgs_b()}, \code{tnc()}, \code{cobyla()}, and \code{slsqp()} are
-  deprecated. They will be removed in greta 0.4.0, since they will no longer
-  be available in TensorFlow 2.0, on which that version of greta will depend.
+\code{l_bfgs_b()}, \code{tnc()}, \code{cobyla()}, and \code{slsqp()} are
+deprecated. They will be removed in greta 0.4.0, since they will no longer
+be available in TensorFlow 2.0, on which that version of greta will depend.
 
 The \code{cobyla()} does not provide information about the number of
-  iterations nor convergence, so these elements of the output are set to NA
+iterations nor convergence, so these elements of the output are set to NA
 }
 \examples{
 \dontrun{

@@ -20,24 +20,24 @@ simulation so as to generate a reproducible sample}
 }
 \value{
 A named list of vectors, matrices or arrays containing independent
-  samples of the greta arrays associated with the model. The number of
-  samples will be prepended as the first dimension of the greta array, so
-  that a vector of samples is returned for each scalar greta array, and a
-  matrix is returned for each vector greta array, etc.
+samples of the greta arrays associated with the model. The number of
+samples will be prepended as the first dimension of the greta array, so
+that a vector of samples is returned for each scalar greta array, and a
+matrix is returned for each vector greta array, etc.
 }
 \description{
 Simulate values of all named greta arrays associated with a
-  greta model from the model priors, including the response variable.
+greta model from the model priors, including the response variable.
 }
 \details{
 This is essentially a wrapper around \code{\link{calculate}()} that
-  finds all relevant greta arrays. See that function for more functionality,
-  including simulation conditional on fixed values or posterior samples.
+finds all relevant greta arrays. See that function for more functionality,
+including simulation conditional on fixed values or posterior samples.
 
-  To simulate values of the response variable, it must be both a named object
-  (in the calling environment) and be a greta array. If you don't see it
-  showing up in the output, you may need to use \code{as_data} to convert it
-  to a greta array before defining the model.
+To simulate values of the response variable, it must be both a named object
+(in the calling environment) and be a greta array. If you don't see it
+showing up in the output, you may need to use \code{as_data} to convert it
+to a greta array before defining the model.
 }
 \examples{
 \dontrun{
