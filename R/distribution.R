@@ -33,7 +33,7 @@
 #' # get the distribution over y
 #' distribution(y)
 #' }
-`distribution<-` <- function(greta_array, value) {  # nolint
+`distribution<-` <- function(greta_array, value) { # nolint
 
   # stash the old greta array to return
   greta_array_tmp <- greta_array
@@ -46,19 +46,22 @@
   # only for greta arrays without distributions
   if (has_distribution(node)) {
     stop("left hand side already has a distribution assigned",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # only for data greta arrays
   if (node_type(node) != "data") {
     stop("distributions can only be assigned to data greta arrays",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # can only assign with greta arrays ...
   if (!inherits(value, "greta_array")) {
     stop("right hand side must be a greta array",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # ... that have distributions
@@ -67,24 +70,27 @@
 
   if (!inherits(distribution_node, "distribution_node")) {
     stop("right hand side must have a distribution",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # that aren't already fixed
   if (inherits(distribution_node$target, "data_node")) {
     stop("right hand side has already been assigned fixed values",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # if distribution isn't scalar, make sure it has the right dimensions
   if (!is_scalar(value)) {
     if (!identical(dim(greta_array), dim(value))) {
       stop("left and right hand sides have different dimensions. ",
-           "The distribution must have dimension of either ",
-           paste(dim(greta_array), collapse = " x "),
-           " or 1 x 1, but instead has dimension ",
-           paste(dim(value), collapse = " x "),
-           call. = FALSE)
+        "The distribution must have dimension of either ",
+        paste(dim(greta_array), collapse = " x "),
+        " or 1 x 1, but instead has dimension ",
+        paste(dim(value), collapse = " x "),
+        call. = FALSE
+      )
     }
   }
 
@@ -102,7 +108,6 @@
 
   # return greta_array (pre-conversion to a greta array)
   greta_array_tmp
-
 }
 
 #' @rdname distribution
@@ -112,21 +117,18 @@ distribution <- function(greta_array) {
   # only for greta arrays
   if (!inherits(greta_array, "greta_array")) {
     stop("not a greta array",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # if greta_array has a distribution, return this greta array
   if (inherits(get_node(greta_array)$distribution, "distribution_node")) {
-
     distrib <- greta_array
-
   } else {
 
     # otherwise return NULL
     distrib <- NULL
-
   }
 
   distrib
-
 }

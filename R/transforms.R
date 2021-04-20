@@ -27,66 +27,74 @@
 #' @examples
 #' \dontrun{
 #'
-#'  x1 <- normal(1, 3, dim = 10)
+#' x1 <- normal(1, 3, dim = 10)
 #'
-#'  # transformation to the unit interval
-#'  p1 <- iprobit(x1)
-#'  p2 <- ilogit(x1)
-#'  p3 <- icloglog(x1)
-#'  p4 <- icauchit(x1)
+#' # transformation to the unit interval
+#' p1 <- iprobit(x1)
+#' p2 <- ilogit(x1)
+#' p3 <- icloglog(x1)
+#' p4 <- icauchit(x1)
 #'
-#'  # and to positive reals
-#'  y <- log1pe(x1)
+#' # and to positive reals
+#' y <- log1pe(x1)
 #'
-#'  # transform from 10x3 to 10x4, where rows are a complete set of
-#'  # probabilities
-#'  x2 <- normal(1, 3, dim = c(10, 3))
-#'  z <- imultilogit(x2)
-#'
+#' # transform from 10x3 to 10x4, where rows are a complete set of
+#' # probabilities
+#' x2 <- normal(1, 3, dim = c(10, 3))
+#' z <- imultilogit(x2)
 #' }
 NULL
 
 #' @rdname transforms
 #' @export
-iprobit <- function(x)
-  op("iprobit", x, tf_operation = "tf_iprobit",
-     representations = list(probit = x))
-
-#' @rdname transforms
-#' @export
-ilogit <- function(x) {
-  op("ilogit", x, tf_operation = "tf$nn$sigmoid",
-     representations = list(logit = x))
+iprobit <- function(x) {
+  op("iprobit", x,
+    tf_operation = "tf_iprobit",
+    representations = list(probit = x)
+  )
 }
 
 #' @rdname transforms
 #' @export
-icloglog <- function(x)
+ilogit <- function(x) {
+  op("ilogit", x,
+    tf_operation = "tf$nn$sigmoid",
+    representations = list(logit = x)
+  )
+}
+
+#' @rdname transforms
+#' @export
+icloglog <- function(x) {
   op("icloglog", x, tf_operation = "tf_icloglog")
+}
 
 #' @rdname transforms
 #' @export
-icauchit <- function(x)
+icauchit <- function(x) {
   op("icauchit", x, tf_operation = "tf_icauchit")
+}
 
 #' @rdname transforms
 #' @export
-log1pe <- function(x)
+log1pe <- function(x) {
   op("log1pe", x, tf_operation = "tf$nn$softplus")
+}
 
 #' @rdname transforms
 #' @export
 imultilogit <- function(x) {
-
   dim <- dim(x)
 
   # check it's a matrix
   if (length(dim) != 2) {
     stop("imultilogit expects a 2D greta array",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   op("imultilogit", x,
-     dim = dim + c(0, 1),
-     tf_operation = "tf_imultilogit")
+    dim = dim + c(0, 1),
+    tf_operation = "tf_imultilogit"
+  )
 }

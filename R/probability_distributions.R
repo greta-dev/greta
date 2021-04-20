@@ -2,37 +2,33 @@ uniform_distribution <- R6Class(
   "uniform_distribution",
   inherit = distribution_node,
   public = list(
-
     min = NA,
     max = NA,
 
     initialize = function(min, max, dim) {
-
-      if (inherits(min, "greta_array") | inherits(max, "greta_array"))
+      if (inherits(min, "greta_array") | inherits(max, "greta_array")) {
         stop("min and max must be fixed, they cannot be another greta array")
+      }
 
       good_types <- is.numeric(min) && length(min) == 1 &
         is.numeric(max) && length(max) == 1
 
       if (!good_types) {
-
         stop("min and max must be numeric vectors of length 1",
-             call. = FALSE)
-
+          call. = FALSE
+        )
       }
 
       if (!is.finite(min) | !is.finite(max)) {
-
         stop("min and max must finite scalars",
-             call. = FALSE)
-
+          call. = FALSE
+        )
       }
 
       if (min >= max) {
-
         stop("max must be greater than min",
-             call. = FALSE)
-
+          call. = FALSE
+        )
       }
 
       # store min and max as numeric scalars (needed in create_target, done in
@@ -49,24 +45,22 @@ uniform_distribution <- R6Class(
       max <- as.greta_array(max)
       self$add_parameter(min, "min")
       self$add_parameter(max, "max")
-
     },
 
     # default value (ignore any truncation arguments)
     create_target = function(...) {
-      vble(truncation = c(self$min, self$max),
-           dim = self$dim)
+      vble(
+        truncation = c(self$min, self$max),
+        dim = self$dim
+      )
     },
 
     tf_distrib = function(parameters, dag) {
-
       tfp$distributions$Uniform(
         low = parameters$min,
         high = parameters$max
       )
-
     }
-
   )
 )
 
@@ -74,9 +68,7 @@ normal_distribution <- R6Class(
   "normal_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(mean, sd, dim, truncation) {
-
       mean <- as.greta_array(mean)
       sd <- as.greta_array(sd)
 
@@ -88,10 +80,11 @@ normal_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$Normal(loc = parameters$mean,
-                               scale = parameters$sd)
+      tfp$distributions$Normal(
+        loc = parameters$mean,
+        scale = parameters$sd
+      )
     }
-
   )
 )
 
@@ -99,9 +92,7 @@ lognormal_distribution <- R6Class(
   "lognormal_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(meanlog, sdlog, dim, truncation) {
-
       meanlog <- as.greta_array(meanlog)
       sdlog <- as.greta_array(sdlog)
 
@@ -115,11 +106,12 @@ lognormal_distribution <- R6Class(
 
     # nolint start
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$LogNormal(loc = parameters$meanlog,
-                                  scale = parameters$sdlog)
+      tfp$distributions$LogNormal(
+        loc = parameters$meanlog,
+        scale = parameters$sdlog
+      )
     }
     # nolint end
-
   )
 )
 
@@ -127,12 +119,10 @@ bernoulli_distribution <- R6Class(
   "bernoulli_distribution",
   inherit = distribution_node,
   public = list(
-
     prob_is_logit = FALSE,
     prob_is_probit = FALSE,
 
     initialize = function(prob, dim) {
-
       prob <- as.greta_array(prob)
 
       # add the nodes as parents and parameters
@@ -152,9 +142,7 @@ bernoulli_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
       if (self$prob_is_logit) {
-
         tfp$distributions$Bernoulli(logits = parameters$prob)
-
       } else if (self$prob_is_probit) {
 
         # in the probit case, get the log probability of success and compute the
@@ -169,14 +157,10 @@ bernoulli_distribution <- R6Class(
         }
 
         list(log_prob = log_prob)
-
       } else {
-
         tfp$distributions$Bernoulli(probs = parameters$prob)
-
       }
     }
-
   )
 )
 
@@ -184,12 +168,10 @@ binomial_distribution <- R6Class(
   "binomial_distribution",
   inherit = distribution_node,
   public = list(
-
     prob_is_logit = FALSE,
     prob_is_probit = FALSE,
 
     initialize = function(size, prob, dim) {
-
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
@@ -207,13 +189,14 @@ binomial_distribution <- R6Class(
 
       self$add_parameter(prob, "prob")
       self$add_parameter(size, "size")
-
     },
 
     tf_distrib = function(parameters, dag) {
       if (self$prob_is_logit) {
-        tfp$distributions$Binomial(total_count = parameters$size,
-                                   logits = parameters$prob)
+        tfp$distributions$Binomial(
+          total_count = parameters$size,
+          logits = parameters$prob
+        )
       } else if (self$prob_is_probit) {
 
         # in the probit case, get the log probability of success and compute the
@@ -232,13 +215,13 @@ binomial_distribution <- R6Class(
         }
 
         list(log_prob = log_prob)
-
       } else {
-        tfp$distributions$Binomial(total_count = parameters$size,
-                                   probs = parameters$prob)
+        tfp$distributions$Binomial(
+          total_count = parameters$size,
+          probs = parameters$prob
+        )
       }
     }
-
   )
 )
 
@@ -246,9 +229,7 @@ beta_binomial_distribution <- R6Class(
   "beta_binomial_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(size, alpha, beta, dim) {
-
       size <- as.greta_array(size)
       alpha <- as.greta_array(alpha)
       beta <- as.greta_array(beta)
@@ -259,11 +240,9 @@ beta_binomial_distribution <- R6Class(
       self$add_parameter(size, "size")
       self$add_parameter(alpha, "alpha")
       self$add_parameter(beta, "beta")
-
     },
 
     tf_distrib = function(parameters, dag) {
-
       size <- parameters$size
       alpha <- parameters$alpha
       beta <- parameters$beta
@@ -276,20 +255,20 @@ beta_binomial_distribution <- R6Class(
 
       # generate a beta, then a binomial
       sample <- function(seed) {
-
-        beta <- tfp$distributions$Beta(concentration1 = alpha,
-                                       concentration0 = beta)
+        beta <- tfp$distributions$Beta(
+          concentration1 = alpha,
+          concentration0 = beta
+        )
         probs <- beta$sample(seed = seed)
-        binomial <- tfp$distributions$Binomial(total_count = size,
-                                               probs = probs)
+        binomial <- tfp$distributions$Binomial(
+          total_count = size,
+          probs = probs
+        )
         binomial$sample(seed = seed)
-
       }
 
       list(log_prob = log_prob, sample = sample)
-
     }
-
   )
 )
 
@@ -297,11 +276,9 @@ poisson_distribution <- R6Class(
   "poisson_distribution",
   inherit = distribution_node,
   public = list(
-
     lambda_is_log = FALSE,
 
     initialize = function(lambda, dim) {
-
       lambda <- as.greta_array(lambda)
 
       # add the nodes as parents and parameters
@@ -316,7 +293,6 @@ poisson_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-
       if (self$lambda_is_log) {
         log_lambda <- parameters$lambda
       } else {
@@ -324,9 +300,7 @@ poisson_distribution <- R6Class(
       }
 
       tfp$distributions$Poisson(log_rate = log_lambda)
-
     }
-
   )
 )
 
@@ -334,9 +308,7 @@ negative_binomial_distribution <- R6Class(
   "negative_binomial_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(size, prob, dim) {
-
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
@@ -349,11 +321,12 @@ negative_binomial_distribution <- R6Class(
 
     # nolint start
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$NegativeBinomial(total_count = parameters$size,
-                                         probs = fl(1) - parameters$prob)
+      tfp$distributions$NegativeBinomial(
+        total_count = parameters$size,
+        probs = fl(1) - parameters$prob
+      )
     }
     # nolint end
-
   )
 )
 
@@ -361,9 +334,7 @@ hypergeometric_distribution <- R6Class(
   "hypergeometric_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(m, n, k, dim) {
-
       m <- as.greta_array(m)
       n <- as.greta_array(n)
       k <- as.greta_array(k)
@@ -377,7 +348,6 @@ hypergeometric_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-
       m <- parameters$m
       n <- parameters$n
       k <- parameters$k
@@ -389,9 +359,7 @@ hypergeometric_distribution <- R6Class(
       }
 
       list(log_prob = log_prob)
-
     }
-
   )
 )
 
@@ -399,9 +367,7 @@ gamma_distribution <- R6Class(
   "gamma_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(shape, rate, dim, truncation) {
-
       shape <- as.greta_array(shape)
       rate <- as.greta_array(rate)
 
@@ -415,10 +381,11 @@ gamma_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$Gamma(concentration = parameters$shape,
-                              rate = parameters$rate)
+      tfp$distributions$Gamma(
+        concentration = parameters$shape,
+        rate = parameters$rate
+      )
     }
-
   )
 )
 
@@ -426,9 +393,7 @@ inverse_gamma_distribution <- R6Class(
   "inverse_gamma_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(alpha, beta, dim, truncation) {
-
       alpha <- as.greta_array(alpha)
       beta <- as.greta_array(beta)
 
@@ -443,11 +408,12 @@ inverse_gamma_distribution <- R6Class(
 
     # nolint start
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$InverseGamma(concentration = parameters$alpha,
-                                     rate = parameters$beta)
+      tfp$distributions$InverseGamma(
+        concentration = parameters$alpha,
+        rate = parameters$beta
+      )
     }
     # nolint end
-
   )
 )
 
@@ -455,9 +421,7 @@ weibull_distribution <- R6Class(
   "weibull_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(shape, scale, dim, truncation) {
-
       shape <- as.greta_array(shape)
       scale <- as.greta_array(scale)
 
@@ -471,7 +435,6 @@ weibull_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-
       a <- parameters$shape
       b <- parameters$scale
 
@@ -479,7 +442,7 @@ weibull_distribution <- R6Class(
       bijector <- tfp$bijectors$Weibull(scale = b, concentration = a)
 
       log_prob <- function(x) {
-        log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
+        log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b)^a
       }
 
       cdf <- function(x) {
@@ -499,7 +462,6 @@ weibull_distribution <- R6Class(
         # sample by pushing standard uniforms through the inverse cdf
         u <- tf_randu(self$dim, dag)
         quantile(u)
-
       }
 
       list(
@@ -509,9 +471,7 @@ weibull_distribution <- R6Class(
         quantile = quantile,
         sample = sample
       )
-
     }
-
   )
 )
 
@@ -519,9 +479,7 @@ exponential_distribution <- R6Class(
   "exponential_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(rate, dim, truncation) {
-
       rate <- as.greta_array(rate)
 
       # add the nodes as parents and parameters
@@ -535,7 +493,6 @@ exponential_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Exponential(rate = parameters$rate)
     }
-
   )
 )
 
@@ -543,7 +500,6 @@ pareto_distribution <- R6Class(
   "pareto_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(a, b, dim, truncation) {
       a <- as.greta_array(a)
       b <- as.greta_array(b)
@@ -560,10 +516,11 @@ pareto_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
 
       # a is shape, b is scale
-      tfp$distributions$Pareto(concentration = parameters$a,
-                               scale = parameters$b)
+      tfp$distributions$Pareto(
+        concentration = parameters$a,
+        scale = parameters$b
+      )
     }
-
   )
 )
 
@@ -571,9 +528,7 @@ student_distribution <- R6Class(
   "student_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(df, mu, sigma, dim, truncation) {
-
       df <- as.greta_array(df)
       mu <- as.greta_array(mu)
       sigma <- as.greta_array(sigma)
@@ -588,12 +543,13 @@ student_distribution <- R6Class(
 
     # nolint start
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$StudentT(df = parameters$df,
-                                 loc = parameters$mu,
-                                 scale = parameters$sigma)
+      tfp$distributions$StudentT(
+        df = parameters$df,
+        loc = parameters$mu,
+        scale = parameters$sigma
+      )
     }
     # nolint end
-
   )
 )
 
@@ -601,9 +557,7 @@ laplace_distribution <- R6Class(
   "laplace_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(mu, sigma, dim, truncation) {
-
       mu <- as.greta_array(mu)
       sigma <- as.greta_array(sigma)
 
@@ -615,10 +569,11 @@ laplace_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$Laplace(loc = parameters$mu,
-                                scale = parameters$sigma)
+      tfp$distributions$Laplace(
+        loc = parameters$mu,
+        scale = parameters$sigma
+      )
     }
-
   )
 )
 
@@ -626,9 +581,7 @@ beta_distribution <- R6Class(
   "beta_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(shape1, shape2, dim, truncation) {
-
       shape1 <- as.greta_array(shape1)
       shape2 <- as.greta_array(shape2)
 
@@ -642,10 +595,11 @@ beta_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$Beta(concentration1 = parameters$shape1,
-                             concentration0 = parameters$shape2)
+      tfp$distributions$Beta(
+        concentration1 = parameters$shape1,
+        concentration0 = parameters$shape2
+      )
     }
-
   )
 )
 
@@ -653,9 +607,7 @@ cauchy_distribution <- R6Class(
   "cauchy_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(location, scale, dim, truncation) {
-
       location <- as.greta_array(location)
       scale <- as.greta_array(scale)
 
@@ -667,11 +619,11 @@ cauchy_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-
-      tfp$distributions$Cauchy(loc = parameters$location,
-                               scale = parameters$scale)
+      tfp$distributions$Cauchy(
+        loc = parameters$location,
+        scale = parameters$scale
+      )
     }
-
   )
 )
 
@@ -679,9 +631,7 @@ chi_squared_distribution <- R6Class(
   "chi_squared_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(df, dim, truncation) {
-
       df <- as.greta_array(df)
 
       # add the nodes as parents and parameters
@@ -695,7 +645,6 @@ chi_squared_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Chi2(df = parameters$df)
     }
-
   )
 )
 
@@ -703,9 +652,7 @@ logistic_distribution <- R6Class(
   "logistic_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(location, scale, dim, truncation) {
-
       location <- as.greta_array(location)
       scale <- as.greta_array(scale)
 
@@ -717,10 +664,11 @@ logistic_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$Logistic(loc = parameters$location,
-                                 scale = parameters$scale)
+      tfp$distributions$Logistic(
+        loc = parameters$location,
+        scale = parameters$scale
+      )
     }
-
   )
 )
 
@@ -728,9 +676,7 @@ f_distribution <- R6Class(
   "f_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(df1, df2, dim, truncation) {
-
       df1 <- as.greta_array(df1)
       df2 <- as.greta_array(df2)
 
@@ -744,12 +690,12 @@ f_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-
       df1 <- parameters$df1
       df2 <- parameters$df2
 
-      tf_lbeta <- function(a, b)
+      tf_lbeta <- function(a, b) {
         tf$math$lgamma(a) + tf$math$lgamma(b) - tf$math$lgamma(a + b)
+      }
 
       log_prob <- function(x) {
         df1_x <- df1 * x
@@ -765,8 +711,9 @@ f_distribution <- R6Class(
         tf$math$betainc(df1 / fl(2), df2 / fl(2), ratio)
       }
 
-      log_cdf <- function(x)
+      log_cdf <- function(x) {
         log(cdf(x))
+      }
 
       sample <- function(seed) {
 
@@ -778,7 +725,6 @@ f_distribution <- R6Class(
         u2 <- d2$sample(seed = seed)
 
         (u1 / df1) / (u2 / df2)
-
       }
 
       list(
@@ -787,9 +733,7 @@ f_distribution <- R6Class(
         log_cdf = log_cdf,
         sample = sample
       )
-
     }
-
   )
 )
 
@@ -797,43 +741,40 @@ dirichlet_distribution <- R6Class(
   "dirichlet_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(alpha, n_realisations, dimension) {
-
       alpha <- as.greta_array(alpha)
 
       # coerce to greta arrays
       alpha <- as.greta_array(alpha)
 
-      dim <- check_multivariate_dims(vectors = list(alpha),
-                                     n_realisations = n_realisations,
-                                     dimension = dimension)
+      dim <- check_multivariate_dims(
+        vectors = list(alpha),
+        n_realisations = n_realisations,
+        dimension = dimension
+      )
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
       self$bounds <- c(0, Inf)
       super$initialize("dirichlet", dim,
-                       truncation = c(0, Inf),
-                       multivariate = TRUE)
+        truncation = c(0, Inf),
+        multivariate = TRUE
+      )
       self$add_parameter(alpha, "alpha")
-
     },
 
     create_target = function(truncation) {
-
       simplex_greta_array <- simplex_variable(self$dim)
 
       # return the node for the simplex
       target_node <- get_node(simplex_greta_array)
       target_node
-
     },
 
     tf_distrib = function(parameters, dag) {
       alpha <- parameters$alpha
       tfp$distributions$Dirichlet(concentration = alpha)
     }
-
   )
 )
 
@@ -841,17 +782,18 @@ dirichlet_multinomial_distribution <- R6Class(
   "dirichlet_multinomial_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(size, alpha, n_realisations, dimension) {
 
       # coerce to greta arrays
       size <- as.greta_array(size)
       alpha <- as.greta_array(alpha)
 
-      dim <- check_multivariate_dims(scalars = list(size),
-                                     vectors = list(alpha),
-                                     n_realisations = n_realisations,
-                                     dimension = dimension)
+      dim <- check_multivariate_dims(
+        scalars = list(size),
+        vectors = list(alpha),
+        n_realisations = n_realisations,
+        dimension = dimension
+      )
 
 
       # need to handle size as a vector!
@@ -859,23 +801,24 @@ dirichlet_multinomial_distribution <- R6Class(
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("dirichlet_multinomial",
-                       dim = dim,
-                       discrete = TRUE,
-                       multivariate = TRUE)
+        dim = dim,
+        discrete = TRUE,
+        multivariate = TRUE
+      )
       self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(alpha, "alpha")
-
     },
 
     # nolint start
     tf_distrib = function(parameters, dag) {
       parameters$size <- tf_flatten(parameters$size)
       distrib <- tfp$distributions$DirichletMultinomial
-      distrib(total_count = parameters$size,
-              concentration = parameters$alpha)
+      distrib(
+        total_count = parameters$size,
+        concentration = parameters$alpha
+      )
     }
     # nolint end
-
   )
 )
 
@@ -883,29 +826,30 @@ multinomial_distribution <- R6Class(
   "multinomial_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(size, prob, n_realisations, dimension) {
 
       # coerce to greta arrays
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
 
-      dim <- check_multivariate_dims(scalars = list(size),
-                                     vectors = list(prob),
-                                     n_realisations = n_realisations,
-                                     dimension = dimension)
+      dim <- check_multivariate_dims(
+        scalars = list(size),
+        vectors = list(prob),
+        n_realisations = n_realisations,
+        dimension = dimension
+      )
 
       # need to make sure size is a column vector!
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("multinomial",
-                       dim = dim,
-                       discrete = TRUE,
-                       multivariate = TRUE)
+        dim = dim,
+        discrete = TRUE,
+        multivariate = TRUE
+      )
       self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(prob, "prob")
-
     },
 
     tf_distrib = function(parameters, dag) {
@@ -913,10 +857,11 @@ multinomial_distribution <- R6Class(
       # scale probs to get absolute density correct
       parameters$prob <- parameters$prob / tf_sum(parameters$prob)
 
-      tfp$distributions$Multinomial(total_count = parameters$size,
-                                    probs = parameters$prob)
+      tfp$distributions$Multinomial(
+        total_count = parameters$size,
+        probs = parameters$prob
+      )
     }
-
   )
 )
 
@@ -924,34 +869,36 @@ categorical_distribution <- R6Class(
   "categorical_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(prob, n_realisations, dimension) {
 
       # coerce to greta arrays
       prob <- as.greta_array(prob)
 
-      dim <- check_multivariate_dims(vectors = list(prob),
-                                     n_realisations = n_realisations,
-                                     dimension = dimension)
+      dim <- check_multivariate_dims(
+        vectors = list(prob),
+        n_realisations = n_realisations,
+        dimension = dimension
+      )
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
       super$initialize("categorical",
-                       dim = dim,
-                       discrete = TRUE,
-                       multivariate = TRUE)
+        dim = dim,
+        discrete = TRUE,
+        multivariate = TRUE
+      )
       self$add_parameter(prob, "prob")
-
     },
 
     tf_distrib = function(parameters, dag) {
       # scale probs to get absolute density correct
       probs <- parameters$prob
       probs <- probs / tf_sum(probs)
-      tfp$distributions$Multinomial(total_count = fl(1),
-                                    probs = probs)
+      tfp$distributions$Multinomial(
+        total_count = fl(1),
+        probs = probs
+      )
     }
-
   )
 )
 
@@ -959,30 +906,30 @@ multivariate_normal_distribution <- R6Class(
   "multivariate_normal_distribution",
   inherit = distribution_node,
   public = list(
-
     sigma_is_cholesky = FALSE,
     # nolint start
     initialize = function(mean, Sigma, n_realisations, dimension) {
-    # nolint end
+      # nolint end
       # coerce to greta arrays
       mean <- as.greta_array(mean)
       sigma <- as.greta_array(Sigma)
 
       # check dim is a positive scalar integer
-      dim <- check_multivariate_dims(vectors = list(mean),
-                                     squares = list(sigma),
-                                     n_realisations = n_realisations,
-                                     dimension = dimension)
+      dim <- check_multivariate_dims(
+        vectors = list(mean),
+        squares = list(sigma),
+        n_realisations = n_realisations,
+        dimension = dimension
+      )
 
       # check dimensions of Sigma
       if (nrow(sigma) != ncol(sigma) |
-          length(dim(sigma)) != 2) {
-
+        length(dim(sigma)) != 2) {
         stop("Sigma must be a square 2D greta array, ",
-             "but has dimensions ",
-             paste(dim(sigma), collapse = " x "),
-             call. = FALSE)
-
+          "but has dimensions ",
+          paste(dim(sigma), collapse = " x "),
+          call. = FALSE
+        )
       }
 
       # compare possible dimensions
@@ -990,11 +937,10 @@ multivariate_normal_distribution <- R6Class(
       dim_sigma <- nrow(sigma)
 
       if (dim_mean != dim_sigma) {
-
         stop("mean and Sigma have different dimensions, ",
-             dim_mean, " vs ", dim_sigma,
-             call. = FALSE)
-
+          dim_mean, " vs ", dim_sigma,
+          call. = FALSE
+        )
       }
 
       # coerce the parameter arguments to nodes and add as parents and
@@ -1007,7 +953,6 @@ multivariate_normal_distribution <- R6Class(
       }
       self$add_parameter(mean, "mean")
       self$add_parameter(sigma, "sigma")
-
     },
 
     tf_distrib = function(parameters, dag) {
@@ -1027,11 +972,12 @@ multivariate_normal_distribution <- R6Class(
 
       mu <- parameters$mean
       # nolint start
-      tfp$distributions$MultivariateNormalTriL(loc = mu,
-                                               scale_tril = l)
+      tfp$distributions$MultivariateNormalTriL(
+        loc = mu,
+        scale_tril = l
+      )
       # nolint end
     }
-
   )
 )
 
@@ -1046,7 +992,7 @@ wishart_distribution <- R6Class(
     # set when defining the graph
     target_is_cholesky = FALSE,
 
-    initialize = function(df, Sigma) {  # nolint
+    initialize = function(df, Sigma) { # nolint
       # add the nodes as parents and parameters
 
       df <- as.greta_array(df)
@@ -1054,12 +1000,11 @@ wishart_distribution <- R6Class(
 
       # check dimensions of Sigma
       if (nrow(sigma) != ncol(sigma) |
-          length(dim(sigma)) != 2) {
-
+        length(dim(sigma)) != 2) {
         stop("Sigma must be a square 2D greta array, but has dimensions ",
-             paste(dim(sigma), collapse = " x "),
-             call. = FALSE)
-
+          paste(dim(sigma), collapse = " x "),
+          call. = FALSE
+        )
       }
 
       dim <- nrow(sigma)
@@ -1077,7 +1022,6 @@ wishart_distribution <- R6Class(
 
       # make the initial value PD (no idea whether this does anything)
       self$value(unknowns(dims = c(dim, dim), data = diag(dim)))
-
     },
 
     # create a variable, and transform to a symmetric matrix (with cholesky
@@ -1093,7 +1037,6 @@ wishart_distribution <- R6Class(
       # return the node for the symmetric matrix
       target_node <- get_node(matrix_greta_array)
       target_node
-
     },
 
     # get a cholesky factor for the target if possible
@@ -1140,16 +1083,16 @@ wishart_distribution <- R6Class(
         }
 
         # use the density for choleskied x, with choleskied Sigma
-        distrib <- tfp$distributions$Wishart(df = df,
-                                             scale_tril = sigma_chol,
-                                             input_output_cholesky = TRUE)
+        distrib <- tfp$distributions$Wishart(
+          df = df,
+          scale_tril = sigma_chol,
+          input_output_cholesky = TRUE
+        )
 
         distrib$log_prob(x_chol)
-
       }
 
       sample <- function(seed) {
-
         df <- tf$squeeze(parameters$df, 1:2)
         sigma <- parameters$sigma
 
@@ -1161,8 +1104,10 @@ wishart_distribution <- R6Class(
         }
 
         # use the density for choleskied x, with choleskied Sigma
-        distrib <- tfp$distributions$Wishart(df = df,
-                                             scale_tril = sigma_chol)
+        distrib <- tfp$distributions$Wishart(
+          df = df,
+          scale_tril = sigma_chol
+        )
 
         draws <- distrib$sample(seed = seed)
 
@@ -1171,13 +1116,10 @@ wishart_distribution <- R6Class(
         }
 
         draws
-
       }
 
       list(log_prob = log_prob, sample = sample)
-
     }
-
   )
 )
 
@@ -1190,27 +1132,24 @@ lkj_correlation_distribution <- R6Class(
     target_is_cholesky = FALSE,
 
     initialize = function(eta, dimension = 2) {
-
       dimension <- check_dimension(target = dimension)
 
       if (!inherits(eta, "greta_array")) {
-
         if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
           stop("eta must be a positive scalar value, or a scalar greta array",
-               call. = FALSE)
+            call. = FALSE
+          )
         }
-
       }
 
       # add the nodes as parents and parameters
       eta <- as.greta_array(eta)
 
       if (!is_scalar(eta)) {
-
         stop("eta must be a scalar, but had dimensions: ",
-             capture.output(dput(dim(eta))),
-             call. = FALSE)
-
+          capture.output(dput(dim(eta))),
+          call. = FALSE
+        )
       }
 
       dim <- c(dimension, dimension)
@@ -1221,7 +1160,6 @@ lkj_correlation_distribution <- R6Class(
 
       # make the initial value PD
       self$value(unknowns(dims = dim, data = diag(dimension)))
-
     },
 
     # default (cholesky factor, ignores truncation)
@@ -1236,7 +1174,6 @@ lkj_correlation_distribution <- R6Class(
       # return the node for the symmetric matrix
       target_node <- get_node(matrix_greta_array)
       target_node
-
     },
 
     # get a cholesky factor for the target if possible
@@ -1257,7 +1194,6 @@ lkj_correlation_distribution <- R6Class(
     },
 
     tf_distrib = function(parameters, dag) {
-
       eta <- tf$squeeze(parameters$eta, 1:2)
       dim <- self$dim[1]
 
@@ -1271,9 +1207,7 @@ lkj_correlation_distribution <- R6Class(
       # some reason. But we can use map_fun to apply their simulation to each
       # element of eta.
       sample <- function(seed) {
-
         sample_once <- function(eta) {
-
           d <- tfp$distributions$LKJ(
             dimension = dim,
             concentration = eta,
@@ -1281,50 +1215,50 @@ lkj_correlation_distribution <- R6Class(
           )
 
           d$sample(seed = seed)
-
         }
 
         tf$map_fn(sample_once, eta)
-
       }
 
-      list(log_prob = distrib$log_prob,
-           sample = sample)
-
+      list(
+        log_prob = distrib$log_prob,
+        sample = sample
+      )
     }
-
   )
 )
 
 # module for export via .internals
-distribution_classes_module <- module(uniform_distribution,
-                                      normal_distribution,
-                                      lognormal_distribution,
-                                      bernoulli_distribution,
-                                      binomial_distribution,
-                                      beta_binomial_distribution,
-                                      negative_binomial_distribution,
-                                      hypergeometric_distribution,
-                                      poisson_distribution,
-                                      gamma_distribution,
-                                      inverse_gamma_distribution,
-                                      weibull_distribution,
-                                      exponential_distribution,
-                                      pareto_distribution,
-                                      student_distribution,
-                                      laplace_distribution,
-                                      beta_distribution,
-                                      cauchy_distribution,
-                                      chi_squared_distribution,
-                                      logistic_distribution,
-                                      f_distribution,
-                                      multivariate_normal_distribution,
-                                      wishart_distribution,
-                                      lkj_correlation_distribution,
-                                      multinomial_distribution,
-                                      categorical_distribution,
-                                      dirichlet_distribution,
-                                      dirichlet_multinomial_distribution)
+distribution_classes_module <- module(
+  uniform_distribution,
+  normal_distribution,
+  lognormal_distribution,
+  bernoulli_distribution,
+  binomial_distribution,
+  beta_binomial_distribution,
+  negative_binomial_distribution,
+  hypergeometric_distribution,
+  poisson_distribution,
+  gamma_distribution,
+  inverse_gamma_distribution,
+  weibull_distribution,
+  exponential_distribution,
+  pareto_distribution,
+  student_distribution,
+  laplace_distribution,
+  beta_distribution,
+  cauchy_distribution,
+  chi_squared_distribution,
+  logistic_distribution,
+  f_distribution,
+  multivariate_normal_distribution,
+  wishart_distribution,
+  lkj_correlation_distribution,
+  multinomial_distribution,
+  categorical_distribution,
+  dirichlet_distribution,
+  dirichlet_multinomial_distribution
+)
 
 # export constructors
 
@@ -1487,30 +1421,33 @@ distribution_classes_module <- module(uniform_distribution,
 #'
 #' # a Wishart variable with the same covariance parameter
 #' theta <- wishart(df = 5, Sigma = Sig)
-#'
 #' }
 NULL
 # nolint end
 
 #' @rdname distributions
 #' @export
-uniform <- function(min, max, dim = NULL)
+uniform <- function(min, max, dim = NULL) {
   distrib("uniform", min, max, dim)
+}
 
 #' @rdname distributions
 #' @export
-normal <- function(mean, sd, dim = NULL, truncation = c(-Inf, Inf))
+normal <- function(mean, sd, dim = NULL, truncation = c(-Inf, Inf)) {
   distrib("normal", mean, sd, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-lognormal <- function(meanlog, sdlog, dim = NULL, truncation = c(0, Inf))
+lognormal <- function(meanlog, sdlog, dim = NULL, truncation = c(0, Inf)) {
   distrib("lognormal", meanlog, sdlog, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-bernoulli <- function(prob, dim = NULL)
+bernoulli <- function(prob, dim = NULL) {
   distrib("bernoulli", prob, dim)
+}
 
 #' @rdname distributions
 #' @export
@@ -1521,18 +1458,21 @@ binomial <- function(size, prob, dim = NULL) {
 
 #' @rdname distributions
 #' @export
-beta_binomial <- function(size, alpha, beta, dim = NULL)
+beta_binomial <- function(size, alpha, beta, dim = NULL) {
   distrib("beta_binomial", size, alpha, beta, dim)
+}
 
 #' @rdname distributions
 #' @export
-negative_binomial <- function(size, prob, dim = NULL)
+negative_binomial <- function(size, prob, dim = NULL) {
   distrib("negative_binomial", size, prob, dim)
+}
 
 #' @rdname distributions
 #' @export
-hypergeometric <- function(m, n, k, dim = NULL)
+hypergeometric <- function(m, n, k, dim = NULL) {
   distrib("hypergeometric", m, n, k, dim)
+}
 
 #' @rdname distributions
 #' @export
@@ -1543,103 +1483,124 @@ poisson <- function(lambda, dim = NULL) {
 
 #' @rdname distributions
 #' @export
-gamma <- function(shape, rate, dim = NULL, truncation = c(0, Inf))
+gamma <- function(shape, rate, dim = NULL, truncation = c(0, Inf)) {
   distrib("gamma", shape, rate, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-inverse_gamma <- function(alpha, beta, dim = NULL, truncation = c(0, Inf))
+inverse_gamma <- function(alpha, beta, dim = NULL, truncation = c(0, Inf)) {
   distrib("inverse_gamma", alpha, beta, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-weibull <- function(shape, scale, dim = NULL, truncation = c(0, Inf))
+weibull <- function(shape, scale, dim = NULL, truncation = c(0, Inf)) {
   distrib("weibull", shape, scale, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-exponential <- function(rate, dim = NULL, truncation = c(0, Inf))
+exponential <- function(rate, dim = NULL, truncation = c(0, Inf)) {
   distrib("exponential", rate, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-pareto <- function(a, b, dim = NULL, truncation = c(0, Inf))
+pareto <- function(a, b, dim = NULL, truncation = c(0, Inf)) {
   distrib("pareto", a, b, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-student <- function(df, mu, sigma, dim = NULL, truncation = c(-Inf, Inf))
+student <- function(df, mu, sigma, dim = NULL, truncation = c(-Inf, Inf)) {
   distrib("student", df, mu, sigma, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-laplace <- function(mu, sigma, dim = NULL, truncation = c(-Inf, Inf))
+laplace <- function(mu, sigma, dim = NULL, truncation = c(-Inf, Inf)) {
   distrib("laplace", mu, sigma, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-beta <- function(shape1, shape2, dim = NULL, truncation = c(0, 1))
+beta <- function(shape1, shape2, dim = NULL, truncation = c(0, 1)) {
   distrib("beta", shape1, shape2, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-cauchy <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf))
+cauchy <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf)) {
   distrib("cauchy", location, scale, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-chi_squared <- function(df, dim = NULL, truncation = c(0, Inf))
+chi_squared <- function(df, dim = NULL, truncation = c(0, Inf)) {
   distrib("chi_squared", df, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-logistic <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf))
+logistic <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf)) {
   distrib("logistic", location, scale, dim, truncation)
+}
 
 #' @rdname distributions
 #' @export
-f <- function(df1, df2, dim = NULL, truncation = c(0, Inf))
+f <- function(df1, df2, dim = NULL, truncation = c(0, Inf)) {
   distrib("f", df1, df2, dim, truncation)
+}
 
 # nolint start
 #' @rdname distributions
 #' @export
 multivariate_normal <- function(mean, Sigma,
                                 n_realisations = NULL, dimension = NULL) {
-# nolint end
-  distrib("multivariate_normal", mean, Sigma,
-          n_realisations, dimension)
+  # nolint end
+  distrib(
+    "multivariate_normal", mean, Sigma,
+    n_realisations, dimension
+  )
 }
 
 #' @rdname distributions
 #' @export
-wishart <- function(df, Sigma)  # nolint
+wishart <- function(df, Sigma) { # nolint
   distrib("wishart", df, Sigma)
+}
 
 #' @rdname distributions
 #' @export
-lkj_correlation <- function(eta, dimension = 2)
+lkj_correlation <- function(eta, dimension = 2) {
   distrib("lkj_correlation", eta, dimension)
+}
 
 #' @rdname distributions
 #' @export
-multinomial <- function(size, prob, n_realisations = NULL, dimension = NULL)
+multinomial <- function(size, prob, n_realisations = NULL, dimension = NULL) {
   distrib("multinomial", size, prob, n_realisations, dimension)
+}
 
 #' @rdname distributions
 #' @export
-categorical <- function(prob, n_realisations = NULL, dimension = NULL)
+categorical <- function(prob, n_realisations = NULL, dimension = NULL) {
   distrib("categorical", prob, n_realisations, dimension)
+}
 
 #' @rdname distributions
 #' @export
-dirichlet <- function(alpha, n_realisations = NULL, dimension = NULL)
+dirichlet <- function(alpha, n_realisations = NULL, dimension = NULL) {
   distrib("dirichlet", alpha, n_realisations, dimension)
+}
 
 #' @rdname distributions
 #' @export
 dirichlet_multinomial <- function(size, alpha,
                                   n_realisations = NULL, dimension = NULL) {
-  distrib("dirichlet_multinomial",
-          size, alpha, n_realisations, dimension)
+  distrib(
+    "dirichlet_multinomial",
+    size, alpha, n_realisations, dimension
+  )
 }

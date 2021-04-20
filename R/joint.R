@@ -37,25 +37,26 @@
 #' a <- normal(0, 3, truncation = c(0, Inf))
 #' b <- normal(0, 3, truncation = c(0, Inf))
 #' distribution(x) <- joint(normal(mu, sd), beta(a, b),
-#'                          dim = 10)
+#'   dim = 10
+#' )
 #' m <- model(mu, sd, a, b)
 #' plot(mcmc(m))
 #' }
-joint <- function(..., dim = NULL)
+joint <- function(..., dim = NULL) {
   distrib("joint", list(...), dim)
+}
 
 joint_distribution <- R6Class(
   "joint_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(dots, dim) {
-
       n_distributions <- length(dots)
 
       if (n_distributions < 2) {
         stop("joint must be passed at least two distributions",
-             call. = FALSE)
+          call. = FALSE
+        )
       }
 
       # check the dimensions of the variables in dots
@@ -76,7 +77,8 @@ joint_distribution <- R6Class(
       are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
       if (!all(are_scalar)) {
         stop("joint only accepts probability distributions over scalars",
-              call. = FALSE)
+          call. = FALSE
+        )
       }
 
       # get the distributions and strip away their variables
@@ -91,8 +93,9 @@ joint_distribution <- R6Class(
 
       if (!all(discrete) & !all(!discrete)) {
         stop("cannot construct a joint distribution from a combination ",
-             "of discrete and continuous distributions",
-             call. = FALSE)
+          "of discrete and continuous distributions",
+          call. = FALSE
+        )
       }
       n_components <- length(dot_nodes)
 
@@ -112,10 +115,10 @@ joint_distribution <- R6Class(
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
-                           paste("distribution", i),
-                           shape_matches_output = FALSE)
+          paste("distribution", i),
+          shape_matches_output = FALSE
+        )
       }
-
     },
 
     create_target = function(truncation) {
@@ -152,19 +155,15 @@ joint_distribution <- R6Class(
 
         # sum them elementwise
         tf$add_n(log_probs)
-
       }
 
       sample <- function(seed) {
-
         samples <- lapply(distribution_nodes, dag$draw_sample)
         names(samples) <- NULL
         tf$concat(samples, axis = 2L)
-
       }
 
       list(log_prob = log_prob, sample = sample)
-
     }
   )
 )

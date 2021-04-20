@@ -42,7 +42,7 @@ NULL
 tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 
 # crate the node list object whenever the package is loaded
-.onLoad <- function(libname, pkgname) {  # nolint
+.onLoad <- function(libname, pkgname) { # nolint
 
   # silence TF's CPU instructions message
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL = 2)
@@ -60,5 +60,4 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 
   # default float type
   options(greta_tf_float = "float64")
-
 }

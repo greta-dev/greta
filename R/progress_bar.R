@@ -11,13 +11,15 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
 
   # name for formatting
   name <- switch(phase,
-                 warmup = "  warmup",
-                 sampling = "sampling")
+    warmup = "  warmup",
+    sampling = "sampling"
+  )
 
   # total iterations for bat
   iter_this <- switch(phase,
-                      warmup = iter[1],
-                      sampling = iter[2])
+    warmup = iter[1],
+    sampling = iter[2]
+  )
 
   # pad the frmat so that the width iterations counter is the same for both
   # warmup and sampling
@@ -25,33 +27,37 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
   count_pad <- paste0(rep(" ", 2 * digit_diff), collapse = "")
 
   # formatting
-  format_text <- sprintf("  %s :bar %s:iter/:total | eta: :eta :rejection",
-                         name,
-                         count_pad)
+  format_text <- sprintf(
+    "  %s :bar %s:iter/:total | eta: :eta :rejection",
+    name,
+    count_pad
+  )
 
-  pb <- progress::progress_bar$new(format = format_text,
-                                   total = iter_this,
-                                   width = width,
-                                   incomplete = " ",
-                                   clear = FALSE,
-                                   current = "=",
-                                   show_after = 0,
-                                   force = TRUE,
-                                   ...)
+  pb <- progress::progress_bar$new(
+    format = format_text,
+    total = iter_this,
+    width = width,
+    incomplete = " ",
+    clear = FALSE,
+    current = "=",
+    show_after = 0,
+    force = TRUE,
+    ...
+  )
 
   # add the increment information and return
   pb_update <- round(pb_update)
 
   if (!is.numeric(pb_update) || length(pb_update) != 1 ||
-      !is.finite(pb_update) || pb_update <= 0) {
+    !is.finite(pb_update) || pb_update <= 0) {
     stop("pb_update must be a finite, positive, scalar integer",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   assign("pb_update", pb_update, envir = pb$.__enclos_env__)
 
   pb
-
 }
 
 
@@ -62,11 +68,9 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
 # 'rejects' is the total number of rejections so far due to numerical
 #   instability
 iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
-
   increment <- pb$.__enclos_env__$pb_update
 
   if (it %% increment == 0) {
-
     if (rejects > 0) {
       reject_perc <- 100 * rejects / (it * chains)
       if (reject_perc < 1) {
@@ -91,13 +95,17 @@ iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
     # tick the progess bar and record the output message
     # (or print it if file = NULL)
     record(pb$tick(amount,
-                   tokens = list(iter = iter_pretty,
-                                 rejection = reject_text)),
-           file = file)
-
+      tokens = list(
+        iter = iter_pretty,
+        rejection = reject_text
+      )
+    ),
+    file = file
+    )
   }
-
 }
 
-progress_bar_module <- module(create_progress_bar,
-                              iterate_progress_bar)
+progress_bar_module <- module(
+  create_progress_bar,
+  iterate_progress_bar
+)

@@ -5,9 +5,7 @@
 # create dag class
 dag_class <- R6Class(
   "dag_class",
-
   public = list(
-
     mode = "all_forward",
     node_list = list(),
     target_nodes = list(),
@@ -37,17 +35,14 @@ dag_class <- R6Class(
       # store the performance control info
       self$tf_float <- tf_float
       self$compile <- compile
-
     },
 
     new_tf_environment = function() {
-
       self$tf_environment <- new.env()
       self$tf_graph <- tf$Graph()
       self$tf_environment$all_forward_data_list <- list()
       self$tf_environment$all_sampling_data_list <- list()
       self$tf_environment$hybrid_data_list <- list()
-
     },
 
     # execute an expression on this dag's tensorflow graph, with the correct
@@ -59,34 +54,36 @@ dag_class <- R6Class(
       old_float_type <- options()$greta_tf_float
       old_batch_size <- options()$greta_batch_size
 
-      on.exit(options(greta_tf_float = old_float_type,
-                      greta_batch_size = old_batch_size))
+      on.exit(options(
+        greta_tf_float = old_float_type,
+        greta_batch_size = old_batch_size
+      ))
 
-      options(greta_tf_float = self$tf_float,
-              greta_batch_size = self$tf_environment$batch_size)
+      options(
+        greta_tf_float = self$tf_float,
+        greta_batch_size = self$tf_environment$batch_size
+      )
 
       with(self$tf_graph$as_default(), expr)
     },
 
     # execute an expression in the tensorflow environment
     tf_run = function(expr, as_text = FALSE) {
-
       tfe <- self$tf_environment
 
-      if (as_text)
+      if (as_text) {
         tfe$expr <- parse(text = expr)
-      else
+      } else {
         tfe$expr <- substitute(expr)
+      }
 
       on.exit(rm("expr", envir = tfe))
 
       self$on_graph(with(tfe, eval(expr)))
-
     },
 
     # sess$run() an expression in the tensorflow environment, with the feed dict
     tf_sess_run = function(expr, as_text = FALSE) {
-
       if (!as_text) {
         expr <- deparse(substitute(expr))
       }
@@ -94,19 +91,16 @@ dag_class <- R6Class(
       expr <- paste0("sess$run(", expr, ", feed_dict = feed_dict)")
 
       self$tf_run(expr, as_text = TRUE)
-
     },
 
     # return a list of nodes connected to those in the target node list
     build_dag = function(greta_array_list) {
-
       target_node_list <- lapply(greta_array_list, get_node)
 
       # loop through the target nodes, recursively registering them to this dag
       for (node in target_node_list) {
         node$register_family(self)
       }
-
     },
 
     # get the TF names for different node types
@@ -114,14 +108,14 @@ dag_class <- R6Class(
 
       # get tf basenames
       names <- self$node_tf_names
-      if (!is.null(types))
+      if (!is.null(types)) {
         names <- names[which(self$node_types %in% types)]
+      }
 
       # prepend mode
       if (length(names) > 0) {
         names <- paste(self$mode, names, sep = "_")
       }
-
     },
 
     # look up the TF name for a single node
@@ -139,13 +133,11 @@ dag_class <- R6Class(
       }
 
       name
-
     },
 
     # how to define a node if the sampling mode is hybrid (this is quite knotty,
     # so gets its own function)
     how_to_define_hybrid = function(node) {
-
       node_type <- node_type(node)
 
       # names of variable nodes not connected to the free state in this dag
@@ -167,17 +159,14 @@ dag_class <- R6Class(
       # if it's an operation, see if it has a distribution (for lkj and
       # wishart) and get mode based on whether the parent has a free state
       if (node_type == "operation") {
-
         parent_name <- node$parents[[1]]$unique_name
         parent_stateless <- parent_name %in% stateless_names
         to_sample <- has_distribution(node) & parent_stateless
         node_mode <- ifelse(to_sample, "sampling", "forward")
-
       }
 
       # if the node is a distribution, decide based on its target
       if (node_type == "distribution") {
-
         target <- node$target
         target_type <- node_type(target)
 
@@ -197,33 +186,26 @@ dag_class <- R6Class(
         if (target_type == "variable") {
           to_sample <- target$unique_name %in% stateless_names
           node_mode <- ifelse(to_sample, "sampling", "forward")
-
         }
 
         # if the target is an operation, see if that operation has a single
         # parent that is a variable, and see if that has a free state
         if (target_type == "operation") {
-
           target_parent_name <- target$parents[[1]]$unique_name
           target_parent_stateless <- target_parent_name %in% stateless_names
           node_mode <- ifelse(target_parent_stateless, "sampling", "forward")
-
         }
-
       }
 
       node_mode
-
     },
 
     # how to define the node if we're sampling everything (no free state)
     how_to_define_all_sampling = function(node) {
-
-
       switch(node_type(node),
-             data = ifelse(has_distribution(node), "sampling", "forward"),
-             operation = ifelse(has_distribution(node), "sampling", "forward"),
-             "sampling"
+        data = ifelse(has_distribution(node), "sampling", "forward"),
+        operation = ifelse(has_distribution(node), "sampling", "forward"),
+        "sampling"
       )
     },
 
@@ -231,7 +213,6 @@ dag_class <- R6Class(
     # from an existing free state), or in sampling mode (generate a random
     # version of itself)
     how_to_define = function(node) {
-
       switch(
         self$mode,
 
@@ -243,22 +224,17 @@ dag_class <- R6Class(
 
         # sampling from posterior some nodes defined forward, others sampled
         hybrid = self$how_to_define_hybrid(node)
-
       )
-
     },
 
     define_batch_size = function() {
-
       self$tf_run(
         batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
       )
-
     },
 
     define_free_state = function(type = c("variable", "placeholder"),
                                  name = "free_state") {
-
       type <- match.arg(type)
       tfe <- self$tf_environment
 
@@ -272,33 +248,35 @@ dag_class <- R6Class(
         vals <- as.logical(vals)
         vals <- t(as.matrix(vals))
 
-        self$on_graph(free_state <- tf$Variable(initial_value = vals,
-                                                dtype = tf_float()))
+        self$on_graph(free_state <- tf$Variable(
+          initial_value = vals,
+          dtype = tf_float()
+        ))
       } else {
-
         shape <- shape(NULL, length(vals))
-        self$on_graph(free_state <- tf$compat$v1$placeholder(dtype = tf_float(),
-                                                             shape = shape))
-
+        self$on_graph(free_state <- tf$compat$v1$placeholder(
+          dtype = tf_float(),
+          shape = shape
+        ))
       }
 
       assign(name,
-             free_state,
-             envir = tfe)
-
+        free_state,
+        envir = tfe
+      )
     },
 
     # split the overall free state vector into free versions of variables
     split_free_state = function() {
-
       tfe <- self$tf_environment
 
       free_state <- get("free_state", envir = tfe)
 
       params <- self$example_parameters(free = TRUE)
       lengths <- vapply(params,
-                        function(x) length(x),
-                        FUN.VALUE = 1L)
+        function(x) length(x),
+        FUN.VALUE = 1L
+      )
 
       if (length(lengths) > 1) {
         args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
@@ -311,7 +289,6 @@ dag_class <- R6Class(
       for (i in seq_along(names)) {
         assign(names[i], args[[i]], envir = tfe)
       }
-
     },
 
     # define the body of the tensorflow graph in the environment env; without
@@ -329,12 +306,10 @@ dag_class <- R6Class(
       )
 
       invisible(NULL)
-
     },
 
     # use core and compilation options to set up a session in this environment
     define_tf_session = function() {
-
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
 
@@ -360,7 +335,6 @@ dag_class <- R6Class(
       # start a session and initialise all variables
       self$tf_run(sess <- tf$compat$v1$Session(config = config))
       self$tf_run(sess$run(tf$compat$v1$global_variables_initializer()))
-
     },
 
     # define tf graph in environment; either for forward-mode computation from a
@@ -376,12 +350,10 @@ dag_class <- R6Class(
       self$define_batch_size()
       self$define_tf_body(target_nodes = target_nodes)
       self$define_tf_session()
-
     },
 
     # define tensor for overall log density and gradients
     define_joint_density = function() {
-
       tfe <- self$tf_environment
 
       # get all distribution nodes that have a target
@@ -393,9 +365,10 @@ dag_class <- R6Class(
 
       # get the densities, evaluated at these targets
       densities <- mapply(self$evaluate_density,
-                          distribution_nodes,
-                          target_nodes,
-                          SIMPLIFY = FALSE)
+        distribution_nodes,
+        target_nodes,
+        SIMPLIFY = FALSE
+      )
 
       # reduce_sum each of them (skipping the batch dimension)
       self$on_graph(summed_densities <- lapply(densities, tf_sum, drop = TRUE))
@@ -406,8 +379,9 @@ dag_class <- R6Class(
 
       # assign overall density to environment
       assign("joint_density",
-             joint_density,
-             envir = self$tf_environment)
+        joint_density,
+        envir = self$tf_environment
+      )
 
       # define adjusted joint density
 
@@ -425,15 +399,14 @@ dag_class <- R6Class(
 
       # assign overall density to environment
       assign("joint_density_adj",
-             joint_density + total_adj,
-             envir = self$tf_environment)
-
+        joint_density + total_adj,
+        envir = self$tf_environment
+      )
     },
 
     # evaluate the (truncation-corrected) density of a tfp distribution on its
     # target tensor
     evaluate_density = function(distribution_node, target_node) {
-
       tfe <- self$tf_environment
 
       parameter_nodes <- distribution_node$parameters
@@ -448,10 +421,10 @@ dag_class <- R6Class(
       tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
 
       self$tf_evaluate_density(tfp_distribution,
-                               tf_target,
-                               truncation = distribution_node$truncation,
-                               bounds = distribution_node$bounds)
-
+        tf_target,
+        truncation = distribution_node$truncation,
+        bounds = distribution_node$bounds
+      )
     },
 
     tf_evaluate_density = function(tfp_distribution,
@@ -468,7 +441,6 @@ dag_class <- R6Class(
       # of the density function between the truncation bounds. This can be
       # calculated from the distribution's CDF
       if (!is.null(truncation)) {
-
         lower <- truncation[[1]]
         upper <- truncation[[2]]
 
@@ -476,28 +448,22 @@ dag_class <- R6Class(
 
           # if only upper is constrained, just need the cdf at the upper
           offset <- tfp_distribution$log_cdf(fl(upper))
-
         } else if (all(upper == bounds[2])) {
 
           # if only lower is constrained, get the log of the integral above it
           offset <- tf$math$log(fl(1) - tfp_distribution$cdf(fl(lower)))
-
         } else {
 
           # if both are constrained, get the log of the integral between them
           offset <- tf$math$log(tfp_distribution$cdf(fl(upper)) -
-                                  tfp_distribution$cdf(fl(lower)))
-
+            tfp_distribution$cdf(fl(lower)))
         }
 
         ld <- ld - offset
-
       }
 
 
       ld
-
-
     },
 
     # get the tf object in envir correpsonding to 'node'
@@ -507,10 +473,11 @@ dag_class <- R6Class(
 
     # return a function to obtain the model log probability from a tensor for
     # the free state
-    generate_log_prob_function = function(which = c("adjusted",
-                                                    "unadjusted",
-                                                    "both")) {
-
+    generate_log_prob_function = function(which = c(
+                                            "adjusted",
+                                            "unadjusted",
+                                            "both"
+                                          )) {
       which <- match.arg(which)
 
       function(free_state) {
@@ -522,8 +489,9 @@ dag_class <- R6Class(
 
         # copy the placeholders over here, so they aren't recreated
         data_names <- self$get_tf_names(types = "data")
-        for (name in data_names)
+        for (name in data_names) {
           tfe[[name]] <- tfe_old[[name]]
+        }
         tfe$batch_size <- tfe_old$batch_size
 
         # put the free state in the environment, and build out the tf graph
@@ -533,19 +501,20 @@ dag_class <- R6Class(
         # define the densities
         self$define_joint_density()
 
-        objectives <- list(adjusted = tfe$joint_density_adj,
-                           unadjusted = tfe$joint_density)
+        objectives <- list(
+          adjusted = tfe$joint_density_adj,
+          unadjusted = tfe$joint_density
+        )
 
         # return either of the densities, or a list of both
         result <- switch(which,
-                         adjusted = objectives$adjusted,
-                         unadjusted = objectives$unadjusted,
-                         both = objectives)
+          adjusted = objectives$adjusted,
+          unadjusted = objectives$unadjusted,
+          both = objectives
+        )
 
         result
-
       }
-
     },
 
     # return the expected parameter format either in free state vector form, or
@@ -565,32 +534,27 @@ dag_class <- R6Class(
 
       # remove any of these that don't need a free state here (for calculate())
       stateless_names <- vapply(self$variables_without_free_state,
-                                self$tf_name,
-                                FUN.VALUE = character(1))
+        self$tf_name,
+        FUN.VALUE = character(1)
+      )
       keep <- !names(parameters) %in% stateless_names
       parameters <- parameters[keep]
 
       parameters
-
     },
 
     get_tf_data_list = function() {
-
       data_list_name <- paste0(self$mode, "_data_list")
       self$tf_environment[[data_list_name]]
-
     },
 
     set_tf_data_list = function(element_name, value) {
-
       data_list_name <- paste0(self$mode, "_data_list")
       self$tf_environment[[data_list_name]][[element_name]] <- value
-
     },
 
     build_feed_dict = function(dict_list = list(),
                                data_list = self$get_tf_data_list()) {
-
       tfe <- self$tf_environment
 
       # put the list in the environment temporarily
@@ -599,7 +563,6 @@ dag_class <- R6Class(
 
       # roll into a dict in the tf environment
       self$tf_run(feed_dict <- do.call(dict, dict_list))
-
     },
 
     send_parameters = function(parameters) {
@@ -616,23 +579,20 @@ dag_class <- R6Class(
       self$set_tf_data_list("batch_size", nrow(parameters))
 
       self$build_feed_dict(parameter_list)
-
     },
 
     # get adjusted joint log density across the whole dag
     log_density = function() {
-
       res <- cleanly(self$tf_sess_run(joint_density_adj))
 
-      if (inherits(res, "error"))
+      if (inherits(res, "error")) {
         res <- NA
+      }
 
       res
-
     },
 
     hessians = function() {
-
       tfe <- self$tf_environment
       nodes <- self$target_nodes
 
@@ -642,13 +602,11 @@ dag_class <- R6Class(
 
       # build the hessian tensors if needed
       if (!exists("hessian_list", envir = tfe)) {
-
         tf_names <- vapply(nodes, self$tf_name, FUN.VALUE = "")
         y <- tfe$joint_density
         xs <- lapply(tf_names, get, tfe)
         names(xs) <- NULL
         tfe$hessian_list <- self$on_graph(tf$hessians(y, xs))
-
       }
 
       # evaluate at the current free state and assign
@@ -661,7 +619,6 @@ dag_class <- R6Class(
       # assign names and return
       names(hessian_list) <- ga_names
       hessian_list
-
     },
 
     trace_values_batch = function(free_state_batch) {
@@ -671,19 +628,22 @@ dag_class <- R6Class(
 
       tfe <- self$tf_environment
 
-      target_tf_names <- lapply(self$target_nodes,
-                                self$tf_name)
+      target_tf_names <- lapply(
+        self$target_nodes,
+        self$tf_name
+      )
 
       target_tensors <- lapply(target_tf_names,
-                               get,
-                               envir = tfe)
+        get,
+        envir = tfe
+      )
 
       # evaluate them in the tensorflow environment
       trace_list <- tfe$sess$run(target_tensors,
-                                 feed_dict = tfe$feed_dict)
+        feed_dict = tfe$feed_dict
+      )
 
       trace_list
-
     },
 
     # return the current values of the traced nodes, as a named vector
@@ -717,22 +677,20 @@ dag_class <- R6Class(
       if (flatten) {
         # loop through elements flattening these arrays to vectors and giving
         # the elements better names
-        trace_list_flat <- lapply(seq_along(trace_list),
-                                  flatten_trace,
-                                  trace_list)
+        trace_list_flat <- lapply(
+          seq_along(trace_list),
+          flatten_trace,
+          trace_list
+        )
 
         out <- do.call(cbind, trace_list_flat)
         self$trace_names <- colnames(out)
-
       } else {
-
         out <- trace_list
-
       }
 
 
       out
-
     },
 
     # for all the nodes in this dag, return a vector of membership to sub-graphs
@@ -758,15 +716,16 @@ dag_class <- R6Class(
           r <- t
           it <- it + 1
         } else {
-          break ()
+          break()
         }
       }
 
       # check we didn't time out
       if (it == maxit) {
         stop("could not determine the number of independent models ",
-             "in a reasonable amount of time",
-             call. = FALSE)
+          "in a reasonable amount of time",
+          call. = FALSE
+        )
       }
 
       # find the cluster IDs
@@ -778,7 +737,6 @@ dag_class <- R6Class(
       # name them
       names(cluster_id) <- rownames(adj)
       cluster_id
-
     },
 
     # get the tfp distribution object for a distribution node
@@ -793,21 +751,20 @@ dag_class <- R6Class(
       # execute the distribution constructor functions to return a tfp
       # distribution object
       tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
-
     },
 
     # try to draw a random sample from a distribution node
     draw_sample = function(distribution_node) {
-
       tfp_distribution <- self$get_tfp_distribution(distribution_node)
 
       sample <- tfp_distribution$sample
 
       if (is.null(sample)) {
         stop("sampling is not yet implemented for ",
-             distribution_node$distribution_name,
-             " distributions",
-             call. = FALSE)
+          distribution_node$distribution_name,
+          " distributions",
+          call. = FALSE
+        )
       }
 
       truncation <- distribution_node$truncation
@@ -816,7 +773,6 @@ dag_class <- R6Class(
 
         # if we're not dealing with truncation, sample directly
         tensor <- sample(seed = get_seed())
-
       } else {
 
         # if we're dealing with truncation (therefore univariate and continuous)
@@ -828,9 +784,10 @@ dag_class <- R6Class(
 
         if (is.null(cdf) | is.null(quantile)) {
           stop("sampling is not yet implemented for truncated ",
-               distribution_node$distribution_name,
-               " distributions",
-               call. = FALSE)
+            distribution_node$distribution_name,
+            " distributions",
+            call. = FALSE
+          )
         }
 
         # generate a random uniform sample of the correct shape and transform
@@ -842,17 +799,13 @@ dag_class <- R6Class(
         range <- upper - lower
 
         tensor <- quantile(lower + u * range)
-
       }
 
       tensor
-
     }
-
   ),
 
   active = list(
-
     node_types = function(value) {
       vapply(self$node_list, node_type, FUN.VALUE = "")
     },
@@ -860,7 +813,6 @@ dag_class <- R6Class(
     # create human-readable base names for TF tensors. these will actually be
     # defined prepended with "all_forward_" or "all_sampling" or "hybrid_
     node_tf_names = function(value) {
-
       types <- self$node_types
 
       for (type in c("variable", "data", "operation", "distribution")) {
@@ -869,7 +821,6 @@ dag_class <- R6Class(
       }
 
       types
-
     },
 
     adjacency_matrix = function(value) {
@@ -881,18 +832,21 @@ dag_class <- R6Class(
       dag_mat <- matrix(0, nrow = n_node, ncol = n_node)
       rownames(dag_mat) <- colnames(dag_mat) <- node_names
 
-      children <- lapply(self$node_list,
-                         member,
-                         "child_names()")
-      parents <- lapply(self$node_list,
-                        member,
-                        "parent_names(recursive = FALSE)")
+      children <- lapply(
+        self$node_list,
+        member,
+        "child_names()"
+      )
+      parents <- lapply(
+        self$node_list,
+        member,
+        "parent_names(recursive = FALSE)"
+      )
 
       # for distribution nodes, remove target nodes from parents, and put them
       # in children to send the arrow in the opposite direction when plotting
       distribs <- which(node_types == "distribution")
       for (i in distribs) {
-
         own_name <- node_names[i]
         target_name <- self$node_list[[i]]$target$unique_name
 
@@ -906,9 +860,7 @@ dag_class <- R6Class(
           idx <- match(target_name, node_names)
           children[[idx]] <- children[[idx]][children[[idx]] != own_name]
           parents[[idx]] <- c(parents[[idx]], own_name)
-
         }
-
       }
 
       # parents in the lower left, children in the upper right
