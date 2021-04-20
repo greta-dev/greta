@@ -14,7 +14,7 @@ distribution(greta_array)
 already have a probability distribution assigned}
 
 \item{value}{a greta array with a distribution (see
-\code{\link{distributions}})}
+\code{\link[=distributions]{distributions()}})}
 }
 \description{
 \code{distribution} defines probability distributions over

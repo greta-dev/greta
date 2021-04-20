@@ -11,7 +11,7 @@
 #' @param ... one or more greta_arrays for which to calculate the value
 #' @param values a named list giving temporary values of the greta arrays with
 #'   which `target` is connected, or a `greta_mcmc_list` object
-#'   returned by \code{\link{mcmc}}.
+#'   returned by [mcmc()].
 #' @param nsim an optional positive integer scalar for the number of responses
 #'   to simulate if stochastic greta arrays are present in the model - see
 #'   Details.
@@ -25,7 +25,7 @@
 #' @return Values of the target greta array(s), given values of the greta arrays
 #'   on which they depend (either specified in `values` or sampled from
 #'   their priors). If `values` is a
-#'   \code{\link[greta:mcmc]{greta_mcmc_list}} and `nsim = NULL`, this will
+#'   [`greta_mcmc_list()`][greta::mcmc] and `nsim = NULL`, this will
 #'   be a `greta_mcmc_list` object of posterior samples for the target
 #'   greta arrays. Otherwise, the result will be a named list of numeric R
 #'   arrays. If `nsim = NULL` the dimensions of returned numeric R arrays

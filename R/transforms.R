@@ -3,7 +3,7 @@
 #' @title transformation functions for greta arrays
 #'
 #' @description transformations for greta arrays, which may also be used as
-#'   inverse link functions. Also see \link{operators} and \link{functions}.
+#'   inverse link functions. Also see [operators] and [functions].
 #'
 #' @param x a real-valued (i.e. values ranging from -Inf to Inf) greta array to
 #'   transform to a constrained value

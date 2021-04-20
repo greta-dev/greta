@@ -130,12 +130,12 @@ greater)}
 \item{decay}{discounting factor for the gradient}
 }
 \value{
-an \code{optimiser} object that can be passed to \code{\link{opt}}.
+an \code{optimiser} object that can be passed to \code{\link[=opt]{opt()}}.
 }
 \description{
 Functions to set up optimisers (which find parameters that
 maximise the joint density of a model) and change their tuning parameters,
-for use in \code{\link{opt}()}. For details of the algorithms and how to
+for use in \code{\link[=opt]{opt()}}. For details of the algorithms and how to
 tune them, see the
 \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy optimiser docs} or the
 \href{https://www.tensorflow.org/api_docs/python/tf/contrib/opt}{TensorFlow optimiser docs}.

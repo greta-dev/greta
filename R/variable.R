@@ -5,7 +5,7 @@
 #'   parameters, to be learned during model fitting. These parameters are not
 #'   associated with a probability distribution. To create a variable greta
 #'   array following a specific probability distribution, see
-#'   \code{\link{distributions}}.
+#'   [distributions()].
 #'
 #' @param lower,upper optional limits to variables. These must be specified as
 #'   numerics, they cannot be greta arrays (though see details for a

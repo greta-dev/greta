@@ -5,7 +5,7 @@
 #'   single mixture distribution, either over a variable, or for fixed data.
 #'
 #' @param ... variable greta arrays following probability distributions (see
-#'   \code{\link{distributions}}); the component distributions in a mixture
+#'   [distributions()]); the component distributions in a mixture
 #'   distribution.
 #'
 #' @param weights a column vector or array of mixture weights, which must be

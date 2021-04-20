@@ -3,8 +3,8 @@
 #' @title functions for greta arrays
 #'
 #' @description This is a list of functions (mostly from base R) that are
-#'   currently implemented to transform greta arrays. Also see \link{operators}
-#'   and \link{transforms}.
+#'   currently implemented to transform greta arrays. Also see [operators]
+#'   and [transforms].
 #'
 #' @section Usage: \preformatted{
 #'

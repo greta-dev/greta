@@ -29,11 +29,11 @@ slice(max_doublings = 5)
 algorithm used to adapt the size of the slice}
 }
 \value{
-a \code{sampler} object that can be passed to \code{\link{mcmc}}.
+a \code{sampler} object that can be passed to \code{\link[=mcmc]{mcmc()}}.
 }
 \description{
 Functions to set up MCMC samplers and change the starting values
-of their parameters, for use in \code{\link{mcmc}()}.
+of their parameters, for use in \code{\link[=mcmc]{mcmc()}}.
 }
 \details{
 During the warmup iterations of \code{mcmc}, some of these
@@ -53,6 +53,6 @@ is implemented for uniform and normal proposals.
 
 \code{slice()} implements a multivariate slice sampling algorithm.
 Currently this algorithm can only be used with single-precision models (set
-using the \code{precision} argument to \code{\link{model}}). The parameter
+using the \code{precision} argument to \code{\link[=model]{model()}}). The parameter
 \code{max_doublings} is not tuned during warmup.
 }

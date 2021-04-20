@@ -2,13 +2,13 @@
 #'
 #' @title MCMC samplers
 #' @description Functions to set up MCMC samplers and change the starting values
-#'   of their parameters, for use in \code{\link{mcmc}()}.
+#'   of their parameters, for use in [mcmc()].
 #'
 #' @details During the warmup iterations of `mcmc`, some of these
 #'   sampler parameters will be tuned to improve the efficiency of the sampler,
 #'   so the values provided here are used as starting values.
 #'
-#' @return a `sampler` object that can be passed to \code{\link{mcmc}}.
+#' @return a `sampler` object that can be passed to [mcmc()].
 
 NULL
 
@@ -70,7 +70,7 @@ rwmh <- function(proposal = c("normal", "uniform"),
 #'
 #' @details `slice()` implements a multivariate slice sampling algorithm.
 #'   Currently this algorithm can only be used with single-precision models (set
-#'   using the `precision` argument to \code{\link{model}}). The parameter
+#'   using the `precision` argument to [model()]). The parameter
 #'   `max_doublings` is not tuned during warmup.
 #'
 #' @param max_doublings the maximum number of iterations of the 'doubling'

@@ -6,7 +6,7 @@
 #'   dimensions) joint distribution, either over a variable, or for fixed data.
 #'
 #' @param ... scalar variable greta arrays following probability distributions
-#'   (see \code{\link{distributions}}); the components of the joint
+#'   (see [distributions()]); the components of the joint
 #'   distribution.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar

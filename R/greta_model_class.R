@@ -5,7 +5,7 @@
 #' @description Create a `greta_model` object representing a statistical
 #'   model (using `model`), and plot a graphical representation of the
 #'   model. Statistical inference can be performed on `greta_model` objects
-#'   with \code{\link{mcmc}}
+#'   with [mcmc()]
 NULL
 
 #' @rdname model
@@ -186,9 +186,9 @@ print.greta_model <- function(x, ...) {
 #'   \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
 #'   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 #'
-#' @return `plot` - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}}
+#' @return `plot` - a [DiagrammeR::grViz()]
 #'   object, with the
-#'   \code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph}} object used to
+#'   [`DiagrammeR::dgr_graph()`][DiagrammeR::create_graph] object used to
 #'   create it as an attribute `"dgr_graph"`.
 #'
 #' @export

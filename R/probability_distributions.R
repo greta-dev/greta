@@ -1335,12 +1335,12 @@ distribution_classes_module <- module(uniform_distribution,
 #'   greta model. They return a variable greta array that follows the specified
 #'   distribution. This variable greta array can be used to represent a
 #'   parameter with prior distribution, combined into a mixture distribution
-#'   using \code{\link{mixture}}, or used with \code{\link{distribution}} to
+#'   using [mixture()], or used with [distribution()] to
 #'   define a distribution over a data greta array.
 #'
 #' @param truncation a length-two vector giving values between which to truncate
 #'   the distribution, similarly to the `lower` and `upper` arguments
-#'   to \code{\link{variable}}
+#'   to [variable()]
 #'
 #' @param min,max scalar values giving optional limits to `uniform`
 #'   variables. Like `lower` and `upper`, these must be specified as
@@ -1374,7 +1374,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'   `binomial`, `negative_binomial`, `poisson`,
 #'   `multinomial`, `categorical`, `dirichlet_multinomial`) can
 #'   be used when they have fixed values (e.g. defined as a likelihood using
-#'   \code{\link{distribution}}, but not as unknown variables.
+#'   [distribution()], but not as unknown variables.
 #'
 #'   For univariate distributions `dim` gives the dimensions of the greta
 #'   array to create. Each element of the greta array will be (independently)
@@ -1412,34 +1412,34 @@ distribution_classes_module <- module(uniform_distribution,
 #'   corresponds:
 #'
 #'   \tabular{ll}{ greta \tab reference\cr `uniform` \tab
-#'   \link[stats:dunif]{stats::dunif}\cr `normal` \tab
-#'   \link[stats:dnorm]{stats::dnorm}\cr `lognormal` \tab
-#'   \link[stats:dlnorm]{stats::dlnorm}\cr `bernoulli` \tab
-#'   \link[extraDistr:dbern]{extraDistr::dbern}\cr `binomial` \tab
-#'   \link[stats:dbinom]{stats::dbinom}\cr `beta_binomial` \tab
-#'   \link[extraDistr:dbbinom]{extraDistr::dbbinom}\cr `negative_binomial`
-#'   \tab \link[stats:dnbinom]{stats::dnbinom}\cr `hypergeometric` \tab
-#'   \link[stats:dhyper]{stats::dhyper}\cr `poisson` \tab
-#'   \link[stats:dpois]{stats::dpois}\cr `gamma` \tab
-#'   \link[stats:dgamma]{stats::dgamma}\cr `inverse_gamma` \tab
-#'   \link[extraDistr:dinvgamma]{extraDistr::dinvgamma}\cr `weibull` \tab
-#'   \link[stats:dweibull]{stats::dweibull}\cr `exponential` \tab
-#'   \link[stats:dexp]{stats::dexp}\cr `pareto` \tab
-#'   \link[extraDistr:dpareto]{extraDistr::dpareto}\cr `student` \tab
-#'   \link[extraDistr:dlst]{extraDistr::dlst}\cr `laplace` \tab
-#'   \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr `beta` \tab
-#'   \link[stats:dbeta]{stats::dbeta}\cr `cauchy` \tab
-#'   \link[stats:dcauchy]{stats::dcauchy}\cr `chi_squared` \tab
-#'   \link[stats:dchisq]{stats::dchisq}\cr `logistic` \tab
-#'   \link[stats:dlogis]{stats::dlogis}\cr `f` \tab
-#'   \link[stats:df]{stats::df}\cr `multivariate_normal` \tab
-#'   \link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}\cr `multinomial` \tab
-#'   \link[stats:dmultinom]{stats::dmultinom}\cr `categorical` \tab
-#'   {\link[stats:dmultinom]{stats::dmultinom} (size = 1)}\cr `dirichlet`
-#'   \tab \link[extraDistr:ddirichlet]{extraDistr::ddirichlet}\cr
+#'   [stats::dunif]\cr `normal` \tab
+#'   [stats::dnorm]\cr `lognormal` \tab
+#'   [stats::dlnorm]\cr `bernoulli` \tab
+#'   [extraDistr::dbern]\cr `binomial` \tab
+#'   [stats::dbinom]\cr `beta_binomial` \tab
+#'   [extraDistr::dbbinom]\cr `negative_binomial`
+#'   \tab [stats::dnbinom]\cr `hypergeometric` \tab
+#'   [stats::dhyper]\cr `poisson` \tab
+#'   [stats::dpois]\cr `gamma` \tab
+#'   [stats::dgamma]\cr `inverse_gamma` \tab
+#'   [extraDistr::dinvgamma]\cr `weibull` \tab
+#'   [stats::dweibull]\cr `exponential` \tab
+#'   [stats::dexp]\cr `pareto` \tab
+#'   [extraDistr::dpareto]\cr `student` \tab
+#'   [extraDistr::dlst]\cr `laplace` \tab
+#'   [extraDistr::dlaplace]\cr `beta` \tab
+#'   [stats::dbeta]\cr `cauchy` \tab
+#'   [stats::dcauchy]\cr `chi_squared` \tab
+#'   [stats::dchisq]\cr `logistic` \tab
+#'   [stats::dlogis]\cr `f` \tab
+#'   [stats::df]\cr `multivariate_normal` \tab
+#'   [mvtnorm::dmvnorm]\cr `multinomial` \tab
+#'   [stats::dmultinom]\cr `categorical` \tab
+#'   {[stats::dmultinom] (size = 1)}\cr `dirichlet`
+#'   \tab [extraDistr::ddirichlet]\cr
 #'   `dirichlet_multinomial` \tab
-#'   \link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr `wishart` \tab
-#'   \link[stats:rWishart]{stats::rWishart}\cr `lkj_correlation` \tab
+#'   [extraDistr::ddirmnom]\cr `wishart` \tab
+#'   [stats::rWishart]\cr `lkj_correlation` \tab
 #'   [rethinking::dlkjcorr](https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html)
 #'   }
 #'

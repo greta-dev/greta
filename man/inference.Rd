@@ -53,7 +53,7 @@ opt(
 \item{model}{greta_model object}
 
 \item{sampler}{sampler used to draw values in MCMC. See
-\code{\link{samplers}} for options.}
+\code{\link[=samplers]{samplers()}} for options.}
 
 \item{n_samples}{number of MCMC samples to draw per chain (after any warm-up,
 but before thinning)}
@@ -97,7 +97,7 @@ variables in the model (unnamed variables will be automatically
 initialised)}
 
 \item{optimiser}{an \code{optimiser} object giving the optimisation algorithm
-and parameters See \code{\link{optimisers}}.}
+and parameters See \code{\link[=optimisers]{optimisers()}}.}
 
 \item{max_iterations}{the maximum number of iterations before giving up}
 
@@ -152,7 +152,7 @@ usually resolve this with a longer warmup period or by manually defining
 starting values to move the sampler into a more reasonable part of the
 parameter space. If you have more samples than that, it may be that your
 model is misspecified. You can often diagnose this by using
-\code{\link{calculate}()} to evaluate the values of greta arrays, given
+\code{\link[=calculate]{calculate()}} to evaluate the values of greta arrays, given
 fixed values of model parameters, and checking the results are what you
 expect.
 
@@ -174,20 +174,19 @@ probably be slower than running multiple chains simultaneously in a single
 sampler (with \code{plan(sequential)}, the default) because of the overhead
 required to start new sessions. However, \code{plan(cluster)} can be used
 to run chains on a cluster of machines on a local or remote network. See
-\code{\link[future:cluster]{future::cluster}} for details, and the
+\code{\link[future:cluster]{future::cluster()}} for details, and the
 \code{future.batchtools} package to set up plans on clusters with job
 schedulers.
 
 If \code{n_cores = NULL} and mcmc samplers are being run sequentially, each
 sampler will be allowed to use all CPU cores (possibly to compute multiple
 chains sequentially). If samplers are being run in parallel with the
-\code{future} package, \code{n_cores} will be set so that \code{n_cores *
-  \link[future:nbrOfWorkers]{future::nbrOfWorkers}} is less than the number
+\code{future} package, \code{n_cores} will be set so that \verb{n_cores * [future::nbrOfWorkers]} is less than the number
 of CPU cores.
 
 After carrying out mcmc on all the model parameters, \code{mcmc()}
 calculates the values of (i.e. traces) the parameters of interest for each
-of these samples, similarly to \code{\link{calculate}}. Multiple
+of these samples, similarly to \code{\link[=calculate]{calculate()}}. Multiple
 posterior samples can be traced simultaneously, though this can require
 large amounts of memory for large models. As in \code{calculate}, the
 argument \code{trace_batch_size} can be modified to trade-off speed against
@@ -207,7 +206,7 @@ sampler or extend the warmup period.
 Because \code{opt()} acts on a list of greta arrays with possibly
 varying dimension, the \code{par} and \code{hessian} objects returned by
 \code{opt()} are named lists, rather than a vector (\code{par}) and a
-matrix (\code{hessian}), as returned by \code{\link[stats:optim]{optim()}}.
+matrix (\code{hessian}), as returned by \code{\link[stats:optim]{stats::optim()}}.
 Because greta arrays may not be vectors, the Hessians may not be matrices,
 but could be higher-dimensional arrays. To return a Hessian matrix covering
 multiple model parameters, you can construct your model so that all those

@@ -8,7 +8,7 @@ mixture(..., weights, dim = NULL)
 }
 \arguments{
 \item{...}{variable greta arrays following probability distributions (see
-\code{\link{distributions}}); the component distributions in a mixture
+\code{\link[=distributions]{distributions()}}); the component distributions in a mixture
 distribution.}
 
 \item{weights}{a column vector or array of mixture weights, which must be

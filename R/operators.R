@@ -4,7 +4,7 @@
 #'
 #' @description This is a list of currently implemented arithmetic, logical and
 #'   relational operators to combine greta arrays into probabilistic models.
-#'   Also see \link{functions} and \link{transforms}.
+#'   Also see [functions] and [transforms].
 #'
 #' @section Usage: \preformatted{
 #'  # arithmetic operators

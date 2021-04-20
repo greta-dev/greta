@@ -8,7 +8,7 @@ joint(..., dim = NULL)
 }
 \arguments{
 \item{...}{scalar variable greta arrays following probability distributions
-(see \code{\link{distributions}}); the components of the joint
+(see \code{\link[=distributions]{distributions()}}); the components of the joint
 distribution.}
 
 \item{dim}{the dimensions of the greta array to be returned, either a scalar

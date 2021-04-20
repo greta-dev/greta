@@ -18,7 +18,7 @@ calculate(
 
 \item{values}{a named list giving temporary values of the greta arrays with
 which \code{target} is connected, or a \code{greta_mcmc_list} object
-returned by \code{\link{mcmc}}.}
+returned by \code{\link[=mcmc]{mcmc()}}.}
 
 \item{nsim}{an optional positive integer scalar for the number of responses
 to simulate if stochastic greta arrays are present in the model - see
@@ -37,7 +37,7 @@ reduce memory demands}
 Values of the target greta array(s), given values of the greta arrays
 on which they depend (either specified in \code{values} or sampled from
 their priors). If \code{values} is a
-\code{\link[greta:mcmc]{greta_mcmc_list}} and \code{nsim = NULL}, this will
+\code{\link[=mcmc]{greta_mcmc_list()}} and \code{nsim = NULL}, this will
 be a \code{greta_mcmc_list} object of posterior samples for the target
 greta arrays. Otherwise, the result will be a named list of numeric R
 arrays. If \code{nsim = NULL} the dimensions of returned numeric R arrays

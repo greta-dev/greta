@@ -6,12 +6,12 @@
 #'   embedding the parameter value using greta's replacement syntax.
 #' @param ... dimensions of the greta arrays to create
 #' @param data a vector giving data to fill the greta array. Other object types
-#'   are coerced by \code{\link{as.vector}}.
+#'   are coerced by [as.vector()].
 #' @param dim an integer vector giving the dimensions for the greta array to be
 #'   created.
 #'
 #' @details `greta_array` is a convenience function to create an R array
-#'   with \code{\link{array}} and then coerce it to a greta array. I.e. when
+#'   with [array()] and then coerce it to a greta array. I.e. when
 #'   passed something that can be coerced to a numeric array, it is equivalent
 #'   to `as_data(array(data, dim))`.
 #'

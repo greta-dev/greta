@@ -20,7 +20,7 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'
 #' @param model greta_model object
 #' @param sampler sampler used to draw values in MCMC. See
-#'   \code{\link{samplers}} for options.
+#'   [samplers()] for options.
 #' @param n_samples number of MCMC samples to draw per chain (after any warm-up,
 #'   but before thinning)
 #' @param thin MCMC thinning rate; every `thin` samples is retained, the
@@ -61,7 +61,7 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   starting values to move the sampler into a more reasonable part of the
 #'   parameter space. If you have more samples than that, it may be that your
 #'   model is misspecified. You can often diagnose this by using
-#'   \code{\link{calculate}()} to evaluate the values of greta arrays, given
+#'   [calculate()] to evaluate the values of greta arrays, given
 #'   fixed values of model parameters, and checking the results are what you
 #'   expect.
 #'
@@ -83,20 +83,20 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'   sampler (with `plan(sequential)`, the default) because of the overhead
 #'   required to start new sessions. However, `plan(cluster)` can be used
 #'   to run chains on a cluster of machines on a local or remote network. See
-#'   \code{\link[future:cluster]{future::cluster}} for details, and the
+#'   [future::cluster()] for details, and the
 #'   `future.batchtools` package to set up plans on clusters with job
 #'   schedulers.
 #'
 #'   If `n_cores = NULL` and mcmc samplers are being run sequentially, each
 #'   sampler will be allowed to use all CPU cores (possibly to compute multiple
 #'   chains sequentially). If samplers are being run in parallel with the
-#'   `future` package, `n_cores` will be set so that \code{n_cores *
-#'   \link[future:nbrOfWorkers]{future::nbrOfWorkers}} is less than the number
+#'   `future` package, `n_cores` will be set so that `n_cores *
+#'   [future::nbrOfWorkers]` is less than the number
 #'   of CPU cores.
 #'
 #'   After carrying out mcmc on all the model parameters, `mcmc()`
 #'   calculates the values of (i.e. traces) the parameters of interest for each
-#'   of these samples, similarly to \code{\link{calculate}}. Multiple
+#'   of these samples, similarly to [calculate()]. Multiple
 #'   posterior samples can be traced simultaneously, though this can require
 #'   large amounts of memory for large models. As in `calculate`, the
 #'   argument `trace_batch_size` can be modified to trade-off speed against
@@ -785,7 +785,7 @@ print.initials <- function(x, ...) {
 #'   stops when the (absolute) difference in the joint density between
 #'   successive iterations drops below this level
 #' @param optimiser an `optimiser` object giving the optimisation algorithm
-#'   and parameters See \code{\link{optimisers}}.
+#'   and parameters See [optimisers()].
 #' @param adjust whether to account for Jacobian adjustments in the joint
 #'   density. Set to `FALSE` (and do not use priors) for maximum likelihood
 #'   estimates, or `TRUE` for maximum *a posteriori* estimates.
@@ -795,7 +795,7 @@ print.initials <- function(x, ...) {
 #' @details Because `opt()` acts on a list of greta arrays with possibly
 #'   varying dimension, the `par` and `hessian` objects returned by
 #'   `opt()` are named lists, rather than a vector (`par`) and a
-#'   matrix (`hessian`), as returned by \code{\link[stats:optim]{optim()}}.
+#'   matrix (`hessian`), as returned by [stats::optim()].
 #'   Because greta arrays may not be vectors, the Hessians may not be matrices,
 #'   but could be higher-dimensional arrays. To return a Hessian matrix covering
 #'   multiple model parameters, you can construct your model so that all those

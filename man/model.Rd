@@ -40,16 +40,16 @@ in violet.}
 \value{
 \code{model} - a \code{greta_model} object.
 
-\code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}}
+\code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz()}}
 object, with the
-\code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph}} object used to
+\code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph()}} object used to
 create it as an attribute \code{"dgr_graph"}.
 }
 \description{
 Create a \code{greta_model} object representing a statistical
 model (using \code{model}), and plot a graphical representation of the
 model. Statistical inference can be performed on \code{greta_model} objects
-with \code{\link{mcmc}}
+with \code{\link[=mcmc]{mcmc()}}
 }
 \details{
 \code{model()} takes greta arrays as arguments, and defines a

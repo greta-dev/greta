@@ -9,7 +9,7 @@
 #'   already have a probability distribution assigned
 #'
 #' @param value a greta array with a distribution (see
-#'   \code{\link{distributions}})
+#'   [distributions()])
 #'
 #' @details The extract method returns the greta array if it has a distribution,
 #'   or `NULL` if it doesn't. It has no real use-case, but is included for

@@ -17,7 +17,7 @@ greta_array(data = 0, dim = length(data))
 \item{...}{dimensions of the greta arrays to create}
 
 \item{data}{a vector giving data to fill the greta array. Other object types
-are coerced by \code{\link{as.vector}}.}
+are coerced by \code{\link[=as.vector]{as.vector()}}.}
 
 \item{dim}{an integer vector giving the dimensions for the greta array to be
 created.}
@@ -33,7 +33,7 @@ embedding the parameter value using greta's replacement syntax.
 }
 \details{
 \code{greta_array} is a convenience function to create an R array
-with \code{\link{array}} and then coerce it to a greta array. I.e. when
+with \code{\link[=array]{array()}} and then coerce it to a greta array. I.e. when
 passed something that can be coerced to a numeric array, it is equivalent
 to \code{as_data(array(data, dim))}.
 

@@ -33,7 +33,7 @@ between -1 and 1).}
 parameters, to be learned during model fitting. These parameters are not
 associated with a probability distribution. To create a variable greta
 array following a specific probability distribution, see
-\code{\link{distributions}}.
+\code{\link[=distributions]{distributions()}}.
 }
 \details{
 \code{lower} and \code{upper} must be fixed, they cannot be greta

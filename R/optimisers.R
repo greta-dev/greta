@@ -4,7 +4,7 @@
 #' @title optimisation methods
 #' @description Functions to set up optimisers (which find parameters that
 #'   maximise the joint density of a model) and change their tuning parameters,
-#'   for use in \code{\link{opt}()}. For details of the algorithms and how to
+#'   for use in [opt()]. For details of the algorithms and how to
 #'   tune them, see the
 #'   [SciPy
 #'    optimiser docs](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html) or the
@@ -16,7 +16,7 @@
 #'   deprecated. They will be removed in greta 0.4.0, since they will no longer
 #'   be available in TensorFlow 2.0, on which that version of greta will depend.
 #'
-#' @return an `optimiser` object that can be passed to \code{\link{opt}}.
+#' @return an `optimiser` object that can be passed to [opt()].
 #'
 #' @examples
 #' \dontrun{
