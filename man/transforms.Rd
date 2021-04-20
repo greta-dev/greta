@@ -39,8 +39,7 @@ meaning in R, and can only be applied to objects that are already in
 existence. The inverse forms of the common link functions (prefixed with an
 'i') can be used instead.
 
-The \code{log1pe} inverse link function is equivalent to \code{log(1 +
-  exp(x))}, yielding a positive transformed parameter. Unlike the log
+The \code{log1pe} inverse link function is equivalent to \code{log(1 + exp(x))}, yielding a positive transformed parameter. Unlike the log
 transformation, this transformation is approximately linear for x > 1. i.e.
 when \eqn{x > 1}, \eqn{y} is approximately \eqn{x}
 

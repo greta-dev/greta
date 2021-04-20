@@ -1,7 +1,7 @@
 #' @name mixture
 #' @title mixtures of probability distributions
 #'
-#' @description \code{mixture} combines other probability distributions into a
+#' @description `mixture` combines other probability distributions into a
 #'   single mixture distribution, either over a variable, or for fixed data.
 #'
 #' @param ... variable greta arrays following probability distributions (see
@@ -16,10 +16,10 @@
 #' @param dim the dimensions of the greta array to be returned, either a scalar
 #'   or a vector of positive integers.
 #'
-#' @details The \code{weights} are rescaled to sum to one along the first
+#' @details The `weights` are rescaled to sum to one along the first
 #'   dimension, and are then used as the mixing weights of the distribution.
 #'   I.e. the probability density is calculated as a weighted sum of the
-#'   component probability distributions passed in via \code{\dots}
+#'   component probability distributions passed in via `\dots`
 #'
 #'   The component probability distributions must all be either continuous or
 #'   discrete, and must have the same dimensions.

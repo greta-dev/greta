@@ -1,4 +1,4 @@
-#' @title Simulate Responses From \code{greta_model} Object
+#' @title Simulate Responses From `greta_model` Object
 #'
 #' @description Simulate values of all named greta arrays associated with a
 #'   greta model from the model priors, including the response variable.
@@ -16,7 +16,7 @@
 #'
 #'   To simulate values of the response variable, it must be both a named object
 #'   (in the calling environment) and be a greta array. If you don't see it
-#'   showing up in the output, you may need to use \code{as_data} to convert it
+#'   showing up in the output, you may need to use `as_data` to convert it
 #'   to a greta array before defining the model.
 #'
 #' @return A named list of vectors, matrices or arrays containing independent

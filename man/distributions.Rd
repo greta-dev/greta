@@ -107,7 +107,7 @@ and \code{dirichlet_multinomial}.}
 the distribution, similarly to the \code{lower} and \code{upper} arguments
 to \code{\link{variable}}}
 
-\item{prob}{probability parameter (\code{0 < prob < 1}), must be a vector for
+\item{prob}{probability parameter (\verb{0 < prob < 1}), must be a vector for
 \code{multinomial} and \code{categorical}}
 
 \item{size, m, n, k}{positive integer parameter}
@@ -148,8 +148,7 @@ corresponds to an independent realisation. If a single realisation or
 parameter value is specified, it must therefore be a row vector (see
 example). \code{n_realisations} gives the number of rows/realisations, and
 \code{dimension} gives the dimension of the distribution. I.e. a bivariate
-normal distribution would be produced with \code{multivariate_normal(...,
-  dimension = 2)}. The dimension can usually be detected from the parameters.
+normal distribution would be produced with \code{multivariate_normal(..., dimension = 2)}. The dimension can usually be detected from the parameters.
 
 \code{multinomial()} does not check that observed values sum to
 \code{size}, and \code{categorical()} does not check that only one of the

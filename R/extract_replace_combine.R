@@ -33,22 +33,22 @@
 #'
 #' @param x a greta array
 #' @param i,j indices specifying elements to extract or replace
-#' @param n a single integer, as in \code{utils::head()} and
-#'   \code{utils::tail()}
+#' @param n a single integer, as in `utils::head()` and
+#'   `utils::tail()`
 #' @param nrow,ncol optional dimensions for the resulting greta array when x is
 #'   not a matrix.
-#' @param value for \code{`[<-`} a greta array to replace elements, for
-#'   \code{`dim<-`} either NULL or a numeric vector of dimensions
+#' @param value for ``[<-`` a greta array to replace elements, for
+#'   ``dim<-`` either NULL or a numeric vector of dimensions
 #' @param ... either further indices specifying elements to extract or replace
-#'   (\code{[}), or multiple greta arrays to combine (\code{cbind()},
-#'   \code{rbind()} & \code{c()}), or additional arguments (\code{rep()},
-#'   \code{head()}, \code{tail()})
+#'   (`[`), or multiple greta arrays to combine (`cbind()`,
+#'   `rbind()` & `c()`), or additional arguments (`rep()`,
+#'   `head()`, `tail()`)
 #' @param drop,recursive generic arguments that are ignored for greta arrays
 #'
-#' @details \code{diag()} can be used to extract or replace the diagonal part of
+#' @details `diag()` can be used to extract or replace the diagonal part of
 #'   a square and two-dimensional greta array, but it cannot be used to create a
 #'   matrix-like greta array from a scalar or vector-like greta array. A static
-#'   diagonal matrix can always be created with e.g. \code{diag(3)}, and then
+#'   diagonal matrix can always be created with e.g. `diag(3)`, and then
 #'   converted into a greta array.
 #'
 #' @examples

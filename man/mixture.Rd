@@ -27,7 +27,7 @@ single mixture distribution, either over a variable, or for fixed data.
 The \code{weights} are rescaled to sum to one along the first
 dimension, and are then used as the mixing weights of the distribution.
 I.e. the probability density is calculated as a weighted sum of the
-component probability distributions passed in via \code{\dots}
+component probability distributions passed in via \verb{\\dots}
 
 The component probability distributions must all be either continuous or
 discrete, and must have the same dimensions.

@@ -1339,26 +1339,26 @@ distribution_classes_module <- module(uniform_distribution,
 #'   define a distribution over a data greta array.
 #'
 #' @param truncation a length-two vector giving values between which to truncate
-#'   the distribution, similarly to the \code{lower} and \code{upper} arguments
+#'   the distribution, similarly to the `lower` and `upper` arguments
 #'   to \code{\link{variable}}
 #'
-#' @param min,max scalar values giving optional limits to \code{uniform}
-#'   variables. Like \code{lower} and \code{upper}, these must be specified as
+#' @param min,max scalar values giving optional limits to `uniform`
+#'   variables. Like `lower` and `upper`, these must be specified as
 #'   numerics, they cannot be greta arrays (though see details for a
-#'   workaround). Unlike \code{lower} and \code{upper}, they must be finite.
-#'   \code{min} must always be less than \code{max}.
+#'   workaround). Unlike `lower` and `upper`, they must be finite.
+#'   `min` must always be less than `max`.
 #'
 #' @param mean,meanlog,location,mu unconstrained parameters
 #'
 #' @param
 #'   sd,sdlog,sigma,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b,eta
-#'    positive parameters, \code{alpha} must be a vector for \code{dirichlet}
-#'   and \code{dirichlet_multinomial}.
+#'    positive parameters, `alpha` must be a vector for `dirichlet`
+#'   and `dirichlet_multinomial`.
 #'
 #' @param size,m,n,k positive integer parameter
 #'
-#' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
-#'   \code{multinomial} and \code{categorical}
+#' @param prob probability parameter (`0 < prob < 1`), must be a vector for
+#'   `multinomial` and `categorical`
 #'
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'
@@ -1370,77 +1370,77 @@ distribution_classes_module <- module(uniform_distribution,
 #' @param n_realisations the number of independent realisation of a multivariate
 #'   distribution
 #'
-#' @details The discrete probability distributions (\code{bernoulli},
-#'   \code{binomial}, \code{negative_binomial}, \code{poisson},
-#'   \code{multinomial}, \code{categorical}, \code{dirichlet_multinomial}) can
+#' @details The discrete probability distributions (`bernoulli`,
+#'   `binomial`, `negative_binomial`, `poisson`,
+#'   `multinomial`, `categorical`, `dirichlet_multinomial`) can
 #'   be used when they have fixed values (e.g. defined as a likelihood using
 #'   \code{\link{distribution}}, but not as unknown variables.
 #'
-#'   For univariate distributions \code{dim} gives the dimensions of the greta
+#'   For univariate distributions `dim` gives the dimensions of the greta
 #'   array to create. Each element of the greta array will be (independently)
-#'   distributed according to the distribution. \code{dim} can also be left at
-#'   its default of \code{NULL}, in which case the dimension will be detected
+#'   distributed according to the distribution. `dim` can also be left at
+#'   its default of `NULL`, in which case the dimension will be detected
 #'   from the dimensions of the parameters (provided they are compatible with
 #'   one another).
 #'
-#'   For multivariate distributions (\code{multivariate_normal()},
-#'   \code{multinomial()}, \code{categorical()}, \code{dirichlet()}, and
-#'   \code{dirichlet_multinomial()}) each row of the output and parameters
+#'   For multivariate distributions (`multivariate_normal()`,
+#'   `multinomial()`, `categorical()`, `dirichlet()`, and
+#'   `dirichlet_multinomial()`) each row of the output and parameters
 #'   corresponds to an independent realisation. If a single realisation or
 #'   parameter value is specified, it must therefore be a row vector (see
-#'   example). \code{n_realisations} gives the number of rows/realisations, and
-#'   \code{dimension} gives the dimension of the distribution. I.e. a bivariate
-#'   normal distribution would be produced with \code{multivariate_normal(...,
-#'   dimension = 2)}. The dimension can usually be detected from the parameters.
+#'   example). `n_realisations` gives the number of rows/realisations, and
+#'   `dimension` gives the dimension of the distribution. I.e. a bivariate
+#'   normal distribution would be produced with `multivariate_normal(...,
+#'   dimension = 2)`. The dimension can usually be detected from the parameters.
 #'
-#'   \code{multinomial()} does not check that observed values sum to
-#'   \code{size}, and \code{categorical()} does not check that only one of the
+#'   `multinomial()` does not check that observed values sum to
+#'   `size`, and `categorical()` does not check that only one of the
 #'   observed entries is 1. It's the user's responsibility to check their data
 #'   matches the distribution!
 #'
-#'   The parameters of \code{uniform} must be fixed, not greta arrays. This
+#'   The parameters of `uniform` must be fixed, not greta arrays. This
 #'   ensures these values can always be transformed to a continuous scale to run
-#'   the samplers efficiently. However, a hierarchical \code{uniform} parameter
-#'   can always be created by defining a \code{uniform} variable constrained
+#'   the samplers efficiently. However, a hierarchical `uniform` parameter
+#'   can always be created by defining a `uniform` variable constrained
 #'   between 0 and 1, and then transforming it to the required scale. See below
 #'   for an example.
 #'
 #'   Wherever possible, the parameterisations and argument names of greta
 #'   distributions match commonly used R functions for distributions, such as
-#'   those in the \code{stats} or \code{extraDistr} packages. The following
+#'   those in the `stats` or `extraDistr` packages. The following
 #'   table states the distribution function to which greta's implementation
 #'   corresponds:
 #'
-#'   \tabular{ll}{ greta \tab reference\cr \code{uniform} \tab
-#'   \link[stats:dunif]{stats::dunif}\cr \code{normal} \tab
-#'   \link[stats:dnorm]{stats::dnorm}\cr \code{lognormal} \tab
-#'   \link[stats:dlnorm]{stats::dlnorm}\cr \code{bernoulli} \tab
-#'   \link[extraDistr:dbern]{extraDistr::dbern}\cr \code{binomial} \tab
-#'   \link[stats:dbinom]{stats::dbinom}\cr \code{beta_binomial} \tab
-#'   \link[extraDistr:dbbinom]{extraDistr::dbbinom}\cr \code{negative_binomial}
-#'   \tab \link[stats:dnbinom]{stats::dnbinom}\cr \code{hypergeometric} \tab
-#'   \link[stats:dhyper]{stats::dhyper}\cr \code{poisson} \tab
-#'   \link[stats:dpois]{stats::dpois}\cr \code{gamma} \tab
-#'   \link[stats:dgamma]{stats::dgamma}\cr \code{inverse_gamma} \tab
-#'   \link[extraDistr:dinvgamma]{extraDistr::dinvgamma}\cr \code{weibull} \tab
-#'   \link[stats:dweibull]{stats::dweibull}\cr \code{exponential} \tab
-#'   \link[stats:dexp]{stats::dexp}\cr \code{pareto} \tab
-#'   \link[extraDistr:dpareto]{extraDistr::dpareto}\cr \code{student} \tab
-#'   \link[extraDistr:dlst]{extraDistr::dlst}\cr \code{laplace} \tab
-#'   \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr \code{beta} \tab
-#'   \link[stats:dbeta]{stats::dbeta}\cr \code{cauchy} \tab
-#'   \link[stats:dcauchy]{stats::dcauchy}\cr \code{chi_squared} \tab
-#'   \link[stats:dchisq]{stats::dchisq}\cr \code{logistic} \tab
-#'   \link[stats:dlogis]{stats::dlogis}\cr \code{f} \tab
-#'   \link[stats:df]{stats::df}\cr \code{multivariate_normal} \tab
-#'   \link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}\cr \code{multinomial} \tab
-#'   \link[stats:dmultinom]{stats::dmultinom}\cr \code{categorical} \tab
-#'   {\link[stats:dmultinom]{stats::dmultinom} (size = 1)}\cr \code{dirichlet}
+#'   \tabular{ll}{ greta \tab reference\cr `uniform` \tab
+#'   \link[stats:dunif]{stats::dunif}\cr `normal` \tab
+#'   \link[stats:dnorm]{stats::dnorm}\cr `lognormal` \tab
+#'   \link[stats:dlnorm]{stats::dlnorm}\cr `bernoulli` \tab
+#'   \link[extraDistr:dbern]{extraDistr::dbern}\cr `binomial` \tab
+#'   \link[stats:dbinom]{stats::dbinom}\cr `beta_binomial` \tab
+#'   \link[extraDistr:dbbinom]{extraDistr::dbbinom}\cr `negative_binomial`
+#'   \tab \link[stats:dnbinom]{stats::dnbinom}\cr `hypergeometric` \tab
+#'   \link[stats:dhyper]{stats::dhyper}\cr `poisson` \tab
+#'   \link[stats:dpois]{stats::dpois}\cr `gamma` \tab
+#'   \link[stats:dgamma]{stats::dgamma}\cr `inverse_gamma` \tab
+#'   \link[extraDistr:dinvgamma]{extraDistr::dinvgamma}\cr `weibull` \tab
+#'   \link[stats:dweibull]{stats::dweibull}\cr `exponential` \tab
+#'   \link[stats:dexp]{stats::dexp}\cr `pareto` \tab
+#'   \link[extraDistr:dpareto]{extraDistr::dpareto}\cr `student` \tab
+#'   \link[extraDistr:dlst]{extraDistr::dlst}\cr `laplace` \tab
+#'   \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr `beta` \tab
+#'   \link[stats:dbeta]{stats::dbeta}\cr `cauchy` \tab
+#'   \link[stats:dcauchy]{stats::dcauchy}\cr `chi_squared` \tab
+#'   \link[stats:dchisq]{stats::dchisq}\cr `logistic` \tab
+#'   \link[stats:dlogis]{stats::dlogis}\cr `f` \tab
+#'   \link[stats:df]{stats::df}\cr `multivariate_normal` \tab
+#'   \link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}\cr `multinomial` \tab
+#'   \link[stats:dmultinom]{stats::dmultinom}\cr `categorical` \tab
+#'   {\link[stats:dmultinom]{stats::dmultinom} (size = 1)}\cr `dirichlet`
 #'   \tab \link[extraDistr:ddirichlet]{extraDistr::ddirichlet}\cr
-#'   \code{dirichlet_multinomial} \tab
-#'   \link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr \code{wishart} \tab
-#'   \link[stats:rWishart]{stats::rWishart}\cr \code{lkj_correlation} \tab
-#'   \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}
+#'   `dirichlet_multinomial` \tab
+#'   \link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr `wishart` \tab
+#'   \link[stats:rWishart]{stats::rWishart}\cr `lkj_correlation` \tab
+#'   [rethinking::dlkjcorr](https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html)
 #'   }
 #'
 #' @examples

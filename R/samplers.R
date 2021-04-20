@@ -4,11 +4,11 @@
 #' @description Functions to set up MCMC samplers and change the starting values
 #'   of their parameters, for use in \code{\link{mcmc}()}.
 #'
-#' @details During the warmup iterations of \code{mcmc}, some of these
+#' @details During the warmup iterations of `mcmc`, some of these
 #'   sampler parameters will be tuned to improve the efficiency of the sampler,
 #'   so the values provided here are used as starting values.
 #'
-#' @return a \code{sampler} object that can be passed to \code{\link{mcmc}}.
+#' @return a `sampler` object that can be passed to \code{\link{mcmc}}.
 
 NULL
 
@@ -22,9 +22,9 @@ NULL
 #' @param diag_sd estimate of the posterior marginal standard deviations
 #'   (positive, will be tuned).
 #'
-#' @details For \code{hmc()}, the number of leapfrog steps at each iteration is
-#'   selected uniformly at random from between \code{Lmin} and \code{Lmax}.
-#'   \code{diag_sd} is used to rescale the parameter space to make it more
+#' @details For `hmc()`, the number of leapfrog steps at each iteration is
+#'   selected uniformly at random from between `Lmin` and `Lmax`.
+#'   `diag_sd` is used to rescale the parameter space to make it more
 #'   uniform, and make sampling more efficient.
 hmc <- function(Lmin = 5,
                 Lmax = 10,
@@ -43,7 +43,7 @@ hmc <- function(Lmin = 5,
 
 #' @rdname samplers
 #'
-#' @details \code{rwmh()} creates a random walk Metropolis-Hastings sampler;  a
+#' @details `rwmh()` creates a random walk Metropolis-Hastings sampler;  a
 #'   a gradient-free sampling algorithm. The algorithm involves a proposal
 #'   generating step `proposal_state = current_state + perturb` by a random
 #'   perturbation, followed by Metropolis-Hastings accept/reject step. The class
@@ -68,10 +68,10 @@ rwmh <- function(proposal = c("normal", "uniform"),
 
 #' @rdname samplers
 #'
-#' @details \code{slice()} implements a multivariate slice sampling algorithm.
+#' @details `slice()` implements a multivariate slice sampling algorithm.
 #'   Currently this algorithm can only be used with single-precision models (set
-#'   using the \code{precision} argument to \code{\link{model}}). The parameter
-#'   \code{max_doublings} is not tuned during warmup.
+#'   using the `precision` argument to \code{\link{model}}). The parameter
+#'   `max_doublings` is not tuned during warmup.
 #'
 #' @param max_doublings the maximum number of iterations of the 'doubling'
 #'   algorithm used to adapt the size of the slice
