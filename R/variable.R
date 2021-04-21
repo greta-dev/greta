@@ -47,7 +47,9 @@ variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
   check_tf_version("error")
 
   if (inherits(lower, "greta_array") | inherits(upper, "greta_array")) {
-    stop("lower and upper must be fixed, they cannot be another greta array")
+    stop("lower and upper must be fixed, they cannot be another greta array",
+      call. = FALSE
+    )
   }
 
   node <- variable_node$new(lower, upper, dim)

@@ -219,7 +219,9 @@ node <- R6Class(
 
       # check it
       if (!inherits(distribution, "distribution_node")) {
-        stop("invalid distribution")
+        stop("invalid distribution",
+          call. = FALSE
+        )
       }
 
       # add it
@@ -278,7 +280,9 @@ to_node <- function(x) {
     } else if (is.numeric(x)) {
       x <- data_node$new(x)
     } else {
-      stop("cannot coerce object to a node")
+      stop("cannot coerce object to a node",
+        call. = FALSE
+      )
     }
   }
   x

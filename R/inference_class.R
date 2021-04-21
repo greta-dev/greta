@@ -159,7 +159,9 @@ inference <- R6Class(
     # run a burst of sampling, and put the resulting free state values in
     # last_burst_free_states
     run_burst = function() {
-      stop("no method to run a burst in the base inference class")
+      stop("no method to run a burst in the base inference class",
+        call. = FALSE
+      )
       self$last_burst_free_states <- free_states
     },
 

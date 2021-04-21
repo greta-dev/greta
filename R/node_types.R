@@ -121,7 +121,9 @@ operation_node <- R6Class(
       if (is.null(value)) {
         value <- unknowns(dim = dim)
       } else if (!all.equal(dim(value), dim)) {
-        stop("values have the wrong dimension so cannot be used")
+        stop("values have the wrong dimension so cannot be used",
+          call. = FALSE
+        )
       }
 
       super$initialize(dim, value)

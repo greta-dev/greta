@@ -203,7 +203,8 @@ NULL
     if (length(index) %% length(replacement) != 0) {
       stop(
         "number of items to replace is not a multiple of ",
-        "replacement length"
+        "replacement length",
+        call. = FALSE
       )
     } else {
       replacement <- rep(replacement, length.out = length(index))

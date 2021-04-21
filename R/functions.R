@@ -198,7 +198,8 @@ round.greta_array <- function(x, digits = 0) {
   if (digits != 0) {
     stop(
       "greta arrays can only be rounded to the nearest integer, ",
-      "the digits argument cannot be set"
+      "the digits argument cannot be set",
+      call. = FALSE
     )
   }
   op("round", x, tf_operation = "tf$round")
@@ -298,7 +299,9 @@ trigamma.greta_array <- function(x) {
 #' @export
 t.greta_array <- function(x) {
   if (length(dim(x)) != 2) {
-    stop("only 2D arrays can be transposed")
+    stop("only 2D arrays can be transposed",
+      call. = FALSE
+    )
   }
 
   dims <- rev(dim(x))
@@ -349,7 +352,8 @@ chol.greta_array <- function(x, ...) {
     if (!(length(dim) == 2 && dim[1] == dim[2])) {
       stop(
         "only two-dimensional, square, symmetric greta arrays ",
-        "can be Cholesky decomposed"
+        "can be Cholesky decomposed",
+        call. = FALSE
       )
     }
 
@@ -370,7 +374,9 @@ solve.greta_array <- function(a, b, ...) {
     stop(sprintf(
       "'a' and 'b' must both be 2D, but 'a' has dimensions: %s",
       paste(dim(a), collapse = " x ")
-    ))
+    ),
+    call. = FALSE
+    )
   }
 
   # check the matrix is square
@@ -378,7 +384,9 @@ solve.greta_array <- function(a, b, ...) {
     stop(sprintf(
       "'a' must be square, but has %i rows and %i columns",
       dim(a)[1], dim(a)[2]
-    ))
+    ),
+    call. = FALSE
+    )
   }
 
   # if they just want the matrix inverse, do that
@@ -398,7 +406,9 @@ solve.greta_array <- function(a, b, ...) {
       stop(sprintf(
         "'a' and 'b' must both be 2D, but 'b' has dimensions: %s",
         paste(dim(b), collapse = " x ")
-      ))
+      ),
+      call. = FALSE
+      )
     }
 
     # b must have the right number of rows
@@ -409,7 +419,9 @@ solve.greta_array <- function(a, b, ...) {
           "(%i), but has %i rows instead"
         ),
         dim(a)[1], dim(b)[1]
-      ))
+      ),
+      call. = FALSE
+      )
     }
 
     # ... and solve the linear equations
@@ -547,12 +559,16 @@ cumprod.greta_array <- function(x) {
 # these primitives are not yet supported:
 #' @export
 cummax.greta_array <- function(x) {
-  stop("cummax not yet implemented for greta")
+  stop("cummax not yet implemented for greta",
+    call. = FALSE
+  )
 }
 
 #' @export
 cummin.greta_array <- function(x) {
-  stop("cummin not yet implemented for greta")
+  stop("cummin not yet implemented for greta",
+    call. = FALSE
+  )
 }
 
 #' @export
@@ -723,7 +739,9 @@ sweep.greta_array <- function(x,
   margin <- MARGIN
 
   if (!margin %in% seq_len(2)) {
-    stop("MARGIN can only be 1 or 2")
+    stop("MARGIN can only be 1 or 2",
+      call. = FALSE
+    )
   }
 
   # x must be 2D
@@ -731,7 +749,9 @@ sweep.greta_array <- function(x,
     stop(sprintf(
       "x must be a 2D array, but has %i dimensions",
       length(dim(x))
-    ))
+    ),
+    call. = FALSE
+    )
   }
 
   # STATS must be a column array
@@ -742,12 +762,16 @@ sweep.greta_array <- function(x,
         "but has dimensions %s"
       ),
       paste(dim(stats), collapse = " x ")
-    ))
+    ),
+    call. = FALSE
+    )
   }
 
   # STATS must have the same dimension as the correct dim of x
   if (dim(x)[margin] != dim(stats)[1]) {
-    stop("the number of elements of STATS does not match dim(x)[MARGIN]")
+    stop("the number of elements of STATS does not match dim(x)[MARGIN]",
+      call. = FALSE
+    )
   }
 
   op("sweep", x, stats,
@@ -772,7 +796,9 @@ setMethod(
       stop(sprintf(
         "X must be a 2D array, but has %i dimensions",
         length(dim(X))
-      ))
+      ),
+      call. = FALSE
+      )
     }
 
     # Y must be 2D
@@ -780,7 +806,9 @@ setMethod(
       stop(sprintf(
         "Y must be a 2D array, but has %i dimensions",
         length(dim(X))
-      ))
+      ),
+      call. = FALSE
+      )
     }
 
     tf_fun_name <- switch(fun,

@@ -168,7 +168,7 @@ NULL
       paste0(dim(x), collapse = "x"),
       paste0(dim(y), collapse = "x")
     )
-    stop(msg)
+    stop(msg, call. = FALSE)
   }
 
   op("matrix multiply", x, y,

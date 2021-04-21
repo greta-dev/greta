@@ -6,7 +6,9 @@ uniform_distribution <- R6Class(
     max = NA,
     initialize = function(min, max, dim) {
       if (inherits(min, "greta_array") | inherits(max, "greta_array")) {
-        stop("min and max must be fixed, they cannot be another greta array")
+        stop("min and max must be fixed, they cannot be another greta array",
+          call. = FALSE
+        )
       }
 
       good_types <- is.numeric(min) && length(min) == 1 &
