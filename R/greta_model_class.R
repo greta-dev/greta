@@ -2,39 +2,39 @@
 
 #' @name model
 #' @title greta model objects
-#' @description Create a \code{greta_model} object representing a statistical
-#'   model (using \code{model}), and plot a graphical representation of the
-#'   model. Statistical inference can be performed on \code{greta_model} objects
-#'   with \code{\link{mcmc}}
+#' @description Create a `greta_model` object representing a statistical
+#'   model (using `model`), and plot a graphical representation of the
+#'   model. Statistical inference can be performed on `greta_model` objects
+#'   with [mcmc()]
 NULL
 
 #' @rdname model
 #' @export
 #'
-#' @param \dots for \code{model}: \code{greta_array} objects to be tracked by
+#' @param \dots for `model`: `greta_array` objects to be tracked by
 #'   the model (i.e. those for which samples will be retained during mcmc). If
-#'   not provided, all of the non-data \code{greta_array} objects defined in the
-#'   calling environment will be tracked. For \code{print} and
-#'   \code{plot}:further arguments passed to or from other methods (currently
+#'   not provided, all of the non-data `greta_array` objects defined in the
+#'   calling environment will be tracked. For `print` and
+#'   `plot`:further arguments passed to or from other methods (currently
 #'   ignored).
 #'
 #' @param precision the floating point precision to use when evaluating this
-#'   model. Switching from \code{"double"} (the default) to \code{"single"} may
+#'   model. Switching from `"double"` (the default) to `"single"` may
 #'   decrease the computation time but increase the risk of numerical
 #'   instability during sampling.
 #'
 #' @param compile whether to apply
-#'   \href{https://www.tensorflow.org/performance/xla/}{XLA JIT compilation} to
+#'   [XLA JIT compilation](https://www.tensorflow.org/performance/xla/) to
 #'   the TensorFlow graph representing the model. This may slow down model
 #'   definition, and speed up model evaluation.
 #'
-#' @details \code{model()} takes greta arrays as arguments, and defines a
+#' @details `model()` takes greta arrays as arguments, and defines a
 #'   statistical model by finding all of the other greta arrays on which they
-#'   depend, or which depend on them. Further arguments to \code{model} can be
+#'   depend, or which depend on them. Further arguments to `model` can be
 #'   used to configure the TensorFlow graph representing the model, to tweak
 #'   performance.
 #'
-#' @return \code{model} - a \code{greta_model} object.
+#' @return `model` - a `greta_model` object.
 #'
 #' @examples
 #' \dontrun{
@@ -78,31 +78,7 @@ model <- function(...,
 
   }
 
-  # check they are greta arrays
-  are_greta_arrays <- vapply(target_greta_arrays,
-                             inherits, "greta_array",
-                             FUN.VALUE = FALSE)
-
-  if (!all(are_greta_arrays)) {
-
-    unexpected_items <- names(target_greta_arrays)[!are_greta_arrays]
-
-    msg <- ifelse(length(unexpected_items) > 1,
-                  paste("The following objects passed to model()",
-                        "are not greta arrays: "),
-                  paste("The following object passed to model()",
-                        "is not a greta array: "))
-
-    stop(msg,
-         paste(unexpected_items, sep = ", "),
-         call. = FALSE)
-
-  }
-
-  if (length(target_greta_arrays) == 0) {
-    stop("could not find any non-data greta arrays",
-         call. = FALSE)
-  }
+  target_greta_arrays <- check_greta_arrays(target_greta_arrays, "model")
 
   # get the dag containing the target nodes
   dag <- dag_class$new(target_greta_arrays,
@@ -183,17 +159,17 @@ model <- function(...,
 }
 
 # register generic method to coerce objects to a greta model
-as.greta_model <- function(x, ...)  # Exclude Linting
+as.greta_model <- function(x, ...)  # nolint
   UseMethod("as.greta_model", x)
 
-as.greta_model.dag_class <- function(x, ...) {  # Exclude Linting
+as.greta_model.dag_class <- function(x, ...) {  # nolint
   ans <- list(dag = x)
   class(ans) <- "greta_model"
   ans
 }
 
 #' @rdname model
-#' @param x a \code{greta_model} object
+#' @param x a `greta_model` object
 #' @export
 print.greta_model <- function(x, ...) {
   cat("greta model")
@@ -201,19 +177,19 @@ print.greta_model <- function(x, ...) {
 
 #' @rdname model
 #' @param y unused default argument
-#' @param colour base colour used for plotting. Defaults to \code{greta} colours
+#' @param colour base colour used for plotting. Defaults to `greta` colours
 #'   in violet.
 #'
 #' @details The plot method produces a visual representation of the defined
-#'   model. It uses the \code{DiagrammeR} package, which must be installed
+#'   model. It uses the `DiagrammeR` package, which must be installed
 #'   first. Here's a key to the plots:
 #'   \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
 #'   \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 #'
-#' @return \code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}}
+#' @return `plot` - a [DiagrammeR::grViz()]
 #'   object, with the
-#'   \code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph}} object used to
-#'   create it as an attribute \code{"dgr_graph"}.
+#'   [`DiagrammeR::dgr_graph()`][DiagrammeR::create_graph] object used to
+#'   create it as an attribute `"dgr_graph"`.
 #'
 #' @export
 plot.greta_model <- function(x,

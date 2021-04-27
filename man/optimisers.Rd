@@ -47,27 +47,40 @@ adadelta(learning_rate = 0.001, rho = 1, epsilon = 1e-08)
 
 adagrad(learning_rate = 0.8, initial_accumulator_value = 0.1)
 
-adagrad_da(learning_rate = 0.8, global_step = 1L,
+adagrad_da(
+  learning_rate = 0.8,
+  global_step = 1L,
   initial_gradient_squared_accumulator_value = 0.1,
-  l1_regularization_strength = 0, l2_regularization_strength = 0)
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+)
 
 momentum(learning_rate = 0.001, momentum = 0.9, use_nesterov = TRUE)
 
-adam(learning_rate = 0.1, beta1 = 0.9, beta2 = 0.999,
-  epsilon = 1e-08)
+adam(learning_rate = 0.1, beta1 = 0.9, beta2 = 0.999, epsilon = 1e-08)
 
-ftrl(learning_rate = 1, learning_rate_power = -0.5,
-  initial_accumulator_value = 0.1, l1_regularization_strength = 0,
-  l2_regularization_strength = 0)
+ftrl(
+  learning_rate = 1,
+  learning_rate_power = -0.5,
+  initial_accumulator_value = 0.1,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+)
 
-proximal_gradient_descent(learning_rate = 0.01,
-  l1_regularization_strength = 0, l2_regularization_strength = 0)
+proximal_gradient_descent(
+  learning_rate = 0.01,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+)
 
-proximal_adagrad(learning_rate = 1, initial_accumulator_value = 0.1,
-  l1_regularization_strength = 0, l2_regularization_strength = 0)
+proximal_adagrad(
+  learning_rate = 1,
+  initial_accumulator_value = 0.1,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+)
 
-rms_prop(learning_rate = 0.1, decay = 0.9, momentum = 0,
-  epsilon = 1e-10)
+rms_prop(learning_rate = 0.1, decay = 0.9, momentum = 0, epsilon = 1e-10)
 }
 \arguments{
 \item{maxcor}{maximum number of 'variable metric corrections' used to define
@@ -117,26 +130,24 @@ greater)}
 \item{decay}{discounting factor for the gradient}
 }
 \value{
-an \code{optimiser} object that can be passed to \code{\link{opt}}.
+an \code{optimiser} object that can be passed to \code{\link[=opt]{opt()}}.
 }
 \description{
 Functions to set up optimisers (which find parameters that
-  maximise the joint density of a model) and change their tuning parameters,
-  for use in \code{\link{opt}()}. For details of the algorithms and how to
-  tune them, see the
-  \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy
-   optimiser docs} or the
-  \href{https://www.tensorflow.org/api_docs/python/tf/contrib/opt}{TensorFlow
-   optimiser docs}.
+maximise the joint density of a model) and change their tuning parameters,
+for use in \code{\link[=opt]{opt()}}. For details of the algorithms and how to
+tune them, see the
+\href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html}{SciPy optimiser docs} or the
+\href{https://www.tensorflow.org/api_docs/python/tf/contrib/opt}{TensorFlow optimiser docs}.
 }
 \details{
 The optimisers \code{powell()}, \code{cg()}, \code{newton_cg()},
-  \code{l_bfgs_b()}, \code{tnc()}, \code{cobyla()}, and \code{slsqp()} are
-  deprecated. They will be removed in greta 0.4.0, since they will no longer
-  be available in TensorFlow 2.0, on which that version of greta will depend.
+\code{l_bfgs_b()}, \code{tnc()}, \code{cobyla()}, and \code{slsqp()} are
+deprecated. They will be removed in greta 0.4.0, since they will no longer
+be available in TensorFlow 2.0, on which that version of greta will depend.
 
 The \code{cobyla()} does not provide information about the number of
-  iterations nor convergence, so these elements of the output are set to NA
+iterations nor convergence, so these elements of the output are set to NA
 }
 \examples{
 \dontrun{

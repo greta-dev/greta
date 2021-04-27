@@ -3,7 +3,7 @@
 #' @title transformation functions for greta arrays
 #'
 #' @description transformations for greta arrays, which may also be used as
-#'   inverse link functions. Also see \link{operators} and \link{functions}.
+#'   inverse link functions. Also see [operators] and [functions].
 #'
 #' @param x a real-valued (i.e. values ranging from -Inf to Inf) greta array to
 #'   transform to a constrained value
@@ -14,12 +14,12 @@
 #'   existence. The inverse forms of the common link functions (prefixed with an
 #'   'i') can be used instead.
 #'
-#'   The \code{log1pe} inverse link function is equivalent to \code{log(1 +
-#'   exp(x))}, yielding a positive transformed parameter. Unlike the log
+#'   The `log1pe` inverse link function is equivalent to `log(1 +
+#'   exp(x))`, yielding a positive transformed parameter. Unlike the log
 #'   transformation, this transformation is approximately linear for x > 1. i.e.
-#'   when \eqn{x > 1}, \eqn{y \approx x}
+#'   when \eqn{x > 1}, \eqn{y} is approximately \eqn{x}
 #'
-#'   \code{imultilogit} expects an n-by-m greta array, and returns an n-by-(m+1)
+#'   `imultilogit` expects an n-by-m greta array, and returns an n-by-(m+1)
 #'   greta array of positive reals whose rows sum to one. This is equivalent
 #'   adding a final column of 0s and then running the softmax function widely
 #'   used in machine learning.

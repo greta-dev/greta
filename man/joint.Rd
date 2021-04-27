@@ -7,8 +7,9 @@
 joint(..., dim = NULL)
 }
 \arguments{
-\item{...}{variable greta arrays following probability distributions (see
-\code{\link{distributions}}); the components of the joint distribution.}
+\item{...}{scalar variable greta arrays following probability distributions
+(see \code{\link[=distributions]{distributions()}}); the components of the joint
+distribution.}
 
 \item{dim}{the dimensions of the greta array to be returned, either a scalar
 or a vector of positive integers. The final dimension of the greta array
@@ -16,18 +17,18 @@ returned will be determined by the number of component distributions}
 }
 \description{
 \code{joint} combines univariate probability distributions
-  together into a multivariate (and \emph{a priori} independent between
-  dimensions) joint distribution, either over a variable, or for fixed data.
+together into a multivariate (and \emph{a priori} independent between
+dimensions) joint distribution, either over a variable, or for fixed data.
 }
 \details{
 The component probability distributions must all be either
-  continuous or discrete, and must have the same dimensions.
+continuous or discrete, and must have the same dimensions.
 
-  This functionality is unlikely to be useful in most models, since the same
-  result can usually be achieved by combining variables with separate
-  distributions. It is included for situations where it is more convenient to
-  consider these as a single distribution, e.g. for use with
-  \code{distribution} or \code{mixture}.
+This functionality is unlikely to be useful in most models, since the same
+result can usually be achieved by combining variables with separate
+distributions. It is included for situations where it is more convenient to
+consider these as a single distribution, e.g. for use with
+\code{distribution} or \code{mixture}.
 }
 \examples{
 \dontrun{

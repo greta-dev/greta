@@ -1,11 +1,38 @@
 # greta (development version)
 
+## Fixes:
 
-* `mcmc()`, `stashed_samples()`, and `calculate()` now return objects of class `greta_mcmc_list` which inherit from `coda`'s `mcmc.list` class, but enable custom greta S3 methods, including a `window()` function.
+* greta_mcmc_list objects (returned by mcmc()) are now no longer modified by operations (like code::gelman.diag()). 
 
-* `mcmc()` and `calculate()` now have a `trace_batch_size` argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays.
+* joint distributions of uniform variables now have the correct constraints when sampling (#377).
+
+* array-scalar dispatch with 3D arrays is now less buggy (#298).
+
+* greta now provides R versions of all of R's primitive functions (I think), to prevent them from silently not executing (#317).
+
+## API changes:
+
+* `calculate()` now accepts multiple greta arrays for which to calculate values, via the `...` argument. As a consequence any other arguments must now be named.
 
 * a number of optimiser methods are now deprecated, since they will be unavailable when greta moves to using TensorFlow v2.0: `powell()`, `cg()`, `newton_cg()`, `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()`.
+
+* `dirichlet()` now returns a variable (rather than an operation) greta array, and the graphs created by `lkj_correlation()` and `wishart()` are now simpler as cholesky-shaped variables are now available internally.
+
+## Features:
+
+* `calculate()` now enables simulation of greta array values from their priors, optionally conditioned on fixed values or posterior samples. This enables prior and posterior predictive checking of models, and simulation of data.
+
+* A `simulate()` method for greta models is now also provided, to simulate the values of all greta arrays in a model from their priors. 
+
+* `variable()` now accepts arrays for `upper` and `lower`, enabling users to define variables with different constraints.
+
+* There are three new variable constructor functions: `cholesky_variable()`, `simplex_variable()`, and `ordered_variable()`, for variables with these constraints but no probability distribution.
+
+* a new function `chol2symm()` - the inverse of `chol()`.
+
+* `mcmc()`, `stashed_samples()`, and `calculate()` now return objects of class `greta_mcmc_list` which inherit from `coda`'s `mcmc.list` class, but enable custom greta methods for manipulating mcmc outputs, including a `window()` function.
+
+* `mcmc()` and `calculate()` now have a `trace_batch_size` argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays (#236).
 
 # greta 0.3.1
 

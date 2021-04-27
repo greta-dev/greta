@@ -2,17 +2,17 @@
 #' @aliases distribution
 #' @title define a distribution over data
 #'
-#' @description \code{distribution} defines probability distributions over
+#' @description `distribution` defines probability distributions over
 #'   observed data, e.g. to set a model likelihood.
 #'
 #' @param greta_array a data greta array. For the assignment method it must not
 #'   already have a probability distribution assigned
 #'
 #' @param value a greta array with a distribution (see
-#'   \code{\link{distributions}})
+#'   [distributions()])
 #'
 #' @details The extract method returns the greta array if it has a distribution,
-#'   or \code{NULL} if it doesn't. It has no real use-case, but is included for
+#'   or `NULL` if it doesn't. It has no real use-case, but is included for
 #'   completeness
 #'
 #' @export
@@ -33,7 +33,7 @@
 #' # get the distribution over y
 #' distribution(y)
 #' }
-`distribution<-` <- function(greta_array, value) {  # Exclude Linting
+`distribution<-` <- function(greta_array, value) {  # nolint
 
   # stash the old greta array to return
   greta_array_tmp <- greta_array
@@ -44,7 +44,7 @@
   node <- get_node(greta_array)
 
   # only for greta arrays without distributions
-  if (!is.null(node$distribution)) {
+  if (has_distribution(node)) {
     stop("left hand side already has a distribution assigned",
          call. = FALSE)
   }
@@ -92,6 +92,10 @@
   # also adds distribution_node as this node's distribution
   distribution_node$remove_target()
   distribution_node$add_target(node)
+
+  # if possible, expand the dimensions of the distribution's parameters to match
+  # the target
+  distribution_node$expand_parameters_to(node$dim)
 
   # remove the distribution from the RHS variable greta array
   value_node$distribution <- NULL

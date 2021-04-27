@@ -33,22 +33,22 @@
 #'
 #' @param x a greta array
 #' @param i,j indices specifying elements to extract or replace
-#' @param n a single integer, as in \code{utils::head()} and
-#'   \code{utils::tail()}
+#' @param n a single integer, as in `utils::head()` and
+#'   `utils::tail()`
 #' @param nrow,ncol optional dimensions for the resulting greta array when x is
 #'   not a matrix.
-#' @param value for \code{`[<-`} a greta array to replace elements, for
-#'   \code{`dim<-`} either NULL or a numeric vector of dimensions
+#' @param value for ``[<-`` a greta array to replace elements, for
+#'   ``dim<-`` either NULL or a numeric vector of dimensions
 #' @param ... either further indices specifying elements to extract or replace
-#'   (\code{[}), or multiple greta arrays to combine (\code{cbind()},
-#'   \code{rbind()} & \code{c()}), or additional arguments (\code{rep()},
-#'   \code{head()}, \code{tail()})
+#'   (`[`), or multiple greta arrays to combine (`cbind()`,
+#'   `rbind()` & `c()`), or additional arguments (`rep()`,
+#'   `head()`, `tail()`)
 #' @param drop,recursive generic arguments that are ignored for greta arrays
 #'
-#' @details \code{diag()} can be used to extract or replace the diagonal part of
+#' @details `diag()` can be used to extract or replace the diagonal part of
 #'   a square and two-dimensional greta array, but it cannot be used to create a
 #'   matrix-like greta array from a scalar or vector-like greta array. A static
-#'   diagonal matrix can always be created with e.g. \code{diag(3)}, and then
+#'   diagonal matrix can always be created with e.g. `diag(3)`, and then
 #'   converted into a greta array.
 #'
 #' @examples
@@ -157,7 +157,7 @@ NULL
 
 # replace syntax for greta array objects
 #' @export
-`[<-.greta_array` <- function(x, ..., value) {  # Exclude Linting
+`[<-.greta_array` <- function(x, ..., value) {  # nolint
 
   node <- get_node(x)
 
@@ -292,7 +292,7 @@ rbind.greta_array <- function(...) {
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname overloaded
 #' @export
 abind <- function(...,
@@ -302,20 +302,20 @@ abind <- function(...,
                   hier.names = FALSE, use.dnns = FALSE) {
   UseMethod("abind")
 }
-# End Exclude Linting
+# nolint end
 
 # clear CRAN checks spotting floating global variables
 #' @importFrom utils globalVariables
 utils::globalVariables("N", "greta")
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 abind.default <- function(...,
                           along = N, rev.along = NULL, new.names = NULL,
                           force.array = TRUE, make.names = use.anon.names,
                           use.anon.names = FALSE, use.first.dimnames = FALSE,
                           hier.names = FALSE, use.dnns = FALSE) {
-# End Exclude Linting
+# nolint end
 
   # error nicely if they don't have abind installed
   abind_installed <- requireNamespace("abind", quietly = TRUE)
@@ -331,7 +331,7 @@ abind.default <- function(...,
 
 }
 
-# Begin Exclude Linting
+# nolint start
 #' @export
 abind.greta_array <- function(...,
                               along = N, rev.along = NULL, new.names = NULL,
@@ -339,10 +339,10 @@ abind.greta_array <- function(...,
                               use.anon.names = FALSE,
                               use.first.dimnames = FALSE, hier.names = FALSE,
                               use.dnns = FALSE) {
-# End Exclude Linting
+# nolint end
 
   # warn if any of the arguments have been changed
-  # Begin Exclude Linting
+  # nolint start
   user_set_args <- !is.null(rev.along) |
     !is.null(new.names) |
     !isTRUE(force.array) |
@@ -351,7 +351,7 @@ abind.greta_array <- function(...,
     !identical(use.first.dimnames, FALSE) |
     !identical(hier.names, FALSE) |
     !identical(use.dnns, FALSE)
-  # End Exclude Linting
+  # nolint end
 
   if (user_set_args) {
     warning("only the argument 'along' is supported when using abind ",
@@ -371,7 +371,7 @@ abind.greta_array <- function(...,
   n <- max(vapply(dims, length, FUN.VALUE = 1L))
 
   # needed to keep the same formals as abind
-  N <- n  # Exclude Linting
+  N <- n  # nolint
   along <- as.integer(force(along))
 
   # rationalise along, and pad N if we're prepending/appending a dimension
@@ -482,7 +482,7 @@ length.greta_array <- function(x)
 
 # reshape greta arrays
 #' @export
-`dim<-.greta_array` <- function(x, value) {  # Exclude Linting
+`dim<-.greta_array` <- function(x, value) {  # nolint
 
   dims <- value
 
@@ -552,7 +552,7 @@ length.greta_array <- function(x)
 # arrays
 #' @export
 #' @importFrom utils head
-head.greta_array <- function(x, n = 6L, ...) {  # Exclude Linting
+head.greta_array <- function(x, n = 6L, ...) {  # nolint
 
   stopifnot(length(n) == 1L)
 
@@ -585,7 +585,7 @@ head.greta_array <- function(x, n = 6L, ...) {  # Exclude Linting
 
 #' @export
 #' @importFrom utils tail
-tail.greta_array <- function(x, n = 6L, ...) {  # Exclude Linting
+tail.greta_array <- function(x, n = 6L, ...) {  # nolint
 
   stopifnot(length(n) == 1L)
 

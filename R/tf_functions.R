@@ -161,36 +161,6 @@ tf_tapply <- function(x, segment_ids, num_segments, op_name) {
 
 }
 
-
-# given a flat tensor, convert it into a square symmetric matrix by considering
-# it  as the non-zero elements of the lower-triangular decomposition of the
-# square matrix
-tf_flat_to_chol <- function(x, dims) {
-  # drop trailing dimension, and biject forward to an upper triangular matrix
-
-  # indices to the cholesky factor
-  l_dummy <- dummy(dims)
-  indices_diag <- diag(l_dummy)
-  indices_offdiag <- sort(l_dummy[upper.tri(l_dummy, diag = FALSE)])
-
-  # indices to the free state
-  x_index_diag <- seq_along(indices_diag) - 1
-  x_index_offdiag <- length(indices_diag) + seq_along(indices_offdiag) - 1
-
-  # create an empty vector to fill with the values
-  values_0 <- tf$zeros(shape(1, prod(dims), 1), dtype = tf_float())
-  values_0_diag <- tf_recombine(values_0,
-                                indices_diag,
-                                tf$exp(x[, x_index_diag, , drop = FALSE]))
-  values_z <- tf_recombine(values_0_diag,
-                           indices_offdiag,
-                           x[, x_index_offdiag, , drop = FALSE])
-
-  # reshape into lower triangular and return
-  tf$reshape(values_z, shape(-1, dims[1], dims[2]))
-
-}
-
 # given a (batched, column) vector tensor of elements, corresponding to the
 # correlation-constrained (between -1 and 1) free state of a single row of the
 # cholesky factor of a correlation matrix, return the (upper-triangular
@@ -239,14 +209,14 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
   cond <- function(z, x, sumsq, lp, iter, maxiter)
     tf$less(iter, maxiter)
 
-  # Begin Exclude Linting
+  # nolint start
   shapes <- list(tf$TensorShape(shape(NULL, n)),
                  tf$TensorShape(shape(NULL, NULL)),
                  tf$TensorShape(shape(NULL)),
                  tf$TensorShape(shape(NULL)),
                  tf$TensorShape(shape()),
                  tf$TensorShape(shape()))
-  # End Exclude Linting
+  # nolint end
 
   body <- switch(which,
                  values = body_values,
@@ -275,57 +245,9 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
 
 }
 
-# convert an unconstrained vector into symmetric correlation matrix
-tf_flat_to_chol_correl <- function(x, dims) {
-
-  dims <- dim(x)
-  k <- dims[[2]]
-  n <- (1 + sqrt(8 * k + 1)) / 2
-
-  # drop the third dimension
-  if (length(dims) == 3) {
-    x <- tf$squeeze(x, axis = 2L)
-  }
-
-  # convert to -1, 1 scale
-  z <- tf$tanh(x)
-
-  # split z up into rows
-  z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
-
-  # accumulate sum of squares within each row
-  x_rows <- lapply(z_rows, tf_corrmat_row)
-
-  # append 0s to all rows for the empty triangle
-  zero_rows <- lapply((n - 2):0,
-                      function(n) {
-                        zeros <- tf$constant(rep(0, n),
-                                             dtype = tf_float(),
-                                             shape = shape(1, n))
-                        expand_to_batch(zeros, x)
-                      })
-
-  lists <- mapply(list, x_rows, zero_rows, SIMPLIFY = FALSE)
-  rows <- lapply(lists, tf$concat, axis = 1L)
-
-  # add a fixed first row
-  row_one <- tf$constant(c(1, rep(0, n - 1)),
-                         dtype = tf_float(),
-                         shape = shape(1, n))
-  row_one <- expand_to_batch(row_one, x)
-  rows <- c(row_one, rows)
-
-  rows <- lapply(rows, tf$expand_dims, 2L)
-
-  # combine into upper-triangular matrix
-  mat <- tf$concat(rows, axis = 2L)
-
-  mat
-
+tf_chol2symm <- function(x) {
+  tf$matmul(x, x, adjoint_a = TRUE)
 }
-
-tf_chol_to_symmetric <- function(u)
-  tf$matmul(tf_transpose(u), u)
 
 tf_colmeans <- function(x, dims) {
 
@@ -495,13 +417,6 @@ tf_imultilogit <- function(x) {
   tf$nn$softmax(latent)
 }
 
-# a version of tf$concat that automatically expands out the first dimension if
-# necessary
-tf_concat <- function(values, axis) {
-  values <- match_batches(values)
-  tf$concat(values = values, axis = axis)
-}
-
 # map R's extract and replace syntax to tensorflow, for use in operation nodes
 # the following arguments are required:
 #   nelem - number of elements in the original array,
@@ -529,11 +444,6 @@ tf_extract <- function(x, nelem, index, dims_out) {
 # values, a tensor `updates` at the elements given by the R vector `index` (in
 # 0-indexing)
 tf_recombine <- function(ref, index, updates) {
-
-  # expand out any data to match the batch dimensions
-  out_list <- match_batches(list(ref, updates))
-  ref <- out_list[[1]]
-  updates <- out_list[[2]]
 
   # vector denoting whether an element is being updated
   nelem <- dim(ref)[[2]]
@@ -655,6 +565,184 @@ tf_distance <- function(x1, x2) {
 
 }
 
+# common construction of a chained bijector for scalars, optionally adding a
+# final reshaping step
+tf_scalar_biject <- function(..., dim) {
+
+  steps <- list(...)
+
+  if (!is.null(dim)) {
+    steps <- c(tfp$bijectors$Reshape(dim), steps)
+  }
+
+  tfp$bijectors$Chain(steps)
+
+}
+
+tf_scalar_bijector <- function(dim, lower, upper) {
+
+  tf_scalar_biject(
+    tfp$bijectors$Identity(),
+    dim = dim
+  )
+
+}
+
+tf_scalar_pos_bijector <- function(dim, lower, upper) {
+
+  tf_scalar_biject(
+    tfp$bijectors$AffineScalar(shift = fl(lower)),
+    tfp$bijectors$Exp(),
+    dim = dim
+  )
+
+}
+
+tf_scalar_neg_bijector <- function(dim, lower, upper) {
+
+  tf_scalar_biject(
+    tfp$bijectors$AffineScalar(shift = fl(upper), scale = fl(-1)),
+    tfp$bijectors$Exp(),
+    dim = dim
+  )
+
+}
+
+tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
+
+  tf_scalar_biject(
+    tfp$bijectors$AffineScalar(shift = fl(lower), scale = fl(upper - lower)),
+    tfp$bijectors$Sigmoid(),
+    dim = dim
+  )
+
+}
+
+# a blockwise combination of other transformations, with final reshaping
+tf_scalar_mixed_bijector <- function(dim, lower, upper, constraints) {
+
+  constructors <-
+    list(
+      none = tf_scalar_bijector,
+      low = tf_scalar_neg_bijector,
+      high = tf_scalar_pos_bijector,
+      both = tf_scalar_neg_pos_bijector
+    )
+
+  # get the constructors, lower and upper bounds for each block
+  rle <- rle(constraints)
+  blocks <- rep(seq_along(rle$lengths), rle$lengths)
+  constructor_idx <- match(rle$values, names(constructors))
+  block_constructors <- constructors[constructor_idx]
+  lowers <- split(lower, blocks)
+  uppers <- split(upper, blocks)
+
+  # combine into lists of arguments
+  n_blocks <- length(rle$lengths)
+  dims <- replicate(n_blocks, NULL, simplify = FALSE)
+  block_parameters <- mapply(list, dims, lowers, uppers, SIMPLIFY = FALSE)
+  block_parameters <- lapply(block_parameters,
+                             `names<-`,
+                             c("dim", "lower", "upper"))
+
+  # create bijectors for each block
+  names(block_constructors) <- NULL
+  bijectors <- mapply(do.call,
+                      block_constructors,
+                      block_parameters,
+                      SIMPLIFY = FALSE)
+
+  # roll into single bijector
+  tf_scalar_biject(
+    tfp$bijectors$Blockwise(bijectors, block_sizes = rle$lengths),
+    dim = dim
+  )
+
+}
+
+tf_correlation_cholesky_bijector <- function() {
+
+  steps <- list(
+    tfp$bijectors$Transpose(perm = 1:0),
+    tfp$bijectors$CorrelationCholesky()
+  )
+  bijector <- tfp$bijectors$Chain(steps)
+
+  # forward_log_det_jacobian doesn't seem to work with unknown dimensions yet,
+  # so replace for now with our own
+  ljac_corr_mat <- function(x, event_ndims) {
+
+    # find dimension
+    k <- dim(x)[[2]]
+    n <- (1 + sqrt(8 * k + 1)) / 2
+
+    # convert to correlation-scale (-1, 1) & get log jacobian
+    z <- tf$tanh(x)
+
+    free_to_correl_lp <- tf_sum(log(fl(1) - tf$square(z)))
+    free_to_correl_lp <- tf$squeeze(free_to_correl_lp, 1L)
+
+    # split z up into rows
+    z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
+
+    # accumulate log prob within each row
+    lps <- lapply(z_rows, tf_corrmat_row, which = "ljac")
+    correl_to_mat_lp <- tf$add_n(lps)
+
+    free_to_correl_lp + correl_to_mat_lp
+
+  }
+
+  list(forward = bijector$forward,
+       inverse = bijector$inverse,
+       forward_log_det_jacobian = ljac_corr_mat)
+
+}
+
+tf_covariance_cholesky_bijector <- function() {
+  tfp$bijectors$FillTriangular(upper = TRUE)
+}
+
+tf_simplex_bijector <- function(dim) {
+
+  n_dim <- length(dim)
+  last_dim <- dim[n_dim]
+  raw_dim <- dim
+  raw_dim[n_dim] <- last_dim - 1L
+
+  steps <- list(
+    tfp$bijectors$IteratedSigmoidCentered(),
+    tfp$bijectors$Reshape(raw_dim)
+  )
+  tfp$bijectors$Chain(steps)
+
+}
+
+tf_ordered_bijector <- function(dim) {
+
+  steps <- list(
+    tfp$bijectors$Invert(tfp$bijectors$Ordered()),
+    tfp$bijectors$Reshape(dim)
+  )
+  tfp$bijectors$Chain(steps)
+
+}
+
+# generate a tensor of random standard uniforms with a given shape,
+# including the batch dimension
+tf_randu <- function(dim, dag) {
+  uniform <- tfp$distributions$Uniform(low = fl(0), high = fl(1))
+  shape <- c(dag$tf_environment$batch_size, as.list(dim))
+  uniform$sample(sample_shape = shape, seed = get_seed())
+}
+
+# generate an integer tensor of values up to n (indexed from 0) with a given
+# shape, including the batch dimension
+tf_randint <- function(n, dim, dag) {
+  u <- tf_randu(dim, dag)
+  tf$floor(u * as.integer(n))
+}
+
 # combine as module for export via internals
 tf_functions_module <- module(tf_as_logical,
                               tf_as_float,
@@ -663,10 +751,8 @@ tf_functions_module <- module(tf_as_logical,
                               tf_lbeta,
                               tf_chol,
                               tf_chol2inv,
-                              tf_flat_to_chol,
                               tf_corrmat_row,
-                              tf_flat_to_chol_correl,
-                              tf_chol_to_symmetric,
+                              tf_chol2symm,
                               tf_colmeans,
                               tf_rowmeans,
                               tf_colsums,
@@ -696,4 +782,10 @@ tf_functions_module <- module(tf_as_logical,
                               tf_extract_eigenvectors,
                               tf_extract_eigenvalues,
                               tf_self_distance,
-                              tf_distance)
+                              tf_distance,
+                              tf_scalar_bijector,
+                              tf_scalar_neg_bijector,
+                              tf_scalar_pos_bijector,
+                              tf_scalar_neg_pos_bijector,
+                              tf_correlation_cholesky_bijector,
+                              tf_covariance_cholesky_bijector)

@@ -125,7 +125,7 @@ test_that("as_data errors informatively", {
   cha_mat <- matrix(cha_vec, nrow = 10, ncol = 2)
   cha_arr <- array(cha_vec, dim = c(5, 2, 2))
   cha_df <- as.data.frame(cha_mat, stringsAsFactors = FALSE)
-  cha_df2 <- as.data.frame(cha_mat)
+  cha_df2 <- as.data.frame(cha_mat, stringsAsFactors = TRUE)
   expect_error(as_data(cha_vec),
                "objects of class character cannot be coerced to greta arrays")
   expect_error(as_data(cha_mat),

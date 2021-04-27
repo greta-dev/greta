@@ -5,7 +5,6 @@ uniform_distribution <- R6Class(
 
     min = NA,
     max = NA,
-    log_density = NULL,
 
     initialize = function(min, max, dim) {
 
@@ -40,18 +39,16 @@ uniform_distribution <- R6Class(
       # initialisation)
       self$min <- min
       self$max <- max
-
       self$bounds <- c(min, max)
 
       # initialize the rest
       super$initialize("uniform", dim)
 
       # add them as parents and greta arrays
+      min <- as.greta_array(min)
+      max <- as.greta_array(max)
       self$add_parameter(min, "min")
       self$add_parameter(max, "max")
-
-      # the density is fixed, so calculate it now
-      self$log_density <- -log(max - min)
 
     },
 
@@ -63,14 +60,10 @@ uniform_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      tf_ld <- fl(self$log_density)
-
-      # weird hack to make TF see a gradient here
-      log_prob <- function(x) {
-        tf_ld + tf_flatten(x) * fl(0)
-      }
-
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      tfp$distributions$Uniform(
+        low = parameters$min,
+        high = parameters$max
+      )
 
     }
 
@@ -120,12 +113,12 @@ lognormal_distribution <- R6Class(
       self$add_parameter(sdlog, "sdlog")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$LogNormal(loc = parameters$meanlog,
                                   scale = parameters$sdlog)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -175,18 +168,14 @@ bernoulli_distribution <- R6Class(
           x * lprob + (fl(1) - x) * lprobnot
         }
 
-        list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+        list(log_prob = log_prob)
 
       } else {
 
         tfp$distributions$Bernoulli(probs = parameters$prob)
 
       }
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -242,17 +231,13 @@ binomial_distribution <- R6Class(
           log_choose + x * lprob + (size - x) * lprobnot
         }
 
-        list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+        list(log_prob = log_prob)
 
       } else {
         tfp$distributions$Binomial(total_count = parameters$size,
                                    probs = parameters$prob)
       }
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -289,13 +274,21 @@ beta_binomial_distribution <- R6Class(
           tf_lbeta(alpha, beta)
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      # generate a beta, then a binomial
+      sample <- function(seed) {
 
-    },
+        beta <- tfp$distributions$Beta(concentration1 = alpha,
+                                       concentration0 = beta)
+        probs <- beta$sample(seed = seed)
+        binomial <- tfp$distributions$Binomial(total_count = size,
+                                               probs = probs)
+        binomial$sample(seed = seed)
 
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+      }
+
+      list(log_prob = log_prob, sample = sample)
+
+    }
 
   )
 )
@@ -332,11 +325,7 @@ poisson_distribution <- R6Class(
 
       tfp$distributions$Poisson(log_rate = log_lambda)
 
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -358,16 +347,12 @@ negative_binomial_distribution <- R6Class(
       self$add_parameter(prob, "prob")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$NegativeBinomial(total_count = parameters$size,
                                          probs = fl(1) - parameters$prob)
-    },
-    # End Exclude Linting
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
+    # nolint end
 
   )
 )
@@ -403,13 +388,9 @@ hypergeometric_distribution <- R6Class(
           tf_lchoose(m + n, k)
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = log_prob)
 
-    },
-
-    # no CDF for discrete distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -460,12 +441,12 @@ inverse_gamma_distribution <- R6Class(
       self$add_parameter(beta, "beta")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$InverseGamma(concentration = parameters$alpha,
                                      rate = parameters$beta)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -494,19 +475,40 @@ weibull_distribution <- R6Class(
       a <- parameters$shape
       b <- parameters$scale
 
+      # use the TFP Weibull CDF bijector
+      bijector <- tfp$bijectors$Weibull(scale = b, concentration = a)
+
       log_prob <- function(x) {
         log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b) ^ a
       }
 
       cdf <- function(x) {
-        fl(1) - exp(fl(-1) * (x / b) ^ a)
+        bijector$forward(x)
       }
 
       log_cdf <- function(x) {
         log(cdf(x))
       }
 
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+      quantile <- function(x) {
+        bijector$inverse(x)
+      }
+
+      sample <- function(seed) {
+
+        # sample by pushing standard uniforms through the inverse cdf
+        u <- tf_randu(self$dim, dag)
+        quantile(u)
+
+      }
+
+      list(
+        log_prob = log_prob,
+        cdf = cdf,
+        log_cdf = log_cdf,
+        quantile = quantile,
+        sample = sample
+      )
 
     }
 
@@ -584,13 +586,13 @@ student_distribution <- R6Class(
       self$add_parameter(sigma, "sigma")
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
       tfp$distributions$StudentT(df = parameters$df,
                                  loc = parameters$mu,
                                  scale = parameters$sigma)
     }
-    # End Exclude Linting
+    # nolint end
 
   )
 )
@@ -717,11 +719,6 @@ logistic_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Logistic(loc = parameters$location,
                                  scale = parameters$scale)
-    },
-
-    # log_cdf in tf$cotrib$distributions has the wrong sign :/
-    tf_log_cdf_function = function(x, parameters) {
-      tf$math$log(self$tf_cdf_function(x, parameters))
     }
 
   )
@@ -741,7 +738,7 @@ f_distribution <- R6Class(
       dim <- check_dims(df1, df2, target_dim = dim)
       check_positive(truncation)
       self$bounds <- c(0, Inf)
-      super$initialize("d", dim, truncation)
+      super$initialize("f", dim, truncation)
       self$add_parameter(df1, "df1")
       self$add_parameter(df2, "df2")
     },
@@ -771,7 +768,25 @@ f_distribution <- R6Class(
       log_cdf <- function(x)
         log(cdf(x))
 
-      list(log_prob = log_prob, cdf = cdf, log_cdf = log_cdf)
+      sample <- function(seed) {
+
+        # sample as the ratio of two scaled chi squared distributions
+        d1 <- tfp$distributions$Chi2(df = df1)
+        d2 <- tfp$distributions$Chi2(df = df2)
+
+        u1 <- d1$sample(seed = seed)
+        u2 <- d2$sample(seed = seed)
+
+        (u1 / df1) / (u2 / df2)
+
+      }
+
+      list(
+        log_prob = log_prob,
+        cdf = cdf,
+        log_cdf = log_cdf,
+        sample = sample
+      )
 
     }
 
@@ -798,18 +813,15 @@ dirichlet_distribution <- R6Class(
       # parameters
       self$bounds <- c(0, Inf)
       super$initialize("dirichlet", dim,
-                       truncation = c(0, Inf))
+                       truncation = c(0, Inf),
+                       multivariate = TRUE)
       self$add_parameter(alpha, "alpha")
 
     },
 
     create_target = function(truncation) {
 
-      # handle simplex via a greta array
-      free_greta_array <- variable(lower = 0, upper = 1, dim = self$dim)
-
-      sums <- rowSums(free_greta_array)
-      simplex_greta_array <- sweep(free_greta_array, 1, sums, "/")
+      simplex_greta_array <- simplex_variable(self$dim)
 
       # return the node for the simplex
       target_node <- get_node(simplex_greta_array)
@@ -820,15 +832,10 @@ dirichlet_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       alpha <- parameters$alpha
       tfp$distributions$Dirichlet(concentration = alpha)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
-
 
 dirichlet_multinomial_distribution <- R6Class(
   "dirichlet_multinomial_distribution",
@@ -853,25 +860,21 @@ dirichlet_multinomial_distribution <- R6Class(
       # parameters
       super$initialize("dirichlet_multinomial",
                        dim = dim,
-                       discrete = TRUE)
-      self$add_parameter(size, "size", expand_scalar_to = NULL)
+                       discrete = TRUE,
+                       multivariate = TRUE)
+      self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(alpha, "alpha")
 
     },
 
-    # Begin Exclude Linting
+    # nolint start
     tf_distrib = function(parameters, dag) {
-      parameters <- match_batches(parameters)
       parameters$size <- tf_flatten(parameters$size)
       distrib <- tfp$distributions$DirichletMultinomial
       distrib(total_count = parameters$size,
               concentration = parameters$alpha)
-    },
-    # End Exclude Linting
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
+    # nolint end
 
   )
 )
@@ -898,25 +901,21 @@ multinomial_distribution <- R6Class(
       # parameters
       super$initialize("multinomial",
                        dim = dim,
-                       discrete = TRUE)
-      self$add_parameter(size, "size", expand_scalar_to = NULL)
+                       discrete = TRUE,
+                       multivariate = TRUE)
+      self$add_parameter(size, "size", shape_matches_output = FALSE)
       self$add_parameter(prob, "prob")
 
     },
 
     tf_distrib = function(parameters, dag) {
-      parameters <- match_batches(parameters)
       parameters$size <- tf_flatten(parameters$size)
       # scale probs to get absolute density correct
       parameters$prob <- parameters$prob / tf_sum(parameters$prob)
 
       tfp$distributions$Multinomial(total_count = parameters$size,
                                     probs = parameters$prob)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -937,7 +936,10 @@ categorical_distribution <- R6Class(
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("categorical", dim = dim, discrete = TRUE)
+      super$initialize("categorical",
+                       dim = dim,
+                       discrete = TRUE,
+                       multivariate = TRUE)
       self$add_parameter(prob, "prob")
 
     },
@@ -948,11 +950,7 @@ categorical_distribution <- R6Class(
       probs <- probs / tf_sum(probs)
       tfp$distributions$Multinomial(total_count = fl(1),
                                     probs = probs)
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -963,9 +961,9 @@ multivariate_normal_distribution <- R6Class(
   public = list(
 
     sigma_is_cholesky = FALSE,
-    # Begin Exclude Linting
+    # nolint start
     initialize = function(mean, Sigma, n_realisations, dimension) {
-    # End Exclude Linting
+    # nolint end
       # coerce to greta arrays
       mean <- as.greta_array(mean)
       sigma <- as.greta_array(Sigma)
@@ -1001,7 +999,7 @@ multivariate_normal_distribution <- R6Class(
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("multivariate_normal", dim)
+      super$initialize("multivariate_normal", dim, multivariate = TRUE)
 
       if (has_representation(sigma, "cholesky")) {
         sigma <- representation(sigma, "cholesky")
@@ -1028,15 +1026,11 @@ multivariate_normal_distribution <- R6Class(
       l <- tf$expand_dims(l, 1L)
 
       mu <- parameters$mean
-      # Begin Exclude Linting
+      # nolint start
       tfp$distributions$MultivariateNormalTriL(loc = mu,
                                                scale_tril = l)
-      # End Exclude Linting
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+      # nolint end
+    }
 
   )
 )
@@ -1052,7 +1046,7 @@ wishart_distribution <- R6Class(
     # set when defining the graph
     target_is_cholesky = FALSE,
 
-    initialize = function(df, Sigma) {  # Exclude Linting
+    initialize = function(df, Sigma) {  # nolint
       # add the nodes as parents and parameters
 
       df <- as.greta_array(df)
@@ -1071,14 +1065,14 @@ wishart_distribution <- R6Class(
       dim <- nrow(sigma)
 
       # initialize with a cholesky factor
-      super$initialize("wishart", dim(sigma))
+      super$initialize("wishart", dim(sigma), multivariate = TRUE)
 
       # set parameters
       if (has_representation(sigma, "cholesky")) {
         sigma <- representation(sigma, "cholesky")
         self$sigma_is_cholesky <- TRUE
       }
-      self$add_parameter(df, "df", expand_scalar_to = NULL)
+      self$add_parameter(df, "df", shape_matches_output = FALSE)
       self$add_parameter(sigma, "sigma")
 
       # make the initial value PD (no idea whether this does anything)
@@ -1090,16 +1084,11 @@ wishart_distribution <- R6Class(
     # factor representation)
     create_target = function(truncation) {
 
-      # create a flat variable greta array
-      k <- self$dim[1]
-      free_greta_array <- vble(truncation = c(-Inf, Inf),
-                               dim = k + k * (k - 1) / 2)
-      free_greta_array$constraint <- "covariance_matrix"
+      # create cholesky factor variable greta array
+      chol_greta_array <- cholesky_variable(self$dim[1])
 
-      # reshape to a cholesky factor and then to a symmetric matrix (which
-      # retains the cholesky representation)
-      chol_greta_array <- flat_to_chol(free_greta_array, self$dim)
-      matrix_greta_array <- chol_to_symmetric(chol_greta_array)
+      # reshape to a symmetric matrix (retaining cholesky representation)
+      matrix_greta_array <- chol2symm(chol_greta_array)
 
       # return the node for the symmetric matrix
       target_node <- get_node(matrix_greta_array)
@@ -1159,13 +1148,35 @@ wishart_distribution <- R6Class(
 
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      sample <- function(seed) {
 
-    },
+        df <- tf$squeeze(parameters$df, 1:2)
+        sigma <- parameters$sigma
 
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+        # get the cholesky factor of Sigma in tf orientation
+        if (self$sigma_is_cholesky) {
+          sigma_chol <- tf$linalg$matrix_transpose(sigma)
+        } else {
+          sigma_chol <- tf$linalg$cholesky(sigma)
+        }
+
+        # use the density for choleskied x, with choleskied Sigma
+        distrib <- tfp$distributions$Wishart(df = df,
+                                             scale_tril = sigma_chol)
+
+        draws <- distrib$sample(seed = seed)
+
+        if (self$target_is_cholesky) {
+          draws <- tf_chol(draws)
+        }
+
+        draws
+
+      }
+
+      list(log_prob = log_prob, sample = sample)
+
+    }
 
   )
 )
@@ -1203,10 +1214,10 @@ lkj_correlation_distribution <- R6Class(
       }
 
       dim <- c(dimension, dimension)
-      super$initialize("lkj_correlation", dim)
+      super$initialize("lkj_correlation", dim, multivariate = TRUE)
 
       # don't try to expand scalar eta out to match the target size
-      self$add_parameter(eta, "eta", expand_scalar_to = NULL)
+      self$add_parameter(eta, "eta", shape_matches_output = FALSE)
 
       # make the initial value PD
       self$value(unknowns(dims = dim, data = diag(dimension)))
@@ -1216,18 +1227,11 @@ lkj_correlation_distribution <- R6Class(
     # default (cholesky factor, ignores truncation)
     create_target = function(truncation) {
 
-      # handle reshaping via a greta array
-      k <- self$dim[1]
-      free_greta_array <- vble(truncation = c(-Inf, Inf),
-                               dim = k * (k - 1) / 2)
-      free_greta_array$constraint <- "correlation_matrix"
+      # create (correlation matrix) cholesky factor variable greta array
+      chol_greta_array <- cholesky_variable(self$dim[1], correlation = TRUE)
 
-      # reshape to a cholesky factor and then to a symmetric correlation matrix
-      # (which retains the cholesky representation)
-      chol_greta_array <- flat_to_chol(free_greta_array,
-                                       self$dim,
-                                       correl = TRUE)
-      matrix_greta_array <- chol_to_symmetric(chol_greta_array)
+      # reshape to a symmetric matrix (retaining cholesky representation)
+      matrix_greta_array <- chol2symm(chol_greta_array)
 
       # return the node for the symmetric matrix
       target_node <- get_node(matrix_greta_array)
@@ -1254,40 +1258,40 @@ lkj_correlation_distribution <- R6Class(
 
     tf_distrib = function(parameters, dag) {
 
-      eta <- parameters$eta
+      eta <- tf$squeeze(parameters$eta, 1:2)
+      dim <- self$dim[1]
 
-      log_prob <- function(x) {
+      distrib <- tfp$distributions$LKJ(
+        dimension = dim,
+        concentration = eta,
+        input_output_cholesky = self$target_is_cholesky
+      )
 
-        n <- self$dim[1]
+      # tfp's lkj sampling can't detect the size of the output from eta, for
+      # some reason. But we can use map_fun to apply their simulation to each
+      # element of eta.
+      sample <- function(seed) {
 
-        # normalising constant
-        k <- 1:n
-        a <- fl(1 - n) * tf$math$lgamma(eta + fl(0.5 * (n - 1)))
-        b <- tf_sum(fl(0.5 * k * log(pi)) +
-                      tf$math$lgamma(eta + fl(0.5 * (n - 1 - k))))
-        norm <- a + b
+        sample_once <- function(eta) {
 
-        # get the cholesky factor of the target in tf_orientation
-        if (self$target_is_cholesky) {
-          x_chol <- tf$linalg$matrix_transpose(x)
-        } else {
-          x_chol <- tf$linalg$cholesky(x)
+          d <- tfp$distributions$LKJ(
+            dimension = dim,
+            concentration = eta,
+            input_output_cholesky = self$target_is_cholesky
+          )
+
+          d$sample(seed = seed)
+
         }
 
-        diags <- tf$linalg$diag_part(x_chol)
-        det <- tf$square(tf_prod(diags))
-
-        (eta - fl(1)) * tf$math$log(det) + norm
+        tf$map_fn(sample_once, eta)
 
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      list(log_prob = distrib$log_prob,
+           sample = sample)
 
-    },
-
-    # no CDF for multivariate distributions
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+    }
 
   )
 )
@@ -1324,37 +1328,37 @@ distribution_classes_module <- module(uniform_distribution,
 
 # export constructors
 
-# Begin Exclude Linting
+# nolint start
 #' @name distributions
 #' @title probability distributions
 #' @description These functions can be used to define random variables in a
 #'   greta model. They return a variable greta array that follows the specified
 #'   distribution. This variable greta array can be used to represent a
 #'   parameter with prior distribution, combined into a mixture distribution
-#'   using \code{\link{mixture}}, or used with \code{\link{distribution}} to
+#'   using [mixture()], or used with [distribution()] to
 #'   define a distribution over a data greta array.
 #'
 #' @param truncation a length-two vector giving values between which to truncate
-#'   the distribution, similarly to the \code{lower} and \code{upper} arguments
-#'   to \code{\link{variable}}
+#'   the distribution, similarly to the `lower` and `upper` arguments
+#'   to [variable()]
 #'
-#' @param min,max scalar values giving optional limits to \code{uniform}
-#'   variables. Like \code{lower} and \code{upper}, these must be specified as
+#' @param min,max scalar values giving optional limits to `uniform`
+#'   variables. Like `lower` and `upper`, these must be specified as
 #'   numerics, they cannot be greta arrays (though see details for a
-#'   workaround). Unlike \code{lower} and \code{upper}, they must be finite.
-#'   \code{min} must always be less than \code{max}.
+#'   workaround). Unlike `lower` and `upper`, they must be finite.
+#'   `min` must always be less than `max`.
 #'
 #' @param mean,meanlog,location,mu unconstrained parameters
 #'
 #' @param
 #'   sd,sdlog,sigma,lambda,shape,rate,df,scale,shape1,shape2,alpha,beta,df1,df2,a,b,eta
-#'    positive parameters, \code{alpha} must be a vector for \code{dirichlet}
-#'   and \code{dirichlet_multinomial}.
+#'    positive parameters, `alpha` must be a vector for `dirichlet`
+#'   and `dirichlet_multinomial`.
 #'
 #' @param size,m,n,k positive integer parameter
 #'
-#' @param prob probability parameter (\code{0 < prob < 1}), must be a vector for
-#'   \code{multinomial} and \code{categorical}
+#' @param prob probability parameter (`0 < prob < 1`), must be a vector for
+#'   `multinomial` and `categorical`
 #'
 #' @param Sigma positive definite variance-covariance matrix parameter
 #'
@@ -1366,77 +1370,77 @@ distribution_classes_module <- module(uniform_distribution,
 #' @param n_realisations the number of independent realisation of a multivariate
 #'   distribution
 #'
-#' @details The discrete probability distributions (\code{bernoulli},
-#'   \code{binomial}, \code{negative_binomial}, \code{poisson},
-#'   \code{multinomial}, \code{categorical}, \code{dirichlet_multinomial}) can
+#' @details The discrete probability distributions (`bernoulli`,
+#'   `binomial`, `negative_binomial`, `poisson`,
+#'   `multinomial`, `categorical`, `dirichlet_multinomial`) can
 #'   be used when they have fixed values (e.g. defined as a likelihood using
-#'   \code{\link{distribution}}, but not as unknown variables.
+#'   [distribution()], but not as unknown variables.
 #'
-#'   For univariate distributions \code{dim} gives the dimensions of the greta
+#'   For univariate distributions `dim` gives the dimensions of the greta
 #'   array to create. Each element of the greta array will be (independently)
-#'   distributed according to the distribution. \code{dim} can also be left at
-#'   its default of \code{NULL}, in which case the dimension will be detected
+#'   distributed according to the distribution. `dim` can also be left at
+#'   its default of `NULL`, in which case the dimension will be detected
 #'   from the dimensions of the parameters (provided they are compatible with
 #'   one another).
 #'
-#'   For multivariate distributions (\code{multivariate_normal()},
-#'   \code{multinomial()}, \code{categorical()}, \code{dirichlet()}, and
-#'   \code{dirichlet_multinomial()}) each row of the output and parameters
+#'   For multivariate distributions (`multivariate_normal()`,
+#'   `multinomial()`, `categorical()`, `dirichlet()`, and
+#'   `dirichlet_multinomial()`) each row of the output and parameters
 #'   corresponds to an independent realisation. If a single realisation or
 #'   parameter value is specified, it must therefore be a row vector (see
-#'   example). \code{n_realisations} gives the number of rows/realisations, and
-#'   \code{dimension} gives the dimension of the distribution. I.e. a bivariate
-#'   normal distribution would be produced with \code{multivariate_normal(...,
-#'   dimension = 2)}. The dimension can usually be detected from the parameters.
+#'   example). `n_realisations` gives the number of rows/realisations, and
+#'   `dimension` gives the dimension of the distribution. I.e. a bivariate
+#'   normal distribution would be produced with `multivariate_normal(...,
+#'   dimension = 2)`. The dimension can usually be detected from the parameters.
 #'
-#'   \code{multinomial()} does not check that observed values sum to
-#'   \code{size}, and \code{categorical()} does not check that only one of the
+#'   `multinomial()` does not check that observed values sum to
+#'   `size`, and `categorical()` does not check that only one of the
 #'   observed entries is 1. It's the user's responsibility to check their data
 #'   matches the distribution!
 #'
-#'   The parameters of \code{uniform} must be fixed, not greta arrays. This
+#'   The parameters of `uniform` must be fixed, not greta arrays. This
 #'   ensures these values can always be transformed to a continuous scale to run
-#'   the samplers efficiently. However, a hierarchical \code{uniform} parameter
-#'   can always be created by defining a \code{uniform} variable constrained
+#'   the samplers efficiently. However, a hierarchical `uniform` parameter
+#'   can always be created by defining a `uniform` variable constrained
 #'   between 0 and 1, and then transforming it to the required scale. See below
 #'   for an example.
 #'
 #'   Wherever possible, the parameterisations and argument names of greta
 #'   distributions match commonly used R functions for distributions, such as
-#'   those in the \code{stats} or \code{extraDistr} packages. The following
+#'   those in the `stats` or `extraDistr` packages. The following
 #'   table states the distribution function to which greta's implementation
 #'   corresponds:
 #'
-#'   \tabular{ll}{ greta \tab reference\cr \code{uniform} \tab
-#'   \link[stats:dunif]{stats::dunif}\cr \code{normal} \tab
-#'   \link[stats:dnorm]{stats::dnorm}\cr \code{lognormal} \tab
-#'   \link[stats:dlnorm]{stats::dlnorm}\cr \code{bernoulli} \tab
-#'   \link[extraDistr:dbern]{extraDistr::dbern}\cr \code{binomial} \tab
-#'   \link[stats:dbinom]{stats::dbinom}\cr \code{beta_binomial} \tab
-#'   \link[extraDistr:dbbinom]{extraDistr::dbbinom}\cr \code{negative_binomial}
-#'   \tab \link[stats:dnbinom]{stats::dnbinom}\cr \code{hypergeometric} \tab
-#'   \link[stats:dhyper]{stats::dhyper}\cr \code{poisson} \tab
-#'   \link[stats:dpois]{stats::dpois}\cr \code{gamma} \tab
-#'   \link[stats:dgamma]{stats::dgamma}\cr \code{inverse_gamma} \tab
-#'   \link[extraDistr:dinvgamma]{extraDistr::dinvgamma}\cr \code{weibull} \tab
-#'   \link[stats:dweibull]{stats::dweibull}\cr \code{exponential} \tab
-#'   \link[stats:dexp]{stats::dexp}\cr \code{pareto} \tab
-#'   \link[extraDistr:dpareto]{extraDistr::dpareto}\cr \code{student} \tab
-#'   \link[extraDistr:dlst]{extraDistr::dlst}\cr \code{laplace} \tab
-#'   \link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr \code{beta} \tab
-#'   \link[stats:dbeta]{stats::dbeta}\cr \code{cauchy} \tab
-#'   \link[stats:dcauchy]{stats::dcauchy}\cr \code{chi_squared} \tab
-#'   \link[stats:dchisq]{stats::dchisq}\cr \code{logistic} \tab
-#'   \link[stats:dlogis]{stats::dlogis}\cr \code{f} \tab
-#'   \link[stats:df]{stats::df}\cr \code{multivariate_normal} \tab
-#'   \link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}\cr \code{multinomial} \tab
-#'   \link[stats:dmultinom]{stats::dmultinom}\cr \code{categorical} \tab
-#'   {\link[stats:dmultinom]{stats::dmultinom} (size = 1)}\cr \code{dirichlet}
-#'   \tab \link[extraDistr:ddirichlet]{extraDistr::ddirichlet}\cr
-#'   \code{dirichlet_multinomial} \tab
-#'   \link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr \code{wishart} \tab
-#'   \link[stats:rWishart]{stats::rWishart}\cr \code{lkj_correlation} \tab
-#'   \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}
+#'   \tabular{ll}{ greta \tab reference\cr `uniform` \tab
+#'   [stats::dunif]\cr `normal` \tab
+#'   [stats::dnorm]\cr `lognormal` \tab
+#'   [stats::dlnorm]\cr `bernoulli` \tab
+#'   [extraDistr::dbern]\cr `binomial` \tab
+#'   [stats::dbinom]\cr `beta_binomial` \tab
+#'   [extraDistr::dbbinom]\cr `negative_binomial`
+#'   \tab [stats::dnbinom]\cr `hypergeometric` \tab
+#'   [stats::dhyper]\cr `poisson` \tab
+#'   [stats::dpois]\cr `gamma` \tab
+#'   [stats::dgamma]\cr `inverse_gamma` \tab
+#'   [extraDistr::dinvgamma]\cr `weibull` \tab
+#'   [stats::dweibull]\cr `exponential` \tab
+#'   [stats::dexp]\cr `pareto` \tab
+#'   [extraDistr::dpareto]\cr `student` \tab
+#'   [extraDistr::dlst]\cr `laplace` \tab
+#'   [extraDistr::dlaplace]\cr `beta` \tab
+#'   [stats::dbeta]\cr `cauchy` \tab
+#'   [stats::dcauchy]\cr `chi_squared` \tab
+#'   [stats::dchisq]\cr `logistic` \tab
+#'   [stats::dlogis]\cr `f` \tab
+#'   [stats::df]\cr `multivariate_normal` \tab
+#'   [mvtnorm::dmvnorm]\cr `multinomial` \tab
+#'   [stats::dmultinom]\cr `categorical` \tab
+#'   {[stats::dmultinom] (size = 1)}\cr `dirichlet`
+#'   \tab [extraDistr::ddirichlet]\cr
+#'   `dirichlet_multinomial` \tab
+#'   [extraDistr::ddirmnom]\cr `wishart` \tab
+#'   [stats::rWishart]\cr `lkj_correlation` \tab
+#'   [rethinking::dlkjcorr](https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html)
 #'   }
 #'
 #' @examples
@@ -1486,7 +1490,7 @@ distribution_classes_module <- module(uniform_distribution,
 #'
 #' }
 NULL
-# End Exclude Linting
+# nolint end
 
 #' @rdname distributions
 #' @export
@@ -1597,19 +1601,19 @@ logistic <- function(location, scale, dim = NULL, truncation = c(-Inf, Inf))
 f <- function(df1, df2, dim = NULL, truncation = c(0, Inf))
   distrib("f", df1, df2, dim, truncation)
 
-# Begin Exclude Linting
+# nolint start
 #' @rdname distributions
 #' @export
 multivariate_normal <- function(mean, Sigma,
                                 n_realisations = NULL, dimension = NULL) {
-# End Exclude Linting
+# nolint end
   distrib("multivariate_normal", mean, Sigma,
           n_realisations, dimension)
 }
 
 #' @rdname distributions
 #' @export
-wishart <- function(df, Sigma)  # Exclude Linting
+wishart <- function(df, Sigma)  # nolint
   distrib("wishart", df, Sigma)
 
 #' @rdname distributions

@@ -1,12 +1,13 @@
 #' @name joint
 #' @title define joint distributions
 #'
-#' @description \code{joint} combines univariate probability distributions
-#'   together into a multivariate (and \emph{a priori} independent between
+#' @description `joint` combines univariate probability distributions
+#'   together into a multivariate (and *a priori* independent between
 #'   dimensions) joint distribution, either over a variable, or for fixed data.
 #'
-#' @param ... variable greta arrays following probability distributions (see
-#'   \code{\link{distributions}}); the components of the joint distribution.
+#' @param ... scalar variable greta arrays following probability distributions
+#'   (see [distributions()]); the components of the joint
+#'   distribution.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
 #'   or a vector of positive integers. The final dimension of the greta array
@@ -19,7 +20,7 @@
 #'   result can usually be achieved by combining variables with separate
 #'   distributions. It is included for situations where it is more convenient to
 #'   consider these as a single distribution, e.g. for use with
-#'   \code{distribution} or \code{mixture}.
+#'   `distribution` or `mixture`.
 #'
 #' @export
 #' @examples
@@ -58,9 +59,10 @@ joint_distribution <- R6Class(
       }
 
       # check the dimensions of the variables in dots
-      dim <- do.call(check_dims, c(dots, target_dim = dim))
+      single_dim <- do.call(check_dims, c(dots, target_dim = dim))
 
       # add the joint dimension as the last dimension
+      dim <- single_dim
       ndim <- length(dim)
       if (dim[ndim] == 1) {
         dim[ndim] <- n_distributions
@@ -69,6 +71,13 @@ joint_distribution <- R6Class(
       }
 
       dot_nodes <- lapply(dots, get_node)
+
+      # check they are all scalar
+      are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
+      if (!all(are_scalar)) {
+        stop("joint only accepts probability distributions over scalars",
+              call. = FALSE)
+      }
 
       # get the distributions and strip away their variables
       distribs <- lapply(dot_nodes, member, "distribution")
@@ -85,47 +94,78 @@ joint_distribution <- R6Class(
              "of discrete and continuous distributions",
              call. = FALSE)
       }
+      n_components <- length(dot_nodes)
 
-      # for any discrete ones, tell them they are fixed
+      # work out the support of the resulting distribution, and add as the
+      # bounds of this one, to use when creating target variable
+      lower <- lapply(dot_nodes, member, "lower")
+      lower <- lapply(lower, array, dim = single_dim)
+      upper <- lapply(dot_nodes, member, "upper")
+      upper <- lapply(upper, array, dim = single_dim)
+
+      self$bounds <- list(
+        lower = do.call(abind::abind, lower),
+        upper = do.call(abind::abind, upper)
+      )
 
       super$initialize("joint", dim, discrete = discrete[1])
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
                            paste("distribution", i),
-                           expand_scalar_to = NULL)
+                           shape_matches_output = FALSE)
       }
 
     },
 
+    create_target = function(truncation) {
+      vble(self$bounds, dim = self$dim)
+    },
+
     tf_distrib = function(parameters, dag) {
 
-      densities <- parameters
-      names(densities) <- NULL
+      # get information from the *nodes* for component distributions, not the tf
+      # objects passed in here
+
+      # get tfp distributions, truncations, & bounds of component distributions
+      distribution_nodes <- self$parameters
+      truncations <- lapply(distribution_nodes, member, "truncation")
+      bounds <- lapply(distribution_nodes, member, "bounds")
+      tfp_distributions <- lapply(distribution_nodes, dag$get_tfp_distribution)
+      names(tfp_distributions) <- NULL
 
       log_prob <- function(x) {
 
         # split x on the joint dimension, and loop through computing the
         # densities
         last_dim <- length(dim(x)) - 1L
-        x_vals <- tf$split(x, length(densities), axis = last_dim)
-        log_probs <- list()
-        for (i in seq_along(densities)) {
-          log_probs[[i]] <- densities[[i]](x_vals[[i]])
-        }
+        x_vals <- tf$split(x, length(tfp_distributions), axis = last_dim)
+
+        log_probs <- mapply(
+          dag$tf_evaluate_density,
+          tfp_distributions,
+          x_vals,
+          truncations,
+          bounds,
+          SIMPLIFY = FALSE
+        )
 
         # sum them elementwise
         tf$add_n(log_probs)
 
       }
 
-      list(log_prob = log_prob, cdf = NULL, log_cdf = NULL)
+      sample <- function(seed) {
 
-    },
+        samples <- lapply(distribution_nodes, dag$draw_sample)
+        names(samples) <- NULL
+        tf$concat(samples, axis = 2L)
 
-    tf_cdf_function = NULL,
-    tf_log_cdf_function = NULL
+      }
 
+      list(log_prob = log_prob, sample = sample)
+
+    }
   )
 )
 

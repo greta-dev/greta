@@ -362,11 +362,34 @@ test_that("stashed_samples works", {
 
   # model_info attribute should have raw draws and the model
   model_info <- attr(ans, "model_info")
-  expect_true(inherits(model_info, "environment"))
+  expect_true(inherits(model_info, "list"))
   expect_s3_class(model_info$raw_draws, "mcmc.list")
   expect_true(inherits(model_info$model, "greta_model"))
 
 })
+
+test_that("samples has object names", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  a <- normal(0, 1)
+  b <- normal(a, 1, dim = 3)
+  m <- model(a, b)
+
+  # mcmc should give the right names
+  draws <- mcmc(m, warmup = 2, n_samples = 10)
+  names <- rownames(summary(draws)$statistics)
+  expect_identical(names, c("a", "b[1,1]", "b[2,1]", "b[3,1]"))
+
+  # so should calculate
+  c <- b ^ 2
+  c_draws <- calculate(c, values = draws)
+  names <- rownames(summary(c_draws)$statistics)
+  expect_identical(names, c("c[1,1]", "c[2,1]", "c[3,1]"))
+
+})
+
 
 test_that("model errors nicely", {
 
@@ -378,6 +401,7 @@ test_that("model errors nicely", {
   b <- normal(0, a)
   expect_error(model(a, b),
                "^The following object")
+
 })
 
 test_that("mcmc supports rwmh sampler with normal proposals", {
@@ -430,10 +454,13 @@ test_that("numerical issues are handled in mcmc", {
   source("helpers.R")
 
   # this should have a cholesky decomposition problem at some point
-  k <- 2
-  sigma <- lkj_correlation(1, k)
-  x <- wishart(k + 1, sigma)
-  m <- model(x, precision = "single")
+  alpha <- normal(0, 1)
+  x <- matrix(rnorm(6), 3, 2)
+  y <- t(rnorm(3))
+  z <- alpha * x
+  sigma <- z %*% t(z)
+  distribution(y) <- multivariate_normal(zeros(1, 3), sigma)
+  m <- model(alpha)
 
   # running with bursts should error informatively
   expect_error(draws <- mcmc(m, verbose = FALSE),
@@ -527,10 +554,10 @@ test_that("parallel reporting works", {
   op <- plan()
   plan(multisession)
 
-  # should report each sampler's progress with a percentage
+  # should report each sampler's progress with a fraction
   out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
   expect_match(out, "2 samplers in parallel")
-  expect_match(out, "100%")
+  expect_match(out, "50/50")
 
   # put the future plan back as we found it
   plan(op)

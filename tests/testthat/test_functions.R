@@ -61,8 +61,8 @@ test_that("primitive functions work as expected", {
   check_op(atanh, m1p1)
   check_op(cospi, real)
   check_op(sinpi, real)
-  check_op(tanpi, real)
-  check_op(trigamma, real, tolerance = 1e-2)
+  check_op(tanpi, real, tolerance = 1e-2)
+  check_op(trigamma, real, tolerance = 2e-2)
 
 })
 
@@ -111,6 +111,7 @@ test_that("matrix functions work as expected", {
   check_op(t, b)
   check_op(chol, a)
   check_op(chol2inv, c)
+  check_op(chol2symm, c)
   check_op(cov2cor, a)
   check_op(diag, a)
   check_op(`diag<-`, a, 1:5, only = "data")
@@ -223,7 +224,7 @@ test_that("apply works as expected", {
   source("helpers.R")
 
   # check apply.greta_array works like R's apply for X
-  check_apply <- function(X, MARGIN, FUN) {  # Exclude Linting
+  check_apply <- function(X, MARGIN, FUN) {  # nolint
     check_op(apply, a,
              other_args = list(MARGIN = MARGIN,
                                FUN = FUN))
@@ -531,6 +532,12 @@ test_that("incorrect dimensions are errored about", {
   expect_error(chol(y),
                "only two-dimensional, square, symmetric greta arrays")
 
+  expect_error(chol2symm(x),
+               "only two-dimensional, square, upper-triangular greta arrays")
+
+  expect_error(chol2symm(y),
+               "only two-dimensional, square, upper-triangular greta arrays")
+
   expect_error(eigen(x),
                "only two-dimensional, square, symmetric greta arrays")
 
@@ -539,5 +546,22 @@ test_that("incorrect dimensions are errored about", {
 
   expect_error(rdist(x, y),
                "must have the same number of columns")
+
+})
+
+test_that("chol2symm inverts chol", {
+
+  skip_if_not(check_tf_version())
+  source("helpers.R")
+
+  x <- rWishart(1, 10, diag(9))[, , 1]
+  u <- chol(x)
+
+  # check the R version
+  expect_equal(x, chol2symm(u))
+
+  # check the greta version
+  x2 <- calculate(chol2symm(as_data(u)))[[1]]
+  expect_equal(x2, x)
 
 })

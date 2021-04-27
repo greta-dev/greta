@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.3.1.9007
-Date: 2020-01-14
+Version: 0.3.1.9012
+Date: 2020-04-13
 Authors@R: c(
   person("Nick", "Golding", role = c("aut", "cre"),
          email = "nick.golding.research@gmail.com",
@@ -23,7 +23,7 @@ Authors@R: c(
 Description: Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'.
   greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on.
   See the website for more information, including tutorials, examples, package documentation, and the greta forum.
-License: Apache License 2.0
+License: Apache License (>= 2)
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
@@ -65,6 +65,8 @@ Collate:
     'internals.R'
     'calculate.R'
     'callbacks.R'
+    'simulate.R'
+    'chol2symm.R'
 Imports:
     R6,
     tensorflow (>= 1.13.0),
@@ -72,7 +74,8 @@ Imports:
     progress (>= 1.2.0),
     future,
     coda,
-    methods
+    methods,
+    abind
 Suggests:
     knitr,
     rmarkdown,
@@ -85,12 +88,12 @@ Suggests:
     rmutil,
     extraDistr,
     truncdist,
+    cramer,
     tidyverse,
     fields,
     MASS,
-    abind,
     spelling,
-    covr
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Language: en-GB
+Roxygen: list(markdown = TRUE)

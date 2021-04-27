@@ -11,7 +11,7 @@
 ^CRAN-RELEASE$
 ^CODE_OF_CONDUCT\.md$
 ^\.EDIT_WEBSITE\.md$
-^LICENSE$
+^LICENSE\.md$
 ^cran-comments\.md$
 
 ^logos$

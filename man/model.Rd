@@ -40,29 +40,29 @@ in violet.}
 \value{
 \code{model} - a \code{greta_model} object.
 
-\code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz}}
-  object, with the
-  \code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph}} object used to
-  create it as an attribute \code{"dgr_graph"}.
+\code{plot} - a \code{\link[DiagrammeR:grViz]{DiagrammeR::grViz()}}
+object, with the
+\code{\link[DiagrammeR:create_graph]{DiagrammeR::dgr_graph()}} object used to
+create it as an attribute \code{"dgr_graph"}.
 }
 \description{
 Create a \code{greta_model} object representing a statistical
-  model (using \code{model}), and plot a graphical representation of the
-  model. Statistical inference can be performed on \code{greta_model} objects
-  with \code{\link{mcmc}}
+model (using \code{model}), and plot a graphical representation of the
+model. Statistical inference can be performed on \code{greta_model} objects
+with \code{\link[=mcmc]{mcmc()}}
 }
 \details{
 \code{model()} takes greta arrays as arguments, and defines a
-  statistical model by finding all of the other greta arrays on which they
-  depend, or which depend on them. Further arguments to \code{model} can be
-  used to configure the TensorFlow graph representing the model, to tweak
-  performance.
+statistical model by finding all of the other greta arrays on which they
+depend, or which depend on them. Further arguments to \code{model} can be
+used to configure the TensorFlow graph representing the model, to tweak
+performance.
 
 The plot method produces a visual representation of the defined
-  model. It uses the \code{DiagrammeR} package, which must be installed
-  first. Here's a key to the plots:
-  \if{html}{\figure{plotlegend.png}{options: width="100\%"}}
-  \if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
+model. It uses the \code{DiagrammeR} package, which must be installed
+first. Here's a key to the plots:
+\if{html}{\figure{plotlegend.png}{options: width="100\%"}}
+\if{latex}{\figure{plotlegend.pdf}{options: width=7cm}}
 }
 \examples{
 \dontrun{

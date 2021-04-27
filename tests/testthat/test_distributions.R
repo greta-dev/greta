@@ -12,6 +12,7 @@ test_that("normal distribution has correct density", {
 
 })
 
+
 test_that("multidimensional normal distribution has correct density", {
 
   skip_if_not(check_tf_version())
@@ -286,8 +287,9 @@ test_that("multivariate normal distribution has correct density", {
   sig <- rWishart(1, m + 1, diag(m))[, , 1]
 
   # function converting Sigma to sigma
-  dmvnorm2 <- function(x, mean, Sigma, log = FALSE)  # Exclude Linting
+  dmvnorm2 <- function(x, mean, Sigma, log = FALSE) {  # nolint
     mvtnorm::dmvnorm(x = x, mean = mean, sigma = Sigma, log = log)
+  }
 
   compare_distribution(greta::multivariate_normal,
                        dmvnorm2,
@@ -308,7 +310,7 @@ test_that("Wishart distribution has correct density", {
   sig <- rWishart(1, df, diag(m))[, , 1]
 
   # wrapper for argument names
-  dwishart <- function(x, df, Sigma, log = FALSE) {  # Exclude Linting
+  dwishart <- function(x, df, Sigma, log = FALSE) {  # nolint
     ans <- MCMCpack::dwish(W = x, v = df, S = Sigma)
     if (log)
       ans <- log(ans)
@@ -336,47 +338,31 @@ test_that("lkj distribution has correct density", {
   eta <- 3
 
   # normalising component of lkj (depends only on eta and dimension)
-  lkj_normalising <- function(eta, n) {
-    if (eta == 1) {
-      result <- sum(lgamma(2 * 1:((n - 1) / 2 + 1)))
-      if (n %% 2 == 1) {
-        add <- (0.25 * (n ^ 2 - 1) * log(pi)
-                - 0.25 * (n - 1) ^ 2 * log(2)
-                - (n - 1) * lgamma((n + 1) / 2))
-      } else {
-        add <- (0.25 * n * (n - 2) * log(pi)
-                + 0.25 * (3 * n ^ 2 - 4 * n) * log(2)
-                + n * lgamma(n / 2) - (n - 1) * lgamma(n))
-      }
-      result <- result + add
-    } else {
-      result <- (1 - n) * lgamma(eta + 0.5 * (n - 1))
-      k <- 1:n
-      result <- result + sum(0.5 * k * log(pi)
-                             + lgamma(eta + 0.5 * (n - 1 - k)))
+  lkj_log_normalising <- function(eta, n) {
+    log_pi <- log(pi)
+    ans <- 0
+    for (k in 1:(n - 1)) {
+      ans <- ans + log_pi * (k / 2)
+      ans <- ans + lgamma(eta + (n - 1 - k) / 2)
+      ans <- ans - lgamma(eta + (n - 1) / 2)
     }
-
-    result
-
+    ans
   }
 
   # lkj density
   dlkj_correlation <- function(x, eta, log = FALSE, dimension = NULL) {
-    res <- lkj_normalising(eta, ncol(x)) + (eta - 1) * log(det(x))
+    res <- (eta - 1) * log(det(x)) - lkj_log_normalising(eta, ncol(x))
     if (!log)
       res <- exp(res)
     res
   }
-
-  rlkj_correlation <- function(m)
-    rlkjcorr(1, k = m, eta = 1)
 
   # no vectorised lkj, so loop through all of these
   replicate(10,
             compare_distribution(greta::lkj_correlation,
                                  dlkj_correlation,
                                  parameters = list(eta = eta, dimension = m),
-                                 x = rlkj_correlation(m),
+                                 x = rlkjcorr(1, eta = 1, dimension = m),
                                  multivariate = TRUE))
 
 })
@@ -625,7 +611,7 @@ test_that("array-valued distributions can be defined in models", {
 
 })
 
-test_that("distributions can be sampled from", {
+test_that("distributions can be sampled from by MCMC", {
 
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -716,31 +702,6 @@ test_that("distributions can be sampled from", {
   sample_distribution(wishart(4L, sig), warmup = 0)
   sample_distribution(lkj_correlation(4, dimension = 3))
   sample_distribution(dirichlet(t(runif(3))))
-
-})
-
-test_that("variable() errors informatively", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  # bad types
-  expect_error(variable(upper = NA),
-               "lower and upper must be numeric vectors of length 1")
-  expect_error(variable(upper = head),
-               "lower and upper must be numeric vectors of length 1")
-  expect_error(variable(lower = 1:3),
-               "lower and upper must be numeric vectors of length 1")
-
-  # good types, bad values
-  expect_error(variable(lower = Inf),
-               "^lower and upper must either be")
-  expect_error(variable(upper = -Inf),
-               "^lower and upper must either be")
-
-  # lower not below upper
-  expect_error(variable(lower = 1, upper = 1),
-               "upper bound must be greater than lower bound")
 
 })
 
@@ -1068,7 +1029,7 @@ test_that("Wishart can use a choleskied Sigma", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  sig <- lkj_correlation(3, dim = 4)
+  sig <- lkj_correlation(3, dim = 3)
   w <- wishart(5, sig)
   m <- model(w, precision = "double")
   expect_ok(draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE))

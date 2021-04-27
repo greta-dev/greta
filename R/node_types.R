@@ -17,31 +17,55 @@ data_node <- R6Class(
 
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
+      unbatched_name <- paste0(tf_name, "_unbatched")
 
-      value <- self$value()
-      shape <- to_shape(c(1, dim(value)))
-      value <- add_first_dim(value)
+      mode <- dag$how_to_define(self)
 
-      # under some circumstances we define data as constants, but normally as
-      # placeholders
-      using_constants <- !is.null(greta_stash$data_as_constants)
+      # if we're in sampling mode, get the distribution constructor and sample
+      if (mode == "sampling") {
 
-      if (using_constants) {
-
-        tensor <- tf$constant(value = value,
-                              dtype = tf_float(),
-                              shape = shape)
-
-      } else {
-
-        tensor <- tf$compat$v1$placeholder(shape = shape,
-                                           dtype = tf_float())
-        tfe$data_list[[tf_name]] <- value
+        batched_tensor <- dag$draw_sample(self$distribution)
 
       }
 
-      # create placeholder
-      assign(tf_name, tensor, envir = tfe)
+      # if we're defining the forward mode graph, create either a constant or a
+      # placeholder
+      if (mode == "forward") {
+
+        value <- self$value()
+        ndim <- length(dim(value))
+        shape <- to_shape(c(1, dim(value)))
+        value <- add_first_dim(value)
+
+        # under some circumstances we define data as constants, but normally as
+        # placeholders
+        using_constants <- !is.null(greta_stash$data_as_constants)
+
+        if (using_constants) {
+
+          unbatched_tensor <- tf$constant(value = value,
+                                          dtype = tf_float(),
+                                          shape = shape)
+
+        } else {
+
+          unbatched_tensor <- tf$compat$v1$placeholder(shape = shape,
+                                                       dtype = tf_float())
+          dag$set_tf_data_list(unbatched_name, value)
+
+        }
+
+        # expand up to batch size
+        tiling <- c(tfe$batch_size, rep(1L, ndim))
+        batched_tensor <- tf$tile(unbatched_tensor, tiling)
+
+        # put unbatched tensor in environment so it can be set
+        assign(unbatched_name, unbatched_tensor, envir = tfe)
+
+      }
+
+      assign(tf_name, batched_tensor, envir = tfe)
+
 
     }
   )
@@ -125,26 +149,37 @@ operation_node <- R6Class(
 
     tf = function(dag) {
 
-      # fetch the tensors for the environment
-      arg_tf_names <- lapply(self$parents, dag$tf_name)
-      args <- lapply(arg_tf_names, get, envir = dag$tf_environment)
+      tfe <- dag$tf_environment
+      tf_name <- dag$tf_name(self)
+      mode <- dag$how_to_define(self)
 
-      # fetch additional (non-tensor) arguments, if any
-      if (length(self$operation_args) > 0)
-        args <- c(args, self$operation_args)
+      # if sampling get the distribution constructor and sample this
+      if (mode == "sampling") {
 
-      # if there are multiple args, reconcile batch dimensions now
-      args <- match_batches(args)
+        tensor <- dag$draw_sample(self$distribution)
 
-      # get the tensorflow function
-      operation <- eval(parse(text = self$operation),
-                        envir = self$tf_function_env)
+      }
 
-      # apply the function on tensors
-      node <- do.call(operation, args)
+      if (mode == "forward") {
+
+        # fetch the tensors for the environment
+        arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
+        tf_args <- lapply(arg_tf_names, get, envir = tfe)
+
+        # fetch additional (non-tensor) arguments, if any
+        if (length(self$operation_args) > 0)
+          tf_args <- c(tf_args, self$operation_args)
+
+        # get the tensorflow function and apply it to the args
+        operation <- eval(parse(text = self$operation),
+                          envir = self$tf_function_env)
+
+        tensor <- do.call(operation, tf_args)
+
+      }
 
       # assign it in the environment
-      assign(dag$tf_name(self), node, envir = dag$tf_environment)
+      assign(tf_name, tensor, envir = dag$tf_environment)
 
     }
   )
@@ -156,66 +191,100 @@ variable_node <- R6Class(
   public = list(
 
     constraint = NULL,
+    constraint_array = NULL,
     lower = -Inf,
     upper = Inf,
+    free_value = NULL,
 
-    initialize = function(lower = -Inf, upper = Inf, dim = 1) {
+    initialize = function(lower = -Inf,
+                          upper = Inf,
+                          dim = NULL,
+                          free_dim = prod(dim)) {
 
-      good_types <- is.numeric(lower) && length(lower) == 1 &
-        is.numeric(upper) && length(upper) == 1
+      if (!is.numeric(lower) | ! is.numeric(upper)) {
 
-      if (!good_types) {
-
-        stop("lower and upper must be numeric vectors of length 1",
+        stop("lower and upper must be numeric",
              call. = FALSE)
 
       }
 
-      # check and assign limits
-      bad_limits <- TRUE
+      # replace values of lower and upper with finite values for dimension
+      # checking (this is pain, but necessary because check_dims coerces to
+      # greta arrays, which must be finite)
+      lower_for_dim <- lower
+      lower_for_dim[] <- 0
+      upper_for_dim <- upper
+      upper_for_dim[] <- 0
+      dim <- check_dims(lower_for_dim, upper_for_dim, target_dim = dim)
 
-      # find constraint type
-      if (lower == -Inf & upper == Inf) {
+      # vectorise these tests, to get a matrix of constraint types - then test
+      # at the end whether it's mixed
 
-        self$constraint <- "none"
-        bad_limits <- FALSE
+      lower_limit <- lower != -Inf
+      upper_limit <- upper != Inf
 
-      } else if (lower == -Inf & upper != Inf) {
+      # create a matrix of elemntwise constraints
+      constraint_array <- array(NA, check_dims(lower_for_dim, upper_for_dim))
+      constraint_array[!lower_limit & !upper_limit] <- "none"
+      constraint_array[!lower_limit & upper_limit] <- "low"
+      constraint_array[lower_limit & !upper_limit] <- "high"
+      constraint_array[lower_limit & upper_limit] <- "both"
 
-        self$constraint <- "low"
-        bad_limits <- !is.finite(upper)
-
-      } else if (lower != -Inf & upper == Inf) {
-
-        self$constraint <- "high"
-        bad_limits <- !is.finite(lower)
-
-      } else if (lower != -Inf & upper != Inf) {
-
-        self$constraint <- "both"
-        bad_limits <- !is.finite(lower) | !is.finite(upper)
-
+      # pass a string depending on whether they are all the same
+      if (all(constraint_array == constraint_array[1])) {
+        self$constraint <- paste0("scalar_all_", constraint_array[1])
+      } else {
+        self$constraint <- "scalar_mixed"
       }
+
+      bad_limits <- switch(
+        self$constraint,
+        scalar_all_low = any(!is.finite(upper)),
+        scalar_all_high = any(!is.finite(lower)),
+        scalar_all_both = any(!is.finite(lower)) | any(!is.finite(upper)),
+        FALSE
+      )
 
       if (bad_limits) {
 
         stop("lower and upper must either be -Inf (lower only), ",
-             "Inf (upper only) or finite scalars",
+             "Inf (upper only) or finite",
              call. = FALSE)
 
       }
 
-      if (lower >= upper) {
+      if (any(lower >= upper)) {
 
-        stop("upper bound must be greater than lower bound",
+        stop("upper bounds must be greater than lower bounds",
              call. = FALSE)
 
       }
 
       # add parameters
       super$initialize(dim)
-      self$lower <- lower
-      self$upper <- upper
+      self$lower <- array(lower, dim)
+      self$upper <- array(upper, dim)
+      self$constraint_array <- constraint_array
+      self$free_value <- unknowns(dim = free_dim)
+
+    },
+
+    # handle two types of value for variables
+    value = function(new_value = NULL, free = FALSE, ...) {
+
+      if (free) {
+
+        if (is.null(new_value)) {
+          self$free_value
+        } else {
+          self$free_value <- new_value
+        }
+
+      } else {
+
+        super$value(new_value, ...)
+
+      }
 
     },
 
@@ -223,124 +292,113 @@ variable_node <- R6Class(
 
       # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
-      free_name <- sprintf("%s_free", tf_name)
 
-      # create the log jacobian adjustment for the free state
-      tf_adj <- self$tf_adjustment(dag)
-      adj_name <- sprintf("%s_adj", tf_name)
-      assign(adj_name,
-             tf_adj,
-             envir = dag$tf_environment)
+      mode <- dag$how_to_define(self)
 
-      # map from the free to constrained state in a new tensor
-      tf_free <- get(free_name, envir = dag$tf_environment)
-      node <- self$tf_from_free(tf_free, dag$tf_environment)
+      if (mode == "sampling") {
 
-      # reshape the tensor to the match the variable
-      node <- tf$reshape(node,
-                         shape = to_shape(c(-1, dim(self))))
+        distrib_node <- self$distribution
 
-      # assign as constrained variable
+        if (is.null(distrib_node)) {
+
+          # if the variable has no distribution create a placeholder instead
+          # (the value must be passed in via values when using simulate)
+          shape <- to_shape(c(1, self$dim))
+          tensor <- tf$compat$v1$placeholder(shape = shape, dtype = tf_float())
+
+        } else {
+
+          tensor <- dag$draw_sample(self$distribution)
+
+        }
+
+      }
+
+      # if we're defining the forward mode graph, get the free state, transform,
+      # and compute any transformation density
+      if (mode == "forward") {
+
+        free_name <- sprintf("%s_free", tf_name)
+
+        # create the log jacobian adjustment for the free state
+        tf_adj <- self$tf_adjustment(dag)
+        adj_name <- sprintf("%s_adj", tf_name)
+        assign(adj_name,
+               tf_adj,
+               envir = dag$tf_environment)
+
+        # map from the free to constrained state in a new tensor
+        tf_free <- get(free_name, envir = dag$tf_environment)
+        tensor <- self$tf_from_free(tf_free)
+
+      }
+
+      # assign to environment variable
       assign(tf_name,
-             node,
+             tensor,
              envir = dag$tf_environment)
 
     },
 
-    tf_from_free = function(x, env) {
+    create_tf_bijector = function() {
 
-      upper <- self$upper
-      lower <- self$lower
+      dim <- self$dim
+      lower <- flatten_rowwise(self$lower)
+      upper <- flatten_rowwise(self$upper)
+      constraints <- flatten_rowwise(self$constraint_array)
 
-      if (self$constraint == "none") {
+      switch(
+        self$constraint,
+        scalar_all_none = tf_scalar_bijector(dim),
+        scalar_all_low = tf_scalar_neg_bijector(dim, upper = upper),
+        scalar_all_high = tf_scalar_pos_bijector(dim, lower = lower),
+        scalar_all_both = tf_scalar_neg_pos_bijector(dim,
+                                                     lower = lower,
+                                                     upper = upper),
+        scalar_mixed = tf_scalar_mixed_bijector(dim,
+                                                lower = lower,
+                                                upper = upper,
+                                                constraints = constraints),
+        correlation_matrix = tf_correlation_cholesky_bijector(),
+        covariance_matrix = tf_covariance_cholesky_bijector(),
+        simplex = tf_simplex_bijector(dim),
+        ordered = tf_ordered_bijector(dim)
+      )
 
-        y <- x
+    },
 
-      } else if (self$constraint == "both") {
+    tf_from_free = function(x) {
 
-        y <- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
-
-      } else if (self$constraint == "low") {
-
-        y <- fl(upper) - tf$exp(x)
-
-      } else if (self$constraint == "high") {
-
-        y <- tf$exp(x) + fl(lower)
-
-      } else {
-
-        y <- x
-
-      }
-
-      y
+      tf_bijector <- self$create_tf_bijector()
+      tf_bijector$forward(x)
 
     },
 
     # adjustments for univariate variables
     tf_log_jacobian_adjustment = function(free) {
 
-      ljac_none <- function(x) {
-        zero <- tf$constant(0, dtype = tf_float(), shape = shape(1))
-        tf$tile(zero, multiples = list(tf$shape(x)[[0]]))
+      tf_bijector <- self$create_tf_bijector()
+
+      event_ndims <- tf_bijector$forward_min_event_ndims
+      ljd <- tf_bijector$forward_log_det_jacobian(
+        x = free,
+        event_ndims = event_ndims
+      )
+
+      # sum across all dimensions of jacobian
+      already_summed <-
+        identical(dim(ljd), list(NULL)) | identical(dim(ljd), list())
+
+      if (!already_summed) {
+        ljd <- tf_sum(ljd, drop = TRUE)
       }
 
-      ljac_exp <- function(x) {
-        tf_sum(x, drop = TRUE)
+      # make sure there's something in the batch dimension
+      if (identical(dim(ljd), list())) {
+        ljd <- tf$expand_dims(ljd, 0L)
       }
 
-      ljac_logistic <- function(x) {
-        lrange <- log(self$upper - self$lower)
-        tf_sum(x - fl(2) * tf$nn$softplus(x) + lrange,
-               drop = TRUE)
-      }
-
-      ljac_corr_mat <- function(x) {
-
-        # find dimension
-        k <- dim(x)[[2]]
-        n <- (1 + sqrt(8 * k + 1)) / 2
-
-        # convert to correlation-scale (-1, 1) & get log jacobian
-        z <- tf$tanh(x)
-
-        free_to_correl_lp <- tf_sum(log(fl(1) - tf$square(z)))
-        free_to_correl_lp <- tf$squeeze(free_to_correl_lp, 1L)
-
-        # split z up into rows
-        z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
-
-        # accumulate log prob within each row
-        lps <- lapply(z_rows, tf_corrmat_row, which = "ljac")
-        correl_to_mat_lp <- tf$add_n(lps)
-
-        free_to_correl_lp + correl_to_mat_lp
-
-      }
-
-      ljac_cov_mat <- function(x) {
-
-        # find dimension
-        n <- dim(x)[[2]]
-        k <- (sqrt(8 * n + 1) - 1) / 2
-
-        k_seq <- seq_len(k)
-        powers <- tf$constant(k - k_seq + 2, dtype = tf_float(),
-                              shape = shape(k))
-        fl(k * log(2)) + tf_sum(powers * x[, k_seq - 1], drop = TRUE)
-
-      }
-
-      fun <- switch(self$constraint,
-                    none = ljac_none,
-                    high = ljac_exp,
-                    low = ljac_exp,
-                    both = ljac_logistic,
-                    correlation_matrix = ljac_corr_mat,
-                    covariance_matrix = ljac_cov_mat)
-
-      fun(free)
+      ljd
 
     },
 
@@ -365,31 +423,41 @@ distribution_node <- R6Class(
   public = list(
     distribution_name = "no distribution",
     discrete = NA,
+    multivariate = NA,
+    truncatable = NA,
     target = NULL,
     user_node = NULL,
     bounds = c(-Inf, Inf),
     truncation = NULL,
     parameters = list(),
+    parameter_shape_matches_output = logical(),
 
     initialize = function(name = "no distribution",
                           dim = NULL,
                           truncation = NULL,
-                          discrete = FALSE) {
+                          discrete = FALSE,
+                          multivariate = FALSE,
+                          truncatable = TRUE) {
 
       super$initialize(dim)
 
       # for all distributions, set name, store dims, and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
+      self$multivariate <- multivariate
+      self$truncatable <- truncatable
 
       # initialize the target values of this distribution
       self$add_target(self$create_target(truncation))
 
-      # if there's a truncation, it's different from the bounds, and it's a
-      # truncatable distribution, set the truncation
+      # if there's a truncation, it's different from the bounds, and it's
+      # truncatable (currently that's only univariate and continuous-discrete
+      # distributions) set the truncation
+      can_be_truncated <- !self$multivariate & !self$discrete & self$truncatable
+
       if (!is.null(truncation) &
           !identical(truncation, self$bounds) &
-          !is.null(self$tf_cdf_function)) {
+          can_be_truncated) {
 
         self$truncation <- truncation
 
@@ -405,10 +473,45 @@ distribution_node <- R6Class(
       vble(truncation, dim = self$dim)
     },
 
+    list_parents = function(dag) {
+
+      parents <- self$parents
+
+      # if this node is being used for sampling and has a target, do not
+      # consider that a parent node
+      mode <- dag$how_to_define(self)
+      if (mode == "sampling" & !is.null(self$target)) {
+        parent_names <- vapply(parents,
+                               member,
+                               "unique_name",
+                               FUN.VALUE = character(1))
+        keep <- parent_names != self$target$unique_name
+        parents <- parents[keep]
+      }
+
+      parents
+
+    },
+
+    list_children = function(dag) {
+
+      children <- self$children
+
+      # if this node is being used for sampling and has a target, consider that
+      # a child node
+      mode <- dag$how_to_define(self)
+      if (mode == "sampling" & !is.null(self$target)) {
+        children <- c(children, list(self$target))
+      }
+
+      children
+
+    },
+
     # create target node, add as a parent, and give it this distribution
     add_target = function(new_target) {
 
-      # add as x and as a parent
+      # add as target and as a parent
       self$target <- new_target
       self$add_parent(new_target)
 
@@ -440,32 +543,9 @@ distribution_node <- R6Class(
 
     tf = function(dag) {
 
-      # for distributions, tf assigns a *function* to execute the density
-      density <- function(tf_target) {
-
-        # fetch inputs
-        tf_parameters <- self$tf_fetch_parameters(dag)
-
-        # ensure x and the parameters are all expanded to have the n_chains
-        # batch dimension, if any have it
-        target_params <- match_batches(c(list(tf_target), tf_parameters))
-        tf_target <- target_params[[1]]
-        tf_parameters <- target_params[-1]
-
-        # calculate log density
-        ld <- self$tf_log_density_function(tf_target, tf_parameters, dag)
-
-        # check for truncation
-        if (!is.null(self$truncation))
-          ld <- ld - self$tf_log_density_offset(tf_parameters)
-
-        ld
-
-      }
-
-      # assign the function to the environment
+      # assign the distribution object constructor function to the environment
       assign(dag$tf_name(self),
-             density,
+             self$tf_distrib,
              envir = dag$tf_environment)
 
     },
@@ -475,81 +555,85 @@ distribution_node <- R6Class(
       self$target
     },
 
-    tf_fetch_parameters = function(dag) {
-      # fetch the tensors corresponding to this node's parameters from the
-      # environment, and return them in a named list
+    # shape_matches_output indicates whether the array for the parameter can
+    # have the same shape as the output (e.g. this is true for binomial's prob
+    # parameter, but not for size) by default, assume a scalar (row) parameter
+    # can be expanded up to the distribution size
+    add_parameter = function(parameter,
+                             name,
+                             shape_matches_output = TRUE,
+                             expand_now = TRUE) {
 
-      # find names
-      tf_names <- lapply(self$parameters, dag$tf_name)
+      # record whether this parameter can be scaled up
+      self$parameter_shape_matches_output[[name]] <- shape_matches_output
 
-      # fetch tensors
-      lapply(tf_names, get, envir = dag$tf_environment)
-
-    },
-
-    tf_log_density_offset = function(parameters) {
-
-      # calculate the log-adjustment to the truncation term of the density
-      # function i.e. the density of a distribution, truncated between a and b,
-      # is the non truncated density, divided by the integral of the density
-      # function between the truncation bounds. This can be calculated from the
-      # distribution's CDF
-
-      lower <- self$truncation[1]
-      upper <- self$truncation[2]
-
-      if (lower == self$bounds[1]) {
-
-        # if only upper is constrained, just need the cdf at the upper
-        offset <- self$tf_log_cdf_function(fl(upper), parameters)
-
-      } else if (upper == self$bounds[2]) {
-
-        # if only lower is constrained, get the log of the integral above it
-        offset <- tf$math$log(fl(1) - self$tf_cdf_function(fl(lower),
-                                                           parameters))
-
-      } else {
-
-        # if both are constrained, get the log of the integral between them
-        offset <- tf$math$log(self$tf_cdf_function(fl(upper), parameters) -
-                                self$tf_cdf_function(fl(lower), parameters))
-
+      # try to do it now if required
+      if (shape_matches_output & expand_now) {
+        parameter <- self$expand_parameter(parameter, self$dim)
       }
 
-      offset
-
-    },
-
-    add_parameter = function(parameter, name, expand_scalar_to = self$dim) {
-
-      # expand out a scalar parameter if needed
-      if (!is.null(expand_scalar_to) &&
-          is_scalar(parameter) & !identical(expand_scalar_to, c(1L, 1L))) {
-        parameter <- greta_array(parameter, dim = expand_scalar_to)
-      }
-
+      # record it in the right places
       parameter <- to_node(parameter)
       self$add_parent(parameter)
       self$parameters[[name]] <- parameter
 
     },
 
-    tf_log_density_function = function(x, parameters, dag) {
+    # try to expand a greta array for a parameter up to the required dimension
+    expand_parameter = function(parameter, dim) {
 
-      self$tf_distrib(parameters, dag)$log_prob(x)
+      # can this realisation of the parameter be expanded?
+      expandable_shape <- ifelse(self$multivariate,
+                                 is_row(parameter),
+                                 is_scalar(parameter))
+
+      # should we expand it now?
+      expanded_target <- ifelse(self$multivariate,
+                               !identical(dim[1], 1L),
+                               !identical(dim, c(1L, 1L)))
+
+      # expand now if needed (and remove flag)
+      if (expandable_shape & expanded_target) {
+
+        if (self$multivariate) {
+
+          n_realisations <- self$dim[1]
+          reps <- replicate(n_realisations, parameter, simplify = FALSE)
+          parameter <- do.call(rbind, reps)
+
+        } else {
+
+          parameter <- greta_array(parameter, dim = self$dim)
+
+        }
+
+      }
+
+      parameter
 
     },
 
-    tf_cdf_function = function(x, parameters) {
+    # try to expand all expandable (scalar for univariate, or row for
+    # multivariate) parameters to the required dimension
+    expand_parameters_to = function(dim) {
 
-      self$tf_distrib(parameters, dag)$cdf(x)
+      parameter_names <- names(self$parameters)
 
-    },
+      for (name in parameter_names) {
 
-    tf_log_cdf_function = function(x, parameters) {
+        if (self$parameter_shape_matches_output[[name]]) {
 
-      self$tf_distrib(parameters, dag)$log_cdf(x)
+          parameter <- as.greta_array(self$parameters[[name]])
+          expanded <- self$expand_parameter(parameter, dim)
+
+          self$add_parameter(expanded,
+                             name,
+                             self$parameter_shape_matches_output[[name]],
+                             expand_now = FALSE)
+
+        }
+
+      }
 
     }
 
@@ -588,14 +672,17 @@ op <- function(...) {
 # helper function to create a variable node
 # by default, make x (the node
 # containing the value) a free parameter of the correct dimension
-vble <- function(truncation, dim = 1) {
+vble <- function(truncation, dim = 1, free_dim = prod(dim)) {
 
   if (is.null(truncation))
     truncation <- c(-Inf, Inf)
 
-  variable_node$new(lower = truncation[1],
-                    upper = truncation[2],
-                    dim = dim)
+  truncation <- as.list(truncation)
+
+  variable_node$new(lower = truncation[[1]],
+                    upper = truncation[[2]],
+                    dim = dim,
+                    free_dim = free_dim)
 
 }
 

@@ -1,4 +1,1 @@
-linters: with_defaults(cyclocomp_linter(35), commas_linter = NULL, object_usage_linter = NULL, object_length_linter = NULL)
-exclude: "# Exclude Linting"
-exclude_start: "# Begin Exclude Linting"
-exclude_end: "# End Exclude Linting"
+linters: with_defaults(cyclocomp_linter(50), commas_linter = NULL, object_usage_linter = NULL, object_length_linter = NULL)

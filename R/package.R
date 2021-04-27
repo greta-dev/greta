@@ -12,10 +12,10 @@
 #'   clusters or on GPUs.
 #'
 #'   See the simple example below, and take a look at the
-#'   \href{https://greta-stats.org}{greta website} for more information
+#'   [greta website](https://greta-stats.org) for more information
 #'   including
-#'   \href{https://greta-stats.org/articles/get_started.html}{tutorials} and
-#'   \href{https://greta-stats.org/articles/example_models.html}{examples}.
+#'   [tutorials](https://greta-stats.org/articles/get_started.html) and
+#'   [examples](https://greta-stats.org/articles/example_models.html).
 #'
 #' @docType package
 #' @importFrom tensorflow tf
@@ -42,7 +42,7 @@ NULL
 tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 
 # crate the node list object whenever the package is loaded
-.onLoad <- function(libname, pkgname) {  # Exclude Linting
+.onLoad <- function(libname, pkgname) {  # nolint
 
   # silence TF's CPU instructions message
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL = 2)
