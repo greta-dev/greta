@@ -500,9 +500,6 @@ test_that("ignored options are errored/warned about", {
   expect_warning(chol(x, pivot = TRUE),
                  "ignored for greta arrays")
 
-  expect_warning(chol2inv(x, LINPACK = TRUE),
-                 "ignored for greta arrays")
-
   expect_warning(chol2inv(x, size = 1),
                  "ignored for greta arrays")
 
