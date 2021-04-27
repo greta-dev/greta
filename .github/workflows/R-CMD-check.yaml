@@ -102,6 +102,14 @@ jobs:
         run: |
           sudo apt-get install libv8-dev
 
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --user numpy
+          pip install --user scipy
+          pip install --user 'tensorflow==1.14'
+          pip install --user 'tensorflow-probability==0.7.0'
+
       - name: Install dependencies
         run: |
           pak::local_install_dev_deps(upgrade = TRUE)
