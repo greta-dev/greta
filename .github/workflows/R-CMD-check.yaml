@@ -40,6 +40,13 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
+    # if there is a github release, set the RELEASE_CANDIDATE variable to true
+    # so that extra tests trigger
+    # adopted from https://github.community/t/possible-to-use-conditional-in-the-env-section-of-a-job/135170
+    if: github.ref == 'v[12].[0-9]+.[0-9]+' &&  success()
+      env:
+        RELEASE_CANDIDATE: true
+
     steps:
       - uses: actions/checkout@v2
 
