@@ -77,3 +77,8 @@ functions and operators are not associated with a class system, so they are
 overloaded here. This should not affect normal use of these functions, but
 they need to be documented to satisfy CRAN's check.
 }
+\details{
+Note that, as in R, the LINPACK argument is defunct and silently ignored.
+The argument is only included for compatibility with the base functions
+that call it.
+}
