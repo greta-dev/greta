@@ -37,3 +37,5 @@
 ^man/figures/greta-header\.png$
 ^man/figures/logo\.png$
 ^\.github/workflows/R-CMD-check\.yaml$
+^\.github$
+^codecov\.yml$

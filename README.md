@@ -21,12 +21,15 @@ or the development version from GitHub:
 devtools::install_github("greta-dev/greta")
 ```
 
-[![build
-status](https://travis-ci.org/greta-dev/greta.svg?branch=master)](https://travis-ci.org/greta-dev/greta)
-[![codecov.io](https://codecov.io/github/greta-dev/greta/coverage.svg?branch=master)](https://codecov.io/github/greta-dev/greta?branch=master)
+<!-- badges: start -->
+[![Codecov test coverage](https://codecov.io/gh/greta-dev/greta/branch/master/graph/badge.svg)](https://codecov.io/gh/greta-dev/greta?branch=master)
+[![R-CMD-check](https://github.com/greta-dev/greta/workflows/R-CMD-check/badge.svg)](https://github.com/greta-dev/greta/actions)
 [![cran
 version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![doi](https://zenodo.org/badge/73758247.svg)](https://zenodo.org/badge/latestdoi/73758247)
 [![joss](http://joss.theoj.org/papers/62e62338d8ba44ff9e5dc295cf631477/status.svg)](http://joss.theoj.org/papers/62e62338d8ba44ff9e5dc295cf631477)
 ![](logos/bottom_banner.png)
+[![build
+status](https://travis-ci.org/greta-dev/greta.svg?branch=master)](https://travis-ci.org/greta-dev/greta)
+<!-- badges: end -->
