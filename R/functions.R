@@ -413,14 +413,14 @@ chol2inv <- function(x, size = NCOL(x), LINPACK = FALSE) {
 
 #' @export
 chol2inv.default <- function(x, size = NCOL(x), LINPACK = FALSE) {
-  base::chol2inv(x = x, size = size, LINPACK = LINPACK)
+  base::chol2inv(x = x, size = size)
 }
 
 #' @export
 chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
 
   if (!identical(LINPACK, FALSE)) {
-    warning("'LINPACK' is ignored for greta arrays")
+    warning("The 'LINPACK' argument is ignored for greta arrays, and has also been defunct since R 3.1.0")
   }
 
   if (!identical(size, NCOL(x))) {

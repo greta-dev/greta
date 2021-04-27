@@ -32,7 +32,7 @@ SystemRequirements: Python (>= 2.7.0) with header files and shared library;
 Encoding: UTF-8
 LazyData: true
 Depends:
-    R (>= 3.0)
+    R (>= 3.1.0)
 Collate:
     'package.R'
     'utils.R'
