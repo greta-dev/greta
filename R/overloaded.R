@@ -14,9 +14,13 @@
 #'    arguments as in original documentation
 #'
 #' @details
-#'   Note that, as in R, the LINPACK argument is defunct and silently ignored.
+#'   Note that, since R 3.1, the LINPACK argument is defunct and silently ignored.
 #'   The argument is only included for compatibility with the base functions
 #'   that call it.
+#'
+#'   To find the original help file for these overloaded functions, search
+#'   using the namespaced function. E.g., `?stats::cov2cor()`,
+#'   `?base::identity()`.
 #'
 NULL
 # nolint end
