@@ -1,4 +1,4 @@
-# greta (development version)
+# greta 0.3.1.9000 (development version)
 
 ## Fixes:
 
@@ -11,6 +11,10 @@
 * greta now provides R versions of all of R's primitive functions (I think), to prevent them from silently not executing (#317).
 
 ## API changes:
+
+* Now depends on R >= 3.1.0 ([#386](https://github.com/greta-dev/greta/issues/386))
+
+* `chol2inv.greta_array()` now warns user about LINPACK argument being ignored, and also reminds user it has been deprecated since R 3.1
 
 * `calculate()` now accepts multiple greta arrays for which to calculate values, via the `...` argument. As a consequence any other arguments must now be named.
 
