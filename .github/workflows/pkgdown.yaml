@@ -3,15 +3,11 @@ on:
     branches:
       - main
       - master
-  pull_request:
-    branches:
-      - main
-      - master
 
-name: test-coverage
+name: pkgdown
 
 jobs:
-  test-coverage:
+  pkgdown:
     runs-on: ubuntu-18.04
     env:
       RSPM: https://packagemanager.rstudio.com/cran/__linux__/bionic/latest
@@ -22,6 +18,8 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v1
         id: install-r
+
+      - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Install pak and query dependencies
         run: |
@@ -42,15 +40,20 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           pak::local_system_requirements(execute = TRUE)
-          pak::pkg_system_requirements("covr", execute = TRUE)
+          pak::pkg_system_requirements("pkgdown", execute = TRUE)
         shell: Rscript {0}
 
       - name: Install dependencies
         run: |
-          pak::local_install_dev_deps(upgrade = TRUE)
-          pak::pkg_install("covr")
+          pak::local_install_dev_deps(upgrade = TRUE, dependencies = c("all", "Config/Needs/website"))
+          pak::pkg_install("pkgdown")
         shell: Rscript {0}
 
-      - name: Test coverage
-        run: covr::codecov()
-        shell: Rscript {0}
+      - name: Install package
+        run: R CMD INSTALL .
+
+      - name: Build and deploy pkgdown site
+        run: |
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'

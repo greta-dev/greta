@@ -89,7 +89,8 @@ Suggests:
     fields,
     MASS,
     abind,
-    spelling
+    spelling,
+    covr
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
 Language: en-GB
