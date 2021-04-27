@@ -18,9 +18,8 @@
 #'   The argument is only included for compatibility with the base functions
 #'   that call it.
 #'
-#'   To find the original help file for these overloaded functions, search
-#'   using the namespaced function. E.g., `?stats::cov2cor()`,
-#'   `?base::identity()`.
+#'   To find the original help file for these overloaded functions, search for
+#'   the function, e.g., `?cov2cor` and select the non-greta function.
 #'
 NULL
 # nolint end

@@ -82,7 +82,6 @@ Note that, since R 3.1, the LINPACK argument is defunct and silently ignored.
 The argument is only included for compatibility with the base functions
 that call it.
 
-To find the original help file for these overloaded functions, search
-using the namespaced function. E.g., \code{?stats::cov2cor()},
-\code{?base::identity()}.
+To find the original help file for these overloaded functions, search for
+the function, e.g., \code{?cov2cor} and select the non-greta function.
 }
