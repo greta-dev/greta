@@ -111,6 +111,7 @@ jobs:
         if: runner.os ==  "windows-latest"
         run: |
           run: Rscript -e "rcmdcheck::rcmdcheck(args = c('--no-manual','--no-multiarch'), error_on = 'error', check_dir = 'check')"
+        shell: Rscript {0}
         if: runner.os != "windows-latest"
         run: |
           options(crayon.enabled = TRUE)
