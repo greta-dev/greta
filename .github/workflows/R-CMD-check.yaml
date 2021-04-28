@@ -105,14 +105,18 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
 
-      - name: Check
+      - name: Windows Check
         env:
           _R_CHECK_CRAN_INCOMING_: false
         if: runner.os ==  "windows-latest"
         run: |
-          run: Rscript -e "rcmdcheck::rcmdcheck(args = c('--no-manual','--no-multiarch'), error_on = 'error', check_dir = 'check')"
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", '--no-multiarch'), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
-        if: runner.os != "windows-latest"
+
+      - name: linux and mac check
+        env:
+          _R_CHECK_CRAN_INCOMING_: false
         run: |
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
