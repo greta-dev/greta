@@ -92,7 +92,7 @@ Suggests:
     tidyverse,
     fields,
     MASS,
-    spelling,
+    spelling
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
 Language: en-GB
