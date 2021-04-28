@@ -74,34 +74,6 @@ jobs:
           pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
         shell: Rscript {0}
 
-      # - name: download libmagick
-      #   run: |
-      #     sudo apt-get install libmagick++-dev
-      #
-      # - name: download wget
-      #   run: |
-      #     sudo apt-get install wget
-      #
-      # - name: download libatlas3gf-base
-      #   run: |
-      #     sudo apt-get install libatlas3gf-base
-      #
-      # - name: download libatlas-dev
-      #   run: |
-      #     sudo apt-get install libatlas-dev
-      #
-      # - name: download python-joblib
-      #   run: |
-      #     sudo apt-get install python-joblib
-      #
-      # - name: download libv8-dev
-      #   run: |
-      #     sudo apt-get install libv8-dev
-
-      # - name: Set up Python
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.6
       - name: Install dependencies
         run: Rscript -e "install.packages('remotes')" -e "remotes::install_deps(dependencies = TRUE)" -e "remotes::install_cran('rcmdcheck')"
 
@@ -136,6 +108,10 @@ jobs:
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_: false
+        if: runner.os ==  "windows-latest"
+        run: |
+          run: Rscript -e "rcmdcheck::rcmdcheck(args = c('--no-manual','--no-multiarch'), error_on = 'error', check_dir = 'check')"
+        if: runner.os != "windows-latest"
         run: |
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
@@ -152,3 +128,32 @@ jobs:
         with:
           name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
           path: check
+
+     # - name: download libmagick
+      #   run: |
+      #     sudo apt-get install libmagick++-dev
+      #
+      # - name: download wget
+      #   run: |
+      #     sudo apt-get install wget
+      #
+      # - name: download libatlas3gf-base
+      #   run: |
+      #     sudo apt-get install libatlas3gf-base
+      #
+      # - name: download libatlas-dev
+      #   run: |
+      #     sudo apt-get install libatlas-dev
+      #
+      # - name: download python-joblib
+      #   run: |
+      #     sudo apt-get install python-joblib
+      #
+      # - name: download libv8-dev
+      #   run: |
+      #     sudo apt-get install libv8-dev
+
+      # - name: Set up Python
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.6
