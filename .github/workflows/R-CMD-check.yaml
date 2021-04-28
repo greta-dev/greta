@@ -78,29 +78,29 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: download libmagick
-        run: |
-          sudo apt-get install libmagick++-dev
-
-      - name: download wget
-        run: |
-          sudo apt-get install wget
-
-      - name: download libatlas3gf-base
-        run: |
-          sudo apt-get install libatlas3gf-base
-
-      - name: download libatlas-dev
-        run: |
-          sudo apt-get install libatlas-dev
-
-      - name: download python-joblib
-        run: |
-          sudo apt-get install python-joblib
-
-      - name: download libv8-dev
-        run: |
-          sudo apt-get install libv8-dev
+      # - name: download libmagick
+      #   run: |
+      #     sudo apt-get install libmagick++-dev
+      #
+      # - name: download wget
+      #   run: |
+      #     sudo apt-get install wget
+      #
+      # - name: download libatlas3gf-base
+      #   run: |
+      #     sudo apt-get install libatlas3gf-base
+      #
+      # - name: download libatlas-dev
+      #   run: |
+      #     sudo apt-get install libatlas-dev
+      #
+      # - name: download python-joblib
+      #   run: |
+      #     sudo apt-get install python-joblib
+      #
+      # - name: download libv8-dev
+      #   run: |
+      #     sudo apt-get install libv8-dev
 
       - name: Install python dependencies
         run: |
