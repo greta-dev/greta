@@ -73,7 +73,7 @@ jobs:
           Rscript -e "pak::local_system_requirements(execute = TRUE)"
           Rscript -e "pak::pkg_system_requirements('rcmdcheck', execute = TRUE)"
 
-      - name: Install dependencies
+      - name: Install R package dependencies
         run: |
           pak::local_install_dev_deps(upgrade = TRUE)
           pak::pkg_install("rcmdcheck")
@@ -86,7 +86,8 @@ jobs:
           reticulate::install_miniconda()
         shell: Rscript {0}
 
-      - if: runner.os == 'macOS'
+      - name: Set options for conda binary for macOS
+        if: runner.os == 'macOS'
         run: |
           echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
 
@@ -111,6 +112,11 @@ jobs:
         run: |
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", '--no-multiarch'), error_on = "warning", check_dir = "check")
+        shell: Rscript {0}
+
+      - name: Print output of library(greta)
+        run: |
+          library(greta)
         shell: Rscript {0}
 
       - name: Show testthat output
