@@ -59,7 +59,7 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: install mvtnorm and mcmcpack for R < 3.6
-        if: !${{ env.UPGRADE_PKGS }}
+        if: ${{ !env.UPGRADE_PKGS}}
         run: |
           install.packages("remotes")
           remotes::install_version(package = "MCMCpack", version = "1.4-4")
