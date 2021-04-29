@@ -42,11 +42,12 @@ jobs:
       RETICULATE_AUTOCONFIGURE: 'FALSE'
       UPGRADE_PKGS: TRUE
 
-    if: runner.r == "3.[3-5]"
-       env:
-         UPGRADE_PKGS: FALSE
-
     steps:
+
+      - if: runner.r == "3.[3-5]"
+         env:
+           UPGRADE_PKGS: FALSE
+
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-r@v1
@@ -68,7 +69,7 @@ jobs:
       - name: Install pak and query dependencies
         run: |
           install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
-          saveRDS(pak::pkg_deps("local::.", upgrade = ${{ env.UPGRADE_PKGS}}, dependencies = TRUE), ".github/r-depends.rds")
+          saveRDS(pak::pkg_deps("local::.", upgrade = ${{ env.UPGRADE_PKGS }}, dependencies = TRUE), ".github/r-depends.rds")
         shell: RScript {0}
 
       - name: Restore R package cache
