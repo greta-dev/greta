@@ -75,18 +75,20 @@ jobs:
 
       - name: Install dependencies
         run: |
-          install.packages('remotes')
-          remotes::install_deps(dependencies = TRUE)
           pak::local_install_dev_deps(upgrade = TRUE)
           pak::pkg_install("rcmdcheck")
         shell: Rscript {0}
 
       - name: Install Miniconda
         run: |
-          Rscript -e "remotes::install_cran('reticulate')"
-          Rscript -e "reticulate::install_miniconda()"
+          install.packages("remotes")
+          remotes::install_cran('reticulate')
+          reticulate::install_miniconda()
+        shell: Rscript {0}
+
       - if: runner.os == 'macOS'
-        run: echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
+        run: |
+          echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
 
       - name: Install python dependencies
         run: |
@@ -123,28 +125,14 @@ jobs:
           name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
           path: check
 
-     # - name: download libmagick
+      # - name: download system packages
+      #   if: runner.os == 'Linux'
       #   run: |
       #     sudo apt-get install libmagick++-dev
-      #
-      # - name: download wget
-      #   run: |
       #     sudo apt-get install wget
-      #
-      # - name: download libatlas3gf-base
-      #   run: |
       #     sudo apt-get install libatlas3gf-base
-      #
-      # - name: download libatlas-dev
-      #   run: |
       #     sudo apt-get install libatlas-dev
-      #
-      # - name: download python-joblib
-      #   run: |
       #     sudo apt-get install python-joblib
-      #
-      # - name: download libv8-dev
-      #   run: |
       #     sudo apt-get install libv8-dev
 
       # - name: Set up Python
