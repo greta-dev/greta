@@ -42,11 +42,11 @@ jobs:
       RETICULATE_AUTOCONFIGURE: 'FALSE'
       UPGRADE_PKGS: true
 
-    steps:
+    if: runner.r == "3.[3-5]"
+      env:
+        UPGRADE_PKGS: false
 
-      - if: runner.r == "3.[3-5]"
-         env:
-           UPGRADE_PKGS: false
+    steps:
 
       - uses: actions/checkout@v2
 
