@@ -43,8 +43,8 @@ jobs:
       UPGRADE_PKGS: true
 
     if: runner.r == "3.[3-5]"
-      env:
-        UPGRADE_PKGS: false
+    env:
+      UPGRADE_PKGS: false
 
     steps:
 
