@@ -65,7 +65,7 @@ jobs:
       - name: Install pak and query dependencies
         run: |
           install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
-          saveRDS(pak::pkg_deps("local::.", upgrade = {'${{ env.UPGRADE_PKGS }}' == 'true'}, dependencies = TRUE), ".github/r-depends.rds")
+          saveRDS(pak::pkg_deps("local::.", upgrade = FALSE, dependencies = TRUE), ".github/r-depends.rds")
         shell: RScript {0}
 
       - name: Restore R package cache
