@@ -40,13 +40,13 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RETICULATE_AUTOCONFIGURE: 'FALSE'
-      UPGRADE_PKGS: ${{ runner.r != "3.[3-5]" }}
+      UPGRADE_PKGS: true
 
     steps:
 
-      # - if: runner.r == "3.[3-5]"
-      #    env:
-      #      UPGRADE_PKGS: FALSE
+      - if: runner.r == "3.[3-5]"
+         env:
+           UPGRADE_PKGS: false
 
       - uses: actions/checkout@v2
 
