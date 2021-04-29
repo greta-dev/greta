@@ -114,13 +114,6 @@ jobs:
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", '--no-multiarch'), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
 
-      - name: Print output of library(greta)
-        run: |
-          install.packages("devtools")
-          devtools::build()
-          library(greta)
-        shell: Rscript {0}
-
       - name: Show testthat output
         if: always()
         run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
