@@ -70,8 +70,8 @@ jobs:
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
-          Rscript -e pak::local_system_requirements(execute = TRUE)
-          Rscript -e pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
+          Rscript -e "pak::local_system_requirements(execute = TRUE)"
+          Rscript -e "pak::pkg_system_requirements('rcmdcheck', execute = TRUE)"
 
       - name: Install dependencies
         run: |
