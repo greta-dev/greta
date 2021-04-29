@@ -39,19 +39,19 @@ jobs:
 
     steps:
 
-    - if: runner.r != "3.[3-5]"
-      env:
-        RSPM: ${{ matrix.config.rspm }}
-        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        RETICULATE_AUTOCONFIGURE: 'FALSE'
-        UPGRADE_PKGS: true
+      - if: runner.r != "3.[3-5]"
+        env:
+          RSPM: ${{ matrix.config.rspm }}
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+          RETICULATE_AUTOCONFIGURE: 'FALSE'
+          UPGRADE_PKGS: true
 
-    - if: runner.r == "3.[3-5]"
-      env:
-        RSPM: ${{ matrix.config.rspm }}
-        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        RETICULATE_AUTOCONFIGURE: 'FALSE'
-        UPGRADE_PKGS: false
+      - if: runner.r == "3.[3-5]"
+        env:
+          RSPM: ${{ matrix.config.rspm }}
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+          RETICULATE_AUTOCONFIGURE: 'FALSE'
+          UPGRADE_PKGS: false
 
       - uses: actions/checkout@v2
 
