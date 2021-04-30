@@ -26,22 +26,20 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: 'release', xref = true}
-          - {os: windows-latest, r: 'release', xref = true}
-          - {os: windows-latest, r: '3.6', xref = true}
-          - {os: ubuntu-18.04,   r: 'devel', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.0.0 (ubuntu-18.04) R (4.0.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
-          - {os: ubuntu-18.04,   r: 'release', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: 'oldrel', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.5', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.4', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.3', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: macOS-latest,   r: 'release'}
+          - {os: windows-latest, r: 'release'}
+          - {os: windows-latest, r: '3.6'}
+          - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.0.0 (ubuntu-18.04) R (4.0.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
+          - {os: ubuntu-18.04,   r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: 'oldrel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: '3.5', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: '3.4', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: '3.3', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
 
     env:
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RETICULATE_AUTOCONFIGURE: 'FALSE'
-       # Some packages might unavailable on the older versions, so let's ignore xref warnings
-      _R_CHECK_RD_XREFS_: ${{ matrix.config.xref }}
 
     steps:
 
