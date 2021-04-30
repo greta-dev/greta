@@ -83,7 +83,7 @@ jobs:
         shell: Rscript {0}
 
       - name: install mvtnorm and mcmcpack for R < 3.6
-        if: ${{ !env.UPGRADE_PKGS}}
+        if: endsWith(matrix.config.r,'[3-5]')
         run: |
           install.packages("remotes")
           remotes::install_version(package = "MCMCpack", version = "1.4-4")
