@@ -85,7 +85,7 @@ jobs:
       - name: check shell syntax
         run: |
           endsWith(${{matrix.config.r}},'[3-5]')
-          ${{UPGRADE_PKGS}}
+          $UPGRADE_PKGS
 
 
       - name: install mvtnorm and mcmcpack for R < 3.6
