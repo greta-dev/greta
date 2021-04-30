@@ -106,6 +106,12 @@ jobs:
         run: |
           echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
 
+      - name: Install TensorFlow
+        run: |
+          install.packages(c('tensorflow'))
+          tensorflow::tf_config()
+        shell: Rscript {0}
+
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
