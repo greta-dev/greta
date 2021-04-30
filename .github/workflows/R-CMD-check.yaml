@@ -112,13 +112,11 @@ jobs:
           tensorflow::tf_config()
         shell: Rscript {0}
 
+
       - name: Install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --user numpy
-          pip install --user scipy
-          pip install --user 'tensorflow==1.14'
-          pip install --user 'tensorflow-probability==0.7.0'
+        run: ./.github/scripts/build-py.sh
+        shell: bash
+
 
       - name: print py config
         run: |
