@@ -40,6 +40,7 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RETICULATE_AUTOCONFIGURE: 'FALSE'
+      UPGRADE_PKGS: ${{ endsWith(matrix.config.r,'[3-5]') }}
 
     steps:
 
@@ -79,6 +80,14 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
+        shell: Rscript {0}
+
+      - name: install mvtnorm and mcmcpack for R < 3.6
+        if: ${{ !env.UPGRADE_PKGS}}
+        run: |
+          install.packages("remotes")
+          remotes::install_version(package = "MCMCpack", version = "1.4-4")
+          remotes::install_version(package = "mvtnorm", version = "1.0-8")
         shell: Rscript {0}
 
       - name: Install Miniconda
