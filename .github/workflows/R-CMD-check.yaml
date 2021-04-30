@@ -88,7 +88,7 @@ jobs:
 
 
       - name: install mvtnorm and mcmcpack for R < 3.6
-        if: ${{$UPGRADE_PKGS}}
+        if: ${{ env.UPGRADE_PKGS }}
         run: |
           $UPGRADE_PKGS
           Rscript -e 'install.packages("remotes")'
