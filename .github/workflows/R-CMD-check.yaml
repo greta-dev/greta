@@ -26,21 +26,22 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: '3.6'}
-          - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.0.0 (ubuntu-18.04) R (4.0.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
-          - {os: ubuntu-18.04,   r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: 'oldrel',  rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.5',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.4',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.3',     rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: macOS-latest,   r: 'release', xref = true}
+          - {os: windows-latest, r: 'release', xref = true}
+          - {os: windows-latest, r: '3.6', xref = true}
+          - {os: ubuntu-18.04,   r: 'devel', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.0.0 (ubuntu-18.04) R (4.0.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
+          - {os: ubuntu-18.04,   r: 'release', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: 'oldrel', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: '3.5', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: '3.4', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: '3.3', xref = true, rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
 
     env:
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RETICULATE_AUTOCONFIGURE: 'FALSE'
-      UPGRADE_PKGS: ${{ endsWith(matrix.config.r,'[3-5]') }}
+       # Some packages might unavailable on the older versions, so let's ignore xref warnings
+      _R_CHECK_RD_XREFS_: ${{ matrix.config.xref }}
 
     steps:
 
@@ -54,39 +55,32 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: install mvtnorm and mcmcpack for R < 3.6
-        if: ${{ !env.UPGRADE_PKGS}}
+      - name: Query dependencies
         run: |
           install.packages("remotes")
-          remotes::install_version(package = "MCMCpack", version = "1.4-4")
-          remotes::install_version(package = "mvtnorm", version = "1.0-8")
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), "depends.Rds", version = 2)
         shell: Rscript {0}
 
-      - name: Install pak and query dependencies
-        run: |
-          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
-          saveRDS(pak::pkg_deps("local::.", upgrade = Sys.getenv("UPGRADE_PKGS") == 'true', dependencies = TRUE), ".github/r-depends.rds")
-        shell: Rscript {0}
-
-      - name: Restore R package cache
+      - name: Cache R packages
+        if: runner.os != 'Windows'
         uses: actions/cache@v2
         with:
-          path: |
-            ${{ env.R_LIBS_USER }}/*
-            !${{ env.R_LIBS_USER }}/pak
-          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
-          restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ env.cache-version }}-${{ runner.os }}-r-${{ matrix.config.r }}-${{ hashFiles('depends.Rds') }}
+          restore-keys: ${{ env.cache-version }}-${{ runner.os }}-r-${{ matrix.config.r }}-
 
-      - name: Install system dependencies
+      - name: Install system dependencies on Linux
         if: runner.os == 'Linux'
         run: |
-          Rscript -e "pak::local_system_requirements(execute = TRUE)"
-          Rscript -e "pak::pkg_system_requirements('rcmdcheck', execute = TRUE)"
+          while read -r cmd
+          do
+            eval sudo $cmd
+          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "18.04"))')
 
-      - name: Install R package dependencies
+      - name: Install dependencies
         run: |
-          pak::local_install_dev_deps(upgrade = TRUE)
-          pak::pkg_install("rcmdcheck")
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
       - name: Install Miniconda
