@@ -84,12 +84,12 @@ jobs:
 
 
       - name: install mvtnorm and mcmcpack for R < 3.6
-        if: $UPGRADE_PKGS
+        if: ${{$UPGRADE_PKGS}}
         run: |
-          install.packages("remotes")
-          remotes::install_version(package = "MCMCpack", version = "1.4-4")
-          remotes::install_version(package = "mvtnorm", version = "1.0-8")
-        shell: Rscript {0}
+          $UPGRADE_PKGS
+          Rscript -e 'install.packages("remotes")'
+          Rscript -e 'remotes::install_version(package = "MCMCpack", version = "1.4-4")'
+          Rscript -e 'remotes::install_version(package = "mvtnorm", version = "1.0-8")'
 
       - name: Install Miniconda
         run: |
