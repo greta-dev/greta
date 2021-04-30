@@ -40,7 +40,7 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RETICULATE_AUTOCONFIGURE: 'FALSE'
-      UPGRADE_PKGS: ${{ matrix.config.r == '3.3' | matrix.config.r == '3.4' |matrix.config.r == '3.5'}}
+      UPGRADE_PKGS: ${{ matrix.config.r == '3.3' | matrix.config.r == '3.4' | matrix.config.r == '3.5'}}
 
     steps:
 
