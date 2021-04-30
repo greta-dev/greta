@@ -120,6 +120,11 @@ jobs:
           pip install --user 'tensorflow==1.14'
           pip install --user 'tensorflow-probability==0.7.0'
 
+      - name: print py config
+        run: |
+          reticulate::py_config()
+        shell: Rscript {0}
+
       - name: Session info
         run: |
           options(width = 100)
