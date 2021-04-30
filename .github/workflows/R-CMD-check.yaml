@@ -82,8 +82,14 @@ jobs:
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
+      - name: check shell syntax
+        run: |
+          endsWith(${{matrix.config.r}},'[3-5]')
+          ${{UPGRADE_PKGS}}
+
+
       - name: install mvtnorm and mcmcpack for R < 3.6
-        if: endsWith(matrix.config.r,'[3-5]')
+        if: endsWith(${{matrix.config.r}},'[3-5]')
         run: |
           install.packages("remotes")
           remotes::install_version(package = "MCMCpack", version = "1.4-4")
