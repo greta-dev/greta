@@ -1,3 +1,4 @@
+#!/bin/sh
 python -m pip install --upgrade pip
 pip install --user numpy
 pip install --user scipy
