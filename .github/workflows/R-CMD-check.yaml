@@ -83,7 +83,6 @@ jobs:
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
-
       - name: install mvtnorm and mcmcpack for R < 3.6
         if: runner.os == "Linux" && ${{ env.UPGRADE_PKGS }}
         run: |
@@ -95,7 +94,6 @@ jobs:
           }
         shell: Rscript {0}
 
-#rstudio/
       - name: Install Miniconda
         run: |
           install.packages(c("remotes", "keras"))
@@ -113,27 +111,14 @@ jobs:
           remotes::install_local()
           keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3'))
         shell: Rscript {0}
-#rstudio
 
-      # - name: Install TensorFlow
-      #   run: |
-      #     tensorflow::tf_config()
-      #   shell: Rscript {0}
-#
-#
-#       - name: Install python dependencies
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install --user numpy
-#           pip install --user scipy
-#           pip install --user 'tensorflow==1.14'
-#           pip install --user 'tensorflow-probability==0.7.0'
-#
-#
-#       - name: print py config
-#         run: |
-#           reticulate::py_config()
-#         shell: Rscript {0}
+      - name: Python + TF details
+        run: |
+          tensorflow::tf_config()
+          tensorflow::tf_version()
+          reticulate::py_module_available("tensorflow_probability")
+          reticulate::py_config()
+        shell: Rscript {0}
 
       - name: Session info
         run: |
@@ -162,17 +147,3 @@ jobs:
           name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
           path: check
 
-      # - name: download system packages
-      #   if: runner.os == 'Linux'
-      #   run: |
-      #     sudo apt-get install libmagick++-dev
-      #     sudo apt-get install wget
-      #     sudo apt-get install libatlas3gf-base
-      #     sudo apt-get install libatlas-dev
-      #     sudo apt-get install python-joblib
-      #     sudo apt-get install libv8-dev
-
-      # - name: Set up Python
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.6
