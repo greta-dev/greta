@@ -110,6 +110,14 @@ jobs:
           tensorflow::tf_config()
         shell: Rscript {0}
 
+      - name: Install python things via R
+        run: |
+          install.packages("reticulate",dependencies = TRUE)
+          condaInstall = try(reticulate::install_miniconda())
+          condaPath = try(reticulate::miniconda_path())
+          reticulate::conda_remove("r-reticulate")  #start clean
+          reticulate::py_config()  # initiate basic r-reticulate config -- ignore any error here
+          reticulate::conda_install(envname = "r-reticulate", packages = c("python=3.7", "tensorflow=1.14", "pyyaml", "requests", "Pillow", "pip", "numpy=1.16", "h5py=2.8", "tensorflow-probability=0.7"))
 
       - name: Install python dependencies
         run: |
