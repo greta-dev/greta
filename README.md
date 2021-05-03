@@ -30,6 +30,4 @@ version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/we
 [![doi](https://zenodo.org/badge/73758247.svg)](https://zenodo.org/badge/latestdoi/73758247)
 [![joss](http://joss.theoj.org/papers/62e62338d8ba44ff9e5dc295cf631477/status.svg)](http://joss.theoj.org/papers/62e62338d8ba44ff9e5dc295cf631477)
 ![](logos/bottom_banner.png)
-[![build
-status](https://travis-ci.org/greta-dev/greta.svg?branch=master)](https://travis-ci.org/greta-dev/greta)
 <!-- badges: end -->
