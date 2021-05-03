@@ -511,7 +511,7 @@ test_that("mcmc works in parallel", {
 
 test_that("mcmc errors for invalid parallel plans", {
   skip_if_not(check_tf_version())
-  skip_on_travis()
+  skip_on_ci()
   source("helpers.R")
 
   m <- model(normal(0, 1))
