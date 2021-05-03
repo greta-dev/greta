@@ -94,10 +94,10 @@ jobs:
           }
         shell: Rscript {0}
 
+#rstudio/
       - name: Install Miniconda
         run: |
-          install.packages("reticulate", dependencies = TRUE)
-          install.packages(c("remotes", "tensorflow"))
+          install.packages("remotes"))
           reticulate::install_miniconda()
         shell: Rscript {0}
 
@@ -108,30 +108,30 @@ jobs:
 
       - name: Install TensorFlow
         run: |
-          tensorflow::tf_config()
-        shell: Rscript {0}
+          reticulate::conda_create('r-reticulate', packages = c('python==3.7', 'numpy==1.19'))
+          remotes::install_local()
+          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3'))
+#rstudio
 
-      - name: Install python things via R
-        run: |
-          try(reticulate::miniconda_path())
-          reticulate::conda_remove("r-reticulate")  #start clean
-          reticulate::py_config()  # initiate basic r-reticulate config -- ignore any error here
-          reticulate::conda_install(envname = "r-reticulate", packages = c("python=3.7", "tensorflow=1.14", "pyyaml", "requests", "Pillow", "pip", "numpy=1.16", "h5py=2.8", "tensorflow-probability=0.7"))
-        shell: Rscript {0}
-
-      - name: Install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --user numpy
-          pip install --user scipy
-          pip install --user 'tensorflow==1.14'
-          pip install --user 'tensorflow-probability==0.7.0'
-
-
-      - name: print py config
-        run: |
-          reticulate::py_config()
-        shell: Rscript {0}
+      # - name: Install TensorFlow
+      #   run: |
+      #     tensorflow::tf_config()
+      #   shell: Rscript {0}
+#
+#
+#       - name: Install python dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install --user numpy
+#           pip install --user scipy
+#           pip install --user 'tensorflow==1.14'
+#           pip install --user 'tensorflow-probability==0.7.0'
+#
+#
+#       - name: print py config
+#         run: |
+#           reticulate::py_config()
+#         shell: Rscript {0}
 
       - name: Session info
         run: |
