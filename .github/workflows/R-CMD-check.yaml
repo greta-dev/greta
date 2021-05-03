@@ -113,7 +113,6 @@ jobs:
 
       - name: Install python things via R
         run: |
-          try(reticulate::install_miniconda())
           try(reticulate::miniconda_path())
           reticulate::conda_remove("r-reticulate")  #start clean
           reticulate::py_config()  # initiate basic r-reticulate config -- ignore any error here
