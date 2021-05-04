@@ -81,7 +81,7 @@ See some examples of these below.
 # then calculate what value y would take for different values of x
 x <- normal(0, 1, dim = 3)
 a <- lognormal(0, 1)
-y <- sum(x ^ 2) + a
+y <- sum(x^2) + a
 calculate(y, values = list(x = c(0.1, 0.2, 0.3), a = 2))
 
 # by setting nsim, you can also sample values from their priors
@@ -128,29 +128,35 @@ calculate(y, values = draws, nsim = 100)
 # you can use calculate on greta arrays created even after the inference on
 # the model - e.g. to plot response curves
 petal_length_plot <- seq(min(iris$Petal.Length),
-                         max(iris$Petal.Length),
-                         length.out = 100)
+  max(iris$Petal.Length),
+  length.out = 100
+)
 mu_plot <- alpha + petal_length_plot * beta
 mu_plot_draws <- calculate(mu_plot, values = draws)
 mu_est <- colMeans(mu_plot_draws[[1]])
-plot(mu_est ~ petal_length_plot, type = "n",
-     ylim = range(mu_plot_draws[[1]]))
+plot(mu_est ~ petal_length_plot,
+  type = "n",
+  ylim = range(mu_plot_draws[[1]])
+)
 apply(mu_plot_draws[[1]], 1, lines,
-      x = petal_length_plot, col = grey(0.8))
+  x = petal_length_plot, col = grey(0.8)
+)
 lines(mu_est ~ petal_length_plot, lwd = 2)
 
 # trace_batch_size can be changed to trade off speed against memory usage
 # when calculating. These all produce the same result, but have increasing
 # memory requirements:
 mu_plot_draws_1 <- calculate(mu_plot,
-                             values = draws,
-                             trace_batch_size = 1)
+  values = draws,
+  trace_batch_size = 1
+)
 mu_plot_draws_10 <- calculate(mu_plot,
-                              values = draws,
-                              trace_batch_size = 10)
+  values = draws,
+  trace_batch_size = 10
+)
 mu_plot_draws_inf <- calculate(mu_plot,
-                               values = draws,
-                               trace_batch_size = Inf)
-
+  values = draws,
+  trace_batch_size = Inf
+)
 }
 }

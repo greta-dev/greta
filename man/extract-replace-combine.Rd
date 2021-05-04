@@ -72,19 +72,19 @@ dim(x) <- value
 \examples{
 \dontrun{
 
- x <- as_data(matrix(1:12, 3, 4))
+x <- as_data(matrix(1:12, 3, 4))
 
- # extract and replace
- x[1:3, ]
- x[, 2:4] <- 1:9
- e <- diag(x)
- diag(x) <- e + 1
+# extract and replace
+x[1:3, ]
+x[, 2:4] <- 1:9
+e <- diag(x)
+diag(x) <- e + 1
 
- # combine
- cbind(x[, 2], x[, 1])
- rbind(x[1, ], x[3, ])
- abind(x[1, ], x[3, ], along = 1)
- c(x[, 1], x)
- rep(x[, 2], times = 3)
+# combine
+cbind(x[, 2], x[, 1])
+rbind(x[1, ], x[3, ])
+abind(x[1, ], x[3, ], along = 1)
+c(x[, 1], x)
+rep(x[, 2], times = 3)
 }
 }

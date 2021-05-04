@@ -61,7 +61,7 @@ c <- variable(lower = 0, upper = 1, dim = c(2, 2, 2))
 
 # create a variable, with lower and upper defined by greta arrays
 min <- as_data(iris$Sepal.Length)
-max <- min ^ 2
+max <- min^2
 d <- min + variable(0, 1, dim = nrow(iris)) * (max - min)
 }
 # 4x4 cholesky factor variables for covariance and correlation matrices

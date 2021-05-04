@@ -190,7 +190,7 @@ corresponds:
 \link[stats:Chisquare]{stats::dchisq}\cr \code{logistic} \tab
 \link[stats:Logistic]{stats::dlogis}\cr \code{f} \tab
 \link[stats:Fdist]{stats::df}\cr \code{multivariate_normal} \tab
-\link[mvtnorm:Mvnorm]{mvtnorm::dmvnorm}\cr \code{multinomial} \tab
+\link[mvtnorm:dmvnorm]{mvtnorm::dmvnorm}\cr \code{multinomial} \tab
 \link[stats:Multinom]{stats::dmultinom}\cr \code{categorical} \tab
 {\link[stats:Multinom]{stats::dmultinom} (size = 1)}\cr \code{dirichlet}
 \tab \link[extraDistr:Dirichlet]{extraDistr::ddirichlet}\cr
@@ -244,6 +244,5 @@ dim(theta)
 
 # a Wishart variable with the same covariance parameter
 theta <- wishart(df = 5, Sigma = Sig)
-
 }
 }

@@ -21,7 +21,6 @@ y <- rWishart(1, 4, diag(3))[, , 1]
 u <- chol(y)
 identical(y, chol2symm(u))
 identical(chol2symm(u), t(u) \%*\% u)
-
 \dontrun{
 u_greta <- cholesky_variable(3)
 y_greta <- chol2symm(u)
