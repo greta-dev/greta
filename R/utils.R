@@ -50,6 +50,22 @@ have_tf <- function() {
   reticulate::py_module_available("tensorflow")
 }
 
+version_tf <- function(){
+  if (have_tf()) {
+    tf$`__version__`
+  } else {
+    message("tensorflow not found")
+  }
+}
+
+version_tfp <- function(){
+  if (have_tfp()) {
+    tfp$`__version__`
+  } else {
+    message("tensorflow probability not found")
+  }
+}
+
 # check tensorflow and tensorflow-probability are installed and have valid
 # versions. error, warn, or message if not and (if not an error) return an
 # invisible logical saying whether it is valid
