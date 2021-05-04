@@ -63,7 +63,7 @@
 #' # then calculate what value y would take for different values of x
 #' x <- normal(0, 1, dim = 3)
 #' a <- lognormal(0, 1)
-#' y <- sum(x ^ 2) + a
+#' y <- sum(x^2) + a
 #' calculate(y, values = list(x = c(0.1, 0.2, 0.3), a = 2))
 #'
 #' # by setting nsim, you can also sample values from their priors
@@ -110,30 +110,36 @@
 #' # you can use calculate on greta arrays created even after the inference on
 #' # the model - e.g. to plot response curves
 #' petal_length_plot <- seq(min(iris$Petal.Length),
-#'                          max(iris$Petal.Length),
-#'                          length.out = 100)
+#'   max(iris$Petal.Length),
+#'   length.out = 100
+#' )
 #' mu_plot <- alpha + petal_length_plot * beta
 #' mu_plot_draws <- calculate(mu_plot, values = draws)
 #' mu_est <- colMeans(mu_plot_draws[[1]])
-#' plot(mu_est ~ petal_length_plot, type = "n",
-#'      ylim = range(mu_plot_draws[[1]]))
+#' plot(mu_est ~ petal_length_plot,
+#'   type = "n",
+#'   ylim = range(mu_plot_draws[[1]])
+#' )
 #' apply(mu_plot_draws[[1]], 1, lines,
-#'       x = petal_length_plot, col = grey(0.8))
+#'   x = petal_length_plot, col = grey(0.8)
+#' )
 #' lines(mu_est ~ petal_length_plot, lwd = 2)
 #'
 #' # trace_batch_size can be changed to trade off speed against memory usage
 #' # when calculating. These all produce the same result, but have increasing
 #' # memory requirements:
 #' mu_plot_draws_1 <- calculate(mu_plot,
-#'                              values = draws,
-#'                              trace_batch_size = 1)
+#'   values = draws,
+#'   trace_batch_size = 1
+#' )
 #' mu_plot_draws_10 <- calculate(mu_plot,
-#'                               values = draws,
-#'                               trace_batch_size = 10)
+#'   values = draws,
+#'   trace_batch_size = 10
+#' )
 #' mu_plot_draws_inf <- calculate(mu_plot,
-#'                                values = draws,
-#'                                trace_batch_size = Inf)
-#'
+#'   values = draws,
+#'   trace_batch_size = Inf
+#' )
 #' }
 calculate <- function(...,
                       values = list(),
@@ -164,13 +170,16 @@ calculate <- function(...,
   # have been stripped out
   if (identical(target, list())) {
     stop("no greta arrays to calculate were provided",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # check the inputs
-  check_greta_arrays(target,
-                     "calculate",
-                     "\nPerhaps you forgot to explicitly name other arguments?")
+  check_greta_arrays(
+    target,
+    "calculate",
+    "\nPerhaps you forgot to explicitly name other arguments?"
+  )
 
   # checks and RNG seed setting if we're sampling
   if (!is.null(nsim)) {
@@ -180,7 +189,6 @@ calculate <- function(...,
 
     # if an RNG seed was provided use it and reset the RNG on exiting
     if (!is.null(seed)) {
-
       if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
         runif(1)
       }
@@ -188,17 +196,16 @@ calculate <- function(...,
       r_seed <- get(".Random.seed", envir = .GlobalEnv)
       on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
       set.seed(seed)
-
     }
   }
 
   # set precision
   tf_float <- switch(match.arg(precision),
-                     double = "float64",
-                     single = "float32")
+    double = "float64",
+    single = "float32"
+  )
 
   if (inherits(values, "greta_mcmc_list")) {
-
     result <- calculate_greta_mcmc_list(
       target = target,
       values = values,
@@ -206,15 +213,14 @@ calculate <- function(...,
       tf_float = tf_float,
       trace_batch_size = trace_batch_size
     )
-
   } else {
-
-    result <- calculate_list(target = target,
-                             values = values,
-                             nsim = nsim,
-                             tf_float = tf_float,
-                             env = parent.frame())
-
+    result <- calculate_list(
+      target = target,
+      values = values,
+      nsim = nsim,
+      tf_float = tf_float,
+      env = parent.frame()
+    )
   }
 
   if (!inherits(result, "greta_mcmc_list")) {
@@ -228,10 +234,8 @@ calculate <- function(...,
     if (is.null(nsim)) {
       result <- lapply(result, drop_first_dim)
     }
-
   }
   result
-
 }
 
 #' @importFrom coda thin
@@ -241,7 +245,6 @@ calculate_greta_mcmc_list <- function(target,
                                       nsim,
                                       tf_float,
                                       trace_batch_size) {
-
   stochastic <- !is.null(nsim)
 
   # check trace_batch_size is valid
@@ -258,9 +261,11 @@ calculate_greta_mcmc_list <- function(target,
 
   # rearrange the nodes in the dag so that any mcmc dag variables are first and
   # in the right order (otherwise the free state will be incorrectly defined)
-  in_draws <- names(dag$node_list)  %in% names(mcmc_dag$node_list)
-  order <- order(match(names(dag$node_list[in_draws]),
-                       names(mcmc_dag$node_list)))
+  in_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
+  order <- order(match(
+    names(dag$node_list[in_draws]),
+    names(mcmc_dag$node_list)
+  ))
   dag$node_list <- c(dag$node_list[in_draws][order], dag$node_list[!in_draws])
 
   # find variable nodes in the new dag without a free state in the old one.
@@ -273,8 +278,9 @@ calculate_greta_mcmc_list <- function(target,
   connected_to_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
   if (!any(connected_to_draws)) {
     stop("the target greta arrays do not appear to be connected ",
-         "to those in the greta_mcmc_list object",
-         call. = FALSE)
+      "to those in the greta_mcmc_list object",
+      call. = FALSE
+    )
   }
 
   # if they didn't specify nsim, check we can deterministically compute the
@@ -285,37 +291,42 @@ calculate_greta_mcmc_list <- function(target,
     new_types <- dag$node_types[!connected_to_draws]
     if (any(new_types == "variable")) {
       stop("the target greta arrays are related to new variables ",
-           "that are not in the MCMC samples so cannot be calculated ",
-           "from the samples alone. Set 'nsim' if you want to sample them ",
-           "conditionally on the MCMC samples",
-           call. = FALSE)
+        "that are not in the MCMC samples so cannot be calculated ",
+        "from the samples alone. Set 'nsim' if you want to sample them ",
+        "conditionally on the MCMC samples",
+        call. = FALSE
+      )
     }
 
     # see if any of the targets are stochastic and not sampled in the mcmc
     target_nodes <- lapply(target, get_node)
     target_node_names <- vapply(target_nodes,
-                                member,
-                                "unique_name",
-                                FUN.VALUE = character(1))
+      member,
+      "unique_name",
+      FUN.VALUE = character(1)
+    )
     existing_variables <- target_node_names %in% names(mcmc_dag_variables)
     have_distributions <- vapply(target_nodes,
-                                 has_distribution,
-                                 FUN.VALUE = logical(1))
+      has_distribution,
+      FUN.VALUE = logical(1)
+    )
     new_stochastics <- have_distributions & !existing_variables
     if (any(new_stochastics)) {
       n_stoch <- sum(new_stochastics)
       stop("the greta array",
-           ngettext(n_stoch, " ", "s "),
-           paste(names(target)[new_stochastics], collapse = ", "),
-           ngettext(n_stoch,
-                    " has a distribution and is ",
-                    " have distributions and are"),
-           "not in the MCMC samples, so cannot be calculated ",
-           "from the samples alone. Set 'nsim' if you want to sample them ",
-           "conditionally on the MCMC samples",
-           call. = FALSE)
+        ngettext(n_stoch, " ", "s "),
+        paste(names(target)[new_stochastics], collapse = ", "),
+        ngettext(
+          n_stoch,
+          " has a distribution and is ",
+          " have distributions and are"
+        ),
+        "not in the MCMC samples, so cannot be calculated ",
+        "from the samples alone. Set 'nsim' if you want to sample them ",
+        "conditionally on the MCMC samples",
+        call. = FALSE
+      )
     }
-
   }
 
   dag$define_tf()
@@ -325,7 +336,6 @@ calculate_greta_mcmc_list <- function(target,
 
   # if we're doing stochastic sampling, subsample the draws
   if (stochastic) {
-
     draws <- as.matrix(draws)
     n_samples <- nrow(draws)
 
@@ -334,8 +344,9 @@ calculate_greta_mcmc_list <- function(target,
     if (nsim > n_samples) {
       replace <- TRUE
       warning("nsim was greater than the number of posterior samples in ",
-              "values, so posterior samples had to be drawn with replacement",
-              call. = FALSE)
+        "values, so posterior samples had to be drawn with replacement",
+        call. = FALSE
+      )
     }
 
     rows <- sample.int(n_samples, nsim, replace = replace)
@@ -346,19 +357,19 @@ calculate_greta_mcmc_list <- function(target,
 
     # pass these values in as the free state
     trace <- dag$trace_values(draws,
-                              trace_batch_size = trace_batch_size,
-                              flatten = FALSE)
+      trace_batch_size = trace_batch_size,
+      flatten = FALSE
+    )
 
     # hopefully values is already a list of the correct dimensions...
-
-
   } else {
 
     # for deterministic posterior prediction, just trace the target for each
     # chain
     values <- lapply(draws,
-                     dag$trace_values,
-                     trace_batch_size = trace_batch_size)
+      dag$trace_values,
+      trace_batch_size = trace_batch_size
+    )
 
     # convert to a greta_mcmc_list object, retaining windowing info
     trace <- lapply(
@@ -373,11 +384,9 @@ calculate_greta_mcmc_list <- function(target,
   }
 
   trace
-
 }
 
 calculate_list <- function(target, values, nsim, tf_float, env) {
-
   stochastic <- !is.null(nsim)
 
   fixed_greta_arrays <- list()
@@ -389,7 +398,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     values_list <- check_values_list(values, env)
     fixed_greta_arrays <- values_list$fixed_greta_arrays
     values <- values_list$values
-
   }
 
   all_greta_arrays <- c(fixed_greta_arrays, target)
@@ -407,12 +415,15 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   tfe <- dag$tf_environment
 
   # build and send a dict for the fixed values
-  fixed_nodes <- lapply(fixed_greta_arrays,
-                        get_node)
+  fixed_nodes <- lapply(
+    fixed_greta_arrays,
+    get_node
+  )
 
   names(values) <- vapply(fixed_nodes,
-                          dag$tf_name,
-                          FUN.VALUE = "")
+    dag$tf_name,
+    FUN.VALUE = ""
+  )
 
   # check we can do the calculation
   if (stochastic) {
@@ -421,36 +432,39 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     # distributions - for lkj & wishart) that aren't given fixed values
     variables <- dag$node_list[dag$node_types == "variable"]
     have_distributions <- vapply(variables,
-                                 has_distribution,
-                                 FUN.VALUE = logical(1))
+      has_distribution,
+      FUN.VALUE = logical(1)
+    )
     any_child_has_distribution <- function(variable) {
       have_distributions <- vapply(variable$children,
-                                   has_distribution,
-                                   FUN.VALUE = logical(1))
+        has_distribution,
+        FUN.VALUE = logical(1)
+      )
       any(have_distributions)
     }
     children_have_distributions <- vapply(variables,
-                                          any_child_has_distribution,
-                                          FUN.VALUE = logical(1))
+      any_child_has_distribution,
+      FUN.VALUE = logical(1)
+    )
 
     unsampleable <- !have_distributions & !children_have_distributions
     fixed_node_names <- vapply(fixed_nodes,
-                               member,
-                               "unique_name",
-                               FUN.VALUE = character(1))
+      member,
+      "unique_name",
+      FUN.VALUE = character(1)
+    )
     unfixed <- !names(variables) %in% fixed_node_names
 
     if (any(unsampleable & unfixed)) {
       stop("the target greta arrays are related to variables ",
-           "that do not have distributions so cannot be sampled",
-           call. = FALSE)
+        "that do not have distributions so cannot be sampled",
+        call. = FALSE
+      )
     }
-
   } else {
 
     # check there are no unspecified variables on which the target depends
     lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
-
   }
 
   # look up the tf names of the target greta arrays (under sampling)
@@ -476,5 +490,4 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   # run the sampling
   dag$tf_sess_run("calculate_target_tensor_list", as_text = TRUE)
-
 }

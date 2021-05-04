@@ -1,18 +1,19 @@
 context("transformations")
 
 test_that("transformations work as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
   a <- randn(25, 4)
 
 
-  r_icloglog <- function(x)
+  r_icloglog <- function(x) {
     1 - exp(-1 * exp(x))
+  }
 
-  r_log1pe <- function(x)
+  r_log1pe <- function(x) {
     log1p(exp(x))
+  }
 
   r_imultilogit <- function(x) {
     x <- cbind(x, 0)
@@ -27,17 +28,16 @@ test_that("transformations work as expected", {
   check_op(pcauchy, a, greta_op = icauchit)
   check_op(r_log1pe, a, greta_op = log1pe)
   check_op(r_imultilogit, a, greta_op = imultilogit)
-
 })
 
 test_that("imultilogit errors informatively", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
   x <- ones(3, 4, 3)
 
-  expect_error(imultilogit(x),
-               "imultilogit expects a 2D greta array")
-
+  expect_error(
+    imultilogit(x),
+    "imultilogit expects a 2D greta array"
+  )
 })
