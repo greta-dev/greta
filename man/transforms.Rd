@@ -51,21 +51,20 @@ used in machine learning.
 \examples{
 \dontrun{
 
- x1 <- normal(1, 3, dim = 10)
+x1 <- normal(1, 3, dim = 10)
 
- # transformation to the unit interval
- p1 <- iprobit(x1)
- p2 <- ilogit(x1)
- p3 <- icloglog(x1)
- p4 <- icauchit(x1)
+# transformation to the unit interval
+p1 <- iprobit(x1)
+p2 <- ilogit(x1)
+p3 <- icloglog(x1)
+p4 <- icauchit(x1)
 
- # and to positive reals
- y <- log1pe(x1)
+# and to positive reals
+y <- log1pe(x1)
 
- # transform from 10x3 to 10x4, where rows are a complete set of
- # probabilities
- x2 <- normal(1, 3, dim = c(10, 3))
- z <- imultilogit(x2)
-
+# transform from 10x3 to 10x4, where rows are a complete set of
+# probabilities
+x2 <- normal(1, 3, dim = c(10, 3))
+z <- imultilogit(x2)
 }
 }
