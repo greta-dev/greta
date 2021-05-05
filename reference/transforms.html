@@ -238,22 +238,21 @@ used in machine learning.</p>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 
- <span class='va'>x1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>x1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
 
- <span class='co'># transformation to the unit interval</span>
- <span class='va'>p1</span> <span class='op'>&lt;-</span> <span class='fu'>iprobit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
- <span class='va'>p2</span> <span class='op'>&lt;-</span> <span class='fu'>ilogit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
- <span class='va'>p3</span> <span class='op'>&lt;-</span> <span class='fu'>icloglog</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
- <span class='va'>p4</span> <span class='op'>&lt;-</span> <span class='fu'>icauchit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
+<span class='co'># transformation to the unit interval</span>
+<span class='va'>p1</span> <span class='op'>&lt;-</span> <span class='fu'>iprobit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
+<span class='va'>p2</span> <span class='op'>&lt;-</span> <span class='fu'>ilogit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
+<span class='va'>p3</span> <span class='op'>&lt;-</span> <span class='fu'>icloglog</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
+<span class='va'>p4</span> <span class='op'>&lt;-</span> <span class='fu'>icauchit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
 
- <span class='co'># and to positive reals</span>
- <span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'>log1pe</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
+<span class='co'># and to positive reals</span>
+<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'>log1pe</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
 
- <span class='co'># transform from 10x3 to 10x4, where rows are a complete set of</span>
- <span class='co'># probabilities</span>
- <span class='va'>x2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>10</span>, <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
- <span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>imultilogit</span><span class='op'>(</span><span class='va'>x2</span><span class='op'>)</span>
-
+<span class='co'># transform from 10x3 to 10x4, where rows are a complete set of</span>
+<span class='co'># probabilities</span>
+<span class='va'>x2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>10</span>, <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>imultilogit</span><span class='op'>(</span><span class='va'>x2</span><span class='op'>)</span>
 <span class='op'>}</span>
 </div></pre>
   </div>

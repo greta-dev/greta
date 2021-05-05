@@ -260,7 +260,7 @@ Passing in a scalar value for <code>dim</code> therefore results in a row-vector
 
 <span class='co'># create a variable, with lower and upper defined by greta arrays</span>
 <span class='va'>min</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Sepal.Length</span><span class='op'>)</span>
-<span class='va'>max</span> <span class='op'>&lt;-</span> <span class='va'>min</span> <span class='op'>^</span> <span class='fl'>2</span>
+<span class='va'>max</span> <span class='op'>&lt;-</span> <span class='va'>min</span><span class='op'>^</span><span class='fl'>2</span>
 <span class='va'>d</span> <span class='op'>&lt;-</span> <span class='va'>min</span> <span class='op'>+</span> <span class='fu'>variable</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>*</span> <span class='op'>(</span><span class='va'>max</span> <span class='op'>-</span> <span class='va'>min</span><span class='op'>)</span>
 <span class='op'>}</span>
 <span class='co'># 4x4 cholesky factor variables for covariance and correlation matrices</span>

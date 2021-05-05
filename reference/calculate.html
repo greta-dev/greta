@@ -288,7 +288,7 @@ See some examples of these below.</p>
 <span class='co'># then calculate what value y would take for different values of x</span>
 <span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 <span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
-<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>x</span> <span class='op'>^</span> <span class='fl'>2</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>a</span>
+<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>^</span><span class='fl'>2</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>a</span>
 <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.2</span>, <span class='fl'>0.3</span><span class='op'>)</span>, a <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'># by setting nsim, you can also sample values from their priors</span>
@@ -335,30 +335,36 @@ See some examples of these below.</p>
 <span class='co'># you can use calculate on greta arrays created even after the inference on</span>
 <span class='co'># the model - e.g. to plot response curves</span>
 <span class='va'>petal_length_plot</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>,
-                         <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>,
-                         length.out <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
+  <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>,
+  length.out <span class='op'>=</span> <span class='fl'>100</span>
+<span class='op'>)</span>
 <span class='va'>mu_plot</span> <span class='op'>&lt;-</span> <span class='va'>alpha</span> <span class='op'>+</span> <span class='va'>petal_length_plot</span> <span class='op'>*</span> <span class='va'>beta</span>
 <span class='va'>mu_plot_draws</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>, values <span class='op'>=</span> <span class='va'>draws</span><span class='op'>)</span>
 <span class='va'>mu_est</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>colMeans</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>mu_est</span> <span class='op'>~</span> <span class='va'>petal_length_plot</span>, type <span class='op'>=</span> <span class='st'>"n"</span>,
-     ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>mu_est</span> <span class='op'>~</span> <span class='va'>petal_length_plot</span>,
+  type <span class='op'>=</span> <span class='st'>"n"</span>,
+  ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
+<span class='op'>)</span>
 <span class='fu'><a href='overloaded.html'>apply</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>, <span class='fl'>1</span>, <span class='va'>lines</span>,
-      x <span class='op'>=</span> <span class='va'>petal_length_plot</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/grDevices/gray.html'>grey</a></span><span class='op'>(</span><span class='fl'>0.8</span><span class='op'>)</span><span class='op'>)</span>
+  x <span class='op'>=</span> <span class='va'>petal_length_plot</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/grDevices/gray.html'>grey</a></span><span class='op'>(</span><span class='fl'>0.8</span><span class='op'>)</span>
+<span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>mu_est</span> <span class='op'>~</span> <span class='va'>petal_length_plot</span>, lwd <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
 
 <span class='co'># trace_batch_size can be changed to trade off speed against memory usage</span>
 <span class='co'># when calculating. These all produce the same result, but have increasing</span>
 <span class='co'># memory requirements:</span>
 <span class='va'>mu_plot_draws_1</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,
-                             values <span class='op'>=</span> <span class='va'>draws</span>,
-                             trace_batch_size <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
+  values <span class='op'>=</span> <span class='va'>draws</span>,
+  trace_batch_size <span class='op'>=</span> <span class='fl'>1</span>
+<span class='op'>)</span>
 <span class='va'>mu_plot_draws_10</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,
-                              values <span class='op'>=</span> <span class='va'>draws</span>,
-                              trace_batch_size <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+  values <span class='op'>=</span> <span class='va'>draws</span>,
+  trace_batch_size <span class='op'>=</span> <span class='fl'>10</span>
+<span class='op'>)</span>
 <span class='va'>mu_plot_draws_inf</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,
-                               values <span class='op'>=</span> <span class='va'>draws</span>,
-                               trace_batch_size <span class='op'>=</span> <span class='cn'>Inf</span><span class='op'>)</span>
-
+  values <span class='op'>=</span> <span class='va'>draws</span>,
+  trace_batch_size <span class='op'>=</span> <span class='cn'>Inf</span>
+<span class='op'>)</span>
 <span class='op'>}</span>
 </div></pre>
   </div>
