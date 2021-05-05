@@ -592,7 +592,7 @@ head.greta_array <- function(x, n = 6L, ...) { # nolint
   stopifnot(length(n) == 1L)
 
   # use default behaviour for R < 4.0.0
-  if (getRversion() <= "4.0.0") {
+  if (getRversion() < "4.0.0") {
 
     # if x is matrix-like, take the top n rows
     if (length(dim(x)) == 2) {
@@ -616,8 +616,12 @@ head.greta_array <- function(x, n = 6L, ...) { # nolint
       ans <- x[seq_len(n)]
     }
 
-    ans
+  } else if (getRversion() >= "4.0.0") {
+
+    ans <- utils::head.matrix(x, n, ...)
+
   }
+    ans
 }
 
 #' @export
@@ -627,7 +631,7 @@ tail.greta_array <- function(x, n = 6L, ...) { # nolint
   stopifnot(length(n) == 1L)
 
   # use default behaviour for R < 4.0.0
-  if (getRversion() <= "4.0.0") {
+  if (getRversion() < "4.0.0") {
 
     # if x is matrix-like, take the top n rows
     if (length(dim(x)) == 2) {
@@ -655,8 +659,12 @@ tail.greta_array <- function(x, n = 6L, ...) { # nolint
       ans <- x[seq.int(to = xlen, length.out = n)]
     }
 
-    ans
+  } else if (getRversion() >= "4.0.0") {
+
+    ans <- utils::tail.matrix(x, n, ...)
+
   }
+    ans
 }
 
 #' @rdname overloaded
