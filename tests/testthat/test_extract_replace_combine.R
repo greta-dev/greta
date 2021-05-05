@@ -537,24 +537,6 @@ test_that("extract, replace, combine work in models", {
   expect_ok(draws_d <- mcmc(m_d, warmup = 3, n_samples = 3, verbose = FALSE))
 })
 
-test_that("head and tail work", {
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  a <- randn(10, 1)
-  b <- randn(10, 4)
-  c <- randn(10, 3, 3)
-
-  check_op(head, a)
-  check_op(tail, a)
-
-  check_op(head, b)
-  check_op(tail, b)
-
-  check_op(head, c)
-  check_op(tail, c)
-})
-
 test_that("length and dim work", {
   skip_if_not(check_tf_version())
   source("helpers.R")
