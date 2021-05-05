@@ -51,6 +51,11 @@
 #'   diagonal matrix can always be created with e.g. `diag(3)`, and then
 #'   converted into a greta array.
 #'
+#'   Also note that since R 4.0.0, `head` and `tail` methods for arrays changed
+#'   to print a vector rather than maintain the array structure. The `greta`
+#'   package supports both methods, and will do so based on which version of R
+#'    you are using.
+#'
 #' @examples
 #' \dontrun{
 #'
