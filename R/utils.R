@@ -915,7 +915,7 @@ check_values_list <- function(values, env) {
 
   # coerce value to have the correct dimensions
   assign_dim <- function(value, greta_array) {
-    array <- strip_unknown_class(get_node(greta_array)$value())
+    array <- unclass(get_node(greta_array)$value())
     if (length(array) != length(value)) {
       stop("a provided value has different number of elements",
         " than the greta array",

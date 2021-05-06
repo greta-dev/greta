@@ -16,17 +16,10 @@ as.unknowns.matrix <- function(x) { # nolint
   as.unknowns.array(x)
 }
 
-strip_unknown_class <- function(x) {
-  classes <- class(x)
-  classes <- classes[classes != "unknowns"]
-  class(x) <- classes
-  x
-}
-
 #' @export
 print.unknowns <- function(x, ...) {
   # remove 'unknown' class attribute
-  x <- strip_unknown_class(x)
+  x <- unclass(x)
 
   # set NA values to ? for printing
   x[is.na(x)] <- " ?"
@@ -43,13 +36,12 @@ unknowns <- function(dims = c(1, 1), data = as.numeric(NA)) {
 
 # set dims like on a matrix/array
 `dim<-.unknowns` <- function(x, value) { # nolint
-  x <- strip_unknown_class(x)
+  x <- unclass(x)
   dim(x) <- value
   as.unknowns(x)
 }
 
 unknowns_module <- module(
   unknowns,
-  as.unknowns,
-  strip_unknown_class
+  as.unknowns
 )
