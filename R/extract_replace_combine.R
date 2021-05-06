@@ -51,6 +51,11 @@
 #'   diagonal matrix can always be created with e.g. `diag(3)`, and then
 #'   converted into a greta array.
 #'
+#'   Also note that since R 4.0.0, `head` and `tail` methods for arrays changed
+#'   to print a vector rather than maintain the array structure. The `greta`
+#'   package supports both methods, and will do so based on which version of R
+#'    you are using.
+#'
 #' @examples
 #' \dontrun{
 #'
@@ -587,68 +592,86 @@ length.greta_array <- function(x) {
 # arrays
 #' @export
 #' @importFrom utils head
+#' @importFrom utils head.matrix
 head.greta_array <- function(x, n = 6L, ...) { # nolint
 
   stopifnot(length(n) == 1L)
 
-  # if x is matrix-like, take the top n rows
-  if (length(dim(x)) == 2) {
-    nrx <- nrow(x)
-    if (n < 0L) {
-      n <- max(nrx + n, 0L)
+  # use default behaviour for R < 4.0.0
+  if (getRversion() < "4.0.0") {
+
+    # if x is matrix-like, take the top n rows
+    if (length(dim(x)) == 2) {
+      nrx <- nrow(x)
+      if (n < 0L) {
+        n <- max(nrx + n, 0L)
+      } else {
+        n <- min(n, nrx)
+      }
+
+      ans <- x[seq_len(n), , drop = FALSE]
     } else {
-      n <- min(n, nrx)
+      # otherwise, take the first n elements
+
+      if (n < 0L) {
+        n <- max(length(x) + n, 0L)
+      } else {
+        n <- min(n, length(x))
+      }
+
+      ans <- x[seq_len(n)]
     }
 
-    ans <- x[seq_len(n), , drop = FALSE]
-  } else {
-    # otherwise, take the first n elements
+  } else if (getRversion() >= "4.0.0") {
 
-    if (n < 0L) {
-      n <- max(length(x) + n, 0L)
-    } else {
-      n <- min(n, length(x))
-    }
+    ans <- head.matrix(x, n, ...)
 
-    ans <- x[seq_len(n)]
   }
-
-  ans
+    ans
 }
 
 #' @export
 #' @importFrom utils tail
+#' @importFrom utils tail.matrix
 tail.greta_array <- function(x, n = 6L, ...) { # nolint
 
   stopifnot(length(n) == 1L)
 
-  # if x is matrix-like, take the top n rows
-  if (length(dim(x)) == 2) {
-    nrx <- nrow(x)
+  # use default behaviour for R < 4.0.0
+  if (getRversion() < "4.0.0") {
 
-    if (n < 0L) {
-      n <- max(nrx + n, 0L)
+    # if x is matrix-like, take the top n rows
+    if (length(dim(x)) == 2) {
+      nrx <- nrow(x)
+
+      if (n < 0L) {
+        n <- max(nrx + n, 0L)
+      } else {
+        n <- min(n, nrx)
+      }
+
+      sel <- as.integer(seq.int(to = nrx, length.out = n))
+      ans <- x[sel, , drop = FALSE]
     } else {
-      n <- min(n, nrx)
+      # otherwise, take the first n elements
+
+      xlen <- length(x)
+
+      if (n < 0L) {
+        n <- max(xlen + n, 0L)
+      } else {
+        n <- min(n, xlen)
+      }
+
+      ans <- x[seq.int(to = xlen, length.out = n)]
     }
 
-    sel <- as.integer(seq.int(to = nrx, length.out = n))
-    ans <- x[sel, , drop = FALSE]
-  } else {
-    # otherwise, take the first n elements
+  } else if (getRversion() >= "4.0.0") {
 
-    xlen <- length(x)
+    ans <- tail.matrix(x, n, ...)
 
-    if (n < 0L) {
-      n <- max(xlen + n, 0L)
-    } else {
-      n <- min(n, xlen)
-    }
-
-    ans <- x[seq.int(to = xlen, length.out = n)]
   }
-
-  ans
+    ans
 }
 
 #' @rdname overloaded

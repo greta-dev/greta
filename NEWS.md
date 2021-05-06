@@ -2,6 +2,8 @@
 
 ## Fixes:
 
+* head and tail S3 methods for `greta_array` are now consistent with head and tail methods for R versions 3 and 4 ([#384](https://github.com/greta-dev/greta/issues/384)).
+
 * greta_mcmc_list objects (returned by mcmc()) are now no longer modified by operations (like code::gelman.diag()). 
 
 * joint distributions of uniform variables now have the correct constraints when sampling (#377).

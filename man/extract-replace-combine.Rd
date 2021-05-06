@@ -40,6 +40,11 @@ a square and two-dimensional greta array, but it cannot be used to create a
 matrix-like greta array from a scalar or vector-like greta array. A static
 diagonal matrix can always be created with e.g. \code{diag(3)}, and then
 converted into a greta array.
+
+Also note that since R 4.0.0, \code{head} and \code{tail} methods for arrays changed
+to print a vector rather than maintain the array structure. The \code{greta}
+package supports both methods, and will do so based on which version of R
+you are using.
 }
 \section{Usage}{
  \preformatted{
