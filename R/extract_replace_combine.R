@@ -592,6 +592,7 @@ length.greta_array <- function(x) {
 # arrays
 #' @export
 #' @importFrom utils head
+#' @importFrom utils head.matrix
 head.greta_array <- function(x, n = 6L, ...) { # nolint
 
   stopifnot(length(n) == 1L)
@@ -623,7 +624,7 @@ head.greta_array <- function(x, n = 6L, ...) { # nolint
 
   } else if (getRversion() >= "4.0.0") {
 
-    ans <- utils::head.matrix(x, n, ...)
+    ans <- head.matrix(x, n, ...)
 
   }
     ans
@@ -631,6 +632,7 @@ head.greta_array <- function(x, n = 6L, ...) { # nolint
 
 #' @export
 #' @importFrom utils tail
+#' @importFrom utils tail.matrix
 tail.greta_array <- function(x, n = 6L, ...) { # nolint
 
   stopifnot(length(n) == 1L)
@@ -666,7 +668,7 @@ tail.greta_array <- function(x, n = 6L, ...) { # nolint
 
   } else if (getRversion() >= "4.0.0") {
 
-    ans <- utils::tail.matrix(x, n, ...)
+    ans <- tail.matrix(x, n, ...)
 
   }
     ans
