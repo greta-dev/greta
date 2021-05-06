@@ -107,9 +107,9 @@ jobs:
 
       - name: Install TensorFlow
         run: |
-          reticulate::conda_create('r-reticulate', packages = c('python==3.7', 'numpy==1.16.4'))
+          reticulate::conda_create('r-reticulate', packages = c('python==3.7'))
           remotes::install_local()
-          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0'))
+         keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
         shell: Rscript {0}
 
       - name: Python + TF details
