@@ -101,7 +101,7 @@ Config/reticulate:
   list(
     packages = list(
       list(package = "h5py", version = "2.8", pip = TRUE),
-      list(package = "numpy", version = "1.16", pip = TRUE),
+      list(package = "numpy", version = "1.16.4", pip = TRUE),
       list(package = "Pillow", pip = TRUE),
       list(package = "pip", version = "3.7", pip = TRUE),
       list(package = "python", version = "3.7", pip = TRUE),
