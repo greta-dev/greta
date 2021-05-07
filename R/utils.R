@@ -140,7 +140,7 @@ check_tf_version <- function(alert = c(
         "  install_tensorflow(\n",
         ifelse(have_conda(), "    method = \"conda\",\n", ""),
         "    version = \"1.14.0\",\n",
-        "    extra_packages = \"tensorflow-probability==0.7.0\"\n",
+        "    extra_packages = c(\"tensorflow-probability==0.7.0\", \"numpy==1.16.4\")\n",
         "  )"
       )
 
