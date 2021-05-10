@@ -89,9 +89,16 @@ jobs:
           Sys.getenv("UPGRADE_PKGS")
           if (Sys.getenv("UPGRADE_PKGS")) {
             install.packages("remotes")
-            remotes::install_version(package = "quantreg", version = "5.40")
-            remotes::install_version(package = "mvtnorm", version = "1.0-8")
-            remotes::install_version(package = "MCMCpack", version = "1.4-4")
+            install.packages("versions")
+            install.dates("quantreg", "2017-03-06")
+            install.dates("mvtnorm", "2017-03-06")
+            install.dates("MCMCpack", "2017-03-06")
+            packageVersion("quantreg")
+            packageVersion("mvtnorm")
+            packageVersion("MCMCpack")
+#            remotes::install_version(package = "quantreg", version = "5.40")
+#            remotes::install_version(package = "mvtnorm", version = "1.0-8")
+#            remotes::install_version(package = "MCMCpack", version = "1.4-4")
           }
         shell: Rscript {0}
 
