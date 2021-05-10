@@ -90,9 +90,9 @@ jobs:
           if (Sys.getenv("UPGRADE_PKGS")) {
             install.packages("remotes")
             install.packages("versions")
-            install.dates("quantreg", "2017-03-06")
-            install.dates("mvtnorm", "2017-03-06")
-            install.dates("MCMCpack", "2017-03-06")
+            versions::install.dates("quantreg", "2017-03-06")
+            versions::install.dates("mvtnorm", "2017-03-06")
+            versions::install.dates("MCMCpack", "2017-03-06")
             packageVersion("quantreg")
             packageVersion("mvtnorm")
             packageVersion("MCMCpack")
