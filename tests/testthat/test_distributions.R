@@ -694,7 +694,7 @@ test_that("distributions can be sampled from by MCMC", {
   # multivariate continuous
   sig <- rWishart(1, 4, diag(3))[, , 1]
   sample_distribution(multivariate_normal(t(rnorm(3)), sig))
-  sample_distribution(wishart(4L, sig), warmup = 0)
+  sample_distribution(wishart(10L, sig), warmup = 0)
   sample_distribution(lkj_correlation(4, dimension = 3))
   sample_distribution(dirichlet(t(runif(3))))
 })
