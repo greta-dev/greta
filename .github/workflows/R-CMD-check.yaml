@@ -91,6 +91,7 @@ jobs:
             install.packages("remotes")
             remotes::install_version(package = "MCMCpack", version = "1.4-4")
             remotes::install_version(package = "mvtnorm", version = "1.0-8")
+            remotes::install_version(package = "quantreg", version = "5.40")
           }
         shell: Rscript {0}
 
