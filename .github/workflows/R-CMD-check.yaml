@@ -34,13 +34,12 @@ jobs:
           - {os: ubuntu-18.04,   r: 'oldrel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: '3.5', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: '3.4', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.3', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
 
     env:
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RETICULATE_AUTOCONFIGURE: 'FALSE'
-      UPGRADE_PKGS: ${{ matrix.config.r == '3.3' || matrix.config.r == '3.4' || matrix.config.r == '3.5'}}
+      UPGRADE_PKGS: ${{ matrix.config.r == '3.4' || matrix.config.r == '3.5'}}
       TF_VERSION: '1.14.0'
 
     steps:
