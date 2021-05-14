@@ -85,22 +85,25 @@ check_tf_version <- function(alert = c("none",
 
   alert <- match.arg(alert)
 
-  valid_dependencies <- (have_greta_conda_env() && py_available() && have_tf() && have_tfp())
+  requirements_valid <- c(
+    python_exists = have_python(),
+    correct_tf = have_tf(),
+    correct_tfp = have_tfp()
+  )
 
-  if (!valid_dependencies) {
+  if (!all(requirements_valid)) {
 
     # if there was a problem, append the solution
       text <- paste0(
-        "\n\n",
         "We have detected that you do not have the greta conda environment ",
         "setup. You can create this using:",
-        "\n",
+        "\n\n\t",
         "create_conda_greta_env()",
-        "\n",
+        "\n\n",
         "and then call:",
-        "\n",
+        "\n\n\t",
         "library(greta)",
-        "\n",
+        "\n\n",
         "in a fresh R session that has not yet initialised Tensorflow.",
         "\n",
         "For more information, see PLACEHOLDER HELP FILE.",
@@ -115,7 +118,7 @@ check_tf_version <- function(alert = c("none",
            none = NULL)
   }
 
-  invisible(valid_dependencies)
+  invisible(all(requirements_valid))
 
 }
 
