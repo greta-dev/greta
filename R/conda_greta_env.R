@@ -5,11 +5,15 @@
 #'
 #' @export
 create_conda_greta_env <- function(){
+
   reticulate::conda_create(envname = "greta-env",
-                           python_version = "3.7",
+                           python_version = "3.7")
+
+  reticulate::conda_install(envname = "greta-env",
                            packages = c("numpy==1.16.4",
                                         "tensorflow-probability==0.7.0",
-                                        "tensorflow==1.14.0"))
+                                        "tensorflow==1.14.0"),
+                           pip = TRUE)
 
 }
 
