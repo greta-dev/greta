@@ -41,12 +41,34 @@ have_python <- function() {
 
 #' @importFrom reticulate py_module_available
 have_tfp <- function() {
-  reticulate::py_module_available("tensorflow_probability")
+  is_tfp_available <- reticulate::py_module_available("tensorflow_probability")
+
+  if (is_tfp_available) {
+
+    pkg <- reticulate::import("pkg_resources")
+    tfp_version <- pkg$get_distribution("tensorflow_probability")$version
+    is_tfp_available <- utils::compareVersion("0.7.0", tfp_version) == 0
+
+  }
+
+  return(is_tfp_available)
+
 }
 
 #' @importFrom reticulate py_module_available
 have_tf <- function() {
-  reticulate::py_module_available("tensorflow")
+
+  is_tf_available <- reticulate::py_module_available("tensorflow")
+
+  if (is_tf_available) {
+
+    tf_version <- tf$`__version__`
+    is_tf_available <- utils::compareVersion("1.14.0", tf_version) == 0
+
+  }
+
+  return(is_tf_available)
+
 }
 
 # check tensorflow and tensorflow-probability are installed and have valid
@@ -54,6 +76,7 @@ have_tf <- function() {
 # invisible logical saying whether it is valid
 
 #' @importFrom utils compareVersion
+#' @importFrom reticulate py_available
 check_tf_version <- function(alert = c("none",
                                        "error",
                                        "warn",
@@ -62,92 +85,20 @@ check_tf_version <- function(alert = c("none",
 
   alert <- match.arg(alert)
 
-  py_available <- TRUE
-  tf_available <- TRUE
-  tfp_available <- TRUE
+  valid_dependencies <- (py_available() && have_tf() && have_tfp())
 
-  # check python installation
-  if (!have_python()) {
-
-    text <- paste0("\n\ngreta requires Python and several Python packages ",
-                  "to be installed, but no Python installation was detected.\n",
-                  "You can install Python directly from ",
-                  "https://www.python.org/downloads/ ",
-                  "or with the Anaconda distribution from ",
-                  "https://www.anaconda.com/download/")
-
-    py_available <- tf_available <- tfp_available <- FALSE
-
-  }
-
-  if (py_available) {
-
-    text <- NULL
-
-    # check TF installation
-    if (!have_tf()) {
-
-      text <- "TensorFlow isn't installed"
-      tf_available <- FALSE
-
-    } else {
-
-      tf_version <- tf$`__version__`
-      tf_version_valid <- utils::compareVersion("1.14.0", tf_version) != 1
-
-      if (!tf_version_valid) {
-        text <- paste0("you have TensorFlow version ", tf_version)
-        tf_available <- FALSE
-      }
-
-    }
-
-    # check TFP installation
-    if (!have_tfp()) {
-
-      text <- paste0(text,
-                     ifelse(is.null(text), "", " and "),
-                     "TensorFlow Probability isn't installed")
-      tfp_available <- FALSE
-
-    } else {
-
-      pkg <- reticulate::import("pkg_resources")
-      tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-      tfp_version_valid <- utils::compareVersion("0.7.0", tfp_version) != 1
-
-      if (!tfp_version_valid) {
-        text <- paste0("you have TensorFlow Probability version ", tfp_version)
-        tfp_available <- FALSE
-      }
-
-    }
+  if (!valid_dependencies) {
 
     # if there was a problem, append the solution
-    if (!tf_available | !tfp_available) {
-
-      install <- paste0(
-        "  install_tensorflow(\n",
-        ifelse(have_conda(), "    method = \"conda\",\n", ""),
-        "    version = \"1.14.0\",\n",
-        "    extra_packages = \"tensorflow-probability==0.7.0\"\n",
-        "  )"
-      )
-
-      # combine the problem and solution messages
       text <- paste0(
         "\n\n",
-        "This version of greta requires TensorFlow v1.14.0 ",
-        "and TensorFlow Probability v0.7.0, but ", text, ". ",
-        "To install the correct versions do:\n\n", install,
+        "We have detected that not all of the python dependencies are",
+        " available. You can install these with:",
+        "\n",
+        "install_greta_deps()",
         "\n"
       )
 
-    }
-
-  }
-
-  if (!is.null(text)) {
     switch(alert,
            error = stop(text, call. = FALSE),
            warn = warning(text, call. = FALSE),
@@ -156,7 +107,7 @@ check_tf_version <- function(alert = c("none",
            none = NULL)
   }
 
-  invisible(py_available & tf_available & tfp_available)
+  invisible(valid_dependencies)
 
 }
 
@@ -1363,6 +1314,10 @@ as_tf_function <- function(r_fun, ...) {
 
   }
 
+}
+
+is_windows <- function() {
+  identical(.Platform$OS.type, "windows")
 }
 
 greta_array_ops_module <- module(as_tf_function)

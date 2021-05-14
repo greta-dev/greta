@@ -67,6 +67,7 @@ Collate:
     'callbacks.R'
     'simulate.R'
     'chol2symm.R'
+    'install_greta_deps.R'
 Imports:
     R6,
     tensorflow (>= 1.13.0),
