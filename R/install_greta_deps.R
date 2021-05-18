@@ -50,12 +50,42 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     }
   }
 
-  install_tensorflow(
-    method = method,
-    conda = conda,
-    version = "1.14.0",
-    extra_packages = c("tensorflow-probability==0.7.0, numpy==1.16.4"),
-    pip_ignore_installed = FALSE,
-    ...
+  # Check if greta-env conda environment exists, if it doesn't, create it
+  if (!using_greta_conda_env()) {
+    create_conda_greta_env()
+  }
+
+  # If the greta-env does exist, then install into it
+  if (using_greta_conda_env()) {
+  # install the relevant python packages into the conda environment, using pip
+  reticulate::conda_install(
+    envname = "greta-env",
+    packages = c("numpy==1.16.4",
+                 "tensorflow-probability==0.7.0",
+                 "tensorflow==1.14.0")
+    # pip = TRUE
+  )
+  }
+
+  # # switch to using this greta environment now
+  # if (reticulate::)
+  # use_greta_conda_env()
+  #
+  # success <- check_tf_version()
+  #
+  # # evaluate installation and report back to the user
+  # if (success) {
+  #   message("greta dependencies successfully installed, no need to restart")
+  # } else {
+  #   message("installation of dependencies failed, complain to Nick Tierney")
+  # }
+  #
+  # invisible(success)
+
+  message(
+    "\nInstallation complete. Please open a fresh R session and load greta with:",
+    "\n\n  ",
+    "library(greta)",
+    "\n"
   )
 }
