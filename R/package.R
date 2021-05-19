@@ -44,9 +44,8 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname) {  # nolint
 
-
   if (have_greta_conda_env()) {
-    reticulate::use_condaenv("greta-env", required = TRUE)
+    use_greta_conda_env()
   }
 
   # silence TF's CPU instructions message

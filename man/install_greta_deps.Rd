@@ -10,24 +10,19 @@ install_greta_deps(
   ...
 )
 }
-\arguments{
-\item{method}{Installation method ("virtualenv" or "conda")}
-
-\item{conda}{The path to a conda executable. Use "auto" to allow reticulate
-to automatically find an appropriate conda binary. See Finding Conda for
-more details.}
-
-\item{...}{Other arguments passed to \code{\link[tensorflow:install_tensorflow]{tensorflow::install_tensorflow()}}.}
-}
 \description{
 This is a helper function to install Python dependencies needed. This
 includes Tensorflow version 1.14.0, Tensorflow Probability 0.7.0, and
 numpy version 1.16.4. These Python modules will be installed into an
-"r-tensorflow" virtual or conda environment. Note that "virtualenv" is
+virtual or conda environment, named "greta-env". Note that "virtualenv" is
 not available on Windows.
 }
 \note{
-This function was heavily inspired by \code{keras::install_keras()}.
+This willl automatically install Miniconda (a minimal version of the
+Anaconda scientific software management system), create a 'conda' environment
+for greta named 'greta-env' with required python and python package versions,
+and forcibly switch over to using that conda environment. There should be no
+need to restart if this was successfull.
 }
 \examples{
 \dontrun{

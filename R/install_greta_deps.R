@@ -3,16 +3,15 @@
 #' This is a helper function to install Python dependencies needed. This
 #'   includes Tensorflow version 1.14.0, Tensorflow Probability 0.7.0, and
 #'   numpy version 1.16.4. These Python modules will be installed into an
-#'   "r-tensorflow" virtual or conda environment. Note that "virtualenv" is
+#'   virtual or conda environment, named "greta-env". Note that "virtualenv" is
 #'   not available on Windows.
 #'
-#' @param method Installation method ("virtualenv" or "conda")
-#' @param conda The path to a conda executable. Use "auto" to allow reticulate
-#'   to automatically find an appropriate conda binary. See Finding Conda for
-#'   more details.
-#' @param ... Other arguments passed to [tensorflow::install_tensorflow()].
+#' @note This willl automatically install Miniconda (a minimal version of the
+#' Anaconda scientific software management system), create a 'conda' environment
+#' for greta named 'greta-env' with required python and python package versions,
+#' and forcibly switch over to using that conda environment. There should be no
+#' need to restart if this was successfull.
 #'
-#' @note This function was heavily inspired by `keras::install_keras()`.
 #' @export
 #'
 #' @examples
@@ -24,38 +23,51 @@
 install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
                                ...) {
-  method <- match.arg(method)
-  if (is_windows()) {
-    method <- "conda"
-    have_conda <- !is.null(tryCatch(
-      conda_binary(conda),
-      error = function(e) {
-        NULL
-      }
-    ))
-    if (!have_conda) {
-      stop(
-        "Dependency installation for greta failed (no conda binary found)\n\n",
-        "Install Anaconda for Python 3.x (https://www.anaconda.com/download/#windows)\n",
-        "before installing greta dependencies.",
-        call. = FALSE
-      )
-    }
-    if (py_available()) {
-      stop(
-        "You should call install_greta_deps() only in a fresh R session that ",
-        "has not yet initialized TensorFlow (this is to avoid DLL in use ",
-        "errors during installation)"
-      )
-    }
+
+  # can we capture the output from all these installation steps, suppress them,
+  # but give the user the option to print them after the fact for debugging
+  # purposes?
+
+  # install miniconda if needed
+  if (!have_conda()) {
+    reticulate::install_miniconda()
   }
 
-  install_tensorflow(
-    method = method,
-    conda = conda,
-    version = "1.14.0",
-    extra_packages = c("tensorflow-probability==0.7.0, numpy==1.16.4"),
-    pip_ignore_installed = FALSE,
-    ...
+  # create the greta conda environment with the required version of python
+  reticulate::conda_create(
+    envname = "greta-env",
+    python_version = "3.7"
   )
+
+  # install the relevant python packages into the conda environment, using pip
+  reticulate::conda_install(
+    envname = "greta-env",
+    packages = c("numpy==1.16.4",
+                 "tensorflow-probability==0.7.0",
+                 "tensorflow==1.14.0")
+    # pip = TRUE
+  )
+
+  # # switch to using this greta environment now
+  # if (reticulate::)
+  # use_greta_conda_env()
+  #
+  # success <- check_tf_version()
+  #
+  # # evaluate installation and report back to the user
+  # if (success) {
+  #   message("greta dependencies successfully installed, no need to restart")
+  # } else {
+  #   message("installation of dependencies failed, complain to Nick Tierney")
+  # }
+  #
+  # invisible(success)
+
+  message(
+    "\nInstallation complete. Please open a fresh R session and load greta with:",
+    "\n\n  ",
+    "library(greta)",
+    "\n"
+  )
+
 }

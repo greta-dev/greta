@@ -95,10 +95,10 @@ check_tf_version <- function(alert = c("none",
 
     # if there was a problem, append the solution
       text <- paste0(
-        "We have detected that you do not have the greta conda environment ",
-        "setup. You can create this using:",
+        "We have detected that you do not have the 'greta-env' conda",
+        "environment and python packages setup. You can set these up using:",
         "\n\n\t",
-        "create_conda_greta_env()",
+        "install_greta_deps()",
         "\n\n",
         "and then call:",
         "\n\n\t",
