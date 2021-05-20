@@ -83,6 +83,15 @@ check_tf_version <- function(alert = c("none",
                                        "message",
                                        "startup")) {
 
+  # temporarily turn off the reticulate autoconfigure functionality
+  ac_flag <- Sys.getenv("RETICULATE_AUTOCONFIGURE")
+  on.exit(
+    Sys.setenv(
+      RETICULATE_AUTOCONFIGURE = ac_flag
+    )
+  )
+  Sys.setenv(RETICULATE_AUTOCONFIGURE = FALSE)
+
   alert <- match.arg(alert)
 
   requirements_valid <- c(
