@@ -30,22 +30,22 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
 
   # install miniconda if needed
   if (!have_conda()) {
+    message("\nNo miniconda detected, installing miniconda\n")
     reticulate::install_miniconda()
   }
 
-  # create the greta conda environment with the required version of python
+  message("\nCreating the `greta-env` conda environment, using python v4.7\n")
   reticulate::conda_create(
     envname = "greta-env",
     python_version = "3.7"
   )
 
-  # install the relevant python packages into the conda environment, using pip
+  message("\nInstalling python packages into greta-env conda environment\n")
   reticulate::conda_install(
     envname = "greta-env",
     packages = c("numpy==1.16.4",
                  "tensorflow-probability==0.7.0",
                  "tensorflow==1.14.0")
-    # pip = TRUE
   )
 
   # # switch to using this greta environment now

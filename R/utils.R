@@ -115,7 +115,7 @@ check_tf_version <- function(alert = c("none",
         "\n\n",
         "in a fresh R session that has not yet initialised Tensorflow.",
         "\n",
-        "For more information, see PLACEHOLDER HELP FILE.",
+        "For more information, see `?install_greta_deps` ",
         "\n"
       )
 
