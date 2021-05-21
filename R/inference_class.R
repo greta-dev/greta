@@ -4,7 +4,6 @@
 inference <- R6Class(
   "inference",
   public = list(
-
     model = NULL,
 
     # RNG seed
@@ -19,7 +18,6 @@ inference <- R6Class(
 
     # where to write the traced values to
     trace_log_file = NULL,
-
     parameters = list(),
     tuning_periods = list(),
 
@@ -29,7 +27,6 @@ inference <- R6Class(
     traced_free_state = list(),
     # all recorded greta array values
     traced_values = list(),
-
     initialize = function(initial_values,
                           model,
                           parameters = list(),
@@ -49,7 +46,6 @@ inference <- R6Class(
       self$set_initial_values(initial_values)
       self$n_traced <- length(model$dag$trace_values(self$free_state))
       self$seed <- seed
-
     },
 
     # Write burst values to log file; appends if the file exists, creates it if
@@ -57,12 +53,16 @@ inference <- R6Class(
     write_trace_to_log_file = function(last_burst_values) {
       if (file.exists(self$trace_log_file)) {
         # Append
-        write.table(last_burst_values, self$trace_log_file, append = TRUE,
-                    row.names = FALSE, col.names = FALSE)
+        write.table(last_burst_values, self$trace_log_file,
+          append = TRUE,
+          row.names = FALSE, col.names = FALSE
+        )
       } else {
         # Create file
-        write.table(last_burst_values, self$trace_log_file, append = FALSE,
-                    row.names = FALSE, col.names = TRUE)
+        write.table(last_burst_values, self$trace_log_file,
+          append = FALSE,
+          row.names = FALSE, col.names = TRUE
+        )
       }
     },
 
@@ -70,11 +70,12 @@ inference <- R6Class(
     write_percentage_log = function(total, completed, stage) {
       if (!is.null(self$percentage_file)) {
         percentage <- round(100 * completed / total)
-        msg <- sprintf("%s %i%%",
-                       stage,
-                       percentage)
+        msg <- sprintf(
+          "%s %i%%",
+          stage,
+          percentage
+        )
         writeLines(msg, self$percentage_file)
-
       }
     },
 
@@ -88,49 +89,44 @@ inference <- R6Class(
     # check and try to autofill a single set of initial values (single vector on
     # free state scale)
     check_initial_values = function(inits) {
-
       undefined <- is.na(inits)
 
       # try to fill in any that weren't specified
       if (any(undefined)) {
-
         n_missing <- sum(undefined)
 
         valid <- FALSE
         attempts <- 1
         while (!valid & attempts < 20) {
-
           inits[undefined] <- rnorm(n_missing, 0, 0.1)
 
           # test validity of values
           valid <- self$valid_parameters(inits)
           attempts <- attempts + 1
-
         }
 
         if (!valid) {
           stop("Could not find reasonable starting values after ", attempts,
-               " attempts. Please specify initial values manually via the ",
-               "initial_values argument",
-               call. = FALSE)
+            " attempts. Please specify initial values manually via the ",
+            "initial_values argument",
+            call. = FALSE
+          )
         }
-
       } else {
 
         # if they were all provided, check they can be be used
         valid <- self$valid_parameters(inits)
         if (!valid) {
           stop("The log density could not be evaluated at these ",
-               "initial values.\nTry using calculate() ",
-               "see whether they lead to values of other ",
-               "greta arrays in the model.",
-               call. = FALSE)
+            "initial values.\nTry using calculate() ",
+            "see whether they lead to values of other ",
+            "greta arrays in the model.",
+            call. = FALSE
+          )
         }
-
       }
 
       inits
-
     },
 
     # check and set a list of initial values
@@ -144,12 +140,10 @@ inference <- R6Class(
 
       # set them as the state
       self$free_state <- inits
-
     },
 
     # check whether the model can be evaluated at these parameters
     valid_parameters = function(parameters) {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -160,29 +154,28 @@ inference <- R6Class(
       dag$send_parameters(parameters)
       ld <- self$model$dag$log_density()
       is.finite(ld)
-
     },
 
     # run a burst of sampling, and put the resulting free state values in
     # last_burst_free_states
     run_burst = function() {
-
-      stop("no method to run a burst in the base inference class")
+      stop("no method to run a burst in the base inference class",
+        call. = FALSE
+      )
       self$last_burst_free_states <- free_states
-
     },
 
     # store the free state, and/or corresponding values of the target greta
     # arrays for the latest batch of raw draws
     trace = function(free_state = TRUE, values = FALSE) {
-
       if (free_state) {
 
         # append the free state trace for each chain
         self$traced_free_state <- mapply(rbind,
-                                         self$traced_free_state,
-                                         self$last_burst_free_states,
-                                         SIMPLIFY = FALSE)
+          self$traced_free_state,
+          self$last_burst_free_states,
+          SIMPLIFY = FALSE
+        )
       }
 
       if (values) {
@@ -192,11 +185,11 @@ inference <- R6Class(
           self$write_trace_to_log_file(last_burst_values)
         }
         self$traced_values <- mapply(rbind,
-                                     self$traced_values,
-                                     last_burst_values,
-                                     SIMPLIFY = FALSE)
+          self$traced_values,
+          last_burst_values,
+          SIMPLIFY = FALSE
+        )
       }
-
     },
 
     # given a matrix of free state values, get a matrix of values of the target
@@ -205,24 +198,24 @@ inference <- R6Class(
 
       # can't use apply directly, as it will drop the variable name if there's
       # only one parameter being traced
-      values_trace <- lapply(free_states,
-                             self$model$dag$trace_values)
+      values_trace <- lapply(
+        free_states,
+        self$model$dag$trace_values
+      )
 
       values_trace
-
     },
 
     # is the sampler in one of the tuning periods for a given parameter
     in_periods = function(periods, i, n_samples) {
-
-      within <- function(period, fraction)
+      within <- function(period, fraction) {
         fraction > period[1] & fraction <= period[2]
+      }
 
       fraction <- i / n_samples
       in_period <- vapply(periods, within, fraction, FUN.VALUE = FALSE)
       any(in_period)
     }
-
   )
 )
 
@@ -246,17 +239,19 @@ sampler <- R6Class(
     log_epsilon_bar = 0,
     tuning_interval = 3,
     uses_metropolis = TRUE,
-
-    welford_state = list(count = 0,
-                         mean = 0,
-                         m2 = 0),
-
+    welford_state = list(
+      count = 0,
+      mean = 0,
+      m2 = 0
+    ),
     accept_target = 0.5,
     accept_history = NULL,
 
     # sampler kernel information
-    parameters = list(epsilon = 0.1,
-                      diag_sd = 1),
+    parameters = list(
+      epsilon = 0.1,
+      diag_sd = 1
+    ),
 
     # parallel progress reporting
     percentage_file = NULL,
@@ -265,17 +260,18 @@ sampler <- R6Class(
 
     # batch sizes for tracing
     trace_batch_size = 100,
-
     initialize = function(initial_values,
                           model,
                           parameters = list(),
                           seed) {
 
       # initialize the inference method
-      super$initialize(initial_values = initial_values,
-                       model = model,
-                       parameters = parameters,
-                       seed = seed)
+      super$initialize(
+        initial_values = initial_values,
+        model = model,
+        parameters = parameters,
+        seed = seed
+      )
 
       self$n_chains <- nrow(self$free_state)
 
@@ -289,15 +285,12 @@ sampler <- R6Class(
 
       # define the draws tensor on the tf graph
       self$define_tf_draws()
-
     },
-
     run_chain = function(n_samples, thin, warmup,
                          verbose, pb_update,
                          one_by_one, plan_is, n_cores, float_type,
                          trace_batch_size,
                          from_scratch = TRUE) {
-
       self$thin <- thin
       dag <- self$model$dag
 
@@ -321,19 +314,19 @@ sampler <- R6Class(
 
         # rebuild the TF draws tensor
         self$define_tf_draws()
-
       }
 
       # create these objects if needed
       if (from_scratch) {
-
         self$traced_free_state <- replicate(self$n_chains,
-                                            matrix(NA, 0, self$n_free),
-                                            simplify = FALSE)
+          matrix(NA, 0, self$n_free),
+          simplify = FALSE
+        )
 
         self$traced_values <- replicate(self$n_chains,
-                                        matrix(NA, 0, self$n_traced),
-                                        simplify = FALSE)
+          matrix(NA, 0, self$n_traced),
+          simplify = FALSE
+        )
       }
 
       # how big would we like the bursts to be
@@ -341,12 +334,13 @@ sampler <- R6Class(
 
       # if warmup is required, do that now
       if (warmup > 0) {
-
         if (verbose) {
-          pb_warmup <- create_progress_bar("warmup",
-                                           c(warmup, n_samples),
-                                           pb_update,
-                                           self$pb_width)
+          pb_warmup <- create_progress_bar(
+            "warmup",
+            c(warmup, n_samples),
+            pb_update,
+            self$pb_width
+          )
 
           iterate_progress_bar(pb_warmup, 0, 0, self$n_chains, self$pb_file)
         } else {
@@ -355,12 +349,12 @@ sampler <- R6Class(
 
         # split up warmup iterations into bursts of sampling
         burst_lengths <- self$burst_lengths(warmup,
-                                            ideal_burst_size,
-                                            warmup = TRUE)
+          ideal_burst_size,
+          warmup = TRUE
+        )
         completed_iterations <- cumsum(burst_lengths)
 
         for (burst in seq_along(burst_lengths)) {
-
           self$run_burst(burst_lengths[burst])
           self$trace()
           self$update_welford()
@@ -370,25 +364,25 @@ sampler <- R6Class(
 
             # update the progress bar/percentage log
             iterate_progress_bar(pb_warmup,
-                                 it = completed_iterations[burst],
-                                 rejects = self$numerical_rejections,
-                                 chains = self$n_chains,
-                                 file = self$pb_file)
+              it = completed_iterations[burst],
+              rejects = self$numerical_rejections,
+              chains = self$n_chains,
+              file = self$pb_file
+            )
 
             self$write_percentage_log(warmup,
-                                      completed_iterations[burst],
-                                      stage = "warmup")
-
+              completed_iterations[burst],
+              stage = "warmup"
+            )
           }
-
         }
 
         # scrub the free state trace and numerical rejections
         self$traced_free_state <- replicate(self$n_chains,
-                                            matrix(NA, 0, self$n_free),
-                                            simplify = FALSE)
+          matrix(NA, 0, self$n_free),
+          simplify = FALSE
+        )
         self$numerical_rejections <- 0
-
       }
 
       if (n_samples > 0) {
@@ -400,10 +394,12 @@ sampler <- R6Class(
 
         # main sampling
         if (verbose) {
-          pb_sampling <- create_progress_bar("sampling",
-                                             c(warmup, n_samples),
-                                             pb_update,
-                                             self$pb_width)
+          pb_sampling <- create_progress_bar(
+            "sampling",
+            c(warmup, n_samples),
+            pb_update,
+            self$pb_width
+          )
           iterate_progress_bar(pb_sampling, 0, 0, self$n_chains, self$pb_file)
         } else {
           pb_sampling <- NULL
@@ -414,7 +410,6 @@ sampler <- R6Class(
         completed_iterations <- cumsum(burst_lengths)
 
         for (burst in seq_along(burst_lengths)) {
-
           self$run_burst(burst_lengths[burst], thin = thin)
           self$trace()
 
@@ -422,24 +417,22 @@ sampler <- R6Class(
 
             # update the progress bar/percentage log
             iterate_progress_bar(pb_sampling,
-                                 it = completed_iterations[burst],
-                                 rejects = self$numerical_rejections,
-                                 chains = self$n_chains,
-                                 file = self$pb_file)
+              it = completed_iterations[burst],
+              rejects = self$numerical_rejections,
+              chains = self$n_chains,
+              file = self$pb_file
+            )
 
             self$write_percentage_log(n_samples,
-                                      completed_iterations[burst],
-                                      stage = "sampling")
-
+              completed_iterations[burst],
+              stage = "sampling"
+            )
           }
-
         }
-
       }
 
       # return self, to send results back when running in parallel
       self
-
     },
 
     # update the welford accumulator for summary statistics of the posterior,
@@ -454,7 +447,6 @@ sampler <- R6Class(
       m2 <- self$welford_state$m2
 
       for (i in seq_len(nrow(trace_matrix))) {
-
         new_value <- trace_matrix[i, ]
 
         count <- count + 1
@@ -462,15 +454,14 @@ sampler <- R6Class(
         mean <- mean + delta / count
         delta2 <- new_value - mean
         m2 <- m2 + delta * delta2
-
       }
 
-      self$welford_state <- list(count = count,
-                                 mean = mean,
-                                 m2 = m2)
-
+      self$welford_state <- list(
+        count = count,
+        mean = mean,
+        m2 = m2
+      )
     },
-
     sample_variance = function() {
       count <- self$welford_state$count
       m2 <- self$welford_state$m2
@@ -480,42 +471,42 @@ sampler <- R6Class(
     # convert traced free state to the traced values, accounting for
     # chain dimension
     trace_values = function(trace_batch_size) {
-
       self$traced_values <- lapply(self$traced_free_state,
-                                   self$model$dag$trace_values,
-                                   trace_batch_size = trace_batch_size)
-
+        self$model$dag$trace_values,
+        trace_batch_size = trace_batch_size
+      )
     },
 
     # print the sampler number (if relevant)
     print_sampler_number = function() {
-
       msg <- ""
 
       if (self$n_samplers > 1) {
-        msg <- sprintf("\nsampler %i/%i",
-                       self$sampler_number,
-                       self$n_samplers)
+        msg <- sprintf(
+          "\nsampler %i/%i",
+          self$sampler_number,
+          self$n_samplers
+        )
       }
 
       if (self$n_chains > 1) {
-
         n_cores <- self$model$dag$n_cores
 
         cores_text <- ifelse(n_cores == 1,
-                             "1 core",
-                             sprintf("up to %i cores", n_cores))
+          "1 core",
+          sprintf("up to %i cores", n_cores)
+        )
 
-        msg <- sprintf("\nrunning %i chains simultaneously on %s",
-                       self$n_chains,
-                       cores_text)
-
+        msg <- sprintf(
+          "\nrunning %i chains simultaneously on %s",
+          self$n_chains,
+          cores_text
+        )
       }
 
       if (!identical(msg, "")) {
         message(msg, "\n")
       }
-
     },
 
     # split the number of samples up into bursts of running the sampler,
@@ -537,12 +528,10 @@ sampler <- R6Class(
         }
 
         changepoints <- c(changepoints, tuning_points)
-
       }
 
       changepoints <- sort(unique(changepoints))
       diff(changepoints)
-
     },
 
     # overall tuning method
@@ -550,16 +539,17 @@ sampler <- R6Class(
       self$tune_epsilon(iterations_completed, total_iterations)
       self$tune_diag_sd(iterations_completed, total_iterations)
     },
-
     tune_epsilon = function(iter, total) {
 
       # tuning periods for the tunable parameters (first 10%, last 60%)
       tuning_periods <- list(c(0, 0.1), c(0.4, 1))
 
       # whether we're tuning now
-      tuning_now <- self$in_periods(tuning_periods,
-                                    iter,
-                                    total)
+      tuning_now <- self$in_periods(
+        tuning_periods,
+        iter,
+        total
+      )
 
       if (tuning_now) {
 
@@ -576,7 +566,7 @@ sampler <- R6Class(
         w1 <- 1 / (iter + t0)
         hbar <- (1 - w1) * hbar + w1 * (self$accept_target - mean_accept_stat)
         log_epsilon <- mu - hbar * sqrt(iter) / gamma
-        w2 <- iter ^ -kappa
+        w2 <- iter^-kappa
         log_epsilon_bar <- w2 * log_epsilon + (1 - w2) * log_epsilon_bar
 
         self$hbar <- hbar
@@ -588,23 +578,21 @@ sampler <- R6Class(
         if (iter == total) {
           self$parameters$epsilon <- exp(log_epsilon_bar)
         }
-
       }
-
     },
-
     tune_diag_sd = function(iterations_completed, total_iterations) {
 
       # when, during warmup, to tune this parameter (after epsilon, but stopping
       # before halfway through)
       tuning_periods <- list(c(0.1, 0.4))
 
-      tuning_now <- self$in_periods(tuning_periods,
-                                    iterations_completed,
-                                    total_iterations)
+      tuning_now <- self$in_periods(
+        tuning_periods,
+        iterations_completed,
+        total_iterations
+      )
 
       if (tuning_now) {
-
         n_accepted <- sum(!self$accept_history)
 
         # provided there have been at least 5 acceptances in the warmup so far
@@ -615,15 +603,10 @@ sampler <- R6Class(
           shrinkage <- 1 / (n_accepted + 5)
           var_shrunk <- n_accepted * shrinkage * sample_var + 5e-3 * shrinkage
           self$parameters$diag_sd <- sqrt(var_shrunk)
-
         }
-
       }
-
     },
-
     define_tf_draws = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -650,25 +633,28 @@ sampler <- R6Class(
           },
           num_burnin_steps = tf$constant(0L, dtype = tf$int32),
           num_steps_between_results = sampler_thin,
-          parallel_iterations = 1L)
+          parallel_iterations = 1L
+        )
       )
-
     },
 
     # run a burst of the sampler
     run_burst = function(n_samples, thin = 1L) {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
-      sampler_values <- list(free_state = self$free_state,
-                             sampler_burst_length = as.integer(n_samples),
-                             sampler_thin = as.integer(thin))
+      sampler_values <- list(
+        free_state = self$free_state,
+        sampler_burst_length = as.integer(n_samples),
+        sampler_thin = as.integer(thin)
+      )
 
-      sampler_dict_list <- c(sampler_values,
-                             self$sampler_parameter_values())
+      sampler_dict_list <- c(
+        sampler_values,
+        self$sampler_parameter_values()
+      )
 
       dag$set_tf_data_list("batch_size", nrow(self$free_state))
       dag$build_feed_dict(sampler_dict_list)
@@ -706,11 +692,8 @@ sampler <- R6Class(
         # numerical rejections parameter sets
         bad <- sum(!is.finite(log_accept_stats))
         self$numerical_rejections <- self$numerical_rejections + bad
-
       }
-
     },
-
     sample_carefully = function(n_samples) {
 
       # tryCatch handling for numerical errors
@@ -719,7 +702,8 @@ sampler <- R6Class(
 
       # don't use dag$tf_sess_run, to avoid the overhead on parsing expressions
       result <- cleanly(tfe$sess$run(tfe$sampler_batch,
-                                     feed_dict = tfe$feed_dict))
+        feed_dict = tfe$feed_dict
+      ))
 
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
@@ -729,7 +713,6 @@ sampler <- R6Class(
         # simple case that this is a single bad sample. Mock up a result and
         # pass it back
         if (n_samples == 1L) {
-
           result <- list(
             all_states = self$free_state,
             trace = list(
@@ -737,7 +720,6 @@ sampler <- R6Class(
               is_accepted = rep(FALSE, self$n_chains)
             )
           )
-
         } else {
 
           # otherwise, *one* of these multiple samples was bad. The sampler
@@ -745,26 +727,22 @@ sampler <- R6Class(
           # informing the user how to run one sample at a time
 
           stop("TensorFlow hit a numerical problem that caused it to error. ",
-               "greta can handle these as bad proposals if you rerun mcmc() ",
-               "with the argument one_by_one = TRUE. ",
-               "This will slow down the sampler slightly.",
-               "\n\n", result, call. = FALSE)
-
+            "greta can handle these as bad proposals if you rerun mcmc() ",
+            "with the argument one_by_one = TRUE. ",
+            "This will slow down the sampler slightly.",
+            "\n\n", result,
+            call. = FALSE
+          )
         }
-
       }
 
       result
-
     },
-
     sampler_parameter_values = function() {
 
       # random number of integration steps
       self$parameters
-
     }
-
   )
 )
 
@@ -772,16 +750,14 @@ hmc_sampler <- R6Class(
   "hmc_sampler",
   inherit = sampler,
   public = list(
-
-    parameters = list(Lmin = 10,
-                      Lmax = 20,
-                      epsilon = 0.005,
-                      diag_sd = 1),
-
+    parameters = list(
+      Lmin = 10,
+      Lmax = 20,
+      epsilon = 0.005,
+      diag_sd = 1
+    ),
     accept_target = 0.651,
-
     define_tf_kernel = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -819,12 +795,11 @@ hmc_sampler <- R6Class(
           target_log_prob_fn = log_prob_fun,
           step_size = hmc_step_sizes,
           num_leapfrog_steps = hmc_l,
-          seed = rng_seed)
+          seed = rng_seed
+        )
       )
       # nolint end
-
     },
-
     sampler_parameter_values = function() {
 
       # random number of integration steps
@@ -836,13 +811,12 @@ hmc_sampler <- R6Class(
       diag_sd <- matrix(self$parameters$diag_sd)
 
       # return named list for replacing tensors
-      list(hmc_l = l,
-           hmc_epsilon = epsilon,
-           hmc_diag_sd = diag_sd)
-
+      list(
+        hmc_l = l,
+        hmc_epsilon = epsilon,
+        hmc_diag_sd = diag_sd
+      )
     }
-
-
   )
 )
 
@@ -850,22 +824,19 @@ rwmh_sampler <- R6Class(
   "rwmh_sampler",
   inherit = sampler,
   public = list(
-
     parameters = list(
       proposal = "normal",
       epsilon = 0.1,
       diag_sd = 1
     ),
-
     accept_target = 0.44,
-
     define_tf_kernel = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
       tfe$rwmh_proposal <- switch(self$parameters$proposal,
-                                  normal = tfp$mcmc$random_walk_normal_fn,
-                                  uniform = tfp$mcmc$random_walk_uniform_fn)
+        normal = tfp$mcmc$random_walk_normal_fn,
+        uniform = tfp$mcmc$random_walk_uniform_fn
+      )
 
       tfe$log_prob_fun <- dag$generate_log_prob_function()
 
@@ -900,22 +871,21 @@ rwmh_sampler <- R6Class(
         sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
           target_log_prob_fn = log_prob_fun,
           new_state_fn = new_state_fn,
-          seed = rng_seed)
+          seed = rng_seed
+        )
       )
       # nolint end
     },
-
     sampler_parameter_values = function() {
-
       epsilon <- self$parameters$epsilon
       diag_sd <- matrix(self$parameters$diag_sd)
 
       # return named list for replacing tensors
-      list(rwmh_epsilon = epsilon,
-           rwmh_diag_sd = diag_sd)
-
+      list(
+        rwmh_epsilon = epsilon,
+        rwmh_diag_sd = diag_sd
+      )
     }
-
   )
 )
 
@@ -923,23 +893,21 @@ slice_sampler <- R6Class(
   "slice_sampler",
   inherit = sampler,
   public = list(
-
     parameters = list(
       max_doublings = NA
     ),
     tuning_interval = Inf,
     uses_metropolis = FALSE,
-
     define_tf_kernel = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
       if (dag$tf_float != "float32") {
         stop("slice sampler can only currently be used for models defined ",
-             "with single precision, set model(..., precision = 'single') ",
-             "instead",
-             call. = FALSE)
+          "with single precision, set model(..., precision = 'single') ",
+          "instead",
+          call. = FALSE
+        )
       }
 
       tfe$log_prob_fun <- dag$generate_log_prob_function()
@@ -954,25 +922,22 @@ slice_sampler <- R6Class(
           target_log_prob_fn = log_prob_fun,
           step_size = fl(1),
           max_doublings = slice_max_doublings,
-          seed = rng_seed)
+          seed = rng_seed
+        )
       )
       # nolint end
     },
-
     sampler_parameter_values = function() {
-
       max_doublings <- as.integer(self$parameters$max_doublings)
 
       # return named list for replacing tensors
       list(slice_max_doublings = max_doublings)
-
     },
 
     # no additional here tuning
     tune = function(iterations_completed, total_iterations) {
 
     }
-
   )
 )
 
@@ -1006,11 +971,11 @@ optimiser <- R6Class(
                           max_iterations,
                           tolerance,
                           adjust) {
-
       super$initialize(initial_values,
-                       model,
-                       parameters = list(),
-                       seed = get_seed())
+        model,
+        parameters = list(),
+        seed = get_seed()
+      )
 
       self$name <- name
       self$method <- method
@@ -1020,20 +985,17 @@ optimiser <- R6Class(
       self$tolerance <- tolerance
       self$adjust <- adjust
 
-      if ("uses_callbacks" %in% names(other_args))
+      if ("uses_callbacks" %in% names(other_args)) {
         self$uses_callbacks <- other_args$uses_callbacks
+      }
 
       self$create_optimiser_objective()
       self$create_tf_minimiser()
-
     },
-
     parameter_names = function() {
       names(self$parameters)
     },
-
     set_dtype = function(parameter_name, dtype) {
-
       params <- self$parameters
       param_names <- self$parameter_names()
 
@@ -1046,12 +1008,10 @@ optimiser <- R6Class(
       }
 
       self$parameters <- params
-
     },
 
     # initialize the variables, then set the ones we care about
     set_inits = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -1060,18 +1020,17 @@ optimiser <- R6Class(
       shape <- tfe$optimiser_free_state$shape
       dag$on_graph(
         tfe$optimiser_init <- tf$constant(self$free_state,
-                                          shape = shape,
-                                          dtype = tf_float())
+          shape = shape,
+          dtype = tf_float()
+        )
       )
 
       . <- dag$tf_sess_run(optimiser_free_state$assign(optimiser_init))
-
     },
 
     # create a separate free state variable and objective, since optimisers must
     # use variables
     create_optimiser_objective = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -1082,46 +1041,39 @@ optimiser <- R6Class(
 
       # use the log prob function to define objectives from the variable
       if (!live_pointer("optimiser_objective_adj", envir = tfe)) {
-
         log_prob_fun <- dag$generate_log_prob_function(which = "both")
         dag$on_graph(objectives <- log_prob_fun(tfe$optimiser_free_state))
 
         assign("optimiser_objective_adj",
-               -objectives$adjusted,
-               envir = tfe)
+          -objectives$adjusted,
+          envir = tfe
+        )
 
         assign("optimiser_objective",
-               -objectives$unadjusted,
-               envir = tfe)
-
+          -objectives$unadjusted,
+          envir = tfe
+        )
       }
-
     },
-
     run = function() {
-
       self$model$dag$build_feed_dict()
       self$set_inits()
       self$run_minimiser()
       self$fetch_free_state()
-
     },
-
     fetch_free_state = function() {
 
       # get the free state as a vector
       self$free_state <- self$model$dag$tf_sess_run(optimiser_free_state)
-
     },
-
     return_outputs = function() {
-
       dag <- self$model$dag
 
       # if the optimiser was ignoring the callbacks, we have no idea about the
       # number of iterations or convergence
-      if (!self$uses_callbacks)
+      if (!self$uses_callbacks) {
         self$it <- NA
+      }
 
       converged <- self$it < (self$max_iterations - 1)
 
@@ -1129,13 +1081,13 @@ optimiser <- R6Class(
       par <- lapply(par, drop_first_dim)
       par <- lapply(par, drop_column_dim)
 
-      list(par = par,
-           value = -dag$tf_sess_run(joint_density),
-           iterations = self$it,
-           convergence = ifelse(converged, 0, 1))
-
+      list(
+        par = par,
+        value = -dag$tf_sess_run(joint_density),
+        iterations = self$it,
+        convergence = ifelse(converged, 0, 1)
+      )
     }
-
   )
 )
 
@@ -1146,51 +1098,49 @@ tf_optimiser <- R6Class(
 
     # some of the optimisers are very fussy about dtypes, so convert them now
     sanitise_dtypes = function() {
-
       self$set_dtype("global_step", tf$int64)
 
-      if (self$name == "proximal_gradient_descent")
+      if (self$name == "proximal_gradient_descent") {
         lapply(self$parameter_names(), self$set_dtype, tf$float64)
-
-      if (self$name == "proximal_adagrad") {
-
-        fussy_params <- c("learning_rate",
-                          "l1_regularization_strength",
-                          "l2_regularization_strength")
-
-        lapply(fussy_params, self$set_dtype, tf$float64)
-
       }
 
+      if (self$name == "proximal_adagrad") {
+        fussy_params <- c(
+          "learning_rate",
+          "l1_regularization_strength",
+          "l2_regularization_strength"
+        )
+
+        lapply(fussy_params, self$set_dtype, tf$float64)
+      }
     },
 
     # create an op to minimise the objective
     create_tf_minimiser = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
       self$sanitise_dtypes()
 
       optimise_fun <- eval(parse(text = self$method))
-      dag$on_graph(tfe$tf_optimiser <- do.call(optimise_fun,
-                                               self$parameters))
+      dag$on_graph(tfe$tf_optimiser <- do.call(
+        optimise_fun,
+        self$parameters
+      ))
 
       if (self$adjust) {
         dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
       } else {
         dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
       }
-
     },
 
     # minimise the objective function
     run_minimiser = function() {
-
       self$set_inits()
 
       while (self$it < self$max_iterations &
-             self$diff > self$tolerance) {
+        self$diff > self$tolerance) {
         self$it <- self$it + 1
         self$model$dag$tf_sess_run(train)
         if (self$adjust) {
@@ -1201,7 +1151,6 @@ tf_optimiser <- R6Class(
         self$diff <- abs(self$old_obj - obj)
         self$old_obj <- obj
       }
-
     }
   )
 )
@@ -1210,9 +1159,7 @@ scipy_optimiser <- R6Class(
   "scipy_optimiser",
   inherit = optimiser,
   public = list(
-
     create_tf_minimiser = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -1224,27 +1171,25 @@ scipy_optimiser <- R6Class(
         loss <- tfe$optimiser_objective
       }
 
-      args <- list(loss = loss,
-                   method = self$method,
-                   options = c(self$parameters,
-                               maxiter = self$max_iterations),
-                   tol = self$tolerance)
+      args <- list(
+        loss = loss,
+        method = self$method,
+        options = c(self$parameters,
+          maxiter = self$max_iterations
+        ),
+        tol = self$tolerance
+      )
 
       dag$on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
-
     },
-
     obj_progress = function(obj) {
       self$diff <- abs(self$old_obj - obj)
       self$old_obj <- obj
     },
-
     it_progress = function(...) {
       self$it <- self$it + 1
     },
-
     run_minimiser = function() {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
       tfe$it_progress <- self$it_progress
@@ -1256,13 +1201,13 @@ scipy_optimiser <- R6Class(
       quietly(
         dag$tf_run(
           tf_optimiser$minimize(sess,
-                                feed_dict = feed_dict,
-                                step_callback = it_progress,
-                                loss_callback = obj_progress,
-                                fetches = list(optimiser_objective_adj))
+            feed_dict = feed_dict,
+            step_callback = it_progress,
+            loss_callback = obj_progress,
+            fetches = list(optimiser_objective_adj)
+          )
         )
       )
-
     }
   )
 )

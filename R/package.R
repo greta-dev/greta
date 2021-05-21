@@ -42,7 +42,7 @@ NULL
 tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 
 # crate the node list object whenever the package is loaded
-.onLoad <- function(libname, pkgname) {  # nolint
+.onLoad <- function(libname, pkgname) { # nolint
 
   if (have_greta_conda_env()) {
     use_greta_conda_env()
@@ -64,5 +64,4 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 
   # default float type
   options(greta_tf_float = "float64")
-
 }

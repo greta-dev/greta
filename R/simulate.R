@@ -46,16 +46,13 @@
 #'
 #' # 100 simulations of y, mu and sd
 #' sims <- simulate(m, nsim = 100)
-#'
 #' }
-# nolint start
-simulate.greta_model <- function(
-  object,
-  nsim = 1,
-  seed = NULL,
-  precision = c("double", "single"),
-  ...
-) {
+#' # nolint start
+simulate.greta_model <- function(object,
+                                 nsim = 1,
+                                 seed = NULL,
+                                 precision = c("double", "single"),
+                                 ...) {
   # nolint end
   # find all the greta arrays in the calling environment
   target_greta_arrays <- all_greta_arrays(parent.frame())
@@ -63,20 +60,23 @@ simulate.greta_model <- function(
   # subset these to only those that are associated with the model
   target_nodes <- lapply(target_greta_arrays, get_node)
   target_node_names <- vapply(target_nodes,
-                              member,
-                              "unique_name",
-                              FUN.VALUE = character(1))
+    member,
+    "unique_name",
+    FUN.VALUE = character(1)
+  )
   object_node_names <- vapply(object$dag$node_list,
-                              member,
-                              "unique_name",
-                              FUN.VALUE = character(1))
+    member,
+    "unique_name",
+    FUN.VALUE = character(1)
+  )
   keep <- target_node_names %in% object_node_names
   target_greta_arrays <- target_greta_arrays[keep]
 
-  other_args <- list(precision = precision,
-                     nsim = nsim,
-                     seed = seed)
+  other_args <- list(
+    precision = precision,
+    nsim = nsim,
+    seed = seed
+  )
 
   do.call(calculate, c(target_greta_arrays, other_args))
-
 }

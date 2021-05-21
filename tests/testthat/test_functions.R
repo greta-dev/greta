@@ -1,7 +1,6 @@
 context("functions")
 
 test_that("simple functions work as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -37,12 +36,10 @@ test_that("simple functions work as expected", {
   # special mathematical functions
   check_op(lgamma, x)
   check_op(digamma, x, tolerance = 1e-2)
-
 })
 
 
 test_that("primitive functions work as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -63,11 +60,9 @@ test_that("primitive functions work as expected", {
   check_op(sinpi, real)
   check_op(tanpi, real, tolerance = 1e-2)
   check_op(trigamma, real, tolerance = 2e-2)
-
 })
 
 test_that("cummax and cummin functions error informatively", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -75,14 +70,14 @@ test_that("cummax and cummin functions error informatively", {
   x <- as_data(randn(10))
 
   for (fun in cumulative_funs) {
-    expect_error(fun(x),
-                 "not yet implemented")
+    expect_error(
+      fun(x),
+      "not yet implemented"
+    )
   }
-
 })
 
 test_that("complex number functions error informatively", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -90,14 +85,14 @@ test_that("complex number functions error informatively", {
   x <- as_data(randn(25, 4))
 
   for (fun in complex_funs) {
-    expect_error(fun(x),
-                 "greta does not yet support complex numbers")
+    expect_error(
+      fun(x),
+      "greta does not yet support complex numbers"
+    )
   }
-
 })
 
 test_that("matrix functions work as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -128,11 +123,9 @@ test_that("matrix functions work as expected", {
   check_op(rdist, b)
   check_op(rdist, b, e)
   check_op(rdist, f, f)
-
 })
 
 test_that("kronecker works with greta and base array arguments", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -151,11 +144,9 @@ test_that("kronecker works with greta and base array arguments", {
 
   compare_op(base_out, grab(greta_out1))
   compare_op(base_out, grab(greta_out2))
-
 })
 
 test_that("aperm works as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -169,11 +160,9 @@ test_that("aperm works as expected", {
   for (perm in perms) {
     check_op(aperm, a, other_args = list(perm = perm))
   }
-
 })
 
 test_that("reducing functions work as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -203,11 +192,9 @@ test_that("reducing functions work as expected", {
   check_expr(rowSums(x, dims = 2))
   check_expr(colMeans(x, dims = 2))
   check_expr(rowMeans(x, dims = 2))
-
 })
 
 test_that("cumulative functions work as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -215,19 +202,20 @@ test_that("cumulative functions work as expected", {
 
   check_op(cumsum, a)
   check_op(cumprod, a)
-
 })
 
 test_that("apply works as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
   # check apply.greta_array works like R's apply for X
-  check_apply <- function(X, MARGIN, FUN) {  # nolint
+  check_apply <- function(X, MARGIN, FUN) { # nolint
     check_op(apply, a,
-             other_args = list(MARGIN = MARGIN,
-                               FUN = FUN))
+      other_args = list(
+        MARGIN = MARGIN,
+        FUN = FUN
+      )
+    )
   }
 
   a <- randu(5, 4, 3, 2, 1)
@@ -245,11 +233,9 @@ test_that("apply works as expected", {
     check_apply(a, margin, "cumsum")
     check_apply(a, margin, "cumprod")
   }
-
 })
 
 test_that("tapply works as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -260,11 +246,9 @@ test_that("tapply works as expected", {
   check_expr(tapply(x, rep(1:5, each = 3), "mean"))
   check_expr(tapply(x, rep(1:5, each = 3), "min"))
   check_expr(tapply(x, rep(1:5, each = 3), "prod"))
-
 })
 
 test_that("cumulative functions error as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -279,11 +263,9 @@ test_that("cumulative functions error as expected", {
 
   expect_error(cumprod(a), a_error)
   expect_error(cumprod(b), b_error)
-
 })
 
 test_that("sweep works as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -292,7 +274,6 @@ test_that("sweep works as expected", {
 
   for (dim in c(1, 2)) {
     for (fun in c("-", "+", "/", "*")) {
-
       stats <- stats_list[[dim]]
 
       r_out <- sweep(x, dim, stats, FUN = fun)
@@ -301,15 +282,11 @@ test_that("sweep works as expected", {
       greta_out <- grab(greta_array)
 
       compare_op(r_out, greta_out)
-
     }
-
   }
-
 })
 
 test_that("sweep works for numeric x and greta array STATS", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -321,11 +298,9 @@ test_that("sweep works for numeric x and greta array STATS", {
   expect_ok(ga_res <- sweep(x, 1, ga_stats, "*"))
   diff <- abs(res - grab(ga_res))
   expect_true(all(diff < 1e-6))
-
 })
 
 test_that("solve and sweep and kronecker error as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -337,73 +312,101 @@ test_that("solve and sweep and kronecker error as expected", {
   # solve
 
   # a must be 2D
-  expect_error(solve(b, a),
-               "'a' and 'b' must both be 2D, but 'a' has dimensions:")
+  expect_error(
+    solve(b, a),
+    "'a' and 'b' must both be 2D, but 'a' has dimensions:"
+  )
 
   # b must also be 2D
-  expect_error(solve(c, b),
-               "'a' and 'b' must both be 2D, but 'b' has dimensions:")
+  expect_error(
+    solve(c, b),
+    "'a' and 'b' must both be 2D, but 'b' has dimensions:"
+  )
 
   # only square matrices allowed for first element
-  expect_error(solve(a, a),
-               "^'a' must be square, but has")
-  expect_error(solve(a),
-               "^'a' must be square, but has")
+  expect_error(
+    solve(a, a),
+    "^'a' must be square, but has"
+  )
+  expect_error(
+    solve(a),
+    "^'a' must be square, but has"
+  )
 
   # dimension of second array must match
-  expect_error(solve(c, t(a)),
-               "^'b' must have the same number of rows as 'a'")
+  expect_error(
+    solve(c, t(a)),
+    "^'b' must have the same number of rows as 'a'"
+  )
 
   # sweep
   # x must be 2D
-  expect_error(sweep(b, 1, stats),
-               "^x must be a 2D array, but has")
+  expect_error(
+    sweep(b, 1, stats),
+    "^x must be a 2D array, but has"
+  )
 
   # dim must be either 1 or 2
-  expect_error(sweep(a, 3, stats),
-               "MARGIN can only be 1 or 2")
+  expect_error(
+    sweep(a, 3, stats),
+    "MARGIN can only be 1 or 2"
+  )
 
   # stats must have the correct number of elements
-  expect_error(sweep(a, 1, c(stats, stats)),
-               "^the number of elements of STATS does not match")
+  expect_error(
+    sweep(a, 1, c(stats, stats)),
+    "^the number of elements of STATS does not match"
+  )
 
   # stats must be a column vector
-  expect_error(sweep(a, 1, t(stats)),
-               "^STATS must be a column vector array, but has dimensions")
+  expect_error(
+    sweep(a, 1, t(stats)),
+    "^STATS must be a column vector array, but has dimensions"
+  )
 
-  expect_error(sweep(a, 2, stats),
-               "^the number of elements of STATS does not match")
+  expect_error(
+    sweep(a, 2, stats),
+    "^the number of elements of STATS does not match"
+  )
 
   # kronecker
   # X must be 2D
-  expect_error(kronecker(a, b),
-               "^Y must be a 2D array, but has . dimensions")
+  expect_error(
+    kronecker(a, b),
+    "^Y must be a 2D array, but has . dimensions"
+  )
 
   # Y must be 2D
-  expect_error(kronecker(b, c),
-               "^X must be a 2D array, but has . dimensions")
-
+  expect_error(
+    kronecker(b, c),
+    "^X must be a 2D array, but has . dimensions"
+  )
 })
 
 test_that("colSums etc. error as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
   x <- as_data(randn(3, 4, 5))
-  expect_error(colSums(x, dims = 3),
-               "invalid 'dims'")
-  expect_error(rowSums(x, dims = 3),
-               "invalid 'dims'")
-  expect_error(colMeans(x, dims = 3),
-               "invalid 'dims'")
-  expect_error(rowMeans(x, dims = 3),
-               "invalid 'dims'")
-
+  expect_error(
+    colSums(x, dims = 3),
+    "invalid 'dims'"
+  )
+  expect_error(
+    rowSums(x, dims = 3),
+    "invalid 'dims'"
+  )
+  expect_error(
+    colMeans(x, dims = 3),
+    "invalid 'dims'"
+  )
+  expect_error(
+    rowMeans(x, dims = 3),
+    "invalid 'dims'"
+  )
 })
 
 test_that("forwardsolve and backsolve error as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -411,20 +414,26 @@ test_that("forwardsolve and backsolve error as expected", {
   b <- as_data(randn(5, 25))
   c <- chol(a)
 
-  expect_error(forwardsolve(a, b, k = 1),
-               "k must equal ncol\\(l\\) for greta arrays")
-  expect_error(backsolve(a, b, k = 1),
-               "k must equal ncol\\(r\\) for greta arrays")
+  expect_error(
+    forwardsolve(a, b, k = 1),
+    "k must equal ncol\\(l\\) for greta arrays"
+  )
+  expect_error(
+    backsolve(a, b, k = 1),
+    "k must equal ncol\\(r\\) for greta arrays"
+  )
 
-  expect_error(forwardsolve(a, b, transpose = TRUE),
-               "transpose must be FALSE for greta arrays")
-  expect_error(backsolve(a, b, transpose = TRUE),
-               "transpose must be FALSE for greta arrays")
-
+  expect_error(
+    forwardsolve(a, b, transpose = TRUE),
+    "transpose must be FALSE for greta arrays"
+  )
+  expect_error(
+    backsolve(a, b, transpose = TRUE),
+    "transpose must be FALSE for greta arrays"
+  )
 })
 
 test_that("tapply errors as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -433,17 +442,19 @@ test_that("tapply errors as expected", {
   b <- ones(10, 2)
 
   # X must be a column vector
-  expect_error(tapply(b, group, "sum"),
-               "X must be 2D greta array with one column")
+  expect_error(
+    tapply(b, group, "sum"),
+    "X must be 2D greta array with one column"
+  )
 
   # INDEX can't be a greta array
-  expect_error(tapply(a, as_data(group), "sum"),
-               "INDEX cannot be a greta array")
-
+  expect_error(
+    tapply(a, as_data(group), "sum"),
+    "INDEX cannot be a greta array"
+  )
 })
 
 test_that("eigen works as expected", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -470,87 +481,113 @@ test_that("eigen works as expected", {
   column_difference <- function(r_column, greta_column) {
     pos <- abs(r_column - greta_column)
     neg <- abs(r_column - (-1 * greta_column))
-    if (sum(pos) < sum(neg))
+    if (sum(pos) < sum(neg)) {
       pos
-    else
+    } else {
       neg
+    }
   }
 
   greta_vectors <- grab(greta_out$vectors)
   difference <- vapply(seq_len(k),
-                       function(i) {
-                         column_difference(r_out$vectors[, i],
-                                           greta_vectors[, i])
-                       },
-                       FUN.VALUE = rep(1, k))
+    function(i) {
+      column_difference(
+        r_out$vectors[, i],
+        greta_vectors[, i]
+      )
+    },
+    FUN.VALUE = rep(1, k)
+  )
 
   expect_true(all(as.vector(difference) < 1e-4))
-
 })
 
 test_that("ignored options are errored/warned about", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
   x <- ones(3, 3)
-  expect_error(round(x, 2),
-               "digits argument cannot be set")
+  expect_error(
+    round(x, 2),
+    "digits argument cannot be set"
+  )
 
-  expect_warning(chol(x, pivot = TRUE),
-                 "ignored for greta arrays")
+  expect_warning(
+    chol(x, pivot = TRUE),
+    "ignored for greta arrays"
+  )
 
-  expect_warning(chol2inv(x, LINPACK = TRUE),
-                 "ignored for greta arrays")
+  expect_warning(
+    chol2inv(x, LINPACK = TRUE),
+    "ignored for greta arrays"
+  )
 
-  expect_warning(chol2inv(x, size = 1),
-                 "ignored for greta arrays")
+  expect_warning(
+    chol2inv(x, size = 1),
+    "ignored for greta arrays"
+  )
 
-  expect_warning(rdist(x, compact = TRUE),
-                 "ignored for greta arrays")
-
+  expect_warning(
+    rdist(x, compact = TRUE),
+    "ignored for greta arrays"
+  )
 })
 
 
 test_that("incorrect dimensions are errored about", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
   x <- ones(3, 3, 3)
   y <- ones(3, 4)
 
-  expect_error(t(x),
-               "only 2D arrays can be transposed")
+  expect_error(
+    t(x),
+    "only 2D arrays can be transposed"
+  )
 
-  expect_error(aperm(x, 2:1),
-               "must be a reordering of the dimensions")
+  expect_error(
+    aperm(x, 2:1),
+    "must be a reordering of the dimensions"
+  )
 
-  expect_error(chol(x),
-               "only two-dimensional, square, symmetric greta arrays")
+  expect_error(
+    chol(x),
+    "only two-dimensional, square, symmetric greta arrays"
+  )
 
-  expect_error(chol(y),
-               "only two-dimensional, square, symmetric greta arrays")
+  expect_error(
+    chol(y),
+    "only two-dimensional, square, symmetric greta arrays"
+  )
 
-  expect_error(chol2symm(x),
-               "only two-dimensional, square, upper-triangular greta arrays")
+  expect_error(
+    chol2symm(x),
+    "only two-dimensional, square, upper-triangular greta arrays"
+  )
 
-  expect_error(chol2symm(y),
-               "only two-dimensional, square, upper-triangular greta arrays")
+  expect_error(
+    chol2symm(y),
+    "only two-dimensional, square, upper-triangular greta arrays"
+  )
 
-  expect_error(eigen(x),
-               "only two-dimensional, square, symmetric greta arrays")
+  expect_error(
+    eigen(x),
+    "only two-dimensional, square, symmetric greta arrays"
+  )
 
-  expect_error(eigen(y),
-               "only two-dimensional, square, symmetric greta arrays")
+  expect_error(
+    eigen(y),
+    "only two-dimensional, square, symmetric greta arrays"
+  )
 
-  expect_error(rdist(x, y),
-               "must have the same number of columns")
-
+  expect_error(
+    rdist(x, y),
+    "must have the same number of columns"
+  )
 })
 
 test_that("chol2symm inverts chol", {
-
   skip_if_not(check_tf_version())
   source("helpers.R")
 
@@ -563,5 +600,4 @@ test_that("chol2symm inverts chol", {
   # check the greta version
   x2 <- calculate(chol2symm(as_data(u)))[[1]]
   expect_equal(x2, x)
-
 })

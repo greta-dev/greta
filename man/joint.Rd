@@ -44,7 +44,8 @@ sd <- normal(0, 3, truncation = c(0, Inf))
 a <- normal(0, 3, truncation = c(0, Inf))
 b <- normal(0, 3, truncation = c(0, Inf))
 distribution(x) <- joint(normal(mu, sd), beta(a, b),
-                         dim = 10)
+  dim = 10
+)
 m <- model(mu, sd, a, b)
 plot(mcmc(m))
 }

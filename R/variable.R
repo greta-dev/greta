@@ -40,19 +40,20 @@
 #'
 #' # create a variable, with lower and upper defined by greta arrays
 #' min <- as_data(iris$Sepal.Length)
-#' max <- min ^ 2
+#' max <- min^2
 #' d <- min + variable(0, 1, dim = nrow(iris)) * (max - min)
 #' }
 variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
-
   check_tf_version("error")
 
-  if (inherits(lower, "greta_array") | inherits(upper, "greta_array"))
-    stop("lower and upper must be fixed, they cannot be another greta array")
+  if (inherits(lower, "greta_array") | inherits(upper, "greta_array")) {
+    stop("lower and upper must be fixed, they cannot be another greta array",
+      call. = FALSE
+    )
+  }
 
   node <- variable_node$new(lower, upper, dim)
   as.greta_array(node)
-
 }
 
 #' @export
@@ -72,36 +73,42 @@ variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
 #' cov <- chol2symm(e_cov)
 #' correl <- chol2symm(e_correl)
 cholesky_variable <- function(dim, correlation = FALSE) {
-
   n_dim <- length(dim)
   if (n_dim == 1) {
     dim <- c(dim, dim)
   } else if (n_dim == 2) {
     if (dim[1] != dim[2]) {
       stop("cholesky variables must be square, but dim was ",
-           paste(dim, collapse = " x "), call. = FALSE)
+        paste(dim, collapse = " x "),
+        call. = FALSE
+      )
     }
   } else {
     stop("dim can either be a scalar or a vector of length 2",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   k <- dim[1]
 
   # dimension of the free state version
   free_dim <- ifelse(correlation,
-                     k * (k - 1) / 2,
-                     k + k * (k - 1) / 2)
+    k * (k - 1) / 2,
+    k + k * (k - 1) / 2
+  )
 
   # create variable node
-  node <- vble(truncation = c(-Inf, Inf),
-               dim = dim,
-               free_dim = free_dim)
+  node <- vble(
+    truncation = c(-Inf, Inf),
+    dim = dim,
+    free_dim = free_dim
+  )
 
   # set the constraint, to enable transformation
   node$constraint <- ifelse(correlation,
-                            "correlation_matrix",
-                            "covariance_matrix")
+    "correlation_matrix",
+    "covariance_matrix"
+  )
 
   # set the printed value to be nicer
   cholesky_value <- unknowns(dim)
@@ -110,7 +117,6 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 
   # reeturn as a greta array
   as.greta_array(node)
-
 }
 
 #' @export
@@ -125,8 +131,9 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 simplex_variable <- function(dim) {
 
   # for scalar dims, return a row vector
-  if (length(dim) == 1)
+  if (length(dim) == 1) {
     dim <- c(1, dim)
+  }
 
   dim <- check_dims(target_dim = dim)
 
@@ -135,8 +142,9 @@ simplex_variable <- function(dim) {
   last_dim <- dim[n_dim]
   if (!last_dim > 1) {
     stop("the final dimension of a simplex variable must have ",
-         "more than one element",
-         call. = FALSE)
+      "more than one element",
+      call. = FALSE
+    )
   }
 
   raw_dim <- dim
@@ -144,16 +152,17 @@ simplex_variable <- function(dim) {
   free_dim <- prod(raw_dim)
 
   # create variable node
-  node <- vble(truncation = c(-Inf, Inf),
-               dim = dim,
-               free_dim = free_dim)
+  node <- vble(
+    truncation = c(-Inf, Inf),
+    dim = dim,
+    free_dim = free_dim
+  )
 
   # set the constraint, to enable transformation
   node$constraint <- "simplex"
 
   # reeturn as a greta array
   as.greta_array(node)
-
 }
 
 #' @export
@@ -168,8 +177,9 @@ simplex_variable <- function(dim) {
 ordered_variable <- function(dim) {
 
   # for scalar dims, return a row vector
-  if (length(dim) == 1)
+  if (length(dim) == 1) {
     dim <- c(1, dim)
+  }
 
   dim <- check_dims(target_dim = dim)
 
@@ -177,8 +187,9 @@ ordered_variable <- function(dim) {
   n_dim <- length(dim)
   if (!dim[n_dim] > 1) {
     stop("the final dimension of an ordered variable must have ",
-         "more than one element",
-         call. = FALSE)
+      "more than one element",
+      call. = FALSE
+    )
   }
 
   # create variable node
@@ -189,5 +200,4 @@ ordered_variable <- function(dim) {
 
   # reeturn as a greta array
   as.greta_array(node)
-
 }

@@ -37,22 +37,26 @@ discrete, and must have the same dimensions.
 # a scalar variable following a strange bimodal distibution
 weights <- uniform(0, 1, dim = 3)
 a <- mixture(normal(-3, 0.5),
-             normal(3, 0.5),
-             normal(0, 3),
-             weights = weights)
+  normal(3, 0.5),
+  normal(0, 3),
+  weights = weights
+)
 m <- model(a)
 plot(mcmc(m, n_samples = 500))
 
 # simulate a mixture of poisson random variables and try to recover the
 # parameters with a Bayesian model
-x <- c(rpois(800, 3),
-       rpois(200, 10))
+x <- c(
+  rpois(800, 3),
+  rpois(200, 10)
+)
 
 weights <- uniform(0, 1, dim = 2)
 rates <- normal(0, 10, truncation = c(0, Inf), dim = 2)
 distribution(x) <- mixture(poisson(rates[1]),
-                           poisson(rates[2]),
-                           weights = weights)
+  poisson(rates[2]),
+  weights = weights
+)
 m <- model(rates)
 draws_rates <- mcmc(m, n_samples = 500)
 
@@ -70,7 +74,8 @@ summary(draws_weights)$statistics[, "Mean"]
 dim <- c(5, 4)
 weights <- uniform(0, 1, dim = c(2, dim))
 b <- mixture(normal(1, 1, dim = dim),
-             normal(-1, 1, dim = dim),
-             weights = weights)
+  normal(-1, 1, dim = dim),
+  weights = weights
+)
 }
 }

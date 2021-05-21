@@ -407,7 +407,7 @@
   "readme": "https://github.com/dill/greta/blob/master/README.md",
   "fileSize": "810.148KB",
   "contIntegration": [
-    "https://travis-ci.org/greta-dev/greta",
+    "https://github.com/greta-dev/greta/actions",
     "https://codecov.io/github/greta-dev/greta?branch=master"
   ],
   "citation": [

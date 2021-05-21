@@ -57,6 +57,6 @@ sims <- simulate(m)
 
 # 100 simulations of y, mu and sd
 sims <- simulate(m, nsim = 100)
-
 }
+# nolint start
 }

@@ -9,8 +9,10 @@ NULL
 # they abort a run
 greta_stash <- new.env()
 
-greta_stash$numerical_messages <- c("is not invertible",
-                                    "Cholesky decomposition was not successful")
+greta_stash$numerical_messages <- c(
+  "is not invertible",
+  "Cholesky decomposition was not successful"
+)
 
 #' @rdname inference
 #' @export
@@ -132,8 +134,9 @@ greta_stash$numerical_messages <- c("is not invertible",
 #'
 #' # you can auto-generate a list of initials with something like this:
 #' inits <- replicate(4,
-#'                    initials(mu = rnorm(1), sigma = runif(1)),
-#'                    simplify = FALSE)
+#'   initials(mu = rnorm(1), sigma = runif(1)),
+#'   simplify = FALSE
+#' )
 #' draws <- mcmc(m, chains = 4, initial_values = inits)
 #'
 #' # or find the MAP estimate
@@ -152,8 +155,8 @@ greta_stash$numerical_messages <- c("is not invertible",
 #' # the MLE corresponds to the *unadjusted* sample variance, but differs
 #' # from the sample variance
 #' o$par
-#' mean((x - mean(x)) ^ 2)  # same
-#' var(x)  # different
+#' mean((x - mean(x))^2) # same
+#' var(x) # different
 #'
 #' # initial values can also be passed to optimisers:
 #' o <- opt(m2, initial_values = initials(variance = 1))
@@ -196,21 +199,24 @@ mcmc <- function(model,
 
   # check they're not data nodes, provide a useful error message if they are
   are_data <- vapply(target_greta_arrays,
-                     function(x) inherits(get_node(x), "data_node"),
-                     FUN.VALUE = FALSE)
+    function(x) inherits(get_node(x), "data_node"),
+    FUN.VALUE = FALSE
+  )
 
   if (any(are_data)) {
-
     is_are <- ifelse(sum(are_data) == 1,
-                     "is a data greta array",
-                     "are data greta arrays")
+      "is a data greta array",
+      "are data greta arrays"
+    )
     bad_greta_arrays <- paste(names[are_data],
-                              collapse = ", ")
-    msg <- sprintf("%s %s, data greta arrays cannot be sampled",
-                   bad_greta_arrays,
-                   is_are)
+      collapse = ", "
+    )
+    msg <- sprintf(
+      "%s %s, data greta arrays cannot be sampled",
+      bad_greta_arrays,
+      is_are
+    )
     stop(msg, call. = FALSE)
-
   }
 
   # get the dag containing the target nodes
@@ -228,7 +234,8 @@ mcmc <- function(model,
 
   # divide chains up between the workers
   chain_assignment <- sort(rep(seq_len(max_samplers),
-                               length.out = chains))
+    length.out = chains
+  ))
 
   # divide the initial values between them
   initial_values_split <- split(initial_values, chain_assignment)
@@ -237,10 +244,12 @@ mcmc <- function(model,
 
   # create a sampler object for each parallel job, using these (possibly NULL)
   # initial values
-  samplers <- lapply(initial_values_split,
-                     build_sampler,
-                     sampler,
-                     model)
+  samplers <- lapply(
+    initial_values_split,
+    build_sampler,
+    sampler,
+    model
+  )
 
   # add chain info for printing
   for (i in seq_len(n_samplers)) {
@@ -257,17 +266,18 @@ mcmc <- function(model,
   pb_update <- min(pb_update, max(warmup, n_samples))
   pb_update <- max(pb_update, thin + 1)
 
-  run_samplers(samplers = samplers,
-               n_samples = n_samples,
-               thin = thin,
-               warmup = warmup,
-               verbose = verbose,
-               pb_update = pb_update,
-               one_by_one = one_by_one,
-               n_cores = n_cores,
-               from_scratch = TRUE,
-               trace_batch_size = trace_batch_size)
-
+  run_samplers(
+    samplers = samplers,
+    n_samples = n_samples,
+    thin = thin,
+    warmup = warmup,
+    verbose = verbose,
+    pb_update = pb_update,
+    one_by_one = one_by_one,
+    n_cores = n_cores,
+    from_scratch = TRUE,
+    trace_batch_size = trace_batch_size
+  )
 }
 
 #' @importFrom future future resolved value
@@ -305,21 +315,27 @@ run_samplers <- function(samplers,
 
   if (plan_is$parallel & plan_is$local & length(samplers) > 1) {
     cores_text <- ifelse(n_cores == 1,
-                         "1 core",
-                         sprintf("up to %i cores", n_cores))
-    msg <- sprintf("\nrunning %i samplers in parallel, each on %s\n\n",
-                   length(samplers),
-                   cores_text)
+      "1 core",
+      sprintf("up to %i cores", n_cores)
+    )
+    msg <- sprintf(
+      "\nrunning %i samplers in parallel, each on %s\n\n",
+      length(samplers),
+      cores_text
+    )
     message(msg, appendLF = FALSE)
   }
 
   if (plan_is$parallel & !plan_is$local) {
     sampler_text <- ifelse(length(samplers) > 1,
-                           "samplers on remote machines",
-                           "sampler on a remote machine")
-    msg <- sprintf("\nrunning %i %s\n\n",
-                   length(samplers),
-                   sampler_text)
+      "samplers on remote machines",
+      "sampler on a remote machine"
+    )
+    msg <- sprintf(
+      "\nrunning %i %s\n\n",
+      length(samplers),
+      sampler_text
+    )
     message(msg, appendLF = FALSE)
   }
 
@@ -327,17 +343,17 @@ run_samplers <- function(samplers,
   chains <- seq_len(n_chain)
 
   # determine the type of progress information
-  if (bar_width(n_chain) < 42)
+  if (bar_width(n_chain) < 42) {
     progress_callback <- percentages
-  else
+  } else {
     progress_callback <- progress_bars
+  }
 
   greta_stash$callbacks$parallel_progress <- progress_callback
 
   # if we're running in parallel and there are callbacks registered,
   # give the samplers somewhere to write their progress
   if (parallel_reporting) {
-
     trace_log_files <- replicate(n_chain, create_log_file())
     percentage_log_files <- replicate(n_chain, create_log_file(TRUE))
     progress_bar_log_files <- replicate(n_chain, create_log_file(TRUE))
@@ -353,14 +369,12 @@ run_samplers <- function(samplers,
 
       # set the progress bar widths for writing
       sampler$pb_width <- pb_width
-
     }
 
     greta_stash$trace_log_files <- trace_log_files
     greta_stash$percentage_log_files <- percentage_log_files
     greta_stash$progress_bar_log_files <- progress_bar_log_files
     greta_stash$mcmc_info <- list(n_samples = n_samples)
-
   }
 
   if (plan_is$parallel) {
@@ -373,37 +387,38 @@ run_samplers <- function(samplers,
   for (chain in chains) {
     sampler <- samplers[[chain]]
     samplers[[chain]] <- dispatch(
-      sampler$run_chain(n_samples = n_samples,
-                        thin = thin,
-                        warmup = warmup,
-                        verbose = verbose,
-                        pb_update = pb_update,
-                        one_by_one = one_by_one,
-                        plan_is = plan_is,
-                        n_cores = n_cores,
-                        float_type = float_type,
-                        trace_batch_size = trace_batch_size,
-                        from_scratch = from_scratch),
-      seed = future_seed())
+      sampler$run_chain(
+        n_samples = n_samples,
+        thin = thin,
+        warmup = warmup,
+        verbose = verbose,
+        pb_update = pb_update,
+        one_by_one = one_by_one,
+        plan_is = plan_is,
+        n_cores = n_cores,
+        float_type = float_type,
+        trace_batch_size = trace_batch_size,
+        from_scratch = from_scratch
+      ),
+      seed = future_seed()
+    )
   }
 
   # if we're non-sequential and there's a callback registered,
   # loop until they are resolved, executing the callbacks
   if (parallel_reporting) {
-
     while (!all(vapply(samplers, resolved, FALSE))) {
 
       # loop through callbacks executing them
-      for (callback in greta_stash$callbacks)
+      for (callback in greta_stash$callbacks) {
         callback()
+      }
 
       # get some nap time
       Sys.sleep(0.1)
-
     }
 
     cat("\n")
-
   }
 
 
@@ -421,7 +436,6 @@ run_samplers <- function(samplers,
   rm("samplers", envir = greta_stash)
 
   draws
-
 }
 
 #' @rdname inference
@@ -434,11 +448,9 @@ run_samplers <- function(samplers,
 #'   retrieved with `stashed_samples()`. Only samples from the sampling
 #'   phase will be returned.
 stashed_samples <- function() {
-
   stashed <- exists("samplers", envir = greta_stash)
 
   if (stashed) {
-
     samplers <- greta_stash$samplers
 
     trace_names <- samplers[[1]]$model$dag$trace_names
@@ -456,22 +468,21 @@ stashed_samples <- function() {
 
     # if there are no samples, return a list of NULLs
     if (nrow(values_draws[[1]]) == 0) {
-
       return(replicate(length(samplers), NULL))
-
     } else {
-
       thins <- lapply(samplers, member, "thin")
 
       # convert to mcmc objects, passing on thinning
       free_state_draws <- mapply(prepare_draws,
-                                 draws = free_state_draws,
-                                 thin = thins,
-                                 SIMPLIFY = FALSE)
+        draws = free_state_draws,
+        thin = thins,
+        SIMPLIFY = FALSE
+      )
       values_draws <- mapply(prepare_draws,
-                             draws = values_draws,
-                             thin = thins,
-                             SIMPLIFY = FALSE)
+        draws = values_draws,
+        thin = thins,
+        SIMPLIFY = FALSE
+      )
 
       # convert to mcmc.list objects
       free_state_draws <- coda::mcmc.list(free_state_draws)
@@ -487,15 +498,10 @@ stashed_samples <- function() {
       values_draws <- as_greta_mcmc_list(values_draws, model_info)
 
       return(values_draws)
-
     }
-
   } else {
-
     return(invisible())
-
   }
-
 }
 
 #' @rdname inference
@@ -519,7 +525,6 @@ extra_samples <- function(draws,
                           pb_update = 50,
                           one_by_one = FALSE,
                           trace_batch_size = 100) {
-
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
 
@@ -531,17 +536,18 @@ extra_samples <- function(draws,
     sampler$free_state <- do.call(rbind, free_state_draws)
   }
 
-  run_samplers(samplers = samplers,
-               n_samples = n_samples,
-               thin = thin,
-               warmup = 0L,
-               verbose = verbose,
-               pb_update = pb_update,
-               one_by_one = one_by_one,
-               n_cores = n_cores,
-               from_scratch = FALSE,
-               trace_batch_size = trace_batch_size)
-
+  run_samplers(
+    samplers = samplers,
+    n_samples = n_samples,
+    thin = thin,
+    warmup = 0L,
+    verbose = verbose,
+    pb_update = pb_update,
+    one_by_one = one_by_one,
+    n_cores = n_cores,
+    from_scratch = FALSE,
+    trace_batch_size = trace_batch_size
+  )
 }
 
 # convert some 'data' values from the constrained to the free state, for a given
@@ -556,36 +562,40 @@ to_free <- function(node, data) {
 
   unsupported_error <- function() {
     stop("some provided initial values are outside the range of values ",
-         "their variables can take",
-         call. = FALSE)
+      "their variables can take",
+      call. = FALSE
+    )
   }
 
   high <- function(x) {
-    if (any(x <= lower))
+    if (any(x <= lower)) {
       unsupported_error()
+    }
     log(x - lower)
   }
 
   low <- function(x) {
-    if (any(x >= upper))
+    if (any(x >= upper)) {
       unsupported_error()
+    }
     log(upper - x)
   }
 
   both <- function(x) {
-    if (any(x >= upper | x <= lower))
+    if (any(x >= upper | x <= lower)) {
       unsupported_error()
+    }
     stats::qlogis((x - lower) / (upper - lower))
   }
 
   fun <- switch(node$constraint,
-                scalar_all_none = identity,
-                scalar_all_high = high,
-                scalar_all_low = low,
-                scalar_all_both = both)
+    scalar_all_none = identity,
+    scalar_all_high = high,
+    scalar_all_low = low,
+    scalar_all_both = both
+  )
 
   fun(data)
-
 }
 
 # convert a named list of initial values into the corresponding vector of values
@@ -594,30 +604,30 @@ parse_initial_values <- function(initials, dag) {
 
   # skip if no inits provided
   if (identical(initials, initials())) {
-
     free_parameters <- dag$example_parameters(free = TRUE)
     free_parameters <- unlist_tf(free_parameters)
     return(free_parameters)
-
   }
 
   # find the elements we have been given initial values for
   tf_names <- vapply(names(initials),
-                     function(name, env) {
-                       ga <- get(name, envir = env)
-                       node <- get_node(ga)
-                       dag$tf_name(node)
-                     },
-                     env = parent.frame(4),
-                     FUN.VALUE = "")
+    function(name, env) {
+      ga <- get(name, envir = env)
+      node <- get_node(ga)
+      dag$tf_name(node)
+    },
+    env = parent.frame(4),
+    FUN.VALUE = ""
+  )
 
   missing_names <- is.na(tf_names)
   if (any(missing_names)) {
     bad <- names(tf_names)[missing_names]
     stop("some greta arrays passed to initials() ",
-         "are not associated with the model: ",
-         paste(bad, collapse = ", "),
-         call. = FALSE)
+      "are not associated with the model: ",
+      paste(bad, collapse = ", "),
+      call. = FALSE
+    )
   }
 
   params <- dag$example_parameters(free = FALSE)
@@ -637,7 +647,8 @@ parse_initial_values <- function(initials, dag) {
 
   if (!all(are_variables)) {
     stop("initial values can only be set for variable greta arrays",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   target_dims <- lapply(params[idx], dim)
@@ -646,8 +657,9 @@ parse_initial_values <- function(initials, dag) {
 
   if (!all(same_dims)) {
     stop("the initial values provided have different dimensions ",
-         "than the named greta arrays",
-         call. = FALSE)
+      "than the named greta arrays",
+      call. = FALSE
+    )
   }
 
   # convert the initial values to their free states
@@ -660,7 +672,6 @@ parse_initial_values <- function(initials, dag) {
   # force them to be row vectors and return
   params <- matrix(params, nrow = 1)
   params
-
 }
 
 # convert (possibly NULL) user-specified initial values into a list of the
@@ -670,64 +681,60 @@ prep_initials <- function(initial_values, n_chains, dag) {
   # if the user passed a single set of initial values, repeat them for all
   # chains
   if (inherits(initial_values, "initials")) {
-
     is_blank <- identical(initial_values, initials())
 
     if (!is_blank & n_chains > 1) {
-      message("only one set of initial values was provided, and was ",
-              "used for all chains")
+      message(
+        "only one set of initial values was provided, and was ",
+        "used for all chains"
+      )
     }
 
     initial_values <- replicate(n_chains,
-                                initial_values,
-                                simplify = FALSE)
-
+      initial_values,
+      simplify = FALSE
+    )
   } else if (is.list(initial_values)) {
 
     # if the user provided a list of initial values, check elements and the
     # length
     are_initials <- vapply(initial_values, inherits, "initials",
-                           FUN.VALUE = FALSE)
+      FUN.VALUE = FALSE
+    )
 
     if (all(are_initials)) {
-
       n_sets <- length(initial_values)
 
       if (n_sets != n_chains) {
         stop(n_sets, " sets of initial values were provided, but there ",
-             ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
-             ifelse(n_chains > 1, "s", ""),
-             call. = FALSE)
+          ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
+          ifelse(n_chains > 1, "s", ""),
+          call. = FALSE
+        )
       }
-
     } else {
-
       initial_values <- NULL
-
     }
-
   } else {
-
     initial_values <- NULL
-
   }
 
   # error on a bad object
   if (is.null(initial_values)) {
-
     stop("initial_values must be an initials object created with initials(), ",
-         "or a simple list of initials objects",
-         call. = FALSE)
-
+      "or a simple list of initials objects",
+      call. = FALSE
+    )
   }
 
   # convert them to free state vectors
-  initial_values <- lapply(initial_values,
-                           parse_initial_values,
-                           dag)
+  initial_values <- lapply(
+    initial_values,
+    parse_initial_values,
+    dag
+  )
 
   initial_values
-
 }
 
 #' @rdname inference
@@ -737,13 +744,13 @@ prep_initials <- function(initial_values, n_chains, dag) {
 #'   initialised)
 #'
 initials <- function(...) {
-
   values <- list(...)
   names <- names(values)
 
   if (length(names) != length(values)) {
     stop("all initial values must be named",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # coerce to greta-array-like shape
@@ -752,7 +759,8 @@ initials <- function(...) {
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
     stop("initial values must be numeric",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   class(values) <- c("initials", class(values))
@@ -761,20 +769,14 @@ initials <- function(...) {
 
 #' @export
 print.initials <- function(x, ...) {
-
   if (identical(x, initials())) {
-
     cat("an empty greta initials object")
-
   } else {
-
     cat("a greta initials object with values:\n\n")
     print(unclass(x))
-
   }
 
   invisible(x)
-
 }
 
 #' @rdname inference
@@ -830,15 +832,17 @@ opt <- function(model,
   initial_values_list <- prep_initials(initial_values, 1, model$dag)
 
   # create R6 object of the right type
-  object <- optimiser$class$new(initial_values = initial_values_list[1],
-                                model = model,
-                                name = optimiser$name,
-                                method = optimiser$method,
-                                parameters = optimiser$parameters,
-                                other_args = optimiser$other_args,
-                                max_iterations = max_iterations,
-                                tolerance = tolerance,
-                                adjust = adjust)
+  object <- optimiser$class$new(
+    initial_values = initial_values_list[1],
+    model = model,
+    name = optimiser$name,
+    method = optimiser$method,
+    parameters = optimiser$parameters,
+    other_args = optimiser$other_args,
+    max_iterations = max_iterations,
+    tolerance = tolerance,
+    adjust = adjust
+  )
 
   # run it and get the outputs
   object$run()
@@ -853,8 +857,8 @@ opt <- function(model,
   }
 
   outputs
-
 }
 
 inference_module <- module(dag_class,
-                           progress_bar = progress_bar_module)
+  progress_bar = progress_bar_module
+)

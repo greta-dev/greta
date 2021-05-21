@@ -30,16 +30,19 @@ converted if they contain missing (\code{NA}) or infinite (\code{-Inf} or
 vec <- rnorm(10)
 mat <- matrix(seq_len(3 * 4), nrow = 3)
 arr <- array(sample(c(TRUE, FALSE), 2 * 2 * 2, replace = TRUE),
-             dim = c(2, 2, 2))
+  dim = c(2, 2, 2)
+)
 (a <- as_data(vec))
 (b <- as_data(mat))
 (c <- as_data(arr))
 
 # dataframes can also be coerced, provided all the columns are numeric,
 # integer or logical
-df <- data.frame(x1 = rnorm(10),
-                 x2 = sample(1L:10L),
-                 x3 = sample(c(TRUE, FALSE), 10, replace = TRUE))
+df <- data.frame(
+  x1 = rnorm(10),
+  x2 = sample(1L:10L),
+  x3 = sample(c(TRUE, FALSE), 10, replace = TRUE)
+)
 (d <- as_data(df))
 }
 }

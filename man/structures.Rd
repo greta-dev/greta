@@ -56,4 +56,5 @@ z <- greta_array(pi, dim = c(2, 4))
 # a 3x3x3 greta array filled with 1, 2, and 3
 z <- greta_array(1:3, dim = c(3, 3, 3))
 }
+
 }
