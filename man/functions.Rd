@@ -121,6 +121,6 @@ d <- abs(x - 5)
 
 z <- t(a)
 
-y <- sweep(x, 1, e, '-')
+y <- sweep(x, 1, e, "-")
 }
 }

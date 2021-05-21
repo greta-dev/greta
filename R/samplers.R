@@ -31,14 +31,17 @@ hmc <- function(Lmin = 5,
                 epsilon = 0.1,
                 diag_sd = 1) {
   # nolint end
-  obj <- list(parameters = list(Lmin = Lmin,
-                                Lmax = Lmax,
-                                epsilon = epsilon,
-                                diag_sd = diag_sd),
-              class = hmc_sampler)
+  obj <- list(
+    parameters = list(
+      Lmin = Lmin,
+      Lmax = Lmax,
+      epsilon = epsilon,
+      diag_sd = diag_sd
+    ),
+    class = hmc_sampler
+  )
   class(obj) <- c("hmc sampler", "sampler")
   obj
-
 }
 
 #' @rdname samplers
@@ -55,13 +58,16 @@ hmc <- function(Lmin = 5,
 rwmh <- function(proposal = c("normal", "uniform"),
                  epsilon = 0.1,
                  diag_sd = 1) {
-
   proposal <- match.arg(proposal)
 
-  obj <- list(parameters = list(proposal = proposal,
-                                epsilon = epsilon,
-                                diag_sd = diag_sd),
-              class = rwmh_sampler)
+  obj <- list(
+    parameters = list(
+      proposal = proposal,
+      epsilon = epsilon,
+      diag_sd = diag_sd
+    ),
+    class = rwmh_sampler
+  )
   class(obj) <- c("rwmh sampler", "sampler")
   obj
 }
@@ -78,8 +84,10 @@ rwmh <- function(proposal = c("normal", "uniform"),
 #'
 #' @export
 slice <- function(max_doublings = 5) {
-  obj <- list(parameters = list(max_doublings = as.integer(max_doublings)[1]),
-              class = slice_sampler)
+  obj <- list(
+    parameters = list(max_doublings = as.integer(max_doublings)[1]),
+    class = slice_sampler
+  )
   class(obj) <- c("slice sampler", "sampler")
   obj
 }
@@ -87,20 +95,24 @@ slice <- function(max_doublings = 5) {
 #' @noRd
 #' @export
 print.sampler <- function(x, ...) {
-
   values_text <- paste(names(x$parameters),
-                       prettyNum(x$parameters),
-                       sep = " = ",
-                       collapse = ", ")
+    prettyNum(x$parameters),
+    sep = " = ",
+    collapse = ", "
+  )
 
   if (!nzchar(values_text)) values_text <- "None"
 
-  parameters_text <- sprintf("parameters:\n  %s",
-                             values_text)
+  parameters_text <- sprintf(
+    "parameters:\n  %s",
+    values_text
+  )
 
-  msg <- sprintf("%s object with %s",
-                 class(x)[1],
-                 parameters_text)
+  msg <- sprintf(
+    "%s object with %s",
+    class(x)[1],
+    parameters_text
+  )
 
   cat(msg)
 }

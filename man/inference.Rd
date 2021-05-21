@@ -238,8 +238,9 @@ draws <- mcmc(m, chains = 2, initial_values = inits)
 
 # you can auto-generate a list of initials with something like this:
 inits <- replicate(4,
-                   initials(mu = rnorm(1), sigma = runif(1)),
-                   simplify = FALSE)
+  initials(mu = rnorm(1), sigma = runif(1)),
+  simplify = FALSE
+)
 draws <- mcmc(m, chains = 4, initial_values = inits)
 
 # or find the MAP estimate
@@ -258,8 +259,8 @@ o <- opt(m2, adjust = FALSE)
 # the MLE corresponds to the *unadjusted* sample variance, but differs
 # from the sample variance
 o$par
-mean((x - mean(x)) ^ 2)  # same
-var(x)  # different
+mean((x - mean(x))^2) # same
+var(x) # different
 
 # initial values can also be passed to optimisers:
 o <- opt(m2, initial_values = initials(variance = 1))

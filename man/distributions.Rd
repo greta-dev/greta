@@ -244,6 +244,5 @@ dim(theta)
 
 # a Wishart variable with the same covariance parameter
 theta <- wishart(df = 5, Sigma = Sig)
-
 }
 }

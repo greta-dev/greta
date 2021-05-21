@@ -5,7 +5,6 @@
 ^.github$
 ^.netlify$
 ^.lintr$
-^.travis.yml$
 
 ^README\.md$
 ^CRAN-RELEASE$

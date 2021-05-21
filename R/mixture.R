@@ -30,22 +30,26 @@
 #' # a scalar variable following a strange bimodal distibution
 #' weights <- uniform(0, 1, dim = 3)
 #' a <- mixture(normal(-3, 0.5),
-#'              normal(3, 0.5),
-#'              normal(0, 3),
-#'              weights = weights)
+#'   normal(3, 0.5),
+#'   normal(0, 3),
+#'   weights = weights
+#' )
 #' m <- model(a)
 #' plot(mcmc(m, n_samples = 500))
 #'
 #' # simulate a mixture of poisson random variables and try to recover the
 #' # parameters with a Bayesian model
-#' x <- c(rpois(800, 3),
-#'        rpois(200, 10))
+#' x <- c(
+#'   rpois(800, 3),
+#'   rpois(200, 10)
+#' )
 #'
 #' weights <- uniform(0, 1, dim = 2)
 #' rates <- normal(0, 10, truncation = c(0, Inf), dim = 2)
 #' distribution(x) <- mixture(poisson(rates[1]),
-#'                            poisson(rates[2]),
-#'                            weights = weights)
+#'   poisson(rates[2]),
+#'   weights = weights
+#' )
 #' m <- model(rates)
 #' draws_rates <- mcmc(m, n_samples = 500)
 #'
@@ -63,26 +67,26 @@
 #' dim <- c(5, 4)
 #' weights <- uniform(0, 1, dim = c(2, dim))
 #' b <- mixture(normal(1, 1, dim = dim),
-#'              normal(-1, 1, dim = dim),
-#'              weights = weights)
+#'   normal(-1, 1, dim = dim),
+#'   weights = weights
+#' )
 #' }
-mixture <- function(..., weights, dim = NULL)
+mixture <- function(..., weights, dim = NULL) {
   distrib("mixture", list(...), weights, dim)
+}
 
 mixture_distribution <- R6Class(
   "mixture_distribution",
   inherit = distribution_node,
   public = list(
-
     weights_is_log = FALSE,
-
     initialize = function(dots, weights, dim) {
-
       n_distributions <- length(dots)
 
       if (n_distributions < 2) {
         stop("mixture must be passed at least two distributions",
-             call. = FALSE)
+          call. = FALSE
+        )
       }
 
       # check the dimensions of the variables in dots
@@ -100,9 +104,10 @@ mixture_distribution <- R6Class(
       # weights should have n_distributions as the first dimension
       if (weights_dim[1] != n_distributions) {
         stop("the first dimension of weights must be the number of ",
-             "distributions in the mixture (", n_distributions, "), ",
-             "but was ", weights_dim[1],
-             call. = FALSE)
+          "distributions in the mixture (", n_distributions, "), ",
+          "but was ", weights_dim[1],
+          call. = FALSE
+        )
       }
 
       # drop a trailing 1 from dim, so user doesn't need to deal with it
@@ -119,9 +124,10 @@ mixture_distribution <- R6Class(
       dim_same <- all(w_dim == weights_extra_dim)
       if (!(dim_1 | dim_same)) {
         stop("the dimension of weights must be either ", n_distributions,
-             " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
-             " but was ", paste(weights_dim, collapse = " x "),
-             call. = FALSE)
+          " x 1 or ", n_distributions, " x ", paste(dim, collapse = " x "),
+          " but was ", paste(weights_dim, collapse = " x "),
+          call. = FALSE
+        )
       }
 
       dot_nodes <- lapply(dots, get_node)
@@ -138,20 +144,23 @@ mixture_distribution <- R6Class(
 
       if (!all(discrete) & !all(!discrete)) {
         stop("cannot construct a mixture from a combination of discrete ",
-             "and continuous distributions",
-             call. = FALSE)
+          "and continuous distributions",
+          call. = FALSE
+        )
       }
 
       # check the distributions are all either multivariate or univariate
       multivariate <- vapply(distribs,
-                             member,
-                             "multivariate",
-                             FUN.VALUE = logical(1))
+        member,
+        "multivariate",
+        FUN.VALUE = logical(1)
+      )
 
       if (!all(multivariate) & !all(!multivariate)) {
         stop("cannot construct a mixture from a combination of multivariate ",
-             "and univariate distributions",
-             call. = FALSE)
+          "and univariate distributions",
+          call. = FALSE
+        )
       }
 
       # ensure the support and bounds of each of the distributions is the same
@@ -171,13 +180,16 @@ mixture_distribution <- R6Class(
           FUN.VALUE = character(1)
         )
         stop("component distributions have different support: ",
-              paste(supports_text, collapse = " vs. "),
-             call. = FALSE)
+          paste(supports_text, collapse = " vs. "),
+          call. = FALSE
+        )
       }
 
       # get the maximal bounds for all component distributions
-      bounds <- c(do.call(min, bounds),
-                 do.call(max, bounds))
+      bounds <- c(
+        do.call(min, bounds),
+        do.call(max, bounds)
+      )
 
       # if the support is smaller than this, treat the distribution as truncated
       support <- supports[[1]]
@@ -191,23 +203,23 @@ mixture_distribution <- R6Class(
 
       # for any discrete ones, tell them they are fixed
       super$initialize("mixture",
-                       dim,
-                       discrete = discrete[1],
-                       multivariate = multivariate[1])
+        dim,
+        discrete = discrete[1],
+        multivariate = multivariate[1]
+      )
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
-                           paste("distribution", i),
-                           shape_matches_output = FALSE)
+          paste("distribution", i),
+          shape_matches_output = FALSE
+        )
       }
 
       self$add_parameter(weights, "weights")
     },
-
     create_target = function(truncation) {
       vble(self$bounds, dim = self$dim)
     },
-
     tf_distrib = function(parameters, dag) {
 
       # get information from the *nodes* for component distributions, not the tf
@@ -281,12 +293,10 @@ mixture_distribution <- R6Class(
         log_weights <- tf$squeeze(log_weights, 2L)
 
         if (!self$multivariate) {
-
           for (i in seq_len(ndim)) {
             log_weights <- tf$expand_dims(log_weights, 1L)
           }
           log_weights <- tf$tile(log_weights, c(1L, self$dim, 1L))
-
         }
 
         # for each observation, select a random component to sample from
@@ -305,19 +315,17 @@ mixture_distribution <- R6Class(
         # extract the relevant component
         indices <- tf$expand_dims(indices, n_batches)
         draws <- tf$gather(samples_array,
-                           indices,
-                           axis = collapse_axis,
-                           batch_dims = n_batches)
+          indices,
+          axis = collapse_axis,
+          batch_dims = n_batches
+        )
         draws <- tf$squeeze(draws, collapse_axis)
 
         draws
-
       }
 
       list(log_prob = log_prob, sample = sample)
-
     }
-
   )
 )
 

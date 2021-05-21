@@ -41,16 +41,20 @@
 #' `op()`, `vble()` and `distrib()` directly.
 NULL
 
-nodes_module <- module(constructors = node_constructors_module,
-                       node_classes = node_classes_module,
-                       distribution_classes = distribution_classes_module,
-                       mixture_classes = mixture_module,
-                       joint_classes = joint_module)
+nodes_module <- module(
+  constructors = node_constructors_module,
+  node_classes = node_classes_module,
+  distribution_classes = distribution_classes_module,
+  mixture_classes = mixture_module,
+  joint_classes = joint_module
+)
 
 #' @export
-.internals <- module(greta_arrays = greta_array_module,
-                     nodes = nodes_module,
-                     inference = inference_module,
-                     tensors = tf_functions_module,
-                     utils = utilities_module,
-                     greta_stash)
+.internals <- module(
+  greta_arrays = greta_array_module,
+  nodes = nodes_module,
+  inference = inference_module,
+  tensors = tf_functions_module,
+  utils = utilities_module,
+  greta_stash
+)

@@ -7,7 +7,6 @@ as_greta_mcmc_list <- function(x, model_info) {
   attr(x, "model_info") <- model_info
   class(x) <- c("greta_mcmc_list", class(x))
   x
-
 }
 
 # nolint start

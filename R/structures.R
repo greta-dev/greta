@@ -35,7 +35,7 @@
 #' # a 3x3x3 greta array filled with 1, 2, and 3
 #' z <- greta_array(1:3, dim = c(3, 3, 3))
 #' }
-
+#'
 NULL
 
 #' @export
@@ -56,8 +56,9 @@ ones <- function(...) {
 
 #' @export
 #' @rdname structures
-greta_array <- function(data = 0, dim = length(data))
+greta_array <- function(data = 0, dim = length(data)) {
   UseMethod("greta_array")
+}
 
 
 # safely handle self-coersion, possibly with reshaping
@@ -66,15 +67,15 @@ greta_array.greta_array <- function(data = 0, dim = length(data)) {
 
   # reshape if necessary (apparently users expect this functionality)
   dim <- as.integer(dim)
-  if (length(dim) == 1)
+  if (length(dim) == 1) {
     dim <- c(dim, 1L)
+  }
 
   if (!identical(dim, dim(data))) {
     dim(data) <- dim
   }
 
   data
-
 }
 
 # else try to coerce to a greta array
