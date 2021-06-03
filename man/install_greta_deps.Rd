@@ -18,7 +18,7 @@ virtual or conda environment, named "greta-env". Note that "virtualenv" is
 not available on Windows.
 }
 \note{
-This willl automatically install Miniconda (a minimal version of the
+This will automatically install Miniconda (a minimal version of the
 Anaconda scientific software management system), create a 'conda' environment
 for greta named 'greta-env' with required python and python package versions,
 and forcibly switch over to using that conda environment. There should be no

@@ -109,6 +109,8 @@ jobs:
         run: |
           echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
 
+#  Perhaps here is where we can install / change the environment that we are
+# installing into? Can we call our own greta install functions here?
       - name: Install TensorFlow
         run: |
           reticulate::conda_create('r-reticulate', packages = c('python==3.7'))

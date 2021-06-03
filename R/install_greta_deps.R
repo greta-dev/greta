@@ -6,7 +6,7 @@
 #'   virtual or conda environment, named "greta-env". Note that "virtualenv" is
 #'   not available on Windows.
 #'
-#' @note This willl automatically install Miniconda (a minimal version of the
+#' @note This will automatically install Miniconda (a minimal version of the
 #' Anaconda scientific software management system), create a 'conda' environment
 #' for greta named 'greta-env' with required python and python package versions,
 #' and forcibly switch over to using that conda environment. There should be no
@@ -30,11 +30,13 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
 
   # install miniconda if needed
   if (!have_conda()) {
+    # perhaps add something here to only do this interactively and add a
+    # prompt?
     message("\nNo miniconda detected, installing miniconda\n")
     reticulate::install_miniconda()
   }
 
-  message("\nCreating the `greta-env` conda environment, using python v4.7\n")
+  message("\nCreating the `greta-env` conda environment, using python v3.7\n")
   reticulate::conda_create(
     envname = "greta-env",
     python_version = "3.7"
