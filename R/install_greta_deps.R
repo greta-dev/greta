@@ -6,6 +6,12 @@
 #'   virtual or conda environment, named "greta-env". Note that "virtualenv" is
 #'   not available on Windows.
 #'
+#' @param method Installation method ("virtualenv" or "conda")
+#' @param conda The path to a `conda` executable. Use `"auto"` to allow
+#'   `reticulate` to automatically find an appropriate `conda` binary. See
+#'   **Finding Conda** for more details.
+#' @param ... Optional arguments, reserved for future expansion.
+#'
 #' @note This will automatically install Miniconda (a minimal version of the
 #' Anaconda scientific software management system), create a 'conda' environment
 #' for greta named 'greta-env' with required python and python package versions,
