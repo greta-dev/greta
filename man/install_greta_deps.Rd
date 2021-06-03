@@ -10,6 +10,15 @@ install_greta_deps(
   ...
 )
 }
+\arguments{
+\item{method}{Installation method ("virtualenv" or "conda")}
+
+\item{conda}{The path to a \code{conda} executable. Use \code{"auto"} to allow
+\code{reticulate} to automatically find an appropriate \code{conda} binary. See
+\strong{Finding Conda} for more details.}
+
+\item{...}{Optional arguments, reserved for future expansion.}
+}
 \description{
 This is a helper function to install Python dependencies needed. This
 includes Tensorflow version 1.14.0, Tensorflow Probability 0.7.0, and
