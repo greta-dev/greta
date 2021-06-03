@@ -2,7 +2,7 @@
 #'
 #' This is a helper function to install Python dependencies needed. This
 #'   includes Tensorflow version 1.14.0, Tensorflow Probability 0.7.0, and
-#'   numpy version 1.16.4. These Python modules will be installed into an
+#'   numpy version 1.16.4. These Python modules will be installed into a
 #'   virtual or conda environment, named "greta-env". Note that "virtualenv" is
 #'   not available on Windows.
 #'
@@ -13,10 +13,16 @@
 #' @param ... Optional arguments, reserved for future expansion.
 #'
 #' @note This will automatically install Miniconda (a minimal version of the
-#' Anaconda scientific software management system), create a 'conda' environment
-#' for greta named 'greta-env' with required python and python package versions,
-#' and forcibly switch over to using that conda environment. There should be no
-#' need to restart if this was successfull.
+#'  Anaconda scientific software management system), create a 'conda'
+#'  environment for greta named 'greta-env' with required python and python
+#'  package versions, and forcibly switch over to using that conda environment.
+#'
+#'  If you prefer to maintain your own conda environment, you can do this
+#'  instead of greta setting up the "greta-env" conda environment. You will
+#'  need to ensure that you have the currently required versions of tensorflow
+#'  (version 1.14.0), and tensorflow-probability (version 0.7.0). If these
+#'  versions are installed, you will not be prompted to set up the special
+#'  installation
 #'
 #' @export
 #'
