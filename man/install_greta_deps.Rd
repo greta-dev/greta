@@ -32,12 +32,12 @@ Anaconda scientific software management system), create a 'conda'
 environment for greta named 'greta-env' with required python and python
 package versions, and forcibly switch over to using that conda environment.
 
-If you prefer to maintain your own conda environment, you can do this
-instead of greta setting up the "greta-env" conda environment. You will
-need to ensure that you have the currently required versions of tensorflow
-(version 1.14.0), and tensorflow-probability (version 0.7.0). If these
-versions are installed, you will not be prompted to set up the special
-installation
+If you don't want to use conda or the "greta-env" conda environment, you
+can install these specific versions of tensorflow (version 1.14.0), and
+tensorflow-probability (version 0.7.0), and ensure that the python
+environment that is initialised in this R session has these versions
+installed. This is now always straightforward, so we recommend installing
+the python packages using \code{install_greta_deps()} for most users.
 }
 \examples{
 \dontrun{
