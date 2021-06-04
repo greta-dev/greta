@@ -684,9 +684,8 @@ prep_initials <- function(initial_values, n_chains, dag) {
     is_blank <- identical(initial_values, initials())
 
     if (!is_blank & n_chains > 1) {
-      message(
-        "only one set of initial values was provided, and was ",
-        "used for all chains"
+      cli::cli_alert_info(
+        "only one set of initial values was provided, and was used for all chains"
       )
     }
 

@@ -77,7 +77,7 @@ version_tf <- function(){
   if (have_tf()) {
     tf$`__version__`
   } else {
-    message("tensorflow not found")
+    cli::cli_alert_danger("tensorflow not found")
   }
 }
 
@@ -85,7 +85,7 @@ version_tfp <- function(){
   if (have_tfp()) {
     tfp$`__version__`
   } else {
-    message("tensorflow probability not found")
+    cli::cli_alert_danger("tensorflow probability not found")
   }
 }
 
@@ -1248,9 +1248,8 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
   if (!is.null(n_cores) && !n_cores %in% allowed_n_cores) {
     check_positive_integer(n_cores, "n_cores")
 
-    message(
-      "\n", n_cores, " cores were requested, but only ",
-      n_cores_detected, " are available."
+    cli::cli_alert_warning(
+      "{n_cores} cores were requested, but only {n_cores_detected} are available."
     )
 
     n_cores <- NULL
