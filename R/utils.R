@@ -112,26 +112,44 @@ check_tf_version <- function(alert = c("none",
 
   alert <- match.arg(alert)
 
-  cli::cli_process_start("Initialising python and checking dependencies")
+  if (!greta_stash$python_has_been_initialised) {
+
+    cli::cli_process_start("Initialising python and checking dependencies")
+
+  }
+
   requirements_valid <- c(
     python_exists = have_python(),
     correct_tf = have_tf(),
     correct_tfp = have_tfp()
     )
-  cli::cli_process_done()
+
+  if ((all(requirements_valid))) {
+
+    if (!greta_stash$python_has_been_initialised) {
+
+      cli::cli_process_done()
+      cat("\n")
+      greta_stash$python_has_been_initialised <- TRUE
+
+    }
+
+  }
 
   if (!all(requirements_valid)) {
+
+    cli::cli_process_failed()
 
     # if there was a problem, append the solution
       text <- paste0(
         "We have detected that you do not have the expected python packages",
         " setup. You can set these up using:",
         "\n\n\t",
-        "install_greta_deps()",
+        "`install_greta_deps()`",
         "\n\n",
-        "and then restart R and run:",
+        "Then, restart R and run:",
         "\n\n\t",
-        "library(greta)",
+        "`library(greta)`",
         "\n\n",
         "(Note: Your R session should not have initialised Tensorflow yet).",
         "\n",
