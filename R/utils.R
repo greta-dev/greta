@@ -111,11 +111,23 @@ check_tf_version <- function(alert = c("none",
 
   alert <- match.arg(alert)
 
-  requirements_valid <- c(
-    python_exists = have_python(),
-    correct_tf = have_tf(),
-    correct_tfp = have_tfp()
+  sp1 <- cli::make_spinner(
+    which = "simpleDotsScrolling",
+    template = "Initialising python and checking dependencies {spin}"
   )
+
+  requirements_spinner <- function(){
+    sp1$spin()
+    #global assign then remove later?
+    requirements_valid <- c(
+      python_exists = have_python(),
+      correct_tf = have_tf(),
+      correct_tfp = have_tfp()
+    )
+    sp1$finish()
+  }
+
+  requirements_spinner()
 
   if (!all(requirements_valid)) {
 
