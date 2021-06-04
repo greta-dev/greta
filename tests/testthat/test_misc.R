@@ -35,6 +35,15 @@ test_that("check_tf_version works", {
     expect_warning(check_tf_version("warn"), expected_message),
     expect_message(check_tf_version("message"), expected_message)
   )
+
+  with_mock(
+    greta_stash$python_has_been_initialised <- FALSE,
+    `have_tfp` = function(x){
+      FALSE
+    },
+    expect_message(object = check_tf_version("message"),
+                   regexp = "failed")
+  )
 })
 
 test_that(".onLoad runs", {
