@@ -524,7 +524,7 @@ test_that("mcmc errors for invalid parallel plans", {
   Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
 
   # handle handle forks, so only accept multisession, or multi session clusters
-  plan(multiprocess)
+  plan(multisession)
   expect_error(
     draws <- mcmc(m),
     "parallel mcmc samplers cannot be run with"
