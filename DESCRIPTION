@@ -77,7 +77,9 @@ Imports:
     future,
     coda,
     methods,
-    abind
+    abind,
+    cli,
+    callr
 Suggests:
     knitr,
     rmarkdown,

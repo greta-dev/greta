@@ -32,6 +32,10 @@
 #' }
 #' @importFrom reticulate py_available
 #' @importFrom tensorflow install_tensorflow
+#' @importFrom reticulate conda_create
+#' @importFrom reticulate conda_install
+#' @importFrom cli cli_alert_info
+#' @importFrom callr r_process_options
 install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
                                ...) {
@@ -44,23 +48,50 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   if (!have_conda()) {
     # perhaps add something here to only do this interactively and add a
     # prompt?
-    message("\nNo miniconda detected, installing miniconda\n")
+    cli_alert_info("No miniconda detected, installing miniconda")
     reticulate::install_miniconda()
   }
 
-  message("\nCreating the `greta-env` conda environment, using python v3.7\n")
-  reticulate::conda_create(
-    envname = "greta-env",
-    python_version = "3.7"
+  opts <- r_process_options(
+    func = function(){
+      conda_create(
+        envname = "greta-env",
+        python_version = "3.7"
+      )
+    }
   )
 
-  message("\nInstalling python packages into greta-env conda environment\n")
-  reticulate::conda_install(
-    envname = "greta-env",
-    packages = c("numpy==1.16.4",
-                 "tensorflow-probability==0.7.0",
-                 "tensorflow==1.14.0")
+  cli_process_start("Creating `greta-env` conda environment using python v3.7")
+  p <- callr::r_process$new(opts)
+  p$wait()
+  greta_stash$install_deps_notes <- p$read_output()
+  cli_process_done()
+  cli_ul("Installation completed. To see full installation notes do:")
+  cli_ul("{.code greta_install_deps_notes()}")
+
+  opts <- r_process_options(
+    func = function(){
+      reticulate::conda_install(
+        envname = "greta-env",
+        packages = c("numpy==1.16.4",
+                     "tensorflow-probability==0.7.0",
+                     "tensorflow==1.14.0")
+      )
+    }
   )
+
+  cli_process_start(
+    "Installing python packages into `greta-env` conda environment"
+    )
+
+  p <- callr::r_process$new(opts)
+  p$wait()
+  greta_stash$install_deps222-change-me_notes <- p$read_output()
+  cli_process_done()
+  cli_ul("Installation completed. To see full installation notes do:")
+  cli_ul("{.code greta_install_deps_notes()}")
+
+
 
   # # switch to using this greta environment now
   # if (reticulate::)
