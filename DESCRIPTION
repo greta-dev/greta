@@ -72,7 +72,7 @@ Collate:
 Imports:
     R6,
     tensorflow (>= 1.13.0),
-    reticulate (>= 1.18.0),
+    reticulate (>= 1.19.0),
     progress (>= 1.2.0),
     future,
     coda,
