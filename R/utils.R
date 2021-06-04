@@ -95,6 +95,9 @@ version_tfp <- function(){
 
 #' @importFrom utils compareVersion
 #' @importFrom reticulate py_available
+#' @importFrom cli cli_process_start
+#' @importFrom cli cli_process_done
+#' @importFrom cli cli_process_failed
 check_tf_version <- function(alert = c("none",
                                        "error",
                                        "warn",
@@ -114,7 +117,7 @@ check_tf_version <- function(alert = c("none",
 
   if (!greta_stash$python_has_been_initialised) {
 
-    cli::cli_process_start("Initialising python and checking dependencies")
+    cli_process_start("Initialising python and checking dependencies")
 
   }
 
@@ -128,7 +131,7 @@ check_tf_version <- function(alert = c("none",
 
     if (!greta_stash$python_has_been_initialised) {
 
-      cli::cli_process_done()
+      cli_process_done()
       cat("\n")
       greta_stash$python_has_been_initialised <- TRUE
 
@@ -138,7 +141,7 @@ check_tf_version <- function(alert = c("none",
 
   if (!all(requirements_valid)) {
 
-    cli::cli_process_failed()
+    cli_process_failed()
 
     # if there was a problem, append the solution
       text <- paste0(
