@@ -40,6 +40,8 @@
 #' @importFrom cli cli_ul
 #' @importFrom callr r_process_options
 #' @importFrom callr r_process
+#' @importFrom cli cli_alert_success
+#' @importFrom cli cli_ul
 install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
                                ...) {
@@ -122,13 +124,8 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   #
   # invisible(success)
 
-  message(
-    "\nInstallation complete. Please open a fresh R session and load greta with:",
-    "\n\n  ",
-    "library(greta)",
-    "\n"
-  )
-
+  cli_alert_success("Installation complete!")
+  cli_ul("Restart R, then load greta with: {.code library(greta)}")
 }
 
 #' @export
