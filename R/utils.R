@@ -35,7 +35,8 @@ have_conda <- function() {
 
 #' @importFrom reticulate py_available
 have_python <- function() {
-  tryCatch(reticulate::py_available(initialize = TRUE),
+  tryCatch(
+    expr = reticulate::py_available(initialize = TRUE),
     error = function(e) FALSE
   )
 }
@@ -94,6 +95,9 @@ version_tfp <- function(){
 
 #' @importFrom utils compareVersion
 #' @importFrom reticulate py_available
+#' @importFrom cli cli_process_start
+#' @importFrom cli cli_process_done
+#' @importFrom cli cli_process_failed
 check_tf_version <- function(alert = c("none",
                                        "error",
                                        "warn",
@@ -111,26 +115,46 @@ check_tf_version <- function(alert = c("none",
 
   alert <- match.arg(alert)
 
+  if (!greta_stash$python_has_been_initialised) {
+
+    cli_process_start("Initialising python and checking dependencies")
+
+  }
+
   requirements_valid <- c(
     python_exists = have_python(),
     correct_tf = have_tf(),
     correct_tfp = have_tfp()
-  )
+    )
+
+  if ((all(requirements_valid))) {
+
+    if (!greta_stash$python_has_been_initialised) {
+
+      cli_process_done()
+      cat("\n")
+      greta_stash$python_has_been_initialised <- TRUE
+
+    }
+
+  }
 
   if (!all(requirements_valid)) {
+
+    cli_process_failed()
 
     # if there was a problem, append the solution
       text <- paste0(
         "We have detected that you do not have the expected python packages",
         " setup. You can set these up using:",
         "\n\n\t",
-        "install_greta_deps()",
+        "`install_greta_deps()`",
         "\n\n",
-        "and then call:",
+        "Then, restart R and run:",
         "\n\n\t",
-        "library(greta)",
+        "`library(greta)`",
         "\n\n",
-        "in a fresh R session that has not yet initialised Tensorflow.",
+        "(Note: Your R session should not have initialised Tensorflow yet).",
         "\n",
         "For more information, see `?install_greta_deps` ",
         "\n"
