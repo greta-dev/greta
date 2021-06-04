@@ -32,6 +32,14 @@
 #' }
 #' @importFrom reticulate py_available
 #' @importFrom tensorflow install_tensorflow
+#' @importFrom reticulate conda_create
+#' @importFrom reticulate conda_install
+#' @importFrom cli cli_alert_info
+#' @importFrom cli cli_process_start
+#' @importFrom cli cli_process_done
+#' @importFrom cli cli_ul
+#' @importFrom callr r_process_options
+#' @importFrom callr r_process
 #' @importFrom cli cli_alert_success
 #' @importFrom cli cli_ul
 install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
@@ -46,23 +54,60 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   if (!have_conda()) {
     # perhaps add something here to only do this interactively and add a
     # prompt?
-    message("\nNo miniconda detected, installing miniconda\n")
-    reticulate::install_miniconda()
+    callr_install_miniconda <- r_process_options(
+      func = function(){
+        reticulate::install_miniconda()
+      }
+    )
+
+    cli_process_start("No miniconda detected, installing miniconda")
+    r_install_miniconda <- r_process$new(callr_install_miniconda)
+    r_install_miniconda$wait()
+    greta_stash$install_miniconda_notes <- r_install_miniconda$read_output()
+    cli_process_done(msg_done = "Miniconda installed!")
+    cli_ul("To see full installation notes run:")
+    cli_ul("{.code greta_notes_install_miniconda()}")
   }
 
-  message("\nCreating the `greta-env` conda environment, using python v3.7\n")
-  reticulate::conda_create(
-    envname = "greta-env",
-    python_version = "3.7"
+  callr_conda_create <- r_process_options(
+    func = function(){
+      reticulate::conda_create(
+        envname = "greta-env",
+        python_version = "3.7"
+      )
+    }
   )
 
-  message("\nInstalling python packages into greta-env conda environment\n")
-  reticulate::conda_install(
-    envname = "greta-env",
-    packages = c("numpy==1.16.4",
-                 "tensorflow-probability==0.7.0",
-                 "tensorflow==1.14.0")
+  cli_process_start("Creating 'greta-env' conda environment using python v3.7")
+  r_conda_create <- r_process$new(callr_conda_create)
+  r_conda_create$wait()
+  greta_stash$conda_create_notes <- r_conda_create$read_output()
+  cli_process_done()
+  cli_ul("To see full installation notes run:")
+  cli_ul("{.code greta_notes_conda_create()}")
+
+  callr_conda_install <- r_process_options(
+    func = function(){
+      reticulate::conda_install(
+        envname = "greta-env",
+        packages = c("numpy==1.16.4",
+                     "tensorflow-probability==0.7.0",
+                     "tensorflow==1.14.0")
+      )
+    }
   )
+
+  cli_process_start(
+    "Installing python packages into 'greta-env' conda environment"
+    )
+
+  r_conda_install <- r_process$new(callr_conda_install)
+  r_conda_install$wait()
+  greta_stash$conda_install_notes <- r_conda_install$read_output()
+  cli_process_done()
+  cli_ul("To see full installation notes run:")
+  cli_ul("{.code greta_notes_conda_install()}")
+
 
   # # switch to using this greta environment now
   # if (reticulate::)

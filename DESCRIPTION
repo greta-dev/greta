@@ -69,16 +69,18 @@ Collate:
     'chol2symm.R'
     'install_greta_deps.R'
     'conda_greta_env.R'
+    'greta_stash.R'
 Imports:
     R6,
     tensorflow (>= 1.13.0),
-    reticulate (>= 1.18.0),
+    reticulate (>= 1.19.0),
     progress (>= 1.2.0),
     future,
     coda,
     methods,
     abind,
-    cli
+    cli,
+    callr
 Suggests:
     knitr,
     rmarkdown,
