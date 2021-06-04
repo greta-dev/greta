@@ -8,7 +8,7 @@ test_that("check_tf_version works", {
   tf$`__version__` <- "0.9.0" # nolint
 
   # expected text
-  expected_message <- "you have TensorFlow version 0.9.0"
+  expected_message <- "We have detected that you do not have the expected python packages"
 
   expect_error(
     check_tf_version("error"),
@@ -27,8 +27,6 @@ test_that("check_tf_version works", {
   tf$`__version__` <- true_version # nolint
 
   # forge a missing installation
-  expected_message <- "isn't installed"
-
   with_mock(
     `reticulate::py_module_available` = function(x) {
       FALSE

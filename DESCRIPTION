@@ -67,10 +67,12 @@ Collate:
     'callbacks.R'
     'simulate.R'
     'chol2symm.R'
+    'install_greta_deps.R'
+    'conda_greta_env.R'
 Imports:
     R6,
     tensorflow (>= 1.13.0),
-    reticulate,
+    reticulate (>= 1.18.0),
     progress (>= 1.2.0),
     future,
     coda,

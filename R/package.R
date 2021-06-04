@@ -44,14 +44,18 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname) { # nolint
 
+  if (have_greta_conda_env()) {
+    use_greta_conda_env()
+  }
+
   # silence TF's CPU instructions message
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL = 2)
 
   # silence messages about deprecation etc.
-  disable_tensorflow_logging()
+  # disable_tensorflow_logging()
 
   # warn if TF version is bad
-  check_tf_version("startup")
+  # check_tf_version("startup")
 
   # switch back to 0-based extraction in tensorflow, and don't warn about
   # indexing with tensors
