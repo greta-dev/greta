@@ -69,6 +69,7 @@ Collate:
     'chol2symm.R'
     'install_greta_deps.R'
     'conda_greta_env.R'
+    'greta_stash.R'
 Imports:
     R6,
     tensorflow (>= 1.13.0),

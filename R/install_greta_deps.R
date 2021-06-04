@@ -64,7 +64,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     greta_stash$install_miniconda_notes <- r_install_miniconda$read_output()
     cli_process_done(msg_done = "Miniconda installed!")
     cli_ul("To see full installation notes run:")
-    cli_ul("{.code greta_install_miniconda_notes()}")
+    cli_ul("{.code greta_notes_install_miniconda()}")
   }
 
   callr_conda_create <- r_process_options(
@@ -82,7 +82,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   greta_stash$conda_create_notes <- r_conda_create$read_output()
   cli_process_done()
   cli_ul("To see full installation notes run:")
-  cli_ul("{.code greta_conda_create_notes()}")
+  cli_ul("{.code greta_notes_conda_create()}")
 
   callr_conda_install <- r_process_options(
     func = function(){
@@ -104,7 +104,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   greta_stash$conda_install_notes <- r_conda_install$read_output()
   cli_process_done()
   cli_ul("To see full installation notes run:")
-  cli_ul("{.code greta_conda_install_notes()}")
+  cli_ul("{.code greta_notes_conda_install()}")
 
 
   # # switch to using this greta environment now
@@ -129,19 +129,4 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     "\n"
   )
 
-}
-
-#' @export
-greta_install_miniconda_notes <- function() {
-  cat(greta_stash$install_miniconda_notes)
-}
-
-#' @export
-greta_conda_create_notes <- function() {
-  cat(greta_stash$conda_create_notes)
-}
-
-#' @export
-greta_conda_install_notes <- function() {
-  cat(greta_stash$conda_install_notes)
 }
