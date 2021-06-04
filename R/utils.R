@@ -112,18 +112,13 @@ check_tf_version <- function(alert = c("none",
 
   alert <- match.arg(alert)
 
-  python_check_spinner <- cli::make_spinner(
-    which = "simpleDotsScrolling",
-    template = "Initialising python and checking dependencies {spin}"
-  )
-
-  python_check_spinner$spin()
+  cli::cli_process_start("Initialising python and checking dependencies")
   requirements_valid <- c(
     python_exists = have_python(),
     correct_tf = have_tf(),
     correct_tfp = have_tfp()
     )
-  python_check_spinner$finish()
+  cli::cli_process_done()
 
   if (!all(requirements_valid)) {
 
