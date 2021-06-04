@@ -38,7 +38,7 @@ test_that("check_tf_version works", {
 
   with_mock(
     greta_stash$python_has_been_initialised <- FALSE,
-    `have_tfp` = function(x){
+    `greta:::have_tfp` = function(x){
       FALSE
     },
     expect_message(object = check_tf_version("message"),
