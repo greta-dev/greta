@@ -35,7 +35,11 @@
 #' @importFrom reticulate conda_create
 #' @importFrom reticulate conda_install
 #' @importFrom cli cli_alert_info
+#' @importFrom cli cli_process_start
+#' @importFrom cli cli_process_done
+#' @importFrom cli cli_ul
 #' @importFrom callr r_process_options
+#' @importFrom callr r_process
 install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
                                ...) {
@@ -48,28 +52,39 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   if (!have_conda()) {
     # perhaps add something here to only do this interactively and add a
     # prompt?
-    cli_alert_info("No miniconda detected, installing miniconda")
-    reticulate::install_miniconda()
+    callr_install_miniconda <- r_process_options(
+      func = function(){
+        reticulate::install_miniconda()
+      }
+    )
+
+    cli_process_start("No miniconda detected, installing miniconda")
+    r_install_miniconda <- r_process$new(callr_install_miniconda)
+    r_install_miniconda$wait()
+    greta_stash$install_miniconda_notes <- r_install_miniconda$read_output()
+    cli_process_done(msg_done = "Miniconda installed!")
+    cli_ul("To see full installation notes run:")
+    cli_ul("{.code greta_install_miniconda_notes()}")
   }
 
-  opts <- r_process_options(
+  callr_conda_create <- r_process_options(
     func = function(){
-      conda_create(
+      reticulate::conda_create(
         envname = "greta-env",
         python_version = "3.7"
       )
     }
   )
 
-  cli_process_start("Creating `greta-env` conda environment using python v3.7")
-  p <- callr::r_process$new(opts)
-  p$wait()
-  greta_stash$install_deps_notes <- p$read_output()
+  cli_process_start("Creating 'greta-env' conda environment using python v3.7")
+  r_conda_create <- r_process$new(callr_conda_create)
+  r_conda_create$wait()
+  greta_stash$conda_create_notes <- r_conda_create$read_output()
   cli_process_done()
-  cli_ul("Installation completed. To see full installation notes do:")
-  cli_ul("{.code greta_install_deps_notes()}")
+  cli_ul("To see full installation notes run:")
+  cli_ul("{.code greta_conda_create_notes()}")
 
-  opts <- r_process_options(
+  callr_conda_install <- r_process_options(
     func = function(){
       reticulate::conda_install(
         envname = "greta-env",
@@ -81,16 +96,15 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   )
 
   cli_process_start(
-    "Installing python packages into `greta-env` conda environment"
+    "Installing python packages into 'greta-env' conda environment"
     )
 
-  p <- callr::r_process$new(opts)
-  p$wait()
-  greta_stash$install_deps222-change-me_notes <- p$read_output()
+  r_conda_install <- r_process$new(callr_conda_install)
+  r_conda_install$wait()
+  greta_stash$conda_install_notes <- r_conda_install$read_output()
   cli_process_done()
-  cli_ul("Installation completed. To see full installation notes do:")
-  cli_ul("{.code greta_install_deps_notes()}")
-
+  cli_ul("To see full installation notes run:")
+  cli_ul("{.code greta_conda_install_notes()}")
 
 
   # # switch to using this greta environment now
@@ -115,4 +129,19 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     "\n"
   )
 
+}
+
+#' @export
+greta_install_miniconda_notes <- function() {
+  cat(greta_stash$install_miniconda_notes)
+}
+
+#' @export
+greta_conda_create_notes <- function() {
+  cat(greta_stash$conda_create_notes)
+}
+
+#' @export
+greta_conda_install_notes <- function() {
+  cat(greta_stash$conda_install_notes)
 }
