@@ -35,7 +35,8 @@ have_conda <- function() {
 
 #' @importFrom reticulate py_available
 have_python <- function() {
-  tryCatch(reticulate::py_available(initialize = TRUE),
+  tryCatch(
+    expr = reticulate::py_available(initialize = TRUE),
     error = function(e) FALSE
   )
 }
@@ -111,23 +112,18 @@ check_tf_version <- function(alert = c("none",
 
   alert <- match.arg(alert)
 
-  sp1 <- cli::make_spinner(
+  python_check_spinner <- cli::make_spinner(
     which = "simpleDotsScrolling",
     template = "Initialising python and checking dependencies {spin}"
   )
 
-  requirements_spinner <- function(){
-    sp1$spin()
-    #global assign then remove later?
-    requirements_valid <- c(
-      python_exists = have_python(),
-      correct_tf = have_tf(),
-      correct_tfp = have_tfp()
+  python_check_spinner$spin()
+  requirements_valid <- c(
+    python_exists = have_python(),
+    correct_tf = have_tf(),
+    correct_tfp = have_tfp()
     )
-    sp1$finish()
-  }
-
-  requirements_spinner()
+  python_check_spinner$finish()
 
   if (!all(requirements_valid)) {
 
@@ -138,11 +134,11 @@ check_tf_version <- function(alert = c("none",
         "\n\n\t",
         "install_greta_deps()",
         "\n\n",
-        "and then call:",
+        "and then restart R and run:",
         "\n\n\t",
         "library(greta)",
         "\n\n",
-        "in a fresh R session that has not yet initialised Tensorflow.",
+        "(Note: Your R session should not have initialised Tensorflow yet).",
         "\n",
         "For more information, see `?install_greta_deps` ",
         "\n"
