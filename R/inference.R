@@ -327,16 +327,12 @@ run_samplers <- function(samplers,
   }
 
   if (plan_is$parallel & !plan_is$local) {
-    sampler_text <- ifelse(length(samplers) > 1,
-      "samplers on remote machines",
-      "sampler on a remote machine"
-    )
-    msg <- sprintf(
-      "\nrunning %i %s\n\n",
-      length(samplers),
-      sampler_text
-    )
-    cli::cli_alert_info(msg)
+
+    cli::cli_alert_info(
+      text = "running {length(samplers)} \\
+      {?sampler on a remote machine/samplers on remote machines}"
+      )
+
   }
 
   n_chain <- length(samplers)
