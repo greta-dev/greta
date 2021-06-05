@@ -505,7 +505,8 @@ sampler <- R6Class(
       }
 
       if (!identical(msg, "")) {
-        message(msg, "\n")
+        cli::cli_alert_info(msg)
+        cat("\n")
       }
     },
 

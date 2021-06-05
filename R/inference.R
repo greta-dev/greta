@@ -323,7 +323,7 @@ run_samplers <- function(samplers,
       length(samplers),
       cores_text
     )
-    message(msg, appendLF = FALSE)
+    cli::cli_alert_info(msg)
   }
 
   if (plan_is$parallel & !plan_is$local) {
@@ -336,7 +336,7 @@ run_samplers <- function(samplers,
       length(samplers),
       sampler_text
     )
-    message(msg, appendLF = FALSE)
+    cli::cli_alert_info(msg)
   }
 
   n_chain <- length(samplers)
