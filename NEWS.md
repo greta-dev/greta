@@ -24,6 +24,8 @@
 
 * `dirichlet()` now returns a variable (rather than an operation) greta array, and the graphs created by `lkj_correlation()` and `wishart()` are now simpler as cholesky-shaped variables are now available internally.
 
+* Python dependency installation has been overhauled with the new `install_greta_deps()` function (#417).
+
 ## Features:
 
 * `calculate()` now enables simulation of greta array values from their priors, optionally conditioned on fixed values or posterior samples. This enables prior and posterior predictive checking of models, and simulation of data.
@@ -39,6 +41,8 @@
 * `mcmc()`, `stashed_samples()`, and `calculate()` now return objects of class `greta_mcmc_list` which inherit from `coda`'s `mcmc.list` class, but enable custom greta methods for manipulating mcmc outputs, including a `window()` function.
 
 * `mcmc()` and `calculate()` now have a `trace_batch_size` argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays (#236).
+
+* Many message prompts have been replaced internally with the {cli} R package for nicer printing. This is a minor change that should result in a more pleasant user experience (#423).
 
 # greta 0.3.1
 
