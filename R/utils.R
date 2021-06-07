@@ -77,7 +77,7 @@ version_tf <- function(){
   if (have_tf()) {
     tf$`__version__`
   } else {
-    cli::cli_alert_danger("tensorflow not found")
+    cli::cli_alert_danger("{.pkg tensorflow} not found")
   }
 }
 
@@ -85,7 +85,7 @@ version_tfp <- function(){
   if (have_tfp()) {
     tfp$`__version__`
   } else {
-    cli::cli_alert_danger("tensorflow probability not found")
+    cli::cli_alert_danger("{.pkg tensorflow-probability} not found")
   }
 }
 

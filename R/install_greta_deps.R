@@ -60,11 +60,12 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
       }
     )
 
-    cli_process_start("No miniconda detected, installing miniconda")
+    cli_process_start("No {.pkg miniconda} detected, installing \\
+                      {.pkg miniconda}")
     r_install_miniconda <- r_process$new(callr_install_miniconda)
     r_install_miniconda$wait()
     greta_stash$install_miniconda_notes <- r_install_miniconda$read_output()
-    cli_process_done(msg_done = "Miniconda installed!")
+    cli_process_done(msg_done = "{.pkg miniconda} installed!")
     cli_ul("To see full installation notes run:")
     cli_ul("{.code greta_notes_install_miniconda()}")
   }
