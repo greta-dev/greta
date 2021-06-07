@@ -163,10 +163,12 @@ NULL
 
   # check the dimensions match
   if (dim(x)[2] != dim(y)[1]) {
-    msg <- sprintf(
-      "incompatible dimensions: %s vs %s",
-      paste0(dim(x), collapse = "x"),
-      paste0(dim(y), collapse = "x")
+    msg <- cli::format_message(
+      c(
+        "incompatible dimensions: \\
+        {paste0(dim(x), collapse = 'x')} vs \\
+        {paste0(dim(y), collapse = 'x')}",
+      )
     )
     stop(msg, call. = FALSE)
   }

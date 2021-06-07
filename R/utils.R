@@ -637,15 +637,16 @@ check_n_realisations <- function(vectors = list(),
 
       # error if not
       if (!all(matches_target)) {
-        stop(sprintf(
-          paste(
-            "number of realisations should be %s,",
-            "but arguments had %s rows"
-          ),
-          target,
-          paste(nrows, collapse = ", ")
-        ),
-        call. = FALSE
+        msg <- cli::format_error(
+          c(
+            "Realisations do not match rows",
+            "number of realisations should be {target},",
+            "but arguments had {paste(nrows, collapse = ', ')} rows"
+            )
+          )
+        stop(
+          msg,
+          call. = FALSE
         )
       }
     }

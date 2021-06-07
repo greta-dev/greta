@@ -371,21 +371,34 @@ solve.greta_array <- function(a, b, ...) {
 
   # check a is 2D
   if (length(dim(a)) != 2) {
-    stop(sprintf(
-      "'a' and 'b' must both be 2D, but 'a' has dimensions: %s",
-      paste(dim(a), collapse = " x ")
-    ),
-    call. = FALSE
+    msg <- cli::format_error(
+      c(
+        "Arrays are not both 2D",
+        "{.var a} and {.var b} must both be 2D, but {.var a} has dimensions: \\
+        {paste(dim(a), collapse = ' x ')}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
     )
   }
 
   # check the matrix is square
   if (dim(a)[1] != dim(a)[2]) {
-    stop(sprintf(
-      "'a' must be square, but has %i rows and %i columns",
-      dim(a)[1], dim(a)[2]
-    ),
-    call. = FALSE
+
+    msg <- cli::format_error(
+      c(
+        "{.var a} is not square",
+        "x" = "{.var a} must be square, but has \\
+        {dim(a)[1]} rows and \\
+        {dim(a)[2]} columns",
+      )
+    )
+
+    stop(
+      msg,
+      call. = FALSE
     )
   }
 
@@ -403,24 +416,31 @@ solve.greta_array <- function(a, b, ...) {
 
     # check b is 2D
     if (length(dim(b)) != 2) {
-      stop(sprintf(
-        "'a' and 'b' must both be 2D, but 'b' has dimensions: %s",
-        paste(dim(b), collapse = " x ")
-      ),
-      call. = FALSE
+      msg <- cli::format_error(
+        c(
+          "Arrays are not both 2D",
+          "{.var a} and {.var b} must both be 2D, but {.var b} has dimensions: \\
+          {paste(dim(b), collapse = ' x ')}"
+        )
+      )
+      stop(
+        msg,
+        call. = FALSE
       )
     }
 
     # b must have the right number of rows
     if (dim(b)[1] != dim(a)[1]) {
-      stop(sprintf(
-        paste(
-          "'b' must have the same number of rows as 'a'",
-          "(%i), but has %i rows instead"
-        ),
-        dim(a)[1], dim(b)[1]
-      ),
-      call. = FALSE
+      msg <- cli::format_message(
+        c(
+          "Number of rows not equal",
+          "x" = "{.var b} must have the same number of rows as {.var a} \\
+          ({dim(a)[1]}), but has {dim(b)[1]} rows instead"
+        )
+      )
+      stop(
+        msg,
+        call. = FALSE
       )
     }
 
@@ -449,7 +469,11 @@ chol2inv.default <- function(x, size = NCOL(x), LINPACK = FALSE) {
 #' @export
 chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
   if (!identical(LINPACK, FALSE)) {
-    warning("The 'LINPACK' argument is ignored for greta arrays, and has also been defunct since R 3.1.0")
+    msg <- cli::format_warning(
+      "The 'LINPACK' argument is ignored for greta arrays, and has also been \\
+      defunct since R 3.1.0"
+    )
+    warning(msg)
   }
 
   if (!identical(size, NCOL(x))) {
@@ -746,30 +770,45 @@ sweep.greta_array <- function(x,
 
   # x must be 2D
   if (length(dim(x)) != 2) {
-    stop(sprintf(
-      "x must be a 2D array, but has %i dimensions",
-      length(dim(x))
-    ),
-    call. = FALSE
+    msg <- cli::format_error(
+      c(
+        "Array not 2D",
+        "x" = "{.var x} must be a 2D array, but has {length(dim(x))} \\
+        dimensions",
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
     )
   }
 
   # STATS must be a column array
   if (!(length(dim(stats)) == 2 && dim(stats)[2] == 1)) {
-    stop(sprintf(
-      paste(
-        "STATS must be a column vector array,",
-        "but has dimensions %s"
-      ),
-      paste(dim(stats), collapse = " x ")
-    ),
-    call. = FALSE
+    msg <- cli::format_error(
+      c(
+        "{.var stats} not a column vector array",
+        "{.var stats} must be a column vector array",
+        "x" = "{.var stats} has dimensions \\
+        {paste(dim(stats), collapse = ' x ')}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
     )
   }
 
   # STATS must have the same dimension as the correct dim of x
   if (dim(x)[margin] != dim(stats)[1]) {
-    stop("the number of elements of STATS does not match dim(x)[MARGIN]",
+    msg <- cli::format_error(
+      c(
+        "The number of elements of {.var stats} does not match \\
+        {.code dim(x)[MARGIN]}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -793,21 +832,29 @@ setMethod(
 
     # X must be 2D
     if (length(dim(X)) != 2) {
-      stop(sprintf(
-        "X must be a 2D array, but has %i dimensions",
-        length(dim(X))
-      ),
-      call. = FALSE
+      msg <- cli::format_error(
+        c(
+          "Not a 2D array",
+          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions",
+        )
+      )
+      stop(
+        msg,
+        call. = FALSE
       )
     }
 
     # Y must be 2D
     if (length(dim(Y)) != 2) {
-      stop(sprintf(
-        "Y must be a 2D array, but has %i dimensions",
-        length(dim(X))
-      ),
-      call. = FALSE
+      msg <- cli::format_error(
+        c(
+          "Not a 2D array",
+          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions",
+        )
+      )
+      stop(
+        msg,
+        call. = FALSE
       )
     }
 

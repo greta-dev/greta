@@ -550,11 +550,15 @@ length.greta_array <- function(x) {
 
   # if x isn't a scalar and the numbers of elements don't match, error
   if (len != 1 && prod_dims != len) {
-    msg <- sprintf(
-      "dims [product %i] do not match the length of object [%i]",
-      prod_dims, len
+    msg <- cli::format_error(
+      c(
+        "dims [product {prod_dims}] do not match the length of object [{len}]"
+      )
     )
-    stop(msg, call. = FALSE)
+    stop(
+      msg,
+      call. = FALSE
+      )
   }
 
   # change the values similarly
