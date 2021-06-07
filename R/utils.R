@@ -117,8 +117,10 @@ check_tf_version <- function(alert = c("none",
 
   if (!greta_stash$python_has_been_initialised) {
 
-    cli_process_start("Initialising python and checking dependencies")
-
+    cli_process_start(
+      msg = "Initialising python and checking dependencies, this may take a \\
+      moment."
+      )
   }
 
   requirements_valid <- c(
@@ -131,7 +133,8 @@ check_tf_version <- function(alert = c("none",
 
     if (!greta_stash$python_has_been_initialised) {
 
-      cli_process_done()
+      cli_process_done(
+        msg_done = "Initialising python and checking dependencies ... done!")
       cat("\n")
       greta_stash$python_has_been_initialised <- TRUE
 
@@ -144,20 +147,25 @@ check_tf_version <- function(alert = c("none",
     cli_process_failed()
 
     # if there was a problem, append the solution
-      text <- paste0(
-        "We have detected that you do not have the expected python packages",
-        " setup. You can set these up using:",
-        "\n\n\t",
-        "`install_greta_deps()`",
-        "\n\n",
-        "Then, restart R and run:",
-        "\n\n\t",
-        "`library(greta)`",
-        "\n\n",
-        "(Note: Your R session should not have initialised Tensorflow yet).",
-        "\n",
-        "For more information, see `?install_greta_deps` ",
-        "\n"
+      text <- cli::format_message(
+        "We have detected that you do not have the expected python packages \\
+        setup.
+
+        You can set these up by running this R code in the console:
+
+        {.code install_greta_deps()}
+
+        Then, restart R and run:
+
+        {.code library(greta)}
+
+        ({.strong Note}: Your R session should not have initialised \\
+        Tensorflow yet.)
+
+        For more information, see {.code ?install_greta_deps}
+
+
+        "
       )
 
     switch(alert,
@@ -476,10 +484,8 @@ check_dims <- function(..., target_dim = NULL) {
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- sprintf(
-        "incompatible dimensions: %s",
-        dims_text
-      )
+      msg <- cli::format_error(message = "incompatible dimensions: {dims_text}")
+
       stop(msg, call. = FALSE)
     }
   }
@@ -506,17 +512,23 @@ check_dims <- function(..., target_dim = NULL) {
 
       # error if not
       if (!all(matches_target)) {
-        stop(sprintf(
-          paste(
-            "array dimensions should be %s,",
-            "but input dimensions were %s"
-          ),
-          paste(target_dim, collapse = "x"),
-          dims_text
-        ),
-        call. = FALSE
+
+        msg <- cli::format_error(
+          c(
+            "incorrect array dimensions",
+            "x" = "array dimensions should be \\
+              {paste(target_dim, collapse = 'x')},",
+            "but input dimensions were {dims_text}."
+          )
         )
+
+        stop(
+          msg,
+          call. = FALSE
+          )
+
       }
+
     }
 
     output_dim <- target_dim
@@ -579,10 +591,12 @@ check_n_realisations <- function(vectors = list(),
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- sprintf(
-        "incompatible number of rows: %s",
-        paste(nrows, collapse = " vs ")
-      )
+      msg <- cli::format_error(
+        c(
+          "incompatible number of rows",
+          x = "{paste(nrows, collapse = ' vs ')}"
+          )
+        )
       stop(msg, call. = FALSE)
     }
   }
@@ -593,8 +607,18 @@ check_n_realisations <- function(vectors = list(),
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1) {
-      stop("'n_realisations' must be a positive scalar integer ",
-        "giving the number of rows of the output",
+      stop(
+        cli::format_error(
+          c(
+            "{.code n_realisations is not a positive scalar interger}",
+            "{.code n_realisations} must be a positive scalar integer giving \\
+            the number of rows of the output",
+            "x" = "We see {.code n_realisations} = {.code {n_realisations}} \\
+            having class: \\
+            {.cls {class(n_realisations)}} and length \\
+            {.var {length(n_realisations)}}"
+          )
+        ),
         call. = FALSE
       )
     }
@@ -667,10 +691,13 @@ check_dimension <- function(vectors = list(),
 
   # check it's big enough
   if (dimension < min_dimension) {
-    stop("the dimension of this distribution must be at least ",
-      min_dimension, " but was ", dimension,
-      "\n\nmultivariate distributions treat each *row* as a separate ",
-      "realisation - perhaps you need to transpose something?",
+    stop(
+      cli::format_error(
+        "the dimension of this distribution must be at least {min_dimension}, \\
+        but was {dimension}
+
+        multivariate distributions treat each {.emph row} as a separate \\
+        realisation - perhaps you need to transpose something?"),
       call. = FALSE
     )
   }
@@ -683,18 +710,16 @@ check_dimension <- function(vectors = list(),
   if (!all(match_dimension)) {
 
     # otherwise it's not fine
-    msg <- sprintf(
-      paste0(
-        "the distribution dimension should be %s, ",
-        "but parameters implied dimensions: %s\n\n",
-        "multivariate distributions treat each *row* as a ",
-        "separate realisation - perhaps you need to ",
-        "transpose something?"
-      ),
-      dimension,
-      paste(ncols, collapse = " vs ")
-    )
-    stop(msg, call. = FALSE)
+    stop(
+      cli::format_error(
+        "The distribution dimension should be {dimension}, but parameters \\
+        implied dimensions: {paste(ncols, collapse = ' vs ')}
+
+
+        Multivariate distributions treat each {.emph row} as a separate \\
+        realisation - perhaps you need to transpose something?"
+        ),
+      call. = FALSE)
   }
 
   dimension
@@ -788,11 +813,13 @@ check_in_family <- function(function_name, arg) {
 
   # nice user-friendly error message
   if (arg_is_link | function_is_family) {
-    msg <- paste0(
-      "It looks like you're using greta's ", function_name,
-      " function in the family argment of another model.",
-      " Maybe you want to use 'family = stats::", function_name,
-      "' instead?"
+    msg <- cli::format_error(
+      c(
+        "Wrong function name provided in another model",
+        "It looks like you're using greta's {.fun {function_name}} function \\
+        in the family argument of another model.",
+        "Maybe you want to use {.code family = stats::{function_name}},instead?"
+      )
     )
     stop(msg, call. = FALSE)
   }
