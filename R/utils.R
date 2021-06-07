@@ -558,8 +558,15 @@ check_square <- function(x) {
   ndim <- length(dim)
   is_square <- ndim == 2 && dim[1] == dim[2]
   if (!is_square) {
-    stop("expected a 2D square greta array, but object had dimension ",
-      paste(dim, collapse = "x"),
+    msg <- cli::format_error(
+      c(
+        "Not 2D square greta array",
+        "x" = "expected a 2D square greta array, but object {.var x} had \\
+        dimension: {paste(dim, collapse = 'x')}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }

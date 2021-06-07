@@ -35,9 +35,17 @@ as.greta_array.data.frame <- function(x, optional = FALSE,
 
   if (!optional & !all(valid)) {
     invalid_types <- unique(classes[!valid])
-    stop("cannot coerce a dataframe to a greta_array unless all columns are ",
-      "numeric, integer or logical. This dataframe had columns of type: ",
-      paste(invalid_types, collapse = ", "),
+    msg <- cli::format_error(
+      c(
+        "greta arrays must contain the same type",
+        "Cannot coerce a {.cls dataframe} to a {.cls greta_array} unless \\
+        all columns are {.cls numeric, integer} or {.class logical}. This \\
+        dataframe had columns of type: \\
+        {.cls {paste(invalid_types, collapse = ', ')}}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -124,9 +132,15 @@ as.greta_array.node <- function(x, optional = FALSE, original_x = x, ...) {
 #' @export
 as.greta_array.default <- function(x, optional = FALSE, original_x = x, ...) {
   if (!optional) {
-    stop("objects of class ",
-      paste(class(x), collapse = " or "),
-      " cannot be coerced to greta arrays",
+    msg <- cli::format_error(
+      c(
+        "Object cannot be coerced to greta array",
+        "Objects of class {.cls {paste(class(x), collapse = ' or ')}} cannot \\
+        be coerced to greta arrays",
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }

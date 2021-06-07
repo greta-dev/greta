@@ -84,11 +84,16 @@
   # if distribution isn't scalar, make sure it has the right dimensions
   if (!is_scalar(value)) {
     if (!identical(dim(greta_array), dim(value))) {
-      stop("left and right hand sides have different dimensions. ",
-        "The distribution must have dimension of either ",
-        paste(dim(greta_array), collapse = " x "),
-        " or 1 x 1, but instead has dimension ",
-        paste(dim(value), collapse = " x "),
+      msg <- cli::format_error(
+        c(
+          "left and right hand sides have different dimensions. ",
+          "The distribution must have dimension of either \\
+          {paste(dim(greta_array), collapse = ' x ')} or 1 x 1, but instead \\
+          has dimension {paste(dim(value), collapse = ' x ')}"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
