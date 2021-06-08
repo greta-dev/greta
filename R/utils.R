@@ -1026,32 +1026,35 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
     unmet_names <- names(greta_array_node_names)[unmet_names_idx]
 
     # build the message
-    msg <- paste(
-      "values have not been provided for all greta arrays on which",
-      "the target depends, and nsim has not been set."
-    )
-
     if (any(matches)) {
       names_text <- paste(unmet_names, collapse = ", ")
-      msg <- paste(
-        msg,
-        sprintf(
-          "Please provide values for the greta array%s: %s",
-          ifelse(length(matches) > 1, "s", ""),
-          names_text
+      msg <- cli::format_error(
+        c(
+          "Please provide values for the following {length(names_text)} \\
+          greta array{?s}:",
+          "{.var {names_text}}"
+          )
         )
-      )
-    } else {
-      msg <- paste(
-        msg,
-        "\nThe names of the missing greta arrays",
-        "could not be detected"
-      )
+      } else {
+        msg <- cli::format_error(
+          "The names of the missing greta arrays could not be detected"
+          )
     }
 
-    stop(msg,
-      call. = FALSE
+    final_msg <- cli::format_error(
+      c(
+        "greta array(s) do not have values",
+        "values have not been provided for all greta arrays on which the \\
+        target depends, and {.var nsim} has not been set.",
+        "{msg}"
+      )
     )
+
+    stop(
+      msg,
+      call. = FALSE
+      )
+
   }
 }
 
