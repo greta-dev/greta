@@ -27,7 +27,15 @@ chol2symm <- function(x) {
 chol2symm.default <- function(x) {
   dim <- dim(x)
   if (length(dim) != 2 || dim[1] != dim[2]) {
-    stop("x must be a square symmetric matrix, assumed to be upper triangular",
+    msg <- cli::format_error(
+      c(
+        "{.fun chol2symm} must have square symmetric matrix, assumed to be \\
+        upper triangular",
+        "{.code dim(x)} returns: {dim(x)}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -40,8 +48,15 @@ chol2symm.greta_array <- function(x) {
   x <- as.greta_array(x)
   dim <- dim(x)
   if (length(dim) != 2 || dim[1] != dim[2]) {
-    stop("only two-dimensional, square, upper-triangular greta arrays ",
-      "can be used by chol2symm",
+    msg <- cli::format_error(
+      c(
+        "{.fun chol2symm} must have two-dimensional, square, upper-triangular \\
+        greta arrays",
+        "{.code dim(x)} returns: {dim(x)}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
