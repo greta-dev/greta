@@ -196,9 +196,16 @@ floor.greta_array <- function(x) {
 #' @export
 round.greta_array <- function(x, digits = 0) {
   if (digits != 0) {
+    msg <- cli::format_error(
+      c(
+        "the {.val digits} argument of {.fun round} cannot be set for \\
+        greta arrays",
+        "greta arrays can only be rounded to the nearest integer, so the \\
+        {.val digits} argument cannot be set"
+      )
+    )
     stop(
-      "greta arrays can only be rounded to the nearest integer, ",
-      "the digits argument cannot be set",
+      msg,
       call. = FALSE
     )
   }
@@ -299,7 +306,12 @@ trigamma.greta_array <- function(x) {
 #' @export
 t.greta_array <- function(x) {
   if (length(dim(x)) != 2) {
-    stop("only 2D arrays can be transposed",
+    msg <- cli::format_error(
+      "only 2D arrays can be transposed",
+      "dimension of {.var x} was {dim(x)}"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -324,9 +336,14 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
   perm <- as.integer(perm)
 
   if (!identical(sort(perm), dimnums)) {
-    stop("perm must be a reordering of the dimensions: ",
-      paste(dimnums, collapse = ", "), " but was: ",
-      paste(perm, collapse = ", "),
+    msg <- cli::format_error(
+      c(
+        "perm must be a reordering of the dimensions: {dimnums}",
+        "but was: {perm}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -350,9 +367,15 @@ chol.greta_array <- function(x, ...) {
     dim <- dim(x)
 
     if (!(length(dim) == 2 && dim[1] == dim[2])) {
+      msg <- cli::format_error(
+        c(
+          "only two-dimensional, square, symmetric greta arrays can be \\
+          Cholesky decomposed",
+          "{.code dim(x)} returns: {dim(x)"
+        )
+      )
       stop(
-        "only two-dimensional, square, symmetric greta arrays ",
-        "can be Cholesky decomposed",
+        msg,
         call. = FALSE
       )
     }
