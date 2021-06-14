@@ -45,21 +45,33 @@
 
   # only for greta arrays without distributions
   if (has_distribution(node)) {
-    stop("left hand side already has a distribution assigned",
+    msg <- cli::format_error(
+      "left hand side already has a distribution assigned"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
 
   # only for data greta arrays
   if (node_type(node) != "data") {
-    stop("distributions can only be assigned to data greta arrays",
+    msg <- cli::format_error(
+      "distributions can only be assigned to data greta arrays"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
 
   # can only assign with greta arrays ...
   if (!inherits(value, "greta_array")) {
-    stop("right hand side must be a greta array",
+    msg <- cli::format_error(
+      "right hand side must be a greta array"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -69,14 +81,22 @@
   distribution_node <- value_node$distribution
 
   if (!inherits(distribution_node, "distribution_node")) {
-    stop("right hand side must have a distribution",
+    msg <- cli::format_error(
+      "right hand side must have a distribution"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
 
   # that aren't already fixed
   if (inherits(distribution_node$target, "data_node")) {
-    stop("right hand side has already been assigned fixed values",
+    msg <- cli::format_error(
+      "right hand side has already been assigned fixed values"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -121,7 +141,14 @@ distribution <- function(greta_array) {
 
   # only for greta arrays
   if (!inherits(greta_array, "greta_array")) {
-    stop("not a greta array",
+    msg <- cli::format_error(
+      c(
+        "{.fun distribution} expects object of type, {.cls greta_array}",
+        "object was not a {.cls greta_array}, but {.cls {class(greta_array)}}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
