@@ -65,9 +65,16 @@ as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
     if (is.logical(x)) {
       x[] <- as.numeric(x[])
     } else if (!optional) {
-      stop("cannot convert a matrix to a greta_array unless it is numeric, ",
-        "integer or logical. This matrix had type: ",
-        class(as.vector(x)),
+      msg <- cli::format_error(
+        c(
+          "Object cannot be coerced to greta array",
+          "cannot convert a matrix to a {.var greta_array} unless it is \\
+          numeric integer or logical. This matrix had type:",
+          "{.cls {class(as.vector(x)))}}",
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -88,9 +95,16 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
     if (is.logical(x)) {
       x[] <- as.numeric(x[])
     } else {
-      stop("cannot convert an array to a greta_array unless it is numeric, ",
-        "integer or logical. This array had type: ",
-        class(as.vector(x)),
+      msg <- cli::format_error(
+        c(
+          "Object cannot be coerced to greta array",
+          "cannot convert an array to a {.var greta_array} unless it is \\
+          numeric integer or logical. This array had type:",
+          "{.cls {class(as.vector(x)))}}",
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -107,8 +121,15 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
 #' @export
 as.greta_array.numeric <- function(x, optional = FALSE, original_x = x, ...) {
   if (!optional & any(!is.finite(x))) {
-    stop("cannot convert objects with missing or infinite values ",
-      "to greta_arrays",
+    msg <- cli::format_error(
+      c(
+        "Object cannot be coerced to greta array",
+        "cannot convert objects with missing or infinite values to a \\
+        {.var greta_array}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -260,8 +281,11 @@ representation <- function(x, name, error = TRUE) {
   }
   repr <- x_node$representations[[name]]
   if (error && is.null(repr)) {
-    stop("greta array has no representation '",
-      name, "'",
+    msg <- cli::format_error(
+      "greta array has no representation {.var name}"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
