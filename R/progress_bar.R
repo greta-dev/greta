@@ -50,16 +50,19 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
 
   if (!is.numeric(pb_update) || length(pb_update) != 1 ||
     !is.finite(pb_update) || pb_update <= 0) {
-    stop(
-      cli::format_error(
-        c(
-          "{.code pb_update} must be a finite, positive, scalar integer",
-          "x" = "We see {.code pb_update} = {.code {pb_update}} \\
+
+    msg <-  cli::format_error(
+      c(
+        "{.code pb_update} must be a finite, positive, scalar integer",
+        "x" = "We see {.code pb_update} = {.code {pb_update}} \\
             having class: \\
             {.cls {class(pb_update)}} and length \\
             {.var {length(pb_update)}}"
-          )
-        ),
+      )
+    )
+
+    stop(
+      msg,
       call. = FALSE
     )
   }

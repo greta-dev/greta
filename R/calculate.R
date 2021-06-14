@@ -169,7 +169,14 @@ calculate <- function(...,
   # catch empty lists here, since check_greta_arrays assumes data greta arrays
   # have been stripped out
   if (identical(target, list())) {
-    stop("no greta arrays to calculate were provided",
+    msg <- cli::format_error(
+      c(
+        "{.fun calculate} requires greta arrays",
+        "no greta arrays were provided to {.fun calculate}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -277,8 +284,12 @@ calculate_greta_mcmc_list <- function(target,
   # check there's some commonality between the two dags
   connected_to_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
   if (!any(connected_to_draws)) {
-    stop("the target greta arrays do not appear to be connected ",
-      "to those in the greta_mcmc_list object",
+    msg <- cli::format_error(
+      "the target greta arrays do not appear to be connected to those in the \\
+      {.var greta_mcmc_list} object"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -290,10 +301,17 @@ calculate_greta_mcmc_list <- function(target,
     # see if the new dag introduces any new variables
     new_types <- dag$node_types[!connected_to_draws]
     if (any(new_types == "variable")) {
-      stop("the target greta arrays are related to new variables ",
-        "that are not in the MCMC samples so cannot be calculated ",
-        "from the samples alone. Set 'nsim' if you want to sample them ",
-        "conditionally on the MCMC samples",
+      msg <- cli::format_error(
+        c(
+          "{.var nsim} must be set to sample greta arrays not in MCMC samples",
+          "the target greta arrays are related to new variables that are not \\
+          in the MCMC samples, so cannot be calculated from the samples alone.",
+          "Set {.var nsim} if you want to sample them conditionally on the \\
+          MCMC samples"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -313,17 +331,20 @@ calculate_greta_mcmc_list <- function(target,
     new_stochastics <- have_distributions & !existing_variables
     if (any(new_stochastics)) {
       n_stoch <- sum(new_stochastics)
-      stop("the greta array",
-        ngettext(n_stoch, " ", "s "),
-        paste(names(target)[new_stochastics], collapse = ", "),
-        ngettext(
-          n_stoch,
-          " has a distribution and is ",
-          " have distributions and are"
-        ),
-        "not in the MCMC samples, so cannot be calculated ",
-        "from the samples alone. Set 'nsim' if you want to sample them ",
-        "conditionally on the MCMC samples",
+      msg <- cli::format_error(
+        c(
+          "{.var nsim} must be set to sample greta arrays with distributions \\
+          not in MCMC samples",
+          "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
+          {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
+          {?have distributions and are/has a distribution and is} not in the \\
+          MCMC samples, so cannot be calculated from the samples alone.",
+          "Set {.var nsim} if you want to sample them conditionally on the \\
+          MCMC samples"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -456,8 +477,14 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     unfixed <- !names(variables) %in% fixed_node_names
 
     if (any(unsampleable & unfixed)) {
-      stop("the target greta arrays are related to variables ",
-        "that do not have distributions so cannot be sampled",
+      msg <- cli::format_error(
+        # NOTE:
+        # is it possible to identify the names of these arrays or variables?
+        "the target greta arrays are related to variables that do not have \\
+        distributions so cannot be sampled"
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }

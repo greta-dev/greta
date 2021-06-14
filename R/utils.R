@@ -484,7 +484,7 @@ check_dims <- function(..., target_dim = NULL) {
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- cli::format_error(message = "incompatible dimensions: {dims_text}")
+      msg <- cli::format_error("incompatible dimensions: {dims_text}")
 
       stop(msg, call. = FALSE)
     }
@@ -546,8 +546,16 @@ check_dims <- function(..., target_dim = NULL) {
 # make sure a greta array is 2D
 check_2d <- function(x) {
   if (length(dim(x)) != 2L) {
-    stop("parameters of multivariate distributions ",
-      "cannot have more than two dimensions",
+    msg <- cli::format_error(
+      c(
+        "Dimensions of parameters not compatible with multivariate \\
+        distribution parameters of multivariate distributions cannot have \\
+        more than two dimensions",
+        "object {.var {x}} has dimensions: {paste(dim(x), collapse = 'x')}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -604,7 +612,10 @@ check_n_realisations <- function(vectors = list(),
           x = "{paste(nrows, collapse = ' vs ')}"
           )
         )
-      stop(msg, call. = FALSE)
+      stop(
+        msg,
+        call. = FALSE
+        )
     }
   }
 
@@ -614,18 +625,19 @@ check_n_realisations <- function(vectors = list(),
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1) {
-      stop(
-        cli::format_error(
-          c(
-            "{.code n_realisations is not a positive scalar interger}",
-            "{.code n_realisations} must be a positive scalar integer giving \\
+      msg <- cli::format_error(
+        c(
+          "{.code n_realisations is not a positive scalar interger}",
+          "{.code n_realisations} must be a positive scalar integer giving \\
             the number of rows of the output",
-            "x" = "We see {.code n_realisations} = {.code {n_realisations}} \\
+          "x" = "We see {.code n_realisations} = {.code {n_realisations}} \\
             having class: \\
             {.cls {class(n_realisations)}} and length \\
             {.var {length(n_realisations)}}"
-          )
-        ),
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -684,8 +696,15 @@ check_dimension <- function(vectors = list(),
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1 || !is.finite(target)) {
-      stop("'dimension' must be a positive scalar integer ",
-        "giving the dimension of the distribution",
+      msg <- cli::format_error(
+        c(
+          "{.var dimension} must be a positive scalar integer giving the \\
+          dimension of the distribution",
+          "{.code dim(target)} returns: {dim(target)}"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -699,13 +718,16 @@ check_dimension <- function(vectors = list(),
 
   # check it's big enough
   if (dimension < min_dimension) {
+    msg <- cli::format_error(
+      c(
+        "the dimension of this distribution must be at least \\
+        {min_dimension}, but was {dimension}",
+        "multivariate distributions treat each {.emph row} as a separate \\
+        realisation - perhaps you need to transpose something?"
+        )
+    )
     stop(
-      cli::format_error(
-        "the dimension of this distribution must be at least {min_dimension}, \\
-        but was {dimension}
-
-        multivariate distributions treat each {.emph row} as a separate \\
-        realisation - perhaps you need to transpose something?"),
+      msg,
       call. = FALSE
     )
   }
@@ -715,18 +737,19 @@ check_dimension <- function(vectors = list(),
     FUN.VALUE = FALSE
   )
 
+  # otherwise it's not fine
   if (!all(match_dimension)) {
-
-    # otherwise it's not fine
-    stop(
-      cli::format_error(
+    msg <- cli::format_error(
+      c(
+        "distribution dimensions do not match implied dimensions",
         "The distribution dimension should be {dimension}, but parameters \\
-        implied dimensions: {paste(ncols, collapse = ' vs ')}
-
-
-        Multivariate distributions treat each {.emph row} as a separate \\
+        implied dimensions: {paste(ncols, collapse = ' vs ')}",
+        "Multivariate distributions treat each {.emph row} as a separate \\
         realisation - perhaps you need to transpose something?"
-        ),
+      )
+    )
+    stop(
+      msg,
       call. = FALSE)
   }
 
@@ -781,7 +804,9 @@ check_multivariate_dims <- function(vectors = list(),
 # check truncation for different distributions
 check_positive <- function(truncation) {
   if (truncation[1] < 0) {
-    stop("lower bound must be 0 or higher",
+    msg <- cli::format_error("lower bound must be 0 or higher")
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -789,7 +814,9 @@ check_positive <- function(truncation) {
 
 check_unit <- function(truncation) {
   if (truncation[1] < 0 | truncation[2] > 1) {
-    stop("lower and upper bounds must be between 0 and 1",
+    msg <- cli::format_error("lower and upper bounds must be between 0 and 1")
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -824,8 +851,8 @@ check_in_family <- function(function_name, arg) {
     msg <- cli::format_error(
       c(
         "Wrong function name provided in another model",
-        "It looks like you're using greta's {.fun {function_name}} function \\
-        in the family argument of another model.",
+        "It looks like you're using {.pkg greta}'s {.fun {function_name}} \\
+        function in the family argument of another model.",
         "Maybe you want to use {.code family = stats::{function_name}},instead?"
       )
     )
@@ -859,7 +886,11 @@ check_future_plan <- function() {
       if (inherits(workers, "cluster")) {
         worker <- workers[[1]]
         if (inherits(worker, "forknode")) {
-          stop("parallel mcmc samplers cannot be run with a fork cluster",
+          msg <- cli::format_error(
+            "parallel mcmc samplers cannot be run with a fork cluster"
+            )
+          stop(
+            msg,
             call. = FALSE
           )
         }
@@ -874,8 +905,12 @@ check_future_plan <- function() {
 
       # if multi*, check it's multisession
       if (plan_is$multiprocess && !plan_is$multisession) {
-        stop("parallel mcmc samplers cannot be run with plan(multiprocess) or ",
-          "plan(multicore)",
+        msg <- cli::format_error(
+          "parallel mcmc samplers cannot be run with \\
+          {.code plan(multiprocess)} or {.code plan(multicore)}"
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -898,28 +933,27 @@ check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
   msg <- NULL
 
   if (length(greta_array_list) == 0) {
-    msg <- "could not find any non-data greta arrays"
+    msg <- cli::format_error(
+      c(
+        "could not find any non-data greta arrays"
+      )
+    )
   }
 
   if (!all(are_greta_arrays)) {
     unexpected_items <- names(greta_array_list)[!are_greta_arrays]
 
-    msg <- ngettext(
-      length(unexpected_items),
-      paste0(
-        "The following objects passed to ",
-        fun_name, "() are not greta arrays: "
-      ),
-      paste0(
-        "The following object passed to ",
-        fun_name, "() is not a greta array: "
+    msg <- cli::format_error(
+      c(
+        "{.fun {fun_name}} arguments must be greta array",
+        "The following {cli::qty(length(unexpected_items))} object{?s} passed \\
+        to {.fun {fun_name}} {cli::qty(length(unexpected_items))} \\
+        {?is not a/are not} greta array{?s}:",
+        "{.val {unexpected_items}}",
+        "{hint}"
       )
     )
-
-    msg <- paste(msg, paste(unexpected_items, sep = ", "))
   }
-
-
 
   if (!is.null(msg)) {
     stop(msg, hint, call. = FALSE)
@@ -947,8 +981,12 @@ check_values_list <- function(values, env) {
   )
 
   if (!all(are_greta_arrays)) {
-    stop("the names of arguments to values must all correspond to named ",
-      "greta arrays",
+    msg <- cli::format_error(
+      "the names of arguments to values must all correspond to named \\
+      greta arrays"
+      )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -957,8 +995,11 @@ check_values_list <- function(values, env) {
   assign_dim <- function(value, greta_array) {
     array <- unclass(get_node(greta_array)$value())
     if (length(array) != length(value)) {
-      stop("a provided value has different number of elements",
-        " than the greta array",
+      msg <- cli::format_error(
+        "a provided value has different number of elements than the greta array"
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -1061,15 +1102,23 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
 check_cum_op <- function(x) {
   dims <- dim(x)
   if (length(dims) > 2 | dims[2] != 1) {
-    stop("'x' must be a column vector, but has dimensions ",
-      paste(dims, collapse = " x "),
+    msg <- cli::format_error(
+      c(
+        "{.var x} must be a column vector",
+        "but {.var x} has dimensions {paste(dims, collapse = 'x ')}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
 }
 
 complex_error <- function(z) {
-  stop("greta does not yet support complex numbers",
+  msg <- cli::format_error("greta does not yet support complex numbers")
+  stop(
+    msg,
     call. = FALSE
   )
 }
