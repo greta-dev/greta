@@ -1358,9 +1358,15 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
   if (!is.null(n_cores) && !n_cores %in% allowed_n_cores) {
     check_positive_integer(n_cores, "n_cores")
 
-    cli::cli_alert_warning(
-      "{n_cores} cores were requested, but only {n_cores_detected} are available."
+    msg <- cli::format_warning(
+      "{n_cores} cores were requested, but only {n_cores_detected} \\
+      are available."
     )
+
+    warning(
+      msg,
+      call. = FALSE
+      )
 
     n_cores <- NULL
   }

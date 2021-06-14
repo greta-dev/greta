@@ -405,9 +405,13 @@ abind.greta_array <- function(...,
   # nolint end
 
   if (user_set_args) {
+    msg <- cli::format_warning(
+      "only the argument {.arg along} is supported when using {.fun abind} \\
+      with greta arrays, any other arguments will be ignored"
+    )
     warning(
-      "only the argument 'along' is supported when using abind ",
-      "with greta arrays, any other arguments will be ignored"
+      msg,
+      call. = FALSE
     )
   }
 

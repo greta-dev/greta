@@ -358,7 +358,13 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
 #' @export
 chol.greta_array <- function(x, ...) {
   if (!identical(list(), list(...))) {
-    warning("chol() options are ignored for greta arrays")
+    msg <- cli::format_warning(
+      "{.fun chol} options are ignored for greta arrays"
+    )
+    warning(
+      msg,
+      call. = FALSE
+    )
   }
 
   if (has_representation(x, "cholesky")) {
@@ -493,14 +499,20 @@ chol2inv.default <- function(x, size = NCOL(x), LINPACK = FALSE) {
 chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
   if (!identical(LINPACK, FALSE)) {
     msg <- cli::format_warning(
-      "The 'LINPACK' argument is ignored for greta arrays, and has also been \\
-      defunct since R 3.1.0"
+      "The {.arg LINPACK} argument is ignored for greta arrays, and has also \\
+      been defunct since R 3.1.0"
     )
     warning(msg)
   }
 
   if (!identical(size, NCOL(x))) {
-    warning("'size' is ignored for greta arrays")
+    msg <- cli::format_warning(
+      "{.arg size} is ignored for greta arrays"
+    )
+    warning(
+      msg,
+      call. = FALSE
+    )
   }
 
   op("chol2inv", x,
@@ -1326,7 +1338,13 @@ rdist.default <- function(x1, x2 = NULL, compact = FALSE) {
 #' @export
 rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
   if (!identical(compact, FALSE)) {
-    warning("'compact' is ignored for greta arrays")
+    msg <- cli::format_warning(
+      "{.arg compact} is ignored for greta arrays"
+    )
+    warning(
+      msg,
+      call. = FALSE
+    )
   }
 
   x1 <- as.greta_array(x1)

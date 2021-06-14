@@ -364,8 +364,12 @@ calculate_greta_mcmc_list <- function(target,
     replace <- FALSE
     if (nsim > n_samples) {
       replace <- TRUE
-      warning("nsim was greater than the number of posterior samples in ",
-        "values, so posterior samples had to be drawn with replacement",
+      msg <- cli::format_warning(
+        "{.arg nsim} was greater than the number of posterior samples in \\
+        values, so posterior samples had to be drawn with replacement"
+      )
+      warning(
+        msg,
         call. = FALSE
       )
     }
