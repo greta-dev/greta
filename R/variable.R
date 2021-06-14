@@ -47,7 +47,11 @@ variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
   check_tf_version("error")
 
   if (inherits(lower, "greta_array") | inherits(upper, "greta_array")) {
-    stop("lower and upper must be fixed, they cannot be another greta array",
+    msg <- cli::format_error(
+      "lower and upper must be fixed, they cannot be another greta array"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -78,13 +82,23 @@ cholesky_variable <- function(dim, correlation = FALSE) {
     dim <- c(dim, dim)
   } else if (n_dim == 2) {
     if (dim[1] != dim[2]) {
-      stop("cholesky variables must be square, but dim was ",
-        paste(dim, collapse = " x "),
+      msg <- cli::format_error(
+        c(
+          "cholesky variables must be square",
+          "However dim was {paste(dim, collapse = ' x ')}"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
   } else {
-    stop("dim can either be a scalar or a vector of length 2",
+    msg <- cli::format_error(
+      "dim can either be a scalar or a vector of length 2"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -141,8 +155,12 @@ simplex_variable <- function(dim) {
   n_dim <- length(dim)
   last_dim <- dim[n_dim]
   if (!last_dim > 1) {
-    stop("the final dimension of a simplex variable must have ",
-      "more than one element",
+    msg <- cli::format_error(
+      "the final dimension of a simplex variable must have more than one \\
+      element"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -186,8 +204,12 @@ ordered_variable <- function(dim) {
   # dimension of the free state version
   n_dim <- length(dim)
   if (!dim[n_dim] > 1) {
-    stop("the final dimension of an ordered variable must have ",
-      "more than one element",
+    msg <- cli::format_error(
+      "the final dimension of an ordered variable must have more than \\
+      one element"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
