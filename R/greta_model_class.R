@@ -98,29 +98,34 @@ model <- function(...,
 
   # separate messages to avoid the subgraphs issue for beginners
   if (n_graphs == 1) {
-    density_message <- paste(
-      "none of the greta arrays in the model are",
-      "associated with a probability density, so a",
-      "model cannot be defined"
+    density_message <- <- cli::format_error(
+      c(
+        "none of the greta arrays in the model are associated with a \\
+        probability density, so a model cannot be defined"
+        )
     )
-    variable_message <- paste(
-      "none of the greta arrays in the model are",
-      "unknown, so a model cannot be defined"
-    )
+    variable_message <- cli::format_error(
+      c(
+        "none of the greta arrays in the model are unknown, so a model cannot \\
+        be defined"
+        )
+      )
   } else {
-    density_message <- paste(
-      "the model contains", n_graphs, "disjoint graphs,",
-      "one or more of these sub-graphs does not contain",
-      "any greta arrays that are associated with a",
-      "probability density, so a model cannot be",
-      "defined"
+    density_message <- cli::format_error(
+      c(
+        "the model contains {n_graphs} disjoint graphs",
+        "one or more of these sub-graphs does not contain any greta arrays \\
+        that are associated with a probability density, so a model cannot be \\
+        defined"
+      )
     )
-    variable_message <- paste(
-      "the model contains", n_graphs, "disjoint",
-      "graphs, one or more of these sub-graphs does",
-      "not contain any greta arrays that are unknown,",
-      "so a model cannot be defined"
-    )
+    variable_message <- cli::format_error(
+        c(
+          "the model contains {n_graphs} disjoint graphs",
+          "one or more of these sub-graphs does not contain any greta arrays \\
+          that are unknown, so a model cannot be defined"
+        )
+      )
   }
 
   for (graph in graphs) {
@@ -128,12 +133,18 @@ model <- function(...,
 
     # check they have a density among them
     if (!("distribution" %in% types_sub)) {
-      stop(density_message, call. = FALSE)
+      stop(
+        density_message,
+        call. = FALSE
+        )
     }
 
     # check they have a variable node among them
     if (!("variable" %in% types_sub)) {
-      stop(variable_message, call. = FALSE)
+      stop(
+        variable_message,
+        call. = FALSE
+        )
     }
   }
 
@@ -150,8 +161,12 @@ model <- function(...,
   )
 
   if (any(bad_nodes)) {
-    stop("model contains a discrete random variable that doesn't have a ",
-      "fixed value, so cannot be sampled from",
+    msg <- cli::format_error(
+        "model contains a discrete random variable that doesn't have a fixed \\
+        value, so cannot be sampled from"
+        )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -207,7 +222,11 @@ plot.greta_model <- function(x,
                              colour = "#996bc7",
                              ...) {
   if (!requireNamespace("DiagrammeR", quietly = TRUE)) {
-    stop("the DiagrammeR package must be installed to plot greta models",
+    msg <- cli::format_error(
+      "the {.pkg DiagrammeR} package must be installed to plot greta models"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }

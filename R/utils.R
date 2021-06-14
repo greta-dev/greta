@@ -484,7 +484,9 @@ check_dims <- function(..., target_dim = NULL) {
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- cli::format_error("incompatible dimensions: {dims_text}")
+      msg <- cli::format_error(
+        "incompatible dimensions: {dims_text}"
+        )
 
       stop(msg, call. = FALSE)
     }
@@ -804,7 +806,9 @@ check_multivariate_dims <- function(vectors = list(),
 # check truncation for different distributions
 check_positive <- function(truncation) {
   if (truncation[1] < 0) {
-    msg <- cli::format_error("lower bound must be 0 or higher")
+    msg <- cli::format_error(
+      "lower bound must be 0 or higher"
+      )
     stop(
       msg,
       call. = FALSE
@@ -814,7 +818,9 @@ check_positive <- function(truncation) {
 
 check_unit <- function(truncation) {
   if (truncation[1] < 0 | truncation[2] > 1) {
-    msg <- cli::format_error("lower and upper bounds must be between 0 and 1")
+    msg <- cli::format_error(
+      "lower and upper bounds must be between 0 and 1"
+      )
     stop(
       msg,
       call. = FALSE
@@ -1116,7 +1122,9 @@ check_cum_op <- function(x) {
 }
 
 complex_error <- function(z) {
-  msg <- cli::format_error("greta does not yet support complex numbers")
+  msg <- cli::format_error(
+    "greta does not yet support complex numbers"
+    )
   stop(
     msg,
     call. = FALSE
@@ -1206,7 +1214,13 @@ greta_col <- function(which = c(
   tryCatch(
     is.matrix(grDevices::col2rgb(colour)),
     error = function(e) {
-      stop(paste("Invalid colour:", colour), call. = FALSE)
+      msg <- cli::format_error(
+          "Invalid colour: {colour}"
+      )
+      stop(
+        msg,
+        call. = FALSE
+        )
     }
   )
 
@@ -1288,7 +1302,16 @@ cleanly <- function(expr) {
 
     # if it was just a numerical error, quietly return a bad value
     if (!any(numerical_errors)) {
-      stop("greta hit a tensorflow error:\n\n", res, call. = FALSE)
+      msg <- cli::format_error(
+        c(
+          "{.pkg greta} hit a tensorflow error:",
+          "{res}"
+        )
+      )
+      stop(
+        msg,
+        call. = FALSE
+        )
     }
   }
 
@@ -1358,7 +1381,11 @@ check_positive_integer <- function(x, name = "") {
   suppressWarnings(x <- as.integer(x))
 
   if (length(x) != 1 | is.na(x) | x < 1) {
-    stop(name, " must be a positive integer",
+    msg <- cli::format_error(
+      "{name} must be a positive integer"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -1370,8 +1397,12 @@ check_positive_integer <- function(x, name = "") {
 check_trace_batch_size <- function(x) {
   valid <- is.numeric(x) && length(x) == 1 && x >= 1
   if (!valid) {
-    stop("trace_batch_size must be a single numeric value ",
-      "greater than or equal to 1",
+    msg <- cli::format_error(
+      "{.var trace_batch_size} must be a single numeric value greater than or \\
+      equal to 1"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -1412,8 +1443,15 @@ flatten_trace <- function(i, trace_list) {
 # stashed_samples, and error nicely if there's something fishy
 get_model_info <- function(draws, name = "value") {
   if (!inherits(draws, "greta_mcmc_list")) {
-    stop(name, " must be an greta_mcmc_list object created by greta::mcmc(), ",
-      "greta::stashed_samples() or greta::extra_samples()",
+    msg <- cli::format_error(
+      c(
+        "{name} must be an {.cls greta_mcmc_list} object",
+        "created by {.fun greta::mcmc}, {.fun greta::stashed_samples}, or \\
+        {.fun greta::extra_samples}",
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -1422,9 +1460,16 @@ get_model_info <- function(draws, name = "value") {
   valid <- !is.null(model_info)
 
   if (!valid) {
-    stop(name, " is an mcmc.list object, but is not associated with any ",
-      "model information, perhaps it wasn't created by greta::mcmc(), ",
-      "greta::stashed_samples() or greta::extra_samples() ?",
+    msg <- cli::format_error(
+      c(
+        "{name} is an {.cls mcmc.list} object, but is not associated with any\\
+        model information",
+        "perhaps it wasn't created by {.fun greta::mcmc}, \\
+        {.fun greta::stashed_samples}, or {.fun greta::extra_samples}?"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
