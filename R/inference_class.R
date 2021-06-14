@@ -109,7 +109,7 @@ inference <- R6Class(
           msg <- cli::format_error(
             c(
               "Could not find reasonable starting values after \\
-              {attempts}, attempts.",
+              {attempts} attempts.",
               "Please specify initial values manually via the \\
               {.arg initial_values} argument"
             )
@@ -521,7 +521,8 @@ sampler <- R6Class(
       }
 
       if (!identical(msg, "")) {
-        cli::cli_alert_info(msg)
+        msg <- cli::format_message(msg)
+        message(msg)
         cat("\n")
       }
     },

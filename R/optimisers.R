@@ -40,8 +40,10 @@ NULL
 # deprecate some optimisers
 optimiser_deprecation_warning <- function() {
   msg <- cli::format_warning(
-    c("This optimiser is deprecated and will be removed in {.pkg greta} 0.4.0.",
-      "Please use a different optimiser.")
+    c(
+      "This optimiser is deprecated and will be removed in {.pkg greta} 0.4.0.",
+      "Please use a different optimiser."
+      )
   )
   warning(
     msg,

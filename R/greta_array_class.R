@@ -40,8 +40,7 @@ as.greta_array.data.frame <- function(x, optional = FALSE,
         "greta arrays must contain the same type",
         "Cannot coerce a {.cls dataframe} to a {.cls greta_array} unless \\
         all columns are {.cls numeric, integer} or {.class logical}. This \\
-        dataframe had columns of type: \\
-        {.cls {paste(invalid_types, collapse = ', ')}}"
+        dataframe had columns of type: {.cls {invalid_types}}"
       )
     )
     stop(
@@ -68,7 +67,7 @@ as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
       msg <- cli::format_error(
         c(
           "Object cannot be coerced to greta array",
-          "cannot convert a matrix to a {.var greta_array} unless it is \\
+          "cannot convert a matrix to a {.cls greta_array} unless it is \\
           numeric integer or logical. This matrix had type:",
           "{.cls {class(as.vector(x)))}}",
         )
@@ -98,7 +97,7 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
       msg <- cli::format_error(
         c(
           "Object cannot be coerced to greta array",
-          "cannot convert an array to a {.var greta_array} unless it is \\
+          "cannot convert an array to a {.cls greta_array} unless it is \\
           numeric integer or logical. This array had type:",
           "{.cls {class(as.vector(x)))}}",
         )
@@ -125,7 +124,7 @@ as.greta_array.numeric <- function(x, optional = FALSE, original_x = x, ...) {
       c(
         "Object cannot be coerced to greta array",
         "cannot convert objects with missing or infinite values to a \\
-        {.var greta_array}"
+        {.cls greta_array}"
       )
     )
     stop(

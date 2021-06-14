@@ -1320,8 +1320,12 @@ rdist.default <- function(x1, x2 = NULL, compact = FALSE) {
   fields_installed <- requireNamespace("fields", quietly = TRUE)
   if (!fields_installed) {
     msg <- cli::format_error(
-      "{.pkg fields} package must be installed to use {.fun rdist} on greta \\
-      arrays"
+      c(
+        "{.pkg fields} package must be installed to use {.fun rdist} on greta \\
+        arrays",
+        "Install {.pkg fields} with:",
+        "{.code install.packages('fields')}"
+        )
     )
     stop(
       msg,

@@ -98,7 +98,7 @@ model <- function(...,
 
   # separate messages to avoid the subgraphs issue for beginners
   if (n_graphs == 1) {
-    density_message <- <- cli::format_error(
+    density_message <- cli::format_error(
       c(
         "none of the greta arrays in the model are associated with a \\
         probability density, so a model cannot be defined"
@@ -223,8 +223,12 @@ plot.greta_model <- function(x,
                              ...) {
   if (!requireNamespace("DiagrammeR", quietly = TRUE)) {
     msg <- cli::format_error(
-      "the {.pkg DiagrammeR} package must be installed to plot greta models"
-    )
+      c(
+        "the {.pkg DiagrammeR} package must be installed to plot greta models",
+        "install {.pkg DiagrammeR} with:",
+        "{.code install.packages('DiagrammeR')"
+        )
+      )
     stop(
       msg,
       call. = FALSE

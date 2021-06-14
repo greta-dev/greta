@@ -303,10 +303,10 @@ calculate_greta_mcmc_list <- function(target,
     if (any(new_types == "variable")) {
       msg <- cli::format_error(
         c(
-          "{.var nsim} must be set to sample greta arrays not in MCMC samples",
+          "{.arg nsim} must be set to sample greta arrays not in MCMC samples",
           "the target greta arrays are related to new variables that are not \\
           in the MCMC samples, so cannot be calculated from the samples alone.",
-          "Set {.var nsim} if you want to sample them conditionally on the \\
+          "Set {.arg nsim} if you want to sample them conditionally on the \\
           MCMC samples"
         )
       )
@@ -333,13 +333,13 @@ calculate_greta_mcmc_list <- function(target,
       n_stoch <- sum(new_stochastics)
       msg <- cli::format_error(
         c(
-          "{.var nsim} must be set to sample greta arrays with distributions \\
+          "{.arg nsim} must be set to sample greta arrays with distributions \\
           not in MCMC samples",
           "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
           {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
           {?have distributions and are/has a distribution and is} not in the \\
           MCMC samples, so cannot be calculated from the samples alone.",
-          "Set {.var nsim} if you want to sample them conditionally on the \\
+          "Set {.arg nsim} if you want to sample them conditionally on the \\
           MCMC samples"
         )
       )

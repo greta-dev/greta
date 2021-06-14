@@ -55,10 +55,8 @@ joint_distribution <- R6Class(
 
       if (n_distributions < 2) {
         msg <- cli::format_error(
-          c(
-            "joint must be passed at least two distributions"
+          "joint must be passed at least two distributions"
           )
-        )
         stop(
           msg,
           call. = FALSE

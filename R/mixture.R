@@ -135,9 +135,10 @@ mixture_distribution <- R6Class(
       if (!(dim_1 | dim_same)) {
         msg <- cli::format_error(
           c(
-            "the dimension of weights must be either {n_distributions} x 1 or \\
-            {n_distributions, x {paste(dim, collapse = ' x ')}",
-            " but was {paste(weights_dim, collapse = ' x ')}"
+            "the dimension of weights must be either \\
+            {.val {n_distributions} x 1} or \\
+            {.val {n_distributions} x {paste(dim, collapse = ' x ')}}",
+            " but was {.val {paste(weights_dim, collapse = ' x ')}}"
           )
         )
         stop(
@@ -207,8 +208,8 @@ mixture_distribution <- R6Class(
         msg <- cli::format_error(
           c(
             "component distributions must have the same support",
-            "However the component distributions have different support: ",
-            "{paste(supports_text, collapse = 'vs. ')}"
+            "However the component distributions have different support:",
+            "{.val {paste(supports_text, collapse = 'vs. ')}}"
           )
         )
         stop(

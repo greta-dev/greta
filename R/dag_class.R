@@ -755,7 +755,7 @@ dag_class <- R6Class(
         msg <- cli::format_error(
           c(
             "sampling is not yet implemented for \\
-            {distribution_node$distribution_name} distributions"
+            {.val {distribution_node$distribution_name}} distributions"
           )
         )
         stop(
@@ -782,7 +782,7 @@ dag_class <- R6Class(
         if (is.null(cdf) | is.null(quantile)) {
           msg <- cli::format_error(
             "sampling is not yet implemented for truncated \\
-            {distribution_node$distribution_name} distributions"
+            {.val {distribution_node$distribution_name}} distributions"
           )
           stop(
             msg,

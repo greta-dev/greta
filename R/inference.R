@@ -320,15 +320,17 @@ run_samplers <- function(samplers,
       length(samplers),
       cores_text
     )
-    cli::cli_alert_info(msg)
+    message(msg)
   }
 
   if (plan_is$parallel & !plan_is$local) {
 
-    cli::cli_alert_info(
-      text = "running {length(samplers)} \\
+    msg <- cli::format_message(
+      "running {length(samplers)} \\
       {?sampler on a remote machine/samplers on remote machines}"
       )
+
+    message(msg)
 
   }
 
@@ -623,7 +625,8 @@ parse_initial_values <- function(initials, dag) {
     msg <- cli::format_error(
       c(
         "some greta arrays passed to {.fun initials} are not associated with \\
-        the model: {bad}"
+        the model:",
+        "{.var {bad}}"
       )
     )
     stop(
@@ -694,9 +697,11 @@ prep_initials <- function(initial_values, n_chains, dag) {
     is_blank <- identical(initial_values, initials())
 
     if (!is_blank & n_chains > 1) {
-      cli::cli_alert_info(
-        "only one set of initial values was provided, and was used for all chains"
+      msg <- cli::format_message(
+        "only one set of initial values was provided, and was used for \\
+        all chains"
       )
+      message(msg)
     }
 
     initial_values <- replicate(n_chains,

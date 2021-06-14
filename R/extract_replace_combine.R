@@ -368,8 +368,12 @@ abind.default <- function(...,
   abind_installed <- requireNamespace("abind", quietly = TRUE)
   if (!abind_installed) {
     msg <- cli::format_error(
-      "{.fun abind} is being called on R arrays (not greta arrays), but \\
-      the {.pkg abind} package is not installed"
+      c(
+        "{.fun abind} is being called on R arrays (not greta arrays), but \\
+        the {.pkg abind} package is not installed",
+        "install {.pkg abind} with:",
+        "{.code install.packages('abind')}"
+      )
     )
     stop(
       msg,

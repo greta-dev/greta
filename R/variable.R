@@ -85,7 +85,7 @@ cholesky_variable <- function(dim, correlation = FALSE) {
       msg <- cli::format_error(
         c(
           "cholesky variables must be square",
-          "However dim was {paste(dim, collapse = ' x ')}"
+          "However dim was: {.val {paste(dim, collapse = ' x ')}}"
         )
       )
       stop(

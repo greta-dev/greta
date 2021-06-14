@@ -108,8 +108,9 @@
         c(
           "left and right hand sides have different dimensions. ",
           "The distribution must have dimension of either \\
-          {paste(dim(greta_array), collapse = ' x ')} or 1 x 1, but instead \\
-          has dimension {paste(dim(value), collapse = ' x ')}"
+          {.val {paste(dim(greta_array), collapse = ' x ')}} or {.val 1 x 1},\\
+          but instead has dimension \\
+          {.val {paste(dim(value), collapse = ' x ')}}"
         )
       )
       stop(

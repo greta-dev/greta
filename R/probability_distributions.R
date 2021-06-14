@@ -923,7 +923,7 @@ multivariate_normal_distribution <- R6Class(
           c(
             "{.arg Sigma} must be a square 2D greta array",
             "However {.arg Sigma} has dimensions \\
-            {paste(dim(sigma), collapse = ' x ')}"
+            {.val {paste(dim(sigma), collapse = ' x ')}}"
           )
         )
         stop(
@@ -1009,7 +1009,7 @@ wishart_distribution <- R6Class(
           c(
             "{.arg Sigma} must be a square 2D greta array",
             "However, {.arg Sigma} has dimensions ",
-            "{paste(dim(sigma), collapse = ' x ')}"
+            "{.val {paste(dim(sigma), collapse = ' x ')}}"
           )
         )
         stop(
@@ -1146,7 +1146,7 @@ lkj_correlation_distribution <- R6Class(
       if (!inherits(eta, "greta_array")) {
         if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
           msg <- cli::format_error(
-            "eta must be a positive scalar value, or a scalar greta array"
+            "{.arg eta} must be a positive scalar value, or a scalar greta array"
           )
           stop(
             msg,
