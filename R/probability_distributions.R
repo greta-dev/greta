@@ -6,7 +6,12 @@ uniform_distribution <- R6Class(
     max = NA,
     initialize = function(min, max, dim) {
       if (inherits(min, "greta_array") | inherits(max, "greta_array")) {
-        stop("min and max must be fixed, they cannot be another greta array",
+        msg <- cli::format_error(
+          "{.arg min} and {.arg max} must be fixed, they cannot be another \\
+          greta array"
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -15,19 +20,31 @@ uniform_distribution <- R6Class(
         is.numeric(max) && length(max) == 1
 
       if (!good_types) {
-        stop("min and max must be numeric vectors of length 1",
+        msg <- cli::format_error(
+          "{.arg min} and {.arg max} must be numeric vectors of length 1"
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
 
       if (!is.finite(min) | !is.finite(max)) {
-        stop("min and max must finite scalars",
+        msg <- cli::format_error(
+          "{.arg min} and {.arg max} must finite scalars"
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
 
       if (min >= max) {
-        stop("max must be greater than min",
+        msg <- cli::format_error(
+          "{.arg max} must be greater than {.arg min}"
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -902,9 +919,15 @@ multivariate_normal_distribution <- R6Class(
       # check dimensions of Sigma
       if (nrow(sigma) != ncol(sigma) |
         length(dim(sigma)) != 2) {
-        stop("Sigma must be a square 2D greta array, ",
-          "but has dimensions ",
-          paste(dim(sigma), collapse = " x "),
+        msg <- cli::format_error(
+          c(
+            "{.arg Sigma} must be a square 2D greta array",
+            "However {.arg Sigma} has dimensions \\
+            {paste(dim(sigma), collapse = ' x ')}"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -914,8 +937,14 @@ multivariate_normal_distribution <- R6Class(
       dim_sigma <- nrow(sigma)
 
       if (dim_mean != dim_sigma) {
-        stop("mean and Sigma have different dimensions, ",
-          dim_mean, " vs ", dim_sigma,
+        msg <- cli::format_error(
+          c(
+            "{.arg mean} and {.arg Sigma} must have the same dimensions",
+            "However they are different: {dim_mean} vs {dim_sigma}",
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -976,8 +1005,15 @@ wishart_distribution <- R6Class(
       # check dimensions of Sigma
       if (nrow(sigma) != ncol(sigma) |
         length(dim(sigma)) != 2) {
-        stop("Sigma must be a square 2D greta array, but has dimensions ",
-          paste(dim(sigma), collapse = " x "),
+        msg <- cli::format_error(
+          c(
+            "{.arg Sigma} must be a square 2D greta array",
+            "However, {.arg Sigma} has dimensions ",
+            "{paste(dim(sigma), collapse = ' x ')}"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -1109,7 +1145,11 @@ lkj_correlation_distribution <- R6Class(
 
       if (!inherits(eta, "greta_array")) {
         if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
-          stop("eta must be a positive scalar value, or a scalar greta array",
+          msg <- cli::format_error(
+            "eta must be a positive scalar value, or a scalar greta array"
+          )
+          stop(
+            msg,
             call. = FALSE
           )
         }
@@ -1119,8 +1159,14 @@ lkj_correlation_distribution <- R6Class(
       eta <- as.greta_array(eta)
 
       if (!is_scalar(eta)) {
-        stop("eta must be a scalar, but had dimensions: ",
-          capture.output(dput(dim(eta))),
+        msg <- cli::format_error(
+          c(
+            "{.arg eta} must be a scalar",
+            "However {.arg eta} had dimensions: {capture.output(dput(dim(eta))}"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
