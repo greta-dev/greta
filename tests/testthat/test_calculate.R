@@ -1,5 +1,3 @@
-context("calculate")
-
 test_that("deterministic calculate works with correct lists", {
   skip_if_not(check_tf_version())
   source("helpers.R")

@@ -1,5 +1,3 @@
-context("iid samples")
-
 test_that("univariate samples are correct", {
   skip_if_not(check_tf_version())
   source("helpers.R")

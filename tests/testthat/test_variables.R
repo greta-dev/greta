@@ -1,5 +1,3 @@
-context("variables")
-
 test_that("variable() errors informatively", {
   skip_if_not(check_tf_version())
   source("helpers.R")

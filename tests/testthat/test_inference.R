@@ -1,5 +1,3 @@
-context("inference methods")
-
 test_that("opt converges with TF optimisers", {
   skip_if_not(check_tf_version())
   source("helpers.R")

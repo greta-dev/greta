@@ -1,5 +1,3 @@
-context("distributions")
-
 test_that("normal distribution has correct density", {
   skip_if_not(check_tf_version())
   source("helpers.R")

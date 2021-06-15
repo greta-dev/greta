@@ -1,5 +1,3 @@
-context("joint distributions")
-
 test_that("continuous joint variables can be sampled from", {
   skip_if_not(check_tf_version())
   source("helpers.R")

@@ -1,5 +1,3 @@
-context("functions")
-
 test_that("simple functions work as expected", {
   skip_if_not(check_tf_version())
   source("helpers.R")

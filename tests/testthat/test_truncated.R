@@ -1,5 +1,3 @@
-context("truncated distributions")
-
 test_that("truncated normal has correct densities", {
   skip_if_not(check_tf_version())
   source("helpers.R")

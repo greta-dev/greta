@@ -1,5 +1,3 @@
-context("as_data")
-
 test_that("as_data coerces correctly", {
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -129,7 +127,7 @@ test_that("as_data errors informatively", {
   cha_arr <- array(cha_vec, dim = c(5, 2, 2))
   cha_df <- as.data.frame(cha_mat, stringsAsFactors = FALSE)
   cha_df2 <- as.data.frame(cha_mat, stringsAsFactors = TRUE)
-  
+
   expect_error(
     as_data(cha_vec),
     "objects of class character cannot be coerced to greta arrays"

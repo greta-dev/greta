@@ -1,5 +1,3 @@
-context("miscellaneous methods")
-
 test_that("check_tf_version works", {
   skip_if_not(check_tf_version())
 

@@ -1,5 +1,3 @@
-context("extract/replace/combine")
-
 test_that("extract works like R", {
   skip_if_not(check_tf_version())
   source("helpers.R")

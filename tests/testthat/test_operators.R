@@ -1,5 +1,3 @@
-context("operators")
-
 test_that("arithmetic operators work as expected", {
   skip_if_not(check_tf_version())
   source("helpers.R")

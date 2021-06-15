@@ -1,5 +1,3 @@
-context("simulate")
-
 test_that("simulate produces the right number of samples", {
   skip_if_not(check_tf_version())
   source("helpers.R")

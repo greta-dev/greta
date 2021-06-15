@@ -1,5 +1,3 @@
-context("mixtures")
-
 test_that("continuous mixture variables can be sampled from", {
   skip_if_not(check_tf_version())
   source("helpers.R")

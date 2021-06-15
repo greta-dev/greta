@@ -1,5 +1,3 @@
-context("transformations")
-
 test_that("transformations work as expected", {
   skip_if_not(check_tf_version())
   source("helpers.R")
