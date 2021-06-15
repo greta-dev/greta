@@ -98,7 +98,8 @@ Suggests:
     fields,
     MASS,
     spelling,
-    covr
+    covr,
+    mockery
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
 Language: en-GB
