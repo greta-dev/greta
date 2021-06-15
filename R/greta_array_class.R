@@ -69,7 +69,7 @@ as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
           "Object cannot be coerced to greta array",
           "cannot convert a matrix to a {.cls greta_array} unless it is \\
           numeric integer or logical. This matrix had type:",
-          "{.cls {class(as.vector(x)))}}",
+          "{.cls {class(as.vector(x))}}"
         )
       )
       stop(
@@ -99,7 +99,7 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
           "Object cannot be coerced to greta array",
           "cannot convert an array to a {.cls greta_array} unless it is \\
           numeric integer or logical. This array had type:",
-          "{.cls {class(as.vector(x)))}}",
+          "{.cls {class(as.vector(x))}}"
         )
       )
       stop(
@@ -156,7 +156,7 @@ as.greta_array.default <- function(x, optional = FALSE, original_x = x, ...) {
       c(
         "Object cannot be coerced to greta array",
         "Objects of class {.cls {paste(class(x), collapse = ' or ')}} cannot \\
-        be coerced to greta arrays",
+        be coerced to greta arrays"
       )
     )
     stop(
