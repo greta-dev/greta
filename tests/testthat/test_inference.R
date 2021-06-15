@@ -75,9 +75,8 @@ test_that("opt converges with SciPy optimisers", {
     matches <- vapply(deprecated, identical, optmr, FUN.VALUE = logical(1))
     msg <- ifelse(any(matches), "deprecated", NA)
 
-    expect_warning(
-      o <- opt(m, optimiser = optmr(), max_iterations = 500),
-      msg
+    expect_snapshot(
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
     )
 
     # should have converged in fewer than 500 iterations and be close to truth
@@ -252,14 +251,15 @@ test_that("mcmc handles initial values nicely", {
   )
 
   inits <- initials(z = rnorm(1))
-  quietly(expect_message(
+  quietly(
+    expect_snapshot(
     mcmc(m,
       warmup = 10, n_samples = 10,
       chains = 2, initial_values = inits,
       verbose = FALSE
-    ),
-    "only one set of initial values was provided"
-  ))
+    )
+    )
+  )
 })
 
 test_that("progress bar gives a range of messages", {

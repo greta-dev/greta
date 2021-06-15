@@ -702,55 +702,59 @@ test_that("uniform distribution errors informatively", {
   source("helpers.R")
 
   # bad types
-  expect_error(
-    uniform(min = 0, max = NA),
-    "min and max must be numeric vectors of length 1"
+  expect_snapshot(
+    error = TRUE,
+    uniform(min = 0, max = NA)
   )
-  expect_error(
-    uniform(min = 0, max = head),
-    "min and max must be numeric vectors of length 1"
+
+  expect_snapshot(
+    error = TRUE,
+    uniform(min = 0, max = head)
   )
-  expect_error(
-    uniform(min = 1:3, max = 5),
-    "min and max must be numeric vectors of length 1"
+
+  expect_snapshot(
+    error = TRUE,
+    uniform(min = 1:3, max = 5)
   )
 
   # good types, bad values
-  expect_error(
-    uniform(min = -Inf, max = Inf),
-    "min and max must finite scalars"
+  expect_snapshot(
+    error = TRUE,
+    uniform(min = -Inf, max = Inf)
   )
 
   # lower not below upper
-  expect_error(
-    uniform(min = 1, max = 1),
-    "max must be greater than min"
+  expect_snapshot(
+    error = TRUE,
+    uniform(min = 1, max = 1)
   )
+
 })
 
 test_that("poisson() and binomial() error informatively in glm", {
   skip_if_not(check_tf_version())
 
   # if passed as an object
-  expect_error(
-    glm(1 ~ 1, family = poisson),
-    "in the family argment of another model."
+  expect_snapshot(
+    error = TRUE,
+    glm(1 ~ 1, family = poisson)
   )
-  expect_error(
-    glm(1 ~ 1, family = binomial),
-    "in the family argment of another model."
+
+  expect_snapshot(
+    error = TRUE,
+    glm(1 ~ 1, family = binomial)
   )
 
   # if executed alone
-  expect_error(
-    glm(1 ~ 1, family = poisson()),
-    "in the family argment of another model."
+  expect_snapshot(
+    error = TRUE,
+    glm(1 ~ 1, family = poisson())
   )
 
   # if given a link
-  expect_error(
-    glm(1 ~ 1, family = poisson("sqrt")),
-    "in the family argment of another model."
+  expect_snapshot(
+    error = TRUE,
+    glm(1 ~ 1, family = poisson("sqrt"))
   )
 })
 
@@ -766,14 +770,17 @@ test_that("wishart distribution errors informatively", {
     wishart(3, a),
     "greta_array"
   ))
-  expect_error(
-    wishart(3, b),
-    "^Sigma must be a square 2D greta array, but has dimensions"
+
+  expect_snapshot(
+    error = TRUE,
+    wishart(3, b)
   )
-  expect_error(
-    wishart(3, c),
-    "^Sigma must be a square 2D greta array, but has dimensions"
+
+  expect_snapshot(
+    error = TRUE,
+    wishart(3, c)
   )
+
 })
 
 
@@ -788,34 +795,34 @@ test_that("lkj_correlation distribution errors informatively", {
     "greta_array"
   ))
 
-  expect_error(
-    lkj_correlation(-1, dim),
-    "^eta must be a positive scalar value, or a scalar greta array"
+  expect_snapshot(
+    error = TRUE,
+    lkj_correlation(-1, dim)
   )
 
-  expect_error(
-    lkj_correlation(c(3, 3), dim),
-    "^eta must be a positive scalar value, or a scalar greta array"
+  expect_snapshot(
+    error = TRUE,
+    lkj_correlation(c(3, 3), dim)
   )
 
-  expect_error(
-    lkj_correlation(uniform(0, 1, dim = 2), dim),
-    "^eta must be a scalar, but had dimensions"
+  expect_snapshot(
+    error = TRUE,
+    lkj_correlation(uniform(0, 1, dim = 2), dim)
   )
 
-  expect_error(
-    lkj_correlation(4, dimension = -1),
-    "'dimension' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    lkj_correlation(4, dimension = -1)
   )
 
-  expect_error(
-    lkj_correlation(4, dim = c(3, 3)),
-    "'dimension' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    lkj_correlation(4, dim = c(3, 3))
   )
 
-  expect_error(
-    lkj_correlation(4, dim = NA),
-    "'dimension' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    lkj_correlation(4, dim = NA)
   )
 })
 
@@ -845,14 +852,14 @@ test_that("multivariate_normal distribution errors informatively", {
   ))
 
   # bad means
-  expect_error(
-    multivariate_normal(m_c, a),
-    paste("the dimension of this distribution must be at least 2")
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_c, a)
   )
 
-  expect_error(
-    multivariate_normal(m_d, a),
-    paste("the dimension of this distribution must be at least 2")
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_d, a)
   )
 
   # good sigmas
@@ -862,45 +869,48 @@ test_that("multivariate_normal distribution errors informatively", {
   ))
 
   # bad sigmas
-  expect_error(
-    multivariate_normal(m_a, b),
-    "cannot have more than two dimensions"
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_a, b)
   )
-  expect_error(
-    multivariate_normal(m_a, c),
-    "expected a 2D square greta array"
+
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_a, c)
   )
 
   # mismatched parameters
-  expect_error(
-    multivariate_normal(m_a, d),
-    "the distribution dimension should be 3, but"
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_a, d)
   )
 
   # scalars
-  expect_error(
-    multivariate_normal(0, 1),
-    "the dimension of this distribution must be at least 2"
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(0, 1)
   )
 
   # bad n_realisations
-  expect_error(
-    multivariate_normal(m_a, a, n_realisations = -1),
-    "'n_realisations' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_a, a, n_realisations = -1)
   )
-  expect_error(
-    multivariate_normal(m_a, a, n_realisations = c(1, 3)),
-    "'n_realisations' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_a, a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_error(
-    multivariate_normal(m_a, a, dimension = -1),
-    "'dimension' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_a, a, dimension = -1)
   )
-  expect_error(
-    multivariate_normal(m_a, a, dimension = c(1, 3)),
-    "'dimension' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    multivariate_normal(m_a, a, dimension = c(1, 3))
   )
 })
 
@@ -935,29 +945,31 @@ test_that("multinomial distribution errors informatively", {
   ))
 
   # scalars
-  expect_error(
-    multinomial(c(1), 1),
-    "the dimension of this distribution must be at least 2"
+  expect_snapshot(
+    error = TRUE,
+    multinomial(c(1), 1)
   )
 
   # bad n_realisations
-  expect_error(
-    multinomial(10, p_a, n_realisations = -1),
-    "'n_realisations' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    multinomial(10, p_a, n_realisations = -1)
   )
-  expect_error(
-    multinomial(10, p_a, n_realisations = c(1, 3)),
-    "'n_realisations' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    multinomial(10, p_a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_error(
-    multinomial(10, p_a, dimension = -1),
-    "'dimension' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    multinomial(10, p_a, dimension = -1)
   )
-  expect_error(
-    multinomial(10, p_a, dimension = c(1, 3)),
-    "'dimension' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    multinomial(10, p_a, dimension = c(1, 3))
   )
 })
 
@@ -980,29 +992,31 @@ test_that("categorical distribution errors informatively", {
   ))
 
   # scalars
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     categorical(1),
-    "the dimension of this distribution must be at least 2"
   )
 
   # bad n_realisations
-  expect_error(
-    categorical(p_a, n_realisations = -1),
-    "'n_realisations' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    categorical(p_a, n_realisations = -1)
   )
-  expect_error(
-    categorical(p_a, n_realisations = c(1, 3)),
-    "'n_realisations' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    categorical(p_a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_error(
-    categorical(p_a, dimension = -1),
-    "'dimension' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    categorical(p_a, dimension = -1)
   )
-  expect_error(
-    categorical(p_a, dimension = c(1, 3)),
-    "'dimension' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    categorical(p_a, dimension = c(1, 3))
   )
 })
 
@@ -1026,29 +1040,31 @@ test_that("dirichlet distribution errors informatively", {
   ))
 
   # scalars
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     dirichlet(1),
-    "the dimension of this distribution must be at least 2"
   )
 
   # bad n_realisations
-  expect_error(
-    dirichlet(alpha_a, n_realisations = -1),
-    "'n_realisations' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    dirichlet(alpha_a, n_realisations = -1)
   )
-  expect_error(
-    dirichlet(alpha_a, n_realisations = c(1, 3)),
-    "'n_realisations' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    dirichlet(alpha_a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_error(
-    dirichlet(alpha_a, dimension = -1),
-    "'dimension' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    dirichlet(alpha_a, dimension = -1)
   )
-  expect_error(
-    dirichlet(alpha_a, dimension = c(1, 3)),
-    "'dimension' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    dirichlet(alpha_a, dimension = c(1, 3))
   )
 })
 
@@ -1098,29 +1114,31 @@ test_that("dirichlet-multinomial distribution errors informatively", {
   ))
 
   # scalars
-  expect_error(
-    dirichlet_multinomial(c(1), 1),
-    "the dimension of this distribution must be at least 2"
+  expect_snapshot(
+    error = TRUE,
+    dirichlet_multinomial(c(1), 1)
   )
 
   # bad n_realisations
-  expect_error(
-    dirichlet_multinomial(10, alpha_a, n_realisations = -1),
-    "'n_realisations' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    dirichlet_multinomial(10, alpha_a, n_realisations = -1)
   )
-  expect_error(
-    dirichlet_multinomial(10, alpha_a, n_realisations = c(1, 3)),
-    "'n_realisations' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    dirichlet_multinomial(10, alpha_a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_error(
-    dirichlet_multinomial(10, alpha_a, dimension = -1),
-    "'dimension' must be a positive scalar integer"
+  expect_snapshot(
+    error = TRUE,
+    dirichlet_multinomial(10, alpha_a, dimension = -1)
   )
-  expect_error(
-    dirichlet_multinomial(10, alpha_a, dimension = c(1, 3)),
-    "'dimension' must be a positive scalar integer"
+
+  expect_snapshot(
+    error = TRUE,
+    dirichlet_multinomial(10, alpha_a, dimension = c(1, 3))
   )
 })
 

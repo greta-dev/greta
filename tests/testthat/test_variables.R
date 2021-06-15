@@ -3,25 +3,26 @@ test_that("variable() errors informatively", {
   source("helpers.R")
 
   # bad types
-  expect_error(
-    variable(upper = NA),
-    "lower and upper must be numeric"
+  expect_snapshot(
+    error = TRUE,
+    variable(upper = NA)
   )
-  expect_error(
-    variable(upper = head),
-    "lower and upper must be numeric"
+
+  expect_snapshot(
+    error = TRUE,
+    variable(upper = head)
   )
 
   # good types, bad values
-  expect_error(
-    variable(lower = 0:2, upper = 1:2),
-    "incompatible dimensions"
+  expect_snapshot(
+    error = TRUE,
+    variable(lower = 0:2, upper = 1:2)
   )
 
   # lower not below upper
-  expect_error(
-    variable(lower = 1, upper = 1),
-    "upper bounds must be greater than lower bounds"
+  expect_snapshot(
+    error = TRUE,
+    variable(lower = 1, upper = 1)
   )
 })
 
@@ -29,31 +30,33 @@ test_that("constrained variable constructors error informatively", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_error(
-    cholesky_variable(dim = 2:3),
-    "cholesky variables must be square"
-  )
-  expect_error(
-    cholesky_variable(dim = rep(2, 3)),
-    "a scalar or a vector of length 2"
+  expect_snapshot(
+    error = TRUE,
+    cholesky_variable(dim = 2:3)
   )
 
-  expect_error(
-    simplex_variable(1),
-    "more than one element"
-  )
-  expect_error(
-    simplex_variable(c(3, 1)),
-    "more than one element"
+  expect_snapshot(
+    error = TRUE,
+    cholesky_variable(dim = rep(2, 3))
   )
 
-  expect_error(
-    ordered_variable(1),
-    "more than one element"
+  expect_snapshot(
+    error = TRUE,
+    simplex_variable(1)
   )
-  expect_error(
-    ordered_variable(c(3, 1)),
-    "more than one element"
+
+  expect_snapshot(
+    error = TRUE,
+    simplex_variable(c(3, 1))
+  )
+
+  expect_snapshot(
+    error = TRUE,
+    ordered_variable(1)
+  )
+  expect_snapshot(
+    error = TRUE,
+    ordered_variable(c(3, 1))
   )
 })
 

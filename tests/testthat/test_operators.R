@@ -104,13 +104,13 @@ test_that("%*% errors informatively", {
   b <- ones(1, 4)
   c <- ones(2, 2, 2)
 
-  expect_error(
-    a %*% b,
-    "incompatible dimensions: 3x4 vs 1x4"
+  expect_snapshot(
+    error = TRUE,
+    a %*% b
   )
 
-  expect_error(
-    a %*% c,
-    "only two-dimensional greta arrays can be matrix-multiplied"
+  expect_snapshot(
+    error = TRUE,
+    a %*% c
   )
 })

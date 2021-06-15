@@ -48,12 +48,13 @@ test_that("mixtures of fixed and continuous distributions errors", {
   source("helpers.R")
 
   weights <- uniform(0, 1, dim = 2)
-  expect_error(
-    mixture(bernoulli(0.5),
+  expect_snapshot(
+    error = TRUE,
+    mixture(
+      bernoulli(0.5),
       normal(0, 1),
       weights = weights
-    ),
-    "combination of discrete and continuous"
+    )
   )
 })
 
@@ -63,12 +64,13 @@ test_that("mixtures of multivariate and univariate errors", {
   source("helpers.R")
 
   weights <- uniform(0, 1, dim = 2)
-  expect_error(
-    mixture(multivariate_normal(zeros(1, 3), diag(3)),
+  expect_snapshot(
+    error = TRUE,
+    mixture(
+      multivariate_normal(zeros(1, 3), diag(3)),
       normal(0, 1, dim = c(1, 3)),
       weights = weights
-    ),
-    "combination of multivariate and univariate"
+    )
   )
 })
 
@@ -79,21 +81,23 @@ test_that("mixtures of supports errors", {
   weights <- c(0.5, 0.5)
 
   # due to truncation
-  expect_error(
-    mixture(normal(0, 1, truncation = c(0, Inf)),
+  expect_snapshot(
+    error = TRUE,
+    mixture(
+      normal(0, 1, truncation = c(0, Inf)),
       normal(0, 1),
       weights = weights
-    ),
-    "component distributions have different support"
+    )
   )
 
   # due to bounds
-  expect_error(
-    mixture(lognormal(0, 1),
+  expect_snapshot(
+    error = TRUE,
+    mixture(
+      lognormal(0, 1),
       normal(0, 1),
       weights = weights
-    ),
-    "component distributions have different support"
+    )
   )
 })
 
@@ -102,12 +106,13 @@ test_that("incorrectly-shaped weights errors", {
   source("helpers.R")
 
   weights <- uniform(0, 1, dim = c(1, 2))
-  expect_error(
-    mixture(normal(0, 1),
+  expect_snapshot(
+    error = TRUE,
+    mixture(
+      normal(0, 1),
       normal(0, 2),
       weights = weights
-    ),
-    "first dimension of weights must be the number of distributions"
+    )
   )
 })
 
@@ -116,17 +121,20 @@ test_that("mixtures with insufficient distributions errors", {
   source("helpers.R")
 
   weights <- uniform(0, 1)
-  expect_error(
-    mixture(normal(0, 2),
+
+  expect_snapshot(
+    error = TRUE,
+    mixture(
+      normal(0, 2),
       weights = weights
-    ),
-    "at least two distributions"
+    )
   )
 
-  expect_error(
-    mixture(weights = weights),
-    "at least two distributions"
+  expect_snapshot(
+    error = TRUE,
+    mixture(weights = weights)
   )
+
 })
 
 test_that("mixture of normals has correct density", {

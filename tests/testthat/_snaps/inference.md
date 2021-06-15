@@ -1,3 +1,69 @@
+# opt converges with SciPy optimisers
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+
+---
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+    Warning <simpleWarning>
+      This optimiser is deprecated and will be removed in greta 0.4.0.
+      Please use a different optimiser.
+
+---
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+    Warning <simpleWarning>
+      This optimiser is deprecated and will be removed in greta 0.4.0.
+      Please use a different optimiser.
+
+---
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+
+---
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+    Warning <simpleWarning>
+      This optimiser is deprecated and will be removed in greta 0.4.0.
+      Please use a different optimiser.
+
+---
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+    Warning <simpleWarning>
+      This optimiser is deprecated and will be removed in greta 0.4.0.
+      Please use a different optimiser.
+
+---
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+    Warning <simpleWarning>
+      This optimiser is deprecated and will be removed in greta 0.4.0.
+      Please use a different optimiser.
+
+---
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+    Warning <simpleWarning>
+      This optimiser is deprecated and will be removed in greta 0.4.0.
+      Please use a different optimiser.
+
+---
+
+    Code
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+    Warning <simpleWarning>
+      This optimiser is deprecated and will be removed in greta 0.4.0.
+      Please use a different optimiser.
+
 # bad mcmc proposals are rejected
 
     Code

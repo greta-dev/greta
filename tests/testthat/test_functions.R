@@ -68,9 +68,9 @@ test_that("cummax and cummin functions error informatively", {
   x <- as_data(randn(10))
 
   for (fun in cumulative_funs) {
-    expect_error(
-      fun(x),
-      "not yet implemented"
+    expect_snapshot(
+      error = TRUE,
+      fun(x)
     )
   }
 })
@@ -83,9 +83,9 @@ test_that("complex number functions error informatively", {
   x <- as_data(randn(25, 4))
 
   for (fun in complex_funs) {
-    expect_error(
-      fun(x),
-      "greta does not yet support complex numbers"
+    expect_snapshot(
+      error = TRUE,
+      fun(x)
     )
   }
 })
@@ -253,14 +253,27 @@ test_that("cumulative functions error as expected", {
   a <- as_data(randn(1, 5))
   b <- as_data(randn(5, 1, 1))
 
-  a_error <- "'x' must be a column vector, but has dimensions 1 x 5"
-  b_error <- "'x' must be a column vector, but has dimensions 5 x 1 x 1"
 
-  expect_error(cumsum(a), a_error)
-  expect_error(cumsum(b), b_error)
+  expect_snapshot(
+    error = TRUE,
+    cumsum(a)
+    )
 
-  expect_error(cumprod(a), a_error)
-  expect_error(cumprod(b), b_error)
+  expect_snapshot(
+    error = TRUE,
+    cumsum(b)
+  )
+
+  expect_snapshot(
+    error = TRUE,
+    cumprod(a)
+  )
+
+  expect_snapshot(
+    error = TRUE,
+    cumprod(b)
+  )
+
 })
 
 test_that("sweep works as expected", {
@@ -310,75 +323,78 @@ test_that("solve and sweep and kronecker error as expected", {
   # solve
 
   # a must be 2D
-  expect_error(
-    solve(b, a),
-    "'a' and 'b' must both be 2D, but 'a' has dimensions:"
+  expect_snapshot(
+    error = TRUE,
+    solve(b, a)
   )
 
   # b must also be 2D
-  expect_error(
-    solve(c, b),
-    "'a' and 'b' must both be 2D, but 'b' has dimensions:"
+  expect_snapshot(
+    error = TRUE,
+    solve(c, b)
   )
 
   # only square matrices allowed for first element
-  expect_error(
-    solve(a, a),
-    "^'a' must be square, but has"
+  expect_snapshot(
+    error = TRUE,
+    solve(a, a)
   )
-  expect_error(
-    solve(a),
-    "^'a' must be square, but has"
+
+  expect_snapshot(
+    error = TRUE,
+    solve(a)
   )
 
   # dimension of second array must match
-  expect_error(
-    solve(c, t(a)),
-    "^'b' must have the same number of rows as 'a'"
+  expect_snapshot(
+    error = TRUE,
+    solve(c, t(a))
   )
 
   # sweep
   # x must be 2D
-  expect_error(
-    sweep(b, 1, stats),
-    "^x must be a 2D array, but has"
+  expect_snapshot(
+    error = TRUE,
+    sweep(b, 1, stats)
   )
 
   # dim must be either 1 or 2
-  expect_error(
-    sweep(a, 3, stats),
-    "MARGIN can only be 1 or 2"
+  expect_snapshot(
+    error = TRUE,
+    sweep(a, 3, stats)
   )
 
   # stats must have the correct number of elements
-  expect_error(
-    sweep(a, 1, c(stats, stats)),
-    "^the number of elements of STATS does not match"
+  expect_snapshot(
+    error = TRUE,
+    sweep(a, 1, c(stats, stats))
   )
 
   # stats must be a column vector
-  expect_error(
-    sweep(a, 1, t(stats)),
-    "^STATS must be a column vector array, but has dimensions"
+  expect_snapshot(
+    error = TRUE,
+    sweep(a, 1, t(stats))
   )
 
-  expect_error(
-    sweep(a, 2, stats),
-    "^the number of elements of STATS does not match"
+
+    expect_snapshot(
+    error = TRUE,
+    sweep(a, 2, stats)
   )
 
   # kronecker
   # X must be 2D
-  expect_error(
-    kronecker(a, b),
-    "^Y must be a 2D array, but has . dimensions"
+  expect_snapshot(
+    error = TRUE,
+    kronecker(a, b)
   )
 
   # Y must be 2D
-  expect_error(
-    kronecker(b, c),
-    "^X must be a 2D array, but has . dimensions"
+  expect_snapshot(
+    error = TRUE,
+    kronecker(b, c)
   )
+
 })
 
 test_that("colSums etc. error as expected", {
@@ -386,22 +402,27 @@ test_that("colSums etc. error as expected", {
   source("helpers.R")
 
   x <- as_data(randn(3, 4, 5))
-  expect_error(
-    colSums(x, dims = 3),
-    "invalid 'dims'"
+
+  expect_snapshot(
+    error = TRUE,
+    colSums(x, dims = 3)
   )
-  expect_error(
-    rowSums(x, dims = 3),
-    "invalid 'dims'"
+
+  expect_snapshot(
+    error = TRUE,
+    rowSums(x, dims = 3)
   )
-  expect_error(
-    colMeans(x, dims = 3),
-    "invalid 'dims'"
+
+  expect_snapshot(
+    error = TRUE,
+    colMeans(x, dims = 3)
   )
-  expect_error(
-    rowMeans(x, dims = 3),
-    "invalid 'dims'"
+
+  expect_snapshot(
+    error = TRUE,
+    rowMeans(x, dims = 3)
   )
+
 })
 
 test_that("forwardsolve and backsolve error as expected", {
@@ -412,23 +433,26 @@ test_that("forwardsolve and backsolve error as expected", {
   b <- as_data(randn(5, 25))
   c <- chol(a)
 
-  expect_error(
-    forwardsolve(a, b, k = 1),
-    "k must equal ncol\\(l\\) for greta arrays"
-  )
-  expect_error(
-    backsolve(a, b, k = 1),
-    "k must equal ncol\\(r\\) for greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    forwardsolve(a, b, k = 1)
   )
 
-  expect_error(
-    forwardsolve(a, b, transpose = TRUE),
-    "transpose must be FALSE for greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    backsolve(a, b, k = 1)
   )
-  expect_error(
-    backsolve(a, b, transpose = TRUE),
-    "transpose must be FALSE for greta arrays"
+
+  expect_snapshot(
+    error = TRUE,
+    forwardsolve(a, b, transpose = TRUE)
   )
+
+  expect_snapshot(
+    error = TRUE,
+    backsolve(a, b, transpose = TRUE)
+  )
+
 })
 
 test_that("tapply errors as expected", {
@@ -440,15 +464,15 @@ test_that("tapply errors as expected", {
   b <- ones(10, 2)
 
   # X must be a column vector
-  expect_error(
-    tapply(b, group, "sum"),
-    "X must be 2D greta array with one column"
+  expect_snapshot(
+    error = TRUE,
+    tapply(b, group, "sum")
   )
 
   # INDEX can't be a greta array
-  expect_error(
-    tapply(a, as_data(group), "sum"),
-    "INDEX cannot be a greta array"
+  expect_snapshot(
+    error = TRUE,
+    tapply(a, as_data(group), "sum")
   )
 })
 
@@ -505,29 +529,25 @@ test_that("ignored options are errored/warned about", {
   source("helpers.R")
 
   x <- ones(3, 3)
-  expect_error(
-    round(x, 2),
-    "digits argument cannot be set"
+  expect_snapshot(
+    error = TRUE,
+    round(x, 2)
   )
 
-  expect_warning(
-    chol(x, pivot = TRUE),
-    "ignored for greta arrays"
+  expect_snapshot(
+    chol(x, pivot = TRUE)
   )
 
-  expect_warning(
-    chol2inv(x, LINPACK = TRUE),
-    "ignored for greta arrays"
+  expect_snapshot(
+    chol2inv(x, LINPACK = TRUE)
   )
 
-  expect_warning(
-    chol2inv(x, size = 1),
-    "ignored for greta arrays"
+  expect_snapshot(
+    chol2inv(x, size = 1)
   )
 
-  expect_warning(
-    rdist(x, compact = TRUE),
-    "ignored for greta arrays"
+  expect_snapshot(
+    rdist(x, compact = TRUE)
   )
 })
 
@@ -539,49 +559,49 @@ test_that("incorrect dimensions are errored about", {
   x <- ones(3, 3, 3)
   y <- ones(3, 4)
 
-  expect_error(
-    t(x),
-    "only 2D arrays can be transposed"
+  expect_snapshot(
+    error = TRUE,
+    t(x)
   )
 
-  expect_error(
-    aperm(x, 2:1),
-    "must be a reordering of the dimensions"
+  expect_snapshot(
+    error = TRUE,
+    aperm(x, 2:1)
   )
 
-  expect_error(
-    chol(x),
-    "only two-dimensional, square, symmetric greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    chol(x)
   )
 
-  expect_error(
-    chol(y),
-    "only two-dimensional, square, symmetric greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    chol(y)
   )
 
-  expect_error(
-    chol2symm(x),
-    "only two-dimensional, square, upper-triangular greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    chol2symm(x)
   )
 
-  expect_error(
-    chol2symm(y),
-    "only two-dimensional, square, upper-triangular greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    chol2symm(y)
   )
 
-  expect_error(
-    eigen(x),
-    "only two-dimensional, square, symmetric greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    eigen(x)
   )
 
-  expect_error(
-    eigen(y),
-    "only two-dimensional, square, symmetric greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    eigen(y)
   )
 
-  expect_error(
-    rdist(x, y),
-    "must have the same number of columns"
+  expect_snapshot(
+    error = TRUE,
+    rdist(x, y)
   )
 })
 

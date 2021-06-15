@@ -34,8 +34,9 @@ test_that("imultilogit errors informatively", {
 
   x <- ones(3, 4, 3)
 
-  expect_error(
-    imultilogit(x),
-    "imultilogit expects a 2D greta array"
+  expect_snapshot(
+    error = TRUE,
+    imultilogit(x)
   )
+
 })

@@ -108,17 +108,19 @@ test_that("as_data errors informatively", {
   source("helpers.R")
 
   # wrong class of object
-  expect_error(
-    as_data(NULL),
-    "objects of class NULL cannot be coerced to greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    as_data(NULL)
   )
-  expect_error(
-    as_data(list()),
-    "objects of class list cannot be coerced to greta arrays"
+
+  expect_snapshot(
+    error = TRUE,
+    as_data(list())
   )
-  expect_error(
-    as_data(environment()),
-    "objects of class environment cannot be coerced to greta arrays"
+
+  expect_snapshot(
+    error = TRUE,
+    as_data(environment())
   )
 
   # correct classes with wrong types
@@ -128,41 +130,29 @@ test_that("as_data errors informatively", {
   cha_df <- as.data.frame(cha_mat, stringsAsFactors = FALSE)
   cha_df2 <- as.data.frame(cha_mat, stringsAsFactors = TRUE)
 
-  expect_error(
-    as_data(cha_vec),
-    "objects of class character cannot be coerced to greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    as_data(cha_vec)
   )
-  expect_error(
-    as_data(cha_mat),
-    paste(
-      "cannot convert a matrix to a greta_array unless it is",
-      "numeric, integer or logical.",
-      "This matrix had type: character"
-    )
+
+  expect_snapshot(
+    error = TRUE,
+    as_data(cha_mat)
   )
-  expect_error(
-    as_data(cha_arr),
-    paste(
-      "cannot convert an array to a greta_array unless it is",
-      "numeric, integer or logical.",
-      "This array had type: character"
-    )
+
+  expect_snapshot(
+    error = TRUE,
+    as_data(cha_arr)
   )
-  expect_error(
-    as_data(cha_df),
-    paste(
-      "cannot coerce a dataframe to a greta_array unless all",
-      "columns are numeric, integer or logical.",
-      "This dataframe had columns of type: character"
-    )
+
+  expect_snapshot(
+    error = TRUE,
+    as_data(cha_df)
   )
-  expect_error(
-    as_data(cha_df2),
-    paste(
-      "cannot coerce a dataframe to a greta_array unless all",
-      "columns are numeric, integer or logical.",
-      "This dataframe had columns of type: factor"
-    )
+
+  expect_snapshot(
+    error = TRUE,
+    as_data(cha_df2)
   )
 
   # correct class and type but infinite or missing values
@@ -173,38 +163,31 @@ test_that("as_data errors informatively", {
   arr_na <- randn(3, 3)
   arr_na[1, 3] <- NA
 
-  expect_error(
-    as_data(arr_inf),
-    paste(
-      "cannot convert objects with missing or",
-      "infinite values to greta_arrays"
-    )
+  expect_snapshot(
+    error = TRUE,
+    as_data(arr_inf)
   )
-  expect_error(
-    as_data(arr_minf),
-    paste(
-      "cannot convert objects with missing or",
-      "infinite values to greta_arrays"
-    )
+
+  expect_snapshot(
+    error = TRUE,
+    as_data(arr_minf)
   )
-  expect_error(
-    as_data(arr_na),
-    paste(
-      "cannot convert objects with missing or",
-      "infinite values to greta_arrays"
-    )
+
+  expect_snapshot(
+    error = TRUE,
+    as_data(arr_na)
   )
 
   # non-data greta arrays
   stoch <- normal(0, 1, dim = c(2, 3))
   op <- stoch^2
 
-  expect_error(
-    as_data(stoch),
-    "cannot coerce a non-data greta_array to data"
+  expect_snapshot(
+    error = TRUE,
+    as_data(stoch)
   )
-  expect_error(
-    as_data(op),
-    "cannot coerce a non-data greta_array to data"
+  expect_snapshot(
+    error = TRUE,
+    as_data(op)
   )
 })

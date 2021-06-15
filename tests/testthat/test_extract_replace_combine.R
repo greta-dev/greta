@@ -394,14 +394,16 @@ test_that("abind errors informatively", {
   b <- ones(1, 1, 3)
   c <- ones(5, 1, 1)
 
-  expect_error(
-    abind(a, b),
-    "dimension 1 had varying sizes"
+  expect_snapshot(
+    error = TRUE,
+    abind(a, b)
   )
-  expect_error(
-    abind(a, c, along = 5),
-    "along must be between 0 and 4"
+
+  expect_snapshot(
+    error = TRUE,
+    abind(a, c, along = 5)
   )
+
 })
 
 test_that("rbind and cbind can prepend R arrays to greta arrays", {
@@ -433,9 +435,9 @@ test_that("assign errors on variable greta arrays", {
   source("helpers.R")
 
   z <- normal(0, 1, dim = 5)
-  expect_error(
-    z[1] <- 3,
-    "cannot replace values in a variable greta array"
+  expect_snapshot(
+    error = TRUE,
+    z[1] <- 3
   )
 })
 
@@ -446,14 +448,14 @@ test_that("rbind and cbind give informative error messages", {
   a <- as_data(randn(5, 1))
   b <- as_data(randn(1, 5))
 
-  expect_error(
-    rbind(a, b),
-    "all greta arrays must be have the same number of columns"
+  expect_snapshot(
+    error = TRUE,
+    rbind(a, b)
   )
 
-  expect_error(
-    cbind(a, b),
-    "all greta arrays must be have the same number of rows"
+  expect_snapshot(
+    error = TRUE,
+    cbind(a, b)
   )
 })
 
@@ -462,20 +464,20 @@ test_that("replacement gives informative error messages", {
   source("helpers.R")
 
   x <- ones(2, 2, 2)
-  expect_error(
-    x[1:2, , 1] <- seq_len(3),
-    "not a multiple of replacement length"
+  expect_snapshot(
+    error = TRUE,
+    x[1:2, , 1] <- seq_len(3)
   )
 
-  expect_error(
-    x[1, 1, 3] <- 1,
-    "subscript out of bounds"
+  expect_snapshot(
+    error = TRUE,
+    x[1, 1, 3] <- 1
   )
 
   x <- ones(2)
-  expect_error(
-    x[3] <- 1,
-    "subscript out of bounds"
+  expect_snapshot(
+    error = TRUE,
+    x[3] <- 1
   )
 })
 
@@ -484,15 +486,15 @@ test_that("extraction gives informative error messages", {
   source("helpers.R")
 
   x <- ones(2, 2, 2)
-  expect_error(
-    x[1, 1, 3],
-    "subscript out of bounds"
+  expect_snapshot(
+    error = TRUE,
+    x[1, 1, 3]
   )
 
   x <- ones(2)
-  expect_error(
-    x[3],
-    "subscript out of bounds"
+  expect_snapshot(
+    error = TRUE,
+    x[3]
   )
 })
 
@@ -629,27 +631,24 @@ test_that("dim<- errors as expected", {
 
   x <- zeros(3, 4)
 
-  expect_error(
-    dim(x) <- pi[0],
-    "length-0 dimension vector is invalid"
+  expect_snapshot(
+    error = TRUE,
+    dim(x) <- pi[0]
   )
 
-  expect_error(
-    dim(x) <- c(1, NA),
-    "the dims contain missing values"
+  expect_snapshot(
+    error = TRUE,
+    dim(x) <- c(1, NA)
   )
 
-  expect_error(
-    dim(x) <- c(1, -1),
-    "the dims contain negative values"
+  expect_snapshot(
+    error = TRUE,
+    dim(x) <- c(1, -1)
   )
 
-  expect_error(
-    dim(x) <- 13,
-    paste(
-      "dims \\[product 13\\] do not match the length of",
-      "object \\[12\\]"
-    )
+  expect_snapshot(
+    error = TRUE,
+    dim(x) <- 13
   )
 })
 
