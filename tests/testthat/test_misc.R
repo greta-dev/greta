@@ -21,24 +21,32 @@ test_that("check_tf_version works", {
 })
 
   # forge a missing installation
-test_that("check_tf_version errors when py_module_available is FALSE", {
-    mockery::stub(check_tf_version, 'reticulate::py_module_available', FALSE)
+test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
+    # mockery::stub(check_tf_version, 'reticulate::py_module_available', FALSE)
+    mockery::stub(check_tf_version, 'have_python', FALSE)
+    mockery::stub(check_tf_version, 'have_tf', FALSE)
+    mockery::stub(check_tf_version, 'have_tfp', FALSE)
+
     expect_snapshot(
       error = TRUE,
       check_tf_version("error")
       )
+
     expect_snapshot(
       check_tf_version("warn")
     )
+
     expect_snapshot(
       check_tf_version("message")
     )
 
-  # check_tf_version fails when tfp not available
+})
+
+test_that("check_tf_version fails when tfp not available", {
     greta_stash$python_has_been_initialised <- FALSE
-    mockery::stub(check_tf_version, 'greta:::have_tfp', FALSE)
-    expect_snapshot(
-      check_tf_version("message")
+    mockery::stub(check_tf_version, 'have_tfp', FALSE)
+    expect_error(
+      check_tf_version("error")
     )
   })
 
