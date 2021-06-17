@@ -67,172 +67,6 @@
 # bad mcmc proposals are rejected
 
     Code
-      mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)
-    Message <simpleMessage>
-      running 4 chains simultaneously on up to 8 cores
-    Output
-      
-    Message <message>
-      
-        sampling                                             0/10 | eta:  ?s          
-      
-        sampling ========================================= 10/10 | eta:  0s | 100% bad
-      
-    Output
-      $`11`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-                  z
-      1  -0.1378134
-      2  -0.1378134
-      3  -0.1378134
-      4  -0.1378134
-      5  -0.1378134
-      6  -0.1378134
-      7  -0.1378134
-      8  -0.1378134
-      9  -0.1378134
-      10 -0.1378134
-      
-      $`12`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-                 z
-      1  0.1096673
-      2  0.1096673
-      3  0.1096673
-      4  0.1096673
-      5  0.1096673
-      6  0.1096673
-      7  0.1096673
-      8  0.1096673
-      9  0.1096673
-      10 0.1096673
-      
-      $`13`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-                  z
-      1  0.01224709
-      2  0.01224709
-      3  0.01224709
-      4  0.01224709
-      5  0.01224709
-      6  0.01224709
-      7  0.01224709
-      8  0.01224709
-      9  0.01224709
-      10 0.01224709
-      
-      $`14`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-                  z
-      1  0.05754025
-      2  0.05754025
-      3  0.05754025
-      4  0.05754025
-      5  0.05754025
-      6  0.05754025
-      7  0.05754025
-      8  0.05754025
-      9  0.05754025
-      10 0.05754025
-      
-      attr(,"class")
-      [1] "greta_mcmc_list" "mcmc.list"      
-      attr(,"model_info")
-      attr(,"model_info")$raw_draws
-      $`11`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-              draws
-      1  -0.1378134
-      2  -0.1378134
-      3  -0.1378134
-      4  -0.1378134
-      5  -0.1378134
-      6  -0.1378134
-      7  -0.1378134
-      8  -0.1378134
-      9  -0.1378134
-      10 -0.1378134
-      
-      $`12`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-             draws
-      1  0.1096673
-      2  0.1096673
-      3  0.1096673
-      4  0.1096673
-      5  0.1096673
-      6  0.1096673
-      7  0.1096673
-      8  0.1096673
-      9  0.1096673
-      10 0.1096673
-      
-      $`13`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-              draws
-      1  0.01224709
-      2  0.01224709
-      3  0.01224709
-      4  0.01224709
-      5  0.01224709
-      6  0.01224709
-      7  0.01224709
-      8  0.01224709
-      9  0.01224709
-      10 0.01224709
-      
-      $`14`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-              draws
-      1  0.05754025
-      2  0.05754025
-      3  0.05754025
-      4  0.05754025
-      5  0.05754025
-      6  0.05754025
-      7  0.05754025
-      8  0.05754025
-      9  0.05754025
-      10 0.05754025
-      
-      attr(,"class")
-      [1] "mcmc.list"
-      
-      attr(,"model_info")$samplers
-      attr(,"model_info")$samplers$`1`
-      hmc_sampler object with parameters:
-        Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1
-      
-      attr(,"model_info")$model
-      greta model
-
----
-
-    Code
       mcmc(m, chains = 1, n_samples = 1, warmup = 0, initial_values = initials(z = 1e+20))
     Error <simpleError>
       The log density could not be evaluated at these initial values
@@ -264,6 +98,122 @@
     Error <simpleError>
       the initial values provided have different dimensions than the named
       greta arrays
+
+---
+
+    Code
+      mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = inits,
+        verbose = FALSE)
+    Message <simpleMessage>
+      only one set of initial values was provided, and was used for all chains
+    Output
+      $`11`
+      Markov Chain Monte Carlo (MCMC) output:
+      Start = 1 
+      End = 10 
+      Thinning interval = 1 
+                 z
+      1  0.2320075
+      2  0.2320075
+      3  0.2320075
+      4  0.2320075
+      5  0.2320075
+      6  0.2320075
+      7  0.2320075
+      8  0.2320075
+      9  0.2320075
+      10 0.2320075
+      
+      $`12`
+      Markov Chain Monte Carlo (MCMC) output:
+      Start = 1 
+      End = 10 
+      Thinning interval = 1 
+                   z
+      1  -0.03301933
+      2  -0.03301933
+      3  -0.03301933
+      4  -0.03301933
+      5  -0.03301933
+      6  -0.03301933
+      7  -0.03301933
+      8  -0.03301933
+      9  -0.03301933
+      10 -0.03301933
+      
+      attr(,"class")
+      [1] "greta_mcmc_list" "mcmc.list"      
+      attr(,"model_info")
+      attr(,"model_info")$raw_draws
+      $`11`
+      Markov Chain Monte Carlo (MCMC) output:
+      Start = 1 
+      End = 10 
+      Thinning interval = 1 
+             draws
+      1  0.2320075
+      2  0.2320075
+      3  0.2320075
+      4  0.2320075
+      5  0.2320075
+      6  0.2320075
+      7  0.2320075
+      8  0.2320075
+      9  0.2320075
+      10 0.2320075
+      
+      $`12`
+      Markov Chain Monte Carlo (MCMC) output:
+      Start = 1 
+      End = 10 
+      Thinning interval = 1 
+               draws
+      1  -0.03301933
+      2  -0.03301933
+      3  -0.03301933
+      4  -0.03301933
+      5  -0.03301933
+      6  -0.03301933
+      7  -0.03301933
+      8  -0.03301933
+      9  -0.03301933
+      10 -0.03301933
+      
+      attr(,"class")
+      [1] "mcmc.list"
+      
+      attr(,"model_info")$samplers
+      attr(,"model_info")$samplers$`1`
+      hmc_sampler object with parameters:
+        Lmin = 5, Lmax = 10, epsilon = 0.7303997, diag_sd = 1
+      
+      attr(,"model_info")$model
+      greta model
+
+# progress bar gives a range of messages
+
+    Code
+      draws <- mock_mcmc(1010)
+    Message <message>
+      
+        sampling          1010/1010 | eta:  0s | <1% bad
+
+---
+
+    Code
+      draws <- mock_mcmc(500)
+    Message <message>
+      
+        sampling            500/500 | eta:  0s | 2% bad 
+
+---
+
+    Code
+      draws <- mock_mcmc(10)
+    Message <message>
+      
+        sampling =========== 10/10 | eta:  0s | 100% bad
+      
 
 # samples has object names
 
@@ -370,17 +320,6 @@
         File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/framework/ops.py", line 2005, in __init__
           self._traceback = tf_stack.extract_stack()
       
-      
-      Detailed traceback:
-        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 950, in run
-          run_metadata_ptr)
-        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1173, in _run
-          feed_dict_tensor, options, run_metadata)
-        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1350, in _do_run
-          run_metadata)
-        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1370, in _do_call
-          raise type(e)(node_def, op, message)
-      
 
 # mcmc errors for invalid parallel plans
 
@@ -404,255 +343,6 @@
       mcmc(m)
     Error <simpleError>
       parallel mcmc samplers cannot be run with a fork cluster
-
-# parallel reporting works
-
-    
-    $`1`
-    Markov Chain Monte Carlo (MCMC) output:
-    Start = 1 
-    End = 50 
-    Thinning interval = 1 
-       normal(0, 1)
-    1   -0.60353627
-    2   -0.70876887
-    3   -0.12786462
-    4   -0.38048314
-    5   -0.52593100
-    6   -0.77275922
-    7   -0.25541066
-    8   -0.20496913
-    9   -0.51230310
-    10  -0.87033490
-    11  -0.97542509
-    12  -0.82763233
-    13  -0.51594138
-    14  -0.35445841
-    15  -0.08278087
-    16  -0.05320751
-    17   0.35754070
-    18   0.01012805
-    19  -0.16452010
-    20  -0.14201107
-    21   0.28838395
-    22   0.07052948
-    23   0.19227378
-    24   0.23332410
-    25   0.03687536
-    26  -0.28782405
-    27  -0.34811660
-    28  -0.16675694
-    29   0.03231739
-    30  -0.24215381
-    31  -0.41002156
-    32   0.15234462
-    33   0.40016195
-    34   0.46318062
-    35   0.91454680
-    36   1.11181785
-    37   0.92794177
-    38   0.82479474
-    39   0.83102312
-    40   0.62644195
-    41   0.41511357
-    42   0.24689580
-    43  -0.06214723
-    44  -0.60490728
-    45  -0.63297842
-    46  -0.42100472
-    47  -0.47519158
-    48  -0.45662466
-    49  -0.72001988
-    50  -0.51153033
-    
-    $`2`
-    Markov Chain Monte Carlo (MCMC) output:
-    Start = 1 
-    End = 50 
-    Thinning interval = 1 
-       normal(0, 1)
-    1   -0.73994652
-    2    0.86013234
-    3   -0.18148090
-    4   -0.60636329
-    5    2.89486932
-    6   -0.35374077
-    7    0.21950963
-    8    1.04208788
-    9   -0.57532942
-    10  -0.70989657
-    11  -0.13673223
-    12  -2.94662648
-    13   2.25851035
-    14   0.33459797
-    15   2.08260300
-    16  -0.08207127
-    17   1.25657272
-    18   0.67984468
-    19  -0.14159572
-    20  -0.19716614
-    21  -0.58173101
-    22  -1.20678012
-    23   0.22687220
-    24  -2.81832076
-    25   0.08045149
-    26  -1.06561396
-    27   0.66191466
-    28   0.07385028
-    29   0.72285259
-    30   1.70855253
-    31  -0.32735329
-    32   0.45611010
-    33  -0.14434979
-    34   1.40308647
-    35   0.54201353
-    36  -0.23447155
-    37   0.45013978
-    38   0.65239743
-    39   0.65239743
-    40  -0.15601453
-    41   1.47541956
-    42  -0.28682682
-    43  -0.25888275
-    44   0.06860817
-    45  -0.46931777
-    46   1.07518457
-    47   1.22710289
-    48   0.73505108
-    49  -0.49205054
-    50   0.85720682
-    
-    attr(,"class")
-    [1] "greta_mcmc_list" "mcmc.list"      
-    attr(,"model_info")
-    attr(,"model_info")$raw_draws
-    $`1`
-    Markov Chain Monte Carlo (MCMC) output:
-    Start = 1 
-    End = 50 
-    Thinning interval = 1 
-             draws
-    1  -0.60353627
-    2  -0.70876887
-    3  -0.12786462
-    4  -0.38048314
-    5  -0.52593100
-    6  -0.77275922
-    7  -0.25541066
-    8  -0.20496913
-    9  -0.51230310
-    10 -0.87033490
-    11 -0.97542509
-    12 -0.82763233
-    13 -0.51594138
-    14 -0.35445841
-    15 -0.08278087
-    16 -0.05320751
-    17  0.35754070
-    18  0.01012805
-    19 -0.16452010
-    20 -0.14201107
-    21  0.28838395
-    22  0.07052948
-    23  0.19227378
-    24  0.23332410
-    25  0.03687536
-    26 -0.28782405
-    27 -0.34811660
-    28 -0.16675694
-    29  0.03231739
-    30 -0.24215381
-    31 -0.41002156
-    32  0.15234462
-    33  0.40016195
-    34  0.46318062
-    35  0.91454680
-    36  1.11181785
-    37  0.92794177
-    38  0.82479474
-    39  0.83102312
-    40  0.62644195
-    41  0.41511357
-    42  0.24689580
-    43 -0.06214723
-    44 -0.60490728
-    45 -0.63297842
-    46 -0.42100472
-    47 -0.47519158
-    48 -0.45662466
-    49 -0.72001988
-    50 -0.51153033
-    
-    $`2`
-    Markov Chain Monte Carlo (MCMC) output:
-    Start = 1 
-    End = 50 
-    Thinning interval = 1 
-             draws
-    1  -0.73994652
-    2   0.86013234
-    3  -0.18148090
-    4  -0.60636329
-    5   2.89486932
-    6  -0.35374077
-    7   0.21950963
-    8   1.04208788
-    9  -0.57532942
-    10 -0.70989657
-    11 -0.13673223
-    12 -2.94662648
-    13  2.25851035
-    14  0.33459797
-    15  2.08260300
-    16 -0.08207127
-    17  1.25657272
-    18  0.67984468
-    19 -0.14159572
-    20 -0.19716614
-    21 -0.58173101
-    22 -1.20678012
-    23  0.22687220
-    24 -2.81832076
-    25  0.08045149
-    26 -1.06561396
-    27  0.66191466
-    28  0.07385028
-    29  0.72285259
-    30  1.70855253
-    31 -0.32735329
-    32  0.45611010
-    33 -0.14434979
-    34  1.40308647
-    35  0.54201353
-    36 -0.23447155
-    37  0.45013978
-    38  0.65239743
-    39  0.65239743
-    40 -0.15601453
-    41  1.47541956
-    42 -0.28682682
-    43 -0.25888275
-    44  0.06860817
-    45 -0.46931777
-    46  1.07518457
-    47  1.22710289
-    48  0.73505108
-    49 -0.49205054
-    50  0.85720682
-    
-    attr(,"class")
-    [1] "mcmc.list"
-    
-    attr(,"model_info")$samplers
-    attr(,"model_info")$samplers$`1`
-    hmc_sampler object with parameters:
-      Lmin = 5, Lmax = 10, epsilon = 1.273579, diag_sd = 1
-    attr(,"model_info")$samplers$`2`
-    hmc_sampler object with parameters:
-      Lmin = 5, Lmax = 10, epsilon = 1.220961, diag_sd = 1
-    
-    attr(,"model_info")$model
-    greta model
 
 # initials works
 

@@ -130,12 +130,13 @@ test_that("define and mcmc error informatively", {
   # a bad number of cores
   a <- normal(0, 1)
   m <- model(a)
-  expect_snapshot(
+  expect_warning(
     mcmc(m,
-      warmup = 1,
-      n_samples = 1,
-      n_cores = 1000000L
-    )
+         warmup = 1,
+         n_samples = 1,
+         n_cores = 1000000L
+    ),
+    "cores were requested, but only"
   )
 
   # can't draw samples of a data greta array
@@ -143,7 +144,7 @@ test_that("define and mcmc error informatively", {
   m <- model(x, z)
   expect_snapshot(
     error = TRUE,
-    mcmc(m)
+    draws <- mcmc(m)
   )
 })
 

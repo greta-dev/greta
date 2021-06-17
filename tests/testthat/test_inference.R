@@ -151,10 +151,14 @@ test_that("bad mcmc proposals are rejected", {
   #   `greta:::create_progress_bar` = mock_create_progress_bar,
   #   out <- get_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
   #   expect_match(out, "100% bad")
-    expect_snapshot(
-      mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)
-    )
+    # expect_snapshot(
+    #   draws <- mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)
+    # )
   # )
+    out <- get_output(
+      mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)
+      )
+    expect_match(out, "100% bad")
 
     expect_snapshot(
       error = TRUE,
@@ -267,15 +271,14 @@ test_that("progress bar gives a range of messages", {
   source("helpers.R")
 
   # 10/1010 should be <1%
-  mockery::stub(mcmc, 'greta:::create_progress_bar', mock_create_progress_bar)
-  mockery::stub(mcmc, 'greta::mcmc', mock_mcmc)
-  expect_snapshot_output(mcmc(1010))
+  expect_snapshot(draws <- mock_mcmc(1010))
 
   # 10/500 should be 2%
-  expect_snapshot_output(mcmc(500))
+  expect_snapshot(draws <- mock_mcmc(500))
 
   # 10/10 should be 100%
-  expect_snapshot_output(mcmc(10))
+  expect_snapshot(draws <- mock_mcmc(10))
+
 })
 
 test_that("extra_samples works", {
@@ -546,9 +549,10 @@ test_that("parallel reporting works", {
   plan(multisession)
 
   # should report each sampler's progress with a fraction
-  expect_snapshot_output(
-    mcmc(m, warmup = 50, n_samples = 50, chains = 2)
-  )
+  out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
+  expect_match(out, "2 samplers in parallel")
+  expect_match(out, "50/50")
+
   # put the future plan back as we found it
   plan(op)
 })

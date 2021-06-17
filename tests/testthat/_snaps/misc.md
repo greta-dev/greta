@@ -38,7 +38,7 @@
       (Note: Your R session should not have initialised Tensorflow yet.)
       For more information, see `?install_greta_deps`
 
-# check_tf_version errors when py_module_available is FALSE
+# check_tf_version errors when have_python, _tf, or _tfp is FALSE
 
     Code
       check_tf_version("error")
@@ -120,102 +120,7 @@
 ---
 
     Code
-      mcmc(m, warmup = 1, n_samples = 1, n_cores = 1000000L)
-    Warning <simpleWarning>
-      1000000 cores were requested, but only 8 are available.
-    Message <simpleMessage>
-      running 4 chains simultaneously on up to 8 cores
-    Output
-      
-    Message <message>
-      
-          warmup                                              0/1 | eta:  ?s          
-      
-        sampling                                              0/1 | eta:  ?s          
-    Output
-      $`11`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 1 
-      Thinning interval = 1 
-                 a
-      1 -0.1665097
-      
-      $`12`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 1 
-      Thinning interval = 1 
-                a
-      1 0.3649543
-      
-      $`13`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 1 
-      Thinning interval = 1 
-                a
-      1 0.5069952
-      
-      $`14`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 1 
-      Thinning interval = 1 
-                 a
-      1 -0.7750817
-      
-      attr(,"class")
-      [1] "greta_mcmc_list" "mcmc.list"      
-      attr(,"model_info")
-      attr(,"model_info")$raw_draws
-      $`11`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 1 
-      Thinning interval = 1 
-             draws
-      1 -0.1665097
-      
-      $`12`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 1 
-      Thinning interval = 1 
-            draws
-      1 0.3649543
-      
-      $`13`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 1 
-      Thinning interval = 1 
-            draws
-      1 0.5069952
-      
-      $`14`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 1 
-      Thinning interval = 1 
-             draws
-      1 -0.7750817
-      
-      attr(,"class")
-      [1] "mcmc.list"
-      
-      attr(,"model_info")$samplers
-      attr(,"model_info")$samplers$`1`
-      hmc_sampler object with parameters:
-        Lmin = 5, Lmax = 10, epsilon = 0.6863129, diag_sd = 1
-      
-      attr(,"model_info")$model
-      greta model
-
----
-
-    Code
-      mcmc(m)
+      draws <- mcmc(m)
     Error <simpleError>
       data greta arrays cannot be sampled
       `x` is a data greta array

@@ -192,7 +192,7 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   # this should error without nsim being specified (y is stochastic)
   expect_snapshot(
     error = TRUE,
-    calculate(a, y, values = draws)
+    calc_a <- calculate(a, y, values = draws)
   )
 
   # this should be OK
@@ -219,7 +219,7 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 
   # warn about resampling if nsim is greater than elements in draws
   expect_snapshot(
-    calculate(y, values = draws, nsim = samples * chains + 1)
+    new_y <- calculate(y, values = draws, nsim = samples * chains + 1)
   )
 
 })
@@ -249,7 +249,7 @@ test_that("calculate errors if the mcmc samples unrelated to target", {
 
   expect_snapshot(
     error = TRUE,
-    calculate(c, values = draws)
+    calc_c <- calculate(c, values = draws)
   )
 })
 
@@ -281,7 +281,7 @@ test_that("stochastic calculate works with mcmc samples & new stochastics", {
   # given by draws)
   expect_snapshot(
     error = TRUE,
-    calculate(b, values = draws)
+    calc_b <- calculate(b, values = draws)
   )
 
   sims <- calculate(b, values = draws, nsim = 10)
@@ -300,13 +300,13 @@ test_that("calculate errors nicely if non-greta arrays are passed", {
   # it should error nicely
   expect_snapshot(
     error = TRUE,
-    calculate(y, x, values = list(x = c(2, 1)))
+    calc_y <- calculate(y, x, values = list(x = c(2, 1)))
   )
 
   # and a hint for this common error
   expect_snapshot(
     error = TRUE,
-    calculate(y, list(x = c(2, 1)))
+    calc_y <- calculate(y, list(x = c(2, 1)))
   )
 
 })
@@ -322,7 +322,7 @@ test_that("calculate errors nicely if values for stochastics not passed", {
   # it should error nicely
   expect_snapshot(
     error = TRUE,
-    calculate(y, values = list(x = c(2, 1)))
+    calc_y <- calculate(y, values = list(x = c(2, 1)))
   )
 
   # but is should work fine if nsim is set
@@ -340,7 +340,7 @@ test_that("calculate errors nicely if values have incorrect dimensions", {
   # it should error nicely
   expect_snapshot(
     error = TRUE,
-    calculate(y, values = list(a = c(1, 1)))
+    calc_y <- calculate(y, values = list(a = c(1, 1)))
   )
 })
 
@@ -386,15 +386,15 @@ test_that("calculate errors nicely with invalid batch sizes", {
   # variable valid batch sizes
   expect_snapshot(
     error = TRUE,
-    calculate(y, values = draws, trace_batch_size = 0)
+    calc_y <- calculate(y, values = draws, trace_batch_size = 0)
   )
   expect_snapshot(
     error = TRUE,
-    calculate(y, values = draws, trace_batch_size = NULL)
+    calc_y <- calculate(y, values = draws, trace_batch_size = NULL)
   )
   expect_snapshot(
     error = TRUE,
-    calculate(y, values = draws, trace_batch_size = NA)
+    calc_y <- calculate(y, values = draws, trace_batch_size = NA)
   )
 })
 
@@ -523,7 +523,7 @@ test_that("calculate errors if distribution-free variables are not fixed", {
   y <- normal(a, 1)
   expect_snapshot(
     error = TRUE,
-    calculate(a, y, nsim = 1)
+    calc_a <- calculate(a, y, nsim = 1)
   )
 })
 
@@ -547,16 +547,16 @@ test_that("calculate errors nicely if nsim is invalid", {
 
   expect_snapshot(
     error = TRUE,
-    calculate(x, nsim = 0)
+    calc_x <- calculate(x, nsim = 0)
   )
 
   expect_snapshot(
     error = TRUE,
-    calculate(x, nsim = -1)
+    calc_x <- calculate(x, nsim = -1)
   )
 
   expect_snapshot(
     error = TRUE,
-    calculate(x, nsim = "five")
+    calc_x <- calculate(x, nsim = "five")
   )
 })
