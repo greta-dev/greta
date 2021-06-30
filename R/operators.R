@@ -174,7 +174,7 @@ NULL
       c(
         "incompatible dimensions: \\
         {.val {paste0(dim(x), collapse = 'x')}} vs \\
-        {.val {paste0(dim(y), collapse = 'x')}}",
+        {.val {paste0(dim(y), collapse = 'x')}}"
       )
     )
     stop(msg, call. = FALSE)

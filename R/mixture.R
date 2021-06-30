@@ -85,7 +85,7 @@ mixture_distribution <- R6Class(
 
       if (n_distributions < 2) {
         msg <- cli::format_error(
-          "mixture must be passed at least two distributions",
+          "mixture must be passed at least two distributions"
         )
         stop(
           msg,

@@ -421,7 +421,7 @@ solve.greta_array <- function(a, b, ...) {
         "{.var a} is not square",
         "x" = "{.var a} must be square, but has \\
         {dim(a)[1]} rows and \\
-        {dim(a)[2]} columns",
+        {dim(a)[2]} columns"
       )
     )
 
@@ -827,7 +827,7 @@ sweep.greta_array <- function(x,
       c(
         "Array not 2D",
         "x" = "{.var x} must be a 2D array, but has {length(dim(x))} \\
-        dimensions",
+        dimensions"
       )
     )
     stop(
@@ -888,7 +888,7 @@ setMethod(
       msg <- cli::format_error(
         c(
           "Not a 2D array",
-          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions",
+          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions"
         )
       )
       stop(
@@ -1384,7 +1384,7 @@ rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
         c(
           "{.var x1} and {.var x2} must have the same number of columns",
           "However {.code ncol(x1)} = {ncol(x1)} and \\
-          {.code ncol(x2)} = {ncol(x2)}",
+          {.code ncol(x2)} = {ncol(x2)}"
         )
       )
       stop(

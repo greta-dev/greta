@@ -1481,7 +1481,7 @@ get_model_info <- function(draws, name = "value") {
       c(
         "{name} must be an {.cls greta_mcmc_list} object",
         "created by {.fun greta::mcmc}, {.fun greta::stashed_samples}, or \\
-        {.fun greta::extra_samples}",
+        {.fun greta::extra_samples}"
       )
     )
     stop(

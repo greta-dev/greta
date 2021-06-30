@@ -940,7 +940,7 @@ multivariate_normal_distribution <- R6Class(
         msg <- cli::format_error(
           c(
             "{.arg mean} and {.arg Sigma} must have the same dimensions",
-            "However they are different: {dim_mean} vs {dim_sigma}",
+            "However they are different: {dim_mean} vs {dim_sigma}"
           )
         )
         stop(
