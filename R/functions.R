@@ -902,7 +902,7 @@ setMethod(
       msg <- cli::format_error(
         c(
           "Not a 2D array",
-          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions",
+          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions"
         )
       )
       stop(
