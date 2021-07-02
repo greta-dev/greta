@@ -100,14 +100,16 @@
     Code
       solve(a, a)
     Error <simpleError>
-      argument 3 is empty
+      `a` is not square
+      x `a` must be square, but has 5 rows and 25 columns
 
 ---
 
     Code
       solve(a)
     Error <simpleError>
-      argument 3 is empty
+      `a` is not square
+      x `a` must be square, but has 5 rows and 25 columns
 
 ---
 
@@ -122,7 +124,8 @@
     Code
       sweep(b, 1, stats)
     Error <simpleError>
-      argument 3 is empty
+      Array not 2D
+      x `x` must be a 2D array, but has 3 dimensions
 
 ---
 
@@ -159,14 +162,16 @@
     Code
       kronecker(a, b)
     Error <simpleError>
-      argument 3 is empty
+      Not a 2D array
+      `X` must be a 2D array, but has 2 dimensions
 
 ---
 
     Code
       kronecker(b, c)
     Error <simpleError>
-      argument 3 is empty
+      Not a 2D array
+      `X` must be a 2D array, but has 3 dimensions
 
 # colSums etc. error as expected
 
@@ -373,5 +378,6 @@
     Code
       rdist(x, y)
     Error <simpleError>
-      argument 3 is empty
+      `x1` and `x2` must have the same number of columns
+      However `ncol(x1)` = 1 and `ncol(x2)` = 4
 
