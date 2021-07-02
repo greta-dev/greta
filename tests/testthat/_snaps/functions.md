@@ -249,8 +249,8 @@
     Code
       round(x, 2)
     Error <simpleError>
-      the 'digits' argument of `round()` cannot be set for greta arrays
-      greta arrays can only be rounded to the nearest integer, so the 'digits'
+      the "digits" argument of `round()` cannot be set for greta arrays
+      greta arrays can only be rounded to the nearest integer, so the "digits"
       argument cannot be set
 
 ---

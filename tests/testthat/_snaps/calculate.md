@@ -42,7 +42,7 @@
     Error <simpleError>
       `calculate()` arguments must be greta array
       The following object passed to `calculate()` is not a greta array:
-      'x'
+      "x"
       Perhaps you forgot to explicitly name other arguments?
       Perhaps you forgot to explicitly name other arguments?
 
@@ -53,7 +53,7 @@
     Error <simpleError>
       `calculate()` arguments must be greta array
       The following object passed to `calculate()` is not a greta array:
-      'list(x = c(2, 1))'
+      "list(x = c(2, 1))"
       Perhaps you forgot to explicitly name other arguments?
       Perhaps you forgot to explicitly name other arguments?
 
@@ -109,7 +109,7 @@
     Code
       sims <- calculate(y, nsim = 1)
     Error <simpleError>
-      sampling is not yet implemented for 'hypergeometric' distributions
+      sampling is not yet implemented for "hypergeometric" distributions
 
 # calculate errors nicely if nsim is invalid
 

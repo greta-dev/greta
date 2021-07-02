@@ -32,7 +32,7 @@
       cholesky_variable(dim = 2:3)
     Error <simpleError>
       cholesky variables must be square
-      However dim was: '2 x 3'
+      However dim was: "2 x 3"
 
 ---
 

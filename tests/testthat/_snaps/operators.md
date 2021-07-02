@@ -3,7 +3,7 @@
     Code
       a %*% b
     Error <simpleError>
-      argument 2 is empty
+      incompatible dimensions: "3x4" vs "1x4"
 
 ---
 

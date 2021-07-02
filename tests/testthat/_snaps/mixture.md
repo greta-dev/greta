@@ -22,7 +22,7 @@
     Error <simpleError>
       component distributions must have the same support
       However the component distributions have different support:
-      '0 to Infvs. -Inf to Inf'
+      "0 to Infvs. -Inf to Inf"
 
 ---
 
@@ -31,7 +31,7 @@
     Error <simpleError>
       component distributions must have the same support
       However the component distributions have different support:
-      '0 to Infvs. -Inf to Inf'
+      "0 to Infvs. -Inf to Inf"
 
 # incorrectly-shaped weights errors
 

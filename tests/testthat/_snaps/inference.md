@@ -113,33 +113,33 @@
       End = 10 
       Thinning interval = 1 
                  z
-      1  0.2320075
-      2  0.2320075
-      3  0.2320075
-      4  0.2320075
-      5  0.2320075
-      6  0.2320075
-      7  0.2320075
-      8  0.2320075
-      9  0.2320075
-      10 0.2320075
+      1  -1.032127
+      2  -1.032127
+      3  -1.032127
+      4  -1.032127
+      5  -1.032127
+      6  -1.032127
+      7  -1.032127
+      8  -1.032127
+      9  -1.032127
+      10 -1.032127
       
       $`12`
       Markov Chain Monte Carlo (MCMC) output:
       Start = 1 
       End = 10 
       Thinning interval = 1 
-                   z
-      1  -0.03301933
-      2  -0.03301933
-      3  -0.03301933
-      4  -0.03301933
-      5  -0.03301933
-      6  -0.03301933
-      7  -0.03301933
-      8  -0.03301933
-      9  -0.03301933
-      10 -0.03301933
+                z
+      1  -1.09758
+      2  -1.09758
+      3  -1.09758
+      4  -1.09758
+      5  -1.09758
+      6  -1.09758
+      7  -1.09758
+      8  -1.09758
+      9  -1.09758
+      10 -1.09758
       
       attr(,"class")
       [1] "greta_mcmc_list" "mcmc.list"      
@@ -151,33 +151,33 @@
       End = 10 
       Thinning interval = 1 
              draws
-      1  0.2320075
-      2  0.2320075
-      3  0.2320075
-      4  0.2320075
-      5  0.2320075
-      6  0.2320075
-      7  0.2320075
-      8  0.2320075
-      9  0.2320075
-      10 0.2320075
+      1  -1.032127
+      2  -1.032127
+      3  -1.032127
+      4  -1.032127
+      5  -1.032127
+      6  -1.032127
+      7  -1.032127
+      8  -1.032127
+      9  -1.032127
+      10 -1.032127
       
       $`12`
       Markov Chain Monte Carlo (MCMC) output:
       Start = 1 
       End = 10 
       Thinning interval = 1 
-               draws
-      1  -0.03301933
-      2  -0.03301933
-      3  -0.03301933
-      4  -0.03301933
-      5  -0.03301933
-      6  -0.03301933
-      7  -0.03301933
-      8  -0.03301933
-      9  -0.03301933
-      10 -0.03301933
+            draws
+      1  -1.09758
+      2  -1.09758
+      3  -1.09758
+      4  -1.09758
+      5  -1.09758
+      6  -1.09758
+      7  -1.09758
+      8  -1.09758
+      9  -1.09758
+      10 -1.09758
       
       attr(,"class")
       [1] "mcmc.list"
@@ -185,7 +185,7 @@
       attr(,"model_info")$samplers
       attr(,"model_info")$samplers$`1`
       hmc_sampler object with parameters:
-        Lmin = 5, Lmax = 10, epsilon = 0.7303997, diag_sd = 1
+        Lmin = 5, Lmax = 10, epsilon = 0.6620174, diag_sd = 1
       
       attr(,"model_info")$model
       greta model
@@ -236,7 +236,7 @@
     Error <simpleError>
       `model()` arguments must be greta array
       The following object passed to `model()` is not a greta array:
-      'a'
+      "a"
 
 # mcmc doesn't support slice sampler with double precision models
 
@@ -319,6 +319,17 @@
           op_def=op_def)
         File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/framework/ops.py", line 2005, in __init__
           self._traceback = tf_stack.extract_stack()
+      
+      
+      Detailed traceback:
+        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 950, in run
+          run_metadata_ptr)
+        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1173, in _run
+          feed_dict_tensor, options, run_metadata)
+        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1350, in _do_run
+          run_metadata)
+        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1370, in _do_call
+          raise type(e)(node_def, op, message)
       
 
 # mcmc errors for invalid parallel plans

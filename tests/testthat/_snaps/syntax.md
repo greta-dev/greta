@@ -25,8 +25,8 @@
       distribution(y) <- normal(0, 1, dim = c(3, 3, 1))
     Error <simpleError>
       left and right hand sides have different dimensions.
-      The distribution must have dimension of either '3 x 3 x 2' or '1 x 1',but
-      instead has dimension '3 x 3 x 1'
+      The distribution must have dimension of either "3 x 3 x 2" or "1 x 1",but
+      instead has dimension "3 x 3 x 1"
 
 ---
 

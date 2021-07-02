@@ -11,7 +11,7 @@
     Code
       sims <- simulate(m)
     Error <simpleError>
-      sampling is not yet implemented for 'hypergeometric' distributions
+      sampling is not yet implemented for "hypergeometric" distributions
 
 # simulate errors nicely if nsim is invalid
 
