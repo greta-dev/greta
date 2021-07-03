@@ -8,5 +8,8 @@ using_greta_conda_env <- function() {
 }
 
 have_greta_conda_env <- function(){
-  "greta-env" %in% reticulate::conda_list()$name
+  tryCatch(
+    expr = "greta-env" %in% reticulate::conda_list()$name,
+    error = FALSE
+  )
 }
