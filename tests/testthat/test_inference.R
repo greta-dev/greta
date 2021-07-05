@@ -229,10 +229,13 @@ test_that("mcmc handles initial values nicely", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  suppressWarnings(expr = {
-    RNGkind(sample.kind = "Rounding")
-    set.seed(2021 - 07 - 05)
-  })
+  # preserve R version
+  if (R.version.string >= "3.6.0") {
+    suppressWarnings(expr = {
+      RNGkind(sample.kind = "Rounding")
+      set.seed(2020 - 02 - 11)
+    })
+  }
 
   x <- rnorm(10)
   z <- normal(0, 1)
