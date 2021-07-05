@@ -1,5 +1,8 @@
 use_greta_conda_env <- function() {
-  reticulate::use_condaenv("greta-env", required = TRUE)
+  tryCatch(
+    expr = reticulate::use_condaenv("greta-env", required = TRUE),
+    error = function(e) NULL
+  )
 }
 
 using_greta_conda_env <- function() {
@@ -10,6 +13,6 @@ using_greta_conda_env <- function() {
 have_greta_conda_env <- function(){
   tryCatch(
     expr = "greta-env" %in% reticulate::conda_list()$name,
-    error = FALSE
+    error = function(e) FALSE
   )
 }
