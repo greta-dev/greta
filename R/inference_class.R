@@ -740,6 +740,8 @@ sampler <- R6Class(
           )
         } else {
 
+          greta_stash$tf_num_error <- result
+
           # otherwise, *one* of these multiple samples was bad. The sampler
           # won't be valid if we just restart, so we need to error here,
           # informing the user how to run one sample at a time
@@ -748,7 +750,9 @@ sampler <- R6Class(
               "TensorFlow hit a numerical problem that caused it to error",
               "{.pkg greta} can handle these as bad proposals if you rerun \\
               {.fun mcmc} with the argument {.code one_by_one = TRUE}.",
-              "This will slow down the sampler slightly."
+              "This will slow down the sampler slightly.",
+              "The error encountered can be recovered and viewed with:",
+              "{.code greta_notes_tf_num_error()}"
             )
           )
 
