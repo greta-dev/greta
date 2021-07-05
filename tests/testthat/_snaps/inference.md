@@ -255,82 +255,9 @@
       TensorFlow hit a numerical problem that caused it to error
       greta can handle these as bad proposals if you rerun `mcmc()` with the argument
       `one_by_one = TRUE`.
-      This will slow down the sampler slightly.Error in py_call_impl(callable, dots$args, dots$keywords): InvalidArgumentError: Cholesky decomposition was not successful. The input might not be valid.
-      	 [[node mcmc_sample_chain/trace_scan/while/smart_for_loop/while/mh_one_step/hmc_kernel_one_step/leapfrog_integrate/while/leapfrog_integrate_one_step/maybe_call_fn_and_grads/value_and_gradients/Cholesky (defined at Library/Frameworks/R.framework/Versions/4.1/Resources/library/reticulate/python/rpytools/call.py:13) ]]
-      
-      Original stack trace for 'mcmc_sample_chain/trace_scan/while/smart_for_loop/while/mh_one_step/hmc_kernel_one_step/leapfrog_integrate/while/leapfrog_integrate_one_step/maybe_call_fn_and_grads/value_and_gradients/Cholesky':
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/sample.py", line 361, in sample_chain
-          parallel_iterations=parallel_iterations)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/util.py", line 370, in trace_scan
-          parallel_iterations=parallel_iterations)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 3501, in while_loop
-          return_same_structure)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 3012, in BuildLoop
-          pred, body, original_loop_vars, loop_vars, shape_invariants)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 2937, in _BuildLoop
-          body_result = body(*packed_vars_for_body)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/util.py", line 359, in _body
-          state = loop_fn(state, elems_array.read(i))
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/sample.py", line 345, in _trace_scan_fn
-          parallel_iterations=parallel_iterations)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/util.py", line 286, in smart_for_loop
-          parallel_iterations=parallel_iterations
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 3501, in while_loop
-          return_same_structure)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 3012, in BuildLoop
-          pred, body, original_loop_vars, loop_vars, shape_invariants)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 2937, in _BuildLoop
-          body_result = body(*packed_vars_for_body)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/util.py", line 284, in <lambda>
-          body=lambda i, *args: [i + 1] + list(body_fn(*args)),
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/hmc.py", line 549, in one_step
-          current_state, previous_kernel_results)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/metropolis_hastings.py", line 194, in one_step
-          previous_kernel_results.accepted_results)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/hmc.py", line 739, in one_step
-          current_target_log_prob_grad_parts)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/leapfrog_integrator.py", line 287, in __call__
-          target_grad_parts,
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 3231, in while_loop_v2
-          return_same_structure=True)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 3501, in while_loop
-          return_same_structure)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 3012, in BuildLoop
-          pred, body, original_loop_vars, loop_vars, shape_invariants)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/control_flow_ops.py", line 2937, in _BuildLoop
-          body_result = body(*packed_vars_for_body)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/leapfrog_integrator.py", line 281, in <lambda>
-          body=lambda i, *args: [i + 1] + list(self._one_step(*args)),  # pylint: disable=no-value-for-parameter
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/leapfrog_integrator.py", line 317, in _one_step
-          self.target_fn, next_state_parts)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/util.py", line 233, in maybe_call_fn_and_grads
-          result, grads = _value_and_gradients(fn, fn_arg_list, result, grads)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow_probability/python/mcmc/internal/util.py", line 192, in _value_and_gradients
-          result = fn(*fn_arg_list)
-        File "Library/Frameworks/R.framework/Versions/4.1/Resources/library/reticulate/python/rpytools/call.py", line 13, in python_function
-          res = rpycall.call_r_function(f, *args, **kwargs)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/ops/gen_linalg_ops.py", line 819, in cholesky
-          "Cholesky", input=input, name=name)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/framework/op_def_library.py", line 788, in _apply_op_helper
-          op_def=op_def)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/util/deprecation.py", line 507, in new_func
-          return func(*args, **kwargs)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/framework/ops.py", line 3616, in create_op
-          op_def=op_def)
-        File "Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/framework/ops.py", line 2005, in __init__
-          self._traceback = tf_stack.extract_stack()
-      
-      
-      Detailed traceback:
-        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 950, in run
-          run_metadata_ptr)
-        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1173, in _run
-          feed_dict_tensor, options, run_metadata)
-        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1350, in _do_run
-          run_metadata)
-        File "/Users/njtierney/Library/r-miniconda/envs/greta-env/lib/python3.7/site-packages/tensorflow/python/client/session.py", line 1370, in _do_call
-          raise type(e)(node_def, op, message)
-      
+      This will slow down the sampler slightly.
+      The error encountered can be recovered and viewed with:
+      `greta_notes_tf_num_error()`
 
 # mcmc errors for invalid parallel plans
 
