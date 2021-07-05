@@ -28,7 +28,7 @@ when running \code{install_miniconda()}, \code{conda_create()}, \code{conda_inst
 when encountering a TensorFlow numerical problem.
 }
 \examples{
-\dontun{
+\dontrun{
 greta_notes_install_miniconda()
 greta_notes_conda_create()
 greta_notes_conda_install()

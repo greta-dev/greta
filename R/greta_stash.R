@@ -19,7 +19,7 @@ greta_stash$tf_num_error <- greta_note_msg
 #' @rdname stash-notes
 #' @export
 #' @examples
-#' \dontun{
+#' \dontrun{
 #' greta_notes_install_miniconda()
 #' greta_notes_conda_create()
 #' greta_notes_conda_install()
