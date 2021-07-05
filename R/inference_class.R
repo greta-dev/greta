@@ -758,7 +758,6 @@ sampler <- R6Class(
 
           stop(
             msg,
-            result,
             call. = FALSE
           )
         }
