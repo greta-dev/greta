@@ -43,6 +43,35 @@ jobs:
           remotes::install_cran("covr")
         shell: Rscript {0}
 
+      ###
+      - name: Install Miniconda
+        run: |
+          install.packages(c("remotes", "keras"))
+          reticulate::install_miniconda()
+        shell: Rscript {0}
+
+      - name: Set options for conda binary for macOS
+        if: runner.os == 'macOS'
+        run: |
+          echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
+
+#  Perhaps here is where we can install / change the environment that we are
+# installing into? Can we call our own greta install functions here?
+      - name: Install TensorFlow
+        run: |
+          reticulate::conda_create('r-reticulate', packages = c('python==3.7'))
+          remotes::install_local()
+          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
+        shell: Rscript {0}
+
+      - name: Python + TF details
+        run: |
+          Rscript -e 'tensorflow::tf_config()'
+          Rscript -e 'tensorflow::tf_version()'
+          Rscript -e 'reticulate::py_module_available("tensorflow_probability")'
+          Rscript -e 'reticulate::py_config()'
+      ###
+
       - name: Test coverage
         run: covr::codecov()
         shell: Rscript {0}
