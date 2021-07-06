@@ -98,6 +98,14 @@ jobs:
           }
         shell: Rscript {0}
 
+      - name: specially install fields for windows
+        if: runner.os == 'Windows'
+        run: |
+          install.packages("fields")
+          library(fields)
+          packageVersion("fields")
+        shell: Rscript {0}
+
       - name: Install Miniconda
         run: |
           install.packages(c("remotes", "keras"))
