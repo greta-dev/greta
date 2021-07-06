@@ -230,7 +230,11 @@ test_that("mcmc handles initial values nicely", {
   source("helpers.R")
 
   # preserve R version
-  if (R.version.string >= "3.6.0") {
+  current_r_version <- paste0(R.version$major,".", R.version$minor)
+  required_r_version <- "3.6.0"
+  old_rng_r <- compareVersion(required_r_version, current_r_version) <= 0
+
+  if (old_rng_r) {
     suppressWarnings(expr = {
       RNGkind(sample.kind = "Rounding")
       set.seed(2020 - 02 - 11)
