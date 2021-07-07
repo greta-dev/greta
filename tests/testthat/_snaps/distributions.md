@@ -4,6 +4,9 @@
       uniform(min = 0, max = NA)
     Error <simpleError>
       `min` and `max` must be numeric vectors of length 1
+      They have class and length:
+      `min`: numeric, 1
+      `max`: logical, 1
 
 ---
 
@@ -11,6 +14,9 @@
       uniform(min = 0, max = head)
     Error <simpleError>
       `min` and `max` must be numeric vectors of length 1
+      They have class and length:
+      `min`: numeric, 1
+      `max`: function, 1
 
 ---
 
@@ -18,6 +24,9 @@
       uniform(min = 1:3, max = 5)
     Error <simpleError>
       `min` and `max` must be numeric vectors of length 1
+      They have class and length:
+      `min`: integer, 3
+      `max`: numeric, 1
 
 ---
 
@@ -25,6 +34,9 @@
       uniform(min = -Inf, max = Inf)
     Error <simpleError>
       `min` and `max` must finite scalars
+      Their values are:
+      `min`: -Inf
+      `max`: Inf
 
 ---
 
@@ -32,6 +44,9 @@
       uniform(min = 1, max = 1)
     Error <simpleError>
       `max` must be greater than `min`
+      Their values are:
+      `min`: 1
+      `max`: 1
 
 # poisson() and binomial() error informatively in glm
 
@@ -96,23 +111,22 @@
     Code
       lkj_correlation(-1, dim)
     Error <simpleError>
-      `eta` must be a positive scalar value, or a scalar greta array
+      `eta` must be a positive scalar value, or a scalar <greta_array>
 
 ---
 
     Code
       lkj_correlation(c(3, 3), dim)
     Error <simpleError>
-      `eta` must be a positive scalar value, or a scalar greta array
+      `eta` must be a positive scalar value, or a scalar <greta_array>
 
 ---
 
     Code
       lkj_correlation(uniform(0, 1, dim = 2), dim)
     Error <simpleError>
-      <text>:2:0: unexpected end of input
-      1: capture.output(dput(dim(eta))
-         ^
+      `eta` must be a scalar
+      However `eta` had dimensions: 2:1
 
 ---
 
@@ -166,16 +180,7 @@
     Error <simpleError>
       Dimensions of parameters not compatible with multivariate distribution
       parameters of multivariate distributions cannot have more than two dimensions
-      object `0.80879368637449`, `0.523551600411954`, `0.558323887413688`,
-      `1.63837136928363`, `-2.17159107548467`, `-0.987808958860901`,
-      `-0.501129424892012`, `-0.735205878172307`, `0.256539032685884`,
-      `-1.11631912530813`, `0.0904909449411677`, `-0.200248544611042`,
-      `0.30815485104994`, `0.773113482054443`, `1.53064642005146`,
-      `1.13538247879829`, `0.134754358771958`, `-1.20807347981108`,
-      `-1.60414220622414`, `0.0426957694535352`, `-0.758806868294973`,
-      `0.767696253812092`, `2.74028803081958`, `-0.0554293337767402`,
-      `-0.38676313591413`, `0.228759165457811`, and `-0.158003221826718` has
-      dimensions: 3x3x3
+      object `x` has dimensions: 3x3x3
 
 ---
 

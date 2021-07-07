@@ -285,8 +285,8 @@ calculate_greta_mcmc_list <- function(target,
   connected_to_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
   if (!any(connected_to_draws)) {
     msg <- cli::format_error(
-      "the target greta arrays do not appear to be connected to those in the \\
-      {.var greta_mcmc_list} object"
+      "the target {.cls greta array}s do not appear to be connected to those \\
+      in the {.var greta_mcmc_list} object"
     )
     stop(
       msg,
@@ -303,9 +303,11 @@ calculate_greta_mcmc_list <- function(target,
     if (any(new_types == "variable")) {
       msg <- cli::format_error(
         c(
-          "{.arg nsim} must be set to sample greta arrays not in MCMC samples",
-          "the target greta arrays are related to new variables that are not \\
-          in the MCMC samples, so cannot be calculated from the samples alone.",
+          "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
+          samples",
+          "the target {.cls greta array}s are related to new variables that \\
+          are not in the MCMC samples, so cannot be calculated from the \\
+          samples alone.",
           "Set {.arg nsim} if you want to sample them conditionally on the \\
           MCMC samples"
         )
@@ -333,8 +335,8 @@ calculate_greta_mcmc_list <- function(target,
       n_stoch <- sum(new_stochastics)
       msg <- cli::format_error(
         c(
-          "{.arg nsim} must be set to sample greta arrays with distributions \\
-          not in MCMC samples",
+          "{.arg nsim} must be set to sample {.cls greta_array} with \\
+          distributions not in MCMC samples",
           "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
           {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
           {?have distributions and are/has a distribution and is} not in the \\
@@ -484,8 +486,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
       msg <- cli::format_error(
         # NOTE:
         # is it possible to identify the names of these arrays or variables?
-        "the target greta arrays are related to variables that do not have \\
-        distributions so cannot be sampled"
+        "the target {.cls greta_array}s are related to variables that do not \\
+        have distributions so cannot be sampled"
       )
       stop(
         msg,

@@ -37,9 +37,9 @@ as.greta_array.data.frame <- function(x, optional = FALSE,
     invalid_types <- unique(classes[!valid])
     msg <- cli::format_error(
       c(
-        "greta arrays must contain the same type",
-        "Cannot coerce a {.cls dataframe} to a {.cls greta_array} unless \\
-        all columns are {.cls numeric, integer} or {.class logical}. This \\
+        "{.cls greta_array} must contain the same type",
+        "Cannot coerce a {.cls data.frame} to a {.cls greta_array} unless \\
+        all columns are {.cls numeric, integer} or {.cls logical}. This \\
         dataframe had columns of type: {.cls {invalid_types}}"
       )
     )
@@ -66,9 +66,10 @@ as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
     } else if (!optional) {
       msg <- cli::format_error(
         c(
-          "Object cannot be coerced to greta array",
-          "cannot convert a matrix to a {.cls greta_array} unless it is \\
-          numeric integer or logical. This matrix had type:",
+          "{.cls greta_array} must contain the same type",
+          "Cannot coerce {.cls matrix} to a {.cls greta_array} unless all \\
+          columns are {.cls numeric}, {.cls integer} or {.cls logical}. This \\
+          {.cls matrix} had type:",
           "{.cls {class(as.vector(x))}}"
         )
       )
@@ -96,9 +97,10 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
     } else {
       msg <- cli::format_error(
         c(
-          "Object cannot be coerced to greta array",
-          "cannot convert an array to a {.cls greta_array} unless it is \\
-          numeric integer or logical. This array had type:",
+          "{.cls greta_array} must contain the same type",
+          "Cannot coerce {.cls array} to a {.cls greta_array} unless it is \\
+          {.cls numeric}, {.cls integer} or {.cls logical}. This {.cls array} \\
+          had type:",
           "{.cls {class(as.vector(x))}}"
         )
       )
@@ -122,9 +124,7 @@ as.greta_array.numeric <- function(x, optional = FALSE, original_x = x, ...) {
   if (!optional & any(!is.finite(x))) {
     msg <- cli::format_error(
       c(
-        "Object cannot be coerced to greta array",
-        "cannot convert objects with missing or infinite values to a \\
-        {.cls greta_array}"
+        "{.cls greta_array} must not contain missing or infinite values"
       )
     )
     stop(
@@ -154,9 +154,9 @@ as.greta_array.default <- function(x, optional = FALSE, original_x = x, ...) {
   if (!optional) {
     msg <- cli::format_error(
       c(
-        "Object cannot be coerced to greta array",
+        "Object cannot be coerced to {.cls greta_array}",
         "Objects of class {.cls {paste(class(x), collapse = ' or ')}} cannot \\
-        be coerced to greta arrays"
+        be coerced to a {.cls greta_array}"
       )
     )
     stop(
@@ -281,7 +281,7 @@ representation <- function(x, name, error = TRUE) {
   repr <- x_node$representations[[name]]
   if (error && is.null(repr)) {
     msg <- cli::format_error(
-      "greta array has no representation {.var name}"
+      "{.cls greta_array} has no representation {.var name}"
     )
     stop(
       msg,

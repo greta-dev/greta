@@ -173,7 +173,7 @@ NULL
 
   if (inherits(node, "variable_node")) {
     msg <- cli::format_error(
-      "cannot replace values in a variable greta array"
+      "cannot replace values in a variable {.cls greta_array}"
     )
     stop(
       msg,
@@ -281,7 +281,7 @@ cbind.greta_array <- function(...) {
   # check all the same
   if (!all(rows == rows[1])) {
     msg <- cli::format_error(
-      "all greta arrays must be have the same number of rows"
+      "all {.cls greta_array}s must be have the same number of rows"
     )
     stop(
       msg,
@@ -322,7 +322,7 @@ rbind.greta_array <- function(...) {
   # check all the same
   if (!all(cols == cols[1])) {
     msg <- cli::format_error(
-      "all greta arrays must be have the same number of columns"
+      "all {.cls greta_array}s must be have the same number of columns"
     )
     stop(
       msg,
@@ -476,9 +476,9 @@ abind.greta_array <- function(...,
     if (!all(this_dim == this_dim[1])) {
       msg <- cli::format_error(
         c(
-          "all greta arrays must have the same dimensions except on the \\
-          {.arg along} dimension",
-          "However, dimension {dim}had varying sizes: {this_dim}"
+          "all {.cls greta_array}s must have the same dimensions except on \\
+          the {.arg along} dimension",
+          "However, dimension {dim} had varying sizes: {this_dim}"
         )
       )
       stop(

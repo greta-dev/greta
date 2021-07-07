@@ -3,9 +3,9 @@
     Code
       abind(a, b)
     Error <simpleError>
-      all greta arrays must have the same dimensions except on the `along`
+      all <greta_array>s must have the same dimensions except on the `along`
       dimension
-      However, dimension 1had varying sizes: 5 and 1
+      However, dimension 1 had varying sizes: 5 and 1
 
 ---
 
@@ -19,21 +19,21 @@
     Code
       z[1] <- 3
     Error <simpleError>
-      cannot replace values in a variable greta array
+      cannot replace values in a variable <greta_array>
 
 # rbind and cbind give informative error messages
 
     Code
       rbind(a, b)
     Error <simpleError>
-      all greta arrays must be have the same number of columns
+      all <greta_array>s must be have the same number of columns
 
 ---
 
     Code
       cbind(a, b)
     Error <simpleError>
-      all greta arrays must be have the same number of rows
+      all <greta_array>s must be have the same number of rows
 
 # replacement gives informative error messages
 

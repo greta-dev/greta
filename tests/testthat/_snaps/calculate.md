@@ -3,8 +3,8 @@
     Code
       calc_a <- calculate(a, y, values = draws)
     Error <simpleError>
-      `nsim` must be set to sample greta arrays with distributions not in MCMC
-      samples
+      `nsim` must be set to sample <greta_array> with distributions not in
+      MCMC samples
       the greta arrays `y` have distributions and are not in the MCMC samples, so
       cannot be calculated from the samples alone.
       Set `nsim` if you want to sample them conditionally on the MCMC samples
@@ -22,7 +22,7 @@
     Code
       calc_c <- calculate(c, values = draws)
     Error <simpleError>
-      the target greta arrays do not appear to be connected to those in the
+      the target <greta array>s do not appear to be connected to those in the
       `greta_mcmc_list` object
 
 # stochastic calculate works with mcmc samples & new stochastics
@@ -30,8 +30,8 @@
     Code
       calc_b <- calculate(b, values = draws)
     Error <simpleError>
-      `nsim` must be set to sample greta arrays not in MCMC samples
-      the target greta arrays are related to new variables that are not in the MCMC
+      `nsim` must be set to sample <greta array>s not in MCMC samples
+      the target <greta array>s are related to new variables that are not in the MCMC
       samples, so cannot be calculated from the samples alone.
       Set `nsim` if you want to sample them conditionally on the MCMC samples
 
@@ -40,8 +40,8 @@
     Code
       calc_y <- calculate(y, x, values = list(x = c(2, 1)))
     Error <simpleError>
-      `calculate()` arguments must be greta array
-      The following object passed to `calculate()` is not a greta array:
+      `calculate()` arguments must be <greta_array>
+      The following object passed to `calculate()` is not a <greta array>:
       "x"
       Perhaps you forgot to explicitly name other arguments?
       Perhaps you forgot to explicitly name other arguments?
@@ -51,8 +51,8 @@
     Code
       calc_y <- calculate(y, list(x = c(2, 1)))
     Error <simpleError>
-      `calculate()` arguments must be greta array
-      The following object passed to `calculate()` is not a greta array:
+      `calculate()` arguments must be <greta_array>
+      The following object passed to `calculate()` is not a <greta array>:
       "list(x = c(2, 1))"
       Perhaps you forgot to explicitly name other arguments?
       Perhaps you forgot to explicitly name other arguments?
@@ -62,7 +62,7 @@
     Code
       calc_y <- calculate(y, values = list(x = c(2, 1)))
     Error <simpleError>
-      Please provide values for the following 1 greta array:
+      Please provide values for the following 1 <greta_array>:
       `a`
 
 # calculate errors nicely if values have incorrect dimensions
@@ -70,7 +70,7 @@
     Code
       calc_y <- calculate(y, values = list(a = c(1, 1)))
     Error <simpleError>
-      a provided value has different number of elements than the greta array
+      a provided value has different number of elements than the <greta_array>
 
 # calculate errors nicely with invalid batch sizes
 
@@ -101,7 +101,7 @@
     Code
       calc_a <- calculate(a, y, nsim = 1)
     Error <simpleError>
-      the target greta arrays are related to variables that do not have
+      the target <greta_array>s are related to variables that do not have
       distributions so cannot be sampled
 
 # calculate errors if a distribution cannot be sampled from
@@ -116,19 +116,19 @@
     Code
       calc_x <- calculate(x, nsim = 0)
     Error <simpleError>
-      must be a positive integer
+      0 must be a positive integer
 
 ---
 
     Code
       calc_x <- calculate(x, nsim = -1)
     Error <simpleError>
-      must be a positive integer
+      -1 must be a positive integer
 
 ---
 
     Code
       calc_x <- calculate(x, nsim = "five")
     Error <simpleError>
-      must be a positive integer
+      NA must be a positive integer
 

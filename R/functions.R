@@ -359,7 +359,7 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
 chol.greta_array <- function(x, ...) {
   if (!identical(list(), list(...))) {
     msg <- cli::format_warning(
-      "{.fun chol} options are ignored for greta arrays"
+      "{.fun chol} options are ignored for {.cls greta_array}s"
     )
     warning(
       msg,
@@ -375,7 +375,7 @@ chol.greta_array <- function(x, ...) {
     if (!(length(dim) == 2 && dim[1] == dim[2])) {
       msg <- cli::format_error(
         c(
-          "only two-dimensional, square, symmetric greta arrays can be \\
+          "only two-dimensional, square, symmetric {.cls greta_array}s can be \\
           Cholesky decomposed",
           "{.code dim(x)} returns: {dim(x)"
         )
@@ -499,15 +499,15 @@ chol2inv.default <- function(x, size = NCOL(x), LINPACK = FALSE) {
 chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
   if (!identical(LINPACK, FALSE)) {
     msg <- cli::format_warning(
-      "The {.arg LINPACK} argument is ignored for greta arrays, and has also \\
-      been defunct since R 3.1.0"
+      "The {.arg LINPACK} argument is ignored for {.cls greta_array}s, and \\
+      has also been defunct since R 3.1.0"
     )
     warning(msg)
   }
 
   if (!identical(size, NCOL(x))) {
     msg <- cli::format_warning(
-      "{.arg size} is ignored for greta arrays"
+      "{.arg size} is ignored for {.cls greta_array}s"
     )
     warning(
       msg,
@@ -619,7 +619,7 @@ cumprod.greta_array <- function(x) {
 #' @export
 cummax.greta_array <- function(x) {
   msg <- cli::format_error(
-    "cummax not yet implemented for greta"
+    "{.fun {x}} not yet implemented for {.pkg greta}"
   )
   stop(
     msg,
@@ -630,7 +630,7 @@ cummax.greta_array <- function(x) {
 #' @export
 cummin.greta_array <- function(x) {
   msg <- cli::format_error(
-    "cummin not yet implemented for greta"
+    "{.fun {x}} not yet implemented for {.pkg greta}"
   )
   stop(
     msg,
@@ -982,7 +982,7 @@ backsolve.greta_array <- function(r, x,
   if (k != ncol(r)) {
     msg <- cli::format_error(
       c(
-        "{.var k} must equal {.code ncol(r)} for greta arrays"
+        "{.var k} must equal {.code ncol(r)} for {.cls greta_array}s"
       )
     )
     stop(
@@ -993,7 +993,7 @@ backsolve.greta_array <- function(r, x,
 
   if (transpose) {
     msg <- cli::format_error(
-      "transpose must be FALSE for greta arrays"
+      "transpose must be FALSE for {.cls greta_array}s"
     )
     stop(
       msg,
@@ -1041,7 +1041,7 @@ forwardsolve.greta_array <- function(l, x,
   # nolint end
   if (k != ncol(l)) {
     msg <- cli::format_error(
-      "{.var k} must equal {.code ncol(l)} for greta arrays"
+      "{.var k} must equal {.code ncol(l)} for {.cls greta_array}s"
     )
     stop(
       msg,
@@ -1051,7 +1051,7 @@ forwardsolve.greta_array <- function(l, x,
 
   if (transpose) {
     msg <- cli::format_error(
-      "transpose must be FALSE for greta arrays"
+      "transpose must be FALSE for {.cls greta_array}s"
     )
     stop(
       msg,
@@ -1343,7 +1343,7 @@ rdist.default <- function(x1, x2 = NULL, compact = FALSE) {
 rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
   if (!identical(compact, FALSE)) {
     msg <- cli::format_warning(
-      "{.arg compact} is ignored for greta arrays"
+      "{.arg compact} is ignored for {.cls greta_array}s"
     )
     warning(
       msg,

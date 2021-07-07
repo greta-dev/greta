@@ -21,7 +21,12 @@ uniform_distribution <- R6Class(
 
       if (!good_types) {
         msg <- cli::format_error(
-          "{.arg min} and {.arg max} must be numeric vectors of length 1"
+          c(
+            "{.arg min} and {.arg max} must be numeric vectors of length 1",
+            "They have class and length:",
+            "{.arg min}: {class(min)}, {length(min)}",
+            "{.arg max}: {class(max)}, {length(max)}"
+          )
         )
         stop(
           msg,
@@ -31,7 +36,12 @@ uniform_distribution <- R6Class(
 
       if (!is.finite(min) | !is.finite(max)) {
         msg <- cli::format_error(
-          "{.arg min} and {.arg max} must finite scalars"
+          c(
+            "{.arg min} and {.arg max} must finite scalars",
+            "Their values are:",
+            "{.arg min}: {min}",
+            "{.arg max}: {max}"
+          )
         )
         stop(
           msg,
@@ -41,7 +51,12 @@ uniform_distribution <- R6Class(
 
       if (min >= max) {
         msg <- cli::format_error(
-          "{.arg max} must be greater than {.arg min}"
+          c(
+            "{.arg max} must be greater than {.arg min}",
+            "Their values are:",
+            "{.arg min}: {min}",
+            "{.arg max}: {max}"
+          )
         )
         stop(
           msg,
@@ -1146,7 +1161,8 @@ lkj_correlation_distribution <- R6Class(
       if (!inherits(eta, "greta_array")) {
         if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
           msg <- cli::format_error(
-            "{.arg eta} must be a positive scalar value, or a scalar greta array"
+            "{.arg eta} must be a positive scalar value, or a scalar \\
+            {.cls greta_array}"
           )
           stop(
             msg,
@@ -1162,7 +1178,7 @@ lkj_correlation_distribution <- R6Class(
         msg <- cli::format_error(
           c(
             "{.arg eta} must be a scalar",
-            "However {.arg eta} had dimensions: {capture.output(dput(dim(eta))}"
+            "However {.arg eta} had dimensions: {capture.output(dput(dim(eta)))}"
           )
         )
         stop(

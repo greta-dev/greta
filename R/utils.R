@@ -581,7 +581,7 @@ check_2d <- function(x) {
         "Dimensions of parameters not compatible with multivariate \\
         distribution parameters of multivariate distributions cannot have \\
         more than two dimensions",
-        "object {.var {x}} has dimensions: {paste(dim(x), collapse = 'x')}"
+        "object {.var x} has dimensions: {paste(dim(x), collapse = 'x')}"
       )
     )
     stop(
@@ -979,10 +979,10 @@ check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
 
     msg <- cli::format_error(
       c(
-        "{.fun {fun_name}} arguments must be greta array",
+        "{.fun {fun_name}} arguments must be {.cls greta_array}",
         "The following {cli::qty(length(unexpected_items))} object{?s} passed \\
         to {.fun {fun_name}} {cli::qty(length(unexpected_items))} \\
-        {?is not a/are not} greta array{?s}:",
+        {?is not a/are not} {.cls greta array}{?s}:",
         "{.val {unexpected_items}}",
         "{hint}"
       )
@@ -1030,7 +1030,8 @@ check_values_list <- function(values, env) {
     array <- unclass(get_node(greta_array)$value())
     if (length(array) != length(value)) {
       msg <- cli::format_error(
-        "a provided value has different number of elements than the greta array"
+        "a provided value has different number of elements than the \\
+        {.cls greta_array}"
       )
       stop(
         msg,
@@ -1106,7 +1107,7 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
       msg <- cli::format_error(
         c(
           "Please provide values for the following {length(names_text)} \\
-          greta array{?s}:",
+          {.cls greta_array}{?s}:",
           "{.var {names_text}}"
           )
         )
@@ -1139,7 +1140,7 @@ check_cum_op <- function(x) {
     msg <- cli::format_error(
       c(
         "{.var x} must be a column vector",
-        "but {.var x} has dimensions {paste(dims, collapse = 'x ')}"
+        "but {.var x} has dimensions {paste(dims, collapse = ' x ')}"
       )
     )
     stop(
@@ -1151,7 +1152,7 @@ check_cum_op <- function(x) {
 
 complex_error <- function(z) {
   msg <- cli::format_error(
-    "greta does not yet support complex numbers"
+    "{.pkg greta} does not yet support complex numbers"
     )
   stop(
     msg,
@@ -1416,7 +1417,7 @@ check_positive_integer <- function(x, name = "") {
 
   if (length(x) != 1 | is.na(x) | x < 1) {
     msg <- cli::format_error(
-      "{name} must be a positive integer"
+      "{.val {x}} must be a positive integer"
     )
     stop(
       msg,
