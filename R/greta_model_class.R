@@ -162,8 +162,8 @@ model <- function(...,
 
   if (any(bad_nodes)) {
     msg <- cli::format_error(
-        "model contains a discrete random variable that doesn't have a fixed \\
-        value, so cannot be sampled from"
+      "model contains a discrete random variable that doesn't have a fixed \\
+      value, so inference cannot be carried out"
         )
     stop(
       msg,

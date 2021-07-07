@@ -107,7 +107,7 @@
       model(bernoulli(0.5))
     Error <simpleError>
       model contains a discrete random variable that doesn't have a fixed
-      value, so cannot be sampled from
+      value, so inference cannot be carried out
 
 ---
 
