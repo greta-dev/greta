@@ -127,8 +127,9 @@ inference <- R6Class(
           msg <- cli::format_error(
             c(
               "The log density could not be evaluated at these initial values",
-              "Try using {.fun calculate} to see whether they lead to values \\
-              of other {.cls greta_array}s in the model."
+              "Try using these initials as the values argument in \\
+              {.fun calculate} to see what values of subsequent \\
+              {.cls greta_array}s these initial values lead to."
             )
           )
           stop(

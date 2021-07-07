@@ -70,8 +70,8 @@
       mcmc(m, chains = 1, n_samples = 1, warmup = 0, initial_values = initials(z = 1e+20))
     Error <simpleError>
       The log density could not be evaluated at these initial values
-      Try using `calculate()` to see whether they lead to values of other
-      <greta_array>s in the model.
+      Try using these initials as the values argument in `calculate()` to see what
+      values of subsequent <greta_array>s these initial values lead to.
 
 ---
 
@@ -234,7 +234,7 @@
     Code
       model(a, b)
     Error <simpleError>
-      `model()` arguments must be <greta_array>
+      `model()` arguments must be <greta_array>s
       The following object passed to `model()` is not a <greta array>:
       "a"
 
