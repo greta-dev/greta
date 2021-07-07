@@ -1178,7 +1178,8 @@ lkj_correlation_distribution <- R6Class(
         msg <- cli::format_error(
           c(
             "{.arg eta} must be a scalar",
-            "However {.arg eta} had dimensions: {capture.output(dput(dim(eta)))}"
+            "However {.arg eta} had dimensions: \\
+            {paste0(dim(eta), collapse = ', ')}"
           )
         )
         stop(

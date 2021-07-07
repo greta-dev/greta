@@ -126,7 +126,7 @@
       lkj_correlation(uniform(0, 1, dim = 2), dim)
     Error <simpleError>
       `eta` must be a scalar
-      However `eta` had dimensions: 2:1
+      However `eta` had dimensions: 2, 1
 
 ---
 
