@@ -986,7 +986,7 @@ check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
 
     msg <- cli::format_error(
       c(
-        "{.fun {fun_name}} arguments must be {.cls greta_array}",
+        "{.fun {fun_name}} arguments must be {.cls greta_array}s",
         "The following {cli::qty(length(unexpected_items))} object{?s} passed \\
         to {.fun {fun_name}} {cli::qty(length(unexpected_items))} \\
         {?is not a/are not} {.cls greta array}{?s}:",

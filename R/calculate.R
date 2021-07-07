@@ -286,7 +286,7 @@ calculate_greta_mcmc_list <- function(target,
   if (!any(connected_to_draws)) {
     msg <- cli::format_error(
       "the target {.cls greta array}s do not appear to be connected to those \\
-      in the {.var greta_mcmc_list} object"
+      in the {.cls greta_mcmc_list} object"
     )
     stop(
       msg,
@@ -335,8 +335,8 @@ calculate_greta_mcmc_list <- function(target,
       n_stoch <- sum(new_stochastics)
       msg <- cli::format_error(
         c(
-          "{.arg nsim} must be set to sample {.cls greta_array} with \\
-          distributions not in MCMC samples",
+          "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
+          samples",
           "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
           {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
           {?have distributions and are/has a distribution and is} not in the \\

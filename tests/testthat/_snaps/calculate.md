@@ -3,8 +3,7 @@
     Code
       calc_a <- calculate(a, y, values = draws)
     Error <simpleError>
-      `nsim` must be set to sample <greta_array> with distributions not in
-      MCMC samples
+      `nsim` must be set to sample <greta array>s not in MCMC samples
       the greta arrays `y` have distributions and are not in the MCMC samples, so
       cannot be calculated from the samples alone.
       Set `nsim` if you want to sample them conditionally on the MCMC samples
@@ -23,7 +22,7 @@
       calc_c <- calculate(c, values = draws)
     Error <simpleError>
       the target <greta array>s do not appear to be connected to those in the
-      `greta_mcmc_list` object
+      <greta_mcmc_list> object
 
 # stochastic calculate works with mcmc samples & new stochastics
 
@@ -40,7 +39,7 @@
     Code
       calc_y <- calculate(y, x, values = list(x = c(2, 1)))
     Error <simpleError>
-      `calculate()` arguments must be <greta_array>
+      `calculate()` arguments must be <greta_array>s
       The following object passed to `calculate()` is not a <greta array>:
       "x"
       Perhaps you forgot to explicitly name other arguments?
@@ -51,7 +50,7 @@
     Code
       calc_y <- calculate(y, list(x = c(2, 1)))
     Error <simpleError>
-      `calculate()` arguments must be <greta_array>
+      `calculate()` arguments must be <greta_array>s
       The following object passed to `calculate()` is not a <greta array>:
       "list(x = c(2, 1))"
       Perhaps you forgot to explicitly name other arguments?
