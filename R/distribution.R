@@ -144,7 +144,7 @@ distribution <- function(greta_array) {
   if (!inherits(greta_array, "greta_array")) {
     msg <- cli::format_error(
       c(
-        "{.fun distribution} expects object of type, {.cls greta_array}",
+        "{.fun distribution} expects object of type {.cls greta_array}",
         "object was not a {.cls greta_array}, but {.cls {class(greta_array)}}"
       )
     )

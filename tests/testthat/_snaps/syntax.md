@@ -68,6 +68,6 @@
     Code
       distribution(y)
     Error <simpleError>
-      `distribution()` expects object of type, <greta_array>
+      `distribution()` expects object of type <greta_array>
       object was not a <greta_array>, but <array>
 
