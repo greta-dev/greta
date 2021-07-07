@@ -938,7 +938,7 @@ multivariate_normal_distribution <- R6Class(
           c(
             "{.arg Sigma} must be a square 2D greta array",
             "However {.arg Sigma} has dimensions \\
-            {.val {paste(dim(sigma), collapse = ' x ')}}"
+            {.val {paste(dim(sigma), collapse = 'x')}}"
           )
         )
         stop(
@@ -1024,7 +1024,7 @@ wishart_distribution <- R6Class(
           c(
             "{.arg Sigma} must be a square 2D greta array",
             "However, {.arg Sigma} has dimensions ",
-            "{.val {paste(dim(sigma), collapse = ' x ')}}"
+            "{.val {paste(dim(sigma), collapse = 'x')}}"
           )
         )
         stop(

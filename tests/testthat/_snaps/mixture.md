@@ -22,7 +22,7 @@
     Error <simpleError>
       component distributions must have the same support
       However the component distributions have different support:
-      "0 to Infvs. -Inf to Inf"
+      "0 to Inf vs. -Inf to Inf"
 
 ---
 
@@ -31,7 +31,7 @@
     Error <simpleError>
       component distributions must have the same support
       However the component distributions have different support:
-      "0 to Infvs. -Inf to Inf"
+      "0 to Inf vs. -Inf to Inf"
 
 # incorrectly-shaped weights errors
 
@@ -47,12 +47,14 @@
     Code
       mixture(normal(0, 2), weights = weights)
     Error <simpleError>
-      mixture must be passed at least two distributions
+      `mixture()` must be passed at least two distributions
+      The number of distributions passed was: 1
 
 ---
 
     Code
       mixture(weights = weights)
     Error <simpleError>
-      mixture must be passed at least two distributions
+      `mixture()` must be passed at least two distributions
+      The number of distributions passed was: 0
 

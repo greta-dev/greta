@@ -55,7 +55,10 @@ joint_distribution <- R6Class(
 
       if (n_distributions < 2) {
         msg <- cli::format_error(
-          "joint must be passed at least two distributions"
+          c(
+            "{.fun joint} must be passed at least two distributions",
+            "The number of distributions passed was {n_distributions}"
+            )
           )
         stop(
           msg,
@@ -81,7 +84,7 @@ joint_distribution <- R6Class(
       are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
       if (!all(are_scalar)) {
         msg <- cli::format_error(
-          "joint only accepts probability distributions over scalars"
+          "{.fun joint} only accepts probability distributions over scalars"
         )
         stop(
           msg,

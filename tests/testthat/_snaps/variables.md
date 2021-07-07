@@ -4,6 +4,10 @@
       variable(upper = NA)
     Error <simpleError>
       lower and upper must be numeric
+      lower has class: numeric
+      lower has length: 1
+      upper has class: logical
+      upper has length: 1
 
 ---
 
@@ -11,6 +15,10 @@
       variable(upper = head)
     Error <simpleError>
       lower and upper must be numeric
+      lower has class: numeric
+      lower has length: 1
+      upper has class: function
+      upper has length: 1
 
 ---
 
@@ -25,6 +33,8 @@
       variable(lower = 1, upper = 1)
     Error <simpleError>
       upper bounds must be greater than lower bounds
+      lower is: 1
+      upper is: 1
 
 # constrained variable constructors error informatively
 
@@ -32,7 +42,7 @@
       cholesky_variable(dim = 2:3)
     Error <simpleError>
       cholesky variables must be square
-      However dim was: "2 x 3"
+      However its dimension is: "2x3"
 
 ---
 
@@ -40,6 +50,7 @@
       cholesky_variable(dim = rep(2, 3))
     Error <simpleError>
       dim can either be a scalar or a vector of length 2
+      However its dimension is: 2, 2, and 2
 
 ---
 

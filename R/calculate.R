@@ -171,8 +171,8 @@ calculate <- function(...,
   if (identical(target, list())) {
     msg <- cli::format_error(
       c(
-        "{.fun calculate} requires greta arrays",
-        "no greta arrays were provided to {.fun calculate}"
+        "{.fun calculate} requires {.cls greta array}s",
+        "no {.cls greta array}s were provided to {.fun calculate}"
       )
     )
     stop(

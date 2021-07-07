@@ -3,7 +3,7 @@
     Code
       sims <- simulate(m)
     Error <simpleError>
-      the target greta arrays are related to variables that do not have
+      the target <greta_array>s are related to variables that do not have
       distributions so cannot be sampled
 
 # simulate errors if a distribution cannot be sampled from
@@ -18,19 +18,22 @@
     Code
       simulate(m, nsim = 0)
     Error <simpleError>
-      must be a positive integer
+      value must be a positive integer
+      However the value provided was: 0
 
 ---
 
     Code
       simulate(m, nsim = -1)
     Error <simpleError>
-      must be a positive integer
+      value must be a positive integer
+      However the value provided was: -1
 
 ---
 
     Code
       simulate(m, nsim = "five")
     Error <simpleError>
-      must be a positive integer
+      value must be a positive integer
+      However the value provided was: NA
 

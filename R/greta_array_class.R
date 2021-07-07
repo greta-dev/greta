@@ -213,7 +213,7 @@ print.summary.greta_array <- function(x, ...) {
   if (x$length == 1) {
     shape_text <- "with 1 element"
   } else {
-    dim_text <- paste(x$dim, collapse = " x ")
+    dim_text <- paste(x$dim, collapse = "x")
     shape_text <- sprintf(
       "with %i elements (%s)",
       x$length,

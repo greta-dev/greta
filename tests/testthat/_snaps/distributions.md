@@ -95,7 +95,7 @@
     Error <simpleError>
       `Sigma` must be a square 2D greta array
       However, `Sigma` has dimensions
-      "3 x 3 x 3"
+      "3x3x3"
 
 ---
 
@@ -104,7 +104,7 @@
     Error <simpleError>
       `Sigma` must be a square 2D greta array
       However, `Sigma` has dimensions
-      "3 x 2"
+      "3x2"
 
 # lkj_correlation distribution errors informatively
 

@@ -85,7 +85,7 @@ cholesky_variable <- function(dim, correlation = FALSE) {
       msg <- cli::format_error(
         c(
           "cholesky variables must be square",
-          "However dim was: {.val {paste(dim, collapse = ' x ')}}"
+          "However its dimension is: {.val {paste(dim, collapse = 'x')}}"
         )
       )
       stop(
@@ -95,7 +95,10 @@ cholesky_variable <- function(dim, correlation = FALSE) {
     }
   } else {
     msg <- cli::format_error(
-      "dim can either be a scalar or a vector of length 2"
+      c(
+        "dim can either be a scalar or a vector of length 2",
+        "However its dimension is: {dim}"
+      )
     )
     stop(
       msg,
@@ -157,7 +160,8 @@ simplex_variable <- function(dim) {
   if (!last_dim > 1) {
     msg <- cli::format_error(
       "the final dimension of a simplex variable must have more than one \\
-      element"
+      element",
+      "The final dimension has: {.val {length(last_dim)} elements}"
     )
     stop(
       msg,
@@ -206,7 +210,8 @@ ordered_variable <- function(dim) {
   if (!dim[n_dim] > 1) {
     msg <- cli::format_error(
       "the final dimension of an ordered variable must have more than \\
-      one element"
+      one element",
+      "the final dimension has: {.val {length(last_dim)} elements}"
     )
     stop(
       msg,

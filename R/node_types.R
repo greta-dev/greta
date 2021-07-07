@@ -188,7 +188,13 @@ variable_node <- R6Class(
                           free_dim = prod(dim)) {
       if (!is.numeric(lower) | !is.numeric(upper)) {
         msg <- cli::format_error(
-          "lower and upper must be numeric"
+          c(
+            "lower and upper must be numeric",
+            "lower has class: {class(lower)}",
+            "lower has length: {length(lower)}",
+            "upper has class: {class(upper)}",
+            "upper has length: {length(upper)}"
+          )
         )
         stop(
           msg,
@@ -245,7 +251,11 @@ variable_node <- R6Class(
 
       if (any(lower >= upper)) {
         msg <- cli::format_error(
-          "upper bounds must be greater than lower bounds"
+          c(
+            "upper bounds must be greater than lower bounds",
+            "lower is: {.val {lower}}",
+            "upper is: {.val {upper}}"
+          )
         )
         stop(
           msg,

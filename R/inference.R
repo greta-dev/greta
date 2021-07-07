@@ -206,9 +206,9 @@ mcmc <- function(model,
   if (any(are_data)) {
     msg <- cli::format_error(
       c(
-        "data greta arrays cannot be sampled",
+        "data {.cls greta_array}s cannot be sampled",
         "{.var {names[are_data]}} \\
-        {?is a data greta array/are data greta arrays}"
+        {?is a data/are data} {.cls greta_array}(s)"
       )
     )
     stop(
@@ -624,7 +624,7 @@ parse_initial_values <- function(initials, dag) {
     bad <- names(tf_names)[missing_names]
     msg <- cli::format_error(
       c(
-        "some greta arrays passed to {.fun initials} are not associated with \\
+        "some {.cls greta_array}s passed to {.fun initials} are not associated with \\
         the model:",
         "{.var {bad}}"
       )
@@ -652,7 +652,7 @@ parse_initial_values <- function(initials, dag) {
 
   if (!all(are_variables)) {
     msg <- cli::format_error(
-      "initial values can only be set for variable greta arrays"
+      "initial values can only be set for variable {.cls greta_array}s"
     )
     stop(
       msg,
@@ -667,7 +667,7 @@ parse_initial_values <- function(initials, dag) {
   if (!all(same_dims)) {
     msg <- cli::format_error(
       "the initial values provided have different dimensions than the named \\
-      greta arrays"
+      {.cls greta_array}s"
     )
     stop(
       msg,

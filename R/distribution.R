@@ -57,7 +57,7 @@
   # only for data greta arrays
   if (node_type(node) != "data") {
     msg <- cli::format_error(
-      "distributions can only be assigned to data greta arrays"
+      "distributions can only be assigned to data {.cls greta array}s"
     )
     stop(
       msg,
@@ -68,7 +68,7 @@
   # can only assign with greta arrays ...
   if (!inherits(value, "greta_array")) {
     msg <- cli::format_error(
-      "right hand side must be a greta array"
+      "right hand side must be a {.cls greta_array}"
     )
     stop(
       msg,
@@ -108,9 +108,9 @@
         c(
           "left and right hand sides have different dimensions. ",
           "The distribution must have dimension of either \\
-          {.val {paste(dim(greta_array), collapse = ' x ')}} or {.val 1 x 1},\\
+          {.val {paste(dim(greta_array), collapse = 'x')}} or {.val 1x1},\\
           but instead has dimension \\
-          {.val {paste(dim(value), collapse = ' x ')}}"
+          {.val {paste(dim(value), collapse = 'x')}}"
         )
       )
       stop(

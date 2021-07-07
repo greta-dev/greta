@@ -266,7 +266,7 @@ cbind.greta_array <- function(...) {
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2)) {
     msg <- cli::format_error(
-      "all greta arrays must be two-dimensional"
+      "all {.cls greta_array}s must be two-dimensional"
     )
     stop(
       msg,
@@ -307,7 +307,7 @@ rbind.greta_array <- function(...) {
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2)) {
     msg <- cli::format_error(
-      "all greta arrays must be two-dimensional"
+      "all {.cls greta_array}s must be two-dimensional"
     )
     stop(
       msg,
@@ -369,8 +369,8 @@ abind.default <- function(...,
   if (!abind_installed) {
     msg <- cli::format_error(
       c(
-        "{.fun abind} is being called on R arrays (not greta arrays), but \\
-        the {.pkg abind} package is not installed",
+        "{.fun abind} is being called on R arrays (not {.cls greta_array}s), \\
+        but the {.pkg abind} package is not installed",
         "install {.pkg abind} with:",
         "{.code install.packages('abind')}"
       )
@@ -411,7 +411,7 @@ abind.greta_array <- function(...,
   if (user_set_args) {
     msg <- cli::format_warning(
       "only the argument {.arg along} is supported when using {.fun abind} \\
-      with greta arrays, any other arguments will be ignored"
+      with {.cls greta_array}s, any other arguments will be ignored"
     )
     warning(
       msg,

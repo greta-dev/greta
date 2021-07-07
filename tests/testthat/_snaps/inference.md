@@ -70,8 +70,8 @@
       mcmc(m, chains = 1, n_samples = 1, warmup = 0, initial_values = initials(z = 1e+20))
     Error <simpleError>
       The log density could not be evaluated at these initial values
-      Try using `calculate()` to see whether they lead to values of other greta
-      arrays in the model.
+      Try using `calculate()` to see whether they lead to values of other
+      <greta_array>s in the model.
 
 ---
 
@@ -97,7 +97,7 @@
         initial_values = inits)
     Error <simpleError>
       the initial values provided have different dimensions than the named
-      greta arrays
+      <greta_array>s
 
 ---
 
@@ -234,8 +234,8 @@
     Code
       model(a, b)
     Error <simpleError>
-      `model()` arguments must be greta array
-      The following object passed to `model()` is not a greta array:
+      `model()` arguments must be <greta_array>
+      The following object passed to `model()` is not a <greta array>:
       "a"
 
 # mcmc doesn't support slice sampler with double precision models
@@ -329,7 +329,7 @@
     Code
       mcmc(m, chains = 1, initial_values = initials(g = 1))
     Error <simpleError>
-      some greta arrays passed to `initials()` are not associated with the
+      some <greta_array>s passed to `initials()` are not associated with the
       model:
       `g`
 
@@ -338,14 +338,14 @@
     Code
       mcmc(m, chains = 1, initial_values = initials(f = 1))
     Error <simpleError>
-      initial values can only be set for variable greta arrays
+      initial values can only be set for variable <greta_array>s
 
 ---
 
     Code
       mcmc(m, chains = 1, initial_values = initials(z = 1))
     Error <simpleError>
-      initial values can only be set for variable greta arrays
+      initial values can only be set for variable <greta_array>s
 
 ---
 

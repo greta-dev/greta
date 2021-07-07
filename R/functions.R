@@ -199,8 +199,8 @@ round.greta_array <- function(x, digits = 0) {
     msg <- cli::format_error(
       c(
         "the {.val digits} argument of {.fun round} cannot be set for \\
-        greta arrays",
-        "greta arrays can only be rounded to the nearest integer, so the \\
+        {.cls greta_array}s",
+        "{.cls greta_array}s can only be rounded to the nearest integer, so the \\
         {.val digits} argument cannot be set"
       )
     )
@@ -338,7 +338,7 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
   if (!identical(sort(perm), dimnums)) {
     msg <- cli::format_error(
       c(
-        "perm must be a reordering of the dimensions: {dimnums}",
+        "{.arg perm} must be a reordering of the dimensions: {dimnums}",
         "but was: {perm}"
       )
     )
@@ -377,7 +377,7 @@ chol.greta_array <- function(x, ...) {
         c(
           "only two-dimensional, square, symmetric {.cls greta_array}s can be \\
           Cholesky decomposed",
-          "{.code dim(x)} returns: {dim(x)"
+          "{.code dim(x)} returns: {dim(x)}"
         )
       )
       stop(
@@ -404,7 +404,7 @@ solve.greta_array <- function(a, b, ...) {
       c(
         "Arrays are not both 2D",
         "{.var a} and {.var b} must both be 2D, but {.var a} has dimensions: \\
-        {paste(dim(a), collapse = ' x ')}"
+        {paste(dim(a), collapse = 'x')}"
       )
     )
     stop(
@@ -449,7 +449,7 @@ solve.greta_array <- function(a, b, ...) {
         c(
           "Arrays are not both 2D",
           "{.var a} and {.var b} must both be 2D, but {.var b} has dimensions: \\
-          {paste(dim(b), collapse = ' x ')}"
+          {paste(dim(b), collapse = 'x')}"
         )
       )
       stop(
@@ -619,7 +619,7 @@ cumprod.greta_array <- function(x) {
 #' @export
 cummax.greta_array <- function(x) {
   msg <- cli::format_error(
-    "{.fun {x}} not yet implemented for {.pkg greta}"
+    "{.fun cummax} not yet implemented for {.pkg greta}"
   )
   stop(
     msg,
@@ -630,7 +630,7 @@ cummax.greta_array <- function(x) {
 #' @export
 cummin.greta_array <- function(x) {
   msg <- cli::format_error(
-    "{.fun {x}} not yet implemented for {.pkg greta}"
+    "{.fun cummin} not yet implemented for {.pkg greta}"
   )
   stop(
     msg,
@@ -843,7 +843,7 @@ sweep.greta_array <- function(x,
         "{.var stats} not a column vector array",
         "{.var stats} must be a column vector array",
         "x" = "{.var stats} has dimensions \\
-        {paste(dim(stats), collapse = ' x ')}"
+        {paste(dim(stats), collapse = 'x')}"
       )
     )
     stop(
@@ -1211,7 +1211,7 @@ tapply.greta_array <- function(X, INDEX,
     msg <- cli::format_error(
       c(
         "{.var x} must be 2D greta array with one column",
-        "However {.var x} has dimensions {paste(dim_x, collapse = ' x ')}"
+        "However {.var x} has dimensions {paste(dim_x, collapse = 'x')}"
       )
     )
     stop(
@@ -1262,7 +1262,7 @@ eigen.greta_array <- function(x, symmetric,
 
   if (length(dims) != 2 | dims[1] != dims[2] | !symmetric) {
     msg <- cli::format_error(
-      "only two-dimensional, square, symmetric greta arrays can be \\
+      "only two-dimensional, square, symmetric {.cls greta_array}s can be \\
       eigendecomposed"
     )
     stop(

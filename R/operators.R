@@ -158,7 +158,7 @@ NULL
   if (length(dim(x)) != 2 | length(dim(y)) != 2) {
     msg <- cli::format_error(
       c(
-        "only two-dimensional greta arrays can be matrix-multiplied",
+        "only two-dimensional {.cls greta_array}s can be matrix-multiplied",
         "dimensions recorded were {dim(x)}"
       )
     )

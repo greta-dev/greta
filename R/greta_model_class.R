@@ -100,30 +100,30 @@ model <- function(...,
   if (n_graphs == 1) {
     density_message <- cli::format_error(
       c(
-        "none of the greta arrays in the model are associated with a \\
+        "none of the {.cls greta_array}s in the model are associated with a \\
         probability density, so a model cannot be defined"
         )
     )
     variable_message <- cli::format_error(
       c(
-        "none of the greta arrays in the model are unknown, so a model cannot \\
-        be defined"
+        "none of the {.cls greta_array}s in the model are unknown, so a model \\
+        cannot be defined"
         )
       )
   } else {
     density_message <- cli::format_error(
       c(
         "the model contains {n_graphs} disjoint graphs",
-        "one or more of these sub-graphs does not contain any greta arrays \\
-        that are associated with a probability density, so a model cannot be \\
-        defined"
+        "one or more of these sub-graphs does not contain any \\
+        {.cls greta_array}s that are associated with a probability density, \\
+        so a model cannot be defined"
       )
     )
     variable_message <- cli::format_error(
         c(
           "the model contains {n_graphs} disjoint graphs",
-          "one or more of these sub-graphs does not contain any greta arrays \\
-          that are unknown, so a model cannot be defined"
+          "one or more of these sub-graphs does not contain any \\
+          {.cls greta_array}s that are unknown, so a model cannot be defined"
         )
       )
   }

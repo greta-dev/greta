@@ -85,7 +85,10 @@ mixture_distribution <- R6Class(
 
       if (n_distributions < 2) {
         msg <- cli::format_error(
-          "mixture must be passed at least two distributions"
+          c(
+            "{.fun mixture} must be passed at least two distributions",
+            "The number of distributions passed was: {.val {n_distributions}}"
+          )
         )
         stop(
           msg,
@@ -110,8 +113,8 @@ mixture_distribution <- R6Class(
         msg <- cli::format_error(
           c(
             "the first dimension of weights must be the number of \\
-            distributions in the mixture ({n_distributions})",
-            "However it was {weights_dim[1]}"
+            distributions in the mixture ({.val {n_distributions}})",
+            "However it was {.val {weights_dim[1]}}"
           )
         )
         stop(
@@ -136,9 +139,9 @@ mixture_distribution <- R6Class(
         msg <- cli::format_error(
           c(
             "the dimension of weights must be either \\
-            {.val {n_distributions} x 1} or \\
-            {.val {n_distributions} x {paste(dim, collapse = ' x ')}}",
-            " but was {.val {paste(weights_dim, collapse = ' x ')}}"
+            {.val {n_distributions}x1} or \\
+            {.val {n_distributions}x{paste(dim, collapse = 'x')}}",
+            " but was {.val {paste(weights_dim, collapse = 'x')}}"
           )
         )
         stop(
@@ -209,7 +212,7 @@ mixture_distribution <- R6Class(
           c(
             "component distributions must have the same support",
             "However the component distributions have different support:",
-            "{.val {paste(supports_text, collapse = 'vs. ')}}"
+            "{.val {paste(supports_text, collapse = ' vs. ')}}"
           )
         )
         stop(

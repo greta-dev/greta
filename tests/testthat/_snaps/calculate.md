@@ -116,19 +116,22 @@
     Code
       calc_x <- calculate(x, nsim = 0)
     Error <simpleError>
-      0 must be a positive integer
+      value must be a positive integer
+      However the value provided was: 0
 
 ---
 
     Code
       calc_x <- calculate(x, nsim = -1)
     Error <simpleError>
-      -1 must be a positive integer
+      value must be a positive integer
+      However the value provided was: -1
 
 ---
 
     Code
       calc_x <- calculate(x, nsim = "five")
     Error <simpleError>
-      NA must be a positive integer
+      value must be a positive integer
+      However the value provided was: NA
 

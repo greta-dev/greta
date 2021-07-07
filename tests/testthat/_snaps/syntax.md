@@ -3,7 +3,7 @@
     Code
       distribution(y) <- x
     Error <simpleError>
-      right hand side must be a greta array
+      right hand side must be a <greta_array>
 
 ---
 
@@ -25,8 +25,8 @@
       distribution(y) <- normal(0, 1, dim = c(3, 3, 1))
     Error <simpleError>
       left and right hand sides have different dimensions.
-      The distribution must have dimension of either "3 x 3 x 2" or "1 x 1",but
-      instead has dimension "3 x 3 x 1"
+      The distribution must have dimension of either "3x3x2" or "1x1",but instead has
+      dimension "3x3x1"
 
 ---
 
@@ -47,21 +47,21 @@
     Code
       distribution(z) <- normal(0, 1)
     Error <simpleError>
-      distributions can only be assigned to data greta arrays
+      distributions can only be assigned to data <greta array>s
 
 ---
 
     Code
       distribution(z2) <- normal(0, 1)
     Error <simpleError>
-      distributions can only be assigned to data greta arrays
+      distributions can only be assigned to data <greta array>s
 
 ---
 
     Code
       distribution(z2) <- normal(0, 1)
     Error <simpleError>
-      distributions can only be assigned to data greta arrays
+      distributions can only be assigned to data <greta array>s
 
 # distribution() errors informatively
 

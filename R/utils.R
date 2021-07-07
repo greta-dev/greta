@@ -835,7 +835,10 @@ check_multivariate_dims <- function(vectors = list(),
 check_positive <- function(truncation) {
   if (truncation[1] < 0) {
     msg <- cli::format_error(
-      "lower bound must be 0 or higher"
+      c(
+        "lower bound must be 0 or higher",
+        "lower bound is: {.val {truncation[1]}}"
+      )
       )
     stop(
       msg,
@@ -847,7 +850,11 @@ check_positive <- function(truncation) {
 check_unit <- function(truncation) {
   if (truncation[1] < 0 | truncation[2] > 1) {
     msg <- cli::format_error(
-      "lower and upper bounds must be between 0 and 1"
+      c(
+        "lower and upper bounds must be between 0 and 1",
+        "lower bound is: {.val {truncation[1]}}",
+        "upper bound is: {.val {truncation[2]}}"
+        )
       )
     stop(
       msg,
@@ -969,7 +976,7 @@ check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
   if (length(greta_array_list) == 0) {
     msg <- cli::format_error(
       c(
-        "could not find any non-data greta arrays"
+        "could not find any non-data {.cls greta_array}s"
       )
     )
   }
@@ -1017,7 +1024,7 @@ check_values_list <- function(values, env) {
   if (!all(are_greta_arrays)) {
     msg <- cli::format_error(
       "the names of arguments to values must all correspond to named \\
-      greta arrays"
+      {.cls greta_array}s"
       )
     stop(
       msg,
@@ -1113,14 +1120,14 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
         )
       } else {
         msg <- cli::format_error(
-          "The names of the missing greta arrays could not be detected"
+          "The names of the missing {.cls greta_array}s could not be detected"
           )
     }
 
     final_msg <- cli::format_error(
       c(
         "greta array(s) do not have values",
-        "values have not been provided for all greta arrays on which the \\
+        "values have not been provided for all {.cls greta_array}s on which the \\
         target depends, and {.var nsim} has not been set.",
         "{msg}"
       )
@@ -1140,7 +1147,7 @@ check_cum_op <- function(x) {
     msg <- cli::format_error(
       c(
         "{.var x} must be a column vector",
-        "but {.var x} has dimensions {paste(dims, collapse = ' x ')}"
+        "but {.var x} has dimensions {paste(dims, collapse = 'x')}"
       )
     )
     stop(
@@ -1417,7 +1424,10 @@ check_positive_integer <- function(x, name = "") {
 
   if (length(x) != 1 | is.na(x) | x < 1) {
     msg <- cli::format_error(
-      "{.val {x}} must be a positive integer"
+      c(
+        "value must be a positive integer",
+        "However the value provided was: {.val {x}}"
+      )
     )
     stop(
       msg,

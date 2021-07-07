@@ -51,7 +51,7 @@ chol2symm.greta_array <- function(x) {
     msg <- cli::format_error(
       c(
         "{.fun chol2symm} must have two-dimensional, square, upper-triangular \\
-        greta arrays",
+        {.cls greta_array}s",
         "{.code dim(x)} returns: {dim(x)}"
       )
     )
