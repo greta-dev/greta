@@ -1425,7 +1425,7 @@ check_positive_integer <- function(x, name = "") {
   if (length(x) != 1 | is.na(x) | x < 1) {
     msg <- cli::format_error(
       c(
-        "value must be a positive integer",
+        "{name} must be a positive integer",
         "However the value provided was: {.val {x}}"
       )
     )

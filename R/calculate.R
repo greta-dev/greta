@@ -192,7 +192,7 @@ calculate <- function(...,
   if (!is.null(nsim)) {
 
     # check nsim is valid
-    nsim <- check_positive_integer(nsim)
+    nsim <- check_positive_integer(nsim, "nsim")
 
     # if an RNG seed was provided use it and reset the RNG on exiting
     if (!is.null(seed)) {
