@@ -49,8 +49,8 @@
     Code
       cholesky_variable(dim = rep(2, 3))
     Error <simpleError>
-      dim can either be a scalar or a vector of length 2
-      However its dimension is: 2, 2, and 2
+      `dim` can either be a scalar or a vector of length 2
+      However `dim` has length 3, and contains: "2, 2, 2"
 
 ---
 

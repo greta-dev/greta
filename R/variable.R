@@ -96,8 +96,9 @@ cholesky_variable <- function(dim, correlation = FALSE) {
   } else {
     msg <- cli::format_error(
       c(
-        "dim can either be a scalar or a vector of length 2",
-        "However its dimension is: {dim}"
+        "{.arg dim} can either be a scalar or a vector of length 2",
+        "However {.arg dim} has length {.val {length(dim)}}, and contains: \\
+        {.val {paste(dim, collapse = ', ')}}"
       )
     )
     stop(
