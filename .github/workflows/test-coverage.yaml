@@ -59,6 +59,7 @@ jobs:
 # installing into? Can we call our own greta install functions here?
       - name: Install TensorFlow
         run: |
+          reticulate::conda_create(envname = "greta-env",python_version = "3.7")
           reticulate::conda_install(envname = "greta-env", packages = c("numpy==1.16.4", "tensorflow-probability==0.7.0", "tensorflow==1.14.0"))
         shell: Rscript {0}
 
