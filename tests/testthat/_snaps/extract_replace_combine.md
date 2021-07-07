@@ -12,7 +12,8 @@
     Code
       abind(a, c, along = 5)
     Error <simpleError>
-      invalid 'enclos' argument of type 'character'
+      `along` must be between 0 and 4
+      Instead `along` was 5
 
 # assign errors on variable greta arrays
 

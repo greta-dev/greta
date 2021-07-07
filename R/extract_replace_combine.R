@@ -442,10 +442,12 @@ abind.greta_array <- function(...,
     along <- max(1, min(n + 1, ceiling(along)))
   }
 
-  if (!along %in% 0:n) {
+  if (!(along %in% 0:n)) {
     msg <- cli::format_error(
-      "{.arg along} must be between 0 and {n}",
-      "Instead {.arg along} was {along}"
+      c(
+        "{.arg along} must be between 0 and {n}",
+        "Instead {.arg along} was {.val {along}}"
+      )
     )
     stop(
       msg,
