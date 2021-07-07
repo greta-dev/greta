@@ -18,7 +18,7 @@
     Code
       simulate(m, nsim = 0)
     Error <simpleError>
-      value must be a positive integer
+      nsim must be a positive integer
       However the value provided was: 0
 
 ---
@@ -26,7 +26,7 @@
     Code
       simulate(m, nsim = -1)
     Error <simpleError>
-      value must be a positive integer
+      nsim must be a positive integer
       However the value provided was: -1
 
 ---
@@ -34,6 +34,6 @@
     Code
       simulate(m, nsim = "five")
     Error <simpleError>
-      value must be a positive integer
+      nsim must be a positive integer
       However the value provided was: NA
 
