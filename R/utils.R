@@ -997,7 +997,10 @@ check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
   }
 
   if (!is.null(msg)) {
-    stop(msg, hint, call. = FALSE)
+    stop(
+      msg,
+      call. = FALSE
+      )
   }
 
   greta_array_list

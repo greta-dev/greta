@@ -185,7 +185,7 @@ calculate <- function(...,
   check_greta_arrays(
     target,
     "calculate",
-    "\nPerhaps you forgot to explicitly name other arguments?"
+    "Perhaps you forgot to explicitly name other arguments?"
   )
 
   # checks and RNG seed setting if we're sampling

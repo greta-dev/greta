@@ -43,7 +43,6 @@
       The following object passed to `calculate()` is not a <greta array>:
       "x"
       Perhaps you forgot to explicitly name other arguments?
-      Perhaps you forgot to explicitly name other arguments?
 
 ---
 
@@ -53,7 +52,6 @@
       `calculate()` arguments must be <greta_array>s
       The following object passed to `calculate()` is not a <greta array>:
       "list(x = c(2, 1))"
-      Perhaps you forgot to explicitly name other arguments?
       Perhaps you forgot to explicitly name other arguments?
 
 # calculate errors nicely if values for stochastics not passed
