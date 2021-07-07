@@ -36,8 +36,8 @@
       as_data(cha_mat)
     Error <simpleError>
       <greta_array> must contain the same type
-      Cannot coerce <matrix> to a <greta_array> unless all columns are <numeric>,
-      <integer> or <logical>. This <matrix> had type:
+      Cannot coerce <matrix> to a <greta_array> unless it is <numeric>, <integer> or
+      <logical>. This <matrix> had type:
       <character>
 
 ---

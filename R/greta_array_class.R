@@ -67,8 +67,8 @@ as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
       msg <- cli::format_error(
         c(
           "{.cls greta_array} must contain the same type",
-          "Cannot coerce {.cls matrix} to a {.cls greta_array} unless all \\
-          columns are {.cls numeric}, {.cls integer} or {.cls logical}. This \\
+          "Cannot coerce {.cls matrix} to a {.cls greta_array} unless it is \\
+          {.cls numeric}, {.cls integer} or {.cls logical}. This \\
           {.cls matrix} had type:",
           "{.cls {class(as.vector(x))}}"
         )
