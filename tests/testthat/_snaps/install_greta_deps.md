@@ -18,6 +18,7 @@
       `reticulate::install_miniconda()`
       Then:
       `reticulate::conda_create(envname = 'greta-env', python_version = '3.7')`
+      Then:
       `reticulate::conda_install(envname = 'greta-env', packages = c('numpy==1.16.4',
       'tensorflow-probability==0.7.0', 'tensorflow==1.14.0'))`
       Then, restart R, and load greta with: `library(greta)`

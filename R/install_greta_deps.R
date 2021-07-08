@@ -67,6 +67,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
       "Then:",
       "{.code reticulate::conda_create(envname = 'greta-env', \\
       python_version = '3.7')}",
+      "Then:",
       "{.code reticulate::conda_install(envname = 'greta-env',
       packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
       'tensorflow==1.14.0'))}",
