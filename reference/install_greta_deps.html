@@ -206,6 +206,7 @@ not available on Windows.</p>
     <pre class="usage"><span class='fu'>install_greta_deps</span><span class='op'>(</span>
   method <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='st'>"auto"</span>, <span class='st'>"virtualenv"</span>, <span class='st'>"conda"</span><span class='op'>)</span>,
   conda <span class='op'>=</span> <span class='st'>"auto"</span>,
+  timeout <span class='op'>=</span> <span class='fl'>5</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
@@ -221,6 +222,12 @@ not available on Windows.</p>
       <td><p>The path to a <code>conda</code> executable. Use <code>"auto"</code> to allow
 <code>reticulate</code> to automatically find an appropriate <code>conda</code> binary. See
 <strong>Finding Conda</strong> for more details.</p></td>
+    </tr>
+    <tr>
+      <th>timeout</th>
+      <td><p>maximum time in minutes until the installation for each
+installation component times out and exits. Default is 5 minutes per
+installation component.</p></td>
     </tr>
     <tr>
       <th>...</th>
