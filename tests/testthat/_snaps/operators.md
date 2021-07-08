@@ -10,5 +10,6 @@
     Code
       a %*% c
     Error <simpleError>
-      cannot coerce type 'builtin' to vector of type 'character'
+      only two-dimensional <greta_array>s can be matrix-multiplied
+      dimensions recorded were 3 and 4
 

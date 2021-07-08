@@ -163,7 +163,7 @@ NULL
       )
     )
     stop(
-      dim,
+      msg,
       call. = FALSE
     )
   }
