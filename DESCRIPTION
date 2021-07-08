@@ -4,9 +4,14 @@ Title: Simple and Scalable Statistical Modelling in R
 Version: 0.3.1.9012
 Date: 2020-04-13
 Authors@R: c(
-  person("Nick", "Golding", role = c("aut", "cre"),
+  person("Nick", "Golding", 
+         role = c("aut"),
          email = "nick.golding.research@gmail.com",
          comment = c(ORCID = "0000-0001-8916-5570")),
+  person("Nicholas", "Tierney", 
+         role = c("aut", "cre"),
+         email = "nicholas.tierney@gmail.com", 
+         comment = c(ORCID = "https://orcid.org/0000-0003-1460-8722")),
   person("Simon", "Dirmeier", role = "ctb"),
   person("Adam", "Fleischhacker", role = "ctb"),
   person("Shirin", "Glander", role = "ctb"),
