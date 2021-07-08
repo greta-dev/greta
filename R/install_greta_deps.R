@@ -10,9 +10,9 @@
 #' @param conda The path to a `conda` executable. Use `"auto"` to allow
 #'   `reticulate` to automatically find an appropriate `conda` binary. See
 #'   **Finding Conda** for more details.
-#' @param timeout maximum time in seconds until the installation for each
-#'    installation component times out and exits. Default is 300 seconds
-#'    (5 minutes) per installation component.
+#' @param timeout maximum time in minutes until the installation for each
+#'    installation component times out and exits. Default is 5 minutes per
+#'    installation component.
 #' @param ... Optional arguments, reserved for future expansion.
 #'
 #' @note This will automatically install Miniconda (a minimal version of the
@@ -47,7 +47,7 @@
 #' @importFrom cli cli_ul
 install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
-                               timeout = 300,
+                               timeout = 5,
                                ...) {
 
   # set warning message length
@@ -55,13 +55,11 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   timeout_install_msg <- cli::format_error(
     message = c(
       "Stopping as installation of {.pkg greta} dependencies took longer than \\
-      {timeout} seconds.",
+      {timeout} minutes",
       "You can increase the timeout time by increasing the {.arg timeout} \\
       argument.",
       "For example, to wait 5 minutes:",
-      "{.code install_greta_deps(timeout = 300)}",
-      "or to wait 10 minutes:",
-      "{.code install_greta_deps(timeout = 600)}",
+      "{.code install_greta_deps(timeout = 5)}",
       "Alternatively, you can perform the entire installation with:",
       "{.code reticulate::install_miniconda()}",
       "Then:",
@@ -88,7 +86,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     cli_process_start("No {.pkg miniconda} detected, installing \\
                       {.pkg miniconda}, this may take a minute.")
     r_install_miniconda <- r_process$new(callr_install_miniconda)
-    r_install_miniconda$wait(timeout = timeout * 1000)
+    r_install_miniconda$wait(timeout = timeout * 60 * 1000)
     status <- r_install_miniconda$get_exit_status()
     if (is.null(status)) {
       cli::cli_process_failed()

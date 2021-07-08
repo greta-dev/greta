@@ -1,19 +1,17 @@
 # install_greta_deps errors appropriately
 
     Code
-      install_greta_deps(timeout = 1)
+      install_greta_deps(timeout = 0.001)
     Message <cliMessage>
       i Creating 'greta-env' conda environment using python v3.7 , this may take a ...
       x Creating 'greta-env' conda environment using python v3.7 , this may take a ...
       
     Error <simpleError>
-      Stopping as installation of greta dependencies took longer than 1
-      seconds.
+      Stopping as installation of greta dependencies took longer than 0.001
+      minutes
       You can increase the timeout time by increasing the `timeout` argument.
       For example, to wait 5 minutes:
-      `install_greta_deps(timeout = 300)`
-      or to wait 10 minutes:
-      `install_greta_deps(timeout = 600)`
+      `install_greta_deps(timeout = 5)`
       Alternatively, you can perform the entire installation with:
       `reticulate::install_miniconda()`
       Then:
