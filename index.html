@@ -315,8 +315,20 @@
 <p>You can install the current release version of the package from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"greta"</span><span class="op">)</span></code></pre></div>
-<p>or the development version from GitHub:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>Or install the development version of <code>greta</code> from <a href="https://greta-dev.r-universe.dev/ui#builds">r-universe</a>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># Enable this universe</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">options</span>(</span>
+<span id="cb2-3"><a href="#cb2-3"></a>  <span class="dt">repos =</span> <span class="kw">c</span>(</span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="dt">gretadev =</span> <span class="st">'https://greta-dev.r-universe.dev'</span>,</span>
+<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">CRAN =</span> <span class="st">'https://cloud.r-project.org'</span>)</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    )</span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="er">)</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a></span>
+<span id="cb2-9"><a href="#cb2-9"></a><span class="co"># Install greta</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="kw">install.packages</span>(<span class="st">'greta'</span>)</span></code></pre></div>
+<p>(Note - installing from r-universe is just like installing from CRAN, and should be faster and more convenient than installing from GitHub)</p>
+<p>You can also install the development version of <code>greta</code> via GitHub:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"greta-dev/greta"</span><span class="op">)</span></code></pre></div>
 <!-- badges: start -->
 <p><a href="https://codecov.io/gh/greta-dev/greta?branch=master"><img src="https://codecov.io/gh/greta-dev/greta/branch/master/graph/badge.svg" alt="Codecov test coverage"></a> <a href="https://github.com/greta-dev/greta/actions"><img src="https://github.com/greta-dev/greta/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <a href="https://cran.rstudio.com/web/packages/greta"><img src="http://www.r-pkg.org/badges/version/greta" alt="cran version"></a> <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="license"></a> <a href="https://zenodo.org/badge/latestdoi/73758247"><img src="https://zenodo.org/badge/73758247.svg" alt="doi"></a> <a href="http://joss.theoj.org/papers/62e62338d8ba44ff9e5dc295cf631477"><img src="http://joss.theoj.org/papers/62e62338d8ba44ff9e5dc295cf631477/status.svg" alt="joss"></a> <img src="logos/bottom_banner.png"><!-- badges: end --></p>
