@@ -1,5 +1,3 @@
-context("joint distributions")
-
 test_that("continuous joint variables can be sampled from", {
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -86,12 +84,12 @@ test_that("joint of fixed and continuous distributions errors", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     joint(
       bernoulli(0.5),
       normal(0, 1)
-    ),
-    "combination of discrete and continuous"
+    )
   )
 })
 
@@ -99,14 +97,14 @@ test_that("joint with insufficient distributions errors", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_error(
-    joint(normal(0, 2)),
-    "at least two distributions"
+  expect_snapshot(
+    error = TRUE,
+    joint(normal(0, 2))
   )
 
-  expect_error(
-    joint(),
-    "at least two distributions"
+  expect_snapshot(
+    error = TRUE,
+    joint()
   )
 })
 
@@ -114,12 +112,12 @@ test_that("joint with non-scalar distributions errors", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     joint(
       normal(0, 2, dim = 3),
       normal(0, 1, dim = 3)
-    ),
-    "probability distributions over scalars"
+    )
   )
 })
 

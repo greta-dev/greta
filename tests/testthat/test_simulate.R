@@ -1,5 +1,3 @@
-context("simulate")
-
 test_that("simulate produces the right number of samples", {
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -64,9 +62,9 @@ test_that("simulate errors if distribution-free variables are not fixed", {
   a <- variable()
   y <- normal(a, 1)
   m <- model(y)
-  expect_error(
-    sims <- simulate(m),
-    "do not have distributions so cannot be sampled"
+  expect_snapshot(
+    error = TRUE,
+    sims <- simulate(m)
   )
 })
 
@@ -80,9 +78,9 @@ test_that("simulate errors if a distribution cannot be sampled from", {
   m <- lognormal(0, 1)
   distribution(y) <- hypergeometric(m, 3, 2)
   m <- model(y)
-  expect_error(
-    sims <- simulate(m),
-    "sampling is not yet implemented"
+  expect_snapshot(
+    error = TRUE,
+    sims <- simulate(m)
   )
 })
 
@@ -93,18 +91,18 @@ test_that("simulate errors nicely if nsim is invalid", {
   x <- normal(0, 1)
   m <- model(x)
 
-  expect_error(
-    simulate(m, nsim = 0),
-    "must be a positive integer"
+  expect_snapshot(
+    error = TRUE,
+    simulate(m, nsim = 0)
   )
 
-  expect_error(
-    simulate(m, nsim = -1),
-    "must be a positive integer"
+  expect_snapshot(
+    error = TRUE,
+    simulate(m, nsim = -1)
   )
 
-  expect_error(
-    simulate(m, nsim = "five"),
-    "must be a positive integer"
+  expect_snapshot(
+    error = TRUE,
+    simulate(m, nsim = "five")
   )
 })

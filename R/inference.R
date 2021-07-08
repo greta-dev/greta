@@ -204,19 +204,16 @@ mcmc <- function(model,
   )
 
   if (any(are_data)) {
-    is_are <- ifelse(sum(are_data) == 1,
-      "is a data greta array",
-      "are data greta arrays"
+    msg <- cli::format_error(
+      c(
+        "data {.cls greta_array}s cannot be sampled",
+        "{.var {names[are_data]}} \\
+        {?is a data/are data} {.cls greta_array}(s)"
+      )
     )
-    bad_greta_arrays <- paste(names[are_data],
-      collapse = ", "
-    )
-    msg <- sprintf(
-      "%s %s, data greta arrays cannot be sampled",
-      bad_greta_arrays,
-      is_are
-    )
-    stop(msg, call. = FALSE)
+    stop(
+      msg,
+      call. = FALSE)
   }
 
   # get the dag containing the target nodes
@@ -323,20 +320,18 @@ run_samplers <- function(samplers,
       length(samplers),
       cores_text
     )
-    message(msg, appendLF = FALSE)
+    message(msg)
   }
 
   if (plan_is$parallel & !plan_is$local) {
-    sampler_text <- ifelse(length(samplers) > 1,
-      "samplers on remote machines",
-      "sampler on a remote machine"
-    )
-    msg <- sprintf(
-      "\nrunning %i %s\n\n",
-      length(samplers),
-      sampler_text
-    )
-    message(msg, appendLF = FALSE)
+
+    msg <- cli::format_message(
+      "running {length(samplers)} \\
+      {?sampler on a remote machine/samplers on remote machines}"
+      )
+
+    message(msg)
+
   }
 
   n_chain <- length(samplers)
@@ -561,8 +556,12 @@ to_free <- function(node, data) {
   upper <- node$upper
 
   unsupported_error <- function() {
-    stop("some provided initial values are outside the range of values ",
-      "their variables can take",
+    msg <- cli::format_error(
+        "some provided initial values are outside the range of values their \\
+        variables can take"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -623,9 +622,15 @@ parse_initial_values <- function(initials, dag) {
   missing_names <- is.na(tf_names)
   if (any(missing_names)) {
     bad <- names(tf_names)[missing_names]
-    stop("some greta arrays passed to initials() ",
-      "are not associated with the model: ",
-      paste(bad, collapse = ", "),
+    msg <- cli::format_error(
+      c(
+        "some {.cls greta_array}s passed to {.fun initials} are not associated with \\
+        the model:",
+        "{.var {bad}}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -646,7 +651,11 @@ parse_initial_values <- function(initials, dag) {
   are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
 
   if (!all(are_variables)) {
-    stop("initial values can only be set for variable greta arrays",
+    msg <- cli::format_error(
+      "initial values can only be set for variable {.cls greta_array}s"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -656,8 +665,12 @@ parse_initial_values <- function(initials, dag) {
   same_dims <- mapply(identical, target_dims, replacement_dims)
 
   if (!all(same_dims)) {
-    stop("the initial values provided have different dimensions ",
-      "than the named greta arrays",
+    msg <- cli::format_error(
+      "the initial values provided have different dimensions than the named \\
+      {.cls greta_array}s"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -684,10 +697,11 @@ prep_initials <- function(initial_values, n_chains, dag) {
     is_blank <- identical(initial_values, initials())
 
     if (!is_blank & n_chains > 1) {
-      message(
-        "only one set of initial values was provided, and was ",
-        "used for all chains"
+      msg <- cli::format_message(
+        "only one set of initial values was provided, and was used for \\
+        all chains"
       )
+      message(msg)
     }
 
     initial_values <- replicate(n_chains,
@@ -706,9 +720,16 @@ prep_initials <- function(initial_values, n_chains, dag) {
       n_sets <- length(initial_values)
 
       if (n_sets != n_chains) {
-        stop(n_sets, " sets of initial values were provided, but there ",
-          ifelse(n_chains > 1, "are ", "is only "), n_chains, " chain",
-          ifelse(n_chains > 1, "s", ""),
+        msg <- cli::format_error(
+          c(
+            "the number of provided initial values does not match chains",
+            "{n_sets} set{?s} of initial values were provided, but there\\
+            {cli::qty(n_chains)} {?is only/are} {n_chains}\\
+            {cli::qty(n_chains)} chain{?s}"
+            )
+          )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -721,8 +742,14 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
   # error on a bad object
   if (is.null(initial_values)) {
-    stop("initial_values must be an initials object created with initials(), ",
-      "or a simple list of initials objects",
+    msg <- cli::format_error(
+      c(
+        "{.arg initial_values} must be an initials object created with \\
+        {.fun initials}, or a simple list of initials objects"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -748,7 +775,11 @@ initials <- function(...) {
   names <- names(values)
 
   if (length(names) != length(values)) {
-    stop("all initial values must be named",
+    msg <- cli::format_error(
+      "all initial values must be named"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -758,7 +789,11 @@ initials <- function(...) {
 
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
-    stop("initial values must be numeric",
+    msg <- cli::format_error(
+      "initial values must be numeric"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }

@@ -1,5 +1,3 @@
-context("calculate")
-
 test_that("deterministic calculate works with correct lists", {
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -192,9 +190,9 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   )
 
   # this should error without nsim being specified (y is stochastic)
-  expect_error(
-    calculate(a, y, values = draws),
-    "y has a distribution and is not in the MCMC samples"
+  expect_snapshot(
+    error = TRUE,
+    calc_a <- calculate(a, y, values = draws)
   )
 
   # this should be OK
@@ -220,10 +218,10 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   expect_true(all(is.finite(sims$y)))
 
   # warn about resampling if nsim is greater than elements in draws
-  expect_warning(
-    calculate(y, values = draws, nsim = samples * chains + 1),
-    "posterior samples had to be drawn with replacement"
+  expect_snapshot(
+    new_y <- calculate(y, values = draws, nsim = samples * chains + 1)
   )
+
 })
 
 test_that("calculate errors if the mcmc samples unrelated to target", {
@@ -249,9 +247,9 @@ test_that("calculate errors if the mcmc samples unrelated to target", {
 
   c <- normal(0, 1)
 
-  expect_error(
-    calculate(c, values = draws),
-    "do not appear to be connected"
+  expect_snapshot(
+    error = TRUE,
+    calc_c <- calculate(c, values = draws)
   )
 })
 
@@ -281,9 +279,9 @@ test_that("stochastic calculate works with mcmc samples & new stochastics", {
 
   # this should error without nsim being specified (b is stochastic and not
   # given by draws)
-  expect_error(
-    calculate(b, values = draws),
-    "new variables that are not in the MCMC samples"
+  expect_snapshot(
+    error = TRUE,
+    calc_b <- calculate(b, values = draws)
   )
 
   sims <- calculate(b, values = draws, nsim = 10)
@@ -300,15 +298,17 @@ test_that("calculate errors nicely if non-greta arrays are passed", {
   y <- a * x
 
   # it should error nicely
-  expect_error(calculate(y, x, values = list(x = c(2, 1))),
-    regexp = "not greta arrays:  x"
+  expect_snapshot(
+    error = TRUE,
+    calc_y <- calculate(y, x, values = list(x = c(2, 1)))
   )
 
   # and a hint for this common error
-  expect_error(
-    calculate(y, list(x = c(2, 1))),
-    "Perhaps you forgot to explicitly name other arguments?"
+  expect_snapshot(
+    error = TRUE,
+    calc_y <- calculate(y, list(x = c(2, 1)))
   )
+
 })
 
 test_that("calculate errors nicely if values for stochastics not passed", {
@@ -320,13 +320,9 @@ test_that("calculate errors nicely if values for stochastics not passed", {
   y <- a * x
 
   # it should error nicely
-  expect_error(
-    calculate(y, values = list(x = c(2, 1))),
-    paste(
-      "values have not been provided for all greta arrays on",
-      "which the target depends, and nsim has not been set.",
-      "Please provide values for the greta array: a"
-    )
+  expect_snapshot(
+    error = TRUE,
+    calc_y <- calculate(y, values = list(x = c(2, 1)))
   )
 
   # but is should work fine if nsim is set
@@ -342,9 +338,9 @@ test_that("calculate errors nicely if values have incorrect dimensions", {
   y <- a * x
 
   # it should error nicely
-  expect_error(
-    calculate(y, values = list(a = c(1, 1))),
-    "different number of elements than the greta array"
+  expect_snapshot(
+    error = TRUE,
+    calc_y <- calculate(y, values = list(a = c(1, 1)))
   )
 })
 
@@ -388,17 +384,17 @@ test_that("calculate errors nicely with invalid batch sizes", {
   draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
 
   # variable valid batch sizes
-  expect_error(
-    calculate(y, values = draws, trace_batch_size = 0),
-    "greater than or equal to 1"
+  expect_snapshot(
+    error = TRUE,
+    calc_y <- calculate(y, values = draws, trace_batch_size = 0)
   )
-  expect_error(
-    calculate(y, values = draws, trace_batch_size = NULL),
-    "greater than or equal to 1"
+  expect_snapshot(
+    error = TRUE,
+    calc_y <- calculate(y, values = draws, trace_batch_size = NULL)
   )
-  expect_error(
-    calculate(y, values = draws, trace_batch_size = NA),
-    "greater than or equal to 1"
+  expect_snapshot(
+    error = TRUE,
+    calc_y <- calculate(y, values = draws, trace_batch_size = NA)
   )
 })
 
@@ -525,9 +521,9 @@ test_that("calculate errors if distribution-free variables are not fixed", {
   # fix variable
   a <- variable()
   y <- normal(a, 1)
-  expect_error(
-    calculate(a, y, nsim = 1),
-    "do not have distributions so cannot be sampled"
+  expect_snapshot(
+    error = TRUE,
+    calc_a <- calculate(a, y, nsim = 1)
   )
 })
 
@@ -537,9 +533,9 @@ test_that("calculate errors if a distribution cannot be sampled from", {
 
   # fix variable
   y <- hypergeometric(5, 3, 2)
-  expect_error(
-    sims <- calculate(y, nsim = 1),
-    "sampling is not yet implemented"
+  expect_snapshot(
+    error = TRUE,
+    sims <- calculate(y, nsim = 1)
   )
 })
 
@@ -549,18 +545,18 @@ test_that("calculate errors nicely if nsim is invalid", {
 
   x <- normal(0, 1)
 
-  expect_error(
-    calculate(x, nsim = 0),
-    "must be a positive integer"
+  expect_snapshot(
+    error = TRUE,
+    calc_x <- calculate(x, nsim = 0)
   )
 
-  expect_error(
-    calculate(x, nsim = -1),
-    "must be a positive integer"
+  expect_snapshot(
+    error = TRUE,
+    calc_x <- calculate(x, nsim = -1)
   )
 
-  expect_error(
-    calculate(x, nsim = "five"),
-    "must be a positive integer"
+  expect_snapshot(
+    error = TRUE,
+    calc_x <- calculate(x, nsim = "five")
   )
 })

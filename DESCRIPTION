@@ -79,7 +79,7 @@ Imports:
     coda,
     methods,
     abind,
-    cli,
+    cli (>= 3.0.0),
     callr
 Suggests:
     knitr,
@@ -87,7 +87,7 @@ Suggests:
     DiagrammeR,
     bayesplot,
     lattice,
-    testthat,
+    testthat (>= 3.0.4),
     mvtnorm,
     MCMCpack,
     rmutil,
@@ -98,8 +98,10 @@ Suggests:
     fields,
     MASS,
     spelling,
-    covr
+    covr,
+    mockery
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
 Language: en-GB
 Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3

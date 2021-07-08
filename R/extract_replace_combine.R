@@ -101,7 +101,11 @@ NULL
   rm("._dummy_in", envir = pf)
 
   if (any(is.na(dummy_out))) {
-    stop("subscript out of bounds",
+    msg <- cli::format_error(
+      "subscript out of bounds"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -168,7 +172,11 @@ NULL
   node <- get_node(x)
 
   if (inherits(node, "variable_node")) {
-    stop("cannot replace values in a variable greta array",
+    msg <- cli::format_error(
+      "cannot replace values in a variable {.cls greta_array}"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -197,7 +205,11 @@ NULL
   rm("._dummy_in", envir = pf)
 
   if (any(is.na(dummy_out))) {
-    stop("subscript out of bounds",
+    msg <- cli::format_error(
+      "subscript out of bounds"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -206,9 +218,11 @@ NULL
 
   if (length(index) != length(replacement)) {
     if (length(index) %% length(replacement) != 0) {
+      msg <- cli::format_error(
+        "number of items to replace is not a multiple of replacement length"
+      )
       stop(
-        "number of items to replace is not a multiple of ",
-        "replacement length",
+        msg,
         call. = FALSE
       )
     } else {
@@ -251,7 +265,11 @@ cbind.greta_array <- function(...) {
   dims <- lapply(dots, dim)
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2)) {
-    stop("all greta arrays must be two-dimensional",
+    msg <- cli::format_error(
+      "all {.cls greta_array}s must be two-dimensional"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -262,7 +280,11 @@ cbind.greta_array <- function(...) {
 
   # check all the same
   if (!all(rows == rows[1])) {
-    stop("all greta arrays must be have the same number of rows",
+    msg <- cli::format_error(
+      "all {.cls greta_array}s must be have the same number of rows"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -284,7 +306,11 @@ rbind.greta_array <- function(...) {
   dims <- lapply(dots, dim)
   ndims <- vapply(dims, length, FUN.VALUE = 1)
   if (!all(ndims == 2)) {
-    stop("all greta arrays must be two-dimensional",
+    msg <- cli::format_error(
+      "all {.cls greta_array}s must be two-dimensional"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -295,7 +321,11 @@ rbind.greta_array <- function(...) {
 
   # check all the same
   if (!all(cols == cols[1])) {
-    stop("all greta arrays must be have the same number of columns",
+    msg <- cli::format_error(
+      "all {.cls greta_array}s must be have the same number of columns"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -337,8 +367,16 @@ abind.default <- function(...,
   # error nicely if they don't have abind installed
   abind_installed <- requireNamespace("abind", quietly = TRUE)
   if (!abind_installed) {
-    stop("abind is being called on R arrays (not greta arrays), ",
-      "but the abind package is not installed",
+    msg <- cli::format_error(
+      c(
+        "{.fun abind} is being called on R arrays (not {.cls greta_array}s), \\
+        but the {.pkg abind} package is not installed",
+        "install {.pkg abind} with:",
+        "{.code install.packages('abind')}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -371,9 +409,13 @@ abind.greta_array <- function(...,
   # nolint end
 
   if (user_set_args) {
+    msg <- cli::format_warning(
+      "only the argument {.arg along} is supported when using {.fun abind} \\
+      with {.cls greta_array}s, any other arguments will be ignored"
+    )
     warning(
-      "only the argument 'along' is supported when using abind ",
-      "with greta arrays, any other arguments will be ignored"
+      msg,
+      call. = FALSE
     )
   }
 
@@ -400,8 +442,17 @@ abind.greta_array <- function(...,
     along <- max(1, min(n + 1, ceiling(along)))
   }
 
-  if (!along %in% 0:n) {
-    stop("along must be between 0 and ", n, call. = FALSE)
+  if (!(along %in% 0:n)) {
+    msg <- cli::format_error(
+      c(
+        "{.arg along} must be between 0 and {n}",
+        "Instead {.arg along} was {.val {along}}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+      )
   }
 
   pre <- seq(from = 1, len = along - 1)
@@ -425,9 +476,15 @@ abind.greta_array <- function(...,
   for (dim in seq_len(n)[-along]) {
     this_dim <- vapply(dims, `[`, dim, FUN.VALUE = 1L)
     if (!all(this_dim == this_dim[1])) {
-      stop("all greta arrays must have the same dimensions ",
-        "except on the 'along' dimension, but dimension ", dim,
-        " had varying sizes: ", paste(this_dim, collapse = ", "),
+      msg <- cli::format_error(
+        c(
+          "all {.cls greta_array}s must have the same dimensions except on \\
+          the {.arg along} dimension",
+          "However, dimension {dim} had varying sizes: {this_dim}"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     } else {
@@ -522,7 +579,11 @@ length.greta_array <- function(x) {
   }
 
   if (length(dims) == 0L) {
-    stop("length-0 dimension vector is invalid",
+    msg <- cli::format_error(
+      "length-0 dimension vector is invalid"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -532,7 +593,11 @@ length.greta_array <- function(x) {
   }
 
   if (any(is.na(dims))) {
-    stop("the dims contain missing values",
+    msg <- cli::format_error(
+      "the dims contain missing values"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -540,7 +605,14 @@ length.greta_array <- function(x) {
   dims <- as.integer(dims)
 
   if (any(dims < 0L)) {
-    stop("the dims contain negative values",
+    msg <- cli::format_error(
+      c(
+        "the dims contain negative values:",
+        "{.code dim(x)} returns {dim(x)}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -550,11 +622,15 @@ length.greta_array <- function(x) {
 
   # if x isn't a scalar and the numbers of elements don't match, error
   if (len != 1 && prod_dims != len) {
-    msg <- sprintf(
-      "dims [product %i] do not match the length of object [%i]",
-      prod_dims, len
+    msg <- cli::format_error(
+      c(
+        "dims [product {prod_dims}] do not match the length of object [{len}]"
+      )
     )
-    stop(msg, call. = FALSE)
+    stop(
+      msg,
+      call. = FALSE
+      )
   }
 
   # change the values similarly
@@ -692,15 +768,22 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
 
   # check the rank isn't too high
   if (length(dim) != 2) {
+    msg <- cli::format_error(
+      "cannot only extract the diagonal from a node with exactly two \\
+      dimensions"
+    )
     stop(
-      "cannot only extract the diagonal from a node ",
-      "with exactly two dimensions",
+      msg,
       call. = FALSE
     )
   }
 
   if (dim[1] != dim[2]) {
-    stop("diagonal elements can only be extracted from square matrices",
+    msg <- cli::format_error(
+      "diagonal elements can only be extracted from square matrices"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }

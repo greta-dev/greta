@@ -1,5 +1,3 @@
-context("miscellaneous methods")
-
 test_that("check_tf_version works", {
   skip_if_not(check_tf_version())
 
@@ -7,44 +5,50 @@ test_that("check_tf_version works", {
   true_version <- tf$`__version__`
   tf$`__version__` <- "0.9.0" # nolint
 
-  # expected text
-  expected_message <- "We have detected that you do not have the expected python packages"
-
-  expect_error(
-    check_tf_version("error"),
-    expected_message
+  expect_snapshot(
+    error = TRUE,
+    check_tf_version("error")
   )
-  expect_warning(
-    check_tf_version("warn"),
-    expected_message
+  expect_snapshot(
+    check_tf_version("warn")
   )
-  expect_message(
-    check_tf_version("message"),
-    expected_message
+  expect_snapshot(
+    check_tf_version("message")
   )
 
   # reset the true version
   tf$`__version__` <- true_version # nolint
+})
 
   # forge a missing installation
-  with_mock(
-    `reticulate::py_module_available` = function(x) {
-      FALSE
-    },
-    expect_error(check_tf_version("error"), expected_message),
-    expect_warning(check_tf_version("warn"), expected_message),
-    expect_message(check_tf_version("message"), expected_message)
-  )
+test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
+    # mockery::stub(check_tf_version, 'reticulate::py_module_available', FALSE)
+    mockery::stub(check_tf_version, 'have_python', FALSE)
+    mockery::stub(check_tf_version, 'have_tf', FALSE)
+    mockery::stub(check_tf_version, 'have_tfp', FALSE)
 
-  with_mock(
-    greta_stash$python_has_been_initialised <- FALSE,
-    `greta:::have_tfp` = function(x){
-      FALSE
-    },
-    expect_message(object = check_tf_version("message"),
-                   regexp = "failed")
-  )
+    expect_snapshot(
+      error = TRUE,
+      check_tf_version("error")
+      )
+
+    expect_snapshot(
+      check_tf_version("warn")
+    )
+
+    expect_snapshot(
+      check_tf_version("message")
+    )
+
 })
+
+test_that("check_tf_version fails when tfp not available", {
+    greta_stash$python_has_been_initialised <- FALSE
+    mockery::stub(check_tf_version, 'have_tfp', FALSE)
+    expect_error(
+      check_tf_version("error")
+    )
+  })
 
 test_that(".onLoad runs", {
   skip_if_not(check_tf_version())
@@ -95,56 +99,42 @@ test_that("define and mcmc error informatively", {
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
-  expect_error(
-    model(variable()),
-    paste(
-      "none of the greta arrays in the model are associated",
-      "with a probability density,",
-      "so a model cannot be defined"
-    )
+  expect_snapshot(
+    error = TRUE,
+    model(variable())
   )
 
-  expect_error(
-    model(x),
-    paste(
-      "none of the greta arrays in the model are associated",
-      "with a probability density,",
-      "so a model cannot be defined"
-    )
+  expect_snapshot(
+    error = TRUE,
+    model(x)
   )
 
-  expect_error(
-    model(),
-    "could not find any non-data greta arrays"
+  expect_snapshot(
+    error = TRUE,
+    model()
   )
 
   # can't define a model for an unfixed discrete variable
-  expect_error(
-    model(bernoulli(0.5)),
-    paste(
-      "model contains a discrete random variable that doesn't",
-      "have a fixed value, so cannot be sampled from"
-    )
+  expect_snapshot(
+    error = TRUE,
+    model(bernoulli(0.5))
   )
 
   # no parameters here, so define or dag should error
   distribution(x) <- normal(0, 1)
-  expect_error(
-    model(x),
-    paste(
-      "none of the greta arrays in the model are unknown,",
-      "so a model cannot be defined"
-    )
+  expect_snapshot(
+    error = TRUE,
+    model(x)
   )
 
   # a bad number of cores
   a <- normal(0, 1)
   m <- model(a)
-  expect_message(
+  expect_warning(
     mcmc(m,
-      warmup = 1,
-      n_samples = 1,
-      n_cores = 1000000L
+         warmup = 1,
+         n_samples = 1,
+         n_cores = 1000000L
     ),
     "cores were requested, but only"
   )
@@ -152,9 +142,9 @@ test_that("define and mcmc error informatively", {
   # can't draw samples of a data greta array
   z <- normal(x, 1)
   m <- model(x, z)
-  expect_error(
-    mcmc(m),
-    "x is a data greta array, data greta arrays cannot be sampled"
+  expect_snapshot(
+    error = TRUE,
+    draws <- mcmc(m)
   )
 })
 
@@ -187,9 +177,9 @@ test_that("check_dims errors informatively", {
   )
 
   # with two differently shaped arrays it shouldn't
-  expect_error(
-    greta:::check_dims(a, c),
-    "incompatible dimensions: 3x3, 2x2"
+  expect_snapshot(
+    error = TRUE,
+    greta:::check_dims(a, c)
   )
 
   # with two scalars and a target dimension, just return the target dimension
@@ -211,27 +201,19 @@ test_that("disjoint graphs are checked", {
   # c is unrelated and has no density
   c <- variable()
 
-  expect_error(
-    m <- model(a, b, c),
-    paste(
-      "the model contains 2 disjoint graphs, one or more of",
-      "these sub-graphs does not contain any greta arrays that",
-      "are associated with a probability density,",
-      "so a model cannot be defined"
-    )
+  expect_snapshot(
+    error = TRUE,
+    m <- model(a, b, c)
   )
 
   # d is unrelated and known
   d <- as_data(randn(3))
   distribution(d) <- normal(0, 1)
-  expect_error(
-    m <- model(a, b, d),
-    paste(
-      "the model contains 2 disjoint graphs, one or more of",
-      "these sub-graphs does not contain any greta arrays that",
-      "are unknown, so a model cannot be defined"
-    )
+  expect_snapshot(
+    error = TRUE,
+    m <- model(a, b, d)
   )
+
 })
 
 test_that("plotting models doesn't error", {
@@ -276,10 +258,11 @@ test_that("cleanly() handles TF errors nicely", {
 
   expect_s3_class(cleanly(inversion_stop()), "error")
   expect_s3_class(cleanly(cholesky_stop()), "error")
-  expect_error(
-    cleanly(other_stop()),
-    "greta hit a tensorflow error:"
+  expect_snapshot(
+    error = TRUE,
+    cleanly(other_stop())
   )
+
 })
 
 test_that("double precision works for all jacobians", {

@@ -169,7 +169,14 @@ calculate <- function(...,
   # catch empty lists here, since check_greta_arrays assumes data greta arrays
   # have been stripped out
   if (identical(target, list())) {
-    stop("no greta arrays to calculate were provided",
+    msg <- cli::format_error(
+      c(
+        "{.fun calculate} requires {.cls greta array}s",
+        "no {.cls greta array}s were provided to {.fun calculate}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -178,14 +185,14 @@ calculate <- function(...,
   check_greta_arrays(
     target,
     "calculate",
-    "\nPerhaps you forgot to explicitly name other arguments?"
+    "Perhaps you forgot to explicitly name other arguments?"
   )
 
   # checks and RNG seed setting if we're sampling
   if (!is.null(nsim)) {
 
     # check nsim is valid
-    nsim <- check_positive_integer(nsim)
+    nsim <- check_positive_integer(nsim, "nsim")
 
     # if an RNG seed was provided use it and reset the RNG on exiting
     if (!is.null(seed)) {
@@ -277,8 +284,12 @@ calculate_greta_mcmc_list <- function(target,
   # check there's some commonality between the two dags
   connected_to_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
   if (!any(connected_to_draws)) {
-    stop("the target greta arrays do not appear to be connected ",
-      "to those in the greta_mcmc_list object",
+    msg <- cli::format_error(
+      "the target {.cls greta array}s do not appear to be connected to those \\
+      in the {.cls greta_mcmc_list} object"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -290,10 +301,19 @@ calculate_greta_mcmc_list <- function(target,
     # see if the new dag introduces any new variables
     new_types <- dag$node_types[!connected_to_draws]
     if (any(new_types == "variable")) {
-      stop("the target greta arrays are related to new variables ",
-        "that are not in the MCMC samples so cannot be calculated ",
-        "from the samples alone. Set 'nsim' if you want to sample them ",
-        "conditionally on the MCMC samples",
+      msg <- cli::format_error(
+        c(
+          "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
+          samples",
+          "the target {.cls greta array}s are related to new variables that \\
+          are not in the MCMC samples, so cannot be calculated from the \\
+          samples alone.",
+          "Set {.arg nsim} if you want to sample them conditionally on the \\
+          MCMC samples"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -313,17 +333,20 @@ calculate_greta_mcmc_list <- function(target,
     new_stochastics <- have_distributions & !existing_variables
     if (any(new_stochastics)) {
       n_stoch <- sum(new_stochastics)
-      stop("the greta array",
-        ngettext(n_stoch, " ", "s "),
-        paste(names(target)[new_stochastics], collapse = ", "),
-        ngettext(
-          n_stoch,
-          " has a distribution and is ",
-          " have distributions and are"
-        ),
-        "not in the MCMC samples, so cannot be calculated ",
-        "from the samples alone. Set 'nsim' if you want to sample them ",
-        "conditionally on the MCMC samples",
+      msg <- cli::format_error(
+        c(
+          "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
+          samples",
+          "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
+          {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
+          {?have distributions and are/has a distribution and is} not in the \\
+          MCMC samples, so cannot be calculated from the samples alone.",
+          "Set {.arg nsim} if you want to sample them conditionally on the \\
+          MCMC samples"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -343,8 +366,12 @@ calculate_greta_mcmc_list <- function(target,
     replace <- FALSE
     if (nsim > n_samples) {
       replace <- TRUE
-      warning("nsim was greater than the number of posterior samples in ",
-        "values, so posterior samples had to be drawn with replacement",
+      msg <- cli::format_warning(
+        "{.arg nsim} was greater than the number of posterior samples in \\
+        values, so posterior samples had to be drawn with replacement"
+      )
+      warning(
+        msg,
         call. = FALSE
       )
     }
@@ -456,8 +483,14 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     unfixed <- !names(variables) %in% fixed_node_names
 
     if (any(unsampleable & unfixed)) {
-      stop("the target greta arrays are related to variables ",
-        "that do not have distributions so cannot be sampled",
+      msg <- cli::format_error(
+        # NOTE:
+        # is it possible to identify the names of these arrays or variables?
+        "the target {.cls greta_array}s are related to variables that do not \\
+        have distributions so cannot be sampled"
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }

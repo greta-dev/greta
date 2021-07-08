@@ -106,9 +106,16 @@ inference <- R6Class(
         }
 
         if (!valid) {
-          stop("Could not find reasonable starting values after ", attempts,
-            " attempts. Please specify initial values manually via the ",
-            "initial_values argument",
+          msg <- cli::format_error(
+            c(
+              "Could not find reasonable starting values after \\
+              {attempts} attempts.",
+              "Please specify initial values manually via the \\
+              {.arg initial_values} argument"
+            )
+          )
+          stop(
+            msg,
             call. = FALSE
           )
         }
@@ -117,10 +124,16 @@ inference <- R6Class(
         # if they were all provided, check they can be be used
         valid <- self$valid_parameters(inits)
         if (!valid) {
-          stop("The log density could not be evaluated at these ",
-            "initial values.\nTry using calculate() ",
-            "see whether they lead to values of other ",
-            "greta arrays in the model.",
+          msg <- cli::format_error(
+            c(
+              "The log density could not be evaluated at these initial values",
+              "Try using these initials as the values argument in \\
+              {.fun calculate} to see what values of subsequent \\
+              {.cls greta_array}s these initial values lead to."
+            )
+          )
+          stop(
+            msg,
             call. = FALSE
           )
         }
@@ -159,7 +172,11 @@ inference <- R6Class(
     # run a burst of sampling, and put the resulting free state values in
     # last_burst_free_states
     run_burst = function() {
-      stop("no method to run a burst in the base inference class",
+      msg <- cli::format_error(
+        "no method to run a burst in the base inference class"
+      )
+      stop(
+        msg,
         call. = FALSE
       )
       self$last_burst_free_states <- free_states
@@ -505,7 +522,9 @@ sampler <- R6Class(
       }
 
       if (!identical(msg, "")) {
-        message(msg, "\n")
+        msg <- cli::format_message(msg)
+        message(msg)
+        cat("\n")
       }
     },
 
@@ -722,15 +741,24 @@ sampler <- R6Class(
           )
         } else {
 
+          greta_stash$tf_num_error <- result
+
           # otherwise, *one* of these multiple samples was bad. The sampler
           # won't be valid if we just restart, so we need to error here,
           # informing the user how to run one sample at a time
+          msg <- cli::format_error(
+            c(
+              "TensorFlow hit a numerical problem that caused it to error",
+              "{.pkg greta} can handle these as bad proposals if you rerun \\
+              {.fun mcmc} with the argument {.code one_by_one = TRUE}.",
+              "This will slow down the sampler slightly.",
+              "The error encountered can be recovered and viewed with:",
+              "{.code greta_notes_tf_num_error()}"
+            )
+          )
 
-          stop("TensorFlow hit a numerical problem that caused it to error. ",
-            "greta can handle these as bad proposals if you rerun mcmc() ",
-            "with the argument one_by_one = TRUE. ",
-            "This will slow down the sampler slightly.",
-            "\n\n", result,
+          stop(
+            msg,
             call. = FALSE
           )
         }
@@ -903,9 +931,15 @@ slice_sampler <- R6Class(
       tfe <- dag$tf_environment
 
       if (dag$tf_float != "float32") {
-        stop("slice sampler can only currently be used for models defined ",
-          "with single precision, set model(..., precision = 'single') ",
-          "instead",
+        msg <- cli::format_error(
+          c(
+            "slice sampler can only currently be used for models defined with \\
+            single precision",
+            "set {.code model(..., precision = 'single')} instead"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }

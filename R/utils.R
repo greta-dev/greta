@@ -77,7 +77,13 @@ version_tf <- function(){
   if (have_tf()) {
     tf$`__version__`
   } else {
-    message("tensorflow not found")
+    msg <- cli::format_error(
+      "{.pkg tensorflow} not found"
+    )
+    stop(
+      msg,
+      call. = FALSE
+      )
   }
 }
 
@@ -85,7 +91,8 @@ version_tfp <- function(){
   if (have_tfp()) {
     tfp$`__version__`
   } else {
-    message("tensorflow probability not found")
+    msg <- cli::format_message("{.pkg tensorflow-probability} not found")
+    message(msg)
   }
 }
 
@@ -117,8 +124,10 @@ check_tf_version <- function(alert = c("none",
 
   if (!greta_stash$python_has_been_initialised) {
 
-    cli_process_start("Initialising python and checking dependencies")
-
+    cli_process_start(
+      msg = "Initialising python and checking dependencies, this may take a \\
+      moment."
+      )
   }
 
   requirements_valid <- c(
@@ -131,7 +140,8 @@ check_tf_version <- function(alert = c("none",
 
     if (!greta_stash$python_has_been_initialised) {
 
-      cli_process_done()
+      cli_process_done(
+        msg_done = "Initialising python and checking dependencies ... done!")
       cat("\n")
       greta_stash$python_has_been_initialised <- TRUE
 
@@ -144,27 +154,53 @@ check_tf_version <- function(alert = c("none",
     cli_process_failed()
 
     # if there was a problem, append the solution
-      text <- paste0(
-        "We have detected that you do not have the expected python packages",
-        " setup. You can set these up using:",
-        "\n\n\t",
-        "`install_greta_deps()`",
-        "\n\n",
-        "Then, restart R and run:",
-        "\n\n\t",
-        "`library(greta)`",
-        "\n\n",
-        "(Note: Your R session should not have initialised Tensorflow yet).",
-        "\n",
-        "For more information, see `?install_greta_deps` ",
-        "\n"
+      message_text <- cli::format_message(
+        c(
+          "We have detected that you do not have the expected python packages \\
+          setup.",
+          "You can set these up by running this R code in the console:",
+          "{.code install_greta_deps()}",
+          "Then, restart R and run:",
+          "{.code library(greta)}",
+          "({.strong Note}: Your R session should not have initialised \\
+          Tensorflow yet.)",
+          "For more information, see {.code ?install_greta_deps}"
+        )
+      )
+
+      warning_text <- cli::format_warning(
+        c(
+          "We have detected that you do not have the expected python packages \\
+          setup.",
+          "You can set these up by running this R code in the console:",
+          "{.code install_greta_deps()}",
+          "Then, restart R and run:",
+          "{.code library(greta)}",
+          "({.strong Note}: Your R session should not have initialised \\
+          Tensorflow yet.)",
+          "For more information, see {.code ?install_greta_deps}"
+        )
+      )
+
+      error_text <- cli::format_error(
+        c(
+          "We have detected that you do not have the expected python packages \\
+          setup.",
+          "You can set these up by running this R code in the console:",
+          "{.code install_greta_deps()}",
+          "Then, restart R and run:",
+          "{.code library(greta)}",
+          "({.strong Note}: Your R session should not have initialised \\
+          Tensorflow yet.)",
+          "For more information, see {.code ?install_greta_deps}"
+        )
       )
 
     switch(alert,
-      error = stop(text, call. = FALSE),
-      warn = warning(text, call. = FALSE),
-      message = message(text),
-      startup = packageStartupMessage(text),
+      error = stop(error_text, call. = FALSE),
+      warn = warning(warning_text, call. = FALSE),
+      message = message(message_text),
+      startup = packageStartupMessage(message_text),
       none = NULL
     )
   }
@@ -476,10 +512,10 @@ check_dims <- function(..., target_dim = NULL) {
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- sprintf(
-        "incompatible dimensions: %s",
-        dims_text
-      )
+      msg <- cli::format_error(
+        "incompatible dimensions: {dims_text}"
+        )
+
       stop(msg, call. = FALSE)
     }
   }
@@ -506,17 +542,23 @@ check_dims <- function(..., target_dim = NULL) {
 
       # error if not
       if (!all(matches_target)) {
-        stop(sprintf(
-          paste(
-            "array dimensions should be %s,",
-            "but input dimensions were %s"
-          ),
-          paste(target_dim, collapse = "x"),
-          dims_text
-        ),
-        call. = FALSE
+
+        msg <- cli::format_error(
+          c(
+            "incorrect array dimensions",
+            "x" = "array dimensions should be \\
+              {paste(target_dim, collapse = 'x')},",
+            "but input dimensions were {dims_text}."
+          )
         )
+
+        stop(
+          msg,
+          call. = FALSE
+          )
+
       }
+
     }
 
     output_dim <- target_dim
@@ -534,8 +576,16 @@ check_dims <- function(..., target_dim = NULL) {
 # make sure a greta array is 2D
 check_2d <- function(x) {
   if (length(dim(x)) != 2L) {
-    stop("parameters of multivariate distributions ",
-      "cannot have more than two dimensions",
+    msg <- cli::format_error(
+      c(
+        "Dimensions of parameters not compatible with multivariate \\
+        distribution parameters of multivariate distributions cannot have \\
+        more than two dimensions",
+        "object {.var x} has dimensions: {paste(dim(x), collapse = 'x')}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -546,8 +596,15 @@ check_square <- function(x) {
   ndim <- length(dim)
   is_square <- ndim == 2 && dim[1] == dim[2]
   if (!is_square) {
-    stop("expected a 2D square greta array, but object had dimension ",
-      paste(dim, collapse = "x"),
+    msg <- cli::format_error(
+      c(
+        "Not 2D square greta array",
+        "x" = "expected a 2D square greta array, but object {.var x} had \\
+        dimension: {paste(dim, collapse = 'x')}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -579,11 +636,16 @@ check_n_realisations <- function(vectors = list(),
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- sprintf(
-        "incompatible number of rows: %s",
-        paste(nrows, collapse = " vs ")
-      )
-      stop(msg, call. = FALSE)
+      msg <- cli::format_error(
+        c(
+          "incompatible number of rows",
+          x = "{paste(nrows, collapse = ' vs ')}"
+          )
+        )
+      stop(
+        msg,
+        call. = FALSE
+        )
     }
   }
 
@@ -593,8 +655,19 @@ check_n_realisations <- function(vectors = list(),
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1) {
-      stop("'n_realisations' must be a positive scalar integer ",
-        "giving the number of rows of the output",
+      msg <- cli::format_error(
+        c(
+          "{.code n_realisations is not a positive scalar interger}",
+          "{.code n_realisations} must be a positive scalar integer giving \\
+            the number of rows of the output",
+          "x" = "We see {.code n_realisations} = {.code {n_realisations}} \\
+            having class: \\
+            {.cls {class(n_realisations)}} and length \\
+            {.var {length(n_realisations)}}"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -613,15 +686,16 @@ check_n_realisations <- function(vectors = list(),
 
       # error if not
       if (!all(matches_target)) {
-        stop(sprintf(
-          paste(
-            "number of realisations should be %s,",
-            "but arguments had %s rows"
-          ),
-          target,
-          paste(nrows, collapse = ", ")
-        ),
-        call. = FALSE
+        msg <- cli::format_error(
+          c(
+            "Realisations do not match rows",
+            "number of realisations should be {target},",
+            "but arguments had {paste(nrows, collapse = ', ')} rows"
+            )
+          )
+        stop(
+          msg,
+          call. = FALSE
         )
       }
     }
@@ -652,8 +726,15 @@ check_dimension <- function(vectors = list(),
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1 || !is.finite(target)) {
-      stop("'dimension' must be a positive scalar integer ",
-        "giving the dimension of the distribution",
+      msg <- cli::format_error(
+        c(
+          "{.var dimension} must be a positive scalar integer giving the \\
+          dimension of the distribution",
+          "{.code dim(target)} returns: {dim(target)}"
+        )
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -667,10 +748,16 @@ check_dimension <- function(vectors = list(),
 
   # check it's big enough
   if (dimension < min_dimension) {
-    stop("the dimension of this distribution must be at least ",
-      min_dimension, " but was ", dimension,
-      "\n\nmultivariate distributions treat each *row* as a separate ",
-      "realisation - perhaps you need to transpose something?",
+    msg <- cli::format_error(
+      c(
+        "the dimension of this distribution must be at least \\
+        {min_dimension}, but was {dimension}",
+        "multivariate distributions treat each {.emph row} as a separate \\
+        realisation - perhaps you need to transpose something?"
+        )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -680,21 +767,20 @@ check_dimension <- function(vectors = list(),
     FUN.VALUE = FALSE
   )
 
+  # otherwise it's not fine
   if (!all(match_dimension)) {
-
-    # otherwise it's not fine
-    msg <- sprintf(
-      paste0(
-        "the distribution dimension should be %s, ",
-        "but parameters implied dimensions: %s\n\n",
-        "multivariate distributions treat each *row* as a ",
-        "separate realisation - perhaps you need to ",
-        "transpose something?"
-      ),
-      dimension,
-      paste(ncols, collapse = " vs ")
+    msg <- cli::format_error(
+      c(
+        "distribution dimensions do not match implied dimensions",
+        "The distribution dimension should be {dimension}, but parameters \\
+        implied dimensions: {paste(ncols, collapse = ' vs ')}",
+        "Multivariate distributions treat each {.emph row} as a separate \\
+        realisation - perhaps you need to transpose something?"
+      )
     )
-    stop(msg, call. = FALSE)
+    stop(
+      msg,
+      call. = FALSE)
   }
 
   dimension
@@ -748,7 +834,14 @@ check_multivariate_dims <- function(vectors = list(),
 # check truncation for different distributions
 check_positive <- function(truncation) {
   if (truncation[1] < 0) {
-    stop("lower bound must be 0 or higher",
+    msg <- cli::format_error(
+      c(
+        "lower bound must be 0 or higher",
+        "lower bound is: {.val {truncation[1]}}"
+      )
+      )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -756,7 +849,15 @@ check_positive <- function(truncation) {
 
 check_unit <- function(truncation) {
   if (truncation[1] < 0 | truncation[2] > 1) {
-    stop("lower and upper bounds must be between 0 and 1",
+    msg <- cli::format_error(
+      c(
+        "lower and upper bounds must be between 0 and 1",
+        "lower bound is: {.val {truncation[1]}}",
+        "upper bound is: {.val {truncation[2]}}"
+        )
+      )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -788,11 +889,13 @@ check_in_family <- function(function_name, arg) {
 
   # nice user-friendly error message
   if (arg_is_link | function_is_family) {
-    msg <- paste0(
-      "It looks like you're using greta's ", function_name,
-      " function in the family argment of another model.",
-      " Maybe you want to use 'family = stats::", function_name,
-      "' instead?"
+    msg <- cli::format_error(
+      c(
+        "Wrong function name provided in another model",
+        "It looks like you're using {.pkg greta}'s {.fun {function_name}} \\
+        function in the family argument of another model.",
+        "Maybe you want to use {.code family = stats::{function_name}},instead?"
+      )
     )
     stop(msg, call. = FALSE)
   }
@@ -824,7 +927,11 @@ check_future_plan <- function() {
       if (inherits(workers, "cluster")) {
         worker <- workers[[1]]
         if (inherits(worker, "forknode")) {
-          stop("parallel mcmc samplers cannot be run with a fork cluster",
+          msg <- cli::format_error(
+            "parallel mcmc samplers cannot be run with a fork cluster"
+            )
+          stop(
+            msg,
             call. = FALSE
           )
         }
@@ -839,8 +946,12 @@ check_future_plan <- function() {
 
       # if multi*, check it's multisession
       if (plan_is$multiprocess && !plan_is$multisession) {
-        stop("parallel mcmc samplers cannot be run with plan(multiprocess) or ",
-          "plan(multicore)",
+        msg <- cli::format_error(
+          "parallel mcmc samplers cannot be run with \\
+          {.code plan(multiprocess)} or {.code plan(multicore)}"
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -863,31 +974,33 @@ check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
   msg <- NULL
 
   if (length(greta_array_list) == 0) {
-    msg <- "could not find any non-data greta arrays"
+    msg <- cli::format_error(
+      c(
+        "could not find any non-data {.cls greta_array}s"
+      )
+    )
   }
 
   if (!all(are_greta_arrays)) {
     unexpected_items <- names(greta_array_list)[!are_greta_arrays]
 
-    msg <- ngettext(
-      length(unexpected_items),
-      paste0(
-        "The following objects passed to ",
-        fun_name, "() are not greta arrays: "
-      ),
-      paste0(
-        "The following object passed to ",
-        fun_name, "() is not a greta array: "
+    msg <- cli::format_error(
+      c(
+        "{.fun {fun_name}} arguments must be {.cls greta_array}s",
+        "The following {cli::qty(length(unexpected_items))} object{?s} passed \\
+        to {.fun {fun_name}} {cli::qty(length(unexpected_items))} \\
+        {?is not a/are not} {.cls greta array}{?s}:",
+        "{.val {unexpected_items}}",
+        "{hint}"
       )
     )
-
-    msg <- paste(msg, paste(unexpected_items, sep = ", "))
   }
 
-
-
   if (!is.null(msg)) {
-    stop(msg, hint, call. = FALSE)
+    stop(
+      msg,
+      call. = FALSE
+      )
   }
 
   greta_array_list
@@ -912,8 +1025,12 @@ check_values_list <- function(values, env) {
   )
 
   if (!all(are_greta_arrays)) {
-    stop("the names of arguments to values must all correspond to named ",
-      "greta arrays",
+    msg <- cli::format_error(
+      "the names of arguments to values must all correspond to named \\
+      {.cls greta_array}s"
+      )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -922,8 +1039,12 @@ check_values_list <- function(values, env) {
   assign_dim <- function(value, greta_array) {
     array <- unclass(get_node(greta_array)$value())
     if (length(array) != length(value)) {
-      stop("a provided value has different number of elements",
-        " than the greta array",
+      msg <- cli::format_error(
+        "a provided value has different number of elements than the \\
+        {.cls greta_array}"
+      )
+      stop(
+        msg,
         call. = FALSE
       )
     }
@@ -991,47 +1112,60 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
     unmet_names <- names(greta_array_node_names)[unmet_names_idx]
 
     # build the message
-    msg <- paste(
-      "values have not been provided for all greta arrays on which",
-      "the target depends, and nsim has not been set."
-    )
-
     if (any(matches)) {
       names_text <- paste(unmet_names, collapse = ", ")
-      msg <- paste(
-        msg,
-        sprintf(
-          "Please provide values for the greta array%s: %s",
-          ifelse(length(matches) > 1, "s", ""),
-          names_text
+      msg <- cli::format_error(
+        c(
+          "Please provide values for the following {length(names_text)} \\
+          {.cls greta_array}{?s}:",
+          "{.var {names_text}}"
+          )
         )
-      )
-    } else {
-      msg <- paste(
-        msg,
-        "\nThe names of the missing greta arrays",
-        "could not be detected"
-      )
+      } else {
+        msg <- cli::format_error(
+          "The names of the missing {.cls greta_array}s could not be detected"
+          )
     }
 
-    stop(msg,
-      call. = FALSE
+    final_msg <- cli::format_error(
+      c(
+        "greta array(s) do not have values",
+        "values have not been provided for all {.cls greta_array}s on which the \\
+        target depends, and {.var nsim} has not been set.",
+        "{msg}"
+      )
     )
+
+    stop(
+      msg,
+      call. = FALSE
+      )
+
   }
 }
 
 check_cum_op <- function(x) {
   dims <- dim(x)
   if (length(dims) > 2 | dims[2] != 1) {
-    stop("'x' must be a column vector, but has dimensions ",
-      paste(dims, collapse = " x "),
+    msg <- cli::format_error(
+      c(
+        "{.var x} must be a column vector",
+        "but {.var x} has dimensions {paste(dims, collapse = 'x')}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
 }
 
 complex_error <- function(z) {
-  stop("greta does not yet support complex numbers",
+  msg <- cli::format_error(
+    "{.pkg greta} does not yet support complex numbers"
+    )
+  stop(
+    msg,
     call. = FALSE
   )
 }
@@ -1119,7 +1253,13 @@ greta_col <- function(which = c(
   tryCatch(
     is.matrix(grDevices::col2rgb(colour)),
     error = function(e) {
-      stop(paste("Invalid colour:", colour), call. = FALSE)
+      msg <- cli::format_error(
+          "Invalid colour: {colour}"
+      )
+      stop(
+        msg,
+        call. = FALSE
+        )
     }
   )
 
@@ -1201,7 +1341,16 @@ cleanly <- function(expr) {
 
     # if it was just a numerical error, quietly return a bad value
     if (!any(numerical_errors)) {
-      stop("greta hit a tensorflow error:\n\n", res, call. = FALSE)
+      msg <- cli::format_error(
+        c(
+          "{.pkg greta} hit a tensorflow error:",
+          "{res}"
+        )
+      )
+      stop(
+        msg,
+        call. = FALSE
+        )
     }
   }
 
@@ -1248,10 +1397,15 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
   if (!is.null(n_cores) && !n_cores %in% allowed_n_cores) {
     check_positive_integer(n_cores, "n_cores")
 
-    message(
-      "\n", n_cores, " cores were requested, but only ",
-      n_cores_detected, " are available."
+    msg <- cli::format_warning(
+      "{n_cores} cores were requested, but only {n_cores_detected} \\
+      are available."
     )
+
+    warning(
+      msg,
+      call. = FALSE
+      )
 
     n_cores <- NULL
   }
@@ -1272,7 +1426,14 @@ check_positive_integer <- function(x, name = "") {
   suppressWarnings(x <- as.integer(x))
 
   if (length(x) != 1 | is.na(x) | x < 1) {
-    stop(name, " must be a positive integer",
+    msg <- cli::format_error(
+      c(
+        "{name} must be a positive integer",
+        "However the value provided was: {.val {x}}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -1284,8 +1445,12 @@ check_positive_integer <- function(x, name = "") {
 check_trace_batch_size <- function(x) {
   valid <- is.numeric(x) && length(x) == 1 && x >= 1
   if (!valid) {
-    stop("trace_batch_size must be a single numeric value ",
-      "greater than or equal to 1",
+    msg <- cli::format_error(
+      "{.var trace_batch_size} must be a single numeric value greater than or \\
+      equal to 1"
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -1326,8 +1491,15 @@ flatten_trace <- function(i, trace_list) {
 # stashed_samples, and error nicely if there's something fishy
 get_model_info <- function(draws, name = "value") {
   if (!inherits(draws, "greta_mcmc_list")) {
-    stop(name, " must be an greta_mcmc_list object created by greta::mcmc(), ",
-      "greta::stashed_samples() or greta::extra_samples()",
+    msg <- cli::format_error(
+      c(
+        "{name} must be an {.cls greta_mcmc_list} object",
+        "created by {.fun greta::mcmc}, {.fun greta::stashed_samples}, or \\
+        {.fun greta::extra_samples}"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }
@@ -1336,9 +1508,16 @@ get_model_info <- function(draws, name = "value") {
   valid <- !is.null(model_info)
 
   if (!valid) {
-    stop(name, " is an mcmc.list object, but is not associated with any ",
-      "model information, perhaps it wasn't created by greta::mcmc(), ",
-      "greta::stashed_samples() or greta::extra_samples() ?",
+    msg <- cli::format_error(
+      c(
+        "{name} is an {.cls mcmc.list} object, but is not associated with any\\
+        model information",
+        "perhaps it wasn't created by {.fun greta::mcmc}, \\
+        {.fun greta::stashed_samples}, or {.fun greta::extra_samples}?"
+      )
+    )
+    stop(
+      msg,
       call. = FALSE
     )
   }

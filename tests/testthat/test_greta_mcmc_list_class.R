@@ -1,5 +1,3 @@
-context("greta_mcmc_list class")
-
 test_that("draws and raw draws should have the right iteration numbering", {
   skip_if_not(check_tf_version())
   source("helpers.R")

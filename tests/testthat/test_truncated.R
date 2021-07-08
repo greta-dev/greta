@@ -1,5 +1,3 @@
-context("truncated distributions")
-
 test_that("truncated normal has correct densities", {
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -616,13 +614,13 @@ test_that("bad truncations error", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_error(
-    lognormal(0, 1, truncation = c(-1, Inf)),
-    "lower bound must be 0 or higher"
+  expect_snapshot(
+    error = TRUE,
+    lognormal(0, 1, truncation = c(-1, Inf))
   )
 
-  expect_error(
-    beta(1, 1, truncation = c(-1, 2)),
-    "lower and upper bounds must be between 0 and 1"
+  expect_snapshot(
+    error = TRUE,
+    beta(1, 1, truncation = c(-1, 2))
   )
 })

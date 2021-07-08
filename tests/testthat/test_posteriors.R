@@ -1,5 +1,3 @@
-context("posteriors")
-
 test_that("posterior is correct (binomial)", {
   skip_if_not(check_tf_version())
   source("helpers.R")

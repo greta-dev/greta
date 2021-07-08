@@ -121,7 +121,11 @@ operation_node <- R6Class(
       if (is.null(value)) {
         value <- unknowns(dim = dim)
       } else if (!all.equal(dim(value), dim)) {
-        stop("values have the wrong dimension so cannot be used",
+        msg <- cli::format_error(
+          "values have the wrong dimension so cannot be used"
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -183,7 +187,17 @@ variable_node <- R6Class(
                           dim = NULL,
                           free_dim = prod(dim)) {
       if (!is.numeric(lower) | !is.numeric(upper)) {
-        stop("lower and upper must be numeric",
+        msg <- cli::format_error(
+          c(
+            "lower and upper must be numeric",
+            "lower has class: {class(lower)}",
+            "lower has length: {length(lower)}",
+            "upper has class: {class(upper)}",
+            "upper has length: {length(upper)}"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -225,14 +239,26 @@ variable_node <- R6Class(
       )
 
       if (bad_limits) {
-        stop("lower and upper must either be -Inf (lower only), ",
-          "Inf (upper only) or finite",
+        msg <- cli::format_error(
+          "lower and upper must either be -Inf (lower only), Inf (upper only) \\
+          or finite"
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
 
       if (any(lower >= upper)) {
-        stop("upper bounds must be greater than lower bounds",
+        msg <- cli::format_error(
+          c(
+            "upper bounds must be greater than lower bounds",
+            "lower is: {.val {lower}}",
+            "upper is: {.val {upper}}"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }

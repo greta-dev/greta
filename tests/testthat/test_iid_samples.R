@@ -1,5 +1,3 @@
-context("iid samples")
-
 test_that("univariate samples are correct", {
   skip_if_not(check_tf_version())
   source("helpers.R")
@@ -291,16 +289,17 @@ test_that("distributions without RNG error nicely", {
   source("helpers.R")
 
   # univariate
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     compare_iid_samples(hypergeometric,
-      rhyper,
-      parameters = list(m = 11, n = 8, k = 5)
-    ),
-    "sampling is not yet implemented"
+                        rhyper,
+                        parameters = list(m = 11, n = 8, k = 5)
+    )
   )
 
   # truncated RNG not implemented
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     compare_iid_samples(f,
       rtf,
       parameters = list(
@@ -308,7 +307,6 @@ test_that("distributions without RNG error nicely", {
         df2 = 1,
         truncation = c(2, 3)
       )
-    ),
-    "sampling is not yet implemented for truncated"
+    )
   )
 })

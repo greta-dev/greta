@@ -1,5 +1,5 @@
 # test functions
-
+options(testthat.progress.max_fails = 100)
 library(tensorflow)
 
 # set the seed and flush the graph before running tests
