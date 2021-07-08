@@ -50,6 +50,8 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                timeout = 5,
                                ...) {
 
+  # convert max timeout into minutes
+  timeout_minutes <- timeout * 60 * 1000
   # set warning message length
   options(warning.length = 1500)
   timeout_install_msg <- cli::format_error(
@@ -86,7 +88,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     cli_process_start("No {.pkg miniconda} detected, installing \\
                       {.pkg miniconda}, this may take a minute.")
     r_install_miniconda <- r_process$new(callr_install_miniconda)
-    r_install_miniconda$wait(timeout = timeout * 60 * 1000)
+    r_install_miniconda$wait(timeout = timeout_minutes)
     status <- r_install_miniconda$get_exit_status()
     if (is.null(status)) {
       cli::cli_process_failed()
@@ -114,7 +116,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   cli_process_start("Creating 'greta-env' conda environment using python v3.7 \\
                     , this may take a minute")
   r_conda_create <- r_process$new(callr_conda_create)
-  r_conda_create$wait(timeout = timeout * 1000)
+  r_conda_create$wait(timeout = timeout_minutes)
   status <- r_conda_create$get_exit_status()
   if (is.null(status)) {
     cli::cli_process_failed()
@@ -146,7 +148,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     )
 
   r_conda_install <- r_process$new(callr_conda_install)
-  r_conda_install$wait(timeout = timeout * 1000)
+  r_conda_install$wait(timeout = timeout_minutes)
   status <- r_conda_install$get_exit_status()
   if (is.null(status)) {
     cli::cli_process_failed()
