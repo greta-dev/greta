@@ -18,7 +18,8 @@ install_greta_deps(
 \code{reticulate} to automatically find an appropriate \code{conda} binary. See
 \strong{Finding Conda} for more details.}
 
-\item{timeout}{time in seconds until the installation times out and exits}
+\item{timeout}{time in seconds until the installation for each installation
+component times out and exits}
 
 \item{...}{Optional arguments, reserved for future expansion.}
 }

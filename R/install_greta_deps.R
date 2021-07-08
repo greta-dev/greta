@@ -10,7 +10,8 @@
 #' @param conda The path to a `conda` executable. Use `"auto"` to allow
 #'   `reticulate` to automatically find an appropriate `conda` binary. See
 #'   **Finding Conda** for more details.
-#' @param timeout time in seconds until the installation times out and exits
+#' @param timeout time in seconds until the installation for each installation
+#'    component times out and exits
 #' @param ... Optional arguments, reserved for future expansion.
 #'
 #' @note This will automatically install Miniconda (a minimal version of the
@@ -48,32 +49,29 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                timeout = 60,
                                ...) {
 
-  # can we capture the output from all these installation steps, suppress them,
-  # but give the user the option to print them after the fact for debugging
-  # purposes?
-
-  timeout_install_msg <- c(
-    "Stopping as installation of {.pkg greta} dependencies took longer than \\
-    {timeout} seconds.",
-    "You can increase the timeout time by increasing the {.arg timeout} \\
-    argument. For example, to wait 10 minutes:",
-    "{.code install_greta_deps(timeout = 600)}",
-    "Alternatively you can perform the entire installation with:",
-    "{.code reticulate::install_miniconda()}",
-    "Then",
-    "{.code reticulate::conda_create(\\
-                               envname = 'greta-env',
-                               python_version = '3.7'
-                             )}",
-    "Then:",
-    "{.code reticulate::conda_install(\\
-                 envname = 'greta-env',\\
-                 packages = c('numpy==1.16.4',\\
-                              'tensorflow-probability==0.7.0',\\
-                              'tensorflow==1.14.0')\\
-                 )",
-    "Then, restart R, and load {.pkg greta} with: {.code library(greta)}"
-  )
+  # set warning message length
+  options(warning.length = 1500)
+  timeout_install_msg <- cli::format_error(
+    message = c(
+      "Stopping as installation of {.pkg greta} dependencies took longer than \\
+      {timeout} seconds.",
+      "You can increase the timeout time by increasing the {.arg timeout} \\
+      argument.",
+      "For example, to wait 2 minutes:",
+      "{.code install_greta_deps(timeout = 120)}",
+      "or to wait 10 minutes:",
+      "{.code install_greta_deps(timeout = 600)}",
+      "Alternatively, you can perform the entire installation with:",
+      "{.code reticulate::install_miniconda()}",
+      "Then:",
+      "{.code reticulate::conda_create(envname = 'greta-env', \\
+      python_version = '3.7')}",
+      "{.code reticulate::conda_install(envname = 'greta-env',
+      packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
+      'tensorflow==1.14.0'))}",
+      "Then, restart R, and load {.pkg greta} with: {.code library(greta)}"
+      )
+    )
 
   # install miniconda if needed
   if (!have_conda()) {
@@ -86,14 +84,16 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     )
 
     cli_process_start("No {.pkg miniconda} detected, installing \\
-                      {.pkg miniconda}")
+                      {.pkg miniconda}, this may take a minute.")
     r_install_miniconda <- r_process$new(callr_install_miniconda)
     r_install_miniconda$wait(timeout = timeout * 1000)
     status <- r_install_miniconda$get_exit_status()
     if (is.null(status)) {
-      cli::cli_process_failed(
-        msg = timeout_install_msg
-      )
+      cli::cli_process_failed()
+        stop(
+          timeout_install_msg,
+          call. = FALSE
+          )
     } else {
       greta_stash$install_miniconda_notes <- r_install_miniconda$read_output()
       cli_process_done(msg_done = "{.pkg miniconda} installed!")
@@ -111,14 +111,17 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     }
   )
 
-  cli_process_start("Creating 'greta-env' conda environment using python v3.7")
+  cli_process_start("Creating 'greta-env' conda environment using python v3.7 \\
+                    , this may take a minute")
   r_conda_create <- r_process$new(callr_conda_create)
   r_conda_create$wait(timeout = timeout * 1000)
   status <- r_conda_create$get_exit_status()
   if (is.null(status)) {
-    cli::cli_process_failed(
-      msg = timeout_install_msg
-      )
+    cli::cli_process_failed()
+    stop(
+      timeout_install_msg,
+      call. = FALSE
+    )
   } else {
     greta_stash$conda_create_notes <- r_conda_create$read_output()
     cli_process_done()
@@ -138,15 +141,18 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   )
 
   cli_process_start(
-    "Installing python packages into 'greta-env' conda environment"
+    "Installing python packages into 'greta-env' conda environment, this may \\
+    take a few minutes"
     )
 
   r_conda_install <- r_process$new(callr_conda_install)
   r_conda_install$wait(timeout = timeout * 1000)
   status <- r_conda_install$get_exit_status()
   if (is.null(status)) {
-    cli::cli_process_failed(
-      msg = timeout_install_msg
+    cli::cli_process_failed()
+    stop(
+      timeout_install_msg,
+      call. = FALSE
     )
   } else {
       greta_stash$conda_install_notes <- r_conda_install$read_output()
