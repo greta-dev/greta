@@ -7,6 +7,7 @@
 install_greta_deps(
   method = c("auto", "virtualenv", "conda"),
   conda = "auto",
+  timeout = 5,
   ...
 )
 }
@@ -16,6 +17,10 @@ install_greta_deps(
 \item{conda}{The path to a \code{conda} executable. Use \code{"auto"} to allow
 \code{reticulate} to automatically find an appropriate \code{conda} binary. See
 \strong{Finding Conda} for more details.}
+
+\item{timeout}{maximum time in minutes until the installation for each
+installation component times out and exits. Default is 5 minutes per
+installation component.}
 
 \item{...}{Optional arguments, reserved for future expansion.}
 }
