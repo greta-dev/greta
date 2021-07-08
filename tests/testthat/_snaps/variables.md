@@ -23,6 +23,28 @@
 ---
 
     Code
+      variable(lower = NA)
+    Error <simpleError>
+      lower and upper must be numeric
+      lower has class: logical
+      lower has length: 1
+      upper has class: numeric
+      upper has length: 1
+
+---
+
+    Code
+      variable(lower = head)
+    Error <simpleError>
+      lower and upper must be numeric
+      lower has class: function
+      lower has length: 1
+      upper has class: numeric
+      upper has length: 1
+
+---
+
+    Code
       variable(lower = 0:2, upper = 1:2)
     Error <simpleError>
       incompatible dimensions: 3x1, 2x1

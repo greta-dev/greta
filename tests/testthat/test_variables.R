@@ -13,6 +13,16 @@ test_that("variable() errors informatively", {
     variable(upper = head)
   )
 
+  expect_snapshot(
+    error = TRUE,
+    variable(lower = NA)
+  )
+
+  expect_snapshot(
+    error = TRUE,
+    variable(lower = head)
+  )
+
   # good types, bad values
   expect_snapshot(
     error = TRUE,
