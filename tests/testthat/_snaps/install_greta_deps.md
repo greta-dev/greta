@@ -10,8 +10,8 @@
       Stopping as installation of greta dependencies took longer than 1
       seconds.
       You can increase the timeout time by increasing the `timeout` argument.
-      For example, to wait 2 minutes:
-      `install_greta_deps(timeout = 120)`
+      For example, to wait 5 minutes:
+      `install_greta_deps(timeout = 300)`
       or to wait 10 minutes:
       `install_greta_deps(timeout = 600)`
       Alternatively, you can perform the entire installation with:

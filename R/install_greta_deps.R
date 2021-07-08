@@ -10,8 +10,9 @@
 #' @param conda The path to a `conda` executable. Use `"auto"` to allow
 #'   `reticulate` to automatically find an appropriate `conda` binary. See
 #'   **Finding Conda** for more details.
-#' @param timeout time in seconds until the installation for each installation
-#'    component times out and exits
+#' @param timeout maximum time in seconds until the installation for each
+#'    installation component times out and exits. Default is 300 seconds
+#'    (5 minutes) per installation component.
 #' @param ... Optional arguments, reserved for future expansion.
 #'
 #' @note This will automatically install Miniconda (a minimal version of the
@@ -46,7 +47,7 @@
 #' @importFrom cli cli_ul
 install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
-                               timeout = 60,
+                               timeout = 300,
                                ...) {
 
   # set warning message length
@@ -57,8 +58,8 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
       {timeout} seconds.",
       "You can increase the timeout time by increasing the {.arg timeout} \\
       argument.",
-      "For example, to wait 2 minutes:",
-      "{.code install_greta_deps(timeout = 120)}",
+      "For example, to wait 5 minutes:",
+      "{.code install_greta_deps(timeout = 300)}",
       "or to wait 10 minutes:",
       "{.code install_greta_deps(timeout = 600)}",
       "Alternatively, you can perform the entire installation with:",
