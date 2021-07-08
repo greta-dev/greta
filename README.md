@@ -15,7 +15,24 @@ CRAN:
 install.packages("greta")
 ```
 
-or the development version from GitHub:
+Or install the development version of `greta` from [r-universe](https://greta-dev.r-universe.dev/ui#builds):
+
+```r
+# Enable this universe
+options(
+  repos = c(
+    gretadev = 'https://greta-dev.r-universe.dev',
+    CRAN = 'https://cloud.r-project.org')
+    )
+)
+
+# Install greta
+install.packages('greta')
+```
+
+(Note - installing from r-universe is just like installing from CRAN, and should be faster and more convenient than installing from GitHub)
+
+You can also install the development version of `greta` via GitHub:
 
 ``` r
 devtools::install_github("greta-dev/greta")
