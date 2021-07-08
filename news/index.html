@@ -211,6 +211,7 @@
 <li><p><code><a href="../reference/calculate.html">calculate()</a></code> now accepts multiple greta arrays for which to calculate values, via the <code>...</code> argument. As a consequence any other arguments must now be named.</p></li>
 <li><p>a number of optimiser methods are now deprecated, since they will be unavailable when greta moves to using TensorFlow v2.0: <code><a href="../reference/optimisers.html">powell()</a></code>, <code><a href="../reference/optimisers.html">cg()</a></code>, <code><a href="../reference/optimisers.html">newton_cg()</a></code>, <code><a href="../reference/optimisers.html">l_bfgs_b()</a></code>, <code><a href="../reference/optimisers.html">tnc()</a></code>, <code><a href="../reference/optimisers.html">cobyla()</a></code>, and <code><a href="../reference/optimisers.html">slsqp()</a></code>.</p></li>
 <li><p><code><a href="../reference/distributions.html">dirichlet()</a></code> now returns a variable (rather than an operation) greta array, and the graphs created by <code><a href="../reference/distributions.html">lkj_correlation()</a></code> and <code><a href="../reference/distributions.html">wishart()</a></code> are now simpler as cholesky-shaped variables are now available internally.</p></li>
+<li><p>Python dependency installation has been overhauled with the new <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> function (<a href='https://github.com/greta-dev/greta/issues/417'>#417</a>).</p></li>
 </ul>
 </div>
 <div id="features" class="section level2">
@@ -224,6 +225,7 @@
 <li><p>a new function <code><a href="../reference/chol2symm.html">chol2symm()</a></code> - the inverse of <code><a href="https://rdrr.io/r/base/chol.html">chol()</a></code>.</p></li>
 <li><p><code><a href="../reference/inference.html">mcmc()</a></code>, <code><a href="../reference/inference.html">stashed_samples()</a></code>, and <code><a href="../reference/calculate.html">calculate()</a></code> now return objects of class <code>greta_mcmc_list</code> which inherit from <code>coda</code>’s <code>mcmc.list</code> class, but enable custom greta methods for manipulating mcmc outputs, including a <code><a href="https://rdrr.io/r/stats/window.html">window()</a></code> function.</p></li>
 <li><p><code><a href="../reference/inference.html">mcmc()</a></code> and <code><a href="../reference/calculate.html">calculate()</a></code> now have a <code>trace_batch_size</code> argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays (<a href='https://github.com/greta-dev/greta/issues/236'>#236</a>).</p></li>
+<li><p>Many message, warning, and error prompts have been replaced internally with the {cli} R package for nicer printing. This is a minor change that should result in a more pleasant user experience (<a href='https://github.com/greta-dev/greta/issues/423'>#423</a> <a href='https://github.com/greta-dev/greta/issues/425'>#425</a>).</p></li>
 </ul>
 </div>
 </div>
