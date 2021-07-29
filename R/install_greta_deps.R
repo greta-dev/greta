@@ -104,31 +104,35 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     }
   }
 
-  callr_conda_create <- r_process_options(
-    func = function(){
-      reticulate::conda_create(
-        envname = "greta-env",
-        python_version = "3.7"
-      )
-    }
-  )
+  if (!have_greta_conda_env()) {
 
-  cli_process_start("Creating 'greta-env' conda environment using python v3.7 \\
-                    , this may take a minute")
-  r_conda_create <- r_process$new(callr_conda_create)
-  r_conda_create$wait(timeout = timeout_minutes)
-  status <- r_conda_create$get_exit_status()
-  if (is.null(status)) {
-    cli::cli_process_failed()
-    stop(
-      timeout_install_msg,
-      call. = FALSE
+    callr_conda_create <- r_process_options(
+      func = function(){
+        reticulate::conda_create(
+          envname = "greta-env",
+          python_version = "3.7"
+        )
+      }
     )
-  } else {
-    greta_stash$conda_create_notes <- r_conda_create$read_output()
-    cli_process_done()
-    cli_ul("To see full installation notes run:")
-    cli_ul("{.code greta_notes_conda_create()}")
+
+    cli_process_start("Creating 'greta-env' conda environment using python \\
+                      v3.7, this may take a minute")
+    r_conda_create <- r_process$new(callr_conda_create)
+    r_conda_create$wait(timeout = timeout_minutes)
+    status <- r_conda_create$get_exit_status()
+    if (is.null(status)) {
+      cli::cli_process_failed()
+      stop(
+        timeout_install_msg,
+        call. = FALSE
+      )
+    } else {
+      greta_stash$conda_create_notes <- r_conda_create$read_output()
+      cli_process_done()
+      cli_ul("To see full installation notes run:")
+      cli_ul("{.code greta_notes_conda_create()}")
+    }
+
   }
 
   callr_conda_install <- r_process_options(
