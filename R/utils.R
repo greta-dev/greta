@@ -153,47 +153,29 @@ check_tf_version <- function(alert = c("none",
 
     cli_process_failed()
 
+    cli_msg <- c(
+      "We have detected that you do not have the expected python packages \\
+          setup.",
+      "You can set these up by running this R code in the console:",
+      "{.code install_greta_deps()}",
+      "Then, restart R and run:",
+      "{.code library(greta)}",
+      "({.strong Note}: Your R session should not have initialised \\
+          Tensorflow yet.)",
+      "For more information, see {.code ?install_greta_deps}"
+    )
+
     # if there was a problem, append the solution
       message_text <- cli::format_message(
-        c(
-          "We have detected that you do not have the expected python packages \\
-          setup.",
-          "You can set these up by running this R code in the console:",
-          "{.code install_greta_deps()}",
-          "Then, restart R and run:",
-          "{.code library(greta)}",
-          "({.strong Note}: Your R session should not have initialised \\
-          Tensorflow yet.)",
-          "For more information, see {.code ?install_greta_deps}"
-        )
+        cli_msg
       )
 
       warning_text <- cli::format_warning(
-        c(
-          "We have detected that you do not have the expected python packages \\
-          setup.",
-          "You can set these up by running this R code in the console:",
-          "{.code install_greta_deps()}",
-          "Then, restart R and run:",
-          "{.code library(greta)}",
-          "({.strong Note}: Your R session should not have initialised \\
-          Tensorflow yet.)",
-          "For more information, see {.code ?install_greta_deps}"
-        )
+        cli_msg
       )
 
       error_text <- cli::format_error(
-        c(
-          "We have detected that you do not have the expected python packages \\
-          setup.",
-          "You can set these up by running this R code in the console:",
-          "{.code install_greta_deps()}",
-          "Then, restart R and run:",
-          "{.code library(greta)}",
-          "({.strong Note}: Your R session should not have initialised \\
-          Tensorflow yet.)",
-          "For more information, see {.code ?install_greta_deps}"
-        )
+        cli_msg
       )
 
     switch(alert,
