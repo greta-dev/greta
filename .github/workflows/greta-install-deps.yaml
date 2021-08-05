@@ -32,6 +32,7 @@ jobs:
         run: |
           library(greta)
           install_greta_deps()
+        shell: Rscript {0}
 
       - name: Check the installation happened properly?
         run: |
