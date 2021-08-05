@@ -22,6 +22,10 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
+      - name: Fix Conda permissions on macOS
+        if: runner.os == 'macOS'
+        run: sudo chown -R $UID $CONDA
+
       - name: Remotes install greta
         run: |
           install.packages('remotes')
