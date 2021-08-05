@@ -32,8 +32,11 @@ jobs:
         run: |
           library(greta)
           install_greta_deps()
-          greta:::have_conda()
+
+      - name: Check the installation happened properly?
+        run: |
           greta:::have_greta_conda_env()
+          greta:::have_conda()
           greta:::have_python()
           greta:::have_tf()
           greta:::have_tfp()
