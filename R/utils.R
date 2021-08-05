@@ -166,19 +166,12 @@ check_tf_version <- function(alert = c("none",
     )
 
     # if there was a problem, append the solution
-      message_text <- cli::format_message(
-        cli_msg
-      )
+      message_text <- cli::format_message(cli_msg)
+      warning_text <- cli::format_warning(cli_msg)
+      error_text <- cli::format_error(cli_msg)
 
-      warning_text <- cli::format_warning(
-        cli_msg
-      )
-
-      error_text <- cli::format_error(
-        cli_msg
-      )
-
-    switch(alert,
+    switch(
+      alert,
       error = stop(error_text, call. = FALSE),
       warn = warning(warning_text, call. = FALSE),
       message = message(message_text),
