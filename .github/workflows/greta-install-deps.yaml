@@ -35,7 +35,7 @@ jobs:
       - name: Greta install deps
         run: |
           library(greta)
-          install_greta_deps(timeout = 10)
+          install_greta_deps(timeout = 5)
         shell: Rscript {0}
 
       - name: Check the installation happened properly?

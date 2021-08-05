@@ -177,14 +177,16 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
 
   greta_stash$conda_install_notes <- r_conda_install$read_output()
   no_output <- nchar(greta_stash$conda_install_notes) == 0
+  py_error <- r_conda_install$read_all_error_lines()
   if (is.null(status)) {
     cli::cli_process_failed()
     stop(
       timeout_install_msg,
+      "Additionally, the following error appeared",
+      py_error,
       call. = FALSE
     )
   } else if (no_output) {
-    py_error <- r_conda_install$read_all_error_lines()
     cli::cli_process_failed()
     stop(
       other_install_fail_msg(py_error),
