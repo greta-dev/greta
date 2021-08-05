@@ -1601,3 +1601,33 @@ utilities_module <- module(
   checks = checks_module,
   colours = colour_module
 )
+
+# remove empty strings
+base_remove_empty_string <- function(string){
+  string[string != ""]
+}
+
+
+other_install_fail_msg <- function(error_passed){
+  # drop ""
+  error_passed <- base_remove_empty_string(error_passed)
+  cli::format_error(
+    message = c(
+      "Stopping as installation of {.pkg greta} dependencies failed",
+      "An error occured:",
+      "{.code {error_passed}}",
+      "You can perform the entire installation manually with:",
+      "{.code reticulate::install_miniconda()}",
+      "Then:",
+      "{.code reticulate::conda_create(envname = 'greta-env', \\
+      python_version = '3.7')}",
+      "Then:",
+      "{.code reticulate::conda_install(envname = 'greta-env',
+      packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
+      'tensorflow==1.14.0'))}",
+      "Then, restart R, and load {.pkg greta} with: {.code library(greta)}",
+      "If this does not work, lodge an issue on github at:",
+      "{.url https://github.com/greta-dev/greta/issues/new}"
+    )
+  )
+}

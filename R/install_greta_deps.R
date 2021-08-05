@@ -53,7 +53,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   # convert max timeout from milliseconds into minutes
   timeout_minutes <- timeout * 1000 * 60
   # set warning message length
-  options(warning.length = 1500)
+  options(warning.length = 2000)
   timeout_install_msg <- cli::format_error(
     message = c(
       "Stopping as installation of {.pkg greta} dependencies took longer than \\
@@ -90,13 +90,24 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     r_install_miniconda <- r_process$new(callr_install_miniconda)
     r_install_miniconda$wait(timeout = timeout_minutes)
     status <- r_install_miniconda$get_exit_status()
+
+    greta_stash$miniconda_notes <- r_install_miniconda$read_output()
+    no_output <- nchar(greta_stash$miniconda_notes) == 0
     if (is.null(status)) {
       cli::cli_process_failed()
-        stop(
-          timeout_install_msg,
-          call. = FALSE
-          )
+      stop(
+        timeout_install_msg,
+        call. = FALSE
+      )
+    } else if (no_output) {
+      py_error <- r_install_miniconda$read_all_error_lines()
+      cli::cli_process_failed()
+      stop(
+        other_install_fail_msg(py_error),
+        call. = FALSE
+      )
     } else {
+
       greta_stash$install_miniconda_notes <- r_install_miniconda$read_output()
       cli_process_done(msg_done = "{.pkg miniconda} installed!")
       cli_ul("To see full installation notes run:")
@@ -120,14 +131,23 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     r_conda_create <- r_process$new(callr_conda_create)
     r_conda_create$wait(timeout = timeout_minutes)
     status <- r_conda_create$get_exit_status()
+    greta_stash$conda_create_notes <- r_conda_create$read_output()
+    no_output <- nchar(greta_stash$conda_create_notes) == 0
     if (is.null(status)) {
       cli::cli_process_failed()
       stop(
         timeout_install_msg,
         call. = FALSE
       )
+    } else if (no_output) {
+      py_error <- r_conda_create$read_all_error_lines()
+      cli::cli_process_failed()
+      stop(
+        other_install_fail_msg(py_error),
+        call. = FALSE
+      )
     } else {
-      greta_stash$conda_create_notes <- r_conda_create$read_output()
+
       cli_process_done()
       cli_ul("To see full installation notes run:")
       cli_ul("{.code greta_notes_conda_create()}")
@@ -154,14 +174,24 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   r_conda_install <- r_process$new(callr_conda_install)
   r_conda_install$wait(timeout = timeout_minutes)
   status <- r_conda_install$get_exit_status()
+
+  greta_stash$conda_install_notes <- r_conda_install$read_output()
+  no_output <- nchar(greta_stash$conda_install_notes) == 0
   if (is.null(status)) {
     cli::cli_process_failed()
     stop(
       timeout_install_msg,
       call. = FALSE
     )
+  } else if (no_output) {
+    py_error <- r_conda_install$read_all_error_lines()
+    cli::cli_process_failed()
+    stop(
+      other_install_fail_msg(py_error),
+      call. = FALSE
+    )
   } else {
-      greta_stash$conda_install_notes <- r_conda_install$read_output()
+
       cli_process_done()
       cli_ul("To see full installation notes run:")
       cli_ul("{.code greta_notes_conda_install()}")
