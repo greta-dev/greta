@@ -1631,3 +1631,39 @@ other_install_fail_msg <- function(error_passed){
     )
   )
 }
+
+timeout_install_msg <- function(timeout, py_error = NULL){
+  msg <- c(
+    "Stopping as installation of {.pkg greta} dependencies took longer than \\
+        {timeout} minutes",
+    "You can increase the timeout time by increasing the {.arg timeout} \\
+        argument.",
+    "For example, to wait 5 minutes:",
+    "{.code install_greta_deps(timeout = 5)}",
+    "Alternatively, you can perform the entire installation with:",
+    "{.code reticulate::install_miniconda()}",
+    "Then:",
+    "{.code reticulate::conda_create(envname = 'greta-env', \\
+        python_version = '3.7')}",
+    "Then:",
+    "{.code reticulate::conda_install(envname = 'greta-env',
+        packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
+        'tensorflow==1.14.0'))}",
+    "Then, restart R, and load {.pkg greta} with: {.code library(greta)}"
+  )
+
+  if (is.null(py_error)){
+    cli::format_error(
+      message = msg
+    )
+  } else {
+    msg <- c(
+      msg,
+      "Additionally, the following error appeared:",
+      "{py_error}"
+    )
+    cli::format_error(
+      message = msg
+    )
+  }
+}

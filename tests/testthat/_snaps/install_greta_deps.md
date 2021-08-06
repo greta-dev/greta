@@ -3,8 +3,8 @@
     Code
       install_greta_deps(timeout = 0.001)
     Message <cliMessage>
-      i Creating 'greta-env' conda environment using python v3.7 , this may take a ...
-      x Creating 'greta-env' conda environment using python v3.7 , this may take a ...
+      i Installing python packages into 'greta-env' conda environment, this may tak...
+      x Installing python packages into 'greta-env' conda environment, this may tak...
       
     Error <simpleError>
       Stopping as installation of greta dependencies took longer than 0.001
@@ -20,4 +20,8 @@
       `reticulate::conda_install(envname = 'greta-env', packages = c('numpy==1.16.4',
       'tensorflow-probability==0.7.0', 'tensorflow==1.14.0'))`
       Then, restart R, and load greta with: `library(greta)`
+      Additionally, the following error appeared:
+      , , ==> WARNING: A newer version of conda exists. <==, current version: 4.10.1,
+      latest version: 4.10.3, , Please update conda by running, , $ conda update -n
+      base -c defaults conda, , and
 

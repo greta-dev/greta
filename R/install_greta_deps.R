@@ -54,26 +54,6 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   timeout_minutes <- timeout * 1000 * 60
   # set warning message length
   options(warning.length = 2000)
-  timeout_install_msg <- cli::format_error(
-    message = c(
-      "Stopping as installation of {.pkg greta} dependencies took longer than \\
-      {timeout} minutes",
-      "You can increase the timeout time by increasing the {.arg timeout} \\
-      argument.",
-      "For example, to wait 5 minutes:",
-      "{.code install_greta_deps(timeout = 5)}",
-      "Alternatively, you can perform the entire installation with:",
-      "{.code reticulate::install_miniconda()}",
-      "Then:",
-      "{.code reticulate::conda_create(envname = 'greta-env', \\
-      python_version = '3.7')}",
-      "Then:",
-      "{.code reticulate::conda_install(envname = 'greta-env',
-      packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
-      'tensorflow==1.14.0'))}",
-      "Then, restart R, and load {.pkg greta} with: {.code library(greta)}"
-      )
-    )
 
   # install miniconda if needed
   if (!have_conda()) {
@@ -93,14 +73,14 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
 
     greta_stash$miniconda_notes <- r_install_miniconda$read_output()
     no_output <- nchar(greta_stash$miniconda_notes) == 0
+    py_error <- r_install_miniconda$read_all_error_lines()
     if (is.null(status)) {
       cli::cli_process_failed()
       stop(
-        timeout_install_msg,
+        timeout_install_msg(timeout, py_error),
         call. = FALSE
       )
     } else if (no_output) {
-      py_error <- r_install_miniconda$read_all_error_lines()
       cli::cli_process_failed()
       stop(
         other_install_fail_msg(py_error),
@@ -133,14 +113,15 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     status <- r_conda_create$get_exit_status()
     greta_stash$conda_create_notes <- r_conda_create$read_output()
     no_output <- nchar(greta_stash$conda_create_notes) == 0
+    py_error <- r_conda_create$read_all_error_lines()
     if (is.null(status)) {
       cli::cli_process_failed()
       stop(
-        timeout_install_msg,
+        timeout_install_msg(timeout, py_error),
         call. = FALSE
       )
     } else if (no_output) {
-      py_error <- r_conda_create$read_all_error_lines()
+
       cli::cli_process_failed()
       stop(
         other_install_fail_msg(py_error),
@@ -181,9 +162,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   if (is.null(status)) {
     cli::cli_process_failed()
     stop(
-      timeout_install_msg,
-      "Additionally, the following error appeared",
-      py_error,
+      timeout_install_msg(timeout, py_error),
       call. = FALSE
     )
   } else if (no_output) {
