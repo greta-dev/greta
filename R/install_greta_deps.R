@@ -50,8 +50,6 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                timeout = 5,
                                ...) {
 
-  # convert max timeout from milliseconds into minutes
-  timeout_minutes <- timeout * 1000 * 60
   # set warning message length
   options(warning.length = 2000)
 
