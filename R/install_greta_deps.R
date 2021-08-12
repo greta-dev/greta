@@ -55,70 +55,14 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
 
   # install miniconda if needed
   if (!have_conda()) {
-    callr_install_miniconda <- r_process_options(
-      func = function() {
-        reticulate::install_miniconda()
-      }
-    )
-
-    # if this function doesn't fail, then this code here can be run?
-    install_miniconda_process <- new_install_process(
-      callr_process = callr_install_miniconda,
-      timeout = timeout,
-      cli_start_msg = "No {.pkg miniconda} detected, installing \\
-                      {.pkg miniconda}, this may take a minute.",
-      cli_end_msg = "{.pkg miniconda} installed!"
-    )
-    greta_stash$miniconda_notes <- install_miniconda_process$output_notes
-    cli_ul("To see full installation notes run:")
-    cli_ul("{.code greta_notes_install_miniconda()}")
+    greta_install_miniconda(timeout)
   }
 
   if (!have_greta_conda_env()) {
-    callr_conda_create <- r_process_options(
-      func = function() {
-        reticulate::conda_create(
-          envname = "greta-env",
-          python_version = "3.7"
-        )
-      }
-    )
-
-    install_conda_create <- new_install_process(
-      callr_process = callr_conda_create,
-      timeout = timeout,
-      cli_start_msg = "Creating 'greta-env' conda environment using python \\
-                      v3.7, this may take a minute",
-      cli_end_msg = "greta-env environment created!"
-    )
-    greta_stash$conda_create_notes <- install_conda_create$output_notes
-    cli_ul("To see full installation notes run:")
-    cli_ul("{.code greta_notes_conda_create()}")
+    greta_create_conda_env(timeout)
   }
 
-  callr_conda_install <- r_process_options(
-    func = function() {
-      reticulate::conda_install(
-        envname = "greta-env",
-        packages = c(
-          "numpy==1.16.4",
-          "tensorflow-probability==0.7.0",
-          "tensorflow==1.14.0"
-        )
-      )
-    }
-  )
-
-  install_python_modules <- new_install_process(
-    callr_process = callr_conda_install,
-    timeout = timeout,
-    cli_start_msg = "Installing python modules into 'greta-env' conda \\
-                     environment, this may take a few minutes",
-    cli_end_msg = "Python modules installed!"
-  )
-  greta_stash$conda_install_notes <- install_python_modules$output_notes
-  cli_ul("To see full installation notes run:")
-  cli_ul("{.code greta_notes_conda_install()}")
+  greta_install_python_deps(timeout)
 
   cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
   cli_ul("Restart R, then load {.pkg greta} with: {.code library(greta)}")
