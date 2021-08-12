@@ -75,7 +75,7 @@ Collate:
     'install_greta_deps.R'
     'conda_greta_env.R'
     'greta_stash.R'
-    'greta_create_conda_env.R '
+    'greta_create_conda_env.R'
     'greta_install_miniconda.R'
     'greta_install_python_deps.R'
     'new_install_process.R'
