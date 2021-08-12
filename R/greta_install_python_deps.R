@@ -1,12 +1,3 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param timeout
-#' @return
-#' @author Nicholas Tierney
-#' @export
 greta_install_python_deps <- function(timeout) {
 
   callr_conda_install <- r_process_options(
