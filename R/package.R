@@ -44,6 +44,10 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname) { # nolint
 
+  # unset reticulate python environment, for more details, see:
+  # https://github.com/greta-dev/greta/issues/444
+  Sys.unsetenv("RETICULATE_PYTHON")
+
   if (have_greta_conda_env()) {
     use_greta_conda_env()
   }
