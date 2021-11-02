@@ -12,6 +12,10 @@
 
 * greta now provides R versions of all of R's primitive functions (I think), to prevent them from silently not executing (#317).
 
+* Uses `Sys.unsetenv("RETICULATE_PYTHON")` in `.onload` on package startup, 
+  to prevent an issue introduced with the latest version of RStudio where they
+  do not find the current version of RStudio. See [#444](https://github.com/greta-dev/greta/issues/444) for more details.
+
 ## API changes:
 
 * Now depends on R >= 3.1.0 ([#386](https://github.com/greta-dev/greta/issues/386))
