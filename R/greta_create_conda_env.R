@@ -1,6 +1,6 @@
 greta_create_conda_env <- function(timeout) {
 
-  callr_conda_create <- r_process_options(
+  callr_conda_create <- callr::r_process_options(
     func = function() {
       reticulate::conda_create(
         envname = "greta-env",
@@ -17,7 +17,7 @@ greta_create_conda_env <- function(timeout) {
     cli_end_msg = "greta-env environment created!"
   )
   greta_stash$conda_create_notes <- install_conda_create$output_notes
-  cli_ul("To see full installation notes run:")
-  cli_ul("{.code greta_notes_conda_create()}")
+  cli::cli_ul("To see full installation notes run:")
+  cli::cli_ul("{.code greta_notes_conda_create()}")
 
 }

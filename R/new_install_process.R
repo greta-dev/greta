@@ -2,6 +2,7 @@ new_install_process <- function(callr_process,
                                 timeout,
                                 cli_start_msg = NULL,
                                 cli_end_msg = NULL){
+  options(warning.length = 2000)
   cli::cli_process_start(cli_start_msg)
   # convert max timeout from milliseconds into minutes
   timeout_minutes <- timeout * 1000 * 60

@@ -79,6 +79,7 @@ Collate:
     'greta_install_miniconda.R'
     'greta_install_python_deps.R'
     'new_install_process.R'
+    'reinstallers.R'
 Imports:
     R6,
     tensorflow (>= 1.13.0),
@@ -89,7 +90,8 @@ Imports:
     methods,
     abind,
     cli (>= 3.0.0),
-    callr
+    callr,
+    yesno
 Suggests:
     knitr,
     rmarkdown,
@@ -110,7 +112,7 @@ Suggests:
     covr,
     mockery
 VignetteBuilder: knitr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Language: en-GB
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3

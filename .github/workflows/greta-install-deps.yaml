@@ -12,7 +12,7 @@ name: greta-install-deps
 
 jobs:
   test-coverage:
-    runs-on: macOS-latest
+    runs-on: ubuntu-18.04
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:

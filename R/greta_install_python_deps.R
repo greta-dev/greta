@@ -1,6 +1,6 @@
 greta_install_python_deps <- function(timeout) {
 
-  callr_conda_install <- r_process_options(
+  callr_conda_install <- callr::r_process_options(
     func = function() {
       reticulate::conda_install(
         envname = "greta-env",
@@ -21,7 +21,7 @@ greta_install_python_deps <- function(timeout) {
     cli_end_msg = "Python modules installed!"
   )
   greta_stash$conda_install_notes <- install_python_modules$output_notes
-  cli_ul("To see full installation notes run:")
-  cli_ul("{.code greta_notes_conda_install()}")
+  cli::cli_ul("To see full installation notes run:")
+  cli::cli_ul("{.code greta_notes_conda_install()}")
 
 }

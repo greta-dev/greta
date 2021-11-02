@@ -1,6 +1,6 @@
 greta_install_miniconda <- function(timeout) {
 
-  callr_install_miniconda <- r_process_options(
+  callr_install_miniconda <- callr::r_process_options(
     func = function() {
       reticulate::install_miniconda()
     }
@@ -15,6 +15,6 @@ greta_install_miniconda <- function(timeout) {
     cli_end_msg = "{.pkg miniconda} installed!"
   )
   greta_stash$miniconda_notes <- install_miniconda_process$output_notes
-  cli_ul("To see full installation notes run:")
-  cli_ul("{.code greta_notes_install_miniconda()}")
+  cli::cli_ul("To see full installation notes run:")
+  cli::cli_ul("{.code greta_notes_install_miniconda()}")
 }
