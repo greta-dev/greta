@@ -153,50 +153,25 @@ check_tf_version <- function(alert = c("none",
 
     cli_process_failed()
 
+    cli_msg <- c(
+      "We have detected that you do not have the expected python packages \\
+          setup.",
+      "You can set these up by running this R code in the console:",
+      "{.code install_greta_deps()}",
+      "Then, restart R and run:",
+      "{.code library(greta)}",
+      "({.strong Note}: Your R session should not have initialised \\
+          Tensorflow yet.)",
+      "For more information, see {.code ?install_greta_deps}"
+    )
+
     # if there was a problem, append the solution
-      message_text <- cli::format_message(
-        c(
-          "We have detected that you do not have the expected python packages \\
-          setup.",
-          "You can set these up by running this R code in the console:",
-          "{.code install_greta_deps()}",
-          "Then, restart R and run:",
-          "{.code library(greta)}",
-          "({.strong Note}: Your R session should not have initialised \\
-          Tensorflow yet.)",
-          "For more information, see {.code ?install_greta_deps}"
-        )
-      )
+      message_text <- cli::format_message(cli_msg)
+      warning_text <- cli::format_warning(cli_msg)
+      error_text <- cli::format_error(cli_msg)
 
-      warning_text <- cli::format_warning(
-        c(
-          "We have detected that you do not have the expected python packages \\
-          setup.",
-          "You can set these up by running this R code in the console:",
-          "{.code install_greta_deps()}",
-          "Then, restart R and run:",
-          "{.code library(greta)}",
-          "({.strong Note}: Your R session should not have initialised \\
-          Tensorflow yet.)",
-          "For more information, see {.code ?install_greta_deps}"
-        )
-      )
-
-      error_text <- cli::format_error(
-        c(
-          "We have detected that you do not have the expected python packages \\
-          setup.",
-          "You can set these up by running this R code in the console:",
-          "{.code install_greta_deps()}",
-          "Then, restart R and run:",
-          "{.code library(greta)}",
-          "({.strong Note}: Your R session should not have initialised \\
-          Tensorflow yet.)",
-          "For more information, see {.code ?install_greta_deps}"
-        )
-      )
-
-    switch(alert,
+    switch(
+      alert,
       error = stop(error_text, call. = FALSE),
       warn = warning(warning_text, call. = FALSE),
       message = message(message_text),
@@ -1626,3 +1601,69 @@ utilities_module <- module(
   checks = checks_module,
   colours = colour_module
 )
+
+# remove empty strings
+base_remove_empty_string <- function(string){
+  string[string != ""]
+}
+
+
+other_install_fail_msg <- function(error_passed){
+  # drop ""
+  error_passed <- base_remove_empty_string(error_passed)
+  cli::format_error(
+    message = c(
+      "Stopping as installation of {.pkg greta} dependencies failed",
+      "An error occured:",
+      "{.code {error_passed}}",
+      "You can perform the entire installation manually with:",
+      "{.code reticulate::install_miniconda()}",
+      "Then:",
+      "{.code reticulate::conda_create(envname = 'greta-env', \\
+      python_version = '3.7')}",
+      "Then:",
+      "{.code reticulate::conda_install(envname = 'greta-env',
+      packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
+      'tensorflow==1.14.0'))}",
+      "Then, restart R, and load {.pkg greta} with: {.code library(greta)}",
+      "If this does not work, lodge an issue on github at:",
+      "{.url https://github.com/greta-dev/greta/issues/new}"
+    )
+  )
+}
+
+timeout_install_msg <- function(timeout, py_error = NULL){
+  msg <- c(
+    "Stopping as installation of {.pkg greta} dependencies took longer than \\
+        {timeout} minutes",
+    "You can increase the timeout time by increasing the {.arg timeout} \\
+        argument.",
+    "For example, to wait 5 minutes:",
+    "{.code install_greta_deps(timeout = 5)}",
+    "Alternatively, you can perform the entire installation with:",
+    "{.code reticulate::install_miniconda()}",
+    "Then:",
+    "{.code reticulate::conda_create(envname = 'greta-env', \\
+        python_version = '3.7')}",
+    "Then:",
+    "{.code reticulate::conda_install(envname = 'greta-env',
+        packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
+        'tensorflow==1.14.0'))}",
+    "Then, restart R, and load {.pkg greta} with: {.code library(greta)}"
+  )
+
+  if (is.null(py_error)){
+    cli::format_error(
+      message = msg
+    )
+  } else {
+    msg <- c(
+      msg,
+      "Additionally, the following error appeared:",
+      "{py_error}"
+    )
+    cli::format_error(
+      message = msg
+    )
+  }
+}

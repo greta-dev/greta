@@ -30,6 +30,8 @@
 
 * Python dependency installation has been overhauled with the new `install_greta_deps()` function (#417).
 
+* Adds helper functions for helping installation get to "clean slate" (#443)
+
 ## Features:
 
 * `calculate()` now enables simulation of greta array values from their priors, optionally conditioned on fixed values or posterior samples. This enables prior and posterior predictive checking of models, and simulation of data.
@@ -47,6 +49,8 @@
 * `mcmc()` and `calculate()` now have a `trace_batch_size` argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays (#236).
 
 * Many message, warning, and error prompts have been replaced internally with the {cli} R package for nicer printing. This is a minor change that should result in a more pleasant user experience (#423 #425).
+
+
 
 # greta 0.3.1
 
