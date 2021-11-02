@@ -227,7 +227,7 @@ modelling languages. That's because the same syntax has a very different
 meaning in R, and can only be applied to objects that are already in
 existence. The inverse forms of the common link functions (prefixed with an
 'i') can be used instead.</p>
-<p>The <code>log1pe</code> inverse link function is equivalent to <code><a href='https://rdrr.io/r/base/Log.html'>log(1 + exp(x))</a></code>, yielding a positive transformed parameter. Unlike the log
+<p>The <code>log1pe</code> inverse link function is equivalent to <code>log(1 + exp(x))</code>, yielding a positive transformed parameter. Unlike the log
 transformation, this transformation is approximately linear for x &gt; 1. i.e.
 when \(x &gt; 1\), \(y\) is approximately \(x\)</p>
 <p><code>imultilogit</code> expects an n-by-m greta array, and returns an n-by-(m+1)
@@ -236,25 +236,25 @@ adding a final column of 0s and then running the softmax function widely
 used in machine learning.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='va'>x1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-
-<span class='co'># transformation to the unit interval</span>
-<span class='va'>p1</span> <span class='op'>&lt;-</span> <span class='fu'>iprobit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
-<span class='va'>p2</span> <span class='op'>&lt;-</span> <span class='fu'>ilogit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
-<span class='va'>p3</span> <span class='op'>&lt;-</span> <span class='fu'>icloglog</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
-<span class='va'>p4</span> <span class='op'>&lt;-</span> <span class='fu'>icauchit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
-
-<span class='co'># and to positive reals</span>
-<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'>log1pe</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
-
-<span class='co'># transform from 10x3 to 10x4, where rows are a complete set of</span>
-<span class='co'># probabilities</span>
-<span class='va'>x2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>10</span>, <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>imultilogit</span><span class='op'>(</span><span class='va'>x2</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>x1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># transformation to the unit interval</span></span>
+<span class='r-in'><span class='va'>p1</span> <span class='op'>&lt;-</span> <span class='fu'>iprobit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>p2</span> <span class='op'>&lt;-</span> <span class='fu'>ilogit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>p3</span> <span class='op'>&lt;-</span> <span class='fu'>icloglog</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>p4</span> <span class='op'>&lt;-</span> <span class='fu'>icauchit</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># and to positive reals</span></span>
+<span class='r-in'><span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'>log1pe</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># transform from 10x3 to 10x4, where rows are a complete set of</span></span>
+<span class='r-in'><span class='co'># probabilities</span></span>
+<span class='r-in'><span class='va'>x2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>10</span>, <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>imultilogit</span><span class='op'>(</span><span class='va'>x2</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

@@ -247,42 +247,42 @@ operate on the final dimension, which must have more than 1 element.
 Passing in a scalar value for <code>dim</code> therefore results in a row-vector.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='co'># a scalar variable</span>
-<span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'>variable</span><span class='op'>(</span><span class='op'>)</span>
-
-<span class='co'># a positive length-three variable</span>
-<span class='va'>b</span> <span class='op'>&lt;-</span> <span class='fu'>variable</span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-
-<span class='co'># a 2x2x2 variable bounded between 0 and 1</span>
-<span class='va'>c</span> <span class='op'>&lt;-</span> <span class='fu'>variable</span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span>, upper <span class='op'>=</span> <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># create a variable, with lower and upper defined by greta arrays</span>
-<span class='va'>min</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Sepal.Length</span><span class='op'>)</span>
-<span class='va'>max</span> <span class='op'>&lt;-</span> <span class='va'>min</span><span class='op'>^</span><span class='fl'>2</span>
-<span class='va'>d</span> <span class='op'>&lt;-</span> <span class='va'>min</span> <span class='op'>+</span> <span class='fu'>variable</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>*</span> <span class='op'>(</span><span class='va'>max</span> <span class='op'>-</span> <span class='va'>min</span><span class='op'>)</span>
-<span class='op'>}</span>
-<span class='co'># 4x4 cholesky factor variables for covariance and correlation matrices</span>
-<span class='va'>e_cov</span> <span class='op'>&lt;-</span> <span class='fu'>cholesky_variable</span><span class='op'>(</span>dim <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>
-<span class='va'>e_correl</span> <span class='op'>&lt;-</span> <span class='fu'>cholesky_variable</span><span class='op'>(</span>dim <span class='op'>=</span> <span class='fl'>4</span>, correlation <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-
-<span class='co'># these can be converted to symmetic matrices with chol2symm</span>
-<span class='co'># (equivalent to t(e_cov) %*% e_cov, but more efficient)</span>
-<span class='va'>cov</span> <span class='op'>&lt;-</span> <span class='fu'><a href='chol2symm.html'>chol2symm</a></span><span class='op'>(</span><span class='va'>e_cov</span><span class='op'>)</span>
-<span class='va'>correl</span> <span class='op'>&lt;-</span> <span class='fu'><a href='chol2symm.html'>chol2symm</a></span><span class='op'>(</span><span class='va'>e_correl</span><span class='op'>)</span>
-<span class='co'># a 4D simplex (sums to 1, all values positive)</span>
-<span class='va'>f</span> <span class='op'>&lt;-</span> <span class='fu'>simplex_variable</span><span class='op'>(</span><span class='fl'>4</span><span class='op'>)</span>
-
-<span class='co'># a 4D simplex on the final dimension</span>
-<span class='va'>g</span> <span class='op'>&lt;-</span> <span class='fu'>simplex_variable</span><span class='op'>(</span>dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>
-<span class='co'># a 2D variable with each element higher than the one in the cell to the left</span>
-<span class='va'>h</span> <span class='op'>&lt;-</span> <span class='fu'>ordered_variable</span><span class='op'>(</span>dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># more constraints can be added with monotonic transformations, e.g. an</span>
-<span class='co'># ordered positive variable</span>
-<span class='va'>i</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='fu'>ordered_variable</span><span class='op'>(</span><span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a scalar variable</span></span>
+<span class='r-in'><span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'>variable</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a positive length-three variable</span></span>
+<span class='r-in'><span class='va'>b</span> <span class='op'>&lt;-</span> <span class='fu'>variable</span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a 2x2x2 variable bounded between 0 and 1</span></span>
+<span class='r-in'><span class='va'>c</span> <span class='op'>&lt;-</span> <span class='fu'>variable</span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span>, upper <span class='op'>=</span> <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># create a variable, with lower and upper defined by greta arrays</span></span>
+<span class='r-in'><span class='va'>min</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Sepal.Length</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>max</span> <span class='op'>&lt;-</span> <span class='va'>min</span><span class='op'>^</span><span class='fl'>2</span></span>
+<span class='r-in'><span class='va'>d</span> <span class='op'>&lt;-</span> <span class='va'>min</span> <span class='op'>+</span> <span class='fu'>variable</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>*</span> <span class='op'>(</span><span class='va'>max</span> <span class='op'>-</span> <span class='va'>min</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'><span class='co'># 4x4 cholesky factor variables for covariance and correlation matrices</span></span>
+<span class='r-in'><span class='va'>e_cov</span> <span class='op'>&lt;-</span> <span class='fu'>cholesky_variable</span><span class='op'>(</span>dim <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>e_correl</span> <span class='op'>&lt;-</span> <span class='fu'>cholesky_variable</span><span class='op'>(</span>dim <span class='op'>=</span> <span class='fl'>4</span>, correlation <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># these can be converted to symmetic matrices with chol2symm</span></span>
+<span class='r-in'><span class='co'># (equivalent to t(e_cov) %*% e_cov, but more efficient)</span></span>
+<span class='r-in'><span class='va'>cov</span> <span class='op'>&lt;-</span> <span class='fu'><a href='chol2symm.html'>chol2symm</a></span><span class='op'>(</span><span class='va'>e_cov</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>correl</span> <span class='op'>&lt;-</span> <span class='fu'><a href='chol2symm.html'>chol2symm</a></span><span class='op'>(</span><span class='va'>e_correl</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'># a 4D simplex (sums to 1, all values positive)</span></span>
+<span class='r-in'><span class='va'>f</span> <span class='op'>&lt;-</span> <span class='fu'>simplex_variable</span><span class='op'>(</span><span class='fl'>4</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a 4D simplex on the final dimension</span></span>
+<span class='r-in'><span class='va'>g</span> <span class='op'>&lt;-</span> <span class='fu'>simplex_variable</span><span class='op'>(</span>dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'># a 2D variable with each element higher than the one in the cell to the left</span></span>
+<span class='r-in'><span class='va'>h</span> <span class='op'>&lt;-</span> <span class='fu'>ordered_variable</span><span class='op'>(</span>dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># more constraints can be added with monotonic transformations, e.g. an</span></span>
+<span class='r-in'><span class='co'># ordered positive variable</span></span>
+<span class='r-in'><span class='va'>i</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='fu'>ordered_variable</span><span class='op'>(</span><span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

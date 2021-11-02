@@ -270,19 +270,19 @@ first. Here's a key to the plots:
 <img src='figures/plotlegend.png' width="100%" /></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='co'># define a simple model</span>
-<span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>3</span>, truncation <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='cn'>Inf</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>10</span><span class='op'>)</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span>
-
-<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'>model</span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>m</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># define a simple model</span></span>
+<span class='r-in'><span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>3</span>, truncation <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='cn'>Inf</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'>model</span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>m</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

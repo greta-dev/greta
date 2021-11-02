@@ -398,7 +398,7 @@ probably be slower than running multiple chains simultaneously in a single
 sampler (with <code>plan(sequential)</code>, the default) because of the overhead
 required to start new sessions. However, <code>plan(cluster)</code> can be used
 to run chains on a cluster of machines on a local or remote network. See
-<code><a href='https://rdrr.io/pkg/future/man/cluster.html'>future::cluster()</a></code> for details, and the
+<code><a href='https://future.futureverse.org/reference/cluster.html'>future::cluster()</a></code> for details, and the
 <code>future.batchtools</code> package to set up plans on clusters with job
 schedulers.</p>
 <p>If <code>n_cores = NULL</code> and mcmc samplers are being run sequentially, each
@@ -433,74 +433,74 @@ parameters are in a vector, then split the vector up to define the model.
 The parameter vector can then be passed to model. See example.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='co'># define a simple Bayesian model</span>
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>10</span><span class='op'>)</span>
-<span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>5</span><span class='op'>)</span>
-<span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>0.1</span><span class='op'>)</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span>
-<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span>
-
-<span class='co'># carry out mcmc on the model</span>
-<span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>mcmc</span><span class='op'>(</span><span class='va'>m</span>, n_samples <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
-
-<span class='co'># add some more samples</span>
-<span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>extra_samples</span><span class='op'>(</span><span class='va'>draws</span>, <span class='fl'>200</span><span class='op'>)</span>
-
-<span class='co'>#' # initial values can be passed for some or all model variables</span>
-<span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>mcmc</span><span class='op'>(</span><span class='va'>m</span>, chains <span class='op'>=</span> <span class='fl'>1</span>, initial_values <span class='op'>=</span> <span class='fu'>initials</span><span class='op'>(</span>mu <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># if there are multiple chains, a list of initial values should be passed,</span>
-<span class='co'># othewise the same initial values will be used for all chains</span>
-<span class='va'>inits</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'>initials</span><span class='op'>(</span>sigma <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>, <span class='fu'>initials</span><span class='op'>(</span>sigma <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>mcmc</span><span class='op'>(</span><span class='va'>m</span>, chains <span class='op'>=</span> <span class='fl'>2</span>, initial_values <span class='op'>=</span> <span class='va'>inits</span><span class='op'>)</span>
-
-<span class='co'># you can auto-generate a list of initials with something like this:</span>
-<span class='va'>inits</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>replicate</a></span><span class='op'>(</span><span class='fl'>4</span>,
-  <span class='fu'>initials</span><span class='op'>(</span>mu <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>, sigma <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>,
-  simplify <span class='op'>=</span> <span class='cn'>FALSE</span>
-<span class='op'>)</span>
-<span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>mcmc</span><span class='op'>(</span><span class='va'>m</span>, chains <span class='op'>=</span> <span class='fl'>4</span>, initial_values <span class='op'>=</span> <span class='va'>inits</span><span class='op'>)</span>
-
-<span class='co'># or find the MAP estimate</span>
-<span class='va'>opt_res</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m</span><span class='op'>)</span>
-
-<span class='co'># get the MLE of the normal variance</span>
-<span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='va'>variance</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>variance</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>m2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>variance</span><span class='op'>)</span>
-
-<span class='co'># adjust = FALSE skips the jacobian adjustments used in MAP estimation, to</span>
-<span class='co'># give the true maximum likelihood estimates</span>
-<span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m2</span>, adjust <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-
-<span class='co'># the MLE corresponds to the *unadjusted* sample variance, but differs</span>
-<span class='co'># from the sample variance</span>
-<span class='va'>o</span><span class='op'>$</span><span class='va'>par</span>
-<span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='op'>(</span><span class='va'>x</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span><span class='op'>^</span><span class='fl'>2</span><span class='op'>)</span> <span class='co'># same</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>var</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='co'># different</span>
-
-<span class='co'># initial values can also be passed to optimisers:</span>
-<span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m2</span>, initial_values <span class='op'>=</span> <span class='fu'>initials</span><span class='op'>(</span>variance <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># and you can return a list of the Hessians for each of these parameters</span>
-<span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m2</span>, hessians <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='va'>o</span><span class='op'>$</span><span class='va'>hessians</span>
-
-
-<span class='co'># to get a hessian matrix across multiple greta arrays, you must first</span>
-<span class='co'># combine them and then split them up for use in the model (so that the</span>
-<span class='co'># combined vector is part of the model) and pass that vector to model:</span>
-<span class='va'>params</span> <span class='op'>&lt;-</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='va'>params</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span>
-<span class='va'>variance</span> <span class='op'>&lt;-</span> <span class='va'>params</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>]</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>variance</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>m3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>params</span><span class='op'>)</span>
-<span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m3</span>, hessians <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='va'>o</span><span class='op'>$</span><span class='va'>hessians</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='co'># define a simple Bayesian model</span></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>5</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>0.1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># carry out mcmc on the model</span></span>
+<span class='r-in'><span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>mcmc</span><span class='op'>(</span><span class='va'>m</span>, n_samples <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># add some more samples</span></span>
+<span class='r-in'><span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>extra_samples</span><span class='op'>(</span><span class='va'>draws</span>, <span class='fl'>200</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#' # initial values can be passed for some or all model variables</span></span>
+<span class='r-in'><span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>mcmc</span><span class='op'>(</span><span class='va'>m</span>, chains <span class='op'>=</span> <span class='fl'>1</span>, initial_values <span class='op'>=</span> <span class='fu'>initials</span><span class='op'>(</span>mu <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># if there are multiple chains, a list of initial values should be passed,</span></span>
+<span class='r-in'><span class='co'># othewise the same initial values will be used for all chains</span></span>
+<span class='r-in'><span class='va'>inits</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'>initials</span><span class='op'>(</span>sigma <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>, <span class='fu'>initials</span><span class='op'>(</span>sigma <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>mcmc</span><span class='op'>(</span><span class='va'>m</span>, chains <span class='op'>=</span> <span class='fl'>2</span>, initial_values <span class='op'>=</span> <span class='va'>inits</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># you can auto-generate a list of initials with something like this:</span></span>
+<span class='r-in'><span class='va'>inits</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>replicate</a></span><span class='op'>(</span><span class='fl'>4</span>,</span>
+<span class='r-in'>  <span class='fu'>initials</span><span class='op'>(</span>mu <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>, sigma <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>,</span>
+<span class='r-in'>  simplify <span class='op'>=</span> <span class='cn'>FALSE</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'>mcmc</span><span class='op'>(</span><span class='va'>m</span>, chains <span class='op'>=</span> <span class='fl'>4</span>, initial_values <span class='op'>=</span> <span class='va'>inits</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># or find the MAP estimate</span></span>
+<span class='r-in'><span class='va'>opt_res</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># get the MLE of the normal variance</span></span>
+<span class='r-in'><span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>variance</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>variance</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>m2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>variance</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># adjust = FALSE skips the jacobian adjustments used in MAP estimation, to</span></span>
+<span class='r-in'><span class='co'># give the true maximum likelihood estimates</span></span>
+<span class='r-in'><span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m2</span>, adjust <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># the MLE corresponds to the *unadjusted* sample variance, but differs</span></span>
+<span class='r-in'><span class='co'># from the sample variance</span></span>
+<span class='r-in'><span class='va'>o</span><span class='op'>$</span><span class='va'>par</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='op'>(</span><span class='va'>x</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span><span class='op'>^</span><span class='fl'>2</span><span class='op'>)</span> <span class='co'># same</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>var</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='co'># different</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># initial values can also be passed to optimisers:</span></span>
+<span class='r-in'><span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m2</span>, initial_values <span class='op'>=</span> <span class='fu'>initials</span><span class='op'>(</span>variance <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># and you can return a list of the Hessians for each of these parameters</span></span>
+<span class='r-in'><span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m2</span>, hessians <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>o</span><span class='op'>$</span><span class='va'>hessians</span></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># to get a hessian matrix across multiple greta arrays, you must first</span></span>
+<span class='r-in'><span class='co'># combine them and then split them up for use in the model (so that the</span></span>
+<span class='r-in'><span class='co'># combined vector is part of the model) and pass that vector to model:</span></span>
+<span class='r-in'><span class='va'>params</span> <span class='op'>&lt;-</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='va'>params</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span></span>
+<span class='r-in'><span class='va'>variance</span> <span class='op'>&lt;-</span> <span class='va'>params</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>]</span></span>
+<span class='r-in'><span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>variance</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>m3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>params</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>opt</span><span class='op'>(</span><span class='va'>m3</span>, hessians <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>o</span><span class='op'>$</span><span class='va'>hessians</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

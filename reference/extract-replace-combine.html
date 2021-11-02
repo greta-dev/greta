@@ -227,7 +227,7 @@ not a matrix.</p></td>
     <tr>
       <th>...</th>
       <td><p>either further indices specifying elements to extract or replace
-(<code><a href='https://rdrr.io/r/base/Extract.html'>[</a></code>), or multiple greta arrays to combine (<code>cbind()</code>,
+(<code>[</code>), or multiple greta arrays to combine (<code>cbind()</code>,
 <code>rbind()</code> &amp; <code>c()</code>), or additional arguments (<code>rep()</code>,
 <code><a href='https://rdrr.io/r/utils/head.html'>head()</a></code>, <code><a href='https://rdrr.io/r/utils/head.html'>tail()</a></code>)</p></td>
     </tr>
@@ -242,7 +242,7 @@ not a matrix.</p></td>
     <p><code><a href='overloaded.html'>diag()</a></code> can be used to extract or replace the diagonal part of
 a square and two-dimensional greta array, but it cannot be used to create a
 matrix-like greta array from a scalar or vector-like greta array. A static
-diagonal matrix can always be created with e.g. <code><a href='overloaded.html'>diag(3)</a></code>, and then
+diagonal matrix can always be created with e.g. <code>diag(3)</code>, and then
 converted into a greta array.</p>
 <p>Also note that since R 4.0.0, <code>head</code> and <code>tail</code> methods for arrays changed
 to print a vector rather than maintain the array structure. The <code>greta</code>
@@ -278,24 +278,24 @@ you are using.</p>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># extract and replace</span>
-<span class='va'>x</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>, <span class='op'>]</span>
-<span class='va'>x</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>:</span><span class='fl'>4</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>9</span>
-<span class='va'>e</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
-<span class='fu'><a href='overloaded.html'>diag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='va'>e</span> <span class='op'>+</span> <span class='fl'>1</span>
-
-<span class='co'># combine</span>
-<span class='fu'>cbind</span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>]</span>, <span class='va'>x</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
-<span class='fu'>rbind</span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span><span class='fl'>1</span>, <span class='op'>]</span>, <span class='va'>x</span><span class='op'>[</span><span class='fl'>3</span>, <span class='op'>]</span><span class='op'>)</span>
-<span class='fu'><a href='overloaded.html'>abind</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span><span class='fl'>1</span>, <span class='op'>]</span>, <span class='va'>x</span><span class='op'>[</span><span class='fl'>3</span>, <span class='op'>]</span>, along <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
-<span class='fu'>c</span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>]</span>, <span class='va'>x</span><span class='op'>)</span>
-<span class='fu'>rep</span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>]</span>, times <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># extract and replace</span></span>
+<span class='r-in'><span class='va'>x</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>, <span class='op'>]</span></span>
+<span class='r-in'><span class='va'>x</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>:</span><span class='fl'>4</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>9</span></span>
+<span class='r-in'><span class='va'>e</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='overloaded.html'>diag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='va'>e</span> <span class='op'>+</span> <span class='fl'>1</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># combine</span></span>
+<span class='r-in'><span class='fu'>cbind</span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>]</span>, <span class='va'>x</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>rbind</span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span><span class='fl'>1</span>, <span class='op'>]</span>, <span class='va'>x</span><span class='op'>[</span><span class='fl'>3</span>, <span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='overloaded.html'>abind</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span><span class='fl'>1</span>, <span class='op'>]</span>, <span class='va'>x</span><span class='op'>[</span><span class='fl'>3</span>, <span class='op'>]</span>, along <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>c</span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>]</span>, <span class='va'>x</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>rep</span><span class='op'>(</span><span class='va'>x</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>]</span>, times <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

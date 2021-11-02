@@ -232,52 +232,52 @@ component probability distributions passed in via <code>\dots</code></p>
 discrete, and must have the same dimensions.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='co'># a scalar variable following a strange bimodal distibution</span>
-<span class='va'>weights</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-<span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'>mixture</span><span class='op'>(</span><span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>3</span>, <span class='fl'>0.5</span><span class='op'>)</span>,
-  <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>0.5</span><span class='op'>)</span>,
-  <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>3</span><span class='op'>)</span>,
-  weights <span class='op'>=</span> <span class='va'>weights</span>
-<span class='op'>)</span>
-<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>a</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='inference.html'>mcmc</a></span><span class='op'>(</span><span class='va'>m</span>, n_samples <span class='op'>=</span> <span class='fl'>500</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># simulate a mixture of poisson random variables and try to recover the</span>
-<span class='co'># parameters with a Bayesian model</span>
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span>
-  <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='fl'>800</span>, <span class='fl'>3</span><span class='op'>)</span>,
-  <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='fl'>200</span>, <span class='fl'>10</span><span class='op'>)</span>
-<span class='op'>)</span>
-
-<span class='va'>weights</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-<span class='va'>rates</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>10</span>, truncation <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='cn'>Inf</span><span class='op'>)</span>, dim <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'>mixture</span><span class='op'>(</span><span class='fu'><a href='distributions.html'>poisson</a></span><span class='op'>(</span><span class='va'>rates</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>,
-  <span class='fu'><a href='distributions.html'>poisson</a></span><span class='op'>(</span><span class='va'>rates</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>]</span><span class='op'>)</span>,
-  weights <span class='op'>=</span> <span class='va'>weights</span>
-<span class='op'>)</span>
-<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>rates</span><span class='op'>)</span>
-<span class='va'>draws_rates</span> <span class='op'>&lt;-</span> <span class='fu'><a href='inference.html'>mcmc</a></span><span class='op'>(</span><span class='va'>m</span>, n_samples <span class='op'>=</span> <span class='fl'>500</span><span class='op'>)</span>
-
-<span class='co'># check the mixing probabilities after fitting using calculate()</span>
-<span class='co'># (you could also do this within the model)</span>
-<span class='va'>normalized_weights</span> <span class='op'>&lt;-</span> <span class='va'>weights</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>weights</span><span class='op'>)</span>
-<span class='va'>draws_weights</span> <span class='op'>&lt;-</span> <span class='fu'><a href='calculate.html'>calculate</a></span><span class='op'>(</span><span class='va'>normalized_weights</span>, <span class='va'>draws_rates</span><span class='op'>)</span>
-
-<span class='co'># get the posterior means</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>draws_rates</span><span class='op'>)</span><span class='op'>$</span><span class='va'>statistics</span><span class='op'>[</span>, <span class='st'>"Mean"</span><span class='op'>]</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>draws_weights</span><span class='op'>)</span><span class='op'>$</span><span class='va'>statistics</span><span class='op'>[</span>, <span class='st'>"Mean"</span><span class='op'>]</span>
-
-<span class='co'># weights can also be an array, giving different mixing weights</span>
-<span class='co'># for each observation (first dimension must be number of components)</span>
-<span class='va'>dim</span> <span class='op'>&lt;-</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>4</span><span class='op'>)</span>
-<span class='va'>weights</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='va'>dim</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>b</span> <span class='op'>&lt;-</span> <span class='fu'>mixture</span><span class='op'>(</span><span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='va'>dim</span><span class='op'>)</span>,
-  <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>1</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='va'>dim</span><span class='op'>)</span>,
-  weights <span class='op'>=</span> <span class='va'>weights</span>
-<span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='co'># a scalar variable following a strange bimodal distibution</span></span>
+<span class='r-in'><span class='va'>weights</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'>mixture</span><span class='op'>(</span><span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>3</span>, <span class='fl'>0.5</span><span class='op'>)</span>,</span>
+<span class='r-in'>  <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>0.5</span><span class='op'>)</span>,</span>
+<span class='r-in'>  <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>3</span><span class='op'>)</span>,</span>
+<span class='r-in'>  weights <span class='op'>=</span> <span class='va'>weights</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>a</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='inference.html'>mcmc</a></span><span class='op'>(</span><span class='va'>m</span>, n_samples <span class='op'>=</span> <span class='fl'>500</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># simulate a mixture of poisson random variables and try to recover the</span></span>
+<span class='r-in'><span class='co'># parameters with a Bayesian model</span></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='fl'>800</span>, <span class='fl'>3</span><span class='op'>)</span>,</span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='fl'>200</span>, <span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>weights</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>rates</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>10</span>, truncation <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='cn'>Inf</span><span class='op'>)</span>, dim <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'>mixture</span><span class='op'>(</span><span class='fu'><a href='distributions.html'>poisson</a></span><span class='op'>(</span><span class='va'>rates</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>,</span>
+<span class='r-in'>  <span class='fu'><a href='distributions.html'>poisson</a></span><span class='op'>(</span><span class='va'>rates</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>]</span><span class='op'>)</span>,</span>
+<span class='r-in'>  weights <span class='op'>=</span> <span class='va'>weights</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>rates</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>draws_rates</span> <span class='op'>&lt;-</span> <span class='fu'><a href='inference.html'>mcmc</a></span><span class='op'>(</span><span class='va'>m</span>, n_samples <span class='op'>=</span> <span class='fl'>500</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># check the mixing probabilities after fitting using calculate()</span></span>
+<span class='r-in'><span class='co'># (you could also do this within the model)</span></span>
+<span class='r-in'><span class='va'>normalized_weights</span> <span class='op'>&lt;-</span> <span class='va'>weights</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>weights</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>draws_weights</span> <span class='op'>&lt;-</span> <span class='fu'><a href='calculate.html'>calculate</a></span><span class='op'>(</span><span class='va'>normalized_weights</span>, <span class='va'>draws_rates</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># get the posterior means</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>draws_rates</span><span class='op'>)</span><span class='op'>$</span><span class='va'>statistics</span><span class='op'>[</span>, <span class='st'>"Mean"</span><span class='op'>]</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>draws_weights</span><span class='op'>)</span><span class='op'>$</span><span class='va'>statistics</span><span class='op'>[</span>, <span class='st'>"Mean"</span><span class='op'>]</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># weights can also be an array, giving different mixing weights</span></span>
+<span class='r-in'><span class='co'># for each observation (first dimension must be number of components)</span></span>
+<span class='r-in'><span class='va'>dim</span> <span class='op'>&lt;-</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>4</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>weights</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>uniform</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='va'>dim</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>b</span> <span class='op'>&lt;-</span> <span class='fu'>mixture</span><span class='op'>(</span><span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='va'>dim</span><span class='op'>)</span>,</span>
+<span class='r-in'>  <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>1</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='va'>dim</span><span class='op'>)</span>,</span>
+<span class='r-in'>  weights <span class='op'>=</span> <span class='va'>weights</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

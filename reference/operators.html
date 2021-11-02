@@ -217,9 +217,9 @@ have unknown values.</p>
  <span class='va'>x</span> <span class='op'>*</span> <span class='va'>y</span>
  <span class='va'>x</span> <span class='op'>/</span> <span class='va'>y</span>
  <span class='va'>x</span> <span class='op'>^</span> <span class='va'>y</span>
- <span class='va'>x</span> <span class='op'>%%</span> <span class='va'>y</span>
- <span class='va'>x</span> <span class='op'>%/%</span> <span class='va'>y</span>
- <span class='va'>x</span> <span class='op'>%*%</span> <span class='va'>y</span>
+ <span class='va'>x</span> <span class='op'><a href='https://rdrr.io/r/base/Arithmetic.html'>%%</a></span> <span class='va'>y</span>
+ <span class='va'>x</span> <span class='op'><a href='https://rdrr.io/r/base/Arithmetic.html'>%/%</a></span> <span class='va'>y</span>
+ <span class='va'>x</span> <span class='op'><a href='overloaded.html'>%*%</a></span> <span class='va'>y</span>
 
  <span class='co'># logical operators</span>
  <span class='op'>!</span><span class='va'>x</span>
@@ -237,27 +237,27 @@ have unknown values.</p>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>12</span><span class='op'>)</span>
-
-<span class='co'># arithmetic</span>
-<span class='va'>a</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'>+</span> <span class='fl'>1</span>
-<span class='va'>b</span> <span class='op'>&lt;-</span> <span class='fl'>2</span> <span class='op'>*</span> <span class='va'>x</span> <span class='op'>+</span> <span class='fl'>3</span>
-<span class='va'>c</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'>%%</span> <span class='fl'>2</span>
-<span class='va'>d</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'>%/%</span> <span class='fl'>5</span>
-
-<span class='co'># logical</span>
-<span class='va'>e</span> <span class='op'>&lt;-</span> <span class='op'>(</span><span class='va'>x</span> <span class='op'>&gt;</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'>|</span> <span class='op'>(</span><span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>1</span><span class='op'>)</span>
-<span class='va'>f</span> <span class='op'>&lt;-</span> <span class='va'>e</span> <span class='op'>&amp;</span> <span class='op'>(</span><span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>2</span><span class='op'>)</span>
-<span class='va'>g</span> <span class='op'>&lt;-</span> <span class='op'>!</span><span class='va'>f</span>
-
-<span class='co'># relational</span>
-<span class='va'>h</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>1</span>
-<span class='va'>i</span> <span class='op'>&lt;-</span> <span class='op'>(</span><span class='op'>-</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&gt;=</span> <span class='va'>x</span>
-<span class='va'>j</span> <span class='op'>&lt;-</span> <span class='va'>h</span> <span class='op'>==</span> <span class='va'>x</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>12</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># arithmetic</span></span>
+<span class='r-in'><span class='va'>a</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'>+</span> <span class='fl'>1</span></span>
+<span class='r-in'><span class='va'>b</span> <span class='op'>&lt;-</span> <span class='fl'>2</span> <span class='op'>*</span> <span class='va'>x</span> <span class='op'>+</span> <span class='fl'>3</span></span>
+<span class='r-in'><span class='va'>c</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'><a href='https://rdrr.io/r/base/Arithmetic.html'>%%</a></span> <span class='fl'>2</span></span>
+<span class='r-in'><span class='va'>d</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'><a href='https://rdrr.io/r/base/Arithmetic.html'>%/%</a></span> <span class='fl'>5</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># logical</span></span>
+<span class='r-in'><span class='va'>e</span> <span class='op'>&lt;-</span> <span class='op'>(</span><span class='va'>x</span> <span class='op'>&gt;</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'>|</span> <span class='op'>(</span><span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>f</span> <span class='op'>&lt;-</span> <span class='va'>e</span> <span class='op'>&amp;</span> <span class='op'>(</span><span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>2</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>g</span> <span class='op'>&lt;-</span> <span class='op'>!</span><span class='va'>f</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># relational</span></span>
+<span class='r-in'><span class='va'>h</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>1</span></span>
+<span class='r-in'><span class='va'>i</span> <span class='op'>&lt;-</span> <span class='op'>(</span><span class='op'>-</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&gt;=</span> <span class='va'>x</span></span>
+<span class='r-in'><span class='va'>j</span> <span class='op'>&lt;-</span> <span class='va'>h</span> <span class='op'>==</span> <span class='va'>x</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

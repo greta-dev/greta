@@ -282,91 +282,91 @@ data from a set of priors, or simulating datasets from a model posterior.
 See some examples of these below.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='co'># define a variable greta array, and another that is calculated from it</span>
-<span class='co'># then calculate what value y would take for different values of x</span>
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-<span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
-<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>^</span><span class='fl'>2</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>a</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.2</span>, <span class='fl'>0.3</span><span class='op'>)</span>, a <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># by setting nsim, you can also sample values from their priors</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, nsim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-
-<span class='co'># you can combine sampling and fixed values</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>a <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>, nsim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-
-<span class='co'># if the greta array only depends on data,</span>
-<span class='co'># you can pass an empty list to values (this is the default)</span>
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='structures.html'>ones</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>3</span><span class='op'>)</span>
-<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span>
-
-<span class='co'># define a model</span>
-<span class='va'>alpha</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
-<span class='va'>beta</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
-<span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>0.1</span><span class='op'>)</span>
-<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Width</span><span class='op'>)</span>
-<span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='va'>alpha</span> <span class='op'>+</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span> <span class='op'>*</span> <span class='va'>beta</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span>
-<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>alpha</span>, <span class='va'>beta</span>, <span class='va'>sigma</span><span class='op'>)</span>
-
-<span class='co'># sample values of the parameters, or different observation data (y), from</span>
-<span class='co'># the priors (useful for prior # predictive checking) - see also</span>
-<span class='co'># ?simulate.greta_model</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>alpha</span>, <span class='va'>beta</span>, <span class='va'>sigma</span>, nsim <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, nsim <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
-
-<span class='co'># calculate intermediate greta arrays, given some parameter values (useful</span>
-<span class='co'># for debugging models)</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>1</span>, beta <span class='op'>=</span> <span class='fl'>2</span>, sigma <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span><span class='op'>)</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span>, beta <span class='op'>=</span> <span class='fl'>0.2</span>, sigma <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># simulate datasets given fixed parameter values</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span>, beta <span class='op'>=</span> <span class='fl'>0.2</span>, sigma <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>, nsim <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-
-<span class='co'># you can use calculate in conjunction with posterior samples from MCMC, e.g.</span>
-<span class='co'># sampling different observation datasets, given a random set of these</span>
-<span class='co'># posterior samples - useful for posterior predictive model checks</span>
-<span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'><a href='inference.html'>mcmc</a></span><span class='op'>(</span><span class='va'>m</span>, n_samples <span class='op'>=</span> <span class='fl'>500</span><span class='op'>)</span>
-<span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='va'>draws</span>, nsim <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
-
-<span class='co'># you can use calculate on greta arrays created even after the inference on</span>
-<span class='co'># the model - e.g. to plot response curves</span>
-<span class='va'>petal_length_plot</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>,
-  <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>,
-  length.out <span class='op'>=</span> <span class='fl'>100</span>
-<span class='op'>)</span>
-<span class='va'>mu_plot</span> <span class='op'>&lt;-</span> <span class='va'>alpha</span> <span class='op'>+</span> <span class='va'>petal_length_plot</span> <span class='op'>*</span> <span class='va'>beta</span>
-<span class='va'>mu_plot_draws</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>, values <span class='op'>=</span> <span class='va'>draws</span><span class='op'>)</span>
-<span class='va'>mu_est</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>colMeans</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>mu_est</span> <span class='op'>~</span> <span class='va'>petal_length_plot</span>,
-  type <span class='op'>=</span> <span class='st'>"n"</span>,
-  ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
-<span class='op'>)</span>
-<span class='fu'><a href='overloaded.html'>apply</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>, <span class='fl'>1</span>, <span class='va'>lines</span>,
-  x <span class='op'>=</span> <span class='va'>petal_length_plot</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/grDevices/gray.html'>grey</a></span><span class='op'>(</span><span class='fl'>0.8</span><span class='op'>)</span>
-<span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>mu_est</span> <span class='op'>~</span> <span class='va'>petal_length_plot</span>, lwd <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-
-<span class='co'># trace_batch_size can be changed to trade off speed against memory usage</span>
-<span class='co'># when calculating. These all produce the same result, but have increasing</span>
-<span class='co'># memory requirements:</span>
-<span class='va'>mu_plot_draws_1</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,
-  values <span class='op'>=</span> <span class='va'>draws</span>,
-  trace_batch_size <span class='op'>=</span> <span class='fl'>1</span>
-<span class='op'>)</span>
-<span class='va'>mu_plot_draws_10</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,
-  values <span class='op'>=</span> <span class='va'>draws</span>,
-  trace_batch_size <span class='op'>=</span> <span class='fl'>10</span>
-<span class='op'>)</span>
-<span class='va'>mu_plot_draws_inf</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,
-  values <span class='op'>=</span> <span class='va'>draws</span>,
-  trace_batch_size <span class='op'>=</span> <span class='cn'>Inf</span>
-<span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># define a variable greta array, and another that is calculated from it</span></span>
+<span class='r-in'><span class='co'># then calculate what value y would take for different values of x</span></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>^</span><span class='fl'>2</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>a</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.2</span>, <span class='fl'>0.3</span><span class='op'>)</span>, a <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># by setting nsim, you can also sample values from their priors</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, nsim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># you can combine sampling and fixed values</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>a <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>, nsim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># if the greta array only depends on data,</span></span>
+<span class='r-in'><span class='co'># you can pass an empty list to values (this is the default)</span></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='structures.html'>ones</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># define a model</span></span>
+<span class='r-in'><span class='va'>alpha</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>beta</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>0.1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Width</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='va'>alpha</span> <span class='op'>+</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span> <span class='op'>*</span> <span class='va'>beta</span></span>
+<span class='r-in'><span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>alpha</span>, <span class='va'>beta</span>, <span class='va'>sigma</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># sample values of the parameters, or different observation data (y), from</span></span>
+<span class='r-in'><span class='co'># the priors (useful for prior # predictive checking) - see also</span></span>
+<span class='r-in'><span class='co'># ?simulate.greta_model</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>alpha</span>, <span class='va'>beta</span>, <span class='va'>sigma</span>, nsim <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, nsim <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># calculate intermediate greta arrays, given some parameter values (useful</span></span>
+<span class='r-in'><span class='co'># for debugging models)</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>1</span>, beta <span class='op'>=</span> <span class='fl'>2</span>, sigma <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span>, beta <span class='op'>=</span> <span class='fl'>0.2</span>, sigma <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># simulate datasets given fixed parameter values</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span>, beta <span class='op'>=</span> <span class='fl'>0.2</span>, sigma <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>, nsim <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># you can use calculate in conjunction with posterior samples from MCMC, e.g.</span></span>
+<span class='r-in'><span class='co'># sampling different observation datasets, given a random set of these</span></span>
+<span class='r-in'><span class='co'># posterior samples - useful for posterior predictive model checks</span></span>
+<span class='r-in'><span class='va'>draws</span> <span class='op'>&lt;-</span> <span class='fu'><a href='inference.html'>mcmc</a></span><span class='op'>(</span><span class='va'>m</span>, n_samples <span class='op'>=</span> <span class='fl'>500</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>y</span>, values <span class='op'>=</span> <span class='va'>draws</span>, nsim <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># you can use calculate on greta arrays created even after the inference on</span></span>
+<span class='r-in'><span class='co'># the model - e.g. to plot response curves</span></span>
+<span class='r-in'><span class='va'>petal_length_plot</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>,</span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>,</span>
+<span class='r-in'>  length.out <span class='op'>=</span> <span class='fl'>100</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>mu_plot</span> <span class='op'>&lt;-</span> <span class='va'>alpha</span> <span class='op'>+</span> <span class='va'>petal_length_plot</span> <span class='op'>*</span> <span class='va'>beta</span></span>
+<span class='r-in'><span class='va'>mu_plot_draws</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>, values <span class='op'>=</span> <span class='va'>draws</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>mu_est</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>colMeans</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>mu_est</span> <span class='op'>~</span> <span class='va'>petal_length_plot</span>,</span>
+<span class='r-in'>  type <span class='op'>=</span> <span class='st'>"n"</span>,</span>
+<span class='r-in'>  ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='overloaded.html'>apply</a></span><span class='op'>(</span><span class='va'>mu_plot_draws</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>, <span class='fl'>1</span>, <span class='va'>lines</span>,</span>
+<span class='r-in'>  x <span class='op'>=</span> <span class='va'>petal_length_plot</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/grDevices/gray.html'>grey</a></span><span class='op'>(</span><span class='fl'>0.8</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>mu_est</span> <span class='op'>~</span> <span class='va'>petal_length_plot</span>, lwd <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># trace_batch_size can be changed to trade off speed against memory usage</span></span>
+<span class='r-in'><span class='co'># when calculating. These all produce the same result, but have increasing</span></span>
+<span class='r-in'><span class='co'># memory requirements:</span></span>
+<span class='r-in'><span class='va'>mu_plot_draws_1</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,</span>
+<span class='r-in'>  values <span class='op'>=</span> <span class='va'>draws</span>,</span>
+<span class='r-in'>  trace_batch_size <span class='op'>=</span> <span class='fl'>1</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>mu_plot_draws_10</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,</span>
+<span class='r-in'>  values <span class='op'>=</span> <span class='va'>draws</span>,</span>
+<span class='r-in'>  trace_batch_size <span class='op'>=</span> <span class='fl'>10</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>mu_plot_draws_inf</span> <span class='op'>&lt;-</span> <span class='fu'>calculate</span><span class='op'>(</span><span class='va'>mu_plot</span>,</span>
+<span class='r-in'>  values <span class='op'>=</span> <span class='va'>draws</span>,</span>
+<span class='r-in'>  trace_batch_size <span class='op'>=</span> <span class='cn'>Inf</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

@@ -368,22 +368,22 @@ be available in TensorFlow 2.0, on which that version of greta will depend.</p>
 iterations nor convergence, so these elements of the output are set to NA</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='co'># use optimisation to find the mean and sd of some data</span>
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>100</span>, <span class='op'>-</span><span class='fl'>2</span>, <span class='fl'>1.2</span><span class='op'>)</span>
-<span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='va'>sd</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sd</span><span class='op'>)</span>
-<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sd</span><span class='op'>)</span>
-
-<span class='co'># configure optimisers &amp; parameters via 'optimiser' argument to opt</span>
-<span class='va'>opt_res</span> <span class='op'>&lt;-</span> <span class='fu'><a href='inference.html'>opt</a></span><span class='op'>(</span><span class='va'>m</span>, optimiser <span class='op'>=</span> <span class='fu'>bfgs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># compare results with the analytic solution</span>
-<span class='va'>opt_res</span><span class='op'>$</span><span class='va'>par</span>
-<span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='co'># use optimisation to find the mean and sd of some data</span></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>100</span>, <span class='op'>-</span><span class='fl'>2</span>, <span class='fl'>1.2</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>sd</span> <span class='op'>&lt;-</span> <span class='fu'><a href='variable.html'>variable</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sd</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sd</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># configure optimisers &amp; parameters via 'optimiser' argument to opt</span></span>
+<span class='r-in'><span class='va'>opt_res</span> <span class='op'>&lt;-</span> <span class='fu'><a href='inference.html'>opt</a></span><span class='op'>(</span><span class='va'>m</span>, optimiser <span class='op'>=</span> <span class='fu'>bfgs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># compare results with the analytic solution</span></span>
+<span class='r-in'><span class='va'>opt_res</span><span class='op'>$</span><span class='va'>par</span></span>
+<span class='r-in'><span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

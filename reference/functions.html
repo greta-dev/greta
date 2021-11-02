@@ -215,7 +215,7 @@ and multiplication.</p>
 and <code>INDEX</code> cannot be a greta array. Currently five functions are
 available, and arguments passed to ... are ignored.</p>
 <p><code><a href='https://rdrr.io/r/base/Trig.html'>cospi()</a></code>, <code><a href='https://rdrr.io/r/base/Trig.html'>sinpi()</a></code>, and <code><a href='https://rdrr.io/r/base/Trig.html'>tanpi()</a></code> do not use the
-computationally more stable routines to compute <code><a href='https://rdrr.io/r/base/Trig.html'>cos(x * pi)</a></code> etc.
+computationally more stable routines to compute <code>cos(x * pi)</code> etc.
 that are available in R under some operating systems. Similarly
 <code><a href='https://rdrr.io/r/base/Special.html'>trigamma()</a></code> uses TensorFlow's polygamma function, resulting in lower
 precision than R's equivalent.</p>
@@ -301,19 +301,19 @@ precision than R's equivalent.</p>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>9</span>, nrow <span class='op'>=</span> <span class='fl'>3</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>b</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log1p</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>expm1</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>c</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sign.html'>sign</a></span><span class='op'>(</span><span class='va'>x</span> <span class='op'>-</span> <span class='fl'>5</span><span class='op'>)</span>
-<span class='va'>d</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span><span class='op'>(</span><span class='va'>x</span> <span class='op'>-</span> <span class='fl'>5</span><span class='op'>)</span>
-
-<span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/t.html'>t</a></span><span class='op'>(</span><span class='va'>a</span><span class='op'>)</span>
-
-<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>sweep</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fl'>1</span>, <span class='va'>e</span>, <span class='st'>"-"</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>9</span>, nrow <span class='op'>=</span> <span class='fl'>3</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>b</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log1p</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>expm1</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>c</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sign.html'>sign</a></span><span class='op'>(</span><span class='va'>x</span> <span class='op'>-</span> <span class='fl'>5</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>d</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span><span class='op'>(</span><span class='va'>x</span> <span class='op'>-</span> <span class='fl'>5</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/t.html'>t</a></span><span class='op'>(</span><span class='va'>a</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>sweep</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fl'>1</span>, <span class='va'>e</span>, <span class='st'>"-"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

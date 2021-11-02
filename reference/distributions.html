@@ -387,51 +387,51 @@ corresponds:</p>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='co'># a uniform parameter constrained to be between 0 and 1</span>
-<span class='va'>phi</span> <span class='op'>&lt;-</span> <span class='fu'>uniform</span><span class='op'>(</span>min <span class='op'>=</span> <span class='fl'>0</span>, max <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
-
-<span class='co'># a length-three variable, with each element following a standard normal</span>
-<span class='co'># distribution</span>
-<span class='va'>alpha</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-
-<span class='co'># a length-three variable of lognormals</span>
-<span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'>lognormal</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-
-<span class='co'># a hierarchical uniform, constrained between alpha and alpha + sigma,</span>
-<span class='va'>eta</span> <span class='op'>&lt;-</span> <span class='va'>alpha</span> <span class='op'>+</span> <span class='fu'>uniform</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='op'>*</span> <span class='va'>sigma</span>
-
-<span class='co'># a hierarchical distribution</span>
-<span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
-<span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'>lognormal</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
-<span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span>
-
-<span class='co'># a vector of 3 variables drawn from the same hierarchical distribution</span>
-<span class='va'>thetas</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-
-<span class='co'># a matrix of 12 variables drawn from the same hierarchical distribution</span>
-<span class='va'>thetas</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># a multivariate normal variable, with correlation between two elements</span>
-<span class='co'># note that the parameter must be a row vector</span>
-<span class='va'>Sig</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span><span class='op'>(</span><span class='fl'>4</span><span class='op'>)</span>
-<span class='va'>Sig</span><span class='op'>[</span><span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='va'>Sig</span><span class='op'>[</span><span class='fl'>4</span>, <span class='fl'>3</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>0.6</span>
-<span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>multivariate_normal</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/t.html'>t</a></span><span class='op'>(</span><span class='fu'><a href='extract-replace-combine.html'>rep</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>Sig</span><span class='op'>)</span>
-
-<span class='co'># 10 independent replicates of that</span>
-<span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>multivariate_normal</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/t.html'>t</a></span><span class='op'>(</span><span class='fu'><a href='extract-replace-combine.html'>rep</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>Sig</span>, n_realisations <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-
-<span class='co'># 10 multivariate normal replicates, each with a different mean vector,</span>
-<span class='co'># but the same covariance matrix</span>
-<span class='va'>means</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>40</span><span class='op'>)</span>, <span class='fl'>10</span>, <span class='fl'>4</span><span class='op'>)</span>
-<span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>multivariate_normal</span><span class='op'>(</span><span class='va'>means</span>, <span class='va'>Sig</span>, n_realisations <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>theta</span><span class='op'>)</span>
-
-<span class='co'># a Wishart variable with the same covariance parameter</span>
-<span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>wishart</span><span class='op'>(</span>df <span class='op'>=</span> <span class='fl'>5</span>, Sigma <span class='op'>=</span> <span class='va'>Sig</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a uniform parameter constrained to be between 0 and 1</span></span>
+<span class='r-in'><span class='va'>phi</span> <span class='op'>&lt;-</span> <span class='fu'>uniform</span><span class='op'>(</span>min <span class='op'>=</span> <span class='fl'>0</span>, max <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a length-three variable, with each element following a standard normal</span></span>
+<span class='r-in'><span class='co'># distribution</span></span>
+<span class='r-in'><span class='va'>alpha</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a length-three variable of lognormals</span></span>
+<span class='r-in'><span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'>lognormal</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a hierarchical uniform, constrained between alpha and alpha + sigma,</span></span>
+<span class='r-in'><span class='va'>eta</span> <span class='op'>&lt;-</span> <span class='va'>alpha</span> <span class='op'>+</span> <span class='fu'>uniform</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='op'>*</span> <span class='va'>sigma</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a hierarchical distribution</span></span>
+<span class='r-in'><span class='va'>mu</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>sigma</span> <span class='op'>&lt;-</span> <span class='fu'>lognormal</span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a vector of 3 variables drawn from the same hierarchical distribution</span></span>
+<span class='r-in'><span class='va'>thetas</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span>, dim <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a matrix of 12 variables drawn from the same hierarchical distribution</span></span>
+<span class='r-in'><span class='va'>thetas</span> <span class='op'>&lt;-</span> <span class='fu'>normal</span><span class='op'>(</span><span class='va'>mu</span>, <span class='va'>sigma</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a multivariate normal variable, with correlation between two elements</span></span>
+<span class='r-in'><span class='co'># note that the parameter must be a row vector</span></span>
+<span class='r-in'><span class='va'>Sig</span> <span class='op'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span><span class='op'>(</span><span class='fl'>4</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>Sig</span><span class='op'>[</span><span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='va'>Sig</span><span class='op'>[</span><span class='fl'>4</span>, <span class='fl'>3</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>0.6</span></span>
+<span class='r-in'><span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>multivariate_normal</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/t.html'>t</a></span><span class='op'>(</span><span class='fu'><a href='extract-replace-combine.html'>rep</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>Sig</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># 10 independent replicates of that</span></span>
+<span class='r-in'><span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>multivariate_normal</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/t.html'>t</a></span><span class='op'>(</span><span class='fu'><a href='extract-replace-combine.html'>rep</a></span><span class='op'>(</span><span class='va'>mu</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>Sig</span>, n_realisations <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># 10 multivariate normal replicates, each with a different mean vector,</span></span>
+<span class='r-in'><span class='co'># but the same covariance matrix</span></span>
+<span class='r-in'><span class='va'>means</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>40</span><span class='op'>)</span>, <span class='fl'>10</span>, <span class='fl'>4</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>multivariate_normal</span><span class='op'>(</span><span class='va'>means</span>, <span class='va'>Sig</span>, n_realisations <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>theta</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a Wishart variable with the same covariance parameter</span></span>
+<span class='r-in'><span class='va'>theta</span> <span class='op'>&lt;-</span> <span class='fu'>wishart</span><span class='op'>(</span>df <span class='op'>=</span> <span class='fl'>5</span>, Sigma <span class='op'>=</span> <span class='va'>Sig</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

@@ -200,6 +200,7 @@
 <li><p>joint distributions of uniform variables now have the correct constraints when sampling (<a href='https://github.com/greta-dev/greta/issues/377'>#377</a>).</p></li>
 <li><p>array-scalar dispatch with 3D arrays is now less buggy (<a href='https://github.com/greta-dev/greta/issues/298'>#298</a>).</p></li>
 <li><p>greta now provides R versions of all of R’s primitive functions (I think), to prevent them from silently not executing (<a href='https://github.com/greta-dev/greta/issues/317'>#317</a>).</p></li>
+<li><p>Uses <code>Sys.unsetenv("RETICULATE_PYTHON")</code> in <code>.onload</code> on package startup, to prevent an issue introduced with the latest version of RStudio where they do not find the current version of RStudio. See <a href="https://github.com/greta-dev/greta/issues/444"><a href='https://github.com/greta-dev/greta/issues/444'>#444</a></a> for more details.</p></li>
 </ul>
 </div>
 <div id="api-changes" class="section level2">
@@ -369,9 +370,9 @@
 <h2 class="hasAnchor">
 <a href="#fixes-2" class="anchor"></a>Fixes:</h2>
 <ul>
-<li>improved error checking/messages in <code><a href="../reference/model.html">model()</a></code>, <code><a href="../reference/overloaded.html">%*%</a></code>
+<li>improved error checking/messages in <code><a href="../reference/model.html">model()</a></code>, <code>%*%</code>
 </li>
-<li>switched docs and examples to always use <code><a href="https://rdrr.io/r/base/assignOps.html">&lt;-</a></code> for assignment</li>
+<li>switched docs and examples to always use <code>&lt;-</code> for assignment</li>
 <li>fixed the <code>n_cores</code> argument to <code><a href="../reference/model.html">model()</a></code>
 </li>
 </ul>

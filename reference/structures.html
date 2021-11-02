@@ -234,28 +234,28 @@ created.</p></td>
     <p><code>greta_array</code> is a convenience function to create an R array
 with <code><a href='https://rdrr.io/r/base/array.html'>array()</a></code> and then coerce it to a greta array. I.e. when
 passed something that can be coerced to a numeric array, it is equivalent
-to <code><a href='as_data.html'>as_data(array(data, dim))</a></code>.</p>
+to <code>as_data(array(data, dim))</code>.</p>
 <p>If <code>data</code> is a greta array and
-dim is different than <code><a href='https://rdrr.io/r/base/dim.html'>dim(data)</a></code>, a reshaped greta array is returned.
+dim is different than <code>dim(data)</code>, a reshaped greta array is returned.
 This is equivalent to: <code>dim(data) &lt;- dim</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='co'># a 3 row, 4 column greta array of 0s</span>
-<span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>zeros</span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span>
-
-<span class='co'># a 3x3x3 greta array of 1s</span>
-<span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>ones</span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span><span class='op'>)</span>
-
-<span class='co'># a 2x4 greta array filled with pi</span>
-<span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>greta_array</span><span class='op'>(</span><span class='va'>pi</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># a 3x3x3 greta array filled with 1, 2, and 3</span>
-<span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>greta_array</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
-<span class='op'>}</span>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a 3 row, 4 column greta array of 0s</span></span>
+<span class='r-in'><span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>zeros</span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>4</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a 3x3x3 greta array of 1s</span></span>
+<span class='r-in'><span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>ones</span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a 2x4 greta array filled with pi</span></span>
+<span class='r-in'><span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>greta_array</span><span class='op'>(</span><span class='va'>pi</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># a 3x3x3 greta array filled with 1, 2, and 3</span></span>
+<span class='r-in'><span class='va'>z</span> <span class='op'>&lt;-</span> <span class='fu'>greta_array</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>, dim <span class='op'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
