@@ -755,8 +755,6 @@ dirichlet_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     initialize = function(alpha, n_realisations, dimension) {
-      alpha <- as.greta_array(alpha)
-
       # coerce to greta arrays
       alpha <- as.greta_array(alpha)
 
