@@ -33,7 +33,6 @@ jobs:
           - {os: ubuntu-18.04,   r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: 'oldrel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
           - {os: ubuntu-18.04,   r: '3.5', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.4', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
 
     env:
       RSPM: ${{ matrix.config.rspm }}
@@ -101,6 +100,9 @@ jobs:
       - name: specially install fields for windows
         if: runner.os == 'Windows'
         run: |
+          install.packages("maps")
+          library(maps)
+          packageVersion("maps")
           install.packages("fields")
           library(fields)
           packageVersion("fields")
