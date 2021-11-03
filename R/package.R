@@ -38,6 +38,11 @@
 #' }
 NULL
 
+# clear CRAN checks spotting floating global variables
+#' @importFrom utils globalVariables
+utils::globalVariables("N", "greta")
+
+
 # load tf probability
 tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 
