@@ -15,6 +15,8 @@
 * Uses `Sys.unsetenv("RETICULATE_PYTHON")` in `.onload` on package startup, 
   to prevent an issue introduced with the latest version of RStudio where they
   do not find the current version of RStudio. See [#444](https://github.com/greta-dev/greta/issues/444) for more details.
+  
+* Internal change to code to ensure `future` continues to support parallisation of chains. See [#447](https://github.com/greta-dev/greta/issues/447) for more details.
 
 ## API changes:
 
