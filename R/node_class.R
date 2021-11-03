@@ -237,18 +237,16 @@ node <- R6Class(
       text <- node_type(self)
 
       if (has_distribution(self)) {
-        text <- paste(
-          text,
-          "following a",
-          self$distribution$distribution_name,
-          "distribution"
+        text <- glue::glue(
+          "{text} following a ",
+          "{self$distribution$distribution_name} distribution"
         )
       }
 
       text
     },
     get_unique_name = function() {
-      self$unique_name <- paste0("node_", rhex())
+      self$unique_name <- glue::glue("node_{rhex()}")
     },
     plotting_label = function() {
       label <- ""

@@ -86,7 +86,7 @@ dag_class <- R6Class(
         expr <- deparse(substitute(expr))
       }
 
-      expr <- paste0("sess$run(", expr, ", feed_dict = feed_dict)")
+      expr <- glue::glue("sess$run({expr}, feed_dict = feed_dict)")
 
       self$tf_run(expr, as_text = TRUE)
     },
@@ -279,7 +279,7 @@ dag_class <- R6Class(
         args <- list(free_state)
       }
 
-      names <- paste0(names(params), "_free")
+      names <- glue::glue("{names(params)}_free")
 
       for (i in seq_along(names)) {
         assign(names[i], args[[i]], envir = tfe)
@@ -381,7 +381,7 @@ dag_class <- R6Class(
       # define adjusted joint density
 
       # get names of Jacobian adjustment tensors for all variable nodes
-      adj_names <- paste0(self$get_tf_names(types = "variable"), "_adj")
+      adj_names <- glue::glue("{self$get_tf_names(types = 'variable')}_adj")
 
       # get TF density tensors for all distribution
       adj <- lapply(adj_names, get, envir = self$tf_environment)
@@ -537,11 +537,11 @@ dag_class <- R6Class(
       parameters
     },
     get_tf_data_list = function() {
-      data_list_name <- paste0(self$mode, "_data_list")
+      data_list_name <- glue::glue("{self$mode}_data_list")
       self$tf_environment[[data_list_name]]
     },
     set_tf_data_list = function(element_name, value) {
-      data_list_name <- paste0(self$mode, "_data_list")
+      data_list_name <- glue::glue("{self$mode}_data_list")
       self$tf_environment[[data_list_name]][[element_name]] <- value
     },
     build_feed_dict = function(dict_list = list(),
@@ -723,7 +723,10 @@ dag_class <- R6Class(
       # find the cluster IDs
       n <- nrow(r)
       neighbours <- lapply(seq_len(n), function(i) which(r[i, ]))
-      cluster_names <- vapply(neighbours, paste, collapse = "_", FUN.VALUE = "")
+      cluster_names <- vapply(X = neighbours,
+                              FUN = paste,
+                              FUN.VALUE = character(),
+                              collapse = "_")
       cluster_id <- match(cluster_names, unique(cluster_names))
 
       # name them

@@ -186,7 +186,7 @@ check_tf_version <- function(alert = c("none",
 
 # helper for *apply statements on R6 objects
 member <- function(x, method) {
-  eval(parse(text = paste0("x$", method)))
+  eval(parse(text = glue::glue("x${method}")))
 }
 
 node_type <- function(node) {
@@ -469,11 +469,16 @@ check_dims <- function(..., target_dim = NULL) {
   dim_list <- lapply(elem_list, dim)
 
   # as text, for printing
-  dims_paste <- vapply(dim_list, paste, "", collapse = "x")
+  dims_paste <- vapply(X = dim_list,
+                       FUN = paste,
+                       FUN.VALUE = character(),
+                       collapse = "x")
   dims_text <- paste(dims_paste, collapse = ", ")
 
   # which are scalars
-  scalars <- vapply(elem_list, is_scalar, FALSE)
+  scalars <- vapply(X = elem_list,
+                    FUN = is_scalar,
+                    FUN.VALUE = logical())
 
   # if more than one is non-scalar, need to check them
   if (sum(!scalars) > 1) {
@@ -1442,7 +1447,7 @@ get_indices_text <- function(dims, name) {
       indices <- arrayInd(vec, dims)
     }
     mid_text <- apply(indices, 1, paste, collapse = ",")
-    name <- paste0(name, "[", mid_text, "]")
+    name <- glue::glue("{name}[{mid_text}]")
   }
   name
 }

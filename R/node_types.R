@@ -13,7 +13,7 @@ data_node <- R6Class(
     tf = function(dag) {
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
-      unbatched_name <- paste0(tf_name, "_unbatched")
+      unbatched_name <- glue::glue("{tf_name}_unbatched")
 
       mode <- dag$how_to_define(self)
 
@@ -226,7 +226,7 @@ variable_node <- R6Class(
 
       # pass a string depending on whether they are all the same
       if (all(constraint_array == constraint_array[1])) {
-        self$constraint <- paste0("scalar_all_", constraint_array[1])
+        self$constraint <- glue::glue("scalar_all_{constraint_array[1]}")
       } else {
         self$constraint <- "scalar_mixed"
       }
@@ -307,11 +307,11 @@ variable_node <- R6Class(
       # if we're defining the forward mode graph, get the free state, transform,
       # and compute any transformation density
       if (mode == "forward") {
-        free_name <- sprintf("%s_free", tf_name)
+        free_name <- glue::glue("{tf_name}_free")
 
         # create the log jacobian adjustment for the free state
         tf_adj <- self$tf_adjustment(dag)
-        adj_name <- sprintf("%s_adj", tf_name)
+        adj_name <- glue::glue("{tf_name}_adj")
         assign(adj_name,
           tf_adj,
           envir = dag$tf_environment
@@ -388,7 +388,7 @@ variable_node <- R6Class(
     tf_adjustment = function(dag) {
 
       # find free version of node
-      free_tensor_name <- paste0(dag$tf_name(self), "_free")
+      free_tensor_name <- glue::glue("{dag$tf_name(self)}_free")
       free_tensor <- get(free_tensor_name, envir = dag$tf_environment)
 
       # apply jacobian adjustment to it
@@ -610,7 +610,7 @@ distrib <- function(distribution, ...) {
   check_tf_version("error")
 
   # get and initialize the distribution, with a default value node
-  constructor <- get(paste0(distribution, "_distribution"),
+  constructor <- get(glue::glue("{distribution}_distribution"),
     envir = parent.frame()
   )
   distrib <- constructor$new(...)
