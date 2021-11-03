@@ -100,6 +100,9 @@ jobs:
       - name: specially install fields for windows
         if: runner.os == 'Windows'
         run: |
+          install.packages("igraph", type = "binary")
+          library(igraph)
+          packageVersion("igraph")
           install.packages("maps", type = "binary")
           library(maps)
           packageVersion("maps")
