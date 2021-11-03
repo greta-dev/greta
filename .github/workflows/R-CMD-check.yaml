@@ -100,10 +100,10 @@ jobs:
       - name: specially install fields for windows
         if: runner.os == 'Windows'
         run: |
-          install.packages("maps")
+          install.packages("maps", type = "binary")
           library(maps)
           packageVersion("maps")
-          install.packages("fields")
+          install.packages("fields", type = "binary")
           library(fields)
           packageVersion("fields")
         shell: Rscript {0}
