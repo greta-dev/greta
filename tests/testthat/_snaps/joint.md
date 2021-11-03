@@ -3,8 +3,7 @@
     Code
       joint(bernoulli(0.5), normal(0, 1))
     Error <simpleError>
-      cannot construct a joint distribution from a combination of discrete and
-      continuous distributions
+      cannot construct a joint distribution from a combination of discrete and continuous distributions
 
 # joint with insufficient distributions errors
 

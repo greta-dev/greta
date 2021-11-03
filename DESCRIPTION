@@ -108,7 +108,7 @@ Suggests:
     spelling,
     rmarkdown,
     rmutil,
-    testthat (>= 3.0.4),
+    testthat (>= 3.1.0),
     tidyverse,
     truncdist
 VignetteBuilder: knitr
