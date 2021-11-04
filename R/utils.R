@@ -896,23 +896,28 @@ check_future_plan <- function() {
     # if it's a cluster, check there's no forking
     if (plan_is$cluster) {
 
-      # This stopgap trick from Henrik on github:
-      f <- future::future(NULL, lazy = FALSE)
-      workers <- f$workers
-      if (inherits(workers, "cluster")) {
-        worker <- workers[[1]]
-        if (inherits(worker, "forknode")) {
+      dummy <- parallelly::isForkedChild()
+
+      f <- future({
+        if (parallelly::isForkedChild()) {
           msg <- cli::format_error(
             "parallel mcmc samplers cannot be run with a fork cluster"
-            )
+          )
           stop(
             msg,
             call. = FALSE
           )
         }
+
+        42
+      })
+
+      workers <- f$workers
+
+      if (inherits(workers, "cluster")) {
+        worker <- workers[[1]]
       }
 
-      # check whether the cluster is local
       if (!is.null(worker$host)) {
         localhosts <- c("localhost", "127.0.0.1", Sys.info()[["nodename"]])
         plan_is$local <- worker$host %in% localhosts
