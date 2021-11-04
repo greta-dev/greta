@@ -70,8 +70,7 @@
       mcmc(m, chains = 1, n_samples = 1, warmup = 0, initial_values = initials(z = 1e+20))
     Error <simpleError>
       The log density could not be evaluated at these initial values
-      Try using these initials as the values argument in `calculate()` to see what
-      values of subsequent <greta_array>s these initial values lead to.
+      Try using these initials as the values argument in `calculate()` to see what values of subsequent <greta_array>s these initial values lead to.
 
 ---
 
@@ -96,8 +95,7 @@
       mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE, chains = 2,
         initial_values = inits)
     Error <simpleError>
-      the initial values provided have different dimensions than the named
-      <greta_array>s
+      the initial values provided have different dimensions than the named <greta_array>s
 
 ---
 
@@ -243,8 +241,7 @@
     Code
       draws <- mcmc(m, sampler = slice(), n_samples = 100, warmup = 100)
     Error <simpleError>
-      slice sampler can only currently be used for models defined with single
-      precision
+      slice sampler can only currently be used for models defined with single precision
       set `model(..., precision = 'single')` instead
 
 # numerical issues are handled in mcmc
@@ -253,8 +250,7 @@
       draws <- mcmc(m, verbose = FALSE)
     Error <simpleError>
       TensorFlow hit a numerical problem that caused it to error
-      greta can handle these as bad proposals if you rerun `mcmc()` with the argument
-      `one_by_one = TRUE`.
+      greta can handle these as bad proposals if you rerun `mcmc()` with the argument `one_by_one = TRUE`.
       This will slow down the sampler slightly.
       The error encountered can be recovered and viewed with:
       `greta_notes_tf_num_error()`
@@ -264,16 +260,14 @@
     Code
       mcmc(m)
     Error <simpleError>
-      parallel mcmc samplers cannot be run with `plan(multiprocess)` or
-      `plan(multicore)`
+      parallel mcmc samplers cannot be run with `plan(multiprocess)` or `plan(multicore)`
 
 ---
 
     Code
       mcmc(m)
     Error <simpleError>
-      parallel mcmc samplers cannot be run with `plan(multiprocess)` or
-      `plan(multicore)`
+      parallel mcmc samplers cannot be run with `plan(multiprocess)` or `plan(multicore)`
 
 ---
 
@@ -313,24 +307,21 @@
     Code
       mcmc(m, initial_values = FALSE)
     Error <simpleError>
-      `initial_values` must be an initials object created with `initials()`,
-      or a simple list of initials objects
+      `initial_values` must be an initials object created with `initials()`, or a simple list of initials objects
 
 ---
 
     Code
       mcmc(m, initial_values = list(FALSE))
     Error <simpleError>
-      `initial_values` must be an initials object created with `initials()`,
-      or a simple list of initials objects
+      `initial_values` must be an initials object created with `initials()`, or a simple list of initials objects
 
 ---
 
     Code
       mcmc(m, chains = 1, initial_values = initials(g = 1))
     Error <simpleError>
-      some <greta_array>s passed to `initials()` are not associated with the
-      model:
+      some <greta_array>s passed to `initials()` are not associated with the model:
       `g`
 
 ---
@@ -352,24 +343,21 @@
     Code
       mcmc(m, chains = 1, initial_values = initials(b = -1))
     Error <simpleError>
-      some provided initial values are outside the range of values their
-      variables can take
+      some provided initial values are outside the range of values their variables can take
 
 ---
 
     Code
       mcmc(m, chains = 1, initial_values = initials(d = -1))
     Error <simpleError>
-      some provided initial values are outside the range of values their
-      variables can take
+      some provided initial values are outside the range of values their variables can take
 
 ---
 
     Code
       mcmc(m, chains = 1, initial_values = initials(e = 2))
     Error <simpleError>
-      some provided initial values are outside the range of values their
-      variables can take
+      some provided initial values are outside the range of values their variables can take
 
 # samplers print informatively
 

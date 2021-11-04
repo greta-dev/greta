@@ -46,7 +46,7 @@ remove_miniconda <- function(){
   if (yesno::yesno("Are you sure you want to delete miniconda from ",
                    path_to_miniconda,"?") ){
   cli::cli_alert_info("removing 'miniconda' installation")
-    fs::dir_delete(path_to_miniconda)
+    file.remove(path_to_miniconda)
     cli::cli_alert_success("'miniconda' successfully removed!")
   } else {
     return(invisible())

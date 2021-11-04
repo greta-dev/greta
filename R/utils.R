@@ -902,7 +902,7 @@ check_future_plan <- function() {
     if (plan_is$cluster) {
 
       # This stopgap trick from Henrik on github:
-      f <- future::future(NULL, lazy = TRUE)
+      f <- future::future(NULL, lazy = FALSE)
       workers <- f$workers
       if (inherits(workers, "cluster")) {
         worker <- workers[[1]]
