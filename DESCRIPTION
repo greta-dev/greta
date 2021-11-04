@@ -80,6 +80,8 @@ Collate:
     'new_install_process.R'
     'reinstallers.R'
     'checkers.R'
+    'test_if_forked_cluster.R'
+    'zzz.R'
     'internals.R'
 Imports:
     abind,
@@ -92,7 +94,8 @@ Imports:
     R6,
     reticulate (>= 1.19.0),
     tensorflow (>= 1.13.0),
-    yesno
+    yesno,
+    parallelly
 Suggests:
     bayesplot,
     DiagrammeR,

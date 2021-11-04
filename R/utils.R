@@ -369,6 +369,7 @@ misc_module <- module(
   pad_vector
 )
 
+
 # convert an array to a vector row-wise
 flatten_rowwise <- function(array) {
   dim <- dim(array)
