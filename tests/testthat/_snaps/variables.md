@@ -79,30 +79,26 @@
     Code
       simplex_variable(1)
     Error <simpleError>
-      the final dimension of a simplex variable must have more than one
-      element
+      the final dimension of a simplex variable must have more than one element
 
 ---
 
     Code
       simplex_variable(c(3, 1))
     Error <simpleError>
-      the final dimension of a simplex variable must have more than one
-      element
+      the final dimension of a simplex variable must have more than one element
 
 ---
 
     Code
       ordered_variable(1)
     Error <simpleError>
-      the final dimension of an ordered variable must have more than one
-      element
+      the final dimension of an ordered variable must have more than one element
 
 ---
 
     Code
       ordered_variable(c(3, 1))
     Error <simpleError>
-      the final dimension of an ordered variable must have more than one
-      element
+      the final dimension of an ordered variable must have more than one element
 

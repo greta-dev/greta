@@ -3,8 +3,7 @@
     Code
       sims <- simulate(m)
     Error <simpleError>
-      the target <greta_array>s are related to variables that do not have
-      distributions so cannot be sampled
+      the target <greta_array>s are related to variables that do not have distributions so cannot be sampled
 
 # simulate errors if a distribution cannot be sampled from
 
