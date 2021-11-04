@@ -36,8 +36,7 @@
       as_data(cha_mat)
     Error <simpleError>
       <greta_array> must contain the same type
-      Cannot coerce <matrix> to a <greta_array> unless it is <numeric>, <integer> or
-      <logical>. This <matrix> had type:
+      Cannot coerce <matrix> to a <greta_array> unless it is <numeric>, <integer> or <logical>. This <matrix> had type:
       <character>
 
 ---
@@ -46,8 +45,7 @@
       as_data(cha_arr)
     Error <simpleError>
       <greta_array> must contain the same type
-      Cannot coerce <array> to a <greta_array> unless it is <numeric>, <integer> or
-      <logical>. This <array> had type:
+      Cannot coerce <array> to a <greta_array> unless it is <numeric>, <integer> or <logical>. This <array> had type:
       <character>
 
 ---
@@ -56,9 +54,7 @@
       as_data(cha_df)
     Error <simpleError>
       <greta_array> must contain the same type
-      Cannot coerce a <data.frame> to a <greta_array> unless all columns are
-      <numeric, integer> or <logical>. This dataframe had columns of type:
-      <character>
+      Cannot coerce a <data.frame> to a <greta_array> unless all columns are <numeric, integer> or <logical>. This dataframe had columns of type: <character>
 
 ---
 
@@ -66,8 +62,7 @@
       as_data(cha_df2)
     Error <simpleError>
       <greta_array> must contain the same type
-      Cannot coerce a <data.frame> to a <greta_array> unless all columns are
-      <numeric, integer> or <logical>. This dataframe had columns of type: <factor>
+      Cannot coerce a <data.frame> to a <greta_array> unless all columns are <numeric, integer> or <logical>. This dataframe had columns of type: <factor>
 
 ---
 

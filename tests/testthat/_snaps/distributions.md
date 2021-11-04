@@ -54,8 +54,7 @@
       glm(1 ~ 1, family = poisson)
     Error <simpleError>
       Wrong function name provided in another model
-      It looks like you're using greta's `poisson()` function in the family argument
-      of another model.
+      It looks like you're using greta's `poisson()` function in the family argument of another model.
       Maybe you want to use `family = stats::poisson`,instead?
 
 ---
@@ -64,8 +63,7 @@
       glm(1 ~ 1, family = binomial)
     Error <simpleError>
       Wrong function name provided in another model
-      It looks like you're using greta's `binomial()` function in the family argument
-      of another model.
+      It looks like you're using greta's `binomial()` function in the family argument of another model.
       Maybe you want to use `family = stats::binomial`,instead?
 
 ---
@@ -74,8 +72,7 @@
       glm(1 ~ 1, family = poisson())
     Error <simpleError>
       Wrong function name provided in another model
-      It looks like you're using greta's `poisson()` function in the family argument
-      of another model.
+      It looks like you're using greta's `poisson()` function in the family argument of another model.
       Maybe you want to use `family = stats::poisson`,instead?
 
 ---
@@ -84,8 +81,7 @@
       glm(1 ~ 1, family = poisson("sqrt"))
     Error <simpleError>
       Wrong function name provided in another model
-      It looks like you're using greta's `poisson()` function in the family argument
-      of another model.
+      It looks like you're using greta's `poisson()` function in the family argument of another model.
       Maybe you want to use `family = stats::poisson`,instead?
 
 # wishart distribution errors informatively
@@ -133,8 +129,7 @@
     Code
       lkj_correlation(4, dimension = -1)
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 ---
@@ -142,8 +137,7 @@
     Code
       lkj_correlation(4, dim = c(3, 3))
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 ---
@@ -151,8 +145,7 @@
     Code
       lkj_correlation(4, dim = NA)
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 # multivariate_normal distribution errors informatively
@@ -161,8 +154,7 @@
       multivariate_normal(m_c, a)
     Error <simpleError>
       the dimension of this distribution must be at least 2, but was 1
-      multivariate distributions treat each row as a separate realisation - perhaps
-      you need to transpose something?
+      multivariate distributions treat each row as a separate realisation - perhaps you need to transpose something?
 
 ---
 
@@ -170,16 +162,14 @@
       multivariate_normal(m_d, a)
     Error <simpleError>
       the dimension of this distribution must be at least 2, but was 1
-      multivariate distributions treat each row as a separate realisation - perhaps
-      you need to transpose something?
+      multivariate distributions treat each row as a separate realisation - perhaps you need to transpose something?
 
 ---
 
     Code
       multivariate_normal(m_a, b)
     Error <simpleError>
-      Dimensions of parameters not compatible with multivariate distribution
-      parameters of multivariate distributions cannot have more than two dimensions
+      Dimensions of parameters not compatible with multivariate distribution parameters of multivariate distributions cannot have more than two dimensions
       object `x` has dimensions: 3x3x3
 
 ---
@@ -196,10 +186,8 @@
       multivariate_normal(m_a, d)
     Error <simpleError>
       distribution dimensions do not match implied dimensions
-      The distribution dimension should be 3, but parameters implied dimensions: 3 vs
-      4
-      Multivariate distributions treat each row as a separate realisation - perhaps
-      you need to transpose something?
+      The distribution dimension should be 3, but parameters implied dimensions: 3 vs 4
+      Multivariate distributions treat each row as a separate realisation - perhaps you need to transpose something?
 
 ---
 
@@ -207,8 +195,7 @@
       multivariate_normal(0, 1)
     Error <simpleError>
       the dimension of this distribution must be at least 2, but was 1
-      multivariate distributions treat each row as a separate realisation - perhaps
-      you need to transpose something?
+      multivariate distributions treat each row as a separate realisation - perhaps you need to transpose something?
 
 ---
 
@@ -229,8 +216,7 @@
     Code
       multivariate_normal(m_a, a, dimension = -1)
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 ---
@@ -238,8 +224,7 @@
     Code
       multivariate_normal(m_a, a, dimension = c(1, 3))
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 # multinomial distribution errors informatively
@@ -248,8 +233,7 @@
       multinomial(c(1), 1)
     Error <simpleError>
       the dimension of this distribution must be at least 2, but was 1
-      multivariate distributions treat each row as a separate realisation - perhaps
-      you need to transpose something?
+      multivariate distributions treat each row as a separate realisation - perhaps you need to transpose something?
 
 ---
 
@@ -270,8 +254,7 @@
     Code
       multinomial(10, p_a, dimension = -1)
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 ---
@@ -279,8 +262,7 @@
     Code
       multinomial(10, p_a, dimension = c(1, 3))
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 # categorical distribution errors informatively
@@ -289,8 +271,7 @@
       categorical(1)
     Error <simpleError>
       the dimension of this distribution must be at least 2, but was 1
-      multivariate distributions treat each row as a separate realisation - perhaps
-      you need to transpose something?
+      multivariate distributions treat each row as a separate realisation - perhaps you need to transpose something?
 
 ---
 
@@ -311,8 +292,7 @@
     Code
       categorical(p_a, dimension = -1)
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 ---
@@ -320,8 +300,7 @@
     Code
       categorical(p_a, dimension = c(1, 3))
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 # dirichlet distribution errors informatively
@@ -330,8 +309,7 @@
       dirichlet(1)
     Error <simpleError>
       the dimension of this distribution must be at least 2, but was 1
-      multivariate distributions treat each row as a separate realisation - perhaps
-      you need to transpose something?
+      multivariate distributions treat each row as a separate realisation - perhaps you need to transpose something?
 
 ---
 
@@ -352,8 +330,7 @@
     Code
       dirichlet(alpha_a, dimension = -1)
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 ---
@@ -361,8 +338,7 @@
     Code
       dirichlet(alpha_a, dimension = c(1, 3))
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 # dirichlet-multinomial distribution errors informatively
@@ -371,8 +347,7 @@
       dirichlet_multinomial(c(1), 1)
     Error <simpleError>
       the dimension of this distribution must be at least 2, but was 1
-      multivariate distributions treat each row as a separate realisation - perhaps
-      you need to transpose something?
+      multivariate distributions treat each row as a separate realisation - perhaps you need to transpose something?
 
 ---
 
@@ -393,8 +368,7 @@
     Code
       dirichlet_multinomial(10, alpha_a, dimension = -1)
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 
 ---
@@ -402,7 +376,6 @@
     Code
       dirichlet_multinomial(10, alpha_a, dimension = c(1, 3))
     Error <simpleError>
-      `dimension` must be a positive scalar integer giving the dimension of
-      the distribution
+      `dimension` must be a positive scalar integer giving the dimension of the distribution
       `dim(target)` returns:
 

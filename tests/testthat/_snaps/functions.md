@@ -250,8 +250,7 @@
       round(x, 2)
     Error <simpleError>
       the "digits" argument of `round()` cannot be set for <greta_array>s
-      <greta_array>s can only be rounded to the nearest integer, so the "digits"
-      argument cannot be set
+      <greta_array>s can only be rounded to the nearest integer, so the "digits" argument cannot be set
 
 ---
 
@@ -272,8 +271,7 @@
     Code
       chol2inv(x, LINPACK = TRUE)
     Warning <simpleWarning>
-      The `LINPACK` argument is ignored for <greta_array>s, and has also been defunct
-      since R 3.1.0
+      The `LINPACK` argument is ignored for <greta_array>s, and has also been defunct since R 3.1.0
     Output
       greta array (operation)
       
@@ -330,8 +328,7 @@
     Code
       chol(x)
     Error <simpleError>
-      only two-dimensional, square, symmetric <greta_array>s can be Cholesky
-      decomposed
+      only two-dimensional, square, symmetric <greta_array>s can be Cholesky decomposed
       `dim(x)` returns: 3, 3, and 3
 
 ---
@@ -339,8 +336,7 @@
     Code
       chol(y)
     Error <simpleError>
-      only two-dimensional, square, symmetric <greta_array>s can be Cholesky
-      decomposed
+      only two-dimensional, square, symmetric <greta_array>s can be Cholesky decomposed
       `dim(x)` returns: 3 and 4
 
 ---
@@ -348,8 +344,7 @@
     Code
       chol2symm(x)
     Error <simpleError>
-      `chol2symm()` must have two-dimensional, square, upper-triangular
-      <greta_array>s
+      `chol2symm()` must have two-dimensional, square, upper-triangular <greta_array>s
       `dim(x)` returns: 3, 3, and 3
 
 ---
@@ -357,8 +352,7 @@
     Code
       chol2symm(y)
     Error <simpleError>
-      `chol2symm()` must have two-dimensional, square, upper-triangular
-      <greta_array>s
+      `chol2symm()` must have two-dimensional, square, upper-triangular <greta_array>s
       `dim(x)` returns: 3 and 4
 
 ---
@@ -366,16 +360,14 @@
     Code
       eigen(x)
     Error <simpleError>
-      only two-dimensional, square, symmetric <greta_array>s can be
-      eigendecomposed
+      only two-dimensional, square, symmetric <greta_array>s can be eigendecomposed
 
 ---
 
     Code
       eigen(y)
     Error <simpleError>
-      only two-dimensional, square, symmetric <greta_array>s can be
-      eigendecomposed
+      only two-dimensional, square, symmetric <greta_array>s can be eigendecomposed
 
 ---
 
