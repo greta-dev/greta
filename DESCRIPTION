@@ -84,7 +84,7 @@ Imports:
     abind,
     callr,
     yesno,
-    glue
+    glue,
     cli (>= 3.0.0),
     coda,
     methods,
