@@ -351,10 +351,6 @@ abind <- function(...,
 }
 # nolint end
 
-# clear CRAN checks spotting floating global variables
-#' @importFrom utils globalVariables
-utils::globalVariables("N", "greta")
-
 # nolint start
 #' @export
 abind.default <- function(...,
