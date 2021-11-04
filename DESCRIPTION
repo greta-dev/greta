@@ -80,6 +80,7 @@ Collate:
     'greta_install_python_deps.R'
     'new_install_process.R'
     'reinstallers.R'
+    'zzz.R'
 Imports:
     abind,
     callr,
