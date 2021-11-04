@@ -81,6 +81,7 @@ Collate:
     'new_install_process.R'
     'reinstallers.R'
     'test_if_forked_cluster.R'
+    'zzz.R'
 Imports:
     abind,
     callr,
