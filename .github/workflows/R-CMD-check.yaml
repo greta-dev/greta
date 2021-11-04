@@ -97,9 +97,10 @@ jobs:
           }
         shell: Rscript {0}
 
-      - name: specially install fields for windows
+      - name: specially install pkgs for windows
         if: runner.os == 'Windows'
         run: |
+          install.packages("MCMCpack", type = "binary")
           install.packages("igraph", type = "binary")
           library(igraph)
           packageVersion("igraph")
