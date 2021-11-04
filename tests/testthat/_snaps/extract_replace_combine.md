@@ -3,8 +3,7 @@
     Code
       abind(a, b)
     Error <simpleError>
-      all <greta_array>s must have the same dimensions except on the `along`
-      dimension
+      all <greta_array>s must have the same dimensions except on the `along` dimension
       However, dimension 1 had varying sizes: 5 and 1
 
 ---

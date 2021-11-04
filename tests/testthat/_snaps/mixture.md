@@ -3,8 +3,7 @@
     Code
       mixture(bernoulli(0.5), normal(0, 1), weights = weights)
     Error <simpleError>
-      cannot construct a mixture from a combination of discrete and continuous
-      distributions
+      cannot construct a mixture from a combination of discrete and continuous distributions
 
 # mixtures of multivariate and univariate errors
 
@@ -12,8 +11,7 @@
       mixture(multivariate_normal(zeros(1, 3), diag(3)), normal(0, 1, dim = c(1, 3)),
       weights = weights)
     Error <simpleError>
-      cannot construct a mixture from a combination of multivariate and
-      univariate distributions
+      cannot construct a mixture from a combination of multivariate and univariate distributions
 
 # mixtures of supports errors
 
@@ -38,8 +36,7 @@
     Code
       mixture(normal(0, 1), normal(0, 2), weights = weights)
     Error <simpleError>
-      the first dimension of weights must be the number of distributions in
-      the mixture (2)
+      the first dimension of weights must be the number of distributions in the mixture (2)
       However it was 1
 
 # mixtures with insufficient distributions errors
