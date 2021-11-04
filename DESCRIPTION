@@ -67,7 +67,6 @@ Collate:
     'optimisers.R'
     'inference.R'
     'install_tensorflow.R'
-    'internals.R'
     'calculate.R'
     'callbacks.R'
     'simulate.R'
@@ -81,6 +80,7 @@ Collate:
     'new_install_process.R'
     'reinstallers.R'
     'checkers.R'
+    'internals.R'
 Imports:
     abind,
     callr,

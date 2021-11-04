@@ -764,15 +764,6 @@ check_cum_op <- function(x) {
   }
 }
 
-complex_error <- function(z) {
-  msg <- cli::format_error(
-    "{.pkg greta} does not yet support complex numbers"
-  )
-  stop(
-    msg,
-    call. = FALSE
-  )
-}
 
 #' @importFrom future availableCores
 check_n_cores <- function(n_cores, samplers, plan_is) {
@@ -851,6 +842,33 @@ check_trace_batch_size <- function(x) {
 }
 
 
+complex_error <- function(z) {
+  msg <- cli::format_error(
+    "{.pkg greta} does not yet support complex numbers"
+  )
+  stop(
+    msg,
+    call. = FALSE
+  )
+}
+
+#' @export
+Im.greta_array <- complex_error
+
+#' @export
+Re.greta_array <- complex_error
+
+#' @export
+Arg.greta_array <- complex_error
+
+#' @export
+Conj.greta_array <- complex_error
+
+#' @export
+Mod.greta_array <- complex_error
+
+
+
 checks_module <- module(
   check_tf_version,
   check_dims,
@@ -862,8 +880,8 @@ checks_module <- module(
   check_values_list,
   check_dependencies_satisfied,
   check_cum_op,
-  complex_error,
   check_future_plan,
   check_n_cores,
-  check_positive_integer
+  check_positive_integer,
+  complex_error
 )

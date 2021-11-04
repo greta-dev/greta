@@ -725,13 +725,13 @@ is_windows <- function() {
 
 greta_array_ops_module <- module(as_tf_function)
 
+
 # utilities to export via .internals
 utilities_module <- module(
   misc = misc_module,
   dummy_arrays = dummy_array_module,
   greta_array_operations = greta_array_ops_module,
   samplers = sampler_utils_module,
-  checks = checks_module,
   colours = colour_module
 )
 
