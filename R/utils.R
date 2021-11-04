@@ -880,6 +880,7 @@ check_in_family <- function(function_name, arg) {
 
 #' @importFrom future plan future
 check_future_plan <- function() {
+
   plan_info <- future::plan()
 
   plan_is <- list(
@@ -896,21 +897,9 @@ check_future_plan <- function() {
     # if it's a cluster, check there's no forking
     if (plan_is$cluster) {
 
-      dummy <- parallelly::isForkedChild()
+      test_if_forked_cluster()
 
-      f <- future({
-        if (parallelly::isForkedChild()) {
-          msg <- cli::format_error(
-            "parallel mcmc samplers cannot be run with a fork cluster"
-          )
-          stop(
-            msg,
-            call. = FALSE
-          )
-        }
-
-        42
-      })
+      f <- future::future(NULL, laze = FALSE)
 
       workers <- f$workers
 
