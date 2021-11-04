@@ -30,7 +30,7 @@ test_that("mcmc errors for invalid parallel plans", {
     check_future_plan()
   )
 
-  cl <- parallel::makeForkCluster(2L)
+  cl <- parallel::makeCluster(2L, type = "FORK")
   plan(cluster, workers = cl)
   expect_snapshot(
     error = TRUE,

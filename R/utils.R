@@ -880,6 +880,7 @@ check_in_family <- function(function_name, arg) {
 
 #' @importFrom future plan future
 check_future_plan <- function() {
+
   plan_info <- future::plan()
 
   plan_is <- list(
@@ -896,23 +897,16 @@ check_future_plan <- function() {
     # if it's a cluster, check there's no forking
     if (plan_is$cluster) {
 
-      # This stopgap trick from Henrik on github:
-      f <- future::future(NULL, lazy = FALSE)
+      test_if_forked_cluster()
+
+      f <- future::future(NULL, laze = FALSE)
+
       workers <- f$workers
+
       if (inherits(workers, "cluster")) {
         worker <- workers[[1]]
-        if (inherits(worker, "forknode")) {
-          msg <- cli::format_error(
-            "parallel mcmc samplers cannot be run with a fork cluster"
-            )
-          stop(
-            msg,
-            call. = FALSE
-          )
-        }
       }
 
-      # check whether the cluster is local
       if (!is.null(worker$host)) {
         localhosts <- c("localhost", "127.0.0.1", Sys.info()[["nodename"]])
         plan_is$local <- worker$host %in% localhosts
