@@ -103,9 +103,10 @@ print.sampler <- function(x, ...) {
 
   if (!nzchar(values_text)) values_text <- "None"
 
-  parameters_text <- glue::glue(
-    "parameters:\n  {values_text}"
-  )
+  parameters_text <- glue::glue("
+                                parameters:
+                                  {values_text}
+                                ")
 
   msg <- glue::glue(
     "{class(x)[1]} object with {parameters_text}"

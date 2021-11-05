@@ -174,7 +174,7 @@ as.greta_array.default <- function(x, optional = FALSE, original_x = x, ...) {
 print.greta_array <- function(x, ...) {
   node <- get_node(x)
   text <- glue::glue(
-    "greta array ({node$description()})\n\n"
+    "greta array ({node$description()})\n\n\n"
   )
 
   cat(text)
