@@ -638,20 +638,6 @@ cummin.greta_array <- function(x) {
   )
 }
 
-#' @export
-Im.greta_array <- complex_error
-
-#' @export
-Re.greta_array <- complex_error
-
-#' @export
-Arg.greta_array <- complex_error
-
-#' @export
-Conj.greta_array <- complex_error
-
-#' @export
-Mod.greta_array <- complex_error
 
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
 rowcol_idx <- function(x, dims, which = c("col", "row")) {

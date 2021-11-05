@@ -56,5 +56,6 @@ nodes_module <- module(
   inference = inference_module,
   tensors = tf_functions_module,
   utils = utilities_module,
+  checks = checks_module,
   greta_stash
 )
