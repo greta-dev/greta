@@ -725,7 +725,7 @@ dag_class <- R6Class(
       neighbours <- lapply(seq_len(n), function(i) which(r[i, ]))
       cluster_names <- vapply(X = neighbours,
                               FUN = paste,
-                              FUN.VALUE = character(),
+                              FUN.VALUE = character(1),
                               collapse = "_")
       cluster_id <- match(cluster_names, unique(cluster_names))
 

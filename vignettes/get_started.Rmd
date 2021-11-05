@@ -347,6 +347,8 @@ sd <- student(3, 0, 1, truncation = c(0, Inf))
 mean <- int + coef * x
 distribution(y) <- normal(mean, sd)
 ```
+
+
 ```{r define_model}
 m <- model(int, coef, sd)
 ```
