@@ -173,9 +173,8 @@ as.greta_array.default <- function(x, optional = FALSE, original_x = x, ...) {
 #' @export
 print.greta_array <- function(x, ...) {
   node <- get_node(x)
-  text <- sprintf(
-    "greta array (%s)\n\n",
-    node$description()
+  text <- glue::glue(
+    "greta array ({node$description()})\n\n\n"
   )
 
   cat(text)
@@ -205,27 +204,23 @@ summary.greta_array <- function(object, ...) {
 print.summary.greta_array <- function(x, ...) {
 
   # array type
-  type_text <- sprintf(
-    "'%s' greta array",
-    x$type
+  type_text <- glue::glue(
+    "'{x$type}' greta array"
   )
 
   if (x$length == 1) {
     shape_text <- "with 1 element"
   } else {
-    dim_text <- paste(x$dim, collapse = "x")
-    shape_text <- sprintf(
-      "with %i elements (%s)",
-      x$length,
-      dim_text
+    dim_text <- glue::glue_collapse(x$dim, sep = "x")
+    shape_text <- glue::glue(
+      "with {x$length} elements ({dim_text})"
     )
   }
 
   # distribution info
   if (!is.null(x$distribution_name)) {
-    distribution_text <- sprintf(
-      "following a %s distribution",
-      x$distribution_name
+    distribution_text <- glue::glue(
+      "following a {x$distribution_name} distribution"
     )
   } else {
     distribution_text <- ""
@@ -238,10 +233,9 @@ print.summary.greta_array <- function(x, ...) {
     values_text <- paste0("\n", paste(values_print, collapse = "\n"))
   }
 
-  text <- paste(type_text, shape_text, distribution_text, paste0(
-    "\n",
-    values_text
-  ))
+  text <- glue::glue(
+    "{type_text} {shape_text} {distribution_text} \n {values_text}"
+  )
   cat(text)
   invisible(x)
 }
@@ -254,7 +248,7 @@ str.greta_array <- function(object, ...) {
   array <- unclass(value)
   string <- capture.output(str(array))
   string <- gsub("NA", "?", string)
-  string <- paste("'greta_array'", string)
+  string <- glue::glue("'greta_array' {string}")
   cat(string)
 }
 

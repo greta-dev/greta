@@ -70,10 +70,8 @@ inference <- R6Class(
     write_percentage_log = function(total, completed, stage) {
       if (!is.null(self$percentage_file)) {
         percentage <- round(100 * completed / total)
-        msg <- sprintf(
-          "%s %i%%",
-          stage,
-          percentage
+        msg <- glue::glue(
+          "{stage} {percentage}%"
         )
         writeLines(msg, self$percentage_file)
       }
@@ -499,25 +497,22 @@ sampler <- R6Class(
       msg <- ""
 
       if (self$n_samplers > 1) {
-        msg <- sprintf(
-          "\nsampler %i/%i",
-          self$sampler_number,
-          self$n_samplers
+        msg <- glue::glue(
+          "\n\nsampler {self$sampler_number}/{self$n_samplers}"
         )
       }
 
       if (self$n_chains > 1) {
         n_cores <- self$model$dag$n_cores
 
-        cores_text <- ifelse(n_cores == 1,
-          "1 core",
-          sprintf("up to %i cores", n_cores)
+        cores_text <- ifelse(
+          test = n_cores == 1,
+          yes = "1 core",
+          no = glue::glue("up to {n_cores} cores")
         )
 
-        msg <- sprintf(
-          "\nrunning %i chains simultaneously on %s",
-          self$n_chains,
-          cores_text
+        msg <- glue::glue(
+          "\n\nrunning {self$n_chains} chains simultaneously on {cores_text}"
         )
       }
 

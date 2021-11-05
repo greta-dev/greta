@@ -64,7 +64,7 @@ define_scipy_optimiser <- function(name,
     class = scipy_optimiser
   )
 
-  class_name <- paste0(name, "_optimiser")
+  class_name <- glue::glue("{name}_optimiser")
   class(obj) <- c(class_name, "optimiser")
   obj
 }
@@ -81,7 +81,7 @@ define_tf_optimiser <- function(name,
     other_args = other_args
   )
 
-  class_name <- paste0(name, "_optimiser")
+  class_name <- glue::glue("{name}_optimiser")
   class(obj) <- c(class_name, "optimiser")
   obj
 }

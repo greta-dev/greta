@@ -52,7 +52,7 @@
 
 * Many message, warning, and error prompts have been replaced internally with the {cli} R package for nicer printing. This is a minor change that should result in a more pleasant user experience (#423 #425).
 
-
+* Internally, where sensible, `greta` now uses the `glue` package to create messages/ouputs (#378).
 
 # greta 0.3.1
 

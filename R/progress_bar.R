@@ -27,10 +27,8 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
   count_pad <- paste0(rep(" ", 2 * digit_diff), collapse = "")
 
   # formatting
-  format_text <- sprintf(
-    "  %s :bar %s:iter/:total | eta: :eta :rejection",
-    name,
-    count_pad
+  format_text <- glue::glue(
+    "  {name} :bar {count_pad}:iter/:total | eta: :eta :rejection",
   )
 
   pb <- progress::progress_bar$new(
@@ -94,7 +92,7 @@ iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
       pad_char <- pmax(0, 2 - nchar(reject_perc_string))
       pad <- paste0(rep(" ", pad_char), collapse = "")
 
-      reject_text <- paste0("| ", reject_perc_string, "% bad", pad)
+      reject_text <- glue::glue("| {reject_perc_string}% bad{pad}")
     } else {
       reject_text <- "         "
     }

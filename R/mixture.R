@@ -246,7 +246,7 @@ mixture_distribution <- R6Class(
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
-          paste("distribution", i),
+          glue::glue("distribution {i}"),
           shape_matches_output = FALSE
         )
       }

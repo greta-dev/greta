@@ -151,7 +151,7 @@ tf_apply <- function(x, axis, tf_fun_name) {
 # permute the tensor to get the non-batch dim first, do the relevant
 # "unsorted_segment_*" op, then permute it back
 tf_tapply <- function(x, segment_ids, num_segments, op_name) {
-  op_name <- paste0("unsorted_segment_", op_name)
+  op_name <- glue::glue("unsorted_segment_{op_name}")
 
   x <- tf$transpose(x, perm = c(1:2, 0L))
   x <- tf$math[[op_name]](x,

@@ -98,7 +98,7 @@ version_tfp <- function(){
 
 # helper for *apply statements on R6 objects
 member <- function(x, method) {
-  eval(parse(text = paste0("x$", method)))
+  eval(parse(text = glue::glue("x${method}")))
 }
 
 node_type <- function(node) {
@@ -369,7 +369,6 @@ misc_module <- module(
   pad_vector
 )
 
-
 # convert an array to a vector row-wise
 flatten_rowwise <- function(array) {
   dim <- dim(array)
@@ -579,7 +578,7 @@ get_indices_text <- function(dims, name) {
       indices <- arrayInd(vec, dims)
     }
     mid_text <- apply(indices, 1, paste, collapse = ",")
-    name <- paste0(name, "[", mid_text, "]")
+    name <- glue::glue("{name}[{mid_text}]")
   }
   name
 }
