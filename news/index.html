@@ -229,6 +229,7 @@
 <li><p><code><a href="../reference/inference.html">mcmc()</a></code>, <code><a href="../reference/inference.html">stashed_samples()</a></code>, and <code><a href="../reference/calculate.html">calculate()</a></code> now return objects of class <code>greta_mcmc_list</code> which inherit from <code>coda</code>’s <code>mcmc.list</code> class, but enable custom greta methods for manipulating mcmc outputs, including a <code><a href="https://rdrr.io/r/stats/window.html">window()</a></code> function.</p></li>
 <li><p><code><a href="../reference/inference.html">mcmc()</a></code> and <code><a href="../reference/calculate.html">calculate()</a></code> now have a <code>trace_batch_size</code> argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays (<a href='https://github.com/greta-dev/greta/issues/236'>#236</a>).</p></li>
 <li><p>Many message, warning, and error prompts have been replaced internally with the {cli} R package for nicer printing. This is a minor change that should result in a more pleasant user experience (<a href='https://github.com/greta-dev/greta/issues/423'>#423</a> <a href='https://github.com/greta-dev/greta/issues/425'>#425</a>).</p></li>
+<li><p>Internally, where sensible, <code>greta</code> now uses the <code>glue</code> package to create messages/ouputs (<a href='https://github.com/greta-dev/greta/issues/378'>#378</a>).</p></li>
 </ul>
 </div>
 </div>
