@@ -311,14 +311,16 @@ run_samplers <- function(samplers,
     !is.null(greta_stash$callbacks)
 
   if (plan_is$parallel & plan_is$local & length(samplers) > 1) {
-    cores_text <- ifelse(n_cores == 1,
-      "1 core",
-      sprintf("up to %i cores", n_cores)
+    cores_text <- ifelse(
+      test = n_cores == 1,
+      yes = "1 core",
+      no = glue::glue("up to {n_cores} cores")
     )
-    msg <- sprintf(
-      "\nrunning %i samplers in parallel, each on %s\n\n",
-      length(samplers),
-      cores_text
+    msg <- glue::glue(
+      "\n",
+      "running {length(samplers)} samplers in parallel, ",
+      "each on {cores_text}",
+      "\n\n"
     )
     message(msg)
   }
@@ -645,7 +647,7 @@ parse_initial_values <- function(initials, dag) {
   # variable
 
   # find the corresponding nodes and check they are variable nodes
-  forward_names <- paste0("all_forward_", dag$node_tf_names)
+  forward_names <- glue::glue("all_forward_{dag$node_tf_names}")
   nodes <- dag$node_list[match(tf_names, forward_names)]
   types <- lapply(nodes, node_type)
   are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)

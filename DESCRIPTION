@@ -67,7 +67,6 @@ Collate:
     'optimisers.R'
     'inference.R'
     'install_tensorflow.R'
-    'internals.R'
     'calculate.R'
     'callbacks.R'
     'simulate.R'
@@ -80,11 +79,15 @@ Collate:
     'greta_install_python_deps.R'
     'new_install_process.R'
     'reinstallers.R'
+    'checkers.R'
     'test_if_forked_cluster.R'
     'zzz.R'
+    'internals.R'
 Imports:
     abind,
     callr,
+    yesno,
+    glue,
     cli (>= 3.0.0),
     coda,
     methods,
