@@ -800,3 +800,7 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     )
   }
 }
+
+is_DiagrammeR_installed <- function(){
+  requireNamespace("DiagrammeR", quietly = TRUE)
+}
