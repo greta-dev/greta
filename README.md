@@ -22,9 +22,9 @@ Or install the development version of `greta` from [r-universe](https://greta-de
 options(
   repos = c(
     gretadev = 'https://greta-dev.r-universe.dev',
-    CRAN = 'https://cloud.r-project.org')
+    CRAN = 'https://cloud.r-project.org'
     )
-)
+  )
 
 # Install greta
 install.packages('greta')

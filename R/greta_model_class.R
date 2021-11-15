@@ -221,12 +221,12 @@ plot.greta_model <- function(x,
                              y,
                              colour = "#996bc7",
                              ...) {
-  if (!requireNamespace("DiagrammeR", quietly = TRUE)) {
+  if (!is_DiagrammeR_installed()) {
     msg <- cli::format_error(
       c(
         "the {.pkg DiagrammeR} package must be installed to plot greta models",
         "install {.pkg DiagrammeR} with:",
-        "{.code install.packages('DiagrammeR')"
+        "{.code install.packages('DiagrammeR')}"
         )
       )
     stop(
