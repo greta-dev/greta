@@ -370,7 +370,7 @@ variable_node <- R6Class(
 
       # sum across all dimensions of jacobian
       already_summed <-
-        identical(dim(ljd), list(NULL)) | identical(dim(ljd), list())
+        identical(dim(ljd), NA_integer_) | identical(dim(ljd), integer(0))
 
       if (!already_summed) {
         ljd <- tf_sum(ljd, drop = TRUE)
