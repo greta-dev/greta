@@ -491,7 +491,7 @@ tf_recombine <- function(ref, index, updates) {
 tf_flatten <- function(x, extra_ones = 0) {
   nelem <- prod(unlist(dim(x)[-1]))
   out_dim <- c(-1, nelem, rep(1, extra_ones))
-  tf$reshape(x, to_shape(out_dim))
+  tf$reshape(x, as_tensor(to_shape(out_dim)))
 }
 
 # replace elements in a tensor with another tensor
