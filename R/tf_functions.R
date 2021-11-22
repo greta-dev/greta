@@ -431,14 +431,14 @@ tf_imultilogit <- function(x) {
 tf_extract <- function(x, nelem, index, dims_out) {
 
   # flatten tensor, gather using index, reshape to output dimension
-  tensor_in_flat <- tf$reshape(x, shape(-1, nelem))
+  tensor_in_flat <- tf$reshape(x, as_tensor(shape(-1, nelem)))
   tf_index <- tf$constant(as.integer(index), dtype = tf$int32)
   tensor_out_flat <- tf$gather(tensor_in_flat, tf_index, axis = 1L)
 
   # reshape, handling unknown dimensions even when the output has 0-dimension
   # (which prevents us from just using -1 on the first dimension)
   batch_size <- tf$shape(x)[[0]]
-  shape_list <- c(list(batch_size), to_shape(dims_out))
+  shape_list <- c(list(batch_size), as.integer(to_shape(dims_out)))
   shape_out <- tf$stack(shape_list)
   tensor_out <- tf$reshape(tensor_out_flat, shape_out)
   tensor_out
