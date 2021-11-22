@@ -308,13 +308,13 @@ tf_kronecker <- function(x, y, tf_fun_name) {
 
   # expand dimensions of tensors to allow direct multiplication for kronecker
   # prod
-  x_rsh <- tf$reshape(x, shape(-1, dims[1], 1L, dims[2], 1L))
-  y_rsh <- tf$reshape(y, shape(-1, 1L, dims[3], 1L, dims[4]))
+  x_rsh <- tf$reshape(x, as_tensor(shape(-1, dims[1], 1L, dims[2], 1L)))
+  y_rsh <- tf$reshape(y, as_tensor(shape(-1, 1L, dims[3], 1L, dims[4])))
 
   # multiply tensors and reshape with appropriate dimensions
   z <- tf_function(x_rsh, y_rsh)
   shape_out <- shape(-1, dims[1] * dims[3], dims[2] * dims[4])
-  tensor_out <- tf$reshape(z, shape_out)
+  tensor_out <- tf$reshape(z, as_tensor(shape_out))
 
   tensor_out
 }
@@ -465,14 +465,14 @@ tf_recombine <- function(ref, index, updates) {
   keep_idx <- which(runs$values == 0)
   keep_list <- lapply(keep_idx, function(i) {
     idx <- starts_old[i] + 0:(runs$lengths[i] - 1) - 1
-    tf$reshape(ref[, idx, ], shape(-1, length(idx), 1))
+    tf$reshape(ref[, idx, ], as_tensor(shape(-1, length(idx), 1)))
   })
 
   run_id <- runs$values[runs$values != 0]
   update_idx <- match(run_id, runs$values)
   # get them in  increasing order
   update_list <- lapply(run_id, function(i) {
-    tf$reshape(updates[, i - 1, ], shape(-1, 1, 1))
+    tf$reshape(updates[, i - 1, ], as_tensor(shape(-1, 1, 1)))
   })
 
   # combine them
@@ -511,7 +511,7 @@ tf_replace <- function(x, replacement, index, dims) {
   # reshape the result
   result <- tf$reshape(
     result_flat,
-    to_shape(c(-1, dims))
+    as_tensor(to_shape(c(-1, dims)))
   )
   result
 }
