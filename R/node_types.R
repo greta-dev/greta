@@ -377,7 +377,7 @@ variable_node <- R6Class(
       }
 
       # make sure there's something in the batch dimension
-      if (identical(dim(ljd), list())) {
+      if (identical(dim(ljd), integer(0))) {
         ljd <- tf$expand_dims(ljd, 0L)
       }
 
