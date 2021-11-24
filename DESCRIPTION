@@ -91,13 +91,13 @@ Imports:
     cli (>= 3.0.0),
     coda,
     methods,
-    future (>= 1.22.0),
+    future (>= 1.22.1),
     progress (>= 1.2.0),
     R6,
     reticulate (>= 1.19.0),
-    tensorflow (>= 1.13.0),
+    tensorflow (>= 2.7.0),
     yesno,
-    parallelly
+    parallelly (>= 1.29.0)
 Suggests:
     bayesplot,
     DiagrammeR,
