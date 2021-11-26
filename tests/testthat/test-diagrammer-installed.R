@@ -1,6 +1,6 @@
 test_that("DiagrammeR installation is checked", {
   mockery::stub(
-    where = plot,
+    where = plot.greta_model,
     what = 'is_DiagrammeR_installed',
     how = FALSE
     )
