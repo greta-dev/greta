@@ -187,22 +187,22 @@
       <small>Source: <a href='https://github.com/greta-dev/greta/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div id="greta-0319000-development-version" class="section level1">
-<h1 class="page-header" data-toc-text="0.3.1.9000">
-<a href="#greta-0319000-development-version" class="anchor"></a>greta 0.3.1.9000 (development version)<small> Unreleased </small>
+    <div id="greta-040-2021-11-26" class="section level1">
+<h1 class="page-header" data-toc-text="0.4.0">
+<a href="#greta-040-2021-11-26" class="anchor"></a>greta 0.4.0 (2021-11-26)<small> Unreleased </small>
 </h1>
 <div id="fixes" class="section level2">
 <h2 class="hasAnchor">
 <a href="#fixes" class="anchor"></a>Fixes:</h2>
 <ul>
 <li><p>head and tail S3 methods for <code>greta_array</code> are now consistent with head and tail methods for R versions 3 and 4 (<a href="https://github.com/greta-dev/greta/issues/384"><a href='https://github.com/greta-dev/greta/issues/384'>#384</a></a>).</p></li>
-<li><p>greta_mcmc_list objects (returned by mcmc()) are now no longer modified by operations (like code::gelman.diag()).</p></li>
+<li><p><code>greta_mcmc_list</code> objects (returned by <code><a href="../reference/inference.html">mcmc()</a></code>) are now no longer modified by operations (like code::gelman.diag()).</p></li>
 <li><p>joint distributions of uniform variables now have the correct constraints when sampling (<a href='https://github.com/greta-dev/greta/issues/377'>#377</a>).</p></li>
 <li><p>array-scalar dispatch with 3D arrays is now less buggy (<a href='https://github.com/greta-dev/greta/issues/298'>#298</a>).</p></li>
 <li><p>greta now provides R versions of all of R’s primitive functions (I think), to prevent them from silently not executing (<a href='https://github.com/greta-dev/greta/issues/317'>#317</a>).</p></li>
 <li><p>Uses <code>Sys.unsetenv("RETICULATE_PYTHON")</code> in <code>.onload</code> on package startup, to prevent an issue introduced with the latest version of RStudio where they do not find the current version of RStudio. See <a href="https://github.com/greta-dev/greta/issues/444"><a href='https://github.com/greta-dev/greta/issues/444'>#444</a></a> for more details.</p></li>
 <li><p>Internal change to code to ensure <code>future</code> continues to support parallelisation of chains. See <a href="https://github.com/greta-dev/greta/issues/447"><a href='https://github.com/greta-dev/greta/issues/447'>#447</a></a> for more details.</p></li>
-<li><p>depend on <code>future</code> version 1.22.1, <code>tensorflow</code> (the R package) 2.7.0, and <code>parallelly</code> 1.29.0.</p></li>
+<li><p><code>greta</code> now depends on <code>future</code> version 1.22.1, <code>tensorflow</code> (the R package) 2.7.0, and <code>parallelly</code> 1.29.0. This should see no changes on the user side.</p></li>
 </ul>
 </div>
 <div id="api-changes" class="section level2">
