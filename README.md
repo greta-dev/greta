@@ -42,7 +42,7 @@ devtools::install_github("greta-dev/greta")
 [![Codecov test coverage](https://codecov.io/gh/greta-dev/greta/branch/master/graph/badge.svg)](https://app.codecov.io/gh/greta-dev/greta?branch=master)
 [![R-CMD-check](https://github.com/greta-dev/greta/workflows/R-CMD-check/badge.svg)](https://github.com/greta-dev/greta/actions)
 [![cran
-version](http://www.r-pkg.org/badges/version/greta)](https://cran.rstudio.com/web/packages/greta/)
+version](http://www.r-pkg.org/badges/version/greta)](https://CRAN.R-project.org/package=greta)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![doi](https://zenodo.org/badge/73758247.svg)](https://zenodo.org/badge/latestdoi/73758247)
 [![joss](https://joss.theoj.org/papers/10.21105/joss.01601/status.svg)](https://joss.theoj.org/papers/10.21105/joss.01601)
