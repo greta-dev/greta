@@ -1,10 +1,10 @@
-# greta 0.3.1.9000 (development version)
+# greta 0.4.0 (2021-11-26)
 
 ## Fixes:
 
 * head and tail S3 methods for `greta_array` are now consistent with head and tail methods for R versions 3 and 4 ([#384](https://github.com/greta-dev/greta/issues/384)).
 
-* greta_mcmc_list objects (returned by mcmc()) are now no longer modified by operations (like code::gelman.diag()). 
+* `greta_mcmc_list` objects (returned by `mcmc()`) are now no longer modified by operations (like code::gelman.diag()). 
 
 * joint distributions of uniform variables now have the correct constraints when sampling (#377).
 
@@ -18,7 +18,7 @@
   
 * Internal change to code to ensure `future` continues to support parallelisation of chains. See [#447](https://github.com/greta-dev/greta/issues/447) for more details.
 
-* depend on `future` version 1.22.1, `tensorflow` (the R package) 2.7.0, and `parallelly` 1.29.0.
+* `greta` now depends on `future` version 1.22.1, `tensorflow` (the R package) 2.7.0, and `parallelly` 1.29.0. This should see no changes on the user side.
 
 ## API changes:
 
