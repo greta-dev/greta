@@ -9,7 +9,7 @@
 #'   [SciPy
 #'    optimiser docs](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html) or the
 #'   [TensorFlow
-#'    optimiser docs](https://www.tensorflow.org/api_docs/python/tf/contrib/opt).
+#'    optimiser docs](https://www.tensorflow.org/versions/r1.15/api_docs/python/tf/contrib).
 #'
 #' @details The optimisers `powell()`, `cg()`, `newton_cg()`,
 #'   `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()` are
