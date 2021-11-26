@@ -256,7 +256,7 @@ expand_to_batch <- function(x, y) {
 
 # does this tensor have a batch dimension (of unknown size) as its first
 # dimension?
-has_batch <- function(x) is.null(dim(x)[[1]])
+has_batch <- function(x) is.na(dim(x)[1])
 
 # given a list of tensors, if none or all of them have a batch dimension, return
 # the list. If any (but not all) of them has a batch dimension, tile the

@@ -18,6 +18,8 @@
   
 * Internal change to code to ensure `future` continues to support parallelisation of chains. See [#447](https://github.com/greta-dev/greta/issues/447) for more details.
 
+* depend on `future` version 1.22.1, `tensorflow` (the R package) 2.7.0, and `parallelly` 1.29.0.
+
 ## API changes:
 
 * Now depends on R >= 3.1.0 ([#386](https://github.com/greta-dev/greta/issues/386))

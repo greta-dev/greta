@@ -28,7 +28,7 @@ Authors@R: c(
 Description: Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'.
   greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on.
   See the website for more information, including tutorials, examples, package documentation, and the greta forum.
-License: Apache License (>= 2) + file LICENSE
+License: Apache License (>= 2)
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
@@ -86,18 +86,17 @@ Collate:
 Imports:
     abind,
     callr,
-    yesno,
     glue,
     cli (>= 3.0.0),
     coda,
     methods,
-    future (>= 1.22.0),
+    future (>= 1.22.1),
     progress (>= 1.2.0),
     R6,
     reticulate (>= 1.19.0),
-    tensorflow (>= 1.13.0),
+    tensorflow (>= 2.7.0),
     yesno,
-    parallelly
+    parallelly (>= 1.29.0)
 Suggests:
     bayesplot,
     DiagrammeR,

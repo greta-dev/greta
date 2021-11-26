@@ -308,13 +308,13 @@ tf_kronecker <- function(x, y, tf_fun_name) {
 
   # expand dimensions of tensors to allow direct multiplication for kronecker
   # prod
-  x_rsh <- tf$reshape(x, shape(-1, dims[1], 1L, dims[2], 1L))
-  y_rsh <- tf$reshape(y, shape(-1, 1L, dims[3], 1L, dims[4]))
+  x_rsh <- tf$reshape(x, tensorflow::as_tensor(shape(-1, dims[1], 1L, dims[2], 1L)))
+  y_rsh <- tf$reshape(y, tensorflow::as_tensor(shape(-1, 1L, dims[3], 1L, dims[4])))
 
   # multiply tensors and reshape with appropriate dimensions
   z <- tf_function(x_rsh, y_rsh)
   shape_out <- shape(-1, dims[1] * dims[3], dims[2] * dims[4])
-  tensor_out <- tf$reshape(z, shape_out)
+  tensor_out <- tf$reshape(z, tensorflow::as_tensor(shape_out))
 
   tensor_out
 }
@@ -431,14 +431,14 @@ tf_imultilogit <- function(x) {
 tf_extract <- function(x, nelem, index, dims_out) {
 
   # flatten tensor, gather using index, reshape to output dimension
-  tensor_in_flat <- tf$reshape(x, shape(-1, nelem))
+  tensor_in_flat <- tf$reshape(x, tensorflow::as_tensor(shape(-1, nelem)))
   tf_index <- tf$constant(as.integer(index), dtype = tf$int32)
   tensor_out_flat <- tf$gather(tensor_in_flat, tf_index, axis = 1L)
 
   # reshape, handling unknown dimensions even when the output has 0-dimension
   # (which prevents us from just using -1 on the first dimension)
   batch_size <- tf$shape(x)[[0]]
-  shape_list <- c(list(batch_size), to_shape(dims_out))
+  shape_list <- c(list(batch_size), as.integer(to_shape(dims_out)))
   shape_out <- tf$stack(shape_list)
   tensor_out <- tf$reshape(tensor_out_flat, shape_out)
   tensor_out
@@ -465,14 +465,14 @@ tf_recombine <- function(ref, index, updates) {
   keep_idx <- which(runs$values == 0)
   keep_list <- lapply(keep_idx, function(i) {
     idx <- starts_old[i] + 0:(runs$lengths[i] - 1) - 1
-    tf$reshape(ref[, idx, ], shape(-1, length(idx), 1))
+    tf$reshape(ref[, idx, ], tensorflow::as_tensor(shape(-1, length(idx), 1)))
   })
 
   run_id <- runs$values[runs$values != 0]
   update_idx <- match(run_id, runs$values)
   # get them in  increasing order
   update_list <- lapply(run_id, function(i) {
-    tf$reshape(updates[, i - 1, ], shape(-1, 1, 1))
+    tf$reshape(updates[, i - 1, ], tensorflow::as_tensor(shape(-1, 1, 1)))
   })
 
   # combine them
@@ -491,7 +491,7 @@ tf_recombine <- function(ref, index, updates) {
 tf_flatten <- function(x, extra_ones = 0) {
   nelem <- prod(unlist(dim(x)[-1]))
   out_dim <- c(-1, nelem, rep(1, extra_ones))
-  tf$reshape(x, to_shape(out_dim))
+  tf$reshape(x, tensorflow::as_tensor(to_shape(out_dim)))
 }
 
 # replace elements in a tensor with another tensor
@@ -511,7 +511,7 @@ tf_replace <- function(x, replacement, index, dims) {
   # reshape the result
   result <- tf$reshape(
     result_flat,
-    to_shape(c(-1, dims))
+    tensorflow::as_tensor(to_shape(c(-1, dims)))
   )
   result
 }
