@@ -85,7 +85,7 @@ Collate:
 Imports:
     abind,
     callr,
-    glue,
+    glue (>= 1.5.1),
     cli (>= 3.0.0),
     coda,
     methods,
