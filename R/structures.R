@@ -57,6 +57,7 @@ ones <- function(...) {
 #' @export
 #' @rdname structures
 greta_array <- function(data = 0, dim = length(data)) {
+  check_tf_version("error")
   UseMethod("greta_array")
 }
 
