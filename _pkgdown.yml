@@ -1,13 +1,13 @@
+url: https://greta-stats.org
+
 template:
-  path: inst/pkgdown/templates
-  assets: inst/pkgdown/assets
+  bootstrap: 5
+  package: greta.pkgdown
   default_assets: false
   params:
     docsearch:
       api_key: fa1406e0044eae29be11408a723039e7
       index_name: greta
-
-url: https://greta-stats.org
 
 reference:
   - title: creating greta arrays
@@ -87,4 +87,4 @@ navbar:
       href: https://forum.greta-stats.org
     github:
       icon: fa-lg fa-github
-      href: https://github.com/greta-dev/greta 
+      href: https://github.com/greta-dev/greta
