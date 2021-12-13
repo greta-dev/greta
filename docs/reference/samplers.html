@@ -42,7 +42,7 @@
 
 <meta property="og:title" content="MCMC samplers — samplers" />
 <meta property="og:description" content="Functions to set up MCMC samplers and change the starting values
-  of their parameters, for use in mcmc()." />
+of their parameters, for use in mcmc()." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -180,7 +180,7 @@
 
     <div class="ref-description">
     <p>Functions to set up MCMC samplers and change the starting values
-  of their parameters, for use in <code><a href='inference.html'>mcmc</a>()</code>.</p>
+of their parameters, for use in <code><a href='inference.html'>mcmc()</a></code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>hmc</span>(<span class='kw'>Lmin</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>Lmax</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>diag_sd</span> <span class='kw'>=</span> <span class='fl'>1</span>)
@@ -222,25 +222,25 @@ algorithm used to adapt the size of the slice</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a <code>sampler</code> object that can be passed to <code><a href='inference.html'>mcmc</a></code>.</p>
+    <p>a <code>sampler</code> object that can be passed to <code><a href='inference.html'>mcmc()</a></code>.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>During the warmup iterations of <code>mcmc</code>, some of these
-  sampler parameters will be tuned to improve the efficiency of the sampler,
-  so the values provided here are used as starting values.</p>
+sampler parameters will be tuned to improve the efficiency of the sampler,
+so the values provided here are used as starting values.</p>
 <p>For <code>hmc()</code>, the number of leapfrog steps at each iteration is
-  selected uniformly at random from between <code>Lmin</code> and <code>Lmax</code>.
-  <code>diag_sd</code> is used to rescale the parameter space to make it more
-  uniform, and make sampling more efficient.</p>
+selected uniformly at random from between <code>Lmin</code> and <code>Lmax</code>.
+<code>diag_sd</code> is used to rescale the parameter space to make it more
+uniform, and make sampling more efficient.</p>
 <p><code>rwmh()</code> creates a random walk Metropolis-Hastings sampler;  a
-  a gradient-free sampling algorithm. The algorithm involves a proposal
-  generating step `proposal_state = current_state + perturb` by a random
-  perturbation, followed by Metropolis-Hastings accept/reject step. The class
-  is implemented for uniform and normal proposals.</p>
+a gradient-free sampling algorithm. The algorithm involves a proposal
+generating step <code><a href='https://www.rdocumentation.org/packages/base/topics/assignOps'>proposal_state = current_state + perturb</a></code> by a random
+perturbation, followed by Metropolis-Hastings accept/reject step. The class
+is implemented for uniform and normal proposals.</p>
 <p><code>slice()</code> implements a multivariate slice sampling algorithm.
-  Currently this algorithm can only be used with single-precision models (set
-  using the <code>precision</code> argument to <code><a href='model.html'>model</a></code>). The parameter
-  <code>max_doublings</code> is not tuned during warmup.</p>
+Currently this algorithm can only be used with single-precision models (set
+using the <code>precision</code> argument to <code><a href='model.html'>model()</a></code>). The parameter
+<code>max_doublings</code> is not tuned during warmup.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>extract, replace and combine greta arrays — extract-replace-combine • greta</title>
+<title>Simulate Responses From <code>greta_model</code> Object — simulate.greta_model • greta</title>
 
 <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
 
@@ -40,9 +40,9 @@
 
 
 
-<meta property="og:title" content="extract, replace and combine greta arrays — extract-replace-combine" />
-<meta property="og:description" content="Generic methods to extract and replace elements of greta arrays,
-or to combine greta arrays." />
+<meta property="og:title" content="Simulate Responses From <code>greta_model</code> Object — simulate.greta_model" />
+<meta property="og:description" content="Simulate values of all named greta arrays associated with a
+greta model from the model priors, including the response variable." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -173,115 +173,88 @@ or to combine greta arrays." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>extract, replace and combine greta arrays</h1>
+    <h1>Simulate Responses From <code>greta_model</code> Object</h1>
     
-    <div class="hidden name"><code>extract-replace-combine.Rd</code></div>
+    <div class="hidden name"><code>simulate.greta_model.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Generic methods to extract and replace elements of greta arrays,
-or to combine greta arrays.</p>
+    <p>Simulate values of all named greta arrays associated with a
+greta model from the model priors, including the response variable.</p>
     </div>
 
+    <pre class="usage"><span class='co'># S3 method for greta_model</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/simulate'>simulate</a></span>(<span class='no'>object</span>, <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"double"</span>, <span class='st'>"single"</span>), <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>a greta array</p></td>
+      <th>object</th>
+      <td><p>a <code><a href='model.html'>greta_model()</a></code> object</p></td>
     </tr>
     <tr>
-      <th>i, j</th>
-      <td><p>indices specifying elements to extract or replace</p></td>
+      <th>nsim</th>
+      <td><p>positive integer scalar - the number of responses to simulate</p></td>
     </tr>
     <tr>
-      <th>n</th>
-      <td><p>a single integer, as in <code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>utils::head()</a></code> and
-<code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>utils::tail()</a></code></p></td>
+      <th>seed</th>
+      <td><p>an optional seed to be used in set.seed immediately before the
+simulation so as to generate a reproducible sample</p></td>
     </tr>
     <tr>
-      <th>nrow, ncol</th>
-      <td><p>optional dimensions for the resulting greta array when x is
-not a matrix.</p></td>
-    </tr>
-    <tr>
-      <th>value</th>
-      <td><p>for <code>[&lt;-</code> a greta array to replace elements, for
-<code>dim&lt;-</code> either NULL or a numeric vector of dimensions</p></td>
+      <th>precision</th>
+      <td><p>the floating point precision to use when calculating values.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>either further indices specifying elements to extract or replace
-(<code>[</code>), or multiple greta arrays to combine (<code>cbind()</code>,
-<code>rbind()</code> &amp; <code>c()</code>), or additional arguments (<code>rep()</code>,
-<code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>head()</a></code>, <code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>tail()</a></code>)</p></td>
-    </tr>
-    <tr>
-      <th>drop, recursive</th>
-      <td><p>generic arguments that are ignored for greta arrays</p></td>
+      <td><p>optional additional arguments, none are used at present</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A named list of vectors, matrices or arrays containing independent
+samples of the greta arrays associated with the model. The number of
+samples will be prepended as the first dimension of the greta array, so
+that a vector of samples is returned for each scalar greta array, and a
+matrix is returned for each vector greta array, etc.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p><code><a href='overloaded.html'>diag()</a></code> can be used to extract or replace the diagonal part of
-a square and two-dimensional greta array, but it cannot be used to create a
-matrix-like greta array from a scalar or vector-like greta array. A static
-diagonal matrix can always be created with e.g. <code><a href='overloaded.html'>diag(3)</a></code>, and then
-converted into a greta array.</p>
-<p>Also note that since R 4.0.0, <code>head</code> and <code>tail</code> methods for arrays changed
-to print a vector rather than maintain the array structure. The <code>greta</code>
-package supports both methods, and will do so based on which version of R
-you are using.</p>
-    <h2 class="hasAnchor" id="usage"><a class="anchor" href="#usage"></a>Usage</h2>
-
-    <p></p><pre>
-# extract
-x[i]
-x[i, j, ..., drop = FALSE]
-head(x, n = 6L, ...)
-tail(x, n = 6L, ...)
-diag(x, nrow, ncol)
-    # replace
-x[i] &lt;- value
-x[i, j, ...] &lt;- value
-diag(x) &lt;- value
-    # combine
-cbind(...)
-rbind(...)
-abind(...)
-c(..., recursive = FALSE)
-rep(x, times, ..., recursive = FALSE)
-    # get and set dimensions
-length(x)
-dim(x)
-dim(x) &lt;- value
-</pre>
+    <p>This is essentially a wrapper around <code><a href='calculate.html'>calculate()</a></code> that
+finds all relevant greta arrays. See that function for more functionality,
+including simulation conditional on fixed values or posterior samples.</p>
+<p>To simulate values of the response variable, it must be both a named object
+(in the calling environment) and be a greta array. If you don't see it
+showing up in the output, you may need to use <code>as_data</code> to convert it
+to a greta array before defining the model.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fl'>1</span>:<span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
+<span class='co'># build a greta model</span>
+<span class='no'>n</span> <span class='kw'>&lt;-</span> <span class='fl'>10</span>
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>n</span>)
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='no'>y</span>)
 
-<span class='co'># extract and replace</span>
-<span class='no'>x</span>[<span class='fl'>1</span>:<span class='fl'>3</span>, ]
-<span class='no'>x</span>[, <span class='fl'>2</span>:<span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>9</span>
-<span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
-<span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>greta</span>)
+<span class='no'>sd</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>2</span>)
+<span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='no'>n</span>)
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>y</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sd</span>)
+<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>mu</span>, <span class='no'>sd</span>)
 
-<span class='co'># combine</span>
-<span class='fu'>cbind</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='no'>x</span>[, <span class='fl'>1</span>])
-<span class='fu'>rbind</span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ])
-<span class='fu'><a href='overloaded.html'>abind</a></span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ], <span class='kw'>along</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='fu'>c</span>(<span class='no'>x</span>[, <span class='fl'>1</span>], <span class='no'>x</span>)
-<span class='fu'>rep</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>3</span>)
-<span class='co'># }</span></pre>
+<span class='co'># simulate one random draw of y, mu and sd from the model prior:</span>
+<span class='no'>sims</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/simulate'>simulate</a></span>(<span class='no'>m</span>)
+
+<span class='co'># 100 simulations of y, mu and sd</span>
+<span class='no'>sims</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/simulate'>simulate</a></span>(<span class='no'>m</span>, <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='co'># }</span><div class='input'># nolint start
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
       <li><a href="#details">Details</a></li>
-      <li><a href="#usage">Usage</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 

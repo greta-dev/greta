@@ -6,7 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>extract, replace and combine greta arrays — extract-replace-combine • greta</title>
+<title>Retrieve python installation or error details
+
+These functions retrieve installation or error information output by python
+when running <code>install_miniconda()</code>, <code>conda_create()</code>, <code>conda_install()</code>, or
+when encountering a TensorFlow numerical problem. — greta_notes_install_miniconda • greta</title>
 
 <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
 
@@ -40,9 +44,15 @@
 
 
 
-<meta property="og:title" content="extract, replace and combine greta arrays — extract-replace-combine" />
-<meta property="og:description" content="Generic methods to extract and replace elements of greta arrays,
-or to combine greta arrays." />
+<meta property="og:title" content="Retrieve python installation or error details
+
+These functions retrieve installation or error information output by python
+when running <code>install_miniconda()</code>, <code>conda_create()</code>, <code>conda_install()</code>, or
+when encountering a TensorFlow numerical problem. — greta_notes_install_miniconda" />
+<meta property="og:description" content="Retrieve python installation or error details
+These functions retrieve installation or error information output by python
+when running install_miniconda(), conda_create(), conda_install(), or
+when encountering a TensorFlow numerical problem." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -173,115 +183,43 @@ or to combine greta arrays." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>extract, replace and combine greta arrays</h1>
+    <h1>Retrieve python installation or error details
+
+These functions retrieve installation or error information output by python
+when running <code>install_miniconda()</code>, <code>conda_create()</code>, <code>conda_install()</code>, or
+when encountering a TensorFlow numerical problem.</h1>
     
-    <div class="hidden name"><code>extract-replace-combine.Rd</code></div>
+    <div class="hidden name"><code>stash-notes.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Generic methods to extract and replace elements of greta arrays,
-or to combine greta arrays.</p>
+    <p>Retrieve python installation or error details</p>
+<p>These functions retrieve installation or error information output by python
+when running <code>install_miniconda()</code>, <code>conda_create()</code>, <code>conda_install()</code>, or
+when encountering a TensorFlow numerical problem.</p>
     </div>
 
+    <pre class="usage"><span class='fu'>greta_notes_install_miniconda</span>()
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>x</th>
-      <td><p>a greta array</p></td>
-    </tr>
-    <tr>
-      <th>i, j</th>
-      <td><p>indices specifying elements to extract or replace</p></td>
-    </tr>
-    <tr>
-      <th>n</th>
-      <td><p>a single integer, as in <code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>utils::head()</a></code> and
-<code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>utils::tail()</a></code></p></td>
-    </tr>
-    <tr>
-      <th>nrow, ncol</th>
-      <td><p>optional dimensions for the resulting greta array when x is
-not a matrix.</p></td>
-    </tr>
-    <tr>
-      <th>value</th>
-      <td><p>for <code>[&lt;-</code> a greta array to replace elements, for
-<code>dim&lt;-</code> either NULL or a numeric vector of dimensions</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>either further indices specifying elements to extract or replace
-(<code>[</code>), or multiple greta arrays to combine (<code>cbind()</code>,
-<code>rbind()</code> &amp; <code>c()</code>), or additional arguments (<code>rep()</code>,
-<code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>head()</a></code>, <code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>tail()</a></code>)</p></td>
-    </tr>
-    <tr>
-      <th>drop, recursive</th>
-      <td><p>generic arguments that are ignored for greta arrays</p></td>
-    </tr>
-    </table>
+<span class='fu'>greta_notes_conda_create</span>()
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+<span class='fu'>greta_notes_conda_install</span>()
 
-    <p><code><a href='overloaded.html'>diag()</a></code> can be used to extract or replace the diagonal part of
-a square and two-dimensional greta array, but it cannot be used to create a
-matrix-like greta array from a scalar or vector-like greta array. A static
-diagonal matrix can always be created with e.g. <code><a href='overloaded.html'>diag(3)</a></code>, and then
-converted into a greta array.</p>
-<p>Also note that since R 4.0.0, <code>head</code> and <code>tail</code> methods for arrays changed
-to print a vector rather than maintain the array structure. The <code>greta</code>
-package supports both methods, and will do so based on which version of R
-you are using.</p>
-    <h2 class="hasAnchor" id="usage"><a class="anchor" href="#usage"></a>Usage</h2>
+<span class='fu'>greta_notes_tf_num_error</span>()</pre>
 
-    <p></p><pre>
-# extract
-x[i]
-x[i, j, ..., drop = FALSE]
-head(x, n = 6L, ...)
-tail(x, n = 6L, ...)
-diag(x, nrow, ncol)
-    # replace
-x[i] &lt;- value
-x[i, j, ...] &lt;- value
-diag(x) &lt;- value
-    # combine
-cbind(...)
-rbind(...)
-abind(...)
-c(..., recursive = FALSE)
-rep(x, times, ..., recursive = FALSE)
-    # get and set dimensions
-length(x)
-dim(x)
-dim(x) &lt;- value
-</pre>
+
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fl'>1</span>:<span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
-
-<span class='co'># extract and replace</span>
-<span class='no'>x</span>[<span class='fl'>1</span>:<span class='fl'>3</span>, ]
-<span class='no'>x</span>[, <span class='fl'>2</span>:<span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>9</span>
-<span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
-<span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
-
-<span class='co'># combine</span>
-<span class='fu'>cbind</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='no'>x</span>[, <span class='fl'>1</span>])
-<span class='fu'>rbind</span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ])
-<span class='fu'><a href='overloaded.html'>abind</a></span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ], <span class='kw'>along</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='fu'>c</span>(<span class='no'>x</span>[, <span class='fl'>1</span>], <span class='no'>x</span>)
-<span class='fu'>rep</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='fu'>greta_notes_install_miniconda</span>()
+<span class='fu'>greta_notes_conda_create</span>()
+<span class='fu'>greta_notes_conda_install</span>()
+<span class='fu'>greta_notes_tf_num_error</span>()
+<span class='fu'>greta_notes_tf_error</span>()
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#details">Details</a></li>
-      <li><a href="#usage">Usage</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 

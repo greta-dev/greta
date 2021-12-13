@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>extract, replace and combine greta arrays — extract-replace-combine • greta</title>
+<title>Install Python dependencies for greta — install_greta_deps • greta</title>
 
 <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
 
@@ -40,9 +40,12 @@
 
 
 
-<meta property="og:title" content="extract, replace and combine greta arrays — extract-replace-combine" />
-<meta property="og:description" content="Generic methods to extract and replace elements of greta arrays,
-or to combine greta arrays." />
+<meta property="og:title" content="Install Python dependencies for greta — install_greta_deps" />
+<meta property="og:description" content="This is a helper function to install Python dependencies needed. This
+includes Tensorflow version 1.14.0, Tensorflow Probability 0.7.0, and
+numpy version 1.16.4. These Python modules will be installed into a
+virtual or conda environment, named &quot;greta-env&quot;. Note that &quot;virtualenv&quot; is
+not available on Windows." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -173,115 +176,73 @@ or to combine greta arrays." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>extract, replace and combine greta arrays</h1>
+    <h1>Install Python dependencies for greta</h1>
     
-    <div class="hidden name"><code>extract-replace-combine.Rd</code></div>
+    <div class="hidden name"><code>install_greta_deps.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Generic methods to extract and replace elements of greta arrays,
-or to combine greta arrays.</p>
+    <p>This is a helper function to install Python dependencies needed. This
+includes Tensorflow version 1.14.0, Tensorflow Probability 0.7.0, and
+numpy version 1.16.4. These Python modules will be installed into a
+virtual or conda environment, named "greta-env". Note that "virtualenv" is
+not available on Windows.</p>
     </div>
 
+    <pre class="usage"><span class='fu'>install_greta_deps</span>(
+  <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"auto"</span>, <span class='st'>"virtualenv"</span>, <span class='st'>"conda"</span>),
+  <span class='kw'>conda</span> <span class='kw'>=</span> <span class='st'>"auto"</span>,
+  <span class='kw'>timeout</span> <span class='kw'>=</span> <span class='fl'>5</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>a greta array</p></td>
+      <th>method</th>
+      <td><p>Installation method ("virtualenv" or "conda")</p></td>
     </tr>
     <tr>
-      <th>i, j</th>
-      <td><p>indices specifying elements to extract or replace</p></td>
+      <th>conda</th>
+      <td><p>The path to a <code>conda</code> executable. Use <code>"auto"</code> to allow
+<code>reticulate</code> to automatically find an appropriate <code>conda</code> binary. See
+<strong>Finding Conda</strong> for more details.</p></td>
     </tr>
     <tr>
-      <th>n</th>
-      <td><p>a single integer, as in <code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>utils::head()</a></code> and
-<code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>utils::tail()</a></code></p></td>
-    </tr>
-    <tr>
-      <th>nrow, ncol</th>
-      <td><p>optional dimensions for the resulting greta array when x is
-not a matrix.</p></td>
-    </tr>
-    <tr>
-      <th>value</th>
-      <td><p>for <code>[&lt;-</code> a greta array to replace elements, for
-<code>dim&lt;-</code> either NULL or a numeric vector of dimensions</p></td>
+      <th>timeout</th>
+      <td><p>maximum time in minutes until the installation for each
+installation component times out and exits. Default is 5 minutes per
+installation component.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>either further indices specifying elements to extract or replace
-(<code>[</code>), or multiple greta arrays to combine (<code>cbind()</code>,
-<code>rbind()</code> &amp; <code>c()</code>), or additional arguments (<code>rep()</code>,
-<code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>head()</a></code>, <code><a href='https://www.rdocumentation.org/packages/utils/topics/head'>tail()</a></code>)</p></td>
-    </tr>
-    <tr>
-      <th>drop, recursive</th>
-      <td><p>generic arguments that are ignored for greta arrays</p></td>
+      <td><p>Optional arguments, reserved for future expansion.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
-    <p><code><a href='overloaded.html'>diag()</a></code> can be used to extract or replace the diagonal part of
-a square and two-dimensional greta array, but it cannot be used to create a
-matrix-like greta array from a scalar or vector-like greta array. A static
-diagonal matrix can always be created with e.g. <code><a href='overloaded.html'>diag(3)</a></code>, and then
-converted into a greta array.</p>
-<p>Also note that since R 4.0.0, <code>head</code> and <code>tail</code> methods for arrays changed
-to print a vector rather than maintain the array structure. The <code>greta</code>
-package supports both methods, and will do so based on which version of R
-you are using.</p>
-    <h2 class="hasAnchor" id="usage"><a class="anchor" href="#usage"></a>Usage</h2>
-
-    <p></p><pre>
-# extract
-x[i]
-x[i, j, ..., drop = FALSE]
-head(x, n = 6L, ...)
-tail(x, n = 6L, ...)
-diag(x, nrow, ncol)
-    # replace
-x[i] &lt;- value
-x[i, j, ...] &lt;- value
-diag(x) &lt;- value
-    # combine
-cbind(...)
-rbind(...)
-abind(...)
-c(..., recursive = FALSE)
-rep(x, times, ..., recursive = FALSE)
-    # get and set dimensions
-length(x)
-dim(x)
-dim(x) &lt;- value
-</pre>
+    <p>This will automatically install Miniconda (a minimal version of the
+Anaconda scientific software management system), create a 'conda'
+environment for greta named 'greta-env' with required python and python
+package versions, and forcibly switch over to using that conda environment.</p>
+<p>If you don't want to use conda or the "greta-env" conda environment, you
+can install these specific versions of tensorflow (version 1.14.0), and
+tensorflow-probability (version 0.7.0), and ensure that the python
+environment that is initialised in this R session has these versions
+installed. This is now always straightforward, so we recommend installing
+the python packages using <code>install_greta_deps()</code> for most users.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fl'>1</span>:<span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
-
-<span class='co'># extract and replace</span>
-<span class='no'>x</span>[<span class='fl'>1</span>:<span class='fl'>3</span>, ]
-<span class='no'>x</span>[, <span class='fl'>2</span>:<span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>9</span>
-<span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
-<span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
-
-<span class='co'># combine</span>
-<span class='fu'>cbind</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='no'>x</span>[, <span class='fl'>1</span>])
-<span class='fu'>rbind</span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ])
-<span class='fu'><a href='overloaded.html'>abind</a></span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ], <span class='kw'>along</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='fu'>c</span>(<span class='no'>x</span>[, <span class='fl'>1</span>], <span class='no'>x</span>)
-<span class='fu'>rep</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='fu'>install_greta_deps</span>()
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#details">Details</a></li>
-      <li><a href="#usage">Usage</a></li>
+      <li><a href="#note">Note</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 

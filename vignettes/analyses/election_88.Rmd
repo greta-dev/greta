@@ -237,7 +237,7 @@ will assign the transformation to a local variable first.
 
 ```{r}
 prob <- ilogit(b)
-as_probs <- calculate(prob, draws)
+as_probs <- calculate(prob, values = draws)
 ```
 
 And now a plot.
