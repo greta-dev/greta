@@ -45,13 +45,12 @@ reference:
 
 navbar:
   structure:
-    left: [get_started, docs, examples, analyses, more, FAQ]
+    left: [get_started, docs, examples, analyses, more, news, FAQ]
     right: [forum, twitter, github]
   components:
     home: ~
     reference: ~
     articles: ~
-    news: ~
     get_started:
       text: get started
       href: articles/get_started.html
@@ -61,6 +60,10 @@ navbar:
     FAQ:
       text: FAQ
       href: articles/faq.html
+    news:
+     releases:
+     - text: "greta 0.4.0.9000"
+       href: "tbd"
     analyses:
       text: analyses
       menu:
