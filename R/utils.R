@@ -1,29 +1,5 @@
 # utility functions
 
-# create a named list
-module <- function(..., sort = TRUE) {
-  dots <- list(...)
-  names <- names(dots)
-
-  # guess names from call
-  cl <- match.call()
-  nm <- as.character(as.list(cl)[-1])
-
-  if (is.null(names)) {
-    names(dots) <- nm
-  } else {
-    blank_names <- names == ""
-    names[blank_names] <- nm[blank_names]
-    names(dots) <- names
-  }
-
-  if (sort) {
-    dots <- dots[order(names(dots))]
-  }
-
-  dots
-}
-
 # find out whether the usr has conda installed and visible
 #' @importFrom reticulate conda_binary
 have_conda <- function() {

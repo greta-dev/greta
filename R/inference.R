@@ -4,16 +4,6 @@
 #'   MCMC or likelihood/posterior optimisation.
 NULL
 
-
-# create an object stash in greta's namespace, to return traces to the user when
-# they abort a run
-greta_stash <- new.env()
-greta_stash$python_has_been_initialised <- FALSE
-greta_stash$numerical_messages <- c(
-  "is not invertible",
-  "Cholesky decomposition was not successful"
-)
-
 #' @rdname inference
 #' @export
 #' @importFrom stats rnorm runif
