@@ -58,6 +58,9 @@ navbar:
     examples:
       text: examples
       href: articles/example_models.html
+    FAQ:
+      text: FAQ
+      href: articles/faq.html
     analyses:
       text: analyses
       menu:
@@ -87,4 +90,4 @@ navbar:
       href: https://forum.greta-stats.org
     github:
       icon: fa-lg fa-github
-      href: https://github.com/greta-dev/greta 
+      href: https://github.com/greta-dev/greta
