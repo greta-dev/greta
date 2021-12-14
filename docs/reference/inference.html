@@ -42,7 +42,7 @@
 
 <meta property="og:title" content="statistical inference on greta models — inference" />
 <meta property="og:description" content="Carry out statistical inference on greta models by
-  MCMC or likelihood/posterior optimisation." />
+MCMC or likelihood/posterior optimisation." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -180,25 +180,48 @@
 
     <div class="ref-description">
     <p>Carry out statistical inference on greta models by
-  MCMC or likelihood/posterior optimisation.</p>
+MCMC or likelihood/posterior optimisation.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>mcmc</span>(<span class='no'>model</span>, <span class='kw'>sampler</span> <span class='kw'>=</span> <span class='fu'><a href='samplers.html'>hmc</a></span>(), <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>50</span>, <span class='kw'>one_by_one</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='fu'>initials</span>(),
-  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+    <pre class="usage"><span class='fu'>mcmc</span>(
+  <span class='no'>model</span>,
+  <span class='kw'>sampler</span> <span class='kw'>=</span> <span class='fu'><a href='samplers.html'>hmc</a></span>(),
+  <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
+  <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
+  <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>,
+  <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>50</span>,
+  <span class='kw'>one_by_one</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='fu'>initials</span>(),
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>
+)
 
 <span class='fu'>stashed_samples</span>()
 
-<span class='fu'>extra_samples</span>(<span class='no'>draws</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>50</span>, <span class='kw'>one_by_one</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='fu'>extra_samples</span>(
+  <span class='no'>draws</span>,
+  <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
+  <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>pb_update</span> <span class='kw'>=</span> <span class='fl'>50</span>,
+  <span class='kw'>one_by_one</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>
+)
 
 <span class='fu'>initials</span>(<span class='no'>...</span>)
 
-<span class='fu'>opt</span>(<span class='no'>model</span>, <span class='kw'>optimiser</span> <span class='kw'>=</span> <span class='fu'><a href='optimisers.html'>bfgs</a></span>(), <span class='kw'>max_iterations</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='fu'>initials</span>(), <span class='kw'>adjust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>hessian</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+<span class='fu'>opt</span>(
+  <span class='no'>model</span>,
+  <span class='kw'>optimiser</span> <span class='kw'>=</span> <span class='fu'><a href='optimisers.html'>bfgs</a></span>(),
+  <span class='kw'>max_iterations</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
+  <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='fu'>initials</span>(),
+  <span class='kw'>adjust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>hessian</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -210,7 +233,7 @@
     <tr>
       <th>sampler</th>
       <td><p>sampler used to draw values in MCMC. See
-<code><a href='samplers.html'>samplers</a></code> for options.</p></td>
+<code><a href='samplers.html'>samplers()</a></code> for options.</p></td>
     </tr>
     <tr>
       <th>n_samples</th>
@@ -280,7 +303,7 @@ initialised)</p></td>
     <tr>
       <th>optimiser</th>
       <td><p>an <code>optimiser</code> object giving the optimisation algorithm
-and parameters See <code><a href='optimisers.html'>optimisers</a></code>.</p></td>
+and parameters See <code><a href='optimisers.html'>optimisers()</a></code>.</p></td>
     </tr>
     <tr>
       <th>max_iterations</th>
@@ -308,93 +331,92 @@ Hessian arrays for the parameters</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p><code>mcmc</code>, <code>stashed_samples</code> &amp; <code>extra_samples</code> - a
-  <code>greta_mcmc_list</code> object that can be analysed using functions from the
-  coda package. This will contain mcmc samples of the greta arrays used to
-  create <code>model</code>.</p>
+<code>greta_mcmc_list</code> object that can be analysed using functions from the
+coda package. This will contain mcmc samples of the greta arrays used to
+create <code>model</code>.</p>
 <p><code>opt</code> - a list containing the following named elements:</p><ul>
 <li><p><code>par</code> a named list of the optimal values for the greta arrays
-    specified in <code>model</code></p></li>
+specified in <code>model</code></p></li>
 <li><p><code>value</code> the (unadjusted) negative log joint density of the
-    model at the parameters 'par'</p></li>
+model at the parameters 'par'</p></li>
 <li><p><code>iterations</code> the number of iterations taken by the optimiser</p></li>
 <li><p><code>convergence</code> an integer code, 0 indicates successful
-    completion, 1 indicates the iteration limit <code>max_iterations</code> had
-    been reached</p></li>
+completion, 1 indicates the iteration limit <code>max_iterations</code> had
+been reached</p></li>
 <li><p><code>hessian</code> (if <code><a href='https://www.rdocumentation.org/packages/base/topics/assignOps'>hessian = TRUE</a></code>) a named list of hessian
-    matrices/arrays for the parameters (w.r.t. <code>value</code>)</p></li>
+matrices/arrays for the parameters (w.r.t. <code>value</code>)</p></li>
 </ul>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>For <code>mcmc()</code> if <code><a href='https://www.rdocumentation.org/packages/base/topics/assignOps'>verbose = TRUE</a></code>, the progress bar shows
-  the number of iterations so far and the expected time to complete the phase
-  of model fitting (warmup or sampling). Occasionally, a proposed set of
-  parameters can cause numerical instability (I.e. the log density or its
-  gradient is <code>NA</code>, <code>Inf</code> or <code><a href='https://www.rdocumentation.org/packages/base/topics/Arithmetic'>-Inf</a></code>); normally because the log
-  joint density is so low that it can't be represented as a floating point
-  number. When this happens, the progress bar will also display the
-  proportion of proposals so far that were 'bad' (numerically unstable) and
-  therefore rejected. Some numerical instability during the warmup phase is
-  normal, but 'bad' samples during the sampling phase can lead to bias in
-  your posterior sample. If you only have a few bad samples (&lt;10\<!-- %), you can -->
-  usually resolve this with a longer warmup period or by manually defining
-  starting values to move the sampler into a more reasonable part of the
-  parameter space. If you have more samples than that, it may be that your
-  model is misspecified. You can often diagnose this by using
-  <code><a href='calculate.html'>calculate</a>()</code> to evaluate the values of greta arrays, given
-  fixed values of model parameters, and checking the results are what you
-  expect.</p>
+the number of iterations so far and the expected time to complete the phase
+of model fitting (warmup or sampling). Occasionally, a proposed set of
+parameters can cause numerical instability (I.e. the log density or its
+gradient is <code>NA</code>, <code>Inf</code> or <code><a href='https://www.rdocumentation.org/packages/base/topics/Arithmetic'>-Inf</a></code>); normally because the log
+joint density is so low that it can't be represented as a floating point
+number. When this happens, the progress bar will also display the
+proportion of proposals so far that were 'bad' (numerically unstable) and
+therefore rejected. Some numerical instability during the warmup phase is
+normal, but 'bad' samples during the sampling phase can lead to bias in
+your posterior sample. If you only have a few bad samples (&lt;10\%), you can
+usually resolve this with a longer warmup period or by manually defining
+starting values to move the sampler into a more reasonable part of the
+parameter space. If you have more samples than that, it may be that your
+model is misspecified. You can often diagnose this by using
+<code><a href='calculate.html'>calculate()</a></code> to evaluate the values of greta arrays, given
+fixed values of model parameters, and checking the results are what you
+expect.</p>
 <p>greta runs multiple chains simultaneously with a single sampler,
-  vectorising all operations across the chains. E.g. a scalar addition in
-  your model is computed as an elementwise vector addition (with vectors
-  having length <code>chains</code>), a vector addition is computed as a matrix
-  addition etc. TensorFlow is able to parallelise these operations, and this
-  approach reduced computational overheads, so this is the most efficient of
-  computing on multiple chains.</p>
+vectorising all operations across the chains. E.g. a scalar addition in
+your model is computed as an elementwise vector addition (with vectors
+having length <code>chains</code>), a vector addition is computed as a matrix
+addition etc. TensorFlow is able to parallelise these operations, and this
+approach reduced computational overheads, so this is the most efficient of
+computing on multiple chains.</p>
 <p>Multiple mcmc samplers (each of which can simultaneously run multiple
-  chains) can also be run in parallel by setting the execution plan with the
-  <code>future</code> package. Only <code>plan(multisession)</code> futures or
-  <code>plan(cluster)</code> futures that don't use fork clusters are allowed,
-  since forked processes conflict with TensorFlow's parallelism. Explicitly
-  parallelising chains on a local machine with <code>plan(multisession)</code> will
-  probably be slower than running multiple chains simultaneously in a single
-  sampler (with <code>plan(sequential)</code>, the default) because of the overhead
-  required to start new sessions. However, <code>plan(cluster)</code> can be used
-  to run chains on a cluster of machines on a local or remote network. See
-  <code><a href='https://www.rdocumentation.org/packages/future/topics/cluster'>future::cluster</a></code> for details, and the
-  <code>future.batchtools</code> package to set up plans on clusters with job
-  schedulers.</p>
+chains) can also be run in parallel by setting the execution plan with the
+<code>future</code> package. Only <code>plan(multisession)</code> futures or
+<code>plan(cluster)</code> futures that don't use fork clusters are allowed,
+since forked processes conflict with TensorFlow's parallelism. Explicitly
+parallelising chains on a local machine with <code>plan(multisession)</code> will
+probably be slower than running multiple chains simultaneously in a single
+sampler (with <code>plan(sequential)</code>, the default) because of the overhead
+required to start new sessions. However, <code>plan(cluster)</code> can be used
+to run chains on a cluster of machines on a local or remote network. See
+<code><a href='https://future.futureverse.org/reference/cluster.html'>future::cluster()</a></code> for details, and the
+<code>future.batchtools</code> package to set up plans on clusters with job
+schedulers.</p>
 <p>If <code><a href='https://www.rdocumentation.org/packages/base/topics/assignOps'>n_cores = NULL</a></code> and mcmc samplers are being run sequentially, each
-  sampler will be allowed to use all CPU cores (possibly to compute multiple
-  chains sequentially). If samplers are being run in parallel with the
-  <code>future</code> package, <code>n_cores</code> will be set so that <code>n_cores *
-  <a href='https://www.rdocumentation.org/packages/future/topics/nbrOfWorkers'>future::nbrOfWorkers</a></code> is less than the number
-  of CPU cores.</p>
+sampler will be allowed to use all CPU cores (possibly to compute multiple
+chains sequentially). If samplers are being run in parallel with the
+<code>future</code> package, <code>n_cores</code> will be set so that <code>n_cores * [future::nbrOfWorkers]</code> is less than the number
+of CPU cores.</p>
 <p>After carrying out mcmc on all the model parameters, <code>mcmc()</code>
-  calculates the values of (i.e. traces) the parameters of interest for each
-  of these samples, similarly to <code>[calculate]{calculate}</code>. Multiple
-  posterior samples can be traced simulataneously, though this can require
-  large amounts of memory for large models. As in <code>calculate</code>, the
-  argument <code>trace_batch_size</code> can be modified to trade-off speed against
-  memory usage.</p>
+calculates the values of (i.e. traces) the parameters of interest for each
+of these samples, similarly to <code><a href='calculate.html'>calculate()</a></code>. Multiple
+posterior samples can be traced simultaneously, though this can require
+large amounts of memory for large models. As in <code>calculate</code>, the
+argument <code>trace_batch_size</code> can be modified to trade-off speed against
+memory usage.</p>
 <p>If the sampler is aborted before finishing (and <code>future</code>
-  parallelism isn't being used), the samples collected so far can be
-  retrieved with <code>stashed_samples()</code>. Only samples from the sampling
-  phase will be returned.</p>
+parallelism isn't being used), the samples collected so far can be
+retrieved with <code>stashed_samples()</code>. Only samples from the sampling
+phase will be returned.</p>
 <p>Samples returned by <code>mcmc()</code> and <code>stashed_samples()</code> can
-  be added to with <code>extra_samples()</code>. This continues the chain from the
-  last value of the previous chain and uses the same sampler and model as was
-  used to generate the previous samples. It is not possible to change the
-  sampler or extend the warmup period.</p>
+be added to with <code>extra_samples()</code>. This continues the chain from the
+last value of the previous chain and uses the same sampler and model as was
+used to generate the previous samples. It is not possible to change the
+sampler or extend the warmup period.</p>
 <p>Because <code>opt()</code> acts on a list of greta arrays with possibly
-  varying dimension, the <code>par</code> and <code>hessian</code> objects returned by
-  <code>opt()</code> are named lists, rather than a vector (<code>par</code>) and a
-  matrix (<code>hessian</code>), as returned by <code><a href='https://www.rdocumentation.org/packages/stats/topics/optim'>optim()</a></code>.
-  Because greta arrays may not be vectors, the Hessians may not be matrices,
-  but could be higher-dimensional arrays. To return a Hessian matrix covering
-  multiple model parameters, you can construct your model so that all those
-  parameters are in a vector, then split the vector up to define the model.
-  The parameter vector can then be passed to model. See example.</p>
+varying dimension, the <code>par</code> and <code>hessian</code> objects returned by
+<code>opt()</code> are named lists, rather than a vector (<code>par</code>) and a
+matrix (<code>hessian</code>), as returned by <code><a href='https://www.rdocumentation.org/packages/stats/topics/optim'>stats::optim()</a></code>.
+Because greta arrays may not be vectors, the Hessians may not be matrices,
+but could be higher-dimensional arrays. To return a Hessian matrix covering
+multiple model parameters, you can construct your model so that all those
+parameters are in a vector, then split the vector up to define the model.
+The parameter vector can then be passed to model. See example.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -421,8 +443,9 @@ Hessian arrays for the parameters</p></td>
 
 <span class='co'># you can auto-generate a list of initials with something like this:</span>
 <span class='no'>inits</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/lapply'>replicate</a></span>(<span class='fl'>4</span>,
-                   <span class='fu'>initials</span>(<span class='kw'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>1</span>), <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Uniform'>runif</a></span>(<span class='fl'>1</span>)),
-                   <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+  <span class='fu'>initials</span>(<span class='kw'>mu</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>1</span>), <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Uniform'>runif</a></span>(<span class='fl'>1</span>)),
+  <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)
 <span class='no'>draws</span> <span class='kw'>&lt;-</span> <span class='fu'>mcmc</span>(<span class='no'>m</span>, <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='no'>inits</span>)
 
 <span class='co'># or find the MAP estimate</span>
@@ -441,8 +464,8 @@ Hessian arrays for the parameters</p></td>
 <span class='co'># the MLE corresponds to the *unadjusted* sample variance, but differs</span>
 <span class='co'># from the sample variance</span>
 <span class='no'>o</span>$<span class='no'>par</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>((<span class='no'>x</span> - <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='no'>x</span>)) ^ <span class='fl'>2</span>)  <span class='co'># same</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>var</a></span>(<span class='no'>x</span>)  <span class='co'># different</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>((<span class='no'>x</span> - <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='no'>x</span>))^<span class='fl'>2</span>) <span class='co'># same</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>var</a></span>(<span class='no'>x</span>) <span class='co'># different</span>
 
 <span class='co'># initial values can also be passed to optimisers:</span>
 <span class='no'>o</span> <span class='kw'>&lt;-</span> <span class='fu'>opt</span>(<span class='no'>m2</span>, <span class='kw'>initial_values</span> <span class='kw'>=</span> <span class='fu'>initials</span>(<span class='kw'>variance</span> <span class='kw'>=</span> <span class='fl'>1</span>))

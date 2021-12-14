@@ -42,9 +42,9 @@
 
 <meta property="og:title" content="create data greta arrays — structures" />
 <meta property="og:description" content="These structures can be used to set up more complex models. For
-  example, scalar parameters can be embedded in a greta array by first
-  creating a greta array with zeros() or ones(), and then
-  embedding the parameter value using greta's replacement syntax." />
+example, scalar parameters can be embedded in a greta array by first
+creating a greta array with zeros() or ones(), and then
+embedding the parameter value using greta's replacement syntax." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -182,9 +182,9 @@
 
     <div class="ref-description">
     <p>These structures can be used to set up more complex models. For
-  example, scalar parameters can be embedded in a greta array by first
-  creating a greta array with <code>zeros()</code> or <code>ones()</code>, and then
-  embedding the parameter value using greta's replacement syntax.</p>
+example, scalar parameters can be embedded in a greta array by first
+creating a greta array with <code>zeros()</code> or <code>ones()</code>, and then
+embedding the parameter value using greta's replacement syntax.</p>
     </div>
 
     <pre class="usage"><span class='fu'>zeros</span>(<span class='no'>...</span>)
@@ -203,7 +203,7 @@
     <tr>
       <th>data</th>
       <td><p>a vector giving data to fill the greta array. Other object types
-are coerced by <code><a href='https://www.rdocumentation.org/packages/base/topics/vector'>as.vector</a></code>.</p></td>
+are coerced by <code><a href='https://www.rdocumentation.org/packages/base/topics/vector'>as.vector()</a></code>.</p></td>
     </tr>
     <tr>
       <th>dim</th>
@@ -218,12 +218,12 @@ created.</p></td>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code>greta_array</code> is a convenience function to create an R array
-  with <code><a href='https://www.rdocumentation.org/packages/base/topics/array'>array</a></code> and then coerce it to a greta array. I.e. when
-  passed something that can be coerced to a numeric array, it is equivalent
-  to <code><a href='as_data.html'>as_data(array(data, dim))</a></code>.</p>
+with <code><a href='https://www.rdocumentation.org/packages/base/topics/array'>array()</a></code> and then coerce it to a greta array. I.e. when
+passed something that can be coerced to a numeric array, it is equivalent
+to <code><a href='as_data.html'>as_data(array(data, dim))</a></code>.</p>
 <p>If <code>data</code> is a greta array and
-  dim is different than <code><a href='https://www.rdocumentation.org/packages/base/topics/dim'>dim(data)</a></code>, a reshaped greta array is returned.
-  This is equivalent to: <code><a href='https://www.rdocumentation.org/packages/base/topics/Logic'>dim(data) &lt;- dim</a></code>.</p>
+dim is different than <code><a href='https://www.rdocumentation.org/packages/base/topics/dim'>dim(data)</a></code>, a reshaped greta array is returned.
+This is equivalent to: <code><a href='https://www.rdocumentation.org/packages/base/topics/Logic'>dim(data) &lt;- dim</a></code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -238,7 +238,8 @@ created.</p></td>
 
 <span class='co'># a 3x3x3 greta array filled with 1, 2, and 3</span>
 <span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>greta_array</span>(<span class='fl'>1</span>:<span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>3</span>))
-<span class='co'># }</span></pre>
+<span class='co'># }</span><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

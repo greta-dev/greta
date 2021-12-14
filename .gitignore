@@ -12,3 +12,4 @@ vignettes/**/*_files/
 docs/*.Rmd
 docs/examples
 paper/paper.html
+inst/doc

@@ -129,8 +129,8 @@
       
       </header><hr style="height:5px; visibility:hidden;">
 <hr>
-<script src="eight_schools_files/htmlwidgets-1.2/htmlwidgets.js"></script><script src="eight_schools_files/viz-0.3/viz.js"></script><link href="eight_schools_files/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
-<script src="eight_schools_files/grViz-binding-1.0.0/grViz.js"></script><div class="row">
+<script src="eight_schools_files/header-attrs-2.11/header-attrs.js"></script><script src="eight_schools_files/htmlwidgets-1.5.4/htmlwidgets.js"></script><script src="eight_schools_files/viz-1.8.2/viz.js"></script><link href="eight_schools_files/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="eight_schools_files/grViz-binding-1.0.6.1/grViz.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Eight Schools Example Analysis</h1>
@@ -149,36 +149,36 @@
 <p>The Scholastic Aptitude Test (SAT) measures the aptitude of high-schoolers in order to help colleges to make admissions decisions. It is divided into two parts, verbal (SAT-V) and mathematical (SAT-M). Our data comes from the SAT-V (Scholastic Aptitude Test-Verbal) on eight different high schools, from an experiment conducted in the late 1970s. SAT-V is a standard multiple choice test administered by the Educational Testing Service. This Service was interested in the effects of coaching programs for each of the selected schools. The study included coached and uncoached pupils, about sixty in each of the eight different schools; see Rubin (1981). All of them had already taken the PSAT (Preliminary SAT) which results were used as covariates. For each school, the estimated treatment effect and the standard error of the effect estimate are given. These are calculated by an analysis of covariance adjustment appropriate for a completely randomized experiment (Rubin 1981). This example was analysed using a hierarchical normal model in Rubin (1981) and Gelman, Carlin, Stern, and Rubin (2003, Section 5.5).</p>
 </blockquote>
 <p>The corresponding <a href="https://medium.com/tensorflow/introducing-tensorflow-probability-dca4c304e245">TensorFlow Probability</a> Jupyter notebook can be found <a href="https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb">here</a>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(greta)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(tidyverse)</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(bayesplot)</span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="kw"><a href="https://mc-stan.org/bayesplot/reference/bayesplot-colors.html">color_scheme_set</a></span>(<span class="st">"purple"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(greta)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">color_scheme_set</span>(<span class="st">"purple"</span>)</span></code></pre></div>
 <pre class="text"><code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps"># data
 N &lt;- letters[1:8]
 treatment_effects &lt;- c(28.39, 7.94, -2.75 , 6.82, -0.64, 0.63, 18.01, 12.16)
 treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>schools &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/data.frame">data.frame</a></span>(<span class="dt">N =</span> N,</span>
-<span id="cb3-2"><a href="#cb3-2"></a>                      <span class="dt">treatment_effects =</span> treatment_effects,</span>
-<span id="cb3-3"><a href="#cb3-3"></a>                      <span class="dt">treatment_stddevs =</span> treatment_stddevs) <span class="op">%&gt;%</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">treatment_effects_p_stddevs =</span> treatment_effects <span class="op">+</span><span class="st"> </span>treatment_stddevs,</span>
-<span id="cb3-5"><a href="#cb3-5"></a>         <span class="dt">treatment_effects_m_stddevs =</span> treatment_effects <span class="op">-</span><span class="st"> </span>treatment_stddevs)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>schools <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">N =</span> N,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">treatment_effects =</span> treatment_effects,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">treatment_stddevs =</span> treatment_stddevs) <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">treatment_effects_p_stddevs =</span> treatment_effects <span class="sc">+</span> treatment_stddevs,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">treatment_effects_m_stddevs =</span> treatment_effects <span class="sc">-</span> treatment_stddevs)</span></code></pre></div>
 <p>For each the eight schools <code>N</code> we have the estimated treatment effect (<code>treatment_effects</code>) plus standard error (<code>treatment_stddevs</code>). Below, we are replicating the barplot from the <a href="https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb">TensorFlow Probability example</a> that shows the estimated treatment effects +/- standard error per school:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">ggplot</span>(schools, <span class="kw">aes</span>(<span class="dt">x =</span> N, <span class="dt">y =</span> treatment_effects)) <span class="op">+</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">"identity"</span>, <span class="dt">fill =</span> <span class="st">"purple"</span>, <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="st">  </span><span class="kw">geom_errorbar</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> treatment_effects_m_stddevs, <span class="dt">ymax =</span> treatment_effects_p_stddevs), <span class="dt">width =</span> <span class="fl">0.3</span>) <span class="op">+</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">"school"</span>, <span class="dt">y =</span> <span class="st">"treatment effect"</span>,</span>
-<span id="cb4-5"><a href="#cb4-5"></a>       <span class="dt">title =</span> <span class="st">"Barplot of treatment effects for eight schools"</span>,</span>
-<span id="cb4-6"><a href="#cb4-6"></a>       <span class="dt">subtitle =</span> <span class="st">"Error bars represent standard error"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(schools, <span class="fu">aes</span>(<span class="at">x =</span> N, <span class="at">y =</span> treatment_effects)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="st">"purple"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> treatment_effects_m_stddevs, <span class="at">ymax =</span> treatment_effects_p_stddevs), <span class="at">width =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"school"</span>, <span class="at">y =</span> <span class="st">"treatment effect"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Barplot of treatment effects for eight schools"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Error bars represent standard error"</span>)</span></code></pre></div>
 <p><img src="eight_schools_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 <p>A different way to plot the estimated effects and their standard errors is to plot the density distribution over the eight schools we have:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>schools <span class="op">%&gt;%</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="st">  </span><span class="kw">gather</span>(x, y, treatment_effects, treatment_effects_p_stddevs, treatment_effects_m_stddevs) <span class="op">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> y, <span class="dt">color =</span> x)) <span class="op">+</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a><span class="st">    </span><span class="kw">geom_density</span>(<span class="dt">fill =</span> <span class="st">"purple"</span>, <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a><span class="st">    </span><span class="kw">scale_color_brewer</span>(<span class="dt">palette =</span> <span class="st">"Set1"</span>) <span class="op">+</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">"treatment effect (+/- standard error)"</span>,</span>
-<span id="cb5-7"><a href="#cb5-7"></a>         <span class="dt">color =</span> <span class="st">"density curve of"</span>,</span>
-<span id="cb5-8"><a href="#cb5-8"></a>         <span class="dt">title =</span> <span class="st">"Density plot of treatment effects +/- standard error for eight schools"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>schools <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather</span>(x, y, treatment_effects, treatment_effects_p_stddevs, treatment_effects_m_stddevs) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">color =</span> x)) <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"purple"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>) <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"treatment effect (+/- standard error)"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">color =</span> <span class="st">"density curve of"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"Density plot of treatment effects +/- standard error for eight schools"</span>)</span></code></pre></div>
 <p><img src="eight_schools_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
 </div>
 <div id="modelling-with-greta" class="section level2">
@@ -194,8 +194,8 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 <li>
 <code>avg_effect</code>: normal density function (<code>dnorm</code>) with a mean of <code>0</code> and standard deviation of <code>10</code>; represents the prior average treatment effect.</li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>avg_effect &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/distributions.html">normal</a></span>(<span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">10</span>)</span>
-<span id="cb6-2"><a href="#cb6-2"></a>avg_effect</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>avg_effect <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>avg_effect</span></code></pre></div>
 <pre><code>## greta array (variable following a normal distribution)
 ## 
 ##      [,1]
@@ -204,8 +204,8 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 <li>
 <code>avg_stddev</code>: normal density function (<code>dnorm</code>) with a mean of <code>5</code> and standard deviation of <code>1</code>; controls the amount of variance between schools.</li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>avg_stddev &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/distributions.html">normal</a></span>(<span class="dv">5</span>, <span class="dv">1</span>)</span>
-<span id="cb8-2"><a href="#cb8-2"></a>avg_stddev</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>avg_stddev <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">5</span>, <span class="dv">1</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>avg_stddev</span></code></pre></div>
 <pre><code>## greta array (variable following a normal distribution)
 ## 
 ##      [,1]
@@ -215,8 +215,8 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 <code>school_effects_standard</code>: normal density function (<code>dnorm</code>) with a mean of <code>0</code>, standard deviation of <code>1</code> and dimension of <code>8</code>
 </li>
 </ul>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>school_effects_standard &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(N))</span>
-<span id="cb10-2"><a href="#cb10-2"></a>school_effects_standard</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>school_effects_standard <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">dim =</span> <span class="fu">length</span>(N))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>school_effects_standard</span></code></pre></div>
 <pre><code>## greta array (variable following a normal distribution)
 ## 
 ##      [,1]
@@ -233,8 +233,8 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 <code>school_effects</code>: here we multiply the exponential of <code>avg_stddev</code> with <code>school_effects_standard</code> and add <code>avg_effect</code>
 </li>
 </ul>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>school_effects &lt;-<span class="st"> </span>avg_effect <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(avg_stddev) <span class="op">*</span><span class="st"> </span>school_effects_standard</span>
-<span id="cb12-2"><a href="#cb12-2"></a>school_effects</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>school_effects <span class="ot">&lt;-</span> avg_effect <span class="sc">+</span> <span class="fu">exp</span>(avg_stddev) <span class="sc">*</span> school_effects_standard</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>school_effects</span></code></pre></div>
 <pre><code>## greta array (operation)
 ## 
 ##      [,1]
@@ -247,14 +247,14 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 ## [7,]  ?  
 ## [8,]  ?</code></pre>
 <p>An alternative would be to directly use the <code><a href="../../reference/distributions.html">lognormal()</a></code> density function for <code>avg_stddev</code> and use that to calculate <code>school_effect</code>:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>avg_stddev &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/distributions.html">lognormal</a></span>(<span class="dv">5</span>, <span class="dv">1</span>)</span>
-<span id="cb14-2"><a href="#cb14-2"></a>school_effects &lt;-<span class="st"> </span>avg_effect <span class="op">+</span><span class="st"> </span>avg_stddev <span class="op">*</span><span class="st"> </span>school_effects_standard</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>avg_stddev <span class="ot">&lt;-</span> <span class="fu">lognormal</span>(<span class="dv">5</span>, <span class="dv">1</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>school_effects <span class="ot">&lt;-</span> avg_effect <span class="sc">+</span> avg_stddev <span class="sc">*</span> school_effects_standard</span></code></pre></div>
 </div>
 <div id="likelihood" class="section level3">
 <h3 class="hasAnchor">
 <a href="#likelihood" class="anchor"></a>Likelihood</h3>
 <p>Next, we want to link the variables and priors with the observed dependent data - in this case the school estimate <code>treatment_effects</code>. We define the likelihood over our observed estimates <code>treatment_effects</code> given a random sample from the normal probability distribution with mean <code>school_effects</code> and standard deviation <code>treatment_stddevs</code>. From this, we would now like to calculate the parameter of that probability distribution by using the <code><a href="../../reference/distribution.html">distribution()</a></code> function:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw"><a href="../../reference/distribution.html">distribution</a></span>(treatment_effects) &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/distributions.html">normal</a></span>(school_effects, treatment_stddevs)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">distribution</span>(treatment_effects) <span class="ot">&lt;-</span> <span class="fu">normal</span>(school_effects, treatment_stddevs)</span></code></pre></div>
 </div>
 <div id="bayesian-inference-model" class="section level3">
 <h3 class="hasAnchor">
@@ -262,16 +262,16 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 <p>Now we have all the prerequisites for building a Hamiltonian Monte Carlo (HMC) to calculate the posterior distribution over the model’s parameters.</p>
 <p>We first define the model by combining the calculated <code>avg_effect</code>, <code>avg_stddev</code> and <code>school_effects_standard</code> variables so that we can sample from them during modelling. The model <code>m</code> we define below contains all our prior distributions and thus represent the combined density of the model.</p>
 <p>It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found <a href="https://greta-stats.org/articles/get_started.html#plotting">here</a>.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># defining the hierarchical model</span></span>
-<span id="cb16-2"><a href="#cb16-2"></a>m &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/model.html">model</a></span>(avg_effect, avg_stddev, school_effects_standard)</span>
-<span id="cb16-3"><a href="#cb16-3"></a>m</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># defining the hierarchical model</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">model</span>(avg_effect, avg_stddev, school_effects_standard)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>m</span></code></pre></div>
 <pre><code>## greta model</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(m)</span></code></pre></div>
-<div id="htmlwidget-ec99f9bb5b6e2503b71a" style="width:700px;height:432.632880098888px;" class="grViz html-widget"></div>
-<script type="application/json" data-for="htmlwidget-ec99f9bb5b6e2503b71a">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\",\n       rankdir = \"LR\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"avg_effect\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"2\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"3\" [label = \"0\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"4\" [label = \"10\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"5\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"6\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"7\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"8\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"9\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"10\" [label = \"5\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"11\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"12\" [label = \"school_effects_standard\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"13\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"14\" [label = \"0\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"15\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"16\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"17\" [label = \"school_effects\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"18\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"19\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"20\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"21\" [label = \"avg_stddev\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"22\" [label = \"lognormal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"23\" [label = \"5\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"24\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n\"1\"->\"5\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"1\"->\"17\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"2\"->\"1\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"3\"->\"2\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"4\"->\"2\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"6\"->\"5\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"7\"->\"6\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"8\"->\"7\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"exp\", style = \"solid\"] \n\"9\"->\"8\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"10\"->\"9\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"11\"->\"9\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"12\"->\"6\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"12\"->\"16\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"13\"->\"12\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"14\"->\"13\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"15\"->\"13\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"16\"->\"17\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"17\"->\"18\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"18\"->\"20\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"19\"->\"18\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"21\"->\"16\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"22\"->\"21\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"23\"->\"22\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"meanlog\", style = \"solid\"] \n\"24\"->\"22\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sdlog\", style = \"solid\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><p>The actual sampling from the model happens with the <code><a href="../../reference/inference.html">mcmc()</a></code> function. By default 1000 MCMC samples are drawn after warm-up. What we obtain is a probability measure that describes the likelihood of a set of randomly sampled values for the model variables.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># sampling</span></span>
-<span id="cb19-2"><a href="#cb19-2"></a>draws &lt;-<span class="st"> </span>greta<span class="op">::</span><span class="kw"><a href="https://greta-stats.org/reference/inference.html">mcmc</a></span>(m, <span class="dt">n_samples =</span> <span class="dv">1000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(draws)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code></pre></div>
+<div id="htmlwidget-f89fe4a6dea4dc8b7d0d" style="width:700px;height:432.632880098888px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-f89fe4a6dea4dc8b7d0d">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\",\n       rankdir = \"LR\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"avg_effect\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"2\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"3\" [label = \"0\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"4\" [label = \"10\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"5\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"6\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"7\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"8\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"9\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"10\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"11\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"12\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"13\" [label = \"5\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"14\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"15\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"16\" [label = \"school_effects_standard\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"17\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"18\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"19\" [label = \"0\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"20\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"21\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"22\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"23\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"24\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"25\" [label = \"school_effects\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"26\" [label = \"normal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"27\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"28\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"29\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"30\" [label = \"\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"lightgray\", width = \"0.2\", height = \"0.16\", fillcolor = \"#D3D3D3\"] \n  \"31\" [label = \"avg_stddev\n\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"circle\", color = \"#E0D2EE\", width = \"0.6\", height = \"0.48\", fillcolor = \"#F4F0F9\"] \n  \"32\" [label = \"lognormal\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"diamond\", color = \"#B797D7\", width = \"1\", height = \"0.8\", fillcolor = \"#E0D2EE\"] \n  \"33\" [label = \"5\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n  \"34\" [label = \"1\", fontcolor = \"#8960B3\", fontsize = \"12\", penwidth = \"2\", shape = \"square\", color = \"#E0D2EE\", width = \"0.5\", height = \"0.4\", fillcolor = \"#FFFFFF\"] \n\"1\"->\"5\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"expand_dim\", style = \"solid\"] \n\"1\"->\"29\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"expand_dim\", style = \"solid\"] \n\"2\"->\"1\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"3\"->\"2\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"4\"->\"2\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"5\"->\"6\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"7\"->\"6\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"8\"->\"7\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"set_dim\", style = \"solid\"] \n\"9\"->\"8\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"10\"->\"9\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"expand_dim\", style = \"solid\"] \n\"11\"->\"10\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"exp\", style = \"solid\"] \n\"12\"->\"11\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"13\"->\"12\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"14\"->\"12\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"15\"->\"8\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"16\"->\"15\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"set_dim\", style = \"solid\"] \n\"16\"->\"22\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"set_dim\", style = \"solid\"] \n\"17\"->\"16\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"18\"->\"17\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"19\"->\"18\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"expand_dim\", style = \"solid\"] \n\"20\"->\"17\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"21\"->\"20\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"expand_dim\", style = \"solid\"] \n\"22\"->\"23\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"23\"->\"24\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"set_dim\", style = \"solid\"] \n\"24\"->\"25\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"25\"->\"26\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"mean\", style = \"solid\"] \n\"26\"->\"28\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"27\"->\"26\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sd\", style = \"solid\"] \n\"29\"->\"25\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"add\", style = \"solid\"] \n\"30\"->\"23\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"multiply\", style = \"solid\"] \n\"31\"->\"30\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"expand_dim\", style = \"solid\"] \n\"32\"->\"31\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", penwidth = \"3\", style = \"dashed\"] \n\"33\"->\"32\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"meanlog\", style = \"solid\"] \n\"34\"->\"32\" [color = \"Gainsboro\", fontname = \"Helvetica\", fontcolor = \"gray\", fontsize = \"11\", penwidth = \"3\", label = \"sdlog\", style = \"solid\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><p>The actual sampling from the model happens with the <code><a href="../../reference/inference.html">mcmc()</a></code> function. By default 1000 MCMC samples are drawn after warm-up. What we obtain is a probability measure that describes the likelihood of a set of randomly sampled values for the model variables.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sampling</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>draws <span class="ot">&lt;-</span> greta<span class="sc">::</span><span class="fu">mcmc</span>(m, <span class="at">n_samples =</span> <span class="dv">1000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">chains =</span> <span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(draws)</span></code></pre></div>
 <pre><code>## 
 ## Iterations = 1:1000
 ## Thinning interval = 1 
@@ -282,96 +282,108 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 ##    plus standard error of the mean:
 ## 
 ##                                  Mean     SD Naive SE Time-series SE
-## avg_stddev                   13.34410 7.4121  0.11720        0.30686
-## school_effects_standard[1,1]  0.67942 0.8090  0.01279        0.01550
-## school_effects_standard[2,1]  0.07902 0.6941  0.01097        0.01349
-## school_effects_standard[3,1] -0.23530 0.7938  0.01255        0.01442
-## school_effects_standard[4,1]  0.02425 0.7215  0.01141        0.01321
-## school_effects_standard[5,1] -0.33197 0.6835  0.01081        0.01237
-## school_effects_standard[6,1] -0.20530 0.7410  0.01172        0.01409
-## school_effects_standard[7,1]  0.52226 0.7098  0.01122        0.01274
-## school_effects_standard[8,1]  0.16803 0.8303  0.01313        0.01615
-## avg_effect                    5.96913 5.5232  0.08733        0.11305
+## avg_effect                    5.66639 5.4058  0.08547        0.11406
+## avg_stddev                   13.23355 7.0904  0.11211        0.24471
+## school_effects_standard[1,1]  0.65643 0.7890  0.01248        0.01573
+## school_effects_standard[2,1]  0.10173 0.7145  0.01130        0.01418
+## school_effects_standard[3,1] -0.21187 0.8164  0.01291        0.01618
+## school_effects_standard[4,1]  0.04093 0.7438  0.01176        0.01369
+## school_effects_standard[5,1] -0.29814 0.6720  0.01063        0.01319
+## school_effects_standard[6,1] -0.19047 0.7308  0.01155        0.01433
+## school_effects_standard[7,1]  0.52154 0.6945  0.01098        0.01326
+## school_effects_standard[8,1]  0.13518 0.8489  0.01342        0.01640
 ## 
 ## 2. Quantiles for each variable:
 ## 
 ##                                 2.5%      25%      50%     75%   97.5%
-## avg_stddev                    3.8937  8.32668 11.85203 16.6972 30.9743
-## school_effects_standard[1,1] -0.9832  0.15694  0.69172  1.2197  2.2386
-## school_effects_standard[2,1] -1.2758 -0.36769  0.07515  0.5149  1.4459
-## school_effects_standard[3,1] -1.8624 -0.74132 -0.21911  0.2866  1.2835
-## school_effects_standard[4,1] -1.3963 -0.42649  0.02580  0.4916  1.4576
-## school_effects_standard[5,1] -1.6972 -0.75841 -0.31379  0.1215  0.9957
-## school_effects_standard[6,1] -1.6735 -0.68559 -0.21268  0.2821  1.2588
-## school_effects_standard[7,1] -0.8777  0.07559  0.52240  0.9760  1.9762
-## school_effects_standard[8,1] -1.4581 -0.38927  0.17397  0.7153  1.7875
-## avg_effect                   -5.1900  2.38110  5.92440  9.6904 16.8460</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="kw"><a href="https://mc-stan.org/bayesplot/reference/MCMC-traces.html">mcmc_trace</a></span>(draws, <span class="dt">facet_args =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">ncol =</span> <span class="dv">3</span>))</span></code></pre></div>
+## avg_effect                   -5.3445  2.28764  5.77921  9.2812 15.6988
+## avg_stddev                    4.1594  8.32819 11.71733 16.5100 33.1951
+## school_effects_standard[1,1] -0.9430  0.15193  0.66124  1.1683  2.2007
+## school_effects_standard[2,1] -1.3107 -0.34421  0.10414  0.5532  1.5196
+## school_effects_standard[3,1] -1.8459 -0.73635 -0.20636  0.3352  1.3145
+## school_effects_standard[4,1] -1.4767 -0.43877  0.05423  0.5166  1.5597
+## school_effects_standard[5,1] -1.6740 -0.72760 -0.28705  0.1321  0.9997
+## school_effects_standard[6,1] -1.6760 -0.65693 -0.17677  0.2787  1.2420
+## school_effects_standard[7,1] -0.8987  0.08377  0.53535  0.9619  1.9026
+## school_effects_standard[8,1] -1.5778 -0.42636  0.14659  0.6951  1.8485</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_trace</span>(draws, <span class="at">facet_args =</span> <span class="fu">list</span>(<span class="at">ncol =</span> <span class="dv">3</span>))</span></code></pre></div>
 <p><img src="eight_schools_files/figure-html/unnamed-chunk-13-1.png" width="960"></p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="kw"><a href="https://mc-stan.org/bayesplot/reference/MCMC-intervals.html">mcmc_intervals</a></span>(draws)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_intervals</span>(draws)</span></code></pre></div>
 <p><img src="eight_schools_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="kw"><a href="https://mc-stan.org/bayesplot/reference/MCMC-diagnostics.html">mcmc_acf_bar</a></span>(draws)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_acf_bar</span>(draws)</span></code></pre></div>
 <p><img src="eight_schools_files/figure-html/unnamed-chunk-15-1.png" width="960"></p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="kw"><a href="https://mc-stan.org/bayesplot/reference/MCMC-distributions.html">mcmc_hist</a></span>(draws, <span class="dt">facet_args =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">ncol =</span> <span class="dv">3</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_hist</span>(draws, <span class="at">facet_args =</span> <span class="fu">list</span>(<span class="at">ncol =</span> <span class="dv">3</span>))</span></code></pre></div>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <p><img src="eight_schools_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
 <div id="use-of-calculate-for-transforming-estimates-to-natural-scale" class="section level4">
 <h4 class="hasAnchor">
 <a href="#use-of-calculate-for-transforming-estimates-to-natural-scale" class="anchor"></a>Use of <code><a href="../../reference/calculate.html">calculate()</a></code> for transforming estimates to natural scale</h4>
 <p>The <code><a href="../../reference/calculate.html">calculate()</a></code> function can be used with the transformation function used in building the model to get the school-specific posteriors chains. This function is also how you would get posterior predictive values.</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="co"># Calculate school effects on original scale</span></span>
-<span id="cb27-2"><a href="#cb27-2"></a>school_effects           &lt;-<span class="st"> </span>avg_effect <span class="op">+</span><span class="st"> </span>avg_stddev <span class="op">*</span><span class="st"> </span>school_effects_standard</span>
-<span id="cb27-3"><a href="#cb27-3"></a>posterior_school_effects &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/calculate.html">calculate</a></span>(school_effects, draws) </span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate school effects on original scale</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>school_effects           <span class="ot">&lt;-</span> avg_effect <span class="sc">+</span> avg_stddev <span class="sc">*</span> school_effects_standard</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>posterior_school_effects <span class="ot">&lt;-</span> <span class="fu">calculate</span>(school_effects, <span class="at">values =</span> draws) </span></code></pre></div>
 </div>
 <div id="comparison-with-edward2-hmc" class="section level4">
 <h4 class="hasAnchor">
 <a href="#comparison-with-edward2-hmc" class="anchor"></a>Comparison with Edward2 HMC</h4>
 <p>As a sanity check that we parameterized our model correctly, we can compare the back-transformed school-specific estimates to the results from the Edward2 approach <a href="https://github.com/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Eight_Schools.ipynb">in the TensorFlow Probability documentation</a>. The results are very similar.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="co"># Posterior means via Edward2</span></span>
-<span id="cb28-2"><a href="#cb28-2"></a>edward2_school_means &lt;-</span>
-<span id="cb28-3"><a href="#cb28-3"></a><span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/data.frame">data.frame</a></span>(<span class="dt">tool =</span> <span class="st">"Edward2"</span>,</span>
-<span id="cb28-4"><a href="#cb28-4"></a>             <span class="dt">school =</span> N,</span>
-<span id="cb28-5"><a href="#cb28-5"></a>             <span class="co">#mean_school_effects_standard = c(0.61157268, 0.06430732, -0.25459746,</span></span>
-<span id="cb28-6"><a href="#cb28-6"></a>             <span class="co">#                                 0.04828103, -0.36940941, -0.23154463,</span></span>
-<span id="cb28-7"><a href="#cb28-7"></a>             <span class="co">#                                 0.49402338,  0.13042814),</span></span>
-<span id="cb28-8"><a href="#cb28-8"></a>             <span class="dt">mean =</span> <span class="kw"><a href="../../reference/extract-replace-combine.html">c</a></span>(<span class="fl">14.93237686</span>, <span class="fl">7.50939941</span>, <span class="fl">3.07602358</span>, <span class="fl">7.21652555</span>,</span>
-<span id="cb28-9"><a href="#cb28-9"></a>                                     <span class="fl">2.0329783</span>, <span class="fl">3.41213799</span>, <span class="fl">12.92509365</span>, <span class="fl">8.36702347</span>),</span>
-<span id="cb28-10"><a href="#cb28-10"></a>             <span class="dt">sd =</span> <span class="dv">0</span>)</span>
-<span id="cb28-11"><a href="#cb28-11"></a></span>
-<span id="cb28-12"><a href="#cb28-12"></a>edward2_pop_mean &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/data.frame">data.frame</a></span>(<span class="dt">tool =</span> <span class="st">"Edward2"</span>, <span class="st">'mean'</span> =<span class="st"> </span><span class="fl">6.48866844177</span>, <span class="st">'sd'</span> =<span class="st"> </span><span class="dv">0</span>)</span>
-<span id="cb28-13"><a href="#cb28-13"></a><span class="co"># hmc_mean_avg_stddev &lt;- 2.46163249016</span></span>
-<span id="cb28-14"><a href="#cb28-14"></a></span>
-<span id="cb28-15"><a href="#cb28-15"></a></span>
-<span id="cb28-16"><a href="#cb28-16"></a>posterior_school_effects &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/as.data.frame">as.data.frame</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/matrix">as.matrix</a></span>(posterior_school_effects))</span>
-<span id="cb28-17"><a href="#cb28-17"></a></span>
-<span id="cb28-18"><a href="#cb28-18"></a><span class="co"># Relabel school measures</span></span>
-<span id="cb28-19"><a href="#cb28-19"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(posterior_school_effects) &lt;-<span class="st"> </span>N</span>
-<span id="cb28-20"><a href="#cb28-20"></a></span>
-<span id="cb28-21"><a href="#cb28-21"></a><span class="co"># Summarise and combine all chains of interest for plotting</span></span>
-<span id="cb28-22"><a href="#cb28-22"></a>posterior_summaries &lt;-</span>
-<span id="cb28-23"><a href="#cb28-23"></a><span class="st">  </span>posterior_school_effects <span class="op">%&gt;%</span></span>
-<span id="cb28-24"><a href="#cb28-24"></a><span class="st">  </span><span class="kw">gather</span>(<span class="dt">key =</span> school, <span class="dt">value =</span> value) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb28-25"><a href="#cb28-25"></a><span class="st">  </span><span class="kw">group_by</span>(school) <span class="op">%&gt;%</span></span>
-<span id="cb28-26"><a href="#cb28-26"></a><span class="st">  </span><span class="kw">summarise_all</span>(<span class="kw">funs</span>(mean, sd)) </span>
-<span id="cb28-27"><a href="#cb28-27"></a></span>
-<span id="cb28-28"><a href="#cb28-28"></a>school_summaries &lt;-<span class="st"> </span></span>
-<span id="cb28-29"><a href="#cb28-29"></a><span class="st">  </span>posterior_summaries <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb28-30"><a href="#cb28-30"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">tool =</span> <span class="st">"greta"</span>) <span class="op">%&gt;%</span></span>
-<span id="cb28-31"><a href="#cb28-31"></a><span class="st">  </span><span class="kw"><a href="../../reference/extract-replace-combine.html">rbind</a></span>(edward2_school_means)</span>
-<span id="cb28-32"><a href="#cb28-32"></a></span>
-<span id="cb28-33"><a href="#cb28-33"></a>population_parameters &lt;-<span class="st"> </span></span>
-<span id="cb28-34"><a href="#cb28-34"></a><span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/as.data.frame">as.data.frame</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/matrix">as.matrix</a></span>(draws)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb28-35"><a href="#cb28-35"></a><span class="st">  </span><span class="kw">select</span>(avg_effect) <span class="op">%&gt;%</span></span>
-<span id="cb28-36"><a href="#cb28-36"></a><span class="st">  </span><span class="kw">summarise_all</span>(<span class="kw">funs</span>(mean, sd)) <span class="op">%&gt;%</span></span>
-<span id="cb28-37"><a href="#cb28-37"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">tool =</span> <span class="st">"greta"</span>) <span class="op">%&gt;%</span></span>
-<span id="cb28-38"><a href="#cb28-38"></a><span class="st">  </span><span class="kw"><a href="../../reference/extract-replace-combine.html">rbind</a></span>(edward2_pop_mean)</span>
-<span id="cb28-39"><a href="#cb28-39"></a></span>
-<span id="cb28-40"><a href="#cb28-40"></a><span class="kw">ggplot</span>(school_summaries, <span class="kw">aes</span>(<span class="dt">x =</span> school, <span class="dt">y =</span> mean, <span class="dt">color =</span> tool, <span class="dt">shape =</span> tool)) <span class="op">+</span><span class="st"> </span></span>
-<span id="cb28-41"><a href="#cb28-41"></a><span class="st">  </span><span class="kw">geom_errorbar</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> mean <span class="op">-</span><span class="st"> </span>sd, <span class="dt">ymax =</span> mean <span class="op">+</span><span class="st"> </span>sd), <span class="dt">width =</span> <span class="fl">0.2</span>) <span class="op">+</span></span>
-<span id="cb28-42"><a href="#cb28-42"></a><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
-<span id="cb28-43"><a href="#cb28-43"></a><span class="st">  </span><span class="kw">geom_hline</span>(<span class="dt">data =</span> population_parameters, </span>
-<span id="cb28-44"><a href="#cb28-44"></a>             <span class="kw">aes</span>(<span class="dt">yintercept =</span> mean, <span class="dt">linetype =</span> <span class="st">'Population mean'</span>, <span class="dt">color =</span> tool)) <span class="op">+</span></span>
-<span id="cb28-45"><a href="#cb28-45"></a><span class="st">  </span><span class="kw">scale_linetype_manual</span>(<span class="dt">name =</span> <span class="st">""</span>, <span class="dt">values =</span> <span class="kw"><a href="../../reference/extract-replace-combine.html">c</a></span>(<span class="dv">2</span>, <span class="dv">2</span>)) </span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior means via Edward2</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>edward2_school_means <span class="ot">&lt;-</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">tool =</span> <span class="st">"Edward2"</span>,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">school =</span> N,</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>             <span class="co">#mean_school_effects_standard = c(0.61157268, 0.06430732, -0.25459746,</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>             <span class="co">#                                 0.04828103, -0.36940941, -0.23154463,</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>             <span class="co">#                                 0.49402338,  0.13042814),</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">mean =</span> <span class="fu">c</span>(<span class="fl">14.93237686</span>, <span class="fl">7.50939941</span>, <span class="fl">3.07602358</span>, <span class="fl">7.21652555</span>,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>                                     <span class="fl">2.0329783</span>, <span class="fl">3.41213799</span>, <span class="fl">12.92509365</span>, <span class="fl">8.36702347</span>),</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">sd =</span> <span class="dv">0</span>)</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>edward2_pop_mean <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">tool =</span> <span class="st">"Edward2"</span>, <span class="st">'mean'</span> <span class="ot">=</span> <span class="fl">6.48866844177</span>, <span class="st">'sd'</span> <span class="ot">=</span> <span class="dv">0</span>)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_mean_avg_stddev &lt;- 2.46163249016</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>posterior_school_effects <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">as.matrix</span>(posterior_school_effects))</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Relabel school measures</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(posterior_school_effects) <span class="ot">&lt;-</span> N</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarise and combine all chains of interest for plotting</span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>posterior_summaries <span class="ot">&lt;-</span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>  posterior_school_effects <span class="sc">%&gt;%</span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather</span>(<span class="at">key =</span> school, <span class="at">value =</span> value) <span class="sc">%&gt;%</span> </span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(school) <span class="sc">%&gt;%</span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_all</span>(<span class="fu">funs</span>(mean, sd)) </span></code></pre></div>
+<pre><code>## Warning: `funs()` was deprecated in dplyr 0.8.0.
+## Please use a list of either functions or lambdas: 
+## 
+##   # Simple named list: 
+##   list(mean = mean, median = median)
+## 
+##   # Auto named with `tibble::lst()`: 
+##   tibble::lst(mean, median)
+## 
+##   # Using lambdas
+##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>school_summaries <span class="ot">&lt;-</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  posterior_summaries <span class="sc">%&gt;%</span> </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">tool =</span> <span class="st">"greta"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(edward2_school_means)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>population_parameters <span class="ot">&lt;-</span> </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>(<span class="fu">as.matrix</span>(draws)) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(avg_effect) <span class="sc">%&gt;%</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_all</span>(<span class="fu">funs</span>(mean, sd)) <span class="sc">%&gt;%</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">tool =</span> <span class="st">"greta"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(edward2_pop_mean)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(school_summaries, <span class="fu">aes</span>(<span class="at">x =</span> school, <span class="at">y =</span> mean, <span class="at">color =</span> tool, <span class="at">shape =</span> tool)) <span class="sc">+</span> </span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean <span class="sc">-</span> sd, <span class="at">ymax =</span> mean <span class="sc">+</span> sd), <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">data =</span> population_parameters, </span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">yintercept =</span> mean, <span class="at">linetype =</span> <span class="st">'Population mean'</span>, <span class="at">color =</span> tool)) <span class="sc">+</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">name =</span> <span class="st">""</span>, <span class="at">values =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>)) </span></code></pre></div>
 <p><img src="eight_schools_files/figure-html/schools-edward2-1.png" width="700"></p>
 </div>
 </div>
@@ -380,55 +392,50 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 <h2 class="hasAnchor">
 <a href="#session-information" class="anchor"></a>Session information</h2>
 <div class="fold o">
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/sessionInfo">sessionInfo</a></span>()</span></code></pre></div>
-<pre><code>## R version 3.5.1 (2018-07-02)
-## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS Sierra 10.12.6
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<pre><code>## R version 4.1.2 (2021-11-01)
+## Platform: x86_64-apple-darwin17.0 (64-bit)
+## Running under: macOS Big Sur 10.16
 ## 
 ## Matrix products: default
-## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
-## LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
-## [1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
+## [1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] bindrcpp_0.2.2  bayesplot_1.6.0 forcats_0.3.0   stringr_1.3.1  
-##  [5] dplyr_0.7.6     purrr_0.2.5     readr_1.1.1     tidyr_0.8.1    
-##  [9] tibble_1.4.2    ggplot2_3.0.0   tidyverse_1.2.1 greta_0.2.5    
+##  [1] bayesplot_1.8.1 forcats_0.5.1   stringr_1.4.0   dplyr_1.0.7    
+##  [5] purrr_0.3.4     readr_2.1.1     tidyr_1.1.4     tibble_3.1.6   
+##  [9] ggplot2_3.3.5   tidyverse_1.3.1 greta_0.4.0    
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] nlme_3.1-137       fs_1.2.5           lubridate_1.7.4   
-##  [4] RColorBrewer_1.1-2 progress_1.2.0     httr_1.3.1        
-##  [7] rprojroot_1.3-2    tools_3.5.1        backports_1.1.2   
-## [10] R6_2.2.2           lazyeval_0.2.1     colorspace_1.3-2  
-## [13] withr_2.1.2        tidyselect_0.2.4   gridExtra_2.3     
-## [16] prettyunits_1.0.2  compiler_3.5.1     cli_1.0.0         
-## [19] rvest_0.3.2        xml2_1.2.0         influenceR_0.1.0  
-## [22] desc_1.2.0         labeling_0.3       scales_1.0.0      
-## [25] ggridges_0.5.1     tfruns_1.4         pkgdown_1.1.0.9000
-## [28] commonmark_1.5     digest_0.6.17      rmarkdown_1.10.13 
-## [31] base64enc_0.1-3    pkgconfig_2.0.1    htmltools_0.3.6   
-## [34] htmlwidgets_1.2    rlang_0.2.2        readxl_1.1.0      
-## [37] htmldeps_0.1.1     rstudioapi_0.8     visNetwork_2.0.4  
-## [40] bindr_0.1.1        jsonlite_1.5       tensorflow_1.9    
-## [43] rgexf_0.15.3       magrittr_1.5       Matrix_1.2-14     
-## [46] Rcpp_0.12.18       munsell_0.5.0      reticulate_1.10   
-## [49] viridis_0.5.1      stringi_1.2.4      whisker_0.3-2     
-## [52] yaml_2.2.0         MASS_7.3-50        plyr_1.8.4        
-## [55] grid_3.5.1         parallel_3.5.1     listenv_0.7.0     
-## [58] crayon_1.3.4       lattice_0.20-35    haven_1.1.2       
-## [61] hms_0.4.2          knitr_1.20         pillar_1.3.0      
-## [64] igraph_1.2.2       reshape2_1.4.3     codetools_0.2-15  
-## [67] XML_3.98-1.16      glue_1.3.0         evaluate_0.11     
-## [70] downloader_0.4     modelr_0.1.2       cellranger_1.1.0  
-## [73] gtable_0.2.0       future_1.9.0       assertthat_0.2.0  
-## [76] broom_0.5.0        coda_0.19-1        roxygen2_6.1.0    
-## [79] viridisLite_0.3.0  memoise_1.1.0      Rook_1.1-1        
-## [82] DiagrammeR_1.0.0   globals_0.12.2     brew_1.0-6</code></pre>
+##  [1] fs_1.5.1           lubridate_1.8.0    progress_1.2.2     httr_1.4.2        
+##  [5] rprojroot_2.0.2    tools_4.1.2        backports_1.4.0    bslib_0.3.1       
+##  [9] utf8_1.2.2         R6_2.5.1           DBI_1.1.1          colorspace_2.0-2  
+## [13] withr_2.4.3        tidyselect_1.1.1   prettyunits_1.1.1  processx_3.5.2    
+## [17] compiler_4.1.2     cli_3.1.0          rvest_1.0.2        xml2_1.3.3        
+## [21] desc_1.4.0         labeling_0.4.2     sass_0.4.0         scales_1.1.1      
+## [25] ggridges_0.5.3     callr_3.7.0        tfruns_1.5.0       pkgdown_1.1.0.9000
+## [29] digest_0.6.29      rmarkdown_2.11     base64enc_0.1-3    pkgconfig_2.0.3   
+## [33] htmltools_0.5.2    parallelly_1.29.0  highr_0.9          dbplyr_2.1.1      
+## [37] fastmap_1.1.0      rlang_0.4.12       readxl_1.3.1       rstudioapi_0.13   
+## [41] farver_2.1.0       jquerylib_0.1.4    generics_0.1.1     jsonlite_1.7.2    
+## [45] tensorflow_2.7.0   magrittr_2.0.1     Matrix_1.3-4       Rcpp_1.0.7        
+## [49] munsell_0.5.0      fansi_0.5.0        abind_1.4-5        reticulate_1.22   
+## [53] lifecycle_1.0.1    stringi_1.7.6      whisker_0.4        yaml_2.2.1        
+## [57] MASS_7.3-54        plyr_1.8.6         grid_4.1.2         parallel_4.1.2    
+## [61] listenv_0.8.0      crayon_1.4.2       lattice_0.20-45    haven_2.4.3       
+## [65] hms_1.1.1          knitr_1.36         ps_1.6.0           pillar_1.6.4      
+## [69] codetools_0.2-18   reprex_2.0.1       glue_1.5.1         evaluate_0.14     
+## [73] modelr_0.1.8       png_0.1-7          vctrs_0.3.8        tzdb_0.2.0        
+## [77] cellranger_1.1.0   gtable_0.3.0       future_1.23.0      assertthat_0.2.1  
+## [81] cachem_1.0.6       xfun_0.28          broom_0.7.10       coda_0.19-4       
+## [85] roxygen2_7.1.2     memoise_2.0.1      globals_0.14.0     ellipsis_0.3.2    
+## [89] here_1.0.1</code></pre>
 </div>
 </div>
   </div>

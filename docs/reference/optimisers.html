@@ -42,13 +42,11 @@
 
 <meta property="og:title" content="optimisation methods — optimisers" />
 <meta property="og:description" content="Functions to set up optimisers (which find parameters that
-  maximise the joint density of a model) and change their tuning parameters,
-  for use in opt(). For details of the algorithms and how to
-  tune them, see the
-  SciPy
-   optimiser docs or the
-  TensorFlow
-   optimiser docs." />
+maximise the joint density of a model) and change their tuning parameters,
+for use in opt(). For details of the algorithms and how to
+tune them, see the
+SciPy optimiser docs or the
+TensorFlow optimiser docs." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -186,13 +184,11 @@
 
     <div class="ref-description">
     <p>Functions to set up optimisers (which find parameters that
-  maximise the joint density of a model) and change their tuning parameters,
-  for use in <code><a href='inference.html'>opt</a>()</code>. For details of the algorithms and how to
-  tune them, see the
-  <a href='https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html'>SciPy
-   optimiser docs</a> or the
-  <a href='https://www.tensorflow.org/api_docs/python/tf/contrib/opt'>TensorFlow
-   optimiser docs</a>.</p>
+maximise the joint density of a model) and change their tuning parameters,
+for use in <code><a href='inference.html'>opt()</a></code>. For details of the algorithms and how to
+tune them, see the
+<a href='https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html'>SciPy optimiser docs</a> or the
+<a href='https://www.tensorflow.org/versions/r1.15/api_docs/python/tf/contrib'>TensorFlow optimiser docs</a>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>nelder_mead</span>()
@@ -219,27 +215,40 @@
 
 <span class='fu'>adagrad</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.8</span>, <span class='kw'>initial_accumulator_value</span> <span class='kw'>=</span> <span class='fl'>0.1</span>)
 
-<span class='fu'>adagrad_da</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.8</span>, <span class='kw'>global_step</span> <span class='kw'>=</span> <span class='fl'>1L</span>,
+<span class='fu'>adagrad_da</span>(
+  <span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.8</span>,
+  <span class='kw'>global_step</span> <span class='kw'>=</span> <span class='fl'>1L</span>,
   <span class='kw'>initial_gradient_squared_accumulator_value</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
-  <span class='kw'>l1_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>l2_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>)
+  <span class='kw'>l1_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>l2_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>
+)
 
 <span class='fu'>momentum</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.001</span>, <span class='kw'>momentum</span> <span class='kw'>=</span> <span class='fl'>0.9</span>, <span class='kw'>use_nesterov</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
-<span class='fu'>adam</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>beta1</span> <span class='kw'>=</span> <span class='fl'>0.9</span>, <span class='kw'>beta2</span> <span class='kw'>=</span> <span class='fl'>0.999</span>,
-  <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>1e-08</span>)
+<span class='fu'>adam</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>beta1</span> <span class='kw'>=</span> <span class='fl'>0.9</span>, <span class='kw'>beta2</span> <span class='kw'>=</span> <span class='fl'>0.999</span>, <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>1e-08</span>)
 
-<span class='fu'>ftrl</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>learning_rate_power</span> <span class='kw'>=</span> -<span class='fl'>0.5</span>,
-  <span class='kw'>initial_accumulator_value</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>l1_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>l2_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>)
+<span class='fu'>ftrl</span>(
+  <span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>learning_rate_power</span> <span class='kw'>=</span> -<span class='fl'>0.5</span>,
+  <span class='kw'>initial_accumulator_value</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
+  <span class='kw'>l1_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>l2_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>
+)
 
-<span class='fu'>proximal_gradient_descent</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.01</span>,
-  <span class='kw'>l1_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>l2_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>)
+<span class='fu'>proximal_gradient_descent</span>(
+  <span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.01</span>,
+  <span class='kw'>l1_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>l2_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>
+)
 
-<span class='fu'>proximal_adagrad</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>initial_accumulator_value</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
-  <span class='kw'>l1_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>l2_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>)
+<span class='fu'>proximal_adagrad</span>(
+  <span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>initial_accumulator_value</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
+  <span class='kw'>l1_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>l2_regularization_strength</span> <span class='kw'>=</span> <span class='fl'>0</span>
+)
 
-<span class='fu'>rms_prop</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>decay</span> <span class='kw'>=</span> <span class='fl'>0.9</span>, <span class='kw'>momentum</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>1e-10</span>)</pre>
+<span class='fu'>rms_prop</span>(<span class='kw'>learning_rate</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>decay</span> <span class='kw'>=</span> <span class='fl'>0.9</span>, <span class='kw'>momentum</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>1e-10</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -334,15 +343,15 @@ greater)</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>an <code>optimiser</code> object that can be passed to <code><a href='inference.html'>opt</a></code>.</p>
+    <p>an <code>optimiser</code> object that can be passed to <code><a href='inference.html'>opt()</a></code>.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The optimisers <code>powell()</code>, <code>cg()</code>, <code>newton_cg()</code>,
-  <code>l_bfgs_b()</code>, <code>tnc()</code>, <code>cobyla()</code>, and <code>slsqp()</code> are
-  deprecated. They will be removed in greta 0.4.0, since they will no longer
-  be available in TensorFlow 2.0, on which that version of greta will depend.</p>
+<code>l_bfgs_b()</code>, <code>tnc()</code>, <code>cobyla()</code>, and <code>slsqp()</code> are
+deprecated. They will be removed in greta 0.4.0, since they will no longer
+be available in TensorFlow 2.0, on which that version of greta will depend.</p>
 <p>The <code>cobyla()</code> does not provide information about the number of
-  iterations nor convergence, so these elements of the output are set to NA</p>
+iterations nor convergence, so these elements of the output are set to NA</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
