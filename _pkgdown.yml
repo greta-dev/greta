@@ -45,7 +45,7 @@ reference:
 
 navbar:
   structure:
-    left: [get_started, docs, examples, analyses, more]
+    left: [get_started, docs, examples, analyses, more, FAQ]
     right: [forum, twitter, github]
   components:
     home: ~
