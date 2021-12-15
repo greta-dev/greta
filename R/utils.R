@@ -804,3 +804,53 @@ timeout_install_msg <- function(timeout, py_error = NULL){
 is_DiagrammeR_installed <- function(){
   requireNamespace("DiagrammeR", quietly = TRUE)
 }
+
+check_if_software_available <- function(fun, software){
+  cli::cli_process_start("checking if {.pkg {software}} available")
+  if (fun) {
+    cli::cli_process_done(msg_done = "{.pkg {software}} available!")
+  } else {
+    cli::cli_process_failed(msg_failed = "{.pkg {software}} not available")
+  }
+}
+
+
+#' Greta Situation Report
+#'
+#' This checks if Python, Tensorflow, Tensorflow Probability, and the greta
+#'   conda environment are available, and also loads and initialises python
+#'
+#' @return Message if greta is ready to use
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' greta_sitrep()
+#' }
+greta_sitrep <- function(){
+
+  check_if_software_available(fun = have_python(),
+                              software = "python")
+  check_if_software_available(fun = have_tf(),
+                              software = "TensorFlow")
+  check_if_software_available(fun = have_tfp(),
+                              software = "TensorFlow Probability")
+  check_if_software_available(fun = have_greta_conda_env(),
+                              software = "greta conda environment")
+
+  software_available <- c(
+    have_python(),
+    have_tf(),
+    have_tfp(),
+    have_greta_conda_env()
+  )
+
+  if (any(!software_available)){
+    check_tf_version("warn")
+  } else if (all(software_available)){
+    check_tf_version("none")
+    cli::cli_alert_info("{.pkg greta} is ready to use!")
+  }
+
+}
+
