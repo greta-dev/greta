@@ -59,12 +59,11 @@ have_tfp <- function() {
 
 #' @importFrom reticulate py_module_available
 have_tf <- function() {
-
   is_tf_available <- reticulate::py_module_available("tensorflow")
 
   if (is_tf_available) {
 
-    tf_version <- tf$`__version__`
+    tf_version <- suppressMessages(tf$`__version__`)
     is_tf_available <- utils::compareVersion("1.14.0", tf_version) == 0
 
   }
@@ -805,11 +804,17 @@ is_DiagrammeR_installed <- function(){
   requireNamespace("DiagrammeR", quietly = TRUE)
 }
 
-check_if_software_available <- function(fun, software){
+check_if_software_available <- function(fun,
+                                        version = NULL,
+                                        software){
   cli::cli_process_start("checking if {.pkg {software}} available")
   if (fun) {
-    cli::cli_process_done(msg_done = "{.pkg {software}} available!")
-  } else {
+      if (!is.null(version)){
+        cli::cli_process_done(msg_done = "{.pkg {software}} (version {version}) available!")
+      } else if (is.null(version)){
+        cli::cli_process_done(msg_done = "{.pkg {software}} available!")
+  }
+    } else {
     cli::cli_process_failed(msg_failed = "{.pkg {software}} not available")
   }
 }
@@ -830,10 +835,13 @@ check_if_software_available <- function(fun, software){
 greta_sitrep <- function(){
 
   check_if_software_available(fun = have_python(),
+                              version = reticulate::py_version(),
                               software = "python")
   check_if_software_available(fun = have_tf(),
+                              version = version_tf(),
                               software = "TensorFlow")
   check_if_software_available(fun = have_tfp(),
+                              version = version_tfp(),
                               software = "TensorFlow Probability")
   check_if_software_available(fun = have_greta_conda_env(),
                               software = "greta conda environment")
