@@ -804,18 +804,40 @@ is_DiagrammeR_installed <- function(){
   requireNamespace("DiagrammeR", quietly = TRUE)
 }
 
-check_if_software_available <- function(fun,
+check_if_software_available <- function(software_available,
                                         version = NULL,
-                                        software){
-  cli::cli_process_start("checking if {.pkg {software}} available")
-  if (fun) {
-      if (!is.null(version)){
-        cli::cli_process_done(msg_done = "{.pkg {software}} (version {version}) available!")
+                                        ideal_version = NULL,
+                                        software_name){
+
+  cli::cli_process_start("checking if {.pkg {software_name}} available")
+  # if the software is detected
+  if (software_available) {
+    # if it has a version and ideal version
+      if (!is.null(version) & !is.null(ideal_version)){
+        version_chr <- paste0(version)
+        version_match <- compareVersion(version_chr, ideal_version) == 0
+
+        if (version_match){
+          cli::cli_process_done(
+            msg_done = "{.pkg {software_name}} (version {version}) available"
+          )
+        }
+        if (!version_match){
+          cli::cli_process_failed(
+            msg_done = "{.pkg {software_name}} available, however \\
+            {ideal_version} is needed and {version} was detected"
+          )
+        }
+        # if there is no version for the software
       } else if (is.null(version)){
-        cli::cli_process_done(msg_done = "{.pkg {software}} available!")
+        cli::cli_process_done(
+          msg_done = "{.pkg {software_name}} available"
+          )
   }
     } else {
-    cli::cli_process_failed(msg_failed = "{.pkg {software}} not available")
+    cli::cli_process_failed
+      (msg_failed = "{.pkg {software_name}} not available"
+        )
   }
 }
 
@@ -834,23 +856,29 @@ check_if_software_available <- function(fun,
 #' }
 greta_sitrep <- function(){
 
-  check_if_software_available(fun = have_python(),
+  check_if_software_available(software_available = have_python(),
                               version = reticulate::py_version(),
-                              software = "python")
-  check_if_software_available(fun = have_tf(),
+                              ideal_version = "3.7",
+                              software_name = "python")
+
+  check_if_software_available(software_available = have_tf(),
                               version = version_tf(),
-                              software = "TensorFlow")
-  check_if_software_available(fun = have_tfp(),
+                              ideal_version = "1.14.0",
+                              software_name = "TensorFlow")
+
+  check_if_software_available(software_available = have_tfp(),
                               version = version_tfp(),
-                              software = "TensorFlow Probability")
-  check_if_software_available(fun = have_greta_conda_env(),
-                              software = "greta conda environment")
+                              ideal_version = "0.7.0",
+                              software_name = "TensorFlow Probability")
+
+  check_if_software_available(software_available = have_greta_conda_env(),
+                              software_name = "greta conda environment")
 
   software_available <- c(
-    have_python(),
-    have_tf(),
-    have_tfp(),
-    have_greta_conda_env()
+    python = have_python(),
+    tf = have_tf(),
+    tfp = have_tfp(),
+    greta_env = have_greta_conda_env()
   )
 
   if (any(!software_available)){
