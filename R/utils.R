@@ -811,34 +811,45 @@ check_if_software_available <- function(software_available,
 
   cli::cli_process_start("checking if {.pkg {software_name}} available")
   # if the software is detected
+
+  if (!software_available) {
+    cli::cli_process_failed(
+      msg_failed = "{.pkg {software_name}} not available"
+    )
+  }
+
   if (software_available) {
     # if it has a version and ideal version
-      if (!is.null(version) & !is.null(ideal_version)){
-        version_chr <- paste0(version)
-        version_match <- compareVersion(version_chr, ideal_version) == 0
+    if (!is.null(version) & !is.null(ideal_version)){
+      version_chr <- paste0(version)
+      version_match <- compareVersion(version_chr, ideal_version) == 0
 
-        if (version_match){
-          cli::cli_process_done(
-            msg_done = "{.pkg {software_name}} (version {version}) available"
-          )
-        }
-        if (!version_match){
-          cli::cli_process_failed(
-            msg_done = "{.pkg {software_name}} available, however \\
-            {ideal_version} is needed and {version} was detected"
-          )
-        }
-        # if there is no version for the software
-      } else if (is.null(version)){
+      if (version_match){
         cli::cli_process_done(
-          msg_done = "{.pkg {software_name}} available"
-          )
-  }
-    } else {
-    cli::cli_process_failed
-      (msg_failed = "{.pkg {software_name}} not available"
+          msg_done = "{.pkg {software_name}} (version {version}) available"
         )
+      }
+      if (!version_match){
+        cli::cli_process_failed(
+          msg_failed = "{.pkg {software_name}} available, \\
+          however {.strong {ideal_version}} is needed and \\
+          {.strong {version}} was detected"
+        )
+      }
+      # if there is no version for the software
+    } else if (is.null(version)){
+      cli::cli_process_done(
+        msg_done = "{.pkg {software_name}} available"
+      )
+    }
   }
+}
+
+compare_version_vec <- function(current,ideal){
+  compareVersion(
+      paste0(current),
+      ideal
+    )
 }
 
 
@@ -881,11 +892,35 @@ greta_sitrep <- function(){
     greta_env = have_greta_conda_env()
   )
 
-  if (any(!software_available)){
-    check_tf_version("warn")
-  } else if (all(software_available)){
+  software_version <- data.frame(
+    software = c(
+      "python",
+      "tf",
+      "tfp"
+    ),
+    current = c(
+      paste0(reticulate::py_version()),
+      paste0(version_tf()),
+      paste0(version_tfp())
+    ),
+    ideal = c(
+      "3.7",
+      "1.14.0",
+      "0.7.0"
+    )
+  )
+
+  software_version$match <- c(
+    compareVersion(software_version$current[1], software_version$ideal[1]) == 0,
+    compareVersion(software_version$current[2], software_version$ideal[2]) == 0,
+    compareVersion(software_version$current[3], software_version$ideal[3]) == 0
+  )
+
+  if (all(software_available) & all(software_version$match)){
     check_tf_version("none")
     cli::cli_alert_info("{.pkg greta} is ready to use!")
+  } else {
+    check_tf_version("warn")
   }
 
 }
