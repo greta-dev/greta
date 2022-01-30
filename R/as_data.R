@@ -35,7 +35,7 @@
 #' (d <- as_data(df))
 #' }
 as_data <- function(x) {
-  check_tf_version("error")
+  check_tf_version("message")
   UseMethod("as_data", x)
 }
 
