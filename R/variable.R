@@ -44,7 +44,7 @@
 #' d <- min + variable(0, 1, dim = nrow(iris)) * (max - min)
 #' }
 variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
-  check_tf_version("message")
+  check_tf_version("error")
 
   if (inherits(lower, "greta_array") | inherits(upper, "greta_array")) {
     msg <- cli::format_error(

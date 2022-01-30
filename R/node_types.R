@@ -607,7 +607,7 @@ node_classes_module <- module(
 
 # shorthand for distribution parameter constructors
 distrib <- function(distribution, ...) {
-  check_tf_version("message")
+  check_tf_version("error")
 
   # get and initialize the distribution, with a default value node
   constructor <- get(glue::glue("{distribution}_distribution"),

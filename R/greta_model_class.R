@@ -52,7 +52,7 @@ NULL
 model <- function(...,
                   precision = c("double", "single"),
                   compile = TRUE) {
-  check_tf_version("message")
+  check_tf_version("error")
 
   # get the floating point precision
   tf_float <- switch(match.arg(precision),
