@@ -96,7 +96,6 @@ Imports:
     tensorflow (>= 2.7.0),
     yesno,
     parallelly (>= 1.29.0),
-    mockery (>= 0.4.2.9000)
 Suggests:
     bayesplot,
     DiagrammeR,
@@ -109,6 +108,7 @@ Suggests:
     MASS,
     MCMCpack,
     mvtnorm,
+    mockery,
     spelling,
     rmarkdown,
     rmutil,
@@ -120,5 +120,3 @@ RoxygenNote: 7.1.2
 Language: en-GB
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
-Remotes:  
-    r-lib/mockery
