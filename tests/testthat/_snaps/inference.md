@@ -66,36 +66,22 @@
 
 # bad mcmc proposals are rejected
 
-    Code
-      mcmc(m, chains = 1, n_samples = 1, warmup = 0, initial_values = initials(z = 1e+20))
-    Error <simpleError>
-      The log density could not be evaluated at these initial values
-      Try using these initials as the values argument in `calculate()` to see what values of subsequent <greta_array>s these initial values lead to.
+    The log density could not be evaluated at these initial values
+    Try using these initials as the values argument in `calculate()` to see what values of subsequent <greta_array>s these initial values lead to.
 
 ---
 
-    Code
-      mcmc(m, chains = 1, n_samples = 1, warmup = 0)
-    Error <simpleError>
-      Could not find reasonable starting values after 20 attempts.
-      Please specify initial values manually via the `initial_values` argument
+    Could not find reasonable starting values after 20 attempts.
+    Please specify initial values manually via the `initial_values` argument
 
 # mcmc handles initial values nicely
 
-    Code
-      mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE, chains = 2,
-        initial_values = inits)
-    Error <simpleError>
-      the number of provided initial values does not match chains
-      3 sets of initial values were provided, but there are 2 chains
+    the number of provided initial values does not match chains
+    3 sets of initial values were provided, but there are 2 chains
 
 ---
 
-    Code
-      mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE, chains = 2,
-        initial_values = inits)
-    Error <simpleError>
-      the initial values provided have different dimensions than the named <greta_array>s
+    the initial values provided have different dimensions than the named <greta_array>s
 
 ---
 
@@ -229,135 +215,76 @@
 
 # model errors nicely
 
-    Code
-      model(a, b)
-    Error <simpleError>
-      `model()` arguments must be <greta_array>s
-      The following object passed to `model()` is not a <greta array>:
-      "a"
+    `model()` arguments must be <greta_array>s
+    The following object passed to `model()` is not a <greta array>:
+    "a"
+    
 
 # mcmc doesn't support slice sampler with double precision models
 
-    Code
-      draws <- mcmc(m, sampler = slice(), n_samples = 100, warmup = 100)
-    Error <simpleError>
-      slice sampler can only currently be used for models defined with single precision
-      set `model(..., precision = 'single')` instead
+    slice sampler can only currently be used for models defined with single precision
+    set `model(..., precision = 'single')` instead
 
 # numerical issues are handled in mcmc
 
-    Code
-      draws <- mcmc(m, verbose = FALSE)
-    Error <simpleError>
-      TensorFlow hit a numerical problem that caused it to error
-      greta can handle these as bad proposals if you rerun `mcmc()` with the argument `one_by_one = TRUE`.
-      This will slow down the sampler slightly.
-      The error encountered can be recovered and viewed with:
-      `greta_notes_tf_num_error()`
+    TensorFlow hit a numerical problem that caused it to error
+    greta can handle these as bad proposals if you rerun `mcmc()` with the argument `one_by_one = TRUE`.
+    This will slow down the sampler slightly.
+    The error encountered can be recovered and viewed with:
+    `greta_notes_tf_num_error()`
 
 # mcmc errors for invalid parallel plans
 
-    Code
-      mcmc(m)
-    Error <simpleError>
-      parallel mcmc samplers cannot be run with `plan(multiprocess)` or `plan(multicore)`
+    parallel mcmc samplers cannot be run with `plan(multiprocess)` or `plan(multicore)`
 
 ---
 
-    Code
-      mcmc(m)
-    Error <simpleError>
-      parallel mcmc samplers cannot be run with `plan(multiprocess)` or `plan(multicore)`
+    parallel mcmc samplers cannot be run with `plan(multiprocess)` or `plan(multicore)`
 
 ---
 
-    Code
-      mcmc(m)
-    Error <simpleError>
-      parallel mcmc samplers cannot be run with a fork cluster
+    parallel mcmc samplers cannot be run with a fork cluster
 
 # initials works
 
-    Code
-      initials(a = FALSE)
-    Error <simpleError>
-      initial values must be numeric
+    initial values must be numeric
 
 ---
 
-    Code
-      initials(FALSE)
-    Error <simpleError>
-      all initial values must be named
-
----
-
-    Code
-      initials(a = 3)
-    Output
-      a greta initials object with values:
-      
-      $a
-           [,1]
-      [1,]    3
-      
+    all initial values must be named
 
 # prep_initials errors informatively
 
-    Code
-      mcmc(m, initial_values = FALSE)
-    Error <simpleError>
-      `initial_values` must be an initials object created with `initials()`, or a simple list of initials objects
+    `initial_values` must be an initials object created with `initials()`, or a simple list of initials objects
 
 ---
 
-    Code
-      mcmc(m, initial_values = list(FALSE))
-    Error <simpleError>
-      `initial_values` must be an initials object created with `initials()`, or a simple list of initials objects
+    `initial_values` must be an initials object created with `initials()`, or a simple list of initials objects
 
 ---
 
-    Code
-      mcmc(m, chains = 1, initial_values = initials(g = 1))
-    Error <simpleError>
-      some <greta_array>s passed to `initials()` are not associated with the model:
-      `g`
+    some <greta_array>s passed to `initials()` are not associated with the model:
+    `g`
 
 ---
 
-    Code
-      mcmc(m, chains = 1, initial_values = initials(f = 1))
-    Error <simpleError>
-      initial values can only be set for variable <greta_array>s
+    initial values can only be set for variable <greta_array>s
 
 ---
 
-    Code
-      mcmc(m, chains = 1, initial_values = initials(z = 1))
-    Error <simpleError>
-      initial values can only be set for variable <greta_array>s
+    initial values can only be set for variable <greta_array>s
 
 ---
 
-    Code
-      mcmc(m, chains = 1, initial_values = initials(b = -1))
-    Error <simpleError>
-      some provided initial values are outside the range of values their variables can take
+    some provided initial values are outside the range of values their variables can take
 
 ---
 
-    Code
-      mcmc(m, chains = 1, initial_values = initials(d = -1))
-    Error <simpleError>
-      some provided initial values are outside the range of values their variables can take
+    some provided initial values are outside the range of values their variables can take
 
 ---
 
-    Code
-      mcmc(m, chains = 1, initial_values = initials(e = 2))
-    Error <simpleError>
-      some provided initial values are outside the range of values their variables can take
+    some provided initial values are outside the range of values their variables can take
 
 # samplers print informatively
 

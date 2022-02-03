@@ -108,18 +108,15 @@ test_that("as_data errors informatively", {
   source("helpers.R")
 
   # wrong class of object
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(NULL)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(list())
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(environment())
   )
 
@@ -130,28 +127,23 @@ test_that("as_data errors informatively", {
   cha_df <- as.data.frame(cha_mat, stringsAsFactors = FALSE)
   cha_df2 <- as.data.frame(cha_mat, stringsAsFactors = TRUE)
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(cha_vec)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(cha_mat)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(cha_arr)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(cha_df)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(cha_df2)
   )
 
@@ -163,18 +155,15 @@ test_that("as_data errors informatively", {
   arr_na <- randn(3, 3)
   arr_na[1, 3] <- NA
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(arr_inf)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(arr_minf)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(arr_na)
   )
 
@@ -182,12 +171,10 @@ test_that("as_data errors informatively", {
   stoch <- normal(0, 1, dim = c(2, 3))
   op <- stoch^2
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(stoch)
   )
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     as_data(op)
   )
 })

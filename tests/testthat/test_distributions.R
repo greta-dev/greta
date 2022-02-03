@@ -702,30 +702,25 @@ test_that("uniform distribution errors informatively", {
   source("helpers.R")
 
   # bad types
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     uniform(min = 0, max = NA)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     uniform(min = 0, max = head)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     uniform(min = 1:3, max = 5)
   )
 
   # good types, bad values
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     uniform(min = -Inf, max = Inf)
   )
 
   # lower not below upper
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     uniform(min = 1, max = 1)
   )
 
@@ -735,25 +730,21 @@ test_that("poisson() and binomial() error informatively in glm", {
   skip_if_not(check_tf_version())
 
   # if passed as an object
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     glm(1 ~ 1, family = poisson)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     glm(1 ~ 1, family = binomial)
   )
 
   # if executed alone
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     glm(1 ~ 1, family = poisson())
   )
 
   # if given a link
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     glm(1 ~ 1, family = poisson("sqrt"))
   )
 })
@@ -771,13 +762,11 @@ test_that("wishart distribution errors informatively", {
     "greta_array"
   ))
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     wishart(3, b)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     wishart(3, c)
   )
 
@@ -795,33 +784,27 @@ test_that("lkj_correlation distribution errors informatively", {
     "greta_array"
   ))
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     lkj_correlation(-1, dim)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     lkj_correlation(c(3, 3), dim)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     lkj_correlation(uniform(0, 1, dim = 2), dim)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     lkj_correlation(4, dimension = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     lkj_correlation(4, dim = c(3, 3))
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     lkj_correlation(4, dim = NA)
   )
 })
@@ -852,13 +835,11 @@ test_that("multivariate_normal distribution errors informatively", {
   ))
 
   # bad means
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_c, a)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_d, a)
   )
 
@@ -869,47 +850,39 @@ test_that("multivariate_normal distribution errors informatively", {
   ))
 
   # bad sigmas
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_a, b)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_a, c)
   )
 
   # mismatched parameters
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_a, d)
   )
 
   # scalars
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(0, 1)
   )
 
   # bad n_realisations
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_a, a, n_realisations = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_a, a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_a, a, dimension = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multivariate_normal(m_a, a, dimension = c(1, 3))
   )
 })
@@ -945,30 +918,25 @@ test_that("multinomial distribution errors informatively", {
   ))
 
   # scalars
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multinomial(c(1), 1)
   )
 
   # bad n_realisations
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multinomial(10, p_a, n_realisations = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multinomial(10, p_a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multinomial(10, p_a, dimension = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     multinomial(10, p_a, dimension = c(1, 3))
   )
 })
@@ -992,30 +960,25 @@ test_that("categorical distribution errors informatively", {
   ))
 
   # scalars
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     categorical(1),
   )
 
   # bad n_realisations
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     categorical(p_a, n_realisations = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     categorical(p_a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     categorical(p_a, dimension = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     categorical(p_a, dimension = c(1, 3))
   )
 })
@@ -1040,30 +1003,25 @@ test_that("dirichlet distribution errors informatively", {
   ))
 
   # scalars
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet(1),
   )
 
   # bad n_realisations
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet(alpha_a, n_realisations = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet(alpha_a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet(alpha_a, dimension = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet(alpha_a, dimension = c(1, 3))
   )
 })
@@ -1114,30 +1072,25 @@ test_that("dirichlet-multinomial distribution errors informatively", {
   ))
 
   # scalars
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet_multinomial(c(1), 1)
   )
 
   # bad n_realisations
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet_multinomial(10, alpha_a, n_realisations = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet_multinomial(10, alpha_a, n_realisations = c(1, 3))
   )
 
   # bad dimension
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet_multinomial(10, alpha_a, dimension = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dirichlet_multinomial(10, alpha_a, dimension = c(1, 3))
   )
 })

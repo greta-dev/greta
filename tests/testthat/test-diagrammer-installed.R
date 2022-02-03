@@ -6,9 +6,7 @@ test_that("DiagrammeR installation is checked", {
     how = FALSE
     )
   m <- model(normal(0,1))
-    expect_snapshot(
-      error = TRUE,
-      cran = FALSE,
+    expect_snapshot_error(
       x = plot(m)
       )
 })

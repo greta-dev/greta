@@ -34,8 +34,7 @@ test_that("imultilogit errors informatively", {
 
   x <- ones(3, 4, 3)
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     imultilogit(x)
   )
 

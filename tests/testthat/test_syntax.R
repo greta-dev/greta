@@ -39,33 +39,28 @@ test_that("`distribution<-` errors informatively", {
   x <- randn(1)
 
   # not a greta array with a distribution on the right
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(y) <- x
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(y) <- as_data(x)
   )
 
   # no density on the right
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(y) <- variable()
   )
 
   # non-scalar and wrong dimensions
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(y) <- normal(0, 1, dim = c(3, 3, 1))
   )
 
   # double assignment of distribution to node
   y_ <- as_data(y)
   distribution(y_) <- normal(0, 1)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(y_) <- normal(0, 1)
   )
 
@@ -74,29 +69,25 @@ test_that("`distribution<-` errors informatively", {
   y2 <- as_data(y)
   d <- normal(0, 1)
   distribution(y1) <- d
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(y2) <- y1
   )
 
   # assignment to a variable
   z <- variable()
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(z) <- normal(0, 1)
   )
 
   # assignment to an op
   z2 <- z^2
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(z2) <- normal(0, 1)
   )
 
   # assignment to another distribution
   u <- uniform(0, 1)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(z2) <- normal(0, 1)
   )
 
@@ -108,8 +99,7 @@ test_that("distribution() errors informatively", {
 
   y <- randn(3)
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     distribution(y)
   )
 })

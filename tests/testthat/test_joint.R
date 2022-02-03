@@ -84,8 +84,7 @@ test_that("joint of fixed and continuous distributions errors", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     joint(
       bernoulli(0.5),
       normal(0, 1)
@@ -97,13 +96,11 @@ test_that("joint with insufficient distributions errors", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     joint(normal(0, 2))
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     joint()
   )
 })
@@ -112,8 +109,7 @@ test_that("joint with non-scalar distributions errors", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     joint(
       normal(0, 2, dim = 3),
       normal(0, 1, dim = 3)

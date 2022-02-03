@@ -3,35 +3,29 @@ test_that("variable() errors informatively", {
   source("helpers.R")
 
   # bad types
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     variable(upper = NA)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     variable(upper = head)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     variable(lower = NA)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     variable(lower = head)
   )
 
   # good types, bad values
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     variable(lower = 0:2, upper = 1:2)
   )
 
   # lower not below upper
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     variable(lower = 1, upper = 1)
   )
 })
@@ -40,32 +34,26 @@ test_that("constrained variable constructors error informatively", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     cholesky_variable(dim = 2:3)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     cholesky_variable(dim = rep(2, 3))
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     simplex_variable(1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     simplex_variable(c(3, 1))
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     ordered_variable(1)
   )
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     ordered_variable(c(3, 1))
   )
 })

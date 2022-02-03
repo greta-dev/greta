@@ -394,13 +394,11 @@ test_that("abind errors informatively", {
   b <- ones(1, 1, 3)
   c <- ones(5, 1, 1)
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     abind(a, b)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     abind(a, c, along = 5)
   )
 
@@ -435,8 +433,7 @@ test_that("assign errors on variable greta arrays", {
   source("helpers.R")
 
   z <- normal(0, 1, dim = 5)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     z[1] <- 3
   )
 })
@@ -448,13 +445,11 @@ test_that("rbind and cbind give informative error messages", {
   a <- as_data(randn(5, 1))
   b <- as_data(randn(1, 5))
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     rbind(a, b)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     cbind(a, b)
   )
 })
@@ -464,19 +459,16 @@ test_that("replacement gives informative error messages", {
   source("helpers.R")
 
   x <- ones(2, 2, 2)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     x[1:2, , 1] <- seq_len(3)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     x[1, 1, 3] <- 1
   )
 
   x <- ones(2)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     x[3] <- 1
   )
 })
@@ -486,14 +478,12 @@ test_that("extraction gives informative error messages", {
   source("helpers.R")
 
   x <- ones(2, 2, 2)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     x[1, 1, 3]
   )
 
   x <- ones(2)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     x[3]
   )
 })
@@ -631,23 +621,19 @@ test_that("dim<- errors as expected", {
 
   x <- zeros(3, 4)
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dim(x) <- pi[0]
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dim(x) <- c(1, NA)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dim(x) <- c(1, -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     dim(x) <- 13
   )
 })
