@@ -19,21 +19,18 @@ test_that("mcmc errors for invalid parallel plans", {
 
   # handle handle forks, so only accept multisession, or multi session clusters
   suppressWarnings(plan(multiprocess))
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     check_future_plan()
   )
 
   plan(multicore)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     check_future_plan()
   )
 
   cl <- parallel::makeCluster(2L, type = "FORK")
   plan(cluster, workers = cl)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     check_future_plan()
   )
 

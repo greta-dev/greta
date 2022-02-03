@@ -62,8 +62,7 @@ test_that("simulate errors if distribution-free variables are not fixed", {
   a <- variable()
   y <- normal(a, 1)
   m <- model(y)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     sims <- simulate(m)
   )
 })
@@ -78,8 +77,7 @@ test_that("simulate errors if a distribution cannot be sampled from", {
   m <- lognormal(0, 1)
   distribution(y) <- hypergeometric(m, 3, 2)
   m <- model(y)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     sims <- simulate(m)
   )
 })
@@ -91,18 +89,15 @@ test_that("simulate errors nicely if nsim is invalid", {
   x <- normal(0, 1)
   m <- model(x)
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     simulate(m, nsim = 0)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     simulate(m, nsim = -1)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     simulate(m, nsim = "five")
   )
 })

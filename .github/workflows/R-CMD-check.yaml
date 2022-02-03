@@ -110,6 +110,8 @@ jobs:
           install.packages("fields", type = "binary")
           library(fields)
           packageVersion("fields")
+          install.packages("DiagrammeR")
+          packageVersion("DiagrammeR")
         shell: Rscript {0}
 
       - name: Install Miniconda

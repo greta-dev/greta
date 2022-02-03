@@ -467,6 +467,8 @@ The bayesplot package makes some nice plots of the MCMC chain and the parameter 
 
 ```{r mcmcvis, echo = TRUE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
 library (bayesplot)
+# set theme to avoid issues with fonts
+ggplot2::theme_set(ggplot2::theme_bw())
 mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1))
 mcmc_intervals(draws)
 ```

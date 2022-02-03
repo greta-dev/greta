@@ -95,7 +95,7 @@ Imports:
     reticulate (>= 1.19.0),
     tensorflow (>= 2.7.0),
     yesno,
-    parallelly (>= 1.29.0)
+    parallelly (>= 1.29.0),
 Suggests:
     bayesplot,
     DiagrammeR,
@@ -103,12 +103,13 @@ Suggests:
     covr,
     extraDistr,
     fields,
+    ggplot2,
     knitr,
     lattice,
     MASS,
     MCMCpack,
-    mockery,
     mvtnorm,
+    mockery,
     spelling,
     rmarkdown,
     rmutil,

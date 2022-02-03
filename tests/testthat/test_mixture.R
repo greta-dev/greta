@@ -48,8 +48,7 @@ test_that("mixtures of fixed and continuous distributions errors", {
   source("helpers.R")
 
   weights <- uniform(0, 1, dim = 2)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mixture(
       bernoulli(0.5),
       normal(0, 1),
@@ -64,8 +63,7 @@ test_that("mixtures of multivariate and univariate errors", {
   source("helpers.R")
 
   weights <- uniform(0, 1, dim = 2)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mixture(
       multivariate_normal(zeros(1, 3), diag(3)),
       normal(0, 1, dim = c(1, 3)),
@@ -81,8 +79,7 @@ test_that("mixtures of supports errors", {
   weights <- c(0.5, 0.5)
 
   # due to truncation
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mixture(
       normal(0, 1, truncation = c(0, Inf)),
       normal(0, 1),
@@ -91,8 +88,7 @@ test_that("mixtures of supports errors", {
   )
 
   # due to bounds
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mixture(
       lognormal(0, 1),
       normal(0, 1),
@@ -106,8 +102,7 @@ test_that("incorrectly-shaped weights errors", {
   source("helpers.R")
 
   weights <- uniform(0, 1, dim = c(1, 2))
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mixture(
       normal(0, 1),
       normal(0, 2),
@@ -122,16 +117,14 @@ test_that("mixtures with insufficient distributions errors", {
 
   weights <- uniform(0, 1)
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mixture(
       normal(0, 2),
       weights = weights
     )
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mixture(weights = weights)
   )
 
