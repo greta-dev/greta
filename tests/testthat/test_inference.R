@@ -573,7 +573,7 @@ test_that("initials works", {
   )
 
   # prints nicely
-  expect_snapshot_error(
+  expect_snapshot(
     initials(a = 3)
   )
 

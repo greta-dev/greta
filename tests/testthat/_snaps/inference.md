@@ -253,6 +253,18 @@
 
     all initial values must be named
 
+---
+
+    Code
+      initials(a = 3)
+    Output
+      a greta initials object with values:
+      
+      $a
+           [,1]
+      [1,]    3
+      
+
 # prep_initials errors informatively
 
     `initial_values` must be an initials object created with `initials()`, or a simple list of initials objects
