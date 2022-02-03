@@ -103,6 +103,7 @@ Suggests:
     covr,
     extraDistr,
     fields,
+    ggplot2,
     knitr,
     lattice,
     MASS,
