@@ -365,7 +365,7 @@ variable_node <- R6Class(
       event_ndims <- tf_bijector$forward_min_event_ndims
       ljd <- tf_bijector$forward_log_det_jacobian(
         x = free,
-        event_ndims = event_ndims
+        event_ndims = as.integer(event_ndims)
       )
 
       # sum across all dimensions of jacobian
