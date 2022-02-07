@@ -49,7 +49,7 @@ have_tfp <- function() {
 
     pkg <- reticulate::import("pkg_resources")
     tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-    is_tfp_available <- utils::compareVersion("0.7.0", tfp_version) == 0
+    is_tfp_available <- utils::compareVersion("0.14.1", tfp_version) == 0
 
   }
 
@@ -63,8 +63,8 @@ have_tf <- function() {
 
   if (is_tf_available) {
 
-    tf_version <- suppressMessages(tf$`__version__`)
-    is_tf_available <- utils::compareVersion("1.14.0", tf_version) == 0
+    tf_version <- tf$`__version__`
+    is_tf_available <- utils::compareVersion("2.6.0", tf_version) == 0
 
   }
 
