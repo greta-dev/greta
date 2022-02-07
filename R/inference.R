@@ -162,8 +162,8 @@ greta_stash$numerical_messages <- c(
 #' o <- opt(m2, initial_values = initials(variance = 1))
 #'
 #' # and you can return a list of the Hessians for each of these parameters
-#' o <- opt(m2, hessians = TRUE)
-#' o$hessians
+#' o <- opt(m2, hessian = TRUE)
+#' o$hessian
 #'
 #'
 #' # to get a hessian matrix across multiple greta arrays, you must first
@@ -174,8 +174,8 @@ greta_stash$numerical_messages <- c(
 #' variance <- params[2]
 #' distribution(x) <- normal(mu, sqrt(variance))
 #' m3 <- model(params)
-#' o <- opt(m3, hessians = TRUE)
-#' o$hessians
+#' o <- opt(m3, hessian = TRUE)
+#' o$hessian
 #' }
 mcmc <- function(model,
                  sampler = hmc(),
