@@ -67,25 +67,25 @@ check_tf_version <- function(alert = c("none",
                        {.code tf$compat$v1$disable_eager_execution()}"))
       tf$compat$v1$disable_eager_execution()
 
-      cli::cli_bullets(c("i" = "Disabling TF V2 behaviour:
-                       {.code tf$compat$v1$disable_v2_behavior()}"))
-      tf$compat$v1$disable_v2_behavior()
+      # cli::cli_bullets(c("i" = "Disabling TF V2 behaviour:
+      #                  {.code tf$compat$v1$disable_v2_behavior()}"))
+      # tf$compat$v1$disable_v2_behavior()
 
-      cli::cli_bullets(c("i" = "Disabling TF V2 tensorshape:
-                       {.code tf$compat$v1$disable_v2_tensorshape()}"))
-      tf$compat$v1$disable_v2_tensorshape()
-
-      cli::cli_bullets(c("i" = "Disabling TF V2 control flow:
-                       {.code tf$compat$v1$disable_control_flow_v2()}"))
-      tf$compat$v1$disable_control_flow_v2()
-
-      cli::cli_bullets(c("i" = "Disabling TF V2 resource variables:
-                       {.code tf$compat$v1$disable_resource_variables()}"))
-      tf$compat$v1$disable_resource_variables()
-
-      cli::cli_bullets(c("i" = "Disabling TF V2 tensor equality:
-                       {.code tf$compat$v1$disable_tensor_equality()}"))
-      tf$compat$v1$disable_tensor_equality()
+      # cli::cli_bullets(c("i" = "Disabling TF V2 tensorshape:
+      #                  {.code tf$compat$v1$disable_v2_tensorshape()}"))
+      # tf$compat$v1$disable_v2_tensorshape()
+      #
+      # cli::cli_bullets(c("i" = "Disabling TF V2 control flow:
+      #                  {.code tf$compat$v1$disable_control_flow_v2()}"))
+      # tf$compat$v1$disable_control_flow_v2()
+      #
+      # cli::cli_bullets(c("i" = "Disabling TF V2 resource variables:
+      #                  {.code tf$compat$v1$disable_resource_variables()}"))
+      # tf$compat$v1$disable_resource_variables()
+      #
+      # cli::cli_bullets(c("i" = "Disabling TF V2 tensor equality:
+      #                  {.code tf$compat$v1$disable_tensor_equality()}"))
+      # tf$compat$v1$disable_tensor_equality()
 
     }
 
