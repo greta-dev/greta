@@ -2,7 +2,7 @@ Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
 Version: 0.4.0
-Date: 2021-11-26
+Date: 2022-02-08
 Authors@R: c(
   person("Nick", "Golding", 
          role = c("aut"),
