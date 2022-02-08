@@ -1,4 +1,6 @@
-# greta 0.4.0 (2021-11-26)
+# greta 0.4.0 (2022-02-08)
+
+This release presents a variety of improvements over the past 2 years. We are now aiming to have smaller, more regular releases of `greta`. This release showcases some strong new features implemented by Nick Golding on the `calculate` and `simulate` functions, as well as many bug fixes and improvements. There are many internal changes made to the package, around installation and checking Python modules, using new testing methods like snapshotting, and overhauling the installation helper and suggestions for installing Python modules, which has long been a source of friction for users. We are hopeful that the new `install_greta_deps()` function will help ensure Python dependencies are installed correctly. In a future release we will switch to using TensorFlow 2.6 or higher,  ensure `greta` works with Apple computers with an M1 chip 
 
 ## Fixes:
 
@@ -34,13 +36,13 @@
 
 * `dirichlet()` now returns a variable (rather than an operation) greta array, and the graphs created by `lkj_correlation()` and `wishart()` are now simpler as cholesky-shaped variables are now available internally.
 
-* Python dependency installation has been overhauled with the new `install_greta_deps()` function (#417).
-
 * Adds helper functions for helping installation get to "clean slate" (#443)
 
 * `greta` currently doesn't work on Apple Silicon (M1 Macs) as they need to use TF 2.0, which is currently being implemented. `greta` now throws an error if M1 macs are detected and directs users to https://github.com/greta-dev/greta/issues/458 (#487)
 
 ## Features:
+
+* Python dependency installation has been overhauled with the new `install_greta_deps()` function (#417). This saves exact versions of Python (3.7), and the python modules NumPy (1.16.4), Tensorflow (1.14.0), and Tensorflow Probability (0.7.0) into a conda environemnt, "greta-env". When initialising Python, greta now searches for this conda environment first, which presents a great advantage as it isolates these exact versions of these modules from other Python installations. It is not required to use the conda environment, "greta-env".
 
 * `calculate()` now enables simulation of greta array values from their priors, optionally conditioned on fixed values or posterior samples. This enables prior and posterior predictive checking of models, and simulation of data.
 
