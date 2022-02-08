@@ -10,7 +10,9 @@ greta_install_python_deps <- function(timeout) {
           "tensorflow==1.14.0"
         )
       )
-    }
+    },
+    stdout = tempfile("out-"),
+    stderr = ">&1"
   )
 
   install_python_modules <- new_install_process(

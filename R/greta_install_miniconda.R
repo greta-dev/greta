@@ -3,7 +3,9 @@ greta_install_miniconda <- function(timeout) {
   callr_install_miniconda <- callr::r_process_options(
     func = function() {
       reticulate::install_miniconda()
-    }
+    },
+    stdout = tempfile("out-"),
+    stderr = ">&1"
   )
 
   # if this function doesn't fail, then this code here can be run?

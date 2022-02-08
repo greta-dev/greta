@@ -6,7 +6,9 @@ greta_create_conda_env <- function(timeout) {
         envname = "greta-env",
         python_version = "3.7"
       )
-    }
+    },
+    stdout = tempfile("out-"),
+    stderr = ">&1"
   )
 
   install_conda_create <- new_install_process(
