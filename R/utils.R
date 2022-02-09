@@ -925,3 +925,10 @@ greta_sitrep <- function(){
 
 }
 
+# adapted from https://github.com/rstudio/tensorflow/blob/main/R/utils.R
+is_mac_arm64 <- function() {
+  si <- Sys.info()
+  is_darwin <- si[["sysname"]] == "Darwin"
+  is_arm64 <- si[["machine"]] == "arm64"
+  is_darwin && is_arm64
+}
