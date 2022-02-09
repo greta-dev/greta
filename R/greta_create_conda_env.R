@@ -1,5 +1,8 @@
 greta_create_conda_env <- function(timeout) {
 
+  stdout_file <- tempfile("out-greta-conda")
+  stderr_file <- tempfile("err-greta-conda")
+
   callr_conda_create <- callr::r_process_options(
     func = function() {
       reticulate::conda_create(
@@ -7,12 +10,14 @@ greta_create_conda_env <- function(timeout) {
         python_version = "3.7"
       )
     },
-    stdout = tempfile("out-"),
-    stderr = ">&1"
+    stdout = stdout_file,
+    stderr = stderr_file
   )
 
   install_conda_create <- new_install_process(
     callr_process = callr_conda_create,
+    stdout_file = stdout_file,
+    stderr_file = stderr_file,
     timeout = timeout,
     cli_start_msg = "Creating 'greta-env' conda environment using python \\
                       v3.7, this may take a minute",
