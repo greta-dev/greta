@@ -45,13 +45,13 @@ have_python <- function() {
 have_tfp <- function() {
   is_tfp_available <- reticulate::py_module_available("tensorflow_probability")
 
-  if (is_tfp_available) {
-
-    pkg <- reticulate::import("pkg_resources")
-    tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-    is_tfp_available <- utils::compareVersion("0.14.1", tfp_version) == 0
-
-  }
+  # if (is_tfp_available) {
+  #
+  #   pkg <- reticulate::import("pkg_resources")
+  #   tfp_version <- pkg$get_distribution("tensorflow_probability")$version
+  #   is_tfp_available <- utils::compareVersion("0.15.0", tfp_version) == 0
+  #
+  # }
 
   return(is_tfp_available)
 
