@@ -26,10 +26,10 @@ installation component.}
 }
 \description{
 This is a helper function to install Python dependencies needed. This
-includes Tensorflow version 1.14.0, Tensorflow Probability 0.7.0, and
-numpy version 1.16.4. These Python modules will be installed into a
-virtual or conda environment, named "greta-env". Note that "virtualenv" is
-not available on Windows.
+includes Tensorflow version 2.6.0, Tensorflow Probability 0.14.0, and the
+latest verison of numpy version (at the time of writing, 1.22.0). These
+Python modules will be installed into a virtual or conda environment,
+named "greta-env". Note that "virtualenv" is not available on Windows.
 }
 \note{
 This will automatically install Miniconda (a minimal version of the
@@ -38,8 +38,8 @@ environment for greta named 'greta-env' with required python and python
 package versions, and forcibly switch over to using that conda environment.
 
 If you don't want to use conda or the "greta-env" conda environment, you
-can install these specific versions of tensorflow (version 1.14.0), and
-tensorflow-probability (version 0.7.0), and ensure that the python
+can install these specific versions of tensorflow (version 2.6.0), and
+tensorflow-probability (version 0.14.0), and ensure that the python
 environment that is initialised in this R session has these versions
 installed. This is now always straightforward, so we recommend installing
 the python packages using \code{install_greta_deps()} for most users.

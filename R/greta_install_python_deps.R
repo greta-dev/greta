@@ -2,16 +2,17 @@ greta_install_python_deps <- function(timeout) {
 
   callr_conda_install <- callr::r_process_options(
     func = function() {
-      reticulate::conda_install(
-        envname = "greta-env",
+      reticulate::py_install(
         packages = c(
-          "numpy==1.16.4",
-          "tensorflow-probability==0.7.0",
-          "tensorflow==1.14.0"
+          "numpy",
+          "tensorflow==2.6.0",
+          "tensorflow-probability==0.14.1"
+          ),
+        envname = "greta-env",
+        pip = TRUE
         )
-      )
-    }
-  )
+      }
+    )
 
   install_python_modules <- new_install_process(
     callr_process = callr_conda_install,
