@@ -813,6 +813,7 @@ hmc_sampler <- R6Class(
 
       # build the kernel
       # nolint start
+      # have a play around here ***
       dag$tf_run(
         sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
           target_log_prob_fn = log_prob_fun,
