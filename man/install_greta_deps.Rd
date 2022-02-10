@@ -8,6 +8,7 @@ install_greta_deps(
   method = c("auto", "virtualenv", "conda"),
   conda = "auto",
   timeout = 5,
+  manual = FALSE,
   ...
 )
 }
@@ -21,6 +22,9 @@ install_greta_deps(
 \item{timeout}{maximum time in minutes until the installation for each
 installation component times out and exits. Default is 5 minutes per
 installation component.}
+
+\item{manual}{logical. Skip the fancy installation and just run:
+\code{reticulate::py_install( packages = c( 'numpy', 'tensorflow==2.6.0', 'tensorflow-probability==0.14.1' ), pip = TRUE )}}
 
 \item{...}{Optional arguments, reserved for future expansion.}
 }
