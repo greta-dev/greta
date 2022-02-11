@@ -747,7 +747,7 @@ other_install_fail_msg <- function(error_passed){
     message = c(
       "Stopping as installation of {.pkg greta} dependencies failed",
       "An error occured:",
-      "{.code {error_passed}}",
+      "{.code {cat(error_passed)}}",
       "You can perform the entire installation manually with:",
       "{.code reticulate::install_miniconda()}",
       "Then:",
@@ -792,7 +792,7 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     msg <- c(
       msg,
       "Additionally, the following error appeared:",
-      "{py_error}"
+      "{cat(py_error)}"
     )
     cli::format_error(
       message = msg
@@ -926,5 +926,5 @@ greta_sitrep <- function(){
 }
 
 read_char <- function(path){
-  readChar(path, nchars = file.info(path)$size)
+  trimws(readChar(path, nchars = file.info(path)$size))
 }
