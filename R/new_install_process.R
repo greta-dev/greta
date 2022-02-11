@@ -13,10 +13,10 @@ new_install_process <- function(callr_process,
 
   status <- r_callr_process$get_exit_status()
   # output_notes <- r_callr_process$read_output()
-  output_notes <- readLines(stdout_file)
+  output_notes <- read_char(stdout_file)
   no_output <- nchar(output_notes) == 0
   # output_error <- r_callr_process$read_all_error_lines()
-  output_error <- readLines(stderr_file)
+  output_error <- read_char(stderr_file)
 
   if (is.null(status)) {
     cli::cli_process_failed()

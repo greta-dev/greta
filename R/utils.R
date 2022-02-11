@@ -925,3 +925,6 @@ greta_sitrep <- function(){
 
 }
 
+read_char <- function(path){
+  readChar(path, nchars = file.info(path)$size)
+}

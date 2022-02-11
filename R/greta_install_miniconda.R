@@ -1,7 +1,11 @@
 greta_install_miniconda <- function(timeout) {
 
-  stdout_file <- tempfile("out-miniconda")
-  stderr_file <- tempfile("err-miniconda")
+  # stdout_file <- tempfile("out-miniconda")
+  # stderr_file <- tempfile("err-miniconda")
+  stdout_file <- file.path("out-miniconda.txt")
+  file.create("out-miniconda.txt")
+  stderr_file <- file.path("err-miniconda.txt")
+  file.create("err-miniconda.txt")
 
   callr_install_miniconda <- callr::r_process_options(
     func = function() {
