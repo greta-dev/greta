@@ -16,6 +16,10 @@ new_install_process <- function(callr_process,
   # output_notes <- r_callr_process$read_output()
   no_output <- nchar(output_notes) == 0
   output_error <- read_char(stderr_file)
+
+  if (is.null(output_error)) {
+    output_error <- "No output detected in stderr"
+  }
   # output_error <- r_callr_process$read_all_error_lines()
 
   # clean up stdout_file and stderr_file

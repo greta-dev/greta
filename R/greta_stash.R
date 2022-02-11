@@ -38,14 +38,26 @@ greta_notes_install_miniconda_error <- function(){
 
 #' @name stash-notes
 #' @export
-greta_notes_conda_create <- function() {
+greta_notes_conda_create_output <- function() {
   cat(greta_stash$conda_create_notes)
 }
 
 #' @name stash-notes
 #' @export
-greta_notes_conda_install <- function() {
+greta_notes_conda_create_error <- function() {
+  cat(greta_stash$conda_create_error)
+}
+
+#' @name stash-notes
+#' @export
+greta_notes_conda_install_output <- function() {
   cat(greta_stash$conda_install_notes)
+}
+
+#' @name stash-notes
+#' @export
+greta_notes_conda_install_error <- function() {
+  cat(greta_stash$conda_install_error)
 }
 
 #' @name stash-notes

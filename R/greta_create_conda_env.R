@@ -1,13 +1,9 @@
 greta_create_conda_env <- function(timeout) {
 
-  stdout_file <- tempfile("out-greta-conda")
-  stderr_file <- tempfile("err-greta-conda")
-
   stdout_file <- file.path("out-greta-conda.txt")
-  file.create("out-miniconda.txt")
-  stderr_file <- file.path("err-miniconda.txt")
-  file.create("err-miniconda.txt")
-
+  file.create(stdout_file)
+  stderr_file <- file.path("err-greta-conda.txt")
+  file.create(stderr_file)
 
   callr_conda_create <- callr::r_process_options(
     func = function() {
@@ -29,8 +25,13 @@ greta_create_conda_env <- function(timeout) {
                       v3.7, this may take a minute",
     cli_end_msg = "greta-env environment created!"
   )
+
   greta_stash$conda_create_notes <- install_conda_create$output_notes
+  greta_stash$conda_create_error <- install_conda_create$output_error
+
   cli::cli_ul("To see full installation notes run:")
-  cli::cli_ul("{.code greta_notes_conda_create()}")
+  cli::cli_ul("{.code greta_notes_conda_create_output()}")
+  cli::cli_ul("To see any error messages, run:")
+  cli::cli_ul("{.code greta_notes_conda_create_error()}")
 
 }
