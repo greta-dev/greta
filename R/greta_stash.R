@@ -26,10 +26,15 @@ greta_stash$tf_num_error <- greta_note_msg
 #' greta_notes_tf_num_error()
 #' greta_notes_tf_error()
 #' }
-greta_notes_install_miniconda <- function() {
-  cat(greta_stash$install_miniconda_notes)
+greta_notes_install_miniconda_output <- function() {
+  cat(greta_stash$miniconda_notes)
 }
 
+#' @name stash-notes
+#' @export
+greta_notes_install_miniconda_error <- function(){
+  cat(greta_stash$miniconda_error)
+}
 
 #' @name stash-notes
 #' @export

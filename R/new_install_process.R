@@ -12,12 +12,15 @@ new_install_process <- function(callr_process,
   r_callr_process$wait(timeout = timeout_minutes)
 
   status <- r_callr_process$get_exit_status()
-  # output_notes <- r_callr_process$read_output()
   output_notes <- read_char(stdout_file)
+  # output_notes <- r_callr_process$read_output()
   no_output <- nchar(output_notes) == 0
-  # output_error <- r_callr_process$read_all_error_lines()
   output_error <- read_char(stderr_file)
+  # output_error <- r_callr_process$read_all_error_lines()
 
+  # clean up stdout_file and stderr_file
+  unlink(stdout_file)
+  unlink(stderr_file)
   if (is.null(status)) {
     cli::cli_process_failed()
     stop(

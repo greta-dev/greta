@@ -3,6 +3,12 @@ greta_create_conda_env <- function(timeout) {
   stdout_file <- tempfile("out-greta-conda")
   stderr_file <- tempfile("err-greta-conda")
 
+  stdout_file <- file.path("out-greta-conda.txt")
+  file.create("out-miniconda.txt")
+  stderr_file <- file.path("err-miniconda.txt")
+  file.create("err-miniconda.txt")
+
+
   callr_conda_create <- callr::r_process_options(
     func = function() {
       reticulate::conda_create(
