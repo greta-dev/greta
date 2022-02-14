@@ -150,10 +150,12 @@ jobs:
 
       - name: Python + TF details
         run: |
-          Rscript -e 'tensorflow::tf_config()'
-          Rscript -e 'tensorflow::tf_version()'
-          Rscript -e 'reticulate::py_module_available("tensorflow_probability")'
-          Rscript -e 'reticulate::py_config()'
+          reticulate::use_condaenv("greta-env", required = TRUE)
+          tensorflow::tf_config()
+          tensorflow::tf_version()
+          reticulate::py_module_available("tensorflow_probability")
+          reticulate::py_config()
+        shell: Rscript {0}
 
       - name: Session info
         run: |
