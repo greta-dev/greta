@@ -59,9 +59,9 @@ jobs:
             local::.
             any::keras
             any::rcmdcheck
-            any::MCMCpack=?ignore-before-r=3.6.0
-            any::quantreg=?ignore-before-r=3.6.0
-            any::mvtnorm=?ignore-before-r=3.6.0
+            MCMCpack=?ignore-before-r=3.6.0
+            quantreg=?ignore-before-r=3.6.0
+            mvtnorm=?ignore-before-r=3.6.0
 
       - name: install mvtnorm and mcmcpack for R < 3.6
         if: runner.os == "Linux" && ${{ env.UPGRADE_PKGS }}
@@ -80,23 +80,6 @@ jobs:
             packageVersion("MCMCpack")
           }
         shell: Rscript {0}
-
-      # - name: specially install pkgs for windows
-      #   if: runner.os == 'Windows'
-      #   run: |
-      #     install.packages("MCMCpack", type = "binary")
-      #     install.packages("igraph", type = "binary")
-      #     library(igraph)
-      #     packageVersion("igraph")
-      #     install.packages("maps", type = "binary")
-      #     library(maps)
-      #     packageVersion("maps")
-      #     install.packages("fields", type = "binary")
-      #     library(fields)
-      #     packageVersion("fields")
-      #     install.packages("DiagrammeR")
-      #     packageVersion("DiagrammeR")
-      #   shell: Rscript {0}
 
       - name: Install Miniconda
         run: |
