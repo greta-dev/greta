@@ -64,7 +64,7 @@ jobs:
             mvtnorm=?ignore-before-r=3.6.0
 
       - name: install mvtnorm and mcmcpack for R < 3.6
-        if: ${{ runner.os == "Linux" && env.UPGRADE_PKGS }}
+        if: ${{ runner.os == 'Linux' && env.UPGRADE_PKGS }}
         run: |
           Sys.getenv("UPGRADE_PKGS")
           if (Sys.getenv("UPGRADE_PKGS")) {
