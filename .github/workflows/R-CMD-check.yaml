@@ -94,7 +94,7 @@ jobs:
           cat("::endgroup::", sep = "\n")
 
           cat("::group::Install Tensorflow", sep = "\n")
-          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), 
+          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'),
               extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
           cat("::endgroup::", sep = "\n")
         shell: Rscript {0}
