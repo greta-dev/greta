@@ -1,7 +1,7 @@
 greta_install_python_deps <- function(timeout) {
 
-  stdout_file <- create_file("out-python-deps.txt")
-  stderr_file <- create_file("err-python-deps.txt")
+  stdout_file <- create_temp_file("out-python-deps")
+  stderr_file <- create_temp_file("err-python-deps")
 
   callr_conda_install <- callr::r_process_options(
     func = function() {

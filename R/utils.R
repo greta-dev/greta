@@ -928,8 +928,8 @@ read_char <- function(path){
   trimws(readChar(path, nchars = file.info(path)$size))
 }
 
-create_file <- function(path){
-  file_path <- file.path(path)
+create_temp_file <- function(path){
+  file_path <- tempfile(path, fileext = ".txt")
   file.create(file_path)
   return(file_path)
 }
