@@ -133,16 +133,18 @@ jobs:
       #     remotes::install_local()
       #     keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
       #   shell: Rscript {0}
-      - name: Remotes install greta
-        run: |
-          install.packages('remotes')
-          remotes::install_github("greta-dev/greta")
-        shell: Rscript {0}
 
-      - name: Greta install deps
+      - name: install greta deps
         run: |
-          library(greta)
-          install_greta_deps(timeout = 50)
+          reticulate::conda_create(envname = "greta-env", python_version = "3.7")
+          reticulate::conda_install(
+            envname = "greta-env",
+            packages = c(
+              "numpy==1.16.4",
+              "tensorflow-probability==0.7.0",
+              "tensorflow==1.14.0"
+            )
+          )
         shell: Rscript {0}
 
 
