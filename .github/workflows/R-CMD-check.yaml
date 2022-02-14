@@ -127,12 +127,24 @@ jobs:
 
 #  Perhaps here is where we can install / change the environment that we are
 # installing into? Can we call our own greta install functions here?
-      - name: Install TensorFlow
+      # - name: Install TensorFlow
+      #   run: |
+      #     reticulate::conda_create('r-reticulate', packages = c('python==3.7'))
+      #     remotes::install_local()
+      #     keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
+      #   shell: Rscript {0}
+      - name: Remotes install greta
         run: |
-          reticulate::conda_create('r-reticulate', packages = c('python==3.7'))
-          remotes::install_local()
-          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
+          install.packages('remotes')
+          remotes::install_github("greta-dev/greta")
         shell: Rscript {0}
+
+      - name: Greta install deps
+        run: |
+          library(greta)
+          install_greta_deps(timeout = 50)
+        shell: Rscript {0}
+
 
       - name: Python + TF details
         run: |
