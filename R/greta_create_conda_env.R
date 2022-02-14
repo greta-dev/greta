@@ -1,9 +1,7 @@
 greta_create_conda_env <- function(timeout) {
 
-  stdout_file <- file.path("out-greta-conda.txt")
-  file.create(stdout_file)
-  stderr_file <- file.path("err-greta-conda.txt")
-  file.create(stderr_file)
+  stdout_file <- create_file("out-greta-conda.txt")
+  stderr_file <- create_file("err-greta-conda.txt")
 
   callr_conda_create <- callr::r_process_options(
     func = function() {

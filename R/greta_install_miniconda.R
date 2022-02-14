@@ -1,16 +1,7 @@
 greta_install_miniconda <- function(timeout) {
 
-  if (missing(timeout)) {
-    stop(
-      "'timeout' argument not given. Supply the number of minutes until timeout",
-      call. = FALSE
-    )
-  }
-
-  stdout_file <- file.path("out-miniconda.txt")
-  file.create(stdout_file)
-  stderr_file <- file.path("err-miniconda.txt")
-  file.create(stderr_file)
+  stdout_file <- create_file("out-miniconda.txt")
+  stderr_file <- create_file("err-miniconda.txt")
 
   callr_install_miniconda <- callr::r_process_options(
     func = function() {
