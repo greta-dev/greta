@@ -56,23 +56,30 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
+            local::.
+            any::keras
             any::rcmdcheck
+            any::MCMCpack=?ignore-before-r=3.6.0
+            any::quantreg=?ignore-before-r=3.6.0
+            any::mvtnorm=?ignore-before-r=3.6.0
 
-      # - name: install mvtnorm and mcmcpack for R < 3.6
-      #   if: runner.os == "Linux" && ${{ env.UPGRADE_PKGS }}
-      #   run: |
-      #     Sys.getenv("UPGRADE_PKGS")
-      #     if (Sys.getenv("UPGRADE_PKGS")) {
-      #       install.packages("remotes")
-      #       install.packages("versions")
-      #       versions::install.dates("quantreg", "2017-03-06")
-      #       versions::install.dates("mvtnorm", "2017-03-06")
-      #       versions::install.dates("MCMCpack", "2017-03-06")
-      #       packageVersion("quantreg")
-      #       packageVersion("mvtnorm")
-      #       packageVersion("MCMCpack")
-      #     }
-      #   shell: Rscript {0}
+      - name: install mvtnorm and mcmcpack for R < 3.6
+        if: runner.os == "Linux" && ${{ env.UPGRADE_PKGS }}
+        run: |
+          Sys.getenv("UPGRADE_PKGS")
+          if (Sys.getenv("UPGRADE_PKGS")) {
+            pak::repo_add("MRAN@2017-03-06")
+            pak::pak(c("quantreg", "mvtnorm", "MCMCpack"))
+            # install.packages("remotes")
+            # install.packages("versions")
+            # versions::install.dates("quantreg", "2017-03-06")
+            # versions::install.dates("mvtnorm", "2017-03-06")
+            # versions::install.dates("MCMCpack", "2017-03-06")
+            packageVersion("quantreg")
+            packageVersion("mvtnorm")
+            packageVersion("MCMCpack")
+          }
+        shell: Rscript {0}
 
       # - name: specially install pkgs for windows
       #   if: runner.os == 'Windows'
@@ -93,7 +100,6 @@ jobs:
 
       - name: Install Miniconda
         run: |
-          install.packages(c("remotes", "keras"))
           reticulate::install_miniconda()
         shell: Rscript {0}
 
@@ -106,9 +112,13 @@ jobs:
 # installing into? Can we call our own greta install functions here?
       - name: Install TensorFlow
         run: |
+          cat("::group::Create Environment", sep = "\n")
           reticulate::conda_create('r-reticulate', packages = c('python==3.7'))
-          remotes::install_local()
-          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
+          cat("::endgroup::", sep = "\n")
+          cat("::group::Install Tensorflow", sep = "\n")
+          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'), 
+              extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
+          cat("::endgroup::", sep = "\n")
         shell: Rscript {0}
 
       - name: Python + TF details
