@@ -102,7 +102,6 @@ jobs:
 
       - name: Python + TF details
         run: |
-          reticulate::use_condaenv("greta-env", required = TRUE)
           tensorflow::tf_config()
           tensorflow::tf_version()
           reticulate::py_module_available("tensorflow_probability")
