@@ -289,8 +289,7 @@ test_that("distributions without RNG error nicely", {
   source("helpers.R")
 
   # univariate
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     compare_iid_samples(hypergeometric,
                         rhyper,
                         parameters = list(m = 11, n = 8, k = 5)
@@ -298,8 +297,7 @@ test_that("distributions without RNG error nicely", {
   )
 
   # truncated RNG not implemented
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     compare_iid_samples(f,
       rtf,
       parameters = list(

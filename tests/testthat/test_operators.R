@@ -104,13 +104,11 @@ test_that("%*% errors informatively", {
   b <- ones(1, 4)
   c <- ones(2, 2, 2)
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     a %*% b
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     a %*% c
   )
 })

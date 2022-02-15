@@ -1,10 +1,12 @@
-# greta 0.3.1.9000 (development version)
+# greta 0.4.0 (2021-11-26)
 
 ## Fixes:
 
+* Python is now initialised when a `greta_array` is created (#468).
+
 * head and tail S3 methods for `greta_array` are now consistent with head and tail methods for R versions 3 and 4 ([#384](https://github.com/greta-dev/greta/issues/384)).
 
-* greta_mcmc_list objects (returned by mcmc()) are now no longer modified by operations (like code::gelman.diag()). 
+* `greta_mcmc_list` objects (returned by `mcmc()`) are now no longer modified by operations (like code::gelman.diag()). 
 
 * joint distributions of uniform variables now have the correct constraints when sampling (#377).
 
@@ -18,7 +20,7 @@
   
 * Internal change to code to ensure `future` continues to support parallelisation of chains. See [#447](https://github.com/greta-dev/greta/issues/447) for more details.
 
-* depend on `future` version 1.22.1, `tensorflow` (the R package) 2.7.0, and `parallelly` 1.29.0.
+* `greta` now depends on `future` version 1.22.1, `tensorflow` (the R package) 2.7.0, and `parallelly` 1.29.0. This should see no changes on the user side.
 
 ## API changes:
 
@@ -35,6 +37,8 @@
 * Python dependency installation has been overhauled with the new `install_greta_deps()` function (#417).
 
 * Adds helper functions for helping installation get to "clean slate" (#443)
+
+* `greta` currently doesn't work on Apple Silicon (M1 Macs) as they need to use TF 2.0, which is currently being implemented. `greta` now throws an error if M1 macs are detected and directs users to https://github.com/greta-dev/greta/issues/458 (#487)
 
 ## Features:
 
@@ -55,6 +59,12 @@
 * Many message, warning, and error prompts have been replaced internally with the {cli} R package for nicer printing. This is a minor change that should result in a more pleasant user experience (#423 #425).
 
 * Internally, where sensible, `greta` now uses the `glue` package to create messages/ouputs (#378).
+
+* New FAQ page and updated installation instructions for installing Python dependencies (#424)
+
+* New `greta_sitrep()` function to generate a situation report of the software
+  that is available for use, and also initialising python so `greta` is ready to
+  use. (#441)
 
 # greta 0.3.1
 

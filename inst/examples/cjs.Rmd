@@ -2,7 +2,7 @@
 
 *Cormack-Jolly-Seber* (CJS) models estimate probabilities of survival and recapture from mark-recapture data. These models assume that we can only ever see individuals that have been initially marked and released or recaptured following release (i.e. individuals do not exist until first observed). The two key parameters are survival, $\phi$, and probability of recapture, $p$. There is an additional derived parameter, $\chi$, which is the probability that an individual is not recaptured following its final capture. $\chi$ marginalises over multiple scenarios in which the individual is not observed either because it has died or because it is alive but not detected.
 
-The [introductory book](http://www.phidot.org/software/mark/docs/book/) to the program MARK has a lot of information on mark-recapture models, including CJS models (starting in Ch. 1) and the broader class of Jolly-Seber models (Ch. 12). There is also a section on mark-recapture models in the [Stan language manual](http://mc-stan.org/users/documentation/), which goes through the derivation of the parameter $\chi$.
+The [introductory book](http://www.phidot.org/software/mark/docs/book/) to the program MARK has a lot of information on mark-recapture models, including CJS models (starting in Ch. 1) and the broader class of Jolly-Seber models (Ch. 12). There is also a section on mark-recapture models in the [Stan language manual](https://mc-stan.org/users/documentation/), which goes through the derivation of the parameter $\chi$.
 
 #### data
 <div class="data">

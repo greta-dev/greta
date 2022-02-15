@@ -48,45 +48,66 @@ library(greta)
 
 <hr>
 
-### TensorFlow
+### Helper functions to install TensorFlow
 
-Before you can fit models with greta, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.10.0 or higher) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package (version 0.3.0 or higher). greta exports `install_tensorflow()` from the `tensorflow` R package, which you can use to install the latest versions of these packages from within your R session. The best way to install these differs depending on how you installed Python.
+Before you can fit models with `greta`, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.14.0) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package (version 0.7.0). In the future we will support different versions of Tensorflow and Tensorflow Probability, but currently we need these exact versions.
 
-If you don't yet have these installed, the startup message for the greta package provides instructions on how to install them for your system. If in doubt just follow those. If you want greta to run as fast as possible on your computer's CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel's MKL routines, which provide a 2-8 fold sampling speedup on most models. 
+To assist with installing these Python packages, `greta` provides an installation helper, `install_greta_deps()`, which installs the exact pythons package versions needed. It also places these inside a "greta-env" conda environment. This isolates these exact python modules from other python installations, so that only `greta` will see them. This helps avoids installation issues, where previously you might update tensorflow on your computer and overwrite the current version needed by `greta`. Using this "greta-env" conda environment means installing other python packages should not be impact the Python packages needed by `greta`.
 
-#### Anaconda installation
+If these python modules aren't yet installed, when `greta` is used, it provides instructions on how to install them for your system. If in doubt follow those. 
 
-If you installed Python with Anaconda, you can install tensorflow with: 
-```{r install_tf_conda, eval = FALSE}
-install_tensorflow(method = "conda")
-```
-Anaconda doesn't have a binary for TensorFlow Probability, but you can install it with the following command:
-```{r install_tfp_conda, eval = FALSE}
-reticulate::conda_install("r-tensorflow", "tensorflow-probability", pip = TRUE)
-```
+<!-- If you want `greta` to run as fast as possible on your computer's CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel's MKL routines, which provide a 2-8 fold sampling speedup on most models. -->
 
-#### standard installation
+#### Standard installation
 
-If you installed python without Anaconda, you can install the latest versions of both packages with the following command:
+If the previous installation helper did not work, you can try the following:
+
 ```{r install_tensorflow, eval = FALSE}
-install_tensorflow(extra_packages = "tensorflow-probability")
+reticulate::install_miniconda()
+reticulate::conda_create(
+        envname = "greta-env",
+        python_version = "3.7"
+      )
+reticulate::conda_install(
+        envname = "greta-env",
+        packages = c(
+          "numpy==1.16.4",
+          "tensorflow-probability==0.7.0",
+          "tensorflow==1.14.0"
+        )
+      )
 ```
 
+Which will install the python modules into a conda environment named "greta-env".
 
-You can also use `install_tensorflow()` to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation.html) may help.
+You can also not install these not into a special conda environment "greta-env",
+like so:
+
+```{r install-deps-plain, eval = FALSE}
+reticulate::install_miniconda()
+reticulate::conda_install(
+        packages = c(
+          "numpy==1.16.4",
+          "tensorflow-probability==0.7.0",
+          "tensorflow==1.14.0"
+        )
+      )
+```
+
+<!-- You can also use `install_tensorflow()` to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation/) may help. -->
 
 <hr>
 
 ### DiagrammeR
 
-greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](http://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](https://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
 
 ```{r install_diagrammer, eval = FALSE}
 install.packages("igraph")
 install.packages("DiagrammeR")
 ```
 
-igraph can be difficult to install on some machines, due to dependencies on the [XML](https://CRAN.R-project.org/package=XML) R package and libxml2 and gfortran software libraries. There are workarounds to these issues (e.g. [here](http://r.789695.n4.nabble.com/Problem-installing-libxml2-under-Homebrew-td4748381.html) and  [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-)) but if you can't get it to work, you can still use greta for everything except plotting models.
+igraph can be difficult to install on some machines, due to dependencies on the [XML](https://CRAN.R-project.org/package=XML) R package and libxml2 and gfortran software libraries. There are workarounds to these issues (e.g. [here](https://stat.ethz.ch/pipermail/r-help//2018-February/451279.html) and  [here](https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-)) but if you can't get it to work, you can still use greta for everything except plotting models.
 
 <hr>
 
@@ -446,6 +467,8 @@ The bayesplot package makes some nice plots of the MCMC chain and the parameter 
 
 ```{r mcmcvis, echo = TRUE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
 library (bayesplot)
+# set theme to avoid issues with fonts
+ggplot2::theme_set(ggplot2::theme_bw())
 mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1))
 mcmc_intervals(draws)
 ```

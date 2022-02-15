@@ -59,12 +59,11 @@ have_tfp <- function() {
 
 #' @importFrom reticulate py_module_available
 have_tf <- function() {
-
   is_tf_available <- reticulate::py_module_available("tensorflow")
 
   if (is_tf_available) {
 
-    tf_version <- tf$`__version__`
+    tf_version <- suppressMessages(tf$`__version__`)
     is_tf_available <- utils::compareVersion("1.14.0", tf_version) == 0
 
   }
@@ -77,13 +76,7 @@ version_tf <- function(){
   if (have_tf()) {
     tf$`__version__`
   } else {
-    msg <- cli::format_error(
-      "{.pkg tensorflow} not found"
-    )
-    stop(
-      msg,
-      call. = FALSE
-      )
+    NULL
   }
 }
 
@@ -91,8 +84,7 @@ version_tfp <- function(){
   if (have_tfp()) {
     tfp$`__version__`
   } else {
-    msg <- cli::format_message("{.pkg tensorflow-probability} not found")
-    message(msg)
+    NULL
   }
 }
 
@@ -748,7 +740,7 @@ other_install_fail_msg <- function(error_passed){
     message = c(
       "Stopping as installation of {.pkg greta} dependencies failed",
       "An error occured:",
-      "{.code {error_passed}}",
+      "{.code {cat(error_passed)}}",
       "You can perform the entire installation manually with:",
       "{.code reticulate::install_miniconda()}",
       "Then:",
@@ -793,7 +785,7 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     msg <- c(
       msg,
       "Additionally, the following error appeared:",
-      "{py_error}"
+      "{cat(py_error)}"
     )
     cli::format_error(
       message = msg
@@ -803,4 +795,149 @@ timeout_install_msg <- function(timeout, py_error = NULL){
 
 is_DiagrammeR_installed <- function(){
   requireNamespace("DiagrammeR", quietly = TRUE)
+}
+
+check_if_software_available <- function(software_available,
+                                        version = NULL,
+                                        ideal_version = NULL,
+                                        software_name){
+
+  cli::cli_process_start("checking if {.pkg {software_name}} available")
+  # if the software is detected
+
+  if (!software_available) {
+    cli::cli_process_failed(
+      msg_failed = "{.pkg {software_name}} not available"
+    )
+  }
+
+  if (software_available) {
+    # if it has a version and ideal version
+    if (!is.null(version) & !is.null(ideal_version)){
+      version_chr <- paste0(version)
+      version_match <- compareVersion(version_chr, ideal_version) == 0
+
+      if (version_match){
+        cli::cli_process_done(
+          msg_done = "{.pkg {software_name}} (version {version}) available"
+        )
+      }
+      if (!version_match){
+        cli::cli_process_failed(
+          msg_failed = "{.pkg {software_name}} available, \\
+          however {.strong {ideal_version}} is needed and \\
+          {.strong {version}} was detected"
+        )
+      }
+      # if there is no version for the software
+    } else if (is.null(version)){
+      cli::cli_process_done(
+        msg_done = "{.pkg {software_name}} available"
+      )
+    }
+  }
+}
+
+compare_version_vec <- function(current,ideal){
+  compareVersion(
+      paste0(current),
+      ideal
+    )
+}
+
+
+#' Greta Situation Report
+#'
+#' This checks if Python, Tensorflow, Tensorflow Probability, and the greta
+#'   conda environment are available, and also loads and initialises python
+#'
+#' @return Message if greta is ready to use
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' greta_sitrep()
+#' }
+greta_sitrep <- function(){
+
+  check_if_software_available(software_available = have_python(),
+                              version = reticulate::py_version(),
+                              ideal_version = "3.7",
+                              software_name = "python")
+
+  check_if_software_available(software_available = have_tf(),
+                              version = version_tf(),
+                              ideal_version = "1.14.0",
+                              software_name = "TensorFlow")
+
+  check_if_software_available(software_available = have_tfp(),
+                              version = version_tfp(),
+                              ideal_version = "0.7.0",
+                              software_name = "TensorFlow Probability")
+
+  check_if_software_available(software_available = have_greta_conda_env(),
+                              software_name = "greta conda environment")
+
+  software_available <- c(
+    python = have_python(),
+    tf = have_tf(),
+    tfp = have_tfp(),
+    greta_env = have_greta_conda_env()
+  )
+
+  if (!all(software_available)) {
+    check_tf_version("warn")
+  } else if (all(software_available)) {
+
+    software_version <- data.frame(
+      software = c(
+        "python",
+        "tf",
+        "tfp"
+      ),
+      current = c(
+        paste0(reticulate::py_version()),
+        paste0(version_tf()),
+        paste0(version_tfp())
+      ),
+      ideal = c(
+        "3.7",
+        "1.14.0",
+        "0.7.0"
+      )
+    )
+
+    software_version$match <- c(
+      compareVersion(software_version$current[1], software_version$ideal[1]) == 0,
+      compareVersion(software_version$current[2], software_version$ideal[2]) == 0,
+      compareVersion(software_version$current[3], software_version$ideal[3]) == 0
+    )
+
+    if (all(software_version$match)){
+      check_tf_version("none")
+      cli::cli_alert_info("{.pkg greta} is ready to use!")
+    } else {
+      check_tf_version("warn")
+    }
+
+  }
+
+}
+
+# adapted from https://github.com/rstudio/tensorflow/blob/main/R/utils.R
+is_mac_arm64 <- function() {
+  si <- Sys.info()
+  is_darwin <- si[["sysname"]] == "Darwin"
+  is_arm64 <- si[["machine"]] == "arm64"
+  is_darwin && is_arm64
+}
+
+read_char <- function(path){
+  trimws(readChar(path, nchars = file.info(path)$size))
+}
+
+create_temp_file <- function(path){
+  file_path <- tempfile(path, fileext = ".txt")
+  file.create(file_path)
+  return(file_path)
 }

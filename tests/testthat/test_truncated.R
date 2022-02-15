@@ -614,13 +614,11 @@ test_that("bad truncations error", {
   skip_if_not(check_tf_version())
   source("helpers.R")
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     lognormal(0, 1, truncation = c(-1, Inf))
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     beta(1, 1, truncation = c(-1, 2))
   )
 })

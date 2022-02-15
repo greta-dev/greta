@@ -160,8 +160,7 @@ test_that("bad mcmc proposals are rejected", {
       )
     expect_match(out, "100% bad")
 
-    expect_snapshot(
-      error = TRUE,
+    expect_snapshot_error(
       mcmc(m,
            chains = 1, n_samples = 1, warmup = 0,
            initial_values = initials(z = 1e20)
@@ -173,8 +172,7 @@ test_that("bad mcmc proposals are rejected", {
   z <- normal(-1e12, 1e-12)
   distribution(x) <- normal(z, 1e-12)
   m <- model(z, precision = "single")
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, chains = 1, n_samples = 1, warmup = 0)
   )
 
@@ -248,8 +246,7 @@ test_that("mcmc handles initial values nicely", {
 
   # too many sets of initial values
   inits <- replicate(3, initials(z = rnorm(1)), simplify = FALSE)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m,
          warmup = 10, n_samples = 10, verbose = FALSE,
          chains = 2, initial_values = inits
@@ -258,8 +255,7 @@ test_that("mcmc handles initial values nicely", {
 
   # initial values have the wrong length
   inits <- replicate(2, initials(z = rnorm(2)), simplify = FALSE)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m,
          warmup = 10, n_samples = 10, verbose = FALSE,
          chains = 2, initial_values = inits
@@ -395,8 +391,7 @@ test_that("model errors nicely", {
   # model should give a nice error if passed something other than a greta array
   a <- 1
   b <- normal(0, a)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     model(a, b)
   )
 })
@@ -438,8 +433,7 @@ test_that("mcmc doesn't support slice sampler with double precision models", {
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x, precision = "double")
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     draws <- mcmc(m,
                   sampler = slice(),
                   n_samples = 100, warmup = 100
@@ -461,8 +455,7 @@ test_that("numerical issues are handled in mcmc", {
   m <- model(alpha)
 
   # running with bursts should error informatively
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     draws <- mcmc(m, verbose = FALSE)
   )
 
@@ -525,21 +518,18 @@ test_that("mcmc errors for invalid parallel plans", {
 
   # handle handle forks, so only accept multisession, or multi session clusters
   suppressWarnings(plan(multiprocess))
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m)
   )
 
   plan(multicore)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m)
   )
 
   cl <- parallel::makeForkCluster(2L)
   plan(cluster, workers = cl)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m)
   )
 
@@ -574,13 +564,11 @@ test_that("initials works", {
   source("helpers.R")
 
   # errors on bad objects
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     initials(a = FALSE)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     initials(FALSE)
   )
 
@@ -604,47 +592,39 @@ test_that("prep_initials errors informatively", {
   m <- model(z)
 
   # bad objects:
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, initial_values = FALSE)
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, initial_values = list(FALSE))
   )
 
   # an unrelated greta array
   g <- normal(0, 1)
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, chains = 1, initial_values = initials(g = 1))
   )
 
   # non-variable greta arrays
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, chains = 1, initial_values = initials(f = 1))
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, chains = 1, initial_values = initials(z = 1))
   )
 
   # out of bounds errors
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, chains = 1, initial_values = initials(b = -1))
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, chains = 1, initial_values = initials(d = -1))
   )
 
-  expect_snapshot(
-    error = TRUE,
+  expect_snapshot_error(
     mcmc(m, chains = 1, initial_values = initials(e = 2))
   )
 })

@@ -11,5 +11,5 @@ vignettes/**/*_files/
 *.pdf
 docs/*.Rmd
 docs/examples
-cran-comments.md
 paper/paper.html
+inst/doc

@@ -1,8 +1,8 @@
 Package: greta
 Type: Package
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.3.1.9012
-Date: 2020-04-13
+Version: 0.4.0
+Date: 2021-11-26
 Authors@R: c(
   person("Nick", "Golding", 
          role = c("aut"),
@@ -28,14 +28,13 @@ Authors@R: c(
 Description: Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'.
   greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on.
   See the website for more information, including tutorials, examples, package documentation, and the greta forum.
-License: Apache License (>= 2)
+License: Apache License (>= 2) + file LICENSE
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
 SystemRequirements: Python (>= 2.7.0) with header files and shared library;
     TensorFlow (v1.14; https://www.tensorflow.org/);
     TensorFlow Probability (v0.7.0; https://www.tensorflow.org/probability/)
 Encoding: UTF-8
-LazyData: true
 Depends:
     R (>= 3.1.0)
 Collate:
@@ -86,7 +85,7 @@ Collate:
 Imports:
     abind,
     callr,
-    glue,
+    glue (>= 1.5.1),
     cli (>= 3.0.0),
     coda,
     methods,
@@ -96,7 +95,7 @@ Imports:
     reticulate (>= 1.19.0),
     tensorflow (>= 2.7.0),
     yesno,
-    parallelly (>= 1.29.0)
+    parallelly (>= 1.29.0),
 Suggests:
     bayesplot,
     DiagrammeR,
@@ -104,12 +103,14 @@ Suggests:
     covr,
     extraDistr,
     fields,
+    ggplot2,
     knitr,
     lattice,
     MASS,
     MCMCpack,
     mockery (>= 0.4.2.9000),
     mvtnorm,
+    mockery,
     spelling,
     rmarkdown,
     rmutil,
