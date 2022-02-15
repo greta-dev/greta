@@ -26,21 +26,38 @@ greta_stash$tf_num_error <- greta_note_msg
 #' greta_notes_tf_num_error()
 #' greta_notes_tf_error()
 #' }
-greta_notes_install_miniconda <- function() {
-  cat(greta_stash$install_miniconda_notes)
+greta_notes_install_miniconda_output <- function() {
+  cat(greta_stash$miniconda_notes)
 }
-
 
 #' @name stash-notes
 #' @export
-greta_notes_conda_create <- function() {
+greta_notes_install_miniconda_error <- function(){
+  cat(greta_stash$miniconda_error)
+}
+
+#' @name stash-notes
+#' @export
+greta_notes_conda_create_output <- function() {
   cat(greta_stash$conda_create_notes)
 }
 
 #' @name stash-notes
 #' @export
-greta_notes_conda_install <- function() {
+greta_notes_conda_create_error <- function() {
+  cat(greta_stash$conda_create_error)
+}
+
+#' @name stash-notes
+#' @export
+greta_notes_conda_install_output <- function() {
   cat(greta_stash$conda_install_notes)
+}
+
+#' @name stash-notes
+#' @export
+greta_notes_conda_install_error <- function() {
+  cat(greta_stash$conda_install_error)
 }
 
 #' @name stash-notes
