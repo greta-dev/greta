@@ -76,13 +76,7 @@ version_tf <- function(){
   if (have_tf()) {
     tf$`__version__`
   } else {
-    msg <- cli::format_error(
-      "{.pkg tensorflow} not found"
-    )
-    stop(
-      msg,
-      call. = FALSE
-      )
+    NULL
   }
 }
 
@@ -90,8 +84,7 @@ version_tfp <- function(){
   if (have_tfp()) {
     tfp$`__version__`
   } else {
-    msg <- cli::format_message("{.pkg tensorflow-probability} not found")
-    message(msg)
+    NULL
   }
 }
 
@@ -747,7 +740,7 @@ other_install_fail_msg <- function(error_passed){
     message = c(
       "Stopping as installation of {.pkg greta} dependencies failed",
       "An error occured:",
-      "{.code {error_passed}}",
+      "{.code {cat(error_passed)}}",
       "You can perform the entire installation manually with:",
       "{.code reticulate::install_miniconda()}",
       "Then:",
@@ -792,7 +785,7 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     msg <- c(
       msg,
       "Additionally, the following error appeared:",
-      "{py_error}"
+      "{cat(py_error)}"
     )
     cli::format_error(
       message = msg
@@ -892,36 +885,51 @@ greta_sitrep <- function(){
     greta_env = have_greta_conda_env()
   )
 
-  software_version <- data.frame(
-    software = c(
-      "python",
-      "tf",
-      "tfp"
-    ),
-    current = c(
-      paste0(reticulate::py_version()),
-      paste0(version_tf()),
-      paste0(version_tfp())
-    ),
-    ideal = c(
-      "3.7",
-      "1.14.0",
-      "0.7.0"
-    )
-  )
-
-  software_version$match <- c(
-    compareVersion(software_version$current[1], software_version$ideal[1]) == 0,
-    compareVersion(software_version$current[2], software_version$ideal[2]) == 0,
-    compareVersion(software_version$current[3], software_version$ideal[3]) == 0
-  )
-
-  if (all(software_available) & all(software_version$match)){
-    check_tf_version("none")
-    cli::cli_alert_info("{.pkg greta} is ready to use!")
-  } else {
+  if (!all(software_available)) {
     check_tf_version("warn")
+  } else if (all(software_available)) {
+
+    software_version <- data.frame(
+      software = c(
+        "python",
+        "tf",
+        "tfp"
+      ),
+      current = c(
+        paste0(reticulate::py_version()),
+        paste0(version_tf()),
+        paste0(version_tfp())
+      ),
+      ideal = c(
+        "3.7",
+        "1.14.0",
+        "0.7.0"
+      )
+    )
+
+    software_version$match <- c(
+      compareVersion(software_version$current[1], software_version$ideal[1]) == 0,
+      compareVersion(software_version$current[2], software_version$ideal[2]) == 0,
+      compareVersion(software_version$current[3], software_version$ideal[3]) == 0
+    )
+
+    if (all(software_version$match)){
+      check_tf_version("none")
+      cli::cli_alert_info("{.pkg greta} is ready to use!")
+    } else {
+      check_tf_version("warn")
+    }
+
   }
 
 }
 
+read_char <- function(path){
+  trimws(readChar(path, nchars = file.info(path)$size))
+}
+
+create_temp_file <- function(path){
+  file_path <- tempfile(path, fileext = ".txt")
+  file.create(file_path)
+  return(file_path)
+}
