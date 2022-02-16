@@ -926,8 +926,7 @@ greta_sitrep <- function(){
 
 # adapted from https://github.com/rstudio/tensorflow/blob/main/R/utils.R
 is_mac_arm64 <- function() {
-  msg_testing <- Sys.getenv("GRETA_M1_MESSAGE_TESTING")
-  if (msg_testing == "on") {
+  if (nzchar(Sys.getenv("GRETA_M1_MESSAGE_TESTING"))) {
     return(TRUE)
   }
   si <- Sys.info()
