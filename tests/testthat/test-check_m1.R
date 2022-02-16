@@ -1,5 +1,5 @@
 test_that("check_tf_version fails when M1 mac detected", {
-  mockery::stub(check_tf_version, 'is_mac_arm64', TRUE, 2)
+  withr::local_envvar("GRETA_M1_MESSAGE_TESTING" = "on")
   expect_snapshot_error(
     check_tf_version("error")
   )

@@ -116,7 +116,8 @@ Suggests:
     rmutil,
     testthat (>= 3.1.0),
     tidyverse,
-    truncdist
+    truncdist,
+    withr
 VignetteBuilder: knitr
 RoxygenNote: 7.1.2
 Language: en-GB

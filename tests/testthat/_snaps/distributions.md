@@ -10,7 +10,7 @@
     `min` and `max` must be numeric vectors of length 1
     They have class and length:
     `min`: numeric, 1
-    `max`: function, 1
+    `max`: standardGeneric, 1
 
 ---
 
@@ -37,25 +37,25 @@
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `family = stats::poisson`,instead?
+    Maybe you want to use `` family = stats::`poisson` ``,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `binomial()` function in the family argument of another model.
-    Maybe you want to use `family = stats::binomial`,instead?
+    Maybe you want to use `` family = stats::`binomial` ``,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `family = stats::poisson`,instead?
+    Maybe you want to use `` family = stats::`poisson` ``,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `family = stats::poisson`,instead?
+    Maybe you want to use `` family = stats::`poisson` ``,instead?
 
 # wishart distribution errors informatively
 
