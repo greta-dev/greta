@@ -1,42 +1,83 @@
-Package: greta
 Type: Package
+Package: greta
 Title: Simple and Scalable Statistical Modelling in R
 Version: 0.4.0
 Date: 2021-11-26
 Authors@R: c(
-  person("Nick", "Golding", 
-         role = c("aut"),
-         email = "nick.golding.research@gmail.com",
-         comment = c(ORCID = "0000-0001-8916-5570")),
-  person("Nicholas", "Tierney", 
-         role = c("aut", "cre"),
-         email = "nicholas.tierney@gmail.com", 
-         comment = c(ORCID = "https://orcid.org/0000-0003-1460-8722")),
-  person("Simon", "Dirmeier", role = "ctb"),
-  person("Adam", "Fleischhacker", role = "ctb"),
-  person("Shirin", "Glander", role = "ctb"),
-  person("Martin", "Ingram", role = "ctb"),
-  person("Lee", "Hazel", role = "ctb"),
-  person("Lionel", "Hertzog", role = "ctb"),
-  person("Tiphaine", "Martin", role = "ctb"),
-  person("Matt", "Mulvahill", role = "ctb"),
-  person("Michael", "Quinn", role = "ctb"),
-  person("David", "Smith", role = "ctb"),
-  person("Paul", "Teetor", role = "ctb"),
-  person("Jian", "Yen", role = "ctb")
+    person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
+           comment = c(ORCID = "0000-0001-8916-5570")),
+    person("Nicholas", "Tierney", , "nicholas.tierney@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "https://orcid.org/0000-0003-1460-8722")),
+    person("Simon", "Dirmeier", role = "ctb"),
+    person("Adam", "Fleischhacker", role = "ctb"),
+    person("Shirin", "Glander", role = "ctb"),
+    person("Martin", "Ingram", role = "ctb"),
+    person("Lee", "Hazel", role = "ctb"),
+    person("Lionel", "Hertzog", role = "ctb"),
+    person("Tiphaine", "Martin", role = "ctb"),
+    person("Matt", "Mulvahill", role = "ctb"),
+    person("Michael", "Quinn", role = "ctb"),
+    person("David", "Smith", role = "ctb"),
+    person("Paul", "Teetor", role = "ctb"),
+    person("Jian", "Yen", role = "ctb")
   )
-Description: Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'.
-  greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on.
-  See the website for more information, including tutorials, examples, package documentation, and the greta forum.
+Description: Write statistical models in R and fit them by MCMC and
+    optimisation on CPUs and GPUs, using Google 'TensorFlow'.  greta lets
+    you write your own model like in BUGS, JAGS and Stan, except that you
+    write models right in R, it scales well to massive datasets, and it’s
+    easy to extend and build on.  See the website for more information,
+    including tutorials, examples, package documentation, and the greta
+    forum.
 License: Apache License (>= 2) + file LICENSE
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
-SystemRequirements: Python (>= 2.7.0) with header files and shared library;
-    TensorFlow (v1.14; https://www.tensorflow.org/);
-    TensorFlow Probability (v0.7.0; https://www.tensorflow.org/probability/)
-Encoding: UTF-8
 Depends:
     R (>= 3.1.0)
+Imports:
+    abind,
+    callr,
+    cli (>= 3.0.0),
+    coda,
+    future (>= 1.22.1),
+    glue (>= 1.5.1),
+    methods,
+    parallelly (>= 1.29.0),
+    progress (>= 1.2.0),
+    R6,
+    reticulate (>= 1.19.0),
+    tensorflow (>= 2.7.0),
+    yesno
+Suggests:
+    bayesplot,
+    covr,
+    cramer,
+    DiagrammeR,
+    extraDistr,
+    fields,
+    ggplot2,
+    knitr,
+    lattice,
+    MASS,
+    MCMCpack,
+    mockery
+    mvtnorm,
+    rmarkdown,
+    rmutil,
+    spelling,
+    testthat (>= 3.1.0),
+    tidyverse,
+    truncdist,
+    withr
+VignetteBuilder: 
+    knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-GB
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+SystemRequirements: Python (>= 2.7.0) with header files and shared
+    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow
+    Probability (v0.7.0; https://www.tensorflow.org/probability/)
 Collate:
     'package.R'
     'utils.R'
@@ -82,43 +123,3 @@ Collate:
     'test_if_forked_cluster.R'
     'zzz.R'
     'internals.R'
-Imports:
-    abind,
-    callr,
-    glue (>= 1.5.1),
-    cli (>= 3.0.0),
-    coda,
-    methods,
-    future (>= 1.22.1),
-    progress (>= 1.2.0),
-    R6,
-    reticulate (>= 1.19.0),
-    tensorflow (>= 2.7.0),
-    yesno,
-    parallelly (>= 1.29.0),
-Suggests:
-    bayesplot,
-    DiagrammeR,
-    cramer,
-    covr,
-    extraDistr,
-    fields,
-    ggplot2,
-    knitr,
-    lattice,
-    MASS,
-    MCMCpack,
-    mockery
-    mvtnorm,
-    spelling,
-    rmarkdown,
-    rmutil,
-    testthat (>= 3.1.0),
-    tidyverse,
-    truncdist,
-    withr
-VignetteBuilder: knitr
-RoxygenNote: 7.1.2
-Language: en-GB
-Roxygen: list(markdown = TRUE)
-Config/testthat/edition: 3
