@@ -59,7 +59,7 @@ Suggests:
     lattice,
     MASS,
     MCMCpack,
-    mockery
+    mockery,
     mvtnorm,
     rmarkdown,
     rmutil,
