@@ -86,9 +86,7 @@ In a future release we will switch to using TensorFlow 2.6 (or higher), to ensur
 
 ### Thanks
 
-A special thanks to everyone who helped with this release:
-
-@maelle, @assignUser
+A special thanks to everyone who helped with this release: [Nick Golding](https://github.com/goldingn), [Jacob Wujciak-Jens](https://github.com/assignUser), and [Maëlle Salmon](https://github.com/maelle).
 
 ## Fixes:
 
