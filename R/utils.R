@@ -771,11 +771,16 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     "{.code reticulate::conda_create(envname = 'greta-env', \\
         python_version = '3.7')}",
     "Then:",
-    "{.code reticulate::conda_install(envname = 'greta-env',
-        packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
+    "{.code reticulate::conda_install(envname = 'greta-env', \\
+        packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0', \\
         'tensorflow==1.14.0'))}",
-    "Then, restart R, and load {.pkg greta} with: {.code library(greta)}"
+    "Then, restart R, and load {.pkg greta} with:",
+    "{.code library(greta)}"
   )
+
+  if (nchar(py_error) == 0) {
+    py_error <- NULL
+  }
 
   if (is.null(py_error)){
     cli::format_error(
@@ -785,7 +790,7 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     msg <- c(
       msg,
       "Additionally, the following error appeared:",
-      "{cat(py_error)}"
+      "{cat({py_error})}"
     )
     cli::format_error(
       message = msg
