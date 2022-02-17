@@ -110,7 +110,7 @@ Suggests:
     MCMCpack,
     mockery
     mvtnorm,
-    mockery,
+    mockery (>= 0.4.2.9000),
     spelling,
     rmarkdown,
     rmutil,
@@ -123,3 +123,5 @@ RoxygenNote: 7.1.2
 Language: en-GB
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
+Remotes:  
+    r-lib/mockery
