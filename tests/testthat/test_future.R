@@ -28,11 +28,14 @@ test_that("mcmc errors for invalid parallel plans", {
     check_future_plan()
   )
 
-  cl <- parallel::makeCluster(2L, type = "FORK")
-  plan(cluster, workers = cl)
-  expect_snapshot_error(
-    check_future_plan()
-  )
+  # skip on windows
+  if (.Platform$OS.type != "windows"){
+    cl <- parallel::makeCluster(2L, type = "FORK")
+    plan(cluster, workers = cl)
+    expect_snapshot_error(
+      check_future_plan()
+    )
+  }
 
   # put the future plan back as we found it
   plan(op)
