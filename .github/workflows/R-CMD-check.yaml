@@ -32,11 +32,11 @@ jobs:
         config:
           - {os: macOS-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: '3.6'}
+          - {os: windows-latest, r: 'oldrel'}
           - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.0.0 (ubuntu-18.04) R (4.0.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
           - {os: ubuntu-18.04,   r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: 'oldrel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.5', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: 'oldrel-1', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: 'oldrel-2', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
 
     env:
       RSPM: ${{ matrix.config.rspm }}
@@ -63,20 +63,6 @@ jobs:
             local::.
             any::keras
             any::rcmdcheck
-            MCMCpack=?ignore-before-r=3.6.0
-            quantreg=?ignore-before-r=3.6.0
-            mvtnorm=?ignore-before-r=3.6.0
-
-      - name: install mvtnorm and mcmcpack for R < 3.6
-        if: runner.os == 'Linux' && (matrix.config.r == '3.4' || matrix.config.r == '3.5')
-        run: |
-          pak::repo_add("MRAN@2017-03-06")
-          pak::pak(c("quantreg", "mvtnorm", "MCMCpack"))
-
-          packageVersion("quantreg")
-          packageVersion("mvtnorm")
-          packageVersion("MCMCpack")
-        shell: Rscript {0}
 
       - name: Install Miniconda
         run: |
