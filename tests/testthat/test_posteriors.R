@@ -7,7 +7,6 @@ test_that("posterior is correct (binomial)", {
   # distribution, with uniform prior
   n <- 100
   pos <- rbinom(1, n, runif(1))
-  library(greta)
   theta <- uniform(0, 1)
   distribution(pos) <- binomial(n, theta)
   m <- model(theta)
