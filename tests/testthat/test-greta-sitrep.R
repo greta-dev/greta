@@ -1,4 +1,5 @@
 test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
+  skip_if_not(check_tf_version())
   skip_on_ci()
   skip_on_cran()
   mockery::stub(greta_sitrep, 'have_python', FALSE, 2)
@@ -77,6 +78,7 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
 })
 
 test_that("greta_sitrep warns when different versions of python, tf, tfp", {
+  skip_if_not(check_tf_version())
   skip_on_ci()
   skip_on_cran()
   mockery::stub(greta_sitrep, 'reticulate::py_version', "3.6", 2)
