@@ -6,8 +6,6 @@ test_that("tensorflow returns appropriate thing with 'dim'", {
   xt_float_32 <- as_tensor(x = 42, "float32")
   xt_float_32_dec <- as_tensor(x = 42.2, "float32")
 
-  x <- shape(NA, 3)
-
   expect_equal(dim(xt_int_32), integer(0))
   expect_equal(dim(xt_int_64), integer(0))
   expect_equal(dim(xt_float_32), integer(0))
@@ -74,6 +72,7 @@ test_that("placeholder and friends behave the same way", {
 
 test_that("TensorShape conversions remain stable", {
   skip_if_not(check_tf_version())
+  x <- shape(NA, 3)
   expect_snapshot_output(as.list(x))
   expect_snapshot_output(as.integer(x))
   expect_snapshot_output(as_tensor(x))
