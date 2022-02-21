@@ -475,6 +475,8 @@ test_that("mcmc works in parallel", {
 
   library(future)
   op <- plan()
+  # put the future plan back as we found it
+  withr::defer(plan(op))
   plan(multisession)
 
   # one chain
@@ -498,8 +500,6 @@ test_that("mcmc works in parallel", {
   expect_true(inherits(draws, "greta_mcmc_list"))
   expect_true(coda::niter(draws) == 10)
 
-  # put the future plan back as we found it
-  plan(op)
 })
 
 test_that("mcmc errors for invalid parallel plans", {
@@ -513,8 +513,10 @@ test_that("mcmc errors for invalid parallel plans", {
   op <- plan()
 
   # silence future's warning about multicore support
-  old_option <- Sys.getenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE")
-  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
+  # put the future plan back as we found it
+  withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
+  # reset warning setting
+  withr::defer(plan(op))
 
   # handle handle forks, so only accept multisession, or multi session clusters
   suppressWarnings(plan(multiprocess))
@@ -533,11 +535,6 @@ test_that("mcmc errors for invalid parallel plans", {
     mcmc(m)
   )
 
-  # put the future plan back as we found it
-  plan(op)
-
-  # reset warning setting
-  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = old_option)
 })
 
 test_that("parallel reporting works", {
@@ -548,6 +545,8 @@ test_that("parallel reporting works", {
 
   library(future)
   op <- plan()
+  # put the future plan back as we found it
+  withr::defer(plan(op))
   plan(multisession)
 
   # should report each sampler's progress with a fraction
@@ -555,8 +554,6 @@ test_that("parallel reporting works", {
   expect_match(out, "2 samplers in parallel")
   expect_match(out, "50/50")
 
-  # put the future plan back as we found it
-  plan(op)
 })
 
 test_that("initials works", {
