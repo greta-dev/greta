@@ -2,7 +2,7 @@
 
 ## Summary
 
-This release presents a variety of improvements over the past 2 years. We are now aiming to have smaller, more regular releases of `greta`. This release showcases new features implemented by Nick Golding on the `calculate` and `simulate` functions. There are also many internal changes on installation, error printing, and testing.
+This release presents a variety of improvements over the past 2 years. We are now aiming to have smaller, more regular releases of `greta`. This release showcases new features implemented by Nick Golding on the `calculate` and `simulate` functions. There are also many internal changes on installation, error printing, and testing. This release also sees changing of maintiner, from Nick Golding to Nick Tierney.
 
 ### Installation
 
