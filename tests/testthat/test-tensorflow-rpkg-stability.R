@@ -101,13 +101,6 @@ test_that("shape returns appropriate TensorShape object", {
   expect_snapshot_output(shape(1, 3) != shape(1,2))
 })
 
-test_that("tf$reshape behaves as expected", {
-  skip_if_not(check_tf_version())
-  expect_snapshot_output(
-    tf$reshape(tf$zeros(shape(8)), as_tensor(shape(NA, 4)))
-    )
-})
-
 test_that("[, [[, and assignment returns right object", {
   skip_if_not(check_tf_version())
   x_extract <- shape(1,2,3)

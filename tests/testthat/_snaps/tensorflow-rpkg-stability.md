@@ -1,3 +1,15 @@
+# Tensor behaves as we expect
+
+    Tensor("Const_5:0", shape=(), dtype=int32)
+
+---
+
+    integer(0)
+
+---
+
+    Tensor("Reshape:0", shape=(1, 1, 1, 1, 1), dtype=int32)
+
 # shape returns right thing
 
     TensorShape([])
@@ -25,6 +37,10 @@
 ---
 
     TensorShape([Dimension(None), Dimension(4)])
+
+---
+
+    TensorShape([Dimension(1), Dimension(1), Dimension(1)])
 
 # placeholder and friends behave the same way
 
@@ -89,7 +105,7 @@
 
 ---
 
-    Tensor("Const_6:0", shape=(2,), dtype=int32)
+    Tensor("Const_8:0", shape=(2,), dtype=int32)
 
 ---
 
@@ -166,10 +182,6 @@
 ---
 
     [1] TRUE
-
-# tf$reshape behaves as expected
-
-    Tensor("Reshape:0", shape=(2, 4), dtype=float32)
 
 # [, [[, and assignment returns right object
 
