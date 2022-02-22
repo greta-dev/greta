@@ -336,6 +336,26 @@ sample_distribution <- function(greta_array, n = 10,
   expect_true(all(above_lower & below_upper))
 }
 
+# apparently testthat can't see these
+dinvgamma <- extraDistr::dinvgamma
+qinvgamma <- extraDistr::qinvgamma
+pinvgamma <- extraDistr::pinvgamma
+#
+dlaplace <- extraDistr::dlaplace
+qlaplace <- extraDistr::qlaplace
+plaplace <- extraDistr::plaplace
+#
+dstudent <- extraDistr::dlst
+qstudent <- extraDistr::qlst
+pstudent <- extraDistr::plst
+#
+# # mock up pareto to have differently named parameters (a and b are use for the
+# # truncation)
+preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
+dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
+
 compare_truncated_distribution <- function(greta_fun,
                                            which,
                                            parameters,
@@ -347,7 +367,25 @@ compare_truncated_distribution <- function(greta_fun,
   # greta array. 'r_fun' is an r function returning the log density for the same
   # truncated distribution, taking x as its only argument.
 
-  require(truncdist)
+  # apparently testthat can't see these
+  dinvgamma <- extraDistr::dinvgamma
+  qinvgamma <- extraDistr::qinvgamma
+  pinvgamma <- extraDistr::pinvgamma
+  #
+  dlaplace <- extraDistr::dlaplace
+  qlaplace <- extraDistr::qlaplace
+  plaplace <- extraDistr::plaplace
+  #
+  dstudent <- extraDistr::dlst
+  qstudent <- extraDistr::qlst
+  pstudent <- extraDistr::plst
+  #
+  # # mock up pareto to have differently named parameters (a and b are use for the
+  # # truncation)
+  preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
+  dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+  ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+  qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 
   x <- do.call(
     truncdist::rtrunc,
@@ -442,27 +480,6 @@ mock_mcmc <- function(n_samples = 1010) {
   )
   iterate_progress_bar(pb, n_samples, rejects = 10, chains = 1)
 }
-
-# apparently testthat can't see these
-
-# dinvgamma <- extraDistr::dinvgamma
-# qinvgamma <- extraDistr::qinvgamma
-# pinvgamma <- extraDistr::pinvgamma
-#
-# dlaplace <- extraDistr::dlaplace
-# plaplace <- extraDistr::plaplace
-# qlaplace <- extraDistr::qlaplace
-#
-# dstudent <- extraDistr::dlst
-# pstudent <- extraDistr::plst
-# qstudent <- extraDistr::qlst
-#
-# # mock up pareto to have differently named parameters (a and b are use for the
-# # truncation)
-# preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
-# dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
-# ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
-# qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 
 # random lkj draws, code from the rethinking package (can't load the package
 # because of stan*Travis*compiler issues)

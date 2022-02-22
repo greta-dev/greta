@@ -135,11 +135,6 @@ test_that("truncated gamma has correct densities", {
 test_that("truncated inverse gamma has correct densities", {
   skip_if_not(check_tf_version())
 
-  # apparently testthat can't see these
-  dinvgamma <- extraDistr::dinvgamma
-  qinvgamma <- extraDistr::qinvgamma
-  pinvgamma <- extraDistr::pinvgamma
-
   # non truncated
   compare_truncated_distribution(inverse_gamma,
     "invgamma",
@@ -261,7 +256,6 @@ test_that("truncated exponential has correct densities", {
 
 test_that("truncated pareto has correct densities", {
   skip_if_not(check_tf_version())
-
   # mock up pareto to have differently named parameters (a and b are use for the
   # truncation)
   preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
