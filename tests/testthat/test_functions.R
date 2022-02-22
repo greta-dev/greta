@@ -506,9 +506,7 @@ test_that("ignored options are errored/warned about", {
   )
 
   expect_snapshot_error(
-    x
     chol2inv(x, LINPACK = TRUE)
-    chol2inv.greta_array(x, LINPACK = TRUE)
   )
 
   expect_snapshot_warning(
