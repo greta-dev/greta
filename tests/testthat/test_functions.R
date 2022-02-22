@@ -505,7 +505,7 @@ test_that("ignored options are errored/warned about", {
     chol(x, pivot = TRUE)
   )
 
-  expect_snapshot_error(
+  expect_snapshot_warning(
     chol2inv(x, LINPACK = TRUE)
   )
 
