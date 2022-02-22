@@ -50,7 +50,7 @@ test_that("check_tf_version fails when tfp not available", {
 
 test_that(".onLoad runs", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   expect_ok(greta:::.onLoad())
 })
 
@@ -92,7 +92,7 @@ test_that("greta_model objects print", {
 
 test_that("define and mcmc error informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- as_data(randn(10))
 
@@ -142,7 +142,7 @@ test_that("define and mcmc error informatively", {
 
 test_that("check_dims errors informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- ones(3, 3)
   b <- ones(1)
@@ -182,7 +182,7 @@ test_that("check_dims errors informatively", {
 
 test_that("disjoint graphs are checked", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # if the target nodes aren't related, they sould be checked separately
 
@@ -207,7 +207,7 @@ test_that("disjoint graphs are checked", {
 
 test_that("plotting models doesn't error", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- uniform(0, 1)
 
@@ -218,7 +218,7 @@ test_that("plotting models doesn't error", {
 
 test_that("structures work correctly", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- ones(2, 2)
   b <- zeros(2)
@@ -231,7 +231,7 @@ test_that("structures work correctly", {
 
 test_that("cleanly() handles TF errors nicely", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   inversion_stop <- function() {
     stop("this non-invertible thing is not invertible")

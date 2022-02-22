@@ -10,7 +10,7 @@
     `min` and `max` must be numeric vectors of length 1
     They have class and length:
     `min`: numeric, 1
-    `max`: function, 1
+    `max`: standardGeneric, 1
 
 ---
 

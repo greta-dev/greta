@@ -1,6 +1,6 @@
 test_that("simulate produces the right number of samples", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # fix variable
   a <- normal(0, 1)
@@ -19,7 +19,7 @@ test_that("simulate produces the right number of samples", {
 
 test_that("simulate uses the local RNG seed", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # fix variable
   a <- normal(0, 1)
@@ -56,7 +56,7 @@ test_that("simulate uses the local RNG seed", {
 
 test_that("simulate errors if distribution-free variables are not fixed", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # fix variable
   a <- variable()
@@ -69,7 +69,7 @@ test_that("simulate errors if distribution-free variables are not fixed", {
 
 test_that("simulate errors if a distribution cannot be sampled from", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # fix variable
   y_ <- rhyper(10, 5, 3, 2)
@@ -84,7 +84,7 @@ test_that("simulate errors if a distribution cannot be sampled from", {
 
 test_that("simulate errors nicely if nsim is invalid", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- normal(0, 1)
   m <- model(x)

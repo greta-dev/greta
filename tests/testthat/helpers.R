@@ -445,24 +445,24 @@ mock_mcmc <- function(n_samples = 1010) {
 
 # apparently testthat can't see these
 
-dinvgamma <- extraDistr::dinvgamma
-qinvgamma <- extraDistr::qinvgamma
-pinvgamma <- extraDistr::pinvgamma
-
-dlaplace <- extraDistr::dlaplace
-plaplace <- extraDistr::plaplace
-qlaplace <- extraDistr::qlaplace
-
-dstudent <- extraDistr::dlst
-pstudent <- extraDistr::plst
-qstudent <- extraDistr::qlst
-
-# mock up pareto to have differently named parameters (a and b are use for the
-# truncation)
-preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
-dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
-ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
-qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
+# dinvgamma <- extraDistr::dinvgamma
+# qinvgamma <- extraDistr::qinvgamma
+# pinvgamma <- extraDistr::pinvgamma
+#
+# dlaplace <- extraDistr::dlaplace
+# plaplace <- extraDistr::plaplace
+# qlaplace <- extraDistr::qlaplace
+#
+# dstudent <- extraDistr::dlst
+# pstudent <- extraDistr::plst
+# qstudent <- extraDistr::qlst
+#
+# # mock up pareto to have differently named parameters (a and b are use for the
+# # truncation)
+# preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
+# dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+# ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+# qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 
 # random lkj draws, code from the rethinking package (can't load the package
 # because of stan*Travis*compiler issues)

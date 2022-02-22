@@ -1,6 +1,6 @@
 test_that("draws and raw draws should have the right iteration numbering", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   samples <- 1000
   warmup <- 100
@@ -29,7 +29,7 @@ test_that("draws and raw draws should have the right iteration numbering", {
 
 test_that("window works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   z <- normal(0, 1)
   m <- model(z)
@@ -66,7 +66,7 @@ test_that("window works", {
 
 test_that("windowing does not have spooky effects", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   chains <- 4
   samples <- 100

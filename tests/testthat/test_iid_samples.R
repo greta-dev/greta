@@ -1,6 +1,6 @@
 test_that("univariate samples are correct", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   compare_iid_samples(uniform,
     runif,
@@ -106,7 +106,7 @@ test_that("univariate samples are correct", {
 
 test_that("truncated univariate samples are correct", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # an originally unconstrained distribution
 
@@ -163,7 +163,7 @@ test_that("truncated univariate samples are correct", {
 
 test_that("multivariate samples are correct", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   sigma <- rwish(1, 5, diag(4))[1, , ]
   prob <- t(runif(4))
@@ -207,7 +207,7 @@ test_that("multivariate samples are correct", {
 
 test_that("joint samples are correct", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # joint of normal distributions
   params <- list(
@@ -235,7 +235,7 @@ test_that("joint samples are correct", {
 
 test_that("mixture samples are correct", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # mixture of normal distributions
   weights <- runif(3)
@@ -286,7 +286,7 @@ test_that("distributions without RNG error nicely", {
   # (move these into other tests as they get implemented)
 
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # univariate
   expect_snapshot_error(

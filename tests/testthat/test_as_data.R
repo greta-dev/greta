@@ -1,6 +1,6 @@
 test_that("as_data coerces correctly", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # logical, integer and numeric
   # vector, matrix, array, dataframe
@@ -105,7 +105,7 @@ test_that("as_data coerces correctly", {
 
 test_that("as_data errors informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # wrong class of object
   expect_snapshot_error(

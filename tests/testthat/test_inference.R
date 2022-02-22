@@ -1,6 +1,6 @@
 test_that("opt converges with TF optimisers", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(5, 2, 0.1)
   z <- variable(dim = 5)
@@ -37,7 +37,7 @@ test_that("opt converges with TF optimisers", {
 
 test_that("opt converges with SciPy optimisers", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(3, 2, 0.1)
   z <- variable(dim = 3)
@@ -93,7 +93,7 @@ test_that("opt converges with SciPy optimisers", {
 
 test_that("opt accepts initial values", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(5, 2, 0.1)
   z <- variable(dim = 5)
@@ -114,7 +114,7 @@ test_that("opt accepts initial values", {
 
 test_that("opt returns hessians", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   sd <- runif(5)
   x <- rnorm(5, 2, 0.1)
@@ -138,7 +138,7 @@ test_that("opt returns hessians", {
 
 test_that("bad mcmc proposals are rejected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up for numerical rejection of initial location
   x <- rnorm(10000, 1e6, 1)
@@ -194,7 +194,7 @@ test_that("bad mcmc proposals are rejected", {
 
 test_that("mcmc works with verbosity and warmup", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(10)
   z <- normal(0, 1)
@@ -205,7 +205,7 @@ test_that("mcmc works with verbosity and warmup", {
 
 test_that("mcmc works with multiple chains", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(10)
   z <- normal(0, 1)
@@ -225,7 +225,7 @@ test_that("mcmc works with multiple chains", {
 
 test_that("mcmc handles initial values nicely", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # preserve R version
   current_r_version <- paste0(R.version$major,".", R.version$minor)
@@ -276,7 +276,7 @@ test_that("mcmc handles initial values nicely", {
 
 test_that("progress bar gives a range of messages", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # 10/1010 should be <1%
   expect_snapshot(draws <- mock_mcmc(1010))
@@ -291,7 +291,7 @@ test_that("progress bar gives a range of messages", {
 
 test_that("extra_samples works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -308,7 +308,7 @@ test_that("extra_samples works", {
 
 test_that("trace_batch_size works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -332,7 +332,7 @@ test_that("trace_batch_size works", {
 
 test_that("stashed_samples works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -367,7 +367,7 @@ test_that("stashed_samples works", {
 
 test_that("samples has object names", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- normal(0, 1)
   b <- normal(a, 1, dim = 3)
@@ -386,7 +386,7 @@ test_that("samples has object names", {
 
 test_that("model errors nicely", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # model should give a nice error if passed something other than a greta array
   a <- 1
@@ -443,7 +443,7 @@ test_that("mcmc doesn't support slice sampler with double precision models", {
 
 test_that("numerical issues are handled in mcmc", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # this should have a cholesky decomposition problem at some point
   alpha <- normal(0, 1)
@@ -469,7 +469,7 @@ test_that("numerical issues are handled in mcmc", {
 
 test_that("mcmc works in parallel", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   m <- model(normal(0, 1))
 
@@ -505,7 +505,7 @@ test_that("mcmc works in parallel", {
 test_that("mcmc errors for invalid parallel plans", {
   skip_if_not(check_tf_version())
   skip_on_ci()
-  source("helpers.R")
+
 
   m <- model(normal(0, 1))
 
@@ -539,7 +539,7 @@ test_that("mcmc errors for invalid parallel plans", {
 
 test_that("parallel reporting works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   m <- model(normal(0, 1))
 
@@ -558,7 +558,7 @@ test_that("parallel reporting works", {
 
 test_that("initials works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # errors on bad objects
   expect_snapshot_error(
@@ -578,7 +578,7 @@ test_that("initials works", {
 
 test_that("prep_initials errors informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- normal(0, 1)
   b <- uniform(0, 1)
@@ -628,7 +628,7 @@ test_that("prep_initials errors informatively", {
 
 test_that("samplers print informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   expect_snapshot(
     hmc()
