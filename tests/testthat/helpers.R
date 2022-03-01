@@ -694,8 +694,8 @@ get_upper_tri <- function(x, diag) {
 compare_iid_samples <- function(greta_fun,
                                 r_fun,
                                 parameters,
-                                nsim = 100,
-                                p_value_threshold = 0.005) {
+                                nsim = 200,
+                                p_value_threshold = 0.001) {
   greta_array <- do.call(greta_fun, parameters)
 
   # get information about distribution
