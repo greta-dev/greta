@@ -38,7 +38,7 @@ test_that("simple functions work as expected", {
 
 test_that("primitive functions work as expected", {
   skip_if_not(check_tf_version())
-  # source("helpers.R")
+  source("helpers.R")
 
   real <- randn(25, 4)
   pos <- exp(real)
