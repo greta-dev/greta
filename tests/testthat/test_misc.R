@@ -127,7 +127,8 @@ test_that("define and mcmc error informatively", {
     mcmc(m,
          warmup = 1,
          n_samples = 1,
-         n_cores = 1000000L
+         n_cores = 1000000L,
+         verbose = FALSE
     ),
     "cores were requested, but only"
   )
@@ -136,7 +137,7 @@ test_that("define and mcmc error informatively", {
   z <- normal(x, 1)
   m <- model(x, z)
   expect_snapshot_error(
-    draws <- mcmc(m)
+    draws <- mcmc(m, verbose = FALSE)
   )
 })
 

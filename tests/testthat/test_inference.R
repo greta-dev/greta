@@ -162,7 +162,10 @@ test_that("bad mcmc proposals are rejected", {
 
     expect_snapshot_error(
       mcmc(m,
-           chains = 1, n_samples = 1, warmup = 0,
+           chains = 1,
+           n_samples = 1,
+           warmup = 0,
+           verbose = FALSE,
            initial_values = initials(z = 1e20)
       )
     )
@@ -173,7 +176,7 @@ test_that("bad mcmc proposals are rejected", {
   distribution(x) <- normal(z, 1e-12)
   m <- model(z, precision = "single")
   expect_snapshot_error(
-    mcmc(m, chains = 1, n_samples = 1, warmup = 0)
+    mcmc(m, chains = 1, n_samples = 1, warmup = 0, verbose = FALSE)
   )
 
   # proposals that are fine, but rejected anyway
@@ -213,13 +216,15 @@ test_that("mcmc works with multiple chains", {
   m <- model(z)
 
   # multiple chains, automatic initial values
-  quietly(expect_ok(mcmc(m, warmup = 10, n_samples = 10, chains = 2)))
+  quietly(expect_ok(mcmc(m, warmup = 10, n_samples = 10, chains = 2,
+                         verbose = FALSE)))
 
   # multiple chains, user-specified initial values
   inits <- list(initials(z = 1), initials(z = 2))
   quietly(expect_ok(mcmc(m,
     warmup = 10, n_samples = 10, chains = 2,
-    initial_values = inits
+    initial_values = inits,
+    verbose = FALSE
   )))
 })
 
@@ -374,7 +379,7 @@ test_that("samples has object names", {
   m <- model(a, b)
 
   # mcmc should give the right names
-  draws <- mcmc(m, warmup = 2, n_samples = 10)
+  draws <- mcmc(m, warmup = 2, n_samples = 10, verbose = FALSE)
   expect_snapshot(rownames(summary(draws)$statistics))
 
   # so should calculate
@@ -402,7 +407,8 @@ test_that("mcmc supports rwmh sampler with normal proposals", {
   m <- model(x)
   expect_ok(draws <- mcmc(m,
     sampler = rwmh("normal"),
-    n_samples = 100, warmup = 100
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
   ))
 })
 
@@ -413,7 +419,8 @@ test_that("mcmc supports rwmh sampler with uniform proposals", {
   m <- model(x)
   expect_ok(draws <- mcmc(m,
     sampler = rwmh("uniform"),
-    n_samples = 100, warmup = 100
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
   ))
 })
 
@@ -424,7 +431,8 @@ test_that("mcmc supports slice sampler with single precision models", {
   m <- model(x, precision = "single")
   expect_ok(draws <- mcmc(m,
     sampler = slice(),
-    n_samples = 100, warmup = 100
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
   ))
 })
 
@@ -436,7 +444,8 @@ test_that("mcmc doesn't support slice sampler with double precision models", {
   expect_snapshot_error(
     draws <- mcmc(m,
                   sampler = slice(),
-                  n_samples = 100, warmup = 100
+                  n_samples = 100, warmup = 100,
+                  verbose = FALSE
     )
   )
 })
@@ -521,18 +530,18 @@ test_that("mcmc errors for invalid parallel plans", {
   # handle handle forks, so only accept multisession, or multi session clusters
   suppressWarnings(plan(multiprocess))
   expect_snapshot_error(
-    mcmc(m)
+    mcmc(m, verbose = FALSE)
   )
 
   plan(multicore)
   expect_snapshot_error(
-    mcmc(m)
+    mcmc(m, verbose = FALSE)
   )
 
   cl <- parallel::makeForkCluster(2L)
   plan(cluster, workers = cl)
   expect_snapshot_error(
-    mcmc(m)
+    mcmc(m, verbose = FALSE)
   )
 
 })
@@ -590,39 +599,39 @@ test_that("prep_initials errors informatively", {
 
   # bad objects:
   expect_snapshot_error(
-    mcmc(m, initial_values = FALSE)
+    mcmc(m, initial_values = FALSE, verbose = FALSE)
   )
 
   expect_snapshot_error(
-    mcmc(m, initial_values = list(FALSE))
+    mcmc(m, initial_values = list(FALSE), verbose = FALSE)
   )
 
   # an unrelated greta array
   g <- normal(0, 1)
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(g = 1))
+    mcmc(m, chains = 1, initial_values = initials(g = 1), verbose = FALSE)
   )
 
   # non-variable greta arrays
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(f = 1))
+    mcmc(m, chains = 1, initial_values = initials(f = 1), verbose = FALSE)
   )
 
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(z = 1))
+    mcmc(m, chains = 1, initial_values = initials(z = 1), verbose = FALSE)
   )
 
   # out of bounds errors
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(b = -1))
+    mcmc(m, chains = 1, initial_values = initials(b = -1), verbose = FALSE)
   )
 
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(d = -1))
+    mcmc(m, chains = 1, initial_values = initials(d = -1), verbose = FALSE)
   )
 
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(e = 2))
+    mcmc(m, chains = 1, initial_values = initials(e = 2), verbose = FALSE)
   )
 })
 
@@ -655,7 +664,7 @@ test_that("pb_update > thin to avoid bursts with no saved iterations", {
   m <- model(x)
   expect_ok(draws <- mcmc(m,
     n_samples = 100, warmup = 100,
-    thin = 3, pb_update = 2
+    thin = 3, pb_update = 2, verbose = FALSE
   ))
   expect_identical(thin(draws), 3)
 })
