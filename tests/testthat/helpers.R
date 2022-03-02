@@ -197,7 +197,9 @@ check_op <- function(op, a, b, greta_op = NULL,
 
 compare_op <- function(r_out, greta_out, tolerance = 1e-4) {
   difference <- as.vector(abs(r_out - greta_out))
-  expect_true(all(difference < tolerance))
+  difference_lt_tolerance <- difference < tolerance
+  are_all_true <- all(difference_lt_tolerance)
+  expect_true(are_all_true)
 }
 
 run_r_op <- function(op, a, b, other_args) {

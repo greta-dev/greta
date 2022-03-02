@@ -38,7 +38,7 @@ test_that("simple functions work as expected", {
 
 test_that("primitive functions work as expected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+  # source("helpers.R")
 
   real <- randn(25, 4)
   pos <- exp(real)
@@ -56,6 +56,8 @@ test_that("primitive functions work as expected", {
   check_op(cospi, real)
   check_op(sinpi, real)
   check_op(tanpi, real, tolerance = 1e-2)
+  # this is failing, the differences are
+  # 0.06386098 0.09231817 0.10306497 6.15746890
   check_op(trigamma, real, tolerance = 2e-2)
 })
 
@@ -89,7 +91,6 @@ test_that("complex number functions error informatively", {
 
 test_that("matrix functions work as expected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- rWishart(1, 6, diag(5))[, , 1]
   b <- randn(5, 25)
@@ -158,7 +159,6 @@ test_that("aperm works as expected", {
 
 test_that("reducing functions work as expected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- randn(1, 3)
   b <- randn(5, 25)
@@ -190,7 +190,6 @@ test_that("reducing functions work as expected", {
 
 test_that("cumulative functions work as expected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- randn(5)
 
@@ -377,7 +376,6 @@ test_that("solve and sweep and kronecker error as expected", {
 
 test_that("colSums etc. error as expected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- as_data(randn(3, 4, 5))
 
@@ -401,7 +399,6 @@ test_that("colSums etc. error as expected", {
 
 test_that("forwardsolve and backsolve error as expected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- wishart(6, diag(5))
   b <- as_data(randn(5, 25))
@@ -494,7 +491,6 @@ test_that("eigen works as expected", {
 
 test_that("ignored options are errored/warned about", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- ones(3, 3)
   expect_snapshot_error(
@@ -521,7 +517,6 @@ test_that("ignored options are errored/warned about", {
 
 test_that("incorrect dimensions are errored about", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- ones(3, 3, 3)
   y <- ones(3, 4)
