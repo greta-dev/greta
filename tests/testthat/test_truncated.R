@@ -1,3 +1,10 @@
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
+
+
 test_that("truncated normal has correct densities", {
   skip_if_not(check_tf_version())
 
@@ -90,7 +97,6 @@ test_that("truncated lognormal has correct densities", {
 test_that("truncated gamma has correct densities", {
   skip_if_not(check_tf_version())
 
-
   # non truncated
   compare_truncated_distribution(gamma,
     "gamma",
@@ -134,6 +140,12 @@ test_that("truncated gamma has correct densities", {
 
 test_that("truncated inverse gamma has correct densities", {
   skip_if_not(check_tf_version())
+
+  # apparently testthat can't see these, trying out global assign to see if that
+  # makes them visible
+  dinvgamma <<- extraDistr::dinvgamma
+  qinvgamma <<- extraDistr::qinvgamma
+  pinvgamma <<- extraDistr::pinvgamma
 
   # non truncated
   compare_truncated_distribution(inverse_gamma,
@@ -258,10 +270,15 @@ test_that("truncated pareto has correct densities", {
   skip_if_not(check_tf_version())
   # mock up pareto to have differently named parameters (a and b are use for the
   # truncation)
-  preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
-  dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
-  ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
-  qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
+  #
+  # # mock up pareto to have differently named parameters (a and b are use for the
+  # # truncation)
+  preto <<- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
+  dpreto <<- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+  ppreto <<- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+  qpreto <<- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
+
+
 
   # non truncated
   compare_truncated_distribution(preto,
@@ -307,9 +324,9 @@ test_that("truncated pareto has correct densities", {
 test_that("truncated student has correct densities", {
   skip_if_not(check_tf_version())
 
-  dstudent <- extraDistr::dlst
-  pstudent <- extraDistr::plst
-  qstudent <- extraDistr::qlst
+  dstudent <<- extraDistr::dlst
+  qstudent <<- extraDistr::qlst
+  pstudent <<- extraDistr::plst
 
   # non truncated
   compare_truncated_distribution(student,
@@ -360,9 +377,9 @@ test_that("truncated student has correct densities", {
 test_that("truncated laplace has correct densities", {
   skip_if_not(check_tf_version())
 
-  dlaplace <- extraDistr::dlaplace
-  plaplace <- extraDistr::plaplace
-  qlaplace <- extraDistr::qlaplace
+  dlaplace <<- extraDistr::dlaplace
+  qlaplace <<- extraDistr::qlaplace
+  plaplace <<- extraDistr::plaplace
 
   # non truncated
   compare_truncated_distribution(laplace,
