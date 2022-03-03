@@ -121,5 +121,6 @@ Collate:
     'reinstallers.R'
     'checkers.R'
     'test_if_forked_cluster.R'
+    'testthat-helpers.R'
     'zzz.R'
     'internals.R'

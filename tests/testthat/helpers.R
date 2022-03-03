@@ -1,21 +1,14 @@
 # test functions
-options(testthat.progress.max_fails = 100)
-library(fields)
-library(tensorflow)
 
 # set the seed and flush the graph before running tests
-if (greta:::check_tf_version()) {
-  tf$compat$v1$reset_default_graph()
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
 }
 
 set.seed(2020 - 02 - 11)
 
 rng_seed <- function() {
   get(".Random.seed", envir = .GlobalEnv)
-}
-
-expect_ok <- function(expr) {
-  expect_error(expr, NA)
 }
 
 # evaluate a greta_array, node, or tensor
@@ -36,27 +29,6 @@ grab <- function(x, dag = NULL) {
   drop_first_dim(out)
 }
 
-# get the value of the target greta array, by passing values for the named
-# variable greta arrays via the free state parameter, optionally with batches
-grab_via_free_state <- function(target, values, batches = 1) {
-  dag <- dag_class$new(list(target))
-  dag$define_tf()
-  inits <- do.call(initials, values)
-  inits_flat <- prep_initials(inits, 1, dag)[[1]]
-  if (batches > 1) {
-    inits_list <- replicate(batches, inits_flat, simplify = FALSE)
-    inits_flat <- do.call(rbind, inits_list)
-    vals <- dag$trace_values(inits_flat)[1, ]
-  } else {
-    vals <- dag$trace_values(inits_flat)
-  }
-  array(vals, dim = dim(target))
-}
-
-is.greta_array <- function(x) { # nolint
-  inherits(x, "greta_array")
-}
-
 set_distribution <- function(dist, data) {
   # fix the value of dist
   dist_node <- get_node(dist)
@@ -74,7 +46,7 @@ get_density <- function(distrib, data) {
   distribution(x) <- distrib
 
   # create dag and define the density
-  dag <- greta:::dag_class$new(list(x))
+  dag <- dag_class$new(list(x))
   get_node(x)$distribution$define_tf(dag)
 
   # get the log density as a vector
@@ -141,7 +113,7 @@ greta_density <- function(fun, parameters, x,
   distrib_node$add_target(get_node(x_))
 
   # create dag
-  dag <- greta:::dag_class$new(list(x_))
+  dag <- dag_class$new(list(x_))
   dag$define_tf()
   dag$set_tf_data_list("batch_size", 1L)
   dag$build_feed_dict()
@@ -154,99 +126,6 @@ greta_density <- function(fun, parameters, x,
 
   density <- dag$tf_sess_run(test_density)
   as.vector(density)
-}
-
-# an array of random standard normals with the specificed dims
-# e.g. randn(3, 2, 1)
-randn <- function(...) {
-  dim <- c(...)
-  array(rnorm(prod(dim)), dim = dim)
-}
-
-
-# ditto for standard uniforms
-randu <- function(...) {
-  dim <- c(...)
-  array(runif(prod(dim)), dim = dim)
-}
-
-# create a variable with the same dimensions as as_data(x)
-as_variable <- function(x) {
-  x <- as_2d_array(x)
-  variable(dim = dim(x))
-}
-
-# check a greta operation and the equivalent R operation give the same output
-# e.g. check_op(sum, randn(100, 3))
-check_op <- function(op, a, b, greta_op = NULL,
-                     other_args = list(),
-                     tolerance = 1e-3,
-                     only = c("data", "variable", "batched")) {
-  if (is.null(greta_op)) {
-    greta_op <- op
-  }
-
-  r_out <- run_r_op(op, a, b, other_args)
-
-  for (type in only) {
-    # compare with ops on data greta arrays
-    greta_out <- run_greta_op(greta_op, a, b, other_args, type)
-    compare_op(r_out, greta_out, tolerance)
-  }
-}
-
-compare_op <- function(r_out, greta_out, tolerance = 1e-4) {
-  difference <- as.vector(abs(r_out - greta_out))
-  difference_lt_tolerance <- difference < tolerance
-  are_all_true <- all(difference_lt_tolerance)
-  expect_true(are_all_true)
-}
-
-run_r_op <- function(op, a, b, other_args) {
-  arg_list <- list(a)
-  if (!missing(b)) {
-    arg_list <- c(arg_list, list(b))
-  }
-  arg_list <- c(arg_list, other_args)
-  do.call(op, arg_list)
-}
-
-run_greta_op <- function(greta_op, a, b, other_args,
-                         type = c("data", "variable", "batched")) {
-  type <- match.arg(type)
-
-  converter <- switch(type,
-    data = as_data,
-    variable = as_variable,
-    batched = as_variable
-  )
-
-  g_a <- converter(a)
-
-  arg_list <- list(g_a)
-  values <- list(g_a = a)
-
-  if (!missing(b)) {
-    g_b <- converter(b)
-    arg_list <- c(arg_list, list(g_b))
-    values <- c(values, list(g_b = b))
-  }
-
-  arg_list <- c(arg_list, other_args)
-  out <- do.call(greta_op, arg_list)
-
-  if (type == "data") {
-    # data greta arrays should provide their own values
-    result <- calculate(out, values = list())[[1]]
-  } else if (type == "variable") {
-    result <- grab_via_free_state(out, values)
-  } else if (type == "batched") {
-    result <- grab_via_free_state(out, values, batches = 3)
-  } else {
-    result <- calculate(out, values = values)[[1]]
-  }
-
-  result
 }
 
 # execute a call via greta, swapping the objects named in 'swap' to greta
@@ -338,26 +217,6 @@ sample_distribution <- function(greta_array, n = 10,
   expect_true(all(above_lower & below_upper))
 }
 
-# apparently testthat can't see these
-dinvgamma <- extraDistr::dinvgamma
-qinvgamma <- extraDistr::qinvgamma
-pinvgamma <- extraDistr::pinvgamma
-#
-dlaplace <- extraDistr::dlaplace
-qlaplace <- extraDistr::qlaplace
-plaplace <- extraDistr::plaplace
-#
-dstudent <- extraDistr::dlst
-qstudent <- extraDistr::qlst
-pstudent <- extraDistr::plst
-#
-# # mock up pareto to have differently named parameters (a and b are use for the
-# # truncation)
-preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
-dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
-ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
-qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
-
 compare_truncated_distribution <- function(greta_fun,
                                            which,
                                            parameters,
@@ -368,26 +227,6 @@ compare_truncated_distribution <- function(greta_fun,
   # is a greta array created from a distribution and a constrained variable
   # greta array. 'r_fun' is an r function returning the log density for the same
   # truncated distribution, taking x as its only argument.
-
-  # apparently testthat can't see these
-  dinvgamma <- extraDistr::dinvgamma
-  qinvgamma <- extraDistr::qinvgamma
-  pinvgamma <- extraDistr::pinvgamma
-  #
-  dlaplace <- extraDistr::dlaplace
-  qlaplace <- extraDistr::qlaplace
-  plaplace <- extraDistr::plaplace
-  #
-  dstudent <- extraDistr::dlst
-  qstudent <- extraDistr::qlst
-  pstudent <- extraDistr::plst
-  #
-  # # mock up pareto to have differently named parameters (a and b are use for the
-  # # truncation)
-  preto <- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
-  dpreto <- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
-  ppreto <- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
-  qpreto <- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
 
   x <- do.call(
     truncdist::rtrunc,
@@ -457,7 +296,7 @@ qt_ls <- function(p, df, location, scale, log.p = FALSE) {
 }
 
 # mock up the progress bar to force its output to stdout for testing
-cpb <- eval(parse(text = capture.output(dput(greta:::create_progress_bar))))
+cpb <- eval(parse(text = capture.output(dput(create_progress_bar))))
 mock_create_progress_bar <- function(...) {
   cpb(..., stream = stdout())
 }
@@ -492,7 +331,7 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
 
   f <- function() {
     alpha <- eta + (k - 2) / 2
-    r12 <- 2 * rbeta(1, alpha, alpha) - 1
+    r12 <- 2 * stats::rbeta(1, alpha, alpha) - 1
     r <- matrix(0, k, k)
     r[1, 1] <- 1
     r[1, 2] <- r12
@@ -529,12 +368,12 @@ rmvnorm <- function(n, mean, Sigma) { # nolint
 }
 
 rwish <- function(n, df, Sigma) { # nolint
-  draws <- rWishart(n = n, df = df, Sigma = Sigma)
+  draws <- stats::rWishart(n = n, df = df, Sigma = Sigma)
   aperm(draws, c(3, 1, 2))
 }
 
 rmulti <- function(n, size, prob) {
-  draws <- rmultinom(n = n, size = size, prob = prob)
+  draws <- stats::rmultinom(n = n, size = size, prob = prob)
   t(draws)
 }
 
@@ -597,7 +436,7 @@ joint_normals <- function(...) {
 rjnorm <- function(n, ...) {
   params_list <- list(...)
   args_list <- lapply(params_list, function(par) c(n, par))
-  sims <- lapply(args_list, function(par) do.call(rnorm, par))
+  sims <- lapply(args_list, function(par) do.call(stats::rnorm, par))
   do.call(cbind, sims)
 }
 
@@ -674,13 +513,9 @@ rmixmvnorm <- function(n, ...) {
   draws_out
 }
 
-
-
-
-
 # a form of two-sample chi squared test for discrete multivariate distributions
 combined_chisq_test <- function(x, y) {
-  chisq.test(
+  stats::chisq.test(
     x = colSums(x),
     y = colSums(y)
   )
@@ -731,14 +566,14 @@ compare_iid_samples <- function(greta_fun,
 
   # find a vaguely appropriate test
   if (discrete) {
-    test <- ifelse(multivariate, combined_chisq_test, chisq.test)
+    test <- ifelse(multivariate, combined_chisq_test, stats::chisq.test)
   } else {
-    test <- ifelse(multivariate, cramer::cramer.test, ks.test)
+    test <- ifelse(multivariate, cramer::cramer.test, stats::ks.test)
   }
 
   # do Kolmogorov Smirnov test on samples
   suppressWarnings(test_result <- test(greta_samples, r_samples))
-  expect_gte(test_result$p.value, p_value_threshold)
+  testthat::expect_gte(test_result$p.value, p_value_threshold)
 }
 
 # is this a release candidate?
@@ -775,13 +610,13 @@ check_geweke <- function(sampler, model, data,
 
   # visualise correspondence
   quants <- (1:99) / 100
-  q1 <- quantile(target_theta, quants)
-  q2 <- quantile(greta_theta, quants)
+  q1 <- stats::quantile(target_theta, quants)
+  q2 <- stats::quantile(greta_theta, quants)
   plot(q2, q1, main = title)
-  abline(0, 1)
+  graphics::abline(0, 1)
 
   # do a formal hypothesis test
-  suppressWarnings(stat <- ks.test(target_theta, greta_theta))
+  suppressWarnings(stat <- stats::ks.test(target_theta, greta_theta))
   testthat::expect_gte(stat$p.value, 0.005)
 }
 
@@ -929,7 +764,7 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
 
   # get multivariate normal samples
   mu <- as_data(t(rnorm(2, 0, 5)))
-  sigma <- rWishart(1, 3, diag(2))[, , 1]
+  sigma <- stats::rWishart(1, 3, diag(2))[, , 1]
   x <- multivariate_normal(mu, sigma)
   m <- model(x, precision = "single")
 
@@ -961,7 +796,7 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   # away from truth. There's a 1/100 chance of any one of these scaled errors
   # being greater than qnorm(0.99) if the sampler is correct
   errors <- scaled_error(stat_draws, stat_truth)
-  expect_lte(max(errors), qnorm(0.99))
+  expect_lte(max(errors), stats::qnorm(0.99))
 }
 
 # sample values of greta array 'x' (which must follow a distribution), and
@@ -993,8 +828,8 @@ check_samples <- function(x,
     title <- paste(distrib, "with", sampler_name)
   }
 
-  qqplot(mcmc_samples, iid_samples, main = title)
-  abline(0, 1)
+  stats::qqplot(mcmc_samples, iid_samples, main = title)
+  graphics::abline(0, 1)
 
   # do a formal hypothesis test
   suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
