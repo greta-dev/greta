@@ -1,3 +1,10 @@
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
+
+
 test_that("opt converges with TF optimisers", {
   skip_if_not(check_tf_version())
 
@@ -476,6 +483,7 @@ test_that("numerical issues are handled in mcmc", {
   ))
 })
 
+# this is the test that says: 'Loaded Tensorflow version 1.14.0'
 test_that("mcmc works in parallel", {
   skip_if_not(check_tf_version())
 

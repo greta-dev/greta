@@ -1,3 +1,9 @@
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
+
 test_that("simple functions work as expected", {
   skip_if_not(check_tf_version())
 
@@ -38,7 +44,7 @@ test_that("simple functions work as expected", {
 
 test_that("primitive functions work as expected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+  # source("helpers.R")
 
   real <- randn(25, 4)
   pos <- exp(real)
@@ -55,10 +61,9 @@ test_that("primitive functions work as expected", {
   check_op(atanh, m1p1)
   check_op(cospi, real)
   check_op(sinpi, real)
-  check_op(tanpi, real, tolerance = 1e-2)
-  # this is failing, the differences are
-  # 0.06386098 0.09231817 0.10306497 6.15746890
-  check_op(trigamma, real, tolerance = 2e-2)
+  # potentially change check_op to use absolute or relative error
+  check_op(tanpi, real, relative_error = TRUE)
+  check_op(trigamma, real, relative_error = TRUE)
 })
 
 test_that("cummax and cummin functions error informatively", {
