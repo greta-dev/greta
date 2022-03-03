@@ -1,23 +1,28 @@
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
 
 test_that("tensorflow returns appropriate thing with 'dim'", {
   skip_if_not(check_tf_version())
-  xt_int_32 <- as_tensor(x = 42, "int32")
-  xt_int_64 <- as_tensor(x = 42, "int64")
-  xt_float_32 <- as_tensor(x = 42, "float32")
-  xt_float_32_dec <- as_tensor(x = 42.2, "float32")
+  xt_int_32 <- tensorflow::as_tensor(x = 42, "int32")
+  xt_int_64 <- tensorflow::as_tensor(x = 42, "int64")
+  xt_float_32 <- tensorflow::as_tensor(x = 42, "float32")
+  xt_float_32_dec <- tensorflow::as_tensor(x = 42.2, "float32")
 
   expect_equal(dim(xt_int_32), integer(0))
   expect_equal(dim(xt_int_64), integer(0))
   expect_equal(dim(xt_float_32), integer(0))
   expect_equal(dim(xt_float_32_dec), integer(0))
   expect_equal(dim(shape(1,2,3)), NULL)
-  expect_equal(dim(as_tensor(c(1:3))), 3)
+  expect_equal(dim(tensorflow::as_tensor(c(1:3))), 3)
 })
 
 test_that("Tensor behaves as we expect",{
   skip_if_not(check_tf_version())
   x <- tensorflow::as_tensor(42, "int32")
-  expect_snapshot_output(x)
+  expect_snapshot_output(length(x))
   expect_snapshot_output(dim(x))
   expect_snapshot_output(
     tf$reshape(x, tensorflow::as_tensor(shape(-1, 1, 1L, 1, 1L)))
@@ -75,7 +80,7 @@ test_that("TensorShape conversions remain stable", {
   x <- shape(NA, 3)
   expect_snapshot_output(as.list(x))
   expect_snapshot_output(as.integer(x))
-  expect_snapshot_output(as_tensor(x))
+  expect_snapshot_output(tensorflow::as_tensor(x))
   expect_snapshot_output(x[[1]])
   expect_snapshot_output(x[[2]])
 })

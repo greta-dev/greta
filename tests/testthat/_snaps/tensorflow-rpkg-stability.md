@@ -1,6 +1,6 @@
 # Tensor behaves as we expect
 
-    Tensor("Const_5:0", shape=(), dtype=int32)
+    [1] 1
 
 ---
 
