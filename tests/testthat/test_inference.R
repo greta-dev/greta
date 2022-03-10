@@ -490,11 +490,10 @@ test_that("mcmc works in parallel", {
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
+  op <- future::plan()
   # put the future plan back as we found it
-  withr::defer(plan(op))
-  plan(multisession)
+  withr::defer(future::plan(op))
+  future::plan(future::multisession)
 
   # one chain
   expect_ok(draws <- mcmc(m,
@@ -526,28 +525,27 @@ test_that("mcmc errors for invalid parallel plans", {
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
+  op <- future::plan()
 
   # silence future's warning about multicore support
   # put the future plan back as we found it
   withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
   # reset warning setting
-  withr::defer(plan(op))
+  withr::defer(future::plan(op))
 
   # handle handle forks, so only accept multisession, or multi session clusters
-  suppressWarnings(plan(multiprocess))
+  suppressWarnings(future::plan(future::multiprocess))
   expect_snapshot_error(
     mcmc(m, verbose = FALSE)
   )
 
-  plan(multicore)
+  future::plan(future::multicore)
   expect_snapshot_error(
     mcmc(m, verbose = FALSE)
   )
 
   cl <- parallel::makeForkCluster(2L)
-  plan(cluster, workers = cl)
+  future::plan(future::cluster, workers = cl)
   expect_snapshot_error(
     mcmc(m, verbose = FALSE)
   )
@@ -560,11 +558,10 @@ test_that("parallel reporting works", {
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
+  op <- future::plan()
   # put the future plan back as we found it
-  withr::defer(plan(op))
-  plan(multisession)
+  withr::defer(future::plan(op))
+  future::plan(future::multisession)
 
   # should report each sampler's progress with a fraction
   out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
