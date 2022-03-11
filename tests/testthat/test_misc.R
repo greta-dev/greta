@@ -19,34 +19,6 @@ test_that("check_tf_version works", {
   tf$`__version__` <- true_version # nolint
 })
 
-#   # forge a missing installation
-# test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
-#     # mockery::stub(check_tf_version, 'reticulate::py_module_available', FALSE)
-#     mockery::stub(check_tf_version, 'have_python', FALSE)
-#     mockery::stub(check_tf_version, 'have_tf', FALSE)
-#     mockery::stub(check_tf_version, 'have_tfp', FALSE)
-#
-#     expect_snapshot_error(
-#       check_tf_version("error")
-#       )
-#
-#     expect_snapshot_warning(
-#       check_tf_version("warn")
-#     )
-#
-#     expect_snapshot(
-#       check_tf_version("message")
-#     )
-#
-# })
-#
-# test_that("check_tf_version fails when tfp not available", {
-#     greta_stash$python_has_been_initialised <- FALSE
-#     mockery::stub(check_tf_version, 'have_tfp', FALSE)
-#     expect_error(
-#       check_tf_version("error")
-#     )
-#   })
 
 test_that(".onLoad runs", {
   skip_if_not(check_tf_version())
