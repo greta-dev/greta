@@ -5,10 +5,9 @@
 
 ## R CMD check results
 
-0 errors | 0 warnings | 2 notes
+0 errors | 0 warnings | 1 notes
 
 * Maintainer has changed from Nick Golding to Nicholas Tierney.
-* We have included a LICENSE file with the Apache 2.0 to indicate Nick Golding as the copyright holder
 
 ## revdepcheck results
 
