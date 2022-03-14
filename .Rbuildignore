@@ -40,3 +40,4 @@
 ^codecov\.yml$
 
 ^depends\.rds$
+^CRAN-SUBMISSION$
