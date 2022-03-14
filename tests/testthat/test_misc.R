@@ -19,38 +19,10 @@ test_that("check_tf_version works", {
   tf$`__version__` <- true_version # nolint
 })
 
-  # forge a missing installation
-test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
-    # mockery::stub(check_tf_version, 'reticulate::py_module_available', FALSE)
-    mockery::stub(check_tf_version, 'have_python', FALSE)
-    mockery::stub(check_tf_version, 'have_tf', FALSE)
-    mockery::stub(check_tf_version, 'have_tfp', FALSE)
-
-    expect_snapshot_error(
-      check_tf_version("error")
-      )
-
-    expect_snapshot_warning(
-      check_tf_version("warn")
-    )
-
-    expect_snapshot(
-      check_tf_version("message")
-    )
-
-})
-
-test_that("check_tf_version fails when tfp not available", {
-    greta_stash$python_has_been_initialised <- FALSE
-    mockery::stub(check_tf_version, 'have_tfp', FALSE)
-    expect_error(
-      check_tf_version("error")
-    )
-  })
 
 test_that(".onLoad runs", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   expect_ok(greta:::.onLoad())
 })
 
@@ -92,7 +64,7 @@ test_that("greta_model objects print", {
 
 test_that("define and mcmc error informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- as_data(randn(10))
 
@@ -127,7 +99,8 @@ test_that("define and mcmc error informatively", {
     mcmc(m,
          warmup = 1,
          n_samples = 1,
-         n_cores = 1000000L
+         n_cores = 1000000L,
+         verbose = FALSE
     ),
     "cores were requested, but only"
   )
@@ -136,13 +109,13 @@ test_that("define and mcmc error informatively", {
   z <- normal(x, 1)
   m <- model(x, z)
   expect_snapshot_error(
-    draws <- mcmc(m)
+    draws <- mcmc(m, verbose = FALSE)
   )
 })
 
 test_that("check_dims errors informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- ones(3, 3)
   b <- ones(1)
@@ -182,7 +155,7 @@ test_that("check_dims errors informatively", {
 
 test_that("disjoint graphs are checked", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # if the target nodes aren't related, they sould be checked separately
 
@@ -207,7 +180,7 @@ test_that("disjoint graphs are checked", {
 
 test_that("plotting models doesn't error", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- uniform(0, 1)
 
@@ -218,7 +191,7 @@ test_that("plotting models doesn't error", {
 
 test_that("structures work correctly", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- ones(2, 2)
   b <- zeros(2)
@@ -231,7 +204,7 @@ test_that("structures work correctly", {
 
 test_that("cleanly() handles TF errors nicely", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   inversion_stop <- function() {
     stop("this non-invertible thing is not invertible")

@@ -1,6 +1,6 @@
 test_that("log and exp function representations work", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # get log and exp pairs as greta data
   n <- 100
@@ -27,7 +27,7 @@ test_that("log and exp function representations work", {
 
 test_that("chol & chol2inv function representation works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # get symmetric matrix
   m <- 10
@@ -54,7 +54,7 @@ test_that("chol & chol2inv function representation works", {
 
 test_that("bernoulli prob representations have correct density", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   n <- 100
   x <- rbinom(n, 1, 0.5)
@@ -86,7 +86,7 @@ test_that("bernoulli prob representations have correct density", {
 
 test_that("binomial prob representations have correct density", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   n <- 100
   size <- rpois(n, 50)
@@ -129,7 +129,7 @@ test_that("binomial prob representations have correct density", {
 
 test_that("poisson lambda representation has correct density", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   n <- 100
   x <- rpois(n, 10)
@@ -154,7 +154,7 @@ test_that("poisson lambda representation has correct density", {
 
 test_that("mvn Sigma representation has correct density", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   n <- 100
   m <- 5
@@ -190,7 +190,7 @@ test_that("mvn Sigma representation has correct density", {
 
 test_that("wishart target and Sigma representations have correct density", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   m <- 10
   x <- rWishart(1, m + 1, diag(m))[, , 1]
@@ -249,7 +249,7 @@ test_that("wishart target and Sigma representations have correct density", {
 
 test_that("lkj target representation has correct density", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   m <- 10
   eta <- 3

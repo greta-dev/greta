@@ -1,29 +1,29 @@
 test_that("check_future_plan() works", {
-  library(future)
-  op <- plan()
-  plan(multisession)
+  op <- future::plan()
+  # put the future plan back as we found it
+  withr::defer(future::plan(op))
+  future::plan(future::multisession)
 
   # one chain
   expect_error(check_future_plan(), NA)
-  # put the future plan back as we found it
-  plan(op)
+
 })
 
 test_that("mcmc errors for invalid parallel plans", {
-  library(future)
-  op <- plan()
+  op <- future::plan()
+  # put the future plan back as we found it
+  withr::defer(future::plan(op))
 
-  # silence future's warning about multicore support
-  old_option <- Sys.getenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE")
-  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
+  # temporarily silence future's warning about multicore support
+  withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
 
   # handle handle forks, so only accept multisession, or multi session clusters
-  suppressWarnings(plan(multiprocess))
+  suppressWarnings(future::plan(future::multiprocess))
   expect_snapshot_error(
     check_future_plan()
   )
 
-  plan(multicore)
+  future::plan(future::multicore)
   expect_snapshot_error(
     check_future_plan()
   )
@@ -31,15 +31,10 @@ test_that("mcmc errors for invalid parallel plans", {
   # skip on windows
   if (.Platform$OS.type != "windows"){
     cl <- parallel::makeCluster(2L, type = "FORK")
-    plan(cluster, workers = cl)
+    future::plan(future::cluster, workers = cl)
     expect_snapshot_error(
       check_future_plan()
     )
   }
 
-  # put the future plan back as we found it
-  plan(op)
-
-  # reset warning setting
-  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = old_option)
 })

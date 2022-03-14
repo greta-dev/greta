@@ -2,7 +2,7 @@ Type: Package
 Package: greta
 Title: Simple and Scalable Statistical Modelling in R
 Version: 0.4.0
-Date: 2021-11-26
+Date: 2022-02-21
 Authors@R: c(
     person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0001-8916-5570")),
@@ -121,5 +121,6 @@ Collate:
     'reinstallers.R'
     'checkers.R'
     'test_if_forked_cluster.R'
+    'testthat-helpers.R'
     'zzz.R'
     'internals.R'
