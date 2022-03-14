@@ -1,6 +1,6 @@
 test_that("transformations work as expected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- randn(25, 4)
 
@@ -30,7 +30,7 @@ test_that("transformations work as expected", {
 
 test_that("imultilogit errors informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- ones(3, 4, 3)
 

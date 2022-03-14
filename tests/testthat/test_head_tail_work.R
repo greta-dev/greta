@@ -1,6 +1,11 @@
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
+
 test_that("head and tail work", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- randn(10, 1)
   b <- randn(10, 4)

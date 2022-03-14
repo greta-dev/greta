@@ -1,6 +1,13 @@
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
+
+
 test_that("opt converges with TF optimisers", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(5, 2, 0.1)
   z <- variable(dim = 5)
@@ -37,7 +44,7 @@ test_that("opt converges with TF optimisers", {
 
 test_that("opt converges with SciPy optimisers", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(3, 2, 0.1)
   z <- variable(dim = 3)
@@ -93,7 +100,7 @@ test_that("opt converges with SciPy optimisers", {
 
 test_that("opt accepts initial values", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(5, 2, 0.1)
   z <- variable(dim = 5)
@@ -114,7 +121,7 @@ test_that("opt accepts initial values", {
 
 test_that("opt returns hessians", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   sd <- runif(5)
   x <- rnorm(5, 2, 0.1)
@@ -138,7 +145,7 @@ test_that("opt returns hessians", {
 
 test_that("bad mcmc proposals are rejected", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up for numerical rejection of initial location
   x <- rnorm(10000, 1e6, 1)
@@ -162,7 +169,10 @@ test_that("bad mcmc proposals are rejected", {
 
     expect_snapshot_error(
       mcmc(m,
-           chains = 1, n_samples = 1, warmup = 0,
+           chains = 1,
+           n_samples = 1,
+           warmup = 0,
+           verbose = FALSE,
            initial_values = initials(z = 1e20)
       )
     )
@@ -173,7 +183,7 @@ test_that("bad mcmc proposals are rejected", {
   distribution(x) <- normal(z, 1e-12)
   m <- model(z, precision = "single")
   expect_snapshot_error(
-    mcmc(m, chains = 1, n_samples = 1, warmup = 0)
+    mcmc(m, chains = 1, n_samples = 1, warmup = 0, verbose = FALSE)
   )
 
   # proposals that are fine, but rejected anyway
@@ -194,7 +204,7 @@ test_that("bad mcmc proposals are rejected", {
 
 test_that("mcmc works with verbosity and warmup", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(10)
   z <- normal(0, 1)
@@ -205,7 +215,7 @@ test_that("mcmc works with verbosity and warmup", {
 
 test_that("mcmc works with multiple chains", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(10)
   z <- normal(0, 1)
@@ -213,19 +223,21 @@ test_that("mcmc works with multiple chains", {
   m <- model(z)
 
   # multiple chains, automatic initial values
-  quietly(expect_ok(mcmc(m, warmup = 10, n_samples = 10, chains = 2)))
+  quietly(expect_ok(mcmc(m, warmup = 10, n_samples = 10, chains = 2,
+                         verbose = FALSE)))
 
   # multiple chains, user-specified initial values
   inits <- list(initials(z = 1), initials(z = 2))
   quietly(expect_ok(mcmc(m,
     warmup = 10, n_samples = 10, chains = 2,
-    initial_values = inits
+    initial_values = inits,
+    verbose = FALSE
   )))
 })
 
 test_that("mcmc handles initial values nicely", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # preserve R version
   current_r_version <- paste0(R.version$major,".", R.version$minor)
@@ -276,7 +288,7 @@ test_that("mcmc handles initial values nicely", {
 
 test_that("progress bar gives a range of messages", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # 10/1010 should be <1%
   expect_snapshot(draws <- mock_mcmc(1010))
@@ -291,7 +303,7 @@ test_that("progress bar gives a range of messages", {
 
 test_that("extra_samples works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -308,7 +320,7 @@ test_that("extra_samples works", {
 
 test_that("trace_batch_size works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -332,7 +344,7 @@ test_that("trace_batch_size works", {
 
 test_that("stashed_samples works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -367,14 +379,14 @@ test_that("stashed_samples works", {
 
 test_that("samples has object names", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- normal(0, 1)
   b <- normal(a, 1, dim = 3)
   m <- model(a, b)
 
   # mcmc should give the right names
-  draws <- mcmc(m, warmup = 2, n_samples = 10)
+  draws <- mcmc(m, warmup = 2, n_samples = 10, verbose = FALSE)
   expect_snapshot(rownames(summary(draws)$statistics))
 
   # so should calculate
@@ -386,7 +398,7 @@ test_that("samples has object names", {
 
 test_that("model errors nicely", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # model should give a nice error if passed something other than a greta array
   a <- 1
@@ -402,7 +414,8 @@ test_that("mcmc supports rwmh sampler with normal proposals", {
   m <- model(x)
   expect_ok(draws <- mcmc(m,
     sampler = rwmh("normal"),
-    n_samples = 100, warmup = 100
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
   ))
 })
 
@@ -413,7 +426,8 @@ test_that("mcmc supports rwmh sampler with uniform proposals", {
   m <- model(x)
   expect_ok(draws <- mcmc(m,
     sampler = rwmh("uniform"),
-    n_samples = 100, warmup = 100
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
   ))
 })
 
@@ -424,7 +438,8 @@ test_that("mcmc supports slice sampler with single precision models", {
   m <- model(x, precision = "single")
   expect_ok(draws <- mcmc(m,
     sampler = slice(),
-    n_samples = 100, warmup = 100
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
   ))
 })
 
@@ -436,14 +451,15 @@ test_that("mcmc doesn't support slice sampler with double precision models", {
   expect_snapshot_error(
     draws <- mcmc(m,
                   sampler = slice(),
-                  n_samples = 100, warmup = 100
+                  n_samples = 100, warmup = 100,
+                  verbose = FALSE
     )
   )
 })
 
 test_that("numerical issues are handled in mcmc", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # this should have a cholesky decomposition problem at some point
   alpha <- normal(0, 1)
@@ -467,15 +483,17 @@ test_that("numerical issues are handled in mcmc", {
   ))
 })
 
+# this is the test that says: 'Loaded Tensorflow version 1.14.0'
 test_that("mcmc works in parallel", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
-  plan(multisession)
+  op <- future::plan()
+  # put the future plan back as we found it
+  withr::defer(future::plan(op))
+  future::plan(future::multisession)
 
   # one chain
   expect_ok(draws <- mcmc(m,
@@ -498,70 +516,63 @@ test_that("mcmc works in parallel", {
   expect_true(inherits(draws, "greta_mcmc_list"))
   expect_true(coda::niter(draws) == 10)
 
-  # put the future plan back as we found it
-  plan(op)
 })
 
 test_that("mcmc errors for invalid parallel plans", {
   skip_if_not(check_tf_version())
   skip_on_ci()
-  source("helpers.R")
+
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
+  op <- future::plan()
 
   # silence future's warning about multicore support
-  old_option <- Sys.getenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE")
-  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
+  # put the future plan back as we found it
+  withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
+  # reset warning setting
+  withr::defer(future::plan(op))
 
   # handle handle forks, so only accept multisession, or multi session clusters
-  suppressWarnings(plan(multiprocess))
+  suppressWarnings(future::plan(future::multiprocess))
   expect_snapshot_error(
-    mcmc(m)
+    mcmc(m, verbose = FALSE)
   )
 
-  plan(multicore)
+  future::plan(future::multicore)
   expect_snapshot_error(
-    mcmc(m)
+    mcmc(m, verbose = FALSE)
   )
 
   cl <- parallel::makeForkCluster(2L)
-  plan(cluster, workers = cl)
+  future::plan(future::cluster, workers = cl)
   expect_snapshot_error(
-    mcmc(m)
+    mcmc(m, verbose = FALSE)
   )
 
-  # put the future plan back as we found it
-  plan(op)
-
-  # reset warning setting
-  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = old_option)
 })
 
 test_that("parallel reporting works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
-  plan(multisession)
+  op <- future::plan()
+  # put the future plan back as we found it
+  withr::defer(future::plan(op))
+  future::plan(future::multisession)
 
   # should report each sampler's progress with a fraction
   out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
   expect_match(out, "2 samplers in parallel")
   expect_match(out, "50/50")
 
-  # put the future plan back as we found it
-  plan(op)
 })
 
 test_that("initials works", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # errors on bad objects
   expect_snapshot_error(
@@ -581,7 +592,7 @@ test_that("initials works", {
 
 test_that("prep_initials errors informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- normal(0, 1)
   b <- uniform(0, 1)
@@ -593,45 +604,45 @@ test_that("prep_initials errors informatively", {
 
   # bad objects:
   expect_snapshot_error(
-    mcmc(m, initial_values = FALSE)
+    mcmc(m, initial_values = FALSE, verbose = FALSE)
   )
 
   expect_snapshot_error(
-    mcmc(m, initial_values = list(FALSE))
+    mcmc(m, initial_values = list(FALSE), verbose = FALSE)
   )
 
   # an unrelated greta array
   g <- normal(0, 1)
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(g = 1))
+    mcmc(m, chains = 1, initial_values = initials(g = 1), verbose = FALSE)
   )
 
   # non-variable greta arrays
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(f = 1))
+    mcmc(m, chains = 1, initial_values = initials(f = 1), verbose = FALSE)
   )
 
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(z = 1))
+    mcmc(m, chains = 1, initial_values = initials(z = 1), verbose = FALSE)
   )
 
   # out of bounds errors
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(b = -1))
+    mcmc(m, chains = 1, initial_values = initials(b = -1), verbose = FALSE)
   )
 
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(d = -1))
+    mcmc(m, chains = 1, initial_values = initials(d = -1), verbose = FALSE)
   )
 
   expect_snapshot_error(
-    mcmc(m, chains = 1, initial_values = initials(e = 2))
+    mcmc(m, chains = 1, initial_values = initials(e = 2), verbose = FALSE)
   )
 })
 
 test_that("samplers print informatively", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   expect_snapshot(
     hmc()
@@ -658,7 +669,7 @@ test_that("pb_update > thin to avoid bursts with no saved iterations", {
   m <- model(x)
   expect_ok(draws <- mcmc(m,
     n_samples = 100, warmup = 100,
-    thin = 3, pb_update = 2
+    thin = 3, pb_update = 2, verbose = FALSE
   ))
   expect_identical(thin(draws), 3)
 })

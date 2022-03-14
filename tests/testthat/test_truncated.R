@@ -1,6 +1,12 @@
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
+
+
 test_that("truncated normal has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   # non truncated normal
   compare_truncated_distribution(normal,
@@ -45,7 +51,7 @@ test_that("truncated normal has correct densities", {
 
 test_that("truncated lognormal has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # non truncated
   compare_truncated_distribution(lognormal,
@@ -90,7 +96,6 @@ test_that("truncated lognormal has correct densities", {
 
 test_that("truncated gamma has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   # non truncated
   compare_truncated_distribution(gamma,
@@ -135,7 +140,12 @@ test_that("truncated gamma has correct densities", {
 
 test_that("truncated inverse gamma has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
+  # apparently testthat can't see these, trying out global assign to see if that
+  # makes them visible
+  dinvgamma <<- extraDistr::dinvgamma
+  qinvgamma <<- extraDistr::qinvgamma
+  pinvgamma <<- extraDistr::pinvgamma
 
   # non truncated
   compare_truncated_distribution(inverse_gamma,
@@ -180,7 +190,7 @@ test_that("truncated inverse gamma has correct densities", {
 
 test_that("truncated weibull has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # non truncated
   compare_truncated_distribution(weibull,
@@ -225,7 +235,7 @@ test_that("truncated weibull has correct densities", {
 
 test_that("truncated exponential has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # non truncated
   compare_truncated_distribution(exponential,
@@ -258,7 +268,17 @@ test_that("truncated exponential has correct densities", {
 
 test_that("truncated pareto has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+  # mock up pareto to have differently named parameters (a and b are use for the
+  # truncation)
+  #
+  # # mock up pareto to have differently named parameters (a and b are use for the
+  # # truncation)
+  preto <<- function(a_, b_, dim, truncation) pareto(a_, b_, dim, truncation)
+  dpreto <<- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
+  ppreto <<- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
+  qpreto <<- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
+
+
 
   # non truncated
   compare_truncated_distribution(preto,
@@ -303,7 +323,10 @@ test_that("truncated pareto has correct densities", {
 
 test_that("truncated student has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
+  dstudent <<- extraDistr::dlst
+  qstudent <<- extraDistr::qlst
+  pstudent <<- extraDistr::plst
 
   # non truncated
   compare_truncated_distribution(student,
@@ -353,7 +376,10 @@ test_that("truncated student has correct densities", {
 
 test_that("truncated laplace has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
+  dlaplace <<- extraDistr::dlaplace
+  qlaplace <<- extraDistr::qlaplace
+  plaplace <<- extraDistr::plaplace
 
   # non truncated
   compare_truncated_distribution(laplace,
@@ -398,7 +424,7 @@ test_that("truncated laplace has correct densities", {
 
 test_that("truncated beta has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # non truncated
   compare_truncated_distribution(beta,
@@ -443,7 +469,7 @@ test_that("truncated beta has correct densities", {
 
 test_that("truncated cauchy has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # non truncated
   compare_truncated_distribution(cauchy,
@@ -488,7 +514,7 @@ test_that("truncated cauchy has correct densities", {
 
 test_that("truncated logistic has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # non truncated
   compare_truncated_distribution(logistic,
@@ -533,7 +559,7 @@ test_that("truncated logistic has correct densities", {
 
 test_that("truncated f has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # non truncated
   compare_truncated_distribution(f,
@@ -578,7 +604,7 @@ test_that("truncated f has correct densities", {
 
 test_that("truncated chi squared has correct densities", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # non truncated
   compare_truncated_distribution(chi_squared,
@@ -612,7 +638,7 @@ test_that("truncated chi squared has correct densities", {
 
 test_that("bad truncations error", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   expect_snapshot_error(
     lognormal(0, 1, truncation = c(-1, Inf))

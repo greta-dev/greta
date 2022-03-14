@@ -1,13 +1,12 @@
 test_that("posterior is correct (binomial)", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   skip_if_not_release()
 
   # analytic solution to the posterior of the paramter of a binomial
   # distribution, with uniform prior
   n <- 100
   pos <- rbinom(1, n, runif(1))
-  library(greta)
   theta <- uniform(0, 1)
   distribution(pos) <- binomial(n, theta)
   m <- model(theta)
@@ -35,7 +34,7 @@ test_that("posterior is correct (binomial)", {
 
 test_that("samplers are unbiased for bivariate normals", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   skip_if_not_release()
 
   check_mvn_samples(hmc())
@@ -45,7 +44,7 @@ test_that("samplers are unbiased for bivariate normals", {
 
 test_that("samplers are unbiased for chi-squared", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   skip_if_not_release()
 
   df <- 5
@@ -57,7 +56,7 @@ test_that("samplers are unbiased for chi-squared", {
 
 test_that("samplers are unbiased for standard uniform", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   skip_if_not_release()
 
   x <- uniform(0, 1)
@@ -68,7 +67,7 @@ test_that("samplers are unbiased for standard uniform", {
 
 test_that("samplers are unbiased for LKJ", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   skip_if_not_release()
 
   x <- lkj_correlation(3, 2)[1, 2]
@@ -81,7 +80,7 @@ test_that("samplers are unbiased for LKJ", {
 
 test_that("samplers are unbiased for Wishart", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   skip_if_not_release()
 
   sigma <- matrix(
@@ -99,7 +98,7 @@ test_that("samplers are unbiased for Wishart", {
 
 test_that("samplers pass geweke tests", {
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
   skip_if_not_release()
 
   # nolint start
