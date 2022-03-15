@@ -1,8 +1,8 @@
 Type: Package
 Package: greta
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.4.0
-Date: 2022-02-21
+Version: 0.4.1
+Date: 2022-03-14
 Authors@R: c(
     person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0001-8916-5570")),
@@ -28,7 +28,7 @@ Description: Write statistical models in R and fit them by MCMC and
     easy to extend and build on.  See the website for more information,
     including tutorials, examples, package documentation, and the greta
     forum.
-License: Apache License (>= 2) + file LICENSE
+License: Apache License 2.0
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
 Depends:

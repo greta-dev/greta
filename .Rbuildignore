@@ -11,6 +11,7 @@
 ^CODE_OF_CONDUCT\.md$
 ^\.EDIT_WEBSITE\.md$
 ^LICENSE\.md$
+LICENSE
 ^cran-comments\.md$
 
 ^logos$
@@ -40,3 +41,4 @@
 ^codecov\.yml$
 
 ^depends\.rds$
+^CRAN-SUBMISSION$

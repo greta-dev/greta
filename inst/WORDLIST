@@ -15,8 +15,10 @@ Inf
 Jupyter
 Lmax
 Lmin
+Maëlle
 Miniconda
 Nesterov
+NumPy
 OpenBUGS
 PSAT
 Poisson
@@ -29,6 +31,7 @@ TensorFlow
 TensorFlow's
 Tensorflow
 WinBUGS
+Wujciak
 XLA
 bayesplot
 cholesky
@@ -37,14 +40,12 @@ conda
 cran
 dag
 devtools
-diag
 dlkjcorr
 doi
 dontrun
 env
 etc
 extraDistr
-gelman
 gfortran
 github
 greta's
@@ -62,6 +63,7 @@ pkgdown
 poisson
 polygamma
 schoolers
+snapshotting
 softmax
 speedup
 st

@@ -1,23 +1,19 @@
 {
-  "@context": [
-    "https://doi.org/10.5063/schema/codemeta-2.0",
-    "http://schema.org"
-  ],
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "identifier": "greta",
-  "description": "Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'.\n  greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on.\n  See the website for more information, including tutorials, examples, package documentation, and the greta forum.",
+  "description": "Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'. greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on. See the website for more information, including tutorials, examples, package documentation, and the greta forum.",
   "name": "greta: Simple and Scalable Statistical Modelling in R",
-  "codeRepository": "https://greta-stats.org",
+  "codeRepository": "https://github.com/njtierney/greta",
   "issueTracker": "https://github.com/greta-dev/greta/issues",
-  "license": "https://spdx.org/licenses/Apache-2.0",
-  "version": "0.3.1.9012",
+  "license": "Apache License 2",
+  "version": "0.4.1",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
-    "version": "3.6.2",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 3.6.2 (2019-12-12)",
+  "runtimePlatform": "R version 4.1.3 (2022-03-10)",
   "provider": {
     "@id": "https://cran.r-project.org",
     "@type": "Organization",
@@ -31,6 +27,13 @@
       "familyName": "Golding",
       "email": "nick.golding.research@gmail.com",
       "@id": "https://orcid.org/0000-0001-8916-5570"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Nicholas",
+      "familyName": "Tierney",
+      "email": "nicholas.tierney@gmail.com",
+      "@id": "https://orcid.org/0000-0003-1460-8722"
     }
   ],
   "contributor": [
@@ -95,54 +98,16 @@
       "familyName": "Yen"
     }
   ],
-  "copyrightHolder": {},
-  "funder": {},
   "maintainer": [
     {
       "@type": "Person",
-      "givenName": "Nick",
-      "familyName": "Golding",
-      "email": "nick.golding.research@gmail.com",
-      "@id": "https://orcid.org/0000-0001-8916-5570"
+      "givenName": "Nicholas",
+      "familyName": "Tierney",
+      "email": "nicholas.tierney@gmail.com",
+      "@id": "https://orcid.org/0000-0003-1460-8722"
     }
   ],
   "softwareSuggestions": [
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "knitr",
-      "name": "knitr",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=knitr"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "rmarkdown",
-      "name": "rmarkdown",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=rmarkdown"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "DiagrammeR",
-      "name": "DiagrammeR",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=DiagrammeR"
-    },
     {
       "@type": "SoftwareApplication",
       "identifier": "bayesplot",
@@ -157,87 +122,15 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "lattice",
-      "name": "lattice",
+      "identifier": "covr",
+      "name": "covr",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=lattice"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "testthat",
-      "name": "testthat",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=testthat"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "mvtnorm",
-      "name": "mvtnorm",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=mvtnorm"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "MCMCpack",
-      "name": "MCMCpack",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=MCMCpack"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "rmutil",
-      "name": "rmutil",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=rmutil"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "extraDistr",
-      "name": "extraDistr",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=extraDistr"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "truncdist",
-      "name": "truncdist",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=truncdist"
+      "sameAs": "https://CRAN.R-project.org/package=covr"
     },
     {
       "@type": "SoftwareApplication",
@@ -253,15 +146,27 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "tidyverse",
-      "name": "tidyverse",
+      "identifier": "DiagrammeR",
+      "name": "DiagrammeR",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=tidyverse"
+      "sameAs": "https://CRAN.R-project.org/package=DiagrammeR"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "extraDistr",
+      "name": "extraDistr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=extraDistr"
     },
     {
       "@type": "SoftwareApplication",
@@ -277,6 +182,42 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "ggplot2",
+      "name": "ggplot2",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggplot2"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "knitr",
+      "name": "knitr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=knitr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "lattice",
+      "name": "lattice",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=lattice"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "MASS",
       "name": "MASS",
       "provider": {
@@ -289,15 +230,63 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "abind",
-      "name": "abind",
+      "identifier": "MCMCpack",
+      "name": "MCMCpack",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=abind"
+      "sameAs": "https://CRAN.R-project.org/package=MCMCpack"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "mockery",
+      "name": "mockery",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=mockery"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "mvtnorm",
+      "name": "mvtnorm",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=mvtnorm"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "rmarkdown",
+      "name": "rmarkdown",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=rmarkdown"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "rmutil",
+      "name": "rmutil",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=rmutil"
     },
     {
       "@type": "SoftwareApplication",
@@ -310,53 +299,158 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=spelling"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "testthat",
+      "name": "testthat",
+      "version": ">= 3.1.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=testthat"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "tidyverse",
+      "name": "tidyverse",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tidyverse"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "truncdist",
+      "name": "truncdist",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=truncdist"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "withr",
+      "name": "withr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=withr"
     }
   ],
-  "softwareRequirements": [
-    {
+  "softwareRequirements": {
+    "1": {
       "@type": "SoftwareApplication",
       "identifier": "R",
       "name": "R",
-      "version": ">= 3.0"
+      "version": ">= 3.1.0"
     },
-    {
+    "2": {
       "@type": "SoftwareApplication",
-      "identifier": "R6",
-      "name": "R6",
+      "identifier": "abind",
+      "name": "abind",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=R6"
+      "sameAs": "https://CRAN.R-project.org/package=abind"
     },
-    {
+    "3": {
       "@type": "SoftwareApplication",
-      "identifier": "tensorflow",
-      "name": "tensorflow",
-      "version": ">= 1.13.0",
+      "identifier": "callr",
+      "name": "callr",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=tensorflow"
+      "sameAs": "https://CRAN.R-project.org/package=callr"
     },
-    {
+    "4": {
       "@type": "SoftwareApplication",
-      "identifier": "reticulate",
-      "name": "reticulate",
+      "identifier": "cli",
+      "name": "cli",
+      "version": ">= 3.0.0",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=reticulate"
+      "sameAs": "https://CRAN.R-project.org/package=cli"
     },
-    {
+    "5": {
+      "@type": "SoftwareApplication",
+      "identifier": "coda",
+      "name": "coda",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=coda"
+    },
+    "6": {
+      "@type": "SoftwareApplication",
+      "identifier": "future",
+      "name": "future",
+      "version": ">= 1.22.1",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=future"
+    },
+    "7": {
+      "@type": "SoftwareApplication",
+      "identifier": "glue",
+      "name": "glue",
+      "version": ">= 1.5.1",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=glue"
+    },
+    "8": {
+      "@type": "SoftwareApplication",
+      "identifier": "methods",
+      "name": "methods"
+    },
+    "9": {
+      "@type": "SoftwareApplication",
+      "identifier": "parallelly",
+      "name": "parallelly",
+      "version": ">= 1.29.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=parallelly"
+    },
+    "10": {
       "@type": "SoftwareApplication",
       "identifier": "progress",
       "name": "progress",
@@ -369,47 +463,59 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=progress"
     },
-    {
+    "11": {
       "@type": "SoftwareApplication",
-      "identifier": "future",
-      "name": "future",
+      "identifier": "R6",
+      "name": "R6",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=future"
+      "sameAs": "https://CRAN.R-project.org/package=R6"
     },
-    {
+    "12": {
       "@type": "SoftwareApplication",
-      "identifier": "coda",
-      "name": "coda",
+      "identifier": "reticulate",
+      "name": "reticulate",
+      "version": ">= 1.19.0",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=coda"
+      "sameAs": "https://CRAN.R-project.org/package=reticulate"
     },
-    {
+    "13": {
       "@type": "SoftwareApplication",
-      "identifier": "methods",
-      "name": "methods"
+      "identifier": "tensorflow",
+      "name": "tensorflow",
+      "version": ">= 2.7.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tensorflow"
     },
-    {
+    "14": {
       "@type": "SoftwareApplication",
-      "identifier": "https://sysreqs.r-hub.io/get/python-2.7"
-    }
-  ],
-  "releaseNotes": "https://github.com/dill/greta/blob/master/NEWS.md",
-  "readme": "https://github.com/dill/greta/blob/master/README.md",
-  "fileSize": "810.148KB",
-  "contIntegration": [
-    "https://github.com/greta-dev/greta/actions",
-    "https://codecov.io/github/greta-dev/greta?branch=master"
-  ],
+      "identifier": "yesno",
+      "name": "yesno",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=yesno"
+    },
+    "SystemRequirements": "Python (>= 2.7.0) with header files and shared\n    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow\n    Probability (v0.7.0; https://www.tensorflow.org/probability/)"
+  },
+  "fileSize": "1326.582KB",
   "citation": [
     {
       "@type": "ScholarlyArticle",
@@ -424,7 +530,7 @@
       "name": "{greta}: simple and scalable statistical modelling in R",
       "identifier": "10.21105/joss.01601",
       "url": "http://dx.doi.org/10.21105/joss.01601",
-      "paginiation": "1601",
+      "pagination": "1601",
       "@id": "https://doi.org/10.21105/joss.01601",
       "sameAs": "https://doi.org/10.21105/joss.01601",
       "isPartOf": {
@@ -438,5 +544,9 @@
         }
       }
     }
-  ]
+  ],
+  "relatedLink": "https://greta-stats.org",
+  "releaseNotes": "https://github.com/njtierney/greta/blob/master/NEWS.md",
+  "readme": "https://github.com/njtierney/greta/blob/master/README.md",
+  "contIntegration": ["https://app.codecov.io/gh/greta-dev/greta?branch=master", "https://github.com/greta-dev/greta/actions"]
 }
