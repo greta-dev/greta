@@ -876,7 +876,7 @@ greta_sitrep <- function(){
 
   check_if_software_available(software_available = have_python(),
                               version = reticulate::py_version(),
-                              ideal_version = "3.7",
+                              ideal_version = "3.8",
                               software_name = "python")
 
   check_if_software_available(software_available = have_tf(),
@@ -886,7 +886,7 @@ greta_sitrep <- function(){
 
   check_if_software_available(software_available = have_tfp(),
                               version = version_tfp(),
-                              ideal_version = "0.14.0",
+                              ideal_version = "0.14.1",
                               software_name = "TensorFlow Probability")
 
   check_if_software_available(software_available = have_greta_conda_env(),
@@ -916,7 +916,7 @@ greta_sitrep <- function(){
     ideal = c(
       "3.7",
       "2.6.0",
-      "0.14.0"
+      "0.14.1"
     )
   )
     software_version$match <- c(
