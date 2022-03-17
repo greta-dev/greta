@@ -638,6 +638,9 @@ sampler <- R6Class(
 
       # define the whole draws tensor
       dag$tf_run(
+        # TODO
+        # NOTE it looks like the `seed`
+        # argument now gets passed through to `sample_chain`
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
           current_state = free_state,
@@ -807,19 +810,21 @@ hmc_sampler <- R6Class(
           shape = shape(dim(free_state)[[2]])
         )
       )
-
       # log probability function
       tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # build the kernel
       # nolint start
-      # have a play around here ***
+
       dag$tf_run(
         sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
           target_log_prob_fn = log_prob_fun,
           step_size = hmc_step_sizes,
-          num_leapfrog_steps = hmc_l,
-          seed = rng_seed
+          num_leapfrog_steps = hmc_l
+          # TODO
+          # NOTE `seed` does not appear to be an argument in
+          # tfp$mcmc$HamiltonianMonteCarlo
+          # seed = rng_seed
         )
       )
       # nolint end
