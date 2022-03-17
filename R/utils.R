@@ -747,9 +747,14 @@ other_install_fail_msg <- function(error_passed){
       "{.code reticulate::conda_create(envname = 'greta-env', \\
       python_version = '3.7')}",
       "Then:",
-      "{.code reticulate::conda_install(envname = 'greta-env',
-      packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0',
-      'tensorflow==1.14.0'))}",
+      "{.code reticulate::py_install(
+        packages = c(
+          'numpy',
+          'tensorflow==2.6.0',
+          'tensorflow-probability==0.14.1'
+          ),
+        pip = TRUE
+        )}",
       "Then, restart R, and load {.pkg greta} with: {.code library(greta)}",
       "If this does not work, lodge an issue on github at:",
       "{.url https://github.com/greta-dev/greta/issues/new}"
@@ -771,11 +776,15 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     "{.code reticulate::conda_create(envname = 'greta-env', \\
         python_version = '3.7')}",
     "Then:",
-    "{.code reticulate::conda_install(envname = 'greta-env', \\
-        packages = c('numpy==1.16.4', 'tensorflow-probability==0.7.0', \\
-        'tensorflow==1.14.0'))}",
-    "Then, restart R, and load {.pkg greta} with:",
-    "{.code library(greta)}"
+    "{.code reticulate::py_install(
+        packages = c(
+          'numpy',
+          'tensorflow==2.6.0',
+          'tensorflow-probability==0.14.1'
+          ),
+        pip = TRUE
+        )}",
+    "Then, restart R, and load {.pkg greta} with: {.code library(greta)}"
   )
 
   if (nchar(py_error) == 0) {
@@ -872,12 +881,12 @@ greta_sitrep <- function(){
 
   check_if_software_available(software_available = have_tf(),
                               version = version_tf(),
-                              ideal_version = "1.14.0",
+                              ideal_version = "2.6.0",
                               software_name = "TensorFlow")
 
   check_if_software_available(software_available = have_tfp(),
                               version = version_tfp(),
-                              ideal_version = "0.7.0",
+                              ideal_version = "0.14.0",
                               software_name = "TensorFlow Probability")
 
   check_if_software_available(software_available = have_greta_conda_env(),
@@ -893,25 +902,23 @@ greta_sitrep <- function(){
   if (!all(software_available)) {
     check_tf_version("warn")
   } else if (all(software_available)) {
-
-    software_version <- data.frame(
-      software = c(
-        "python",
-        "tf",
-        "tfp"
-      ),
-      current = c(
-        paste0(reticulate::py_version()),
-        paste0(version_tf()),
-        paste0(version_tfp())
-      ),
-      ideal = c(
-        "3.7",
-        "1.14.0",
-        "0.7.0"
-      )
+  software_version <- data.frame(
+    software = c(
+      "python",
+      "tf",
+      "tfp"
+    ),
+    current = c(
+      paste0(reticulate::py_version()),
+      paste0(version_tf()),
+      paste0(version_tfp())
+    ),
+    ideal = c(
+      "3.7",
+      "2.6.0",
+      "0.14.0"
     )
-
+  )
     software_version$match <- c(
       compareVersion(software_version$current[1], software_version$ideal[1]) == 0,
       compareVersion(software_version$current[2], software_version$ideal[2]) == 0,

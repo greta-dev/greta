@@ -63,14 +63,14 @@ check_tf_version <- function(alert = c("none",
       cat("\n")
       greta_stash$python_has_been_initialised <- TRUE
 
-      cli::cli_bullets(c("i" = "Disabling TF eager execution with:
-                       {.code tf$compat$v1$disable_eager_execution()}"))
-      tf$compat$v1$disable_eager_execution()
-
+      # cli::cli_bullets(c("i" = "Disabling TF eager execution with:
+      #                  {.code tf$compat$v1$disable_eager_execution()}"))
+      # tf$compat$v1$disable_eager_execution()
+      #
       # cli::cli_bullets(c("i" = "Disabling TF V2 behaviour:
       #                  {.code tf$compat$v1$disable_v2_behavior()}"))
       # tf$compat$v1$disable_v2_behavior()
-
+      #
       # cli::cli_bullets(c("i" = "Disabling TF V2 tensorshape:
       #                  {.code tf$compat$v1$disable_v2_tensorshape()}"))
       # tf$compat$v1$disable_v2_tensorshape()
