@@ -22,6 +22,7 @@ test_that("simple functions work as expected", {
   check_op(mean, x)
   check_op(sqrt, exp(x))
   check_op(sign, x)
+  check_op(sd, x)
 
   # rounding of numbers
   check_op(ceiling, x)
@@ -230,6 +231,7 @@ test_that("apply works as expected", {
     check_apply(a, margin, "prod")
     check_apply(a, margin, "cumsum")
     check_apply(a, margin, "cumprod")
+    check_apply(a, margin, "sd")
   }
 })
 
@@ -243,6 +245,7 @@ test_that("tapply works as expected", {
   check_expr(tapply(x, rep(1:5, each = 3), "mean"))
   check_expr(tapply(x, rep(1:5, each = 3), "min"))
   check_expr(tapply(x, rep(1:5, each = 3), "prod"))
+  check_expr(tapply(x, rep(1:5, each = 3), "sd"))
 })
 
 test_that("cumulative functions error as expected", {

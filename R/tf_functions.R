@@ -80,6 +80,12 @@ tf_mean <- function(x, drop = FALSE) {
   skip_dim("reduce_mean", x, drop)
 }
 
+tf_sd <- function(x, drop = FALSE) {
+  n_dim <- length(dim(x))
+  reduction_dims <- seq_len(n_dim - 1)
+  tf$math$reduce_std(x, axis = reduction_dims, keepdims = !drop)
+}
+
 tf_max <- function(x, drop = FALSE) {
   skip_dim("reduce_max", x, drop)
 }
