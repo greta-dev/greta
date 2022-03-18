@@ -62,6 +62,7 @@
 #'  prod(..., na.rm = TRUE)
 #'  min(..., na.rm = TRUE)
 #'  max(..., na.rm = TRUE)
+#'  sd(..., na.rm = TRUE)
 #'
 #'  # cumulative operations
 #'  cumsum(x)
@@ -77,10 +78,10 @@
 #'
 #'  # miscellaneous operations
 #'  aperm(x, perm)
-#'  apply(x, MARGIN, FUN = c("sum", "max", "mean", "min",
+#'  apply(x, MARGIN, FUN = c("sum", "max", "mean", "min", "sd,
 #'                           "prod", "cumsum", "cumprod"))
 #'  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
-#'  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
+#'  tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "sd, "prod"), ...)
 #'
 #' }
 #'
@@ -590,6 +591,31 @@ mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) { # nolint
   )
 }
 
+# need to define sd as a generic since it isn't actually a generic
+#' @rdname overloaded
+#' @export
+sd <- function(x, ...) UseMethod("sd", x)
+
+# setting default and setting arguments for it so it passes package check
+#' @export
+sd.default <- function(x, na.rm = FALSE, ...) {
+  sd_result <- stats::sd(x = x,
+                         na.rm = na.rm)
+  formals(sd.default) <- c(formals(sd.default), alist(... =))
+
+  sd_result
+}
+
+#' @export
+sd.greta_array <- function(x, na.rm = TRUE, ...) { # nolint
+
+  # calculate SD on greta array
+  op("sd", x,
+    dim = c(1, 1),
+    tf_operation = "tf_sd"
+  )
+}
+
 #' @export
 max.greta_array <- function(..., na.rm = TRUE) { # nolint
 
@@ -1073,7 +1099,7 @@ apply.default <- function(X, MARGIN, FUN, ...) { # nolint
 #' @export
 apply.greta_array <- function(X, MARGIN,
                               FUN = c(
-                                "sum", "max", "mean", "min", "prod",
+                                "sum", "max", "mean", "min", "sd", "prod",
                                 "cumsum", "cumprod"
                               ),
                               ...) {
@@ -1169,7 +1195,7 @@ tapply.default <- function(X, INDEX, FUN = NULL, ...,
 # nolint start
 #' @export
 tapply.greta_array <- function(X, INDEX,
-                               FUN = c("sum", "max", "mean", "min", "prod"),
+                               FUN = c("sum", "max", "mean", "min", "prod", "sd"),
                                ...) {
   # nolint end
 
