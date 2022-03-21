@@ -930,6 +930,11 @@ greta_sitrep <- function(){
 }
 
 # adapted from https://github.com/rstudio/tensorflow/blob/main/R/utils.R
+#' Is the operating system M1?
+#'
+#' This is used to check if the operating system is M1 mac
+#'
+#' @export
 is_mac_arm64 <- function() {
   if (nzchar(Sys.getenv("GRETA_M1_MESSAGE_TESTING"))) {
     return(TRUE)
