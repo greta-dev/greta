@@ -26,14 +26,14 @@ check_tf_version <- function(alert = c("none",
 
   if (is_mac_arm64()) {
 
-    msg <-  cli::format_message(
+    msg <-  cli::format_error(
       c(
         "{.pkg greta} does not currently work with Apple Silicon (M1)",
         "We are working on getting this resolved ASAP, see {.url https://github.com/greta-dev/greta/issues/458} for current progress."
       )
     )
 
-    message(
+    stop(
       msg,
       call. = FALSE
     )
