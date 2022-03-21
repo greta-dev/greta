@@ -1,5 +1,5 @@
 ## Test environments
-* local R installation, R 4.1.3
+* Mac OSX (Intel) local R installation, R 4.1.3
 * ubuntu 16.04 (on travis-ci), R 4.1.3
 * win-builder (devel)
 
@@ -7,7 +7,8 @@
 
 0 errors | 0 warnings | 1 notes
 
-* Maintainer has changed from Nick Golding to Nicholas Tierney.
+* Days since last update: 6
+* Package has been resubmitted based on request to fix error on install of M1. This has now been resolved
 
 ## revdepcheck results
 
