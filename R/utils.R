@@ -930,11 +930,6 @@ greta_sitrep <- function(){
 }
 
 # adapted from https://github.com/rstudio/tensorflow/blob/main/R/utils.R
-#' Is the operating system M1?
-#'
-#' This is used to check if the operating system is M1 mac
-#'
-#' @export
 is_mac_arm64 <- function() {
   if (nzchar(Sys.getenv("GRETA_M1_MESSAGE_TESTING"))) {
     return(TRUE)
@@ -953,4 +948,8 @@ create_temp_file <- function(path){
   file_path <- tempfile(path, fileext = ".txt")
   file.create(file_path)
   return(file_path)
+}
+
+is_not_cran <- function(){
+  identical(Sys.getenv("NOT_CRAN", unset = "true"), "true")
 }
