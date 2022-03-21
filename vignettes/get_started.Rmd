@@ -10,7 +10,7 @@ vignette: >
 ```{r setup, include = FALSE}
 
 knitr::opts_chunk$set(echo = TRUE,
-                      eval = greta:::is_not_cran(),
+                      eval = greta:::check_tf_version("message"),
                       cache = TRUE,
                       comment = NA,
                       progress = FALSE)
