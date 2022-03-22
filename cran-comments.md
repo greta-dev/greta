@@ -5,9 +5,9 @@
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 notes
+0 errors | 0 warnings | 0 notes
 
-* Days since last update: 6
+* Days since last update: 7
 * Package has been resubmitted based on request to fix error on install of M1. This has now been resolved
 
 ## revdepcheck results
