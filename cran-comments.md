@@ -1,5 +1,5 @@
 ## Test environments
-* Mac OSX (Intel) local R installation, R 4.1.3
+* local R installation, R 4.1.3
 * ubuntu 16.04 (on travis-ci), R 4.1.3
 * win-builder (devel)
 

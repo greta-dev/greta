@@ -949,7 +949,3 @@ create_temp_file <- function(path){
   file.create(file_path)
   return(file_path)
 }
-
-is_not_cran <- function(){
-  identical(Sys.getenv("NOT_CRAN", unset = "true"), "true")
-}
