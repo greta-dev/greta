@@ -5,9 +5,10 @@
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 notes
+0 errors | 0 warnings | 0 notes
 
-* Maintainer has changed from Nick Golding to Nicholas Tierney.
+* Days since last update: 7
+* Package has been resubmitted based on request to fix error on install of M1. This has now been resolved
 
 ## revdepcheck results
 

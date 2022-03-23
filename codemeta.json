@@ -6,8 +6,8 @@
   "name": "greta: Simple and Scalable Statistical Modelling in R",
   "codeRepository": "https://github.com/njtierney/greta",
   "issueTracker": "https://github.com/greta-dev/greta/issues",
-  "license": "Apache License 2",
-  "version": "0.4.1",
+  "license": "https://spdx.org/licenses/Apache-2.0",
+  "version": "0.4.2",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -515,7 +515,7 @@
     },
     "SystemRequirements": "Python (>= 2.7.0) with header files and shared\n    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow\n    Probability (v0.7.0; https://www.tensorflow.org/probability/)"
   },
-  "fileSize": "1326.582KB",
+  "fileSize": "1320.891KB",
   "citation": [
     {
       "@type": "ScholarlyArticle",
