@@ -1,4 +1,10 @@
-# greta 0.4.1.9000 (development version)
+# greta (development version)
+
+# greta 0.4.2
+
+## Fixes
+
+* workaround for M1 issues (#507)
 
 # greta 0.4.1 (2022-03-14)
 
