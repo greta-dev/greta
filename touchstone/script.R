@@ -1,5 +1,3 @@
-library(greta)
-install_greta_deps(timeout = 50)
 # see `help(run_script, package = 'touchstone')` on how to run this
 # interactively
 
@@ -9,6 +7,9 @@ install_greta_deps(timeout = 50)
 
 # installs branches to benchmark
 touchstone::branch_install()
+
+library(greta)
+install_greta_deps(timeout = 50)
 
 # benchmark a function call from your package (two calls per branch)
 touchstone::benchmark_run(
