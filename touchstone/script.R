@@ -1,3 +1,5 @@
+library(greta)
+install_greta_deps(timeout = 50)
 # see `help(run_script, package = 'touchstone')` on how to run this
 # interactively
 
