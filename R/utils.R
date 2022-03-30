@@ -642,14 +642,21 @@ sampler_utils_module <- module(
 # convert a function on greta arrays into a function on corresponding tensors,
 # given the greta arrays for inputs. When executed, this needs to be wrapped in
 # dag$on_graph() to get the tensors connected up with the rest of the graph
+# NOTE: Could use this as a way of getting the functions we need from greta
+# we could use this as a way of returning a function that TF recognises
+# as a function tensorflow function that returns tensors
 as_tf_function <- function(r_fun, ...) {
 
   # run the operation on isolated greta arrays, so nothing gets attached to the
   # model real greta arrays in dots
+  # creating a fake greta array
   ga_dummies <- lapply(list(...), dummy_greta_array)
+
+  # now run the function on these completely separate ones
   ga_out <- do.call(r_fun, ga_dummies)
   ga_out
 
+  # a function that will act on TF things
   function(...) {
     tensor_inputs <- list(...)
 
@@ -677,6 +684,7 @@ as_tf_function <- function(r_fun, ...) {
     sub_tfe <- sub_dag$tf_environment
 
     # pass on the batch size, used when defining data
+    #  - how many chains or whatever to use
     sub_tfe$batch_size <- get_batch_size()
 
     # set the input tensors as the values for the dummy greta arrays in the new
@@ -689,7 +697,11 @@ as_tf_function <- function(r_fun, ...) {
 
     # have output node define_tf in the new environment, with data defined as
     # constants
+    # trying to not get them to use placeholders
+    # (TF can have data as a placeholder or a constant)
+    # (using a constant is expensive, normally)
     greta_stash$data_as_constants <- TRUE
+    # TODO explore changin this to previous state
     on.exit(greta_stash$data_as_constants <- NULL)
 
     tf_out <- list()
