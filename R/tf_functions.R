@@ -89,8 +89,10 @@ tf_sd <- function(x, drop = FALSE){
   reduction_dims <- seq_len(n_dim - 1)
 
   # replace these parts with tf_sum and friends?
-  x_mean_sq <- tf_mean(x, drop = drop) * tf_mean(x, drop = drop)
-  total_ss <- tf_sum(x - x_mean_sq, drop = drop)
+  x_mean <- tf_mean(x, drop = drop)
+  x_sub <- x - x_mean
+  x_mean_sq <- x_sub * x_sub
+  total_ss <- tf_sum(x_mean_sq, drop = drop)
   n_denom <- prod(dim(x)[reduction_dims + 1])
   var <- total_ss / fl(n_denom - 1)
   sd_result <- tf$math$sqrt(var)
