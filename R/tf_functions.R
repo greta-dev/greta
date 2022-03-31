@@ -80,22 +80,22 @@ tf_mean <- function(x, drop = FALSE) {
   skip_dim("reduce_mean", x, drop)
 }
 
-tf_sd <- function(x, n_minus_1 = TRUE){
-  if (n_minus_1){
-    # replace these parts with tf_sum and friends?
-    x_mean_sq <- tf_mean(x) * tf_mean(x)
-    total_ss <- tf_sum(x - x_mean_sq)
-    var <- total_ss / (length(x) - 1)
-    sd_result <- sqrt(var)
-    # total_ss <- sum((x - mean(x))^2)
-    # var <- (total_ss / (length(x) - 1))
-    # sd_result <- sqrt(var)
-  } else if (!n_minus_1) {
-    n_dim <- length(dim(x))
-    reduction_dims <- seq_len(n_dim - 1)
-    sd_result <- tf$math$reduce_std(x, axis = reduction_dims, keepdims = !drop)
-  }
-  return(sd_result)
+# need to create a "reduce_sd" function
+# which
+
+tf_sd <- function(x, drop = FALSE){
+
+  n_dim <- length(dim(x))
+  reduction_dims <- seq_len(n_dim - 1)
+
+  # replace these parts with tf_sum and friends?
+  x_mean_sq <- tf_mean(x, drop = drop) * tf_mean(x, drop = drop)
+  total_ss <- tf_sum(x - x_mean_sq, drop = drop)
+  n_denom <- prod(dim(x)[reduction_dims + 1])
+  var <- total_ss / fl(n_denom - 1)
+  sd_result <- tf$math$sqrt(var)
+
+  sd_result
 }
 
 
