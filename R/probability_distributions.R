@@ -110,6 +110,8 @@ normal_distribution <- R6Class(
       self$add_parameter(mean, "mean")
       self$add_parameter(sd, "sd")
     },
+    # TODO
+    # why is "dag" an argument here?
     tf_distrib = function(parameters, dag) {
       tfp$distributions$Normal(
         loc = parameters$mean,

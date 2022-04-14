@@ -55,6 +55,9 @@ model <- function(...,
   check_tf_version("error")
 
   # get the floating point precision
+  # TODO
+  # what does it choose as default if both double and single are listed
+  # as default?
   tf_float <- switch(match.arg(precision),
     double = "float64",
     single = "float32"

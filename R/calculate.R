@@ -439,7 +439,7 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   dag$mode <- "all_sampling"
 
   # this is taking advantage of non-eager mode
-  # TODO for TF2, might need to use some of the tensorflow
+  # TF1/2, might need to use some of the tensorflow
   # creation function approaches (in as_tf_function + generate_log_prob_function)
   dag$define_tf()
   tfe <- dag$tf_environment

@@ -620,6 +620,8 @@ sampler <- R6Class(
         }
       }
     },
+    # TF1/2
+    # need to convert this into a TF function
     define_tf_draws = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -638,9 +640,13 @@ sampler <- R6Class(
 
       # define the whole draws tensor
       dag$tf_run(
-        # TODO
+        # TF1/2
         # NOTE it looks like the `seed`
         # argument now gets passed through to `sample_chain`
+        # need to work out how to get the new
+        # sampler_batch() to run as a TF functionm
+        # and to do that we need to work out how
+        # to get the free state
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
           current_state = free_state,
@@ -667,6 +673,8 @@ sampler <- R6Class(
         sampler_burst_length = as.integer(n_samples),
         sampler_thin = as.integer(thin)
       )
+      # create a function that takes in these arguments ^^
+      # and then run the code for the sampler_batch
 
       sampler_dict_list <- c(
         sampler_values,
@@ -717,6 +725,13 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
+      # TF1/2
+      # might be easiest to replace a lot of the tf$sess$run stuff with
+      # a do.call, the second argument is the feed_dict, which could be a
+      # plain R list
+      # so something like:
+        # define_sampler_batch <-
+        # tf_function(define_tf_draws)
       # don't use dag$tf_sess_run, to avoid the overhead on parsing expressions
       result <- cleanly(tfe$sess$run(tfe$sampler_batch,
         feed_dict = tfe$feed_dict
@@ -821,7 +836,7 @@ hmc_sampler <- R6Class(
           target_log_prob_fn = log_prob_fun,
           step_size = hmc_step_sizes,
           num_leapfrog_steps = hmc_l
-          # TODO
+          # TF1/2
           # NOTE `seed` does not appear to be an argument in
           # tfp$mcmc$HamiltonianMonteCarlo
           # seed = rng_seed

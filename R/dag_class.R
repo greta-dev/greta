@@ -249,6 +249,12 @@ dag_class <- R6Class(
         ))
       } else {
         shape <- shape(NULL, length(vals))
+        # NOTE on TF1 v 2
+        # defining an empty/unknown thing
+        # so in TF2, we might not need to define a free state, we can
+        # define a function that returns these pieces of information
+        # so we will need to define the function relative to the free state
+        # and will not need to define the object
         self$on_graph(free_state <- tf$compat$v1$placeholder(
           dtype = tf_float(),
           shape = shape
@@ -474,6 +480,9 @@ dag_class <- R6Class(
                                           )) {
       which <- match.arg(which)
 
+      # we can only pass the free_state parameter through
+      # we need some way to lexically scope the
+      # batch size and the data
       function(free_state) {
 
         # temporarily define a new environment
@@ -481,15 +490,26 @@ dag_class <- R6Class(
         on.exit(self$tf_environment <- tfe_old)
         tfe <- self$tf_environment <- new.env()
 
+        # TF1/2
+          # we won't have placeholders in the future so we will need to change
+          # this part
         # copy the placeholders over here, so they aren't recreated
         data_names <- self$get_tf_names(types = "data")
         for (name in data_names) {
           tfe[[name]] <- tfe_old[[name]]
         }
+
+        # TF1/2
+          # the batch size might need to be passed in to the function
+          # somehow - perhaps even lexically scoped?
+          # the question is if lexical scoping works when passing a function
+          # through to tensorflow...
         tfe$batch_size <- tfe_old$batch_size
 
         # put the free state in the environment, and build out the tf graph
         tfe$free_state <- free_state
+
+        # we now make all of the operations define themselves now
         self$define_tf_body()
 
         # define the densities

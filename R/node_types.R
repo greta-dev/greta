@@ -139,7 +139,9 @@ operation_node <- R6Class(
       self$add_parent(parameter)
     },
     tf = function(dag) {
+      # where to put it
       tfe <- dag$tf_environment
+      # what to call the tensor object
       tf_name <- dag$tf_name(self)
       mode <- dag$how_to_define(self)
 
@@ -150,7 +152,7 @@ operation_node <- R6Class(
 
       if (mode == "forward") {
 
-        # fetch the tensors for the environment
+        # fetch the tensors from the environment
         arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
         tf_args <- lapply(arg_tf_names, get, envir = tfe)
 
@@ -298,6 +300,8 @@ variable_node <- R6Class(
           # if the variable has no distribution create a placeholder instead
           # (the value must be passed in via values when using simulate)
           shape <- to_shape(c(1, self$dim))
+          # TF1/2
+            # need to change the placeholder approach here.
           tensor <- tf$compat$v1$placeholder(shape = shape, dtype = tf_float())
         } else {
           tensor <- dag$draw_sample(self$distribution)
@@ -610,7 +614,8 @@ distrib <- function(distribution, ...) {
   check_tf_version("error")
 
   # get and initialize the distribution, with a default value node
-  constructor <- get(glue::glue("{distribution}_distribution"),
+  constructor <- get(
+    x = glue::glue("{distribution}_distribution"),
     envir = parent.frame()
   )
   distrib <- constructor$new(...)
