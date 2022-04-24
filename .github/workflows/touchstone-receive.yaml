@@ -4,11 +4,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
 
-on: pull_request
+on: 
+   #pull_request
+   issue_comment:
+     types: ["created", "edited"]
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (
+          github.event.issue.pull_request &&
+          startsWith(github.event.comment.body, '/benchmark') 
+          )
     outputs:
       config: ${{ steps.read_touchstone_config.outputs.config }}
     steps:
@@ -39,7 +46,7 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: lorenzwalthert/touchstone/actions/receive@v1
+      - uses: lorenzwalthert/touchstone/actions/receive@manual-trigger
         with:
           cache-version: 1
           benchmarking_repo: ${{ matrix.config.benchmarking_repo }}
