@@ -993,3 +993,11 @@ dzipois <- function(x , theta , lambda , log=FALSE ) {
     return(ll)
   }
 }
+
+
+# zero-inflated negative binomial likelihood from likelihoodExplore package
+dzinb <- function(x, theta, size, prob, log = FALSE)
+    return(liknbinom(x, size = size, prob = prob, log = log))
+
+
+

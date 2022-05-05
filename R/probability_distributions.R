@@ -401,6 +401,58 @@ zero_inflated_poisson_distribution <- R6Class(
   )
 )
 
+
+# NegBin: p(x) = \frac{\Gamma(x + n)}{\Gamma(n) x!} p^n (1-p)^x
+# prob = 1 / (1 + mu / size) ; mu = size * (1 - p) / p
+
+zero_inflated_negbin_distribution <- R6Class(
+  "zero_inflated_negbin_distribution",
+  inherit = greta::.internals$nodes$node_classes$distribution_node,
+  public = list(
+    initialize = function(theta, size, prob, dim) {
+      theta <- as.greta_array(theta)
+      size <- as.greta_array(size)
+      prob <- as.greta_array(prob)
+      # add the nodes as children and parameters
+      dim <- greta::.internals$utils$checks$check_dims(theta, size, prob, target_dim = dim)
+      super$initialize("zero_inflated_negative_binomial", dim, discrete = TRUE)
+      self$add_parameter(theta, "theta")
+      self$add_parameter(size, "size")
+      self$add_parameter(prob, "prob")
+    },
+  
+    tf_distrib = function(parameters, dag) {
+      theta <- parameters$theta
+      size <- parameters$size 
+      prob <- parameters$prob
+      log_prob <- function(x) {
+
+        tf$log(theta * tf$nn$relu(fl(1) - x) + (fl(1) - theta) * tf$pow(prob, size) * tf$pow(fl(1) - prob, x) * tf$exp(tf$lgamma(x + size)) / tf$exp(tf$lgamma(size + fl(1))) / tf$exp(tf$lgamma(x)))
+
+      }
+
+      sample <- function(seed) {
+
+        binom <- tfp$distributions$Binomial(total_count = 1, probs = theta)
+        negbin <- tfp$distributions$NegativeBinomial(total_count = x, probs = prob)
+
+        zi <- binom$sample(seed = seed)
+        lbd <- negbin$sample(seed = seed)
+
+        (fl(1) - zi) * lbd
+
+      }
+
+      list(log_prob = log_prob, sample = sample, cdf = NULL, log_cdf = NULL)
+    },
+
+    tf_cdf_function = NULL,
+    tf_log_cdf_function = NULL
+  )
+)
+
+
+
 hypergeometric_distribution <- R6Class(
   "hypergeometric_distribution",
   inherit = distribution_node,
@@ -1589,6 +1641,12 @@ poisson <- function(lambda, dim = NULL) {
 #' @export
 zero_inflated_poisson <- function (theta, lambda, dim = NULL)
   distrib('zero_inflated_poisson', theta, lambda, dim)
+
+#' @rdname distributions
+#' @export
+zero_inflated_negbin <- function (theta, size, prob, dim = NULL)
+  distrib('zero_inflated_negbin', theta, size, prob, dim)
+
 
 
 #' @rdname distributions
