@@ -1644,8 +1644,8 @@ zero_inflated_poisson <- function (theta, lambda, dim = NULL)
 
 #' @rdname distributions
 #' @export
-zero_inflated_negbin <- function (theta, size, prob, dim = NULL)
-  distrib('zero_inflated_negbin', theta, size, prob, dim)
+zero_inflated_negative_binomial <- function (theta, size, prob, dim = NULL)
+  distrib('zero_inflated_negative_binomial', theta, size, prob, dim)
 
 
 
