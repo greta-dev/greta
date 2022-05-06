@@ -402,11 +402,11 @@ zero_inflated_poisson_distribution <- R6Class(
 )
 
 
-# NegBin: p(x) = \frac{\Gamma(x + n)}{\Gamma(n) x!} p^n (1-p)^x
+# NegativeBinomial: p(x) = \frac{\Gamma(x + n)}{\Gamma(n) x!} p^n (1-p)^x
 # prob = 1 / (1 + mu / size) ; mu = size * (1 - p) / p
 
-zero_inflated_negbin_distribution <- R6Class(
-  "zero_inflated_negbin_distribution",
+zero_inflated_negative_binomial_distribution <- R6Class(
+  "zero_inflated_negative_binomial_distribution",
   inherit = greta::.internals$nodes$node_classes$distribution_node,
   public = list(
     initialize = function(theta, size, prob, dim) {
@@ -1400,6 +1400,8 @@ distribution_classes_module <- module(uniform_distribution,
                                       binomial_distribution,
                                       beta_binomial_distribution,
                                       negative_binomial_distribution,
+                                      zero_inflated_poisson_distribution,
+                                      zero_inflated_negative_binomial_distribution,
                                       hypergeometric_distribution,
                                       poisson_distribution,
                                       gamma_distribution,
