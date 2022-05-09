@@ -42,7 +42,7 @@
 
 <meta property="og:title" content="extract, replace and combine greta arrays — extract-replace-combine" />
 <meta property="og:description" content="Generic methods to extract and replace elements of greta arrays,
-  or to combine greta arrays." />
+or to combine greta arrays." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -133,6 +133,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -180,7 +186,7 @@
 
     <div class="ref-description">
     <p>Generic methods to extract and replace elements of greta arrays,
-  or to combine greta arrays.</p>
+or to combine greta arrays.</p>
     </div>
 
 
@@ -207,8 +213,8 @@ not a matrix.</p></td>
     </tr>
     <tr>
       <th>value</th>
-      <td><p>for <code>`[&lt;-`</code> a greta array to replace elements, for
-<code>`dim&lt;-`</code> either NULL or a numeric vector of dimensions</p></td>
+      <td><p>for <code>[&lt;-</code> a greta array to replace elements, for
+<code>dim&lt;-</code> either NULL or a numeric vector of dimensions</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -226,10 +232,14 @@ not a matrix.</p></td>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code><a href='overloaded.html'>diag()</a></code> can be used to extract or replace the diagonal part of
-  a square and two-dimensional greta array, but it cannot be used to create a
-  matrix-like greta array from a scalar or vector-like greta array. A static
-  diagonal matrix can always be created with e.g. <code><a href='overloaded.html'>diag(3)</a></code>, and then
-  converted into a greta array.</p>
+a square and two-dimensional greta array, but it cannot be used to create a
+matrix-like greta array from a scalar or vector-like greta array. A static
+diagonal matrix can always be created with e.g. <code><a href='overloaded.html'>diag(3)</a></code>, and then
+converted into a greta array.</p>
+<p>Also note that since R 4.0.0, <code>head</code> and <code>tail</code> methods for arrays changed
+to print a vector rather than maintain the array structure. The <code>greta</code>
+package supports both methods, and will do so based on which version of R
+you are using.</p>
     <h2 class="hasAnchor" id="usage"><a class="anchor" href="#usage"></a>Usage</h2>
 
     <p></p><pre>
@@ -257,20 +267,20 @@ dim(x) &lt;- value
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
- <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fl'>1</span>:<span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fl'>1</span>:<span class='fl'>12</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
 
- <span class='co'># extract and replace</span>
- <span class='no'>x</span>[<span class='fl'>1</span>:<span class='fl'>3</span>, ]
- <span class='no'>x</span>[, <span class='fl'>2</span>:<span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>9</span>
- <span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
- <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
+<span class='co'># extract and replace</span>
+<span class='no'>x</span>[<span class='fl'>1</span>:<span class='fl'>3</span>, ]
+<span class='no'>x</span>[, <span class='fl'>2</span>:<span class='fl'>4</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>9</span>
+<span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>)
+<span class='fu'><a href='overloaded.html'>diag</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>e</span> + <span class='fl'>1</span>
 
- <span class='co'># combine</span>
- <span class='fu'>cbind</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='no'>x</span>[, <span class='fl'>1</span>])
- <span class='fu'>rbind</span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ])
- <span class='fu'><a href='overloaded.html'>abind</a></span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ], <span class='kw'>along</span> <span class='kw'>=</span> <span class='fl'>1</span>)
- <span class='fu'>c</span>(<span class='no'>x</span>[, <span class='fl'>1</span>], <span class='no'>x</span>)
- <span class='fu'>rep</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='co'># combine</span>
+<span class='fu'>cbind</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='no'>x</span>[, <span class='fl'>1</span>])
+<span class='fu'>rbind</span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ])
+<span class='fu'><a href='overloaded.html'>abind</a></span>(<span class='no'>x</span>[<span class='fl'>1</span>, ], <span class='no'>x</span>[<span class='fl'>3</span>, ], <span class='kw'>along</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'>c</span>(<span class='no'>x</span>[, <span class='fl'>1</span>], <span class='no'>x</span>)
+<span class='fu'>rep</span>(<span class='no'>x</span>[, <span class='fl'>2</span>], <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

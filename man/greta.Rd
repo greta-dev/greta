@@ -6,18 +6,18 @@
 \title{greta: simple and scalable statistical modelling in R}
 \description{
 greta lets you write statistical models interactively in native
-  R code, then sample from them efficiently using Hamiltonian Monte Carlo.
+R code, then sample from them efficiently using Hamiltonian Monte Carlo.
 
-  The computational heavy lifting is done by TensorFlow, Google's automatic
-  differentiation library. So greta is particularly fast where the model
-  contains lots of linear algebra, and greta models can be run across CPU
-  clusters or on GPUs.
+The computational heavy lifting is done by TensorFlow, Google's automatic
+differentiation library. So greta is particularly fast where the model
+contains lots of linear algebra, and greta models can be run across CPU
+clusters or on GPUs.
 
-  See the simple example below, and take a look at the
-  \href{https://greta-stats.org}{greta website} for more information
-  including
-  \href{https://greta-stats.org/articles/get_started.html}{tutorials} and
-  \href{https://greta-stats.org/articles/example_models.html}{examples}.
+See the simple example below, and take a look at the
+\href{https://greta-stats.org}{greta website} for more information
+including
+\href{https://greta-stats.org/articles/get_started.html}{tutorials} and
+\href{https://greta-stats.org/articles/example_models.html}{examples}.
 }
 \examples{
 \dontrun{

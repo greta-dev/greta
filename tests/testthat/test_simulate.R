@@ -1,9 +1,6 @@
-context("simulate")
-
 test_that("simulate produces the right number of samples", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # fix variable
   a <- normal(0, 1)
@@ -18,13 +15,11 @@ test_that("simulate produces the right number of samples", {
   sims <- simulate(m, 17)
   expect_equal(dim(sims$a), c(17, dim(a)))
   expect_equal(dim(sims$y), c(17, dim(y)))
-
 })
 
 test_that("simulate uses the local RNG seed", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # fix variable
   a <- normal(0, 1)
@@ -57,27 +52,24 @@ test_that("simulate uses the local RNG seed", {
   one <- simulate(m, seed = 12345)
   two <- simulate(m, seed = 12345)
   expect_identical(one, two)
-
 })
 
 test_that("simulate errors if distribution-free variables are not fixed", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # fix variable
   a <- variable()
   y <- normal(a, 1)
   m <- model(y)
-  expect_error(sims <- simulate(m),
-               "do not have distributions so cannot be sampled")
-
+  expect_snapshot_error(
+    sims <- simulate(m)
+  )
 })
 
 test_that("simulate errors if a distribution cannot be sampled from", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # fix variable
   y_ <- rhyper(10, 5, 3, 2)
@@ -85,26 +77,27 @@ test_that("simulate errors if a distribution cannot be sampled from", {
   m <- lognormal(0, 1)
   distribution(y) <- hypergeometric(m, 3, 2)
   m <- model(y)
-  expect_error(sims <- simulate(m),
-               "sampling is not yet implemented")
-
+  expect_snapshot_error(
+    sims <- simulate(m)
+  )
 })
 
 test_that("simulate errors nicely if nsim is invalid", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- normal(0, 1)
   m <- model(x)
 
-  expect_error(simulate(m, nsim = 0),
-               "must be a positive integer")
+  expect_snapshot_error(
+    simulate(m, nsim = 0)
+  )
 
-  expect_error(simulate(m, nsim = -1),
-               "must be a positive integer")
+  expect_snapshot_error(
+    simulate(m, nsim = -1)
+  )
 
-  expect_error(simulate(m, nsim = "five"),
-               "must be a positive integer")
-
+  expect_snapshot_error(
+    simulate(m, nsim = "five")
+  )
 })

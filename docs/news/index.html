@@ -131,6 +131,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -173,6 +179,55 @@
       
     </div>
 
+    <div id="greta-040-2021-11-26" class="section level1">
+<h1 class="page-header">
+<a href="#greta-040-2021-11-26" class="anchor"></a>greta 0.4.0 (2021-11-26)<small> Unreleased </small>
+</h1>
+<div id="fixes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#fixes" class="anchor"></a>Fixes:</h2>
+<ul>
+<li><p>Python is now initialised when a <code>greta_array</code> is created (#468).</p></li>
+<li><p>head and tail S3 methods for <code>greta_array</code> are now consistent with head and tail methods for R versions 3 and 4 (<a href="https://github.com/greta-dev/greta/issues/384">#384</a>).</p></li>
+<li><p><code>greta_mcmc_list</code> objects (returned by <code><a href="../reference/inference.html">mcmc()</a></code>) are now no longer modified by operations (like code::gelman.diag()).</p></li>
+<li><p>joint distributions of uniform variables now have the correct constraints when sampling (#377).</p></li>
+<li><p>array-scalar dispatch with 3D arrays is now less buggy (#298).</p></li>
+<li><p>greta now provides R versions of all of R’s primitive functions (I think), to prevent them from silently not executing (#317).</p></li>
+<li><p>Uses <code><a href="https://www.rdocumentation.org/packages/base/topics/Sys.setenv">Sys.unsetenv("RETICULATE_PYTHON")</a></code> in <code>.onload</code> on package startup, to prevent an issue introduced with the latest version of RStudio where they do not find the current version of RStudio. See <a href="https://github.com/greta-dev/greta/issues/444">#444</a> for more details.</p></li>
+<li><p>Internal change to code to ensure <code>future</code> continues to support parallelisation of chains. See <a href="https://github.com/greta-dev/greta/issues/447">#447</a> for more details.</p></li>
+<li><p><code>greta</code> now depends on <code>future</code> version 1.22.1, <code>tensorflow</code> (the R package) 2.7.0, and <code>parallelly</code> 1.29.0. This should see no changes on the user side.</p></li>
+</ul>
+</div>
+<div id="api-changes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#api-changes" class="anchor"></a>API changes:</h2>
+<ul>
+<li><p>Now depends on R &gt;= 3.1.0 (<a href="https://github.com/greta-dev/greta/issues/386">#386</a>)</p></li>
+<li><p><code>chol2inv.greta_array()</code> now warns user about LINPACK argument being ignored, and also reminds user it has been deprecated since R 3.1</p></li>
+<li><p><code><a href="../reference/calculate.html">calculate()</a></code> now accepts multiple greta arrays for which to calculate values, via the <code>...</code> argument. As a consequence any other arguments must now be named.</p></li>
+<li><p>a number of optimiser methods are now deprecated, since they will be unavailable when greta moves to using TensorFlow v2.0: <code><a href="../reference/optimisers.html">powell()</a></code>, <code><a href="../reference/optimisers.html">cg()</a></code>, <code><a href="../reference/optimisers.html">newton_cg()</a></code>, <code><a href="../reference/optimisers.html">l_bfgs_b()</a></code>, <code><a href="../reference/optimisers.html">tnc()</a></code>, <code><a href="../reference/optimisers.html">cobyla()</a></code>, and <code><a href="../reference/optimisers.html">slsqp()</a></code>.</p></li>
+<li><p><code><a href="../reference/distributions.html">dirichlet()</a></code> now returns a variable (rather than an operation) greta array, and the graphs created by <code><a href="../reference/distributions.html">lkj_correlation()</a></code> and <code><a href="../reference/distributions.html">wishart()</a></code> are now simpler as cholesky-shaped variables are now available internally.</p></li>
+<li><p>Python dependency installation has been overhauled with the new <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> function (#417).</p></li>
+<li><p>Adds helper functions for helping installation get to “clean slate” (#443)</p></li>
+</ul>
+</div>
+<div id="features" class="section level2">
+<h2 class="hasAnchor">
+<a href="#features" class="anchor"></a>Features:</h2>
+<ul>
+<li><p><code><a href="../reference/calculate.html">calculate()</a></code> now enables simulation of greta array values from their priors, optionally conditioned on fixed values or posterior samples. This enables prior and posterior predictive checking of models, and simulation of data.</p></li>
+<li><p>A <code><a href="https://www.rdocumentation.org/packages/stats/topics/simulate">simulate()</a></code> method for greta models is now also provided, to simulate the values of all greta arrays in a model from their priors.</p></li>
+<li><p><code><a href="../reference/variable.html">variable()</a></code> now accepts arrays for <code>upper</code> and <code>lower</code>, enabling users to define variables with different constraints.</p></li>
+<li><p>There are three new variable constructor functions: <code><a href="../reference/variable.html">cholesky_variable()</a></code>, <code><a href="../reference/variable.html">simplex_variable()</a></code>, and <code><a href="../reference/variable.html">ordered_variable()</a></code>, for variables with these constraints but no probability distribution.</p></li>
+<li><p>a new function <code><a href="../reference/chol2symm.html">chol2symm()</a></code> - the inverse of <code><a href="https://www.rdocumentation.org/packages/base/topics/chol">chol()</a></code>.</p></li>
+<li><p><code><a href="../reference/inference.html">mcmc()</a></code>, <code><a href="../reference/inference.html">stashed_samples()</a></code>, and <code><a href="../reference/calculate.html">calculate()</a></code> now return objects of class <code>greta_mcmc_list</code> which inherit from <code>coda</code>’s <code>mcmc.list</code> class, but enable custom greta methods for manipulating mcmc outputs, including a <code><a href="https://www.rdocumentation.org/packages/stats/topics/window">window()</a></code> function.</p></li>
+<li><p><code><a href="../reference/inference.html">mcmc()</a></code> and <code><a href="../reference/calculate.html">calculate()</a></code> now have a <code>trace_batch_size</code> argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays (#236).</p></li>
+<li><p>Many message, warning, and error prompts have been replaced internally with the {cli} R package for nicer printing. This is a minor change that should result in a more pleasant user experience (#423 #425).</p></li>
+<li><p>Internally, where sensible, <code>greta</code> now uses the <code>glue</code> package to create messages/ouputs (#378).</p></li>
+<li><p>New FAQ page and updated installation instructions for installing Python dependencies (#424)</p></li>
+</ul>
+</div>
+</div>
     <div id="greta-031" class="section level1">
 <h1 class="page-header">
 <a href="#greta-031" class="anchor"></a>greta 0.3.1<small> 2019-08-09 </small>
@@ -189,9 +244,9 @@
 <a href="#greta-030" class="anchor"></a>greta 0.3.0<small> 2018-10-30 </small>
 </h1>
 <p>This is a very large update which adds a number of features and major speed improvements. We now depend on the TensorFlow Probability Python package, and use functionality in that package wherever possible. Sampling a simple model now takes ~10s, rather than ~2m (&gt;10x speedup).</p>
-<div id="fixes" class="section level2">
+<div id="fixes-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#fixes" class="anchor"></a>Fixes:</h2>
+<a href="#fixes-1" class="anchor"></a>Fixes:</h2>
 <div id="operation-bugs" class="section level3">
 <h3 class="hasAnchor">
 <a href="#operation-bugs" class="anchor"></a>operation bugs</h3>
@@ -254,9 +309,9 @@
 </ul>
 </div>
 </div>
-<div id="api-changes" class="section level2">
+<div id="api-changes-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#api-changes" class="anchor"></a>API changes:</h2>
+<a href="#api-changes-1" class="anchor"></a>API changes:</h2>
 <div id="inference-methods-1" class="section level3">
 <h3 class="hasAnchor">
 <a href="#inference-methods-1" class="anchor"></a>inference methods</h3>
@@ -309,9 +364,9 @@
 <h1 class="page-header">
 <a href="#greta-024" class="anchor"></a>greta 0.2.4<small> Unreleased </small>
 </h1>
-<div id="fixes-1" class="section level2">
+<div id="fixes-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#fixes-1" class="anchor"></a>Fixes:</h2>
+<a href="#fixes-2" class="anchor"></a>Fixes:</h2>
 <ul>
 <li>improved error checking/messages in <code><a href="../reference/model.html">model()</a></code>, <code>%*%</code>
 </li>
@@ -336,9 +391,9 @@
 <h1 class="page-header">
 <a href="#greta-023" class="anchor"></a>greta 0.2.3<small> 2018-01-23 </small>
 </h1>
-<div id="fixes-2" class="section level2">
+<div id="fixes-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#fixes-2" class="anchor"></a>Fixes:</h2>
+<a href="#fixes-3" class="anchor"></a>Fixes:</h2>
 <ul>
 <li>fixed breaking change in extraDistr API (caused test errors on CRAN builds)</li>
 <li>added dontrun statements to pass CRAN checks on winbuilder</li>
@@ -395,6 +450,7 @@
     <div id="tocnav">
       <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
+        <li><a href="#greta-040-2021-11-26">0.4.0</a></li>
         <li><a href="#greta-031">0.3.1</a></li>
         <li><a href="#greta-030">0.3.0</a></li>
         <li><a href="#greta-025">0.2.5</a></li>

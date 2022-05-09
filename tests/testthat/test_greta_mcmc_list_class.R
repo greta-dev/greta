@@ -1,9 +1,12 @@
-context("greta_mcmc_list class")
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
 
 test_that("draws and raw draws should have the right iteration numbering", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   samples <- 1000
   warmup <- 100
@@ -19,7 +22,7 @@ test_that("draws and raw draws should have the right iteration numbering", {
   expect_equal(end(raw_draws), samples)
 
   # same after calculating
-  y <- z ^ 2
+  y <- z^2
 
   y_draws <- calculate(y, values = draws)
   expect_equal(start(y_draws), 1)
@@ -28,13 +31,11 @@ test_that("draws and raw draws should have the right iteration numbering", {
   raw_draws <- get_model_info(y_draws)$raw_draws
   expect_equal(start(raw_draws), 1)
   expect_equal(end(raw_draws), samples)
-
 })
 
 test_that("window works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   z <- normal(0, 1)
   m <- model(z)
@@ -59,7 +60,7 @@ test_that("window works", {
   expect_identical(times, seq(start, end, by = thin))
 
   # calculate should retain this info too
-  z2 <- z ^ 2
+  z2 <- z^2
   z2_draws_sub <- calculate(z2, values = draws_sub)
 
   expect_s3_class(z2_draws_sub, "greta_mcmc_list")
@@ -67,13 +68,11 @@ test_that("window works", {
   expect_identical(end(z2_draws_sub), end)
   z2_times <- as.vector(time(z2_draws_sub))
   expect_identical(z2_times, seq(start, end, by = thin))
-
 })
 
 test_that("windowing does not have spooky effects", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   chains <- 4
   samples <- 100
@@ -81,10 +80,11 @@ test_that("windowing does not have spooky effects", {
   x <- normal(0, 1)
   m <- model(x)
   draws <- mcmc(m,
-                warmup = 100,
-                n_samples = samples,
-                chains = chains,
-                verbose = FALSE)
+    warmup = 100,
+    n_samples = samples,
+    chains = chains,
+    verbose = FALSE
+  )
 
   raw_draws <- get_model_info(draws)$raw_draws
 
@@ -102,5 +102,4 @@ test_that("windowing does not have spooky effects", {
   raw_draws <- get_model_info(draws)$raw_draws
   expect_equal(dim(as.matrix(draws)), c(n_samples, 1))
   expect_equal(dim(as.matrix(raw_draws)), c(n_samples, 1))
-
 })

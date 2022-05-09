@@ -1,24 +1,53 @@
 # greta (development version)
 
+# greta 0.4.2
+
+## Fixes
+
+* workaround for M1 issues (#507)
+
+# greta 0.4.1 (2022-03-14)
+
 ## Fixes:
 
-* greta_mcmc_list objects (returned by mcmc()) are now no longer modified by operations (like code::gelman.diag()). 
+* Python is now initialised when a `greta_array` is created (#468).
+
+* head and tail S3 methods for `greta_array` are now consistent with head and tail methods for R versions 3 and 4 ([#384](https://github.com/greta-dev/greta/issues/384)).
+
+* `greta_mcmc_list` objects (returned by `mcmc()`) are now no longer modified by operations (like `coda::gelman.diag()`). 
 
 * joint distributions of uniform variables now have the correct constraints when sampling (#377).
 
 * array-scalar dispatch with 3D arrays is now less buggy (#298).
 
-* greta now provides R versions of all of R's primitive functions (I think), to prevent them from silently not executing (#317).
+* `greta` now provides R versions of all of R's primitive functions (I think), to prevent them from silently not executing (#317).
+
+* Uses `Sys.unsetenv("RETICULATE_PYTHON")` in `.onload` on package startup, 
+  to prevent an issue introduced with the "ghost orchid" version of RStudio where they do not find the current version of RStudio. See [#444](https://github.com/greta-dev/greta/issues/444) for more details.
+  
+* Internal change to code to ensure `future` continues to support parallelisation of chains. See [#447](https://github.com/greta-dev/greta/issues/447) for more details.
+
+* `greta` now depends on `future` version 1.22.1, `tensorflow` (the R package) 2.7.0, and `parallelly` 1.29.0. This should see no changes on the user side.
 
 ## API changes:
 
+* Now depends on R >= 3.1.0 ([#386](https://github.com/greta-dev/greta/issues/386))
+
+* `chol2inv.greta_array()` now warns user about LINPACK argument being ignored, and also reminds user it has been deprecated since R 3.1
+
 * `calculate()` now accepts multiple greta arrays for which to calculate values, via the `...` argument. As a consequence any other arguments must now be named.
 
-* a number of optimiser methods are now deprecated, since they will be unavailable when greta moves to using TensorFlow v2.0: `powell()`, `cg()`, `newton_cg()`, `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()`.
+* A number of optimiser methods are now deprecated, since they will be unavailable when greta moves to using TensorFlow v2.0: `powell()`, `cg()`, `newton_cg()`, `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()`.
 
 * `dirichlet()` now returns a variable (rather than an operation) greta array, and the graphs created by `lkj_correlation()` and `wishart()` are now simpler as cholesky-shaped variables are now available internally.
 
+* Adds the `reinstall_greta_env()`, `reinstall_miniconda()`, `remove_greta_env()`, and  `remove_miniconda()` helper functions for helping installation get to "clean slate" (#443).
+
+* `greta` currently doesn't work on Apple Silicon (M1 Macs) as they need to use TF 2.0, which is currently being implemented. `greta` now throws an error if M1 macs are detected and directs users to https://github.com/greta-dev/greta/issues/458 (#487)
+
 ## Features:
+
+* New `install_greta_deps()` - provides installation of python dependencies (#417). This saves exact versions of Python (3.7), and the python modules NumPy (1.16.4), Tensorflow (1.14.0), and Tensorflow Probability (0.7.0) into a conda environment, "greta-env". When initialising Python, greta now searches for this conda environment first, which presents a great advantage as it isolates these exact versions of these modules from other Python installations. It is not required to use the conda environment, "greta-env". Overall this means that users can run the function `install_greta_deps()`, follow the prompts, and have all the python modules they need installed, without contaminating other  software that use different python modules.
 
 * `calculate()` now enables simulation of greta array values from their priors, optionally conditioned on fixed values or posterior samples. This enables prior and posterior predictive checking of models, and simulation of data.
 
@@ -28,11 +57,21 @@
 
 * There are three new variable constructor functions: `cholesky_variable()`, `simplex_variable()`, and `ordered_variable()`, for variables with these constraints but no probability distribution.
 
-* a new function `chol2symm()` - the inverse of `chol()`.
+* New `chol2symm()` is the inverse of `chol()`.
 
 * `mcmc()`, `stashed_samples()`, and `calculate()` now return objects of class `greta_mcmc_list` which inherit from `coda`'s `mcmc.list` class, but enable custom greta methods for manipulating mcmc outputs, including a `window()` function.
 
 * `mcmc()` and `calculate()` now have a `trace_batch_size` argument enabling users to trade-off computation speed versus memory requirements when calculating posterior samples for target greta arrays (#236).
+
+* Many message, warning, and error prompts have been replaced internally with the {cli} R package for nicer printing. This is a minor change that should result in a more pleasant user experience (#423 #425).
+
+* Internally, where sensible, `greta` now uses the `glue` package to create messages/ouputs (#378).
+
+* New FAQ page and updated installation instructions for installing Python dependencies (#424)
+
+* New `greta_sitrep()` function to generate a situation report of the software
+  that is available for use, and also initialising python so `greta` is ready to
+  use. (#441)
 
 # greta 0.3.1
 

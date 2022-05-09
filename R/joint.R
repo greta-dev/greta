@@ -1,12 +1,12 @@
 #' @name joint
 #' @title define joint distributions
 #'
-#' @description \code{joint} combines univariate probability distributions
-#'   together into a multivariate (and \emph{a priori} independent between
+#' @description `joint` combines univariate probability distributions
+#'   together into a multivariate (and *a priori* independent between
 #'   dimensions) joint distribution, either over a variable, or for fixed data.
 #'
 #' @param ... scalar variable greta arrays following probability distributions
-#'   (see \code{\link{distributions}}); the components of the joint
+#'   (see [distributions()]); the components of the joint
 #'   distribution.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
@@ -20,7 +20,7 @@
 #'   result can usually be achieved by combining variables with separate
 #'   distributions. It is included for situations where it is more convenient to
 #'   consider these as a single distribution, e.g. for use with
-#'   \code{distribution} or \code{mixture}.
+#'   `distribution` or `mixture`.
 #'
 #' @export
 #' @examples
@@ -37,25 +37,33 @@
 #' a <- normal(0, 3, truncation = c(0, Inf))
 #' b <- normal(0, 3, truncation = c(0, Inf))
 #' distribution(x) <- joint(normal(mu, sd), beta(a, b),
-#'                          dim = 10)
+#'   dim = 10
+#' )
 #' m <- model(mu, sd, a, b)
 #' plot(mcmc(m))
 #' }
-joint <- function(..., dim = NULL)
+joint <- function(..., dim = NULL) {
   distrib("joint", list(...), dim)
+}
 
 joint_distribution <- R6Class(
   "joint_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(dots, dim) {
-
       n_distributions <- length(dots)
 
       if (n_distributions < 2) {
-        stop("joint must be passed at least two distributions",
-             call. = FALSE)
+        msg <- cli::format_error(
+          c(
+            "{.fun joint} must be passed at least two distributions",
+            "The number of distributions passed was {n_distributions}"
+            )
+          )
+        stop(
+          msg,
+          call. = FALSE
+        )
       }
 
       # check the dimensions of the variables in dots
@@ -75,8 +83,13 @@ joint_distribution <- R6Class(
       # check they are all scalar
       are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
       if (!all(are_scalar)) {
-        stop("joint only accepts probability distributions over scalars",
-              call. = FALSE)
+        msg <- cli::format_error(
+          "{.fun joint} only accepts probability distributions over scalars"
+        )
+        stop(
+          msg,
+          call. = FALSE
+        )
       }
 
       # get the distributions and strip away their variables
@@ -90,9 +103,14 @@ joint_distribution <- R6Class(
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)
 
       if (!all(discrete) & !all(!discrete)) {
-        stop("cannot construct a joint distribution from a combination ",
-             "of discrete and continuous distributions",
-             call. = FALSE)
+        msg <- cli::format_error(
+          "cannot construct a joint distribution from a combination of \\
+          discrete and continuous distributions"
+        )
+        stop(
+          msg,
+          call. = FALSE
+        )
       }
       n_components <- length(dot_nodes)
 
@@ -112,16 +130,14 @@ joint_distribution <- R6Class(
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
-                           paste("distribution", i),
-                           shape_matches_output = FALSE)
+          glue::glue("distribution {i}"),
+          shape_matches_output = FALSE
+        )
       }
-
     },
-
     create_target = function(truncation) {
       vble(self$bounds, dim = self$dim)
     },
-
     tf_distrib = function(parameters, dag) {
 
       # get information from the *nodes* for component distributions, not the tf
@@ -152,19 +168,15 @@ joint_distribution <- R6Class(
 
         # sum them elementwise
         tf$add_n(log_probs)
-
       }
 
       sample <- function(seed) {
-
         samples <- lapply(distribution_nodes, dag$draw_sample)
         names(samples) <- NULL
         tf$concat(samples, axis = 2L)
-
       }
 
       list(log_prob = log_prob, sample = sample)
-
     }
   )
 )

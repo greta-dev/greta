@@ -1,9 +1,13 @@
-context("inference methods")
+if (check_tf_version()) {
+  tensorflow::tf$compat$v1$reset_default_graph()
+}
+
+set.seed(2020 - 02 - 11)
+
 
 test_that("opt converges with TF optimisers", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(5, 2, 0.1)
   z <- variable(dim = 5)
@@ -12,36 +16,35 @@ test_that("opt converges with TF optimisers", {
   m <- model(z)
 
   # loop through optimisers that might be expected to work
-  optimisers <- list(gradient_descent,
-                     adadelta,
-                     adagrad,
-                     adagrad_da,
-                     momentum,
-                     adam,
-                     ftrl,
-                     proximal_gradient_descent,
-                     proximal_adagrad,
-                     rms_prop)
+  optimisers <- list(
+    gradient_descent,
+    adadelta,
+    adagrad,
+    adagrad_da,
+    momentum,
+    adam,
+    ftrl,
+    proximal_gradient_descent,
+    proximal_adagrad,
+    rms_prop
+  )
 
   for (optmr in optimisers) {
-
     (o <- opt(m,
-              optimiser = optmr(),
-              max_iterations = 200))
+      optimiser = optmr(),
+      max_iterations = 200
+    ))
 
     # should have converged in fewer than 200 iterations and be close to truth
     expect_equal(o$convergence, 0)
     expect_lte(o$iterations, 200)
     expect_true(all(abs(x - o$par$z) < 1e-2))
-
   }
-
 })
 
 test_that("opt converges with SciPy optimisers", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(3, 2, 0.1)
   z <- variable(dim = 3)
@@ -79,9 +82,8 @@ test_that("opt converges with SciPy optimisers", {
     matches <- vapply(deprecated, identical, optmr, FUN.VALUE = logical(1))
     msg <- ifelse(any(matches), "deprecated", NA)
 
-    expect_warning(
-      o <- opt(m, optimiser = optmr(), max_iterations = 500),
-      msg
+    expect_snapshot(
+      o <- opt(m, optimiser = optmr(), max_iterations = 500)
     )
 
     # should have converged in fewer than 500 iterations and be close to truth
@@ -93,15 +95,12 @@ test_that("opt converges with SciPy optimisers", {
     }
 
     expect_true(all(abs(x - o$par$z) < 1e-2))
-
   }
-
 })
 
 test_that("opt accepts initial values", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(5, 2, 0.1)
   z <- variable(dim = 5)
@@ -118,13 +117,11 @@ test_that("opt accepts initial values", {
 
   # should be close to the truth
   expect_true(all(abs(x - o$par$z) < 1e-3))
-
 })
 
 test_that("opt returns hessians", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   sd <- runif(5)
   x <- rnorm(5, 2, 0.1)
@@ -144,13 +141,11 @@ test_that("opt returns hessians", {
   # the model density is IID normal, so we should be able to recover the SD
   approx_sd <- sqrt(diag(solve(hess)))
   expect_true(all(abs(approx_sd - sd) < 1e-9))
-
 })
 
 test_that("bad mcmc proposals are rejected", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up for numerical rejection of initial location
   x <- rnorm(10000, 1e6, 1)
@@ -158,57 +153,69 @@ test_that("bad mcmc proposals are rejected", {
   distribution(x) <- normal(z, 1e6)
   m <- model(z, precision = "single")
 
-  # catch badness in the progress bar
-  with_mock(
-    `greta:::create_progress_bar` = mock_create_progress_bar,
-    out <- get_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
+  # # catch badness in the progress bar
+  # with_mock(
+  #   `greta:::create_progress_bar` = mock_create_progress_bar,
+  #   out <- get_output(mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)),
+  #   expect_match(out, "100% bad")
+    # expect_snapshot(
+    #   draws <- mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)
+    # )
+  # )
+    out <- get_output(
+      mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)
+      )
     expect_match(out, "100% bad")
-  )
 
-  # bad initial values
-  expect_error(mcmc(m, chains = 1, n_samples = 1, warmup = 0,
-                    initial_values = initials(z = 1e20)),
-               "could not be evaluated at these initial values")
+    expect_snapshot_error(
+      mcmc(m,
+           chains = 1,
+           n_samples = 1,
+           warmup = 0,
+           verbose = FALSE,
+           initial_values = initials(z = 1e20)
+      )
+    )
 
   # really bad proposals
   x <- rnorm(100000, 1e12, 1)
   z <- normal(-1e12, 1e-12)
   distribution(x) <- normal(z, 1e-12)
   m <- model(z, precision = "single")
-  expect_error(mcmc(m, chains = 1, n_samples = 1, warmup = 0),
-               "Could not find reasonable starting values after 20 attempts")
+  expect_snapshot_error(
+    mcmc(m, chains = 1, n_samples = 1, warmup = 0, verbose = FALSE)
+  )
 
   # proposals that are fine, but rejected anyway
   z <- normal(0, 1)
   m <- model(z, precision = "single")
   expect_ok(mcmc(m,
-                 hmc(epsilon = 100,
-                     Lmin = 1,
-                     Lmax = 1),
-                 chains = 1,
-                 n_samples = 5,
-                 warmup = 0,
-                 verbose = FALSE))
-
+    hmc(
+      epsilon = 100,
+      Lmin = 1,
+      Lmax = 1
+    ),
+    chains = 1,
+    n_samples = 5,
+    warmup = 0,
+    verbose = FALSE
+  ))
 })
 
 test_that("mcmc works with verbosity and warmup", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(10)
   z <- normal(0, 1)
   distribution(x) <- normal(z, 1)
   m <- model(z)
   quietly(expect_ok(mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE)))
-
 })
 
 test_that("mcmc works with multiple chains", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   x <- rnorm(10)
   z <- normal(0, 1)
@@ -216,19 +223,33 @@ test_that("mcmc works with multiple chains", {
   m <- model(z)
 
   # multiple chains, automatic initial values
-  quietly(expect_ok(mcmc(m, warmup = 10, n_samples = 10, chains = 2)))
+  quietly(expect_ok(mcmc(m, warmup = 10, n_samples = 10, chains = 2,
+                         verbose = FALSE)))
 
   # multiple chains, user-specified initial values
   inits <- list(initials(z = 1), initials(z = 2))
-  quietly(expect_ok(mcmc(m, warmup = 10, n_samples = 10, chains = 2,
-                         initial_values = inits)))
-
+  quietly(expect_ok(mcmc(m,
+    warmup = 10, n_samples = 10, chains = 2,
+    initial_values = inits,
+    verbose = FALSE
+  )))
 })
 
 test_that("mcmc handles initial values nicely", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
+
+  # preserve R version
+  current_r_version <- paste0(R.version$major,".", R.version$minor)
+  required_r_version <- "3.6.0"
+  old_rng_r <- compareVersion(required_r_version, current_r_version) <= 0
+
+  if (old_rng_r) {
+    suppressWarnings(expr = {
+      RNGkind(sample.kind = "Rounding")
+      set.seed(2020 - 02 - 11)
+    })
+  }
 
   x <- rnorm(10)
   z <- normal(0, 1)
@@ -237,59 +258,52 @@ test_that("mcmc handles initial values nicely", {
 
   # too many sets of initial values
   inits <- replicate(3, initials(z = rnorm(1)), simplify = FALSE)
-  expect_error(mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE,
-                    chains = 2, initial_values = inits),
-               "sets of initial values were provided, but there are")
+  expect_snapshot_error(
+    mcmc(m,
+         warmup = 10, n_samples = 10, verbose = FALSE,
+         chains = 2, initial_values = inits
+    )
+  )
 
   # initial values have the wrong length
   inits <- replicate(2, initials(z = rnorm(2)), simplify = FALSE)
-  expect_error(mcmc(m, warmup = 10, n_samples = 10, verbose = FALSE,
-                    chains = 2, initial_values = inits),
-               "initial values provided have different dimensions")
+  expect_snapshot_error(
+    mcmc(m,
+         warmup = 10, n_samples = 10, verbose = FALSE,
+         chains = 2, initial_values = inits
+    )
+  )
 
   inits <- initials(z = rnorm(1))
-  quietly(expect_message(mcmc(m, warmup = 10, n_samples = 10,
-                              chains = 2, initial_values = inits,
-                              verbose = FALSE),
-                         "only one set of initial values was provided"))
-
+  quietly(
+    expect_snapshot(
+    mcmc(m,
+      warmup = 10, n_samples = 10,
+      chains = 2, initial_values = inits,
+      verbose = FALSE
+    )
+    )
+  )
 })
 
 test_that("progress bar gives a range of messages", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # 10/1010 should be <1%
-  with_mock(
-    `greta:::create_progress_bar` = mock_create_progress_bar,
-    `greta:::mcmc` = mock_mcmc,
-    out <- get_output(mcmc(1010)),
-    expect_match(out, "<1% bad")
-  )
+  expect_snapshot(draws <- mock_mcmc(1010))
 
   # 10/500 should be 2%
-  with_mock(
-    `greta:::create_progress_bar` = mock_create_progress_bar,
-    `greta:::mcmc` = mock_mcmc,
-    out <- get_output(mcmc(500)),
-    expect_match(out, "2% bad")
-  )
+  expect_snapshot(draws <- mock_mcmc(500))
 
   # 10/10 should be 100%
-  with_mock(
-    `greta:::create_progress_bar` = mock_create_progress_bar,
-    `greta:::mcmc` = mock_mcmc,
-    out <- get_output(mcmc(10)),
-    expect_match(out, "100% bad")
-  )
+  expect_snapshot(draws <- mock_mcmc(10))
 
 })
 
 test_that("extra_samples works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -302,13 +316,11 @@ test_that("extra_samples works", {
   expect_true(inherits(more_draws, "greta_mcmc_list"))
   expect_true(coda::niter(more_draws) == 30)
   expect_true(coda::nchain(more_draws) == 4)
-
 })
 
 test_that("trace_batch_size works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -328,13 +340,11 @@ test_that("trace_batch_size works", {
   expect_true(inherits(more_draws, "greta_mcmc_list"))
   expect_true(coda::niter(more_draws) == 30)
   expect_true(coda::nchain(more_draws) == 4)
-
 })
 
 test_that("stashed_samples works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # set up model
   a <- normal(0, 1)
@@ -365,93 +375,91 @@ test_that("stashed_samples works", {
   expect_true(inherits(model_info, "list"))
   expect_s3_class(model_info$raw_draws, "mcmc.list")
   expect_true(inherits(model_info$model, "greta_model"))
-
 })
 
 test_that("samples has object names", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- normal(0, 1)
   b <- normal(a, 1, dim = 3)
   m <- model(a, b)
 
   # mcmc should give the right names
-  draws <- mcmc(m, warmup = 2, n_samples = 10)
-  names <- rownames(summary(draws)$statistics)
-  expect_identical(names, c("a", "b[1,1]", "b[2,1]", "b[3,1]"))
+  draws <- mcmc(m, warmup = 2, n_samples = 10, verbose = FALSE)
+  expect_snapshot(rownames(summary(draws)$statistics))
 
   # so should calculate
-  c <- b ^ 2
+  c <- b^2
   c_draws <- calculate(c, values = draws)
-  names <- rownames(summary(c_draws)$statistics)
-  expect_identical(names, c("c[1,1]", "c[2,1]", "c[3,1]"))
-
+  expect_snapshot(rownames(summary(c_draws)$statistics))
 })
 
 
 test_that("model errors nicely", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # model should give a nice error if passed something other than a greta array
   a <- 1
   b <- normal(0, a)
-  expect_error(model(a, b),
-               "^The following object")
-
+  expect_snapshot_error(
+    model(a, b)
+  )
 })
 
 test_that("mcmc supports rwmh sampler with normal proposals", {
-
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
   m <- model(x)
-  expect_ok(draws <- mcmc(m, sampler = rwmh("normal"),
-                          n_samples = 100, warmup = 100))
-
+  expect_ok(draws <- mcmc(m,
+    sampler = rwmh("normal"),
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
+  ))
 })
 
 test_that("mcmc supports rwmh sampler with uniform proposals", {
-
   skip_if_not(check_tf_version())
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
-  expect_ok(draws <- mcmc(m, sampler = rwmh("uniform"),
-                          n_samples = 100, warmup = 100))
-
+  expect_ok(draws <- mcmc(m,
+    sampler = rwmh("uniform"),
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
+  ))
 })
 
 test_that("mcmc supports slice sampler with single precision models", {
-
   skip_if_not(check_tf_version())
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x, precision = "single")
-  expect_ok(draws <- mcmc(m, sampler = slice(),
-                          n_samples = 100, warmup = 100))
-
+  expect_ok(draws <- mcmc(m,
+    sampler = slice(),
+    n_samples = 100, warmup = 100,
+    verbose = FALSE
+  ))
 })
 
 test_that("mcmc doesn't support slice sampler with double precision models", {
-
   skip_if_not(check_tf_version())
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x, precision = "double")
-  expect_error(draws <- mcmc(m, sampler = slice(),
-                             n_samples = 100, warmup = 100),
-               "models defined with single precision")
-
+  expect_snapshot_error(
+    draws <- mcmc(m,
+                  sampler = slice(),
+                  n_samples = 100, warmup = 100,
+                  verbose = FALSE
+    )
+  )
 })
 
 test_that("numerical issues are handled in mcmc", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # this should have a cholesky decomposition problem at some point
   alpha <- normal(0, 1)
@@ -463,132 +471,128 @@ test_that("numerical issues are handled in mcmc", {
   m <- model(alpha)
 
   # running with bursts should error informatively
-  expect_error(draws <- mcmc(m, verbose = FALSE),
-               "TensorFlow hit a numerical problem")
+  expect_snapshot_error(
+    draws <- mcmc(m, verbose = FALSE)
+  )
 
   # setting one_by_one = TRUE should handle those errors as bad samples
-  expect_ok(draws <- mcmc(m, warmup = 100, n_samples = 10,
-                          one_by_one = TRUE,
-                          verbose = FALSE))
-
+  expect_ok(draws <- mcmc(m,
+    warmup = 100, n_samples = 10,
+    one_by_one = TRUE,
+    verbose = FALSE
+  ))
 })
 
+# this is the test that says: 'Loaded Tensorflow version 1.14.0'
 test_that("mcmc works in parallel", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
-  plan(multisession)
+  op <- future::plan()
+  # put the future plan back as we found it
+  withr::defer(future::plan(op))
+  future::plan(future::multisession)
 
   # one chain
-  expect_ok(draws <- mcmc(m, warmup = 10, n_samples = 10,
-                          chains = 1,
-                          verbose = FALSE))
+  expect_ok(draws <- mcmc(m,
+    warmup = 10, n_samples = 10,
+    chains = 1,
+    verbose = FALSE
+  ))
 
   expect_true(inherits(draws, "greta_mcmc_list"))
   expect_true(coda::niter(draws) == 10)
   rm(draws)
 
   # multiple chains
-  expect_ok(draws <- mcmc(m, warmup = 10, n_samples = 10,
-                          chains = 2,
-                          verbose = FALSE))
+  expect_ok(draws <- mcmc(m,
+    warmup = 10, n_samples = 10,
+    chains = 2,
+    verbose = FALSE
+  ))
 
   expect_true(inherits(draws, "greta_mcmc_list"))
   expect_true(coda::niter(draws) == 10)
 
-  # put the future plan back as we found it
-  plan(op)
-
 })
 
 test_that("mcmc errors for invalid parallel plans", {
-
   skip_if_not(check_tf_version())
-  skip_on_travis()
-  source("helpers.R")
+  skip_on_ci()
+
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
+  op <- future::plan()
 
   # silence future's warning about multicore support
-  old_option <- Sys.getenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE")
-  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
+  # put the future plan back as we found it
+  withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
+  # reset warning setting
+  withr::defer(future::plan(op))
 
   # handle handle forks, so only accept multisession, or multi session clusters
-  plan(multiprocess)
-  expect_error(draws <- mcmc(m),
-               "parallel mcmc samplers cannot be run with")
+  suppressWarnings(future::plan(future::multiprocess))
+  expect_snapshot_error(
+    mcmc(m, verbose = FALSE)
+  )
 
-  plan(multicore)
-  expect_error(draws <- mcmc(m),
-               "parallel mcmc samplers cannot be run with")
+  future::plan(future::multicore)
+  expect_snapshot_error(
+    mcmc(m, verbose = FALSE)
+  )
 
   cl <- parallel::makeForkCluster(2L)
-  plan(cluster, workers = cl)
-  expect_error(draws <- mcmc(m),
-               "parallel mcmc samplers cannot be run with")
-
-  # put the future plan back as we found it
-  plan(op)
-
-  # reset warning setting
-  Sys.setenv("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = old_option)
+  future::plan(future::cluster, workers = cl)
+  expect_snapshot_error(
+    mcmc(m, verbose = FALSE)
+  )
 
 })
 
 test_that("parallel reporting works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   m <- model(normal(0, 1))
 
-  library(future)
-  op <- plan()
-  plan(multisession)
+  op <- future::plan()
+  # put the future plan back as we found it
+  withr::defer(future::plan(op))
+  future::plan(future::multisession)
 
   # should report each sampler's progress with a fraction
   out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
   expect_match(out, "2 samplers in parallel")
   expect_match(out, "50/50")
 
-  # put the future plan back as we found it
-  plan(op)
-
 })
 
 test_that("initials works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   # errors on bad objects
-  expect_error(initials(a = FALSE),
-               "must be numeric")
+  expect_snapshot_error(
+    initials(a = FALSE)
+  )
 
-  expect_error(initials(FALSE),
-               "must be named")
+  expect_snapshot_error(
+    initials(FALSE)
+  )
 
   # prints nicely
-  init <- initials(a = 3)
-  out <- capture.output(print(init))
-  out <- paste(out, collapse = "\n")
-  expect_match(out, "a greta initials object")
-  expect_match(out, "\\$a")
+  expect_snapshot(
+    initials(a = 3)
+  )
 
 })
 
 test_that("prep_initials errors informatively", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
+
 
   a <- normal(0, 1)
   b <- uniform(0, 1)
@@ -599,61 +603,73 @@ test_that("prep_initials errors informatively", {
   m <- model(z)
 
   # bad objects:
-  expect_error(mcmc(m, initial_values = FALSE),
-               "must be an initials object created with initials()")
+  expect_snapshot_error(
+    mcmc(m, initial_values = FALSE, verbose = FALSE)
+  )
 
-  expect_error(mcmc(m, initial_values = list(FALSE)),
-               "must be an initials object created with initials()")
+  expect_snapshot_error(
+    mcmc(m, initial_values = list(FALSE), verbose = FALSE)
+  )
 
   # an unrelated greta array
   g <- normal(0, 1)
-  expect_error(mcmc(m, chains = 1, initial_values = initials(g = 1)),
-               "not associated with the model: g")
+  expect_snapshot_error(
+    mcmc(m, chains = 1, initial_values = initials(g = 1), verbose = FALSE)
+  )
 
   # non-variable greta arrays
-  expect_error(mcmc(m, chains = 1, initial_values = initials(f = 1)),
-               "can only be set for variable greta arrays")
-  expect_error(mcmc(m, chains = 1, initial_values = initials(z = 1)),
-               "can only be set for variable greta arrays")
+  expect_snapshot_error(
+    mcmc(m, chains = 1, initial_values = initials(f = 1), verbose = FALSE)
+  )
+
+  expect_snapshot_error(
+    mcmc(m, chains = 1, initial_values = initials(z = 1), verbose = FALSE)
+  )
 
   # out of bounds errors
-  expect_error(mcmc(m, chains = 1, initial_values = initials(b = -1)),
-               "outside the range of values")
-  expect_error(mcmc(m, chains = 1, initial_values = initials(d = -1)),
-               "outside the range of values")
-  expect_error(mcmc(m, chains = 1, initial_values = initials(e = 2)),
-               "outside the range of values")
+  expect_snapshot_error(
+    mcmc(m, chains = 1, initial_values = initials(b = -1), verbose = FALSE)
+  )
 
+  expect_snapshot_error(
+    mcmc(m, chains = 1, initial_values = initials(d = -1), verbose = FALSE)
+  )
+
+  expect_snapshot_error(
+    mcmc(m, chains = 1, initial_values = initials(e = 2), verbose = FALSE)
+  )
 })
 
 test_that("samplers print informatively", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
-  out <- capture_output(hmc(), TRUE)
-  expect_match(out, "hmc sampler")
 
-  out <- capture_output(rwmh(), TRUE)
-  expect_match(out, "rwmh sampler")
+  expect_snapshot(
+    hmc()
+  )
+  expect_snapshot(
+    rwmh()
+  )
+  expect_snapshot(
+    slice()
+  )
+  expect_snapshot(
+    hmc(Lmin = 1)
+  )
 
-  out <- capture_output(slice(), TRUE)
-  expect_match(out, "slice sampler")
-
-  # check print sees changed parameters
-  out <- capture_output(hmc(Lmin = 1), TRUE)
-  expect_match(out, "Lmin = 1")
-
+  # # check print sees changed parameters
+  # out <- capture_output(hmc(Lmin = 1), TRUE)
+  # expect_match(out, "Lmin = 1")
 })
 
 test_that("pb_update > thin to avoid bursts with no saved iterations", {
-
   skip_if_not(check_tf_version())
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
-  expect_ok(draws <- mcmc(m, n_samples = 100, warmup = 100,
-                          thin = 3, pb_update = 2))
+  expect_ok(draws <- mcmc(m,
+    n_samples = 100, warmup = 100,
+    thin = 3, pb_update = 2, verbose = FALSE
+  ))
   expect_identical(thin(draws), 3)
-
 })

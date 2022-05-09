@@ -10,6 +10,9 @@
     <loc>https://greta-stats.org/reference/calculate.html</loc>
   </url>
   <url>
+    <loc>https://greta-stats.org/reference/chol2symm.html</loc>
+  </url>
+  <url>
     <loc>https://greta-stats.org/reference/distribution.html</loc>
   </url>
   <url>
@@ -26,6 +29,9 @@
   </url>
   <url>
     <loc>https://greta-stats.org/reference/inference.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-stats.org/reference/install_greta_deps.html</loc>
   </url>
   <url>
     <loc>https://greta-stats.org/reference/internals.html</loc>
@@ -52,7 +58,16 @@
     <loc>https://greta-stats.org/reference/reexports.html</loc>
   </url>
   <url>
+    <loc>https://greta-stats.org/reference/reinstallers.html</loc>
+  </url>
+  <url>
     <loc>https://greta-stats.org/reference/samplers.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-stats.org/reference/simulate.greta_model.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-stats.org/reference/stash-notes.html</loc>
   </url>
   <url>
     <loc>https://greta-stats.org/reference/structures.html</loc>
@@ -71,6 +86,9 @@
   </url>
   <url>
     <loc>https://greta-stats.org/articles/example_models.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-stats.org/articles/faq.html</loc>
   </url>
   <url>
     <loc>https://greta-stats.org/articles/get_started.html</loc>

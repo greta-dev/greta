@@ -1,38 +1,83 @@
-Package: greta
 Type: Package
+Package: greta
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.3.1.9012
-Date: 2020-04-13
+Version: 0.4.2.9000
+Date: 2022-03-22
 Authors@R: c(
-  person("Nick", "Golding", role = c("aut", "cre"),
-         email = "nick.golding.research@gmail.com",
-         comment = c(ORCID = "0000-0001-8916-5570")),
-  person("Simon", "Dirmeier", role = "ctb"),
-  person("Adam", "Fleischhacker", role = "ctb"),
-  person("Shirin", "Glander", role = "ctb"),
-  person("Martin", "Ingram", role = "ctb"),
-  person("Lee", "Hazel", role = "ctb"),
-  person("Lionel", "Hertzog", role = "ctb"),
-  person("Tiphaine", "Martin", role = "ctb"),
-  person("Matt", "Mulvahill", role = "ctb"),
-  person("Michael", "Quinn", role = "ctb"),
-  person("David", "Smith", role = "ctb"),
-  person("Paul", "Teetor", role = "ctb"),
-  person("Jian", "Yen", role = "ctb")
+    person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
+           comment = c(ORCID = "0000-0001-8916-5570")),
+    person("Nicholas", "Tierney", , "nicholas.tierney@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "https://orcid.org/0000-0003-1460-8722")),
+    person("Simon", "Dirmeier", role = "ctb"),
+    person("Adam", "Fleischhacker", role = "ctb"),
+    person("Shirin", "Glander", role = "ctb"),
+    person("Martin", "Ingram", role = "ctb"),
+    person("Lee", "Hazel", role = "ctb"),
+    person("Lionel", "Hertzog", role = "ctb"),
+    person("Tiphaine", "Martin", role = "ctb"),
+    person("Matt", "Mulvahill", role = "ctb"),
+    person("Michael", "Quinn", role = "ctb"),
+    person("David", "Smith", role = "ctb"),
+    person("Paul", "Teetor", role = "ctb"),
+    person("Jian", "Yen", role = "ctb")
   )
-Description: Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'.
-  greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on.
-  See the website for more information, including tutorials, examples, package documentation, and the greta forum.
+Description: Write statistical models in R and fit them by MCMC and
+    optimisation on CPUs and GPUs, using Google 'TensorFlow'.  greta lets
+    you write your own model like in BUGS, JAGS and Stan, except that you
+    write models right in R, it scales well to massive datasets, and it’s
+    easy to extend and build on.  See the website for more information,
+    including tutorials, examples, package documentation, and the greta
+    forum.
 License: Apache License 2.0
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
-SystemRequirements: Python (>= 2.7.0) with header files and shared library;
-    TensorFlow (v1.14; https://www.tensorflow.org/);
-    TensorFlow Probability (v0.7.0; https://www.tensorflow.org/probability/)
-Encoding: UTF-8
-LazyData: true
 Depends:
-    R (>= 3.0)
+    R (>= 3.1.0)
+Imports:
+    abind,
+    callr,
+    cli (>= 3.0.0),
+    coda,
+    future (>= 1.22.1),
+    glue (>= 1.5.1),
+    methods,
+    parallelly (>= 1.29.0),
+    progress (>= 1.2.0),
+    R6,
+    reticulate (>= 1.19.0),
+    tensorflow (>= 2.7.0),
+    yesno
+Suggests:
+    bayesplot,
+    covr,
+    cramer,
+    DiagrammeR,
+    extraDistr,
+    fields,
+    ggplot2,
+    knitr,
+    lattice,
+    MASS,
+    MCMCpack,
+    mockery,
+    mvtnorm,
+    rmarkdown,
+    rmutil,
+    spelling,
+    testthat (>= 3.1.0),
+    tidyverse,
+    truncdist,
+    withr
+VignetteBuilder: 
+    knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-GB
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+SystemRequirements: Python (>= 2.7.0) with header files and shared
+    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow
+    Probability (v0.7.0; https://www.tensorflow.org/probability/)
 Collate:
     'package.R'
     'utils.R'
@@ -62,11 +107,11 @@ Collate:
     'optimisers.R'
     'inference.R'
     'install_tensorflow.R'
-    'internals.R'
     'calculate.R'
     'callbacks.R'
     'simulate.R'
     'chol2symm.R'
+<<<<<<< HEAD
 Imports:
     R6,
     tensorflow (>= 1.13.0),
@@ -96,3 +141,18 @@ Suggests:
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0
 Language: en-GB
+=======
+    'install_greta_deps.R'
+    'conda_greta_env.R'
+    'greta_stash.R'
+    'greta_create_conda_env.R'
+    'greta_install_miniconda.R'
+    'greta_install_python_deps.R'
+    'new_install_process.R'
+    'reinstallers.R'
+    'checkers.R'
+    'test_if_forked_cluster.R'
+    'testthat-helpers.R'
+    'zzz.R'
+    'internals.R'
+>>>>>>> upstream/master

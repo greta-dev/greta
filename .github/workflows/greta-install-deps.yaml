@@ -1,0 +1,54 @@
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+name: greta-install-deps
+
+jobs:
+  test-coverage:
+    runs-on: ubuntu-18.04
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: r-lib/actions/setup-r@v1
+
+      - uses: r-lib/actions/setup-pandoc@v1
+
+      - name: Fix Conda permissions on macOS
+        if: runner.os == 'macOS'
+        run: sudo chown -R $UID $CONDA
+
+      - name: Remotes install greta
+        run: |
+          install.packages('remotes')
+          remotes::install_github("greta-dev/greta")
+        shell: Rscript {0}
+
+      - name: Greta install deps
+        run: |
+          library(greta)
+          install_greta_deps(timeout = 50)
+        shell: Rscript {0}
+
+      - name: Check the installation happened properly?
+        run: |
+          greta:::have_greta_conda_env()
+          greta:::have_conda()
+          greta:::have_python()
+          greta:::have_tf()
+          greta:::have_tfp()
+        shell: Rscript {0}
+
+      - name: Greta run model
+        run: |
+          library(greta)
+          model(normal(0,1))
+        shell: Rscript {0}

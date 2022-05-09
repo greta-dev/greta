@@ -194,7 +194,7 @@ function is also how you would get posterior predictive values.
 ```{r backtransform}
 # Calculate school effects on original scale
 school_effects           <- avg_effect + avg_stddev * school_effects_standard
-posterior_school_effects <- calculate(school_effects, draws) 
+posterior_school_effects <- calculate(school_effects, values = draws) 
 ```
 
 

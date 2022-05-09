@@ -1,30 +1,30 @@
 #' @rdname variable
 #' @export
 #' @title create greta variables
-#' @description \code{variable()} creates greta arrays representing unknown
+#' @description `variable()` creates greta arrays representing unknown
 #'   parameters, to be learned during model fitting. These parameters are not
 #'   associated with a probability distribution. To create a variable greta
 #'   array following a specific probability distribution, see
-#'   \code{\link{distributions}}.
+#'   [distributions()].
 #'
 #' @param lower,upper optional limits to variables. These must be specified as
 #'   numerics, they cannot be greta arrays (though see details for a
-#'   workaround). They can be set to \code{-Inf} (\code{lower}) or \code{Inf}
-#'   (\code{upper}), though \code{lower} must always be less than \code{upper}.
+#'   workaround). They can be set to `-Inf` (`lower`) or `Inf`
+#'   (`upper`), though `lower` must always be less than `upper`.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
 #'   or a vector of positive integers. See details.
 #'
-#' @details \code{lower} and \code{upper} must be fixed, they cannot be greta
+#' @details `lower` and `upper` must be fixed, they cannot be greta
 #'   arrays. This ensures these values can always be transformed to a continuous
 #'   scale to run the samplers efficiently. However, a variable parameter with
 #'   dynamic limits can always be created by first defining a variable
 #'   constrained between 0 and 1, and then transforming it to the required
 #'   scale. See below for an example.
 #'
-#'   The constraints in \code{simplex_variable()} and \code{ordered_variable()}
+#'   The constraints in `simplex_variable()` and `ordered_variable()`
 #'   operate on the final dimension, which must have more than 1 element.
-#'   Passing in a scalar value for \code{dim} therefore results in a row-vector.
+#'   Passing in a scalar value for `dim` therefore results in a row-vector.
 #'
 #' @examples
 #' \dontrun{
@@ -40,19 +40,24 @@
 #'
 #' # create a variable, with lower and upper defined by greta arrays
 #' min <- as_data(iris$Sepal.Length)
-#' max <- min ^ 2
+#' max <- min^2
 #' d <- min + variable(0, 1, dim = nrow(iris)) * (max - min)
 #' }
 variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
-
   check_tf_version("error")
 
-  if (inherits(lower, "greta_array") | inherits(upper, "greta_array"))
-    stop("lower and upper must be fixed, they cannot be another greta array")
+  if (inherits(lower, "greta_array") | inherits(upper, "greta_array")) {
+    msg <- cli::format_error(
+      "lower and upper must be fixed, they cannot be another greta array"
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
 
   node <- variable_node$new(lower, upper, dim)
   as.greta_array(node)
-
 }
 
 #' @export
@@ -72,36 +77,56 @@ variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
 #' cov <- chol2symm(e_cov)
 #' correl <- chol2symm(e_correl)
 cholesky_variable <- function(dim, correlation = FALSE) {
-
   n_dim <- length(dim)
   if (n_dim == 1) {
     dim <- c(dim, dim)
   } else if (n_dim == 2) {
     if (dim[1] != dim[2]) {
-      stop("cholesky variables must be square, but dim was ",
-           paste(dim, collapse = " x "), call. = FALSE)
+      msg <- cli::format_error(
+        c(
+          "cholesky variables must be square",
+          "However its dimension is: {.val {paste(dim, collapse = 'x')}}"
+        )
+      )
+      stop(
+        msg,
+        call. = FALSE
+      )
     }
   } else {
-    stop("dim can either be a scalar or a vector of length 2",
-         call. = FALSE)
+    msg <- cli::format_error(
+      c(
+        "{.arg dim} can either be a scalar or a vector of length 2",
+        "However {.arg dim} has length {.val {length(dim)}}, and contains: \\
+        {.val {paste(dim, collapse = ', ')}}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
   }
 
   k <- dim[1]
 
   # dimension of the free state version
   free_dim <- ifelse(correlation,
-                     k * (k - 1) / 2,
-                     k + k * (k - 1) / 2)
+    k * (k - 1) / 2,
+    k + k * (k - 1) / 2
+  )
 
   # create variable node
-  node <- vble(truncation = c(-Inf, Inf),
-               dim = dim,
-               free_dim = free_dim)
+  node <- vble(
+    truncation = c(-Inf, Inf),
+    dim = dim,
+    free_dim = free_dim
+  )
 
   # set the constraint, to enable transformation
   node$constraint <- ifelse(correlation,
-                            "correlation_matrix",
-                            "covariance_matrix")
+    "correlation_matrix",
+    "covariance_matrix"
+  )
 
   # set the printed value to be nicer
   cholesky_value <- unknowns(dim)
@@ -110,7 +135,6 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 
   # reeturn as a greta array
   as.greta_array(node)
-
 }
 
 #' @export
@@ -125,8 +149,9 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 simplex_variable <- function(dim) {
 
   # for scalar dims, return a row vector
-  if (length(dim) == 1)
+  if (length(dim) == 1) {
     dim <- c(1, dim)
+  }
 
   dim <- check_dims(target_dim = dim)
 
@@ -134,9 +159,15 @@ simplex_variable <- function(dim) {
   n_dim <- length(dim)
   last_dim <- dim[n_dim]
   if (!last_dim > 1) {
-    stop("the final dimension of a simplex variable must have ",
-         "more than one element",
-         call. = FALSE)
+    msg <- cli::format_error(
+      "the final dimension of a simplex variable must have more than one \\
+      element",
+      "The final dimension has: {.val {length(last_dim)} elements}"
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
   }
 
   raw_dim <- dim
@@ -144,16 +175,17 @@ simplex_variable <- function(dim) {
   free_dim <- prod(raw_dim)
 
   # create variable node
-  node <- vble(truncation = c(-Inf, Inf),
-               dim = dim,
-               free_dim = free_dim)
+  node <- vble(
+    truncation = c(-Inf, Inf),
+    dim = dim,
+    free_dim = free_dim
+  )
 
   # set the constraint, to enable transformation
   node$constraint <- "simplex"
 
   # reeturn as a greta array
   as.greta_array(node)
-
 }
 
 #' @export
@@ -168,17 +200,24 @@ simplex_variable <- function(dim) {
 ordered_variable <- function(dim) {
 
   # for scalar dims, return a row vector
-  if (length(dim) == 1)
+  if (length(dim) == 1) {
     dim <- c(1, dim)
+  }
 
   dim <- check_dims(target_dim = dim)
 
   # dimension of the free state version
   n_dim <- length(dim)
   if (!dim[n_dim] > 1) {
-    stop("the final dimension of an ordered variable must have ",
-         "more than one element",
-         call. = FALSE)
+    msg <- cli::format_error(
+      "the final dimension of an ordered variable must have more than \\
+      one element",
+      "the final dimension has: {.val {length(last_dim)} elements}"
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
   }
 
   # create variable node
@@ -189,5 +228,4 @@ ordered_variable <- function(dim) {
 
   # reeturn as a greta array
   as.greta_array(node)
-
 }

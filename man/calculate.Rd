@@ -18,7 +18,7 @@ calculate(
 
 \item{values}{a named list giving temporary values of the greta arrays with
 which \code{target} is connected, or a \code{greta_mcmc_list} object
-returned by \code{\link{mcmc}}.}
+returned by \code{\link[=mcmc]{mcmc()}}.}
 
 \item{nsim}{an optional positive integer scalar for the number of responses
 to simulate if stochastic greta arrays are present in the model - see
@@ -35,44 +35,44 @@ reduce memory demands}
 }
 \value{
 Values of the target greta array(s), given values of the greta arrays
-  on which they depend (either specified in \code{values} or sampled from
-  their priors). If \code{values} is a
-  \code{\link[greta:mcmc]{greta_mcmc_list}} and \code{nsim = NULL}, this will
-  be a \code{greta_mcmc_list} object of posterior samples for the target
-  greta arrays. Otherwise, the result will be a named list of numeric R
-  arrays. If \code{nsim = NULL} the dimensions of returned numeric R arrays
-  will be the same as the corresponding greta arrays, otherwise an additional
-  dimension with \code{nsim} elements will be prepended, to represent
-  multiple simulations.
+on which they depend (either specified in \code{values} or sampled from
+their priors). If \code{values} is a
+\code{\link[=mcmc]{greta_mcmc_list()}} and \code{nsim = NULL}, this will
+be a \code{greta_mcmc_list} object of posterior samples for the target
+greta arrays. Otherwise, the result will be a named list of numeric R
+arrays. If \code{nsim = NULL} the dimensions of returned numeric R arrays
+will be the same as the corresponding greta arrays, otherwise an additional
+dimension with \code{nsim} elements will be prepended, to represent
+multiple simulations.
 }
 \description{
 Calculate the values that greta arrays would take, given
-  temporary, or simulated values for the greta arrays on which they depend.
-  This can be used to check the behaviour of your model, make predictions to
-  new data after model fitting, or simulate datasets from either the prior or
-  posterior of your model.
+temporary, or simulated values for the greta arrays on which they depend.
+This can be used to check the behaviour of your model, make predictions to
+new data after model fitting, or simulate datasets from either the prior or
+posterior of your model.
 }
 \details{
 The greta arrays named in \code{values} need not be variables, they
-  can also be other operations or even data.
+can also be other operations or even data.
 
-  At present, if \code{values} is a named list it must contain values for
-  \emph{all} of the variable greta arrays with which \code{target} is
-  connected, even values are given for intermediate operations, or the target
-  doesn't depend on the variable. That may be relaxed in a future release.
+At present, if \code{values} is a named list it must contain values for
+\emph{all} of the variable greta arrays with which \code{target} is
+connected, even values are given for intermediate operations, or the target
+doesn't depend on the variable. That may be relaxed in a future release.
 
-  If the model contains stochastic greta arrays; those with a distribution,
-  calculate can be used to sample from these distributions (and all greta
-  arrays that depend on them) by setting the \code{nsim} argument to a
-  positive integer for the required number of samples. If \code{values} is
-  specified (either as a list of fixed values or as draws), those values will
-  be used, and remaining variables will be sampled conditional on them.
-  Observed data with distributions (i.e. response variables defined with
-  \code{distribution()} can also be sampled, provided they are defined as
-  greta arrays. This behaviour can be used for a number of tasks, like
-  simulating datasets for known parameter sets, simulating parameters and
-  data from a set of priors, or simulating datasets from a model posterior.
-  See some examples of these below.
+If the model contains stochastic greta arrays; those with a distribution,
+calculate can be used to sample from these distributions (and all greta
+arrays that depend on them) by setting the \code{nsim} argument to a
+positive integer for the required number of samples. If \code{values} is
+specified (either as a list of fixed values or as draws), those values will
+be used, and remaining variables will be sampled conditional on them.
+Observed data with distributions (i.e. response variables defined with
+\code{distribution()} can also be sampled, provided they are defined as
+greta arrays. This behaviour can be used for a number of tasks, like
+simulating datasets for known parameter sets, simulating parameters and
+data from a set of priors, or simulating datasets from a model posterior.
+See some examples of these below.
 }
 \examples{
 \dontrun{
@@ -81,7 +81,7 @@ The greta arrays named in \code{values} need not be variables, they
 # then calculate what value y would take for different values of x
 x <- normal(0, 1, dim = 3)
 a <- lognormal(0, 1)
-y <- sum(x ^ 2) + a
+y <- sum(x^2) + a
 calculate(y, values = list(x = c(0.1, 0.2, 0.3), a = 2))
 
 # by setting nsim, you can also sample values from their priors
@@ -128,29 +128,35 @@ calculate(y, values = draws, nsim = 100)
 # you can use calculate on greta arrays created even after the inference on
 # the model - e.g. to plot response curves
 petal_length_plot <- seq(min(iris$Petal.Length),
-                         max(iris$Petal.Length),
-                         length.out = 100)
+  max(iris$Petal.Length),
+  length.out = 100
+)
 mu_plot <- alpha + petal_length_plot * beta
 mu_plot_draws <- calculate(mu_plot, values = draws)
 mu_est <- colMeans(mu_plot_draws[[1]])
-plot(mu_est ~ petal_length_plot, type = "n",
-     ylim = range(mu_plot_draws[[1]]))
+plot(mu_est ~ petal_length_plot,
+  type = "n",
+  ylim = range(mu_plot_draws[[1]])
+)
 apply(mu_plot_draws[[1]], 1, lines,
-      x = petal_length_plot, col = grey(0.8))
+  x = petal_length_plot, col = grey(0.8)
+)
 lines(mu_est ~ petal_length_plot, lwd = 2)
 
 # trace_batch_size can be changed to trade off speed against memory usage
 # when calculating. These all produce the same result, but have increasing
 # memory requirements:
 mu_plot_draws_1 <- calculate(mu_plot,
-                             values = draws,
-                             trace_batch_size = 1)
+  values = draws,
+  trace_batch_size = 1
+)
 mu_plot_draws_10 <- calculate(mu_plot,
-                              values = draws,
-                              trace_batch_size = 10)
+  values = draws,
+  trace_batch_size = 10
+)
 mu_plot_draws_inf <- calculate(mu_plot,
-                               values = draws,
-                               trace_batch_size = Inf)
-
+  values = draws,
+  trace_batch_size = Inf
+)
 }
 }
