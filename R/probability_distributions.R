@@ -1650,7 +1650,6 @@ zero_inflated_negative_binomial <- function (theta, size, prob, dim = NULL)
   distrib('zero_inflated_negative_binomial', theta, size, prob, dim)
 
 
-
 #' @rdname distributions
 #' @export
 gamma <- function(shape, rate, dim = NULL, truncation = c(0, Inf))
