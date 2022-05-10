@@ -249,7 +249,7 @@ dag_class <- R6Class(
         ))
       } else {
         shape <- shape(NULL, length(vals))
-        # NOTE on TF1 v 2
+        # TF1/2 NOTE
         # defining an empty/unknown thing
         # so in TF2, we might not need to define a free state, we can
         # define a function that returns these pieces of information

@@ -45,7 +45,7 @@ Imports:
     progress (>= 1.2.0),
     R6,
     reticulate (>= 1.19.0),
-    tensorflow (>= 2.7.0),
+    tensorflow (>= 2.8.0),
     yesno
 Suggests:
     bayesplot,
