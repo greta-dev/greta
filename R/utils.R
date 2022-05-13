@@ -61,12 +61,12 @@ have_tfp <- function() {
 have_tf <- function() {
   is_tf_available <- reticulate::py_module_available("tensorflow")
 
-  if (is_tf_available) {
-
-    tf_version <- tf$`__version__`
-    is_tf_available <- utils::compareVersion("2.6.0", tf_version) == 0
-
-  }
+  # if (is_tf_available) {
+  #
+  #   tf_version <- tf$`__version__`
+  #   is_tf_available <- utils::compareVersion("2.6.0", tf_version) == 0
+  #
+  # }
 
   return(is_tf_available)
 
@@ -757,13 +757,13 @@ other_install_fail_msg <- function(error_passed){
       "{.code reticulate::install_miniconda()}",
       "Then:",
       "{.code reticulate::conda_create(envname = 'greta-env', \\
-      python_version = '3.7')}",
+      python_version = '3.8')}",
       "Then:",
       "{.code reticulate::py_install(
         packages = c(
           'numpy',
-          'tensorflow==2.6.0',
-          'tensorflow-probability==0.14.1'
+          'tensorflow',
+          'tensorflow-probability'
           ),
         pip = TRUE
         )}",
@@ -786,13 +786,13 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     "{.code reticulate::install_miniconda()}",
     "Then:",
     "{.code reticulate::conda_create(envname = 'greta-env', \\
-        python_version = '3.7')}",
+        python_version = '3.8')}",
     "Then:",
     "{.code reticulate::py_install(
         packages = c(
           'numpy',
-          'tensorflow==2.6.0',
-          'tensorflow-probability==0.14.1'
+          'tensorflow',
+          'tensorflow-probability'
           ),
         pip = TRUE
         )}",
@@ -888,17 +888,17 @@ greta_sitrep <- function(){
 
   check_if_software_available(software_available = have_python(),
                               version = reticulate::py_version(),
-                              ideal_version = "3.8",
+                              ideal_version = NULL,
                               software_name = "python")
 
   check_if_software_available(software_available = have_tf(),
                               version = version_tf(),
-                              ideal_version = "2.6.0",
+                              ideal_version = NULL,
                               software_name = "TensorFlow")
 
   check_if_software_available(software_available = have_tfp(),
                               version = version_tfp(),
-                              ideal_version = "0.14.1",
+                              ideal_version = NULL,
                               software_name = "TensorFlow Probability")
 
   check_if_software_available(software_available = have_greta_conda_env(),
@@ -926,7 +926,7 @@ greta_sitrep <- function(){
       paste0(version_tfp())
     ),
     ideal = c(
-      "3.7",
+      "3.8",
       "2.6.0",
       "0.14.1"
     )
