@@ -644,7 +644,7 @@ sampler <- R6Class(
         # NOTE it looks like the `seed`
         # argument now gets passed through to `sample_chain`
         # need to work out how to get the new
-        # sampler_batch() to run as a TF functionm
+        # sampler_batch() to run as a TF function
         # and to do that we need to work out how
         # to get the free state
         sampler_batch <- tfp$mcmc$sample_chain(
@@ -825,6 +825,9 @@ hmc_sampler <- R6Class(
           shape = shape(dim(free_state)[[2]])
         )
       )
+      # TF1/2 note
+        # where is "free_state" pulled from, given that it is the
+        # argument to this function, "generate_log_prob_function" ?
       # log probability function
       tfe$log_prob_fun <- dag$generate_log_prob_function()
 

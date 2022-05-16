@@ -65,6 +65,9 @@ dag_class <- R6Class(
       with(self$tf_graph$as_default(), expr)
     },
 
+    # TF1/2
+      # so it seems we won't really need to be using the tf_run function
+      # anymore as these things will just be tensorflow objects?
     # execute an expression in the tensorflow environment
     tf_run = function(expr, as_text = FALSE) {
       tfe <- self$tf_environment
@@ -80,6 +83,9 @@ dag_class <- R6Class(
       self$on_graph(with(tfe, eval(expr)))
     },
 
+    # TF1/2
+      # similarly we should be able to just avoid using this and instead
+      # wrap things up in tensorflow functions?
     # sess$run() an expression in the tensorflow environment, with the feed dict
     tf_sess_run = function(expr, as_text = FALSE) {
       if (!as_text) {
