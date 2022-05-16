@@ -28,7 +28,7 @@ module <- function(..., sort = TRUE) {
 #' @importFrom reticulate conda_binary
 have_conda <- function() {
   conda_bin <- tryCatch(reticulate::conda_binary("auto"),
-    error = function(e) NULL
+                        error = function(e) NULL
   )
   !is.null(conda_bin)
 }
@@ -60,13 +60,6 @@ have_tfp <- function() {
 #' @importFrom reticulate py_module_available
 have_tf <- function() {
   is_tf_available <- reticulate::py_module_available("tensorflow")
-
-  # if (is_tf_available) {
-  #
-  #   tf_version <- tf$`__version__`
-  #   is_tf_available <- utils::compareVersion("2.6.0", tf_version) == 0
-  #
-  # }
 
   return(is_tf_available)
 
@@ -419,36 +412,36 @@ palettize <- function(base_colour) {
 # colour scheme for plotting
 #' @importFrom grDevices col2rgb
 greta_col <- function(which = c(
-                        "main",
-                        "dark",
-                        "light",
-                        "lighter",
-                        "super_light"
-                      ),
-                      colour = "#996bc7") {
+  "main",
+  "dark",
+  "light",
+  "lighter",
+  "super_light"
+),
+colour = "#996bc7") {
 
   # tests if a color encoded as string can be converted to RGB
   tryCatch(
     is.matrix(grDevices::col2rgb(colour)),
     error = function(e) {
       msg <- cli::format_error(
-          "Invalid colour: {colour}"
+        "Invalid colour: {colour}"
       )
       stop(
         msg,
         call. = FALSE
-        )
+      )
     }
   )
 
   which <- match.arg(which)
   pal <- palettize(colour)
   switch(which,
-    dark = pal(0.45), # 45%
-    main = pal(0.55), # 55%
-    light = pal(0.65), # 65%ish
-    lighter = pal(0.85), # 85%ish
-    super_light = pal(0.95)
+         dark = pal(0.45), # 45%
+         main = pal(0.55), # 55%
+         light = pal(0.65), # 65%ish
+         lighter = pal(0.85), # 85%ish
+         super_light = pal(0.95)
   ) # 95%ish
 }
 
@@ -469,23 +462,23 @@ all_greta_arrays <- function(env = parent.frame(),
   all_objects <- list()
   for (name in all_object_names) {
     all_objects[[name]] <- tryCatch(get(name, envir = env),
-      error = function(e) NULL
+                                    error = function(e) NULL
     )
   }
 
   # find the greta arrays
   is_greta_array <- vapply(all_objects,
-    inherits,
-    "greta_array",
-    FUN.VALUE = FALSE
+                           inherits,
+                           "greta_array",
+                           FUN.VALUE = FALSE
   )
   all_arrays <- all_objects[is_greta_array]
 
   # optionally strip out the data arrays
   if (!include_data) {
     is_data <- vapply(all_arrays,
-      function(x) inherits(get_node(x), "data_node"),
-      FUN.VALUE = FALSE
+                      function(x) inherits(get_node(x), "data_node"),
+                      FUN.VALUE = FALSE
     )
     all_arrays <- all_arrays[!is_data]
   }
@@ -512,9 +505,9 @@ cleanly <- function(expr) {
 
     # check for known numerical errors
     numerical_errors <- vapply(greta_stash$numerical_messages,
-      grepl,
-      res$message,
-      FUN.VALUE = 0
+                               grepl,
+                               res$message,
+                               FUN.VALUE = 0
     ) == 1
 
     # if it was just a numerical error, quietly return a bad value
@@ -528,7 +521,7 @@ cleanly <- function(expr) {
       stop(
         msg,
         call. = FALSE
-        )
+      )
     }
   }
 
@@ -546,9 +539,9 @@ prepare_draws <- function(draws, thin = 1) {
 
 build_sampler <- function(initial_values, sampler, model, seed = get_seed()) {
   sampler$class$new(initial_values,
-    model,
-    sampler$parameters,
-    seed = seed
+                    model,
+                    sampler$parameters,
+                    seed = seed
   )
 }
 
@@ -838,6 +831,13 @@ check_if_software_available <- function(software_available,
   }
 
   if (software_available) {
+
+    if (is.null(ideal_version) & !is.null(version)){
+      cli::cli_process_done(
+        msg_done = "{.pkg {software_name}} (v{version}) available"
+      )
+    }
+
     # if it has a version and ideal version
     if (!is.null(version) & !is.null(ideal_version)){
       version_chr <- paste0(version)
@@ -845,7 +845,7 @@ check_if_software_available <- function(software_available,
 
       if (version_match){
         cli::cli_process_done(
-          msg_done = "{.pkg {software_name}} (version {version}) available"
+          msg_done = "{.pkg {software_name}} (v{version}) available"
         )
       }
       if (!version_match){
@@ -866,9 +866,9 @@ check_if_software_available <- function(software_available,
 
 compare_version_vec <- function(current,ideal){
   compareVersion(
-      paste0(current),
-      ideal
-    )
+    paste0(current),
+    ideal
+  )
 }
 
 
@@ -888,17 +888,14 @@ greta_sitrep <- function(){
 
   check_if_software_available(software_available = have_python(),
                               version = reticulate::py_version(),
-                              ideal_version = NULL,
                               software_name = "python")
 
   check_if_software_available(software_available = have_tf(),
                               version = version_tf(),
-                              ideal_version = NULL,
                               software_name = "TensorFlow")
 
   check_if_software_available(software_available = have_tfp(),
                               version = version_tfp(),
-                              ideal_version = NULL,
                               software_name = "TensorFlow Probability")
 
   check_if_software_available(software_available = have_greta_conda_env(),
@@ -914,27 +911,28 @@ greta_sitrep <- function(){
   if (!all(software_available)) {
     check_tf_version("warn")
   } else if (all(software_available)) {
-  software_version <- data.frame(
-    software = c(
-      "python",
-      "tf",
-      "tfp"
-    ),
-    current = c(
-      paste0(reticulate::py_version()),
-      paste0(version_tf()),
-      paste0(version_tfp())
-    ),
-    ideal = c(
-      "3.8",
-      "2.6.0",
-      "0.14.1"
+    software_version <- data.frame(
+      software = c(
+        "python",
+        "tf",
+        "tfp"
+      ),
+      current = c(
+        paste0(reticulate::py_version()),
+        paste0(version_tf()),
+        paste0(version_tfp())
+      ),
+      # versions must be at least this version
+      ideal = c(
+        "3.8",
+        "2.0.0",
+        "0.14.0"
+      )
     )
-  )
     software_version$match <- c(
-      compareVersion(software_version$current[1], software_version$ideal[1]) == 0,
-      compareVersion(software_version$current[2], software_version$ideal[2]) == 0,
-      compareVersion(software_version$current[3], software_version$ideal[3]) == 0
+      compareVersion(software_version$current[1], software_version$ideal[1]) >= 0,
+      compareVersion(software_version$current[2], software_version$ideal[2]) >= 0,
+      compareVersion(software_version$current[3], software_version$ideal[3]) >= 0
     )
 
     if (all(software_version$match)){

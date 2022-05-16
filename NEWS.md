@@ -1,5 +1,13 @@
 # greta (development version)
 
+## Features
+
+* This version of greta uses Tensorflow 2.0.0, which comes with it a host of new very exciting features!
+
+## Minor
+
+* `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.
+
 # greta 0.4.2
 
 ## Fixes

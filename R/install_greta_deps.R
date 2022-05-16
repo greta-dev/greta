@@ -1,10 +1,11 @@
 #' Install Python dependencies for greta
 #'
 #' This is a helper function to install Python dependencies needed. This
-#'   includes Tensorflow version 2.6.0, Tensorflow Probability 0.14.1, and the
-#'   latest verison of numpy version (at the time of writing, 1.22.0). These
-#'   Python modules will be installed into a virtual or conda environment,
-#'   named "greta-env". Note that "virtualenv" is not available on Windows.
+#'   includes the latest version of Tensorflow version (2.8.0 or higher),
+#'   Tensorflow Probability 0.16.0 (or higher), and the latest verison of
+#'   numpy (1.21.0 or higher). These Python modules will be installed into a
+#'   virtual or conda environment, named "greta-env". Note that "virtualenv"
+#'   is not available on Windows.
 #'
 #' @param method Installation method ("virtualenv" or "conda")
 #' @param conda The path to a `conda` executable. Use `"auto"` to allow
@@ -18,8 +19,8 @@
 #'     reticulate::py_install(
 #'         packages = c(
 #'           'numpy',
-#'           'tensorflow==2.6.0',
-#'           'tensorflow-probability==0.14.1'
+#'           'tensorflow',
+#'           'tensorflow-probability'
 #'           ),
 #'           pip = TRUE
 #'        )
@@ -70,8 +71,8 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     reticulate::py_install(
       packages = c(
         'numpy',
-        'tensorflow==2.6.0',
-        'tensorflow-probability==0.14.1'
+        'tensorflow',
+        'tensorflow-probability'
       ),
       pip = TRUE
     )

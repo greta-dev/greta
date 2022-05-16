@@ -24,16 +24,17 @@ installation component times out and exits. Default is 5 minutes per
 installation component.}
 
 \item{manual}{logical. Skip the fancy installation and just run:
-\code{reticulate::py_install( packages = c( 'numpy', 'tensorflow==2.6.0', 'tensorflow-probability==0.14.1' ), pip = TRUE )}}
+\code{reticulate::py_install( packages = c( 'numpy', 'tensorflow', 'tensorflow-probability' ), pip = TRUE )}}
 
 \item{...}{Optional arguments, reserved for future expansion.}
 }
 \description{
 This is a helper function to install Python dependencies needed. This
-includes Tensorflow version 2.6.0, Tensorflow Probability 0.14.0, and the
-latest verison of numpy version (at the time of writing, 1.22.0). These
-Python modules will be installed into a virtual or conda environment,
-named "greta-env". Note that "virtualenv" is not available on Windows.
+includes the latest version of Tensorflow version (2.8.0 or higher),
+Tensorflow Probability 0.16.0 (or higher), and the latest verison of
+numpy (1.21.0 or higher). These Python modules will be installed into a
+virtual or conda environment, named "greta-env". Note that "virtualenv"
+is not available on Windows.
 }
 \note{
 This will automatically install Miniconda (a minimal version of the
@@ -43,7 +44,7 @@ package versions, and forcibly switch over to using that conda environment.
 
 If you don't want to use conda or the "greta-env" conda environment, you
 can install these specific versions of tensorflow (version 2.6.0), and
-tensorflow-probability (version 0.14.0), and ensure that the python
+tensorflow-probability (version 0.14.1), and ensure that the python
 environment that is initialised in this R session has these versions
 installed. This is now always straightforward, so we recommend installing
 the python packages using \code{install_greta_deps()} for most users.
