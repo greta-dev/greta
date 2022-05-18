@@ -4,6 +4,30 @@
 
 * This version of greta uses Tensorflow 2.0.0, which comes with it a host of new very exciting features!
 
+### Optimizers
+
+The latest interface to optimizers in tensorflow are now used, these changes are described.
+
+* `gradient_descent` gains `momentum` and `nesterov` arguments, as described here in [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/SGD)
+* `adagrad` gains [`epsilon` argument](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adagrad)
+* removes `momentum` optimizer, as this has been folded into `gradient_descent` arguments
+* Adds `amsgrad` argument to `adam` optimizer, as described in [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam)
+* Adds `adamax` optimiser, see [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adamax)
+* Adds `l2_shrinkage_regularization_strength` and `beta` arguments to `ftrl`
+  optimiser.
+* adds `nadam` optimiser - see [docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Nadam).
+* In `rms_prop` optimiser, changes `decay` parameter to `rho`, and adds `centered` parameter - see [docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/RMSprop)
+
+The following optimisers are removed, as they are no longer supported by Tensorflow:
+
+ * `powell()`
+ * `cg()`
+ * `newton_cg()`
+ * `l_bfgs_b()`
+ * `tnc()`
+ * `cobyla()`
+ * `slsqp()`
+
 ## Minor
 
 * `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.

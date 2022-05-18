@@ -5,16 +5,12 @@
 #' @description Functions to set up optimisers (which find parameters that
 #'   maximise the joint density of a model) and change their tuning parameters,
 #'   for use in [opt()]. For details of the algorithms and how to
-#'   tune them, see the
-#'   [SciPy
-#'    optimiser docs](https://docs.scipy.org/doc/scipy-1.8.0/html-scipyorg/reference/optimize.html#optimization) or the
-#'   [TensorFlow
-#'    optimiser docs](https://www.tensorflow.org/versions/r1.15/api_docs/python/tf/contrib).
+#'   tune them, see the [TensorFlow optimiser docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers), or the [Tensorflow Probability optimiser docs](https://www.tensorflow.org/probability/api_docs/python/tfp/optimizer).
 #'
 #' @details The optimisers `powell()`, `cg()`, `newton_cg()`,
 #'   `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()` are
-#'   deprecated. They will be removed in greta 0.4.0, since they will no longer
-#'   be available in TensorFlow 2.0, on which that version of greta will depend.
+#'   now defunct. They will error when called in greta 0.5.0. This are removed
+#'   because they are no longer available in TensorFlow 2.0.
 #'
 #' @return an `optimiser` object that can be passed to [opt()].
 #'
@@ -37,36 +33,19 @@
 NULL
 # nolint end
 
-# deprecate some optimisers
-optimiser_deprecation_warning <- function() {
-  msg <- cli::format_warning(
+# defunct some optimisers
+optimiser_defunct_error <- function() {
+  msg <- cli::format_error(
     c(
-      "This optimiser is deprecated and will be removed in {.pkg greta} 0.4.0.",
-      "Please use a different optimiser."
+      "This optimiser is defunct and has been removed in {.pkg greta} 0.5.0.",
+      "Please use a different optimiser.",
+      "See {.code ?optimisers} for more details on which optimizers are removed."
       )
   )
-  warning(
+  stop(
     msg,
     call. = FALSE
   )
-}
-
-# set up an optimiser object
-define_scipy_optimiser <- function(name,
-                                   method,
-                                   parameters = list(),
-                                   other_args = list(uses_callbacks = TRUE)) {
-  obj <- list(
-    name = name,
-    method = method,
-    parameters = parameters,
-    other_args = other_args,
-    class = scipy_optimiser
-  )
-
-  class_name <- glue::glue("{name}_optimiser")
-  class(obj) <- c(class_name, "optimiser")
-  obj
 }
 
 define_tf_optimiser <- function(name,
@@ -90,33 +69,9 @@ define_tf_optimiser <- function(name,
 #' @export
 #'
 nelder_mead <- function() {
-  define_scipy_optimiser(
+  define_tf_optimiser(
     name = "nelder_mead",
-    method = "Nelder-Mead"
-  )
-}
-
-#' @rdname optimisers
-#' @export
-#'
-powell <- function() {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "powell",
-    method = "Powell"
-  )
-}
-
-#' @rdname optimisers
-#' @export
-#'
-cg <- function() {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "cg",
-    method = "CG"
+    method = "tfp$optimizer$nelder_mead_minimize",
   )
 }
 
@@ -124,7 +79,7 @@ cg <- function() {
 #' @export
 #'
 bfgs <- function() {
-  define_scipy_optimiser(
+  define_tf_optimiser(
     name = "bfgs",
     method = "BFGS"
   )
@@ -133,87 +88,50 @@ bfgs <- function() {
 #' @rdname optimisers
 #' @export
 #'
+powell <- function() {
+  optimiser_defunct_error()
+}
+
+#' @rdname optimisers
+#' @export
+#'
+cg <- function() {
+  optimiser_defunct_error()
+}
+
+#' @rdname optimisers
+#' @export
+#'
 newton_cg <- function() {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "newton_cg",
-    method = "Newton-CG"
-  )
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
-#' @param maxcor maximum number of 'variable metric corrections' used to define
-#'   the approximation to the hessian matrix
-#' @param maxls maximum number of line search steps per iteration
-#'
-l_bfgs_b <- function(maxcor = 10, maxls = 20) {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "l_bfgs_b",
-    method = "L-BFGS-B",
-    parameters = list(
-      maxcor = as.integer(maxcor),
-      maxls = as.integer(maxls)
-    )
-  )
+l_bfgs_b <- function() {
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
-#' @param max_cg_it maximum number of hessian * vector evaluations per iteration
-#' @param stepmx maximum step for the line search
-#' @param rescale log10 scaling factor used to trigger rescaling of objective
-#'
-tnc <- function(max_cg_it = -1, stepmx = 0, rescale = -1) {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "tnc",
-    method = "TNC",
-    parameters = list(
-      maxCGit = as.integer(max_cg_it),
-      stepmx = stepmx,
-      rescale = rescale
-    )
-  )
+tnc <- function() {
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
-#' @param rhobeg reasonable initial changes to the variables
-#'
-#' @details The `cobyla()` does not provide information about the number of
-#'   iterations nor convergence, so these elements of the output are set to NA
-#'
-cobyla <- function(rhobeg = 1) {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "cobyla",
-    method = "COBYLA",
-    parameters = list(
-      rhobeg = rhobeg
-    ),
-    other_args = list(uses_callbacks = FALSE)
-  )
+cobyla <- function() {
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
 slsqp <- function() {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "slsqp",
-    method = "SLSQP"
-  )
+  optimiser_defunct_error()
 }
 
 
@@ -221,13 +139,21 @@ slsqp <- function() {
 #' @export
 #'
 #' @param learning_rate the size of steps (in parameter space) towards the
-#'   optimal value
-gradient_descent <- function(learning_rate = 0.01) {
+#'   optimal value. Default value 0.01
+#' @param momentum hyperparameter that accelerates gradient descent in the
+#'   relevant direction and dampens oscillations. Defaults to 0, which is
+#'   vanilla gradient descent.
+#' @param nesterov Whether to apply Nesterov momentum. Defaults to FALSE.
+gradient_descent <- function(learning_rate = 0.01,
+                             momentum = 0,
+                             nesterov = FALSE) {
   define_tf_optimiser(
     name = "gradient_descent",
-    method = "tf$compat$v1$train$GradientDescentOptimizer",
+    method = "tf$keras$optimizers$SGD",
     parameters = list(
-      learning_rate = learning_rate
+      learning_rate = learning_rate,
+      momentum = momentum,
+      nesterov = nesterov
     )
   )
 }
@@ -241,7 +167,7 @@ gradient_descent <- function(learning_rate = 0.01) {
 adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
   define_tf_optimiser(
     name = "adadelta",
-    method = "tf$compat$v1$train$AdadeltaOptimizer",
+    method = "tf$keras$optimizers$Adadelta",
     parameters = list(
       learning_rate = learning_rate,
       rho = rho,
@@ -257,13 +183,15 @@ adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
 #'   tune the algorithm
 #'
 adagrad <- function(learning_rate = 0.8,
-                    initial_accumulator_value = 0.1) {
+                    initial_accumulator_value = 0.1,
+                    epsilon = 1e-08) {
   define_tf_optimiser(
     name = "adagrad",
-    method = "tf$compat$v1$train$AdagradOptimizer",
+    method = "tf$keras$optimizers$Adagrad",
     parameters = list(
       learning_rate = learning_rate,
-      initial_accumulator_value = initial_accumulator_value
+      initial_accumulator_value = initial_accumulator_value,
+      epsilon = epsilon
     )
   )
 }
@@ -279,6 +207,9 @@ adagrad <- function(learning_rate = 0.8,
 #'   greater)
 #' @param l2_regularization_strength L2 regularisation coefficient (must be 0 or
 #'   greater)
+#'
+#' @note This optimizer isn't supported in TF2, so proceed with caution. See
+#'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/AdagradDAOptimizer) for more detail.
 #'
 adagrad_da <- function(learning_rate = 0.8,
                        global_step = 1L,
@@ -303,19 +234,25 @@ adagrad_da <- function(learning_rate = 0.8,
 #' @rdname optimisers
 #' @export
 #'
-#' @param momentum the momentum of the algorithm
-#' @param use_nesterov whether to use Nesterov momentum
+#' @param beta1 exponential decay rate for the 1st moment estimates
+#' @param beta2 exponential decay rate for the 2nd moment estimates
+#' @param amsgrad Boolean. Whether to apply AMSGrad variant of this algorithm
+#'   from the paper "On the Convergence of Adam and beyond". Defaults to FALSE.
 #'
-momentum <- function(learning_rate = 0.001,
-                     momentum = 0.9,
-                     use_nesterov = TRUE) {
+adam <- function(learning_rate = 0.1,
+                 beta1 = 0.9,
+                 beta2 = 0.999,
+                 amsgrad = FALSE,
+                 epsilon = 1e-08) {
   define_tf_optimiser(
-    name = "momentum",
-    method = "tf$compat$v1$train$MomentumOptimizer",
+    name = "adam",
+    method = "tf$keras$optimizers$Adam",
     parameters = list(
       learning_rate = learning_rate,
-      momentum = momentum,
-      use_nesterov = use_nesterov
+      beta1 = beta1,
+      beta2 = beta2,
+      epsilon = epsilon,
+      amsgrad = amsgrad
     )
   )
 }
@@ -323,20 +260,17 @@ momentum <- function(learning_rate = 0.001,
 #' @rdname optimisers
 #' @export
 #'
-#' @param beta1 exponential decay rate for the 1st moment estimates
-#' @param beta2 exponential decay rate for the 2nd moment estimates
-#'
-adam <- function(learning_rate = 0.1,
-                 beta1 = 0.9,
-                 beta2 = 0.999,
-                 epsilon = 1e-08) {
+adamax <- function(learning_rate = 0.001,
+                   beta_1 = 0.9,
+                   beta_2 = 0.999,
+                   epsilon = 1e-07){
   define_tf_optimiser(
-    name = "adam",
-    method = "tf$compat$v1$train$AdamOptimizer",
+    name = "adamax",
+    method = "tf$keras$optimizers$Adamax",
     parameters = list(
       learning_rate = learning_rate,
-      beta1 = beta1,
-      beta2 = beta2,
+      beta_1 = beta_1,
+      beta_2 = beta_2,
       epsilon = epsilon
     )
   )
@@ -346,27 +280,40 @@ adam <- function(learning_rate = 0.1,
 #' @export
 #'
 #' @param learning_rate_power power on the learning rate, must be 0 or less
+#' @param l2_shrinkage_regularization_strength A float value, must be greater
+#'   than or equal to zero. This differs from L2 above in that the L2 above is
+#'   a stabilization penalty, whereas this L2 shrinkage is a magnitude penalty.
+#'   When input is sparse shrinkage will only happen on the active weights.
+#' @param beta A float value, representing the beta value from the paper by
+#'   [McMahan et al 2013](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/41159.pdf). Defaults to 0
 #'
 ftrl <- function(learning_rate = 1,
                  learning_rate_power = -0.5,
                  initial_accumulator_value = 0.1,
                  l1_regularization_strength = 0,
-                 l2_regularization_strength = 0) {
+                 l2_regularization_strength = 0,
+                 l2_shrinkage_regularization_strength = 0,
+                 beta = 0) {
   define_tf_optimiser(
     name = "ftrl",
-    method = "tf$compat$v1$train$FtrlOptimizer",
+    method = "tf$keras$optimizers$Ftrl",
     parameters = list(
       learning_rate = learning_rate,
       learning_rate_power = learning_rate_power,
       initial_accumulator_value = initial_accumulator_value,
       l1_regularization_strength = l1_regularization_strength,
-      l2_regularization_strength = l2_regularization_strength
+      l2_regularization_strength = l2_regularization_strength,
+      l2_shrinkage_regularization_strength = l2_shrinkage_regularization_strength,
+      beta = beta
     )
   )
 }
 
 #' @rdname optimisers
 #' @export
+#'
+#' @note This optimizer isn't supported in TF2, so proceed with caution. See
+#'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer) for more detail.
 #'
 proximal_gradient_descent <- function(learning_rate = 0.01,
                                       l1_regularization_strength = 0,
@@ -384,6 +331,10 @@ proximal_gradient_descent <- function(learning_rate = 0.01,
 
 #' @rdname optimisers
 #' @export
+#'
+#' @note This optimizer isn't supported in TF2, so proceed with caution. See
+#'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer) for more detail.
+
 #'
 proximal_adagrad <- function(learning_rate = 1,
                              initial_accumulator_value = 0.1,
@@ -404,20 +355,45 @@ proximal_adagrad <- function(learning_rate = 1,
 #' @rdname optimisers
 #' @export
 #'
-#' @param decay discounting factor for the gradient
-#'
-rms_prop <- function(learning_rate = 0.1,
-                     decay = 0.9,
-                     momentum = 0,
-                     epsilon = 1e-10) {
+nadam <- function(learning_rate = 0.001,
+                  beta_1 = 0.9,
+                  beta_2 = 0.999,
+                  epsilon = 1e-07){
+
   define_tf_optimiser(
-    name = "rms_prop",
-    method = "tf$compat$v1$train$RMSPropOptimizer",
+    name = "nadam",
+    method = "tf$keras$optimizers$Nadam",
     parameters = list(
       learning_rate = learning_rate,
-      decay = decay,
-      momentum = momentum,
+      beta_1 = beta_1,
+      beta_2 = beta_2,
       epsilon = epsilon
+    )
+  )
+
+}
+
+#' @rdname optimisers
+#' @export
+#'
+#' @param centered Boolean. If TRUE, gradients are normalized by the estimated
+#'   variance of the gradient; if FALSE, by the uncentered second moment.
+#'   Setting this to TRUE may help with training, but is slightly more
+#'   expensive in terms of computation and memory. Defaults to FALSE.
+rms_prop <- function(learning_rate = 0.1,
+                     rho = 0.9,
+                     momentum = 0,
+                     epsilon = 1e-10,
+                     centered = FALSE) {
+  define_tf_optimiser(
+    name = "rms_prop",
+    method = "tf$keras$optimizers$RMSprop",
+    parameters = list(
+      learning_rate = learning_rate,
+      rho = rho,
+      momentum = momentum,
+      epsilon = epsilon,
+      centered = centered
     )
   )
 }
