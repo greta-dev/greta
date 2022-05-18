@@ -13,7 +13,9 @@ The latest interface to optimizers in tensorflow are now used, these changes are
 * removes `momentum` optimizer, as this has been folded into `gradient_descent` arguments
 * Adds `amsgrad` argument to `adam` optimizer, as described in [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam)
 * Adds `adamax` optimiser, see [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adamax)
-* 
+* Adds `l2_shrinkage_regularization_strength` and `beta` arguments to `ftrl`
+  optimiser.
+
 
 ## Minor
 

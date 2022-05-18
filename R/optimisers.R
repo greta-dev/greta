@@ -362,12 +362,20 @@ adamax <- function(learning_rate = 0.001,
 #' @export
 #'
 #' @param learning_rate_power power on the learning rate, must be 0 or less
+#' @param l2_shrinkage_regularization_strength A float value, must be greater
+#'   than or equal to zero. This differs from L2 above in that the L2 above is
+#'   a stabilization penalty, whereas this L2 shrinkage is a magnitude penalty.
+#'   When input is sparse shrinkage will only happen on the active weights.
+#' @param beta A float value, representing the beta value from the paper by
+#'   [McMahan et al 2013](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/41159.pdf). Defaults to 0
 #'
 ftrl <- function(learning_rate = 1,
                  learning_rate_power = -0.5,
                  initial_accumulator_value = 0.1,
                  l1_regularization_strength = 0,
-                 l2_regularization_strength = 0) {
+                 l2_regularization_strength = 0,
+                 l2_shrinkage_regularization_strength = 0,
+                 beta = 0) {
   define_tf_optimiser(
     name = "ftrl",
     method = "tf$compat$v1$train$FtrlOptimizer",
@@ -376,7 +384,9 @@ ftrl <- function(learning_rate = 1,
       learning_rate_power = learning_rate_power,
       initial_accumulator_value = initial_accumulator_value,
       l1_regularization_strength = l1_regularization_strength,
-      l2_regularization_strength = l2_regularization_strength
+      l2_regularization_strength = l2_regularization_strength,
+      l2_shrinkage_regularization_strength = l2_shrinkage_regularization_strength,
+      beta = beta
     )
   )
 }
