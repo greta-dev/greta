@@ -15,7 +15,8 @@ The latest interface to optimizers in tensorflow are now used, these changes are
 * Adds `adamax` optimiser, see [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adamax)
 * Adds `l2_shrinkage_regularization_strength` and `beta` arguments to `ftrl`
   optimiser.
-
+* adds `nadam` optimiser - see [docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Nadam).
+* 
 
 ## Minor
 

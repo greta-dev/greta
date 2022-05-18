@@ -437,6 +437,27 @@ proximal_adagrad <- function(learning_rate = 1,
 #' @rdname optimisers
 #' @export
 #'
+nadam <- function(learning_rate = 0.001,
+                  beta_1 = 0.9,
+                  beta_2 = 0.999,
+                  epsilon = 1e-07){
+
+  define_tf_optimiser(
+    name = "nadam",
+    method = "tf$keras$optimizers$Nadam",
+    parameters = list(
+      learning_rate = learning_rate,
+      beta_1 = beta_1,
+      beta_2 = beta_2,
+      epsilon = epsilon
+    )
+  )
+
+}
+
+#' @rdname optimisers
+#' @export
+#'
 #' @param decay discounting factor for the gradient
 #'
 rms_prop <- function(learning_rate = 0.1,
