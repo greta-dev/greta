@@ -414,6 +414,10 @@ proximal_gradient_descent <- function(learning_rate = 0.01,
 #' @rdname optimisers
 #' @export
 #'
+#' @note This optimizer isn't supported in TF2, so proceed with caution. See
+#'  the [TF docs](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer) for more detail.
+
+#'
 proximal_adagrad <- function(learning_rate = 1,
                              initial_accumulator_value = 0.1,
                              l1_regularization_strength = 0,
