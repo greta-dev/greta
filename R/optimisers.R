@@ -5,16 +5,12 @@
 #' @description Functions to set up optimisers (which find parameters that
 #'   maximise the joint density of a model) and change their tuning parameters,
 #'   for use in [opt()]. For details of the algorithms and how to
-#'   tune them, see the
-#'   [SciPy
-#'    optimiser docs](https://docs.scipy.org/doc/scipy-1.8.0/html-scipyorg/reference/optimize.html#optimization) or the
-#'   [TensorFlow
-#'    optimiser docs](https://www.tensorflow.org/versions/r1.15/api_docs/python/tf/contrib).
+#'   tune them, see the [TensorFlow optimiser docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers), or the [Tensorflow Probability optimiser docs](https://www.tensorflow.org/probability/api_docs/python/tfp/optimizer).
 #'
 #' @details The optimisers `powell()`, `cg()`, `newton_cg()`,
 #'   `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()` are
-#'   deprecated. They will be removed in greta 0.4.0, since they will no longer
-#'   be available in TensorFlow 2.0, on which that version of greta will depend.
+#'   now defunct. They will error when called in greta 0.5.0. This are removed
+#'   because they are no longer available in TensorFlow 2.0.
 #'
 #' @return an `optimiser` object that can be passed to [opt()].
 #'
@@ -37,50 +33,19 @@
 NULL
 # nolint end
 
-# deprecate some optimisers
-optimiser_deprecation_warning <- function() {
-  msg <- cli::format_warning(
-    c(
-      "This optimiser is deprecated and will be removed in {.pkg greta} 0.4.0.",
-      "Please use a different optimiser."
-      )
-  )
-  warning(
-    msg,
-    call. = FALSE
-  )
-}
-
 # defunct some optimisers
 optimiser_defunct_error <- function() {
   msg <- cli::format_error(
     c(
       "This optimiser is defunct and has been removed in {.pkg greta} 0.5.0.",
-      "Please use a different optimiser."
+      "Please use a different optimiser.",
+      "See {.code ?optimisers} for more details on which optimizers are removed."
       )
   )
   stop(
     msg,
     call. = FALSE
   )
-}
-
-# set up an optimiser object
-define_scipy_optimiser <- function(name,
-                                   method,
-                                   parameters = list(),
-                                   other_args = list(uses_callbacks = TRUE)) {
-  obj <- list(
-    name = name,
-    method = method,
-    parameters = parameters,
-    other_args = other_args,
-    class = scipy_optimiser
-  )
-
-  class_name <- glue::glue("{name}_optimiser")
-  class(obj) <- c(class_name, "optimiser")
-  obj
 }
 
 define_tf_optimiser <- function(name,
@@ -113,18 +78,18 @@ nelder_mead <- function() {
 #' @rdname optimisers
 #' @export
 #'
-powell <- function() {
-  optimiser_defunct_error()
-}
-
-#' @rdname optimisers
-#' @export
-#'
 bfgs <- function() {
   define_tf_optimiser(
     name = "bfgs",
     method = "BFGS"
   )
+}
+
+#' @rdname optimisers
+#' @export
+#'
+powell <- function() {
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
