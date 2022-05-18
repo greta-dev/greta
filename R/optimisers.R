@@ -291,6 +291,8 @@ adagrad <- function(learning_rate = 0.8,
 #' @param l2_regularization_strength L2 regularisation coefficient (must be 0 or
 #'   greater)
 #'
+#' @note Not available on TF2, so this may not work. Use at your own risk.
+#'
 adagrad_da <- function(learning_rate = 0.8,
                        global_step = 1L,
                        initial_gradient_squared_accumulator_value = 0.1,
