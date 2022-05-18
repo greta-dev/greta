@@ -8,8 +8,9 @@
 
 The latest interface to optimizers in tensorflow are now used, these changes are described.
 
-* `gradient_descent` gains `momentum` and `nesterov` arguments, as described here: https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/SGD
-* `adagrad` gains `epsilon` argument: https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adagrad
+* `gradient_descent` gains `momentum` and `nesterov` arguments, as described here in [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/SGD)
+* `adagrad` gains [`epsilon` argument](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adagrad)
+* removes `momentum` optimizer, as this has been folded into `gradient_descent` arguments
 * 
 
 ## Minor

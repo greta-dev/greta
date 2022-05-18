@@ -316,26 +316,6 @@ adagrad_da <- function(learning_rate = 0.8,
 #' @rdname optimisers
 #' @export
 #'
-#' @param momentum the momentum of the algorithm
-#' @param use_nesterov whether to use Nesterov momentum
-#'
-momentum <- function(learning_rate = 0.001,
-                     momentum = 0.9,
-                     use_nesterov = TRUE) {
-  define_tf_optimiser(
-    name = "momentum",
-    method = "tf$compat$v1$train$MomentumOptimizer",
-    parameters = list(
-      learning_rate = learning_rate,
-      momentum = momentum,
-      use_nesterov = use_nesterov
-    )
-  )
-}
-
-#' @rdname optimisers
-#' @export
-#'
 #' @param beta1 exponential decay rate for the 1st moment estimates
 #' @param beta2 exponential decay rate for the 2nd moment estimates
 #'
