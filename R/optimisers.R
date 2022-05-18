@@ -250,7 +250,7 @@ gradient_descent <- function(learning_rate = 0.01,
 adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
   define_tf_optimiser(
     name = "adadelta",
-    method = "tf$compat$v1$train$AdadeltaOptimizer",
+    method = "tf$keras$optimizers$Adadelta",
     parameters = list(
       learning_rate = learning_rate,
       rho = rho,
