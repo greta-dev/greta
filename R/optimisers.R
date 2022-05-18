@@ -221,13 +221,22 @@ slsqp <- function() {
 #' @export
 #'
 #' @param learning_rate the size of steps (in parameter space) towards the
-#'   optimal value
-gradient_descent <- function(learning_rate = 0.01) {
+#'   optimal value. Default value 0.01
+#' @param momentum hyperparameter that accelerates gradient descent in the
+#'   relevant direction and dampens oscillations. Defaults to 0, which is
+#'   vanilla gradient descent.
+#' @param nesterov Whether to apply Nesterov momentum. Defaults to FALSE.
+#' @param epsilon
+gradient_descent <- function(learning_rate = 0.01,
+                             momentum = 0,
+                             nesterov = FALSE) {
   define_tf_optimiser(
     name = "gradient_descent",
-    method = "tf$compat$v1$train$GradientDescentOptimizer",
+    method = "tf$keras$optimizers$SGD",
     parameters = list(
-      learning_rate = learning_rate
+      learning_rate = learning_rate,
+      momentum = momentum,
+      nesterov = nesterov
     )
   )
 }

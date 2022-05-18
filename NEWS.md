@@ -4,6 +4,13 @@
 
 * This version of greta uses Tensorflow 2.0.0, which comes with it a host of new very exciting features!
 
+### Optimizers
+
+The latest interface to optimizers in tensorflow are now used, these changes are described.
+
+* `gradient_descent` gains `momentum` and `nesterov` arguments, as described here: https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/SGD
+* 
+
 ## Minor
 
 * `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.
