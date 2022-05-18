@@ -51,6 +51,20 @@ optimiser_deprecation_warning <- function() {
   )
 }
 
+# defunct some optimisers
+optimiser_defunct_error <- function() {
+  msg <- cli::format_error(
+    c(
+      "This optimiser is defunct and has been removed in {.pkg greta} 0.5.0.",
+      "Please use a different optimiser."
+      )
+  )
+  stop(
+    msg,
+    call. = FALSE
+  )
+}
+
 # set up an optimiser object
 define_scipy_optimiser <- function(name,
                                    method,
@@ -90,9 +104,9 @@ define_tf_optimiser <- function(name,
 #' @export
 #'
 nelder_mead <- function() {
-  define_scipy_optimiser(
+  define_tf_optimiser(
     name = "nelder_mead",
-    method = "Nelder-Mead"
+    method = "tfp$optimizer$nelder_mead_minimize",
   )
 }
 
@@ -100,31 +114,14 @@ nelder_mead <- function() {
 #' @export
 #'
 powell <- function() {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "powell",
-    method = "Powell"
-  )
-}
-
-#' @rdname optimisers
-#' @export
-#'
-cg <- function() {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "cg",
-    method = "CG"
-  )
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
 bfgs <- function() {
-  define_scipy_optimiser(
+  define_tf_optimiser(
     name = "bfgs",
     method = "BFGS"
   )
@@ -133,87 +130,43 @@ bfgs <- function() {
 #' @rdname optimisers
 #' @export
 #'
+cg <- function() {
+  optimiser_defunct_error()
+}
+
+#' @rdname optimisers
+#' @export
+#'
 newton_cg <- function() {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "newton_cg",
-    method = "Newton-CG"
-  )
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
-#' @param maxcor maximum number of 'variable metric corrections' used to define
-#'   the approximation to the hessian matrix
-#' @param maxls maximum number of line search steps per iteration
-#'
-l_bfgs_b <- function(maxcor = 10, maxls = 20) {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "l_bfgs_b",
-    method = "L-BFGS-B",
-    parameters = list(
-      maxcor = as.integer(maxcor),
-      maxls = as.integer(maxls)
-    )
-  )
+l_bfgs_b <- function() {
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
-#' @param max_cg_it maximum number of hessian * vector evaluations per iteration
-#' @param stepmx maximum step for the line search
-#' @param rescale log10 scaling factor used to trigger rescaling of objective
-#'
-tnc <- function(max_cg_it = -1, stepmx = 0, rescale = -1) {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "tnc",
-    method = "TNC",
-    parameters = list(
-      maxCGit = as.integer(max_cg_it),
-      stepmx = stepmx,
-      rescale = rescale
-    )
-  )
+tnc <- function() {
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
-#' @param rhobeg reasonable initial changes to the variables
-#'
-#' @details The `cobyla()` does not provide information about the number of
-#'   iterations nor convergence, so these elements of the output are set to NA
-#'
-cobyla <- function(rhobeg = 1) {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "cobyla",
-    method = "COBYLA",
-    parameters = list(
-      rhobeg = rhobeg
-    ),
-    other_args = list(uses_callbacks = FALSE)
-  )
+cobyla <- function() {
+  optimiser_defunct_error()
 }
 
 #' @rdname optimisers
 #' @export
 #'
 slsqp <- function() {
-  optimiser_deprecation_warning()
-
-  define_scipy_optimiser(
-    name = "slsqp",
-    method = "SLSQP"
-  )
+  optimiser_defunct_error()
 }
 
 
@@ -226,7 +179,6 @@ slsqp <- function() {
 #'   relevant direction and dampens oscillations. Defaults to 0, which is
 #'   vanilla gradient descent.
 #' @param nesterov Whether to apply Nesterov momentum. Defaults to FALSE.
-#' @param epsilon
 gradient_descent <- function(learning_rate = 0.01,
                              momentum = 0,
                              nesterov = FALSE) {
