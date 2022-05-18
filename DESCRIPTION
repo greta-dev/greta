@@ -111,37 +111,6 @@ Collate:
     'callbacks.R'
     'simulate.R'
     'chol2symm.R'
-<<<<<<< HEAD
-Imports:
-    R6,
-    tensorflow (>= 1.13.0),
-    reticulate,
-    progress (>= 1.2.0),
-    future,
-    coda,
-    abind,
-    methods
-Suggests:
-    knitr,
-    rmarkdown,
-    DiagrammeR,
-    bayesplot,
-    lattice,
-    testthat,
-    mvtnorm,
-    MCMCpack,
-    rmutil,
-    extraDistr,
-    truncdist,
-    cramer,
-    tidyverse,
-    fields,
-    MASS,
-    spelling
-VignetteBuilder: knitr
-RoxygenNote: 7.1.0
-Language: en-GB
-=======
     'install_greta_deps.R'
     'conda_greta_env.R'
     'greta_stash.R'
@@ -155,4 +124,4 @@ Language: en-GB
     'testthat-helpers.R'
     'zzz.R'
     'internals.R'
->>>>>>> upstream/master
+
