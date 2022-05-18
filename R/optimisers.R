@@ -342,6 +342,25 @@ adam <- function(learning_rate = 0.1,
 #' @rdname optimisers
 #' @export
 #'
+adamax <- function(learning_rate = 0.001,
+                   beta_1 = 0.9,
+                   beta_2 = 0.999,
+                   epsilon = 1e-07){
+  define_tf_optimiser(
+    name = "adamax",
+    method = "tf$keras$optimizers$Adamax",
+    parameters = list(
+      learning_rate = learning_rate,
+      beta_1 = beta_1,
+      beta_2 = beta_2,
+      epsilon = epsilon
+    )
+  )
+}
+
+#' @rdname optimisers
+#' @export
+#'
 #' @param learning_rate_power power on the learning rate, must be 0 or less
 #'
 ftrl <- function(learning_rate = 1,

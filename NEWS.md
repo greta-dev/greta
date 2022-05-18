@@ -12,6 +12,7 @@ The latest interface to optimizers in tensorflow are now used, these changes are
 * `adagrad` gains [`epsilon` argument](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adagrad)
 * removes `momentum` optimizer, as this has been folded into `gradient_descent` arguments
 * Adds `amsgrad` argument to `adam` optimizer, as described in [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam)
+* Adds `adamax` optimiser, see [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adamax)
 * 
 
 ## Minor
