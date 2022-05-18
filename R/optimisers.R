@@ -266,13 +266,15 @@ adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
 #'   tune the algorithm
 #'
 adagrad <- function(learning_rate = 0.8,
-                    initial_accumulator_value = 0.1) {
+                    initial_accumulator_value = 0.1,
+                    epsilon = 1e-08) {
   define_tf_optimiser(
     name = "adagrad",
-    method = "tf$compat$v1$train$AdagradOptimizer",
+    method = "tf$keras$optimizers$Adagrad",
     parameters = list(
       learning_rate = learning_rate,
-      initial_accumulator_value = initial_accumulator_value
+      initial_accumulator_value = initial_accumulator_value,
+      epsilon = epsilon
     )
   )
 }
