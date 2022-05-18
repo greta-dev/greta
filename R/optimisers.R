@@ -291,7 +291,8 @@ adagrad <- function(learning_rate = 0.8,
 #' @param l2_regularization_strength L2 regularisation coefficient (must be 0 or
 #'   greater)
 #'
-#' @note Not available on TF2, so this may not work. Use at your own risk.
+#' @note This optimizer isn't supported in TF2, so proceed with caution. See
+#'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/AdagradDAOptimizer) for more detail.
 #'
 adagrad_da <- function(learning_rate = 0.8,
                        global_step = 1L,
@@ -378,7 +379,7 @@ ftrl <- function(learning_rate = 1,
                  beta = 0) {
   define_tf_optimiser(
     name = "ftrl",
-    method = "tf$compat$v1$train$FtrlOptimizer",
+    method = "tf$keras$optimizers$Ftrl",
     parameters = list(
       learning_rate = learning_rate,
       learning_rate_power = learning_rate_power,
@@ -395,7 +396,7 @@ ftrl <- function(learning_rate = 1,
 #' @export
 #'
 #' @note This optimizer isn't supported in TF2, so proceed with caution. See
-#'  the [TF docs](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer) for more detail.
+#'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer) for more detail.
 #'
 proximal_gradient_descent <- function(learning_rate = 0.01,
                                       l1_regularization_strength = 0,
@@ -415,7 +416,7 @@ proximal_gradient_descent <- function(learning_rate = 0.01,
 #' @export
 #'
 #' @note This optimizer isn't supported in TF2, so proceed with caution. See
-#'  the [TF docs](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer) for more detail.
+#'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer) for more detail.
 
 #'
 proximal_adagrad <- function(learning_rate = 1,
