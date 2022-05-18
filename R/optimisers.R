@@ -458,20 +458,24 @@ nadam <- function(learning_rate = 0.001,
 #' @rdname optimisers
 #' @export
 #'
-#' @param decay discounting factor for the gradient
-#'
+#' @param centered Boolean. If TRUE, gradients are normalized by the estimated
+#'   variance of the gradient; if FALSE, by the uncentered second moment.
+#'   Setting this to TRUE may help with training, but is slightly more
+#'   expensive in terms of computation and memory. Defaults to FALSE.
 rms_prop <- function(learning_rate = 0.1,
-                     decay = 0.9,
+                     rho = 0.9,
                      momentum = 0,
-                     epsilon = 1e-10) {
+                     epsilon = 1e-10,
+                     centered = FALSE) {
   define_tf_optimiser(
     name = "rms_prop",
-    method = "tf$compat$v1$train$RMSPropOptimizer",
+    method = "tf$keras$optimizers$RMSprop",
     parameters = list(
       learning_rate = learning_rate,
-      decay = decay,
+      rho = rho,
       momentum = momentum,
-      epsilon = epsilon
+      epsilon = epsilon,
+      centered = centered
     )
   )
 }

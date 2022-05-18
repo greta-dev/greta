@@ -16,7 +16,7 @@ The latest interface to optimizers in tensorflow are now used, these changes are
 * Adds `l2_shrinkage_regularization_strength` and `beta` arguments to `ftrl`
   optimiser.
 * adds `nadam` optimiser - see [docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Nadam).
-* 
+* In `rms_prop` optimiser, changes `decay` parameter to `rho`, and adds `centered` parameter - see [docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/RMSprop)
 
 ## Minor
 
