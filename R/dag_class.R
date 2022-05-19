@@ -35,6 +35,9 @@ dag_class <- R6Class(
       self$tf_float <- tf_float
       self$compile <- compile
     },
+    # TF1/2
+    # Not sure if we need tensorflow environments in TF2, given that
+    # everything will be passed as functions?
     new_tf_environment = function() {
       self$tf_environment <- new.env()
       self$tf_graph <- tf$Graph()
@@ -43,6 +46,9 @@ dag_class <- R6Class(
       self$tf_environment$hybrid_data_list <- list()
     },
 
+    # TF1/2
+    # Not sure if we need this anyore since this information will be handled
+    # by tf_function?
     # execute an expression on this dag's tensorflow graph, with the correct
     # float type
     on_graph = function(expr) {
@@ -325,6 +331,8 @@ dag_class <- R6Class(
       # TF2 functions, although I'm not 100% sure about changing
       # tf$compat$v1$ConfigProto as the documentation online doesn't seem to
       # say not to remove it
+      # I'm also not sure if we can get the optimizer options extracted via
+      # the new API, as described at: https://www.tensorflow.org/api_docs/python/tf/optimizers
     define_tf_session = function() {
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
@@ -353,6 +361,9 @@ dag_class <- R6Class(
       self$tf_run(sess$run(tf$compat$v1$global_variables_initializer()))
     },
 
+    # TF1/2
+    # I think we can probably remove this part of things? However I'm not sure
+    # if the "mode" part is going to be imporatnt here?
     # define tf graph in environment; either for forward-mode computation from a
     # free state variable, or for sampling
     define_tf = function(target_nodes = self$node_list) {

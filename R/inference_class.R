@@ -798,6 +798,9 @@ hmc_sampler <- R6Class(
       diag_sd = 1
     ),
     accept_target = 0.651,
+
+    # TF1/2
+    # instances of `placeholder` should just be arguments in `define_tf_kernel`?
     define_tf_kernel = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -877,6 +880,9 @@ rwmh_sampler <- R6Class(
       diag_sd = 1
     ),
     accept_target = 0.44,
+
+    # TF1/2
+    # Again all tf_run parts need to be converted into arguments?
     define_tf_kernel = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -945,6 +951,9 @@ slice_sampler <- R6Class(
     ),
     tuning_interval = Inf,
     uses_metropolis = FALSE,
+
+    # TF1/2
+    # replace tf_run with arguments to define_tf_kernel or return the values?
     define_tf_kernel = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -1048,6 +1057,12 @@ optimiser <- R6Class(
     parameter_names = function() {
       names(self$parameters)
     },
+    # TF1/2
+    # Not sure if the dtype needs to be set anymore, since I think TF2
+    # will guess what it should be based on function input?
+    # I see this is used inside of optimizers to ensure the right dtype is used
+    # perhaps it will be OK to have this set...it's just that `on_graph()`
+    # might not work in TF2?
     set_dtype = function(parameter_name, dtype) {
       params <- self$parameters
       param_names <- self$parameter_names()
@@ -1211,6 +1226,10 @@ tf_optimiser <- R6Class(
   )
 )
 
+# TF1/2
+# I think gien that the scipy optimisers have been removed, then this code
+# could be removed as well? Might be worthwhile to explore/understand if this
+# output is different to the tensorflow output?
 scipy_optimiser <- R6Class(
   "scipy_optimiser",
   inherit = optimiser,

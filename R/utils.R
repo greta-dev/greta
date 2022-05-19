@@ -632,6 +632,10 @@ sampler_utils_module <- module(
   get_model_info
 )
 
+# TF1/2
+# Is this still needed with the new `tf_function` from TF2?
+# I cannot actually currently see uses of `as_tf_function ` in the code
+# base currently
 # convert a function on greta arrays into a function on corresponding tensors,
 # given the greta arrays for inputs. When executed, this needs to be wrapped in
 # dag$on_graph() to get the tensors connected up with the rest of the graph
