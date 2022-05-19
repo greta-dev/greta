@@ -828,7 +828,7 @@ hmc_sampler <- R6Class(
           shape = shape(dim(free_state)[[2]])
         )
       )
-      # TF1/2 note
+      # TF1/2
         # where is "free_state" pulled from, given that it is the
         # argument to this function, "generate_log_prob_function" ?
       # log probability function

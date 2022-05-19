@@ -29,13 +29,14 @@ dag_class <- R6Class(
       self$target_nodes <- lapply(target_greta_arrays, get_node)
 
       # set up the tf environment, with a graph
+      # TF1/2 - not sure if we need to build the new environment in eager mode?
       self$new_tf_environment()
 
       # store the performance control info
       self$tf_float <- tf_float
       self$compile <- compile
     },
-    # TF1/2
+    # TF1/2 - built with TF
     # Not sure if we need tensorflow environments in TF2, given that
     # everything will be passed as functions?
     new_tf_environment = function() {
@@ -46,7 +47,7 @@ dag_class <- R6Class(
       self$tf_environment$hybrid_data_list <- list()
     },
 
-    # TF1/2
+    # TF1/2 - built with TF
     # Not sure if we need this anyore since this information will be handled
     # by tf_function?
     # execute an expression on this dag's tensorflow graph, with the correct
@@ -265,7 +266,7 @@ dag_class <- R6Class(
         ))
       } else {
         shape <- shape(NULL, length(vals))
-        # TF1/2 NOTE
+        # TF1/2
         # defining an empty/unknown thing
         # so in TF2, we might not need to define a free state, we can
         # define a function that returns these pieces of information
@@ -520,8 +521,8 @@ dag_class <- R6Class(
         tfe <- self$tf_environment <- new.env()
 
         # TF1/2
-          # we won't have placeholders in the future so we will need to change
-          # this part
+        # we won't have placeholders in the future so we will need to change
+        # this part
         # copy the placeholders over here, so they aren't recreated
         data_names <- self$get_tf_names(types = "data")
         for (name in data_names) {
@@ -529,10 +530,9 @@ dag_class <- R6Class(
         }
 
         # TF1/2
-          # the batch size might need to be passed in to the function
-          # somehow - perhaps even lexically scoped?
-          # the question is if lexical scoping works when passing a function
-          # through to tensorflow...
+        # the batch size might need to be passed in to the function somehow,
+        # perhaps even lexically scoped? The question is if lexical scoping
+        # works when passing a function through to tensorflow...
         tfe$batch_size <- tfe_old$batch_size
 
         # put the free state in the environment, and build out the tf graph
