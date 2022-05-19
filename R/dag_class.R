@@ -378,6 +378,8 @@ dag_class <- R6Class(
       # TF1/2
       # pretty sure define_batch_size needs to be passed as an argument to
       # whatever is above here...if define_tf even needs to exist?
+      # NOTE: I think this is where we need to start implementing TF2.0 changes
+      # as `define_batch_size` uses placeholder methods
       self$define_batch_size()
       self$define_tf_body(target_nodes = target_nodes)
       self$define_tf_session()
