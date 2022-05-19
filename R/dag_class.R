@@ -231,6 +231,10 @@ dag_class <- R6Class(
     },
     define_batch_size = function() {
       self$tf_run(
+        # TF1/2
+        # pretty sure `batch_size` just now needs to be the input of a function
+        # I'm not even sure that batch_size needs to be a function, it might
+        # just need to be the input to wherever it is used next?
         batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
       )
     },
@@ -316,6 +320,11 @@ dag_class <- R6Class(
     },
 
     # use core and compilation options to set up a session in this environment
+    # TF1/2
+      # We can probably get around almost all of this with the introduction of
+      # TF2 functions, although I'm not 100% sure about changing
+      # tf$compat$v1$ConfigProto as the documentation online doesn't seem to
+      # say not to remove it
     define_tf_session = function() {
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
@@ -354,6 +363,9 @@ dag_class <- R6Class(
       }
 
       # define the body of the graph (depending on the mode) and the session
+      # TF1/2
+      # pretty sure define_batch_size needs to be passed as an argument to
+      # whatever is above here...if define_tf even needs to exist?
       self$define_batch_size()
       self$define_tf_body(target_nodes = target_nodes)
       self$define_tf_session()

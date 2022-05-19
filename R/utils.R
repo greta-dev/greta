@@ -671,6 +671,9 @@ as_tf_function <- function(r_fun, ...) {
     targets <- c(ga_out, ga_dummies)
     sub_dag <- dag_class$new(targets)
 
+    # TF1/2
+      # `get_default_graph()` doesn't work with either eager execution or
+      # `tf.function`.
     # use the default graph, so that it can be overwritten when this is called?
     # alternatively fetch from above, or put it in greta_stash?
     sub_dag$tf_graph <- tf$compat$v1$get_default_graph()

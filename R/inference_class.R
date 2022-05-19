@@ -1064,6 +1064,9 @@ optimiser <- R6Class(
     },
 
     # initialize the variables, then set the ones we care about
+    # TF1/2
+      # I think we can skip out on initializing the variables, since this is
+      # done by default in TF2 now.
     set_inits = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment

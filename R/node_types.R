@@ -41,6 +41,9 @@ data_node <- R6Class(
             shape = shape
           )
         } else {
+          # TF1/2
+          # We can pass tensors directly into ops and layers
+          # tf.function arguments do the job of placeholders
           unbatched_tensor <- tf$compat$v1$placeholder(
             shape = shape,
             dtype = tf_float()
