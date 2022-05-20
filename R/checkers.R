@@ -545,7 +545,7 @@ check_future_plan <- function() {
 
       test_if_forked_cluster()
 
-      f <- future::future(NULL, laze = FALSE)
+      f <- future::future(NULL, lazy = FALSE)
 
       workers <- f$workers
 
