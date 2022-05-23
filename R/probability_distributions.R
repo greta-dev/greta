@@ -1612,14 +1612,15 @@ poisson <- function(lambda, dim = NULL) {
 
 #' @rdname distributions
 #' @export
-zero_inflated_poisson <- function (theta, lambda, dim = NULL)
+zero_inflated_poisson <- function (theta, lambda, dim = NULL) {
   distrib('zero_inflated_poisson', theta, lambda, dim)
+}
 
 #' @rdname distributions
 #' @export
-zero_inflated_negative_binomial <- function (theta, size, prob, dim = NULL)
+zero_inflated_negative_binomial <- function (theta, size, prob, dim = NULL) {
   distrib('zero_inflated_negative_binomial', theta, size, prob, dim)
-
+}
 
 #' @rdname distributions
 #' @export
