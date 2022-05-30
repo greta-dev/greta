@@ -511,6 +511,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)
 
   # add the batch size to the data list
+  # TF1/2
+  # is this where we can now specify the batch size?
   batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
   dag$set_tf_data_list("batch_size", batch_size)
 
@@ -524,6 +526,10 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   dag$build_feed_dict(values, data_list = data_list[missing])
 
+  # TF1/2
+  # This object and the tfe contain the calls we want to make
+  # we want to instead run the tfp function here with the feed dict
+  # just being the arguments from the function.
   # run the sampling
   dag$tf_sess_run("calculate_target_tensor_list", as_text = TRUE)
 }
