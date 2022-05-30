@@ -44,12 +44,15 @@ data_node <- R6Class(
           # TF1/2
           # We can pass tensors directly into ops and layers
           # tf.function arguments do the job of placeholders
+          # or we can use tf$keras$Input ?
+          # unbatched_tensor <- tf$keras$Input(
           unbatched_tensor <- tf$compat$v1$placeholder(
             shape = shape,
             dtype = tf_float()
           )
           dag$set_tf_data_list(unbatched_name, value)
         }
+        browser()
 
         # expand up to batch size
         tiling <- c(tfe$batch_size, rep(1L, ndim))

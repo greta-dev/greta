@@ -53,7 +53,7 @@ dag_class <- R6Class(
     # execute an expression on this dag's tensorflow graph, with the correct
     # float type
     on_graph = function(expr) {
-
+   # browser()
       # temporarily pass float type info to options, so it can be accessed by
       # nodes on definition, without cluncky explicit passing
       old_float_type <- options()$greta_tf_float
@@ -69,6 +69,9 @@ dag_class <- R6Class(
         greta_batch_size = self$tf_environment$batch_size
       )
 
+      # A tf.Graph can be constructed and used directly without a tf.function,
+      # as was required in TensorFlow 1, but this is deprecated and it is
+      # recommended to use a tf.function instead.
       with(self$tf_graph$as_default(), expr)
     },
 
@@ -243,6 +246,7 @@ dag_class <- R6Class(
         # I'm not even sure that batch_size needs to be a function, it might
         # just need to be the input to wherever it is used next?
         batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
+      # batch_size <- tf$keras$Input(dtype = tf$int32)
       )
     },
     define_free_state = function(type = c("variable", "placeholder"),
@@ -311,17 +315,20 @@ dag_class <- R6Class(
 
     # define the body of the tensorflow graph in the environment env; without
     # defining the free_state, or the densities etc.
-    define_tf_body = function(target_nodes = self$node_list) {
+    define_tf_body = function(target_nodes = self$node_list,
+                              batch_size = NULL) {
 
       # if in forward or hybrid mode, split up the free state
       if (self$mode %in% c("all_forward", "hybrid")) {
         self$split_free_state()
       }
 
+      # browser()
       # define all nodes in the environment and on the graph
-      self$on_graph(
-        lapply(target_nodes, function(x) x$define_tf(self))
-      )
+      # self$on_graph(
+      lapply(target_nodes, function(x) x$define_tf(self,
+                                                   batch_size))
+      # )
 
       invisible(NULL)
     },
@@ -367,19 +374,27 @@ dag_class <- R6Class(
     # if the "mode" part is going to be imporatnt here?
     # define tf graph in environment; either for forward-mode computation from a
     # free state variable, or for sampling
-    define_tf = function(target_nodes = self$node_list) {
-
+    define_tf = function(target_nodes = self$node_list,
+                         batch_size) {
       # define the free state variable
       if (self$mode %in% c("all_forward", "hybrid")) {
         self$define_free_state("placeholder")
       }
 
+      # browser()
       # define the body of the graph (depending on the mode) and the session
       # TF1/2
       # pretty sure define_batch_size needs to be passed as an argument to
       # whatever is above here...if define_tf even needs to exist?
+      # and I think we can remove define_batch_size since
+      # this should just be passed as an argument later?
+
       self$define_batch_size()
-      self$define_tf_body(target_nodes = target_nodes)
+
+      self$define_tf_body(target_nodes = target_nodes,
+                          batch_size = NULL)
+
+      # similarly with define_tf_session, I think this can go?
       self$define_tf_session()
     },
 
@@ -520,7 +535,7 @@ dag_class <- R6Class(
         on.exit(self$tf_environment <- tfe_old)
         tfe <- self$tf_environment <- new.env()
 
-        # TF1/2
+        # TF1/2 - start here?
         # we won't have placeholders in the future so we will need to change
         # this part
         # copy the placeholders over here, so they aren't recreated

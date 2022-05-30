@@ -170,7 +170,10 @@ node <- R6Class(
 
     # define this and all descendent objects on tensorflow graph in environment
     # env
-    define_tf = function(dag) {
+    define_tf = function(dag,
+                         batch_size = NULL) {
+      # browser?
+      # browser()
 
       # if defined already, skip
       if (!self$defined(dag)) {
