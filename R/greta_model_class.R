@@ -82,6 +82,9 @@ model <- function(...,
   target_greta_arrays <- check_greta_arrays(target_greta_arrays, "model")
 
   # get the dag containing the target nodes
+  # TF1/2
+  # I don't think we need to use the `compile` flag in TF2 anymore
+  # Well, it will be passed onto the tf_function creation step
   dag <- dag_class$new(target_greta_arrays,
     tf_float = tf_float,
     compile = compile
