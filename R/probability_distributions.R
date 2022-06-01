@@ -423,7 +423,7 @@ zero_inflated_negative_binomial_distribution <- R6Class(
       q <- fl(1) - parameters$prob 
       log_prob <- function(x) {
 
-        tf$mtf$math$$log(theta * tf$nn$relu(fl(1) - x) + (fl(1) - theta) * tf$pow(p, size) * tf$pow(q, x) * tf$exp(tf$math$lgamma(x + size)) / tf$exp(tf$math$lgamma(size + fl(1))) / tf$exp(tf$math$lgamma(tf$math$)
+        tf$math$log(theta * tf$nn$relu(fl(1) - x) + (fl(1) - theta) * tf$pow(p, size) * tf$pow(q, x) * tf$exp(tf$math$lgamma(x + size)) / tf$exp(tf$math$lgamma(size + fl(1))) / tf$exp(tf$math$lgamma(x)))
 
       }
 
