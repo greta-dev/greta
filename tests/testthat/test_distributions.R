@@ -108,11 +108,12 @@ test_that("zero inflated poisson distribution has correct density", {
 
 test_that("zero inflated negative binomial distribution has correct density", {
 
+  require(VGAM)
   skip_if_not(check_tf_version())
   source("helpers.R")
 
   compare_distribution(zero_inflated_negative_binomial,
-                       dzinb,
+                       dzinegbin,
                        parameters = list(theta = 0.2, size = 10, prob = 0.1),
                        x = rnbinom(100, size = 10, prob = 0.1))
 

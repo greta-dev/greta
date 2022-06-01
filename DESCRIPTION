@@ -67,6 +67,7 @@ Suggests:
     testthat (>= 3.1.0),
     tidyverse,
     truncdist,
+    VGAM,
     withr
 VignetteBuilder: 
     knitr
@@ -124,4 +125,3 @@ Collate:
     'testthat-helpers.R'
     'zzz.R'
     'internals.R'
-
