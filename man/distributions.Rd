@@ -178,19 +178,19 @@ corresponds:
 \link[stats:Uniform]{stats::dunif}\cr \code{normal} \tab
 \link[stats:Normal]{stats::dnorm}\cr \code{lognormal} \tab
 \link[stats:Lognormal]{stats::dlnorm}\cr \code{bernoulli} \tab
-\link[extraDistr:dbern]{extraDistr::dbern}\cr \code{binomial} \tab
+\link[extraDistr:Bernoulli]{extraDistr::dbern}\cr \code{binomial} \tab
 \link[stats:Binomial]{stats::dbinom}\cr \code{beta_binomial} \tab
-\link[extraDistr:dbbinom]{extraDistr::dbbinom}\cr \code{negative_binomial}
+\link[extraDistr:BetaBinom]{extraDistr::dbbinom}\cr \code{negative_binomial}
 \tab \link[stats:NegBinomial]{stats::dnbinom}\cr \code{hypergeometric} \tab
 \link[stats:Hypergeometric]{stats::dhyper}\cr \code{poisson} \tab
 \link[stats:Poisson]{stats::dpois}\cr \code{gamma} \tab
 \link[stats:GammaDist]{stats::dgamma}\cr \code{inverse_gamma} \tab
-\link[extraDistr:dinvgamma]{extraDistr::dinvgamma}\cr \code{weibull} \tab
+\link[extraDistr:InvGamma]{extraDistr::dinvgamma}\cr \code{weibull} \tab
 \link[stats:Weibull]{stats::dweibull}\cr \code{exponential} \tab
 \link[stats:Exponential]{stats::dexp}\cr \code{pareto} \tab
-\link[extraDistr:dpareto]{extraDistr::dpareto}\cr \code{student} \tab
-\link[extraDistr:dlst]{extraDistr::dlst}\cr \code{laplace} \tab
-\link[extraDistr:dlaplace]{extraDistr::dlaplace}\cr \code{beta} \tab
+\link[extraDistr:Pareto]{extraDistr::dpareto}\cr \code{student} \tab
+\link[extraDistr:LocationScaleT]{extraDistr::dlst}\cr \code{laplace} \tab
+\link[extraDistr:Laplace]{extraDistr::dlaplace}\cr \code{beta} \tab
 \link[stats:Beta]{stats::dbeta}\cr \code{cauchy} \tab
 \link[stats:Cauchy]{stats::dcauchy}\cr \code{chi_squared} \tab
 \link[stats:Chisquare]{stats::dchisq}\cr \code{logistic} \tab
@@ -199,9 +199,9 @@ corresponds:
 \link[mvtnorm:Mvnorm]{mvtnorm::dmvnorm}\cr \code{multinomial} \tab
 \link[stats:Multinom]{stats::dmultinom}\cr \code{categorical} \tab
 {\link[stats:Multinom]{stats::dmultinom} (size = 1)}\cr \code{dirichlet}
-\tab \link[extraDistr:ddirichlet]{extraDistr::ddirichlet}\cr
+\tab \link[extraDistr:Dirichlet]{extraDistr::ddirichlet}\cr
 \code{dirichlet_multinomial} \tab
-\link[extraDistr:ddirmnom]{extraDistr::ddirmnom}\cr \code{wishart} \tab
+\link[extraDistr:DirMnom]{extraDistr::ddirmnom}\cr \code{wishart} \tab
 \link[stats:rWishart]{stats::rWishart}\cr \code{lkj_correlation} \tab
 \href{https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html}{rethinking::dlkjcorr}
 }

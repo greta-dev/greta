@@ -397,9 +397,6 @@ zero_inflated_poisson_distribution <- R6Class(
 )
 
 
-# NegativeBinomial: p(x) = \frac{\Gamma(x + n)}{\Gamma(n) x!} p^n (1-p)^x
-# prob = 1 / (1 + mu / size) ; mu = size * (1 - p) / p
-
 zero_inflated_negative_binomial_distribution <- R6Class(
   "zero_inflated_negative_binomial_distribution",
   inherit = greta::.internals$nodes$node_classes$distribution_node,
@@ -423,14 +420,14 @@ zero_inflated_negative_binomial_distribution <- R6Class(
       q <- fl(1) - parameters$prob 
       log_prob <- function(x) {
 
-        tf$math$log(theta * tf$nn$relu(fl(1) - x) + (fl(1) - theta) * tf$pow(p, x) * tf$pow(q, size) * tf$exp(tf$math$lgamma(x + size)) / tf$exp(tf$math$lgamma(size)) / tf$exp(tf$math$lgamma(x + 1)))
+        tf$math$log(theta * tf$nn$relu(fl(1) - x) + (fl(1) - theta) * tf$pow(p, size) * tf$pow(q, x) * tf$exp(tf$math$lgamma(x + size)) / tf$exp(tf$math$lgamma(size)) / tf$exp(tf$math$lgamma(x + fl(1))))
 
       }
 
       sample <- function(seed) {
 
         binom <- tfp$distributions$Binomial(total_count = 1, probs = theta)
-        negbin <- tfp$distributions$NegativeBinomial(total_count = size, probs = p)
+        negbin <- tfp$distributions$NegativeBinomial(total_count = size, probs = q) # change of proba / parametrisation in 'stats'
 
         zi <- binom$sample(seed = seed)
         lbd <- negbin$sample(seed = seed)
