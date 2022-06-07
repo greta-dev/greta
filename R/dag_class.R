@@ -264,10 +264,12 @@ dag_class <- R6Class(
         vals <- as.logical(vals)
         vals <- t(as.matrix(vals))
 
-        self$on_graph(free_state <- tf$Variable(
+        # self$on_graph(
+          free_state <- tf$Variable(
           initial_value = vals,
           dtype = tf_float()
-        ))
+        )
+          # )
       } else {
         shape <- shape(NULL, length(vals))
         # TF1/2
@@ -301,7 +303,8 @@ dag_class <- R6Class(
       )
 
       if (length(lengths) > 1) {
-        args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
+        # args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
+        args <- tf$split(free_state, lengths, axis = 1L)
       } else {
         args <- list(free_state)
       }
@@ -417,11 +420,15 @@ dag_class <- R6Class(
       )
 
       # reduce_sum each of them (skipping the batch dimension)
-      self$on_graph(summed_densities <- lapply(densities, tf_sum, drop = TRUE))
+      # self$on_graph(
+      summed_densities <- lapply(densities, tf_sum, drop = TRUE)
+        # )
 
       # sum them together
       names(summed_densities) <- NULL
-      self$on_graph(joint_density <- tf$add_n(summed_densities))
+      # self$on_graph(
+      joint_density <- tf$add_n(summed_densities)
+      # )
 
       # assign overall density to environment
       assign("joint_density",
@@ -441,7 +448,9 @@ dag_class <- R6Class(
       # sometimes returning a scalar tensor)
       names(adj) <- NULL
       adj <- match_batches(adj)
-      self$on_graph(total_adj <- tf$add_n(adj))
+      # self$on_graph(
+      total_adj <- tf$add_n(adj)
+      # )
 
       # assign overall density to environment
       assign("joint_density_adj",
@@ -659,7 +668,8 @@ dag_class <- R6Class(
         y <- tfe$joint_density
         xs <- lapply(tf_names, get, tfe)
         names(xs) <- NULL
-        tfe$hessian_list <- self$on_graph(tf$hessians(y, xs))
+        # tfe$hessian_list <- self$on_graph(tf$hessians(y, xs))
+        tfe$hessian_list <- tf$hessians(y, xs)
       }
 
       # evaluate at the current free state and assign

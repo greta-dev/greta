@@ -46,15 +46,20 @@ data_node <- R6Class(
           # tf.function arguments do the job of placeholders
           # or we can use tf$keras$Input ?
           # unbatched_tensor <- tf$keras$Input(
-          unbatched_tensor <- tf$compat$v1$placeholder(
+          # for data - find yourself so it can be substituted in
+          # we need to fetch the data from the DAG
+          # what is the TF2 method for casting data into a tensor
+          # we can probably just use `as_tensor`
+          unbatched_tensor <- tensorflow::as_tensor(
+            x = value,
             shape = shape,
             dtype = tf_float()
           )
           dag$set_tf_data_list(unbatched_name, value)
         }
-        browser()
+        # browser()
 
-        # expand up to batch size
+        # expand up to batch size - so we can run multiple chains
         tiling <- c(tfe$batch_size, rep(1L, ndim))
         batched_tensor <- tf$tile(unbatched_tensor, tiling)
 
@@ -370,6 +375,7 @@ variable_node <- R6Class(
 
     # adjustments for univariate variables
     tf_log_jacobian_adjustment = function(free) {
+      # browser()
       tf_bijector <- self$create_tf_bijector()
 
       event_ndims <- tf_bijector$forward_min_event_ndims

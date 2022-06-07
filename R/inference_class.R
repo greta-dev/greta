@@ -159,7 +159,9 @@ inference <- R6Class(
       tfe <- dag$tf_environment
 
       if (!live_pointer("joint_density_adj", envir = tfe)) {
-        dag$on_graph(dag$define_joint_density())
+        # dag$on_graph(
+          dag$define_joint_density()
+          # )
       }
 
       dag$send_parameters(parameters)
@@ -299,6 +301,7 @@ sampler <- R6Class(
       }
 
       # define the draws tensor on the tf graph
+      # TF1/2 creates a tensor for what the draws will be
       self$define_tf_draws()
     },
     run_chain = function(n_samples, thin, warmup,
@@ -1069,9 +1072,9 @@ optimiser <- R6Class(
 
       if (parameter_name %in% param_names) {
         param <- params[[parameter_name]]
-        self$model$dag$on_graph(
+        # self$model$dag$on_graph(
           tf_param <- tf$constant(param, dtype = dtype)
-        )
+        # )
         params[[parameter_name]] <- tf_param
       }
 
@@ -1089,12 +1092,12 @@ optimiser <- R6Class(
       dag$tf_sess_run(tf$compat$v1$global_variables_initializer())
 
       shape <- tfe$optimiser_free_state$shape
-      dag$on_graph(
-        tfe$optimiser_init <- tf$constant(self$free_state,
-          shape = shape,
-          dtype = tf_float()
-        )
+      # dag$on_graph(
+      tfe$optimiser_init <- tf$constant(self$free_state,
+        shape = shape,
+        dtype = tf_float()
       )
+      # )
 
       . <- dag$tf_sess_run(optimiser_free_state$assign(optimiser_init))
     },
@@ -1113,7 +1116,9 @@ optimiser <- R6Class(
       # use the log prob function to define objectives from the variable
       if (!live_pointer("optimiser_objective_adj", envir = tfe)) {
         log_prob_fun <- dag$generate_log_prob_function(which = "both")
-        dag$on_graph(objectives <- log_prob_fun(tfe$optimiser_free_state))
+        # dag$on_graph(
+        objectives <- log_prob_fun(tfe$optimiser_free_state)
+          # )
 
         assign("optimiser_objective_adj",
           -objectives$adjusted,
@@ -1194,10 +1199,12 @@ tf_optimiser <- R6Class(
       self$sanitise_dtypes()
 
       optimise_fun <- eval(parse(text = self$method))
-      dag$on_graph(tfe$tf_optimiser <- do.call(
+      # dag$on_graph(
+      tfe$tf_optimiser <- do.call(
         optimise_fun,
         self$parameters
-      ))
+        )
+      # )
 
       if (self$adjust) {
         dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
@@ -1255,7 +1262,9 @@ scipy_optimiser <- R6Class(
         tol = self$tolerance
       )
 
-      dag$on_graph(tfe$tf_optimiser <- do.call(opt_fun, args))
+      # dag$on_graph(
+      tfe$tf_optimiser <- do.call(opt_fun, args)
+        # )
     },
     obj_progress = function(obj) {
       self$diff <- abs(self$old_obj - obj)
