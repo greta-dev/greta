@@ -35,6 +35,8 @@ dag_class <- R6Class(
       # store the performance control info
       self$tf_float <- tf_float
       self$compile <- compile
+      self$trace_values_batch <-
+        tensorflow::tf_function(self$define_trace_values_batch)
     },
     # TF1/2 - built with TF
     # Not sure if we need tensorflow environments in TF2, given that
@@ -239,16 +241,18 @@ dag_class <- R6Class(
         hybrid = self$how_to_define_hybrid(node)
       )
     },
-    define_batch_size = function() {
-      self$tf_run(
-        # TF1/2
-        # pretty sure `batch_size` just now needs to be the input of a function
-        # I'm not even sure that batch_size needs to be a function, it might
-        # just need to be the input to wherever it is used next?
-        batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
-      # batch_size <- tf$keras$Input(dtype = tf$int32)
-      )
-    },
+   define_batch_size = function() {
+     # self$tf_run(
+     # TF1/2
+     # pretty sure `batch_size` just now needs to be the input of a function
+     # I'm not even sure that batch_size needs to be a function, it might
+     # just need to be the input to wherever it is used next?
+     self$tf_environment$batch_size <- dim(self$tf_environment$free_state)[[1]]
+     # batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
+     # batch_size <- tf$keras$Input(dtype = tf$int32)
+     # )
+   },
+
     define_free_state = function(type = c("variable", "placeholder"),
                                  name = "free_state") {
       type <- match.arg(type)
@@ -278,6 +282,7 @@ dag_class <- R6Class(
         # define a function that returns these pieces of information
         # so we will need to define the function relative to the free state
         # and will not need to define the object
+        # Can we just turn this into a tensor with some arbitrary value?
         self$on_graph(free_state <- tf$compat$v1$placeholder(
           dtype = tf_float(),
           shape = shape
@@ -377,12 +382,12 @@ dag_class <- R6Class(
     # if the "mode" part is going to be imporatnt here?
     # define tf graph in environment; either for forward-mode computation from a
     # free state variable, or for sampling
-    define_tf = function(target_nodes = self$node_list,
-                         batch_size) {
+    define_tf = function(target_nodes = self$node_list) {
       # define the free state variable
-      if (self$mode %in% c("all_forward", "hybrid")) {
-        self$define_free_state("placeholder")
-      }
+      browser()
+      # if (self$mode %in% c("all_forward", "hybrid")) {
+      #   self$define_free_state("placeholder")
+      # }
 
       # browser()
       # define the body of the graph (depending on the mode) and the session
@@ -557,12 +562,13 @@ dag_class <- R6Class(
         # the batch size might need to be passed in to the function somehow,
         # perhaps even lexically scoped? The question is if lexical scoping
         # works when passing a function through to tensorflow...
-        tfe$batch_size <- tfe_old$batch_size
+        # tfe$batch_size <- tfe_old$batch_size
 
         # put the free state in the environment, and build out the tf graph
         tfe$free_state <- free_state
 
         # we now make all of the operations define themselves now
+        self$define_batch_size()
         self$define_tf_body()
 
         # define the densities
@@ -683,17 +689,32 @@ dag_class <- R6Class(
       names(hessian_list) <- ga_names
       hessian_list
     },
-    trace_values_batch = function(free_state_batch) {
+
+    trace_values_batch = NULL,
+
+    define_trace_values_batch = function(free_state_batch) {
 
       # update the parameters & build the feed dict
-      self$send_parameters(free_state_batch)
-
-      tfe <- self$tf_environment
-
+      # self$send_parameters(free_state_batch)
+      #
+      # tfe <- self$tf_environment
+      #
       target_tf_names <- lapply(
         self$target_nodes,
         self$tf_name
       )
+
+      # TF1/2 - maybe remove onexit stufff
+      tfe_old <- self$tf_environment
+      on.exit(self$tf_environment <- tfe_old)
+      tfe <- self$tf_environment <- new.env()
+
+      # put the free state in the environment, and build out the tf graph
+      tfe$free_state <- free_state_batch
+
+      # we now make all of the operations define themselves now
+      self$define_tf()
+      ## self$define_tf(free_state_batch)
 
       target_tensors <- lapply(target_tf_names,
         get,
@@ -701,11 +722,12 @@ dag_class <- R6Class(
       )
 
       # evaluate them in the tensorflow environment
-      trace_list <- tfe$sess$run(target_tensors,
-        feed_dict = tfe$feed_dict
-      )
+      # trace_list <- tfe$sess$run(target_tensors,
+      #   feed_dict = tfe$feed_dict
+      # )
 
-      trace_list
+      # trace_list
+      return(target_tensors)
     },
 
     # return the current values of the traced nodes, as a named vector
