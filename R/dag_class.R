@@ -247,7 +247,21 @@ dag_class <- R6Class(
      # pretty sure `batch_size` just now needs to be the input of a function
      # I'm not even sure that batch_size needs to be a function, it might
      # just need to be the input to wherever it is used next?
-     self$tf_environment$batch_size <- dim(self$tf_environment$free_state)[[1]]
+
+     ## NOTE: when calling `model` there is no `free_state` in `tf_environment`
+     ## Trying out something where the free state is set if there isn't one?
+
+     free_state_exists <- !is.null(self$tf_environment$free_state)
+
+     if (free_state_exists){
+       self$tf_environment$batch_size <-
+         dim(self$tf_environment$free_state)[[1]]
+     } else if (!free_state_exists){
+       self$tf_environment$batch_size <- list()
+     }
+
+
+
      # batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
      # batch_size <- tf$keras$Input(dtype = tf$int32)
      # )
@@ -323,8 +337,7 @@ dag_class <- R6Class(
 
     # define the body of the tensorflow graph in the environment env; without
     # defining the free_state, or the densities etc.
-    define_tf_body = function(target_nodes = self$node_list,
-                              batch_size = NULL) {
+    define_tf_body = function(target_nodes = self$node_list) {
 
       # if in forward or hybrid mode, split up the free state
       if (self$mode %in% c("all_forward", "hybrid")) {
@@ -399,8 +412,7 @@ dag_class <- R6Class(
 
       self$define_batch_size()
 
-      self$define_tf_body(target_nodes = target_nodes,
-                          batch_size = NULL)
+      self$define_tf_body(target_nodes = target_nodes)
 
       # similarly with define_tf_session, I think this can go?
       self$define_tf_session()
