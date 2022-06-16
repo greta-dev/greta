@@ -32,11 +32,15 @@ inference <- R6Class(
                           parameters = list(),
                           seed = get_seed()) {
 
+      # browser()
       # flush the environment and redefine the tensorflow graph if needed
+      # TF 1/2
+      # we can probably remove this as we don't build the TF graph now
       if (is.null(model$dag$tf_graph$unique_name)) {
         model$dag$new_tf_environment()
         model$dag$define_tf()
       }
+
 
       self$parameters <- parameters
       self$model <- model
@@ -45,6 +49,7 @@ inference <- R6Class(
       self$n_free <- length(free_parameters)
       self$set_initial_values(initial_values)
       # maybe inefficient-  potentially speed up?
+
       self$n_traced <- length(model$dag$trace_values(self$free_state))
       self$seed <- seed
     },
@@ -156,18 +161,27 @@ inference <- R6Class(
 
     # check whether the model can be evaluated at these parameters
     valid_parameters = function(parameters) {
+      # browser()
       dag <- self$model$dag
-      tfe <- dag$tf_environment
-
-      if (!live_pointer("joint_density_adj", envir = tfe)) {
-        # dag$on_graph(
-          dag$define_joint_density()
-          # )
-      }
-
-      dag$send_parameters(parameters)
-      ld <- self$model$dag$log_density()
-      is.finite(ld)
+      # tfe <- dag$tf_environment
+      #
+      # if (!live_pointer("joint_density_adj", envir = tfe)) {
+      #   # dag$on_graph(
+      #     # dag$define_joint_density()
+      #     # )
+      # }
+      #
+      # dag$send_parameters(parameters)
+      # ld <- self$model$dag$log_density()
+      tf_parameters <- fl(array(
+        data = parameters,
+        dim = c(1, length(parameters))
+        ))
+      ld <- lapply(
+        dag$tf_log_prob_function(tf_parameters),
+        as.numeric
+        )
+      is.finite(ld$adjusted) && is.finite(ld$unadjusted)
     },
 
     # run a burst of sampling, and put the resulting free state values in
@@ -282,7 +296,6 @@ sampler <- R6Class(
                           model,
                           parameters = list(),
                           seed) {
-
       # initialize the inference method
       super$initialize(
         initial_values = initial_values,
@@ -305,8 +318,9 @@ sampler <- R6Class(
       # TF1/2 creates a tensor for what the draws will be
       # define_tf_draws is now used in place of of run_burst
       # self$define_tf_draws()
-      self$tf_evaluate_sample_batch <-
-        tensorflow::tf_function(self$define_tf_draws)
+      self$tf_evaluate_sample_batch <- #tensorflow::tf_function(
+        self$define_tf_draws
+      # )
     },
     run_chain = function(n_samples, thin, warmup,
                          verbose, pb_update,
@@ -665,7 +679,7 @@ sampler <- R6Class(
       # rwmh has `rwmh_epsilon` and `rwmh_diag_sd`.
       # or are all of these handled at the levels above, in the respective
       # functions `hmc`, `rwmh` etc?
-      self$define_tf_kernel(
+      sampler_kernel <- self$define_tf_kernel(
         sampler_param_vec
       )
 
@@ -688,6 +702,7 @@ sampler <- R6Class(
         # sampler_batch() to run as a TF function
         # and to do that we need to work out how
         # to get the free state
+      # browser()
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
           # TF1/2 - where is free_state coming from? is this in tfe / sampler?
@@ -747,7 +762,7 @@ sampler <- R6Class(
         free_state = self$free_state,
         sampler_burst_length = as.integer(n_samples),
         sampler_thin = as.integer(thin),
-        sampler_parameter_vec = param_vec
+        sampler_param_vec = param_vec
       )
 
       # get trace of free state and drop the null dimension
@@ -788,7 +803,7 @@ sampler <- R6Class(
     sample_carefully = function(free_state,
                                 sampler_burst_length,
                                 sampler_thin,
-                                sampler_parameter_vec) {
+                                sampler_param_vec) {
 
       # tryCatch handling for numerical errors
       dag <- self$model$dag
@@ -803,11 +818,12 @@ sampler <- R6Class(
       # the feed_dict also contains various parameter information, I'm not sure
       # if this needs to be passed along, perhaps as an object
       #
-      result <- cleanly(tf_evaluate_sample_batch(
+      # browser()
+      result <- cleanly(self$tf_evaluate_sample_batch(
         free_state = free_state,
         sampler_burst_length = sampler_burst_length,
         sampler_thin = sampler_thin,
-        sampler_parameter_vec = sampler_parameter_vec
+        sampler_param_vec = sampler_param_vec
       ))
       # result <- cleanly(tfe$sess$run(tfe$sampler_batch,
       #   feed_dict = tfe$feed_dict
@@ -917,14 +933,13 @@ hmc_sampler <- R6Class(
         # where is "free_state" pulled from, given that it is the
         # argument to this function, "generate_log_prob_function" ?
       # log probability function
-      tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # build the kernel
       # nolint start
 
       # dag$tf_run(
         sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
-          target_log_prob_fn = tfe$log_prob_fun,
+          target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = hmc_step_sizes,
           num_leapfrog_steps = hmc_l
           # TF1/2
@@ -1023,7 +1038,7 @@ rwmh_sampler <- R6Class(
       # nolint start
       # dag$tf_run(
         sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
-          target_log_prob_fn = dag$generate_log_prob_function(),
+          target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           new_state_fn = new_state_fn,
           seed = tfe$rng_seed
         )
@@ -1079,7 +1094,6 @@ slice_sampler <- R6Class(
         )
       }
 
-      tfe$log_prob_fun <- dag$generate_log_prob_function()
       # dag$tf_run(
         # slice_max_doublings <- tf$compat$v1$placeholder(dtype = tf$int32)
       # )
@@ -1088,7 +1102,7 @@ slice_sampler <- R6Class(
       # nolint start
       # dag$tf_run(
         sampler_kernel <- tfp$mcmc$SliceSampler(
-          target_log_prob_fn = tfe$log_prob_fun,
+          target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = fl(1),
           max_doublings = slice_max_doublings,
           seed = tfe$rng_seed
@@ -1221,10 +1235,14 @@ optimiser <- R6Class(
       }
 
       # use the log prob function to define objectives from the variable
+      # TF 1/2 - probably going to delete this code as we don't care about
+      # pointers to TF graph things
       if (!live_pointer("optimiser_objective_adj", envir = tfe)) {
-        log_prob_fun <- dag$generate_log_prob_function(which = "both")
         # dag$on_graph(
-        objectives <- log_prob_fun(tfe$optimiser_free_state)
+        # TF 1/2 - this will not work at the moment, we need ot be able to
+        # switch between using the adjusted or unadjusted log prob function
+        # depending on what the user asked for
+        objectives <- dag$tf_log_prob_function(tfe$optimiser_free_state)
           # )
 
         assign("optimiser_objective_adj",

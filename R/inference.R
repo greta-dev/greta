@@ -241,6 +241,7 @@ mcmc <- function(model,
 
   # create a sampler object for each parallel job, using these (possibly NULL)
   # initial values
+  # browser()
   samplers <- lapply(
     initial_values_split,
     build_sampler,

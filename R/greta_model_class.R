@@ -178,7 +178,7 @@ model <- function(...,
   }
 
   # define the TF graph
-  dag$define_tf()
+  # dag$define_tf()
 
   # create the model object and add details
   model <- as.greta_model(dag)

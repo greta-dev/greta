@@ -35,9 +35,21 @@ dag_class <- R6Class(
       # store the performance control info
       self$tf_float <- tf_float
       self$compile <- compile
-      self$trace_values_batch <-
+      self$tf_trace_values_batch <-
         tensorflow::tf_function(self$define_trace_values_batch)
+      self$tf_log_prob_function <- #tensorflow::tf_function(
+        self$generate_log_prob_function()
+      # )
     },
+
+    tf_log_prob_function = NULL,
+    tf_log_prob_function_adjusted = function(free_state){
+      self$tf_log_prob_function(free_state)$adjusted
+    },
+    tf_log_prob_function_unadjusted = function(free_state){
+      self$tf_log_prob_function(free_state)$unadjusted
+    },
+
     # TF1/2 - built with TF
     # Not sure if we need tensorflow environments in TF2, given that
     # everything will be passed as functions?
@@ -55,7 +67,7 @@ dag_class <- R6Class(
     # execute an expression on this dag's tensorflow graph, with the correct
     # float type
     on_graph = function(expr) {
-   # browser()
+      # browser()
       # temporarily pass float type info to options, so it can be accessed by
       # nodes on definition, without cluncky explicit passing
       old_float_type <- options()$greta_tf_float
@@ -78,8 +90,8 @@ dag_class <- R6Class(
     },
 
     # TF1/2
-      # so it seems we won't really need to be using the tf_run function
-      # anymore as these things will just be tensorflow objects?
+    # so it seems we won't really need to be using the tf_run function
+    # anymore as these things will just be tensorflow objects?
     # execute an expression in the tensorflow environment
     tf_run = function(expr, as_text = FALSE) {
       tfe <- self$tf_environment
@@ -96,8 +108,8 @@ dag_class <- R6Class(
     },
 
     # TF1/2
-      # similarly we should be able to just avoid using this and instead
-      # wrap things up in tensorflow functions?
+    # similarly we should be able to just avoid using this and instead
+    # wrap things up in tensorflow functions?
     # sess$run() an expression in the tensorflow environment, with the feed dict
     tf_sess_run = function(expr, as_text = FALSE) {
       if (!as_text) {
@@ -219,9 +231,9 @@ dag_class <- R6Class(
     # how to define the node if we're sampling everything (no free state)
     how_to_define_all_sampling = function(node) {
       switch(node_type(node),
-        data = ifelse(has_distribution(node), "sampling", "forward"),
-        operation = ifelse(has_distribution(node), "sampling", "forward"),
-        "sampling"
+             data = ifelse(has_distribution(node), "sampling", "forward"),
+             operation = ifelse(has_distribution(node), "sampling", "forward"),
+             "sampling"
       )
     },
 
@@ -231,41 +243,35 @@ dag_class <- R6Class(
     how_to_define = function(node) {
       switch(self$mode,
 
-        # if doing inference, everything is push-forward
-        all_forward = "forward",
+             # if doing inference, everything is push-forward
+             all_forward = "forward",
 
-        # sampling from prior most nodes are in sampling mode
-        all_sampling = self$how_to_define_all_sampling(node),
+             # sampling from prior most nodes are in sampling mode
+             all_sampling = self$how_to_define_all_sampling(node),
 
-        # sampling from posterior some nodes defined forward, others sampled
-        hybrid = self$how_to_define_hybrid(node)
+             # sampling from posterior some nodes defined forward, others sampled
+             hybrid = self$how_to_define_hybrid(node)
       )
     },
-   define_batch_size = function() {
-     # self$tf_run(
-     # TF1/2
-     # pretty sure `batch_size` just now needs to be the input of a function
-     # I'm not even sure that batch_size needs to be a function, it might
-     # just need to be the input to wherever it is used next?
+    define_batch_size = function() {
+      # self$tf_run(
+      # TF1/2
+      # pretty sure `batch_size` just now needs to be the input of a function
+      # I'm not even sure that batch_size needs to be a function, it might
+      # just need to be the input to wherever it is used next?
 
-     ## NOTE: when calling `model` there is no `free_state` in `tf_environment`
-     ## Trying out something where the free state is set if there isn't one?
+      ## NOTE: when calling `model` there is no `free_state` in `tf_environment`
+      ## Trying out something where the free state is set if there isn't one?
 
-     free_state_exists <- !is.null(self$tf_environment$free_state)
+      with(
+        data = self$tf_environment,
+        batch_size <- dim(free_state)[[1]]
+      )
 
-     if (free_state_exists){
-       self$tf_environment$batch_size <-
-         dim(self$tf_environment$free_state)[[1]]
-     } else if (!free_state_exists){
-       self$tf_environment$batch_size <- list()
-     }
-
-
-
-     # batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
-     # batch_size <- tf$keras$Input(dtype = tf$int32)
-     # )
-   },
+      # batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
+      # batch_size <- tf$keras$Input(dtype = tf$int32)
+      # )
+    },
 
     define_free_state = function(type = c("variable", "placeholder"),
                                  name = "free_state") {
@@ -283,11 +289,11 @@ dag_class <- R6Class(
         vals <- t(as.matrix(vals))
 
         # self$on_graph(
-          free_state <- tf$Variable(
+        free_state <- tf$Variable(
           initial_value = vals,
           dtype = tf_float()
         )
-          # )
+        # )
       } else {
         shape <- shape(NULL, length(vals))
         # TF1/2
@@ -301,11 +307,17 @@ dag_class <- R6Class(
           dtype = tf_float(),
           shape = shape
         ))
+
+        # TF1/2 instead?
+        # free_state <- tensorflow::as_tensor(
+        #   dtype = tf_float(),
+        #   shape = shape
+        # )
       }
 
       assign(name,
-        free_state,
-        envir = tfe
+             free_state,
+             envir = tfe
       )
     },
 
@@ -317,8 +329,8 @@ dag_class <- R6Class(
 
       params <- self$example_parameters(free = TRUE)
       lengths <- vapply(params,
-        function(x) length(x),
-        FUN.VALUE = 1L
+                        function(x) length(x),
+                        FUN.VALUE = 1L
       )
 
       if (length(lengths) > 1) {
@@ -347,8 +359,7 @@ dag_class <- R6Class(
       # browser()
       # define all nodes in the environment and on the graph
       # self$on_graph(
-      lapply(target_nodes, function(x) x$define_tf(self,
-                                                   batch_size))
+      lapply(target_nodes, function(x) x$define_tf(self))
       # )
 
       invisible(NULL)
@@ -356,12 +367,12 @@ dag_class <- R6Class(
 
     # use core and compilation options to set up a session in this environment
     # TF1/2
-      # We can probably get around almost all of this with the introduction of
-      # TF2 functions, although I'm not 100% sure about changing
-      # tf$compat$v1$ConfigProto as the documentation online doesn't seem to
-      # say not to remove it
-      # I'm also not sure if we can get the optimizer options extracted via
-      # the new API, as described at: https://www.tensorflow.org/api_docs/python/tf/optimizers
+    # We can probably get around almost all of this with the introduction of
+    # TF2 functions, although I'm not 100% sure about changing
+    # tf$compat$v1$ConfigProto as the documentation online doesn't seem to
+    # say not to remove it
+    # I'm also not sure if we can get the optimizer options extracted via
+    # the new API, as described at: https://www.tensorflow.org/api_docs/python/tf/optimizers
     define_tf_session = function() {
       tfe <- self$tf_environment
       tfe$n_cores <- self$n_cores
@@ -397,7 +408,7 @@ dag_class <- R6Class(
     # free state variable, or for sampling
     define_tf = function(target_nodes = self$node_list) {
       # define the free state variable
-      browser()
+      # browser()
       # if (self$mode %in% c("all_forward", "hybrid")) {
       #   self$define_free_state("placeholder")
       # }
@@ -415,11 +426,12 @@ dag_class <- R6Class(
       self$define_tf_body(target_nodes = target_nodes)
 
       # similarly with define_tf_session, I think this can go?
-      self$define_tf_session()
+      # self$define_tf_session()
     },
 
     # define tensor for overall log density and gradients
     define_joint_density = function() {
+      # browser()
       tfe <- self$tf_environment
 
       # get all distribution nodes that have a target
@@ -431,15 +443,15 @@ dag_class <- R6Class(
 
       # get the densities, evaluated at these targets
       densities <- mapply(self$evaluate_density,
-        distribution_nodes,
-        target_nodes,
-        SIMPLIFY = FALSE
+                          distribution_nodes,
+                          target_nodes,
+                          SIMPLIFY = FALSE
       )
 
       # reduce_sum each of them (skipping the batch dimension)
       # self$on_graph(
       summed_densities <- lapply(densities, tf_sum, drop = TRUE)
-        # )
+      # )
 
       # sum them together
       names(summed_densities) <- NULL
@@ -449,8 +461,8 @@ dag_class <- R6Class(
 
       # assign overall density to environment
       assign("joint_density",
-        joint_density,
-        envir = self$tf_environment
+             joint_density,
+             envir = self$tf_environment
       )
 
       # define adjusted joint density
@@ -471,8 +483,8 @@ dag_class <- R6Class(
 
       # assign overall density to environment
       assign("joint_density_adj",
-        joint_density + total_adj,
-        envir = self$tf_environment
+             joint_density + total_adj,
+             envir = self$tf_environment
       )
     },
 
@@ -491,11 +503,11 @@ dag_class <- R6Class(
       # execute the distribution constructor functions to return a tfp
       # distribution object
       tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
-
+      # browser()
       self$tf_evaluate_density(tfp_distribution,
-        tf_target,
-        truncation = distribution_node$truncation,
-        bounds = distribution_node$bounds
+                               tf_target,
+                               truncation = distribution_node$truncation,
+                               bounds = distribution_node$bounds
       )
     },
     tf_evaluate_density = function(tfp_distribution,
@@ -527,7 +539,7 @@ dag_class <- R6Class(
 
           # if both are constrained, get the log of the integral between them
           offset <- tf$math$log(tfp_distribution$cdf(fl(upper)) -
-            tfp_distribution$cdf(fl(lower)))
+                                  tfp_distribution$cdf(fl(lower)))
         }
 
         ld <- ld - offset
@@ -545,30 +557,30 @@ dag_class <- R6Class(
     # return a function to obtain the model log probability from a tensor for
     # the free state
     generate_log_prob_function = function(which = c(
-                                            "adjusted",
-                                            "unadjusted",
-                                            "both"
-                                          )) {
+      "both",
+      "adjusted",
+      "unadjusted"
+    )) {
       which <- match.arg(which)
 
       # we can only pass the free_state parameter through
       # we need some way to lexically scope the
       # batch size and the data
       function(free_state) {
-
+        # browser()
         # temporarily define a new environment
-        tfe_old <- self$tf_environment
-        on.exit(self$tf_environment <- tfe_old)
-        tfe <- self$tf_environment <- new.env()
+        tfe <- self$tf_environment
+        # on.exit(self$tf_environment <- tfe_old)
+        # tfe <- self$tf_environment <- new.env()
 
         # TF1/2 - start here?
         # we won't have placeholders in the future so we will need to change
         # this part
         # copy the placeholders over here, so they aren't recreated
-        data_names <- self$get_tf_names(types = "data")
-        for (name in data_names) {
-          tfe[[name]] <- tfe_old[[name]]
-        }
+        # data_names <- self$get_tf_names(types = "data")
+        # for (name in data_names) {
+        #   tfe[[name]] <- tfe_old[[name]]
+        # }
 
         # TF1/2
         # the batch size might need to be passed in to the function somehow,
@@ -579,10 +591,11 @@ dag_class <- R6Class(
         # put the free state in the environment, and build out the tf graph
         tfe$free_state <- free_state
 
+        # browser()
         # we now make all of the operations define themselves now
-        self$define_batch_size()
-        self$define_tf_body()
-
+        # self$define_batch_size()
+        # self$define_tf_body()
+        self$define_tf()
         # define the densities
         self$define_joint_density()
 
@@ -593,9 +606,9 @@ dag_class <- R6Class(
 
         # return either of the densities, or a list of both
         result <- switch(which,
-          adjusted = objectives$adjusted,
-          unadjusted = objectives$unadjusted,
-          both = objectives
+                         adjusted = objectives$adjusted,
+                         unadjusted = objectives$unadjusted,
+                         both = objectives
         )
 
         result
@@ -619,8 +632,8 @@ dag_class <- R6Class(
 
       # remove any of these that don't need a free state here (for calculate())
       stateless_names <- vapply(self$variables_without_free_state,
-        self$tf_name,
-        FUN.VALUE = character(1)
+                                self$tf_name,
+                                FUN.VALUE = character(1)
       )
       keep <- !names(parameters) %in% stateless_names
       parameters <- parameters[keep]
@@ -702,7 +715,13 @@ dag_class <- R6Class(
       hessian_list
     },
 
-    trace_values_batch = NULL,
+    tf_trace_values_batch = NULL,
+    trace_values_batch = function(free_state_batch){
+      lapply(
+        X = self$tf_trace_values_batch(free_state_batch),
+        FUN = as.array
+      )
+    },
 
     define_trace_values_batch = function(free_state_batch) {
 

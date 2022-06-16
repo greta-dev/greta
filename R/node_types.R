@@ -297,7 +297,6 @@ variable_node <- R6Class(
       }
     },
     tf = function(dag) {
-
       # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
 
@@ -323,7 +322,6 @@ variable_node <- R6Class(
       # and compute any transformation density
       if (mode == "forward") {
         free_name <- glue::glue("{tf_name}_free")
-
         # create the log jacobian adjustment for the free state
         tf_adj <- self$tf_adjustment(dag)
         adj_name <- glue::glue("{tf_name}_adj")
