@@ -44,7 +44,9 @@ dag_class <- R6Class(
 
     tf_log_prob_function = NULL,
     tf_log_prob_function_adjusted = function(free_state){
-      self$tf_log_prob_function(free_state)$adjusted
+        # self$tf_log_prob_function(free_state)$adjusted
+        # tf$reduce_sum(free_state, axis = 1L)
+      (free_state * free_state) * -1
     },
     tf_log_prob_function_unadjusted = function(free_state){
       self$tf_log_prob_function(free_state)$unadjusted
