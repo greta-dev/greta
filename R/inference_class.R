@@ -766,13 +766,14 @@ sampler <- R6Class(
       )
 
       # get trace of free state and drop the null dimension
-      free_state_draws <- batch_results$all_states
+      free_state_draws <- as.array(batch_results$all_states)
 
       # if there is one sample at a time, and it's rejected, conversion from
       # python back to R can drop a dimension, so handle that here. Ugh.
       if (length(dim(free_state_draws)) != 3) {
         dim(free_state_draws) <- c(1, dim(free_state_draws))
       }
+
 
       self$last_burst_free_states <- split_chains(free_state_draws)
 
@@ -786,8 +787,8 @@ sampler <- R6Class(
       if (self$uses_metropolis) {
 
         # log acceptance probability
-        log_accept_stats <- batch_results$trace$log_accept_ratio
-        is_accepted <- batch_results$trace$is_accepted
+        log_accept_stats <- as.array(batch_results$trace$log_accept_ratio)
+        is_accepted <- as.array(batch_results$trace$is_accepted)
         self$accept_history <- rbind(self$accept_history, is_accepted)
         accept_stats_batch <- pmin(1, exp(log_accept_stats))
         self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
@@ -923,11 +924,15 @@ hmc_sampler <- R6Class(
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
       # dag$tf_run(
-        hmc_step_sizes <- tf$reshape(
+      # browser()
+      hmc_step_sizes <- tf$cast(
+        x = tf$reshape(
           hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
           # TF1/2 - what do we do with the free_state here?
           shape = shape(free_state_size)
-        )
+        ),
+        dtype = tf$float64
+      )
       # )
       # TF1/2
         # where is "free_state" pulled from, given that it is the
