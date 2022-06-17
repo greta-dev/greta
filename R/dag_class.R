@@ -37,20 +37,35 @@ dag_class <- R6Class(
       self$compile <- compile
       self$tf_trace_values_batch <-
         tensorflow::tf_function(self$define_trace_values_batch)
-      self$tf_log_prob_function <- #tensorflow::tf_function(
-        self$generate_log_prob_function()
-      # )
+
+      # self$tf_log_prob_function <- #tensorflow::tf_function(
+      #   self$generate_log_prob_function()
+      # # )
+      self$tf_log_prob_function <- tensorflow::tf_function(
+        self$tf_log_prob_function_raw
+        )
     },
 
     tf_log_prob_function = NULL,
+
+    tf_log_prob_function_raw = function(free_state){
+      result <- (free_state * free_state) * -1
+      list(adjusted = result, unadjusted = result)
+    },
+
     tf_log_prob_function_adjusted = function(free_state){
         # self$tf_log_prob_function(free_state)$adjusted
         # tf$reduce_sum(free_state, axis = 1L)
-      (free_state * free_state) * -1
+      # (free_state * free_state) * -1
+      self$tf_log_prob_function(free_state)$adjusted
     },
+
+
     tf_log_prob_function_unadjusted = function(free_state){
       self$tf_log_prob_function(free_state)$unadjusted
     },
+
+
 
     # TF1/2 - built with TF
     # Not sure if we need tensorflow environments in TF2, given that
