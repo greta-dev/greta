@@ -263,7 +263,7 @@ cbind.greta_array <- function(...) {
   dots <- lapply(dots, as.greta_array)
 
   dims <- lapply(dots, dim)
-  ndims <- vapply(dims, length, FUN.VALUE = 1)
+  ndims <- lengths(dims)
   if (!all(ndims == 2)) {
     msg <- cli::format_error(
       "all {.cls greta_array}s must be two-dimensional"
@@ -304,7 +304,7 @@ rbind.greta_array <- function(...) {
   dots <- lapply(dots, as.greta_array)
 
   dims <- lapply(dots, dim)
-  ndims <- vapply(dims, length, FUN.VALUE = 1)
+  ndims <- lengths(dims)
   if (!all(ndims == 2)) {
     msg <- cli::format_error(
       "all {.cls greta_array}s must be two-dimensional"
