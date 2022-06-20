@@ -185,7 +185,7 @@ check_dims <- function(..., target_dim = NULL) {
   } else {
 
     # otherwise, find the correct output dimension
-    dim_lengths <- vapply(dim_list, length, numeric(1))
+    dim_lengths <- lengths(dim_list)
     dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
     output_dim <- do.call(pmax, dim_list)
   }
