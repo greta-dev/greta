@@ -318,9 +318,9 @@ sampler <- R6Class(
       # TF1/2 creates a tensor for what the draws will be
       # define_tf_draws is now used in place of of run_burst
       # self$define_tf_draws()
-      self$tf_evaluate_sample_batch <- #tensorflow::tf_function(
+      self$tf_evaluate_sample_batch <- tensorflow::tf_function(
         self$define_tf_draws
-      # )
+      )
     },
     run_chain = function(n_samples, thin, warmup,
                          verbose, pb_update,
