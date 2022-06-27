@@ -551,11 +551,10 @@ check_future_plan <- function() {
 
       if (inherits(workers, "cluster")) {
         worker <- workers[[1]]
-      }
-
-      if (!is.null(worker$host)) {
-        localhosts <- c("localhost", "127.0.0.1", Sys.info()[["nodename"]])
-        plan_is$local <- worker$host %in% localhosts
+        if (!is.null(worker$host)) {
+          localhosts <- c("localhost", "127.0.0.1", Sys.info()[["nodename"]])
+          plan_is$local <- worker$host %in% localhosts
+        }
       }
     } else {
 
