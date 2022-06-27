@@ -532,7 +532,6 @@ check_future_plan <- function() {
   plan_is <- list(
     parallel = !inherits(plan_info, "sequential"),
     cluster = inherits(plan_info, "cluster"),
-    multiprocess = inherits(plan_info, "multiprocess"),
     multisession = inherits(plan_info, "multisession"),
     local = TRUE
   )
@@ -560,10 +559,9 @@ check_future_plan <- function() {
     } else {
 
       # if multi*, check it's multisession
-      if (plan_is$multiprocess && !plan_is$multisession) {
+      if (!plan_is$multisession) {
         msg <- cli::format_error(
-          "parallel mcmc samplers cannot be run with \\
-          {.code plan(multiprocess)} or {.code plan(multicore)}"
+          "parallel mcmc samplers cannot be run with {.code plan(multicore)}"
         )
         stop(
           msg,

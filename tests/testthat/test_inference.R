@@ -534,7 +534,6 @@ test_that("mcmc errors for invalid parallel plans", {
   withr::defer(future::plan(op))
 
   # handle handle forks, so only accept multisession, or multi session clusters
-  suppressWarnings(future::plan(future::multiprocess))
   expect_snapshot_error(
     mcmc(m, verbose = FALSE)
   )
