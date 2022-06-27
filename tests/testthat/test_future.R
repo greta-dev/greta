@@ -31,7 +31,6 @@ test_that("mcmc errors for invalid parallel plans", {
   withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
 
   # handle handle forks, so only accept multisession, or multi session clusters
-  suppressWarnings(future::plan(future::multiprocess))
   expect_snapshot_error(
     check_future_plan()
   )
