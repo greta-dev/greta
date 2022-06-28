@@ -1,6 +1,4 @@
-# greta (development version)
-
-# greta 0.4.2.9000
+# greta 0.4.2.9000 (development version)
 
 ## Fixes
 
