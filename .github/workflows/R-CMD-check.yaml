@@ -106,3 +106,10 @@ jobs:
         with:
           args: 'c("--no-manual", "--as-cran", "--no-multiarch")'
 
+      - name: Check on single core machine
+        if: runner.os != 'Windows'
+        env:
+          R_PARALLELLY_AVAILABLE_CORES: 1
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--no-multiarch"))
+        shell: Rscript {0}
+
