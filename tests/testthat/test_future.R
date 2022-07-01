@@ -18,7 +18,9 @@ test_that("check_future_plan() works", {
   future::plan(future::multisession)
 
   # one chain
-  expect_error(check_future_plan(), NA)
+  expect_snapshot_error(
+    check_future_plan()
+    )
 
 })
 
@@ -30,7 +32,8 @@ test_that("mcmc errors for invalid parallel plans", {
   # temporarily silence future's warning about multicore support
   withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
 
-  # handle handle forks, so only accept multisession, or multi session clusters
+  # handle forks, so only accept multisession, or multi session clusters
+  future::plan(future::multisession)
   expect_snapshot_error(
     check_future_plan()
   )
