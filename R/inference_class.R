@@ -331,7 +331,13 @@ sampler <- R6Class(
           tf$TensorSpec(shape = list(1L),
                         dtype = tf$int32),
           # sampler_param_vec
-          tf$TensorSpec(shape = list(length(unlist(self$sampler_parameter_values()))),
+          tf$TensorSpec(shape = list(
+            length(
+              unlist(
+                self$sampler_parameter_values()
+                )
+              )
+            ),
                         dtype = tf_float())
         )
       )
@@ -746,6 +752,7 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
+      browser()
       param_vec <- unlist(self$sampler_parameter_values())
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
@@ -916,6 +923,7 @@ hmc_sampler <- R6Class(
 
       free_state_size <- length(sampler_param_vec) - 2
       # this will likely get replaced...
+
       hmc_epsilon <- sampler_param_vec[1]
       hmc_l <- sampler_param_vec[2]
       hmc_diag_sd <- sampler_param_vec[3:(2+free_state_size)]
@@ -938,7 +946,8 @@ hmc_sampler <- R6Class(
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
       # dag$tf_run(
-      # browser()
+      # DEBUG HERE - the reshaping is erroring, not the input_signature
+      browser()
       hmc_step_sizes <- tf$cast(
         x = tf$reshape(
           hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
