@@ -1,5 +1,9 @@
 # greta 0.4.2.9000 (development version)
 
+## Features
+
+- Adds `reinstall_greta_deps()`, which helps with starting from a clean slate when installing greta dependencies (#524)
+
 ## Fixes
 
 * Issue where `future` and `parallely` packages error when a CPU with only one core is provided (#513, #516).
