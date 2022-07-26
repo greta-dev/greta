@@ -681,7 +681,7 @@ dag_class <- R6Class(
 
     # get adjusted joint log density across the whole dag
     log_density = function() {
-      res <- cleanly(self$tf_sess_run(joint_density_adj))
+      res <- cleanly(self$tf_environment$joint_density_adj)
 
       if (inherits(res, "error")) {
         res <- NA
