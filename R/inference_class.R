@@ -325,10 +325,10 @@ sampler <- R6Class(
           tf$TensorSpec(shape = list(NULL, self$n_free),
                         dtype = tf_float()),
           # sampler_burst_length
-          tf$TensorSpec(shape = list(1L),
+          tf$TensorSpec(shape = list(),
                         dtype = tf$int32),
           # sampler_thin
-          tf$TensorSpec(shape = list(1L),
+          tf$TensorSpec(shape = list(),
                         dtype = tf$int32),
           # sampler_param_vec
           tf$TensorSpec(shape = list(
@@ -699,6 +699,7 @@ sampler <- R6Class(
       # rwmh has `rwmh_epsilon` and `rwmh_diag_sd`.
       # or are all of these handled at the levels above, in the respective
       # functions `hmc`, `rwmh` etc?
+      # browser()
       sampler_kernel <- self$define_tf_kernel(
         sampler_param_vec
       )
@@ -752,7 +753,7 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      browser()
+      # browser()
       param_vec <- unlist(self$sampler_parameter_values())
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
@@ -842,10 +843,13 @@ sampler <- R6Class(
       #
       # browser()
       result <- cleanly(self$tf_evaluate_sample_batch(
-        free_state = free_state,
-        sampler_burst_length = sampler_burst_length,
-        sampler_thin = sampler_thin,
-        sampler_param_vec = sampler_param_vec
+        free_state = tensorflow::as_tensor(free_state,
+                                           dtype = tf_float()),
+        sampler_burst_length = tensorflow::as_tensor(sampler_burst_length),
+        sampler_thin = tensorflow::as_tensor(sampler_thin),
+        sampler_param_vec = tensorflow::as_tensor(sampler_param_vec,
+                                                  dtype = tf_float(),
+                                                  shape = length(sampler_param_vec))
       ))
       # result <- cleanly(tfe$sess$run(tfe$sampler_batch,
       #   feed_dict = tfe$feed_dict
@@ -921,12 +925,13 @@ hmc_sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
+      # browser()
       free_state_size <- length(sampler_param_vec) - 2
       # this will likely get replaced...
 
-      hmc_epsilon <- sampler_param_vec[1]
-      hmc_l <- sampler_param_vec[2]
-      hmc_diag_sd <- sampler_param_vec[3:(2+free_state_size)]
+      hmc_epsilon <- sampler_param_vec[0]
+      hmc_l <- sampler_param_vec[1]
+      hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
 
       # tensors for sampler parameters
       # dag$tf_run(
@@ -947,7 +952,7 @@ hmc_sampler <- R6Class(
       # but it step_sizes must be a vector (shape(n, )), so reshape it
       # dag$tf_run(
       # DEBUG HERE - the reshaping is erroring, not the input_signature
-      browser()
+
       hmc_step_sizes <- tf$cast(
         x = tf$reshape(
           hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
@@ -966,6 +971,7 @@ hmc_sampler <- R6Class(
       # nolint start
 
       # dag$tf_run(
+      # browser()
         sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = hmc_step_sizes,

@@ -269,7 +269,7 @@ dag_class <- R6Class(
 
       with(
         data = self$tf_environment,
-        batch_size <- dim(free_state)[[1]]
+        batch_size <- tf$shape(self$tf_environment$free_state)[0]
       )
 
       # batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)

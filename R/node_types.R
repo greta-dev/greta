@@ -55,6 +55,9 @@ data_node <- R6Class(
             shape = shape,
             dtype = tf_float()
           )
+          # TF1/2
+          # note - we might not need this anymore as it was to do with
+          # stashing things for use in the feed_dict later
           dag$set_tf_data_list(unbatched_name, value)
         }
         # browser()
