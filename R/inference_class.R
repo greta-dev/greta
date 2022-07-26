@@ -809,6 +809,7 @@ sampler <- R6Class(
       if (self$uses_metropolis) {
 
         # log acceptance probability
+        # browser()
         log_accept_stats <- as.array(batch_results$trace$log_accept_ratio)
         is_accepted <- as.array(batch_results$trace$is_accepted)
         self$accept_history <- rbind(self$accept_history, is_accepted)
@@ -929,8 +930,8 @@ hmc_sampler <- R6Class(
       free_state_size <- length(sampler_param_vec) - 2
       # this will likely get replaced...
 
-      hmc_epsilon <- sampler_param_vec[0]
-      hmc_l <- sampler_param_vec[1]
+      hmc_l <- sampler_param_vec[0]
+      hmc_epsilon <- sampler_param_vec[1]
       hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
 
       # tensors for sampler parameters
