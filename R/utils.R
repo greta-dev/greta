@@ -756,7 +756,7 @@ other_install_fail_msg <- function(error_passed){
       "You can perform the entire installation manually with:",
       "{.code reticulate::install_miniconda()}",
       "Then:",
-      "{.code reticulate::conda_create(envname = 'greta-env', \\
+      "{.code reticulate::conda_create(envname = 'greta-env-tf2', \\
       python_version = '3.8')}",
       "Then:",
       "{.code reticulate::py_install(
@@ -785,7 +785,7 @@ timeout_install_msg <- function(timeout, py_error = NULL){
     "Alternatively, you can perform the entire installation with:",
     "{.code reticulate::install_miniconda()}",
     "Then:",
-    "{.code reticulate::conda_create(envname = 'greta-env', \\
+    "{.code reticulate::conda_create(envname = 'greta-env-tf2', \\
         python_version = '3.8')}",
     "Then:",
     "{.code reticulate::py_install(

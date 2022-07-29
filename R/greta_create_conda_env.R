@@ -8,7 +8,7 @@ greta_create_conda_env <- function(timeout) {
   callr_conda_create <- callr::r_process_options(
     func = function() {
       reticulate::conda_create(
-        envname = "greta-env",
+        envname = "greta-env-tf2",
         python_version = "3.8"
       )
     },
@@ -21,9 +21,9 @@ greta_create_conda_env <- function(timeout) {
     stdout_file = stdout_file,
     stderr_file = stderr_file,
     timeout = timeout,
-    cli_start_msg = "Creating 'greta-env' conda environment using python \\
+    cli_start_msg = "Creating 'greta-env-tf2' conda environment using python \\
                       v3.8, this may take a minute",
-    cli_end_msg = "greta-env environment created!"
+    cli_end_msg = "greta-env-tf2 environment created!"
   )
 
   greta_stash$conda_create_notes <- install_conda_create$output_notes
