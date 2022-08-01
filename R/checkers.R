@@ -851,6 +851,23 @@ check_trace_batch_size <- function(x) {
   x
 }
 
+check_if_greta_model <- function(x) {
+  if (!inherits(x, "greta_model")) {
+    msg <- cli::format_error(
+      c(
+        "{.var x} must be a {.cls greta_model}",
+        "But {.var x} is {.cls {class(x)}}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+
+
 
 complex_error <- function(z) {
   msg <- cli::format_error(
