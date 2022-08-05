@@ -190,7 +190,8 @@ mcmc <- function(model,
                  initial_values = initials(),
                  trace_batch_size = 100) {
 
-  check_if_greta_model(model)
+  # check_if_greta_model(model)
+  check_if_greta_array_in_mcmc(model)
 
   # check the trace batch size
   trace_batch_size <- check_trace_batch_size(trace_batch_size)
