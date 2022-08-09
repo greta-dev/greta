@@ -122,5 +122,6 @@ Collate:
     'checkers.R'
     'test_if_forked_cluster.R'
     'testthat-helpers.R'
+    'utils_device.R'
     'zzz.R'
     'internals.R'

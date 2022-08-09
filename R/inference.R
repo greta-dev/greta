@@ -48,6 +48,9 @@ greta_stash$numerical_messages <- c(
 #'   when tracing the parameters of interest; reduce this to reduce memory
 #'   demands
 #'
+#' @param compute_options Default is to use CPU only with `cpu_only()`. Use
+#'   `gpu_only()` to use only GPU.
+#'
 #' @details For `mcmc()` if `verbose = TRUE`, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
 #'   of model fitting (warmup or sampling). Occasionally, a proposed set of
@@ -188,7 +191,8 @@ mcmc <- function(model,
                  pb_update = 50,
                  one_by_one = FALSE,
                  initial_values = initials(),
-                 trace_batch_size = 100) {
+                 trace_batch_size = 100,
+                 compute_options = cpu_only()) {
 
   # check the trace batch size
   trace_batch_size <- check_trace_batch_size(trace_batch_size)
@@ -220,6 +224,14 @@ mcmc <- function(model,
   dag <- model$dag
 
   chains <- check_positive_integer(chains, "chains")
+
+  # set device
+  the_default_device <- default_device()
+  on.exit(
+    set_device(the_default_device)
+  )
+
+  set_device(compute_options)
 
   # turn initial values into a list if needed (checking the length), and convert
   # from a named list on the constrained scale to free state vectors
