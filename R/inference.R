@@ -228,7 +228,8 @@ mcmc <- function(model,
   # set device
   the_default_device <- default_device()
   on.exit(
-    set_device(the_default_device)
+    expr = set_device(the_default_device),
+    add = TRUE
   )
 
   set_device(compute_options)
