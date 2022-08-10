@@ -6,6 +6,9 @@ inference <- R6Class(
   public = list(
     model = NULL,
 
+    # compute information
+    compute_options = NULL,
+
     # RNG seed
     seed = 1,
 
@@ -295,13 +298,15 @@ sampler <- R6Class(
     initialize = function(initial_values,
                           model,
                           parameters = list(),
-                          seed) {
+                          seed,
+                          compute_options) {
       # initialize the inference method
       super$initialize(
         initial_values = initial_values,
         model = model,
         parameters = parameters,
-        seed = seed
+        seed = seed,
+        compute_options = compute_options
       )
 
       self$n_chains <- nrow(self$free_state)
@@ -558,11 +563,12 @@ sampler <- R6Class(
 
       if (self$n_chains > 1) {
         n_cores <- self$model$dag$n_cores
+        compute_options <- self$compute_options
 
         cores_text <- ifelse(
           test = n_cores == 1,
           yes = "1 core",
-          no = glue::glue("up to {n_cores} cores")
+          no = glue::glue("up to {n_cores} {compute_options} cores")
         )
 
         msg <- glue::glue(

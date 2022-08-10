@@ -259,7 +259,8 @@ mcmc <- function(
       initial_values_split,
       build_sampler,
       sampler,
-      model
+      model,
+      compute_options = compute_options
     )
 
     # add chain info for printing
@@ -287,7 +288,8 @@ mcmc <- function(
       one_by_one = one_by_one,
       n_cores = n_cores,
       from_scratch = TRUE,
-      trace_batch_size = trace_batch_size
+      trace_batch_size = trace_batch_size,
+      compute_options = compute_options
     )
 
     # close `with` setting to control CPU/GPU usage
@@ -304,7 +306,8 @@ run_samplers <- function(samplers,
                          one_by_one,
                          n_cores,
                          from_scratch,
-                         trace_batch_size) {
+                         trace_batch_size,
+                         compute_options) {
 
   # check the future plan is valid, and get information about it
   plan_is <- check_future_plan()
@@ -331,7 +334,7 @@ run_samplers <- function(samplers,
     cores_text <- ifelse(
       test = n_cores == 1,
       yes = "1 core",
-      no = glue::glue("up to {n_cores} cores")
+      no = glue::glue("up to {n_cores} {compute_options} cores")
     )
     msg <- glue::glue(
       "\n",
@@ -373,6 +376,7 @@ run_samplers <- function(samplers,
     progress_bar_log_files <- replicate(n_chain, create_log_file(TRUE))
 
     pb_width <- bar_width(n_chain)
+
     for (chain in chains) {
 
       # set the log files

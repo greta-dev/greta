@@ -537,11 +537,13 @@ prepare_draws <- function(draws, thin = 1) {
   coda::mcmc(draws_df, thin = thin)
 }
 
-build_sampler <- function(initial_values, sampler, model, seed = get_seed()) {
+build_sampler <- function(initial_values, sampler, model, seed = get_seed(),
+                          compute_options) {
   sampler$class$new(initial_values,
                     model,
                     sampler$parameters,
-                    seed = seed
+                    seed = seed,
+                    compute_options = compute_options
   )
 }
 
