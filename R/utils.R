@@ -1001,7 +1001,7 @@ compute_text <- function(n_cores, compute_options){
       test = compute_options == "CPU",
       yes = glue::glue("each on up to {n_cores} {compute_options} cores"),
       # "on GPU"
-      no = glue::glue("{compute_options}")
+      no = glue::glue("on {compute_options}")
     )
   )
 }

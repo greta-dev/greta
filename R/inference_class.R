@@ -567,7 +567,7 @@ sampler <- R6Class(
         cores_text <- compute_text(n_cores, compute_options)
 
         msg <- glue::glue(
-          "\n\nrunning {self$n_chains} chains simultaneously on {cores_text}"
+          "\n\nrunning {self$n_chains} chains simultaneously {cores_text}"
         )
       }
 
