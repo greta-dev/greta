@@ -973,3 +973,20 @@ create_temp_file <- function(path){
   file.create(file_path)
   return(file_path)
 }
+
+#' @title Set GPU or CPU usage
+#' @name gpu_cpu
+#' @description These functions set the use of CPU or GPU inside of greta. They
+#'   simply return either "GPU" or "CPU", but in the future may handle more
+#'   complexity. These functions arepassed to `compute_options` inside of a few
+#'   functions: [mcmc()], [opt()], and [calculate()].
+#' @export
+gpu_only <- function(){
+  "GPU"
+}
+
+#' @rdname gpu_cpu
+#' @export
+cpu_only <- function(){
+  "CPU"
+}

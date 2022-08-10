@@ -21,6 +21,9 @@
 #' @param trace_batch_size the number of posterior samples to process at a time
 #'   when `target` is a `greta_mcmc_list` object; reduce this to
 #'   reduce memory demands
+#' @param compute_options Default is to use CPU only with `cpu_only()`. Use
+#'   `gpu_only()` to use only GPU. In the future we will add more options for
+#'   specifying CPU and GPU use.
 #'
 #' @return Values of the target greta array(s), given values of the greta arrays
 #'   on which they depend (either specified in `values` or sampled from
@@ -141,108 +144,118 @@
 #'   trace_batch_size = Inf
 #' )
 #' }
-calculate <- function(...,
-                      values = list(),
-                      nsim = NULL,
-                      seed = NULL,
-                      precision = c("double", "single"),
-                      trace_batch_size = 100) {
+calculate <- function(
+  ...,
+  values = list(),
+  nsim = NULL,
+  seed = NULL,
+  precision = c("double", "single"),
+  trace_batch_size = 100,
+  compute_options = cpu_only()
+) {
 
-  # turn the provided greta arrays into a list and try to find the names
-  target <- list(...)
-  names <- names(target)
+  # set device to be CPU/GPU for the entire run
+  with(tf$device(compute_options), {
 
-  # see if any names are missing and try to fill them in
-  if (is.null(names)) {
-    names_missing <- rep(TRUE, length(target))
-  } else {
-    names_missing <- names == ""
-  }
+    # turn the provided greta arrays into a list and try to find the names
+    target <- list(...)
+    names <- names(target)
 
-  if (any(names_missing)) {
-    scraped_names <- substitute(list(...))[-1]
-    missing_names <- vapply(scraped_names[names_missing], deparse, "")
-    names[names_missing] <- missing_names
-    names(target) <- names
-  }
+    # see if any names are missing and try to fill them in
+    if (is.null(names)) {
+      names_missing <- rep(TRUE, length(target))
+    } else {
+      names_missing <- names == ""
+    }
 
-  # catch empty lists here, since check_greta_arrays assumes data greta arrays
-  # have been stripped out
-  if (identical(target, list())) {
-    msg <- cli::format_error(
-      c(
-        "{.fun calculate} requires {.cls greta array}s",
-        "no {.cls greta array}s were provided to {.fun calculate}"
+    if (any(names_missing)) {
+      scraped_names <- substitute(list(...))[-1]
+      missing_names <- vapply(scraped_names[names_missing], deparse, "")
+      names[names_missing] <- missing_names
+      names(target) <- names
+    }
+
+    # catch empty lists here, since check_greta_arrays assumes data greta arrays
+    # have been stripped out
+    if (identical(target, list())) {
+      msg <- cli::format_error(
+        c(
+          "{.fun calculate} requires {.cls greta array}s",
+          "no {.cls greta array}s were provided to {.fun calculate}"
+        )
       )
+      stop(
+        msg,
+        call. = FALSE
+      )
+    }
+
+    # check the inputs
+    check_greta_arrays(
+      target,
+      "calculate",
+      "Perhaps you forgot to explicitly name other arguments?"
     )
-    stop(
-      msg,
-      call. = FALSE
-    )
-  }
 
-  # check the inputs
-  check_greta_arrays(
-    target,
-    "calculate",
-    "Perhaps you forgot to explicitly name other arguments?"
-  )
+    # checks and RNG seed setting if we're sampling
+    if (!is.null(nsim)) {
 
-  # checks and RNG seed setting if we're sampling
-  if (!is.null(nsim)) {
+      # check nsim is valid
+      nsim <- check_positive_integer(nsim, "nsim")
 
-    # check nsim is valid
-    nsim <- check_positive_integer(nsim, "nsim")
+      # if an RNG seed was provided use it and reset the RNG on exiting
+      if (!is.null(seed)) {
+        if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+          runif(1)
+        }
 
-    # if an RNG seed was provided use it and reset the RNG on exiting
-    if (!is.null(seed)) {
-      if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-        runif(1)
+        r_seed <- get(".Random.seed", envir = .GlobalEnv)
+        on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
+        set.seed(seed)
       }
-
-      r_seed <- get(".Random.seed", envir = .GlobalEnv)
-      on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
-      set.seed(seed)
     }
-  }
 
-  # set precision
-  tf_float <- switch(match.arg(precision),
-    double = "float64",
-    single = "float32"
-  )
-
-  if (inherits(values, "greta_mcmc_list")) {
-    result <- calculate_greta_mcmc_list(
-      target = target,
-      values = values,
-      nsim = nsim,
-      tf_float = tf_float,
-      trace_batch_size = trace_batch_size
+    # set precision
+    tf_float <- switch(
+      match.arg(precision),
+      double = "float64",
+      single = "float32"
     )
-  } else {
-    result <- calculate_list(
-      target = target,
-      values = values,
-      nsim = nsim,
-      tf_float = tf_float,
-      env = parent.frame()
-    )
-  }
 
-  if (!inherits(result, "greta_mcmc_list")) {
-
-    # if it's not mcmc samples, make sure the results are in the right order
-    # (tensorflow order seems to be platform specific?!?)
-    order <- match(names(result), names(target))
-    result <- result[order]
-
-    # if the result wasn't mcmc samples or simulations, drop the batch dimension
-    if (is.null(nsim)) {
-      result <- lapply(result, drop_first_dim)
+    if (inherits(values, "greta_mcmc_list")) {
+      result <- calculate_greta_mcmc_list(
+        target = target,
+        values = values,
+        nsim = nsim,
+        tf_float = tf_float,
+        trace_batch_size = trace_batch_size
+      )
+    } else {
+      result <- calculate_list(
+        target = target,
+        values = values,
+        nsim = nsim,
+        tf_float = tf_float,
+        env = parent.frame()
+      )
     }
-  }
-  result
+
+    if (!inherits(result, "greta_mcmc_list")) {
+
+      # if it's not mcmc samples, make sure the results are in the right order
+      # (tensorflow order seems to be platform specific?!?)
+      order <- match(names(result), names(target))
+      result <- result[order]
+
+      # if the result wasn't mcmc samples or simulations, drop the batch dimension
+      if (is.null(nsim)) {
+        result <- lapply(result, drop_first_dim)
+      }
+    }
+    result
+
+    # close tf$device call to use CPU or GPU
+  })
 }
 
 #' @importFrom coda thin

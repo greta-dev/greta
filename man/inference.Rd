@@ -21,7 +21,8 @@ mcmc(
   pb_update = 50,
   one_by_one = FALSE,
   initial_values = initials(),
-  trace_batch_size = 100
+  trace_batch_size = 100,
+  compute_options = cpu_only()
 )
 
 stashed_samples()
@@ -46,7 +47,8 @@ opt(
   tolerance = 1e-06,
   initial_values = initials(),
   adjust = TRUE,
-  hessian = FALSE
+  hessian = FALSE,
+  compute_options = cpu_only()
 )
 }
 \arguments{
@@ -88,6 +90,10 @@ starting point for sampling/optimisation.}
 \item{trace_batch_size}{the number of posterior samples to process at a time
 when tracing the parameters of interest; reduce this to reduce memory
 demands}
+
+\item{compute_options}{Default is to use CPU only with \code{cpu_only()}. Use
+\code{gpu_only()} to use only GPU. In the future we will add more options for
+specifying CPU and GPU use.}
 
 \item{draws}{a greta_mcmc_list object returned by \code{mcmc} or
 \code{stashed_samples}}

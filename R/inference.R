@@ -49,7 +49,8 @@ greta_stash$numerical_messages <- c(
 #'   demands
 #'
 #' @param compute_options Default is to use CPU only with `cpu_only()`. Use
-#'   `gpu_only()` to use only GPU.
+#'   `gpu_only()` to use only GPU. In the future we will add more options for
+#'   specifying CPU and GPU use.
 #'
 #' @details For `mcmc()` if `verbose = TRUE`, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
@@ -180,115 +181,117 @@ greta_stash$numerical_messages <- c(
 #' o <- opt(m3, hessian = TRUE)
 #' o$hessian
 #' }
-mcmc <- function(model,
-                 sampler = hmc(),
-                 n_samples = 1000,
-                 thin = 1,
-                 warmup = 1000,
-                 chains = 4,
-                 n_cores = NULL,
-                 verbose = TRUE,
-                 pb_update = 50,
-                 one_by_one = FALSE,
-                 initial_values = initials(),
-                 trace_batch_size = 100,
-                 compute_options = cpu_only()) {
+mcmc <- function(
+  model,
+  sampler = hmc(),
+  n_samples = 1000,
+  thin = 1,
+  warmup = 1000,
+  chains = 4,
+  n_cores = NULL,
+  verbose = TRUE,
+  pb_update = 50,
+  one_by_one = FALSE,
+  initial_values = initials(),
+  trace_batch_size = 100,
+  compute_options = cpu_only()
+) {
 
-  # check the trace batch size
-  trace_batch_size <- check_trace_batch_size(trace_batch_size)
+  # set device to be CPU/GPU for the entire run
+  with(tf$device(compute_options), {
 
-  # find variable names to label samples
-  target_greta_arrays <- model$target_greta_arrays
-  names <- names(target_greta_arrays)
+    # check the trace batch size
+    trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
-  # check they're not data nodes, provide a useful error message if they are
-  are_data <- vapply(target_greta_arrays,
-    function(x) inherits(get_node(x), "data_node"),
-    FUN.VALUE = FALSE
-  )
+    # find variable names to label samples
+    target_greta_arrays <- model$target_greta_arrays
+    names <- names(target_greta_arrays)
 
-  if (any(are_data)) {
-    msg <- cli::format_error(
-      c(
-        "data {.cls greta_array}s cannot be sampled",
-        "{.var {names[are_data]}} \\
-        {?is a data/are data} {.cls greta_array}(s)"
-      )
+    # check they're not data nodes, provide a useful error message if they are
+    are_data <- vapply(
+      target_greta_arrays,
+      function(x) inherits(get_node(x), "data_node"),
+      FUN.VALUE = FALSE
     )
-    stop(
-      msg,
-      call. = FALSE)
-  }
 
-  # get the dag containing the target nodes
-  dag <- model$dag
+    if (any(are_data)) {
+      msg <- cli::format_error(
+        c(
+          "data {.cls greta_array}s cannot be sampled",
+          "{.var {names[are_data]}} \\
+        {?is a data/are data} {.cls greta_array}(s)"
+        )
+      )
+      stop(
+        msg,
+        call. = FALSE
+      )
+    }
 
-  chains <- check_positive_integer(chains, "chains")
+    # get the dag containing the target nodes
+    dag <- model$dag
 
-  # set device
-  the_default_device <- default_device()
-  on.exit(
-    expr = set_device(the_default_device),
-    add = TRUE
-  )
+    chains <- check_positive_integer(chains, "chains")
 
-  set_device(compute_options)
+    # turn initial values into a list if needed (checking the length), and convert
+    # from a named list on the constrained scale to free state vectors
+    initial_values <- prep_initials(initial_values, chains, dag)
 
-  # turn initial values into a list if needed (checking the length), and convert
-  # from a named list on the constrained scale to free state vectors
-  initial_values <- prep_initials(initial_values, chains, dag)
+    # determine the number of separate samplers to spin up, based on the future
+    # plan
+    max_samplers <- future::nbrOfWorkers()
 
-  # determine the number of separate samplers to spin up, based on the future
-  # plan
-  max_samplers <- future::nbrOfWorkers()
+    # divide chains up between the workers
+    chain_assignment <- sort(rep(
+      seq_len(max_samplers),
+      length.out = chains
+    ))
 
-  # divide chains up between the workers
-  chain_assignment <- sort(rep(seq_len(max_samplers),
-    length.out = chains
-  ))
+    # divide the initial values between them
+    initial_values_split <- split(initial_values, chain_assignment)
 
-  # divide the initial values between them
-  initial_values_split <- split(initial_values, chain_assignment)
+    n_samplers <- length(initial_values_split)
 
-  n_samplers <- length(initial_values_split)
+    # create a sampler object for each parallel job, using these (possibly NULL)
+    # initial values
+    # browser()
+    samplers <- lapply(
+      initial_values_split,
+      build_sampler,
+      sampler,
+      model
+    )
 
-  # create a sampler object for each parallel job, using these (possibly NULL)
-  # initial values
-  # browser()
-  samplers <- lapply(
-    initial_values_split,
-    build_sampler,
-    sampler,
-    model
-  )
+    # add chain info for printing
+    for (i in seq_len(n_samplers)) {
+      samplers[[i]]$sampler_number <- i
+      samplers[[i]]$n_samplers <- n_samplers
+    }
 
-  # add chain info for printing
-  for (i in seq_len(n_samplers)) {
-    samplers[[i]]$sampler_number <- i
-    samplers[[i]]$n_samplers <- n_samplers
-  }
+    # if verbose = FALSE, make pb_update as big as possible to speed up sampling
+    if (!verbose) {
+      pb_update <- Inf
+    }
 
-  # if verbose = FALSE, make pb_update as big as possible to speed up sampling
-  if (!verbose) {
-    pb_update <- Inf
-  }
+    # now make it finite
+    pb_update <- min(pb_update, max(warmup, n_samples))
+    pb_update <- max(pb_update, thin + 1)
 
-  # now make it finite
-  pb_update <- min(pb_update, max(warmup, n_samples))
-  pb_update <- max(pb_update, thin + 1)
+    run_samplers(
+      samplers = samplers,
+      n_samples = n_samples,
+      thin = thin,
+      warmup = warmup,
+      verbose = verbose,
+      pb_update = pb_update,
+      one_by_one = one_by_one,
+      n_cores = n_cores,
+      from_scratch = TRUE,
+      trace_batch_size = trace_batch_size
+    )
 
-  run_samplers(
-    samplers = samplers,
-    n_samples = n_samples,
-    thin = thin,
-    warmup = warmup,
-    verbose = verbose,
-    pb_update = pb_update,
-    one_by_one = one_by_one,
-    n_cores = n_cores,
-    from_scratch = TRUE,
-    trace_batch_size = trace_batch_size
-  )
+    # close `with` setting to control CPU/GPU usage
+  })
 }
 
 #' @importFrom future future resolved value
@@ -844,6 +847,9 @@ print.initials <- function(x, ...) {
 #'   estimates, or `TRUE` for maximum *a posteriori* estimates.
 #' @param hessian whether to return a list of *analytically* differentiated
 #'   Hessian arrays for the parameters
+#' @param compute_options Default is to use CPU only with `cpu_only()`. Use
+#'   `gpu_only()` to use only GPU. In the future we will add more options for
+#'   specifying CPU and GPU use.
 #'
 #' @details Because `opt()` acts on a list of greta arrays with possibly
 #'   varying dimension, the `par` and `hessian` objects returned by
@@ -876,7 +882,11 @@ opt <- function(model,
                 tolerance = 1e-6,
                 initial_values = initials(),
                 adjust = TRUE,
-                hessian = FALSE) {
+                hessian = FALSE,
+                compute_options = cpu_only()) {
+
+  # set device to be CPU/GPU for the entire run
+  with(tf$device(compute_options), {
 
   # check initial values. Can up the number of chains in the future to handle
   # random restarts
@@ -908,6 +918,9 @@ opt <- function(model,
   }
 
   outputs
+
+  # close setting of CPU/GPU usage
+  })
 }
 
 inference_module <- module(dag_class,

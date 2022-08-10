@@ -10,7 +10,8 @@ calculate(
   nsim = NULL,
   seed = NULL,
   precision = c("double", "single"),
-  trace_batch_size = 100
+  trace_batch_size = 100,
+  compute_options = cpu_only()
 )
 }
 \arguments{
@@ -32,6 +33,10 @@ simulation so as to generate a reproducible sample}
 \item{trace_batch_size}{the number of posterior samples to process at a time
 when \code{target} is a \code{greta_mcmc_list} object; reduce this to
 reduce memory demands}
+
+\item{compute_options}{Default is to use CPU only with \code{cpu_only()}. Use
+\code{gpu_only()} to use only GPU. In the future we will add more options for
+specifying CPU and GPU use.}
 }
 \value{
 Values of the target greta array(s), given values of the greta arrays
