@@ -564,11 +564,7 @@ sampler <- R6Class(
         n_cores <- self$model$dag$n_cores
         compute_options <- self$compute_options
 
-        cores_text <- ifelse(
-          test = n_cores == 1,
-          yes = "1 core",
-          no = glue::glue("up to {n_cores} {compute_options} cores")
-        )
+        cores_text <- compute_text(n_cores, compute_options)
 
         msg <- glue::glue(
           "\n\nrunning {self$n_chains} chains simultaneously on {cores_text}"

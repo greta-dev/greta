@@ -992,3 +992,16 @@ gpu_only <- function(){
 cpu_only <- function(){
   "CPU"
 }
+
+compute_text <- function(n_cores, compute_options){
+  ifelse(
+    test = n_cores == 1,
+    yes = "each on 1 core",
+    no = ifelse(
+      test = compute_options == "CPU",
+      yes = glue::glue("each on up to {n_cores} {compute_options} cores"),
+      # "on GPU"
+      no = glue::glue("{compute_options}")
+    )
+  )
+}

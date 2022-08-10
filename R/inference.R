@@ -331,15 +331,11 @@ run_samplers <- function(samplers,
     !is.null(greta_stash$callbacks)
 
   if (plan_is$parallel & plan_is$local & length(samplers) > 1) {
-    cores_text <- ifelse(
-      test = n_cores == 1,
-      yes = "1 core",
-      no = glue::glue("up to {n_cores} {compute_options} cores")
-    )
+    cores_text <- compute_text(n_cores, compute_options)
     msg <- glue::glue(
       "\n",
       "running {length(samplers)} samplers in parallel, ",
-      "each on {cores_text}",
+      "{cores_text}",
       "\n\n"
     )
     message(msg)
