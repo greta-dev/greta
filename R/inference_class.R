@@ -305,8 +305,7 @@ sampler <- R6Class(
         initial_values = initial_values,
         model = model,
         parameters = parameters,
-        seed = seed,
-        compute_options = compute_options
+        seed = seed
       )
 
       self$n_chains <- nrow(self$free_state)

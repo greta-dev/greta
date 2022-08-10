@@ -404,6 +404,7 @@ run_samplers <- function(samplers,
   # dispatch all the jobs
   for (chain in chains) {
     sampler <- samplers[[chain]]
+    sampler$compute_options <- compute_options
     samplers[[chain]] <- dispatch(
       sampler$run_chain(
         n_samples = n_samples,
