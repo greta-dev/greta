@@ -862,6 +862,52 @@ Conj.greta_array <- complex_error
 #' @export
 Mod.greta_array <- complex_error
 
+check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays, dag) {
+  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
+  # check there are no variables without distributions (or whose children have
+  # distributions - for lkj & wishart) that aren't given fixed values
+  variables <- dag$node_list[dag$node_types == "variable"]
+  have_distributions <- vapply(
+    variables,
+    has_distribution,
+    FUN.VALUE = logical(1)
+  )
+  any_child_has_distribution <- function(variable) {
+    have_distributions <- vapply(
+      variable$children,
+      has_distribution,
+      FUN.VALUE = logical(1)
+    )
+    any(have_distributions)
+  }
+  children_have_distributions <- vapply(
+    variables,
+    any_child_has_distribution,
+    FUN.VALUE = logical(1)
+  )
+
+  unsampleable <- !have_distributions & !children_have_distributions
+  fixed_node_names <- vapply(
+    fixed_nodes,
+    member,
+    "unique_name",
+    FUN.VALUE = character(1)
+  )
+  unfixed <- !names(variables) %in% fixed_node_names
+
+  if (any(unsampleable & unfixed)) {
+    msg <- cli::format_error(
+      # NOTE:
+      # is it possible to identify the names of these arrays or variables?
+      "the target {.cls greta_array}s are related to variables that do not \\
+        have distributions so cannot be sampled"
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
 
 
 checks_module <- module(

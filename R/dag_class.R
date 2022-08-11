@@ -267,6 +267,7 @@ dag_class <- R6Class(
       ## NOTE: when calling `model` there is no `free_state` in `tf_environment`
       ## Trying out something where the free state is set if there isn't one?
 
+      # browser()
       with(
         data = self$tf_environment,
         batch_size <- tf$shape(self$tf_environment$free_state)[0]
@@ -425,7 +426,9 @@ dag_class <- R6Class(
       # and I think we can remove define_batch_size since
       # this should just be passed as an argument later?
 
-      self$define_batch_size()
+      if (self$mode != "all_sampling") {
+        self$define_batch_size()
+      }
 
       self$define_tf_body(target_nodes = target_nodes)
 

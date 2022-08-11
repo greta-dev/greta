@@ -441,93 +441,80 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   }
 
   all_greta_arrays <- c(fixed_greta_arrays, target)
+
+  # TF1/2
+  # wrap from here to ^^^ in a function to then to tf_function on
+  # and pass the all_greta arrays and values arguments
   # define the dag and TF graph
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
 
-  # convert to nodes, and add tensor names to values
-  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
-  names(values) <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
-
-  # change dag mode to sampling
-  dag$mode <- "all_sampling"
-
-  # this is taking advantage of non-eager mode
-  # TF1/2, might need to use some of the tensorflow creation function
-  # approaches (in as_tf_function + generate_log_prob_function)
-  dag$define_tf()
-  tfe <- dag$tf_environment
-
-  # build and send a dict for the fixed values
-  fixed_nodes <- lapply(
-    fixed_greta_arrays,
-    get_node
-  )
-
-  names(values) <- vapply(fixed_nodes,
-    dag$tf_name,
-    FUN.VALUE = ""
-  )
-
-  # check we can do the calculation
+  browser()
   if (stochastic) {
 
-    # check there are no variables without distributions (or whose children have
-    # distributions - for lkj & wishart) that aren't given fixed values
-    variables <- dag$node_list[dag$node_types == "variable"]
-    have_distributions <- vapply(variables,
-      has_distribution,
-      FUN.VALUE = logical(1)
-    )
-    any_child_has_distribution <- function(variable) {
-      have_distributions <- vapply(variable$children,
-        has_distribution,
-        FUN.VALUE = logical(1)
-      )
-      any(have_distributions)
-    }
-    children_have_distributions <- vapply(variables,
-      any_child_has_distribution,
-      FUN.VALUE = logical(1)
-    )
+    check_if_unsampleable_and_unfixed(fixed_greta_arrays, dag)
 
-    unsampleable <- !have_distributions & !children_have_distributions
-    fixed_node_names <- vapply(fixed_nodes,
-      member,
-      "unique_name",
-      FUN.VALUE = character(1)
-    )
-    unfixed <- !names(variables) %in% fixed_node_names
-
-    if (any(unsampleable & unfixed)) {
-      msg <- cli::format_error(
-        # NOTE:
-        # is it possible to identify the names of these arrays or variables?
-        "the target {.cls greta_array}s are related to variables that do not \\
-        have distributions so cannot be sampled"
-      )
-      stop(
-        msg,
-        call. = FALSE
-      )
-    }
   } else {
 
     # check there are no unspecified variables on which the target depends
     lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
   }
+  ###
+
+
+  # change dag mode to sampling
+  dag$mode <- "all_sampling"
+
+  # convert to nodes, and add tensor names to values
+  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
+  value_names <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
+
+  tfe <- dag$tf_environment
+
+  mapply(
+    FUN = assign,
+    value_names,
+    values,
+    MoreArgs = list(
+      envir = tfe
+    )
+  )
+
+  # add the batch size to the data list
+  # TF1/2
+  # is this where we can now specify the batch size?
+  batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
+  assign("batch_size", batch_size, envir = tfe)
+
+  # this is taking advantage of non-eager mode
+  # TF1/2, might need to use some of the tensorflow creation function
+  # approaches (in as_tf_function + generate_log_prob_function)
+  dag$define_tf()
+
+  browser()
 
   # look up the tf names of the target greta arrays (under sampling)
   # create an object in the environment that's a list of these, and sample that
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
   target_tensor_list <- lapply(target_names_list, get, envir = tfe)
-  assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)
+  # ^^^ - in the function
 
-  # add the batch size to the data list
+  # TF 1/2 - could potentially not run this list in the correct way, in that
+  # it might result in running it twice with different seeds, rather than
+  # simultaneously
+  # assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)
+
   # TF1/2
-  # is this where we can now specify the batch size?
-  batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
-  dag$set_tf_data_list("batch_size", batch_size)
+  # build and send a dict for the fixed values
+  # fixed_nodes <- lapply(
+  #   fixed_greta_arrays,
+  #   get_node
+  # )
+  #
+  # names(values) <- vapply(fixed_nodes,
+  #   dag$tf_name,
+  #   FUN.VALUE = ""
+  # )
 
   # add values or data not specified by the user
   data_list <- dag$get_tf_data_list()
