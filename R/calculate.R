@@ -442,13 +442,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   all_greta_arrays <- c(fixed_greta_arrays, target)
 
-  # TF1/2
-  # wrap from here to ^^^ in a function to then to tf_function on
-  # and pass the all_greta arrays and values arguments
-  # define the dag and TF graph
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
 
-  browser()
   if (stochastic) {
 
     check_if_unsampleable_and_unfixed(fixed_greta_arrays, dag)
@@ -458,8 +453,61 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     # check there are no unspecified variables on which the target depends
     lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
   }
-  ###
 
+  calculate_target_tensor_list(
+    dag,
+    fixed_greta_arrays,
+    values,
+    stochastic,
+    target
+  )
+  # TF 1/2 - could potentially not run this list in the correct way, in that
+  # it might result in running it twice with different seeds, rather than
+  # simultaneously
+  # assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)
+
+  # TF1/2
+  # build and send a dict for the fixed values
+  # fixed_nodes <- lapply(
+  #   fixed_greta_arrays,
+  #   get_node
+  # )
+  #
+  # names(values) <- vapply(fixed_nodes,
+  #   dag$tf_name,
+  #   FUN.VALUE = ""
+  # )
+#
+#   # add values or data not specified by the user
+#   data_list <- dag$get_tf_data_list()
+#   missing <- !names(data_list) %in% names(values)
+#
+#   # send list to tf environment and roll into a dict
+#   values <- lapply(values, add_first_dim)
+#   values <- lapply(values, tile_first_dim, batch_size)
+#
+#   dag$build_feed_dict(values, data_list = data_list[missing])
+#
+#   # TF1/2
+#   # This object and the tfe contain the calls we want to make
+#   # we want to instead run the tfp function here with the feed dict
+#   # just being the arguments from the function.
+#   # run the sampling
+#   dag$tf_sess_run("calculate_target_tensor_list", as_text = TRUE)
+}
+
+### fun
+calculate_target_tensor_list <- function(
+  dag,
+  fixed_greta_arrays,
+  values,
+  stochastic,
+  target
+) {
+  # TF1/2
+  # wrap from here to ^^^ in a function to then to tf_function on
+  # and pass the all_greta arrays and values arguments
+  # define the dag and TF graph
 
   # change dag mode to sampling
   dag$mode <- "all_sampling"
@@ -490,46 +538,13 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   # approaches (in as_tf_function + generate_log_prob_function)
   dag$define_tf()
 
-  browser()
-
   # look up the tf names of the target greta arrays (under sampling)
   # create an object in the environment that's a list of these, and sample that
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
   target_tensor_list <- lapply(target_names_list, get, envir = tfe)
-  # ^^^ - in the function
 
-  # TF 1/2 - could potentially not run this list in the correct way, in that
-  # it might result in running it twice with different seeds, rather than
-  # simultaneously
-  # assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)
-
-  # TF1/2
-  # build and send a dict for the fixed values
-  # fixed_nodes <- lapply(
-  #   fixed_greta_arrays,
-  #   get_node
-  # )
-  #
-  # names(values) <- vapply(fixed_nodes,
-  #   dag$tf_name,
-  #   FUN.VALUE = ""
-  # )
-
-  # add values or data not specified by the user
-  data_list <- dag$get_tf_data_list()
-  missing <- !names(data_list) %in% names(values)
-
-  # send list to tf environment and roll into a dict
-  values <- lapply(values, add_first_dim)
-  values <- lapply(values, tile_first_dim, batch_size)
-
-  dag$build_feed_dict(values, data_list = data_list[missing])
-
-  # TF1/2
-  # This object and the tfe contain the calls we want to make
-  # we want to instead run the tfp function here with the feed dict
-  # just being the arguments from the function.
-  # run the sampling
-  dag$tf_sess_run("calculate_target_tensor_list", as_text = TRUE)
+  return(target_tensor_list)
 }
+
+### end fun
