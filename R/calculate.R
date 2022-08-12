@@ -461,7 +461,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     fixed_greta_arrays,
     values,
     stochastic,
-    target
+    target,
+    nsim
   )
   # TF 1/2 - could potentially not run this list in the correct way, in that
   # it might result in running it twice with different seeds, rather than
@@ -498,13 +499,14 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 #   dag$tf_sess_run("calculate_target_tensor_list", as_text = TRUE)
 }
 
-### fun
+
 calculate_target_tensor_list <- function(
   dag,
   fixed_greta_arrays,
   values,
   stochastic,
-  target
+  target,
+  nsim
 ) {
   # TF1/2
   # wrap from here to ^^^ in a function to then to tf_function on
@@ -548,5 +550,3 @@ calculate_target_tensor_list <- function(
 
   return(target_tensor_list)
 }
-
-### end fun
