@@ -454,6 +454,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
   }
 
+  # TF1/2
+  # need to wrap this in tf_function I think?
   calculate_target_tensor_list(
     dag,
     fixed_greta_arrays,
