@@ -134,7 +134,12 @@ flatten <- function(x) {
 
 # return an integer to pass on as an RNG seed
 get_seed <- function() {
-  sample.int(1e12, 1)
+  # if n is >= 2^31 then the vector is represented as a double, and causes
+  # a bunch of TF mechanics to break as they require integers
+  sample.int(
+    n = 2^30,
+    size = 1
+    )
 }
 
 # does a pointer exist (as a named object) and is it from the current session
