@@ -574,7 +574,6 @@ dag_class <- R6Class(
       # we need some way to lexically scope the
       # batch size and the data
       function(free_state) {
-        # browser()
         # temporarily define a new environment
         tfe_old <- self$tf_environment
         on.exit(self$tf_environment <- tfe_old)

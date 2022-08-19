@@ -35,7 +35,6 @@ inference <- R6Class(
                           parameters = list(),
                           seed = get_seed()) {
 
-      # browser()
       # flush the environment and redefine the tensorflow graph if needed
       # TF 1/2
       # we can probably remove this as we don't build the TF graph now

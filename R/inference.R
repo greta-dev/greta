@@ -200,6 +200,7 @@ mcmc <- function(
   # set device to be CPU/GPU for the entire run
   with(tf$device(compute_options), {
 
+    # browser()
     # check the trace batch size
     trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
@@ -254,7 +255,6 @@ mcmc <- function(
 
     # create a sampler object for each parallel job, using these (possibly NULL)
     # initial values
-    # browser()
     samplers <- lapply(
       initial_values_split,
       build_sampler,
