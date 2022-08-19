@@ -590,7 +590,8 @@ tf_scalar_bijector <- function(dim, lower, upper) {
 
 tf_scalar_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(lower)),
+    tfp$bijectors$Shift(fl(lower)),
+    # tfp$bijectors$AffineScalar(shift = fl(lower)),
     tfp$bijectors$Exp(),
     dim = dim
   )
