@@ -184,6 +184,9 @@ operation_node <- R6Class(
       }
 
       # assign it in the environment
+      # TF1/2
+      # this is where it errors when debugging calculate_mcmc_list
+      browser()
       assign(tf_name, tensor, envir = dag$tf_environment)
     }
   )

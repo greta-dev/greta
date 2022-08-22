@@ -265,6 +265,8 @@ calculate_greta_mcmc_list <- function(target,
                                       nsim,
                                       tf_float,
                                       trace_batch_size) {
+
+  # assign the free state
   stochastic <- !is.null(nsim)
 
   # check trace_batch_size is valid
@@ -273,6 +275,8 @@ calculate_greta_mcmc_list <- function(target,
   # get the free state draws and old dag from the samples
   model_info <- get_model_info(values)
   mcmc_dag <- model_info$model$dag
+
+  # this is the free state MCMC object
   draws <- model_info$raw_draws
 
   # build a new dag from the targets
@@ -365,8 +369,6 @@ calculate_greta_mcmc_list <- function(target,
     }
   }
 
-  dag$define_tf()
-
   dag$target_nodes <- lapply(target, get_node)
   names(dag$target_nodes) <- names(target)
 
@@ -393,6 +395,7 @@ calculate_greta_mcmc_list <- function(target,
     draws <- draws[rows, , drop = FALSE]
 
     # add the batch size to the data list
+    # assign
     dag$set_tf_data_list("batch_size", as.integer(nsim))
 
     # pass these values in as the free state
@@ -407,6 +410,7 @@ calculate_greta_mcmc_list <- function(target,
     # for deterministic posterior prediction, just trace the target for each
     # chain
     values <- lapply(draws,
+  #double check the trace value part - can pronbanly just do that here
       dag$trace_values,
       trace_batch_size = trace_batch_size
     )
@@ -422,6 +426,9 @@ calculate_greta_mcmc_list <- function(target,
     trace <- coda::mcmc.list(trace)
     trace <- as_greta_mcmc_list(trace, model_info)
   }
+
+  browser()
+  dag$define_tf()
 
   trace
 }
@@ -456,7 +463,7 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   # TF1/2
   # need to wrap this in tf_function I think?
-  calculate_target_tensor_list(
+  values <- calculate_target_tensor_list(
     dag,
     fixed_greta_arrays,
     values,
@@ -464,6 +471,17 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     target,
     nsim
   )
+
+  # TF1/2
+  # I think we need to check on these values - it might be something like this
+  # except that we need to do something with batch_size, since I'm fairly
+  # sure we just removed batch_size completely in this version
+  #   # send list to tf environment and roll into a dict
+  #   values <- lapply(values, add_first_dim)
+  #   values <- lapply(values, tile_first_dim, batch_size)
+
+
+  return(values)
   # TF 1/2 - could potentially not run this list in the correct way, in that
   # it might result in running it twice with different seeds, rather than
   # simultaneously
@@ -522,6 +540,15 @@ calculate_target_tensor_list <- function(
 
   tfe <- dag$tf_environment
 
+  # add the batch size to the data list
+  # TF1/2
+  # is this where we can now specify the batch size?
+  batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
+  assign("batch_size", batch_size, envir = tfe)
+
+  values <- lapply(values, add_first_dim)
+  values <- lapply(values, tile_first_dim, batch_size)
+
   mapply(
     FUN = assign,
     value_names,
@@ -530,12 +557,6 @@ calculate_target_tensor_list <- function(
       envir = tfe
     )
   )
-
-  # add the batch size to the data list
-  # TF1/2
-  # is this where we can now specify the batch size?
-  batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
-  assign("batch_size", batch_size, envir = tfe)
 
   # this is taking advantage of non-eager mode
   # TF1/2, might need to use some of the tensorflow creation function
@@ -547,6 +568,7 @@ calculate_target_tensor_list <- function(
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
   target_tensor_list <- lapply(target_names_list, get, envir = tfe)
+  target_tensor_list_array <- lapply(target_tensor_list, as.array)
 
-  return(target_tensor_list)
+  return(target_tensor_list_array)
 }

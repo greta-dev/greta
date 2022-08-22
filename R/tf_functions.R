@@ -588,6 +588,12 @@ tf_scalar_bijector <- function(dim, lower, upper) {
   )
 }
 
+tfb_shift_scale <- function(x, y){
+  tfb_shift <- tfp$bijectors$Shift(fl(x))
+  tfb_shift_scale <- tfb_shift(fl(y))
+  tfb_shift_scale
+}
+
 tf_scalar_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
     tfp$bijectors$Shift(fl(lower)),
@@ -599,7 +605,9 @@ tf_scalar_pos_bijector <- function(dim, lower, upper) {
 
 tf_scalar_neg_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(upper), scale = fl(-1)),
+    # tfp$bijectors$AffineScalar(shift = fl(upper), scale = fl(-1)),
+    tfb_shift_scale(fl(upper), fl(-1)),
+    tfb_shif_tscale,
     tfp$bijectors$Exp(),
     dim = dim
   )
@@ -607,7 +615,8 @@ tf_scalar_neg_bijector <- function(dim, lower, upper) {
 
 tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(lower), scale = fl(upper - lower)),
+    # tfp$bijectors$AffineScalar(shift = fl(lower), scale = fl(upper - lower)),
+    tfb_shift_scale(fl(upper), fl(upper - lower)),
     tfp$bijectors$Sigmoid(),
     dim = dim
   )
