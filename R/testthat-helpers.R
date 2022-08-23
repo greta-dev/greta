@@ -101,7 +101,8 @@ run_greta_op <- function(greta_op, a, b, other_args,
 # variable greta arrays via the free state parameter, optionally with batches
 grab_via_free_state <- function(target, values, batches = 1) {
   dag <- dag_class$new(list(target))
-  dag$define_tf()
+  # TF1/2 - maybe don't need this?
+  # dag$define_tf()
   inits <- do.call(initials, values)
   inits_flat <- prep_initials(inits, 1, dag)[[1]]
   if (batches > 1) {
