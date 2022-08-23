@@ -1010,3 +1010,81 @@ compute_text <- function(n_cores, compute_options){
     )
   )
 }
+
+connected_to_draws <- function(dag, mcmc_dag) {
+  names(dag$node_list) %in% names(mcmc_dag$node_list)
+}
+
+check_commanality_btn_dags <- function(dag, mcmc_dag) {
+  if (!any(connected_to_draws(dag, mcmc_dag))) {
+    msg <- cli::format_error(
+      "the target {.cls greta array}s do not appear to be connected to those \\
+      in the {.cls greta_mcmc_list} object"
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+# see if the new dag introduces any new variables
+check_dag_introduces_new_variables <- function(dag, mcmc_dag) {
+  new_types <- dag$node_types[!connected_to_draws(dag, mcmc_dag)]
+  if (any(new_types == "variable")) {
+    msg <- cli::format_error(
+      c(
+        "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
+          samples",
+        "the target {.cls greta array}s are related to new variables that \\
+          are not in the MCMC samples, so cannot be calculated from the \\
+          samples alone.",
+        "Set {.arg nsim} if you want to sample them conditionally on the \\
+          MCMC samples"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_targets_stochastic_and_not_sampled <- function(
+  target,
+  mcmc_dag_variables
+) {
+  target_nodes <- lapply(target, get_node)
+  target_node_names <- vapply(
+    target_nodes,
+    member,
+    "unique_name",
+    FUN.VALUE = character(1)
+  )
+  existing_variables <- target_node_names %in% names(mcmc_dag_variables)
+  have_distributions <- vapply(
+    target_nodes,
+    has_distribution,
+    FUN.VALUE = logical(1)
+  )
+  new_stochastics <- have_distributions & !existing_variables
+  if (any(new_stochastics)) {
+    n_stoch <- sum(new_stochastics)
+    msg <- cli::format_error(
+      c(
+        "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
+          samples",
+        "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
+          {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
+          {?have distributions and are/has a distribution and is} not in the \\
+          MCMC samples, so cannot be calculated from the samples alone.",
+        "Set {.arg nsim} if you want to sample them conditionally on the \\
+          MCMC samples"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
