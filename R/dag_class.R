@@ -427,12 +427,11 @@ dag_class <- R6Class(
       # this should just be passed as an argument later?
 
       # TF1/2
-      # This is where I looked through
-      # if (self$mode != "all_sampling") {
-      #   self$define_batch_size()
-      # }
-
-      browser()
+      # This is where I looked through - I suspect we don't need to do this?
+      if (self$mode != "all_sampling") {
+        # browser()
+        self$define_batch_size()
+      }
 
       self$define_tf_body(target_nodes = target_nodes)
 

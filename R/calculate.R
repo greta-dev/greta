@@ -299,74 +299,18 @@ calculate_greta_mcmc_list <- function(target,
   dag$variables_without_free_state <- dag_variables[stateless_names]
 
   # check there's some commonality between the two dags
-  connected_to_draws <- names(dag$node_list) %in% names(mcmc_dag$node_list)
-  if (!any(connected_to_draws)) {
-    msg <- cli::format_error(
-      "the target {.cls greta array}s do not appear to be connected to those \\
-      in the {.cls greta_mcmc_list} object"
-    )
-    stop(
-      msg,
-      call. = FALSE
-    )
-  }
+  check_commanality_btn_dags(dag, mcmc_dag)
 
   # if they didn't specify nsim, check we can deterministically compute the
   # targets from the draws
   if (!stochastic) {
 
     # see if the new dag introduces any new variables
-    new_types <- dag$node_types[!connected_to_draws]
-    if (any(new_types == "variable")) {
-      msg <- cli::format_error(
-        c(
-          "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
-          samples",
-          "the target {.cls greta array}s are related to new variables that \\
-          are not in the MCMC samples, so cannot be calculated from the \\
-          samples alone.",
-          "Set {.arg nsim} if you want to sample them conditionally on the \\
-          MCMC samples"
-        )
-      )
-      stop(
-        msg,
-        call. = FALSE
-      )
-    }
+    check_dag_introduces_new_variables(dag, mcmc_dag)
 
     # see if any of the targets are stochastic and not sampled in the mcmc
-    target_nodes <- lapply(target, get_node)
-    target_node_names <- vapply(target_nodes,
-      member,
-      "unique_name",
-      FUN.VALUE = character(1)
-    )
-    existing_variables <- target_node_names %in% names(mcmc_dag_variables)
-    have_distributions <- vapply(target_nodes,
-      has_distribution,
-      FUN.VALUE = logical(1)
-    )
-    new_stochastics <- have_distributions & !existing_variables
-    if (any(new_stochastics)) {
-      n_stoch <- sum(new_stochastics)
-      msg <- cli::format_error(
-        c(
-          "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
-          samples",
-          "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
-          {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
-          {?have distributions and are/has a distribution and is} not in the \\
-          MCMC samples, so cannot be calculated from the samples alone.",
-          "Set {.arg nsim} if you want to sample them conditionally on the \\
-          MCMC samples"
-        )
-      )
-      stop(
-        msg,
-        call. = FALSE
-      )
-    }
+    check_targets_stochastic_and_not_sampled(target, mcmc_dag_variables)
+
   }
 
   dag$target_nodes <- lapply(target, get_node)
@@ -374,6 +318,8 @@ calculate_greta_mcmc_list <- function(target,
 
   # if we're doing stochastic sampling, subsample the draws
   if (stochastic) {
+    # TF1/2
+    # might need to rename draws to indicate that it is a matrix, for readability
     draws <- as.matrix(draws)
     n_samples <- nrow(draws)
 
@@ -396,9 +342,11 @@ calculate_greta_mcmc_list <- function(target,
 
     # add the batch size to the data list
     # assign
-    dag$set_tf_data_list("batch_size", as.integer(nsim))
+    # TF1/2 - remove as this is artifact from feed dict
+    # dag$set_tf_data_list("batch_size", as.integer(nsim))
 
     # pass these values in as the free state
+    # browser()
     trace <- dag$trace_values(draws,
       trace_batch_size = trace_batch_size,
       flatten = FALSE
@@ -409,6 +357,7 @@ calculate_greta_mcmc_list <- function(target,
 
     # for deterministic posterior prediction, just trace the target for each
     # chain
+
     values <- lapply(draws,
   #double check the trace value part - can pronbanly just do that here
       dag$trace_values,
@@ -427,8 +376,8 @@ calculate_greta_mcmc_list <- function(target,
     trace <- as_greta_mcmc_list(trace, model_info)
   }
 
-  browser()
-  dag$define_tf()
+  # browser()
+  # dag$define_tf()
 
   trace
 }
