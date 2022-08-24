@@ -492,6 +492,18 @@ test_that("calculate uses the local RNG seed", {
   expect_identical(one, two)
 })
 
+test_that("when calculate simulates multiple values, they are calculated using the same RNG seeds", {
+  skip_if_not(check_tf_version())
+
+  x <- normal(0, 1)
+  x_squared <- x ^ 2
+
+  vals <- calculate(x, x_squared, nsim = 10)
+
+  # use expect_equal
+  expect_identical(vals$x ^ 2, vals$x_squared)
+})
+
 test_that("calculate works if distribution-free variables are fixed", {
   skip_if_not(check_tf_version())
 
