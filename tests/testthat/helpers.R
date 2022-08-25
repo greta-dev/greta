@@ -24,12 +24,18 @@ grab <- function(x, dag = NULL) {
     # dag$define_tf()
   }
 
-  browser()
   # TF1/2
   # I think I need to do some kind of tfe$batch_size thing here?
-  dag$set_tf_data_list("batch_size", 1L)
-  dag$build_feed_dict()
-  out <- dag$tf_sess_run(dag$tf_name(node), as_text = TRUE)
+  # dag$set_tf_data_list("batch_size", 1L)
+  # dag$build_feed_dict()
+  dag$tf_environment$batch_size <- 1L
+  node$define_tf(dag)
+  x_name <- dag$tf_name(node)
+  out <- dag$tf_environment[[x_name]]
+  out <- as.array(out)
+  # node$value()
+  # dag$define_tf()
+  # out <- dag$tf_sess_run(dag$tf_name(node), as_text = TRUE)
   drop_first_dim(out)
 }
 
@@ -170,7 +176,7 @@ with_greta <- function(call, swap = c("x"), swap_scope = 1) {
 # check an expression is equivalent when done in R, and when done on greta
 # arrays with results ported back to R
 # e.g. check_expr(a[1:3], swap = 'a')
-check_expr <- function(expr, swap = c("x"), tolerance = 1e-4) {
+ check_expr <- function(expr, swap = c("x"), tolerance = 1e-4) {
   call <- substitute(expr)
 
   r_out <- eval(expr)
