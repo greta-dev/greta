@@ -267,11 +267,12 @@ dag_class <- R6Class(
       ## NOTE: when calling `model` there is no `free_state` in `tf_environment`
       ## Trying out something where the free state is set if there isn't one?
 
-      # browser()
-      with(
-        data = self$tf_environment,
-        batch_size <- tf$shape(self$tf_environment$free_state)[0]
-      )
+      if (!exists("batch_size", envir = self$tf_environment)) {
+        with(
+          data = self$tf_environment,
+          batch_size <- tf$shape(self$tf_environment$free_state)[0]
+        )
+      }
 
       # batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
       # batch_size <- tf$keras$Input(dtype = tf$int32)
