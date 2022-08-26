@@ -122,15 +122,16 @@ greta_density <- function(fun, parameters, x,
   distrib_node$remove_target()
   distrib_node$add_target(get_node(x_))
 
-  browser()
   # create dag
   dag <- dag_class$new(list(x_))
   # TF1/2 - I think I can just remove define_tf?
-  # dag$define_tf()
 
+  browser()
   # TF1/2 - still need to work out what to do with this...perhaps nothing?
-  dag$set_tf_data_list("batch_size", 1L)
-  dag$build_feed_dict()
+  # dag$set_tf_data_list("batch_size", 1L)
+  # dag$build_feed_dict()
+  dag$tf_environment$batch_size <- 1L
+  dag$define_tf()
 
   # get the log density as a vector
   # TF1/2 - no more on_graph stuff
