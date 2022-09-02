@@ -854,10 +854,10 @@ check_trace_batch_size <- function(x) {
 check_if_greta_array_in_mcmc <- function(x){
   if (!inherits(x, "greta_model") && inherits(x, "greta_array")) {
     msg <- cli::format_error(
-      c(
-        "{.var x} is a {.cls greta_array} but must be a {.cls greta_model}",
-        "You can convert {.var x} into a {.cls greta_model} by running:",
-        "{.code model({.var x})}"
+      c( "MCMC requires input to be a {.cls greta_model} not a {.cls greta_array}",
+        "x" = "{.var x} is a {.cls greta_array} not a {.cls greta_model}",
+        "i" = "You can convert {.var x} into a {.cls greta_model} by running:",
+        "{.code model(x)}"
       )
     )
     stop(
