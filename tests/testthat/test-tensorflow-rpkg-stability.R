@@ -24,9 +24,6 @@ test_that("Tensor behaves as we expect",{
   x <- tensorflow::as_tensor(42, "int32")
   expect_snapshot_output(length(x))
   expect_snapshot_output(dim(x))
-  expect_snapshot_output(
-    tf$reshape(x, tensorflow::as_tensor(shape(-1, 1, 1L, 1, 1L)))
-  )
 })
 
 test_that("shape returns right thing", {
@@ -80,7 +77,6 @@ test_that("TensorShape conversions remain stable", {
   x <- shape(NA, 3)
   expect_snapshot_output(as.list(x))
   expect_snapshot_output(as.integer(x))
-  expect_snapshot_output(tensorflow::as_tensor(x))
   expect_snapshot_output(x[[1]])
   expect_snapshot_output(x[[2]])
 })
