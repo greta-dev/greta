@@ -7,7 +7,9 @@ test_that("check_future_plan() works when only one core available", {
   future::plan(future::multisession)
 
   # one chain
-  expect_error(check_future_plan(), NA)
+  expect_snapshot_error(
+    check_future_plan()
+    )
 
 })
 
