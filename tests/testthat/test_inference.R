@@ -143,6 +143,14 @@ test_that("opt returns hessians", {
   expect_true(all(abs(approx_sd - sd) < 1e-9))
 })
 
+test_that("greta arrays passed into mcmc fail appropriately", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  expect_snapshot_error(
+    mcmc(x)
+  )
+})
+
 test_that("bad mcmc proposals are rejected", {
   skip_if_not(check_tf_version())
 

@@ -64,6 +64,13 @@
       This optimiser is deprecated and will be removed in greta 0.4.0.
       Please use a different optimiser.
 
+# greta arrays passed into mcmc fail appropriately
+
+    MCMC requires input to be a <greta_model> not a <greta_array>
+    x `x` is a <greta_array> not a <greta_model>
+    i You can convert `x` into a <greta_model> by running:
+    `model(x)`
+
 # bad mcmc proposals are rejected
 
     The log density could not be evaluated at these initial values
