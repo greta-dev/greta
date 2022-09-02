@@ -434,7 +434,7 @@ inverse_gamma_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       tfp$distributions$InverseGamma(
         concentration = parameters$alpha,
-        rate = parameters$beta
+        scale = parameters$beta
       )
     }
     # nolint end
@@ -462,7 +462,7 @@ weibull_distribution <- R6Class(
       b <- parameters$scale
 
       # use the TFP Weibull CDF bijector
-      bijector <- tfp$bijectors$Weibull(scale = b, concentration = a)
+      bijector <- tfp$bijectors$WeibullCDF(scale = b, concentration = a)
 
       log_prob <- function(x) {
         log(a) - log(b) + (a - fl(1)) * (log(x) - log(b)) - (x / b)^a
@@ -1108,7 +1108,7 @@ wishart_distribution <- R6Class(
         }
 
         # use the density for choleskied x, with choleskied Sigma
-        distrib <- tfp$distributions$Wishart(
+        distrib <- tfp$distributions$WishartTriL(
           df = df,
           scale_tril = sigma_chol,
           input_output_cholesky = TRUE

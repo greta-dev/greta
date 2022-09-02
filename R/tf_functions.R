@@ -578,6 +578,7 @@ tf_scalar_biject <- function(..., dim) {
     steps <- c(tfp$bijectors$Reshape(dim), steps)
   }
 
+  # browser()
   tfp$bijectors$Chain(steps)
 }
 
@@ -607,7 +608,6 @@ tf_scalar_neg_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
     # tfp$bijectors$AffineScalar(shift = fl(upper), scale = fl(-1)),
     tfb_shift_scale(fl(upper), fl(-1)),
-    tfb_shif_tscale,
     tfp$bijectors$Exp(),
     dim = dim
   )

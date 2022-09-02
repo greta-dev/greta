@@ -39,9 +39,10 @@ dag_class <- R6Class(
         self$define_trace_values_batch
         )
 
-      self$tf_log_prob_function <- tensorflow::tf_function(
+      self$tf_log_prob_function <-
+        # tensorflow::tf_function(
         self$generate_log_prob_function()
-      )
+      # )
     },
 
     tf_log_prob_function = NULL,
@@ -365,7 +366,10 @@ dag_class <- R6Class(
       # browser()
       # define all nodes in the environment and on the graph
       # self$on_graph(
-      lapply(target_nodes, function(x) x$define_tf(self))
+      lapply(target_nodes, function(x){
+        # debugonce(x$define_tf)
+        x$define_tf(self)
+        })
       # )
 
       invisible(NULL)
