@@ -105,7 +105,7 @@
 
 ---
 
-    Tensor("Const_8:0", shape=(2,), dtype=int32)
+    Tensor("Const_8:0", shape=(2), dtype=int32)
 
 ---
 

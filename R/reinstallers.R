@@ -61,3 +61,21 @@ reinstall_miniconda <- function(timeout = 5){
   remove_miniconda()
   greta_install_miniconda(timeout)
 }
+
+#' @rdname install_greta_deps
+#' @export
+#' @examples
+#' \dontrun{
+#' # to help troubleshoot your greta installation, this can help resolve some
+#' # issues with installing greta dependencies
+#' reinstall_greta_deps()
+#' }
+reinstall_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
+                                 conda = "auto",
+                                 timeout = 5){
+  remove_greta_env()
+  remove_miniconda()
+  install_greta_deps(method = method,
+                     conda = conda,
+                     timeout = timeout)
+}
