@@ -7,7 +7,7 @@ test_that("check_future_plan() works when only one core available", {
   future::plan(future::multisession)
 
   # one chain
-  expect_snapshot_error(
+  expect_snapshot_output(
     check_future_plan()
     )
 
@@ -20,7 +20,7 @@ test_that("check_future_plan() works", {
   future::plan(future::multisession)
 
   # one chain
-  expect_snapshot_error(
+  expect_snapshot_output(
     check_future_plan()
     )
 
@@ -36,7 +36,7 @@ test_that("mcmc errors for invalid parallel plans", {
 
   # handle forks, so only accept multisession, or multi session clusters
   future::plan(future::multisession)
-  expect_snapshot_error(
+  expect_snapshot_output(
     check_future_plan()
   )
 
