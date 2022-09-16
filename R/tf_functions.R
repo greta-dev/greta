@@ -589,9 +589,12 @@ tf_scalar_bijector <- function(dim, lower, upper) {
   )
 }
 
-tfb_shift_scale <- function(x, y){
-  tfb_shift <- tfp$bijectors$Shift(fl(x))
-  tfb_shift_scale <- tfb_shift(fl(y))
+tfb_shift_scale <- function(shift, scale){
+  # call x and y shift and scale, respectively
+  # tfb.Shift(shift)(tfb.Scale(scale))
+  tfb_shift <- tfp$bijectors$Shift(shift)
+  tfb_scale <- tfp$bijectors$Scale(scale)
+  tfb_shift_scale <- tfb_shift(tfb_scale)
   tfb_shift_scale
 }
 
