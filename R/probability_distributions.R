@@ -865,7 +865,9 @@ multinomial_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       parameters$size <- tf_flatten(parameters$size)
       # scale probs to get absolute density correct
-      parameters$prob <- parameters$prob / tf_sum(parameters$prob)
+      # parameters$prob <- parameters$prob / tf_sum(parameters$prob)
+      parameters$prob <- parameters$prob / tf_rowsums(parameters$prob,
+                                                      dims = 1L)
 
       tfp$distributions$Multinomial(
         total_count = parameters$size,
@@ -902,7 +904,8 @@ categorical_distribution <- R6Class(
     tf_distrib = function(parameters, dag) {
       # scale probs to get absolute density correct
       probs <- parameters$prob
-      probs <- probs / tf_sum(probs)
+      # probs <- probs / tf_sum(probs)
+      probs <- probs / tf_rowsums(probs, dims = 1L)
       tfp$distributions$Multinomial(
         total_count = fl(1),
         probs = probs

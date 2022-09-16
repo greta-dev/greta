@@ -382,7 +382,6 @@ variable_node <- R6Class(
 
     # adjustments for univariate variables
     tf_log_jacobian_adjustment = function(free) {
-      # browser()
       tf_bijector <- self$create_tf_bijector()
 
       event_ndims <- tf_bijector$forward_min_event_ndims
