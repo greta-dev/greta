@@ -725,7 +725,8 @@ tf_simplex_bijector <- function(dim) {
 
 tf_ordered_bijector <- function(dim) {
   steps <- list(
-    tfp$bijectors$Invert(tfp$bijectors$Ordered()),
+    # tfp$bijectors$Invert(tfp$bijectors$Ordered()),
+    tfp$bijectors$Ascending(),
     tfp$bijectors$Reshape(dim)
   )
   tfp$bijectors$Chain(steps)
