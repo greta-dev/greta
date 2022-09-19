@@ -1121,6 +1121,7 @@ wishart_distribution <- R6Class(
       }
 
       sample <- function(seed) {
+        # browser()
         df <- tf$squeeze(parameters$df, 1:2)
         sigma <- parameters$sigma
 
@@ -1132,9 +1133,10 @@ wishart_distribution <- R6Class(
         }
 
         # use the density for choleskied x, with choleskied Sigma
-        distrib <- tfp$distributions$Wishart(
+        distrib <- tfp$distributions$WishartTriL(
           df = df,
-          scale_tril = sigma_chol
+          scale_tril = sigma_chol,
+          input_output_cholesky = TRUE
         )
 
         draws <- distrib$sample(seed = seed)
