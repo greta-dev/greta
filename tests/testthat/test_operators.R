@@ -34,7 +34,6 @@ test_that("arithmetic operators work as expected with arrays and scalars", {
 test_that("logical operators work as expected", {
   skip_if_not(check_tf_version())
 
-
   a <- randn(25, 4) > 0
   b <- randn(25, 4) > 0
   a[] <- as.integer(a[])
@@ -47,7 +46,6 @@ test_that("logical operators work as expected", {
 
 test_that("relational operators work as expected", {
   skip_if_not(check_tf_version())
-
 
   a <- randn(25, 4)
   b <- randn(25, 4)
@@ -62,7 +60,6 @@ test_that("relational operators work as expected", {
 
 test_that("random strings of operators work as expected", {
   skip_if_not(check_tf_version())
-
 
   for (i in 1:10) {
     a <- randn(25, 4)
