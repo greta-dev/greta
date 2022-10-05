@@ -19,7 +19,6 @@ test_that("simulate produces the right number of samples", {
 test_that("simulate uses the local RNG seed", {
   skip_if_not(check_tf_version())
 
-
   # fix variable
   a <- normal(0, 1)
   y <- normal(a, 1)

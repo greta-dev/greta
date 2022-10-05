@@ -13,7 +13,6 @@ test_that("continuous joint variables can be sampled from", {
 test_that("truncated continuous joint variables can be sampled from", {
   skip_if_not(check_tf_version())
 
-
   x <- joint(
     normal(0, 1, truncation = c(0, Inf)),
     normal(0, 2, truncation = c(0, Inf)),
@@ -26,7 +25,6 @@ test_that("truncated continuous joint variables can be sampled from", {
 test_that("uniform joint variables can be sampled from", {
   skip_if_not(check_tf_version())
 
-
   x <- joint(
     uniform(0, 1),
     uniform(0, 2),
@@ -38,7 +36,6 @@ test_that("uniform joint variables can be sampled from", {
 
 test_that("joint normals with different truncation types can be sampled", {
   skip_if_not(check_tf_version())
-
 
   x <- joint(
     normal(0, 1, truncation = c(0, Inf)),
@@ -67,10 +64,10 @@ test_that("fixed continuous joint distributions can be sampled from", {
 test_that("fixed discrete joint distributions can be sampled from", {
   skip_if_not(check_tf_version())
 
-
   obs <- matrix(rbinom(300, 1, 0.5), 100, 3)
   probs <- variable(0, 1, dim = 3)
-  distribution(obs) <- joint(bernoulli(probs[1]),
+  distribution(obs) <- joint(
+    bernoulli(probs[1]),
     bernoulli(probs[2]),
     bernoulli(probs[3]),
     dim = 100

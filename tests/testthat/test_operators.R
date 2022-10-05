@@ -18,7 +18,6 @@ test_that("arithmetic operators work as expected", {
 test_that("arithmetic operators work as expected with arrays and scalars", {
   skip_if_not(check_tf_version())
 
-
   a <- randn(2, 1, 1)
   b <- 4
 
