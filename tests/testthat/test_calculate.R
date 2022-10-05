@@ -1,7 +1,6 @@
 test_that("deterministic calculate works with correct lists", {
   skip_if_not(check_tf_version())
 
-
   # unknown variable
   x <- as_data(c(1, 2))
   a <- normal(0, 1)

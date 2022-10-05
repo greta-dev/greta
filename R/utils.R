@@ -45,13 +45,13 @@ have_python <- function() {
 have_tfp <- function() {
   is_tfp_available <- reticulate::py_module_available("tensorflow_probability")
 
-  # if (is_tfp_available) {
-  #
-  #   pkg <- reticulate::import("pkg_resources")
-  #   tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-  #   is_tfp_available <- utils::compareVersion("0.15.0", tfp_version) == 0
-  #
-  # }
+  if (is_tfp_available) {
+
+    pkg <- reticulate::import("pkg_resources")
+    tfp_version <- pkg$get_distribution("tensorflow_probability")$version
+    is_tfp_available <- utils::compareVersion("0.15.0", tfp_version) <= 0
+
+  }
 
   return(is_tfp_available)
 
@@ -60,6 +60,13 @@ have_tfp <- function() {
 #' @importFrom reticulate py_module_available
 have_tf <- function() {
   is_tf_available <- reticulate::py_module_available("tensorflow")
+
+  if (is_tf_available) {
+
+    tf_version <- suppressMessages(tf$`__version__`)
+    is_tf_available <- utils::compareVersion("2.9.0", tf_version) <= 0
+
+  }
 
   return(is_tf_available)
 

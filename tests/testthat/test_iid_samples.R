@@ -170,7 +170,6 @@ test_that("truncated univariate samples are correct", {
 test_that("multivariate samples are correct", {
   skip_if_not(check_tf_version())
 
-
   sigma <- rwish(1, 5, diag(4))[1, , ]
   prob <- t(runif(4))
   prob <- prob / sum(prob)
