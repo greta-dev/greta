@@ -534,19 +534,19 @@ tf_abind <- function(..., axis) {
 
 tf_only_eigenvalues <- function(x) {
   vals <- tf$linalg$eigvalsh(x)
-  dim <- tf$constant(1L, shape = list(1))
+  dim <- tf$constant(1L, shape = list(1L))
   tf$reverse(vals, dim)
 }
 
 tf_extract_eigenvectors <- function(x) {
   vecs <- x[[2]]
-  dim <- tf$constant(2L, shape = list(1))
+  dim <- tf$constant(2L, shape = list(1L))
   tf$reverse(vecs, dim)
 }
 
 tf_extract_eigenvalues <- function(x) {
   vals <- x[[1]]
-  dim <- tf$constant(1L, shape = list(1))
+  dim <- tf$constant(1L, shape = list(1L))
   tf$reverse(vals, dim)
 }
 
