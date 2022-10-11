@@ -1074,7 +1074,9 @@ rwmh_sampler <- R6Class(
         sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           new_state_fn = new_state_fn,
-          seed = tfe$rng_seed
+          # TF1/2
+          # NOTE `seed` does not appear to be an argument anymore
+          # seed = tfe$rng_seed
         )
       # )
       return(
@@ -1139,7 +1141,9 @@ slice_sampler <- R6Class(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = fl(1),
           max_doublings = slice_max_doublings,
-          seed = tfe$rng_seed
+          # TF1/2
+          # NOTE `seed` does not appear to be an argument anymore
+          # seed = tfe$rng_seed
         )
       # )
       return(
