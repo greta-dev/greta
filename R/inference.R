@@ -200,6 +200,9 @@ mcmc <- function(
   # set device to be CPU/GPU for the entire run
   with(tf$device(compute_options), {
 
+    # message users about random seeds and GPU usage if they are using GPU
+    message_if_using_gpu(compute_options)
+
     # browser()
     # check the trace batch size
     trace_batch_size <- check_trace_batch_size(trace_batch_size)
@@ -889,6 +892,9 @@ opt <- function(model,
 
   # set device to be CPU/GPU for the entire run
   with(tf$device(compute_options), {
+
+    # message users about random seeds and GPU usage if they are using GPU
+    message_if_using_gpu(compute_options)
 
   # check initial values. Can up the number of chains in the future to handle
   # random restarts

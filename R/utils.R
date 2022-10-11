@@ -1095,3 +1095,34 @@ check_targets_stochastic_and_not_sampled <- function(
     )
   }
 }
+
+is_using_gpu <- function(x){
+  x == "GPU"
+}
+
+is_using_cpu <- function(x){
+  x == "CPU"
+}
+
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+message_if_using_gpu <- function(compute_options){
+  if (is_using_gpu(compute_options)) {
+    if (getOption("greta_gpu_message") %||% TRUE){
+      gpu_msg <- cli::format_message(
+        c(
+          "NOTE: When using GPU, the random number seed may not always be \\
+          respected (results may not be fully reproducible).",
+          "For more information, see details of the {.code compute_options} \\
+          argument in {.code ?calculate}.",
+          "You can turn off this message with:",
+          "{.code options(greta_gpu_message = FALSE)}"
+        )
+      )
+      message(
+        gpu_msg
+      )
+    }
+  }
+}
+

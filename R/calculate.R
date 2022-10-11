@@ -23,7 +23,12 @@
 #'   reduce memory demands
 #' @param compute_options Default is to use CPU only with `cpu_only()`. Use
 #'   `gpu_only()` to use only GPU. In the future we will add more options for
-#'   specifying CPU and GPU use.
+#'   specifying CPU and GPU use.  If setting GPU with `gpu_only()` then we
+#'   cannot always guarantee that the random number seed will be respected. This
+#'   is due to the way tensorflow interfaces with the GPU. If you must have
+#'   reproducibility of all simulations we recommend using `cpu_only()`, which
+#'   is the default. You can turn off the message about setting seed with GPU
+#'   usage using `options(greta_gpu_message = FALSE)`
 #'
 #' @return Values of the target greta array(s), given values of the greta arrays
 #'   on which they depend (either specified in `values` or sampled from
@@ -157,6 +162,9 @@ calculate <- function(
   # set device to be CPU/GPU for the entire run
   with(tf$device(compute_options), {
 
+    # message users about random seeds and GPU usage if they are using GPU
+    message_if_using_gpu(compute_options)
+
     # turn the provided greta arrays into a list and try to find the names
     target <- list(...)
     names <- names(target)
@@ -198,6 +206,7 @@ calculate <- function(
     )
 
     # checks and RNG seed setting if we're sampling
+
     if (!is.null(nsim)) {
 
       # check nsim is valid
@@ -211,7 +220,10 @@ calculate <- function(
 
         r_seed <- get(".Random.seed", envir = .GlobalEnv)
         on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
-        set.seed(seed)
+        tensorflow::set_random_seed(
+          seed = seed,
+          disable_gpu = is_using_cpu(compute_options)
+          )
       }
     }
 

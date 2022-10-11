@@ -541,7 +541,6 @@ test_that("calculate errors if a distribution cannot be sampled from", {
 test_that("calculate errors nicely if nsim is invalid", {
   skip_if_not(check_tf_version())
 
-
   x <- normal(0, 1)
 
   expect_snapshot_error(

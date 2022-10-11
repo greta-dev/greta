@@ -36,7 +36,12 @@ reduce memory demands}
 
 \item{compute_options}{Default is to use CPU only with \code{cpu_only()}. Use
 \code{gpu_only()} to use only GPU. In the future we will add more options for
-specifying CPU and GPU use.}
+specifying CPU and GPU use.  If setting GPU with \code{gpu_only()} then we
+cannot always guarantee that the random number seed will be respected. This
+is due to the way tensorflow interfaces with the GPU. If you must have
+reproducibility of all simulations we recommend using \code{cpu_only()}, which
+is the default. You can turn off the message about setting seed with GPU
+usage using \code{options(greta_gpu_message = FALSE)}}
 }
 \value{
 Values of the target greta array(s), given values of the greta arrays
