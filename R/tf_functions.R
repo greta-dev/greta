@@ -619,7 +619,7 @@ tf_scalar_neg_bijector <- function(dim, lower, upper) {
 tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
     # tfp$bijectors$AffineScalar(shift = fl(lower), scale = fl(upper - lower)),
-    tfb_shift_scale(fl(upper), fl(upper - lower)),
+    tfb_shift_scale(shift = fl(lower), scale = fl(upper - lower)),
     tfp$bijectors$Sigmoid(),
     dim = dim
   )
