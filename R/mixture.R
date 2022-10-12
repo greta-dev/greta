@@ -306,7 +306,7 @@ mixture_distribution <- R6Class(
           log_weights <- tf$expand_dims(log_weights, ndim)
           if (dim > 1L) {
             tiling <- c(rep(1L, ndim), dim)
-            tf_tiling <- tf$constant(tiling, shape = list(ndim + 1))
+            tf_tiling <- tf$constant(tiling, shape = list(as.integer(ndim + 1)))
             log_weights <- tf$tile(log_weights, tf_tiling)
           }
         }
