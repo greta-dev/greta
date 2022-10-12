@@ -49,7 +49,6 @@ test_that("joint normals with different truncation types can be sampled", {
 test_that("fixed continuous joint distributions can be sampled from", {
   skip_if_not(check_tf_version())
 
-
   obs <- matrix(rnorm(3, 0, 2), 100, 3)
   mu <- variable(dim = 3)
   distribution(obs) <- joint(normal(mu[1], 1),
@@ -79,7 +78,6 @@ test_that("fixed discrete joint distributions can be sampled from", {
 test_that("joint of fixed and continuous distributions errors", {
   skip_if_not(check_tf_version())
 
-
   expect_snapshot_error(
     joint(
       bernoulli(0.5),
@@ -90,7 +88,6 @@ test_that("joint of fixed and continuous distributions errors", {
 
 test_that("joint with insufficient distributions errors", {
   skip_if_not(check_tf_version())
-
 
   expect_snapshot_error(
     joint(normal(0, 2))
@@ -104,7 +101,6 @@ test_that("joint with insufficient distributions errors", {
 test_that("joint with non-scalar distributions errors", {
   skip_if_not(check_tf_version())
 
-
   expect_snapshot_error(
     joint(
       normal(0, 2, dim = 3),
@@ -115,7 +111,6 @@ test_that("joint with non-scalar distributions errors", {
 
 test_that("joint of normals has correct density", {
   skip_if_not(check_tf_version())
-
 
   joint_greta <- function(means, sds, dim) {
     joint(normal(means[1], sds[1]),
@@ -151,7 +146,6 @@ test_that("joint of normals has correct density", {
 
 test_that("joint of truncated normals has correct density", {
   skip_if_not(check_tf_version())
-
 
   joint_greta <- function(means, sds, lower, upper, dim) {
     joint(normal(means[1], sds[1], truncation = c(lower[1], upper[1])),
@@ -202,7 +196,6 @@ test_that("joint of truncated normals has correct density", {
 test_that("joint of uniforms has correct density", {
   skip_if_not(check_tf_version())
 
-
   joint_greta <- function(lower, upper, dim) {
     joint(uniform(lower[1], upper[1]),
       uniform(lower[2], upper[2]),
@@ -242,7 +235,6 @@ test_that("joint of uniforms has correct density", {
 
 test_that("joint of Poissons has correct density", {
   skip_if_not(check_tf_version())
-
 
   joint_greta <- function(rates, dim) {
     joint(poisson(rates[1]),

@@ -1,10 +1,4 @@
-# TF1/2 - don't think we need this anymore?
-# if (check_tf_version()) {
-#   tensorflow::tf$compat$v1$reset_default_graph()
-# }
-
 set.seed(2020 - 02 - 11)
-
 
 test_that("truncated normal has correct densities", {
   skip_if_not(check_tf_version())
@@ -52,7 +46,6 @@ test_that("truncated normal has correct densities", {
 
 test_that("truncated lognormal has correct densities", {
   skip_if_not(check_tf_version())
-
 
   # non truncated
   compare_truncated_distribution(lognormal,
@@ -192,7 +185,6 @@ test_that("truncated inverse gamma has correct densities", {
 test_that("truncated weibull has correct densities", {
   skip_if_not(check_tf_version())
 
-
   # non truncated
   compare_truncated_distribution(weibull,
     "weibull",
@@ -237,7 +229,6 @@ test_that("truncated weibull has correct densities", {
 test_that("truncated exponential has correct densities", {
   skip_if_not(check_tf_version())
 
-
   # non truncated
   compare_truncated_distribution(exponential,
     "exp",
@@ -278,8 +269,6 @@ test_that("truncated pareto has correct densities", {
   dpreto <<- function(x, a_, b_) extraDistr::dpareto(x, a_, b_)
   ppreto <<- function(q, a_, b_) extraDistr::ppareto(q, a_, b_)
   qpreto <<- function(p, a_, b_) extraDistr::qpareto(p, a_, b_)
-
-
 
   # non truncated
   compare_truncated_distribution(preto,
@@ -426,7 +415,6 @@ test_that("truncated laplace has correct densities", {
 test_that("truncated beta has correct densities", {
   skip_if_not(check_tf_version())
 
-
   # non truncated
   compare_truncated_distribution(beta,
     "beta",
@@ -470,7 +458,6 @@ test_that("truncated beta has correct densities", {
 
 test_that("truncated cauchy has correct densities", {
   skip_if_not(check_tf_version())
-
 
   # non truncated
   compare_truncated_distribution(cauchy,
@@ -516,7 +503,6 @@ test_that("truncated cauchy has correct densities", {
 test_that("truncated logistic has correct densities", {
   skip_if_not(check_tf_version())
 
-
   # non truncated
   compare_truncated_distribution(logistic,
     "logis",
@@ -560,7 +546,6 @@ test_that("truncated logistic has correct densities", {
 
 test_that("truncated f has correct densities", {
   skip_if_not(check_tf_version())
-
 
   # non truncated
   compare_truncated_distribution(f,
@@ -606,7 +591,6 @@ test_that("truncated f has correct densities", {
 test_that("truncated chi squared has correct densities", {
   skip_if_not(check_tf_version())
 
-
   # non truncated
   compare_truncated_distribution(chi_squared,
     "chisq",
@@ -636,10 +620,8 @@ test_that("truncated chi squared has correct densities", {
   )
 })
 
-
 test_that("bad truncations error", {
   skip_if_not(check_tf_version())
-
 
   expect_snapshot_error(
     lognormal(0, 1, truncation = c(-1, Inf))

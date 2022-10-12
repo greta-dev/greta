@@ -1,7 +1,6 @@
 test_that("variable() errors informatively", {
   skip_if_not(check_tf_version())
 
-
   # bad types
   expect_snapshot_error(
     variable(upper = NA)
@@ -32,7 +31,6 @@ test_that("variable() errors informatively", {
 
 test_that("constrained variable constructors error informatively", {
   skip_if_not(check_tf_version())
-
 
   expect_snapshot_error(
     cholesky_variable(dim = 2:3)
@@ -119,7 +117,6 @@ test_that("cholesky_variable() can be sampled correctly", {
 
 test_that("cholesky_variable() correlation can be sampled correctly", {
   skip_if_not(check_tf_version())
-
 
   n <- 3
   u <- cholesky_variable(3, correlation = TRUE)

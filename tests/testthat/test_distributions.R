@@ -1,8 +1,8 @@
 test_that("normal distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::normal,
+  compare_distribution(
+    greta::normal,
     stats::dnorm,
     parameters = list(mean = -2, sd = 3),
     x = rnorm(100, -2, 3)
@@ -13,11 +13,12 @@ test_that("normal distribution has correct density", {
 test_that("multidimensional normal distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::normal,
+  compare_distribution(
+    greta::normal,
     stats::dnorm,
     parameters = list(mean = -2, sd = 3),
-    x = array(rnorm(100, -2, 3),
+    x = array(
+      rnorm(100, -2, 3),
       dim = c(10, 2, 5)
     ),
     dim = c(10, 2, 5)
@@ -27,8 +28,8 @@ test_that("multidimensional normal distribution has correct density", {
 test_that("uniform distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::uniform,
+  compare_distribution(
+    greta::uniform,
     stats::dunif,
     parameters = list(min = -2.1, max = -1.2),
     x = runif(100, -2.1, -1.2)
@@ -38,8 +39,8 @@ test_that("uniform distribution has correct density", {
 test_that("lognormal distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::lognormal,
+  compare_distribution(
+    greta::lognormal,
     stats::dlnorm,
     parameters = list(meanlog = 1, sdlog = 3),
     x = rlnorm(100, 1, 3)
@@ -49,8 +50,8 @@ test_that("lognormal distribution has correct density", {
 test_that("bernoulli distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::bernoulli,
+  compare_distribution(
+    greta::bernoulli,
     extraDistr::dbern,
     parameters = list(prob = 0.3),
     x = rbinom(100, 1, 0.3)
@@ -60,8 +61,8 @@ test_that("bernoulli distribution has correct density", {
 test_that("binomial distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::binomial,
+  compare_distribution(
+    greta::binomial,
     stats::dbinom,
     parameters = list(size = 10, prob = 0.8),
     x = rbinom(100, 10, 0.8)
@@ -71,8 +72,8 @@ test_that("binomial distribution has correct density", {
 test_that("beta-binomial distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::beta_binomial,
+  compare_distribution(
+    greta::beta_binomial,
     extraDistr::dbbinom,
     parameters = list(
       size = 10,
@@ -86,8 +87,8 @@ test_that("beta-binomial distribution has correct density", {
 test_that("negative binomial distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::negative_binomial,
+  compare_distribution(
+    greta::negative_binomial,
     stats::dnbinom,
     parameters = list(size = 3.3, prob = 0.2),
     x = rnbinom(100, 3.3, 0.2)
@@ -97,8 +98,8 @@ test_that("negative binomial distribution has correct density", {
 test_that("hypergeometric distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::hypergeometric,
+  compare_distribution(
+    greta::hypergeometric,
     stats::dhyper,
     parameters = list(m = 11, n = 8, k = 5),
     x = rhyper(100, 11, 8, 5)
@@ -108,8 +109,8 @@ test_that("hypergeometric distribution has correct density", {
 test_that("poisson distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::poisson,
+  compare_distribution(
+    greta::poisson,
     stats::dpois,
     parameters = list(lambda = 17.2),
     x = rpois(100, 17.2)
@@ -119,20 +120,20 @@ test_that("poisson distribution has correct density", {
 test_that("gamma distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::gamma,
+  compare_distribution(
+    greta::gamma,
     stats::dgamma,
     parameters = list(shape = 1.2, rate = 2.3),
     x = rgamma(100, 1.2, 2.3)
   )
 })
 
-
 test_that("inverse gamma distribution has correct density", {
   skip_if_not(check_tf_version())
 
 
-  compare_distribution(greta::inverse_gamma,
+  compare_distribution(
+    greta::inverse_gamma,
     extraDistr::dinvgamma,
     parameters = list(alpha = 1.2, beta = 0.9),
     x = extraDistr::rinvgamma(100, 1.2, 0.9)
@@ -142,8 +143,8 @@ test_that("inverse gamma distribution has correct density", {
 test_that("weibull distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::weibull,
+  compare_distribution(
+    greta::weibull,
     dweibull,
     parameters = list(
       shape = 1.2,
@@ -156,8 +157,8 @@ test_that("weibull distribution has correct density", {
 test_that("exponential distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::exponential,
+  compare_distribution(
+    greta::exponential,
     stats::dexp,
     parameters = list(rate = 1.9),
     x = rexp(100, 1.9)
@@ -167,8 +168,8 @@ test_that("exponential distribution has correct density", {
 test_that("pareto distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::pareto,
+  compare_distribution(
+    greta::pareto,
     extraDistr::dpareto,
     parameters = list(a = 1.9, b = 2.3),
     x = extraDistr::rpareto(100, 1.9, 2.3)
@@ -195,8 +196,8 @@ test_that("student distribution has correct density", {
 test_that("laplace distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::laplace,
+  compare_distribution(
+    greta::laplace,
     extraDistr::dlaplace,
     parameters = list(mu = -0.9, sigma = 2),
     x = extraDistr::rlaplace(100, -0.9, 2)
@@ -206,8 +207,8 @@ test_that("laplace distribution has correct density", {
 test_that("beta distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::beta,
+  compare_distribution(
+    greta::beta,
     stats::dbeta,
     parameters = list(
       shape1 = 2.3,
@@ -220,8 +221,8 @@ test_that("beta distribution has correct density", {
 test_that("cauchy distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::cauchy,
+  compare_distribution(
+    greta::cauchy,
     stats::dcauchy,
     parameters = list(
       location = -1.3,
@@ -234,8 +235,8 @@ test_that("cauchy distribution has correct density", {
 test_that("logistic distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::logistic,
+  compare_distribution(
+    greta::logistic,
     stats::dlogis,
     parameters = list(
       location = -1.3,
@@ -248,8 +249,8 @@ test_that("logistic distribution has correct density", {
 test_that("f distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::f,
+  compare_distribution(
+    greta::f,
     df,
     parameters = list(df1 = 5.9, df2 = 2),
     x = rf(100, 5.9, 2)
@@ -259,8 +260,8 @@ test_that("f distribution has correct density", {
 test_that("chi squared distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
-  compare_distribution(greta::chi_squared,
+  compare_distribution(
+    greta::chi_squared,
     stats::dchisq,
     parameters = list(df = 9.3),
     x = rchisq(100, 9.3)
@@ -269,7 +270,6 @@ test_that("chi squared distribution has correct density", {
 
 test_that("multivariate normal distribution has correct density", {
   skip_if_not(check_tf_version())
-
 
   # parameters to test
   m <- 5
@@ -281,7 +281,8 @@ test_that("multivariate normal distribution has correct density", {
     mvtnorm::dmvnorm(x = x, mean = mean, sigma = Sigma, log = log)
   }
 
-  compare_distribution(greta::multivariate_normal,
+  compare_distribution(
+    greta::multivariate_normal,
     dmvnorm2,
     parameters = list(mean = mn, Sigma = sig),
     x = mvtnorm::rmvnorm(100, mn, sig),
@@ -291,7 +292,6 @@ test_that("multivariate normal distribution has correct density", {
 
 test_that("Wishart distribution has correct density", {
   skip_if_not(check_tf_version())
-
 
   # parameters to test
   m <- 5
@@ -310,7 +310,8 @@ test_that("Wishart distribution has correct density", {
   # no vectorised wishart, so loop through all of these
   replicate(
     10,
-    compare_distribution(greta::wishart,
+    compare_distribution(
+      greta::wishart,
       dwishart,
       parameters = list(
         df = df,
@@ -324,7 +325,6 @@ test_that("Wishart distribution has correct density", {
 
 test_that("lkj distribution has correct density", {
   skip_if_not(check_tf_version())
-
 
   # parameters to test
   m <- 5
@@ -354,7 +354,8 @@ test_that("lkj distribution has correct density", {
   # no vectorised lkj, so loop through all of these
   replicate(
     10,
-    compare_distribution(greta::lkj_correlation,
+    compare_distribution(
+      greta::lkj_correlation,
       dlkj_correlation,
       parameters = list(eta = eta, dimension = m),
       x = rlkjcorr(1, eta = 1, dimension = m),
@@ -366,7 +367,6 @@ test_that("lkj distribution has correct density", {
 test_that("multinomial distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
   # parameters to test
   m <- 5
   prob <- t(runif(m))
@@ -377,7 +377,8 @@ test_that("multinomial distribution has correct density", {
     apply(x, 1, stats::dmultinom, size = size, prob = prob)
   }
 
-  compare_distribution(greta::multinomial,
+  compare_distribution(
+    greta::multinomial,
     dmultinom_vec,
     parameters = list(
       size = size,
@@ -391,7 +392,6 @@ test_that("multinomial distribution has correct density", {
 test_that("categorical distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
   # parameters to test
   m <- 5
   prob <- t(runif(m))
@@ -401,7 +401,8 @@ test_that("categorical distribution has correct density", {
     apply(x, 1, stats::dmultinom, size = 1, prob = prob)
   }
 
-  compare_distribution(greta::categorical,
+  compare_distribution(
+    greta::categorical,
     dcategorical_vec,
     parameters = list(prob = prob),
     x = t(rmultinom(100, 1, prob)),
@@ -427,13 +428,13 @@ test_that("dirichlet distribution has correct density", {
 test_that("dirichlet-multinomial distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
   # parameters to test
   size <- 10
   m <- 5
   alpha <- t(runif(m))
 
-  compare_distribution(greta::dirichlet_multinomial,
+  compare_distribution(
+    greta::dirichlet_multinomial,
     extraDistr::ddirmnom,
     parameters = list(
       size = size,
@@ -450,7 +451,6 @@ test_that("dirichlet-multinomial distribution has correct density", {
 
 test_that("scalar-valued distributions can be defined in models", {
   skip_if_not(check_tf_version())
-
 
   x <- randn(5)
   y <- round(randu(5))
@@ -526,7 +526,6 @@ test_that("scalar-valued distributions can be defined in models", {
 
 test_that("array-valued distributions can be defined in models", {
   skip_if_not(check_tf_version())
-
 
   dim <- c(5, 2)
   x <- randn(5, 2)
@@ -608,7 +607,6 @@ test_that("array-valued distributions can be defined in models", {
 
 test_that("distributions can be sampled from by MCMC", {
   skip_if_not(check_tf_version())
-
 
   x <- randn(100)
   y <- round(randu(100))
@@ -702,7 +700,6 @@ test_that("uniform distribution errors informatively", {
   skip_if_not(check_tf_version())
   skip_on_ci()
 
-
   # bad types
   expect_snapshot_error(
     uniform(min = 0, max = NA)
@@ -725,7 +722,6 @@ test_that("uniform distribution errors informatively", {
   expect_snapshot_error(
     uniform(min = 1, max = 1)
   )
-
 })
 
 test_that("poisson() and binomial() error informatively in glm", {
@@ -755,7 +751,6 @@ test_that("poisson() and binomial() error informatively in glm", {
 test_that("wishart distribution errors informatively", {
   skip_if_not(check_tf_version())
 
-
   a <- randn(3, 3)
   b <- randn(3, 3, 3)
   c <- randn(3, 2)
@@ -772,13 +767,11 @@ test_that("wishart distribution errors informatively", {
   expect_snapshot_error(
     wishart(3, c)
   )
-
 })
 
 
 test_that("lkj_correlation distribution errors informatively", {
   skip_if_not(check_tf_version())
-
 
   dim <- 3
 
@@ -814,7 +807,6 @@ test_that("lkj_correlation distribution errors informatively", {
 
 test_that("multivariate_normal distribution errors informatively", {
   skip_if_not(check_tf_version())
-
 
   m_a <- randn(1, 3)
   m_b <- randn(2, 3)
@@ -893,7 +885,6 @@ test_that("multivariate_normal distribution errors informatively", {
 test_that("multinomial distribution errors informatively", {
   skip_if_not(check_tf_version())
 
-
   p_a <- randu(1, 3)
   p_b <- randu(2, 3)
 
@@ -947,7 +938,6 @@ test_that("multinomial distribution errors informatively", {
 test_that("categorical distribution errors informatively", {
   skip_if_not(check_tf_version())
 
-
   p_a <- randu(1, 3)
   p_b <- randu(2, 3)
 
@@ -988,7 +978,6 @@ test_that("categorical distribution errors informatively", {
 
 test_that("dirichlet distribution errors informatively", {
   skip_if_not(check_tf_version())
-
 
   alpha_a <- randu(1, 3)
   alpha_b <- randu(2, 3)
@@ -1033,7 +1022,6 @@ test_that("dirichlet distribution errors informatively", {
 test_that("dirichlet values sum to one", {
   skip_if_not(check_tf_version())
 
-
   alpha <- uniform(0, 10, dim = c(1, 5))
   x <- dirichlet(alpha)
   m <- model(x)
@@ -1046,10 +1034,8 @@ test_that("dirichlet values sum to one", {
 test_that("dirichlet-multinomial distribution errors informatively", {
   skip_if_not(check_tf_version())
 
-
   alpha_a <- randu(1, 3)
   alpha_b <- randu(2, 3)
-
 
   # same size & probs
   expect_true(inherits(

@@ -25,7 +25,6 @@ test_that("fixed continuous mixture distributions can be sampled from", {
   sample_distribution(weights)
 })
 
-
 test_that("fixed discrete mixture distributions can be sampled from", {
   skip_if_not(check_tf_version())
 
@@ -52,7 +51,6 @@ test_that("mixtures of fixed and continuous distributions errors", {
     )
   )
 })
-
 
 test_that("mixtures of multivariate and univariate errors", {
   skip_if_not(check_tf_version())

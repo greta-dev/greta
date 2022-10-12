@@ -1,7 +1,6 @@
 test_that("`distribution<-` works in models", {
   skip_if_not(check_tf_version())
 
-
   # with a distribution parameter
   y <- as_data(randn(5))
   expect_equal(node_type(get_node(y)), "data")
@@ -14,7 +13,6 @@ test_that("`distribution<-` works in models", {
 
 test_that("distribution() works", {
   skip_if_not(check_tf_version())
-
 
   a <- normal(0, 1)
   x <- as_data(randn(5))
@@ -33,7 +31,6 @@ test_that("distribution() works", {
 
 test_that("`distribution<-` errors informatively", {
   skip_if_not(check_tf_version())
-
 
   y <- randn(3, 3, 2)
   x <- randn(1)
@@ -95,7 +92,6 @@ test_that("`distribution<-` errors informatively", {
 
 test_that("distribution() errors informatively", {
   skip_if_not(check_tf_version())
-
 
   y <- randn(3)
 

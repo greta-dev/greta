@@ -1,213 +1,288 @@
 # Tensor behaves as we expect
 
-    [1] 1
+    Code
+      length(x)
+    Output
+      [1] 1
 
 ---
 
-    integer(0)
+    Code
+      dim(x)
+    Output
+      integer(0)
 
 ---
 
-    Tensor("Reshape:0", shape=(1, 1, 1, 1, 1), dtype=int32)
+    Code
+      tf$reshape(x, tensorflow::as_tensor(shape(-1, 1, 1L, 1, 1L)))
+    Output
+      tf.Tensor([[[[[42]]]]], shape=(1, 1, 1, 1, 1), dtype=int32)
 
 # shape returns right thing
 
-    TensorShape([])
+    Code
+      shape()
+    Output
+      TensorShape([])
 
 ---
 
-    TensorShape([Dimension(None)])
+    Code
+      shape(NULL)
+    Output
+      TensorShape([None])
 
 ---
 
-    TensorShape([Dimension(None)])
+    Code
+      shape(NA)
+    Output
+      TensorShape([None])
 
 ---
 
-    TensorShape(None)
+    Code
+      shape(dims = NULL)
+    Output
+      TensorShape(None)
 
 ---
 
-    TensorShape([Dimension(3), Dimension(4)])
+    Code
+      shape(3, 4)
+    Output
+      TensorShape([3, 4])
 
 ---
 
-    TensorShape([Dimension(None), Dimension(4)])
+    Code
+      shape(NA, 4)
+    Output
+      TensorShape([None, 4])
 
 ---
 
-    TensorShape([Dimension(None), Dimension(4)])
+    Code
+      shape(dims = c(NA, 4))
+    Output
+      TensorShape([None, 4])
 
 ---
 
-    TensorShape([Dimension(1), Dimension(1), Dimension(1)])
-
-# placeholder and friends behave the same way
-
-    [1]  2 NA
-
----
-
-    [1] NA
-
----
-
-    [1]  2 NA
-
----
-
-    [1] NA
-
----
-
-    [1] 1
-
----
-
-    NULL
-
----
-
-    [1] 20
-
----
-
-    [1]  2 10
-
----
-
-    NULL
-
----
-
-    [1] 1
-
----
-
-    [1] 8
-
----
-
-    [1] 2 4
+    Code
+      shape(1, 1, 1)
+    Output
+      TensorShape([1, 1, 1])
 
 # TensorShape conversions remain stable
 
-    [[1]]
-    NULL
-    
-    [[2]]
-    [1] 3
-    
+    Code
+      as.list(x)
+    Output
+      [[1]]
+      NULL
+      
+      [[2]]
+      [1] 3
+      
 
 ---
 
-    [1] NA  3
+    Code
+      as.integer(x)
+    Output
+      [1] NA  3
 
 ---
 
-    Tensor("Const_8:0", shape=(2,), dtype=int32)
+    Code
+      tensorflow::as_tensor(x)
+    Output
+      tf.Tensor([-1  3], shape=(2), dtype=int32)
 
 ---
 
-    NULL
+    Code
+      x[[1]]
+    Output
+      NULL
 
 ---
 
-    [1] 3
+    Code
+      x[[2]]
+    Output
+      [1] 3
 
 # shape returns appropriate TensorShape object
 
-    TensorShape([])
+    Code
+      shape()
+    Output
+      TensorShape([])
 
 ---
 
-    TensorShape([Dimension(None)])
+    Code
+      shape(NULL)
+    Output
+      TensorShape([None])
 
 ---
 
-    TensorShape([Dimension(None)])
+    Code
+      shape(NA)
+    Output
+      TensorShape([None])
 
 ---
 
-    TensorShape(None)
+    Code
+      shape(dims = NULL)
+    Output
+      TensorShape(None)
 
 ---
 
-    TensorShape([Dimension(3), Dimension(4)])
+    Code
+      shape(3, 4)
+    Output
+      TensorShape([3, 4])
 
 ---
 
-    TensorShape([Dimension(None), Dimension(4)])
+    Code
+      shape(NA, 4)
+    Output
+      TensorShape([None, 4])
 
 ---
 
-    TensorShape([Dimension(None), Dimension(4)])
+    Code
+      shape(dims = c(NA, 4))
+    Output
+      TensorShape([None, 4])
 
 ---
 
-    TensorShape([Dimension(1), Dimension(3)])
+    Code
+      c(shape(1), 3)
+    Output
+      TensorShape([1, 3])
 
 ---
 
-    [1] 1
+    Code
+      length(shape(1))
+    Output
+      [1] 1
 
 ---
 
-    [1] 2
+    Code
+      length(shape(1, 3))
+    Output
+      [1] 2
 
 ---
 
-    [1] 1 3
+    Code
+      as.integer(shape(1, 3))
+    Output
+      [1] 1 3
 
 ---
 
-    [1] 1 3
+    Code
+      as.numeric(shape(1, 3))
+    Output
+      [1] 1 3
 
 ---
 
-    [1] 1 3
+    Code
+      as.double(shape(1, 3))
+    Output
+      [1] 1 3
 
 ---
 
-    [1] TRUE
+    Code
+      shape(1, 3) == shape(1, 3)
+    Output
+      [1] TRUE
 
 ---
 
-    [1] FALSE
+    Code
+      shape(1, 3) == shape(1, 2)
+    Output
+      [1] FALSE
 
 ---
 
-    [1] FALSE
+    Code
+      shape(1, 3) != shape(1, 3)
+    Output
+      [1] FALSE
 
 ---
 
-    [1] TRUE
+    Code
+      shape(1, 3) != shape(1, 2)
+    Output
+      [1] TRUE
 
 # [, [[, and assignment returns right object
 
-    TensorShape([Dimension(1)])
+    Code
+      x_extract[1]
+    Output
+      TensorShape([1])
 
 ---
 
-    [1] 1
+    Code
+      x_extract[[1]]
+    Output
+      [1] 1
 
 ---
 
-    TensorShape([Dimension(2), Dimension(3)])
+    Code
+      x_extract[2:3]
+    Output
+      TensorShape([2, 3])
 
 ---
 
-    TensorShape([Dimension(2), Dimension(3)])
+    Code
+      x_extract[-1]
+    Output
+      TensorShape([2, 3])
 
 ---
 
-    
+    Code
+      x_extract[1] <- 11
+      x_extract[1]
+    Output
+      TensorShape([11])
 
 ---
 
-    
+    Code
+      x_extract[1] <- shape(11)
+      x_extract[1]
+    Output
+      TensorShape([11])
 
 ---
 
-    
+    Code
+      x_extract[1] <- list(11)
+      x_extract[1]
+    Output
+      TensorShape([11])
 
