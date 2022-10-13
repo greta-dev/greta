@@ -15,7 +15,6 @@ test_that("opt converges with TF optimisers", {
     adadelta,
     adagrad,
     adagrad_da,
-    momentum,
     adam,
     ftrl,
     proximal_gradient_descent,
@@ -61,6 +60,7 @@ test_that("opt converges with SciPy optimisers", {
   # check that the right ones warn about deprecation
   deprecated <- list(
     powell,
+    momentum,
     cg,
     newton_cg,
     l_bfgs_b,

@@ -10,7 +10,8 @@
 #' @details The optimisers `powell()`, `cg()`, `newton_cg()`,
 #'   `l_bfgs_b()`, `tnc()`, `cobyla()`, and `slsqp()` are
 #'   now defunct. They will error when called in greta 0.5.0. This are removed
-#'   because they are no longer available in TensorFlow 2.0.
+#'   because they are no longer available in TensorFlow 2.0. Note that
+#'   optimiser `momentum()` has been replaced with `gradient_descent()`
 #'
 #' @return an `optimiser` object that can be passed to [opt()].
 #'
@@ -89,6 +90,13 @@ bfgs <- function() {
 #' @export
 #'
 powell <- function() {
+  optimiser_defunct_error()
+}
+
+#' @rdname optimisers
+#' @export
+#'
+momentum <- function() {
   optimiser_defunct_error()
 }
 
