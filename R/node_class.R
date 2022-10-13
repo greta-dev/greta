@@ -182,7 +182,6 @@ node <- R6Class(
           function(x) x$defined(dag),
           FUN.VALUE = FALSE
         )
-
         if (any(!parents_defined)) {
           parents <- self$list_parents(dag)
           lapply(

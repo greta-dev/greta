@@ -38,9 +38,9 @@ test_that("logical operators work as expected", {
   a[] <- as.integer(a[])
   b[] <- as.integer(b[])
 
-  check_op(`!`, a)
-  check_op(`&`, a, b)
-  check_op(`|`, a, b)
+  check_op(`!`, a, only = "data")
+  check_op(`&`, a, b, only = "data")
+  check_op(`|`, a, b, only = "data")
 })
 
 test_that("relational operators work as expected", {

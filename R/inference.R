@@ -575,7 +575,6 @@ extra_samples <- function(draws,
 # 'node'
 #' @importFrom stats qlogis
 to_free <- function(node, data) {
-
   # use reverse mode of bijectors!
 
   lower <- node$lower
