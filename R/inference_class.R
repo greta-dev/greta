@@ -94,6 +94,7 @@ inference <- R6Class(
     # check and try to autofill a single set of initial values (single vector on
     # free state scale)
     check_initial_values = function(inits) {
+      # browser()
       undefined <- is.na(inits)
 
       # try to fill in any that weren't specified
@@ -349,6 +350,7 @@ sampler <- R6Class(
                          one_by_one, plan_is, n_cores, float_type,
                          trace_batch_size,
                          from_scratch = TRUE) {
+      # stop("hi...from the future")
       self$thin <- thin
       dag <- self$model$dag
 
