@@ -1,78 +1,46 @@
-# opt converges with SciPy optimisers
+# mcmc prints out CPU and GPU text
 
     Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
+      draws <- mcmc(m, n_samples = 5, warmup = 5, compute_options = cpu_only())
+    Message <simpleMessage>
+      running 4 chains simultaneously on up to 8 CPU cores
+    Output
+      
+    Message <message>
+      
+          warmup                                              0/5 | eta:  ?s          
+      
+          warmup ============================================ 5/5 | eta:  0s          
+      
+      
+        sampling                                              0/5 | eta:  ?s          
+      
+        sampling ============================================ 5/5 | eta:  0s          
+      
 
 ---
 
     Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
-# bad mcmc proposals are rejected
-
-    The log density could not be evaluated at these initial values
-    Try using these initials as the values argument in `calculate()` to see what values of subsequent <greta_array>s these initial values lead to.
-
----
-
-    Could not find reasonable starting values after 20 attempts.
-    Please specify initial values manually via the `initial_values` argument
+      draws <- mcmc(m, n_samples = 5, warmup = 5, compute_options = gpu_only())
+    Message <simpleMessage>
+      NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
+      For more information, see details of the `compute_options` argument in `?calculate`.
+      You can turn off this message with:
+      `options(greta_gpu_message = FALSE)`
+      running 4 chains simultaneously on GPU
+    Output
+      
+    Message <message>
+      
+          warmup                                              0/5 | eta:  ?s          
+      
+          warmup ============================================ 5/5 | eta:  0s          
+      
+      
+        sampling                                              0/5 | eta:  ?s          
+      
+        sampling ============================================ 5/5 | eta:  0s          
+      
 
 # mcmc handles initial values nicely
 
@@ -86,93 +54,10 @@
 ---
 
     Code
-      mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = inits,
+      draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = inits,
         verbose = FALSE)
     Message <simpleMessage>
       only one set of initial values was provided, and was used for all chains
-    Output
-      $`11`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-                 z
-      1  0.3742083
-      2  0.3742083
-      3  0.3742083
-      4  0.3742083
-      5  0.3742083
-      6  0.3742083
-      7  0.3742083
-      8  0.3742083
-      9  0.3742083
-      10 0.3742083
-      
-      $`12`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-                  z
-      1  0.04036782
-      2  0.04036782
-      3  0.04036782
-      4  0.04036782
-      5  0.04036782
-      6  0.04036782
-      7  0.04036782
-      8  0.04036782
-      9  0.04036782
-      10 0.04036782
-      
-      attr(,"class")
-      [1] "greta_mcmc_list" "mcmc.list"      
-      attr(,"model_info")
-      attr(,"model_info")$raw_draws
-      $`11`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-             draws
-      1  0.3742083
-      2  0.3742083
-      3  0.3742083
-      4  0.3742083
-      5  0.3742083
-      6  0.3742083
-      7  0.3742083
-      8  0.3742083
-      9  0.3742083
-      10 0.3742083
-      
-      $`12`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-              draws
-      1  0.04036782
-      2  0.04036782
-      3  0.04036782
-      4  0.04036782
-      5  0.04036782
-      6  0.04036782
-      7  0.04036782
-      8  0.04036782
-      9  0.04036782
-      10 0.04036782
-      
-      attr(,"class")
-      [1] "mcmc.list"
-      
-      attr(,"model_info")$samplers
-      attr(,"model_info")$samplers$`1`
-      hmc_sampler object with parameters:
-        Lmin = 5, Lmax = 10, epsilon = 0.7326749, diag_sd = 1
-      
-      attr(,"model_info")$model
-      greta model
 
 # progress bar gives a range of messages
 
@@ -222,16 +107,9 @@
 
 # mcmc doesn't support slice sampler with double precision models
 
-    slice sampler can only currently be used for models defined with single precision
-    set `model(..., precision = 'single')` instead
-
-# numerical issues are handled in mcmc
-
-    TensorFlow hit a numerical problem that caused it to error
-    greta can handle these as bad proposals if you rerun `mcmc()` with the argument `one_by_one = TRUE`.
-    This will slow down the sampler slightly.
-    The error encountered can be recovered and viewed with:
-    `greta_notes_tf_num_error()`
+    RuntimeError: Evaluation error: ValueError: slice index 1 of dimension 0 out of bounds. for '{{node strided_slice}} = StridedSlice[Index=DT_INT32, T=DT_DOUBLE, begin_mask=0, ellipsis_mask=0, end_mask=0, new_axis_mask=0, shrink_axis_mask=1](sampler_param_vec, strided_slice/stack, strided_slice/stack_1, strided_slice/stack_2)' with input shapes: [1], [1], [1], [1] and with computed input tensors: input[1] = <1>, input[2] = <2>, input[3] = <1>.
+    .
+    
 
 # mcmc errors for invalid parallel plans
 

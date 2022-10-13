@@ -543,7 +543,8 @@ extra_samples <- function(draws,
                           verbose = TRUE,
                           pb_update = 50,
                           one_by_one = FALSE,
-                          trace_batch_size = 100) {
+                          trace_batch_size = 100,
+                          compute_options = cpu_only()) {
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
 
@@ -565,7 +566,8 @@ extra_samples <- function(draws,
     one_by_one = one_by_one,
     n_cores = n_cores,
     from_scratch = FALSE,
-    trace_batch_size = trace_batch_size
+    trace_batch_size = trace_batch_size,
+    compute_options = compute_options
   )
 }
 

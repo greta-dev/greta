@@ -102,7 +102,6 @@ test_that("mcmc prints out CPU and GPU text", {
 test_that("mcmc works with multiple chains", {
   skip_if_not(check_tf_version())
 
-
   x <- rnorm(10)
   z <- normal(0, 1)
   distribution(x) <- normal(z, 1)
@@ -124,7 +123,6 @@ test_that("mcmc works with multiple chains", {
 test_that("mcmc handles initial values nicely", {
   skip_if_not(check_tf_version())
 
-
   # preserve R version
   current_r_version <- paste0(R.version$major,".", R.version$minor)
   required_r_version <- "3.6.0"
@@ -144,7 +142,7 @@ test_that("mcmc handles initial values nicely", {
 
   # too many sets of initial values
   inits <- replicate(3, initials(z = rnorm(1)), simplify = FALSE)
-  expect_snapshot(
+  expect_snapshot_error(
     draws <- mcmc(m,
          warmup = 10, n_samples = 10, verbose = FALSE,
          chains = 2, initial_values = inits
@@ -175,7 +173,6 @@ test_that("mcmc handles initial values nicely", {
 test_that("progress bar gives a range of messages", {
   skip_if_not(check_tf_version())
 
-
   # 10/1010 should be <1%
   expect_snapshot(draws <- mock_mcmc(1010))
 
@@ -189,7 +186,6 @@ test_that("progress bar gives a range of messages", {
 
 test_that("extra_samples works", {
   skip_if_not(check_tf_version())
-
 
   # set up model
   a <- normal(0, 1)
