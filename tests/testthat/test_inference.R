@@ -24,12 +24,12 @@ test_that("bad mcmc proposals are rejected", {
     expect_match(out, "100% bad")
 
     expect_snapshot_error(
-      mcmc(m,
-           chains = 1,
-           n_samples = 1,
-           warmup = 0,
-           verbose = FALSE,
-           initial_values = initials(z = 1e20)
+      draws <- mcmc(m,
+                    chains = 1,
+                    n_samples = 2,
+                    warmup = 0,
+                    verbose = FALSE,
+                    initial_values = initials(z = 1e60)
       )
     )
 
