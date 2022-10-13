@@ -36,7 +36,7 @@ Depends:
 Imports:
     abind,
     callr,
-    cli (>= 3.0.0),
+    cli (>= 3.4.1),
     coda,
     future (>= 1.22.1),
     glue (>= 1.5.1),
