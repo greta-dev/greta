@@ -105,6 +105,7 @@ Collate:
     'inference_class.R'
     'samplers.R'
     'optimisers.R'
+    'optimiser_class.R'
     'inference.R'
     'install_tensorflow.R'
     'calculate.R'

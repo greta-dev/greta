@@ -208,6 +208,7 @@ tf_optimiser <- R6Class(
       )
       # )
 
+      # browser()
       if (self$adjust) {
         dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
       } else {
