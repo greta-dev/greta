@@ -1269,15 +1269,20 @@ optimiser <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
+      # TF 1/2 - do we care about live pointers anymore?
       # define a *variable* free state object
-      if (!live_pointer("optimiser_free_state", envir = tfe)) {
+      # if (!live_pointer("optimiser_free_state", envir = tfe)) {
+      if (!exists("optimiser_free_state", envir = tfe)) {
         dag$define_free_state("variable", name = "optimiser_free_state")
       }
+
 
       # use the log prob function to define objectives from the variable
       # TF 1/2 - probably going to delete this code as we don't care about
       # pointers to TF graph things
-      if (!live_pointer("optimiser_objective_adj", envir = tfe)) {
+      # if (!live_pointer("optimiser_objective_adj", envir = tfe)) {
+      if (!exists("optimiser_objective_adj", envir = tfe)) {
+        # browser() <<
         # dag$on_graph(
         # TF 1/2 - this will not work at the moment, we need ot be able to
         # switch between using the adjusted or unadjusted log prob function
@@ -1358,6 +1363,7 @@ tf_optimiser <- R6Class(
 
     # create an op to minimise the objective
     create_tf_minimiser = function() {
+      # browser() <<
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
