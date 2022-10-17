@@ -35,7 +35,8 @@ extra_samples(
   verbose = TRUE,
   pb_update = 50,
   one_by_one = FALSE,
-  trace_batch_size = 100
+  trace_batch_size = 100,
+  compute_options = cpu_only()
 )
 
 initials(...)
