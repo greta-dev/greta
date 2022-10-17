@@ -66,6 +66,27 @@ define_tf_optimiser <- function(name,
   obj
 }
 
+## NOTE: TF1/2
+## This define_xxx_optimiser pattern might benefit from a new_optimiser
+## type constructor function. It only happens twice, but maybe
+## this kind of things becomes more common
+define_tfp_optimiser <- function(name,
+                                 method,
+                                 parameters = list(),
+                                 other_args = list()) {
+  obj <- list(
+    name = name,
+    method = method,
+    parameters = parameters,
+    class = tfp_optimiser,
+    other_args = other_args
+  )
+
+  class_name <- glue::glue("{name}_optimiser")
+  class(obj) <- c(class_name, "optimiser")
+  obj
+}
+
 #' @rdname optimisers
 #' @export
 #'
@@ -79,10 +100,38 @@ nelder_mead <- function() {
 #' @rdname optimisers
 #' @export
 #'
-bfgs <- function() {
+bfgs <- function(value_and_gradients_function,
+                 initial_position,
+                 tolerance = 1e-08,
+                 x_tolerance = 0,
+                 f_relative_tolerance = 0,
+                 initial_inverse_hessian_estimate = NULL,
+                 max_iterations = 50,
+                 parallel_iterations = 1,
+                 stopping_condition = NULL,
+                 validate_args = TRUE,
+                 max_line_search_iterations = 50,
+                 f_absolute_tolerance = 0,
+                 name = NULL
+) {
   define_tf_optimiser(
     name = "bfgs",
-    method = "BFGS"
+    method = "tfp$optimizer$bfgs_minimize",
+    parameters = list(
+      value_and_gradients_function = value_and_gradients_function,
+      initial_position = initial_position,
+      tolerance = tolerance,
+      x_tolerance = x_tolerance,
+      f_relative_tolerance = f_relative_tolerance,
+      initial_inverse_hessian_estimate = initial_inverse_hessian_estimate,
+      max_iterations = max_iterations,
+      parallel_iterations = parallel_iterations,
+      stopping_condition = stopping_condition,
+      validate_args = validate_args,
+      max_line_search_iterations = max_line_search_iterations,
+      f_absolute_tolerance = f_absolute_tolerance,
+      name = name
+    )
   )
 }
 
