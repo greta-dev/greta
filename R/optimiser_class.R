@@ -46,6 +46,7 @@ optimiser <- R6Class(
         self$uses_callbacks <- other_args$uses_callbacks
       }
 
+      browser()
       self$create_optimiser_objective()
       self$create_tf_minimiser()
     },
@@ -210,9 +211,11 @@ tf_optimiser <- R6Class(
 
       # browser()
       if (self$adjust) {
-        dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
+        # dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
+        tfe$tf_optimiser$minimize(tfe$optimiser_objective)
+        with(tfe, tf_optimiser$minimize(optimiser_objective))
       } else {
-        dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
+        # dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
       }
     },
 
@@ -262,7 +265,7 @@ tfp_optimiser <- R6Class(
 
     # create an op to minimise the objective
     create_tfp_minimiser = function() {
-      # browser()
+      browser()
       dag <- self$model$dag
       tfe <- dag$tf_environment
 

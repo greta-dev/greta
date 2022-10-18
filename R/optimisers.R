@@ -49,21 +49,35 @@ optimiser_defunct_error <- function() {
   )
 }
 
-define_tf_optimiser <- function(name,
-                                method,
-                                parameters = list(),
-                                other_args = list()) {
+new_optimiser <- function(name,
+                          method,
+                          parameters,
+                          class,
+                          other_args){
   obj <- list(
     name = name,
     method = method,
     parameters = parameters,
-    class = tf_optimiser,
+    class = class,
     other_args = other_args
   )
 
   class_name <- glue::glue("{name}_optimiser")
   class(obj) <- c(class_name, "optimiser")
   obj
+}
+
+define_tf_optimiser <- function(name,
+                                method,
+                                parameters = list(),
+                                other_args = list()) {
+  new_optimiser(
+    name = name,
+    method = method,
+    parameters = parameters,
+    class = tf_optimiser,
+    other_args = other_args
+  )
 }
 
 ## NOTE: TF1/2
@@ -74,17 +88,13 @@ define_tfp_optimiser <- function(name,
                                  method,
                                  parameters = list(),
                                  other_args = list()) {
-  obj <- list(
+  new_optimiser(
     name = name,
     method = method,
     parameters = parameters,
     class = tfp_optimiser,
     other_args = other_args
   )
-
-  class_name <- glue::glue("{name}_optimiser")
-  class(obj) <- c(class_name, "optimiser")
-  obj
 }
 
 #' @rdname optimisers
@@ -100,8 +110,8 @@ nelder_mead <- function() {
 #' @rdname optimisers
 #' @export
 #'
-bfgs <- function(value_and_gradients_function,
-                 initial_position,
+bfgs <- function(value_and_gradients_function = NULL,
+                 initial_position = NULL,
                  tolerance = 1e-08,
                  x_tolerance = 0,
                  f_relative_tolerance = 0,
@@ -112,9 +122,8 @@ bfgs <- function(value_and_gradients_function,
                  validate_args = TRUE,
                  max_line_search_iterations = 50,
                  f_absolute_tolerance = 0,
-                 name = NULL
-) {
-  define_tf_optimiser(
+                 name = NULL) {
+  define_tfp_optimiser(
     name = "bfgs",
     method = "tfp$optimizer$bfgs_minimize",
     parameters = list(
