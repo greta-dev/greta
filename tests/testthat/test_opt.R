@@ -35,7 +35,7 @@ test_that("opt converges with TF optimisers", {
   }
 })
 
-test_that("opt converges with SciPy optimisers", {
+test_that("opt converges with TFP optimisers", {
   skip_if_not(check_tf_version())
 
   x <- rnorm(3, 2, 0.1)
@@ -47,26 +47,13 @@ test_that("opt converges with SciPy optimisers", {
   # loop through optimisers that might be expected to work
   optimisers <- list(
     nelder_mead,
-    powell,
-    cg,
-    bfgs,
-    newton_cg,
-    l_bfgs_b,
-    tnc,
-    cobyla,
-    slsqp
+    bfgs
   )
 
-  # check that the right ones warn about deprecation
   deprecated <- list(
-    powell,
-    momentum,
-    cg,
-    newton_cg,
-    l_bfgs_b,
-    tnc,
-    cobyla,
-    slsqp
+    adagrad_da,
+    proximal_adagrad,
+    proximal_gradient_descent
   )
 
   for (optmr in optimisers) {
@@ -89,6 +76,32 @@ test_that("opt converges with SciPy optimisers", {
 
     expect_true(all(abs(x - o$par$z) < 1e-2))
   }
+})
+
+test_that("opt fails with defunct optimisers", {
+
+  skip_if_not(check_tf_version())
+
+  x <- rnorm(3, 2, 0.1)
+  z <- variable(dim = 3)
+  distribution(x) <- normal(z, 0.1)
+
+  m <- model(z)
+
+  # check that the right ones error about defunct
+  defunct <- list(
+    powell,
+    momentum,
+    cg,
+    newton_cg,
+    l_bfgs_b,
+    tnc,
+    cobyla,
+    slsqp
+  )
+
+  # more code...
+
 })
 
 test_that("opt accepts initial values", {

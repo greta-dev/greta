@@ -17,6 +17,7 @@ optimiser <- R6Class(
     it = 0,
     old_obj = Inf,
     diff = Inf,
+    minimiser_function = NULL,
 
     # set up the model
     initialize = function(initial_values,
@@ -28,6 +29,7 @@ optimiser <- R6Class(
                           max_iterations,
                           tolerance,
                           adjust) {
+
       super$initialize(initial_values,
                        model,
                        parameters = list(),
@@ -46,9 +48,12 @@ optimiser <- R6Class(
         self$uses_callbacks <- other_args$uses_callbacks
       }
 
-      browser()
-      self$create_optimiser_objective()
-      self$create_tf_minimiser()
+      # browser()
+      # self$create_optimiser_objective()
+      ## TF1/2 create_tf_minimiser needs to be renamed to reflect that it
+      ## is actually running the optimisation
+      # self$create_tf_minimiser()
+      run_optimiser(self)
     },
     parameter_names = function() {
       names(self$parameters)
@@ -82,7 +87,7 @@ optimiser <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      dag$tf_sess_run(tf$compat$v1$global_variables_initializer())
+      # dag$tf_sess_run(tf$compat$v1$global_variables_initializer())
 
       shape <- tfe$optimiser_free_state$shape
       # dag$on_graph(
@@ -92,8 +97,13 @@ optimiser <- R6Class(
       )
       # )
 
-      . <- dag$tf_sess_run(optimiser_free_state$assign(optimiser_init))
+      # . <- dag$tf_sess_run(optimiser_free_state$assign(optimiser_init))
+      tfe$optimiser_free_state$assign(tfe$optimiser_init)
     },
+
+    # TF1/2 - current interface might actually change this somewhat
+    # as we end up just redefining the optimiser /tf log prob function
+    # again later on
 
     # create a separate free state variable and objective, since optimisers must
     # use variables
@@ -122,30 +132,41 @@ optimiser <- R6Class(
         objectives <- dag$tf_log_prob_function(tfe$optimiser_free_state)
         # )
 
-        assign("optimiser_objective_adj",
-               -objectives$adjusted,
-               envir = tfe
+        assign(
+          x = "optimiser_objective_adj",
+          value = function() -dag$tf_log_prob_function(free_state)$adjusted,
+          envir = tfe
         )
 
-        assign("optimiser_objective",
-               -objectives$unadjusted,
-               envir = tfe
+        assign(
+          x = "optimiser_objective",
+          value = function() -dag$tf_log_prob_function(free_state)$unadjusted,
+          envir = tfe
         )
+
       }
     },
     run = function() {
-      self$model$dag$build_feed_dict()
-      self$set_inits()
-      self$run_minimiser()
+      # TF1/2 - don't need to build a feed_dict anymore as it isn't getting built?
+      # self$model$dag$build_feed_dict()
+      # self$set_inits()
+      # self$run_minimiser()
+      self$minimiser_function(self$free_state)
       self$fetch_free_state()
+
     },
     fetch_free_state = function() {
 
+      tfe <- self$model$dag$tf_environment
       # get the free state as a vector
-      self$free_state <- self$model$dag$tf_sess_run(optimiser_free_state)
+      # self$free_state <- self$model$dag$tf_sess_run(optimiser_free_state)
+      # self$free_state <- tfe$optimiser_free_state
+      self$free_state <- tfe$free_state
+
     },
     return_outputs = function() {
       dag <- self$model$dag
+      # browser()
 
       # if the optimiser was ignoring the callbacks, we have no idea about the
       # number of iterations or convergence
@@ -153,15 +174,27 @@ optimiser <- R6Class(
         self$it <- NA
       }
 
+      # TF1/2 need to note some way of the number of iterations
       converged <- self$it < (self$max_iterations - 1)
-
-      par <- dag$trace_values(self$free_state, flatten = FALSE)
+      # because we need to resolve an issue with indexing of TF object
+      r_free_state <- as.array(self$free_state)
+      par <- dag$trace_values(r_free_state, flatten = FALSE)
       par <- lapply(par, drop_first_dim)
       par <- lapply(par, drop_column_dim)
 
+      if (self$adjust) {
+        value <- dag$tf_log_prob_function(self$free_state)$adjusted
+      } else {
+        value <- dag$tf_log_prob_function(self$free_state)$unadjusted
+      }
+
+      value <- as.array(value) * -1
+
       list(
         par = par,
-        value = -dag$tf_sess_run(joint_density),
+        #TF1/2 - need to remove uses of tf_sess_run
+        # value = -dag$tf_sess_run(joint_density),
+        value = value,
         iterations = self$it,
         convergence = ifelse(converged, 0, 1)
       )
@@ -199,38 +232,96 @@ tf_optimiser <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      self$sanitise_dtypes()
+      # TF1/2 - unsure if we need this any more
+      # self$sanitise_dtypes()
 
       optimise_fun <- eval(parse(text = self$method))
-      # dag$on_graph(
+
       tfe$tf_optimiser <- do.call(
         optimise_fun,
         self$parameters
       )
-      # )
 
-      # browser()
-      if (self$adjust) {
-        # dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
-        tfe$tf_optimiser$minimize(tfe$optimiser_objective)
-        with(tfe, tf_optimiser$minimize(optimiser_objective))
-      } else {
-        # dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
+      self$minimiser_function <- function(inits) {
+
+        free_state <- tf$Variable(inits)
+
+        objective_adjusted <- function(){
+          -dag$tf_log_prob_function(free_state)$adjusted
+        }
+
+        objective_unadjusted <- function(){
+          -dag$tf_log_prob_function(free_state)$unadjusted
+        }
+
+        if (self$adjust) {
+          tfe$train <- tfe$tf_optimiser$minimize(
+            objective_adjusted,
+            var_list = list(free_state)
+          )
+
+        } else {
+          tfe$train <- tfe$tf_optimiser$minimize(
+            objective_unadjusted,
+            var_list = list(free_state)
+          )
+        }
+        browser()
+        tfe$free_state <- free_state
       }
+
+      #
+      #       free_state <- tf$Variable(self$free_state)
+      #
+      #       objective_adjusted <- function(){
+      #         -dag$tf_log_prob_function(free_state)$adjusted
+      #       }
+      #
+      #       objective_unadjusted <- function(){
+      #         -dag$tf_log_prob_function(free_state)$adjusted
+      #       }
+      #
+      #       if (self$adjust) {
+      #           browser()
+      #         # dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
+      #
+      #         tfe$train <- tfe$tf_optimiser$minimize(
+      #           objective_adjusted,
+      #           var_list = list(free_state)
+      #         )
+      #
+      #         } else {
+      #         # dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
+      #
+      #           tfe$train <- tfe$tf_optimiser$minimize(
+      #             objective_unadjusted,
+      #             var_list = list(free_state)
+      #           )
+      #         }
+      #
+      #       # add the updated free state into TFE
+      #       tfe$free_state <- free_state
     },
 
     # minimise the objective function
     run_minimiser = function() {
       self$set_inits()
+      tfe <- self$model$dag$tf_environment
 
+      # browser() <<
+      ## TF1/2 - need to get have some way of getting the number of iterations
+      ## out from the train
       while (self$it < self$max_iterations &
              self$diff > self$tolerance) {
         self$it <- self$it + 1
-        self$model$dag$tf_sess_run(train)
+        # self$model$dag$tf_sess_run(train)
+        tfe$train
         if (self$adjust) {
-          obj <- self$model$dag$tf_sess_run(optimiser_objective_adj)
+          # obj <- self$model$dag$tf_sess_run(optimiser_objective_adj)
+          obj <- tfe$optimiser_objective_adj
         } else {
-          obj <- self$model$dag$tf_sess_run(optimiser_objective)
+          # obj <- self$model$dag$tf_sess_run(optimiser_objective)
+          obj <- tfe$optimiser_objective
         }
         self$diff <- abs(self$old_obj - obj)
         self$old_obj <- obj
@@ -263,9 +354,8 @@ tfp_optimiser <- R6Class(
       }
     },
 
-    # create an op to minimise the objective
     create_tfp_minimiser = function() {
-      browser()
+      # browser() <<
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -273,6 +363,7 @@ tfp_optimiser <- R6Class(
 
       optimise_fun <- eval(parse(text = self$method))
       # dag$on_graph(
+      # TF1/2 - need to work out how to appropriately call the TFP function
       tfe$tf_optimiser <- do.call(
         optimise_fun,
         self$parameters
@@ -284,6 +375,36 @@ tfp_optimiser <- R6Class(
       } else {
         dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
       }
+
+      # create an op to minimise the objective
+      self$minimiser_function <- function(inits) {
+
+        free_state <- tf$Variable(inits)
+
+        objective_adjusted <- function(){
+          -dag$tf_log_prob_function(free_state)$adjusted
+        }
+
+        objective_unadjusted <- function(){
+          -dag$tf_log_prob_function(free_state)$adjusted
+        }
+
+        if (self$adjust) {
+          tfe$train <- tfe$tf_optimiser$minimize(
+            objective_adjusted,
+            var_list = list(free_state)
+          )
+
+        } else {
+          tfe$train <- tfe$tf_optimiser$minimize(
+            objective_unadjusted,
+            var_list = list(free_state)
+          )
+        }
+
+        tfe$free_state <- free_state
+      }
+
     },
 
     # minimise the objective function
@@ -306,65 +427,18 @@ tfp_optimiser <- R6Class(
   )
 )
 
-# TF1/2
-# I think gien that the scipy optimisers have been removed, then this code
-# could be removed as well? Might be worthwhile to explore/understand if this
-# output is different to the tensorflow output?
-scipy_optimiser <- R6Class(
-  "scipy_optimiser",
-  inherit = optimiser,
-  public = list(
-    create_tf_minimiser = function() {
-      dag <- self$model$dag
-      tfe <- dag$tf_environment
+# implement an S3 method to handle dispatching the optimisation method based
+# on the class. Should also allow for building other methods in the future
+run_optimiser <- function(self){
+  UseMethod("run_optimiser")
+}
 
-      opt_fun <- eval(parse(text = "tf$contrib$opt$ScipyOptimizerInterface"))
+## TF1/2 Change from `create_tf_minimiser` as it runs the minimisation
+run_optimiser.tf_optimiser <- function(self){
+  self$create_tf_minimiser()
+}
 
-      if (self$adjust) {
-        loss <- tfe$optimiser_objective_adj
-      } else {
-        loss <- tfe$optimiser_objective
-      }
+run_optimiser.tfp_optimiser <- function(self){
+  self$create_tfp_minimiser()
+}
 
-      args <- list(
-        loss = loss,
-        method = self$method,
-        options = c(self$parameters,
-                    maxiter = self$max_iterations
-        ),
-        tol = self$tolerance
-      )
-
-      # dag$on_graph(
-      tfe$tf_optimiser <- do.call(opt_fun, args)
-      # )
-    },
-    obj_progress = function(obj) {
-      self$diff <- abs(self$old_obj - obj)
-      self$old_obj <- obj
-    },
-    it_progress = function(...) {
-      self$it <- self$it + 1
-    },
-    run_minimiser = function() {
-      dag <- self$model$dag
-      tfe <- dag$tf_environment
-      tfe$it_progress <- self$it_progress
-      tfe$obj_progress <- self$obj_progress
-
-      self$set_inits()
-
-      # run the optimiser, suppressing python's yammering
-      quietly(
-        dag$tf_run(
-          tf_optimiser$minimize(sess,
-                                feed_dict = feed_dict,
-                                step_callback = it_progress,
-                                loss_callback = obj_progress,
-                                fetches = list(optimiser_objective_adj)
-          )
-        )
-      )
-    }
-  )
-)

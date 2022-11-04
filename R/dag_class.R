@@ -39,10 +39,9 @@ dag_class <- R6Class(
         self$define_trace_values_batch
         )
 
-      self$tf_log_prob_function <-
-        # tensorflow::tf_function(
+      self$tf_log_prob_function <- tensorflow::tf_function(
         self$generate_log_prob_function()
-      # )
+      )
     },
 
     tf_log_prob_function = NULL,
@@ -780,7 +779,6 @@ dag_class <- R6Class(
     trace_values = function(free_state,
                             flatten = TRUE,
                             trace_batch_size = Inf) {
-
       # get the number of samples to trace
       n_samples <- nrow(free_state)
       indices <- seq_len(n_samples)
