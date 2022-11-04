@@ -14,11 +14,8 @@ test_that("opt converges with TF optimisers", {
     gradient_descent,
     adadelta,
     adagrad,
-    adagrad_da,
     adam,
     ftrl,
-    proximal_gradient_descent,
-    proximal_adagrad,
     rms_prop
   )
 
@@ -27,12 +24,12 @@ test_that("opt converges with TF optimisers", {
               optimiser = optmr(),
               max_iterations = 200
     ))
-
     # should have converged in fewer than 200 iterations and be close to truth
     expect_equal(o$convergence, 0)
     expect_lte(o$iterations, 200)
     expect_true(all(abs(x - o$par$z) < 1e-2))
   }
+
 })
 
 test_that("opt converges with TFP optimisers", {
