@@ -254,53 +254,32 @@ tf_optimiser <- R6Class(
           -dag$tf_log_prob_function(free_state)$unadjusted
         }
 
-        if (self$adjust) {
-          tfe$train <- tfe$tf_optimiser$minimize(
-            objective_adjusted,
-            var_list = list(free_state)
-          )
+        while (self$it < self$max_iterations &
+               all(self$diff > self$tolerance)) {
+          # add 1 because python indexing
+          self$it <- as.numeric(tfe$tf_optimiser$iterations) + 1
 
-        } else {
-          tfe$train <- tfe$tf_optimiser$minimize(
-            objective_unadjusted,
-            var_list = list(free_state)
-          )
+          if (self$adjust) {
+            tfe$tf_optimiser$minimize(
+              objective_adjusted,
+              var_list = list(free_state)
+            )
+
+          } else {
+            tfe$tf_optimiser$minimize(
+              objective_unadjusted,
+              var_list = list(free_state)
+            )
+          }
+
+          free_state_numeric <- as.numeric(free_state)
+          self$diff <- abs(self$old_obj - free_state_numeric)
+          self$old_obj <- free_state_numeric
+
         }
-        browser()
         tfe$free_state <- free_state
       }
 
-      #
-      #       free_state <- tf$Variable(self$free_state)
-      #
-      #       objective_adjusted <- function(){
-      #         -dag$tf_log_prob_function(free_state)$adjusted
-      #       }
-      #
-      #       objective_unadjusted <- function(){
-      #         -dag$tf_log_prob_function(free_state)$adjusted
-      #       }
-      #
-      #       if (self$adjust) {
-      #           browser()
-      #         # dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective_adj))
-      #
-      #         tfe$train <- tfe$tf_optimiser$minimize(
-      #           objective_adjusted,
-      #           var_list = list(free_state)
-      #         )
-      #
-      #         } else {
-      #         # dag$tf_run(train <- tf_optimiser$minimize(optimiser_objective))
-      #
-      #           tfe$train <- tfe$tf_optimiser$minimize(
-      #             objective_unadjusted,
-      #             var_list = list(free_state)
-      #           )
-      #         }
-      #
-      #       # add the updated free state into TFE
-      #       tfe$free_state <- free_state
     },
 
     # minimise the objective function
