@@ -317,14 +317,14 @@ adagrad_da <- function(learning_rate = 0.8,
 #' @rdname optimisers
 #' @export
 #'
-#' @param beta1 exponential decay rate for the 1st moment estimates
-#' @param beta2 exponential decay rate for the 2nd moment estimates
+#' @param beta_1 exponential decay rate for the 1st moment estimates
+#' @param beta_2 exponential decay rate for the 2nd moment estimates
 #' @param amsgrad Boolean. Whether to apply AMSGrad variant of this algorithm
 #'   from the paper "On the Convergence of Adam and beyond". Defaults to FALSE.
 #'
 adam <- function(learning_rate = 0.1,
-                 beta1 = 0.9,
-                 beta2 = 0.999,
+                 beta_1 = 0.9,
+                 beta_2 = 0.999,
                  amsgrad = FALSE,
                  epsilon = 1e-08) {
   define_tf_optimiser(
@@ -332,8 +332,8 @@ adam <- function(learning_rate = 0.1,
     method = "tf$keras$optimizers$Adam",
     parameters = list(
       learning_rate = learning_rate,
-      beta1 = beta1,
-      beta2 = beta2,
+      beta_1 = beta_1,
+      beta_2 = beta_2,
       epsilon = epsilon,
       amsgrad = amsgrad
     )
