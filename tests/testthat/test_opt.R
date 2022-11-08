@@ -32,6 +32,21 @@ test_that("opt converges with TF optimisers", {
 
 })
 
+test_that("opt gives appropriate warning with deprecated optimisers in TFP", {
+  skip_if_not(check_tf_version())
+
+  deprecated <- list(
+    adagrad_da,
+    proximal_adagrad,
+    proximal_gradient_descent
+  )
+
+  # see if it's a deprecated optimiser
+  matches <- vapply(deprecated, identical, optmr, FUN.VALUE = logical(1))
+  msg <- ifelse(any(matches), "deprecated", NA)
+
+})
+
 test_that("opt converges with TFP optimisers", {
   skip_if_not(check_tf_version())
 
@@ -47,31 +62,17 @@ test_that("opt converges with TFP optimisers", {
     bfgs
   )
 
-  deprecated <- list(
-    adagrad_da,
-    proximal_adagrad,
-    proximal_gradient_descent
-  )
-
   for (optmr in optimisers) {
 
-    # see if it's a deprecated optimiser
-    matches <- vapply(deprecated, identical, optmr, FUN.VALUE = logical(1))
-    msg <- ifelse(any(matches), "deprecated", NA)
-
+    browser()
     expect_snapshot(
       o <- opt(m, optimiser = optmr(), max_iterations = 500)
     )
 
     # should have converged in fewer than 500 iterations and be close to truth
-
-    # can't tell that from output of cobyla
-    if (!identical(optmr, cobyla)) {
       expect_equal(o$convergence, 0)
       expect_lte(o$iterations, 500)
-    }
-
-    expect_true(all(abs(x - o$par$z) < 1e-2))
+      expect_true(all(abs(x - o$par$z) < 1e-2))
   }
 })
 
@@ -97,7 +98,7 @@ test_that("opt fails with defunct optimisers", {
 
 })
 
-test_that("opt accepts initial values", {
+test_that("opt accepts initial values for TF optimisers", {
   skip_if_not(check_tf_version())
 
   x <- rnorm(5, 2, 0.1)
@@ -105,7 +106,9 @@ test_that("opt accepts initial values", {
   distribution(x) <- normal(z, 0.1)
 
   m <- model(z)
-  o <- opt(m, initial_values = initials(z = rnorm(5)))
+  o <- opt(m,
+           initial_values = initials(z = rnorm(5)),
+           optimiser = gradient_descent())
 
   # should have converged
   expect_equal(o$convergence, 0)
@@ -117,7 +120,52 @@ test_that("opt accepts initial values", {
   expect_true(all(abs(x - o$par$z) < 1e-3))
 })
 
-test_that("opt returns hessians", {
+test_that("opt accepts initial values for TFP optimisers", {
+  skip_if_not(check_tf_version())
+
+  x <- rnorm(5, 2, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, 0.1)
+
+  m <- model(z)
+  o <- opt(m,
+           initial_values = initials(z = rnorm(5)),
+           optimiser = bfgs())
+
+  # should have converged
+  expect_equal(o$convergence, 0)
+
+  # should be fewer than 100 iterations
+  expect_lte(o$iterations, 100)
+
+  # should be close to the truth
+  expect_true(all(abs(x - o$par$z) < 1e-3))
+})
+
+test_that("TF opt returns hessians", {
+  skip_if_not(check_tf_version())
+
+  sd <- runif(5)
+  x <- rnorm(5, 2, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, sd)
+
+  m <- model(z)
+  o <- opt(m, hessian = TRUE, optimiser = gradient_descent())
+
+  hess <- o$hessian$z
+
+  # should be a 5x5 numeric matrix
+  expect_true(inherits(hess, "matrix"))
+  expect_true(is.numeric(hess))
+  expect_true(identical(dim(hess), c(5L, 5L)))
+
+  # the model density is IID normal, so we should be able to recover the SD
+  approx_sd <- sqrt(diag(solve(hess)))
+  expect_true(all(abs(approx_sd - sd) < 1e-9))
+})
+
+test_that("TFP opt returns hessians", {
   skip_if_not(check_tf_version())
 
   sd <- runif(5)

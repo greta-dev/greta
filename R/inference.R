@@ -914,7 +914,6 @@ opt <- function(model,
       adjust = adjust
     )
 
-    # browser()
     # run it and get the outputs
     object$run()
     outputs <- object$return_outputs()

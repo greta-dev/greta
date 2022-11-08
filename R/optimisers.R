@@ -114,10 +114,45 @@ define_tfp_optimiser <- function(name,
 #' @rdname optimisers
 #' @export
 #'
-nelder_mead <- function() {
+nelder_mead <- function(
+    objective_function = NULL,
+    initial_simplex = NULL,
+    initial_vertex = NULL,
+    step_sizes = NULL,
+    objective_at_initial_simplex = NULL,
+    objective_at_initial_vertex = NULL,
+    batch_evaluate_objective = FALSE,
+    func_tolerance = 1e-08,
+    position_tolerance = 1e-08,
+    parallel_iterations = 1,
+    max_iterations = NULL,
+    reflection = NULL,
+    expansion = NULL,
+    contraction = NULL,
+    shrinkage = NULL,
+    name = NULL) {
+  browser()
   define_tf_optimiser(
     name = "nelder_mead",
     method = "tfp$optimizer$nelder_mead_minimize",
+    parameters = list(
+      objective_function = objective_function,
+      initial_simplex = initial_simplex,
+      initial_vertex = initial_vertex,
+      step_sizes = step_sizes,
+      objective_at_initial_simplex = objective_at_initial_simplex,
+      objective_at_initial_vertex = objective_at_initial_vertex,
+      batch_evaluate_objective = batch_evaluate_objective,
+      func_tolerance = func_tolerance,
+      position_tolerance = position_tolerance,
+      parallel_iterations = parallel_iterations,
+      max_iterations = max_iterations,
+      reflection = reflection,
+      expansion = expansion,
+      contraction = contraction,
+      shrinkage = shrinkage,
+      name = name
+    )
   )
 }
 
@@ -127,15 +162,15 @@ nelder_mead <- function() {
 bfgs <- function(value_and_gradients_function = NULL,
                  initial_position = NULL,
                  tolerance = 1e-08,
-                 x_tolerance = 0,
-                 f_relative_tolerance = 0,
+                 x_tolerance = 0L,
+                 f_relative_tolerance = 0L,
                  initial_inverse_hessian_estimate = NULL,
-                 max_iterations = 50,
-                 parallel_iterations = 1,
+                 max_iterations = 50L,
+                 parallel_iterations = 1L,
                  stopping_condition = NULL,
                  validate_args = TRUE,
-                 max_line_search_iterations = 50,
-                 f_absolute_tolerance = 0,
+                 max_line_search_iterations = 50L,
+                 f_absolute_tolerance = 0L,
                  name = NULL) {
   define_tfp_optimiser(
     name = "bfgs",
