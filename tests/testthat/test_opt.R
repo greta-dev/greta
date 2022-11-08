@@ -86,18 +86,14 @@ test_that("opt fails with defunct optimisers", {
   m <- model(z)
 
   # check that the right ones error about defunct
-  defunct <- list(
-    powell,
-    momentum,
-    cg,
-    newton_cg,
-    l_bfgs_b,
-    tnc,
-    cobyla,
-    slsqp
-  )
-
-  # more code...
+  expect_snapshot_error(o <- opt(m, optimiser = powell()))
+  expect_snapshot_error(o <- opt(m, optimiser = momentum()))
+  expect_snapshot_error(o <- opt(m, optimiser = cg()))
+  expect_snapshot_error(o <- opt(m, optimiser = newton_cg()))
+  expect_snapshot_error(o <- opt(m, optimiser = l_bfgs_b()))
+  expect_snapshot_error(o <- opt(m, optimiser = tnc()))
+  expect_snapshot_error(o <- opt(m, optimiser = cobyla()))
+  expect_snapshot_error(o <- opt(m, optimiser = slsqp()))
 
 })
 

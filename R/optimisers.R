@@ -35,10 +35,10 @@ NULL
 # nolint end
 
 # defunct some optimisers
-optimiser_defunct_error <- function() {
+optimiser_defunct_error <- function(optimiser) {
   msg <- cli::format_error(
     c(
-      "This optimiser is defunct and has been removed in {.pkg greta} 0.5.0.",
+      "The optimiser, {.fun {optimiser}}, is defunct and has been removed in {.pkg greta} 0.5.0.",
       "Please use a different optimiser.",
       "See {.code ?optimisers} for more details on which optimizers are removed."
       )
@@ -162,56 +162,56 @@ bfgs <- function(value_and_gradients_function = NULL,
 #' @export
 #'
 powell <- function() {
-  optimiser_defunct_error()
+  optimiser_defunct_error("powell")
 }
 
 #' @rdname optimisers
 #' @export
 #'
 momentum <- function() {
-  optimiser_defunct_error()
+  optimiser_defunct_error("momentum")
 }
 
 #' @rdname optimisers
 #' @export
 #'
 cg <- function() {
-  optimiser_defunct_error()
+  optimiser_defunct_error("cg")
 }
 
 #' @rdname optimisers
 #' @export
 #'
 newton_cg <- function() {
-  optimiser_defunct_error()
+  optimiser_defunct_error("newton_cg")
 }
 
 #' @rdname optimisers
 #' @export
 #'
 l_bfgs_b <- function() {
-  optimiser_defunct_error()
+  optimiser_defunct_error("l_bfgs_b")
 }
 
 #' @rdname optimisers
 #' @export
 #'
 tnc <- function() {
-  optimiser_defunct_error()
+  optimiser_defunct_error("tnc")
 }
 
 #' @rdname optimisers
 #' @export
 #'
 cobyla <- function() {
-  optimiser_defunct_error()
+  optimiser_defunct_error("cobyla")
 }
 
 #' @rdname optimisers
 #' @export
 #'
 slsqp <- function() {
-  optimiser_defunct_error()
+  optimiser_defunct_error("slsqp")
 }
 
 
