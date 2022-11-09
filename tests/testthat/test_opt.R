@@ -35,15 +35,15 @@ test_that("opt converges with TF optimisers", {
 test_that("opt gives appropriate warning with deprecated optimisers in TFP", {
   skip_if_not(check_tf_version())
 
-  deprecated <- list(
-    adagrad_da,
-    proximal_adagrad,
-    proximal_gradient_descent
+  expect_snapshot_warning(
+    opt(m, optimiser = adagrad_da())
   )
-
-  # see if it's a deprecated optimiser
-  matches <- vapply(deprecated, identical, optmr, FUN.VALUE = logical(1))
-  msg <- ifelse(any(matches), "deprecated", NA)
+  expect_snapshot_warning(
+    opt(m, optimiser = proximal_adagrad())
+  )
+  expect_snapshot_warning(
+    opt(m, optimiser = proximal_gradient_descent())
+  )
 
 })
 
@@ -57,23 +57,24 @@ test_that("opt converges with TFP optimisers", {
   m <- model(z)
 
   # loop through optimisers that might be expected to work
-  optimisers <- list(
-    nelder_mead,
-    bfgs
+  expect_snapshot(
+    o <- opt(m, optimiser = bfgs(), max_iterations = 500)
   )
 
-  for (optmr in optimisers) {
+  # should have converged in fewer than 500 iterations and be close to truth
+  expect_equal(o$convergence, 0)
+  expect_lte(o$iterations, 500)
+  expect_true(all(abs(x - o$par$z) < 1e-2))
 
-    browser()
-    expect_snapshot(
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    )
+  expect_snapshot(
+    o <- opt(m, optimiser = nelder_mead(), max_iterations = 500)
+  )
 
-    # should have converged in fewer than 500 iterations and be close to truth
-      expect_equal(o$convergence, 0)
-      expect_lte(o$iterations, 500)
-      expect_true(all(abs(x - o$par$z) < 1e-2))
-  }
+  # should have converged in fewer than 500 iterations and be close to truth
+  expect_equal(o$convergence, 0)
+  expect_lte(o$iterations, 500)
+  expect_true(all(abs(x - o$par$z) < 1e-2))
+
 })
 
 test_that("opt fails with defunct optimisers", {

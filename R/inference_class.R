@@ -42,7 +42,6 @@ inference <- R6Class(
         model$dag$define_tf()
       }
 
-
       self$parameters <- parameters
       self$model <- model
       free_parameters <- model$dag$example_parameters(free = TRUE)

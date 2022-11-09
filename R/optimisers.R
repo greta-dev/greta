@@ -124,15 +124,15 @@ nelder_mead <- function(
     batch_evaluate_objective = FALSE,
     func_tolerance = 1e-08,
     position_tolerance = 1e-08,
-    parallel_iterations = 1,
+    parallel_iterations = 1L,
     max_iterations = NULL,
     reflection = NULL,
     expansion = NULL,
     contraction = NULL,
     shrinkage = NULL,
     name = NULL) {
-  browser()
-  define_tf_optimiser(
+
+  define_tfp_optimiser(
     name = "nelder_mead",
     method = "tfp$optimizer$nelder_mead_minimize",
     parameters = list(
