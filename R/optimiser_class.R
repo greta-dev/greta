@@ -192,9 +192,11 @@ tfp_optimiser <- R6Class(
         # because nelder_mead uses initial_vertex and not initial_position
         # this is a quick hack changing the argument in place by argument
         # position instead of by name ... for reasons
-      browser()
+      # >>> browser() <<<
         self$parameters$objective_function <- objective
-        self$parameters$initial_vertex <- inits
+        self$parameters$initial_vertex <- tf$constant(inits)
+        self$parameters$batch_evaluate_objective <- TRUE
+        # self$parameters$batch_evaluate_objective <- FALSE
         # self$parameters$step_sizes <- tf$constant(c(rep(1L, 5)))
       }
 
