@@ -845,3 +845,40 @@ check_samples <- function(x,
   suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
   testthat::expect_gte(stat$p.value, 0.01)
 }
+
+## helpers for looping through optimisers
+
+library(tidyverse)
+
+run_opt <- function(m,
+                    optmr,
+                    max_iterations = 200){
+  opt(m,
+      optimiser = optmr(),
+      max_iterations = max_iterations
+  )
+}
+
+possibly_run_opt <- possibly(.f = run_opt, otherwise = "error")
+
+opt_df_run <- function(optimisers, m){
+  opt_df <- enframe(
+    x = optimisers,
+    name = "opt",
+    value = "opt_fn"
+  ) %>%
+    mutate(
+      result = lapply(opt_fn, possibly_run_opt, m = m)
+    )
+
+  opt_df
+}
+
+tidy_optimisers <- function(opt_df, tolerance = 1e-2){
+  opt_df %>%
+    unnest_wider(col = c(result)) %>%
+    mutate(par = unname(flatten(par)),
+           par_x_diff = map(par, function(par) abs(x - par)),
+           close_to_truth = map_lgl(par_x_diff,
+                                    function(x) all(x < tolerance)))
+}

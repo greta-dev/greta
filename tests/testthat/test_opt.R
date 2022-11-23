@@ -9,8 +9,7 @@ test_that("opt converges with TF optimisers", {
 
   m <- model(z)
 
-  # loop through optimisers that might be expected to work
-  optimisers <- list(
+  optimisers <- lst(
     gradient_descent,
     adadelta,
     adagrad,
@@ -19,16 +18,13 @@ test_that("opt converges with TF optimisers", {
     rms_prop
   )
 
-  for (optmr in optimisers) {
-    (o <- opt(m,
-              optimiser = optmr(),
-              max_iterations = 200
-    ))
-    # should have converged in fewer than 200 iterations and be close to truth
-    expect_equal(o$convergence, 0)
-    expect_lte(o$iterations, 200)
-    expect_true(all(abs(x - o$par$z) < 1e-2))
-  }
+  opt_df <- opt_df_run(optimisers, m)
+  tidied_opt <- tidy_optimisers(opt_df)
+
+  expect_true(all(tidied_opt$convergence == 0))
+  expect_true(all(tidied_opt$iterations <= 200))
+  expect_true(all(tidied_opt$close_to_truth))
+
 
 })
 
@@ -56,7 +52,8 @@ test_that("opt converges with TFP optimisers", {
 
   m <- model(z)
 
-  # loop through optimisers that might be expected to work
+  # There are only 2 TFP optimisers: bfgs & nelder_mead
+  # check through each individualls
   expect_snapshot(
     o <- opt(m, optimiser = bfgs(), max_iterations = 500)
   )
