@@ -72,5 +72,6 @@
 
 # cleanly() handles TF errors nicely
 
-    Fetchez la vache!
+    greta hit a tensorflow error:
+    Error in other_stop(): Fetchez la vache!
 

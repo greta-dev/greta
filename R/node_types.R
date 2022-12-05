@@ -60,7 +60,6 @@ data_node <- R6Class(
           # stashing things for use in the feed_dict later
           dag$set_tf_data_list(unbatched_name, value)
         }
-        # browser()
 
         # expand up to batch size - so we can run multiple chains
         tiling <- c(tfe$batch_size, rep(1L, ndim))

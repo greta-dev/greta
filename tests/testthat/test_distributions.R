@@ -131,7 +131,6 @@ test_that("gamma distribution has correct density", {
 test_that("inverse gamma distribution has correct density", {
   skip_if_not(check_tf_version())
 
-
   compare_distribution(
     greta::inverse_gamma,
     extraDistr::dinvgamma,

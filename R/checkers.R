@@ -264,10 +264,10 @@ check_n_realisations <- function(vectors = list(),
           "{.code n_realisations is not a positive scalar interger}",
           "{.code n_realisations} must be a positive scalar integer giving \\
             the number of rows of the output",
-          "x" = "We see {.code n_realisations} = {.code {n_realisations}} \\
+          "x" = "We see {.code n_realisations} = {.code {target}} \\
             having class: \\
-            {.cls {class(n_realisations)}} and length \\
-            {.var {length(n_realisations)}}"
+            {.cls {class(target)}} and length \\
+            {.var {length(target)}}"
         )
       )
       stop(
