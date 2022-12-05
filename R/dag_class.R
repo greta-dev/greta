@@ -710,6 +710,7 @@ dag_class <- R6Class(
       # build the hessian tensors if needed
       # TF1/2 - retrieving hessians is currently broken
       # cannot find the variable, all_forward_variable_1, for some reason
+      # <<< browser()
       if (!exists("hessian_list", envir = tfe)) {
         tf_names <- vapply(nodes, self$tf_name, FUN.VALUE = "")
         y <- tfe$joint_density

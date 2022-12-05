@@ -921,6 +921,7 @@ opt <- function(model,
     # optionally evaluate the hessians at these parameters (return as hessian for
     # objective function)
     if (hessian) {
+      # <<< browser()
       hessians <- model$dag$hessians()
       hessians <- lapply(hessians, `*`, -1)
       outputs$hessian <- hessians

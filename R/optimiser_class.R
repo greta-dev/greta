@@ -180,38 +180,36 @@ tfp_optimiser <- R6Class(
         )
       }
 
-    self$run_minimiser <- function(inits) {
+      self$run_minimiser <- function(inits) {
 
+        # TF1/2 - will be better in the long run to have some kind of constructor
+        # function or similar to implement this
+        if (self$name == "bfgs") {
+          self$parameters$value_and_gradients_function <- value_and_gradient
+          self$parameters$initial_position <- inits
+        } else if (self$name == "nelder_mead") {
+          # because nelder_mead uses initial_vertex and not initial_position
+          # this is a quick hack changing the argument in place by argument
+          # position instead of by name ... for reasons
+          # <<< browser()
+          self$parameters$objective_function <- objective
+          self$parameters$initial_vertex <- tf$constant(c(inits))
+          self$parameters$batch_evaluate_objective <- TRUE
+          # self$parameters$batch_evaluate_objective <- FALSE
+        }
 
-      # TF1/2 - will be better in the long run to have some kind of constructor
-      # function or similar to implement this
-      if (self$name == "bfgs") {
-        self$parameters$value_and_gradients_function <- value_and_gradient
-        self$parameters$initial_position <- inits
-      } else if (self$name == "nelder_mead") {
-        # because nelder_mead uses initial_vertex and not initial_position
-        # this is a quick hack changing the argument in place by argument
-        # position instead of by name ... for reasons
-      # >>> browser() <<<
-        self$parameters$objective_function <- objective
-        self$parameters$initial_vertex <- tf$constant(inits)
-        self$parameters$batch_evaluate_objective <- TRUE
-        # self$parameters$batch_evaluate_objective <- FALSE
-        # self$parameters$step_sizes <- tf$constant(c(rep(1L, 5)))
+        tfe$tf_optimiser <- do.call(
+          optimise_fun,
+          self$parameters
+        )
+
+        self$it <- as.numeric(tfe$tf_optimiser$num_iterations)
+        tfe$free_state <- tfe$tf_optimiser$position
+
       }
 
-      tfe$tf_optimiser <- do.call(
-        optimise_fun,
-        self$parameters
-      )
-
-      self$it <- as.numeric(tfe$tf_optimiser$num_iterations)
-      tfe$free_state <- tfe$tf_optimiser$position
-
     }
-
-    }
-)
+  )
 )
 
 # implement an S3 method to handle dispatching the optimisation method based
