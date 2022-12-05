@@ -195,7 +195,8 @@ test_that("multivariate samples are correct", {
 
   compare_iid_samples(wishart,
     rwish,
-    parameters = list(df = 7, Sigma = sigma)
+    parameters = list(df = 7, Sigma = sigma),
+    nsim = 400
   )
 
   compare_iid_samples(lkj_correlation,

@@ -37,25 +37,25 @@
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `` family = stats::`poisson` ``,instead?
+    Maybe you want to use `family = stats::poisson`,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `binomial()` function in the family argument of another model.
-    Maybe you want to use `` family = stats::`binomial` ``,instead?
+    Maybe you want to use `family = stats::binomial`,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `` family = stats::`poisson` ``,instead?
+    Maybe you want to use `family = stats::poisson`,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `` family = stats::`poisson` ``,instead?
+    Maybe you want to use `family = stats::poisson`,instead?
 
 # wishart distribution errors informatively
 
@@ -130,11 +130,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
@@ -153,11 +157,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
@@ -176,11 +184,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
@@ -199,11 +211,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
@@ -222,11 +238,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
