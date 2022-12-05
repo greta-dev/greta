@@ -1,3 +1,8 @@
+# opt converges with TFP optimisers
+
+    Code
+      o <- opt(m, optimiser = bfgs(), max_iterations = 500)
+
 # opt fails with defunct optimisers
 
     The optimiser, `powell()`, is defunct and has been removed in greta 0.5.0.
