@@ -39,6 +39,7 @@ dag_class <- R6Class(
         self$define_trace_values_batch
         )
 
+      # TF1/2 - need to check in on all cases of `tensorflow::tf_function()`
       self$tf_log_prob_function <-
         # tensorflow::tf_function(
         self$generate_log_prob_function()
