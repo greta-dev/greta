@@ -844,13 +844,17 @@ sampler <- R6Class(
       #
       # browser()
       result <- cleanly(self$tf_evaluate_sample_batch(
-        free_state = tensorflow::as_tensor(free_state,
-                                           dtype = tf_float()),
+        free_state = tensorflow::as_tensor(
+          free_state,
+          dtype = tf_float()
+        ),
         sampler_burst_length = tensorflow::as_tensor(sampler_burst_length),
         sampler_thin = tensorflow::as_tensor(sampler_thin),
-        sampler_param_vec = tensorflow::as_tensor(sampler_param_vec,
-                                                  dtype = tf_float(),
-                                                  shape = length(sampler_param_vec))
+        sampler_param_vec = tensorflow::as_tensor(
+          sampler_param_vec,
+          dtype = tf_float(),
+          shape = length(sampler_param_vec)
+        )
       ))
       # result <- cleanly(tfe$sess$run(tfe$sampler_batch,
       #   feed_dict = tfe$feed_dict

@@ -50,10 +50,11 @@ optimiser_defunct_error <- function(optimiser) {
 }
 
 # deprecate some optimisers
-optimiser_deprecation_warning <- function() {
+optimiser_deprecation_warning <- function(version = "0.4.0") {
   msg <- cli::format_warning(
     c(
-      "This optimiser is deprecated and will be removed in {.pkg greta} 0.6.0.",
+      "This optimiser is deprecated and will be removed in {.pkg greta} \\
+      {.val {version}}.",
       "Please use a different optimiser."
     )
   )
@@ -332,7 +333,7 @@ adagrad_da <- function(learning_rate = 0.8,
                        l1_regularization_strength = 0,
                        l2_regularization_strength = 0) {
 
-  optimiser_deprecation_warning()
+  optimiser_deprecation_warning(version = "0.6.0")
 
   define_tf_optimiser(
     name = "adagrad_da",
@@ -437,7 +438,7 @@ proximal_gradient_descent <- function(learning_rate = 0.01,
                                       l1_regularization_strength = 0,
                                       l2_regularization_strength = 0) {
 
-  optimiser_deprecation_warning()
+  optimiser_deprecation_warning(version = "0.6.0")
 
   define_tf_optimiser(
     name = "proximal_gradient_descent",
@@ -462,7 +463,7 @@ proximal_adagrad <- function(learning_rate = 1,
                              l1_regularization_strength = 0,
                              l2_regularization_strength = 0) {
 
-  optimiser_deprecation_warning()
+  optimiser_deprecation_warning(version = "0.6.0")
 
   define_tf_optimiser(
     name = "proximal_adagrad",

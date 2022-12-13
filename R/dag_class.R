@@ -40,6 +40,8 @@ dag_class <- R6Class(
         )
 
       self$tf_log_prob_function <- tensorflow::tf_function(
+      # TF1/2 - need to check in on all cases of `tensorflow::tf_function()`
+        # tensorflow::tf_function(
         self$generate_log_prob_function()
       )
     },

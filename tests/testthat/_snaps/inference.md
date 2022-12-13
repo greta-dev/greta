@@ -107,8 +107,17 @@
 
 # mcmc doesn't support slice sampler with double precision models
 
-    RuntimeError: Evaluation error: ValueError: slice index 1 of dimension 0 out of bounds. for '{{node strided_slice}} = StridedSlice[Index=DT_INT32, T=DT_DOUBLE, begin_mask=0, ellipsis_mask=0, end_mask=0, new_axis_mask=0, shrink_axis_mask=1](sampler_param_vec, strided_slice/stack, strided_slice/stack_1, strided_slice/stack_2)' with input shapes: [1], [1], [1], [1] and with computed input tensors: input[1] = <1>, input[2] = <2>, input[3] = <1>.
-    .
+    slice sampler can only currently be used for models defined with single precision
+    
+    set `model(..., precision = 'single')` instead
+
+# numerical issues are handled in mcmc
+
+    Python module tensorflow was not found.
+    
+    Detected Python configuration:
+    
+    
     
 
 # mcmc errors for invalid parallel plans
