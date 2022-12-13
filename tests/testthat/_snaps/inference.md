@@ -108,7 +108,7 @@
 # mcmc doesn't support slice sampler with double precision models
 
     slice sampler can only currently be used for models defined with single precision
-
+    
     set `model(..., precision = 'single')` instead
 
 # numerical issues are handled in mcmc
