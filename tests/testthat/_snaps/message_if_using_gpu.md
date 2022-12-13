@@ -89,7 +89,7 @@
 # mcmc provides a message when GPU is set
 
     Code
-      mcmc_m <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only())
+      mcmc_gpu <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only())
     Message <simpleMessage>
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
@@ -105,7 +105,7 @@
 ---
 
     Code
-      mcmc_m <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = cpu_only())
+      mcmc_cpu <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = cpu_only())
     Message <simpleMessage>
       running 4 chains simultaneously on up to 8 CPU cores
     Output
