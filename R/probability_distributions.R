@@ -1114,7 +1114,7 @@ wishart_distribution <- R6Class(
         distrib <- tfp$distributions$WishartTriL(
           df = df,
           scale_tril = sigma_chol,
-          input_output_cholesky = FALSE
+          input_output_cholesky = TRUE
         )
 
         distrib$log_prob(x_chol)
@@ -1136,7 +1136,7 @@ wishart_distribution <- R6Class(
         distrib <- tfp$distributions$WishartTriL(
           df = df,
           scale_tril = sigma_chol,
-          input_output_cholesky = FALSE
+          input_output_cholesky = TRUE
         )
 
         draws <- distrib$sample(seed = seed)
