@@ -18,8 +18,8 @@ test_that("opt converges with TF optimisers", {
     rms_prop
   )
 
-  opt_df <- opt_df_run(optimisers, m)
-  tidied_opt <- tidy_optimisers(opt_df)
+  opt_df <- opt_df_run(optimisers, m, x)
+  tidied_opt <- tidy_optimisers(opt_df, tolerance = 1e-2)
 
   expect_true(all(tidied_opt$convergence == 0))
   expect_true(all(tidied_opt$iterations <= 200))
@@ -30,6 +30,12 @@ test_that("opt converges with TF optimisers", {
 
 test_that("opt gives appropriate warning with deprecated optimisers in TFP", {
   skip_if_not(check_tf_version())
+
+  x <- rnorm(5, 2, 0.1)
+  z <- variable(dim = 5)
+  distribution(x) <- normal(z, 0.1)
+
+  m <- model(z)
 
   expect_snapshot_warning(
     opt(m, optimiser = adagrad_da())
@@ -53,7 +59,7 @@ test_that("opt converges with TFP optimisers", {
   m <- model(z)
 
   # There are only 2 TFP optimisers: bfgs & nelder_mead
-  # check through each individualls
+  # check through each individually
   expect_snapshot(
     o <- opt(m, optimiser = bfgs(), max_iterations = 500)
   )
