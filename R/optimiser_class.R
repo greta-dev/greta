@@ -214,6 +214,61 @@ tfp_optimiser <- R6Class(
   )
 )
 
+tf_compat_optimiser <- R6Class(
+  "tf_compat_optimiser",
+  inherit = optimiser,
+  public = list(
+
+    # create an op to minimise the objective
+    run_tf_compat_minimiser = function() {
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      optimise_fun <- eval(parse(text = self$method))
+
+      tfe$tf_optimiser <- do.call(
+        optimise_fun,
+        self$parameters
+      )
+
+      self$run_minimiser <- function(inits) {
+        # <<< browser()
+        free_state <- tf$Variable(inits)
+
+        objective_adjusted <- function() {
+          -dag$tf_log_prob_function(free_state)$adjusted
+        }
+
+        objective_unadjusted <- function() {
+          -dag$tf_log_prob_function(free_state)$unadjusted
+        }
+
+        # need to get this to work for tf compat
+
+        # TF1/2 - get this to work inside TF with TF while loop
+        while (self$it < self$max_iterations &
+               all(self$diff > self$tolerance)) {
+          # add 1 because python indexing
+          self$it <- self$it + 1
+
+          if (self$adjust) {
+            tfe$tf_optimiser$minimize(objective_adjusted)
+            obj_numeric <- objective_adjusted()$numpy()
+          } else {
+            tfe$tf_optimiser$minimize(objective_unadjusted)
+            obj_numeric <- objective_unadjusted()$numpy()
+          }
+
+          self$diff <- abs(self$old_obj - obj_numeric)
+          self$old_obj <- obj_numeric
+        }
+        tfe$free_state <- free_state
+      }
+    }
+  )
+)
+
+
 # implement an S3 method to handle dispatching the optimisation method based
 # on the class. Should also allow for building other methods in the future
 run_optimiser <- function(self) {
@@ -226,4 +281,8 @@ run_optimiser.tf_optimiser <- function(self) {
 
 run_optimiser.tfp_optimiser <- function(self) {
   self$run_tfp_minimiser()
+}
+
+run_optimiser.tf_compat_optimiser <- function(self) {
+  self$run_tf_compat_minimiser()
 }

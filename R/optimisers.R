@@ -95,6 +95,19 @@ define_tf_optimiser <- function(name,
   )
 }
 
+define_tf_compat_optimiser <- function(name,
+                                method,
+                                parameters = list(),
+                                other_args = list()) {
+  new_optimiser(
+    name = name,
+    method = method,
+    parameters = parameters,
+    class = tf_compat_optimiser,
+    other_args = other_args
+  )
+}
+
 ## NOTE: TF1/2
 ## This define_xxx_optimiser pattern might benefit from a new_optimiser
 ## type constructor function. It only happens twice, but maybe
@@ -335,7 +348,7 @@ adagrad_da <- function(learning_rate = 0.8,
 
   optimiser_deprecation_warning(version = "0.6.0")
 
-  define_tf_optimiser(
+  define_tf_compat_optimiser(
     name = "adagrad_da",
     method = "tf$compat$v1$train$AdagradDAOptimizer",
     parameters = list(
@@ -440,7 +453,7 @@ proximal_gradient_descent <- function(learning_rate = 0.01,
 
   optimiser_deprecation_warning(version = "0.6.0")
 
-  define_tf_optimiser(
+  define_tf_compat_optimiser(
     name = "proximal_gradient_descent",
     method = "tf$compat$v1$train$ProximalGradientDescentOptimizer",
     parameters = list(
@@ -465,7 +478,7 @@ proximal_adagrad <- function(learning_rate = 1,
 
   optimiser_deprecation_warning(version = "0.6.0")
 
-  define_tf_optimiser(
+  define_tf_compat_optimiser(
     name = "proximal_adagrad",
     method = "tf$compat$v1$train$ProximalAdagradOptimizer",
     parameters = list(
