@@ -232,8 +232,7 @@ tf_compat_optimiser <- R6Class(
       )
 
       self$run_minimiser <- function(inits) {
-        # <<< browser()
-        free_state <- tf$Variable(inits)
+        free_state <- tf$Variable(inits, dtype = tf_float())
 
         objective_adjusted <- function() {
           -dag$tf_log_prob_function(free_state)$adjusted
