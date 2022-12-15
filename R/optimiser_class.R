@@ -123,6 +123,7 @@ tf_optimiser <- R6Class(
           -dag$tf_log_prob_function(free_state)$unadjusted
         }
 
+        # TF1/2 - get this to work inside TF with TF while loop
         while (self$it < self$max_iterations &
                all(self$diff > self$tolerance)) {
           # add 1 because python indexing
@@ -133,16 +134,17 @@ tf_optimiser <- R6Class(
               objective_adjusted,
               var_list = list(free_state)
             )
+            obj_numeric <- objective_adjusted()$numpy()
           } else {
             tfe$tf_optimiser$minimize(
               objective_unadjusted,
               var_list = list(free_state)
             )
+            obj_numeric <- objective_unadjusted()$numpy()
           }
 
-          free_state_numeric <- as.numeric(free_state)
-          self$diff <- abs(self$old_obj - free_state_numeric)
-          self$old_obj <- free_state_numeric
+          self$diff <- abs(self$old_obj - obj_numeric)
+          self$old_obj <- obj_numeric
         }
         tfe$free_state <- free_state
       }
