@@ -60,9 +60,7 @@ optimiser <- R6Class(
 
       if (parameter_name %in% param_names) {
         param <- params[[parameter_name]]
-        # self$model$dag$on_graph(
-          tf_param <- tf$constant(param, dtype = dtype)
-        # )
+        tf_param <- tf$constant(param, dtype = dtype)
         params[[parameter_name]] <- tf_param
       }
 
@@ -173,7 +171,6 @@ tfp_optimiser <- R6Class(
   public = list(
 
     run_tfp_minimiser = function() {
-      # browser()
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -199,8 +196,8 @@ tfp_optimiser <- R6Class(
 
       self$run_minimiser <- function(inits) {
 
-        # TF1/2 - will be better in the long run to have some kind of constructor
-        # function or similar to implement this
+        # TF1/2 - will be better in the long run to have some kind of
+        # constructor function or similar to implement this
         if (self$name == "bfgs") {
           self$parameters$value_and_gradients_function <- value_and_gradient
           self$parameters$initial_position <- inits

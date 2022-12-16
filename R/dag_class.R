@@ -714,6 +714,10 @@ dag_class <- R6Class(
       # cannot find the variable, all_forward_variable_1, for some reason
       # <<< browser()
       if (!exists("hessian_list", envir = tfe)) {
+        #TF1/2 - joint density doesn't appear to be defined when doing this
+        # so perhaps this needs to happen earlier?
+        # browser()
+        # dag$define_joint_density()
         tf_names <- vapply(nodes, self$tf_name, FUN.VALUE = "")
         y <- tfe$joint_density
         xs <- lapply(tf_names, get, tfe)

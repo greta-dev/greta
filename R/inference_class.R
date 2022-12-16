@@ -168,7 +168,8 @@ inference <- R6Class(
       #
       # if (!live_pointer("joint_density_adj", envir = tfe)) {
       #   # dag$on_graph(
-      #     # dag$define_joint_density()
+      # TF1/2 - I think that the joint density needs to be defined still?
+      # dag$define_joint_density()
       #     # )
       # }
       #
