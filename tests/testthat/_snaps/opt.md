@@ -1,3 +1,18 @@
+# opt gives appropriate warning with deprecated optimisers in TFP
+
+    This optimiser is deprecated and will be removed in greta "0.6.0".
+    Please use a different optimiser.
+
+---
+
+    This optimiser is deprecated and will be removed in greta "0.6.0".
+    Please use a different optimiser.
+
+---
+
+    This optimiser is deprecated and will be removed in greta "0.6.0".
+    Please use a different optimiser.
+
 # opt converges with TFP optimisers
 
     Code

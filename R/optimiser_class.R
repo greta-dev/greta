@@ -54,6 +54,21 @@ optimiser <- R6Class(
       names(self$parameters)
     },
 
+    set_dtype = function(parameter_name, dtype) {
+      params <- self$parameters
+      param_names <- self$parameter_names()
+
+      if (parameter_name %in% param_names) {
+        param <- params[[parameter_name]]
+        # self$model$dag$on_graph(
+          tf_param <- tf$constant(param, dtype = dtype)
+        # )
+        params[[parameter_name]] <- tf_param
+      }
+
+      self$parameters <- params
+    },
+
     run = function() {
       self$run_minimiser(self$free_state)
       self$fetch_free_state()
@@ -219,10 +234,30 @@ tf_compat_optimiser <- R6Class(
   inherit = optimiser,
   public = list(
 
+    # some of the optimisers are very fussy about dtypes, so convert them now
+    sanitise_dtypes = function() {
+      self$set_dtype("global_step", tf$int64)
+
+      if (self$name == "proximal_gradient_descent") {
+        lapply(self$parameter_names(), self$set_dtype, tf$float64)
+      }
+
+      if (self$name == "proximal_adagrad") {
+        fussy_params <- c(
+          "learning_rate",
+          "l1_regularization_strength",
+          "l2_regularization_strength"
+        )
+
+        lapply(fussy_params, self$set_dtype, tf$float64)
+      }
+    },
+
     # create an op to minimise the objective
     run_tf_compat_minimiser = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
+      self$sanitise_dtypes()
 
       optimise_fun <- eval(parse(text = self$method))
 
@@ -232,7 +267,7 @@ tf_compat_optimiser <- R6Class(
       )
 
       self$run_minimiser <- function(inits) {
-        free_state <- tf$Variable(inits, dtype = tf_float())
+        free_state <- tf$Variable(inits)
 
         objective_adjusted <- function() {
           -dag$tf_log_prob_function(free_state)$adjusted
