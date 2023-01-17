@@ -9,7 +9,7 @@ test_that("opt converges with TF optimisers", {
 
   m <- model(z)
 
-  optimisers <- lst(
+  optimisers <- tibble::lst(
     gradient_descent,
     adadelta,
     adagrad,

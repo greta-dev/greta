@@ -52,6 +52,7 @@ Suggests:
     covr,
     cramer,
     DiagrammeR,
+    dplyr,
     extraDistr,
     fields,
     ggplot2,
@@ -61,11 +62,13 @@ Suggests:
     MCMCpack,
     mockery,
     mvtnorm,
+    purrr,
     rmarkdown,
     rmutil,
     spelling,
     testthat (>= 3.1.0),
-    tidyverse,
+    tibble,
+    tidyr,
     truncdist,
     withr
 VignetteBuilder: 

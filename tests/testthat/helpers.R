@@ -893,9 +893,6 @@ check_samples <- function(
 }
 
 ## helpers for looping through optimisers
-
-library(tidyverse)
-
 run_opt <- function(
   m,
   optmr,
