@@ -223,10 +223,12 @@ tfp_optimiser <- R6Class(
         )
 
         self$it <- as.numeric(tfe$tf_optimiser$num_iterations)
-        tfe$free_state <- tf$expand_dims(tfe$tf_optimiser$position, axis = 0L)
-
+        if (self$name == "nelder_mead") {
+          tfe$free_state <- tf$expand_dims(tfe$tf_optimiser$position, axis = 0L)
+        } else if (self$name == "bfgs") {
+          tfe$free_state <- tfe$tf_optimiser$position
+        }
       }
-
     }
   )
 )
