@@ -55,6 +55,7 @@ optimiser <- R6Class(
     },
 
     set_dtype = function(parameter_name, dtype) {
+      # browser()
       params <- self$parameters
       param_names <- self$parameter_names()
 
@@ -196,6 +197,7 @@ tfp_optimiser <- R6Class(
 
       self$run_minimiser <- function(inits) {
 
+        self$parameters$max_iterations <- self$max_iterations
         # TF1/2 - will be better in the long run to have some kind of
         # constructor function or similar to implement this
         if (self$name == "bfgs") {
@@ -205,11 +207,14 @@ tfp_optimiser <- R6Class(
           # because nelder_mead uses initial_vertex and not initial_position
           # this is a quick hack changing the argument in place by argument
           # position instead of by name ... for reasons
-          # <<< browser()
-          self$parameters$objective_function <- objective
-          self$parameters$initial_vertex <- tf$constant(c(inits))
-          self$parameters$batch_evaluate_objective <- TRUE
-          # self$parameters$batch_evaluate_objective <- FALSE
+          # browser() # <<<
+          self$parameters$batch_evaluate_objective <- FALSE
+          self$parameters$objective_function <- function(x){
+            x_expand <- tf$expand_dims(x, axis = 0L)
+            val <- objective(x_expand)
+            tf$squeeze(val)
+          }
+          self$parameters$initial_vertex <- fl(inits[1,])
         }
 
         tfe$tf_optimiser <- do.call(
@@ -218,7 +223,7 @@ tfp_optimiser <- R6Class(
         )
 
         self$it <- as.numeric(tfe$tf_optimiser$num_iterations)
-        tfe$free_state <- tfe$tf_optimiser$position
+        tfe$free_state <- tf$expand_dims(tfe$tf_optimiser$position, axis = 0L)
 
       }
 
