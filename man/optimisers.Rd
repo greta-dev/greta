@@ -25,9 +25,37 @@
 \alias{rms_prop}
 \title{optimisation methods}
 \usage{
-nelder_mead()
+nelder_mead(
+  objective_function = NULL,
+  initial_simplex = NULL,
+  initial_vertex = NULL,
+  step_sizes = NULL,
+  objective_at_initial_simplex = NULL,
+  objective_at_initial_vertex = NULL,
+  func_tolerance = 1e-08,
+  position_tolerance = 1e-08,
+  parallel_iterations = 1L,
+  reflection = NULL,
+  expansion = NULL,
+  contraction = NULL,
+  shrinkage = NULL,
+  name = NULL
+)
 
-bfgs()
+bfgs(
+  value_and_gradients_function = NULL,
+  initial_position = NULL,
+  tolerance = 1e-08,
+  x_tolerance = 0L,
+  f_relative_tolerance = 0L,
+  initial_inverse_hessian_estimate = NULL,
+  parallel_iterations = 1L,
+  stopping_condition = NULL,
+  validate_args = TRUE,
+  max_line_search_iterations = 50L,
+  f_absolute_tolerance = 0L,
+  name = NULL
+)
 
 powell()
 
@@ -61,8 +89,8 @@ adagrad_da(
 
 adam(
   learning_rate = 0.1,
-  beta1 = 0.9,
-  beta2 = 0.999,
+  beta_1 = 0.9,
+  beta_2 = 0.999,
   amsgrad = FALSE,
   epsilon = 1e-08
 )
@@ -130,9 +158,9 @@ greater)}
 \item{l2_regularization_strength}{L2 regularisation coefficient (must be 0 or
 greater)}
 
-\item{beta1}{exponential decay rate for the 1st moment estimates}
+\item{beta_1}{exponential decay rate for the 1st moment estimates}
 
-\item{beta2}{exponential decay rate for the 2nd moment estimates}
+\item{beta_2}{exponential decay rate for the 2nd moment estimates}
 
 \item{amsgrad}{Boolean. Whether to apply AMSGrad variant of this algorithm
 from the paper "On the Convergence of Adam and beyond". Defaults to FALSE.}

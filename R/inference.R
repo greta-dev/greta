@@ -921,8 +921,15 @@ opt <- function(model,
     # optionally evaluate the hessians at these parameters (return as hessian for
     # objective function)
     if (hessian) {
-      # <<< browser()
-      hessians <- model$dag$hessians()
+      which_objective <- ifelse(adjust, "adjusted", "unadjusted")
+      hessians <- model$dag$hessians(
+        # coercing to Variable as TFP free state is a Tensor not a variable
+        # and you can overload a Variable as a Variable without consequence
+        # (hopefully)
+        free_state = tf$Variable(object$free_state),
+        which_objective = which_objective
+        )
+      # hessians <- model$dag$calculate_hessian(object$free_state)
       hessians <- lapply(hessians, `*`, -1)
       outputs$hessian <- hessians
     }

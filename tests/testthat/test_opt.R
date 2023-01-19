@@ -146,7 +146,7 @@ test_that("opt accepts initial values for TFP optimisers", {
   expect_true(all(abs(x - o$par$z) < 1e-3))
 })
 
-test_that("TF opt returns hessians", {
+test_that("TF opt returns a hessian", {
   skip_if_not(check_tf_version())
 
   sd <- runif(5)
@@ -166,6 +166,36 @@ test_that("TF opt returns hessians", {
 
   # the model density is IID normal, so we should be able to recover the SD
   approx_sd <- sqrt(diag(solve(hess)))
+  expect_true(all(abs(approx_sd - sd) < 1e-9))
+})
+
+test_that("TF opt returns multiple hessians", {
+  skip_if_not(check_tf_version())
+
+  sd <- runif(5)
+  x <- rnorm(5, 2, 0.1)
+  z1 <- variable(dim = 1)
+  z2 <- variable(dim = 1)
+  z3 <- variable(dim = 1)
+  z4 <- variable(dim = 1)
+  z5 <- variable(dim = 1)
+  z <- c(z1, z2, z3, z4, z5)
+  distribution(x) <- normal(z, sd)
+
+  m <- model(z1, z2, z3, z4, z5)
+  o <- opt(m, hessian = TRUE, optimiser = gradient_descent())
+
+  hess <- o$hessian
+
+  # should be a 5x5 numeric matrix
+  expect_true(inherits(hess, "list"))
+  expect_true(length(hess) == 5)
+  expect_true(all(sapply(hess,is.matrix)))
+  hess_dims <- lapply(hess, dim)
+  expect_true(all(sapply(hess_dims, identical, c(1L,1L))))
+
+  # the model density is IID normal, so we should be able to recover the SD
+  approx_sd <- sqrt( 1/unlist(hess))
   expect_true(all(abs(approx_sd - sd) < 1e-9))
 })
 
