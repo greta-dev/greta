@@ -861,6 +861,7 @@ sweep.greta_array <- function(x,
 
 # nolint start
 #' @import methods
+#' @importFrom tensorflow %as%
 setClass("greta_array")
 setMethod(
   "kronecker", signature(X = "greta_array", Y = "greta_array"),

@@ -897,38 +897,46 @@ opt <- function(model,
     # message users about random seeds and GPU usage if they are using GPU
     message_if_using_gpu(compute_options)
 
-  # check initial values. Can up the number of chains in the future to handle
-  # random restarts
-  initial_values_list <- prep_initials(initial_values, 1, model$dag)
+    # check initial values. Can up the number of chains in the future to handle
+    # random restarts
+    initial_values_list <- prep_initials(initial_values, 1, model$dag)
 
-  # create R6 object of the right type
-  object <- optimiser$class$new(
-    initial_values = initial_values_list[1],
-    model = model,
-    name = optimiser$name,
-    method = optimiser$method,
-    parameters = optimiser$parameters,
-    other_args = optimiser$other_args,
-    max_iterations = max_iterations,
-    tolerance = tolerance,
-    adjust = adjust
-  )
+    # create R6 object of the right type
+    object <- optimiser$class$new(
+      initial_values = initial_values_list[1],
+      model = model,
+      name = optimiser$name,
+      method = optimiser$method,
+      parameters = optimiser$parameters,
+      other_args = optimiser$other_args,
+      max_iterations = max_iterations,
+      tolerance = tolerance,
+      adjust = adjust
+    )
 
-  # run it and get the outputs
-  object$run()
-  outputs <- object$return_outputs()
+    # run it and get the outputs
+    object$run()
+    outputs <- object$return_outputs()
 
-  # optionally evaluate the hessians at these parameters (return as hessian for
-  # objective function)
-  if (hessian) {
-    hessians <- model$dag$hessians()
-    hessians <- lapply(hessians, `*`, -1)
-    outputs$hessian <- hessians
-  }
+    # optionally evaluate the hessians at these parameters (return as hessian for
+    # objective function)
+    if (hessian) {
+      which_objective <- ifelse(adjust, "adjusted", "unadjusted")
+      hessians <- model$dag$hessians(
+        # coercing to Variable as TFP free state is a Tensor not a variable
+        # and you can overload a Variable as a Variable without consequence
+        # (hopefully)
+        free_state = tf$Variable(object$free_state),
+        which_objective = which_objective
+        )
+      # hessians <- model$dag$calculate_hessian(object$free_state)
+      hessians <- lapply(hessians, `*`, -1)
+      outputs$hessian <- hessians
+    }
 
-  outputs
+    outputs
 
-  # close setting of CPU/GPU usage
+    # close setting of CPU/GPU usage
   })
 }
 

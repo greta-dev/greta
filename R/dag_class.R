@@ -37,13 +37,13 @@ dag_class <- R6Class(
       self$compile <- compile
       self$tf_trace_values_batch <- tensorflow::tf_function(
         self$define_trace_values_batch
-        )
+      )
 
-      # TF1/2 - need to check in on all cases of `tensorflow::tf_function()`
-      self$tf_log_prob_function <-
+      self$tf_log_prob_function <- tensorflow::tf_function(
+        # TF1/2 - need to check in on all cases of `tensorflow::tf_function()`
         # tensorflow::tf_function(
         self$generate_log_prob_function()
-      # )
+      )
     },
 
     tf_log_prob_function = NULL,
@@ -370,7 +370,7 @@ dag_class <- R6Class(
       lapply(target_nodes, function(x){
         # debugonce(x$define_tf)
         x$define_tf(self)
-        })
+      })
       # )
 
       invisible(NULL)
@@ -570,6 +570,83 @@ dag_class <- R6Class(
       get(self$tf_name(node), envir = self$tf_environment)
     },
 
+    ###<<<
+    hessians = function(
+      free_state,
+      nodes = self$target_nodes,
+      which_objective = c(
+        "adjusted",
+        "unadjusted"
+      )
+    ){
+      which_objective <- match.arg(which_objective)
+
+      ga_names <- names(nodes)
+
+      hessian_list <- lapply(X = nodes,
+             self$calculate_one_hessian,
+             free_state = free_state,
+             which_objective = which_objective)
+      # assign names and return
+      names(hessian_list) <- ga_names
+      hessian_list
+    },
+
+    calculate_one_hessian = function(
+    node,
+    free_state,
+    which_objective = c(
+      "adjusted",
+      "unadjusted"
+    )
+    ) {
+      which_objective <- match.arg(which_objective)
+
+      # temporarily define a new environment
+      tfe_old <- self$tf_environment
+      on.exit(self$tf_environment <- tfe_old)
+      tfe <- self$tf_environment <- new.env()
+
+      # put the free state in the environment, and build out the tf graph
+      tfe$free_state <- free_state
+
+      # get names and dimensions of target greta arrays
+      ga_dim <- node$dim
+      tf_name <- self$tf_name(node)
+
+      # we now make all of the operations define themselves now
+      with(tf$GradientTape() %as% tape_1, {
+        with(tf$GradientTape() %as% tape_2, {
+          self$define_tf()
+          # define the densities
+          self$define_joint_density()
+
+          xs <- get(tf_name, tfe)
+
+          objectives <- list(
+            adjusted = tfe$joint_density_adj,
+            unadjusted = tfe$joint_density
+          )
+
+          # return either of the densities, or a list of both
+          y <- switch(which_objective,
+                      adjusted = objectives$adjusted,
+                      unadjusted = objectives$unadjusted
+          )
+        })
+        g <- tape_2$gradient(y, xs)
+      })
+      h <- tape_1$jacobian(g, xs)
+
+      # reshape from tensor to R dimensions
+      hessian <- array(h$numpy(), dim = hessian_dims(ga_dim))
+
+      hessian
+
+    },
+
+    ###<<<
+
     # return a function to obtain the model log probability from a tensor for
     # the free state
     generate_log_prob_function = function(which = c(
@@ -701,35 +778,6 @@ dag_class <- R6Class(
 
       res
     },
-    hessians = function() {
-      tfe <- self$tf_environment
-      nodes <- self$target_nodes
-
-      # get names and dimensions of target greta arrays
-      ga_names <- names(nodes)
-      ga_dims <- lapply(nodes, member, "dim")
-
-      # build the hessian tensors if needed
-      if (!exists("hessian_list", envir = tfe)) {
-        tf_names <- vapply(nodes, self$tf_name, FUN.VALUE = "")
-        y <- tfe$joint_density
-        xs <- lapply(tf_names, get, tfe)
-        names(xs) <- NULL
-        # tfe$hessian_list <- self$on_graph(tf$hessians(y, xs))
-        tfe$hessian_list <- tf$hessians(y, xs)
-      }
-
-      # evaluate at the current free state and assign
-      hessian_list <- self$tf_sess_run(hessian_list)
-
-      # reshape from tensor to R dimensions
-      dims <- lapply(ga_dims, hessian_dims)
-      hessian_list <- mapply(array, hessian_list, dims, SIMPLIFY = FALSE)
-
-      # assign names and return
-      names(hessian_list) <- ga_names
-      hessian_list
-    },
 
     tf_trace_values_batch = NULL,
     trace_values_batch = function(free_state_batch){
@@ -764,8 +812,8 @@ dag_class <- R6Class(
       ## self$define_tf(free_state_batch)
 
       target_tensors <- lapply(target_tf_names,
-        get,
-        envir = tfe
+                               get,
+                               envir = tfe
       )
 
       # evaluate them in the tensorflow environment
@@ -781,7 +829,6 @@ dag_class <- R6Class(
     trace_values = function(free_state,
                             flatten = TRUE,
                             trace_batch_size = Inf) {
-
       # get the number of samples to trace
       n_samples <- nrow(free_state)
       indices <- seq_len(n_samples)

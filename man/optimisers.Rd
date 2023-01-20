@@ -3,9 +3,10 @@
 \name{optimisers}
 \alias{optimisers}
 \alias{nelder_mead}
-\alias{powell}
-\alias{cg}
 \alias{bfgs}
+\alias{powell}
+\alias{momentum}
+\alias{cg}
 \alias{newton_cg}
 \alias{l_bfgs_b}
 \alias{tnc}
@@ -15,37 +16,68 @@
 \alias{adadelta}
 \alias{adagrad}
 \alias{adagrad_da}
-\alias{momentum}
 \alias{adam}
+\alias{adamax}
 \alias{ftrl}
 \alias{proximal_gradient_descent}
 \alias{proximal_adagrad}
+\alias{nadam}
 \alias{rms_prop}
 \title{optimisation methods}
 \usage{
-nelder_mead()
+nelder_mead(
+  objective_function = NULL,
+  initial_simplex = NULL,
+  initial_vertex = NULL,
+  step_sizes = NULL,
+  objective_at_initial_simplex = NULL,
+  objective_at_initial_vertex = NULL,
+  func_tolerance = 1e-08,
+  position_tolerance = 1e-08,
+  parallel_iterations = 1L,
+  reflection = NULL,
+  expansion = NULL,
+  contraction = NULL,
+  shrinkage = NULL,
+  name = NULL
+)
+
+bfgs(
+  value_and_gradients_function = NULL,
+  initial_position = NULL,
+  tolerance = 1e-08,
+  x_tolerance = 0L,
+  f_relative_tolerance = 0L,
+  initial_inverse_hessian_estimate = NULL,
+  parallel_iterations = 1L,
+  stopping_condition = NULL,
+  validate_args = TRUE,
+  max_line_search_iterations = 50L,
+  f_absolute_tolerance = 0L,
+  name = NULL
+)
 
 powell()
 
-cg()
+momentum()
 
-bfgs()
+cg()
 
 newton_cg()
 
-l_bfgs_b(maxcor = 10, maxls = 20)
+l_bfgs_b()
 
-tnc(max_cg_it = -1, stepmx = 0, rescale = -1)
+tnc()
 
-cobyla(rhobeg = 1)
+cobyla()
 
 slsqp()
 
-gradient_descent(learning_rate = 0.01)
+gradient_descent(learning_rate = 0.01, momentum = 0, nesterov = FALSE)
 
 adadelta(learning_rate = 0.001, rho = 1, epsilon = 1e-08)
 
-adagrad(learning_rate = 0.8, initial_accumulator_value = 0.1)
+adagrad(learning_rate = 0.8, initial_accumulator_value = 0.1, epsilon = 1e-08)
 
 adagrad_da(
   learning_rate = 0.8,
@@ -55,16 +87,24 @@ adagrad_da(
   l2_regularization_strength = 0
 )
 
-momentum(learning_rate = 0.001, momentum = 0.9, use_nesterov = TRUE)
+adam(
+  learning_rate = 0.1,
+  beta_1 = 0.9,
+  beta_2 = 0.999,
+  amsgrad = FALSE,
+  epsilon = 1e-08
+)
 
-adam(learning_rate = 0.1, beta1 = 0.9, beta2 = 0.999, epsilon = 1e-08)
+adamax(learning_rate = 0.001, beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-07)
 
 ftrl(
   learning_rate = 1,
   learning_rate_power = -0.5,
   initial_accumulator_value = 0.1,
   l1_regularization_strength = 0,
-  l2_regularization_strength = 0
+  l2_regularization_strength = 0,
+  l2_shrinkage_regularization_strength = 0,
+  beta = 0
 )
 
 proximal_gradient_descent(
@@ -80,24 +120,25 @@ proximal_adagrad(
   l2_regularization_strength = 0
 )
 
-rms_prop(learning_rate = 0.1, decay = 0.9, momentum = 0, epsilon = 1e-10)
+nadam(learning_rate = 0.001, beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-07)
+
+rms_prop(
+  learning_rate = 0.1,
+  rho = 0.9,
+  momentum = 0,
+  epsilon = 1e-10,
+  centered = FALSE
+)
 }
 \arguments{
-\item{maxcor}{maximum number of 'variable metric corrections' used to define
-the approximation to the hessian matrix}
-
-\item{maxls}{maximum number of line search steps per iteration}
-
-\item{max_cg_it}{maximum number of hessian * vector evaluations per iteration}
-
-\item{stepmx}{maximum step for the line search}
-
-\item{rescale}{log10 scaling factor used to trigger rescaling of objective}
-
-\item{rhobeg}{reasonable initial changes to the variables}
-
 \item{learning_rate}{the size of steps (in parameter space) towards the
-optimal value}
+optimal value. Default value 0.01}
+
+\item{momentum}{hyperparameter that accelerates gradient descent in the
+relevant direction and dampens oscillations. Defaults to 0, which is
+vanilla gradient descent.}
+
+\item{nesterov}{Whether to apply Nesterov momentum. Defaults to FALSE.}
 
 \item{rho}{the decay rate}
 
@@ -117,17 +158,27 @@ greater)}
 \item{l2_regularization_strength}{L2 regularisation coefficient (must be 0 or
 greater)}
 
-\item{momentum}{the momentum of the algorithm}
+\item{beta_1}{exponential decay rate for the 1st moment estimates}
 
-\item{use_nesterov}{whether to use Nesterov momentum}
+\item{beta_2}{exponential decay rate for the 2nd moment estimates}
 
-\item{beta1}{exponential decay rate for the 1st moment estimates}
-
-\item{beta2}{exponential decay rate for the 2nd moment estimates}
+\item{amsgrad}{Boolean. Whether to apply AMSGrad variant of this algorithm
+from the paper "On the Convergence of Adam and beyond". Defaults to FALSE.}
 
 \item{learning_rate_power}{power on the learning rate, must be 0 or less}
 
-\item{decay}{discounting factor for the gradient}
+\item{l2_shrinkage_regularization_strength}{A float value, must be greater
+than or equal to zero. This differs from L2 above in that the L2 above is
+a stabilization penalty, whereas this L2 shrinkage is a magnitude penalty.
+When input is sparse shrinkage will only happen on the active weights.}
+
+\item{beta}{A float value, representing the beta value from the paper by
+\href{https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/41159.pdf}{McMahan et al 2013}. Defaults to 0}
+
+\item{centered}{Boolean. If TRUE, gradients are normalized by the estimated
+variance of the gradient; if FALSE, by the uncentered second moment.
+Setting this to TRUE may help with training, but is slightly more
+expensive in terms of computation and memory. Defaults to FALSE.}
 }
 \value{
 an \code{optimiser} object that can be passed to \code{\link[=opt]{opt()}}.
@@ -136,18 +187,24 @@ an \code{optimiser} object that can be passed to \code{\link[=opt]{opt()}}.
 Functions to set up optimisers (which find parameters that
 maximise the joint density of a model) and change their tuning parameters,
 for use in \code{\link[=opt]{opt()}}. For details of the algorithms and how to
-tune them, see the
-\href{https://docs.scipy.org/doc/scipy-1.8.0/html-scipyorg/reference/optimize.html#optimization}{SciPy optimiser docs} or the
-\href{https://www.tensorflow.org/versions/r1.15/api_docs/python/tf/contrib}{TensorFlow optimiser docs}.
+tune them, see the \href{https://www.tensorflow.org/api_docs/python/tf/keras/optimizers}{TensorFlow optimiser docs}, or the \href{https://www.tensorflow.org/probability/api_docs/python/tfp/optimizer}{Tensorflow Probability optimiser docs}.
 }
 \details{
 The optimisers \code{powell()}, \code{cg()}, \code{newton_cg()},
 \code{l_bfgs_b()}, \code{tnc()}, \code{cobyla()}, and \code{slsqp()} are
-deprecated. They will be removed in greta 0.4.0, since they will no longer
-be available in TensorFlow 2.0, on which that version of greta will depend.
+now defunct. They will error when called in greta 0.5.0. This are removed
+because they are no longer available in TensorFlow 2.0. Note that
+optimiser \code{momentum()} has been replaced with \code{gradient_descent()}
+}
+\note{
+This optimizer isn't supported in TF2, so proceed with caution. See
+the \href{https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/AdagradDAOptimizer}{TF docs on AdagradDAOptimiser} for more detail.
 
-The \code{cobyla()} does not provide information about the number of
-iterations nor convergence, so these elements of the output are set to NA
+This optimizer isn't supported in TF2, so proceed with caution. See
+the \href{https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer}{TF docs on AdagradDAOptimiser} for more detail.
+
+This optimizer isn't supported in TF2, so proceed with caution. See
+the \href{https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer}{TF docs on AdagradDAOptimiser} for more detail.
 }
 \examples{
 \dontrun{
