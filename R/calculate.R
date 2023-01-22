@@ -354,11 +354,7 @@ calculate_greta_mcmc_list <- function(target,
 
     # add the batch size to the data list
     # assign
-    # TF1/2 - remove as this is artifact from feed dict
-    # dag$set_tf_data_list("batch_size", as.integer(nsim))
-
     # pass these values in as the free state
-    # browser()
     trace <- dag$trace_values(draws,
       trace_batch_size = trace_batch_size,
       flatten = FALSE
@@ -448,18 +444,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   # simultaneously
   # assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)
 
-  # TF1/2
-  # build and send a dict for the fixed values
-  # fixed_nodes <- lapply(
-  #   fixed_greta_arrays,
-  #   get_node
-  # )
-  #
-  # names(values) <- vapply(fixed_nodes,
-  #   dag$tf_name,
-  #   FUN.VALUE = ""
-  # )
-#
 #   # add values or data not specified by the user
 #   data_list <- dag$get_tf_data_list()
 #   missing <- !names(data_list) %in% names(values)
@@ -468,14 +452,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 #   values <- lapply(values, add_first_dim)
 #   values <- lapply(values, tile_first_dim, batch_size)
 #
-#   dag$build_feed_dict(values, data_list = data_list[missing])
-#
-#   # TF1/2
-#   # This object and the tfe contain the calls we want to make
-#   # we want to instead run the tfp function here with the feed dict
-#   # just being the arguments from the function.
-#   # run the sampling
-#   dag$tf_sess_run("calculate_target_tensor_list", as_text = TRUE)
 }
 
 
@@ -502,8 +478,6 @@ calculate_target_tensor_list <- function(
   tfe <- dag$tf_environment
 
   # add the batch size to the data list
-  # TF1/2
-  # is this where we can now specify the batch size?
   batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
   assign("batch_size", batch_size, envir = tfe)
 

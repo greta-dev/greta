@@ -1,8 +1,3 @@
-# TF1/2 - do'nt think we need to reset the graph anymore?
-# if (check_tf_version()) {
-#   tensorflow::tf$compat$v1$reset_default_graph()
-# }
-
 set.seed(2020 - 02 - 11)
 
 test_that("simple functions work as expected", {

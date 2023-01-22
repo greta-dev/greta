@@ -318,14 +318,7 @@ variable_node <- R6Class(
           # TF1/2
             # need to change the placeholder approach here.
             # NT: can we change this to be a tensor of the right shape with 1s?
-          # browser()
           tensor <- tensorflow::as_tensor(1L, shape = shape, dtype = tf_float())
-          # tensor <- tf$compat$v1$placeholder(shape = shape, dtype = tf_float())
-          # TF1/2 this breaks in the test
-              # compare_iid_samples(wishart,
-              #                     rwish,
-              #                     parameters = list(df = 7, Sigma = sigma)
-              # )
         } else {
           tensor <- dag$draw_sample(self$distribution)
         }

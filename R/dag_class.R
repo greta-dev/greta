@@ -73,7 +73,6 @@ dag_class <- R6Class(
     # execute an expression on this dag's tensorflow graph, with the correct
     # float type
     on_graph = function(expr) {
-      # browser()
       # temporarily pass float type info to options, so it can be accessed by
       # nodes on definition, without cluncky explicit passing
       old_float_type <- options()$greta_tf_float
@@ -376,42 +375,6 @@ dag_class <- R6Class(
       invisible(NULL)
     },
 
-    # use core and compilation options to set up a session in this environment
-    # TF1/2
-    # We can probably get around almost all of this with the introduction of
-    # TF2 functions, although I'm not 100% sure about changing
-    # tf$compat$v1$ConfigProto as the documentation online doesn't seem to
-    # say not to remove it
-    # I'm also not sure if we can get the optimizer options extracted via
-    # the new API, as described at: https://www.tensorflow.org/api_docs/python/tf/optimizers
-    define_tf_session = function() {
-      tfe <- self$tf_environment
-      tfe$n_cores <- self$n_cores
-
-      # nolint start
-      self$tf_run(
-        config <- tf$compat$v1$ConfigProto(
-          inter_op_parallelism_threads = n_cores,
-          intra_op_parallelism_threads = n_cores
-        )
-      )
-
-      if (self$compile) {
-        self$tf_run(
-          py_set_attr(
-            config$graph_options$optimizer_options,
-            "global_jit_level",
-            tf$compat$v1$OptimizerOptions$ON_1
-          )
-        )
-      }
-      # nolint end
-
-      # start a session and initialise all variables
-      self$tf_run(sess <- tf$compat$v1$Session(config = config))
-      self$tf_run(sess$run(tf$compat$v1$global_variables_initializer()))
-    },
-
     # TF1/2
     # I think we can probably remove this part of things? However I'm not sure
     # if the "mode" part is going to be imporatnt here?
@@ -419,30 +382,18 @@ dag_class <- R6Class(
     # free state variable, or for sampling
     define_tf = function(target_nodes = self$node_list) {
       # define the free state variable
-      # browser()
-      # if (self$mode %in% c("all_forward", "hybrid")) {
-      #   self$define_free_state("placeholder")
-      # }
-
-      # browser()
-      # define the body of the graph (depending on the mode) and the session
       # TF1/2
       # pretty sure define_batch_size needs to be passed as an argument to
       # whatever is above here...if define_tf even needs to exist?
       # and I think we can remove define_batch_size since
       # this should just be passed as an argument later?
 
-      # TF1/2
-      # This is where I looked through - I suspect we don't need to do this?
       if (self$mode != "all_sampling") {
-        # browser()
         self$define_batch_size()
       }
 
       self$define_tf_body(target_nodes = target_nodes)
 
-      # similarly with define_tf_session, I think this can go?
-      # self$define_tf_session()
     },
 
     # define tensor for overall log density and gradients
@@ -666,28 +617,10 @@ dag_class <- R6Class(
         on.exit(self$tf_environment <- tfe_old)
         tfe <- self$tf_environment <- new.env()
 
-        # TF1/2 - start here?
-        # we won't have placeholders in the future so we will need to change
-        # this part
-        # copy the placeholders over here, so they aren't recreated
-        # data_names <- self$get_tf_names(types = "data")
-        # for (name in data_names) {
-        #   tfe[[name]] <- tfe_old[[name]]
-        # }
-
-        # TF1/2
-        # the batch size might need to be passed in to the function somehow,
-        # perhaps even lexically scoped? The question is if lexical scoping
-        # works when passing a function through to tensorflow...
-        # tfe$batch_size <- tfe_old$batch_size
-
         # put the free state in the environment, and build out the tf graph
         tfe$free_state <- free_state
 
-        # browser()
         # we now make all of the operations define themselves now
-        # self$define_batch_size()
-        # self$define_tf_body()
         self$define_tf()
         # define the densities
         self$define_joint_density()

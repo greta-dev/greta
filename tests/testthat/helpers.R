@@ -26,16 +26,11 @@ grab <- function(x, dag = NULL) {
 
   # TF1/2
   # I think I need to do some kind of tfe$batch_size thing here?
-  # dag$set_tf_data_list("batch_size", 1L)
-  # dag$build_feed_dict()
   dag$tf_environment$batch_size <- 1L
   node$define_tf(dag)
   x_name <- dag$tf_name(node)
   out <- dag$tf_environment[[x_name]]
   out <- as.array(out)
-  # node$value()
-  # dag$define_tf()
-  # out <- dag$tf_sess_run(dag$tf_name(node), as_text = TRUE)
   drop_first_dim(out)
 }
 
@@ -138,16 +133,11 @@ greta_density <- function(
 
   # create dag
   dag <- dag_class$new(list(x_))
-  # TF1/2 - I think I can just remove define_tf?
 
-  # TF1/2 - still need to work out what to do with this...perhaps nothing?
-  # dag$set_tf_data_list("batch_size", 1L)
-  # dag$build_feed_dict()
   dag$tf_environment$batch_size <- 1L
   distrib_node$define_tf(dag)
 
   # get the log density as a vector
-  # TF1/2 - no more on_graph stuff
   result <- dag$evaluate_density(distrib_node, get_node(x_))
   as.vector(result)
 }
