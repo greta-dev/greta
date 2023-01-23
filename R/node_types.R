@@ -41,7 +41,7 @@ data_node <- R6Class(
             shape = shape
           )
         } else {
-          # TF1/2
+          # TF1/2 check
           # We can pass tensors directly into ops and layers
           # tf.function arguments do the job of placeholders
           # or we can use tf$keras$Input ?
@@ -55,7 +55,7 @@ data_node <- R6Class(
             shape = shape,
             dtype = tf_float()
           )
-          # TF1/2
+          # TF1/2 check
           # note - we might not need this anymore as it was to do with
           # stashing things for use in the feed_dict later
           dag$set_tf_data_list(unbatched_name, value)
@@ -183,9 +183,6 @@ operation_node <- R6Class(
       }
 
       # assign it in the environment
-      # TF1/2
-      # this is where it errors when debugging calculate_mcmc_list
-      # browser()
       assign(tf_name, tensor, envir = dag$tf_environment)
     }
   )
@@ -315,7 +312,7 @@ variable_node <- R6Class(
           # if the variable has no distribution create a placeholder instead
           # (the value must be passed in via values when using simulate)
           shape <- to_shape(c(1, self$dim))
-          # TF1/2
+          # TF1/2 check
             # need to change the placeholder approach here.
             # NT: can we change this to be a tensor of the right shape with 1s?
           tensor <- tensorflow::as_tensor(1L, shape = shape, dtype = tf_float())

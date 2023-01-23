@@ -29,7 +29,8 @@ dag_class <- R6Class(
       self$target_nodes <- lapply(target_greta_arrays, get_node)
 
       # set up the tf environment, with a graph
-      # TF1/2 - not sure if we need to build the new environment in eager mode?
+      # TF1/2 check
+      # not sure if we need to build the new environment in eager mode?
       self$new_tf_environment()
 
       # store the performance control info
@@ -40,7 +41,9 @@ dag_class <- R6Class(
       )
 
       self$tf_log_prob_function <- tensorflow::tf_function(
-        # TF1/2 - need to check in on all cases of `tensorflow::tf_function()`
+        # TF1/2 check
+        # need to check in on all cases of `tensorflow::tf_function()`
+        # as we are getting lots of warnings about retracting
         # tensorflow::tf_function(
         self$generate_log_prob_function()
       )
@@ -56,7 +59,8 @@ dag_class <- R6Class(
       self$tf_log_prob_function(free_state)$unadjusted
     },
 
-    # TF1/2 - built with TF
+    # TF1/2 check
+    # built with TF
     # Not sure if we need tensorflow environments in TF2, given that
     # everything will be passed as functions?
     new_tf_environment = function() {
@@ -67,7 +71,8 @@ dag_class <- R6Class(
       self$tf_environment$hybrid_data_list <- list()
     },
 
-    # TF1/2 - built with TF
+    # TF1/2 check remove on_graph
+    # built with TF
     # Not sure if we need this anyore since this information will be handled
     # by tf_function?
     # execute an expression on this dag's tensorflow graph, with the correct
@@ -92,38 +97,6 @@ dag_class <- R6Class(
       # as was required in TensorFlow 1, but this is deprecated and it is
       # recommended to use a tf.function instead.
       with(self$tf_graph$as_default(), expr)
-    },
-
-    # TF1/2
-    # so it seems we won't really need to be using the tf_run function
-    # anymore as these things will just be tensorflow objects?
-    # execute an expression in the tensorflow environment
-    tf_run = function(expr, as_text = FALSE) {
-      tfe <- self$tf_environment
-
-      if (as_text) {
-        tfe$expr <- parse(text = expr)
-      } else {
-        tfe$expr <- substitute(expr)
-      }
-
-      on.exit(rm("expr", envir = tfe))
-
-      self$on_graph(with(tfe, eval(expr)))
-    },
-
-    # TF1/2
-    # similarly we should be able to just avoid using this and instead
-    # wrap things up in tensorflow functions?
-    # sess$run() an expression in the tensorflow environment, with the feed dict
-    tf_sess_run = function(expr, as_text = FALSE) {
-      if (!as_text) {
-        expr <- deparse(substitute(expr))
-      }
-
-      expr <- glue::glue("sess$run({expr}, feed_dict = feed_dict)")
-
-      self$tf_run(expr, as_text = TRUE)
     },
 
     # return a list of nodes connected to those in the target node list
@@ -259,8 +232,7 @@ dag_class <- R6Class(
       )
     },
     define_batch_size = function() {
-      # self$tf_run(
-      # TF1/2
+      # TF1/2 check?
       # pretty sure `batch_size` just now needs to be the input of a function
       # I'm not even sure that batch_size needs to be a function, it might
       # just need to be the input to wherever it is used next?
@@ -274,10 +246,6 @@ dag_class <- R6Class(
           batch_size <- tf$shape(self$tf_environment$free_state)[0]
         )
       }
-
-      # batch_size <- tf$compat$v1$placeholder(dtype = tf$int32)
-      # batch_size <- tf$keras$Input(dtype = tf$int32)
-      # )
     },
 
     define_free_state = function(type = c("variable", "placeholder"),
@@ -303,7 +271,10 @@ dag_class <- R6Class(
         # )
       } else {
         shape <- shape(NULL, length(vals))
-        # TF1/2
+        # TF1/2 check?
+        # this `on_graph` part below is probably not needed/wont work because it
+        # is using placeholder and co?
+        #
         # defining an empty/unknown thing
         # so in TF2, we might not need to define a free state, we can
         # define a function that returns these pieces of information
@@ -315,7 +286,8 @@ dag_class <- R6Class(
           shape = shape
         ))
 
-        # TF1/2 instead?
+        # TF1/2 check
+        # instead?
         # free_state <- tensorflow::as_tensor(
         #   dtype = tf_float(),
         #   shape = shape
@@ -375,14 +347,14 @@ dag_class <- R6Class(
       invisible(NULL)
     },
 
-    # TF1/2
+    # TF1/2 check?
     # I think we can probably remove this part of things? However I'm not sure
     # if the "mode" part is going to be imporatnt here?
     # define tf graph in environment; either for forward-mode computation from a
     # free state variable, or for sampling
     define_tf = function(target_nodes = self$node_list) {
       # define the free state variable
-      # TF1/2
+      # TF1/2 check?
       # pretty sure define_batch_size needs to be passed as an argument to
       # whatever is above here...if define_tf even needs to exist?
       # and I think we can remove define_batch_size since
@@ -674,32 +646,6 @@ dag_class <- R6Class(
       data_list_name <- glue::glue("{self$mode}_data_list")
       self$tf_environment[[data_list_name]][[element_name]] <- value
     },
-    build_feed_dict = function(dict_list = list(),
-                               data_list = self$get_tf_data_list()) {
-      tfe <- self$tf_environment
-
-      # put the list in the environment temporarily
-      tfe$dict_list <- c(dict_list, data_list)
-      on.exit(rm("dict_list", envir = tfe))
-
-      # roll into a dict in the tf environment
-      self$tf_run(feed_dict <- do.call(dict, dict_list))
-    },
-    send_parameters = function(parameters) {
-
-      # reshape to a row vector if needed
-      if (is.null(dim(parameters))) {
-        parameters <- array(parameters, dim = c(1, length(parameters)))
-      }
-
-      # create a feed dict in the TF environment
-      parameter_list <- list(free_state = parameters)
-
-      # set the batch size to match parameters
-      self$set_tf_data_list("batch_size", nrow(parameters))
-
-      self$build_feed_dict(parameter_list)
-    },
 
     # get adjusted joint log density across the whole dag
     log_density = function() {
@@ -723,16 +669,13 @@ dag_class <- R6Class(
     define_trace_values_batch = function(free_state_batch) {
 
       # update the parameters & build the feed dict
-      # self$send_parameters(free_state_batch)
-      #
-      # tfe <- self$tf_environment
-      #
       target_tf_names <- lapply(
         self$target_nodes,
         self$tf_name
       )
 
-      # TF1/2 - maybe remove onexit stufff
+      # TF1/2 check
+      # maybe remove onexit stuff?
       tfe_old <- self$tf_environment
       on.exit(self$tf_environment <- tfe_old)
       tfe <- self$tf_environment <- new.env()

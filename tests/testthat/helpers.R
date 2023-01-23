@@ -20,12 +20,8 @@ grab <- function(x, dag = NULL) {
   if (inherits(x, "greta_array")) {
     node <- get_node(x)
     dag <- dag_class$new(list(x))
-    # TF1/2 - don't seem to need this define_tf?
-    # dag$define_tf()
   }
 
-  # TF1/2
-  # I think I need to do some kind of tfe$batch_size thing here?
   dag$tf_environment$batch_size <- 1L
   node$define_tf(dag)
   x_name <- dag$tf_name(node)

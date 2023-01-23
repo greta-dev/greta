@@ -162,19 +162,7 @@ inference <- R6Class(
 
     # check whether the model can be evaluated at these parameters
     valid_parameters = function(parameters) {
-      # browser()
       dag <- self$model$dag
-      # tfe <- dag$tf_environment
-      #
-      # if (!live_pointer("joint_density_adj", envir = tfe)) {
-      #   # dag$on_graph(
-      # TF1/2 - I think that the joint density needs to be defined still?
-      # dag$define_joint_density()
-      #     # )
-      # }
-      #
-      # dag$send_parameters(parameters)
-      # ld <- self$model$dag$log_density()
       tf_parameters <- fl(array(
         data = parameters,
         dim = c(1, length(parameters))
@@ -318,9 +306,7 @@ sampler <- R6Class(
       }
 
       # define the draws tensor on the tf graph
-      # TF1/2 creates a tensor for what the draws will be
       # define_tf_draws is now used in place of of run_burst
-      # self$define_tf_draws()
       self$tf_evaluate_sample_batch <- tensorflow::tf_function(
         f = self$define_tf_draws,
         input_signature = list(
@@ -416,10 +402,12 @@ sampler <- R6Class(
 
         # relay between R and tensorflow in a burst to be cpu efficient
         for (burst in seq_along(burst_lengths)) {
-          # TF1/2 - replace with define_tf_draws
+          # TF1/2 check todo?
+          # replace with define_tf_draws
           self$run_burst(n_samples = burst_lengths[burst])
           # align the free state back to the parameters we are tracing
-          # TF1/2 - this is the tuning stage, might not need to evaluate
+          # TF1/2 check todo?
+          # this is the tuning stage, might not need to evaluate
           # / record the parameter values, as they will be thrown away
           # after warmup - so could remove trace here.
           self$trace()
@@ -479,7 +467,7 @@ sampler <- R6Class(
         for (burst in seq_along(burst_lengths)) {
           # so these bursts are R objects being passed through to python
           # and how often to return them
-          # TF1/2
+          # TF1/2 check todo
           # replace with define_tf_draws
           self$run_burst(n_samples = burst_lengths[burst],
                          thin = thin)
@@ -675,7 +663,7 @@ sampler <- R6Class(
         }
       }
     },
-    # TF1/2
+    # TF1/2 check todo
     # need to convert this into a TF function
     define_tf_draws = function(free_state,
                                sampler_burst_length,
@@ -686,26 +674,20 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # TF1/2 might need to convert this into a tensor to make sure it is
-      # the correct type
+      # TF1/2 check?
+      # might need to convert this into a tensor to make sure it is the correct
+      # type
       # free_state <- self$free_state
 
-      # TF1/2 - how do TF2 and TFP use seeds?
+      # TF1/2 check seed
+      # how do TF2 and TFP use seeds?
       self$set_tf_seed()
 
-      # TF1/2
-      # how is this going to know which sampler kernel to choose, if these
-      # each end up having different arguments that could be called?
-      # e.g., hmc has `hmc_epsilon`, `hmc_l`, and `hmc_diag_sd`, and
-      # rwmh has `rwmh_epsilon` and `rwmh_diag_sd`.
-      # or are all of these handled at the levels above, in the respective
-      # functions `hmc`, `rwmh` etc?
-      # browser()
       sampler_kernel <- self$define_tf_kernel(
         sampler_param_vec
       )
 
-      # TF1/2
+      # TF1/2 check
       # some sampler parameter values need to be re-run at each iteration
       # to decide, say, the leap step in HMC - which is run inside
       # define_tf_kernel
@@ -716,20 +698,16 @@ sampler <- R6Class(
       #
 
       # define the whole draws tensor
-      # dag$tf_run(
-        # TF1/2
+        # TF1/2 check
         # NOTE it looks like the `seed`
         # argument now gets passed through to `sample_chain`
         # need to work out how to get the new
         # sampler_batch() to run as a TF function
         # and to do that we need to work out how
         # to get the free state
-      # browser()
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
-          # TF1/2 - where is free_state coming from? is this in tfe / sampler?
           current_state = free_state,
-          # TF1/2 - where is sampler_kernel coming from?
           kernel = sampler_kernel,
           trace_fn = function(current_state, kernel_results) {
             kernel_results
@@ -741,11 +719,10 @@ sampler <- R6Class(
         return(
           sampler_batch
         )
-      # )
     },
 
     # run a burst of the sampler
-    # TF1/2
+    # TF1/2 check
     # this will be removed in favour of the tf_function decorated
     # define_tf_draws() function that takes in argument values
     # sampler_burst_length and sampler_thin
@@ -754,13 +731,13 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # browser()
       param_vec <- unlist(self$sampler_parameter_values())
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
 
       # sampler_values <- list(
-      #   # TF1/2 - do we need free state here anymore?
+      #   # TF1/2 check
+          # do we need free state here anymore?
       #   free_state = self$free_state,
       #   sampler_burst_length = as.integer(n_samples),
       #   sampler_thin = as.integer(thin)
@@ -768,19 +745,10 @@ sampler <- R6Class(
       # # create a function that takes in these arguments ^^
       # # and then run the code for the sampler_batch
       #
-      # sampler_dict_list <- c(
-      #   sampler_values,
-      #   # TF1/2 this needs to be passed into define_tf_draws
-      #   self$sampler_parameter_values()
-      # )
 
       dag$set_tf_data_list("batch_size", nrow(self$free_state))
-      # dag$build_feed_dict(sampler_dict_list)
 
       # run the sampler, handling numerical errors
-      # TF1/2 - need to work out how whether to:
-        # A) Pass on the things in the feed dict
-        # B)not build the feed dict at all and pass these arguments directly
       batch_results <- self$sample_carefully(
         free_state = self$free_state,
         sampler_burst_length = as.integer(n_samples),
@@ -834,16 +802,16 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # TF1/2***
+      # TF1/2 check?
       # might be easiest to replace a lot of the tf$sess$run stuff with
       # a do.call, the second argument is the feed_dict, which could be a
       # plain R list - so something like:
         # define_sampler_batch <- tf_function(define_tf_draws)
-      # don't use dag$tf_sess_run, to avoid the overhead on parsing expressions
+      # don't use dag$tf_sess_run (now removed), to avoid the overhead on
+      # parsing expressions
       # the feed_dict also contains various parameter information, I'm not sure
       # if this needs to be passed along, perhaps as an object
-      #
-      # browser()
+
       result <- cleanly(self$tf_evaluate_sample_batch(
         free_state = tensorflow::as_tensor(
           free_state,
@@ -923,9 +891,6 @@ hmc_sampler <- R6Class(
     ),
     accept_target = 0.651,
 
-    # TF1/2
-    # instances of `placeholder` should just be arguments in `define_tf_kernel`?
-    # should these arguments just inherit from self$parameters?
     define_tf_kernel = function(sampler_param_vec) {
 
       dag <- self$model$dag
@@ -939,36 +904,14 @@ hmc_sampler <- R6Class(
       hmc_epsilon <- sampler_param_vec[1]
       hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
 
-      # tensors for sampler parameters
-      # dag$tf_run(
-        # hmc_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
-      # )
-      # dag$tf_run(
-        # hmc_l <- tf$compat$v1$placeholder(dtype = tf$int64)
-      # )
-
-      # need to pass in the value for this placeholder as a matrix (shape(n, 1))
-      # dag$tf_run(
-        # hmc_diag_sd <- tf$compat$v1$placeholder(
-        #   dtype = tf_float(),
-        #   shape = shape(dim(free_state)[[2]], 1)
-        # )
-      # )
-
-      # but it step_sizes must be a vector (shape(n, )), so reshape it
-      # dag$tf_run(
-      # DEBUG HERE - the reshaping is erroring, not the input_signature
-
       hmc_step_sizes <- tf$cast(
         x = tf$reshape(
           hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
-          # TF1/2 - what do we do with the free_state here?
           shape = shape(free_state_size)
         ),
         dtype = tf$float64
       )
-      # )
-      # TF1/2
+      # TF1/2 check
         # where is "free_state" pulled from, given that it is the
         # argument to this function, "generate_log_prob_function" ?
       # log probability function
@@ -976,18 +919,15 @@ hmc_sampler <- R6Class(
       # build the kernel
       # nolint start
 
-      # dag$tf_run(
-      # browser()
         sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = hmc_step_sizes,
           num_leapfrog_steps = hmc_l
-          # TF1/2
+          # TF1/2 check seed
           # NOTE `seed` does not appear to be an argument in
           # tfp$mcmc$HamiltonianMonteCarlo
           # seed = rng_seed
         )
-      # )
       return(
         sampler_kernel
         )
@@ -1024,8 +964,6 @@ rwmh_sampler <- R6Class(
     ),
     accept_target = 0.44,
 
-    # TF1/2
-    # Again all tf_run parts need to be converted into arguments?
     define_tf_kernel = function(sampler_param_vec) {
 
       # wrap this up into a function to extract these out
@@ -1041,50 +979,42 @@ rwmh_sampler <- R6Class(
         uniform = tfp$mcmc$random_walk_uniform_fn
       )
 
-      # TF1/2
+      # TF1/2 check
       # I think a good portion of this code could be abstracted away
       # Perhaps from `rwmh_epsilon` to `new_state_fn`
       # could be passed
       # tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # tensors for sampler parameters
-      # dag$tf_run(
         # rwmh_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
-      # )
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
-      # dag$tf_run(
         # rwmh_diag_sd <- tf$compat$v1$placeholder(
         #   dtype = tf_float(),
-        #   # TF1/2 - again what do we with with `free_state`?
+        #   # TF1/2 check
+            # again what do we with with `free_state`?
         #   shape = shape(dim(free_state)[[2]], 1)
         # )
-      # )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
-      # dag$tf_run(
         rwmh_step_sizes <- tf$reshape(
           rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
-          # TF1/2 - what are we to do about `free_state` here?
+          # TF1/2 check
+          # what are we to do about `free_state` here?
           shape = shape(free_state_size)
         )
-      # )
 
-      # dag$tf_run(
         new_state_fn <- rwmh_proposal(scale = rwmh_step_sizes)
-      # )
 
       # build the kernel
       # nolint start
-      # dag$tf_run(
         sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           new_state_fn = new_state_fn,
-          # TF1/2
+          # TF1/2 check seed
           # NOTE `seed` does not appear to be an argument anymore
           # seed = tfe$rng_seed
         )
-      # )
       return(
         sampler_kernel
       )
@@ -1113,8 +1043,6 @@ slice_sampler <- R6Class(
     tuning_interval = Inf,
     uses_metropolis = FALSE,
 
-    # TF1/2
-    # replace tf_run with arguments to define_tf_kernel or return the values?
     define_tf_kernel = function(sampler_param_vec) {
 
       slice_max_doublings <- sampler_param_vec[1]
@@ -1136,22 +1064,17 @@ slice_sampler <- R6Class(
         )
       }
 
-      # dag$tf_run(
-        # slice_max_doublings <- tf$compat$v1$placeholder(dtype = tf$int32)
-      # )
-
       # build the kernel
       # nolint start
-      # dag$tf_run(
         sampler_kernel <- tfp$mcmc$SliceSampler(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = fl(1),
           max_doublings = slice_max_doublings,
-          # TF1/2
+          # TF1/2 check seed
           # NOTE `seed` does not appear to be an argument anymore
           # seed = tfe$rng_seed
         )
-      # )
+
       return(
         sampler_kernel
       )

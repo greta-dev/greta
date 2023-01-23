@@ -108,10 +108,6 @@ define_tf_compat_optimiser <- function(name,
   )
 }
 
-## NOTE: TF1/2
-## This define_xxx_optimiser pattern might benefit from a new_optimiser
-## type constructor function. It only happens twice, but maybe
-## this kind of things becomes more common
 define_tfp_optimiser <- function(name,
                                  method,
                                  parameters = list(),

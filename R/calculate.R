@@ -330,7 +330,7 @@ calculate_greta_mcmc_list <- function(target,
 
   # if we're doing stochastic sampling, subsample the draws
   if (stochastic) {
-    # TF1/2
+    # TF1/2 check todo
     # might need to rename draws to indicate that it is a matrix, for readability
     draws <- as.matrix(draws)
     n_samples <- nrow(draws)
@@ -418,7 +418,7 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
   }
 
-  # TF1/2
+  # TF1/2 check todo
   # need to wrap this in tf_function I think?
   values <- calculate_target_tensor_list(
     dag,
@@ -428,15 +428,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     target,
     nsim
   )
-
-  # TF1/2
-  # I think we need to check on these values - it might be something like this
-  # except that we need to do something with batch_size, since I'm fairly
-  # sure we just removed batch_size completely in this version
-  #   # send list to tf environment and roll into a dict
-  #   values <- lapply(values, add_first_dim)
-  #   values <- lapply(values, tile_first_dim, batch_size)
-
 
   return(values)
   # TF 1/2 - could potentially not run this list in the correct way, in that
@@ -463,9 +454,9 @@ calculate_target_tensor_list <- function(
   target,
   nsim
 ) {
-  # TF1/2
-  # wrap from here to ^^^ in a function to then to tf_function on
-  # and pass the all_greta arrays and values arguments
+  # TF1/2 check todo
+  # wrap from here to ^^^ in a function to then to tf_function on and pass the
+  # all_greta arrays and values arguments
   # define the dag and TF graph
 
   # change dag mode to sampling
@@ -494,7 +485,8 @@ calculate_target_tensor_list <- function(
   )
 
   # this is taking advantage of non-eager mode
-  # TF1/2, might need to use some of the tensorflow creation function
+  # TF1/2 check
+  # might need to use some of the tensorflow creation function
   # approaches (in as_tf_function + generate_log_prob_function)
   dag$define_tf()
 

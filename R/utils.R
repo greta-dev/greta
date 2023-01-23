@@ -646,7 +646,7 @@ sampler_utils_module <- module(
   get_model_info
 )
 
-# TF1/2
+# TF1/2 check remove?
 # Is this still needed with the new `tf_function` from TF2?
 # I cannot actually currently see uses of `as_tf_function ` in the code
 # base currently
@@ -689,7 +689,7 @@ as_tf_function <- function(r_fun, ...) {
     targets <- c(ga_out, ga_dummies)
     sub_dag <- dag_class$new(targets)
 
-    # TF1/2
+    # TF1/2 check remove
       # `get_default_graph()` doesn't work with either eager execution or
       # `tf.function`.
     # use the default graph, so that it can be overwritten when this is called?

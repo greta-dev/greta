@@ -44,7 +44,8 @@ test_that("shape returns right thing", {
   expect_equal(dim(shape(dims = c(NA, 4))), NULL)
 })
 
-## TF1/2 - do we care about something equivalent to this?
+# TF1/2 check todo
+# do we care about something equivalent to this?
 # test_that("placeholder and friends behave the same way", {
 #   skip_if_not(check_tf_version())
 #

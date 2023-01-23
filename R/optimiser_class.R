@@ -137,7 +137,8 @@ tf_optimiser <- R6Class(
           -dag$tf_log_prob_function(free_state)$unadjusted
         }
 
-        # TF1/2 - get this to work inside TF with TF while loop
+        # TF1/2 todo
+        # get this to work inside TF with TF while loop
         while (self$it < self$max_iterations &
                all(self$diff > self$tolerance)) {
           # add 1 because python indexing
@@ -198,7 +199,8 @@ tfp_optimiser <- R6Class(
       self$run_minimiser <- function(inits) {
 
         self$parameters$max_iterations <- self$max_iterations
-        # TF1/2 - will be better in the long run to have some kind of
+        # TF1/2 todo
+        # will be better in the long run to have some kind of
         # constructor function or similar to implement this
         if (self$name == "bfgs") {
           self$parameters$value_and_gradients_function <- value_and_gradient
@@ -283,7 +285,8 @@ tf_compat_optimiser <- R6Class(
 
         # need to get this to work for tf compat
 
-        # TF1/2 - get this to work inside TF with TF while loop
+        # TF1/2 todo
+        # get this to work inside TF with TF while loop
         while (self$it < self$max_iterations &
                all(self$diff > self$tolerance)) {
           # add 1 because python indexing
