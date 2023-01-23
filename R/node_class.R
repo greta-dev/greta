@@ -168,11 +168,8 @@ node <- R6Class(
       tf_name %in% ls(dag$tf_environment)
     },
 
-    # define this and all descendent objects on tensorflow graph in environment
-    # env
+    # define this and all descendent objects on TF graph in environment
     define_tf = function(dag) {
-      # browser?
-      # browser()
 
       # if defined already, skip
       if (!self$defined(dag)) {

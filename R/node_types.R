@@ -378,7 +378,6 @@ variable_node <- R6Class(
     tf_log_jacobian_adjustment = function(free) {
       tf_bijector <- self$create_tf_bijector()
 
-      # browser()
       event_ndims <- as.integer(tf_bijector$forward_min_event_ndims)
       ljd <- tf_bijector$forward_log_det_jacobian(
         x = free,

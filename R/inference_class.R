@@ -93,7 +93,6 @@ inference <- R6Class(
     # check and try to autofill a single set of initial values (single vector on
     # free state scale)
     check_initial_values = function(inits) {
-      # browser()
       undefined <- is.na(inits)
 
       # try to fill in any that weren't specified
@@ -778,7 +777,6 @@ sampler <- R6Class(
       if (self$uses_metropolis) {
 
         # log acceptance probability
-        # browser()
         log_accept_stats <- as.array(batch_results$trace$log_accept_ratio)
         is_accepted <- as.array(batch_results$trace$is_accepted)
         self$accept_history <- rbind(self$accept_history, is_accepted)
@@ -825,10 +823,6 @@ sampler <- R6Class(
           shape = length(sampler_param_vec)
         )
       ))
-      # result <- cleanly(tfe$sess$run(tfe$sampler_batch,
-      #   feed_dict = tfe$feed_dict
-      # ))
-
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
       # if it's a numerical error, batch_results will be an error object
@@ -896,8 +890,9 @@ hmc_sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # browser()
       free_state_size <- length(sampler_param_vec) - 2
+
+      # TF1/2 check
       # this will likely get replaced...
 
       hmc_l <- sampler_param_vec[0]

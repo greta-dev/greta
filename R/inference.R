@@ -203,7 +203,6 @@ mcmc <- function(
     # message users about random seeds and GPU usage if they are using GPU
     message_if_using_gpu(compute_options)
 
-    # browser()
     # check the trace batch size
     trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
@@ -930,7 +929,6 @@ opt <- function(model,
         free_state = tf$Variable(object$free_state),
         which_objective = which_objective
         )
-      # hessians <- model$dag$calculate_hessian(object$free_state)
       hessians <- lapply(hessians, `*`, -1)
       outputs$hessian <- hessians
     }

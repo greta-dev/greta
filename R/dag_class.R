@@ -46,6 +46,7 @@ dag_class <- R6Class(
         # as we are getting lots of warnings about retracting
         # tensorflow::tf_function(
         self$generate_log_prob_function()
+        # )
       )
     },
 
@@ -258,17 +259,16 @@ dag_class <- R6Class(
 
       if (type == "variable") {
 
+        # TF1/2 check
         # tf$Variable seems to have trouble assigning values, if created with
         # numeric (rather than logical) NAs
         vals <- as.logical(vals)
         vals <- t(as.matrix(vals))
 
-        # self$on_graph(
         free_state <- tf$Variable(
           initial_value = vals,
           dtype = tf_float()
         )
-        # )
       } else {
         shape <- shape(NULL, length(vals))
         # TF1/2 check?
@@ -335,14 +335,10 @@ dag_class <- R6Class(
         self$split_free_state()
       }
 
-      # browser()
       # define all nodes in the environment and on the graph
-      # self$on_graph(
       lapply(target_nodes, function(x){
-        # debugonce(x$define_tf)
         x$define_tf(self)
       })
-      # )
 
       invisible(NULL)
     },
@@ -370,7 +366,6 @@ dag_class <- R6Class(
 
     # define tensor for overall log density and gradients
     define_joint_density = function() {
-      # browser()
       tfe <- self$tf_environment
 
       # get all distribution nodes that have a target
@@ -388,15 +383,11 @@ dag_class <- R6Class(
       )
 
       # reduce_sum each of them (skipping the batch dimension)
-      # self$on_graph(
       summed_densities <- lapply(densities, tf_sum, drop = TRUE)
-      # )
 
       # sum them together
       names(summed_densities) <- NULL
-      # self$on_graph(
       joint_density <- tf$add_n(summed_densities)
-      # )
 
       # assign overall density to environment
       assign("joint_density",
@@ -416,9 +407,7 @@ dag_class <- R6Class(
       # sometimes returning a scalar tensor)
       names(adj) <- NULL
       adj <- match_batches(adj)
-      # self$on_graph(
       total_adj <- tf$add_n(adj)
-      # )
 
       # assign overall density to environment
       assign("joint_density_adj",
@@ -442,11 +431,11 @@ dag_class <- R6Class(
       # execute the distribution constructor functions to return a tfp
       # distribution object
       tfp_distribution <- distrib_constructor(tf_parameter_list, dag = self)
-      # browser()
-      self$tf_evaluate_density(tfp_distribution,
-                               tf_target,
-                               truncation = distribution_node$truncation,
-                               bounds = distribution_node$bounds
+      self$tf_evaluate_density(
+        tfp_distribution,
+        tf_target,
+        truncation = distribution_node$truncation,
+        bounds = distribution_node$bounds
       )
     },
     tf_evaluate_density = function(tfp_distribution,
@@ -583,7 +572,6 @@ dag_class <- R6Class(
       # we need some way to lexically scope the
       # batch size and the data
       function(free_state) {
-        # browser()
         # temporarily define a new environment
         tfe_old <- self$tf_environment
         on.exit(self$tf_environment <- tfe_old)
@@ -685,19 +673,12 @@ dag_class <- R6Class(
 
       # we now make all of the operations define themselves now
       self$define_tf()
-      ## self$define_tf(free_state_batch)
 
       target_tensors <- lapply(target_tf_names,
                                get,
                                envir = tfe
       )
 
-      # evaluate them in the tensorflow environment
-      # trace_list <- tfe$sess$run(target_tensors,
-      #   feed_dict = tfe$feed_dict
-      # )
-
-      # trace_list
       return(target_tensors)
     },
 

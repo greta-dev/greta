@@ -55,7 +55,6 @@ optimiser <- R6Class(
     },
 
     set_dtype = function(parameter_name, dtype) {
-      # browser()
       params <- self$parameters
       param_names <- self$parameter_names()
 
@@ -206,10 +205,7 @@ tfp_optimiser <- R6Class(
           self$parameters$value_and_gradients_function <- value_and_gradient
           self$parameters$initial_position <- inits
         } else if (self$name == "nelder_mead") {
-          # because nelder_mead uses initial_vertex and not initial_position
-          # this is a quick hack changing the argument in place by argument
-          # position instead of by name ... for reasons
-          # browser() # <<<
+          # nelder_mead uses different args, so we must change the ags in place
           self$parameters$batch_evaluate_objective <- FALSE
           self$parameters$objective_function <- function(x){
             x_expand <- tf$expand_dims(x, axis = 0L)

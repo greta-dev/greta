@@ -578,7 +578,6 @@ tf_scalar_biject <- function(..., dim) {
     steps <- c(tfp$bijectors$Reshape(dim), steps)
   }
 
-  # browser()
   tfp$bijectors$Chain(steps)
 }
 
@@ -590,8 +589,6 @@ tf_scalar_bijector <- function(dim, lower, upper) {
 }
 
 tfb_shift_scale <- function(shift, scale){
-  # call x and y shift and scale, respectively
-  # tfb.Shift(shift)(tfb.Scale(scale))
   tfb_shift <- tfp$bijectors$Shift(shift)
   tfb_scale <- tfp$bijectors$Scale(scale)
   tfb_shift_scale <- tfb_shift(tfb_scale)
@@ -601,7 +598,6 @@ tfb_shift_scale <- function(shift, scale){
 tf_scalar_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
     tfp$bijectors$Shift(fl(lower)),
-    # tfp$bijectors$AffineScalar(shift = fl(lower)),
     tfp$bijectors$Exp(),
     dim = dim
   )
@@ -609,7 +605,6 @@ tf_scalar_pos_bijector <- function(dim, lower, upper) {
 
 tf_scalar_neg_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    # tfp$bijectors$AffineScalar(shift = fl(upper), scale = fl(-1)),
     tfb_shift_scale(fl(upper), fl(-1)),
     tfp$bijectors$Exp(),
     dim = dim
@@ -618,7 +613,6 @@ tf_scalar_neg_bijector <- function(dim, lower, upper) {
 
 tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    # tfp$bijectors$AffineScalar(shift = fl(lower), scale = fl(upper - lower)),
     tfb_shift_scale(shift = fl(lower), scale = fl(upper - lower)),
     tfp$bijectors$Sigmoid(),
     dim = dim

@@ -1121,7 +1121,6 @@ wishart_distribution <- R6Class(
       }
 
       sample <- function(seed) {
-        # browser()
         df <- tf$squeeze(parameters$df, 1:2)
         sigma <- parameters$sigma
 

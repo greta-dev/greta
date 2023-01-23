@@ -384,9 +384,6 @@ calculate_greta_mcmc_list <- function(target,
     trace <- as_greta_mcmc_list(trace, model_info)
   }
 
-  # browser()
-  # dag$define_tf()
-
   trace
 }
 
