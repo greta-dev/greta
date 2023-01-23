@@ -430,7 +430,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   )
 
   return(values)
-  # TF 1/2 - could potentially not run this list in the correct way, in that
+  # TF1/2 check
+  # could potentially not run this list in the correct way, in that
   # it might result in running it twice with different seeds, rather than
   # simultaneously
   # assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)

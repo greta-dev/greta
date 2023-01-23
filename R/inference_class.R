@@ -35,7 +35,7 @@ inference <- R6Class(
                           parameters = list(),
                           seed = get_seed()) {
       # flush the environment and redefine the tensorflow graph if needed
-      # TF 1/2
+      # TF1/2 check
       # we can probably remove this as we don't build the TF graph now
       if (is.null(model$dag$tf_graph$unique_name)) {
         model$dag$new_tf_environment()
