@@ -41,7 +41,6 @@
       
         sampling ============================================ 5/5 | eta:  0s          
       
-
 # mcmc handles initial values nicely
 
     the number of provided initial values does not match chains
@@ -122,11 +121,7 @@
 
 # mcmc errors for invalid parallel plans
 
-    parallel mcmc samplers cannot be run with `plan(multiprocess)` or `plan(multicore)`
-
----
-
-    parallel mcmc samplers cannot be run with `plan(multiprocess)` or `plan(multicore)`
+    parallel mcmc samplers cannot be run with `plan(multicore)`
 
 ---
 

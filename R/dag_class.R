@@ -307,10 +307,8 @@ dag_class <- R6Class(
       free_state <- get("free_state", envir = tfe)
 
       params <- self$example_parameters(free = TRUE)
-      lengths <- vapply(params,
-                        function(x) length(x),
-                        FUN.VALUE = 1L
-      )
+
+      lengths <- lengths(params)
 
       if (length(lengths) > 1) {
         # args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))

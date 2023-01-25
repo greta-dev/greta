@@ -109,7 +109,7 @@ operation_node <- R6Class(
       # the provided list of nodes arguments
       if (is.null(dim)) {
         dim_list <- lapply(dots, dim)
-        dim_lengths <- vapply(dim_list, length, numeric(1))
+        dim_lengths <- lengths(dim_list)
         dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
         dim <- do.call(pmax, dim_list)
       }

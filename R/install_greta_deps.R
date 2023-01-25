@@ -40,6 +40,8 @@
 #'  installed. This is now always straightforward, so we recommend installing
 #'  the python packages using `install_greta_deps()` for most users.
 #'
+#' @name install_greta_deps
+#'
 #' @export
 #'
 #' @examples

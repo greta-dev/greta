@@ -32,6 +32,17 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 
 * `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.
 
+# greta 0.4.3
+
+## Features
+
+- Adds `reinstall_greta_deps()`, which helps with starting from a clean slate when installing greta dependencies (#524)
+
+## Fixes
+
+* Issue where `future` and `parallely` packages error when a CPU with only one core is provided (#513, #516).
+* Removes any use of `multiprocess` as it is deprecated in the `future` package (#394)
+
 # greta 0.4.2
 
 ## Fixes

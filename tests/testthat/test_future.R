@@ -1,3 +1,18 @@
+test_that("check_future_plan() works when only one core available", {
+  # temporarily set the envvar to have only 1 core available
+  withr::local_envvar("R_PARALLELLY_AVAILABLE_CORES" = "1")
+  op <- future::plan()
+  # put the future plan back as we found it
+  withr::defer(future::plan(op))
+  future::plan(future::multisession)
+
+  # one chain
+  expect_snapshot_output(
+    check_future_plan()
+    )
+
+})
+
 test_that("check_future_plan() works", {
   op <- future::plan()
   # put the future plan back as we found it
@@ -5,7 +20,9 @@ test_that("check_future_plan() works", {
   future::plan(future::multisession)
 
   # one chain
-  expect_error(check_future_plan(), NA)
+  expect_snapshot_output(
+    check_future_plan()
+    )
 
 })
 
@@ -17,9 +34,9 @@ test_that("mcmc errors for invalid parallel plans", {
   # temporarily silence future's warning about multicore support
   withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
 
-  # handle handle forks, so only accept multisession, or multi session clusters
-  suppressWarnings(future::plan(future::multiprocess))
-  expect_snapshot_error(
+  # handle forks, so only accept multisession, or multi session clusters
+  future::plan(future::multisession)
+  expect_snapshot_output(
     check_future_plan()
   )
 
