@@ -58,7 +58,7 @@
       
     Message <message>
       
-        sampling                                              0/1 | eta:  ?s          
+        sampling                                     0/1 | eta:  ?s          
 
 # calculate/mcmc does message when option set
 
@@ -84,7 +84,7 @@
       
     Message <message>
       
-        sampling                                              0/1 | eta:  ?s          
+        sampling                                     0/1 | eta:  ?s          
 
 # mcmc provides a message when GPU is set
 
@@ -100,7 +100,7 @@
       
     Message <message>
       
-        sampling                                              0/1 | eta:  ?s          
+        sampling                                     0/1 | eta:  ?s          
 
 ---
 
@@ -112,5 +112,5 @@
       
     Message <message>
       
-        sampling                                              0/1 | eta:  ?s          
+        sampling                                     0/1 | eta:  ?s          
 

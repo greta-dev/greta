@@ -40,7 +40,7 @@
         sampling                                              0/5 | eta:  ?s          
       
         sampling ============================================ 5/5 | eta:  0s          
-      
+
 # mcmc handles initial values nicely
 
     the number of provided initial values does not match chains
