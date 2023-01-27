@@ -81,6 +81,9 @@ jobs:
       - name: Greta install greta deps
         run: greta::install_greta_deps(timeout = 50)
 
+      - name: greta sitrep
+        run: greta::greta_sitrep()
+
       - name: Check the installation happened properly?
         run: |
           greta:::have_greta_conda_env()
@@ -89,33 +92,9 @@ jobs:
           greta:::have_tf()
           greta:::have_tfp()
 
-      - name: Install Miniconda
-        run: reticulate::install_miniconda()
-
-      - name: Install TensorFlow
-        run: tensorflow::install_tensorflow(version = '${{ matrix.tf }}-cpu')
-
-      - name: Install Tensorflow Probability
-        run: |
-          reticulate::py_install(packages = "tensorflow-probability",
-                                 pip = TRUE,
-                                 method = "conda")
 
       - name: Install rcmdcheck
         run: remotes::install_cran("rcmdcheck")
-
-      - name: Python + TF details
-        run: |
-          tensorflow::tf_config()
-          tensorflow::tf_version()
-          reticulate::py_module_available("tensorflow_probability")
-          reticulate::py_config()
-
-      - name: Session info
-        run: |
-          options(width = 100)
-          pkgs <- installed.packages()[, "Package"]
-          sessioninfo::session_info(pkgs, include_base = TRUE)
 
       - name: Check
         run: rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')
@@ -136,3 +115,8 @@ jobs:
           R_PARALLELLY_AVAILABLE_CORES: 1
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--no-multiarch"))
 
+      - name: Session info
+        run: |
+          options(width = 100)
+          pkgs <- installed.packages()[, "Package"]
+          sessioninfo::session_info(pkgs, include_base = TRUE)
