@@ -13,6 +13,6 @@ cpu_only()
 \description{
 These functions set the use of CPU or GPU inside of greta. They
 simply return either "GPU" or "CPU", but in the future may handle more
-complexity. These functions arepassed to \code{compute_options} inside of a few
+complexity. These functions are passed to \code{compute_options} inside of a few
 functions: \code{\link[=mcmc]{mcmc()}}, \code{\link[=opt]{opt()}}, and \code{\link[=calculate]{calculate()}}.
 }

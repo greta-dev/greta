@@ -13,6 +13,7 @@
 #'   because they are no longer available in TensorFlow 2.0. Note that
 #'   optimiser `momentum()` has been replaced with `gradient_descent()`
 #'
+#'
 #' @return an `optimiser` object that can be passed to [opt()].
 #'
 #' @examples
@@ -435,7 +436,7 @@ ftrl <- function(learning_rate = 1,
 #' @export
 #'
 #' @note This optimizer isn't supported in TF2, so proceed with caution. See
-#'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer) for more detail.
+#'  the [TF docs on ProximalGradientDescentOptimizer](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer) for more detail.
 #'
 proximal_gradient_descent <- function(learning_rate = 0.01,
                                       l1_regularization_strength = 0,
@@ -458,7 +459,7 @@ proximal_gradient_descent <- function(learning_rate = 0.01,
 #' @export
 #'
 #' @note This optimizer isn't supported in TF2, so proceed with caution. See
-#'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer) for more detail.
+#'  the [TF docs on ProximalAdagradOptimizer](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer) for more detail.
 
 #'
 proximal_adagrad <- function(learning_rate = 1,

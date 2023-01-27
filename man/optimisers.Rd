@@ -201,10 +201,10 @@ This optimizer isn't supported in TF2, so proceed with caution. See
 the \href{https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/AdagradDAOptimizer}{TF docs on AdagradDAOptimiser} for more detail.
 
 This optimizer isn't supported in TF2, so proceed with caution. See
-the \href{https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer}{TF docs on AdagradDAOptimiser} for more detail.
+the \href{https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer}{TF docs on ProximalGradientDescentOptimizer} for more detail.
 
 This optimizer isn't supported in TF2, so proceed with caution. See
-the \href{https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer}{TF docs on AdagradDAOptimiser} for more detail.
+the \href{https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer}{TF docs on ProximalAdagradOptimizer} for more detail.
 }
 \examples{
 \dontrun{

@@ -2,7 +2,7 @@
 #'
 #' This is a helper function to install Python dependencies needed. This
 #'   includes the latest version of Tensorflow version (2.8.0 or higher),
-#'   Tensorflow Probability 0.16.0 (or higher), and the latest verison of
+#'   Tensorflow Probability 0.16.0 (or higher), and the latest version of
 #'   numpy (1.21.0 or higher). These Python modules will be installed into a
 #'   virtual or conda environment, named "greta-env-tf2". Note that "virtualenv"
 #'   is not available on Windows.
