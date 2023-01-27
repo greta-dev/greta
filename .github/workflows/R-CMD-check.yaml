@@ -38,30 +38,6 @@ jobs:
           - {os: 'windows-latest', tf: 'default', r: 'release'}
           - {os: 'macOS-latest'  , tf: 'default', r: 'release'}
 
-          # - {os: 'ubuntu-latest' , tf: 'default', r: 'oldrel'}
-          # - {os: 'windows-latest', tf: 'default', r: 'oldrel'}
-          # - {os: 'macOS-latest'  , tf: 'default', r: 'oldrel'}
-          #
-          # # - {os: 'ubuntu-20.04', tf: 'default', r: '3.6'} # default R in ubuntu-20.04
-          # - {os: 'ubuntu-latest', tf: 'default', r: 'oldrel-1'}
-          # - {os: 'ubuntu-latest', tf: 'default', r: 'oldrel-2'}
-          # - {os: 'ubuntu-latest', tf: 'default', r: 'oldrel-3'}
-          #
-          # ## uncomment if/when tf "release" != "default"
-          # # - {os: 'ubuntu-20.04'  , tf: 'release', r: 'release'}
-          # # - {os: 'windows-latest', tf: 'release', r: 'release'}
-          # # - {os: 'macOS-latest'  , tf: 'release', r: 'release'}
-          #
-          # - {os: 'ubuntu-latest', tf: '2.10', r: 'release'}
-          # - {os: 'ubuntu-latest', tf: '2.9' , r: 'release'}
-          # - {os: 'ubuntu-latest', tf: '2.7' , r: 'release'}
-          # - {os: 'ubuntu-latest', tf: '2.6' , r: 'release'}
-          # - {os: 'ubuntu-latest', tf: '2.5' , r: 'release'}
-
-          # these are allowed to fail
-          # - {os: 'ubuntu-20.04', tf: 'default', r: 'devel'}
-          # - {os: 'ubuntu-20.04', tf: 'nightly' , r: 'release'}
-          # - {os: 'ubuntu-20.04', tf: '2.7.0rc1', r: 'release'}
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.tf == 'nightly' || contains(matrix.tf, 'rc') || matrix.r == 'devel' }}
     env:
@@ -128,14 +104,14 @@ jobs:
           tensorflow::tf_version()
           reticulate::py_module_available("tensorflow_probability")
           reticulate::py_config()
-#       shell: Rscript {0}
+      shell: Rscript {0}
 
       - name: Session info
         run: |
           options(width = 100)
           pkgs <- installed.packages()[, "Package"]
           sessioninfo::session_info(pkgs, include_base = TRUE)
-#        shell: Rscript {0}
+       shell: Rscript {0}
 
       - name: Check
         run: rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')
