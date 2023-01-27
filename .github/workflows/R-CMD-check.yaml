@@ -84,6 +84,14 @@ jobs:
       - name: Install TensorFlow
         run: tensorflow::install_tensorflow(version = '${{ matrix.tf }}-cpu')
 
+      - name: Install Tensorflow Probability
+        run: |
+          reticulate::py_install(packages = "tensorflow-probability",
+                                 pip = TRUE,
+                                 method = "conda")
+        shell: Rscript {0}
+
+
       - name: Install rcmdcheck
         run: remotes::install_cran("rcmdcheck")
 
