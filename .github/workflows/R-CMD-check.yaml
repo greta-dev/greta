@@ -78,6 +78,17 @@ jobs:
       - name: Install package + deps
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
 
+      - name: Greta install greta deps
+        run: greta::install_greta_deps(timeout = 50)
+
+      - name: Check the installation happened properly?
+        run: |
+          greta:::have_greta_conda_env()
+          greta:::have_conda()
+          greta:::have_python()
+          greta:::have_tf()
+          greta:::have_tfp()
+
       - name: Install Miniconda
         run: reticulate::install_miniconda()
 
