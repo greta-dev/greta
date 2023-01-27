@@ -84,15 +84,6 @@ jobs:
       - name: greta sitrep
         run: greta::greta_sitrep()
 
-      - name: Check the installation happened properly?
-        run: |
-          greta:::have_greta_conda_env()
-          greta:::have_conda()
-          greta:::have_python()
-          greta:::have_tf()
-          greta:::have_tfp()
-
-
       - name: Install rcmdcheck
         run: remotes::install_cran("rcmdcheck")
 

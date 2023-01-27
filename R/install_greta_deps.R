@@ -76,6 +76,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
         'tensorflow',
         'tensorflow-probability'
       ),
+      envname = "greta-env-tf2",
       pip = TRUE
     )
   } else if (!manual) {
