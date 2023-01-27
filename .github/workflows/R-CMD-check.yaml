@@ -122,6 +122,21 @@ jobs:
       - name: Install rcmdcheck
         run: remotes::install_cran("rcmdcheck")
 
+     - name: Python + TF details
+        run: |
+          tensorflow::tf_config()
+          tensorflow::tf_version()
+          reticulate::py_module_available("tensorflow_probability")
+          reticulate::py_config()
+#       shell: Rscript {0}
+
+      - name: Session info
+        run: |
+          options(width = 100)
+          pkgs <- installed.packages()[, "Package"]
+          sessioninfo::session_info(pkgs, include_base = TRUE)
+#        shell: Rscript {0}
+
       - name: Check
         run: rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')
 
