@@ -40,5 +40,5 @@ NULL
 
 # clear CRAN checks spotting floating global variables
 #' @importFrom utils globalVariables
-utils::globalVariables("N", "greta")
+utils::globalVariables(c("N"), "greta")
 

@@ -9,6 +9,7 @@ DAGs
 DiagrammeR
 GPUs
 GPflow
+Gao
 Gelman
 Geweke
 Greh
@@ -43,6 +44,8 @@ al
 analysed
 bayesplot
 behaviour
+broadcastable
+broadcasted
 cholesky
 cli
 colour
@@ -53,6 +56,7 @@ devtools
 dlkjcorr
 doi
 dontrun
+dtype
 env
 equalling
 et
@@ -62,6 +66,7 @@ gfortran
 github
 greta's
 gretaDynamics
+hager
 helpfile
 igraph
 initialised
@@ -123,3 +128,4 @@ virtualenv
 visualise
 warmup
 winbuilder
+zhang

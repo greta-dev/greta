@@ -14,6 +14,7 @@
 #'   optimiser `momentum()` has been replaced with `gradient_descent()`
 #'
 #'
+#'
 #' @return an `optimiser` object that can be passed to [opt()].
 #'
 #' @examples
@@ -123,61 +124,148 @@ define_tfp_optimiser <- function(name,
 }
 
 #' @rdname optimisers
+#'
+#' @param objective_function A function that accepts a point as a real Tensor
+#'   and returns a Tensor of real dtype containing the value of the function at
+#'   that point. The function to be minimized. If `batch_evaluate_objective` is
+#'   TRUE, the function may be evaluated on a Tensor of shape `[n+1] + s` where
+#'   n is the dimension of the problem and s is the shape of a single point in
+#'   the domain (so n is the size of a Tensor representing a single point). In
+#'   this case, the expected return value is a Tensor of shape `[n+1]`. Note
+#'   that this method does not support univariate functions so the problem
+#'   dimension n must be strictly greater than 1.
+#' @param initial_vertex  Tensor of real dtype and any shape that can be
+#'   consumed by the `objective_function`. A single point in the domain that
+#'   will be used to construct an axes aligned initial simplex.
+#' @param step_sizes  Tensor of real dtype and shape broadcasting compatible
+#'   with `initial_vertex`. Supplies the simplex scale along each axes.
+#' @param func_tolerance Single numeric number. The algorithm stops if the
+#'    absolute difference between the largest and the smallest function value
+#'    on the vertices of the simplex is below this number. Default is 1e-08.
+#' @param position_tolerance Single numeric number. The algorithm stops if
+#'   the largest absolute difference between the coordinates of the vertices
+#'   is below this threshold.
+#' @param reflection (optional) Positive Scalar Tensor of same dtype as
+#'   `initial_vertex`. This parameter controls the scaling of the reflected
+#'   vertex. See, [Press et al(2007)](http://numerical.recipes/cpppages/chap0sel.pdf)
+#'   for details. If not specified, uses the dimension dependent prescription of
+#'    [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df)
+#' @param expansion (optional) Positive Scalar Tensor of same dtype as
+#'  `initial_vertex`. Should be greater than 1 and reflection. This parameter
+#'  controls the expanded scaling of a reflected vertex.See,
+#'   [Press et al(2007)](http://numerical.recipes/cpppages/chap0sel.pdf) for
+#'   details. If not specified, uses the dimension dependent prescription of
+#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df)
+#' @param contraction (optional) Positive scalar Tensor of same dtype as
+#'   `initial_vertex`. Must be between 0 and 1. This parameter controls the
+#'   contraction of the reflected vertex when the objective function at the
+#'   reflected point fails to show sufficient decrease. See,
+#'   [Press et al(2007)](http://numerical.recipes/cpppages/chap0sel.pdf) for
+#'   details. If not specified, uses the dimension dependent prescription of
+#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df)
+#' @param shrinkage (Optional) Positive scalar Tensor of same dtype as
+#'   `initial_vertex`. Must be between 0 and 1. This parameter is the scale by
+#'   which the simplex is shrunk around the best point when the other steps fail
+#'   to produce improvements. See,
+#'   [Press et al(2007)](http://numerical.recipes/cpppages/chap0sel.pdf) for
+#'   details. If not specified, uses the dimension dependent prescription of
+#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df)
+#'
 #' @export
 #'
 nelder_mead <- function(
     objective_function = NULL,
-    initial_simplex = NULL,
     initial_vertex = NULL,
     step_sizes = NULL,
-    objective_at_initial_simplex = NULL,
-    objective_at_initial_vertex = NULL,
     func_tolerance = 1e-08,
     position_tolerance = 1e-08,
-    parallel_iterations = 1L,
     reflection = NULL,
     expansion = NULL,
     contraction = NULL,
-    shrinkage = NULL,
-    name = NULL) {
+    shrinkage = NULL) {
 
   define_tfp_optimiser(
     name = "nelder_mead",
     method = "tfp$optimizer$nelder_mead_minimize",
     parameters = list(
       objective_function = objective_function,
-      initial_simplex = initial_simplex,
+      initial_simplex = NULL,
       initial_vertex = initial_vertex,
       step_sizes = step_sizes,
-      objective_at_initial_simplex = objective_at_initial_simplex,
-      objective_at_initial_vertex = objective_at_initial_vertex,
+      objective_at_initial_simplex = NULL,
+      objective_at_initial_vertex = NULL,
       func_tolerance = func_tolerance,
       position_tolerance = position_tolerance,
-      parallel_iterations = parallel_iterations,
+      parallel_iterations = 1L,
       reflection = reflection,
       expansion = expansion,
       contraction = contraction,
       shrinkage = shrinkage,
-      name = name
+      name = NULL
     )
   )
 }
 
 #' @rdname optimisers
-#' @export
 #'
+#' @param value_and_gradients_function A function that accepts a point as a
+#'   real Tensor and returns a tuple of Tensors of real dtype containing the
+#'   value of the function and its gradient at that point. The function to be
+#'   minimized. The input should be of shape `[..., n]`, where n is the size of
+#'   the domain of input points, and all others are batching dimensions. The
+#'   first component of the return value should be a real Tensor of matching
+#'   shape `[...]`. The second component (the gradient) should also be of
+#'   shape `[..., n]` like the input value to the function.
+#' @param initial_position real Tensor of shape `[..., n]`. The starting point,
+#'   or points when using batching dimensions, of the search procedure. At
+#'   these points the function value and the gradient norm should be finite.
+#' @param tolerance Scalar Tensor of real dtype. Specifies the gradient
+#'   tolerance for the procedure. If the supremum norm of the gradient vector
+#'   is below this number, the algorithm is stopped. Default is 1e-08.
+#' @param x_tolerance Scalar Tensor of real dtype. If the absolute change in
+#'   the position between one iteration and the next is smaller than this
+#'   number, the algorithm is stopped. Default of 0L.
+#' @param f_relative_tolerance Scalar Tensor of real dtype. If the relative
+#'   change in the objective value between one iteration and the next is
+#'   smaller than this value, the algorithm is stopped.
+#' @param initial_inverse_hessian_estimate Optional Tensor of the same dtype
+#'   as the components of the output of the value_and_gradients_function. If
+#'   specified, the shape should broadcastable to shape `[..., n, n]`; e.g. if a
+#'   single `[n, n]` matrix is provided, it will be automatically broadcasted to
+#'   all batches. Alternatively, one can also specify a different hessian
+#'   estimate for each batch member. For the correctness of the algorithm, it
+#'   is required that this parameter be symmetric and positive definite.
+#'   Specifies the starting estimate for the inverse of the Hessian at the
+#'   initial point. If not specified, the identity matrix is used as the
+#'   starting estimate for the inverse Hessian.
+#' @param stopping_condition (Optional) A function that takes as input two
+#'   Boolean tensors of shape `[...]`, and returns a Boolean scalar tensor. The
+#'   input tensors are converged and failed, indicating the current status of
+#'   each respective batch member; the return value states whether the
+#'   algorithm should stop. The default is `tfp$optimizer.converged_all` which
+#'   only stops when all batch members have either converged or failed. An
+#'   alternative is `tfp$optimizer.converged_any` which stops as soon as one
+#'   batch member has converged, or when all have failed.
+#' @param validate_args Logical, default TRUE. When TRUE, optimizer
+#'   parameters are checked for validity despite possibly degrading runtime
+#'   performance. When FALSE invalid inputs may silently render incorrect outputs.
+#' @param max_line_search_iterations Python int. The maximum number of
+#'   iterations for the hager_zhang line search algorithm.
+#' @param f_absolute_tolerance Scalar Tensor of real dtype. If the absolute
+#'   change in the objective value between one iteration and the next is
+#'   smaller than this value, the algorithm is stopped.
+#'
+#' @export
 bfgs <- function(value_and_gradients_function = NULL,
                  initial_position = NULL,
                  tolerance = 1e-08,
                  x_tolerance = 0L,
                  f_relative_tolerance = 0L,
                  initial_inverse_hessian_estimate = NULL,
-                 parallel_iterations = 1L,
                  stopping_condition = NULL,
                  validate_args = TRUE,
                  max_line_search_iterations = 50L,
-                 f_absolute_tolerance = 0L,
-                 name = NULL) {
+                 f_absolute_tolerance = 0L) {
   define_tfp_optimiser(
     name = "bfgs",
     method = "tfp$optimizer$bfgs_minimize",
@@ -188,12 +276,12 @@ bfgs <- function(value_and_gradients_function = NULL,
       x_tolerance = x_tolerance,
       f_relative_tolerance = f_relative_tolerance,
       initial_inverse_hessian_estimate = initial_inverse_hessian_estimate,
-      parallel_iterations = parallel_iterations,
+      parallel_iterations = 1L,
       stopping_condition = stopping_condition,
       validate_args = validate_args,
       max_line_search_iterations = max_line_search_iterations,
       f_absolute_tolerance = f_absolute_tolerance,
-      name = name
+      name = NULL
     )
   )
 }
