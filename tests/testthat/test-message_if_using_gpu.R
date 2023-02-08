@@ -70,7 +70,8 @@ test_that("calculate/mcmc does not message when option set",{
     mcmc_m <- mcmc(model = m,
                    n_samples = 1,
                    warmup = 0,
-                   compute_options = gpu_only())
+                   compute_options = gpu_only(),
+                   verbose = FALSE)
   )
 
 })
@@ -93,7 +94,8 @@ test_that("calculate/mcmc does message when option set",{
     mcmc_m <- mcmc(model = m,
                    n_samples = 1,
                    warmup = 0,
-                   compute_options = gpu_only())
+                   compute_options = gpu_only(),
+                   verbose = FALSE)
   )
 
 })
@@ -108,16 +110,29 @@ test_that("mcmc provides a message when GPU is set", {
   mcmc_gpu <- mcmc(model = m,
          n_samples = 1,
          warmup = 0,
-         compute_options = gpu_only())
+         compute_options = gpu_only(),
+         verbose = FALSE)
   )
 
   expect_snapshot(
   mcmc_cpu <- mcmc(model = m,
          n_samples = 1,
          warmup = 0,
-         compute_options = cpu_only())
+         compute_options = cpu_only(),
+         verbose = FALSE)
   )
 
 })
 
+test_that("mcmc prints out CPU and GPU text", {
+  skip_if_not(check_tf_version())
 
+  x <- normal(0,1)
+  m <- model(x)
+  expect_snapshot(
+    draws <- mcmc(m, n_samples = 5, warmup = 5, compute_options = cpu_only())
+  )
+  expect_snapshot(
+    draws <- mcmc(m, n_samples = 5, warmup = 5, compute_options = gpu_only())
+  )
+})

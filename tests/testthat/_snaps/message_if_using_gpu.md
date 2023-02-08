@@ -51,14 +51,8 @@
 ---
 
     Code
-      mcmc_m <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only())
-    Message <simpleMessage>
-      running 4 chains simultaneously on GPU
-    Output
-      
-    Message <message>
-      
-        sampling                                     0/1 | eta:  ?s          
+      mcmc_m <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only(),
+      verbose = FALSE)
 
 # calculate/mcmc does message when option set
 
@@ -73,44 +67,28 @@
 ---
 
     Code
-      mcmc_m <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only())
+      mcmc_m <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only(),
+      verbose = FALSE)
     Message <simpleMessage>
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
       You can turn off this message with:
       `options(greta_gpu_message = FALSE)`
-      running 4 chains simultaneously on GPU
-    Output
-      
-    Message <message>
-      
-        sampling                                     0/1 | eta:  ?s          
 
 # mcmc provides a message when GPU is set
 
     Code
-      mcmc_gpu <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only())
+      mcmc_gpu <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only(),
+      verbose = FALSE)
     Message <simpleMessage>
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
       You can turn off this message with:
       `options(greta_gpu_message = FALSE)`
-      running 4 chains simultaneously on GPU
-    Output
-      
-    Message <message>
-      
-        sampling                                     0/1 | eta:  ?s          
 
 ---
 
     Code
-      mcmc_cpu <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = cpu_only())
-    Message <simpleMessage>
-      running 4 chains simultaneously on up to 8 CPU cores
-    Output
-      
-    Message <message>
-      
-        sampling                                     0/1 | eta:  ?s          
+      mcmc_cpu <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = cpu_only(),
+      verbose = FALSE)
 

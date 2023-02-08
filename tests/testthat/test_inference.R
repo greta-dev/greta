@@ -84,21 +84,6 @@ test_that("mcmc works with cpu and gpu options", {
     )
 })
 
-test_that("mcmc prints out CPU and GPU text", {
-  skip_if_not(check_tf_version())
-
-  x <- rnorm(10)
-  z <- normal(0, 1)
-  distribution(x) <- normal(z, 1)
-  m <- model(z)
-  expect_snapshot(
-    draws <- mcmc(m, n_samples = 5, warmup = 5, compute_options = cpu_only())
-  )
-  expect_snapshot(
-    draws <- mcmc(m, n_samples = 5, warmup = 5, compute_options = gpu_only())
-  )
-})
-
 test_that("mcmc works with multiple chains", {
   skip_if_not(check_tf_version())
 
