@@ -1,3 +1,13 @@
+# bad mcmc proposals are rejected
+
+    The log density could not be evaluated at these initial values
+    Try using these initials as the values argument in `calculate()` to see what values of subsequent <greta_array>s these initial values lead to.
+
+---
+
+    Could not find reasonable starting values after 20 attempts.
+    Please specify initial values manually via the `initial_values` argument
+
 # mcmc handles initial values nicely
 
     the number of provided initial values does not match chains
@@ -60,12 +70,6 @@
     The following object passed to `model()` is not a <greta array>:
     "a"
     
-
-# mcmc doesn't support slice sampler with double precision models
-
-    slice sampler can only currently be used for models defined with single precision
-    
-    set `model(..., precision = 'single')` instead
 
 # numerical issues are handled in mcmc
 

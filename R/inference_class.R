@@ -335,6 +335,7 @@ sampler <- R6Class(
                          one_by_one, plan_is, n_cores, float_type,
                          trace_batch_size,
                          from_scratch = TRUE) {
+      # keep iterating down and moving this until we get the other error first
       # stop("hi...from the future")
       self$thin <- thin
       dag <- self$model$dag
