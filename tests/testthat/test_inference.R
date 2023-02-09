@@ -4,9 +4,9 @@ test_that("bad mcmc proposals are rejected", {
   skip_if_not(check_tf_version())
 
   # set up for numerical rejection of initial location
-  x <- rnorm(10000, 1e6, 1)
-  z <- normal(-1e6, 1e-6)
-  distribution(x) <- normal(z, 1e6)
+  x <- rnorm(10000, 1e12, 1)
+  z <- normal(-1e6, 1e-12)
+  distribution(x) <- normal(z, 1e12)
   m <- model(z, precision = "single")
 
   # # catch badness in the progress bar
@@ -304,20 +304,6 @@ test_that("mcmc supports slice sampler with single precision models", {
     n_samples = 100, warmup = 100,
     verbose = FALSE
   ))
-})
-
-test_that("mcmc doesn't support slice sampler with double precision models", {
-  skip_if_not(check_tf_version())
-  set.seed(5)
-  x <- uniform(0, 1)
-  m <- model(x, precision = "double")
-  expect_snapshot_error(
-    draws <- mcmc(m,
-                  sampler = slice(),
-                  n_samples = 100, warmup = 100,
-                  verbose = FALSE
-    )
-  )
 })
 
 test_that("numerical issues are handled in mcmc", {

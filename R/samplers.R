@@ -75,9 +75,7 @@ rwmh <- function(proposal = c("normal", "uniform"),
 #' @rdname samplers
 #'
 #' @details `slice()` implements a multivariate slice sampling algorithm.
-#'   Currently this algorithm can only be used with single-precision models (set
-#'   using the `precision` argument to [model()]). The parameter
-#'   `max_doublings` is not tuned during warmup.
+#'   The parameter `max_doublings` is not tuned during warmup.
 #'
 #' @param max_doublings the maximum number of iterations of the 'doubling'
 #'   algorithm used to adapt the size of the slice

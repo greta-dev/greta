@@ -964,11 +964,12 @@ rwmh_sampler <- R6Class(
       # wrap this up into a function to extract these out
       free_state_size <- length(sampler_param_vec) - 1 # get it from dag object
       # e.g., length(dag$free_state)
-      rwmh_epsilon <- sampler_param_vec[1]
-      rwmh_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
+      rwmh_epsilon <- sampler_param_vec[0]
+      rwmh_diag_sd <- sampler_param_vec[1:(1+free_state_size)]
 
       dag <- self$model$dag
       tfe <- dag$tf_environment
+
       tfe$rwmh_proposal <- switch(self$parameters$proposal,
         normal = tfp$mcmc$random_walk_normal_fn,
         uniform = tfp$mcmc$random_walk_uniform_fn
@@ -999,13 +1000,13 @@ rwmh_sampler <- R6Class(
           shape = shape(free_state_size)
         )
 
-        new_state_fn <- rwmh_proposal(scale = rwmh_step_sizes)
+        new_state_fn <- tfe$rwmh_proposal(scale = rwmh_step_sizes)
 
       # build the kernel
       # nolint start
         sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
-          new_state_fn = new_state_fn,
+          new_state_fn = new_state_fn
           # TF1/2 check seed
           # NOTE `seed` does not appear to be an argument anymore
           # seed = tfe$rng_seed
@@ -1039,32 +1040,20 @@ slice_sampler <- R6Class(
     uses_metropolis = FALSE,
 
     define_tf_kernel = function(sampler_param_vec) {
-
-      slice_max_doublings <- sampler_param_vec[1]
+      slice_max_doublings <- tensorflow::as_tensor(
+        x = sampler_param_vec[0],
+        dtype = tf$int32
+      )
 
       dag <- self$model$dag
       tfe <- dag$tf_environment
-
-      if (dag$tf_float != "float32") {
-        msg <- cli::format_error(
-          c(
-            "slice sampler can only currently be used for models defined with \\
-            single precision",
-            "set {.code model(..., precision = 'single')} instead"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
 
       # build the kernel
       # nolint start
         sampler_kernel <- tfp$mcmc$SliceSampler(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = fl(1),
-          max_doublings = slice_max_doublings,
+          max_doublings = slice_max_doublings
           # TF1/2 check seed
           # NOTE `seed` does not appear to be an argument anymore
           # seed = tfe$rng_seed
