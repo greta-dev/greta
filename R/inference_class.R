@@ -335,8 +335,6 @@ sampler <- R6Class(
                          one_by_one, plan_is, n_cores, float_type,
                          trace_batch_size,
                          from_scratch = TRUE) {
-      # keep iterating down and moving this until we get the other error first
-      # stop("hi...from the future")
       self$thin <- thin
       dag <- self$model$dag
 
@@ -346,8 +344,9 @@ sampler <- R6Class(
       if (!plan_is$parallel & verbose) {
         self$print_sampler_number()
       }
-
       if (plan_is$parallel) {
+        # keep iterating down and moving this until we get the other error first
+        # stop("hi...from the future")
 
         # flush the environment
         dag$new_tf_environment()
@@ -358,6 +357,7 @@ sampler <- R6Class(
         # rebuild the TF graph
         dag$define_tf()
 
+        ## THIS IS WHERE FUTURE FALLS OVER
         # rebuild the TF draws tensor
         self$define_tf_draws()
       }
@@ -671,6 +671,9 @@ sampler <- R6Class(
                                sampler_param_vec
                                # pass values through
                                ) {
+      # browser()
+      # keep iterating down and moving this until we get the other error first
+      # stop("hi...from the future")
       dag <- self$model$dag
       tfe <- dag$tf_environment
 

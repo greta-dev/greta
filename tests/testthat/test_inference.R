@@ -303,11 +303,14 @@ test_that("numerical issues are handled in mcmc", {
 
   # this should have a cholesky decomposition problem at some point
   alpha <- normal(0, 1)
-  x <- matrix(rnorm(6), 3, 2)
-  y <- t(rnorm(3))
+  # x <- matrix(rnorm(6), 3, 2)
+  x <- matrix(rnorm(12), 4, 3)
+  # y <- t(rnorm(3))
+  y <- t(rnorm(4))
   z <- alpha * x
   sigma <- z %*% t(z)
-  distribution(y) <- multivariate_normal(zeros(1, 3), sigma)
+  # distribution(y) <- multivariate_normal(zeros(1, 3), sigma)
+  distribution(y) <- multivariate_normal(zeros(1, 4), sigma)
   m <- model(alpha)
 
   # running with bursts should error informatively
@@ -395,9 +398,9 @@ test_that("parallel reporting works", {
   future::plan(future::multisession)
 
   # should report each sampler's progress with a fraction
-  out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
-  expect_match(out, "2 samplers in parallel")
-  expect_match(out, "50/50")
+  #out <- get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2))
+  expect_match(get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2)), "2 samplers in parallel")
+  expect_match(get_output(. <- mcmc(m, warmup = 50, n_samples = 50, chains = 2)), "50/50")
 
 })
 

@@ -188,6 +188,7 @@ node <- R6Class(
         }
 
         # then define self
+          # stop("hi from the future ... parents are of class:", str(parents))
         self$tf(dag)
       }
     },
