@@ -395,6 +395,10 @@ variable_node <- R6Class(
       # make sure there's something in the batch dimension
       if (identical(dim(ljd), integer(0))) {
         ljd <- tf$expand_dims(ljd, 0L)
+        tiling <- tf$stack(
+          list(tf$shape(free)[0]),
+          axis = 0L)
+        ljd <- tf$tile(ljd, tiling)
       }
 
       ljd
