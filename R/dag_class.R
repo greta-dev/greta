@@ -247,6 +247,11 @@ dag_class <- R6Class(
           batch_size <- tf$shape(self$tf_environment$free_state)[0]
         )
       }
+
+      # put this in the greta stash, so it can be accessed by other (sub-)dags
+      # if needed, e.g. when using as_tf_function()
+      assign("batch_size", self$tf_environment$batch_size, envir = greta_stash)
+
     },
 
     define_free_state = function(type = c("variable", "placeholder"),
