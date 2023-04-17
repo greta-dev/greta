@@ -34,13 +34,6 @@ inference <- R6Class(
                           model,
                           parameters = list(),
                           seed = get_seed()) {
-      # flush the environment and redefine the tensorflow graph if needed
-      # TF1/2 check
-      # we can probably remove this as we don't build the TF graph now
-      if (is.null(model$dag$tf_graph$unique_name)) {
-        model$dag$new_tf_environment()
-        model$dag$define_tf()
-      }
 
       self$parameters <- parameters
       self$model <- model
@@ -345,21 +338,11 @@ sampler <- R6Class(
         self$print_sampler_number()
       }
       if (plan_is$parallel) {
-        # keep iterating down and moving this until we get the other error first
-        # stop("hi...from the future")
 
-        # flush the environment
-        dag$new_tf_environment()
+        dag$define_tf_trace_values_batch()
 
-        # set the batch size for multiple chains
-        dag$set_tf_data_list("batch_size", self$n_chains)
+        dag$define_tf_log_prob_function()
 
-        # rebuild the TF graph
-        dag$define_tf()
-
-        ## THIS IS WHERE FUTURE FALLS OVER
-        # rebuild the TF draws tensor
-        self$define_tf_draws()
       }
 
       # create these objects if needed
@@ -671,16 +654,9 @@ sampler <- R6Class(
                                sampler_param_vec
                                # pass values through
                                ) {
-      # browser()
-      # keep iterating down and moving this until we get the other error first
-      # stop("hi...from the future")
+
       dag <- self$model$dag
       tfe <- dag$tf_environment
-
-      # TF1/2 check?
-      # might need to convert this into a tensor to make sure it is the correct
-      # type
-      # free_state <- self$free_state
 
       # TF1/2 check seed
       # how do TF2 and TFP use seeds?
@@ -708,6 +684,9 @@ sampler <- R6Class(
         # sampler_batch() to run as a TF function
         # and to do that we need to work out how
         # to get the free state
+
+      # TF1/2----------- future start/end old school debug -----------
+
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
           current_state = free_state,
@@ -814,19 +793,24 @@ sampler <- R6Class(
       # the feed_dict also contains various parameter information, I'm not sure
       # if this needs to be passed along, perhaps as an object
 
-      result <- cleanly(self$tf_evaluate_sample_batch(
-        free_state = tensorflow::as_tensor(
-          free_state,
-          dtype = tf_float()
-        ),
-        sampler_burst_length = tensorflow::as_tensor(sampler_burst_length),
-        sampler_thin = tensorflow::as_tensor(sampler_thin),
-        sampler_param_vec = tensorflow::as_tensor(
-          sampler_param_vec,
-          dtype = tf_float(),
-          shape = length(sampler_param_vec)
+      # result <- cleanly(
+        # self$tf_evaluate_sample_batch(
+          # result <- self$tf_evaluate_sample_batch(
+          result <- self$define_tf_draws(
+          free_state = tensorflow::as_tensor(
+            free_state,
+            dtype = tf_float()
+          ),
+          sampler_burst_length = tensorflow::as_tensor(sampler_burst_length),
+          sampler_thin = tensorflow::as_tensor(sampler_thin),
+          sampler_param_vec = tensorflow::as_tensor(
+            sampler_param_vec,
+            dtype = tf_float(),
+            shape = length(sampler_param_vec)
+          )
         )
-      ))
+      # ) # closing cleanly
+
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
       # if it's a numerical error, batch_results will be an error object
