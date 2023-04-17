@@ -36,17 +36,22 @@ dag_class <- R6Class(
       # store the performance control info
       self$tf_float <- tf_float
       self$compile <- compile
+      self$define_tf_trace_values_batch()
+      self$define_tf_log_prob_function()
+    },
+
+    define_tf_trace_values_batch = function(){
       self$tf_trace_values_batch <- tensorflow::tf_function(
         self$define_trace_values_batch
       )
+    },
 
+    define_tf_log_prob_function = function(){
       self$tf_log_prob_function <- tensorflow::tf_function(
         # TF1/2 check
         # need to check in on all cases of `tensorflow::tf_function()`
         # as we are getting lots of warnings about retracting
-        # tensorflow::tf_function(
         self$generate_log_prob_function()
-        # )
       )
     },
 
