@@ -38,6 +38,7 @@ dag_class <- R6Class(
       self$compile <- compile
       self$define_tf_trace_values_batch()
       self$define_tf_log_prob_function()
+      self$define_tf_evaluate_sample_batch()
     },
 
     define_tf_trace_values_batch = function(){
@@ -52,6 +53,32 @@ dag_class <- R6Class(
         # need to check in on all cases of `tensorflow::tf_function()`
         # as we are getting lots of warnings about retracting
         self$generate_log_prob_function()
+      )
+    },
+
+    define_tf_evaluate_sample_batch = function(){
+      self$tf_evaluate_sample_batch <- tensorflow::tf_function(
+        f = self$define_tf_draws,
+        input_signature = list(
+          # free state
+          tf$TensorSpec(shape = list(NULL, self$n_free),
+                        dtype = tf_float()),
+          # sampler_burst_length
+          tf$TensorSpec(shape = list(),
+                        dtype = tf$int32),
+          # sampler_thin
+          tf$TensorSpec(shape = list(),
+                        dtype = tf$int32),
+          # sampler_param_vec
+          tf$TensorSpec(shape = list(
+            length(
+              unlist(
+                self$sampler_parameter_values()
+              )
+            )
+          ),
+          dtype = tf_float())
+        )
       )
     },
 
