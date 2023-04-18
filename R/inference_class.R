@@ -685,7 +685,22 @@ sampler <- R6Class(
         # and to do that we need to work out how
         # to get the free state
 
-      # TF1/2----------- future start/end old school debug -----------
+      # TF1/2----------- future start old school debug -----------
+      # if (is.null(greta_stash$counter)) counter <- 0
+      # counter <- counter + 1
+      # if (counter == 3) {
+        # msg <- cli::format_error(
+        #   c(
+        #     "hi...from the future",
+        #     " inside of function: {.fun define_tf_draws}",
+        #     "sampler_burst_length is {sampler_burst_length}",
+        #     "sampler_thin is {sampler_thin}",
+        #     "free_state is {free_state}"
+        #   )
+        # )
+        # stop(msg)
+      # } # end counter
+      # TF1/2----------- future end old school debug -----------
 
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
@@ -794,7 +809,7 @@ sampler <- R6Class(
       # if this needs to be passed along, perhaps as an object
 
       # result <- cleanly(
-        # self$tf_evaluate_sample_batch(
+      #   self$tf_evaluate_sample_batch(
           # result <- self$tf_evaluate_sample_batch(
           result <- self$define_tf_draws(
           free_state = tensorflow::as_tensor(
