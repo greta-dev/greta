@@ -80,14 +80,6 @@
     
     
 
-# mcmc errors for invalid parallel plans
-
-    parallel mcmc samplers cannot be run with `plan(multicore)`
-
----
-
-    parallel mcmc samplers cannot be run with a fork cluster
-
 # initials works
 
     initial values must be numeric

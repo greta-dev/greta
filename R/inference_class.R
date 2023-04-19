@@ -297,13 +297,39 @@ sampler <- R6Class(
         self$parameters$diag_sd <- diag_sd
       }
 
-
       # define the draws tensor on the tf graph
       # define_tf_draws is now used in place of of run_burst
-    define_tf_evaluate_sample_batch()
+      self$define_tf_evaluate_sample_batch()
 
     },
-      # TF1/2 - moving to dag definition?
+
+    define_tf_evaluate_sample_batch = function(){
+      self$tf_evaluate_sample_batch <- tensorflow::tf_function(
+        f = self$define_tf_draws,
+        input_signature = list(
+          # free state
+          tf$TensorSpec(shape = list(NULL, self$n_free),
+                        dtype = tf_float()),
+          # sampler_burst_length
+          tf$TensorSpec(shape = list(),
+                        dtype = tf$int32),
+          # sampler_thin
+          tf$TensorSpec(shape = list(),
+                        dtype = tf$int32),
+          # sampler_param_vec
+          tf$TensorSpec(shape = list(
+            length(
+              unlist(
+                self$sampler_parameter_values()
+              )
+            )
+          ),
+          dtype = tf_float())
+        )
+      )
+    },
+
+    # TF1/2 - moving to dag definition?
     #   self$tf_evaluate_sample_batch <- tensorflow::tf_function(
     #     f = self$define_tf_draws,
     #     input_signature = list(
@@ -328,6 +354,7 @@ sampler <- R6Class(
     #     )
     #   )
     # },
+
     run_chain = function(n_samples, thin, warmup,
                          verbose, pb_update,
                          one_by_one, plan_is, n_cores, float_type,
@@ -348,7 +375,7 @@ sampler <- R6Class(
 
         dag$define_tf_log_prob_function()
 
-        dag$define_tf_evaluate_sample_batch()
+        self$define_tf_evaluate_sample_batch()
 
       }
 
