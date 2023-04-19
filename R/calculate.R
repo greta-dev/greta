@@ -331,7 +331,7 @@ calculate_greta_mcmc_list <- function(target,
   # if we're doing stochastic sampling, subsample the draws
   if (stochastic) {
     # TF1/2 check todo
-    # might need to rename draws to indicate that it is a matrix, for readability
+    # might rename draws to indicate that it is a matrix, for readability
     draws <- as.matrix(draws)
     n_samples <- nrow(draws)
 
@@ -438,8 +438,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 #   missing <- !names(data_list) %in% names(values)
 #
 #   # send list to tf environment and roll into a dict
-#   values <- lapply(values, add_first_dim)
-#   values <- lapply(values, tile_first_dim, batch_size)
 #
 }
 

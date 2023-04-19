@@ -441,8 +441,6 @@ run_samplers <- function(samplers,
 
   # if we were running in parallel, retrieve the samplers and put them back in
   # the stash to return
-  # TF1/2 check!
-  # this is failing when sampling a multivariate normal
   if (plan_is$parallel) {
     samplers <- lapply(samplers, future::value)
     greta_stash$samplers <- samplers

@@ -329,32 +329,6 @@ sampler <- R6Class(
       )
     },
 
-    # TF1/2 - moving to dag definition?
-    #   self$tf_evaluate_sample_batch <- tensorflow::tf_function(
-    #     f = self$define_tf_draws,
-    #     input_signature = list(
-    #       # free state
-    #       tf$TensorSpec(shape = list(NULL, self$n_free),
-    #                     dtype = tf_float()),
-    #       # sampler_burst_length
-    #       tf$TensorSpec(shape = list(),
-    #                     dtype = tf$int32),
-    #       # sampler_thin
-    #       tf$TensorSpec(shape = list(),
-    #                     dtype = tf$int32),
-    #       # sampler_param_vec
-    #       tf$TensorSpec(shape = list(
-    #         length(
-    #           unlist(
-    #             self$sampler_parameter_values()
-    #             )
-    #           )
-    #         ),
-    #                     dtype = tf_float())
-    #     )
-    #   )
-    # },
-
     run_chain = function(n_samples, thin, warmup,
                          verbose, pb_update,
                          one_by_one, plan_is, n_cores, float_type,
@@ -422,7 +396,6 @@ sampler <- R6Class(
           # TF1/2 check todo?
           # replace with define_tf_draws
 
-          ## TF1/2 future: debugger errors here ----
           self$run_burst(n_samples = burst_lengths[burst])
           # align the free state back to the parameters we are tracing
           # TF1/2 check todo?
@@ -430,14 +403,10 @@ sampler <- R6Class(
           # / record the parameter values, as they will be thrown away
           # after warmup - so could remove trace here.
 
-          ## TF1/2 future: FUTURE errors here ----
-
           self$trace()
           # a memory efficient way to calculate summary stats of samples
           self$update_welford()
           self$tune(completed_iterations[burst], warmup)
-
-          ## TF1/2 future: FUTURE errors here ----
 
           if (verbose) {
 
@@ -717,9 +686,9 @@ sampler <- R6Class(
 
       # define the whole draws tensor
       # TF1/2 check
-      # Looks like the `seed` arg now gets passed through to `sample_chain`.
-      # need to work out how to get the new sampler_batch() to run as a TF
-      # function and to do that we need to work out how to get the free state
+      # `seed` arg now gets passed to `sample_chain`.
+      # Need to work out how to get sampler_batch() to run as a TF function.
+      # To do that we need to work out how to get the free state
 
         sampler_batch <- tfp$mcmc$sample_chain(
           num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
@@ -813,43 +782,12 @@ sampler <- R6Class(
                                 sampler_thin,
                                 sampler_param_vec) {
 
-      ## TF1/2 future: debugger catches here
-
       # tryCatch handling for numerical errors
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # TF1/2 check?
-      # might be easiest to replace a lot of the tf$sess$run stuff with
-      # a do.call, the second argument is the feed_dict, which could be a
-      # plain R list - so something like:
-        # define_sampler_batch <- tf_function(define_tf_draws)
-      # don't use dag$tf_sess_run (now removed), to avoid the overhead on
-      # parsing expressions
-      # the feed_dict also contains various parameter information, I'm not sure
-      # if this needs to be passed along, perhaps as an object
-
-      # TF1/2----------- future start old school debug -----------
-      # if (is.null(greta_stash$counter)) greta_stash$counter <- 1
-      # if (greta_stash$counter == 1) {
-      # msg <- cli::format_error(
-      #   c(
-      #     "hi...from the future",
-      #     "sampler_burst_length is {sampler_burst_length}",
-      #     "sampler_thin is {sampler_thin}",
-      #     "free_state is {free_state}",
-      #     "sampler_param_vec is {sampler_param_vec}"
-      #   )
-      # )
-      # stop(msg)
-      # } # end counter
-      # greta_stash$counter <- greta_stash$counter + 1
-      # TF1/2----------- future end old school debug -----------
-
       result <- cleanly(
         self$tf_evaluate_sample_batch(
-          # result <- self$tf_evaluate_sample_batch(
-          # result <- self$define_tf_draws(
           free_state = tensorflow::as_tensor(
             free_state,
             dtype = tf_float()
@@ -863,8 +801,6 @@ sampler <- R6Class(
           )
         )
       ) # closing cleanly
-
-      ## TF1/2: future FUTURE errors here
 
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
@@ -910,7 +846,6 @@ sampler <- R6Class(
     },
     sampler_parameter_values = function() {
 
-      ## TF1/2 future: debugger does not error here
       # random number of integration steps
       self$parameters
     }
@@ -962,10 +897,6 @@ hmc_sampler <- R6Class(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = hmc_step_sizes,
           num_leapfrog_steps = hmc_l
-          # TF1/2 check seed
-          # NOTE `seed` does not appear to be an argument in
-          # tfp$mcmc$HamiltonianMonteCarlo
-          # seed = rng_seed
         )
       return(
         sampler_kernel
@@ -1051,9 +982,6 @@ rwmh_sampler <- R6Class(
         sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           new_state_fn = new_state_fn
-          # TF1/2 check seed
-          # NOTE `seed` does not appear to be an argument anymore
-          # seed = tfe$rng_seed
         )
       return(
         sampler_kernel
@@ -1098,9 +1026,6 @@ slice_sampler <- R6Class(
           target_log_prob_fn = dag$tf_log_prob_function_adjusted,
           step_size = fl(1),
           max_doublings = slice_max_doublings
-          # TF1/2 check seed
-          # NOTE `seed` does not appear to be an argument anymore
-          # seed = tfe$rng_seed
         )
 
       return(
