@@ -71,15 +71,6 @@
     "a"
     
 
-# numerical issues are handled in mcmc
-
-    Python module tensorflow was not found.
-    
-    Detected Python configuration:
-    
-    
-    
-
 # initials works
 
     initial values must be numeric

@@ -314,7 +314,8 @@ test_that("numerical issues are handled in mcmc", {
   m <- model(alpha)
 
   # running with bursts should error informatively
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     draws <- mcmc(m, verbose = FALSE)
   )
 

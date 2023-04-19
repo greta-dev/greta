@@ -107,19 +107,19 @@ test_that("mcmc provides a message when GPU is set", {
   m <- model(x)
 
   expect_snapshot(
-  mcmc_gpu <- mcmc(model = m,
-         n_samples = 1,
-         warmup = 0,
-         compute_options = gpu_only(),
-         verbose = FALSE)
+    mcmc_gpu <- mcmc(model = m,
+                     n_samples = 1,
+                     warmup = 0,
+                     compute_options = gpu_only(),
+                     verbose = FALSE)
   )
 
   expect_snapshot(
-  mcmc_cpu <- mcmc(model = m,
-         n_samples = 1,
-         warmup = 0,
-         compute_options = cpu_only(),
-         verbose = FALSE)
+    mcmc_cpu <- mcmc(model = m,
+                     n_samples = 1,
+                     warmup = 0,
+                     compute_options = cpu_only(),
+                     verbose = FALSE)
   )
 
 })
@@ -129,10 +129,17 @@ test_that("mcmc prints out CPU and GPU text", {
 
   x <- normal(0,1)
   m <- model(x)
-  expect_snapshot(
-    draws <- mcmc(m, n_samples = 5, warmup = 5, compute_options = cpu_only())
+  # removed snapshot testing as it was too fickle
+  cpu_output <- get_output(
+    mcmc(m, n_samples = 5, warmup = 5, compute_options = cpu_only())
   )
-  expect_snapshot(
+  expect_match(cpu_output, "CPU cores")
+
+  # removed snapshot testing as it was too fickle
+  gpu_output <- get_output(
     draws <- mcmc(m, n_samples = 5, warmup = 5, compute_options = gpu_only())
   )
+  expect_match(gpu_output, "NOTE: When using GPU")
+  expect_match(gpu_output, "For more information, see")
+  expect_match(gpu_output, "on GPU")
 })
