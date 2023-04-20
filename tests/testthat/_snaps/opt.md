@@ -76,5 +76,5 @@
     Detected numerical overflow during optimisation
     Please try one of the following:
     i Using different initial values
-    i Using another optimiser. (E.g., instead of `gradient_descent()`, try `adam()`
+    i Using another optimiser. (E.g., instead of `gradient_descent()`, try `adam()`)
 
