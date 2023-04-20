@@ -1092,6 +1092,24 @@ test_that("Wishart can use a choleskied Sigma", {
   expect_ok(draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE))
 })
 
+test_that("Cholesky factor of Wishart should be an upper triangular matrix", {
+  x <- wishart(df = 4, Sigma = diag(3))
+  chol_x <- chol(x)
+  calc_chol <- calculate(x, chol_x, nsim = 1)
+  expect_equal(dim(calc_chol$chol_x), c(1,3,3))
+  calc_chol_mat <- matrix(calc_chol$chol_x, nrow = 3, ncol = 3)
+  expect_equal(calc_chol_mat[lower.tri(calc_chol_mat)], c(0,0,0))
+})
+
+test_that("Cholesky factor of LJK_correlation should be an upper triangular matrix", {
+  x <- lkj_correlation(eta = 3, dimension = 3)
+  chol_x <- chol(x)
+  calc_chol <- calculate(x, chol_x, nsim = 1)
+  expect_equal(dim(calc_chol$chol_x), c(1,3,3))
+  calc_chol_mat <- matrix(calc_chol$chol_x, nrow = 3, ncol = 3)
+  expect_equal(calc_chol_mat[lower.tri(calc_chol_mat)], c(0,0,0))
+})
+
 test_that("multivariate distribs with matrix params can be sampled from", {
   skip_if_not(check_tf_version())
 
