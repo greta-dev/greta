@@ -157,6 +157,20 @@ tf_optimiser <- R6Class(
             obj_numeric <- objective_unadjusted()$numpy()
           }
 
+          # The objective value can reach numerical overflow, so we error and
+          # suggest changing initial values or changing sampler, e.g., `adam`
+          if (is.infinite(obj_numeric)){
+            cli::cli_abort(
+              c(
+                "Detected numerical overflow during optimisation",
+                "Please try one of the following:",
+                "i" = "Using different initial values",
+                "i" = "Using another optimiser. (E.g., instead of \\
+                {.fun {self$name}}, try {.fun adam}"
+              )
+            )
+          }
+
           self$diff <- abs(self$old_obj - obj_numeric)
           self$old_obj <- obj_numeric
         }

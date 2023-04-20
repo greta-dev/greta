@@ -71,3 +71,10 @@
     Please use a different optimiser.
     See `?optimisers` for more details on which optimizers are removed.
 
+# TF opt with `gradient_descent` fails with bad initial values
+
+    Detected numerical overflow during optimisation
+    Please try one of the following:
+    i Using different initial values
+    i Using another optimiser. (E.g., instead of `gradient_descent()`, try `adam()`
+
