@@ -218,6 +218,7 @@ calculate <- function(
           runif(1)
         }
 
+
         r_seed <- get(".Random.seed", envir = .GlobalEnv)
         on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
         tensorflow::set_random_seed(
@@ -225,6 +226,14 @@ calculate <- function(
           disable_gpu = is_using_cpu(compute_options)
           )
       }
+
+      if (is.null(seed)){
+        tensorflow::set_random_seed(
+          seed = get_seed(),
+          disable_gpu = is_using_cpu(compute_options)
+        )
+      }
+
     }
 
     # set precision
