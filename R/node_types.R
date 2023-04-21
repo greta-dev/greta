@@ -161,6 +161,11 @@ operation_node <- R6Class(
       # if sampling get the distribution constructor and sample this
       if (mode == "sampling") {
         tensor <- dag$draw_sample(self$distribution)
+        if (has_representation(self, "cholesky")) {
+          cholesky_tensor <- tf_chol(tensor)
+          cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
+        }
       }
 
       if (mode == "forward") {

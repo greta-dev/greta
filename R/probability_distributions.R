@@ -1009,14 +1009,15 @@ wishart_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
+    # TF1/2 - consider setting this as NULL for debugging purposes
     # set when defining the distribution
     sigma_is_cholesky = FALSE,
 
+    # TF1/2 - consider setting this as NULL for debugging purposes
     # set when defining the graph
     target_is_cholesky = FALSE,
     initialize = function(df, Sigma) { # nolint
       # add the nodes as parents and parameters
-
       df <- as.greta_array(df)
       sigma <- as.greta_array(Sigma)
 
@@ -1056,7 +1057,6 @@ wishart_distribution <- R6Class(
     # create a variable, and transform to a symmetric matrix (with cholesky
     # factor representation)
     create_target = function(truncation) {
-
       # create cholesky factor variable greta array
       chol_greta_array <- cholesky_variable(self$dim[1])
 
@@ -1085,12 +1085,10 @@ wishart_distribution <- R6Class(
       self$target_is_cholesky <- FALSE
     },
     tf_distrib = function(parameters, dag) {
-
       # this is messy, we want to use the tfp wishart, but can't define the
       # density without expanding the dimension of x
 
       log_prob <- function(x) {
-
         # reshape the dimensions
         df <- tf_flatten(parameters$df)
         sigma <- tf$expand_dims(parameters$sigma, 1L)
@@ -1135,14 +1133,15 @@ wishart_distribution <- R6Class(
         distrib <- tfp$distributions$WishartTriL(
           df = df,
           scale_tril = sigma_chol,
-          input_output_cholesky = FALSE
+          input_output_cholesky = TRUE
         )
 
         draws <- distrib$sample(seed = seed)
 
-        if (self$target_is_cholesky) {
-          draws <- tf_chol(draws)
-        }
+        # if (!self$target_is_cholesky) {
+          # draws <- tf_chol(draws)
+          draws <- tf_chol2symm(draws)
+        # }
 
         draws
       }
