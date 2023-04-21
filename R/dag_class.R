@@ -503,6 +503,8 @@ dag_class <- R6Class(
 
       ga_names <- names(nodes)
 
+      ## TF1/2 retracing
+      ## This is a location where retracting happens in `opt`
       hessian_list <- lapply(X = nodes,
              self$calculate_one_hessian,
              free_state = free_state,

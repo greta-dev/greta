@@ -551,6 +551,9 @@ prepare_draws <- function(draws, thin = 1) {
 
 build_sampler <- function(initial_values, sampler, model, seed = get_seed(),
                           compute_options) {
+  ## TF1/2 retracing
+  ## This is where a retracing warning happens
+  ## in mcmc
   sampler$class$new(initial_values,
                     model,
                     sampler$parameters,
