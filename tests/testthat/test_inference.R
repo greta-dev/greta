@@ -320,7 +320,7 @@ test_that("numerical issues are handled in mcmc", {
   )
 
   # setting one_by_one = TRUE should handle those errors as bad samples
-  expect_ok(draws <- mcmc(m,
+  expect_no_error(draws <- mcmc(m,
     warmup = 100, n_samples = 10,
     one_by_one = TRUE,
     verbose = FALSE
