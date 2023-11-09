@@ -7,7 +7,7 @@
 
     Code
       message_if_using_gpu(gpu_only())
-    Message <simpleMessage>
+    Message
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
       You can turn off this message with:
@@ -22,7 +22,7 @@
 
     Code
       message_if_using_gpu(gpu_only())
-    Message <simpleMessage>
+    Message
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
       You can turn off this message with:
@@ -32,7 +32,7 @@
 
     Code
       calc_x <- calculate(x, nsim = 1, compute_options = gpu_only())
-    Message <simpleMessage>
+    Message
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
       You can turn off this message with:
@@ -58,7 +58,7 @@
 
     Code
       calc_x <- calculate(x, nsim = 1, compute_options = gpu_only())
-    Message <simpleMessage>
+    Message
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
       You can turn off this message with:
@@ -69,7 +69,7 @@
     Code
       mcmc_m <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only(),
       verbose = FALSE)
-    Message <simpleMessage>
+    Message
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
       You can turn off this message with:
@@ -80,7 +80,7 @@
     Code
       mcmc_gpu <- mcmc(model = m, n_samples = 1, warmup = 0, compute_options = gpu_only(),
       verbose = FALSE)
-    Message <simpleMessage>
+    Message
       NOTE: When using GPU, the random number seed may not always be respected (results may not be fully reproducible).
       For more information, see details of the `compute_options` argument in `?calculate`.
       You can turn off this message with:

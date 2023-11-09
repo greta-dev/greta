@@ -22,14 +22,14 @@
     Code
       draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = inits,
         verbose = FALSE)
-    Message <simpleMessage>
+    Message
       only one set of initial values was provided, and was used for all chains
 
 # progress bar gives a range of messages
 
     Code
       draws <- mock_mcmc(1010)
-    Message <message>
+    Message
       
         sampling          1010/1010 | eta:  0s | <1% bad
 
@@ -37,7 +37,7 @@
 
     Code
       draws <- mock_mcmc(500)
-    Message <message>
+    Message
       
         sampling            500/500 | eta:  0s | 2% bad 
 
@@ -45,7 +45,7 @@
 
     Code
       draws <- mock_mcmc(10)
-    Message <message>
+    Message
       
         sampling =========== 10/10 | eta:  0s | 100% bad
       
