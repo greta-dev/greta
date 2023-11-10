@@ -1136,6 +1136,10 @@ wishart_distribution <- R6Class(
           input_output_cholesky = TRUE
         )
 
+        ## TF1/2
+        ## The issue with getting the cholesky part of the Wishart
+        ## isn't happening here,
+        ## This produces something that looks about right
         draws <- distrib$sample(seed = seed)
 
         # if (!self$target_is_cholesky) {
