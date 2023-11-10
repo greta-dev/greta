@@ -489,6 +489,9 @@ calculate_target_tensor_list <- function(
   # create an object in the environment that's a list of these, and sample that
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
+  ## TF1/2 OK so the error with Wishart and cholesky is happening here
+  ## I feel as thought this isn't the "problem" per se, but it is where the
+  ## matrix of 1s is returned. So seems to me we first expose the problem here
   target_tensor_list <- lapply(target_names_list, get, envir = tfe)
   target_tensor_list_array <- lapply(target_tensor_list, as.array)
 
