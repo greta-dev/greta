@@ -202,7 +202,7 @@ operation_node <- R6Class(
         operation <- eval(parse(text = self$operation),
           envir = self$tf_function_env
         )
-
+        # browser()
         tensor <- do.call(operation, tf_args)
       }
 
