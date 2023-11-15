@@ -345,6 +345,7 @@ dag_class <- R6Class(
 
       # define all nodes in the environment and on the graph
       lapply(target_nodes, function(x){
+        # browser()
         x$define_tf(self)
       })
 
