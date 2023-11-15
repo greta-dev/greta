@@ -162,18 +162,15 @@ operation_node <- R6Class(
       if (mode == "sampling") {
         tensor <- dag$draw_sample(self$distribution)
         if (has_representation(self, "cholesky")) {
+          # browser()
           cholesky_tensor <- tf_chol(tensor)
-          cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
-          assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
+          # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          cholesky_node <- get_node(representation(self, "cholesky"))
+          cholesky_tf_name <- dag$tf_name(cholesky_node)
+          assign(cholesky_tf_name, cholesky_tensor, envir = tfe)
           ## TF1/2
-          ## This gives strange/bad behaviour for two reasons
-          ## 1. self$representation should be self$representation**s**
-          ##    But if you do this then you end up with a tensor being passed
-          ##    to dag$tf_name(self$representation$cholesky), which is an error
-          ##    So instead I think it should be
-          ##    dag$tf_name(self)
-          ## 2. This assignment I think is supposed to be passed down to later
-          ##    on in the script, as `cholesky_tf_name` gets overwritten
+          ## This assignment I think is supposed to be passed down to later on
+          ## in the script, as `cholesky_tf_name` gets overwritten
           # cholesky_tf_name <- dag$tf_name(self)
           # tf_name <- cholesky_tf_name
           # tensor <- cholesky_tensor
@@ -199,6 +196,7 @@ operation_node <- R6Class(
         tensor <- do.call(operation, tf_args)
       }
 
+      # browser()
       # assign it in the environment
       assign(tf_name, tensor, envir = dag$tf_environment)
     }

@@ -497,6 +497,7 @@ calculate_target_tensor_list <- function(
   # approaches (in as_tf_function + generate_log_prob_function)
   dag$define_tf()
 
+  # browser()
   # look up the tf names of the target greta arrays (under sampling)
   # create an object in the environment that's a list of these, and sample that
   target_nodes <- lapply(target, get_node)
