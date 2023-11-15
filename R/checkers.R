@@ -939,6 +939,20 @@ check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays, dag) {
   }
 }
 
+check_if_array_is_empty_list <- function(target){
+  if (identical(target, list())) {
+    msg <- cli::format_error(
+      c(
+        "{.fun calculate} requires {.cls greta array}s",
+        "no {.cls greta array}s were provided to {.fun calculate}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
 
 checks_module <- module(
   check_tf_version,
@@ -954,5 +968,7 @@ checks_module <- module(
   check_future_plan,
   check_n_cores,
   check_positive_integer,
+  check_if_array_is_empty_list,
   complex_error
 )
+
