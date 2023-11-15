@@ -165,8 +165,11 @@ calculate <- function(
     # message users about random seeds and GPU usage if they are using GPU
     message_if_using_gpu(compute_options)
 
-    # turn the provided greta arrays into a list and try to find the names
+    # turn the provided greta arrays into a list
     target <- list(...)
+
+    # try to find the names
+    # REFACTOR as: target <- find_and_name_arrays(target)
     names <- names(target)
 
     # see if any names are missing and try to fill them in
@@ -185,18 +188,7 @@ calculate <- function(
 
     # catch empty lists here, since check_greta_arrays assumes data greta arrays
     # have been stripped out
-    if (identical(target, list())) {
-      msg <- cli::format_error(
-        c(
-          "{.fun calculate} requires {.cls greta array}s",
-          "no {.cls greta array}s were provided to {.fun calculate}"
-        )
-      )
-      stop(
-        msg,
-        call. = FALSE
-      )
-    }
+    check_if_array_is_empty_list(target)
 
     # check the inputs
     check_greta_arrays(
@@ -206,7 +198,7 @@ calculate <- function(
     )
 
     # checks and RNG seed setting if we're sampling
-
+    # REFACTOR: check_rng_seed(nim, seed, compute_option)
     if (!is.null(nsim)) {
 
       # check nsim is valid
