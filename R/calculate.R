@@ -427,12 +427,12 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   # TF1/2 check todo
   # need to wrap this in tf_function I think?
   values <- calculate_target_tensor_list(
-    dag,
-    fixed_greta_arrays,
-    values,
-    stochastic,
-    target,
-    nsim
+    dag = dag,
+    fixed_greta_arrays = fixed_greta_arrays,
+    values = values,
+    stochastic = stochastic,
+    target = target,
+    nsim = nsim
   )
 
   return(values)
@@ -469,6 +469,7 @@ calculate_target_tensor_list <- function(
 
   # convert to nodes, and add tensor names to values
   fixed_nodes <- lapply(fixed_greta_arrays, get_node)
+
   value_names <- vapply(fixed_nodes, dag$tf_name, FUN.VALUE = character(1))
 
   tfe <- dag$tf_environment
@@ -504,6 +505,8 @@ calculate_target_tensor_list <- function(
   ## I feel as thought this isn't the "problem" per se, but it is where the
   ## matrix of 1s is returned. So seems to me we first expose the problem here
   target_tensor_list <- lapply(target_names_list, get, envir = tfe)
+  ## It looks like it is getting all_sampling_operation_2 and not
+  ## all_sampling_operation_1
   target_tensor_list_array <- lapply(target_tensor_list, as.array)
 
   return(target_tensor_list_array)
