@@ -226,21 +226,7 @@ variable_node <- R6Class(
                           upper = Inf,
                           dim = NULL,
                           free_dim = prod(dim)) {
-      if (!is.numeric(lower) | !is.numeric(upper)) {
-        msg <- cli::format_error(
-          c(
-            "lower and upper must be numeric",
-            "lower has class: {class(lower)}",
-            "lower has length: {length(lower)}",
-            "upper has class: {class(upper)}",
-            "upper has length: {length(upper)}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_if_lower_upper_numeric(lower, upper)
 
       # replace values of lower and upper with finite values for dimension
       # checking (this is pain, but necessary because check_dims coerces to
@@ -278,30 +264,9 @@ variable_node <- R6Class(
         FALSE
       )
 
-      if (bad_limits) {
-        msg <- cli::format_error(
-          "lower and upper must either be -Inf (lower only), Inf (upper only) \\
-          or finite"
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_if_lower_upper_has_bad_limits(bad_limits)
 
-      if (any(lower >= upper)) {
-        msg <- cli::format_error(
-          c(
-            "upper bounds must be greater than lower bounds",
-            "lower is: {.val {lower}}",
-            "upper is: {.val {upper}}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_if_upper_gt_lower(lower, upper)
 
       # add parameters
       super$initialize(dim)
@@ -330,6 +295,7 @@ variable_node <- R6Class(
       mode <- dag$how_to_define(self)
 
       if (mode == "sampling") {
+        # browser()
         distrib_node <- self$distribution
 
         if (is.null(distrib_node)) {

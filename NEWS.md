@@ -33,6 +33,11 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 * `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.
 * slice sampler no longer needs precision = "single" to work.
 
+## Internals
+
+* Internally we are replacing most of the error handling code as separate 
+  `check_*` functions.
+
 # greta 0.4.3
 
 ## Features
