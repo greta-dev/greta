@@ -1023,6 +1023,53 @@ check_if_array_is_empty_list <- function(target){
   }
 }
 
+check_if_lower_upper_numeric <- function(lower, upper) {
+  if (!is.numeric(lower) | !is.numeric(upper)) {
+    msg <- cli::format_error(
+      c(
+        "lower and upper must be numeric",
+        "lower has class: {class(lower)}",
+        "lower has length: {length(lower)}",
+        "upper has class: {class(upper)}",
+        "upper has length: {length(upper)}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_if_lower_upper_has_bad_limits <- function(bad_limits) {
+  if (bad_limits) {
+    msg <- cli::format_error(
+      "lower and upper must either be -Inf (lower only), Inf (upper only) \\
+          or finite"
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_if_upper_gt_lower <- function(lower, upper) {
+  if (any(lower >= upper)) {
+    msg <- cli::format_error(
+      c(
+        "upper bounds must be greater than lower bounds",
+        "lower is: {.val {lower}}",
+        "upper is: {.val {upper}}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
 checks_module <- module(
   check_tf_version,
   check_dims,
