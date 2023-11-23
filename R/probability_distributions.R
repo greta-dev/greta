@@ -934,41 +934,10 @@ multivariate_normal_distribution <- R6Class(
         dimension = dimension
       )
 
-      # check dimensions of Sigma
-      if (nrow(sigma) != ncol(sigma) |
-        length(dim(sigma)) != 2) {
-        msg <- cli::format_error(
-          c(
-            "{.arg Sigma} must be a square 2D greta array",
-            "However {.arg Sigma} has dimensions \\
-            {.val {paste(dim(sigma), collapse = 'x')}}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_sigma_square_2d_greta_array(sigma)
+      check_mean_sigma_have_same_dimensions(mean, sigma)
 
-      # compare possible dimensions
-      dim_mean <- ncol(mean)
-      dim_sigma <- nrow(sigma)
-
-      if (dim_mean != dim_sigma) {
-        msg <- cli::format_error(
-          c(
-            "{.arg mean} and {.arg Sigma} must have the same dimensions",
-            "However they are different: {dim_mean} vs {dim_sigma}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
-
-      # coerce the parameter arguments to nodes and add as parents and
-      # parameters
+      # coerce parameter arguments to nodes and add as parents and parameters
       super$initialize("multivariate_normal", dim, multivariate = TRUE)
 
       if (has_representation(sigma, "cholesky")) {
@@ -1022,20 +991,7 @@ wishart_distribution <- R6Class(
       sigma <- as.greta_array(Sigma)
 
       # check dimensions of Sigma
-      if (nrow(sigma) != ncol(sigma) |
-        length(dim(sigma)) != 2) {
-        msg <- cli::format_error(
-          c(
-            "{.arg Sigma} must be a square 2D greta array",
-            "However, {.arg Sigma} has dimensions ",
-            "{.val {paste(dim(sigma), collapse = 'x')}}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_sigma_square_2d_greta_array(sigma)
 
       dim <- nrow(sigma)
 
@@ -1134,6 +1090,10 @@ wishart_distribution <- R6Class(
           df = df,
           scale_tril = sigma_chol,
           input_output_cholesky = TRUE
+          ## TF1/2 could potentially flip to TRUE, then at
+          ## target_is_cholesky check below we could use tf_chol2symm
+          ## instead of tf_chol, as this should be more efficient
+          # input_output_cholesky = FALSE
         )
 
         ## TF1/2
@@ -1144,8 +1104,12 @@ wishart_distribution <- R6Class(
 
         # if (!self$target_is_cholesky) {
           # draws <- tf_chol(draws)
-          draws <- tf_chol2symm(draws)
+          # draws <- tf_chol2symm(draws)
         # }
+        ## TF1/2 - as above, this would need to be !self$target_is_cholesky
+        if (self$target_is_cholesky) {
+          draws <- tf_chol(draws)
+        }
 
         draws
       }
@@ -1247,7 +1211,7 @@ lkj_correlation_distribution <- R6Class(
       )
 
       # tfp's lkj sampling can't detect the size of the output from eta, for
-      # some reason. But we can use map_fun to apply their simulation to each
+      # some reason. But we can use map_fn to apply their simulation to each
       # element of eta.
       sample <- function(seed) {
         sample_once <- function(eta) {

@@ -1,0 +1,42 @@
+%conditions%            Control whether standard output should be
+                        captured or not
+%globals%               Specify globals and packages for a future
+                        assignment
+%label%                 Specify label for a future assignment
+%lazy%                  Control lazy / eager evaluation for a future
+                        assignment
+%plan%                  Use a specific plan for a future assignment
+%seed%                  Set random seed for future assignment
+%stdout%                Control whether standard output should be
+                        captured or not
+%tweak%                 Temporarily tweaks the arguments of the current
+                        strategy
+backtrace               Back trace the expressions evaluated when an
+                        error was caught
+cluster                 Create a cluster future whose value will be
+                        resolved asynchronously in a parallel process
+clusterExportSticky     Export globals to the sticky-globals
+                        environment of the cluster nodes
+future                  Create a future
+future.options          Options used for futures
+futureOf                Get the future of a future variable
+futureSessionInfo       Get future-specific session information and
+                        validate current backend
+futures                 Get all futures in a container
+multicore               Create a multicore future whose value will be
+                        resolved asynchronously in a forked parallel
+                        process
+multisession            Create a multisession future whose value will
+                        be resolved asynchronously in a parallel R
+                        session
+nbrOfWorkers            Get the number of workers available
+plan                    Plan how to resolve a future
+re-exports              Functions Moved to 'parallelly'
+resolve                 Resolve one or more futures synchronously
+resolved                Check whether a future is resolved or not
+sequential              Create a sequential future whose value will be
+                        in the current R session
+tweak                   Tweak a future function by adjusting its
+                        default arguments
+value                   The value of a future or the values of all
+                        elements in a container

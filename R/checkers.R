@@ -214,6 +214,75 @@ check_square <- function(x) {
   }
 }
 
+check_sigma_square_2d_greta_array <- function(sigma){
+  # check dimensions of Sigma
+  if (nrow(sigma) != ncol(sigma) | length(dim(sigma)) != 2) {
+    msg <- cli::format_error(
+      c(
+        "{.arg Sigma} must be a square 2D greta array",
+        "However, {.arg Sigma} has dimensions \\
+            {.val {paste(dim(sigma), collapse = 'x')}}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_mean_sigma_have_same_dimensions <- function(mean, sigma) {
+  dim_mean <- ncol(mean)
+  dim_sigma <- nrow(sigma)
+
+  if (dim_mean != dim_sigma) {
+    msg <- cli::format_error(
+      c(
+        "{.arg mean} and {.arg Sigma} must have the same dimensions",
+        "However they are different: {dim_mean} vs {dim_sigma}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_chol2symm_square_symmetric_upper_tri_matrix <- function(x) {
+  dim <- dim(x)
+  if (length(dim) != 2 || dim[1] != dim[2]) {
+    msg <- cli::format_error(
+      c(
+        "{.fun chol2symm} must have square symmetric matrix, assumed to be \\
+        upper triangular",
+        "{.code dim(x)} returns: {dim(x)}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_chol2symm_2d_square_upper_tri_greta_array <- function(x) {
+  dim <- dim(x)
+  if (length(dim) != 2 || dim[1] != dim[2]) {
+    msg <- cli::format_error(
+      c(
+        "{.fun chol2symm} must have two-dimensional, square, upper-triangular \\
+        {.cls greta_array}s",
+        "{.code dim(x)} returns: {dim(x)}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
 # given lists of greta arrays for the vector and scalar parameters (can be
 # matrices and column vectors, respectively, where number of rows implies the
 # number of realisations) and an optional target number of realisations, error

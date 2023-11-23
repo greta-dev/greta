@@ -1,0 +1,30 @@
+as_data                 convert other objects to greta arrays
+calculate               calculate greta arrays given fixed values
+chol2symm               Cholesky Factor to Symmetric Matrix
+distribution            define a distribution over data
+distributions           probability distributions
+extract-replace-combine
+                        extract, replace and combine greta arrays
+functions               functions for greta arrays
+greta                   greta: simple and scalable statistical
+                        modelling in R
+greta_notes_install_miniconda_output
+                        Retrieve python installation or error details.
+greta_sitrep            Greta Situation Report
+inference               Statistical inference on greta models.
+install_greta_deps      Install Python dependencies for greta
+internals               internal greta methods
+joint                   define joint distributions
+mixture                 mixtures of probability distributions
+model                   greta model objects
+operators               arithmetic, logical and relational operators
+                        for greta arrays
+optimisers              optimisation methods
+overloaded              Functions overloaded by greta
+reinstallers            Helpers to remove, and reinstall python
+                        environments and miniconda
+samplers                MCMC samplers
+simulate.greta_model    Simulate Responses From 'greta_model' Object
+structures              create data greta arrays
+transforms              transformation functions for greta arrays
+variable                create greta variables

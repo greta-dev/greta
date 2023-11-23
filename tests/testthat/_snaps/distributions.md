@@ -60,14 +60,12 @@
 # wishart distribution errors informatively
 
     `Sigma` must be a square 2D greta array
-    However, `Sigma` has dimensions
-    "3x3x3"
+    However, `Sigma` has dimensions "3x3x3"
 
 ---
 
     `Sigma` must be a square 2D greta array
-    However, `Sigma` has dimensions
-    "3x2"
+    However, `Sigma` has dimensions "3x2"
 
 # lkj_correlation distribution errors informatively
 

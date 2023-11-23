@@ -1,0 +1,30 @@
+### Logistic regression with error term
+
+This is an example of a simple logistic regression with an extra observation-level error term, to model over-dispersion or clustering in occupancy data from multiple visits.
+
+#### data
+```{r data_logistic_error_term_greta, highlight = FALSE}
+# make fake data
+n_env <- 3
+n_sites <- 20
+n_obs <- 5
+
+# n_sites x n_env matrix of environmental variables
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
+# n_sites observations of species presence or absence over n_obs visits
+occupancy <- rbinom(n_sites, n_obs, 0.5)
+```
+
+#### greta code
+```{r logistic_error_term_greta}
+alpha <- normal(0, 10)
+beta <- normal(0, 10, dim = n_env)
+error <- normal(0, 10, dim = n_sites)
+
+# logit-linear model with extra variation
+linear_predictor <- alpha + env %*% beta + error
+p <- ilogit(linear_predictor)
+
+# distribution (likelihood) over observed values
+distribution(occupancy) <- binomial(n_obs, p)
+```

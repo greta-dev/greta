@@ -1,0 +1,77 @@
+### Cormack-Jolly-Seber model
+
+*Cormack-Jolly-Seber* (CJS) models estimate probabilities of survival and recapture from mark-recapture data. These models assume that we can only ever see individuals that have been initially marked and released or recaptured following release (i.e. individuals do not exist until first observed). The two key parameters are survival, $\phi$, and probability of recapture, $p$. There is an additional derived parameter, $\chi$, which is the probability that an individual is not recaptured following its final capture. $\chi$ marginalises over multiple scenarios in which the individual is not observed either because it has died or because it is alive but not detected.
+
+The [introductory book](http://www.phidot.org/software/mark/docs/book/) to the program MARK has a lot of information on mark-recapture models, including CJS models (starting in Ch. 1) and the broader class of Jolly-Seber models (Ch. 12). There is also a section on mark-recapture models in the [Stan language manual](https://mc-stan.org/users/documentation/), which goes through the derivation of the parameter $\chi$.
+
+#### data
+<div class="data">
+```{r cjs_data, highlight = FALSE}
+n_obs <- 100
+n_time <- 20
+y <- matrix(sample(c(0, 1), size = (n_obs * n_time), replace = TRUE),
+            ncol = n_time)
+```
+</div>
+
+#### greta code
+```{r cjs_greta}
+# data summaries
+first_obs <- apply(y, 1, function(x) min(which(x > 0)))
+final_obs <- apply(y, 1, function(x) max(which(x > 0)))
+obs_id <- apply(y, 1, function(x) seq(min(which(x > 0)), max(which(x > 0)), by = 1)[-1])
+obs_id <- unlist(obs_id)
+capture_vec <- apply(y, 1, function(x) x[min(which(x > 0)):max(which(x > 0))][-1])
+capture_vec <- unlist(capture_vec)
+
+# priors
+phi <- beta(1, 1, dim = n_time)
+p <- beta(1, 1, dim = n_time)
+
+# derived parameter
+chi <- ones(n_time)
+for (i in seq_len(n_time - 1)) {
+  tn <- n_time - i
+  chi[tn] <- (1 - phi[tn]) + phi[tn] * (1 - p[tn + 1]) * chi[tn + 1]
+}
+
+# dummy variables
+alive_data <- ones(length(obs_id))            # definitely alive
+not_seen_last <- final_obs != 20              # ignore observations in last timestep
+final_observation <- ones(sum(not_seen_last)) # final observation
+
+# set likelihoods
+distribution(alive_data) <- bernoulli(phi[obs_id - 1])
+distribution(capture_vec) <- bernoulli(p[obs_id])
+distribution(final_observation) <- bernoulli(chi[final_obs[not_seen_last]])
+```
+
+#### BUGS/JAGS code
+<div class="bugs">
+```
+model {
+  # priors
+  for (t in 1:(n_time - 1)) {
+    phi[t] ~ dunif(0, 1)
+    p[t] ~ dunif(0, 1)
+  }
+  # likelihood
+  for (i in 1:n_obs) {
+    z[i, first_obs[i]] <- 1   # state at first capture must be 1!
+    for (t in (first_obs[i] + 1):n_time) {
+      mu1[i, t] <- phi[t - 1] * z[i, t - 1] 
+      z[i, t] ~ dbern(mu1[i, t])   # true state
+      mu2[i, t] <- p[t - 1] * z[i, t]
+      y[i, t] ~ dbern(mu2[i, t])      # observed state
+    }
+  }
+}
+```
+</div>
+
+#### Stan code
+<div class="stan">
+```{r cjs_stan, echo = FALSE}
+cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/master/misc/ecology/mark-recapture/cjs-K.stan'), sep = '\n')
+```
+</div>

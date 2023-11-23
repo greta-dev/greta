@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>A Future for R: Controlling Default Future Strategy</title>
+<style type="text/css">
+/**
+ * Prism.s theme ported from highlight.js's xcode style
+ */
+pre code {
+  padding: 1em;
+}
+.token.comment {
+  color: #007400;
+}
+.token.punctuation {
+  color: #999;
+}
+.token.tag,
+.token.selector {
+  color: #aa0d91;
+}
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+  color: #1c00cf;
+}
+.token.property,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+  color: #c41a16;
+}
+.token.inserted {
+  background-color: #ccffd8;
+}
+.token.deleted {
+  background-color: #ffebe9;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #9a6e3a;
+}
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #836c28;
+}
+.token.function,
+.token.class-name {
+  color: #DD4A68;
+}
+.token.regex,
+.token.important,
+.token.variable {
+  color: #5c2699;
+}
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+</style>
+<style type="text/css">
+body {
+  font-family: sans-serif;
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+body, .footnotes, code { font-size: .9em; }
+li li { font-size: .95em; }
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+pre, img { max-width: 100%; }
+pre, pre:hover {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+pre code {
+  display: block;
+  overflow-x: auto;
+}
+code { font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace; }
+:not(pre) > code, code[class] { background-color: #F8F8F8; }
+code.language-undefined, pre > code:not([class]) {
+  background-color: inherit;
+  border: 1px solid #eee;
+}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+blockquote {
+  color: #666;
+  margin: 0;
+  padding-left: 1em;
+  border-left: 0.5em solid #eee;
+}
+hr, .footnotes::before { border: 1px dashed #ddd; }
+.frontmatter { text-align: center; }
+#TOC .numbered li { list-style: none; }
+#TOC .numbered { padding-left: 0; }
+#TOC .numbered ul { padding-left: 1em; }
+table, .body h2 { border-bottom: 1px solid #666; }
+.body .appendix, .appendix ~ h2 { border-bottom-style: dashed; }
+.footnote-ref a::before { content: "["; }
+.footnote-ref a::after { content: "]"; }
+section.footnotes::before {
+  content: "";
+  display: block;
+  max-width: 20em;
+}
+
+@media print {
+  body {
+    font-size: 12pt;
+    max-width: 100%;
+  }
+  tr, img { page-break-inside: avoid; }
+}
+@media only screen and (min-width: 992px) {
+  pre { white-space: pre; }
+}
+</style>
+<meta name="keywords" content="R, package, vignette, future, promise">
+<meta name="author" content="Henrik Bengtsson">
+</head>
+<body>
+<div class="frontmatter">
+<div class="title"><h1>A Future for R: Controlling Default Future Strategy</h1></div>
+<div class="author"><h2></h2></div>
+<div class="date"><h3></h3></div>
+</div>
+<div class="body">
+<h1 id="a-future-for-r-controlling-default-future-strategy">A Future for R: Controlling Default Future Strategy</h1>
+<p>The default is to use synchronous futures, but this <em>default</em> can be overridden via R options, system environment variables and command-line options as explained below as well as in <code>help(&quot;future.options&quot;, package = &quot;future&quot;)</code>.</p>
+<h2 id="r-options">R options</h2>
+<p>The default strategy for resolving futures can be controlled via R option <code>future.plan</code>.  For instance, if we add</p>
+<pre><code class="language-r">options(future.plan = &quot;multisession&quot;)
+</code></pre>
+<p>to our <code>~/.Rprofile</code> startup script, the future package will resolve futures in parallel (asynchronously using all available cores), i.e.</p>
+<pre><code class="language-sh">$ Rscript -e &quot;class(future::plan())&quot;
+[1] &quot;multisession&quot; &quot;future&quot;       &quot;function&quot;
+</code></pre>
+<p>Option <code>future.plan</code> is ignored if command-line option <code>--parallel</code> (<code>-p</code>) is specified.</p>
+<h2 id="environment-variables">Environment variables</h2>
+<p>An alternative to using <code>options()</code> for setting option <code>future.plan</code> is to specify system environment variable <code>R_FUTURE_PLAN</code>.  If set, then the future package will set <code>future.plan</code> accordingly <em>when loaded</em>.  For example,</p>
+<pre><code class="language-sh">$ export R_FUTURE_PLAN=multisession
+$ Rscript -e &quot;class(future::plan())&quot;
+[1] &quot;multisession&quot; &quot;future&quot;       &quot;function&quot;
+</code></pre>
+<p>Environment variable <code>R_FUTURE_PLAN</code> is ignored if either option <code>future.plan</code> or command-line option <code>--parallel</code> (<code>-p</code>) is specified.</p>
+<h2 id="command-line-options">Command-line options</h2>
+<p>When loaded, the future package checks for the command-line option <code>--parallel=ncores</code> (short <code>-p ncores</code>) and sets the future strategy (via option <code>future.plan</code>) and the number of available cores (via option <code>mc.cores</code>) accordingly.  This provides a convenient mechanism for specifying parallel future processing from the command line.  For example, if we start R with</p>
+<pre><code class="language-sh">$ R --quiet --args --parallel=2
+</code></pre>
+<p>then future will interpret this as we wish to resolve futures in parallel using 2 cores.  More specifically, we get that</p>
+<pre><code class="language-r">&gt; availableCores()
+mc.cores
+       2
+&gt; class(future::plan())
+[1] &quot;FutureStrategy&quot; &quot;tweaked&quot;        &quot;multisession&quot;   &quot;future&quot;         &quot;function&quot;
+</code></pre>
+<p>We can use this command-line option also with <code>Rscript</code>, which provides a convenient mechanism for launching future-enhanced R scripts such that they run in parallel, e.g.</p>
+<pre><code class="language-sh">$ Rscript analysis.R --parallel=4
+</code></pre>
+<p>This does, of course, require that the script uses futures and the future package.</p>
+<p>If <code>--parallel=1</code> is specified, or equivalently <code>-p 1</code>, then futures are resolved using a single process.</p>
+<p>Specifying these command-line options override any other startup settings.</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+</body>
+</html>
