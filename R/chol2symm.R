@@ -25,20 +25,8 @@ chol2symm <- function(x) {
 
 #' @export
 chol2symm.default <- function(x) {
-  dim <- dim(x)
-  if (length(dim) != 2 || dim[1] != dim[2]) {
-    msg <- cli::format_error(
-      c(
-        "{.fun chol2symm} must have square symmetric matrix, assumed to be \\
-        upper triangular",
-        "{.code dim(x)} returns: {dim(x)}"
-      )
-    )
-    stop(
-      msg,
-      call. = FALSE
-    )
-  }
+
+  check_chol2symm_square_symmetric_upper_tri_matrix(x)
 
   t(x) %*% x
 }
@@ -46,20 +34,8 @@ chol2symm.default <- function(x) {
 #' @export
 chol2symm.greta_array <- function(x) {
   x <- as.greta_array(x)
-  dim <- dim(x)
-  if (length(dim) != 2 || dim[1] != dim[2]) {
-    msg <- cli::format_error(
-      c(
-        "{.fun chol2symm} must have two-dimensional, square, upper-triangular \\
-        {.cls greta_array}s",
-        "{.code dim(x)} returns: {dim(x)}"
-      )
-    )
-    stop(
-      msg,
-      call. = FALSE
-    )
-  }
+
+  check_chol2symm_2d_square_upper_tri_greta_array(x)
 
   # sum the elements
   op("chol2symm", x,
