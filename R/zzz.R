@@ -1,5 +1,6 @@
 # load tf probability
 tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
+tf <- reticulate::import("tensorflow", delay_load = TRUE)
 
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname) { # nolint

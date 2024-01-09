@@ -28,9 +28,9 @@ There are four functions:
 }
 \details{
 \itemize{
-\item \code{remove_greta_env()} removes the 'greta-env' conda environment
+\item \code{remove_greta_env()} removes the 'greta-env-tf2' conda environment
 \item \code{remove_miniconda()} removes miniconda installation
-\item \code{reinstall_greta_env()} remove 'greta-env' and reinstall it using \code{greta_create_conda_env()} (which is used internally).
+\item \code{reinstall_greta_env()} remove 'greta-env-tf2' and reinstall it using \code{greta_create_conda_env()} (which is used internally).
 \item \code{reinstall_miniconda()} removes miniconda and reinstalls it using \code{greta_install_miniconda()} (which is used internally)
 }
 }

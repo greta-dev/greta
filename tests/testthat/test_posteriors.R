@@ -1,3 +1,4 @@
+# Sys.setenv("RELEASE_CANDIDATE" = "true")
 test_that("posterior is correct (binomial)", {
   skip_if_not(check_tf_version())
 
@@ -54,6 +55,7 @@ test_that("samplers are unbiased for chi-squared", {
   check_samples(x, iid)
 })
 
+## TF1/2 this sampler fails
 test_that("samplers are unbiased for standard uniform", {
   skip_if_not(check_tf_version())
 

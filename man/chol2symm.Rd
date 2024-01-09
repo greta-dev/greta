@@ -18,7 +18,10 @@ matrix. I.e. it is the inverse of \code{chol}.
 \examples{
 # a symmetric, positive definite square matrix
 y <- rWishart(1, 4, diag(3))[, , 1]
+y
 u <- chol(y)
+u
+chol2symm(u)
 identical(y, chol2symm(u))
 identical(chol2symm(u), t(u) \%*\% u)
 \dontrun{

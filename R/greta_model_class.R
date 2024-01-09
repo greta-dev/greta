@@ -55,6 +55,9 @@ model <- function(...,
   check_tf_version("error")
 
   # get the floating point precision
+  # TODO
+  # what does it choose as default if both double and single are listed
+  # as default?
   tf_float <- switch(match.arg(precision),
     double = "float64",
     single = "float32"
@@ -79,6 +82,9 @@ model <- function(...,
   target_greta_arrays <- check_greta_arrays(target_greta_arrays, "model")
 
   # get the dag containing the target nodes
+  # TF1/2 check
+  # I don't think we need to use the `compile` flag in TF2 anymore
+  # Well, it will be passed onto the tf_function creation step
   dag <- dag_class$new(target_greta_arrays,
     tf_float = tf_float,
     compile = compile
@@ -172,7 +178,7 @@ model <- function(...,
   }
 
   # define the TF graph
-  dag$define_tf()
+  # dag$define_tf()
 
   # create the model object and add details
   model <- as.greta_model(dag)

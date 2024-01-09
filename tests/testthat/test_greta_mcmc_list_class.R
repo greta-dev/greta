@@ -1,12 +1,7 @@
-if (check_tf_version()) {
-  tensorflow::tf$compat$v1$reset_default_graph()
-}
-
 set.seed(2020 - 02 - 11)
 
 test_that("draws and raw draws should have the right iteration numbering", {
   skip_if_not(check_tf_version())
-
 
   samples <- 1000
   warmup <- 100
@@ -35,7 +30,6 @@ test_that("draws and raw draws should have the right iteration numbering", {
 
 test_that("window works", {
   skip_if_not(check_tf_version())
-
 
   z <- normal(0, 1)
   m <- model(z)
@@ -72,7 +66,6 @@ test_that("window works", {
 
 test_that("windowing does not have spooky effects", {
   skip_if_not(check_tf_version())
-
 
   chains <- 4
   samples <- 100

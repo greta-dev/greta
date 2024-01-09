@@ -168,8 +168,7 @@ node <- R6Class(
       tf_name %in% ls(dag$tf_environment)
     },
 
-    # define this and all descendent objects on tensorflow graph in environment
-    # env
+    # define this and all descendent objects on TF graph in environment
     define_tf = function(dag) {
 
       # if defined already, skip
@@ -180,16 +179,19 @@ node <- R6Class(
           function(x) x$defined(dag),
           FUN.VALUE = FALSE
         )
-
         if (any(!parents_defined)) {
           parents <- self$list_parents(dag)
           lapply(
             parents[which(!parents_defined)],
-            function(x) x$define_tf(dag)
+            function(x){
+              # browser()
+              x$define_tf(dag)
+            }
           )
         }
 
         # then define self
+          # stop("hi from the future ... parents are of class:", str(parents))
         self$tf(dag)
       }
     },

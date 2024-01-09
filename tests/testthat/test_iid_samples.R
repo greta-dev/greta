@@ -1,12 +1,7 @@
-if (check_tf_version()) {
-  tensorflow::tf$compat$v1$reset_default_graph()
-}
-
 set.seed(2020 - 02 - 11)
 
 test_that("univariate samples are correct", {
   skip_if_not(check_tf_version())
-
 
   compare_iid_samples(uniform,
     runif,
@@ -41,7 +36,8 @@ test_that("univariate samples are correct", {
 
   compare_iid_samples(negative_binomial,
     rnbinom,
-    parameters = list(size = 12, prob = 0.3)
+    parameters = list(size = 12, prob = 0.3),
+    nsim = 1000
   )
 
   compare_iid_samples(poisson,
@@ -113,7 +109,6 @@ test_that("univariate samples are correct", {
 test_that("truncated univariate samples are correct", {
   skip_if_not(check_tf_version())
 
-
   # an originally unconstrained distribution
 
   # positive
@@ -170,7 +165,6 @@ test_that("truncated univariate samples are correct", {
 test_that("multivariate samples are correct", {
   skip_if_not(check_tf_version())
 
-
   sigma <- rwish(1, 5, diag(4))[1, , ]
   prob <- t(runif(4))
   prob <- prob / sum(prob)
@@ -214,7 +208,6 @@ test_that("multivariate samples are correct", {
 test_that("joint samples are correct", {
   skip_if_not(check_tf_version())
 
-
   # joint of normal distributions
   params <- list(
     list(mean = 0, sd = 1),
@@ -241,7 +234,6 @@ test_that("joint samples are correct", {
 
 test_that("mixture samples are correct", {
   skip_if_not(check_tf_version())
-
 
   # mixture of normal distributions
   weights <- runif(3)
@@ -288,11 +280,8 @@ test_that("mixture samples are correct", {
 })
 
 test_that("distributions without RNG error nicely", {
-
   # (move these into other tests as they get implemented)
-
   skip_if_not(check_tf_version())
-
 
   # univariate
   expect_snapshot_error(

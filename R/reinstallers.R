@@ -3,9 +3,9 @@
 #' This can be useful when debugging greta installation to get to "clean slate".
 #'   There are four functions:
 #'
-#'   - `remove_greta_env()` removes the 'greta-env' conda environment
+#'   - `remove_greta_env()` removes the 'greta-env-tf2' conda environment
 #'   - `remove_miniconda()` removes miniconda installation
-#'   - `reinstall_greta_env()` remove 'greta-env' and reinstall it using `greta_create_conda_env()` (which is used internally).
+#'   - `reinstall_greta_env()` remove 'greta-env-tf2' and reinstall it using `greta_create_conda_env()` (which is used internally).
 #'   - `reinstall_miniconda()` removes miniconda and reinstalls it using `greta_install_miniconda()` (which is used internally)
 #'
 #' @return invisible
@@ -20,11 +20,11 @@
 #' reinstall_miniconda()
 #' }
 remove_greta_env <- function(){
-  cli::cli_alert_info("removing 'greta-env' conda environment")
+  cli::cli_alert_info("removing 'greta-env-tf2' conda environment")
       reticulate::conda_remove(
-        envname = "greta-env"
+        envname = "greta-env-tf2"
       )
-  cli::cli_alert_success("greta-env environment removed!")
+  cli::cli_alert_success("greta-env-tf2 environment removed!")
 }
 
 #' @export

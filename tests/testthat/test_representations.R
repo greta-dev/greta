@@ -1,7 +1,6 @@
 test_that("log and exp function representations work", {
   skip_if_not(check_tf_version())
 
-
   # get log and exp pairs as greta data
   n <- 100
   x <- rnorm(n)

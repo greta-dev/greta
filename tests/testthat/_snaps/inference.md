@@ -1,76 +1,3 @@
-# opt converges with SciPy optimisers
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
----
-
-    Code
-      o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
-      This optimiser is deprecated and will be removed in greta 0.4.0.
-      Please use a different optimiser.
-
-# greta arrays passed into mcmc fail appropriately
-
-    MCMC requires input to be a <greta_model> not a <greta_array>
-    x `x` is a <greta_array> not a <greta_model>
-    i You can convert `x` into a <greta_model> by running:
-    `model(x)`
-
 # bad mcmc proposals are rejected
 
     The log density could not be evaluated at these initial values
@@ -93,99 +20,16 @@
 ---
 
     Code
-      mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = inits,
+      draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = inits,
         verbose = FALSE)
-    Message <simpleMessage>
+    Message
       only one set of initial values was provided, and was used for all chains
-    Output
-      $`11`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-                 z
-      1  0.3742083
-      2  0.3742083
-      3  0.3742083
-      4  0.3742083
-      5  0.3742083
-      6  0.3742083
-      7  0.3742083
-      8  0.3742083
-      9  0.3742083
-      10 0.3742083
-      
-      $`12`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-                  z
-      1  0.04036782
-      2  0.04036782
-      3  0.04036782
-      4  0.04036782
-      5  0.04036782
-      6  0.04036782
-      7  0.04036782
-      8  0.04036782
-      9  0.04036782
-      10 0.04036782
-      
-      attr(,"class")
-      [1] "greta_mcmc_list" "mcmc.list"      
-      attr(,"model_info")
-      attr(,"model_info")$raw_draws
-      $`11`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-             draws
-      1  0.3742083
-      2  0.3742083
-      3  0.3742083
-      4  0.3742083
-      5  0.3742083
-      6  0.3742083
-      7  0.3742083
-      8  0.3742083
-      9  0.3742083
-      10 0.3742083
-      
-      $`12`
-      Markov Chain Monte Carlo (MCMC) output:
-      Start = 1 
-      End = 10 
-      Thinning interval = 1 
-              draws
-      1  0.04036782
-      2  0.04036782
-      3  0.04036782
-      4  0.04036782
-      5  0.04036782
-      6  0.04036782
-      7  0.04036782
-      8  0.04036782
-      9  0.04036782
-      10 0.04036782
-      
-      attr(,"class")
-      [1] "mcmc.list"
-      
-      attr(,"model_info")$samplers
-      attr(,"model_info")$samplers$`1`
-      hmc_sampler object with parameters:
-        Lmin = 5, Lmax = 10, epsilon = 0.7326749, diag_sd = 1
-      
-      attr(,"model_info")$model
-      greta model
 
 # progress bar gives a range of messages
 
     Code
       draws <- mock_mcmc(1010)
-    Message <message>
+    Message
       
         sampling          1010/1010 | eta:  0s | <1% bad
 
@@ -193,7 +37,7 @@
 
     Code
       draws <- mock_mcmc(500)
-    Message <message>
+    Message
       
         sampling            500/500 | eta:  0s | 2% bad 
 
@@ -201,7 +45,7 @@
 
     Code
       draws <- mock_mcmc(10)
-    Message <message>
+    Message
       
         sampling =========== 10/10 | eta:  0s | 100% bad
       
@@ -226,27 +70,6 @@
     The following object passed to `model()` is not a <greta array>:
     "a"
     
-
-# mcmc doesn't support slice sampler with double precision models
-
-    slice sampler can only currently be used for models defined with single precision
-    set `model(..., precision = 'single')` instead
-
-# numerical issues are handled in mcmc
-
-    TensorFlow hit a numerical problem that caused it to error
-    greta can handle these as bad proposals if you rerun `mcmc()` with the argument `one_by_one = TRUE`.
-    This will slow down the sampler slightly.
-    The error encountered can be recovered and viewed with:
-    `greta_notes_tf_num_error()`
-
-# mcmc errors for invalid parallel plans
-
-    parallel mcmc samplers cannot be run with `plan(multicore)`
-
----
-
-    parallel mcmc samplers cannot be run with a fork cluster
 
 # initials works
 

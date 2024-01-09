@@ -22,7 +22,7 @@
 
     Code
       check_tf_version("message")
-    Message <simpleMessage>
+    Message
       We have detected that you do not have the expected python packages setup.
       You can set these up by running this R code in the console:
       `install_greta_deps()`
@@ -72,5 +72,6 @@
 
 # cleanly() handles TF errors nicely
 
-    Fetchez la vache!
+    greta hit a tensorflow error:
+    Error in other_stop(): Fetchez la vache!
 

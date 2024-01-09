@@ -24,22 +24,6 @@ check_tf_version <- function(alert = c("none",
 
   alert <- match.arg(alert)
 
-  if (is_mac_arm64()) {
-
-    msg <-  cli::format_message(
-      c(
-        "{.pkg greta} does not currently work with Apple Silicon (M1)",
-        "We are working on getting this resolved ASAP, see {.url https://github.com/greta-dev/greta/issues/458} for current progress."
-      )
-    )
-
-    message(
-      msg,
-      call. = FALSE
-    )
-
-  }
-
   if (!greta_stash$python_has_been_initialised) {
 
     cli_process_start(
@@ -230,6 +214,75 @@ check_square <- function(x) {
   }
 }
 
+check_sigma_square_2d_greta_array <- function(sigma){
+  # check dimensions of Sigma
+  if (nrow(sigma) != ncol(sigma) | length(dim(sigma)) != 2) {
+    msg <- cli::format_error(
+      c(
+        "{.arg Sigma} must be a square 2D greta array",
+        "However, {.arg Sigma} has dimensions \\
+            {.val {paste(dim(sigma), collapse = 'x')}}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_mean_sigma_have_same_dimensions <- function(mean, sigma) {
+  dim_mean <- ncol(mean)
+  dim_sigma <- nrow(sigma)
+
+  if (dim_mean != dim_sigma) {
+    msg <- cli::format_error(
+      c(
+        "{.arg mean} and {.arg Sigma} must have the same dimensions",
+        "However they are different: {dim_mean} vs {dim_sigma}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_chol2symm_square_symmetric_upper_tri_matrix <- function(x) {
+  dim <- dim(x)
+  if (length(dim) != 2 || dim[1] != dim[2]) {
+    msg <- cli::format_error(
+      c(
+        "{.fun chol2symm} must have square symmetric matrix, assumed to be \\
+        upper triangular",
+        "{.code dim(x)} returns: {dim(x)}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_chol2symm_2d_square_upper_tri_greta_array <- function(x) {
+  dim <- dim(x)
+  if (length(dim) != 2 || dim[1] != dim[2]) {
+    msg <- cli::format_error(
+      c(
+        "{.fun chol2symm} must have two-dimensional, square, upper-triangular \\
+        {.cls greta_array}s",
+        "{.code dim(x)} returns: {dim(x)}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
 # given lists of greta arrays for the vector and scalar parameters (can be
 # matrices and column vectors, respectively, where number of rows implies the
 # number of realisations) and an optional target number of realisations, error
@@ -280,10 +333,10 @@ check_n_realisations <- function(vectors = list(),
           "{.code n_realisations is not a positive scalar interger}",
           "{.code n_realisations} must be a positive scalar integer giving \\
             the number of rows of the output",
-          "x" = "We see {.code n_realisations} = {.code {n_realisations}} \\
+          "x" = "We see {.code n_realisations} = {.code {target}} \\
             having class: \\
-            {.cls {class(n_realisations)}} and length \\
-            {.var {length(n_realisations)}}"
+            {.cls {class(target)}} and length \\
+            {.var {length(target)}}"
         )
       )
       stop(
@@ -908,7 +961,114 @@ Conj.greta_array <- complex_error
 #' @export
 Mod.greta_array <- complex_error
 
+check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays, dag) {
+  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
+  # check there are no variables without distributions (or whose children have
+  # distributions - for lkj & wishart) that aren't given fixed values
+  variables <- dag$node_list[dag$node_types == "variable"]
+  have_distributions <- vapply(
+    variables,
+    has_distribution,
+    FUN.VALUE = logical(1)
+  )
+  any_child_has_distribution <- function(variable) {
+    have_distributions <- vapply(
+      variable$children,
+      has_distribution,
+      FUN.VALUE = logical(1)
+    )
+    any(have_distributions)
+  }
+  children_have_distributions <- vapply(
+    variables,
+    any_child_has_distribution,
+    FUN.VALUE = logical(1)
+  )
 
+  unsampleable <- !have_distributions & !children_have_distributions
+  fixed_node_names <- vapply(
+    fixed_nodes,
+    member,
+    "unique_name",
+    FUN.VALUE = character(1)
+  )
+  unfixed <- !names(variables) %in% fixed_node_names
+
+  if (any(unsampleable & unfixed)) {
+    msg <- cli::format_error(
+      # NOTE:
+      # is it possible to identify the names of these arrays or variables?
+      "the target {.cls greta_array}s are related to variables that do not \\
+        have distributions so cannot be sampled"
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_if_array_is_empty_list <- function(target){
+  if (identical(target, list())) {
+    msg <- cli::format_error(
+      c(
+        "{.fun calculate} requires {.cls greta array}s",
+        "no {.cls greta array}s were provided to {.fun calculate}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_if_lower_upper_numeric <- function(lower, upper) {
+  if (!is.numeric(lower) | !is.numeric(upper)) {
+    msg <- cli::format_error(
+      c(
+        "lower and upper must be numeric",
+        "lower has class: {class(lower)}",
+        "lower has length: {length(lower)}",
+        "upper has class: {class(upper)}",
+        "upper has length: {length(upper)}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_if_lower_upper_has_bad_limits <- function(bad_limits) {
+  if (bad_limits) {
+    msg <- cli::format_error(
+      "lower and upper must either be -Inf (lower only), Inf (upper only) \\
+          or finite"
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_if_upper_gt_lower <- function(lower, upper) {
+  if (any(lower >= upper)) {
+    msg <- cli::format_error(
+      c(
+        "upper bounds must be greater than lower bounds",
+        "lower is: {.val {lower}}",
+        "upper is: {.val {upper}}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
 
 checks_module <- module(
   check_tf_version,
@@ -924,5 +1084,7 @@ checks_module <- module(
   check_future_plan,
   check_n_cores,
   check_positive_integer,
+  check_if_array_is_empty_list,
   complex_error
 )
+

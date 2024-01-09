@@ -1,6 +1,5 @@
 test_that("continuous mixture variables can be sampled from", {
   skip_if_not(check_tf_version())
-  
 
   weights <- uniform(0, 1, 3)
   x <- mixture(normal(0, 1),
@@ -14,7 +13,6 @@ test_that("continuous mixture variables can be sampled from", {
 
 test_that("fixed continuous mixture distributions can be sampled from", {
   skip_if_not(check_tf_version())
-  
 
   weights <- uniform(0, 1, 3)
   obs <- rnorm(100, 0, 2)
@@ -27,10 +25,8 @@ test_that("fixed continuous mixture distributions can be sampled from", {
   sample_distribution(weights)
 })
 
-
 test_that("fixed discrete mixture distributions can be sampled from", {
   skip_if_not(check_tf_version())
-  
 
   weights <- uniform(0, 1, 3)
   obs <- rbinom(100, 1, 0.5)
@@ -45,7 +41,6 @@ test_that("fixed discrete mixture distributions can be sampled from", {
 
 test_that("mixtures of fixed and continuous distributions errors", {
   skip_if_not(check_tf_version())
-  
 
   weights <- uniform(0, 1, dim = 2)
   expect_snapshot_error(
@@ -57,10 +52,8 @@ test_that("mixtures of fixed and continuous distributions errors", {
   )
 })
 
-
 test_that("mixtures of multivariate and univariate errors", {
   skip_if_not(check_tf_version())
-  
 
   weights <- uniform(0, 1, dim = 2)
   expect_snapshot_error(
@@ -74,7 +67,6 @@ test_that("mixtures of multivariate and univariate errors", {
 
 test_that("mixtures of supports errors", {
   skip_if_not(check_tf_version())
-  
 
   weights <- c(0.5, 0.5)
 
@@ -99,7 +91,6 @@ test_that("mixtures of supports errors", {
 
 test_that("incorrectly-shaped weights errors", {
   skip_if_not(check_tf_version())
-  
 
   weights <- uniform(0, 1, dim = c(1, 2))
   expect_snapshot_error(
@@ -113,7 +104,6 @@ test_that("incorrectly-shaped weights errors", {
 
 test_that("mixtures with insufficient distributions errors", {
   skip_if_not(check_tf_version())
-  
 
   weights <- uniform(0, 1)
 
@@ -132,7 +122,6 @@ test_that("mixtures with insufficient distributions errors", {
 
 test_that("mixture of normals has correct density", {
   skip_if_not(check_tf_version())
-  
 
   mix_greta <- function(means, sds, weights, dim) {
     mixture(normal(means[1], sds[1], dim),
@@ -170,7 +159,6 @@ test_that("mixture of normals has correct density", {
 
 test_that("mixture of truncated normals has correct density", {
   skip_if_not(check_tf_version())
-  
 
   mix_greta <- function(means, sds, weights, dim) {
     mixture(normal(means[1], sds[1], dim, truncation = c(0, Inf)),
@@ -216,7 +204,6 @@ test_that("mixture of truncated normals has correct density", {
 
 test_that("mixture of Poissons has correct density", {
   skip_if_not(check_tf_version())
-  
 
   mix_greta <- function(rates, weights, dim) {
     mixture(poisson(rates[1], dim),
@@ -253,7 +240,6 @@ test_that("mixture of Poissons has correct density", {
 
 test_that("mixture of normals with varying weights has correct density", {
   skip_if_not(check_tf_version())
-  
 
   mix_greta <- function(means, sds, weights, dim) {
     mixture(normal(means[1], sds[1], dim),

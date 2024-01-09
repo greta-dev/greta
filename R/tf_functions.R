@@ -534,19 +534,19 @@ tf_abind <- function(..., axis) {
 
 tf_only_eigenvalues <- function(x) {
   vals <- tf$linalg$eigvalsh(x)
-  dim <- tf$constant(1L, shape = list(1))
+  dim <- tf$constant(1L, shape = list(1L))
   tf$reverse(vals, dim)
 }
 
 tf_extract_eigenvectors <- function(x) {
   vecs <- x[[2]]
-  dim <- tf$constant(2L, shape = list(1))
+  dim <- tf$constant(2L, shape = list(1L))
   tf$reverse(vecs, dim)
 }
 
 tf_extract_eigenvalues <- function(x) {
   vals <- x[[1]]
-  dim <- tf$constant(1L, shape = list(1))
+  dim <- tf$constant(1L, shape = list(1L))
   tf$reverse(vals, dim)
 }
 
@@ -588,9 +588,16 @@ tf_scalar_bijector <- function(dim, lower, upper) {
   )
 }
 
+tfb_shift_scale <- function(shift, scale){
+  tfb_shift <- tfp$bijectors$Shift(shift)
+  tfb_scale <- tfp$bijectors$Scale(scale)
+  tfb_shift_scale <- tfb_shift(tfb_scale)
+  tfb_shift_scale
+}
+
 tf_scalar_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(lower)),
+    tfp$bijectors$Shift(fl(lower)),
     tfp$bijectors$Exp(),
     dim = dim
   )
@@ -598,7 +605,7 @@ tf_scalar_pos_bijector <- function(dim, lower, upper) {
 
 tf_scalar_neg_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(upper), scale = fl(-1)),
+    tfb_shift_scale(fl(upper), fl(-1)),
     tfp$bijectors$Exp(),
     dim = dim
   )
@@ -606,7 +613,7 @@ tf_scalar_neg_bijector <- function(dim, lower, upper) {
 
 tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(lower), scale = fl(upper - lower)),
+    tfb_shift_scale(shift = fl(lower), scale = fl(upper - lower)),
     tfp$bijectors$Sigmoid(),
     dim = dim
   )
@@ -712,7 +719,8 @@ tf_simplex_bijector <- function(dim) {
 
 tf_ordered_bijector <- function(dim) {
   steps <- list(
-    tfp$bijectors$Invert(tfp$bijectors$Ordered()),
+    # tfp$bijectors$Invert(tfp$bijectors$Ordered()),
+    tfp$bijectors$Ascending(),
     tfp$bijectors$Reshape(dim)
   )
   tfp$bijectors$Chain(steps)
