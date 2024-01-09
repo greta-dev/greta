@@ -451,9 +451,6 @@ calculate_target_tensor_list <- function(
   target,
   nsim
 ) {
-  # TF1/2 check todo
-  # wrap from here to ^^^ in a function to then to tf_function on and pass the
-  # all_greta arrays and values arguments
   # define the dag and TF graph
 
   # change dag mode to sampling

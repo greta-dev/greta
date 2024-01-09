@@ -44,6 +44,11 @@
   node <- get_node(greta_array)
 
   # only for greta arrays without distributions
+  ## TODO provide more detail on the distribution already assigned
+  ## This might come up when the user accidentally runs assignment
+  ## of a distribution twice. Is there a way to avoid this, or perhaps
+  ## remove a distribution in case the user wants to do reassign it?
+  ## or perhaps we can recommend something?
   if (has_distribution(node)) {
     msg <- cli::format_error(
       "left hand side already has a distribution assigned"
