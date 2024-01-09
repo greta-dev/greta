@@ -16,8 +16,9 @@ uniform_distribution <- R6Class(
         )
       }
 
-      good_types <- is.numeric(min) && length(min) == 1 &
-        is.numeric(max) && length(max) == 1
+      good_min <- is.numeric(min) && length(min) == 1
+      good_max <- is.numeric(max) && length(max) == 1
+      good_types <- good_min & good_max
 
       if (!good_types) {
         msg <- cli::format_error(
