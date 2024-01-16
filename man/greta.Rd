@@ -2,6 +2,7 @@
 % Please edit documentation in R/package.R
 \docType{package}
 \name{greta}
+\alias{greta-package}
 \alias{greta}
 \title{greta: simple and scalable statistical modelling in R}
 \description{
@@ -36,4 +37,37 @@ distribution(iris$Sepal.Length) <- normal(mean, sd)
 m <- model(int, coef, sd)
 draws <- mcmc(m, n_samples = 100)
 }
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://greta-stats.org}
+  \item Report bugs at \url{https://github.com/greta-dev/greta/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Nicholas Tierney \email{nicholas.tierney@gmail.com} (\href{https://orcid.org/0000-0003-1460-8722}{ORCID})
+
+Authors:
+\itemize{
+  \item Nick Golding \email{nick.golding.research@gmail.com} (\href{https://orcid.org/0000-0001-8916-5570}{ORCID})
+}
+
+Other contributors:
+\itemize{
+  \item Simon Dirmeier [contributor]
+  \item Adam Fleischhacker [contributor]
+  \item Shirin Glander [contributor]
+  \item Martin Ingram [contributor]
+  \item Lee Hazel [contributor]
+  \item Lionel Hertzog [contributor]
+  \item Tiphaine Martin [contributor]
+  \item Matt Mulvahill [contributor]
+  \item Michael Quinn [contributor]
+  \item David Smith [contributor]
+  \item Paul Teetor [contributor]
+  \item Jian Yen [contributor]
+}
+
 }

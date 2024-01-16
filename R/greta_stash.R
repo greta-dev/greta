@@ -10,9 +10,10 @@ greta_stash$conda_create_notes <- greta_note_msg
 greta_stash$conda_install_notes <- greta_note_msg
 greta_stash$tf_num_error <- greta_note_msg
 
-#' @title Retrieve python installation or error details
+#' @title Retrieve python installation or error details.
 #'
-#' @description These functions retrieve installation or error information output by python
+#' @description
+#'  These functions retrieve installation or error information output by python
 #'   when running `install_miniconda()`, `conda_create()`, `conda_install()`, or
 #'   when encountering a TensorFlow numerical problem.
 #'

@@ -1,5 +1,5 @@
 #' @name inference
-#' @title statistical inference on greta models
+#' @title Statistical inference on greta models.
 #' @description Carry out statistical inference on greta models by
 #'   MCMC or likelihood/posterior optimisation.
 NULL

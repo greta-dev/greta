@@ -9,7 +9,7 @@
 \alias{greta_notes_conda_install_output}
 \alias{greta_notes_conda_install_error}
 \alias{greta_notes_tf_num_error}
-\title{Retrieve python installation or error details}
+\title{Retrieve python installation or error details.}
 \usage{
 greta_notes_install_miniconda_output()
 

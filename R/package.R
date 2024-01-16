@@ -36,7 +36,7 @@
 #' m <- model(int, coef, sd)
 #' draws <- mcmc(m, n_samples = 100)
 #' }
-NULL
+"_PACKAGE"
 
 # clear CRAN checks spotting floating global variables
 #' @importFrom utils globalVariables
