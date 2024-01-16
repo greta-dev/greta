@@ -1,18 +1,17 @@
 ## Test environments
-* local R installation, R 4.1.3
-* ubuntu 16.04 (on travis-ci), R 4.1.3
+* local R installation, R 4.2.1
+* ubuntu 18.04 (on github actions), R 4.2.1
 * win-builder (devel)
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
 
-* Days since last update: 7
-* Package has been resubmitted based on request to fix error on install of M1. This has now been resolved
+* Days since last update: 170
 
 ## revdepcheck results
 
-We checked 1 reverse dependencies, comparing R CMD check results across CRAN and dev versions of this package.
+We checked 3 reverse dependencies, comparing R CMD check results across CRAN and dev versions of this package.
 
  * We saw 0 new problems
  * We failed to check 0 packages

@@ -532,7 +532,6 @@ check_future_plan <- function() {
   plan_is <- list(
     parallel = !inherits(plan_info, "sequential"),
     cluster = inherits(plan_info, "cluster"),
-    multiprocess = inherits(plan_info, "multiprocess"),
     multisession = inherits(plan_info, "multisession"),
     local = TRUE
   )
@@ -559,10 +558,9 @@ check_future_plan <- function() {
     } else {
 
       # if multi*, check it's multisession
-      if (plan_is$multiprocess && !plan_is$multisession) {
+      if (!plan_is$multisession) {
         msg <- cli::format_error(
-          "parallel mcmc samplers cannot be run with \\
-          {.code plan(multiprocess)} or {.code plan(multicore)}"
+          "parallel mcmc samplers cannot be run with {.code plan(multicore)}"
         )
         stop(
           msg,
@@ -850,6 +848,39 @@ check_trace_batch_size <- function(x) {
   }
   x
 }
+
+check_if_greta_array_in_mcmc <- function(x){
+  if (!inherits(x, "greta_model") && inherits(x, "greta_array")) {
+    msg <- cli::format_error(
+      c( "MCMC requires input to be a {.cls greta_model} not a {.cls greta_array}",
+        "x" = "{.var x} is a {.cls greta_array} not a {.cls greta_model}",
+        "i" = "You can convert {.var x} into a {.cls greta_model} by running:",
+        "{.code model(x)}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+check_if_greta_model <- function(x) {
+  if (!inherits(x, "greta_model")) {
+    msg <- cli::format_error(
+      c(
+        "{.var x} must be a {.cls greta_model}",
+        "But {.var x} is {.cls {class(x)}}"
+      )
+    )
+    stop(
+      msg,
+      call. = FALSE
+    )
+  }
+}
+
+
 
 
 complex_error <- function(z) {

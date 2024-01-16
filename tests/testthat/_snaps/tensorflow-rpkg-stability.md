@@ -6,10 +6,6 @@
 
     integer(0)
 
----
-
-    Tensor("Reshape:0", shape=(1, 1, 1, 1, 1), dtype=int32)
-
 # shape returns right thing
 
     TensorShape([])
@@ -102,10 +98,6 @@
 ---
 
     [1] NA  3
-
----
-
-    Tensor("Const_8:0", shape=(2,), dtype=int32)
 
 ---
 

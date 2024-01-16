@@ -143,6 +143,14 @@ test_that("opt returns hessians", {
   expect_true(all(abs(approx_sd - sd) < 1e-9))
 })
 
+test_that("greta arrays passed into mcmc fail appropriately", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  expect_snapshot_error(
+    mcmc(x)
+  )
+})
+
 test_that("bad mcmc proposals are rejected", {
   skip_if_not(check_tf_version())
 
@@ -532,12 +540,6 @@ test_that("mcmc errors for invalid parallel plans", {
   withr::local_envvar("R_FUTURE_SUPPORTSMULTICORE_UNSTABLE" = "quiet")
   # reset warning setting
   withr::defer(future::plan(op))
-
-  # handle handle forks, so only accept multisession, or multi session clusters
-  suppressWarnings(future::plan(future::multiprocess))
-  expect_snapshot_error(
-    mcmc(m, verbose = FALSE)
-  )
 
   future::plan(future::multicore)
   expect_snapshot_error(

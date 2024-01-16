@@ -137,7 +137,7 @@ Functions to set up optimisers (which find parameters that
 maximise the joint density of a model) and change their tuning parameters,
 for use in \code{\link[=opt]{opt()}}. For details of the algorithms and how to
 tune them, see the
-\href{https://docs.scipy.org/doc/scipy-1.8.0/html-scipyorg/reference/optimize.html#optimization}{SciPy optimiser docs} or the
+\href{https://docs.scipy.org/doc/scipy/tutorial/optimize.html?highlight=optimize}{SciPy optimiser docs} or the
 \href{https://www.tensorflow.org/versions/r1.15/api_docs/python/tf/contrib}{TensorFlow optimiser docs}.
 }
 \details{
