@@ -7,7 +7,7 @@
 \alias{extra_samples}
 \alias{initials}
 \alias{opt}
-\title{statistical inference on greta models}
+\title{Statistical inference on greta models.}
 \usage{
 mcmc(
   model,
