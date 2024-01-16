@@ -410,7 +410,8 @@ test_that("categorical distribution has correct density", {
 })
 
 test_that("dirichlet distribution has correct density", {
-  skip_if_not(check_tf_version())
+  # skip_if_not(check_tf_version())
+  skip_on_cran()
   # parameters to test
   m <- 5
   alpha <- t(runif(m))
