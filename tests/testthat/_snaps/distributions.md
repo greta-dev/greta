@@ -258,3 +258,15 @@
     `dimension` must be a positive scalar integer giving the dimension of the distribution
     `dim(target)` returns:
 
+# Cholesky factor of Wishart should be an upper triangular matrix
+
+    When using `calculate()` to sample a greta array with a cholesky factor, the output can sometimes be unreliable.
+    See issue here on github for more details:
+    <>
+
+# Cholesky factor of LJK_correlation should be an upper triangular matrix
+
+    When using `calculate()` to sample a greta array with a cholesky factor, the output can sometimes be unreliable.
+    See issue here on github for more details:
+    <>
+
