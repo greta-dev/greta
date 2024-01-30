@@ -7,7 +7,8 @@
 
     Code
       o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
+    Condition
+      Warning:
       This optimiser is deprecated and will be removed in greta 0.4.0.
       Please use a different optimiser.
 
@@ -15,7 +16,8 @@
 
     Code
       o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
+    Condition
+      Warning:
       This optimiser is deprecated and will be removed in greta 0.4.0.
       Please use a different optimiser.
 
@@ -28,7 +30,8 @@
 
     Code
       o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
+    Condition
+      Warning:
       This optimiser is deprecated and will be removed in greta 0.4.0.
       Please use a different optimiser.
 
@@ -36,7 +39,8 @@
 
     Code
       o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
+    Condition
+      Warning:
       This optimiser is deprecated and will be removed in greta 0.4.0.
       Please use a different optimiser.
 
@@ -44,7 +48,8 @@
 
     Code
       o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
+    Condition
+      Warning:
       This optimiser is deprecated and will be removed in greta 0.4.0.
       Please use a different optimiser.
 
@@ -52,7 +57,8 @@
 
     Code
       o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
+    Condition
+      Warning:
       This optimiser is deprecated and will be removed in greta 0.4.0.
       Please use a different optimiser.
 
@@ -60,7 +66,8 @@
 
     Code
       o <- opt(m, optimiser = optmr(), max_iterations = 500)
-    Warning <simpleWarning>
+    Condition
+      Warning:
       This optimiser is deprecated and will be removed in greta 0.4.0.
       Please use a different optimiser.
 
@@ -95,7 +102,7 @@
     Code
       mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = inits,
         verbose = FALSE)
-    Message <simpleMessage>
+    Message
       only one set of initial values was provided, and was used for all chains
     Output
       $`11`
@@ -185,7 +192,7 @@
 
     Code
       draws <- mock_mcmc(1010)
-    Message <message>
+    Message
       
         sampling          1010/1010 | eta:  0s | <1% bad
 
@@ -193,7 +200,7 @@
 
     Code
       draws <- mock_mcmc(500)
-    Message <message>
+    Message
       
         sampling            500/500 | eta:  0s | 2% bad 
 
@@ -201,7 +208,7 @@
 
     Code
       draws <- mock_mcmc(10)
-    Message <message>
+    Message
       
         sampling =========== 10/10 | eta:  0s | 100% bad
       
