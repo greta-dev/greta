@@ -165,9 +165,12 @@ operation_node <- R6Class(
           # error here since when sampling from a cholesky represented variable
           # we don't really get consistent results
           cli::cli_warn(
+            ## Could note that there are false positives
             message = c(
-              "{.pkg greta} does not currently support sampling from \\
-              cholesky represented distributions."
+              "When using {.fun calculate} to sample a greta array with a \\
+              cholesky factor, the output can sometimes be unreliable.",
+              "See issue here on github for more details:",
+              "{.url }"
             )
           )
           cholesky_tensor <- tf_chol(tensor)
