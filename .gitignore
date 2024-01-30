@@ -13,3 +13,5 @@ docs/*.Rmd
 docs/examples
 paper/paper.html
 inst/doc
+
+.lazytest
