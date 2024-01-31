@@ -26,6 +26,8 @@ file.copy("../man/figures/plotlegend.png",
           "figures/plotlegend.png")
 
 diagrammer_svg_installed <- requireNamespace("DiagrammeRsvg", quietly = TRUE)
+rsvg_installed <- requireNamespace("rsvg", quietly = TRUE)
+svg_things_installed <- diagrammer_svg_installed && rsvg_installed
 ```
 
 ## Installation
@@ -387,7 +389,7 @@ greta provides a plot function for greta models to help you visualise and check 
 plot(m)
 ```
 
-```{r plot-hidden, echo = FALSE, eval = diagrammer_svg_installed} 
+```{r plot-hidden, echo = FALSE, eval = svg_things_installed} 
 gr <- plot(m)
 DiagrammeR::export_graph(attr(gr, "dgr_graph"),
                          file_name = "figures/full_graph.png",
@@ -408,7 +410,7 @@ The fourth type of node (diamonds) represents probability distributions. These h
 
 For example, a plot of just the prior distribution over `coef` (defined as `coef <- normal(0, 3)`) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution's value, the variable `coef`:
 
-```{r plot_coef, echo = FALSE, eval = diagrammer_svg_installed}
+```{r plot_coef, echo = FALSE, eval = svg_things_installed}
 coef <- normal(0, 3)
 m_coef <- model(coef)
 gr <- plot(m_coef)
@@ -422,7 +424,7 @@ DiagrammeR::export_graph(attr(gr, "dgr_graph"),
 
 It's the same for the model likelihood, but this time the distribution's parameters are a variable (`sd`) and the result of an operation (`mean`), and the distribution's value is given by data (the observed sepal lengths `y`):
 
-```{r plot_likelihood, echo = FALSE, eval = diagrammer_svg_installed}
+```{r plot_likelihood, echo = FALSE, eval = svg_things_installed}
 sd <- variable()
 y <- as_data(iris$Sepal.Length)
 mean <- ones(150)
