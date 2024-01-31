@@ -153,7 +153,7 @@ test_that("greta arrays passed into mcmc fail appropriately", {
 
 test_that("bad mcmc proposals are rejected", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # set up for numerical rejection of initial location
   x <- rnorm(10000, 1e6, 1)
@@ -212,7 +212,7 @@ test_that("bad mcmc proposals are rejected", {
 
 test_that("mcmc works with verbosity and warmup", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   x <- rnorm(10)
   z <- normal(0, 1)
@@ -296,7 +296,7 @@ test_that("mcmc handles initial values nicely", {
 
 test_that("progress bar gives a range of messages", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # 10/1010 should be <1%
   expect_snapshot(draws <- mock_mcmc(1010))
