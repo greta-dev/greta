@@ -8,9 +8,9 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-
+greta_run <- greta:::check_tf_version("message")
 knitr::opts_chunk$set(echo = TRUE,
-                      eval = greta:::check_tf_version("message"),
+                      eval = greta_run,
                       cache = TRUE,
                       comment = NA,
                       progress = FALSE)
