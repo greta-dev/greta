@@ -387,7 +387,7 @@ greta provides a plot function for greta models to help you visualise and check 
 plot(m)
 ```
 
-```{r plot_hidden, echo = FALSE, eval = diagrammer_svg_installed} 
+```{r plot-hidden, echo = FALSE, eval = diagrammer_svg_installed} 
 gr <- plot(m)
 DiagrammeR::export_graph(attr(gr, "dgr_graph"),
                          file_name = "figures/full_graph.png",

@@ -63,6 +63,7 @@ Suggests:
     mvtnorm,
     rmarkdown,
     rmutil,
+    rsvg,
     spelling,
     testthat (>= 3.1.0),
     tidyverse,
