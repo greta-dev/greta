@@ -556,7 +556,7 @@ test_that("mcmc errors for invalid parallel plans", {
 
 test_that("parallel reporting works", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   m <- model(normal(0, 1))
 
