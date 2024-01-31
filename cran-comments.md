@@ -1,13 +1,12 @@
 ## Test environments
-* local R installation, R 4.2.1
-* ubuntu 18.04 (on github actions), R 4.2.1
+* local R installation, R 4.3.2
 * win-builder (devel)
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
 
-* Days since last update: 170
+* Days since last update: 510
 
 ## revdepcheck results
 
