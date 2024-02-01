@@ -7,7 +7,7 @@ set.seed(2020 - 02 - 11)
 
 test_that("opt converges with TF optimisers", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   x <- rnorm(5, 2, 0.1)
   z <- variable(dim = 5)
@@ -44,7 +44,7 @@ test_that("opt converges with TF optimisers", {
 
 test_that("opt converges with SciPy optimisers", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   x <- rnorm(3, 2, 0.1)
   z <- variable(dim = 3)
@@ -100,7 +100,7 @@ test_that("opt converges with SciPy optimisers", {
 
 test_that("opt accepts initial values", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   x <- rnorm(5, 2, 0.1)
   z <- variable(dim = 5)
@@ -121,7 +121,7 @@ test_that("opt accepts initial values", {
 
 test_that("opt returns hessians", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   sd <- runif(5)
   x <- rnorm(5, 2, 0.1)
@@ -145,6 +145,7 @@ test_that("opt returns hessians", {
 
 test_that("greta arrays passed into mcmc fail appropriately", {
   skip_if_not(check_tf_version())
+  skip_on_cran()
   x <- normal(0, 1)
   expect_snapshot_error(
     mcmc(x)
@@ -223,7 +224,7 @@ test_that("mcmc works with verbosity and warmup", {
 
 test_that("mcmc works with multiple chains", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   x <- rnorm(10)
   z <- normal(0, 1)
@@ -245,7 +246,7 @@ test_that("mcmc works with multiple chains", {
 
 test_that("mcmc handles initial values nicely", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # preserve R version
   current_r_version <- paste0(R.version$major,".", R.version$minor)
@@ -311,7 +312,7 @@ test_that("progress bar gives a range of messages", {
 
 test_that("extra_samples works", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # set up model
   a <- normal(0, 1)
@@ -328,7 +329,7 @@ test_that("extra_samples works", {
 
 test_that("trace_batch_size works", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # set up model
   a <- normal(0, 1)
@@ -352,7 +353,7 @@ test_that("trace_batch_size works", {
 
 test_that("stashed_samples works", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # set up model
   a <- normal(0, 1)
@@ -387,7 +388,7 @@ test_that("stashed_samples works", {
 
 test_that("samples has object names", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   a <- normal(0, 1)
   b <- normal(a, 1, dim = 3)
@@ -406,7 +407,7 @@ test_that("samples has object names", {
 
 test_that("model errors nicely", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # model should give a nice error if passed something other than a greta array
   a <- 1
@@ -418,6 +419,8 @@ test_that("model errors nicely", {
 
 test_that("mcmc supports rwmh sampler with normal proposals", {
   skip_if_not(check_tf_version())
+  skip_on_cran()
+
   x <- normal(0, 1)
   m <- model(x)
   expect_ok(draws <- mcmc(m,
@@ -429,6 +432,8 @@ test_that("mcmc supports rwmh sampler with normal proposals", {
 
 test_that("mcmc supports rwmh sampler with uniform proposals", {
   skip_if_not(check_tf_version())
+  skip_on_cran()
+
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
@@ -441,6 +446,8 @@ test_that("mcmc supports rwmh sampler with uniform proposals", {
 
 test_that("mcmc supports slice sampler with single precision models", {
   skip_if_not(check_tf_version())
+  skip_on_cran()
+
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x, precision = "single")
@@ -453,6 +460,8 @@ test_that("mcmc supports slice sampler with single precision models", {
 
 test_that("mcmc doesn't support slice sampler with double precision models", {
   skip_if_not(check_tf_version())
+  skip_on_cran()
+
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x, precision = "double")
@@ -467,7 +476,7 @@ test_that("mcmc doesn't support slice sampler with double precision models", {
 
 test_that("numerical issues are handled in mcmc", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # this should have a cholesky decomposition problem at some point
   alpha <- normal(0, 1)
@@ -494,7 +503,7 @@ test_that("numerical issues are handled in mcmc", {
 # this is the test that says: 'Loaded Tensorflow version 1.14.0'
 test_that("mcmc works in parallel", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   m <- model(normal(0, 1))
 
@@ -529,7 +538,7 @@ test_that("mcmc works in parallel", {
 test_that("mcmc errors for invalid parallel plans", {
   skip_if_not(check_tf_version())
   skip_on_ci()
-
+  skip_on_cran()
 
   m <- model(normal(0, 1))
 
@@ -574,7 +583,7 @@ test_that("parallel reporting works", {
 
 test_that("initials works", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # errors on bad objects
   expect_snapshot_error(
@@ -594,7 +603,7 @@ test_that("initials works", {
 
 test_that("prep_initials errors informatively", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   a <- normal(0, 1)
   b <- uniform(0, 1)
@@ -644,7 +653,7 @@ test_that("prep_initials errors informatively", {
 
 test_that("samplers print informatively", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   expect_snapshot(
     hmc()
@@ -666,6 +675,8 @@ test_that("samplers print informatively", {
 
 test_that("pb_update > thin to avoid bursts with no saved iterations", {
   skip_if_not(check_tf_version())
+  skip_on_cran()
+
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
