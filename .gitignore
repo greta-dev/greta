@@ -13,3 +13,6 @@ docs/*.Rmd
 docs/examples
 paper/paper.html
 inst/doc
+
+revdep/checks.noindex
+revdep/library.noindex

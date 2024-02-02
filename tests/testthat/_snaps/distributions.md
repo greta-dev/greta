@@ -37,25 +37,25 @@
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `` family = stats::`poisson` ``,instead?
+    Maybe you want to use `family = stats::poisson`,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `binomial()` function in the family argument of another model.
-    Maybe you want to use `` family = stats::`binomial` ``,instead?
+    Maybe you want to use `family = stats::binomial`,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `` family = stats::`poisson` ``,instead?
+    Maybe you want to use `family = stats::poisson`,instead?
 
 ---
 
     Wrong function name provided in another model
     It looks like you're using greta's `poisson()` function in the family argument of another model.
-    Maybe you want to use `` family = stats::`poisson` ``,instead?
+    Maybe you want to use `family = stats::poisson`,instead?
 
 # wishart distribution errors informatively
 
@@ -130,11 +130,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
@@ -153,11 +157,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
@@ -176,11 +184,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
@@ -199,11 +211,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
@@ -222,11 +238,15 @@
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 
-    object 'n_realisations' not found
+    ! Could not evaluate cli `{}` expression: `n_realisations`.
+    Caused by error in `eval(expr, envir = envir)`:
+    ! object 'n_realisations' not found
 
 ---
 

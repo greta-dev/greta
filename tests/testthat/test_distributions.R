@@ -1,6 +1,6 @@
 test_that("normal distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::normal,
     stats::dnorm,
@@ -12,7 +12,7 @@ test_that("normal distribution has correct density", {
 
 test_that("multidimensional normal distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::normal,
     stats::dnorm,
@@ -26,7 +26,7 @@ test_that("multidimensional normal distribution has correct density", {
 
 test_that("uniform distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::uniform,
     stats::dunif,
@@ -37,7 +37,7 @@ test_that("uniform distribution has correct density", {
 
 test_that("lognormal distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::lognormal,
     stats::dlnorm,
@@ -48,7 +48,7 @@ test_that("lognormal distribution has correct density", {
 
 test_that("bernoulli distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::bernoulli,
     extraDistr::dbern,
@@ -59,7 +59,7 @@ test_that("bernoulli distribution has correct density", {
 
 test_that("binomial distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::binomial,
     stats::dbinom,
@@ -70,7 +70,7 @@ test_that("binomial distribution has correct density", {
 
 test_that("beta-binomial distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::beta_binomial,
     extraDistr::dbbinom,
@@ -85,7 +85,7 @@ test_that("beta-binomial distribution has correct density", {
 
 test_that("negative binomial distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::negative_binomial,
     stats::dnbinom,
@@ -96,7 +96,7 @@ test_that("negative binomial distribution has correct density", {
 
 test_that("hypergeometric distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::hypergeometric,
     stats::dhyper,
@@ -107,7 +107,7 @@ test_that("hypergeometric distribution has correct density", {
 
 test_that("poisson distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::poisson,
     stats::dpois,
@@ -118,7 +118,7 @@ test_that("poisson distribution has correct density", {
 
 test_that("gamma distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::gamma,
     stats::dgamma,
@@ -130,7 +130,7 @@ test_that("gamma distribution has correct density", {
 
 test_that("inverse gamma distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::inverse_gamma,
     extraDistr::dinvgamma,
@@ -141,7 +141,7 @@ test_that("inverse gamma distribution has correct density", {
 
 test_that("weibull distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::weibull,
     dweibull,
@@ -155,7 +155,7 @@ test_that("weibull distribution has correct density", {
 
 test_that("exponential distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::exponential,
     stats::dexp,
@@ -166,7 +166,7 @@ test_that("exponential distribution has correct density", {
 
 test_that("pareto distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::pareto,
     extraDistr::dpareto,
@@ -177,7 +177,7 @@ test_that("pareto distribution has correct density", {
 
 test_that("student distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
   dstudent <- extraDistr::dlst
 
   compare_distribution(
@@ -194,7 +194,7 @@ test_that("student distribution has correct density", {
 
 test_that("laplace distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::laplace,
     extraDistr::dlaplace,
@@ -205,7 +205,7 @@ test_that("laplace distribution has correct density", {
 
 test_that("beta distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::beta,
     stats::dbeta,
@@ -219,7 +219,7 @@ test_that("beta distribution has correct density", {
 
 test_that("cauchy distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::cauchy,
     stats::dcauchy,
@@ -233,7 +233,7 @@ test_that("cauchy distribution has correct density", {
 
 test_that("logistic distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::logistic,
     stats::dlogis,
@@ -247,7 +247,7 @@ test_that("logistic distribution has correct density", {
 
 test_that("f distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::f,
     df,
@@ -258,7 +258,7 @@ test_that("f distribution has correct density", {
 
 test_that("chi squared distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   compare_distribution(greta::chi_squared,
     stats::dchisq,
@@ -269,7 +269,7 @@ test_that("chi squared distribution has correct density", {
 
 test_that("multivariate normal distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # parameters to test
   m <- 5
@@ -291,7 +291,7 @@ test_that("multivariate normal distribution has correct density", {
 
 test_that("Wishart distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # parameters to test
   m <- 5
@@ -324,7 +324,7 @@ test_that("Wishart distribution has correct density", {
 
 test_that("lkj distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # parameters to test
   m <- 5
@@ -365,7 +365,7 @@ test_that("lkj distribution has correct density", {
 
 test_that("multinomial distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # parameters to test
   m <- 5
@@ -390,7 +390,7 @@ test_that("multinomial distribution has correct density", {
 
 test_that("categorical distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # parameters to test
   m <- 5
@@ -410,7 +410,8 @@ test_that("categorical distribution has correct density", {
 })
 
 test_that("dirichlet distribution has correct density", {
-  skip_if_not(check_tf_version())
+  # skip_if_not(check_tf_version())
+  skip_on_cran()
   # parameters to test
   m <- 5
   alpha <- t(runif(m))
@@ -426,7 +427,7 @@ test_that("dirichlet distribution has correct density", {
 
 test_that("dirichlet-multinomial distribution has correct density", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   # parameters to test
   size <- 10
@@ -450,7 +451,7 @@ test_that("dirichlet-multinomial distribution has correct density", {
 
 test_that("scalar-valued distributions can be defined in models", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   x <- randn(5)
   y <- round(randu(5))
@@ -526,7 +527,7 @@ test_that("scalar-valued distributions can be defined in models", {
 
 test_that("array-valued distributions can be defined in models", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   dim <- c(5, 2)
   x <- randn(5, 2)
@@ -608,7 +609,7 @@ test_that("array-valued distributions can be defined in models", {
 
 test_that("distributions can be sampled from by MCMC", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   x <- randn(100)
   y <- round(randu(100))
@@ -701,7 +702,7 @@ test_that("distributions can be sampled from by MCMC", {
 test_that("uniform distribution errors informatively", {
   skip_if_not(check_tf_version())
   skip_on_ci()
-
+  skip_on_cran()
 
   # bad types
   expect_snapshot_error(
@@ -731,6 +732,7 @@ test_that("uniform distribution errors informatively", {
 test_that("poisson() and binomial() error informatively in glm", {
   skip_on_ci()
   skip_if_not(check_tf_version())
+  skip_on_cran()
 
   # if passed as an object
   expect_snapshot_error(
@@ -778,7 +780,7 @@ test_that("wishart distribution errors informatively", {
 
 test_that("lkj_correlation distribution errors informatively", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   dim <- 3
 
@@ -814,7 +816,7 @@ test_that("lkj_correlation distribution errors informatively", {
 
 test_that("multivariate_normal distribution errors informatively", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   m_a <- randn(1, 3)
   m_b <- randn(2, 3)
@@ -892,7 +894,7 @@ test_that("multivariate_normal distribution errors informatively", {
 
 test_that("multinomial distribution errors informatively", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   p_a <- randu(1, 3)
   p_b <- randu(2, 3)
@@ -946,7 +948,7 @@ test_that("multinomial distribution errors informatively", {
 
 test_that("categorical distribution errors informatively", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   p_a <- randu(1, 3)
   p_b <- randu(2, 3)
@@ -988,7 +990,7 @@ test_that("categorical distribution errors informatively", {
 
 test_that("dirichlet distribution errors informatively", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   alpha_a <- randu(1, 3)
   alpha_b <- randu(2, 3)
@@ -1032,7 +1034,7 @@ test_that("dirichlet distribution errors informatively", {
 
 test_that("dirichlet values sum to one", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   alpha <- uniform(0, 10, dim = c(1, 5))
   x <- dirichlet(alpha)
@@ -1045,7 +1047,7 @@ test_that("dirichlet values sum to one", {
 
 test_that("dirichlet-multinomial distribution errors informatively", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
 
   alpha_a <- randu(1, 3)
   alpha_b <- randu(2, 3)
@@ -1100,6 +1102,7 @@ test_that("dirichlet-multinomial distribution errors informatively", {
 
 test_that("Wishart can use a choleskied Sigma", {
   skip_if_not(check_tf_version())
+  skip_on_cran()
 
   sig <- lkj_correlation(2, dim = 2)
   w <- wishart(5, sig)
@@ -1109,7 +1112,7 @@ test_that("Wishart can use a choleskied Sigma", {
 
 test_that("multivariate distribs with matrix params can be sampled from", {
   skip_if_not(check_tf_version())
-
+  skip_on_cran()
   n <- 10
   k <- 3
 

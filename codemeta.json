@@ -7,13 +7,13 @@
   "codeRepository": "https://github.com/njtierney/greta",
   "issueTracker": "https://github.com/greta-dev/greta/issues",
   "license": "https://spdx.org/licenses/Apache-2.0",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.2.1 (2022-06-23)",
+  "runtimePlatform": "R version 4.3.2 (2023-10-31)",
   "provider": {
     "@id": "https://cran.r-project.org",
     "@type": "Organization",
@@ -158,6 +158,18 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "DiagrammeRsvg",
+      "name": "DiagrammeRsvg",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=DiagrammeRsvg"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "extraDistr",
       "name": "extraDistr",
       "provider": {
@@ -287,6 +299,18 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=rmutil"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "rsvg",
+      "name": "rsvg",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=rsvg"
     },
     {
       "@type": "SoftwareApplication",
@@ -515,7 +539,7 @@
     },
     "SystemRequirements": "Python (>= 2.7.0) with header files and shared\n    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow\n    Probability (v0.7.0; https://www.tensorflow.org/probability/)"
   },
-  "fileSize": "1313.486KB",
+  "fileSize": "2098.014KB",
   "citation": [
     {
       "@type": "ScholarlyArticle",

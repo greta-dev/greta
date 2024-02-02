@@ -13,6 +13,7 @@
 ^LICENSE\.md$
 LICENSE
 ^cran-comments\.md$
+^revdep$
 
 ^logos$
 ^paper$
