@@ -183,7 +183,10 @@ node <- R6Class(
           parents <- self$list_parents(dag)
           lapply(
             parents[which(!parents_defined)],
-            function(x) x$define_tf(dag)
+            function(x){
+              # browser()
+              x$define_tf(dag)
+            }
           )
         }
 

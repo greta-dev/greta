@@ -171,6 +171,7 @@ dag_class <- R6Class(
       # if it's an operation, see if it has a distribution (for lkj and
       # wishart) and get mode based on whether the parent has a free state
       if (node_type == "operation") {
+        # browser()
         parent_name <- node$parents[[1]]$unique_name
         parent_stateless <- parent_name %in% stateless_names
         to_sample <- has_distribution(node) & parent_stateless
@@ -345,6 +346,7 @@ dag_class <- R6Class(
 
       # define all nodes in the environment and on the graph
       lapply(target_nodes, function(x){
+        # browser()
         x$define_tf(self)
       })
 

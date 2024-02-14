@@ -52,7 +52,5 @@ perturbation, followed by Metropolis-Hastings accept/reject step. The class
 is implemented for uniform and normal proposals.
 
 \code{slice()} implements a multivariate slice sampling algorithm.
-Currently this algorithm can only be used with single-precision models (set
-using the \code{precision} argument to \code{\link[=model]{model()}}). The parameter
-\code{max_doublings} is not tuned during warmup.
+The parameter \code{max_doublings} is not tuned during warmup.
 }
