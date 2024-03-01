@@ -15,3 +15,5 @@ paper/paper.html
 inst/doc
 
 .lazytest
+
+revdep

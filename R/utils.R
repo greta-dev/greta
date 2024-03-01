@@ -916,13 +916,13 @@ greta_sitrep <- function(){
                               version = reticulate::py_version(),
                               software_name = "python")
 
-  check_if_software_available(software_available = have_tfp(),
-                              version = version_tfp(),
-                              software_name = "TensorFlow Probability")
-
   check_if_software_available(software_available = have_tf(),
                               version = version_tf(),
                               software_name = "TensorFlow")
+
+  check_if_software_available(software_available = have_tfp(),
+                              version = version_tfp(),
+                              software_name = "TensorFlow Probability")
 
   check_if_software_available(software_available = have_greta_conda_env(),
                               software_name = "greta conda environment")
