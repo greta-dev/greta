@@ -28,7 +28,7 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
 
   # formatting
   format_text <- glue::glue(
-    "  {name} :bar {count_pad}:iter/:total | eta: :eta :rejection",
+    "  {name} :bar {count_pad}:iter/:total | eta: :eta :rejection"
   )
 
   pb <- progress::progress_bar$new(
