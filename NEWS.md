@@ -1,3 +1,9 @@
+# greta 0.4.5
+
+## Bug Fixes
+
+- Remove trailing comma bug in glue #618
+
 # greta 0.4.4
 
 ## Bug fixes

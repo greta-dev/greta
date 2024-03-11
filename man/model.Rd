@@ -26,7 +26,7 @@ decrease the computation time but increase the risk of numerical
 instability during sampling.}
 
 \item{compile}{whether to apply
-\href{https://www.tensorflow.org/xla}{XLA JIT compilation} to
+\href{https://openxla.org/xla}{XLA JIT compilation} to
 the TensorFlow graph representing the model. This may slow down model
 definition, and speed up model evaluation.}
 
