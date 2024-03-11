@@ -1,12 +1,16 @@
 ## Test environments
-* local R installation, R 4.3.2
+* local R installation, R 4.3.3
 * win-builder (devel)
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
 
-* Days since last update: 510
+* Days since last update: 38
+
+## Submission notes
+
+This release is due to a bug we discovered with trailing commas from the `glue` package (https://github.com/tidyverse/glue/issues/320). It is a very small change, but it is very critical. We have also 
 
 ## revdepcheck results
 
