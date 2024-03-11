@@ -45,3 +45,4 @@ LICENSE
 ^CRAN-SUBMISSION$
 ^touchstone$
 ^.lazytest$
+^\.lazytext$
