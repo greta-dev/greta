@@ -44,3 +44,4 @@ LICENSE
 ^depends\.rds$
 ^CRAN-SUBMISSION$
 ^touchstone$
+^.lazytest$
