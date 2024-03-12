@@ -87,6 +87,7 @@ precision than R's equivalent.
  prod(..., na.rm = TRUE)
  min(..., na.rm = TRUE)
  max(..., na.rm = TRUE)
+ sd(..., na.rm = TRUE)
 
  # cumulative operations
  cumsum(x)
@@ -102,10 +103,10 @@ precision than R's equivalent.
 
  # miscellaneous operations
  aperm(x, perm)
- apply(x, MARGIN, FUN = c("sum", "max", "mean", "min",
+ apply(x, MARGIN, FUN = c("sum", "max", "mean", "min", "sd,
                           "prod", "cumsum", "cumprod"))
  sweep(x, MARGIN, STATS, FUN = c('-', '+', '/', '*'))
- tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "prod"), ...)
+ tapply(X, INDEX, FUN = c("sum", "max", "mean", "min", "sd, "prod"), ...)
 
 }
 }

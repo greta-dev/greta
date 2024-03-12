@@ -6,6 +6,7 @@
 \alias{\%*\%}
 \alias{chol2inv}
 \alias{cov2cor}
+\alias{sd}
 \alias{identity}
 \alias{colMeans}
 \alias{rowMeans}
@@ -27,6 +28,8 @@ x \%*\% y
 chol2inv(x, size = NCOL(x), LINPACK = FALSE)
 
 cov2cor(V)
+
+sd(x, ...)
 
 identity(x)
 

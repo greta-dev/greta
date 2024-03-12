@@ -80,6 +80,27 @@ tf_mean <- function(x, drop = FALSE) {
   skip_dim("reduce_mean", x, drop)
 }
 
+# need to create a "reduce_sd" function
+# which
+
+tf_sd <- function(x, drop = FALSE){
+
+  n_dim <- length(dim(x))
+  reduction_dims <- seq_len(n_dim - 1)
+
+  # replace these parts with tf_sum and friends?
+  x_mean <- tf_mean(x, drop = drop)
+  x_sub <- x - x_mean
+  x_mean_sq <- x_sub * x_sub
+  total_ss <- tf_sum(x_mean_sq, drop = drop)
+  n_denom <- prod(dim(x)[reduction_dims + 1])
+  var <- total_ss / fl(n_denom - 1)
+  sd_result <- tf$math$sqrt(var)
+
+  sd_result
+}
+
+
 tf_max <- function(x, drop = FALSE) {
   skip_dim("reduce_max", x, drop)
 }
