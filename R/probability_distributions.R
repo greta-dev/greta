@@ -1090,17 +1090,14 @@ wishart_distribution <- R6Class(
         distrib <- tfp$distributions$WishartTriL(
           df = df,
           scale_tril = sigma_chol,
-          input_output_cholesky = TRUE
+          # input_output_cholesky = TRUE
           ## TF1/2 could potentially flip to TRUE, then at
           ## target_is_cholesky check below we could use tf_chol2symm
           ## instead of tf_chol, as this should be more efficient
-<<<<<<< HEAD
           # input_output_cholesky = FALSE
-=======
           input_output_cholesky = FALSE
           ## TF1/2 - check
           # input_output_cholesky = TRUE
->>>>>>> 4809ff8c (rebasing stuff)
         )
 
         ## TF1/2
