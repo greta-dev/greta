@@ -272,6 +272,7 @@ node <- R6Class(
 )
 
 # generic to grab dimensions
+#' @export
 dim.node <- function(x) {
   x$dim
 }

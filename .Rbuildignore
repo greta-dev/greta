@@ -43,3 +43,5 @@ LICENSE
 ^depends\.rds$
 ^CRAN-SUBMISSION$
 ^touchstone$
+^revdep$
+^__autograph*
