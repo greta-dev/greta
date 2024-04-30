@@ -185,11 +185,9 @@ operation_node <- R6Class(
           # cholesky_tf_name <- dag$tf_name(self)
           # tf_name <- cholesky_tf_name
           # tensor <- cholesky_tensor
-=======
           cholesky_tensor <- tf_chol(tensor)
           cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
           assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
->>>>>>> 4809ff8c (rebasing stuff)
         }
       }
 
