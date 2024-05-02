@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head><title>R: Unified Parallel and Distributed Processing in R for Everyone</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body><div class="container">
+<h1> Unified Parallel and Distributed Processing in R for Everyone
+<img class="toplogo" src="../../../doc/html/Rlogo.svg" alt="[R logo]" />
+</h1>
+<hr/>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]" /></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]" /></a>
+</div><h2>Documentation for package &lsquo;future&rsquo; version 1.33.1</h2>
+
+<ul><li><a href="../DESCRIPTION">DESCRIPTION file</a>.</li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation.</a></li>
+<li><a href="../demo">Code demos</a>.  Use <a href="../../utils/help/demo">demo()</a> to run them.</li>
+<li><a href="../NEWS">Package NEWS</a>.</li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="future.html">%-&gt;%</a></td>
+<td>Create a future</td></tr>
+<tr><td style="width: 25%;"><a href="future.html">%&lt;-%</a></td>
+<td>Create a future</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-conditions-grapes.html">%conditions%</a></td>
+<td>Control whether standard output should be captured or not</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-globals-grapes.html">%globals%</a></td>
+<td>Specify globals and packages for a future assignment</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-label-grapes.html">%label%</a></td>
+<td>Specify label for a future assignment</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-lazy-grapes.html">%lazy%</a></td>
+<td>Control lazy / eager evaluation for a future assignment</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-globals-grapes.html">%packages%</a></td>
+<td>Specify globals and packages for a future assignment</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-plan-grapes.html">%plan%</a></td>
+<td>Use a specific plan for a future assignment</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-seed-grapes.html">%seed%</a></td>
+<td>Set random seed for future assignment</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-stdout-grapes.html">%stdout%</a></td>
+<td>Control whether standard output should be captured or not</td></tr>
+<tr><td style="width: 25%;"><a href="grapes-tweak-grapes.html">%tweak%</a></td>
+<td>Temporarily tweaks the arguments of the current strategy</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">.future.R</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">as.cluster</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">autoStopCluster</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">availableCores</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">availableWorkers</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="backtrace.html">backtrace</a></td>
+<td>Back trace the expressions evaluated when an error was caught</td></tr>
+<tr><td style="width: 25%;"><a href="cluster.html">cluster</a></td>
+<td>Create a cluster future whose value will be resolved asynchronously in a parallel process</td></tr>
+<tr><td style="width: 25%;"><a href="clusterExportSticky.html">clusterExportSticky</a></td>
+<td>Export globals to the sticky-globals environment of the cluster nodes</td></tr>
+<tr><td style="width: 25%;"><a href="future.html">future</a></td>
+<td>Create a future</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.cmdargs</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.debug</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.demo.mandelbrot.nrow</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.demo.mandelbrot.region</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.fork.multithreading.enable</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.globalenv.onMisuse</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.globals.maxSize</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.globals.method</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.globals.onMissing</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.globals.onReference</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.globals.resolve</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.journal</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.onFutureCondition.keepFuture</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.options</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.output.windows.reencode</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.plan</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.resolve.recursive</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.rng.onMisuse</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.startup.script</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.wait.alpha</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.wait.interval</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">future.wait.timeout</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.html">futureAssign</a></td>
+<td>Create a future</td></tr>
+<tr><td style="width: 25%;"><a href="future.html">futureCall</a></td>
+<td>Create a future</td></tr>
+<tr><td style="width: 25%;"><a href="futureOf.html">futureOf</a></td>
+<td>Get the future of a future variable</td></tr>
+<tr><td style="width: 25%;"><a href="futures.html">futures</a></td>
+<td>Get all futures in a container</td></tr>
+<tr><td style="width: 25%;"><a href="futureSessionInfo.html">futureSessionInfo</a></td>
+<td>Get future-specific session information and validate current backend</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">makeClusterMPI</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">makeClusterPSOCK</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">makeNodePSOCK</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="multicore.html">multicore</a></td>
+<td>Create a multicore future whose value will be resolved asynchronously in a forked parallel process</td></tr>
+<tr><td style="width: 25%;"><a href="multisession.html">multisession</a></td>
+<td>Create a multisession future whose value will be resolved asynchronously in a parallel R session</td></tr>
+<tr><td style="width: 25%;"><a href="nbrOfWorkers.html">nbrOfFreeWorkers</a></td>
+<td>Get the number of workers available</td></tr>
+<tr><td style="width: 25%;"><a href="nbrOfWorkers.html">nbrOfWorkers</a></td>
+<td>Get the number of workers available</td></tr>
+<tr><td style="width: 25%;"><a href="plan.html">plan</a></td>
+<td>Plan how to resolve a future</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">re-exports</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="resolve.html">resolve</a></td>
+<td>Resolve one or more futures synchronously</td></tr>
+<tr><td style="width: 25%;"><a href="resolved.html">resolved</a></td>
+<td>Check whether a future is resolved or not</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_DEBUG</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_DEMO_MANDELBROT_NROW</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_DEMO_MANDELBROT_REGION</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_FORK_MULTITHREADING_ENABLE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_GLOBALENV_ONMISUSE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_GLOBALS_MAXSIZE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_GLOBALS_METHOD</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_GLOBALS_ONMISSING</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_GLOBALS_ONREFERENCE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_GLOBALS_RESOLVE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_JOURNAL</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_ONFUTURECONDITION_KEEPFUTURE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_OUTPUT_WINDOWS_REENCODE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_PLAN</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_RESOLVED_TIMEOUT</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_RESOLVE_RECURSIVE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_RNG_ONMISUSE</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_STARTUP_SCRIPT</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_WAIT_ALPHA</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_WAIT_INTERVAL</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="future.options.html">R_FUTURE_WAIT_TIMEOUT</a></td>
+<td>Options used for futures</td></tr>
+<tr><td style="width: 25%;"><a href="sequential.html">sequential</a></td>
+<td>Create a sequential future whose value will be in the current R session</td></tr>
+<tr><td style="width: 25%;"><a href="re-exports.html">supportsMulticore</a></td>
+<td>Functions Moved to 'parallelly'</td></tr>
+<tr><td style="width: 25%;"><a href="tweak.html">tweak</a></td>
+<td>Tweak a future function by adjusting its default arguments</td></tr>
+<tr><td style="width: 25%;"><a href="sequential.html">uniprocess</a></td>
+<td>Create a sequential future whose value will be in the current R session</td></tr>
+<tr><td style="width: 25%;"><a href="value.html">value</a></td>
+<td>The value of a future or the values of all elements in a container</td></tr>
+<tr><td style="width: 25%;"><a href="value.html">value.environment</a></td>
+<td>The value of a future or the values of all elements in a container</td></tr>
+<tr><td style="width: 25%;"><a href="value.html">value.Future</a></td>
+<td>The value of a future or the values of all elements in a container</td></tr>
+<tr><td style="width: 25%;"><a href="value.html">value.list</a></td>
+<td>The value of a future or the values of all elements in a container</td></tr>
+<tr><td style="width: 25%;"><a href="value.html">value.listenv</a></td>
+<td>The value of a future or the values of all elements in a container</td></tr>
+</table>
+</div></body></html>

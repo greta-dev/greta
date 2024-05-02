@@ -7,7 +7,7 @@
 as.unknowns(x)
 }
 \arguments{
-\item{x}{an unknowns object}
+\item{x}{object to convert to "unknowns" class}
 }
 \description{
 Create objects of class 'unknowns' to nicely print ? valued arrays

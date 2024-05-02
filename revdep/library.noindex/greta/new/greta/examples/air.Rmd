@@ -1,0 +1,48 @@
+### Air
+
+*Air* analyses reported respiratory illness versus exposure to nitrogen dioxide in 103 children. The parameters `alpha`, `beta` and `sigma2` are known in advance, and the data are grouped into three categories.
+
+See [WinBUGS examples volume 2](https://legacy.voteview.com/pdf/WINBUGSmanual_2.pdf) (pdf) for details.
+
+#### data
+```{r air_data, highlight = FALSE}
+y <- c(21, 20, 15)
+n <- c(48, 34, 21)
+Z <- c(10, 30, 50)
+alpha <- 4.48
+beta <- 0.76
+sigma2 <- 81.14
+sigma <- sqrt(sigma2)
+tau <- 1 / sigma2
+J <- 3
+```
+
+#### greta code
+```{r air_greta}
+theta <- normal(0, 32, dim = 2)
+mu <- alpha + beta * Z
+X <- normal(mu, sigma)
+p <- ilogit(theta[1] + theta[2] * X)
+distribution(y) <- binomial(n, p)
+```
+
+#### BUGS/JAGS code
+<div class="bugs">
+```
+for(j in 1 : J) {
+   y[j] ~ dbin(p[j], n[j])
+   logit(p[j]) <- theta[1] + theta[2] * X[j]
+   X[j] ~ dnorm(mu[j], tau)
+   mu[j] <- alpha + beta * Z[j]
+}
+theta[1] ~ dnorm(0.0, 0.001)
+theta[2] ~ dnorm(0.0, 0.001)
+```
+</div>
+
+#### Stan code
+<div class="stan">
+```{r air_stan, echo = FALSE}
+cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/master/bugs_examples/vol2/air/air.stan'), sep = '\n')
+```
+</div>

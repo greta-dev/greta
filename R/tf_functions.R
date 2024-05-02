@@ -339,7 +339,9 @@ tf_sweep <- function(x, stats, margin, fun) {
 
 # transpose and get the right matrix, like R
 tf_chol <- function(x) {
-  tf_transpose(tf$linalg$cholesky(x))
+  x_chol <- tf$linalg$cholesky(x)
+  x_chol_t <- tf_transpose(x_chol)
+  x_chol_t
 }
 
 tf_chol2inv <- function(u) {

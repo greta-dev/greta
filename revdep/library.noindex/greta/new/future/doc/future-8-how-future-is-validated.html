@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>A Future for R: How the Future Framework is Validated</title>
+<style type="text/css">
+body {
+  font-family: sans-serif;
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+body, .footnotes, code { font-size: .9em; }
+li li { font-size: .95em; }
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+pre, img { max-width: 100%; }
+pre, pre:hover {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+pre code {
+  display: block;
+  overflow-x: auto;
+}
+code { font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace; }
+:not(pre) > code, code[class] { background-color: #F8F8F8; }
+code.language-undefined, pre > code:not([class]) {
+  background-color: inherit;
+  border: 1px solid #eee;
+}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+blockquote {
+  color: #666;
+  margin: 0;
+  padding-left: 1em;
+  border-left: 0.5em solid #eee;
+}
+hr, .footnotes::before { border: 1px dashed #ddd; }
+.frontmatter { text-align: center; }
+#TOC .numbered li { list-style: none; }
+#TOC .numbered { padding-left: 0; }
+#TOC .numbered ul { padding-left: 1em; }
+table, .body h2 { border-bottom: 1px solid #666; }
+.body .appendix, .appendix ~ h2 { border-bottom-style: dashed; }
+.footnote-ref a::before { content: "["; }
+.footnote-ref a::after { content: "]"; }
+section.footnotes::before {
+  content: "";
+  display: block;
+  max-width: 20em;
+}
+
+@media print {
+  body {
+    font-size: 12pt;
+    max-width: 100%;
+  }
+  tr, img { page-break-inside: avoid; }
+}
+@media only screen and (min-width: 992px) {
+  pre { white-space: pre; }
+}
+</style>
+<meta name="keywords" content="R, package, vignette, future, promise">
+<meta name="author" content="Henrik Bengtsson">
+</head>
+<body>
+<div class="frontmatter">
+<div class="title"><h1>A Future for R: How the Future Framework is Validated</h1></div>
+<div class="author"><h2></h2></div>
+<div class="date"><h3></h3></div>
+</div>
+<div class="body">
+<h1 id="a-future-for-r-how-the-future-framework-is-validated">A Future for R: How the Future Framework is Validated</h1>
+<p>Since correctness and reproducibility is essential to all data processing, validation is a top priority and part of the design and implementation throughout the future ecosystem.  Several types of testing are performed.</p>
+<p>First, all the essential core packages part of the future framework,
+<strong><a href="https://CRAN.R-Project.org/package=future">future</a></strong>, <strong><a href="https://CRAN.R-Project.org/package=globals">globals</a></strong>, and <strong><a href="https://CRAN.R-Project.org/package=listenv">listenv</a></strong>, implement a rich set of package tests.
+These are validated regularly across the wide-range of operating
+systems (Linux, Solaris, macOS, and MS Windows) and R versions available
+on CRAN, via continuous integration (CI) (<a href="https://github.com/features/actions">GitHub Actions</a>), and on <a href="https://builder.r-hub.io/">R-hub</a>.</p>
+<p>Second, for each new release, these packages undergo full reverse-package
+dependency checks using <strong><a href="https://github.com/r-lib/revdepcheck">revdepcheck</a></strong>.
+As of June 2022, the <strong>future</strong> package is tested against 240+
+direct reverse-package dependencies available on CRAN and Bioconductor.
+These checks are performed on Linux with both the default settings and
+when forcing tests to use multisession workers (SOCK clusters), which further
+validates that globals and packages are identified correctly.</p>
+<p>Third, a suite of <em>Future API conformance tests</em> available in the
+<strong><a href="https://CRAN.R-Project.org/package=future">future.tests</a></strong> package validates the
+correctness of all future backends.  Any new future backend developed, must
+pass these tests to comply with the <em>Future API</em>.
+By conforming to this API, the end-user can trust that the backend will
+produce the same correct and reproducible results as any other backend,
+including the ones that the developer have tested on.
+Also, by making it the responsibility of the developer to assert that their
+new future backend conforms to the <em>Future API</em>, we relieve other
+developers from having to test that their future-based software works on all
+backends.
+It would be a daunting task for a developer to validate the correctness of
+their software with all existing backends. Even if they would achieve that,
+there may be additional third-party future backends that they are not aware
+of, that they do not have the possibility to test with, or that yet have not
+been developed.</p>
+<p>Fourth, since <strong><a href="https://CRAN.R-Project.org/package=foreach">foreach</a></strong> is used by a large number of essential
+CRAN packages, it provides an excellent opportunity for supplementary
+validation. Specifically, we dynamically tweak the examples of
+<strong><a href="https://CRAN.R-Project.org/package=foreach">foreach</a></strong> and popular CRAN packages <strong><a href="https://CRAN.R-Project.org/package=caret">caret</a></strong>, <strong><a href="https://CRAN.R-Project.org/package=glmnet">glmnet</a></strong>, <strong><a href="https://CRAN.R-Project.org/package=NMF">NMF</a></strong>,
+<strong><a href="https://CRAN.R-Project.org/package=plyr">plyr</a></strong>, and <strong><a href="https://CRAN.R-Project.org/package=TSP">TSP</a></strong> to use the <strong><a href="https://CRAN.R-Project.org/package=doFuture">doFuture</a></strong> adaptor.
+This allows us to run these examples with a variety of future backends to
+validate that the examples produce no run-time errors, which indirectly
+validates the backends as well as the <em>Future API</em>.
+In the past, these types of tests helped to identify and resolve corner cases
+where automatic identification of global variables would fail.
+As a side note, several of these foreach-based examples fail when using a
+parallel foreach adaptor because they do not properly export globals or
+declare package dependencies.  The exception is when using the sequential
+<em>doSEQ</em> adaptor (default), fork-based ones such as <strong><a href="https://CRAN.R-Project.org/package=doMC">doMC</a></strong>, or
+the generic <strong><a href="https://CRAN.R-Project.org/package=doFuture">doFuture</a></strong>, which supports any future backend and
+relies on the future framework for handling globals and packages(*)</p>
+<p>Lastly, analogously to above reverse-dependency checks of each new release,
+CRAN and Bioconductor continuously run checks on all these direct, but
+also indirect, reverse dependencies, which further increases the validation
+of the <em>Future API</em> and the future ecosystem at large.</p>
+<p>(*) There is a plan to update <strong><a href="https://CRAN.R-Project.org/package=foreach">foreach</a></strong> to use the exact same static-code-analysis method as the <strong><a href="https://CRAN.R-Project.org/package=future">future</a></strong> package use for identifying globals.  As the maintainer of the future framework, I collaborate with the maintainer of the <strong><a href="https://CRAN.R-Project.org/package=foreach">foreach</a></strong> package to implement this.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>A Future for R: Future Topologies</title>
+<style type="text/css">
+/**
+ * Prism.s theme ported from highlight.js's xcode style
+ */
+pre code {
+  padding: 1em;
+}
+.token.comment {
+  color: #007400;
+}
+.token.punctuation {
+  color: #999;
+}
+.token.tag,
+.token.selector {
+  color: #aa0d91;
+}
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+  color: #1c00cf;
+}
+.token.property,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+  color: #c41a16;
+}
+.token.inserted {
+  background-color: #ccffd8;
+}
+.token.deleted {
+  background-color: #ffebe9;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #9a6e3a;
+}
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #836c28;
+}
+.token.function,
+.token.class-name {
+  color: #DD4A68;
+}
+.token.regex,
+.token.important,
+.token.variable {
+  color: #5c2699;
+}
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+</style>
+<style type="text/css">
+body {
+  font-family: sans-serif;
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+body, .footnotes, code { font-size: .9em; }
+li li { font-size: .95em; }
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+pre, img { max-width: 100%; }
+pre, pre:hover {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+pre code {
+  display: block;
+  overflow-x: auto;
+}
+code { font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace; }
+:not(pre) > code, code[class] { background-color: #F8F8F8; }
+code.language-undefined, pre > code:not([class]) {
+  background-color: inherit;
+  border: 1px solid #eee;
+}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+blockquote {
+  color: #666;
+  margin: 0;
+  padding-left: 1em;
+  border-left: 0.5em solid #eee;
+}
+hr, .footnotes::before { border: 1px dashed #ddd; }
+.frontmatter { text-align: center; }
+#TOC .numbered li { list-style: none; }
+#TOC .numbered { padding-left: 0; }
+#TOC .numbered ul { padding-left: 1em; }
+table, .body h2 { border-bottom: 1px solid #666; }
+.body .appendix, .appendix ~ h2 { border-bottom-style: dashed; }
+.footnote-ref a::before { content: "["; }
+.footnote-ref a::after { content: "]"; }
+section.footnotes::before {
+  content: "";
+  display: block;
+  max-width: 20em;
+}
+
+@media print {
+  body {
+    font-size: 12pt;
+    max-width: 100%;
+  }
+  tr, img { page-break-inside: avoid; }
+}
+@media only screen and (min-width: 992px) {
+  pre { white-space: pre; }
+}
+</style>
+<meta name="keywords" content="R, package, vignette, future, promise">
+<meta name="author" content="Henrik Bengtsson">
+</head>
+<body>
+<div class="frontmatter">
+<div class="title"><h1>A Future for R: Future Topologies</h1></div>
+<div class="author"><h2></h2></div>
+<div class="date"><h3></h3></div>
+</div>
+<div class="body">
+<h1 id="a-future-for-r-future-topologies">A Future for R: Future Topologies</h1>
+<p>Futures can be nested in R such that one future creates another set of futures and so on.  This may, for instance, occur within nested for loops, e.g.</p>
+<pre><code class="language-r">library(future)
+library(listenv)
+x &lt;- listenv()
+for (ii in 1:3) {
+  x[[ii]] %&lt;-% {
+    y &lt;- listenv()
+    for (jj in 1:3) {
+      y[[jj]] %&lt;-% { ii + jj / 10 }
+    }
+    y
+  }
+}
+unlist(x)
+## [1] 1.1 1.2 1.3 2.1 2.2 2.3 3.1 3.2 3.3
+</code></pre>
+<p>The default is to use synchronous futures unless otherwise specified, which is also true for nested futures.  If we for instance specify, <code>plan(multisession)</code>, the first layer of futures (<code>x[[ii]] %&lt;-% { expr }</code>) will be processed asynchronously in background R processes, and the futures in the second layer of futures (<code>y[[jj]] %&lt;-% { expr }</code>) will be processed synchronously in the separate background R processes.  If we wish to be explicit about this, we can specify <code>plan(list(multisession, sequential))</code>.</p>
+<h2 id="example-high-throughput-sequencing">Example: High-Throughput Sequencing</h2>
+<p>Consider a high-throughput sequencing (HT-Seq) project with 50 human DNA samples where we have one FASTQ file per sample containing the raw sequence reads as they come out of the sequencing machine.  With this data, we wish to align each FASTQ to a reference genome such that we generate 24 individual BAM files per sample - one per chromosome.</p>
+<p>Here is the layout of what such an analysis could look like in R using futures.</p>
+<pre><code class="language-r">library(future)
+library(listenv)
+htseq_align &lt;- function(fq, chr) { chr }
+
+fqs &lt;- dir(pattern = &quot;[.]fastq$&quot;)
+
+bams &lt;- listenv()
+for (ss in seq_along(fqs)) {
+  fq &lt;- fqs[ss]
+  bams[[ss]] %&lt;-% {
+    bams_ss &lt;- listenv()
+    for (cc in 1:24) {
+      bams_ss[[cc]] %&lt;-% htseq_align(fq, chr = cc)
+    }
+    as.list(bams_ss)
+  }
+}
+bams &lt;- as.list(bams)
+</code></pre>
+<p>The default is to use synchronous futures, so without further specifications, the above will process each sample and each chromosome sequentially.  Next, we will consider what can be done with the following two computer setups:</p>
+<ul>
+<li>A single machine with 8 cores</li>
+<li>A compute cluster with 3 machines each with 16 cores</li>
+</ul>
+<h3 id="one-multi-core-machine">One multi-core machine</h3>
+<p>With a single machine of 8 cores, we could choose to process multiple samples at the same time while processing chromosomes sequentially.  In other words, we would like to evaluate the outer layer of futures using multisession futures and the inner ones as sequential futures.  This can be specified as:</p>
+<pre><code class="language-r">plan(list(multisession, sequential))
+</code></pre>
+<p>The internals for processing multisession future queries <code>availableCores()</code> to infer how many cores can be used simultaneously, so there is no need to explicitly specify that there are 8 cores available.</p>
+<p><em>Comment</em>: Since synchronous is the default future, we could skip trailing sequential futures in the setup, e.g. <code>plan(list(multisession))</code> or just <code>plan(multisession)</code>.  However, it does not hurt to be explicit.</p>
+<p>If we instead would like to process the sample sequentially and the chromosomes in parallel, we can use:</p>
+<pre><code class="language-r">plan(list(sequential, multisession))
+</code></pre>
+<h4 id="built-in-protection-against-recursive-parallelism">Built-in protection against recursive parallelism</h4>
+<p>Above we have processed either the outer or the inner set of future in parallel.  What if we want to process both layers in parallel?  It’s tempting to use:</p>
+<pre><code class="language-r">plan(list(multisession, multisession))
+</code></pre>
+<p>Although this does not give an error, we will find that the inner layer of futures will be processed sequentially just as if we would use <code>plan(list(multisession, sequential))</code>.  This behavior is due to the built-in protection against nested parallelism.  If both layers would run in parallel, each using the 8 cores available on the machine, we would be running 8 * 8 = 64 parallel processes - that would for sure overload our computer.  What happens internally is that for the outer layer, <code>availableCores()</code> equals eight (8), whereas for the inner layer it equals one (1).</p>
+<p>Now, we could imagine that we process the outer layer with, say, two parallel futures, and then the inner layer with four parallel futures.  In that case, we would end up running on at most eight cores (= 2 * 4).  This can be achieved by forcing a fixed number of workers at each layer:</p>
+<pre><code class="language-r">plan(list(tweak(multisession, workers = 2), tweak(multisession, workers = 4)))
+</code></pre>
+<p>When using this approach, there is a risk of setting up too many concurrent workers.  To make sure the setup respects <code>availableCores()</code>, use something like:</p>
+<pre><code class="language-r">plan(list(
+  tweak(multisession, workers = availableCores() %/% 4),
+  tweak(multisession, workers = 4)
+))
+</code></pre>
+<p>However, before using nested parallelization on a single machine, make sure it is actually more efficient than using parallelization in only one of the layers.</p>
+<h3 id="an-ad-hoc-compute-cluster">An ad-hoc compute cluster</h3>
+<p>With a compute cluster of 3 machines each with 16 cores, we can run up to 48 alignment processes in parallel.  A natural setup is to have one machine process one sample in parallel.  We could specify this as:</p>
+<pre><code class="language-r">nodes &lt;- c(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;)
+plan(list(tweak(cluster, workers = nodes), multisession))
+</code></pre>
+<p><em>Comment:</em> Multisession futures are agile to its environment, that is, they will query the machine they are running on to find out how many parallel processes it can run at the same time.</p>
+<p>One possible downside to the above setup is that we might not utilize all available cores all the time.  This is because the alignment of the shorter chromosomes will finish sooner than the longer ones, which means that we might at the end of each sample have only a few alignment processes running on each machine leaving the remaining cores idle/unused.  An alternative set up is then to use the following setup:</p>
+<pre><code class="language-r">nodes &lt;- rep(c(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;), each = 8)
+plan(list(
+  tweak(cluster, workers = nodes),
+  tweak(multisession, workers = 2)
+))
+</code></pre>
+<p>This will cause up to 24 (= 3*8) samples to be processed in parallel each processing two chromosomes at the same time.</p>
+<h2 id="example-a-remote-compute-cluster">Example: A Remote Compute Cluster</h2>
+<p>Imagine we have access to a remote compute cluster, with login node <code>remote.server.org</code>, and that the cluster has three nodes <code>n1</code>, <code>n2</code>, and <code>n3</code>.  Also, let us assume we have already set up the cluster such that we can log in via public key authentication via SSH, i.e. when we do <code>ssh remote.server.org</code> authentication is done automatically.</p>
+<p>With the above setup, we can use nested futures in our local R session to evaluate R expression on the remote compute cluster and its three nodes.  Here is a proof of concept illustrating how the different nested futures are evaluated on different machines.</p>
+<pre><code class="language-r">library(future)
+library(listenv)
+
+## Set up access to remote login node (must have Rscript)
+login &lt;- tweak(cluster, workers = &quot;remote.server.org&quot;, persistent = TRUE)
+plan(login)
+
+## Set up cluster nodes on login node
+nodes %&lt;-% { .keepme &lt;- parallelly::makeClusterPSOCK(c(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;)) }
+print(nodes)
+## socket cluster with 3 nodes on hosts 'n1', 'n2', 'n3'
+
+## Specify future topology
+## login node -&gt; { cluster nodes } -&gt; { multiple cores }
+plan(list(
+  login,
+  tweak(cluster, workers = nodes),
+  multisession
+))
+
+
+## (a) This will be evaluated on the cluster login computer
+x %&lt;-% {
+  thost &lt;- Sys.info()[[&quot;nodename&quot;]]
+  tpid &lt;- Sys.getpid()
+  y &lt;- listenv()
+  for (task in 1:4) {
+    ## (b) This will be evaluated on a compute node on the cluster
+    y[[task]] %&lt;-% {
+      mhost &lt;- Sys.info()[[&quot;nodename&quot;]]
+      mpid &lt;- Sys.getpid()
+      z &lt;- listenv()
+      for (jj in 1:2) {
+        ## (c) These will be evaluated in separate processes on the same compute node
+        z[[jj]] %&lt;-% data.frame(task = task,
+		                        top.host = thost, top.pid = tpid,
+                                mid.host = mhost, mid.pid = mpid,
+                                host = Sys.info()[[&quot;nodename&quot;]],
+								pid = Sys.getpid())
+      }
+      Reduce(rbind, z)
+    }
+  }
+  Reduce(rbind, y)
+}
+
+print(x)
+##   task top.host top.pid mid.host mid.pid host    pid
+## 1    1    login  391547       n1  391878   n1 393943
+## 2    1    login  391547       n1  391878   n1 393951
+## 3    2    login  391547       n2  392204   n2 393971
+## 4    2    login  391547       n2  392204   n2 393978
+## 5    3    login  391547       n3  392527   n3 394040
+## 6    3    login  391547       n3  392527   n3 394048
+## 7    4    login  391547       n1  391878   n1 393959
+## 8    4    login  391547       n1  391878   n1 393966
+</code></pre>
+<p>Try the above <code>x %&lt;-% { ... }</code> future with, say, <code>plan(list(sequential, multisession))</code> and see what the output will be.</p>
+<h2 id="example-adjust-the-number-of-workers-for-each-cluster-node">Example: Adjust the Number of Workers for Each Cluster Node</h2>
+<p>When using</p>
+<pre><code class="language-r">nodes &lt;- c(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;)
+plan(list(tweak(cluster, workers = nodes), multisession))
+</code></pre>
+<p>the number of workers used on each of the nodes (<code>n1</code>, <code>n2</code>, and <code>n3</code>) is
+given by the value of <code>availableCores()</code> on each of those nodes.  In turn,
+<code>availableCores()</code> typically defaults to the number of cores on those nodes.
+Now, imagine you want to use only 50% of these cores.  This can be done by
+tweaking the <code>multisession</code> plan by passing a function to <code>workers</code>;</p>
+<pre><code class="language-r">halfCores &lt;- function() { max(1, round(0.5 * availableCores()))
+plan(list(
+  tweak(cluster, workers = nodes),
+  tweak(multisession, workers = halfCores)
+))
+</code></pre>
+<p>With this, each node will use at most 50% of the cores available.
+For instance, if <code>n1</code> and <code>n2</code> have eight cores, and <code>n3</code> has 32 cores,
+then they nodes will use four, four, and 16 cores, respectively.</p>
+<p>Another example is:</p>
+<pre><code class="language-r">customWorkers &lt;- function() {
+  switch(Sys.info()[[&quot;nodename&quot;]],
+    &quot;n1&quot; = 2L,
+    &quot;n2&quot; = 3L,
+    ## default:
+    availableCores()
+  )
+}
+plan(list(
+  tweak(cluster, workers = nodes),
+  tweak(multisession, workers = customWorkers)
+))
+</code></pre>
+<p>In this case, node <code>n1</code> will always use two cores, <code>n2</code> three cores,
+and <code>n3</code> will respect what <code>availableCores()</code> returns.</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+</body>
+</html>

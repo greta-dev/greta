@@ -1,0 +1,27 @@
+### Bayesian neural network
+
+*Bayesian neural network* estimates an easy neural network with a normal prior on the edge weights.
+For clarity we use an architecture without a hidden layer, such that the weights actually correspond to coefficients in a linear regression model.
+
+```{r bayesian_neural_network_data, highlight = FALSE}
+N <- 100
+p <- 10
+
+set.seed(23)  
+X <- matrix(rnorm(N * p), N)
+beta <- rnorm(10)
+y <- X %*% beta + rnorm(N, sd = 0.1)
+```
+
+```{r bayesian_neural_network_greta}
+neural_network <- function(x)
+{
+  # this can be arbitrarily complex, e.g. multiple hidden layers
+  x %*% weights
+}
+  
+weights <- normal(0, 1, dim = c(p, 1))
+sd <- inverse_gamma(1, 1)
+
+distribution(y) <- normal(neural_network(X), sd)
+```

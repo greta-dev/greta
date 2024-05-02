@@ -161,6 +161,34 @@ operation_node <- R6Class(
       # if sampling get the distribution constructor and sample this
       if (mode == "sampling") {
         tensor <- dag$draw_sample(self$distribution)
+        if (has_representation(self, "cholesky")) {
+          # error here since when sampling from a cholesky represented variable
+          # we don't really get consistent results
+          cli::cli_warn(
+            ## Could note that there are false positives
+            message = c(
+              "When using {.fun calculate} to sample a greta array with a \\
+              cholesky factor, the output can sometimes be unreliable.",
+              "See issue here on github for more details:",
+              "{.url }"
+            )
+          )
+          # browser()
+          cholesky_tensor <- tf_chol(tensor)
+          # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          cholesky_node <- get_node(representation(self, "cholesky"))
+          cholesky_tf_name <- dag$tf_name(cholesky_node)
+          assign(cholesky_tf_name, cholesky_tensor, envir = tfe)
+          ## TF1/2
+          ## This assignment I think is supposed to be passed down to later on
+          ## in the script, as `cholesky_tf_name` gets overwritten
+          # cholesky_tf_name <- dag$tf_name(self)
+          # tf_name <- cholesky_tf_name
+          # tensor <- cholesky_tensor
+          cholesky_tensor <- tf_chol(tensor)
+          cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
+        }
       }
 
       if (mode == "forward") {
@@ -182,6 +210,7 @@ operation_node <- R6Class(
         tensor <- do.call(operation, tf_args)
       }
 
+      # browser()
       # assign it in the environment
       assign(tf_name, tensor, envir = dag$tf_environment)
     }

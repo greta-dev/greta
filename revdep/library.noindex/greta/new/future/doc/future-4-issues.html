@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>A Future for R: Common Issues with Solutions</title>
+<style type="text/css">
+/**
+ * Prism.s theme ported from highlight.js's xcode style
+ */
+pre code {
+  padding: 1em;
+}
+.token.comment {
+  color: #007400;
+}
+.token.punctuation {
+  color: #999;
+}
+.token.tag,
+.token.selector {
+  color: #aa0d91;
+}
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+  color: #1c00cf;
+}
+.token.property,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+  color: #c41a16;
+}
+.token.inserted {
+  background-color: #ccffd8;
+}
+.token.deleted {
+  background-color: #ffebe9;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #9a6e3a;
+}
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #836c28;
+}
+.token.function,
+.token.class-name {
+  color: #DD4A68;
+}
+.token.regex,
+.token.important,
+.token.variable {
+  color: #5c2699;
+}
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+</style>
+<style type="text/css">
+body {
+  font-family: sans-serif;
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+body, .footnotes, code { font-size: .9em; }
+li li { font-size: .95em; }
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+pre, img { max-width: 100%; }
+pre, pre:hover {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+pre code {
+  display: block;
+  overflow-x: auto;
+}
+code { font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace; }
+:not(pre) > code, code[class] { background-color: #F8F8F8; }
+code.language-undefined, pre > code:not([class]) {
+  background-color: inherit;
+  border: 1px solid #eee;
+}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+blockquote {
+  color: #666;
+  margin: 0;
+  padding-left: 1em;
+  border-left: 0.5em solid #eee;
+}
+hr, .footnotes::before { border: 1px dashed #ddd; }
+.frontmatter { text-align: center; }
+#TOC .numbered li { list-style: none; }
+#TOC .numbered { padding-left: 0; }
+#TOC .numbered ul { padding-left: 1em; }
+table, .body h2 { border-bottom: 1px solid #666; }
+.body .appendix, .appendix ~ h2 { border-bottom-style: dashed; }
+.footnote-ref a::before { content: "["; }
+.footnote-ref a::after { content: "]"; }
+section.footnotes::before {
+  content: "";
+  display: block;
+  max-width: 20em;
+}
+
+@media print {
+  body {
+    font-size: 12pt;
+    max-width: 100%;
+  }
+  tr, img { page-break-inside: avoid; }
+}
+@media only screen and (min-width: 992px) {
+  pre { white-space: pre; }
+}
+</style>
+<meta name="keywords" content="R, package, vignette, future, promise">
+<meta name="author" content="Henrik Bengtsson">
+</head>
+<body>
+<div class="frontmatter">
+<div class="title"><h1>A Future for R: Common Issues with Solutions</h1></div>
+<div class="author"><h2></h2></div>
+<div class="date"><h3></h3></div>
+</div>
+<div class="body">
+<h1 id="a-future-for-r-common-issues-with-solutions">A Future for R: Common Issues with Solutions</h1>
+<p>In the ideal case, all it takes to start using futures in R is to replace select standard assignments (<code>&lt;-</code>) in your R code with future assignments (<code>%&lt;-%</code>) and make sure the right-hand side (RHS) expressions are within curly brackets (<code>{ ... }</code>).  Also, if you assign these to lists (e.g. in a for loop), you need to use a list environment (<code>listenv</code>) instead of a plain list.</p>
+<p>However, as show below, there are few cases where you might run into some hurdles, but, as also shown, they are often easy to overcome.  These are often related to global variables.</p>
+<p><em>If you identify other cases, please consider <a href="https://github.com/HenrikBengtsson/future/issues/">reporting</a> them so they can be documented here and possibly even be fixed.</em></p>
+<h2 id="issues-with-globals-and-packages">Issues with globals and packages</h2>
+<h3 id="missing-globals-false-negatives">Missing globals (false negatives)</h3>
+<p>If a global variable is used in a future expression that <em>conditionally</em> overrides this global variable with a local one, the future framework fails to identify the global variable and therefore fails to export it, resulting in a run-time error.  For example, although this works:</p>
+<pre><code class="language-r">plan(multisession)
+
+reset &lt;- TRUE
+x &lt;- 1
+y %&lt;-% { if (reset) x &lt;- 0; x + 1 }
+y
+## [1] 1
+</code></pre>
+<p>the following does <em>not</em> work:</p>
+<pre><code class="language-r">reset &lt;- FALSE
+x &lt;- 1
+y %&lt;-% { if (reset) x &lt;- 0; x + 1 }
+y
+## Error: object 'x' not found
+</code></pre>
+<p>It is recommended to avoid above constructs where it is ambiguous whether a variable is global or local.  To force variable <code>x</code> to always be global, insert it at the very being of the future expression, e.g.</p>
+<pre><code class="language-r">reset &lt;- FALSE
+x &lt;- 1
+y %&lt;-% { x; if (reset) x &lt;- 0; x + 1 }
+y
+## [1] 2
+</code></pre>
+<p><em>Comment:</em> The goal is to in a future version of the package detect globals also in expression where the local-global state of a variable is only known at run time.</p>
+<h4 id="do-call-function-not-found">do.call() - function not found</h4>
+<p>When calling a function using <code>do.call()</code> make sure to specify the function as the object itself and not by name.  This will help identify the function as a global object in the future expression.  For instance, use</p>
+<pre><code class="language-r">do.call(file_ext, list(&quot;foo.txt&quot;))
+</code></pre>
+<p>instead of</p>
+<pre><code class="language-r">do.call(&quot;file_ext&quot;, list(&quot;foo.txt&quot;))
+</code></pre>
+<p>so that <code>file_ext()</code> is properly located and exported.  Although you may not notice a difference when evaluating futures in the same R session, it may become a problem if you use a character string instead of a function object when futures are evaluated in external R sessions, such as on a cluster.
+It may also become a problem with futures evaluated with lazy evaluation if the intended function is redefined after the future is resolved.  For example,</p>
+<pre><code class="language-r">&gt; library(future)
+&gt; library(listenv)
+&gt; library(tools)
+&gt; plan(sequential)
+&gt; pathnames &lt;- c(&quot;foo.txt&quot;, &quot;bar.png&quot;, &quot;yoo.md&quot;)
+&gt; res &lt;- listenv()
+&gt; for (ii in seq_along(pathnames)) {
++   res[[ii]] %&lt;-% do.call(&quot;file_ext&quot;, list(pathnames[ii])) %lazy% TRUE
++ }
+&gt; file_ext &lt;- function(...) &quot;haha!&quot;
+&gt; unlist(res)
+[1] &quot;haha!&quot; &quot;haha!&quot; &quot;haha!&quot;
+</code></pre>
+<h4 id="get-object-not-found">get() - object not found</h4>
+<p>The base R function <code>get()</code> can be used to get the value of a object by its name.  For example, <code>get(&quot;pi&quot;, envir = baseenv())</code> will get the value of object <code>pi</code> in the ‘base’ environment, i.e. it corresponds to <code>base::pi</code>.  If no other objects named <code>pi</code> exists on the search path, we could have used <code>get(&quot;pi&quot;)</code> and <code>pi</code>, respectively.  It is not unusual to see code snippets such as:</p>
+<pre><code class="language-r">&gt; a &lt;- 1:3
+&gt; b &lt;- 4:6
+&gt; c &lt;- 3:5
+&gt; my_sum &lt;- function(var) { sum(get(var)) }
+&gt; y &lt;- my_sum(&quot;a&quot;)
+&gt; y
+[1] 6
+</code></pre>
+<p>If we attempt to call <code>my_sum()</code> via a future, we will get an error (if the future is resolved in an external R process);</p>
+<pre><code class="language-r">&gt; library(future)
+&gt; plan(multisession)
+&gt; f &lt;- future(my_sum(&quot;a&quot;))
+&gt; y &lt;- value(f)
+Error in get(var) : object 'a' not found
+</code></pre>
+<p>This is because the static code inspection done on the future expression <code>my_sum(&quot;a&quot;)</code> does not reveal object <code>a</code> as a global object.  In that expression alone, there are only three objects: the function <code>my_sum()</code>, the primitive function <code>(</code>, and the string <code>&quot;a&quot;</code>, and none of those are object <code>a</code>.  The future framework will also scan these three objects for globals, which in this example means that it scans also <code>my_sum()</code>.  This recursive search for globals will identify three additional globals, namely, the primitive function <code>{</code>, the function <code>sum()</code>, and the function <code>get()</code>, but, as before, none of these source will identify <code>a</code> as a global object.
+In order for <code>a</code> to be identified, the future framework would need to have a built-in understanding on how <code>get(var)</code> works, which would be a daunting task, especially if it need to know how it acts for different data types of <code>var</code> and various choices on arguments <code>envir</code> and <code>enclos</code>.  In fact, this can often not be inferred until run time, that is, it is not possible to identify what objects are needed without actually running the code.  In short, it is not possible to automatically identify global variables specified via a character string.</p>
+<p>The workaround is to tell the future framework what <em>additional</em> globals are needed.  This can be done via argument <code>globals</code> using:</p>
+<pre><code class="language-r">&gt; f &lt;- future(my_sum(&quot;a&quot;), globals = structure(TRUE, add = &quot;a&quot;))
+&gt; y &lt;- value(f)
+&gt; y
+[1] 6
+</code></pre>
+<p>or by injecting variable <code>a</code> at the beginning of the future expression, e.g.</p>
+<pre><code class="language-r">&gt; f &lt;- future({ a; my_sum(&quot;a&quot;) })
+&gt; y &lt;- value(f)
+&gt; y
+[1] 6
+</code></pre>
+<p>Note that, independently of the future framework, it is often a bad idea to use <code>get()</code>, and related functions <code>mget()</code> and <code>assign()</code>, in R code.  Searching the archives of R forums, such as the R-help and R-devel mailing lists, will reveal numerous suggestions against using them.  A good rule of thumb is:</p>
+<blockquote>
+<p>If you find yourself using <code>get()</code> in your code, take a step back, and reconsider your implementation.  There is most likely a better solution available.</p>
+</blockquote>
+<p>For example, consider this, slightly more complex, example:</p>
+<pre><code class="language-r">&gt; a &lt;- 1:3
+&gt; b &lt;- 4:7
+&gt; c &lt;- 3:5
+&gt; my_sum &lt;- function(var) { sum(get(var)) }
+&gt; y &lt;- sapply(c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;), FUN = my_sum)
+&gt; y
+ a  b  c
+ 6 22 12
+</code></pre>
+<p>Instead of using “free roaming” objects <code>a</code>, <code>b</code>, and <code>c</code>, it’s better to put those values in a list (or a data frame of of the same length);</p>
+<pre><code class="language-r">&gt; data &lt;- list(a = 1:3, b = 4:7, c = 3:5)
+</code></pre>
+<p>This will in turn allow us to perform the same calculations without having to use <code>get()</code>;</p>
+<pre><code class="language-r">&gt; my_sum &lt;- function(x) { sum(x) }
+&gt; y &lt;- sapply(data, FUN = my_sum)
+&gt; y
+ a  b  c
+ 6 22 12
+</code></pre>
+<h4 id="glue-glue-object-not-found">glue::glue() - object not found</h4>
+<p>The future framework will fail to identify globals that are declared via character strings.  The above section gives an example of this where <code>get()</code> is used and explains why it is not feasible to automatically identify string-embedded globals from such code.  Another example, is when using <code>glue()</code> from the <strong><a href="https://cran.r-project.org/package=glue">glue</a></strong> package to generate strings dynamically, e.g.</p>
+<pre><code class="language-r">&gt; library(glue)
+&gt; a &lt;- 42
+&gt; s &lt;- glue(&quot;The value of a is {a}.&quot;)
+&gt; s
+The value of a is 42.
+</code></pre>
+<p>Attempt to perform the same via a future that is resolved in another R session will produce an “object not found” error;</p>
+<pre><code class="language-r">&gt; library(glue)
+&gt; library(future)
+&gt; plan(multisession)
+&gt; a &lt;- 42
+&gt; s %&lt;-% glue(&quot;The value of a is {a}.&quot;)
+&gt; s
+Error in eval(parse(text = text, keep.source = FALSE), envir) : 
+  object 'a' not found
+</code></pre>
+<p>As explained in the previous section, the workaround is to specify what additional global variables there are, which can be done as:</p>
+<pre><code>&gt; s %&lt;-% glue(&quot;The value of a is {a}.&quot;) %globals% structure(TRUE, add = &quot;a&quot;)
+&gt; s
+The value of a is 42.
+</code></pre>
+<p>An alternative solution is to guide the future framework by adding the missing globals as “dummy” variables, e.g.</p>
+<pre><code>&gt; s %&lt;-% { a; glue(&quot;The value of a is {a}.&quot;) }
+&gt; s
+The value of a is 42.
+</code></pre>
+<h3 id="missing-packages-false-negatives">Missing packages (false negatives)</h3>
+<p>Occasionally, the static-code inspection of the future expression fails to identify packages needed to evaluated the expression.  This may occur when an expression uses S3 generic functions part of one package whereas the required S3 method is in another package.  For example, in the below future generic function <code>[</code> is used on data.table object <code>DT</code>, which requires S3 method <code>[.data.table</code> from the <strong><a href="https://cran.r-project.org/package=data.table">data.table</a></strong> package.  However, the <strong>future</strong> and <strong><a href="https://cran.r-project.org/package=globals">globals</a></strong> packages fail to identify <strong>data.table</strong> as a required package, which results in an evaluation error:</p>
+<pre><code class="language-r">&gt; library(future)
+&gt; plan(multisession)
+
+&gt; library(data.table)
+&gt; DT &lt;- data.table(a = LETTERS[1:3], b = 1:3)
+&gt; y %&lt;-% DT[, sum(b)]
+&gt; y
+Error: object 'b' not found
+</code></pre>
+<p>The above error occurs because, contrary to the master R process, the R worker that evaluated the future expression does not have <strong>data.table</strong> loaded.  Instead the evaluation falls back to the <code>[.data.frame</code> method, which is not what we want.</p>
+<p>Until the future framework manages to identify <strong>data.table</strong> as a required package (which is the goal), we can guide future by specifying additional packages needed:</p>
+<pre><code class="language-r">&gt; y %&lt;-% DT[, sum(b)] %packages% &quot;data.table&quot;
+&gt; y
+[1] 6
+</code></pre>
+<p>or equivalently</p>
+<pre><code class="language-r">&gt; f &lt;- future(DT[, sum(b)], packages = &quot;data.table&quot;)
+&gt; value(f)
+[1] 6
+</code></pre>
+<p>Note, do <em>not</em> use <code>library()</code> or <code>loadNamespace()</code> to resolve these problems. It is always better to use the above <code>packages</code> approach.</p>
+<h2 id="non-exportable-objects">Non-exportable objects</h2>
+<p>Certain types of objects are tied to a given R session and cannot be passed along to another R process (a “worker”).  An example of a non-exportable object is is XML objects of the <strong><a href="https://cran.r-project.org/package=xml2">xml2</a></strong> package.  If we attempt to use those in parallel processing, we may get a error when the future is evaluated (or just invalid results depending on how they are used), e.g.</p>
+<pre><code class="language-r">&gt; library(future)
+&gt; plan(multisession)
+&gt; library(xml2)
+&gt; xml &lt;- read_xml(&quot;&lt;body&gt;&lt;/body&gt;&quot;)
+&gt; f &lt;- future(xml_children(xml))
+&gt; value(f)
+Error: external pointer is not valid
+</code></pre>
+<p>The future framework can help detect this <em>before</em> sending off the future to the worker;</p>
+<pre><code class="language-r">&gt; options(future.globals.onReference = &quot;error&quot;)
+&gt; f &lt;- future(xml_children(xml))
+Error in FALSE : 
+  Detected a non-exportable reference ('externalptr') in one of the globals
+('xml' of class 'xml_document') used in the future expression
+</code></pre>
+<p>For additional details on non-exportable objects and examples of other R packages that use objects that may cause problems in parallel processing, see Vignette ‘Non-Exportable Objects’.</p>
+<h2 id="trying-to-pass-an-unresolved-future-to-another-future">Trying to pass an unresolved future to another future</h2>
+<p>It is not possible for a future to resolve another one unless it was created by the future trying to resolve it.  For instance, the following gives an error:</p>
+<pre><code class="language-r">&gt; library(future)
+&gt; plan(multisession)
+&gt; f1 &lt;- future({ Sys.getpid() })
+&gt; f2 &lt;- future({ value(f1) })
+&gt; v1 &lt;- value(f1)
+[1] 7464
+&gt; v2 &lt;- value(f2)
+Error: Invalid usage of futures: A future whose value has not yet been collected
+ can only be queried by the R process (cdd013cb-e045-f4a5-3977-9f064c31f188; pid
+ 1276 on MyMachine) that created it, not by any other R processes (5579f789-e7b6
+ -bace-c50d-6c7a23ddb5a3; pid 2352 on MyMachine): {; Sys.getpid(); }
+</code></pre>
+<p>This is because the main R process creates two futures, but then the second future tries to retrieve the value of the first one.  This is an invalid request because the second future has no channel to communicate with the first future; it is only the process that created a future who can communicate with it(*).</p>
+<p>Note that it is only <em>unresolved</em> futures that cannot be queried this way.  Thus, the solution to the above problem is to make sure all futures are resolved before they are passed to other futures, e.g.</p>
+<pre><code class="language-r">&gt; f1 &lt;- future({ Sys.getpid() })
+&gt; v1 &lt;- value(f1)
+&gt; v1
+[1] 7464
+&gt; f2 &lt;- future({ value(f1) })
+&gt; v2 &lt;- value(f2)
+&gt; v2
+[1] 7464
+</code></pre>
+<p>This works because the value has already been collected and stored inside future <code>f1</code> before future <code>f2</code> is created.  Since the value is already stored internally, <code>value(f1)</code> is readily available everywhere.  Of course, instead of using <code>value(f1)</code> for the second future, it would be more readable and cleaner to simply use <code>v1</code>.</p>
+<p>The above is typically not a problem when future assignments are used.  For example:</p>
+<pre><code class="language-r">&gt; v1 %&lt;-% { Sys.getpid() })
+&gt; v2 %&lt;-% { v1 }
+&gt; v1
+[1] 2352
+&gt; v2
+[1] 2352
+</code></pre>
+<p>The reason that this approach works out of the box is because in the second future assignment <code>v1</code> is identified as a global variable, which is retrieved.  Up to this point, <code>v1</code> is a promise (“delayed assignment” in R), but when it is retrieved as a global variable its value is resolved and <code>v1</code> becomes a regular variable.</p>
+<p>However, there are cases where future assignments can be passed via global variables without being resolved.  This can happen if the future assignment is done to an element of an environment (including list environments).  For instance,</p>
+<pre><code class="language-r">&gt; library(listenv)
+&gt; x &lt;- listenv()
+&gt; x$a %&lt;-% { Sys.getpid() }
+&gt; x$b %&lt;-% { x$a }
+&gt; x$a
+[1] 2352
+&gt; x$b
+Error: Invalid usage of futures: A future whose value has not yet been collected
+ can only be queried by the R process (cdd013cb-e045-f4a5-3977-9f064c31f188; pid
+ 1276 on localhost) that created it, not by any other R processes (2ce86ccd-5854
+ -7a05-1373-e1b20022e4d8; pid 7464 on localhost): {; Sys.getpid(); }
+</code></pre>
+<p>As previously, this can be avoided by making sure <code>x$a</code> is resolved first, which can be one in various ways, e.g. <code>dummy &lt;- x$a</code>, <code>resolve(x$a)</code> and <code>force(x$a)</code>.</p>
+<p><em>Footnote</em>: (*) Although sequential futures could be passed on to other futures part of the same R process and be resolved there because they share the same evaluation process, by definition of the Future API it is invalid to do so regardless of future type.  This conservative approach is taken in order to make future expressions behave consistently regardless of the type of future used.</p>
+<h2 id="miscellaneous">Miscellaneous</h2>
+<h3 id="capturing-errors-outputting-their-messages-and-returning-a-default-value">Capturing errors, outputting their messages, and returning a default value</h3>
+<p>Sometimes a function call produce an error for a particular input. In such cases, we might want to return a default value, say, a missing value, instead of signaling an error. This can be done using:</p>
+<pre><code class="language-r">res &lt;- tryCatch({
+  unstable_calc(x)
+}, error = function(e) {
+  NA_real_
+})
+</code></pre>
+<p>Here, <code>res</code> takes the value of <code>unstable_calc(x)</code>, unless it produces an error, in case it takes value <code>NA_real_</code>.</p>
+<p>In addition to the above, we could produce a warning whenever we get an error and replace it with a missing value. We can do this as:</p>
+<pre><code class="language-r">res &lt;- tryCatch({
+  unstable_calc(x)
+}, error = function(e) {
+  warning(conditionMessage(e))
+  NA_real_
+})
+</code></pre>
+<p>This will turn the error into a warning with the same message.  If we want to just output the message without producing a warning, we can use <code>message(conditionMessage(e))</code>.</p>
+<p>Importantly, we must not use just <code>warning(e)</code> or <code>message(e)</code>, although it appears to work at a first glance.  If we do, we will end up re-signaling the error but without interruption.  It is an important distinction that will reveal itself if used within futures.  The above example with <code>warning(conditionMessage(e))</code> will work as expected, but if we use <code>warning(e)</code> the future framework will produce an error, not a warning.</p>
+<h3 id="using-source-in-a-future">Using <code>source()</code> in a future</h3>
+<p>Avoid using <code>source()</code> inside futures. It is always better to source external R scripts at the top of your main R script, e.g.</p>
+<pre><code class="language-r">library(future)
+source(&quot;./my-script.R&quot;)
+
+f &lt;- future({
+  ...
+})
+</code></pre>
+<p>However, if you find yourself having to source a script inside a future, or inside a function, make sure to specify argument <code>local = TRUE</code>, e.g.</p>
+<pre><code class="language-r">f &lt;- future({
+  source(&quot;./my-script.R&quot;, local = TRUE)
+  ...
+})
+</code></pre>
+<p>This is because <code>source()</code> defaults to <code>local = FALSE</code>, which has side effects.  When using <code>local = FALSE</code>, any functions or variables defined by the R script are assigned to the global environment - not the calling environment as we might expect.  This may make little different when calling <code>source()</code> from the R prompt, or from another script.  However, when called from inside a function, inside <code>local()</code>, or inside a future, it might result in unexpected behavior. It is similar to using <code>assign(&quot;a&quot;, 42, envir = globalenv())</code>, which is known be a bad practice.  To be on the safe side, it is almost always better call <code>source()</code> with <code>local = TRUE</code>.</p>
+<h3 id="clashes-with-other-packages">Clashes with other packages</h3>
+<p>Sometimes other packages have functions or operators with the same name as the future package, and if those packages are attached <em>after</em> the <strong>future</strong> package, their objects will mask the ones of the <strong>future</strong> package.  For instance, the <strong><a href="https://cran.r-project.org/package=igraph">igraph</a></strong> package also defines a <code>%&lt;-%</code> operator which clashes with the one in future <em>if used at the prompt or in a script</em> (it is not a problem inside package because there we explicitly import objects in a known order).  Here is what we might get:</p>
+<pre><code class="language-r">&gt; library(future)
+&gt; library(igraph)
+
+Attaching package: 'igraph'
+
+The following objects are masked from 'package:future':
+
+    %&lt;-%, %-&gt;%
+
+The following objects are masked from 'package:stats':
+
+    decompose, spectrum
+
+The following object is masked from 'package:base':
+
+    union
+
+&gt; y %&lt;-% { 42 }
+Error in get(&quot;.igraph.from&quot;, parent.frame()) : 
+  object '.igraph.from' not found
+</code></pre>
+<p>Here we get an error because <code>%&lt;-%</code> is from <strong>igraph</strong> and not the future assignment operator as we wanted.  This can be confirmed as:</p>
+<pre><code class="language-r">&gt; environment(`%&lt;-%`)
+&lt;environment: namespace:igraph&gt;
+</code></pre>
+<p>To avoid this problem, attach the two packages in opposite order such that <strong>future</strong> comes last and thereby overrides <strong>igraph</strong>, i.e.</p>
+<pre><code class="language-r">&gt; library(igraph)
+&gt; library(future)
+
+Attaching package: 'future'
+
+The following objects are masked from 'package:igraph':
+
+%&lt;-%, %-&gt;%
+
+&gt; y %&lt;-% { 42 }
+&gt; y
+[1] 42
+</code></pre>
+<p>An alternative is to detach the <strong>future</strong> package and re-attach it, which will achieve the same thing:</p>
+<pre><code class="language-r">&gt; detach(&quot;package:future&quot;)
+&gt; library(future)
+</code></pre>
+<p>Yet another alternative is to explicitly override the object by importing it to the global environment, e.g.</p>
+<pre><code class="language-r">&gt; `%&lt;-%` &lt;- future::`%&lt;-%`
+&gt; y %&lt;-% { 42 }
+&gt; y
+[1] 42
+</code></pre>
+<p>In this case, it does not matter in what order the packages are attached because we will always use the copy of <code>future::`%&lt;-%`</code>.</p>
+<h3 id="syntax-error-non-numeric-argument-to-binary-operator">Syntax error: “non-numeric argument to binary operator”</h3>
+<p>The future assignment operator <code>%&lt;-%</code> is a <em>binary infix operator</em>, which means it has higher precedence than most other binary operators but also higher than some of the unary operators in R.  For instance, this explains why we get the following error:</p>
+<pre><code class="language-r">&gt; x %&lt;-% 2 * runif(1)
+Error in x %&lt;-% 2 * runif(1) : non-numeric argument to binary operator
+</code></pre>
+<p>What effectively is happening here is that because of the higher priority of <code>%&lt;-%</code>, we first create a future <code>x %&lt;-% 2</code> and then we try to multiply the future (not its value) with the value of <code>runif(1)</code> - which makes no sense.  In order to properly assign the future variable, we need to put the future expression within curly brackets;</p>
+<pre><code class="language-r">&gt; x %&lt;-% { 2 * runif(1) }
+&gt; x
+[1] 1.030209
+</code></pre>
+<p>Parentheses will also do.  For details on precedence on operators in R, see Section ‘Infix and prefix operators’ in the ‘R Language Definition’ document.</p>
+<h3 id="error-invalid-type-environment-of-argument-with-magrittr">Error: invalid ‘type’ (environment) of argument with magrittr</h3>
+<p>Another example where the future assignment operator <code>%&lt;-%</code> requires curly brackets is when using the <strong><a href="https://cran.r-project.org/package=magrittr">magrittr</a></strong> infix operator <code>%&gt;%</code>, e.g.</p>
+<pre><code class="language-r">&gt; library(magrittr)
+&gt; x %&lt;-% 1:100 %&gt;% sum
+Error in sum(.) : invalid 'type' (environment) of argument
+</code></pre>
+<p>The reason for this error is that <code>x %&lt;-% 1:100</code> is passed to <code>sum()</code> by <code>%&gt;%</code>.  To fix this, use:</p>
+<pre><code class="language-r">&gt; x %&lt;-% { 1:100 %&gt;% sum }
+&gt; x
+[1] 5050
+</code></pre>
+<h3 id="r-cmd-check-notes">R CMD check NOTEs</h3>
+<p>The code inspection run by <code>R CMD check</code> will not recognize the future assignment operator <code>%&lt;-%</code> as an assignment operator, which is not surprising because <code>%&lt;-%</code> is technically an infix operator.  This means that if you for instance use the following code in your package:</p>
+<pre><code class="language-r">foo &lt;- function() {
+  b &lt;- 3.14
+  a %&lt;-% { b + 1 }
+  a
+}
+</code></pre>
+<p>then <code>R CMD check</code> will produce a NOTE saying:</p>
+<pre><code class="language-sh">* checking R code for possible problems ... NOTE
+foo: no visible binding for global variable 'a'
+Undefined global functions or variables:
+  a
+</code></pre>
+<p>In order to avoid this, we can add a dummy assignment of the missing global at the top of the function, i.e.</p>
+<pre><code class="language-r">foo &lt;- function() {
+  a &lt;- NULL ## To please R CMD check
+  b &lt;- 3.14
+  a %&lt;-% { b + 1 }
+  a
+}
+</code></pre>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+</body>
+</html>
