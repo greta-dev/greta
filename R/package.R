@@ -17,7 +17,6 @@
 #'   [tutorials](https://greta-stats.org/articles/get_started.html) and
 #'   [examples](https://greta-stats.org/articles/example_models.html).
 #'
-#' @docType package
 #' @importFrom tensorflow tf
 #' @examples
 #' \dontrun{
@@ -36,7 +35,7 @@
 #' m <- model(int, coef, sd)
 #' draws <- mcmc(m, n_samples = 100)
 #' }
-NULL
+"_PACKAGE"
 
 # clear CRAN checks spotting floating global variables
 #' @importFrom utils globalVariables

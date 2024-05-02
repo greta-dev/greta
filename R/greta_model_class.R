@@ -188,11 +188,17 @@ model <- function(...,
   model
 }
 
-# register generic method to coerce objects to a greta model
+#' @title register generic method to coerce objects to a greta model
+#'
+#' @param x greta_model object
+#' @param ... extra arguments - not used.
+#'
+#' @export
 as.greta_model <- function(x, ...) { # nolint
   UseMethod("as.greta_model", x)
 }
 
+#' @export
 as.greta_model.dag_class <- function(x, ...) { # nolint
   ans <- list(dag = x)
   class(ans) <- "greta_model"

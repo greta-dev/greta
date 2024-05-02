@@ -320,20 +320,30 @@ tf_compat_optimiser <- R6Class(
 )
 
 
-# implement an S3 method to handle dispatching the optimisation method based
-# on the class. Should also allow for building other methods in the future
+#' @title Dispatch optimisation method to right class
+#'
+#' @description
+#'  Should also allow for building other methods in the future
+#'
+#' @param self optimiser of class: `tf_optimiser`, `tfp_optimiser`, or
+#'   `tf_compat_optimiser`.
+#'
+#' @export
 run_optimiser <- function(self) {
   UseMethod("run_optimiser")
 }
 
+#' @export
 run_optimiser.tf_optimiser <- function(self) {
   self$run_tf_minimiser()
 }
 
+#' @export
 run_optimiser.tfp_optimiser <- function(self) {
   self$run_tfp_minimiser()
 }
 
+#' @export
 run_optimiser.tf_compat_optimiser <- function(self) {
   self$run_tf_compat_minimiser()
 }
