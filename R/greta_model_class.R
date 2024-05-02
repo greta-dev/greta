@@ -191,8 +191,7 @@ model <- function(...,
 # register generic method to coerce objects to a greta model
 #' @title Convert object to a "greta_model" object
 #' @param x object to convert to greta model
-#'
-#' @param ... extra arguments
+#' @param ... extra arguments - not used.
 #'
 #' @export
 as.greta_model <- function(x, ...) { # nolint

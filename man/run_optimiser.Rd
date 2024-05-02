@@ -2,14 +2,14 @@
 % Please edit documentation in R/optimiser_class.R
 \name{run_optimiser}
 \alias{run_optimiser}
-\title{Dispatching the optimisation method based on the class.}
+\title{Dispatch optimisation method to right class}
 \usage{
 run_optimiser(self)
 }
 \arguments{
-\item{self}{Object of class "tf_optimiser", "tfp_optimiser", or
-"tf_compat_optimiser".}
+\item{self}{optimiser of class: \code{tf_optimiser}, \code{tfp_optimiser}, or
+\code{tf_compat_optimiser}.}
 }
 \description{
-Dispatching the optimisation method based on the class.
+Should also allow for building other methods in the future
 }

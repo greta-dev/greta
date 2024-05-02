@@ -9,7 +9,7 @@ as.greta_model(x, ...)
 \arguments{
 \item{x}{object to convert to greta model}
 
-\item{...}{extra arguments}
+\item{...}{extra arguments - not used.}
 }
 \description{
 Convert object to a "greta_model" object
