@@ -15,7 +15,7 @@ CRAN:
 install.packages("greta")
 ```
 
-Or install the development version of `greta` from [r-universe](https://greta-dev.r-universe.dev/ui#builds):
+Or install the development version of `greta` from [r-universe](http://greta-dev.r-universe.dev/ui/):
 
 ```r
 # Enable this universe
@@ -51,7 +51,7 @@ If these python modules aren't yet installed, when `greta` is used, it provides 
 [![R-CMD-check](https://github.com/greta-dev/greta/workflows/R-CMD-check/badge.svg)](https://github.com/greta-dev/greta/actions)
 [![cran
 version](http://www.r-pkg.org/badges/version/greta)](https://CRAN.R-project.org/package=greta)
-[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0)
 [![doi](https://zenodo.org/badge/73758247.svg)](https://zenodo.org/badge/latestdoi/73758247)
 [![joss](https://joss.theoj.org/papers/10.21105/joss.01601/status.svg)](https://joss.theoj.org/papers/10.21105/joss.01601)
 ![](logos/bottom_banner.png)

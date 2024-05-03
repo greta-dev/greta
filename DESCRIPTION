@@ -1,7 +1,7 @@
 Type: Package
 Package: greta
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.4.4.9000
+Version: 0.4.5.9000
 Authors@R: c(
     person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0001-8916-5570")),
@@ -52,6 +52,7 @@ Suggests:
     cramer,
     DiagrammeR,
     dplyr,
+    DiagrammeRsvg,
     extraDistr,
     fields,
     ggplot2,
@@ -64,6 +65,7 @@ Suggests:
     purrr,
     rmarkdown,
     rmutil,
+    rsvg,
     spelling,
     testthat (>= 3.1.0),
     tibble,

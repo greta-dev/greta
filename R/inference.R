@@ -1,5 +1,5 @@
 #' @name inference
-#' @title statistical inference on greta models
+#' @title Statistical inference on greta models.
 #' @description Carry out statistical inference on greta models by
 #'   MCMC or likelihood/posterior optimisation.
 NULL
@@ -202,6 +202,8 @@ mcmc <- function(
 
     # message users about random seeds and GPU usage if they are using GPU
     message_if_using_gpu(compute_options)
+
+    check_if_greta_array_in_mcmc(model)
 
     # check the trace batch size
     trace_batch_size <- check_trace_batch_size(trace_batch_size)
@@ -868,16 +870,16 @@ print.initials <- function(x, ...) {
 
 #' @return `opt` - a list containing the following named elements:
 #'   \itemize{
-#'    \item{`par`} {a named list of the optimal values for the greta arrays
-#'     specified in `model`}
-#'    \item{`value`} {the (unadjusted) negative log joint density of the
-#'     model at the parameters 'par'}
-#'    \item{`iterations`} {the number of iterations taken by the optimiser}
-#'    \item{`convergence`} {an integer code, 0 indicates successful
+#'    \item `par` a named list of the optimal values for the greta arrays
+#'     specified in `model`
+#'    \item `value` the (unadjusted) negative log joint density of the
+#'     model at the parameters 'par'
+#'    \item `iterations` the number of iterations taken by the optimiser
+#'    \item `convergence` an integer code, 0 indicates successful
 #'     completion, 1 indicates the iteration limit `max_iterations` had
-#'     been reached}
-#'   \item{`hessian`} {(if `hessian = TRUE`) a named list of hessian
-#'     matrices/arrays for the parameters (w.r.t. `value`)}
+#'     been reached
+#'   \item `hessian` (if `hessian = TRUE`) a named list of hessian
+#'     matrices/arrays for the parameters (w.r.t. `value`)
 #'  }
 #'
 opt <- function(model,

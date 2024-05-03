@@ -13,6 +13,7 @@
 ^LICENSE\.md$
 LICENSE
 ^cran-comments\.md$
+^revdep$
 
 ^logos$
 ^paper$
@@ -43,3 +44,5 @@ LICENSE
 ^depends\.rds$
 ^CRAN-SUBMISSION$
 ^touchstone$
+^.lazytest$
+^\.lazytext$
