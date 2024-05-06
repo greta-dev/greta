@@ -73,7 +73,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
     reticulate::py_install(
       packages = c(
         'numpy',
-        'tensorflow==2.15',
+        'tensorflow==2.16',
         'tensorflow-probability'
       ),
       envname = "greta-env-tf2",

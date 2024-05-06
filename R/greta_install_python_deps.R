@@ -6,10 +6,10 @@ greta_install_python_deps <- function(timeout) {
   callr_conda_install <- callr::r_process_options(
     func = function() {
       tensorflow::install_tensorflow(
-        version = "2.15",
+        version = "2.16.1",
         envname = "greta-env-tf2"
         )
-      reticulate::py_install(packages = "tensorflow-probability",
+      reticulate::py_install(packages = "tensorflow-probability[tf]",
                              pip = TRUE,
                              envname = "greta-env-tf2",
                              method = "conda")
