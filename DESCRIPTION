@@ -31,7 +31,7 @@ License: Apache License 2.0
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
 Depends:
-    R (>= 3.1.0)
+    R (>= 4.1.0)
 Imports:
     abind,
     callr,
