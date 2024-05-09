@@ -1181,7 +1181,7 @@ lkj_correlation_distribution <- R6Class(
       target_node
     },
 
-    # NOTE: this code is repeated above on line 1069, is that intended?
+    # NOTE: this code is repeated above on line 1032, is that intended?
     # get a cholesky factor for the target if possible
     get_tf_target_node = function() {
       target <- self$target

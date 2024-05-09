@@ -357,7 +357,7 @@ gradient_descent <- function(learning_rate = 0.01,
                              nesterov = FALSE) {
   define_tf_optimiser(
     name = "gradient_descent",
-    method = "tf$keras$optimizers$SGD",
+    method = "tf$keras$optimizers$legacy$SGD",
     parameters = list(
       learning_rate = learning_rate,
       momentum = momentum,
@@ -375,7 +375,8 @@ gradient_descent <- function(learning_rate = 0.01,
 adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
   define_tf_optimiser(
     name = "adadelta",
-    method = "tf$keras$optimizers$Adadelta",
+    # method = "tf$keras$optimizers$Adadelta",
+    method = "tf$keras$optimizers$legacy$Adadelta",
     parameters = list(
       learning_rate = learning_rate,
       rho = rho,
@@ -395,7 +396,8 @@ adagrad <- function(learning_rate = 0.8,
                     epsilon = 1e-08) {
   define_tf_optimiser(
     name = "adagrad",
-    method = "tf$keras$optimizers$Adagrad",
+    # method = "tf$keras$optimizers$Adagrad",
+    method = "tf$keras$optimizers$legacy$Adagrad",
     parameters = list(
       learning_rate = learning_rate,
       initial_accumulator_value = initial_accumulator_value,
@@ -457,7 +459,8 @@ adam <- function(learning_rate = 0.1,
                  epsilon = 1e-08) {
   define_tf_optimiser(
     name = "adam",
-    method = "tf$keras$optimizers$Adam",
+    # method = "tf$keras$optimizers$Adam",
+    method = "tf$keras$optimizers$legacy$Adam",
     parameters = list(
       learning_rate = learning_rate,
       beta_1 = beta_1,
@@ -477,7 +480,8 @@ adamax <- function(learning_rate = 0.001,
                    epsilon = 1e-07){
   define_tf_optimiser(
     name = "adamax",
-    method = "tf$keras$optimizers$Adamax",
+    # method = "tf$keras$optimizers$Adamax",
+    method = "tf$keras$optimizers$legacy$Adamax",
     parameters = list(
       learning_rate = learning_rate,
       beta_1 = beta_1,
@@ -507,7 +511,8 @@ ftrl <- function(learning_rate = 1,
                  beta = 0) {
   define_tf_optimiser(
     name = "ftrl",
-    method = "tf$keras$optimizers$Ftrl",
+    # method = "tf$keras$optimizers$Ftrl",
+    method = "tf$keras$optimizers$legacy$Ftrl",
     parameters = list(
       learning_rate = learning_rate,
       learning_rate_power = learning_rate_power,
@@ -579,7 +584,8 @@ nadam <- function(learning_rate = 0.001,
 
   define_tf_optimiser(
     name = "nadam",
-    method = "tf$keras$optimizers$Nadam",
+    # method = "tf$keras$optimizers$Nadam",
+    method = "tf$keras$optimizers$legacy$Nadam",
     parameters = list(
       learning_rate = learning_rate,
       beta_1 = beta_1,
@@ -604,7 +610,8 @@ rms_prop <- function(learning_rate = 0.1,
                      centered = FALSE) {
   define_tf_optimiser(
     name = "rms_prop",
-    method = "tf$keras$optimizers$RMSprop",
+    # method = "tf$keras$optimizers$RMSprop",
+    method = "tf$keras$optimizers$legacy$RMSprop",
     parameters = list(
       learning_rate = learning_rate,
       rho = rho,
