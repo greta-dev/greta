@@ -142,6 +142,8 @@ tf_optimiser <- R6Class(
                all(self$diff > self$tolerance)) {
           # add 1 because python indexing
           self$it <- as.numeric(tfe$tf_optimiser$iterations) + 1
+          ## TF1/2 For Keras 3.0, this is the new syntax
+          # self$it <- tfe$tf_optimiser$iterations$numpy() + 1
 
           if (self$adjust) {
             tfe$tf_optimiser$minimize(
