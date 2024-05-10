@@ -367,6 +367,9 @@ chol.greta_array <- function(x, ...) {
     )
   }
 
+  # set golden_cholesky flag
+  x <- set_golden_cholesky(x)
+
   if (has_representation(x, "cholesky")) {
     result <- copy_representation(x, "cholesky")
   } else {
@@ -390,6 +393,7 @@ chol.greta_array <- function(x, ...) {
       dim = dim,
       tf_operation = "tf_chol"
     )
+
   }
 
   result

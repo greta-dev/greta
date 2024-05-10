@@ -265,6 +265,12 @@ get_node <- function(x) {
   attr(x, "node")
 }
 
+set_golden_cholesky <- function(x) {
+  x_node <- get_node(x)
+  x_node$golden_cholesky <- TRUE
+  x_node
+}
+
 # check for and get representations
 representation <- function(x, name, error = TRUE) {
   if (inherits(x, "greta_array")) {
