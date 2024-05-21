@@ -146,6 +146,9 @@ NULL
   # if y is a greta array, coerce x before dispatch
   if (inherits(y, "greta_array") & !inherits(x, "greta_array")) {
     as_data(x) %*% y
+  # if y is not a greta array and x is, coerce y before dispatch
+  } else if (!inherits(y, "greta_array") & inherits(x, "greta_array")){
+    x %*% as_data(y)
   } else {
     UseMethod("%*%", x)
   }
