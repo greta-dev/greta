@@ -137,12 +137,8 @@ operation_node <- R6Class(
       if (is.null(value)) {
         value <- unknowns(dim = dim)
       } else if (!all.equal(dim(value), dim)) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "values have the wrong dimension so cannot be used"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 

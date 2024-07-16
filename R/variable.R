@@ -47,12 +47,8 @@ variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
   check_tf_version("error")
 
   if (inherits(lower, "greta_array") | inherits(upper, "greta_array")) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "lower and upper must be fixed, they cannot be another greta array"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -151,14 +147,10 @@ simplex_variable <- function(dim) {
   n_dim <- length(dim)
   last_dim <- dim[n_dim]
   if (!last_dim > 1) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "the final dimension of a simplex variable must have more than one \\
       element",
       "The final dimension has: {.val {length(last_dim)} elements}"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -201,14 +193,10 @@ ordered_variable <- function(dim) {
   # dimension of the free state version
   n_dim <- length(dim)
   if (!dim[n_dim] > 1) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "the final dimension of an ordered variable must have more than \\
       one element",
       "the final dimension has: {.val {length(last_dim)} elements}"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 

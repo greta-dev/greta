@@ -38,31 +38,23 @@ NULL
 
 # defunct some optimisers
 optimiser_defunct_error <- function(optimiser) {
-  msg <- cli::format_error(
+  cli::cli_abort(
     c(
       "The optimiser, {.fun {optimiser}}, is defunct and has been removed in {.pkg greta} 0.5.0.",
       "Please use a different optimiser.",
       "See {.code ?optimisers} for more details on which optimizers are removed."
       )
   )
-  stop(
-    msg,
-    call. = FALSE
-  )
 }
 
 # deprecate some optimisers
 optimiser_deprecation_warning <- function(version = "0.4.0") {
-  msg <- cli::format_warning(
+  cli::cli_warn(
     c(
       "This optimiser is deprecated and will be removed in {.pkg greta} \\
       {.val {version}}.",
       "Please use a different optimiser."
     )
-  )
-  warning(
-    msg,
-    call. = FALSE
   )
 }
 

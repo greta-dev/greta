@@ -770,13 +770,9 @@ dag_class <- R6Class(
 
       # check we didn't time out
       if (it == maxit) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "could not determine the number of independent models in a \\
           reasonable amount of time"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -815,15 +811,9 @@ dag_class <- R6Class(
       sample <- tfp_distribution$sample
 
       if (is.null(sample)) {
-        msg <- cli::format_error(
-          c(
-            "sampling is not yet implemented for \\
+        cli::cli_abort(
+          "sampling is not yet implemented for \\
             {.val {distribution_node$distribution_name}} distributions"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -843,13 +833,9 @@ dag_class <- R6Class(
         quantile <- tfp_distribution$quantile
 
         if (is.null(cdf) | is.null(quantile)) {
-          msg <- cli::format_error(
+          cli::cli_abort(
             "sampling is not yet implemented for truncated \\
             {.val {distribution_node$distribution_name}} distributions"
-          )
-          stop(
-            msg,
-            call. = FALSE
           )
         }
 

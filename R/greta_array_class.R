@@ -35,17 +35,13 @@ as.greta_array.data.frame <- function(x, optional = FALSE,
 
   if (!optional & !all(valid)) {
     invalid_types <- unique(classes[!valid])
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.cls greta_array} must contain the same type",
         "Cannot coerce a {.cls data.frame} to a {.cls greta_array} unless \\
         all columns are {.cls numeric, integer} or {.cls logical}. This \\
         dataframe had columns of type: {.cls {invalid_types}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -64,7 +60,7 @@ as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
     if (is.logical(x)) {
       x[] <- as.numeric(x[])
     } else if (!optional) {
-      msg <- cli::format_error(
+      cli::cli_abort(
         c(
           "{.cls greta_array} must contain the same type",
           "Cannot coerce {.cls matrix} to a {.cls greta_array} unless it is \\
@@ -72,10 +68,6 @@ as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
           {.cls matrix} had type:",
           "{.cls {class(as.vector(x))}}"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
   }
@@ -95,7 +87,7 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
     if (is.logical(x)) {
       x[] <- as.numeric(x[])
     } else {
-      msg <- cli::format_error(
+      cli::cli_abort(
         c(
           "{.cls greta_array} must contain the same type",
           "Cannot coerce {.cls array} to a {.cls greta_array} unless it is \\
@@ -103,10 +95,6 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
           had type:",
           "{.cls {class(as.vector(x))}}"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
   }
@@ -122,14 +110,8 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
 #' @export
 as.greta_array.numeric <- function(x, optional = FALSE, original_x = x, ...) {
   if (!optional & any(!is.finite(x))) {
-    msg <- cli::format_error(
-      c(
+    cli::cli_abort(
         "{.cls greta_array} must not contain missing or infinite values"
-      )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
   as.greta_array.node(data_node$new(x),
@@ -152,16 +134,12 @@ as.greta_array.node <- function(x, optional = FALSE, original_x = x, ...) {
 #' @export
 as.greta_array.default <- function(x, optional = FALSE, original_x = x, ...) {
   if (!optional) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "Object cannot be coerced to {.cls greta_array}",
         "Objects of class {.cls {paste(class(x), collapse = ' or ')}} cannot \\
         be coerced to a {.cls greta_array}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -280,12 +258,8 @@ representation <- function(x, name, error = TRUE) {
   }
   repr <- x_node$representations[[name]]
   if (error && is.null(repr)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "{.cls greta_array} has no representation {.var name}"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
   repr

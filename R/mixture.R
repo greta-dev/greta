@@ -84,15 +84,11 @@ mixture_distribution <- R6Class(
       n_distributions <- length(dots)
 
       if (n_distributions < 2) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "{.fun mixture} must be passed at least two distributions",
             "The number of distributions passed was: {.val {n_distributions}}"
           )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -110,16 +106,12 @@ mixture_distribution <- R6Class(
 
       # weights should have n_distributions as the first dimension
       if (weights_dim[1] != n_distributions) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "the first dimension of weights must be the number of \\
             distributions in the mixture ({.val {n_distributions}})",
             "However it was {.val {weights_dim[1]}}"
           )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -136,17 +128,13 @@ mixture_distribution <- R6Class(
       dim_1 <- length(w_dim) == 1 && w_dim == 1
       dim_same <- all(w_dim == weights_extra_dim)
       if (!(dim_1 | dim_same)) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "the dimension of weights must be either \\
             {.val {n_distributions}x1} or \\
             {.val {n_distributions}x{paste(dim, collapse = 'x')}}",
             " but was {.val {paste(weights_dim, collapse = 'x')}}"
           )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -163,13 +151,9 @@ mixture_distribution <- R6Class(
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = logical(1))
 
       if (!all(discrete) & !all(!discrete)) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "cannot construct a mixture from a combination of discrete and \\
           continuous distributions"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -181,13 +165,9 @@ mixture_distribution <- R6Class(
       )
 
       if (!all(multivariate) & !all(!multivariate)) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "cannot construct a mixture from a combination of multivariate and \\
           univariate distributions"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -208,16 +188,12 @@ mixture_distribution <- R6Class(
           FUN.VALUE = character(1)
         )
 
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "component distributions must have the same support",
             "However the component distributions have different support:",
             "{.val {paste(supports_text, collapse = ' vs. ')}}"
           )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
