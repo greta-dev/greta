@@ -268,7 +268,7 @@ get_node <- function(x) {
 set_golden_cholesky <- function(x) {
   x_node <- get_node(x)
   x_node$golden_cholesky <- TRUE
-  x_node
+  x
 }
 
 # check for and get representations

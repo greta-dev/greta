@@ -324,7 +324,8 @@ sampler <- R6Class(
               )
             )
           ),
-          dtype = tf_float())
+          dtype = tf_float()
+          )
         )
       )
     },

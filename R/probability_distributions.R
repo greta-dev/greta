@@ -102,6 +102,7 @@ normal_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     initialize = function(mean, sd, dim, truncation) {
+      ## browser()
       mean <- as.greta_array(mean)
       sd <- as.greta_array(sd)
 
@@ -997,7 +998,6 @@ wishart_distribution <- R6Class(
 
       # initialize with a cholesky factor
       super$initialize("wishart", dim(sigma), multivariate = TRUE)
-
       # set parameters
       if (has_representation(sigma, "cholesky")) {
         sigma <- representation(sigma, "cholesky")
@@ -1013,7 +1013,6 @@ wishart_distribution <- R6Class(
     # create a variable, and transform to a symmetric matrix (with cholesky
     # factor representation)
     create_target = function(truncation) {
-
       # create cholesky factor variable greta array
       chol_greta_array <- cholesky_variable(self$dim[1])
 
@@ -1439,6 +1438,7 @@ uniform <- function(min, max, dim = NULL) {
 #' @rdname distributions
 #' @export
 normal <- function(mean, sd, dim = NULL, truncation = c(-Inf, Inf)) {
+  ##browser()
   distrib("normal", mean, sd, dim, truncation)
 }
 

@@ -82,28 +82,20 @@ cholesky_variable <- function(dim, correlation = FALSE) {
     dim <- c(dim, dim)
   } else if (n_dim == 2) {
     if (dim[1] != dim[2]) {
-      msg <- cli::format_error(
+      msg <- cli::cli_abort(
         c(
           "cholesky variables must be square",
           "However its dimension is: {.val {paste(dim, collapse = 'x')}}"
         )
       )
-      stop(
-        msg,
-        call. = FALSE
-      )
     }
   } else {
-    msg <- cli::format_error(
+    msg <- cli::cli_abort(
       c(
         "{.arg dim} can either be a scalar or a vector of length 2",
         "However {.arg dim} has length {.val {length(dim)}}, and contains: \\
         {.val {paste(dim, collapse = ', ')}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 

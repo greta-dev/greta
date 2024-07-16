@@ -10,6 +10,7 @@ node <- R6Class(
     dim = NA,
     distribution = NULL,
     initialize = function(dim = NULL, value = NULL) {
+      ## browser()
       if (is.null(dim)) {
         dim <- c(1, 1)
       }
@@ -33,6 +34,8 @@ node <- R6Class(
 
     # recursively register self and family
     register_family = function(dag) {
+      ## TF1/2
+      ## Rename with an explaining variable
       if (!(self$unique_name %in% names(dag$node_list))) {
 
         # add self to list
@@ -69,6 +72,9 @@ node <- R6Class(
       node$remove_child(self)
     },
     list_parents = function(dag) {
+      ## TF1/2
+      ## tf_cholesky
+      ## is there a way here to add some check for cholesky?
       parents <- self$parents
 
       # if this node is being sampled and has a distribution, consider
@@ -170,7 +176,9 @@ node <- R6Class(
 
     # define this and all descendent objects on TF graph in environment
     define_tf = function(dag) {
-
+      if (Sys.getenv("GRETA_DEBUG") == "true") {
+        browser()
+      }
       # if defined already, skip
       if (!self$defined(dag)) {
 
