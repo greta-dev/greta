@@ -355,8 +355,18 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
   )
 }
 
+#' @title Compute the Cholesky Factor of a Matrix
+#' @inheritParams base::chol
+#'
+#' @param ... further arguments pass to or from methods.
+#' @param force_cholesky Whether to force cholesky computation. Currently
+#'   used as a workaround to ensure cholesky is calculated properly, and may
+#'   result in code that uses `chol()` to be slow. Default is TRUE. Can change
+#'   to FALSE, but may encounter issues in
+#'   \url{https://github.com/greta-dev/greta/issues/585}.
+#'
 #' @export
-chol.greta_array <- function(x, ...) {
+chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
   if (!identical(list(), list(...))) {
     msg <- cli::format_warning(
       "{.fun chol} options are ignored for {.cls greta_array}s"
@@ -366,9 +376,6 @@ chol.greta_array <- function(x, ...) {
       call. = FALSE
     )
   }
-
-  # set golden_cholesky flag
-  x <- set_golden_cholesky(x)
 
   if (has_representation(x, "cholesky")) {
     result <- copy_representation(x, "cholesky")
@@ -395,6 +402,16 @@ chol.greta_array <- function(x, ...) {
     )
 
   }
+
+  if (force_cholesky){
+    result <- op("chol", x,
+                 dim = dim(x),
+                 tf_operation = "tf_chol"
+    )
+  }
+
+  # set golden_cholesky flag
+  result <- set_golden_cholesky(result)
 
   result
 }

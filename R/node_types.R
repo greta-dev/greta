@@ -3,7 +3,7 @@ data_node <- R6Class(
   inherit = node,
   public = list(
     initialize = function(data) {
-
+      ## browser()
       # coerce to an array with 2+ dimensions
       data <- as_2d_array(data)
 
@@ -159,13 +159,13 @@ operation_node <- R6Class(
       tfe <- dag$tf_environment
       # what to call the tensor object
       tf_name <- dag$tf_name(self)
-      mode <- dag$how_to_define(self)
 
-      # if sampling get the distribution constructor and sample this
-      if (mode == "sampling") {
-        tensor <- dag$draw_sample(self$distribution)
+      # cholesky
+      # maybe put this warning inside the calculate part
+      # !! check whether the change to define tf will break
+      mode <- dag$how_to_define(self)
         is_cholesky <- isTRUE(self$golden_cholesky)
-        if (has_representation(self, "cholesky") && is_cholesky){
+        if (is_cholesky){
           ## TF1/2
           ## This approach currently fails because of how we use representations
           ## within greta.
@@ -185,10 +185,17 @@ operation_node <- R6Class(
             )
           )
         }
-          cholesky_tensor <- tf_chol(tensor)
-          cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
-          assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
+      # if sampling get the distribution constructor and sample this
+      if (mode == "sampling") {
+        # browser()
+        tensor <- dag$draw_sample(self$distribution)
+        ## TF1/2 - I had previously written this tf_chol code
+        ## and it is not clear to me now why we are doing this
+          # cholesky_tensor <- tf_chol(tensor)
+          # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          # assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
 
+        ## This was commented out before, unclear what this is doing either
           # tf_name <- cholesky_tf_name
           # tensor <- cholesky_tensor
         }
@@ -231,6 +238,7 @@ variable_node <- R6Class(
                           upper = Inf,
                           dim = NULL,
                           free_dim = prod(dim)) {
+      ## browser()
       check_if_lower_upper_numeric(lower, upper)
 
       # replace values of lower and upper with finite values for dimension
@@ -433,8 +441,10 @@ distribution_node <- R6Class(
                           discrete = FALSE,
                           multivariate = FALSE,
                           truncatable = TRUE) {
+      ## browser()
       super$initialize(dim)
 
+      ## browser()
       # for all distributions, set name, store dims, and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
@@ -461,6 +471,7 @@ distribution_node <- R6Class(
 
     # create a target variable node (unconstrained by default)
     create_target = function(truncation) {
+      ##browser()
       vble(truncation, dim = self$dim)
     },
     list_parents = function(dag) {
@@ -496,7 +507,7 @@ distribution_node <- R6Class(
 
     # create target node, add as a parent, and give it this distribution
     add_target = function(new_target) {
-
+      ##browser()
       # add as target and as a parent
       self$target <- new_target
       self$add_parent(new_target)
@@ -623,6 +634,7 @@ node_classes_module <- module(
 
 # shorthand for distribution parameter constructors
 distrib <- function(distribution, ...) {
+  ##browser()
   check_tf_version("error")
 
   # get and initialize the distribution, with a default value node
