@@ -26,9 +26,9 @@ greta_notes_conda_install_error()
 greta_notes_tf_num_error()
 }
 \description{
-These functions retrieve installation or error information
-output by python when running \code{install_miniconda()}, \code{conda_create()},
-\code{conda_install()}, or when encountering a TensorFlow numerical problem.
+These functions retrieve installation or error information output by python
+when running \code{install_miniconda()}, \code{conda_create()}, \code{conda_install()}, or
+when encountering a TensorFlow numerical problem.
 }
 \examples{
 \dontrun{
