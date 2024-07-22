@@ -2,7 +2,7 @@
 
 *Beetles* considers dose-response data from an experiment applying carbon disulphide to 8 beetles. The original example compares three different link functions; the logit, probit and complementary log-log. Here, only the code for the logit link is shown. You can implement the other two link functions in greta by changing `ilogit` to `iprobit` or `icloglog`.
 
-See [WinBUGS examples volume 2](https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf) (pdf) for details.
+See [WinBUGS examples volume 2](https://legacy.voteview.com/pdf/WINBUGSmanual_2.pdf) (pdf) for details.
 
 
 #### data

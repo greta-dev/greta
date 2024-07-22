@@ -46,12 +46,8 @@ as_data <- function(x) {
 as_data.greta_array <- function(x) {
   # nolint end
   if (!inherits(get_node(x), "data_node")) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "cannot coerce a non-data greta_array to data"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
   x

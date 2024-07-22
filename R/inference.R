@@ -1,5 +1,5 @@
 #' @name inference
-#' @title statistical inference on greta models
+#' @title Statistical inference on greta models.
 #' @description Carry out statistical inference on greta models by
 #'   MCMC or likelihood/posterior optimisation.
 NULL
@@ -203,6 +203,8 @@ mcmc <- function(
     # message users about random seeds and GPU usage if they are using GPU
     message_if_using_gpu(compute_options)
 
+    check_if_greta_array_in_mcmc(model)
+
     # check the trace batch size
     trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
@@ -218,16 +220,12 @@ mcmc <- function(
     )
 
     if (any(are_data)) {
-      msg <- cli::format_error(
+      cli::cli_abort(
         c(
           "data {.cls greta_array}s cannot be sampled",
           "{.var {names[are_data]}} \\
         {?is a data/are data} {.cls greta_array}(s)"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
 
@@ -345,12 +343,10 @@ run_samplers <- function(samplers,
 
   if (plan_is$parallel & !plan_is$local) {
 
-    msg <- cli::format_message(
+    cli::cli_inform(
       "running {length(samplers)} \\
       {?sampler on a remote machine/samplers on remote machines}"
       )
-
-    message(msg)
 
   }
 
@@ -579,13 +575,9 @@ to_free <- function(node, data) {
   upper <- node$upper
 
   unsupported_error <- function() {
-    msg <- cli::format_error(
+    cli::cli_abort(
         "some provided initial values are outside the range of values their \\
         variables can take"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -645,16 +637,12 @@ parse_initial_values <- function(initials, dag) {
   missing_names <- is.na(tf_names)
   if (any(missing_names)) {
     bad <- names(tf_names)[missing_names]
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "some {.cls greta_array}s passed to {.fun initials} are not associated with \\
         the model:",
         "{.var {bad}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -674,12 +662,8 @@ parse_initial_values <- function(initials, dag) {
   are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
 
   if (!all(are_variables)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "initial values can only be set for variable {.cls greta_array}s"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -688,13 +672,9 @@ parse_initial_values <- function(initials, dag) {
   same_dims <- mapply(identical, target_dims, replacement_dims)
 
   if (!all(same_dims)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "the initial values provided have different dimensions than the named \\
       {.cls greta_array}s"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -720,11 +700,10 @@ prep_initials <- function(initial_values, n_chains, dag) {
     is_blank <- identical(initial_values, initials())
 
     if (!is_blank & n_chains > 1) {
-      msg <- cli::format_message(
+      cli::cli_inform(
         "only one set of initial values was provided, and was used for \\
         all chains"
       )
-      message(msg)
     }
 
     initial_values <- replicate(n_chains,
@@ -743,18 +722,14 @@ prep_initials <- function(initial_values, n_chains, dag) {
       n_sets <- length(initial_values)
 
       if (n_sets != n_chains) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "the number of provided initial values does not match chains",
-            "{n_sets} set{?s} of initial values were provided, but there\\
-            {cli::qty(n_chains)} {?is only/are} {n_chains}\\
+            "{n_sets} set{?s} of initial values were provided, but there \\
+            {cli::qty(n_chains)} {?is only/are} {n_chains} \\
             {cli::qty(n_chains)} chain{?s}"
             )
           )
-        stop(
-          msg,
-          call. = FALSE
-        )
       }
     } else {
       initial_values <- NULL
@@ -765,15 +740,11 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
   # error on a bad object
   if (is.null(initial_values)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.arg initial_values} must be an initials object created with \\
         {.fun initials}, or a simple list of initials objects"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -798,12 +769,8 @@ initials <- function(...) {
   names <- names(values)
 
   if (length(names) != length(values)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "all initial values must be named"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -812,12 +779,8 @@ initials <- function(...) {
 
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "initial values must be numeric"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -868,16 +831,16 @@ print.initials <- function(x, ...) {
 
 #' @return `opt` - a list containing the following named elements:
 #'   \itemize{
-#'    \item{`par`} {a named list of the optimal values for the greta arrays
-#'     specified in `model`}
-#'    \item{`value`} {the (unadjusted) negative log joint density of the
-#'     model at the parameters 'par'}
-#'    \item{`iterations`} {the number of iterations taken by the optimiser}
-#'    \item{`convergence`} {an integer code, 0 indicates successful
+#'    \item `par` a named list of the optimal values for the greta arrays
+#'     specified in `model`
+#'    \item `value` the (unadjusted) negative log joint density of the
+#'     model at the parameters 'par'
+#'    \item `iterations` the number of iterations taken by the optimiser
+#'    \item `convergence` an integer code, 0 indicates successful
 #'     completion, 1 indicates the iteration limit `max_iterations` had
-#'     been reached}
-#'   \item{`hessian`} {(if `hessian = TRUE`) a named list of hessian
-#'     matrices/arrays for the parameters (w.r.t. `value`)}
+#'     been reached
+#'   \item `hessian` (if `hessian = TRUE`) a named list of hessian
+#'     matrices/arrays for the parameters (w.r.t. `value`)
 #'  }
 #'
 opt <- function(model,

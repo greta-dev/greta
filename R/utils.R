@@ -436,12 +436,8 @@ colour = "#996bc7") {
   tryCatch(
     is.matrix(grDevices::col2rgb(colour)),
     error = function(e) {
-      msg <- cli::format_error(
+      cli::cli_abort(
         "Invalid colour: {colour}"
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
   )
@@ -524,15 +520,11 @@ cleanly <- function(expr) {
 
     # if it was just a numerical error, quietly return a bad value
     if (!any(numerical_errors)) {
-      msg <- cli::format_error(
+      cli::cli_abort(
         c(
           "{.pkg greta} hit a tensorflow error:",
           "{res}"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
   }
@@ -604,16 +596,12 @@ flatten_trace <- function(i, trace_list) {
 # stashed_samples, and error nicely if there's something fishy
 get_model_info <- function(draws, name = "value") {
   if (!inherits(draws, "greta_mcmc_list")) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{name} must be an {.cls greta_mcmc_list} object",
         "created by {.fun greta::mcmc}, {.fun greta::stashed_samples}, or \\
         {.fun greta::extra_samples}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -621,17 +609,13 @@ get_model_info <- function(draws, name = "value") {
   valid <- !is.null(model_info)
 
   if (!valid) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{name} is an {.cls mcmc.list} object, but is not associated with any\\
         model information",
         "perhaps it wasn't created by {.fun greta::mcmc}, \\
         {.fun greta::stashed_samples}, or {.fun greta::extra_samples}?"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -940,8 +924,8 @@ greta_sitrep <- function(){
     software_version <- data.frame(
       software = c(
         "python",
-        "tf",
-        "tfp"
+        "tfp",
+        "tf"
       ),
       current = c(
         paste0(reticulate::py_version()),
@@ -951,8 +935,8 @@ greta_sitrep <- function(){
       # versions must be at least this version
       ideal = c(
         "3.8",
-        "2.0.0",
-        "0.14.0"
+        "2.15.0",
+        "0.23.0"
       )
     )
     software_version$match <- c(
@@ -1029,13 +1013,9 @@ connected_to_draws <- function(dag, mcmc_dag) {
 
 check_commanality_btn_dags <- function(dag, mcmc_dag) {
   if (!any(connected_to_draws(dag, mcmc_dag))) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "the target {.cls greta array}s do not appear to be connected to those \\
       in the {.cls greta_mcmc_list} object"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -1044,7 +1024,7 @@ check_commanality_btn_dags <- function(dag, mcmc_dag) {
 check_dag_introduces_new_variables <- function(dag, mcmc_dag) {
   new_types <- dag$node_types[!connected_to_draws(dag, mcmc_dag)]
   if (any(new_types == "variable")) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
           samples",
@@ -1054,10 +1034,6 @@ check_dag_introduces_new_variables <- function(dag, mcmc_dag) {
         "Set {.arg nsim} if you want to sample them conditionally on the \\
           MCMC samples"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -1082,7 +1058,7 @@ check_targets_stochastic_and_not_sampled <- function(
   new_stochastics <- have_distributions & !existing_variables
   if (any(new_stochastics)) {
     n_stoch <- sum(new_stochastics)
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
           samples",
@@ -1093,10 +1069,6 @@ check_targets_stochastic_and_not_sampled <- function(
         "Set {.arg nsim} if you want to sample them conditionally on the \\
           MCMC samples"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -1114,7 +1086,7 @@ is_using_cpu <- function(x){
 message_if_using_gpu <- function(compute_options){
   if (is_using_gpu(compute_options)) {
     if (getOption("greta_gpu_message") %||% TRUE){
-      gpu_msg <- cli::format_message(
+      cli::cli_inform(
         c(
           "NOTE: When using GPU, the random number seed may not always be \\
           respected (results may not be fully reproducible).",
@@ -1123,9 +1095,6 @@ message_if_using_gpu <- function(compute_options){
           "You can turn off this message with:",
           "{.code options(greta_gpu_message = FALSE)}"
         )
-      )
-      message(
-        gpu_msg
       )
     }
   }

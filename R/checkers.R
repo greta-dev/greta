@@ -116,11 +116,10 @@ check_dims <- function(..., target_dim = NULL) {
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- cli::format_error(
+      cli::cli_abort(
         "incompatible dimensions: {dims_text}"
       )
 
-      stop(msg, call. = FALSE)
     }
   }
 
@@ -147,18 +146,13 @@ check_dims <- function(..., target_dim = NULL) {
       # error if not
       if (!all(matches_target)) {
 
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "incorrect array dimensions",
             "x" = "array dimensions should be \\
               {paste(target_dim, collapse = 'x')},",
             "but input dimensions were {dims_text}."
           )
-        )
-
-        stop(
-          msg,
-          call. = FALSE
         )
 
       }
@@ -180,17 +174,13 @@ check_dims <- function(..., target_dim = NULL) {
 # make sure a greta array is 2D
 check_2d <- function(x) {
   if (length(dim(x)) != 2L) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "Dimensions of parameters not compatible with multivariate \\
         distribution parameters of multivariate distributions cannot have \\
         more than two dimensions",
         "object {.var x} has dimensions: {paste(dim(x), collapse = 'x')}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -200,16 +190,12 @@ check_square <- function(x) {
   ndim <- length(dim)
   is_square <- ndim == 2 && dim[1] == dim[2]
   if (!is_square) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "Not 2D square greta array",
         "x" = "expected a 2D square greta array, but object {.var x} had \\
         dimension: {paste(dim, collapse = 'x')}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -217,16 +203,12 @@ check_square <- function(x) {
 check_sigma_square_2d_greta_array <- function(sigma){
   # check dimensions of Sigma
   if (nrow(sigma) != ncol(sigma) | length(dim(sigma)) != 2) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.arg Sigma} must be a square 2D greta array",
         "However, {.arg Sigma} has dimensions \\
             {.val {paste(dim(sigma), collapse = 'x')}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -236,15 +218,11 @@ check_mean_sigma_have_same_dimensions <- function(mean, sigma) {
   dim_sigma <- nrow(sigma)
 
   if (dim_mean != dim_sigma) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.arg mean} and {.arg Sigma} must have the same dimensions",
         "However they are different: {dim_mean} vs {dim_sigma}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -252,16 +230,12 @@ check_mean_sigma_have_same_dimensions <- function(mean, sigma) {
 check_chol2symm_square_symmetric_upper_tri_matrix <- function(x) {
   dim <- dim(x)
   if (length(dim) != 2 || dim[1] != dim[2]) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.fun chol2symm} must have square symmetric matrix, assumed to be \\
         upper triangular",
         "{.code dim(x)} returns: {dim(x)}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -269,16 +243,12 @@ check_chol2symm_square_symmetric_upper_tri_matrix <- function(x) {
 check_chol2symm_2d_square_upper_tri_greta_array <- function(x) {
   dim <- dim(x)
   if (length(dim) != 2 || dim[1] != dim[2]) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.fun chol2symm} must have two-dimensional, square, upper-triangular \\
         {.cls greta_array}s",
         "{.code dim(x)} returns: {dim(x)}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -309,15 +279,11 @@ check_n_realisations <- function(vectors = list(),
     if (!all(match_first)) {
 
       # otherwise it's not fine
-      msg <- cli::format_error(
+      cli::cli_abort(
         c(
           "incompatible number of rows",
           x = "{paste(nrows, collapse = ' vs ')}"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
   }
@@ -328,7 +294,7 @@ check_n_realisations <- function(vectors = list(),
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1) {
-      msg <- cli::format_error(
+      cli::cli_abort(
         c(
           "{.code n_realisations is not a positive scalar interger}",
           "{.code n_realisations} must be a positive scalar integer giving \\
@@ -338,10 +304,6 @@ check_n_realisations <- function(vectors = list(),
             {.cls {class(target)}} and length \\
             {.var {length(target)}}"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
 
@@ -359,16 +321,12 @@ check_n_realisations <- function(vectors = list(),
 
       # error if not
       if (!all(matches_target)) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "Realisations do not match rows",
             "number of realisations should be {target},",
             "but arguments had {paste(nrows, collapse = ', ')} rows"
           )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
     }
@@ -399,16 +357,12 @@ check_dimension <- function(vectors = list(),
 
     # make sure it's a scalar
     if (length(target) != 1 || target < 1 || !is.finite(target)) {
-      msg <- cli::format_error(
+      cli::cli_abort(
         c(
           "{.var dimension} must be a positive scalar integer giving the \\
           dimension of the distribution",
           "{.code dim(target)} returns: {dim(target)}"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
 
@@ -421,17 +375,13 @@ check_dimension <- function(vectors = list(),
 
   # check it's big enough
   if (dimension < min_dimension) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "the dimension of this distribution must be at least \\
         {min_dimension}, but was {dimension}",
         "multivariate distributions treat each {.emph row} as a separate \\
         realisation - perhaps you need to transpose something?"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -442,7 +392,7 @@ check_dimension <- function(vectors = list(),
 
   # otherwise it's not fine
   if (!all(match_dimension)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "distribution dimensions do not match implied dimensions",
         "The distribution dimension should be {dimension}, but parameters \\
@@ -451,9 +401,6 @@ check_dimension <- function(vectors = list(),
         realisation - perhaps you need to transpose something?"
       )
     )
-    stop(
-      msg,
-      call. = FALSE)
   }
 
   dimension
@@ -507,31 +454,23 @@ check_multivariate_dims <- function(vectors = list(),
 # check truncation for different distributions
 check_positive <- function(truncation) {
   if (truncation[1] < 0) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "lower bound must be 0 or higher",
         "lower bound is: {.val {truncation[1]}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
 
 check_unit <- function(truncation) {
   if (truncation[1] < 0 | truncation[2] > 1) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "lower and upper bounds must be between 0 and 1",
         "lower bound is: {.val {truncation[1]}}",
         "upper bound is: {.val {truncation[2]}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -562,7 +501,7 @@ check_in_family <- function(function_name, arg) {
 
   # nice user-friendly error message
   if (arg_is_link | function_is_family) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "Wrong function name provided in another model",
         "It looks like you're using {.pkg greta}'s {.fun {function_name}} \\
@@ -570,7 +509,6 @@ check_in_family <- function(function_name, arg) {
         "Maybe you want to use {.code family = stats::{function_name}},instead?"
       )
     )
-    stop(msg, call. = FALSE)
   }
 }
 
@@ -612,12 +550,8 @@ check_future_plan <- function() {
 
       # if multi*, check it's multisession
       if (!plan_is$multisession) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "parallel mcmc samplers cannot be run with {.code plan(multicore)}"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
     }
@@ -690,13 +624,9 @@ check_values_list <- function(values, env) {
   )
 
   if (!all(are_greta_arrays)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "the names of arguments to values must all correspond to named \\
       {.cls greta_array}s"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -704,13 +634,9 @@ check_values_list <- function(values, env) {
   assign_dim <- function(value, greta_array) {
     array <- unclass(get_node(greta_array)$value())
     if (length(array) != length(value)) {
-      msg <- cli::format_error(
+      cli::cli_abort(
         "a provided value has different number of elements than the \\
         {.cls greta_array}"
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
     array[] <- value
@@ -812,15 +738,11 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
 check_cum_op <- function(x) {
   dims <- dim(x)
   if (length(dims) > 2 | dims[2] != 1) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.var x} must be a column vector",
         "but {.var x} has dimensions {paste(dims, collapse = 'x')}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -842,14 +764,9 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
   if (!is.null(n_cores) && !n_cores %in% allowed_n_cores) {
     check_positive_integer(n_cores, "n_cores")
 
-    msg <- cli::format_warning(
+    cli::cli_warn(
       "{n_cores} cores were requested, but only {n_cores_detected} \\
       are available."
-    )
-
-    warning(
-      msg,
-      call. = FALSE
     )
 
     n_cores <- NULL
@@ -871,15 +788,11 @@ check_positive_integer <- function(x, name = "") {
   suppressWarnings(x <- as.integer(x))
 
   if (length(x) != 1 | is.na(x) | x < 1) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{name} must be a positive integer",
         "However the value provided was: {.val {x}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -890,13 +803,9 @@ check_positive_integer <- function(x, name = "") {
 check_trace_batch_size <- function(x) {
   valid <- is.numeric(x) && length(x) == 1 && x >= 1
   if (!valid) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "{.var trace_batch_size} must be a single numeric value greater than or \\
       equal to 1"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
   x
@@ -904,31 +813,23 @@ check_trace_batch_size <- function(x) {
 
 check_if_greta_array_in_mcmc <- function(x){
   if (!inherits(x, "greta_model") && inherits(x, "greta_array")) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c( "MCMC requires input to be a {.cls greta_model} not a {.cls greta_array}",
         "x" = "{.var x} is a {.cls greta_array} not a {.cls greta_model}",
         "i" = "You can convert {.var x} into a {.cls greta_model} by running:",
         "{.code model(x)}"
       )
     )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 }
 
 check_if_greta_model <- function(x) {
   if (!inherits(x, "greta_model")) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.var x} must be a {.cls greta_model}",
         "But {.var x} is {.cls {class(x)}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
@@ -937,12 +838,8 @@ check_if_greta_model <- function(x) {
 
 
 complex_error <- function(z) {
-  msg <- cli::format_error(
+  cli::cli_abort(
     "{.pkg greta} does not yet support complex numbers"
-  )
-  stop(
-    msg,
-    call. = FALSE
   )
 }
 
@@ -962,7 +859,6 @@ Conj.greta_array <- complex_error
 Mod.greta_array <- complex_error
 
 check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays, dag) {
-  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
   # check there are no variables without distributions (or whose children have
   # distributions - for lkj & wishart) that aren't given fixed values
   variables <- dag$node_list[dag$node_types == "variable"]
@@ -986,46 +882,41 @@ check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays, dag) {
   )
 
   unsampleable <- !have_distributions & !children_have_distributions
+
+  fixed_nodes <- lapply(fixed_greta_arrays, get_node)
   fixed_node_names <- vapply(
     fixed_nodes,
     member,
     "unique_name",
     FUN.VALUE = character(1)
   )
-  unfixed <- !names(variables) %in% fixed_node_names
+
+  unfixed <- !(names(variables) %in% fixed_node_names)
 
   if (any(unsampleable & unfixed)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       # NOTE:
       # is it possible to identify the names of these arrays or variables?
       "the target {.cls greta_array}s are related to variables that do not \\
         have distributions so cannot be sampled"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
 
 check_if_array_is_empty_list <- function(target){
   if (identical(target, list())) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.fun calculate} requires {.cls greta array}s",
         "no {.cls greta array}s were provided to {.fun calculate}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
 
 check_if_lower_upper_numeric <- function(lower, upper) {
   if (!is.numeric(lower) | !is.numeric(upper)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "lower and upper must be numeric",
         "lower has class: {class(lower)}",
@@ -1034,38 +925,26 @@ check_if_lower_upper_numeric <- function(lower, upper) {
         "upper has length: {length(upper)}"
       )
     )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 }
 
 check_if_lower_upper_has_bad_limits <- function(bad_limits) {
   if (bad_limits) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "lower and upper must either be -Inf (lower only), Inf (upper only) \\
           or finite"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }
 
 check_if_upper_gt_lower <- function(lower, upper) {
   if (any(lower >= upper)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "upper bounds must be greater than lower bounds",
         "lower is: {.val {lower}}",
         "upper is: {.val {upper}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 }

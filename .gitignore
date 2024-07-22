@@ -17,3 +17,5 @@ inst/doc
 .lazytest
 
 revdep
+revdep/checks.noindex
+revdep/library.noindex

@@ -107,3 +107,27 @@ test_that("%*% errors informatively", {
     a %*% c
   )
 })
+
+test_that("%*% works when one is a non-greta array", {
+  x <- matrix(1, 2, 3)
+  y <- rep(1, 3)
+
+  expect_snapshot(x %*% y)
+  expect_snapshot(x %*% as_data(y))
+  expect_snapshot(as_data(x) %*% y)
+  expect_snapshot(as_data(x) %*% as_data(y))
+
+  dim1 <- dim(x %*% as_data(y))
+  dim2 <- dim(as_data(x) %*% y)
+  dim3 <- dim(as_data(x) %*% as_data(y))
+
+  expect_true(all(dim1 == dim2 & dim1 == dim3 & dim2 == dim3))
+
+  res_1 <- x %*% as_data(y)
+  res_2 <- as_data(x) %*% y
+  res_3 <- as_data(x) %*% as_data(y)
+
+  expect_snapshot(calculate(res_1, nsim = 1))
+  expect_snapshot(calculate(res_2, nsim = 1))
+  expect_snapshot(calculate(res_3, nsim = 1))
+})

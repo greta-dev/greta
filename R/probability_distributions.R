@@ -6,13 +6,9 @@ uniform_distribution <- R6Class(
     max = NA,
     initialize = function(min, max, dim) {
       if (inherits(min, "greta_array") | inherits(max, "greta_array")) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "{.arg min} and {.arg max} must be fixed, they cannot be another \\
           greta array"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -21,7 +17,7 @@ uniform_distribution <- R6Class(
       good_types <- good_min & good_max
 
       if (!good_types) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "{.arg min} and {.arg max} must be numeric vectors of length 1",
             "They have class and length:",
@@ -29,14 +25,10 @@ uniform_distribution <- R6Class(
             "{.arg max}: {class(max)}, {length(max)}"
           )
         )
-        stop(
-          msg,
-          call. = FALSE
-        )
       }
 
       if (!is.finite(min) | !is.finite(max)) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "{.arg min} and {.arg max} must finite scalars",
             "Their values are:",
@@ -44,24 +36,16 @@ uniform_distribution <- R6Class(
             "{.arg max}: {max}"
           )
         )
-        stop(
-          msg,
-          call. = FALSE
-        )
       }
 
       if (min >= max) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "{.arg max} must be greater than {.arg min}",
             "Their values are:",
             "{.arg min}: {min}",
             "{.arg max}: {max}"
           )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -102,6 +86,7 @@ normal_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     initialize = function(mean, sd, dim, truncation) {
+      ## browser()
       mean <- as.greta_array(mean)
       sd <- as.greta_array(sd)
 
@@ -998,7 +983,6 @@ wishart_distribution <- R6Class(
 
       # initialize with a cholesky factor
       super$initialize("wishart", dim(sigma), multivariate = TRUE)
-
       # set parameters
       if (has_representation(sigma, "cholesky")) {
         sigma <- representation(sigma, "cholesky")
@@ -1139,13 +1123,9 @@ lkj_correlation_distribution <- R6Class(
 
       if (!inherits(eta, "greta_array")) {
         if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
-          msg <- cli::format_error(
+          cli::cli_abort(
             "{.arg eta} must be a positive scalar value, or a scalar \\
             {.cls greta_array}"
-          )
-          stop(
-            msg,
-            call. = FALSE
           )
         }
       }
@@ -1154,16 +1134,12 @@ lkj_correlation_distribution <- R6Class(
       eta <- as.greta_array(eta)
 
       if (!is_scalar(eta)) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "{.arg eta} must be a scalar",
             "However {.arg eta} had dimensions: \\
             {paste0(dim(eta), collapse = ', ')}"
           )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -1191,7 +1167,7 @@ lkj_correlation_distribution <- R6Class(
       target_node
     },
 
-    # NOTE: this code is repeated above on line 1069, is that intended?
+    # NOTE: this code is repeated above on line 1032, is that intended?
     # get a cholesky factor for the target if possible
     get_tf_target_node = function() {
       target <- self$target
@@ -1449,6 +1425,7 @@ uniform <- function(min, max, dim = NULL) {
 #' @rdname distributions
 #' @export
 normal <- function(mean, sd, dim = NULL, truncation = c(-Inf, Inf)) {
+  ##browser()
   distrib("normal", mean, sd, dim, truncation)
 }
 

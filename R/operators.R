@@ -146,6 +146,9 @@ NULL
   # if y is a greta array, coerce x before dispatch
   if (inherits(y, "greta_array") & !inherits(x, "greta_array")) {
     as_data(x) %*% y
+  # if y is not a greta array and x is, coerce y before dispatch
+  } else if (!inherits(y, "greta_array") & inherits(x, "greta_array")){
+    x %*% as_data(y)
   } else {
     UseMethod("%*%", x)
   }
@@ -156,28 +159,23 @@ NULL
 
   # check they're matrices
   if (length(dim(x)) != 2 | length(dim(y)) != 2) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "only two-dimensional {.cls greta_array}s can be matrix-multiplied",
         "dimensions recorded were {dim(x)}"
       )
     )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   # check the dimensions match
   if (dim(x)[2] != dim(y)[1]) {
-    msg <- cli::format_message(
+    cli::cli_abort(
       c(
         "incompatible dimensions: \\
         {.val {paste0(dim(x), collapse = 'x')}} vs \\
         {.val {paste0(dim(y), collapse = 'x')}}"
       )
     )
-    stop(msg, call. = FALSE)
   }
 
   op("matrix multiply", x, y,

@@ -103,7 +103,7 @@ inference <- R6Class(
         }
 
         if (!valid) {
-          msg <- cli::format_error(
+          cli::cli_abort(
             c(
               "Could not find reasonable starting values after \\
               {attempts} attempts.",
@@ -111,27 +111,19 @@ inference <- R6Class(
               {.arg initial_values} argument"
             )
           )
-          stop(
-            msg,
-            call. = FALSE
-          )
         }
       } else {
 
         # if they were all provided, check they can be be used
         valid <- self$valid_parameters(inits)
         if (!valid) {
-          msg <- cli::format_error(
+          cli::cli_abort(
             c(
               "The log density could not be evaluated at these initial values",
               "Try using these initials as the values argument in \\
               {.fun calculate} to see what values of subsequent \\
               {.cls greta_array}s these initial values lead to."
             )
-          )
-          stop(
-            msg,
-            call. = FALSE
           )
         }
       }
@@ -169,12 +161,8 @@ inference <- R6Class(
     # run a burst of sampling, and put the resulting free state values in
     # last_burst_free_states
     run_burst = function() {
-      msg <- cli::format_error(
+      cli::cli_abort(
         "no method to run a burst in the base inference class"
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
       self$last_burst_free_states <- free_states
     },
@@ -324,7 +312,8 @@ sampler <- R6Class(
               )
             )
           ),
-          dtype = tf_float())
+          dtype = tf_float()
+          )
         )
       )
     },
@@ -824,7 +813,7 @@ sampler <- R6Class(
           # otherwise, *one* of these multiple samples was bad. The sampler
           # won't be valid if we just restart, so we need to error here,
           # informing the user how to run one sample at a time
-          msg <- cli::format_error(
+          cli::cli_abort(
             c(
               "TensorFlow hit a numerical problem that caused it to error",
               "{.pkg greta} can handle these as bad proposals if you rerun \\
@@ -835,10 +824,6 @@ sampler <- R6Class(
             )
           )
 
-          stop(
-            msg,
-            call. = FALSE
-          )
         }
       }
 

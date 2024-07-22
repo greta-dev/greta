@@ -21,7 +21,7 @@ dag_class <- R6Class(
     initialize = function(target_greta_arrays,
                           tf_float = "float32",
                           compile = FALSE) {
-
+      # browser()
       # build the dag
       self$build_dag(target_greta_arrays)
 
@@ -42,7 +42,7 @@ dag_class <- R6Class(
 
     define_tf_trace_values_batch = function(){
       self$tf_trace_values_batch <- tensorflow::tf_function(
-        self$define_trace_values_batch
+        f = self$define_trace_values_batch
       )
     },
 
@@ -51,7 +51,7 @@ dag_class <- R6Class(
         # TF1/2 check
         # need to check in on all cases of `tensorflow::tf_function()`
         # as we are getting lots of warnings about retracting
-        self$generate_log_prob_function()
+        f = self$generate_log_prob_function()
       )
     },
 
@@ -345,6 +345,7 @@ dag_class <- R6Class(
       }
 
       # define all nodes in the environment and on the graph
+      ## HERE
       lapply(target_nodes, function(x){
         # browser()
         x$define_tf(self)
@@ -769,13 +770,9 @@ dag_class <- R6Class(
 
       # check we didn't time out
       if (it == maxit) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "could not determine the number of independent models in a \\
           reasonable amount of time"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -814,15 +811,9 @@ dag_class <- R6Class(
       sample <- tfp_distribution$sample
 
       if (is.null(sample)) {
-        msg <- cli::format_error(
-          c(
-            "sampling is not yet implemented for \\
+        cli::cli_abort(
+          "sampling is not yet implemented for \\
             {.val {distribution_node$distribution_name}} distributions"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -842,13 +833,9 @@ dag_class <- R6Class(
         quantile <- tfp_distribution$quantile
 
         if (is.null(cdf) | is.null(quantile)) {
-          msg <- cli::format_error(
+          cli::cli_abort(
             "sampling is not yet implemented for truncated \\
             {.val {distribution_node$distribution_name}} distributions"
-          )
-          stop(
-            msg,
-            call. = FALSE
           )
         }
 

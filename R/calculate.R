@@ -340,13 +340,9 @@ calculate_greta_mcmc_list <- function(target,
     replace <- FALSE
     if (nsim > n_samples) {
       replace <- TRUE
-      msg <- cli::format_warning(
+      cli::cli_warn(
         "{.arg nsim} was greater than the number of posterior samples in \\
         values, so posterior samples had to be drawn with replacement"
-      )
-      warning(
-        msg,
-        call. = FALSE
       )
     }
 
@@ -389,11 +385,12 @@ calculate_greta_mcmc_list <- function(target,
 }
 
 calculate_list <- function(target, values, nsim, tf_float, env) {
-  stochastic <- !is.null(nsim)
-
+  ### browser()
   fixed_greta_arrays <- list()
 
-  if (!identical(values, list())) {
+  values_exist <- !identical(values, list())
+
+  if (values_exist) {
 
     # check the list of values makes sense, and return these and the
     # corresponding greta arrays (looked up by name in environment env)
@@ -406,6 +403,8 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
 
+  stochastic <- !is.null(nsim)
+  ### browser()
   if (stochastic) {
 
     check_if_unsampleable_and_unfixed(fixed_greta_arrays, dag)
@@ -418,6 +417,9 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
 
   # TF1/2 check todo
   # need to wrap this in tf_function I think?
+  if (Sys.getenv("GRETA_DEBUG") == "true") {
+  browser()
+  }
   values <- calculate_target_tensor_list(
     dag = dag,
     fixed_greta_arrays = fixed_greta_arrays,
@@ -452,7 +454,7 @@ calculate_target_tensor_list <- function(
   nsim
 ) {
   # define the dag and TF graph
-
+  ### browser()
   # change dag mode to sampling
   dag$mode <- "all_sampling"
 
@@ -480,17 +482,23 @@ calculate_target_tensor_list <- function(
     )
   )
 
+  # look up the tf names of the target greta arrays (under sampling)
+  # create an object in the environment that's a list of these, and sample that
+  target_nodes <- lapply(target, get_node)
+  target_names_list <- lapply(target_nodes, dag$tf_name)
+
   # this is taking advantage of non-eager mode
   # TF1/2 check
   # might need to use some of the tensorflow creation function
   # approaches (in as_tf_function + generate_log_prob_function)
-  dag$define_tf()
+  dag$define_tf(target_nodes = target_nodes)
 
   # browser()
   # look up the tf names of the target greta arrays (under sampling)
   # create an object in the environment that's a list of these, and sample that
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
+
   ## TF1/2 OK so the error with Wishart and cholesky is happening here
   ## I feel as thought this isn't the "problem" per se, but it is where the
   ## matrix of 1s is returned. So seems to me we first expose the problem here

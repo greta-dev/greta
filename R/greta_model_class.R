@@ -167,14 +167,10 @@ model <- function(...,
   )
 
   if (any(bad_nodes)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "model contains a discrete random variable that doesn't have a fixed \\
       value, so inference cannot be carried out"
         )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   # define the TF graph
@@ -234,17 +230,13 @@ plot.greta_model <- function(x,
                              colour = "#996bc7",
                              ...) {
   if (!is_DiagrammeR_installed()) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "the {.pkg DiagrammeR} package must be installed to plot greta models",
         "install {.pkg DiagrammeR} with:",
         "{.code install.packages('DiagrammeR')}"
         )
       )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   # set up graph

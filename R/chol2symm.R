@@ -36,6 +36,9 @@ chol2symm.default <- function(x) {
 
 #' @export
 chol2symm.greta_array <- function(x) {
+  ## TF1/2
+  ## Does this extra coercion need to be here?
+  ## in order for this to dispatch with S3 it must be a greta array already?
   x <- as.greta_array(x)
 
   check_chol2symm_2d_square_upper_tri_greta_array(x)
