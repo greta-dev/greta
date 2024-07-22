@@ -184,9 +184,9 @@ model <- function(...,
   model
 }
 
-#' @title register generic method to coerce objects to a greta model
-#'
-#' @param x greta_model object
+# register generic method to coerce objects to a greta model
+#' @title Convert object to a "greta_model" object
+#' @param x object to convert to greta model
 #' @param ... extra arguments - not used.
 #'
 #' @export

@@ -2,15 +2,15 @@
 % Please edit documentation in R/greta_model_class.R
 \name{as.greta_model}
 \alias{as.greta_model}
-\title{register generic method to coerce objects to a greta model}
+\title{Convert object to a "greta_model" object}
 \usage{
 as.greta_model(x, ...)
 }
 \arguments{
-\item{x}{greta_model object}
+\item{x}{object to convert to greta model}
 
 \item{...}{extra arguments - not used.}
 }
 \description{
-register generic method to coerce objects to a greta model
+Convert object to a "greta_model" object
 }

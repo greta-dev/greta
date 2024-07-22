@@ -964,14 +964,15 @@ wishart_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
 
+    # TF1/2 - consider setting this as NULL for debugging purposes
     # set when defining the distribution
     sigma_is_cholesky = FALSE,
 
+    # TF1/2 - consider setting this as NULL for debugging purposes
     # set when defining the graph
     target_is_cholesky = FALSE,
     initialize = function(df, Sigma) { # nolint
       # add the nodes as parents and parameters
-
       df <- as.greta_array(df)
       sigma <- as.greta_array(Sigma)
 
@@ -1025,12 +1026,10 @@ wishart_distribution <- R6Class(
       self$target_is_cholesky <- FALSE
     },
     tf_distrib = function(parameters, dag) {
-
       # this is messy, we want to use the tfp wishart, but can't define the
       # density without expanding the dimension of x
 
       log_prob <- function(x) {
-
         # reshape the dimensions
         df <- tf_flatten(parameters$df)
         sigma <- tf$expand_dims(parameters$sigma, 1L)
@@ -1075,10 +1074,14 @@ wishart_distribution <- R6Class(
         distrib <- tfp$distributions$WishartTriL(
           df = df,
           scale_tril = sigma_chol,
+          # input_output_cholesky = TRUE
           ## TF1/2 could potentially flip to TRUE, then at
           ## target_is_cholesky check below we could use tf_chol2symm
           ## instead of tf_chol, as this should be more efficient
+          # input_output_cholesky = FALSE
           input_output_cholesky = FALSE
+          ## TF1/2 - check
+          # input_output_cholesky = TRUE
         )
 
         ## TF1/2
@@ -1087,11 +1090,19 @@ wishart_distribution <- R6Class(
         ## This produces something that looks about right
         draws <- distrib$sample(seed = seed)
 
+        # if (!self$target_is_cholesky) {
+          # draws <- tf_chol(draws)
+          # draws <- tf_chol2symm(draws)
+        # }
         ## TF1/2 - as above, this would need to be !self$target_is_cholesky
         if (self$target_is_cholesky) {
           draws <- tf_chol(draws)
         }
-
+        ## TF1/2 - check
+        # if (!self$target_is_cholesky) {
+          # draws <- tf_chol(draws)
+          # draws <- tf_chol2symm(draws)
+        # }
         draws
       }
 

@@ -1,0 +1,19 @@
+### Multiple Poisson regression
+
+A multiple Bayesian linear regression model using the `warpbreaks` data.
+
+```{r multiple_linear_warpbreaks_data}
+data("warpbreaks")
+X <- as_data(model.matrix(breaks ~ wool + tension, warpbreaks))
+y <- as_data(warpbreaks$breaks)
+```
+
+```{r multiple_linear_warpbreaks_greta}
+int <- variable()
+coefs <- normal(0, 5, dim = ncol(X) - 1)
+beta <- c(int, coefs)
+
+eta <- X %*% beta
+
+distribution(y) <- poisson(exp(eta))
+```

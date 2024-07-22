@@ -1,5 +1,3 @@
-# package file
-
 #' greta: simple and scalable statistical modelling in R
 #' @name greta
 #'

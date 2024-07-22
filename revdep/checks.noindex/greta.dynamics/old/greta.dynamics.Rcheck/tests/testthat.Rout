@@ -1,0 +1,99 @@
+
+R version 4.3.2 (2023-10-31) -- "Eye Holes"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(testthat)
+> library(deSolve)
+> library(abind)
+> test_check("greta.dynamics")
+Loading required package: greta.dynamics
+Loading required package: greta
+
+Attaching package: 'greta'
+
+The following object is masked from 'package:abind':
+
+    abind
+
+The following objects are masked from 'package:stats':
+
+    binomial, cov2cor, poisson
+
+The following objects are masked from 'package:base':
+
+    %*%, apply, backsolve, beta, chol2inv, colMeans, colSums, diag,
+    eigen, forwardsolve, gamma, identity, rowMeans, rowSums, sweep,
+    tapply
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+greta does not currently work with Apple Silicon (M1)
+We are working on getting this resolved ASAP, see <https://github.com/greta-dev/greta/issues/458> for current progress.FALSE
+i Initialising python and checking dependencies, this may take a moment.
+x Initialising python and checking dependencies, this may take a moment. ... ...
+
+[ FAIL 0 | WARN 2 | SKIP 9 | PASS 9 ]
+
+══ Skipped tests (9) ═══════════════════════════════════════════════════════════
+• greta:::check_tf_version() is not TRUE (9): 'test_iterate_matrix.R:4:3',
+  'test_iterate_matrix.R:60:3', 'test_iterate_matrix.R:100:3',
+  'test_iterate_matrix.R:239:3', 'test_iterate_matrix.R:257:3',
+  'test_iterate_matrix.R:281:3', 'test_iterate_matrix.R:293:3',
+  'test_ode_solve.R:4:3', 'test_ode_solve.R:80:3'
+
+[ FAIL 0 | WARN 2 | SKIP 9 | PASS 9 ]
+> 
+> proc.time()
+   user  system elapsed 
+  3.191   0.445   4.663 

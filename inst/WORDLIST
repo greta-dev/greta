@@ -51,6 +51,7 @@ cholesky
 cli
 colour
 colours
+compat
 conda
 cran
 devtools
@@ -120,6 +121,7 @@ specialised
 summarise
 tensorflow
 tf
+tfp
 tuh
 unadjusted
 uncentered

@@ -1,5 +1,5 @@
 #' @title Create objects of class 'unknowns' to nicely print ? valued arrays
-#' @param x an unknowns object
+#' @param x object to convert to "unknowns" class
 #' @export
 as.unknowns <- function(x) { # nolint
   UseMethod("as.unknowns")

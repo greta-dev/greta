@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>A Future for R: Non-Exportable Objects</title>
+<style type="text/css">
+/**
+ * Prism.s theme ported from highlight.js's xcode style
+ */
+pre code {
+  padding: 1em;
+}
+.token.comment {
+  color: #007400;
+}
+.token.punctuation {
+  color: #999;
+}
+.token.tag,
+.token.selector {
+  color: #aa0d91;
+}
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+  color: #1c00cf;
+}
+.token.property,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+  color: #c41a16;
+}
+.token.inserted {
+  background-color: #ccffd8;
+}
+.token.deleted {
+  background-color: #ffebe9;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #9a6e3a;
+}
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #836c28;
+}
+.token.function,
+.token.class-name {
+  color: #DD4A68;
+}
+.token.regex,
+.token.important,
+.token.variable {
+  color: #5c2699;
+}
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+</style>
+<style type="text/css">
+body {
+  font-family: sans-serif;
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+body, .footnotes, code { font-size: .9em; }
+li li { font-size: .95em; }
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+pre, img { max-width: 100%; }
+pre, pre:hover {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+pre code {
+  display: block;
+  overflow-x: auto;
+}
+code { font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace; }
+:not(pre) > code, code[class] { background-color: #F8F8F8; }
+code.language-undefined, pre > code:not([class]) {
+  background-color: inherit;
+  border: 1px solid #eee;
+}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+blockquote {
+  color: #666;
+  margin: 0;
+  padding-left: 1em;
+  border-left: 0.5em solid #eee;
+}
+hr, .footnotes::before { border: 1px dashed #ddd; }
+.frontmatter { text-align: center; }
+#TOC .numbered li { list-style: none; }
+#TOC .numbered { padding-left: 0; }
+#TOC .numbered ul { padding-left: 1em; }
+table, .body h2 { border-bottom: 1px solid #666; }
+.body .appendix, .appendix ~ h2 { border-bottom-style: dashed; }
+.footnote-ref a::before { content: "["; }
+.footnote-ref a::after { content: "]"; }
+section.footnotes::before {
+  content: "";
+  display: block;
+  max-width: 20em;
+}
+
+@media print {
+  body {
+    font-size: 12pt;
+    max-width: 100%;
+  }
+  tr, img { page-break-inside: avoid; }
+}
+@media only screen and (min-width: 992px) {
+  pre { white-space: pre; }
+}
+</style>
+<meta name="keywords" content="R, package, vignette, future, promise">
+<meta name="author" content="Henrik Bengtsson">
+</head>
+<body>
+<div class="frontmatter">
+<div class="title"><h1>A Future for R: Non-Exportable Objects</h1></div>
+<div class="author"><h2></h2></div>
+<div class="date"><h3></h3></div>
+</div>
+<div class="body">
+<h1 id="a-future-for-r-non-exportable-objects">A Future for R: Non-Exportable Objects</h1>
+<p>Certain types of objects are tied to a given R session.  Such objects cannot be saved to file by one R process and then later be reloaded in another R process and expected to work correctly.  If attempted, we will often get an informative error but not always.  For the same reason, these type of objects cannot be exported to another R processes(*) for parallel processing regardless of which parallelization framework we use.  We refer to these type of objects as “non-exportable objects”.</p>
+<p>(*) The exception <em>might be</em> when <em>forked</em> processes are used, i.e. <code>plan(multicore)</code>.  However, such attempts to work around the underlying problem, which is non-exportable objects, should be avoided and considered non-stable.  Moreover, such code will fail to parallelize when using other future backends.</p>
+<h2 id="a-first-example-file-connections">A first example - file connections</h2>
+<p>An example of a non-exportable object is a connection, e.g. a file connection.  For instance, if you create a file connection,</p>
+<pre><code class="language-r">con &lt;- file(&quot;output.log&quot;, open = &quot;wb&quot;)
+cat(&quot;hello &quot;, file = con)
+flush(con)
+readLines(&quot;output.log&quot;, warn = FALSE)
+## [1] &quot;hello &quot;
+</code></pre>
+<p>it will not work when used in another R process.  If we try, the result is “unknown”, e.g.</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+f &lt;- future({ cat(&quot;world!&quot;, file = con); flush(con) })
+value(f)
+## NULL
+close(con)
+readLines(&quot;output.log&quot;, warn = FALSE)
+## [1] &quot;hello &quot;
+</code></pre>
+<p>In other words, the output <code>&quot;world!&quot;</code> written by the R worker is completely lost.</p>
+<p>The culprit here is that the connection uses a so called <em>external pointer</em>:</p>
+<pre><code class="language-r">str(con)
+## Classes 'file', 'connection'  atomic [1:1] 3
+##   ..- attr(*, &quot;conn_id&quot;)=&lt;externalptr&gt; 
+</code></pre>
+<p>which is bound to the main R process and makes no sense to the worker.  Ideally, the R process of the worker would detect this and produce an informative error message, but as seen here, that does not always occur.</p>
+<h2 id="protect-against-non-exportable-objects">Protect against non-exportable objects</h2>
+<p>To help avoiding exporting non-exportable objects by mistakes, which typically happens because a global variable is non-exportable, the future framework provides a mechanism for automatically detecting such objects.  To enable it, do:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+f &lt;- future({ cat(&quot;world!&quot;, file = con); flush(con) })
+## Error: Detected a non-exportable reference ('externalptr') in one of the globals
+## ('con' of class 'file') used in the future expression
+</code></pre>
+<p><em>Comment</em>: The <code>future.globals.onReference</code> options is set to <code>&quot;ignore&quot;</code> by default due to the extra overhead <code>&quot;error&quot;</code> introduces, which can be significant for very large nested objects.  Furthermore, some subclasses of external pointers can be exported without causing problems.</p>
+<h2 id="packages-with-non-exportable-objects">Packages with non-exportable objects</h2>
+<p>The below table and sections provide a few examples of non-exportable R objects that you may run into when trying to parallelize your code, or simply from trying reload objects saved in a previous R session.
+<em>If you identify other cases, please consider <a href="https://github.com/HenrikBengtsson/future/issues/">reporting</a> them so they can be documented here and possibly even be fixed.</em></p>
+<table>
+<thead>
+<tr>
+<th align="left">Package</th>
+<th align="left">Examples of non-exportable types or classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>base</strong></td>
+<td align="left">connection (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>cpp11</strong></td>
+<td align="left">E.g. functions created by <code>cpp_source()</code></td>
+</tr>
+<tr>
+<td align="left"><strong>DBI</strong></td>
+<td align="left">DBIConnection (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>inline</strong></td>
+<td align="left">CFunc (<code>externalptr</code> of class DLLHandle)</td>
+</tr>
+<tr>
+<td align="left"><strong>keras</strong></td>
+<td align="left">keras.engine.sequential.Sequential (<code>externalptr</code>), keras.engine.base_layer.Layer (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>magick</strong></td>
+<td align="left">magick-image (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>ncdf4</strong></td>
+<td align="left">ncdf4 (custom reference; <em>non-detectable</em>)</td>
+</tr>
+<tr>
+<td align="left"><strong>parallel</strong></td>
+<td align="left">cluster and cluster nodes (<code>connection</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>raster</strong></td>
+<td align="left">RasterLayer (<code>externalptr</code>; <em>not all</em>)</td>
+</tr>
+<tr>
+<td align="left"><strong>Rcpp</strong></td>
+<td align="left">NativeSymbol (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>reticulate</strong></td>
+<td align="left">python.builtin.function (<code>externalptr</code>), python.builtin.module (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>rJava</strong></td>
+<td align="left">jclassName (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>ShortRead</strong></td>
+<td align="left">FastqFile, FastqStreamer, FastqStreamerList (<code>connection</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>sparklyr</strong></td>
+<td align="left">tbl_spark (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>terra</strong></td>
+<td align="left">SpatRaster, SpatVector (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>udpipe</strong></td>
+<td align="left">udpipe_model (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>xgboost</strong></td>
+<td align="left">xgb.DMatrix (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>XML</strong></td>
+<td align="left">XMLInternalDocument, XMLInternalElementNode (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>xml2</strong></td>
+<td align="left">xml_document (<code>externalptr</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>These are illustrated in sections ‘Packages that rely on external pointers’ and ‘Packages with other types of non-external objects’ below.</p>
+<p>Importantly, there are objects with external pointer than can indeed be exported.  Here are some example,</p>
+<table>
+<thead>
+<tr>
+<th align="left">Package</th>
+<th align="left">Examples of exportable types or classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>data.table</strong></td>
+<td align="left">data.table (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>rstan</strong></td>
+<td align="left">stanmodel (<code>externalptr</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>These are discussed in sections ‘False positives - packages with exportable external pointers’ at the very end of this vignette.</p>
+<h3 id="packages-with-connections">Packages with connections</h3>
+<h4 id="package-parallel">Package: parallel</h4>
+<pre><code class="language-r">library(future)
+plan(multisession, workers = 2)
+
+cl &lt;- parallel::makeCluster(2L)
+y &lt;- parSapply(cl, X = 2:3, FUN = sqrt)
+y
+## [1] 1.414214 1.732051
+
+y %&lt;-% parSapply(cl, X = 2:3, FUN = sqrt)
+y
+## Error in summary.connection(connection) : invalid connection
+</code></pre>
+<p>If we turn on <code>options(future.globals.onReference = &quot;error&quot;)</code>, we will catch this already when we create the future:</p>
+<pre><code class="language-r">y %&lt;-% parSapply(cl, X = 2:3, FUN = sqrt)
+## Error: Detected a non-exportable reference ('externalptr') in one of the globals
+## ('cl' of class 'SOCKcluster') used in the future expression
+</code></pre>
+<h3 id="packages-that-rely-on-external-pointers">Packages that rely on external pointers</h3>
+<p>If an object carries an <em>external pointer</em>, it is likely that it can only be used in the R session where it was created.  If it is exported to and used in a parallel process, it will likely cause an error there.  As shown above, and in below examples, setting option <code>future.globals.onReference</code> to <code>&quot;error&quot;</code> will make <strong>future</strong> to scan for <em>external pointer</em>:s before launching the future on a parallel worker, and throw an error if one is detected.</p>
+<p>However, there are objects with <em>external pointer</em>:s that can be exported, e.g. <code>data.table</code> objects of the <strong><a href="https://cran.r-project.org/package=data.table">data.table</a></strong> package is one such example.  In other words, the existence of a <em>external pointer</em> is just a suggestion for an object being non-exportable - it is not a sufficient condition.</p>
+<p>Below are some examples of packages who produce non-exportable objects with <em>external pointer</em>:s.</p>
+<h4 id="package-cpp11">Package: cpp11</h4>
+<p>Another example is <strong><a href="https://cran.r-project.org/package=cpp11">cpp11</a></strong>, which allows us to easily create R functions that are implemented in C++, e.g.</p>
+<pre><code class="language-r">cpp11::cpp_source(code = '
+#include &quot;cpp11/doubles.hpp&quot;
+using namespace cpp11;
+
+[[cpp11::register]]
+int my_length(doubles x) {
+    return x.size();
+}
+')
+</code></pre>
+<p>so that:</p>
+<pre><code>x &lt;- rnorm(10)
+my_length(x)
+## [1] 10
+</code></pre>
+<p>However, this function cannot be exported to another R process:</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+x &lt;- rnorm(10)
+n %&lt;-% my_length(x)
+n
+#&gt; Error in .Call(&quot;_code_1748ff617940b9_my_length&quot;, x, PACKAGE = &quot;code_1748ff617940b9&quot;) : 
+#&gt;   &quot;_code_1748ff617940b9_my_length&quot; not available for .Call() for package &quot;code_1748ff617940b9&quot;
+</code></pre>
+<h4 id="package-dbi">Package: DBI</h4>
+<p><strong><a href="https://cran.r-project.org/package=DBI">DBI</a></strong> provides a unified database interface for communication between R and various database engines.  Analogously to regular connections in R, DBIConnection objects can <em>not</em> safely be exported to another R process, e.g.</p>
+<pre><code class="language-r">library(future)
+options(future.globals.onReference = &quot;error&quot;)
+plan(multisession)
+library(DBI)
+con &lt;- dbConnect(RSQLite::SQLite(), &quot;:memory:&quot;)
+dummy %&lt;-% print(con)
+## Error: Detected a non-exportable reference ('externalptr') in one of the globals
+## ('con' of class 'SQLiteConnection') used in the future expression
+</code></pre>
+<h4 id="package-inline">Package: inline</h4>
+<p>Another example is <strong><a href="https://cran.r-project.org/package=inline">inline</a></strong>, which allows us to easily create R functions that are implemented in C and C++, e.g.</p>
+<pre><code class="language-r">library(inline)
+code &lt;- &quot;
+  int i;
+  for (i = 0; i &lt; *n; i++) x[0] = x[0] + (i+1);
+&quot;
+sum_1_to_n &lt;- cfunction(signature(n=&quot;integer&quot;, x=&quot;numeric&quot;), code, language = &quot;C&quot;, convention = &quot;.C&quot;)
+y &lt;- sum_1_to_n(10, 0)$x
+print(y)
+## 55
+</code></pre>
+<p>However, if we would attempt to call <code>sum_1_to_n()</code> in a future, we get an error:</p>
+<pre><code class="language-r">library(future)
+plan(cluster, workers = 1L)
+f &lt;- future(sum_1_to_n(10, 0))
+v &lt;- value(f)
+## Error in .Primitive(&quot;.C&quot;)(&lt;pointer: (nil)&gt;, n = as.integer(n), x = as.double(x)) : 
+##   NULL value passed as symbol address
+</code></pre>
+<p>This is because:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+f &lt;- future(sum_1_to_n(10, 0))
+## Error: Detected a non-exportable reference ('externalptr' of class
+## 'DLLHandle') in one of the globals ('sum_1_to_n' of class 'CFunc')
+## used in the future expression
+</code></pre>
+<h4 id="package-keras">Package: keras</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=DBI">keras</a></strong> package provides an R interface to
+<a href="https://keras.io/">Keras</a>, which “is a high-level neural networks API
+developed with a focus on enabling fast experimentation”.  The R
+implementation accesses the Keras Python API via <strong><a href="https://cran.r-project.org/package=reticulate">reticulate</a></strong>.
+However, Keras model instances in R make use of R connections and
+external pointers, which prevents them from being exported to external
+R processes.  For example, if the attempt to use a Keras model in a
+multisession workers, the worker will produce a run-time error:</p>
+<pre><code class="language-r">library(keras)
+
+library(future)
+plan(multisession)
+
+## Adopted from the 'keras' vignettes
+inputs &lt;- layer_input(shape = shape(32))
+outputs &lt;- layer_dense(inputs, units = 1L)
+model &lt;- keras_model(inputs, outputs)
+model &lt;- compile(model, optimizer = &quot;adam&quot;, loss = &quot;mean_squared_error&quot;)
+
+test_input &lt;- array(runif(128 * 32), dim = c(128, 32))
+test_target &lt;- array(runif(128), dim = c(128, 1))
+fit(model, test_input, test_target)
+
+f &lt;- future({
+  stats::predict(model, test_input)
+}, seed = TRUE)
+pred &lt;- value(f)
+## Error in do.call(object$predict, args) : 
+##   'what' must be a function or character string
+</code></pre>
+<p>This is error message is not very helpful.  But, if we turn on
+<code>options(future.globals.onReference = &quot;error&quot;)</code>, we get more
+clues;</p>
+<pre><code class="language-r">Error: Detected a non-exportable reference ('externalptr') in one of the
+globals ('model' of class 'keras.engine.functional.Functional') used in
+the future expression
+</code></pre>
+<p>Functions <code>serialize_model()</code> and <code>unserialize_model()</code> of the
+<strong>keras</strong> package can be used as workaround to marshal and unmarshal
+non-exportable <strong>keras</strong> objects, e.g.</p>
+<pre><code class="language-r">.model &lt;- serialize_model(model)
+f &lt;- future({
+  model &lt;- unserialize_model(.model)
+  stats::predict(model, test_input)
+}, seed = TRUE)
+rm(.model) ## not needed anymore
+
+pred &lt;- value(f)
+str(pred)
+## num [1:128, 1] 0.6937 -0.048 0.2996 -0.0818 1.0673 ...
+</code></pre>
+<h4 id="package-magick">Package: magick</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=magick">magick</a></strong> package provides an R-level API for <a href="https://imagemagick.org/">ImageMagick</a> to work with images.  When working with this API, the images are represented internally as external pointers of class ‘magick_image’ that cannot be be exported to another R process, e.g.</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(magick)
+frink &lt;- magick::image_read(&quot;https://jeroen.github.io/images/frink.png&quot;)
+f &lt;- future(image_fill(frink, &quot;orange&quot;, &quot;+100+200&quot;, 20))
+v &lt;- value(f)
+## Error: Image pointer is dead. You cannot save or cache image objects
+## between R sessions.
+</code></pre>
+<p>If we set:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+</code></pre>
+<p>we’ll see that this is caught even before attempting to run this in parallel;</p>
+<pre><code class="language-r">&gt; f &lt;- future(image_fill(frink, &quot;orange&quot;, &quot;+100+200&quot;, 20))
+## Error: Detected a non-exportable reference ('externalptr' of class
+## 'magick-image') in one of the globals ('frink' of class 'magick-image')
+## used in the future expression
+</code></pre>
+<h4 id="package-raster">Package: raster</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=raster">raster</a></strong> package provides methods for working with spatial data, which are held in ‘RasterLayer’ objects.  Not all but some of these objects use an external pointer.  For example,</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+options(future.globals.onReference = &quot;error&quot;)
+
+library(raster)
+r &lt;- raster(system.file(&quot;external/test.grd&quot;, package = &quot;raster&quot;))
+tf &lt;- tempfile(fileext = &quot;.grd&quot;)
+s &lt;- writeStart(r, filename = tf,  overwrite = TRUE)
+
+f &lt;- future({
+  print(dim(r))
+  print(dim(s))
+})
+Error: Detected a non-exportable reference ('externalptr') in one of the
+globals ('s' of class 'RasterLayer') used in the future expression
+</code></pre>
+<p>Note that it is only the RasterLayer object <code>s</code> that carries an external pointer.  If we dig deeper, we find that this is because <code>attr(s@file, &quot;con&quot;)</code> is file connection opened for writing.  This is why <code>s</code> cannot be passed on to an external worker.  In contrast, RasterLayer object <code>r</code> does not have this problem and would be fine to pass on to a worker.</p>
+<h4 id="package-rcpp">Package: Rcpp</h4>
+<p>Similarly to <strong>cpp11</strong>, <strong><a href="https://cran.r-project.org/package=Rcpp">Rcpp</a></strong> can be use to create R functions that are implemented in C++, e.g.</p>
+<pre><code class="language-r">Rcpp::sourceCpp(code = '
+#include &lt;Rcpp.h&gt;
+using namespace Rcpp;
+
+// [[Rcpp::export]]
+int my_length(NumericVector x) {
+    return x.size();
+}
+')
+</code></pre>
+<p>so that:</p>
+<pre><code>x &lt;- 1:10
+my_length(x)
+## [1] 10
+</code></pre>
+<p>However, since this function uses an external pointer internally, we cannot pass it to another R process:</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+x &lt;- rnorm(10)
+n %&lt;-% my_length(x)
+n
+## Error in .Call(&lt;pointer: (nil)&gt;, x) : NULL value passed as symbol address
+</code></pre>
+<p>We can detect and protect against this using:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+n %&lt;-% my_length(x)
+## Error: Detected a non-exportable reference ('externalptr' of class
+## 'NativeSymbol') in one of the globals ('my_length' of class 'function')
+## used in the future expression
+</code></pre>
+<h4 id="package-reticulate">Package: reticulate</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=reticulate">reticulate</a></strong> package provides methods for creating and calling Python code from within R.  If one attempt to use Python-binding objects from this package, we get errors like:</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(reticulate)
+os &lt;- import(&quot;os&quot;)
+pwd %&lt;-% os$getcwd()
+pwd
+## Error in eval(quote(os$getcwd()), new.env()) : 
+##   attempt to apply non-function
+</code></pre>
+<p>and by telling the <strong>future</strong> package to validate globals further, we get:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+pwd %&lt;-% os$getcwd()
+## Error: Detected a non-exportable reference ('externalptr') in one of the
+## globals ('os' of class 'python.builtin.module') used in the future expression
+</code></pre>
+<p>Another reticulate example is when we try to use a Python function that we create ourselves as in:</p>
+<pre><code class="language-r">cat(&quot;def twice(x):\n    return 2*x\n&quot;, file = &quot;twice.py&quot;)
+source_python(&quot;twice.py&quot;)
+twice(1.2)
+## [1] 2.4
+y %&lt;-% twice(1.2)
+y
+## Error in unserialize(node$con) : 
+##   Failed to retrieve the value of MultisessionFuture from cluster node #1
+##   (on 'localhost').  The reason reported was 'error reading from connection'
+</code></pre>
+<p>which, again, is because:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+y %&lt;-% twice(1.2)
+## Error: Detected a non-exportable reference ('externalptr') in one of the globals
+## ('twice' of class 'python.builtin.function') used in the future expression
+</code></pre>
+<h4 id="package-rjava">Package: rJava</h4>
+<p>Here is an example that shows how <strong><a href="https://cran.r-project.org/package=rJava">rJava</a></strong> objects cannot be exported to external R processes.</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(rJava)
+.jinit() ## Initialize Java VM on master
+
+Double &lt;- J(&quot;java.lang.Double&quot;)
+d0 &lt;- new(Double, &quot;3.14&quot;)
+d0
+## [1] &quot;Java-Object{3.14}&quot;
+
+f &lt;- future({
+  .jinit() ## Initialize Java VM on worker
+  new(Double, &quot;3.14&quot;)
+})
+d1 &lt;- value(f)
+d1
+## [1] &quot;Java-Object&lt;null&gt;&quot;
+</code></pre>
+<p>Although no error is produced, we see that the value <code>d1</code> is a Java NULL Object.  As before, we can catch this by using:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+f &lt;- future({
+  .jinit() ## Initialize Java VM on worker
+  new(Double, &quot;3.14&quot;)
+})
+## Error: Detected a non-exportable reference ('externalptr') in one of the
+## globals ('Double' of class 'jclassName') used in the future expression
+</code></pre>
+<h4 id="package-shortread">Package: ShortRead</h4>
+<p>The <strong><a href="https://bioconductor.org/packages/ShortRead/">ShortRead</a></strong> package from Bioconductor implements efficient methods for sampling, iterating, and reading FASTQ files.  Some of the helper objects used cannot be saved to file or exported to a parallel worker, because they comprise of connections and other non-exportable objects.</p>
+<p>Here is an example that illustrates how an attempt to use a ‘FastqStreamer’ object created in the main R session fails when used in a parallel worker:</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+
+# Adopted from example(&quot;FastqStreamer&quot;, package = &quot;ShortRead&quot;)
+library(ShortRead)
+sp &lt;- SolexaPath(system.file(&quot;extdata&quot;, package = &quot;ShortRead&quot;))
+fl &lt;- file.path(analysisPath(sp), &quot;s_1_sequence.txt&quot;)
+fs &lt;- FastqStreamer(fl, 50)
+
+reads %&lt;-% yield(fs)
+reads
+## Error in status(update = TRUE) : invalid FastqStreamer
+</code></pre>
+<p>To catch this earlier, and to get a more informative error message, we do as before;</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+
+reads %&lt;-% yield(fs)
+## Error: Detected a non-exportable reference ('externalptr') in one of the
+## globals ('fs' of class 'FastqStreamer') used in the future expression
+</code></pre>
+<h4 id="package-sparklyr">Package: sparklyr</h4>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(sparklyr)
+sc &lt;- spark_connect(master = &quot;local&quot;)
+
+file &lt;- system.file(&quot;misc&quot;, &quot;exDIF.csv&quot;, package = &quot;utils&quot;)
+data &lt;- spark_read_csv(sc, &quot;exDIF&quot;, file)
+d %&lt;-% dim(data)
+d
+## Error in unserialize(node$con) : 
+##   Failed to retrieve the value of MultisessionFuture (&lt;none&gt;) from cluster
+## SOCKnode #1 (PID 29864 on localhost 'localhost'). The reason reported was
+## 'unknown input format'. Post-mortem diagnostic: A process with this PID
+## exists, which suggests that the localhost worker is still alive.
+</code></pre>
+<p>To catch this as soon as possible,</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+d %&lt;-% dim(data)
+## Error: Detected a non-exportable reference ('externalptr') in one of
+## the globals ('data' of class 'tbl_spark') used in the future expression
+</code></pre>
+<h4 id="package-terra">Package: terra</h4>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(terra)
+
+file &lt;- system.file(&quot;ex/lux.shp&quot;, package = &quot;terra&quot;)
+v &lt;- vect(file)
+dv %&lt;-% dim(v)
+dv
+Error in x@ptr$nrow() : external pointer is not valid
+
+file &lt;- system.file(&quot;ex/elev.tif&quot;, package = &quot;terra&quot;)
+r &lt;- rast(file)
+dr %&lt;-% dim(r)
+dr
+## Error in .External(list(name = &quot;CppMethod__invoke_notvoid&quot;, address = &lt;pointer: (nil)&gt;,  : 
+##  NULL value passed as symbol address
+</code></pre>
+<p>To catch this as soon as possible,</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+
+dv %&lt;-% dim(v)
+## Error: Detected a non-exportable reference ('externalptr' of class
+## 'RegisteredNativeSymbol') in one of the globals ('v' of class
+## 'SpatVector') used in the future expression
+
+dr %&lt;-% dim(data)
+## Error: Detected a non-exportable reference ('externalptr' of class
+## 'RegisteredNativeSymbol') in one of the globals ('r' of class
+## 'SpatRaster') used in the future expression
+</code></pre>
+<p>Functions <code>wrap()</code> and <code>vect()</code> of the <strong>terra</strong> package can be used as workaround to marshal and unmarshal non-exportable <strong>terra</strong> objects, e.g.</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(terra)
+
+file &lt;- system.file(&quot;ex/lux.shp&quot;, package = &quot;terra&quot;)
+v &lt;- vect(file)
+.v &lt;- wrap(v)
+dv %&lt;-% { v &lt;- vect(.v); dim(v) }
+rm(.v) ## not needed anymore
+dv
+[1] 12  6
+</code></pre>
+<p>and</p>
+<pre><code class="language-r">file &lt;- system.file(&quot;ex/elev.tif&quot;, package = &quot;terra&quot;)
+r &lt;- rast(file)
+.r &lt;- wrap(v)
+dr %&lt;-% { r &lt;- vect(.r); dim(r) }
+rm(.r) ## not needed anymore
+dr
+[1] 12  6
+</code></pre>
+<p>For more details, see <code>help(&quot;wrap&quot;, package = &quot;terra&quot;)</code>.</p>
+<h4 id="package-udpipe">Package: udpipe</h4>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(udpipe)
+udmodel &lt;- udpipe_download_model(language = &quot;dutch&quot;)
+udmodel &lt;- udpipe_load_model(file = udmodel$file_model)
+x %&lt;-% udpipe_annotate(udmodel, x = &quot;Ik ging op reis en ik nam mee.&quot;)
+x
+## Error in udp_tokenise_tag_parse(object$model, x, doc_id, tokenizer, tagger,  : 
+##   external pointer is not valid
+</code></pre>
+<p>To catch this as soon as possible,</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+x %&lt;-% udpipe_annotate(udmodel, x = &quot;Ik ging op reis en ik nam mee.&quot;)
+## Error: Detected a non-exportable reference ('externalptr') in one of the
+## globals ('udmodel' of class 'udpipe_model') used in the future expression
+</code></pre>
+<p>Now, it is indeed possible to parallelize <strong><a href="https://cran.r-project.org/package=udpipe">udpipe</a></strong> calls.  For details on how to do this, see the ‘UDPipe Natural Language Processing - Parallel’ vignette that comes with the <strong>udpipe</strong> package.</p>
+<h4 id="package-xgboost">Package: xgboost</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=xgboost">xgboost</a></strong> package provides fast gradient-boosting methods.  Some of its data structures use external pointers.  For example,</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+
+library(xgboost)
+data(agaricus.train, package = &quot;xgboost&quot;)
+train &lt;- xgb.DMatrix(agaricus.train$data, label = agaricus.train$label)
+class(train)
+## [1] &quot;xgb.DMatrix&quot;
+
+d &lt;- dim(dtrain)
+d
+## [1] 6513  126
+</code></pre>
+<p>works just fine but if we attempt to pass on the ‘xgb.DMatrix’ object <code>train</code> to an external worker, we silently get a incorrect value:</p>
+<pre><code class="language-r">f &lt;- future(dim(dtrain))
+d &lt;- value(f)
+d
+## NULL
+</code></pre>
+<p>This is unfortunate, but we can at least detect this by:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+f &lt;- future(dim(dtrain))
+## Error: Detected a non-exportable reference ('externalptr' of class 'xgb.DMatrix')
+## in one of the globals ('dtrain' of class 'xgb.DMatrix') used in the future expression
+</code></pre>
+<p>This is because <code>train</code> itself is an external pointer, i.e. <code>mode(train) == &quot;externalptr&quot;</code>.</p>
+<h4 id="package-xml">Package: XML</h4>
+<p>Another example is XML objects of the <strong><a href="https://cran.r-project.org/package=XML">XML</a></strong> package, which may
+produce evaluation error, or even cause R to abort if used in another
+R process, e.g.</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(XML)
+doc &lt;- xmlParse(system.file(&quot;exampleData&quot;, &quot;tagnames.xml&quot;, package = &quot;XML&quot;))
+a &lt;- getNodeSet(doc, &quot;/doc//a[@status]&quot;)[[1]]
+f &lt;- future(xmlGetAttr(a, &quot;status&quot;))
+value(f)
+## Error in unserialize(node$con) :
+##   MultisessionFuture (&lt;none&gt;) failed to receive results from cluster
+## RichSOCKnode #1 (PID 31541 on localhost 'localhost'). The reason
+## reported was 'error reading from connection'. Post-mortem diagnostic:
+## No process exists with this PID, i.e. the localhost worker is no
+## longer alive. Detected a non-exportable reference ('externalptr' of
+## class 'XMLInternalElementNode') in one of the globals ('a' of class
+## 'XMLInternalElementNode') used in the future expression. The total
+## size of the 1 globals exported is 520 bytes. There is one global: 'a'
+## (520 bytes of class 'externalptr')
+</code></pre>
+<p>This is an example, where we end up exporting an
+<code>XMLInternalElementNode</code> object to another R process, where it is no
+longer valid.  When we try to use it there by calling <code>xmlGetAttr()</code>
+on it, <strong>XML</strong> causes R to crash and abort.  To illustrate what’s
+going on the parallel workers, if we save the object to file using
+<code>saveRDS(a, &quot;a.rds&quot;)</code>, and try to use it in <em>another</em> R session, the
+following happens:</p>
+<pre><code class="language-r">$ R --quiet --vanilla
+&gt; a &lt;- readRDS(&quot;a.rds&quot;)
+&gt; XML::xmlGetAttr(a, &quot;status&quot;)
+
+ *** caught segfault ***
+address 0x40, cause 'memory not mapped'
+
+Traceback:
+ 1: xmlAttrs.XMLInternalNode(node, addNamespace)
+ 2: xmlAttrs(node, addNamespace)
+ 3: XML::xmlGetAttr(a, &quot;status&quot;)
+
+Possible actions:
+1: abort (with core dump, if enabled)
+2: normal R exit
+3: exit R without saving workspace
+4: exit R saving workspace
+Selection: 
+</code></pre>
+<p>This is a very harsh way of telling us that we cannot export all types
+of objects produced by <strong>XML</strong>.  Ideally, <strong>XML</strong> would detect this
+and give am informative error message and not crash R like this.</p>
+<p>A workaround for working around this is to marshal the problematic
+objects before exporting them to a parallel R process, and unmarshal
+them before working with them there.  For example,</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(XML)
+doc &lt;- xmlParse(system.file(&quot;exampleData&quot;, &quot;tagnames.xml&quot;, package = &quot;XML&quot;))
+a &lt;- getNodeSet(doc, &quot;/doc//a[@status]&quot;)[[1]]
+
+## Marshall the non-exportable XMLInternalElementNode object
+a_m &lt;- xmlSerializeHook(a)
+
+f &lt;- future({ a &lt;- xmlDeserializeHook(a_m); xmlGetAttr(a, &quot;status&quot;) })
+value(f)
+## [1] &quot;xyz&quot;
+</code></pre>
+<p>An alternative, more generic workaround, is to always create the <code>doc</code>
+element, an <code>XMLInternalDocument</code> object, on the parallel workers,
+i.e.</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(XML)
+
+f &lt;- future({
+  doc &lt;- xmlParse(system.file(&quot;exampleData&quot;, &quot;tagnames.xml&quot;, package = &quot;XML&quot;))
+  a &lt;- getNodeSet(doc, &quot;/doc//a[@status]&quot;)[[1]]
+  xmlGetAttr(a, &quot;status&quot;)
+})
+value(f)
+## [1] &quot;xyz&quot;
+</code></pre>
+<h4 id="package-xml2">Package: xml2</h4>
+<p>Yet another example is XML objects of the <strong><a href="https://cran.r-project.org/package=xml2">xml2</a></strong> package, which
+may produce evaluation errors (or just invalid results depending on
+how they are used), e.g.</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(xml2)
+doc &lt;- read_xml(&quot;&lt;body&gt;&lt;/body&gt;&quot;)
+f &lt;- future(xml_children(doc))
+value(f)
+## Error: external pointer is not valid
+</code></pre>
+<p>The future framework can help detect this <em>before</em> sending off the future to the worker;</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+f &lt;- future(xml_children(xml))
+## Error: Detected a non-exportable reference ('externalptr') in one of the
+## globals ('xml' of class 'xml_document') used in the future expression
+</code></pre>
+<p>One workaround when dealing with non-exportable objects is to look for ways to encode the object such that it can be exported, and the decoded on the receiving end.  With <strong>xml2</strong>, we can use <code>xml2::xml_serialize()</code> and <code>xml2::xml_unserialize()</code> to do this.  Here is how we can rewrite the above example such that we can pass <strong>xml2</strong> object back and forth between the main R session and R workers:</p>
+<pre><code class="language-r">## Encode the 'xml_document' object 'doc' as a 'raw' object
+doc_raw &lt;- xml_serialize(doc, connection = NULL)
+
+f &lt;- future({
+  ## In the future, reconstruct the 'xml_document' object
+  ## from the 'raw' object
+  doc &lt;- xml_unserialize(doc_raw)
+
+  ## Continue as usual
+  children &lt;- xml_children(doc)
+
+  ## Send back a 'raw' representation of the 'xml_nodeset'
+  ## object 'children'
+  xml_serialize(children, connection = NULL)
+})
+
+## Reconstruct the 'xml_nodeset' object in the main R session
+children &lt;- xml_unserialize(value(f))
+</code></pre>
+<h3 id="packages-with-other-types-of-non-external-objects">Packages with other types of non-external objects</h3>
+<h4 id="package-ncdf4">Package: ncdf4</h4>
+<p>Package <strong><a href="https://cran.r-project.org/package=ncdf4">ncdf4</a></strong> provides an R API to work with data that live in netCDF files.  For example, we can create a simple netCDF file that holds a variable ‘x’:</p>
+<pre><code class="language-r">library(ncdf4)
+x &lt;- ncvar_def(&quot;x&quot;, units = &quot;count&quot;, dim = list())
+file &lt;- nc_create(&quot;example.nc&quot;, x)
+ncvar_put(file, x, 42)
+nc_close(file)
+</code></pre>
+<p>We can now use this netCDF file next time we start R, e.g.</p>
+<pre><code class="language-r">library(ncdf4)
+file &lt;- nc_open(&quot;example.nc&quot;)
+y &lt;- ncvar_get(file)
+y
+## [1] 42
+</code></pre>
+<p>However, it would fail if we attempt to use <code>file</code>, which is an object of class ‘ncdf4’, in a parallel worker, we will get an error:</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(ncdf4)
+file &lt;- nc_open(&quot;example.nc&quot;)
+f &lt;- future(ncvar_get(file))
+y &lt;- value(f)
+## Error in R_nc4_inq_varndims: NetCDF: Not a valid ID
+## Error in ncvar_ndims(ncid, varid) : error returned from C call
+</code></pre>
+<p>This is because ncdf4 objects make use of internal references that are unique to the R session where they were created.  However, these are <em>not</em> formal <em>external pointer</em>:s, meaning the future framework cannot detect them.  That is, using <code>options(future.globals.onReference = &quot;error&quot;)</code> is of no help here.</p>
+<p>A workaround is to open the netCDF in each worker, e.g.</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+library(ncdf4)
+f &lt;- future({
+  file &lt;- nc_open(&quot;example.nc&quot;)
+  value &lt;- ncvar_get(file)
+  nc_close(file)
+  value
+})
+y &lt;- value(f)
+y
+## [1] 42
+</code></pre>
+<h3 id="false-positives-packages-with-exportable-external-pointers">False positives - packages with exportable external pointers</h3>
+<h4 id="package-data-table">Package data.table</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=data.table">data.table</a></strong> package creates objects comprising external pointers.  Contrary to above non-exportable examples, such objects can be saved to file and used in another R session, or exported to a parallel worker. This is because <strong>data.table</strong> is capable of restoring these objects to a valid state.  Consider the following example:</p>
+<pre><code class="language-r">library(data.table)
+DT &lt;- data.table(a = 1:3, b = letters[1:3])
+
+## Extract second row
+row &lt;- DT[2]
+print(row)
+#&gt;    a b
+#&gt; 1: 2 b
+</code></pre>
+<p>If we would try the last step with a future with strict checking for references enabled, we would get an error:</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+options(future.globals.onReference = &quot;error&quot;)
+
+row %&lt;-% DT[2]
+Error: Detected a non-exportable reference ('externalptr') in one of
+the globals ('DT' of class 'data.table') used in the future expression
+</code></pre>
+<p>This is a false positive.  If we relax the checks, it does indeed work:</p>
+<pre><code class="language-r">options(future.globals.onReference = NULL)
+
+row &lt;- DT[2]
+print(row)
+#&gt;    a b
+#&gt; 1: 2 b
+</code></pre>
+<h4 id="package-rstan">Package rstan</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=rstan">rstan</a></strong> package creates objects comprising external pointers.  Contrary to above non-exportable examples, such objects can be saved to file and used in another R session, or exported to a parallel worker. This is because <strong>rstan</strong> is capable of restoring these objects to a valid state.  Consider the following example from <code>example(&quot;rstan&quot;, package = &quot;rstan&quot;)</code>:</p>
+<pre><code class="language-r">library(rstan)
+
+code &lt;- &quot;
+data {
+  int&lt;lower=0&gt; N;
+  real y[N];
+} 
+
+parameters {
+  real mu;
+} 
+
+model {
+  target += normal_lpdf(mu | 0, 10);
+  target += normal_lpdf(y  | mu, 1);
+} 
+&quot;
+
+y &lt;- rnorm(20)
+data &lt;- list(N = 20, y = y)
+fit &lt;- stan(model_code = code, model_name = &quot;example&quot;,
+            data = data, iter = 2012L, chains = 3L,
+            sample_file = file.path(tempdir(), &quot;norm.csv&quot;))
+
+e &lt;- extract(fit, permuted = FALSE)
+</code></pre>
+<p>If we would try the last step with a future with strict checking for references enabled, we would get an error:</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+options(future.globals.onReference = &quot;error&quot;)
+
+e %&lt;-% extract(fit, permuted = FALSE)
+Error: Detected a non-exportable reference ('externalptr' of class 'DLLHandle')
+in one of the globals ('fit' of class 'stanfit') used in the future expression
+</code></pre>
+<p>However, this is a false positive.  The <code>fit</code> object, which is of class ‘stanfit’, can indeed be exported to be used in an external R process, e.g.</p>
+<pre><code class="language-r">options(future.globals.onReference = NULL)
+
+e %&lt;-% extract(fit, permuted = FALSE)
+str(e)
+#&gt;  num [1:1006, 1:3, 1:2] -0.3028 -0.4017 -0.3379 -0.2358 0.0443 ...
+#&gt;  - attr(*, &quot;dimnames&quot;)=List of 3
+#&gt;   ..$ iterations: NULL
+#&gt;   ..$ chains    : chr [1:3] &quot;chain:1&quot; &quot;chain:2&quot; &quot;chain:3&quot;
+#&gt;   ..$ parameters: chr [1:2] &quot;mu&quot; &quot;lp__&quot;
+</code></pre>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+</body>
+</html>
