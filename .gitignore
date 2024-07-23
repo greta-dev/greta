@@ -20,4 +20,4 @@ revdep
 revdep/checks.noindex
 revdep/library.noindex
 
-^testlog*
+testlog*.md
