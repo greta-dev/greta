@@ -390,9 +390,6 @@ chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
     )
   }
 
-  # set golden_cholesky flag
-  result <- set_golden_cholesky(result)
-
   result
 }
 
