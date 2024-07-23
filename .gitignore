@@ -19,3 +19,5 @@ inst/doc
 revdep
 revdep/checks.noindex
 revdep/library.noindex
+
+^testlog*
