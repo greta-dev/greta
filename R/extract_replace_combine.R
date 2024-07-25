@@ -522,9 +522,7 @@ length.greta_array <- function(x) {
 
   dims <- value
 
-  if (is.null(dims)) {
-    dims <- length(x)
-  }
+  dims <- dims %||% length(x)
 
   if (length(dims) == 0L) {
     cli::cli_abort(

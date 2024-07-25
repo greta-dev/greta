@@ -11,17 +11,13 @@ node <- R6Class(
     distribution = NULL,
     initialize = function(dim = NULL, value = NULL) {
       ## browser()
-      if (is.null(dim)) {
-        dim <- c(1, 1)
-      }
+      dim <- dim %||% c(1,1)
 
       # coerce dim to integer
       dim <- as.integer(dim)
 
       # store array (updates dim)
-      if (is.null(value)) {
-        value <- unknowns(dim = dim)
-      }
+      value <- value %||% unknowns(dim = dim)
 
       self$value(value)
       self$get_unique_name()

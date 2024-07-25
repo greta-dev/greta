@@ -772,11 +772,8 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
     n_cores <- NULL
   }
 
-  # if n_cores isn't user-specified, set it so
-  # there's no clash between samplers
-  if (is.null(n_cores)) {
-    n_cores <- floor(n_cores_detected / samplers)
-  }
+  # if n_cores isn't user-specified, set it so there's no clash between samplers
+  n_cores <- n_cores %||% floor(n_cores_detected / samplers)
 
   # make sure there's at least 1
   n_cores <- max(n_cores, 1)

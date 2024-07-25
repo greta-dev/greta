@@ -32,11 +32,21 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 
 * `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.
 * slice sampler no longer needs precision = "single" to work.
+* greta now depends on R 4.1.0, which was released May 2021, over 3 years ago.
 
 ## Internals
 
 * Internally we are replacing most of the error handling code as separate 
   `check_*` functions.
+* Implemented `cli::cli_abort/warn/inform()` in place of `cli::format_error/warning/message()` + `stop/warning/message(msg, call. = FALSE)` pattern.
+* Uses legacy optimizer internally (Use `tf$keras$optimizers$legacy$METHOD` over `tf$keras$optimizers$METHOD`). No user impact expected.
+* Update photo of Grete Hermann (#598)
+* Use `%||%` internally to replace the pattern: `if (is.null(x)) x <- thing` with `x <- x %||% thing`. (#630)
+
+## Bug fixes
+
+* Fix bug where matrix multiply had dimension error before coercing to greta array. (#464)
+* 
 
 # greta 0.4.5
 

@@ -25,9 +25,7 @@ check_op <- function(op, a, b, greta_op = NULL,
                      tolerance = 1e-3,
                      only = c("data", "variable", "batched"),
                      relative_error = FALSE) {
-  if (is.null(greta_op)) {
-    greta_op <- op
-  }
+  greta_op <- greta_op %||% op
 
   r_out <- run_r_op(op, a, b, other_args)
 

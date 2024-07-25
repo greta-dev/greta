@@ -16,9 +16,7 @@ new_install_process <- function(callr_process,
   no_output <- nchar(output_notes) == 0
   output_error <- read_char(stderr_file)
 
-  if (is.null(output_error)) {
-    output_error <- "No output detected in stderr"
-  }
+  output_error <- output_error %||% "No output detected in stderr"
 
   if (is.null(status)) {
     cli::cli_process_failed()
