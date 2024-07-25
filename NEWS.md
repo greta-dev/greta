@@ -41,6 +41,7 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 * Implemented `cli::cli_abort/warn/inform()` in place of `cli::format_error/warning/message()` + `stop/warning/message(msg, call. = FALSE)` pattern.
 * Uses legacy optimizer internally (Use `tf$keras$optimizers$legacy$METHOD` over `tf$keras$optimizers$METHOD`). No user impact expected.
 * Update photo of Grete Hermann (#598)
+* Use `%||%` internally to replace the pattern: `if (is.null(x)) x <- thing` with `x <- x %||% thing`. (#630)
 
 ## Bug fixes
 
