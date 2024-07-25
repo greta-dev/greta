@@ -321,9 +321,7 @@ t.greta_array <- function(x) {
 aperm.greta_array <- function(a, perm = NULL, ...) {
   dimnums <- seq_along(dim(a))
 
-  if (is.null(perm)) {
-    perm <- rev(dimnums)
-  }
+  perm <- perm %||% rev(dimnums)
 
   perm <- as.integer(perm)
 

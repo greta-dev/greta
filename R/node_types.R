@@ -134,13 +134,13 @@ operation_node <- R6Class(
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
-      if (is.null(value)) {
-        value <- unknowns(dim = dim)
-      } else if (!all.equal(dim(value), dim)) {
+      if (!is.null(value) && !all.equal(dim(value), dim)) {
         cli::cli_abort(
           "values have the wrong dimension so cannot be used"
         )
       }
+
+      value <- value %||% unknowns(dim = dim)
 
       super$initialize(dim, value)
     },
