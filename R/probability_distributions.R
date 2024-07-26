@@ -5,7 +5,7 @@ uniform_distribution <- R6Class(
     min = NA,
     max = NA,
     initialize = function(min, max, dim) {
-      if (inherits(min, "greta_array") | inherits(max, "greta_array")) {
+      if (is.greta_array(min) | is.greta_array(max)) {
         cli::cli_abort(
           "{.arg min} and {.arg max} must be fixed, they cannot be another \\
           greta array"
@@ -30,7 +30,7 @@ uniform_distribution <- R6Class(
       if (!is.finite(min) | !is.finite(max)) {
         cli::cli_abort(
           c(
-            "{.arg min} and {.arg max} must finite scalars",
+            "{.arg min} and {.arg max} must be finite scalars",
             "Their values are:",
             "{.arg min}: {min}",
             "{.arg max}: {max}"
@@ -1121,8 +1121,9 @@ lkj_correlation_distribution <- R6Class(
     initialize = function(eta, dimension = 2) {
       dimension <- check_dimension(target = dimension)
 
-      if (!inherits(eta, "greta_array")) {
-        if (!is.numeric(eta) || !length(eta) == 1 || eta <= 0) {
+      if (!is.greta_array(eta)) {
+        not_positive_scalar <- !is.numeric(eta) || !length(eta) == 1 || eta <= 0
+        if (not_positive_scalar) {
           cli::cli_abort(
             "{.arg eta} must be a positive scalar value, or a scalar \\
             {.cls greta_array}"

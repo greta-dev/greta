@@ -301,7 +301,7 @@ trigamma.greta_array <- function(x) {
 
 #' @export
 t.greta_array <- function(x) {
-  if (length(dim(x)) != 2) {
+  if (!is_2d(x)) {
     cli::cli_abort(
       "only 2D arrays can be transposed",
       "dimension of {.var x} was {dim(x)}"
@@ -364,7 +364,9 @@ chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
   } else {
     dim <- dim(x)
 
-    if (!(length(dim) == 2 && dim[1] == dim[2])) {
+    is_2d_square <- is_2d(x) && dim[1] == dim[2]
+    if (!is_2d_square) {
+      ## TODO do we need to check for symmetry?
       cli::cli_abort(
         c(
           "only two-dimensional, square, symmetric {.cls greta_array}s can be \\
@@ -398,7 +400,7 @@ chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
 solve.greta_array <- function(a, b, ...) {
 
   # check a is 2D
-  if (length(dim(a)) != 2) {
+  if (!is_2d(a)) {
     cli::cli_abort(
       c(
         "Arrays are not both 2D",
@@ -409,7 +411,8 @@ solve.greta_array <- function(a, b, ...) {
   }
 
   # check the matrix is square
-  if (dim(a)[1] != dim(a)[2]) {
+  a_not_square <- dim(a)[1] != dim(a)[2]
+  if (a_not_square) {
 
     cli::cli_abort(
       c(
@@ -435,7 +438,7 @@ solve.greta_array <- function(a, b, ...) {
   } else {
 
     # check b is 2D
-    if (length(dim(b)) != 2) {
+    if (!is_2d(b)) {
       cli::cli_abort(
         c(
           "Arrays are not both 2D",
@@ -446,7 +449,8 @@ solve.greta_array <- function(a, b, ...) {
     }
 
     # b must have the right number of rows
-    if (dim(b)[1] != dim(a)[1]) {
+    rows_not_equal <- dim(b)[1] != dim(a)[1]
+    if (rows_not_equal) {
       cli::cli_abort(
         c(
           "Number of rows not equal",
@@ -480,13 +484,14 @@ chol2inv.default <- function(x, size = NCOL(x), LINPACK = FALSE) {
 
 #' @export
 chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
-  if (!identical(LINPACK, FALSE)) {
+  if (isTRUE(LINPACK)) {
     cli::cli_warn(
       "The {.arg LINPACK} argument is ignored for {.cls greta_array}s, and \\
       has also been defunct since R 3.1.0"
     )
   }
 
+  ## TODO shouldn't this be a !/missing() or something?
   if (!identical(size, NCOL(x))) {
     cli::cli_warn(
       "{.arg size} is ignored for {.cls greta_array}s"
@@ -611,14 +616,15 @@ cummin.greta_array <- function(x) {
 
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
 rowcol_idx <- function(x, dims, which = c("col", "row")) {
-  if (dims < 1L || dims > length(dim(x)) - 1L) {
+  invalid_dims <- dims < 1L || dims > n_dim(x) - 1L
+  if (invalid_dims) {
     cli::cli_abort(
       "invalid {.var dims}"
     )
   }
 
   switch(which,
-    row = (dims + 1):length(dim(x)),
+    row = (dims + 1):n_dim(x),
     col = seq_len(dims)
   )
 }
@@ -739,7 +745,7 @@ rowSums.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
 #' @export
 sweep <- function(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
   # nolint end
-  if (inherits(STATS, "greta_array")) {
+  if (is.greta_array(STATS)) {
     x <- as.greta_array(x)
   }
 
@@ -770,18 +776,19 @@ sweep.greta_array <- function(x,
   }
 
   # x must be 2D
-  if (length(dim(x)) != 2) {
+  if (!is_2d(x)) {
     cli::cli_abort(
       c(
         "Array not 2D",
-        "x" = "{.var x} must be a 2D array, but has {length(dim(x))} \\
+        "x" = "{.var x} must be a 2D array, but has {n_dim(x)} \\
         dimensions"
       )
     )
   }
 
   # STATS must be a column array
-  if (!(length(dim(stats)) == 2 && dim(stats)[2] == 1)) {
+  is_column_array <- is_2d(stats) && dim(stats)[2] == 1
+  if (!is_column_array) {
     cli::cli_abort(
       c(
         "{.var stats} not a column vector array",
@@ -793,7 +800,8 @@ sweep.greta_array <- function(x,
   }
 
   # STATS must have the same dimension as the correct dim of x
-  if (dim(x)[margin] != dim(stats)[1]) {
+  stats_dim_matches_x_dim <- dim(x)[margin] == dim(stats)[1]
+  if (!stats_dim_matches_x_dim) {
     cli::cli_abort(
       c(
         "The number of elements of {.var stats} does not match \\
@@ -821,21 +829,21 @@ setMethod(
     fun <- match.arg(FUN)
 
     # X must be 2D
-    if (length(dim(X)) != 2) {
+    if (!is_2d(X)) {
       cli::cli_abort(
         c(
           "Not a 2D array",
-          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions"
+          "{.var X} must be a 2D array, but has {n_dim(X)} dimensions"
         )
       )
     }
 
     # Y must be 2D
-    if (length(dim(Y)) != 2) {
+    if (!is_2d(Y)) {
       cli::cli_abort(
         c(
           "Not a 2D array",
-          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions"
+          "{.var X} must be a 2D array, but has {n_dim(X)} dimensions"
         )
       )
     }
@@ -1007,7 +1015,7 @@ apply.greta_array <- function(X, MARGIN,
   # nolint end
   fun <- match.arg(FUN)
 
-  if (inherits(MARGIN, "greta_array")) {
+  if (is.greta_array(MARGIN)) {
     cli::cli_abort(
       "MARGIN cannot be a greta array"
     )
@@ -1100,7 +1108,7 @@ tapply.greta_array <- function(X, INDEX,
   index <- INDEX
   fun <- match.arg(FUN)
 
-  if (inherits(index, "greta_array")) {
+  if (is.greta_array(index)) {
     cli::cli_abort(
       "INDEX cannot be a greta array"
     )
@@ -1112,7 +1120,8 @@ tapply.greta_array <- function(X, INDEX,
   len <- length(groups)
 
   dim_x <- dim(x)
-  if (!(length(dim_x) == 2L && dim_x[2] == 1L)) {
+  is_2_by_1 <- is_2d(x) && dim_x[2] == 1L
+  if (!is_2_by_1) {
     cli::cli_abort(
       c(
         "{.var x} must be 2D greta array with one column",
@@ -1158,10 +1167,15 @@ eigen.greta_array <- function(x, symmetric,
   # nolint end
   x <- as.greta_array(x)
 
-  if (missing(symmetric)) symmetric <- TRUE
+  if (missing(symmetric)) {
+    symmetric <- TRUE
+  }
+
   dims <- dim(x)
 
-  if (length(dims) != 2 | dims[1] != dims[2] | !symmetric) {
+  is_square <- dims[1] == dims[2]
+  is_not_2d_square_symmetric <- !is_2d(x) | !is_square | !symmetric
+  if (is_not_2d_square_symmetric) {
     cli::cli_abort(
       "only two-dimensional, square, symmetric {.cls greta_array}s can be \\
       eigendecomposed"
@@ -1234,7 +1248,7 @@ rdist.default <- function(x1, x2 = NULL, compact = FALSE) {
 
 #' @export
 rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
-  if (!identical(compact, FALSE)) {
+  if (isTRUE(compact)) {
     cli::cli_warn(
       "{.arg compact} is ignored for {.cls greta_array}s"
     )
@@ -1243,7 +1257,7 @@ rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
   x1 <- as.greta_array(x1)
 
   # like rdist, convert to a column vector if it has too many dimensions
-  if (length(dim(x1)) != 2) {
+  if (!is_2d(x1)) {
     x1 <- flatten(x1)
   }
 
@@ -1261,7 +1275,7 @@ rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
 
     x2 <- as.greta_array(x2)
 
-    if (length(dim(x2)) != 2) {
+    if (!is_2d(x2)) {
       x2 <- flatten(x2)
     }
 

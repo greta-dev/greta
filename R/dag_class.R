@@ -466,6 +466,7 @@ dag_class <- R6Class(
         lower <- truncation[[1]]
         upper <- truncation[[2]]
 
+        ## TODO add explaining variables
         if (all(lower == bounds[1])) {
 
           # if only upper is constrained, just need the cdf at the upper
@@ -832,7 +833,8 @@ dag_class <- R6Class(
         cdf <- tfp_distribution$cdf
         quantile <- tfp_distribution$quantile
 
-        if (is.null(cdf) | is.null(quantile)) {
+        is_truncated <- is.null(cdf) | is.null(quantile)
+        if (is_truncated) {
           cli::cli_abort(
             "sampling is not yet implemented for truncated \\
             {.val {distribution_node$distribution_name}} distributions"

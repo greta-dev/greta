@@ -87,7 +87,7 @@ imultilogit <- function(x) {
   dim <- dim(x)
 
   # check it's a matrix
-  if (length(dim) != 2) {
+  if (!is_2d(x)) {
     cli::cli_abort(
       c(
         "{.fun imultilogit} must have a 2D greta array",

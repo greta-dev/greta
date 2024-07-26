@@ -108,7 +108,7 @@ NULL
 
   node <- get_node(x)
   # if this is a data node, also subset the values and pass on
-  if (inherits(node, "data_node")) {
+  if (is.data_node(node)) {
     values_in <- node$value()
     call_list <- as.list(call)[-1]
     call_list[[1]] <- as.name("._values_in")
@@ -167,7 +167,7 @@ NULL
 
   node <- get_node(x)
 
-  if (inherits(node, "variable_node")) {
+  if (is.variable_node(node)) {
     cli::cli_abort(
       "cannot replace values in a variable {.cls greta_array}"
     )
@@ -205,7 +205,8 @@ NULL
   index <- as.vector(dummy_out)
 
   if (length(index) != length(replacement)) {
-    if (length(index) %% length(replacement) != 0) {
+    replacement_is_not_multiple <- length(index) %% length(replacement) != 0
+    if (replacement_is_not_multiple) {
       cli::cli_abort(
         "number of items to replace is not a multiple of replacement length"
       )
@@ -223,7 +224,8 @@ NULL
   new_value[r_index] <- replacement_value
 
   # if either parent has an unknowns array as a value, coerce this to unknowns
-  if (inherits(x_value, "unknowns") | inherits(replacement_value, "unknowns")) {
+  either_are_unknowns <- is.unknowns(x_value) | is.unknowns(replacement_value)
+  if (either_are_unknowns) {
     new_value <- as.unknowns(new_value)
   }
 
@@ -248,7 +250,8 @@ cbind.greta_array <- function(...) {
 
   dims <- lapply(dots, dim)
   ndims <- lengths(dims)
-  if (!all(ndims == 2)) {
+  arrays_are_2d <- all(ndims == 2)
+  if (!arrays_are_2d) {
     cli::cli_abort(
       "all {.cls greta_array}s must be two-dimensional"
     )
@@ -259,7 +262,8 @@ cbind.greta_array <- function(...) {
   cols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
 
   # check all the same
-  if (!all(rows == rows[1])) {
+  same_number_of_rows <- all(rows == rows[1])
+  if (!same_number_of_rows) {
     cli::cli_abort(
       "all {.cls greta_array}s must be have the same number of rows"
     )
@@ -281,7 +285,8 @@ rbind.greta_array <- function(...) {
 
   dims <- lapply(dots, dim)
   ndims <- lengths(dims)
-  if (!all(ndims == 2)) {
+  arrays_2d <- all(ndims == 2)
+  if (!arrays_2d) {
     cli::cli_abort(
       "all {.cls greta_array}s must be two-dimensional"
     )
@@ -292,7 +297,8 @@ rbind.greta_array <- function(...) {
   cols <- vapply(dims, `[`, 2, FUN.VALUE = 1)
 
   # check all the same
-  if (!all(cols == cols[1])) {
+  array_cols_same <- all(cols == cols[1])
+  if (!array_cols_same) {
     cli::cli_abort(
       "all {.cls greta_array}s must be have the same number of columns"
     )
@@ -392,13 +398,15 @@ abind.greta_array <- function(...,
   along <- as.integer(force(along))
 
   # rationalise along, and pad N if we're prepending/appending a dimension
+  ## TODO add explaining variable here
   if (along < 1 || along > n || (along > floor(along) &&
     along < ceiling(along))) {
     n <- n + 1
     along <- max(1, min(n + 1, ceiling(along)))
   }
 
-  if (!(along %in% 0:n)) {
+  along_outside_0_n <- !(along %in% 0:n)
+  if (along_outside_0_n) {
     cli::cli_abort(
       c(
         "{.arg along} must be between 0 and {n}",
@@ -415,7 +423,7 @@ abind.greta_array <- function(...,
     arg_list,
     function(x) {
       dim <- dim(x)
-      if (length(dim) == n - 1) {
+      if (n_dim(x) == n - 1) {
         dim(x) <- c(dim[pre], 1, dim[post])
       }
       x
@@ -427,7 +435,8 @@ abind.greta_array <- function(...,
   dim_out <- rep(NA, n)
   for (dim in seq_len(n)[-along]) {
     this_dim <- vapply(dims, `[`, dim, FUN.VALUE = 1L)
-    if (!all(this_dim == this_dim[1])) {
+    dim_varying <- !all(this_dim == this_dim[1])
+    if (dim_varying) {
       cli::cli_abort(
         c(
           "all {.cls greta_array}s must have the same dimensions except on \\
@@ -542,7 +551,8 @@ length.greta_array <- function(x) {
 
   dims <- as.integer(dims)
 
-  if (any(dims < 0L)) {
+  dims_contain_negatives <- any(dims < 0L)
+  if (dims_contain_negatives) {
     cli::cli_abort(
       c(
         "the dims contain negative values:",
@@ -553,9 +563,10 @@ length.greta_array <- function(x) {
 
   prod_dims <- prod(dims)
   len <- length(x)
-
+  is_scalar <- len == 1
   # if x isn't a scalar and the numbers of elements don't match, error
-  if (len != 1 && prod_dims != len) {
+  n_elem_not_match <- prod_dims != len
+  if (!is_scalar && n_elem_not_match) {
     cli::cli_abort(
         "dims [product {prod_dims}] do not match the length of object [{len}]"
     )
@@ -565,7 +576,9 @@ length.greta_array <- function(x) {
   new_value <- get_node(x)$value()
   new_value <- array(new_value, dim = dims)
 
-  if (!identical(dim(x), dims) && len == 1) {
+  unmatch_dim <- !identical(dim(x), dims)
+
+  if (unmatch_dim && is_scalar) {
 
     # if the dims don't match, but x is a scalar, expand it to the required
     # dimension
@@ -601,11 +614,12 @@ head.greta_array <- function(x, n = 6L, ...) { # nolint
 
   stopifnot(length(n) == 1L)
 
+  # TODO remove R 3.X.X behaviour checks
   # use default behaviour for R < 4.0.0
   if (getRversion() < "4.0.0") {
 
     # if x is matrix-like, take the top n rows
-    if (length(dim(x)) == 2) {
+    if (n_dim(x) == 2) {
       nrx <- nrow(x)
       if (n < 0L) {
         n <- max(nrx + n, 0L)
@@ -641,11 +655,12 @@ tail.greta_array <- function(x, n = 6L, ...) { # nolint
 
   stopifnot(length(n) == 1L)
 
+  # TODO remove R 3.X.X behaviour checks
   # use default behaviour for R < 4.0.0
   if (getRversion() < "4.0.0") {
 
     # if x is matrix-like, take the top n rows
-    if (length(dim(x)) == 2) {
+    if (n_dim(x) == 2) {
       nrx <- nrow(x)
 
       if (n < 0L) {
@@ -695,14 +710,15 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
   dim <- dim(x)
 
   # check the rank isn't too high
-  if (length(dim) != 2) {
+  if (!is_2d(x)) {
     cli::cli_abort(
       "cannot only extract the diagonal from a node with exactly two \\
       dimensions"
     )
   }
 
-  if (dim[1] != dim[2]) {
+  is_square <- dim[1] != dim[2]
+  if (is_square) {
     cli::cli_abort(
       "diagonal elements can only be extracted from square matrices"
     )

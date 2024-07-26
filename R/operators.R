@@ -144,10 +144,10 @@ NULL
 `%*%` <- function(x, y) { # nolint
 
   # if y is a greta array, coerce x before dispatch
-  if (inherits(y, "greta_array") & !inherits(x, "greta_array")) {
+  if (is.greta_array(y) & !is.greta_array(x)) {
     as_data(x) %*% y
   # if y is not a greta array and x is, coerce y before dispatch
-  } else if (!inherits(y, "greta_array") & inherits(x, "greta_array")){
+  } else if (!is.greta_array(y) & is.greta_array(x)){
     x %*% as_data(y)
   } else {
     UseMethod("%*%", x)
@@ -158,7 +158,7 @@ NULL
 `%*%.greta_array` <- function(x, y) { # nolint
 
   # check they're matrices
-  if (length(dim(x)) != 2 | length(dim(y)) != 2) {
+  if (!is_2d(x) | !is_2d(y)) {
     cli::cli_abort(
       c(
         "only two-dimensional {.cls greta_array}s can be matrix-multiplied",
@@ -168,7 +168,8 @@ NULL
   }
 
   # check the dimensions match
-  if (dim(x)[2] != dim(y)[1]) {
+  incompatible_dimensions <- dim(x)[2] != dim(y)[1]
+  if (incompatible_dimensions) {
     cli::cli_abort(
       c(
         "incompatible dimensions: \\

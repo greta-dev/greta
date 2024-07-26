@@ -67,7 +67,8 @@ model <- function(...,
   target_greta_arrays <- list(...)
 
   # if no arrays were specified, find all of the non-data arrays
-  if (identical(target_greta_arrays, list())) {
+  no_arrays_specified <- identical(target_greta_arrays, list())
+  if (no_arrays_specified) {
     target_greta_arrays <- all_greta_arrays(parent.frame(),
       include_data = FALSE
     )
@@ -138,7 +139,8 @@ model <- function(...,
     types_sub <- types[graph_id == graph]
 
     # check they have a density among them
-    if (!("distribution" %in% types_sub)) {
+    no_distribution <- !("distribution" %in% types_sub)
+    if (no_distribution) {
       stop(
         density_message,
         call. = FALSE
@@ -146,7 +148,8 @@ model <- function(...,
     }
 
     # check they have a variable node among them
-    if (!("variable" %in% types_sub)) {
+    no_variable_node <- !("variable" %in% types_sub)
+    if (no_variable_node) {
       stop(
         variable_message,
         call. = FALSE
@@ -160,7 +163,7 @@ model <- function(...,
     distributions,
     function(x) {
       valid_target <- is.null(x$target) ||
-        inherits(x$target, "data_node")
+        is.data_node(x$target)
       x$discrete && !valid_target
     },
     FALSE

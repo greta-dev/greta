@@ -114,7 +114,3 @@ grab_via_free_state <- function(target, values, batches = 1) {
 expect_ok <- function(expr) {
   testthat::expect_error(expr, NA)
 }
-
-is.greta_array <- function(x) { # nolint
-  inherits(x, "greta_array")
-}

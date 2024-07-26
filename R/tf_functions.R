@@ -59,8 +59,8 @@ tf_lbeta <- function(a, b) {
 
 # set up the tf$reduce_* functions to ignore the first dimension
 skip_dim <- function(op_name, x, drop = FALSE) {
-  n_dim <- length(dim(x))
-  reduction_dims <- seq_len(n_dim - 1)
+  ndim <- n_dim(x)
+  reduction_dims <- seq_len(ndim - 1)
   tf[[op_name]](x, axis = reduction_dims, keepdims = !drop)
 }
 
@@ -116,7 +116,7 @@ tf_expand_dim <- function(x, dims) {
   dims <- c(1L, dims)
 
   # pad/shrink x to have the correct number of dimensions
-  x_dims <- length(dim(x))
+  x_dims <- n_dim(x)
   target_dims <- length(dims)
 
   # add extra dimensions at the end
@@ -133,7 +133,7 @@ tf_expand_dim <- function(x, dims) {
 
 # skip the first index when transposing
 tf_transpose <- function(x) {
-  nelem <- length(dim(x))
+  nelem <- n_dim(x)
   perm <- c(0L, (nelem - 1):1)
   tf$transpose(x, perm = perm)
 }
@@ -142,7 +142,7 @@ tf_apply <- function(x, axis, tf_fun_name) {
   fun <- tf$math[[tf_fun_name]]
   out <- fun(x, axis = axis)
   # if we reduced we lost a dimension, make sure we have enough
-  if (length(dim(out)) < 3) {
+  if (n_dim(out) < 3) {
     out <- tf$expand_dims(out, 2L)
   }
   out
@@ -254,7 +254,7 @@ tf_colmeans <- function(x, dims) {
   idx <- rowcol_idx(x, dims, "col")
   y <- tf$reduce_mean(x, axis = idx)
 
-  if (length(dim(y)) == 2) {
+  if (is_2d(y)) {
     dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
     y <- tf$reshape(y, dims_out)
   }
@@ -267,7 +267,7 @@ tf_rowmeans <- function(x, dims) {
   idx <- idx[-length(idx)]
   y <- tf$reduce_mean(x, axis = idx)
 
-  if (length(dim(y)) == 2) {
+  if (is_2d(y)) {
     dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
     y <- tf$reshape(y, dims_out)
   }
@@ -279,7 +279,7 @@ tf_colsums <- function(x, dims) {
   idx <- rowcol_idx(x, dims, "col")
   y <- tf$reduce_sum(x, axis = idx)
 
-  if (length(dim(y)) == 2) {
+  if (is_2d(y)) {
     dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
     y <- tf$reshape(y, dims_out)
   }
@@ -292,7 +292,7 @@ tf_rowsums <- function(x, dims) {
   idx <- idx[-length(idx)]
   y <- tf$reduce_sum(x, axis = idx)
 
-  if (length(dim(y)) == 2) {
+  if (is_2d(y)) {
     dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
     y <- tf$reshape(y, dims_out)
   }
