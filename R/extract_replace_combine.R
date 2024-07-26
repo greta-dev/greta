@@ -614,38 +614,10 @@ head.greta_array <- function(x, n = 6L, ...) { # nolint
 
   stopifnot(length(n) == 1L)
 
-  # TODO remove R 3.X.X behaviour checks
-  # use default behaviour for R < 4.0.0
-  if (getRversion() < "4.0.0") {
+  ans <- head.matrix(x, n, ...)
 
-    # if x is matrix-like, take the top n rows
-    if (n_dim(x) == 2) {
-      nrx <- nrow(x)
-      if (n < 0L) {
-        n <- max(nrx + n, 0L)
-      } else {
-        n <- min(n, nrx)
-      }
+  ans
 
-      ans <- x[seq_len(n), , drop = FALSE]
-    } else {
-      # otherwise, take the first n elements
-
-      if (n < 0L) {
-        n <- max(length(x) + n, 0L)
-      } else {
-        n <- min(n, length(x))
-      }
-
-      ans <- x[seq_len(n)]
-    }
-
-  } else if (getRversion() >= "4.0.0") {
-
-    ans <- head.matrix(x, n, ...)
-
-  }
-    ans
 }
 
 #' @export
@@ -655,42 +627,10 @@ tail.greta_array <- function(x, n = 6L, ...) { # nolint
 
   stopifnot(length(n) == 1L)
 
-  # TODO remove R 3.X.X behaviour checks
-  # use default behaviour for R < 4.0.0
-  if (getRversion() < "4.0.0") {
+  ans <- tail.matrix(x, n, ...)
 
-    # if x is matrix-like, take the top n rows
-    if (n_dim(x) == 2) {
-      nrx <- nrow(x)
+  ans
 
-      if (n < 0L) {
-        n <- max(nrx + n, 0L)
-      } else {
-        n <- min(n, nrx)
-      }
-
-      sel <- as.integer(seq.int(to = nrx, length.out = n))
-      ans <- x[sel, , drop = FALSE]
-    } else {
-      # otherwise, take the first n elements
-
-      xlen <- length(x)
-
-      if (n < 0L) {
-        n <- max(xlen + n, 0L)
-      } else {
-        n <- min(n, xlen)
-      }
-
-      ans <- x[seq.int(to = xlen, length.out = n)]
-    }
-
-  } else if (getRversion() >= "4.0.0") {
-
-    ans <- tail.matrix(x, n, ...)
-
-  }
-    ans
 }
 
 #' @rdname overloaded
