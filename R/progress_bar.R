@@ -46,8 +46,12 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
   # add the increment information and return
   pb_update <- round(pb_update)
 
-  if (!is.numeric(pb_update) || length(pb_update) != 1 ||
-    !is.finite(pb_update) || pb_update <= 0) {
+  is_not_finite_positive_scalar_integer <- !is.numeric(pb_update) ||
+    length(pb_update) != 1 ||
+    !is.finite(pb_update) ||
+    pb_update <= 0
+
+  if (is_not_finite_positive_scalar_integer) {
 
     cli::cli_abort(
       c(

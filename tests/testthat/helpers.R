@@ -97,9 +97,8 @@ greta_density <- function(
   dim = NULL,
   multivariate = FALSE
 ) {
-  if (is.null(dim)) {
-    dim <- NROW(x)
-  }
+
+  dim <- dim %||% NROW(x)
 
   # add the output dimension to the arguments list
   dim_list <- list(dim = dim)

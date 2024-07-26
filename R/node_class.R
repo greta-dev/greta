@@ -11,22 +11,19 @@ node <- R6Class(
     distribution = NULL,
     initialize = function(dim = NULL, value = NULL) {
       ## browser()
-      if (is.null(dim)) {
-        dim <- c(1, 1)
-      }
+      dim <- dim %||% c(1,1)
 
       # coerce dim to integer
       dim <- as.integer(dim)
 
       # store array (updates dim)
-      if (is.null(value)) {
-        value <- unknowns(dim = dim)
-      }
+      value <- value %||% unknowns(dim = dim)
 
       self$value(value)
       self$get_unique_name()
     },
     register = function(dag) {
+      ## TODO add explaining variable
       if (!(self$unique_name %in% names(dag$node_list))) {
         dag$node_list[[self$unique_name]] <- self
       }
@@ -36,6 +33,7 @@ node <- R6Class(
     register_family = function(dag) {
       ## TF1/2
       ## Rename with an explaining variable
+      ## TODO add explaining variable
       if (!(self$unique_name %in% names(dag$node_list))) {
 
         # add self to list
@@ -228,7 +226,7 @@ node <- R6Class(
     set_distribution = function(distribution) {
 
       # check it
-      if (!inherits(distribution, "distribution_node")) {
+      if (!is.distribution_node(distribution)) {
         cli::cli_abort(
           "invalid distribution"
         )
@@ -284,8 +282,8 @@ dim.node <- function(x) {
 
 # coerce an object to a node
 to_node <- function(x) {
-  if (!inherits(x, "node")) {
-    if (inherits(x, "greta_array")) {
+  if (!is.node(x)) {
+    if (is.greta_array(x)) {
       x <- get_node(x)
     } else if (is.numeric(x)) {
       x <- data_node$new(x)

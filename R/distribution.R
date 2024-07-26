@@ -63,7 +63,7 @@
   }
 
   # can only assign with greta arrays ...
-  if (!inherits(value, "greta_array")) {
+  if (!is.greta_array(value)) {
     cli::cli_abort(
       "right hand side must be a {.cls greta_array}"
     )
@@ -73,20 +73,21 @@
   value_node <- get_node(value)
   distribution_node <- value_node$distribution
 
-  if (!inherits(distribution_node, "distribution_node")) {
+  if (!is.distribution_node(distribution_node)) {
     cli::cli_abort(
       "right hand side must have a distribution"
     )
   }
 
   # that aren't already fixed
-  if (inherits(distribution_node$target, "data_node")) {
+  if (is.data_node(distribution_node$target)) {
     cli::cli_abort(
       "right hand side has already been assigned fixed values"
     )
   }
 
   # if distribution isn't scalar, make sure it has the right dimensions
+  ## TODO fix explaining variable
   if (!is_scalar(value)) {
     if (!identical(dim(greta_array), dim(value))) {
       cli::cli_abort(
@@ -122,7 +123,7 @@
 distribution <- function(greta_array) {
 
   # only for greta arrays
-  if (!inherits(greta_array, "greta_array")) {
+  if (!is.greta_array(greta_array)) {
     cli::cli_abort(
       c(
         "{.fun distribution} expects object of type {.cls greta_array}",
@@ -132,7 +133,7 @@ distribution <- function(greta_array) {
   }
 
   # if greta_array has a distribution, return this greta array
-  if (inherits(get_node(greta_array)$distribution, "distribution_node")) {
+  if (is.distribution_node(get_node(greta_array)$distribution)) {
     distrib <- greta_array
   } else {
 

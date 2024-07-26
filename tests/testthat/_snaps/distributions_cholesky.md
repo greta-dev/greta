@@ -1,3 +1,4 @@
+
 # Cholesky factor of Wishart should be a lower triangular matrix
 
     Code
@@ -65,6 +66,7 @@
 
     Code
       calculate(chol_x, nsim = 1)
+
     Output
       $chol_x
       , , 1

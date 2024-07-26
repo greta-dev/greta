@@ -21,6 +21,17 @@ as.mcmc.list.greta_mcmc_list <- function(x, ...) {
   x
 }
 
+#' @title Is object a `greta_mcmc_list`?
+#' @param x An object that may be a greta_mcmc_list
+#'
+#' @param ... extra args (not currently used)
+#' @returns logical TRUE/FALSE
+#'
+#' @export
+is.greta_mcmc_list <- function(x, ...){
+  inherits(x, "greta_mcmc_list")
+}
+
 
 # for window (and any other function that modifies the object), apply the same
 # to the free state draws

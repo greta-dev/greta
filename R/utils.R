@@ -204,7 +204,8 @@ as_2d_array <- function(x) {
   x <- as.array(x)
 
   # coerce 1D arrays to column vectors
-  if (length(dim(x)) == 1) {
+  one_dimensional <- n_dim(x) == 1
+  if (one_dimensional) {
     dim(x) <- c(dim(x), 1)
   }
 
@@ -220,7 +221,8 @@ add_first_dim <- function(x) {
 # drop the additional dimension at the beginning of an array
 drop_first_dim <- function(x) {
   x <- as.array(x)
-  if (length(dim(x)) > 1) {
+  not_1d <- n_dim(x) > 1
+  if (not_1d) {
     x <- array(x, dim = dim(x)[-1])
   }
   x
@@ -236,7 +238,8 @@ tile_first_dim <- function(x, times) {
 # if x is an R matrix representing a column vector, make it a plain R vector
 drop_column_dim <- function(x) {
   dims <- dim(x)
-  if (length(dims) == 2 && dims[2] == 1L) {
+  is_2_by_1 <- length(dims) == 2 && dims[2] == 1L
+  if (is_2_by_1) {
     x <- as.vector(x)
   }
   x
@@ -247,7 +250,7 @@ drop_column_dim <- function(x) {
 # run time)
 expand_to_batch <- function(x, y) {
   batch_size <- tf$shape(y)[[0]]
-  ndim <- length(dim(x))
+  ndim <- n_dim(x)
   tf$tile(x, c(batch_size, rep(1L, ndim - 1)))
 }
 
@@ -266,9 +269,9 @@ match_batches <- function(values) {
 
   have_batches <- vapply(values_mutable, has_batch, FUN.VALUE = TRUE)
 
-  # if any, but not all, have a batch, dimension, tile the others to match the
-  # batch
-  if (!all(have_batches) & any(have_batches)) {
+  any_but_not_all_have_batch_and_dim <- !all(have_batches) & any(have_batches)
+  if (any_but_not_all_have_batch_and_dim) {
+    # tile the others to match the batch
     target_id <- which(have_batches)[1]
     target <- values_mutable[[target_id]]
 
@@ -302,7 +305,9 @@ split_chains <- function(samples_array) {
 # take a greta array dimension and return the dimension of the hessian to return
 # to the user
 hessian_dims <- function(dim) {
-  if (length(dim) == 2 && dim[2] == 1L) {
+  has_2d <- length(dim) == 2
+  is_2_by_1 <- has_2d && dim[2] == 1L
+  if (is_2_by_1) {
     dim <- dim[1]
   }
   rep(dim, 2)
@@ -485,7 +490,7 @@ all_greta_arrays <- function(env = parent.frame(),
   # optionally strip out the data arrays
   if (!include_data) {
     is_data <- vapply(all_arrays,
-                      function(x) inherits(get_node(x), "data_node"),
+                      function(x) is.data_node(get_node(x)),
                       FUN.VALUE = FALSE
     )
     all_arrays <- all_arrays[!is_data]
@@ -595,7 +600,7 @@ flatten_trace <- function(i, trace_list) {
 # extract the model information object from mcmc samples returned by
 # stashed_samples, and error nicely if there's something fishy
 get_model_info <- function(draws, name = "value") {
-  if (!inherits(draws, "greta_mcmc_list")) {
+  if (!is.greta_mcmc_list(draws)) {
     cli::cli_abort(
       c(
         "{name} must be an {.cls greta_mcmc_list} object",
@@ -662,7 +667,8 @@ as_tf_function <- function(r_fun, ...) {
     tensor_inputs <- lapply(
       tensor_inputs,
       function(x) {
-        if (identical(dim(x), list())) {
+        empty_dim <- identical(dim(x), list())
+        if (empty_dim) {
           x <- tf$reshape(x, shape(1, 1, 1))
         }
         x
@@ -849,7 +855,8 @@ check_if_software_available <- function(software_available,
     }
 
     # if it has a version and ideal version
-    if (!is.null(version) & !is.null(ideal_version)){
+    has_ideal_version <- !is.null(version) & !is.null(ideal_version)
+    if (has_ideal_version){
       version_chr <- paste0(version)
       version_match <- compareVersion(version_chr, ideal_version) == 0
 
@@ -1012,7 +1019,8 @@ connected_to_draws <- function(dag, mcmc_dag) {
 }
 
 check_commanality_btn_dags <- function(dag, mcmc_dag) {
-  if (!any(connected_to_draws(dag, mcmc_dag))) {
+  target_not_connected_to_mcmc <- !any(connected_to_draws(dag, mcmc_dag))
+  if (target_not_connected_to_mcmc) {
     cli::cli_abort(
       "the target {.cls greta array}s do not appear to be connected to those \\
       in the {.cls greta_mcmc_list} object"
@@ -1023,7 +1031,8 @@ check_commanality_btn_dags <- function(dag, mcmc_dag) {
 # see if the new dag introduces any new variables
 check_dag_introduces_new_variables <- function(dag, mcmc_dag) {
   new_types <- dag$node_types[!connected_to_draws(dag, mcmc_dag)]
-  if (any(new_types == "variable")) {
+  any_new_variables <- any(new_types == "variable")
+  if (any_new_variables) {
     cli::cli_abort(
       c(
         "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
@@ -1100,3 +1109,33 @@ message_if_using_gpu <- function(compute_options){
   }
 }
 
+n_dim <- function(x) length(dim(x))
+is_2d <- function(x) n_dim(x) == 2
+
+is.node <- function(x, ...){
+  inherits(x, "node")
+}
+
+is.data_node <- function(x, ...){
+  inherits(x, "data_node")
+}
+
+is.distribution_node <- function(x, ...){
+  inherits(x, "distribution_node")
+}
+
+is.variable_node <- function(x, ...){
+  inherits(x, "variable_node")
+}
+
+is.greta_model <- function(x, ...){
+  inherits(x, "greta_model")
+}
+
+is.unknowns <- function(x, ...){
+  inherits(x, "unknowns")
+}
+
+is.initials <- function(x, ...){
+  inherits(x, "initials")
+}

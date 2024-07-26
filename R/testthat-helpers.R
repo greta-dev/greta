@@ -25,9 +25,7 @@ check_op <- function(op, a, b, greta_op = NULL,
                      tolerance = 1e-3,
                      only = c("data", "variable", "batched"),
                      relative_error = FALSE) {
-  if (is.null(greta_op)) {
-    greta_op <- op
-  }
+  greta_op <- greta_op %||% op
 
   r_out <- run_r_op(op, a, b, other_args)
 
@@ -115,8 +113,4 @@ grab_via_free_state <- function(target, values, batches = 1) {
 
 expect_ok <- function(expr) {
   testthat::expect_error(expr, NA)
-}
-
-is.greta_array <- function(x) { # nolint
-  inherits(x, "greta_array")
 }

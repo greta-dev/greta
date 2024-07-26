@@ -206,7 +206,12 @@ calculate <- function(
 
       # if an RNG seed was provided use it and reset the RNG on exiting
       if (!is.null(seed)) {
-        if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+        no_global_random_seed <- !exists(
+          x = ".Random.seed",
+          envir = .GlobalEnv,
+          inherits = FALSE
+          )
+        if (no_global_random_seed) {
           runif(1)
         }
 
@@ -235,7 +240,7 @@ calculate <- function(
       single = "float32"
     )
 
-    if (inherits(values, "greta_mcmc_list")) {
+    if (is.greta_mcmc_list(values)) {
       result <- calculate_greta_mcmc_list(
         target = target,
         values = values,
@@ -253,7 +258,7 @@ calculate <- function(
       )
     }
 
-    if (!inherits(result, "greta_mcmc_list")) {
+    if (!is.greta_mcmc_list(result)) {
 
       # if it's not mcmc samples, make sure the results are in the right order
       # (tensorflow order seems to be platform specific?!?)

@@ -105,7 +105,8 @@ check_dims <- function(..., target_dim = NULL) {
   scalars <- vapply(elem_list, is_scalar, FALSE)
 
   # if more than one is non-scalar, need to check them
-  if (sum(!scalars) > 1) {
+  more_than_one_is_non_scalar <- sum(!scalars) > 1
+  if (more_than_one_is_non_scalar) {
     match_first <- vapply(dim_list[!scalars],
                           identical,
                           FUN.VALUE = FALSE,
@@ -127,7 +128,8 @@ check_dims <- function(..., target_dim = NULL) {
   if (!is.null(target_dim)) {
 
     # make sure it's 2D
-    if (length(target_dim) == 1) {
+    is_1d <- length(target_dim) == 1
+    if (is_1d) {
       target_dim <- c(target_dim, 1)
     }
 
@@ -173,7 +175,7 @@ check_dims <- function(..., target_dim = NULL) {
 
 # make sure a greta array is 2D
 check_2d <- function(x) {
-  if (length(dim(x)) != 2L) {
+  if (!is_2d(x)) {
     cli::cli_abort(
       c(
         "Dimensions of parameters not compatible with multivariate \\
@@ -202,7 +204,10 @@ check_square <- function(x) {
 
 check_sigma_square_2d_greta_array <- function(sigma){
   # check dimensions of Sigma
-  if (nrow(sigma) != ncol(sigma) | length(dim(sigma)) != 2) {
+  not_square <- nrow(sigma) != ncol(sigma)
+  not_2d <- n_dim(sigma) != 2
+  not_square_or_2d <- not_square | not_2d
+  if (not_square_or_2d) {
     cli::cli_abort(
       c(
         "{.arg Sigma} must be a square 2D greta array",
@@ -229,7 +234,8 @@ check_mean_sigma_have_same_dimensions <- function(mean, sigma) {
 
 check_chol2symm_square_symmetric_upper_tri_matrix <- function(x) {
   dim <- dim(x)
-  if (length(dim) != 2 || dim[1] != dim[2]) {
+  is_square <- dim[1] == dim[2]
+  if (!is_2d(x) || !is_square) {
     cli::cli_abort(
       c(
         "{.fun chol2symm} must have square symmetric matrix, assumed to be \\
@@ -242,7 +248,8 @@ check_chol2symm_square_symmetric_upper_tri_matrix <- function(x) {
 
 check_chol2symm_2d_square_upper_tri_greta_array <- function(x) {
   dim <- dim(x)
-  if (length(dim) != 2 || dim[1] != dim[2]) {
+  is_square <- dim[1] == dim[2]
+  if (!is_2d(x) || !is_square) {
     cli::cli_abort(
       c(
         "{.fun chol2symm} must have two-dimensional, square, upper-triangular \\
@@ -293,7 +300,8 @@ check_n_realisations <- function(vectors = list(),
   if (!is.null(target)) {
 
     # make sure it's a scalar
-    if (length(target) != 1 || target < 1) {
+    not_scalar <- length(target) != 1 || target < 1
+    if (not_scalar) {
       cli::cli_abort(
         c(
           "{.code n_realisations is not a positive scalar interger}",
@@ -356,7 +364,8 @@ check_dimension <- function(vectors = list(),
   if (!is.null(target)) {
 
     # make sure it's a scalar
-    if (length(target) != 1 || target < 1 || !is.finite(target)) {
+    positive_scalar <- length(target) != 1 || target < 1 || !is.finite(target)
+    if (positive_scalar) {
       cli::cli_abort(
         c(
           "{.var dimension} must be a positive scalar integer giving the \\
@@ -453,7 +462,8 @@ check_multivariate_dims <- function(vectors = list(),
 
 # check truncation for different distributions
 check_positive <- function(truncation) {
-  if (truncation[1] < 0) {
+  bound_is_negative <- truncation[1] < 0
+  if (bound_is_negative) {
     cli::cli_abort(
       c(
         "lower bound must be 0 or higher",
@@ -464,7 +474,8 @@ check_positive <- function(truncation) {
 }
 
 check_unit <- function(truncation) {
-  if (truncation[1] < 0 | truncation[2] > 1) {
+  bounds_not_btn_0_1 <- truncation[1] < 0 | truncation[2] > 1
+  if (bounds_not_btn_0_1) {
     cli::cli_abort(
       c(
         "lower and upper bounds must be between 0 and 1",
@@ -565,7 +576,7 @@ check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
 
   # check they are greta arrays
   are_greta_arrays <- vapply(greta_array_list,
-                             inherits, "greta_array",
+                             is.greta_array,
                              FUN.VALUE = FALSE
   )
 
@@ -737,7 +748,8 @@ check_dependencies_satisfied <- function(target, fixed_greta_arrays, dag, env) {
 
 check_cum_op <- function(x) {
   dims <- dim(x)
-  if (length(dims) > 2 | dims[2] != 1) {
+  x_not_column_vector <- length(dims) > 2 | dims[2] != 1
+  if (x_not_column_vector) {
     cli::cli_abort(
       c(
         "{.var x} must be a column vector",
@@ -760,6 +772,7 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
   n_cores_detected <- future::availableCores()
   allowed_n_cores <- seq_len(n_cores_detected)
 
+  ## TODO check explaining var
   # check user-provided cores
   if (!is.null(n_cores) && !n_cores %in% allowed_n_cores) {
     check_positive_integer(n_cores, "n_cores")
@@ -772,11 +785,8 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
     n_cores <- NULL
   }
 
-  # if n_cores isn't user-specified, set it so
-  # there's no clash between samplers
-  if (is.null(n_cores)) {
-    n_cores <- floor(n_cores_detected / samplers)
-  }
+  # if n_cores isn't user-specified, set it so there's no clash between samplers
+  n_cores <- n_cores %||% floor(n_cores_detected / samplers)
 
   # make sure there's at least 1
   n_cores <- max(n_cores, 1)
@@ -787,7 +797,8 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
 check_positive_integer <- function(x, name = "") {
   suppressWarnings(x <- as.integer(x))
 
-  if (length(x) != 1 | is.na(x) | x < 1) {
+  not_positive_integer <- length(x) != 1 | is.na(x) | x < 1
+  if (not_positive_integer) {
     cli::cli_abort(
       c(
         "{name} must be a positive integer",
@@ -812,7 +823,7 @@ check_trace_batch_size <- function(x) {
 }
 
 check_if_greta_array_in_mcmc <- function(x){
-  if (!inherits(x, "greta_model") && inherits(x, "greta_array")) {
+  if (!is.greta_model(x) && is.greta_array(x)) {
     cli::cli_abort(
       c( "MCMC requires input to be a {.cls greta_model} not a {.cls greta_array}",
         "x" = "{.var x} is a {.cls greta_array} not a {.cls greta_model}",
@@ -824,7 +835,7 @@ check_if_greta_array_in_mcmc <- function(x){
 }
 
 check_if_greta_model <- function(x) {
-  if (!inherits(x, "greta_model")) {
+  if (!is.greta_model(x)) {
     cli::cli_abort(
       c(
         "{.var x} must be a {.cls greta_model}",
@@ -904,7 +915,8 @@ check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays, dag) {
 }
 
 check_if_array_is_empty_list <- function(target){
-  if (identical(target, list())) {
+  no_greta_arrays_provided <- identical(target, list())
+  if (no_greta_arrays_provided) {
     cli::cli_abort(
       c(
         "{.fun calculate} requires {.cls greta array}s",

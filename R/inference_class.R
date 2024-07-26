@@ -278,9 +278,11 @@ sampler <- R6Class(
       self$n_chains <- nrow(self$free_state)
 
       # duplicate diag_sd if needed
+      ## TODO improve explaining variable here - why does this need to happen?
       n_diag <- length(self$parameters$diag_sd)
       n_parameters <- self$n_free
-      if (n_diag != n_parameters && n_parameters > 1) {
+      multiple_parameters <- n_parameters > 1
+      if (n_diag != n_parameters && multiple_parameters) {
         diag_sd <- rep(self$parameters$diag_sd[1], n_parameters)
         self$parameters$diag_sd <- diag_sd
       }
@@ -735,7 +737,7 @@ sampler <- R6Class(
 
       # if there is one sample at a time, and it's rejected, conversion from
       # python back to R can drop a dimension, so handle that here. Ugh.
-      if (length(dim(free_state_draws)) != 3) {
+      if (n_dim(free_state_draws) != 3) {
         dim(free_state_draws) <- c(1, dim(free_state_draws))
       }
 
