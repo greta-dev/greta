@@ -90,7 +90,6 @@ operation_node <- R6Class(
     # computational speedups or numerical stability. E.g. a logarithm or a
     # cholesky factor
     representations = list(),
-    golden_cholesky = FALSE,
     initialize = function(operation,
                           ...,
                           dim = NULL,
@@ -98,7 +97,6 @@ operation_node <- R6Class(
                           tf_operation = NULL,
                           value = NULL,
                           representations = list(),
-                          golden_cholesky = FALSE,
                           tf_function_env = parent.frame(3),
                           expand_scalars = FALSE) {
 
@@ -129,7 +127,6 @@ operation_node <- R6Class(
       self$operation <- tf_operation
       self$operation_args <- operation_args
       self$representations <- representations
-      self$golden_cholesky <- golden_cholesky
       self$tf_function_env <- tf_function_env
 
       # assign empty value of the right dimension, or the values passed via the
@@ -161,44 +158,12 @@ operation_node <- R6Class(
       # maybe put this warning inside the calculate part
       # !! check whether the change to define tf will break
       mode <- dag$how_to_define(self)
-        is_cholesky <- isTRUE(self$golden_cholesky)
-        if (is_cholesky){
-          ## TF1/2
-          ## This approach currently fails because of how we use representations
-          ## within greta.
-          # We will now error here since when sampling from a cholesky
-          # represented variable, we don't really get consistent results
-          cli::cli_warn(
-            ## Could note that there are false positives?
-            message = c(
-              "Cannot use {.fun calculate} to sample a cholesky factor of a \\
-              greta array",
-              "E.g., {.code x_chol <- chol(wishart(df = 4, Sigma = diag(3)))}",
-              "{.code {.code calculate(x_chol)}}",
-              "This is due to an internal issue with how greta handles \\
-              cholesky representations.",
-              "See issue here on github for more details:",
-              "{.url https://github.com/greta-dev/greta/issues/593}"
-            )
-          )
-        }
       # if sampling get the distribution constructor and sample this
       if (mode == "sampling") {
         # browser()
         tensor <- dag$draw_sample(self$distribution)
 
         if (has_representation(self, "cholesky")) {
-          # error here since when sampling from a cholesky represented variable
-          # we don't really get consistent results
-          cli::cli_warn(
-            ## Could note that there are false positives
-            message = c(
-              "When using {.fun calculate} to sample a greta array with a \\
-              cholesky factor, the output can sometimes be unreliable.",
-              "See issue here on github for more details:",
-              "{.url }"
-            )
-          )
           # browser()
           cholesky_tensor <- tf_chol(tensor)
           # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)

@@ -1005,7 +1005,10 @@ wishart_distribution <- R6Class(
       matrix_greta_array <- chol2symm(chol_greta_array)
 
       # return the node for the symmetric matrix
-      target_node <- get_node(matrix_greta_array)
+      # target_node <- get_node(matrix_greta_array)
+      ## Patch fix - return the cholesky variable as target, rather than
+      ## the chol2symm
+      target_node <- get_node(chol_greta_array)
       target_node
     },
 
@@ -1164,7 +1167,9 @@ lkj_correlation_distribution <- R6Class(
       matrix_greta_array <- chol2symm(chol_greta_array)
 
       # return the node for the symmetric matrix
-      target_node <- get_node(matrix_greta_array)
+      # target_node <- get_node(matrix_greta_array)
+      ## PATCH - return colesky variable rather than chol2symm
+      target_node <- get_node(chol_greta_array)
       target_node
     },
 

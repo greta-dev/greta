@@ -1,43 +1,208 @@
-# Cholesky factor of Wishart should be an upper triangular matrix
+
+# Cholesky factor of Wishart should be a lower triangular matrix
 
     Code
       calculate(chol_x, nsim = 1)
-    Condition
-      Warning:
-      Cannot use `calculate()` to sample a cholesky factor of a greta array
-      E.g., `x_chol <- chol(wishart(df = 4, Sigma = diag(3)))`
-      `calculate(x_chol)`
-      This is due to an internal issue with how greta handles cholesky representations.
-      See issue here on github for more details:
-      <https://github.com/greta-dev/greta/issues/593>
     Output
       $chol_x
       , , 1
       
-           [,1] [,2] [,3]
-      [1,]    1    1    1
+               [,1] [,2] [,3]
+      [1,] 1.191098    0    0
       
       , , 2
       
-           [,1] [,2] [,3]
-      [1,]    1    1    1
+                 [,1]     [,2] [,3]
+      [1,] -0.5446781 1.148268    0
       
       , , 3
       
-           [,1] [,2] [,3]
-      [1,]    1    1    1
+                  [,1]      [,2]     [,3]
+      [1,] -0.07584197 -0.543763 0.852187
       
       
 
 ---
 
-    When using `calculate()` to sample a greta array with a cholesky factor, the output can sometimes be unreliable.
-    See issue here on github for more details:
-    <>
+    Code
+      (calc_chol <- calculate(x, chol_x, nsim = 1))
+    Output
+      $x
+      , , 1
+      
+               [,1]       [,2]       [,3]
+      [1,] 3.280857 -0.8723121 -0.7930352
+      
+      , , 2
+      
+                 [,1]     [,2]    [,3]
+      [1,] -0.8723121 4.256879 1.20619
+      
+      , , 3
+      
+                 [,1]    [,2]     [,3]
+      [1,] -0.7930352 1.20619 1.070123
+      
+      
+      $chol_x
+      , , 1
+      
+               [,1] [,2] [,3]
+      [1,] 1.811314    0    0
+      
+      , , 2
+      
+                 [,1]     [,2] [,3]
+      [1,] -0.4815909 2.006228    0
+      
+      , , 3
+      
+                 [,1]      [,2]      [,3]
+      [1,] -0.4378232 0.4961243 0.7951696
+      
+      
 
-# Cholesky factor of LJK_correlation should be an upper triangular matrix
+# Cholesky factor of LJK_correlation should be a lower triangular matrix
 
-    When using `calculate()` to sample a greta array with a cholesky factor, the output can sometimes be unreliable.
-    See issue here on github for more details:
-    <>
+    Code
+      calculate(chol_x, nsim = 1)
+
+    Output
+      $chol_x
+      , , 1
+      
+           [,1] [,2] [,3]
+      [1,]    1    0    0
+      
+      , , 2
+      
+                 [,1]      [,2] [,3]
+      [1,] -0.2949061 0.9555263    0
+      
+      , , 3
+      
+                  [,1]      [,2]      [,3]
+      [1,] -0.02679775 0.2445977 0.9692543
+      
+      
+
+---
+
+    Code
+      (calc_chol <- calculate(x, chol_x, nsim = 1))
+    Output
+      $x
+      , , 1
+      
+           [,1]       [,2]       [,3]
+      [1,]    1 -0.2012312 -0.1072049
+      
+      , , 2
+      
+                 [,1] [,2]      [,3]
+      [1,] -0.2012312    1 0.5519843
+      
+      , , 3
+      
+                 [,1]      [,2] [,3]
+      [1,] -0.1072049 0.5519843    1
+      
+      
+      $chol_x
+      , , 1
+      
+           [,1] [,2] [,3]
+      [1,]    1    0    0
+      
+      , , 2
+      
+                 [,1]      [,2] [,3]
+      [1,] -0.2012312 0.9795438    0
+      
+      , , 3
+      
+                 [,1]      [,2]      [,3]
+      [1,] -0.1072049 0.5414881 0.8338451
+      
+      
+
+# Post-MCMC, Wishart distribution stays symmetric, chol remains lower tri
+
+    Code
+      calcs
+    Output
+      $x
+      , , 1
+      
+               [,1]       [,2]     [,3]
+      [1,] 5.555332 -0.2148704 2.431943
+      
+      , , 2
+      
+                 [,1]    [,2]      [,3]
+      [1,] -0.2148704 1.03555 -1.263782
+      
+      , , 3
+      
+               [,1]      [,2]     [,3]
+      [1,] 2.431943 -1.263782 8.162073
+      
+      
+      $`chol(x)`
+      , , 1
+      
+               [,1] [,2] [,3]
+      [1,] 2.356975    0    0
+      
+      , , 2
+      
+                  [,1]     [,2] [,3]
+      [1,] -0.09116363 1.013528    0
+      
+      , , 3
+      
+               [,1]      [,2]     [,3]
+      [1,] 1.031807 -1.154106 2.401143
+      
+      
+
+# Post-MCMC, LKJ distribution stays symmetric, chol remains lower tri
+
+    Code
+      calcs
+    Output
+      $x
+      , , 1
+      
+           [,1]      [,2]      [,3]
+      [1,]    1 0.4092182 0.1046861
+      
+      , , 2
+      
+                [,1] [,2]        [,3]
+      [1,] 0.4092182    1 -0.03410899
+      
+      , , 3
+      
+                [,1]        [,2] [,3]
+      [1,] 0.1046861 -0.03410899    1
+      
+      
+      $`chol(x)`
+      , , 1
+      
+           [,1] [,2] [,3]
+      [1,]    1    0    0
+      
+      , , 2
+      
+                [,1]      [,2] [,3]
+      [1,] 0.4092182 0.9124365    0
+      
+      , , 3
+      
+                [,1]        [,2]      [,3]
+      [1,] 0.1046861 -0.08433292 0.9909232
+      
+      
 

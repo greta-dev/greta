@@ -9,56 +9,96 @@ test_that("Wishart can use a choleskied Sigma", {
   expect_ok(draws <- mcmc(m, warmup = 0, n_samples = 5, verbose = FALSE))
 })
 
-test_that("Cholesky factor of Wishart should be an upper triangular matrix", {
+test_that("Cholesky factor of Wishart should be a lower triangular matrix", {
   skip_if_not(check_tf_version())
 
+  ## Test if we just do calculate on chol_x
   x <- wishart(df = 4, Sigma = diag(3))
   chol_x <- chol(x)
   expect_snapshot(
     calculate(chol_x, nsim = 1)
   )
   calc_x <- calculate(x, nsim = 1)
-  calc_chol <- suppressWarnings(calculate(chol_x, nsim = 1))
-  expect_equal(dim(calc_chol$chol_x), c(1,3,3))
-  calc_chol_mat <- matrix(calc_chol$chol_x, nrow = 3, ncol = 3)
-  expect_equal(calc_chol_mat[lower.tri(calc_chol_mat)], c(0,0,0))
-})
+  calc_chol <- calculate(chol_x, nsim = 1)
 
-test_that("Cholesky factor of LJK_correlation should be an upper triangular matrix", {
-  skip_if_not(check_tf_version())
+  expect_lower_tri(calc_chol$chol_x)
+  expect_square(calc_chol$chol_x)
 
-  x <- lkj_correlation(eta = 3, dimension = 3)
-  chol_x <- chol(x)
-  calc_chol <- suppressWarnings(calculate(x, chol_x, nsim = 1))
-  expect_equal(dim(calc_chol$chol_x), c(1,3,3))
-  calc_chol_mat <- matrix(calc_chol$chol_x, nrow = 3, ncol = 3)
-  expect_equal(calc_chol_mat[lower.tri(calc_chol_mat)], c(0,0,0))
-})
-
-
-test_that("Cholesky factor of Wishart should be an upper triangular matrix", {
-  skip_if_not(check_tf_version())
-
+  ## Test if we do calculate on x and chol_x
   x <- wishart(df = 4, Sigma = diag(3))
   chol_x <- chol(x)
-  expect_snapshot_warning(
-    calc_chol <- calculate(x, chol_x, nsim = 1)
-    )
-  expect_equal(dim(calc_chol$chol_x), c(1,3,3))
-  calc_chol_mat <- matrix(calc_chol$chol_x, nrow = 3, ncol = 3)
-  expect_equal(calc_chol_mat[lower.tri(calc_chol_mat)], c(0,0,0))
+  expect_snapshot(
+    (calc_chol <- calculate(x, chol_x, nsim = 1))
+  )
+  expect_square(calc_chol$chol_x)
+  expect_lower_tri(calc_chol$chol_x)
 })
 
-test_that("Cholesky factor of LJK_correlation should be an upper triangular matrix", {
+test_that("Cholesky factor of LJK_correlation should be a lower triangular matrix", {
   skip_if_not(check_tf_version())
 
+  ## Test if we just do calculate on chol_x
   x <- lkj_correlation(eta = 3, dimension = 3)
   chol_x <- chol(x)
-  expect_snapshot_warning(
-    calc_chol <- calculate(x, chol_x, nsim = 1)
+  expect_snapshot(
+    calculate(chol_x, nsim = 1)
   )
-  expect_equal(dim(calc_chol$chol_x), c(1,3,3))
-  calc_chol_mat <- matrix(calc_chol$chol_x, nrow = 3, ncol = 3)
-  expect_equal(calc_chol_mat[lower.tri(calc_chol_mat)], c(0,0,0))
+  calc_x <- calculate(x, nsim = 1)
+  calc_chol <- calculate(chol_x, nsim = 1)
+
+  expect_lower_tri(calc_chol$chol_x)
+  expect_square(calc_chol$chol_x)
+
+  ## Test if we do calculate on x and chol_x
+  x <- lkj_correlation(eta = 3, dimension = 3)
+  chol_x <- chol(x)
+  expect_snapshot(
+    (calc_chol <- calculate(x, chol_x, nsim = 1))
+  )
+  expect_square(calc_chol$chol_x)
+  expect_lower_tri(calc_chol$chol_x)
 })
 
+test_that("Post-MCMC, Wishart distribution stays symmetric, chol remains lower tri",{
+# From https://github.com/greta-dev/greta/issues/585
+  x <- wishart(df = 4, Sigma = diag(3))
+  m <- model(x)
+  draws <- mcmc(m, warmup = 1, n_samples = 1)
+
+  calcs <- calculate(x, chol(x), nsim = 1)
+  # ensure that the symmetric matrix is still symmetric
+  expect_snapshot(
+    calcs
+  )
+
+  expect_square(calcs$x)
+  expect_square(calcs$`chol(x)`)
+  expect_symmetric(calcs$x)
+  expect_lower_tri(calcs$`chol(x)`)
+
+})
+
+test_that("Post-MCMC, LKJ distribution stays symmetric, chol remains lower tri",{
+  # From https://github.com/greta-dev/greta/issues/585
+  x <- lkj_correlation(eta = 3, dimension = 3)
+  m <- model(x)
+  draws <- mcmc(m, warmup = 1, n_samples = 1)
+
+  calcs <- calculate(x, chol(x), nsim = 1)
+  # ensure that the symmetric matrix is still symmetric
+  expect_snapshot(
+    calcs
+  )
+
+  expect_square(calcs$x)
+  expect_square(calcs$`chol(x)`)
+  expect_symmetric(calcs$x)
+  expect_lower_tri(calcs$`chol(x)`)
+
+})
+
+
+## TODO
+# further ensure all of the issues in
+## https://github.com/greta-dev/greta/labels/cholesky
+## are resolved in this branch

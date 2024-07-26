@@ -48,3 +48,4 @@ LICENSE
 ^\.lazytext$
 ^revdep$
 ^__autograph*
+^testlog
