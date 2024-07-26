@@ -215,7 +215,7 @@ mcmc <- function(
     # check they're not data nodes, provide a useful error message if they are
     are_data <- vapply(
       target_greta_arrays,
-      function(x) inherits(get_node(x), "data_node"),
+      function(x) is.data_node(get_node(x)),
       FUN.VALUE = FALSE
     )
 
@@ -330,6 +330,7 @@ run_samplers <- function(samplers,
     plan_is$local &
     !is.null(greta_stash$callbacks)
 
+  ## TODO add explaining variable
   if (plan_is$parallel & plan_is$local & length(samplers) > 1) {
     cores_text <- compute_text(n_cores, compute_options)
     msg <- glue::glue(
@@ -341,7 +342,8 @@ run_samplers <- function(samplers,
     message(msg)
   }
 
-  if (plan_is$parallel & !plan_is$local) {
+  is_remote_machine <- plan_is$parallel & !plan_is$local
+  if (is_remote_machine) {
 
     cli::cli_inform(
       "running {length(samplers)} \\
@@ -480,7 +482,8 @@ stashed_samples <- function() {
     values_draws <- lapply(values_draws, `colnames<-`, trace_names)
 
     # if there are no samples, return a list of NULLs
-    if (nrow(values_draws[[1]]) == 0) {
+    no_samples <- nrow(values_draws[[1]]) == 0
+    if (no_samples) {
       return(replicate(length(samplers), NULL))
     } else {
       thins <- lapply(samplers, member, "thin")
@@ -582,21 +585,24 @@ to_free <- function(node, data) {
   }
 
   high <- function(x) {
-    if (any(x <= lower)) {
+    initials_outside_support <- any(x <= lower)
+    if (initials_outside_support) {
       unsupported_error()
     }
     log(x - lower)
   }
 
   low <- function(x) {
-    if (any(x >= upper)) {
+    initials_outside_support <- any(x >= upper)
+    if (initials_outside_support) {
       unsupported_error()
     }
     log(upper - x)
   }
 
   both <- function(x) {
-    if (any(x >= upper | x <= lower)) {
+    initials_outside_support <- any(x >= upper | x <= lower)
+    if (initials_outside_support) {
       unsupported_error()
     }
     stats::qlogis((x - lower) / (upper - lower))
@@ -696,10 +702,11 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
   # if the user passed a single set of initial values, repeat them for all
   # chains
-  if (inherits(initial_values, "initials")) {
+  if (is.initials(initial_values)) {
     is_blank <- identical(initial_values, initials())
 
-    if (!is_blank & n_chains > 1) {
+    one_set_of_initials <- !is_blank & n_chains > 1
+    if (one_set_of_initials) {
       cli::cli_inform(
         "only one set of initial values was provided, and was used for \\
         all chains"
@@ -714,14 +721,13 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
     # if the user provided a list of initial values, check elements and the
     # length
-    are_initials <- vapply(initial_values, inherits, "initials",
-      FUN.VALUE = FALSE
-    )
+    are_initials <- vapply(initial_values, is.initials, FUN.VALUE = FALSE)
 
     if (all(are_initials)) {
       n_sets <- length(initial_values)
 
-      if (n_sets != n_chains) {
+      initial_values_do_not_match_chains <- n_sets != n_chains
+      if (initial_values_do_not_match_chains) {
         cli::cli_abort(
           c(
             "the number of provided initial values does not match chains",
@@ -768,7 +774,8 @@ initials <- function(...) {
   values <- list(...)
   names <- names(values)
 
-  if (length(names) != length(values)) {
+  initials_not_all_named <- length(names) != length(values)
+  if (initials_not_all_named) {
     cli::cli_abort(
       "all initial values must be named"
     )
@@ -790,7 +797,8 @@ initials <- function(...) {
 
 #' @export
 print.initials <- function(x, ...) {
-  if (identical(x, initials())) {
+  empty_initials <- identical(x, initials())
+  if (empty_initials) {
     cat("an empty greta initials object")
   } else {
     cat("a greta initials object with values:\n\n")

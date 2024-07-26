@@ -33,7 +33,8 @@ as.greta_array.data.frame <- function(x, optional = FALSE,
   classes <- vapply(x, class, "")
   valid <- classes %in% c("numeric", "integer", "logical")
 
-  if (!optional & !all(valid)) {
+  array_has_different_types <- !optional & !all(valid)
+  if (array_has_different_types) {
     invalid_types <- unique(classes[!valid])
     cli::cli_abort(
       c(
@@ -56,6 +57,7 @@ as.greta_array.data.frame <- function(x, optional = FALSE,
 # or numeric
 #' @export
 as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
+  ## TODO better abstract these if else clauses
   if (!is.numeric(x)) {
     if (is.logical(x)) {
       x[] <- as.numeric(x[])
@@ -83,6 +85,7 @@ as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
 # or numeric
 #' @export
 as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
+  ## TODO Better abstract out these if statements
   if (!optional & !is.numeric(x)) {
     if (is.logical(x)) {
       x[] <- as.numeric(x[])
@@ -109,7 +112,8 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
 # finally, reject if there are any missing values, or set up the greta_array
 #' @export
 as.greta_array.numeric <- function(x, optional = FALSE, original_x = x, ...) {
-  if (!optional & any(!is.finite(x))) {
+  contains_missing_or_inf <- !optional & any(!is.finite(x))
+  if (contains_missing_or_inf) {
     cli::cli_abort(
         "{.cls greta_array} must not contain missing or infinite values"
     )
@@ -204,7 +208,7 @@ print.summary.greta_array <- function(x, ...) {
     distribution_text <- ""
   }
 
-  if (inherits(x$values, "unknowns")) {
+  if (is.unknowns(x$values)) {
     values_text <- "\n  (values currently unknown)"
   } else {
     values_print <- capture.output(summary(x$values))
@@ -251,13 +255,14 @@ set_golden_cholesky <- function(x) {
 
 # check for and get representations
 representation <- function(x, name, error = TRUE) {
-  if (inherits(x, "greta_array")) {
+  if (is.greta_array(x)) {
     x_node <- get_node(x)
   } else {
     x_node <- x
   }
   repr <- x_node$representations[[name]]
-  if (error && is.null(repr)) {
+  not_represented <- error && is.null(repr)
+  if (not_represented) {
     cli::cli_abort(
       "{.cls greta_array} has no representation {.var name}"
     )

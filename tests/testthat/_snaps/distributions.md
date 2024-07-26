@@ -21,7 +21,7 @@
 
 ---
 
-    `min` and `max` must finite scalars
+    `min` and `max` must be finite scalars
     Their values are:
     `min`: -Inf
     `max`: Inf

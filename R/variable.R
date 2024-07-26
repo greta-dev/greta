@@ -46,7 +46,7 @@
 variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
   check_tf_version("error")
 
-  if (inherits(lower, "greta_array") | inherits(upper, "greta_array")) {
+  if (is.greta_array(lower)| is.greta_array(upper)) {
     cli::cli_abort(
       "lower and upper must be fixed, they cannot be another greta array"
     )
@@ -77,7 +77,8 @@ cholesky_variable <- function(dim, correlation = FALSE) {
   if (n_dim == 1) {
     dim <- c(dim, dim)
   } else if (n_dim == 2) {
-    if (dim[1] != dim[2]) {
+    not_square <- dim[1] != dim[2]
+    if (not_square) {
       msg <- cli::cli_abort(
         c(
           "cholesky variables must be square",
@@ -192,7 +193,9 @@ ordered_variable <- function(dim) {
 
   # dimension of the free state version
   n_dim <- length(dim)
-  if (!dim[n_dim] > 1) {
+  last_dim <- dim[n_dim]
+
+  if (!last_dim > 1) {
     cli::cli_abort(
       "the final dimension of an ordered variable must have more than \\
       one element",

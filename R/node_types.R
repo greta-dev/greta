@@ -26,7 +26,7 @@ data_node <- R6Class(
       # placeholder
       if (mode == "forward") {
         value <- self$value()
-        ndim <- length(dim(value))
+        ndim <- n_dim(value)
         shape <- to_shape(c(1, dim(value)))
         value <- add_first_dim(value)
 
@@ -134,7 +134,8 @@ operation_node <- R6Class(
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
-      if (!is.null(value) && !all.equal(dim(value), dim)) {
+      values_have_wrong_dim <- !is.null(value) && !all.equal(dim(value), dim)
+      if (values_have_wrong_dim) {
         cli::cli_abort(
           "values have the wrong dimension so cannot be used"
         )
@@ -223,7 +224,8 @@ operation_node <- R6Class(
         tf_args <- lapply(arg_tf_names, get, envir = tfe)
 
         # fetch additional (non-tensor) arguments, if any
-        if (length(self$operation_args) > 0) {
+        multiple_operation_args <- length(self$operation_args) > 0
+        if (multiple_operation_args) {
           tf_args <- c(tf_args, self$operation_args)
         }
 
@@ -281,7 +283,8 @@ variable_node <- R6Class(
       constraint_array[lower_limit & upper_limit] <- "both"
 
       # pass a string depending on whether they are all the same
-      if (all(constraint_array == constraint_array[1])) {
+      constraint_arrays_are_same <- all(constraint_array == constraint_array[1])
+      if (constraint_arrays_are_same) {
         self$constraint <- glue::glue("scalar_all_{constraint_array[1]}")
       } else {
         self$constraint <- "scalar_mixed"
@@ -414,7 +417,8 @@ variable_node <- R6Class(
       }
 
       # make sure there's something in the batch dimension
-      if (identical(dim(ljd), integer(0))) {
+      no_batch_dimension <- identical(dim(ljd), integer(0))
+      if (no_batch_dimension) {
         ljd <- tf$expand_dims(ljd, 0L)
         tiling <- tf$stack(
           list(tf$shape(free)[0]),

@@ -72,7 +72,8 @@ greta_array.greta_array <- function(data = 0, dim = length(data)) {
     dim <- c(dim, 1L)
   }
 
-  if (!identical(dim, dim(data))) {
+  dim_matches_data_dim <- identical(dim, dim(data))
+  if (!dim_matches_data_dim) {
     dim(data) <- dim
   }
 
@@ -83,4 +84,15 @@ greta_array.greta_array <- function(data = 0, dim = length(data)) {
 #' @export
 greta_array.default <- function(data = 0, dim = length(data)) {
   as.greta_array(array(data = data, dim = dim))
+}
+
+#' @title Is object a greta array?
+#'
+#' @param x object to test if is greta array
+#'
+#' @param ... extra args (currently not used)
+#'
+#' @export
+is.greta_array <- function(x, ...) {
+  inherits(x, "greta_array")
 }
