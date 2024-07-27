@@ -88,6 +88,9 @@ check_tf_version <- function(alert = c("none",
 
 
 # check dimensions of arguments to ops, and return the maximum dimension
+## TODO checker-fun
+## this should not return max dimension, that should be a separate
+## function. This function should only error if dimensions are not appropriate
 check_dims <- function(..., target_dim = NULL) {
 
   # coerce args to greta arrays
@@ -173,6 +176,8 @@ check_dims <- function(..., target_dim = NULL) {
   output_dim
 }
 
+## TODO checker-fun
+## This is specific to multivariate distributions?
 # make sure a greta array is 2D
 check_2d <- function(x) {
   if (!is_2d(x)) {
@@ -187,6 +192,7 @@ check_2d <- function(x) {
   }
 }
 
+## TODO checker-fun
 check_square <- function(x) {
   dim <- dim(x)
   ndim <- length(dim)
@@ -202,6 +208,7 @@ check_square <- function(x) {
   }
 }
 
+## TODO checker-fun
 check_sigma_square_2d_greta_array <- function(sigma){
   # check dimensions of Sigma
   not_square <- nrow(sigma) != ncol(sigma)

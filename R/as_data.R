@@ -46,6 +46,7 @@ as_data <- function(x) {
 as_data.greta_array <- function(x) {
   # nolint end
   non_data_greta_array <- !is.data_node(get_node(x))
+  ## TODO checker-fun check for similar error messages
   if (non_data_greta_array) {
     cli::cli_abort(
       "cannot coerce a non-data greta_array to data"

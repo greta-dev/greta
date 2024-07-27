@@ -1138,6 +1138,8 @@ lkj_correlation_distribution <- R6Class(
       eta <- as.greta_array(eta)
 
       if (!is_scalar(eta)) {
+        ## TODO checker-fun
+        ## Add check for scalar
         cli::cli_abort(
           c(
             "{.arg eta} must be a scalar",

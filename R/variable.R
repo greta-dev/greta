@@ -79,6 +79,8 @@ cholesky_variable <- function(dim, correlation = FALSE) {
   } else if (n_dim == 2) {
     not_square <- dim[1] != dim[2]
     if (not_square) {
+      ## TODO checker-fun
+      ## replace with check_square?
       msg <- cli::cli_abort(
         c(
           "cholesky variables must be square",
@@ -87,6 +89,8 @@ cholesky_variable <- function(dim, correlation = FALSE) {
       )
     }
   } else {
+    ## TODO checker-fun
+    ## replace with check scalar?
     msg <- cli::cli_abort(
       c(
         "{.arg dim} can either be a scalar or a vector of length 2",
@@ -196,6 +200,8 @@ ordered_variable <- function(dim) {
   last_dim <- dim[n_dim]
 
   if (!last_dim > 1) {
+    ## TODO checker-fun
+    ## Very similar error message above - can these be combined?
     cli::cli_abort(
       "the final dimension of an ordered variable must have more than \\
       one element",

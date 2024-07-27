@@ -169,6 +169,8 @@ NULL
 
   # check the dimensions match
   incompatible_dimensions <- dim(x)[2] != dim(y)[1]
+  ## TODO checker-fun
+  ## check function for incompatible dims
   if (incompatible_dimensions) {
     cli::cli_abort(
       c(
