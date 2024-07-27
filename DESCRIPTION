@@ -87,6 +87,7 @@ Collate:
     'package.R'
     'utils.R'
     'greta_mcmc_list.R'
+    'greta-conflicts.R'
     'tf_functions.R'
     'overloaded.R'
     'node_class.R'
