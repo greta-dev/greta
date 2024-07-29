@@ -68,7 +68,7 @@ print.greta_mcmc_list <- function(x, ..., n = 5){
   cli::cli_h1("MCMC draws from {.pkg greta}")
   cli::cli_bullets(
     c(
-      "*" = "Iteration = {n_iter}",
+      "*" = "Iterations = {n_iter}",
       "*" = "Chains  = {n_chain}",
       "*" = "Thinning  = {n_thin}"
     )

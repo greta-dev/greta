@@ -220,6 +220,10 @@ multiple model parameters, you can construct your model so that all those
 parameters are in a vector, then split the vector up to define the model.
 The parameter vector can then be passed to model. See example.
 }
+\note{
+to set a seed with MCMC you must use \code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}}.
+This is due to an internal API with tensorflow. See \url{https://github.com/greta-dev/greta/issues/559} for a thread exploring this.
+}
 \examples{
 \dontrun{
 # define a simple Bayesian model
