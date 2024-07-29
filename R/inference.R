@@ -108,6 +108,9 @@ greta_stash$numerical_messages <- c(
 #'   argument `trace_batch_size` can be modified to trade-off speed against
 #'   memory usage.
 #'
+#' @note to set a seed with MCMC you must use [tensorflow::set_random_seed()].
+#'   This is due to an internal API with tensorflow. See \url{https://github.com/greta-dev/greta/issues/559} for a thread exploring this.
+#'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
 #'   `greta_mcmc_list` object that can be analysed using functions from the
 #'   coda package. This will contain mcmc samples of the greta arrays used to
