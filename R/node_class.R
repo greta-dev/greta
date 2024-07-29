@@ -249,6 +249,22 @@ node <- R6Class(
 
       text
     },
+    cli_description = function() {
+      text <- node_type(self)
+      text <- node_type_colour(text)
+
+      dist_txt <- glue::glue("{self$distribution$distribution_name} distribution")
+      if (has_distribution(self)) {
+        text <- cli::cli_fmt(
+          cli::cli_text(
+            # "{text} following a {.strong {dist_txt}}"
+            "{text} following a {cli::col_yellow({dist_txt})}"
+          )
+        )
+      }
+
+      text
+    }
     get_unique_name = function() {
       self$unique_name <- glue::glue("node_{rhex()}")
     },
