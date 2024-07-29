@@ -155,11 +155,13 @@ as.greta_array.default <- function(x, optional = FALSE, original_x = x, ...) {
 #' @export
 print.greta_array <- function(x, ...) {
   node <- get_node(x)
-  text <- glue::glue(
-    "greta array ({node$description()})\n\n\n"
-  )
+  cli::cli_h1("{.pkg greta} array {.cls {node$description()}}")
+  cli::cli_text("\n")
+  # text <- glue::glue(
+    # "greta array ({node$description()})\n\n\n"
+  # )
 
-  cat(text)
+  # cat(text)
   print(node$value(), ...)
 }
 

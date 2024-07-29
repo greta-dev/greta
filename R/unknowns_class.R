@@ -22,19 +22,43 @@ as.unknowns.matrix <- function(x) { # nolint
 }
 
 #' @export
-print.unknowns <- function(x, ...) {
+print.unknowns <- function(x, ..., n = 10) {
   # remove 'unknown' class attribute
   x <- unclass(x)
 
   # set NA values to ? for printing
   x[is.na(x)] <- " ?"
 
+  # browser()
+
+  n_print <- getOption("greta.print_max") %||% n
+
+  n_unknowns <- length(x)
+  x_head <- head(x, n = n_print)
+  remaining_vals <- n_unknowns - n_print
+
   # print with question marks
-  print.default(x, quote = FALSE, ...)
+  print.default(x_head, quote = FALSE)
+
+  cli::cli_text("\n")
+
+  if (remaining_vals < 0) {
+    return(invisible(x))
+  }
+
+  if (remaining_vals >= 0 ) {
+    cli::cli_alert_info(
+      text = c(
+        "i" = "{remaining_vals} more values\n",
+        "i" = "Use {.code print(n = ...)} to see more values"
+      )
+    )
+  }
+
 }
 
 # create an unknowns array from some dimensions
-unknowns <- function(dims = c(1, 1), data = as.numeric(NA)) {
+unknowns <- function(x, dims = c(1, 1), data = as.numeric(NA)) {
   x <- array(data = data, dim = dims)
   as.unknowns(x)
 }
