@@ -42,11 +42,11 @@ print.unknowns <- function(x, ..., n = 10) {
 
   cli::cli_text("\n")
 
-  if (remaining_vals < 0) {
+  if (remaining_vals <= 0) {
     return(invisible(x))
   }
 
-  if (remaining_vals >= 0 ) {
+  if (remaining_vals > 0 ) {
     cli::cli_alert_info(
       text = c(
         "i" = "{remaining_vals} more values\n",
