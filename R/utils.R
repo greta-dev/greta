@@ -1146,8 +1146,8 @@ node_type_colour <- function(type){
     type,
     variable = cli::col_red(type),
     data = cli::col_green(type),
-    operation = cli::col_yellow(type),
-    distribution = cli::col_magenta(type)
+    operation = cli::col_cyan(type),
+    distribution = cli::col_yellow(type)
     )
 
   switch_cols

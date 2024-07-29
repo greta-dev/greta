@@ -264,7 +264,8 @@ node <- R6Class(
       }
 
       text
-    }
+    },
+
     get_unique_name = function() {
       self$unique_name <- glue::glue("node_{rhex()}")
     },
