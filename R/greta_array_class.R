@@ -153,15 +153,46 @@ as.greta_array.default <- function(x, optional = FALSE, original_x = x, ...) {
 
 # print method
 #' @export
-print.greta_array <- function(x, ...) {
+print.greta_array <- function(x, ..., n = 10) {
   node <- get_node(x)
-  text <- glue::glue(
-    "greta array ({node$description()})\n\n\n"
-  )
 
-  cat(text)
-  print(node$value(), ...)
+  node_desc <- node$cli_description()
+
+  cli::cli_text("{.pkg greta} array {.cls {node_desc}}")
+  cli::cli_text("\n")
+
+  if (is.unknowns(node$value())){
+    return(print(node$value(), ..., n = n))
+  }
+
+  x_val <- node$value()
+  n_print <- getOption("greta.print_max") %||% n
+
+  n_unknowns <- length(x_val)
+  x_head <- head(x_val, n = n_print)
+  remaining_vals <- n_unknowns - n_print
+
+  # print with question marks
+  print.default(x_head, quote = FALSE, max = n)
+
+  cli::cli_text("\n")
+
+  if (remaining_vals <= 0) {
+    return(invisible(x_val))
+  }
+
+  if (remaining_vals > 0 ) {
+    cli::cli_alert_info(
+      text = c(
+        "i" = "{remaining_vals} more values\n",
+        "i" = "Use {.code print(n = ...)} to see more values"
+      )
+    )
+  }
+
+
 }
+
 
 # summary method
 #' @export

@@ -20,34 +20,43 @@
 
     Code
       x %*% as_data(y)
-    Output
-      greta array (operation)
+    Message
+      greta array <operation>
       
+    Output
            [,1]
       [1,]  ?  
       [2,]  ?  
+    Message
+      
 
 ---
 
     Code
       as_data(x) %*% y
-    Output
-      greta array (operation)
+    Message
+      greta array <operation>
       
+    Output
            [,1]
       [1,]  ?  
       [2,]  ?  
+    Message
+      
 
 ---
 
     Code
       as_data(x) %*% as_data(y)
-    Output
-      greta array (operation)
+    Message
+      greta array <operation>
       
+    Output
            [,1]
       [1,]  ?  
       [2,]  ?  
+    Message
+      
 
 ---
 

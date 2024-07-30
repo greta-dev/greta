@@ -1139,3 +1139,16 @@ is.unknowns <- function(x, ...){
 is.initials <- function(x, ...){
   inherits(x, "initials")
 }
+
+node_type_colour <- function(type){
+
+  switch_cols <- switch(
+    type,
+    variable = cli::col_red(type),
+    data = cli::col_green(type),
+    operation = cli::col_cyan(type),
+    distribution = cli::col_yellow(type)
+    )
+
+  switch_cols
+}
