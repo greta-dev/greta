@@ -5,11 +5,11 @@
     Message
       
       -- MCMC draws from greta -------------------------------------------------------
-      * Iteration = 10
+      * Iterations = 10
       * Chains = 4
       * Thinning = 1
       
-      -- Chain 1 (iterations 1 - 5) --------------------------------------------------
+      -- Chain 1 (iterations 1...5) --------------------------------------------------
     Output
                     z
       [1,] -0.8389218
@@ -23,8 +23,8 @@
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
       `greta_draws_object[[i]]`. 
-      E.g.,:
-      `greta_draws_object[[1]] to view chain 1`.
+      E.g., view chain 1 with: 
+      `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
 
