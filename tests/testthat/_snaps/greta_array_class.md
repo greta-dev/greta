@@ -2,13 +2,16 @@
 
     Code
       ga_data
-    Output
-      greta array (data)
+    Message
+      greta array <data>
       
+    Output
            [,1] [,2] [,3]
       [1,]    1    4    7
       [2,]    2    5    8
       [3,]    3    6    9
+    Message
+      
 
 ---
 
@@ -29,11 +32,14 @@
 
     Code
       ga_stochastic
-    Output
-      greta array (variable following a normal distribution)
+    Message
+      greta array <variable following a normal distribution>
       
+    Output
            [,1]
       [1,]  ?  
+    Message
+      
 
 ---
 
@@ -48,13 +54,16 @@
 
     Code
       ga_operation
-    Output
-      greta array (operation)
+    Message
+      greta array <operation>
       
+    Output
            [,1] [,2] [,3]
       [1,]  ?    ?    ?  
       [2,]  ?    ?    ?  
       [3,]  ?    ?    ?  
+    Message
+      
 
 ---
 
@@ -69,23 +78,392 @@
 
     Code
       z
-    Output
-      greta array (operation)
+    Message
+      greta array <operation>
       
+    Output
            [,1] [,2] [,3]
       [1,] 1     ?   0   
       [2,] 1     ?   0   
       [3,] 1     ?   0   
+    Message
+      
 
 ---
 
     Code
       n
-    Output
-      greta array (operation)
+    Message
+      greta array <operation>
       
+    Output
            [,1] [,2] [,3]
       [1,] 1     ?    ?  
       [2,] 1     ?    ?  
       [3,] 1     ?    ?  
+    Message
+      
+
+# print method works for longer greta arrays
+
+    Code
+      ga_data_long
+    Message
+      greta array <data>
+      
+    Output
+            [,1]
+       [1,]    1
+       [2,]    2
+       [3,]    3
+       [4,]    4
+       [5,]    5
+       [6,]    6
+       [7,]    7
+       [8,]    8
+       [9,]    9
+      [10,]   10
+    Message
+      
+      i 10 more values
+      Use `print(n = ...)` to see more values
+
+---
+
+    Code
+      ga_stochastic_long
+    Message
+      greta array <variable following a normal distribution>
+      
+    Output
+            [,1]
+       [1,]  ?  
+       [2,]  ?  
+       [3,]  ?  
+       [4,]  ?  
+       [5,]  ?  
+       [6,]  ?  
+       [7,]  ?  
+       [8,]  ?  
+       [9,]  ?  
+      [10,]  ?  
+    Message
+      
+      i 10 more values
+      Use `print(n = ...)` to see more values
+
+---
+
+    Code
+      ga_operation_long
+    Message
+      greta array <operation>
+      
+    Output
+            [,1]
+       [1,]  ?  
+       [2,]  ?  
+       [3,]  ?  
+       [4,]  ?  
+       [5,]  ?  
+       [6,]  ?  
+       [7,]  ?  
+       [8,]  ?  
+       [9,]  ?  
+      [10,]  ?  
+    Message
+      
+      i 10 more values
+      Use `print(n = ...)` to see more values
+
+---
+
+    Code
+      print(ga_data_long, n = 19)
+    Message
+      greta array <data>
+      
+    Output
+            [,1]
+       [1,]    1
+       [2,]    2
+       [3,]    3
+       [4,]    4
+       [5,]    5
+       [6,]    6
+       [7,]    7
+       [8,]    8
+       [9,]    9
+      [10,]   10
+      [11,]   11
+      [12,]   12
+      [13,]   13
+      [14,]   14
+      [15,]   15
+      [16,]   16
+      [17,]   17
+      [18,]   18
+      [19,]   19
+    Message
+      
+      i 1 more values
+      Use `print(n = ...)` to see more values
+
+---
+
+    Code
+      print(ga_data_long, n = 20)
+    Message
+      greta array <data>
+      
+    Output
+            [,1]
+       [1,]    1
+       [2,]    2
+       [3,]    3
+       [4,]    4
+       [5,]    5
+       [6,]    6
+       [7,]    7
+       [8,]    8
+       [9,]    9
+      [10,]   10
+      [11,]   11
+      [12,]   12
+      [13,]   13
+      [14,]   14
+      [15,]   15
+      [16,]   16
+      [17,]   17
+      [18,]   18
+      [19,]   19
+      [20,]   20
+    Message
+      
+
+---
+
+    Code
+      print(ga_data_long, n = 21)
+    Message
+      greta array <data>
+      
+    Output
+            [,1]
+       [1,]    1
+       [2,]    2
+       [3,]    3
+       [4,]    4
+       [5,]    5
+       [6,]    6
+       [7,]    7
+       [8,]    8
+       [9,]    9
+      [10,]   10
+      [11,]   11
+      [12,]   12
+      [13,]   13
+      [14,]   14
+      [15,]   15
+      [16,]   16
+      [17,]   17
+      [18,]   18
+      [19,]   19
+      [20,]   20
+    Message
+      
+
+---
+
+    Code
+      print(ga_stochastic_long, n = 19)
+    Message
+      greta array <variable following a normal distribution>
+      
+    Output
+            [,1]
+       [1,]  ?  
+       [2,]  ?  
+       [3,]  ?  
+       [4,]  ?  
+       [5,]  ?  
+       [6,]  ?  
+       [7,]  ?  
+       [8,]  ?  
+       [9,]  ?  
+      [10,]  ?  
+      [11,]  ?  
+      [12,]  ?  
+      [13,]  ?  
+      [14,]  ?  
+      [15,]  ?  
+      [16,]  ?  
+      [17,]  ?  
+      [18,]  ?  
+      [19,]  ?  
+    Message
+      
+      i 1 more values
+      Use `print(n = ...)` to see more values
+
+---
+
+    Code
+      print(ga_stochastic_long, n = 20)
+    Message
+      greta array <variable following a normal distribution>
+      
+    Output
+            [,1]
+       [1,]  ?  
+       [2,]  ?  
+       [3,]  ?  
+       [4,]  ?  
+       [5,]  ?  
+       [6,]  ?  
+       [7,]  ?  
+       [8,]  ?  
+       [9,]  ?  
+      [10,]  ?  
+      [11,]  ?  
+      [12,]  ?  
+      [13,]  ?  
+      [14,]  ?  
+      [15,]  ?  
+      [16,]  ?  
+      [17,]  ?  
+      [18,]  ?  
+      [19,]  ?  
+      [20,]  ?  
+    Message
+      
+
+---
+
+    Code
+      print(ga_stochastic_long, n = 21)
+    Message
+      greta array <variable following a normal distribution>
+      
+    Output
+            [,1]
+       [1,]  ?  
+       [2,]  ?  
+       [3,]  ?  
+       [4,]  ?  
+       [5,]  ?  
+       [6,]  ?  
+       [7,]  ?  
+       [8,]  ?  
+       [9,]  ?  
+      [10,]  ?  
+      [11,]  ?  
+      [12,]  ?  
+      [13,]  ?  
+      [14,]  ?  
+      [15,]  ?  
+      [16,]  ?  
+      [17,]  ?  
+      [18,]  ?  
+      [19,]  ?  
+      [20,]  ?  
+    Message
+      
+
+---
+
+    Code
+      print(ga_operation_long, n = 19)
+    Message
+      greta array <operation>
+      
+    Output
+            [,1]
+       [1,]  ?  
+       [2,]  ?  
+       [3,]  ?  
+       [4,]  ?  
+       [5,]  ?  
+       [6,]  ?  
+       [7,]  ?  
+       [8,]  ?  
+       [9,]  ?  
+      [10,]  ?  
+      [11,]  ?  
+      [12,]  ?  
+      [13,]  ?  
+      [14,]  ?  
+      [15,]  ?  
+      [16,]  ?  
+      [17,]  ?  
+      [18,]  ?  
+      [19,]  ?  
+    Message
+      
+      i 1 more values
+      Use `print(n = ...)` to see more values
+
+---
+
+    Code
+      print(ga_operation_long, n = 20)
+    Message
+      greta array <operation>
+      
+    Output
+            [,1]
+       [1,]  ?  
+       [2,]  ?  
+       [3,]  ?  
+       [4,]  ?  
+       [5,]  ?  
+       [6,]  ?  
+       [7,]  ?  
+       [8,]  ?  
+       [9,]  ?  
+      [10,]  ?  
+      [11,]  ?  
+      [12,]  ?  
+      [13,]  ?  
+      [14,]  ?  
+      [15,]  ?  
+      [16,]  ?  
+      [17,]  ?  
+      [18,]  ?  
+      [19,]  ?  
+      [20,]  ?  
+    Message
+      
+
+---
+
+    Code
+      print(ga_operation_long, n = 21)
+    Message
+      greta array <operation>
+      
+    Output
+            [,1]
+       [1,]  ?  
+       [2,]  ?  
+       [3,]  ?  
+       [4,]  ?  
+       [5,]  ?  
+       [6,]  ?  
+       [7,]  ?  
+       [8,]  ?  
+       [9,]  ?  
+      [10,]  ?  
+      [11,]  ?  
+      [12,]  ?  
+      [13,]  ?  
+      [14,]  ?  
+      [15,]  ?  
+      [16,]  ?  
+      [17,]  ?  
+      [18,]  ?  
+      [19,]  ?  
+      [20,]  ?  
+    Message
+      
 
