@@ -44,7 +44,6 @@ Imports:
     progress (>= 1.2.0),
     R6,
     reticulate (>= 1.19.0),
-    rlang,
     tensorflow (>= 2.8.0),
     yesno
 Suggests:
