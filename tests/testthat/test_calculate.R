@@ -95,13 +95,13 @@ test_that("stochastic calculate works with correct lists", {
       x = rep(2, k)
     )
   )
+
   expect_true(all(apply(sims$y, 1:2, sum) == 1))
   expect_equal(dim(sims$y), c(nsim, dim(y)))
 })
 
 test_that("deterministic calculate works with greta_mcmc_list objects", {
   skip_if_not(check_tf_version())
-
 
   samples <- 10
   x <- as_data(c(1, 2))

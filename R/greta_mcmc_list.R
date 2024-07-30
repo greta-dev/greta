@@ -51,3 +51,70 @@ window.greta_mcmc_list <- function(x, start, end, thin, ...) {
 # add new methods for these generics, to make them look nicer and be more
 # user-friendly:
 # print, plot, summary
+
+#' Print method for greta MCMC list
+#'
+#' @param x greta mcmc list
+#' @param ... extra args (currently not used)
+#' @param n number of lines to print
+#'
+#' @return printed MCMC output
+#' @export
+print.greta_mcmc_list <- function(x, ..., n = 5){
+
+  n_chain <- coda::nchain(x)
+  n_iter <- coda::niter(x)
+  n_thin <- coda::thin(x)
+  cli::cli_h1("MCMC draws from {.pkg greta}")
+  cli::cli_bullets(
+    c(
+      "*" = "Iterations = {n_iter}",
+      "*" = "Chains  = {n_chain}",
+      "*" = "Thinning  = {n_thin}"
+    )
+  )
+
+  n_print <- getOption("greta.print_max") %||% n
+  remaining_draws <- n_iter - n_print
+  more_draws_than_can_print <- remaining_draws > 0
+  draws_can_be_printed <- remaining_draws <= 0
+
+  if (more_draws_than_can_print) {
+    cli::cli_h1("Chain 1 (iterations 1...{n_print})")
+  }
+
+  if (draws_can_be_printed) {
+    cli::cli_h1("Chain 1 (iterations 1...{n_iter})")
+  }
+
+  flat_mat <- as.matrix(x[[1]])
+
+  draws_head <- head(flat_mat, n = n_print)
+
+  print(draws_head)
+
+  if (more_draws_than_can_print){
+  cli::cli_alert_info(
+    text = c(
+      "i" = "{remaining_draws} more draws\n",
+      "i" = "Use {.code print(n = ...)} to see more draws"
+    )
+  )
+  }
+
+  cli::cli_rule()
+
+  cli::cli_alert_info(
+    c("View {.pkg greta} draw chain {.param i} with:\n",
+      "{.code greta_draws_object[[i]]}. \n",
+      "E.g., view chain {.param 1} with: \n",
+      "{.code greta_draws_object[[1]]}."
+    )
+  )
+
+  cli::cli_alert_info(
+    c("To see a summary of draws, run:\n",
+      "{.code summary(greta_draws_object)}")
+  )
+
+}
