@@ -34,6 +34,7 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 * slice sampler no longer needs precision = "single" to work.
 * greta now depends on R 4.1.0, which was released May 2021, over 3 years ago.
 * export `is.greta_array()` and `is.greta_mcmc_list()`
+* greta arrays now have a print method that stops them from printing too many rows into the console. Similar to MCMC print method, you can control the print output with the `n` argument: `print(object, n = <elements to print>)`. (#644)
 
 ## Internals
 
