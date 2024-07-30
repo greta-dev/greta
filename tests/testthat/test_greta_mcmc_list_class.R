@@ -96,3 +96,16 @@ test_that("windowing does not have spooky effects", {
   expect_equal(dim(as.matrix(draws)), c(n_samples, 1))
   expect_equal(dim(as.matrix(raw_draws)), c(n_samples, 1))
 })
+
+test_that("greta_mcmc_list print method works", {
+  skip_if_not(check_tf_version())
+  samples <- 10
+  warmup <- 10
+  z <- normal(0, 1)
+  m <- model(z)
+  tensorflow::set_random_seed(2024-07-29-1217)
+  draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
+  expect_snapshot(
+    draws
+  )
+})
