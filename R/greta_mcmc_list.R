@@ -76,7 +76,7 @@ print.greta_mcmc_list <- function(x, ..., n = 5){
 
   n_print <- getOption("greta.print_max") %||% n
 
-  cli::cli_h1("Chain 1 (iterations 1 - {n_print})")
+  cli::cli_h1("Chain 1 (iterations 1...{n_print})")
 
   flat_mat <- as.matrix(x[[1]])
 
@@ -96,8 +96,8 @@ print.greta_mcmc_list <- function(x, ..., n = 5){
   cli::cli_alert_info(
     c("View {.pkg greta} draw chain {.param i} with:\n",
       "{.code greta_draws_object[[i]]}. \n",
-      "E.g.,:\n",
-      "{.code greta_draws_object[[1]] to view chain 1}."
+      "E.g., view chain {.param 1} with: \n",
+      "{.code greta_draws_object[[1]]}."
     )
   )
 
