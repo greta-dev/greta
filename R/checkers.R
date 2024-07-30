@@ -629,8 +629,7 @@ check_values_list <- function(values, env) {
 
   # make sure that's what they are
   are_greta_arrays <- vapply(fixed_greta_arrays,
-                             inherits,
-                             "greta_array",
+                             is.greta_array,
                              FUN.VALUE = FALSE
   )
 

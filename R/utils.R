@@ -481,8 +481,7 @@ all_greta_arrays <- function(env = parent.frame(),
 
   # find the greta arrays
   is_greta_array <- vapply(all_objects,
-                           inherits,
-                           "greta_array",
+                           is.greta_array,
                            FUN.VALUE = FALSE
   )
   all_arrays <- all_objects[is_greta_array]
