@@ -48,6 +48,10 @@ greta_stash$numerical_messages <- c(
 #'   when tracing the parameters of interest; reduce this to reduce memory
 #'   demands
 #'
+#' @param compute_options Default is to use CPU only with `cpu_only()`. Use
+#'   `gpu_only()` to use only GPU. In the future we will add more options for
+#'   specifying CPU and GPU use.
+#'
 #' @details For `mcmc()` if `verbose = TRUE`, the progress bar shows
 #'   the number of iterations so far and the expected time to complete the phase
 #'   of model fitting (warmup or sampling). Occasionally, a proposed set of
@@ -103,6 +107,9 @@ greta_stash$numerical_messages <- c(
 #'   large amounts of memory for large models. As in `calculate`, the
 #'   argument `trace_batch_size` can be modified to trade-off speed against
 #'   memory usage.
+#'
+#' @note to set a seed with MCMC you must use [tensorflow::set_random_seed()].
+#'   This is due to an internal API with tensorflow. See \url{https://github.com/greta-dev/greta/issues/559} for a thread exploring this.
 #'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
 #'   `greta_mcmc_list` object that can be analysed using functions from the
@@ -177,107 +184,119 @@ greta_stash$numerical_messages <- c(
 #' o <- opt(m3, hessian = TRUE)
 #' o$hessian
 #' }
-mcmc <- function(model,
-                 sampler = hmc(),
-                 n_samples = 1000,
-                 thin = 1,
-                 warmup = 1000,
-                 chains = 4,
-                 n_cores = NULL,
-                 verbose = TRUE,
-                 pb_update = 50,
-                 one_by_one = FALSE,
-                 initial_values = initials(),
-                 trace_batch_size = 100) {
+mcmc <- function(
+  model,
+  sampler = hmc(),
+  n_samples = 1000,
+  thin = 1,
+  warmup = 1000,
+  chains = 4,
+  n_cores = NULL,
+  verbose = TRUE,
+  pb_update = 50,
+  one_by_one = FALSE,
+  initial_values = initials(),
+  trace_batch_size = 100,
+  compute_options = cpu_only()
+) {
 
-  # check_if_greta_model(model)
-  check_if_greta_array_in_mcmc(model)
+  # set device to be CPU/GPU for the entire run
+  with(tf$device(compute_options), {
 
-  # check the trace batch size
-  trace_batch_size <- check_trace_batch_size(trace_batch_size)
+    # message users about random seeds and GPU usage if they are using GPU
+    message_if_using_gpu(compute_options)
 
-  # find variable names to label samples
-  target_greta_arrays <- model$target_greta_arrays
-  names <- names(target_greta_arrays)
+    check_if_greta_array_in_mcmc(model)
 
-  # check they're not data nodes, provide a useful error message if they are
-  are_data <- vapply(target_greta_arrays,
-    function(x) inherits(get_node(x), "data_node"),
-    FUN.VALUE = FALSE
-  )
+    # check the trace batch size
+    trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
-  if (any(are_data)) {
-    msg <- cli::format_error(
-      c(
-        "data {.cls greta_array}s cannot be sampled",
-        "{.var {names[are_data]}} \\
-        {?is a data/are data} {.cls greta_array}(s)"
-      )
+    # find variable names to label samples
+    target_greta_arrays <- model$target_greta_arrays
+    names <- names(target_greta_arrays)
+
+    # check they're not data nodes, provide a useful error message if they are
+    are_data <- vapply(
+      target_greta_arrays,
+      function(x) is.data_node(get_node(x)),
+      FUN.VALUE = FALSE
     )
-    stop(
-      msg,
-      call. = FALSE)
-  }
 
-  # get the dag containing the target nodes
-  dag <- model$dag
+    if (any(are_data)) {
+      cli::cli_abort(
+        c(
+          "data {.cls greta_array}s cannot be sampled",
+          "{.var {names[are_data]}} \\
+        {?is a data/are data} {.cls greta_array}(s)"
+        )
+      )
+    }
 
-  chains <- check_positive_integer(chains, "chains")
+    # get the dag containing the target nodes
+    dag <- model$dag
 
-  # turn initial values into a list if needed (checking the length), and convert
-  # from a named list on the constrained scale to free state vectors
-  initial_values <- prep_initials(initial_values, chains, dag)
+    chains <- check_positive_integer(chains, "chains")
 
-  # determine the number of separate samplers to spin up, based on the future
-  # plan
-  max_samplers <- future::nbrOfWorkers()
+    # turn initial values into a list if needed (checking the length), and convert
+    # from a named list on the constrained scale to free state vectors
+    initial_values <- prep_initials(initial_values, chains, dag)
 
-  # divide chains up between the workers
-  chain_assignment <- sort(rep(seq_len(max_samplers),
-    length.out = chains
-  ))
+    # determine the number of separate samplers to spin up, based on the future
+    # plan
+    max_samplers <- future::nbrOfWorkers()
 
-  # divide the initial values between them
-  initial_values_split <- split(initial_values, chain_assignment)
+    # divide chains up between the workers
+    chain_assignment <- sort(rep(
+      seq_len(max_samplers),
+      length.out = chains
+    ))
 
-  n_samplers <- length(initial_values_split)
+    # divide the initial values between them
+    initial_values_split <- split(initial_values, chain_assignment)
 
-  # create a sampler object for each parallel job, using these (possibly NULL)
-  # initial values
-  samplers <- lapply(
-    initial_values_split,
-    build_sampler,
-    sampler,
-    model
-  )
+    n_samplers <- length(initial_values_split)
 
-  # add chain info for printing
-  for (i in seq_len(n_samplers)) {
-    samplers[[i]]$sampler_number <- i
-    samplers[[i]]$n_samplers <- n_samplers
-  }
+    # create a sampler object for each parallel job, using these (possibly NULL)
+    # initial values
+    samplers <- lapply(
+      initial_values_split,
+      build_sampler,
+      sampler,
+      model,
+      compute_options = compute_options
+    )
 
-  # if verbose = FALSE, make pb_update as big as possible to speed up sampling
-  if (!verbose) {
-    pb_update <- Inf
-  }
+    # add chain info for printing
+    for (i in seq_len(n_samplers)) {
+      samplers[[i]]$sampler_number <- i
+      samplers[[i]]$n_samplers <- n_samplers
+    }
 
-  # now make it finite
-  pb_update <- min(pb_update, max(warmup, n_samples))
-  pb_update <- max(pb_update, thin + 1)
+    # if verbose = FALSE, make pb_update as big as possible to speed up sampling
+    if (!verbose) {
+      pb_update <- Inf
+    }
 
-  run_samplers(
-    samplers = samplers,
-    n_samples = n_samples,
-    thin = thin,
-    warmup = warmup,
-    verbose = verbose,
-    pb_update = pb_update,
-    one_by_one = one_by_one,
-    n_cores = n_cores,
-    from_scratch = TRUE,
-    trace_batch_size = trace_batch_size
-  )
+    # now make it finite
+    pb_update <- min(pb_update, max(warmup, n_samples))
+    pb_update <- max(pb_update, thin + 1)
+
+    run_samplers(
+      samplers = samplers,
+      n_samples = n_samples,
+      thin = thin,
+      warmup = warmup,
+      verbose = verbose,
+      pb_update = pb_update,
+      one_by_one = one_by_one,
+      n_cores = n_cores,
+      from_scratch = TRUE,
+      trace_batch_size = trace_batch_size,
+      compute_options = compute_options
+    )
+
+    # close `with` setting to control CPU/GPU usage
+  })
 }
 
 #' @importFrom future future resolved value
@@ -290,7 +309,8 @@ run_samplers <- function(samplers,
                          one_by_one,
                          n_cores,
                          from_scratch,
-                         trace_batch_size) {
+                         trace_batch_size,
+                         compute_options) {
 
   # check the future plan is valid, and get information about it
   plan_is <- check_future_plan()
@@ -313,29 +333,25 @@ run_samplers <- function(samplers,
     plan_is$local &
     !is.null(greta_stash$callbacks)
 
+  ## TODO add explaining variable
   if (plan_is$parallel & plan_is$local & length(samplers) > 1) {
-    cores_text <- ifelse(
-      test = n_cores == 1,
-      yes = "1 core",
-      no = glue::glue("up to {n_cores} cores")
-    )
+    cores_text <- compute_text(n_cores, compute_options)
     msg <- glue::glue(
       "\n",
       "running {length(samplers)} samplers in parallel, ",
-      "each on {cores_text}",
+      "{cores_text}",
       "\n\n"
     )
     message(msg)
   }
 
-  if (plan_is$parallel & !plan_is$local) {
+  is_remote_machine <- plan_is$parallel & !plan_is$local
+  if (is_remote_machine) {
 
-    msg <- cli::format_message(
+    cli::cli_inform(
       "running {length(samplers)} \\
       {?sampler on a remote machine/samplers on remote machines}"
       )
-
-    message(msg)
 
   }
 
@@ -359,6 +375,7 @@ run_samplers <- function(samplers,
     progress_bar_log_files <- replicate(n_chain, create_log_file(TRUE))
 
     pb_width <- bar_width(n_chain)
+
     for (chain in chains) {
 
       # set the log files
@@ -386,6 +403,7 @@ run_samplers <- function(samplers,
   # dispatch all the jobs
   for (chain in chains) {
     sampler <- samplers[[chain]]
+    sampler$compute_options <- compute_options
     samplers[[chain]] <- dispatch(
       sampler$run_chain(
         n_samples = n_samples,
@@ -467,7 +485,8 @@ stashed_samples <- function() {
     values_draws <- lapply(values_draws, `colnames<-`, trace_names)
 
     # if there are no samples, return a list of NULLs
-    if (nrow(values_draws[[1]]) == 0) {
+    no_samples <- nrow(values_draws[[1]]) == 0
+    if (no_samples) {
       return(replicate(length(samplers), NULL))
     } else {
       thins <- lapply(samplers, member, "thin")
@@ -524,7 +543,8 @@ extra_samples <- function(draws,
                           verbose = TRUE,
                           pb_update = 50,
                           one_by_one = FALSE,
-                          trace_batch_size = 100) {
+                          trace_batch_size = 100,
+                          compute_options = cpu_only()) {
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
 
@@ -546,7 +566,8 @@ extra_samples <- function(draws,
     one_by_one = one_by_one,
     n_cores = n_cores,
     from_scratch = FALSE,
-    trace_batch_size = trace_batch_size
+    trace_batch_size = trace_batch_size,
+    compute_options = compute_options
   )
 }
 
@@ -554,39 +575,37 @@ extra_samples <- function(draws,
 # 'node'
 #' @importFrom stats qlogis
 to_free <- function(node, data) {
-
   # use reverse mode of bijectors!
 
   lower <- node$lower
   upper <- node$upper
 
   unsupported_error <- function() {
-    msg <- cli::format_error(
+    cli::cli_abort(
         "some provided initial values are outside the range of values their \\
         variables can take"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
   high <- function(x) {
-    if (any(x <= lower)) {
+    initials_outside_support <- any(x <= lower)
+    if (initials_outside_support) {
       unsupported_error()
     }
     log(x - lower)
   }
 
   low <- function(x) {
-    if (any(x >= upper)) {
+    initials_outside_support <- any(x >= upper)
+    if (initials_outside_support) {
       unsupported_error()
     }
     log(upper - x)
   }
 
   both <- function(x) {
-    if (any(x >= upper | x <= lower)) {
+    initials_outside_support <- any(x >= upper | x <= lower)
+    if (initials_outside_support) {
       unsupported_error()
     }
     stats::qlogis((x - lower) / (upper - lower))
@@ -627,16 +646,12 @@ parse_initial_values <- function(initials, dag) {
   missing_names <- is.na(tf_names)
   if (any(missing_names)) {
     bad <- names(tf_names)[missing_names]
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "some {.cls greta_array}s passed to {.fun initials} are not associated with \\
         the model:",
         "{.var {bad}}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -653,15 +668,11 @@ parse_initial_values <- function(initials, dag) {
   forward_names <- glue::glue("all_forward_{dag$node_tf_names}")
   nodes <- dag$node_list[match(tf_names, forward_names)]
   types <- lapply(nodes, node_type)
-  are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
+  are_variables <- are_identical(types, "variable")
 
   if (!all(are_variables)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "initial values can only be set for variable {.cls greta_array}s"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -670,13 +681,9 @@ parse_initial_values <- function(initials, dag) {
   same_dims <- mapply(identical, target_dims, replacement_dims)
 
   if (!all(same_dims)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "the initial values provided have different dimensions than the named \\
       {.cls greta_array}s"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -698,15 +705,15 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
   # if the user passed a single set of initial values, repeat them for all
   # chains
-  if (inherits(initial_values, "initials")) {
+  if (is.initials(initial_values)) {
     is_blank <- identical(initial_values, initials())
 
-    if (!is_blank & n_chains > 1) {
-      msg <- cli::format_message(
+    one_set_of_initials <- !is_blank & n_chains > 1
+    if (one_set_of_initials) {
+      cli::cli_inform(
         "only one set of initial values was provided, and was used for \\
         all chains"
       )
-      message(msg)
     }
 
     initial_values <- replicate(n_chains,
@@ -717,26 +724,21 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
     # if the user provided a list of initial values, check elements and the
     # length
-    are_initials <- vapply(initial_values, inherits, "initials",
-      FUN.VALUE = FALSE
-    )
+    are_initials <- vapply(initial_values, is.initials, FUN.VALUE = FALSE)
 
     if (all(are_initials)) {
       n_sets <- length(initial_values)
 
-      if (n_sets != n_chains) {
-        msg <- cli::format_error(
+      initial_values_do_not_match_chains <- n_sets != n_chains
+      if (initial_values_do_not_match_chains) {
+        cli::cli_abort(
           c(
             "the number of provided initial values does not match chains",
-            "{n_sets} set{?s} of initial values were provided, but there\\
-            {cli::qty(n_chains)} {?is only/are} {n_chains}\\
+            "{n_sets} set{?s} of initial values were provided, but there \\
+            {cli::qty(n_chains)} {?is only/are} {n_chains} \\
             {cli::qty(n_chains)} chain{?s}"
             )
           )
-        stop(
-          msg,
-          call. = FALSE
-        )
       }
     } else {
       initial_values <- NULL
@@ -747,15 +749,11 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
   # error on a bad object
   if (is.null(initial_values)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.arg initial_values} must be an initials object created with \\
         {.fun initials}, or a simple list of initials objects"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -779,13 +777,10 @@ initials <- function(...) {
   values <- list(...)
   names <- names(values)
 
-  if (length(names) != length(values)) {
-    msg <- cli::format_error(
+  initials_not_all_named <- length(names) != length(values)
+  if (initials_not_all_named) {
+    cli::cli_abort(
       "all initial values must be named"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -794,12 +789,8 @@ initials <- function(...) {
 
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "initial values must be numeric"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -809,7 +800,8 @@ initials <- function(...) {
 
 #' @export
 print.initials <- function(x, ...) {
-  if (identical(x, initials())) {
+  empty_initials <- identical(x, initials())
+  if (empty_initials) {
     cat("an empty greta initials object")
   } else {
     cat("a greta initials object with values:\n\n")
@@ -833,6 +825,9 @@ print.initials <- function(x, ...) {
 #'   estimates, or `TRUE` for maximum *a posteriori* estimates.
 #' @param hessian whether to return a list of *analytically* differentiated
 #'   Hessian arrays for the parameters
+#' @param compute_options Default is to use CPU only with `cpu_only()`. Use
+#'   `gpu_only()` to use only GPU. In the future we will add more options for
+#'   specifying CPU and GPU use.
 #'
 #' @details Because `opt()` acts on a list of greta arrays with possibly
 #'   varying dimension, the `par` and `hessian` objects returned by
@@ -865,38 +860,55 @@ opt <- function(model,
                 tolerance = 1e-6,
                 initial_values = initials(),
                 adjust = TRUE,
-                hessian = FALSE) {
+                hessian = FALSE,
+                compute_options = cpu_only()) {
 
-  # check initial values. Can up the number of chains in the future to handle
-  # random restarts
-  initial_values_list <- prep_initials(initial_values, 1, model$dag)
+  # set device to be CPU/GPU for the entire run
+  with(tf$device(compute_options), {
 
-  # create R6 object of the right type
-  object <- optimiser$class$new(
-    initial_values = initial_values_list[1],
-    model = model,
-    name = optimiser$name,
-    method = optimiser$method,
-    parameters = optimiser$parameters,
-    other_args = optimiser$other_args,
-    max_iterations = max_iterations,
-    tolerance = tolerance,
-    adjust = adjust
-  )
+    # message users about random seeds and GPU usage if they are using GPU
+    message_if_using_gpu(compute_options)
 
-  # run it and get the outputs
-  object$run()
-  outputs <- object$return_outputs()
+    # check initial values. Can up the number of chains in the future to handle
+    # random restarts
+    initial_values_list <- prep_initials(initial_values, 1, model$dag)
 
-  # optionally evaluate the hessians at these parameters (return as hessian for
-  # objective function)
-  if (hessian) {
-    hessians <- model$dag$hessians()
-    hessians <- lapply(hessians, `*`, -1)
-    outputs$hessian <- hessians
-  }
+    # create R6 object of the right type
+    object <- optimiser$class$new(
+      initial_values = initial_values_list[1],
+      model = model,
+      name = optimiser$name,
+      method = optimiser$method,
+      parameters = optimiser$parameters,
+      other_args = optimiser$other_args,
+      max_iterations = max_iterations,
+      tolerance = tolerance,
+      adjust = adjust
+    )
 
-  outputs
+    # run it and get the outputs
+    object$run()
+    outputs <- object$return_outputs()
+
+    # optionally evaluate the hessians at these parameters (return as hessian for
+    # objective function)
+    if (hessian) {
+      which_objective <- ifelse(adjust, "adjusted", "unadjusted")
+      hessians <- model$dag$hessians(
+        # coercing to Variable as TFP free state is a Tensor not a variable
+        # and you can overload a Variable as a Variable without consequence
+        # (hopefully)
+        free_state = tf$Variable(object$free_state),
+        which_objective = which_objective
+        )
+      hessians <- lapply(hessians, `*`, -1)
+      outputs$hessian <- hessians
+    }
+
+    outputs
+
+    # close setting of CPU/GPU usage
+  })
 }
 
 inference_module <- module(dag_class,

@@ -1,9 +1,3 @@
-# NOTE: This workflow is overkill for most R packages
-# check-standard.yaml is likely a better choice
-# usethis::use_github_action("check-standard") will install it.
-#
-# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
-# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
 on:
   push:
     branches:
@@ -13,103 +7,109 @@ on:
     branches:
       - main
       - master
+  schedule:
+    - cron: '1 23 * * Sun'
 
 name: R-CMD-check
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref }}
-  cancel-in-progress: true
+defaults:
+  run:
+    shell: Rscript {0}
 
 jobs:
   R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
+    name: ${{ matrix.os }}, tf-${{ matrix.tf }}, R-${{ matrix.r}}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        config:
-          - {os: macOS-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: 'oldrel'}
-          - {os: ubuntu-18.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "R/4.0.0 (ubuntu-18.04) R (4.0.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
-          - {os: ubuntu-18.04,   r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: 'oldrel-1', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: 'oldrel-2', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+        include:
+          - {os: 'ubuntu-latest' , tf: 'default', r: 'release'}
+          - {os: 'windows-latest', tf: 'default', r: 'release'}
+          - {os: 'macOS-latest'  , tf: 'default', r: 'release'}
 
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.tf == 'nightly' || contains(matrix.tf, 'rc') || matrix.r == 'devel' }}
     env:
-      RSPM: ${{ matrix.config.rspm }}
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: 'true'
+      R_COMPILE_AND_INSTALL_PACKAGES: 'never'
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      RETICULATE_AUTOCONFIGURE: 'FALSE'
-      TF_VERSION: '1.14.0'
 
     steps:
 
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-r@v2
-        id: install-r
+        id: setup-r
         with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
+          r-version: ${{ matrix.r }}
+          Ncpus: '2L'
+          use-public-rspm: true
 
       - uses: r-lib/actions/setup-pandoc@v2
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      - name: Get Date
+        id: get-date
+        shell: bash
+        run: |
+          echo "::set-output name=year-week::$(date -u "+%Y-%U")"
+          echo "::set-output name=date::$(date -u "+%F")"
+
+      - name: Restore R package cache
+        uses: actions/cache@v2
+        id: r-package-cache
         with:
-          cache-version: 2
-          extra-packages: |
-            local::.
-            any::keras
-            any::rcmdcheck
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ matrix.os }}-${{ steps.setup-r.outputs.installed-r-version }}-${{ steps.get-date.outputs.year-week }}-1
 
-      - name: Install Miniconda
+      - name: Install remotes
+        if: steps.r-package-cache.outputs.cache-hit != 'true'
+        run: install.packages("remotes")
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        shell: bash
         run: |
-          reticulate::install_miniconda()
-        shell: Rscript {0}
+          . /etc/os-release
+          while read -r cmd
+          do
+            echo "$cmd"
+            sudo $cmd
+          done < <(Rscript -e "writeLines(remotes::system_requirements('$ID-$VERSION_ID'))")
 
-      - name: Set options for conda binary for macOS
-        if: runner.os == 'macOS'
-        run: |
-          echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
+      - name: Install package + deps
+        run: remotes::install_local(dependencies = TRUE, force = TRUE)
 
-      - name: Install TensorFlow
-        run: |
-          cat("::group::Create Environment", sep = "\n")
-          reticulate::conda_create('r-reticulate', packages = c('python==3.7'))
-          cat("::endgroup::", sep = "\n")
+      - name: Install greta deps
+        run: greta::install_greta_deps(timeout = 50)
 
-          cat("::group::Install Tensorflow", sep = "\n")
-          keras::install_keras(tensorflow = Sys.getenv('TF_VERSION'),
-              extra_packages = c('IPython', 'requests', 'certifi', 'urllib3', 'tensorflow-probability==0.7.0', 'numpy==1.16.4'))
-          cat("::endgroup::", sep = "\n")
-        shell: Rscript {0}
+      - name: Situation Report on greta install
+        run: greta::greta_sitrep()
 
+      - name: Install rcmdcheck
+        run: remotes::install_cran("rcmdcheck")
 
-      - name: Python + TF details
-        run: |
-          tensorflow::tf_config()
-          tensorflow::tf_version()
-          reticulate::py_module_available("tensorflow_probability")
-          reticulate::py_config()
-        shell: Rscript {0}
+      - name: Check
+        run: rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')
 
-      - name: Session info
-        run: |
-          options(width = 100)
-          pkgs <- installed.packages()[, "Package"]
-          sessioninfo::session_info(pkgs, include_base = TRUE)
-        shell: Rscript {0}
+      - name: Show testthat output
+        if: always()
+        shell: bash
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
 
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          args: 'c("--no-manual", "--as-cran", "--no-multiarch")'
+      - name: Don't use tar from old Rtools to store the cache
+        if: ${{ runner.os == 'Windows' && startsWith(steps.install-r.outputs.installed-r-version, '3') }}
+        shell: bash
+        run: echo "C:/Program Files/Git/usr/bin" >> $GITHUB_PATH
 
       - name: Check on single core machine
         if: runner.os != 'Windows'
         env:
           R_PARALLELLY_AVAILABLE_CORES: 1
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--no-multiarch"))
-        shell: Rscript {0}
 
+      - name: Session info
+        run: |
+          options(width = 100)
+          pkgs <- installed.packages()[, "Package"]
+          sessioninfo::session_info(pkgs, include_base = TRUE)

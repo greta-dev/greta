@@ -3,7 +3,7 @@ data_node <- R6Class(
   inherit = node,
   public = list(
     initialize = function(data) {
-
+      ## browser()
       # coerce to an array with 2+ dimensions
       data <- as_2d_array(data)
 
@@ -26,7 +26,7 @@ data_node <- R6Class(
       # placeholder
       if (mode == "forward") {
         value <- self$value()
-        ndim <- length(dim(value))
+        ndim <- n_dim(value)
         shape <- to_shape(c(1, dim(value)))
         value <- add_first_dim(value)
 
@@ -41,14 +41,27 @@ data_node <- R6Class(
             shape = shape
           )
         } else {
-          unbatched_tensor <- tf$compat$v1$placeholder(
+          # TF1/2 check
+          # We can pass tensors directly into ops and layers
+          # tf.function arguments do the job of placeholders
+          # or we can use tf$keras$Input ?
+          # unbatched_tensor <- tf$keras$Input(
+          # for data - find yourself so it can be substituted in
+          # we need to fetch the data from the DAG
+          # what is the TF2 method for casting data into a tensor
+          # we can probably just use `as_tensor`
+          unbatched_tensor <- tensorflow::as_tensor(
+            x = value,
             shape = shape,
             dtype = tf_float()
           )
+          # TF1/2 check
+          # note - we might not need this anymore as it was to do with
+          # stashing things for use in the feed_dict later
           dag$set_tf_data_list(unbatched_name, value)
         }
 
-        # expand up to batch size
+        # expand up to batch size - so we can run multiple chains
         tiling <- c(tfe$batch_size, rep(1L, ndim))
         batched_tensor <- tf$tile(unbatched_tensor, tiling)
 
@@ -118,17 +131,14 @@ operation_node <- R6Class(
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
-      if (is.null(value)) {
-        value <- unknowns(dim = dim)
-      } else if (!all.equal(dim(value), dim)) {
-        msg <- cli::format_error(
+      values_have_wrong_dim <- !is.null(value) && !all.equal(dim(value), dim)
+      if (values_have_wrong_dim) {
+        cli::cli_abort(
           "values have the wrong dimension so cannot be used"
         )
-        stop(
-          msg,
-          call. = FALSE
-        )
       }
+
+      value <- value %||% unknowns(dim = dim)
 
       super$initialize(dim, value)
     },
@@ -139,23 +149,48 @@ operation_node <- R6Class(
       self$add_parent(parameter)
     },
     tf = function(dag) {
+      # where to put it
       tfe <- dag$tf_environment
+      # what to call the tensor object
       tf_name <- dag$tf_name(self)
-      mode <- dag$how_to_define(self)
 
+      # cholesky
+      # maybe put this warning inside the calculate part
+      # !! check whether the change to define tf will break
+      mode <- dag$how_to_define(self)
       # if sampling get the distribution constructor and sample this
       if (mode == "sampling") {
+        # browser()
         tensor <- dag$draw_sample(self$distribution)
+
+        if (has_representation(self, "cholesky")) {
+          # browser()
+          cholesky_tensor <- tf_chol(tensor)
+          # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          cholesky_node <- get_node(representation(self, "cholesky"))
+          cholesky_tf_name <- dag$tf_name(cholesky_node)
+          assign(cholesky_tf_name, cholesky_tensor, envir = tfe)
+          ## TF1/2
+          ## This assignment I think is supposed to be passed down to later on
+          ## in the script, as `cholesky_tf_name` gets overwritten
+          # cholesky_tf_name <- dag$tf_name(self)
+          # tf_name <- cholesky_tf_name
+          # tensor <- cholesky_tensor
+          cholesky_tensor <- tf_chol(tensor)
+          cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
+        }
       }
 
       if (mode == "forward") {
 
-        # fetch the tensors for the environment
+        # fetch the tensors from the environment
         arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
         tf_args <- lapply(arg_tf_names, get, envir = tfe)
 
         # fetch additional (non-tensor) arguments, if any
-        if (length(self$operation_args) > 0) {
+        multiple_operation_args <- length(self$operation_args) > 0
+        if (multiple_operation_args) {
           tf_args <- c(tf_args, self$operation_args)
         }
 
@@ -163,10 +198,11 @@ operation_node <- R6Class(
         operation <- eval(parse(text = self$operation),
           envir = self$tf_function_env
         )
-
+        # browser()
         tensor <- do.call(operation, tf_args)
       }
 
+      # browser()
       # assign it in the environment
       assign(tf_name, tensor, envir = dag$tf_environment)
     }
@@ -186,21 +222,8 @@ variable_node <- R6Class(
                           upper = Inf,
                           dim = NULL,
                           free_dim = prod(dim)) {
-      if (!is.numeric(lower) | !is.numeric(upper)) {
-        msg <- cli::format_error(
-          c(
-            "lower and upper must be numeric",
-            "lower has class: {class(lower)}",
-            "lower has length: {length(lower)}",
-            "upper has class: {class(upper)}",
-            "upper has length: {length(upper)}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      ## browser()
+      check_if_lower_upper_numeric(lower, upper)
 
       # replace values of lower and upper with finite values for dimension
       # checking (this is pain, but necessary because check_dims coerces to
@@ -225,7 +248,8 @@ variable_node <- R6Class(
       constraint_array[lower_limit & upper_limit] <- "both"
 
       # pass a string depending on whether they are all the same
-      if (all(constraint_array == constraint_array[1])) {
+      constraint_arrays_are_same <- all(constraint_array == constraint_array[1])
+      if (constraint_arrays_are_same) {
         self$constraint <- glue::glue("scalar_all_{constraint_array[1]}")
       } else {
         self$constraint <- "scalar_mixed"
@@ -238,30 +262,9 @@ variable_node <- R6Class(
         FALSE
       )
 
-      if (bad_limits) {
-        msg <- cli::format_error(
-          "lower and upper must either be -Inf (lower only), Inf (upper only) \\
-          or finite"
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_if_lower_upper_has_bad_limits(bad_limits)
 
-      if (any(lower >= upper)) {
-        msg <- cli::format_error(
-          c(
-            "upper bounds must be greater than lower bounds",
-            "lower is: {.val {lower}}",
-            "upper is: {.val {upper}}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_if_upper_gt_lower(lower, upper)
 
       # add parameters
       super$initialize(dim)
@@ -284,13 +287,13 @@ variable_node <- R6Class(
       }
     },
     tf = function(dag) {
-
       # get the names of the variable and (already-defined) free state version
       tf_name <- dag$tf_name(self)
 
       mode <- dag$how_to_define(self)
 
       if (mode == "sampling") {
+        # browser()
         distrib_node <- self$distribution
 
         if (is.null(distrib_node)) {
@@ -298,7 +301,10 @@ variable_node <- R6Class(
           # if the variable has no distribution create a placeholder instead
           # (the value must be passed in via values when using simulate)
           shape <- to_shape(c(1, self$dim))
-          tensor <- tf$compat$v1$placeholder(shape = shape, dtype = tf_float())
+          # TF1/2 check
+            # need to change the placeholder approach here.
+            # NT: can we change this to be a tensor of the right shape with 1s?
+          tensor <- tensorflow::as_tensor(1L, shape = shape, dtype = tf_float())
         } else {
           tensor <- dag$draw_sample(self$distribution)
         }
@@ -308,7 +314,6 @@ variable_node <- R6Class(
       # and compute any transformation density
       if (mode == "forward") {
         free_name <- glue::glue("{tf_name}_free")
-
         # create the log jacobian adjustment for the free state
         tf_adj <- self$tf_adjustment(dag)
         adj_name <- glue::glue("{tf_name}_adj")
@@ -362,10 +367,10 @@ variable_node <- R6Class(
     tf_log_jacobian_adjustment = function(free) {
       tf_bijector <- self$create_tf_bijector()
 
-      event_ndims <- tf_bijector$forward_min_event_ndims
+      event_ndims <- as.integer(tf_bijector$forward_min_event_ndims)
       ljd <- tf_bijector$forward_log_det_jacobian(
         x = free,
-        event_ndims = event_ndims
+        event_ndims = as.integer(event_ndims)
       )
 
       # sum across all dimensions of jacobian
@@ -377,8 +382,13 @@ variable_node <- R6Class(
       }
 
       # make sure there's something in the batch dimension
-      if (identical(dim(ljd), integer(0))) {
+      no_batch_dimension <- identical(dim(ljd), integer(0))
+      if (no_batch_dimension) {
         ljd <- tf$expand_dims(ljd, 0L)
+        tiling <- tf$stack(
+          list(tf$shape(free)[0]),
+          axis = 0L)
+        ljd <- tf$tile(ljd, tiling)
       }
 
       ljd
@@ -417,8 +427,10 @@ distribution_node <- R6Class(
                           discrete = FALSE,
                           multivariate = FALSE,
                           truncatable = TRUE) {
+      ## browser()
       super$initialize(dim)
 
+      ## browser()
       # for all distributions, set name, store dims, and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
@@ -445,6 +457,7 @@ distribution_node <- R6Class(
 
     # create a target variable node (unconstrained by default)
     create_target = function(truncation) {
+      ##browser()
       vble(truncation, dim = self$dim)
     },
     list_parents = function(dag) {
@@ -454,11 +467,7 @@ distribution_node <- R6Class(
       # consider that a parent node
       mode <- dag$how_to_define(self)
       if (mode == "sampling" & !is.null(self$target)) {
-        parent_names <- vapply(parents,
-          member,
-          "unique_name",
-          FUN.VALUE = character(1)
-        )
+        parent_names <- extract_unique_names(parents)
         keep <- parent_names != self$target$unique_name
         parents <- parents[keep]
       }
@@ -480,7 +489,7 @@ distribution_node <- R6Class(
 
     # create target node, add as a parent, and give it this distribution
     add_target = function(new_target) {
-
+      ##browser()
       # add as target and as a parent
       self$target <- new_target
       self$add_parent(new_target)
@@ -607,10 +616,12 @@ node_classes_module <- module(
 
 # shorthand for distribution parameter constructors
 distrib <- function(distribution, ...) {
+  ##browser()
   check_tf_version("error")
 
   # get and initialize the distribution, with a default value node
-  constructor <- get(glue::glue("{distribution}_distribution"),
+  constructor <- get(
+    x = glue::glue("{distribution}_distribution"),
     envir = parent.frame()
   )
   distrib <- constructor$new(...)

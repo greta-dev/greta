@@ -46,3 +46,6 @@ LICENSE
 ^touchstone$
 ^.lazytest$
 ^\.lazytext$
+^revdep$
+^__autograph*
+^testlog

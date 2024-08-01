@@ -59,8 +59,8 @@ tf_lbeta <- function(a, b) {
 
 # set up the tf$reduce_* functions to ignore the first dimension
 skip_dim <- function(op_name, x, drop = FALSE) {
-  n_dim <- length(dim(x))
-  reduction_dims <- seq_len(n_dim - 1)
+  ndim <- n_dim(x)
+  reduction_dims <- seq_len(ndim - 1)
   tf[[op_name]](x, axis = reduction_dims, keepdims = !drop)
 }
 
@@ -116,7 +116,7 @@ tf_expand_dim <- function(x, dims) {
   dims <- c(1L, dims)
 
   # pad/shrink x to have the correct number of dimensions
-  x_dims <- length(dim(x))
+  x_dims <- n_dim(x)
   target_dims <- length(dims)
 
   # add extra dimensions at the end
@@ -133,7 +133,7 @@ tf_expand_dim <- function(x, dims) {
 
 # skip the first index when transposing
 tf_transpose <- function(x) {
-  nelem <- length(dim(x))
+  nelem <- n_dim(x)
   perm <- c(0L, (nelem - 1):1)
   tf$transpose(x, perm = perm)
 }
@@ -142,7 +142,7 @@ tf_apply <- function(x, axis, tf_fun_name) {
   fun <- tf$math[[tf_fun_name]]
   out <- fun(x, axis = axis)
   # if we reduced we lost a dimension, make sure we have enough
-  if (length(dim(out)) < 3) {
+  if (n_dim(out) < 3) {
     out <- tf$expand_dims(out, 2L)
   }
   out
@@ -254,7 +254,7 @@ tf_colmeans <- function(x, dims) {
   idx <- rowcol_idx(x, dims, "col")
   y <- tf$reduce_mean(x, axis = idx)
 
-  if (length(dim(y)) == 2) {
+  if (is_2d(y)) {
     dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
     y <- tf$reshape(y, dims_out)
   }
@@ -267,7 +267,7 @@ tf_rowmeans <- function(x, dims) {
   idx <- idx[-length(idx)]
   y <- tf$reduce_mean(x, axis = idx)
 
-  if (length(dim(y)) == 2) {
+  if (is_2d(y)) {
     dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
     y <- tf$reshape(y, dims_out)
   }
@@ -279,7 +279,7 @@ tf_colsums <- function(x, dims) {
   idx <- rowcol_idx(x, dims, "col")
   y <- tf$reduce_sum(x, axis = idx)
 
-  if (length(dim(y)) == 2) {
+  if (is_2d(y)) {
     dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
     y <- tf$reshape(y, dims_out)
   }
@@ -292,7 +292,7 @@ tf_rowsums <- function(x, dims) {
   idx <- idx[-length(idx)]
   y <- tf$reduce_sum(x, axis = idx)
 
-  if (length(dim(y)) == 2) {
+  if (is_2d(y)) {
     dims_out <- c(-1L, unlist(dim(y)[-1]), 1L)
     y <- tf$reshape(y, dims_out)
   }
@@ -339,7 +339,9 @@ tf_sweep <- function(x, stats, margin, fun) {
 
 # transpose and get the right matrix, like R
 tf_chol <- function(x) {
-  tf_transpose(tf$linalg$cholesky(x))
+  x_chol <- tf$linalg$cholesky(x)
+  x_chol_t <- tf_transpose(x_chol)
+  x_chol_t
 }
 
 tf_chol2inv <- function(u) {
@@ -534,19 +536,19 @@ tf_abind <- function(..., axis) {
 
 tf_only_eigenvalues <- function(x) {
   vals <- tf$linalg$eigvalsh(x)
-  dim <- tf$constant(1L, shape = list(1))
+  dim <- tf$constant(1L, shape = list(1L))
   tf$reverse(vals, dim)
 }
 
 tf_extract_eigenvectors <- function(x) {
   vecs <- x[[2]]
-  dim <- tf$constant(2L, shape = list(1))
+  dim <- tf$constant(2L, shape = list(1L))
   tf$reverse(vecs, dim)
 }
 
 tf_extract_eigenvalues <- function(x) {
   vals <- x[[1]]
-  dim <- tf$constant(1L, shape = list(1))
+  dim <- tf$constant(1L, shape = list(1L))
   tf$reverse(vals, dim)
 }
 
@@ -588,9 +590,16 @@ tf_scalar_bijector <- function(dim, lower, upper) {
   )
 }
 
+tfb_shift_scale <- function(shift, scale){
+  tfb_shift <- tfp$bijectors$Shift(shift)
+  tfb_scale <- tfp$bijectors$Scale(scale)
+  tfb_shift_scale <- tfb_shift(tfb_scale)
+  tfb_shift_scale
+}
+
 tf_scalar_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(lower)),
+    tfp$bijectors$Shift(fl(lower)),
     tfp$bijectors$Exp(),
     dim = dim
   )
@@ -598,7 +607,7 @@ tf_scalar_pos_bijector <- function(dim, lower, upper) {
 
 tf_scalar_neg_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(upper), scale = fl(-1)),
+    tfb_shift_scale(fl(upper), fl(-1)),
     tfp$bijectors$Exp(),
     dim = dim
   )
@@ -606,7 +615,7 @@ tf_scalar_neg_bijector <- function(dim, lower, upper) {
 
 tf_scalar_neg_pos_bijector <- function(dim, lower, upper) {
   tf_scalar_biject(
-    tfp$bijectors$AffineScalar(shift = fl(lower), scale = fl(upper - lower)),
+    tfb_shift_scale(shift = fl(lower), scale = fl(upper - lower)),
     tfp$bijectors$Sigmoid(),
     dim = dim
   )
@@ -712,7 +721,8 @@ tf_simplex_bijector <- function(dim) {
 
 tf_ordered_bijector <- function(dim) {
   steps <- list(
-    tfp$bijectors$Invert(tfp$bijectors$Ordered()),
+    # tfp$bijectors$Invert(tfp$bijectors$Ordered()),
+    tfp$bijectors$Ascending(),
     tfp$bijectors$Reshape(dim)
   )
   tfp$bijectors$Chain(steps)

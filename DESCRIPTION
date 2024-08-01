@@ -1,7 +1,7 @@
 Type: Package
 Package: greta
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.4.5
+Version: 0.4.5.9000
 Authors@R: c(
     person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0001-8916-5570")),
@@ -31,11 +31,11 @@ License: Apache License 2.0
 URL: https://greta-stats.org
 BugReports: https://github.com/greta-dev/greta/issues
 Depends:
-    R (>= 3.1.0)
+    R (>= 4.1.0)
 Imports:
     abind,
     callr,
-    cli (>= 3.0.0),
+    cli (>= 3.4.1),
     coda,
     future (>= 1.22.1),
     glue (>= 1.5.1),
@@ -44,13 +44,14 @@ Imports:
     progress (>= 1.2.0),
     R6,
     reticulate (>= 1.19.0),
-    tensorflow (>= 2.7.0),
+    tensorflow (>= 2.8.0),
     yesno
 Suggests:
     bayesplot,
     covr,
     cramer,
     DiagrammeR,
+    dplyr,
     DiagrammeRsvg,
     extraDistr,
     fields,
@@ -61,21 +62,23 @@ Suggests:
     MCMCpack,
     mockery,
     mvtnorm,
+    purrr,
     rmarkdown,
     rmutil,
     rsvg,
     spelling,
     testthat (>= 3.1.0),
-    tidyverse,
+    tibble,
+    tidyr,
     truncdist,
     withr
 VignetteBuilder: 
     knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
-Language: en-GB
+Language: en-US
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 SystemRequirements: Python (>= 2.7.0) with header files and shared
     library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow
     Probability (v0.7.0; https://www.tensorflow.org/probability/)
@@ -106,6 +109,7 @@ Collate:
     'inference_class.R'
     'samplers.R'
     'optimisers.R'
+    'optimiser_class.R'
     'inference.R'
     'install_tensorflow.R'
     'calculate.R'

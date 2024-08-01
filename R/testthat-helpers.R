@@ -25,9 +25,7 @@ check_op <- function(op, a, b, greta_op = NULL,
                      tolerance = 1e-3,
                      only = c("data", "variable", "batched"),
                      relative_error = FALSE) {
-  if (is.null(greta_op)) {
-    greta_op <- op
-  }
+  greta_op <- greta_op %||% op
 
   r_out <- run_r_op(op, a, b, other_args)
 
@@ -101,7 +99,6 @@ run_greta_op <- function(greta_op, a, b, other_args,
 # variable greta arrays via the free state parameter, optionally with batches
 grab_via_free_state <- function(target, values, batches = 1) {
   dag <- dag_class$new(list(target))
-  dag$define_tf()
   inits <- do.call(initials, values)
   inits_flat <- prep_initials(inits, 1, dag)[[1]]
   if (batches > 1) {
@@ -116,8 +113,4 @@ grab_via_free_state <- function(target, values, batches = 1) {
 
 expect_ok <- function(expr) {
   testthat::expect_error(expr, NA)
-}
-
-is.greta_array <- function(x) { # nolint
-  inherits(x, "greta_array")
 }

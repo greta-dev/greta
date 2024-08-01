@@ -55,6 +55,9 @@ model <- function(...,
   check_tf_version("error")
 
   # get the floating point precision
+  # TODO
+  # what does it choose as default if both double and single are listed
+  # as default?
   tf_float <- switch(match.arg(precision),
     double = "float64",
     single = "float32"
@@ -64,7 +67,8 @@ model <- function(...,
   target_greta_arrays <- list(...)
 
   # if no arrays were specified, find all of the non-data arrays
-  if (identical(target_greta_arrays, list())) {
+  no_arrays_specified <- identical(target_greta_arrays, list())
+  if (no_arrays_specified) {
     target_greta_arrays <- all_greta_arrays(parent.frame(),
       include_data = FALSE
     )
@@ -79,6 +83,9 @@ model <- function(...,
   target_greta_arrays <- check_greta_arrays(target_greta_arrays, "model")
 
   # get the dag containing the target nodes
+  # TF1/2 check
+  # I don't think we need to use the `compile` flag in TF2 anymore
+  # Well, it will be passed onto the tf_function creation step
   dag <- dag_class$new(target_greta_arrays,
     tf_float = tf_float,
     compile = compile
@@ -132,7 +139,8 @@ model <- function(...,
     types_sub <- types[graph_id == graph]
 
     # check they have a density among them
-    if (!("distribution" %in% types_sub)) {
+    no_distribution <- !("distribution" %in% types_sub)
+    if (no_distribution) {
       stop(
         density_message,
         call. = FALSE
@@ -140,7 +148,8 @@ model <- function(...,
     }
 
     # check they have a variable node among them
-    if (!("variable" %in% types_sub)) {
+    no_variable_node <- !("variable" %in% types_sub)
+    if (no_variable_node) {
       stop(
         variable_message,
         call. = FALSE
@@ -154,25 +163,21 @@ model <- function(...,
     distributions,
     function(x) {
       valid_target <- is.null(x$target) ||
-        inherits(x$target, "data_node")
+        is.data_node(x$target)
       x$discrete && !valid_target
     },
     FALSE
   )
 
   if (any(bad_nodes)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "model contains a discrete random variable that doesn't have a fixed \\
       value, so inference cannot be carried out"
         )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   # define the TF graph
-  dag$define_tf()
+  # dag$define_tf()
 
   # create the model object and add details
   model <- as.greta_model(dag)
@@ -183,6 +188,11 @@ model <- function(...,
 }
 
 # register generic method to coerce objects to a greta model
+#' @title Convert object to a "greta_model" object
+#' @param x object to convert to greta model
+#' @param ... extra arguments - not used.
+#'
+#' @export
 as.greta_model <- function(x, ...) { # nolint
   UseMethod("as.greta_model", x)
 }
@@ -223,17 +233,13 @@ plot.greta_model <- function(x,
                              colour = "#996bc7",
                              ...) {
   if (!is_DiagrammeR_installed()) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "the {.pkg DiagrammeR} package must be installed to plot greta models",
         "install {.pkg DiagrammeR} with:",
         "{.code install.packages('DiagrammeR')}"
         )
       )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   # set up graph
@@ -279,11 +285,8 @@ plot.greta_model <- function(x,
 
   # add greta array names where available
   visible_nodes <- lapply(x$visible_greta_arrays, get_node)
-  known_nodes <- vapply(visible_nodes,
-    member,
-    "unique_name",
-    FUN.VALUE = ""
-  )
+  known_nodes <- extract_unique_names(visible_nodes)
+
   known_nodes <- known_nodes[known_nodes %in% names]
   known_idx <- match(known_nodes, names)
   node_labels[known_idx] <- paste(names(known_nodes),
@@ -317,13 +320,7 @@ plot.greta_model <- function(x,
 
   node_names <- lapply(
     parameter_list,
-    function(parameters) {
-      vapply(parameters,
-        member,
-        "unique_name",
-        FUN.VALUE = ""
-      )
-    }
+    extract_unique_names
   )
 
   # for each distribution
@@ -354,7 +351,7 @@ plot.greta_model <- function(x,
     "target"
   )
 
-  keep <- !vapply(targets, is.null, TRUE)
+  keep <- !are_null(targets)
   distrib_idx <- distrib_idx[keep]
 
 

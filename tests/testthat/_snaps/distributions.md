@@ -21,7 +21,7 @@
 
 ---
 
-    `min` and `max` must finite scalars
+    `min` and `max` must be finite scalars
     Their values are:
     `min`: -Inf
     `max`: Inf
@@ -60,14 +60,12 @@
 # wishart distribution errors informatively
 
     `Sigma` must be a square 2D greta array
-    However, `Sigma` has dimensions
-    "3x3x3"
+    However, `Sigma` has dimensions "3x3x3"
 
 ---
 
     `Sigma` must be a square 2D greta array
-    However, `Sigma` has dimensions
-    "3x2"
+    However, `Sigma` has dimensions "3x2"
 
 # lkj_correlation distribution errors informatively
 
@@ -130,15 +128,15 @@
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
@@ -157,15 +155,15 @@
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
@@ -184,15 +182,15 @@
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
@@ -211,15 +209,15 @@
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 
@@ -238,15 +236,15 @@
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `-1` having class: <numeric> and length `1`
 
 ---
 
-    ! Could not evaluate cli `{}` expression: `n_realisations`.
-    Caused by error in `eval(expr, envir = envir)`:
-    ! object 'n_realisations' not found
+    `n_realisations is not a positive scalar interger`
+    `n_realisations` must be a positive scalar integer giving the number of rows of the output
+    x We see `n_realisations` = `1` and `3` having class: <numeric> and length `2`
 
 ---
 

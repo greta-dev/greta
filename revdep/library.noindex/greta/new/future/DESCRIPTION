@@ -1,0 +1,42 @@
+Package: future
+Version: 1.33.1
+Title: Unified Parallel and Distributed Processing in R for Everyone
+Imports: digest, globals (>= 0.16.1), listenv (>= 0.8.0), parallel,
+        parallelly (>= 1.34.0), utils
+Suggests: methods, RhpcBLASctl, R.rsp, markdown
+VignetteBuilder: R.rsp
+Authors@R: c(person("Henrik", "Bengtsson",
+                    role = c("aut", "cre", "cph"),
+                    email = "henrikb@braju.com",
+                    comment = c(ORCID = "0000-0002-7579-5165")))
+Description: The purpose of this package is to provide a lightweight and
+    unified Future API for sequential and parallel processing of R
+    expression via futures.  The simplest way to evaluate an expression
+    in parallel is to use `x %<-% { expression }` with `plan(multisession)`.
+    This package implements sequential, multicore, multisession, and
+    cluster futures.  With these, R expressions can be evaluated on the
+    local machine, in parallel a set of local machines, or distributed
+    on a mix of local and remote machines.
+    Extensions to this package implement additional backends for
+    processing futures via compute cluster schedulers, etc.
+    Because of its unified API, there is no need to modify any code in order
+    switch from sequential on the local machine to, say, distributed
+    processing on a remote compute cluster.
+    Another strength of this package is that global variables and functions
+    are automatically identified and exported as needed, making it
+    straightforward to tweak existing code to make use of futures.
+License: LGPL (>= 2.1)
+LazyLoad: TRUE
+ByteCompile: TRUE
+URL: https://future.futureverse.org,
+        https://github.com/HenrikBengtsson/future
+BugReports: https://github.com/HenrikBengtsson/future/issues
+RoxygenNote: 7.2.3
+NeedsCompilation: no
+Packaged: 2023-12-21 22:22:38 UTC; henrik
+Author: Henrik Bengtsson [aut, cre, cph]
+    (<https://orcid.org/0000-0002-7579-5165>)
+Maintainer: Henrik Bengtsson <henrikb@braju.com>
+Repository: CRAN
+Date/Publication: 2023-12-22 07:20:02 UTC
+Built: R 4.3.1; ; 2023-12-22 08:38:00 UTC; unix

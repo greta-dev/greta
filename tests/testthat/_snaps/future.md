@@ -51,3 +51,11 @@
 
     parallel mcmc samplers cannot be run with a fork cluster
 
+---
+
+    parallel mcmc samplers cannot be run with `plan(multicore)`
+
+---
+
+    parallel mcmc samplers cannot be run with a fork cluster
+

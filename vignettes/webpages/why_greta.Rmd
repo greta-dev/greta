@@ -39,6 +39,6 @@ Grete (usually said *Greh*•tuh, like its alternate spelling *Greta*) can be co
 </div>
 <div class="column-right">
 ```{r image, out.width = "280px", echo = FALSE}
-knitr::include_graphics("https://consulting.qa.com/media/uploads/Grete-Hermann.jpg")
+knitr::include_graphics("https://en.wikipedia.org/wiki/Grete_Hermann#/media/File:Grete_Hermann.jpg")
 ```
 </div>

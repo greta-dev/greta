@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>A Future for R: Best Practices for Package Developers</title>
+<style type="text/css">
+/**
+ * Prism.s theme ported from highlight.js's xcode style
+ */
+pre code {
+  padding: 1em;
+}
+.token.comment {
+  color: #007400;
+}
+.token.punctuation {
+  color: #999;
+}
+.token.tag,
+.token.selector {
+  color: #aa0d91;
+}
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+  color: #1c00cf;
+}
+.token.property,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+  color: #c41a16;
+}
+.token.inserted {
+  background-color: #ccffd8;
+}
+.token.deleted {
+  background-color: #ffebe9;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #9a6e3a;
+}
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #836c28;
+}
+.token.function,
+.token.class-name {
+  color: #DD4A68;
+}
+.token.regex,
+.token.important,
+.token.variable {
+  color: #5c2699;
+}
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+</style>
+<style type="text/css">
+body {
+  font-family: sans-serif;
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+body, .footnotes, code { font-size: .9em; }
+li li { font-size: .95em; }
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+pre, img { max-width: 100%; }
+pre, pre:hover {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+pre code {
+  display: block;
+  overflow-x: auto;
+}
+code { font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace; }
+:not(pre) > code, code[class] { background-color: #F8F8F8; }
+code.language-undefined, pre > code:not([class]) {
+  background-color: inherit;
+  border: 1px solid #eee;
+}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+blockquote {
+  color: #666;
+  margin: 0;
+  padding-left: 1em;
+  border-left: 0.5em solid #eee;
+}
+hr, .footnotes::before { border: 1px dashed #ddd; }
+.frontmatter { text-align: center; }
+#TOC .numbered li { list-style: none; }
+#TOC .numbered { padding-left: 0; }
+#TOC .numbered ul { padding-left: 1em; }
+table, .body h2 { border-bottom: 1px solid #666; }
+.body .appendix, .appendix ~ h2 { border-bottom-style: dashed; }
+.footnote-ref a::before { content: "["; }
+.footnote-ref a::after { content: "]"; }
+section.footnotes::before {
+  content: "";
+  display: block;
+  max-width: 20em;
+}
+
+@media print {
+  body {
+    font-size: 12pt;
+    max-width: 100%;
+  }
+  tr, img { page-break-inside: avoid; }
+}
+@media only screen and (min-width: 992px) {
+  pre { white-space: pre; }
+}
+</style>
+<meta name="keywords" content="R, package, vignette, future, promise">
+<meta name="author" content="Henrik Bengtsson">
+</head>
+<body>
+<div class="frontmatter">
+<div class="title"><h1>A Future for R: Best Practices for Package Developers</h1></div>
+<div class="author"><h2></h2></div>
+<div class="date"><h3></h3></div>
+</div>
+<div class="body">
+<h1 id="a-future-for-r-best-practices-for-package-developers">A Future for R: Best Practices for Package Developers</h1>
+<p>Using future code in package is not much different from other type of package code or when using futures in R scripts.  However, there are a few things that are useful to know about in order to minimize the risk for surprises to the end user.</p>
+<h2 id="the-future-smell-test">The future smell test</h2>
+<p>The by far most common and popular future strategy is to parallelize on the local machine, i.e. <code>plan(multisession)</code>.  This is often good enough in most situations but note that some end-users have access to multiple machines and might want to run your code using all of them to speed it up beyond what a single machine can do.  Because of this, avoid as far as possible making assumption about your code will only run on the local machine.  A good “smell test” is to ask yourself:</p>
+<p><em>- Will my future code work if it ends up running on the other side of the world?</em></p>
+<p>Regardless of performance, if you answer “Yes”, you have already embraced the core philosophy of the future framework.  If you answer “Maybe” or “No”, see if you can rewrite it.</p>
+<p>For instance, if your future code made an assumption that it will have access to our local file system, as in:</p>
+<pre><code class="language-r">f &lt;- future({
+  data &lt;- read_tsv(file)
+  analyze(data)
+})
+</code></pre>
+<p>you can rewrite the code to load the content of the file before you set up the future, as in:</p>
+<pre><code class="language-r">data &lt;- read_tsv(file)
+f &lt;- future({
+  analyze(data)
+})
+</code></pre>
+<p>Similarly, we should avoid having the future code write to the local file system because the parent R session might not have access to that file system.</p>
+<p>By keeping the future smell test in mind when writing future code, we increase the chances that the code can be parallelized in more ways than on just the local computer.  Properly written future code will work regardless of what future strategy the end-user picks, e.g.</p>
+<pre><code class="language-r">plan(sequential)
+plan(multisession)
+plan(cluster, workers = rep(c(&quot;n1.remote.org&quot;, &quot;n2.remote.org&quot;, &quot;n3.remote.org&quot;), each = 32))
+</code></pre>
+<p>Remember, as developers we never know what compute resources the end-user has access to right now or they will have access to in six month.  Who knows, your code might even end up running on 2,000 cores located on The Moon twenty years from now.</p>
+<h2 id="avoid-changing-the-future-strategy">Avoid changing the future strategy</h2>
+<p>For reasons like the ones mentioned above, refrain from setting <code>plan()</code> in a function.  It is better to leave it to the end-user to decided how they want to parallelize.  One reason for this is that we can never know how and in what context our code will run.  For example, they might use futures to parallelize a function call in some other package and that package code calls your package internally.  If you set <code>plan(multisession)</code> internally without undoing, you might mess up the <code>plan()</code> that is already set breaking any further parallelization.</p>
+<p>If you still think it is necessary to set <code>plan()</code>, make sure to undo when the function exits, also on errors.  This can be done by using <code>on.exit()</code>, e.g.</p>
+<pre><code class="language-r">my_fcn &lt;- function(x) {
+  oplan &lt;- plan(multisession)
+  on.exit(plan(oplan))
+
+  y &lt;- analyze(x)
+  summarize(y)
+}
+</code></pre>
+<p>The need for setting the future strategy within a function often comes from developers wanting to add an argument to their function that allows the end-user to specify whether they want to run the function in parallel or sequentially.  This often result in code like:</p>
+<pre><code class="language-r">my_fcn &lt;- function(x, parallel = FALSE) {
+  if (parallel) {
+    oplan &lt;- plan(multisession)
+    on.exit(plan(oplan))
+    y &lt;- future_lapply(x, FUN = analyze) ## from future.apply package
+  } else {
+    y &lt;- lapply(x, FUN = analyze)
+  }
+  summarize(y)
+}
+</code></pre>
+<p>This way the user can use:</p>
+<pre><code class="language-r">y &lt;- my_fcn(x, parallel = FALSE)
+</code></pre>
+<p>or</p>
+<pre><code class="language-r">y &lt;- my_fcn(x, parallel = TRUE)
+</code></pre>
+<p>depending on their needs.  However, if another package developer decide to call you function in their function, they now have to expose that <code>parallel</code> argument to the users of their function, e.g.</p>
+<pre><code class="language-r">their_fcn &lt;- function(x, parallel = FALSE) {
+  x2 &lt;- preprocess(x)
+  y &lt;- my_fcn(x2, parallel = parallel)
+  z &lt;- another_fcn(y)
+  z
+}
+</code></pre>
+<p>Exposing and passing a “parallel” argument along can become quite cumbersome.  Instead, it is neater to use:</p>
+<pre><code class="language-r">my_fcn &lt;- function(x) {
+  y &lt;- future_lapply(x, FUN = analyze) ## from future.apply package
+  summarize(y)
+}
+</code></pre>
+<p>and let the user control whether or not they want to parallelize via <code>plan()</code>, e.g. <code>plan(multisession)</code> and <code>plan(sequential)</code>.</p>
+<h2 id="writing-examples">Writing examples</h2>
+<p>If your example sets the future strategy at the beginning, make sure to reset the future strategy to <code>plan(sequential)</code> at the end of the example.  The reason for this is that when switching plan, the previous one will be cleaned up.  This is particularly important for multisession and cluster futures where <code>plan(sequential)</code> will shut down the underlying PSOCK clusters.</p>
+<p>For instance, here is an example:</p>
+<pre><code class="language-r">## Run the analysis in parallel on the local computer
+future::plan(&quot;multisession&quot;)
+
+y &lt;- analyze(&quot;path/to/file.csv&quot;)
+
+## Shut down parallel workers
+future::plan(&quot;sequential&quot;)
+</code></pre>
+<p>If you forget to shut down the PSOCK cluster, then <code>R CMD check --as-cran</code>, or <code>R CMD check</code> with environment variable <code>_R_CHECK_CONNECTIONS_LEFT_OPEN_=true</code> set, will produce an error on</p>
+<pre><code class="language-r">$ R CMD check --as-cran mypkg_1.0.tar.gz
+...
+* checking examples ... ERROR
+Running examples in 'analyze-Ex.R' failed
+...
+&gt; cleanEx()
+Error: connections left open:
+      &lt;-localhost:37400 (sockconn)
+      &lt;-localhost:37400 (sockconn)
+Execution halted
+</code></pre>
+<p>If you for some reason do not like to display reset of the future strategy in the help documentation, but you still want it run, wrap the statement in an Rd <code>\dontshow{}</code> statement.</p>
+<h2 id="testing-a-package-that-relies-on-futures">Testing a package that relies on futures</h2>
+<p>If you want to make sure your code works when running sequentially as well as when running in parallel, it is often good enough to have package tests that run the code with:</p>
+<pre><code class="language-r">plan(multisession)
+</code></pre>
+<p>If the code works with this setup, you can be sure that all global variables are properly identified and exported to the workers and that the required packages are loaded on the workers.</p>
+<p>Always make sure to shut down your parallel ‘multisession’ workers at the end of each package test by calling:</p>
+<pre><code class="language-r">plan(sequential)
+</code></pre>
+<p>If not all of your tests are written this way, you can set environment variable <code>R_FUTURE_PLAN=multisession</code> before you call <code>R CMD check</code>.  This will make the default future strategy to become ‘multisession’ instead of ‘sequential’.  For example,</p>
+<pre><code class="language-sh">$ export R_FUTURE_PLAN=multisession
+$ R CMD check --as-cran mypkg_1.0.tar.gz
+</code></pre>
+<h2 id="making-sure-to-stop-parallel-workers">Making sure to stop parallel workers</h2>
+<p>When creating a <code>cluster</code> object, for instance via <code>plan(multisession)</code>, in
+a package help example, in a package vignette, or in a package test, we must
+<em>remember to stop the cluster at the end of all examples(*), vignettes, and
+unit tests</em>. This is required in order to not leave behind stray parallel
+<code>cluster</code> workers after our main R session terminates. On Linux and macOS,
+the operating system often takes care of terminating the worker processes
+if we forget, but on MS Windows such processes will keep running in the
+background until they time out themselves, which takes 30 days (sic!).</p>
+<p><code>R CMD check --as-cran</code> will indirectly detect these stray worker processes
+on MS Windows when running R (&gt;= 4.3.0). They are detected, because they
+result in placeholder <code>Rscript&lt;hexcode&gt;</code> files being left behind in
+the temporary directory.  The check NOTE to look out for
+(only in R (&gt;= 4.3.0)) is:</p>
+<pre><code>* checking for detritus in the temp directory ... NOTE
+Found the following files/directories:
+  'Rscript1058267d0c10' 'Rscriptbd4267d0c10'
+</code></pre>
+<p>Those <code>Rscript&lt;hexcode&gt;</code> files are from background R worker processes,
+which almost always are parallel <code>cluster</code>:s that we forgot to stop
+at the end.  To stop ‘multisession’ workers, call:</p>
+<pre><code class="language-r">plan(sequential)
+</code></pre>
+<p>at the end of your examples(*), vignettes, and package tests.</p>
+<p>If you create the <code>cluster</code> manually using</p>
+<pre><code class="language-r">cl &lt;- parallelly::makeClusterPSOCK(2)
+plan(cluster, workers = cl)
+</code></pre>
+<p>make sure to stop such clusters at the end using</p>
+<pre><code class="language-r">parallel::stopCluster(cl)
+</code></pre>
+<p>(*) Currently, examples are excluded from the detritus checks.
+This was the validated with R-devel revision 82991 (2022-10-02).</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+</body>
+</html>

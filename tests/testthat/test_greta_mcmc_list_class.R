@@ -1,12 +1,7 @@
-if (check_tf_version()) {
-  tensorflow::tf$compat$v1$reset_default_graph()
-}
-
 set.seed(2020 - 02 - 11)
 
 test_that("draws and raw draws should have the right iteration numbering", {
   skip_if_not(check_tf_version())
-
 
   samples <- 1000
   warmup <- 100
@@ -35,7 +30,6 @@ test_that("draws and raw draws should have the right iteration numbering", {
 
 test_that("window works", {
   skip_if_not(check_tf_version())
-
 
   z <- normal(0, 1)
   m <- model(z)
@@ -73,7 +67,6 @@ test_that("window works", {
 test_that("windowing does not have spooky effects", {
   skip_if_not(check_tf_version())
 
-
   chains <- 4
   samples <- 100
   n_samples <- chains * samples
@@ -102,4 +95,58 @@ test_that("windowing does not have spooky effects", {
   raw_draws <- get_model_info(draws)$raw_draws
   expect_equal(dim(as.matrix(draws)), c(n_samples, 1))
   expect_equal(dim(as.matrix(raw_draws)), c(n_samples, 1))
+})
+
+test_that("greta_mcmc_list print method works", {
+  skip_if_not(check_tf_version())
+  samples <- 10
+  warmup <- 10
+  z <- normal(0, 1)
+  m <- model(z)
+  tensorflow::set_random_seed(2024-07-29-1217)
+  draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
+  expect_snapshot(
+    draws
+  )
+})
+
+test_that("greta_mcmc_list print method works with larger sample size", {
+  skip_if_not(check_tf_version())
+  samples <- 20
+  warmup <- 20
+  z <- normal(0, 1)
+  m <- model(z)
+  tensorflow::set_random_seed(2024-07-30-1233)
+  draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
+  expect_snapshot(
+    draws
+  )
+  expect_snapshot(
+    print(draws, n = 20)
+  )
+  expect_snapshot(
+    print(draws, n = 19)
+  )
+  expect_snapshot(
+    print(draws, n = 21)
+  )
+})
+
+test_that("greta_mcmc_list print method works with smaller sample size", {
+  skip_if_not(check_tf_version())
+  samples <- 2
+  warmup <- 2
+  z <- normal(0, 1)
+  m <- model(z)
+  tensorflow::set_random_seed(2024-07-30-34)
+  draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
+  expect_snapshot(
+    draws
+  )
+  expect_snapshot(
+    print(draws, n = 1)
+  )
+  expect_snapshot(
+    print(draws, n = 3)
+  )
 })

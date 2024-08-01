@@ -1,3 +1,58 @@
+# greta 0.4.5.9000 (development version)
+
+## Features
+
+* This version of greta uses Tensorflow 2.0.0, which comes with it a host of new very exciting features!
+
+### Optimizers
+
+The latest interface to optimizers in tensorflow are now used, these changes are described.
+
+* `gradient_descent` gains `momentum` and `nesterov` arguments, as described here in [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/SGD)
+* `adagrad` gains [`epsilon` argument](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adagrad)
+* removes `momentum` optimizer, as this has been folded into `gradient_descent` arguments
+* Adds `amsgrad` argument to `adam` optimizer, as described in [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam)
+* Adds `adamax` optimiser, see [TF docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adamax)
+* Adds `l2_shrinkage_regularization_strength` and `beta` arguments to `ftrl`
+  optimiser.
+* adds `nadam` optimiser - see [docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Nadam).
+* In `rms_prop` optimiser, changes `decay` parameter to `rho`, and adds `centered` parameter - see [docs](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/RMSprop)
+
+The following optimisers are removed, as they are no longer supported by Tensorflow:
+
+ * `powell()`
+ * `cg()`
+ * `newton_cg()`
+ * `l_bfgs_b()`
+ * `tnc()`
+ * `cobyla()`
+ * `slsqp()`
+
+## Minor
+
+* `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.
+* slice sampler no longer needs precision = "single" to work.
+* greta now depends on R 4.1.0, which was released May 2021, over 3 years ago.
+* export `is.greta_array()` and `is.greta_mcmc_list()`
+* greta arrays now have a print method that stops them from printing too many rows into the console. Similar to MCMC print method, you can control the print output with the `n` argument: `print(object, n = <elements to print>)`. (#644)
+* New print method for `greta_mcmc_list`. This means MCMC output will be shorter and more informative. (#644)
+
+## Internals
+
+* Internally we are replacing most of the error handling code as separate 
+  `check_*` functions.
+* Implemented `cli::cli_abort/warn/inform()` in place of `cli::format_error/warning/message()` + `stop/warning/message(msg, call. = FALSE)` pattern.
+* Uses legacy optimizer internally (Use `tf$keras$optimizers$legacy$METHOD` over `tf$keras$optimizers$METHOD`). No user impact expected.
+* Update photo of Grete Hermann (#598)
+* Use `%||%` internally to replace the pattern: `if (is.null(x)) x <- thing` with `x <- x %||% thing`. (#630)
+* Add more explaining variables - replace `if (thing & thing & what == this)` with `if (explanation_of_thing)`.
+* Refactored repeated uses of `vapply` into functions (#377, #658)
+
+## Bug fixes
+
+* Fix bug where matrix multiply had dimension error before coercing to greta array. (#464)
+* 
+
 # greta 0.4.5
 
 ## Bug Fixes

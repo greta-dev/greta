@@ -196,17 +196,13 @@ floor.greta_array <- function(x) {
 #' @export
 round.greta_array <- function(x, digits = 0) {
   if (digits != 0) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "the {.val digits} argument of {.fun round} cannot be set for \\
         {.cls greta_array}s",
         "{.cls greta_array}s can only be rounded to the nearest integer, so the \\
         {.val digits} argument cannot be set"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
   op("round", x, tf_operation = "tf$round")
@@ -305,14 +301,10 @@ trigamma.greta_array <- function(x) {
 
 #' @export
 t.greta_array <- function(x) {
-  if (length(dim(x)) != 2) {
-    msg <- cli::format_error(
+  if (!is_2d(x)) {
+    cli::cli_abort(
       "only 2D arrays can be transposed",
       "dimension of {.var x} was {dim(x)}"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -329,22 +321,16 @@ t.greta_array <- function(x) {
 aperm.greta_array <- function(a, perm = NULL, ...) {
   dimnums <- seq_along(dim(a))
 
-  if (is.null(perm)) {
-    perm <- rev(dimnums)
-  }
+  perm <- perm %||% rev(dimnums)
 
   perm <- as.integer(perm)
 
   if (!identical(sort(perm), dimnums)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.arg perm} must be a reordering of the dimensions: {dimnums}",
         "but was: {perm}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -355,15 +341,21 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
   )
 }
 
+#' @title Compute the Cholesky Factor of a Matrix
+#' @inheritParams base::chol
+#'
+#' @param ... further arguments pass to or from methods.
+#' @param force_cholesky Whether to force cholesky computation. Currently
+#'   used as a workaround to ensure cholesky is calculated properly, and may
+#'   result in code that uses `chol()` to be slow. Default is TRUE. Can change
+#'   to FALSE, but may encounter issues in
+#'   \url{https://github.com/greta-dev/greta/issues/585}.
+#'
 #' @export
-chol.greta_array <- function(x, ...) {
+chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
   if (!identical(list(), list(...))) {
-    msg <- cli::format_warning(
+    cli::cli_warn(
       "{.fun chol} options are ignored for {.cls greta_array}s"
-    )
-    warning(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -372,23 +364,29 @@ chol.greta_array <- function(x, ...) {
   } else {
     dim <- dim(x)
 
-    if (!(length(dim) == 2 && dim[1] == dim[2])) {
-      msg <- cli::format_error(
+    is_2d_square <- is_2d(x) && dim[1] == dim[2]
+    if (!is_2d_square) {
+      ## TODO do we need to check for symmetry?
+      cli::cli_abort(
         c(
           "only two-dimensional, square, symmetric {.cls greta_array}s can be \\
           Cholesky decomposed",
           "{.code dim(x)} returns: {dim(x)}"
         )
       )
-      stop(
-        msg,
-        call. = FALSE
-      )
     }
 
     result <- op("chol", x,
       dim = dim,
       tf_operation = "tf_chol"
+    )
+
+  }
+
+  if (force_cholesky){
+    result <- op("chol", x,
+                 dim = dim(x),
+                 tf_operation = "tf_chol"
     )
   }
 
@@ -399,24 +397,21 @@ chol.greta_array <- function(x, ...) {
 solve.greta_array <- function(a, b, ...) {
 
   # check a is 2D
-  if (length(dim(a)) != 2) {
-    msg <- cli::format_error(
+  if (!is_2d(a)) {
+    cli::cli_abort(
       c(
         "Arrays are not both 2D",
         "{.var a} and {.var b} must both be 2D, but {.var a} has dimensions: \\
         {paste(dim(a), collapse = 'x')}"
       )
     )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   # check the matrix is square
-  if (dim(a)[1] != dim(a)[2]) {
+  a_not_square <- dim(a)[1] != dim(a)[2]
+  if (a_not_square) {
 
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.var a} is not square",
         "x" = "{.var a} must be square, but has \\
@@ -425,10 +420,6 @@ solve.greta_array <- function(a, b, ...) {
       )
     )
 
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   # if they just want the matrix inverse, do that
@@ -444,32 +435,25 @@ solve.greta_array <- function(a, b, ...) {
   } else {
 
     # check b is 2D
-    if (length(dim(b)) != 2) {
-      msg <- cli::format_error(
+    if (!is_2d(b)) {
+      cli::cli_abort(
         c(
           "Arrays are not both 2D",
           "{.var a} and {.var b} must both be 2D, but {.var b} has dimensions: \\
           {paste(dim(b), collapse = 'x')}"
         )
       )
-      stop(
-        msg,
-        call. = FALSE
-      )
     }
 
     # b must have the right number of rows
-    if (dim(b)[1] != dim(a)[1]) {
-      msg <- cli::format_message(
+    rows_not_equal <- dim(b)[1] != dim(a)[1]
+    if (rows_not_equal) {
+      cli::cli_abort(
         c(
           "Number of rows not equal",
           "x" = "{.var b} must have the same number of rows as {.var a} \\
           ({dim(a)[1]}), but has {dim(b)[1]} rows instead"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
 
@@ -497,21 +481,17 @@ chol2inv.default <- function(x, size = NCOL(x), LINPACK = FALSE) {
 
 #' @export
 chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
-  if (!identical(LINPACK, FALSE)) {
-    msg <- cli::format_warning(
+  if (isTRUE(LINPACK)) {
+    cli::cli_warn(
       "The {.arg LINPACK} argument is ignored for {.cls greta_array}s, and \\
       has also been defunct since R 3.1.0"
     )
-    warning(msg)
   }
 
+  ## TODO shouldn't this be a !/missing() or something?
   if (!identical(size, NCOL(x))) {
-    msg <- cli::format_warning(
+    cli::cli_warn(
       "{.arg size} is ignored for {.cls greta_array}s"
-    )
-    warning(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -618,41 +598,30 @@ cumprod.greta_array <- function(x) {
 # these primitives are not yet supported:
 #' @export
 cummax.greta_array <- function(x) {
-  msg <- cli::format_error(
+  cli::cli_abort(
     "{.fun cummax} not yet implemented for {.pkg greta}"
-  )
-  stop(
-    msg,
-    call. = FALSE
   )
 }
 
 #' @export
 cummin.greta_array <- function(x) {
-  msg <- cli::format_error(
+  cli::cli_abort(
     "{.fun cummin} not yet implemented for {.pkg greta}"
-  )
-  stop(
-    msg,
-    call. = FALSE
   )
 }
 
 
 # get the incides to reduce over, for colSums, rowSums, colMeans, rowMeans
 rowcol_idx <- function(x, dims, which = c("col", "row")) {
-  if (dims < 1L || dims > length(dim(x)) - 1L) {
-    msg <- cli::format_error(
+  invalid_dims <- dims < 1L || dims > n_dim(x) - 1L
+  if (invalid_dims) {
+    cli::cli_abort(
       "invalid {.var dims}"
     )
-    stop(
-      msg,
-      call. = FALSE
-      )
   }
 
   switch(which,
-    row = (dims + 1):length(dim(x)),
+    row = (dims + 1):n_dim(x),
     col = seq_len(dims)
   )
 }
@@ -773,7 +742,7 @@ rowSums.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
 #' @export
 sweep <- function(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
   # nolint end
-  if (inherits(STATS, "greta_array")) {
+  if (is.greta_array(STATS)) {
     x <- as.greta_array(x)
   }
 
@@ -798,33 +767,26 @@ sweep.greta_array <- function(x,
   margin <- MARGIN
 
   if (!margin %in% seq_len(2)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "MARGIN can only be 1 or 2"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
   # x must be 2D
-  if (length(dim(x)) != 2) {
-    msg <- cli::format_error(
+  if (!is_2d(x)) {
+    cli::cli_abort(
       c(
         "Array not 2D",
-        "x" = "{.var x} must be a 2D array, but has {length(dim(x))} \\
+        "x" = "{.var x} must be a 2D array, but has {n_dim(x)} \\
         dimensions"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
   # STATS must be a column array
-  if (!(length(dim(stats)) == 2 && dim(stats)[2] == 1)) {
-    msg <- cli::format_error(
+  is_column_array <- is_2d(stats) && dim(stats)[2] == 1
+  if (!is_column_array) {
+    cli::cli_abort(
       c(
         "{.var stats} not a column vector array",
         "{.var stats} must be a column vector array",
@@ -832,23 +794,16 @@ sweep.greta_array <- function(x,
         {paste(dim(stats), collapse = 'x')}"
       )
     )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   # STATS must have the same dimension as the correct dim of x
-  if (dim(x)[margin] != dim(stats)[1]) {
-    msg <- cli::format_error(
+  stats_dim_matches_x_dim <- dim(x)[margin] == dim(stats)[1]
+  if (!stats_dim_matches_x_dim) {
+    cli::cli_abort(
       c(
         "The number of elements of {.var stats} does not match \\
         {.code dim(x)[MARGIN]}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -861,6 +816,7 @@ sweep.greta_array <- function(x,
 
 # nolint start
 #' @import methods
+#' @importFrom tensorflow %as%
 setClass("greta_array")
 setMethod(
   "kronecker", signature(X = "greta_array", Y = "greta_array"),
@@ -870,30 +826,22 @@ setMethod(
     fun <- match.arg(FUN)
 
     # X must be 2D
-    if (length(dim(X)) != 2) {
-      msg <- cli::format_error(
+    if (!is_2d(X)) {
+      cli::cli_abort(
         c(
           "Not a 2D array",
-          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions"
+          "{.var X} must be a 2D array, but has {n_dim(X)} dimensions"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
 
     # Y must be 2D
-    if (length(dim(Y)) != 2) {
-      msg <- cli::format_error(
+    if (!is_2d(Y)) {
+      cli::cli_abort(
         c(
           "Not a 2D array",
-          "{.var X} must be a 2D array, but has {length(dim(X))} dimensions"
+          "{.var X} must be a 2D array, but has {n_dim(X)} dimensions"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
 
@@ -966,24 +914,16 @@ backsolve.greta_array <- function(r, x,
                                   transpose = FALSE) {
   # nolint end
   if (k != ncol(r)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.var k} must equal {.code ncol(r)} for {.cls greta_array}s"
       )
     )
-    stop(
-      msg,
-      call. = FALSE
-    )
   }
 
   if (transpose) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "transpose must be FALSE for {.cls greta_array}s"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -1026,22 +966,14 @@ forwardsolve.greta_array <- function(l, x,
                                      transpose = FALSE) {
   # nolint end
   if (k != ncol(l)) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "{.var k} must equal {.code ncol(l)} for {.cls greta_array}s"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
   if (transpose) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       "transpose must be FALSE for {.cls greta_array}s"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -1080,13 +1012,9 @@ apply.greta_array <- function(X, MARGIN,
   # nolint end
   fun <- match.arg(FUN)
 
-  if (inherits(MARGIN, "greta_array")) {
-    msg <- cli::format_error(
+  if (is.greta_array(MARGIN)) {
+    cli::cli_abort(
       "MARGIN cannot be a greta array"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -1177,13 +1105,9 @@ tapply.greta_array <- function(X, INDEX,
   index <- INDEX
   fun <- match.arg(FUN)
 
-  if (inherits(index, "greta_array")) {
-    msg <- cli::format_error(
+  if (is.greta_array(index)) {
+    cli::cli_abort(
       "INDEX cannot be a greta array"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -1193,16 +1117,13 @@ tapply.greta_array <- function(X, INDEX,
   len <- length(groups)
 
   dim_x <- dim(x)
-  if (!(length(dim_x) == 2L && dim_x[2] == 1L)) {
-    msg <- cli::format_error(
+  is_2_by_1 <- is_2d(x) && dim_x[2] == 1L
+  if (!is_2_by_1) {
+    cli::cli_abort(
       c(
         "{.var x} must be 2D greta array with one column",
         "However {.var x} has dimensions {paste(dim_x, collapse = 'x')}"
       )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -1243,17 +1164,18 @@ eigen.greta_array <- function(x, symmetric,
   # nolint end
   x <- as.greta_array(x)
 
-  if (missing(symmetric)) symmetric <- TRUE
+  if (missing(symmetric)) {
+    symmetric <- TRUE
+  }
+
   dims <- dim(x)
 
-  if (length(dims) != 2 | dims[1] != dims[2] | !symmetric) {
-    msg <- cli::format_error(
+  is_square <- dims[1] == dims[2]
+  is_not_2d_square_symmetric <- !is_2d(x) | !is_square | !symmetric
+  if (is_not_2d_square_symmetric) {
+    cli::cli_abort(
       "only two-dimensional, square, symmetric {.cls greta_array}s can be \\
       eigendecomposed"
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
 
@@ -1305,17 +1227,13 @@ rdist.default <- function(x1, x2 = NULL, compact = FALSE) {
   # error nicely if they don't have fields installed
   fields_installed <- requireNamespace("fields", quietly = TRUE)
   if (!fields_installed) {
-    msg <- cli::format_error(
+    cli::cli_abort(
       c(
         "{.pkg fields} package must be installed to use {.fun rdist} on greta \\
         arrays",
         "Install {.pkg fields} with:",
         "{.code install.packages('fields')}"
         )
-    )
-    stop(
-      msg,
-      call. = FALSE
     )
   }
   fields::rdist(
@@ -1327,20 +1245,16 @@ rdist.default <- function(x1, x2 = NULL, compact = FALSE) {
 
 #' @export
 rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
-  if (!identical(compact, FALSE)) {
-    msg <- cli::format_warning(
+  if (isTRUE(compact)) {
+    cli::cli_warn(
       "{.arg compact} is ignored for {.cls greta_array}s"
-    )
-    warning(
-      msg,
-      call. = FALSE
     )
   }
 
   x1 <- as.greta_array(x1)
 
   # like rdist, convert to a column vector if it has too many dimensions
-  if (length(dim(x1)) != 2) {
+  if (!is_2d(x1)) {
     x1 <- flatten(x1)
   }
 
@@ -1358,7 +1272,7 @@ rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
 
     x2 <- as.greta_array(x2)
 
-    if (length(dim(x2)) != 2) {
+    if (!is_2d(x2)) {
       x2 <- flatten(x2)
     }
 
@@ -1366,16 +1280,12 @@ rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
     # different numbers of columns, takes the number of columns from x1,and
     # sometimes gives nonsense results
     if (ncol(x1) != ncol(x2)) {
-      msg <- cli::format_error(
+      cli::cli_abort(
         c(
           "{.var x1} and {.var x2} must have the same number of columns",
           "However {.code ncol(x1)} = {ncol(x1)} and \\
           {.code ncol(x2)} = {ncol(x2)}"
         )
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
 

@@ -10,22 +10,20 @@ node <- R6Class(
     dim = NA,
     distribution = NULL,
     initialize = function(dim = NULL, value = NULL) {
-      if (is.null(dim)) {
-        dim <- c(1, 1)
-      }
+      ## browser()
+      dim <- dim %||% c(1,1)
 
       # coerce dim to integer
       dim <- as.integer(dim)
 
       # store array (updates dim)
-      if (is.null(value)) {
-        value <- unknowns(dim = dim)
-      }
+      value <- value %||% unknowns(dim = dim)
 
       self$value(value)
-      self$get_unique_name()
+      self$create_unique_name()
     },
     register = function(dag) {
+      ## TODO add explaining variable
       if (!(self$unique_name %in% names(dag$node_list))) {
         dag$node_list[[self$unique_name]] <- self
       }
@@ -33,6 +31,9 @@ node <- R6Class(
 
     # recursively register self and family
     register_family = function(dag) {
+      ## TF1/2
+      ## Rename with an explaining variable
+      ## TODO add explaining variable
       if (!(self$unique_name %in% names(dag$node_list))) {
 
         # add self to list
@@ -42,7 +43,7 @@ node <- R6Class(
         family <- c(self$list_children(dag), self$list_parents(dag))
 
         # get and assign their names
-        family_names <- vapply(family, member, "unique_name", FUN.VALUE = "")
+        family_names <- extract_unique_names(family)
         names(family) <- family_names
 
         # find the unregistered ones
@@ -69,6 +70,9 @@ node <- R6Class(
       node$remove_child(self)
     },
     list_parents = function(dag) {
+      ## TF1/2
+      ## tf_cholesky
+      ## is there a way here to add some check for cholesky?
       parents <- self$parents
 
       # if this node is being sampled and has a distribution, consider
@@ -98,11 +102,7 @@ node <- R6Class(
       # that a child node
       mode <- dag$how_to_define(self)
       if (mode == "sampling" & has_distribution(self)) {
-        child_names <- vapply(children,
-          member,
-          "unique_name",
-          FUN.VALUE = character(1)
-        )
+        child_names <- extract_unique_names(children)
         keep <- child_names != self$distribution$unique_name
         children <- children[keep]
       }
@@ -118,11 +118,7 @@ node <- R6Class(
       parents <- self$parents
 
       if (length(parents) > 0) {
-        names <- vapply(parents,
-          member,
-          "unique_name",
-          FUN.VALUE = character(1)
-        )
+        names <- extract_unique_names(parents)
 
         if (recursive) {
           their_parents <- function(x) {
@@ -168,10 +164,11 @@ node <- R6Class(
       tf_name %in% ls(dag$tf_environment)
     },
 
-    # define this and all descendent objects on tensorflow graph in environment
-    # env
+    # define this and all descendent objects on TF graph in environment
     define_tf = function(dag) {
-
+      if (Sys.getenv("GRETA_DEBUG") == "true") {
+        browser()
+      }
       # if defined already, skip
       if (!self$defined(dag)) {
 
@@ -180,16 +177,19 @@ node <- R6Class(
           function(x) x$defined(dag),
           FUN.VALUE = FALSE
         )
-
         if (any(!parents_defined)) {
           parents <- self$list_parents(dag)
           lapply(
             parents[which(!parents_defined)],
-            function(x) x$define_tf(dag)
+            function(x){
+              # browser()
+              x$define_tf(dag)
+            }
           )
         }
 
         # then define self
+          # stop("hi from the future ... parents are of class:", str(parents))
         self$tf(dag)
       }
     },
@@ -218,13 +218,9 @@ node <- R6Class(
     set_distribution = function(distribution) {
 
       # check it
-      if (!inherits(distribution, "distribution_node")) {
-        msg <- cli::format_error(
+      if (!is.distribution_node(distribution)) {
+        cli::cli_abort(
           "invalid distribution"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -245,7 +241,24 @@ node <- R6Class(
 
       text
     },
-    get_unique_name = function() {
+    cli_description = function() {
+      text <- node_type(self)
+      text <- node_type_colour(text)
+
+      dist_txt <- glue::glue("{self$distribution$distribution_name} distribution")
+      if (has_distribution(self)) {
+        text <- cli::cli_fmt(
+          cli::cli_text(
+            # "{text} following a {.strong {dist_txt}}"
+            "{text} following a {cli::col_yellow({dist_txt})}"
+          )
+        )
+      }
+
+      text
+    },
+
+    create_unique_name = function() {
       self$unique_name <- glue::glue("node_{rhex()}")
     },
     plotting_label = function() {
@@ -269,7 +282,8 @@ node <- R6Class(
   )
 )
 
-# generic to grab dimensions
+#' @title generic to grab dimensions of nodes
+#' @param x greta node class
 #' @export
 dim.node <- function(x) {
   x$dim
@@ -277,18 +291,14 @@ dim.node <- function(x) {
 
 # coerce an object to a node
 to_node <- function(x) {
-  if (!inherits(x, "node")) {
-    if (inherits(x, "greta_array")) {
+  if (!is.node(x)) {
+    if (is.greta_array(x)) {
       x <- get_node(x)
     } else if (is.numeric(x)) {
       x <- data_node$new(x)
     } else {
-      msg <- cli::format_error(
+      cli::cli_abort(
         "cannot coerce object to a node"
-      )
-      stop(
-        msg,
-        call. = FALSE
       )
     }
   }

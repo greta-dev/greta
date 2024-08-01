@@ -5,25 +5,29 @@ greta_install_python_deps <- function(timeout) {
 
   callr_conda_install <- callr::r_process_options(
     func = function() {
-      reticulate::conda_install(
-        envname = "greta-env",
-        packages = c(
-          "numpy==1.16.4",
-          "tensorflow-probability==0.7.0",
-          "tensorflow==1.14.0"
-        )
+      tensorflow::install_tensorflow(
+        version = "2.15.0",
+        envname = "greta-env-tf2"
       )
-    },
+      reticulate::py_install(packages = "tensorflow-probability==0.23.0",
+                             pip = TRUE,
+                             envname = "greta-env-tf2",
+                             method = "conda")
+      reticulate::py_install(packages = "keras==2.15.0",
+                             pip = TRUE,
+                             envname = "greta-env-tf2",
+                             method = "conda")
+      },
     stdout = stdout_file,
     stderr = stderr_file
-  )
+    )
 
   install_python_modules <- new_install_process(
     callr_process = callr_conda_install,
     timeout = timeout,
     stdout_file = stdout_file,
     stderr_file = stderr_file,
-    cli_start_msg = "Installing python modules into 'greta-env' conda \\
+    cli_start_msg = "Installing python modules into 'greta-env-tf2' conda \\
                      environment, this may take a few minutes",
     cli_end_msg = "Python modules installed!"
   )

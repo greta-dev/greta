@@ -1,0 +1,30 @@
+### Lightspeed
+
+*Lightspeed* estimates a linear normal model without predictors. The data are 66 measurements from Simon Newcomb and represent the time required for light to travel roughly 7500 meters.
+
+See also the [Stan examples](https://github.com/stan-dev/example-models/wiki/ARM-Models-Sorted-by-Type#no-predictors) for details.
+
+#### data
+```{r lightspeed_data, highlight = FALSE}
+y <- c(28, 26, 33, 24, 34, -44, 27, 16, 40, -2, 29, 22, 24, 21, 25, 
+       30, 23, 29, 31, 19, 24, 20, 36, 32, 36, 28, 25, 21, 28, 29, 
+       37, 25, 28, 26, 30, 32, 36, 26, 30, 22, 36, 23, 27, 27, 28, 
+       27, 31, 27, 26, 33, 26, 32, 32, 24, 39, 28, 24, 25, 32, 25, 
+       29, 27, 28, 29, 16, 23)
+n <- length(y)
+```
+
+#### greta code
+```{r lightspeed_greta}
+beta  <- variable()
+sigma <- variable(lower = 0)
+
+distribution(y) <- normal(beta, sigma)
+```
+
+#### Stan code
+<div class="stan">
+```{r lightspeed_stan, echo = FALSE}
+cat(readLines('https://raw.githubusercontent.com/stan-dev/example-models/master/ARM/Ch.8/lightspeed.stan'), sep = '\n')
+```
+</div>

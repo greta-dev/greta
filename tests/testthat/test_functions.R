@@ -1,7 +1,3 @@
-if (check_tf_version()) {
-  tensorflow::tf$compat$v1$reset_default_graph()
-}
-
 set.seed(2020 - 02 - 11)
 
 test_that("simple functions work as expected", {
@@ -449,7 +445,6 @@ test_that("tapply errors as expected", {
 test_that("eigen works as expected", {
   skip_if_not(check_tf_version())
 
-
   k <- 4
   x <- rWishart(1, k + 1, diag(k))[, , 1]
   x_ga <- as_data(x)
@@ -459,7 +454,6 @@ test_that("eigen works as expected", {
 
   r_out_vals <- eigen(x, only.values = TRUE)
   greta_out_vals <- eigen(as_data(x), only.values = TRUE)
-
 
   # values
   compare_op(r_out$values, grab(greta_out$values))

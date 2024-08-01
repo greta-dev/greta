@@ -72,7 +72,8 @@ joint_distribution <- R6Class(
       # add the joint dimension as the last dimension
       dim <- single_dim
       ndim <- length(dim)
-      if (dim[ndim] == 1) {
+      last_dim_1d <- dim[ndim] == 1
+      if (last_dim_1d) {
         dim[ndim] <- n_distributions
       } else {
         dim <- c(dim, n_distributions)
@@ -102,7 +103,8 @@ joint_distribution <- R6Class(
       # check the distributions are all either discrete or continuous
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)
 
-      if (!all(discrete) & !all(!discrete)) {
+      is_discrete_and_continuous <- !all(discrete) & !all(!discrete)
+      if (is_discrete_and_continuous) {
         msg <- cli::format_error(
           "cannot construct a joint distribution from a combination of \\
           discrete and continuous distributions"
@@ -154,7 +156,7 @@ joint_distribution <- R6Class(
 
         # split x on the joint dimension, and loop through computing the
         # densities
-        last_dim <- length(dim(x)) - 1L
+        last_dim <- n_dim(x) - 1L
         x_vals <- tf$split(x, length(tfp_distributions), axis = last_dim)
 
         log_probs <- mapply(
