@@ -384,7 +384,7 @@ abind.greta_array <- function(...,
   arg_list <- list(...)
 
   # drop any NULLs
-  to_discard <- vapply(arg_list, is.null, FUN.VALUE = FALSE)
+  to_discard <- are_null(arg_list)
   if (any(to_discard)) {
     arg_list <- arg_list[!to_discard]
   }
@@ -469,17 +469,14 @@ c.greta_array <- function(...) {
   args <- list(...)
 
   # drop NULLs from the list
-  is_null <- vapply(args, is.null, FUN.VALUE = FALSE)
+  is_null <- are_null(args)
   args <- args[!is_null]
 
   # try to coerce to greta arrays
   args <- lapply(args, as.greta_array, optional = TRUE)
 
   # return a list if they aren't all greta arrays
-  is_greta_array <- vapply(args,
-    is.greta_array,
-    FUN.VALUE = FALSE
-  )
+  is_greta_array <- are_greta_array(args)
 
   if (!all(is_greta_array)) {
     return(args)

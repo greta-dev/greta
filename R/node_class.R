@@ -20,7 +20,7 @@ node <- R6Class(
       value <- value %||% unknowns(dim = dim)
 
       self$value(value)
-      self$get_unique_name()
+      self$create_unique_name()
     },
     register = function(dag) {
       ## TODO add explaining variable
@@ -43,7 +43,7 @@ node <- R6Class(
         family <- c(self$list_children(dag), self$list_parents(dag))
 
         # get and assign their names
-        family_names <- vapply(family, member, "unique_name", FUN.VALUE = "")
+        family_names <- extract_unique_names(family)
         names(family) <- family_names
 
         # find the unregistered ones
@@ -102,11 +102,7 @@ node <- R6Class(
       # that a child node
       mode <- dag$how_to_define(self)
       if (mode == "sampling" & has_distribution(self)) {
-        child_names <- vapply(children,
-          member,
-          "unique_name",
-          FUN.VALUE = character(1)
-        )
+        child_names <- extract_unique_names(children)
         keep <- child_names != self$distribution$unique_name
         children <- children[keep]
       }
@@ -122,11 +118,7 @@ node <- R6Class(
       parents <- self$parents
 
       if (length(parents) > 0) {
-        names <- vapply(parents,
-          member,
-          "unique_name",
-          FUN.VALUE = character(1)
-        )
+        names <- extract_unique_names(parents)
 
         if (recursive) {
           their_parents <- function(x) {
@@ -266,7 +258,7 @@ node <- R6Class(
       text
     },
 
-    get_unique_name = function() {
+    create_unique_name = function() {
       self$unique_name <- glue::glue("node_{rhex()}")
     },
     plotting_label = function() {

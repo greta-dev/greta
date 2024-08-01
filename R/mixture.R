@@ -180,7 +180,7 @@ mixture_distribution <- R6Class(
       truncations <- lapply(distribs, member, "truncation")
       bounds <- lapply(distribs, member, "bounds")
 
-      truncated <- !vapply(truncations, is.null, logical(1))
+      truncated <- !are_null(truncations)
       supports <- bounds
       supports[truncated] <- truncations[truncated]
 

@@ -382,7 +382,7 @@ dag_class <- R6Class(
       # get all distribution nodes that have a target
       distribution_nodes <- self$node_list[self$node_types == "distribution"]
       target_nodes <- lapply(distribution_nodes, member, "get_tf_target_node()")
-      has_target <- !vapply(target_nodes, is.null, FUN.VALUE = TRUE)
+      has_target <- !are_null(target_nodes)
       distribution_nodes <- distribution_nodes[has_target]
       target_nodes <- target_nodes[has_target]
 

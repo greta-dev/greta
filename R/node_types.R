@@ -467,11 +467,7 @@ distribution_node <- R6Class(
       # consider that a parent node
       mode <- dag$how_to_define(self)
       if (mode == "sampling" & !is.null(self$target)) {
-        parent_names <- vapply(parents,
-          member,
-          "unique_name",
-          FUN.VALUE = character(1)
-        )
+        parent_names <- extract_unique_names(parents)
         keep <- parent_names != self$target$unique_name
         parents <- parents[keep]
       }

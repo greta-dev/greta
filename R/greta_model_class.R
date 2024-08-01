@@ -285,11 +285,8 @@ plot.greta_model <- function(x,
 
   # add greta array names where available
   visible_nodes <- lapply(x$visible_greta_arrays, get_node)
-  known_nodes <- vapply(visible_nodes,
-    member,
-    "unique_name",
-    FUN.VALUE = ""
-  )
+  known_nodes <- extract_unique_names(visible_nodes)
+
   known_nodes <- known_nodes[known_nodes %in% names]
   known_idx <- match(known_nodes, names)
   node_labels[known_idx] <- paste(names(known_nodes),
@@ -323,13 +320,7 @@ plot.greta_model <- function(x,
 
   node_names <- lapply(
     parameter_list,
-    function(parameters) {
-      vapply(parameters,
-        member,
-        "unique_name",
-        FUN.VALUE = ""
-      )
-    }
+    extract_unique_names
   )
 
   # for each distribution
@@ -360,7 +351,7 @@ plot.greta_model <- function(x,
     "target"
   )
 
-  keep <- !vapply(targets, is.null, TRUE)
+  keep <- !are_null(targets)
   distrib_idx <- distrib_idx[keep]
 
 

@@ -107,11 +107,7 @@ check_dims <- function(..., target_dim = NULL) {
   # if more than one is non-scalar, need to check them
   more_than_one_is_non_scalar <- sum(!scalars) > 1
   if (more_than_one_is_non_scalar) {
-    match_first <- vapply(dim_list[!scalars],
-                          identical,
-                          FUN.VALUE = FALSE,
-                          dim_list[!scalars][[1]]
-    )
+    match_first <- are_identical(dim_list[!scalars], dim_list[!scalars][[1]])
 
     # if they're non-scalar, but have the same dimensions, that's fine too
     if (!all(match_first)) {
@@ -139,11 +135,7 @@ check_dims <- function(..., target_dim = NULL) {
     if (!all(scalars)) {
 
       # check all arguments against this
-      matches_target <- vapply(dim_list[!scalars],
-                               identical,
-                               FUN.VALUE = FALSE,
-                               target_dim
-      )
+      matches_target <- are_identical(dim_list[!scalars], target_dim)
 
       # error if not
       if (!all(matches_target)) {
@@ -276,11 +268,7 @@ check_n_realisations <- function(vectors = list(),
 
   # if more than one has multiple rows, need to check them
   if (sum(!single_rows) > 1) {
-    match_first <- vapply(nrows[!single_rows],
-                          identical,
-                          FUN.VALUE = FALSE,
-                          nrows[!single_rows][[1]]
-    )
+    match_first <- are_identical(nrows[!single_rows], nrows[!single_rows][[1]])
 
     # if they're non-scalar, but have the same dimensions, that's fine too
     if (!all(match_first)) {
@@ -321,11 +309,7 @@ check_n_realisations <- function(vectors = list(),
     if (!all(single_rows)) {
 
       # check all arguments against this
-      matches_target <- vapply(nrows[!single_rows],
-                               identical,
-                               FUN.VALUE = FALSE,
-                               target
-      )
+      matches_target <- are_identical(nrows[!single_rows], target)
 
       # error if not
       if (!all(matches_target)) {
@@ -395,9 +379,7 @@ check_dimension <- function(vectors = list(),
   }
 
   # make sure all the parameters match this dimension
-  match_dimension <- vapply(ncols, identical, dimension,
-                            FUN.VALUE = FALSE
-  )
+  match_dimension <- are_identical(ncols, dimension)
 
   # otherwise it's not fine
   if (!all(match_dimension)) {
@@ -575,11 +557,7 @@ check_future_plan <- function() {
 check_greta_arrays <- function(greta_array_list, fun_name, hint = NULL) {
 
   # check they are greta arrays
-  are_greta_arrays <- vapply(greta_array_list,
-                             is.greta_array,
-                             FUN.VALUE = FALSE
-  )
-
+  are_greta_arrays <- are_greta_array(greta_array_list)
 
   msg <- NULL
 
@@ -628,10 +606,7 @@ check_values_list <- function(values, env) {
   fixed_greta_arrays <- lapply(names, get, envir = env)
 
   # make sure that's what they are
-  are_greta_arrays <- vapply(fixed_greta_arrays,
-                             is.greta_array,
-                             FUN.VALUE = FALSE
-  )
+  are_greta_arrays <- are_greta_array(fixed_greta_arrays)
 
   if (!all(are_greta_arrays)) {
     cli::cli_abort(
@@ -872,17 +847,9 @@ check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays, dag) {
   # check there are no variables without distributions (or whose children have
   # distributions - for lkj & wishart) that aren't given fixed values
   variables <- dag$node_list[dag$node_types == "variable"]
-  have_distributions <- vapply(
-    variables,
-    has_distribution,
-    FUN.VALUE = logical(1)
-  )
+  have_distributions <- have_distribution(variables)
   any_child_has_distribution <- function(variable) {
-    have_distributions <- vapply(
-      variable$children,
-      has_distribution,
-      FUN.VALUE = logical(1)
-    )
+    have_distributions <- have_distribution(variable$children)
     any(have_distributions)
   }
   children_have_distributions <- vapply(
@@ -894,12 +861,7 @@ check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays, dag) {
   unsampleable <- !have_distributions & !children_have_distributions
 
   fixed_nodes <- lapply(fixed_greta_arrays, get_node)
-  fixed_node_names <- vapply(
-    fixed_nodes,
-    member,
-    "unique_name",
-    FUN.VALUE = character(1)
-  )
+  fixed_node_names <- extract_unique_names(fixed_nodes)
 
   unfixed <- !(names(variables) %in% fixed_node_names)
 
