@@ -25,6 +25,8 @@
 #'           pip = TRUE
 #'        )
 #'     ```
+#' @param restart logical. Restart R after installation? Default is FALSE.
+#'   Will only restart R during interactive sessions, and only works in RStudio.
 #'
 #' @param ... Optional arguments, reserved for future expansion.
 #'
@@ -64,6 +66,7 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
                                timeout = 5,
                                manual = FALSE,
+                               restart = FALSE,
                                ...) {
 
   # set warning message length
@@ -93,8 +96,29 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
 
     greta_install_python_deps(timeout)
 
+
+    restart_session <- interactive() && restart
+    has_rstudioapi_pkg <- requireNamespace("rstudioapi", quietly = TRUE)
+    will_restart <- restart_session &&
+      has_rstudioapi_pkg &&
+      rstudioapi::hasFun("restartSession")
+
     cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
-    cli_ul("Restart R, then load {.pkg greta} with: {.code library(greta)}")
+
+    if (!will_restart){
+      cli::cli_inform(
+        "Restart R, then load {.pkg greta} with: {.code library(greta)}"
+        )
+      return(invisible())
+    }
+
+    if (will_restart) {
+      cli::cli_inform("Restarting R!")
+      cli::cli_inform("Next, load {.pkg greta} with: {.code library(greta)}")
+      rstudioapi::restartSession()
+    }
+
+
 
   }
 

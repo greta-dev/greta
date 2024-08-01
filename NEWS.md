@@ -36,6 +36,7 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 * export `is.greta_array()` and `is.greta_mcmc_list()`
 * greta arrays now have a print method that stops them from printing too many rows into the console. Similar to MCMC print method, you can control the print output with the `n` argument: `print(object, n = <elements to print>)`. (#644)
 * New print method for `greta_mcmc_list`. This means MCMC output will be shorter and more informative. (#644)
+* `restart` argument for `install_greta_deps()` and `reinstall_greta_deps()` to automatically restart R (#523)
 
 ## Internals
 

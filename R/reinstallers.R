@@ -21,9 +21,9 @@
 #' }
 remove_greta_env <- function(){
   cli::cli_alert_info("removing 'greta-env-tf2' conda environment")
-      reticulate::conda_remove(
-        envname = "greta-env-tf2"
-      )
+  reticulate::conda_remove(
+    envname = "greta-env-tf2"
+  )
   cli::cli_alert_success("greta-env-tf2 environment removed!")
 }
 
@@ -45,7 +45,7 @@ remove_miniconda <- function(){
   }
   if (yesno::yesno("Are you sure you want to delete miniconda from ",
                    path_to_miniconda,"?") ){
-  cli::cli_alert_info("removing 'miniconda' installation")
+    cli::cli_alert_info("removing 'miniconda' installation")
     unlink(path_to_miniconda, recursive = TRUE)
     cli::cli_alert_success("'miniconda' successfully removed!")
   } else {
@@ -72,10 +72,12 @@ reinstall_miniconda <- function(timeout = 5){
 #' }
 reinstall_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                  conda = "auto",
-                                 timeout = 5){
+                                 timeout = 5,
+                                 restart = FALSE){
   remove_greta_env()
   remove_miniconda()
   install_greta_deps(method = method,
                      conda = conda,
-                     timeout = timeout)
+                     timeout = timeout,
+                     restart = restart)
 }

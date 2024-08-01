@@ -10,13 +10,15 @@ install_greta_deps(
   conda = "auto",
   timeout = 5,
   manual = FALSE,
+  restart = FALSE,
   ...
 )
 
 reinstall_greta_deps(
   method = c("auto", "virtualenv", "conda"),
   conda = "auto",
-  timeout = 5
+  timeout = 5,
+  restart = FALSE
 )
 }
 \arguments{
@@ -32,6 +34,9 @@ installation component.}
 
 \item{manual}{logical. Skip the fancy installation and just run:
 \code{reticulate::py_install( packages = c( 'numpy', 'tensorflow', 'tensorflow-probability' ), pip = TRUE )}}
+
+\item{restart}{logical. Restart R after installation? Default is FALSE.
+Will only restart R during interactive sessions, and only works in RStudio.}
 
 \item{...}{Optional arguments, reserved for future expansion.}
 }
