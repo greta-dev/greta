@@ -384,14 +384,14 @@ abind.greta_array <- function(...,
   arg_list <- list(...)
 
   # drop any NULLs
-  to_discard <- vapply(arg_list, is.null, FUN.VALUE = FALSE)
+  to_discard <- are_null(arg_list)
   if (any(to_discard)) {
     arg_list <- arg_list[!to_discard]
   }
 
   # get N first, in case they used the default value for along
   dims <- lapply(arg_list, dim)
-  n <- max(vapply(dims, length, FUN.VALUE = 1L))
+  n <- max(lengths(dims))
 
   # needed to keep the same formals as abind
   N <- n # nolint
@@ -469,17 +469,14 @@ c.greta_array <- function(...) {
   args <- list(...)
 
   # drop NULLs from the list
-  is_null <- vapply(args, is.null, FUN.VALUE = FALSE)
+  is_null <- are_null(args)
   args <- args[!is_null]
 
   # try to coerce to greta arrays
   args <- lapply(args, as.greta_array, optional = TRUE)
 
   # return a list if they aren't all greta arrays
-  is_greta_array <- vapply(args,
-    inherits, "greta_array",
-    FUN.VALUE = FALSE
-  )
+  is_greta_array <- are_greta_array(args)
 
   if (!all(is_greta_array)) {
     return(args)
@@ -489,7 +486,7 @@ c.greta_array <- function(...) {
   arrays <- lapply(args, flatten)
 
   # get output dimensions
-  length_vec <- vapply(arrays, length, FUN.VALUE = 1)
+  length_vec <- lengths(arrays)
   dim_out <- c(sum(length_vec), 1L)
 
   # create the op, expanding 'arrays' out to match op()'s dots input

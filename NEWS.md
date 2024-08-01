@@ -46,7 +46,7 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 * Update photo of Grete Hermann (#598)
 * Use `%||%` internally to replace the pattern: `if (is.null(x)) x <- thing` with `x <- x %||% thing`. (#630)
 * Add more explaining variables - replace `if (thing & thing & what == this)` with `if (explanation_of_thing)`.
-* 
+* Refactored repeated uses of `vapply` into functions (#377, #658)
 
 ## Bug fixes
 

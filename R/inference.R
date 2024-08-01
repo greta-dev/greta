@@ -668,7 +668,7 @@ parse_initial_values <- function(initials, dag) {
   forward_names <- glue::glue("all_forward_{dag$node_tf_names}")
   nodes <- dag$node_list[match(tf_names, forward_names)]
   types <- lapply(nodes, node_type)
-  are_variables <- vapply(types, identical, "variable", FUN.VALUE = FALSE)
+  are_variables <- are_identical(types, "variable")
 
   if (!all(are_variables)) {
     cli::cli_abort(

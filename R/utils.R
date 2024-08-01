@@ -480,11 +480,8 @@ all_greta_arrays <- function(env = parent.frame(),
   }
 
   # find the greta arrays
-  is_greta_array <- vapply(all_objects,
-                           inherits,
-                           "greta_array",
-                           FUN.VALUE = FALSE
-  )
+  is_greta_array <- are_greta_array(all_objects)
+
   all_arrays <- all_objects[is_greta_array]
 
   # optionally strip out the data arrays
@@ -1052,18 +1049,9 @@ check_targets_stochastic_and_not_sampled <- function(
   mcmc_dag_variables
 ) {
   target_nodes <- lapply(target, get_node)
-  target_node_names <- vapply(
-    target_nodes,
-    member,
-    "unique_name",
-    FUN.VALUE = character(1)
-  )
+  target_node_names <- extract_unique_names(target_nodes)
   existing_variables <- target_node_names %in% names(mcmc_dag_variables)
-  have_distributions <- vapply(
-    target_nodes,
-    has_distribution,
-    FUN.VALUE = logical(1)
-  )
+  have_distributions <- have_distribution(target_nodes)
   new_stochastics <- have_distributions & !existing_variables
   if (any(new_stochastics)) {
     n_stoch <- sum(new_stochastics)
@@ -1151,4 +1139,59 @@ node_type_colour <- function(type){
     )
 
   switch_cols
+}
+
+extract_unique_names <- function(x){
+  vapply(
+    X = x,
+    FUN = member,
+    "unique_name",
+    FUN.VALUE = character(1)
+  )
+}
+
+are_identical <- function(x, y){
+  vapply(
+    X = x,
+    FUN = identical,
+    FUN.VALUE = logical(1),
+    y
+  )
+}
+
+#' Vectorised is.null
+#'
+#' @param x list of things that may contain NULL values
+#'
+#' @return logical
+#' @export
+#'
+#' @examples
+#' is.null(list(NULL, NULL, 1))
+#' are_null(list(NULL, NULL, 1))
+#' are_null(list(NULL, NULL, NULL))
+#' are_null(list(1, 2, 3))
+#' is.null(list(1, 2, 3))
+are_null <- function(x){
+  vapply(
+    x,
+    is.null,
+    FUN.VALUE = logical(1)
+    )
+}
+
+are_greta_array <- function(x){
+  vapply(
+    x,
+    is.greta_array,
+    FUN.VALUE = logical(1)
+  )
+}
+
+have_distribution <- function(x){
+  vapply(
+    x,
+    has_distribution,
+    FUN.VALUE = logical(1)
+  )
 }
