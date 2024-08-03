@@ -1,11 +1,12 @@
 #' Install Python dependencies for greta
 #'
 #' This is a helper function to install Python dependencies needed. This
-#'   includes the latest version of Tensorflow version (2.8.0 or higher),
-#'   Tensorflow Probability 0.16.0 (or higher), and the latest version of
-#'   numpy (1.21.0 or higher). These Python modules will be installed into a
-#'   virtual or conda environment, named "greta-env-tf2". Note that "virtualenv"
-#'   is not available on Windows.
+#'   includes the latest version of Tensorflow version (2.15.0),
+#'   Tensorflow Probability (0.23.0), keras 2.15.0) and the latest version of
+#'   numpy. These Python modules will be installed into a user specified
+#'   virtual or conda environment, named "greta-env-tf2". Note that
+#'   "virtualenv" is not available on Windows, but conda envs are. See details
+#'   below on restarting defaults.
 #'
 #' @param method Installation method ("virtualenv" or "conda")
 #' @param conda The path to a `conda` executable. Use `"auto"` to allow
@@ -25,10 +26,17 @@
 #'           pip = TRUE
 #'        )
 #'     ```
-#' @param restart logical. Restart R after installation? Default is FALSE.
-#'   Will only restart R during interactive sessions, and only works in RStudio.
+#' @param restart character. Restart R after installation? Default is "ask".
+#'  Other options are, "force", and "no". Using "force" will will force a
+#'  restart after installation. Using  "no" will not restart. Note that this
+#'  only restarts R during interactive sessions, and only in RStudio.
 #'
 #' @param ... Optional arguments, reserved for future expansion.
+#'
+#' @details
+#'  By default, if using RStudio, it will now ask you if you want to restart
+#'  the R session. If the session is not interactive, or is not in RStudio,
+#'  it will not restart. You can also override this with `restart = TRUE`.
 #'
 #' @note This will automatically install Miniconda (a minimal version of the
 #'  Anaconda scientific software management system), create a 'conda'
@@ -65,62 +73,111 @@
 install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
                                timeout = 5,
+                               scheme = c("default", "manual", "aws"),
                                manual = FALSE,
-                               restart = FALSE,
+                               restart = c("ask", "force", "no"),
                                ...) {
 
   # set warning message length
   options(warning.length = 2000)
 
-  if (manual) {
-    reticulate::py_install(
-      packages = c(
-        'numpy',
-        'tensorflow==2.15',
-        'tensorflow-probability==0.23.0',
-        "keras==2.15.0"
-      ),
-      envname = "greta-env-tf2",
-      pip = TRUE
-    )
-  } else if (!manual) {
+  restart <- rlang::arg_match(
+    arg = restart,
+    values = c("ask", "force", "no")
+  )
 
+  scheme <- rlang::arg_match(
+    arg = scheme,
+    values = c("default", "manual", "aws")
+  )
+
+  install_method <- switch(scheme,
+                           default = default_install(timeout = timeout),
+                           manual = manual_install,
+                           aws = aws_install)
+
+  install_method()
+
+  cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
+
+  restart_or_not(restart = restart)
+
+}
+
+default_install <- function(timeout = 5){
+
+  installer <- function(timeout = timeout){
     # install miniconda if needed
     if (!have_conda()) {
-      greta_install_miniconda(timeout)
+      greta_install_miniconda(timeout = timeout)
     }
 
     if (!have_greta_conda_env()) {
-      greta_create_conda_env(timeout)
+      greta_create_conda_env(timeout = timeout)
     }
 
-    greta_install_python_deps(timeout)
-
-
-    restart_session <- interactive() && restart
-    has_rstudioapi_pkg <- requireNamespace("rstudioapi", quietly = TRUE)
-    will_restart <- restart_session &&
-      has_rstudioapi_pkg &&
-      rstudioapi::hasFun("restartSession")
-
-    cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
-
-    if (!will_restart){
-      cli::cli_inform(
-        "Restart R, then load {.pkg greta} with: {.code library(greta)}"
-        )
-      return(invisible())
-    }
-
-    if (will_restart) {
-      cli::cli_inform("Restarting R!")
-      cli::cli_inform("Next, load {.pkg greta} with: {.code library(greta)}")
-      rstudioapi::restartSession()
-    }
-
-
+    greta_install_python_deps(timeout = timeout)
 
   }
 
+  installer
 
 }
+
+create_py_installer <- function(tf_version = "2.15.0",
+                             tfp_version = "0.23.0",
+                             keras_version = "2.15.0",
+                             py_version = "3.11",
+                             versions = c("exact", "gte")){
+
+  versions <- rlang::arg_match(
+    arg = versions,
+    values = c("exact", "gte")
+  )
+
+  gte_exact <- switch(versions,
+                      exact = "==",
+                      gte = ">=")
+
+  v_tf <- glue::glue("tensorflow{gte_exact}{tf_version}")
+  v_tfp <- glue::glue("tensorflow-probability{gte_exact}{tfp_version}")
+
+  # in case you don't want to install keras, set it to NULL
+  if (!is.null(keras_version)){
+    v_keras <- glue::glue("keras{gte_exact}{keras_version}")
+  } else
+  v_keras <- NULL
+
+  py_installer <- function(){
+    reticulate::py_install(
+      packages = c(
+        'numpy',
+        v_tf,
+        v_tfp,
+        v_keras
+      ),
+      envname = "greta-env-tf2",
+      python_version = py_version,
+      pip = TRUE
+    )
+  }
+
+  py_installer
+
+}
+
+manual_install <- create_py_installer(
+  tf_version = "2.15.0",
+  tfp_version = "0.23.0",
+  keras_version = "2.15.0",
+  py_version = "3.11",
+  versions = "exact"
+)
+
+aws_install <- create_py_installer(
+  tf_version = "2.11.0",
+  tfp_version = "0.19.0",
+  keras_version = NULL,
+  py_version = "3.8.15",
+  versions = "exact"
+)

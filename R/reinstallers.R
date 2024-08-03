@@ -73,7 +73,7 @@ reinstall_miniconda <- function(timeout = 5){
 reinstall_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                  conda = "auto",
                                  timeout = 5,
-                                 restart = FALSE){
+                                 restart = "ask"){
   remove_greta_env()
   remove_miniconda()
   install_greta_deps(method = method,

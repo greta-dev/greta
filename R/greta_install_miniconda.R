@@ -1,4 +1,4 @@
-greta_install_miniconda <- function(timeout) {
+greta_install_miniconda <- function(timeout = 5) {
 
   stdout_file <- create_temp_file("out-miniconda")
   stderr_file <- create_temp_file("err-miniconda")

@@ -1195,3 +1195,47 @@ have_distribution <- function(x){
     FUN.VALUE = logical(1)
   )
 }
+
+restart_or_not <- function(restart){
+  # Managing how to restart R
+  # requires RStudio and also an interactive session
+  has_rstudioapi_pkg <- requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::hasFun("restartSession")
+
+  # Default (if using rstudio) - we ask the user if they want to restart?
+  ask_restart <- interactive() && has_rstudioapi_pkg && (restart == "ask")
+
+  # where the user has specified a restart
+  user_force_restart <- (restart == "force") &&
+    interactive() &&
+    has_rstudioapi_pkg
+
+  # Where there is no rstudio/not interactive, suggest restarting.
+  suggest_restart <- (restart == "force" | restart == "no") &&
+    (!interactive()  | !has_rstudioapi_pkg)
+
+  if (suggest_restart) {
+    cli::cli_inform(
+      "Restart R, then load {.pkg greta} with: {.code library(greta)}"
+    )
+    return(invisible())
+  }
+
+  if (ask_restart) {
+    if (yesno::yesno("Restart R and load greta?")) {
+      rstudioapi::restartSession(
+        command = "library(greta)",
+        clean = TRUE
+      )
+    }
+  }
+
+  if (user_force_restart) {
+    cli::cli_inform("Restarting R, then loading {.pkg greta}")
+    rstudioapi::restartSession(
+      command = "library(greta)",
+      clean = TRUE
+    )
+  }
+
+}

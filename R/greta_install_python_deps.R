@@ -1,23 +1,48 @@
-greta_install_python_deps <- function(timeout) {
+greta_install_python_deps <- function(timeout = 5,
+                                      tf_version = "2.15.0",
+                                      tfp_version = "0.23.0",
+                                      keras_version = "2.15.0",
+                                      versions = c("exact", "gte")) {
+
+  versions <- rlang::arg_match(
+    arg = versions,
+    values = c("exact", "gte")
+  )
+
+  gte_exact <- switch(versions,
+                      exact = "==",
+                      gte = ">=")
 
   stdout_file <- create_temp_file("out-python-deps")
   stderr_file <- create_temp_file("err-python-deps")
 
   callr_conda_install <- callr::r_process_options(
-    func = function() {
+    func = function(tf_version,
+                    tfp_version,
+                    keras_version,
+                    gte_exact) {
       tensorflow::install_tensorflow(
-        version = "2.15.0",
+        version = tf_version,
         envname = "greta-env-tf2"
       )
-      reticulate::py_install(packages = "tensorflow-probability==0.23.0",
+
+      tfp_install <- glue::glue("tensorflow-probability{gte_exact}{tfp_version}")
+      keras_install <- glue::glue("keras{gte_exact}{keras_version}")
+      reticulate::py_install(packages = tfp_install,
                              pip = TRUE,
                              envname = "greta-env-tf2",
                              method = "conda")
-      reticulate::py_install(packages = "keras==2.15.0",
+      reticulate::py_install(packages = keras_install,
                              pip = TRUE,
                              envname = "greta-env-tf2",
                              method = "conda")
       },
+    args = list(
+      tf_version = tf_version,
+      tfp_version = tfp_version,
+      keras_version = keras_version,
+      gte_exact = gte_exact
+    ),
     stdout = stdout_file,
     stderr = stderr_file
     )
@@ -27,6 +52,10 @@ greta_install_python_deps <- function(timeout) {
     timeout = timeout,
     stdout_file = stdout_file,
     stderr_file = stderr_file,
+    tf_version = tf_version,
+    tfp_version = tfp_version,
+    keras_version = keras_version,
+    gte_exact = gte_exact,
     cli_start_msg = "Installing python modules into 'greta-env-tf2' conda \\
                      environment, this may take a few minutes",
     cli_end_msg = "Python modules installed!"
@@ -39,5 +68,7 @@ greta_install_python_deps <- function(timeout) {
   cli::cli_ul("{.code greta_notes_conda_install_output()}")
   cli::cli_ul("To see any error messages, run:")
   cli::cli_ul("{.code greta_notes_conda_install_error()}")
+  cli::cli_ul("To write installation notes to file, run:")
+  cli::cli_ul("{.code greta_notes_conda_install_write(<path>)}")
 
 }

@@ -2,6 +2,7 @@ new_install_process <- function(callr_process,
                                 timeout,
                                 stdout_file = NULL,
                                 stderr_file = NULL,
+                                greta_py_version = NULL,
                                 cli_start_msg = NULL,
                                 cli_end_msg = NULL){
   options(warning.length = 2000)

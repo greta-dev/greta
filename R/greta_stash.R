@@ -66,3 +66,9 @@ greta_notes_conda_install_error <- function() {
 greta_notes_tf_num_error <- function() {
   cat(greta_stash$tf_num_error)
 }
+
+greta_notes_conda_install_write <- function(path){
+  writeLines(text = c(greta_stash$conda_install_error,
+                      greta_stash$conda_install_notes),
+             con = path)
+}
