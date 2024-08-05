@@ -10,7 +10,7 @@ install_greta_deps(
   conda = "auto",
   timeout = 5,
   manual = FALSE,
-  restart = FALSE,
+  restart = c("ask", "force", "no"),
   ...
 )
 
@@ -18,7 +18,7 @@ reinstall_greta_deps(
   method = c("auto", "virtualenv", "conda"),
   conda = "auto",
   timeout = 5,
-  restart = FALSE
+  restart = c("ask", "force", "no")
 )
 }
 \arguments{
@@ -35,18 +35,25 @@ installation component.}
 \item{manual}{logical. Skip the fancy installation and just run:
 \code{reticulate::py_install( packages = c( 'numpy', 'tensorflow', 'tensorflow-probability' ), pip = TRUE )}}
 
-\item{restart}{logical. Restart R after installation? Default is FALSE.
-Will only restart R during interactive sessions, and only works in RStudio.}
+\item{restart}{character. Restart R after installation? Default is "ask".
+Other options are, "force", and "no". Using "force" will will force a
+restart after installation. Using  "no" will not restart. Note that this
+only restarts R during interactive sessions, and only in RStudio.}
 
 \item{...}{Optional arguments, reserved for future expansion.}
 }
 \description{
 This is a helper function to install Python dependencies needed. This
-includes the latest version of Tensorflow version (2.8.0 or higher),
-Tensorflow Probability 0.16.0 (or higher), and the latest version of
+includes the latest version of Tensorflow version (2.13.0 or higher),
+Tensorflow Probability 0.21.0 (or higher), and the latest version of
 numpy (1.21.0 or higher). These Python modules will be installed into a
 virtual or conda environment, named "greta-env-tf2". Note that "virtualenv"
 is not available on Windows.
+}
+\details{
+By default, if using RStudio, it will now ask you if you want to restart
+the R session. If the session is not interactive, or is not in RStudio,
+it will not restart. You can also override this with \code{restart = TRUE}.
 }
 \note{
 This will automatically install Miniconda (a minimal version of the
