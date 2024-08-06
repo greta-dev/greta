@@ -226,8 +226,18 @@ greta_deps_receipt <- function(){
 }
 
 check_greta_deps_config <- function(python_deps){
+
+  # check for envvar to silence these checks
+
   deps$tf_version
   deps$tfp_version
   deps$python_version
   .deps_tf_tfp
+
+  # test what version range is acceptable
+
+  # message displaying what version we detect
+  # Display what version range is acceptable
+
+
 }
