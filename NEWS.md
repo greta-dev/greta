@@ -28,6 +28,17 @@ The following optimisers are removed, as they are no longer supported by Tensorf
  * `cobyla()`
  * `slsqp()`
 
+## Installation revamp
+
+This release provides a few improvements to installation in greta. It should now provide more information about installation progress, and be more robust. The intention is, it should _just work_, and if it doesn't fail gracefully with some useful advice on problem solving.
+
+* Added option to restart R + run `library(greta)` after installation (#523)
+* Added installation deps object, `greta_python_deps()` to help simplify specifying package versions (#664)
+* removed `method` and `conda` arguments from `install_greta_deps()` as they 
+  were not used.
+* removed `manual` option in `install_greta_deps()`
+* added default 5 minute timer to installation processes
+
 ## Minor
 
 * `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.

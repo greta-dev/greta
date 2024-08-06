@@ -7,24 +7,12 @@
 #'   virtual or conda environment, named "greta-env-tf2". Note that "virtualenv"
 #'   is not available on Windows.
 #'
-#' @param method Installation method ("virtualenv" or "conda")
-#' @param conda The path to a `conda` executable. Use `"auto"` to allow
-#'   `reticulate` to automatically find an appropriate `conda` binary. See
-#'   **Finding Conda** for more details.
+#' @param python_deps object created with `greta_python_deps()` where you
+#'   specify python, TF, and TFP versions.
+#'
 #' @param timeout maximum time in minutes until the installation for each
 #'    installation component times out and exits. Default is 5 minutes per
 #'    installation component.
-#' @param manual logical. Skip the fancy installation and just run:
-#'     ```
-#'     reticulate::py_install(
-#'         packages = c(
-#'           'numpy',
-#'           'tensorflow',
-#'           'tensorflow-probability'
-#'           ),
-#'           pip = TRUE
-#'        )
-#'     ```
 #' @param restart character. Restart R after installation? Default is "ask".
 #'  Other options are, "force", and "no". Using "force" will will force a
 #'  restart after installation. Using  "no" will not restart. Note that this
@@ -69,12 +57,12 @@
 #' @importFrom callr r_process
 #' @importFrom cli cli_alert_success
 #' @importFrom cli cli_ul
-install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
-                               conda = "auto",
+install_greta_deps <- function(python_deps = greta_python_deps(),
                                timeout = 5,
-                               manual = FALSE,
                                restart = c("ask", "force", "no"),
                                ...) {
+
+  check_greta_python_deps(python_deps)
 
   restart <- rlang::arg_match(
     arg = restart,
@@ -84,35 +72,26 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
   # set warning message length
   options(warning.length = 2000)
 
-  if (manual) {
-    reticulate::py_install(
-      packages = c(
-        'numpy',
-        'tensorflow==2.15',
-        'tensorflow-probability==0.23.0',
-        "keras==2.15.0"
-      ),
-      envname = "greta-env-tf2",
-      pip = TRUE
-    )
-  } else if (!manual) {
-
-    # install miniconda if needed
-    if (!have_conda()) {
-      greta_install_miniconda(timeout)
-    }
-
-    if (!have_greta_conda_env()) {
-      greta_create_conda_env(timeout)
-    }
-
-    greta_install_python_deps(timeout)
-
+  # install miniconda if needed
+  if (!have_conda()) {
+    greta_install_miniconda(timeout)
   }
 
-    cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
+  if (!have_greta_conda_env()) {
+    greta_create_conda_env(
+      timeout = timeout,
+      python_deps = python_deps
+      )
+  }
 
-    restart_or_not(restart)
+  greta_install_python_deps(
+    timeout = timeout,
+    python_deps = python_deps
+  )
+
+  cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
+
+  restart_or_not(restart)
 
 }
 
@@ -159,4 +138,66 @@ restart_or_not <- function(restart){
     )
   }
 
+}
+
+## TODO
+## Add a way to pass this along to a custom simpler python installer function
+## A la:
+# reticulate::py_install(
+#   packages = c(
+#     'numpy',
+#     'tensorflow==2.15',
+#     'tensorflow-probability==0.23.0',
+#     "keras==2.15.0"
+#   ),
+#   envname = "greta-env-tf2",
+#   pip = TRUE
+# )
+
+#' Specify python dependencies for greta
+#'
+#' A helper function for specifying versions of Tensorflow (TF), Tensorflow Probability (TFP), and Python.
+#'
+#' @param tf_version Character. Tensorflow (TF) version in format major.minor.patch. Default is "2.15.0".
+#' @param tfp_version Character.Tensorflow probability (TFP) version major.minor.patch. Default is "0.23.0".
+#' @param python_version Character. Ptyhon version in format major.minor.patch. Default is "3.10".
+#'
+#' @return list of dependencies
+#' @export
+#'
+#' @examples
+#' greta_python_deps()
+greta_python_deps <- function(tf_version = "2.15.0",
+                              tfp_version = "0.23.0",
+                              python_version = "3.10"){
+
+  deps_list <- list(
+    tf_version = tf_version,
+    tfp_version = tfp_version,
+    python_version = python_version
+  )
+
+  structure(
+    deps_list,
+    class = "greta_python_deps"
+  )
+
+}
+
+check_greta_python_deps <- function(deps) {
+  if (!inherits(deps, "greta_python_deps")) {
+    cli::cli_abort("{.arg deps} must be created by {.fun greta_python_deps}.")
+  }
+}
+
+#' Print method for greta python deps
+#'
+#' @param x greta python deps
+#' @param ... extra args, not used
+#' @export
+print.greta_python_deps <- function(x, ...){
+  cli::cli_h1("{.pkg greta} Python dependency spec:")
+  cli::cli_li("{.pkg TF} Version: {.val {x$tf_version}}")
+  cli::cli_li("{.pkg TFP} Version: {.val {x$tfp_version}}")
+  cli::cli_li("{.pkg Python} Version: {.val {x$python_version}}")
 }

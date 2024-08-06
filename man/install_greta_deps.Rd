@@ -6,10 +6,8 @@
 \title{Install Python dependencies for greta}
 \usage{
 install_greta_deps(
-  method = c("auto", "virtualenv", "conda"),
-  conda = "auto",
+  python_deps = greta_python_deps(),
   timeout = 5,
-  manual = FALSE,
   restart = c("ask", "force", "no"),
   ...
 )
@@ -22,18 +20,12 @@ reinstall_greta_deps(
 )
 }
 \arguments{
-\item{method}{Installation method ("virtualenv" or "conda")}
-
-\item{conda}{The path to a \code{conda} executable. Use \code{"auto"} to allow
-\code{reticulate} to automatically find an appropriate \code{conda} binary. See
-\strong{Finding Conda} for more details.}
+\item{python_deps}{object created with \code{greta_python_deps()} where you
+specify python, TF, and TFP versions.}
 
 \item{timeout}{maximum time in minutes until the installation for each
 installation component times out and exits. Default is 5 minutes per
 installation component.}
-
-\item{manual}{logical. Skip the fancy installation and just run:
-\code{reticulate::py_install( packages = c( 'numpy', 'tensorflow', 'tensorflow-probability' ), pip = TRUE )}}
 
 \item{restart}{character. Restart R after installation? Default is "ask".
 Other options are, "force", and "no". Using "force" will will force a

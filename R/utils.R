@@ -780,7 +780,7 @@ other_install_fail_msg <- function(error_passed){
   )
 }
 
-timeout_install_msg <- function(timeout, py_error = NULL){
+timeout_install_msg <- function(timeout = 5, py_error = NULL){
   msg <- c(
     "Stopping as installation of {.pkg greta} dependencies took longer than \\
         {timeout} minutes",
