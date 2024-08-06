@@ -6,11 +6,11 @@ greta_install_python_deps <- function(timeout) {
   callr_conda_install <- callr::r_process_options(
     func = function() {
       tensorflow::install_tensorflow(
-        version = "2.13.0",
+        version = "2.15.0",
         envname = "greta-env-tf2",
         method = "conda"
       )
-      reticulate::py_install(packages = "tensorflow-probability==0.21.0",
+      reticulate::py_install(packages = "tensorflow-probability==0.23.0",
                              pip = TRUE,
                              envname = "greta-env-tf2",
                              method = "conda")

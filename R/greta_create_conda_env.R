@@ -9,7 +9,7 @@ greta_create_conda_env <- function(timeout) {
     func = function() {
       reticulate::conda_create(
         envname = "greta-env-tf2",
-        python_version = "3.8"
+        python_version = "3.10"
       )
     },
     stdout = stdout_file,
