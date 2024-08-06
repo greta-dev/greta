@@ -91,6 +91,8 @@ tf_cpu_deps <- tf_deps |>
     delim = "-",
     names = c("python_version_min", "python_version_max")
   )
+
+
 # TFP versions are in https://github.com/greta-dev/greta/issues/638#issuecomment-2268372432
 
 # This is the 0.24.0 release of TensorFlow Probability. It is tested and stable against TensorFlow 2.16.1 and JAX 0.4.25 (cannot use as TF 2.15 uses keras 3 which has breaking changes) (Mar 13, 2024)
@@ -128,12 +130,36 @@ tfp_to_tf_compatability <- tibble::tribble(
 
 tfp_to_tf_compatability
 
-.deps_tf <- tf_cpu_deps
+extra_rows <- tibble(
+  os = c("windows", "linux", "mac"),
+  tf_version = rep("2.9.1", 3),
+  python_version_min = rep("3.7", 3),
+  python_version_max = rep("3.10", 3)
+)
+
+
+
+numeric_version(tf_cpu_deps$tf_version)
+
+.deps_tf <- bind_rows(tf_cpu_deps, extra_rows) |>
+  mutate(tf_version = numeric_version(tf_version)) |>
+  arrange(os, desc(tf_version)) |>
+  mutate(tf_version = as.character(tf_version))
 .deps_tfp <- tfp_to_tf_compatability
+
+.deps_tf_tfp <- .deps_tf |>
+  left_join(.deps_tfp,
+            by = "tf_version") |>
+  relocate(tfp_version,
+           .after = tf_version)
+
+.deps_tf_tfp
 
 usethis::use_data(
   .deps_tf,
   .deps_tfp,
+  .deps_tf_tfp,
   internal = TRUE,
   overwrite = TRUE
   )
+
