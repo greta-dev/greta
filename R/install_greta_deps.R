@@ -224,3 +224,10 @@ greta_deps_receipt <- function(){
   )
 
 }
+
+check_greta_deps_config <- function(python_deps){
+  deps$tf_version
+  deps$tfp_version
+  deps$python_version
+  .deps_tf_tfp
+}

@@ -155,6 +155,11 @@ numeric_version(tf_cpu_deps$tf_version)
 
 .deps_tf_tfp
 
+.deps_tf_tfp |> mutate(
+  tf_version_max = lag(tf_version),
+  .after = tf_version
+  )
+
 usethis::use_data(
   .deps_tf,
   .deps_tfp,
