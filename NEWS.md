@@ -36,7 +36,7 @@ This release provides a few improvements to installation in greta. It should now
 * Added installation deps object, `greta_python_deps()` to help simplify specifying package versions (#664)
 * removed `method` and `conda` arguments from `install_greta_deps()` as they 
   were not used.
-* removed `manual` option in `install_greta_deps()`
+* removed `manual` argument in `install_greta_deps()`.
 * added default 5 minute timer to installation processes
 * Added `greta_deps_receipt()` to list the current main python packages installed. (#668)
 

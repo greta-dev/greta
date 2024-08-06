@@ -12,12 +12,7 @@ install_greta_deps(
   ...
 )
 
-reinstall_greta_deps(
-  method = c("auto", "virtualenv", "conda"),
-  conda = "auto",
-  timeout = 5,
-  restart = c("ask", "force", "no")
-)
+reinstall_greta_deps(timeout = 5, restart = c("ask", "force", "no"))
 }
 \arguments{
 \item{python_deps}{object created with \code{greta_python_deps()} where you
