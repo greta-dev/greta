@@ -1,8 +1,8 @@
 #' Install Python dependencies for greta
 #'
 #' This is a helper function to install Python dependencies needed. This
-#'   includes the latest version of Tensorflow version (2.8.0 or higher),
-#'   Tensorflow Probability 0.16.0 (or higher), and the latest version of
+#'   includes the latest version of Tensorflow version (2.13.0 or higher),
+#'   Tensorflow Probability 0.21.0 (or higher), and the latest version of
 #'   numpy (1.21.0 or higher). These Python modules will be installed into a
 #'   virtual or conda environment, named "greta-env-tf2". Note that "virtualenv"
 #'   is not available on Windows.
@@ -25,8 +25,17 @@
 #'           pip = TRUE
 #'        )
 #'     ```
+#' @param restart character. Restart R after installation? Default is "ask".
+#'  Other options are, "force", and "no". Using "force" will will force a
+#'  restart after installation. Using  "no" will not restart. Note that this
+#'  only restarts R during interactive sessions, and only in RStudio.
 #'
 #' @param ... Optional arguments, reserved for future expansion.
+#'
+#' @details
+#'  By default, if using RStudio, it will now ask you if you want to restart
+#'  the R session. If the session is not interactive, or is not in RStudio,
+#'  it will not restart. You can also override this with `restart = TRUE`.
 #'
 #' @note This will automatically install Miniconda (a minimal version of the
 #'  Anaconda scientific software management system), create a 'conda'
@@ -64,7 +73,13 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
                                conda = "auto",
                                timeout = 5,
                                manual = FALSE,
+                               restart = c("ask", "force", "no"),
                                ...) {
+
+  restart <- rlang::arg_match(
+    arg = restart,
+    values = c("ask", "force", "no")
+  )
 
   # set warning message length
   options(warning.length = 2000)
@@ -93,10 +108,55 @@ install_greta_deps <- function(method = c("auto", "virtualenv", "conda"),
 
     greta_install_python_deps(timeout)
 
-    cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
-    cli_ul("Restart R, then load {.pkg greta} with: {.code library(greta)}")
-
   }
 
+    cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
+
+    restart_or_not(restart)
+
+}
+
+
+restart_or_not <- function(restart){
+  # Managing how to restart R
+  # requires RStudio and also an interactive session
+  has_rstudioapi_pkg <- requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::hasFun("restartSession")
+
+  # Default (if using rstudio) - we ask the user if they want to restart?
+  ask_restart <- interactive() && has_rstudioapi_pkg && (restart == "ask")
+
+  # where the user has specified a restart
+  user_force_restart <- (restart == "force") &&
+    interactive() &&
+    has_rstudioapi_pkg
+
+  # Where there is no rstudio/not interactive, suggest restarting.
+  suggest_restart <- (restart == "force" | restart == "no") &&
+    (!interactive()  | !has_rstudioapi_pkg)
+
+  if (suggest_restart) {
+    cli::cli_inform(
+      "Restart R, then load {.pkg greta} with: {.code library(greta)}"
+    )
+    return(invisible())
+  }
+
+  if (ask_restart) {
+    if (yesno::yesno("Restart R and load greta?")) {
+      rstudioapi::restartSession(
+        command = "library(greta)",
+        clean = TRUE
+      )
+    }
+  }
+
+  if (user_force_restart) {
+    cli::cli_inform("Restarting R, then loading {.pkg greta}")
+    rstudioapi::restartSession(
+      command = "library(greta)",
+      clean = TRUE
+    )
+  }
 
 }
