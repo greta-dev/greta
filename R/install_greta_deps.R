@@ -196,8 +196,31 @@ check_greta_python_deps <- function(deps) {
 #' @param ... extra args, not used
 #' @export
 print.greta_python_deps <- function(x, ...){
-  cli::cli_h1("{.pkg greta} Python dependency spec:")
+  cli::cli_h1("{.pkg greta} Python dependencies")
   cli::cli_li("{.pkg TF} Version: {.val {x$tf_version}}")
   cli::cli_li("{.pkg TFP} Version: {.val {x$tfp_version}}")
   cli::cli_li("{.pkg Python} Version: {.val {x$python_version}}")
+  cli::cli_rule()
+}
+
+#' Capture greta python dependencies.
+#'
+#' To assist with capturing and sharing python dependencies, we provide a way
+#'   to capture the dependencies currently used.
+#'
+#' @return `greta_python_deps()` object
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' my_deps <- greta_deps_receipt()
+#' }
+greta_deps_receipt <- function(){
+
+  greta_python_deps(
+    tf_version = version_tf(),
+    tfp_version = version_tfp(),
+    python_version = as.character(reticulate::py_version())
+  )
+
 }
