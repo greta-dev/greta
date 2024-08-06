@@ -38,6 +38,7 @@ This release provides a few improvements to installation in greta. It should now
   were not used.
 * removed `manual` option in `install_greta_deps()`
 * added default 5 minute timer to installation processes
+* Added `greta_deps_receipt()` to list the current main python packages installed. (#668)
 
 ## Minor
 
