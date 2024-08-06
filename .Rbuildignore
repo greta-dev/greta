@@ -49,3 +49,4 @@ LICENSE
 ^revdep$
 ^__autograph*
 ^testlog
+^data-raw$

@@ -60,6 +60,7 @@ This release provides a few improvements to installation in greta. It should now
 * Use `%||%` internally to replace the pattern: `if (is.null(x)) x <- thing` with `x <- x %||% thing`. (#630)
 * Add more explaining variables - replace `if (thing & thing & what == this)` with `if (explanation_of_thing)`.
 * Refactored repeated uses of `vapply` into functions (#377, #658)
+* Add internal data files `.deps_tf` and `.deps_tfp` to track dependencies of TF and TFP. Related to #666.
 
 ## Bug fixes
 
