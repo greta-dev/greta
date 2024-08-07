@@ -1,42 +1,69 @@
+test_that("greta python range detection works correctly",{
+  # correct ranges
+  expect_snapshot(check_greta_python_range("3.12"))
+  expect_snapshot(check_greta_python_range("3.9"))
+  expect_snapshot(check_greta_python_range("3.3"))
+  expect_snapshot(check_greta_python_range("3.8.2"))
+  expect_snapshot(check_greta_python_range("3.3.3"))
+  # incorrect ranges
+  expect_snapshot(
+    error = TRUE,
+    check_greta_python_range("3.1")
+    )
+  expect_snapshot(
+    error = TRUE,
+    check_greta_python_range("2.7")
+    )
+  expect_snapshot(
+    error = TRUE,
+    check_greta_python_range("3.1.1")
+    )
+  expect_snapshot(
+    error = TRUE,
+    check_greta_python_range("3.14")
+    )
+})
+
+
 test_that("greta_python_deps fails appropriately", {
   # default
   expect_snapshot(greta_python_deps())
-  # TF outside range
+  # TF above range
   expect_snapshot(
     error = TRUE,
-    greta_python_deps(tf_version = "2.17.0",
+    greta_python_deps(tf_version = "2.16.1",
                     tfp_version = "0.11.0",
                     python_version = "3.8")
   )
-  # TF outside range
+  # TF below range
   expect_snapshot(
     error = TRUE,
     greta_python_deps(tf_version = "1.9.0",
                     tfp_version = "0.11.0",
                     python_version = "3.8")
   )
-  # TFP outside range
+  # TFP above range
   expect_snapshot(
     error = TRUE,
     greta_python_deps(tf_version = "2.15.0",
                       tfp_version = "0.24.0",
                       python_version = "3.10")
   )
-  # TFP outside range
+  # TFP below range
   expect_snapshot(
     error = TRUE,
     greta_python_deps(tf_version = "2.15.0",
                       tfp_version = "0.6.0",
                       python_version = "3.10")
   )
-  # Python outside range
+  # Python above range
   expect_snapshot(
     error = TRUE,
     greta_python_deps(tf_version = "2.9.1",
                       tfp_version = "0.23.0",
                       python_version = "3.13")
   )
-  # Python outside range
+  # Python below range
   expect_snapshot(
     error = TRUE,
     greta_python_deps(tf_version = "2.9.1",

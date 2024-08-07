@@ -182,9 +182,15 @@ greta_python_deps <- function(tf_version = "2.15.0",
     class = c("greta_python_deps", "data.frame")
   )
 
+  check_tfp_tf_semantic(deps_obj)
+  # TODO
+  # Make these tf/tfp_range functions entirely separate
+  # Make sure they flag an issue with using TF > 2.15.0 - pointing to issue
+  # https://github.com/greta-dev/greta/issues/675
   check_greta_tf_range(deps_obj)
   check_greta_tfp_range(deps_obj)
-  check_greta_python_range(deps_obj)
+
+  check_greta_python_range(deps_obj$python_version)
   check_greta_deps_config(deps_obj)
 
 }
@@ -236,24 +242,13 @@ check_greta_deps_range <- function(python_deps,
 
   version_name <- switch(deps,
                          tf_version = "TF",
-                         tfp_version = "TFP",
-                         python_version = "Python")
+                         tfp_version = "TFP")
 
   version_provided <- python_deps[[deps]]
-  if (version_name == "Python"){
-    valid <- all(
-      version_provided >= unique(greta_deps_tf_tfp$python_version_min)) ||
-      all(version_provided <= unique(greta_deps_tf_tfp$python_version_max))
-    if (!valid){
-      py_versions <- sort(unique(c(greta_deps_tf_tfp$python_version_min,
-                       greta_deps_tf_tfp$python_version_max)))
-      closest_value <- closest_version(version_provided, c(py_versions))
-    }
-  } else {
-    valid <- version_provided %in% greta_deps_tf_tfp[[deps]]
-    if (!valid) {
-      closest_value <- closest_version(version_provided, greta_deps_tf_tfp[[deps]])
-    }
+
+  valid <- version_provided %in% greta_deps_tf_tfp[[deps]]
+  if (!valid) {
+    closest_value <- closest_version(version_provided, greta_deps_tf_tfp[[deps]])
   }
 
   if (!valid){
@@ -281,10 +276,31 @@ check_greta_tfp_range <- function(python_deps, call = rlang::caller_env()) {
                          call = call)
 }
 
-check_greta_python_range <- function(python_deps, call = rlang::caller_env()) {
-  check_greta_deps_range(python_deps = python_deps,
-                         deps = "python_version",
-                         call = call)
+check_greta_python_range <- function(version_provided,
+                                     call = rlang::caller_env()) {
+
+  py_version_min <- unique(greta_deps_tf_tfp$python_version_min)
+  py_version_max <- unique(greta_deps_tf_tfp$python_version_max)
+  py_versions <- sort(unique(c(py_version_min, py_version_max)))
+
+  min_py <- paste0(min(py_versions))
+  max_py <- paste0(max(py_versions))
+
+  outside_range <- outside_version_range(version_provided, py_versions)
+
+  if (outside_range) {
+
+    closest_value <- paste0(closest_version(version_provided, c(py_versions)))
+
+  cli::cli_abort(
+    message = c("Python version must be between \\
+                {.val {min_py}}-{.val {min_py}}",
+                "The version provided was {.val {version_provided}}. The \\
+                closest value is: {.val {closest_value}}"),
+    call = call
+  )
+  }
+
 }
 
 check_greta_deps_config <- function(python_deps,
@@ -393,4 +409,39 @@ check_greta_deps_config <- function(python_deps,
 
   }
 
+}
+
+check_tfp_tf_semantic <- function(deps_obj,
+                                  call = rlang::caller_env()){
+  check_semantic(deps_obj$tf_version)
+  check_semantic(deps_obj$tfp_version)
+}
+
+split_dots <- function(x){
+  strsplit(x = x,
+           split = ".",
+           fixed = TRUE)[[1]]
+}
+
+is_semantic <- function(x){
+  separated <- split_dots(x)
+  is_sem <- length(separated) == 3
+  is_sem
+}
+
+check_semantic <- function(x,
+                           arg = rlang::caller_arg(x),
+                           call = rlang::caller_env()){
+
+  not_semantic <- !is_semantic(x)
+
+  if (not_semantic){
+    cli::cli_abort(
+      message = c("{.arg {arg}} must be semantic.",
+                  "We saw {.val {x}}, but we require three separating dots:",
+                  "i" = "{.val 1.1.1}",
+                  "x" = "{.val 1.1}"),
+      call = call
+    )
+  }
 }

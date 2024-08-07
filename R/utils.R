@@ -878,13 +878,11 @@ check_if_software_available <- function(software_available,
   }
 }
 
-compare_version_vec <- function(current,ideal){
-  compareVersion(
-    paste0(current),
-    ideal
+compare_version_vec <- Vectorize(
+    FUN = compareVersion,
+    vectorize.args = "b",
+    SIMPLIFY = TRUE
   )
-}
-
 
 #' Greta Situation Report
 #'
@@ -1245,4 +1243,12 @@ closest_version <- function(current, available){
 
   return(closest)
 
+}
+
+outside_version_range <- function(provided, range) {
+  version_num <- numeric_version(provided)
+  above_range <- all(version_num > range)
+  below_range <- all(version_num < range)
+  outside_range <- above_range || below_range
+  outside_range
 }
