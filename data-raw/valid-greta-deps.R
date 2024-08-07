@@ -44,16 +44,16 @@ tf_deps_linux_mac <- linux_mac_deps |>
       "linux-gpu",
       "mac-cpu",
       "mac-gpu"
-      )
     )
+  )
 
 tf_deps_windows <- windows_deps |>
   tidy_tf_dep_tables(
     os_hardware_names = c(
       "windows-cpu",
       "windows-gpu"
-      )
     )
+  )
 
 # check classes are the same
 # waldo::compare(
@@ -99,29 +99,29 @@ tf_cpu_deps <- tf_deps |>
 #
 
 tfp_to_tf_compatability <- tibble::tribble(
-~tfp_version, ~tf_version,
-"tfp==0.24.0", "tf==2.16.1",
-"tfp==0.23.0", "tf==2.15.0",
-"tfp==0.22.1", "tf==2.14.0",
-"tfp==0.22.0", "tf==2.14.0",
-"tfp==0.21.0", "tf==2.13.0",
-"tfp==0.20.0", "tf==2.12.0",
-"tfp==0.19.0", "tf==2.11.0",
-"tfp==0.18.0", "tf==2.10.0",
-"tfp==0.17.0", "tf==2.9.1",
-"tfp==0.16.0", "tf==2.8.0",
-"tfp==0.15.0", "tf==2.7.0",
-"tfp==0.14.1", "tf==2.6.0",
-"tfp==0.14.0", "tf==2.6.0",
-"tfp==0.13.0", "tf==2.5.0",
-"tfp==0.12.2", "tf==2.4.0",
-"tfp==0.12.1", "tf==2.4.0",
-"tfp==0.12.0", "tf==2.4.0",
-"tfp==0.11.1", "tf==2.3.0",
-"tfp==0.11.0", "tf==2.3.0",
-"tfp==0.10.1", "tf==2.2.0",
-"tfp==0.9.0", "tf==2.1.0",
-"tfp==0.8.0", "tf==2.0.0"
+  ~tfp_version, ~tf_version,
+  "tfp==0.24.0", "tf==2.16.1",
+  "tfp==0.23.0", "tf==2.15.0",
+  "tfp==0.22.1", "tf==2.14.0",
+  "tfp==0.22.0", "tf==2.14.0",
+  "tfp==0.21.0", "tf==2.13.0",
+  "tfp==0.20.0", "tf==2.12.0",
+  "tfp==0.19.0", "tf==2.11.0",
+  "tfp==0.18.0", "tf==2.10.0",
+  "tfp==0.17.0", "tf==2.9.1",
+  "tfp==0.16.0", "tf==2.8.0",
+  "tfp==0.15.0", "tf==2.7.0",
+  "tfp==0.14.1", "tf==2.6.0",
+  "tfp==0.14.0", "tf==2.6.0",
+  "tfp==0.13.0", "tf==2.5.0",
+  "tfp==0.12.2", "tf==2.4.0",
+  "tfp==0.12.1", "tf==2.4.0",
+  "tfp==0.12.0", "tf==2.4.0",
+  "tfp==0.11.1", "tf==2.3.0",
+  "tfp==0.11.0", "tf==2.3.0",
+  "tfp==0.10.1", "tf==2.2.0",
+  "tfp==0.9.0", "tf==2.1.0",
+  "tfp==0.8.0", "tf==2.0.0"
 ) |>
   mutate(
     tfp_version = str_remove_all(tfp_version,"tfp=="),
@@ -147,24 +147,45 @@ numeric_version(tf_cpu_deps$tf_version)
   mutate(tf_version = as.character(tf_version))
 .deps_tfp <- tfp_to_tf_compatability
 
-.deps_tf_tfp <- .deps_tf |>
+remove_before_comma <- function(x){
+  trimws(str_remove_all(x, ".*?,"))
+}
+
+greta_deps_tf_tfp <- .deps_tf |>
   left_join(.deps_tfp,
-            by = "tf_version") |>
+            by = "tf_version",
+            relationship = "many-to-many") |>
   relocate(tfp_version,
-           .after = tf_version)
-
-.deps_tf_tfp
-
-.deps_tf_tfp |> mutate(
-  tf_version_max = lag(tf_version),
-  .after = tf_version
+           .after = tf_version) |>
+  mutate(
+    python_version_min =  remove_before_comma(python_version_min)
+  ) |>
+  mutate(
+    across(
+      contains("version"),
+      numeric_version
+    )
+  ) |>
+  relocate(
+    tfp_version,
+    .after = os
+  ) |>
+  arrange(os,
+          desc(tfp_version)) |>
+  drop_na() |>
+  filter(
+    tfp_version < "0.24.0"
   )
 
-usethis::use_data(
-  .deps_tf,
-  .deps_tfp,
-  .deps_tf_tfp,
-  internal = TRUE,
-  overwrite = TRUE
+  usethis::use_data(
+    .deps_tf,
+    .deps_tfp,
+    internal = TRUE,
+    overwrite = TRUE
+  )
+
+  usethis::use_data(
+    greta_deps_tf_tfp,
+    overwrite = TRUE
   )
 

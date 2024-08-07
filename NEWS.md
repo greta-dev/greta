@@ -39,6 +39,8 @@ This release provides a few improvements to installation in greta. It should now
 * removed `manual` argument in `install_greta_deps()`.
 * added default 5 minute timer to installation processes
 * Added `greta_deps_receipt()` to list the current main python packages installed. (#668)
+* Added checking suite to ensure you are using valid versions of TF, TFP, and Python(#666)
+* Added data `greta_deps_tf_tfp` (#666), which contains valid versions combinations of TF, TFP, and Python.
 
 ## Minor
 

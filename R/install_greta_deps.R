@@ -81,7 +81,7 @@ install_greta_deps <- function(python_deps = greta_python_deps(),
     greta_create_conda_env(
       timeout = timeout,
       python_deps = python_deps
-      )
+    )
   }
 
   greta_install_python_deps(
@@ -171,22 +171,31 @@ greta_python_deps <- function(tf_version = "2.15.0",
                               tfp_version = "0.23.0",
                               python_version = "3.10"){
 
-  deps_list <- list(
+  deps_list <- data.frame(
     tf_version = tf_version,
     tfp_version = tfp_version,
     python_version = python_version
   )
 
-  structure(
+  deps_obj <- structure(
     deps_list,
-    class = "greta_python_deps"
+    class = c("greta_python_deps", "data.frame")
   )
+
+  check_greta_tf_range(deps_obj)
+  check_greta_tfp_range(deps_obj)
+  check_greta_python_range(deps_obj)
+  check_greta_deps_config(deps_obj)
 
 }
 
-check_greta_python_deps <- function(deps) {
+check_greta_python_deps <- function(deps,
+                                    call = rlang::caller_env()) {
   if (!inherits(deps, "greta_python_deps")) {
-    cli::cli_abort("{.arg deps} must be created by {.fun greta_python_deps}.")
+    cli::cli_abort(
+      message = "{.arg deps} must be created by {.fun greta_python_deps}.",
+      call = call
+    )
   }
 }
 
@@ -196,11 +205,7 @@ check_greta_python_deps <- function(deps) {
 #' @param ... extra args, not used
 #' @export
 print.greta_python_deps <- function(x, ...){
-  cli::cli_h1("{.pkg greta} Python dependencies")
-  cli::cli_li("{.pkg TF} Version: {.val {x$tf_version}}")
-  cli::cli_li("{.pkg TFP} Version: {.val {x$tfp_version}}")
-  cli::cli_li("{.pkg Python} Version: {.val {x$python_version}}")
-  cli::cli_rule()
+  print.data.frame(x)
 }
 
 #' Capture greta python dependencies.
@@ -225,19 +230,167 @@ greta_deps_receipt <- function(){
 
 }
 
-check_greta_deps_config <- function(python_deps){
+check_greta_deps_range <- function(python_deps,
+                                   deps,
+                                   call = rlang::caller_env()){
+
+  version_name <- switch(deps,
+                         tf_version = "TF",
+                         tfp_version = "TFP",
+                         python_version = "Python")
+
+  version_provided <- python_deps[[deps]]
+  if (version_name == "Python"){
+    valid <- all(
+      version_provided >= unique(greta_deps_tf_tfp$python_version_min)) ||
+      all(version_provided <= unique(greta_deps_tf_tfp$python_version_max))
+    if (!valid){
+      py_versions <- sort(unique(c(greta_deps_tf_tfp$python_version_min,
+                       greta_deps_tf_tfp$python_version_max)))
+      closest_value <- closest_version(version_provided, c(py_versions))
+    }
+  } else {
+    valid <- version_provided %in% greta_deps_tf_tfp[[deps]]
+    if (!valid) {
+      closest_value <- closest_version(version_provided, greta_deps_tf_tfp[[deps]])
+    }
+  }
+
+  if (!valid){
+
+    cli::cli_abort(
+      message = c("{.val {version_name}} version provided does not match \\
+                  supported range",
+                  "The version {.val {version_provided}} was not in \\
+                  {.val {greta_deps_tf_tfp[[deps]]}}",
+                  "The closest value is: {.val {closest_value}}"),
+      call = call
+    )
+  }
+}
+
+check_greta_tf_range <- function(python_deps, call = rlang::caller_env()) {
+  check_greta_deps_range(python_deps = python_deps,
+                         deps = "tf_version",
+                         call = call)
+}
+
+check_greta_tfp_range <- function(python_deps, call = rlang::caller_env()) {
+  check_greta_deps_range(python_deps = python_deps,
+                         deps = "tfp_version",
+                         call = call)
+}
+
+check_greta_python_range <- function(python_deps, call = rlang::caller_env()) {
+  check_greta_deps_range(python_deps = python_deps,
+                         deps = "python_version",
+                         call = call)
+}
+
+check_greta_deps_config <- function(python_deps,
+                                    call = rlang::caller_env()){
 
   # check for envvar to silence these checks
+  check_greta_python_deps(python_deps)
 
-  deps$tf_version
-  deps$tfp_version
-  deps$python_version
-  .deps_tf_tfp
+  python_deps <- python_deps |>
+    lapply(numeric_version) |>
+    as.data.frame()
 
-  # test what version range is acceptable
+  os_matches <- greta_deps_tf_tfp |>
+    subset(os_name() == os)
 
-  # message displaying what version we detect
-  # Display what version range is acceptable
+  no_os_matches <- nrow(os_matches) == 0
+  if (no_os_matches) {
+    valid_os <- unique(greta_deps_tf_tfp$os)
+    cli::cli_abort(
+      message = c("The os provided does not match one of {.val {valid_os}}",
+                  "To see valid installations of TF, TFP, and Python versions",
+                  "inspect {.code greta_deps_tf_tfp} with:",
+                  "{.run View(greta_deps_tf_tfp)}"),
+      call = call
+    )
+  }
 
+  config_matches <- os_matches |>
+    subset(tfp_version == python_deps$tfp_version) |>
+    subset(tf_version == python_deps$tf_version) |>
+    subset(python_deps$python_version >= python_version_min) |>
+    subset(python_deps$python_version <= python_version_max)
+
+  no_matches <- nrow(config_matches) == 0
+
+  # Build logic to prioritise valid TFP over others
+  if (no_matches){
+
+    tfp_matches <- subset(os_matches, tfp_version == python_deps$tfp_version)
+    tf_matches <- subset(os_matches, tf_version == python_deps$tf_version)
+    py_matches <- os_matches |>
+      subset(python_deps$python_version >= python_version_min) |>
+      subset(python_deps$python_version <= python_version_max)
+
+    config_matches <- data.frame(
+      tfp_match = nrow(tfp_matches) > 0,
+      tf_match = nrow(tf_matches) > 0,
+      py_match = nrow(py_matches) > 0
+    )
+
+    all_valid <- all(config_matches)
+    any_valid <- any(config_matches)
+    tfp_valid <- config_matches$tfp_match
+    tf_valid <- config_matches$tf_match
+    py_valid <- config_matches$py_match
+    suggest_tfp <- all_valid | tfp_valid | tfp_valid && py_valid
+    suggest_tf <- !all_valid && any_valid && tf_valid
+    suggest_py <- !tfp_valid && !tf_valid && py_valid
+
+    if (!any_valid){
+      cli::cli_abort(
+        message = c("config does not match any installation combinations.",
+                    "To see valid installations of TF, TFP, and Python versions",
+                    "inspect {.code greta_deps_tf_tfp} with:",
+                    "{.run View(greta_deps_tf_tfp)}"),
+        call = call
+      )
+    }
+
+    possible_suggestions <- c(
+      "suggest_tfp" = suggest_tfp,
+      "suggest_tf" = suggest_tf,
+      "suggest_py" = suggest_py
+    )
+
+    which_to_suggest <- names(which(possible_suggestions))
+
+    # Could possibly just suggest that users consult an inbuilt dataset?
+
+    suggested_match <- switch(
+      which_to_suggest,
+      "suggest_tfp" = tfp_matches,
+      "suggest_tf" = tf_matches,
+      "suggest_py" = py_matches
+    )
+
+    suggested_tfp <- as.character(suggested_match$tfp_version)
+    suggested_tf <- as.character(suggested_match$tf_version)
+    suggested_py <- as.character(suggested_match$python_version_max)
+
+    cli::cli_abort(
+      message = c("Provided {.code greta_python_deps} does not match valid \\
+                  installation combinations.",
+                  "See below for a suggested config to use:",
+                  "{.code greta_python_deps(\\
+                  tf_version = {.val {suggested_tf}}, \\
+                  tfp_version = {.val {suggested_tfp}}, \\
+                  python_version = {.val {suggested_py}}\\
+                  )}",
+                  "To see valid installations of TF, TFP, and Python versions",
+                  "inspect {.code greta_deps_tf_tfp} with:",
+                  "{.run View(greta_deps_tf_tfp)}"
+      ),
+      call = call
+    )
+
+  }
 
 }

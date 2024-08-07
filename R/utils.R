@@ -1195,3 +1195,54 @@ have_distribution <- function(x){
     FUN.VALUE = logical(1)
   )
 }
+
+is_windows <- function() {
+  identical(.Platform$OS.type, "windows")
+}
+
+is_mac <- function() {
+  as.logical(Sys.info()["sysname"] == "Darwin")
+}
+
+is_linux <- function() {
+  identical(tolower(Sys.info()[["sysname"]]), "linux")
+}
+
+os_name <- function(){
+  os <- c(
+    windows = is_windows(),
+    mac = is_mac(),
+    linux = is_linux()
+  )
+  names(which(os))
+}
+
+# semantic version finder
+closest_version <- function(current, available){
+
+  available <- sort(available)
+  not_available <- !(current %in% available)
+
+  current_gt_available <- all(current > available)
+  current_lt_available <- all(current < available)
+  current_btn_available <- any(current > available) && any(current < available)
+
+  pick_largest <- not_available && current_gt_available
+  pick_smallest <- not_available && current_lt_available
+
+  if (pick_largest) {
+    closest <- max(available)
+  }
+
+  if (pick_smallest) {
+    closest <- min(available)
+  }
+
+  if (current_btn_available){
+    version_gt <- current > available
+    closest <- max(available[version_gt])
+  }
+
+  return(closest)
+
+}
