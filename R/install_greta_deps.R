@@ -227,10 +227,10 @@ greta_python_deps <- function(tf_version = "2.15.0",
     class = c("greta_python_deps", "data.frame")
   )
 
+  # check for envvar to silence these checks
   check_tfp_tf_semantic(deps_obj)
   check_greta_tf_range(deps_obj)
   check_greta_tfp_range(deps_obj)
-
   check_greta_python_range(deps_obj$python_version)
   check_greta_deps_config(deps_obj)
 
@@ -379,7 +379,6 @@ check_greta_python_range <- function(version_provided,
 check_greta_deps_config <- function(python_deps,
                                     call = rlang::caller_env()){
 
-  # check for envvar to silence these checks
   check_greta_python_deps(python_deps)
 
   python_deps <- python_deps |>
@@ -462,9 +461,9 @@ check_greta_deps_config <- function(python_deps,
       "suggest_py" = py_matches
     )
 
-    suggested_tfp <- as.character(suggested_match$tfp_version)
-    suggested_tf <- as.character(suggested_match$tf_version)
-    suggested_py <- as.character(suggested_match$python_version_max)
+    suggested_tfp <- as.character(max(suggested_match$tfp_version))
+    suggested_tf <- as.character(max(suggested_match$tf_version))
+    suggested_py <- as.character(max(suggested_match$python_version_max))
 
     cli::cli_abort(
       message = c("Provided {.code greta_python_deps} does not match valid \\
