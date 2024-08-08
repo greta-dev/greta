@@ -240,13 +240,37 @@ check_greta_deps_range <- function(python_deps,
                                    deps,
                                    call = rlang::caller_env()){
 
+  greta_tf_tfp <- greta_deps_tf_tfp[[deps]]
+  version_provided <- numeric_version(python_deps[[deps]])
+
   version_name <- switch(deps,
                          tf_version = "TF",
                          tfp_version = "TFP")
 
-  version_provided <- python_deps[[deps]]
+  latest_version <- switch(deps,
+                           tf_version = numeric_version("2.15.0"),
+                           tfp_version = numeric_version("0.23.0"))
 
-  valid <- version_provided %in% greta_deps_tf_tfp[[deps]]
+  later_tf_tfp <- version_provided > latest_version
+
+  if (later_tf_tfp){
+    gh_issue <- "https://github.com/greta-dev/greta/issues/675"
+    cli::cli_abort(
+      message = c(
+        "{.pkg greta} Does not yet support \\
+        {version_name} > {.val {latest_version}}",
+        "i" = "See {.url {gh_issue}} for more information",
+        "x" = "The provided version was {.val {version_provided}}",
+        "i" = "The closest value is: {.val {latest_version}}",
+        "i" = "Valid versions of TF, TFP, and Python are in \\
+                  {.code greta_deps_tf_tfp}",
+        "i" = "Inspect with:",
+        "{.run View(greta_deps_tf_tfp)}"),
+      call = call
+    )
+  }
+
+  valid <- version_provided %in% greta_tf_tfp
   if (!valid) {
     closest_value <- closest_version(version_provided, greta_deps_tf_tfp[[deps]])
   }
@@ -255,10 +279,14 @@ check_greta_deps_range <- function(python_deps,
 
     cli::cli_abort(
       message = c("{.val {version_name}} version provided does not match \\
-                  supported range",
+                  supported versions",
                   "The version {.val {version_provided}} was not in \\
                   {.val {greta_deps_tf_tfp[[deps]]}}",
-                  "The closest value is: {.val {closest_value}}"),
+                  "The closest value is: {.val {closest_value}}",
+                  "i" = "Valid versions of TF, TFP, and Python are in \\
+                  {.code greta_deps_tf_tfp}",
+                  "i" = "Inspect with:",
+                  "{.run View(greta_deps_tf_tfp)}"),
       call = call
     )
   }
@@ -292,13 +320,13 @@ check_greta_python_range <- function(version_provided,
 
     closest_value <- paste0(closest_version(version_provided, c(py_versions)))
 
-  cli::cli_abort(
-    message = c("Python version must be between \\
-                {.val {min_py}}-{.val {min_py}}",
-                "The version provided was {.val {version_provided}}. The \\
-                closest value is: {.val {closest_value}}"),
-    call = call
-  )
+    cli::cli_abort(
+      message = c("Python version must be between \\
+                {.val {min_py}}-{.val {max_py}}",
+                  "x" = "The version provided was {.val {version_provided}}.",
+                  "i" = "Try: {.val {closest_value}}"),
+      call = call
+    )
   }
 
 }
@@ -321,8 +349,9 @@ check_greta_deps_config <- function(python_deps,
     valid_os <- unique(greta_deps_tf_tfp$os)
     cli::cli_abort(
       message = c("The os provided does not match one of {.val {valid_os}}",
-                  "To see valid installations of TF, TFP, and Python versions",
-                  "inspect {.code greta_deps_tf_tfp} with:",
+                  "i" = "Valid versions of TF, TFP, and Python are in \\
+                  {.code greta_deps_tf_tfp}",
+                  "i" = "Inspect with:",
                   "{.run View(greta_deps_tf_tfp)}"),
       call = call
     )
@@ -362,9 +391,10 @@ check_greta_deps_config <- function(python_deps,
 
     if (!any_valid){
       cli::cli_abort(
-        message = c("config does not match any installation combinations.",
-                    "To see valid installations of TF, TFP, and Python versions",
-                    "inspect {.code greta_deps_tf_tfp} with:",
+        message = c("Config does not match any installation combinations.",
+                    "i" = "Valid versions of TF, TFP, and Python are in \\
+                  {.code greta_deps_tf_tfp}",
+                    "i" = "Inspect with:",
                     "{.run View(greta_deps_tf_tfp)}"),
         call = call
       )
@@ -400,8 +430,9 @@ check_greta_deps_config <- function(python_deps,
                   tfp_version = {.val {suggested_tfp}}, \\
                   python_version = {.val {suggested_py}}\\
                   )}",
-                  "To see valid installations of TF, TFP, and Python versions",
-                  "inspect {.code greta_deps_tf_tfp} with:",
+                  "i" = "Valid versions of TF, TFP, and Python are in \\
+                  {.code greta_deps_tf_tfp}",
+                  "i" = "Inspect with:",
                   "{.run View(greta_deps_tf_tfp)}"
       ),
       call = call

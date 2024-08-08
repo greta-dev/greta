@@ -1,6 +1,6 @@
 test_that("greta python range detection works correctly",{
   # correct ranges
-  expect_snapshot(check_greta_python_range("3.12"))
+  expect_snapshot(check_greta_python_range("3.11"))
   expect_snapshot(check_greta_python_range("3.9"))
   expect_snapshot(check_greta_python_range("3.3"))
   expect_snapshot(check_greta_python_range("3.8.2"))
@@ -9,6 +9,10 @@ test_that("greta python range detection works correctly",{
   expect_snapshot(
     error = TRUE,
     check_greta_python_range("3.1")
+    )
+  expect_snapshot(
+    error = TRUE,
+    check_greta_python_range("3.12")
     )
   expect_snapshot(
     error = TRUE,
