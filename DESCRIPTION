@@ -134,4 +134,4 @@ Collate:
     'write-logfiles.R'
     'zzz.R'
     'internals.R'
-LazyData: true
+LazyData: false
