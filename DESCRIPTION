@@ -131,6 +131,7 @@ Collate:
     'checkers.R'
     'test_if_forked_cluster.R'
     'testthat-helpers.R'
+    'write-logfiles.R'
     'zzz.R'
     'internals.R'
 LazyData: true

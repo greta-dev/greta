@@ -1,13 +1,18 @@
 greta_note_msg <- cli::format_message(
   c(
     "If you are reading this, the {.pkg greta} installation or error notes \\
-    have been wiped."
+    have been wiped. This likely means that installation has not happened, or \\
+    it has happened and you've restarted R. See `?install_greta_deps()` for \\
+    more information."
     )
 )
 
 greta_stash$install_miniconda_notes <- greta_note_msg
+greta_stash$install_miniconda_error <- greta_note_msg
 greta_stash$conda_create_notes <- greta_note_msg
+greta_stash$conda_create_error <- greta_note_msg
 greta_stash$conda_install_notes <- greta_note_msg
+greta_stash$conda_install_error <- greta_note_msg
 greta_stash$tf_num_error <- greta_note_msg
 
 #' @title Retrieve python messages.

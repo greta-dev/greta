@@ -19,8 +19,13 @@ reinstall_greta_deps(
 )
 }
 \arguments{
-\item{python_deps}{object created with \code{greta_python_deps()} where you
-specify python, TF, and TFP versions.}
+\item{python_deps}{object created with \code{\link[=greta_python_deps]{greta_python_deps()}} where you
+specify python, TF, and TFP versions. By default these are TF 2.15.0,
+TFP 0.23.0, and Python 3.10. These versions must be compatible
+with each other. If they are not, \code{\link[=greta_python_deps]{greta_python_deps()}} will error with
+more information and suggestions. See ?\code{\link[=greta_python_deps]{greta_python_deps()}} for more
+information, and see the data object \code{greta_deps_tf_tfp}
+(`?greta_deps_tf_tfp``).}
 
 \item{timeout}{maximum time in minutes until the installation for each
 installation component times out and exits. Default is 5 minutes per
@@ -34,14 +39,20 @@ only restarts R during interactive sessions, and only in RStudio.}
 \item{...}{Optional arguments, reserved for future expansion.}
 }
 \description{
-This is a helper function to install Python dependencies needed. This
-includes the latest version of Tensorflow version (2.13.0 or higher),
-Tensorflow Probability 0.21.0 (or higher), and the latest version of
-numpy (1.21.0 or higher). These Python modules will be installed into a
-virtual or conda environment, named "greta-env-tf2". Note that "virtualenv"
-is not available on Windows.
+This is a helper function to install Python dependencies needed. By default
+these are TF 2.15.0, TFP 0.23.0, and Python 3.10. These Python modules
+will be installed into a conda environment named "greta-env-tf2".
 }
 \details{
+To see install notes or errors, there isn't an argument to specify,
+instead you will need to specify and environment variable,
+\code{GRETA_INSTALLATION_LOG}, with
+\code{Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}. Or use
+\code{\link[=greta_set_install_logfile]{greta_set_install_logfile()}} to set the path, e.g.,
+\code{greta_set_install_logfile('path/to/logfile.html')}. You can also skip
+the restarting of R and use \code{\link[=write_greta_install_log]{write_greta_install_log()}}, which
+installation notes will indicate how to use if you haven't specified.
+
 By default, if using RStudio, it will now ask you if you want to restart
 the R session. If the session is not interactive, or is not in RStudio,
 it will not restart. You can also override this with \code{restart = TRUE}.

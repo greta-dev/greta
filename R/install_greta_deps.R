@@ -1,14 +1,25 @@
 #' Install Python dependencies for greta
 #'
-#' This is a helper function to install Python dependencies needed. This
-#'   includes the latest version of Tensorflow version (2.13.0 or higher),
-#'   Tensorflow Probability 0.21.0 (or higher), and the latest version of
-#'   numpy (1.21.0 or higher). These Python modules will be installed into a
-#'   virtual or conda environment, named "greta-env-tf2". Note that "virtualenv"
-#'   is not available on Windows.
+#' This is a helper function to install Python dependencies needed. By default
+#'   these are TF 2.15.0, TFP 0.23.0, and Python 3.10. These Python modules
+#'   will be installed into a conda environment named "greta-env-tf2".
 #'
-#' @param python_deps object created with `greta_python_deps()` where you
-#'   specify python, TF, and TFP versions.
+#'   To see install notes or errors, there isn't an argument to specify,
+#'     instead you will need to specify and environment variable,
+#'     `GRETA_INSTALLATION_LOG`, with
+#'     `Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')`. Or use
+#'     [greta_set_install_logfile()] to set the path, e.g.,
+#'     `greta_set_install_logfile('path/to/logfile.html')`. You can also skip
+#'     the restarting of R and use [write_greta_install_log()], which
+#'     installation notes will indicate how to use if you haven't specified.
+#'
+#' @param python_deps object created with [greta_python_deps()] where you
+#'   specify python, TF, and TFP versions. By default these are TF 2.15.0,
+#'   TFP 0.23.0, and Python 3.10. These versions must be compatible
+#'   with each other. If they are not, [greta_python_deps()] will error with
+#'   more information and suggestions. See ?[greta_python_deps()] for more
+#'   information, and see the data object `greta_deps_tf_tfp`
+#'   (`?greta_deps_tf_tfp``).
 #'
 #' @param timeout maximum time in minutes until the installation for each
 #'    installation component times out and exits. Default is 5 minutes per
@@ -24,8 +35,6 @@
 #'  By default, if using RStudio, it will now ask you if you want to restart
 #'  the R session. If the session is not interactive, or is not in RStudio,
 #'  it will not restart. You can also override this with `restart = TRUE`.
-#'
-#'  TODO If you would like to write a logfile of installation ...
 #'
 #' @note This will automatically install Miniconda (a minimal version of the
 #'  Anaconda scientific software management system), create a 'conda'
@@ -112,21 +121,14 @@ install_greta_deps <- function(python_deps = greta_python_deps(),
   }
 
   if (no_logfile) {
-    cli::cli_alert_info(
-      text = c(
-      "To see install notes or errors, specify the environment variable \\
-      {.envvar GRETA_INSTALLATION_LOG}, with:\n",
-      "{.code Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}\n",
-      "Or set using {.fun greta_set_install_logfile}, e.g.,:\n",
-      "{.code greta_set_install_logfile('path/to/logfile.html')}"),
-      wrap = TRUE
-    )
     cli::cli_alert_warning(
       text = c(
-      "If you want to retrieve the logfile, you will need to \\
-      {.strong not restart R} and instead run:",
-      ""
-      )
+        "No logfile specified. If you want to save the logfile to see any \\
+        install notes, or potential errors, you will need to \\
+        {.strong not restart R}, then run:\n\n",
+      "{.run write_greta_install_log('greta-logfile.html')}"
+      ),
+      wrap = TRUE
     )
   }
 
