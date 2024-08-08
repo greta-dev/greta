@@ -878,13 +878,11 @@ check_if_software_available <- function(software_available,
   }
 }
 
-compare_version_vec <- function(current,ideal){
-  compareVersion(
-    paste0(current),
-    ideal
+compare_version_vec <- Vectorize(
+    FUN = compareVersion,
+    vectorize.args = "b",
+    SIMPLIFY = TRUE
   )
-}
-
 
 #' Greta Situation Report
 #'
@@ -1194,4 +1192,63 @@ have_distribution <- function(x){
     has_distribution,
     FUN.VALUE = logical(1)
   )
+}
+
+is_windows <- function() {
+  identical(.Platform$OS.type, "windows")
+}
+
+is_mac <- function() {
+  as.logical(Sys.info()["sysname"] == "Darwin")
+}
+
+is_linux <- function() {
+  identical(tolower(Sys.info()[["sysname"]]), "linux")
+}
+
+os_name <- function(){
+  os <- c(
+    windows = is_windows(),
+    mac = is_mac(),
+    linux = is_linux()
+  )
+  names(which(os))
+}
+
+# semantic version finder
+closest_version <- function(current, available){
+
+  available <- sort(available)
+  not_available <- !(current %in% available)
+
+  current_gt_available <- all(current > available)
+  current_lt_available <- all(current < available)
+  current_btn_available <- any(current > available) && any(current < available)
+
+  pick_largest <- not_available && current_gt_available
+  pick_smallest <- not_available && current_lt_available
+
+  if (pick_largest) {
+    closest <- max(available)
+  }
+
+  if (pick_smallest) {
+    closest <- min(available)
+  }
+
+  if (current_btn_available){
+    version_gt <- current > available
+    closest <- max(available[version_gt])
+  }
+
+  return(closest)
+
+}
+
+outside_version_range <- function(provided, range) {
+  version_num <- numeric_version(provided)
+  above_range <- all(version_num > range)
+  below_range <- all(version_num < range)
+  outside_range <- above_range || below_range
+  outside_range
 }

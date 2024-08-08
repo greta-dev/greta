@@ -39,6 +39,8 @@ This release provides a few improvements to installation in greta. It should now
 * removed `manual` argument in `install_greta_deps()`.
 * added default 5 minute timer to installation processes
 * Added `greta_deps_receipt()` to list the current main python packages installed. (#668)
+* Added checking suite to ensure you are using valid versions of TF, TFP, and Python(#666)
+* Added data `greta_deps_tf_tfp` (#666), which contains valid versions combinations of TF, TFP, and Python.
 
 ## Minor
 
@@ -60,6 +62,7 @@ This release provides a few improvements to installation in greta. It should now
 * Use `%||%` internally to replace the pattern: `if (is.null(x)) x <- thing` with `x <- x %||% thing`. (#630)
 * Add more explaining variables - replace `if (thing & thing & what == this)` with `if (explanation_of_thing)`.
 * Refactored repeated uses of `vapply` into functions (#377, #658)
+* Add internal data files `.deps_tf` and `.deps_tfp` to track dependencies of TF and TFP. Related to #666.
 
 ## Bug fixes
 

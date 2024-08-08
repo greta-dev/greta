@@ -106,6 +106,7 @@ Collate:
     'structures.R'
     'extract_replace_combine.R'
     'dag_class.R'
+    'data-deps-tf-tfp.R'
     'greta_model_class.R'
     'progress_bar.R'
     'inference_class.R'
@@ -131,3 +132,4 @@ Collate:
     'testthat-helpers.R'
     'zzz.R'
     'internals.R'
+LazyData: true
