@@ -31,9 +31,4 @@ greta_create_conda_env <- function(timeout = 5,
   greta_stash$conda_create_notes <- install_conda_create$output_notes
   greta_stash$conda_create_error <- install_conda_create$output_error
 
-  cli::cli_ul("To see full installation notes run:")
-  cli::cli_ul("{.code greta_notes_conda_create_output()}")
-  cli::cli_ul("To see any error messages, run:")
-  cli::cli_ul("{.code greta_notes_conda_create_error()}")
-
 }

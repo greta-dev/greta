@@ -49,9 +49,4 @@ greta_install_python_deps <- function(timeout = 5,
   greta_stash$conda_install_notes <- install_python_modules$output_notes
   greta_stash$conda_install_error <- install_python_modules$output_error
 
-  cli::cli_ul("To see full installation notes run:")
-  cli::cli_ul("{.code greta_notes_conda_install_output()}")
-  cli::cli_ul("To see any error messages, run:")
-  cli::cli_ul("{.code greta_notes_conda_install_error()}")
-
 }

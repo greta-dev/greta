@@ -25,6 +25,8 @@
 #'  the R session. If the session is not interactive, or is not in RStudio,
 #'  it will not restart. You can also override this with `restart = TRUE`.
 #'
+#'  TODO If you would like to write a logfile of installation ...
+#'
 #' @note This will automatically install Miniconda (a minimal version of the
 #'  Anaconda scientific software management system), create a 'conda'
 #'  environment for greta named 'greta-env-tf2' with required python and python
@@ -84,12 +86,53 @@ install_greta_deps <- function(python_deps = greta_python_deps(),
     )
   }
 
+  # TODO
+  # Issue warning if you already have conda env +/ miniconda
+  # suggest using `reinstall_greta_deps()`
   greta_install_python_deps(
     timeout = timeout,
     python_deps = python_deps
   )
 
-  cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
+  # TODO
+  # Detect if you have tried to install greta multiple times in the same
+  # session, and suggest that perhaps they want to use
+  # `reinstall_greta_deps()`
+  # perhaps even stopping the session with a "yesno"
+
+  greta_logfile <- Sys.getenv("GRETA_INSTALLATION_LOG")
+
+  logfile_exists <- nzchar(greta_logfile)
+
+  no_logfile <- !logfile_exists
+
+
+  if (logfile_exists) {
+    write_greta_install_log(path = greta_logfile)
+  }
+
+  if (no_logfile) {
+    cli::cli_alert_info(
+      text = c(
+      "To see install notes or errors, specify the environment variable \\
+      {.envvar GRETA_INSTALLATION_LOG}, with:\n",
+      "{.code Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}\n",
+      "Or set using {.fun greta_set_install_logfile}, e.g.,:\n",
+      "{.code greta_set_install_logfile('path/to/logfile.html')}"),
+      wrap = TRUE
+    )
+    cli::cli_alert_warning(
+      text = c(
+      "If you want to retrieve the logfile, you will need to \\
+      {.strong not restart R} and instead run:",
+      ""
+      )
+    )
+  }
+
+  cli::cli_alert_success("Installation of {.pkg greta} dependencies \\
+                         is complete!",
+                         wrap = TRUE)
 
   restart_or_not(restart)
 
@@ -259,7 +302,8 @@ check_greta_deps_range <- function(python_deps,
         {version_name} > {.val {latest_version}}",
         "i" = "See {.url {gh_issue}} for more information",
         "x" = "The provided version was {.val {version_provided}}",
-        "i" = "The closest value is: {.val {latest_version}}",
+        "i" = "The nearest valid version that is supported by \\
+        {.pkg greta} is: {.val {latest_version}}",
         "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
         "i" = "Inspect with:",
@@ -280,7 +324,8 @@ check_greta_deps_range <- function(python_deps,
                   supported versions",
                   "The version {.val {version_provided}} was not in \\
                   {.val {greta_deps_tf_tfp[[deps]]}}",
-                  "The closest value is: {.val {closest_value}}",
+                  "i" = "The nearest valid version that is supported by \\
+        {.pkg greta} is: {.val {latest_version}}",
                   "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
                   "i" = "Inspect with:",

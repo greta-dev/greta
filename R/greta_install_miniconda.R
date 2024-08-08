@@ -25,8 +25,4 @@ greta_install_miniconda <- function(timeout = 5) {
   greta_stash$miniconda_notes <- install_miniconda_process$output_notes
   greta_stash$miniconda_error <- install_miniconda_process$output_error
 
-  cli::cli_ul("To see full installation notes run:")
-  cli::cli_ul("{.code greta_notes_install_miniconda_output()}")
-  cli::cli_ul("To see any error messages, run:")
-  cli::cli_ul("{.code greta_notes_install_miniconda_error()}")
 }

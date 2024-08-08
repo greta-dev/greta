@@ -46,6 +46,7 @@ Imports:
     reticulate (>= 1.19.0),
     rlang,
     tensorflow (>= 2.8.0),
+    whisker,
     yesno
 Suggests:
     bayesplot,
