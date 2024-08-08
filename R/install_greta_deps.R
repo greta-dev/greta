@@ -325,7 +325,7 @@ check_greta_deps_range <- function(python_deps,
                   "The version {.val {version_provided}} was not in \\
                   {.val {greta_deps_tf_tfp[[deps]]}}",
                   "i" = "The nearest valid version that is supported by \\
-        {.pkg greta} is: {.val {latest_version}}",
+        {.pkg greta} is: {.val {closest_value}}",
                   "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
                   "i" = "Inspect with:",
