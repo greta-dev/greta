@@ -5,7 +5,7 @@
 \alias{greta_deps_tf_tfp}
 \title{Suggested TF, TFP, and Python dependencies}
 \format{
-\subsection{\code{.deps_tf_tfp}}{
+\subsection{\code{greta_deps_tf_tfp}}{
 
 A data frame with 71 rows and 5 columns:
 \describe{

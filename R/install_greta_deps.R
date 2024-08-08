@@ -193,6 +193,8 @@ greta_python_deps <- function(tf_version = "2.15.0",
   check_greta_python_range(deps_obj$python_version)
   check_greta_deps_config(deps_obj)
 
+  deps_obj
+
 }
 
 check_greta_python_deps <- function(deps,

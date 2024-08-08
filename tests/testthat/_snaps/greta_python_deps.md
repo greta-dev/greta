@@ -77,6 +77,27 @@
 
     Code
       greta_python_deps()
+    Output
+        tf_version tfp_version python_version
+      1     2.15.0      0.23.0           3.10
+
+---
+
+    Code
+      greta_python_deps(tf_version = "2.14.0", tfp_version = "0.22.1",
+        python_version = "3.9")
+    Output
+        tf_version tfp_version python_version
+      1     2.14.0      0.22.1            3.9
+
+---
+
+    Code
+      greta_python_deps(tf_version = "2.13.0", tfp_version = "0.21.0",
+        python_version = "3.9")
+    Output
+        tf_version tfp_version python_version
+      1     2.13.0      0.21.0            3.9
 
 ---
 
@@ -164,6 +185,48 @@
       ! Provided `greta_python_deps` does not match valid installation combinations.
       See below for a suggested config to use:
       `greta_python_deps(tf_version = "2.15.0", tfp_version = "0.23.0", python_version = "3.11")`
+      i Valid versions of TF, TFP, and Python are in `greta_deps_tf_tfp`
+      i Inspect with:
+      `View(greta_deps_tf_tfp)`
+
+---
+
+    Code
+      greta_python_deps(tf_version = "2.15.0", tfp_version = "0.22.0",
+        python_version = "3.10")
+    Condition
+      Error in `greta_python_deps()`:
+      ! Provided `greta_python_deps` does not match valid installation combinations.
+      See below for a suggested config to use:
+      `greta_python_deps(tf_version = "2.14.0", tfp_version = "0.22.0", python_version = "3.11")`
+      i Valid versions of TF, TFP, and Python are in `greta_deps_tf_tfp`
+      i Inspect with:
+      `View(greta_deps_tf_tfp)`
+
+---
+
+    Code
+      greta_python_deps(tf_version = "2.14.0", tfp_version = "0.21.0",
+        python_version = "3.8")
+    Condition
+      Error in `greta_python_deps()`:
+      ! Provided `greta_python_deps` does not match valid installation combinations.
+      See below for a suggested config to use:
+      `greta_python_deps(tf_version = "2.13.0", tfp_version = "0.21.0", python_version = "3.11")`
+      i Valid versions of TF, TFP, and Python are in `greta_deps_tf_tfp`
+      i Inspect with:
+      `View(greta_deps_tf_tfp)`
+
+---
+
+    Code
+      greta_python_deps(tf_version = "2.13.0", tfp_version = "0.20.0",
+        python_version = "3.8")
+    Condition
+      Error in `greta_python_deps()`:
+      ! Provided `greta_python_deps` does not match valid installation combinations.
+      See below for a suggested config to use:
+      `greta_python_deps(tf_version = "2.12.0", tfp_version = "0.20.0", python_version = "3.11")`
       i Valid versions of TF, TFP, and Python are in `greta_deps_tf_tfp`
       i Inspect with:
       `View(greta_deps_tf_tfp)`

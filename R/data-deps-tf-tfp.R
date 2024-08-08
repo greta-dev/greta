@@ -7,8 +7,10 @@
 #'   <https://www.tensorflow.org/install/source_windows>, and by inspecting
 #'   <https://github.com/tensorflow/probability/releases>.
 #'
+#' We recommend using the default versions provided in `greta_python_deps()`.
+#'
 #' @format ## `greta_deps_tf_tfp`
-#' A data frame with 71 rows and 5 columns:
+#' A data frame with 63 rows and 5 columns:
 #' \describe{
 #'   \item{os}{Operating System}
 #'   \item{tfp_version, tf_version}{numeric versions in format major.minor.patch for TFP and TF}
