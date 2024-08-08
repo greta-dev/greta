@@ -32,6 +32,8 @@ test_that("greta python range detection works correctly",{
 
 test_that("greta_python_deps fails appropriately", {
   skip_if_not(check_tf_version())
+  # skip on windows as there are small differences in version recommendations
+  skip_on_os(os = "windows")
   # default
   expect_snapshot(greta_python_deps())
   # some correct ranges

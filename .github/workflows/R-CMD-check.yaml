@@ -80,7 +80,6 @@ jobs:
       - name: Install package + deps
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
 
-
       - name: Install greta deps
         run: |
           library(greta)
