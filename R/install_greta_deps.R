@@ -205,7 +205,7 @@ restart_or_not <- function(restart){
 #'
 #' @param tf_version Character. Tensorflow (TF) version in format major.minor.patch. Default is "2.15.0".
 #' @param tfp_version Character.Tensorflow probability (TFP) version major.minor.patch. Default is "0.23.0".
-#' @param python_version Character. Ptyhon version in format major.minor.patch. Default is "3.10".
+#' @param python_version Character. Python version in format major.minor.patch. Default is "3.10".
 #'
 #' @return list of dependencies
 #' @export

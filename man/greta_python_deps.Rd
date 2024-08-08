@@ -15,7 +15,7 @@ greta_python_deps(
 
 \item{tfp_version}{Character.Tensorflow probability (TFP) version major.minor.patch. Default is "0.23.0".}
 
-\item{python_version}{Character. Ptyhon version in format major.minor.patch. Default is "3.10".}
+\item{python_version}{Character. Python version in format major.minor.patch. Default is "3.10".}
 }
 \value{
 list of dependencies

@@ -3,7 +3,7 @@
 \docType{data}
 \name{greta_deps_tf_tfp}
 \alias{greta_deps_tf_tfp}
-\title{Suggested TF, TFP, and Python dependencies}
+\title{Suggested valid Python dependencies for greta}
 \format{
 \subsection{\code{greta_deps_tf_tfp}}{
 
@@ -22,7 +22,7 @@ greta_deps_tf_tfp
 This is a dataset that contains suggested valid versions of Tensorflow (TF),
 Tensorflow Probability (TFP), and Python for linux, mac, and windows
 machines. It was constructed from
-\url{https://www.tensorflow.org/install/source},
+\url{https://www.tensorflow.org/install/source} and
 \url{https://www.tensorflow.org/install/source_windows}, and by inspecting
 \url{https://github.com/tensorflow/probability/releases}.
 }
