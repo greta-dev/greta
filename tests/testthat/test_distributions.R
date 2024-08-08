@@ -697,7 +697,7 @@ test_that("distributions can be sampled from by MCMC", {
 
 test_that("uniform distribution errors informatively", {
   skip_if_not(check_tf_version())
-  skip_on_ci()
+  # skip_on_ci()
 
   # bad types
   expect_snapshot_error(
@@ -724,7 +724,7 @@ test_that("uniform distribution errors informatively", {
 })
 
 test_that("poisson() and binomial() error informatively in glm", {
-  skip_on_ci()
+  # skip_on_ci()
   skip_if_not(check_tf_version())
 
   # if passed as an object

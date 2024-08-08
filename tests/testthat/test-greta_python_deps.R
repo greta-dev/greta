@@ -1,4 +1,5 @@
 test_that("greta python range detection works correctly",{
+  skip_if_not(check_tf_version())
   # correct ranges
   expect_snapshot(check_greta_python_range("3.11"))
   expect_snapshot(check_greta_python_range("3.9"))
@@ -30,6 +31,7 @@ test_that("greta python range detection works correctly",{
 
 
 test_that("greta_python_deps fails appropriately", {
+  skip_if_not(check_tf_version())
   # default
   expect_snapshot(greta_python_deps())
   # some correct ranges
@@ -39,8 +41,8 @@ test_that("greta_python_deps fails appropriately", {
                       python_version = "3.9")
   )
   expect_snapshot(
-    greta_python_deps(tf_version = "2.13.0",
-                      tfp_version = "0.21.0",
+    greta_python_deps(tf_version = "2.12.0",
+                      tfp_version = "0.20.0",
                       python_version = "3.9")
   )
   # TF above range

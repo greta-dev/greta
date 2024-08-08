@@ -93,11 +93,11 @@
 ---
 
     Code
-      greta_python_deps(tf_version = "2.13.0", tfp_version = "0.21.0",
+      greta_python_deps(tf_version = "2.12.0", tfp_version = "0.20.0",
         python_version = "3.9")
     Output
         tf_version tfp_version python_version
-      1     2.13.0      0.21.0            3.9
+      1     2.12.0      0.20.0            3.9
 
 ---
 
