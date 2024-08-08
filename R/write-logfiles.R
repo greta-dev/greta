@@ -7,7 +7,7 @@
 #'   can benefit from the html rendering.
 #'
 #' @return nothing - sets an environment variable for use with
-#'   `greta_install_deps()`.
+#'   [install_greta_deps()].
 #' @export
 greta_set_install_logfile <- function(path){
   Sys.setenv("GRETA_INSTALLATION_LOG"=path)
@@ -16,7 +16,7 @@ greta_set_install_logfile <- function(path){
 #' Write greta dependency installation log file
 #'
 #' This can only be run after installation has happened with
-#'   [greta_install_deps()], and before restarting R.
+#'   [install_greta_deps()], and before restarting R.
 #'
 #' @param path a path with an HTML (.html) extension.
 #'

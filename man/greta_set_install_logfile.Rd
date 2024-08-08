@@ -12,7 +12,7 @@ can benefit from the html rendering.}
 }
 \value{
 nothing - sets an environment variable for use with
-\code{greta_install_deps()}.
+\code{\link[=install_greta_deps]{install_greta_deps()}}.
 }
 \description{
 To help debug greta installation, you can save all installation output

@@ -14,5 +14,5 @@ nothing - writes to file
 }
 \description{
 This can only be run after installation has happened with
-\code{\link[=greta_install_deps]{greta_install_deps()}}, and before restarting R.
+\code{\link[=install_greta_deps]{install_greta_deps()}}, and before restarting R.
 }
