@@ -183,10 +183,6 @@ greta_python_deps <- function(tf_version = "2.15.0",
   )
 
   check_tfp_tf_semantic(deps_obj)
-  # TODO
-  # Make these tf/tfp_range functions entirely separate
-  # Make sure they flag an issue with using TF > 2.15.0 - pointing to issue
-  # https://github.com/greta-dev/greta/issues/675
   check_greta_tf_range(deps_obj)
   check_greta_tfp_range(deps_obj)
 
