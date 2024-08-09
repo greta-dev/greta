@@ -898,18 +898,28 @@ compare_version_vec <- Vectorize(
 #' }
 greta_sitrep <- function(){
 
+  cli::cli_h1("R")
+  cli::cli_ul("version: {.val {getRversion()}}")
+  cli::cli_ul("path: {R.home()}")
+  cli::cli_h1("{.pkg greta}")
+  cli::cli_ul("version: {.val {packageVersion('greta')}}")
+
+  cli::cli_h1("{.pkg Python}")
   check_if_software_available(software_available = have_python(),
                               version = reticulate::py_version(),
                               software_name = "python")
 
+  cli::cli_h1("{.pkg Tensorflow}")
   check_if_software_available(software_available = have_tf(),
                               version = version_tf(),
                               software_name = "TensorFlow")
 
+  cli::cli_h1("{.pkg Tensorflow Probability}")
   check_if_software_available(software_available = have_tfp(),
                               version = version_tfp(),
                               software_name = "TensorFlow Probability")
 
+  cli::cli_h1("{.pkg greta conda environment} ")
   check_if_software_available(software_available = have_greta_conda_env(),
                               software_name = "greta conda environment")
 
