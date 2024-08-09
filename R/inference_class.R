@@ -85,7 +85,8 @@ inference <- R6Class(
 
     # check and try to autofill a single set of initial values (single vector on
     # free state scale)
-    check_initial_values = function(inits) {
+    check_initial_values = function(inits,
+                                    call = rlang::caller_env()) {
       undefined <- is.na(inits)
 
       # try to fill in any that weren't specified
@@ -104,12 +105,13 @@ inference <- R6Class(
 
         if (!valid) {
           cli::cli_abort(
-            c(
+            message = c(
               "Could not find reasonable starting values after \\
               {attempts} attempts.",
               "Please specify initial values manually via the \\
               {.arg initial_values} argument"
-            )
+            ),
+            call = call
           )
         }
       } else {
