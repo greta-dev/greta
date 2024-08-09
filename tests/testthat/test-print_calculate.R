@@ -1,7 +1,7 @@
 test_that("calculate print method is different for different inputs", {
   # ensure print method is the new MCMC one
   skip_on_cran()
-  skip_on_os(os = "mac")
+  skip_on_ci()
 
   x <- normal(0,1)
   m <- model(x)
