@@ -20,11 +20,13 @@
 #' reinstall_miniconda()
 #' }
 remove_greta_env <- function(){
-  cli::cli_alert_info("removing 'greta-env-tf2' conda environment")
+  cli::cli_alert_info("removing 'greta-env-tf2' conda environment",
+                      wrap = TRUE)
   reticulate::conda_remove(
     envname = "greta-env-tf2"
   )
-  cli::cli_alert_success("greta-env-tf2 environment removed!")
+  cli::cli_alert_success("greta-env-tf2 environment removed!",
+                         wrap = TRUE)
 }
 
 #' @export
@@ -40,14 +42,17 @@ reinstall_greta_env <- function(timeout = 5){
 remove_miniconda <- function(){
   path_to_miniconda <- reticulate::miniconda_path()
   if (!file.exists(path_to_miniconda)){
-    cli::cli_alert_info("No miniconda files found at {path_to_miniconda}")
+    cli::cli_alert_info("No miniconda files found at {path_to_miniconda}",
+                        wrap = TRUE)
     return(invisible())
   }
   if (yesno::yesno("Are you sure you want to delete miniconda from ",
                    path_to_miniconda,"?") ){
-    cli::cli_alert_info("removing 'miniconda' installation")
+    cli::cli_alert_info("removing 'miniconda' installation",
+                        wrap = TRUE)
     unlink(path_to_miniconda, recursive = TRUE)
-    cli::cli_alert_success("'miniconda' successfully removed!")
+    cli::cli_alert_success("'miniconda' successfully removed!",
+                           wrap = TRUE)
   } else {
     return(invisible())
   }
@@ -80,4 +85,22 @@ reinstall_greta_deps <- function(python_deps = greta_python_deps(),
     timeout = timeout,
     restart = restart
     )
+}
+
+#' Remove greta dependencies and remove miniconda
+#'
+#' Sometimes when installing greta you might encounter an error and the best
+#'   thing to do is start from a clean slate. This function does two things:
+#'   1. Removes the "greta-tf2-env" with [remove_greta_env()]
+#'   2. Removes the miniconda installation with [remove_miniconda()]
+#'
+#' @return nothing
+#' @export
+destroy_greta_deps <- function(){
+  cli::cli_progress_step(
+    msg = "You are removing greta env and miniconda",
+    msg_done = c("You have successfully removed greta env and miniconda")
+  )
+  remove_greta_env()
+  remove_miniconda()
 }

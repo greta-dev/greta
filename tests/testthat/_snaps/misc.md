@@ -1,35 +1,35 @@
 # check_tf_version works
 
-    We have detected that you do not have the expected python packages setup.
-    You can set these up by running this R code in the console:
+    x The expected python packages are not available
+    i We recommend installing them (in a fresh R session) with:
     `install_greta_deps()`
-    Then, restart R and run:
-    `library(greta)`
+    or
+    `reinstall_greta_deps()`
     (Note: Your R session should not have initialised Tensorflow yet.)
-    For more information, see `?install_greta_deps`
+    i For more information, see `?install_greta_deps`
 
 ---
 
-    We have detected that you do not have the expected python packages setup.
-    You can set these up by running this R code in the console:
+    x The expected python packages are not available
+    i We recommend installing them (in a fresh R session) with:
     `install_greta_deps()`
-    Then, restart R and run:
-    `library(greta)`
+    or
+    `reinstall_greta_deps()`
     (Note: Your R session should not have initialised Tensorflow yet.)
-    For more information, see `?install_greta_deps`
+    i For more information, see `?install_greta_deps`
 
 ---
 
     Code
       check_tf_version("message")
     Message
-      We have detected that you do not have the expected python packages setup.
-      You can set these up by running this R code in the console:
+      x The expected python packages are not available
+      i We recommend installing them (in a fresh R session) with:
       `install_greta_deps()`
-      Then, restart R and run:
-      `library(greta)`
+      or
+      `reinstall_greta_deps()`
       (Note: Your R session should not have initialised Tensorflow yet.)
-      For more information, see `?install_greta_deps`
+      i For more information, see `?install_greta_deps`
 
 # define and mcmc error informatively
 

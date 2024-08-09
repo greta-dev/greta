@@ -1,9 +1,9 @@
-#' Suggested TF, TFP, and Python dependencies
+#' Suggested valid Python dependencies for greta
 #'
 #' This is a dataset that contains suggested valid versions of Tensorflow (TF),
 #'   Tensorflow Probability (TFP), and Python for linux, mac, and windows
 #'   machines. It was constructed from
-#'   <https://www.tensorflow.org/install/source>,
+#'   <https://www.tensorflow.org/install/source> and
 #'   <https://www.tensorflow.org/install/source_windows>, and by inspecting
 #'   <https://github.com/tensorflow/probability/releases>.
 #'

@@ -4,7 +4,6 @@ AdagradDAOptimiser
 CMD
 CRAN's
 Codecov
-Conda
 DAGs
 DiagrammeR
 GPUs
@@ -37,6 +36,7 @@ RStudio
 RStudio's
 Scalable
 TF
+TFP
 Tensorflow
 Vectorised
 WinBUGS
@@ -55,6 +55,7 @@ colour
 colours
 conda
 cran
+deps
 devtools
 dlkjcorr
 doi
@@ -78,6 +79,8 @@ initialising
 joss
 labelled
 libxml
+linux
+logfile
 maximise
 mcmc
 md
@@ -88,7 +91,6 @@ modelling
 multisession
 nd
 normalised
-numpy
 optimisation
 optimisations
 optimiser
@@ -122,12 +124,12 @@ specialised
 summarise
 tensorflow
 tf
+tfp
 tuh
 unadjusted
 uncentered
 uncoached
 vectorising
-virtualenv
 visualise
 warmup
 winbuilder

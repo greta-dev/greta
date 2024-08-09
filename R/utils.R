@@ -949,7 +949,8 @@ greta_sitrep <- function(){
 
     if (all(software_version$match)){
       check_tf_version("none")
-      cli::cli_alert_info("{.pkg greta} is ready to use!")
+      cli::cli_alert_info("{.pkg greta} is ready to use!",
+                          wrap = TRUE)
     } else {
       check_tf_version("warn")
     }
@@ -1252,3 +1253,4 @@ outside_version_range <- function(provided, range) {
   outside_range <- above_range || below_range
   outside_range
 }
+

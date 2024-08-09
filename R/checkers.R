@@ -56,15 +56,14 @@ check_tf_version <- function(alert = c("none",
     cli_process_failed()
 
     cli_msg <- c(
-      "We have detected that you do not have the expected python packages \\
-          setup.",
-      "You can set these up by running this R code in the console:",
+      "x" = "The expected python packages are not available",
+      "i" = "We recommend installing them (in a fresh R session) with:",
       "{.code install_greta_deps()}",
-      "Then, restart R and run:",
-      "{.code library(greta)}",
+      "or",
+      "{.code reinstall_greta_deps()}",
       "({.strong Note}: Your R session should not have initialised \\
           Tensorflow yet.)",
-      "For more information, see {.code ?install_greta_deps}"
+      "i" = "For more information, see {.code ?install_greta_deps}"
     )
 
     # if there was a problem, append the solution
@@ -74,9 +73,9 @@ check_tf_version <- function(alert = c("none",
 
     switch(
       alert,
-      error = stop(error_text, call. = FALSE),
-      warn = warning(warning_text, call. = FALSE),
-      message = message(message_text),
+      error = rlang::abort(error_text),
+      warn = rlang::warn(warning_text),
+      message = rlang::inform(message_text),
       startup = packageStartupMessage(message_text),
       none = NULL
     )
