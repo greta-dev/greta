@@ -25,12 +25,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr, any::xml2
+          extra-packages: |
+            any::covr
+            any::xml2
+            any::remotes
           needs: coverage
-
-      - name: Install remotes
-        if: steps.r-package-cache.outputs.cache-hit != 'true'
-        run: install.packages("remotes")
 
       - name: Install system dependencies
         if: runner.os == 'Linux'
@@ -43,18 +42,19 @@ jobs:
             sudo $cmd
           done < <(Rscript -e "writeLines(remotes::system_requirements('$ID-$VERSION_ID'))")
 
-
       - name: Install package + deps
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
+        shell: Rscript {0}
 
       - name: Install greta deps
         run: |
           library(greta)
           greta::install_greta_deps(timeout = 50)
+        shell: Rscript {0}
 
       - name: Situation Report on greta install
         run: greta::greta_sitrep()
-
+        shell: Rscript {0}
 
       - name: Test coverage
         run: |
