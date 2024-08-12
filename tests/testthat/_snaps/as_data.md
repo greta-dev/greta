@@ -54,9 +54,9 @@
 
 ---
 
-    cannot coerce a non-data greta_array to data
+    cannot coerce a non-data <greta_array> to data
 
 ---
 
-    cannot coerce a non-data greta_array to data
+    cannot coerce a non-data <greta_array> to data
 
