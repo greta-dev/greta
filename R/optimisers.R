@@ -40,9 +40,10 @@ NULL
 optimiser_defunct_error <- function(optimiser) {
   cli::cli_abort(
     c(
-      "The optimiser, {.fun {optimiser}}, is defunct and has been removed in {.pkg greta} 0.5.0.",
+      "The optimiser, {.fun {optimiser}}, is defunct and has been removed \\
+      in {.pkg greta} 0.5.0.",
       "Please use a different optimiser.",
-      "See {.code ?optimisers} for more details on which optimizers are removed."
+      "See {.code ?optimisers} for detail on which optimizers are removed."
       )
   )
 }

@@ -1055,6 +1055,28 @@ check_commanality_btn_dags <- function(dag,
   }
 }
 
+check_finite_positive_scalar_integer <- function(x,
+                                                 arg = rlang::caller_arg(x),
+                                                 call = rlang::caller_env()){
+  is_not_finite_positive_scalar_integer <- !is.numeric(x) ||
+    length(x) != 1 ||
+    !is.finite(x) ||
+    x <= 0
+
+  if (is_not_finite_positive_scalar_integer) {
+
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} must be a finite, positive, scalar integer",
+        "x" = "We see {.arg {arg}} = {.arg {x}}",
+        "x" = "having class: {.cls {class(x)}}",
+        "x" = "and length {.var {length(x)}}"
+      ),
+      call = call
+    )
+  }
+
+}
 
 checks_module <- module(
   check_tf_version,
@@ -1074,6 +1096,7 @@ checks_module <- module(
   complex_error,
   check_targets_stochastic_and_not_sampled,
   check_dag_introduces_new_variables,
-  check_commanality_btn_dags
+  check_commanality_btn_dags,
+  check_finite_positive_scalar_integer
 )
 
