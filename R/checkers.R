@@ -749,8 +749,8 @@ check_dependencies_satisfied <- function(target,
     final_msg <- cli::format_error(
       message = c(
         "greta array(s) do not have values",
-        "values have not been provided for all {.cls greta_array}s on which the \\
-        target depends, and {.var nsim} has not been set.",
+        "values have not been provided for all {.cls greta_array}s on which \\
+        the target depends, and {.var nsim} has not been set.",
         "{msg}"
       )
     )
@@ -991,6 +991,71 @@ check_if_upper_gt_lower <- function(lower,
   }
 }
 
+
+check_targets_stochastic_and_not_sampled <- function(
+    target,
+    mcmc_dag_variables,
+    call = rlang::caller_env()
+) {
+  target_nodes <- lapply(target, get_node)
+  target_node_names <- extract_unique_names(target_nodes)
+  existing_variables <- target_node_names %in% names(mcmc_dag_variables)
+  have_distributions <- have_distribution(target_nodes)
+  new_stochastics <- have_distributions & !existing_variables
+  if (any(new_stochastics)) {
+    n_stoch <- sum(new_stochastics)
+    cli::cli_abort(
+      message = c(
+        "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
+          samples",
+        "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
+          {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
+          {?have distributions and are/has a distribution and is} not in the \\
+          MCMC samples, so cannot be calculated from the samples alone.",
+        "Set {.arg nsim} if you want to sample them conditionally on the \\
+          MCMC samples"
+      ),
+      call = call
+    )
+  }
+}
+
+# see if the new dag introduces any new variables
+check_dag_introduces_new_variables <- function(dag,
+                                               mcmc_dag,
+                                               call = rlang::caller_env()) {
+  new_types <- dag$node_types[!connected_to_draws(dag, mcmc_dag)]
+  any_new_variables <- any(new_types == "variable")
+  if (any_new_variables) {
+    cli::cli_abort(
+      message = c(
+        "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
+          samples",
+        "the target {.cls greta array}s are related to new variables that \\
+          are not in the MCMC samples, so cannot be calculated from the \\
+          samples alone.",
+        "Set {.arg nsim} if you want to sample them conditionally on the \\
+          MCMC samples"
+      ),
+      call = call
+    )
+  }
+}
+
+check_commanality_btn_dags <- function(dag,
+                                       mcmc_dag,
+                                       call = rlang::caller_env()) {
+  target_not_connected_to_mcmc <- !any(connected_to_draws(dag, mcmc_dag))
+  if (target_not_connected_to_mcmc) {
+    cli::cli_abort(
+      message = "the target {.cls greta array}s do not appear to be \\
+      connected to those in the {.cls greta_mcmc_list} object",
+      call = call
+    )
+  }
+}
+
+
 checks_module <- module(
   check_tf_version,
   check_dims,
@@ -1006,6 +1071,9 @@ checks_module <- module(
   check_n_cores,
   check_positive_integer,
   check_if_array_is_empty_list,
-  complex_error
+  complex_error,
+  check_targets_stochastic_and_not_sampled,
+  check_dag_introduces_new_variables,
+  check_commanality_btn_dags
 )
 

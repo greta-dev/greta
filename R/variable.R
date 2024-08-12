@@ -46,9 +46,10 @@
 variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
   check_tf_version("error")
 
-  if (is.greta_array(lower)| is.greta_array(upper)) {
+  if (is.greta_array(lower) | is.greta_array(upper)) {
     cli::cli_abort(
-      "lower and upper must be fixed, they cannot be another greta array"
+      "{.arg lower} and {.arg upper} must be fixed, they cannot be another \\
+      {.cls greta_array}"
     )
   }
 

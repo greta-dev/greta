@@ -54,15 +54,11 @@ joint_distribution <- R6Class(
       n_distributions <- length(dots)
 
       if (n_distributions < 2) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           c(
             "{.fun joint} must be passed at least two distributions",
             "The number of distributions passed was {n_distributions}"
             )
-          )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -84,12 +80,8 @@ joint_distribution <- R6Class(
       # check they are all scalar
       are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
       if (!all(are_scalar)) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "{.fun joint} only accepts probability distributions over scalars"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
 
@@ -105,13 +97,9 @@ joint_distribution <- R6Class(
 
       is_discrete_and_continuous <- !all(discrete) & !all(!discrete)
       if (is_discrete_and_continuous) {
-        msg <- cli::format_error(
+        cli::cli_abort(
           "cannot construct a joint distribution from a combination of \\
           discrete and continuous distributions"
-        )
-        stop(
-          msg,
-          call. = FALSE
         )
       }
       n_components <- length(dot_nodes)

@@ -141,18 +141,16 @@ model <- function(...,
     # check they have a density among them
     no_distribution <- !("distribution" %in% types_sub)
     if (no_distribution) {
-      stop(
-        density_message,
-        call. = FALSE
+      cli::cli_abort(
+        message = density_message
         )
     }
 
     # check they have a variable node among them
     no_variable_node <- !("variable" %in% types_sub)
     if (no_variable_node) {
-      stop(
-        variable_message,
-        call. = FALSE
+      cli::cli_abort(
+        variable_message
         )
     }
   }
