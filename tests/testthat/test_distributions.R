@@ -700,25 +700,30 @@ test_that("uniform distribution errors informatively", {
   # skip_on_ci()
 
   # bad types
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     uniform(min = 0, max = NA)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     uniform(min = 0, max = head)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     uniform(min = 1:3, max = 5)
   )
 
   # good types, bad values
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     uniform(min = -Inf, max = Inf)
   )
 
   # lower not below upper
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     uniform(min = 1, max = 1)
   )
 })

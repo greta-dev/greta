@@ -596,30 +596,13 @@ flatten_trace <- function(i, trace_list) {
 
 # extract the model information object from mcmc samples returned by
 # stashed_samples, and error nicely if there's something fishy
-get_model_info <- function(draws, name = "value") {
-  if (!is.greta_mcmc_list(draws)) {
-    cli::cli_abort(
-      c(
-        "{name} must be an {.cls greta_mcmc_list} object",
-        "created by {.fun greta::mcmc}, {.fun greta::stashed_samples}, or \\
-        {.fun greta::extra_samples}"
-      )
-    )
-  }
+get_model_info <- function(draws) {
+
+  check_if_greta_mcmc_list(draws)
 
   model_info <- attr(draws, "model_info")
-  valid <- !is.null(model_info)
 
-  if (!valid) {
-    cli::cli_abort(
-      c(
-        "{name} is an {.cls mcmc.list} object, but is not associated with any\\
-        model information",
-        "perhaps it wasn't created by {.fun greta::mcmc}, \\
-        {.fun greta::stashed_samples}, or {.fun greta::extra_samples}?"
-      )
-    )
-  }
+  check_if_model_info(model_info)
 
   model_info
 }

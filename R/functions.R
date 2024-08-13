@@ -396,16 +396,7 @@ chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
 #' @export
 solve.greta_array <- function(a, b, ...) {
 
-  # check a is 2D
-  if (!is_2d(a)) {
-    cli::cli_abort(
-      c(
-        "Arrays are not both 2D",
-        "{.var a} and {.var b} must both be 2D, but {.var a} has dimensions: \\
-        {paste(dim(a), collapse = 'x')}"
-      )
-    )
-  }
+  check_2d(a)
 
   # check the matrix is square
   a_not_square <- dim(a)[1] != dim(a)[2]
@@ -434,16 +425,7 @@ solve.greta_array <- function(a, b, ...) {
     }
   } else {
 
-    # check b is 2D
-    if (!is_2d(b)) {
-      cli::cli_abort(
-        c(
-          "Arrays are not both 2D",
-          "{.var a} and {.var b} must both be 2D, but {.var b} has dimensions: \\
-          {paste(dim(b), collapse = 'x')}"
-        )
-      )
-    }
+    check_2d(b)
 
     # b must have the right number of rows
     rows_not_equal <- dim(b)[1] != dim(a)[1]
@@ -772,16 +754,7 @@ sweep.greta_array <- function(x,
     )
   }
 
-  # x must be 2D
-  if (!is_2d(x)) {
-    cli::cli_abort(
-      c(
-        "Array not 2D",
-        "x" = "{.var x} must be a 2D array, but has {n_dim(x)} \\
-        dimensions"
-      )
-    )
-  }
+  check_2d(x)
 
   # STATS must be a column array
   is_column_array <- is_2d(stats) && dim(stats)[2] == 1
@@ -825,25 +798,8 @@ setMethod(
     # nolint end
     fun <- match.arg(FUN)
 
-    # X must be 2D
-    if (!is_2d(X)) {
-      cli::cli_abort(
-        c(
-          "Not a 2D array",
-          "{.var X} must be a 2D array, but has {n_dim(X)} dimensions"
-        )
-      )
-    }
-
-    # Y must be 2D
-    if (!is_2d(Y)) {
-      cli::cli_abort(
-        c(
-          "Not a 2D array",
-          "{.var X} must be a 2D array, but has {n_dim(X)} dimensions"
-        )
-      )
-    }
+    check_2d(X)
+    check_2d(Y)
 
     tf_fun_name <- switch(fun,
       `*` = "multiply",

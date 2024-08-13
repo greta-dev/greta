@@ -168,8 +168,8 @@ check_dims <- function(...,
 }
 
 # make sure a greta array is 2D
-check_2d <- function(x,
-                     call = rlang::caller_env()) {
+check_2d_multivariate <- function(x,
+                                  call = rlang::caller_env()) {
   if (!is_2d(x)) {
     cli::cli_abort(
       message = c(
@@ -238,7 +238,7 @@ check_mean_sigma_have_same_dimensions <- function(mean,
 check_chol2symm_square_symmetric_upper_tri_matrix <- function(
     x,
     call = rlang::caller_env()
-      ) {
+) {
   dim <- dim(x)
   is_square <- dim[1] == dim[2]
   if (!is_2d(x) || !is_square) {
@@ -256,7 +256,7 @@ check_chol2symm_square_symmetric_upper_tri_matrix <- function(
 check_chol2symm_2d_square_upper_tri_greta_array <- function(
     x,
     call = rlang::caller_env()
-    ) {
+) {
   dim <- dim(x)
   is_square <- dim[1] == dim[2]
   if (!is_2d(x) || !is_square) {
@@ -442,7 +442,7 @@ check_multivariate_dims <- function(vectors = list(),
   squares <- lapply(squares, as.greta_array)
 
   # make sure they are all 2D and the squares are square
-  lapply(c(vectors, scalars, squares), check_2d)
+  lapply(c(vectors, scalars, squares), check_2d_multivariate)
   lapply(squares, check_square)
 
   # check and return the output number of distribution realisations
@@ -1078,6 +1078,146 @@ check_finite_positive_scalar_integer <- function(x,
 
 }
 
+check_if_greta_mcmc_list <- function(x,
+                                     arg = rlang::caller_arg(x),
+                                     call = rlang::caller_env()){
+  if (!is.greta_mcmc_list(x)) {
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} must be a {.cls greta_mcmc_list} object",
+        "created by {.fun greta::mcmc}, {.fun greta::stashed_samples}, or \\
+        {.fun greta::extra_samples}"
+      ),
+      call = call
+    )
+  }
+}
+
+check_if_model_info <- function(x,
+                                arg = rlang::caller_arg(x),
+                                call = rlang::caller_env()){
+  valid <- !is.null(x)
+
+  if (!valid) {
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} is an {.cls mcmc.list} object, but is not associated \\
+        with any model information",
+        "Perhaps it wasn't created by {.fun greta::mcmc}, \\
+        {.fun greta::stashed_samples}, or {.fun greta::extra_samples}?"
+      ),
+      call = call
+    )
+  }
+
+}
+
+check_2d <- function(x,
+                     arg = rlang::caller_arg(x),
+                     call = rlang::caller_env()){
+  if (!is_2d(x)){
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg} must be two dimensional}",
+        "However, {.arg {arg}} has dimensions: {paste(dim(x), collapse = 'x')}"
+      ),
+      call = call
+    )
+  }
+}
+
+check_positive_scalar <- function(x,
+                                  arg = rlang::caller_arg(x),
+                                  call = rlang::caller_env()){
+
+  not_positive_scalar <- !is.numeric(x) || !length(x) == 1 || x <= 0
+  if (not_positive_scalar){
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} must be a positive scalar value, or a scalar \\
+            {.cls greta_array}"
+      ),
+      call = call
+    )
+  }
+}
+
+check_scalar <- function(x,
+                            arg = rlang::caller_arg(x),
+                            call = rlang::caller_env()){
+  scalar <- is_scalar(x)
+  if (!scalar){
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} must be a scalar",
+        "However {.arg {arg}} had dimensions: \\
+            {paste0(dim({x}), collapse = 'x')}"
+      ),
+      call = call
+    )
+  }
+}
+
+check_finite <- function(x,
+                   arg = rlang::caller_arg(x),
+                   call = rlang::caller_env()){
+  not_finite <- !is.finite(x)
+  if (not_finite){
+    cli::cli_abort(
+      message =   c(
+        "{.arg {x}} must be a finite scalar",
+        "But their values are:",
+        "{.arg {x}}: {x}"
+      ),
+      call = call
+    )
+  }
+}
+
+check_x_gte_y <- function(x,
+                          y,
+                          x_arg = rlang::caller_arg(x),
+                          y_arg = rlang::caller_arg(y),
+                          call = rlang::caller_env()){
+
+  x_gte_y <- x >= y
+
+  if (x_gte_y) {
+    cli::cli_abort(
+      message = c(
+        "{.arg {y_arg}} must be greater than {.arg {x_arg}}",
+        "Their values are:",
+        "{.arg {x_arg}}: {x}",
+        "{.arg {y_arg}}: {y}"
+      ),
+      call = call
+    )
+  }
+
+}
+
+
+check_numeric_length_1 <- function(x,
+                                   arg = rlang::caller_arg(x),
+                                   call = rlang::caller_env()){
+  good_type <- is.numeric(x) && length(x) == 1
+
+  if (!good_type) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be a numeric vector of length 1",
+        "However its class, and length are:",
+        "{.arg {arg}}:",
+        "*" = "(class: {.cls {class({x})}})",
+        "*" = "(length: {.val {length({x})}})"
+      ),
+      call = call
+    )
+  }
+
+}
+
+
 checks_module <- module(
   check_tf_version,
   check_dims,
@@ -1097,6 +1237,8 @@ checks_module <- module(
   check_targets_stochastic_and_not_sampled,
   check_dag_introduces_new_variables,
   check_commanality_btn_dags,
-  check_finite_positive_scalar_integer
+  check_finite_positive_scalar_integer,
+  check_if_greta_mcmc_list,
+  check_2d_multivariate
 )
 

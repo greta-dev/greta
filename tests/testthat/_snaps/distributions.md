@@ -1,37 +1,59 @@
 # uniform distribution errors informatively
 
-    `min` and `max` must be numeric vectors of length 1
-    They have class and length:
-    `min`: numeric, 1
-    `max`: logical, 1
+    Code
+      uniform(min = 0, max = NA)
+    Condition
+      Error in `initialize()`:
+      ! `max` must be a numeric vector of length 1
+      However its class, and length are:
+      `max`:
+      * (class: <logical>)
+      * (length: 1)
 
 ---
 
-    `min` and `max` must be numeric vectors of length 1
-    They have class and length:
-    `min`: numeric, 1
-    `max`: function, 1
+    Code
+      uniform(min = 0, max = head)
+    Condition
+      Error in `initialize()`:
+      ! `max` must be a numeric vector of length 1
+      However its class, and length are:
+      `max`:
+      * (class: <function>)
+      * (length: 1)
 
 ---
 
-    `min` and `max` must be numeric vectors of length 1
-    They have class and length:
-    `min`: integer, 3
-    `max`: numeric, 1
+    Code
+      uniform(min = 1:3, max = 5)
+    Condition
+      Error in `initialize()`:
+      ! `min` must be a numeric vector of length 1
+      However its class, and length are:
+      `min`:
+      * (class: <integer>)
+      * (length: 3)
 
 ---
 
-    `min` and `max` must be finite scalars
-    Their values are:
-    `min`: -Inf
-    `max`: Inf
+    Code
+      uniform(min = -Inf, max = Inf)
+    Condition
+      Error in `initialize()`:
+      ! `-Inf` must be a finite scalar
+      But their values are:
+      `-Inf`: -Inf
 
 ---
 
-    `max` must be greater than `min`
-    Their values are:
-    `min`: 1
-    `max`: 1
+    Code
+      uniform(min = 1, max = 1)
+    Condition
+      Error in `initialize()`:
+      ! `max` must be greater than `min`
+      Their values are:
+      `min`: 1
+      `max`: 1
 
 # poisson() and binomial() error informatively in glm
 
@@ -78,7 +100,7 @@
 ---
 
     `eta` must be a scalar
-    However `eta` had dimensions: 2, 1
+    However `eta` had dimensions: 2x1
 
 ---
 

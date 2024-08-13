@@ -305,7 +305,6 @@ test_that("sweep works for numeric x and greta array STATS", {
 test_that("solve and sweep and kronecker error as expected", {
   skip_if_not(check_tf_version())
 
-
   a <- as_data(randn(5, 25))
   b <- as_data(randn(5, 25, 2))
   c <- as_data(randn(5, 5))
@@ -314,62 +313,74 @@ test_that("solve and sweep and kronecker error as expected", {
   # solve
 
   # a must be 2D
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     solve(b, a)
   )
 
   # b must also be 2D
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     solve(c, b)
   )
 
   # only square matrices allowed for first element
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     solve(a, a)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     solve(a)
   )
 
   # dimension of second array must match
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     solve(c, t(a))
   )
 
   # sweep
   # x must be 2D
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     sweep(b, 1, stats)
   )
 
   # dim must be either 1 or 2
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     sweep(a, 3, stats)
   )
 
   # stats must have the correct number of elements
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     sweep(a, 1, c(stats, stats))
   )
 
   # stats must be a column vector
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     sweep(a, 1, t(stats))
   )
 
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     sweep(a, 2, stats)
   )
 
   # kronecker
   # X must be 2D
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     kronecker(a, b)
   )
 
   # Y must be 2D
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     kronecker(b, c)
   )
 

@@ -1,5 +1,5 @@
 # imultilogit errors informatively
 
-    `imultilogit()` must have a 2D greta array
-    `dim(x)` returns: 3, 4, and 3
+    `x must be two dimensional`
+    However, `x` has dimensions: 3x4x3
 
