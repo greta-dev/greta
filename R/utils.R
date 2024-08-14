@@ -510,26 +510,7 @@ quietly <- function(expr) {
 cleanly <- function(expr) {
   res <- tryCatch(expr, error = function(e) e)
 
-  # if it errored
-  if (inherits(res, "error")) {
-
-    # check for known numerical errors
-    numerical_errors <- vapply(greta_stash$numerical_messages,
-                               grepl,
-                               res$message,
-                               FUN.VALUE = 0
-    ) == 1
-
-    # if it was just a numerical error, quietly return a bad value
-    if (!any(numerical_errors)) {
-      cli::cli_abort(
-        c(
-          "{.pkg greta} hit a tensorflow error:",
-          "{res}"
-        )
-      )
-    }
-  }
+  check_for_errors(res)
 
   res
 }

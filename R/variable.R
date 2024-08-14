@@ -72,18 +72,21 @@ cholesky_variable <- function(dim, correlation = FALSE) {
   n_dim <- length(dim)
   if (n_dim == 1) {
     dim <- c(dim, dim)
-  } else if (n_dim == 2) {
-    not_square <- dim[1] != dim[2]
-    if (not_square) {
-      msg <- cli::cli_abort(
-        c(
-          "cholesky variables must be square",
-          "However its dimension is: {.val {paste(dim, collapse = 'x')}}"
-        )
+  }
+
+  not_square <- dim[1] != dim[2]
+
+  if (n_dim == 2 && not_square){
+    cli::cli_abort(
+      c(
+        "cholesky variables must be square",
+        "However its dimension is: {.val {paste(dim, collapse = 'x')}}"
       )
-    }
-  } else {
-    msg <- cli::cli_abort(
+    )
+  }
+
+  if (length(dim) > 2) {
+    cli::cli_abort(
       c(
         "{.arg dim} can either be a scalar or a vector of length 2",
         "However {.arg dim} has length {.val {length(dim)}}, and contains: \\
@@ -96,8 +99,8 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 
   # dimension of the free state version
   free_dim <- ifelse(correlation,
-    k * (k - 1) / 2,
-    k + k * (k - 1) / 2
+                     k * (k - 1) / 2,
+                     k + k * (k - 1) / 2
   )
 
   # create variable node
@@ -109,8 +112,8 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 
   # set the constraint, to enable transformation
   node$constraint <- ifelse(correlation,
-    "correlation_matrix",
-    "covariance_matrix"
+                            "correlation_matrix",
+                            "covariance_matrix"
   )
 
   # set the printed value to be nicer

@@ -1693,9 +1693,9 @@ check_final_dim <- function(dim,
   if (last_dim_gt_1) {
     cli::cli_abort(
       message = c(
-      "The final dimension of a {thing} must have more than \\
+        "The final dimension of a {thing} must have more than \\
       one element",
-      "The final dimension has: {.val {n_last_dim} element{?s}}"
+        "The final dimension has: {.val {n_last_dim} element{?s}}"
       ),
       call = call
     )
@@ -1723,6 +1723,33 @@ check_not_greta_array <- function(x,
       "{.arg {arg}} cannot be a {.cls greta_array}"
     )
   }
+}
+
+# if it errored
+check_for_errors <- function(res,
+                             call = rlang::caller_env()){
+
+  if (inherits(res, "error")) {
+
+    # check for known numerical errors
+    numerical_errors <- vapply(greta_stash$numerical_messages,
+                               grepl,
+                               res$message,
+                               FUN.VALUE = 0
+    ) == 1
+
+    # if it was just a numerical error, quietly return a bad value
+    if (!any(numerical_errors)) {
+      cli::cli_abort(
+        message = c(
+          "{.pkg greta} hit a tensorflow error:",
+          "{res}"
+        ),
+        call = call
+      )
+    }
+  }
+
 }
 
 checks_module <- module(
