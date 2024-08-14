@@ -5,13 +5,8 @@ uniform_distribution <- R6Class(
     min = NA,
     max = NA,
     initialize = function(min, max, dim) {
-      if (is.greta_array(min) | is.greta_array(max)) {
-        cli::cli_abort(
-          "{.arg min} and {.arg max} must be fixed, they cannot be another \\
-          greta array"
-        )
-      }
-
+      check_param_greta_array(min)
+      check_param_greta_array(max)
       check_numeric_length_1(min)
       check_numeric_length_1(max)
       check_finite(min)

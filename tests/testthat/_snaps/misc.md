@@ -45,7 +45,7 @@
 
 ---
 
-    model contains a discrete random variable that doesn't have a fixed value, so inference cannot be carried out
+    Model contains a discrete random variable that doesn't have a fixed value, so inference cannot be carried out.
 
 ---
 
@@ -53,7 +53,7 @@
 
 ---
 
-    data <greta_array>s cannot be sampled
+    Data <greta_array>s cannot be sampled
     `x` is a data <greta_array>(s)
 
 # check_dims errors informatively

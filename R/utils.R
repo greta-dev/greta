@@ -1184,3 +1184,4 @@ outside_version_range <- function(provided, range) {
   outside_range
 }
 
+pretty_dim <- function(x) paste0(dim(x), collapse = "x")

@@ -649,7 +649,7 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
   # check the rank isn't too high
   if (!is_2d(x)) {
     cli::cli_abort(
-      "cannot only extract the diagonal from a node with exactly two \\
+      "Cannot only extract the diagonal from a node with exactly two \\
       dimensions"
     )
   }
@@ -657,7 +657,7 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
   is_square <- dim[1] != dim[2]
   if (is_square) {
     cli::cli_abort(
-      "diagonal elements can only be extracted from square matrices"
+      "Diagonal elements can only be extracted from square matrices"
     )
   }
 

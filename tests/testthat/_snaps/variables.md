@@ -52,17 +52,21 @@
 
 ---
 
-    the final dimension of a simplex variable must have more than one element
+    The final dimension of a simplex variable must have more than one element
+    The final dimension has: "1 element"
 
 ---
 
-    the final dimension of a simplex variable must have more than one element
+    The final dimension of a simplex variable must have more than one element
+    The final dimension has: "1 element"
 
 ---
 
-    the final dimension of an ordered variable must have more than one element
+    The final dimension of a ordered variable must have more than one element
+    The final dimension has: "1 element"
 
 ---
 
-    the final dimension of an ordered variable must have more than one element
+    The final dimension of a ordered variable must have more than one element
+    The final dimension has: "1 element"
 

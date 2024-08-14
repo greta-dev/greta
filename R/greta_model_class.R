@@ -155,24 +155,7 @@ model <- function(...,
     }
   }
 
-  # check for unfixed discrete distributions
-  distributions <- dag$node_list[dag$node_types == "distribution"]
-  bad_nodes <- vapply(
-    distributions,
-    function(x) {
-      valid_target <- is.null(x$target) ||
-        is.data_node(x$target)
-      x$discrete && !valid_target
-    },
-    FALSE
-  )
-
-  if (any(bad_nodes)) {
-    cli::cli_abort(
-      "model contains a discrete random variable that doesn't have a fixed \\
-      value, so inference cannot be carried out"
-        )
-  }
+  check_unfixed_discrete_distributions(dag)
 
   # define the TF graph
   # dag$define_tf()
@@ -230,15 +213,7 @@ plot.greta_model <- function(x,
                              y,
                              colour = "#996bc7",
                              ...) {
-  if (!is_DiagrammeR_installed()) {
-    cli::cli_abort(
-      c(
-        "the {.pkg DiagrammeR} package must be installed to plot greta models",
-        "install {.pkg DiagrammeR} with:",
-        "{.code install.packages('DiagrammeR')}"
-        )
-      )
-  }
+  check_diagrammer_installed()
 
   # set up graph
   dag_mat <- x$dag$adjacency_matrix

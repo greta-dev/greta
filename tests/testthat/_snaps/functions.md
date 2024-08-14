@@ -70,8 +70,8 @@
       solve(a, a)
     Condition
       Error in `solve()`:
-      ! `a` is not square
-      x `a` must be square, but has 5 rows and 25 columns
+      ! Not 2D square greta array
+      x expected a 2D square greta array, but object `x` had dimension: 5x25
 
 ---
 
@@ -79,8 +79,8 @@
       solve(a)
     Condition
       Error in `solve()`:
-      ! `a` is not square
-      x `a` must be square, but has 5 rows and 25 columns
+      ! Not 2D square greta array
+      x expected a 2D square greta array, but object `x` had dimension: 5x25
 
 ---
 
@@ -124,7 +124,8 @@
       Error in `sweep()`:
       ! `stats` not a column vector array
       `stats` must be a column vector array
-      x `stats` has dimensions 1x5
+      x `stats` has dimensions:
+      "1x5"
 
 ---
 
@@ -170,28 +171,28 @@
 
 # forwardsolve and backsolve error as expected
 
-    `k` must equal `ncol(l)` for <greta_array>s
+    `1` must equal `ncol(l)` for <greta_array>s
 
 ---
 
-    `k` must equal `ncol(r)` for <greta_array>s
+    `1` must equal `ncol(r)` for <greta_array>s
 
 ---
 
-    transpose must be FALSE for <greta_array>s
+    `transpose` must be FALSE for <greta_array>s
 
 ---
 
-    transpose must be FALSE for <greta_array>s
+    `transpose` must be FALSE for <greta_array>s
 
 # tapply errors as expected
 
-    `x` must be 2D greta array with one column
+    `x` must be 2D <greta_array> with one column
     However `x` has dimensions 10x2
 
 ---
 
-    INDEX cannot be a greta array
+    `INDEX` cannot be a <greta_array>
 
 # ignored options are errored/warned about
 

@@ -220,7 +220,7 @@ node <- R6Class(
       # check it
       if (!is.distribution_node(distribution)) {
         cli::cli_abort(
-          "invalid distribution"
+          "Invalid distribution"
         )
       }
 

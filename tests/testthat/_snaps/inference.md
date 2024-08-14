@@ -1,7 +1,7 @@
 # bad mcmc proposals are rejected
 
     The log density could not be evaluated at these initial values
-    Try using these initials as the values argument in `calculate()` to see what values of subsequent <greta_array>s these initial values lead to.
+    Try using these initials as the `values` argument in `calculate()` to see what values of subsequent <greta_array>s these initial values lead to.
 
 ---
 
@@ -10,12 +10,12 @@
 
 # mcmc handles initial values nicely
 
-    the number of provided initial values does not match chains
+    The number of provided initial values does not match chains
     3 sets of initial values were provided, but there are 2 chains
 
 ---
 
-    the initial values provided have different dimensions than the named <greta_array>s
+    The initial values provided have different dimensions than the named <greta_array>s
 
 ---
 
@@ -77,7 +77,7 @@
 
 ---
 
-    all initial values must be named
+    All initial values must be named
 
 ---
 
@@ -101,28 +101,28 @@
 
 ---
 
-    some <greta_array>s passed to `initials()` are not associated with the model:
+    Some <greta_array>s passed to `initials()` are not associated with the model:
     `g`
 
 ---
 
-    initial values can only be set for variable <greta_array>s
+    Initial values can only be set for variable <greta_array>s
 
 ---
 
-    initial values can only be set for variable <greta_array>s
+    Initial values can only be set for variable <greta_array>s
 
 ---
 
-    some provided initial values are outside the range of values their variables can take
+    Some provided initial values are outside the range of values their variables can take
 
 ---
 
-    some provided initial values are outside the range of values their variables can take
+    Some provided initial values are outside the range of values their variables can take
 
 ---
 
-    some provided initial values are outside the range of values their variables can take
+    Some provided initial values are outside the range of values their variables can take
 
 # samplers print informatively
 

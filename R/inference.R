@@ -211,26 +211,7 @@ mcmc <- function(
     # check the trace batch size
     trace_batch_size <- check_trace_batch_size(trace_batch_size)
 
-    # find variable names to label samples
-    target_greta_arrays <- model$target_greta_arrays
-    names <- names(target_greta_arrays)
-
-    # check they're not data nodes, provide a useful error message if they are
-    are_data <- vapply(
-      target_greta_arrays,
-      function(x) is.data_node(get_node(x)),
-      FUN.VALUE = FALSE
-    )
-
-    if (any(are_data)) {
-      cli::cli_abort(
-        c(
-          "data {.cls greta_array}s cannot be sampled",
-          "{.var {names[are_data]}} \\
-        {?is a data/are data} {.cls greta_array}(s)"
-        )
-      )
-    }
+    check_not_data_greta_arrays(model)
 
     # get the dag containing the target nodes
     dag <- model$dag
@@ -582,7 +563,7 @@ to_free <- function(node, data) {
 
   unsupported_error <- function() {
     cli::cli_abort(
-        "some provided initial values are outside the range of values their \\
+        "Some provided initial values are outside the range of values their \\
         variables can take"
     )
   }
@@ -643,17 +624,7 @@ parse_initial_values <- function(initials, dag) {
     FUN.VALUE = ""
   )
 
-  missing_names <- is.na(tf_names)
-  if (any(missing_names)) {
-    bad <- names(tf_names)[missing_names]
-    cli::cli_abort(
-      c(
-        "some {.cls greta_array}s passed to {.fun initials} are not associated with \\
-        the model:",
-        "{.var {bad}}"
-      )
-    )
-  }
+  check_greta_arrays_associated_with_model(tf_names)
 
   params <- dag$example_parameters(free = FALSE)
   idx <- match(tf_names, names(params))
@@ -667,25 +638,12 @@ parse_initial_values <- function(initials, dag) {
   # find the corresponding nodes and check they are variable nodes
   forward_names <- glue::glue("all_forward_{dag$node_tf_names}")
   nodes <- dag$node_list[match(tf_names, forward_names)]
-  types <- lapply(nodes, node_type)
-  are_variables <- are_identical(types, "variable")
 
-  if (!all(are_variables)) {
-    cli::cli_abort(
-      "initial values can only be set for variable {.cls greta_array}s"
-    )
-  }
+  check_nodes_all_variable(nodes)
 
   target_dims <- lapply(params[idx], dim)
   replacement_dims <- lapply(initials, dim)
-  same_dims <- mapply(identical, target_dims, replacement_dims)
-
-  if (!all(same_dims)) {
-    cli::cli_abort(
-      "the initial values provided have different dimensions than the named \\
-      {.cls greta_array}s"
-    )
-  }
+  check_initial_values_correct_dim(target_dims, replacement_dims)
 
   # convert the initial values to their free states
   inits_free <- mapply(to_free, nodes, initials, SIMPLIFY = FALSE)
@@ -727,19 +685,7 @@ prep_initials <- function(initial_values, n_chains, dag) {
     are_initials <- vapply(initial_values, is.initials, FUN.VALUE = FALSE)
 
     if (all(are_initials)) {
-      n_sets <- length(initial_values)
-
-      initial_values_do_not_match_chains <- n_sets != n_chains
-      if (initial_values_do_not_match_chains) {
-        cli::cli_abort(
-          c(
-            "the number of provided initial values does not match chains",
-            "{n_sets} set{?s} of initial values were provided, but there \\
-            {cli::qty(n_chains)} {?is only/are} {n_chains} \\
-            {cli::qty(n_chains)} chain{?s}"
-            )
-          )
-      }
+      check_initial_values_match_chains(initial_values, n_chains)
     } else {
       initial_values <- NULL
     }
@@ -777,22 +723,12 @@ initials <- function(...) {
   values <- list(...)
   names <- names(values)
 
-  initials_not_all_named <- length(names) != length(values)
-  if (initials_not_all_named) {
-    cli::cli_abort(
-      "all initial values must be named"
-    )
-  }
+  check_initials_are_named(values)
 
   # coerce to greta-array-like shape
   values <- lapply(values, as_2d_array)
 
-  are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
-  if (!all(are_numeric)) {
-    cli::cli_abort(
-      "initial values must be numeric"
-    )
-  }
+  check_initials_are_numeric(values)
 
   class(values) <- c("initials", class(values))
   values

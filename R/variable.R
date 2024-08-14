@@ -45,13 +45,8 @@
 #' }
 variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
   check_tf_version("error")
-
-  if (is.greta_array(lower) | is.greta_array(upper)) {
-    cli::cli_abort(
-      "{.arg lower} and {.arg upper} must be fixed, they cannot be another \\
-      {.cls greta_array}"
-    )
-  }
+  check_param_greta_array(lower)
+  check_param_greta_array(upper)
 
   node <- variable_node$new(lower, upper, dim)
   as.greta_array(node)
@@ -144,17 +139,10 @@ simplex_variable <- function(dim) {
   }
 
   dim <- check_dims(target_dim = dim)
-
-  # dimension of the free state version
   n_dim <- length(dim)
   last_dim <- dim[n_dim]
-  if (!last_dim > 1) {
-    cli::cli_abort(
-      "the final dimension of a simplex variable must have more than one \\
-      element",
-      "The final dimension has: {.val {length(last_dim)} elements}"
-    )
-  }
+  # dimension of the free state version
+  check_final_dim(dim, thing = "simplex variable")
 
   raw_dim <- dim
   raw_dim[n_dim] <- last_dim - 1
@@ -192,17 +180,7 @@ ordered_variable <- function(dim) {
 
   dim <- check_dims(target_dim = dim)
 
-  # dimension of the free state version
-  n_dim <- length(dim)
-  last_dim <- dim[n_dim]
-
-  if (!last_dim > 1) {
-    cli::cli_abort(
-      "the final dimension of an ordered variable must have more than \\
-      one element",
-      "the final dimension has: {.val {length(last_dim)} elements}"
-    )
-  }
+  check_final_dim(dim, thing = "ordered variable")
 
   # create variable node
   node <- vble(truncation = c(-Inf, Inf), dim = dim)

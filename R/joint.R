@@ -53,14 +53,7 @@ joint_distribution <- R6Class(
     initialize = function(dots, dim) {
       n_distributions <- length(dots)
 
-      if (n_distributions < 2) {
-        cli::cli_abort(
-          c(
-            "{.fun joint} must be passed at least two distributions",
-            "The number of distributions passed was {n_distributions}"
-            )
-        )
-      }
+      check_num_distributions(n_distributions, at_least = 2, name = "joint")
 
       # check the dimensions of the variables in dots
       single_dim <- do.call(check_dims, c(dots, target_dim = dim))
@@ -95,13 +88,8 @@ joint_distribution <- R6Class(
       # check the distributions are all either discrete or continuous
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)
 
-      is_discrete_and_continuous <- !all(discrete) & !all(!discrete)
-      if (is_discrete_and_continuous) {
-        cli::cli_abort(
-          "cannot construct a joint distribution from a combination of \\
-          discrete and continuous distributions"
-        )
-      }
+      check_not_discrete_continuous(discrete, "joint")
+
       n_components <- length(dot_nodes)
 
       # work out the support of the resulting distribution, and add as the
