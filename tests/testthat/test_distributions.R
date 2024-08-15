@@ -764,11 +764,13 @@ test_that("wishart distribution errors informatively", {
     "greta_array"
   ))
 
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     wishart(3, b)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     wishart(3, c)
   )
 })
