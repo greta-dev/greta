@@ -70,13 +70,7 @@ joint_distribution <- R6Class(
 
       dot_nodes <- lapply(dots, get_node)
 
-      # check they are all scalar
-      are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
-      if (!all(are_scalar)) {
-        cli::cli_abort(
-          "{.fun joint} only accepts probability distributions over scalars"
-        )
-      }
+      check_dot_nodes_scalar(dot_nodes)
 
       # get the distributions and strip away their variables
       distribs <- lapply(dot_nodes, member, "distribution")

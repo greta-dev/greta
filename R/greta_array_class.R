@@ -252,12 +252,7 @@ representation <- function(x, name, error = TRUE) {
     x_node <- x
   }
   repr <- x_node$representations[[name]]
-  not_represented <- error && is.null(repr)
-  if (not_represented) {
-    cli::cli_abort(
-      "{.cls greta_array} has no representation {.var name}"
-    )
-  }
+  check_has_representation(repr, name, error)
   repr
 }
 

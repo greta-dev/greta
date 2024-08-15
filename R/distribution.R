@@ -123,14 +123,7 @@
 distribution <- function(greta_array) {
 
   # only for greta arrays
-  if (!is.greta_array(greta_array)) {
-    cli::cli_abort(
-      c(
-        "{.fun distribution} expects object of type {.cls greta_array}",
-        "object was not a {.cls greta_array}, but {.cls {class(greta_array)}}"
-      )
-    )
-  }
+  check_is_greta_array(greta_array)
 
   # if greta_array has a distribution, return this greta array
   if (is.distribution_node(get_node(greta_array)$distribution)) {

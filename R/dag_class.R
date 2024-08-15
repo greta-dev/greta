@@ -807,6 +807,7 @@ dag_class <- R6Class(
 
     # try to draw a random sample from a distribution node
     draw_sample = function(distribution_node) {
+      # self$check_sampling_implemented(distribution_node)
       tfp_distribution <- self$get_tfp_distribution(distribution_node)
 
       sample <- tfp_distribution$sample

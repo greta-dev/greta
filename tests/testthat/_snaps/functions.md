@@ -70,8 +70,8 @@
       solve(a, a)
     Condition
       Error in `solve()`:
-      ! Not 2D square greta array
-      x expected a 2D square greta array, but object `x` had dimension: 5x25
+      ! Object must be 2D square array
+      x But it had dimension: "5x25"
 
 ---
 
@@ -79,8 +79,8 @@
       solve(a)
     Condition
       Error in `solve()`:
-      ! Not 2D square greta array
-      x expected a 2D square greta array, but object `x` had dimension: 5x25
+      ! Object must be 2D square array
+      x But it had dimension: "5x25"
 
 ---
 

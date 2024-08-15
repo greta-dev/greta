@@ -185,19 +185,19 @@ greta_stash$numerical_messages <- c(
 #' o$hessian
 #' }
 mcmc <- function(
-  model,
-  sampler = hmc(),
-  n_samples = 1000,
-  thin = 1,
-  warmup = 1000,
-  chains = 4,
-  n_cores = NULL,
-  verbose = TRUE,
-  pb_update = 50,
-  one_by_one = FALSE,
-  initial_values = initials(),
-  trace_batch_size = 100,
-  compute_options = cpu_only()
+    model,
+    sampler = hmc(),
+    n_samples = 1000,
+    thin = 1,
+    warmup = 1000,
+    chains = 4,
+    n_cores = NULL,
+    verbose = TRUE,
+    pb_update = 50,
+    one_by_one = FALSE,
+    initial_values = initials(),
+    trace_batch_size = 100,
+    compute_options = cpu_only()
 ) {
 
   # set device to be CPU/GPU for the entire run
@@ -332,7 +332,7 @@ run_samplers <- function(samplers,
     cli::cli_inform(
       "running {length(samplers)} \\
       {?sampler on a remote machine/samplers on remote machines}"
-      )
+    )
 
   }
 
@@ -474,14 +474,14 @@ stashed_samples <- function() {
 
       # convert to mcmc objects, passing on thinning
       free_state_draws <- mapply(prepare_draws,
-        draws = free_state_draws,
-        thin = thins,
-        SIMPLIFY = FALSE
+                                 draws = free_state_draws,
+                                 thin = thins,
+                                 SIMPLIFY = FALSE
       )
       values_draws <- mapply(prepare_draws,
-        draws = values_draws,
-        thin = thins,
-        SIMPLIFY = FALSE
+                             draws = values_draws,
+                             thin = thins,
+                             SIMPLIFY = FALSE
       )
 
       # convert to mcmc.list objects
@@ -563,7 +563,7 @@ to_free <- function(node, data) {
 
   unsupported_error <- function() {
     cli::cli_abort(
-        "Some provided initial values are outside the range of values their \\
+      "Some provided initial values are outside the range of values their \\
         variables can take"
     )
   }
@@ -593,10 +593,10 @@ to_free <- function(node, data) {
   }
 
   fun <- switch(node$constraint,
-    scalar_all_none = identity,
-    scalar_all_high = high,
-    scalar_all_low = low,
-    scalar_all_both = both
+                scalar_all_none = identity,
+                scalar_all_high = high,
+                scalar_all_low = low,
+                scalar_all_both = both
   )
 
   fun(data)
@@ -615,13 +615,13 @@ parse_initial_values <- function(initials, dag) {
 
   # find the elements we have been given initial values for
   tf_names <- vapply(names(initials),
-    function(name, env) {
-      ga <- get(name, envir = env)
-      node <- get_node(ga)
-      dag$tf_name(node)
-    },
-    env = parent.frame(4),
-    FUN.VALUE = ""
+                     function(name, env) {
+                       ga <- get(name, envir = env)
+                       node <- get_node(ga)
+                       dag$tf_name(node)
+                     },
+                     env = parent.frame(4),
+                     FUN.VALUE = ""
   )
 
   check_greta_arrays_associated_with_model(tf_names)
@@ -661,24 +661,20 @@ parse_initial_values <- function(initials, dag) {
 # correct length, with nice error messages
 prep_initials <- function(initial_values, n_chains, dag) {
 
+  # TODO: Tidy up the logic here for errors and messages
   # if the user passed a single set of initial values, repeat them for all
   # chains
   if (is.initials(initial_values)) {
-    is_blank <- identical(initial_values, initials())
-
-    one_set_of_initials <- !is_blank & n_chains > 1
-    if (one_set_of_initials) {
-      cli::cli_inform(
-        "only one set of initial values was provided, and was used for \\
-        all chains"
-      )
-    }
+    inform_if_one_set_of_initials(initial_values, n_chains)
 
     initial_values <- replicate(n_chains,
-      initial_values,
-      simplify = FALSE
+                                initial_values,
+                                simplify = FALSE
     )
-  } else if (is.list(initial_values)) {
+  }
+
+  not_initials_but_list <- !is.initials(initial_values) && is.list(initial_values)
+  if (not_initials_but_list) {
 
     # if the user provided a list of initial values, check elements and the
     # length
@@ -686,10 +682,12 @@ prep_initials <- function(initial_values, n_chains, dag) {
 
     if (all(are_initials)) {
       check_initial_values_match_chains(initial_values, n_chains)
-    } else {
+    }
+    if (!all(are_initials)) {
       initial_values <- NULL
     }
-  } else {
+  }
+  if (!not_initials_but_list) {
     initial_values <- NULL
   }
 
@@ -836,7 +834,7 @@ opt <- function(model,
         # (hopefully)
         free_state = tf$Variable(object$free_state),
         which_objective = which_objective
-        )
+      )
       hessians <- lapply(hessians, `*`, -1)
       outputs$hessian <- hessians
     }
@@ -848,5 +846,5 @@ opt <- function(model,
 }
 
 inference_module <- module(dag_class,
-  progress_bar = progress_bar_module
+                           progress_bar = progress_bar_module
 )

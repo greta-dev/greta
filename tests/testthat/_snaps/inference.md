@@ -23,7 +23,7 @@
       draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 2, initial_values = inits,
         verbose = FALSE)
     Message
-      only one set of initial values was provided, and was used for all chains
+      Only one set of initial values was provided, and was used for all chains
 
 # progress bar gives a range of messages
 

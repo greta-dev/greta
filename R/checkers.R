@@ -183,17 +183,20 @@ check_2d_multivariate <- function(x,
   }
 }
 
-check_square <- function(x,
+check_square <- function(x = NULL,
+                         dim = NULL,
                          call = rlang::caller_env()) {
-  dim <- dim(x)
+
+  # allows for specifying x or named dim = dim
+  dim <- dim %||% dim(x)
   ndim <- length(dim)
-  is_square <- ndim == 2 && dim[1] == dim[2]
-  if (!is_square) {
+  not_square <- dim[1] != dim[2]
+  if (ndim == 2 && not_square) {
     cli::cli_abort(
       message = c(
-        "Not 2D square greta array",
-        "x" = "expected a 2D square greta array, but object {.var x} had \\
-        dimension: {paste(dim, collapse = 'x')}"
+        "Object must be 2D square array",
+        "x" = "But it had dimension: \\
+        {.val {paste(dim, collapse = 'x')}}"
       ),
       call = call
     )
@@ -1395,20 +1398,27 @@ check_initials_are_numeric <- function(values,
 check_initial_values_match_chains <- function(initial_values,
                                               n_chains,
                                               call = rlang::caller_env()){
-  n_sets <- length(initial_values)
 
-  initial_values_do_not_match_chains <- n_sets != n_chains
-  if (initial_values_do_not_match_chains) {
-    cli::cli_abort(
-      message = c(
-        "The number of provided initial values does not match chains",
-        "{n_sets} set{?s} of initial values were provided, but there \\
+  if (!is.initials(initial_values) && is.list(initial_values)) {
+    # if the user provided a list of initial values, check elements and length
+    are_initials <- vapply(initial_values, is.initials, FUN.VALUE = FALSE)
+
+    n_sets <- length(initial_values)
+
+    initial_values_do_not_match_chains <- n_sets != n_chains
+    if (initial_values_do_not_match_chains && all(are_initials)) {
+      cli::cli_abort(
+        message = c(
+          "The number of provided initial values does not match chains",
+          "{n_sets} set{?s} of initial values were provided, but there \\
             {cli::qty(n_chains)} {?is only/are} {n_chains} \\
             {cli::qty(n_chains)} chain{?s}"
-      ),
-      call = call
-    )
+        ),
+        call = call
+      )
+    }
   }
+
 }
 
 check_initial_values_correct_dim <- function(target_dims,
@@ -1751,6 +1761,178 @@ check_for_errors <- function(res,
   }
 
 }
+
+check_dim_length <- function(dim,
+                             call = rlang::caller_env()){
+
+  ndim <- length(dim)
+  ndim_gt2 <- ndim > 2
+  if (ndim_gt2) {
+    cli::cli_abort(
+      message = c(
+        "{.arg dim} can either be a scalar or a vector of length 2",
+        "However {.arg dim} has length {.val {ndim}}, and contains:",
+        "{.val {dim}}"
+      ),
+      call = call
+    )
+  }
+}
+
+check_is_distribution_node <- function(distribution,
+                                       call = rlang::caller_env()){
+  if (!is.distribution_node(distribution)) {
+    cli::cli_abort(
+      message = c("Invalid distribution"),
+      call = call
+    )
+  }
+
+}
+
+check_values_dim <- function(value,
+                             dim,
+                             call = rlang::caller_env()){
+  values_have_wrong_dim <- !is.null(value) && !all.equal(dim(value), dim)
+  if (values_have_wrong_dim) {
+    cli::cli_abort(
+      message = "Values have the wrong dimension so cannot be used",
+      call = call
+    )
+  }
+
+}
+
+# check they are all scalar
+check_dot_nodes_scalar <- function(dot_nodes,
+                                   call = rlang::caller_env()){
+  are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
+  if (!all(are_scalar)) {
+    cli::cli_abort(
+      message = "{.fun joint} only accepts probability distributions over \\
+      scalars",
+      call = call
+    )
+  }
+
+}
+
+inform_if_one_set_of_initials <- function(initial_values,
+                                          n_chains,
+                                          call = rlang::caller_env()){
+
+  is_blank <- identical(initial_values, initials())
+
+  one_set_of_initials <- !is_blank & n_chains > 1
+  if (one_set_of_initials) {
+    cli::cli_inform(
+      message = "Only one set of initial values was provided, and was used \\
+        for all chains"
+    )
+  }
+}
+
+# the user might pass greta arrays with groups of nodes that are unconnected
+# to one another. Need to check there are densities in each graph
+check_subgraphs <- function(dag,
+                            call = rlang::caller_env()){
+  # get and check the types
+  types <- dag$node_types
+
+  # the user might pass greta arrays with groups of nodes that are unconnected
+  # to one another. Need to check there are densities in each graph
+
+  # so find the subgraph to which each node belongs
+  graph_id <- dag$subgraph_membership()
+
+  graphs <- unique(graph_id)
+  n_graphs <- length(graphs)
+
+  # separate messages to avoid the subgraphs issue for beginners
+
+  if (n_graphs == 1) {
+    density_message <- cli::format_error(
+      c(
+        "none of the {.cls greta_array}s in the model are associated with a \\
+        probability density, so a model cannot be defined"
+      )
+    )
+    variable_message <- cli::format_error(
+      c(
+        "none of the {.cls greta_array}s in the model are unknown, so a model \\
+        cannot be defined"
+      )
+    )
+  } else {
+    density_message <- cli::format_error(
+      c(
+        "the model contains {n_graphs} disjoint graphs",
+        "one or more of these sub-graphs does not contain any \\
+        {.cls greta_array}s that are associated with a probability density, \\
+        so a model cannot be defined"
+      )
+    )
+    variable_message <- cli::format_error(
+      c(
+        "the model contains {n_graphs} disjoint graphs",
+        "one or more of these sub-graphs does not contain any \\
+          {.cls greta_array}s that are unknown, so a model cannot be defined"
+      )
+    )
+  }
+
+  for (graph in graphs) {
+    types_sub <- types[graph_id == graph]
+
+    # check they have a density among them
+    no_distribution <- !("distribution" %in% types_sub)
+    if (no_distribution) {
+      cli::cli_abort(
+        message = density_message,
+        call = call
+      )
+    }
+
+    # check they have a variable node among them
+    no_variable_node <- !("variable" %in% types_sub)
+    if (no_variable_node) {
+      cli::cli_abort(
+        message = variable_message,
+        call = call
+      )
+    }
+  }
+
+}
+
+check_has_representation <- function(repr,
+                                     name,
+                                     error,
+                                     call = rlang::caller_env()){
+  not_represented <- error && is.null(repr)
+  if (not_represented) {
+    cli::cli_abort(
+      message = "{.cls greta_array} has no representation {.var {name}}",
+      call = call
+    )
+  }
+}
+
+check_is_greta_array <- function(x,
+                                 arg = rlang::caller_arg(x),
+                                 call = rlang::caller_env()){
+  # only for greta arrays
+  if (!is.greta_array(x)) {
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} must be {.cls greta_array}",
+        "Object was is {.cls {class(x)}}"
+      ),
+      call = call
+    )
+  }
+}
+
 
 checks_module <- module(
   check_tf_version,
