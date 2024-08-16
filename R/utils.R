@@ -146,7 +146,7 @@ get_seed <- function() {
   sample.int(
     n = 2^30,
     size = 1
-    )
+  )
 }
 
 # does a pointer exist (as a named object) and is it from the current session
@@ -680,8 +680,8 @@ as_tf_function <- function(r_fun, ...) {
     sub_dag <- dag_class$new(targets)
 
     # TF1/2 check remove
-      # `get_default_graph()` doesn't work with either eager execution or
-      # `tf.function`.
+    # `get_default_graph()` doesn't work with either eager execution or
+    # `tf.function`.
     # use the default graph, so that it can be overwritten when this is called?
     # alternatively fetch from above, or put it in greta_stash?
     # sub_dag$tf_graph <- tf$compat$v1$get_default_graph()
@@ -879,10 +879,10 @@ check_if_software_available <- function(software_available,
 }
 
 compare_version_vec <- Vectorize(
-    FUN = compareVersion,
-    vectorize.args = "b",
-    SIMPLIFY = TRUE
-  )
+  FUN = compareVersion,
+  vectorize.args = "b",
+  SIMPLIFY = TRUE
+)
 
 #' Greta Situation Report
 #'
@@ -897,6 +897,8 @@ compare_version_vec <- Vectorize(
 #' greta_sitrep()
 #' }
 greta_sitrep <- function(){
+
+  config_info <- reticulate::py_config()
 
   cli::cli_h1("R")
   cli::cli_ul("version: {.val {getRversion()}}")
@@ -922,6 +924,8 @@ greta_sitrep <- function(){
   cli::cli_h1("{.pkg greta conda environment} ")
   check_if_software_available(software_available = have_greta_conda_env(),
                               software_name = "greta conda environment")
+
+  show_greta_conda_env_path()
 
   software_available <- c(
     python = have_python(),
@@ -965,6 +969,18 @@ greta_sitrep <- function(){
     }
 
   }
+
+}
+
+show_greta_conda_env_path <- function(){
+  if (!have_greta_conda_env()){
+    cli::cli_ul("path: no conda env found for {.var greta-env-tf2}")
+  }
+
+  py_cl <- reticulate::conda_list()
+  which_greta_env <- which(py_cl$name == "greta-env-tf2")
+  greta_env_path <- py_cl$python[which_greta_env]
+  cli::cli_ul("path: {greta_env_path}")
 
 }
 
@@ -1053,8 +1069,8 @@ check_dag_introduces_new_variables <- function(dag, mcmc_dag) {
 }
 
 check_targets_stochastic_and_not_sampled <- function(
-  target,
-  mcmc_dag_variables
+    target,
+    mcmc_dag_variables
 ) {
   target_nodes <- lapply(target, get_node)
   target_node_names <- extract_unique_names(target_nodes)
@@ -1144,7 +1160,7 @@ node_type_colour <- function(type){
     data = cli::col_green(type),
     operation = cli::col_cyan(type),
     distribution = cli::col_yellow(type)
-    )
+  )
 
   switch_cols
 }
@@ -1185,7 +1201,7 @@ are_null <- function(x){
     x,
     is.null,
     FUN.VALUE = logical(1)
-    )
+  )
 }
 
 are_greta_array <- function(x){
