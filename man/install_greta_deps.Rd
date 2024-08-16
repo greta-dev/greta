@@ -44,14 +44,15 @@ these are TF 2.15.0, TFP 0.23.0, and Python 3.10. These Python modules
 will be installed into a conda environment named "greta-env-tf2".
 }
 \details{
-To see install notes or errors, there isn't an argument to specify,
+To see installation notes or errors, there isn't an argument to specify,
 instead you will need to specify and environment variable,
 \code{GRETA_INSTALLATION_LOG}, with
 \code{Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}. Or use
 \code{\link[=greta_set_install_logfile]{greta_set_install_logfile()}} to set the path, e.g.,
 \code{greta_set_install_logfile('path/to/logfile.html')}. You can also skip
-the restarting of R and use \code{\link[=write_greta_install_log]{write_greta_install_log()}}, which
-installation notes will indicate how to use if you haven't specified.
+the restarting of R and use \code{\link[=write_greta_install_log]{write_greta_install_log()}}. If you have
+not specified the \code{GRETA_INSTALLATION_LOG} environmental variable, the
+installation notes will indicate how to use \code{\link[=write_greta_install_log]{write_greta_install_log()}}.
 
 By default, if using RStudio, it will now ask you if you want to restart
 the R session. If the session is not interactive, or is not in RStudio,
@@ -64,10 +65,11 @@ environment for greta named 'greta-env-tf2' with required python and python
 package versions, and forcibly switch over to using that conda environment.
 
 If you don't want to use conda or the "greta-env-tf2" conda environment, you
-can install these specific versions of tensorflow (version 2.6.0), and
-tensorflow-probability (version 0.14.1), and ensure that the python
-environment that is initialised in this R session has these versions
-installed. This is now always straightforward, so we recommend installing
+can install versions that you like, e.g., using \code{\link[reticulate:py_install]{reticulate::py_install()}}.
+If you want to see which versions of TF, TFP, and Python work with each
+other (at least according to information from tensorflows website), see the
+data \code{greta_deps_tf_tfp}, which is provided with greta. Managing your own
+installation is not always straightforward, so we recommend installing
 the python packages using \code{install_greta_deps()} for most users.
 }
 \examples{
