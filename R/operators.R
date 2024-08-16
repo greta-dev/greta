@@ -157,27 +157,8 @@ NULL
 #' @export
 `%*%.greta_array` <- function(x, y) { # nolint
 
-  # check they're matrices
-  if (!is_2d(x) | !is_2d(y)) {
-    cli::cli_abort(
-      c(
-        "only two-dimensional {.cls greta_array}s can be matrix-multiplied",
-        "dimensions recorded were {dim(x)}"
-      )
-    )
-  }
-
-  # check the dimensions match
-  incompatible_dimensions <- dim(x)[2] != dim(y)[1]
-  if (incompatible_dimensions) {
-    cli::cli_abort(
-      c(
-        "incompatible dimensions: \\
-        {.val {paste0(dim(x), collapse = 'x')}} vs \\
-        {.val {paste0(dim(y), collapse = 'x')}}"
-      )
-    )
-  }
+  check_both_2d(x,y)
+  check_compatible_dimensions(x, y)
 
   op("matrix multiply", x, y,
     dim = c(nrow(x), ncol(y)),

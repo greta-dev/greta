@@ -217,12 +217,7 @@ node <- R6Class(
     },
     set_distribution = function(distribution) {
 
-      # check it
-      if (!is.distribution_node(distribution)) {
-        cli::cli_abort(
-          "invalid distribution"
-        )
-      }
+      check_is_distribution_node(distribution)
 
       # add it
       self$distribution <- distribution
@@ -291,6 +286,7 @@ dim.node <- function(x) {
 
 # coerce an object to a node
 to_node <- function(x) {
+  # TODO: clean up this logic
   if (!is.node(x)) {
     if (is.greta_array(x)) {
       x <- get_node(x)

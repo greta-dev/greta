@@ -91,90 +91,10 @@ model <- function(...,
     compile = compile
   )
 
-  # get and check the types
-  types <- dag$node_types
-
   # the user might pass greta arrays with groups of nodes that are unconnected
   # to one another. Need to check there are densities in each graph
-
-  # so find the subgraph to which each node belongs
-  graph_id <- dag$subgraph_membership()
-
-  graphs <- unique(graph_id)
-  n_graphs <- length(graphs)
-
-  # separate messages to avoid the subgraphs issue for beginners
-  if (n_graphs == 1) {
-    density_message <- cli::format_error(
-      c(
-        "none of the {.cls greta_array}s in the model are associated with a \\
-        probability density, so a model cannot be defined"
-        )
-    )
-    variable_message <- cli::format_error(
-      c(
-        "none of the {.cls greta_array}s in the model are unknown, so a model \\
-        cannot be defined"
-        )
-      )
-  } else {
-    density_message <- cli::format_error(
-      c(
-        "the model contains {n_graphs} disjoint graphs",
-        "one or more of these sub-graphs does not contain any \\
-        {.cls greta_array}s that are associated with a probability density, \\
-        so a model cannot be defined"
-      )
-    )
-    variable_message <- cli::format_error(
-        c(
-          "the model contains {n_graphs} disjoint graphs",
-          "one or more of these sub-graphs does not contain any \\
-          {.cls greta_array}s that are unknown, so a model cannot be defined"
-        )
-      )
-  }
-
-  for (graph in graphs) {
-    types_sub <- types[graph_id == graph]
-
-    # check they have a density among them
-    no_distribution <- !("distribution" %in% types_sub)
-    if (no_distribution) {
-      stop(
-        density_message,
-        call. = FALSE
-        )
-    }
-
-    # check they have a variable node among them
-    no_variable_node <- !("variable" %in% types_sub)
-    if (no_variable_node) {
-      stop(
-        variable_message,
-        call. = FALSE
-        )
-    }
-  }
-
-  # check for unfixed discrete distributions
-  distributions <- dag$node_list[dag$node_types == "distribution"]
-  bad_nodes <- vapply(
-    distributions,
-    function(x) {
-      valid_target <- is.null(x$target) ||
-        is.data_node(x$target)
-      x$discrete && !valid_target
-    },
-    FALSE
-  )
-
-  if (any(bad_nodes)) {
-    cli::cli_abort(
-      "model contains a discrete random variable that doesn't have a fixed \\
-      value, so inference cannot be carried out"
-        )
-  }
+  check_subgraphs(dag)
+  check_unfixed_discrete_distributions(dag)
 
   # define the TF graph
   # dag$define_tf()
@@ -232,15 +152,7 @@ plot.greta_model <- function(x,
                              y,
                              colour = "#996bc7",
                              ...) {
-  if (!is_DiagrammeR_installed()) {
-    cli::cli_abort(
-      c(
-        "the {.pkg DiagrammeR} package must be installed to plot greta models",
-        "install {.pkg DiagrammeR} with:",
-        "{.code install.packages('DiagrammeR')}"
-        )
-      )
-  }
+  check_diagrammer_installed()
 
   # set up graph
   dag_mat <- x$dag$adjacency_matrix

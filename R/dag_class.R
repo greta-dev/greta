@@ -769,13 +769,7 @@ dag_class <- R6Class(
         }
       }
 
-      # check we didn't time out
-      if (it == maxit) {
-        cli::cli_abort(
-          "could not determine the number of independent models in a \\
-          reasonable amount of time"
-        )
-      }
+      check_timeout(it, maxit)
 
       # find the cluster IDs
       n <- nrow(r)
@@ -807,16 +801,12 @@ dag_class <- R6Class(
 
     # try to draw a random sample from a distribution node
     draw_sample = function(distribution_node) {
+      # self$check_sampling_implemented(distribution_node)
       tfp_distribution <- self$get_tfp_distribution(distribution_node)
 
       sample <- tfp_distribution$sample
 
-      if (is.null(sample)) {
-        cli::cli_abort(
-          "sampling is not yet implemented for \\
-            {.val {distribution_node$distribution_name}} distributions"
-        )
-      }
+      check_sampling_implemented(sample, distribution_node)
 
       truncation <- distribution_node$truncation
 
@@ -832,14 +822,7 @@ dag_class <- R6Class(
 
         cdf <- tfp_distribution$cdf
         quantile <- tfp_distribution$quantile
-
-        is_truncated <- is.null(cdf) | is.null(quantile)
-        if (is_truncated) {
-          cli::cli_abort(
-            "sampling is not yet implemented for truncated \\
-            {.val {distribution_node$distribution_name}} distributions"
-          )
-        }
+        check_truncation_implemented(tfp_distribution, distribution_node)
 
         # generate a random uniform sample of the correct shape and transform
         # through truncated inverse CDF to get draws on truncated scale

@@ -5,49 +5,13 @@ uniform_distribution <- R6Class(
     min = NA,
     max = NA,
     initialize = function(min, max, dim) {
-      if (is.greta_array(min) | is.greta_array(max)) {
-        cli::cli_abort(
-          "{.arg min} and {.arg max} must be fixed, they cannot be another \\
-          greta array"
-        )
-      }
-
-      good_min <- is.numeric(min) && length(min) == 1
-      good_max <- is.numeric(max) && length(max) == 1
-      good_types <- good_min & good_max
-
-      if (!good_types) {
-        cli::cli_abort(
-          c(
-            "{.arg min} and {.arg max} must be numeric vectors of length 1",
-            "They have class and length:",
-            "{.arg min}: {class(min)}, {length(min)}",
-            "{.arg max}: {class(max)}, {length(max)}"
-          )
-        )
-      }
-
-      if (!is.finite(min) | !is.finite(max)) {
-        cli::cli_abort(
-          c(
-            "{.arg min} and {.arg max} must be finite scalars",
-            "Their values are:",
-            "{.arg min}: {min}",
-            "{.arg max}: {max}"
-          )
-        )
-      }
-
-      if (min >= max) {
-        cli::cli_abort(
-          c(
-            "{.arg max} must be greater than {.arg min}",
-            "Their values are:",
-            "{.arg min}: {min}",
-            "{.arg max}: {max}"
-          )
-        )
-      }
+      check_param_greta_array(min)
+      check_param_greta_array(max)
+      check_numeric_length_1(min)
+      check_numeric_length_1(max)
+      check_finite(min)
+      check_finite(max)
+      check_x_gte_y(min, max)
 
       # store min and max as numeric scalars (needed in create_target, done in
       # initialisation)
@@ -1125,27 +1089,13 @@ lkj_correlation_distribution <- R6Class(
       dimension <- check_dimension(target = dimension)
 
       if (!is.greta_array(eta)) {
-        not_positive_scalar <- !is.numeric(eta) || !length(eta) == 1 || eta <= 0
-        if (not_positive_scalar) {
-          cli::cli_abort(
-            "{.arg eta} must be a positive scalar value, or a scalar \\
-            {.cls greta_array}"
-          )
-        }
+        check_positive_scalar(eta)
       }
 
       # add the nodes as parents and parameters
       eta <- as.greta_array(eta)
 
-      if (!is_scalar(eta)) {
-        cli::cli_abort(
-          c(
-            "{.arg eta} must be a scalar",
-            "However {.arg eta} had dimensions: \\
-            {paste0(dim(eta), collapse = ', ')}"
-          )
-        )
-      }
+      check_scalar(eta)
 
       dim <- c(dimension, dimension)
       super$initialize("lkj_correlation", dim, multivariate = TRUE)

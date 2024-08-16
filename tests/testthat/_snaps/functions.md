@@ -48,61 +48,110 @@
 
 # solve and sweep and kronecker error as expected
 
-    Arrays are not both 2D
-    `a` and `b` must both be 2D, but `a` has dimensions: 5x25x2
+    Code
+      solve(b, a)
+    Condition
+      Error in `solve()`:
+      ! `a must be two dimensional`
+      However, `a` has dimensions: 5x25x2
 
 ---
 
-    Arrays are not both 2D
-    `a` and `b` must both be 2D, but `b` has dimensions: 5x25x2
+    Code
+      solve(c, b)
+    Condition
+      Error in `solve()`:
+      ! `b must be two dimensional`
+      However, `b` has dimensions: 5x25x2
 
 ---
 
-    `a` is not square
-    x `a` must be square, but has 5 rows and 25 columns
+    Code
+      solve(a, a)
+    Condition
+      Error in `solve()`:
+      ! Object must be 2D square array
+      x But it had dimension: "5x25"
 
 ---
 
-    `a` is not square
-    x `a` must be square, but has 5 rows and 25 columns
+    Code
+      solve(a)
+    Condition
+      Error in `solve()`:
+      ! Object must be 2D square array
+      x But it had dimension: "5x25"
 
 ---
 
-    Number of rows not equal
-    x `b` must have the same number of rows as `a` (5), but has 25 rows instead
+    Code
+      solve(c, t(a))
+    Condition
+      Error in `solve()`:
+      ! Number of rows not equal
+      x `b` must have the same number of rows as `a` (5), but has 25 rows instead
 
 ---
 
-    Array not 2D
-    x `x` must be a 2D array, but has 3 dimensions
+    Code
+      sweep(b, 1, stats)
+    Condition
+      Error in `sweep()`:
+      ! `x must be two dimensional`
+      However, `x` has dimensions: 5x25x2
 
 ---
 
-    MARGIN can only be 1 or 2
+    Code
+      sweep(a, 3, stats)
+    Condition
+      Error in `sweep()`:
+      ! MARGIN can only be 1 or 2
 
 ---
 
-    The number of elements of `stats` does not match `dim(x)[MARGIN]`
+    Code
+      sweep(a, 1, c(stats, stats))
+    Condition
+      Error in `sweep()`:
+      ! The number of elements of `stats` does not match `dim(x)[MARGIN]`
 
 ---
 
-    `stats` not a column vector array
-    `stats` must be a column vector array
-    x `stats` has dimensions 1x5
+    Code
+      sweep(a, 1, t(stats))
+    Condition
+      Error in `sweep()`:
+      ! `stats` not a column vector array
+      `stats` must be a column vector array
+      x `stats` has dimensions:
+      "1x5"
 
 ---
 
-    The number of elements of `stats` does not match `dim(x)[MARGIN]`
+    Code
+      sweep(a, 2, stats)
+    Condition
+      Error in `sweep()`:
+      ! The number of elements of `stats` does not match `dim(x)[MARGIN]`
 
 ---
 
-    Not a 2D array
-    `X` must be a 2D array, but has 2 dimensions
+    Code
+      kronecker(a, b)
+    Condition
+      Error in `kronecker()`:
+      ! `Y must be two dimensional`
+      However, `Y` has dimensions: 5x25x2
 
 ---
 
-    Not a 2D array
-    `X` must be a 2D array, but has 3 dimensions
+    Code
+      kronecker(b, c)
+    Condition
+      Error in `kronecker()`:
+      ! `X must be two dimensional`
+      However, `X` has dimensions: 5x25x2
 
 # colSums etc. error as expected
 
@@ -122,28 +171,28 @@
 
 # forwardsolve and backsolve error as expected
 
-    `k` must equal `ncol(l)` for <greta_array>s
+    `1` must equal `ncol(l)` for <greta_array>s
 
 ---
 
-    `k` must equal `ncol(r)` for <greta_array>s
+    `1` must equal `ncol(r)` for <greta_array>s
 
 ---
 
-    transpose must be FALSE for <greta_array>s
+    `transpose` must be FALSE for <greta_array>s
 
 ---
 
-    transpose must be FALSE for <greta_array>s
+    `transpose` must be FALSE for <greta_array>s
 
 # tapply errors as expected
 
-    `x` must be 2D greta array with one column
+    `x` must be 2D <greta_array> with one column
     However `x` has dimensions 10x2
 
 ---
 
-    INDEX cannot be a greta array
+    `INDEX` cannot be a <greta_array>
 
 # ignored options are errored/warned about
 

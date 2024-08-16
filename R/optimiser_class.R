@@ -161,24 +161,33 @@ tf_optimiser <- R6Class(
 
           # The objective value can reach numerical overflow, so we error and
           # suggest changing initial values or changing sampler, e.g., `adam`
-          if (!is.finite(obj_numeric)){
-            cli::cli_abort(
-              c(
-                "Detected numerical overflow during optimisation",
-                "Please try one of the following:",
-                "i" = "Using different initial values",
-                "i" = "Using another optimiser. (E.g., instead of \\
-                {.fun {self$name}}, try {.fun adam})"
-              )
-            )
-          }
+          self$check_numerical_overflow(obj_numeric)
 
           self$diff <- abs(self$old_obj - obj_numeric)
           self$old_obj <- obj_numeric
         }
         tfe$free_state <- free_state
       }
+    },
+
+    check_numerical_overflow = function(x,
+                                        arg = rlang::caller_arg(x),
+                                        call = rlang::caller_env()){
+      if (!is.finite(x)){
+        cli::cli_abort(
+          message = c(
+            "Detected numerical overflow during optimisation",
+            "Please try one of the following:",
+            "i" = "Using different initial values",
+            "i" = "Using another optimiser. (E.g., instead of \\
+                {.fun {self$name}}, try {.fun adam})"
+          ),
+          call = call
+        )
+      }
     }
+
+
   )
 )
 

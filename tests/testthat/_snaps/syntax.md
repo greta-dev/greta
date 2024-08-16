@@ -37,6 +37,10 @@
 
 # distribution() errors informatively
 
-    `distribution()` expects object of type <greta_array>
-    object was not a <greta_array>, but <array>
+    Code
+      distribution(y)
+    Condition
+      Error in `distribution()`:
+      ! `greta_array` must be <greta_array>
+      `greta_array` is: <array>
 

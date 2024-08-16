@@ -95,7 +95,8 @@ test_that("distribution() errors informatively", {
 
   y <- randn(3)
 
-  expect_snapshot_error(
+  expect_snapshot(
+    error = TRUE,
     distribution(y)
   )
 })
