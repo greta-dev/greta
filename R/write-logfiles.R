@@ -27,6 +27,10 @@ write_greta_install_log <- function(path = greta_logfile) {
   cli::cli_progress_step(
     msg = "Writing logfile to {.path {path}}",
     msg_done = "Logfile written to {.path {path}}"
+    )
+
+  cli::cli_progress_step(
+    msg = "Open with: {.fun read_greta_logfile}"
   )
 
   template <- '
@@ -40,15 +44,23 @@ write_greta_install_log <- function(path = greta_logfile) {
     <details>
       <summary>
         Miniconda Installation Notes
+      <pre>
+        <code>
+          {{{miniconda_notes}}}
+        </code>
+      </pre>
       </summary>
-      {{miniconda_notes}}
     </details>
 
     <details>
       <summary>
         Miniconda Installation Errors
       </summary>
-  {{miniconda_error}}
+      <pre>
+        <code>
+          {{{miniconda_error}}}
+        </code>
+      </pre>
     </details>
 
   <h2>Conda Environment</h2>
@@ -57,14 +69,22 @@ write_greta_install_log <- function(path = greta_logfile) {
       <summary>
       Conda Environment Notes
       </summary>
-     {{conda_create_notes}}
+      <pre>
+        <code>
+     {{{conda_create_notes}}}
+        </code>
+      </pre>
     </details>
 
     <details>
       <summary>
       Conda Environment Errors
       </summary>
-      {{conda_create_error}}
+      <pre>
+        <code>
+      {{{conda_create_error}}}
+        </code>
+      </pre>
     </details>
 
   <h2>Python Module Installation</h2>
@@ -73,14 +93,22 @@ write_greta_install_log <- function(path = greta_logfile) {
       <summary>
         Python Module Installation Notes
       </summary>
-      {{conda_install_notes}}
+      <pre>
+        <code>
+  {{{conda_install_notes}}}
+        </code>
+      </pre>
     </details>
 
       <details>
       <summary>
       Python Module Installation Errors
       </summary>
-       {{conda_install_error}}
+      <pre>
+        <code>
+       {{{conda_install_error}}}
+        </code>
+      </pre>
     </details>
   '
 
@@ -96,5 +124,34 @@ write_greta_install_log <- function(path = greta_logfile) {
 
   writeLines(whisker::whisker.render(template, greta_install_data),
              path)
+
+}
+
+# returns NULL if no envvar
+sys_get_env <- function(envvar){
+  retrieved_envvar <- Sys.getenv(envvar)
+  env_exists <- nzchar(log_env)
+  if (env_exists){
+    envvar
+  } else {
+    envvar <- NULL
+  }
+
+  envvar
+}
+
+#' Read a greta logfile
+#'
+#' @param path file to read. Optional. If not specified, it will search for
+#'   the environment variable "GRETA_INSTALLATION_LOG"
+#'
+#' @return opens a URL in your default browser
+#' @export
+read_greta_install_log <- function(path = NULL){
+  log_env <- sys_get_env("GRETA_INSTALLATION_LOG")
+
+  path <- path %||% log_env
+
+  browseURL(path)
 
 }
