@@ -59,7 +59,7 @@
 
 # calculate errors if a distribution cannot be sampled from
 
-    sampling is not yet implemented for "hypergeometric" distributions
+    Sampling is not yet implemented for "hypergeometric" distributions
 
 # calculate errors nicely if nsim is invalid
 

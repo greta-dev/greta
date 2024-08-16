@@ -561,6 +561,8 @@ to_free <- function(node, data) {
   lower <- node$lower
   upper <- node$upper
 
+  # TODO
+  # replace these with more informative errors related to the range of values
   unsupported_error <- function() {
     cli::cli_abort(
       "Some provided initial values are outside the range of values their \\
@@ -661,7 +663,6 @@ parse_initial_values <- function(initials, dag) {
 # correct length, with nice error messages
 prep_initials <- function(initial_values, n_chains, dag) {
 
-  # TODO: Tidy up the logic here for errors and messages
   # if the user passed a single set of initial values, repeat them for all
   # chains
   if (is.initials(initial_values)) {
@@ -673,33 +674,9 @@ prep_initials <- function(initial_values, n_chains, dag) {
     )
   }
 
-  not_initials_but_list <- !is.initials(initial_values) && is.list(initial_values)
-  if (not_initials_but_list) {
-
-    # if the user provided a list of initial values, check elements and the
-    # length
-    are_initials <- vapply(initial_values, is.initials, FUN.VALUE = FALSE)
-
-    if (all(are_initials)) {
-      check_initial_values_match_chains(initial_values, n_chains)
-    }
-    if (!all(are_initials)) {
-      initial_values <- NULL
-    }
-  }
-  if (!not_initials_but_list) {
-    initial_values <- NULL
-  }
-
-  # error on a bad object
-  if (is.null(initial_values)) {
-    cli::cli_abort(
-      c(
-        "{.arg initial_values} must be an initials object created with \\
-        {.fun initials}, or a simple list of initials objects"
-      )
-    )
-  }
+  # TODO: revisit logic here for errors and messages
+  check_initial_values_match_chains(initial_values, n_chains)
+  check_initial_values_correct_class(initial_values)
 
   # convert them to free state vectors
   initial_values <- lapply(

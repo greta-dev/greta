@@ -1399,14 +1399,16 @@ check_initial_values_match_chains <- function(initial_values,
                                               n_chains,
                                               call = rlang::caller_env()){
 
-  if (!is.initials(initial_values) && is.list(initial_values)) {
+  initials <- initial_values
+  not_initials_but_list <- !is.initials(initials) && is.list(initials)
+  if (not_initials_but_list) {
     # if the user provided a list of initial values, check elements and length
-    are_initials <- vapply(initial_values, is.initials, FUN.VALUE = FALSE)
+    all_initials <- all(are_initials(initials))
 
-    n_sets <- length(initial_values)
+    n_sets <- length(initials)
 
     initial_values_do_not_match_chains <- n_sets != n_chains
-    if (initial_values_do_not_match_chains && all(are_initials)) {
+    if (initial_values_do_not_match_chains && all_initials) {
       cli::cli_abort(
         message = c(
           "The number of provided initial values does not match chains",
@@ -1431,6 +1433,29 @@ check_initial_values_correct_dim <- function(target_dims,
     cli::cli_abort(
       message = "The initial values provided have different dimensions than \\
       the named {.cls greta_array}s",
+      call = call
+    )
+  }
+
+}
+
+check_initial_values_correct_class <- function(initial_values,
+                                               call = rlang::caller_env()){
+
+  initials <- initial_values
+  not_initials_but_list <- !is.initials(initials) && is.list(initials)
+  not_initials_not_list <- !is.initials(initials) && !is.list(initials)
+  # if the user provided a list of initial values, check elements and the
+  # length
+  all_initials <- all(are_initials(initials))
+  not_all_initials <- !all_initials
+
+  if (not_initials_but_list && not_all_initials || not_initials_not_list) {
+    cli::cli_abort(
+      message = c(
+        "{.arg initial_values} must be an initials object created with \\
+        {.fun initials}, or a simple list of initials objects"
+      ),
       call = call
     )
   }
@@ -1921,16 +1946,78 @@ check_has_representation <- function(repr,
 check_is_greta_array <- function(x,
                                  arg = rlang::caller_arg(x),
                                  call = rlang::caller_env()){
-  # only for greta arrays
   if (!is.greta_array(x)) {
     cli::cli_abort(
       message = c(
         "{.arg {arg}} must be {.cls greta_array}",
-        "Object was is {.cls {class(x)}}"
+        "{.arg {arg}} is: {.cls {class(x)}}"
       ),
       call = call
     )
   }
+}
+
+check_missing_infinite_values <- function(x,
+                                          optional,
+                                          call = rlang::caller_env()){
+  contains_missing_or_inf <- !optional & any(!is.finite(x))
+  if (contains_missing_or_inf) {
+    cli::cli_abort(
+      message = c(
+        "{.cls greta_array} must not contain missing or infinite values"
+      ),
+      call = call
+    )
+  }
+}
+
+check_truncation_implemented <- function(tfp_distribution,
+                                         distribution_node,
+                                         call = rlang::caller_env()){
+
+  cdf <- tfp_distribution$cdf
+  quantile <- tfp_distribution$quantile
+
+  is_truncated <- is.null(cdf) | is.null(quantile)
+  if (is_truncated) {
+    cli::cli_abort(
+      message = c(
+        "Sampling is not yet implemented for truncated \\
+            {.val {distribution_node$distribution_name}} distributions"
+      ),
+      call = call
+    )
+  }
+
+}
+
+check_sampling_implemented <- function(sample,
+                                       distribution_node,
+                                       call = rlang::caller_env()){
+  if (is.null(sample)) {
+    cli::cli_abort(
+      "Sampling is not yet implemented for \\
+            {.val {distribution_node$distribution_name}} distributions"
+    )
+  }
+}
+
+check_timeout <- function(it,
+                          maxit,
+                          call = rlang::caller_env()){
+  # check we didn't time out
+  if (it == maxit) {
+    cli::cli_abort(
+      message = c(
+      "Could not determine the number of independent models in a reasonable \\
+      amount of time",
+      "Iterations = {.val {it}}",
+      "Maximum iterations = {.cal {maxit}}"
+      ),
+      call = call
+    )
+  }
+
 }
 
 

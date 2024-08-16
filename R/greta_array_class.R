@@ -78,12 +78,8 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
 # finally, reject if there are any missing values, or set up the greta_array
 #' @export
 as.greta_array.numeric <- function(x, optional = FALSE, original_x = x, ...) {
-  contains_missing_or_inf <- !optional & any(!is.finite(x))
-  if (contains_missing_or_inf) {
-    cli::cli_abort(
-        "{.cls greta_array} must not contain missing or infinite values"
-    )
-  }
+  check_missing_infinite_values(x, optional)
+
   as.greta_array.node(data_node$new(x),
     optional = optional,
     original_x = original_x,

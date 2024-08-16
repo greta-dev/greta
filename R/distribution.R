@@ -43,6 +43,7 @@
 
   node <- get_node(greta_array)
 
+  # TODO revisit checking functions here
   # only for greta arrays without distributions
   ## TODO provide more detail on the distribution already assigned
   ## This might come up when the user accidentally runs assignment

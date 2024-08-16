@@ -1166,3 +1166,11 @@ outside_version_range <- function(provided, range) {
 }
 
 pretty_dim <- function(x) paste0(dim(x), collapse = "x")
+
+are_initials <- function(x){
+  vapply(
+    X = x,
+    FUN = is.initials,
+    FUN.VALUE = logical(1)
+    )
+}

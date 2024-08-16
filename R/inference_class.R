@@ -807,6 +807,15 @@ sampler <- R6Class(
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
       # if it's a numerical error, batch_results will be an error object
+      self$check_for_free_state_error(result, n_samples)
+
+      result
+    },
+
+    check_for_free_state_error = function(result, n_samples){
+      # if it's fine, batch_results is the output
+      # if it's a non-numerical error, it will error
+      # if it's a numerical error, batch_results will be an error object
       if (inherits(result, "error")) {
 
         # simple case that this is a single bad sample. Mock up a result and
@@ -827,7 +836,7 @@ sampler <- R6Class(
           # won't be valid if we just restart, so we need to error here,
           # informing the user how to run one sample at a time
           cli::cli_abort(
-            c(
+            message = c(
               "TensorFlow hit a numerical problem that caused it to error",
               "{.pkg greta} can handle these as bad proposals if you rerun \\
               {.fun mcmc} with the argument {.code one_by_one = TRUE}.",
@@ -839,9 +848,8 @@ sampler <- R6Class(
 
         }
       }
-
-      result
     },
+
     sampler_parameter_values = function() {
 
       # random number of integration steps
