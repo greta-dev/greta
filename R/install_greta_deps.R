@@ -4,14 +4,15 @@
 #'   these are TF 2.15.0, TFP 0.23.0, and Python 3.10. These Python modules
 #'   will be installed into a conda environment named "greta-env-tf2".
 #'
-#'   To see install notes or errors, there isn't an argument to specify,
+#'   To see installation notes or errors, there isn't an argument to specify,
 #'     instead you will need to specify and environment variable,
 #'     `GRETA_INSTALLATION_LOG`, with
 #'     `Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')`. Or use
 #'     [greta_set_install_logfile()] to set the path, e.g.,
 #'     `greta_set_install_logfile('path/to/logfile.html')`. You can also skip
-#'     the restarting of R and use [write_greta_install_log()], which
-#'     installation notes will indicate how to use if you haven't specified.
+#'     the restarting of R and use [write_greta_install_log()]. If you have
+#'     not specified the `GRETA_INSTALLATION_LOG` environmental variable, the
+#'     installation notes will indicate how to use [write_greta_install_log()].
 #'
 #' @param python_deps object created with [greta_python_deps()] where you
 #'   specify python, TF, and TFP versions. By default these are TF 2.15.0,
@@ -42,10 +43,11 @@
 #'  package versions, and forcibly switch over to using that conda environment.
 #'
 #'  If you don't want to use conda or the "greta-env-tf2" conda environment, you
-#'  can install these specific versions of tensorflow (version 2.6.0), and
-#'  tensorflow-probability (version 0.14.1), and ensure that the python
-#'  environment that is initialised in this R session has these versions
-#'  installed. This is now always straightforward, so we recommend installing
+#'  can install versions that you like, e.g., using [reticulate::py_install()].
+#'  If you want to see which versions of TF, TFP, and Python work with each
+#'  other (at least according to information from tensorflows website), see the
+#'  data `greta_deps_tf_tfp`, which is provided with greta. Managing your own
+#'  installation is not always straightforward, so we recommend installing
 #'  the python packages using `install_greta_deps()` for most users.
 #'
 #' @name install_greta_deps

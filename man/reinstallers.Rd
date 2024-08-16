@@ -28,10 +28,12 @@ There are four functions:
 }
 \details{
 \itemize{
-\item \code{remove_greta_env()} removes the 'greta-env-tf2' conda environment
-\item \code{remove_miniconda()} removes miniconda installation
-\item \code{reinstall_greta_env()} remove 'greta-env-tf2' and reinstall it using \code{greta_create_conda_env()} (which is used internally).
-\item \code{reinstall_miniconda()} removes miniconda and reinstalls it using \code{greta_install_miniconda()} (which is used internally)
+\item \code{\link[=remove_greta_env]{remove_greta_env()}} removes the 'greta-env-tf2' conda environment
+\item \code{\link[=remove_miniconda]{remove_miniconda()}} removes miniconda installation
+\item \code{\link[=reinstall_greta_env]{reinstall_greta_env()}} remove 'greta-env-tf2' and reinstall it
+using \code{\link[=greta_create_conda_env]{greta_create_conda_env()}} (which is used internally).
+\item \code{\link[=reinstall_miniconda]{reinstall_miniconda()}} removes miniconda and reinstalls it using
+\code{\link[=greta_install_miniconda]{greta_install_miniconda()}} (which is used internally)
 }
 }
 \examples{
@@ -41,4 +43,7 @@ remove_miniconda()
 reinstall_greta_env()
 reinstall_miniconda()
 }
+}
+\seealso{
+\code{\link[=destroy_greta_deps]{destroy_greta_deps()}}
 }

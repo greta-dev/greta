@@ -1,7 +1,7 @@
 #' Set logfile path when installing greta
 #'
 #' To help debug greta installation, you can save all installation output
-#' to a single logfile.
+#'   to a single logfile.
 #'
 #' @param path valid path to logfile - should end with `.html` so you
 #'   can benefit from the html rendering.
