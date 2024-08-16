@@ -40,15 +40,23 @@ write_greta_install_log <- function(path = greta_logfile) {
     <details>
       <summary>
         Miniconda Installation Notes
+      <pre>
+        <code>
+          {{{miniconda_notes}}}
+        </code>
+      </pre>
       </summary>
-      {{miniconda_notes}}
     </details>
 
     <details>
       <summary>
         Miniconda Installation Errors
       </summary>
-  {{miniconda_error}}
+      <pre>
+        <code>
+          {{{miniconda_error}}}
+        </code>
+      </pre>
     </details>
 
   <h2>Conda Environment</h2>
@@ -57,14 +65,22 @@ write_greta_install_log <- function(path = greta_logfile) {
       <summary>
       Conda Environment Notes
       </summary>
-     {{conda_create_notes}}
+      <pre>
+        <code>
+     {{{conda_create_notes}}}
+        </code>
+      </pre>
     </details>
 
     <details>
       <summary>
       Conda Environment Errors
       </summary>
-      {{conda_create_error}}
+      <pre>
+        <code>
+      {{{conda_create_error}}}
+        </code>
+      </pre>
     </details>
 
   <h2>Python Module Installation</h2>
@@ -73,14 +89,22 @@ write_greta_install_log <- function(path = greta_logfile) {
       <summary>
         Python Module Installation Notes
       </summary>
-      {{conda_install_notes}}
+      <pre>
+        <code>
+  {{{conda_install_notes}}}
+        </code>
+      </pre>
     </details>
 
       <details>
       <summary>
       Python Module Installation Errors
       </summary>
-       {{conda_install_error}}
+      <pre>
+        <code>
+       {{{conda_install_error}}}
+        </code>
+      </pre>
     </details>
   '
 
@@ -98,3 +122,4 @@ write_greta_install_log <- function(path = greta_logfile) {
              path)
 
 }
+
