@@ -99,8 +99,13 @@ reinstall_greta_deps <- function(python_deps = greta_python_deps(),
 destroy_greta_deps <- function(){
   cli::cli_progress_step(
     msg = "You are removing greta env and miniconda",
-    msg_done = c("You have successfully removed greta env and miniconda")
+    spinner = TRUE
   )
+  cli::cli_progress_update()
   remove_greta_env()
+  cli::cli_progress_update()
+  cli::cli_progress_step(msg_done = "You have successfully removed greta env")
   remove_miniconda()
+  cli::cli_progress_update()
+  cli::cli_progress_step(msg_done = "You have successfully removed miniconda")
 }
