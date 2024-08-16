@@ -11,18 +11,45 @@ greta_python_deps(
 )
 }
 \arguments{
-\item{tf_version}{Character. Tensorflow (TF) version in format major.minor.patch. Default is "2.15.0".}
+\item{tf_version}{Character. Tensorflow (TF) version in format
+major.minor.patch. Default is "2.15.0".}
 
-\item{tfp_version}{Character.Tensorflow probability (TFP) version major.minor.patch. Default is "0.23.0".}
+\item{tfp_version}{Character.Tensorflow probability (TFP) version
+major.minor.patch. Default is "0.23.0".}
 
-\item{python_version}{Character. Python version in format major.minor.patch. Default is "3.10".}
+\item{python_version}{Character. Python version in format major.minor.patch.
+Default is "3.10".}
 }
 \value{
-list of dependencies
+data frame of valid dependencies
 }
 \description{
-A helper function for specifying versions of Tensorflow (TF), Tensorflow Probability (TFP), and Python.
+A helper function for specifying versions of Tensorflow (TF), Tensorflow
+Probability (TFP), and Python. Defaulting to 2.15.0, 0.23.0, and 3.10.
+You can specify the version that you want to install, but it will check
+if these are compatible. That is, if you specify versions of TF/TFP/Python
+which do not work with each other, it will error and give a suggested
+version to install. It does this by using a dataset, \code{greta_deps_tf_tfp},
+to check if the versions of TF, TFP, and Python specified are compatible
+on your operating system. You can inspect this  dataset with
+\code{View(greta_deps_tf_tfp)}.
 }
 \examples{
 greta_python_deps()
+greta_python_deps(tf_version = "2.15.0")
+greta_python_deps(tf_version = "2.15.0", tfp_version = "0.23.0")
+greta_python_deps(tf_version = "2.15.0", python_version = "3.10")
+greta_python_deps(
+  tf_version = "2.15.0",
+  tfp_version = "0.23.0",
+  python_version = "3.10"
+  )
+# this will fail
+\dontrun{
+greta_python_deps(
+  tf_version = "2.11.0",
+  tfp_version = "0.23.0",
+  python_version = "3.10"
+  )
+  }
 }
