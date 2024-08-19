@@ -77,6 +77,7 @@ test_that("calculate produces the right number of samples", {
 
 
 test_that("calculate samples are the same when the argument seed is the same", {
+  skip_if_not(check_tf_version())
   a <- normal(0, 1)
   y <- normal(a, 1)
   m <- model(y)
@@ -92,6 +93,7 @@ test_that("calculate samples are the same when the argument seed is the same", {
 })
 
 test_that("calculate samples are the same when the R seed is the same", {
+  skip_if_not(check_tf_version())
   a <- normal(0, 1)
   y <- normal(a, 1)
   m <- model(y)
@@ -109,6 +111,7 @@ test_that("calculate samples are the same when the R seed is the same", {
 })
 
 test_that("mcmc samples are the same when the R seed is the same", {
+  skip_if_not(check_tf_version())
   a <- normal(0, 1)
   y <- normal(a, 1)
   m <- model(y)

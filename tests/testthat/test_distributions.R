@@ -775,7 +775,6 @@ test_that("wishart distribution errors informatively", {
   )
 })
 
-
 test_that("lkj_correlation distribution errors informatively", {
   skip_if_not(check_tf_version())
 
