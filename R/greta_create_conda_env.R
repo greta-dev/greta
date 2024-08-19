@@ -1,5 +1,25 @@
+#' Create conda environment for greta
+#'
+#' This function runs [reticulate::conda_create()] inside
+#'   [callr::r_process_options()], to create the conda environment,
+#'   "greta-env-tf2". This is used within [install_greta_deps()] as part of
+#'   setting up python dependencies. It uses a version of python that is
+#'   compatible with the versions of tensorflow and tensorflow-probability,
+#'   which is established with  [greta_python_deps()]. We mostly recommend
+#'   users use [install_greta_deps()] to manage their python dependency
+#'   installation.
+#'
+#'
+#' @param timeout time (minutes) until installation stops. Default is 5 minutes.
+#' @param python_deps dependency specification, see [greta_python_deps()] for
+#'   more details.
+#'
+#' @return nothing - creates a conda environment for a specific python version
+#' @export
 greta_create_conda_env <- function(timeout = 5,
                                    python_deps = greta_python_deps()) {
+
+  check_greta_python_deps(python_deps)
 
   stdout_file <- create_temp_file("out-greta-conda")
   stderr_file <- create_temp_file("err-greta-conda")
