@@ -1,4 +1,5 @@
 test_that("calculate print method is different for different inputs", {
+  skip_if_not(check_tf_version())
   # ensure print method is the new MCMC one
   skip_on_cran()
   skip_on_ci()

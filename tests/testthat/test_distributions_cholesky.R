@@ -61,6 +61,7 @@ test_that("Cholesky factor of LJK_correlation should be a lower triangular matri
 })
 
 test_that("Post-MCMC, Wishart distribution stays symmetric, chol remains lower tri",{
+  skip_if_not(check_tf_version())
 # From https://github.com/greta-dev/greta/issues/585
   x <- wishart(df = 4, Sigma = diag(3))
   m <- model(x)
@@ -81,6 +82,7 @@ test_that("Post-MCMC, Wishart distribution stays symmetric, chol remains lower t
 })
 
 test_that("Post-MCMC, LKJ distribution stays symmetric, chol remains lower tri",{
+  skip_if_not(check_tf_version())
   # From https://github.com/greta-dev/greta/issues/585
   x <- lkj_correlation(eta = 3, dimension = 3)
   m <- model(x)
