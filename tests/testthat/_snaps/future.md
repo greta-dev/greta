@@ -45,17 +45,33 @@
 
 ---
 
-    parallel mcmc samplers cannot be run with `plan(multicore)`
+    Code
+      check_future_plan()
+    Condition
+      Error:
+      ! parallel mcmc samplers cannot be run with `plan(multicore)`
 
 ---
 
-    parallel mcmc samplers cannot be run with a fork cluster
+    Code
+      check_future_plan()
+    Condition
+      Error in `test_if_forked_cluster()`:
+      ! parallel mcmc samplers cannot be run with a fork cluster
 
 ---
 
-    parallel mcmc samplers cannot be run with `plan(multicore)`
+    Code
+      mcmc(m, verbose = FALSE)
+    Condition
+      Error in `run_samplers()`:
+      ! parallel mcmc samplers cannot be run with `plan(multicore)`
 
 ---
 
-    parallel mcmc samplers cannot be run with a fork cluster
+    Code
+      mcmc(m, verbose = FALSE)
+    Condition
+      Error in `test_if_forked_cluster()`:
+      ! parallel mcmc samplers cannot be run with a fork cluster
 

@@ -1,50 +1,94 @@
 # cummax and cummin functions error informatively
 
-    `cummax()` not yet implemented for greta
+    Code
+      fun(x)
+    Condition
+      Error:
+      ! `cummax()` not yet implemented for greta
 
 ---
 
-    `cummin()` not yet implemented for greta
+    Code
+      fun(x)
+    Condition
+      Error:
+      ! `cummin()` not yet implemented for greta
 
 # complex number functions error informatively
 
-    greta does not yet support complex numbers
+    Code
+      fun(x)
+    Condition
+      Error:
+      ! greta does not yet support complex numbers
 
 ---
 
-    greta does not yet support complex numbers
+    Code
+      fun(x)
+    Condition
+      Error:
+      ! greta does not yet support complex numbers
 
 ---
 
-    greta does not yet support complex numbers
+    Code
+      fun(x)
+    Condition
+      Error:
+      ! greta does not yet support complex numbers
 
 ---
 
-    greta does not yet support complex numbers
+    Code
+      fun(x)
+    Condition
+      Error:
+      ! greta does not yet support complex numbers
 
 ---
 
-    greta does not yet support complex numbers
+    Code
+      fun(x)
+    Condition
+      Error:
+      ! greta does not yet support complex numbers
 
 # cumulative functions error as expected
 
-    `x` must be a column vector
-    but `x` has dimensions 1x5
+    Code
+      cumsum(a)
+    Condition
+      Error:
+      ! `x` must be a column vector
+      but `x` has dimensions 1x5
 
 ---
 
-    `x` must be a column vector
-    but `x` has dimensions 5x1x1
+    Code
+      cumsum(b)
+    Condition
+      Error:
+      ! `x` must be a column vector
+      but `x` has dimensions 5x1x1
 
 ---
 
-    `x` must be a column vector
-    but `x` has dimensions 1x5
+    Code
+      cumprod(a)
+    Condition
+      Error:
+      ! `x` must be a column vector
+      but `x` has dimensions 1x5
 
 ---
 
-    `x` must be a column vector
-    but `x` has dimensions 5x1x1
+    Code
+      cumprod(b)
+    Condition
+      Error:
+      ! `x` must be a column vector
+      but `x` has dimensions 5x1x1
 
 # solve and sweep and kronecker error as expected
 
@@ -155,49 +199,93 @@
 
 # colSums etc. error as expected
 
-    invalid `dims`
+    Code
+      colSums(x, dims = 3)
+    Condition
+      Error in `rowcol_idx()`:
+      ! invalid `dims`
 
 ---
 
-    invalid `dims`
+    Code
+      rowSums(x, dims = 3)
+    Condition
+      Error in `rowcol_idx()`:
+      ! invalid `dims`
 
 ---
 
-    invalid `dims`
+    Code
+      colMeans(x, dims = 3)
+    Condition
+      Error in `rowcol_idx()`:
+      ! invalid `dims`
 
 ---
 
-    invalid `dims`
+    Code
+      rowMeans(x, dims = 3)
+    Condition
+      Error in `rowcol_idx()`:
+      ! invalid `dims`
 
 # forwardsolve and backsolve error as expected
 
-    `1` must equal `ncol(l)` for <greta_array>s
+    Code
+      forwardsolve(a, b, k = 1)
+    Condition
+      Error in `forwardsolve()`:
+      ! `1` must equal `ncol(l)` for <greta_array>s
 
 ---
 
-    `1` must equal `ncol(r)` for <greta_array>s
+    Code
+      backsolve(a, b, k = 1)
+    Condition
+      Error in `backsolve()`:
+      ! `1` must equal `ncol(r)` for <greta_array>s
 
 ---
 
-    `transpose` must be FALSE for <greta_array>s
+    Code
+      forwardsolve(a, b, transpose = TRUE)
+    Condition
+      Error in `forwardsolve()`:
+      ! `transpose` must be FALSE for <greta_array>s
 
 ---
 
-    `transpose` must be FALSE for <greta_array>s
+    Code
+      backsolve(a, b, transpose = TRUE)
+    Condition
+      Error in `backsolve()`:
+      ! `transpose` must be FALSE for <greta_array>s
 
 # tapply errors as expected
 
-    `x` must be 2D <greta_array> with one column
-    However `x` has dimensions 10x2
+    Code
+      tapply(b, group, "sum")
+    Condition
+      Error in `tapply()`:
+      ! `x` must be 2D <greta_array> with one column
+      However `x` has dimensions 10x2
 
 ---
 
-    `INDEX` cannot be a <greta_array>
+    Code
+      tapply(a, as_data(group), "sum")
+    Condition
+      Error in `check_not_greta_array()`:
+      ! `INDEX` cannot be a <greta_array>
 
 # ignored options are errored/warned about
 
-    the "digits" argument of `round()` cannot be set for <greta_array>s
-    <greta_array>s can only be rounded to the nearest integer, so the "digits" argument cannot be set
+    Code
+      round(x, 2)
+    Condition
+      Error:
+      ! the "digits" argument of `round()` cannot be set for <greta_array>s
+      <greta_array>s can only be rounded to the nearest integer, so the "digits" argument cannot be set
 
 ---
 
@@ -217,43 +305,79 @@
 
 # incorrect dimensions are errored about
 
-    only 2D arrays can be transposed
+    Code
+      t(x)
+    Condition
+      Error in `t()`:
+      ! only 2D arrays can be transposed
 
 ---
 
-    `perm` must be a reordering of the dimensions: 1, 2, and 3
-    but was: 2 and 1
+    Code
+      aperm(x, 2:1)
+    Condition
+      Error in `aperm()`:
+      ! `perm` must be a reordering of the dimensions: 1, 2, and 3
+      but was: 2 and 1
 
 ---
 
-    only two-dimensional, square, symmetric <greta_array>s can be Cholesky decomposed
-    `dim(x)` returns: 3, 3, and 3
+    Code
+      chol(x)
+    Condition
+      Error in `chol()`:
+      ! only two-dimensional, square, symmetric <greta_array>s can be Cholesky decomposed
+      `dim(x)` returns: 3, 3, and 3
 
 ---
 
-    only two-dimensional, square, symmetric <greta_array>s can be Cholesky decomposed
-    `dim(x)` returns: 3 and 4
+    Code
+      chol(y)
+    Condition
+      Error in `chol()`:
+      ! only two-dimensional, square, symmetric <greta_array>s can be Cholesky decomposed
+      `dim(x)` returns: 3 and 4
 
 ---
 
-    `chol2symm()` must have two-dimensional, square, upper-triangular <greta_array>s
-    `dim(x)` returns: 3, 3, and 3
+    Code
+      chol2symm(x)
+    Condition
+      Error in `chol2symm()`:
+      ! `chol2symm()` must have two-dimensional, square, upper-triangular <greta_array>s
+      `dim(x)` returns: 3, 3, and 3
 
 ---
 
-    `chol2symm()` must have two-dimensional, square, upper-triangular <greta_array>s
-    `dim(x)` returns: 3 and 4
+    Code
+      chol2symm(y)
+    Condition
+      Error in `chol2symm()`:
+      ! `chol2symm()` must have two-dimensional, square, upper-triangular <greta_array>s
+      `dim(x)` returns: 3 and 4
 
 ---
 
-    only two-dimensional, square, symmetric <greta_array>s can be eigendecomposed
+    Code
+      eigen(x)
+    Condition
+      Error in `eigen()`:
+      ! only two-dimensional, square, symmetric <greta_array>s can be eigendecomposed
 
 ---
 
-    only two-dimensional, square, symmetric <greta_array>s can be eigendecomposed
+    Code
+      eigen(y)
+    Condition
+      Error in `eigen()`:
+      ! only two-dimensional, square, symmetric <greta_array>s can be eigendecomposed
 
 ---
 
-    `x1` and `x2` must have the same number of columns
-    However `ncol(x1)` = 1 and `ncol(x2)` = 4
+    Code
+      rdist(x, y)
+    Condition
+      Error in `rdist()`:
+      ! `x1` and `x2` must have the same number of columns
+      However `ncol(x1)` = 1 and `ncol(x2)` = 4
 

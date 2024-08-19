@@ -5,7 +5,7 @@ test_that("check_tf_version works", {
   true_version <- tf$`__version__`
   tf$`__version__` <- "0.9.0" # nolint
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     check_tf_version("error")
   )
   expect_snapshot_warning(
@@ -69,26 +69,26 @@ test_that("define and mcmc error informatively", {
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     model(variable())
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     model(x)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     model()
   )
 
   # can't define a model for an unfixed discrete variable
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     model(bernoulli(0.5))
   )
 
   # no parameters here, so define or dag should error
   distribution(x) <- normal(0, 1)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     model(x)
   )
 
@@ -108,7 +108,7 @@ test_that("define and mcmc error informatively", {
   # can't draw samples of a data greta array
   z <- normal(x, 1)
   m <- model(x, z)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     draws <- mcmc(m, verbose = FALSE)
   )
 })
@@ -142,7 +142,7 @@ test_that("check_dims errors informatively", {
   )
 
   # with two differently shaped arrays it shouldn't
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     greta:::check_dims(a, c)
   )
 
@@ -165,14 +165,14 @@ test_that("disjoint graphs are checked", {
   # c is unrelated and has no density
   c <- variable()
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     m <- model(a, b, c)
   )
 
   # d is unrelated and known
   d <- as_data(randn(3))
   distribution(d) <- normal(0, 1)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     m <- model(a, b, d)
   )
 
@@ -220,7 +220,7 @@ test_that("cleanly() handles TF errors nicely", {
 
   expect_s3_class(cleanly(inversion_stop()), "error")
   expect_s3_class(cleanly(cholesky_stop()), "error")
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     cleanly(other_stop())
   )
 

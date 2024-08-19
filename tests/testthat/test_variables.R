@@ -2,29 +2,29 @@ test_that("variable() errors informatively", {
   skip_if_not(check_tf_version())
 
   # bad types
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     variable(upper = NA)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     variable(upper = head)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     variable(lower = NA)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     variable(lower = head)
   )
 
   # good types, bad values
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     variable(lower = 0:2, upper = 1:2)
   )
 
   # lower not below upper
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     variable(lower = 1, upper = 1)
   )
 })

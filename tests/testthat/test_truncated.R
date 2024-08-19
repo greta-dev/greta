@@ -623,11 +623,11 @@ test_that("truncated chi squared has correct densities", {
 test_that("bad truncations error", {
   skip_if_not(check_tf_version())
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     lognormal(0, 1, truncation = c(-1, Inf))
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     beta(1, 1, truncation = c(-1, 2))
   )
 })
