@@ -1,4 +1,5 @@
 test_that("message_if_using_gpu gives the correct message for cpu or gpu use", {
+  skip_if_not(check_tf_version())
   expect_snapshot(
     message_if_using_gpu(cpu_only())
   )
@@ -8,6 +9,7 @@ test_that("message_if_using_gpu gives the correct message for cpu or gpu use", {
 })
 
 test_that("message_if_using_gpu does not message when option set",{
+  skip_if_not(check_tf_version())
   withr::local_options(
     list("greta_gpu_message" = FALSE)
   )
@@ -19,6 +21,7 @@ test_that("message_if_using_gpu does not message when option set",{
 })
 
 test_that("message_if_using_gpu does message when option set",{
+  skip_if_not(check_tf_version())
   withr::local_options(
     list("greta_gpu_message" = TRUE)
   )
@@ -30,7 +33,7 @@ test_that("message_if_using_gpu does message when option set",{
 })
 
 test_that("is_using_gpu and is_using_cpu work",{
-
+  skip_if_not(check_tf_version())
   expect_true(is_using_gpu(gpu_only()))
   expect_false(is_using_gpu(cpu_only()))
 

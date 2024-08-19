@@ -65,7 +65,6 @@ test_that("primitive functions work as expected", {
 test_that("cummax and cummin functions error informatively", {
   skip_if_not(check_tf_version())
 
-
   cumulative_funs <- list(cummax, cummin)
   x <- as_data(randn(10))
 
@@ -78,7 +77,6 @@ test_that("cummax and cummin functions error informatively", {
 
 test_that("complex number functions error informatively", {
   skip_if_not(check_tf_version())
-
 
   complex_funs <- list(Im, Re, Arg, Conj, Mod)
   x <- as_data(randn(25, 4))
@@ -145,7 +143,6 @@ test_that("kronecker works with greta and base array arguments", {
 test_that("aperm works as expected", {
   skip_if_not(check_tf_version())
 
-
   a <- randn(5, 4, 3, 2, 1)
 
   # default is to reverse dims
@@ -201,7 +198,6 @@ test_that("cumulative functions work as expected", {
 test_that("apply works as expected", {
   skip_if_not(check_tf_version())
 
-
   # check apply.greta_array works like R's apply for X
   check_apply <- function(X, MARGIN, FUN) { # nolint
     check_op(apply, a,
@@ -244,7 +240,6 @@ test_that("tapply works as expected", {
 test_that("cumulative functions error as expected", {
   skip_if_not(check_tf_version())
 
-
   a <- as_data(randn(1, 5))
   b <- as_data(randn(5, 1, 1))
 
@@ -270,7 +265,6 @@ test_that("cumulative functions error as expected", {
 test_that("sweep works as expected", {
   skip_if_not(check_tf_version())
 
-
   stats_list <- list(randn(5), randn(25))
   x <- randn(5, 25)
 
@@ -290,7 +284,6 @@ test_that("sweep works as expected", {
 
 test_that("sweep works for numeric x and greta array STATS", {
   skip_if_not(check_tf_version())
-
 
   stats <- randn(5)
   ga_stats <- as_data(stats)
@@ -436,7 +429,6 @@ test_that("forwardsolve and backsolve error as expected", {
 
 test_that("tapply errors as expected", {
   skip_if_not(check_tf_version())
-
 
   group <- sample.int(5, 10, replace = TRUE)
   a <- ones(10, 1)
