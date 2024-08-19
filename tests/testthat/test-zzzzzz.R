@@ -10,7 +10,7 @@
 #     mockery::stub(check_tf_version, 'have_tf', FALSE)
 #     mockery::stub(check_tf_version, 'have_tfp', FALSE)
 #
-#     expect_snapshot_error(
+#     expect_snapshot(error = TRUE,
 #       check_tf_version("error")
 #       )
 #
