@@ -1,3 +1,14 @@
+#' Installs miniconda
+#'
+#' This installs miniconda using [reticulate::install_miniconda()] inside
+#'   [callr::r_process_options()]. Used internally by [install_greta_deps()].
+#'   We mostly recommend users use [install_greta_deps()] to manage their
+#'   python dependency installation.
+#'
+#' @param timeout time (minutes) until installation stops. Default is 5 minutes.
+#'
+#' @return nothing - installs miniconda.
+#' @export
 greta_install_miniconda <- function(timeout = 5) {
 
   stdout_file <- create_temp_file("out-miniconda")
