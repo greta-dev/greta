@@ -9,9 +9,11 @@
 #'     `Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')`. Or use
 #'     [greta_set_install_logfile()] to set the path, e.g.,
 #'     `greta_set_install_logfile('path/to/logfile.html')`. By default it uses
-#'     `tools::R_user_dir("greta")`. To see installation notes or errors, after
-#'     installation you can open the logfile with [read_greta_install_log()],
-#'     or you can navigate to the logfile and open it in a browser.
+#'     `tools::R_user_dir("greta")` as the directory to save a logfile named
+#'     "greta-installation-logfile.html". To see installation notes or errors,
+#'     after installation you can open the logfile with
+#'     [read_greta_install_log()], or you can navigate to the logfile and open
+#'     it in a browser.
 #'
 #' @param deps object created with [greta_deps_spec()] where you
 #'   specify python, TF, and TFP versions. By default these are TF 2.15.0,
@@ -134,10 +136,7 @@ get_pkg_user_dir <- function() {
 
 greta_default_logfile <- function(){
   greta_user_dir <- get_pkg_user_dir()
-  default_greta_logfile_path <- glue::glue(
-    "{greta_user_dir}/greta-installation-logfile.html"
-  )
-  default_greta_logfile_path
+  file.path(greta_user_dir, "greta-installation-logfile.html")
 }
 
 

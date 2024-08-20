@@ -49,9 +49,11 @@ location with \code{GRETA_INSTALLATION_LOG} using
 \code{Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}. Or use
 \code{\link[=greta_set_install_logfile]{greta_set_install_logfile()}} to set the path, e.g.,
 \code{greta_set_install_logfile('path/to/logfile.html')}. By default it uses
-\code{tools::R_user_dir("greta")}. To see installation notes or errors, after
-installation you can open the logfile with \code{\link[=read_greta_install_log]{read_greta_install_log()}},
-or you can navigate to the logfile and open it in a browser.
+\code{tools::R_user_dir("greta")} as the directory to save a logfile named
+"greta-installation-logfile.html". To see installation notes or errors,
+after installation you can open the logfile with
+\code{\link[=read_greta_install_log]{read_greta_install_log()}}, or you can navigate to the logfile and open
+it in a browser.
 
 By default, if using RStudio, it will now ask you if you want to restart
 the R session. If the session is not interactive, or is not in RStudio,
