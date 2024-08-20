@@ -69,7 +69,7 @@ test_that("cummax and cummin functions error informatively", {
   x <- as_data(randn(10))
 
   for (fun in cumulative_funs) {
-    expect_snapshot_error(
+    expect_snapshot(error = TRUE,
       fun(x)
     )
   }
@@ -82,7 +82,7 @@ test_that("complex number functions error informatively", {
   x <- as_data(randn(25, 4))
 
   for (fun in complex_funs) {
-    expect_snapshot_error(
+    expect_snapshot(error = TRUE,
       fun(x)
     )
   }
@@ -244,19 +244,19 @@ test_that("cumulative functions error as expected", {
   b <- as_data(randn(5, 1, 1))
 
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     cumsum(a)
     )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     cumsum(b)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     cumprod(a)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     cumprod(b)
   )
 
@@ -384,19 +384,19 @@ test_that("colSums etc. error as expected", {
 
   x <- as_data(randn(3, 4, 5))
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     colSums(x, dims = 3)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     rowSums(x, dims = 3)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     colMeans(x, dims = 3)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     rowMeans(x, dims = 3)
   )
 
@@ -409,19 +409,19 @@ test_that("forwardsolve and backsolve error as expected", {
   b <- as_data(randn(5, 25))
   c <- chol(a)
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     forwardsolve(a, b, k = 1)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     backsolve(a, b, k = 1)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     forwardsolve(a, b, transpose = TRUE)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     backsolve(a, b, transpose = TRUE)
   )
 
@@ -435,12 +435,12 @@ test_that("tapply errors as expected", {
   b <- ones(10, 2)
 
   # X must be a column vector
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     tapply(b, group, "sum")
   )
 
   # INDEX can't be a greta array
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     tapply(a, as_data(group), "sum")
   )
 })
@@ -495,7 +495,7 @@ test_that("ignored options are errored/warned about", {
   skip_if_not(check_tf_version())
 
   x <- ones(3, 3)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     round(x, 2)
   )
 
@@ -523,39 +523,39 @@ test_that("incorrect dimensions are errored about", {
   x <- ones(3, 3, 3)
   y <- ones(3, 4)
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     t(x)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     aperm(x, 2:1)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     chol(x)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     chol(y)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     chol2symm(x)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     chol2symm(y)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     eigen(x)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     eigen(y)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     rdist(x, y)
   )
 })

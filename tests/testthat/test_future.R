@@ -41,7 +41,7 @@ test_that("mcmc errors for invalid parallel plans", {
   )
 
   future::plan(future::multicore)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     check_future_plan()
   )
 
@@ -49,7 +49,7 @@ test_that("mcmc errors for invalid parallel plans", {
   if (.Platform$OS.type != "windows"){
     cl <- parallel::makeCluster(2L, type = "FORK")
     future::plan(future::cluster, workers = cl)
-    expect_snapshot_error(
+    expect_snapshot(error = TRUE,
       check_future_plan()
     )
   }
@@ -89,13 +89,13 @@ test_that("mcmc errors for invalid parallel plans", {
   withr::defer(future::plan(op))
 
   future::plan(future::multicore)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     mcmc(m, verbose = FALSE)
   )
 
   cl <- parallel::makeForkCluster(2L)
   future::plan(future::cluster, workers = cl)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     mcmc(m, verbose = FALSE)
   )
 
