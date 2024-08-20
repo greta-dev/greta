@@ -20,23 +20,55 @@ library(greta)
 
 # Why we need to install dependencies
 
+The greta package uses Google's [TensorFlow (TF)](https://www.tensorflow.org/) and [Tensorflow Probability (TFP)](https://github.com/tensorflow/probability)) under the hood to do efficient, fast, and scalable linear algebra and MCMC. TF and TFP are python packages, and so are required to be installed. This is different to how normal dependencies work with R packages, where the dependencies are automagically built and managed by CRAN. Unfortunately there isn't an automatic, reliable way to ensure that these are provided along when you install greta, so we need to take an additional step to install them. We have tried very hard to make the process as easy as possible by providing a helper function, `install_greta_deps()`.
+
 # How to install python dependencies using `install_greta_deps()`
 
-The `install_greta_deps()` function helps install the Python dependencies (Google's [TensorFlow](https://www.tensorflow.org/) and [tensorflow-probability](https://github.com/tensorflow/probability)). 
+We recommend running:
 
-By default, `install_greta_deps()` installs versions TF 2.15.0, and TFP version 0.23.0, using python 3.10. To change the versions of TF, TFP, or python that you want to use, you specify the `python_deps` argument of `install_greta_deps()`, which used `greta_python_deps()`. See `?install_greta_deps()` or `?greta_python_deps()` for more information.
+```{r}
+#| eval: FALSE
+install_greta_deps()
+```
 
-This helper function, `install_greta_deps()`, installs the exact pythons package versions needed. It also places these inside a conda environment, "greta-env-tf2". This isolates these exact python modules from other python installations, so that only `greta` will see them. This helps avoids installation issues, where previously you might update tensorflow on your computer and overwrite the current version needed by `greta`. Using this "greta-env-tf2" conda environment means installing other python packages should not be impact the Python packages needed by `greta`.
+And then following any prompts to install dependencies. You will then need to restart R and load `library(greta)` to start using greta.
 
-If these python modules aren't yet installed, when `greta` is used, it provides instructions on how to install them for your system. If in doubt follow those. 
+# How `install_greta_deps()` works
 
-<!-- If you want `greta` to run as fast as possible on your computer's CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel's MKL routines, which provide a 2-8 fold sampling speedup on most models. -->
+The `install_greta_deps()` function installs the Python dependencies TF and TFP. 
+By default it installs versions TF 2.15.0, and TFP version 0.23.0. It places these inside a conda environment, "greta-env-tf2". For the default settings, this is python 3.10. Using a conda environment isolates these exact python modules from other python installations, so only `greta` will see them. 
 
-## `greta_deps_tf_tfp`
+We do this as it helps avoids installation issues, where previously you might update TF on your computer and overwrite the current version needed by `greta`. Using this "greta-env-tf2" conda environment means installing other python packages should not be impact the Python packages needed by `greta`. It is part of the recommended way to [manage python dependencies in an R package](https://rstudio.github.io/reticulate/articles/python_dependencies.html) as recommended by the team at Posit.
+
+## Using different versions of TF, TFP, and Python
+
+The `install_greta_deps()` function takes three arguments:
+
+1. `python_deps`: Specify dependencies with `greta_python_deps()`
+2. `timeout`: time in minutes to wait in installation before failing/exiting
+3. `restart`: whether to restart R ("force" - restart R, "no", will not restart, "ask" (default) - ask the user)
+
+You specify the version of TF TFP, or python that you want to use with `greta_python_deps()`, which has arguments:
+
+- `tf_version`
+- `tfp_version`
+- `python_version`
+
+If you specify versions of TF/TFP/Python that are not compatible with each other, it will error before starting installation. We determined the appropriate versions of Python, TF, and TFP from https://www.tensorflow.org/install/source#tested_build_configurations and https://www.tensorflow.org/install/source_windows#tested_build_configurations, and by inspecting TFP release notes. We put this information together into a dataset, `greta_deps_tf_tfp`. You can inspect this with `View(greta_deps_tf_tfp)`.
+
+If you provide an invalid installation versions, it will error and suggest some alternative installation versions.
+
+## How we install dependencies.
+
+We create a separate R instances using [`callr`]() to install python dependencies using `reticulate` to talk to Python, and the R package `tensorflow`, for installing the tensorflow python module.
 
 ## More Detail on how greta installs python dependencies
 
 ## Troubleshooting installation
+
+### Using reinstallers
+### destroying dependencies
+### manual installation
 
 If the previous installation helper did not work, you can try the following:
 
@@ -75,3 +107,47 @@ reticulate::conda_install(
 <!-- You can also use `install_tensorflow()` to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation/) may help. -->
 
 <hr>
+
+
+# Morgue
+
+
+#### Standard installation
+
+If the previous installation helper did not work, you can try the following:
+
+```{r install_tensorflow, eval = FALSE}
+reticulate::install_miniconda()
+reticulate::conda_create(
+        envname = "greta-env",
+        python_version = "3.7"
+      )
+reticulate::conda_install(
+        envname = "greta-env",
+        packages = c(
+          "numpy==1.16.4",
+          "tensorflow-probability==0.7.0",
+          "tensorflow==1.14.0"
+        )
+      )
+```
+
+Which will install the python modules into a conda environment named "greta-env".
+
+You can also not install these not into a special conda environment "greta-env",
+like so:
+
+```{r install-deps-plain, eval = FALSE}
+reticulate::install_miniconda()
+reticulate::conda_install(
+        packages = c(
+          "numpy==1.16.4",
+          "tensorflow-probability==0.7.0",
+          "tensorflow==1.14.0"
+        )
+      )
+```
+
+<!-- You can also use `install_tensorflow()` to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation/) may help. -->
+
+<!-- If you want `greta` to run as fast as possible on your computer's CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel's MKL routines, which provide a 2-8 fold sampling speedup on most models. -->
