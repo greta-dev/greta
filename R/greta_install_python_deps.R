@@ -1,26 +1,26 @@
 greta_install_python_deps <- function(timeout = 5,
-                                      python_deps = greta_python_deps()) {
+                                      deps = greta_deps_spec()) {
 
   stdout_file <- create_temp_file("out-python-deps")
   stderr_file <- create_temp_file("err-python-deps")
 
   callr_conda_install <- callr::r_process_options(
-    func = function(python_deps) {
+    func = function(deps) {
       cli::cli_progress_step(
-        msg = "Installing TF (v{python_deps$tf_version})",
-        msg_done = "Installed TF (v{python_deps$tf_version})!",
-        msg_failed = "Error installing TF (v{python_deps$tf_version})"
+        msg = "Installing TF (v{deps$tf_version})",
+        msg_done = "Installed TF (v{deps$tf_version})!",
+        msg_failed = "Error installing TF (v{deps$tf_version})"
         )
       tensorflow::install_tensorflow(
-        version = python_deps$tf_version,
+        version = deps$tf_version,
         envname = "greta-env-tf2",
         method = "conda"
       )
-      dep_tfp <- glue::glue("tensorflow-probability=={python_deps$tfp_version}")
+      dep_tfp <- glue::glue("tensorflow-probability=={deps$tfp_version}")
       cli::cli_progress_step(
-        msg = "Installing TFP (v{python_deps$tfp_version})",
-        msg_done = "Installed TFP (v{python_deps$tfp_version})!",
-        msg_failed = "Error installing TFP (v{python_deps$tfp_version})"
+        msg = "Installing TFP (v{deps$tfp_version})",
+        msg_done = "Installed TFP (v{deps$tfp_version})!",
+        msg_failed = "Error installing TFP (v{deps$tfp_version})"
       )
       reticulate::py_install(
         packages = dep_tfp,
@@ -29,7 +29,7 @@ greta_install_python_deps <- function(timeout = 5,
         method = "conda"
         )
       },
-    args = list(python_deps = python_deps),
+    args = list(deps = deps),
     stdout = stdout_file,
     stderr = stderr_file
     )

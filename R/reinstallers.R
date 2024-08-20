@@ -78,13 +78,13 @@ reinstall_miniconda <- function(timeout = 5){
 #' # issues with installing greta dependencies
 #' reinstall_greta_deps()
 #' }
-reinstall_greta_deps <- function(python_deps = greta_python_deps(),
+reinstall_greta_deps <- function(deps = greta_deps_spec(),
                                  timeout = 5,
                                  restart = c("ask", "force", "no")){
   remove_greta_env()
   remove_miniconda()
   install_greta_deps(
-    python_deps = python_deps,
+    deps = deps,
     timeout = timeout,
     restart = restart
     )

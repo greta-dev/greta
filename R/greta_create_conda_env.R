@@ -5,21 +5,21 @@
 #'   "greta-env-tf2". This is used within [install_greta_deps()] as part of
 #'   setting up python dependencies. It uses a version of python that is
 #'   compatible with the versions of tensorflow and tensorflow-probability,
-#'   which is established with  [greta_python_deps()]. We mostly recommend
+#'   which is established with  [greta_deps_spec()]. We mostly recommend
 #'   users use [install_greta_deps()] to manage their python dependency
 #'   installation.
 #'
 #'
 #' @param timeout time (minutes) until installation stops. Default is 5 minutes.
-#' @param python_deps dependency specification, see [greta_python_deps()] for
+#' @param deps dependency specification, see [greta_deps_spec()] for
 #'   more details.
 #'
 #' @return nothing - creates a conda environment for a specific python version
 #' @export
 greta_create_conda_env <- function(timeout = 5,
-                                   python_deps = greta_python_deps()) {
+                                   deps = greta_deps_spec()) {
 
-  check_greta_python_deps(python_deps)
+  check_greta_deps_spec(deps)
 
   stdout_file <- create_temp_file("out-greta-conda")
   stderr_file <- create_temp_file("err-greta-conda")
@@ -31,7 +31,7 @@ greta_create_conda_env <- function(timeout = 5,
         python_version = python_version
       )
     },
-    args = list(python_version = python_deps$python_version),
+    args = list(python_version = deps$python_version),
     stdout = stdout_file,
     stderr = stderr_file
   )
@@ -43,7 +43,7 @@ greta_create_conda_env <- function(timeout = 5,
     timeout = timeout,
     cli_start_msg = glue::glue(
     "Creating 'greta-env-tf2' conda environment using python \\
-    v{python_deps$python_version}, this may take a minute"
+    v{deps$python_version}, this may take a minute"
     ),
     cli_end_msg = "greta-env-tf2 environment created!"
   )

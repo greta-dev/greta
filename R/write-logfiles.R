@@ -37,7 +37,7 @@ write_greta_install_log <- function(path = greta_logfile) {
   <h1>Greta installation logfile</h1>
   <h2>Created: {{sys_date}}</h2>
   <p>Use this logfile to explore potential issues in installation with greta</p>
-  <p>Try searching the text for "error" with Cmd/Ctrl+F</p>
+  <p>Try opening this in a browser and searching the text for "error" with Cmd/Ctrl+F</p>
 
   <h2>Miniconda</h2>
 

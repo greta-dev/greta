@@ -4,12 +4,12 @@
 \alias{greta_create_conda_env}
 \title{Create conda environment for greta}
 \usage{
-greta_create_conda_env(timeout = 5, python_deps = greta_python_deps())
+greta_create_conda_env(timeout = 5, deps = greta_deps_spec())
 }
 \arguments{
 \item{timeout}{time (minutes) until installation stops. Default is 5 minutes.}
 
-\item{python_deps}{dependency specification, see \code{\link[=greta_python_deps]{greta_python_deps()}} for
+\item{deps}{dependency specification, see \code{\link[=greta_deps_spec]{greta_deps_spec()}} for
 more details.}
 }
 \value{
@@ -21,7 +21,7 @@ This function runs \code{\link[reticulate:conda-tools]{reticulate::conda_create(
 "greta-env-tf2". This is used within \code{\link[=install_greta_deps]{install_greta_deps()}} as part of
 setting up python dependencies. It uses a version of python that is
 compatible with the versions of tensorflow and tensorflow-probability,
-which is established with  \code{\link[=greta_python_deps]{greta_python_deps()}}. We mostly recommend
+which is established with  \code{\link[=greta_deps_spec]{greta_deps_spec()}}. We mostly recommend
 users use \code{\link[=install_greta_deps]{install_greta_deps()}} to manage their python dependency
 installation.
 }

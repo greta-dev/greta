@@ -6,24 +6,24 @@
 \title{Install Python dependencies for greta}
 \usage{
 install_greta_deps(
-  python_deps = greta_python_deps(),
+  deps = greta_deps_spec(),
   timeout = 5,
   restart = c("ask", "force", "no"),
   ...
 )
 
 reinstall_greta_deps(
-  python_deps = greta_python_deps(),
+  deps = greta_deps_spec(),
   timeout = 5,
   restart = c("ask", "force", "no")
 )
 }
 \arguments{
-\item{python_deps}{object created with \code{\link[=greta_python_deps]{greta_python_deps()}} where you
+\item{deps}{object created with \code{\link[=greta_deps_spec]{greta_deps_spec()}} where you
 specify python, TF, and TFP versions. By default these are TF 2.15.0,
 TFP 0.23.0, and Python 3.10. These versions must be compatible
-with each other. If they are not, \code{\link[=greta_python_deps]{greta_python_deps()}} will error with
-more information and suggestions. See ?\code{\link[=greta_python_deps]{greta_python_deps()}} for more
+with each other. If they are not, \code{\link[=greta_deps_spec]{greta_deps_spec()}} will error with
+more information and suggestions. See ?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more
 information, and see the data object \code{greta_deps_tf_tfp}
 (`?greta_deps_tf_tfp``).}
 
