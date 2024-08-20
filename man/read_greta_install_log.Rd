@@ -4,20 +4,18 @@
 \alias{read_greta_install_log}
 \title{Read a greta logfile}
 \usage{
-read_greta_install_log(path = NULL)
-}
-\arguments{
-\item{path}{file to read. Optional. If not specified, it will search for
-the environment variable "GRETA_INSTALLATION_LOG". To set
-"GRETA_INSTALLATION_LOG" you can use
-\code{Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}. Or use
-\code{\link[=greta_set_install_logfile]{greta_set_install_logfile()}} to set the path, e.g.,
-\code{greta_set_install_logfile('path/to/logfile.html')}.}
+read_greta_install_log()
 }
 \value{
 opens a URL in your default browser
 }
 \description{
 This is a convenience function to facilitate reading logfiles. It opens
-a browser using \code{\link[utils:browseURL]{utils::browseURL()}}.
+a browser using \code{\link[utils:browseURL]{utils::browseURL()}}. It will search for
+the environment variable "GRETA_INSTALLATION_LOG" or default to
+\code{tools::R_user_dir("greta")}. To set
+"GRETA_INSTALLATION_LOG" you can use
+\code{Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}. Or use
+\code{\link[=greta_set_install_logfile]{greta_set_install_logfile()}} to set the path, e.g.,
+\code{greta_set_install_logfile('path/to/logfile.html')}.
 }

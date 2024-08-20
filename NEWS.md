@@ -44,6 +44,7 @@ This release provides a few improvements to installation in greta. It should now
 * remove `greta_nodes_install/conda_*()` options as #493 makes them defunct.
 * Added option to write to a single logfile with `greta_set_install_logfile()`, and `write_greta_install_log()`, and `read_greta_install_log()` (#493)
 * Added `destroy_greta_deps()` function to remove miniconda and python conda environment
+* Improved `write_greta_install_log()` and `read_greta_install_log()` to use `tools::R_user_dir()` to always write to a file location. `read_greta_install_log()` will open one found from an environment variable or go to the default location. (#703)
 
 ## Minor
 
