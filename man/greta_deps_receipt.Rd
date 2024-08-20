@@ -7,7 +7,7 @@
 greta_deps_receipt()
 }
 \value{
-\code{greta_python_deps()} object
+\code{greta_deps_spec()} object
 }
 \description{
 To assist with capturing and sharing python dependencies, we provide a way

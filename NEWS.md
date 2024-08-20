@@ -33,7 +33,7 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 This release provides a few improvements to installation in greta. It should now provide more information about installation progress, and be more robust. The intention is, it should _just work_, and if it doesn't fail gracefully with some useful advice on problem solving.
 
 * Added option to restart R + run `library(greta)` after installation (#523)
-* Added installation deps object, `greta_python_deps()` to help simplify specifying package versions (#664)
+* Added installation deps object, `greta_deps_sepc()` to help simplify specifying package versions (#664)
 * removed `method` and `conda` arguments from `install_greta_deps()` as they 
   were not used.
 * removed `manual` argument in `install_greta_deps()`.

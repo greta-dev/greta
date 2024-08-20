@@ -27,6 +27,6 @@ machines. It was constructed from
 \url{https://github.com/tensorflow/probability/releases}.
 }
 \details{
-We recommend using the default versions provided in \code{greta_python_deps()}.
+We recommend using the default versions provided in \code{greta_deps_spec()}.
 }
 \keyword{datasets}
