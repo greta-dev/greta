@@ -44,15 +44,16 @@ these are TF 2.15.0, TFP 0.23.0, and Python 3.10. These Python modules
 will be installed into a conda environment named "greta-env-tf2".
 }
 \details{
-To see installation notes or errors, there isn't an argument to specify,
-instead you will need to specify and environment variable,
-\code{GRETA_INSTALLATION_LOG}, with
+You can specify an environment variable to write a logfile to a specific
+location with \code{GRETA_INSTALLATION_LOG} using
 \code{Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}. Or use
 \code{\link[=greta_set_install_logfile]{greta_set_install_logfile()}} to set the path, e.g.,
-\code{greta_set_install_logfile('path/to/logfile.html')}. You can also skip
-the restarting of R and use \code{\link[=write_greta_install_log]{write_greta_install_log()}}. If you have
-not specified the \code{GRETA_INSTALLATION_LOG} environmental variable, the
-installation notes will indicate how to use \code{\link[=write_greta_install_log]{write_greta_install_log()}}.
+\code{greta_set_install_logfile('path/to/logfile.html')}. By default it uses
+\code{tools::R_user_dir("greta")} as the directory to save a logfile named
+"greta-installation-logfile.html". To see installation notes or errors,
+after installation you can open the logfile with
+\code{\link[=read_greta_install_log]{read_greta_install_log()}}, or you can navigate to the logfile and open
+it in a browser.
 
 By default, if using RStudio, it will now ask you if you want to restart
 the R session. If the session is not interactive, or is not in RStudio,

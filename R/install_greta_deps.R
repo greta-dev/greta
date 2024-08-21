@@ -4,15 +4,16 @@
 #'   these are TF 2.15.0, TFP 0.23.0, and Python 3.10. These Python modules
 #'   will be installed into a conda environment named "greta-env-tf2".
 #'
-#'   To see installation notes or errors, there isn't an argument to specify,
-#'     instead you will need to specify and environment variable,
-#'     `GRETA_INSTALLATION_LOG`, with
+#'   You can specify an environment variable to write a logfile to a specific
+#'     location with `GRETA_INSTALLATION_LOG` using
 #'     `Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')`. Or use
 #'     [greta_set_install_logfile()] to set the path, e.g.,
-#'     `greta_set_install_logfile('path/to/logfile.html')`. You can also skip
-#'     the restarting of R and use [write_greta_install_log()]. If you have
-#'     not specified the `GRETA_INSTALLATION_LOG` environmental variable, the
-#'     installation notes will indicate how to use [write_greta_install_log()].
+#'     `greta_set_install_logfile('path/to/logfile.html')`. By default it uses
+#'     `tools::R_user_dir("greta")` as the directory to save a logfile named
+#'     "greta-installation-logfile.html". To see installation notes or errors,
+#'     after installation you can open the logfile with
+#'     [read_greta_install_log()], or you can navigate to the logfile and open
+#'     it in a browser.
 #'
 #' @param deps object created with [greta_deps_spec()] where you
 #'   specify python, TF, and TFP versions. By default these are TF 2.15.0,
@@ -111,28 +112,11 @@ install_greta_deps <- function(deps = greta_deps_spec(),
   # `reinstall_greta_deps()`
   # perhaps even stopping the session with a "yesno"
 
-  greta_logfile <- Sys.getenv("GRETA_INSTALLATION_LOG")
+  greta_logfile <- sys_get_env("GRETA_INSTALLATION_LOG")
 
-  logfile_exists <- nzchar(greta_logfile)
+  greta_logfile <- greta_logfile %||% greta_default_logfile()
 
-  no_logfile <- !logfile_exists
-
-
-  if (logfile_exists) {
-    write_greta_install_log(path = greta_logfile)
-  }
-
-  if (no_logfile) {
-    cli::cli_alert_warning(
-      text = c(
-        "No logfile specified. If you want to save the logfile to see any \\
-        install notes, or potential errors, you will need to \\
-        {.strong not restart R}, then run:\n\n",
-      "{.run write_greta_install_log('greta-logfile.html')}"
-      ),
-      wrap = TRUE
-    )
-  }
+  write_greta_install_log(path = greta_logfile)
 
   cli::cli_alert_success("Installation of {.pkg greta} dependencies \\
                          is complete!",
@@ -140,6 +124,19 @@ install_greta_deps <- function(deps = greta_deps_spec(),
 
   restart_or_not(restart)
 
+}
+
+get_pkg_user_dir <- function() {
+  pkg_user_dir <- tools::R_user_dir("greta")
+  if (!dir.exists(pkg_user_dir)) {
+    dir.create(pkg_user_dir, recursive = TRUE)
+  }
+  pkg_user_dir
+}
+
+greta_default_logfile <- function(){
+  greta_user_dir <- get_pkg_user_dir()
+  file.path(greta_user_dir, "greta-installation-logfile.html")
 }
 
 
