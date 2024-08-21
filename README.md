@@ -49,12 +49,15 @@ This helper function, `install_greta_deps()`, installs the exact pythons package
 If these python modules aren't yet installed, when `greta` is used, it provides instructions on how to install them for your system. If in doubt follow those. 
 
 <!-- badges: start -->
-[![Codecov test coverage](https://codecov.io/gh/greta-dev/greta/branch/master/graph/badge.svg)](https://app.codecov.io/gh/greta-dev/greta?branch=master)
+[![CRAN status](https://www.r-pkg.org/badges/version/greta)](https://CRAN.R-project.org/package=greta)
 [![R-CMD-check](https://github.com/greta-dev/greta/workflows/R-CMD-check/badge.svg)](https://github.com/greta-dev/greta/actions)
-[![cran-version](http://www.r-pkg.org/badges/version/greta)](https://CRAN.R-project.org/package=greta)
+[![greta status badge](https://greta-dev.r-universe.dev/badges/greta)](https://greta-dev.r-universe.dev/greta)
+[![Codecov test coverage](https://codecov.io/gh/greta-dev/greta/branch/master/graph/badge.svg)](https://app.codecov.io/gh/greta-dev/greta?branch=master)
+
+
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0)
 [![doi](https://zenodo.org/badge/73758247.svg)](https://zenodo.org/badge/latestdoi/73758247)
 [![joss](https://joss.theoj.org/papers/10.21105/joss.01601/status.svg)](https://joss.theoj.org/papers/10.21105/joss.01601)
-![](logos/bottom_banner.png)
-[![greta status badge](https://greta-dev.r-universe.dev/badges/greta)](https://greta-dev.r-universe.dev/greta)
 <!-- badges: end -->
+
+![](logos/bottom_banner.png)
