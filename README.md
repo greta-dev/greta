@@ -18,16 +18,7 @@ install.packages("greta")
 Or install the development version of `greta` from [r-universe](http://greta-dev.r-universe.dev/ui/):
 
 ```r
-# Enable this universe
-options(
-  repos = c(
-    gretadev = 'https://greta-dev.r-universe.dev',
-    CRAN = 'https://cloud.r-project.org'
-    )
-  )
-
-# Install greta
-install.packages('greta')
+install.packages("greta", repos = c("https://greta-dev.r-universe.dev", "https://cloud.r-project.org"))
 ```
 
 (Note - installing from r-universe is just like installing from CRAN, and should be faster and more convenient than installing from GitHub)
