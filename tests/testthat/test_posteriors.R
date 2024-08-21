@@ -1,4 +1,4 @@
-# Sys.setenv("RELEASE_CANDIDATE" = "true")
+Sys.setenv("RELEASE_CANDIDATE" = "true")
 test_that("posterior is correct (binomial)", {
   skip_if_not(check_tf_version())
 
