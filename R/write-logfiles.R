@@ -31,6 +31,7 @@ write_greta_install_log <- function(path = greta_logfile) {
 
   cli::cli_progress_step(
     msg = "Open with: {.fun read_greta_logfile}"
+    msg = "Open with: {.run open_greta_install_log()}"
   )
 
   template <- '
@@ -142,10 +143,9 @@ sys_get_env <- function(envvar){
 #' Read a greta logfile
 #'
 #' This is a convenience function to facilitate reading logfiles. It opens
-#'   a browser using [utils::browseURL()].
-#'
-#' @param path file to read. Optional. If not specified, it will search for
-#'   the environment variable "GRETA_INSTALLATION_LOG". To set
+#'   a browser using [utils::browseURL()]. It will search for
+#'   the environment variable "GRETA_INSTALLATION_LOG" or default to
+#'   `tools::R_user_dir("greta")`. To set
 #'   "GRETA_INSTALLATION_LOG" you can use
 #'   `Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')`. Or use
 #'   [greta_set_install_logfile()] to set the path, e.g.,
@@ -153,11 +153,12 @@ sys_get_env <- function(envvar){
 #'
 #' @return opens a URL in your default browser
 #' @export
-open_greta_install_log <- function(path = NULL){
-  log_env <- sys_get_env("GRETA_INSTALLATION_LOG")
+open_greta_install_log <- function(){
 
-  path <- path %||% log_env
+  greta_logfile <- sys_get_env("GRETA_INSTALLATION_LOG")
 
-  utils::browseURL(path)
+  greta_logfile <- greta_logfile %||% greta_default_logfile()
+
+  utils::browseURL(greta_logfile)
 
 }
