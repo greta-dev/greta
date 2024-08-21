@@ -30,7 +30,7 @@ write_greta_install_log <- function(path = greta_logfile) {
     )
 
   cli::cli_progress_step(
-    msg = "Open with: {.run read_greta_install_log()}"
+    msg = "Open with: {.run open_greta_install_log()}"
   )
 
   template <- '
@@ -152,7 +152,7 @@ sys_get_env <- function(envvar){
 #'
 #' @return opens a URL in your default browser
 #' @export
-read_greta_install_log <- function(){
+open_greta_install_log <- function(){
 
   greta_logfile <- sys_get_env("GRETA_INSTALLATION_LOG")
 

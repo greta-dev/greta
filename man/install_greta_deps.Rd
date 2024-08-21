@@ -52,7 +52,7 @@ location with \code{GRETA_INSTALLATION_LOG} using
 \code{tools::R_user_dir("greta")} as the directory to save a logfile named
 "greta-installation-logfile.html". To see installation notes or errors,
 after installation you can open the logfile with
-\code{\link[=read_greta_install_log]{read_greta_install_log()}}, or you can navigate to the logfile and open
+\code{\link[=open_greta_install_log]{open_greta_install_log()}}, or you can navigate to the logfile and open
 it in a browser.
 
 By default, if using RStudio, it will now ask you if you want to restart

@@ -12,7 +12,7 @@
 #'     `tools::R_user_dir("greta")` as the directory to save a logfile named
 #'     "greta-installation-logfile.html". To see installation notes or errors,
 #'     after installation you can open the logfile with
-#'     [read_greta_install_log()], or you can navigate to the logfile and open
+#'     [open_greta_install_log()], or you can navigate to the logfile and open
 #'     it in a browser.
 #'
 #' @param deps object created with [greta_deps_spec()] where you

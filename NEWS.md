@@ -42,9 +42,9 @@ This release provides a few improvements to installation in greta. It should now
 * Added checking suite to ensure you are using valid versions of TF, TFP, and Python(#666)
 * Added data `greta_deps_tf_tfp` (#666), which contains valid versions combinations of TF, TFP, and Python.
 * remove `greta_nodes_install/conda_*()` options as #493 makes them defunct.
-* Added option to write to a single logfile with `greta_set_install_logfile()`, and `write_greta_install_log()`, and `read_greta_install_log()` (#493)
+* Added option to write to a single logfile with `greta_set_install_logfile()`, and `write_greta_install_log()`, and `open_greta_install_log()` (#493)
 * Added `destroy_greta_deps()` function to remove miniconda and python conda environment
-* Improved `write_greta_install_log()` and `read_greta_install_log()` to use `tools::R_user_dir()` to always write to a file location. `read_greta_install_log()` will open one found from an environment variable or go to the default location. (#703)
+* Improved `write_greta_install_log()` and `open_greta_install_log()` to use `tools::R_user_dir()` to always write to a file location. `open_greta_install_log()` will open one found from an environment variable or go to the default location. (#703)
 
 ## Minor
 
