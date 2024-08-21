@@ -30,7 +30,6 @@ write_greta_install_log <- function(path = greta_logfile) {
     )
 
   cli::cli_progress_step(
-    msg = "Open with: {.fun read_greta_logfile}"
     msg = "Open with: {.run open_greta_install_log()}"
   )
 
