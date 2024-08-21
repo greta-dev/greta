@@ -142,27 +142,27 @@ define_tfp_optimiser <- function(name,
 #'   `initial_vertex`. This parameter controls the scaling of the reflected
 #'   vertex. See, [Press et al(2007)](http://numerical.recipes/cpppages/chap0sel.pdf)
 #'   for details. If not specified, uses the dimension dependent prescription of
-#'    [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df)
+#'    [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-with-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be)
 #' @param expansion (optional) Positive Scalar Tensor of same dtype as
 #'  `initial_vertex`. Should be greater than 1 and reflection. This parameter
 #'  controls the expanded scaling of a reflected vertex.See,
 #'   [Press et al(2007)](http://numerical.recipes/cpppages/chap0sel.pdf) for
 #'   details. If not specified, uses the dimension dependent prescription of
-#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df)
+#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-with-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be)
 #' @param contraction (optional) Positive scalar Tensor of same dtype as
 #'   `initial_vertex`. Must be between 0 and 1. This parameter controls the
 #'   contraction of the reflected vertex when the objective function at the
 #'   reflected point fails to show sufficient decrease. See,
 #'   [Press et al(2007)](http://numerical.recipes/cpppages/chap0sel.pdf) for
 #'   details. If not specified, uses the dimension dependent prescription of
-#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df)
+#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-with-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be)
 #' @param shrinkage (Optional) Positive scalar Tensor of same dtype as
 #'   `initial_vertex`. Must be between 0 and 1. This parameter is the scale by
 #'   which the simplex is shrunk around the best point when the other steps fail
 #'   to produce improvements. See,
 #'   [Press et al(2007)](http://numerical.recipes/cpppages/chap0sel.pdf) for
 #'   details. If not specified, uses the dimension dependent prescription of
-#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df)
+#'   [Gao and Han(2012)](https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-with-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be)
 #'
 #' @export
 #'

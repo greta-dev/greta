@@ -100,7 +100,7 @@ reticulate::conda_install(
 
 ### DiagrammeR
 
-greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](https://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](https://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](https://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
 
 ```{r install_diagrammer, eval = FALSE}
 install.packages("igraph")
