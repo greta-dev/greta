@@ -153,7 +153,7 @@ sys_get_env <- function(envvar){
 #'
 #' @return opens a URL in your default browser
 #' @export
-read_greta_install_log <- function(path = NULL){
+open_greta_install_log <- function(path = NULL){
   log_env <- sys_get_env("GRETA_INSTALLATION_LOG")
 
   path <- path %||% log_env

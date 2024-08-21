@@ -1,5 +1,5 @@
 ---
-title: "Installing Python Dependencies"
+title: "Installing Dependencies"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{installation}
@@ -20,7 +20,9 @@ library(greta)
 
 # Why we need to install dependencies
 
-The greta package uses Google's [TensorFlow (TF)](https://www.tensorflow.org/) and [Tensorflow Probability (TFP)](https://github.com/tensorflow/probability)) under the hood to do efficient, fast, and scalable linear algebra and MCMC. TF and TFP are python packages, and so are required to be installed. This is different to how normal dependencies work with R packages, where the dependencies are automagically built and managed by CRAN. Unfortunately there isn't an automatic, reliable way to ensure that these are provided along when you install greta, so we need to take an additional step to install them. We have tried very hard to make the process as easy as possible by providing a helper function, `install_greta_deps()`.
+The greta package uses Google's [TensorFlow (TF)](https://www.tensorflow.org/) and [Tensorflow Probability (TFP)](https://github.com/tensorflow/probability)) under the hood to do efficient, fast, and scalable linear algebra and MCMC. TF and TFP are python packages, and so are required to be installed. This is different to how normal dependencies work with R packages, where the dependencies are automagically built and managed by CRAN. 
+
+Unfortunately, there isn't an automatic, reliable way to ensure that these are provided along when you install greta, so we need to take an additional step to install them. We have tried very hard to make the process as easy as possible by providing a helper function, `install_greta_deps()`.
 
 # How to install python dependencies using `install_greta_deps()`
 
@@ -60,9 +62,9 @@ If you provide an invalid installation versions, it will error and suggest some 
 
 ## How we install dependencies
 
-This is for users who want to know more about the installation process of dependencies in greta.
+For users who want to know more about the installation process of dependencies in greta.
 
-We create a separate R instance using [`callr`](https://callr.r-lib.org/index.html) to install python dependencies using `reticulate` to talk to Python, and the R package `tensorflow`, for installing the tensorflow python module. We use `callr` so that we can ensure the installation of python dependencies happens in a clean R session that doesn't have python or reticulate already loaded.
+We create a separate R instance using [`callr`](https://callr.r-lib.org/index.html) to install python dependencies using `reticulate` to talk to Python, and the R package `tensorflow`, for installing the tensorflow python module. We use `callr` so that we can ensure the installation of python dependencies happens in a clean R session that doesn't have python or reticulate already loaded. It also means that we can hide the large amounts of text output to the console that happens when installation is running - these are written a logfile during installation that you can read with `open_greta_install_log()`.
 
 If miniconda isn't installed, we install miniconda. You can think of miniconda as a lightweight version of python with minimal dependencies.
 
@@ -74,20 +76,30 @@ After installation, we ask users if they want to restart R. This only happens in
 
 ## Troubleshooting installation
 
-Installation doesn't always go to plan. Sometimes 
+Installation doesn't always go to plan. Here are some approaches to getting your dependencies working. 
 
-### Using a logfile
+- Check you have restarted R after installing dependencies
+  - After you have installed dependencies with `install_greta_deps()`, you will be prompted to restart R. To use greta you must restart R after installing dependencies as this allows greta to connect to the installed python dependencies.
 
-We write a logfile 
+- Use `greta_sitrep()` to check dependencies.
+  - `greta_sitrep()` will provide information about your installed version of Python, TF, TFP, and whether a conda environment is used. This can be helpful to troubleshoot some installation issues.
 
-### Using reinstallers
+- Check the installation logfile
+  - During installation we write a logfile, which records all of the steps taken during installation. This can sometimes provide useful clues as to what might have gone awry during installation. You can open the logfile with `open_greta_install_log()`, which opens the logfile in a browser window, and scroll through it to try and find errors or things that went wrong during installation. We recommend viewing this with `open_greta_install_log()` and then searching with Ctrl/Cmd+F for things like "error/Error/ERROR/warn/etc" to find problems. There might not be a clear solution to the problem, but the logfile might provide clues to the problem that you can share on a forum or issue on the greta github.
 
-You
+- Reinstall greta dependencies with `reinstall_greta_deps()`
+  - Sometimes we just need to "turn it off and on again". Use `reinstall_greta_deps()` to remove miniconda, and the greta conda environment, and install them again.
 
-### Destroying dependencies
-
-
-### Manual installation
+- Manually remove python installation
+  - You can manually remove python installation by doing:
+    - `remove_greta_env()`
+    - `remove_miniconda()`
+    - or `destroy_greta_deps()`, which does both of these steps.
+  - Then install the dependences with: `install_greta_deps()`
+    - Note that this is functionally what `reinstall_greta_deps()` does, but sometimes it can be useful to separate them out into separate steps.
+    
+- Check internet access
+  - Installing these dependencies requires an internet connection, and sometimes the internet service provider (perhaps IT?) blocks websites like conda from downloading. In the past we have encountered this issue and have found that it can be avoided by doing re-installation with `reinstall_greta_deps()`.
 
 If the previous installation helper did not work, you can try the following:
 
