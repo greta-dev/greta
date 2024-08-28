@@ -28,7 +28,7 @@ Description: Write statistical models in R and fit them by MCMC and
     including tutorials, examples, package documentation, and the greta
     forum.
 License: Apache License 2.0
-URL: https://greta-stats.org
+URL: https://greta-stats.org, https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
 Depends:
     R (>= 4.1.0)
