@@ -142,27 +142,27 @@ define_tfp_optimiser <- function(name,
 #'   `initial_vertex`. This parameter controls the scaling of the reflected
 #'   vertex. See, [Press et al(2007)](https://numerical.recipes/book.html)
 #'   for details. If not specified, uses the dimension dependent prescription of
-#'    [Gao and Han(2012)](https://api.semanticscholar.org/CorpusID:9211872)
+#'    Gao and Han (2012) \doi{10.1007/s10589-010-9329-3}
 #' @param expansion (optional) Positive Scalar Tensor of same dtype as
 #'  `initial_vertex`. Should be greater than 1 and reflection. This parameter
 #'  controls the expanded scaling of a reflected vertex.See,
 #'   [Press et al(2007)](https://numerical.recipes/book.html) for
 #'   details. If not specified, uses the dimension dependent prescription of
-#'   [Gao and Han(2012)](https://api.semanticscholar.org/CorpusID:9211872)
+#'   Gao and Han (2012) \doi{10.1007/s10589-010-9329-3}
 #' @param contraction (optional) Positive scalar Tensor of same dtype as
 #'   `initial_vertex`. Must be between 0 and 1. This parameter controls the
 #'   contraction of the reflected vertex when the objective function at the
 #'   reflected point fails to show sufficient decrease. See,
 #'   [Press et al(2007)](https://numerical.recipes/book.html) for
 #'   details. If not specified, uses the dimension dependent prescription of
-#'   [Gao and Han(2012)](https://api.semanticscholar.org/CorpusID:9211872)
+#'   Gao and Han (2012) \doi{10.1007/s10589-010-9329-3}
 #' @param shrinkage (Optional) Positive scalar Tensor of same dtype as
 #'   `initial_vertex`. Must be between 0 and 1. This parameter is the scale by
 #'   which the simplex is shrunk around the best point when the other steps fail
 #'   to produce improvements. See,
 #'   [Press et al(2007)](https://numerical.recipes/book.html) for
 #'   details. If not specified, uses the dimension dependent prescription of
-#'   [Gao and Han(2012)](https://api.semanticscholar.org/CorpusID:9211872)
+#'   Gao and Han (2012) \doi{10.1007/s10589-010-9329-3}
 #'
 #' @export
 #'
