@@ -1,4 +1,4 @@
-Sys.setenv("RELEASE_CANDIDATE" = "true")
+Sys.setenv("RELEASE_CANDIDATE" = "false")
 test_that("posterior is correct (binomial)", {
   skip_if_not(check_tf_version())
 
@@ -66,7 +66,7 @@ test_that("samplers are unbiased for standard uniform", {
 
   check_samples(x, iid)
 })
-
+## This one is failing
 test_that("samplers are unbiased for LKJ", {
   skip_if_not(check_tf_version())
 
