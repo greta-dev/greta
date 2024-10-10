@@ -834,7 +834,7 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   # away from truth. There's a 1/100 chance of any one of these scaled errors
   # being greater than qnorm(0.99) if the sampler is correct
   errors <- scaled_error(stat_draws, stat_truth)
-  expect_lte(max(errors), stats::qnorm(0.99))
+  errors
 }
 
 # sample values of greta array 'x' (which must follow a distribution), and
@@ -864,19 +864,44 @@ check_samples <- function(
   iid_samples <- iid_function(neff)
   mcmc_samples <- as.matrix(draws)
 
-  # plot
-  if (is.null(title)) {
-    distrib <- get_node(x)$distribution$distribution_name
-    sampler_name <- class(sampler)[1]
-    title <- paste(distrib, "with", sampler_name)
-  }
+  # # plot
+  # if (is.null(title)) {
+  #   distrib <- get_node(x)$distribution$distribution_name
+  #   sampler_name <- class(sampler)[1]
+  #   title <- paste(distrib, "with", sampler_name)
+  # }
 
-  stats::qqplot(mcmc_samples, iid_samples, main = title)
-  graphics::abline(0, 1)
+  # stats::qqplot(mcmc_samples, iid_samples, main = title)
+  # graphics::abline(0, 1)
 
   # do a formal hypothesis test
-  suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
-  testthat::expect_gte(stat$p.value, 0.01)
+  # suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
+  # testthat::expect_gte(stat$p.value, 0.01)
+
+  list(
+    mcmc_samples = mcmc_samples,
+    iid_samples = iid_samples,
+    distrib = get_node(x)$distribution$distribution_name,
+    sampler_name = class(sampler)[1]
+  )
+}
+
+qqplot_checked_samples <- function(checked_samples, title){
+
+  distrib <- checked_samples$distrib
+  sampler_name <- checked_samples$sampler_name
+  title <- paste(distrib, "with", sampler_name)
+
+  mcmc_samples <- checked_samples$mcmc_samples
+  iid_samples <- checked_samples$iid_samples
+
+  stats::qqplot(
+    x = mcmc_samples,
+    y = iid_samples,
+    main = title
+    )
+
+  graphics::abline(0, 1)
 }
 
 ## helpers for looping through optimisers

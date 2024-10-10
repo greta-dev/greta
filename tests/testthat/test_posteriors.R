@@ -38,9 +38,14 @@ test_that("samplers are unbiased for bivariate normals", {
 
   skip_if_not_release()
 
-  check_mvn_samples(hmc())
-  check_mvn_samples(rwmh())
-  check_mvn_samples(slice())
+  hmc_mvn_samples <- check_mvn_samples(hmc())
+  expect_lte(max(hmc_mvn_samples), stats::qnorm(0.99))
+
+  rwmh_mvn_samples <- check_mvn_samples(rwmh())
+  expect_lte(max(rwmh_mvn_samples), stats::qnorm(0.99))
+
+  slice_mvn_samples <- check_mvn_samples(slice())
+  expect_lte(max(rwmh_mvn_samples), stats::qnorm(0.99))
 })
 
 test_that("samplers are unbiased for chi-squared", {
@@ -52,7 +57,17 @@ test_that("samplers are unbiased for chi-squared", {
   x <- chi_squared(df)
   iid <- function(n) rchisq(n, df)
 
-  check_samples(x, iid)
+  chi_squared_checked <- check_samples(x = x,
+                                       iid_function = iid,
+                                       sampler = hmc())
+
+  # do the plotting
+  qqplot_checked_samples(chi_squared_checked)
+
+  # do a formal hypothesis test
+  suppressWarnings(stat <- ks.test(chi_squared_checked$mcmc_samples,
+                                   chi_squared_checked$iid_samples))
+  expect_gte(stat$p.value, 0.01)
 })
 
 ## TF1/2 this sampler fails
@@ -64,8 +79,16 @@ test_that("samplers are unbiased for standard uniform", {
   x <- uniform(0, 1)
   iid <- runif
 
-  check_samples(x, iid)
+  runif_checked <- check_samples(x, iid)
+
+  qqplot_checked_samples(runif_checked)
+
+  # do a formal hypothesis test
+  suppressWarnings(stat <- ks.test(chi_squared_checked$mcmc_samples,
+                                   chi_squared_checked$iid_samples))
+  expect_gte(stat$p.value, 0.01)
 })
+## UP TO HERE
 ## This one is failing
 test_that("samplers are unbiased for LKJ", {
   skip_if_not(check_tf_version())
