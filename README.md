@@ -15,7 +15,7 @@ CRAN:
 install.packages("greta")
 ```
 
-Or install the development version of `greta` from [r-universe](http://greta-dev.r-universe.dev/ui/):
+Or install the development version of `greta` from [r-universe](http://greta-dev.r-universe.dev/):
 
 ```r
 install.packages("greta", repos = c("https://greta-dev.r-universe.dev", "https://cloud.r-project.org"))

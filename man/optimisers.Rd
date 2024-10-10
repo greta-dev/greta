@@ -151,32 +151,32 @@ is below this threshold.}
 
 \item{reflection}{(optional) Positive Scalar Tensor of same dtype as
 \code{initial_vertex}. This parameter controls the scaling of the reflected
-vertex. See, \href{http://numerical.recipes/cpppages/chap0sel.pdf}{Press et al(2007)}
+vertex. See, \href{https://numerical.recipes/book.html}{Press et al(2007)}
 for details. If not specified, uses the dimension dependent prescription of
-\href{https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df}{Gao and Han(2012)}}
+Gao and Han (2012) \doi{10.1007/s10589-010-9329-3}}
 
 \item{expansion}{(optional) Positive Scalar Tensor of same dtype as
 \code{initial_vertex}. Should be greater than 1 and reflection. This parameter
 controls the expanded scaling of a reflected vertex.See,
-\href{http://numerical.recipes/cpppages/chap0sel.pdf}{Press et al(2007)} for
+\href{https://numerical.recipes/book.html}{Press et al(2007)} for
 details. If not specified, uses the dimension dependent prescription of
-\href{https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df}{Gao and Han(2012)}}
+Gao and Han (2012) \doi{10.1007/s10589-010-9329-3}}
 
 \item{contraction}{(optional) Positive scalar Tensor of same dtype as
 \code{initial_vertex}. Must be between 0 and 1. This parameter controls the
 contraction of the reflected vertex when the objective function at the
 reflected point fails to show sufficient decrease. See,
-\href{http://numerical.recipes/cpppages/chap0sel.pdf}{Press et al(2007)} for
+\href{https://numerical.recipes/book.html}{Press et al(2007)} for
 details. If not specified, uses the dimension dependent prescription of
-\href{https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df}{Gao and Han(2012)}}
+Gao and Han (2012) \doi{10.1007/s10589-010-9329-3}}
 
 \item{shrinkage}{(Optional) Positive scalar Tensor of same dtype as
 \code{initial_vertex}. Must be between 0 and 1. This parameter is the scale by
 which the simplex is shrunk around the best point when the other steps fail
 to produce improvements. See,
-\href{http://numerical.recipes/cpppages/chap0sel.pdf}{Press et al(2007)} for
+\href{https://numerical.recipes/book.html}{Press et al(2007)} for
 details. If not specified, uses the dimension dependent prescription of
-\href{https://www.semanticscholar.org/paper/Implementing-the-Nelder-Mead-simplex-algorithm-Gao-Han/15b4c4aa7437df4d032c6ee6ce98d6030dd627be?p2df}{Gao and Han(2012)}}
+Gao and Han (2012) \doi{10.1007/s10589-010-9329-3}}
 
 \item{value_and_gradients_function}{A function that accepts a point as a
 real Tensor and returns a tuple of Tensors of real dtype containing the

@@ -1,10 +1,8 @@
-# greta 0.4.5.9000 (development version)
+# greta 0.5.0
 
-## Features
+This version of greta uses Tensorflow 2.0.0, which comes with it a host of new very exciting features!
 
-* This version of greta uses Tensorflow 2.0.0, which comes with it a host of new very exciting features!
-
-### Optimizers
+## Optimizers
 
 The latest interface to optimizers in tensorflow are now used, these changes are described.
 
@@ -46,14 +44,17 @@ This release provides a few improvements to installation in greta. It should now
 * Added `destroy_greta_deps()` function to remove miniconda and python conda environment
 * Improved `write_greta_install_log()` and `open_greta_install_log()` to use `tools::R_user_dir()` to always write to a file location. `open_greta_install_log()` will open one found from an environment variable or go to the default location. (#703)
 
+## New Print methods
+
+* New print method for `greta_mcmc_list`. This means MCMC output will be shorter and more informative. (#644)
+* greta arrays now have a print method that stops them from printing too many rows into the console. Similar to MCMC print method, you can control the print output with the `n` argument: `print(object, n = <elements to print>)`. (#644)
+
 ## Minor
 
-* `greta_sitrep()` now checks for minimum versions of software, instead of exact versions. It requires at least Python version 3.8, TensorFlow 2.8.0, and Tensorflow Probability 0.14.0.
-* slice sampler no longer needs precision = "single" to work.
+* `greta_sitrep()` now checks for installations of Python, TF, and TFP
+* Slice sampler no longer needs precision = "single" to work.
 * greta now depends on R 4.1.0, which was released May 2021, over 3 years ago.
 * export `is.greta_array()` and `is.greta_mcmc_list()`
-* greta arrays now have a print method that stops them from printing too many rows into the console. Similar to MCMC print method, you can control the print output with the `n` argument: `print(object, n = <elements to print>)`. (#644)
-* New print method for `greta_mcmc_list`. This means MCMC output will be shorter and more informative. (#644)
 * `restart` argument for `install_greta_deps()` and `reinstall_greta_deps()` to automatically restart R (#523)
 
 ## Internals

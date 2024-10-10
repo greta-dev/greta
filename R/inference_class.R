@@ -787,6 +787,8 @@ sampler <- R6Class(
       # tryCatch handling for numerical errors
       dag <- self$model$dag
       tfe <- dag$tf_environment
+      # legacy: previously we used `n_samples` not `sampler_burst_length`
+      n_samples <- sampler_burst_length
 
       result <- cleanly(
         self$tf_evaluate_sample_batch(

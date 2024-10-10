@@ -24,7 +24,7 @@ NULL
 #'   instability during sampling.
 #'
 #' @param compile whether to apply
-#'   [XLA JIT compilation](https://www.tensorflow.org/xla) to
+#'   [XLA JIT compilation](https://openxla.org/xla) to
 #'   the TensorFlow graph representing the model. This may slow down model
 #'   definition, and speed up model evaluation.
 #'

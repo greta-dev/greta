@@ -703,7 +703,7 @@ p_theta_greta <- function(
 
 # test mcmc for models with analytic posteriors
 
-not_finished <- function(draws, target_samples = 5000) {
+need_more_samples <- function(draws, target_samples = 5000) {
   neff <- coda::effectiveSize(draws)
   rhats <- coda::gelman.diag(
     x = draws,
@@ -722,7 +722,7 @@ new_samples <- function(draws, target_samples = 5000) {
   1.2 * (target_samples - neff) / efficiency
 }
 
-not_timed_out <- function(start_time, time_limit = 300) {
+still_have_time <- function(start_time, time_limit = 300) {
   elapsed <- Sys.time() - start_time
   elapsed < time_limit
 }
@@ -743,8 +743,8 @@ get_enough_draws <- function(
     one_by_one = one_by_one
   )
 
-  while (not_finished(draws, n_effective) &
-    not_timed_out(start_time, time_limit)) {
+  while (need_more_samples(draws, n_effective) &&
+         still_have_time(start_time, time_limit)) {
     n_samples <- new_samples(draws, n_effective)
     draws <- extra_samples(
       draws,
@@ -754,7 +754,7 @@ get_enough_draws <- function(
     )
   }
 
-  if (not_finished(draws, n_effective)) {
+  if (need_more_samples(draws, n_effective)) {
     stop("could not draws enough effective samples within the time limit")
   }
 
@@ -847,15 +847,17 @@ check_samples <- function(
   sampler = hmc(),
   n_effective = 3000,
   title = NULL,
-  one_by_one = FALSE
+  one_by_one = FALSE,
+  time_limit = 300
 ) {
   m <- model(x, precision = "single")
   draws <- get_enough_draws(
-    m,
+    model = m,
     sampler = sampler,
     n_effective = n_effective,
     verbose = FALSE,
-    one_by_one = one_by_one
+    one_by_one = one_by_one,
+    time_limit = time_limit
   )
 
   neff <- coda::effectiveSize(draws)
