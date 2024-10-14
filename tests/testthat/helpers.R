@@ -904,6 +904,14 @@ qqplot_checked_samples <- function(checked_samples, title){
   graphics::abline(0, 1)
 }
 
+## helpers for running Kolmogorov-Smirnov test for MCMC samples vs IID samples
+ks_test_mcmc_vs_iid <- function(checked_samples){
+  # do a formal hypothesis test
+  suppressWarnings(stat <- ks.test(checked_samples$mcmc_samples,
+                                   checked_samples$iid_samples))
+  stat
+}
+
 ## helpers for looping through optimisers
 run_opt <- function(
   m,
