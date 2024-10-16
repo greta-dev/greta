@@ -703,8 +703,15 @@ tf_correlation_cholesky_bijector <- function() {
 }
 
 tf_covariance_cholesky_bijector <- function() {
-  tfp$bijectors$FillTriangular(upper = TRUE)
+
+  steps <- list(
+    tfp$bijectors$Transpose(perm = 1:0),
+    tfp$bijectors$FillScaleTriL(diag_shift = fl(1e-5))
+  )
+
+  tfp$bijectors$Chain(steps)
 }
+
 
 tf_simplex_bijector <- function(dim) {
   n_dim <- length(dim)
