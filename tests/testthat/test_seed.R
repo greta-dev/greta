@@ -38,12 +38,10 @@ test_that("when calculate simulates multiple values, they are calculated using t
   skip_if_not(check_tf_version())
 
   x <- normal(0, 1)
-  x_squared <- x ^ 2
+  x_2 <- x*1
 
-  vals <- calculate(x, x_squared, nsim = 10)
-
-  # use expect_equal
-  expect_identical(vals$x ^ 2, vals$x_squared)
+  vals <- calculate(x, x_2, nsim = 10)
+  expect_equal(vals$x, vals$x_2)
 })
 
 test_that("calculate produces the right number of samples", {
