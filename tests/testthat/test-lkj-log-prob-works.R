@@ -1,15 +1,9 @@
-test_that("Wishart log_prob function does not return NaNs", {
-  sigma <- matrix(
-    data = c(1.2, 0.7, 0.7, 2.3),
-    nrow = 2,
-    ncol = 2
-  )
-  df <- 4
-  x <- wishart(df, sigma)[1, 2]
+test_that("LKJ distribution log_prob function does not return NaNs", {
+  x <- lkj_correlation(3, 2)[1, 2]
   m <- model(x)
   new_log_prob <- m$dag$generate_log_prob_function()
   m$dag$define_tf_log_prob_function()
-  prob_input <- matrix(rnorm(12), 4, 3)
+  prob_input <- matrix(rnorm(4), 4, 1)
   log_probs <- new_log_prob(prob_input)
 
   is_nan_adjusted <- all(is.nan(as.numeric(log_probs$adjusted)))
