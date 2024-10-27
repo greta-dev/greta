@@ -855,7 +855,7 @@ check_samples <- function(
     model = m,
     sampler = sampler,
     n_effective = n_effective,
-    verbose = FALSE,
+    verbose = TRUE,
     one_by_one = one_by_one,
     time_limit = time_limit
   )
@@ -878,10 +878,20 @@ check_samples <- function(
   # suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
   # testthat::expect_gte(stat$p.value, 0.01)
 
+  get_distribution_name <- function(x){
+    x_node <- get_node(x)
+    if (inherits(x_node, "operation_node")){
+      dist_name <- x_node$parents[[1]]$distribution$distribution_name
+    } else {
+      dist_name <- get_node(x)$distribution$distribution_name
+    }
+    dist_name
+  }
+
   list(
     mcmc_samples = mcmc_samples,
     iid_samples = iid_samples,
-    distrib = get_node(x)$distribution$distribution_name,
+    distrib = get_distribution_name(x),
     sampler_name = class(sampler)[1]
   )
 }
