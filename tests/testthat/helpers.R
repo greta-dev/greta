@@ -384,6 +384,27 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
   r
 }
 
+# normalising component of lkj (depends only on eta and dimension)
+lkj_log_normalising <- function(eta, n) {
+  log_pi <- log(pi)
+  ans <- 0
+  for (k in 1:(n - 1)) {
+    ans <- ans + log_pi * (k / 2)
+    ans <- ans + lgamma(eta + (n - 1 - k) / 2)
+    ans <- ans - lgamma(eta + (n - 1) / 2)
+  }
+  ans
+}
+
+# lkj density
+dlkj_correlation <- function(x, eta, log = FALSE, dimension = NULL) {
+  res <- (eta - 1) * log(det(x)) - lkj_log_normalising(eta, ncol(x))
+  if (!log) {
+    res <- exp(res)
+  }
+  res
+}
+
 # helper RNG functions
 rmvnorm <- function(n, mean, Sigma) { # nolint
   mvtnorm::rmvnorm(n = n, mean = mean, sigma = Sigma)

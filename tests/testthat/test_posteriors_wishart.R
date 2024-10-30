@@ -1,4 +1,6 @@
-Sys.setenv("RELEASE_CANDIDATE" = "false")
+library(devtools)
+devtools::load_all(".")
+Sys.setenv("RELEASE_CANDIDATE" = "true")
 
 test_that("samplers are unbiased for Wishart", {
   skip_if_not(check_tf_version())
@@ -33,3 +35,5 @@ test_that("samplers are unbiased for Wishart", {
 
   expect_gte(stat$p.value, 0.01)
 })
+
+beepr::beep(sound = 4)

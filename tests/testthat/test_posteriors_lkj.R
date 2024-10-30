@@ -1,4 +1,4 @@
-Sys.setenv("RELEASE_CANDIDATE" = "false")
+Sys.setenv("RELEASE_CANDIDATE" = "true")
 
 ## This one is failing
 test_that("samplers are unbiased for LKJ", {

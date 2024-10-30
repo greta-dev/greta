@@ -257,6 +257,23 @@ has_representation <- function(x, name) {
   !is.null(repr)
 }
 
+anti_representation <- function(x, name, error = TRUE) {
+  if (is.greta_array(x)) {
+    x_node <- get_node(x)
+  } else {
+    x_node <- x
+  }
+  repr <- x_node$anti_representations[[name]]
+  check_has_anti_representation(repr, name, error)
+  repr
+}
+
+
+has_anti_representation <- function(x, name){
+  repr <- anti_representation(x, name, error = FALSE)
+  !is.null(repr)
+}
+
 # helper function to make a copy of the greta array & tensor
 copy_representation <- function(x, name) {
   repr <- representation(x, name)

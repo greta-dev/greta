@@ -744,6 +744,9 @@ sampler <- R6Class(
       )
 
       # get trace of free state and drop the null dimension
+      if (is.null(batch_results$all_states)){
+        browser()
+      }
       free_state_draws <- as.array(batch_results$all_states)
 
       # if there is one sample at a time, and it's rejected, conversion from

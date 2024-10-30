@@ -969,10 +969,8 @@ wishart_distribution <- R6Class(
       matrix_greta_array <- chol2symm(chol_greta_array)
 
       # return the node for the symmetric matrix
-      # target_node <- get_node(matrix_greta_array)
-      ## Patch fix - return the cholesky variable as target, rather than
-      ## the chol2symm
-      target_node <- get_node(chol_greta_array)
+      target_node <- get_node(matrix_greta_array)
+
       target_node
     },
 
@@ -1019,7 +1017,7 @@ wishart_distribution <- R6Class(
         # use the density for choleskied x, with choleskied Sigma
         distrib <- tfp$distributions$WishartTriL(
           df = df,
-          scale_tril = sigma_chol,
+          scale_tril = x,
           input_output_cholesky = TRUE
         )
 
@@ -1038,38 +1036,19 @@ wishart_distribution <- R6Class(
         }
 
         # use the density for choleskied x, with choleskied Sigma
-        distrib <- tfp$distributions$WishartTriL(
+        chol_distrib <- tfp$distributions$WishartTriL(
           df = df,
           scale_tril = sigma_chol,
-          # input_output_cholesky = TRUE
-          ## TF1/2 could potentially flip to TRUE, then at
-          ## target_is_cholesky check below we could use tf_chol2symm
-          ## instead of tf_chol, as this should be more efficient
-          # input_output_cholesky = FALSE
-          input_output_cholesky = FALSE
-          ## TF1/2 - check
-          # input_output_cholesky = TRUE
+          input_output_cholesky = TRUE
         )
 
         ## TF1/2
         ## The issue with getting the cholesky part of the Wishart
         ## isn't happening here,
         ## This produces something that looks about right
-        draws <- distrib$sample(seed = seed)
+        chol_draws <- chol_distrib$sample(seed = seed)
 
-        # if (!self$target_is_cholesky) {
-          # draws <- tf_chol(draws)
-          # draws <- tf_chol2symm(draws)
-        # }
-        ## TF1/2 - as above, this would need to be !self$target_is_cholesky
-        if (self$target_is_cholesky) {
-          draws <- tf_chol(draws)
-        }
-        ## TF1/2 - check
-        # if (!self$target_is_cholesky) {
-          # draws <- tf_chol(draws)
-          # draws <- tf_chol2symm(draws)
-        # }
+        draws <- tf_chol2symm(chol_draws)
         draws
       }
 
@@ -1085,6 +1064,7 @@ lkj_correlation_distribution <- R6Class(
 
     # set when defining the graph
     target_is_cholesky = FALSE,
+    eta_is_cholesky = FALSE,
     initialize = function(eta, dimension = 2) {
       dimension <- check_dimension(target = dimension)
 
@@ -1117,9 +1097,7 @@ lkj_correlation_distribution <- R6Class(
       matrix_greta_array <- chol2symm(chol_greta_array)
 
       # return the node for the symmetric matrix
-      # target_node <- get_node(matrix_greta_array)
-      ## PATCH - return colesky variable rather than chol2symm
-      target_node <- get_node(chol_greta_array)
+      target_node <- get_node(matrix_greta_array)
       target_node
     },
 
@@ -1144,21 +1122,42 @@ lkj_correlation_distribution <- R6Class(
       eta <- tf$squeeze(parameters$eta, 1:2)
       dim <- self$dim[1]
 
-      distrib <- tfp$distributions$LKJ(
-        dimension = dim,
-        concentration = eta,
-        input_output_cholesky = self$target_is_cholesky
-      )
+      log_prob <- function(x){
+        # get the cholesky factor of eta in tf orientation
+        if (self$eta_is_cholesky) {
+          eta_chol <- tf$linalg$matrix_transpose(eta)
+        } else {
+          eta_chol <- tf$linalg$cholesky(eta)
+        }
+
+        if (self$target_is_cholesky) {
+          x_chol <- tf$linalg$matrix_transpose(x)
+        } else {
+          x_chol <- tf$linalg$cholesky(x)
+        }
+
+        chol_distrib <- tfp$distributions$CholeskyLKJ(
+          dimension = dim,
+          concentration = eta_chol,
+          input_output_cholesky = TRUE
+        )
+
+        chol_distrib$log_prob(x_chol)
+
+      }
+
+
 
       # tfp's lkj sampling can't detect the size of the output from eta, for
       # some reason. But we can use map_fn to apply their simulation to each
       # element of eta.
       sample <- function(seed) {
         sample_once <- function(eta) {
+          chol_eta <- chol(eta)
           d <- tfp$distributions$LKJ(
             dimension = dim,
             concentration = eta,
-            input_output_cholesky = self$target_is_cholesky
+            input_output_cholesky = TRUE
           )
 
           d$sample(seed = seed)
