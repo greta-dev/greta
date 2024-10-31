@@ -1123,13 +1123,6 @@ lkj_correlation_distribution <- R6Class(
       dim <- self$dim[1]
 
       log_prob <- function(x){
-        # get the cholesky factor of eta in tf orientation
-        if (self$eta_is_cholesky) {
-          eta_chol <- tf$linalg$matrix_transpose(eta)
-        } else {
-          eta_chol <- tf$linalg$cholesky(eta)
-        }
-
         if (self$target_is_cholesky) {
           x_chol <- tf$linalg$matrix_transpose(x)
         } else {
@@ -1138,36 +1131,39 @@ lkj_correlation_distribution <- R6Class(
 
         chol_distrib <- tfp$distributions$CholeskyLKJ(
           dimension = dim,
-          concentration = eta_chol,
-          input_output_cholesky = TRUE
+          concentration = eta
         )
 
         chol_distrib$log_prob(x_chol)
 
       }
 
-
-
       # tfp's lkj sampling can't detect the size of the output from eta, for
       # some reason. But we can use map_fn to apply their simulation to each
       # element of eta.
       sample <- function(seed) {
         sample_once <- function(eta) {
-          chol_eta <- chol(eta)
-          d <- tfp$distributions$LKJ(
+          d <- tfp$distributions$CholeskyLKJ(
             dimension = dim,
-            concentration = eta,
-            input_output_cholesky = TRUE
+            concentration = eta
           )
 
-          d$sample(seed = seed)
+          chol_draws <- d$sample(seed = seed)
+
+          # equivalent to (but faster than) tf_chol2symm(tf_transpose(chol_draws))
+          # the transpose is needed because TF uses lower triangular
+          # (non-zeros are in bottom left)
+          # and R uses upper triangular (non zeroes are in top right)
+          draws <- tf$matmul(chol_draws, chol_draws, adjoint_b = TRUE)
+          draws
+
         }
 
         tf$map_fn(sample_once, eta)
       }
 
       list(
-        log_prob = distrib$log_prob,
+        log_prob = log_prob,
         sample = sample
       )
     }

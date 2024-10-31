@@ -1,26 +1,24 @@
 test_that("Log prob for lkj is correct", {
   # General process is:
-  # 1. Simulate a lkj draw x with rWish()
+  # 1. Simulate a lkj draw x with rlkj()
   # 2. Transform x to the equivalent free_state, using the bijector but running
   # it in reverse
   # 3. Run the log_prob() function on free_state
-  # 4. Run dWish(..., log = TRUE) on x, and compare with result of step 3
+  # 4. Run dlkj(..., log = TRUE) on x, and compare with result of step 3
 
-  # 1. Simulate a lkj draw x with rWish() ----------------------------------
-  set.seed(2024-10-28-1100)
+  # 1. Simulate a lkj draw x with rlkj() ----------------------------------
+  set.seed(2024-10-31-1027)
 
-  # these are more likely to result in a mix of negative and positive free state
-  # values
   eta <- 1
   dim <- 2
 
   x <- rlkjcorr(n = 1, eta = eta, dimension = dim)
-  x
   chol_x <- chol(x)
 
   ## 2. Transform x to the equivalent free_state, using the bijector but
   ## running it in reverse -----------------------------------------------------
-  ### we need to get a free state that we can plug into log prob. We know that this free state matches the chol_x, so we can compare them later.
+  # we need to get a free state that we can plug into log prob. We know that
+  # this free state matches the chol_x, so we can compare them later.
 
   new_lkj_bijector <- function(){
     steps <- list(
@@ -33,21 +31,48 @@ test_that("Log prob for lkj is correct", {
 
   a_bijector <- new_lkj_bijector()
   free_state <- a_bijector$inverse(fl(chol_x))
-  # get the greta log prob function
-  x_g <- lkj_correlation(eta = eta, dimension = dim)
-  m_g <- model(x_g)
-  greta_log_prob <- m_g$dag$generate_log_prob_function()
 
-  free_state_mat <- t(as.matrix(free_state))
-  log_probs <- greta_log_prob(free_state_mat)
+  # TODO
+  # get the greta log prob function
+  # x_g <- lkj_correlation(eta = eta, dimension = dim)
+  # m_g <- model(x_g)
+  # greta_log_prob <- m_g$dag$generate_log_prob_function()
+  #
+  # free_state_mat <- t(as.matrix(free_state))
+  # log_probs <- greta_log_prob(free_state_mat)
 
   # compare this with a direct calculation of what it should be, using TF
 
-  # wishart distribution for choleskies, matching what's in the greta code
+  # lkj distribution for choleskies, matching what's in the greta code
   lkj_cholesky_dist <- tfp$distributions$CholeskyLKJ(
     dimension = as.integer(dim),
     concentration = fl(eta)
   )
+
+  # we should expect this to have 1s on the diagonal...
+  new_draws <- lkj_cholesky_dist$sample()
+
+  new_draws
+
+  chol2symm(t(new_draws))
+  chol2symm(new_draws)
+  tf_chol2symm(new_draws)
+
+  tf_chol2symm_new <- function(x) {
+    tf$matmul(x, tf_transpose(x))
+  }
+
+  tf_transpose(new_draws) |>
+  tf_chol2symm_new()
+
+    tf_transpose(new_draws) |>
+  tf_chol2symm()
+
+
+  chol2symm(tf_transpose(lkj_cholesky_dist$sample())
+  tf_chol2symm(lkj_cholesky_dist$sample())
+  tf_chol2symm(tf_tranpose(lkj_cholesky_dist$sample()))
+
   lkj_dist <- tfp$distributions$LKJ(dimension = as.integer(dim),
                                     concentration = fl(eta),
                                     input_output_cholesky = FALSE)
@@ -62,7 +87,10 @@ test_that("Log prob for lkj is correct", {
   log_density_raw_new <- lkj_dist$log_prob(x_new)
   adjustment <- a_bijector$forward_log_det_jacobian(free_state)
   log_density <- log_density_raw + adjustment
+  log_density_new <- log_density_raw_new + adjustment
 
+  log_density
+  log_density_new
   # greta log probs should match alternative way to calculate these
   expect_equal(as.numeric(log_density), as.numeric(log_probs$adjusted))
   # this is what the unadjusted version would look like, without accounting for
@@ -81,6 +109,11 @@ test_that("Log prob for lkj is correct", {
   # check the TF distribution we use above against the R version (the same)
   expect_equal(
     as.numeric(log_density_raw),
+    dlkj_correlation(x, eta = eta, log = TRUE, dimension = dim)
+  )
+
+  expect_equal(
+    as.numeric(log_density_raw_new),
     dlkj_correlation(x, eta = eta, log = TRUE, dimension = dim)
   )
 

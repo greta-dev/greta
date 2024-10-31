@@ -17,19 +17,22 @@ test_that("Cholesky factor of Wishart should be a lower triangular matrix", {
   x <- wishart(df = 4, Sigma = diag(3))
   chol_x <- chol(x)
   expect_snapshot(
-    calculate(chol_x, nsim = 1, seed = 2024-07-30-1431)
+    calculate(chol_x, nsim = 1, seed = 2024-10-31-1338)$chol_x[1,,]
   )
   calc_x <- calculate(x, nsim = 1)
   calc_chol <- calculate(chol_x, nsim = 1)
 
   expect_lower_tri(calc_chol$chol_x)
+  expect_upper_tri(calc_chol$chol_x)
   expect_square(calc_chol$chol_x)
 
   ## Test if we do calculate on x and chol_x
   x <- wishart(df = 4, Sigma = diag(3))
   chol_x <- chol(x)
   expect_snapshot(
-    (calc_chol <- calculate(x, chol_x, nsim = 1, seed = 2024-07-30-1431))
+    calc_chol <- calculate(x, chol_x, nsim = 1, seed = 2024-10-31-1342)
+    calc_chol$x[1,,]
+    calc_chol$chol_x[1,,]
   )
   expect_square(calc_chol$chol_x)
   expect_lower_tri(calc_chol$chol_x)

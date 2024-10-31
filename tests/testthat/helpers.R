@@ -869,7 +869,8 @@ check_samples <- function(
   n_effective = 3000,
   title = NULL,
   one_by_one = FALSE,
-  time_limit = 300
+  time_limit = 300,
+  thin = 1
 ) {
   m <- model(x, precision = "single")
   draws <- get_enough_draws(
@@ -884,6 +885,15 @@ check_samples <- function(
   neff <- coda::effectiveSize(draws)
   iid_samples <- iid_function(neff)
   mcmc_samples <- as.matrix(draws)
+
+  do_thinning <- function(x, thinning = 1) {
+    idx <- seq(1, length(x), by = thinning)
+    x[idx]
+  }
+
+  mcmc_samples <- do_thinning(mcmc_samples, thin)
+  iid_samples <- do_thinning(iid_samples, thin)
+
 
   # # plot
   # if (is.null(title)) {

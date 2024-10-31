@@ -15,7 +15,8 @@ test_that("samplers are unbiased for LKJ", {
     x = x,
     iid_function = iid,
     sampler = hmc(),
-    one_by_one = TRUE
+    one_by_one = TRUE,
+    thin = 5
   )
 
   # do the plotting
