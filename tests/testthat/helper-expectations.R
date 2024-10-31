@@ -20,54 +20,23 @@ expect_upper_tri <- function(object){
   act$upper_tri <- get_upper_tri2(act$mat)
   act$lower_tri <- get_lower_tri(act$mat)
 
-  all_upper_zero <- all(act$upper_tri == 0)
-  all_lower_non_zero <- all(act$lower_tri != 0)
-  if (all_upper_zero && all_lower_non_zero){
+  all_lower_zero <- all(act$lower_tri == 0)
+  all_upper_non_zero <- all(act$upper_tri != 0)
+  is_upper_tri <- all_lower_zero && all_upper_non_zero
+  if (is_upper_tri){
     succeed()
     return(invisible(act$val))
   }
 
-  if (!all_upper_zero){
-    vals <- glue::glue_collapse(glue::glue("{round(act$upper_tri, 3)}"), sep = " ")
-    msg <- glue::glue("{act$lab} is not lower triangular. Values above the \\
+  if (!all_lower_zero){
+    vals <- glue::glue_collapse(glue::glue("{round(act$lower_tri, 3)}"), sep = " ")
+    msg <- glue::glue("{act$lab} is not upper triangular. Values below the \\
     main diagonal are not all zero: {vals}")
   }
 
-  if (!all_lower_non_zero){
-    vals <- glue::glue_collapse(glue::glue("{round(act$lower_tri, 3)}"), sep = " ")
-    msg <- glue::glue_collapse(glue::glue("{act$lab} is not lower triangular. Some values below \\
-    the main diagonal contain zero: {vals}"))
-  }
-
-  fail(msg)
-
-}
-
-
-expect_lower_tri <- function(object){
-  act <- quasi_label(rlang::enquo(object), arg = "object")
-
-  act$mat <- ga_to_mat(object)
-
-  act$upper_tri <- get_upper_tri2(act$mat)
-  act$lower_tri <- get_lower_tri(act$mat)
-
-  all_upper_zero <- all(act$upper_tri == 0)
-  all_lower_non_zero <- all(act$lower_tri != 0)
-  if (all_upper_zero && all_lower_non_zero){
-    succeed()
-    return(invisible(act$val))
-  }
-
-  if (!all_upper_zero){
+  if (!all_upper_non_zero){
     vals <- glue::glue_collapse(glue::glue("{round(act$upper_tri, 3)}"), sep = " ")
-    msg <- glue::glue("{act$lab} is not lower triangular. Values above the \\
-    main diagonal are not all zero: {vals}")
-  }
-
-  if (!all_lower_non_zero){
-    vals <- glue::glue_collapse(glue::glue("{round(act$lower_tri, 3)}"), sep = " ")
-    msg <- glue::glue_collapse(glue::glue("{act$lab} is not lower triangular. Some values below \\
+    msg <- glue::glue_collapse(glue::glue("{act$lab} is not upper triangular. Some values above \\
     the main diagonal contain zero: {vals}"))
   }
 
