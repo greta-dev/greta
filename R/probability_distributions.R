@@ -1017,7 +1017,7 @@ wishart_distribution <- R6Class(
         # use the density for choleskied x, with choleskied Sigma
         distrib <- tfp$distributions$WishartTriL(
           df = df,
-          scale_tril = x,
+          scale_tril = sigma_chol,
           input_output_cholesky = TRUE
         )
 
@@ -1048,7 +1048,11 @@ wishart_distribution <- R6Class(
         ## This produces something that looks about right
         chol_draws <- chol_distrib$sample(seed = seed)
 
-        draws <- tf_chol2symm(chol_draws)
+        # equivalent to (but faster than) tf_chol2symm(tf_transpose(chol_draws))
+        # the transpose is needed because TF uses lower triangular
+        # (non-zeros are in bottom left)
+        # and R uses upper triangular (non zeroes are in top right)
+        draws <- tf$matmul(chol_draws, chol_draws, adjoint_b = TRUE)
         draws
       }
 
