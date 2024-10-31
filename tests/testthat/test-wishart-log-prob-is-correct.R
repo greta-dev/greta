@@ -12,6 +12,8 @@ test_that("Log prob for wishart is correct", {
   # these are more likely to result in a mix of negative and positive free state
   # values
   df <- 3
+  # TODO consider using a different value here as we are had a latent bug in the
+  # code below where the sigma had to be appropriately transposed
   sigma <- diag(2)
 
   x <- rWishart(1, df, sigma)[, , 1]
@@ -35,7 +37,7 @@ test_that("Log prob for wishart is correct", {
 
   # wishart distribution for choleskies, matching what's in the greta code
   wishart_cholesky_dist <- tfp$distributions$WishartTriL(df = df,
-                                                         scale_tril = chol(sigma),
+                                                         scale_tril = t(chol(sigma)),
                                                          input_output_cholesky = TRUE)
 
   # project forward from the free state
@@ -43,7 +45,7 @@ test_that("Log prob for wishart is correct", {
   # compute the log density of the transformed variable, and the adjustment for
   # change of support
   ### njt log_density_unadjusted?
-  log_density_raw <- wishart_cholesky_dist$log_prob(chol_x_new)
+  log_density_raw <- wishart_cholesky_dist$log_prob(t(chol_x_new))
   adjustment <- a_bijector$forward_log_det_jacobian(free_state)
   log_density <- log_density_raw + adjustment
 

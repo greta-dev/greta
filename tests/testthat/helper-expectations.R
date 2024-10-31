@@ -80,8 +80,8 @@ expect_square <- function(object){
   act <- quasi_label(rlang::enquo(object), arg = "object")
 
   # 2. Call expect()
-  act$nrow <- dim(act$val)[2]
-  act$ncol <- dim(act$val)[3]
+  act$nrow <- dim(act$val[1,,])[1]
+  act$ncol <- dim(act$val[1,,])[2]
   expect(
     ok = act$nrow == act$ncol,
     failure_message = glue::glue("{act$lab} has dim {act$nrow}x{act$ncol}, and is not square.")

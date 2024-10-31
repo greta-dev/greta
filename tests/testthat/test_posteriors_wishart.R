@@ -1,5 +1,3 @@
-library(devtools)
-devtools::load_all(".")
 Sys.setenv("RELEASE_CANDIDATE" = "true")
 
 test_that("samplers are unbiased for Wishart", {
@@ -36,5 +34,3 @@ test_that("samplers are unbiased for Wishart", {
 
   expect_gte(stat$p.value, 0.01)
 })
-
-beepr::beep(sound = 4)
