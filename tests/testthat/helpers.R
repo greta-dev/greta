@@ -721,29 +721,45 @@ p_theta_greta <- function(
     verbose = FALSE
   )
 
+  # set up a progress bar and do a first increment
+  cli::cli_progress_bar("Geweke test iterations", total = niter)
+  cli::cli_progress_update()
+
   # now loop through, sampling and updating x and returning theta
   for (i in 2:niter) {
+
+    # update the progress bar
+    cli::cli_progress_update()
+
     # sample x given theta
     x <- p_x_bar_theta(theta[i - 1])
 
-    # put x in the data list
+    # replace x in the node
     dag <- model$dag
-    target_name <- dag$tf_name(get_node(data))
-    x_array <- array(x, dim = c(1, dim(data)))
-    dag$tf_environment$data_list[[target_name]] <- x_array
+    x_node <- get_node(data)
+    x_node$value(as.matrix(x))
 
-    # put theta in the free state
+    # rewrite the log prob tf function, and the tf function for the posterior
+    # samples, now using this value of x (slow, but necessary in eager mode)
+    dag$tf_log_prob_function <- NULL
+    dag$define_tf_log_prob_function()
     sampler <- attr(draws, "model_info")$samplers[[1]]
-    sampler$free_state <- as.matrix(theta[i - 1])
+    sampler$define_tf_evaluate_sample_batch()
 
+    # take anoteher sample
     draws <- extra_samples(
       draws,
       n_samples = 1,
       verbose = FALSE
     )
 
+    # trace the sample
     theta[i] <- tail(as.numeric(draws[[1]]), 1)
+
   }
+
+  # kill the progress_bar
+  cli::cli_progress_done()
 
   theta
 }

@@ -41,14 +41,14 @@ test_that("samplers pass geweke tests", {
     model = model,
     data = x,
     p_theta = p_theta,
-    p_x_bar_theta = p_x_bar_theta,
+    p_x_bar_theta = p_x_bar_theta
   )
 
   geweke_qq(geweke_hmc, title = "HMC Geweke test")
 
   geweke_stat_hmc <- geweke_ks(geweke_hmc)
 
-  testthat::expect_gte(geweke_hmc_stat$p.value, 0.005)
+  testthat::expect_gte(geweke_stat_hmc$p.value, 0.005)
 
   geweke_hmc_rwmh <- check_geweke(
     sampler = rwmh(),
