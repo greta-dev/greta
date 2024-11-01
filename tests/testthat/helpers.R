@@ -654,8 +654,7 @@ check_geweke <- function(
   p_theta,
   p_x_bar_theta,
   niter = 2000,
-  warmup = 1000,
-  title = "Geweke test"
+  warmup = 1000
 ) {
   # sample independently
   target_theta <- p_theta(niter)
@@ -671,16 +670,29 @@ check_geweke <- function(
     warmup = warmup
   )
 
+  geweke_checks <- list(target_theta = target_theta,
+       greta_theta = greta_theta)
+
+
+  geweke_checks
+
+}
+
+geweke_qq <- function(geweke_checks, title){
   # visualise correspondence
   quants <- (1:99) / 100
-  q1 <- stats::quantile(target_theta, quants)
-  q2 <- stats::quantile(greta_theta, quants)
+  q1 <- stats::quantile(geweke_checks$target_theta, quants)
+  q2 <- stats::quantile(geweke_checks$greta_theta, quants)
   plot(q2, q1, main = title)
   graphics::abline(0, 1)
 
+}
+
+geweke_ks <- function(geweke_checks){
   # do a formal hypothesis test
-  suppressWarnings(stat <- stats::ks.test(target_theta, greta_theta))
-  testthat::expect_gte(stat$p.value, 0.005)
+  suppressWarnings(stat <- stats::ks.test(geweke_checks$target_theta,
+                                          geweke_checks$greta_theta))
+  stat
 }
 
 # sample from a prior on theta the long way round, fro use in a Geweke test:
