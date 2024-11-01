@@ -1021,7 +1021,16 @@ wishart_distribution <- R6Class(
           input_output_cholesky = TRUE
         )
 
-        distrib$log_prob(x_chol)
+        log_prob_raw <- distrib$log_prob(x_chol)
+
+        # add an adjustment for the implicit chol2symm bijection in using the
+        # choleskied distribution, rather than the symmetric matrix version
+        chol2symm_bijector <- tfp$bijectors$CholeskyOuterProduct()
+        adjustment <- chol2symm_bijector$forward_log_det_jacobian(x_chol)
+        log_prob <- log_prob_raw + adjustment
+
+        log_prob
+
       }
 
       sample <- function(seed) {
@@ -1143,7 +1152,17 @@ lkj_correlation_distribution <- R6Class(
         # reference implementation of the normalising constant. This does not
         # impact MCMC or sampling, but may affect future uses of this.
         # e.g., the integration and marginalisation interface
-        chol_distrib$log_prob(x_chol)
+        # chol_distrib$log_prob(x_chol)
+
+        log_prob_raw <- chol_distrib$log_prob(x_chol)
+
+        # add an adjustment for the implicit chol2symm bijection in using the
+        # choleskied distribution, rather than the symmetric matrix version
+        chol2symm_bijector <- tfp$bijectors$CholeskyOuterProduct()
+        adjustment <- chol2symm_bijector$forward_log_det_jacobian(x_chol)
+        log_prob <- log_prob_raw + adjustment
+
+        log_prob
 
       }
 

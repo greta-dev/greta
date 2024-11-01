@@ -22,7 +22,8 @@ test_that("samplers are unbiased for Wishart", {
   wishart_checked <- check_samples(
     x = x,
     iid_function = iid,
-    one_by_one = TRUE
+    one_by_one = TRUE,
+    thin = 5
   )
 
 
