@@ -1,5 +1,5 @@
 # Currently takes about 30 seconds on an M1 mac
-Sys.setenv("RELEASE_CANDIDATE" = "false")
+Sys.setenv("RELEASE_CANDIDATE" = "true")
 
 test_that("samplers are unbiased for bivariate normals", {
   skip_if_not(check_tf_version())
