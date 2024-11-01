@@ -41,7 +41,8 @@ test_that("samplers pass geweke tests", {
     model = model,
     data = x,
     p_theta = p_theta,
-    p_x_bar_theta = p_x_bar_theta
+    p_x_bar_theta = p_x_bar_theta,
+    thin = 5
   )
 
   geweke_qq(geweke_hmc, title = "HMC Geweke test")
@@ -56,7 +57,8 @@ test_that("samplers pass geweke tests", {
     data = x,
     p_theta = p_theta,
     p_x_bar_theta = p_x_bar_theta,
-    warmup = 2000
+    warmup = 2000,
+    thin = 5
   )
 
   geweke_qq(geweke_hmc_rwmh, title = "RWMH Geweke test")
