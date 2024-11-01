@@ -385,6 +385,12 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
 }
 
 # normalising component of lkj (depends only on eta and dimension)
+# NOTE
+# we may need to find a better way to do the normalising of this/find a better
+# reference equation. E.g., looking in
+# potentially our implementation here is incorrect. This is not impacting
+# IID sampling or MCMC, but is currently causing some tests to fail where we
+# are ensuring our densities are accurate (in test_distributions.R)
 lkj_log_normalising <- function(eta, n) {
   log_pi <- log(pi)
   ans <- 0
@@ -394,6 +400,14 @@ lkj_log_normalising <- function(eta, n) {
     ans <- ans - lgamma(eta + (n - 1) / 2)
   }
   ans
+}
+
+dlkj_correlation_unnormalised <- function(x, eta, log = FALSE, dimension = NULL) {
+  res <- (eta - 1) * log(det(x))
+  if (!log) {
+    res <- exp(res)
+  }
+  res
 }
 
 # lkj density

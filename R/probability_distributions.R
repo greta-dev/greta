@@ -1138,6 +1138,11 @@ lkj_correlation_distribution <- R6Class(
           concentration = eta
         )
 
+        # NOTE there seems to be a difference with our implementation of
+        # normalising constant of the log prob. So we need to find a different
+        # reference implementation of the normalising constant. This does not
+        # impact MCMC or sampling, but may affect future uses of this.
+        # e.g., the integration and marginalisation interface
         chol_distrib$log_prob(x_chol)
 
       }
