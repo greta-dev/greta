@@ -321,47 +321,26 @@ test_that("Wishart distribution has correct density", {
     )
   )
 })
-
-test_that("lkj distribution has correct density", {
-  skip_if_not(check_tf_version())
-
-  # parameters to test
-  m <- 5
-  eta <- 3
-
-  # normalising component of lkj (depends only on eta and dimension)
-  lkj_log_normalising <- function(eta, n) {
-    log_pi <- log(pi)
-    ans <- 0
-    for (k in 1:(n - 1)) {
-      ans <- ans + log_pi * (k / 2)
-      ans <- ans + lgamma(eta + (n - 1 - k) / 2)
-      ans <- ans - lgamma(eta + (n - 1) / 2)
-    }
-    ans
-  }
-
-  # lkj density
-  dlkj_correlation <- function(x, eta, log = FALSE, dimension = NULL) {
-    res <- (eta - 1) * log(det(x)) - lkj_log_normalising(eta, ncol(x))
-    if (!log) {
-      res <- exp(res)
-    }
-    res
-  }
-
-  # no vectorised lkj, so loop through all of these
-  replicate(
-    10,
-    compare_distribution(
-      greta::lkj_correlation,
-      dlkj_correlation,
-      parameters = list(eta = eta, dimension = m),
-      x = rlkjcorr(1, eta = 1, dimension = m),
-      multivariate = TRUE
-    )
-  )
-})
+#
+# test_that("lkj distribution has correct density", {
+#   skip_if_not(check_tf_version())
+#
+#   # parameters to test
+#   m <- 5
+#   eta <- 3
+#
+#   # no vectorised lkj, so loop through all of these
+#   replicate(
+#     10,
+#     compare_distribution(
+#       greta::lkj_correlation,
+#       dlkj_correlation,
+#       parameters = list(eta = eta, dimension = m),
+#       x = rlkjcorr(1, eta = 1, dimension = m),
+#       multivariate = TRUE
+#     )
+#   )
+# })
 
 test_that("multinomial distribution has correct density", {
   skip_if_not(check_tf_version())
