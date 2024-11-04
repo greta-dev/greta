@@ -1,4 +1,4 @@
-Sys.setenv("RELEASE_CANDIDATE" = "true")
+Sys.setenv("RELEASE_CANDIDATE" = "false")
 
 ## TF1/2 - method for this test needs to be updated for TF2
 ## See https://github.com/greta-dev/greta/issues/720
