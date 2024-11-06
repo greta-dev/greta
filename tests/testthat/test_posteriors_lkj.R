@@ -1,4 +1,4 @@
-Sys.setenv("RELEASE_CANDIDATE" = "false")
+Sys.setenv("RELEASE_CANDIDATE" = "true")
 
 ## This one is failing
 test_that("samplers are unbiased for LKJ", {
@@ -14,8 +14,8 @@ test_that("samplers are unbiased for LKJ", {
   lkj_checked <- check_samples(
     x = x,
     iid_function = iid,
-    sampler = hmc(),
-    one_by_one = TRUE
+    one_by_one = TRUE,
+    thin = 5
   )
 
   # do the plotting

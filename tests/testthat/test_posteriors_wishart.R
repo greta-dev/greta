@@ -1,4 +1,4 @@
-Sys.setenv("RELEASE_CANDIDATE" = "false")
+Sys.setenv("RELEASE_CANDIDATE" = "true")
 
 test_that("samplers are unbiased for Wishart", {
   skip_if_not(check_tf_version())
@@ -22,8 +22,10 @@ test_that("samplers are unbiased for Wishart", {
   wishart_checked <- check_samples(
     x = x,
     iid_function = iid,
-    one_by_one = TRUE
+    one_by_one = TRUE,
+    thin = 5
   )
+
 
   # do the plotting
   qqplot_checked_samples(wishart_checked)

@@ -669,42 +669,21 @@ tf_correlation_cholesky_bijector <- function() {
     tfp$bijectors$Transpose(perm = 1:0),
     tfp$bijectors$CorrelationCholesky()
   )
-  bijector <- tfp$bijectors$Chain(steps)
 
-  # forward_log_det_jacobian doesn't seem to work with unknown dimensions yet,
-  # so replace for now with our own
-  ljac_corr_mat <- function(x, event_ndims) {
+  tfp$bijectors$Chain(steps)
 
-    # find dimension
-    k <- dim(x)[[2]]
-    n <- (1 + sqrt(8 * k + 1)) / 2
-
-    # convert to correlation-scale (-1, 1) & get log jacobian
-    z <- tf$tanh(x)
-
-    free_to_correl_lp <- tf_sum(log(fl(1) - tf$square(z)))
-    free_to_correl_lp <- tf$squeeze(free_to_correl_lp, 1L)
-
-    # split z up into rows
-    z_rows <- tf$split(z, 1:(n - 1), axis = 1L)
-
-    # accumulate log prob within each row
-    lps <- lapply(z_rows, tf_corrmat_row, which = "ljac")
-    correl_to_mat_lp <- tf$add_n(lps)
-
-    free_to_correl_lp + correl_to_mat_lp
-  }
-
-  list(
-    forward = bijector$forward,
-    inverse = bijector$inverse,
-    forward_log_det_jacobian = ljac_corr_mat
-  )
 }
 
 tf_covariance_cholesky_bijector <- function() {
-  tfp$bijectors$FillTriangular(upper = TRUE)
+
+  steps <- list(
+    tfp$bijectors$Transpose(perm = 1:0),
+    tfp$bijectors$FillScaleTriL(diag_shift = fl(1e-5))
+  )
+
+  tfp$bijectors$Chain(steps)
 }
+
 
 tf_simplex_bijector <- function(dim) {
   n_dim <- length(dim)

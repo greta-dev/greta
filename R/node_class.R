@@ -5,7 +5,12 @@ node <- R6Class(
     unique_name = "",
     parents = list(),
     children = list(),
+    # named greta arrays giving different representations of the greta array
+    # represented by this node that have already been calculated, to be used for
+    # computational speedups or numerical stability. E.g. a logarithm or a
+    # cholesky factor
     representations = list(),
+    anti_representations = list(),
     .value = array(NA),
     dim = NA,
     distribution = NULL,
@@ -80,6 +85,19 @@ node <- R6Class(
       mode <- dag$how_to_define(self)
       if (mode == "sampling" & has_distribution(self)) {
         parents <- c(parents, list(self$distribution))
+      }
+
+      if (mode == "sampling" & has_representation(self, "cholesky")){
+        # remove cholesky representation node from parents
+        parent_names <- extract_unique_names(parents)
+        antirep_name <- get_node(self$representations$cholesky)$unique_name
+        parent_names_keep <- setdiff(parent_names, antirep_name)
+        parents <- parents[match(parent_names_keep, parent_names)]
+      }
+
+      if (mode == "sampling" & has_anti_representation(self, "chol2symm")){
+        chol2symm_node <- get_node(self$anti_representations$chol2symm)
+        parents <- c(parents, list(chol2symm_node))
       }
 
       parents
@@ -273,6 +291,31 @@ node <- R6Class(
       }
 
       label
+    },
+    make_antirepresentations = function(representations){
+      mapply(
+        FUN = self$make_one_anti_representation,
+        representations,
+        names(representations)
+        )
+    },
+    make_one_anti_representation = function(ga, name){
+      node <- get_node(ga)
+      anti_name <- self$find_anti_name(name)
+      node$anti_representations[[anti_name]] <- as.greta_array(self)
+      node
+    },
+    find_anti_name = function(name){
+      switch(name,
+             cholesky = "chol2symm",
+             chol2symm = "chol",
+             exp = "log",
+             log = "exp",
+             probit = "iprobit",
+             iprobit = "probit",
+             logit = "ilogit",
+             ilogit = "logit"
+      )
     }
   )
 )

@@ -289,78 +289,19 @@ test_that("multivariate normal distribution has correct density", {
   )
 })
 
-test_that("Wishart distribution has correct density", {
+test_that("Wishart and LKJ distributions have correct density", {
   skip_if_not(check_tf_version())
 
-  # parameters to test
-  m <- 5
-  df <- m + 1
-  sig <- rWishart(1, df, diag(m))[, , 1]
+  # NOTE: we no longer have unit tests for the densities of the Wishart and LKJ
+  # distributions, because the greta implementation uses the distribution over
+  # hcolesky factors, combined with the log det jacobian for change of support
+  # from the cholesky factor to the symmetric matrix. This distribution is
+  # non-standard, so there is no reference distribution in R against which to
+  # compare the log probs. Instead, the implied densities for these
+  # distributions are tested using integration tests with the MCMC sampler, in
+  # test_posteriors_wishart.R and test_posteriors_lkj.R.
+  skip()
 
-  # wrapper for argument names
-  dwishart <- function(x, df, Sigma, log = FALSE) { # nolint
-    ans <- MCMCpack::dwish(W = x, v = df, S = Sigma)
-    if (log) {
-      ans <- log(ans)
-    }
-    ans
-  }
-
-  # no vectorised wishart, so loop through all of these
-  replicate(
-    10,
-    compare_distribution(
-      greta::wishart,
-      dwishart,
-      parameters = list(
-        df = df,
-        Sigma = sig
-      ),
-      x = rWishart(1, df, sig)[, , 1],
-      multivariate = TRUE
-    )
-  )
-})
-
-test_that("lkj distribution has correct density", {
-  skip_if_not(check_tf_version())
-
-  # parameters to test
-  m <- 5
-  eta <- 3
-
-  # normalising component of lkj (depends only on eta and dimension)
-  lkj_log_normalising <- function(eta, n) {
-    log_pi <- log(pi)
-    ans <- 0
-    for (k in 1:(n - 1)) {
-      ans <- ans + log_pi * (k / 2)
-      ans <- ans + lgamma(eta + (n - 1 - k) / 2)
-      ans <- ans - lgamma(eta + (n - 1) / 2)
-    }
-    ans
-  }
-
-  # lkj density
-  dlkj_correlation <- function(x, eta, log = FALSE, dimension = NULL) {
-    res <- (eta - 1) * log(det(x)) - lkj_log_normalising(eta, ncol(x))
-    if (!log) {
-      res <- exp(res)
-    }
-    res
-  }
-
-  # no vectorised lkj, so loop through all of these
-  replicate(
-    10,
-    compare_distribution(
-      greta::lkj_correlation,
-      dlkj_correlation,
-      parameters = list(eta = eta, dimension = m),
-      x = rlkjcorr(1, eta = 1, dimension = m),
-      multivariate = TRUE
-    )
-  )
 })
 
 test_that("multinomial distribution has correct density", {

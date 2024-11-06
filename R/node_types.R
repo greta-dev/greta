@@ -84,12 +84,6 @@ operation_node <- R6Class(
     operation_args = NA,
     arguments = list(),
     tf_function_env = NA,
-
-    # named greta arrays giving different representations of the greta array
-    # represented by this node that have already been calculated, to be used for
-    # computational speedups or numerical stability. E.g. a logarithm or a
-    # cholesky factor
-    representations = list(),
     initialize = function(operation,
                           ...,
                           dim = NULL,
@@ -127,6 +121,7 @@ operation_node <- R6Class(
       self$operation <- tf_operation
       self$operation_args <- operation_args
       self$representations <- representations
+      self$make_antirepresentations(representations)
       self$tf_function_env <- tf_function_env
 
       # assign empty value of the right dimension, or the values passed via the
@@ -158,23 +153,23 @@ operation_node <- R6Class(
         # browser()
         tensor <- dag$draw_sample(self$distribution)
 
-        if (has_representation(self, "cholesky")) {
+        # if (has_representation(self, "cholesky")) {
           # browser()
-          cholesky_tensor <- tf_chol(tensor)
-          # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
-          cholesky_node <- get_node(representation(self, "cholesky"))
-          cholesky_tf_name <- dag$tf_name(cholesky_node)
-          assign(cholesky_tf_name, cholesky_tensor, envir = tfe)
+          # cholesky_tensor <- tf_chol(tensor)
+          # # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          # cholesky_node <- get_node(representation(self, "cholesky"))
+          # cholesky_tf_name <- dag$tf_name(cholesky_node)
+          # assign(cholesky_tf_name, cholesky_tensor, envir = tfe)
           ## TF1/2
           ## This assignment I think is supposed to be passed down to later on
           ## in the script, as `cholesky_tf_name` gets overwritten
           # cholesky_tf_name <- dag$tf_name(self)
           # tf_name <- cholesky_tf_name
           # tensor <- cholesky_tensor
-          cholesky_tensor <- tf_chol(tensor)
-          cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
-          assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
-        }
+          # cholesky_tensor <- tf_chol(tensor)
+          # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
+          # assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
+        # }
       }
 
       if (mode == "forward") {
@@ -292,14 +287,29 @@ variable_node <- R6Class(
         distrib_node <- self$distribution
 
         if (is.null(distrib_node)) {
+          # does it have an anti-representation where it is the cholesky?
+            # the antirepresentation of cholesky is chol2symm
+            # if it does, we will take the antirepresentation and get it to `tf` itself
+              # then we need to get the tf_name
+          chol2symm_ga <- self$anti_representations$chol2symm
+          chol2symm_existing <- !is.null(chol2symm_ga)
+          if (chol2symm_existing) {
+            chol2symm_node <- get_node(chol2symm_ga)
+            chol2symm_name <- dag$tf_name(chol2symm_node)
+            chol2symm_tensor <- get(chol2symm_name, envir = dag$tf_environment)
+            tensor <- tf_chol(chol2symm_tensor)
+          }
 
-          # if the variable has no distribution create a placeholder instead
-          # (the value must be passed in via values when using simulate)
-          shape <- to_shape(c(1, self$dim))
-          # TF1/2 check
-            # need to change the placeholder approach here.
-            # NT: can we change this to be a tensor of the right shape with 1s?
-          tensor <- tensorflow::as_tensor(1L, shape = shape, dtype = tf_float())
+          #   chol2symm_ga$define_tf(dag)
+          # } else {
+          #
+          # # if the variable has no distribution create a placeholder instead
+          # # (the value must be passed in via values when using simulate)
+          # shape <- to_shape(c(1, self$dim))
+          # # TF1/2 check
+          #   # need to change the placeholder approach here.
+          #   # NT: can we change this to be a tensor of the right shape with 1s?
+          # tensor <- tensorflow::as_tensor(1L, shape = shape, dtype = tf_float())
         } else {
           tensor <- dag$draw_sample(self$distribution)
         }

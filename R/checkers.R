@@ -1943,6 +1943,19 @@ check_has_representation <- function(repr,
   }
 }
 
+check_has_anti_representation <- function(repr,
+                                     name,
+                                     error,
+                                     call = rlang::caller_env()){
+  not_anti_represented <- error && is.null(repr)
+  if (not_anti_represented) {
+    cli::cli_abort(
+      message = "{.cls greta_array} has no anti representation {.var {name}}",
+      call = call
+    )
+  }
+}
+
 check_is_greta_array <- function(x,
                                  arg = rlang::caller_arg(x),
                                  call = rlang::caller_env()){

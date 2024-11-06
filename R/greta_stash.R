@@ -28,5 +28,6 @@ greta_stash$tf_num_error <- greta_note_msg
 #' greta_notes_tf_error()
 #' }
 greta_notes_tf_num_error <- function() {
-  cat(greta_stash$tf_num_error)
+  # wrap in paste0 to remove list properties
+  cat(paste0(greta_stash$tf_num_error))
 }
