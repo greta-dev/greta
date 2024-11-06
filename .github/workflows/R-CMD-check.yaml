@@ -53,6 +53,10 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      - name: Install remotes
+        if: steps.r-package-cache.outputs.cache-hit != 'true'
+        run: install.packages("remotes")
+
       - name: Install package + deps
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
 
