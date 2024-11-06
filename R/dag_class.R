@@ -21,7 +21,6 @@ dag_class <- R6Class(
     initialize = function(target_greta_arrays,
                           tf_float = "float32",
                           compile = FALSE) {
-      # browser()
       # build the dag
       self$build_dag(target_greta_arrays)
 
@@ -171,7 +170,6 @@ dag_class <- R6Class(
       # if it's an operation, see if it has a distribution (for lkj and
       # wishart) and get mode based on whether the parent has a free state
       if (node_type == "operation") {
-        # browser()
         parent_name <- node$parents[[1]]$unique_name
         parent_stateless <- parent_name %in% stateless_names
         to_sample <- has_distribution(node) & parent_stateless
@@ -345,9 +343,7 @@ dag_class <- R6Class(
       }
 
       # define all nodes in the environment and on the graph
-      ## HERE
       lapply(target_nodes, function(x){
-        # browser()
         x$define_tf(self)
       })
 

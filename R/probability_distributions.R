@@ -50,7 +50,6 @@ normal_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     initialize = function(mean, sd, dim, truncation) {
-      ## browser()
       mean <- as.greta_array(mean)
       sd <- as.greta_array(sd)
 
@@ -1051,10 +1050,6 @@ wishart_distribution <- R6Class(
           input_output_cholesky = TRUE
         )
 
-        ## TF1/2
-        ## The issue with getting the cholesky part of the Wishart
-        ## isn't happening here,
-        ## This produces something that looks about right
         chol_draws <- chol_distrib$sample(seed = seed)
 
         # equivalent to (but faster than) tf_chol2symm(tf_transpose(chol_draws))
@@ -1404,7 +1399,6 @@ uniform <- function(min, max, dim = NULL) {
 #' @rdname distributions
 #' @export
 normal <- function(mean, sd, dim = NULL, truncation = c(-Inf, Inf)) {
-  ##browser()
   distrib("normal", mean, sd, dim, truncation)
 }
 

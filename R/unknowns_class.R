@@ -29,8 +29,6 @@ print.unknowns <- function(x, ..., n = 10) {
   # set NA values to ? for printing
   x[is.na(x)] <- " ?"
 
-  # browser()
-
   n_print <- getOption("greta.print_max") %||% n
 
   n_unknowns <- length(x)

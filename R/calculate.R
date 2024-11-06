@@ -390,7 +390,6 @@ calculate_greta_mcmc_list <- function(target,
 }
 
 calculate_list <- function(target, values, nsim, tf_float, env) {
-  ### browser()
   fixed_greta_arrays <- list()
 
   values_exist <- !identical(values, list())
@@ -409,7 +408,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
 
   stochastic <- !is.null(nsim)
-  ### browser()
   if (stochastic) {
 
     check_if_unsampleable_and_unfixed(fixed_greta_arrays, dag)
@@ -459,7 +457,6 @@ calculate_target_tensor_list <- function(
   nsim
 ) {
   # define the dag and TF graph
-  ### browser()
   # change dag mode to sampling
   dag$mode <- "all_sampling"
 
@@ -498,18 +495,12 @@ calculate_target_tensor_list <- function(
   # approaches (in as_tf_function + generate_log_prob_function)
   dag$define_tf(target_nodes = target_nodes)
 
-  # browser()
   # look up the tf names of the target greta arrays (under sampling)
   # create an object in the environment that's a list of these, and sample that
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
 
-  ## TF1/2 OK so the error with Wishart and cholesky is happening here
-  ## I feel as thought this isn't the "problem" per se, but it is where the
-  ## matrix of 1s is returned. So seems to me we first expose the problem here
   target_tensor_list <- lapply(target_names_list, get, envir = tfe)
-  ## It looks like it is getting all_sampling_operation_2 and not
-  ## all_sampling_operation_1
   target_tensor_list_array <- lapply(target_tensor_list, as.array)
 
   return(target_tensor_list_array)
