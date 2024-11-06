@@ -908,6 +908,17 @@ do_thinning <- function(x, thinning = 1) {
 }
 
 
+get_distribution_name <- function(x){
+  x_node <- get_node(x)
+  if (inherits(x_node, "operation_node")){
+    dist_name <- x_node$parents[[1]]$distribution$distribution_name
+  } else {
+    dist_name <- get_node(x)$distribution$distribution_name
+  }
+  dist_name
+}
+
+
 # sample values of greta array 'x' (which must follow a distribution), and
 # compare the samples with iid samples returned by iid_function (which takes the
 # number of arguments as its sole argument), producing a labelled qqplot, and
@@ -919,8 +930,7 @@ check_samples <- function(
   n_effective = 3000,
   title = NULL,
   one_by_one = FALSE,
-  time_limit = 300,
-  thin = 1
+  time_limit = 300
 ) {
   m <- model(x, precision = "single")
   draws <- get_enough_draws(
@@ -936,32 +946,10 @@ check_samples <- function(
   iid_samples <- iid_function(neff)
   mcmc_samples <- as.matrix(draws)
 
-  mcmc_samples <- do_thinning(mcmc_samples, thin)
-  iid_samples <- do_thinning(iid_samples, thin)
+  thin_amount <- find_thinning(draws)
 
-  # # plot
-  # if (is.null(title)) {
-  #   distrib <- get_node(x)$distribution$distribution_name
-  #   sampler_name <- class(sampler)[1]
-  #   title <- paste(distrib, "with", sampler_name)
-  # }
-
-  # stats::qqplot(mcmc_samples, iid_samples, main = title)
-  # graphics::abline(0, 1)
-
-  # do a formal hypothesis test
-  # suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
-  # testthat::expect_gte(stat$p.value, 0.01)
-
-  get_distribution_name <- function(x){
-    x_node <- get_node(x)
-    if (inherits(x_node, "operation_node")){
-      dist_name <- x_node$parents[[1]]$distribution$distribution_name
-    } else {
-      dist_name <- get_node(x)$distribution$distribution_name
-    }
-    dist_name
-  }
+  mcmc_samples <- do_thinning(mcmc_samples, thin_amount)
+  iid_samples <- do_thinning(iid_samples, thin_amount)
 
   list(
     mcmc_samples = mcmc_samples,
@@ -1050,4 +1038,29 @@ tidy_optimisers <- function(opt_df, tolerance = 1e-2) {
       convergence,
       .after = opt
     )
+}
+
+
+# find a thinning rate that sufficiently reduces autocorrelation in the samples
+# example
+# x <- normal(0, 1)
+# m <- model(x)
+# draws <- mcmc(m)
+# find_thinning(draws)
+find_thinning <- function(draws, max_thin = 100, autocorr_threshold = 0.01) {
+  autocorr_list <- coda::autocorr(draws, lags = seq_len(max_thin))
+  autocorrs <- do.call(cbind, autocorr_list)
+  mean_autocorr <- rowMeans(autocorrs)
+  smallest_thin <- which(mean_autocorr < autocorr_threshold)[1]
+  if (is.na(smallest_thin)) {
+    smallest_thin <- max_thin
+    cli::cli_warn(
+      c(
+        "Could not find a thinning value that reduces mean autocorrelation \\
+        below the threshold, {.val {autocorr_threshold}}.",
+        "Using the maximum thinning amount: {.val {max_thin}}"
+      )
+    )
+  }
+  smallest_thin
 }

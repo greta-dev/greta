@@ -14,8 +14,7 @@ test_that("samplers are unbiased for LKJ", {
   lkj_checked <- check_samples(
     x = x,
     iid_function = iid,
-    one_by_one = TRUE,
-    thin = 5
+    one_by_one = TRUE
   )
 
   # do the plotting
