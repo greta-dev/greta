@@ -53,9 +53,11 @@ jobs:
         run: |
           library(greta)
           greta::install_greta_deps(timeout = 50)
+        shell: Rscript {0}
 
       - name: Situation Report on greta install
         run: greta::greta_sitrep()
+        shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
         with:
