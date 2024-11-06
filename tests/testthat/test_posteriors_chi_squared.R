@@ -1,9 +1,5 @@
-Sys.setenv("RELEASE_CANDIDATE" = "true")
-
 test_that("samplers are unbiased for chi-squared", {
   skip_if_not(check_tf_version())
-
-  skip_if_not_release()
 
   df <- 5
   x <- chi_squared(df)

@@ -1,9 +1,5 @@
-Sys.setenv("RELEASE_CANDIDATE" = "true")
-
 test_that("samplers are unbiased for Wishart", {
   skip_if_not(check_tf_version())
-
-  skip_if_not_release()
 
   sigma <- matrix(
     data = c(1.2, 0.7, 0.7, 2.3),
