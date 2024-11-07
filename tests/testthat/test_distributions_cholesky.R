@@ -109,9 +109,3 @@ test_that("Post-MCMC, LKJ distribution stays symmetric, chol remains lower tri",
   expect_upper_tri(calcs$`chol(x)`)
 
 })
-
-
-## TODO
-# further ensure all of the issues in
-## https://github.com/greta-dev/greta/labels/cholesky
-## are resolved in this branch

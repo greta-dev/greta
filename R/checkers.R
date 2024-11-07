@@ -796,9 +796,8 @@ check_n_cores <- function(n_cores,
   n_cores_detected <- future::availableCores()
   allowed_n_cores <- seq_len(n_cores_detected)
 
-  ## TODO check explaining var
-  # check user-provided cores
-  if (!is.null(n_cores) && !n_cores %in% allowed_n_cores) {
+  cores_exceed_available <- !is.null(n_cores) && !n_cores %in% allowed_n_cores
+  if (cores_exceed_available) {
     check_positive_integer(n_cores, "n_cores")
 
     cli::cli_warn(
