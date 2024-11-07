@@ -108,8 +108,9 @@ greta_stash$numerical_messages <- c(
 #'   argument `trace_batch_size` can be modified to trade-off speed against
 #'   memory usage.
 #'
-#' @note to set a seed with MCMC you must use [tensorflow::set_random_seed()].
-#'   This is due to an internal API with tensorflow. See \url{https://github.com/greta-dev/greta/issues/559} for a thread exploring this.
+#' @note to set a seed with MCMC you can use [set.seed()], or
+#'   [tensorflow::set_random_seed()]. They both given identical results. See
+#'   examples below.
 #'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
 #'   `greta_mcmc_list` object that can be analysed using functions from the
@@ -183,6 +184,27 @@ greta_stash$numerical_messages <- c(
 #' m3 <- model(params)
 #' o <- opt(m3, hessian = TRUE)
 #' o$hessian
+#'
+#' # using set.seed or tensorflow::set_random_seed to set RNG for MCMC
+#' a <- normal(0, 1)
+#' y <- normal(a, 1)
+#' m <- model(y)
+#'
+#' set.seed(12345)
+#' one <- mcmc(m, n_samples = 1, chains = 1)
+#' set.seed(12345)
+#' two <- mcmc(m, n_samples = 1, chains = 1)
+#' # same
+#' all.equal(as.numeric(one), as.numeric(two))
+#' tensorflow::set_random_seed(12345)
+#' one_tf <- mcmc(m, n_samples = 1, chains = 1)
+#' tensorflow::set_random_seed(12345)
+#' two_tf <- mcmc(m, n_samples = 1, chains = 1)
+#' # same
+#' all.equal(as.numeric(one_tf), as.numeric(two_tf))
+#' # different
+#' all.equal(as.numeric(one), as.numeric(one_tf))
+#'
 #' }
 mcmc <- function(
     model,
