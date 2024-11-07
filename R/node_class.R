@@ -15,7 +15,6 @@ node <- R6Class(
     dim = NA,
     distribution = NULL,
     initialize = function(dim = NULL, value = NULL) {
-      ## browser()
       dim <- dim %||% c(1,1)
 
       # coerce dim to integer
@@ -36,8 +35,6 @@ node <- R6Class(
 
     # recursively register self and family
     register_family = function(dag) {
-      ## TF1/2
-      ## Rename with an explaining variable
       ## TODO add explaining variable
       if (!(self$unique_name %in% names(dag$node_list))) {
 
@@ -75,9 +72,6 @@ node <- R6Class(
       node$remove_child(self)
     },
     list_parents = function(dag) {
-      ## TF1/2
-      ## tf_cholesky
-      ## is there a way here to add some check for cholesky?
       parents <- self$parents
 
       # if this node is being sampled and has a distribution, consider
@@ -200,7 +194,6 @@ node <- R6Class(
           lapply(
             parents[which(!parents_defined)],
             function(x){
-              # browser()
               x$define_tf(dag)
             }
           )

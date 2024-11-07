@@ -7,11 +7,11 @@
 open_greta_install_log()
 }
 \value{
-opens a URL in your default browser
+opens a URL in your default HTML browser.
 }
 \description{
 This is a convenience function to facilitate reading logfiles. It opens
-a browser using \code{\link[utils:browseURL]{utils::browseURL()}}. It will search for
+a HTML browser using \code{\link[utils:browseURL]{utils::browseURL()}}. It will search for
 the environment variable "GRETA_INSTALLATION_LOG" or default to
 \code{tools::R_user_dir("greta")}. To set
 "GRETA_INSTALLATION_LOG" you can use

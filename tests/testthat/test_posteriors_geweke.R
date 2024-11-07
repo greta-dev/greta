@@ -1,7 +1,5 @@
 Sys.setenv("RELEASE_CANDIDATE" = "false")
 
-## TF1/2 - method for this test needs to be updated for TF2
-## See https://github.com/greta-dev/greta/issues/720
 test_that("samplers pass geweke tests", {
   skip_if_not(check_tf_version())
 

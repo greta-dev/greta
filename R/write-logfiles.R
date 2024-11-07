@@ -37,7 +37,7 @@ write_greta_install_log <- function(path = greta_logfile) {
   <h1>Greta installation logfile</h1>
   <h2>Created: {{sys_date}}</h2>
   <p>Use this logfile to explore potential issues in installation with greta</p>
-  <p>Try opening this in a browser and searching the text for "error" with Cmd/Ctrl+F</p>
+  <p>Try opening this in a HTML browser and searching the text for "error" with Cmd/Ctrl+F</p>
 
   <h2>Miniconda</h2>
 
@@ -142,7 +142,7 @@ sys_get_env <- function(envvar){
 #' Read a greta logfile
 #'
 #' This is a convenience function to facilitate reading logfiles. It opens
-#'   a browser using [utils::browseURL()]. It will search for
+#'   a HTML browser using [utils::browseURL()]. It will search for
 #'   the environment variable "GRETA_INSTALLATION_LOG" or default to
 #'   `tools::R_user_dir("greta")`. To set
 #'   "GRETA_INSTALLATION_LOG" you can use
@@ -150,7 +150,7 @@ sys_get_env <- function(envvar){
 #'   [greta_set_install_logfile()] to set the path, e.g.,
 #'   `greta_set_install_logfile('path/to/logfile.html')`.
 #'
-#' @return opens a URL in your default browser
+#' @return opens a URL in your default HTML browser.
 #' @export
 open_greta_install_log <- function(){
 
