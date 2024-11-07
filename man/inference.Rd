@@ -221,8 +221,9 @@ parameters are in a vector, then split the vector up to define the model.
 The parameter vector can then be passed to model. See example.
 }
 \note{
-to set a seed with MCMC you must use \code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}}.
-This is due to an internal API with tensorflow. See \url{https://github.com/greta-dev/greta/issues/559} for a thread exploring this.
+to set a seed with MCMC you can use \code{\link[=set.seed]{set.seed()}}, or
+\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}}. They both given identical results. See
+examples below.
 }
 \examples{
 \dontrun{
@@ -291,5 +292,26 @@ distribution(x) <- normal(mu, sqrt(variance))
 m3 <- model(params)
 o <- opt(m3, hessian = TRUE)
 o$hessian
+
+# using set.seed or tensorflow::set_random_seed to set RNG for MCMC
+a <- normal(0, 1)
+y <- normal(a, 1)
+m <- model(y)
+
+set.seed(12345)
+one <- mcmc(m, n_samples = 1, chains = 1)
+set.seed(12345)
+two <- mcmc(m, n_samples = 1, chains = 1)
+# same
+all.equal(as.numeric(one), as.numeric(two))
+tensorflow::set_random_seed(12345)
+one_tf <- mcmc(m, n_samples = 1, chains = 1)
+tensorflow::set_random_seed(12345)
+two_tf <- mcmc(m, n_samples = 1, chains = 1)
+# same
+all.equal(as.numeric(one_tf), as.numeric(two_tf))
+# different
+all.equal(as.numeric(one), as.numeric(one_tf))
+
 }
 }

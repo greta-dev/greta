@@ -1,10 +1,5 @@
-Sys.setenv("RELEASE_CANDIDATE" = "true")
-
-## This one is failing
 test_that("samplers are unbiased for LKJ", {
   skip_if_not(check_tf_version())
-
-  skip_if_not_release()
 
   x <- lkj_correlation(3, 2)[1, 2]
   iid <- function(n) {
@@ -14,8 +9,7 @@ test_that("samplers are unbiased for LKJ", {
   lkj_checked <- check_samples(
     x = x,
     iid_function = iid,
-    one_by_one = TRUE,
-    thin = 5
+    one_by_one = TRUE
   )
 
   # do the plotting

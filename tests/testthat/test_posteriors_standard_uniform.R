@@ -1,9 +1,5 @@
-Sys.setenv("RELEASE_CANDIDATE" = "true")
-
 test_that("samplers are unbiased for standard uniform", {
   skip_if_not(check_tf_version())
-
-  skip_if_not_release()
 
   x <- uniform(0, 1)
   iid <- runif
