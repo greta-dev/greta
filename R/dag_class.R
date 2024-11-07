@@ -76,34 +76,6 @@ dag_class <- R6Class(
       self$tf_environment$hybrid_data_list <- list()
     },
 
-    # TF1/2 check remove on_graph
-    # built with TF
-    # Not sure if we need this anyore since this information will be handled
-    # by tf_function?
-    # execute an expression on this dag's tensorflow graph, with the correct
-    # float type
-    on_graph = function(expr) {
-      # temporarily pass float type info to options, so it can be accessed by
-      # nodes on definition, without cluncky explicit passing
-      old_float_type <- options()$greta_tf_float
-      old_batch_size <- options()$greta_batch_size
-
-      on.exit(options(
-        greta_tf_float = old_float_type,
-        greta_batch_size = old_batch_size
-      ))
-
-      options(
-        greta_tf_float = self$tf_float,
-        greta_batch_size = self$tf_environment$batch_size
-      )
-
-      # A tf.Graph can be constructed and used directly without a tf.function,
-      # as was required in TensorFlow 1, but this is deprecated and it is
-      # recommended to use a tf.function instead.
-      with(self$tf_graph$as_default(), expr)
-    },
-
     # return a list of nodes connected to those in the target node list
     build_dag = function(greta_array_list) {
       target_node_list <- lapply(greta_array_list, get_node)
@@ -280,21 +252,6 @@ dag_class <- R6Class(
         )
       } else {
         shape <- shape(NULL, length(vals))
-        # TF1/2 check?
-        # this `on_graph` part below is probably not needed/wont work because it
-        # is using placeholder and co?
-        #
-        # defining an empty/unknown thing
-        # so in TF2, we might not need to define a free state, we can
-        # define a function that returns these pieces of information
-        # so we will need to define the function relative to the free state
-        # and will not need to define the object
-        # Can we just turn this into a tensor with some arbitrary value?
-        self$on_graph(free_state <- tf$compat$v1$placeholder(
-          dtype = tf_float(),
-          shape = shape
-        ))
-
         # TF1/2 check
         # instead?
         # free_state <- tensorflow::as_tensor(
@@ -320,7 +277,6 @@ dag_class <- R6Class(
       lengths <- lengths(params)
 
       if (length(lengths) > 1) {
-        # args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
         args <- tf$split(free_state, lengths, axis = 1L)
       } else {
         args <- list(free_state)
