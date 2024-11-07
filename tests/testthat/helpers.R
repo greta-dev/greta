@@ -797,7 +797,7 @@ get_enough_draws <- function(
   sampler = sampler,
   n_effective = 5000,
   time_limit = 300,
-  verbose = TRUE,
+  verbose = FALSE,
   one_by_one = FALSE
 ) {
   start_time <- Sys.time()
@@ -873,8 +873,7 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   draws <- get_enough_draws(
     m,
     sampler = sampler,
-    n_effective = n_effective,
-    verbose = FALSE
+    n_effective = n_effective
   )
 
   # get MCMC samples for statistics of the samples (value, variance and
@@ -927,7 +926,6 @@ check_samples <- function(
     model = m,
     sampler = sampler,
     n_effective = n_effective,
-    verbose = TRUE,
     one_by_one = one_by_one,
     time_limit = time_limit
   )
