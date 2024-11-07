@@ -74,6 +74,11 @@ jobs:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 
+      - name: Show testthat output
+        if: always()
+        shell: bash
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+
       # - name: Check on single core machine
       #   if: runner.os != 'Windows'
       #   env:
