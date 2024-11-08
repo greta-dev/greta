@@ -1,4 +1,5 @@
 test_that("Wishart log_prob function does not return NaNs", {
+  skip_if_not(check_tf_version())
   sigma <- matrix(
     data = c(1.2, 0.7, 0.7, 2.3),
     nrow = 2,
