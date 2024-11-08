@@ -3,7 +3,9 @@ AVX
 AdagradDAOptimiser
 CMD
 CRAN's
+Cmd
 Codecov
+Ctrl
 DAGs
 DiagrammeR
 GPUs
@@ -18,6 +20,7 @@ Hermann
 Hessians
 JIT
 Jupyter
+LKJ
 Lmax
 Lmin
 McMahan
@@ -45,16 +48,20 @@ acyclic
 al
 analysed
 args
+automagically
 bayesplot
 behaviour
+bijection
 broadcastable
 broadcasted
+chol
+choleskied
 cholesky
 cli
 colour
 colours
 conda
-cran
+dependences
 deps
 devtools
 dlkjcorr
@@ -66,6 +73,7 @@ equalling
 et
 extraDistr
 generalises
+geweke
 gfortran
 github
 greta's
@@ -80,7 +88,9 @@ joss
 labelled
 libxml
 linux
+lkj
 logfile
+logfiles
 maximise
 mcmc
 md
@@ -90,6 +100,7 @@ modelled
 modelling
 multisession
 nd
+normalisation
 normalised
 optimisation
 optimisations
@@ -123,8 +134,10 @@ softmax
 specialised
 summarise
 tensorflow
+tensorflows
 tf
 tfp
+tril
 tuh
 unadjusted
 uncentered
@@ -133,4 +146,5 @@ vectorising
 visualise
 warmup
 winbuilder
+wishart
 zhang
