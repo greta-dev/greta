@@ -25,22 +25,8 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: |
-            any::covr
-            any::xml2
-            any::remotes
+          extra-packages: any::covr, any::xml2, any::remotes
           needs: coverage
-
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          . /etc/os-release
-          while read -r cmd
-          do
-            echo "$cmd"
-            sudo $cmd
-          done < <(Rscript -e "writeLines(remotes::system_requirements('$ID-$VERSION_ID'))")
 
       - name: Install package + deps
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
