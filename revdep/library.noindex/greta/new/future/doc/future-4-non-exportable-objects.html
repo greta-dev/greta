@@ -172,7 +172,7 @@ readLines(&quot;output.log&quot;, warn = FALSE)
 <p>The culprit here is that the connection uses a so called <em>external pointer</em>:</p>
 <pre><code class="language-r">str(con)
 ## Classes 'file', 'connection'  atomic [1:1] 3
-##   ..- attr(*, &quot;conn_id&quot;)=&lt;externalptr&gt; 
+##   ..- attr(*, &quot;conn_id&quot;)=&lt;externalptr&gt;
 </code></pre>
 <p>which is bound to the main R process and makes no sense to the worker.  Ideally, the R process of the worker would detect this and produce an informative error message, but as seen here, that does not always occur.</p>
 <h2 id="protect-against-non-exportable-objects">Protect against non-exportable objects</h2>
@@ -195,8 +195,16 @@ f &lt;- future({ cat(&quot;world!&quot;, file = con); flush(con) })
 </thead>
 <tbody>
 <tr>
+<td align="left"><strong>arrow</strong></td>
+<td align="left">Table (<code>externalptr</code>)</td>
+</tr>
+<tr>
 <td align="left"><strong>base</strong></td>
 <td align="left">connection (<code>externalptr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>bigmemory</strong></td>
+<td align="left">big.matrix (<code>externalptr</code>)</td>
 </tr>
 <tr>
 <td align="left"><strong>cpp11</strong></td>
@@ -225,6 +233,10 @@ f &lt;- future({ cat(&quot;world!&quot;, file = con); flush(con) })
 <tr>
 <td align="left"><strong>parallel</strong></td>
 <td align="left">cluster and cluster nodes (<code>connection</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>polars</strong></td>
+<td align="left">RPolarsDataFrame (<code>externalptr</code>)</td>
 </tr>
 <tr>
 <td align="left"><strong>raster</strong></td>
@@ -316,6 +328,96 @@ y
 <p>If an object carries an <em>external pointer</em>, it is likely that it can only be used in the R session where it was created.  If it is exported to and used in a parallel process, it will likely cause an error there.  As shown above, and in below examples, setting option <code>future.globals.onReference</code> to <code>&quot;error&quot;</code> will make <strong>future</strong> to scan for <em>external pointer</em>:s before launching the future on a parallel worker, and throw an error if one is detected.</p>
 <p>However, there are objects with <em>external pointer</em>:s that can be exported, e.g. <code>data.table</code> objects of the <strong><a href="https://cran.r-project.org/package=data.table">data.table</a></strong> package is one such example.  In other words, the existence of a <em>external pointer</em> is just a suggestion for an object being non-exportable - it is not a sufficient condition.</p>
 <p>Below are some examples of packages who produce non-exportable objects with <em>external pointer</em>:s.</p>
+<h4 id="package-arrow">Package: arrow</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=arrow">arrow</a></strong> package provides efficient in-memory storage of arrays
+and tables.  However, these objects cannot be transferred as-is to a
+parallel worker.</p>
+<pre><code class="language-r">library(arrow)
+
+library(future)
+plan(multisession)
+
+data &lt;- as_arrow_table(iris)
+f &lt;- future(dim(data))
+v &lt;- value(f)
+#&gt; Error: Invalid &lt;Table&gt;, external pointer to null
+</code></pre>
+<p>This error takes place on the parallel worker.  We could set
+<code>options(future.globals.onReference = &quot;error&quot;)</code> to have <strong>future</strong>
+detect the problem before it sends the object over to the parallel
+worker.</p>
+<p>That said, the <strong>arrow</strong> package provides low-level functions
+<code>write_to_raw()</code> and <code>read_ipc_stream()</code> that can used to marshal and
+unmarshal <strong>arrow</strong> objects. For example,</p>
+<pre><code class="language-r">library(arrow)
+
+library(future)
+plan(multisession)
+
+data &lt;- as_arrow_table(iris)
+.data &lt;- write_to_raw(data)      ## marshal
+f &lt;- future({
+  data &lt;- read_ipc_stream(.data) ## unmarshal
+  dim(data)
+})
+v &lt;- value(f)
+print(v)
+#&gt; [1] 150   5
+</code></pre>
+<h4 id="package-bigmemory">Package: bigmemory</h4>
+<p>The <strong><a href="https://cran.r-project.org/package=bigmemory">bigmemory</a></strong> package provides mechanisms for working with very
+large matrices that can be updated in-place, which helps save
+memory. For example,</p>
+<pre><code class="language-r">library(bigmemory)
+
+g &lt;- function(x) {
+  x[1,1] &lt;- 42L
+  x
+}
+
+x &lt;- big.matrix(nrow = 3, ncol = 2, type = &quot;integer&quot;)
+print(x[1,1])
+#&gt; [1] NA
+
+void &lt;- g(x)
+print(x[1,1])
+#&gt; [1] 42
+</code></pre>
+<p>Note how <code>x</code> was updated in-place. This is achieved by <code>big.matrix</code>
+objects holds an external pointer to where the matrix data is stored;</p>
+<pre><code class="language-r">str(x)
+#&gt; Formal class 'big.matrix' [package &quot;bigmemory&quot;] with 1 slot
+#&gt;   ..@ address:&lt;externalptr&gt; 
+</code></pre>
+<p>If we would try to use <code>x</code> in a parallel worker, then the parallel
+worker crashes due to a bug in <strong>bigmemory</strong>, e.g.</p>
+<pre><code class="language-r">library(bigmemory)
+
+library(future)
+plan(multisession, workers = 2)
+
+x &lt;- big.matrix(nrow = 3, ncol = 2, type = &quot;integer&quot;)
+f &lt;- future(dim(x), packages = &quot;bigmemory&quot;)
+value(f)
+#&gt; Error in unserialize(node$con) : 
+#&gt;   MultisessionFuture (&lt;none&gt;) failed to receive message results from
+#&gt; cluster RichSOCKnode #1 (PID 1746676 on localhost 'localhost'). The
+#&gt; reason reported was 'error reading from connection'. Post-mortem
+#&gt; diagnostic: No process exists with this PID, i.e. the localhost worker
+#&gt; is no longer alive. Detected a non-exportable reference
+#&gt; ('externalptr') in one of the globals ('x' of class 'big.matrix') used
+#&gt; in the future expression. The total size of the 1 globals exported is
+#&gt; 696 bytes. There is one global: 'x' (696 bytes of class 'S4')
+</code></pre>
+<p>We can protected against this setting:</p>
+<pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
+</code></pre>
+<p>which gives:</p>
+<pre><code class="language-r">f &lt;- future(dim(x), packages = &quot;bigmemory&quot;)
+#&gt; Error: Detected a non-exportable reference ('externalptr') in one
+#&gt; of the globals ('x' of class 'big.matrix') used in the future
+#&gt; expression
+</code></pre>
 <h4 id="package-cpp11">Package: cpp11</h4>
 <p>Another example is <strong><a href="https://cran.r-project.org/package=cpp11">cpp11</a></strong>, which allows us to easily create R functions that are implemented in C++, e.g.</p>
 <pre><code class="language-r">cpp11::cpp_source(code = '
@@ -339,7 +441,7 @@ plan(multisession)
 x &lt;- rnorm(10)
 n %&lt;-% my_length(x)
 n
-#&gt; Error in .Call(&quot;_code_1748ff617940b9_my_length&quot;, x, PACKAGE = &quot;code_1748ff617940b9&quot;) : 
+#&gt; Error in .Call(&quot;_code_1748ff617940b9_my_length&quot;, x, PACKAGE = &quot;code_1748ff617940b9&quot;) :
 #&gt;   &quot;_code_1748ff617940b9_my_length&quot; not available for .Call() for package &quot;code_1748ff617940b9&quot;
 </code></pre>
 <h4 id="package-dbi">Package: DBI</h4>
@@ -370,7 +472,7 @@ print(y)
 plan(cluster, workers = 1L)
 f &lt;- future(sum_1_to_n(10, 0))
 v &lt;- value(f)
-## Error in .Primitive(&quot;.C&quot;)(&lt;pointer: (nil)&gt;, n = as.integer(n), x = as.double(x)) : 
+## Error in .Primitive(&quot;.C&quot;)(&lt;pointer: (nil)&gt;, n = as.integer(n), x = as.double(x)) :
 ##   NULL value passed as symbol address
 </code></pre>
 <p>This is because:</p>
@@ -408,7 +510,7 @@ f &lt;- future({
   stats::predict(model, test_input)
 }, seed = TRUE)
 pred &lt;- value(f)
-## Error in do.call(object$predict, args) : 
+## Error in do.call(object$predict, args) :
 ##   'what' must be a function or character string
 </code></pre>
 <p>This is error message is not very helpful.  But, if we turn on
@@ -421,9 +523,9 @@ the future expression
 <p>Functions <code>serialize_model()</code> and <code>unserialize_model()</code> of the
 <strong>keras</strong> package can be used as workaround to marshal and unmarshal
 non-exportable <strong>keras</strong> objects, e.g.</p>
-<pre><code class="language-r">.model &lt;- serialize_model(model)
+<pre><code class="language-r">.model &lt;- serialize_model(model)      ## marshal
 f &lt;- future({
-  model &lt;- unserialize_model(.model)
+  model &lt;- unserialize_model(.model)  ## unmarshal
   stats::predict(model, test_input)
 }, seed = TRUE)
 rm(.model) ## not needed anymore
@@ -452,6 +554,27 @@ v &lt;- value(f)
 ## 'magick-image') in one of the globals ('frink' of class 'magick-image')
 ## used in the future expression
 </code></pre>
+<h4 id="package-polars">Package: polars</h4>
+<p>The <strong><a href="https://rpolars.github.io/">polars</a></strong> package provides objects for performant processing on
+tabular data.  However, these objects are tied to the R process that
+created them. If we attempt to use them in a parallel worker, we end
+up crashing the parallel worker:</p>
+<pre><code class="language-r">library(future)
+plan(multisession)
+
+library(polars)
+data &lt;- as_polars_df(data.frame(x = 1:3))
+f &lt;- future(dim(data), packages = &quot;polars&quot;)
+v &lt;- value(f)
+#&gt; Error: Execution halted with the following contexts
+#&gt;    0: In R: in `$.RPolarsDataFrame`
+#&gt;    0: During function call [workRSOCK()]
+#&gt;    1: This Polars object is not valid. Execute `rm(&lt;object&gt;)` to remove
+#&gt;       the object or restart the R session.
+</code></pre>
+<p>This is because the external pointer in the <code>RPolarsDataFrame</code> object
+is erased when transferred to another process, which <strong>polars</strong> (&gt;= 0.15.0)
+detects and gives an informative error message about.</p>
 <h4 id="package-raster">Package: raster</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=raster">raster</a></strong> package provides methods for working with spatial data, which are held in ‘RasterLayer’ objects.  Not all but some of these objects use an external pointer.  For example,</p>
 <pre><code class="language-r">library(future)
@@ -511,7 +634,7 @@ library(reticulate)
 os &lt;- import(&quot;os&quot;)
 pwd %&lt;-% os$getcwd()
 pwd
-## Error in eval(quote(os$getcwd()), new.env()) : 
+## Error in eval(quote(os$getcwd()), new.env()) :
 ##   attempt to apply non-function
 </code></pre>
 <p>and by telling the <strong>future</strong> package to validate globals further, we get:</p>
@@ -527,7 +650,7 @@ twice(1.2)
 ## [1] 2.4
 y %&lt;-% twice(1.2)
 y
-## Error in unserialize(node$con) : 
+## Error in unserialize(node$con) :
 ##   Failed to retrieve the value of MultisessionFuture from cluster node #1
 ##   (on 'localhost').  The reason reported was 'error reading from connection'
 </code></pre>
@@ -599,7 +722,7 @@ file &lt;- system.file(&quot;misc&quot;, &quot;exDIF.csv&quot;, package = &quot;
 data &lt;- spark_read_csv(sc, &quot;exDIF&quot;, file)
 d %&lt;-% dim(data)
 d
-## Error in unserialize(node$con) : 
+## Error in unserialize(node$con) :
 ##   Failed to retrieve the value of MultisessionFuture (&lt;none&gt;) from cluster
 ## SOCKnode #1 (PID 29864 on localhost 'localhost'). The reason reported was
 ## 'unknown input format'. Post-mortem diagnostic: A process with this PID
@@ -626,7 +749,7 @@ file &lt;- system.file(&quot;ex/elev.tif&quot;, package = &quot;terra&quot;)
 r &lt;- rast(file)
 dr %&lt;-% dim(r)
 dr
-## Error in .External(list(name = &quot;CppMethod__invoke_notvoid&quot;, address = &lt;pointer: (nil)&gt;,  : 
+## Error in .External(list(name = &quot;CppMethod__invoke_notvoid&quot;, address = &lt;pointer: (nil)&gt;,  :
 ##  NULL value passed as symbol address
 </code></pre>
 <p>To catch this as soon as possible,</p>
@@ -642,15 +765,18 @@ dr %&lt;-% dim(data)
 ## 'RegisteredNativeSymbol') in one of the globals ('r' of class
 ## 'SpatRaster') used in the future expression
 </code></pre>
-<p>Functions <code>wrap()</code> and <code>vect()</code> of the <strong>terra</strong> package can be used as workaround to marshal and unmarshal non-exportable <strong>terra</strong> objects, e.g.</p>
+<p>Functions <code>wrap()</code> and <code>unwrap()</code> of the <strong>terra</strong> package can be used as workaround to marshal and unmarshal non-exportable <strong>terra</strong> objects, e.g.</p>
 <pre><code class="language-r">library(future)
 plan(multisession)
 library(terra)
 
 file &lt;- system.file(&quot;ex/lux.shp&quot;, package = &quot;terra&quot;)
 v &lt;- vect(file)
-.v &lt;- wrap(v)
-dv %&lt;-% { v &lt;- vect(.v); dim(v) }
+.v &lt;- wrap(v)      ## marshal
+dv %&lt;-% {
+  v &lt;- unwrap(.v)  ## unmarshal
+  dim(v)
+}
 rm(.v) ## not needed anymore
 dv
 [1] 12  6
@@ -658,11 +784,14 @@ dv
 <p>and</p>
 <pre><code class="language-r">file &lt;- system.file(&quot;ex/elev.tif&quot;, package = &quot;terra&quot;)
 r &lt;- rast(file)
-.r &lt;- wrap(v)
-dr %&lt;-% { r &lt;- vect(.r); dim(r) }
+.r &lt;- wrap(r)      ## marshal
+dr %&lt;-% {
+  r &lt;- unwrap(.r)  ## unmarshal
+  dim(r)
+}
 rm(.r) ## not needed anymore
 dr
-[1] 12  6
+[1] 90 95  1
 </code></pre>
 <p>For more details, see <code>help(&quot;wrap&quot;, package = &quot;terra&quot;)</code>.</p>
 <h4 id="package-udpipe">Package: udpipe</h4>
@@ -673,7 +802,7 @@ udmodel &lt;- udpipe_download_model(language = &quot;dutch&quot;)
 udmodel &lt;- udpipe_load_model(file = udmodel$file_model)
 x %&lt;-% udpipe_annotate(udmodel, x = &quot;Ik ging op reis en ik nam mee.&quot;)
 x
-## Error in udp_tokenise_tag_parse(object$model, x, doc_id, tokenizer, tagger,  : 
+## Error in udp_tokenise_tag_parse(object$model, x, doc_id, tokenizer, tagger,  :
 ##   external pointer is not valid
 </code></pre>
 <p>To catch this as soon as possible,</p>
@@ -694,12 +823,12 @@ train &lt;- xgb.DMatrix(agaricus.train$data, label = agaricus.train$label)
 class(train)
 ## [1] &quot;xgb.DMatrix&quot;
 
-d &lt;- dim(dtrain)
+d &lt;- dim(train)
 d
 ## [1] 6513  126
 </code></pre>
 <p>works just fine but if we attempt to pass on the ‘xgb.DMatrix’ object <code>train</code> to an external worker, we silently get a incorrect value:</p>
-<pre><code class="language-r">f &lt;- future(dim(dtrain))
+<pre><code class="language-r">f &lt;- future(dim(train))
 d &lt;- value(f)
 d
 ## NULL
@@ -757,7 +886,7 @@ Possible actions:
 2: normal R exit
 3: exit R without saving workspace
 4: exit R saving workspace
-Selection: 
+Selection:
 </code></pre>
 <p>This is a very harsh way of telling us that we cannot export all types
 of objects produced by <strong>XML</strong>.  Ideally, <strong>XML</strong> would detect this
@@ -772,9 +901,12 @@ doc &lt;- xmlParse(system.file(&quot;exampleData&quot;, &quot;tagnames.xml&quot;
 a &lt;- getNodeSet(doc, &quot;/doc//a[@status]&quot;)[[1]]
 
 ## Marshall the non-exportable XMLInternalElementNode object
-a_m &lt;- xmlSerializeHook(a)
+.a &lt;- xmlSerializeHook(a)      ## marshal
 
-f &lt;- future({ a &lt;- xmlDeserializeHook(a_m); xmlGetAttr(a, &quot;status&quot;) })
+f &lt;- future({
+  a &lt;- xmlDeserializeHook(.a)  ## unmarshal
+  xmlGetAttr(a, &quot;status&quot;)
+})
 value(f)
 ## [1] &quot;xyz&quot;
 </code></pre>
@@ -813,12 +945,12 @@ f &lt;- future(xml_children(xml))
 </code></pre>
 <p>One workaround when dealing with non-exportable objects is to look for ways to encode the object such that it can be exported, and the decoded on the receiving end.  With <strong>xml2</strong>, we can use <code>xml2::xml_serialize()</code> and <code>xml2::xml_unserialize()</code> to do this.  Here is how we can rewrite the above example such that we can pass <strong>xml2</strong> object back and forth between the main R session and R workers:</p>
 <pre><code class="language-r">## Encode the 'xml_document' object 'doc' as a 'raw' object
-doc_raw &lt;- xml_serialize(doc, connection = NULL)
+.doc &lt;- xml_serialize(doc, connection = NULL)  ## marshal
 
 f &lt;- future({
   ## In the future, reconstruct the 'xml_document' object
   ## from the 'raw' object
-  doc &lt;- xml_unserialize(doc_raw)
+  doc &lt;- xml_unserialize(.doc)                 ## unmarshal
 
   ## Continue as usual
   children &lt;- xml_children(doc)
@@ -909,16 +1041,16 @@ code &lt;- &quot;
 data {
   int&lt;lower=0&gt; N;
   real y[N];
-} 
+}
 
 parameters {
   real mu;
-} 
+}
 
 model {
   target += normal_lpdf(mu | 0, 10);
   target += normal_lpdf(y  | mu, 1);
-} 
+}
 &quot;
 
 y &lt;- rnorm(20)
