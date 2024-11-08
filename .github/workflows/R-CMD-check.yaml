@@ -21,7 +21,7 @@ jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }}) (${{ matrix.config.tf }})
 
@@ -56,9 +56,7 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Install remotes
-        if: steps.r-package-cache.outputs.cache-hit != 'true'
-        run: install.packages("remotes")
+
 
       - name: Install system dependencies
         if: runner.os == 'Linux'
@@ -70,6 +68,10 @@ jobs:
             echo "$cmd"
             sudo $cmd
           done < <(Rscript -e "writeLines(remotes::system_requirements('$ID-$VERSION_ID'))")
+
+      - name: Install remotes
+        if: steps.r-package-cache.outputs.cache-hit != 'true'
+        run: install.packages("remotes")
 
       - name: Install package + deps
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
