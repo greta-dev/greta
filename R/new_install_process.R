@@ -4,11 +4,14 @@ new_install_process <- function(callr_process,
                                 stderr_file = NULL,
                                 cli_start_msg = NULL,
                                 cli_end_msg = NULL){
-  cli::cli_process_start(cli_start_msg)
+  cli::cli_progress_step(msg = cli_start_msg,
+                         spinner = TRUE)
   # convert max timeout from milliseconds into minutes
   timeout_minutes <- timeout * 1000 * 60
   r_callr_process <- callr::r_process$new(callr_process)
+  cli::cli_progress_update()
   r_callr_process$wait(timeout = timeout_minutes)
+  cli::cli_progress_update()
 
   status <- r_callr_process$get_exit_status()
   output_notes <- read_char(stdout_file)
@@ -18,20 +21,22 @@ new_install_process <- function(callr_process,
   output_error <- output_error %||% "No output detected in stderr"
 
   if (is.null(status)) {
-    cli::cli_process_failed()
+    cli::cli_progress_step(msg_failed = "Installation timed out")
     msg_timeout <- timeout_install_msg(timeout, output_error)
     cli::cli_abort(
-      msg_timeout
+      message = msg_timeout
     )
   } else if (no_output) {
-    cli::cli_process_failed()
+    cli::cli_progress_step(msg_failed = "Installation failed")
     msg_other <- other_install_fail_msg(output_error)
     cli::cli_abort(
       msg_other
     )
   }
 
-  cli_process_done(msg_done = cli_end_msg)
+  cli::cli_progress_update()
+  cli::cli_progress_step(msg_done = cli_end_msg)
+  cli::cli_progress_done()
 
   return(
     list(output_notes = output_notes,
