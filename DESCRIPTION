@@ -84,9 +84,9 @@ Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-SystemRequirements: Python (>= 2.7.0) with header files and shared
-    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow
-    Probability (v0.7.0; https://www.tensorflow.org/probability/)
+SystemRequirements: Python (>= 3.7.0) with header files and shared
+    library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/); TensorFlow
+    Probability (v0.8.0; https://www.tensorflow.org/probability/)
 Collate:
     'package.R'
     'utils.R'
