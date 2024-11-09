@@ -1,7 +1,7 @@
 
-R version 4.3.2 (2023-10-31) -- "Eye Holes"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: aarch64-apple-darwin20 (64-bit)
+R version 4.4.2 (2024-10-31) -- "Pile of Leaves"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -27,7 +27,7 @@ Type 'q()' to quit R.
 > library(runMCMCbtadjust)
 > 
 > test_check("runMCMCbtadjust")
-nimble version 1.0.1 is loaded.
+nimble version 1.2.1 is loaded.
 For more information on NIMBLE and a User Manual,
 please visit https://R-nimble.org.
 
@@ -42,32 +42,43 @@ The following object is masked from 'package:stats':
 
     simulate
 
-Timing stopped at: 0.004 0 0.005
-Timing stopped at: 0.003 0 0.004
-Timing stopped at: 0.004 0 0.004
-Timing stopped at: 0.002 0 0.002
-Timing stopped at: 0.004 0 0.004
-Timing stopped at: 0.004 0 0.004
-Timing stopped at: 0.005 0 0.006
-Timing stopped at: 0.002 0 0.002
-Timing stopped at: 0.003 0 0.003
-Timing stopped at: 0.002 0 0.002
-Timing stopped at: 0.002 0 0.003
-Timing stopped at: 0.002 0 0.003
-Timing stopped at: 0.002 0 0.002
-Timing stopped at: 0.002 0 0.003
-Timing stopped at: 0.003 0 0.003
-Timing stopped at: 0.003 0 0.004
-Timing stopped at: 0.004 0 0.005
-Timing stopped at: 0.003 0 0.004
-Timing stopped at: 0.004 0.001 0.006
-Timing stopped at: 0.005 0.001 0.005
-Timing stopped at: 0.004 0.001 0.005
-Timing stopped at: 0.004 0 0.005
-[ FAIL 0 | WARN 1 | SKIP 0 | PASS 23 ]
+The following object is masked from 'package:base':
 
-[ FAIL 0 | WARN 1 | SKIP 0 | PASS 23 ]
+    declare
+
+[1] "control$seed is NULL. Replaced by 1"
+Timing stopped at: 0.005 0 0.005
+Timing stopped at: 0.002 0 0.002
+Timing stopped at: 0.003 0 0.002
+Timing stopped at: 0.002 0 0.003
+Timing stopped at: 0.002 0 0.003
+Timing stopped at: 0.002 0 0.002
+Timing stopped at: 0.003 0 0.003
+Timing stopped at: 0.003 0 0.003
+Timing stopped at: 0.003 0 0.002
+Timing stopped at: 0.003 0 0.002
+Timing stopped at: 0.002 0 0.003
+Timing stopped at: 0.003 0 0.003
+Timing stopped at: 0.002 0 0.003
+Timing stopped at: 0.003 0 0.002
+Timing stopped at: 0.002 0 0.002
+Timing stopped at: 0.003 0 0.002
+[1] "control$seed is NULL. Replaced by 1"
+Timing stopped at: 0.004 0 0.005
+[1] "control$seed is NULL. Replaced by 1"
+Timing stopped at: 0.004 0.001 0.004
+[1] "control$seed is NULL. Replaced by 1"
+Timing stopped at: 0.004 0 0.004
+[1] "control$seed is NULL. Replaced by 1"
+Timing stopped at: 0.007 0.001 0.012
+[1] "control$seed is NULL. Replaced by 1"
+Timing stopped at: 0.004 0.001 0.005
+[1] "control$seed is NULL. Replaced by 1"
+Timing stopped at: 0.007 0.001 0.008
+[ FAIL 0 | WARN 2 | SKIP 0 | PASS 23 ]
+
+[ FAIL 0 | WARN 2 | SKIP 0 | PASS 23 ]
 > 
 > proc.time()
    user  system elapsed 
-  2.619   0.085   2.729 
+  2.556   0.065   2.664 

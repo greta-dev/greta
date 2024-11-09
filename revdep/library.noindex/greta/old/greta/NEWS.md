@@ -1,3 +1,15 @@
+# greta 0.4.5
+
+## Bug Fixes
+
+- Remove trailing comma bug in glue #618
+
+# greta 0.4.4
+
+## Bug fixes
+
+- Some small documentation bugs were fixed, namely the sentinel "_PACKAGE" documentation, and various small changes to correctly export S3 methods.
+
 # greta 0.4.3
 
 ## Features

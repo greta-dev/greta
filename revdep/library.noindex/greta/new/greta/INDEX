@@ -1,30 +1,57 @@
+are_null                Vectorised is.null
+as.greta_model          Convert object to a "greta_model" object
+as.unknowns             Create objects of class 'unknowns' to nicely
+                        print ? valued arrays
 as_data                 convert other objects to greta arrays
 calculate               calculate greta arrays given fixed values
+chol.greta_array        Compute the Cholesky Factor of a Matrix
 chol2symm               Cholesky Factor to Symmetric Matrix
+destroy_greta_deps      Remove greta dependencies and remove miniconda
+dim.node                generic to grab dimensions of nodes
+dim<-.unknowns          set dims like on a matrix/array
 distribution            define a distribution over data
 distributions           probability distributions
 extract-replace-combine
                         extract, replace and combine greta arrays
 functions               functions for greta arrays
+gpu_cpu                 Set GPU or CPU usage
 greta                   greta: simple and scalable statistical
                         modelling in R
-greta_notes_install_miniconda_output
-                        Retrieve python installation or error details.
+greta_create_conda_env
+                        Create conda environment for greta
+greta_deps_receipt      Capture greta python dependencies.
+greta_deps_spec         Specify python dependencies for greta
+greta_deps_tf_tfp       Suggested valid Python dependencies for greta
+greta_install_miniconda
+                        Installs miniconda
+greta_notes_tf_num_error
+                        Retrieve python messages.
+greta_set_install_logfile
+                        Set logfile path when installing greta
 greta_sitrep            Greta Situation Report
 inference               Statistical inference on greta models.
 install_greta_deps      Install Python dependencies for greta
 internals               internal greta methods
+is.greta_array          Is object a greta array?
+is.greta_mcmc_list      Is object a 'greta_mcmc_list'?
 joint                   define joint distributions
 mixture                 mixtures of probability distributions
 model                   greta model objects
+open_greta_install_log
+                        Read a greta logfile
 operators               arithmetic, logical and relational operators
                         for greta arrays
 optimisers              optimisation methods
 overloaded              Functions overloaded by greta
+print.greta_deps_spec   Print method for greta python deps
+print.greta_mcmc_list   Print method for greta MCMC list
 reinstallers            Helpers to remove, and reinstall python
                         environments and miniconda
+run_optimiser           Dispatch optimisation method to right class
 samplers                MCMC samplers
 simulate.greta_model    Simulate Responses From 'greta_model' Object
 structures              create data greta arrays
 transforms              transformation functions for greta arrays
 variable                create greta variables
+write_greta_install_log
+                        Write greta dependency installation log file

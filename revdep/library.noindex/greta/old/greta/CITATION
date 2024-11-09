@@ -1,8 +1,8 @@
 citHeader("To cite greta in publications use:")
 
-citEntry(entry = "Article",
+bibentry(bibtype = "Article",
   title        = "{greta}: simple and scalable statistical modelling in R",
-  author       = personList(as.person("Nick Golding")),
+  author       = c(person(given = "Nick", family = "Golding", email = "nick.golding.research@gmail.com")),
   journal      = "Journal of Open Source Software",
   year         = "2019",
   volume       = "4",

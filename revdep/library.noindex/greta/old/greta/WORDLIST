@@ -15,10 +15,10 @@ Inf
 Jupyter
 Lmax
 Lmin
-Maëlle
 Miniconda
 Nesterov
 NumPy
+ORCID
 OpenBUGS
 PSAT
 Poisson
@@ -31,7 +31,6 @@ TensorFlow
 TensorFlow's
 Tensorflow
 WinBUGS
-Wujciak
 XLA
 bayesplot
 cholesky
@@ -63,7 +62,6 @@ pkgdown
 poisson
 polygamma
 schoolers
-snapshotting
 softmax
 speedup
 st

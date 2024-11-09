@@ -1,4 +1,4 @@
-context("tunMCMC_btadjust")
+context("runMCMC_btadjust")
 
 ### minimal setup for running runMCMC_btadjust: see vignette
 set.seed(1)
@@ -135,7 +135,7 @@ testthat::test_that("errors", {
                                            inits=Inits,params=params,neff.min=150,conv.max=1.05,Nchains=2,niter.max=2000,control=list(convType="Gelman",convtype.alpha=NULL))))
   testthat::expect_error((runMCMC_btadjust(data=ModelData,constants=ModelConsts,code=ModelCode,MCMC_language="Nimble",
                                            inits=Inits,params=params,neff.min=150,conv.max=1.05,Nchains=2,niter.max=2000,control=list(convType="Gelman",convtype.alpha=1.1))))
- 
+
 
   #should give an error because neff.method is not "Stan" or "Coda"
   testthat::expect_error((runMCMC_btadjust(data=ModelData,constants=ModelConsts,code=ModelCode,MCMC_language="Nimble",
@@ -167,6 +167,7 @@ testthat::test_that("errors", {
                                            inits=Inits,neff.min=150,conv.max=1.05,Nchains=2,niter.max=2000)))
 
 
+
   })}
 
 
@@ -183,7 +184,7 @@ testthat::test_that("errors", {
   testthat::expect_error((runMCMC_btadjust(data=ModelData.Jags,MCMC_language="Jags",
                                            inits=Inits,params=params,neff.min=150,conv.max=1.05,Nchains=2,niter.max=2000)))
 
- 
+
   #should give an error because code is not of type character with MCMC_language="Jags"
   testthat::expect_error((runMCMC_btadjust(data=ModelData.Jags,code=1,MCMC_language="Jags",
                                            inits=Inits,params=params,neff.min=150,conv.max=1.05,Nchains=2,niter.max=2000)))

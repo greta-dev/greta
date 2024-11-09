@@ -42,6 +42,7 @@ future.fork.multithreading.enable	future.options
 future.globalenv.onMisuse	future.options
 future.globals.maxSize	future.options
 future.globals.method	future.options
+future.globals.objectSize.method	future.options
 future.globals.onMissing	future.options
 future.globals.onReference	future.options
 future.globals.resolve	future.options
@@ -115,6 +116,7 @@ R_FUTURE_FORK_MULTITHREADING_ENABLE	future.options
 R_FUTURE_GLOBALENV_ONMISUSE	future.options
 R_FUTURE_GLOBALS_MAXSIZE	future.options
 R_FUTURE_GLOBALS_METHOD	future.options
+R_FUTURE_GLOBALS_OBJECTSIZE_METHOD	future.options
 R_FUTURE_GLOBALS_ONMISSING	future.options
 R_FUTURE_GLOBALS_ONREFERENCE	future.options
 R_FUTURE_GLOBALS_RESOLVE	future.options

@@ -4,16 +4,17 @@
   "identifier": "greta",
   "description": "Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'. greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on. See the website for more information, including tutorials, examples, package documentation, and the greta forum.",
   "name": "greta: Simple and Scalable Statistical Modelling in R",
-  "codeRepository": "https://github.com/njtierney/greta",
+  "relatedLink": ["https://greta-stats.org", "https://CRAN.R-project.org/package=greta"],
+  "codeRepository": "https://github.com/greta-dev/greta",
   "issueTracker": "https://github.com/greta-dev/greta/issues",
   "license": "https://spdx.org/licenses/Apache-2.0",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.3.2 (2023-10-31)",
+  "runtimePlatform": "R version 4.4.2 (2024-10-31)",
   "provider": {
     "@id": "https://cran.r-project.org",
     "@type": "Organization",
@@ -158,6 +159,18 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "dplyr",
+      "name": "dplyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=dplyr"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "DiagrammeRsvg",
       "name": "DiagrammeRsvg",
       "provider": {
@@ -278,6 +291,18 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "purrr",
+      "name": "purrr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=purrr"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "rmarkdown",
       "name": "rmarkdown",
       "provider": {
@@ -339,15 +364,27 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "tidyverse",
-      "name": "tidyverse",
+      "identifier": "tibble",
+      "name": "tibble",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=tidyverse"
+      "sameAs": "https://CRAN.R-project.org/package=tibble"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "tidyr",
+      "name": "tidyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tidyr"
     },
     {
       "@type": "SoftwareApplication",
@@ -372,6 +409,18 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=withr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "rstudioapi",
+      "name": "rstudioapi",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=rstudioapi"
     }
   ],
   "softwareRequirements": {
@@ -379,7 +428,7 @@
       "@type": "SoftwareApplication",
       "identifier": "R",
       "name": "R",
-      "version": ">= 3.1.0"
+      "version": ">= 4.1.0"
     },
     "2": {
       "@type": "SoftwareApplication",
@@ -409,7 +458,7 @@
       "@type": "SoftwareApplication",
       "identifier": "cli",
       "name": "cli",
-      "version": ">= 3.0.0",
+      "version": ">= 3.4.1",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -514,9 +563,21 @@
     },
     "13": {
       "@type": "SoftwareApplication",
+      "identifier": "rlang",
+      "name": "rlang",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=rlang"
+    },
+    "14": {
+      "@type": "SoftwareApplication",
       "identifier": "tensorflow",
       "name": "tensorflow",
-      "version": ">= 2.7.0",
+      "version": "== 2.16.0",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -525,7 +586,29 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=tensorflow"
     },
-    "14": {
+    "15": {
+      "@type": "SoftwareApplication",
+      "identifier": "tools",
+      "name": "tools"
+    },
+    "16": {
+      "@type": "SoftwareApplication",
+      "identifier": "utils",
+      "name": "utils"
+    },
+    "17": {
+      "@type": "SoftwareApplication",
+      "identifier": "whisker",
+      "name": "whisker",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=whisker"
+    },
+    "18": {
       "@type": "SoftwareApplication",
       "identifier": "yesno",
       "name": "yesno",
@@ -537,9 +620,9 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=yesno"
     },
-    "SystemRequirements": "Python (>= 2.7.0) with header files and shared\n    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow\n    Probability (v0.7.0; https://www.tensorflow.org/probability/)"
+    "SystemRequirements": "Python (>= 3.7.0) with header files and shared\n    library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/); TensorFlow\n    Probability (v0.8.0; https://www.tensorflow.org/probability/)"
   },
-  "fileSize": "2098.014KB",
+  "fileSize": "1625.784KB",
   "citation": [
     {
       "@type": "ScholarlyArticle",
@@ -569,8 +652,7 @@
       }
     }
   ],
-  "relatedLink": "https://greta-stats.org",
-  "releaseNotes": "https://github.com/njtierney/greta/blob/master/NEWS.md",
-  "readme": "https://github.com/njtierney/greta/blob/master/README.md",
-  "contIntegration": ["https://app.codecov.io/gh/greta-dev/greta?branch=master", "https://github.com/greta-dev/greta/actions"]
+  "releaseNotes": "https://github.com/greta-dev/greta/blob/master/NEWS.md",
+  "readme": "https://github.com/greta-dev/greta/blob/master/README.md",
+  "contIntegration": ["https://github.com/greta-dev/greta/actions", "https://app.codecov.io/gh/greta-dev/greta?branch=master"]
 }

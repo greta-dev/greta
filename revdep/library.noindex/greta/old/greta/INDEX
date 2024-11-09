@@ -9,9 +9,9 @@ functions               functions for greta arrays
 greta                   greta: simple and scalable statistical
                         modelling in R
 greta_notes_install_miniconda_output
-                        Retrieve python installation or error details
+                        Retrieve python installation or error details.
 greta_sitrep            Greta Situation Report
-inference               statistical inference on greta models
+inference               Statistical inference on greta models.
 install_greta_deps      Install Python dependencies for greta
 internals               internal greta methods
 joint                   define joint distributions

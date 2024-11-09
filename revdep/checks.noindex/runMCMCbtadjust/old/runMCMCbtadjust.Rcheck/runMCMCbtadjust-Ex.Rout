@@ -1,7 +1,7 @@
 
-R version 4.3.2 (2023-10-31) -- "Eye Holes"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: aarch64-apple-darwin20 (64-bit)
+R version 4.4.2 (2024-10-31) -- "Pile of Leaves"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -25,6 +25,65 @@ Type 'q()' to quit R.
 > base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
 > base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
 > cleanEx()
+> nameEx("findMCMC_strong_corrs")
+> ### * findMCMC_strong_corrs
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: findMCMC_strong_corrs
+> ### Title: findMCMC_strong_corrs
+> ### Aliases: findMCMC_strong_corrs
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D #generating data
+> ##D set.seed(1)
+> ##D y1000<-rnorm(n=1000,mean=600,sd=30)
+> ##D ModelData <-list(mass = y1000,nobs = length(y1000))
+> ##D 
+> ##D #writing the Jags code as a character chain in R
+> ##D modeltotransfer<-"model {
+> ##D 
+> ##D # Priors
+> ##D population.mean ~ dunif(0,5000)
+> ##D population.sd ~ dunif(0,100)
+> ##D 
+> ##D # Precision = 1/variance: Normal distribution parameterized by precision in Jags
+> ##D population.variance <- population.sd * population.sd
+> ##D precision <- 1 / population.variance
+> ##D 
+> ##D # Likelihood
+> ##D for(i in 1:nobs){
+> ##D   mass[i] ~ dnorm(population.mean, precision)
+> ##D  }
+> ##D  }"
+> ##D 
+> ##D #specifying the initial values
+> ##D ModelInits <- function()
+> ##D {list (population.mean = rnorm(1,600,90), population.sd = runif(1, 1, 30))}
+> ##D params <- c("population.mean", "population.sd", "population.variance")
+> ##D K<-3
+> ##D set.seed(1)
+> ##D Inits<-lapply(1:K,function(x){ModelInits()})
+> ##D 
+> ##D # running runMCMC_btadjust with MCMC_language="Jags":
+> ##D set.seed(1)
+> ##D out.mcmc.Coda<-runMCMC_btadjust(MCMC_language="Jags", code=modeltotransfer,
+> ##D data=ModelData,
+> ##D Nchains=K, params=params, inits=Inits,
+> ##D niter.min=1000, niter.max=300000,
+> ##D nburnin.min=100, nburnin.max=200000,
+> ##D thin.min=1, thin.max=1000,
+> ##D neff.min=1000, conv.max=1.05,
+> ##D control=list(print.diagnostics=TRUE, neff.method="Coda"))
+> ##D 
+> ##D findMCMC_strong_corrs(out.mcmc.Coda)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
 > nameEx("runMCMC_btadjust")
 > ### * runMCMC_btadjust
 > 
@@ -36,111 +95,51 @@ Type 'q()' to quit R.
 > 
 > ### ** Examples
 > 
->  #\code{
-> # for examples with Nimble or Greta, see the Vignette.
-> # condition variable of whether installation is OK with Jags to avoid error durong package check
-> condition_jags<-TRUE
-> if (nchar(system.file(package='rjags'))==0) {condition_jags<-FALSE}
-> if (nchar(system.file(package='runjags'))==0) {condition_jags<-FALSE}
-> if (condition_jags)
-+ {suppressWarnings(temp<-runjags::testjags(silent=TRUE))
-+  if(!(temp$JAGS.available&temp$JAGS.found&temp$JAGS.major==4)) {condition_jags<-FALSE}}
-> 
-> if (condition_jags) {
-+ #generating data
-+ set.seed(1)
-+ y1000<-rnorm(n=1000,mean=600,sd=30)
-+ ModelData <-list(mass = y1000,nobs = length(y1000))
-+ 
-+ #writing the Jags code as a character chain in R
-+ modeltotransfer<-"model {
-+ 
-+ # Priors
-+ population.mean ~ dunif(0,5000)
-+ population.sd ~ dunif(0,100)
-+ 
-+ # Precision = 1/variance: Normal distribution parameterized by precision in Jags
-+ population.variance <- population.sd * population.sd
-+ precision <- 1 / population.variance
-+ 
-+ # Likelihood
-+ for(i in 1:nobs){
-+   mass[i] ~ dnorm(population.mean, precision)
-+  }
-+  }"
-+ 
-+ #specifying the initial values
-+ ModelInits <- function()
-+ {list (population.mean = rnorm(1,600,90), population.sd = runif(1, 1, 30))}
-+ params <- c("population.mean", "population.sd", "population.variance")
-+ K<-3
-+ set.seed(1)
-+ Inits<-lapply(1:K,function(x){ModelInits()})
-+ 
-+ # running runMCMC_btadjust with MCMC_language="Jags":
-+ set.seed(1)
-+ out.mcmc.Coda<-runMCMC_btadjust(MCMC_language="Jags", code=modeltotransfer,
-+ data=ModelData,
-+ Nchains=K, params=params, inits=Inits,
-+ niter.min=1000, niter.max=300000,
-+ nburnin.min=100, nburnin.max=200000,
-+ thin.min=1, thin.max=1000,
-+ neff.min=1000, conv.max=1.05,
-+ control=list(print.diagnostics=TRUE, neff.method="Coda"))
-+ 
-+ summary(out.mcmc.Coda)
-+ }
-Compiling model graph
-   Resolving undeclared variables
-   Allocating nodes
-Graph information:
-   Observed stochastic nodes: 1000
-   Unobserved stochastic nodes: 2
-   Total graph size: 1009
-
-Initializing model
-
-Cycle 1...
-[1] "###################################################################################"
-[1] "###################################################################################"
-[1] "Current state of diagnostics:"
-                Nchains thin niter.tot Nvalues nu.burn
-MCMC parameters       3    1      1000    2700       1
-[1] "###################################################################################"
-                   max median  mean        name_max prop_ab_1p2 prop_ab_1p05
-Gelman_Upper_C_I 1.001  1.001 1.001 population.mean           0            0
-Gelman_Point_Est 1.000  1.000 1.000 population.mean           0            0
-                 prop_ab_1p01
-Gelman_Upper_C_I            0
-Gelman_Point_Est            0
-[1] "###################################################################################"
-                  min median mean            name_min prop_bel_1000
-Neff             1773   1778 1787 population.variance             0
-                 prop_bel_5000 prop_bel_10000
-Neff                         1              1
-[1] "###################################################################################"
-
-Iterations = 1:900
-Thinning interval = 1 
-Number of chains = 3 
-Sample size per chain = 900 
-
-1. Empirical mean and standard deviation for each variable,
-   plus standard error of the mean:
-
-                      Mean      SD Naive SE Time-series SE
-population.mean     599.67  0.9941  0.01913        0.02344
-population.sd        31.07  0.6850  0.01318        0.01633
-population.variance 965.96 42.6060  0.81995        1.01695
-
-2. Quantiles for each variable:
-
-                      2.5%    25%    50%    75%   97.5%
-population.mean     597.70 598.99 599.66 600.35  601.57
-population.sd        29.76  30.59  31.07  31.53   32.42
-population.variance 885.53 935.97 965.40 994.14 1051.32
-
-> #}
+> # for examples with Nimble or Greta, see the Presentation Vignette.
+> ## Not run: 
+> ##D #generating data
+> ##D set.seed(1)
+> ##D y1000<-rnorm(n=1000,mean=600,sd=30)
+> ##D ModelData <-list(mass = y1000,nobs = length(y1000))
+> ##D 
+> ##D #writing the Jags code as a character chain in R
+> ##D modeltotransfer<-"model {
+> ##D 
+> ##D # Priors
+> ##D population.mean ~ dunif(0,5000)
+> ##D population.sd ~ dunif(0,100)
+> ##D 
+> ##D # Precision = 1/variance: Normal distribution parameterized by precision in Jags
+> ##D population.variance <- population.sd * population.sd
+> ##D precision <- 1 / population.variance
+> ##D 
+> ##D # Likelihood
+> ##D for(i in 1:nobs){
+> ##D   mass[i] ~ dnorm(population.mean, precision)
+> ##D  }
+> ##D  }"
+> ##D 
+> ##D #specifying the initial values
+> ##D ModelInits <- function()
+> ##D {list (population.mean = rnorm(1,600,90), population.sd = runif(1, 1, 30))}
+> ##D params <- c("population.mean", "population.sd", "population.variance")
+> ##D K<-3
+> ##D set.seed(1)
+> ##D Inits<-lapply(1:K,function(x){ModelInits()})
+> ##D 
+> ##D # running runMCMC_btadjust with MCMC_language="Jags":
+> ##D set.seed(1)
+> ##D out.mcmc.Coda<-runMCMC_btadjust(MCMC_language="Jags", code=modeltotransfer,
+> ##D data=ModelData,
+> ##D Nchains=K, params=params, inits=Inits,
+> ##D niter.min=1000, niter.max=300000,
+> ##D nburnin.min=100, nburnin.max=200000,
+> ##D thin.min=1, thin.max=1000,
+> ##D neff.min=1000, conv.max=1.05,
+> ##D control=list(print.diagnostics=TRUE, neff.method="Coda"))
+> ##D 
+> ##D summary(out.mcmc.Coda)
+> ## End(Not run)
 > 
 > 
 > 
@@ -149,7 +148,7 @@ population.variance 885.53 935.97 965.40 994.14 1051.32
 > cleanEx()
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  1.481 0.042 15.239 0.021 0.035 
+Time elapsed:  0.035 0.003 0.041 0 0 
 > grDevices::dev.off()
 null device 
           1 
