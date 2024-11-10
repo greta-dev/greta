@@ -207,12 +207,12 @@ bams &lt;- as.list(bams)
 </code></pre>
 <p>Although this does not give an error, we will find that the inner layer of futures will be processed sequentially just as if we would use <code>plan(list(multisession, sequential))</code>.  This behavior is due to the built-in protection against nested parallelism.  If both layers would run in parallel, each using the 8 cores available on the machine, we would be running 8 * 8 = 64 parallel processes - that would for sure overload our computer.  What happens internally is that for the outer layer, <code>availableCores()</code> equals eight (8), whereas for the inner layer it equals one (1).</p>
 <p>Now, we could imagine that we process the outer layer with, say, two parallel futures, and then the inner layer with four parallel futures.  In that case, we would end up running on at most eight cores (= 2 * 4).  This can be achieved by forcing a fixed number of workers at each layer:</p>
-<pre><code class="language-r">plan(list(tweak(multisession, workers = 2), tweak(multisession, workers = 4)))
+<pre><code class="language-r">plan(list(tweak(multisession, workers = 2), tweak(multisession, workers = I(4))))
 </code></pre>
-<p>When using this approach, there is a risk of setting up too many concurrent workers.  To make sure the setup respects <code>availableCores()</code>, use something like:</p>
+<p>When using this approach, there is a risk of setting up too many concurrent workers. Because Futureverse has a built-in protection, we need to declare nested workers using the As-Is <code>I(.)</code> function, which basically tells the parallel framework “trust us, we know what we are doing”. To minimize the risk of mistakes and to make sure our setup respects <code>availableCores()</code>, use something like:</p>
 <pre><code class="language-r">plan(list(
   tweak(multisession, workers = availableCores() %/% 4),
-  tweak(multisession, workers = 4)
+  tweak(multisession, workers = I(4))
 ))
 </code></pre>
 <p>However, before using nested parallelization on a single machine, make sure it is actually more efficient than using parallelization in only one of the layers.</p>
@@ -226,7 +226,7 @@ plan(list(tweak(cluster, workers = nodes), multisession))
 <pre><code class="language-r">nodes &lt;- rep(c(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;), each = 8)
 plan(list(
   tweak(cluster, workers = nodes),
-  tweak(multisession, workers = 2)
+  tweak(multisession, workers = I(2))
 ))
 </code></pre>
 <p>This will cause up to 24 (= 3*8) samples to be processed in parallel each processing two chromosomes at the same time.</p>
@@ -304,7 +304,7 @@ tweaking the <code>multisession</code> plan by passing a function to <code>worke
 <pre><code class="language-r">halfCores &lt;- function() { max(1, round(0.5 * availableCores()))
 plan(list(
   tweak(cluster, workers = nodes),
-  tweak(multisession, workers = halfCores)
+  tweak(multisession, workers = I(halfCores))
 ))
 </code></pre>
 <p>With this, each node will use at most 50% of the cores available.
@@ -321,7 +321,7 @@ then they nodes will use four, four, and 16 cores, respectively.</p>
 }
 plan(list(
   tweak(cluster, workers = nodes),
-  tweak(multisession, workers = customWorkers)
+  tweak(multisession, workers = I(customWorkers))
 ))
 </code></pre>
 <p>In this case, node <code>n1</code> will always use two cores, <code>n2</code> three cores,

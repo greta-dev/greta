@@ -12,7 +12,7 @@
 <div style="text-align: center;">
 <a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]" /></a>
 <a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]" /></a>
-</div><h2>Documentation for package &lsquo;greta&rsquo; version 0.4.4</h2>
+</div><h2>Documentation for package &lsquo;greta&rsquo; version 0.5.0</h2>
 
 <ul><li><a href="../DESCRIPTION">DESCRIPTION file</a>.</li>
 <li><a href="../NEWS">Package NEWS</a>.</li>
@@ -66,8 +66,16 @@
 <td>optimisation methods</td></tr>
 <tr><td style="width: 25%;"><a href="optimisers.html">adam</a></td>
 <td>optimisation methods</td></tr>
+<tr><td style="width: 25%;"><a href="optimisers.html">adamax</a></td>
+<td>optimisation methods</td></tr>
 <tr><td style="width: 25%;"><a href="overloaded.html">apply</a></td>
 <td>Functions overloaded by greta</td></tr>
+<tr><td style="width: 25%;"><a href="are_null.html">are_null</a></td>
+<td>Vectorised is.null</td></tr>
+<tr><td style="width: 25%;"><a href="as.greta_model.html">as.greta_model</a></td>
+<td>Convert object to a "greta_model" object</td></tr>
+<tr><td style="width: 25%;"><a href="as.unknowns.html">as.unknowns</a></td>
+<td>Create objects of class 'unknowns' to nicely print ? valued arrays</td></tr>
 <tr><td style="width: 25%;"><a href="as_data.html">as_data</a></td>
 <td>convert other objects to greta arrays</td></tr>
 </table>
@@ -106,6 +114,8 @@
 <td>optimisation methods</td></tr>
 <tr><td style="width: 25%;"><a href="distributions.html">chi_squared</a></td>
 <td>probability distributions</td></tr>
+<tr><td style="width: 25%;"><a href="chol.greta_array.html">chol.greta_array</a></td>
+<td>Compute the Cholesky Factor of a Matrix</td></tr>
 <tr><td style="width: 25%;"><a href="overloaded.html">chol2inv</a></td>
 <td>Functions overloaded by greta</td></tr>
 <tr><td style="width: 25%;"><a href="chol2symm.html">chol2symm</a></td>
@@ -120,13 +130,21 @@
 <td>Functions overloaded by greta</td></tr>
 <tr><td style="width: 25%;"><a href="overloaded.html">cov2cor</a></td>
 <td>Functions overloaded by greta</td></tr>
+<tr><td style="width: 25%;"><a href="gpu_cpu.html">cpu_only</a></td>
+<td>Set GPU or CPU usage</td></tr>
 </table>
 
 <h2><a id="D">-- D --</a></h2>
 
 <table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="destroy_greta_deps.html">destroy_greta_deps</a></td>
+<td>Remove greta dependencies and remove miniconda</td></tr>
 <tr><td style="width: 25%;"><a href="overloaded.html">diag</a></td>
 <td>Functions overloaded by greta</td></tr>
+<tr><td style="width: 25%;"><a href="dim.node.html">dim.node</a></td>
+<td>generic to grab dimensions of nodes</td></tr>
+<tr><td style="width: 25%;"><a href="dim-set-.unknowns.html">dim&lt;-.unknowns</a></td>
+<td>set dims like on a matrix/array</td></tr>
 <tr><td style="width: 25%;"><a href="distributions.html">dirichlet</a></td>
 <td>probability distributions</td></tr>
 <tr><td style="width: 25%;"><a href="distributions.html">dirichlet_multinomial</a></td>
@@ -172,26 +190,30 @@
 <table style="width: 100%;">
 <tr><td style="width: 25%;"><a href="distributions.html">gamma</a></td>
 <td>probability distributions</td></tr>
+<tr><td style="width: 25%;"><a href="gpu_cpu.html">gpu_cpu</a></td>
+<td>Set GPU or CPU usage</td></tr>
+<tr><td style="width: 25%;"><a href="gpu_cpu.html">gpu_only</a></td>
+<td>Set GPU or CPU usage</td></tr>
 <tr><td style="width: 25%;"><a href="optimisers.html">gradient_descent</a></td>
 <td>optimisation methods</td></tr>
 <tr><td style="width: 25%;"><a href="greta.html">greta</a></td>
 <td>greta: simple and scalable statistical modelling in R</td></tr>
 <tr><td style="width: 25%;"><a href="structures.html">greta_array</a></td>
 <td>create data greta arrays</td></tr>
-<tr><td style="width: 25%;"><a href="stash-notes.html">greta_notes_conda_create_error</a></td>
-<td>Retrieve python installation or error details.</td></tr>
-<tr><td style="width: 25%;"><a href="stash-notes.html">greta_notes_conda_create_output</a></td>
-<td>Retrieve python installation or error details.</td></tr>
-<tr><td style="width: 25%;"><a href="stash-notes.html">greta_notes_conda_install_error</a></td>
-<td>Retrieve python installation or error details.</td></tr>
-<tr><td style="width: 25%;"><a href="stash-notes.html">greta_notes_conda_install_output</a></td>
-<td>Retrieve python installation or error details.</td></tr>
-<tr><td style="width: 25%;"><a href="stash-notes.html">greta_notes_install_miniconda_error</a></td>
-<td>Retrieve python installation or error details.</td></tr>
-<tr><td style="width: 25%;"><a href="stash-notes.html">greta_notes_install_miniconda_output</a></td>
-<td>Retrieve python installation or error details.</td></tr>
+<tr><td style="width: 25%;"><a href="greta_create_conda_env.html">greta_create_conda_env</a></td>
+<td>Create conda environment for greta</td></tr>
+<tr><td style="width: 25%;"><a href="greta_deps_receipt.html">greta_deps_receipt</a></td>
+<td>Capture greta python dependencies.</td></tr>
+<tr><td style="width: 25%;"><a href="greta_deps_spec.html">greta_deps_spec</a></td>
+<td>Specify python dependencies for greta</td></tr>
+<tr><td style="width: 25%;"><a href="greta_deps_tf_tfp.html">greta_deps_tf_tfp</a></td>
+<td>Suggested valid Python dependencies for greta</td></tr>
+<tr><td style="width: 25%;"><a href="greta_install_miniconda.html">greta_install_miniconda</a></td>
+<td>Installs miniconda</td></tr>
 <tr><td style="width: 25%;"><a href="stash-notes.html">greta_notes_tf_num_error</a></td>
-<td>Retrieve python installation or error details.</td></tr>
+<td>Retrieve python messages.</td></tr>
+<tr><td style="width: 25%;"><a href="greta_set_install_logfile.html">greta_set_install_logfile</a></td>
+<td>Set logfile path when installing greta</td></tr>
 <tr><td style="width: 25%;"><a href="greta_sitrep.html">greta_sitrep</a></td>
 <td>Greta Situation Report</td></tr>
 </table>
@@ -232,6 +254,10 @@
 <td>probability distributions</td></tr>
 <tr><td style="width: 25%;"><a href="transforms.html">iprobit</a></td>
 <td>transformation functions for greta arrays</td></tr>
+<tr><td style="width: 25%;"><a href="is.greta_array.html">is.greta_array</a></td>
+<td>Is object a greta array?</td></tr>
+<tr><td style="width: 25%;"><a href="is.greta_mcmc_list.html">is.greta_mcmc_list</a></td>
+<td>Is object a 'greta_mcmc_list'?</td></tr>
 </table>
 
 <h2><a id="J">-- J --</a></h2>
@@ -278,6 +304,8 @@
 <h2><a id="N">-- N --</a></h2>
 
 <table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="optimisers.html">nadam</a></td>
+<td>optimisation methods</td></tr>
 <tr><td style="width: 25%;"><a href="distributions.html">negative_binomial</a></td>
 <td>probability distributions</td></tr>
 <tr><td style="width: 25%;"><a href="optimisers.html">nelder_mead</a></td>
@@ -293,6 +321,8 @@
 <table style="width: 100%;">
 <tr><td style="width: 25%;"><a href="structures.html">ones</a></td>
 <td>create data greta arrays</td></tr>
+<tr><td style="width: 25%;"><a href="open_greta_install_log.html">open_greta_install_log</a></td>
+<td>Read a greta logfile</td></tr>
 <tr><td style="width: 25%;"><a href="operators.html">operators</a></td>
 <td>arithmetic, logical and relational operators for greta arrays</td></tr>
 <tr><td style="width: 25%;"><a href="inference.html">opt</a></td>
@@ -316,6 +346,10 @@
 <td>probability distributions</td></tr>
 <tr><td style="width: 25%;"><a href="optimisers.html">powell</a></td>
 <td>optimisation methods</td></tr>
+<tr><td style="width: 25%;"><a href="print.greta_deps_spec.html">print.greta_deps_spec</a></td>
+<td>Print method for greta python deps</td></tr>
+<tr><td style="width: 25%;"><a href="print.greta_mcmc_list.html">print.greta_mcmc_list</a></td>
+<td>Print method for greta MCMC list</td></tr>
 <tr><td style="width: 25%;"><a href="model.html">print.greta_model</a></td>
 <td>greta model objects</td></tr>
 <tr><td style="width: 25%;"><a href="optimisers.html">proximal_adagrad</a></td>
@@ -353,6 +387,8 @@
 <td>Functions overloaded by greta</td></tr>
 <tr><td style="width: 25%;"><a href="overloaded.html">rowSums</a></td>
 <td>Functions overloaded by greta</td></tr>
+<tr><td style="width: 25%;"><a href="run_optimiser.html">run_optimiser</a></td>
+<td>Dispatch optimisation method to right class</td></tr>
 <tr><td style="width: 25%;"><a href="samplers.html">rwmh</a></td>
 <td>MCMC samplers</td></tr>
 </table>
@@ -370,8 +406,6 @@
 <td>MCMC samplers</td></tr>
 <tr><td style="width: 25%;"><a href="optimisers.html">slsqp</a></td>
 <td>optimisation methods</td></tr>
-<tr><td style="width: 25%;"><a href="stash-notes.html">stash-notes</a></td>
-<td>Retrieve python installation or error details.</td></tr>
 <tr><td style="width: 25%;"><a href="inference.html">stashed_samples</a></td>
 <td>Statistical inference on greta models.</td></tr>
 <tr><td style="width: 25%;"><a href="structures.html">structures</a></td>
@@ -414,6 +448,8 @@
 <td>probability distributions</td></tr>
 <tr><td style="width: 25%;"><a href="distributions.html">wishart</a></td>
 <td>probability distributions</td></tr>
+<tr><td style="width: 25%;"><a href="write_greta_install_log.html">write_greta_install_log</a></td>
+<td>Write greta dependency installation log file</td></tr>
 </table>
 
 <h2><a id="Z">-- Z --</a></h2>

@@ -117,8 +117,14 @@ namespace Rcpp{
         static DataFrame_Impl create(){
             return DataFrame_Impl() ;
         }
-
-        #include <Rcpp/generated/DataFrame_generated.h>
+        #if defined(HAS_VARIADIC_TEMPLATES) || defined(RCPP_USING_CXX11)
+            template <typename... T>
+            static DataFrame_Impl create(const T&... args) {
+                return DataFrame_Impl::from_list(Parent::create(args...));
+            }
+        #else
+            #include <Rcpp/generated/DataFrame_generated.h>
+        #endif
 
     private:
         void set__(SEXP x){
@@ -131,7 +137,7 @@ namespace Rcpp{
         }
 
         void set_type_after_push(){
-            int max_rows = 0;
+            R_xlen_t max_rows = 0;
             bool invalid_column_size = false;
             List::iterator it;
             // Get the maximum number of rows

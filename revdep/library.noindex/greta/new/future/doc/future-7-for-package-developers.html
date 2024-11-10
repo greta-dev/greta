@@ -216,6 +216,17 @@ plan(cluster, workers = rep(c(&quot;n1.remote.org&quot;, &quot;n2.remote.org&quo
 }
 </code></pre>
 <p>and let the user control whether or not they want to parallelize via <code>plan()</code>, e.g. <code>plan(multisession)</code> and <code>plan(sequential)</code>.</p>
+<h2 id="avoid-changing-the-future-options">Avoid changing the future options</h2>
+<p>Just like for other R options, you must not change any of the R
+<code>future.*</code> options.  Only the end-user should set these.</p>
+<p>If you find yourself having to tweak one of the options, make sure to
+undo your changes immediately afterward.  For example, if you want to
+bump up the <code>future.globals.maxSize</code> limit when creating a future,
+use something like the following inside your function:</p>
+<pre><code class="language-r">oopts &lt;- options(future.globals.maxSize = 1.0 * 1e9)  ## 1.0 GB
+on.exit(options(oopts))
+f &lt;- future({ expr })  ## Launch a future with large objects
+</code></pre>
 <h2 id="writing-examples">Writing examples</h2>
 <p>If your example sets the future strategy at the beginning, make sure to reset the future strategy to <code>plan(sequential)</code> at the end of the example.  The reason for this is that when switching plan, the previous one will be cleaned up.  This is particularly important for multisession and cluster futures where <code>plan(sequential)</code> will shut down the underlying PSOCK clusters.</p>
 <p>For instance, here is an example:</p>

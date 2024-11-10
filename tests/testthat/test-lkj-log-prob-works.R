@@ -1,4 +1,5 @@
 test_that("LKJ distribution log_prob function does not return NaNs", {
+  skip_if_not(check_tf_version())
   x <- lkj_correlation(3, 2)[1, 2]
   m <- model(x)
   new_log_prob <- m$dag$generate_log_prob_function()

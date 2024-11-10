@@ -109,6 +109,7 @@ test_that("%*% errors informatively", {
 })
 
 test_that("%*% works when one is a non-greta array", {
+  skip_if_not(check_tf_version())
   x <- matrix(1, 2, 3)
   y <- rep(1, 3)
 

@@ -8,9 +8,13 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-
+greta_run <- greta:::check_tf_version("message")
+diagrammer_svg_installed <- requireNamespace("DiagrammeRsvg", quietly = TRUE)
+rsvg_installed <- requireNamespace("rsvg", quietly = TRUE)
+svg_things_installed <- diagrammer_svg_installed && rsvg_installed
+run_vigette <- svg_things_installed && greta_run
 knitr::opts_chunk$set(echo = TRUE,
-                      eval = greta:::check_tf_version("message"),
+                      eval = run_vigette,
                       cache = TRUE,
                       comment = NA,
                       progress = FALSE)
@@ -24,6 +28,7 @@ if (!file.exists("figures"))
 
 file.copy("../man/figures/plotlegend.png",
           "figures/plotlegend.png")
+
 ```
 
 ## Installation
@@ -100,7 +105,7 @@ reticulate::conda_install(
 
 ### DiagrammeR
 
-greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](https://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](https://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](https://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
 
 ```{r install_diagrammer, eval = FALSE}
 install.packages("igraph")
@@ -370,7 +375,7 @@ distribution(y) <- normal(mean, sd)
 ```
 
 
-```{r define_model}
+```{r define_model, eval=FALSE}
 m <- model(int, coef, sd)
 ```
 
@@ -381,10 +386,11 @@ m <- model(int, coef, sd)
 ### Plotting
 
 greta provides a plot function for greta models to help you visualise and check the model before sampling from it.
-```{r plot, eval = FALSE}
+```{r plot,eval=FALSE}
 plot(m)
 ```
-```{r plot_hidden, echo = FALSE} 
+
+```{r plot-hidden, echo = FALSE, eval=FALSE} 
 gr <- plot(m)
 DiagrammeR::export_graph(attr(gr, "dgr_graph"),
                          file_name = "figures/full_graph.png",
@@ -405,7 +411,7 @@ The fourth type of node (diamonds) represents probability distributions. These h
 
 For example, a plot of just the prior distribution over `coef` (defined as `coef <- normal(0, 3)`) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution's value, the variable `coef`:
 
-```{r plot_coef, echo = FALSE}
+```{r plot_coef, echo = FALSE, eval=FALSE}
 coef <- normal(0, 3)
 m_coef <- model(coef)
 gr <- plot(m_coef)
@@ -419,7 +425,7 @@ DiagrammeR::export_graph(attr(gr, "dgr_graph"),
 
 It's the same for the model likelihood, but this time the distribution's parameters are a variable (`sd`) and the result of an operation (`mean`), and the distribution's value is given by data (the observed sepal lengths `y`):
 
-```{r plot_likelihood, echo = FALSE}
+```{r plot_likelihood, echo = FALSE, eval=FALSE}
 sd <- variable()
 y <- as_data(iris$Sepal.Length)
 mean <- ones(150)
@@ -452,7 +458,7 @@ When defining the model, greta combines all of the distributions together to def
 
 Now we have a greta model that will give us the joint density for a candidate set of values, so we can use that to carry out inference on the model. We do that using an Markov chain Monte Carlo (MCMC) algorithm to sample values of the parameters we're interested in, using the `mcmc()` function:
 
-```{r mcmc, message = FALSE, results = "hide", progress = FALSE}
+```{r mcmc, message = FALSE, results = "hide", progress = FALSE, eval=FALSE}
 draws <- mcmc(m, n_samples = 1000)
 ```
 
@@ -460,12 +466,12 @@ Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorith
 
 `draws` is a `greta_mcmc_list` object, which inherits from the coda R package's `mcmc.list` object. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.
 
-```{r coda_summary}
+```{r coda_summary, eval=FALSE}
 summary(draws)
 ```
 The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates
 
-```{r mcmcvis, echo = TRUE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
+```{r mcmcvis, echo = TRUE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold', eval=FALSE}
 library (bayesplot)
 # set theme to avoid issues with fonts
 ggplot2::theme_set(ggplot2::theme_bw())
