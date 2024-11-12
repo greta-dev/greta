@@ -1,3 +1,9 @@
+# greta 0.5.1.90000
+
+## Changes
+
+- `log.greta_array()` function drops `base` arg, as it was unused, (#597).
+
 # greta 0.5.0
 
 This version of greta uses Tensorflow 2.0.0, which comes with it a host of new very exciting features!

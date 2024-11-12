@@ -121,7 +121,7 @@
 NULL
 
 #' @export
-log.greta_array <- function(x, base = exp(1)) {
+log.greta_array <- function(x) {
   if (has_representation(x, "log")) {
     result <- copy_representation(x, "log")
   } else {
