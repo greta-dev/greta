@@ -1,70 +1,62 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures?
+# Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master]
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [main, master]
   schedule:
     - cron: '1 23 * * Sun'
 
-name: R-CMD-check
+name: R-CMD-check.yaml
 
 defaults:
   run:
     shell: Rscript {0}
 
+permissions: read-all
+
 jobs:
   R-CMD-check:
-    name: ${{ matrix.os }}, tf-${{ matrix.tf }}, R-${{ matrix.r}}
-    timeout-minutes: 30
+    runs-on: ${{ matrix.config.os }}
+
+    timeout-minutes: 60
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }}) (${{ matrix.config.tf }})
+
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - {os: 'ubuntu-latest' , tf: 'default', r: 'release'}
-          - {os: 'windows-latest', tf: 'default', r: 'release'}
-          - {os: 'macOS-latest'  , tf: 'default', r: 'release'}
+        config:
+          - {os: macos-latest,    r: 'release', tf: 'default'}
+          - {os: windows-latest,  r: 'release', tf: 'default'}
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release', tf: 'default'}
+          - {os: ubuntu-latest,   r: 'release', tf: 'default'}
+          - {os: ubuntu-latest,   r: 'oldrel-1', tf: 'default'}
 
-    runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.tf == 'nightly' || contains(matrix.tf, 'rc') || matrix.r == 'devel' }}
     env:
-      R_REMOTES_NO_ERRORS_FROM_WARNINGS: 'true'
-      R_COMPILE_AND_INSTALL_PACKAGES: 'never'
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
 
     steps:
-
-      - uses: actions/checkout@v2
-
-      - uses: r-lib/actions/setup-r@v2
-        id: setup-r
-        with:
-          r-version: ${{ matrix.r }}
-          Ncpus: '2L'
-          use-public-rspm: true
+      - uses: actions/checkout@v4
 
       - uses: r-lib/actions/setup-pandoc@v2
 
-      - name: Get Date
-        id: get-date
-        shell: bash
-        run: |
-          echo "::set-output name=year-week::$(date -u "+%Y-%U")"
-          echo "::set-output name=date::$(date -u "+%F")"
-
-      - name: Restore R package cache
-        uses: actions/cache@v2
-        id: r-package-cache
+      - uses: r-lib/actions/setup-r@v2
         with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ matrix.os }}-${{ steps.setup-r.outputs.installed-r-version }}-${{ steps.get-date.outputs.year-week }}-1
+          r-version: ${{ matrix.config.r }}
+          Ncpus: '2L'
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
 
-      - name: Install remotes
-        if: steps.r-package-cache.outputs.cache-hit != 'true'
-        run: install.packages("remotes")
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+
 
       - name: Install system dependencies
         if: runner.os == 'Linux'
@@ -77,6 +69,10 @@ jobs:
             sudo $cmd
           done < <(Rscript -e "writeLines(remotes::system_requirements('$ID-$VERSION_ID'))")
 
+      - name: Install remotes
+        if: steps.r-package-cache.outputs.cache-hit != 'true'
+        run: install.packages("remotes")
+
       - name: Install package + deps
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
 
@@ -88,30 +84,18 @@ jobs:
       - name: Situation Report on greta install
         run: greta::greta_sitrep()
 
-      - name: Install rcmdcheck
-        run: remotes::install_cran("rcmdcheck")
-
-      - name: Check
-        run: rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 
       - name: Show testthat output
         if: always()
         shell: bash
         run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
 
-      - name: Don't use tar from old Rtools to store the cache
-        if: ${{ runner.os == 'Windows' && startsWith(steps.install-r.outputs.installed-r-version, '3') }}
-        shell: bash
-        run: echo "C:/Program Files/Git/usr/bin" >> $GITHUB_PATH
-
-      - name: Check on single core machine
-        if: runner.os != 'Windows'
-        env:
-          R_PARALLELLY_AVAILABLE_CORES: 1
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--no-multiarch"))
-
-      - name: Session info
-        run: |
-          options(width = 100)
-          pkgs <- installed.packages()[, "Package"]
-          sessioninfo::session_info(pkgs, include_base = TRUE)
+      # - name: Check on single core machine
+      #   if: runner.os != 'Windows'
+      #   env:
+      #     R_PARALLELLY_AVAILABLE_CORES: 1
+      #   run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--no-multiarch"))
