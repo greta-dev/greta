@@ -42,9 +42,9 @@
 
 <meta property="og:title" content="greta model objects — model" />
 <meta property="og:description" content="Create a greta_model object representing a statistical
-  model (using model), and plot a graphical representation of the
-  model. Statistical inference can be performed on greta_model objects
-  with mcmc" />
+model (using model), and plot a graphical representation of the
+model. Statistical inference can be performed on greta_model objects
+with mcmc()" />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -135,6 +135,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -182,9 +188,9 @@
 
     <div class="ref-description">
     <p>Create a <code>greta_model</code> object representing a statistical
-  model (using <code>model</code>), and plot a graphical representation of the
-  model. Statistical inference can be performed on <code>greta_model</code> objects
-  with <code><a href='inference.html'>mcmc</a></code></p>
+model (using <code>model</code>), and plot a graphical representation of the
+model. Statistical inference can be performed on <code>greta_model</code> objects
+with <code><a href='inference.html'>mcmc()</a></code></p>
     </div>
 
     <pre class="usage"><span class='fu'>model</span>(<span class='no'>...</span>, <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"double"</span>, <span class='st'>"single"</span>), <span class='kw'>compile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
@@ -193,7 +199,7 @@
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)
 
 <span class='co'># S3 method for greta_model</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>colour</span> <span class='kw'>=</span> <span class='st'>"#996bc7"</span>, <span class='no'>...</span>)</pre>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/plot'>plot</a></span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>colour</span> <span class='kw'>=</span> <span class='st'>"#996bc7"</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -217,7 +223,7 @@ instability during sampling.</p></td>
     <tr>
       <th>compile</th>
       <td><p>whether to apply
-<a href='https://www.tensorflow.org/performance/xla/'>XLA JIT compilation</a> to
+<a href='https://www.tensorflow.org/xla'>XLA JIT compilation</a> to
 the TensorFlow graph representing the model. This may slow down model
 definition, and speed up model evaluation.</p></td>
     </tr>
@@ -239,21 +245,21 @@ in violet.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p><code>model</code> - a <code>greta_model</code> object.</p>
-<p><code>plot</code> - a <code><a href='https://www.rdocumentation.org/packages/DiagrammeR/topics/grViz'>DiagrammeR::grViz</a></code>
-  object, with the
-  <code><a href='https://www.rdocumentation.org/packages/DiagrammeR/topics/create_graph'>DiagrammeR::dgr_graph</a></code> object used to
-  create it as an attribute <code>"dgr_graph"</code>.</p>
+<p><code>plot</code> - a <code><a href='https://www.rdocumentation.org/packages/DiagrammeR/topics/grViz'>DiagrammeR::grViz()</a></code>
+object, with the
+<code><a href='https://www.rdocumentation.org/packages/DiagrammeR/topics/create_graph'>DiagrammeR::dgr_graph()</a></code> object used to
+create it as an attribute <code>"dgr_graph"</code>.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code>model()</code> takes greta arrays as arguments, and defines a
-  statistical model by finding all of the other greta arrays on which they
-  depend, or which depend on them. Further arguments to <code>model</code> can be
-  used to configure the TensorFlow graph representing the model, to tweak
-  performance.</p>
+statistical model by finding all of the other greta arrays on which they
+depend, or which depend on them. Further arguments to <code>model</code> can be
+used to configure the TensorFlow graph representing the model, to tweak
+performance.</p>
 <p>The plot method produces a visual representation of the defined
-  model. It uses the <code>DiagrammeR</code> package, which must be installed
-  first. Here's a key to the plots:
-  <img src='figures/plotlegend.png' width="100%" /></p>
+model. It uses the <code>DiagrammeR</code> package, which must be installed
+first. Here's a key to the plots:
+<img src='figures/plotlegend.png' width="100%" /></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -265,7 +271,7 @@ in violet.</p></td>
 
 <span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>model</span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 
-<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='no'>m</span>)
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/plot'>plot</a></span>(<span class='no'>m</span>)
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

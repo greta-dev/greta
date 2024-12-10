@@ -1,12 +1,12 @@
 #' @name joint
 #' @title define joint distributions
 #'
-#' @description \code{joint} combines univariate probability distributions
-#'   together into a multivariate (and \emph{a priori} independent between
+#' @description `joint` combines univariate probability distributions
+#'   together into a multivariate (and *a priori* independent between
 #'   dimensions) joint distribution, either over a variable, or for fixed data.
 #'
 #' @param ... scalar variable greta arrays following probability distributions
-#'   (see \code{\link{distributions}}); the components of the joint
+#'   (see [distributions()]); the components of the joint
 #'   distribution.
 #'
 #' @param dim the dimensions of the greta array to be returned, either a scalar
@@ -20,7 +20,7 @@
 #'   result can usually be achieved by combining variables with separate
 #'   distributions. It is included for situations where it is more convenient to
 #'   consider these as a single distribution, e.g. for use with
-#'   \code{distribution} or \code{mixture}.
+#'   `distribution` or `mixture`.
 #'
 #' @export
 #' @examples
@@ -37,26 +37,23 @@
 #' a <- normal(0, 3, truncation = c(0, Inf))
 #' b <- normal(0, 3, truncation = c(0, Inf))
 #' distribution(x) <- joint(normal(mu, sd), beta(a, b),
-#'                          dim = 10)
+#'   dim = 10
+#' )
 #' m <- model(mu, sd, a, b)
 #' plot(mcmc(m))
 #' }
-joint <- function(..., dim = NULL)
+joint <- function(..., dim = NULL) {
   distrib("joint", list(...), dim)
+}
 
 joint_distribution <- R6Class(
   "joint_distribution",
   inherit = distribution_node,
   public = list(
-
     initialize = function(dots, dim) {
-
       n_distributions <- length(dots)
 
-      if (n_distributions < 2) {
-        stop("joint must be passed at least two distributions",
-             call. = FALSE)
-      }
+      check_num_distributions(n_distributions, at_least = 2, name = "joint")
 
       # check the dimensions of the variables in dots
       single_dim <- do.call(check_dims, c(dots, target_dim = dim))
@@ -64,7 +61,8 @@ joint_distribution <- R6Class(
       # add the joint dimension as the last dimension
       dim <- single_dim
       ndim <- length(dim)
-      if (dim[ndim] == 1) {
+      last_dim_1d <- dim[ndim] == 1
+      if (last_dim_1d) {
         dim[ndim] <- n_distributions
       } else {
         dim <- c(dim, n_distributions)
@@ -72,12 +70,7 @@ joint_distribution <- R6Class(
 
       dot_nodes <- lapply(dots, get_node)
 
-      # check they are all scalar
-      are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
-      if (!all(are_scalar)) {
-        stop("joint only accepts probability distributions over scalars",
-              call. = FALSE)
-      }
+      check_dot_nodes_scalar(dot_nodes)
 
       # get the distributions and strip away their variables
       distribs <- lapply(dot_nodes, member, "distribution")
@@ -89,11 +82,8 @@ joint_distribution <- R6Class(
       # check the distributions are all either discrete or continuous
       discrete <- vapply(distribs, member, "discrete", FUN.VALUE = FALSE)
 
-      if (!all(discrete) & !all(!discrete)) {
-        stop("cannot construct a joint distribution from a combination ",
-             "of discrete and continuous distributions",
-             call. = FALSE)
-      }
+      check_not_discrete_continuous(discrete, "joint")
+
       n_components <- length(dot_nodes)
 
       # work out the support of the resulting distribution, and add as the
@@ -112,16 +102,14 @@ joint_distribution <- R6Class(
 
       for (i in seq_len(n_distributions)) {
         self$add_parameter(distribs[[i]],
-                           paste("distribution", i),
-                           shape_matches_output = FALSE)
+          glue::glue("distribution {i}"),
+          shape_matches_output = FALSE
+        )
       }
-
     },
-
     create_target = function(truncation) {
       vble(self$bounds, dim = self$dim)
     },
-
     tf_distrib = function(parameters, dag) {
 
       # get tfp distributions
@@ -138,7 +126,7 @@ joint_distribution <- R6Class(
 
         # split x on the joint dimension, and loop through computing the
         # densities
-        last_dim <- length(dim(x)) - 1L
+        last_dim <- n_dim(x) - 1L
         x_vals <- tf$split(x, length(tfp_distributions), axis = last_dim)
 
         log_probs <- mapply(
@@ -152,19 +140,15 @@ joint_distribution <- R6Class(
 
         # sum them elementwise
         tf$add_n(log_probs)
-
       }
 
       sample <- function(seed) {
-
         samples <- lapply(distribution_nodes, dag$draw_sample)
         names(samples) <- NULL
         tf$concat(samples, axis = 2L)
-
       }
 
       list(log_prob = log_prob, sample = sample)
-
     }
   )
 )

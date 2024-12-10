@@ -1,9 +1,5 @@
-context("extract/replace/combine")
-
 test_that("extract works like R", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- randn(10)
   b <- randn(10, 1)
@@ -55,13 +51,10 @@ test_that("extract works like R", {
   check_expr(b[-1:-3, ], "b")
   check_expr(c[-1:-4, ], "c")
   check_expr(d[-1:-2, -1, , drop = FALSE], "d")
-
 })
 
 test_that("replace works like R", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   # check using expressions, and comparing the whole object to which replacement
   # was applied
@@ -302,57 +295,55 @@ test_that("replace works like R", {
   ga_x[1:6, ] <- ga_x[6:1, ]
   greta_out <- as.vector(grab(ga_x))
   compare_op(x, greta_out)
-
 })
 
 test_that("rep works like R", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- randn(10)
   b <- randn(10, 1)
   c <- randn(10, 5)
   d <- randn(10, 2, 2)
 
-  rep_times <- function(x)
+  rep_times <- function(x) {
     rep(x, times = 3)
+  }
 
   check_op(rep_times, a)
   check_op(rep_times, b)
   check_op(rep_times, c)
   check_op(rep_times, d)
 
-  rep_length <- function(x)
+  rep_length <- function(x) {
     rep(x, length.out = 3)
+  }
 
   check_op(rep_length, a)
   check_op(rep_length, b)
   check_op(rep_length, c)
   check_op(rep_length, d)
 
-  rep_times_each <- function(x)
+  rep_times_each <- function(x) {
     rep(x, times = 3, each = 3)
+  }
 
   check_op(rep_times_each, a)
   check_op(rep_times_each, b)
   check_op(rep_times_each, c)
   check_op(rep_times_each, d)
 
-  rep_length_each <- function(x)
+  rep_length_each <- function(x) {
     rep(x, length = 30, each = 3)
+  }
 
   check_op(rep_length_each, a)
   check_op(rep_length_each, b)
   check_op(rep_length_each, c)
   check_op(rep_length_each, d)
-
 })
 
 test_that("rbind, cbind and c work like R", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- randn(5, 1)
   b <- randn(1, 5)
@@ -375,13 +366,10 @@ test_that("rbind, cbind and c work like R", {
   check_op(c, a)
   check_op(c, b)
   check_op(c, d)
-
 })
 
 test_that("abind works like R", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- randn(5, 1, 3)
   b <- randn(1, 1, 3)
@@ -391,29 +379,27 @@ test_that("abind works like R", {
   check_op(abind, a, c)
   check_op(abind, a, a, other_args = list(along = 0))
   check_op(abind, a, a, other_args = list(along = 4))
-
 })
 
 test_that("abind errors informatively", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- ones(5, 1, 3)
   b <- ones(1, 1, 3)
   c <- ones(5, 1, 1)
 
-  expect_error(abind(a, b),
-               "dimension 1 had varying sizes")
-  expect_error(abind(a, c, along = 5),
-               "along must be between 0 and 4")
+  expect_snapshot(error = TRUE,
+    abind(a, b)
+  )
+
+  expect_snapshot(error = TRUE,
+    abind(a, c, along = 5)
+  )
 
 })
 
 test_that("rbind and cbind can prepend R arrays to greta arrays", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- randn(5, 1)
   b <- ones(5, 1)
@@ -433,73 +419,66 @@ test_that("rbind and cbind can prepend R arrays to greta arrays", {
   z <- cbind(b, a)
   expect_s3_class(z, "greta_array")
   expect_identical(dim(z), c(5L, 2L))
-
 })
 
 test_that("assign errors on variable greta arrays", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   z <- normal(0, 1, dim = 5)
-  expect_error(z[1] <- 3,
-               "cannot replace values in a variable greta array")
-
+  expect_snapshot(error = TRUE,
+    z[1] <- 3
+  )
 })
 
 test_that("rbind and cbind give informative error messages", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- as_data(randn(5, 1))
   b <- as_data(randn(1, 5))
 
-  expect_error(rbind(a, b),
-               "all greta arrays must be have the same number of columns")
+  expect_snapshot(error = TRUE,
+    rbind(a, b)
+  )
 
-  expect_error(cbind(a, b),
-               "all greta arrays must be have the same number of rows")
-
+  expect_snapshot(error = TRUE,
+    cbind(a, b)
+  )
 })
 
 test_that("replacement gives informative error messages", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- ones(2, 2, 2)
-  expect_error(x[1:2, , 1] <- seq_len(3),
-               "not a multiple of replacement length")
+  expect_snapshot(error = TRUE,
+    x[1:2, , 1] <- seq_len(3)
+  )
 
-  expect_error(x[1, 1, 3] <- 1,
-               "subscript out of bounds")
+  expect_snapshot(error = TRUE,
+    x[1, 1, 3] <- 1
+  )
 
   x <- ones(2)
-  expect_error(x[3] <- 1,
-               "subscript out of bounds")
-
+  expect_snapshot(error = TRUE,
+    x[3] <- 1
+  )
 })
 
 test_that("extraction gives informative error messages", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- ones(2, 2, 2)
-  expect_error(x[1, 1, 3],
-               "subscript out of bounds")
+  expect_snapshot(error = TRUE,
+    x[1, 1, 3]
+  )
 
   x <- ones(2)
-  expect_error(x[3],
-               "subscript out of bounds")
-
+  expect_snapshot(error = TRUE,
+    x[3]
+  )
 })
 
 test_that("stochastic and operation greta arrays can be extracted", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   a <- normal(0, 1, dim = c(3, 4))
   a_sub <- a[1:2, 2:3]
@@ -508,13 +487,10 @@ test_that("stochastic and operation greta arrays can be extracted", {
   b <- a * 2
   b_sub <- b[1:2, ]
   expect_identical(dim(b_sub), c(2L, 4L))
-
 })
 
 test_that("extract, replace, combine work in models", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   # extract
   a <- normal(0, 1, dim = c(3, 4))
@@ -530,37 +506,16 @@ test_that("extract, replace, combine work in models", {
   expect_ok(draws_b <- mcmc(m_b, warmup = 3, n_samples = 3, verbose = FALSE))
 
   # combine
-  d <- c(normal(0, 1, dim = 2),
-         lognormal(0, 1, dim = 3))
+  d <- c(
+    normal(0, 1, dim = 2),
+    lognormal(0, 1, dim = 3)
+  )
   m_d <- model(d)
   expect_ok(draws_d <- mcmc(m_d, warmup = 3, n_samples = 3, verbose = FALSE))
-
-})
-
-test_that("head and tail work", {
-
-  skip_if_not(check_tf_version())
-  source("helpers.R")
-
-  a <- randn(10, 1)
-  b <- randn(10, 4)
-  c <- randn(10, 3, 3)
-
-  check_op(head, a)
-  check_op(tail, a)
-
-  check_op(head, b)
-  check_op(tail, b)
-
-  check_op(head, c)
-  check_op(tail, c)
-
 })
 
 test_that("length and dim work", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   ga_data <- as_data(matrix(1:9, nrow = 3))
   ga_stochastic <- normal(0, 1, dim = c(3, 3))
@@ -575,13 +530,10 @@ test_that("length and dim work", {
   expect_identical(dim(ga_data), c(3L, 3L))
   expect_identical(dim(ga_stochastic), c(3L, 3L))
   expect_identical(dim(ga_operation), c(3L, 3L))
-
 })
 
 test_that("dim<- works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- randn(3, 4, 2)
 
@@ -593,13 +545,10 @@ test_that("dim<- works", {
 
   new_dim <- NULL
   check_op(`dim<-`, x, other_args = list(value = new_dim))
-
 })
 
 test_that("greta_array() reshapes array-like greta arrays like array", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x_ <- randu(3, 4, 2)
   x <- as_data(x_)
@@ -621,14 +570,11 @@ test_that("greta_array() reshapes array-like greta arrays like array", {
   y_ <- as_data(array(x_, dim = new_dim))
   y <- greta_array(x, dim = new_dim)
   compare_op(calculate(y, values = list(x = x_))[[1]], calculate(y_)[[1]])
-
 })
 
 
 test_that("greta_array() reshapes scalar greta arrays like array", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x_ <- randu(1)
   x <- as_data(x_)
@@ -650,35 +596,32 @@ test_that("greta_array() reshapes scalar greta arrays like array", {
   y_ <- as_data(array(x_, dim = new_dim))
   y <- greta_array(x, dim = new_dim)
   compare_op(calculate(y, values = list(x = x_))[[1]], calculate(y_)[[1]])
-
 })
 
 test_that("dim<- errors as expected", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- zeros(3, 4)
 
-  expect_error(dim(x) <- pi[0],
-               "length-0 dimension vector is invalid")
+  expect_snapshot(error = TRUE,
+    dim(x) <- pi[0]
+  )
 
-  expect_error(dim(x) <- c(1, NA),
-               "the dims contain missing values")
+  expect_snapshot(error = TRUE,
+    dim(x) <- c(1, NA)
+  )
 
-  expect_error(dim(x) <- c(1, -1),
-               "the dims contain negative values")
+  expect_snapshot(error = TRUE,
+    dim(x) <- c(1, -1)
+  )
 
-  expect_error(dim(x) <- 13,
-               paste("dims \\[product 13\\] do not match the length of",
-                     "object \\[12\\]"))
-
+  expect_snapshot(error = TRUE,
+    dim(x) <- 13
+  )
 })
 
 test_that("dim<- works in a model", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   y <- rnorm(5)
 
@@ -696,14 +639,11 @@ test_that("dim<- works in a model", {
   distribution(y) <- normal(z, lognormal(0, 1))
 
   expect_ok(m <- model(z))
-  expect_ok(mcmc(m, warmup = 0, n_samples = 2))
-
+  expect_ok(mcmc(m, warmup = 0, n_samples = 2, verbose = FALSE))
 })
 
 test_that("c handles NULLs and lists", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- normal(0, 1)
   y <- as_data(3:1)
@@ -735,5 +675,4 @@ test_that("c handles NULLs and lists", {
   expect_true(is.list(z))
   expect_s3_class(z[[1]], "greta_array")
   expect_identical(dim(z[[1]]), c(1L, 1L))
-
 })

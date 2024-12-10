@@ -30,40 +30,40 @@ diagonal, to speed up computations. See Details.}
 }
 \value{
 a \code{marginaliser} object that can be passed to
-  \code{marginalise}.
+\code{marginalise}.
 }
 \description{
 Functions to set up marginalisers (which explicitly integrate
-  out random variables) and modify their behaviour, for use in
-  \code{\link{marginalise}()}.
+out random variables) and modify their behaviour, for use in
+\code{\link{marginalise}()}.
 
-  \code{discrete_marginalisation} marginalises discrete random variables via
-  a Riemann sum over a range of plausible values.
+\code{discrete_marginalisation} marginalises discrete random variables via
+a Riemann sum over a range of plausible values.
 
-  \code{laplace_approximation} marginalises random variables (with
-  multivariate normal priors) approximately, using by Newton-Raphson
-  optimisation and assuming the posterior follows a multivariate normal
-  distribution.
+\code{laplace_approximation} marginalises random variables (with
+multivariate normal priors) approximately, using by Newton-Raphson
+optimisation and assuming the posterior follows a multivariate normal
+distribution.
 }
 \details{
 \code{discrete_marginalisation} can only be used with discrete
-  probability distributions, e.g. those defined with \code{poisson()} and
-  \code{binomial()}. For discrete distributions with finite support (such as
-  \code{bernoulli()}) the marginalisation will be exact, so long as
-  \code{values} includes all possible values of the variable. For discrete
-  distributions with non-finite support (such as \code{poisson()}, which has
-  no upper bound), the marginalisation can only ever be approximate. However
-  if \code{values} cover a range of values with sufficiently high support in
-  the distribution, that approximation error will be minimal.
+probability distributions, e.g. those defined with \code{poisson()} and
+\code{binomial()}. For discrete distributions with finite support (such as
+\code{bernoulli()}) the marginalisation will be exact, so long as
+\code{values} includes all possible values of the variable. For discrete
+distributions with non-finite support (such as \code{poisson()}, which has
+no upper bound), the marginalisation can only ever be approximate. However
+if \code{values} cover a range of values with sufficiently high support in
+the distribution, that approximation error will be minimal.
 
 \code{laplace_approximation} can only be used to marginalise
-  variables following a multivariate normal distribution.
+variables following a multivariate normal distribution.
 
- The argument \code{diagonal_hessian} can be used to state that the
- conditional density factorises along the elements of the variable being
- marginalised, and therefore the Hessian matrix of this function can be
- assumed to be diagonal. A conditional density function factorises if each
- observation in the conditional density depends only on the corresponding per
- element of the variable being marginalised. If this is not the case and you
- set \code{diagonal_hessian = TRUE}, your inferences will be incorrect.
+The argument \code{diagonal_hessian} can be used to state that the
+conditional density factorises along the elements of the variable being
+marginalised, and therefore the Hessian matrix of this function can be
+assumed to be diagonal. A conditional density function factorises if each
+observation in the conditional density depends only on the corresponding per
+element of the variable being marginalised. If this is not the case and you
+set \code{diagonal_hessian = TRUE}, your inferences will be incorrect.
 }

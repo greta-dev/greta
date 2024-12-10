@@ -22,20 +22,20 @@ the marginalisation}
 }
 \description{
 Inference on many statistical models requires marginalisation of
-  (ie. integration of functions over) random variables. In addition to
-  general purpose marginalisation methods like MCMC that act on an entire
-  model, it is often useful to directly marginalise a single random variable
-  within a larger model; e.g. for random variables where marginalisation by
-  MCMC is inefficient, impossible, or when an approximate marginalisation is
-  substantially more efficient. \code{marginalise()} performs direct
-  marginalisation within a greta model, using one of the available
-  marginalisation methods, detailed in \link{marginalisers}.
+(ie. integration of functions over) random variables. In addition to
+general purpose marginalisation methods like MCMC that act on an entire
+model, it is often useful to directly marginalise a single random variable
+within a larger model; e.g. for random variables where marginalisation by
+MCMC is inefficient, impossible, or when an approximate marginalisation is
+substantially more efficient. \code{marginalise()} performs direct
+marginalisation within a greta model, using one of the available
+marginalisation methods, detailed in \link{marginalisers}.
 }
 \details{
 The code in \code{fun} must define at least one distribution over
-  data (ie. a model likelihood), and cannot create any new variables. Any
-  variables must be created outide this function, and passed in via the \dots
-  argument.
+data (ie. a model likelihood), and cannot create any new variables. Any
+variables must be created outide this function, and passed in via the \dots
+argument.
 }
 \examples{
 \dontrun{

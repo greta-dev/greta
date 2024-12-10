@@ -45,19 +45,25 @@ reference:
 
 navbar:
   structure:
-    left: [get_started, docs, examples, analyses, more]
+    left: [get_started, docs, examples, analyses, more, news, FAQ]
     right: [forum, twitter, github]
   components:
     home: ~
     reference: ~
     articles: ~
-    news: ~
     get_started:
       text: get started
       href: articles/get_started.html
     examples:
       text: examples
       href: articles/example_models.html
+    FAQ:
+      text: FAQ
+      href: articles/faq.html
+    news:
+     releases:
+     - text: "greta 0.4.0.9000"
+       href: "tbd"
     analyses:
       text: analyses
       menu:
@@ -87,4 +93,4 @@ navbar:
       href: https://forum.greta-stats.org
     github:
       icon: fa-lg fa-github
-      href: https://github.com/greta-dev/greta 
+      href: https://github.com/greta-dev/greta

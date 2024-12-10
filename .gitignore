@@ -11,5 +11,13 @@ vignettes/**/*_files/
 *.pdf
 docs/*.Rmd
 docs/examples
-cran-comments.md
 paper/paper.html
+inst/doc
+
+.lazytest
+
+revdep
+revdep/checks.noindex
+revdep/library.noindex
+
+testlog*.md

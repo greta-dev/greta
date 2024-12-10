@@ -1,56 +1,75 @@
-context("variables")
-
 test_that("variable() errors informatively", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   # bad types
-  expect_error(variable(upper = NA),
-               "lower and upper must be numeric")
-  expect_error(variable(upper = head),
-               "lower and upper must be numeric")
+  expect_snapshot(error = TRUE,
+    variable(upper = NA)
+  )
+
+  expect_snapshot(error = TRUE,
+    variable(upper = head)
+  )
+
+  expect_snapshot(error = TRUE,
+    variable(lower = NA)
+  )
+
+  expect_snapshot(error = TRUE,
+    variable(lower = head)
+  )
 
   # good types, bad values
-  expect_error(variable(lower = 0:2, upper = 1:2),
-               "incompatible dimensions")
+  expect_snapshot(error = TRUE,
+    variable(lower = 0:2, upper = 1:2)
+  )
 
   # lower not below upper
-  expect_error(variable(lower = 1, upper = 1),
-               "upper bounds must be greater than lower bounds")
-
+  expect_snapshot(error = TRUE,
+    variable(lower = 1, upper = 1)
+  )
 })
 
 test_that("constrained variable constructors error informatively", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
-  expect_error(cholesky_variable(dim = 2:3),
-               "cholesky variables must be square")
-  expect_error(cholesky_variable(dim = rep(2, 3)),
-               "a scalar or a vector of length 2")
+  expect_snapshot(
+    error = TRUE,
+    cholesky_variable(dim = 2:3)
+  )
 
-  expect_error(simplex_variable(1),
-               "more than one element")
-  expect_error(simplex_variable(c(3, 1)),
-               "more than one element")
+  expect_snapshot(
+    error = TRUE,
+    cholesky_variable(dim = rep(2, 3))
+  )
 
-  expect_error(ordered_variable(1),
-               "more than one element")
-  expect_error(ordered_variable(c(3, 1)),
-               "more than one element")
+  expect_snapshot(
+    error = TRUE,
+    simplex_variable(1)
+  )
 
+  expect_snapshot(
+    error = TRUE,
+    simplex_variable(c(3, 1))
+  )
+
+  expect_snapshot(
+    error = TRUE,
+    ordered_variable(1)
+  )
+  expect_snapshot(
+    error = TRUE,
+    ordered_variable(c(3, 1))
+  )
 })
 
 test_that("variable() with universal bounds can be sampled correctly", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- rnorm(3, 0, 10)
-  mu <- variable(lower = 2,
-                 upper = 6)
+  mu <- variable(
+    lower = 2,
+    upper = 6
+  )
   distribution(x) <- normal(mu, 1)
   m <- model(mu)
   draws <- mcmc(m, n_samples = 100, warmup = 1, verbose = FALSE)
@@ -60,19 +79,18 @@ test_that("variable() with universal bounds can be sampled correctly", {
   below_upper <- sweep(samples, 2, 6, `<=`)
 
   expect_true(all(above_lower & below_upper))
-
 })
 
 test_that("variable() with vectorised bounds can be sampled correctly", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   x <- rnorm(3, 0, 10)
   lower <- c(-3, -1, 2)
   upper <- c(0, 2, 3)
-  mu <- variable(lower = lower,
-                 upper = upper)
+  mu <- variable(
+    lower = lower,
+    upper = upper
+  )
   distribution(x) <- normal(mu, 1)
   m <- model(mu)
   draws <- mcmc(m, n_samples = 100, warmup = 1, verbose = FALSE)
@@ -82,13 +100,10 @@ test_that("variable() with vectorised bounds can be sampled correctly", {
   below_upper <- sweep(samples, 2, upper, `<=`)
 
   expect_true(all(above_lower & below_upper))
-
 })
 
 test_that("cholesky_variable() can be sampled correctly", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   n <- 3
   u <- cholesky_variable(3)
@@ -104,13 +119,10 @@ test_that("cholesky_variable() can be sampled correctly", {
 
   variances_positive <- sweep(samples, 2, 0, `>=`)
   expect_true(all(variances_positive))
-
 })
 
 test_that("cholesky_variable() correlation can be sampled correctly", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   n <- 3
   u <- cholesky_variable(3, correlation = TRUE)
@@ -130,21 +142,17 @@ test_that("cholesky_variable() correlation can be sampled correctly", {
   correlations_above_minus_one <- sweep(correlation_samples, 2, -1, `>=`)
   correlations_below_one <- sweep(correlation_samples, 2, 1, `<=`)
   expect_true(all(variances_one) &
-                all(correlations_above_minus_one) &
-                all(correlations_below_one)
-  )
-
+    all(correlations_above_minus_one) &
+    all(correlations_below_one))
 })
 
 test_that("simplex_variable() can be sampled correctly", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   k <- 3
   n <- 10
   idx <- sample.int(k, n, replace = TRUE)
-  x <- matrix(0, n , k)
+  x <- matrix(0, n, k)
   x[cbind(seq_len(n), idx)] <- 1
   prob <- simplex_variable(k)
   distribution(x) <- categorical(prob, n_realisations = n)
@@ -155,13 +163,10 @@ test_that("simplex_variable() can be sampled correctly", {
   positive <- samples > 0
   sum_to_one <- abs(rowSums(samples) - 1) < 1e-6
   expect_true(all(positive) & all(sum_to_one))
-
 })
 
 test_that("ordered_variable() can be sampled correctly", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   k <- 3
   n <- 10
@@ -177,5 +182,4 @@ test_that("ordered_variable() can be sampled correctly", {
   samples <- as.matrix(draws)
   increasing <- t(apply(samples, 1, diff)) > 0
   expect_true(all(increasing))
-
 })

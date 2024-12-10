@@ -42,7 +42,7 @@
 
 <meta property="og:title" content="transformation functions for greta arrays — transforms" />
 <meta property="og:description" content="transformations for greta arrays, which may also be used as
-  inverse link functions. Also see operators and functions." />
+inverse link functions. Also see operators and functions." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -133,6 +133,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -180,7 +186,7 @@
 
     <div class="ref-description">
     <p>transformations for greta arrays, which may also be used as
-  inverse link functions. Also see <a href='operators.html'>operators</a> and <a href='functions.html'>functions</a>.</p>
+inverse link functions. Also see <a href='operators.html'>operators</a> and <a href='functions.html'>functions</a>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>iprobit</span>(<span class='no'>x</span>)
@@ -208,38 +214,36 @@ transform to a constrained value</p></td>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>greta does not allow you to state the transformation/link on the
-  left hand side of an assignment, as is common in the BUGS and STAN
-  modelling languages. That's because the same syntax has a very different
-  meaning in R, and can only be applied to objects that are already in
-  existence. The inverse forms of the common link functions (prefixed with an
-  'i') can be used instead.</p>
-<p>The <code>log1pe</code> inverse link function is equivalent to <code><a href='https://www.rdocumentation.org/packages/base/topics/Log'>log(1 +
-  exp(x))</a></code>, yielding a positive transformed parameter. Unlike the log
-  transformation, this transformation is approximately linear for x &gt; 1. i.e.
-  when \(x &gt; 1\), \(y \approx x\)</p>
+left hand side of an assignment, as is common in the BUGS and STAN
+modelling languages. That's because the same syntax has a very different
+meaning in R, and can only be applied to objects that are already in
+existence. The inverse forms of the common link functions (prefixed with an
+'i') can be used instead.</p>
+<p>The <code>log1pe</code> inverse link function is equivalent to <code><a href='https://www.rdocumentation.org/packages/base/topics/Log'>log(1 + exp(x))</a></code>, yielding a positive transformed parameter. Unlike the log
+transformation, this transformation is approximately linear for x &gt; 1. i.e.
+when \(x &gt; 1\), \(y\) is approximately \(x\)</p>
 <p><code>imultilogit</code> expects an n-by-m greta array, and returns an n-by-(m+1)
-  greta array of positive reals whose rows sum to one. This is equivalent
-  adding a final column of 0s and then running the softmax function widely
-  used in machine learning.</p>
+greta array of positive reals whose rows sum to one. This is equivalent
+adding a final column of 0s and then running the softmax function widely
+used in machine learning.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
- <span class='no'>x1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='no'>x1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 
- <span class='co'># transformation to the unit interval</span>
- <span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'>iprobit</span>(<span class='no'>x1</span>)
- <span class='no'>p2</span> <span class='kw'>&lt;-</span> <span class='fu'>ilogit</span>(<span class='no'>x1</span>)
- <span class='no'>p3</span> <span class='kw'>&lt;-</span> <span class='fu'>icloglog</span>(<span class='no'>x1</span>)
- <span class='no'>p4</span> <span class='kw'>&lt;-</span> <span class='fu'>icauchit</span>(<span class='no'>x1</span>)
+<span class='co'># transformation to the unit interval</span>
+<span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'>iprobit</span>(<span class='no'>x1</span>)
+<span class='no'>p2</span> <span class='kw'>&lt;-</span> <span class='fu'>ilogit</span>(<span class='no'>x1</span>)
+<span class='no'>p3</span> <span class='kw'>&lt;-</span> <span class='fu'>icloglog</span>(<span class='no'>x1</span>)
+<span class='no'>p4</span> <span class='kw'>&lt;-</span> <span class='fu'>icauchit</span>(<span class='no'>x1</span>)
 
- <span class='co'># and to positive reals</span>
- <span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>log1pe</span>(<span class='no'>x1</span>)
+<span class='co'># and to positive reals</span>
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>log1pe</span>(<span class='no'>x1</span>)
 
- <span class='co'># transform from 10x3 to 10x4, where rows are a complete set of</span>
- <span class='co'># probabilities</span>
- <span class='no'>x2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>10</span>, <span class='fl'>3</span>))
- <span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>imultilogit</span>(<span class='no'>x2</span>)
-
+<span class='co'># transform from 10x3 to 10x4, where rows are a complete set of</span>
+<span class='co'># probabilities</span>
+<span class='no'>x2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>10</span>, <span class='fl'>3</span>))
+<span class='no'>z</span> <span class='kw'>&lt;-</span> <span class='fu'>imultilogit</span>(<span class='no'>x2</span>)
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

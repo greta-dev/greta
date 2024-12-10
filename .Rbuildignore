@@ -5,14 +5,15 @@
 ^.github$
 ^.netlify$
 ^.lintr$
-^.travis.yml$
 
 ^README\.md$
 ^CRAN-RELEASE$
 ^CODE_OF_CONDUCT\.md$
 ^\.EDIT_WEBSITE\.md$
-^LICENSE$
+^LICENSE\.md$
+LICENSE
 ^cran-comments\.md$
+^revdep$
 
 ^logos$
 ^paper$
@@ -36,3 +37,16 @@
 ^man/figures/main_icon\.png$
 ^man/figures/greta-header\.png$
 ^man/figures/logo\.png$
+^\.github/workflows/R-CMD-check\.yaml$
+^\.github$
+^codecov\.yml$
+
+^depends\.rds$
+^CRAN-SUBMISSION$
+^touchstone$
+^.lazytest$
+^\.lazytext$
+^revdep$
+^__autograph*
+^testlog
+^data-raw$
