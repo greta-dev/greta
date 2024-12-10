@@ -92,6 +92,9 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../../articles/faq.html">FAQ</a>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -129,7 +132,7 @@
       
       </header><hr style="height:5px; visibility:hidden;">
 <hr>
-<div class="row">
+<script src="technical_details_files/header-attrs-2.11/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Technical details</h1>
@@ -148,199 +151,169 @@
 <h3 class="hasAnchor">
 <a href="#greta-arrays" class="anchor"></a>greta arrays</h3>
 <p>greta arrays are the user-facing representation of the model. greta arrays extend R arrays and have the classes <code>greta_array</code> and <code>array</code>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>x &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/structures.html">ones</a></span>(<span class="dv">3</span>, <span class="dv">3</span>)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">ones</span>(<span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(x)</span></code></pre></div>
 <pre><code>[1] "greta_array" "array"      </code></pre>
 </div>
 <div id="nodes" class="section level3">
 <h3 class="hasAnchor">
 <a href="#nodes" class="anchor"></a>nodes</h3>
 <p>The main difference between greta arrays and R arrays is that greta array has a <code>node</code> attribute; an R6 object inheriting from the R6 class ‘node’, as well as one of the three node types: ‘data’, ‘operation’ or ‘variable’.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>x_node &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/attr">attr</a></span>(x, <span class="st">"node"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(x_node)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>x_node <span class="ot">&lt;-</span> <span class="fu">attr</span>(x, <span class="st">"node"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(x_node)</span></code></pre></div>
 <pre><code>[1] "data_node" "node"      "R6"       </code></pre>
 <p>There is a fourth node type: ‘distribution’, but these are never directly associated with greta arrays.</p>
 <p>These R6 node objects are where the magic happens. When created, each node points to its ‘parent’ nodes - the nodes for the greta arrays that were used to create this one.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># data nodes have no parents</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(x_node<span class="op">$</span>parents)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data nodes have no parents</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(x_node<span class="sc">$</span>parents)</span></code></pre></div>
 <pre><code>[1] 0</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># operation nodes have one or more parents</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a>z &lt;-<span class="st"> </span>x <span class="op">*</span><span class="st"> </span><span class="dv">3</span></span>
-<span id="cb7-3"><a href="#cb7-3"></a>z_node &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/attr">attr</a></span>(z, <span class="st">"node"</span>)</span>
-<span id="cb7-4"><a href="#cb7-4"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(z_node<span class="op">$</span>parents)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># operation nodes have one or more parents</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> x <span class="sc">*</span> <span class="dv">3</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>z_node <span class="ot">&lt;-</span> <span class="fu">attr</span>(z, <span class="st">"node"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(z_node<span class="sc">$</span>parents)</span></code></pre></div>
 <pre><code>[1] 2</code></pre>
 <p>Each node also has a list of its children, the nodes that have been created from this one.</p>
 <p>When <code><a href="../../reference/model.html">model()</a></code> is called, that inheritance information is used to construct the directed acyclic graph (DAG) that defines the model. The inheritance also preserves intermediate nodes, such as those creates in multi-part operations, but not assigned as greta arrays.</p>
 <p>Nodes also have a value member, which is an array for data nodes or an ‘unknowns’ object for other node types. The unknowns class is a thin wrapper around arrays, which prints the question marks. Generic functions for working on arrays (e.g. <code>dim</code>, <code>length</code>, <code>print</code>) use these node values to return something familiar to the user.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>x_node<span class="op">$</span><span class="kw">value</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>x_node<span class="sc">$</span><span class="fu">value</span>()</span></code></pre></div>
 <pre><code>     [,1] [,2] [,3]
 [1,]    1    1    1
 [2,]    1    1    1
 [3,]    1    1    1</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># R calls this a matrix because it's 2d, but it's an array</span></span>
-<span id="cb11-2"><a href="#cb11-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(x_node<span class="op">$</span><span class="kw">value</span>())</span></code></pre></div>
-<pre><code>[1] "matrix"</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>z_node<span class="op">$</span><span class="kw">value</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R calls this a matrix because it's 2d, but it's an array</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(x_node<span class="sc">$</span><span class="fu">value</span>())</span></code></pre></div>
+<pre><code>[1] "matrix" "array" </code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>z_node<span class="sc">$</span><span class="fu">value</span>()</span></code></pre></div>
 <pre><code>     [,1] [,2] [,3]
 [1,]  ?    ?    ?  
 [2,]  ?    ?    ?  
 [3,]  ?    ?    ?  </code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(z_node<span class="op">$</span><span class="kw">value</span>())</span></code></pre></div>
-<pre><code>[1] "unknowns" "matrix"  </code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(z_node<span class="sc">$</span><span class="fu">value</span>())</span></code></pre></div>
+<pre><code>[1] "unknowns" "matrix"   "array"   </code></pre>
 </div>
 <div id="tensors" class="section level3">
 <h3 class="hasAnchor">
 <a href="#tensors" class="anchor"></a>Tensors</h3>
 <p>In addition to remembering their shape and size and where they are in the DAG, each node has methods to define a corresponding TensorFlow Tensor object in a specified environment. That doesn’t happen until the user runs <code><a href="../../reference/model.html">model()</a></code>, which creates a ‘dag_class’ object to store the relevant nodes, the environment for the tensors, and methods to talk to the TensorFlow graph.</p>
 <p>The node <code>tf()</code> method takes the DAG as an argument, and defines a tensor representing itself in the tensorflow environment, with a name determined by the dag object.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>x_node<span class="op">$</span>tf</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>x_node<span class="sc">$</span>tf</span></code></pre></div>
 <pre><code>function(dag) {
-
       tfe &lt;- dag$tf_environment
       tf_name &lt;- dag$tf_name(self)
+      unbatched_name &lt;- glue::glue("{tf_name}_unbatched")
 
-      value &lt;- self$value()
-      shape &lt;- to_shape(c(1, dim(value)))
-      value &lt;- add_first_dim(value)
+      mode &lt;- dag$how_to_define(self)
 
-      # under some circumstances we define data as constants, but normally as
-      # placeholders
-      using_constants &lt;- !is.null(greta_stash$data_as_constants)
-
-      if (using_constants) {
-
-        tensor &lt;- tf$constant(value = value,
-                              dtype = tf_float(),
-                              shape = shape)
-
-      } else {
-
-        tensor &lt;- tf$compat$v1$placeholder(shape = shape,
-                                           dtype = tf_float())
-        tfe$data_list[[tf_name]] &lt;- value
-
+      # if we're in sampling mode, get the distribution constructor and sample
+      if (mode == "sampling") {
+        batched_tensor &lt;- dag$draw_sample(self$distribution)
       }
 
-      # create placeholder
-      assign(tf_name, tensor, envir = tfe)
+      # if we're defining the forward mode graph, create either a constant or a
+      # placeholder
+      if (mode == "forward") {
+        value &lt;- self$value()
+        ndim &lt;- length(dim(value))
+        shape &lt;- to_shape(c(1, dim(value)))
+        value &lt;- add_first_dim(value)
 
+        # under some circumstances we define data as constants, but normally as
+        # placeholders
+        using_constants &lt;- !is.null(greta_stash$data_as_constants)
+
+        if (using_constants) {
+          unbatched_tensor &lt;- tf$constant(
+            value = value,
+            dtype = tf_float(),
+            shape = shape
+          )
+        } else {
+          unbatched_tensor &lt;- tf$compat$v1$placeholder(
+            shape = shape,
+            dtype = tf_float()
+          )
+          dag$set_tf_data_list(unbatched_name, value)
+        }
+
+        # expand up to batch size
+        tiling &lt;- c(tfe$batch_size, rep(1L, ndim))
+        batched_tensor &lt;- tf$tile(unbatched_tensor, tiling)
+
+        # put unbatched tensor in environment so it can be set
+        assign(unbatched_name, unbatched_tensor, envir = tfe)
+      }
+
+      assign(tf_name, batched_tensor, envir = tfe)
     }
-&lt;environment: 0x7fca6bbaf5b0&gt;</code></pre>
+&lt;environment: 0x7fd0316e1698&gt;</code></pre>
 <p>Because R6 objects are pass-by-reference (rather than pass-by-value), the dag accumulates all of the defined tensors, rather than being re-written each time. Similarly, because nodes are R6 objects and know which are their parents, they can make sure those parents are defined as tensors before they are. The <code>define_tf()</code> member function ensures that that happens, enabling operation nodes to use the tensors for their parents when defining their own tensor.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>x_node<span class="op">$</span>define_tf</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>x_node<span class="sc">$</span>define_tf</span></code></pre></div>
 <pre><code>function(dag) {
 
       # if defined already, skip
       if (!self$defined(dag)) {
 
         # make sure parents are defined
-        parents_defined &lt;- vapply(self$parents,
-                                   function(x) x$defined(dag),
-                                   FUN.VALUE = FALSE)
+        parents_defined &lt;- vapply(self$list_parents(dag),
+          function(x) x$defined(dag),
+          FUN.VALUE = FALSE
+        )
 
         if (any(!parents_defined)) {
-          lapply(self$parents[which(!parents_defined)],
-                 function(x) x$define_tf(dag))
+          parents &lt;- self$list_parents(dag)
+          lapply(
+            parents[which(!parents_defined)],
+            function(x) x$define_tf(dag)
+          )
         }
 
         # then define self
         self$tf(dag)
-
       }
-
     }
-&lt;environment: 0x7fca6bbab508&gt;</code></pre>
+&lt;environment: 0x7fd0316e3660&gt;</code></pre>
 </div>
 </div>
 <div id="variables-and-free-states" class="section level2">
 <h2 class="hasAnchor">
 <a href="#variables-and-free-states" class="anchor"></a>variables and free states</h2>
 <p>Hamiltonian Monte Carlo (HMC) requires all of the parameters to be transformed to a continuous scale for sampling. Variable nodes are therefore converted to tensors by first defining a ‘free’ (unconstrained) version of themselves as a tensor, and then applying a transformation function to convert them back to the scale of interest.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>a &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/variable.html">variable</a></span>(<span class="dt">lower =</span> <span class="dv">0</span>)</span>
-<span id="cb21-2"><a href="#cb21-2"></a>a_node &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/attr">attr</a></span>(a, <span class="st">"node"</span>)</span>
-<span id="cb21-3"><a href="#cb21-3"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(a_node)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">variable</span>(<span class="at">lower =</span> <span class="dv">0</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>a_node <span class="ot">&lt;-</span> <span class="fu">attr</span>(a, <span class="st">"node"</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(a_node)</span></code></pre></div>
 <pre><code>[1] "variable_node" "node"          "R6"           </code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>a_node<span class="op">$</span>tf_from_free</span></code></pre></div>
-<pre><code>function(x, env) {
-
-      upper &lt;- self$upper
-      lower &lt;- self$lower
-
-      if (self$constraint == "none") {
-
-        y &lt;- x
-
-      } else if (self$constraint == "both") {
-
-        y &lt;- tf$nn$sigmoid(x) * fl(upper - lower) + fl(lower)
-
-      } else if (self$constraint == "low") {
-
-        y &lt;- fl(upper) - tf$exp(x)
-
-      } else if (self$constraint == "high") {
-
-        y &lt;- tf$exp(x) + fl(lower)
-
-      } else {
-
-        y &lt;- x
-
-      }
-
-      y
-
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>a_node<span class="sc">$</span>tf_from_free</span></code></pre></div>
+<pre><code>function(x) {
+      tf_bijector &lt;- self$create_tf_bijector()
+      tf_bijector$forward(x)
     }
-&lt;environment: 0x7fca6f3217a8&gt;</code></pre>
+&lt;environment: 0x7fd032a20b38&gt;</code></pre>
 </div>
 <div id="distributions" class="section level2">
 <h2 class="hasAnchor">
 <a href="#distributions" class="anchor"></a>distributions</h2>
 <p>distribution nodes are node objects just like the others, but they are not <em>directly</em> associated with greta arrays. Instead, greta arrays may have a distribution node in their <code>distribution</code> slot to indicate that their values are assumed to follow that distribution. The distribution node will also be listed as a child node, and likewise the ‘target node’ will be listed as a child of the distribution. Distribution nodes also have child nodes (data, variables or operations) representing their parameters.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>b &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb25-2"><a href="#cb25-2"></a>b_node &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/attr">attr</a></span>(b, <span class="st">"node"</span>)</span>
-<span id="cb25-3"><a href="#cb25-3"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(b_node)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>b_node <span class="ot">&lt;-</span> <span class="fu">attr</span>(b, <span class="st">"node"</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(b_node)</span></code></pre></div>
 <pre><code>[1] "variable_node" "node"          "R6"           </code></pre>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(b_node<span class="op">$</span>distribution)</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(b_node<span class="sc">$</span>distribution)</span></code></pre></div>
 <pre><code>[1] "normal_distribution" "distribution_node"   "node"               
 [4] "R6"                 </code></pre>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="co"># b is the target of its own distribution</span></span>
-<span id="cb29-2"><a href="#cb29-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(b_node<span class="op">$</span>distribution<span class="op">$</span>target)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># b is the target of its own distribution</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(b_node<span class="sc">$</span>distribution<span class="sc">$</span>target)</span></code></pre></div>
 <pre><code>[1] "variable_node" "node"          "R6"           </code></pre>
 <p>When they define themselves as tensors, distribution nodes define the log density of their target node/tensor given the tensors representing their parameters.</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>b_node<span class="op">$</span>distribution<span class="op">$</span>tf</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>b_node<span class="sc">$</span>distribution<span class="sc">$</span>tf</span></code></pre></div>
 <pre><code>function(dag) {
 
-      # for distributions, tf assigns a *function* to execute the density
-      density &lt;- function(tf_target) {
-
-        # fetch inputs
-        tf_parameters &lt;- self$tf_fetch_parameters(dag)
-
-        # ensure x and the parameters are all expanded to have the n_chains
-        # batch dimension, if any have it
-        target_params &lt;- match_batches(c(list(tf_target), tf_parameters))
-        tf_target &lt;- target_params[[1]]
-        tf_parameters &lt;- target_params[-1]
-
-        # calculate log density
-        ld &lt;- self$tf_log_density_function(tf_target, tf_parameters, dag)
-
-        # check for truncation
-        if (!is.null(self$truncation))
-          ld &lt;- ld - self$tf_log_density_offset(tf_parameters)
-
-        ld
-
-      }
-
-      # assign the function to the environment
+      # assign the distribution object constructor function to the environment
       assign(dag$tf_name(self),
-             density,
-             envir = dag$tf_environment)
-
+        self$tf_distrib,
+        envir = dag$tf_environment
+      )
     }
-&lt;environment: 0x7fca6f834660&gt;</code></pre>
+&lt;environment: 0x7fd0323e2ae8&gt;</code></pre>
 <p>If the distribution was truncated, the log density is normalised using the cumulative distribution function.</p>
 </div>
 <div id="joint-density" class="section level2">
@@ -348,8 +321,8 @@
 <a href="#joint-density" class="anchor"></a>Joint density</h2>
 <p>Those log-densities for these distributions are summed on the TensorFlow graph to create a Tensor for the joint log-density of the model. TensorFlow’s automatic gradient capabilities are then used to define a Tensor for the gradient of the log-density with respect to each parameter in the model.</p>
 <p>The <code>dag</code> R6 object contained within the model then exposes methods to send parameters to the TensorFlow graph and return the joint density and gradient.</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>model &lt;-<span class="st"> </span><span class="kw"><a href="../../reference/model.html">model</a></span>(b)</span>
-<span id="cb33-2"><a href="#cb33-2"></a>model<span class="op">$</span>dag<span class="op">$</span>send_parameters</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">model</span>(b)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>dag<span class="sc">$</span>send_parameters</span></code></pre></div>
 <pre><code>function(parameters) {
 
       # reshape to a row vector if needed
@@ -360,30 +333,32 @@
       # create a feed dict in the TF environment
       parameter_list &lt;- list(free_state = parameters)
 
+      # set the batch size to match parameters
+      self$set_tf_data_list("batch_size", nrow(parameters))
+
       self$build_feed_dict(parameter_list)
-
     }
-&lt;environment: 0x7fca6dbf5e18&gt;</code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>model<span class="op">$</span>dag<span class="op">$</span>log_density</span></code></pre></div>
+&lt;environment: 0x7fd03289b008&gt;</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>dag<span class="sc">$</span>log_density</span></code></pre></div>
 <pre><code>function() {
-
       res &lt;- cleanly(self$tf_sess_run(joint_density_adj))
 
-      if (inherits(res, "error"))
+      if (inherits(res, "error")) {
         res &lt;- NA
+      }
 
       res
-
     }
-&lt;environment: 0x7fca6dbf5e18&gt;</code></pre>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>model<span class="op">$</span>dag<span class="op">$</span>gradients</span></code></pre></div>
+&lt;environment: 0x7fd03289b008&gt;</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>dag<span class="sc">$</span>gradients</span></code></pre></div>
 <pre><code>NULL</code></pre>
 <p>These methods are used to check the validity of initial values, sampling is now done using samplers from tensorflow probability, which require a function mapping from the overall free state to the joint log density. That’s created with the <code>generate_log_prob_function</code> method:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>model<span class="op">$</span>dag<span class="op">$</span>generate_log_prob_function</span></code></pre></div>
-<pre><code>function(which = c("adjusted",
-                                                    "unadjusted",
-                                                    "both")) {
-
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>dag<span class="sc">$</span>generate_log_prob_function</span></code></pre></div>
+<pre><code>function(which = c(
+                                            "adjusted",
+                                            "unadjusted",
+                                            "both"
+                                          )) {
       which &lt;- match.arg(which)
 
       function(free_state) {
@@ -395,8 +370,10 @@
 
         # copy the placeholders over here, so they aren't recreated
         data_names &lt;- self$get_tf_names(types = "data")
-        for (name in data_names)
+        for (name in data_names) {
           tfe[[name]] &lt;- tfe_old[[name]]
+        }
+        tfe$batch_size &lt;- tfe_old$batch_size
 
         # put the free state in the environment, and build out the tf graph
         tfe$free_state &lt;- free_state
@@ -405,21 +382,22 @@
         # define the densities
         self$define_joint_density()
 
-        objectives &lt;- list(adjusted = tfe$joint_density_adj,
-                           unadjusted = tfe$joint_density)
+        objectives &lt;- list(
+          adjusted = tfe$joint_density_adj,
+          unadjusted = tfe$joint_density
+        )
 
         # return either of the densities, or a list of both
         result &lt;- switch(which,
-                         adjusted = objectives$adjusted,
-                         unadjusted = objectives$unadjusted,
-                         both = objectives)
+          adjusted = objectives$adjusted,
+          unadjusted = objectives$unadjusted,
+          both = objectives
+        )
 
         result
-
       }
-
     }
-&lt;environment: 0x7fca6dbf5e18&gt;</code></pre>
+&lt;environment: 0x7fd03289b008&gt;</code></pre>
 </div>
   </div>
 

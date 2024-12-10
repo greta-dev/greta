@@ -1,9 +1,7 @@
-context("greta_mcmc_list class")
+set.seed(2020 - 02 - 11)
 
 test_that("draws and raw draws should have the right iteration numbering", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   samples <- 1000
   warmup <- 100
@@ -19,7 +17,7 @@ test_that("draws and raw draws should have the right iteration numbering", {
   expect_equal(end(raw_draws), samples)
 
   # same after calculating
-  y <- z ^ 2
+  y <- z^2
 
   y_draws <- calculate(y, values = draws)
   expect_equal(start(y_draws), 1)
@@ -28,13 +26,10 @@ test_that("draws and raw draws should have the right iteration numbering", {
   raw_draws <- get_model_info(y_draws)$raw_draws
   expect_equal(start(raw_draws), 1)
   expect_equal(end(raw_draws), samples)
-
 })
 
 test_that("window works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   z <- normal(0, 1)
   m <- model(z)
@@ -59,7 +54,7 @@ test_that("window works", {
   expect_identical(times, seq(start, end, by = thin))
 
   # calculate should retain this info too
-  z2 <- z ^ 2
+  z2 <- z^2
   z2_draws_sub <- calculate(z2, values = draws_sub)
 
   expect_s3_class(z2_draws_sub, "greta_mcmc_list")
@@ -67,13 +62,10 @@ test_that("window works", {
   expect_identical(end(z2_draws_sub), end)
   z2_times <- as.vector(time(z2_draws_sub))
   expect_identical(z2_times, seq(start, end, by = thin))
-
 })
 
 test_that("windowing does not have spooky effects", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   chains <- 4
   samples <- 100
@@ -81,10 +73,11 @@ test_that("windowing does not have spooky effects", {
   x <- normal(0, 1)
   m <- model(x)
   draws <- mcmc(m,
-                warmup = 100,
-                n_samples = samples,
-                chains = chains,
-                verbose = FALSE)
+    warmup = 100,
+    n_samples = samples,
+    chains = chains,
+    verbose = FALSE
+  )
 
   raw_draws <- get_model_info(draws)$raw_draws
 
@@ -102,5 +95,58 @@ test_that("windowing does not have spooky effects", {
   raw_draws <- get_model_info(draws)$raw_draws
   expect_equal(dim(as.matrix(draws)), c(n_samples, 1))
   expect_equal(dim(as.matrix(raw_draws)), c(n_samples, 1))
+})
 
+test_that("greta_mcmc_list print method works", {
+  skip_if_not(check_tf_version())
+  samples <- 10
+  warmup <- 10
+  z <- normal(0, 1)
+  m <- model(z)
+  tensorflow::set_random_seed(2024-07-29-1217)
+  draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
+  expect_snapshot(
+    draws
+  )
+})
+
+test_that("greta_mcmc_list print method works with larger sample size", {
+  skip_if_not(check_tf_version())
+  samples <- 20
+  warmup <- 20
+  z <- normal(0, 1)
+  m <- model(z)
+  tensorflow::set_random_seed(2024-07-30-1233)
+  draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
+  expect_snapshot(
+    draws
+  )
+  expect_snapshot(
+    print(draws, n = 20)
+  )
+  expect_snapshot(
+    print(draws, n = 19)
+  )
+  expect_snapshot(
+    print(draws, n = 21)
+  )
+})
+
+test_that("greta_mcmc_list print method works with smaller sample size", {
+  skip_if_not(check_tf_version())
+  samples <- 2
+  warmup <- 2
+  z <- normal(0, 1)
+  m <- model(z)
+  tensorflow::set_random_seed(2024-07-30-34)
+  draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
+  expect_snapshot(
+    draws
+  )
+  expect_snapshot(
+    print(draws, n = 1)
+  )
+  expect_snapshot(
+    print(draws, n = 3)
+  )
 })

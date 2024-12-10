@@ -42,10 +42,10 @@
 
 <meta property="og:title" content="create greta variables — variable" />
 <meta property="og:description" content="variable() creates greta arrays representing unknown
-  parameters, to be learned during model fitting. These parameters are not
-  associated with a probability distribution. To create a variable greta
-  array following a specific probability distribution, see
-  distributions." />
+parameters, to be learned during model fitting. These parameters are not
+associated with a probability distribution. To create a variable greta
+array following a specific probability distribution, see
+distributions()." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -136,6 +136,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -183,40 +189,54 @@
 
     <div class="ref-description">
     <p><code>variable()</code> creates greta arrays representing unknown
-  parameters, to be learned during model fitting. These parameters are not
-  associated with a probability distribution. To create a variable greta
-  array following a specific probability distribution, see
-  <code><a href='distributions.html'>distributions</a></code>.</p>
+parameters, to be learned during model fitting. These parameters are not
+associated with a probability distribution. To create a variable greta
+array following a specific probability distribution, see
+<code><a href='distributions.html'>distributions()</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>variable</span>(<span class='kw'>lower</span> <span class='kw'>=</span> -<span class='fl'>Inf</span>, <span class='kw'>upper</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
+    <pre class="usage"><span class='fu'>variable</span>(<span class='kw'>lower</span> <span class='kw'>=</span> -<span class='fl'>Inf</span>, <span class='kw'>upper</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+<span class='fu'>cholesky_variable</span>(<span class='no'>dim</span>, <span class='kw'>correlation</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='fu'>simplex_variable</span>(<span class='no'>dim</span>)
+
+<span class='fu'>ordered_variable</span>(<span class='no'>dim</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>lower, upper</th>
-      <td><p>scalar values giving optional limits to variables. These
-must be specified as numerics, they cannot be greta arrays (though see
-details for a workaround). They can be set to <code><a href='https://www.rdocumentation.org/packages/base/topics/Arithmetic'>-Inf</a></code> (<code>lower</code>) or
-<code>Inf</code> (<code>upper</code>), though <code>lower</code> must always be less than
-<code>upper</code>.</p></td>
+      <td><p>optional limits to variables. These must be specified as
+numerics, they cannot be greta arrays (though see details for a
+workaround). They can be set to <code><a href='https://www.rdocumentation.org/packages/base/topics/Arithmetic'>-Inf</a></code> (<code>lower</code>) or <code>Inf</code>
+(<code>upper</code>), though <code>lower</code> must always be less than <code>upper</code>.</p></td>
     </tr>
     <tr>
       <th>dim</th>
       <td><p>the dimensions of the greta array to be returned, either a scalar
 or a vector of positive integers. See details.</p></td>
     </tr>
+    <tr>
+      <th>correlation</th>
+      <td><p>whether to return a cholesky factor corresponding to a
+correlation matrix (diagonal elements equalling 1, off-diagonal elements
+between -1 and 1).</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code>lower</code> and <code>upper</code> must be fixed, they cannot be greta
-  arrays. This ensures these values can always be transformed to a continuous
-  scale to run the samplers efficiently. However, a variable parameter with
-  dynamic limits can always be created by first defining a variable
-  constrained between 0 and 1, and then transforming it to the required
-  scale. See below for an example.</p>
+arrays. This ensures these values can always be transformed to a continuous
+scale to run the samplers efficiently. However, a variable parameter with
+dynamic limits can always be created by first defining a variable
+constrained between 0 and 1, and then transforming it to the required
+scale. See below for an example.</p>
+<p>The constraints in <code>simplex_variable()</code> and <code>ordered_variable()</code>
+operate on the final dimension, which must have more than 1 element.
+Passing in a scalar value for <code>dim</code> therefore results in a row-vector.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -231,9 +251,27 @@ or a vector of positive integers. See details.</p></td>
 
 <span class='co'># create a variable, with lower and upper defined by greta arrays</span>
 <span class='no'>min</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='no'>iris</span>$<span class='no'>Sepal.Length</span>)
-<span class='no'>max</span> <span class='kw'>&lt;-</span> <span class='no'>min</span> ^ <span class='fl'>2</span>
+<span class='no'>max</span> <span class='kw'>&lt;-</span> <span class='no'>min</span>^<span class='fl'>2</span>
 <span class='no'>d</span> <span class='kw'>&lt;-</span> <span class='no'>min</span> + <span class='fu'>variable</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>iris</span>)) * (<span class='no'>max</span> - <span class='no'>min</span>)
-<span class='co'># }</span></pre>
+<span class='co'># }</span><div class='input'><span class='co'># 4x4 cholesky factor variables for covariance and correlation matrices</span>
+<span class='no'>e_cov</span> <span class='kw'>&lt;-</span> <span class='fu'>cholesky_variable</span>(<span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>4</span>)
+<span class='no'>e_correl</span> <span class='kw'>&lt;-</span> <span class='fu'>cholesky_variable</span>(<span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>correlation</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+
+<span class='co'># these can be converted to symmetic matrices with chol2symm</span>
+<span class='co'># (equivalent to t(e_cov) %*% e_cov, but more efficient)</span>
+<span class='no'>cov</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='chol2symm.html'>chol2symm</a></span>(<span class='no'>e_cov</span>)
+<span class='no'>correl</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='chol2symm.html'>chol2symm</a></span>(<span class='no'>e_correl</span>)
+<span class='co'># a 4D simplex (sums to 1, all values positive)</span>
+<span class='no'>f</span> <span class='kw'>&lt;-</span> <span class='fu'>simplex_variable</span>(<span class='fl'>4</span>)
+
+<span class='co'># a 4D simplex on the final dimension</span>
+<span class='no'>g</span> <span class='kw'>&lt;-</span> <span class='fu'>simplex_variable</span>(<span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>4</span>))
+<span class='co'># a 2D variable with each element higher than the one in the cell to the left</span>
+<span class='no'>h</span> <span class='kw'>&lt;-</span> <span class='fu'>ordered_variable</span>(<span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>4</span>))
+
+<span class='co'># more constraints can be added with monotonic transformations, e.g. an</span>
+<span class='co'># ordered positive variable</span>
+<span class='no'>i</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Log'>exp</a></span>(<span class='fu'>ordered_variable</span>(<span class='fl'>5</span>))</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

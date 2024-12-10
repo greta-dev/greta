@@ -42,10 +42,10 @@
 
 <meta property="og:title" content="Functions overloaded by greta — overloaded" />
 <meta property="og:description" content="greta provides a wide range of methods to apply common R
-  functions and operations to greta_array objects. A few of these
-  functions and operators are not associated with a class system, so they are
-  overloaded here. This should not affect normal use of these functions, but
-  they need to be documented to satisfy CRAN's check." />
+functions and operations to greta_array objects. A few of these
+functions and operators are not associated with a class system, so they are
+overloaded here. This should not affect normal use of these functions, but
+they need to be documented to satisfy CRAN's check." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -136,6 +136,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -183,10 +189,10 @@
 
     <div class="ref-description">
     <p>greta provides a wide range of methods to apply common R
-  functions and operations to <code>greta_array</code> objects. A few of these
-  functions and operators are not associated with a class system, so they are
-  overloaded here. This should not affect normal use of these functions, but
-  they need to be documented to satisfy CRAN's check.</p>
+functions and operations to <code>greta_array</code> objects. A few of these
+functions and operators are not associated with a class system, so they are
+overloaded here. This should not affect normal use of these functions, but
+they need to be documented to satisfy CRAN's check.</p>
     </div>
 
     <pre class="usage"><span class='no'>x</span> <span class='kw'>%*%</span> <span class='no'>y</span>
@@ -219,10 +225,18 @@
 
 <span class='fu'>rdist</span>(<span class='no'>x1</span>, <span class='kw'>x2</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>compact</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
-<span class='fu'>abind</span>(<span class='no'>...</span>, <span class='kw'>along</span> <span class='kw'>=</span> <span class='no'>N</span>, <span class='kw'>rev.along</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>new.names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>force.array</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>make.names</span> <span class='kw'>=</span> <span class='no'>use.anon.names</span>,
-  <span class='kw'>use.anon.names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>use.first.dimnames</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>hier.names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>use.dnns</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+<span class='fu'>abind</span>(
+  <span class='no'>...</span>,
+  <span class='kw'>along</span> <span class='kw'>=</span> <span class='no'>N</span>,
+  <span class='kw'>rev.along</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>new.names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>force.array</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>make.names</span> <span class='kw'>=</span> <span class='no'>use.anon.names</span>,
+  <span class='kw'>use.anon.names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>use.first.dimnames</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>hier.names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>use.dnns</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)
 
 <span class='fu'>diag</span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>nrow</span>, <span class='no'>ncol</span>)</pre>
 
@@ -235,11 +249,19 @@
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Note that, since R 3.1, the LINPACK argument is defunct and silently ignored.
+The argument is only included for compatibility with the base functions
+that call it.</p>
+<p>To find the original help file for these overloaded functions, search for
+the function, e.g., <code>?cov2cor</code> and select the non-greta function.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#details">Details</a></li>
     </ul>
 
   </div>

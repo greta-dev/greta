@@ -1,19 +1,11 @@
-citHeader("To cite greta in publications use:")
-
-citEntry(entry = "Article",
-  title        = "{greta}: simple and scalable statistical modelling in R",
-  author       = personList(as.person("Nick Golding")),
-  journal      = "Journal of Open Source Software",
-  year         = "2019",
-  volume       = "4",
-  number       = "40",
-  pages        = "1601",
-  url          = "http://dx.doi.org/10.21105/joss.01601",
-  doi          = "10.21105/joss.01601",
-
-  textVersion  =
-  paste("Nick Golding (2019).",
-        "greta: simple and scalable statistical modelling in R.",
-        "Journal of Open Source Software, 4(40), 1601.",
-        "URL http://dx.doi.org/10.21105/joss.01601.")
+bibentry(
+  bibtype  = "Article",
+  title    = "{greta}: simple and scalable statistical modelling in R",
+  author   = "Nick Golding",
+  journal  = "Journal of Open Source Software",
+  year     = 2019,
+  volume   = 4,
+  number   = 40,
+  pages    = 1601,
+  doi      = "10.21105/joss.01601"
 )

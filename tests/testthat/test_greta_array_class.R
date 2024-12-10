@@ -1,9 +1,5 @@
-context("greta_array class")
-
 test_that("print and summary work", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   ga_data <- as_data(matrix(1:9, nrow = 3))
   ga_stochastic <- normal(0, 1)
@@ -11,77 +7,57 @@ test_that("print and summary work", {
 
   # data arrays
   # print method
-  expected_output <- paste0("greta array (data)\n\n     [,1] [,2] [,3]\n[1,]",
-                            "    1    4    7\n[2,]    2    5    8\n[3,]    3",
-                            "    6    9")
-  result <- evaluate_promise(ga_data, print = TRUE)
-  expect_identical(result$output, expected_output)
+  expect_snapshot(
+    ga_data
+  )
 
   # summary method
-  expected_output <- paste0("'data' greta array with 9 elements (3 x 3)  \n\n",
-                            "       V1            V2            V3     \n Min.",
-                            "   :1.0   Min.   :4.0   Min.   :7.0  \n 1st",
-                            " Qu.:1.5   1st Qu.:4.5   1st Qu.:7.5  \n Median",
-                            " :2.0   Median :5.0   Median :8.0  \n Mean   :2.0",
-                            "   Mean   :5.0   Mean   :8.0  \n 3rd Qu.:2.5   ",
-                            "3rd Qu.:5.5   3rd Qu.:8.5  \n Max.   :3.0   Max.",
-                            "   :6.0   Max.   :9.0  ")
-  result <- evaluate_promise(summary(ga_data), print = TRUE)
-  expect_identical(result$output, expected_output)
-
+  expect_snapshot(
+    summary(ga_data)
+  )
   # stochastic arrays
   # print method
-  expected_output <- paste("greta array (variable following a normal",
-                           "distribution)\n\n     [,1]\n[1,]  ?  ")
-  result <- evaluate_promise(ga_stochastic, print = TRUE)
-  expect_identical(result$output, expected_output)
+  expect_snapshot(
+    ga_stochastic
+  )
 
   # summary method
-  expected_output <- paste("'variable' greta array with 1 element following",
-                           "a normal distribution \n\n  (values currently",
-                           "unknown)")
-  result <- evaluate_promise(summary(ga_stochastic), print = TRUE)
-  expect_identical(result$output, expected_output)
+  expect_snapshot(
+    summary(ga_stochastic)
+  )
 
   # operation arrays
   # print method
-  expected_output <- paste0("greta array (operation)\n\n     [,1] [,2] [,3]\n",
-                            "[1,]  ?    ?    ?  \n[2,]  ?    ?    ?  \n[3,]",
-                            "  ?    ?    ?  ")
-  result <- evaluate_promise(ga_operation, print = TRUE)
-  expect_identical(result$output, expected_output)
+  expect_snapshot(
+    ga_operation
+  )
 
   # summary method
-  expected_output <- paste0("'operation' greta array with 9 elements (3 x 3)",
-                            "  \n\n  (values currently unknown)")
-  result <- evaluate_promise(summary(ga_operation), print = TRUE)
-  expect_identical(result$output, expected_output)
+  expect_snapshot(
+    summary(ga_operation)
+  )
 
   # assigned arrays (only partly unknown)
   z <- zeros(3, 3)
   z[, 1] <- ones(3)
   z[, 2] <- normal(0, 1, 3)
-  expected_output <- paste0("greta array (operation)\n\n     [,1] [,2] [,3]",
-                            "\n[1,] 1     ?   0   \n[2,] 1     ?   0   \n[3,]",
-                            " 1     ?   0   ")
-  result <- evaluate_promise(z, print = TRUE)
-  expect_identical(result$output, expected_output)
+
+  expect_snapshot(
+    z
+  )
 
   # assigned unknown arrays (only partly unknown)
-  n <- normal(0, 1, dim = c(3, 3)) ^ 2
+  n <- normal(0, 1, dim = c(3, 3))^2
   n[, 1] <- ones(3)
-  expected_output <- paste0("greta array (operation)\n\n     [,1] [,2] [,3]",
-                            "\n[1,] 1     ?    ?  \n[2,] 1     ?    ?  \n[3,]",
-                            " 1     ?    ?  ")
-  result <- evaluate_promise(n, print = TRUE)
-  expect_identical(result$output, expected_output)
+
+  expect_snapshot(
+    n
+  )
 
 })
 
 test_that("as.matrix works", {
-
   skip_if_not(check_tf_version())
-  source("helpers.R")
 
   # data
   d <- greta_array(0:1, dim = c(3, 3))
@@ -97,5 +73,50 @@ test_that("as.matrix works", {
   o <- v[1]
   o_mat <- as.matrix(o)
   expect_true(inherits(o_mat, "matrix"))
+})
+
+test_that("print method works for longer greta arrays",{
+  skip_if_not(check_tf_version())
+
+  ga_data_long <- as_data(matrix(1:20, ncol = 1))
+  ga_stochastic_long <- normal(0, 1, dim = 20)
+  ga_operation_long <- ga_data_long * ga_stochastic_long
+
+  expect_snapshot(
+    ga_data_long
+    )
+  expect_snapshot(
+    ga_stochastic_long
+    )
+  expect_snapshot(
+    ga_operation_long
+    )
+  expect_snapshot(
+    print(ga_data_long, n = 19)
+    )
+  expect_snapshot(
+    print(ga_data_long, n = 20)
+    )
+  expect_snapshot(
+    print(ga_data_long, n = 21)
+    )
+  expect_snapshot(
+    print(ga_stochastic_long, n = 19)
+    )
+  expect_snapshot(
+    print(ga_stochastic_long, n = 20)
+    )
+  expect_snapshot(
+    print(ga_stochastic_long, n = 21)
+    )
+  expect_snapshot(
+    print(ga_operation_long, n = 19)
+    )
+  expect_snapshot(
+    print(ga_operation_long, n = 20)
+    )
+  expect_snapshot(
+    print(ga_operation_long, n = 21)
+    )
 
 })

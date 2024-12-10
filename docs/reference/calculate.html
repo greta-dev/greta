@@ -42,9 +42,10 @@
 
 <meta property="og:title" content="calculate greta arrays given fixed values — calculate" />
 <meta property="og:description" content="Calculate the values that greta arrays would take, given
-  temporary values for the greta arrays on which they depend, and return them
-  as numeric R arrays. This can be used to check the behaviour of your model
-  or make predictions to new data after model fitting." />
+temporary, or simulated values for the greta arrays on which they depend.
+This can be used to check the behaviour of your model, make predictions to
+new data after model fitting, or simulate datasets from either the prior or
+posterior of your model." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -135,6 +136,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -182,26 +189,44 @@
 
     <div class="ref-description">
     <p>Calculate the values that greta arrays would take, given
-  temporary values for the greta arrays on which they depend, and return them
-  as numeric R arrays. This can be used to check the behaviour of your model
-  or make predictions to new data after model fitting.</p>
+temporary, or simulated values for the greta arrays on which they depend.
+This can be used to check the behaviour of your model, make predictions to
+new data after model fitting, or simulate datasets from either the prior or
+posterior of your model.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>calculate</span>(<span class='no'>target</span>, <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(), <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"double"</span>, <span class='st'>"single"</span>),
-  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>)</pre>
+    <pre class="usage"><span class='fu'>calculate</span>(
+  <span class='no'>...</span>,
+  <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(),
+  <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>precision</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='st'>"double"</span>, <span class='st'>"single"</span>),
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>100</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>target</th>
-      <td><p>a greta array for which to calculate the value</p></td>
+      <th>...</th>
+      <td><p>one or more greta_arrays for which to calculate the value</p></td>
     </tr>
     <tr>
       <th>values</th>
       <td><p>a named list giving temporary values of the greta arrays with
 which <code>target</code> is connected, or a <code>greta_mcmc_list</code> object
-returned by <code><a href='inference.html'>mcmc</a></code>.</p></td>
+returned by <code><a href='inference.html'>mcmc()</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>nsim</th>
+      <td><p>an optional positive integer scalar for the number of responses
+to simulate if stochastic greta arrays are present in the model - see
+Details.</p></td>
+    </tr>
+    <tr>
+      <th>seed</th>
+      <td><p>an optional seed to be used in set.seed immediately before the
+simulation so as to generate a reproducible sample</p></td>
     </tr>
     <tr>
       <th>precision</th>
@@ -217,17 +242,36 @@ reduce memory demands</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A numeric R array with the same dimensions as <code>target</code>, giving
-  the values it would take conditioned on the fixed values given by
-  <code>values</code>.</p>
+    <p>Values of the target greta array(s), given values of the greta arrays
+on which they depend (either specified in <code>values</code> or sampled from
+their priors). If <code>values</code> is a
+<code><a href='inference.html'>greta_mcmc_list()</a></code> and <code><a href='https://www.rdocumentation.org/packages/base/topics/assignOps'>nsim = NULL</a></code>, this will
+be a <code>greta_mcmc_list</code> object of posterior samples for the target
+greta arrays. Otherwise, the result will be a named list of numeric R
+arrays. If <code><a href='https://www.rdocumentation.org/packages/base/topics/assignOps'>nsim = NULL</a></code> the dimensions of returned numeric R arrays
+will be the same as the corresponding greta arrays, otherwise an additional
+dimension with <code>nsim</code> elements will be prepended, to represent
+multiple simulations.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The greta arrays named in <code>values</code> need not be variables, they
-  can also be other operations or even data.</p>
+can also be other operations or even data.</p>
 <p>At present, if <code>values</code> is a named list it must contain values for
-  <em>all</em> of the variable greta arrays with which <code>target</code> is
-  connected, even values are given for intermediate operations, or the target
-  doesn't depend on the variable. That may be relaxed in a future release.</p>
+<em>all</em> of the variable greta arrays with which <code>target</code> is
+connected, even values are given for intermediate operations, or the target
+doesn't depend on the variable. That may be relaxed in a future release.</p>
+<p>If the model contains stochastic greta arrays; those with a distribution,
+calculate can be used to sample from these distributions (and all greta
+arrays that depend on them) by setting the <code>nsim</code> argument to a
+positive integer for the required number of samples. If <code>values</code> is
+specified (either as a list of fixed values or as draws), those values will
+be used, and remaining variables will be sampled conditional on them.
+Observed data with distributions (i.e. response variables defined with
+<code><a href='distribution.html'>distribution()</a></code> can also be sampled, provided they are defined as
+greta arrays. This behaviour can be used for a number of tasks, like
+simulating datasets for known parameter sets, simulating parameters and
+data from a set of priors, or simulating datasets from a model posterior.
+See some examples of these below.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -235,8 +279,14 @@ reduce memory demands</p></td>
 <span class='co'># then calculate what value y would take for different values of x</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 <span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sum'>sum</a></span>(<span class='no'>x</span> ^ <span class='fl'>2</span>) + <span class='no'>a</span>
-<span class='fu'>calculate</span>(<span class='no'>y</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>, <span class='fl'>0.3</span>), <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>2</span>))
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sum'>sum</a></span>(<span class='no'>x</span>^<span class='fl'>2</span>) + <span class='no'>a</span>
+<span class='fu'>calculate</span>(<span class='no'>y</span>, <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>, <span class='fl'>0.3</span>), <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>2</span>))
+
+<span class='co'># by setting nsim, you can also sample values from their priors</span>
+<span class='fu'>calculate</span>(<span class='no'>y</span>, <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+
+<span class='co'># you can combine sampling and fixed values</span>
+<span class='fu'>calculate</span>(<span class='no'>y</span>, <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>2</span>), <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 
 <span class='co'># if the greta array only depends on data,</span>
 <span class='co'># you can pass an empty list to values (this is the default)</span>
@@ -248,40 +298,65 @@ reduce memory demands</p></td>
 <span class='no'>alpha</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
 <span class='no'>beta</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>)
 <span class='no'>sigma</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>lognormal</a></span>(<span class='fl'>1</span>, <span class='fl'>0.1</span>)
+<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_data.html'>as_data</a></span>(<span class='no'>iris</span>$<span class='no'>Petal.Width</span>)
 <span class='no'>mu</span> <span class='kw'>&lt;-</span> <span class='no'>alpha</span> + <span class='no'>iris</span>$<span class='no'>Petal.Length</span> * <span class='no'>beta</span>
-<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>iris</span>$<span class='no'>Petal.Width</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
+<span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>y</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sigma</span>)
 <span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>alpha</span>, <span class='no'>beta</span>, <span class='no'>sigma</span>)
 
-<span class='co'># calculate intermediate greta arrays, given some parameter values</span>
-<span class='fu'>calculate</span>(<span class='no'>mu</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>beta</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>0.5</span>))
-<span class='fu'>calculate</span>(<span class='no'>mu</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>alpha</span> <span class='kw'>=</span> -<span class='fl'>1</span>, <span class='kw'>beta</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>0.5</span>))
+<span class='co'># sample values of the parameters, or different observation data (y), from</span>
+<span class='co'># the priors (useful for prior # predictive checking) - see also</span>
+<span class='co'># ?simulate.greta_model</span>
+<span class='fu'>calculate</span>(<span class='no'>alpha</span>, <span class='no'>beta</span>, <span class='no'>sigma</span>, <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='fu'>calculate</span>(<span class='no'>y</span>, <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
+<span class='co'># calculate intermediate greta arrays, given some parameter values (useful</span>
+<span class='co'># for debugging models)</span>
+<span class='fu'>calculate</span>(<span class='no'>mu</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>beta</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>0.5</span>))
+<span class='fu'>calculate</span>(<span class='no'>mu</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>alpha</span> <span class='kw'>=</span> -<span class='fl'>1</span>, <span class='kw'>beta</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>0.5</span>))
 
-<span class='co'># fit the model then calculate samples at a new greta array</span>
+<span class='co'># simulate datasets given fixed parameter values</span>
+<span class='fu'>calculate</span>(<span class='no'>y</span>, <span class='kw'>values</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>alpha</span> <span class='kw'>=</span> -<span class='fl'>1</span>, <span class='kw'>beta</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>0.5</span>), <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+
+<span class='co'># you can use calculate in conjunction with posterior samples from MCMC, e.g.</span>
+<span class='co'># sampling different observation datasets, given a random set of these</span>
+<span class='co'># posterior samples - useful for posterior predictive model checks</span>
 <span class='no'>draws</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>500</span>)
-<span class='no'>petal_length_plot</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Extremes'>min</a></span>(<span class='no'>iris</span>$<span class='no'>Petal.Length</span>),
-                         <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Extremes'>max</a></span>(<span class='no'>iris</span>$<span class='no'>Petal.Length</span>),
-                         <span class='kw'>length.out</span> <span class='kw'>=</span> <span class='fl'>100</span>)
-<span class='no'>mu_plot</span> <span class='kw'>&lt;-</span> <span class='no'>alpha</span> + <span class='no'>petal_length_plot</span> * <span class='no'>beta</span>
-<span class='no'>mu_plot_draws</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='no'>draws</span>)
+<span class='fu'>calculate</span>(<span class='no'>y</span>, <span class='kw'>values</span> <span class='kw'>=</span> <span class='no'>draws</span>, <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
-<span class='co'># plot the draws</span>
+<span class='co'># you can use calculate on greta arrays created even after the inference on</span>
+<span class='co'># the model - e.g. to plot response curves</span>
+<span class='no'>petal_length_plot</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Extremes'>min</a></span>(<span class='no'>iris</span>$<span class='no'>Petal.Length</span>),
+  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Extremes'>max</a></span>(<span class='no'>iris</span>$<span class='no'>Petal.Length</span>),
+  <span class='kw'>length.out</span> <span class='kw'>=</span> <span class='fl'>100</span>
+)
+<span class='no'>mu_plot</span> <span class='kw'>&lt;-</span> <span class='no'>alpha</span> + <span class='no'>petal_length_plot</span> * <span class='no'>beta</span>
+<span class='no'>mu_plot_draws</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='kw'>values</span> <span class='kw'>=</span> <span class='no'>draws</span>)
 <span class='no'>mu_est</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='overloaded.html'>colMeans</a></span>(<span class='no'>mu_plot_draws</span><span class='kw'>[[</span><span class='fl'>1</span>]])
-<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='no'>mu_est</span> ~ <span class='no'>petal_length_plot</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"n"</span>,
-     <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='no'>mu_plot_draws</span><span class='kw'>[[</span><span class='fl'>1</span>]]))
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/plot'>plot</a></span>(<span class='no'>mu_est</span> ~ <span class='no'>petal_length_plot</span>,
+  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"n"</span>,
+  <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='no'>mu_plot_draws</span><span class='kw'>[[</span><span class='fl'>1</span>]])
+)
 <span class='fu'><a href='overloaded.html'>apply</a></span>(<span class='no'>mu_plot_draws</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='fl'>1</span>, <span class='no'>lines</span>,
-      <span class='kw'>x</span> <span class='kw'>=</span> <span class='no'>petal_length_plot</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/grDevices/topics/gray'>grey</a></span>(<span class='fl'>0.8</span>))
+  <span class='kw'>x</span> <span class='kw'>=</span> <span class='no'>petal_length_plot</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/grDevices/topics/gray'>grey</a></span>(<span class='fl'>0.8</span>)
+)
 <span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/lines'>lines</a></span>(<span class='no'>mu_est</span> ~ <span class='no'>petal_length_plot</span>, <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>)
 
 <span class='co'># trace_batch_size can be changed to trade off speed against memory usage</span>
 <span class='co'># when calculating. These all produce the same result, but have increasing</span>
 <span class='co'># memory requirements:</span>
-<span class='no'>mu_plot_draws_1</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='no'>draws</span>, <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='no'>mu_plot_draws_10</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='no'>draws</span>, <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>10</span>)
-<span class='no'>mu_plot_draws_inf</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>, <span class='no'>draws</span>, <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)
-<span class='co'># }</span><div class='input'>
-
-</div></pre>
+<span class='no'>mu_plot_draws_1</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>,
+  <span class='kw'>values</span> <span class='kw'>=</span> <span class='no'>draws</span>,
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>1</span>
+)
+<span class='no'>mu_plot_draws_10</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>,
+  <span class='kw'>values</span> <span class='kw'>=</span> <span class='no'>draws</span>,
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>10</span>
+)
+<span class='no'>mu_plot_draws_inf</span> <span class='kw'>&lt;-</span> <span class='fu'>calculate</span>(<span class='no'>mu_plot</span>,
+  <span class='kw'>values</span> <span class='kw'>=</span> <span class='no'>draws</span>,
+  <span class='kw'>trace_batch_size</span> <span class='kw'>=</span> <span class='fl'>Inf</span>
+)
+<span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <ul class="nav nav-pills nav-stacked">

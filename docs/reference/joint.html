@@ -42,8 +42,8 @@
 
 <meta property="og:title" content="define joint distributions — joint" />
 <meta property="og:description" content="joint combines univariate probability distributions
-  together into a multivariate (and a priori independent between
-  dimensions) joint distribution, either over a variable, or for fixed data." />
+together into a multivariate (and a priori independent between
+dimensions) joint distribution, either over a variable, or for fixed data." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -134,6 +134,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -181,8 +187,8 @@
 
     <div class="ref-description">
     <p><code>joint</code> combines univariate probability distributions
-  together into a multivariate (and <em>a priori</em> independent between
-  dimensions) joint distribution, either over a variable, or for fixed data.</p>
+together into a multivariate (and <em>a priori</em> independent between
+dimensions) joint distribution, either over a variable, or for fixed data.</p>
     </div>
 
     <pre class="usage"><span class='fu'>joint</span>(<span class='no'>...</span>, <span class='kw'>dim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
@@ -192,8 +198,9 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>...</th>
-      <td><p>variable greta arrays following probability distributions (see
-<code><a href='distributions.html'>distributions</a></code>); the components of the joint distribution.</p></td>
+      <td><p>scalar variable greta arrays following probability distributions
+(see <code><a href='distributions.html'>distributions()</a></code>); the components of the joint
+distribution.</p></td>
     </tr>
     <tr>
       <th>dim</th>
@@ -206,19 +213,19 @@ returned will be determined by the number of component distributions</p></td>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The component probability distributions must all be either
-  continuous or discrete, and must have the same dimensions.</p>
+continuous or discrete, and must have the same dimensions.</p>
 <p>This functionality is unlikely to be useful in most models, since the same
-  result can usually be achieved by combining variables with separate
-  distributions. It is included for situations where it is more convenient to
-  consider these as a single distribution, e.g. for use with
-  <code>distribution</code> or <code>mixture</code>.</p>
+result can usually be achieved by combining variables with separate
+distributions. It is included for situations where it is more convenient to
+consider these as a single distribution, e.g. for use with
+<code>distribution</code> or <code>mixture</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
 <span class='co'># an uncorrelated bivariate normal</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>joint</span>(<span class='fu'><a href='distributions.html'>normal</a></span>(-<span class='fl'>3</span>, <span class='fl'>0.5</span>), <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>3</span>, <span class='fl'>0.5</span>))
 <span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>x</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>500</span>))
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/plot'>plot</a></span>(<span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>500</span>))
 
 <span class='co'># joint distributions can be used to define densities over data</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='extract-replace-combine.html'>cbind</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>10</span>, <span class='fl'>2</span>, <span class='fl'>0.5</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Beta'>rbeta</a></span>(<span class='fl'>10</span>, <span class='fl'>3</span>, <span class='fl'>3</span>))
@@ -227,9 +234,10 @@ returned will be determined by the number of component distributions</p></td>
 <span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 <span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='distributions.html'>normal</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>, <span class='kw'>truncation</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>Inf</span>))
 <span class='fu'><a href='distribution.html'>distribution</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='fu'>joint</span>(<span class='fu'><a href='distributions.html'>normal</a></span>(<span class='no'>mu</span>, <span class='no'>sd</span>), <span class='fu'><a href='distributions.html'>beta</a></span>(<span class='no'>a</span>, <span class='no'>b</span>),
-                         <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+  <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fl'>10</span>
+)
 <span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='model.html'>model</a></span>(<span class='no'>mu</span>, <span class='no'>sd</span>, <span class='no'>a</span>, <span class='no'>b</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>))
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/plot'>plot</a></span>(<span class='fu'><a href='inference.html'>mcmc</a></span>(<span class='no'>m</span>))
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

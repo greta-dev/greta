@@ -42,7 +42,7 @@
 
 <meta property="og:title" content="convert other objects to greta arrays — as_data" />
 <meta property="og:description" content="define an object in an R session as a data greta array for use
-  as data in a greta model." />
+as data in a greta model." />
 <meta property="og:image" content="https://greta-stats.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -133,6 +133,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../articles/faq.html">FAQ</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -180,7 +186,7 @@
 
     <div class="ref-description">
     <p>define an object in an R session as a data greta array for use
-  as data in a greta model.</p>
+as data in a greta model.</p>
     </div>
 
     <pre class="usage"><span class='fu'>as_data</span>(<span class='no'>x</span>)</pre>
@@ -197,11 +203,11 @@
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code>as_data()</code> can currently convert R objects to greta_arrays if
-  they are numeric or logical vectors, matrices or arrays; or if they are
-  dataframes with only numeric (including integer) or logical elements.
-  Logical elements are always converted to numerics. R objects cannot be
-  converted if they contain missing (<code>NA</code>) or infinite (<code><a href='https://www.rdocumentation.org/packages/base/topics/Arithmetic'>-Inf</a></code> or
-  <code>Inf</code>) values.</p>
+they are numeric or logical vectors, matrices or arrays; or if they are
+dataframes with only numeric (including integer) or logical elements.
+Logical elements are always converted to numerics. R objects cannot be
+converted if they contain missing (<code>NA</code>) or infinite (<code><a href='https://www.rdocumentation.org/packages/base/topics/Arithmetic'>-Inf</a></code> or
+<code>Inf</code>) values.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
@@ -211,16 +217,19 @@
 <span class='no'>vec</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>10</span>)
 <span class='no'>mat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq_len</a></span>(<span class='fl'>3</span> * <span class='fl'>4</span>), <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 <span class='no'>arr</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/array'>array</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>TRUE</span>, <span class='fl'>FALSE</span>), <span class='fl'>2</span> * <span class='fl'>2</span> * <span class='fl'>2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>),
-             <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>2</span>))
+  <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>2</span>)
+)
 (<span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'>as_data</span>(<span class='no'>vec</span>))
 (<span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='fu'>as_data</span>(<span class='no'>mat</span>))
 (<span class='no'>c</span> <span class='kw'>&lt;-</span> <span class='fu'>as_data</span>(<span class='no'>arr</span>))
 
 <span class='co'># dataframes can also be coerced, provided all the columns are numeric,</span>
 <span class='co'># integer or logical</span>
-<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/data.frame'>data.frame</a></span>(<span class='kw'>x1</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>10</span>),
-                 <span class='kw'>x2</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fl'>1L</span>:<span class='fl'>10L</span>),
-                 <span class='kw'>x3</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>TRUE</span>, <span class='fl'>FALSE</span>), <span class='fl'>10</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>))
+<span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/data.frame'>data.frame</a></span>(
+  <span class='kw'>x1</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>10</span>),
+  <span class='kw'>x2</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fl'>1L</span>:<span class='fl'>10L</span>),
+  <span class='kw'>x3</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fu'><a href='extract-replace-combine.html'>c</a></span>(<span class='fl'>TRUE</span>, <span class='fl'>FALSE</span>), <span class='fl'>10</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+)
 (<span class='no'>d</span> <span class='kw'>&lt;-</span> <span class='fu'>as_data</span>(<span class='no'>df</span>))
 <span class='co'># }</span></pre>
   </div>

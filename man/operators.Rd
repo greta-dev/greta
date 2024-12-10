@@ -5,14 +5,14 @@
 \title{arithmetic, logical and relational operators for greta arrays}
 \description{
 This is a list of currently implemented arithmetic, logical and
-  relational operators to combine greta arrays into probabilistic models.
-  Also see \link{functions} and \link{transforms}.
+relational operators to combine greta arrays into probabilistic models.
+Also see \link{functions} and \link{transforms}.
 }
 \details{
 greta's operators are used just like R's the standard arithmetic,
-  logical and relational operators, but they return other greta arrays. Since
-  the operations are only carried during sampling, the greta array objects
-  have unknown values.
+logical and relational operators, but they return other greta arrays. Since
+the operations are only carried during sampling, the greta array objects
+have unknown values.
 }
 \section{Usage}{
  \preformatted{

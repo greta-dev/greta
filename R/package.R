@@ -1,5 +1,3 @@
-# package file
-
 #' greta: simple and scalable statistical modelling in R
 #' @name greta
 #'
@@ -12,12 +10,11 @@
 #'   clusters or on GPUs.
 #'
 #'   See the simple example below, and take a look at the
-#'   \href{https://greta-stats.org}{greta website} for more information
+#'   [greta website](https://greta-stats.org) for more information
 #'   including
-#'   \href{https://greta-stats.org/articles/get_started.html}{tutorials} and
-#'   \href{https://greta-stats.org/articles/example_models.html}{examples}.
+#'   [tutorials](https://greta-stats.org/articles/get_started.html) and
+#'   [examples](https://greta-stats.org/articles/example_models.html).
 #'
-#' @docType package
 #' @importFrom tensorflow tf
 #' @examples
 #' \dontrun{
@@ -36,29 +33,18 @@
 #' m <- model(int, coef, sd)
 #' draws <- mcmc(m, n_samples = 100)
 #' }
-NULL
+"_PACKAGE"
 
-# load tf probability
-tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
-
-# crate the node list object whenever the package is loaded
-.onLoad <- function(libname, pkgname) {  # nolint
-
-  # silence TF's CPU instructions message
-  Sys.setenv(TF_CPP_MIN_LOG_LEVEL = 2)
-
-  # silence messages about deprecation etc.
-  disable_tensorflow_logging()
-
-  # warn if TF version is bad
-  check_tf_version("startup")
-
-  # switch back to 0-based extraction in tensorflow, and don't warn about
-  # indexing with tensors
-  options(tensorflow.one_based_extract = FALSE)
-  options(tensorflow.extract.warn_tensors_passed_asis = FALSE)
-
-  # default float type
-  options(greta_tf_float = "float64")
-
-}
+# clear CRAN checks spotting floating global variables
+#' @importFrom utils globalVariables
+utils::globalVariables(
+  c("N",
+  "greta_deps_tf_tfp",
+  "greta_logfile",
+  "os",
+  "python_version_max",
+  "python_version_min",
+  "tf_version",
+  "tfp_version",
+  "greta")
+)

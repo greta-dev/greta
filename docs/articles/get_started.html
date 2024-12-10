@@ -129,7 +129,7 @@
       
       </header><hr style="height:5px; visibility:hidden;">
 <hr>
-<div class="row">
+<script src="get_started_files/header-attrs-2.11/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Get started with greta</h1>
@@ -143,41 +143,57 @@
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>You can install the stable version of greta from CRAN:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"greta"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"greta"</span>)</span></code></pre></div>
 <p>or the development version from GitHub using devtools:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"greta-dev/greta"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"greta-dev/greta"</span>)</span></code></pre></div>
 <p>then load the package</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(greta)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(greta)</span></code></pre></div>
 <hr>
-<div id="tensorflow" class="section level3">
+<div id="helper-functions-to-install-tensorflow" class="section level3">
 <h3 class="hasAnchor">
-<a href="#tensorflow" class="anchor"></a>TensorFlow</h3>
-<p>Before you can fit models with greta, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> python package (version 1.10.0 or higher) and the <a href="https://github.com/tensorflow/probability">tensorflow-probability</a> python package (version 0.3.0 or higher). greta exports <code><a href="https://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow()</a></code> from the <code>tensorflow</code> R package, which you can use to install the latest versions of these packages from within your R session. The best way to install these differs depending on how you installed Python.</p>
-<p>If you don’t yet have these installed, the startup message for the greta package provides instructions on how to install them for your system. If in doubt just follow those. If you want greta to run as fast as possible on your computer’s CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel’s MKL routines, which provide a 2-8 fold sampling speedup on most models.</p>
-<div id="anaconda-installation" class="section level4">
-<h4 class="hasAnchor">
-<a href="#anaconda-installation" class="anchor"></a>Anaconda installation</h4>
-<p>If you installed Python with Anaconda, you can install tensorflow with:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow</a></span>(<span class="dt">method =</span> <span class="st">"conda"</span>)</span></code></pre></div>
-<p>Anaconda doesn’t have a binary for TensorFlow Probability, but you can install it with the following command:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>reticulate<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/reticulate/topics/conda-tools">conda_install</a></span>(<span class="st">"r-tensorflow"</span>, <span class="st">"tensorflow-probability"</span>, <span class="dt">pip =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
-</div>
+<a href="#helper-functions-to-install-tensorflow" class="anchor"></a>Helper functions to install TensorFlow</h3>
+<p>Before you can fit models with <code>greta</code>, you will also need to have a working installation of Google’s <a href="https://www.tensorflow.org/">TensorFlow</a> python package (version 1.14.0) and the <a href="https://github.com/tensorflow/probability">tensorflow-probability</a> python package (version 0.7.0). In the future we will support different versions of Tensorflow and Tensorflow Probability, but currently we need these exact versions.</p>
+<p>To assist with installing these Python packages, <code>greta</code> provides an installation helper, <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>, which installs the exact pythons package versions needed. It also places these inside a “greta-env” conda environment. This isolates these exact python modules from other python installations, so that only <code>greta</code> will see them. This helps avoids installation issues, where previously you might update tensorflow on your computer and overwrite the current version needed by <code>greta</code>. Using this “greta-env” conda environment means installing other python packages should not be impact the Python packages needed by <code>greta</code>.</p>
+<p>If these python modules aren’t yet installed, when <code>greta</code> is used, it provides instructions on how to install them for your system. If in doubt follow those.</p>
+<!-- If you want `greta` to run as fast as possible on your computer's CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel's MKL routines, which provide a 2-8 fold sampling speedup on most models. -->
 <div id="standard-installation" class="section level4">
 <h4 class="hasAnchor">
-<a href="#standard-installation" class="anchor"></a>standard installation</h4>
-<p>If you installed python without Anaconda, you can install the latest versions of both packages with the following command:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow</a></span>(<span class="dt">extra_packages =</span> <span class="st">"tensorflow-probability"</span>)</span></code></pre></div>
-<p>You can also use <code><a href="https://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">install_tensorflow()</a></code> to install different versions of TensorFlow, including versions with GPU acceleration. If you’re having trouble with this step, <a href="https://tensorflow.rstudio.com/installation.html">this guide</a> may help.</p>
+<a href="#standard-installation" class="anchor"></a>Standard installation</h4>
+<p>If the previous installation helper did not work, you can try the following:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>reticulate<span class="sc">::</span><span class="fu">install_miniconda</span>()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>reticulate<span class="sc">::</span><span class="fu">conda_create</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">envname =</span> <span class="st">"greta-env"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">python_version =</span> <span class="st">"3.7"</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>reticulate<span class="sc">::</span><span class="fu">conda_install</span>(</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">envname =</span> <span class="st">"greta-env"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">packages =</span> <span class="fu">c</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>          <span class="st">"numpy==1.16.4"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>          <span class="st">"tensorflow-probability==0.7.0"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>          <span class="st">"tensorflow==1.14.0"</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      )</span></code></pre></div>
+<p>Which will install the python modules into a conda environment named “greta-env”.</p>
+<p>You can also not install these not into a special conda environment “greta-env”, like so:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>reticulate<span class="sc">::</span><span class="fu">install_miniconda</span>()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>reticulate<span class="sc">::</span><span class="fu">conda_install</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">packages =</span> <span class="fu">c</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>          <span class="st">"numpy==1.16.4"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>          <span class="st">"tensorflow-probability==0.7.0"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>          <span class="st">"tensorflow==1.14.0"</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      )</span></code></pre></div>
+<!-- You can also use `install_tensorflow()` to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation/) may help. -->
 <hr>
 </div>
 </div>
 <div id="diagrammer" class="section level3">
 <h3 class="hasAnchor">
 <a href="#diagrammer" class="anchor"></a>DiagrammeR</h3>
-<p>greta’s <a href="#plotting">plotting functionality</a> depends on the <a href="http://rich-iannone.github.io/DiagrammeR/">DiagrammeR package</a>. Because DiagrammeR depends on the <a href="http://igraph.org/r/">igraph</a> package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"igraph"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"DiagrammeR"</span>)</span></code></pre></div>
-<p>igraph can be difficult to install on some machines, due to dependencies on the <a href="https://CRAN.R-project.org/package=XML">XML</a> R package and libxml2 and gfortran software libraries. There are workarounds to these issues (e.g. <a href="http://r.789695.n4.nabble.com/Problem-installing-libxml2-under-Homebrew-td4748381.html">here</a> and <a href="https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-">here</a>) but if you can’t get it to work, you can still use greta for everything except plotting models.</p>
+<p>greta’s <a href="#plotting">plotting functionality</a> depends on the <a href="http://rich-iannone.github.io/DiagrammeR/">DiagrammeR package</a>. Because DiagrammeR depends on the <a href="https://igraph.org/r/">igraph</a> package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"igraph"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"DiagrammeR"</span>)</span></code></pre></div>
+<p>igraph can be difficult to install on some machines, due to dependencies on the <a href="https://CRAN.R-project.org/package=XML">XML</a> R package and libxml2 and gfortran software libraries. There are workarounds to these issues (e.g. <a href="https://stat.ethz.ch/pipermail/r-help//2018-February/451279.html">here</a> and <a href="https://askubuntu.com/questions/859256/how-to-install-gcc-7-or-clang-4-">here</a>) but if you can’t get it to work, you can still use greta for everything except plotting models.</p>
 <hr>
 </div>
 </div>
@@ -187,7 +203,7 @@
 <p>greta lets us build statistical models interactively in R, and then sample from them by MCMC. We build greta models with <em>greta array</em> objects, which behave much like R’s array, matrix and vector objects for numeric data. Like those numeric data objects, greta arrays can be manipulated with functions and mathematical operators to create new greta arrays.</p>
 <p>The key difference between greta arrays and numeric data objects is that when you do something to a greta array, greta <em>doesn’t calculate the values</em> of the new greta array. Instead, it just remembers what operation to do, and works out the size and shape of the result.</p>
 <p>For example, we can create a greta array <code>z</code> representing some data (a 3x3 matrix of 1s):</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>(z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">ones</a></span>(<span class="dv">3</span>, <span class="dv">3</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(z <span class="ot">&lt;-</span> <span class="fu">ones</span>(<span class="dv">3</span>, <span class="dv">3</span>))</span></code></pre></div>
 <pre><code>greta array (data)
 
      [,1] [,2] [,3]
@@ -195,7 +211,7 @@
 [2,]    1    1    1
 [3,]    1    1    1</code></pre>
 <p>we can then create a new greta array <code>z2</code> by doing something to <code>z</code>:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>(z2 &lt;-<span class="st"> </span>z <span class="op">+</span><span class="st"> </span>z <span class="op">^</span><span class="st"> </span><span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(z2 <span class="ot">&lt;-</span> z <span class="sc">+</span> z <span class="sc">^</span> <span class="dv">2</span>)</span></code></pre></div>
 <pre><code>greta array (operation)
 
      [,1] [,2] [,3]
@@ -204,14 +220,14 @@
 [3,]  ?    ?    ?  </code></pre>
 <p>greta knows the result must also be a 3x3 matrix, but it doesn’t try to calculate the results. Instead it treats the new greta array <code>z2</code> like a placeholder, for which it will calculate the results later.</p>
 <p>Because greta only creates <em>placeholders</em> when we’re building our model, we can construct models using greta arrays that represent unknown variables. For example, if we create a new greta array <code>a</code> representing some unknown values, we can still manipulate it as though it were data:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>(a &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>(<span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">3</span>, <span class="dv">3</span>)))</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(a <span class="ot">&lt;-</span> <span class="fu">variable</span>(<span class="at">dim =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>)))</span></code></pre></div>
 <pre><code>greta array (variable)
 
      [,1] [,2] [,3]
 [1,]  ?    ?    ?  
 [2,]  ?    ?    ?  
 [3,]  ?    ?    ?  </code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>(a2 &lt;-<span class="st"> </span>a <span class="op">+</span><span class="st"> </span>a <span class="op">^</span><span class="st"> </span><span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(a2 <span class="ot">&lt;-</span> a <span class="sc">+</span> a <span class="sc">^</span> <span class="dv">2</span>)</span></code></pre></div>
 <pre><code>greta array (operation)
 
      [,1] [,2] [,3]
@@ -228,41 +244,41 @@
 <a href="#building-a-model" class="anchor"></a>Building a model</h2>
 <p>The rest of the vignette explains step-by-step how to build, visualise and fit a model with greta. We’ll be stepping through a model for linear regression between two of the variables in the <a href="https://en.wikipedia.org/wiki/Iris_flower_data_set"><code>iris</code></a> dataset, which is included with base R. The model is <em>Bayesian</em> (we specify priors over the variables), though it is also possible to do frequentist (no priors) inference in greta, using <code><a href="../reference/variable.html">variable()</a></code> instead of a probability distribution to create random variables.</p>
 <p>Here’s the whole script to specify and fit the model:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(greta)</span>
-<span id="cb16-2"><a href="#cb16-2"></a></span>
-<span id="cb16-3"><a href="#cb16-3"></a><span class="co"># data</span></span>
-<span id="cb16-4"><a href="#cb16-4"></a>x &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(iris<span class="op">$</span>Petal.Length)</span>
-<span id="cb16-5"><a href="#cb16-5"></a>y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(iris<span class="op">$</span>Sepal.Length)</span>
-<span id="cb16-6"><a href="#cb16-6"></a></span>
-<span id="cb16-7"><a href="#cb16-7"></a><span class="co"># variables and priors</span></span>
-<span id="cb16-8"><a href="#cb16-8"></a>int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb16-9"><a href="#cb16-9"></a>coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">3</span>)</span>
-<span id="cb16-10"><a href="#cb16-10"></a>sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">student</a></span>(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</span>
-<span id="cb16-11"><a href="#cb16-11"></a></span>
-<span id="cb16-12"><a href="#cb16-12"></a><span class="co"># operations</span></span>
-<span id="cb16-13"><a href="#cb16-13"></a>mean &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>x</span>
-<span id="cb16-14"><a href="#cb16-14"></a></span>
-<span id="cb16-15"><a href="#cb16-15"></a><span class="co"># likelihood</span></span>
-<span id="cb16-16"><a href="#cb16-16"></a><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mean, sd)</span>
-<span id="cb16-17"><a href="#cb16-17"></a></span>
-<span id="cb16-18"><a href="#cb16-18"></a><span class="co"># defining the model</span></span>
-<span id="cb16-19"><a href="#cb16-19"></a>m &lt;-<span class="st"> </span><span class="kw"><a href="../reference/model.html">model</a></span>(int, coef, sd)</span>
-<span id="cb16-20"><a href="#cb16-20"></a></span>
-<span id="cb16-21"><a href="#cb16-21"></a><span class="co"># plotting</span></span>
-<span id="cb16-22"><a href="#cb16-22"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(m)</span>
-<span id="cb16-23"><a href="#cb16-23"></a></span>
-<span id="cb16-24"><a href="#cb16-24"></a><span class="co"># sampling</span></span>
-<span id="cb16-25"><a href="#cb16-25"></a>draws &lt;-<span class="st"> </span><span class="kw"><a href="../reference/inference.html">mcmc</a></span>(m, <span class="dt">n_samples =</span> <span class="dv">1000</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(greta)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># data</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">as_data</span>(iris<span class="sc">$</span>Petal.Length)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as_data</span>(iris<span class="sc">$</span>Sepal.Length)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># variables and priors</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>int <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>coef <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>sd <span class="ot">&lt;-</span> <span class="fu">student</span>(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="at">truncation =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">Inf</span>))</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># operations</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>mean <span class="ot">&lt;-</span> int <span class="sc">+</span> coef <span class="sc">*</span> x</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># likelihood</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="fu">distribution</span>(y) <span class="ot">&lt;-</span> <span class="fu">normal</span>(mean, sd)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co"># defining the model</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">model</span>(int, coef, sd)</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="co"># plotting</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="co"># sampling</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>draws <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m, <span class="at">n_samples =</span> <span class="dv">1000</span>)</span></code></pre></div>
 <hr>
 <div id="data" class="section level3">
 <h3 class="hasAnchor">
 <a href="#data" class="anchor"></a>Data</h3>
 <p>The first section of the script takes the iris data (which is automatically loaded) and converts the two columns we care about into greta arrays:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>x &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(iris<span class="op">$</span>Petal.Length)</span>
-<span id="cb17-2"><a href="#cb17-2"></a>y &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(iris<span class="op">$</span>Sepal.Length)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">as_data</span>(iris<span class="sc">$</span>Petal.Length)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as_data</span>(iris<span class="sc">$</span>Sepal.Length)</span></code></pre></div>
 <p>The greta function <code><a href="../reference/as_data.html">as_data()</a></code> converts other R objects into greta arrays. In this case it’s converting numeric vectors (the two columns of the iris dataframe) into greta arrays. <code><a href="../reference/as_data.html">as_data()</a></code> can also convert matrices and R arrays with numeric, integer or logical (<code>TRUE</code> or <code>FALSE</code>) values into greta arrays. It can also convert dataframes to greta arrays, so long as all elements are either numeric, integer or logical.</p>
 <p>E.g. we can convert the first 5 rows and 4 columns of the iris dataframe, and print the result:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(iris[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as_data</span>(iris[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div>
 <pre><code>greta array (data)
 
      [,1] [,2] [,3] [,4]
@@ -272,9 +288,9 @@
 [4,]  4.6  3.1  1.5  0.2
 [5,]  5.0  3.6  1.4  0.2</code></pre>
 <p>Whenever <code><a href="../reference/as_data.html">as_data()</a></code> converts logical values to greta arrays, it converts them to 1s (for <code>TRUE</code>) and 0s (for <code>FALSE</code>). E.g. if we first convert the last column of <code>iris</code> from a factor into a logical vector, we can see this:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>(is_setosa &lt;-<span class="st"> </span>iris<span class="op">$</span>Species[<span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">1</span>, <span class="dv">41</span>, <span class="dv">81</span>, <span class="dv">121</span>)] <span class="op">==</span><span class="st"> "setosa"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(is_setosa <span class="ot">&lt;-</span> iris<span class="sc">$</span>Species[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">41</span>, <span class="dv">81</span>, <span class="dv">121</span>)] <span class="sc">==</span> <span class="st">"setosa"</span>)</span></code></pre></div>
 <pre><code>[1]  TRUE  TRUE FALSE FALSE</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(is_setosa)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as_data</span>(is_setosa)</span></code></pre></div>
 <pre><code>greta array (data)
 
      [,1]
@@ -283,7 +299,7 @@
 [3,]    0
 [4,]    0</code></pre>
 <p>You can also see from this example that greta arrays always consider a vector as either a column vector (the default) or a row vector, and greta arrays always have at least two dimensions:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/dim">dim</a></span>(<span class="kw"><a href="../reference/as_data.html">as_data</a></span>(is_setosa))</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(<span class="fu">as_data</span>(is_setosa))</span></code></pre></div>
 <pre><code>[1] 4 1</code></pre>
 <div id="explicit-vs--automatic-conversion" class="section level4">
 <h4 class="hasAnchor">
@@ -294,25 +310,25 @@
 <h4 class="hasAnchor">
 <a href="#data-structures" class="anchor"></a>data structures</h4>
 <p>greta also provides some convenience functions to generate fixed numeric values. <code><a href="../reference/structures.html">ones()</a></code> and <code><a href="../reference/structures.html">zeros()</a></code> create greta arrays filled with either 1 or zero, and with the specified dimensions:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="kw"><a href="../reference/structures.html">ones</a></span>(<span class="dv">1</span>, <span class="dv">3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ones</span>(<span class="dv">1</span>, <span class="dv">3</span>)</span></code></pre></div>
 <pre><code>greta array (data)
 
      [,1] [,2] [,3]
 [1,]    1    1    1</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="kw"><a href="../reference/structures.html">zeros</a></span>(<span class="dv">2</span>, <span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zeros</span>(<span class="dv">2</span>, <span class="dv">2</span>)</span></code></pre></div>
 <pre><code>greta array (data)
 
      [,1] [,2]
 [1,]    0    0
 [2,]    0    0</code></pre>
 <p>The <code><a href="../reference/structures.html">greta_array()</a></code> function generalises this to let you create greta arrays with any values, in the same way as R’s <code><a href="https://www.rdocumentation.org/packages/base/topics/array">array()</a></code> function:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="kw"><a href="../reference/structures.html">greta_array</a></span>(pi, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">2</span>, <span class="dv">2</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">greta_array</span>(pi, <span class="at">dim =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span></code></pre></div>
 <pre><code>greta array (data)
 
          [,1]     [,2]
 [1,] 3.141593 3.141593
 [2,] 3.141593 3.141593</code></pre>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a><span class="kw"><a href="../reference/structures.html">greta_array</a></span>(<span class="dv">0</span><span class="op">:</span><span class="dv">1</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">3</span>, <span class="dv">3</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">greta_array</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">dim =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>))</span></code></pre></div>
 <pre><code>greta array (data)
 
      [,1] [,2] [,3]
@@ -327,28 +343,28 @@
 <h3 class="hasAnchor">
 <a href="#variables-and-priors" class="anchor"></a>Variables and priors</h3>
 <p>The second section of the script creates three greta arrays to represent the parameters in our model:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb34-2"><a href="#cb34-2"></a>coef &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">3</span>)</span>
-<span id="cb34-3"><a href="#cb34-3"></a>sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">student</a></span>(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">0</span>, <span class="ot">Inf</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>int <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>coef <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>sd <span class="ot">&lt;-</span> <span class="fu">student</span>(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="at">truncation =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">Inf</span>))</span></code></pre></div>
 <p>Each of these is a variable greta array, and each is assumed <em>a priori</em> (before fitting to data) to follow a different probability distribution. In other words, these are prior distributions over variables, which we need to specify to make this a full Bayesian analysis. Before going through how to specify variables with probability distributions, it will be clearer to first demonstrate the alternative; variables without probability distributions.</p>
 <div id="variables-without-probability-distributions" class="section level4">
 <h4 class="hasAnchor">
 <a href="#variables-without-probability-distributions" class="anchor"></a>variables without probability distributions</h4>
 <p>If we were carrying out a frequentist analysis of this model, we could create variable greta arrays (values we want to learn) without probability distributions using the <code><a href="../reference/variable.html">variable()</a></code> function. E.g. in a frequentist version of the model we could create <code>int</code> with:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>(int &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>())</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>(int <span class="ot">&lt;-</span> <span class="fu">variable</span>())</span></code></pre></div>
 <pre><code>greta array (variable)
 
      [,1]
 [1,]  ?  </code></pre>
 <p><code><a href="../reference/variable.html">variable()</a></code> has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of <code>lower = -Inf, upper = Inf</code> meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).</p>
 <p>We can create a variable constrained between two values by specifying <code>lower</code> and <code>upper</code>. So we could have created the positive variable <code>sd</code> (the standard deviation of the likelihood) with:</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>(sd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/variable.html">variable</a></span>(<span class="dt">lower =</span> <span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>(sd <span class="ot">&lt;-</span> <span class="fu">variable</span>(<span class="at">lower =</span> <span class="dv">0</span>))</span></code></pre></div>
 <pre><code>greta array (variable)
 
      [,1]
 [1,]  ?  </code></pre>
 <p>If we had instead wanted a 2x3 array of positive variables we could have created it like this:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a><span class="kw"><a href="../reference/variable.html">variable</a></span>(<span class="dt">lower =</span> <span class="dv">0</span>, <span class="dt">dim =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="dv">2</span>, <span class="dv">3</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">variable</span>(<span class="at">lower =</span> <span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span></code></pre></div>
 <pre><code>greta array (variable)
 
      [,1] [,2] [,3]
@@ -365,7 +381,7 @@
 <h4 class="hasAnchor">
 <a href="#variables-with-truncated-distributions" class="anchor"></a>variables with truncated distributions</h4>
 <p>Some of greta’s probability distributions (those that are continuous and univariate) can be specified as truncated distributions. By modifying the <code>truncation</code> argument, we can state that the resulting distribution should be truncated between the two truncation bounds. So to create a standard normal distribution truncated between -1 and 1 we can do:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>(z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">truncation =</span> <span class="kw"><a href="../reference/extract-replace-combine.html">c</a></span>(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)))</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>(z <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">truncation =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>)))</span></code></pre></div>
 <pre><code>greta array (variable following a normal distribution)
 
      [,1]
@@ -378,11 +394,11 @@
 <h3 class="hasAnchor">
 <a href="#operations" class="anchor"></a>Operations</h3>
 <p>The third section of the script uses mathematical operators to combine some of our parameters and data, to calculate the predicted sepal lengths, for a given parameter set:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>mean &lt;-<span class="st"> </span>int <span class="op">+</span><span class="st"> </span>coef <span class="op">*</span><span class="st"> </span>x</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>mean <span class="ot">&lt;-</span> int <span class="sc">+</span> coef <span class="sc">*</span> x</span></code></pre></div>
 <p>Because <code>int</code> and <code>coef</code> are both scalars, the resulting greta array <code>mean</code> has the same dimensions as <code>x</code>; a column vector with 150 elements:</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/dim">dim</a></span>(mean)</span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(mean)</span></code></pre></div>
 <pre><code>[1] 150   1</code></pre>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(mean)</span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mean)</span></code></pre></div>
 <pre><code>greta array (operation)
 
      [,1]
@@ -397,7 +413,7 @@
 <h4 class="hasAnchor">
 <a href="#extract-and-replace" class="anchor"></a>Extract and replace</h4>
 <p>We can use R’s extract and replace syntax (using <code>[</code>) on greta arrays, just like with R’s vectors, matrices and arrays. E.g. to extract elements from <code>mean</code> we can do:</p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>mean[<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>mean[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
 <pre><code>greta array (operation)
 
      [,1]
@@ -405,9 +421,9 @@
 [2,]  ?  
 [3,]  ?  </code></pre>
 <p>We can assign values from one greta array to another too. For example, if we wanted to create a matrix that has random normal variables in the first column, but zeros everywhere else, we could do:</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/structures.html">zeros</a></span>(<span class="dv">4</span>, <span class="dv">3</span>)</span>
-<span id="cb50-2"><a href="#cb50-2"></a>z[, <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">dim =</span> <span class="dv">4</span>)</span>
-<span id="cb50-3"><a href="#cb50-3"></a>z</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">zeros</span>(<span class="dv">4</span>, <span class="dv">3</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>z[, <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">dim =</span> <span class="dv">4</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>z</span></code></pre></div>
 <pre><code>greta array (operation)
 
      [,1] [,2] [,3]
@@ -416,24 +432,24 @@
 [3,]  ?   0    0   
 [4,]  ?   0    0   </code></pre>
 <p>R’s subset operator <code>[</code> has an argument <code>drop</code>, which determines whether to reduce the number of dimensions of a array or matrix when the object has zero elements in that dimension. By default, <code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">drop = TRUE</a></code> for R objects, so matrices are automatically converted into vectors (which have dimension <code>NULL</code>) if you take out a single column:</p>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>z &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/matrix">matrix</a></span>(<span class="dv">1</span>, <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">2</span>)</span>
-<span id="cb52-2"><a href="#cb52-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/dim">dim</a></span>(z[, <span class="dv">1</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(z[, <span class="dv">1</span>])</span></code></pre></div>
 <pre><code>NULL</code></pre>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/dim">dim</a></span>(z[, <span class="dv">1</span>, <span class="dt">drop =</span> <span class="ot">FALSE</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(z[, <span class="dv">1</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div>
 <pre><code>[1] 2 1</code></pre>
 <p>greta arrays must always have two dimensions, so greta always acts as though <code><a href="https://www.rdocumentation.org/packages/base/topics/assignOps">drop = FALSE</a></code>:</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a>z_greta &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as_data.html">as_data</a></span>(z)</span>
-<span id="cb56-2"><a href="#cb56-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/dim">dim</a></span>(z_greta[, <span class="dv">1</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>z_greta <span class="ot">&lt;-</span> <span class="fu">as_data</span>(z)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(z_greta[, <span class="dv">1</span>])</span></code></pre></div>
 <pre><code>[1] 2 1</code></pre>
 </div>
 <div id="functions" class="section level4">
 <h4 class="hasAnchor">
 <a href="#functions" class="anchor"></a>Functions</h4>
 <p>We can write our own functions for greta arrays, using the existing operators and functions. For example, we could define the <a href="https://en.wikipedia.org/wiki/Inverse_hyperbolic_function#Inverse_hyperbolic_tangent">inverse hyperbolic tangent function</a> for greta arrays like this:</p>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a>atanh &lt;-<span class="st"> </span><span class="cf">function</span> (z)</span>
-<span id="cb58-2"><a href="#cb58-2"></a>  (<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">log</a></span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>z) <span class="op">-</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">log</a></span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>z)) <span class="op">/</span><span class="st"> </span><span class="dv">2</span></span>
-<span id="cb58-3"><a href="#cb58-3"></a></span>
-<span id="cb58-4"><a href="#cb58-4"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Hyperbolic">atanh</a></span>(z_greta)</span></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>atanh <span class="ot">&lt;-</span> <span class="cf">function</span> (z)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> z) <span class="sc">-</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> z)) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="fu">atanh</span>(z_greta)</span></code></pre></div>
 <pre><code>greta array (operation)
 
      [,1] [,2]
@@ -447,7 +463,7 @@
 <a href="#likelihood" class="anchor"></a>Likelihood</h3>
 <p>So far, we have created greta arrays representing the variables in our model (with prior distributions) and created other greta arrays from them and some fixed, <em>independent</em> data. To perform statistical inference on this model, we also need to link it to some observed <em>dependent</em> data. By comparing the sepal lengths predicted under different parameter values with the observed sepal lengths, we can estimate the most plausible values of those parameters. We do that by defining a likelihood for the observed sepal length data <code>y</code>.</p>
 <p>By defining a likelihood over observed data, we are stating that these observed data are actually a random sample from some probability distribution, and we’re trying to work out the parameters of that distribution. In greta we do that with the <code><a href="../reference/distribution.html">distribution()</a></code> assignment function:</p>
-<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1"></a><span class="kw"><a href="../reference/distribution.html">distribution</a></span>(y) &lt;-<span class="st"> </span><span class="kw"><a href="../reference/distributions.html">normal</a></span>(mean, sd)</span></code></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">distribution</span>(y) <span class="ot">&lt;-</span> <span class="fu">normal</span>(mean, sd)</span></code></pre></div>
 <p>With the syntax <code>distribution(&lt;lhs&gt;) &lt;- &lt;rhs&gt;</code>, we are stating that the data greta array on the left <code>&lt;lhs&gt;</code> has the same distribution as the greta array on the right <code>&lt;rhs&gt;</code>. In this case, we’re temporarily creating a random variable with a normal distribution (with parameters determined by the greta arrays <code>mean</code> and <code>sd</code>), but then stating that values of that distribution have been observed (<code>y</code>). In this case both <code>&lt;lhs&gt;</code> (<code>y</code>) and <code>&lt;rhs&gt;</code> are column vectors with the same dimensions, so each element in <code>y</code> has a normal distribution with the corresponding parameters.</p>
 <hr>
 </div>
@@ -455,7 +471,7 @@
 <h3 class="hasAnchor">
 <a href="#defining-the-model" class="anchor"></a>Defining the model</h3>
 <p>Now all of the greta arrays making up the model have been created, we need to combine them and set up the model so that we can sample from it, using <code><a href="../reference/model.html">model()</a></code>:</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1"></a>m &lt;-<span class="st"> </span><span class="kw"><a href="../reference/model.html">model</a></span>(int, coef, sd)</span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">model</span>(int, coef, sd)</span></code></pre></div>
 <p><code><a href="../reference/model.html">model()</a></code> returns a ‘greta model’ object, which combines all of the greta arrays that make up the model. We can pass greta arrays as arguments to <code><a href="../reference/model.html">model()</a></code> to flag them as the parameters we’re interested in. When sampling from the model with <code><a href="../reference/inference.html">mcmc()</a></code> those will be the greta arrays for which samples will be returned. Alternatively, we can run <code><a href="../reference/model.html">model()</a></code> without passing any greta arrays, in which case all of the greta arrays (except for data greta arrays) in the working environment will be set as the targets for sampling instead.</p>
 <hr>
 </div>
@@ -463,7 +479,7 @@
 <h3 class="hasAnchor">
 <a href="#plotting" class="anchor"></a>Plotting</h3>
 <p>greta provides a plot function for greta models to help you visualise and check the model before sampling from it.</p>
-<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(m)</span></code></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code></pre></div>
 <p>
 <img src="figures/full_graph.png" width="800"></p>
 <p>The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; <code>x</code> and <code>y</code>), variables (large circles; <code>int</code>, <code>coef</code>, <code>sd</code>) or the results of operations (small circles; <code>mean</code>). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from. There are also nodes for greta arrays that were <em>implicitly defined</em> in our model. The data nodes (squares) with numbers are the parameters used to define the prior distributions, and there’s also an intermediate operation node (small circle), which was the result of multiplying <code>coef</code> and <code>x</code> (before adding <code>int</code> to create <code>mean</code>).</p>
@@ -484,10 +500,10 @@
 <a href="#sampling" class="anchor"></a>Sampling</h3>
 <p>When defining the model, greta combines all of the distributions together to define the <em>joint density</em> of the model, a measure of how ‘good’ (or how probable if we’re being Bayesian) are a particular candidate set of values for the variables in the model.</p>
 <p>Now we have a greta model that will give us the joint density for a candidate set of values, so we can use that to carry out inference on the model. We do that using an Markov chain Monte Carlo (MCMC) algorithm to sample values of the parameters we’re interested in, using the <code><a href="../reference/inference.html">mcmc()</a></code> function:</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1"></a>draws &lt;-<span class="st"> </span><span class="kw"><a href="../reference/inference.html">mcmc</a></span>(m, <span class="dt">n_samples =</span> <span class="dv">1000</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>draws <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m, <span class="at">n_samples =</span> <span class="dv">1000</span>)</span></code></pre></div>
 <p>Here we’re using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorithm on each of 4 separate chains, giving us 4000 samples. HMC uses the gradients of the joint density to efficiently explore the set of parameters. By default, greta also spends 1000 iterations on each chain ‘warming up’ (tuning the sampler parameters) and ‘burning in’ (moving to the area of highest probability) the sampler.</p>
 <p><code>draws</code> is a <code>greta_mcmc_list</code> object, which inherits from the coda R package’s <code>mcmc.list</code> object. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(draws)</span></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(draws)</span></code></pre></div>
 <pre><code>
 Iterations = 1:1000
 Thinning interval = 1 
@@ -498,20 +514,20 @@ Sample size per chain = 1000
    plus standard error of the mean:
 
        Mean      SD  Naive SE Time-series SE
-int  4.2803 0.07807 0.0012343      0.0014083
-coef 0.4146 0.01884 0.0002979      0.0003364
-sd   0.4103 0.02395 0.0003787      0.0004092
+int  4.2783 0.08021 0.0012683      0.0014340
+coef 0.4150 0.01936 0.0003061      0.0003448
+sd   0.4107 0.02440 0.0003857      0.0004308
 
 2. Quantiles for each variable:
 
        2.5%    25%    50%    75%  97.5%
-int  4.1245 4.2286 4.2814 4.3325 4.4310
-coef 0.3774 0.4021 0.4143 0.4272 0.4516
-sd   0.3668 0.3933 0.4090 0.4259 0.4616</code></pre>
+int  4.1232 4.2227 4.2776 4.3339 4.4329
+coef 0.3782 0.4017 0.4153 0.4279 0.4529
+sd   0.3667 0.3938 0.4093 0.4262 0.4617</code></pre>
 <p>The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates</p>
-<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span> (bayesplot)</span>
-<span id="cb66-2"><a href="#cb66-2"></a><span class="kw"><a href="https://mc-stan.org/bayesplot/reference/MCMC-traces.html">mcmc_trace</a></span>(draws, <span class="dt">facet_args =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">nrow =</span> <span class="dv">3</span>, <span class="dt">ncol =</span> <span class="dv">1</span>))</span>
-<span id="cb66-3"><a href="#cb66-3"></a><span class="kw"><a href="https://mc-stan.org/bayesplot/reference/MCMC-intervals.html">mcmc_intervals</a></span>(draws)</span></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span> (bayesplot)</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_trace</span>(draws, <span class="at">facet_args =</span> <span class="fu">list</span>(<span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">1</span>))</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_intervals</span>(draws)</span></code></pre></div>
 <p><img src="get_started_files/figure-html/mcmcvis-1.png" width="400px"><img src="get_started_files/figure-html/mcmcvis-2.png" width="400px"></p>
 <p>If your model is taking a long time whilst in the sampling phase and you want to take a look at the samples. You can stop the sampler (e.g. using the stop button in RStudio) and then retrieve the samples drawn so far, by using <code><a href="../reference/inference.html">stashed_samples()</a></code>. Note that this won’t return anything if you stop the model during the warmup phase (since those aren’t valid posterior samples) or if the sampler completed successfully.</p>
 <div id="tweaking-the-sampler" class="section level4">
