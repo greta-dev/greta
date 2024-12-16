@@ -39,6 +39,7 @@ Imports:
     coda,
     future (>= 1.22.1),
     glue (>= 1.5.1),
+    lifecycle,
     methods,
     parallelly (>= 1.29.0),
     progress (>= 1.2.0),

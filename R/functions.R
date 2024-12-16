@@ -87,9 +87,9 @@
 #' @details TensorFlow only enables rounding to integers, so `round()` will
 #'   error if `digits` is set to anything other than `0`.
 #'
-#'   Any additional arguments to `chol()`, `chol2inv`, and
-#'   `solve()` will be ignored, see the TensorFlow documentation for
-#'   details of these routines.
+#'   Any additional arguments to `chol()`, `chol2inv`, `solve()`, and `log()`
+#'   will be ignored, see the TensorFlow documentation for details of these
+#'   routines.
 #'
 #'   `sweep()` only works on two-dimensional greta arrays (so `MARGIN`
 #'   can only be either 1 or 2), and only for subtraction, addition, division
@@ -121,7 +121,18 @@
 NULL
 
 #' @export
-log.greta_array <- function(x) {
+log.greta_array <- function(x, base = lifecycle::deprecated()) {
+
+  if (lifecycle::is_present(base)) {
+    lifecycle::deprecate_warn(
+      when = "0.5.1",
+      what = "log(base)",
+      details = "The `base` argument is (and actually was) never used in \\
+      `log.greta_array()`. See the TensorFlow documentation for details of \\
+      this routine."
+    )
+  }
+
   if (has_representation(x, "log")) {
     result <- copy_representation(x, "log")
   } else {
