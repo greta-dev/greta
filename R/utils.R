@@ -1174,3 +1174,8 @@ are_initials <- function(x){
     FUN.VALUE = logical(1)
     )
 }
+
+n_warmup <- function(x){
+  x_info <- attr(x, "model_info")
+  x_info$warmup
+}
