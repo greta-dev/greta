@@ -1,5 +1,28 @@
 set.seed(2020 - 02 - 11)
 
+test_that("log.greta_array has a warning when base argument used",{
+  skip_if_not(check_tf_version())
+
+  x <- normal(0, 1)
+  expect_snapshot(
+    log(x)
+  )
+
+  expect_snapshot_warning(
+    log(x, base = 3)
+  )
+
+  y <- as_data(matrix(1:9, nrow = 3, ncol = 3))
+  expect_snapshot(
+    y
+  )
+
+  expect_snapshot_warning(
+    log(exp(x), base = 3)
+  )
+
+})
+
 test_that("simple functions work as expected", {
   skip_if_not(check_tf_version())
 

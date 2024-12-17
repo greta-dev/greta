@@ -1,5 +1,9 @@
 # greta (development version)
 
+## Changes
+
+- `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
+
 # greta 0.5.0
 
 This version of greta uses Tensorflow 2.0.0, which comes with it a host of new very exciting features!

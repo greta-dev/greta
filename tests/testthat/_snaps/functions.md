@@ -1,3 +1,41 @@
+# log.greta_array has a warning when base argument used
+
+    Code
+      log(x)
+    Message
+      greta array <operation>
+      
+    Output
+           [,1]
+      [1,]  ?  
+    Message
+      
+
+---
+
+    The `base` argument of `log()` is deprecated as of greta 0.5.1.
+    i The `base` argument is (and actually was) never used in `log.greta_array()`. See the TensorFlow documentation for details of this routine.
+
+---
+
+    Code
+      y
+    Message
+      greta array <data>
+      
+    Output
+           [,1] [,2] [,3]
+      [1,]    1    4    7
+      [2,]    2    5    8
+      [3,]    3    6    9
+    Message
+      
+
+---
+
+    The `base` argument of `log()` is deprecated as of greta 0.5.1.
+    i The `base` argument is (and actually was) never used in `log.greta_array()`. See the TensorFlow documentation for details of this routine.
+
 # cummax and cummin functions error informatively
 
     Code
