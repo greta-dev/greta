@@ -2,7 +2,7 @@
 
 ## Changes
 
-- `log.greta_array()` function drops `base` arg, as it was unused, (#597).
+- `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
 
 # greta 0.5.0
 
