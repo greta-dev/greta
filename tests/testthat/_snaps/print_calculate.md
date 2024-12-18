@@ -28,6 +28,7 @@
       
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 10
+      * Warmup = 10
       * Chains = 4
       * Thinning = 1
       
