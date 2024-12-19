@@ -244,6 +244,7 @@ sampler <- R6Class(
     n_chains = 1,
     numerical_rejections = 0,
     thin = 1,
+    warmup = 1,
 
     # tuning information
     mean_accept_stat = 0.5,
@@ -336,6 +337,7 @@ sampler <- R6Class(
                          one_by_one, plan_is, n_cores, float_type,
                          trace_batch_size,
                          from_scratch = TRUE) {
+      self$warmup <- warmup
       self$thin <- thin
       dag <- self$model$dag
 

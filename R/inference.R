@@ -394,7 +394,10 @@ run_samplers <- function(samplers,
     greta_stash$trace_log_files <- trace_log_files
     greta_stash$percentage_log_files <- percentage_log_files
     greta_stash$progress_bar_log_files <- progress_bar_log_files
-    greta_stash$mcmc_info <- list(n_samples = n_samples)
+    greta_stash$mcmc_info <- list(
+      n_samples = n_samples,
+      warmup = warmup
+      )
   }
 
   if (plan_is$parallel) {
@@ -514,7 +517,8 @@ stashed_samples <- function() {
       model_info <- list(
         raw_draws = free_state_draws,
         samplers = samplers,
-        model = samplers[[1]]$model
+        model = samplers[[1]]$model,
+        warmup = samplers[[1]]$warmup
       )
 
       values_draws <- as_greta_mcmc_list(values_draws, model_info)

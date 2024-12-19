@@ -62,6 +62,7 @@ window.greta_mcmc_list <- function(x, start, end, thin, ...) {
 #' @export
 print.greta_mcmc_list <- function(x, ..., n = 5){
 
+  n_warmup <- n_warmup(x)
   n_chain <- coda::nchain(x)
   n_iter <- coda::niter(x)
   n_thin <- coda::thin(x)
@@ -69,6 +70,7 @@ print.greta_mcmc_list <- function(x, ..., n = 5){
   cli::cli_bullets(
     c(
       "*" = "Iterations = {n_iter}",
+      "*" = "Warmup = {n_warmup}",
       "*" = "Chains  = {n_chain}",
       "*" = "Thinning  = {n_thin}"
     )

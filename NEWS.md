@@ -3,6 +3,7 @@
 ## Changes
 
 - `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
+- Add warmup information to MCMC print method (#652, resolved by #755).
 
 # greta 0.5.0
 
