@@ -905,23 +905,31 @@ greta_sitrep <- function(){
   cli::cli_ul("path: {R.home()}")
   cli::cli_h1("{.pkg greta}")
   cli::cli_ul("version: {.val {packageVersion('greta')}}")
+  cli::cli_ul("path: {.val {find.package('greta')}}")
 
-  cli::cli_h1("{.pkg Python}")
+
+  cli::cli_h1("{.pkg python}")
   check_if_software_available(software_available = have_python(),
                               version = reticulate::py_version(),
                               software_name = "python")
+  cli::cli_ul("path: {.val {find.package('greta')}}")
+  cli::cli_ul("path: {.val {reticulate::miniconda_path()}}")
 
-  cli::cli_h1("{.pkg Tensorflow}")
+  cli::cli_h1("{.pkg TensorFlow}")
   check_if_software_available(software_available = have_tf(),
                               version = version_tf(),
                               software_name = "TensorFlow")
+  cli::cli_ul("R path: {.path {find.package('tensorflow')}}")
+  cli::cli_ul("python path: {.val {find.package('greta')}}")
 
-  cli::cli_h1("{.pkg Tensorflow Probability}")
+  cli::cli_h1("{.pkg TensorFlow Probability}")
   check_if_software_available(software_available = have_tfp(),
                               version = version_tfp(),
                               software_name = "TensorFlow Probability")
+  cli::cli_ul("R path: {.path {find.package('tensorflow')}}")
+  cli::cli_ul("python path: {.val {find.package('greta')}}")
 
-  cli::cli_h1("{.pkg greta conda environment} ")
+  cli::cli_h1("{.pkg greta conda environment}")
   check_if_software_available(software_available = have_greta_conda_env(),
                               software_name = "greta conda environment")
 
@@ -960,6 +968,8 @@ greta_sitrep <- function(){
       compareVersion(software_version$current[2], software_version$ideal[2]) >= 0,
       compareVersion(software_version$current[3], software_version$ideal[3]) >= 0
     )
+
+    cli::cli_h1("{.pkg greta} usability")
 
     if (all(software_version$match)){
       check_tf_version("none")
