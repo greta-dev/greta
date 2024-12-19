@@ -4,9 +4,6 @@
 
 #' @importFrom utils compareVersion
 #' @importFrom reticulate py_available
-#' @importFrom cli cli_process_start
-#' @importFrom cli cli_process_done
-#' @importFrom cli cli_process_failed
 check_tf_version <- function(alert = c("none",
                                        "error",
                                        "warn",
@@ -26,9 +23,10 @@ check_tf_version <- function(alert = c("none",
 
   if (!greta_stash$python_has_been_initialised) {
 
-    cli_process_start(
+    cli::cli_progress_step(
       msg = "Initialising python and checking dependencies, this may take a \\
-      moment."
+      moment.",
+      spinner = TRUE
     )
   }
 
@@ -42,10 +40,12 @@ check_tf_version <- function(alert = c("none",
 
     if (!greta_stash$python_has_been_initialised) {
 
-      cli_process_done(
-        msg_done = "Initialising python and checking dependencies ... done!")
-      cat("\n")
+      cli::cli_progress_update()
       greta_stash$python_has_been_initialised <- TRUE
+      cli::cli_progress_step(
+        msg_done = "Done intialising python and checking dependencies!"
+      )
+      cli::cli_progress_done()
 
     }
 
@@ -53,9 +53,9 @@ check_tf_version <- function(alert = c("none",
 
   if (!all(requirements_valid)) {
 
-    cli_process_failed()
-
-    cli_msg <- c(
+    cli::cli_progress_update()
+    cli::cli_progress_step(
+      msg_failed = c(
       "x" = "The expected python packages are not available",
       "i" = "We recommend installing them (in a fresh R session) with:",
       "{.code install_greta_deps()}",
@@ -64,7 +64,9 @@ check_tf_version <- function(alert = c("none",
       "({.strong Note}: Your R session should not have initialised \\
           Tensorflow yet.)",
       "i" = "For more information, see {.code ?install_greta_deps}"
+    ),
     )
+    cli::cli_progress_done()
 
     # if there was a problem, append the solution
     message_text <- cli::format_message(cli_msg)

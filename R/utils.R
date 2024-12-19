@@ -798,19 +798,18 @@ check_if_software_available <- function(software_available,
                                         ideal_version = NULL,
                                         software_name){
 
-  cli::cli_process_start("checking if {.pkg {software_name}} available")
+  cli::cli_progress_step(msg = "checking if {.pkg {software_name}} available",
+                         spinner = TRUE)
   # if the software is detected
 
   if (!software_available) {
-    cli::cli_process_failed(
-      msg_failed = "{.pkg {software_name}} not available"
-    )
+    cli::cli_progress_step(msg_failed = "{.pkg {software_name}} not available")
   }
 
   if (software_available) {
 
     if (is.null(ideal_version) & !is.null(version)){
-      cli::cli_process_done(
+      cli::cli_progress_step(
         msg_done = "{.pkg {software_name}} (v{version}) available"
       )
     }
@@ -822,12 +821,12 @@ check_if_software_available <- function(software_available,
       version_match <- compareVersion(version_chr, ideal_version) == 0
 
       if (version_match){
-        cli::cli_process_done(
+        cli::cli_progress_step(
           msg_done = "{.pkg {software_name}} (v{version}) available"
         )
       }
       if (!version_match){
-        cli::cli_process_failed(
+        cli::cli_progress_step(
           msg_failed = "{.pkg {software_name}} available, \\
           however {.strong {ideal_version}} is needed and \\
           {.strong {version}} was detected"
@@ -835,7 +834,7 @@ check_if_software_available <- function(software_available,
       }
       # if there is no version for the software
     } else if (is.null(version)){
-      cli::cli_process_done(
+      cli::cli_progress_step(
         msg_done = "{.pkg {software_name}} available"
       )
     }
