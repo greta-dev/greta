@@ -384,6 +384,41 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
   r
 }
 
+# normalising component of lkj (depends only on eta and dimension)
+# NOTE
+# we may need to find a better way to do the normalising of this/find a better
+# reference equation. E.g., looking in
+# potentially our implementation here is incorrect. This is not impacting
+# IID sampling or MCMC, but is currently causing some tests to fail where we
+# are ensuring our densities are accurate (in test_distributions.R)
+lkj_log_normalising <- function(eta, n) {
+  log_pi <- log(pi)
+  ans <- 0
+  for (k in 1:(n - 1)) {
+    ans <- ans + log_pi * (k / 2)
+    ans <- ans + lgamma(eta + (n - 1 - k) / 2)
+    ans <- ans - lgamma(eta + (n - 1) / 2)
+  }
+  ans
+}
+
+dlkj_correlation_unnormalised <- function(x, eta, log = FALSE, dimension = NULL) {
+  res <- (eta - 1) * log(det(x))
+  if (!log) {
+    res <- exp(res)
+  }
+  res
+}
+
+# lkj density
+dlkj_correlation <- function(x, eta, log = FALSE, dimension = NULL) {
+  res <- (eta - 1) * log(det(x)) - lkj_log_normalising(eta, ncol(x))
+  if (!log) {
+    res <- exp(res)
+  }
+  res
+}
+
 # helper RNG functions
 rmvnorm <- function(n, mean, Sigma) { # nolint
   mvtnorm::rmvnorm(n = n, mean = mean, sigma = Sigma)
@@ -620,7 +655,7 @@ check_geweke <- function(
   p_x_bar_theta,
   niter = 2000,
   warmup = 1000,
-  title = "Geweke test"
+  thin = 1
 ) {
   # sample independently
   target_theta <- p_theta(niter)
@@ -636,16 +671,30 @@ check_geweke <- function(
     warmup = warmup
   )
 
+  geweke_checks <- list(
+    target_theta = do_thinning(target_theta, thin),
+    greta_theta = do_thinning(greta_theta, thin)
+  )
+
+  geweke_checks
+
+}
+
+geweke_qq <- function(geweke_checks, title){
   # visualise correspondence
   quants <- (1:99) / 100
-  q1 <- stats::quantile(target_theta, quants)
-  q2 <- stats::quantile(greta_theta, quants)
+  q1 <- stats::quantile(geweke_checks$target_theta, quants)
+  q2 <- stats::quantile(geweke_checks$greta_theta, quants)
   plot(q2, q1, main = title)
   graphics::abline(0, 1)
 
+}
+
+geweke_ks <- function(geweke_checks){
   # do a formal hypothesis test
-  suppressWarnings(stat <- stats::ks.test(target_theta, greta_theta))
-  testthat::expect_gte(stat$p.value, 0.005)
+  suppressWarnings(stat <- stats::ks.test(geweke_checks$target_theta,
+                                          geweke_checks$greta_theta))
+  stat
 }
 
 # sample from a prior on theta the long way round, fro use in a Geweke test:
@@ -674,36 +723,52 @@ p_theta_greta <- function(
     verbose = FALSE
   )
 
+  # set up a progress bar and do a first increment
+  cli::cli_progress_bar("Geweke test iterations", total = niter)
+  cli::cli_progress_update()
+
   # now loop through, sampling and updating x and returning theta
   for (i in 2:niter) {
+
+    # update the progress bar
+    cli::cli_progress_update()
+
     # sample x given theta
     x <- p_x_bar_theta(theta[i - 1])
 
-    # put x in the data list
+    # replace x in the node
     dag <- model$dag
-    target_name <- dag$tf_name(get_node(data))
-    x_array <- array(x, dim = c(1, dim(data)))
-    dag$tf_environment$data_list[[target_name]] <- x_array
+    x_node <- get_node(data)
+    x_node$value(as.matrix(x))
 
-    # put theta in the free state
+    # rewrite the log prob tf function, and the tf function for the posterior
+    # samples, now using this value of x (slow, but necessary in eager mode)
+    dag$tf_log_prob_function <- NULL
+    dag$define_tf_log_prob_function()
     sampler <- attr(draws, "model_info")$samplers[[1]]
-    sampler$free_state <- as.matrix(theta[i - 1])
+    sampler$define_tf_evaluate_sample_batch()
 
+    # take anoteher sample
     draws <- extra_samples(
       draws,
       n_samples = 1,
       verbose = FALSE
     )
 
+    # trace the sample
     theta[i] <- tail(as.numeric(draws[[1]]), 1)
+
   }
+
+  # kill the progress_bar
+  cli::cli_progress_done()
 
   theta
 }
 
 # test mcmc for models with analytic posteriors
 
-not_finished <- function(draws, target_samples = 5000) {
+need_more_samples <- function(draws, target_samples = 5000) {
   neff <- coda::effectiveSize(draws)
   rhats <- coda::gelman.diag(
     x = draws,
@@ -722,7 +787,7 @@ new_samples <- function(draws, target_samples = 5000) {
   1.2 * (target_samples - neff) / efficiency
 }
 
-not_timed_out <- function(start_time, time_limit = 300) {
+still_have_time <- function(start_time, time_limit = 300) {
   elapsed <- Sys.time() - start_time
   elapsed < time_limit
 }
@@ -743,8 +808,8 @@ get_enough_draws <- function(
     one_by_one = one_by_one
   )
 
-  while (not_finished(draws, n_effective) &
-    not_timed_out(start_time, time_limit)) {
+  while (need_more_samples(draws, n_effective) &&
+         still_have_time(start_time, time_limit)) {
     n_samples <- new_samples(draws, n_effective)
     draws <- extra_samples(
       draws,
@@ -754,7 +819,7 @@ get_enough_draws <- function(
     )
   }
 
-  if (not_finished(draws, n_effective)) {
+  if (need_more_samples(draws, n_effective)) {
     stop("could not draws enough effective samples within the time limit")
   }
 
@@ -834,8 +899,25 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   # away from truth. There's a 1/100 chance of any one of these scaled errors
   # being greater than qnorm(0.99) if the sampler is correct
   errors <- scaled_error(stat_draws, stat_truth)
-  expect_lte(max(errors), stats::qnorm(0.99))
+  errors
 }
+
+do_thinning <- function(x, thinning = 1) {
+  idx <- seq(1, length(x), by = thinning)
+  x[idx]
+}
+
+
+get_distribution_name <- function(x){
+  x_node <- get_node(x)
+  if (inherits(x_node, "operation_node")){
+    dist_name <- x_node$parents[[1]]$distribution$distribution_name
+  } else {
+    dist_name <- get_node(x)$distribution$distribution_name
+  }
+  dist_name
+}
+
 
 # sample values of greta array 'x' (which must follow a distribution), and
 # compare the samples with iid samples returned by iid_function (which takes the
@@ -847,34 +929,60 @@ check_samples <- function(
   sampler = hmc(),
   n_effective = 3000,
   title = NULL,
-  one_by_one = FALSE
+  one_by_one = FALSE,
+  time_limit = 300
 ) {
   m <- model(x, precision = "single")
   draws <- get_enough_draws(
-    m,
+    model = m,
     sampler = sampler,
     n_effective = n_effective,
-    verbose = FALSE,
-    one_by_one = one_by_one
+    verbose = TRUE,
+    one_by_one = one_by_one,
+    time_limit = time_limit
   )
 
   neff <- coda::effectiveSize(draws)
   iid_samples <- iid_function(neff)
   mcmc_samples <- as.matrix(draws)
 
-  # plot
-  if (is.null(title)) {
-    distrib <- get_node(x)$distribution$distribution_name
-    sampler_name <- class(sampler)[1]
-    title <- paste(distrib, "with", sampler_name)
-  }
+  thin_amount <- find_thinning(draws)
 
-  stats::qqplot(mcmc_samples, iid_samples, main = title)
+  mcmc_samples <- do_thinning(mcmc_samples, thin_amount)
+  iid_samples <- do_thinning(iid_samples, thin_amount)
+
+  list(
+    mcmc_samples = mcmc_samples,
+    iid_samples = iid_samples,
+    distrib = get_distribution_name(x),
+    sampler_name = class(sampler)[1]
+  )
+}
+
+qqplot_checked_samples <- function(checked_samples, title){
+
+  distrib <- checked_samples$distrib
+  sampler_name <- checked_samples$sampler_name
+  title <- paste(distrib, "with", sampler_name)
+
+  mcmc_samples <- checked_samples$mcmc_samples
+  iid_samples <- checked_samples$iid_samples
+
+  stats::qqplot(
+    x = mcmc_samples,
+    y = iid_samples,
+    main = title
+    )
+
   graphics::abline(0, 1)
+}
 
+## helpers for running Kolmogorov-Smirnov test for MCMC samples vs IID samples
+ks_test_mcmc_vs_iid <- function(checked_samples){
   # do a formal hypothesis test
-  suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
-  testthat::expect_gte(stat$p.value, 0.01)
+  suppressWarnings(stat <- ks.test(checked_samples$mcmc_samples,
+                                   checked_samples$iid_samples))
+  stat
 }
 
 ## helpers for looping through optimisers
@@ -930,4 +1038,29 @@ tidy_optimisers <- function(opt_df, tolerance = 1e-2) {
       convergence,
       .after = opt
     )
+}
+
+
+# find a thinning rate that sufficiently reduces autocorrelation in the samples
+# example
+# x <- normal(0, 1)
+# m <- model(x)
+# draws <- mcmc(m)
+# find_thinning(draws)
+find_thinning <- function(draws, max_thin = 100, autocorr_threshold = 0.01) {
+  autocorr_list <- coda::autocorr(draws, lags = seq_len(max_thin))
+  autocorrs <- do.call(cbind, autocorr_list)
+  mean_autocorr <- rowMeans(autocorrs)
+  smallest_thin <- which(mean_autocorr < autocorr_threshold)[1]
+  if (is.na(smallest_thin)) {
+    smallest_thin <- max_thin
+    cli::cli_warn(
+      c(
+        "Could not find a thinning value that reduces mean autocorrelation \\
+        below the threshold, {.val {autocorr_threshold}}.",
+        "Using the maximum thinning amount: {.val {max_thin}}"
+      )
+    )
+  }
+  smallest_thin
 }

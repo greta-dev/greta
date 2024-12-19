@@ -405,6 +405,7 @@ abind.greta_array <- function(...,
     along <- max(1, min(n + 1, ceiling(along)))
   }
 
+  # TODO revisit checking functions here
   along_outside_0_n <- !(along %in% 0:n)
   if (along_outside_0_n) {
     cli::cli_abort(
@@ -530,6 +531,7 @@ length.greta_array <- function(x) {
 
   dims <- dims %||% length(x)
 
+  # TODO revisit logic / checking functions here
   if (length(dims) == 0L) {
     cli::cli_abort(
       "length-0 dimension vector is invalid"
@@ -649,7 +651,7 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
   # check the rank isn't too high
   if (!is_2d(x)) {
     cli::cli_abort(
-      "cannot only extract the diagonal from a node with exactly two \\
+      "Cannot only extract the diagonal from a node with exactly two \\
       dimensions"
     )
   }
@@ -657,7 +659,7 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
   is_square <- dim[1] != dim[2]
   if (is_square) {
     cli::cli_abort(
-      "diagonal elements can only be extracted from square matrices"
+      "Diagonal elements can only be extracted from square matrices"
     )
   }
 

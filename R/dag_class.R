@@ -21,7 +21,6 @@ dag_class <- R6Class(
     initialize = function(target_greta_arrays,
                           tf_float = "float32",
                           compile = FALSE) {
-      # browser()
       # build the dag
       self$build_dag(target_greta_arrays)
 
@@ -75,34 +74,6 @@ dag_class <- R6Class(
       self$tf_environment$all_forward_data_list <- list()
       self$tf_environment$all_sampling_data_list <- list()
       self$tf_environment$hybrid_data_list <- list()
-    },
-
-    # TF1/2 check remove on_graph
-    # built with TF
-    # Not sure if we need this anyore since this information will be handled
-    # by tf_function?
-    # execute an expression on this dag's tensorflow graph, with the correct
-    # float type
-    on_graph = function(expr) {
-      # temporarily pass float type info to options, so it can be accessed by
-      # nodes on definition, without cluncky explicit passing
-      old_float_type <- options()$greta_tf_float
-      old_batch_size <- options()$greta_batch_size
-
-      on.exit(options(
-        greta_tf_float = old_float_type,
-        greta_batch_size = old_batch_size
-      ))
-
-      options(
-        greta_tf_float = self$tf_float,
-        greta_batch_size = self$tf_environment$batch_size
-      )
-
-      # A tf.Graph can be constructed and used directly without a tf.function,
-      # as was required in TensorFlow 1, but this is deprecated and it is
-      # recommended to use a tf.function instead.
-      with(self$tf_graph$as_default(), expr)
     },
 
     # return a list of nodes connected to those in the target node list
@@ -171,7 +142,6 @@ dag_class <- R6Class(
       # if it's an operation, see if it has a distribution (for lkj and
       # wishart) and get mode based on whether the parent has a free state
       if (node_type == "operation") {
-        # browser()
         parent_name <- node$parents[[1]]$unique_name
         parent_stateless <- parent_name %in% stateless_names
         to_sample <- has_distribution(node) & parent_stateless
@@ -282,21 +252,6 @@ dag_class <- R6Class(
         )
       } else {
         shape <- shape(NULL, length(vals))
-        # TF1/2 check?
-        # this `on_graph` part below is probably not needed/wont work because it
-        # is using placeholder and co?
-        #
-        # defining an empty/unknown thing
-        # so in TF2, we might not need to define a free state, we can
-        # define a function that returns these pieces of information
-        # so we will need to define the function relative to the free state
-        # and will not need to define the object
-        # Can we just turn this into a tensor with some arbitrary value?
-        self$on_graph(free_state <- tf$compat$v1$placeholder(
-          dtype = tf_float(),
-          shape = shape
-        ))
-
         # TF1/2 check
         # instead?
         # free_state <- tensorflow::as_tensor(
@@ -322,7 +277,6 @@ dag_class <- R6Class(
       lengths <- lengths(params)
 
       if (length(lengths) > 1) {
-        # args <- self$on_graph(tf$split(free_state, lengths, axis = 1L))
         args <- tf$split(free_state, lengths, axis = 1L)
       } else {
         args <- list(free_state)
@@ -345,9 +299,7 @@ dag_class <- R6Class(
       }
 
       # define all nodes in the environment and on the graph
-      ## HERE
       lapply(target_nodes, function(x){
-        # browser()
         x$define_tf(self)
       })
 
@@ -769,13 +721,7 @@ dag_class <- R6Class(
         }
       }
 
-      # check we didn't time out
-      if (it == maxit) {
-        cli::cli_abort(
-          "could not determine the number of independent models in a \\
-          reasonable amount of time"
-        )
-      }
+      check_timeout(it, maxit)
 
       # find the cluster IDs
       n <- nrow(r)
@@ -807,16 +753,12 @@ dag_class <- R6Class(
 
     # try to draw a random sample from a distribution node
     draw_sample = function(distribution_node) {
+      # self$check_sampling_implemented(distribution_node)
       tfp_distribution <- self$get_tfp_distribution(distribution_node)
 
       sample <- tfp_distribution$sample
 
-      if (is.null(sample)) {
-        cli::cli_abort(
-          "sampling is not yet implemented for \\
-            {.val {distribution_node$distribution_name}} distributions"
-        )
-      }
+      check_sampling_implemented(sample, distribution_node)
 
       truncation <- distribution_node$truncation
 
@@ -832,14 +774,7 @@ dag_class <- R6Class(
 
         cdf <- tfp_distribution$cdf
         quantile <- tfp_distribution$quantile
-
-        is_truncated <- is.null(cdf) | is.null(quantile)
-        if (is_truncated) {
-          cli::cli_abort(
-            "sampling is not yet implemented for truncated \\
-            {.val {distribution_node$distribution_name}} distributions"
-          )
-        }
+        check_truncation_implemented(tfp_distribution, distribution_node)
 
         # generate a random uniform sample of the correct shape and transform
         # through truncated inverse CDF to get draws on truncated scale

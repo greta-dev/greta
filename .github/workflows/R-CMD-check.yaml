@@ -81,7 +81,9 @@ jobs:
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
 
       - name: Install greta deps
-        run: greta::install_greta_deps(timeout = 50)
+        run: |
+          library(greta)
+          greta::install_greta_deps(timeout = 50)
 
       - name: Situation Report on greta install
         run: greta::greta_sitrep()

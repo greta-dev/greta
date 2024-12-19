@@ -1,15 +1,15 @@
 * using log directory ‘/Users/nick/github/greta-dev/greta/revdep/checks.noindex/runMCMCbtadjust/new/runMCMCbtadjust.Rcheck’
-* using R version 4.3.2 (2023-10-31)
-* using platform: aarch64-apple-darwin20 (64-bit)
+* using R version 4.4.2 (2024-10-31)
+* using platform: aarch64-apple-darwin20
 * R was compiled by
     Apple clang version 14.0.0 (clang-1400.0.29.202)
     GNU Fortran (GCC) 12.2.0
-* running under: macOS Sonoma 14.0
+* running under: macOS Sonoma 14.5
 * using session charset: UTF-8
 * using options ‘--no-manual --no-build-vignettes’
 * checking for file ‘runMCMCbtadjust/DESCRIPTION’ ... OK
 * checking extension type ... Package
-* this is package ‘runMCMCbtadjust’ version ‘1.0.5’
+* this is package ‘runMCMCbtadjust’ version ‘1.1.2’
 * package encoding: UTF-8
 * checking package namespace information ... OK
 * checking package dependencies ... OK
@@ -23,15 +23,12 @@
 * checking installed package size ... OK
 * checking package directory ... OK
 * checking ‘build’ directory ... OK
-* checking DESCRIPTION meta-information ... WARNING
-Non-standard license specification:
-  CECILL-2.1
-Standardizable: FALSE
+* checking DESCRIPTION meta-information ... OK
 * checking top-level files ... OK
 * checking for left-over files ... OK
 * checking index information ... OK
 * checking package subdirectories ... OK
-* checking R files for non-ASCII characters ... OK
+* checking code files for non-ASCII characters ... OK
 * checking R files for syntax errors ... OK
 * checking whether the package can be loaded ... OK
 * checking whether the package can be loaded with stated dependencies ... OK
@@ -39,7 +36,11 @@ Standardizable: FALSE
 * checking whether the namespace can be loaded with stated dependencies ... OK
 * checking whether the namespace can be unloaded cleanly ... OK
 * checking loading without being on the library search path ... OK
-* checking dependencies in R code ... OK
+* checking dependencies in R code ... NOTE
+'library' or 'require' calls in package code:
+  ‘nimble’ ‘nimbleAPT’
+  Please use :: or requireNamespace() instead.
+  See section 'Suggested packages' in the 'Writing R Extensions' manual.
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
@@ -59,9 +60,11 @@ Standardizable: FALSE
 * checking tests ... OK
   Running ‘testthat.R’
 * checking for unstated dependencies in vignettes ... OK
-* checking package vignettes in ‘inst/doc’ ... OK
+* checking package vignettes ... OK
 * checking running R code from vignettes ... NONE
-  ‘runMCMCbtadjust_Presentation.Rmd’ using ‘UTF-8’... OK
+  ‘runMCMCbtadjust_Nimble_variations.Rmd’ using ‘UTF-8’... OK
+  ‘runMCMCbtadjust_Pres.Rmd’ using ‘UTF-8’... OK
+  ‘runMCMCbtadjust_extraCalculations.Rmd’ using ‘UTF-8’... OK
 * checking re-building of vignette outputs ... SKIPPED
 * DONE
-Status: 1 WARNING
+Status: 1 NOTE

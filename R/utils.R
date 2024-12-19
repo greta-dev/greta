@@ -510,26 +510,7 @@ quietly <- function(expr) {
 cleanly <- function(expr) {
   res <- tryCatch(expr, error = function(e) e)
 
-  # if it errored
-  if (inherits(res, "error")) {
-
-    # check for known numerical errors
-    numerical_errors <- vapply(greta_stash$numerical_messages,
-                               grepl,
-                               res$message,
-                               FUN.VALUE = 0
-    ) == 1
-
-    # if it was just a numerical error, quietly return a bad value
-    if (!any(numerical_errors)) {
-      cli::cli_abort(
-        c(
-          "{.pkg greta} hit a tensorflow error:",
-          "{res}"
-        )
-      )
-    }
-  }
+  check_for_errors(res)
 
   res
 }
@@ -596,30 +577,13 @@ flatten_trace <- function(i, trace_list) {
 
 # extract the model information object from mcmc samples returned by
 # stashed_samples, and error nicely if there's something fishy
-get_model_info <- function(draws, name = "value") {
-  if (!is.greta_mcmc_list(draws)) {
-    cli::cli_abort(
-      c(
-        "{name} must be an {.cls greta_mcmc_list} object",
-        "created by {.fun greta::mcmc}, {.fun greta::stashed_samples}, or \\
-        {.fun greta::extra_samples}"
-      )
-    )
-  }
+get_model_info <- function(draws) {
+
+  check_if_greta_mcmc_list(draws)
 
   model_info <- attr(draws, "model_info")
-  valid <- !is.null(model_info)
 
-  if (!valid) {
-    cli::cli_abort(
-      c(
-        "{name} is an {.cls mcmc.list} object, but is not associated with any\\
-        model information",
-        "perhaps it wasn't created by {.fun greta::mcmc}, \\
-        {.fun greta::stashed_samples}, or {.fun greta::extra_samples}?"
-      )
-    )
-  }
+  check_if_model_info(model_info)
 
   model_info
 }
@@ -973,7 +937,8 @@ greta_sitrep <- function(){
 
     if (all(software_version$match)){
       check_tf_version("none")
-      cli::cli_alert_info("{.pkg greta} is ready to use!")
+      cli::cli_alert_info("{.pkg greta} is ready to use!",
+                          wrap = TRUE)
     } else {
       check_tf_version("warn")
     }
@@ -1047,61 +1012,6 @@ compute_text <- function(n_cores, compute_options){
 
 connected_to_draws <- function(dag, mcmc_dag) {
   names(dag$node_list) %in% names(mcmc_dag$node_list)
-}
-
-check_commanality_btn_dags <- function(dag, mcmc_dag) {
-  target_not_connected_to_mcmc <- !any(connected_to_draws(dag, mcmc_dag))
-  if (target_not_connected_to_mcmc) {
-    cli::cli_abort(
-      "the target {.cls greta array}s do not appear to be connected to those \\
-      in the {.cls greta_mcmc_list} object"
-    )
-  }
-}
-
-# see if the new dag introduces any new variables
-check_dag_introduces_new_variables <- function(dag, mcmc_dag) {
-  new_types <- dag$node_types[!connected_to_draws(dag, mcmc_dag)]
-  any_new_variables <- any(new_types == "variable")
-  if (any_new_variables) {
-    cli::cli_abort(
-      c(
-        "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
-          samples",
-        "the target {.cls greta array}s are related to new variables that \\
-          are not in the MCMC samples, so cannot be calculated from the \\
-          samples alone.",
-        "Set {.arg nsim} if you want to sample them conditionally on the \\
-          MCMC samples"
-      )
-    )
-  }
-}
-
-check_targets_stochastic_and_not_sampled <- function(
-    target,
-    mcmc_dag_variables
-) {
-  target_nodes <- lapply(target, get_node)
-  target_node_names <- extract_unique_names(target_nodes)
-  existing_variables <- target_node_names %in% names(mcmc_dag_variables)
-  have_distributions <- have_distribution(target_nodes)
-  new_stochastics <- have_distributions & !existing_variables
-  if (any(new_stochastics)) {
-    n_stoch <- sum(new_stochastics)
-    cli::cli_abort(
-      c(
-        "{.arg nsim} must be set to sample {.cls greta array}s not in MCMC \\
-          samples",
-        "the greta {cli::qty(n_stoch)} arra{?ys/y} \\
-          {.var {names(target)[new_stochastics]}} {cli::qty(n_stoch)} \\
-          {?have distributions and are/has a distribution and is} not in the \\
-          MCMC samples, so cannot be calculated from the samples alone.",
-        "Set {.arg nsim} if you want to sample them conditionally on the \\
-          MCMC samples"
-      )
-    )
-  }
 }
 
 is_using_gpu <- function(x){
@@ -1287,4 +1197,19 @@ outside_version_range <- function(provided, range) {
   below_range <- all(version_num < range)
   outside_range <- above_range || below_range
   outside_range
+}
+
+pretty_dim <- function(x) paste0(dim(x), collapse = "x")
+
+are_initials <- function(x){
+  vapply(
+    X = x,
+    FUN = is.initials,
+    FUN.VALUE = logical(1)
+    )
+}
+
+n_warmup <- function(x){
+  x_info <- attr(x, "model_info")
+  x_info$warmup
 }

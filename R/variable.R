@@ -45,12 +45,8 @@
 #' }
 variable <- function(lower = -Inf, upper = Inf, dim = NULL) {
   check_tf_version("error")
-
-  if (is.greta_array(lower)| is.greta_array(upper)) {
-    cli::cli_abort(
-      "lower and upper must be fixed, they cannot be another greta array"
-    )
-  }
+  check_param_greta_array(lower)
+  check_param_greta_array(upper)
 
   node <- variable_node$new(lower, upper, dim)
   as.greta_array(node)
@@ -76,32 +72,17 @@ cholesky_variable <- function(dim, correlation = FALSE) {
   n_dim <- length(dim)
   if (n_dim == 1) {
     dim <- c(dim, dim)
-  } else if (n_dim == 2) {
-    not_square <- dim[1] != dim[2]
-    if (not_square) {
-      msg <- cli::cli_abort(
-        c(
-          "cholesky variables must be square",
-          "However its dimension is: {.val {paste(dim, collapse = 'x')}}"
-        )
-      )
-    }
-  } else {
-    msg <- cli::cli_abort(
-      c(
-        "{.arg dim} can either be a scalar or a vector of length 2",
-        "However {.arg dim} has length {.val {length(dim)}}, and contains: \\
-        {.val {paste(dim, collapse = ', ')}}"
-      )
-    )
   }
+
+  check_square(dim = dim)
+  check_dim_length(dim)
 
   k <- dim[1]
 
   # dimension of the free state version
   free_dim <- ifelse(correlation,
-    k * (k - 1) / 2,
-    k + k * (k - 1) / 2
+                     k * (k - 1) / 2,
+                     k + k * (k - 1) / 2
   )
 
   # create variable node
@@ -113,8 +94,8 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 
   # set the constraint, to enable transformation
   node$constraint <- ifelse(correlation,
-    "correlation_matrix",
-    "covariance_matrix"
+                            "correlation_matrix",
+                            "covariance_matrix"
   )
 
   # set the printed value to be nicer
@@ -143,17 +124,10 @@ simplex_variable <- function(dim) {
   }
 
   dim <- check_dims(target_dim = dim)
-
-  # dimension of the free state version
   n_dim <- length(dim)
   last_dim <- dim[n_dim]
-  if (!last_dim > 1) {
-    cli::cli_abort(
-      "the final dimension of a simplex variable must have more than one \\
-      element",
-      "The final dimension has: {.val {length(last_dim)} elements}"
-    )
-  }
+  # dimension of the free state version
+  check_final_dim(dim, thing = "simplex variable")
 
   raw_dim <- dim
   raw_dim[n_dim] <- last_dim - 1
@@ -191,17 +165,7 @@ ordered_variable <- function(dim) {
 
   dim <- check_dims(target_dim = dim)
 
-  # dimension of the free state version
-  n_dim <- length(dim)
-  last_dim <- dim[n_dim]
-
-  if (!last_dim > 1) {
-    cli::cli_abort(
-      "the final dimension of an ordered variable must have more than \\
-      one element",
-      "the final dimension has: {.val {length(last_dim)} elements}"
-    )
-  }
+  check_final_dim(dim, thing = "ordered variable")
 
   # create variable node
   node <- vble(truncation = c(-Inf, Inf), dim = dim)

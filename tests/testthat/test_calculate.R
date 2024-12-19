@@ -28,7 +28,6 @@ test_that("deterministic calculate works with correct lists", {
 test_that("stochastic calculate works with correct lists", {
   skip_if_not(check_tf_version())
 
-
   # nolint start
   # with y ~ N(100, 1 ^ 2), it should be very unlikely that y <= 90
   # ( pnorm(90, 100, 1) = 7e-24 )
@@ -132,7 +131,6 @@ test_that("deterministic calculate works with greta_mcmc_list objects", {
 test_that("calculate with greta_mcmc_list doesn't mix up variables", {
   skip_if_not(check_tf_version())
 
-
   a <- normal(-100, 0.001)
   b <- normal(100, 0.001)
   c <- normal(0, 0.001)
@@ -153,7 +151,6 @@ test_that("calculate with greta_mcmc_list doesn't mix up variables", {
 test_that("calculate with greta_mcmc_list doesn't lose track of new nodes", {
   skip_if_not(check_tf_version())
 
-
   z <- normal(0, 1)
   m <- model(z)
   draws <- mcmc(m, warmup = 100, n_samples = 100, verbose = FALSE)
@@ -169,7 +166,6 @@ test_that("calculate with greta_mcmc_list doesn't lose track of new nodes", {
 
 test_that("stochastic calculate works with greta_mcmc_list objects", {
   skip_if_not(check_tf_version())
-
 
   samples <- 10
   chains <- 2
@@ -189,7 +185,7 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
   )
 
   # this should error without nsim being specified (y is stochastic)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_a <- calculate(a, y, values = draws)
   )
 
@@ -225,7 +221,6 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 test_that("calculate errors if the mcmc samples unrelated to target", {
   skip_if_not(check_tf_version())
 
-
   samples <- 10
   chains <- 2
 
@@ -245,14 +240,13 @@ test_that("calculate errors if the mcmc samples unrelated to target", {
 
   c <- normal(0, 1)
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_c <- calculate(c, values = draws)
   )
 })
 
 test_that("stochastic calculate works with mcmc samples & new stochastics", {
   skip_if_not(check_tf_version())
-
 
   samples <- 10
   chains <- 2
@@ -276,7 +270,7 @@ test_that("stochastic calculate works with mcmc samples & new stochastics", {
 
   # this should error without nsim being specified (b is stochastic and not
   # given by draws)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_b <- calculate(b, values = draws)
   )
 
@@ -288,18 +282,17 @@ test_that("stochastic calculate works with mcmc samples & new stochastics", {
 test_that("calculate errors nicely if non-greta arrays are passed", {
   skip_if_not(check_tf_version())
 
-
   x <- c(1, 2)
   a <- normal(0, 1)
   y <- a * x
 
   # it should error nicely
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_y <- calculate(y, x, values = list(x = c(2, 1)))
   )
 
   # and a hint for this common error
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_y <- calculate(y, list(x = c(2, 1)))
   )
 
@@ -308,13 +301,12 @@ test_that("calculate errors nicely if non-greta arrays are passed", {
 test_that("calculate errors nicely if values for stochastics not passed", {
   skip_if_not(check_tf_version())
 
-
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
   y <- a * x
 
   # it should error nicely
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_y <- calculate(y, values = list(x = c(2, 1)))
   )
 
@@ -325,20 +317,18 @@ test_that("calculate errors nicely if values for stochastics not passed", {
 test_that("calculate errors nicely if values have incorrect dimensions", {
   skip_if_not(check_tf_version())
 
-
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
   y <- a * x
 
   # it should error nicely
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_y <- calculate(y, values = list(a = c(1, 1)))
   )
 })
 
 test_that("calculate works with variable batch sizes", {
   skip_if_not(check_tf_version())
-
 
   samples <- 100
   x <- as_data(c(1, 2))
@@ -367,7 +357,6 @@ test_that("calculate works with variable batch sizes", {
 test_that("calculate errors nicely with invalid batch sizes", {
   skip_if_not(check_tf_version())
 
-
   samples <- 100
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
@@ -376,20 +365,19 @@ test_that("calculate errors nicely with invalid batch sizes", {
   draws <- mcmc(m, warmup = 0, n_samples = samples, verbose = FALSE)
 
   # variable valid batch sizes
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_y <- calculate(y, values = draws, trace_batch_size = 0)
   )
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_y <- calculate(y, values = draws, trace_batch_size = NULL)
   )
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_y <- calculate(y, values = draws, trace_batch_size = NA)
   )
 })
 
 test_that("calculate returns a named list", {
   skip_if_not(check_tf_version())
-
 
   a <- as_data(randn(3))
   b <- a^2
@@ -449,11 +437,10 @@ test_that("calculate works if distribution-free variables are fixed", {
 test_that("calculate errors if distribution-free variables are not fixed", {
   skip_if_not(check_tf_version())
 
-
   # fix variable
   a <- variable()
   y <- normal(a, 1)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_a <- calculate(a, y, nsim = 1)
   )
 })
@@ -461,10 +448,9 @@ test_that("calculate errors if distribution-free variables are not fixed", {
 test_that("calculate errors if a distribution cannot be sampled from", {
   skip_if_not(check_tf_version())
 
-
   # fix variable
   y <- hypergeometric(5, 3, 2)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     sims <- calculate(y, nsim = 1)
   )
 })
@@ -474,15 +460,15 @@ test_that("calculate errors nicely if nsim is invalid", {
 
   x <- normal(0, 1)
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_x <- calculate(x, nsim = 0)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_x <- calculate(x, nsim = -1)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     calc_x <- calculate(x, nsim = "five")
   )
 })

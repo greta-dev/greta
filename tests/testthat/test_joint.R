@@ -78,7 +78,7 @@ test_that("fixed discrete joint distributions can be sampled from", {
 test_that("joint of fixed and continuous distributions errors", {
   skip_if_not(check_tf_version())
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     joint(
       bernoulli(0.5),
       normal(0, 1)
@@ -89,11 +89,11 @@ test_that("joint of fixed and continuous distributions errors", {
 test_that("joint with insufficient distributions errors", {
   skip_if_not(check_tf_version())
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     joint(normal(0, 2))
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     joint()
   )
 })
@@ -101,7 +101,7 @@ test_that("joint with insufficient distributions errors", {
 test_that("joint with non-scalar distributions errors", {
   skip_if_not(check_tf_version())
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     joint(
       normal(0, 2, dim = 3),
       normal(0, 1, dim = 3)

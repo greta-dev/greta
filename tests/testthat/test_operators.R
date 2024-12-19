@@ -99,16 +99,17 @@ test_that("%*% errors informatively", {
   b <- ones(1, 4)
   c <- ones(2, 2, 2)
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     a %*% b
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     a %*% c
   )
 })
 
 test_that("%*% works when one is a non-greta array", {
+  skip_if_not(check_tf_version())
   x <- matrix(1, 2, 3)
   y <- rep(1, 3)
 

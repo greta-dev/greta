@@ -1,14 +1,27 @@
 #' Install Python dependencies for greta
 #'
-#' This is a helper function to install Python dependencies needed. This
-#'   includes the latest version of Tensorflow version (2.13.0 or higher),
-#'   Tensorflow Probability 0.21.0 (or higher), and the latest version of
-#'   numpy (1.21.0 or higher). These Python modules will be installed into a
-#'   virtual or conda environment, named "greta-env-tf2". Note that "virtualenv"
-#'   is not available on Windows.
+#' This is a helper function to install Python dependencies needed. By default
+#'   these are TF 2.15.0, TFP 0.23.0, and Python 3.10. These Python modules
+#'   will be installed into a conda environment named "greta-env-tf2".
 #'
-#' @param python_deps object created with `greta_python_deps()` where you
-#'   specify python, TF, and TFP versions.
+#'   You can specify an environment variable to write a logfile to a specific
+#'     location with `GRETA_INSTALLATION_LOG` using
+#'     `Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')`. Or use
+#'     [greta_set_install_logfile()] to set the path, e.g.,
+#'     `greta_set_install_logfile('path/to/logfile.html')`. By default it uses
+#'     `tools::R_user_dir("greta")` as the directory to save a logfile named
+#'     "greta-installation-logfile.html". To see installation notes or errors,
+#'     after installation you can open the logfile with
+#'     [open_greta_install_log()], or you can navigate to the logfile and open
+#'     it in a browser.
+#'
+#' @param deps object created with [greta_deps_spec()] where you
+#'   specify python, TF, and TFP versions. By default these are TF 2.15.0,
+#'   TFP 0.23.0, and Python 3.10. These versions must be compatible
+#'   with each other. If they are not, [greta_deps_spec()] will error with
+#'   more information and suggestions. See ?[greta_deps_spec()] for more
+#'   information, and see the data object `greta_deps_tf_tfp`
+#'   (`?greta_deps_tf_tfp``).
 #'
 #' @param timeout maximum time in minutes until the installation for each
 #'    installation component times out and exits. Default is 5 minutes per
@@ -31,10 +44,11 @@
 #'  package versions, and forcibly switch over to using that conda environment.
 #'
 #'  If you don't want to use conda or the "greta-env-tf2" conda environment, you
-#'  can install these specific versions of tensorflow (version 2.6.0), and
-#'  tensorflow-probability (version 0.14.1), and ensure that the python
-#'  environment that is initialised in this R session has these versions
-#'  installed. This is now always straightforward, so we recommend installing
+#'  can install versions that you like, e.g., using [reticulate::py_install()].
+#'  If you want to see which versions of TF, TFP, and Python work with each
+#'  other (at least according to information from tensorflows website), see the
+#'  data `greta_deps_tf_tfp`, which is provided with greta. Managing your own
+#'  installation is not always straightforward, so we recommend installing
 #'  the python packages using `install_greta_deps()` for most users.
 #'
 #' @name install_greta_deps
@@ -57,12 +71,12 @@
 #' @importFrom callr r_process
 #' @importFrom cli cli_alert_success
 #' @importFrom cli cli_ul
-install_greta_deps <- function(python_deps = greta_python_deps(),
+install_greta_deps <- function(deps = greta_deps_spec(),
                                timeout = 5,
                                restart = c("ask", "force", "no"),
                                ...) {
 
-  check_greta_python_deps(python_deps)
+  check_greta_deps_spec(deps)
 
   restart <- rlang::arg_match(
     arg = restart,
@@ -80,19 +94,49 @@ install_greta_deps <- function(python_deps = greta_python_deps(),
   if (!have_greta_conda_env()) {
     greta_create_conda_env(
       timeout = timeout,
-      python_deps = python_deps
+      deps = deps
     )
   }
 
+  # TODO
+  # Issue warning if you already have conda env +/ miniconda
+  # suggest using `reinstall_greta_deps()`
   greta_install_python_deps(
     timeout = timeout,
-    python_deps = python_deps
+    deps = deps
   )
 
-  cli_alert_success("Installation of {.pkg greta} dependencies is complete!")
+  # TODO
+  # Detect if you have tried to install greta multiple times in the same
+  # session, and suggest that perhaps they want to use
+  # `reinstall_greta_deps()`
+  # perhaps even stopping the session with a "yesno"
+
+  greta_logfile <- sys_get_env("GRETA_INSTALLATION_LOG")
+
+  greta_logfile <- greta_logfile %||% greta_default_logfile()
+
+  write_greta_install_log(path = greta_logfile)
+
+  cli::cli_alert_success("Installation of {.pkg greta} dependencies \\
+                         is complete!",
+                         wrap = TRUE)
 
   restart_or_not(restart)
 
+}
+
+get_pkg_user_dir <- function() {
+  pkg_user_dir <- tools::R_user_dir("greta")
+  if (!dir.exists(pkg_user_dir)) {
+    dir.create(pkg_user_dir, recursive = TRUE)
+  }
+  pkg_user_dir
+}
+
+greta_default_logfile <- function(){
+  greta_user_dir <- get_pkg_user_dir()
+  file.path(greta_user_dir, "greta-installation-logfile.html")
 }
 
 
@@ -156,18 +200,45 @@ restart_or_not <- function(restart){
 
 #' Specify python dependencies for greta
 #'
-#' A helper function for specifying versions of Tensorflow (TF), Tensorflow Probability (TFP), and Python.
+#' A helper function for specifying versions of Tensorflow (TF), Tensorflow
+#'   Probability (TFP), and Python. Defaulting to 2.15.0, 0.23.0, and 3.10,
+#'   respectively. You can specify the version that you want to install, but
+#'   it will check if these are compatible. That is, if you specify versions of
+#'   TF/TFP/Python which do not work with each other, it will error and give
+#'   a suggested version to install. It does this by using a dataset,
+#'   `greta_deps_tf_tfp`, to check if the versions of TF, TFP, and Python
+#'   specified are compatible on your operating system. You can inspect
+#'   this  dataset with `View(greta_deps_tf_tfp)`.
 #'
-#' @param tf_version Character. Tensorflow (TF) version in format major.minor.patch. Default is "2.15.0".
-#' @param tfp_version Character.Tensorflow probability (TFP) version major.minor.patch. Default is "0.23.0".
-#' @param python_version Character. Ptyhon version in format major.minor.patch. Default is "3.10".
+#' @param tf_version Character. Tensorflow (TF) version in format
+#'   major.minor.patch. Default is "2.15.0".
+#' @param tfp_version Character.Tensorflow probability (TFP) version
+#'   major.minor.patch. Default is "0.23.0".
+#' @param python_version Character. Python version in format major.minor.patch.
+#'   Default is "3.10".
 #'
-#' @return list of dependencies
+#' @return data frame of valid dependencies
 #' @export
 #'
 #' @examples
-#' greta_python_deps()
-greta_python_deps <- function(tf_version = "2.15.0",
+#' greta_deps_spec()
+#' greta_deps_spec(tf_version = "2.15.0")
+#' greta_deps_spec(tf_version = "2.15.0", tfp_version = "0.23.0")
+#' greta_deps_spec(tf_version = "2.15.0", python_version = "3.10")
+#' greta_deps_spec(
+#'   tf_version = "2.15.0",
+#'   tfp_version = "0.23.0",
+#'   python_version = "3.10"
+#'   )
+#' # this will fail
+#' \dontrun{
+#' greta_deps_spec(
+#'   tf_version = "2.11.0",
+#'   tfp_version = "0.23.0",
+#'   python_version = "3.10"
+#'   )
+#'   }
+greta_deps_spec <- function(tf_version = "2.15.0",
                               tfp_version = "0.23.0",
                               python_version = "3.10"){
 
@@ -179,13 +250,13 @@ greta_python_deps <- function(tf_version = "2.15.0",
 
   deps_obj <- structure(
     deps_list,
-    class = c("greta_python_deps", "data.frame")
+    class = c("greta_deps_spec", "data.frame")
   )
 
+  # check for envvar to silence these checks
   check_tfp_tf_semantic(deps_obj)
   check_greta_tf_range(deps_obj)
   check_greta_tfp_range(deps_obj)
-
   check_greta_python_range(deps_obj$python_version)
   check_greta_deps_config(deps_obj)
 
@@ -193,11 +264,11 @@ greta_python_deps <- function(tf_version = "2.15.0",
 
 }
 
-check_greta_python_deps <- function(deps,
+check_greta_deps_spec <- function(deps,
                                     call = rlang::caller_env()) {
-  if (!inherits(deps, "greta_python_deps")) {
+  if (!inherits(deps, "greta_deps_spec")) {
     cli::cli_abort(
-      message = "{.arg deps} must be created by {.fun greta_python_deps}.",
+      message = "{.arg deps} must be created by {.fun greta_deps_spec}.",
       call = call
     )
   }
@@ -208,7 +279,7 @@ check_greta_python_deps <- function(deps,
 #' @param x greta python deps
 #' @param ... extra args, not used
 #' @export
-print.greta_python_deps <- function(x, ...){
+print.greta_deps_spec <- function(x, ...){
   print.data.frame(x)
 }
 
@@ -217,7 +288,7 @@ print.greta_python_deps <- function(x, ...){
 #' To assist with capturing and sharing python dependencies, we provide a way
 #'   to capture the dependencies currently used.
 #'
-#' @return `greta_python_deps()` object
+#' @return `greta_deps_spec()` object
 #' @export
 #'
 #' @examples
@@ -226,7 +297,7 @@ print.greta_python_deps <- function(x, ...){
 #' }
 greta_deps_receipt <- function(){
 
-  greta_python_deps(
+  greta_deps_spec(
     tf_version = version_tf(),
     tfp_version = version_tfp(),
     python_version = as.character(reticulate::py_version())
@@ -234,18 +305,18 @@ greta_deps_receipt <- function(){
 
 }
 
-check_greta_deps_range <- function(python_deps,
-                                   deps,
+check_greta_deps_range <- function(deps,
+                                   module,
                                    call = rlang::caller_env()){
 
-  greta_tf_tfp <- greta_deps_tf_tfp[[deps]]
-  version_provided <- numeric_version(python_deps[[deps]])
+  greta_tf_tfp <- greta_deps_tf_tfp[[module]]
+  version_provided <- numeric_version(deps[[module]])
 
-  version_name <- switch(deps,
+  version_name <- switch(module,
                          tf_version = "TF",
                          tfp_version = "TFP")
 
-  latest_version <- switch(deps,
+  latest_version <- switch(module,
                            tf_version = numeric_version("2.15.0"),
                            tfp_version = numeric_version("0.23.0"))
 
@@ -259,7 +330,8 @@ check_greta_deps_range <- function(python_deps,
         {version_name} > {.val {latest_version}}",
         "i" = "See {.url {gh_issue}} for more information",
         "x" = "The provided version was {.val {version_provided}}",
-        "i" = "The closest value is: {.val {latest_version}}",
+        "i" = "The nearest valid version that is supported by \\
+        {.pkg greta} is: {.val {latest_version}}",
         "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
         "i" = "Inspect with:",
@@ -270,7 +342,7 @@ check_greta_deps_range <- function(python_deps,
 
   valid <- version_provided %in% greta_tf_tfp
   if (!valid) {
-    closest_value <- closest_version(version_provided, greta_deps_tf_tfp[[deps]])
+    closest_value <- closest_version(version_provided, greta_deps_tf_tfp[[module]])
   }
 
   if (!valid){
@@ -279,8 +351,9 @@ check_greta_deps_range <- function(python_deps,
       message = c("{.val {version_name}} version provided does not match \\
                   supported versions",
                   "The version {.val {version_provided}} was not in \\
-                  {.val {greta_deps_tf_tfp[[deps]]}}",
-                  "The closest value is: {.val {closest_value}}",
+                  {.val {greta_deps_tf_tfp[[module]]}}",
+                  "i" = "The nearest valid version that is supported by \\
+        {.pkg greta} is: {.val {closest_value}}",
                   "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
                   "i" = "Inspect with:",
@@ -290,15 +363,15 @@ check_greta_deps_range <- function(python_deps,
   }
 }
 
-check_greta_tf_range <- function(python_deps, call = rlang::caller_env()) {
-  check_greta_deps_range(python_deps = python_deps,
-                         deps = "tf_version",
+check_greta_tf_range <- function(deps, call = rlang::caller_env()) {
+  check_greta_deps_range(deps = deps,
+                         module = "tf_version",
                          call = call)
 }
 
-check_greta_tfp_range <- function(python_deps, call = rlang::caller_env()) {
-  check_greta_deps_range(python_deps = python_deps,
-                         deps = "tfp_version",
+check_greta_tfp_range <- function(deps, call = rlang::caller_env()) {
+  check_greta_deps_range(deps = deps,
+                         module = "tfp_version",
                          call = call)
 }
 
@@ -329,13 +402,12 @@ check_greta_python_range <- function(version_provided,
 
 }
 
-check_greta_deps_config <- function(python_deps,
+check_greta_deps_config <- function(deps,
                                     call = rlang::caller_env()){
 
-  # check for envvar to silence these checks
-  check_greta_python_deps(python_deps)
+  check_greta_deps_spec(deps)
 
-  python_deps <- python_deps |>
+  deps <- deps |>
     lapply(numeric_version) |>
     as.data.frame()
 
@@ -356,21 +428,21 @@ check_greta_deps_config <- function(python_deps,
   }
 
   config_matches <- os_matches |>
-    subset(tfp_version == python_deps$tfp_version) |>
-    subset(tf_version == python_deps$tf_version) |>
-    subset(python_deps$python_version >= python_version_min) |>
-    subset(python_deps$python_version <= python_version_max)
+    subset(tfp_version == deps$tfp_version) |>
+    subset(tf_version == deps$tf_version) |>
+    subset(deps$python_version >= python_version_min) |>
+    subset(deps$python_version <= python_version_max)
 
   no_matches <- nrow(config_matches) == 0
 
   # Build logic to prioritise valid TFP over others
   if (no_matches){
 
-    tfp_matches <- subset(os_matches, tfp_version == python_deps$tfp_version)
-    tf_matches <- subset(os_matches, tf_version == python_deps$tf_version)
+    tfp_matches <- subset(os_matches, tfp_version == deps$tfp_version)
+    tf_matches <- subset(os_matches, tf_version == deps$tf_version)
     py_matches <- os_matches |>
-      subset(python_deps$python_version >= python_version_min) |>
-      subset(python_deps$python_version <= python_version_max)
+      subset(deps$python_version >= python_version_min) |>
+      subset(deps$python_version <= python_version_max)
 
     config_matches <- data.frame(
       tfp_match = nrow(tfp_matches) > 0,
@@ -415,15 +487,15 @@ check_greta_deps_config <- function(python_deps,
       "suggest_py" = py_matches
     )
 
-    suggested_tfp <- as.character(suggested_match$tfp_version)
-    suggested_tf <- as.character(suggested_match$tf_version)
-    suggested_py <- as.character(suggested_match$python_version_max)
+    suggested_tfp <- as.character(max(suggested_match$tfp_version))
+    suggested_tf <- as.character(max(suggested_match$tf_version))
+    suggested_py <- as.character(max(suggested_match$python_version_max))
 
     cli::cli_abort(
-      message = c("Provided {.code greta_python_deps} does not match valid \\
+      message = c("Provided {.code greta_deps_spec} does not match valid \\
                   installation combinations.",
                   "See below for a suggested config to use:",
-                  "{.code greta_python_deps(\\
+                  "{.code greta_deps_spec(\\
                   tf_version = {.val {suggested_tf}}, \\
                   tfp_version = {.val {suggested_tfp}}, \\
                   python_version = {.val {suggested_py}}\\

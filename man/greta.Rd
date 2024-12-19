@@ -42,6 +42,7 @@ draws <- mcmc(m, n_samples = 100)
 Useful links:
 \itemize{
   \item \url{https://greta-stats.org}
+  \item \url{https://github.com/greta-dev/greta}
   \item Report bugs at \url{https://github.com/greta-dev/greta/issues}
 }
 

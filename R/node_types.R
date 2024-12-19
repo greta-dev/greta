@@ -3,7 +3,6 @@ data_node <- R6Class(
   inherit = node,
   public = list(
     initialize = function(data) {
-      ## browser()
       # coerce to an array with 2+ dimensions
       data <- as_2d_array(data)
 
@@ -84,12 +83,6 @@ operation_node <- R6Class(
     operation_args = NA,
     arguments = list(),
     tf_function_env = NA,
-
-    # named greta arrays giving different representations of the greta array
-    # represented by this node that have already been calculated, to be used for
-    # computational speedups or numerical stability. E.g. a logarithm or a
-    # cholesky factor
-    representations = list(),
     initialize = function(operation,
                           ...,
                           dim = NULL,
@@ -127,16 +120,12 @@ operation_node <- R6Class(
       self$operation <- tf_operation
       self$operation_args <- operation_args
       self$representations <- representations
+      self$make_antirepresentations(representations)
       self$tf_function_env <- tf_function_env
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
-      values_have_wrong_dim <- !is.null(value) && !all.equal(dim(value), dim)
-      if (values_have_wrong_dim) {
-        cli::cli_abort(
-          "values have the wrong dimension so cannot be used"
-        )
-      }
+      check_values_dim(value, dim)
 
       value <- value %||% unknowns(dim = dim)
 
@@ -160,26 +149,7 @@ operation_node <- R6Class(
       mode <- dag$how_to_define(self)
       # if sampling get the distribution constructor and sample this
       if (mode == "sampling") {
-        # browser()
         tensor <- dag$draw_sample(self$distribution)
-
-        if (has_representation(self, "cholesky")) {
-          # browser()
-          cholesky_tensor <- tf_chol(tensor)
-          # cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
-          cholesky_node <- get_node(representation(self, "cholesky"))
-          cholesky_tf_name <- dag$tf_name(cholesky_node)
-          assign(cholesky_tf_name, cholesky_tensor, envir = tfe)
-          ## TF1/2
-          ## This assignment I think is supposed to be passed down to later on
-          ## in the script, as `cholesky_tf_name` gets overwritten
-          # cholesky_tf_name <- dag$tf_name(self)
-          # tf_name <- cholesky_tf_name
-          # tensor <- cholesky_tensor
-          cholesky_tensor <- tf_chol(tensor)
-          cholesky_tf_name <- dag$tf_name(self$representation$cholesky)
-          assign(cholesky_tf_name, cholesky_tensor, envir = dag$tf_environment)
-        }
       }
 
       if (mode == "forward") {
@@ -198,11 +168,9 @@ operation_node <- R6Class(
         operation <- eval(parse(text = self$operation),
           envir = self$tf_function_env
         )
-        # browser()
         tensor <- do.call(operation, tf_args)
       }
 
-      # browser()
       # assign it in the environment
       assign(tf_name, tensor, envir = dag$tf_environment)
     }
@@ -222,7 +190,6 @@ variable_node <- R6Class(
                           upper = Inf,
                           dim = NULL,
                           free_dim = prod(dim)) {
-      ## browser()
       check_if_lower_upper_numeric(lower, upper)
 
       # replace values of lower and upper with finite values for dimension
@@ -293,18 +260,24 @@ variable_node <- R6Class(
       mode <- dag$how_to_define(self)
 
       if (mode == "sampling") {
-        # browser()
         distrib_node <- self$distribution
 
         if (is.null(distrib_node)) {
+          # does it have an anti-representation where it is the cholesky?
+            # the antirepresentation of cholesky is chol2symm
+            # if yes, we take antirep and get it to `tf`, then get the tf_name
+          chol2symm_ga <- self$anti_representations$chol2symm
+          chol2symm_existing <- !is.null(chol2symm_ga)
 
-          # if the variable has no distribution create a placeholder instead
-          # (the value must be passed in via values when using simulate)
-          shape <- to_shape(c(1, self$dim))
-          # TF1/2 check
-            # need to change the placeholder approach here.
-            # NT: can we change this to be a tensor of the right shape with 1s?
-          tensor <- tensorflow::as_tensor(1L, shape = shape, dtype = tf_float())
+          if (chol2symm_existing) {
+
+            chol2symm_node <- get_node(chol2symm_ga)
+            chol2symm_name <- dag$tf_name(chol2symm_node)
+            chol2symm_tensor <- get(chol2symm_name, envir = dag$tf_environment)
+            tensor <- tf_chol(chol2symm_tensor)
+
+          }
+
         } else {
           tensor <- dag$draw_sample(self$distribution)
         }
@@ -427,10 +400,8 @@ distribution_node <- R6Class(
                           discrete = FALSE,
                           multivariate = FALSE,
                           truncatable = TRUE) {
-      ## browser()
       super$initialize(dim)
 
-      ## browser()
       # for all distributions, set name, store dims, and set whether discrete
       self$distribution_name <- name
       self$discrete <- discrete
@@ -457,7 +428,6 @@ distribution_node <- R6Class(
 
     # create a target variable node (unconstrained by default)
     create_target = function(truncation) {
-      ##browser()
       vble(truncation, dim = self$dim)
     },
     list_parents = function(dag) {
@@ -489,7 +459,6 @@ distribution_node <- R6Class(
 
     # create target node, add as a parent, and give it this distribution
     add_target = function(new_target) {
-      ##browser()
       # add as target and as a parent
       self$target <- new_target
       self$add_parent(new_target)
@@ -616,7 +585,6 @@ node_classes_module <- module(
 
 # shorthand for distribution parameter constructors
 distrib <- function(distribution, ...) {
-  ##browser()
   check_tf_version("error")
 
   # get and initialize the distribution, with a default value node

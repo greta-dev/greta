@@ -38,12 +38,10 @@ test_that("when calculate simulates multiple values, they are calculated using t
   skip_if_not(check_tf_version())
 
   x <- normal(0, 1)
-  x_squared <- x ^ 2
+  x_2 <- x*1
 
-  vals <- calculate(x, x_squared, nsim = 10)
-
-  # use expect_equal
-  expect_identical(vals$x ^ 2, vals$x_squared)
+  vals <- calculate(x, x_2, nsim = 10)
+  expect_equal(vals$x, vals$x_2)
 })
 
 test_that("calculate produces the right number of samples", {
@@ -77,6 +75,7 @@ test_that("calculate produces the right number of samples", {
 
 
 test_that("calculate samples are the same when the argument seed is the same", {
+  skip_if_not(check_tf_version())
   a <- normal(0, 1)
   y <- normal(a, 1)
   m <- model(y)
@@ -92,6 +91,7 @@ test_that("calculate samples are the same when the argument seed is the same", {
 })
 
 test_that("calculate samples are the same when the R seed is the same", {
+  skip_if_not(check_tf_version())
   a <- normal(0, 1)
   y <- normal(a, 1)
   m <- model(y)
@@ -108,7 +108,8 @@ test_that("calculate samples are the same when the R seed is the same", {
     )
 })
 
-test_that("mcmc samples are the same when the R seed is the same", {
+test_that("mcmc samples are the same when the R seed is the same, also with tf set seed", {
+  skip_if_not(check_tf_version())
   a <- normal(0, 1)
   y <- normal(a, 1)
   m <- model(y)
@@ -122,6 +123,25 @@ test_that("mcmc samples are the same when the R seed is the same", {
     as.numeric(one),
     as.numeric(two)
     )
+
+  tensorflow::set_random_seed(12345)
+  one_tf <- mcmc(m, warmup = 10, n_samples = 1, chains = 1)
+  tensorflow::set_random_seed(12345)
+  two_tf <- mcmc(m, warmup = 10, n_samples = 1, chains = 1)
+
+  expect_equal(
+    as.numeric(one_tf),
+    as.numeric(two_tf)
+  )
+
+  # but these are not (always) equal to each other
+  mcmc_matches_tf_one <- identical(as.numeric(one),as.numeric(one_tf))
+  mcmc_matches_tf_two <- identical(as.numeric(two),as.numeric(two_tf))
+
+  expect_false(mcmc_matches_tf_one)
+
+  expect_false(mcmc_matches_tf_two)
+
 })
 
 test_that("simulate uses the local RNG seed", {

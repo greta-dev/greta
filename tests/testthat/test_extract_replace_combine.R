@@ -388,11 +388,11 @@ test_that("abind errors informatively", {
   b <- ones(1, 1, 3)
   c <- ones(5, 1, 1)
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     abind(a, b)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     abind(a, c, along = 5)
   )
 
@@ -425,7 +425,7 @@ test_that("assign errors on variable greta arrays", {
   skip_if_not(check_tf_version())
 
   z <- normal(0, 1, dim = 5)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     z[1] <- 3
   )
 })
@@ -436,11 +436,11 @@ test_that("rbind and cbind give informative error messages", {
   a <- as_data(randn(5, 1))
   b <- as_data(randn(1, 5))
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     rbind(a, b)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     cbind(a, b)
   )
 })
@@ -449,16 +449,16 @@ test_that("replacement gives informative error messages", {
   skip_if_not(check_tf_version())
 
   x <- ones(2, 2, 2)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     x[1:2, , 1] <- seq_len(3)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     x[1, 1, 3] <- 1
   )
 
   x <- ones(2)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     x[3] <- 1
   )
 })
@@ -467,12 +467,12 @@ test_that("extraction gives informative error messages", {
   skip_if_not(check_tf_version())
 
   x <- ones(2, 2, 2)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     x[1, 1, 3]
   )
 
   x <- ones(2)
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     x[3]
   )
 })
@@ -603,19 +603,19 @@ test_that("dim<- errors as expected", {
 
   x <- zeros(3, 4)
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     dim(x) <- pi[0]
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     dim(x) <- c(1, NA)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     dim(x) <- c(1, -1)
   )
 
-  expect_snapshot_error(
+  expect_snapshot(error = TRUE,
     dim(x) <- 13
   )
 })

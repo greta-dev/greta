@@ -133,9 +133,9 @@ public:
 
 private:
 
-    #ifndef RCPP_NO_BOUNDS_CHECK
     template <typename IDX>
     void check_indices(IDX* x, R_xlen_t n, R_xlen_t size) {
+#ifndef RCPP_NO_BOUNDS_CHECK
         for (IDX i=0; i < n; ++i) {
             if (x[i] < 0 or x[i] >= size) {
                 if(std::numeric_limits<IDX>::is_integer && size > std::numeric_limits<IDX>::max()) {
@@ -144,11 +144,8 @@ private:
                 stop("index error");
             }
         }
+#endif
     }
-    #else
-    template <typename IDX>
-    void check_indices(IDX* x, IDX n, IDX size) {}
-    #endif
 
     void get_indices( traits::identity< traits::int2type<INTSXP> > t ) {
         indices.reserve(rhs_n);
@@ -177,10 +174,10 @@ private:
         indices.reserve(rhs_n);
         SEXP names = Rf_getAttrib(lhs, R_NamesSymbol);
         if (Rf_isNull(names)) stop("names is null");
-        SEXP* namesPtr = STRING_PTR(names);
-        SEXP* rhsPtr = STRING_PTR(rhs);
+        const SEXP* namesPtr = RCPP_STRING_PTR(names);
+        const SEXP* rhsPtr = RCPP_STRING_PTR(rhs);
         for (R_xlen_t i = 0; i < rhs_n; ++i) {
-            SEXP* match = std::find(namesPtr, namesPtr + lhs_n, *(rhsPtr + i));
+            const SEXP* match = std::find(namesPtr, namesPtr + lhs_n, *(rhsPtr + i));
             if (match == namesPtr + lhs_n)
                 stop("not found");
             indices.push_back(match - namesPtr);

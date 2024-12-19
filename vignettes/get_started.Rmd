@@ -50,57 +50,17 @@ library(greta)
 
 ### Helper functions to install TensorFlow
 
-Before you can fit models with `greta`, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.14.0) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package (version 0.7.0). In the future we will support different versions of Tensorflow and Tensorflow Probability, but currently we need these exact versions.
+Before you can fit models with `greta`, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version >= 2.0.0) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package (version >= 0.8.0).
 
-To assist with installing these Python packages, `greta` provides an installation helper, `install_greta_deps()`, which installs the exact pythons package versions needed. It also places these inside a "greta-env" conda environment. This isolates these exact python modules from other python installations, so that only `greta` will see them. This helps avoids installation issues, where previously you might update tensorflow on your computer and overwrite the current version needed by `greta`. Using this "greta-env" conda environment means installing other python packages should not be impact the Python packages needed by `greta`.
-
-If these python modules aren't yet installed, when `greta` is used, it provides instructions on how to install them for your system. If in doubt follow those. 
+If these python modules aren't yet installed when `greta` is used, it suggests to use `install_greta_deps()` to install the dependencies. We recommend using this function to install dependencies. For more detail on installation, see the vignette "installation".
 
 <!-- If you want `greta` to run as fast as possible on your computer's CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel's MKL routines, which provide a 2-8 fold sampling speedup on most models. -->
-
-#### Standard installation
-
-If the previous installation helper did not work, you can try the following:
-
-```{r install_tensorflow, eval = FALSE}
-reticulate::install_miniconda()
-reticulate::conda_create(
-        envname = "greta-env",
-        python_version = "3.7"
-      )
-reticulate::conda_install(
-        envname = "greta-env",
-        packages = c(
-          "numpy==1.16.4",
-          "tensorflow-probability==0.7.0",
-          "tensorflow==1.14.0"
-        )
-      )
-```
-
-Which will install the python modules into a conda environment named "greta-env".
-
-You can also not install these not into a special conda environment "greta-env",
-like so:
-
-```{r install-deps-plain, eval = FALSE}
-reticulate::install_miniconda()
-reticulate::conda_install(
-        packages = c(
-          "numpy==1.16.4",
-          "tensorflow-probability==0.7.0",
-          "tensorflow==1.14.0"
-        )
-      )
-```
-
-<!-- You can also use `install_tensorflow()` to install different versions of TensorFlow, including versions with GPU acceleration. If you're having trouble with this step, [this guide](https://tensorflow.rstudio.com/installation/) may help. -->
 
 <hr>
 
 ### DiagrammeR
 
-greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](http://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](https://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
+greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](https://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](https://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
 
 ```{r install_diagrammer, eval = FALSE}
 install.packages("igraph")

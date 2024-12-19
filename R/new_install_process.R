@@ -20,16 +20,14 @@ new_install_process <- function(callr_process,
   if (is.null(status)) {
     cli::cli_process_failed()
     msg_timeout <- timeout_install_msg(timeout, output_error)
-    stop(
-      msg_timeout,
-      call. = FALSE
+    cli::cli_abort(
+      msg_timeout
     )
   } else if (no_output) {
     cli::cli_process_failed()
     msg_other <- other_install_fail_msg(output_error)
-    stop(
-      msg_other,
-      call. = FALSE
+    cli::cli_abort(
+      msg_other
     )
   }
 

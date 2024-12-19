@@ -53,14 +53,14 @@ inference <- R6Class(
       if (file.exists(self$trace_log_file)) {
         # Append
         write.table(last_burst_values, self$trace_log_file,
-          append = TRUE,
-          row.names = FALSE, col.names = FALSE
+                    append = TRUE,
+                    row.names = FALSE, col.names = FALSE
         )
       } else {
         # Create file
         write.table(last_burst_values, self$trace_log_file,
-          append = FALSE,
-          row.names = FALSE, col.names = TRUE
+                    append = FALSE,
+                    row.names = FALSE, col.names = TRUE
         )
       }
     },
@@ -85,7 +85,8 @@ inference <- R6Class(
 
     # check and try to autofill a single set of initial values (single vector on
     # free state scale)
-    check_initial_values = function(inits) {
+    check_initial_values = function(inits,
+                                    call = rlang::caller_env()) {
       undefined <- is.na(inits)
 
       # try to fill in any that weren't specified
@@ -102,33 +103,43 @@ inference <- R6Class(
           attempts <- attempts + 1
         }
 
-        if (!valid) {
-          cli::cli_abort(
-            c(
-              "Could not find reasonable starting values after \\
-              {attempts} attempts.",
-              "Please specify initial values manually via the \\
-              {.arg initial_values} argument"
-            )
-          )
-        }
+        self$check_reasonable_starting_values(valid, attempts)
+
       } else {
 
         # if they were all provided, check they can be be used
         valid <- self$valid_parameters(inits)
-        if (!valid) {
-          cli::cli_abort(
-            c(
-              "The log density could not be evaluated at these initial values",
-              "Try using these initials as the values argument in \\
-              {.fun calculate} to see what values of subsequent \\
-              {.cls greta_array}s these initial values lead to."
-            )
-          )
-        }
+        self$check_valid_parameters(valid)
+
       }
 
       inits
+    },
+
+    check_reasonable_starting_values = function(valid, attempts){
+      if (!valid) {
+        cli::cli_abort(
+          message = c(
+            "Could not find reasonable starting values after \\
+              {attempts} attempts.",
+            "Please specify initial values manually via the \\
+              {.arg initial_values} argument"
+          )
+        )
+      }
+    },
+
+    check_valid_parameters = function(valid){
+      if (!valid) {
+        cli::cli_abort(
+          c(
+            "The log density could not be evaluated at these initial values",
+            "Try using these initials as the {.arg values} argument in \\
+              {.fun calculate} to see what values of subsequent \\
+              {.cls greta_array}s these initial values lead to."
+          )
+        )
+      }
     },
 
     # check and set a list of initial values
@@ -150,11 +161,11 @@ inference <- R6Class(
       tf_parameters <- fl(array(
         data = parameters,
         dim = c(1, length(parameters))
-        ))
+      ))
       ld <- lapply(
         dag$tf_log_prob_function(tf_parameters),
         as.numeric
-        )
+      )
       is.finite(ld$adjusted) && is.finite(ld$unadjusted)
     },
 
@@ -174,9 +185,9 @@ inference <- R6Class(
 
         # append the free state trace for each chain
         self$traced_free_state <- mapply(rbind,
-          self$traced_free_state,
-          self$last_burst_free_states,
-          SIMPLIFY = FALSE
+                                         self$traced_free_state,
+                                         self$last_burst_free_states,
+                                         SIMPLIFY = FALSE
         )
       }
 
@@ -187,9 +198,9 @@ inference <- R6Class(
           self$write_trace_to_log_file(last_burst_values)
         }
         self$traced_values <- mapply(rbind,
-          self$traced_values,
-          last_burst_values,
-          SIMPLIFY = FALSE
+                                     self$traced_values,
+                                     last_burst_values,
+                                     SIMPLIFY = FALSE
         )
       }
     },
@@ -233,6 +244,7 @@ sampler <- R6Class(
     n_chains = 1,
     numerical_rejections = 0,
     thin = 1,
+    warmup = 1,
 
     # tuning information
     mean_accept_stat = 0.5,
@@ -325,6 +337,7 @@ sampler <- R6Class(
                          one_by_one, plan_is, n_cores, float_type,
                          trace_batch_size,
                          from_scratch = TRUE) {
+      self$warmup <- warmup
       self$thin <- thin
       dag <- self$model$dag
 
@@ -347,13 +360,13 @@ sampler <- R6Class(
       # create these objects if needed
       if (from_scratch) {
         self$traced_free_state <- replicate(self$n_chains,
-          matrix(NA, 0, self$n_free),
-          simplify = FALSE
+                                            matrix(NA, 0, self$n_free),
+                                            simplify = FALSE
         )
 
         self$traced_values <- replicate(self$n_chains,
-          matrix(NA, 0, self$n_traced),
-          simplify = FALSE
+                                        matrix(NA, 0, self$n_traced),
+                                        simplify = FALSE
         )
       }
 
@@ -377,8 +390,8 @@ sampler <- R6Class(
 
         # split up warmup iterations into bursts of sampling
         burst_lengths <- self$burst_lengths(warmup,
-          ideal_burst_size,
-          warmup = TRUE
+                                            ideal_burst_size,
+                                            warmup = TRUE
         )
         completed_iterations <- cumsum(burst_lengths)
 
@@ -403,23 +416,23 @@ sampler <- R6Class(
 
             # update the progress bar/percentage log
             iterate_progress_bar(pb_warmup,
-              it = completed_iterations[burst],
-              rejects = self$numerical_rejections,
-              chains = self$n_chains,
-              file = self$pb_file
+                                 it = completed_iterations[burst],
+                                 rejects = self$numerical_rejections,
+                                 chains = self$n_chains,
+                                 file = self$pb_file
             )
 
             self$write_percentage_log(warmup,
-              completed_iterations[burst],
-              stage = "warmup"
+                                      completed_iterations[burst],
+                                      stage = "warmup"
             )
           }
         }
 
         # scrub the free state trace and numerical rejections
         self$traced_free_state <- replicate(self$n_chains,
-          matrix(NA, 0, self$n_free),
-          simplify = FALSE
+                                            matrix(NA, 0, self$n_free),
+                                            simplify = FALSE
         )
         self$numerical_rejections <- 0
       }
@@ -462,15 +475,15 @@ sampler <- R6Class(
 
             # update the progress bar/percentage log
             iterate_progress_bar(pb_sampling,
-              it = completed_iterations[burst],
-              rejects = self$numerical_rejections,
-              chains = self$n_chains,
-              file = self$pb_file
+                                 it = completed_iterations[burst],
+                                 rejects = self$numerical_rejections,
+                                 chains = self$n_chains,
+                                 file = self$pb_file
             )
 
             self$write_percentage_log(n_samples,
-              completed_iterations[burst],
-              stage = "sampling"
+                                      completed_iterations[burst],
+                                      stage = "sampling"
             )
           }
         }
@@ -517,8 +530,8 @@ sampler <- R6Class(
     # chain dimension
     trace_values = function(trace_batch_size) {
       self$traced_values <- lapply(self$traced_free_state,
-        self$model$dag$trace_values,
-        trace_batch_size = trace_batch_size
+                                   self$model$dag$trace_values,
+                                   trace_batch_size = trace_batch_size
       )
     },
 
@@ -654,7 +667,7 @@ sampler <- R6Class(
                                sampler_thin,
                                sampler_param_vec
                                # pass values through
-                               ) {
+    ) {
 
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -681,20 +694,20 @@ sampler <- R6Class(
       # Need to work out how to get sampler_batch() to run as a TF function.
       # To do that we need to work out how to get the free state
 
-        sampler_batch <- tfp$mcmc$sample_chain(
-          num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
-          current_state = free_state,
-          kernel = sampler_kernel,
-          trace_fn = function(current_state, kernel_results) {
-            kernel_results
-          },
-          num_burnin_steps = tf$constant(0L, dtype = tf$int32),
-          num_steps_between_results = sampler_thin,
-          parallel_iterations = 1L
-        )
-        return(
-          sampler_batch
-        )
+      sampler_batch <- tfp$mcmc$sample_chain(
+        num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
+        current_state = free_state,
+        kernel = sampler_kernel,
+        trace_fn = function(current_state, kernel_results) {
+          kernel_results
+        },
+        num_burnin_steps = tf$constant(0L, dtype = tf$int32),
+        num_steps_between_results = sampler_thin,
+        parallel_iterations = 1L
+      )
+      return(
+        sampler_batch
+      )
     },
 
     # run a burst of the sampler
@@ -713,7 +726,7 @@ sampler <- R6Class(
 
       # sampler_values <- list(
       #   # TF1/2 check
-          # do we need free state here anymore?
+      # do we need free state here anymore?
       #   free_state = self$free_state,
       #   sampler_burst_length = as.integer(n_samples),
       #   sampler_thin = as.integer(thin)
@@ -733,6 +746,9 @@ sampler <- R6Class(
       )
 
       # get trace of free state and drop the null dimension
+      if (is.null(batch_results$all_states)){
+        browser()
+      }
       free_state_draws <- as.array(batch_results$all_states)
 
       # if there is one sample at a time, and it's rejected, conversion from
@@ -776,6 +792,8 @@ sampler <- R6Class(
       # tryCatch handling for numerical errors
       dag <- self$model$dag
       tfe <- dag$tf_environment
+      # legacy: previously we used `n_samples` not `sampler_burst_length`
+      n_samples <- sampler_burst_length
 
       result <- cleanly(
         self$tf_evaluate_sample_batch(
@@ -793,6 +811,15 @@ sampler <- R6Class(
         )
       ) # closing cleanly
 
+      # if it's fine, batch_results is the output
+      # if it's a non-numerical error, it will error
+      # if it's a numerical error, batch_results will be an error object
+      self$check_for_free_state_error(result, n_samples)
+
+      result
+    },
+
+    check_for_free_state_error = function(result, n_samples){
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
       # if it's a numerical error, batch_results will be an error object
@@ -816,7 +843,7 @@ sampler <- R6Class(
           # won't be valid if we just restart, so we need to error here,
           # informing the user how to run one sample at a time
           cli::cli_abort(
-            c(
+            message = c(
               "TensorFlow hit a numerical problem that caused it to error",
               "{.pkg greta} can handle these as bad proposals if you rerun \\
               {.fun mcmc} with the argument {.code one_by_one = TRUE}.",
@@ -828,9 +855,8 @@ sampler <- R6Class(
 
         }
       }
-
-      result
     },
+
     sampler_parameter_values = function() {
 
       # random number of integration steps
@@ -873,21 +899,21 @@ hmc_sampler <- R6Class(
         dtype = tf$float64
       )
       # TF1/2 check
-        # where is "free_state" pulled from, given that it is the
-        # argument to this function, "generate_log_prob_function" ?
+      # where is "free_state" pulled from, given that it is the
+      # argument to this function, "generate_log_prob_function" ?
       # log probability function
 
       # build the kernel
       # nolint start
 
-        sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
-          target_log_prob_fn = dag$tf_log_prob_function_adjusted,
-          step_size = hmc_step_sizes,
-          num_leapfrog_steps = hmc_l
-        )
+      sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
+        target_log_prob_fn = dag$tf_log_prob_function_adjusted,
+        step_size = hmc_step_sizes,
+        num_leapfrog_steps = hmc_l
+      )
       return(
         sampler_kernel
-        )
+      )
       # nolint end
     },
     sampler_parameter_values = function() {
@@ -933,8 +959,8 @@ rwmh_sampler <- R6Class(
       tfe <- dag$tf_environment
 
       tfe$rwmh_proposal <- switch(self$parameters$proposal,
-        normal = tfp$mcmc$random_walk_normal_fn,
-        uniform = tfp$mcmc$random_walk_uniform_fn
+                                  normal = tfp$mcmc$random_walk_normal_fn,
+                                  uniform = tfp$mcmc$random_walk_uniform_fn
       )
 
       # TF1/2 check
@@ -944,32 +970,32 @@ rwmh_sampler <- R6Class(
       # tfe$log_prob_fun <- dag$generate_log_prob_function()
 
       # tensors for sampler parameters
-        # rwmh_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
+      # rwmh_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
 
       # need to pass in the value for this placeholder as a matrix (shape(n, 1))
-        # rwmh_diag_sd <- tf$compat$v1$placeholder(
-        #   dtype = tf_float(),
-        #   # TF1/2 check
-            # again what do we with with `free_state`?
-        #   shape = shape(dim(free_state)[[2]], 1)
-        # )
+      # rwmh_diag_sd <- tf$compat$v1$placeholder(
+      #   dtype = tf_float(),
+      #   # TF1/2 check
+      # again what do we with with `free_state`?
+      #   shape = shape(dim(free_state)[[2]], 1)
+      # )
 
       # but it step_sizes must be a vector (shape(n, )), so reshape it
-        rwmh_step_sizes <- tf$reshape(
-          rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
-          # TF1/2 check
-          # what are we to do about `free_state` here?
-          shape = shape(free_state_size)
-        )
+      rwmh_step_sizes <- tf$reshape(
+        rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
+        # TF1/2 check
+        # what are we to do about `free_state` here?
+        shape = shape(free_state_size)
+      )
 
-        new_state_fn <- tfe$rwmh_proposal(scale = rwmh_step_sizes)
+      new_state_fn <- tfe$rwmh_proposal(scale = rwmh_step_sizes)
 
       # build the kernel
       # nolint start
-        sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
-          target_log_prob_fn = dag$tf_log_prob_function_adjusted,
-          new_state_fn = new_state_fn
-        )
+      sampler_kernel <- tfp$mcmc$RandomWalkMetropolis(
+        target_log_prob_fn = dag$tf_log_prob_function_adjusted,
+        new_state_fn = new_state_fn
+      )
       return(
         sampler_kernel
       )
@@ -1009,11 +1035,11 @@ slice_sampler <- R6Class(
 
       # build the kernel
       # nolint start
-        sampler_kernel <- tfp$mcmc$SliceSampler(
-          target_log_prob_fn = dag$tf_log_prob_function_adjusted,
-          step_size = fl(1),
-          max_doublings = slice_max_doublings
-        )
+      sampler_kernel <- tfp$mcmc$SliceSampler(
+        target_log_prob_fn = dag$tf_log_prob_function_adjusted,
+        step_size = fl(1),
+        max_doublings = slice_max_doublings
+      )
 
       return(
         sampler_kernel

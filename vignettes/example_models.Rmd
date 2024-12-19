@@ -115,7 +115,7 @@ Below are some more advanced examples implemented in greta.
 
 The BUGS project provide a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The [Stan wiki](https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically) provides Stan implementations of these models.
 
-The following sections provide greta implementations of some of these example models, alongside the BUGS code from [WinBUGS examples volume 2](https://www.mrc-bsu.cam.ac.uk/wp-content/uploads/WinBUGS_Vol2.pdf) (pdf) and Stan code and an R version of the data from the [Stan example models wiki](https://github.com/stan-dev/example-models/wiki). 
+The following sections provide greta implementations of some of these example models, alongside the BUGS code from [WinBUGS examples volume 2](https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=56b11079d6495501c84932c0a7a372ca6bc370ae) (pdf) and Stan code and an R version of the data from the [Stan example models wiki](https://github.com/stan-dev/example-models/wiki). 
 
 <hr>
 

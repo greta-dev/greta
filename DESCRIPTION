@@ -1,7 +1,7 @@
 Type: Package
 Package: greta
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.4.5.9000
+Version: 0.5.0.9000
 Authors@R: c(
     person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0001-8916-5570")),
@@ -28,7 +28,7 @@ Description: Write statistical models in R and fit them by MCMC and
     including tutorials, examples, package documentation, and the greta
     forum.
 License: Apache License 2.0
-URL: https://greta-stats.org
+URL: https://greta-stats.org, https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
 Depends:
     R (>= 4.1.0)
@@ -39,13 +39,17 @@ Imports:
     coda,
     future (>= 1.22.1),
     glue (>= 1.5.1),
+    lifecycle,
     methods,
     parallelly (>= 1.29.0),
     progress (>= 1.2.0),
     R6,
     reticulate (>= 1.19.0),
     rlang,
-    tensorflow (>= 2.8.0),
+    tensorflow (== 2.16.0),
+    tools,
+    utils,
+    whisker,
     yesno
 Suggests:
     bayesplot,
@@ -81,9 +85,9 @@ Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-SystemRequirements: Python (>= 2.7.0) with header files and shared
-    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow
-    Probability (v0.7.0; https://www.tensorflow.org/probability/)
+SystemRequirements: Python (>= 3.7.0) with header files and shared
+    library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/); TensorFlow
+    Probability (v0.8.0; https://www.tensorflow.org/probability/)
 Collate:
     'package.R'
     'utils.R'
@@ -130,6 +134,7 @@ Collate:
     'checkers.R'
     'test_if_forked_cluster.R'
     'testthat-helpers.R'
+    'write-logfiles.R'
     'zzz.R'
     'internals.R'
 LazyData: true
