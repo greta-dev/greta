@@ -146,7 +146,7 @@ get_seed <- function() {
   sample.int(
     n = 2^30,
     size = 1
-    )
+  )
 }
 
 # does a pointer exist (as a named object) and is it from the current session
@@ -644,8 +644,8 @@ as_tf_function <- function(r_fun, ...) {
     sub_dag <- dag_class$new(targets)
 
     # TF1/2 check remove
-      # `get_default_graph()` doesn't work with either eager execution or
-      # `tf.function`.
+    # `get_default_graph()` doesn't work with either eager execution or
+    # `tf.function`.
     # use the default graph, so that it can be overwritten when this is called?
     # alternatively fetch from above, or put it in greta_stash?
     # sub_dag$tf_graph <- tf$compat$v1$get_default_graph()
@@ -843,10 +843,10 @@ check_if_software_available <- function(software_available,
 }
 
 compare_version_vec <- Vectorize(
-    FUN = compareVersion,
-    vectorize.args = "b",
-    SIMPLIFY = TRUE
-  )
+  FUN = compareVersion,
+  vectorize.args = "b",
+  SIMPLIFY = TRUE
+)
 
 #' Greta Situation Report
 #'
@@ -862,20 +862,42 @@ compare_version_vec <- Vectorize(
 #' }
 greta_sitrep <- function(){
 
+  config_info <- reticulate::py_config()
+
+  cli::cli_h1("R")
+  cli::cli_ul("version: {.val {getRversion()}}")
+  cli::cli_ul("path: {R.home()}")
+  cli::cli_h1("{.pkg greta}")
+  cli::cli_ul("version: {.val {packageVersion('greta')}}")
+  cli::cli_ul("path: {.val {find.package('greta')}}")
+
+
+  cli::cli_h1("{.pkg python}")
   check_if_software_available(software_available = have_python(),
                               version = reticulate::py_version(),
                               software_name = "python")
+  cli::cli_ul("path: {.val {find.package('greta')}}")
+  cli::cli_ul("path: {.val {reticulate::miniconda_path()}}")
 
+  cli::cli_h1("{.pkg TensorFlow}")
   check_if_software_available(software_available = have_tf(),
                               version = version_tf(),
                               software_name = "TensorFlow")
+  cli::cli_ul("R path: {.path {find.package('tensorflow')}}")
+  cli::cli_ul("python path: {.val {find.package('greta')}}")
 
+  cli::cli_h1("{.pkg TensorFlow Probability}")
   check_if_software_available(software_available = have_tfp(),
                               version = version_tfp(),
                               software_name = "TensorFlow Probability")
+  cli::cli_ul("R path: {.path {find.package('tensorflow')}}")
+  cli::cli_ul("python path: {.val {find.package('greta')}}")
 
+  cli::cli_h1("{.pkg greta conda environment}")
   check_if_software_available(software_available = have_greta_conda_env(),
                               software_name = "greta conda environment")
+
+  show_greta_conda_env_path()
 
   software_available <- c(
     python = have_python(),
@@ -911,6 +933,8 @@ greta_sitrep <- function(){
       compareVersion(software_version$current[3], software_version$ideal[3]) >= 0
     )
 
+    cli::cli_h1("{.pkg greta} usability")
+
     if (all(software_version$match)){
       check_tf_version("none")
       cli::cli_alert_info("{.pkg greta} is ready to use!",
@@ -920,6 +944,18 @@ greta_sitrep <- function(){
     }
 
   }
+
+}
+
+show_greta_conda_env_path <- function(){
+  if (!have_greta_conda_env()){
+    cli::cli_ul("path: no conda env found for {.var greta-env-tf2}")
+  }
+
+  py_cl <- reticulate::conda_list()
+  which_greta_env <- which(py_cl$name == "greta-env-tf2")
+  greta_env_path <- py_cl$python[which_greta_env]
+  cli::cli_ul("path: {greta_env_path}")
 
 }
 
@@ -977,8 +1013,6 @@ compute_text <- function(n_cores, compute_options){
 connected_to_draws <- function(dag, mcmc_dag) {
   names(dag$node_list) %in% names(mcmc_dag$node_list)
 }
-
-
 
 is_using_gpu <- function(x){
   x == "GPU"
@@ -1046,7 +1080,7 @@ node_type_colour <- function(type){
     data = cli::col_green(type),
     operation = cli::col_cyan(type),
     distribution = cli::col_yellow(type)
-    )
+  )
 
   switch_cols
 }
@@ -1087,7 +1121,7 @@ are_null <- function(x){
     x,
     is.null,
     FUN.VALUE = logical(1)
-    )
+  )
 }
 
 are_greta_array <- function(x){
