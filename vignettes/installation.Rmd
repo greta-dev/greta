@@ -2,7 +2,7 @@
 title: "Installing Dependencies"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{installation}
+  %\VignetteIndexEntry{Installing Dependencies}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
