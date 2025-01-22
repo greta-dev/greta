@@ -900,7 +900,7 @@ test_that("categorical distribution errors informatively", {
 
   # scalars
   expect_snapshot(error = TRUE,
-    categorical(1),
+    categorical(1)
   )
 
   # bad n_realisations
@@ -942,7 +942,7 @@ test_that("dirichlet distribution errors informatively", {
 
   # scalars
   expect_snapshot(error = TRUE,
-    dirichlet(1),
+    dirichlet(1)
   )
 
   # bad n_realisations

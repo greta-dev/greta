@@ -88,19 +88,19 @@
   }
 
   # if distribution isn't scalar, make sure it has the right dimensions
-  ## TODO fix explaining variable
-  if (!is_scalar(value)) {
-    if (!identical(dim(greta_array), dim(value))) {
-      cli::cli_abort(
-        c(
-          "left and right hand sides have different dimensions. ",
-          "The distribution must have dimension of either \\
+  not_scalar <- !is_scalar(value)
+  lhs_rhs_different_dim <- !identical(dim(greta_array), dim(value))
+  not_scalar_different_dims <- not_scalar && lhs_rhs_different_dim
+  if (not_scalar_different_dims) {
+    cli::cli_abort(
+      c(
+        "left and right hand sides have different dimensions. ",
+        "The distribution must have dimension of either \\
           {.val {paste(dim(greta_array), collapse = 'x')}} or {.val 1x1},\\
           but instead has dimension \\
           {.val {paste(dim(value), collapse = 'x')}}"
-        )
       )
-    }
+    )
   }
 
   # assign the new node as the distribution's target

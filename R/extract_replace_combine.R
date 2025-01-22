@@ -100,7 +100,7 @@ NULL
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
   rm("._dummy_in", envir = pf)
 
-  if (any(is.na(dummy_out))) {
+  if (anyNA(dummy_out)) {
     cli::cli_abort(
       "subscript out of bounds"
     )
@@ -196,7 +196,7 @@ NULL
   dummy_out <- do.call(.Primitive("["), call_list, envir = pf)
   rm("._dummy_in", envir = pf)
 
-  if (any(is.na(dummy_out))) {
+  if (anyNA(dummy_out)) {
     cli::cli_abort(
       "subscript out of bounds"
     )
@@ -211,7 +211,7 @@ NULL
         "number of items to replace is not a multiple of replacement length"
       )
     } else {
-      replacement <- rep(replacement, length.out = length(index))
+      replacement <- rep_len(replacement, length(index))
     }
   }
 
@@ -542,7 +542,7 @@ length.greta_array <- function(x) {
     dims <- c(dims, 1L)
   }
 
-  if (any(is.na(dims))) {
+  if (anyNA(dims)) {
     cli::cli_abort(
       "the dims contain missing values"
     )

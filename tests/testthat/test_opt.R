@@ -62,7 +62,7 @@ test_that("opt converges with TFP optimisers", {
   )
 
   # should have converged in fewer than 500 iterations and be close to truth
-  expect_equal(o$convergence, 0)
+  expect_identical(o$convergence, 0)
   expect_lte(o$iterations, 500)
   expect_true(all(abs(x - o$par$z) < 1e-2))
 
@@ -71,7 +71,7 @@ test_that("opt converges with TFP optimisers", {
   )
 
   # should have converged in fewer than 500 iterations and be close to truth
-  expect_equal(o$convergence, 0)
+  expect_identical(o$convergence, 0)
   expect_lte(o$iterations, 500)
   expect_true(all(abs(x - o$par$z) < 1e-2))
 })
@@ -111,7 +111,7 @@ test_that("opt accepts initial values for TF optimisers", {
   )
 
   # should have converged
-  expect_equal(o$convergence, 0)
+  expect_identical(o$convergence, 0)
 
   # should be fewer than 100 iterations
   expect_lte(o$iterations, 100)
@@ -135,7 +135,7 @@ test_that("opt accepts initial values for TFP optimisers", {
   )
 
   # should have converged
-  expect_equal(o$convergence, 0)
+  expect_identical(o$convergence, 0)
 
   # should be fewer than 100 iterations
   expect_lte(o$iterations, 100)
@@ -159,8 +159,8 @@ test_that("TF opt returns a hessian", {
 
   # should be a 5x5 numeric matrix
   expect_true(inherits(hess, "matrix"))
-  expect_true(is.numeric(hess))
-  expect_true(identical(dim(hess), c(5L, 5L)))
+  expect_type(hess, "double")
+  expect_identical(dim(hess), c(5L, 5L))
 
   # the model density is IID normal, so we should be able to recover the SD
   approx_sd <- sqrt(diag(solve(hess)))
@@ -227,8 +227,8 @@ test_that("TF opt with `adam` succeeds with bad initial values", {
 
   # should be a 5x5 numeric matrix
   expect_true(inherits(hess, "matrix"))
-  expect_true(is.numeric(hess))
-  expect_true(identical(dim(hess), c(5L, 5L)))
+  expect_type(hess, "double")
+  expect_identical(dim(hess), c(5L, 5L))
 
   # the model density is IID normal, so we should be able to recover the SD
   approx_sd <- sqrt(diag(solve(hess)))
@@ -283,8 +283,8 @@ test_that("TFP opt returns a hessian", {
 
   # should be a 5x5 numeric matrix
   expect_true(inherits(hess, "matrix"))
-  expect_true(is.numeric(hess))
-  expect_true(identical(dim(hess), c(5L, 5L)))
+  expect_type(hess, "double")
+  expect_identical(dim(hess), c(5L, 5L))
 
   # the model density is IID normal, so we should be able to recover the SD
   approx_sd <- sqrt(diag(solve(hess)))

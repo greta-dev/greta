@@ -249,10 +249,12 @@ mcmc <- function(
     max_samplers <- future::nbrOfWorkers()
 
     # divide chains up between the workers
-    chain_assignment <- sort(rep(
-      seq_len(max_samplers),
-      length.out = chains
-    ))
+    chain_assignment <- sort(
+      rep_len(
+        seq_len(max_samplers),
+        length.out = chains
+    )
+    )
 
     # divide the initial values between them
     initial_values_split <- split(initial_values, chain_assignment)

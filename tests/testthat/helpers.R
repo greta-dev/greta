@@ -145,7 +145,7 @@ with_greta <- function(call, swap = c("x"), swap_scope = 1) {
   swap_entries <- paste0(swap, " = as_data(", swap, ")")
   swap_text <- paste0(
     "list(",
-    paste(swap_entries, collapse = ", "),
+    toString(swap_entries),
     ")"
   )
   swap_list <- eval(

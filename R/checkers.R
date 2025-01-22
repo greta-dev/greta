@@ -38,16 +38,14 @@ check_tf_version <- function(alert = c("none",
     correct_tfp = have_tfp()
   )
 
-  if ((all(requirements_valid))) {
-
-    if (!greta_stash$python_has_been_initialised) {
+  py_not_init <- !greta_stash$python_has_been_initialised
+  requirements_valid_py_not_init <- all(requirements_valid) && py_not_init
+  if (requirements_valid_py_not_init) {
 
       cli_process_done(
         msg_done = "Initialising python and checking dependencies ... done!")
       cat("\n")
       greta_stash$python_has_been_initialised <- TRUE
-
-    }
 
   }
 
@@ -100,7 +98,7 @@ check_dims <- function(...,
 
   # as text, for printing
   dims_paste <- vapply(dim_list, paste, "", collapse = "x")
-  dims_text <- paste(dims_paste, collapse = ", ")
+  dims_text <- toString(dims_paste)
 
   # which are scalars
   scalars <- vapply(elem_list, is_scalar, FALSE)
@@ -734,7 +732,7 @@ check_dependencies_satisfied <- function(target,
 
     # build the message
     if (any(matches)) {
-      names_text <- paste(unmet_names, collapse = ", ")
+      names_text <- toString(unmet_names)
       msg <- cli::format_error(
         message = c(
           "Please provide values for the following {length(names_text)} \\
@@ -1972,7 +1970,7 @@ check_is_greta_array <- function(x,
 check_missing_infinite_values <- function(x,
                                           optional,
                                           call = rlang::caller_env()){
-  contains_missing_or_inf <- !optional & any(!is.finite(x))
+  contains_missing_or_inf <- !optional & !all(is.finite(x))
   if (contains_missing_or_inf) {
     cli::cli_abort(
       message = c(

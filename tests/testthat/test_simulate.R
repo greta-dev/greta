@@ -8,12 +8,12 @@ test_that("simulate produces the right number of samples", {
 
   # should be vectors
   sims <- simulate(m)
-  expect_equal(dim(sims$a), c(1, dim(a)))
-  expect_equal(dim(sims$y), c(1, dim(y)))
+  expect_identical(dim(sims$a), c(1L, dim(a)))
+  expect_identical(dim(sims$y), c(1L, dim(y)))
 
   sims <- simulate(m, 17)
-  expect_equal(dim(sims$a), c(17, dim(a)))
-  expect_equal(dim(sims$y), c(17, dim(y)))
+  expect_identical(dim(sims$a), c(17L, dim(a)))
+  expect_identical(dim(sims$y), c(17L, dim(y)))
 })
 
 test_that("simulate errors if distribution-free variables are not fixed", {

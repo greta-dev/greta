@@ -914,7 +914,6 @@ hmc_sampler <- R6Class(
       return(
         sampler_kernel
       )
-      # nolint end
     },
     sampler_parameter_values = function() {
 
@@ -999,7 +998,6 @@ rwmh_sampler <- R6Class(
       return(
         sampler_kernel
       )
-      # nolint end
     },
     sampler_parameter_values = function() {
       epsilon <- self$parameters$epsilon
@@ -1044,7 +1042,6 @@ slice_sampler <- R6Class(
       return(
         sampler_kernel
       )
-      # nolint end
     },
     sampler_parameter_values = function() {
       max_doublings <- as.integer(self$parameters$max_doublings)

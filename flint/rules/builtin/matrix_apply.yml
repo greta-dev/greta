@@ -1,0 +1,142 @@
+id: matrix_apply-1
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: apply($INPUT, $MARG, sum)
+    - pattern: apply($INPUT, MARGIN = $MARG, sum)
+    - pattern: apply($INPUT, $MARG, FUN = sum)
+    - pattern: apply($INPUT, MARGIN = $MARG, FUN = sum)
+constraints:
+  MARG:
+    has:
+      regex: ^(2|2L)$
+fix: colSums(~~INPUT~~)
+message: Use colSums(x) rather than apply(x, 2, sum)
+
+---
+
+id: matrix_apply-2
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: apply($INPUT, $MARG, sum, na.rm = $NARM)
+    - pattern: apply($INPUT, MARGIN = $MARG, sum, na.rm = $NARM)
+    - pattern: apply($INPUT, $MARG, FUN = sum, na.rm = $NARM)
+    - pattern: apply($INPUT, MARGIN = $MARG, FUN = sum, na.rm = $NARM)
+constraints:
+  MARG:
+    has:
+      regex: ^(2|2L)$
+fix: colSums(~~INPUT~~, na.rm = ~~NARM~~)
+message: Use colSums(x, na.rm = ~~NARM~~) rather than apply(x, 2, sum, na.rm = ~~NARM~~).
+
+---
+
+id: matrix_apply-3
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: apply($INPUT, $MARG, sum)
+    - pattern: apply($INPUT, MARGIN = $MARG, sum)
+    - pattern: apply($INPUT, $MARG, FUN = sum)
+    - pattern: apply($INPUT, MARGIN = $MARG, FUN = sum)
+constraints:
+  MARG:
+    has:
+      regex: ^(1|1L)$
+fix: rowSums(~~INPUT~~)
+message: Use rowSums(x) rather than apply(x, 1, sum)
+
+---
+
+id: matrix_apply-4
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: apply($INPUT, $MARG, sum, na.rm = $NARM)
+    - pattern: apply($INPUT, MARGIN = $MARG, sum, na.rm = $NARM)
+    - pattern: apply($INPUT, $MARG, FUN = sum, na.rm = $NARM)
+    - pattern: apply($INPUT, MARGIN = $MARG, FUN = sum, na.rm = $NARM)
+constraints:
+  MARG:
+    has:
+      regex: ^(1|1L)$
+fix: rowSums(~~INPUT~~, na.rm = ~~NARM~~)
+message: Use rowSums(x, na.rm = ~~NARM~~) rather than apply(x, 1, sum, na.rm = ~~NARM~~).
+
+---
+
+id: matrix_apply-5
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: apply($INPUT, $MARG, mean)
+    - pattern: apply($INPUT, MARGIN = $MARG, mean)
+    - pattern: apply($INPUT, $MARG, FUN = mean)
+    - pattern: apply($INPUT, MARGIN = $MARG, FUN = mean)
+constraints:
+  MARG:
+    has:
+      regex: ^(1|1L)$
+fix: rowMeans(~~INPUT~~)
+message: Use rowMeans(x) rather than apply(x, 1, mean).
+
+---
+
+id: matrix_apply-6
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: apply($INPUT, $MARG, mean, na.rm = $NARM)
+    - pattern: apply($INPUT, MARGIN = $MARG, mean, na.rm = $NARM)
+    - pattern: apply($INPUT, $MARG, FUN = mean, na.rm = $NARM)
+    - pattern: apply($INPUT, MARGIN = $MARG, FUN = mean, na.rm = $NARM)
+constraints:
+  MARG:
+    has:
+      regex: ^(1|1L)$
+fix: rowMeans(~~INPUT~~, na.rm = ~~NARM~~)
+message: Use rowMeans(x, na.rm = ~~NARM~~) rather than apply(x, 1, mean, na.rm = ~~NARM~~).
+
+---
+
+id: matrix_apply-7
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: apply($INPUT, $MARG, mean)
+    - pattern: apply($INPUT, MARGIN = $MARG, mean)
+    - pattern: apply($INPUT, $MARG, FUN = mean)
+    - pattern: apply($INPUT, MARGIN = $MARG, FUN = mean)
+constraints:
+  MARG:
+    has:
+      regex: ^(2|2L)$
+fix: colMeans(~~INPUT~~)
+message: Use colMeans(x) rather than apply(x, 2, mean).
+
+---
+
+id: matrix_apply-8
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: apply($INPUT, $MARG, mean, na.rm = $NARM)
+    - pattern: apply($INPUT, MARGIN = $MARG, mean, na.rm = $NARM)
+    - pattern: apply($INPUT, $MARG, FUN = mean, na.rm = $NARM)
+    - pattern: apply($INPUT, MARGIN = $MARG, FUN = mean, na.rm = $NARM)
+constraints:
+  MARG:
+    has:
+      regex: ^(2|2L)$
+fix: colMeans(~~INPUT~~, na.rm = ~~NARM~~)
+message: Use colMeans(x, na.rm = ~~NARM~~) rather than apply(x, 2, mean, na.rm = ~~NARM~~).
+

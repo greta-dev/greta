@@ -3,7 +3,7 @@ test_that("`distribution<-` works in models", {
 
   # with a distribution parameter
   y <- as_data(randn(5))
-  expect_equal(node_type(get_node(y)), "data")
+  expect_identical(node_type(get_node(y)), "data")
 
   # data
   mu <- normal(0, 1)
@@ -26,7 +26,7 @@ test_that("distribution() works", {
   # once assigned, should return the original distribution
   a2 <- normal(0, 1)
   distribution(x) <- a2
-  expect_equal(distribution(x), x)
+  expect_identical(distribution(x), x)
 })
 
 test_that("`distribution<-` errors informatively", {
