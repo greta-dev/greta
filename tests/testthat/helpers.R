@@ -330,7 +330,7 @@ get_output <- function(expr) {
     expr,
     message = function(e) msgs[[i <<- i + 1]] <<- conditionMessage(e)
   ))
-  paste0(msgs, collapse = "")
+  paste(msgs, collapse = "")
 }
 
 # mock up mcmc progress bar output for neurotic testing
