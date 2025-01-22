@@ -338,16 +338,17 @@ run_samplers <- function(samplers,
     plan_is$local &
     !is.null(greta_stash$callbacks)
 
-  ## TODO add explaining variable
-  if (plan_is$parallel & plan_is$local & length(samplers) > 1) {
+  local_parallel_multiple_samplers <- plan_is$parallel &
+    plan_is$local &
+    length(samplers) > 1
+  if (local_parallel_multiple_samplers) {
     cores_text <- compute_text(n_cores, compute_options)
-    msg <- glue::glue(
+    cli::cli_inform(
       "\n",
       "running {length(samplers)} samplers in parallel, ",
       "{cores_text}",
       "\n\n"
     )
-    message(msg)
   }
 
   is_remote_machine <- plan_is$parallel & !plan_is$local
