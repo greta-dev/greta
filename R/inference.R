@@ -344,10 +344,10 @@ run_samplers <- function(samplers,
   if (local_parallel_multiple_samplers) {
     cores_text <- compute_text(n_cores, compute_options)
     cli::cli_inform(
-      "\n",
-      "running {length(samplers)} samplers in parallel, ",
-      "{cores_text}",
-      "\n\n"
+      message = c("
+      running {length(samplers)} samplers in parallel,
+      {cores_text} \n\n"
+    )
     )
   }
 

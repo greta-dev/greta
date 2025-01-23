@@ -557,8 +557,7 @@ sampler <- R6Class(
       }
 
       if (!identical(msg, "")) {
-        msg <- cli::format_message(msg)
-        message(msg)
+        cli::cli_inform(msg)
         cat("\n")
       }
     },
