@@ -137,4 +137,5 @@ Collate:
     'write-logfiles.R'
     'zzz.R'
     'internals.R'
+    'greta-sitrep.R'
 LazyData: true
