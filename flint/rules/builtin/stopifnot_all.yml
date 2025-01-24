@@ -1,0 +1,24 @@
+id: stopifnot_all-1
+language: r
+severity: warning
+rule:
+  pattern: stopifnot(all($$$CODE))
+fix: stopifnot(~~CODE~~)
+message: |
+  Use stopifnot(x) instead of stopifnot(all(x)). stopifnot(x) runs all() 'under 
+  the hood' and provides a better error message in case of failure.
+
+---
+
+id: stopifnot_all-2
+language: r
+severity: warning
+rule:
+  pattern: stopifnot(exprs = { all($$$CODE) })
+fix: |
+  stopifnot(exprs = {
+    ~~CODE~~
+  })
+message: |
+  Use stopifnot(x) instead of stopifnot(all(x)). stopifnot(x) runs all() 'under 
+  the hood' and provides a better error message in case of failure.

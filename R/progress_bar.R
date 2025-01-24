@@ -24,7 +24,7 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
   # pad the frmat so that the width iterations counter is the same for both
   # warmup and sampling
   digit_diff <- nchar(max(iter)) - nchar(iter_this)
-  count_pad <- paste0(rep(" ", 2 * digit_diff), collapse = "")
+  count_pad <- paste(rep(" ", 2 * digit_diff), collapse = "")
 
   # formatting
   format_text <- glue::glue(
@@ -73,7 +73,7 @@ iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
       }
       # pad the end of the line to keep the update bar a consistent width
       pad_char <- pmax(0, 2 - nchar(reject_perc_string))
-      pad <- paste0(rep(" ", pad_char), collapse = "")
+      pad <- paste(rep(" ", pad_char), collapse = "")
 
       reject_text <- glue::glue("| {reject_perc_string}% bad{pad}")
     } else {

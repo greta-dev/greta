@@ -50,3 +50,7 @@ LICENSE
 ^__autograph*
 ^testlog
 ^data-raw$
+
+
+# flint files
+^flint$

@@ -29,14 +29,14 @@ test_that(".onLoad runs", {
 test_that("tensorflow coercion works", {
   skip_if_not(check_tf_version())
 
-  float <- greta:::tf_as_float(1)
-  integer <- greta:::tf_as_integer(1)
-  logical <- greta:::tf_as_logical(1)
+  float <- tf_as_float(1)
+  integer <- tf_as_integer(1)
+  logical <- tf_as_logical(1)
 
   float_type <- options()$greta_tf_float
-  expect_equal(float$dtype$name, float_type)
-  expect_equal(integer$dtype$name, "int32")
-  expect_equal(logical$dtype$name, "bool")
+  expect_identical(float$dtype$name, float_type)
+  expect_identical(integer$dtype$name, "int32")
+  expect_identical(logical$dtype$name, "bool")
 })
 
 test_that("all_greta_arrays works", {
@@ -47,11 +47,11 @@ test_that("all_greta_arrays works", {
   env$b <- as_data(rnorm(10))
   env$c <- env$a * env$b
 
-  array_list <- greta:::all_greta_arrays(env)
-  array_list_nodata <- greta:::all_greta_arrays(env, include_data = FALSE)
+  array_list <- all_greta_arrays(env)
+  array_list_nodata <- all_greta_arrays(env, include_data = FALSE)
 
-  expect_identical(names(array_list), c("a", "b", "c"))
-  expect_identical(names(array_list_nodata), c("a", "c"))
+  expect_named(array_list, c("a", "b", "c"))
+  expect_named(array_list_nodata, c("a", "c"))
 })
 
 test_that("greta_model objects print", {
@@ -59,7 +59,7 @@ test_that("greta_model objects print", {
 
   m <- model(normal(0, 1))
   message <- capture_output(print(m))
-  expect_equal(message, "greta model")
+  expect_identical(message, "greta model")
 })
 
 test_that("define and mcmc error informatively", {
@@ -121,36 +121,24 @@ test_that("check_dims errors informatively", {
   b <- ones(1)
   c <- ones(2, 2)
   d <- ones(2, 2, 2)
-  dim1 <- c(3, 3)
+  dim1 <- c(3L, 3L)
 
   # with one scalar, it should always should work
-  expect_equal(
-    greta:::check_dims(a, b),
-    dim(a)
-  )
+  expect_identical(check_dims(a, b), dim(a))
 
   # as long as target_dim matches vector dim
-  expect_equal(
-    greta:::check_dims(a, b, target_dim = dim1),
-    dim(a)
-  )
+  expect_identical(check_dims(a, b, target_dim = dim1), dim(a))
 
   # with both scalar, it should always should work
-  expect_equal(
-    greta:::check_dims(b, b),
-    dim(b)
-  )
+  expect_identical(check_dims(b, b), dim(b))
 
   # with two differently shaped arrays it shouldn't
   expect_snapshot(error = TRUE,
-    greta:::check_dims(a, c)
+    check_dims(a, c)
   )
 
   # with two scalars and a target dimension, just return the target dimension
-  expect_equal(
-    greta:::check_dims(b, b, target_dim = dim1),
-    dim1
-  )
+  expect_identical(check_dims(b, b, target_dim = dim1), dim1)
 })
 
 test_that("disjoint graphs are checked", {
@@ -262,6 +250,6 @@ test_that("module works", {
   expect_true(inherits(mod$functions, "list"))
 
   # all elements named, and reordered
-  expect_identical(names(mod), c("functions", "mean"))
-  expect_identical(names(mod$functions), c("exp", "log", "sum"))
+  expect_named(mod, c("functions", "mean"))
+  expect_named(mod$functions, c("exp", "log", "sum"))
 })

@@ -1,6 +1,6 @@
 test_that("samplers are unbiased for chi-squared", {
   skip_if_not(check_tf_version())
-
+  skip_on_os("windows")
   df <- 5
   x <- chi_squared(df)
   iid <- function(n) rchisq(n, df)

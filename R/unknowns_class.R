@@ -56,7 +56,7 @@ print.unknowns <- function(x, ..., n = 10) {
 }
 
 # create an unknowns array from some dimensions
-unknowns <- function(dims = c(1, 1), data = as.numeric(NA)) {
+unknowns <- function(dims = c(1, 1), data = NA_real_) {
   x <- array(data = data, dim = dims)
   as.unknowns(x)
 }

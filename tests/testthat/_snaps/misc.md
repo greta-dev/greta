@@ -87,7 +87,7 @@
 # check_dims errors informatively
 
     Code
-      greta:::check_dims(a, c)
+      check_dims(a, c)
     Condition
       Error:
       ! incompatible dimensions: 3x3, 2x2

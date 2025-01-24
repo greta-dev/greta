@@ -223,9 +223,9 @@ variable_node <- R6Class(
       }
 
       bad_limits <- switch(self$constraint,
-        scalar_all_low = any(!is.finite(upper)),
-        scalar_all_high = any(!is.finite(lower)),
-        scalar_all_both = any(!is.finite(lower)) | any(!is.finite(upper)),
+        scalar_all_low = !all(is.finite(upper)),
+        scalar_all_high = !all(is.finite(lower)),
+        scalar_all_both = !all(is.finite(lower)) | !all(is.finite(upper)),
         FALSE
       )
 

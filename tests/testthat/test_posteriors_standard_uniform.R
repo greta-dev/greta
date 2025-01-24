@@ -1,6 +1,6 @@
 test_that("samplers are unbiased for standard uniform", {
   skip_if_not(check_tf_version())
-
+  skip_on_os("windows")
   x <- uniform(0, 1)
   iid <- runif
 

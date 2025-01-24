@@ -41,7 +41,7 @@ test_that("when calculate simulates multiple values, they are calculated using t
   x_2 <- x*1
 
   vals <- calculate(x, x_2, nsim = 10)
-  expect_equal(vals$x, vals$x_2)
+  expect_identical(vals$x, vals$x_2)
 })
 
 test_that("calculate produces the right number of samples", {
@@ -83,10 +83,7 @@ test_that("calculate samples are the same when the argument seed is the same", {
   c_one <- calculate(y, nsim = 1, seed = 12345)
   c_two <- calculate(y, nsim = 1, seed = 12345)
 
-  expect_equal(
-    as.numeric(c_one),
-    as.numeric(c_two)
-  )
+  expect_identical(as.numeric(c_one), as.numeric(c_two))
 
 })
 
@@ -102,10 +99,7 @@ test_that("calculate samples are the same when the R seed is the same", {
   set.seed(12345)
   c_two <- calculate(y, nsim = 1)
 
-  expect_equal(
-    as.numeric(c_one),
-    as.numeric(c_two)
-    )
+  expect_identical(as.numeric(c_one), as.numeric(c_two))
 })
 
 test_that("mcmc samples are the same when the R seed is the same, also with tf set seed", {
@@ -119,20 +113,14 @@ test_that("mcmc samples are the same when the R seed is the same, also with tf s
   set.seed(12345)
   two <- mcmc(m, warmup = 10, n_samples = 1, chains = 1)
 
-  expect_equal(
-    as.numeric(one),
-    as.numeric(two)
-    )
+  expect_identical(as.numeric(one), as.numeric(two))
 
   tensorflow::set_random_seed(12345)
   one_tf <- mcmc(m, warmup = 10, n_samples = 1, chains = 1)
   tensorflow::set_random_seed(12345)
   two_tf <- mcmc(m, warmup = 10, n_samples = 1, chains = 1)
 
-  expect_equal(
-    as.numeric(one_tf),
-    as.numeric(two_tf)
-  )
+  expect_identical(as.numeric(one_tf), as.numeric(two_tf))
 
   # but these are not (always) equal to each other
   mcmc_matches_tf_one <- identical(as.numeric(one),as.numeric(one_tf))

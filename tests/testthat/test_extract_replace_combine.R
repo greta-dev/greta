@@ -315,7 +315,7 @@ test_that("rep works like R", {
   check_op(rep_times, d)
 
   rep_length <- function(x) {
-    rep(x, length.out = 3)
+    rep_len(x, 3)
   }
 
   check_op(rep_length, a)
@@ -522,9 +522,9 @@ test_that("length and dim work", {
   ga_operation <- ga_data * ga_stochastic
 
   # length
-  expect_identical(length(ga_data), 9L)
-  expect_identical(length(ga_stochastic), 9L)
-  expect_identical(length(ga_operation), 9L)
+  expect_length(ga_data, 9L)
+  expect_length(ga_stochastic, 9L)
+  expect_length(ga_operation, 9L)
 
   # dim
   expect_identical(dim(ga_data), c(3L, 3L))
@@ -666,13 +666,13 @@ test_that("c handles NULLs and lists", {
 
   # greta arrays combined with other things should return a list
   z <- c(x, mean)
-  expect_true(is.list(z))
+  expect_type(z, "list")
   expect_s3_class(z[[1]], "greta_array")
   expect_identical(dim(z[[1]]), c(1L, 1L))
 
   # even with a NULL in there
   z <- c(x, NULL, mean)
-  expect_true(is.list(z))
+  expect_type(z, "list")
   expect_s3_class(z[[1]], "greta_array")
   expect_identical(dim(z[[1]]), c(1L, 1L))
 })
