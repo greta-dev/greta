@@ -40,7 +40,7 @@ greta_sitrep <- function(verbosity = c("minimal", "detailed", "quiet")){
 check_if_python_available <- function(){
   check_if_software_available(
     software_available = have_python(),
-    version = reticulate::py_version(),
+    version = py_version(),
     software_name = "python"
     )
 }
@@ -87,7 +87,7 @@ get_current_ideal_deps <- function(){
       "tf"
     ),
     current = c(
-      paste0(reticulate::py_version()),
+      paste0(py_version()),
       paste0(version_tf()),
       paste0(version_tfp())
     ),
@@ -263,7 +263,7 @@ have_python <- function() {
 
 #' @importFrom reticulate py_module_available
 have_tfp <- function() {
-  is_tfp_available <- reticulate::py_module_available("tensorflow_probability")
+  is_tfp_available <- py_module_available("tensorflow_probability")
 
   if (is_tfp_available) {
 
@@ -277,9 +277,8 @@ have_tfp <- function() {
 
 }
 
-#' @importFrom reticulate py_module_available
 have_tf <- function() {
-  is_tf_available <- reticulate::py_module_available("tensorflow")
+  is_tf_available <- py_module_available("tensorflow")
 
   if (is_tf_available) {
 

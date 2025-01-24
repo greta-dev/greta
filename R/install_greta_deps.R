@@ -300,7 +300,7 @@ greta_deps_receipt <- function(){
   greta_deps_spec(
     tf_version = version_tf(),
     tfp_version = version_tfp(),
-    python_version = as.character(reticulate::py_version())
+    python_version = as.character(py_version())
   )
 
 }
