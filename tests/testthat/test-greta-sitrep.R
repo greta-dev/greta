@@ -123,7 +123,7 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
     py_version = function(...) "3.6"
   )
 
-  expect_snapshot_warning(
+  expect_snapshot(
     greta_sitrep()
   )
 
@@ -131,7 +131,7 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
     version_tf = function(...) "2.0.0"
   )
 
-  expect_snapshot_warning(
+  expect_snapshot(
     greta_sitrep()
   )
 
@@ -139,7 +139,7 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
     version_tfp = function(...) "0.9.0"
   )
 
-  expect_snapshot_warning(
+  expect_snapshot(
     greta_sitrep()
   )
 

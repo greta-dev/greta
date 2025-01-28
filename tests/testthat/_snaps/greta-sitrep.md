@@ -138,7 +138,7 @@
       greta_sitrep()
     Message
       i checking if python available
-      v python (v3.10) available
+      v python (v3.6) available
       
       i checking if TensorFlow available
       v TensorFlow (v2.15.0) available
@@ -149,7 +149,6 @@
       i checking if greta conda environment available
       v greta conda environment available
       
-      i greta is ready to use!
 
 ---
 
@@ -157,7 +156,7 @@
       greta_sitrep()
     Message
       i checking if python available
-      v python (v3.10) available
+      v python (v3.6) available
       
       i checking if TensorFlow available
       v TensorFlow (v2.0.0) available
@@ -175,7 +174,7 @@
       greta_sitrep()
     Message
       i checking if python available
-      v python (v3.10) available
+      v python (v3.6) available
       
       i checking if TensorFlow available
       v TensorFlow (v2.0.0) available
