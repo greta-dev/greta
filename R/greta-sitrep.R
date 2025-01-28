@@ -34,10 +34,85 @@ greta_sitrep <- function(verbosity = c("minimal", "detailed", "quiet")){
     quiet = quiet_sitrep()
   )
 
+}
+
+
+minimal_sitrep <- function(){
+
+  check_if_python_available()
+  check_if_tf_available()
+  check_if_tfp_available()
+  check_if_greta_conda_env_available()
+
+  check_greta_ready_to_use()
 
 }
 
-check_if_python_available <- function(){
+detailed_sitrep <- function(){
+
+  config_info <- reticulate::py_config()
+
+  cli::cli_h1("R")
+  cli::cli_ul("version: {.val {getRversion()}}")
+  cli::cli_ul("path: {.path {R.home()}}")
+
+  cli::cli_h1("{.pkg greta}")
+  cli::cli_ul("version: {.val {packageVersion('greta')}}")
+  cli::cli_ul("path: {.path {find.package('greta')}}")
+
+  cli::cli_h1("{.pkg python}")
+  check_if_python_available()
+  cli::cli_ul("path: {.path {reticulate::miniconda_path()}}")
+
+  cli::cli_h1("{.pkg greta conda environment}")
+  check_if_greta_conda_env_available()
+  conda_env_path <- greta_conda_env_path()
+  cli::cli_ul("path: {.path {conda_env_path}}")
+  conda_modules <- conda_list_env_modules()
+
+  tf_in_conda <- nzchar(stringr::str_subset(
+    conda_modules,
+    "^(tensorflow)(\\s|$)"
+    ))
+
+  tfp_in_conda <- nzchar(stringr::str_subset(
+    conda_modules,
+    "^(tensorflow-probability)(\\s|$)"
+    ))
+
+  cli::cli_h1("{.pkg TensorFlow}")
+  check_if_tf_available()
+  cli::cli_ul("R path: {.path {find.package('tensorflow')}}")
+  cli::cli_ul("Exists in conda env: {.val {tf_in_conda}}")
+
+  cli::cli_h1("{.pkg TensorFlow Probability}")
+  check_if_tfp_available()
+  cli::cli_ul("Exists in conda env: {.val {tfp_in_conda}}")
+
+  cli::cli_h1("Is {.pkg greta} ready to use?")
+  check_greta_ready_to_use()
+  cli::cli_inform(
+    c(
+      "i" = "Use the following code to list available python modules in \\
+      {.var greta-env-tf2}:",
+      "{.code system(paste('conda list -n', 'greta-env-tf2'), intern = TRUE)}"
+    )
+  )
+
+}
+
+quiet_sitrep <- function(){
+
+  suppressMessages(check_greta_ready_to_use())
+
+}
+
+conda_list_env_modules <- function(){
+  system(paste("conda list -n", "greta-env-tf2"), intern = TRUE)
+}
+
+
+check_if_python_available <- function(min_version = "3.3"){
   check_if_software_available(
     software_available = have_python(),
     version = py_version(),
@@ -111,6 +186,21 @@ get_current_ideal_deps <- function(){
 
 check_greta_ready_to_use <- function(software_available){
 
+  software_available <- software_availability()
+
+  greta_env_not_available <- !software_available["greta_env"]
+  other_software_ready <-  all(software_available[1:3])
+  deps_avail_not_greta_env <- greta_env_not_available && other_software_ready
+  if (deps_avail_not_greta_env){
+    check_tf_version("none")
+    cli::cli_alert_info(
+      c(
+        "i" = "Conda environment not set up, but all dependencies available\n\n",
+        "i" = "{.pkg greta} is ready to use!"
+      ),
+      wrap = TRUE
+      )
+  }
   if (!all(software_available)) {
     check_tf_version("warn")
   } else if (all(software_available)) {
@@ -128,66 +218,6 @@ check_greta_ready_to_use <- function(software_available){
 
 }
 
-
-minimal_sitrep <- function(){
-
-  check_if_python_available()
-  check_if_tf_available()
-  check_if_tfp_available()
-  check_if_greta_conda_env_available()
-
-  software_available <- software_availability()
-
-  check_greta_ready_to_use(software_available)
-
-}
-
-detailed_sitrep <- function(){
-
-  config_info <- reticulate::py_config()
-
-  cli::cli_h1("R")
-  cli::cli_ul("version: {.val {getRversion()}}")
-  cli::cli_ul("path: {R.home()}")
-  cli::cli_h1("{.pkg greta}")
-  cli::cli_ul("version: {.val {packageVersion('greta')}}")
-  cli::cli_ul("path: {.val {find.package('greta')}}")
-
-  cli::cli_h1("{.pkg python}")
-  check_if_python_available()
-  cli::cli_ul("path: {.val {find.package('greta')}}")
-  cli::cli_ul("path: {.val {reticulate::miniconda_path()}}")
-
-  cli::cli_h1("{.pkg TensorFlow}")
-  check_if_tf_available()
-  cli::cli_ul("R path: {.path {find.package('tensorflow')}}")
-  cli::cli_ul("python path: {.val {find.package('greta')}}")
-
-  cli::cli_h1("{.pkg TensorFlow Probability}")
-  check_if_tfp_available()
-  cli::cli_ul("R path: {.path {find.package('tensorflow')}}")
-  cli::cli_ul("python path: {.val {find.package('greta')}}")
-
-  cli::cli_h1("{.pkg greta conda environment}")
-  check_if_greta_conda_env_available()
-  show_greta_conda_env_path()
-
-  software_available <- software_availability()
-
-  check_greta_ready_to_use(software_available)
-
-}
-
-quiet_sitrep <- function(){
-
-  suppressMessages({
-
-    software_available <- software_availability()
-
-    check_greta_ready_to_use(software_available)
-  })
-
-}
 
 check_if_software_available <- function(software_available,
                                         version = NULL,

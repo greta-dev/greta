@@ -730,7 +730,7 @@ is_DiagrammeR_installed <- function(){
   requireNamespace("DiagrammeR", quietly = TRUE)
 }
 
-show_greta_conda_env_path <- function(){
+greta_conda_env_path <- function(){
   if (!have_greta_conda_env()){
     cli::cli_ul("path: no conda env found for {.var greta-env-tf2}")
   }
@@ -738,7 +738,7 @@ show_greta_conda_env_path <- function(){
   py_cl <- reticulate::conda_list()
   which_greta_env <- which(py_cl$name == "greta-env-tf2")
   greta_env_path <- py_cl$python[which_greta_env]
-  cli::cli_ul("path: {greta_env_path}")
+  greta_env_path
 
 }
 

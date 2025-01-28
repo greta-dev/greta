@@ -48,14 +48,8 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     have_tfp = function(...) TRUE
   )
 
-  expect_snapshot(
-    error = TRUE,
-    greta_sitrep(),
-  )
-
-  expect_snapshot(
-    error = TRUE,
-    greta_sitrep(),
+  expect_snapshot_warning(
+    greta_sitrep()
   )
 
   local_mocked_bindings(
@@ -64,9 +58,8 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     have_tfp = function(...) FALSE
   )
 
-  expect_snapshot(
-    error = TRUE,
-    greta_sitrep(),
+  expect_snapshot_warning(
+    greta_sitrep()
   )
 
   local_mocked_bindings(
@@ -75,9 +68,8 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     have_tfp = function(...) TRUE
   )
 
-  expect_snapshot(
-    error = TRUE,
-    greta_sitrep(),
+  expect_snapshot_warning(
+    greta_sitrep()
   )
 
   local_mocked_bindings(
@@ -86,9 +78,8 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     have_tfp = function(...) FALSE
   )
 
-  expect_snapshot(
-    error = TRUE,
-    greta_sitrep(),
+  expect_snapshot_warning(
+    greta_sitrep()
   )
 
   local_mocked_bindings(
@@ -97,9 +88,8 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     have_tfp = function(...) TRUE
   )
 
-  expect_snapshot(
-    error = TRUE,
-    greta_sitrep(),
+  expect_snapshot_warning(
+    greta_sitrep()
   )
 
   local_mocked_bindings(
@@ -108,9 +98,8 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     have_tfp = function(...) FALSE
   )
 
-  expect_snapshot(
-    error = TRUE,
-    greta_sitrep(),
+  expect_snapshot_warning(
+    greta_sitrep()
   )
 
   local_mocked_bindings(
@@ -120,8 +109,7 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
   )
 
   expect_snapshot(
-    error = TRUE,
-    greta_sitrep(),
+    greta_sitrep()
   )
 
 })
@@ -154,5 +142,39 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
   expect_snapshot_warning(
     greta_sitrep()
   )
+
+})
+
+test_that("greta_sitrep warns greta conda env not available", {
+  skip_if_not(check_tf_version())
+  skip_on_ci()
+  skip_on_cran()
+
+  local_mocked_bindings(
+    have_greta_conda_env = function(...) FALSE
+  )
+
+  expect_snapshot(
+    greta_sitrep()
+  )
+})
+
+
+test_that("greta_sitrep works with quiet, minimal, and detailed options", {
+  expect_snapshot(
+    greta_sitrep(verbosity = "quiet")
+  )
+  expect_snapshot(
+    greta_sitrep(verbosity = "minimal")
+  )
+  expect_snapshot(
+    greta_sitrep(verbosity = "detailed")
+  )
+  # test it errors when verbosity is not "quiet", "minimal", and "detailed"
+  expect_snapshot(
+    error = TRUE,
+    greta_sitrep(verbosity = "bananas")
+  )
+
 
 })
