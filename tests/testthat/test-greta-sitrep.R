@@ -161,14 +161,15 @@ test_that("greta_sitrep warns greta conda env not available", {
 
 
 test_that("greta_sitrep works with quiet, minimal, and detailed options", {
+  skip_if_not(check_tf_version())
+  skip_on_ci()
+  skip_on_cran()
+
   expect_snapshot(
     greta_sitrep(verbosity = "quiet")
   )
   expect_snapshot(
     greta_sitrep(verbosity = "minimal")
-  )
-  expect_snapshot(
-    greta_sitrep(verbosity = "detailed")
   )
   # test it errors when verbosity is not "quiet", "minimal", and "detailed"
   expect_snapshot(
@@ -176,5 +177,8 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
     greta_sitrep(verbosity = "bananas")
   )
 
+  expect_snapshot(
+    greta_sitrep(verbosity = "detailed")
+  )
 
 })
