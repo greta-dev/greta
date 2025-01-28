@@ -100,7 +100,7 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 
   # set the printed value to be nicer
   cholesky_value <- unknowns(dim)
-  cholesky_value[lower.tri(cholesky_value, )] <- 0
+  cholesky_value[lower.tri(cholesky_value)] <- 0
   node$value(cholesky_value)
 
   # reeturn as a greta array

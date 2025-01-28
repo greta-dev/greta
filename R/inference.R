@@ -249,10 +249,12 @@ mcmc <- function(
     max_samplers <- future::nbrOfWorkers()
 
     # divide chains up between the workers
-    chain_assignment <- sort(rep(
-      seq_len(max_samplers),
-      length.out = chains
-    ))
+    chain_assignment <- sort(
+      rep_len(
+        seq_len(max_samplers),
+        length.out = chains
+    )
+    )
 
     # divide the initial values between them
     initial_values_split <- split(initial_values, chain_assignment)
@@ -336,16 +338,17 @@ run_samplers <- function(samplers,
     plan_is$local &
     !is.null(greta_stash$callbacks)
 
-  ## TODO add explaining variable
-  if (plan_is$parallel & plan_is$local & length(samplers) > 1) {
+  local_parallel_multiple_samplers <- plan_is$parallel &
+    plan_is$local &
+    length(samplers) > 1
+  if (local_parallel_multiple_samplers) {
     cores_text <- compute_text(n_cores, compute_options)
-    msg <- glue::glue(
-      "\n",
-      "running {length(samplers)} samplers in parallel, ",
-      "{cores_text}",
-      "\n\n"
+    cli::cli_inform(
+      message = c("
+      running {length(samplers)} samplers in parallel,
+      {cores_text} \n\n"
     )
-    message(msg)
+    )
   }
 
   is_remote_machine <- plan_is$parallel & !plan_is$local

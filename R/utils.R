@@ -808,8 +808,10 @@ is_using_cpu <- function(x){
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
 message_if_using_gpu <- function(compute_options){
-  if (is_using_gpu(compute_options)) {
-    if (getOption("greta_gpu_message") %||% TRUE){
+  gpu_used <- is_using_gpu(compute_options)
+  greta_gpu_message <- getOption("greta_gpu_message") %||% TRUE
+  gpu_used_and_message <- gpu_used && greta_gpu_message
+  if (gpu_used_and_message) {
       cli::cli_inform(
         c(
           "NOTE: When using GPU, the random number seed may not always be \\
@@ -820,7 +822,6 @@ message_if_using_gpu <- function(compute_options){
           "{.code options(greta_gpu_message = FALSE)}"
         )
       )
-    }
   }
 }
 
@@ -982,7 +983,13 @@ outside_version_range <- function(provided, range) {
   outside_range
 }
 
-pretty_dim <- function(x) paste0(dim(x), collapse = "x")
+pretty_dim <- function(x){
+  x_dim <- dim(x)
+  print_dim_x <- x_dim %||% x
+
+  prettied_dim <- paste(print_dim_x, collapse = "x")
+  prettied_dim
+}
 
 are_initials <- function(x){
   vapply(

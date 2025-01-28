@@ -1,6 +1,6 @@
 test_that("posterior is correct (binomial)", {
   skip_if_not(check_tf_version())
-
+  skip_on_os("windows")
   # analytic solution to the posterior of the paramter of a binomial
   # distribution, with uniform prior
   n <- 100

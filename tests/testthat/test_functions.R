@@ -156,8 +156,8 @@ test_that("kronecker works with greta and base array arguments", {
   greta_out1 <- kronecker(a_greta, b)
   greta_out2 <- kronecker(a, b_greta)
 
-  expect_true(is.greta_array(greta_out1))
-  expect_true(is.greta_array(greta_out1))
+  expect_s3_class(greta_out1, "greta_array")
+  expect_s3_class(greta_out1, "greta_array")
 
   compare_op(base_out, grab(greta_out1))
   compare_op(base_out, grab(greta_out2))
@@ -590,9 +590,9 @@ test_that("chol2symm inverts chol", {
   u <- chol(x)
 
   # check the R version
-  expect_equal(x, chol2symm(u))
+  expect_equal(x, chol2symm(u), tolerance = .Machine$double.eps)
 
   # check the greta version
   x2 <- calculate(chol2symm(as_data(u)))[[1]]
-  expect_equal(x2, x)
+  expect_equal(x2, x, tolerance = .Machine$double.eps)
 })

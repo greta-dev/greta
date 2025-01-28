@@ -6,14 +6,14 @@ test_that("deterministic calculate works with correct lists", {
   a <- normal(0, 1)
   y <- a * x
   vals <- calculate(y, values = list(a = 3))
-  expect_equal(vals$y, matrix(c(3, 6)))
+  expect_identical(vals$y, matrix(c(3, 6)))
 
   # unknown variable and new data
   x <- as_data(c(1, 2))
   a <- normal(0, 1)
   y <- a * x
   vals <- calculate(y, values = list(a = 6, x = c(2, 1)))
-  expect_equal(vals$y, matrix(c(12, 6)))
+  expect_identical(vals$y, matrix(c(12, 6)))
 
   # fixed value depending on multiple variables
   x <- as_data(c(1, 2))
@@ -22,7 +22,7 @@ test_that("deterministic calculate works with correct lists", {
   a <- a1 * a2
   y <- a * x
   vals <- calculate(y, values = list(a = 6, x = c(2, 1)))
-  expect_equal(vals$y, matrix(c(12, 6)))
+  expect_identical(vals$y, matrix(c(12, 6)))
 })
 
 test_that("stochastic calculate works with correct lists", {
@@ -33,21 +33,21 @@ test_that("stochastic calculate works with correct lists", {
   # ( pnorm(90, 100, 1) = 7e-24 )
   # nolint end
 
-  nsim <- 97
+  nsim <- 97L
 
   # fix variable
   a <- normal(0, 1)
   y <- normal(a, 1)
   sims <- calculate(y, nsim = nsim, values = list(a = 100))
   expect_true(all(sims$y > 90))
-  expect_equal(dim(sims$y), c(nsim, dim(y)))
+  expect_identical(dim(sims$y), c(nsim, dim(y)))
 
   # fix variable with more dims on y
   a <- normal(0, 1)
   y <- normal(a, 1, dim = c(3, 3, 3))
   sims <- calculate(y, nsim = nsim, values = list(a = 100))
   expect_true(all(sims$y > 90))
-  expect_equal(dim(sims$y), c(nsim, dim(y)))
+  expect_identical(dim(sims$y), c(nsim, dim(y)))
 
   # fix variable and new data
   x <- as_data(1)
@@ -55,7 +55,7 @@ test_that("stochastic calculate works with correct lists", {
   y <- normal(a * x, 1)
   sims <- calculate(y, nsim = nsim, values = list(a = 50, x = 2))
   expect_true(all(sims$y > 90))
-  expect_equal(dim(sims$y), c(nsim, dim(y)))
+  expect_identical(dim(sims$y), c(nsim, dim(y)))
 
   # data with distribution
   x <- as_data(1)
@@ -64,7 +64,7 @@ test_that("stochastic calculate works with correct lists", {
   distribution(y) <- normal(a * x, 1)
   sims <- calculate(y, nsim = nsim, values = list(a = 50, x = 2))
   expect_true(all(sims$y > 90))
-  expect_equal(dim(sims$y), c(nsim, dim(y)))
+  expect_identical(dim(sims$y), c(nsim, dim(y)))
 
   # multivariate data with distribution
   n <- 10
@@ -75,7 +75,7 @@ test_that("stochastic calculate works with correct lists", {
   distribution(y) <- multivariate_normal(a * x, diag(k), n_realisations = n)
   sims <- calculate(y, nsim = nsim, values = list(a = 50, x = rep(2, k)))
   expect_true(all(sims$y > 90))
-  expect_equal(dim(sims$y), c(nsim, dim(y)))
+  expect_identical(dim(sims$y), c(nsim, dim(y)))
 
   # weird multivariate data with distribution
   n <- 10
@@ -96,7 +96,7 @@ test_that("stochastic calculate works with correct lists", {
   )
 
   expect_true(all(apply(sims$y, 1:2, sum) == 1))
-  expect_equal(dim(sims$y), c(nsim, dim(y)))
+  expect_identical(dim(sims$y), c(nsim, dim(y)))
 })
 
 test_that("deterministic calculate works with greta_mcmc_list objects", {
@@ -114,7 +114,7 @@ test_that("deterministic calculate works with greta_mcmc_list objects", {
   # correct class
   expect_s3_class(y_values, "greta_mcmc_list")
   # correct dimensions
-  expect_equal(dim(y_values[[1]]), c(10, 2))
+  expect_identical(dim(y_values[[1]]), c(10L, 2L))
   # all valid values
   expect_true(all(is.finite(as.vector(y_values[[1]]))))
 
@@ -123,7 +123,7 @@ test_that("deterministic calculate works with greta_mcmc_list objects", {
   # correct class
   expect_s3_class(new_values, "greta_mcmc_list")
   # correct dimensions
-  expect_equal(dim(new_values[[1]]), c(10, 1))
+  expect_identical(dim(new_values[[1]]), c(10L, 1L))
   # all valid values
   expect_true(all(is.finite(as.vector(new_values[[1]]))))
 })
@@ -157,20 +157,20 @@ test_that("calculate with greta_mcmc_list doesn't lose track of new nodes", {
 
   x <- z^2
   expect_ok(x_draws <- calculate(x, values = draws))
-  expect_equal(as.matrix(x_draws)[, 1], as.matrix(draws)[, 1]^2)
+  expect_identical(as.matrix(x_draws)[, 1], as.matrix(draws)[, 1]^2)
 
   y <- z * 2
   expect_ok(y_draws <- calculate(y, values = draws))
-  expect_equal(as.matrix(y_draws)[, 1], as.matrix(draws)[, 1] * 2)
+  expect_identical(as.matrix(y_draws)[, 1], as.matrix(draws)[, 1] * 2)
 })
 
 test_that("stochastic calculate works with greta_mcmc_list objects", {
   skip_if_not(check_tf_version())
 
-  samples <- 10
-  chains <- 2
+  samples <- 10L
+  chains <- 2L
 
-  n <- 100
+  n <- 100L
   y <- as_data(rnorm(n))
   x <- as_data(1)
   a <- normal(0, 1)
@@ -191,24 +191,24 @@ test_that("stochastic calculate works with greta_mcmc_list objects", {
 
   # this should be OK
   sims <- calculate(y, values = draws, nsim = 10)
-  expect_equal(dim(sims$y), c(10, dim(y)))
+  expect_identical(dim(sims$y), c(10L, dim(y)))
 
   # for a list of targets, the result should be a list
-  nsim <- 10
+  nsim <- 10L
   sims <- calculate(a, y, values = draws, nsim = nsim)
 
   # correct class, dimensions, and valid values
-  expect_true(is.list(sims))
-  expect_equal(names(sims), c("a", "y"))
-  expect_equal(dim(sims$a), c(nsim, 1, 1))
-  expect_equal(dim(sims$y), c(nsim, n, 1))
+  expect_type(sims, "list")
+  expect_named(sims, c("a", "y"))
+  expect_identical(dim(sims$a), c(nsim, 1L, 1L))
+  expect_identical(dim(sims$y), c(nsim, n, 1L))
   expect_true(all(is.finite(sims$a)) & all(is.finite(sims$y)))
 
   # a single array with these nsim observations
   sims <- calculate(y, values = draws, nsim = nsim)
 
-  expect_true(is.numeric(sims$y))
-  expect_equal(dim(sims$y), c(nsim, n, 1))
+  expect_type(sims$y, "double")
+  expect_identical(dim(sims$y), c(nsim, n, 1L))
   expect_true(all(is.finite(sims$y)))
 
   # warn about resampling if nsim is greater than elements in draws
@@ -275,7 +275,7 @@ test_that("stochastic calculate works with mcmc samples & new stochastics", {
   )
 
   sims <- calculate(b, values = draws, nsim = 10)
-  expect_equal(dim(sims$b), c(10, dim(b)))
+  expect_identical(dim(sims$b), c(10L, dim(b)))
   expect_true(all(sims$b > 0))
 })
 
@@ -345,7 +345,7 @@ test_that("calculate works with variable batch sizes", {
 
   # check the first one
   expect_s3_class(val_1, "greta_mcmc_list")
-  expect_equal(dim(val_1[[1]]), c(100, 2))
+  expect_identical(dim(val_1[[1]]), c(100L, 2L))
   expect_true(all(is.finite(as.vector(val_1[[1]]))))
 
   # check the others are the same
@@ -385,19 +385,19 @@ test_that("calculate returns a named list", {
 
   # if target is a single greta array, the output should be a single numeric
   result <- calculate(b, nsim = 10)
-  expect_true(is.list(result))
-  expect_true(is.numeric(result$b))
+  expect_type(result, "list")
+  expect_type(result$b, "double")
 
   # if target is a list, the output should be a list of numerics
   result <- calculate(b, c, nsim = 10)
-  expect_true(is.list(result))
+  expect_type(result, "list")
 
   # check contents
   are_numeric <- vapply(result, is.numeric, FUN.VALUE = logical(1))
   expect_true(all(are_numeric))
 
   # check names
-  expect_equal(names(result), c("b", "c"))
+  expect_named(result, c("b", "c"))
 })
 
 test_that("calculate produces the right number of samples", {
@@ -409,16 +409,16 @@ test_that("calculate produces the right number of samples", {
 
   # should be vectors
   sims <- calculate(a, nsim = 1)
-  expect_equal(dim(sims$a), c(1, dim(a)))
+  expect_identical(dim(sims$a), c(1L, dim(a)))
 
   sims <- calculate(a, nsim = 17)
-  expect_equal(dim(sims$a), c(17, dim(a)))
+  expect_identical(dim(sims$a), c(17L, dim(a)))
 
   sims <- calculate(y, nsim = 1)
-  expect_equal(dim(sims$y), c(1, dim(y)))
+  expect_identical(dim(sims$y), c(1L, dim(y)))
 
   sims <- calculate(y, nsim = 19)
-  expect_equal(dim(sims$y), c(19, dim(y)))
+  expect_identical(dim(sims$y), c(19L, dim(y)))
 
 })
 

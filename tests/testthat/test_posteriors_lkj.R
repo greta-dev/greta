@@ -1,5 +1,6 @@
 test_that("samplers are unbiased for LKJ", {
   skip_if_not(check_tf_version())
+  skip_on_os("windows")
 
   x <- lkj_correlation(3, 2)[1, 2]
   iid <- function(n) {

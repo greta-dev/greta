@@ -1,0 +1,25 @@
+id: any_na-1
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: any(is.na($MYVAR))
+    - pattern: any(na.rm = $NARM, is.na($MYVAR))
+    - pattern: any(is.na($MYVAR), na.rm = $NARM)
+fix: anyNA(~~MYVAR~~)
+message: anyNA(x) is better than any(is.na(x)).
+
+---
+
+id: any_na-2
+language: r
+severity: warning
+rule:
+  any:
+    - pattern: NA %in% $ELEM
+    - pattern: NA_real_ %in% $ELEM
+    - pattern: NA_logical_ %in% $ELEM
+    - pattern: NA_character_ %in% $ELEM
+    - pattern: NA_complex_ %in% $ELEM
+fix: anyNA(~~ELEM~~)
+message: anyNA(x) is better than NA %in% x.
