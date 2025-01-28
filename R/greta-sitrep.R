@@ -70,15 +70,13 @@ detailed_sitrep <- function(){
   cli::cli_ul("path: {.path {conda_env_path}}")
   conda_modules <- conda_list_env_modules()
 
-  tf_in_conda <- nzchar(stringr::str_subset(
-    conda_modules,
-    "^(tensorflow)(\\s|$)"
-    ))
+  tf_in_conda <- nzchar(grep("^(tensorflow)(\\s|$)",
+                             conda_modules,
+                             value = TRUE))
 
-  tfp_in_conda <- nzchar(stringr::str_subset(
-    conda_modules,
-    "^(tensorflow-probability)(\\s|$)"
-    ))
+  tfp_in_conda <- nzchar(grep("^(tensorflow-probability)(\\s|$)",
+                             conda_modules,
+                             value = TRUE))
 
   cli::cli_h1("{.pkg TensorFlow}")
   check_if_tf_available()
