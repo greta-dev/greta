@@ -24,69 +24,6 @@ module <- function(..., sort = TRUE) {
   dots
 }
 
-# find out whether the usr has conda installed and visible
-#' @importFrom reticulate conda_binary
-have_conda <- function() {
-  conda_bin <- tryCatch(reticulate::conda_binary("auto"),
-                        error = function(e) NULL
-  )
-  !is.null(conda_bin)
-}
-
-#' @importFrom reticulate py_available
-have_python <- function() {
-  tryCatch(
-    expr = reticulate::py_available(initialize = TRUE),
-    error = function(e) FALSE
-  )
-}
-
-#' @importFrom reticulate py_module_available
-have_tfp <- function() {
-  is_tfp_available <- reticulate::py_module_available("tensorflow_probability")
-
-  if (is_tfp_available) {
-
-    pkg <- reticulate::import("pkg_resources")
-    tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-    is_tfp_available <- utils::compareVersion("0.15.0", tfp_version) <= 0
-
-  }
-
-  return(is_tfp_available)
-
-}
-
-#' @importFrom reticulate py_module_available
-have_tf <- function() {
-  is_tf_available <- reticulate::py_module_available("tensorflow")
-
-  if (is_tf_available) {
-
-    tf_version <- suppressMessages(tf$`__version__`)
-    is_tf_available <- utils::compareVersion("2.9.0", tf_version) <= 0
-
-  }
-
-  return(is_tf_available)
-
-}
-
-version_tf <- function(){
-  if (have_tf()) {
-    tf$`__version__`
-  } else {
-    NULL
-  }
-}
-
-version_tfp <- function(){
-  if (have_tfp()) {
-    tfp$`__version__`
-  } else {
-    NULL
-  }
-}
 
 # helper for *apply statements on R6 objects
 member <- function(x, method) {
@@ -146,7 +83,7 @@ get_seed <- function() {
   sample.int(
     n = 2^30,
     size = 1
-    )
+  )
 }
 
 # does a pointer exist (as a named object) and is it from the current session
@@ -644,8 +581,8 @@ as_tf_function <- function(r_fun, ...) {
     sub_dag <- dag_class$new(targets)
 
     # TF1/2 check remove
-      # `get_default_graph()` doesn't work with either eager execution or
-      # `tf.function`.
+    # `get_default_graph()` doesn't work with either eager execution or
+    # `tf.function`.
     # use the default graph, so that it can be overwritten when this is called?
     # alternatively fetch from above, or put it in greta_stash?
     # sub_dag$tf_graph <- tf$compat$v1$get_default_graph()
@@ -793,133 +730,15 @@ is_DiagrammeR_installed <- function(){
   requireNamespace("DiagrammeR", quietly = TRUE)
 }
 
-check_if_software_available <- function(software_available,
-                                        version = NULL,
-                                        ideal_version = NULL,
-                                        software_name){
-
-  cli::cli_process_start("checking if {.pkg {software_name}} available")
-  # if the software is detected
-
-  if (!software_available) {
-    cli::cli_process_failed(
-      msg_failed = "{.pkg {software_name}} not available"
-    )
+greta_conda_env_path <- function(){
+  if (!have_greta_conda_env()){
+    cli::cli_ul("path: no conda env found for {.var greta-env-tf2}")
   }
 
-  if (software_available) {
-
-    if (is.null(ideal_version) & !is.null(version)){
-      cli::cli_process_done(
-        msg_done = "{.pkg {software_name}} (v{version}) available"
-      )
-    }
-
-    # if it has a version and ideal version
-    has_ideal_version <- !is.null(version) & !is.null(ideal_version)
-    if (has_ideal_version){
-      version_chr <- paste0(version)
-      version_match <- compareVersion(version_chr, ideal_version) == 0
-
-      if (version_match){
-        cli::cli_process_done(
-          msg_done = "{.pkg {software_name}} (v{version}) available"
-        )
-      }
-      if (!version_match){
-        cli::cli_process_failed(
-          msg_failed = "{.pkg {software_name}} available, \\
-          however {.strong {ideal_version}} is needed and \\
-          {.strong {version}} was detected"
-        )
-      }
-      # if there is no version for the software
-    } else if (is.null(version)){
-      cli::cli_process_done(
-        msg_done = "{.pkg {software_name}} available"
-      )
-    }
-  }
-}
-
-compare_version_vec <- Vectorize(
-    FUN = compareVersion,
-    vectorize.args = "b",
-    SIMPLIFY = TRUE
-  )
-
-#' Greta Situation Report
-#'
-#' This checks if Python, Tensorflow, Tensorflow Probability, and the greta
-#'   conda environment are available, and also loads and initialises python
-#'
-#' @return Message if greta is ready to use
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' greta_sitrep()
-#' }
-greta_sitrep <- function(){
-
-  check_if_software_available(software_available = have_python(),
-                              version = reticulate::py_version(),
-                              software_name = "python")
-
-  check_if_software_available(software_available = have_tf(),
-                              version = version_tf(),
-                              software_name = "TensorFlow")
-
-  check_if_software_available(software_available = have_tfp(),
-                              version = version_tfp(),
-                              software_name = "TensorFlow Probability")
-
-  check_if_software_available(software_available = have_greta_conda_env(),
-                              software_name = "greta conda environment")
-
-  software_available <- c(
-    python = have_python(),
-    tf = have_tf(),
-    tfp = have_tfp(),
-    greta_env = have_greta_conda_env()
-  )
-
-  if (!all(software_available)) {
-    check_tf_version("warn")
-  } else if (all(software_available)) {
-    software_version <- data.frame(
-      software = c(
-        "python",
-        "tfp",
-        "tf"
-      ),
-      current = c(
-        paste0(reticulate::py_version()),
-        paste0(version_tf()),
-        paste0(version_tfp())
-      ),
-      # versions must be at least this version
-      ideal = c(
-        "3.8",
-        "2.15.0",
-        "0.23.0"
-      )
-    )
-    software_version$match <- c(
-      compareVersion(software_version$current[1], software_version$ideal[1]) >= 0,
-      compareVersion(software_version$current[2], software_version$ideal[2]) >= 0,
-      compareVersion(software_version$current[3], software_version$ideal[3]) >= 0
-    )
-
-    if (all(software_version$match)){
-      check_tf_version("none")
-      cli::cli_alert_info("{.pkg greta} is ready to use!",
-                          wrap = TRUE)
-    } else {
-      check_tf_version("warn")
-    }
-
-  }
+  py_cl <- reticulate::conda_list()
+  which_greta_env <- which(py_cl$name == "greta-env-tf2")
+  greta_env_path <- py_cl$python[which_greta_env]
+  greta_env_path
 
 }
 
@@ -977,8 +796,6 @@ compute_text <- function(n_cores, compute_options){
 connected_to_draws <- function(dag, mcmc_dag) {
   names(dag$node_list) %in% names(mcmc_dag$node_list)
 }
-
-
 
 is_using_gpu <- function(x){
   x == "GPU"
@@ -1047,7 +864,7 @@ node_type_colour <- function(type){
     data = cli::col_green(type),
     operation = cli::col_cyan(type),
     distribution = cli::col_yellow(type)
-    )
+  )
 
   switch_cols
 }
@@ -1088,7 +905,7 @@ are_null <- function(x){
     x,
     is.null,
     FUN.VALUE = logical(1)
-    )
+  )
 }
 
 are_greta_array <- function(x){

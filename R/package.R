@@ -35,6 +35,14 @@
 #' }
 "_PACKAGE"
 
+#' @export
+#' @importFrom reticulate py_module_available
+reticulate::py_module_available
+
+#' @export
+#' @importFrom reticulate py_version
+reticulate::py_version
+
 # clear CRAN checks spotting floating global variables
 #' @importFrom utils globalVariables
 utils::globalVariables(
