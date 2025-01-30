@@ -283,3 +283,8 @@ test_that("mixture of normals with varying weights has correct density", {
     dim = dim
   )
 })
+
+#
+# test_that("mixture of deterministic and continuous has correct density", {
+#
+# })

@@ -389,6 +389,18 @@ test_that("dirichlet-multinomial distribution has correct density", {
   )
 })
 
+# test_that("deterministic distribution has correct density", {
+#   skip_if_not(check_tf_version())
+#
+#   compare_distribution(
+#     greta::deterministic,
+#     # stats::dunif,
+#     # parameters = list(location),
+#     # x = runif(100, -2.1, -1.2)
+#   )
+# })
+
+
 test_that("scalar-valued distributions can be defined in models", {
   skip_if_not(check_tf_version())
 

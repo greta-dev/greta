@@ -298,6 +298,18 @@ test_that("mcmc supports slice sampler with single precision models", {
   ))
 })
 
+# test_that("mcmc works with deterministic distribution", {
+#   skip_if_not(check_tf_version())
+#   set.seed(5)
+#   x <- deterministic(0)
+#   m <- model(x, precision = "single")
+#   expect_ok(draws <- mcmc(m,
+#                           sampler = slice(),
+#                           n_samples = 100, warmup = 100,
+#                           verbose = FALSE
+#   ))
+# })
+
 test_that("initials works", {
   skip_if_not(check_tf_version())
 

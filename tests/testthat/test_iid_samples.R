@@ -104,6 +104,12 @@ test_that("univariate samples are correct", {
     rf,
     parameters = list(df1 = 4, df2 = 1)
   )
+
+  # compare_iid_samples(deterministic,
+  #                     # runif, degenerate
+  #                     # parameters = list(min = -2, max = 3)
+  # )
+
 })
 
 test_that("truncated univariate samples are correct", {

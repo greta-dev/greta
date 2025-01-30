@@ -30,6 +30,7 @@
 \alias{categorical}
 \alias{dirichlet}
 \alias{dirichlet_multinomial}
+\alias{deterministic}
 \title{probability distributions}
 \usage{
 uniform(min, max, dim = NULL)
@@ -87,6 +88,8 @@ categorical(prob, n_realisations = NULL, dimension = NULL)
 dirichlet(alpha, n_realisations = NULL, dimension = NULL)
 
 dirichlet_multinomial(size, alpha, n_realisations = NULL, dimension = NULL)
+
+deterministic(location, dimension = NULL)
 }
 \arguments{
 \item{min, max}{scalar values giving optional limits to \code{uniform}
