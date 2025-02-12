@@ -90,6 +90,39 @@ slice <- function(max_doublings = 5) {
   obj
 }
 
+#' @rdname samplers
+#' @export
+#'
+#' @param epsilon leapfrog stepsize hyperparameter (positive, will be tuned)
+#' @param diag_sd estimate of the posterior marginal standard deviations
+#'   (positive, will be tuned).
+#' @param max_leapfrog_steps numeric. Default 1000. Maximum number of leapfrog
+#'   steps used. The algorithm will determine the optimal number less than this.
+#'
+#' @details For `snaper_hmc()`. The Lmin and Lmax parameters are learnt and so
+#'   not probivided in this. The number of chains cannot be less than 2, due to
+#'   how Snaper HMC works. `diag_sd` is used to rescale the parameter space to
+#'   make it more uniform, and make sampling more efficient.
+snaper_hmc <- function(
+                max_leapfrog_steps = 1000,
+                epsilon = 0.1,
+                diag_sd = 1
+                ) {
+  # nolint end
+  obj <- list(
+    parameters = list(
+      max_leapfrog_steps = max_leapfrog_steps,
+      epsilon = epsilon,
+      diag_sd = diag_sd
+    ),
+    class = snaper_hmc_sampler
+  )
+  class(obj) <- c("snaper hmc sampler", "sampler")
+  obj
+}
+
+
+
 #' @noRd
 #' @export
 print.sampler <- function(x, ...) {

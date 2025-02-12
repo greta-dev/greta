@@ -1055,3 +1055,89 @@ slice_sampler <- R6Class(
     }
   )
 )
+
+snaper_hmc_sampler <- R6Class(
+  "snaper_hmc_sampler",
+  inherit = sampler,
+  public = list(
+    parameters = list(
+      # Lmin = 10,
+      # Lmax = 20,
+      max_leapfrog_steps = 1000,
+      epsilon = 0.005,
+      diag_sd = 1
+    ),
+    accept_target = 0.651,
+
+    define_tf_kernel = function(sampler_param_vec) {
+
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      # TODO double check this
+      free_state_size <- length(sampler_param_vec) - 2
+
+      # TF1/2 check
+      # this will likely get replaced...
+
+      s_hmc_max_leapfrog_steps <- sampler_param_vec[0]
+      s_hmc_epsilon <- sampler_param_vec[2]
+      s_hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
+
+      hmc_step_sizes <- tf$cast(
+        x = tf$reshape(
+          hmc_epsilon * (s_hmc_diag_sd / tf$reduce_sum(s_hmc_diag_sd)),
+          shape = shape(free_state_size)
+        ),
+        dtype = tf$float64
+      )
+      # TF1/2 check
+      # where is "free_state" pulled from, given that it is the
+      # argument to this function, "generate_log_prob_function" ?
+      # log probability function
+
+      # build the kernel
+      # nolint start
+
+      # sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
+      #   target_log_prob_fn = dag$tf_log_prob_function_adjusted,
+      #   step_size = hmc_step_sizes,
+      #   num_leapfrog_steps = hmc_l
+      # )
+
+      kernel_base <- tfp$experimental$mcmc$SNAPERHamiltonianMonteCarlo(
+        target_log_prob_fn = dag$tf_log_prob_function_adjusted,
+        # TODO do we want to use hmc_step_size or 1?
+        # step_size = 1,
+        step_size = hmc_step_sizes,
+        # num_adaptation_steps = as.integer(n_warmup * 0.9))
+        # TODO check n_warmup?
+        num_adaptation_steps = as.integer(s_hmc_max_leapfrog_steps * 0.9))
+
+      sampler_kernel <- tfp$mcmc$DualAveragingStepSizeAdaptation(
+        inner_kernel = kernel_base,
+        # num_adaptation_steps = as.integer(n_warmup))
+        # TODO check n_warmup?
+        num_adaptation_steps = as.integer(s_hmc_max_leapfrog_steps))
+
+
+      return(
+        sampler_kernel
+      )
+    },
+    sampler_parameter_values = function() {
+
+      # random number of integration steps
+      max_leapfrog_steps <- self$parameters$max_leapfrog_steps
+      epsilon <- self$parameters$epsilon
+      diag_sd <- matrix(self$parameters$diag_sd)
+
+      # return named list for replacing tensors
+      list(
+        s_hmc_max_leapfrog_steps = max_leapfrog_steps,
+        s_hmc_epsilon = epsilon,
+        s_hmc_diag_sd = diag_sd
+      )
+    }
+  )
+)
