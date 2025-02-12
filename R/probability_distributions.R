@@ -1193,6 +1193,27 @@ lkj_correlation_distribution <- R6Class(
   )
 )
 
+deterministic_distribution <- R6Class(
+  "deterministic_distribution",
+  inherit = distribution_node,
+  public = list(
+    location = NA,
+    initialize = function(location, dim) {
+      location <- as.greta_array(location)
+
+      dim <- check_dims(location, target_dim = dim)
+      super$initialize("deterministic", dim)
+      self$add_parameter(location, "location")
+    },
+
+    tf_distrib = function(parameters, dag) {
+      tfp$distributions$Deterministic(
+        loc = parameters$location
+      )
+    }
+  )
+)
+
 # module for export via .internals
 distribution_classes_module <- module(
   uniform_distribution,
@@ -1222,7 +1243,8 @@ distribution_classes_module <- module(
   multinomial_distribution,
   categorical_distribution,
   dirichlet_distribution,
-  dirichlet_multinomial_distribution
+  dirichlet_multinomial_distribution,
+  deterministic_distribution
 )
 
 # export constructors
@@ -1568,4 +1590,10 @@ dirichlet_multinomial <- function(size, alpha,
     "dirichlet_multinomial",
     size, alpha, n_realisations, dimension
   )
+}
+
+#' @rdname distributions
+#' @export
+deterministic <- function(location, dimension = NULL) {
+  distrib("deterministic", location, dimension)
 }

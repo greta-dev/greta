@@ -56,7 +56,7 @@
 #' # check the mixing probabilities after fitting using calculate()
 #' # (you could also do this within the model)
 #' normalized_weights <- weights / sum(weights)
-#' draws_weights <- calculate(normalized_weights, draws_rates)
+#' draws_weights <- calculate(normalized_weights, values = draws_rates)
 #'
 #' # get the posterior means
 #' summary(draws_rates)$statistics[, "Mean"]

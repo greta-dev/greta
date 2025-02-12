@@ -389,6 +389,24 @@ test_that("dirichlet-multinomial distribution has correct density", {
   )
 })
 
+ddegenerate <- function(x, location) {
+  ifelse(test = x == location,
+         yes = 1,
+         no = 0)
+}
+
+test_that("deterministic distribution has correct density", {
+  skip_if_not(check_tf_version())
+
+  compare_distribution(
+    greta::deterministic,
+    ddegenerate,
+    parameters = list(location),
+    x = sample(x = 1, size = 100, replace = TRUE)
+  )
+})
+
+
 test_that("scalar-valued distributions can be defined in models", {
   skip_if_not(check_tf_version())
 
