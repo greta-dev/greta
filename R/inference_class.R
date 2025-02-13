@@ -157,6 +157,7 @@ inference <- R6Class(
 
     # check whether the model can be evaluated at these parameters
     valid_parameters = function(parameters) {
+      # ADAPTIVE HMC - this is where this breaks
       dag <- self$model$dag
       tf_parameters <- fl(array(
         data = parameters,
@@ -668,6 +669,7 @@ sampler <- R6Class(
                                # pass values through
     ) {
 
+      browser()
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -693,6 +695,7 @@ sampler <- R6Class(
       # Need to work out how to get sampler_batch() to run as a TF function.
       # To do that we need to work out how to get the free state
 
+      browser()
       sampler_batch <- tfp$mcmc$sample_chain(
         num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
         current_state = free_state,
@@ -794,6 +797,8 @@ sampler <- R6Class(
       # legacy: previously we used `n_samples` not `sampler_burst_length`
       n_samples <- sampler_burst_length
 
+      # ADPATIVE HMC
+      # TODO - this is where the adaptive_hmc fails at the moment
       result <- cleanly(
         self$tf_evaluate_sample_batch(
           free_state = tensorflow::as_tensor(
@@ -877,7 +882,6 @@ hmc_sampler <- R6Class(
     accept_target = 0.651,
 
     define_tf_kernel = function(sampler_param_vec) {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -1056,70 +1060,50 @@ slice_sampler <- R6Class(
   )
 )
 
-snaper_hmc_sampler <- R6Class(
-  "snaper_hmc_sampler",
+adaptive_hmc_sampler <- R6Class(
+  "adaptive_hmc_sampler",
   inherit = sampler,
   public = list(
     parameters = list(
       # Lmin = 10,
       # Lmax = 20,
       max_leapfrog_steps = 1000,
-      epsilon = 0.005,
-      diag_sd = 1
+      # TODO clean up these parameter usage else where
+      # epsilon = 0.005,
+      # diag_sd = 1,
+      # TODO some kind of validity check of method? Currently this can only be
+      # "SNAPER".
+      method = "SNAPER"
     ),
     accept_target = 0.651,
 
     define_tf_kernel = function(sampler_param_vec) {
-
+      browser()
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # TODO double check this
       free_state_size <- length(sampler_param_vec) - 2
 
-      # TF1/2 check
-      # this will likely get replaced...
-
-      s_hmc_max_leapfrog_steps <- sampler_param_vec[0]
-      s_hmc_epsilon <- sampler_param_vec[2]
-      s_hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
-
-      hmc_step_sizes <- tf$cast(
-        x = tf$reshape(
-          hmc_epsilon * (s_hmc_diag_sd / tf$reduce_sum(s_hmc_diag_sd)),
-          shape = shape(free_state_size)
-        ),
-        dtype = tf$float64
+      adaptive_hmc_max_leapfrog_steps <- tf$cast(
+        x = sampler_param_vec[0],
+        dtype = tf$int32
       )
-      # TF1/2 check
-      # where is "free_state" pulled from, given that it is the
-      # argument to this function, "generate_log_prob_function" ?
-      # log probability function
-
-      # build the kernel
-      # nolint start
-
-      # sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
-      #   target_log_prob_fn = dag$tf_log_prob_function_adjusted,
-      #   step_size = hmc_step_sizes,
-      #   num_leapfrog_steps = hmc_l
-      # )
+      # TODO pipe that in properly
+      n_warmup <- sampler_param_vec[1]
+      # adaptive_hmc_epsilon <- sampler_param_vec[1]
+      # adaptive_hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
 
       kernel_base <- tfp$experimental$mcmc$SNAPERHamiltonianMonteCarlo(
         target_log_prob_fn = dag$tf_log_prob_function_adjusted,
-        # TODO do we want to use hmc_step_size or 1?
-        # step_size = 1,
-        step_size = hmc_step_sizes,
-        # num_adaptation_steps = as.integer(n_warmup * 0.9))
-        # TODO check n_warmup?
-        num_adaptation_steps = as.integer(s_hmc_max_leapfrog_steps * 0.9))
+        step_size = 1,
+        num_adaptation_steps = as.integer(self$warmup),
+        max_leapfrog_steps = adaptive_hmc_max_leapfrog_steps
+      )
 
       sampler_kernel <- tfp$mcmc$DualAveragingStepSizeAdaptation(
         inner_kernel = kernel_base,
-        # num_adaptation_steps = as.integer(n_warmup))
-        # TODO check n_warmup?
-        num_adaptation_steps = as.integer(s_hmc_max_leapfrog_steps))
-
+        num_adaptation_steps = as.integer(self$warmup)
+        )
 
       return(
         sampler_kernel
@@ -1131,12 +1115,14 @@ snaper_hmc_sampler <- R6Class(
       max_leapfrog_steps <- self$parameters$max_leapfrog_steps
       epsilon <- self$parameters$epsilon
       diag_sd <- matrix(self$parameters$diag_sd)
+      method <- self$parameters$method
 
       # return named list for replacing tensors
       list(
-        s_hmc_max_leapfrog_steps = max_leapfrog_steps,
-        s_hmc_epsilon = epsilon,
-        s_hmc_diag_sd = diag_sd
+        adaptive_hmc_max_leapfrog_steps = max_leapfrog_steps,
+        adaptive_hmc_epsilon = epsilon,
+        adaptive_hmc_diag_sd = diag_sd,
+        method = method
       )
     }
   )
