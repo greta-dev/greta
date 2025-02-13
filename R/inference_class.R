@@ -307,13 +307,20 @@ sampler <- R6Class(
     },
 
     define_tf_evaluate_sample_batch = function(){
+      browser()
+
+      dummy_init_state <- matrix(data = 0,
+                                 nrow = nrow(self$free_state),
+                                 ncol = ncol(self$free_state))
 
       # create a dummy sample_param_vec (vector with length as defined below)
-      #   dummy_sampler_param_vec <- self$sampler_parameter_values()
+        dummy_sampler_param_vec <- length(unlist(self$sampler_parameter_values()))
       # create dummy kernel using this, with:
-      #   dummy_kernel <- self$define_tf_kernel(dummy_sampler_param_vec)
+        dummy_kernel <- self$define_tf_kernel(dummy_sampler_param_vec)
       # use dummy kernel to bootrap a dummy results object
-      #   dummy_kernel_results <- dummy_kernel$bootstrap_results()
+        dummy_kernel_results <- dummy_kernel$bootstrap_results(
+          init_state = dummy_init_state
+          )
       # use dummy results object to make a tensorspec or whatever
 
       self$tf_evaluate_sample_batch <- tensorflow::tf_function(
@@ -335,10 +342,13 @@ sampler <- R6Class(
                 self$sampler_parameter_values()
               )
             )
-          ),
+          )
+        ),
           # kernel_results
-          kernel$bootstrap_results()
-          dtype = tf_float()
+          tf$TensorSpec(
+            shape = list(
+              length(dummy_kernel_results)
+              )
           )
         )
       )
