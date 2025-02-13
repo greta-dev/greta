@@ -307,6 +307,15 @@ sampler <- R6Class(
     },
 
     define_tf_evaluate_sample_batch = function(){
+
+      # create a dummy sample_param_vec (vector with length as defined below)
+      #   dummy_sampler_param_vec <- self$sampler_parameter_values()
+      # create dummy kernel using this, with:
+      #   dummy_kernel <- self$define_tf_kernel(dummy_sampler_param_vec)
+      # use dummy kernel to bootrap a dummy results object
+      #   dummy_kernel_results <- dummy_kernel$bootstrap_results()
+      # use dummy results object to make a tensorspec or whatever
+
       self$tf_evaluate_sample_batch <- tensorflow::tf_function(
         f = self$define_tf_draws,
         input_signature = list(
@@ -327,6 +336,8 @@ sampler <- R6Class(
               )
             )
           ),
+          # kernel_results
+          kernel$bootstrap_results()
           dtype = tf_float()
           )
         )
@@ -744,7 +755,8 @@ sampler <- R6Class(
         free_state = self$free_state,
         sampler_burst_length = as.integer(n_samples),
         sampler_thin = as.integer(thin),
-        sampler_param_vec = param_vec
+        sampler_param_vec = param_vec,
+        kernel_results = kernel_results
       )
 
       # get trace of free state and drop the null dimension
@@ -789,7 +801,8 @@ sampler <- R6Class(
     sample_carefully = function(free_state,
                                 sampler_burst_length,
                                 sampler_thin,
-                                sampler_param_vec) {
+                                sampler_param_vec,
+                                kernel_results) {
 
       # tryCatch handling for numerical errors
       dag <- self$model$dag
@@ -799,6 +812,10 @@ sampler <- R6Class(
 
       # ADPATIVE HMC
       # TODO - this is where the adaptive_hmc fails at the moment
+
+      # so we can pass in the results from the previous kernel
+      dummy_kernel <- self$define_tf_kernel()
+
       result <- cleanly(
         self$tf_evaluate_sample_batch(
           free_state = tensorflow::as_tensor(
@@ -811,7 +828,8 @@ sampler <- R6Class(
             sampler_param_vec,
             dtype = tf_float(),
             shape = length(sampler_param_vec)
-          )
+          ),
+          kernel_results = kernel_results
         )
       ) # closing cleanly
 
@@ -1120,8 +1138,8 @@ adaptive_hmc_sampler <- R6Class(
       # return named list for replacing tensors
       list(
         adaptive_hmc_max_leapfrog_steps = max_leapfrog_steps,
-        adaptive_hmc_epsilon = epsilon,
-        adaptive_hmc_diag_sd = diag_sd,
+        # adaptive_hmc_epsilon = epsilon,
+        # adaptive_hmc_diag_sd = diag_sd,
         method = method
       )
     }
