@@ -1003,3 +1003,16 @@ n_warmup <- function(x){
   x_info <- attr(x, "model_info")
   x_info$warmup
 }
+
+build_tensor_spec <- function(tensor){
+  tf$TensorSpec(shape = tensor$shape,
+                dtype = tensor$dtype)
+}
+
+maybe_make_tensor_shape <- function(x){
+  if (tf$is_tensor(x)) {
+    build_tensor_spec(x)
+  } else{
+    x
+  }
+}

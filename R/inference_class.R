@@ -157,6 +157,7 @@ inference <- R6Class(
 
     # check whether the model can be evaluated at these parameters
     valid_parameters = function(parameters) {
+      # ADAPTIVE HMC - this is where this breaks
       dag <- self$model$dag
       tf_parameters <- fl(array(
         data = parameters,
@@ -274,6 +275,9 @@ sampler <- R6Class(
 
     # batch sizes for tracing
     trace_batch_size = 100,
+
+    kernel_results = NULL,
+
     initialize = function(initial_values,
                           model,
                           parameters = list(),
@@ -305,29 +309,48 @@ sampler <- R6Class(
 
     },
 
+    # TODO two versions of `define_tf_evaluate_sample_batch()`
+    # one that does warmup
+      # this returns the last trace
+      # and the kernel
+    # one that does sampling
+      # then we need to curry this with the kernel used in warmup
+
+    # sampling one?
     define_tf_evaluate_sample_batch = function(){
+      browser()
+
+      # create a dummy sample_param_vec (vector with length as defined below)
+      sampler_param_length <- length(unlist(self$sampler_parameter_values()))
+
       self$tf_evaluate_sample_batch <- tensorflow::tf_function(
         f = self$define_tf_draws,
         input_signature = list(
           # free state
-          tf$TensorSpec(shape = list(NULL, self$n_free),
-                        dtype = tf_float()),
+          tf$TensorSpec(
+            # TODO
+            # we might be able to remove this NULL
+            # with a known shape, might make TF happier
+            # this will just be the number of chains
+            shape = list(NULL, self$n_free),
+            dtype = tf_float()
+            ),
           # sampler_burst_length
-          tf$TensorSpec(shape = list(),
-                        dtype = tf$int32),
+          tf$TensorSpec(
+            shape = list(),
+            dtype = tf$int32
+            ),
           # sampler_thin
-          tf$TensorSpec(shape = list(),
-                        dtype = tf$int32),
+          tf$TensorSpec(
+            shape = list(),
+            dtype = tf$int32
+            ),
           # sampler_param_vec
-          tf$TensorSpec(shape = list(
-            length(
-              unlist(
-                self$sampler_parameter_values()
-              )
+          tf$TensorSpec(
+            shape = list(sampler_param_length),
+            # TODO this is new
+            dtype = tf$float64
             )
-          ),
-          dtype = tf_float()
-          )
         )
       )
     },
@@ -373,8 +396,17 @@ sampler <- R6Class(
       # how big would we like the bursts to be
       ideal_burst_size <- ifelse(one_by_one, 1L, pb_update)
 
+      # TODO
       # if warmup is required, do that now
       if (warmup > 0) {
+
+        # TODO
+        # create kernel results dummy object
+        # assign to self$kernel_results
+        # rebuild tf_evaluate_sample_batch function
+        # self$define_tf_evaluate_sample_batch()
+        # also get rid of bursts for warmup / progress bar goes from 0->100
+
         if (verbose) {
           pb_warmup <- create_progress_bar(
             "warmup",
@@ -388,56 +420,72 @@ sampler <- R6Class(
           pb_warmup <- NULL
         }
 
-        # split up warmup iterations into bursts of sampling
-        burst_lengths <- self$burst_lengths(warmup,
-                                            ideal_burst_size,
-                                            warmup = TRUE
-        )
-        completed_iterations <- cumsum(burst_lengths)
+        self$run_burst(n_samples = warmup)
+        # # split up warmup iterations into bursts of sampling
+        # burst_lengths <- self$burst_lengths(warmup,
+        #                                     ideal_burst_size,
+        #                                     warmup = TRUE
+        # )
+        # completed_iterations <- cumsum(burst_lengths)
 
         # relay between R and tensorflow in a burst to be cpu efficient
-        for (burst in seq_along(burst_lengths)) {
-          # TF1/2 check todo?
-          # replace with define_tf_draws
+        # for (burst in seq_along(burst_lengths)) {
+        #   # TF1/2 check todo?
+        #   # replace with define_tf_draws
+        #
+        #   # self$run_burst(n_samples = burst_lengths[burst])
+        #   # align the free state back to the parameters we are tracing
+        #   # TF1/2 check todo?
+        #   # this is the tuning stage, might not need to evaluate
+        #   # / record the parameter values, as they will be thrown away
+        #   # after warmup - so could remove trace here.
+        #
+        #   self$trace()
+        #   # a memory efficient way to calculate summary stats of samples
+        #   self$update_welford()
+        #   self$tune(completed_iterations[burst], warmup)
+        #
+        #   if (verbose) {
+        #
+        #     # update the progress bar/percentage log
+        #     iterate_progress_bar(pb_warmup,
+        #                          it = completed_iterations[burst],
+        #                          rejects = self$numerical_rejections,
+        #                          chains = self$n_chains,
+        #                          file = self$pb_file
+        #     )
+        #
+        #     self$write_percentage_log(warmup,
+        #                               completed_iterations[burst],
+        #                               stage = "warmup"
+        #     )
+        #   }
+        # }
 
-          self$run_burst(n_samples = burst_lengths[burst])
-          # align the free state back to the parameters we are tracing
-          # TF1/2 check todo?
-          # this is the tuning stage, might not need to evaluate
-          # / record the parameter values, as they will be thrown away
-          # after warmup - so could remove trace here.
+        ## close progress bar
 
-          self$trace()
-          # a memory efficient way to calculate summary stats of samples
-          self$update_welford()
-          self$tune(completed_iterations[burst], warmup)
-
-          if (verbose) {
-
-            # update the progress bar/percentage log
             iterate_progress_bar(pb_warmup,
-                                 it = completed_iterations[burst],
-                                 rejects = self$numerical_rejections,
+                                 it = warmup,
+                                 # TODO
+                                 # grab the rejected samples somehow
+                                 # rejects = self$numerical_rejections,
+                                 rejects = 1L,
                                  chains = self$n_chains,
                                  file = self$pb_file
             )
 
-            self$write_percentage_log(warmup,
-                                      completed_iterations[burst],
-                                      stage = "warmup"
-            )
-          }
-        }
-
         # scrub the free state trace and numerical rejections
-        self$traced_free_state <- replicate(self$n_chains,
-                                            matrix(NA, 0, self$n_free),
-                                            simplify = FALSE
-        )
+        # self$traced_free_state <- replicate(self$n_chains,
+        #                                     matrix(NA, 0, self$n_free),
+        #                                     simplify = FALSE
+        # )
         self$numerical_rejections <- 0
       }
-
+        # TODO possibly grab out last state (final free state), put into sampling
       if (n_samples > 0) {
+
+        # Recompile kernel results - self$define_tf_evaluate_sample_batch()
+        # then...the rest of this code should work
 
         # on exiting during the main sampling period (even if killed by the
         # user) trace the free state values
@@ -668,6 +716,7 @@ sampler <- R6Class(
                                # pass values through
     ) {
 
+      browser()
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -693,10 +742,13 @@ sampler <- R6Class(
       # Need to work out how to get sampler_batch() to run as a TF function.
       # To do that we need to work out how to get the free state
 
+      browser()
       sampler_batch <- tfp$mcmc$sample_chain(
         num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
+        previous_kernel_results = self$kernel_results,
         current_state = free_state,
         kernel = sampler_kernel,
+        return_final_kernel_results = TRUE,
         trace_fn = function(current_state, kernel_results) {
           kernel_results
         },
@@ -719,6 +771,7 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
+      # TODO we can use the param vec internally inside TF/TFP
       param_vec <- unlist(self$sampler_parameter_values())
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
@@ -734,6 +787,7 @@ sampler <- R6Class(
       # # and then run the code for the sampler_batch
       #
 
+      # TODO - possibly TF1 thing, can remove
       dag$set_tf_data_list("batch_size", nrow(self$free_state))
 
       # run the sampler, handling numerical errors
@@ -741,8 +795,11 @@ sampler <- R6Class(
         free_state = self$free_state,
         sampler_burst_length = as.integer(n_samples),
         sampler_thin = as.integer(thin),
-        sampler_param_vec = param_vec
+        sampler_param_vec = param_vec,
+        kernel_results = kernel_results
       )
+
+      self$kernel_results <- batch_results$final_kernel_results
 
       # get trace of free state and drop the null dimension
       if (is.null(batch_results$all_states)){
@@ -786,13 +843,20 @@ sampler <- R6Class(
     sample_carefully = function(free_state,
                                 sampler_burst_length,
                                 sampler_thin,
-                                sampler_param_vec) {
+                                sampler_param_vec,
+                                kernel_results) {
 
       # tryCatch handling for numerical errors
       dag <- self$model$dag
       tfe <- dag$tf_environment
       # legacy: previously we used `n_samples` not `sampler_burst_length`
       n_samples <- sampler_burst_length
+
+      # ADPATIVE HMC
+      # TODO - this is where the adaptive_hmc fails at the moment
+
+      # so we can pass in the results from the previous kernel
+      dummy_kernel <- self$define_tf_kernel()
 
       result <- cleanly(
         self$tf_evaluate_sample_batch(
@@ -804,7 +868,7 @@ sampler <- R6Class(
           sampler_thin = tensorflow::as_tensor(sampler_thin),
           sampler_param_vec = tensorflow::as_tensor(
             sampler_param_vec,
-            dtype = tf_float(),
+            dtype = tf$float64,
             shape = length(sampler_param_vec)
           )
         )
@@ -877,7 +941,6 @@ hmc_sampler <- R6Class(
     accept_target = 0.651,
 
     define_tf_kernel = function(sampler_param_vec) {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -1052,6 +1115,74 @@ slice_sampler <- R6Class(
     # no additional here tuning
     tune = function(iterations_completed, total_iterations) {
 
+    }
+  )
+)
+
+adaptive_hmc_sampler <- R6Class(
+  "adaptive_hmc_sampler",
+  inherit = sampler,
+  public = list(
+    parameters = list(
+      # Lmin = 10,
+      # Lmax = 20,
+      max_leapfrog_steps = 1000,
+      # TODO clean up these parameter usage else where
+      # epsilon = 0.005,
+      # diag_sd = 1,
+      # TODO some kind of validity check of method? Currently this can only be
+      # "SNAPER".
+      method = "SNAPER"
+    ),
+    accept_target = 0.651,
+
+    define_tf_kernel = function(sampler_param_vec) {
+      browser()
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      free_state_size <- length(sampler_param_vec) - 2
+
+      adaptive_hmc_max_leapfrog_steps <- tf$cast(
+        x = sampler_param_vec[0],
+        dtype = tf$int32
+      )
+      # TODO pipe that in properly
+      n_warmup <- sampler_param_vec[1]
+      # adaptive_hmc_epsilon <- sampler_param_vec[1]
+      # adaptive_hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
+
+      kernel_base <- tfp$experimental$mcmc$SNAPERHamiltonianMonteCarlo(
+        target_log_prob_fn = dag$tf_log_prob_function_adjusted,
+        step_size = 1,
+        num_adaptation_steps = as.integer(self$warmup),
+        max_leapfrog_steps = adaptive_hmc_max_leapfrog_steps
+      )
+
+      sampler_kernel <- tfp$mcmc$DualAveragingStepSizeAdaptation(
+        inner_kernel = kernel_base,
+        num_adaptation_steps = as.integer(self$warmup)
+        )
+
+      return(
+        sampler_kernel
+      )
+    },
+    sampler_parameter_values = function() {
+
+      # random number of integration steps
+      max_leapfrog_steps <- self$parameters$max_leapfrog_steps
+      epsilon <- self$parameters$epsilon
+      diag_sd <- matrix(self$parameters$diag_sd)
+      method <- self$parameters$method
+
+      # return named list for replacing tensors
+      list(
+        adaptive_hmc_max_leapfrog_steps = max_leapfrog_steps,
+        # adaptive_hmc_epsilon = epsilon,
+        # adaptive_hmc_diag_sd = diag_sd,
+        method = method
+      )
     }
   )
 )

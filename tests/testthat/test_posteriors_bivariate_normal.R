@@ -5,9 +5,13 @@ test_that("samplers are unbiased for bivariate normals", {
   hmc_mvn_samples <- check_mvn_samples(sampler = hmc())
   expect_lte(max(hmc_mvn_samples), stats::qnorm(0.99))
 
+  adaptive_hmc_mvn_samples <- check_mvn_samples(sampler = adaptive_hmc())
+  expect_lte(max(adaptive_hmc_mvn_samples), stats::qnorm(0.99))
+
   rwmh_mvn_samples <- check_mvn_samples(sampler = rwmh())
   expect_lte(max(rwmh_mvn_samples), stats::qnorm(0.99))
 
   slice_mvn_samples <- check_mvn_samples(sampler = slice())
   expect_lte(max(rwmh_mvn_samples), stats::qnorm(0.99))
 })
+
