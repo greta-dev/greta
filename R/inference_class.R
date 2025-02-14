@@ -321,6 +321,12 @@ sampler <- R6Class(
         dummy_kernel_results <- dummy_kernel$bootstrap_results(
           init_state = dummy_init_state
           )
+
+        dummy_kernel_results_tensor_spec <- tf$nest$map_structure(
+          maybe_make_tensor_shape,
+          dummy_kernel_results
+        )
+
       # use dummy results object to make a tensorspec or whatever
 
       self$tf_evaluate_sample_batch <- tensorflow::tf_function(
@@ -345,11 +351,7 @@ sampler <- R6Class(
           )
         ),
           # kernel_results
-          tf$TensorSpec(
-            shape = list(
-              length(dummy_kernel_results)
-              )
-          )
+        dummy_kernel_results_tensor_spec
         )
       )
     },
