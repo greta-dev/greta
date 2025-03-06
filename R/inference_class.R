@@ -309,6 +309,12 @@ sampler <- R6Class(
 
     },
 
+    define_tf_evaluate_sample_batch_warmup = function(){
+      # This does warmup, returns:
+        # Last trace
+        # Kernel
+    },
+
     # TODO two versions of `define_tf_evaluate_sample_batch()`
     # one that does warmup
       # this returns the last trace
@@ -353,6 +359,23 @@ sampler <- R6Class(
             )
         )
       )
+    },
+
+    create_dummy_kernel_results = function(){
+
+      dummy_init_state <- matrix(data = 0,
+                                 nrow = nrow(self$free_state),
+                                 ncol = ncol(self$free_state))
+
+      dummy_sampler_param_vec <- length(unlist(self$sampler_parameter_values()))
+      # create dummy kernel using this, with:
+      dummy_kernel <- self$define_tf_kernel(dummy_sampler_param_vec)
+      # use dummy kernel to bootrap a dummy results object
+      dummy_kernel_results <- dummy_kernel$bootstrap_results(
+        init_state = dummy_init_state
+      )
+
+      dummy_kernel_results
     },
 
     run_chain = function(n_samples, thin, warmup,
@@ -403,8 +426,9 @@ sampler <- R6Class(
         # TODO
         # create kernel results dummy object
         # assign to self$kernel_results
+        self$kernel_results <- self$create_dummy_kernel_results()
         # rebuild tf_evaluate_sample_batch function
-        # self$define_tf_evaluate_sample_batch()
+        self$define_tf_evaluate_sample_batch()
         # also get rid of bursts for warmup / progress bar goes from 0->100
 
         if (verbose) {
