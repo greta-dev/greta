@@ -15,14 +15,17 @@ test_that("bad mcmc proposals are rejected", {
   )
   expect_match(out, "100% bad")
 
-  expect_snapshot(error = TRUE,
-                  draws <- mcmc(m,
-                                chains = 1,
-                                n_samples = 2,
-                                warmup = 0,
-                                verbose = FALSE,
-                                initial_values = initials(z = 1e120)
-                  )
+  expect_snapshot(
+    error = TRUE,
+    draws <- mcmc(
+      m,
+      chains = 1,
+      n_samples = 2,
+      warmup = 0,
+      verbose = FALSE,
+      sampler = adaptive_hmc(),
+      initial_values = initials(z = 1e120)
+    )
   )
 
   # really bad proposals
@@ -30,22 +33,29 @@ test_that("bad mcmc proposals are rejected", {
   z <- normal(-1e120, 1e-120)
   distribution(x) <- normal(z, 1e-120)
   m <- model(z, precision = "single")
-  expect_snapshot(error = TRUE,
-                  mcmc(m, chains = 1, n_samples = 1, warmup = 0, verbose = FALSE)
+  expect_snapshot(
+    error = TRUE,
+    mcmc(m,
+         chains = 1,
+         n_samples = 1,
+         warmup = 0,
+         sampler = adaptive_hmc(),
+         verbose = FALSE)
   )
 
   # proposals that are fine, but rejected anyway
   z <- normal(0, 1)
   m <- model(z, precision = "single")
-  expect_ok(mcmc(m,
-                 adaptive_hmc(
-                   epsilon = 100,
-                   # Lmin = 1,
-                   # Lmax = 1
-                 ),
-                 chains = 1,
-                 n_samples = 5,
-                 warmup = 0,
-                 verbose = FALSE
+  expect_ok(mcmc(
+    m,
+    adaptive_hmc(
+      epsilon = 100,
+      # Lmin = 1,
+      # Lmax = 1
+    ),
+    chains = 1,
+    n_samples = 5,
+    warmup = 0,
+    verbose = FALSE
   ))
 })
