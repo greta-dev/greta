@@ -17,3 +17,23 @@ test_that("samplers are unbiased for chi-squared", {
 
   expect_gte(stat$p.value, 0.01)
 })
+
+test_that("samplers are unbiased for chi-squared with adaptive hmc", {
+  skip_if_not(check_tf_version())
+  skip_on_os("windows")
+  df <- 5
+  x <- chi_squared(df)
+  iid <- function(n) rchisq(n, df)
+
+  chi_squared_checked <- check_samples(x = x,
+                                       iid_function = iid,
+                                       sampler = adaptive_hmc())
+
+  # do the plotting
+  qqplot_checked_samples(chi_squared_checked)
+
+  # do a formal hypothesis test
+  stat <- ks_test_mcmc_vs_iid(chi_squared_checked)
+
+  expect_gte(stat$p.value, 0.01)
+})
