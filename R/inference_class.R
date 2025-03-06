@@ -309,10 +309,12 @@ sampler <- R6Class(
 
     },
 
+    ## TODO
     define_tf_evaluate_sample_batch_warmup = function(){
       # This does warmup, returns:
         # Last trace
         # Kernel
+
     },
 
     # TODO two versions of `define_tf_evaluate_sample_batch()`

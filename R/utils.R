@@ -1016,3 +1016,74 @@ maybe_make_tensor_shape <- function(x){
     x
   }
 }
+
+# get the final model parameter state from a chain as returned in the all_states
+# object from tfp$mcmc$sample_chain
+get_last_state <- function(all_states) {
+  n_iter <- dim(all_states)[1]
+  tf$gather(all_states, n_iter - 1L, 0L)
+}
+
+# find out if MCMC steps had non-finite acceptance probabilities
+bad_steps <- function(kernel_results) {
+  log_accept_ratios <- recursive_get_log_accept_ratio(kernel_results)
+  !is.finite(log_accept_ratios)
+}
+
+
+# recursively extract the log accaptance ratio from the MCMC kernel
+recursive_get_log_accept_ratio <- function(kernel_results) {
+  nm <- names(kernel_results)
+  if("log_accept_ratio" %in% nm) {
+    log_accept_ratios <- kernel_results$log_accept_ratio
+  } else if ("inner_results" %in% nm) {
+    log_accept_ratios <- recursive_get_log_accept_ratio(
+      kernel_results$inner_results
+    )
+  } else {
+    stop("non-standard kernel structure")
+  }
+  as.array(log_accept_ratios)
+}
+
+
+# given a warmed up sampler object, return a compiled TF function that generates
+# a new burst of samples from samples from it
+make_sampler_function <- function(warm_sampler) {
+
+  # make the uncompiled function (with curried arguments)
+  sample_raw <- function(current_state, n_samples) {
+    results <- tfp$mcmc$sample_chain(
+      # how many iterations
+      num_results = n_samples,
+      # where to start from
+      current_state = current_state,
+      # kernel
+      kernel = warm_sampler$kernel,
+      # tuned sampler settings
+      previous_kernel_results = warm_sampler$kernel_results,
+      # what to trace (nothing)
+      trace_fn = function(current_state, kernel_results) {
+        # could compute badness here to save memory?
+        # is.finite(kernel_results$inner_results$inner_results$inner_results$log_accept_ratio)
+        kernel_results
+      }
+    )
+    # return the parameter states and the kernel results
+    list(
+      all_states = results$all_states,
+      kernel_results = results$trace
+    )
+  }
+
+  # compile it into a concrete function and return
+  sample <- tf_function(sample_raw,
+                        list(
+                          as_tensorspec(warm_sampler$current_state),
+                          tf$TensorSpec(shape = c(),
+                                        dtype = tf$int32)
+                        ))
+
+  sample
+
+}
