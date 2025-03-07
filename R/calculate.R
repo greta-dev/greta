@@ -287,8 +287,7 @@ calculate_greta_mcmc_list <- function(target,
   # assign the free state
   stochastic <- !is.null(nsim)
 
-  # check trace_batch_size is valid
-  trace_batch_size <- check_trace_batch_size(trace_batch_size)
+  check_trace_batch_size(trace_batch_size)
 
   # get the free state draws and old dag from the samples
   model_info <- get_model_info(values)
