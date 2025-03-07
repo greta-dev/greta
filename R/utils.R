@@ -1080,3 +1080,10 @@ n_warmup <- function(x){
   x_info <- attr(x, "model_info")
   x_info$warmup
 }
+
+empty_matrices <- function(n,
+                           ncol){
+  replicate(n = n,
+            matrix(data = NA, nrow = 0, ncol = ncol),
+            simplify = FALSE)
+}

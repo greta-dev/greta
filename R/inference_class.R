@@ -332,9 +332,15 @@ sampler <- R6Class(
       )
     },
 
-    run_chain = function(n_samples, thin, warmup,
-                         verbose, pb_update,
-                         one_by_one, plan_is, n_cores, float_type,
+    run_chain = function(n_samples,
+                         thin,
+                         warmup,
+                         verbose,
+                         pb_update,
+                         one_by_one,
+                         plan_is,
+                         n_cores,
+                         float_type,
                          trace_batch_size,
                          from_scratch = TRUE) {
       self$warmup <- warmup
@@ -359,15 +365,11 @@ sampler <- R6Class(
 
       # create these objects if needed
       if (from_scratch) {
-        self$traced_free_state <- replicate(self$n_chains,
-                                            matrix(NA, 0, self$n_free),
-                                            simplify = FALSE
-        )
+        self$traced_free_state <- empty_matrices(n = self$n_chains,
+                                                 ncol = self$n_free)
 
-        self$traced_values <- replicate(self$n_chains,
-                                        matrix(NA, 0, self$n_traced),
-                                        simplify = FALSE
-        )
+        self$traced_values <- empty_matrices(n = self$n_chains,
+                                             ncol = self$n_traced)
       }
 
       # how big would we like the bursts to be
@@ -391,8 +393,8 @@ sampler <- R6Class(
         # split up warmup iterations into bursts of sampling
         burst_lengths <- self$burst_lengths(warmup,
                                             ideal_burst_size,
-                                            warmup = TRUE
-        )
+                                            warmup = TRUE)
+
         completed_iterations <- cumsum(burst_lengths)
 
         # relay between R and tensorflow in a burst to be cpu efficient
@@ -430,10 +432,9 @@ sampler <- R6Class(
         }
 
         # scrub the free state trace and numerical rejections
-        self$traced_free_state <- replicate(self$n_chains,
-                                            matrix(NA, 0, self$n_free),
-                                            simplify = FALSE
-        )
+        self$traced_free_state <- empty_matrices(n = self$n_chains,
+                                                 ncol = self$n_free)
+
         self$numerical_rejections <- 0
       }
 

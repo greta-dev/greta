@@ -38,6 +38,7 @@ hmc <- function(Lmin = 5,
       epsilon = epsilon,
       diag_sd = diag_sd
     ),
+    name = "hmc",
     class = hmc_sampler
   )
   class(obj) <- c("hmc sampler", "sampler")
@@ -66,6 +67,7 @@ rwmh <- function(proposal = c("normal", "uniform"),
       epsilon = epsilon,
       diag_sd = diag_sd
     ),
+    name = "rwmh",
     class = rwmh_sampler
   )
   class(obj) <- c("rwmh sampler", "sampler")
@@ -83,7 +85,10 @@ rwmh <- function(proposal = c("normal", "uniform"),
 #' @export
 slice <- function(max_doublings = 5) {
   obj <- list(
-    parameters = list(max_doublings = as.integer(max_doublings)[1]),
+    parameters = list(
+      max_doublings = as.integer(max_doublings)[1]
+      ),
+    name = "slice",
     class = slice_sampler
   )
   class(obj) <- c("slice sampler", "sampler")
