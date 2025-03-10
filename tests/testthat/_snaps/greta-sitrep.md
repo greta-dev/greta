@@ -234,6 +234,14 @@
 ---
 
     Code
+      greta_sitrep(verbosity = "bananas")
+    Condition
+      Error in `greta_sitrep()`:
+      ! `verbosity` must be one of "minimal", "detailed", or "quiet", not "bananas".
+
+---
+
+    Code
       greta_sitrep(verbosity = "detailed")
     Message
       
@@ -274,12 +282,4 @@
       i greta is ready to use!
       i Use the following code to list available python modules in `greta-env-tf2`:
       `system(paste('conda list -n', 'greta-env-tf2'), intern = TRUE)`
-
----
-
-    Code
-      greta_sitrep(verbosity = "bananas")
-    Condition
-      Error in `greta_sitrep()`:
-      ! `verbosity` must be one of "minimal", "detailed", or "quiet", not "bananas".
 
