@@ -724,17 +724,6 @@ sampler <- R6Class(
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
 
-      # sampler_values <- list(
-      #   # TF1/2 check
-      # do we need free state here anymore?
-      #   free_state = self$free_state,
-      #   sampler_burst_length = as.integer(n_samples),
-      #   sampler_thin = as.integer(thin)
-      # )
-      # # create a function that takes in these arguments ^^
-      # # and then run the code for the sampler_batch
-      #
-
       dag$set_tf_data_list("batch_size", nrow(self$free_state))
 
       # run the sampler, handling numerical errors
