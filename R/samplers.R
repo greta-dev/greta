@@ -122,24 +122,12 @@ print.sampler <- function(x, ...) {
 
 tune_tf <- R6Class(
   "tune_tf",
-  inherit = sampler,
-  public = list(
-    parameters = list(),
-    accept_target = NULL,
-    define_tf_kernel = NULL,
-    sampler_parameter_values = NULL
-  )
+  inherit = sampler
 )
 
 tune_r <- R6Class(
   "tune_r",
-  inherit = sampler,
-  public = list(
-    parameters = list(),
-    accept_target = NULL,
-    define_tf_kernel = NULL,
-    sampler_parameter_values = NULL
-  )
+  inherit = sampler
 )
 
 hmc_sampler <- R6Class(
