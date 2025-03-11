@@ -42,10 +42,10 @@ check_tf_version <- function(alert = c("none",
   requirements_valid_py_not_init <- all(requirements_valid) && py_not_init
   if (requirements_valid_py_not_init) {
 
-      cli_process_done(
-        msg_done = "Initialising python and checking dependencies ... done!")
-      cat("\n")
-      greta_stash$python_has_been_initialised <- TRUE
+    cli_process_done(
+      msg_done = "Initialising python and checking dependencies ... done!")
+    cat("\n")
+    greta_stash$python_has_been_initialised <- TRUE
 
   }
 
@@ -1941,9 +1941,9 @@ check_has_representation <- function(repr,
 }
 
 check_has_anti_representation <- function(repr,
-                                     name,
-                                     error,
-                                     call = rlang::caller_env()){
+                                          name,
+                                          error,
+                                          call = rlang::caller_env()){
   not_anti_represented <- error && is.null(repr)
   if (not_anti_represented) {
     cli::cli_abort(
@@ -2019,16 +2019,51 @@ check_timeout <- function(it,
   if (it == maxit) {
     cli::cli_abort(
       message = c(
-      "Could not determine the number of independent models in a reasonable \\
+        "Could not determine the number of independent models in a reasonable \\
       amount of time",
-      "Iterations = {.val {it}}",
-      "Maximum iterations = {.cal {maxit}}"
+        "Iterations = {.val {it}}",
+        "Maximum iterations = {.cal {maxit}}"
       ),
       call = call
     )
   }
 
 }
+
+inform_if_remote_machine <- function(plan_is,
+                                     samplers){
+  is_remote_machine <- plan_is$parallel & !plan_is$local
+  if (is_remote_machine) {
+
+    cli::cli_inform(
+      message = c(
+        "running {length(samplers)} \\
+      {?sampler on a remote machine/samplers on remote machines}"
+      )
+    )
+
+  }
+}
+
+inform_if_local_parallel_multiple_samplers <- function(plan_is,
+                                                       samplers,
+                                                       n_cores,
+                                                       compute_options){
+
+  local_parallel_multiple_samplers <- plan_is$parallel &
+    plan_is$local &
+    length(samplers) > 1
+  if (local_parallel_multiple_samplers) {
+    cores_text <- compute_text(n_cores, compute_options)
+    cli::cli_inform(
+      message = c("
+      running {length(samplers)} samplers in parallel,
+      {cores_text} \n\n"
+      )
+    )
+  }
+}
+
 
 
 checks_module <- module(

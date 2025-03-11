@@ -474,6 +474,83 @@ build_sampler <- function(initial_values, sampler, model, seed = get_seed(),
   )
 }
 
+build_samplers <- function(sampler,
+                           initial_values,
+                           chains,
+                           model,
+                           compute_options){
+
+  # determine number of separate samplers to spin up, based on future plan
+  max_samplers <- future::nbrOfWorkers()
+
+  # divide chains up between the workers
+  chain_assignment <- sort(
+    rep_len(
+      seq_len(max_samplers),
+      length.out = chains
+    )
+  )
+
+  # divide the initial values between them
+  initial_values_split <- split(initial_values, chain_assignment)
+
+  n_samplers <- length(initial_values_split)
+
+  # create a sampler object for each parallel job, using these (possibly NULL)
+  # initial values
+  samplers <- lapply(
+    initial_values_split,
+    build_sampler,
+    sampler,
+    model,
+    compute_options = compute_options
+  )
+
+  # add chain info for printing
+  for (i in seq_len(n_samplers)) {
+    samplers[[i]]$sampler_number <- i
+    samplers[[i]]$n_samplers <- n_samplers
+  }
+
+  samplers
+
+}
+
+sampler_parallel_reporting <- function(n_chain,
+                                       samplers,
+                                       chains,
+                                       n_samples,
+                                       warmup){
+
+  trace_log_files <- replicate(n_chain, create_log_file())
+  percentage_log_files <- replicate(n_chain, create_log_file(TRUE))
+  progress_bar_log_files <- replicate(n_chain, create_log_file(TRUE))
+
+  pb_width <- bar_width(n_chain)
+
+  for (chain in chains) {
+
+    # set the log files
+    sampler <- samplers[[chain]]
+    sampler$trace_log_file <- trace_log_files[[chain]]
+    sampler$percentage_file <- percentage_log_files[[chain]]
+    sampler$pb_file <- progress_bar_log_files[[chain]]
+
+    # set the progress bar widths for writing
+    sampler$pb_width <- pb_width
+  }
+
+  greta_stash$trace_log_files <- trace_log_files
+  greta_stash$percentage_log_files <- percentage_log_files
+  greta_stash$progress_bar_log_files <- progress_bar_log_files
+  greta_stash$mcmc_info <- list(
+    n_samples = n_samples,
+    warmup = warmup
+  )
+
+  sampler
+
+}
 # unlist and flatten a list of arrays to a vector row-wise
 unlist_tf <- function(x) {
   # flatten each element row-wise and concatenate
@@ -812,16 +889,16 @@ message_if_using_gpu <- function(compute_options){
   greta_gpu_message <- getOption("greta_gpu_message") %||% TRUE
   gpu_used_and_message <- gpu_used && greta_gpu_message
   if (gpu_used_and_message) {
-      cli::cli_inform(
-        c(
-          "NOTE: When using GPU, the random number seed may not always be \\
+    cli::cli_inform(
+      c(
+        "NOTE: When using GPU, the random number seed may not always be \\
           respected (results may not be fully reproducible).",
-          "For more information, see details of the {.code compute_options} \\
+        "For more information, see details of the {.code compute_options} \\
           argument in {.code ?calculate}.",
-          "You can turn off this message with:",
-          "{.code options(greta_gpu_message = FALSE)}"
-        )
+        "You can turn off this message with:",
+        "{.code options(greta_gpu_message = FALSE)}"
       )
+    )
   }
 }
 
@@ -996,7 +1073,7 @@ are_initials <- function(x){
     X = x,
     FUN = is.initials,
     FUN.VALUE = logical(1)
-    )
+  )
 }
 
 n_warmup <- function(x){

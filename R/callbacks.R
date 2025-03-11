@@ -57,5 +57,18 @@ progress_bars <- function() {
   render_progress(reads)
 }
 
+# determine the type of progress information
+set_progress_bar_type <- function(n_chain){
+
+if (bar_width(n_chain) < 42) {
+  progress_callback <- percentages
+} else {
+  progress_callback <- progress_bars
+}
+
+greta_stash$callbacks$parallel_progress <- progress_callback
+
+}
+
 # register some
 greta_stash$callbacks <- list(parallel_progress = progress_bars)

@@ -230,52 +230,26 @@ mcmc <- function(
 
     check_if_greta_array_in_mcmc(model)
 
-    # check the trace batch size
-    trace_batch_size <- check_trace_batch_size(trace_batch_size)
+    check_trace_batch_size(trace_batch_size)
 
     check_not_data_greta_arrays(model)
+
+    chains <- check_positive_integer(chains, "chains")
 
     # get the dag containing the target nodes
     dag <- model$dag
 
-    chains <- check_positive_integer(chains, "chains")
-
-    # turn initial values into a list if needed (checking the length), and convert
-    # from a named list on the constrained scale to free state vectors
+    # turn initial values into a list if needed (checking length). Convert from
+    # a named list on the constrained scale to free state vectors
     initial_values <- prep_initials(initial_values, chains, dag)
 
-    # determine the number of separate samplers to spin up, based on the future
-    # plan
-    max_samplers <- future::nbrOfWorkers()
-
-    # divide chains up between the workers
-    chain_assignment <- sort(
-      rep_len(
-        seq_len(max_samplers),
-        length.out = chains
-    )
-    )
-
-    # divide the initial values between them
-    initial_values_split <- split(initial_values, chain_assignment)
-
-    n_samplers <- length(initial_values_split)
-
-    # create a sampler object for each parallel job, using these (possibly NULL)
-    # initial values
-    samplers <- lapply(
-      initial_values_split,
-      build_sampler,
-      sampler,
-      model,
+    samplers <- build_samplers(
+      sampler = sampler,
+      initial_values = initial_values,
+      chains = chains,
+      model = model,
       compute_options = compute_options
     )
-
-    # add chain info for printing
-    for (i in seq_len(n_samplers)) {
-      samplers[[i]]$sampler_number <- i
-      samplers[[i]]$n_samplers <- n_samplers
-    }
 
     # if verbose = FALSE, make pb_update as big as possible to speed up sampling
     if (!verbose) {
@@ -333,73 +307,28 @@ run_samplers <- function(samplers,
   # stash the samplers now, to retrieve draws later
   greta_stash$samplers <- samplers
 
-  parallel_reporting <- verbose &
-    plan_is$parallel &
-    plan_is$local &
-    !is.null(greta_stash$callbacks)
-
-  local_parallel_multiple_samplers <- plan_is$parallel &
-    plan_is$local &
-    length(samplers) > 1
-  if (local_parallel_multiple_samplers) {
-    cores_text <- compute_text(n_cores, compute_options)
-    cli::cli_inform(
-      message = c("
-      running {length(samplers)} samplers in parallel,
-      {cores_text} \n\n"
-    )
-    )
-  }
-
-  is_remote_machine <- plan_is$parallel & !plan_is$local
-  if (is_remote_machine) {
-
-    cli::cli_inform(
-      "running {length(samplers)} \\
-      {?sampler on a remote machine/samplers on remote machines}"
+  inform_if_local_parallel_multiple_samplers(
+    plan_is, samplers, n_cores, compute_options
     )
 
-  }
+  inform_if_remote_machine(plan_is, samplers)
 
   n_chain <- length(samplers)
   chains <- seq_len(n_chain)
 
   # determine the type of progress information
-  if (bar_width(n_chain) < 42) {
-    progress_callback <- percentages
-  } else {
-    progress_callback <- progress_bars
-  }
+  set_progress_bar_type(n_chain)
 
-  greta_stash$callbacks$parallel_progress <- progress_callback
+  parallel_reporting <- verbose &
+    plan_is$parallel &
+    plan_is$local &
+    !is.null(greta_stash$callbacks)
 
   # if we're running in parallel and there are callbacks registered,
   # give the samplers somewhere to write their progress
   if (parallel_reporting) {
-    trace_log_files <- replicate(n_chain, create_log_file())
-    percentage_log_files <- replicate(n_chain, create_log_file(TRUE))
-    progress_bar_log_files <- replicate(n_chain, create_log_file(TRUE))
-
-    pb_width <- bar_width(n_chain)
-
-    for (chain in chains) {
-
-      # set the log files
-      sampler <- samplers[[chain]]
-      sampler$trace_log_file <- trace_log_files[[chain]]
-      sampler$percentage_file <- percentage_log_files[[chain]]
-      sampler$pb_file <- progress_bar_log_files[[chain]]
-
-      # set the progress bar widths for writing
-      sampler$pb_width <- pb_width
-    }
-
-    greta_stash$trace_log_files <- trace_log_files
-    greta_stash$percentage_log_files <- percentage_log_files
-    greta_stash$progress_bar_log_files <- progress_bar_log_files
-    greta_stash$mcmc_info <- list(
-      n_samples = n_samples,
-      warmup = warmup
+    sampler <- sampler_parallel_reporting(
+      n_chain, samplers, chains, n_samples, warmup
       )
   }
 

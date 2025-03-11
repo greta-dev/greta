@@ -115,6 +115,7 @@ Collate:
     'progress_bar.R'
     'inference_class.R'
     'samplers.R'
+    'sampler_class.R'
     'optimisers.R'
     'optimiser_class.R'
     'inference.R'
