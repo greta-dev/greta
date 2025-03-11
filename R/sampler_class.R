@@ -131,22 +131,48 @@ sampler <- R6Class(
 
       # create these objects if needed
       if (from_scratch) {
-        self$traced_free_state <- empty_matrices(n = self$n_chains,
+        self$traced_free_state <- self$empty_matrices(n = self$n_chains,
                                                  ncol = self$n_free)
 
-        self$traced_values <- empty_matrices(n = self$n_chains,
+        self$traced_values <- self$empty_matrices(n = self$n_chains,
                                              ncol = self$n_traced)
       }
 
       # how big would we like the bursts to be
       ideal_burst_size <- ifelse(one_by_one, 1L, pb_update)
 
-      # if warmup is required, do that now
-      if (warmup > 0) {
+      self$run_warmup(
+        n_samples = n_samples,
+        pb_update = pb_update,
+        ideal_burst_size = ideal_burst_size,
+        verbose = verbose
+      )
+
+      self$run_sampling(
+        n_samples = n_samples,
+        pb_update = pb_update,
+        ideal_burst_size = ideal_burst_size,
+        trace_batch_size = trace_batch_size,
+        thin = thin,
+        verbose = verbose
+      )
+
+      # return self, to send results back when running in parallel
+      self
+    },
+
+    run_warmup = function(
+        n_samples,
+        pb_update,
+        ideal_burst_size,
+        verbose
+    ) {
+      perform_warmup <- self$warmup > 0
+      if (perform_warmup) {
         if (verbose) {
           pb_warmup <- create_progress_bar(
             "warmup",
-            c(warmup, n_samples),
+            c(self$warmup, n_samples),
             pb_update,
             self$pb_width
           )
@@ -157,7 +183,7 @@ sampler <- R6Class(
         }
 
         # split up warmup iterations into bursts of sampling
-        burst_lengths <- self$burst_lengths(warmup,
+        burst_lengths <- self$burst_lengths(self$warmup,
                                             ideal_burst_size,
                                             warmup = TRUE)
 
@@ -178,7 +204,7 @@ sampler <- R6Class(
           self$trace()
           # a memory efficient way to calculate summary stats of samples
           self$update_welford()
-          self$tune(completed_iterations[burst], warmup)
+          self$tune(completed_iterations[burst], self$warmup)
 
           if (verbose) {
 
@@ -190,7 +216,7 @@ sampler <- R6Class(
                                  file = self$pb_file
             )
 
-            self$write_percentage_log(warmup,
+            self$write_percentage_log(self$warmup,
                                       completed_iterations[burst],
                                       stage = "warmup"
             )
@@ -198,13 +224,23 @@ sampler <- R6Class(
         }
 
         # scrub the free state trace and numerical rejections
-        self$traced_free_state <- empty_matrices(n = self$n_chains,
+        self$traced_free_state <- self$empty_matrices(n = self$n_chains,
                                                  ncol = self$n_free)
 
         self$numerical_rejections <- 0
-      }
+      } # end warmup
+    },
 
-      if (n_samples > 0) {
+    run_sampling = function (
+      n_samples,
+      pb_update,
+      ideal_burst_size,
+      trace_batch_size,
+      thin,
+      verbose
+    ){
+      perform_sampling <- n_samples > 0
+      if (perform_sampling) {
 
         # on exiting during the main sampling period (even if killed by the
         # user) trace the free state values
@@ -215,7 +251,7 @@ sampler <- R6Class(
         if (verbose) {
           pb_sampling <- create_progress_bar(
             "sampling",
-            c(warmup, n_samples),
+            c(self$warmup, n_samples),
             pb_update,
             self$pb_width
           )
@@ -254,10 +290,8 @@ sampler <- R6Class(
             )
           }
         }
-      }
+      } # end sampling
 
-      # return self, to send results back when running in parallel
-      self
     },
 
     # update the welford accumulator for summary statistics of the posterior,
@@ -616,6 +650,12 @@ sampler <- R6Class(
 
       # random number of integration steps
       self$parameters
-    }
+    },
+  empty_matrices = function(n,
+                            ncol){
+    replicate(n = n,
+              matrix(data = NA, nrow = 0, ncol = ncol),
+              simplify = FALSE)
+  }
   )
 )
