@@ -309,3 +309,69 @@ slice_sampler <- R6Class(
     }
   )
 )
+
+adaptive_hmc_sampler <- R6Class(
+  "adaptive_hmc_sampler",
+  inherit = sampler,
+  public = list(
+    parameters = list(
+      # Lmin = 10,
+      # Lmax = 20,
+      max_leapfrog_steps = 1000,
+      # TODO clean up these parameter usage else where
+      # epsilon = 0.005,
+      # diag_sd = 1,
+      # TODO some kind of validity check of method? Currently this can only be
+      # "SNAPER".
+      method = "SNAPER"
+    ),
+    accept_target = 0.651,
+
+    define_tf_kernel = function(sampler_param_vec) {
+      dag <- self$model$dag
+      tfe <- dag$tf_environment
+
+      free_state_size <- length(sampler_param_vec) - 2
+
+      adaptive_hmc_max_leapfrog_steps <- tf$cast(
+        x = sampler_param_vec[0],
+        dtype = tf$int32
+      )
+      # TODO pipe that in properly
+      n_warmup <- sampler_param_vec[1]
+      # adaptive_hmc_epsilon <- sampler_param_vec[1]
+      # adaptive_hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
+
+      kernel_base <- tfp$experimental$mcmc$SNAPERHamiltonianMonteCarlo(
+        target_log_prob_fn = dag$tf_log_prob_function_adjusted,
+        step_size = 1,
+        num_adaptation_steps = as.integer(self$warmup),
+        max_leapfrog_steps = adaptive_hmc_max_leapfrog_steps
+      )
+
+      sampler_kernel <- tfp$mcmc$DualAveragingStepSizeAdaptation(
+        inner_kernel = kernel_base,
+        num_adaptation_steps = as.integer(self$warmup)
+      )
+
+      return(
+        sampler_kernel
+      )
+    },
+    sampler_parameter_values = function() {
+      # random number of integration steps
+      max_leapfrog_steps <- self$parameters$max_leapfrog_steps
+      epsilon <- self$parameters$epsilon
+      diag_sd <- matrix(self$parameters$diag_sd)
+      method <- self$parameters$method
+
+      # return named list for replacing tensors
+      list(
+        adaptive_hmc_max_leapfrog_steps = max_leapfrog_steps,
+        # adaptive_hmc_epsilon = epsilon,
+        # adaptive_hmc_diag_sd = diag_sd,
+        method = method
+      )
+    }
+  )
+)
