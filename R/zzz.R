@@ -3,7 +3,8 @@ tfp <- reticulate::import("tensorflow_probability", delay_load = TRUE)
 tf <- reticulate::import("tensorflow", delay_load = TRUE)
 
 # crate the node list object whenever the package is loaded
-.onLoad <- function(libname, pkgname) { # nolint
+.onLoad <- function(libname, pkgname) {
+  # nolint
 
   # unset reticulate python environment, for more details, see:
   # https://github.com/greta-dev/greta/issues/444

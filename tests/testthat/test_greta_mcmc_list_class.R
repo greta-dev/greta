@@ -72,7 +72,8 @@ test_that("windowing does not have spooky effects", {
   n_samples <- as.integer(chains * samples)
   x <- normal(0, 1)
   m <- model(x)
-  draws <- mcmc(m,
+  draws <- mcmc(
+    m,
     warmup = 100,
     n_samples = samples,
     chains = chains,
@@ -103,7 +104,7 @@ test_that("greta_mcmc_list print method works", {
   warmup <- 10
   z <- normal(0, 1)
   m <- model(z)
-  tensorflow::set_random_seed(2024-07-29-1217)
+  tensorflow::set_random_seed(2024 - 07 - 29 - 1217)
   draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
   expect_snapshot(
     draws
@@ -116,7 +117,7 @@ test_that("greta_mcmc_list print method works with larger sample size", {
   warmup <- 20
   z <- normal(0, 1)
   m <- model(z)
-  tensorflow::set_random_seed(2024-07-30-1233)
+  tensorflow::set_random_seed(2024 - 07 - 30 - 1233)
   draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
   expect_snapshot(
     draws
@@ -138,7 +139,7 @@ test_that("greta_mcmc_list print method works with smaller sample size", {
   warmup <- 2
   z <- normal(0, 1)
   m <- model(z)
-  tensorflow::set_random_seed(2024-07-30-34)
+  tensorflow::set_random_seed(2024 - 07 - 30 - 34)
   draws <- mcmc(m, warmup = warmup, n_samples = samples, verbose = FALSE)
   expect_snapshot(
     draws

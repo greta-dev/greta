@@ -124,7 +124,6 @@ bernoulli_distribution <- R6Class(
       if (self$prob_is_logit) {
         tfp$distributions$Bernoulli(logits = parameters$prob)
       } else if (self$prob_is_probit) {
-
         # in the probit case, get the log probability of success and compute the
         # log prob directly
         probit <- parameters$prob
@@ -176,7 +175,6 @@ binomial_distribution <- R6Class(
           logits = parameters$prob
         )
       } else if (self$prob_is_probit) {
-
         # in the probit case, get the log probability of success and compute the
         # log prob directly
         size <- parameters$size
@@ -430,7 +428,6 @@ weibull_distribution <- R6Class(
       }
 
       sample <- function(seed) {
-
         # sample by pushing standard uniforms through the inverse cdf
         u <- tf_randu(self$dim, dag)
         quantile(u)
@@ -484,7 +481,6 @@ pareto_distribution <- R6Class(
       self$add_parameter(b, "b")
     },
     tf_distrib = function(parameters, dag) {
-
       # a is shape, b is scale
       tfp$distributions$Pareto(
         concentration = parameters$a,
@@ -680,7 +676,6 @@ f_distribution <- R6Class(
       }
 
       sample <- function(seed) {
-
         # sample as the ratio of two scaled chi squared distributions
         d1 <- tfp$distributions$Chi2(df = df1)
         d2 <- tfp$distributions$Chi2(df = df2)
@@ -718,7 +713,9 @@ dirichlet_distribution <- R6Class(
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
       self$bounds <- c(0, Inf)
-      super$initialize("dirichlet", dim,
+      super$initialize(
+        "dirichlet",
+        dim,
         truncation = c(0, Inf),
         multivariate = TRUE
       )
@@ -743,7 +740,6 @@ dirichlet_multinomial_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     initialize = function(size, alpha, n_realisations, dimension) {
-
       # coerce to greta arrays
       size <- as.greta_array(size)
       alpha <- as.greta_array(alpha)
@@ -755,12 +751,12 @@ dirichlet_multinomial_distribution <- R6Class(
         dimension = dimension
       )
 
-
       # need to handle size as a vector!
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("dirichlet_multinomial",
+      super$initialize(
+        "dirichlet_multinomial",
         dim = dim,
         discrete = TRUE,
         multivariate = TRUE
@@ -787,7 +783,6 @@ multinomial_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     initialize = function(size, prob, n_realisations, dimension) {
-
       # coerce to greta arrays
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
@@ -803,7 +798,8 @@ multinomial_distribution <- R6Class(
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("multinomial",
+      super$initialize(
+        "multinomial",
         dim = dim,
         discrete = TRUE,
         multivariate = TRUE
@@ -815,8 +811,8 @@ multinomial_distribution <- R6Class(
       parameters$size <- tf_flatten(parameters$size)
       # scale probs to get absolute density correct
       # parameters$prob <- parameters$prob / tf_sum(parameters$prob)
-      parameters$prob <- parameters$prob / tf_rowsums(parameters$prob,
-                                                      dims = 1L)
+      parameters$prob <- parameters$prob /
+        tf_rowsums(parameters$prob, dims = 1L)
 
       tfp$distributions$Multinomial(
         total_count = parameters$size,
@@ -831,7 +827,6 @@ categorical_distribution <- R6Class(
   inherit = distribution_node,
   public = list(
     initialize = function(prob, n_realisations, dimension) {
-
       # coerce to greta arrays
       prob <- as.greta_array(prob)
 
@@ -843,7 +838,8 @@ categorical_distribution <- R6Class(
 
       # coerce the parameter arguments to nodes and add as parents and
       # parameters
-      super$initialize("categorical",
+      super$initialize(
+        "categorical",
         dim = dim,
         discrete = TRUE,
         multivariate = TRUE
@@ -897,7 +893,6 @@ multivariate_normal_distribution <- R6Class(
       self$add_parameter(sigma, "sigma")
     },
     tf_distrib = function(parameters, dag) {
-
       # if Sigma is a cholesky factor transpose it to tensorflow expoectation,
       # otherwise decompose it
 
@@ -926,7 +921,6 @@ wishart_distribution <- R6Class(
   "wishart_distribution",
   inherit = distribution_node,
   public = list(
-
     # TF1/2 - consider setting this as NULL for debugging purposes
     # set when defining the distribution
     sigma_is_cholesky = FALSE,
@@ -934,7 +928,8 @@ wishart_distribution <- R6Class(
     # TF1/2 - consider setting this as NULL for debugging purposes
     # set when defining the graph
     target_is_cholesky = FALSE,
-    initialize = function(df, Sigma) { # nolint
+    initialize = function(df, Sigma) {
+      # nolint
       # add the nodes as parents and parameters
       df <- as.greta_array(df)
       sigma <- as.greta_array(Sigma)
@@ -1029,7 +1024,6 @@ wishart_distribution <- R6Class(
         log_prob <- log_prob_raw + adjustment
 
         log_prob
-
       }
 
       sample <- function(seed) {
@@ -1069,7 +1063,6 @@ lkj_correlation_distribution <- R6Class(
   "lkj_correlation_distribution",
   inherit = distribution_node,
   public = list(
-
     # set when defining the graph
     target_is_cholesky = FALSE,
     eta_is_cholesky = FALSE,
@@ -1097,7 +1090,6 @@ lkj_correlation_distribution <- R6Class(
 
     # default (cholesky factor, ignores truncation)
     create_target = function(truncation) {
-
       # create (correlation matrix) cholesky factor variable greta array
       chol_greta_array <- cholesky_variable(self$dim[1], correlation = TRUE)
 
@@ -1130,7 +1122,7 @@ lkj_correlation_distribution <- R6Class(
       eta <- tf$squeeze(parameters$eta, 1:2)
       dim <- self$dim[1]
 
-      log_prob <- function(x){
+      log_prob <- function(x) {
         if (self$target_is_cholesky) {
           x_chol <- tf$linalg$matrix_transpose(x)
         } else {
@@ -1158,7 +1150,6 @@ lkj_correlation_distribution <- R6Class(
         log_prob <- log_prob_raw + adjustment
 
         log_prob
-
       }
 
       # tfp's lkj sampling can't detect the size of the output from eta, for
@@ -1179,7 +1170,6 @@ lkj_correlation_distribution <- R6Class(
           # and R uses upper triangular (non zeroes are in top right)
           draws <- tf$matmul(chol_draws, chol_draws, adjoint_b = TRUE)
           draws
-
         }
 
         tf$map_fn(sample_once, eta)
@@ -1521,18 +1511,26 @@ f <- function(df1, df2, dim = NULL, truncation = c(0, Inf)) {
 # nolint start
 #' @rdname distributions
 #' @export
-multivariate_normal <- function(mean, Sigma,
-                                n_realisations = NULL, dimension = NULL) {
+multivariate_normal <- function(
+  mean,
+  Sigma,
+  n_realisations = NULL,
+  dimension = NULL
+) {
   # nolint end
   distrib(
-    "multivariate_normal", mean, Sigma,
-    n_realisations, dimension
+    "multivariate_normal",
+    mean,
+    Sigma,
+    n_realisations,
+    dimension
   )
 }
 
 #' @rdname distributions
 #' @export
-wishart <- function(df, Sigma) { # nolint
+wishart <- function(df, Sigma) {
+  # nolint
   distrib("wishart", df, Sigma)
 }
 
@@ -1562,10 +1560,17 @@ dirichlet <- function(alpha, n_realisations = NULL, dimension = NULL) {
 
 #' @rdname distributions
 #' @export
-dirichlet_multinomial <- function(size, alpha,
-                                  n_realisations = NULL, dimension = NULL) {
+dirichlet_multinomial <- function(
+  size,
+  alpha,
+  n_realisations = NULL,
+  dimension = NULL
+) {
   distrib(
     "dirichlet_multinomial",
-    size, alpha, n_realisations, dimension
+    size,
+    alpha,
+    n_realisations,
+    dimension
   )
 }

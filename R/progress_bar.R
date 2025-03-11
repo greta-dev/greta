@@ -8,18 +8,11 @@
 #   iterations respectively
 # 'pb_update' gives the number of iterations between updates of the progress bar
 create_progress_bar <- function(phase, iter, pb_update, width, ...) {
-
   # name for formatting
-  name <- switch(phase,
-    warmup = "  warmup",
-    sampling = "sampling"
-  )
+  name <- switch(phase, warmup = "  warmup", sampling = "sampling")
 
   # total iterations for bat
-  iter_this <- switch(phase,
-    warmup = iter[1],
-    sampling = iter[2]
-  )
+  iter_this <- switch(phase, warmup = iter[1], sampling = iter[2])
 
   # pad the frmat so that the width iterations counter is the same for both
   # warmup and sampling
@@ -87,13 +80,15 @@ iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
 
     # tick the progess bar and record the output message
     # (or print it if file = NULL)
-    record(pb$tick(amount,
-      tokens = list(
-        iter = iter_pretty,
-        rejection = reject_text
-      )
-    ),
-    file = file
+    record(
+      pb$tick(
+        amount,
+        tokens = list(
+          iter = iter_pretty,
+          rejection = reject_text
+        )
+      ),
+      file = file
     )
   }
 }

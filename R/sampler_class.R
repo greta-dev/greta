@@ -3,7 +3,6 @@ sampler <- R6Class(
   "sampler",
   inherit = inference,
   public = list(
-
     # sampler information
     sampler_number = 1,
     n_samplers = 1,
@@ -40,11 +39,13 @@ sampler <- R6Class(
 
     # batch sizes for tracing
     trace_batch_size = 100,
-    initialize = function(initial_values,
-                          model,
-                          parameters = list(),
-                          seed,
-                          compute_options) {
+    initialize = function(
+      initial_values,
+      model,
+      parameters = list(),
+      seed,
+      compute_options
+    ) {
       # initialize the inference method
       super$initialize(
         initial_values = initial_values,
@@ -68,47 +69,46 @@ sampler <- R6Class(
       # define the draws tensor on the tf graph
       # define_tf_draws is now used in place of of run_burst
       self$define_tf_evaluate_sample_batch()
-
     },
 
-    define_tf_evaluate_sample_batch = function(){
+    define_tf_evaluate_sample_batch = function() {
       self$tf_evaluate_sample_batch <- tensorflow::tf_function(
         f = self$define_tf_draws,
         input_signature = list(
           # free state
-          tf$TensorSpec(shape = list(NULL, self$n_free),
-                        dtype = tf_float()),
+          tf$TensorSpec(shape = list(NULL, self$n_free), dtype = tf_float()),
           # sampler_burst_length
-          tf$TensorSpec(shape = list(),
-                        dtype = tf$int32),
+          tf$TensorSpec(shape = list(), dtype = tf$int32),
           # sampler_thin
-          tf$TensorSpec(shape = list(),
-                        dtype = tf$int32),
+          tf$TensorSpec(shape = list(), dtype = tf$int32),
           # sampler_param_vec
-          tf$TensorSpec(shape = list(
-            length(
-              unlist(
-                self$sampler_parameter_values()
+          tf$TensorSpec(
+            shape = list(
+              length(
+                unlist(
+                  self$sampler_parameter_values()
+                )
               )
-            )
-          ),
-          dtype = tf_float()
+            ),
+            dtype = tf_float()
           )
         )
       )
     },
 
-    run_chain = function(n_samples,
-                         thin,
-                         warmup,
-                         verbose,
-                         pb_update,
-                         one_by_one,
-                         plan_is,
-                         n_cores,
-                         float_type,
-                         trace_batch_size,
-                         from_scratch = TRUE) {
+    run_chain = function(
+      n_samples,
+      thin,
+      warmup,
+      verbose,
+      pb_update,
+      one_by_one,
+      plan_is,
+      n_cores,
+      float_type,
+      trace_batch_size,
+      from_scratch = TRUE
+    ) {
       self$warmup <- warmup
       self$thin <- thin
       dag <- self$model$dag
@@ -120,22 +120,24 @@ sampler <- R6Class(
         self$print_sampler_number()
       }
       if (plan_is$parallel) {
-
         dag$define_tf_trace_values_batch()
 
         dag$define_tf_log_prob_function()
 
         self$define_tf_evaluate_sample_batch()
-
       }
 
       # create these objects if needed
       if (from_scratch) {
-        self$traced_free_state <- self$empty_matrices(n = self$n_chains,
-                                                 ncol = self$n_free)
+        self$traced_free_state <- self$empty_matrices(
+          n = self$n_chains,
+          ncol = self$n_free
+        )
 
-        self$traced_values <- self$empty_matrices(n = self$n_chains,
-                                             ncol = self$n_traced)
+        self$traced_values <- self$empty_matrices(
+          n = self$n_chains,
+          ncol = self$n_traced
+        )
       }
 
       # how big would we like the bursts to be
@@ -162,10 +164,10 @@ sampler <- R6Class(
     },
 
     run_warmup = function(
-        n_samples,
-        pb_update,
-        ideal_burst_size,
-        verbose
+      n_samples,
+      pb_update,
+      ideal_burst_size,
+      verbose
     ) {
       perform_warmup <- self$warmup > 0
       if (perform_warmup) {
@@ -189,9 +191,11 @@ sampler <- R6Class(
         }
 
         # split up warmup iterations into bursts of sampling
-        burst_lengths <- self$burst_lengths(self$warmup,
-                                            ideal_burst_size,
-                                            warmup = TRUE)
+        burst_lengths <- self$burst_lengths(
+          self$warmup,
+          ideal_burst_size,
+          warmup = TRUE
+        )
 
         completed_iterations <- cumsum(burst_lengths)
 
@@ -213,7 +217,6 @@ sampler <- R6Class(
           self$tune(completed_iterations[burst], self$warmup)
 
           if (verbose) {
-
             # update the progress bar/percentage log
             iterate_progress_bar(
               pb = pb_warmup,
@@ -232,24 +235,25 @@ sampler <- R6Class(
         }
 
         # scrub the free state trace and numerical rejections
-        self$traced_free_state <- self$empty_matrices(n = self$n_chains,
-                                                 ncol = self$n_free)
+        self$traced_free_state <- self$empty_matrices(
+          n = self$n_chains,
+          ncol = self$n_free
+        )
 
         self$numerical_rejections <- 0
       } # end warmup
     },
 
-    run_sampling = function (
+    run_sampling = function(
       n_samples,
       pb_update,
       ideal_burst_size,
       trace_batch_size,
       thin,
       verbose
-    ){
+    ) {
       perform_sampling <- n_samples > 0
       if (perform_sampling) {
-
         # on exiting during the main sampling period (even if killed by the
         # user) trace the free state values
 
@@ -269,7 +273,7 @@ sampler <- R6Class(
             rejects = 0,
             chains = self$n_chains,
             file = self$pb_file
-            )
+          )
         } else {
           pb_sampling <- NULL
         }
@@ -283,13 +287,11 @@ sampler <- R6Class(
           # and how often to return them
           # TF1/2 check todo
           # replace with define_tf_draws
-          self$run_burst(n_samples = burst_lengths[burst],
-                         thin = thin)
+          self$run_burst(n_samples = burst_lengths[burst], thin = thin)
           # trace is it receiving the python
           self$trace()
 
           if (verbose) {
-
             # update the progress bar/percentage log
             iterate_progress_bar(
               pb = pb_sampling,
@@ -307,13 +309,11 @@ sampler <- R6Class(
           }
         }
       } # end sampling
-
     },
 
     # update the welford accumulator for summary statistics of the posterior,
     # used for tuning
     update_welford = function() {
-
       # unlist the states into a matrix
       trace_matrix <- do.call(rbind, self$last_burst_free_states)
 
@@ -346,9 +346,10 @@ sampler <- R6Class(
     # convert traced free state to the traced values, accounting for
     # chain dimension
     trace_values = function(trace_batch_size) {
-      self$traced_values <- lapply(self$traced_free_state,
-                                   self$model$dag$trace_values,
-                                   trace_batch_size = trace_batch_size
+      self$traced_values <- lapply(
+        self$traced_free_state,
+        self$model$dag$trace_values,
+        trace_batch_size = trace_batch_size
       )
     },
 
@@ -383,12 +384,10 @@ sampler <- R6Class(
     # considering the progress bar update frequency and the parameter tuning
     # schedule during warmup
     burst_lengths = function(n_samples, pb_update, warmup = FALSE) {
-
       # when to stop for progress bar updates
       changepoints <- c(seq(0, n_samples, by = pb_update), n_samples)
 
       if (warmup) {
-
         # when to break to update tuning
         tuning_points <- seq(0, n_samples, by = self$tuning_interval)
 
@@ -410,7 +409,6 @@ sampler <- R6Class(
       self$tune_diag_sd(iterations_completed, total_iterations)
     },
     tune_epsilon = function(iter, total) {
-
       # tuning periods for the tunable parameters (first 10%, last 60%)
       tuning_periods <- list(c(0, 0.1), c(0.4, 1))
 
@@ -422,7 +420,6 @@ sampler <- R6Class(
       )
 
       if (tuning_now) {
-
         # epsilon & tuning parameters
         kappa <- 0.75
         gamma <- 0.1
@@ -451,7 +448,6 @@ sampler <- R6Class(
       }
     },
     tune_diag_sd = function(iterations_completed, total_iterations) {
-
       # when, during warmup, to tune this parameter (after epsilon, but stopping
       # before halfway through)
       tuning_periods <- list(c(0.1, 0.4))
@@ -467,7 +463,6 @@ sampler <- R6Class(
 
         # provided there have been at least 5 acceptances in the warmup so far
         if (n_accepted > 5) {
-
           # get the sample posterior variance and shrink it
           sample_var <- self$sample_variance()
           shrinkage <- 1 / (n_accepted + 5)
@@ -478,13 +473,13 @@ sampler <- R6Class(
     },
     # TF1/2 check todo
     # need to convert this into a TF function
-    define_tf_draws = function(free_state,
-                               sampler_burst_length,
-                               sampler_thin,
-                               sampler_param_vec
-                               # pass values through
+    define_tf_draws = function(
+      free_state,
+      sampler_burst_length,
+      sampler_thin,
+      sampler_param_vec
+      # pass values through
     ) {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -531,8 +526,7 @@ sampler <- R6Class(
     # this will be removed in favour of the tf_function decorated
     # define_tf_draws() function that takes in argument values
     # sampler_burst_length and sampler_thin
-    run_burst = function(n_samples,
-                         thin = 1L) {
+    run_burst = function(n_samples, thin = 1L) {
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -551,7 +545,7 @@ sampler <- R6Class(
       )
 
       # get trace of free state and drop the null dimension
-      if (is.null(batch_results$all_states)){
+      if (is.null(batch_results$all_states)) {
         browser()
       }
       free_state_draws <- as.array(batch_results$all_states)
@@ -561,7 +555,6 @@ sampler <- R6Class(
       if (n_dim(free_state_draws) != 3) {
         dim(free_state_draws) <- c(1, dim(free_state_draws))
       }
-
 
       self$last_burst_free_states <- split_chains(free_state_draws)
 
@@ -573,7 +566,6 @@ sampler <- R6Class(
       }
 
       if (self$uses_metropolis) {
-
         # log acceptance probability
         log_accept_stats <- as.array(batch_results$trace$log_accept_ratio)
         is_accepted <- as.array(batch_results$trace$is_accepted)
@@ -589,11 +581,12 @@ sampler <- R6Class(
 
     tf_evaluate_sample_batch = NULL,
 
-    sample_carefully = function(free_state,
-                                sampler_burst_length,
-                                sampler_thin,
-                                sampler_param_vec) {
-
+    sample_carefully = function(
+      free_state,
+      sampler_burst_length,
+      sampler_thin,
+      sampler_param_vec
+    ) {
       # tryCatch handling for numerical errors
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -624,12 +617,11 @@ sampler <- R6Class(
       result
     },
 
-    check_for_free_state_error = function(result, n_samples){
+    check_for_free_state_error = function(result, n_samples) {
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
       # if it's a numerical error, batch_results will be an error object
       if (inherits(result, "error")) {
-
         # simple case that this is a single bad sample. Mock up a result and
         # pass it back
         if (n_samples == 1L) {
@@ -641,7 +633,6 @@ sampler <- R6Class(
             )
           )
         } else {
-
           greta_stash$tf_num_error <- result
 
           # otherwise, *one* of these multiple samples was bad. The sampler
@@ -657,21 +648,20 @@ sampler <- R6Class(
               "{.code greta_notes_tf_num_error()}"
             )
           )
-
         }
       }
     },
 
     sampler_parameter_values = function() {
-
       # random number of integration steps
       self$parameters
     },
-  empty_matrices = function(n,
-                            ncol){
-    replicate(n = n,
-              matrix(data = NA, nrow = 0, ncol = ncol),
-              simplify = FALSE)
-  }
+    empty_matrices = function(n, ncol) {
+      replicate(
+        n = n,
+        matrix(data = NA, nrow = 0, ncol = ncol),
+        simplify = FALSE
+      )
+    }
   )
 )

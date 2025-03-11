@@ -21,7 +21,6 @@ test_that("samplers are unbiased for Wishart", {
     one_by_one = TRUE
   )
 
-
   # do the plotting
   qqplot_checked_samples(wishart_checked)
 

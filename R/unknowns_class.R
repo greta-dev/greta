@@ -1,23 +1,27 @@
 #' @title Create objects of class 'unknowns' to nicely print ? valued arrays
 #' @param x object to convert to "unknowns" class
 #' @export
-as.unknowns <- function(x) { # nolint
+as.unknowns <- function(x) {
+  # nolint
   UseMethod("as.unknowns")
 }
 
 #' @export
-as.unknowns.unknowns <- function(x) { # nolint
+as.unknowns.unknowns <- function(x) {
+  # nolint
   x
 }
 
 #' @export
-as.unknowns.array <- function(x) { # nolint
+as.unknowns.array <- function(x) {
+  # nolint
   class(x) <- c("unknowns", class(x))
   x
 }
 
 #' @export
-as.unknowns.matrix <- function(x) { # nolint
+as.unknowns.matrix <- function(x) {
+  # nolint
   as.unknowns.array(x)
 }
 
@@ -44,7 +48,7 @@ print.unknowns <- function(x, ..., n = 10) {
     return(invisible(x))
   }
 
-  if (remaining_vals > 0 ) {
+  if (remaining_vals > 0) {
     cli::cli_alert_info(
       text = c(
         "i" = "{remaining_vals} more values\n",
@@ -52,7 +56,6 @@ print.unknowns <- function(x, ..., n = 10) {
       )
     )
   }
-
 }
 
 # create an unknowns array from some dimensions
@@ -65,7 +68,8 @@ unknowns <- function(dims = c(1, 1), data = NA_real_) {
 #' @param x matrix/array to set values to
 #' @param value values that are  being set set
 #' @export
-`dim<-.unknowns` <- function(x, value) { # nolint
+`dim<-.unknowns` <- function(x, value) {
+  # nolint
   x <- unclass(x)
   dim(x) <- value
   as.unknowns(x)

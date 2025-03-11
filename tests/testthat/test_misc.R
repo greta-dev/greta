@@ -5,9 +5,7 @@ test_that("check_tf_version works", {
   true_version <- tf$`__version__`
   tf$`__version__` <- "0.9.0" # nolint
 
-  expect_snapshot(error = TRUE,
-    check_tf_version("error")
-  )
+  expect_snapshot(error = TRUE, check_tf_version("error"))
   expect_snapshot_warning(
     check_tf_version("warn")
   )
@@ -65,57 +63,38 @@ test_that("greta_model objects print", {
 test_that("define and mcmc error informatively", {
   skip_if_not(check_tf_version())
 
-
   x <- as_data(randn(10))
 
   # no model with non-probability density greta arrays
-  expect_snapshot(error = TRUE,
-    model(variable())
-  )
+  expect_snapshot(error = TRUE, model(variable()))
 
-  expect_snapshot(error = TRUE,
-    model(x)
-  )
+  expect_snapshot(error = TRUE, model(x))
 
-  expect_snapshot(error = TRUE,
-    model()
-  )
+  expect_snapshot(error = TRUE, model())
 
   # can't define a model for an unfixed discrete variable
-  expect_snapshot(error = TRUE,
-    model(bernoulli(0.5))
-  )
+  expect_snapshot(error = TRUE, model(bernoulli(0.5)))
 
   # no parameters here, so define or dag should error
   distribution(x) <- normal(0, 1)
-  expect_snapshot(error = TRUE,
-    model(x)
-  )
+  expect_snapshot(error = TRUE, model(x))
 
   # a bad number of cores
   a <- normal(0, 1)
   m <- model(a)
   expect_warning(
-    mcmc(m,
-         warmup = 1,
-         n_samples = 1,
-         n_cores = 1000000L,
-         verbose = FALSE
-    ),
+    mcmc(m, warmup = 1, n_samples = 1, n_cores = 1000000L, verbose = FALSE),
     "cores were requested, but only"
   )
 
   # can't draw samples of a data greta array
   z <- normal(x, 1)
   m <- model(x, z)
-  expect_snapshot(error = TRUE,
-    draws <- mcmc(m, verbose = FALSE)
-  )
+  expect_snapshot(error = TRUE, draws <- mcmc(m, verbose = FALSE))
 })
 
 test_that("check_dims errors informatively", {
   skip_if_not(check_tf_version())
-
 
   a <- ones(3, 3)
   b <- ones(1)
@@ -133,9 +112,7 @@ test_that("check_dims errors informatively", {
   expect_identical(check_dims(b, b), dim(b))
 
   # with two differently shaped arrays it shouldn't
-  expect_snapshot(error = TRUE,
-    check_dims(a, c)
-  )
+  expect_snapshot(error = TRUE, check_dims(a, c))
 
   # with two scalars and a target dimension, just return the target dimension
   expect_identical(check_dims(b, b, target_dim = dim1), dim1)
@@ -143,7 +120,6 @@ test_that("check_dims errors informatively", {
 
 test_that("disjoint graphs are checked", {
   skip_if_not(check_tf_version())
-
 
   # if the target nodes aren't related, they sould be checked separately
 
@@ -153,22 +129,16 @@ test_that("disjoint graphs are checked", {
   # c is unrelated and has no density
   c <- variable()
 
-  expect_snapshot(error = TRUE,
-    m <- model(a, b, c)
-  )
+  expect_snapshot(error = TRUE, m <- model(a, b, c))
 
   # d is unrelated and known
   d <- as_data(randn(3))
   distribution(d) <- normal(0, 1)
-  expect_snapshot(error = TRUE,
-    m <- model(a, b, d)
-  )
-
+  expect_snapshot(error = TRUE, m <- model(a, b, d))
 })
 
 test_that("plotting models doesn't error", {
   skip_if_not(check_tf_version())
-
 
   a <- uniform(0, 1)
 
@@ -179,7 +149,6 @@ test_that("plotting models doesn't error", {
 
 test_that("structures work correctly", {
   skip_if_not(check_tf_version())
-
 
   a <- ones(2, 2)
   b <- zeros(2)
@@ -192,7 +161,6 @@ test_that("structures work correctly", {
 
 test_that("cleanly() handles TF errors nicely", {
   skip_if_not(check_tf_version())
-
 
   inversion_stop <- function() {
     stop("this non-invertible thing is not invertible")
@@ -208,10 +176,7 @@ test_that("cleanly() handles TF errors nicely", {
 
   expect_s3_class(cleanly(inversion_stop()), "error")
   expect_s3_class(cleanly(cholesky_stop()), "error")
-  expect_snapshot(error = TRUE,
-    cleanly(other_stop())
-  )
-
+  expect_snapshot(error = TRUE, cleanly(other_stop()))
 })
 
 test_that("double precision works for all jacobians", {
@@ -237,7 +202,8 @@ test_that("double precision works for all jacobians", {
 })
 
 test_that("module works", {
-  mod <- module(mean,
+  mod <- module(
+    mean,
     functions = module(
       sum,
       exp,

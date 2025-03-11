@@ -1,6 +1,4 @@
-greta_install_python_deps <- function(timeout = 5,
-                                      deps = greta_deps_spec()) {
-
+greta_install_python_deps <- function(timeout = 5, deps = greta_deps_spec()) {
   stdout_file <- create_temp_file("out-python-deps")
   stderr_file <- create_temp_file("err-python-deps")
 
@@ -10,7 +8,7 @@ greta_install_python_deps <- function(timeout = 5,
         msg = "Installing TF (v{deps$tf_version})",
         msg_done = "Installed TF (v{deps$tf_version})!",
         msg_failed = "Error installing TF (v{deps$tf_version})"
-        )
+      )
       tensorflow::install_tensorflow(
         version = deps$tf_version,
         envname = "greta-env-tf2",
@@ -27,12 +25,12 @@ greta_install_python_deps <- function(timeout = 5,
         pip = TRUE,
         envname = "greta-env-tf2",
         method = "conda"
-        )
-      },
+      )
+    },
     args = list(deps = deps),
     stdout = stdout_file,
     stderr = stderr_file
-    )
+  )
 
   install_python_modules <- new_install_process(
     callr_process = callr_conda_install,
@@ -40,7 +38,7 @@ greta_install_python_deps <- function(timeout = 5,
     stdout_file = stdout_file,
     stderr_file = stderr_file,
     cli_start_msg = glue::glue(
-    "Installing python modules into 'greta-env-tf2' conda environment, \\
+      "Installing python modules into 'greta-env-tf2' conda environment, \\
     this may take a few minutes"
     ),
     cli_end_msg = "Python modules installed!"
@@ -48,5 +46,4 @@ greta_install_python_deps <- function(timeout = 5,
 
   greta_stash$conda_install_notes <- install_python_modules$output_notes
   greta_stash$conda_install_error <- install_python_modules$output_error
-
 }

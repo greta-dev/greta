@@ -20,11 +20,16 @@ as_variable <- function(x) {
 
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
-check_op <- function(op, a, b, greta_op = NULL,
-                     other_args = list(),
-                     tolerance = 1e-3,
-                     only = c("data", "variable", "batched"),
-                     relative_error = FALSE) {
+check_op <- function(
+  op,
+  a,
+  b,
+  greta_op = NULL,
+  other_args = list(),
+  tolerance = 1e-3,
+  only = c("data", "variable", "batched"),
+  relative_error = FALSE
+) {
   greta_op <- greta_op %||% op
 
   r_out <- run_r_op(op, a, b, other_args)
@@ -36,10 +41,15 @@ check_op <- function(op, a, b, greta_op = NULL,
   }
 }
 
-compare_op <- function(r_out, greta_out, tolerance = 1e-4, relative_error = FALSE) {
-  if (relative_error){
+compare_op <- function(
+  r_out,
+  greta_out,
+  tolerance = 1e-4,
+  relative_error = FALSE
+) {
+  if (relative_error) {
     difference <- as.vector(abs(r_out - greta_out) / abs(r_out))
-  } else if (!relative_error){
+  } else if (!relative_error) {
     difference <- as.vector(abs(r_out - greta_out))
   }
   difference_lt_tolerance <- difference < tolerance
@@ -57,14 +67,20 @@ run_r_op <- function(op, a, b, other_args) {
   do.call(op, arg_list)
 }
 
-run_greta_op <- function(greta_op, a, b, other_args,
-                         type = c("data", "variable", "batched")) {
+run_greta_op <- function(
+  greta_op,
+  a,
+  b,
+  other_args,
+  type = c("data", "variable", "batched")
+) {
   type <- match.arg(type)
 
-  converter <- switch(type,
-                      data = as_data,
-                      variable = as_variable,
-                      batched = as_variable
+  converter <- switch(
+    type,
+    data = as_data,
+    variable = as_variable,
+    batched = as_variable
   )
 
   g_a <- converter(a)

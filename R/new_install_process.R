@@ -1,9 +1,11 @@
-new_install_process <- function(callr_process,
-                                timeout,
-                                stdout_file = NULL,
-                                stderr_file = NULL,
-                                cli_start_msg = NULL,
-                                cli_end_msg = NULL){
+new_install_process <- function(
+  callr_process,
+  timeout,
+  stdout_file = NULL,
+  stderr_file = NULL,
+  cli_start_msg = NULL,
+  cli_end_msg = NULL
+) {
   cli::cli_process_start(cli_start_msg)
   # convert max timeout from milliseconds into minutes
   timeout_minutes <- timeout * 1000 * 60
@@ -34,10 +36,11 @@ new_install_process <- function(callr_process,
   cli_process_done(msg_done = cli_end_msg)
 
   return(
-    list(output_notes = output_notes,
-         status = status,
-         no_output = no_output,
-         output_error = output_error)
+    list(
+      output_notes = output_notes,
+      status = status,
+      no_output = no_output,
+      output_error = output_error
+    )
   )
-
 }

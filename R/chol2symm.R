@@ -28,7 +28,6 @@ chol2symm <- function(x) {
 
 #' @export
 chol2symm.default <- function(x) {
-
   check_chol2symm_square_symmetric_upper_tri_matrix(x)
 
   t(x) %*% x
@@ -44,7 +43,9 @@ chol2symm.greta_array <- function(x) {
   check_chol2symm_2d_square_upper_tri_greta_array(x)
 
   # sum the elements
-  op("chol2symm", x,
+  op(
+    "chol2symm",
+    x,
     tf_operation = "tf_chol2symm",
     representations = list(cholesky = x)
   )

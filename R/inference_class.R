@@ -30,11 +30,12 @@ inference <- R6Class(
     traced_free_state = list(),
     # all recorded greta array values
     traced_values = list(),
-    initialize = function(initial_values,
-                          model,
-                          parameters = list(),
-                          seed = get_seed()) {
-
+    initialize = function(
+      initial_values,
+      model,
+      parameters = list(),
+      seed = get_seed()
+    ) {
       self$parameters <- parameters
       self$model <- model
       free_parameters <- model$dag$example_parameters(free = TRUE)
@@ -52,15 +53,21 @@ inference <- R6Class(
     write_trace_to_log_file = function(last_burst_values) {
       if (file.exists(self$trace_log_file)) {
         # Append
-        write.table(last_burst_values, self$trace_log_file,
-                    append = TRUE,
-                    row.names = FALSE, col.names = FALSE
+        write.table(
+          last_burst_values,
+          self$trace_log_file,
+          append = TRUE,
+          row.names = FALSE,
+          col.names = FALSE
         )
       } else {
         # Create file
-        write.table(last_burst_values, self$trace_log_file,
-                    append = FALSE,
-                    row.names = FALSE, col.names = TRUE
+        write.table(
+          last_burst_values,
+          self$trace_log_file,
+          append = FALSE,
+          row.names = FALSE,
+          col.names = TRUE
         )
       }
     },
@@ -85,8 +92,7 @@ inference <- R6Class(
 
     # check and try to autofill a single set of initial values (single vector on
     # free state scale)
-    check_initial_values = function(inits,
-                                    call = rlang::caller_env()) {
+    check_initial_values = function(inits, call = rlang::caller_env()) {
       undefined <- is.na(inits)
 
       # try to fill in any that weren't specified
@@ -104,19 +110,16 @@ inference <- R6Class(
         }
 
         self$check_reasonable_starting_values(valid, attempts)
-
       } else {
-
         # if they were all provided, check they can be be used
         valid <- self$valid_parameters(inits)
         self$check_valid_parameters(valid)
-
       }
 
       inits
     },
 
-    check_reasonable_starting_values = function(valid, attempts){
+    check_reasonable_starting_values = function(valid, attempts) {
       if (!valid) {
         cli::cli_abort(
           message = c(
@@ -129,7 +132,7 @@ inference <- R6Class(
       }
     },
 
-    check_valid_parameters = function(valid){
+    check_valid_parameters = function(valid) {
       if (!valid) {
         cli::cli_abort(
           c(
@@ -144,7 +147,6 @@ inference <- R6Class(
 
     # check and set a list of initial values
     set_initial_values = function(init_list) {
-
       # check/autofill them
       init_list <- lapply(init_list, self$check_initial_values)
 
@@ -182,12 +184,12 @@ inference <- R6Class(
     # arrays for the latest batch of raw draws
     trace = function(free_state = TRUE, values = FALSE) {
       if (free_state) {
-
         # append the free state trace for each chain
-        self$traced_free_state <- mapply(rbind,
-                                         self$traced_free_state,
-                                         self$last_burst_free_states,
-                                         SIMPLIFY = FALSE
+        self$traced_free_state <- mapply(
+          rbind,
+          self$traced_free_state,
+          self$last_burst_free_states,
+          SIMPLIFY = FALSE
         )
       }
 
@@ -197,10 +199,11 @@ inference <- R6Class(
         if (!is.null(self$trace_log_file)) {
           self$write_trace_to_log_file(last_burst_values)
         }
-        self$traced_values <- mapply(rbind,
-                                     self$traced_values,
-                                     last_burst_values,
-                                     SIMPLIFY = FALSE
+        self$traced_values <- mapply(
+          rbind,
+          self$traced_values,
+          last_burst_values,
+          SIMPLIFY = FALSE
         )
       }
     },
@@ -208,7 +211,6 @@ inference <- R6Class(
     # given a matrix of free state values, get a matrix of values of the target
     # greta arrays
     trace_burst_values = function(free_states = self$last_burst_free_states) {
-
       # can't use apply directly, as it will drop the variable name if there's
       # only one parameter being traced
       values_trace <- lapply(
@@ -231,4 +233,3 @@ inference <- R6Class(
     }
   )
 )
-

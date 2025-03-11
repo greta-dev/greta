@@ -7,12 +7,9 @@
 #' @importFrom cli cli_process_start
 #' @importFrom cli cli_process_done
 #' @importFrom cli cli_process_failed
-check_tf_version <- function(alert = c("none",
-                                       "error",
-                                       "warn",
-                                       "message",
-                                       "startup")) {
-
+check_tf_version <- function(
+  alert = c("none", "error", "warn", "message", "startup")
+) {
   # temporarily turn off the reticulate autoconfigure functionality
   ac_flag <- Sys.getenv("RETICULATE_AUTOCONFIGURE")
   on.exit(
@@ -25,7 +22,6 @@ check_tf_version <- function(alert = c("none",
   alert <- match.arg(alert)
 
   if (!greta_stash$python_has_been_initialised) {
-
     cli_process_start(
       msg = "Initialising python and checking dependencies, this may take a \\
       moment."
@@ -41,16 +37,14 @@ check_tf_version <- function(alert = c("none",
   py_not_init <- !greta_stash$python_has_been_initialised
   requirements_valid_py_not_init <- all(requirements_valid) && py_not_init
   if (requirements_valid_py_not_init) {
-
     cli_process_done(
-      msg_done = "Initialising python and checking dependencies ... done!")
+      msg_done = "Initialising python and checking dependencies ... done!"
+    )
     cat("\n")
     greta_stash$python_has_been_initialised <- TRUE
-
   }
 
   if (!all(requirements_valid)) {
-
     cli_process_failed()
 
     cli_msg <- c(
@@ -80,15 +74,11 @@ check_tf_version <- function(alert = c("none",
   }
 
   invisible(all(requirements_valid))
-
 }
 
 
 # check dimensions of arguments to ops, and return the maximum dimension
-check_dims <- function(...,
-                       target_dim = NULL,
-                       call = rlang::caller_env()) {
-
+check_dims <- function(..., target_dim = NULL, call = rlang::caller_env()) {
   # coerce args to greta arrays
   elem_list <- list(...)
   elem_list <- lapply(elem_list, as.greta_array)
@@ -110,19 +100,16 @@ check_dims <- function(...,
 
     # if they're non-scalar, but have the same dimensions, that's fine too
     if (!all(match_first)) {
-
       # otherwise it's not fine
       cli::cli_abort(
         message = "incompatible dimensions: {dims_text}",
         call = call
       )
-
     }
   }
 
   # if there's a target dimension, make sure they all match it
   if (!is.null(target_dim)) {
-
     # make sure it's 2D
     is_1d <- length(target_dim) == 1
     if (is_1d) {
@@ -133,13 +120,11 @@ check_dims <- function(...,
 
     # if they are all scalars, that's fine too
     if (!all(scalars)) {
-
       # check all arguments against this
       matches_target <- are_identical(dim_list[!scalars], target_dim)
 
       # error if not
       if (!all(matches_target)) {
-
         cli::cli_abort(
           c(
             "incorrect array dimensions",
@@ -148,14 +133,11 @@ check_dims <- function(...,
             "but input dimensions were {dims_text}."
           )
         )
-
       }
-
     }
 
     output_dim <- target_dim
   } else {
-
     # otherwise, find the correct output dimension
     dim_lengths <- lengths(dim_list)
     dim_list <- lapply(dim_list, pad_vector, to_length = max(dim_lengths))
@@ -166,8 +148,7 @@ check_dims <- function(...,
 }
 
 # make sure a greta array is 2D
-check_2d_multivariate <- function(x,
-                                  call = rlang::caller_env()) {
+check_2d_multivariate <- function(x, call = rlang::caller_env()) {
   if (!is_2d(x)) {
     cli::cli_abort(
       message = c(
@@ -181,10 +162,7 @@ check_2d_multivariate <- function(x,
   }
 }
 
-check_square <- function(x = NULL,
-                         dim = NULL,
-                         call = rlang::caller_env()) {
-
+check_square <- function(x = NULL, dim = NULL, call = rlang::caller_env()) {
   # allows for specifying x or named dim = dim
   dim <- dim %||% dim(x)
   ndim <- length(dim)
@@ -201,8 +179,10 @@ check_square <- function(x = NULL,
   }
 }
 
-check_sigma_square_2d_greta_array <- function(sigma,
-                                              call = rlang::caller_env()){
+check_sigma_square_2d_greta_array <- function(
+  sigma,
+  call = rlang::caller_env()
+) {
   # check dimensions of Sigma
   not_square <- nrow(sigma) != ncol(sigma)
   not_2d <- n_dim(sigma) != 2
@@ -219,9 +199,11 @@ check_sigma_square_2d_greta_array <- function(sigma,
   }
 }
 
-check_mean_sigma_have_same_dimensions <- function(mean,
-                                                  sigma,
-                                                  call = rlang::caller_env()) {
+check_mean_sigma_have_same_dimensions <- function(
+  mean,
+  sigma,
+  call = rlang::caller_env()
+) {
   dim_mean <- ncol(mean)
   dim_sigma <- nrow(sigma)
 
@@ -237,8 +219,8 @@ check_mean_sigma_have_same_dimensions <- function(mean,
 }
 
 check_chol2symm_square_symmetric_upper_tri_matrix <- function(
-    x,
-    call = rlang::caller_env()
+  x,
+  call = rlang::caller_env()
 ) {
   dim <- dim(x)
   is_square <- dim[1] == dim[2]
@@ -255,8 +237,8 @@ check_chol2symm_square_symmetric_upper_tri_matrix <- function(
 }
 
 check_chol2symm_2d_square_upper_tri_greta_array <- function(
-    x,
-    call = rlang::caller_env()
+  x,
+  call = rlang::caller_env()
 ) {
   dim <- dim(x)
   is_square <- dim[1] == dim[2]
@@ -276,11 +258,12 @@ check_chol2symm_2d_square_upper_tri_greta_array <- function(
 # matrices and column vectors, respectively, where number of rows implies the
 # number of realisations) and an optional target number of realisations, error
 # if there's a mismatch, and otherwise return the output number of realisations
-check_n_realisations <- function(vectors = list(),
-                                 scalars = list(),
-                                 target = NULL,
-                                 call = rlang::caller_env()) {
-
+check_n_realisations <- function(
+  vectors = list(),
+  scalars = list(),
+  target = NULL,
+  call = rlang::caller_env()
+) {
   # get the number of rows in the vector and scalar objects
   nrows <- lapply(c(vectors, scalars), nrow)
 
@@ -293,7 +276,6 @@ check_n_realisations <- function(vectors = list(),
 
     # if they're non-scalar, but have the same dimensions, that's fine too
     if (!all(match_first)) {
-
       # otherwise it's not fine
       cli::cli_abort(
         message = c(
@@ -308,7 +290,6 @@ check_n_realisations <- function(vectors = list(),
   # if there's a target number of realisations, check it's valid and make sure
   # they all match it
   if (!is.null(target)) {
-
     # make sure it's a scalar
     not_scalar <- length(target) != 1 || target < 1
     if (not_scalar) {
@@ -329,7 +310,6 @@ check_n_realisations <- function(vectors = list(),
 
     # if they are all scalars, that's fine too
     if (!all(single_rows)) {
-
       # check all arguments against this
       matches_target <- are_identical(nrows[!single_rows], target)
 
@@ -347,7 +327,6 @@ check_n_realisations <- function(vectors = list(),
 
     n_realisations <- target
   } else {
-
     # otherwise, find the correct output dimension
     n_realisations <- max(unlist(nrows))
   }
@@ -358,18 +337,18 @@ check_n_realisations <- function(vectors = list(),
 
 # check the dimension of maultivariate parameters matches, and matches the
 # optional target dimension
-check_dimension <- function(vectors = list(),
-                            squares = list(),
-                            target = NULL,
-                            min_dimension = 2L,
-                            call = rlang::caller_env()) {
-
+check_dimension <- function(
+  vectors = list(),
+  squares = list(),
+  target = NULL,
+  min_dimension = 2L,
+  call = rlang::caller_env()
+) {
   # get the number of columns in the vector and scalar objects
   ncols <- lapply(c(vectors, squares), ncol)
 
   # if there's a target dimension, check then use that:
   if (!is.null(target)) {
-
     # make sure it's a scalar
     positive_scalar <- length(target) != 1 || target < 1 || !is.finite(target)
     if (positive_scalar) {
@@ -385,7 +364,6 @@ check_dimension <- function(vectors = list(),
 
     dimension <- as.integer(target)
   } else {
-
     # otherwise, get it from the first parameter
     dimension <- ncols[[1]]
   }
@@ -430,13 +408,14 @@ check_dimension <- function(vectors = list(),
 
 # the objects passed in can either be vector-like (like 'mean'),
 # scalar-like (like 'size'), or square (like 'Sigma').
-check_multivariate_dims <- function(vectors = list(),
-                                    scalars = list(),
-                                    squares = list(),
-                                    n_realisations = NULL,
-                                    dimension = NULL,
-                                    min_dimension = 2L) {
-
+check_multivariate_dims <- function(
+  vectors = list(),
+  scalars = list(),
+  squares = list(),
+  n_realisations = NULL,
+  dimension = NULL,
+  min_dimension = 2L
+) {
   # coerce args to greta arrays
   vectors <- lapply(vectors, as.greta_array)
   scalars <- lapply(scalars, as.greta_array)
@@ -467,8 +446,7 @@ check_multivariate_dims <- function(vectors = list(),
 
 
 # check truncation for different distributions
-check_positive <- function(truncation,
-                           call = rlang::caller_env()) {
+check_positive <- function(truncation, call = rlang::caller_env()) {
   bound_is_negative <- truncation[1] < 0
   if (bound_is_negative) {
     cli::cli_abort(
@@ -481,8 +459,7 @@ check_positive <- function(truncation,
   }
 }
 
-check_unit <- function(truncation,
-                       call = rlang::caller_env()) {
+check_unit <- function(truncation, call = rlang::caller_env()) {
   bounds_not_btn_0_1 <- truncation[1] < 0 | truncation[2] > 1
   if (bounds_not_btn_0_1) {
     cli::cli_abort(
@@ -498,9 +475,7 @@ check_unit <- function(truncation,
 
 # check whether the function calling this is being used as the 'family' argument
 # of another modelling function
-check_in_family <- function(function_name,
-                            arg,
-                            call = rlang::caller_env()) {
+check_in_family <- function(function_name, arg, call = rlang::caller_env()) {
   if (missing(arg)) {
     # if the first argument is missing, the user might be doing
     # `family = binomial()` or similar
@@ -509,11 +484,17 @@ check_in_family <- function(function_name,
     # if the first argument is one of these text strings, the user might be
     # doing `family = binomial("logit")` or similar
     links <- c(
-      "logit", "probit", "cloglog", "cauchit",
-      "log", "identity", "sqrt"
+      "logit",
+      "probit",
+      "cloglog",
+      "cauchit",
+      "log",
+      "identity",
+      "sqrt"
     )
     arg_is_link <- inherits(arg, "character") &&
-      length(arg) == 1 && arg %in% links
+      length(arg) == 1 &&
+      arg %in% links
   }
 
   # if it's being executed in an environment where it's named 'family', the user
@@ -541,7 +522,6 @@ check_in_family <- function(function_name,
 
 #' @importFrom future plan future
 check_future_plan <- function(call = rlang::caller_env()) {
-
   plan_info <- future::plan()
 
   plan_is <- list(
@@ -553,10 +533,8 @@ check_future_plan <- function(call = rlang::caller_env()) {
 
   # if running in parallel
   if (plan_is$parallel) {
-
     # if it's a cluster, check there's no forking
     if (plan_is$cluster) {
-
       test_if_forked_cluster()
 
       f <- future::future(NULL, lazy = FALSE)
@@ -571,7 +549,6 @@ check_future_plan <- function(call = rlang::caller_env()) {
         }
       }
     } else {
-
       # if multi*, check it's multisession
       if (!plan_is$multisession) {
         cli::cli_abort(
@@ -587,11 +564,12 @@ check_future_plan <- function(call = rlang::caller_env()) {
 }
 
 # check a list of greta arrays and return a list with names scraped from call
-check_greta_arrays <- function(greta_array_list,
-                               fun_name,
-                               hint = NULL,
-                               call = rlang::caller_env()) {
-
+check_greta_arrays <- function(
+  greta_array_list,
+  fun_name,
+  hint = NULL,
+  call = rlang::caller_env()
+) {
   # check they are greta arrays
   are_greta_arrays <- are_greta_array(greta_array_list)
 
@@ -632,10 +610,7 @@ check_greta_arrays <- function(greta_array_list,
 
 # check the provided list of greta array fixed values (as used in calculate and
 # simulate) is valid
-check_values_list <- function(values,
-                              env,
-                              call = rlang::caller_env()) {
-
+check_values_list <- function(values, env, call = rlang::caller_env()) {
   # get the values and their names
   names <- names(values)
   stopifnot(length(names) == length(values))
@@ -668,11 +643,7 @@ check_values_list <- function(values,
   }
 
   # make sure the values have the correct dimensions
-  values <- mapply(assign_dim,
-                   values,
-                   fixed_greta_arrays,
-                   SIMPLIFY = FALSE
-  )
+  values <- mapply(assign_dim, values, fixed_greta_arrays, SIMPLIFY = FALSE)
 
   list(
     fixed_greta_arrays = fixed_greta_arrays,
@@ -682,11 +653,13 @@ check_values_list <- function(values,
 
 # check that all the variable greta arrays on which the target greta array
 # depends are in the list fixed_greta_arrays (for use in calculate_list)
-check_dependencies_satisfied <- function(target,
-                                         fixed_greta_arrays,
-                                         dag,
-                                         env,
-                                         call = rlang::caller_env()) {
+check_dependencies_satisfied <- function(
+  target,
+  fixed_greta_arrays,
+  dag,
+  env,
+  call = rlang::caller_env()
+) {
   dependency_names <- function(x) {
     get_node(x)$parent_names(recursive = TRUE)
   }
@@ -713,14 +686,14 @@ check_dependencies_satisfied <- function(target,
 
   # if there are any undefined variables
   if (any(is_variable)) {
-
     # try to find the associated greta arrays to provide a more informative
     # error message
     greta_arrays <- all_greta_arrays(env, include_data = FALSE)
 
-    greta_array_node_names <- vapply(greta_arrays,
-                                     function(x) get_node(x)$unique_name,
-                                     FUN.VALUE = ""
+    greta_array_node_names <- vapply(
+      greta_arrays,
+      function(x) get_node(x)$unique_name,
+      FUN.VALUE = ""
     )
 
     unmet_variables <- unmet_nodes[is_variable]
@@ -760,12 +733,10 @@ check_dependencies_satisfied <- function(target,
       message = msg,
       call = call
     )
-
   }
 }
 
-check_cum_op <- function(x,
-                         call = rlang::caller_env()) {
+check_cum_op <- function(x, call = rlang::caller_env()) {
   dims <- dim(x)
   x_not_column_vector <- length(dims) > 2 | dims[2] != 1
   if (x_not_column_vector) {
@@ -781,10 +752,7 @@ check_cum_op <- function(x,
 
 
 #' @importFrom future availableCores
-check_n_cores <- function(n_cores,
-                          samplers,
-                          plan_is) {
-
+check_n_cores <- function(n_cores, samplers, plan_is) {
   # if the plan is remote, and the user hasn't specificed the number of cores,
   # leave it as all of them
   if (is.null(n_cores) & !plan_is$local) {
@@ -815,9 +783,7 @@ check_n_cores <- function(n_cores,
   as.integer(n_cores)
 }
 
-check_positive_integer <- function(x,
-                                   name = "",
-                                   call = rlang::caller_env()) {
+check_positive_integer <- function(x, name = "", call = rlang::caller_env()) {
   suppressWarnings(x <- as.integer(x))
 
   not_positive_integer <- length(x) != 1 | is.na(x) | x < 1
@@ -835,8 +801,7 @@ check_positive_integer <- function(x,
 }
 
 # batch sizes must be positive numerics, rounded off to integers
-check_trace_batch_size <- function(x,
-                                   call = rlang::caller_env()) {
+check_trace_batch_size <- function(x, call = rlang::caller_env()) {
   valid <- is.numeric(x) && length(x) == 1 && x >= 1
   if (!valid) {
     cli::cli_abort(
@@ -848,8 +813,7 @@ check_trace_batch_size <- function(x,
   x
 }
 
-check_if_greta_array_in_mcmc <- function(x,
-                                         call = rlang::caller_env()){
+check_if_greta_array_in_mcmc <- function(x, call = rlang::caller_env()) {
   if (!is.greta_model(x) && is.greta_array(x)) {
     cli::cli_abort(
       message = c(
@@ -863,8 +827,7 @@ check_if_greta_array_in_mcmc <- function(x,
   }
 }
 
-check_if_greta_model <- function(x,
-                                 call = rlang::caller_env()) {
+check_if_greta_model <- function(x, call = rlang::caller_env()) {
   if (!is.greta_model(x)) {
     cli::cli_abort(
       message = c(
@@ -875,8 +838,6 @@ check_if_greta_model <- function(x,
     )
   }
 }
-
-
 
 
 complex_error <- function(z) {
@@ -900,9 +861,11 @@ Conj.greta_array <- complex_error
 #' @export
 Mod.greta_array <- complex_error
 
-check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays,
-                                              dag,
-                                              call = rlang::caller_env()) {
+check_if_unsampleable_and_unfixed <- function(
+  fixed_greta_arrays,
+  dag,
+  call = rlang::caller_env()
+) {
   # check there are no variables without distributions (or whose children have
   # distributions - for lkj & wishart) that aren't given fixed values
   variables <- dag$node_list[dag$node_types == "variable"]
@@ -935,7 +898,7 @@ check_if_unsampleable_and_unfixed <- function(fixed_greta_arrays,
   }
 }
 
-check_if_array_is_empty_list <- function(target, call = rlang::caller_env()){
+check_if_array_is_empty_list <- function(target, call = rlang::caller_env()) {
   no_greta_arrays_provided <- identical(target, list())
   if (no_greta_arrays_provided) {
     cli::cli_abort(
@@ -948,9 +911,11 @@ check_if_array_is_empty_list <- function(target, call = rlang::caller_env()){
   }
 }
 
-check_if_lower_upper_numeric <- function(lower,
-                                         upper,
-                                         call = rlang::caller_env()) {
+check_if_lower_upper_numeric <- function(
+  lower,
+  upper,
+  call = rlang::caller_env()
+) {
   if (!is.numeric(lower) | !is.numeric(upper)) {
     cli::cli_abort(
       message = c(
@@ -965,8 +930,10 @@ check_if_lower_upper_numeric <- function(lower,
   }
 }
 
-check_if_lower_upper_has_bad_limits <- function(bad_limits,
-                                                call = rlang::caller_env()) {
+check_if_lower_upper_has_bad_limits <- function(
+  bad_limits,
+  call = rlang::caller_env()
+) {
   if (bad_limits) {
     cli::cli_abort(
       message = "lower and upper must either be -Inf (lower only), \\
@@ -976,9 +943,7 @@ check_if_lower_upper_has_bad_limits <- function(bad_limits,
   }
 }
 
-check_if_upper_gt_lower <- function(lower,
-                                    upper,
-                                    call = rlang::caller_env()) {
+check_if_upper_gt_lower <- function(lower, upper, call = rlang::caller_env()) {
   if (any(lower >= upper)) {
     cli::cli_abort(
       message = c(
@@ -993,9 +958,9 @@ check_if_upper_gt_lower <- function(lower,
 
 
 check_targets_stochastic_and_not_sampled <- function(
-    target,
-    mcmc_dag_variables,
-    call = rlang::caller_env()
+  target,
+  mcmc_dag_variables,
+  call = rlang::caller_env()
 ) {
   target_nodes <- lapply(target, get_node)
   target_node_names <- extract_unique_names(target_nodes)
@@ -1021,9 +986,11 @@ check_targets_stochastic_and_not_sampled <- function(
 }
 
 # see if the new dag introduces any new variables
-check_dag_introduces_new_variables <- function(dag,
-                                               mcmc_dag,
-                                               call = rlang::caller_env()) {
+check_dag_introduces_new_variables <- function(
+  dag,
+  mcmc_dag,
+  call = rlang::caller_env()
+) {
   new_types <- dag$node_types[!connected_to_draws(dag, mcmc_dag)]
   any_new_variables <- any(new_types == "variable")
   if (any_new_variables) {
@@ -1042,9 +1009,11 @@ check_dag_introduces_new_variables <- function(dag,
   }
 }
 
-check_commanality_btn_dags <- function(dag,
-                                       mcmc_dag,
-                                       call = rlang::caller_env()) {
+check_commanality_btn_dags <- function(
+  dag,
+  mcmc_dag,
+  call = rlang::caller_env()
+) {
   target_not_connected_to_mcmc <- !any(connected_to_draws(dag, mcmc_dag))
   if (target_not_connected_to_mcmc) {
     cli::cli_abort(
@@ -1055,16 +1024,17 @@ check_commanality_btn_dags <- function(dag,
   }
 }
 
-check_finite_positive_scalar_integer <- function(x,
-                                                 arg = rlang::caller_arg(x),
-                                                 call = rlang::caller_env()){
+check_finite_positive_scalar_integer <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   is_not_finite_positive_scalar_integer <- !is.numeric(x) ||
     length(x) != 1 ||
     !is.finite(x) ||
     x <= 0
 
   if (is_not_finite_positive_scalar_integer) {
-
     cli::cli_abort(
       message = c(
         "{.arg {arg}} must be a finite, positive, scalar integer",
@@ -1075,12 +1045,13 @@ check_finite_positive_scalar_integer <- function(x,
       call = call
     )
   }
-
 }
 
-check_if_greta_mcmc_list <- function(x,
-                                     arg = rlang::caller_arg(x),
-                                     call = rlang::caller_env()){
+check_if_greta_mcmc_list <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   if (!is.greta_mcmc_list(x)) {
     cli::cli_abort(
       message = c(
@@ -1093,9 +1064,11 @@ check_if_greta_mcmc_list <- function(x,
   }
 }
 
-check_if_model_info <- function(x,
-                                arg = rlang::caller_arg(x),
-                                call = rlang::caller_env()){
+check_if_model_info <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   valid <- !is.null(x)
 
   if (!valid) {
@@ -1109,13 +1082,14 @@ check_if_model_info <- function(x,
       call = call
     )
   }
-
 }
 
-check_2d <- function(x,
-                     arg = rlang::caller_arg(x),
-                     call = rlang::caller_env()){
-  if (!is_2d(x)){
+check_2d <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (!is_2d(x)) {
     cli::cli_abort(
       message = c(
         "{.arg {arg} must be two dimensional}",
@@ -1126,12 +1100,13 @@ check_2d <- function(x,
   }
 }
 
-check_positive_scalar <- function(x,
-                                  arg = rlang::caller_arg(x),
-                                  call = rlang::caller_env()){
-
+check_positive_scalar <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   not_positive_scalar <- !is.numeric(x) || !length(x) == 1 || x <= 0
-  if (not_positive_scalar){
+  if (not_positive_scalar) {
     cli::cli_abort(
       message = c(
         "{.arg {arg}} must be a positive scalar value, or a scalar \\
@@ -1142,11 +1117,13 @@ check_positive_scalar <- function(x,
   }
 }
 
-check_scalar <- function(x,
-                         arg = rlang::caller_arg(x),
-                         call = rlang::caller_env()){
+check_scalar <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   scalar <- is_scalar(x)
-  if (!scalar){
+  if (!scalar) {
     cli::cli_abort(
       message = c(
         "{.arg {arg}} must be a scalar",
@@ -1158,13 +1135,15 @@ check_scalar <- function(x,
   }
 }
 
-check_finite <- function(x,
-                         arg = rlang::caller_arg(x),
-                         call = rlang::caller_env()){
+check_finite <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   not_finite <- !is.finite(x)
-  if (not_finite){
+  if (not_finite) {
     cli::cli_abort(
-      message =   c(
+      message = c(
         "{.arg {x}} must be a finite scalar",
         "But their values are:",
         "{.arg {x}}: {x}"
@@ -1174,12 +1153,13 @@ check_finite <- function(x,
   }
 }
 
-check_x_gte_y <- function(x,
-                          y,
-                          x_arg = rlang::caller_arg(x),
-                          y_arg = rlang::caller_arg(y),
-                          call = rlang::caller_env()){
-
+check_x_gte_y <- function(
+  x,
+  y,
+  x_arg = rlang::caller_arg(x),
+  y_arg = rlang::caller_arg(y),
+  call = rlang::caller_env()
+) {
   x_gte_y <- x >= y
 
   if (x_gte_y) {
@@ -1193,13 +1173,14 @@ check_x_gte_y <- function(x,
       call = call
     )
   }
-
 }
 
 
-check_numeric_length_1 <- function(x,
-                                   arg = rlang::caller_arg(x),
-                                   call = rlang::caller_env()){
+check_numeric_length_1 <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   good_type <- is.numeric(x) && length(x) == 1
 
   if (!good_type) {
@@ -1214,14 +1195,15 @@ check_numeric_length_1 <- function(x,
       call = call
     )
   }
-
 }
 
-check_both_2d <- function(x,
-                          y,
-                          x_arg = rlang::caller_arg(x),
-                          y_arg = rlang::caller_arg(y),
-                          call = rlang::caller_env()){
+check_both_2d <- function(
+  x,
+  y,
+  x_arg = rlang::caller_arg(x),
+  y_arg = rlang::caller_arg(y),
+  call = rlang::caller_env()
+) {
   if (!is_2d(x) | !is_2d(y)) {
     cli::cli_abort(
       message = c(
@@ -1235,10 +1217,7 @@ check_both_2d <- function(x,
   }
 }
 
-check_compatible_dimensions <- function(x,
-                                        y,
-                                        call = rlang::caller_env()){
-
+check_compatible_dimensions <- function(x, y, call = rlang::caller_env()) {
   incompatible_dimensions <- dim(x)[2] != dim(y)[1]
   if (incompatible_dimensions) {
     cli::cli_abort(
@@ -1252,9 +1231,11 @@ check_compatible_dimensions <- function(x,
   }
 }
 
-check_distribution_support <- function(x,
-                                       arg = rlang::caller_arg(x),
-                                       call = rlang::caller_env()){
+check_distribution_support <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   n_supports <- length(unique(x))
   if (n_supports != 1) {
     supports_text <- vapply(
@@ -1273,12 +1254,13 @@ check_distribution_support <- function(x,
       call = call
     )
   }
-
 }
 
-check_not_multivariate_univariate <- function(x,
-                                              arg = rlang::caller_arg(x),
-                                              call = rlang::caller_env()){
+check_not_multivariate_univariate <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   is_multivariate_and_univariate <- !all(x) & !all(!x)
   if (is_multivariate_and_univariate) {
     cli::cli_abort(
@@ -1291,11 +1273,12 @@ check_not_multivariate_univariate <- function(x,
   }
 }
 
-check_not_discrete_continuous <- function(x,
-                                          name,
-                                          arg = rlang::caller_arg(x),
-                                          call = rlang::caller_env()){
-
+check_not_discrete_continuous <- function(
+  x,
+  name,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   is_discrete_and_continuous <- !all(x) & !all(!x)
   if (is_discrete_and_continuous) {
     cli::cli_abort(
@@ -1308,10 +1291,12 @@ check_not_discrete_continuous <- function(x,
   }
 }
 
-check_num_distributions <- function(n_distributions,
-                                    at_least,
-                                    name,
-                                    call = rlang::caller_env()){
+check_num_distributions <- function(
+  n_distributions,
+  at_least,
+  name,
+  call = rlang::caller_env()
+) {
   if (n_distributions < at_least) {
     cli::cli_abort(
       message = c(
@@ -1322,15 +1307,15 @@ check_num_distributions <- function(n_distributions,
       call = call
     )
   }
-
 }
 
-check_weights_dim <- function(weights_dim,
-                              dim,
-                              n_distributions,
-                              arg = rlang::caller_arg(weights_dim),
-                              call = rlang::caller_env()){
-
+check_weights_dim <- function(
+  weights_dim,
+  dim,
+  n_distributions,
+  arg = rlang::caller_arg(weights_dim),
+  call = rlang::caller_env()
+) {
   # weights should have n_distributions as the first dimension
   if (weights_dim[1] != n_distributions) {
     cli::cli_abort(
@@ -1366,11 +1351,9 @@ check_weights_dim <- function(weights_dim,
       call = call
     )
   }
-
 }
 
-check_initials_are_named <- function(values,
-                                     call = rlang::caller_env()){
+check_initials_are_named <- function(values, call = rlang::caller_env()) {
   names <- names(values)
   initials_not_all_named <- length(names) != length(values)
   if (initials_not_all_named) {
@@ -1381,8 +1364,7 @@ check_initials_are_named <- function(values,
   }
 }
 
-check_initials_are_numeric <- function(values,
-                                       call = rlang::caller_env()){
+check_initials_are_numeric <- function(values, call = rlang::caller_env()) {
   are_numeric <- vapply(values, is.numeric, FUN.VALUE = FALSE)
   if (!all(are_numeric)) {
     cli::cli_abort(
@@ -1392,10 +1374,11 @@ check_initials_are_numeric <- function(values,
   }
 }
 
-check_initial_values_match_chains <- function(initial_values,
-                                              n_chains,
-                                              call = rlang::caller_env()){
-
+check_initial_values_match_chains <- function(
+  initial_values,
+  n_chains,
+  call = rlang::caller_env()
+) {
   initials <- initial_values
   not_initials_but_list <- !is.initials(initials) && is.list(initials)
   if (not_initials_but_list) {
@@ -1417,13 +1400,13 @@ check_initial_values_match_chains <- function(initial_values,
       )
     }
   }
-
 }
 
-check_initial_values_correct_dim <- function(target_dims,
-                                             replacement_dims,
-                                             call = rlang::caller_env()){
-
+check_initial_values_correct_dim <- function(
+  target_dims,
+  replacement_dims,
+  call = rlang::caller_env()
+) {
   same_dims <- mapply(identical, target_dims, replacement_dims)
 
   if (!all(same_dims)) {
@@ -1433,12 +1416,12 @@ check_initial_values_correct_dim <- function(target_dims,
       call = call
     )
   }
-
 }
 
-check_initial_values_correct_class <- function(initial_values,
-                                               call = rlang::caller_env()){
-
+check_initial_values_correct_class <- function(
+  initial_values,
+  call = rlang::caller_env()
+) {
   initials <- initial_values
   not_initials_but_list <- !is.initials(initials) && is.list(initials)
   not_initials_not_list <- !is.initials(initials) && !is.list(initials)
@@ -1456,11 +1439,9 @@ check_initial_values_correct_class <- function(initial_values,
       call = call
     )
   }
-
 }
 
-check_nodes_all_variable <- function(nodes,
-                                     call = rlang::caller_env()){
+check_nodes_all_variable <- function(nodes, call = rlang::caller_env()) {
   types <- lapply(nodes, node_type)
   are_variables <- are_identical(types, "variable")
 
@@ -1469,11 +1450,12 @@ check_nodes_all_variable <- function(nodes,
       "Initial values can only be set for variable {.cls greta_array}s"
     )
   }
-
 }
 
-check_greta_arrays_associated_with_model <- function(tf_names,
-                                                     call = rlang::caller_env()){
+check_greta_arrays_associated_with_model <- function(
+  tf_names,
+  call = rlang::caller_env()
+) {
   missing_names <- is.na(tf_names)
   if (any(missing_names)) {
     bad <- names(tf_names)[missing_names]
@@ -1487,9 +1469,7 @@ check_greta_arrays_associated_with_model <- function(tf_names,
   }
 }
 
-check_not_data_greta_arrays <- function(model,
-                                        call = rlang::caller_env()){
-
+check_not_data_greta_arrays <- function(model, call = rlang::caller_env()) {
   # find variable names to label samples
   target_greta_arrays <- model$target_greta_arrays
   names <- names(target_greta_arrays)
@@ -1513,7 +1493,7 @@ check_not_data_greta_arrays <- function(model,
   }
 }
 
-check_diagrammer_installed <- function(call = rlang::caller_env()){
+check_diagrammer_installed <- function(call = rlang::caller_env()) {
   if (!is_DiagrammeR_installed()) {
     cli::cli_abort(
       message = c(
@@ -1527,9 +1507,10 @@ check_diagrammer_installed <- function(call = rlang::caller_env()){
   }
 }
 
-check_unfixed_discrete_distributions <- function(dag,
-                                                 call = rlang::caller_env()){
-
+check_unfixed_discrete_distributions <- function(
+  dag,
+  call = rlang::caller_env()
+) {
   # check for unfixed discrete distributions
   distributions <- dag$node_list[dag$node_types == "distribution"]
   bad_nodes <- vapply(
@@ -1549,11 +1530,8 @@ check_unfixed_discrete_distributions <- function(dag,
   }
 }
 
-check_greta_array_type <- function(x,
-                                   optional,
-                                   call = rlang::caller_env()){
-
-  if (!is.numeric(x) && !is.logical(x) && !optional){
+check_greta_array_type <- function(x, optional, call = rlang::caller_env()) {
+  if (!is.numeric(x) && !is.logical(x) && !optional) {
     cli::cli_abort(
       message = c(
         "{.cls greta_array} must contain the same type",
@@ -1566,10 +1544,12 @@ check_greta_array_type <- function(x,
   }
 }
 
-check_greta_data_frame <- function(x,
-                                   optional,
-                                   arg = rlang::caller_arg(x),
-                                   call = rlang::caller_env()){
+check_greta_data_frame <- function(
+  x,
+  optional,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   classes <- vapply(x, class, "")
   valid <- classes %in% c("numeric", "integer", "logical")
 
@@ -1588,9 +1568,7 @@ check_greta_data_frame <- function(x,
   }
 }
 
-check_ncols_match <- function(x1,
-                              x2,
-                              call = rlang::caller_env()){
+check_ncols_match <- function(x1, x2, call = rlang::caller_env()) {
   if (ncol(x1) != ncol(x2)) {
     cli::cli_abort(
       message = c(
@@ -1603,7 +1581,7 @@ check_ncols_match <- function(x1,
   }
 }
 
-check_fields_installed <- function(){
+check_fields_installed <- function() {
   fields_installed <- requireNamespace("fields", quietly = TRUE)
   if (!fields_installed) {
     cli::cli_abort(
@@ -1617,8 +1595,7 @@ check_fields_installed <- function(){
   }
 }
 
-check_2_by_1 <- function(x,
-                         call = rlang::caller_env()){
+check_2_by_1 <- function(x, call = rlang::caller_env()) {
   dim_x <- dim(x)
   is_2_by_1 <- is_2d(x) && dim_x[2] == 1L
   if (!is_2_by_1) {
@@ -1633,8 +1610,7 @@ check_2_by_1 <- function(x,
 }
 
 
-check_transpose <- function(x,
-                            call = rlang::caller_env()){
+check_transpose <- function(x, call = rlang::caller_env()) {
   if (x) {
     cli::cli_abort(
       message = "{.arg transpose} must be FALSE for {.cls greta_array}s",
@@ -1643,12 +1619,13 @@ check_transpose <- function(x,
   }
 }
 
-check_x_matches_ncol <- function(x,
-                                 ncol_of,
-                                 x_arg = rlang::caller_arg(x),
-                                 ncol_of_arg = rlang::caller_arg(ncol_of),
-                                 call = rlang::caller_env()){
-
+check_x_matches_ncol <- function(
+  x,
+  ncol_of,
+  x_arg = rlang::caller_arg(x),
+  ncol_of_arg = rlang::caller_arg(ncol_of),
+  call = rlang::caller_env()
+) {
   if (x != ncol(ncol_of)) {
     cli::cli_abort(
       message = "{.arg {x}} must equal {.code ncol({ncol_of_arg})} for \\
@@ -1658,10 +1635,12 @@ check_x_matches_ncol <- function(x,
   }
 }
 
-check_stats_dim_matches_x_dim <- function(x,
-                                          margin,
-                                          stats,
-                                          call = rlang::caller_env()){
+check_stats_dim_matches_x_dim <- function(
+  x,
+  margin,
+  stats,
+  call = rlang::caller_env()
+) {
   stats_dim_matches_x_dim <- dim(x)[margin] == dim(stats)[1]
   if (!stats_dim_matches_x_dim) {
     cli::cli_abort(
@@ -1675,10 +1654,11 @@ check_stats_dim_matches_x_dim <- function(x,
 }
 
 # STATS must be a column array
-check_is_column_array <- function(x,
-                                  arg = rlang::caller_arg(x),
-                                  call = rlang::caller_env()){
-
+check_is_column_array <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   is_column_array <- is_2d(x) && dim(x)[2] == 1
   if (!is_column_array) {
     cli::cli_abort(
@@ -1693,12 +1673,13 @@ check_is_column_array <- function(x,
   }
 }
 
-check_rows_equal <- function(a,
-                             b,
-                             a_arg = rlang::caller_arg(a),
-                             b_arg = rlang::caller_arg(b),
-                             call = rlang::caller_env()){
-
+check_rows_equal <- function(
+  a,
+  b,
+  a_arg = rlang::caller_arg(a),
+  b_arg = rlang::caller_arg(b),
+  call = rlang::caller_env()
+) {
   # b must have the right number of rows
   rows_not_equal <- dim(b)[1] != dim(a)[1]
   if (rows_not_equal) {
@@ -1714,9 +1695,7 @@ check_rows_equal <- function(a,
   }
 }
 
-check_final_dim <- function(dim,
-                            thing,
-                            call = rlang::caller_env()){
+check_final_dim <- function(dim, thing, call = rlang::caller_env()) {
   # dimension of the free state version
   n_dim <- length(dim)
   last_dim <- dim[n_dim]
@@ -1732,12 +1711,13 @@ check_final_dim <- function(dim,
       call = call
     )
   }
-
 }
 
-check_param_greta_array <- function(x,
-                                    arg = rlang::caller_arg(x),
-                                    call = rlang::caller_env()){
+check_param_greta_array <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   if (is.greta_array(x)) {
     cli::cli_abort(
       message = "{.arg {arg}} must be fixed, they cannot be another \\
@@ -1747,9 +1727,11 @@ check_param_greta_array <- function(x,
   }
 }
 
-check_not_greta_array <- function(x,
-                                  arg = rlang::caller_arg(x),
-                                  call = rlang::caller_env()){
+check_not_greta_array <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   if (is.greta_array(x)) {
     cli::cli_abort(
       "{.arg {arg}} cannot be a {.cls greta_array}"
@@ -1758,17 +1740,16 @@ check_not_greta_array <- function(x,
 }
 
 # if it errored
-check_for_errors <- function(res,
-                             call = rlang::caller_env()){
-
+check_for_errors <- function(res, call = rlang::caller_env()) {
   if (inherits(res, "error")) {
-
     # check for known numerical errors
-    numerical_errors <- vapply(greta_stash$numerical_messages,
-                               grepl,
-                               res$message,
-                               FUN.VALUE = 0
-    ) == 1
+    numerical_errors <- vapply(
+      greta_stash$numerical_messages,
+      grepl,
+      res$message,
+      FUN.VALUE = 0
+    ) ==
+      1
 
     # if it was just a numerical error, quietly return a bad value
     if (!any(numerical_errors)) {
@@ -1781,12 +1762,9 @@ check_for_errors <- function(res,
       )
     }
   }
-
 }
 
-check_dim_length <- function(dim,
-                             call = rlang::caller_env()){
-
+check_dim_length <- function(dim, call = rlang::caller_env()) {
   ndim <- length(dim)
   ndim_gt2 <- ndim > 2
   if (ndim_gt2) {
@@ -1801,20 +1779,19 @@ check_dim_length <- function(dim,
   }
 }
 
-check_is_distribution_node <- function(distribution,
-                                       call = rlang::caller_env()){
+check_is_distribution_node <- function(
+  distribution,
+  call = rlang::caller_env()
+) {
   if (!is.distribution_node(distribution)) {
     cli::cli_abort(
       message = c("Invalid distribution"),
       call = call
     )
   }
-
 }
 
-check_values_dim <- function(value,
-                             dim,
-                             call = rlang::caller_env()){
+check_values_dim <- function(value, dim, call = rlang::caller_env()) {
   values_have_wrong_dim <- !is.null(value) && !all.equal(dim(value), dim)
   if (values_have_wrong_dim) {
     cli::cli_abort(
@@ -1822,12 +1799,10 @@ check_values_dim <- function(value,
       call = call
     )
   }
-
 }
 
 # check they are all scalar
-check_dot_nodes_scalar <- function(dot_nodes,
-                                   call = rlang::caller_env()){
+check_dot_nodes_scalar <- function(dot_nodes, call = rlang::caller_env()) {
   are_scalar <- vapply(dot_nodes, is_scalar, logical(1))
   if (!all(are_scalar)) {
     cli::cli_abort(
@@ -1836,13 +1811,13 @@ check_dot_nodes_scalar <- function(dot_nodes,
       call = call
     )
   }
-
 }
 
-inform_if_one_set_of_initials <- function(initial_values,
-                                          n_chains,
-                                          call = rlang::caller_env()){
-
+inform_if_one_set_of_initials <- function(
+  initial_values,
+  n_chains,
+  call = rlang::caller_env()
+) {
   is_blank <- identical(initial_values, initials())
 
   one_set_of_initials <- !is_blank & n_chains > 1
@@ -1856,8 +1831,7 @@ inform_if_one_set_of_initials <- function(initial_values,
 
 # the user might pass greta arrays with groups of nodes that are unconnected
 # to one another. Need to check there are densities in each graph
-check_subgraphs <- function(dag,
-                            call = rlang::caller_env()){
+check_subgraphs <- function(dag, call = rlang::caller_env()) {
   # get and check the types
   types <- dag$node_types
 
@@ -1924,13 +1898,14 @@ check_subgraphs <- function(dag,
       )
     }
   }
-
 }
 
-check_has_representation <- function(repr,
-                                     name,
-                                     error,
-                                     call = rlang::caller_env()){
+check_has_representation <- function(
+  repr,
+  name,
+  error,
+  call = rlang::caller_env()
+) {
   not_represented <- error && is.null(repr)
   if (not_represented) {
     cli::cli_abort(
@@ -1940,10 +1915,12 @@ check_has_representation <- function(repr,
   }
 }
 
-check_has_anti_representation <- function(repr,
-                                          name,
-                                          error,
-                                          call = rlang::caller_env()){
+check_has_anti_representation <- function(
+  repr,
+  name,
+  error,
+  call = rlang::caller_env()
+) {
   not_anti_represented <- error && is.null(repr)
   if (not_anti_represented) {
     cli::cli_abort(
@@ -1953,9 +1930,11 @@ check_has_anti_representation <- function(repr,
   }
 }
 
-check_is_greta_array <- function(x,
-                                 arg = rlang::caller_arg(x),
-                                 call = rlang::caller_env()){
+check_is_greta_array <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   if (!is.greta_array(x)) {
     cli::cli_abort(
       message = c(
@@ -1967,9 +1946,11 @@ check_is_greta_array <- function(x,
   }
 }
 
-check_missing_infinite_values <- function(x,
-                                          optional,
-                                          call = rlang::caller_env()){
+check_missing_infinite_values <- function(
+  x,
+  optional,
+  call = rlang::caller_env()
+) {
   contains_missing_or_inf <- !optional & !all(is.finite(x))
   if (contains_missing_or_inf) {
     cli::cli_abort(
@@ -1981,10 +1962,11 @@ check_missing_infinite_values <- function(x,
   }
 }
 
-check_truncation_implemented <- function(tfp_distribution,
-                                         distribution_node,
-                                         call = rlang::caller_env()){
-
+check_truncation_implemented <- function(
+  tfp_distribution,
+  distribution_node,
+  call = rlang::caller_env()
+) {
   cdf <- tfp_distribution$cdf
   quantile <- tfp_distribution$quantile
 
@@ -1998,12 +1980,13 @@ check_truncation_implemented <- function(tfp_distribution,
       call = call
     )
   }
-
 }
 
-check_sampling_implemented <- function(sample,
-                                       distribution_node,
-                                       call = rlang::caller_env()){
+check_sampling_implemented <- function(
+  sample,
+  distribution_node,
+  call = rlang::caller_env()
+) {
   if (is.null(sample)) {
     cli::cli_abort(
       "Sampling is not yet implemented for \\
@@ -2012,9 +1995,7 @@ check_sampling_implemented <- function(sample,
   }
 }
 
-check_timeout <- function(it,
-                          maxit,
-                          call = rlang::caller_env()){
+check_timeout <- function(it, maxit, call = rlang::caller_env()) {
   # check we didn't time out
   if (it == maxit) {
     cli::cli_abort(
@@ -2027,43 +2008,40 @@ check_timeout <- function(it,
       call = call
     )
   }
-
 }
 
-inform_if_remote_machine <- function(plan_is,
-                                     samplers){
+inform_if_remote_machine <- function(plan_is, samplers) {
   is_remote_machine <- plan_is$parallel & !plan_is$local
   if (is_remote_machine) {
-
     cli::cli_inform(
       message = c(
         "running {length(samplers)} \\
       {?sampler on a remote machine/samplers on remote machines}"
       )
     )
-
   }
 }
 
-inform_if_local_parallel_multiple_samplers <- function(plan_is,
-                                                       samplers,
-                                                       n_cores,
-                                                       compute_options){
-
+inform_if_local_parallel_multiple_samplers <- function(
+  plan_is,
+  samplers,
+  n_cores,
+  compute_options
+) {
   local_parallel_multiple_samplers <- plan_is$parallel &
     plan_is$local &
     length(samplers) > 1
   if (local_parallel_multiple_samplers) {
     cores_text <- compute_text(n_cores, compute_options)
     cli::cli_inform(
-      message = c("
+      message = c(
+        "
       running {length(samplers)} samplers in parallel,
       {cores_text} \n\n"
       )
     )
   }
 }
-
 
 
 checks_module <- module(
@@ -2089,4 +2067,3 @@ checks_module <- module(
   check_if_greta_mcmc_list,
   check_2d_multivariate
 )
-

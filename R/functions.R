@@ -122,7 +122,6 @@ NULL
 
 #' @export
 log.greta_array <- function(x, base = lifecycle::deprecated()) {
-
   if (lifecycle::is_present(base)) {
     lifecycle::deprecate_warn(
       when = "0.5.1",
@@ -136,7 +135,9 @@ log.greta_array <- function(x, base = lifecycle::deprecated()) {
   if (has_representation(x, "log")) {
     result <- copy_representation(x, "log")
   } else {
-    result <- op("log", x,
+    result <- op(
+      "log",
+      x,
       tf_operation = "tf$math$log",
       representations = list(exp = x)
     )
@@ -151,7 +152,9 @@ exp.greta_array <- function(x) {
     result <- copy_representation(x, "exp")
   } else {
     # otherwise exponentiate it, and store the log representation
-    result <- op("exp", x,
+    result <- op(
+      "exp",
+      x,
       tf_operation = "tf$math$exp",
       representations = list(log = x)
     )
@@ -321,11 +324,7 @@ t.greta_array <- function(x) {
 
   dims <- rev(dim(x))
 
-  op("transpose",
-    x,
-    dim = dims,
-    tf_operation = "tf_transpose"
-  )
+  op("transpose", x, dim = dims, tf_operation = "tf_transpose")
 }
 
 #' @export
@@ -345,7 +344,9 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
     )
   }
 
-  op("aperm", a,
+  op(
+    "aperm",
+    a,
     dim = dim(a)[perm],
     tf_operation = "tf$transpose",
     operation_args = list(perm = c(0L, perm))
@@ -387,18 +388,11 @@ chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
       )
     }
 
-    result <- op("chol", x,
-      dim = dim,
-      tf_operation = "tf_chol"
-    )
-
+    result <- op("chol", x, dim = dim, tf_operation = "tf_chol")
   }
 
-  if (force_cholesky){
-    result <- op("chol", x,
-                 dim = dim(x),
-                 tf_operation = "tf_chol"
-    )
+  if (force_cholesky) {
+    result <- op("chol", x, dim = dim(x), tf_operation = "tf_chol")
   }
 
   result
@@ -406,7 +400,6 @@ chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
 
 #' @export
 solve.greta_array <- function(a, b, ...) {
-
   check_2d(a)
 
   # check the matrix is square
@@ -418,21 +411,15 @@ solve.greta_array <- function(a, b, ...) {
       u <- representation(a, "cholesky")
       result <- chol2inv(u)
     } else {
-      result <- op("solve", a,
-        tf_operation = "tf$linalg$inv"
-      )
+      result <- op("solve", a, tf_operation = "tf$linalg$inv")
     }
   } else {
-
     check_2d(b)
     # b must have the right number of rows
     check_rows_equal(a, b)
 
     # ... and solve the linear equations
-    result <- op("solve", a, b,
-      dim = dim(b),
-      tf_operation = "tf$linalg$solve"
-    )
+    result <- op("solve", a, b, dim = dim(b), tf_operation = "tf$linalg$solve")
   }
 
   result
@@ -466,92 +453,81 @@ chol2inv.greta_array <- function(x, size = NCOL(x), LINPACK = FALSE) {
     )
   }
 
-  op("chol2inv", x,
-    tf_operation = "tf_chol2inv"
-  )
+  op("chol2inv", x, tf_operation = "tf_chol2inv")
 }
 # nolint end
 
 #' @rdname overloaded
 #' @export
-cov2cor <- function(V) { # nolint
+cov2cor <- function(V) {
+  # nolint
   UseMethod("cov2cor", V)
 }
 
 #' @export
-cov2cor.default <- function(V) { # nolint
+cov2cor.default <- function(V) {
+  # nolint
   stats::cov2cor(V)
 }
 
 #' @export
-cov2cor.greta_array <- function(V) { # nolint
-  op("cov2cor", V,
-    tf_operation = "tf_cov2cor"
-  )
+cov2cor.greta_array <- function(V) {
+  # nolint
+  op("cov2cor", V, tf_operation = "tf_cov2cor")
 }
 
 # sum, prod, min, mean, max
 
 #' @export
-sum.greta_array <- function(..., na.rm = TRUE) { # nolint
+sum.greta_array <- function(..., na.rm = TRUE) {
+  # nolint
 
   # combine all elements into a column vector
   vec <- c(...)
 
   # sum the elements
-  op("sum", vec,
-    dim = c(1, 1),
-    tf_operation = "tf_sum"
-  )
+  op("sum", vec, dim = c(1, 1), tf_operation = "tf_sum")
 }
 
 #' @export
-prod.greta_array <- function(..., na.rm = TRUE) { # nolint
+prod.greta_array <- function(..., na.rm = TRUE) {
+  # nolint
 
   # combine all elements into a column vector
   vec <- c(...)
 
   # sum the elements
-  op("prod", vec,
-    dim = c(1, 1),
-    tf_operation = "tf_prod"
-  )
+  op("prod", vec, dim = c(1, 1), tf_operation = "tf_prod")
 }
 
 #' @export
-min.greta_array <- function(..., na.rm = TRUE) { # nolint
+min.greta_array <- function(..., na.rm = TRUE) {
+  # nolint
 
   # combine all elements into a column vector
   vec <- c(...)
 
   # sum the elements
-  op("min", vec,
-    dim = c(1, 1),
-    tf_operation = "tf_min"
-  )
+  op("min", vec, dim = c(1, 1), tf_operation = "tf_min")
 }
 
 #' @export
-mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) { # nolint
+mean.greta_array <- function(x, trim = 0, na.rm = TRUE, ...) {
+  # nolint
 
   # sum the elements
-  op("mean", x,
-    dim = c(1, 1),
-    tf_operation = "tf_mean"
-  )
+  op("mean", x, dim = c(1, 1), tf_operation = "tf_mean")
 }
 
 #' @export
-max.greta_array <- function(..., na.rm = TRUE) { # nolint
+max.greta_array <- function(..., na.rm = TRUE) {
+  # nolint
 
   # combine all elements into a column vector
   vec <- c(...)
 
   # sum the elements
-  op("max", vec,
-    dim = c(1, 1),
-    tf_operation = "tf_max"
-  )
+  op("max", vec, dim = c(1, 1), tf_operation = "tf_max")
 }
 
 #' @export
@@ -591,10 +567,7 @@ rowcol_idx <- function(x, dims, which = c("col", "row")) {
     )
   }
 
-  switch(which,
-    row = (dims + 1):n_dim(x),
-    col = seq_len(dims)
-  )
+  switch(which, row = (dims + 1):n_dim(x), col = seq_len(dims))
 }
 
 # get output dimension for colSums, rowSums, colMeans, rowMeans
@@ -639,7 +612,9 @@ colMeans.default <- function(x, na.rm = FALSE, dims = 1L) {
 
 #' @export
 colMeans.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
-  op("colMeans", x,
+  op(
+    "colMeans",
+    x,
     operation_args = list(dims = dims),
     tf_operation = "tf_colmeans",
     dim = rowcol_dim(x, dims, "col")
@@ -659,7 +634,9 @@ rowMeans.default <- function(x, na.rm = FALSE, dims = 1L) {
 
 #' @export
 rowMeans.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
-  op("rowMeans", x,
+  op(
+    "rowMeans",
+    x,
     operation_args = list(dims = dims),
     tf_operation = "tf_rowmeans",
     dim = rowcol_dim(x, dims, "row")
@@ -679,7 +656,9 @@ colSums.default <- function(x, na.rm = FALSE, dims = 1L) {
 
 #' @export
 colSums.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
-  op("colSums", x,
+  op(
+    "colSums",
+    x,
     operation_args = list(dims = dims),
     tf_operation = "tf_colsums",
     dim = rowcol_dim(x, dims, "col")
@@ -699,7 +678,9 @@ rowSums.default <- function(x, na.rm = FALSE, dims = 1L) {
 
 #' @export
 rowSums.greta_array <- function(x, na.rm = FALSE, dims = 1L) {
-  op("rowSums", x,
+  op(
+    "rowSums",
+    x,
     operation_args = list(dims = dims),
     tf_operation = "tf_rowsums",
     dim = rowcol_dim(x, dims, "row")
@@ -725,11 +706,14 @@ sweep.default <- base::sweep
 
 # nolint start
 #' @export
-sweep.greta_array <- function(x,
-                              MARGIN,
-                              STATS,
-                              FUN = c("-", "+", "/", "*"),
-                              check.margin = TRUE, ...) {
+sweep.greta_array <- function(
+  x,
+  MARGIN,
+  STATS,
+  FUN = c("-", "+", "/", "*"),
+  check.margin = TRUE,
+  ...
+) {
   # nolint end
 
   # only allow these four functions
@@ -748,7 +732,10 @@ sweep.greta_array <- function(x,
   # STATS must have the same dimension as the correct dim of x
   check_stats_dim_matches_x_dim(x, margin, stats)
 
-  op("sweep", x, stats,
+  op(
+    "sweep",
+    x,
+    stats,
     operation_args = list(margin = margin, fun = fun),
     tf_operation = "tf_sweep",
     dim = dim(x)
@@ -760,23 +747,27 @@ sweep.greta_array <- function(x,
 #' @importFrom tensorflow %as%
 setClass("greta_array")
 setMethod(
-  "kronecker", signature(X = "greta_array", Y = "greta_array"),
-  function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
-           ...) {
+  "kronecker",
+  signature(X = "greta_array", Y = "greta_array"),
+  function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE, ...) {
     # nolint end
     fun <- match.arg(FUN)
 
     check_2d(X)
     check_2d(Y)
 
-    tf_fun_name <- switch(fun,
+    tf_fun_name <- switch(
+      fun,
       `*` = "multiply",
       `/` = "truediv",
       `+` = "add",
       `-` = "subtract"
     )
 
-    op("kronecker", X, Y,
+    op(
+      "kronecker",
+      X,
+      Y,
       tf_operation = "tf_kronecker",
       operation_args = list(tf_fun_name = tf_fun_name),
       dim = dim(X) * dim(Y)
@@ -787,9 +778,9 @@ setMethod(
 # nolint start
 #' @import methods
 setMethod(
-  kronecker, signature(X = "array", Y = "greta_array"),
-  function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
-           ...) {
+  kronecker,
+  signature(X = "array", Y = "greta_array"),
+  function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE, ...) {
     # nolint end
     kronecker(as.greta_array(X), Y, FUN, make.dimnames = FALSE)
   }
@@ -798,9 +789,9 @@ setMethod(
 # nolint start
 #' @import methods
 setMethod(
-  kronecker, signature(X = "greta_array", Y = "array"),
-  function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE,
-           ...) {
+  kronecker,
+  signature(X = "greta_array", Y = "array"),
+  function(X, Y, FUN = c("*", "/", "+", "-"), make.dimnames = FALSE, ...) {
     # nolint end
     kronecker(X, as.greta_array(Y), FUN, make.dimnames = FALSE)
   }
@@ -809,38 +800,42 @@ setMethod(
 # nolint start
 #' @rdname overloaded
 #' @export
-backsolve <- function(r, x, k = ncol(r),
-                      upper.tri = TRUE,
-                      transpose = FALSE) {
+backsolve <- function(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE) {
   # nolint end
   UseMethod("backsolve", x)
 }
 
 # nolint start
 #' @export
-backsolve.default <- function(r, x, k = ncol(r),
-                              upper.tri = TRUE,
-                              transpose = FALSE) {
+backsolve.default <- function(
+  r,
+  x,
+  k = ncol(r),
+  upper.tri = TRUE,
+  transpose = FALSE
+) {
   # nolint end
-  base::backsolve(r, x,
-    k = ncol(r),
-    upper.tri = TRUE,
-    transpose = FALSE
-  )
+  base::backsolve(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE)
 }
 
 # define this explicitly so CRAN doesn't think we're using .Internal
 # nolint start
 #' @export
-backsolve.greta_array <- function(r, x,
-                                  k = ncol(r),
-                                  upper.tri = TRUE,
-                                  transpose = FALSE) {
+backsolve.greta_array <- function(
+  r,
+  x,
+  k = ncol(r),
+  upper.tri = TRUE,
+  transpose = FALSE
+) {
   # nolint end
   check_x_matches_ncol(x = k, ncol_of = r)
   check_transpose(transpose)
 
-  op("backsolve", r, x,
+  op(
+    "backsolve",
+    r,
+    x,
     operation_args = list(lower = !upper.tri),
     tf_operation = "tf$linalg$triangular_solve",
     dim = dim(x)
@@ -850,9 +845,13 @@ backsolve.greta_array <- function(r, x,
 # nolint start
 #' @rdname overloaded
 #' @export
-forwardsolve <- function(l, x, k = ncol(l),
-                         upper.tri = FALSE,
-                         transpose = FALSE) {
+forwardsolve <- function(
+  l,
+  x,
+  k = ncol(l),
+  upper.tri = FALSE,
+  transpose = FALSE
+) {
   # nolint end
   UseMethod("forwardsolve", x)
 }
@@ -860,28 +859,34 @@ forwardsolve <- function(l, x, k = ncol(l),
 # define this explicitly so CRAN doesn't think we're using .Internal
 # nolint start
 #' @export
-forwardsolve.default <- function(l, x, k = ncol(l),
-                                 upper.tri = FALSE,
-                                 transpose = FALSE) {
+forwardsolve.default <- function(
+  l,
+  x,
+  k = ncol(l),
+  upper.tri = FALSE,
+  transpose = FALSE
+) {
   # nolint end
-  base::forwardsolve(l, x,
-    k = ncol(l),
-    upper.tri = FALSE,
-    transpose = FALSE
-  )
+  base::forwardsolve(l, x, k = ncol(l), upper.tri = FALSE, transpose = FALSE)
 }
 
 # nolint start
 #' @export
-forwardsolve.greta_array <- function(l, x,
-                                     k = ncol(l),
-                                     upper.tri = FALSE,
-                                     transpose = FALSE) {
+forwardsolve.greta_array <- function(
+  l,
+  x,
+  k = ncol(l),
+  upper.tri = FALSE,
+  transpose = FALSE
+) {
   # nolint end
   check_x_matches_ncol(x = k, ncol_of = l)
   check_transpose(transpose)
 
-  op("forwardsolve", l, x,
+  op(
+    "forwardsolve",
+    l,
+    x,
     operation_args = list(lower = !upper.tri),
     tf_operation = "tf$linalg$triangular_solve",
     dim = dim(x)
@@ -891,12 +896,14 @@ forwardsolve.greta_array <- function(l, x,
 
 #' @rdname overloaded
 #' @export
-apply <- function(X, MARGIN, FUN, ...) { # nolint
+apply <- function(X, MARGIN, FUN, ...) {
+  # nolint
   UseMethod("apply", X)
 }
 
 #' @export
-apply.default <- function(X, MARGIN, FUN, ...) { # nolint
+apply.default <- function(X, MARGIN, FUN, ...) {
+  # nolint
   base::apply(
     X = X,
     MARGIN = MARGIN,
@@ -907,12 +914,20 @@ apply.default <- function(X, MARGIN, FUN, ...) { # nolint
 
 # nolint start
 #' @export
-apply.greta_array <- function(X, MARGIN,
-                              FUN = c(
-                                "sum", "max", "mean", "min", "prod",
-                                "cumsum", "cumprod"
-                              ),
-                              ...) {
+apply.greta_array <- function(
+  X,
+  MARGIN,
+  FUN = c(
+    "sum",
+    "max",
+    "mean",
+    "min",
+    "prod",
+    "cumsum",
+    "cumprod"
+  ),
+  ...
+) {
   # nolint end
   fun <- match.arg(FUN)
 
@@ -955,7 +970,9 @@ apply.greta_array <- function(X, MARGIN,
     tf_fun_name <- paste("reduce", tf_fun_name, sep = "_")
   }
 
-  out <- op("apply", new_x,
+  out <- op(
+    "apply",
+    new_x,
     operation_args = list(
       axis = -2L,
       tf_fun_name = tf_fun_name
@@ -975,14 +992,21 @@ apply.greta_array <- function(X, MARGIN,
 
 #' @rdname overloaded
 #' @export
-tapply <- function(X, INDEX, FUN, ...) { # nolint
+tapply <- function(X, INDEX, FUN, ...) {
+  # nolint
   UseMethod("tapply", X)
 }
 
 # nolint start
 #' @export
-tapply.default <- function(X, INDEX, FUN = NULL, ...,
-                           default = NA, simplify = TRUE) {
+tapply.default <- function(
+  X,
+  INDEX,
+  FUN = NULL,
+  ...,
+  default = NA,
+  simplify = TRUE
+) {
   # nolint end
   base::tapply(
     X = X,
@@ -996,9 +1020,12 @@ tapply.default <- function(X, INDEX, FUN = NULL, ...,
 
 # nolint start
 #' @export
-tapply.greta_array <- function(X, INDEX,
-                               FUN = c("sum", "max", "mean", "min", "prod"),
-                               ...) {
+tapply.greta_array <- function(
+  X,
+  INDEX,
+  FUN = c("sum", "max", "mean", "min", "prod"),
+  ...
+) {
   # nolint end
 
   x <- X
@@ -1014,7 +1041,9 @@ tapply.greta_array <- function(X, INDEX,
 
   check_2_by_1(x)
 
-  op("tapply", x,
+  op(
+    "tapply",
+    x,
     operation_args = list(
       segment_ids = id,
       num_segments = len,
@@ -1027,14 +1056,14 @@ tapply.greta_array <- function(X, INDEX,
 
 #' @rdname overloaded
 #' @export
-eigen <- function(x, symmetric, only.values, EISPACK) { # nolint
+eigen <- function(x, symmetric, only.values, EISPACK) {
+  # nolint
   UseMethod("eigen")
 }
 
 # nolint start
 #' @export
-eigen.default <- function(x, symmetric,
-                          only.values = FALSE, EISPACK = FALSE) {
+eigen.default <- function(x, symmetric, only.values = FALSE, EISPACK = FALSE) {
   # nolint end
   base::eigen(
     x = x,
@@ -1046,8 +1075,12 @@ eigen.default <- function(x, symmetric,
 
 # nolint start
 #' @export
-eigen.greta_array <- function(x, symmetric,
-                              only.values = FALSE, EISPACK = FALSE) {
+eigen.greta_array <- function(
+  x,
+  symmetric,
+  only.values = FALSE,
+  EISPACK = FALSE
+) {
   # nolint end
   x <- as.greta_array(x)
 
@@ -1069,32 +1102,31 @@ eigen.greta_array <- function(x, symmetric,
 
   # they just want the eigenvalues, use that tf method
   if (only.values) {
-    values <- op("eigenvalues", x,
+    values <- op(
+      "eigenvalues",
+      x,
       dim = nrow(x),
       tf_operation = "tf_only_eigenvalues"
     )
 
     vectors <- NULL
   } else {
-
     # if we're doing the whole eigendecomposition, do it in three operations
 
     # a wacky greta array which apparently has the same dimension as x; but in
     # fact is a list of the two elements. But that's OK so long as the user
     # never sees it
-    eig <- op("eigen", x,
-      tf_operation = "tf$linalg$eigh"
-    )
+    eig <- op("eigen", x, tf_operation = "tf$linalg$eigh")
 
     # get the eigenvalues and vectors as actual, sane greta arrays
-    values <- op("values", eig,
+    values <- op(
+      "values",
+      eig,
       dim = c(nrow(eig), 1L),
       tf_operation = "tf_extract_eigenvalues"
     )
 
-    vectors <- op("vectors", eig,
-      tf_operation = "tf_extract_eigenvectors"
-    )
+    vectors <- op("vectors", eig, tf_operation = "tf_extract_eigenvectors")
   }
 
   list(
@@ -1141,12 +1173,8 @@ rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
 
   # square self-distance matrix
   if (is.null(x2)) {
-    op("rdist", x1,
-      tf_operation = "tf_self_distance",
-      dim = c(n1, n1)
-    )
+    op("rdist", x1, tf_operation = "tf_self_distance", dim = c(n1, n1))
   } else {
-
     # possibly non-square pairwise distance matrix
 
     x2 <- as.greta_array(x2)
@@ -1162,9 +1190,6 @@ rdist.greta_array <- function(x1, x2 = NULL, compact = FALSE) {
 
     n2 <- nrow(x2)
 
-    op("rdist", x1, x2,
-      tf_operation = "tf_distance",
-      dim = c(n1, n2)
-    )
+    op("rdist", x1, x2, tf_operation = "tf_distance", dim = c(n1, n2))
   }
 }

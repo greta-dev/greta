@@ -2,7 +2,6 @@
 # mcmc.list
 
 as_greta_mcmc_list <- function(x, model_info) {
-
   # add the raw draws as an attribute
   attr(x, "model_info") <- model_info
   class(x) <- c("greta_mcmc_list", class(x))
@@ -28,7 +27,7 @@ as.mcmc.list.greta_mcmc_list <- function(x, ...) {
 #' @returns logical TRUE/FALSE
 #'
 #' @export
-is.greta_mcmc_list <- function(x, ...){
+is.greta_mcmc_list <- function(x, ...) {
   inherits(x, "greta_mcmc_list")
 }
 
@@ -60,8 +59,7 @@ window.greta_mcmc_list <- function(x, start, end, thin, ...) {
 #'
 #' @return printed MCMC output
 #' @export
-print.greta_mcmc_list <- function(x, ..., n = 5){
-
+print.greta_mcmc_list <- function(x, ..., n = 5) {
   n_warmup <- n_warmup(x)
   n_chain <- coda::nchain(x)
   n_iter <- coda::niter(x)
@@ -95,19 +93,20 @@ print.greta_mcmc_list <- function(x, ..., n = 5){
 
   print(draws_head)
 
-  if (more_draws_than_can_print){
-  cli::cli_alert_info(
-    text = c(
-      "i" = "{remaining_draws} more draws\n",
-      "i" = "Use {.code print(n = ...)} to see more draws"
+  if (more_draws_than_can_print) {
+    cli::cli_alert_info(
+      text = c(
+        "i" = "{remaining_draws} more draws\n",
+        "i" = "Use {.code print(n = ...)} to see more draws"
+      )
     )
-  )
   }
 
   cli::cli_rule()
 
   cli::cli_alert_info(
-    c("View {.pkg greta} draw chain {.param i} with:\n",
+    c(
+      "View {.pkg greta} draw chain {.param i} with:\n",
       "{.code greta_draws_object[[i]]}. \n",
       "E.g., view chain {.param 1} with: \n",
       "{.code greta_draws_object[[1]]}."
@@ -115,8 +114,9 @@ print.greta_mcmc_list <- function(x, ..., n = 5){
   )
 
   cli::cli_alert_info(
-    c("To see a summary of draws, run:\n",
-      "{.code summary(greta_draws_object)}")
+    c(
+      "To see a summary of draws, run:\n",
+      "{.code summary(greta_draws_object)}"
+    )
   )
-
 }

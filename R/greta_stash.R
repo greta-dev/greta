@@ -4,7 +4,7 @@ greta_note_msg <- cli::format_message(
     have been wiped. This likely means that installation has not happened, or \\
     it has happened and you've restarted R. See `?install_greta_deps()` for \\
     more information."
-    )
+  )
 )
 
 greta_stash$install_miniconda_notes <- greta_note_msg

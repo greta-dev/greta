@@ -22,50 +22,52 @@
 #' reinstall_greta_env()
 #' reinstall_miniconda()
 #' }
-remove_greta_env <- function(){
-  cli::cli_alert_info("removing 'greta-env-tf2' conda environment",
-                      wrap = TRUE)
+remove_greta_env <- function() {
+  cli::cli_alert_info("removing 'greta-env-tf2' conda environment", wrap = TRUE)
   reticulate::conda_remove(
     envname = "greta-env-tf2"
   )
-  cli::cli_alert_success("greta-env-tf2 environment removed!",
-                         wrap = TRUE)
+  cli::cli_alert_success("greta-env-tf2 environment removed!", wrap = TRUE)
 }
 
 #' @export
 #' @param timeout time in minutes to wait until timeout (default is 5 minutes)
 #' @rdname reinstallers
-reinstall_greta_env <- function(timeout = 5){
+reinstall_greta_env <- function(timeout = 5) {
   remove_greta_env()
   greta_create_conda_env(timeout = timeout)
 }
 
 #' @export
 #' @rdname reinstallers
-remove_miniconda <- function(){
+remove_miniconda <- function() {
   path_to_miniconda <- reticulate::miniconda_path()
-  if (!file.exists(path_to_miniconda)){
-    cli::cli_alert_info("No miniconda files found at {path_to_miniconda}",
-                        wrap = TRUE)
+  if (!file.exists(path_to_miniconda)) {
+    cli::cli_alert_info(
+      "No miniconda files found at {path_to_miniconda}",
+      wrap = TRUE
+    )
     return(invisible())
   }
-  if (yesno::yesno("Are you sure you want to delete miniconda from ",
-                   path_to_miniconda,"?") ){
-    cli::cli_alert_info("removing 'miniconda' installation",
-                        wrap = TRUE)
+  if (
+    yesno::yesno(
+      "Are you sure you want to delete miniconda from ",
+      path_to_miniconda,
+      "?"
+    )
+  ) {
+    cli::cli_alert_info("removing 'miniconda' installation", wrap = TRUE)
     unlink(path_to_miniconda, recursive = TRUE)
-    cli::cli_alert_success("'miniconda' successfully removed!",
-                           wrap = TRUE)
+    cli::cli_alert_success("'miniconda' successfully removed!", wrap = TRUE)
   } else {
     return(invisible())
   }
-
 }
 
 #' @param timeout time in minutes to wait until timeout (default is 5 minutes)
 #' @rdname reinstallers
 #' @export
-reinstall_miniconda <- function(timeout = 5){
+reinstall_miniconda <- function(timeout = 5) {
   remove_miniconda()
   greta_install_miniconda(timeout)
 }
@@ -78,16 +80,18 @@ reinstall_miniconda <- function(timeout = 5){
 #' # issues with installing greta dependencies
 #' reinstall_greta_deps()
 #' }
-reinstall_greta_deps <- function(deps = greta_deps_spec(),
-                                 timeout = 5,
-                                 restart = c("ask", "force", "no")){
+reinstall_greta_deps <- function(
+  deps = greta_deps_spec(),
+  timeout = 5,
+  restart = c("ask", "force", "no")
+) {
   remove_greta_env()
   remove_miniconda()
   install_greta_deps(
     deps = deps,
     timeout = timeout,
     restart = restart
-    )
+  )
 }
 
 #' Remove greta dependencies and remove miniconda
@@ -99,7 +103,7 @@ reinstall_greta_deps <- function(deps = greta_deps_spec(),
 #'
 #' @return nothing
 #' @export
-destroy_greta_deps <- function(){
+destroy_greta_deps <- function() {
   cli::cli_progress_step(
     msg = "You are removing greta env and miniconda",
     msg_done = c("You have successfully removed greta env and miniconda")

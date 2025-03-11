@@ -117,7 +117,8 @@ mixture_distribution <- R6Class(
       check_not_discrete_continuous(discrete, name = "mixture")
 
       # check the distributions are all either multivariate or univariate
-      multivariate <- vapply(distribs,
+      multivariate <- vapply(
+        distribs,
         member,
         "multivariate",
         FUN.VALUE = logical(1)
@@ -152,14 +153,16 @@ mixture_distribution <- R6Class(
       self$bounds <- support
 
       # for any discrete ones, tell them they are fixed
-      super$initialize("mixture",
+      super$initialize(
+        "mixture",
         dim,
         discrete = discrete[1],
         multivariate = multivariate[1]
       )
 
       for (i in seq_len(n_distributions)) {
-        self$add_parameter(distribs[[i]],
+        self$add_parameter(
+          distribs[[i]],
           glue::glue("distribution {i}"),
           shape_matches_output = FALSE
         )
@@ -171,7 +174,6 @@ mixture_distribution <- R6Class(
       vble(self$bounds, dim = self$dim)
     },
     tf_distrib = function(parameters, dag) {
-
       # get information from the *nodes* for component distributions, not the tf
       # objects passed in here
 
@@ -200,7 +202,6 @@ mixture_distribution <- R6Class(
       log_weights <- log_weights - log_weights_sum
 
       log_prob <- function(x) {
-
         # get component densities in an array
         log_probs <- mapply(
           dag$tf_evaluate_density,
@@ -231,7 +232,6 @@ mixture_distribution <- R6Class(
       }
 
       sample <- function(seed) {
-
         # draw samples from each component
         samples <- lapply(distribution_nodes, dag$draw_sample)
         names(samples) <- NULL
@@ -264,7 +264,8 @@ mixture_distribution <- R6Class(
 
         # extract the relevant component
         indices <- tf$expand_dims(indices, n_batches)
-        draws <- tf$gather(samples_array,
+        draws <- tf$gather(
+          samples_array,
           indices,
           axis = collapse_axis,
           batch_dims = n_batches

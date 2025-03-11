@@ -26,10 +26,7 @@ NULL
 #'   selected uniformly at random from between `Lmin` and `Lmax`.
 #'   `diag_sd` is used to rescale the parameter space to make it more
 #'   uniform, and make sampling more efficient.
-hmc <- function(Lmin = 5,
-                Lmax = 10,
-                epsilon = 0.1,
-                diag_sd = 1) {
+hmc <- function(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1) {
   # nolint end
   obj <- list(
     parameters = list(
@@ -56,9 +53,11 @@ hmc <- function(Lmin = 5,
 #' @param proposal the probability distribution used to generate proposal states
 #'
 #' @export
-rwmh <- function(proposal = c("normal", "uniform"),
-                 epsilon = 0.1,
-                 diag_sd = 1) {
+rwmh <- function(
+  proposal = c("normal", "uniform"),
+  epsilon = 0.1,
+  diag_sd = 1
+) {
   proposal <- match.arg(proposal)
 
   obj <- list(
@@ -87,7 +86,7 @@ slice <- function(max_doublings = 5) {
   obj <- list(
     parameters = list(
       max_doublings = as.integer(max_doublings)[1]
-      ),
+    ),
     name = "slice",
     class = slice_sampler
   )
@@ -98,7 +97,8 @@ slice <- function(max_doublings = 5) {
 #' @noRd
 #' @export
 print.sampler <- function(x, ...) {
-  values_text <- paste(names(x$parameters),
+  values_text <- paste(
+    names(x$parameters),
     prettyNum(x$parameters),
     sep = " = ",
     collapse = ", "
@@ -106,10 +106,12 @@ print.sampler <- function(x, ...) {
 
   if (!nzchar(values_text)) values_text <- "None"
 
-  parameters_text <- glue::glue("
+  parameters_text <- glue::glue(
+    "
                                 parameters:
                                   {values_text}
-                                ")
+                                "
+  )
 
   msg <- glue::glue(
     "{class(x)[1]} object with {parameters_text}"
@@ -132,7 +134,6 @@ hmc_sampler <- R6Class(
     accept_target = 0.651,
 
     define_tf_kernel = function(sampler_param_vec) {
-
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
@@ -143,7 +144,7 @@ hmc_sampler <- R6Class(
 
       hmc_l <- sampler_param_vec[0]
       hmc_epsilon <- sampler_param_vec[1]
-      hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
+      hmc_diag_sd <- sampler_param_vec[2:(1 + free_state_size)]
 
       hmc_step_sizes <- tf$cast(
         x = tf$reshape(
@@ -170,7 +171,6 @@ hmc_sampler <- R6Class(
       )
     },
     sampler_parameter_values = function() {
-
       # random number of integration steps
       l_min <- self$parameters$Lmin
       l_max <- self$parameters$Lmax
@@ -201,19 +201,19 @@ rwmh_sampler <- R6Class(
     accept_target = 0.44,
 
     define_tf_kernel = function(sampler_param_vec) {
-
       # wrap this up into a function to extract these out
       free_state_size <- length(sampler_param_vec) - 1 # get it from dag object
       # e.g., length(dag$free_state)
       rwmh_epsilon <- sampler_param_vec[0]
-      rwmh_diag_sd <- sampler_param_vec[1:(1+free_state_size)]
+      rwmh_diag_sd <- sampler_param_vec[1:(1 + free_state_size)]
 
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      tfe$rwmh_proposal <- switch(self$parameters$proposal,
-                                  normal = tfp$mcmc$random_walk_normal_fn,
-                                  uniform = tfp$mcmc$random_walk_uniform_fn
+      tfe$rwmh_proposal <- switch(
+        self$parameters$proposal,
+        normal = tfp$mcmc$random_walk_normal_fn,
+        uniform = tfp$mcmc$random_walk_uniform_fn
       )
 
       # TF1/2 check
@@ -306,7 +306,6 @@ slice_sampler <- R6Class(
 
     # no additional here tuning
     tune = function(iterations_completed, total_iterations) {
-
     }
   )
 )

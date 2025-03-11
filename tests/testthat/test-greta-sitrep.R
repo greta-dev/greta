@@ -12,31 +12,30 @@ test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
     have_tfp = function(...) FALSE
   )
 
-    expect_snapshot(
-      error = TRUE,
-      check_tf_version("error")
-      )
+  expect_snapshot(
+    error = TRUE,
+    check_tf_version("error")
+  )
 
-    expect_snapshot_warning(
-      check_tf_version("warn")
-    )
+  expect_snapshot_warning(
+    check_tf_version("warn")
+  )
 
-    expect_snapshot(
-      check_tf_version("message")
-    )
-
+  expect_snapshot(
+    check_tf_version("message")
+  )
 })
 
 test_that("check_tf_version fails when tfp not available", {
-    greta_stash$python_has_been_initialised <- FALSE
-    local_mocked_bindings(
-      have_tfp = function(...) FALSE
-    )
-    expect_snapshot(
-      error = TRUE,
-      check_tf_version("error")
-    )
-  })
+  greta_stash$python_has_been_initialised <- FALSE
+  local_mocked_bindings(
+    have_tfp = function(...) FALSE
+  )
+  expect_snapshot(
+    error = TRUE,
+    check_tf_version("error")
+  )
+})
 
 test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
   skip_if_not(check_tf_version())
@@ -111,7 +110,6 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
   expect_snapshot(
     greta_sitrep()
   )
-
 })
 
 test_that("greta_sitrep warns when different versions of python, tf, tfp", {
@@ -142,7 +140,6 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
   expect_snapshot(
     greta_sitrep()
   )
-
 })
 
 test_that("greta_sitrep warns greta conda env not available", {
@@ -180,5 +177,4 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
   expect_snapshot(
     greta_sitrep(verbosity = "detailed")
   )
-
 })

@@ -72,13 +72,19 @@ test_that("as_data coerces correctly", {
   int_df <- as.data.frame(int_mat)
   num_df <- as.data.frame(num_mat)
 
-  expect_true(is.data.frame(log_df) &
-    all(vapply(log_df, is.logical, FALSE)))
-  expect_true(is.data.frame(int_df) &
-    all(vapply(int_df, is.numeric, FALSE)) &
-    all(vapply(int_df, is.integer, FALSE)))
-  expect_true(is.data.frame(num_df) &
-    all(vapply(num_df, is.numeric, FALSE)))
+  expect_true(
+    is.data.frame(log_df) &
+      all(vapply(log_df, is.logical, FALSE))
+  )
+  expect_true(
+    is.data.frame(int_df) &
+      all(vapply(int_df, is.numeric, FALSE)) &
+      all(vapply(int_df, is.integer, FALSE))
+  )
+  expect_true(
+    is.data.frame(num_df) &
+      all(vapply(num_df, is.numeric, FALSE))
+  )
 
   ga_log_df <- as_data(log_df)
   ga_int_df <- as_data(int_df)
@@ -104,7 +110,6 @@ test_that("as_data coerces correctly", {
 
 test_that("as_data errors informatively", {
   skip_if_not(check_tf_version())
-
 
   # wrong class of object
   expect_snapshot(

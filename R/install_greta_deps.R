@@ -71,11 +71,12 @@
 #' @importFrom callr r_process
 #' @importFrom cli cli_alert_success
 #' @importFrom cli cli_ul
-install_greta_deps <- function(deps = greta_deps_spec(),
-                               timeout = 5,
-                               restart = c("ask", "force", "no"),
-                               ...) {
-
+install_greta_deps <- function(
+  deps = greta_deps_spec(),
+  timeout = 5,
+  restart = c("ask", "force", "no"),
+  ...
+) {
   check_greta_deps_spec(deps)
 
   restart <- rlang::arg_match(
@@ -118,12 +119,13 @@ install_greta_deps <- function(deps = greta_deps_spec(),
 
   write_greta_install_log(path = greta_logfile)
 
-  cli::cli_alert_success("Installation of {.pkg greta} dependencies \\
+  cli::cli_alert_success(
+    "Installation of {.pkg greta} dependencies \\
                          is complete!",
-                         wrap = TRUE)
+    wrap = TRUE
+  )
 
   restart_or_not(restart)
-
 }
 
 get_pkg_user_dir <- function() {
@@ -134,13 +136,13 @@ get_pkg_user_dir <- function() {
   pkg_user_dir
 }
 
-greta_default_logfile <- function(){
+greta_default_logfile <- function() {
   greta_user_dir <- get_pkg_user_dir()
   file.path(greta_user_dir, "greta-installation-logfile.html")
 }
 
 
-restart_or_not <- function(restart){
+restart_or_not <- function(restart) {
   # Managing how to restart R
   # requires RStudio and also an interactive session
   has_rstudioapi_pkg <- requireNamespace("rstudioapi", quietly = TRUE) &&
@@ -156,7 +158,7 @@ restart_or_not <- function(restart){
 
   # Where there is no rstudio/not interactive, suggest restarting.
   suggest_restart <- (restart == "force" | restart == "no") &&
-    (!interactive()  | !has_rstudioapi_pkg)
+    (!interactive() | !has_rstudioapi_pkg)
 
   if (suggest_restart) {
     cli::cli_inform(
@@ -181,7 +183,6 @@ restart_or_not <- function(restart){
       clean = TRUE
     )
   }
-
 }
 
 ## TODO
@@ -238,10 +239,11 @@ restart_or_not <- function(restart){
 #'   python_version = "3.10"
 #'   )
 #'   }
-greta_deps_spec <- function(tf_version = "2.15.0",
-                              tfp_version = "0.23.0",
-                              python_version = "3.10"){
-
+greta_deps_spec <- function(
+  tf_version = "2.15.0",
+  tfp_version = "0.23.0",
+  python_version = "3.10"
+) {
   deps_list <- data.frame(
     tf_version = tf_version,
     tfp_version = tfp_version,
@@ -261,11 +263,9 @@ greta_deps_spec <- function(tf_version = "2.15.0",
   check_greta_deps_config(deps_obj)
 
   deps_obj
-
 }
 
-check_greta_deps_spec <- function(deps,
-                                    call = rlang::caller_env()) {
+check_greta_deps_spec <- function(deps, call = rlang::caller_env()) {
   if (!inherits(deps, "greta_deps_spec")) {
     cli::cli_abort(
       message = "{.arg deps} must be created by {.fun greta_deps_spec}.",
@@ -279,7 +279,7 @@ check_greta_deps_spec <- function(deps,
 #' @param x greta python deps
 #' @param ... extra args, not used
 #' @export
-print.greta_deps_spec <- function(x, ...){
+print.greta_deps_spec <- function(x, ...) {
   print.data.frame(x)
 }
 
@@ -295,34 +295,29 @@ print.greta_deps_spec <- function(x, ...){
 #' \dontrun{
 #' my_deps <- greta_deps_receipt()
 #' }
-greta_deps_receipt <- function(){
-
+greta_deps_receipt <- function() {
   greta_deps_spec(
     tf_version = version_tf(),
     tfp_version = version_tfp(),
     python_version = as.character(py_version())
   )
-
 }
 
-check_greta_deps_range <- function(deps,
-                                   module,
-                                   call = rlang::caller_env()){
-
+check_greta_deps_range <- function(deps, module, call = rlang::caller_env()) {
   greta_tf_tfp <- greta_deps_tf_tfp[[module]]
   version_provided <- numeric_version(deps[[module]])
 
-  version_name <- switch(module,
-                         tf_version = "TF",
-                         tfp_version = "TFP")
+  version_name <- switch(module, tf_version = "TF", tfp_version = "TFP")
 
-  latest_version <- switch(module,
-                           tf_version = numeric_version("2.15.0"),
-                           tfp_version = numeric_version("0.23.0"))
+  latest_version <- switch(
+    module,
+    tf_version = numeric_version("2.15.0"),
+    tfp_version = numeric_version("0.23.0")
+  )
 
   later_tf_tfp <- version_provided > latest_version
 
-  if (later_tf_tfp){
+  if (later_tf_tfp) {
     gh_issue <- "https://github.com/greta-dev/greta/issues/675"
     cli::cli_abort(
       message = c(
@@ -335,49 +330,51 @@ check_greta_deps_range <- function(deps,
         "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
         "i" = "Inspect with:",
-        "{.run View(greta_deps_tf_tfp)}"),
+        "{.run View(greta_deps_tf_tfp)}"
+      ),
       call = call
     )
   }
 
   valid <- version_provided %in% greta_tf_tfp
   if (!valid) {
-    closest_value <- closest_version(version_provided, greta_deps_tf_tfp[[module]])
+    closest_value <- closest_version(
+      version_provided,
+      greta_deps_tf_tfp[[module]]
+    )
   }
 
-  if (!valid){
-
+  if (!valid) {
     cli::cli_abort(
-      message = c("{.val {version_name}} version provided does not match \\
+      message = c(
+        "{.val {version_name}} version provided does not match \\
                   supported versions",
-                  "The version {.val {version_provided}} was not in \\
+        "The version {.val {version_provided}} was not in \\
                   {.val {greta_deps_tf_tfp[[module]]}}",
-                  "i" = "The nearest valid version that is supported by \\
+        "i" = "The nearest valid version that is supported by \\
         {.pkg greta} is: {.val {closest_value}}",
-                  "i" = "Valid versions of TF, TFP, and Python are in \\
+        "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
-                  "i" = "Inspect with:",
-                  "{.run View(greta_deps_tf_tfp)}"),
+        "i" = "Inspect with:",
+        "{.run View(greta_deps_tf_tfp)}"
+      ),
       call = call
     )
   }
 }
 
 check_greta_tf_range <- function(deps, call = rlang::caller_env()) {
-  check_greta_deps_range(deps = deps,
-                         module = "tf_version",
-                         call = call)
+  check_greta_deps_range(deps = deps, module = "tf_version", call = call)
 }
 
 check_greta_tfp_range <- function(deps, call = rlang::caller_env()) {
-  check_greta_deps_range(deps = deps,
-                         module = "tfp_version",
-                         call = call)
+  check_greta_deps_range(deps = deps, module = "tfp_version", call = call)
 }
 
-check_greta_python_range <- function(version_provided,
-                                     call = rlang::caller_env()) {
-
+check_greta_python_range <- function(
+  version_provided,
+  call = rlang::caller_env()
+) {
   py_version_min <- unique(greta_deps_tf_tfp$python_version_min)
   py_version_max <- unique(greta_deps_tf_tfp$python_version_max)
   py_versions <- sort(unique(c(py_version_min, py_version_max)))
@@ -388,23 +385,21 @@ check_greta_python_range <- function(version_provided,
   outside_range <- outside_version_range(version_provided, py_versions)
 
   if (outside_range) {
-
     closest_value <- paste0(closest_version(version_provided, c(py_versions)))
 
     cli::cli_abort(
-      message = c("Python version must be between \\
+      message = c(
+        "Python version must be between \\
                 {.val {min_py}}-{.val {max_py}}",
-                  "x" = "The version provided was {.val {version_provided}}.",
-                  "i" = "Try: {.val {closest_value}}"),
+        "x" = "The version provided was {.val {version_provided}}.",
+        "i" = "Try: {.val {closest_value}}"
+      ),
       call = call
     )
   }
-
 }
 
-check_greta_deps_config <- function(deps,
-                                    call = rlang::caller_env()){
-
+check_greta_deps_config <- function(deps, call = rlang::caller_env()) {
   check_greta_deps_spec(deps)
 
   deps <- deps |>
@@ -418,11 +413,13 @@ check_greta_deps_config <- function(deps,
   if (no_os_matches) {
     valid_os <- unique(greta_deps_tf_tfp$os)
     cli::cli_abort(
-      message = c("The os provided does not match one of {.val {valid_os}}",
-                  "i" = "Valid versions of TF, TFP, and Python are in \\
+      message = c(
+        "The os provided does not match one of {.val {valid_os}}",
+        "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
-                  "i" = "Inspect with:",
-                  "{.run View(greta_deps_tf_tfp)}"),
+        "i" = "Inspect with:",
+        "{.run View(greta_deps_tf_tfp)}"
+      ),
       call = call
     )
   }
@@ -436,8 +433,7 @@ check_greta_deps_config <- function(deps,
   no_matches <- nrow(config_matches) == 0
 
   # Build logic to prioritise valid TFP over others
-  if (no_matches){
-
+  if (no_matches) {
     tfp_matches <- subset(os_matches, tfp_version == deps$tfp_version)
     tf_matches <- subset(os_matches, tf_version == deps$tf_version)
     py_matches <- os_matches |>
@@ -459,13 +455,15 @@ check_greta_deps_config <- function(deps,
     suggest_tf <- !all_valid && any_valid && tf_valid
     suggest_py <- !tfp_valid && !tf_valid && py_valid
 
-    if (!any_valid){
+    if (!any_valid) {
       cli::cli_abort(
-        message = c("Config does not match any installation combinations.",
-                    "i" = "Valid versions of TF, TFP, and Python are in \\
+        message = c(
+          "Config does not match any installation combinations.",
+          "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
-                    "i" = "Inspect with:",
-                    "{.run View(greta_deps_tf_tfp)}"),
+          "i" = "Inspect with:",
+          "{.run View(greta_deps_tf_tfp)}"
+        ),
         call = call
       )
     }
@@ -492,56 +490,55 @@ check_greta_deps_config <- function(deps,
     suggested_py <- as.character(max(suggested_match$python_version_max))
 
     cli::cli_abort(
-      message = c("Provided {.code greta_deps_spec} does not match valid \\
+      message = c(
+        "Provided {.code greta_deps_spec} does not match valid \\
                   installation combinations.",
-                  "See below for a suggested config to use:",
-                  "{.code greta_deps_spec(\\
+        "See below for a suggested config to use:",
+        "{.code greta_deps_spec(\\
                   tf_version = {.val {suggested_tf}}, \\
                   tfp_version = {.val {suggested_tfp}}, \\
                   python_version = {.val {suggested_py}}\\
                   )}",
-                  "i" = "Valid versions of TF, TFP, and Python are in \\
+        "i" = "Valid versions of TF, TFP, and Python are in \\
                   {.code greta_deps_tf_tfp}",
-                  "i" = "Inspect with:",
-                  "{.run View(greta_deps_tf_tfp)}"
+        "i" = "Inspect with:",
+        "{.run View(greta_deps_tf_tfp)}"
       ),
       call = call
     )
-
   }
-
 }
 
-check_tfp_tf_semantic <- function(deps_obj,
-                                  call = rlang::caller_env()){
+check_tfp_tf_semantic <- function(deps_obj, call = rlang::caller_env()) {
   check_semantic(deps_obj$tf_version)
   check_semantic(deps_obj$tfp_version)
 }
 
-split_dots <- function(x){
-  strsplit(x = x,
-           split = ".",
-           fixed = TRUE)[[1]]
+split_dots <- function(x) {
+  strsplit(x = x, split = ".", fixed = TRUE)[[1]]
 }
 
-is_semantic <- function(x){
+is_semantic <- function(x) {
   separated <- split_dots(x)
   is_sem <- length(separated) == 3
   is_sem
 }
 
-check_semantic <- function(x,
-                           arg = rlang::caller_arg(x),
-                           call = rlang::caller_env()){
-
+check_semantic <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   not_semantic <- !is_semantic(x)
 
-  if (not_semantic){
+  if (not_semantic) {
     cli::cli_abort(
-      message = c("{.arg {arg}} must be semantic.",
-                  "We saw {.val {x}}, but we require three separating dots:",
-                  "i" = "{.val 1.1.1}",
-                  "x" = "{.val 1.1}"),
+      message = c(
+        "{.arg {arg}} must be semantic.",
+        "We saw {.val {x}}, but we require three separating dots:",
+        "i" = "{.val 1.1.1}",
+        "x" = "{.val 1.1}"
+      ),
       call = call
     )
   }

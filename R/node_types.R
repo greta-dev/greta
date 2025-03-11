@@ -83,16 +83,17 @@ operation_node <- R6Class(
     operation_args = NA,
     arguments = list(),
     tf_function_env = NA,
-    initialize = function(operation,
-                          ...,
-                          dim = NULL,
-                          operation_args = list(),
-                          tf_operation = NULL,
-                          value = NULL,
-                          representations = list(),
-                          tf_function_env = parent.frame(3),
-                          expand_scalars = FALSE) {
-
+    initialize = function(
+      operation,
+      ...,
+      dim = NULL,
+      operation_args = list(),
+      tf_operation = NULL,
+      value = NULL,
+      representations = list(),
+      tf_function_env = parent.frame(3),
+      expand_scalars = FALSE
+    ) {
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
 
@@ -132,7 +133,6 @@ operation_node <- R6Class(
       super$initialize(dim, value)
     },
     add_argument = function(argument) {
-
       # guess at a name, coerce to a node, and add as a parent
       parameter <- to_node(argument)
       self$add_parent(parameter)
@@ -153,7 +153,6 @@ operation_node <- R6Class(
       }
 
       if (mode == "forward") {
-
         # fetch the tensors from the environment
         arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
         tf_args <- lapply(arg_tf_names, get, envir = tfe)
@@ -165,7 +164,8 @@ operation_node <- R6Class(
         }
 
         # get the tensorflow function and apply it to the args
-        operation <- eval(parse(text = self$operation),
+        operation <- eval(
+          parse(text = self$operation),
           envir = self$tf_function_env
         )
         tensor <- do.call(operation, tf_args)
@@ -186,10 +186,12 @@ variable_node <- R6Class(
     lower = -Inf,
     upper = Inf,
     free_value = NULL,
-    initialize = function(lower = -Inf,
-                          upper = Inf,
-                          dim = NULL,
-                          free_dim = prod(dim)) {
+    initialize = function(
+      lower = -Inf,
+      upper = Inf,
+      dim = NULL,
+      free_dim = prod(dim)
+    ) {
       check_if_lower_upper_numeric(lower, upper)
 
       # replace values of lower and upper with finite values for dimension
@@ -222,7 +224,8 @@ variable_node <- R6Class(
         self$constraint <- "scalar_mixed"
       }
 
-      bad_limits <- switch(self$constraint,
+      bad_limits <- switch(
+        self$constraint,
         scalar_all_low = !all(is.finite(upper)),
         scalar_all_high = !all(is.finite(lower)),
         scalar_all_both = !all(is.finite(lower)) | !all(is.finite(upper)),
@@ -264,20 +267,17 @@ variable_node <- R6Class(
 
         if (is.null(distrib_node)) {
           # does it have an anti-representation where it is the cholesky?
-            # the antirepresentation of cholesky is chol2symm
-            # if yes, we take antirep and get it to `tf`, then get the tf_name
+          # the antirepresentation of cholesky is chol2symm
+          # if yes, we take antirep and get it to `tf`, then get the tf_name
           chol2symm_ga <- self$anti_representations$chol2symm
           chol2symm_existing <- !is.null(chol2symm_ga)
 
           if (chol2symm_existing) {
-
             chol2symm_node <- get_node(chol2symm_ga)
             chol2symm_name <- dag$tf_name(chol2symm_node)
             chol2symm_tensor <- get(chol2symm_name, envir = dag$tf_environment)
             tensor <- tf_chol(chol2symm_tensor)
-
           }
-
         } else {
           tensor <- dag$draw_sample(self$distribution)
         }
@@ -290,10 +290,7 @@ variable_node <- R6Class(
         # create the log jacobian adjustment for the free state
         tf_adj <- self$tf_adjustment(dag)
         adj_name <- glue::glue("{tf_name}_adj")
-        assign(adj_name,
-          tf_adj,
-          envir = dag$tf_environment
-        )
+        assign(adj_name, tf_adj, envir = dag$tf_environment)
 
         # map from the free to constrained state in a new tensor
         tf_free <- get(free_name, envir = dag$tf_environment)
@@ -301,10 +298,7 @@ variable_node <- R6Class(
       }
 
       # assign to environment variable
-      assign(tf_name,
-        tensor,
-        envir = dag$tf_environment
-      )
+      assign(tf_name, tensor, envir = dag$tf_environment)
     },
     create_tf_bijector = function() {
       dim <- self$dim
@@ -312,15 +306,18 @@ variable_node <- R6Class(
       upper <- flatten_rowwise(self$upper)
       constraints <- flatten_rowwise(self$constraint_array)
 
-      switch(self$constraint,
+      switch(
+        self$constraint,
         scalar_all_none = tf_scalar_bijector(dim),
         scalar_all_low = tf_scalar_neg_bijector(dim, upper = upper),
         scalar_all_high = tf_scalar_pos_bijector(dim, lower = lower),
-        scalar_all_both = tf_scalar_neg_pos_bijector(dim,
+        scalar_all_both = tf_scalar_neg_pos_bijector(
+          dim,
           lower = lower,
           upper = upper
         ),
-        scalar_mixed = tf_scalar_mixed_bijector(dim,
+        scalar_mixed = tf_scalar_mixed_bijector(
+          dim,
           lower = lower,
           upper = upper,
           constraints = constraints
@@ -360,7 +357,8 @@ variable_node <- R6Class(
         ljd <- tf$expand_dims(ljd, 0L)
         tiling <- tf$stack(
           list(tf$shape(free)[0]),
-          axis = 0L)
+          axis = 0L
+        )
         ljd <- tf$tile(ljd, tiling)
       }
 
@@ -369,7 +367,6 @@ variable_node <- R6Class(
 
     # create a tensor giving the log jacobian adjustment for this variable
     tf_adjustment = function(dag) {
-
       # find free version of node
       free_tensor_name <- glue::glue("{dag$tf_name(self)}_free")
       free_tensor <- get(free_tensor_name, envir = dag$tf_environment)
@@ -394,12 +391,14 @@ distribution_node <- R6Class(
     truncation = NULL,
     parameters = list(),
     parameter_shape_matches_output = logical(),
-    initialize = function(name = "no distribution",
-                          dim = NULL,
-                          truncation = NULL,
-                          discrete = FALSE,
-                          multivariate = FALSE,
-                          truncatable = TRUE) {
+    initialize = function(
+      name = "no distribution",
+      dim = NULL,
+      truncation = NULL,
+      discrete = FALSE,
+      multivariate = FALSE,
+      truncatable = TRUE
+    ) {
       super$initialize(dim)
 
       # for all distributions, set name, store dims, and set whether discrete
@@ -416,9 +415,11 @@ distribution_node <- R6Class(
       # distributions) set the truncation
       can_be_truncated <- !self$multivariate & !self$discrete & self$truncatable
 
-      if (!is.null(truncation) &
-        !identical(truncation, self$bounds) &
-        can_be_truncated) {
+      if (
+        !is.null(truncation) &
+          !identical(truncation, self$bounds) &
+          can_be_truncated
+      ) {
         self$truncation <- truncation
       }
 
@@ -476,23 +477,17 @@ distribution_node <- R6Class(
     # optional function to reset the flags for target representations whenever a
     # target is changed
     reset_target_flags = function() {
-
     },
 
     # replace the existing target node with a new one
     remove_target = function() {
-
       # remove x from parents
       self$remove_parent(self$target)
       self$target <- NULL
     },
     tf = function(dag) {
-
       # assign the distribution object constructor function to the environment
-      assign(dag$tf_name(self),
-        self$tf_distrib,
-        envir = dag$tf_environment
-      )
+      assign(dag$tf_name(self), self$tf_distrib, envir = dag$tf_environment)
     },
 
     # which node to use as the *tf* target (overwritten by some distributions)
@@ -504,11 +499,12 @@ distribution_node <- R6Class(
     # have the same shape as the output (e.g. this is true for binomial's prob
     # parameter, but not for size) by default, assume a scalar (row) parameter
     # can be expanded up to the distribution size
-    add_parameter = function(parameter,
-                             name,
-                             shape_matches_output = TRUE,
-                             expand_now = TRUE) {
-
+    add_parameter = function(
+      parameter,
+      name,
+      shape_matches_output = TRUE,
+      expand_now = TRUE
+    ) {
       # record whether this parameter can be scaled up
       self$parameter_shape_matches_output[[name]] <- shape_matches_output
 
@@ -525,15 +521,16 @@ distribution_node <- R6Class(
 
     # try to expand a greta array for a parameter up to the required dimension
     expand_parameter = function(parameter, dim) {
-
       # can this realisation of the parameter be expanded?
-      expandable_shape <- ifelse(self$multivariate,
+      expandable_shape <- ifelse(
+        self$multivariate,
         is_row(parameter),
         is_scalar(parameter)
       )
 
       # should we expand it now?
-      expanded_target <- ifelse(self$multivariate,
+      expanded_target <- ifelse(
+        self$multivariate,
         !identical(dim[1], 1L),
         !identical(dim, c(1L, 1L))
       )
@@ -562,7 +559,8 @@ distribution_node <- R6Class(
           parameter <- as.greta_array(self$parameters[[name]])
           expanded <- self$expand_parameter(parameter, dim)
 
-          self$add_parameter(expanded,
+          self$add_parameter(
+            expanded,
             name,
             self$parameter_shape_matches_output[[name]],
             expand_now = FALSE

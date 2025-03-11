@@ -136,7 +136,6 @@ record <- function(expr, file) {
 
 # convert an assumed numeric to an array with at least 2 dimensions
 as_2d_array <- function(x) {
-
   # coerce data from common formats to an array here
   x <- as.array(x)
 
@@ -365,15 +364,16 @@ palettize <- function(base_colour) {
 
 # colour scheme for plotting
 #' @importFrom grDevices col2rgb
-greta_col <- function(which = c(
-  "main",
-  "dark",
-  "light",
-  "lighter",
-  "super_light"
-),
-colour = "#996bc7") {
-
+greta_col <- function(
+  which = c(
+    "main",
+    "dark",
+    "light",
+    "lighter",
+    "super_light"
+  ),
+  colour = "#996bc7"
+) {
   # tests if a color encoded as string can be converted to RGB
   tryCatch(
     is.matrix(grDevices::col2rgb(colour)),
@@ -386,12 +386,13 @@ colour = "#996bc7") {
 
   which <- match.arg(which)
   pal <- palettize(colour)
-  switch(which,
-         dark = pal(0.45), # 45%
-         main = pal(0.55), # 55%
-         light = pal(0.65), # 65%ish
-         lighter = pal(0.85), # 85%ish
-         super_light = pal(0.95)
+  switch(
+    which,
+    dark = pal(0.45), # 45%
+    main = pal(0.55), # 55%
+    light = pal(0.65), # 65%ish
+    lighter = pal(0.85), # 85%ish
+    super_light = pal(0.95)
   ) # 95%ish
 }
 
@@ -402,17 +403,16 @@ colour_module <- module(
 
 # look in the environment specified by env, and return a named list of all greta
 # arrays in that environment
-all_greta_arrays <- function(env = parent.frame(),
-                             include_data = TRUE) {
-
+all_greta_arrays <- function(env = parent.frame(), include_data = TRUE) {
   # all objects in that environment as a named list
   all_object_names <- ls(envir = env)
 
   # loop carefully in case there are unfulfilled promises
   all_objects <- list()
   for (name in all_object_names) {
-    all_objects[[name]] <- tryCatch(get(name, envir = env),
-                                    error = function(e) NULL
+    all_objects[[name]] <- tryCatch(
+      get(name, envir = env),
+      error = function(e) NULL
     )
   }
 
@@ -423,9 +423,10 @@ all_greta_arrays <- function(env = parent.frame(),
 
   # optionally strip out the data arrays
   if (!include_data) {
-    is_data <- vapply(all_arrays,
-                      function(x) is.data_node(get_node(x)),
-                      FUN.VALUE = FALSE
+    is_data <- vapply(
+      all_arrays,
+      function(x) is.data_node(get_node(x)),
+      FUN.VALUE = FALSE
     )
     all_arrays <- all_arrays[!is_data]
   }
@@ -461,25 +462,32 @@ prepare_draws <- function(draws, thin = 1) {
   coda::mcmc(draws_df, thin = thin)
 }
 
-build_sampler <- function(initial_values, sampler, model, seed = get_seed(),
-                          compute_options) {
+build_sampler <- function(
+  initial_values,
+  sampler,
+  model,
+  seed = get_seed(),
+  compute_options
+) {
   ## TF1/2 retracing
   ## This is where a retracing warning happens
   ## in mcmc
-  sampler$class$new(initial_values,
-                    model,
-                    sampler$parameters,
-                    seed = seed,
-                    compute_options = compute_options
+  sampler$class$new(
+    initial_values,
+    model,
+    sampler$parameters,
+    seed = seed,
+    compute_options = compute_options
   )
 }
 
-build_samplers <- function(sampler,
-                           initial_values,
-                           chains,
-                           model,
-                           compute_options){
-
+build_samplers <- function(
+  sampler,
+  initial_values,
+  chains,
+  model,
+  compute_options
+) {
   # determine number of separate samplers to spin up, based on future plan
   max_samplers <- future::nbrOfWorkers()
 
@@ -513,15 +521,15 @@ build_samplers <- function(sampler,
   }
 
   samplers
-
 }
 
-sampler_parallel_reporting <- function(n_chain,
-                                       samplers,
-                                       chains,
-                                       n_samples,
-                                       warmup){
-
+sampler_parallel_reporting <- function(
+  n_chain,
+  samplers,
+  chains,
+  n_samples,
+  warmup
+) {
   trace_log_files <- replicate(n_chain, create_log_file())
   percentage_log_files <- replicate(n_chain, create_log_file(TRUE))
   progress_bar_log_files <- replicate(n_chain, create_log_file(TRUE))
@@ -529,7 +537,6 @@ sampler_parallel_reporting <- function(n_chain,
   pb_width <- bar_width(n_chain)
 
   for (chain in chains) {
-
     # set the log files
     sampler <- samplers[[chain]]
     sampler$trace_log_file <- trace_log_files[[chain]]
@@ -549,7 +556,6 @@ sampler_parallel_reporting <- function(n_chain,
   )
 
   sampler
-
 }
 # unlist and flatten a list of arrays to a vector row-wise
 unlist_tf <- function(x) {
@@ -592,7 +598,6 @@ flatten_trace <- function(i, trace_list) {
 # extract the model information object from mcmc samples returned by
 # stashed_samples, and error nicely if there's something fishy
 get_model_info <- function(draws) {
-
   check_if_greta_mcmc_list(draws)
 
   model_info <- attr(draws, "model_info")
@@ -624,7 +629,6 @@ sampler_utils_module <- module(
 # we could use this as a way of returning a function that TF recognises
 # as a function tensorflow function that returns tensors
 as_tf_function <- function(r_fun, ...) {
-
   # run the operation on isolated greta arrays, so nothing gets attached to the
   # model real greta arrays in dots
   # creating a fake greta array
@@ -690,7 +694,6 @@ as_tf_function <- function(r_fun, ...) {
 
     tf_out <- list()
     for (i in seq_along(ga_out)) {
-
       # define the output nodes
       node_out <- get_node(ga_out[[i]])
       node_out$define_tf(sub_dag)
@@ -724,12 +727,12 @@ utilities_module <- module(
 )
 
 # remove empty strings
-base_remove_empty_string <- function(string){
+base_remove_empty_string <- function(string) {
   string[string != ""]
 }
 
 
-other_install_fail_msg <- function(error_passed){
+other_install_fail_msg <- function(error_passed) {
   # drop ""
   error_passed <- base_remove_empty_string(error_passed)
   cli::format_error(
@@ -758,7 +761,7 @@ other_install_fail_msg <- function(error_passed){
   )
 }
 
-timeout_install_msg <- function(timeout = 5, py_error = NULL){
+timeout_install_msg <- function(timeout = 5, py_error = NULL) {
   msg <- c(
     "Stopping as installation of {.pkg greta} dependencies took longer than \\
         {timeout} minutes",
@@ -787,7 +790,7 @@ timeout_install_msg <- function(timeout = 5, py_error = NULL){
     py_error <- NULL
   }
 
-  if (is.null(py_error)){
+  if (is.null(py_error)) {
     cli::format_error(
       message = msg
     )
@@ -803,12 +806,12 @@ timeout_install_msg <- function(timeout = 5, py_error = NULL){
   }
 }
 
-is_DiagrammeR_installed <- function(){
+is_DiagrammeR_installed <- function() {
   requireNamespace("DiagrammeR", quietly = TRUE)
 }
 
-greta_conda_env_path <- function(){
-  if (!have_greta_conda_env()){
+greta_conda_env_path <- function() {
+  if (!have_greta_conda_env()) {
     cli::cli_ul("path: no conda env found for {.var greta-env-tf2}")
   }
 
@@ -816,7 +819,6 @@ greta_conda_env_path <- function(){
   which_greta_env <- which(py_cl$name == "greta-env-tf2")
   greta_env_path <- py_cl$python[which_greta_env]
   greta_env_path
-
 }
 
 # adapted from https://github.com/rstudio/tensorflow/blob/main/R/utils.R
@@ -830,11 +832,11 @@ is_mac_arm64 <- function() {
   is_darwin && is_arm64
 }
 
-read_char <- function(path){
+read_char <- function(path) {
   trimws(readChar(path, nchars = file.info(path)$size))
 }
 
-create_temp_file <- function(path){
+create_temp_file <- function(path) {
   file_path <- tempfile(path, fileext = ".txt")
   file.create(file_path)
   return(file_path)
@@ -847,17 +849,17 @@ create_temp_file <- function(path){
 #'   complexity. These functions are passed to `compute_options` inside of a few
 #'   functions: [mcmc()], [opt()], and [calculate()].
 #' @export
-gpu_only <- function(){
+gpu_only <- function() {
   "GPU"
 }
 
 #' @rdname gpu_cpu
 #' @export
-cpu_only <- function(){
+cpu_only <- function() {
   "CPU"
 }
 
-compute_text <- function(n_cores, compute_options){
+compute_text <- function(n_cores, compute_options) {
   ifelse(
     test = n_cores == 1,
     yes = "each on 1 core",
@@ -874,17 +876,17 @@ connected_to_draws <- function(dag, mcmc_dag) {
   names(dag$node_list) %in% names(mcmc_dag$node_list)
 }
 
-is_using_gpu <- function(x){
+is_using_gpu <- function(x) {
   x == "GPU"
 }
 
-is_using_cpu <- function(x){
+is_using_cpu <- function(x) {
   x == "CPU"
 }
 
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
-message_if_using_gpu <- function(compute_options){
+message_if_using_gpu <- function(compute_options) {
   gpu_used <- is_using_gpu(compute_options)
   greta_gpu_message <- getOption("greta_gpu_message") %||% TRUE
   gpu_used_and_message <- gpu_used && greta_gpu_message
@@ -905,36 +907,35 @@ message_if_using_gpu <- function(compute_options){
 n_dim <- function(x) length(dim(x))
 is_2d <- function(x) n_dim(x) == 2
 
-is.node <- function(x, ...){
+is.node <- function(x, ...) {
   inherits(x, "node")
 }
 
-is.data_node <- function(x, ...){
+is.data_node <- function(x, ...) {
   inherits(x, "data_node")
 }
 
-is.distribution_node <- function(x, ...){
+is.distribution_node <- function(x, ...) {
   inherits(x, "distribution_node")
 }
 
-is.variable_node <- function(x, ...){
+is.variable_node <- function(x, ...) {
   inherits(x, "variable_node")
 }
 
-is.greta_model <- function(x, ...){
+is.greta_model <- function(x, ...) {
   inherits(x, "greta_model")
 }
 
-is.unknowns <- function(x, ...){
+is.unknowns <- function(x, ...) {
   inherits(x, "unknowns")
 }
 
-is.initials <- function(x, ...){
+is.initials <- function(x, ...) {
   inherits(x, "initials")
 }
 
-node_type_colour <- function(type){
-
+node_type_colour <- function(type) {
   switch_cols <- switch(
     type,
     variable = cli::col_red(type),
@@ -946,7 +947,7 @@ node_type_colour <- function(type){
   switch_cols
 }
 
-extract_unique_names <- function(x){
+extract_unique_names <- function(x) {
   vapply(
     X = x,
     FUN = member,
@@ -955,7 +956,7 @@ extract_unique_names <- function(x){
   )
 }
 
-are_identical <- function(x, y){
+are_identical <- function(x, y) {
   vapply(
     X = x,
     FUN = identical,
@@ -977,7 +978,7 @@ are_identical <- function(x, y){
 #' are_null(list(NULL, NULL, NULL))
 #' are_null(list(1, 2, 3))
 #' is.null(list(1, 2, 3))
-are_null <- function(x){
+are_null <- function(x) {
   vapply(
     x,
     is.null,
@@ -985,7 +986,7 @@ are_null <- function(x){
   )
 }
 
-are_greta_array <- function(x){
+are_greta_array <- function(x) {
   vapply(
     x,
     is.greta_array,
@@ -993,7 +994,7 @@ are_greta_array <- function(x){
   )
 }
 
-have_distribution <- function(x){
+have_distribution <- function(x) {
   vapply(
     x,
     has_distribution,
@@ -1013,7 +1014,7 @@ is_linux <- function() {
   identical(tolower(Sys.info()[["sysname"]]), "linux")
 }
 
-os_name <- function(){
+os_name <- function() {
   os <- c(
     windows = is_windows(),
     mac = is_mac(),
@@ -1023,8 +1024,7 @@ os_name <- function(){
 }
 
 # semantic version finder
-closest_version <- function(current, available){
-
+closest_version <- function(current, available) {
   available <- sort(available)
   not_available <- !(current %in% available)
 
@@ -1043,13 +1043,12 @@ closest_version <- function(current, available){
     closest <- min(available)
   }
 
-  if (current_btn_available){
+  if (current_btn_available) {
     version_gt <- current > available
     closest <- max(available[version_gt])
   }
 
   return(closest)
-
 }
 
 outside_version_range <- function(provided, range) {
@@ -1060,7 +1059,7 @@ outside_version_range <- function(provided, range) {
   outside_range
 }
 
-pretty_dim <- function(x){
+pretty_dim <- function(x) {
   x_dim <- dim(x)
   print_dim_x <- x_dim %||% x
 
@@ -1068,7 +1067,7 @@ pretty_dim <- function(x){
   prettied_dim
 }
 
-are_initials <- function(x){
+are_initials <- function(x) {
   vapply(
     X = x,
     FUN = is.initials,
@@ -1076,7 +1075,7 @@ are_initials <- function(x){
   )
 }
 
-n_warmup <- function(x){
+n_warmup <- function(x) {
   x_info <- attr(x, "model_info")
   x_info$warmup
 }

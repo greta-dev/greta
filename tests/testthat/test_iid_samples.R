@@ -3,107 +3,91 @@ set.seed(2020 - 02 - 11)
 test_that("univariate samples are correct", {
   skip_if_not(check_tf_version())
 
-  compare_iid_samples(uniform,
-    runif,
-    parameters = list(min = -2, max = 3)
-  )
+  compare_iid_samples(uniform, runif, parameters = list(min = -2, max = 3))
 
-  compare_iid_samples(normal,
-    rnorm,
-    parameters = list(mean = -2, sd = 3)
-  )
+  compare_iid_samples(normal, rnorm, parameters = list(mean = -2, sd = 3))
 
-  compare_iid_samples(lognormal,
-    rlnorm,
-    parameters = list(mean = -2, sd = 3)
-  )
+  compare_iid_samples(lognormal, rlnorm, parameters = list(mean = -2, sd = 3))
 
-  compare_iid_samples(bernoulli,
+  compare_iid_samples(
+    bernoulli,
     extraDistr::rbern,
     parameters = list(prob = 0.3)
   )
 
-  compare_iid_samples(binomial,
+  compare_iid_samples(
+    binomial,
     rbinom,
     parameters = list(size = 5, prob = 0.3),
     nsim = 1000
   )
 
-  compare_iid_samples(beta_binomial,
+  compare_iid_samples(
+    beta_binomial,
     extraDistr::rbbinom,
     parameters = list(size = 12, alpha = 4, beta = 2)
   )
 
-  compare_iid_samples(negative_binomial,
+  compare_iid_samples(
+    negative_binomial,
     rnbinom,
     parameters = list(size = 12, prob = 0.3),
     nsim = 1000
   )
 
-  compare_iid_samples(poisson,
-    rpois,
-    parameters = list(lambda = 3.14)
-  )
+  compare_iid_samples(poisson, rpois, parameters = list(lambda = 3.14))
 
-  compare_iid_samples(gamma,
-    rgamma,
-    parameters = list(shape = 3, rate = 1.2)
-  )
+  compare_iid_samples(gamma, rgamma, parameters = list(shape = 3, rate = 1.2))
 
-  compare_iid_samples(inverse_gamma,
+  compare_iid_samples(
+    inverse_gamma,
     extraDistr::rinvgamma,
     parameters = list(alpha = 3, beta = 1.2)
   )
 
-  compare_iid_samples(weibull,
+  compare_iid_samples(
+    weibull,
     rweibull,
     parameters = list(shape = 1.2, scale = 3.2)
   )
 
-  compare_iid_samples(exponential,
-    rexp,
-    parameters = list(rate = 0.54)
-  )
+  compare_iid_samples(exponential, rexp, parameters = list(rate = 0.54))
 
-  compare_iid_samples(pareto,
+  compare_iid_samples(
+    pareto,
     extraDistr::rpareto,
     parameters = list(a = 1, b = 2)
   )
 
-  compare_iid_samples(student,
+  compare_iid_samples(
+    student,
     extraDistr::rlst,
     parameters = list(df = 3, mu = -2, sigma = 3)
   )
 
-  compare_iid_samples(laplace,
+  compare_iid_samples(
+    laplace,
     extraDistr::rlaplace,
     parameters = list(mu = -2, sigma = 1.2)
   )
 
-  compare_iid_samples(beta,
-    rbeta,
-    parameters = list(shape1 = 3, shape2 = 2)
-  )
+  compare_iid_samples(beta, rbeta, parameters = list(shape1 = 3, shape2 = 2))
 
-  compare_iid_samples(cauchy,
+  compare_iid_samples(
+    cauchy,
     rcauchy,
     parameters = list(location = -1, scale = 1.2)
   )
 
-  compare_iid_samples(chi_squared,
-    rchisq,
-    parameters = list(df = 4)
-  )
+  compare_iid_samples(chi_squared, rchisq, parameters = list(df = 4))
 
-  compare_iid_samples(logistic,
+  compare_iid_samples(
+    logistic,
     rlogis,
     parameters = list(location = -2, scale = 1.3)
   )
 
-  compare_iid_samples(f,
-    rf,
-    parameters = list(df1 = 4, df2 = 1)
-  )
+  compare_iid_samples(f, rf, parameters = list(df1 = 4, df2 = 1))
 })
 
 test_that("truncated univariate samples are correct", {
@@ -112,7 +96,8 @@ test_that("truncated univariate samples are correct", {
   # an originally unconstrained distribution
 
   # positive
-  compare_iid_samples(normal,
+  compare_iid_samples(
+    normal,
     rtnorm,
     parameters = list(
       mean = -2,
@@ -122,7 +107,8 @@ test_that("truncated univariate samples are correct", {
   )
 
   # negative
-  compare_iid_samples(normal,
+  compare_iid_samples(
+    normal,
     rtnorm,
     parameters = list(
       mean = -2,
@@ -132,7 +118,8 @@ test_that("truncated univariate samples are correct", {
   )
 
   # both
-  compare_iid_samples(normal,
+  compare_iid_samples(
+    normal,
     rtnorm,
     parameters = list(
       mean = -2,
@@ -143,7 +130,8 @@ test_that("truncated univariate samples are correct", {
 
   # originally constrained distribution
 
-  compare_iid_samples(lognormal,
+  compare_iid_samples(
+    lognormal,
     rtlnorm,
     parameters = list(
       mean = -2,
@@ -152,7 +140,8 @@ test_that("truncated univariate samples are correct", {
     )
   )
 
-  compare_iid_samples(weibull,
+  compare_iid_samples(
+    weibull,
     rtweibull,
     parameters = list(
       shape = 1.2,
@@ -169,37 +158,36 @@ test_that("multivariate samples are correct", {
   prob <- t(runif(4))
   prob <- prob / sum(prob)
 
-  compare_iid_samples(multivariate_normal,
+  compare_iid_samples(
+    multivariate_normal,
     rmvnorm,
     parameters = list(mean = t(rnorm(4)), Sigma = sigma)
   )
 
-  compare_iid_samples(multinomial,
+  compare_iid_samples(
+    multinomial,
     rmulti,
     parameters = list(size = 12, prob = prob)
   )
 
-  compare_iid_samples(categorical,
-    rcat,
-    parameters = list(prob = prob)
-  )
+  compare_iid_samples(categorical, rcat, parameters = list(prob = prob))
 
-  compare_iid_samples(dirichlet,
+  compare_iid_samples(
+    dirichlet,
     extraDistr::rdirichlet,
     parameters = list(alpha = t(runif(4)))
   )
 
-  compare_iid_samples(dirichlet_multinomial,
+  compare_iid_samples(
+    dirichlet_multinomial,
     extraDistr::rdirmnom,
     parameters = list(size = 3, alpha = t(runif(4)))
   )
 
-  compare_iid_samples(wishart,
-    rwish,
-    parameters = list(df = 7, Sigma = sigma)
-  )
+  compare_iid_samples(wishart, rwish, parameters = list(df = 7, Sigma = sigma))
 
-  compare_iid_samples(lkj_correlation,
+  compare_iid_samples(
+    lkj_correlation,
     rlkjcorr,
     parameters = list(eta = 6.5, dimension = 4)
   )
@@ -213,11 +201,7 @@ test_that("joint samples are correct", {
     list(mean = 0, sd = 1),
     list(mean = 0, sd = 2)
   )
-  compare_iid_samples(joint_normals,
-    rjnorm,
-    parameters = params
-  )
-
+  compare_iid_samples(joint_normals, rjnorm, parameters = params)
 
   # joint of truncated normal distributions
   params <- list(
@@ -225,10 +209,7 @@ test_that("joint samples are correct", {
     list(mean = 0, sd = 2, truncation = c(-Inf, 2)),
     list(mean = 0, sd = 3, truncation = c(-2, 1))
   )
-  compare_iid_samples(joint_normals,
-    rjtnorm,
-    parameters = params
-  )
+  compare_iid_samples(joint_normals, rjtnorm, parameters = params)
 })
 
 
@@ -246,10 +227,7 @@ test_that("mixture samples are correct", {
     weights = weights
   )
 
-  compare_iid_samples(mixture_normals,
-    rmixnorm,
-    parameters = params
-  )
+  compare_iid_samples(mixture_normals, rmixnorm, parameters = params)
 
   # mixture of truncated normal distributions
   params <- list(
@@ -259,10 +237,7 @@ test_that("mixture samples are correct", {
     weights = weights
   )
 
-  compare_iid_samples(mixture_normals,
-    rmixtnorm,
-    parameters = params
-  )
+  compare_iid_samples(mixture_normals, rmixtnorm, parameters = params)
 
   # mixture of multivariate normal distributions
   sigma <- diag(4) * 0.1
@@ -273,7 +248,8 @@ test_that("mixture samples are correct", {
     weights = weights
   )
 
-  compare_iid_samples(mixture_multivariate_normals,
+  compare_iid_samples(
+    mixture_multivariate_normals,
     rmixmvnorm,
     parameters = params
   )
@@ -284,16 +260,20 @@ test_that("distributions without RNG error nicely", {
   skip_if_not(check_tf_version())
 
   # univariate
-  expect_snapshot(error = TRUE,
-    compare_iid_samples(hypergeometric,
-                        rhyper,
-                        parameters = list(m = 11, n = 8, k = 5)
+  expect_snapshot(
+    error = TRUE,
+    compare_iid_samples(
+      hypergeometric,
+      rhyper,
+      parameters = list(m = 11, n = 8, k = 5)
     )
   )
 
   # truncated RNG not implemented
-  expect_snapshot(error = TRUE,
-    compare_iid_samples(f,
+  expect_snapshot(
+    error = TRUE,
+    compare_iid_samples(
+      f,
       rtf,
       parameters = list(
         df1 = 4,

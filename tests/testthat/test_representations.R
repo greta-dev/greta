@@ -27,10 +27,9 @@ test_that("log and exp function representations work", {
 test_that("chol & chol2inv function representation works", {
   skip_if_not(check_tf_version())
 
-
   # get symmetric matrix
   m <- 10
-  w <- rWishart(1, m + 1, diag(m))[, , 1]
+  w <- rWishart(1, m + 1, diag(m))[,, 1]
   u <- chol(w)
 
   # convert to greta arrays
@@ -53,7 +52,6 @@ test_that("chol & chol2inv function representation works", {
 
 test_that("bernoulli prob representations have correct density", {
   skip_if_not(check_tf_version())
-
 
   n <- 100
   x <- rbinom(n, 1, 0.5)
@@ -85,7 +83,6 @@ test_that("bernoulli prob representations have correct density", {
 
 test_that("binomial prob representations have correct density", {
   skip_if_not(check_tf_version())
-
 
   n <- 100
   size <- rpois(n, 50)
@@ -129,7 +126,6 @@ test_that("binomial prob representations have correct density", {
 test_that("poisson lambda representation has correct density", {
   skip_if_not(check_tf_version())
 
-
   n <- 100
   x <- rpois(n, 10)
 
@@ -154,11 +150,10 @@ test_that("poisson lambda representation has correct density", {
 test_that("mvn Sigma representation has correct density", {
   skip_if_not(check_tf_version())
 
-
   n <- 100
   m <- 5
   mn <- t(rnorm(m))
-  sig <- rWishart(1, m + 1, diag(m))[, , 1]
+  sig <- rWishart(1, m + 1, diag(m))[,, 1]
   x <- mvtnorm::rmvnorm(n, mn, sig)
 
   # greta arrays with and without representation
@@ -166,7 +161,8 @@ test_that("mvn Sigma representation has correct density", {
   u <- as_data(chol(sig))
   chol_sigs <- chol2symm(u)
 
-  sigs_dens <- greta_density(greta::multivariate_normal,
+  sigs_dens <- greta_density(
+    greta::multivariate_normal,
     list(
       mean = mn,
       Sigma = sigs
@@ -175,7 +171,8 @@ test_that("mvn Sigma representation has correct density", {
     multivariate = TRUE
   )
 
-  chol_sigs_dens <- greta_density(greta::multivariate_normal,
+  chol_sigs_dens <- greta_density(
+    greta::multivariate_normal,
     list(
       mean = mn,
       Sigma = chol_sigs
@@ -190,17 +187,17 @@ test_that("mvn Sigma representation has correct density", {
 test_that("wishart target and Sigma representations have correct density", {
   skip_if_not(check_tf_version())
 
-
   m <- 10
-  x <- rWishart(1, m + 1, diag(m))[, , 1]
-  sig <- rWishart(1, m + 1, diag(m))[, , 1]
+  x <- rWishart(1, m + 1, diag(m))[,, 1]
+  sig <- rWishart(1, m + 1, diag(m))[,, 1]
 
   # greta arrays for Sigma with and without representation
   sigs <- as_data(sig)
   u <- as_data(chol(sig))
   chol_sigs <- chol2symm(u)
 
-  sigs_dens <- greta_density(greta::wishart,
+  sigs_dens <- greta_density(
+    greta::wishart,
     list(
       df = m + 1,
       Sigma = sigs
@@ -209,7 +206,8 @@ test_that("wishart target and Sigma representations have correct density", {
     multivariate = TRUE
   )
 
-  chol_sigs_dens <- greta_density(greta::wishart,
+  chol_sigs_dens <- greta_density(
+    greta::wishart,
     list(
       df = m + 1,
       Sigma = chol_sigs
@@ -225,7 +223,8 @@ test_that("wishart target and Sigma representations have correct density", {
   ux <- as_data(chol(x))
   chol_xs <- chol2symm(ux)
 
-  xs_dens <- greta_density(greta::wishart,
+  xs_dens <- greta_density(
+    greta::wishart,
     list(
       df = m + 1,
       Sigma = sig
@@ -234,7 +233,8 @@ test_that("wishart target and Sigma representations have correct density", {
     multivariate = TRUE
   )
 
-  chol_xs_dens <- greta_density(greta::wishart,
+  chol_xs_dens <- greta_density(
+    greta::wishart,
     list(
       df = m + 1,
       Sigma = sig
@@ -249,10 +249,9 @@ test_that("wishart target and Sigma representations have correct density", {
 test_that("lkj target representation has correct density", {
   skip_if_not(check_tf_version())
 
-
   m <- 10
   eta <- 3
-  x <- rWishart(1, m + 1, diag(m))[, , 1]
+  x <- rWishart(1, m + 1, diag(m))[,, 1]
   x <- cov2cor(x)
 
   # greta arrays for x with and without representation

@@ -5,9 +5,11 @@ test_that("samplers are unbiased for chi-squared", {
   x <- chi_squared(df)
   iid <- function(n) rchisq(n, df)
 
-  chi_squared_checked <- check_samples(x = x,
-                                       iid_function = iid,
-                                       sampler = hmc())
+  chi_squared_checked <- check_samples(
+    x = x,
+    iid_function = iid,
+    sampler = hmc()
+  )
 
   # do the plotting
   qqplot_checked_samples(chi_squared_checked)

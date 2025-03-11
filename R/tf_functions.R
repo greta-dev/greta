@@ -94,7 +94,6 @@ tf_cumprod <- function(x) {
 
 # set the dimensions of a tensor, reshaping in the same way (column-major) as R
 tf_set_dim <- function(x, dims) {
-
   # transpose to do work in row-major order
   perm_old <- c(0L, rev(seq_along(dim(x)[-1])))
   x <- tf$transpose(x, perm_old)
@@ -111,7 +110,6 @@ tf_set_dim <- function(x, dims) {
 # expand the dimensions of a scalar tensor, reshaping in the same way
 # (column-major) as R
 tf_expand_dim <- function(x, dims) {
-
   # prepend a batch dimension to dims (a 1 so we can tile with it)
   dims <- c(1L, dims)
 
@@ -154,9 +152,11 @@ tf_tapply <- function(x, segment_ids, num_segments, op_name) {
   op_name <- glue::glue("unsorted_segment_{op_name}")
 
   x <- tf$transpose(x, perm = c(1:2, 0L))
-  x <- tf$math[[op_name]](x,
+  x <- tf$math[[op_name]](
+    x,
     segment_ids = segment_ids,
-    num_segments = num_segments)
+    num_segments = num_segments
+  )
   x <- tf$transpose(x, perm = c(2L, 0:1))
   x
 }
@@ -222,16 +222,9 @@ tf_corrmat_row <- function(z, which = c("values", "ljac")) {
   )
   # nolint end
 
-  body <- switch(which,
-    values = body_values,
-    ljac = body_ljac
-  )
+  body <- switch(which, values = body_values, ljac = body_ljac)
 
-  out <- tf$while_loop(cond,
-    body,
-    values,
-    shape_invariants = shapes
-  )
+  out <- tf$while_loop(cond, body, values, shape_invariants = shapes)
 
   if (which == "values") {
     x <- out[[2]]
@@ -308,8 +301,14 @@ tf_kronecker <- function(x, y, tf_fun_name) {
 
   # expand dimensions of tensors to allow direct multiplication for kronecker
   # prod
-  x_rsh <- tf$reshape(x, tensorflow::as_tensor(shape(-1, dims[1], 1L, dims[2], 1L)))
-  y_rsh <- tf$reshape(y, tensorflow::as_tensor(shape(-1, 1L, dims[3], 1L, dims[4])))
+  x_rsh <- tf$reshape(
+    x,
+    tensorflow::as_tensor(shape(-1, dims[1], 1L, dims[2], 1L))
+  )
+  y_rsh <- tf$reshape(
+    y,
+    tensorflow::as_tensor(shape(-1, 1L, dims[3], 1L, dims[4]))
+  )
 
   # multiply tensors and reshape with appropriate dimensions
   z <- tf_function(x_rsh, y_rsh)
@@ -321,7 +320,6 @@ tf_kronecker <- function(x, y, tf_fun_name) {
 
 # tensorflow version of sweep, based on broadcasting of tf ops
 tf_sweep <- function(x, stats, margin, fun) {
-
   # if the second margin, transpose before and after
   if (margin == 2) {
     x <- tf_transpose(x)
@@ -431,7 +429,6 @@ tf_imultilogit <- function(x) {
 #     input tensor
 #   dims_out - dimension of output array
 tf_extract <- function(x, nelem, index, dims_out) {
-
   # flatten tensor, gather using index, reshape to output dimension
   tensor_in_flat <- tf$reshape(x, tensorflow::as_tensor(shape(-1, nelem)))
   tf_index <- tf$constant(as.integer(index), dtype = tf$int32)
@@ -450,7 +447,6 @@ tf_extract <- function(x, nelem, index, dims_out) {
 # values, a tensor `updates` at the elements given by the R vector `index` (in
 # 0-indexing)
 tf_recombine <- function(ref, index, updates) {
-
   # vector denoting whether an element is being updated
   nelem <- dim(ref)[[2]]
   replaced <- rep(0, nelem)
@@ -498,7 +494,6 @@ tf_flatten <- function(x, extra_ones = 0) {
 
 # replace elements in a tensor with another tensor
 tf_replace <- function(x, replacement, index, dims) {
-
   # flatten original tensor and new values
   x_flat <- tf_flatten(x, 1)
   replacement_flat <- tf_flatten(replacement, 1)
@@ -590,7 +585,7 @@ tf_scalar_bijector <- function(dim, lower, upper) {
   )
 }
 
-tfb_shift_scale <- function(shift, scale){
+tfb_shift_scale <- function(shift, scale) {
   tfb_shift <- tfp$bijectors$Shift(shift)
   tfb_scale <- tfp$bijectors$Scale(scale)
   tfb_shift_scale <- tfb_shift(tfb_scale)
@@ -651,7 +646,8 @@ tf_scalar_mixed_bijector <- function(dim, lower, upper, constraints) {
 
   # create bijectors for each block
   names(block_constructors) <- NULL
-  bijectors <- mapply(do.call,
+  bijectors <- mapply(
+    do.call,
     block_constructors,
     block_parameters,
     SIMPLIFY = FALSE
@@ -671,11 +667,9 @@ tf_correlation_cholesky_bijector <- function() {
   )
 
   tfp$bijectors$Chain(steps)
-
 }
 
 tf_covariance_cholesky_bijector <- function() {
-
   steps <- list(
     tfp$bijectors$Transpose(perm = 1:0),
     tfp$bijectors$FillScaleTriL(diag_shift = fl(1e-5))
