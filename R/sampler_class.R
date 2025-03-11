@@ -171,13 +171,19 @@ sampler <- R6Class(
       if (perform_warmup) {
         if (verbose) {
           pb_warmup <- create_progress_bar(
-            "warmup",
-            c(self$warmup, n_samples),
-            pb_update,
-            self$pb_width
+            phase = "warmup",
+            iter = c(self$warmup, n_samples),
+            pb_update = pb_update,
+            width = self$pb_width
           )
 
-          iterate_progress_bar(pb_warmup, 0, 0, self$n_chains, self$pb_file)
+          iterate_progress_bar(
+            pb = pb_warmup,
+            it = 0,
+            rejects = 0,
+            chains = self$n_chains,
+            file = self$pb_file
+          )
         } else {
           pb_warmup <- NULL
         }
@@ -209,16 +215,18 @@ sampler <- R6Class(
           if (verbose) {
 
             # update the progress bar/percentage log
-            iterate_progress_bar(pb_warmup,
-                                 it = completed_iterations[burst],
-                                 rejects = self$numerical_rejections,
-                                 chains = self$n_chains,
-                                 file = self$pb_file
+            iterate_progress_bar(
+              pb = pb_warmup,
+              it = completed_iterations[burst],
+              rejects = self$numerical_rejections,
+              chains = self$n_chains,
+              file = self$pb_file
             )
 
-            self$write_percentage_log(self$warmup,
-                                      completed_iterations[burst],
-                                      stage = "warmup"
+            self$write_percentage_log(
+              total = self$warmup,
+              completed = completed_iterations[burst],
+              stage = "warmup"
             )
           }
         }
@@ -250,12 +258,18 @@ sampler <- R6Class(
         # main sampling
         if (verbose) {
           pb_sampling <- create_progress_bar(
-            "sampling",
-            c(self$warmup, n_samples),
-            pb_update,
-            self$pb_width
+            phase = "sampling",
+            iter = c(self$warmup, n_samples),
+            pb_update = pb_update,
+            width = self$pb_width
           )
-          iterate_progress_bar(pb_sampling, 0, 0, self$n_chains, self$pb_file)
+          iterate_progress_bar(
+            pb = pb_sampling,
+            it = 0,
+            rejects = 0,
+            chains = self$n_chains,
+            file = self$pb_file
+            )
         } else {
           pb_sampling <- NULL
         }
@@ -277,16 +291,18 @@ sampler <- R6Class(
           if (verbose) {
 
             # update the progress bar/percentage log
-            iterate_progress_bar(pb_sampling,
-                                 it = completed_iterations[burst],
-                                 rejects = self$numerical_rejections,
-                                 chains = self$n_chains,
-                                 file = self$pb_file
+            iterate_progress_bar(
+              pb = pb_sampling,
+              it = completed_iterations[burst],
+              rejects = self$numerical_rejections,
+              chains = self$n_chains,
+              file = self$pb_file
             )
 
-            self$write_percentage_log(n_samples,
-                                      completed_iterations[burst],
-                                      stage = "sampling"
+            self$write_percentage_log(
+              total = n_samples,
+              completed = completed_iterations[burst],
+              stage = "sampling"
             )
           }
         }
