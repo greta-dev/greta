@@ -80,10 +80,7 @@ cholesky_variable <- function(dim, correlation = FALSE) {
   k <- dim[1]
 
   # dimension of the free state version
-  free_dim <- ifelse(correlation,
-                     k * (k - 1) / 2,
-                     k + k * (k - 1) / 2
-  )
+  free_dim <- ifelse(correlation, k * (k - 1) / 2, k + k * (k - 1) / 2)
 
   # create variable node
   node <- vble(
@@ -93,9 +90,10 @@ cholesky_variable <- function(dim, correlation = FALSE) {
   )
 
   # set the constraint, to enable transformation
-  node$constraint <- ifelse(correlation,
-                            "correlation_matrix",
-                            "covariance_matrix"
+  node$constraint <- ifelse(
+    correlation,
+    "correlation_matrix",
+    "covariance_matrix"
   )
 
   # set the printed value to be nicer
@@ -117,7 +115,6 @@ cholesky_variable <- function(dim, correlation = FALSE) {
 #' # a 4D simplex on the final dimension
 #' g <- simplex_variable(dim = c(2, 3, 4))
 simplex_variable <- function(dim) {
-
   # for scalar dims, return a row vector
   if (length(dim) == 1) {
     dim <- c(1, dim)
@@ -157,7 +154,6 @@ simplex_variable <- function(dim) {
 #' # ordered positive variable
 #' i <- exp(ordered_variable(5))
 ordered_variable <- function(dim) {
-
   # for scalar dims, return a row vector
   if (length(dim) == 1) {
     dim <- c(1, dim)

@@ -44,7 +44,7 @@ optimiser_defunct_error <- function(optimiser) {
       in {.pkg greta} 0.5.0.",
       "Please use a different optimiser.",
       "See {.code ?optimisers} for detail on which optimizers are removed."
-      )
+    )
   )
 }
 
@@ -59,11 +59,7 @@ optimiser_deprecation_warning <- function(version = "0.4.0") {
   )
 }
 
-new_optimiser <- function(name,
-                          method,
-                          parameters,
-                          class,
-                          other_args){
+new_optimiser <- function(name, method, parameters, class, other_args) {
   obj <- list(
     name = name,
     method = method,
@@ -77,10 +73,12 @@ new_optimiser <- function(name,
   obj
 }
 
-define_tf_optimiser <- function(name,
-                                method,
-                                parameters = list(),
-                                other_args = list()) {
+define_tf_optimiser <- function(
+  name,
+  method,
+  parameters = list(),
+  other_args = list()
+) {
   new_optimiser(
     name = name,
     method = method,
@@ -90,10 +88,12 @@ define_tf_optimiser <- function(name,
   )
 }
 
-define_tf_compat_optimiser <- function(name,
-                                method,
-                                parameters = list(),
-                                other_args = list()) {
+define_tf_compat_optimiser <- function(
+  name,
+  method,
+  parameters = list(),
+  other_args = list()
+) {
   new_optimiser(
     name = name,
     method = method,
@@ -103,10 +103,12 @@ define_tf_compat_optimiser <- function(name,
   )
 }
 
-define_tfp_optimiser <- function(name,
-                                 method,
-                                 parameters = list(),
-                                 other_args = list()) {
+define_tfp_optimiser <- function(
+  name,
+  method,
+  parameters = list(),
+  other_args = list()
+) {
   new_optimiser(
     name = name,
     method = method,
@@ -167,16 +169,16 @@ define_tfp_optimiser <- function(name,
 #' @export
 #'
 nelder_mead <- function(
-    objective_function = NULL,
-    initial_vertex = NULL,
-    step_sizes = NULL,
-    func_tolerance = 1e-08,
-    position_tolerance = 1e-08,
-    reflection = NULL,
-    expansion = NULL,
-    contraction = NULL,
-    shrinkage = NULL) {
-
+  objective_function = NULL,
+  initial_vertex = NULL,
+  step_sizes = NULL,
+  func_tolerance = 1e-08,
+  position_tolerance = 1e-08,
+  reflection = NULL,
+  expansion = NULL,
+  contraction = NULL,
+  shrinkage = NULL
+) {
   define_tfp_optimiser(
     name = "nelder_mead",
     method = "tfp$optimizer$nelder_mead_minimize",
@@ -249,16 +251,18 @@ nelder_mead <- function(
 #'   smaller than this value, the algorithm is stopped.
 #'
 #' @export
-bfgs <- function(value_and_gradients_function = NULL,
-                 initial_position = NULL,
-                 tolerance = 1e-08,
-                 x_tolerance = 0L,
-                 f_relative_tolerance = 0L,
-                 initial_inverse_hessian_estimate = NULL,
-                 stopping_condition = NULL,
-                 validate_args = TRUE,
-                 max_line_search_iterations = 50L,
-                 f_absolute_tolerance = 0L) {
+bfgs <- function(
+  value_and_gradients_function = NULL,
+  initial_position = NULL,
+  tolerance = 1e-08,
+  x_tolerance = 0L,
+  f_relative_tolerance = 0L,
+  initial_inverse_hessian_estimate = NULL,
+  stopping_condition = NULL,
+  validate_args = TRUE,
+  max_line_search_iterations = 50L,
+  f_absolute_tolerance = 0L
+) {
   define_tfp_optimiser(
     name = "bfgs",
     method = "tfp$optimizer$bfgs_minimize",
@@ -345,9 +349,11 @@ slsqp <- function() {
 #'   relevant direction and dampens oscillations. Defaults to 0, which is
 #'   vanilla gradient descent.
 #' @param nesterov Whether to apply Nesterov momentum. Defaults to FALSE.
-gradient_descent <- function(learning_rate = 0.01,
-                             momentum = 0,
-                             nesterov = FALSE) {
+gradient_descent <- function(
+  learning_rate = 0.01,
+  momentum = 0,
+  nesterov = FALSE
+) {
   define_tf_optimiser(
     name = "gradient_descent",
     method = "tf$keras$optimizers$legacy$SGD",
@@ -384,9 +390,11 @@ adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
 #' @param initial_accumulator_value initial value of the 'accumulator' used to
 #'   tune the algorithm
 #'
-adagrad <- function(learning_rate = 0.8,
-                    initial_accumulator_value = 0.1,
-                    epsilon = 1e-08) {
+adagrad <- function(
+  learning_rate = 0.8,
+  initial_accumulator_value = 0.1,
+  epsilon = 1e-08
+) {
   define_tf_optimiser(
     name = "adagrad",
     # method = "tf$keras$optimizers$Adagrad",
@@ -414,12 +422,13 @@ adagrad <- function(learning_rate = 0.8,
 #' @note This optimizer isn't supported in TF2, so proceed with caution. See
 #'  the [TF docs on AdagradDAOptimiser](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/AdagradDAOptimizer) for more detail.
 #'
-adagrad_da <- function(learning_rate = 0.8,
-                       global_step = 1L,
-                       initial_gradient_squared_accumulator_value = 0.1,
-                       l1_regularization_strength = 0,
-                       l2_regularization_strength = 0) {
-
+adagrad_da <- function(
+  learning_rate = 0.8,
+  global_step = 1L,
+  initial_gradient_squared_accumulator_value = 0.1,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+) {
   optimiser_deprecation_warning(version = "0.6.0")
 
   define_tf_compat_optimiser(
@@ -428,8 +437,7 @@ adagrad_da <- function(learning_rate = 0.8,
     parameters = list(
       learning_rate = learning_rate,
       global_step = global_step,
-      initial_gradient_squared_accumulator_value =
-        initial_gradient_squared_accumulator_value,
+      initial_gradient_squared_accumulator_value = initial_gradient_squared_accumulator_value,
       l1_regularization_strength = l1_regularization_strength,
       l2_regularization_strength = l2_regularization_strength
     )
@@ -445,11 +453,13 @@ adagrad_da <- function(learning_rate = 0.8,
 #' @param amsgrad Boolean. Whether to apply AMSGrad variant of this algorithm
 #'   from the paper "On the Convergence of Adam and beyond". Defaults to FALSE.
 #'
-adam <- function(learning_rate = 0.1,
-                 beta_1 = 0.9,
-                 beta_2 = 0.999,
-                 amsgrad = FALSE,
-                 epsilon = 1e-08) {
+adam <- function(
+  learning_rate = 0.1,
+  beta_1 = 0.9,
+  beta_2 = 0.999,
+  amsgrad = FALSE,
+  epsilon = 1e-08
+) {
   define_tf_optimiser(
     name = "adam",
     # method = "tf$keras$optimizers$Adam",
@@ -467,10 +477,12 @@ adam <- function(learning_rate = 0.1,
 #' @rdname optimisers
 #' @export
 #'
-adamax <- function(learning_rate = 0.001,
-                   beta_1 = 0.9,
-                   beta_2 = 0.999,
-                   epsilon = 1e-07){
+adamax <- function(
+  learning_rate = 0.001,
+  beta_1 = 0.9,
+  beta_2 = 0.999,
+  epsilon = 1e-07
+) {
   define_tf_optimiser(
     name = "adamax",
     # method = "tf$keras$optimizers$Adamax",
@@ -495,13 +507,15 @@ adamax <- function(learning_rate = 0.001,
 #' @param beta A float value, representing the beta value from the paper by
 #'   [McMahan et al 2013](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/41159.pdf). Defaults to 0
 #'
-ftrl <- function(learning_rate = 1,
-                 learning_rate_power = -0.5,
-                 initial_accumulator_value = 0.1,
-                 l1_regularization_strength = 0,
-                 l2_regularization_strength = 0,
-                 l2_shrinkage_regularization_strength = 0,
-                 beta = 0) {
+ftrl <- function(
+  learning_rate = 1,
+  learning_rate_power = -0.5,
+  initial_accumulator_value = 0.1,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0,
+  l2_shrinkage_regularization_strength = 0,
+  beta = 0
+) {
   define_tf_optimiser(
     name = "ftrl",
     # method = "tf$keras$optimizers$Ftrl",
@@ -524,10 +538,11 @@ ftrl <- function(learning_rate = 1,
 #' @note This optimizer isn't supported in TF2, so proceed with caution. See
 #'  the [TF docs on ProximalGradientDescentOptimizer](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalGradientDescentOptimizer) for more detail.
 #'
-proximal_gradient_descent <- function(learning_rate = 0.01,
-                                      l1_regularization_strength = 0,
-                                      l2_regularization_strength = 0) {
-
+proximal_gradient_descent <- function(
+  learning_rate = 0.01,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+) {
   optimiser_deprecation_warning(version = "0.6.0")
 
   define_tf_compat_optimiser(
@@ -548,11 +563,12 @@ proximal_gradient_descent <- function(learning_rate = 0.01,
 #'  the [TF docs on ProximalAdagradOptimizer](https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/ProximalAdagradOptimizer) for more detail.
 
 #'
-proximal_adagrad <- function(learning_rate = 1,
-                             initial_accumulator_value = 0.1,
-                             l1_regularization_strength = 0,
-                             l2_regularization_strength = 0) {
-
+proximal_adagrad <- function(
+  learning_rate = 1,
+  initial_accumulator_value = 0.1,
+  l1_regularization_strength = 0,
+  l2_regularization_strength = 0
+) {
   optimiser_deprecation_warning(version = "0.6.0")
 
   define_tf_compat_optimiser(
@@ -570,11 +586,12 @@ proximal_adagrad <- function(learning_rate = 1,
 #' @rdname optimisers
 #' @export
 #'
-nadam <- function(learning_rate = 0.001,
-                  beta_1 = 0.9,
-                  beta_2 = 0.999,
-                  epsilon = 1e-07){
-
+nadam <- function(
+  learning_rate = 0.001,
+  beta_1 = 0.9,
+  beta_2 = 0.999,
+  epsilon = 1e-07
+) {
   define_tf_optimiser(
     name = "nadam",
     # method = "tf$keras$optimizers$Nadam",
@@ -586,7 +603,6 @@ nadam <- function(learning_rate = 0.001,
       epsilon = epsilon
     )
   )
-
 }
 
 #' @rdname optimisers
@@ -596,11 +612,13 @@ nadam <- function(learning_rate = 0.001,
 #'   variance of the gradient; if FALSE, by the uncentered second moment.
 #'   Setting this to TRUE may help with training, but is slightly more
 #'   expensive in terms of computation and memory. Defaults to FALSE.
-rms_prop <- function(learning_rate = 0.1,
-                     rho = 0.9,
-                     momentum = 0,
-                     epsilon = 1e-10,
-                     centered = FALSE) {
+rms_prop <- function(
+  learning_rate = 0.1,
+  rho = 0.9,
+  momentum = 0,
+  epsilon = 1e-10,
+  centered = FALSE
+) {
   define_tf_optimiser(
     name = "rms_prop",
     # method = "tf$keras$optimizers$RMSprop",

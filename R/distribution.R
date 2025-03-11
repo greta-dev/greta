@@ -33,7 +33,8 @@
 #' # get the distribution over y
 #' distribution(y)
 #' }
-`distribution<-` <- function(greta_array, value) { # nolint
+`distribution<-` <- function(greta_array, value) {
+  # nolint
 
   # stash the old greta array to return
   greta_array_tmp <- greta_array
@@ -122,7 +123,6 @@
 #' @rdname distribution
 #' @export
 distribution <- function(greta_array) {
-
   # only for greta arrays
   check_is_greta_array(greta_array)
 
@@ -130,7 +130,6 @@ distribution <- function(greta_array) {
   if (is.distribution_node(get_node(greta_array)$distribution)) {
     distrib <- greta_array
   } else {
-
     # otherwise return NULL
     distrib <- NULL
   }

@@ -11,11 +11,11 @@ test_that("tensorflow returns appropriate thing with 'dim'", {
   expect_identical(dim(xt_int_64), integer(0))
   expect_identical(dim(xt_float_32), integer(0))
   expect_identical(dim(xt_float_32_dec), integer(0))
-  expect_null(dim(shape(1,2,3)))
+  expect_null(dim(shape(1, 2, 3)))
   expect_identical(dim(tensorflow::as_tensor(c(1:3))), 3L)
 })
 
-test_that("Tensor behaves as we expect",{
+test_that("Tensor behaves as we expect", {
   skip_if_not(check_tf_version())
   x <- tensorflow::as_tensor(42, "int32")
   expect_snapshot(length(x))
@@ -34,7 +34,7 @@ test_that("shape returns right thing", {
   expect_snapshot(shape(3, 4))
   expect_snapshot(shape(NA, 4))
   expect_snapshot(shape(dims = c(NA, 4)))
-  expect_snapshot(shape(1,1,1))
+  expect_snapshot(shape(1, 1, 1))
   expect_null(dim(shape()))
   expect_null(dim(shape(NULL)))
   expect_null(dim(shape(NA)))
@@ -97,15 +97,15 @@ test_that("shape returns appropriate TensorShape object", {
   expect_snapshot(as.integer(shape(1, 3)))
   expect_snapshot(as.numeric(shape(1, 3)))
   expect_snapshot(as.double(shape(1, 3)))
-  expect_snapshot(shape(1, 3) == shape(1,3))
-  expect_snapshot(shape(1, 3) == shape(1,2))
-  expect_snapshot(shape(1, 3) != shape(1,3))
-  expect_snapshot(shape(1, 3) != shape(1,2))
+  expect_snapshot(shape(1, 3) == shape(1, 3))
+  expect_snapshot(shape(1, 3) == shape(1, 2))
+  expect_snapshot(shape(1, 3) != shape(1, 3))
+  expect_snapshot(shape(1, 3) != shape(1, 2))
 })
 
 test_that("[, [[, and assignment returns right object", {
   skip_if_not(check_tf_version())
-  x_extract <- shape(1,2,3)
+  x_extract <- shape(1, 2, 3)
   expect_snapshot(x_extract[1])
   expect_snapshot(x_extract[[1]])
   expect_snapshot(x_extract[2:3])
@@ -113,17 +113,16 @@ test_that("[, [[, and assignment returns right object", {
   expect_snapshot({
     x_extract[1] <- 11
     x_extract[1]
-    })
+  })
   expect_snapshot({
     x_extract[1] <- shape(11)
     x_extract[1]
-    })
+  })
   expect_snapshot({
     x_extract[1] <- list(11)
     x_extract[1]
-    })
+  })
 })
-
 
 # other parts to test:
 # batch_size <- tf$shape(x)[[0]]

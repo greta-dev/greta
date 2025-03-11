@@ -101,7 +101,8 @@ joint_distribution <- R6Class(
       super$initialize("joint", dim, discrete = discrete[1])
 
       for (i in seq_len(n_distributions)) {
-        self$add_parameter(distribs[[i]],
+        self$add_parameter(
+          distribs[[i]],
           glue::glue("distribution {i}"),
           shape_matches_output = FALSE
         )
@@ -111,7 +112,6 @@ joint_distribution <- R6Class(
       vble(self$bounds, dim = self$dim)
     },
     tf_distrib = function(parameters, dag) {
-
       # get information from the *nodes* for component distributions, not the tf
       # objects passed in here
 
@@ -123,7 +123,6 @@ joint_distribution <- R6Class(
       names(tfp_distributions) <- NULL
 
       log_prob <- function(x) {
-
         # split x on the joint dimension, and loop through computing the
         # densities
         last_dim <- n_dim(x) - 1L

@@ -4,9 +4,9 @@ test_that("calculate print method is different for different inputs", {
   skip_on_cran()
   skip_on_ci()
 
-  x <- normal(0,1)
+  x <- normal(0, 1)
   m <- model(x)
-  new_seed <- 2024-11-07-14-01
+  new_seed <- 2024 - 11 - 07 - 14 - 01
   x_sim_10 <- calculate(x, nsim = 10, seed = new_seed)
   expect_snapshot(names(x_sim_10))
   expect_snapshot(dim(x_sim_10$x))

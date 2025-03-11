@@ -207,24 +207,22 @@ greta_stash$numerical_messages <- c(
 #'
 #' }
 mcmc <- function(
-    model,
-    sampler = hmc(),
-    n_samples = 1000,
-    thin = 1,
-    warmup = 1000,
-    chains = 4,
-    n_cores = NULL,
-    verbose = TRUE,
-    pb_update = 50,
-    one_by_one = FALSE,
-    initial_values = initials(),
-    trace_batch_size = 100,
-    compute_options = cpu_only()
+  model,
+  sampler = hmc(),
+  n_samples = 1000,
+  thin = 1,
+  warmup = 1000,
+  chains = 4,
+  n_cores = NULL,
+  verbose = TRUE,
+  pb_update = 50,
+  one_by_one = FALSE,
+  initial_values = initials(),
+  trace_batch_size = 100,
+  compute_options = cpu_only()
 ) {
-
   # set device to be CPU/GPU for the entire run
   with(tf$device(compute_options), {
-
     # message users about random seeds and GPU usage if they are using GPU
     message_if_using_gpu(compute_options)
 
@@ -279,18 +277,19 @@ mcmc <- function(
 }
 
 #' @importFrom future future resolved value
-run_samplers <- function(samplers,
-                         n_samples,
-                         thin,
-                         warmup,
-                         verbose,
-                         pb_update,
-                         one_by_one,
-                         n_cores,
-                         from_scratch,
-                         trace_batch_size,
-                         compute_options) {
-
+run_samplers <- function(
+  samplers,
+  n_samples,
+  thin,
+  warmup,
+  verbose,
+  pb_update,
+  one_by_one,
+  n_cores,
+  from_scratch,
+  trace_batch_size,
+  compute_options
+) {
   # check the future plan is valid, and get information about it
   plan_is <- check_future_plan()
 
@@ -308,8 +307,11 @@ run_samplers <- function(samplers,
   greta_stash$samplers <- samplers
 
   inform_if_local_parallel_multiple_samplers(
-    plan_is, samplers, n_cores, compute_options
-    )
+    plan_is,
+    samplers,
+    n_cores,
+    compute_options
+  )
 
   inform_if_remote_machine(plan_is, samplers)
 
@@ -328,8 +330,12 @@ run_samplers <- function(samplers,
   # give the samplers somewhere to write their progress
   if (parallel_reporting) {
     sampler <- sampler_parallel_reporting(
-      n_chain, samplers, chains, n_samples, warmup
-      )
+      n_chain,
+      samplers,
+      chains,
+      n_samples,
+      warmup
+    )
   }
 
   if (plan_is$parallel) {
@@ -364,7 +370,6 @@ run_samplers <- function(samplers,
   # loop until they are resolved, executing the callbacks
   if (parallel_reporting) {
     while (!all(vapply(samplers, resolved, FALSE))) {
-
       # loop through callbacks executing them
       for (callback in greta_stash$callbacks) {
         callback()
@@ -376,7 +381,6 @@ run_samplers <- function(samplers,
 
     cat("\n")
   }
-
 
   # if we were running in parallel, retrieve the samplers and put them back in
   # the stash to return
@@ -430,15 +434,17 @@ stashed_samples <- function() {
       thins <- lapply(samplers, member, "thin")
 
       # convert to mcmc objects, passing on thinning
-      free_state_draws <- mapply(prepare_draws,
-                                 draws = free_state_draws,
-                                 thin = thins,
-                                 SIMPLIFY = FALSE
+      free_state_draws <- mapply(
+        prepare_draws,
+        draws = free_state_draws,
+        thin = thins,
+        SIMPLIFY = FALSE
       )
-      values_draws <- mapply(prepare_draws,
-                             draws = values_draws,
-                             thin = thins,
-                             SIMPLIFY = FALSE
+      values_draws <- mapply(
+        prepare_draws,
+        draws = values_draws,
+        thin = thins,
+        SIMPLIFY = FALSE
       )
 
       # convert to mcmc.list objects
@@ -475,15 +481,17 @@ stashed_samples <- function() {
 #'   used to generate the previous samples. It is not possible to change the
 #'   sampler or extend the warmup period.
 #'
-extra_samples <- function(draws,
-                          n_samples = 1000,
-                          thin = 1,
-                          n_cores = NULL,
-                          verbose = TRUE,
-                          pb_update = 50,
-                          one_by_one = FALSE,
-                          trace_batch_size = 100,
-                          compute_options = cpu_only()) {
+extra_samples <- function(
+  draws,
+  n_samples = 1000,
+  thin = 1,
+  n_cores = NULL,
+  verbose = TRUE,
+  pb_update = 50,
+  one_by_one = FALSE,
+  trace_batch_size = 100,
+  compute_options = cpu_only()
+) {
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
 
@@ -552,11 +560,12 @@ to_free <- function(node, data) {
     stats::qlogis((x - lower) / (upper - lower))
   }
 
-  fun <- switch(node$constraint,
-                scalar_all_none = identity,
-                scalar_all_high = high,
-                scalar_all_low = low,
-                scalar_all_both = both
+  fun <- switch(
+    node$constraint,
+    scalar_all_none = identity,
+    scalar_all_high = high,
+    scalar_all_low = low,
+    scalar_all_both = both
   )
 
   fun(data)
@@ -565,7 +574,6 @@ to_free <- function(node, data) {
 # convert a named list of initial values into the corresponding vector of values
 # on the free state
 parse_initial_values <- function(initials, dag) {
-
   # skip if no inits provided
   if (identical(initials, initials())) {
     free_parameters <- dag$example_parameters(free = TRUE)
@@ -574,14 +582,15 @@ parse_initial_values <- function(initials, dag) {
   }
 
   # find the elements we have been given initial values for
-  tf_names <- vapply(names(initials),
-                     function(name, env) {
-                       ga <- get(name, envir = env)
-                       node <- get_node(ga)
-                       dag$tf_name(node)
-                     },
-                     env = parent.frame(4),
-                     FUN.VALUE = ""
+  tf_names <- vapply(
+    names(initials),
+    function(name, env) {
+      ga <- get(name, envir = env)
+      node <- get_node(ga)
+      dag$tf_name(node)
+    },
+    env = parent.frame(4),
+    FUN.VALUE = ""
   )
 
   check_greta_arrays_associated_with_model(tf_names)
@@ -620,16 +629,12 @@ parse_initial_values <- function(initials, dag) {
 # convert (possibly NULL) user-specified initial values into a list of the
 # correct length, with nice error messages
 prep_initials <- function(initial_values, n_chains, dag) {
-
   # if the user passed a single set of initial values, repeat them for all
   # chains
   if (is.initials(initial_values)) {
     inform_if_one_set_of_initials(initial_values, n_chains)
 
-    initial_values <- replicate(n_chains,
-                                initial_values,
-                                simplify = FALSE
-    )
+    initial_values <- replicate(n_chains, initial_values, simplify = FALSE)
   }
 
   # TODO: revisit logic here for errors and messages
@@ -723,18 +728,18 @@ print.initials <- function(x, ...) {
 #'     matrices/arrays for the parameters (w.r.t. `value`)
 #'  }
 #'
-opt <- function(model,
-                optimiser = bfgs(),
-                max_iterations = 100,
-                tolerance = 1e-6,
-                initial_values = initials(),
-                adjust = TRUE,
-                hessian = FALSE,
-                compute_options = cpu_only()) {
-
+opt <- function(
+  model,
+  optimiser = bfgs(),
+  max_iterations = 100,
+  tolerance = 1e-6,
+  initial_values = initials(),
+  adjust = TRUE,
+  hessian = FALSE,
+  compute_options = cpu_only()
+) {
   # set device to be CPU/GPU for the entire run
   with(tf$device(compute_options), {
-
     # message users about random seeds and GPU usage if they are using GPU
     message_if_using_gpu(compute_options)
 
@@ -780,6 +785,4 @@ opt <- function(model,
   })
 }
 
-inference_module <- module(dag_class,
-                           progress_bar = progress_bar_module
-)
+inference_module <- module(dag_class, progress_bar = progress_bar_module)

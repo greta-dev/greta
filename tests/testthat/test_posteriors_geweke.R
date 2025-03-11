@@ -76,5 +76,4 @@ test_that("samplers pass geweke tests", {
   geweke_qq(geweke_hmc_slice, title = "slice sampler Geweke test")
 
   testthat::expect_gte(geweke_hmc_slice$p.value, 0.005)
-
 })

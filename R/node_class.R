@@ -15,7 +15,7 @@ node <- R6Class(
     dim = NA,
     distribution = NULL,
     initialize = function(dim = NULL, value = NULL) {
-      dim <- dim %||% c(1,1)
+      dim <- dim %||% c(1, 1)
 
       # coerce dim to integer
       dim <- as.integer(dim)
@@ -37,7 +37,6 @@ node <- R6Class(
     register_family = function(dag) {
       ## TODO add explaining variable
       if (!(self$unique_name %in% names(dag$node_list))) {
-
         # add self to list
         self$register(dag)
 
@@ -59,13 +58,11 @@ node <- R6Class(
       }
     },
     add_parent = function(node) {
-
       # add to list of parents
       self$parents <- c(self$parents, node)
       node$add_child(self)
     },
     remove_parent = function(node) {
-
       # remove node from list of parents
       rem_idx <- which(self$parent_names(recursive = FALSE) == node$unique_name)
       self$parents <- self$parents[-rem_idx]
@@ -81,7 +78,7 @@ node <- R6Class(
         parents <- c(parents, list(self$distribution))
       }
 
-      if (mode == "sampling" & has_representation(self, "cholesky")){
+      if (mode == "sampling" & has_representation(self, "cholesky")) {
         # remove cholesky representation node from parents
         parent_names <- extract_unique_names(parents)
         antirep_name <- get_node(self$representations$cholesky)$unique_name
@@ -89,7 +86,7 @@ node <- R6Class(
         parents <- parents[match(parent_names_keep, parent_names)]
       }
 
-      if (mode == "sampling" & has_anti_representation(self, "chol2symm")){
+      if (mode == "sampling" & has_anti_representation(self, "chol2symm")) {
         chol2symm_node <- get_node(self$anti_representations$chol2symm)
         parents <- c(parents, list(chol2symm_node))
       }
@@ -97,12 +94,10 @@ node <- R6Class(
       parents
     },
     add_child = function(node) {
-
       # add to list of children
       self$children <- c(self$children, node)
     },
     remove_child = function(node) {
-
       # remove node from list of parents
       rem_idx <- which(self$child_names() == node$unique_name)
       self$children <- self$children[-rem_idx]
@@ -183,9 +178,9 @@ node <- R6Class(
       }
       # if defined already, skip
       if (!self$defined(dag)) {
-
         # make sure parents are defined
-        parents_defined <- vapply(self$list_parents(dag),
+        parents_defined <- vapply(
+          self$list_parents(dag),
           function(x) x$defined(dag),
           FUN.VALUE = FALSE
         )
@@ -193,14 +188,14 @@ node <- R6Class(
           parents <- self$list_parents(dag)
           lapply(
             parents[which(!parents_defined)],
-            function(x){
+            function(x) {
               x$define_tf(dag)
             }
           )
         }
 
         # then define self
-          # stop("hi from the future ... parents are of class:", str(parents))
+        # stop("hi from the future ... parents are of class:", str(parents))
         self$tf(dag)
       }
     },
@@ -210,7 +205,6 @@ node <- R6Class(
       if (is.null(new_value)) {
         self$.value
       } else {
-
         # get the dimension of the new value
         dim <- dim(new_value)
 
@@ -227,7 +221,6 @@ node <- R6Class(
       }
     },
     set_distribution = function(distribution) {
-
       check_is_distribution_node(distribution)
 
       # add it
@@ -251,7 +244,9 @@ node <- R6Class(
       text <- node_type(self)
       text <- node_type_colour(text)
 
-      dist_txt <- glue::glue("{self$distribution$distribution_name} distribution")
+      dist_txt <- glue::glue(
+        "{self$distribution$distribution_name} distribution"
+      )
       if (has_distribution(self)) {
         text <- cli::cli_fmt(
           cli::cli_text(
@@ -285,29 +280,30 @@ node <- R6Class(
 
       label
     },
-    make_antirepresentations = function(representations){
+    make_antirepresentations = function(representations) {
       mapply(
         FUN = self$make_one_anti_representation,
         representations,
         names(representations)
-        )
+      )
     },
-    make_one_anti_representation = function(ga, name){
+    make_one_anti_representation = function(ga, name) {
       node <- get_node(ga)
       anti_name <- self$find_anti_name(name)
       node$anti_representations[[anti_name]] <- as.greta_array(self)
       node
     },
-    find_anti_name = function(name){
-      switch(name,
-             cholesky = "chol2symm",
-             chol2symm = "chol",
-             exp = "log",
-             log = "exp",
-             probit = "iprobit",
-             iprobit = "probit",
-             logit = "ilogit",
-             ilogit = "logit"
+    find_anti_name = function(name) {
+      switch(
+        name,
+        cholesky = "chol2symm",
+        chol2symm = "chol",
+        exp = "log",
+        log = "exp",
+        probit = "iprobit",
+        iprobit = "probit",
+        logit = "ilogit",
+        ilogit = "logit"
       )
     }
   )

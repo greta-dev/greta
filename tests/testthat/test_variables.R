@@ -2,31 +2,19 @@ test_that("variable() errors informatively", {
   skip_if_not(check_tf_version())
 
   # bad types
-  expect_snapshot(error = TRUE,
-    variable(upper = NA)
-  )
+  expect_snapshot(error = TRUE, variable(upper = NA))
 
-  expect_snapshot(error = TRUE,
-    variable(upper = head)
-  )
+  expect_snapshot(error = TRUE, variable(upper = head))
 
-  expect_snapshot(error = TRUE,
-    variable(lower = NA)
-  )
+  expect_snapshot(error = TRUE, variable(lower = NA))
 
-  expect_snapshot(error = TRUE,
-    variable(lower = head)
-  )
+  expect_snapshot(error = TRUE, variable(lower = head))
 
   # good types, bad values
-  expect_snapshot(error = TRUE,
-    variable(lower = 0:2, upper = 1:2)
-  )
+  expect_snapshot(error = TRUE, variable(lower = 0:2, upper = 1:2))
 
   # lower not below upper
-  expect_snapshot(error = TRUE,
-    variable(lower = 1, upper = 1)
-  )
+  expect_snapshot(error = TRUE, variable(lower = 1, upper = 1))
 })
 
 test_that("constrained variable constructors error informatively", {
@@ -141,9 +129,11 @@ test_that("cholesky_variable() correlation can be sampled correctly", {
   variances_one <- abs(variance_samples - 1) < 1e-3
   correlations_above_minus_one <- sweep(correlation_samples, 2, -1, `>=`)
   correlations_below_one <- sweep(correlation_samples, 2, 1, `<=`)
-  expect_true(all(variances_one) &
-    all(correlations_above_minus_one) &
-    all(correlations_below_one))
+  expect_true(
+    all(variances_one) &
+      all(correlations_above_minus_one) &
+      all(correlations_below_one)
+  )
 })
 
 test_that("simplex_variable() can be sampled correctly", {

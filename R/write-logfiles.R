@@ -9,8 +9,8 @@
 #' @return nothing - sets an environment variable for use with
 #'   [install_greta_deps()].
 #' @export
-greta_set_install_logfile <- function(path){
-  Sys.setenv("GRETA_INSTALLATION_LOG"=path)
+greta_set_install_logfile <- function(path) {
+  Sys.setenv("GRETA_INSTALLATION_LOG" = path)
 }
 
 #' Write greta dependency installation log file
@@ -23,11 +23,10 @@ greta_set_install_logfile <- function(path){
 #' @return nothing - writes to file
 #' @export
 write_greta_install_log <- function(path = greta_logfile) {
-
   cli::cli_progress_step(
     msg = "Writing logfile to {.path {path}}",
     msg_done = "Logfile written to {.path {path}}"
-    )
+  )
 
   cli::cli_progress_step(
     msg = "Open with: {.run open_greta_install_log()}"
@@ -122,16 +121,14 @@ write_greta_install_log <- function(path = greta_logfile) {
     conda_install_error = greta_stash$conda_install_error
   )
 
-  writeLines(whisker::whisker.render(template, greta_install_data),
-             path)
-
+  writeLines(whisker::whisker.render(template, greta_install_data), path)
 }
 
 # returns NULL if no envvar
-sys_get_env <- function(envvar){
+sys_get_env <- function(envvar) {
   retrieved_envvar <- Sys.getenv(envvar)
   env_exists <- nzchar(retrieved_envvar)
-  if (env_exists){
+  if (env_exists) {
     envvar
   } else {
     envvar <- NULL
@@ -152,12 +149,10 @@ sys_get_env <- function(envvar){
 #'
 #' @return opens a URL in your default HTML browser.
 #' @export
-open_greta_install_log <- function(){
-
+open_greta_install_log <- function() {
   greta_logfile <- sys_get_env("GRETA_INSTALLATION_LOG")
 
   greta_logfile <- greta_logfile %||% greta_default_logfile()
 
   utils::browseURL(greta_logfile)
-
 }

@@ -65,7 +65,6 @@ greta_array <- function(data = 0, dim = length(data)) {
 # safely handle self-coersion, possibly with reshaping
 #' @export
 greta_array.greta_array <- function(data = 0, dim = length(data)) {
-
   # reshape if necessary (apparently users expect this functionality)
   dim <- as.integer(dim)
   if (length(dim) == 1) {

@@ -46,13 +46,15 @@ reticulate::py_version
 # clear CRAN checks spotting floating global variables
 #' @importFrom utils globalVariables
 utils::globalVariables(
-  c("N",
-  "greta_deps_tf_tfp",
-  "greta_logfile",
-  "os",
-  "python_version_max",
-  "python_version_min",
-  "tf_version",
-  "tfp_version",
-  "greta")
+  c(
+    "N",
+    "greta_deps_tf_tfp",
+    "greta_logfile",
+    "os",
+    "python_version_max",
+    "python_version_min",
+    "tf_version",
+    "tfp_version",
+    "greta"
+  )
 )

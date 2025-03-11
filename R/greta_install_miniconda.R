@@ -10,7 +10,6 @@
 #' @return nothing - installs miniconda.
 #' @export
 greta_install_miniconda <- function(timeout = 5) {
-
   stdout_file <- create_temp_file("out-miniconda")
   stderr_file <- create_temp_file("err-miniconda")
 
@@ -35,5 +34,4 @@ greta_install_miniconda <- function(timeout = 5) {
 
   greta_stash$miniconda_notes <- install_miniconda_process$output_notes
   greta_stash$miniconda_error <- install_miniconda_process$output_error
-
 }

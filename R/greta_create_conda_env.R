@@ -16,9 +16,7 @@
 #'
 #' @return nothing - creates a conda environment for a specific python version
 #' @export
-greta_create_conda_env <- function(timeout = 5,
-                                   deps = greta_deps_spec()) {
-
+greta_create_conda_env <- function(timeout = 5, deps = greta_deps_spec()) {
   check_greta_deps_spec(deps)
 
   stdout_file <- create_temp_file("out-greta-conda")
@@ -42,7 +40,7 @@ greta_create_conda_env <- function(timeout = 5,
     stderr_file = stderr_file,
     timeout = timeout,
     cli_start_msg = glue::glue(
-    "Creating 'greta-env-tf2' conda environment using python \\
+      "Creating 'greta-env-tf2' conda environment using python \\
     v{deps$python_version}, this may take a minute"
     ),
     cli_end_msg = "greta-env-tf2 environment created!"
@@ -50,5 +48,4 @@ greta_create_conda_env <- function(timeout = 5,
 
   greta_stash$conda_create_notes <- install_conda_create$output_notes
   greta_stash$conda_create_error <- install_conda_create$output_error
-
 }

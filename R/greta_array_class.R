@@ -10,7 +10,12 @@ as.greta_array <- function(x, optional = FALSE, original_x = x, ...) {
 
 # safely handle self-coercion
 #' @export
-as.greta_array.greta_array <- function(x, optional = FALSE, original_x = x, ...) {
+as.greta_array.greta_array <- function(
+  x,
+  optional = FALSE,
+  original_x = x,
+  ...
+) {
   x
 }
 
@@ -18,21 +23,22 @@ as.greta_array.greta_array <- function(x, optional = FALSE, original_x = x, ...)
 #' @export
 as.greta_array.logical <- function(x, optional = FALSE, original_x = x, ...) {
   x[] <- as.numeric(x[])
-  as.greta_array.numeric(x,
-    optional = optional,
-    original_x = original_x,
-    ...
-  )
+  as.greta_array.numeric(x, optional = optional, original_x = original_x, ...)
 }
 
 # coerce dataframes if all columns can safely be converted to numeric, error
 # otherwise
 #' @export
-as.greta_array.data.frame <- function(x, optional = FALSE,
-                                      original_x = x, ...) {
+as.greta_array.data.frame <- function(
+  x,
+  optional = FALSE,
+  original_x = x,
+  ...
+) {
   check_greta_data_frame(x, optional)
 
-  as.greta_array.numeric(as.matrix(x),
+  as.greta_array.numeric(
+    as.matrix(x),
     optional = optional,
     original_x = original_x,
     ...
@@ -43,36 +49,26 @@ as.greta_array.data.frame <- function(x, optional = FALSE,
 # or numeric
 #' @export
 as.greta_array.matrix <- function(x, optional = FALSE, original_x = x, ...) {
-
   check_greta_array_type(x, optional)
 
   if (!is.numeric(x) && is.logical(x)) {
-      x[] <- as.numeric(x[])
-    }
+    x[] <- as.numeric(x[])
+  }
 
-  as.greta_array.numeric(x,
-    optional = optional,
-    original_x = original_x,
-    ...
-  )
+  as.greta_array.numeric(x, optional = optional, original_x = original_x, ...)
 }
 
 # coerce logical arrays to numeric arrays, and error if they aren't logical
 # or numeric
 #' @export
 as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
-
   check_greta_array_type(x, optional)
 
   if (!optional && !is.numeric(x) && is.logical(x)) {
-      x[] <- as.numeric(x[])
+    x[] <- as.numeric(x[])
   }
 
-  as.greta_array.numeric(x,
-    optional = optional,
-    original_x = original_x,
-    ...
-  )
+  as.greta_array.numeric(x, optional = optional, original_x = original_x, ...)
 }
 
 # finally, reject if there are any missing values, or set up the greta_array
@@ -80,7 +76,8 @@ as.greta_array.array <- function(x, optional = FALSE, original_x = x, ...) {
 as.greta_array.numeric <- function(x, optional = FALSE, original_x = x, ...) {
   check_missing_infinite_values(x, optional)
 
-  as.greta_array.node(data_node$new(x),
+  as.greta_array.node(
+    data_node$new(x),
     optional = optional,
     original_x = original_x,
     ...
@@ -123,7 +120,7 @@ print.greta_array <- function(x, ..., n = 10) {
   cli::cli_text("{.pkg greta} array {.cls {node_desc}}")
   cli::cli_text("\n")
 
-  if (is.unknowns(node$value())){
+  if (is.unknowns(node$value())) {
     return(print(node$value(), ..., n = n))
   }
 
@@ -143,7 +140,7 @@ print.greta_array <- function(x, ..., n = 10) {
     return(invisible(x_val))
   }
 
-  if (remaining_vals > 0 ) {
+  if (remaining_vals > 0) {
     cli::cli_alert_info(
       text = c(
         "i" = "{remaining_vals} more values\n",
@@ -151,8 +148,6 @@ print.greta_array <- function(x, ..., n = 10) {
       )
     )
   }
-
-
 }
 
 
@@ -177,7 +172,6 @@ summary.greta_array <- function(object, ...) {
 #' @export
 #' @method print summary.greta_array
 print.summary.greta_array <- function(x, ...) {
-
   # array type
   type_text <- glue::glue(
     "'{x$type}' greta array"
@@ -269,7 +263,7 @@ anti_representation <- function(x, name, error = TRUE) {
 }
 
 
-has_anti_representation <- function(x, name){
+has_anti_representation <- function(x, name) {
   repr <- anti_representation(x, name, error = FALSE)
   !is.null(repr)
 }
@@ -280,7 +274,8 @@ copy_representation <- function(x, name) {
   identity(repr)
 }
 
-greta_array_module <- module(as.greta_array,
+greta_array_module <- module(
+  as.greta_array,
   get_node,
   has_representation,
   representation,

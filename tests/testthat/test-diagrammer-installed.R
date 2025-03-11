@@ -4,9 +4,9 @@ test_that("DiagrammeR installation is checked", {
   local_mocked_bindings(
     is_DiagrammeR_installed = function() FALSE
   )
-  m <- model(normal(0,1))
-    expect_snapshot(
-      error = TRUE,
-      x = plot(m)
-      )
+  m <- model(normal(0, 1))
+  expect_snapshot(
+    error = TRUE,
+    x = plot(m)
+  )
 })

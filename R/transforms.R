@@ -48,7 +48,9 @@ NULL
 #' @rdname transforms
 #' @export
 iprobit <- function(x) {
-  op("iprobit", x,
+  op(
+    "iprobit",
+    x,
     tf_operation = "tf_iprobit",
     representations = list(probit = x)
   )
@@ -57,7 +59,9 @@ iprobit <- function(x) {
 #' @rdname transforms
 #' @export
 ilogit <- function(x) {
-  op("ilogit", x,
+  op(
+    "ilogit",
+    x,
     tf_operation = "tf$nn$sigmoid",
     representations = list(logit = x)
   )
@@ -88,8 +92,5 @@ imultilogit <- function(x) {
 
   check_2d(x)
 
-  op("imultilogit", x,
-    dim = dim + c(0, 1),
-    tf_operation = "tf_imultilogit"
-  )
+  op("imultilogit", x, dim = dim + c(0, 1), tf_operation = "tf_imultilogit")
 }

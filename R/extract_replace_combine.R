@@ -79,7 +79,6 @@ NULL
 # extract syntax for greta_array objects
 #' @export
 `[.greta_array` <- function(x, ...) {
-
   # store the full call to mimic on a dummy array, plus the array's dimensions
   call <- sys.call()
   dims_in <- dim(x)
@@ -148,7 +147,8 @@ NULL
   index <- flatten_rowwise(dummy_out)
 
   # create operation node, passing call and dims as additional arguments
-  op("extract",
+  op(
+    "extract",
     x,
     dim = dims_out,
     operation_args = list(
@@ -163,7 +163,8 @@ NULL
 
 # replace syntax for greta array objects
 #' @export
-`[<-.greta_array` <- function(x, ..., value) { # nolint
+`[<-.greta_array` <- function(x, ..., value) {
+  # nolint
 
   node <- get_node(x)
 
@@ -230,7 +231,8 @@ NULL
   }
 
   # create operation node, passing call and dims as additional arguments
-  op("replace",
+  op(
+    "replace",
     x,
     replacement,
     dim = dims,
@@ -272,10 +274,7 @@ cbind.greta_array <- function(...) {
   # output dimensions
   dims <- c(rows[1], sum(cols))
 
-  op("cbind", ...,
-    dim = dims,
-    tf_operation = "tf_cbind"
-  )
+  op("cbind", ..., dim = dims, tf_operation = "tf_cbind")
 }
 
 #' @export
@@ -307,31 +306,42 @@ rbind.greta_array <- function(...) {
   # output dimensions
   dims <- c(sum(rows), cols[1])
 
-  op("rbind", ...,
-    dim = dims,
-    tf_operation = "tf_rbind"
-  )
+  op("rbind", ..., dim = dims, tf_operation = "tf_rbind")
 }
 
 # nolint start
 #' @rdname overloaded
 #' @export
-abind <- function(...,
-                  along = N, rev.along = NULL, new.names = NULL,
-                  force.array = TRUE, make.names = use.anon.names,
-                  use.anon.names = FALSE, use.first.dimnames = FALSE,
-                  hier.names = FALSE, use.dnns = FALSE) {
+abind <- function(
+  ...,
+  along = N,
+  rev.along = NULL,
+  new.names = NULL,
+  force.array = TRUE,
+  make.names = use.anon.names,
+  use.anon.names = FALSE,
+  use.first.dimnames = FALSE,
+  hier.names = FALSE,
+  use.dnns = FALSE
+) {
   UseMethod("abind")
 }
 # nolint end
 
 # nolint start
 #' @export
-abind.default <- function(...,
-                          along = N, rev.along = NULL, new.names = NULL,
-                          force.array = TRUE, make.names = use.anon.names,
-                          use.anon.names = FALSE, use.first.dimnames = FALSE,
-                          hier.names = FALSE, use.dnns = FALSE) {
+abind.default <- function(
+  ...,
+  along = N,
+  rev.along = NULL,
+  new.names = NULL,
+  force.array = TRUE,
+  make.names = use.anon.names,
+  use.anon.names = FALSE,
+  use.first.dimnames = FALSE,
+  hier.names = FALSE,
+  use.dnns = FALSE
+) {
   # nolint end
 
   # error nicely if they don't have abind installed
@@ -354,12 +364,18 @@ abind.default <- function(...,
 
 # nolint start
 #' @export
-abind.greta_array <- function(...,
-                              along = N, rev.along = NULL, new.names = NULL,
-                              force.array = TRUE, make.names = use.anon.names,
-                              use.anon.names = FALSE,
-                              use.first.dimnames = FALSE, hier.names = FALSE,
-                              use.dnns = FALSE) {
+abind.greta_array <- function(
+  ...,
+  along = N,
+  rev.along = NULL,
+  new.names = NULL,
+  force.array = TRUE,
+  make.names = use.anon.names,
+  use.anon.names = FALSE,
+  use.first.dimnames = FALSE,
+  hier.names = FALSE,
+  use.dnns = FALSE
+) {
   # nolint end
 
   # warn if any of the arguments have been changed
@@ -399,8 +415,12 @@ abind.greta_array <- function(...,
 
   # rationalise along, and pad N if we're prepending/appending a dimension
   ## TODO add explaining variable here
-  if (along < 1 || along > n || (along > floor(along) &&
-    along < ceiling(along))) {
+  if (
+    along < 1 ||
+      along > n ||
+      (along > floor(along) &&
+        along < ceiling(along))
+  ) {
     n <- n + 1
     along <- max(1, min(n + 1, ceiling(along)))
   }
@@ -504,7 +524,6 @@ c.greta_array <- function(...) {
 
 #' @export
 rep.greta_array <- function(x, ...) {
-
   # get the index
   idx <- rep(seq_along(x), ...)
 
@@ -525,7 +544,8 @@ length.greta_array <- function(x) {
 
 # reshape greta arrays
 #' @export
-`dim<-.greta_array` <- function(x, value) { # nolint
+`dim<-.greta_array` <- function(x, value) {
+  # nolint
 
   dims <- value
 
@@ -567,7 +587,7 @@ length.greta_array <- function(x) {
   n_elem_not_match <- prod_dims != len
   if (!is_scalar && n_elem_not_match) {
     cli::cli_abort(
-        "dims [product {prod_dims}] do not match the length of object [{len}]"
+      "dims [product {prod_dims}] do not match the length of object [{len}]"
     )
   }
 
@@ -578,10 +598,10 @@ length.greta_array <- function(x) {
   unmatch_dim <- !identical(dim(x), dims)
 
   if (unmatch_dim && is_scalar) {
-
     # if the dims don't match, but x is a scalar, expand it to the required
     # dimension
-    op("expand_dim",
+    op(
+      "expand_dim",
       x,
       operation_args = list(dims = dims),
       tf_operation = "tf_expand_dim",
@@ -591,7 +611,8 @@ length.greta_array <- function(x) {
   } else {
     # otherwise, if the dimensions don't match, but the number of elements do,
     # just change the dimensions
-    op("set_dim",
+    op(
+      "set_dim",
       x,
       operation_args = list(dims = dims),
       tf_operation = "tf_set_dim",
@@ -599,7 +620,6 @@ length.greta_array <- function(x) {
       value = new_value
     )
   }
-
 
   # otherwise just reorder them
 }
@@ -609,27 +629,27 @@ length.greta_array <- function(x) {
 #' @export
 #' @importFrom utils head
 #' @importFrom utils head.matrix
-head.greta_array <- function(x, n = 6L, ...) { # nolint
+head.greta_array <- function(x, n = 6L, ...) {
+  # nolint
 
   stopifnot(length(n) == 1L)
 
   ans <- head.matrix(x, n, ...)
 
   ans
-
 }
 
 #' @export
 #' @importFrom utils tail
 #' @importFrom utils tail.matrix
-tail.greta_array <- function(x, n = 6L, ...) { # nolint
+tail.greta_array <- function(x, n = 6L, ...) {
+  # nolint
 
   stopifnot(length(n) == 1L)
 
   ans <- tail.matrix(x, n, ...)
 
   ans
-
 }
 
 #' @rdname overloaded
@@ -667,8 +687,5 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
   dims <- c(dim[1], 1)
 
   # return the extraction op
-  op("diag", x,
-    dim = dims,
-    tf_operation = "tf$linalg$diag_part"
-  )
+  op("diag", x, dim = dims, tf_operation = "tf$linalg$diag_part")
 }

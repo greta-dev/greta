@@ -26,7 +26,6 @@ render_progress <- function(reads) {
   reads[is.na(reads)] <- ""
   some_results <- any(nchar(reads) > 0)
   if (some_results) {
-
     # optionally add blanks to put lines at the edges
     if (length(reads) > 1) {
       reads <- c("", reads, "")
@@ -50,7 +49,8 @@ percentages <- function() {
 }
 
 progress_bars <- function() {
-  reads <- lapply(greta_stash$progress_bar_log_files,
+  reads <- lapply(
+    greta_stash$progress_bar_log_files,
     read_progress_log_file,
     skip = 1
   )
@@ -58,16 +58,14 @@ progress_bars <- function() {
 }
 
 # determine the type of progress information
-set_progress_bar_type <- function(n_chain){
+set_progress_bar_type <- function(n_chain) {
+  if (bar_width(n_chain) < 42) {
+    progress_callback <- percentages
+  } else {
+    progress_callback <- progress_bars
+  }
 
-if (bar_width(n_chain) < 42) {
-  progress_callback <- percentages
-} else {
-  progress_callback <- progress_bars
-}
-
-greta_stash$callbacks$parallel_progress <- progress_callback
-
+  greta_stash$callbacks$parallel_progress <- progress_callback
 }
 
 # register some

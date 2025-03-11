@@ -10,7 +10,7 @@ using_greta_conda_env <- function() {
   grepl("greta-env-tf2", config$python)
 }
 
-have_greta_conda_env <- function(){
+have_greta_conda_env <- function() {
   tryCatch(
     expr = "greta-env-tf2" %in% reticulate::conda_list()$name,
     error = function(e) FALSE

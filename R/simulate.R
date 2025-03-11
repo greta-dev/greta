@@ -48,11 +48,13 @@
 #' sims <- simulate(m, nsim = 100)
 #' }
 #' # nolint start
-simulate.greta_model <- function(object,
-                                 nsim = 1,
-                                 seed = NULL,
-                                 precision = c("double", "single"),
-                                 ...) {
+simulate.greta_model <- function(
+  object,
+  nsim = 1,
+  seed = NULL,
+  precision = c("double", "single"),
+  ...
+) {
   # nolint end
   # find all the greta arrays in the calling environment
   target_greta_arrays <- all_greta_arrays(parent.frame())

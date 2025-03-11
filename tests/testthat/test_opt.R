@@ -86,14 +86,14 @@ test_that("opt fails with defunct optimisers", {
   m <- model(z)
 
   # check that the right ones error about defunct
-  expect_snapshot(error = TRUE,o <- opt(m, optimiser = powell()))
-  expect_snapshot(error = TRUE,o <- opt(m, optimiser = momentum()))
-  expect_snapshot(error = TRUE,o <- opt(m, optimiser = cg()))
-  expect_snapshot(error = TRUE,o <- opt(m, optimiser = newton_cg()))
-  expect_snapshot(error = TRUE,o <- opt(m, optimiser = l_bfgs_b()))
-  expect_snapshot(error = TRUE,o <- opt(m, optimiser = tnc()))
-  expect_snapshot(error = TRUE,o <- opt(m, optimiser = cobyla()))
-  expect_snapshot(error = TRUE,o <- opt(m, optimiser = slsqp()))
+  expect_snapshot(error = TRUE, o <- opt(m, optimiser = powell()))
+  expect_snapshot(error = TRUE, o <- opt(m, optimiser = momentum()))
+  expect_snapshot(error = TRUE, o <- opt(m, optimiser = cg()))
+  expect_snapshot(error = TRUE, o <- opt(m, optimiser = newton_cg()))
+  expect_snapshot(error = TRUE, o <- opt(m, optimiser = l_bfgs_b()))
+  expect_snapshot(error = TRUE, o <- opt(m, optimiser = tnc()))
+  expect_snapshot(error = TRUE, o <- opt(m, optimiser = cobyla()))
+  expect_snapshot(error = TRUE, o <- opt(m, optimiser = slsqp()))
 })
 
 test_that("opt accepts initial values for TF optimisers", {
@@ -190,10 +190,10 @@ test_that("TF opt with `gradient_descent` fails with bad initial values", {
   distribution(x) <- normal(z, sd)
 
   m <- model(z)
-  expect_snapshot(error = TRUE,
+  expect_snapshot(
+    error = TRUE,
     o <- opt(m, hessian = TRUE, optimiser = gradient_descent())
   )
-
 })
 
 test_that("TF opt with `adam` succeeds with bad initial values", {
@@ -233,7 +233,6 @@ test_that("TF opt with `adam` succeeds with bad initial values", {
   # the model density is IID normal, so we should be able to recover the SD
   approx_sd <- sqrt(diag(solve(hess)))
   expect_true(all(abs(approx_sd - sd) < 1e-9))
-
 })
 
 ##

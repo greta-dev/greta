@@ -97,7 +97,6 @@ greta_density <- function(
   dim = NULL,
   multivariate = FALSE
 ) {
-
   dim <- dim %||% NROW(x)
 
   # add the output dimension to the arguments list
@@ -376,7 +375,7 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
   r <- replicate(n, f())
 
   if (dim(r)[3] == 1) {
-    r <- r[, , 1]
+    r <- r[,, 1]
   } else {
     r <- aperm(r, c(3, 1, 2))
   }
@@ -402,7 +401,12 @@ lkj_log_normalising <- function(eta, n) {
   ans
 }
 
-dlkj_correlation_unnormalised <- function(x, eta, log = FALSE, dimension = NULL) {
+dlkj_correlation_unnormalised <- function(
+  x,
+  eta,
+  log = FALSE,
+  dimension = NULL
+) {
   res <- (eta - 1) * log(det(x))
   if (!log) {
     res <- exp(res)
@@ -420,11 +424,13 @@ dlkj_correlation <- function(x, eta, log = FALSE, dimension = NULL) {
 }
 
 # helper RNG functions
-rmvnorm <- function(n, mean, Sigma) { # nolint
+rmvnorm <- function(n, mean, Sigma) {
+  # nolint
   mvtnorm::rmvnorm(n = n, mean = mean, sigma = Sigma)
 }
 
-rwish <- function(n, df, Sigma) { # nolint
+rwish <- function(n, df, Sigma) {
+  # nolint
   draws <- stats::rWishart(n = n, df = df, Sigma = Sigma)
   aperm(draws, c(3, 1, 2))
 }
@@ -677,23 +683,25 @@ check_geweke <- function(
   )
 
   geweke_checks
-
 }
 
-geweke_qq <- function(geweke_checks, title){
+geweke_qq <- function(geweke_checks, title) {
   # visualise correspondence
   quants <- (1:99) / 100
   q1 <- stats::quantile(geweke_checks$target_theta, quants)
   q2 <- stats::quantile(geweke_checks$greta_theta, quants)
   plot(q2, q1, main = title)
   graphics::abline(0, 1)
-
 }
 
-geweke_ks <- function(geweke_checks){
+geweke_ks <- function(geweke_checks) {
   # do a formal hypothesis test
-  suppressWarnings(stat <- stats::ks.test(geweke_checks$target_theta,
-                                          geweke_checks$greta_theta))
+  suppressWarnings(
+    stat <- stats::ks.test(
+      geweke_checks$target_theta,
+      geweke_checks$greta_theta
+    )
+  )
   stat
 }
 
@@ -729,7 +737,6 @@ p_theta_greta <- function(
 
   # now loop through, sampling and updating x and returning theta
   for (i in 2:niter) {
-
     # update the progress bar
     cli::cli_progress_update()
 
@@ -757,7 +764,6 @@ p_theta_greta <- function(
 
     # trace the sample
     theta[i] <- tail(as.numeric(draws[[1]]), 1)
-
   }
 
   # kill the progress_bar
@@ -808,8 +814,10 @@ get_enough_draws <- function(
     one_by_one = one_by_one
   )
 
-  while (need_more_samples(draws, n_effective) &&
-         still_have_time(start_time, time_limit)) {
+  while (
+    need_more_samples(draws, n_effective) &&
+      still_have_time(start_time, time_limit)
+  ) {
     n_samples <- new_samples(draws, n_effective)
     draws <- extra_samples(
       draws,
@@ -866,7 +874,7 @@ scaled_error <- function(draws, expectation) {
 check_mvn_samples <- function(sampler, n_effective = 3000) {
   # get multivariate normal samples
   mu <- as_data(t(rnorm(2, 0, 5)))
-  sigma <- stats::rWishart(1, 3, diag(2))[, , 1]
+  sigma <- stats::rWishart(1, 3, diag(2))[,, 1]
   x <- multivariate_normal(mu, sigma)
   m <- model(x, precision = "single")
 
@@ -908,9 +916,9 @@ do_thinning <- function(x, thinning = 1) {
 }
 
 
-get_distribution_name <- function(x){
+get_distribution_name <- function(x) {
   x_node <- get_node(x)
-  if (inherits(x_node, "operation_node")){
+  if (inherits(x_node, "operation_node")) {
     dist_name <- x_node$parents[[1]]$distribution$distribution_name
   } else {
     dist_name <- get_node(x)$distribution$distribution_name
@@ -959,8 +967,7 @@ check_samples <- function(
   )
 }
 
-qqplot_checked_samples <- function(checked_samples, title){
-
+qqplot_checked_samples <- function(checked_samples, title) {
   distrib <- checked_samples$distrib
   sampler_name <- checked_samples$sampler_name
   title <- paste(distrib, "with", sampler_name)
@@ -972,16 +979,17 @@ qqplot_checked_samples <- function(checked_samples, title){
     x = mcmc_samples,
     y = iid_samples,
     main = title
-    )
+  )
 
   graphics::abline(0, 1)
 }
 
 ## helpers for running Kolmogorov-Smirnov test for MCMC samples vs IID samples
-ks_test_mcmc_vs_iid <- function(checked_samples){
+ks_test_mcmc_vs_iid <- function(checked_samples) {
   # do a formal hypothesis test
-  suppressWarnings(stat <- ks.test(checked_samples$mcmc_samples,
-                                   checked_samples$iid_samples))
+  suppressWarnings(
+    stat <- ks.test(checked_samples$mcmc_samples, checked_samples$iid_samples)
+  )
   stat
 }
 
@@ -1023,9 +1031,10 @@ tidy_optimisers <- function(opt_df, tolerance = 1e-2) {
       par_x_diff = purrr::map2(
         .x = par,
         .y = x_val,
-        .f = function(.x, .y){
+        .f = function(.x, .y) {
           abs(.y - .x)
-      }),
+        }
+      ),
       close_to_truth = purrr::map_lgl(
         par_x_diff,
         function(x) all(x < tolerance)

@@ -65,11 +65,17 @@ test_that("random strings of operators work as expected", {
     b <- randn(25, 4)
 
     # generate a 5-deep random function of operations
-    fun <- gen_opfun(5,
+    fun <- gen_opfun(
+      5,
       ops = c(
-        "+", "-", "*",
-        "/", "&",
-        "|", "<", ">"
+        "+",
+        "-",
+        "*",
+        "/",
+        "&",
+        "|",
+        "<",
+        ">"
       )
     )
 
@@ -94,18 +100,13 @@ test_that("random strings of operators work as expected", {
 test_that("%*% errors informatively", {
   skip_if_not(check_tf_version())
 
-
   a <- ones(3, 4)
   b <- ones(1, 4)
   c <- ones(2, 2, 2)
 
-  expect_snapshot(error = TRUE,
-    a %*% b
-  )
+  expect_snapshot(error = TRUE, a %*% b)
 
-  expect_snapshot(error = TRUE,
-    a %*% c
-  )
+  expect_snapshot(error = TRUE, a %*% c)
 })
 
 test_that("%*% works when one is a non-greta array", {

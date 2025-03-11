@@ -49,16 +49,15 @@ NULL
 #'
 #' plot(m)
 #' }
-model <- function(...,
-                  precision = c("double", "single"),
-                  compile = TRUE) {
+model <- function(..., precision = c("double", "single"), compile = TRUE) {
   check_tf_version("error")
 
   # get the floating point precision
   # TODO
   # what does it choose as default if both double and single are listed
   # as default?
-  tf_float <- switch(match.arg(precision),
+  tf_float <- switch(
+    match.arg(precision),
     double = "float64",
     single = "float32"
   )
@@ -69,11 +68,11 @@ model <- function(...,
   # if no arrays were specified, find all of the non-data arrays
   no_arrays_specified <- identical(target_greta_arrays, list())
   if (no_arrays_specified) {
-    target_greta_arrays <- all_greta_arrays(parent.frame(),
+    target_greta_arrays <- all_greta_arrays(
+      parent.frame(),
       include_data = FALSE
     )
   } else {
-
     # otherwise, find variable names for the provided nodes
     names <- substitute(list(...))[-1]
     names <- vapply(names, deparse, "")
@@ -86,7 +85,8 @@ model <- function(...,
   # TF1/2 check
   # I don't think we need to use the `compile` flag in TF2 anymore
   # Well, it will be passed onto the tf_function creation step
-  dag <- dag_class$new(target_greta_arrays,
+  dag <- dag_class$new(
+    target_greta_arrays,
     tf_float = tf_float,
     compile = compile
   )
@@ -113,12 +113,14 @@ model <- function(...,
 #' @param ... extra arguments - not used.
 #'
 #' @export
-as.greta_model <- function(x, ...) { # nolint
+as.greta_model <- function(x, ...) {
+  # nolint
   UseMethod("as.greta_model", x)
 }
 
 #' @export
-as.greta_model.dag_class <- function(x, ...) { # nolint
+as.greta_model.dag_class <- function(x, ...) {
+  # nolint
   ans <- list(dag = x)
   class(ans) <- "greta_model"
   ans
@@ -148,16 +150,14 @@ print.greta_model <- function(x, ...) {
 #'   create it as an attribute `"dgr_graph"`.
 #'
 #' @export
-plot.greta_model <- function(x,
-                             y,
-                             colour = "#996bc7",
-                             ...) {
+plot.greta_model <- function(x, y, colour = "#996bc7", ...) {
   check_diagrammer_installed()
 
   # set up graph
   dag_mat <- x$dag$adjacency_matrix
 
-  gr <- DiagrammeR::from_adj_matrix(dag_mat,
+  gr <- DiagrammeR::from_adj_matrix(
+    dag_mat,
     mode = "directed",
     use_diag = FALSE
   )
@@ -189,7 +189,8 @@ plot.greta_model <- function(x,
   node_size[types == "operation"] <- 0.2
 
   # get node labels
-  node_labels <- vapply(x$dag$node_list,
+  node_labels <- vapply(
+    x$dag$node_list,
     member,
     "plotting_label()",
     FUN.VALUE = ""
@@ -201,14 +202,16 @@ plot.greta_model <- function(x,
 
   known_nodes <- known_nodes[known_nodes %in% names]
   known_idx <- match(known_nodes, names)
-  node_labels[known_idx] <- paste(names(known_nodes),
+  node_labels[known_idx] <- paste(
+    names(known_nodes),
     node_labels[known_idx],
     sep = "\n"
   )
 
   # for the operation nodes, add the operation to the edges
   op_idx <- which(types == "operation")
-  op_names <- vapply(x$dag$node_list[op_idx],
+  op_names <- vapply(
+    x$dag$node_list[op_idx],
     member,
     "operation_name",
     FUN.VALUE = ""
@@ -266,8 +269,8 @@ plot.greta_model <- function(x,
   keep <- !are_null(targets)
   distrib_idx <- distrib_idx[keep]
 
-
-  target_names <- vapply(x$dag$node_list[distrib_idx],
+  target_names <- vapply(
+    x$dag$node_list[distrib_idx],
     member,
     "target$unique_name",
     FUN.VALUE = ""
@@ -316,7 +319,6 @@ plot.greta_model <- function(x,
       attr_type = "graph"
     )
   )
-
 
   widget <- DiagrammeR::render_graph(gr)
   attr(widget, "dgr_graph") <- gr

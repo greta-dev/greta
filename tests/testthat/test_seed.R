@@ -1,4 +1,3 @@
-
 test_that("calculate uses the local RNG seed", {
   skip_if_not(check_tf_version())
 
@@ -38,7 +37,7 @@ test_that("when calculate simulates multiple values, they are calculated using t
   skip_if_not(check_tf_version())
 
   x <- normal(0, 1)
-  x_2 <- x*1
+  x_2 <- x * 1
 
   vals <- calculate(x, x_2, nsim = 10)
   expect_identical(vals$x, vals$x_2)
@@ -84,7 +83,6 @@ test_that("calculate samples are the same when the argument seed is the same", {
   c_two <- calculate(y, nsim = 1, seed = 12345)
 
   expect_identical(as.numeric(c_one), as.numeric(c_two))
-
 })
 
 test_that("calculate samples are the same when the R seed is the same", {
@@ -123,13 +121,12 @@ test_that("mcmc samples are the same when the R seed is the same, also with tf s
   expect_identical(as.numeric(one_tf), as.numeric(two_tf))
 
   # but these are not (always) equal to each other
-  mcmc_matches_tf_one <- identical(as.numeric(one),as.numeric(one_tf))
-  mcmc_matches_tf_two <- identical(as.numeric(two),as.numeric(two_tf))
+  mcmc_matches_tf_one <- identical(as.numeric(one), as.numeric(one_tf))
+  mcmc_matches_tf_two <- identical(as.numeric(two), as.numeric(two_tf))
 
   expect_false(mcmc_matches_tf_one)
 
   expect_false(mcmc_matches_tf_two)
-
 })
 
 test_that("simulate uses the local RNG seed", {

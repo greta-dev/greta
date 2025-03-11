@@ -20,15 +20,15 @@ optimiser <- R6Class(
 
     # set up the model
     initialize = function(
-    initial_values,
-    model,
-    name,
-    method,
-    parameters,
-    other_args,
-    max_iterations,
-    tolerance,
-    adjust
+      initial_values,
+      model,
+      name,
+      method,
+      parameters,
+      other_args,
+      max_iterations,
+      tolerance,
+      adjust
     ) {
       super$initialize(
         initial_values,
@@ -112,7 +112,6 @@ tf_optimiser <- R6Class(
   "tf_optimiser",
   inherit = optimiser,
   public = list(
-
     # create an op to minimise the objective
     run_tf_minimiser = function() {
       dag <- self$model$dag
@@ -138,8 +137,10 @@ tf_optimiser <- R6Class(
 
         # TF1/2 todo
         # get this to work inside TF with TF while loop
-        while (self$it < self$max_iterations &
-               all(self$diff > self$tolerance)) {
+        while (
+          self$it < self$max_iterations &
+            all(self$diff > self$tolerance)
+        ) {
           # add 1 because python indexing
           self$it <- as.numeric(tfe$tf_optimiser$iterations) + 1
           ## TF1/2 For Keras 3.0, this is the new syntax
@@ -170,10 +171,12 @@ tf_optimiser <- R6Class(
       }
     },
 
-    check_numerical_overflow = function(x,
-                                        arg = rlang::caller_arg(x),
-                                        call = rlang::caller_env()){
-      if (!is.finite(x)){
+    check_numerical_overflow = function(
+      x,
+      arg = rlang::caller_arg(x),
+      call = rlang::caller_env()
+    ) {
+      if (!is.finite(x)) {
         cli::cli_abort(
           message = c(
             "Detected numerical overflow during optimisation",
@@ -186,8 +189,6 @@ tf_optimiser <- R6Class(
         )
       }
     }
-
-
   )
 )
 
@@ -195,7 +196,6 @@ tfp_optimiser <- R6Class(
   "tfp_optimiser",
   inherit = optimiser,
   public = list(
-
     run_tfp_minimiser = function() {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -213,7 +213,7 @@ tfp_optimiser <- R6Class(
       }
 
       # bfgs uses value_and_gradient
-      value_and_gradient <- function(x){
+      value_and_gradient <- function(x) {
         tfp$math$value_and_gradient(
           function(x) objective(x),
           x
@@ -221,7 +221,6 @@ tfp_optimiser <- R6Class(
       }
 
       self$run_minimiser <- function(inits) {
-
         self$parameters$max_iterations <- self$max_iterations
         # TF1/2 todo
         # will be better in the long run to have some kind of
@@ -232,12 +231,12 @@ tfp_optimiser <- R6Class(
         } else if (self$name == "nelder_mead") {
           # nelder_mead uses different args, so we must change the ags in place
           self$parameters$batch_evaluate_objective <- FALSE
-          self$parameters$objective_function <- function(x){
+          self$parameters$objective_function <- function(x) {
             x_expand <- tf$expand_dims(x, axis = 0L)
             val <- objective(x_expand)
             tf$squeeze(val)
           }
-          self$parameters$initial_vertex <- fl(inits[1,])
+          self$parameters$initial_vertex <- fl(inits[1, ])
         }
 
         tfe$tf_optimiser <- do.call(
@@ -260,7 +259,6 @@ tf_compat_optimiser <- R6Class(
   "tf_compat_optimiser",
   inherit = optimiser,
   public = list(
-
     # some of the optimisers are very fussy about dtypes, so convert them now
     sanitise_dtypes = function() {
       self$set_dtype("global_step", tf$int64)
@@ -308,8 +306,10 @@ tf_compat_optimiser <- R6Class(
 
         # TF1/2 todo
         # get this to work inside TF with TF while loop
-        while (self$it < self$max_iterations &
-               all(self$diff > self$tolerance)) {
+        while (
+          self$it < self$max_iterations &
+            all(self$diff > self$tolerance)
+        ) {
           # add 1 because python indexing
           self$it <- self$it + 1
 
