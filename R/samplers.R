@@ -466,9 +466,10 @@ adaptive_hmc_sampler <- R6Class(
       # adapt and warm up
       # self$kernel?
       # self$init?
-        self$warm_up_sampler(kernel, init)
+        result <- self$warm_up_sampler(kernel, init)
     }
 
+    result
   },
 
   run_sampling = function(
