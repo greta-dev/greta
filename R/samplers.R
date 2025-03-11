@@ -120,10 +120,31 @@ print.sampler <- function(x, ...) {
   cat(msg)
 }
 
+tune_tf <- R6Class(
+  "tune_tf",
+  inherit = sampler,
+  public = list(
+    parameters = list(),
+    accept_target = NULL,
+    define_tf_kernel = NULL,
+    sampler_parameter_values = NULL
+  )
+)
+
+tune_r <- R6Class(
+  "tune_r",
+  inherit = sampler,
+  public = list(
+    parameters = list(),
+    accept_target = NULL,
+    define_tf_kernel = NULL,
+    sampler_parameter_values = NULL
+  )
+)
 
 hmc_sampler <- R6Class(
   "hmc_sampler",
-  inherit = sampler,
+  inherit = tune_r,
   public = list(
     parameters = list(
       Lmin = 10,
@@ -191,7 +212,7 @@ hmc_sampler <- R6Class(
 
 rwmh_sampler <- R6Class(
   "rwmh_sampler",
-  inherit = sampler,
+  inherit = tune_r,
   public = list(
     parameters = list(
       proposal = "normal",
@@ -268,7 +289,7 @@ rwmh_sampler <- R6Class(
 
 slice_sampler <- R6Class(
   "slice_sampler",
-  inherit = sampler,
+  inherit = tune_r,
   public = list(
     parameters = list(
       max_doublings = NA
