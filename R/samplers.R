@@ -346,6 +346,7 @@ adaptive_hmc_sampler <- R6Class(
         target_log_prob_fn = dag$tf_log_prob_function_adjusted,
         step_size = 1,
         num_adaptation_steps = as.integer(self$warmup),
+        # TODO potentially remove this line
         max_leapfrog_steps = adaptive_hmc_max_leapfrog_steps
       )
 
@@ -358,6 +359,45 @@ adaptive_hmc_sampler <- R6Class(
         sampler_kernel
       )
     },
+
+    # given MCMC kernel `kernel` and initial model parameter state `init`, adapt
+    # the kernel tuning parameters whilst simultaneously burning-in the model
+    # parameter state. Return both finalised kernel tuning parameters and the
+    # burned-in model parameter state
+    warm_up_sampler = function(kernel, init) {
+
+      # get the predetermined adaptation period of the kernel
+      n_adapt <- kernel$num_adaptation_steps
+
+      # make the uncompiled function (with curried arguments)
+      warmup_raw <- function() {
+        tfp$mcmc$sample_chain(
+          num_results = n_adapt,
+          current_state = init,
+          kernel = kernel,
+          return_final_kernel_results = TRUE,
+          trace_fn = function(current_state, kernel_results) {
+            kernel_results$step #kernel_results
+          }
+        )
+      }
+
+      # compile it into a concrete function
+      warmup <- tf_function(warmup_raw)
+
+      # execute it
+      result <- warmup()
+
+      # return the last (burned-in) state of the model parameters and the final
+      # (tuned) kernel parameters
+      list(
+        kernel = kernel,
+        kernel_results = result$final_kernel_results,
+        current_state = get_last_state(result$all_states)
+      )
+
+    }
+
     sampler_parameter_values = function() {
       # random number of integration steps
       max_leapfrog_steps <- self$parameters$max_leapfrog_steps
@@ -372,6 +412,160 @@ adaptive_hmc_sampler <- R6Class(
         # adaptive_hmc_diag_sd = diag_sd,
         method = method
       )
+    },
+
+  # given a warmed up sampler object, return a compiled TF function
+  # that generates a new burst of samples from samples from it
+  make_sampler_function = function(warm_sampler) {
+
+    # make the uncompiled function (with curried arguments)
+    sample_raw <- function(current_state, n_samples) {
+      results <- tfp$mcmc$sample_chain(
+        # how many iterations
+        num_results = n_samples,
+        # where to start from
+        current_state = current_state,
+        # kernel
+        kernel = warm_sampler$kernel,
+        # tuned sampler settings
+        previous_kernel_results = warm_sampler$kernel_results,
+        # what to trace (nothing)
+        trace_fn = function(current_state, kernel_results) {
+          # could compute badness here to save memory?
+          # is.finite(kernel_results$inner_results$inner_results$inner_results$log_accept_ratio)
+          kernel_results
+        }
+      )
+      # return the parameter states and the kernel results
+      list(
+        all_states = results$all_states,
+        kernel_results = results$trace
+      )
     }
-  )
+
+    # compile it into a concrete function and return
+    sample <- tf_function(sample_raw,
+                          list(
+                            as_tensorspec(warm_sampler$current_state),
+                            tf$TensorSpec(shape = c(),
+                                          dtype = tf$int32)
+                          ))
+
+    sample
+
+  },
+
+  run_warmup = function(
+    n_samples,
+    pb_update,
+    ideal_burst_size,
+    verbose
+  ) {
+    perform_warmup <- self$warmup > 0
+    if (perform_warmup) {
+      # adapt and warm up
+      # self$kernel?
+      # self$init?
+        self$warm_up_sampler(kernel, init)
+    }
+
+  },
+
+  run_sampling = function(
+    n_samples,
+    pb_update,
+    ideal_burst_size,
+    trace_batch_size,
+    thin,
+    verbose
+  ) {
+    perform_sampling <- n_samples > 0
+    if (perform_sampling) {
+      # on exiting during the main sampling period (even if killed by the
+      # user) trace the free state values
+
+      on.exit(self$trace_values(trace_batch_size), add = TRUE)
+
+      # main sampling
+      if (verbose) {
+        pb_sampling <- create_progress_bar(
+          phase = "sampling",
+          iter = c(self$warmup, n_samples),
+          pb_update = pb_update,
+          width = self$pb_width
+        )
+        iterate_progress_bar(
+          pb = pb_sampling,
+          it = 0,
+          rejects = 0,
+          chains = self$n_chains,
+          file = self$pb_file
+        )
+      } else {
+        pb_sampling <- NULL
+      }
+
+      ### Adaptive start
+      print("Sampling parameters")
+      for (burst in seq_len(n_bursts)) {
+        burst_result <- sample(
+          current_state = current_state,
+          n_samples = burst_size
+        )
+
+        # trace the MCMC results from this burst
+        burst_idx <- (burst - 1) * burst_size + seq_len(burst_size)
+        trace[burst_idx, , ] <- as.array(burst_result$all_states)
+
+        # overwrite the current state
+        current_state <- get_last_state(burst_result$all_states)
+
+        # accumulate and report on the badness
+        new_badness <- sum(bad_steps(burst_result$kernel_results))
+        n_bad <- n_bad + new_badness
+        n_evaluations <- burst * burst_size * n_chains
+        perc_badness <- round(100 * n_bad / n_evaluations)
+
+        # report on progress
+        print(sprintf("burst %i of %i (%i%s bad)",
+                      burst,
+                      n_bursts,
+                      perc_badness,
+                      "%"))
+
+      }
+      ### Adaptive end
+
+      # split up warmup iterations into bursts of sampling
+      burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
+      completed_iterations <- cumsum(burst_lengths)
+
+      for (burst in seq_along(burst_lengths)) {
+        # so these bursts are R objects being passed through to python
+        # and how often to return them
+        # TF1/2 check todo
+        # replace with define_tf_draws
+        self$run_burst(n_samples = burst_lengths[burst], thin = thin)
+        # trace is it receiving the python
+        self$trace()
+
+        if (verbose) {
+          # update the progress bar/percentage log
+          iterate_progress_bar(
+            pb = pb_sampling,
+            it = completed_iterations[burst],
+            rejects = self$numerical_rejections,
+            chains = self$n_chains,
+            file = self$pb_file
+          )
+
+          self$write_percentage_log(
+            total = n_samples,
+            completed = completed_iterations[burst],
+            stage = "sampling"
+          )
+        }
+      }
+    } # end sampling
+  },
 )
