@@ -35,12 +35,14 @@ test_that("bad mcmc proposals are rejected", {
   m <- model(z, precision = "single")
   expect_snapshot(
     error = TRUE,
-    mcmc(m,
-         chains = 1,
-         n_samples = 1,
-         warmup = 0,
-         sampler = adaptive_hmc(),
-         verbose = FALSE)
+    mcmc(
+      m,
+      chains = 1,
+      n_samples = 1,
+      warmup = 0,
+      sampler = adaptive_hmc(),
+      verbose = FALSE
+    )
   )
 
   # proposals that are fine, but rejected anyway
