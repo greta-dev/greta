@@ -499,21 +499,19 @@ adaptive_hmc_sampler <- R6Class(
       ideal_burst_size,
       verbose
     ) {
-      perform_warmup <- self$warmup > 0
-      if (perform_warmup) {
-        # adapt and warm up
-        param_vec <- unlist(self$sampler_parameter_values())
-        sampler_kernel <- self$define_tf_kernel(
-          sampler_param_vec = param_vec
-        )
-        init <- self$free_state
-        n_adapt <- as.integer(param_vec)
-        result <- self$warm_up_sampler(
-          sampler_kernel = sampler_kernel,
-          n_adapt = n_adapt,
-          free_state = init
-        )
-      }
+      check_if_warmup_gt_zero(self$warmup)
+      # adapt and warm up
+      param_vec <- unlist(self$sampler_parameter_values())
+      sampler_kernel <- self$define_tf_kernel(
+        sampler_param_vec = param_vec
+      )
+      init <- self$free_state
+      n_adapt <- as.integer(param_vec)
+      result <- self$warm_up_sampler(
+        sampler_kernel = sampler_kernel,
+        n_adapt = n_adapt,
+        free_state = init
+      )
 
       self$warm_results <- result
       result

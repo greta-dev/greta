@@ -2043,6 +2043,17 @@ inform_if_local_parallel_multiple_samplers <- function(
   }
 }
 
+check_if_warmup_gt_zero <- function(warmup, call = rlang::caller_env()) {
+  warmup_lte_zero <- warmup <= 0
+  cli::cli_abort(
+    message = c(
+      "{.arg warmup} must be greater than 0 for {.fun adaptive_hmc} sampler",
+      "We saw: {.val {warmup}}"
+    ),
+    call = call
+  )
+}
+
 
 checks_module <- module(
   check_tf_version,

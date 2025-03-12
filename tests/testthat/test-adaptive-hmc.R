@@ -11,7 +11,13 @@ test_that("bad mcmc proposals are rejected", {
 
   # # catch badness in the progress bar
   out <- get_output(
-    mcmc(m, n_samples = 10, warmup = 0, pb_update = 10)
+    mcmc(
+      m,
+      n_samples = 10,
+      warmup = 0,
+      pb_update = 10,
+      sampler = adaptive_hmc()
+    )
   )
   expect_match(out, "100% bad")
 
