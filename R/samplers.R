@@ -95,7 +95,6 @@ slice <- function(max_doublings = 5) {
 }
 
 #' @rdname samplers
-#' @export
 #'
 #' @param epsilon leapfrog stepsize hyperparameter (positive, will be tuned)
 #' @param diag_sd estimate of the posterior marginal standard deviations
@@ -108,6 +107,7 @@ slice <- function(max_doublings = 5) {
 #'   not provided in this. The number of chains cannot be less than 2, due to
 #'   how adaptive HMC works. `diag_sd` is used to rescale the parameter space to
 #'   make it more uniform, and make sampling more efficient.
+#' @export
 adaptive_hmc <- function(
   max_leapfrog_steps = 1000,
   epsilon = 0.1,
@@ -564,32 +564,49 @@ adaptive_hmc_sampler <- R6Class(
         # use this to compile the warmed version
         sample <- make_sampler_function(self$warm_results)
 
-        # TODO
-        # unsure how to get the first current state? I think this is right?
         current_state <- self$warm_results$current_state
-        trace <- array(NA, dim = c(n_samples, dim(current_state)))
+        # trace <- array(NA, dim = c(n_samples, dim(current_state)))
         # track numerical rejections
-        n_bad <- 0
+        # n_bad <- 0
 
         for (burst in seq_along(burst_lengths)) {
           burst_size <- burst_lengths[burst]
-          burst_result <- sample(
+          batch_results <- sample(
             current_state = current_state,
             n_samples = burst_size
           )
 
+          free_state_draws <- as.array(batch_results$all_states)
+
+          # if there is one sample at a time, and it's rejected, conversion from
+          # python back to R can drop a dimension, so handle that here. Ugh.
+          if (n_dim(free_state_draws) != 3) {
+            dim(free_state_draws) <- c(1, dim(free_state_draws))
+          }
+
+          self$last_burst_free_states <- split_chains(free_state_draws)
+
+          n_draws <- nrow(free_state_draws)
+          if (n_draws > 0) {
+            free_state <- free_state_draws[n_draws, , , drop = FALSE]
+            dim(free_state) <- dim(free_state)[-1]
+            self$free_state <- free_state
+          }
+
+          self$trace()
+
           # trace the MCMC results from this burst
-          burst_idx <- (burst - 1) * burst_size + seq_len(burst_size)
-          trace[burst_idx, , ] <- as.array(burst_result$all_states)
+          # burst_idx <- (burst - 1) * burst_size + seq_len(burst_size)
+          # trace[burst_idx, , ] <- as.array(batch_results$all_states)
 
           # overwrite the current state
-          current_state <- get_last_state(burst_result$all_states)
+          current_state <- get_last_state(batch_results$all_states)
 
           # accumulate and report on the badness
-          new_badness <- sum(bad_steps(burst_result$kernel_results))
-          n_bad <- n_bad + new_badness
-          n_evaluations <- burst * burst_size * n_chains
-          perc_badness <- round(100 * n_bad / n_evaluations)
+          # new_badness <- sum(bad_steps(batch_results$kernel_results))
+          # n_bad <- n_bad + new_badness
+          # n_evaluations <- burst * burst_size * self$n_chains
+          # perc_badness <- round(100 * n_bad / n_evaluations)
 
           # report on progress
           # print(sprintf(
