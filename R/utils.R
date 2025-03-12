@@ -1080,7 +1080,7 @@ n_warmup <- function(x) {
   x_info$warmup
 }
 
-as_tensor_spec <- function(tensor) {
+as_tensorspec <- function(tensor) {
   tf$TensorSpec(shape = tensor$shape, dtype = tensor$dtype)
 }
 
@@ -1151,7 +1151,7 @@ make_sampler_function <- function(warm_sampler) {
   }
 
   # compile it into a concrete function and return
-  sample <- tf_function(
+  sample <- tensorflow::tf_function(
     sample_raw,
     list(
       as_tensorspec(warm_sampler$current_state),

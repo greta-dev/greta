@@ -490,6 +490,9 @@ adaptive_hmc_sampler <- R6Class(
       sample
     },
 
+    # prepare a slot to put the warmed up results into
+    warm_results = NULL,
+
     run_warmup = function(
       n_samples,
       pb_update,
@@ -512,6 +515,7 @@ adaptive_hmc_sampler <- R6Class(
         )
       }
 
+      self$warm_results <- result
       result
     },
 
@@ -550,8 +554,25 @@ adaptive_hmc_sampler <- R6Class(
         }
 
         ### Adaptive start
-        print("Sampling parameters")
-        for (burst in seq_len(n_bursts)) {
+        # split up warmup iterations into bursts of sampling
+        burst_lengths <- as.integer(self$burst_lengths(
+          n_samples,
+          ideal_burst_size
+        ))
+        completed_iterations <- cumsum(burst_lengths)
+
+        # use this to compile the warmed version
+        sample <- make_sampler_function(self$warm_results)
+
+        # TODO
+        # unsure how to get the first current state? I think this is right?
+        current_state <- self$warm_results$current_state
+        trace <- array(NA, dim = c(n_samples, dim(current_state)))
+        # track numerical rejections
+        n_bad <- 0
+
+        for (burst in seq_along(burst_lengths)) {
+          burst_size <- burst_lengths[burst]
           burst_result <- sample(
             current_state = current_state,
             n_samples = burst_size
@@ -571,28 +592,13 @@ adaptive_hmc_sampler <- R6Class(
           perc_badness <- round(100 * n_bad / n_evaluations)
 
           # report on progress
-          print(sprintf(
-            "burst %i of %i (%i%s bad)",
-            burst,
-            n_bursts,
-            perc_badness,
-            "%"
-          ))
-        }
-        ### Adaptive end
-
-        # split up warmup iterations into bursts of sampling
-        burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
-        completed_iterations <- cumsum(burst_lengths)
-
-        for (burst in seq_along(burst_lengths)) {
-          # so these bursts are R objects being passed through to python
-          # and how often to return them
-          # TF1/2 check todo
-          # replace with define_tf_draws
-          self$run_burst(n_samples = burst_lengths[burst], thin = thin)
-          # trace is it receiving the python
-          self$trace()
+          # print(sprintf(
+          #   "burst %i of %i (%i%s bad)",
+          #   burst,
+          #   n_bursts,
+          #   perc_badness,
+          #   "%"
+          # ))
 
           if (verbose) {
             # update the progress bar/percentage log
@@ -612,6 +618,7 @@ adaptive_hmc_sampler <- R6Class(
           }
         }
       } # end sampling
+      ### Adaptive end
     }
   )
 )
