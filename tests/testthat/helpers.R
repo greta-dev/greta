@@ -714,6 +714,7 @@ p_theta_greta <- function(
   data,
   p_theta,
   p_x_bar_theta,
+  # TODO note that we might want to change this to adaptive_hmc()
   sampler = hmc(),
   warmup = 1000
 ) {
@@ -934,6 +935,7 @@ get_distribution_name <- function(x) {
 check_samples <- function(
   x,
   iid_function,
+  # TODO note that we might want to change this to adaptive_hmc
   sampler = hmc(),
   n_effective = 3000,
   title = NULL,

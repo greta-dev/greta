@@ -5,6 +5,7 @@
 \alias{hmc}
 \alias{rwmh}
 \alias{slice}
+\alias{adaptive_hmc}
 \title{MCMC samplers}
 \usage{
 hmc(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1)
@@ -12,6 +13,13 @@ hmc(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1)
 rwmh(proposal = c("normal", "uniform"), epsilon = 0.1, diag_sd = 1)
 
 slice(max_doublings = 5)
+
+adaptive_hmc(
+  max_leapfrog_steps = 1000,
+  epsilon = 0.1,
+  diag_sd = 1,
+  method = "SNAPER"
+)
 }
 \arguments{
 \item{Lmin}{minimum number of leapfrog steps (positive integer, Lmin > Lmax)}
@@ -27,6 +35,12 @@ slice(max_doublings = 5)
 
 \item{max_doublings}{the maximum number of iterations of the 'doubling'
 algorithm used to adapt the size of the slice}
+
+\item{max_leapfrog_steps}{numeric. Default 1000. Maximum number of leapfrog
+steps used. The algorithm will determine the optimal number less than this.}
+
+\item{method}{character length one. Currently can only be "SNAPER" but in
+the future this may expand to other adaptive samplers.}
 }
 \value{
 a \code{sampler} object that can be passed to \code{\link[=mcmc]{mcmc()}}.
@@ -53,4 +67,9 @@ is implemented for uniform and normal proposals.
 
 \code{slice()} implements a multivariate slice sampling algorithm.
 The parameter \code{max_doublings} is not tuned during warmup.
+
+For \code{adaptive_hmc()}. The Lmin and Lmax parameters are learnt and so
+not provided in this. The number of chains cannot be less than 2, due to
+how adaptive HMC works. \code{diag_sd} is used to rescale the parameter space to
+make it more uniform, and make sampling more efficient.
 }
