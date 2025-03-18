@@ -177,8 +177,9 @@ hmc_sampler <- R6Class(
 
       free_state_size <- length(sampler_param_vec) - 2
 
-      # TF1/2 check
-      # this will likely get replaced...
+      # TODO we will wrap these up into adaptive sampling to learn better
+      # similar to the adaptive_hmc - to put more things into TFP,
+      # rather than going back and forth between R and TF
 
       hmc_l <- sampler_param_vec[0]
       hmc_epsilon <- sampler_param_vec[1]
@@ -198,6 +199,12 @@ hmc_sampler <- R6Class(
 
       # build the kernel
       # nolint start
+      # TODO HMC with momentum would get adaptation addition
+      # one of the is dual averaging step size adapation (see adaptive_hmc)
+      # the other is adapt_momentum
+      # diagonal mass
+      # https://www.tensorflow.org/probability/api_docs/python/tfp/experimental/mcmc/DiagonalMassMatrixAdaptation
+      #
 
       sampler_kernel <- tfp$mcmc$HamiltonianMonteCarlo(
         target_log_prob_fn = dag$tf_log_prob_function_adjusted,
@@ -365,30 +372,26 @@ adaptive_hmc_sampler <- R6Class(
     ),
     accept_target = 0.651,
 
+    # TODO
+    # Eventually we will adapt the other samplers to have an interface
+    # more in line with this - where we do the adaptation in tensorflow
     define_tf_kernel = function(sampler_param_vec) {
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # free_state_size <- length(sampler_param_vec) - 2
-      free_state_size <- length(sampler_param_vec)
-
       adaptive_hmc_max_leapfrog_steps <- tf$cast(
-        x = sampler_param_vec[1],
+        x = self$parameters$max_leapfrog_steps,
         dtype = tf$int32
       )
-      # TODO pipe that in properly
-      n_warmup <- sampler_param_vec[1]
-      # adaptive_hmc_epsilon <- sampler_param_vec[1]
-      # adaptive_hmc_diag_sd <- sampler_param_vec[2:(1+free_state_size)]
 
       kernel_base <- tfp$experimental$mcmc$SNAPERHamiltonianMonteCarlo(
         target_log_prob_fn = dag$tf_log_prob_function_adjusted,
         step_size = 1,
         num_adaptation_steps = as.integer(self$warmup),
-        # TODO potentially remove this line
         max_leapfrog_steps = adaptive_hmc_max_leapfrog_steps
       )
 
+      # learns the step size
       sampler_kernel <- tfp$mcmc$DualAveragingStepSizeAdaptation(
         inner_kernel = kernel_base,
         num_adaptation_steps = as.integer(self$warmup)
@@ -403,13 +406,13 @@ adaptive_hmc_sampler <- R6Class(
     # `free_state`, adapt the kernel tuning parameters whilst simultaneously
     # burning-in the model parameter state. Return both finalised kernel
     # tuning parameters and the burned-in model parameter state
-    warm_up_sampler = function(sampler_kernel, n_adapt, free_state) {
+    warm_up_sampler = function(sampler_kernel, free_state) {
       # get the predetermined adaptation period of the kernel
 
       # make the uncompiled function (with curried arguments)
       warmup_raw <- function() {
         tfp$mcmc$sample_chain(
-          num_results = n_adapt,
+          num_results = as.integer(sampler_kernel$num_adaptation_steps),
           current_state = free_state,
           kernel = sampler_kernel,
           return_final_kernel_results = TRUE,
@@ -499,21 +502,12 @@ adaptive_hmc_sampler <- R6Class(
       ideal_burst_size,
       verbose
     ) {
-      perform_warmup <- self$warmup > 0
-      if (perform_warmup) {
-        # adapt and warm up
-        param_vec <- unlist(self$sampler_parameter_values())
-        sampler_kernel <- self$define_tf_kernel(
-          sampler_param_vec = param_vec
-        )
-        init <- self$free_state
-        n_adapt <- as.integer(param_vec)
-        result <- self$warm_up_sampler(
-          sampler_kernel = sampler_kernel,
-          n_adapt = n_adapt,
-          free_state = init
-        )
-      }
+      sampler_kernel <- self$define_tf_kernel()
+      init <- self$free_state
+      result <- self$warm_up_sampler(
+        sampler_kernel = sampler_kernel,
+        free_state = init
+      )
 
       self$warm_results <- result
       result
@@ -527,6 +521,16 @@ adaptive_hmc_sampler <- R6Class(
       thin,
       verbose
     ) {
+      # There's a couple of possibilities
+      ## warmup already happened previously, so get already-warmup sampler
+      ## warmup never happened, so get an unwarmed up sampler
+
+      # warmup_status <- self$warmup_status()
+      # self$warm_results
+      # self$warmup
+      # warmup_has_happened <- self$has_warmup_happened()
+      # warmup
+
       perform_sampling <- n_samples > 0
       if (perform_sampling) {
         # on exiting during the main sampling period (even if killed by the
