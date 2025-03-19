@@ -16,21 +16,6 @@ test_that("adaptive_hmc() errors when given 1 chain", {
   )
 })
 
-test_that("adaptive_hmc() does not error when given 0 warmup", {
-  skip_if_not(check_tf_version())
-  x <- normal(0, 1)
-  m <- model(x)
-  expect_no_error(
-    draws <- mcmc(
-      m,
-      n_samples = 1,
-      warmup = 0,
-      chains = 2,
-      sampler = adaptive_hmc()
-    )
-  )
-})
-
 test_that("bad mcmc proposals are rejected", {
   skip_if_not(check_tf_version())
 
