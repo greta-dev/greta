@@ -428,12 +428,21 @@ adaptive_hmc_sampler <- R6Class(
       # execute it
       result <- warmup()
 
+      # If no warmup, return the free state to use as initials in sampling,
+      # Otherwise, use the last chunk of all_states, which has been tuned
+      no_warmup <- as.integer(sampler_kernel$num_adaptation_steps) <= 0
+      if (no_warmup) {
+        current_state <- tensorflow::as_tensor(free_state)
+      } else {
+        current_state <- get_last_state(result$all_states)
+      }
+
       # return the last (burned-in) state of the model parameters and the final
       # (tuned) kernel parameters
       list(
         kernel = sampler_kernel,
         kernel_results = result$final_kernel_results,
-        current_state = get_last_state(result$all_states)
+        current_state = current_state
       )
     },
 
