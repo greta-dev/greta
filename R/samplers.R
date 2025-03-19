@@ -517,6 +517,7 @@ adaptive_hmc_sampler <- R6Class(
         sampler_kernel = sampler_kernel,
         free_state = init
       )
+      self$update_rejection(result)
 
       self$warm_results <- result
       result
@@ -606,6 +607,8 @@ adaptive_hmc_sampler <- R6Class(
             self$free_state <- free_state
           }
 
+          self$update_rejection(batch_results)
+
           self$trace()
 
           # trace the MCMC results from this burst
@@ -614,21 +617,6 @@ adaptive_hmc_sampler <- R6Class(
 
           # overwrite the current state
           current_state <- get_last_state(batch_results$all_states)
-
-          # accumulate and report on the badness
-          # new_badness <- sum(bad_steps(batch_results$kernel_results))
-          # n_bad <- n_bad + new_badness
-          # n_evaluations <- burst * burst_size * self$n_chains
-          # perc_badness <- round(100 * n_bad / n_evaluations)
-
-          # report on progress
-          # print(sprintf(
-          #   "burst %i of %i (%i%s bad)",
-          #   burst,
-          #   n_bursts,
-          #   perc_badness,
-          #   "%"
-          # ))
 
           if (verbose) {
             # update the progress bar/percentage log
@@ -649,6 +637,14 @@ adaptive_hmc_sampler <- R6Class(
         }
       } # end sampling
       ### Adaptive end
+    },
+
+    update_rejection = function(results) {
+      if (self$uses_metropolis) {
+        # accumulate and report on the badness
+        bad <- sum(bad_steps(results$kernel_results))
+        self$numerical_rejections <- self$numerical_rejections + bad
+      }
     }
   )
 )
