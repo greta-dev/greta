@@ -20,8 +20,7 @@ test_that("adaptive_hmc() does not error when given 0 warmup", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
   m <- model(x)
-  expect_snapshot(
-    error = TRUE,
+  expect_no_error(
     draws <- mcmc(
       m,
       n_samples = 1,

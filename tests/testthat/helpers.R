@@ -661,7 +661,8 @@ check_geweke <- function(
   p_x_bar_theta,
   niter = 2000,
   warmup = 1000,
-  thin = 1
+  thin = 1,
+  chains = 1
 ) {
   # sample independently
   target_theta <- p_theta(niter)
@@ -674,7 +675,8 @@ check_geweke <- function(
     p_theta = p_theta,
     p_x_bar_theta = p_x_bar_theta,
     sampler = sampler,
-    warmup = warmup
+    warmup = warmup,
+    chains = chains
   )
 
   geweke_checks <- list(
@@ -716,7 +718,8 @@ p_theta_greta <- function(
   p_x_bar_theta,
   # TODO note that we might want to change this to adaptive_hmc()
   sampler = hmc(),
-  warmup = 1000
+  warmup = 1000,
+  chains
 ) {
   # set up and initialize trace
   theta <- rep(NA, niter)
@@ -727,7 +730,7 @@ p_theta_greta <- function(
     model,
     warmup = warmup,
     n_samples = 1,
-    chains = 1,
+    chains = chains,
     sampler = sampler,
     verbose = FALSE
   )

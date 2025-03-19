@@ -98,7 +98,8 @@ test_that("adaptive hmc sampler passes geweke tests", {
     model = model,
     data = x,
     p_theta = p_theta,
-    p_x_bar_theta = p_x_bar_theta
+    p_x_bar_theta = p_x_bar_theta,
+    chains = 2
   )
 
   geweke_qq(geweke_adaptive_hmc, title = "adaptive hmc sampler Geweke test")
