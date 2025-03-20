@@ -375,6 +375,8 @@ adaptive_hmc_sampler <- R6Class(
     # TODO
     # Eventually we will adapt the other samplers to have an interface
     # more in line with this - where we do the adaptation in tensorflow
+    sampler_kernel = NULL,
+
     define_tf_kernel = function(sampler_param_vec) {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -392,13 +394,9 @@ adaptive_hmc_sampler <- R6Class(
       )
 
       # learns the step size
-      sampler_kernel <- tfp$mcmc$DualAveragingStepSizeAdaptation(
+      self$sampler_kernel <- tfp$mcmc$DualAveragingStepSizeAdaptation(
         inner_kernel = kernel_base,
         num_adaptation_steps = as.integer(self$warmup)
-      )
-
-      return(
-        sampler_kernel
       )
     },
 
@@ -464,7 +462,16 @@ adaptive_hmc_sampler <- R6Class(
 
     # given a warmed up sampler object, return a compiled TF function
     # that generates a new burst of samples from samples from it
-    make_sampler_function = function(warm_sampler) {
+    sampler_function = NULL,
+    make_sampler_function = function(sampler) {
+      # if warmed up?
+      warmed_up <- !is.null(self$warm_results)
+      if (warmed_up) {
+        sampler <- self$warm_results
+      } else {
+        sampler <- self$sampler_kernel
+      }
+
       # make the uncompiled function (with curried arguments)
       sample_raw <- function(current_state, n_samples) {
         results <- tfp$mcmc$sample_chain(
@@ -473,9 +480,9 @@ adaptive_hmc_sampler <- R6Class(
           # where to start from
           current_state = current_state,
           # kernel
-          kernel = warm_sampler$kernel,
+          kernel = sampler$kernel,
           # tuned sampler settings
-          previous_kernel_results = warm_sampler$kernel_results,
+          previous_kernel_results = sampler$kernel_results,
           # what to trace (nothing)
           trace_fn = function(current_state, kernel_results) {
             # could compute badness here to save memory?
@@ -491,15 +498,13 @@ adaptive_hmc_sampler <- R6Class(
       }
 
       # compile it into a concrete function and return
-      sample <- tensorflow::tf_function(
+      self$sampler_function <- tensorflow::tf_function(
         sample_raw,
         list(
-          as_tensorspec(warm_sampler$current_state),
+          as_tensorspec(sampler$current_state),
           tf$TensorSpec(shape = c(), dtype = tf$int32)
         )
       )
-
-      sample
     },
 
     # prepare a slot to put the warmed up results into
@@ -511,11 +516,10 @@ adaptive_hmc_sampler <- R6Class(
       ideal_burst_size,
       verbose
     ) {
-      sampler_kernel <- self$define_tf_kernel()
-      init <- self$free_state
+      self$define_tf_kernel()
       self$warm_up_sampler(
-        sampler_kernel = sampler_kernel,
-        free_state = init
+        sampler_kernel = self$sampler_kernel,
+        free_state = self$free_state
       )
     },
 
@@ -571,8 +575,16 @@ adaptive_hmc_sampler <- R6Class(
         ))
         completed_iterations <- cumsum(burst_lengths)
 
+        # maybe warm up a sampler
+        if (is.null(self$warm_results)) {
+          self$run_warmup()
+        }
+        # maybe compile a sampling function
+        if (is.null(self$sampler_function)) {
+          self$make_sampler_function()
+        }
         # use this to compile the warmed version
-        sample <- make_sampler_function(self$warm_results)
+        # sample <- self$make_sampler_function()
 
         current_state <- self$warm_results$current_state
         # trace <- array(NA, dim = c(n_samples, dim(current_state)))
@@ -581,7 +593,7 @@ adaptive_hmc_sampler <- R6Class(
 
         for (burst in seq_along(burst_lengths)) {
           burst_size <- burst_lengths[burst]
-          batch_results <- sample(
+          batch_results <- self$sampler_function(
             current_state = current_state,
             n_samples = burst_size
           )

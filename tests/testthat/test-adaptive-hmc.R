@@ -82,3 +82,25 @@ test_that("bad mcmc proposals are rejected", {
     verbose = FALSE
   ))
 })
+
+test_that("extra_samples works with adaptive_hmc()", {
+  skip_if_not(check_tf_version())
+
+  # set up model
+  a <- normal(0, 1)
+  m <- model(a)
+
+  draws <- mcmc(
+    m,
+    warmup = 10,
+    n_samples = 10,
+    verbose = FALSE,
+    sampler = adaptive_hmc()
+  )
+
+  more_draws <- extra_samples(draws, 20, verbose = FALSE)
+
+  expect_true(inherits(more_draws, "greta_mcmc_list"))
+  expect_true(coda::niter(more_draws) == 30)
+  expect_true(coda::nchain(more_draws) == 4)
+})

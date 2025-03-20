@@ -142,12 +142,15 @@ sampler <- R6Class(
 
       # how big would we like the bursts to be
       ideal_burst_size <- ifelse(one_by_one, 1L, pb_update)
-      self$run_warmup(
-        n_samples = n_samples,
-        pb_update = pb_update,
-        ideal_burst_size = ideal_burst_size,
-        verbose = verbose
-      )
+      do_warmup <- self$warmup > 0
+      if (do_warmup) {
+        self$run_warmup(
+          n_samples = n_samples,
+          pb_update = pb_update,
+          ideal_burst_size = ideal_burst_size,
+          verbose = verbose
+        )
+      }
 
       self$run_sampling(
         n_samples = n_samples,
