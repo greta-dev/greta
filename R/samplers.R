@@ -439,7 +439,7 @@ adaptive_hmc_sampler <- R6Class(
 
       # return the last (burned-in) state of the model parameters and the final
       # (tuned) kernel parameters
-      list(
+      self$warm_results <- list(
         kernel = sampler_kernel,
         kernel_results = result$final_kernel_results,
         current_state = current_state
@@ -513,14 +513,10 @@ adaptive_hmc_sampler <- R6Class(
     ) {
       sampler_kernel <- self$define_tf_kernel()
       init <- self$free_state
-      result <- self$warm_up_sampler(
+      self$warm_up_sampler(
         sampler_kernel = sampler_kernel,
         free_state = init
       )
-      self$update_rejection(result)
-
-      self$warm_results <- result
-      result
     },
 
     run_sampling = function(
