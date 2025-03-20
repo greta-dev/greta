@@ -99,10 +99,15 @@ test_that("adaptive hmc sampler passes geweke tests", {
     data = x,
     p_theta = p_theta,
     p_x_bar_theta = p_x_bar_theta,
-    chains = 2
+    chains = 2,
+    niter = 200,
+    warmup = 100,
+    thin = 5
   )
 
   geweke_qq(geweke_adaptive_hmc, title = "adaptive hmc sampler Geweke test")
 
-  testthat::expect_gte(geweke_adaptive_hmc$p.value, 0.005)
+  geweke_stat_adaptive_hmc <- geweke_ks(geweke_adaptive_hmc)
+
+  testthat::expect_gte(geweke_stat_adaptive_hmc$p.value, 0.005)
 })
