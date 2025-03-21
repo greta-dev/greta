@@ -588,7 +588,7 @@ adaptive_hmc_sampler <- R6Class(
         # use this to compile the warmed version
         # sample <- self$make_sampler_function()
 
-        current_state <- self$warm_results$current_state
+        current_state <- self$current_state
         # trace <- array(NA, dim = c(n_samples, dim(current_state)))
         # track numerical rejections
         # n_bad <- 0
