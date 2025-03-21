@@ -400,6 +400,8 @@ adaptive_hmc_sampler <- R6Class(
       )
     },
 
+    current_state = NULL,
+
     # given MCMC kernel `sampler_kernel` and initial model parameter state
     # `free_state`, adapt the kernel tuning parameters whilst simultaneously
     # burning-in the model parameter state. Return both finalised kernel
@@ -430,9 +432,9 @@ adaptive_hmc_sampler <- R6Class(
       # Otherwise, use the last chunk of all_states, which has been tuned
       no_warmup <- as.integer(sampler_kernel$num_adaptation_steps) <= 0
       if (no_warmup) {
-        current_state <- tensorflow::as_tensor(free_state)
+        self$current_state <- tensorflow::as_tensor(free_state)
       } else {
-        current_state <- get_last_state(result$all_states)
+        self$current_state <- get_last_state(result$all_states)
       }
 
       # return the last (burned-in) state of the model parameters and the final
@@ -440,7 +442,7 @@ adaptive_hmc_sampler <- R6Class(
       self$warm_results <- list(
         kernel = sampler_kernel,
         kernel_results = result$final_kernel_results,
-        current_state = current_state
+        current_state = self$current_state
       )
     },
 
@@ -501,7 +503,7 @@ adaptive_hmc_sampler <- R6Class(
       self$sampler_function <- tensorflow::tf_function(
         sample_raw,
         list(
-          as_tensorspec(sampler$current_state),
+          as_tensorspec(self$current_state),
           tf$TensorSpec(shape = c(), dtype = tf$int32)
         )
       )
