@@ -756,8 +756,19 @@ p_theta_greta <- function(
     # samples, now using this value of x (slow, but necessary in eager mode)
     dag$tf_log_prob_function <- NULL
     dag$define_tf_log_prob_function()
+
     sampler <- attr(draws, "model_info")$samplers[[1]]
-    sampler$define_tf_evaluate_sample_batch()
+
+    # we need a condition inside the geweke test where if it's adaptive_hmc we
+    # recreate the log prob function, recreate the default kernel, replace that
+    # inside the warmed up results, and then recreate the sampler function
+    if (inherits(sampler, "adaptive_hmc_sampler")) {
+      sampler$define_tf_kernel()
+      sampler$warm_results$kernel <- sampler$sampler_kernel
+      sampler$make_sampler_function()
+    } else {
+      sampler$define_tf_evaluate_sample_batch()
+    }
 
     # take anoteher sample
     draws <- extra_samples(
