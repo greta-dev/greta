@@ -608,6 +608,8 @@ adaptive_hmc_sampler <- R6Class(
           if (n_draws > 0) {
             free_state <- free_state_draws[n_draws, , , drop = FALSE]
             dim(free_state) <- dim(free_state)[-1]
+            ## NG - free_state and self$free_state are the same here only
+            ## when doing the check_geweke step, otherwise they are different
             self$free_state <- free_state
           }
 
