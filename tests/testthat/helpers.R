@@ -764,9 +764,8 @@ p_theta_greta <- function(
     # inside the warmed up results, and then recreate the sampler function
     if (inherits(sampler, "adaptive_hmc_sampler")) {
       sampler$define_tf_kernel()
-      # sample_results <- sampler$sampling_results$kernel_results
-      # sampler$warm_results$kernel_results <- sample_results
-      # sampler$warm_results$kernel <- sampler$sampler_kernel
+      sample_results <- sampler$sampling_results$kernel_results
+      sampler$warm_results$kernel_results <- sample_results
       sampler$make_sampler_function()
     } else {
       sampler$define_tf_evaluate_sample_batch()
