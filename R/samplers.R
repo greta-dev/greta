@@ -400,7 +400,7 @@ adaptive_hmc_sampler <- R6Class(
       )
     },
 
-    current_state = NULL,
+    # current_state = NULL,
 
     # given MCMC kernel `sampler_kernel` and initial model parameter state
     # `free_state`, adapt the kernel tuning parameters whilst simultaneously
@@ -432,17 +432,17 @@ adaptive_hmc_sampler <- R6Class(
       # Otherwise, use the last chunk of all_states, which has been tuned
       no_warmup <- as.integer(sampler_kernel$num_adaptation_steps) <= 0
       if (no_warmup) {
-        self$current_state <- tensorflow::as_tensor(free_state)
+        self$free_state <- tensorflow::as_tensor(free_state)
       } else {
-        self$current_state <- get_last_state(result$all_states)
+        # when there is warmup, get the warmed up result
+        self$free_state <- get_last_state(result$all_states)
       }
-
       # return the last (burned-in) state of the model parameters and the final
       # (tuned) kernel parameters
       self$warm_results <- list(
-        kernel = sampler_kernel,
-        kernel_results = result$final_kernel_results,
-        current_state = self$current_state
+        # kernel = sampler_kernel,
+        kernel_results = result$final_kernel_results
+        # current_state = self$current_state
       )
     },
 
@@ -465,15 +465,7 @@ adaptive_hmc_sampler <- R6Class(
     # given a warmed up sampler object, return a compiled TF function
     # that generates a new burst of samples from samples from it
     sampler_function = NULL,
-    make_sampler_function = function(sampler) {
-      # if warmed up?
-      warmed_up <- !is.null(self$warm_results)
-      if (warmed_up) {
-        sampler <- self$warm_results
-      } else {
-        sampler <- self$sampler_kernel
-      }
-
+    make_sampler_function = function() {
       # make the uncompiled function (with curried arguments)
       sample_raw <- function(current_state, n_samples) {
         results <- tfp$mcmc$sample_chain(
@@ -482,9 +474,9 @@ adaptive_hmc_sampler <- R6Class(
           # where to start from
           current_state = current_state,
           # kernel
-          kernel = sampler$kernel,
+          kernel = self$sampler_kernel,
           # tuned sampler settings
-          previous_kernel_results = sampler$kernel_results,
+          previous_kernel_results = self$warm_results$kernel_results,
           # what to trace (nothing)
           trace_fn = function(current_state, kernel_results) {
             # could compute badness here to save memory?
@@ -503,7 +495,7 @@ adaptive_hmc_sampler <- R6Class(
       self$sampler_function <- tensorflow::tf_function(
         sample_raw,
         list(
-          as_tensorspec(self$current_state),
+          as_tensorspec(tensorflow::as_tensor(self$free_state)),
           tf$TensorSpec(shape = c(), dtype = tf$int32)
         )
       )
@@ -524,6 +516,8 @@ adaptive_hmc_sampler <- R6Class(
         free_state = self$free_state
       )
     },
+
+    sampling_results = NULL,
 
     run_sampling = function(
       n_samples,
@@ -588,7 +582,7 @@ adaptive_hmc_sampler <- R6Class(
         # use this to compile the warmed version
         # sample <- self$make_sampler_function()
 
-        current_state <- self$current_state
+        # current_state <- self$current_state
         # trace <- array(NA, dim = c(n_samples, dim(current_state)))
         # track numerical rejections
         # n_bad <- 0
@@ -596,7 +590,7 @@ adaptive_hmc_sampler <- R6Class(
         for (burst in seq_along(burst_lengths)) {
           burst_size <- burst_lengths[burst]
           batch_results <- self$sampler_function(
-            current_state = current_state,
+            current_state = self$free_state,
             n_samples = burst_size
           )
 
@@ -626,7 +620,7 @@ adaptive_hmc_sampler <- R6Class(
           # trace[burst_idx, , ] <- as.array(batch_results$all_states)
 
           # overwrite the current state
-          current_state <- get_last_state(batch_results$all_states)
+          # self$current_state <- get_last_state(batch_results$all_states)
 
           if (verbose) {
             # update the progress bar/percentage log
@@ -644,6 +638,9 @@ adaptive_hmc_sampler <- R6Class(
               stage = "sampling"
             )
           }
+          self$sampling_results <- list(
+            kernel_results = batch_results$kernel_results
+          )
         }
       } # end sampling
       ### Adaptive end
