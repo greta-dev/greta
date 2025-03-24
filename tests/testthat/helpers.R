@@ -763,6 +763,7 @@ p_theta_greta <- function(
     # recreate the log prob function, recreate the default kernel, replace that
     # inside the warmed up results, and then recreate the sampler function
     if (inherits(sampler, "adaptive_hmc_sampler")) {
+      ## NG another place to place a debugger to explore things
       sampler$define_tf_kernel()
       sample_results <- sampler$sampling_results$kernel_results
       sampler$warm_results$kernel_results <- sample_results
