@@ -6,9 +6,10 @@ Sys.setenv("RELEASE_CANDIDATE" = "false")
 # for i in N
 
 n <- 10
-mu1 <- rnorm(1, 0, 3)
-sd1 <- rlnorm(1)
-sd2 <- rlnorm(1)
+
+mu1 <- 0
+sd1 <- 2
+sd2 <- 1
 
 # prior (n draws)
 p_theta <- function(n) {
@@ -99,9 +100,9 @@ test_that("adaptive hmc sampler passes geweke tests", {
     data = x,
     p_theta = p_theta,
     p_x_bar_theta = p_x_bar_theta,
-    chains = 2,
+    chains = 10,
     niter = 200,
-    warmup = 100,
+    warmup = 2000,
     thin = 5
   )
 
