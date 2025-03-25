@@ -101,8 +101,8 @@ test_that("adaptive hmc sampler passes geweke tests", {
     p_theta = p_theta,
     p_x_bar_theta = p_x_bar_theta,
     chains = 10,
-    niter = 200,
-    warmup = 2000,
+    niter = 1000,
+    warmup = 10000,
     thin = 5
   )
 
