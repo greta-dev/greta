@@ -439,6 +439,7 @@ adaptive_hmc_sampler <- R6Class(
       }
       # return the last (burned-in) state of the model parameters and the final
       # (tuned) kernel parameters
+
       self$warm_results <- list(
         # kernel = sampler_kernel,
         kernel_results = result$final_kernel_results
@@ -516,8 +517,6 @@ adaptive_hmc_sampler <- R6Class(
         free_state = self$free_state
       )
     },
-
-    sampling_results = NULL,
 
     run_sampling = function(
       n_samples,
@@ -640,9 +639,6 @@ adaptive_hmc_sampler <- R6Class(
               stage = "sampling"
             )
           }
-          self$sampling_results <- list(
-            kernel_results = batch_results$kernel_results
-          )
         }
       } # end sampling
       ### Adaptive end
