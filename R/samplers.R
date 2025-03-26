@@ -441,9 +441,7 @@ adaptive_hmc_sampler <- R6Class(
       # (tuned) kernel parameters
 
       self$warm_results <- list(
-        # kernel = sampler_kernel,
         kernel_results = result$final_kernel_results
-        # current_state = self$current_state
       )
     },
 
@@ -457,8 +455,6 @@ adaptive_hmc_sampler <- R6Class(
       # return named list for replacing tensors
       list(
         adaptive_hmc_max_leapfrog_steps = max_leapfrog_steps,
-        # adaptive_hmc_epsilon = epsilon,
-        # adaptive_hmc_diag_sd = diag_sd,
         method = method
       )
     },
@@ -526,16 +522,6 @@ adaptive_hmc_sampler <- R6Class(
       thin,
       verbose
     ) {
-      # There's a couple of possibilities
-      ## warmup already happened previously, so get already-warmup sampler
-      ## warmup never happened, so get an unwarmed up sampler
-
-      # warmup_status <- self$warmup_status()
-      # self$warm_results
-      # self$warmup
-      # warmup_has_happened <- self$has_warmup_happened()
-      # warmup
-
       perform_sampling <- n_samples > 0
       if (perform_sampling) {
         # on exiting during the main sampling period (even if killed by the
@@ -578,13 +564,6 @@ adaptive_hmc_sampler <- R6Class(
         if (is.null(self$sampler_function)) {
           self$make_sampler_function()
         }
-        # use this to compile the warmed version
-        # sample <- self$make_sampler_function()
-
-        # current_state <- self$current_state
-        # trace <- array(NA, dim = c(n_samples, dim(current_state)))
-        # track numerical rejections
-        # n_bad <- 0
 
         for (burst in seq_along(burst_lengths)) {
           burst_size <- burst_lengths[burst]
@@ -607,21 +586,12 @@ adaptive_hmc_sampler <- R6Class(
           if (n_draws > 0) {
             free_state <- free_state_draws[n_draws, , , drop = FALSE]
             dim(free_state) <- dim(free_state)[-1]
-            ## NG - free_state and self$free_state are the same here only
-            ## when doing the check_geweke step, otherwise they are different
             self$free_state <- free_state
           }
 
           self$update_rejection(batch_results)
 
           self$trace()
-
-          # trace the MCMC results from this burst
-          # burst_idx <- (burst - 1) * burst_size + seq_len(burst_size)
-          # trace[burst_idx, , ] <- as.array(batch_results$all_states)
-
-          # overwrite the current state
-          # self$current_state <- get_last_state(batch_results$all_states)
 
           if (verbose) {
             # update the progress bar/percentage log
