@@ -507,13 +507,46 @@ adaptive_hmc_sampler <- R6Class(
       ideal_burst_size,
       verbose
     ) {
+      if (verbose) {
+        pb_warmup <- create_progress_bar(
+          phase = "warmup",
+          iter = c(self$warmup, n_samples),
+          pb_update = self$warmup,
+          width = self$pb_width
+        )
+        iterate_progress_bar(
+          pb = pb_warmup,
+          it = 0,
+          rejects = 0,
+          chains = self$n_chains,
+          file = self$pb_file
+        )
+      } else {
+        pb_sampling <- NULL
+      }
       self$define_tf_kernel()
-      cli::cli_inform("warming up HMC sampler")
       self$warm_up_sampler(
         sampler_kernel = self$sampler_kernel,
         free_state = self$free_state
       )
-      cli::cli_inform("HMC sampler warmed up!")
+
+      if (verbose) {
+        # update the progress bar/percentage log
+        iterate_progress_bar(
+          pb = pb_warmup,
+          it = self$warmup,
+          # TODO check if we can add rejection info
+          rejects = 0,
+          chains = self$n_chains,
+          file = self$pb_file
+        )
+
+        self$write_percentage_log(
+          total = self$warmup,
+          completed = self$warmup,
+          stage = "warmup"
+        )
+      } # close verbose
     },
 
     run_sampling = function(
