@@ -508,10 +508,12 @@ adaptive_hmc_sampler <- R6Class(
       verbose
     ) {
       self$define_tf_kernel()
+      cli::cli_inform("warming up HMC sampler")
       self$warm_up_sampler(
         sampler_kernel = self$sampler_kernel,
         free_state = self$free_state
       )
+      cli::cli_inform("HMC sampler warmed up!")
     },
 
     run_sampling = function(
