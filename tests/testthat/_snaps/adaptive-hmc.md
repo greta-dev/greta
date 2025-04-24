@@ -2,6 +2,9 @@
 
     Code
       draws <- mcmc(m, n_samples = 1, warmup = 1, chains = 1, sampler = adaptive_hmc())
+    Message
+      
+          warmup                                              0/1 | eta:  ?s          
     Condition
       Error in `py_call_impl()`:
       ! ValueError: SNAPERHMC requires at least 2 chains. Got: 1

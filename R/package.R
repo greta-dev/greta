@@ -47,6 +47,7 @@ reticulate::py_version
 #' @importFrom utils globalVariables
 utils::globalVariables(
   c(
+    "as_tensor_spec",
     "N",
     "greta_deps_tf_tfp",
     "greta_logfile",

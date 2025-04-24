@@ -68,8 +68,8 @@ is implemented for uniform and normal proposals.
 \code{slice()} implements a multivariate slice sampling algorithm.
 The parameter \code{max_doublings} is not tuned during warmup.
 
-For \code{adaptive_hmc()}. The Lmin and Lmax parameters are learnt and so
-not provided in this. The number of chains cannot be less than 2, due to
-how adaptive HMC works. \code{diag_sd} is used to rescale the parameter space to
-make it more uniform, and make sampling more efficient.
+For \code{adaptive_hmc()}. The Lmin and Lmax parameters are learned and
+so not provided in this. The number of chains cannot be less than 2, due
+to how adaptive HMC works. \code{diag_sd} is used to rescale the parameter
+space to make it more uniform, and make sampling more efficient.
 }

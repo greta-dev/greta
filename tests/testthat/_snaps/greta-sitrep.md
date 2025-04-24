@@ -246,18 +246,18 @@
     Message
       
       -- R ---------------------------------------------------------------------------
-      * version: 4.4.2
+      * version: 4.5.0
       * path: '/Library/Frameworks/R.framework/Resources'
       
       -- greta -----------------------------------------------------------------------
       * version: 0.5.0.9000
-      * path: '/Users/nick/github/greta-dev/greta'
+      * path: '/Users/nick_1/github/greta-dev/greta'
       
       -- python ----------------------------------------------------------------------
       i checking if python available
       v python (v3.10) available
       
-      * path: '/Users/nick/Library/r-miniconda-arm64'
+      * path: '/Users/nick_1/Library/r-miniconda-arm64'
       
       -- greta conda environment -----------------------------------------------------
       i checking if greta conda environment available
@@ -269,7 +269,7 @@
       i checking if TensorFlow available
       v TensorFlow (v2.15.0) available
       
-      * R path: '/Users/nick/Library/R/arm64/4.4/library/tensorflow'
+      * R path: '/Users/nick_1/Library/R/arm64/4.5/library/tensorflow'
       * Exists in conda env: TRUE
       
       -- TensorFlow Probability ------------------------------------------------------
