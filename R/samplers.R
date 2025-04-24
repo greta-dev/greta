@@ -103,10 +103,10 @@ slice <- function(max_doublings = 5) {
 #'   steps used. The algorithm will determine the optimal number less than this.
 #' @param method character length one. Currently can only be "SNAPER" but in
 #'   the future this may expand to other adaptive samplers.
-#' @details For `adaptive_hmc()`. The Lmin and Lmax parameters are learnt and so
-#'   not provided in this. The number of chains cannot be less than 2, due to
-#'   how adaptive HMC works. `diag_sd` is used to rescale the parameter space to
-#'   make it more uniform, and make sampling more efficient.
+#' @details For `adaptive_hmc()`. The Lmin and Lmax parameters are learned and
+#'   so not provided in this. The number of chains cannot be less than 2, due
+#'   to how adaptive HMC works. `diag_sd` is used to rescale the parameter
+#'   space to make it more uniform, and make sampling more efficient.
 #' @export
 adaptive_hmc <- function(
   max_leapfrog_steps = 1000,
@@ -507,7 +507,9 @@ adaptive_hmc_sampler <- R6Class(
       ideal_burst_size,
       verbose
     ) {
-      if (verbose) {
+      # skip warmup progress bar if warmup is 0
+      nonzero_warmup <- self$warmup > 0
+      if (verbose && nonzero_warmup) {
         pb_warmup <- create_progress_bar(
           phase = "warmup",
           iter = c(self$warmup, n_samples),
@@ -530,7 +532,8 @@ adaptive_hmc_sampler <- R6Class(
         free_state = self$free_state
       )
 
-      if (verbose) {
+      # skip warmup progress bar if warmup is 0
+      if (verbose && nonzero_warmup) {
         # update the progress bar/percentage log
         iterate_progress_bar(
           pb = pb_warmup,
@@ -593,7 +596,10 @@ adaptive_hmc_sampler <- R6Class(
 
         # maybe warm up a sampler
         if (is.null(self$warm_results)) {
-          self$run_warmup()
+          self$run_warmup(
+            verbose = verbose,
+            n_samples = n_samples
+          )
         }
         # maybe compile a sampling function
         if (is.null(self$sampler_function)) {
