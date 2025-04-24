@@ -679,3 +679,14 @@ sampler <- R6Class(
     }
   )
 )
+
+
+tune_tf <- R6Class(
+  "tune_tf",
+  inherit = sampler
+)
+
+tune_r <- R6Class(
+  "tune_r",
+  inherit = sampler
+)

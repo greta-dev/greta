@@ -161,7 +161,7 @@ print.sampler <- function(x, ...) {
 
 hmc_sampler <- R6Class(
   "hmc_sampler",
-  inherit = sampler,
+  inherit = tune_r,
   public = list(
     parameters = list(
       Lmin = 10,
@@ -236,7 +236,7 @@ hmc_sampler <- R6Class(
 
 rwmh_sampler <- R6Class(
   "rwmh_sampler",
-  inherit = sampler,
+  inherit = tune_r,
   public = list(
     parameters = list(
       proposal = "normal",
@@ -313,7 +313,7 @@ rwmh_sampler <- R6Class(
 
 slice_sampler <- R6Class(
   "slice_sampler",
-  inherit = sampler,
+  inherit = tune_r,
   public = list(
     parameters = list(
       max_doublings = NA
@@ -357,7 +357,7 @@ slice_sampler <- R6Class(
 
 adaptive_hmc_sampler <- R6Class(
   "adaptive_hmc_sampler",
-  inherit = sampler,
+  inherit = tune_tf,
   public = list(
     parameters = list(
       # Lmin = 10,
