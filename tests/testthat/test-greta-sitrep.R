@@ -1,9 +1,3 @@
-# these tests need to be run last because otherwise mockery infects the
-# rest of the tests and Python is never detected :'(
-# it turns out that putting these here doesn't actually help
-# I'll leave these here for the time being, commented out.
-
-# # forge a missing installation
 test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
   local_mocked_bindings(
     py_module_available = function(...) FALSE,
