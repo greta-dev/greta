@@ -16,15 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: r-lib/actions/setup-r@v2
-        id: setup-r
         with:
-          r-version: ${{ matrix.r }}
-          Ncpus: '4L'
           use-public-rspm: true
-      - uses: r-lib/actions/setup-r-dependencies@v2\
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck any::devtools any::reticulate local::.
           cache-version: 4
