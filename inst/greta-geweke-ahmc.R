@@ -67,8 +67,8 @@ geweke_adaptive_hmc <- check_geweke(
   p_theta = p_theta,
   p_x_bar_theta = p_x_bar_theta,
   chains = 10,
-  niter = 100,
-  warmup = 100,
+  niter = 10000,
+  warmup = 10000,
   thin = 5
 )
 
