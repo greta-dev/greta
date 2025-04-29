@@ -1,0 +1,167 @@
+name: Geweke Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      script_path:
+        description: 'Path to Geweke test script'
+        required: true
+        default: 'inst/greta-geweke-ahmc.R'
+
+jobs:
+  run-geweke-tests:
+    name: ${{ matrix.os }}, tf-${{ matrix.tf }}, R-${{ matrix.r}}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Uncomment additional environments as needed
+          # - {os: 'ubuntu-latest' , tf: 'default', r: 'release'}
+          # - {os: 'windows-latest', tf: 'default', r: 'release'}
+          - {os: 'macOS-latest'  , tf: 'default', r: 'release'}
+
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.tf == 'nightly' || contains(matrix.tf, 'rc') || matrix.r == 'devel' }}
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: 'true'
+      R_COMPILE_AND_INSTALL_PACKAGES: 'never'
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        id: setup-r
+        with:
+          r-version: ${{ matrix.r }}
+          Ncpus: '4L'
+          use-public-rspm: true
+
+      - name: Get Date
+        id: get-date
+        shell: bash
+        run: |
+          echo "year-week=$(date -u '+%Y-%U')" >> $GITHUB_OUTPUT
+          echo "date=$(date -u '+%F')" >> $GITHUB_OUTPUT
+
+      - name: Restore R package cache
+        uses: actions/cache@v4
+        id: r-package-cache
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ matrix.os }}-${{ steps.setup-r.outputs.installed-r-version }}-${{ steps.get-date.outputs.year-week }}-1
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck any::devtools any::reticulate local::.
+          cache-version: 4
+          upgrade: 'TRUE'
+
+      - name: Install greta deps
+        shell: Rscript {0}
+        run: |
+          library(greta)
+          greta::install_greta_deps(timeout = 50)
+
+      - name: Situation Report on greta install
+        shell: Rscript {0}
+        run: greta::greta_sitrep()
+
+      - name: Session info
+        shell: Rscript {0}
+        run: |
+          options(width = 100)
+          pkgs <- installed.packages()[, "Package"]
+          sessioninfo::session_info(pkgs, include_base = TRUE)
+
+      - name: Create plots directory
+        shell: bash
+        run: mkdir -p plots
+
+      - name: Set up wrapper script
+        shell: bash
+        run: |
+          # Create the wrapper script in the tools directory
+          mkdir -p tools
+          cat > tools/run_geweke_test.R << 'EOF'
+#!/usr/bin/env Rscript
+
+# Script that runs a Geweke test and captures plots and statistics
+# Usage: Rscript run_geweke_test.R path/to/geweke/script.R
+
+# Get script path from command line args
+args <- commandArgs(trailingOnly = TRUE)
+script_path <- if (length(args) > 0) args[1] else "inst/greta-geweke-ahmc.R"
+
+cat("Running Geweke test script:", script_path, "\n")
+
+# Create directory for plots if it doesn't exist
+if (!dir.exists("plots")) dir.create("plots", recursive = TRUE)
+
+# Load the package
+devtools::load_all(".")
+
+# Set up graphics device to capture plots
+script_basename <- basename(tools::file_path_sans_ext(script_path))
+plot_filename <- paste0("plots/geweke_", script_basename, ".png")
+png(plot_filename, width = 1200, height = 800, res = 150)
+
+# Source the user's script
+tryCatch({
+  source(script_path)
+  cat("Successfully sourced script:", script_path, "\n")
+}, error = function(e) {
+  cat("Error occurred while running the script:\n")
+  cat(as.character(e), "\n")
+  quit(status = 1)
+})
+
+# Close the device to save the plot
+dev.off()
+cat("Plot saved to", plot_filename, "\n")
+
+# Save test statistics to a text file
+stats_filename <- paste0("plots/geweke_stats_", script_basename, ".txt")
+if (exists("geweke_stat_adaptive_hmc")) {
+  capture.output(geweke_stat_adaptive_hmc, file = stats_filename)
+  cat("Geweke test statistics saved to", stats_filename, "\n")
+} else {
+  cat("Warning: No geweke_stat_adaptive_hmc object found\n")
+}
+
+# List all created files
+cat("Files in plots directory:\n")
+print(list.files("plots"))
+EOF
+          chmod +x tools/run_geweke_test.R
+
+      - name: Run Geweke test script
+        shell: bash
+        run: |
+          script_path="${{ github.event.inputs.script_path || 'inst/greta-geweke-ahmc.R' }}"
+          Rscript tools/run_geweke_test.R "$script_path"
+
+      - name: Upload plots and statistics as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: geweke-results-${{ matrix.os }}
+          path: plots/
+          if-no-files-found: warn
+
+      - name: Upload test script
+        uses: actions/upload-artifact@v3
+        with:
+          name: geweke-script-${{ matrix.os }}
+          path: ${{ github.event.inputs.script_path || 'inst/greta-geweke-ahmc.R' }}
+          if-no-files-found: warn
