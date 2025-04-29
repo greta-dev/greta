@@ -41,7 +41,7 @@ jobs:
         run: Rscript inst/greta-geweke-ahmc.R
 
       - name: Upload plot as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: qq-plot
           path: geweke-plot.png
