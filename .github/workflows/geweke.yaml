@@ -40,6 +40,13 @@ jobs:
       - name: Run Geweke tests
         run: Rscript inst/greta-geweke-ahmc.R
 
+      - name: Upload plot as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: qq-plot
+          path: geweke-plot.png
+          retention-days: 90  # How long to keep the artifact
+
       - name: Session info
         shell: Rscript {0}
         run: |

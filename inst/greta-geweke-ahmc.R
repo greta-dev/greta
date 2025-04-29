@@ -60,20 +60,25 @@ greta_theta <- normal(mu1, sd1)
 distribution(x) <- normal(greta_theta, sd2)
 model <- model(greta_theta, precision = "single")
 
-geweke_adaptive_hmc <- check_geweke(
-  sampler = adaptive_hmc(),
-  model = model,
-  data = x,
-  p_theta = p_theta,
-  p_x_bar_theta = p_x_bar_theta,
-  chains = 10,
-  niter = 100,
-  warmup = 100,
-  thin = 5
-)
+# geweke_adaptive_hmc <- check_geweke(
+#   sampler = adaptive_hmc(),
+#   model = model,
+#   data = x,
+#   p_theta = p_theta,
+#   p_x_bar_theta = p_x_bar_theta,
+#   chains = 10,
+#   niter = 100,
+#   warmup = 100,
+#   thin = 5
+# )
 
+png("geweke-plot.png", width = 1200, height = 800, res = 150)
 # geweke_qq(geweke_adaptive_hmc, title = "adaptive hmc sampler Geweke test")
-#
-# geweke_stat_adaptive_hmc <- geweke_ks(geweke_adaptive_hmc)
+sym <- c(1, 16)
+pal <- c("darkorange", "purple", "cyan4")
+plot(bill_dep ~ bill_len, data = penguins, pch = sym[sex], col = pal[species])
+dev.off()
 
-geweke_stat_adaptive_hmc
+# geweke_stat_adaptive_hmc <- geweke_ks(geweke_adaptive_hmc)
+#
+# geweke_stat_adaptive_hmc
