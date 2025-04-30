@@ -5,6 +5,7 @@
 - `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
 - Add warmup information to MCMC print method (#652, resolved by #755).
 - Add more options to level of detail in `greta_sitrep()` with "verbosity" argument. There are three levels, "minimal" (default), "detailed", and "quiet". (#612, resolved by #679).
+- Use `.batch_size` instead of `batch_size` internally, to avoid rare name clash errors (#634).
 
 # greta 0.5.0
 

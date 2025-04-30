@@ -212,23 +212,27 @@ dag_class <- R6Class(
     },
     define_batch_size = function() {
       # TF1/2 check?
-      # pretty sure `batch_size` just now needs to be the input of a function
-      # I'm not even sure that batch_size needs to be a function, it might
+      # pretty sure `.batch_size` just now needs to be the input of a function
+      # I'm not even sure that .batch_size needs to be a function, it might
       # just need to be the input to wherever it is used next?
 
       ## NOTE: when calling `model` there is no `free_state` in `tf_environment`
       ## Trying out something where the free state is set if there isn't one?
 
-      if (!exists("batch_size", envir = self$tf_environment)) {
+      if (!exists(".batch_size", envir = self$tf_environment)) {
         with(
           data = self$tf_environment,
-          batch_size <- tf$shape(self$tf_environment$free_state)[0]
+          .batch_size <- tf$shape(self$tf_environment$free_state)[0]
         )
       }
 
       # put this in the greta stash, so it can be accessed by other (sub-)dags
       # if needed, e.g. when using as_tf_function()
-      assign("batch_size", self$tf_environment$batch_size, envir = greta_stash)
+      assign(
+        ".batch_size",
+        self$tf_environment$.batch_size,
+        envir = greta_stash
+      )
     },
 
     define_free_state = function(

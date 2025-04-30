@@ -50,7 +50,7 @@ fl <- function(x) {
 # get the tensor for the batch size in the dag recently defined (since it's
 # not always possible to pass the dag in)
 get_batch_size <- function() {
-  greta_stash$batch_size
+  greta_stash$.batch_size
 }
 
 # coerce an integer(ish) vector to a list as expected in tensorflow shape
@@ -185,9 +185,9 @@ drop_column_dim <- function(x) {
 # dimension, tile x to have first dimension matching y (dimension determined at
 # run time)
 expand_to_batch <- function(x, y) {
-  batch_size <- tf$shape(y)[[0]]
+  .batch_size <- tf$shape(y)[[0]]
   ndim <- n_dim(x)
-  tf$tile(x, c(batch_size, rep(1L, ndim - 1)))
+  tf$tile(x, c(.batch_size, rep(1L, ndim - 1)))
 }
 
 # does this tensor have a batch dimension (of unknown size) as its first
@@ -673,7 +673,7 @@ as_tf_function <- function(r_fun, ...) {
     #  - how many chains or whatever to use
     # get the batch size from the input tensors - it should be written to the
     # stash by the main dag - but only if a main dag is defined. What about in calculate?
-    sub_tfe$batch_size <- get_batch_size()
+    sub_tfe$.batch_size <- get_batch_size()
 
     # set the input tensors as the values for the dummy greta arrays in the new
     # tf_environment

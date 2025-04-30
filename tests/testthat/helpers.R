@@ -22,7 +22,7 @@ grab <- function(x, dag = NULL) {
     dag <- dag_class$new(list(x))
   }
 
-  dag$tf_environment$batch_size <- 1L
+  dag$tf_environment$.batch_size <- 1L
   node$define_tf(dag)
   x_name <- dag$tf_name(node)
   out <- dag$tf_environment[[x_name]]
@@ -128,7 +128,7 @@ greta_density <- function(
   # create dag
   dag <- dag_class$new(list(x_))
 
-  dag$tf_environment$batch_size <- 1L
+  dag$tf_environment$.batch_size <- 1L
   distrib_node$define_tf(dag)
 
   # get the log density as a vector

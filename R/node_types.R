@@ -61,7 +61,7 @@ data_node <- R6Class(
         }
 
         # expand up to batch size - so we can run multiple chains
-        tiling <- c(tfe$batch_size, rep(1L, ndim))
+        tiling <- c(tfe$.batch_size, rep(1L, ndim))
         batched_tensor <- tf$tile(unbatched_tensor, tiling)
 
         # put unbatched tensor in environment so it can be set

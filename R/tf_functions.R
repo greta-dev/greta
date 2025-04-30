@@ -415,8 +415,8 @@ tf_icauchit <- function(x) {
 }
 
 tf_imultilogit <- function(x) {
-  batch_size <- tf$shape(x)[[0]]
-  shape <- c(batch_size, dim(x)[[2]], 1L)
+  .batch_size <- tf$shape(x)[[0]]
+  shape <- c(.batch_size, dim(x)[[2]], 1L)
   zeros <- tf$zeros(shape, tf_float())
   latent <- tf$concat(list(x, zeros), 2L)
   tf$nn$softmax(latent)
@@ -436,8 +436,8 @@ tf_extract <- function(x, nelem, index, dims_out) {
 
   # reshape, handling unknown dimensions even when the output has 0-dimension
   # (which prevents us from just using -1 on the first dimension)
-  batch_size <- tf$shape(x)[[0]]
-  shape_list <- c(list(batch_size), as.integer(to_shape(dims_out)))
+  .batch_size <- tf$shape(x)[[0]]
+  shape_list <- c(list(.batch_size), as.integer(to_shape(dims_out)))
   shape_out <- tf$stack(shape_list)
   tensor_out <- tf$reshape(tensor_out_flat, shape_out)
   tensor_out
@@ -705,7 +705,7 @@ tf_ordered_bijector <- function(dim) {
 # including the batch dimension
 tf_randu <- function(dim, dag) {
   uniform <- tfp$distributions$Uniform(low = fl(0), high = fl(1))
-  shape <- c(dag$tf_environment$batch_size, as.list(dim))
+  shape <- c(dag$tf_environment$.batch_size, as.list(dim))
   uniform$sample(sample_shape = shape, seed = get_seed())
 }
 

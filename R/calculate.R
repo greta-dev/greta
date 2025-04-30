@@ -457,12 +457,12 @@ calculate_target_tensor_list <- function(
   tfe <- dag$tf_environment
 
   # add the batch size to the data list and the greta stash (for sub-dags)
-  batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
-  assign("batch_size", batch_size, envir = tfe)
-  assign("batch_size", batch_size, envir = greta_stash)
+  .batch_size <- ifelse(stochastic, as.integer(nsim), 1L)
+  assign(".batch_size", .batch_size, envir = tfe)
+  assign(".batch_size", .batch_size, envir = greta_stash)
 
   values <- lapply(values, add_first_dim)
-  values <- lapply(values, tile_first_dim, batch_size)
+  values <- lapply(values, tile_first_dim, .batch_size)
 
   mapply(
     FUN = assign,
