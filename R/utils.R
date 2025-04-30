@@ -905,6 +905,7 @@ message_if_using_gpu <- function(compute_options) {
 }
 
 n_dim <- function(x) length(dim(x))
+
 is_2d <- function(x) n_dim(x) == 2
 
 is.node <- function(x, ...) {
