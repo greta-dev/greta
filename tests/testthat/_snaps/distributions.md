@@ -189,8 +189,9 @@
       multivariate_normal(m_a, b)
     Condition
       Error in `lapply()`:
-      ! Dimensions of parameters not compatible with multivariate distribution parameters of multivariate distributions cannot have more than two dimensions
-      object `x` has dimensions: 3x3x3
+      ! Dimensions of parameters not compatible with multivariate distribution parameters
+      Multivariate distributions cannot have more than two dimensions
+      Object `X[[i]]` has dimensions: 3x3x3
 
 ---
 

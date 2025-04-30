@@ -134,7 +134,7 @@
       solve(b, a)
     Condition
       Error in `solve()`:
-      ! `a must be two dimensional`
+      ! `a` must be two dimensional
       However, `a` has dimensions: 5x25x2
 
 ---
@@ -143,7 +143,7 @@
       solve(c, b)
     Condition
       Error in `solve()`:
-      ! `b must be two dimensional`
+      ! `b` must be two dimensional
       However, `b` has dimensions: 5x25x2
 
 ---
@@ -179,7 +179,7 @@
       sweep(b, 1, stats)
     Condition
       Error in `sweep()`:
-      ! `x must be two dimensional`
+      ! `x` must be two dimensional
       However, `x` has dimensions: 5x25x2
 
 ---
@@ -223,7 +223,7 @@
       kronecker(a, b)
     Condition
       Error in `kronecker()`:
-      ! `Y must be two dimensional`
+      ! `Y` must be two dimensional
       However, `Y` has dimensions: 5x25x2
 
 ---
@@ -232,7 +232,7 @@
       kronecker(b, c)
     Condition
       Error in `kronecker()`:
-      ! `X must be two dimensional`
+      ! `X` must be two dimensional
       However, `X` has dimensions: 5x25x2
 
 # colSums etc. error as expected

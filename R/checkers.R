@@ -148,14 +148,19 @@ check_dims <- function(..., target_dim = NULL, call = rlang::caller_env()) {
 }
 
 # make sure a greta array is 2D
-check_2d_multivariate <- function(x, call = rlang::caller_env()) {
+check_2d_multivariate <- function(
+  x,
+  call = rlang::caller_env(),
+  arg = rlang::caller_arg(x)
+) {
+  check_1d(x)
   if (!is_2d(x)) {
     cli::cli_abort(
       message = c(
         "Dimensions of parameters not compatible with multivariate \\
-        distribution parameters of multivariate distributions cannot have \\
-        more than two dimensions",
-        "object {.var x} has dimensions: {paste(dim(x), collapse = 'x')}"
+        distribution parameters",
+        "Multivariate distributions cannot have more than two dimensions",
+        "Object {.arg {arg}} has dimensions: {paste(dim(x), collapse = 'x')}"
       ),
       call = call
     )
@@ -1084,6 +1089,27 @@ check_if_model_info <- function(
   }
 }
 
+is_1d <- function(x) {
+  is.null(dim(x)) && (length(x) == 1)
+}
+
+check_1d <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (is_1d(x)) {
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} must be two dimensional",
+        "However, {.arg {arg}} is one dimensional and contains the value: \\
+        {.value {x}}"
+      ),
+      call = call
+    )
+  }
+}
+
 check_2d <- function(
   x,
   arg = rlang::caller_arg(x),
@@ -1092,7 +1118,7 @@ check_2d <- function(
   if (!is_2d(x)) {
     cli::cli_abort(
       message = c(
-        "{.arg {arg} must be two dimensional}",
+        "{.arg {arg}} must be two dimensional",
         "However, {.arg {arg}} has dimensions: {paste(dim(x), collapse = 'x')}"
       ),
       call = call
