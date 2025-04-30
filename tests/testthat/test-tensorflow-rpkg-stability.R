@@ -125,8 +125,8 @@ test_that("[, [[, and assignment returns right object", {
 })
 
 # other parts to test:
-# batch_size <- tf$shape(x)[[0]]
-# shape_list <- c(list(batch_size), as.integer(to_shape(dims_out)))
+# .batch_size <- tf$shape(x)[[0]]
+# shape_list <- c(list(.batch_size), as.integer(to_shape(dims_out)))
 # shape_out <- tf$stack(shape_list)
 #
 # tf$reshape(ref[, idx, ], tensorflow::as_tensor(shape(-1, length(idx), 1)))

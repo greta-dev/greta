@@ -534,7 +534,7 @@ sampler <- R6Class(
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
 
-      dag$set_tf_data_list("batch_size", nrow(self$free_state))
+      dag$set_tf_data_list(".batch_size", nrow(self$free_state))
 
       # run the sampler, handling numerical errors
       batch_results <- self$sample_carefully(
