@@ -57,7 +57,7 @@ qq_title <- build_qq_title(
   n_iter,
   n_chains,
   n_thin,
-  geweke_stat_rwmh,
+  geweke_slice,
   the_time
 )
 geweke_qq(geweke_thin, title = qq_title)
