@@ -1,4 +1,4 @@
-name: geweke-tests-ahmc
+name: Geweke-tests
 
 on:
   push:
@@ -27,14 +27,7 @@ jobs:
           use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: |
-            any::rcmdcheck
-            any::devtools
-            any::reticulate
-            any::ggplot2
-            any::bayesplot
-            any::glue
-            local::.
+          extra-packages: any::rcmdcheck any::devtools any::reticulate local::.
           cache-version: 4
           upgrade: 'TRUE'
       - name: Install greta deps
@@ -46,13 +39,13 @@ jobs:
         shell: Rscript {0}
         run: greta::greta_sitrep()
       - name: Run Geweke tests
-        run: Rscript inst/greta-geweke-slice.R
+        run: Rscript inst/greta-geweke-ahmc.R
 
-      - name: Upload diagnostic plots
+      - name: Upload plot as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: diagnostic-plots
-          path: geweke-*.png
+          name: qq-plot
+          path: geweke-plot.png
           retention-days: 90  # How long to keep the artifact
 
       - name: Session info

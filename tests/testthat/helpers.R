@@ -945,34 +945,53 @@ apply_thinning <- function(geweke_result, n_thin) {
   geweke_thin
 }
 
-
-build_qq_title <- function(
-  sampler_name,
+build_plot_metadata <- function(
+  sampler,
+  time,
   n_warmup,
   n_iter,
   n_chains,
   n_thin,
-  geweke_stat,
-  the_time
+  ks_stat
 ) {
-  qq_title <- paste0(
-    sampler_name,
-    " sampler Geweke test \nwarmup = ",
-    n_warmup,
-    ", iter = ",
-    n_iter,
-    ", chains = ",
-    n_chains,
-    ", thin = ",
-    n_thin,
-    ", p-value = ",
-    round(geweke_stat$p.value, 8),
-    ", time = ",
-    the_time,
-    "s"
+  sampler_class <- class(sampler)
+
+  sampler <- switch(
+    sampler_class[1],
+    "adaptive_hmc_sampler" = "ahmc",
+    "slice sampler" = "slice",
+    "rwmh sampler" = "rwmh",
+    "hmc sampler" = "hmc"
   )
 
-  qq_title
+  qq_title <- glue::glue(
+    "Sampler {sampler} Geweke test (time taken = {time}s)\\
+    \nwarmup = {n_warmup}, iter = {n_iter}, chains = {n_chains}, thin = {n_thin}\np-value = {round(ks_stat$p.value, 8)}"
+  )
+
+  param_stub <- glue::glue(
+    "warm-{n_warmup}-it-{n_iter}\\
+    -chain-{n_chains}-thin-{n_thin}.png"
+  )
+
+  qq_filename <- glue::glue(
+    "geweke-{sampler}-qq-{param_stub}"
+  )
+
+  coda_filename <- glue::glue(
+    "geweke-{sampler}-coda-{param_stub}"
+  )
+
+  bayesplot_filename <- glue::glue(
+    "geweke-{sampler}-dens-{param_stub}"
+  )
+
+  list(
+    qq_title = qq_title,
+    qq_filename = qq_filename,
+    coda_filename = coda_filename,
+    bayesplot_filename = bayesplot_filename
+  )
 }
 
 

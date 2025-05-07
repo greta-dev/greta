@@ -27,7 +27,7 @@ n_iter <- 10
 n_warmup <- 10
 n_chains <- 2
 n_thin <- 1
-geweke_sampler <- slice()
+geweke_sampler <- rwmh()
 
 # ---- checking ----
 time_taken <- system.time({

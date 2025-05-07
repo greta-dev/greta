@@ -33,6 +33,7 @@ jobs:
             any::reticulate
             any::ggplot2
             any::bayesplot
+            any::glue
             local::.
           cache-version: 4
           upgrade: 'TRUE'
