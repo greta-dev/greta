@@ -680,8 +680,9 @@ check_geweke <- function(
   )
 
   geweke_checks <- list(
-    target_theta = do_thinning(target_theta, thin),
-    greta_theta = do_thinning(greta_theta, thin)
+    target_theta = target_theta,
+    greta_theta = greta_theta$theta,
+    draws = greta_theta$draws
   )
 
   geweke_checks
@@ -690,9 +691,13 @@ check_geweke <- function(
 geweke_qq <- function(geweke_checks, title) {
   # visualise correspondence
   quants <- (1:99) / 100
+  # target
   q1 <- stats::quantile(geweke_checks$target_theta, quants)
+  # greta sampled
   q2 <- stats::quantile(geweke_checks$greta_theta, quants)
-  plot(q2, q1, main = title)
+  # q1 is target
+  # q2 is greta
+  plot(q2, q1, main = title, xlab = "Q2 greta", ylab = "Q1 target")
   graphics::abline(0, 1)
 }
 
@@ -716,7 +721,7 @@ p_theta_greta <- function(
   data,
   p_theta,
   p_x_bar_theta,
-  # TODO note that we might want to change this to adaptive_hmc()
+  # this argument gets passed along based on sampler used
   sampler = hmc(),
   warmup = 1000,
   chains
@@ -776,14 +781,17 @@ p_theta_greta <- function(
       verbose = FALSE
     )
 
-    # trace the sample
+    # trace the sample - just one chain
     theta[i] <- tail(as.numeric(draws[[1]]), 1)
   }
 
   # kill the progress_bar
   cli::cli_progress_done()
 
-  theta
+  list(
+    theta = theta,
+    draws = draws
+  )
 }
 
 # test mcmc for models with analytic posteriors
@@ -927,6 +935,44 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
 do_thinning <- function(x, thinning = 1) {
   idx <- seq(1, length(x), by = thinning)
   x[idx]
+}
+
+apply_thinning <- function(geweke_result, n_thin) {
+  geweke_thin <- list(
+    target_theta = do_thinning(geweke_result$target_theta, n_thin),
+    greta_theta = do_thinning(geweke_result$greta_theta, n_thin)
+  )
+  geweke_thin
+}
+
+
+build_qq_title <- function(
+  sampler_name,
+  n_warmup,
+  n_iter,
+  n_chains,
+  n_thin,
+  geweke_stat_rwmh,
+  the_time
+) {
+  qq_title <- paste0(
+    sampler_name,
+    " sampler Geweke test \nwarmup = ",
+    n_warmup,
+    ", iter = ",
+    n_iter,
+    ", chains = ",
+    n_chains,
+    ", thin = ",
+    n_thin,
+    ", p-value = ",
+    round(geweke_stat_rwmh$p.value, 8),
+    ", time = ",
+    the_time,
+    "s"
+  )
+
+  qq_title
 }
 
 
