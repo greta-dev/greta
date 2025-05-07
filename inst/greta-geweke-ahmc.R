@@ -1,35 +1,35 @@
 devtools::load_all(".")
 
+# parameters ----
 n <- 10
-
 mu1 <- 0
 sd1 <- 2
 sd2 <- 1
 
-# prior (n draws)
+# prior (n draws) ----
 p_theta <- function(n) {
   rnorm(n, mu1, sd1)
 }
 
-# likelihood
+# likelihood ----
 p_x_bar_theta <- function(theta) {
   rnorm(n, theta, sd2)
 }
 
-# define the greta model (single precision for slice sampler)
+# define the greta model ----
 x <- as_data(rep(0, n))
 greta_theta <- normal(mu1, sd1)
 distribution(x) <- normal(greta_theta, sd2)
-model <- model(greta_theta, precision = "single")
+model <- model(greta_theta)
 
-# ---- parameters ----
+# mcmc parameters ----
 n_iter <- 10
 n_warmup <- 10
 n_chains <- 2
 n_thin <- 1
 geweke_sampler <- adaptive_hmc()
 
-# ---- checking ----
+#  checking ----
 time_taken <- system.time({
   geweke_ahmc <- check_geweke(
     sampler = geweke_sampler,
@@ -44,7 +44,7 @@ time_taken <- system.time({
   )
 })
 
-# ---- processing ----
+# processing ----
 geweke_thin <- apply_thinning(geweke_ahmc, n_thin)
 
 geweke_stat <- geweke_ks(geweke_thin)

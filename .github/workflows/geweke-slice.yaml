@@ -51,7 +51,7 @@ jobs:
       - name: Upload diagnostic plots
         uses: actions/upload-artifact@v4
         with:
-          name: diagnostic-plots
+          name: geweke-slice-diagnostic-plots
           path: geweke-*.png
           retention-days: 90  # How long to keep the artifact
 

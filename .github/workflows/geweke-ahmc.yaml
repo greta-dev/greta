@@ -46,12 +46,12 @@ jobs:
         shell: Rscript {0}
         run: greta::greta_sitrep()
       - name: Run Geweke tests
-        run: Rscript inst/greta-geweke-slice.R
+        run: Rscript inst/greta-geweke-ahmc.R
 
       - name: Upload diagnostic plots
         uses: actions/upload-artifact@v4
         with:
-          name: diagnostic-plots
+          name: geweke-ahmc-diagnostic-plots
           path: geweke-*.png
           retention-days: 90  # How long to keep the artifact
 
