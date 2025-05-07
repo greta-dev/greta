@@ -3,6 +3,9 @@ on:
     branches:
       - main
       - master
+    paths:
+      - 'R/**'      # Run when R code changes
+      - '.github/workflows/pkgdown.yaml'  # Run when the workflow file changes
 
 name: pkgdown
 

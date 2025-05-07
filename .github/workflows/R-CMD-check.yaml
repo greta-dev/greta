@@ -3,10 +3,19 @@ on:
     branches:
       - main
       - master
+    paths:
+      - '.github/workflows/R-CMD-check.yaml'  # Run when the workflow file changes
+      - 'R/**'      # Run when R code changes
+      - 'tests/**'  # Run when test code changes
   pull_request:
     branches:
       - main
       - master
+    paths:
+      - '.github/workflows/R-CMD-check.yaml'  # Run when the workflow file changes
+      - 'R/**'
+      - 'tests/**'
+  workflow_dispatch:
   schedule:
     - cron: '1 23 * * Sun'
 

@@ -5,10 +5,18 @@ on:
     branches:
       - main
       - master
+    paths:
+      - '.github/workflows/geweke-slice.yaml'  # Run when the workflow file changes
+      - 'R/**'                                     # Run when R code changes
+      - 'inst/greta-geweke-slice.R'                 # Run when the test script changes
   pull_request:
     branches:
       - main
       - master
+    paths:
+      - '.github/workflows/geweke-slice.yaml'
+      - 'R/**'
+      - 'inst/greta-geweke-slice.R'
   workflow_dispatch:
 
 jobs:
