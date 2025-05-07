@@ -23,10 +23,10 @@ distribution(x) <- normal(greta_theta, sd2)
 model <- model(greta_theta)
 
 # mcmc parameters ----
-n_iter <- 10
-n_warmup <- 10
-n_chains <- 2
-n_thin <- 1
+n_iter <- 500
+n_warmup <- 10000
+n_chains <- 20
+n_thin <- 5
 geweke_sampler <- adaptive_hmc()
 
 #  checking ----

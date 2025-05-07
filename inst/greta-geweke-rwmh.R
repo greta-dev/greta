@@ -23,10 +23,10 @@ distribution(x) <- normal(greta_theta, sd2)
 model <- model(greta_theta)
 
 # mcmc parameters ----
-n_iter <- 10
-n_warmup <- 10
+n_iter <- 2000
+n_warmup <- 2000
 n_chains <- 2
-n_thin <- 1
+n_thin <- 5
 geweke_sampler <- rwmh()
 
 #  checking ----
