@@ -142,13 +142,15 @@ sampler <- R6Class(
 
       # how big would we like the bursts to be
       ideal_burst_size <- ifelse(one_by_one, 1L, pb_update)
-
-      self$run_warmup(
-        n_samples = n_samples,
-        pb_update = pb_update,
-        ideal_burst_size = ideal_burst_size,
-        verbose = verbose
-      )
+      do_warmup <- self$warmup > 0
+      if (do_warmup) {
+        self$run_warmup(
+          n_samples = n_samples,
+          pb_update = pb_update,
+          ideal_burst_size = ideal_burst_size,
+          verbose = verbose
+        )
+      }
 
       self$run_sampling(
         n_samples = n_samples,
@@ -565,14 +567,26 @@ sampler <- R6Class(
         self$free_state <- free_state
       }
 
+      self$update_acceptance(results = batch_results$trace)
+      self$update_rejection(results = batch_results$trace)
+    },
+
+    update_acceptance = function(results) {
       if (self$uses_metropolis) {
         # log acceptance probability
-        log_accept_stats <- as.array(batch_results$trace$log_accept_ratio)
-        is_accepted <- as.array(batch_results$trace$is_accepted)
+        log_accept_stats <- as.array(results$log_accept_ratio)
+        is_accepted <- as.array(results$is_accepted)
+        # related to tuning information
         self$accept_history <- rbind(self$accept_history, is_accepted)
         accept_stats_batch <- pmin(1, exp(log_accept_stats))
+        # also related to tuning information
         self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
+      }
+    },
 
+    update_rejection = function(results) {
+      if (self$uses_metropolis) {
+        log_accept_stats <- as.array(results$log_accept_ratio)
         # numerical rejections parameter sets
         bad <- sum(!is.finite(log_accept_stats))
         self$numerical_rejections <- self$numerical_rejections + bad
@@ -664,4 +678,15 @@ sampler <- R6Class(
       )
     }
   )
+)
+
+
+tune_tf <- R6Class(
+  "tune_tf",
+  inherit = sampler
+)
+
+tune_r <- R6Class(
+  "tune_r",
+  inherit = sampler
 )

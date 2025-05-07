@@ -1080,3 +1080,44 @@ n_warmup <- function(x) {
   x_info <- attr(x, "model_info")
   x_info$warmup
 }
+
+as_tensorspec <- function(tensor) {
+  tf$TensorSpec(shape = tensor$shape, dtype = tensor$dtype)
+}
+
+maybe_make_tensor_shape <- function(x) {
+  if (tf$is_tensor(x)) {
+    as_tensor_spec(x)
+  } else {
+    x
+  }
+}
+
+# get the final model parameter state from a chain as returned in the all_states
+# object from tfp$mcmc$sample_chain
+get_last_state <- function(all_states) {
+  n_iter <- dim(all_states)[1]
+  tf$gather(all_states, n_iter - 1L, 0L)
+}
+
+# find out if MCMC steps had non-finite acceptance probabilities
+bad_steps <- function(kernel_results) {
+  log_accept_ratios <- recursive_get_log_accept_ratio(kernel_results)
+  !is.finite(log_accept_ratios)
+}
+
+
+# recursively extract the log accaptance ratio from the MCMC kernel
+recursive_get_log_accept_ratio <- function(kernel_results) {
+  nm <- names(kernel_results)
+  if ("log_accept_ratio" %in% nm) {
+    log_accept_ratios <- kernel_results$log_accept_ratio
+  } else if ("inner_results" %in% nm) {
+    log_accept_ratios <- recursive_get_log_accept_ratio(
+      kernel_results$inner_results
+    )
+  } else {
+    stop("non-standard kernel structure")
+  }
+  as.array(log_accept_ratios)
+}

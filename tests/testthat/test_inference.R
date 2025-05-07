@@ -422,6 +422,9 @@ test_that("samplers print informatively", {
   expect_snapshot(
     hmc(Lmin = 1)
   )
+  expect_snapshot(
+    adaptive_hmc(max_leapfrog_steps = 1L)
+  )
 
   # # check print sees changed parameters
   # out <- capture_output(hmc(Lmin = 1), TRUE)

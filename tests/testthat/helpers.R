@@ -661,7 +661,8 @@ check_geweke <- function(
   p_x_bar_theta,
   niter = 2000,
   warmup = 1000,
-  thin = 1
+  thin = 1,
+  chains = 1
 ) {
   # sample independently
   target_theta <- p_theta(niter)
@@ -674,12 +675,14 @@ check_geweke <- function(
     p_theta = p_theta,
     p_x_bar_theta = p_x_bar_theta,
     sampler = sampler,
-    warmup = warmup
+    warmup = warmup,
+    chains = chains
   )
 
   geweke_checks <- list(
-    target_theta = do_thinning(target_theta, thin),
-    greta_theta = do_thinning(greta_theta, thin)
+    target_theta = target_theta,
+    greta_theta = greta_theta$theta,
+    draws = greta_theta$draws
   )
 
   geweke_checks
@@ -688,9 +691,13 @@ check_geweke <- function(
 geweke_qq <- function(geweke_checks, title) {
   # visualise correspondence
   quants <- (1:99) / 100
+  # target
   q1 <- stats::quantile(geweke_checks$target_theta, quants)
+  # greta sampled
   q2 <- stats::quantile(geweke_checks$greta_theta, quants)
-  plot(q2, q1, main = title)
+  # q1 is target
+  # q2 is greta
+  plot(q2, q1, main = title, xlab = "Q2 greta", ylab = "Q1 target")
   graphics::abline(0, 1)
 }
 
@@ -714,8 +721,10 @@ p_theta_greta <- function(
   data,
   p_theta,
   p_x_bar_theta,
+  # this argument gets passed along based on sampler used
   sampler = hmc(),
-  warmup = 1000
+  warmup = 1000,
+  chains
 ) {
   # set up and initialize trace
   theta <- rep(NA, niter)
@@ -726,7 +735,7 @@ p_theta_greta <- function(
     model,
     warmup = warmup,
     n_samples = 1,
-    chains = 1,
+    chains = chains,
     sampler = sampler,
     verbose = FALSE
   )
@@ -752,24 +761,37 @@ p_theta_greta <- function(
     # samples, now using this value of x (slow, but necessary in eager mode)
     dag$tf_log_prob_function <- NULL
     dag$define_tf_log_prob_function()
-    sampler <- attr(draws, "model_info")$samplers[[1]]
-    sampler$define_tf_evaluate_sample_batch()
 
-    # take anoteher sample
+    sampler <- attr(draws, "model_info")$samplers[[1]]
+
+    # we need a condition inside the geweke test where if it's adaptive_hmc we
+    # recreate the log prob function, recreate the default kernel, replace that
+    # inside the warmed up results, and then recreate the sampler function
+    if (inherits(sampler, "adaptive_hmc_sampler")) {
+      sampler$define_tf_kernel()
+      sampler$make_sampler_function()
+    } else {
+      sampler$define_tf_evaluate_sample_batch()
+    }
+
+    # take another sample
     draws <- extra_samples(
       draws,
       n_samples = 1,
       verbose = FALSE
     )
 
-    # trace the sample
+    # trace the sample - just one chain
     theta[i] <- tail(as.numeric(draws[[1]]), 1)
   }
 
   # kill the progress_bar
   cli::cli_progress_done()
 
-  theta
+  list(
+    theta = theta,
+    draws = draws
+  )
 }
 
 # test mcmc for models with analytic posteriors
@@ -915,6 +937,63 @@ do_thinning <- function(x, thinning = 1) {
   x[idx]
 }
 
+apply_thinning <- function(geweke_result, n_thin) {
+  geweke_thin <- list(
+    target_theta = do_thinning(geweke_result$target_theta, n_thin),
+    greta_theta = do_thinning(geweke_result$greta_theta, n_thin)
+  )
+  geweke_thin
+}
+
+build_plot_metadata <- function(
+  sampler,
+  time,
+  n_warmup,
+  n_iter,
+  n_chains,
+  n_thin,
+  ks_stat
+) {
+  sampler_class <- class(sampler)
+
+  sampler <- switch(
+    sampler_class[1],
+    "adaptive_hmc_sampler" = "ahmc",
+    "slice sampler" = "slice",
+    "rwmh sampler" = "rwmh",
+    "hmc sampler" = "hmc"
+  )
+
+  qq_title <- glue::glue(
+    "Sampler {sampler} Geweke test (time taken = {time}s)\\
+    \nwarmup = {n_warmup}, iter = {n_iter}, chains = {n_chains}, thin = {n_thin}\np-value = {round(ks_stat$p.value, 8)}"
+  )
+
+  param_stub <- glue::glue(
+    "warm-{n_warmup}-it-{n_iter}\\
+    -chain-{n_chains}-thin-{n_thin}.png"
+  )
+
+  qq_filename <- glue::glue(
+    "geweke-{sampler}-qq-{param_stub}"
+  )
+
+  coda_filename <- glue::glue(
+    "geweke-{sampler}-coda-{param_stub}"
+  )
+
+  bayesplot_filename <- glue::glue(
+    "geweke-{sampler}-dens-{param_stub}"
+  )
+
+  list(
+    qq_title = qq_title,
+    qq_filename = qq_filename,
+    coda_filename = coda_filename,
+    bayesplot_filename = bayesplot_filename
+  )
+}
+
 
 get_distribution_name <- function(x) {
   x_node <- get_node(x)
@@ -934,6 +1013,7 @@ get_distribution_name <- function(x) {
 check_samples <- function(
   x,
   iid_function,
+  # TODO note that we might want to change this to adaptive_hmc
   sampler = hmc(),
   n_effective = 3000,
   title = NULL,
