@@ -952,7 +952,7 @@ build_qq_title <- function(
   n_iter,
   n_chains,
   n_thin,
-  geweke_stat_rwmh,
+  geweke_stat,
   the_time
 ) {
   qq_title <- paste0(
@@ -966,7 +966,7 @@ build_qq_title <- function(
     ", thin = ",
     n_thin,
     ", p-value = ",
-    round(geweke_stat_rwmh$p.value, 8),
+    round(geweke_stat$p.value, 8),
     ", time = ",
     the_time,
     "s"
