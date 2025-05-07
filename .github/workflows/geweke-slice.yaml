@@ -47,10 +47,10 @@ jobs:
       - name: Run Geweke tests
         run: Rscript inst/greta-geweke-slice.R
 
-      - name: Upload plot as artifact
+      - name: Upload diagnostic plots
         uses: actions/upload-artifact@v4
         with:
-          name: qq-plots
+          name: diagnostic-plots
           path: geweke-*.png
           retention-days: 90  # How long to keep the artifact
 

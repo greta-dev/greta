@@ -47,9 +47,9 @@ geweke_stat_slice
 
 the_time <- round(time_taken[3])
 
-cat("this took", the_time, "seconds")
+cat("This took", the_time, "seconds")
 
-png("geweke-plot-slice.png", width = 1200, height = 800, res = 150)
+png("geweke-qq-plot-sampler-slice.png", width = 1200, height = 800, res = 150)
 
 qq_title <- build_qq_title(
   "slice",
@@ -63,14 +63,19 @@ qq_title <- build_qq_title(
 geweke_qq(geweke_thin, title = qq_title)
 dev.off()
 
-png("geweke-mcmc-plot-slice.png", width = 1200, height = 800, res = 150)
+png(
+  "geweke-mcmc-coda-plot-sampler-slice.png",
+  width = 1200,
+  height = 800,
+  res = 150
+)
 plot(geweke_slice$draws)
 dev.off()
 
 bplot_dens <- bayesplot::mcmc_dens_chains(geweke_slice$draws)
 
 ggplot2::ggsave(
-  filename = "geweke-gg-mcmc-plot-slice.png",
+  filename = "geweke-dens-chains-plot-sampler-slice.png",
   plot = bplot_dens,
   width = 1200,
   height = 800,
