@@ -676,8 +676,8 @@ diag.greta_array <- function(x = 1, nrow, ncol) {
     )
   }
 
-  is_square <- dim[1] != dim[2]
-  if (is_square) {
+  is_square <- dim[1] == dim[2]
+  if (!is_square) {
     cli::cli_abort(
       "Diagonal elements can only be extracted from square matrices"
     )
