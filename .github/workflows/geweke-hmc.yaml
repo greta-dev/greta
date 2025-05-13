@@ -1,0 +1,71 @@
+name: geweke-tests-hmc
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - '.github/workflows/geweke-hmc.yaml'  # Run when the workflow file changes
+      - 'R/**'                                    # Run when R code changes
+      - 'inst/greta-geweke-hmc.R'                 # Run when the test script changes
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - '.github/workflows/geweke-hmc.yaml'
+      - 'R/**'
+      - 'inst/greta-geweke-hmc.R'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    timeout-minutes: 360
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck any::devtools any::reticulate local::.
+          cache-version: 4
+          upgrade: 'TRUE'
+      - name: Install greta deps
+        shell: Rscript {0}
+        run: |
+          library(greta)
+          greta::install_greta_deps(timeout = 50)
+      - name: Situation Report on greta install
+        shell: Rscript {0}
+        run: greta::greta_sitrep()
+      - name: Run Geweke tests
+        run: Rscript inst/greta-geweke-hmc.R
+
+      - name: Upload plot as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: geweke-hmc-diagnostic-plots
+          path: geweke-*.png
+          retention-days: 90  # How long to keep the artifact
+
+      - name: Session info
+        shell: Rscript {0}
+        run: |
+          options(width = 100)
+          pkgs <- installed.packages()[, "Package"]
+          sessioninfo::session_info(pkgs, include_base = TRUE)
+
+      # - name: Upload plots and statistics as artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: geweke-results-${{ matrix.os }}
+      #     path: plots/
+      #     if-no-files-found: warn

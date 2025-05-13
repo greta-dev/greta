@@ -218,3 +218,11 @@
       hmc sampler object with parameters:
         Lmin = 1, Lmax = 10, epsilon = 0.1, diag_sd = 1
 
+---
+
+    Code
+      adaptive_hmc(max_leapfrog_steps = 1L)
+    Output
+      adaptive_hmc_sampler object with parameters:
+        max_leapfrog_steps = 1, epsilon = 0.1, diag_sd = 1
+
