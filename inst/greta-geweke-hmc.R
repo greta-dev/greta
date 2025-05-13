@@ -25,7 +25,7 @@ model <- model(greta_theta)
 # mcmc parameters ----
 n_iter <- 2000
 n_warmup <- 2000
-n_chains <- 2
+n_chains <- 10
 n_thin <- 5
 geweke_sampler <- hmc()
 
