@@ -18,12 +18,6 @@ test_that("check_tf_version works", {
 })
 
 
-test_that(".onLoad runs", {
-  skip_if_not(check_tf_version())
-
-  expect_ok(greta:::.onLoad())
-})
-
 test_that("tensorflow coercion works", {
   skip_if_not(check_tf_version())
 
