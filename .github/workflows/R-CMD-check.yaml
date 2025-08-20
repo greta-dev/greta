@@ -99,6 +99,10 @@ jobs:
       # - name: Install rcmdcheck
       #   run: remotes::install_cran("rcmdcheck")
 
+      # Some snapshot tests specifically check for miniconda
+      - name: Install miniconda
+        run: reticulate::install_miniconda()
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
