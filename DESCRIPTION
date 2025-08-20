@@ -46,7 +46,7 @@ Imports:
     R6,
     reticulate (>= 1.19.0),
     rlang,
-    tensorflow (== 2.16.0),
+    tensorflow (>= 2.16.0),
     tools,
     utils,
     whisker,
