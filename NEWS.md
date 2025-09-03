@@ -1,4 +1,4 @@
-# greta (development version)
+# greta 0.5.1
 
 ## Changes
 
