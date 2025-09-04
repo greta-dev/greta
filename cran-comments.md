@@ -1,24 +1,15 @@
 ## Test environments
-* local R installation, R 4.4.2
+* local R installation, R 4.5.1
 * win-builder (devel)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 notes
-
-> Found the following (possibly) invalid URLs:
-  URL: http://www.phidot.org/software/mark/docs/book/
-    From: inst/doc/example_models.html
-    Status: 403
-    Message: Forbidden
-    
-We could not find an issue with this link, or an alternative link.
-
-* Days since last update: 244 days
+0 errors | 0 warnings | 0 notes
 
 ## Submission notes
 
-This release is a substantial overhaul of the internals of greta to migrate the internals from tensorflow 1 to tensorflow 2.
+This release is a patch update to fix a tensorflow update and dependency change
+in the DESCRIPTION to not rely on `==` for versions.
 
 ## revdepcheck results
 
