@@ -1,5 +1,6 @@
 
-##  Copyright (C) 2010 - 2023  Dirk Eddelbuettel and Romain Francois
+##  Copyright (C) 2010 - 2025  Dirk Eddelbuettel and Romain Francois
+##  Copyright (C) 2025         Dirk Eddelbuettel, Romain Francois and Iñaki Ucar
 ##
 ##  This file is part of Rcpp.
 ##
@@ -22,7 +23,8 @@ Rcpp::sourceCpp("cpp/sugar.cpp")
 
 ## There are some (documented, see https://blog.r-project.org/2020/11/02/will-r-work-on-apple-silicon/index.html)
 ## issues with NA propagation on arm64 / macOS. We not (yet ?) do anything special so we just skip some tests
-isArmMacOs <- Sys.info()[["sysname"]] == "Darwin" && Sys.info()[["machine"]] == "arm64"
+## This also seems to hit arm64 on Linux (aka 'aarch64' here)
+isArm <- Sys.info()[["machine"]] == "arm64" || Sys.info()[["machine"]] == "aarch64"
 
 ## Needed for a change in R 3.6.0 reducing a bias in very large samples
 suppressWarnings(RNGversion("3.5.0"))
@@ -35,8 +37,8 @@ expect_equal( runit_abs(x,y) , list( abs(x), abs(y) ) )
 #    test.sugar.all.one.less <- function( ){
 expect_true( runit_all_one_less( 1 ) )
 expect_true( ! runit_all_one_less( 1:10 ) )
-if (!isArmMacOs) expect_true( is.na( runit_all_one_less( NA ) ) )
-if (!isArmMacOs) expect_true( is.na( runit_all_one_less( c( NA, 1)  ) ) )
+if (!isArm) expect_true( is.na( runit_all_one_less( NA ) ) )
+if (!isArm) expect_true( is.na( runit_all_one_less( c( NA, 1)  ) ) )
 expect_true( ! runit_all_one_less( c( 6, NA)  ) )
 
 
@@ -45,14 +47,14 @@ expect_true( ! runit_all_one_greater( 1 ) )
 expect_true( ! runit_all_one_greater( 1:10 ) )
 expect_true( runit_all_one_greater( 6:10 ) )
 expect_true( ! runit_all_one_greater( c(NA, 1) ) )
-if (!isArmMacOs) expect_true( is.na( runit_all_one_greater( c(NA, 6) ) ) )
+if (!isArm) expect_true( is.na( runit_all_one_greater( c(NA, 6) ) ) )
 
 
 #    test.sugar.all.one.less.or.equal <- function( ){
 expect_true( runit_all_one_less_or_equal( 1 ) )
 expect_true( ! runit_all_one_less_or_equal( 1:10 ) )
-if (!isArmMacOs) expect_true( is.na( runit_all_one_less_or_equal( NA ) ) )
-if (!isArmMacOs) expect_true( is.na( runit_all_one_less_or_equal( c( NA, 1)  ) ) )
+if (!isArm) expect_true( is.na( runit_all_one_less_or_equal( NA ) ) )
+if (!isArm) expect_true( is.na( runit_all_one_less_or_equal( c( NA, 1)  ) ) )
 expect_true( ! runit_all_one_less_or_equal( c( 6, NA)  ) )
 expect_true( runit_all_one_less_or_equal( 5 ) )
 
@@ -65,7 +67,7 @@ expect_true( ! fx( 1:10 ) )
 expect_true( fx( 6:10 ) )
 expect_true( fx( 5 ) )
 expect_true( ! fx( c(NA, 1) ) )
-if (!isArmMacOs) expect_true( is.na( fx( c(NA, 6) ) ) )
+if (!isArm) expect_true( is.na( fx( c(NA, 6) ) ) )
 
 
 #    test.sugar.all.one.equal <- function( ){
@@ -73,7 +75,7 @@ fx <- runit_all_one_equal
 expect_true( ! fx( 1 ) )
 expect_true( ! fx( 1:2 ) )
 expect_true( fx( rep(5,4) ) )
-if (!isArmMacOs) expect_true( is.na( fx( c(5,NA) ) ) )
+if (!isArm) expect_true( is.na( fx( c(5,NA) ) ) )
 expect_true(! fx( c(NA, 1) ) )
 
 
@@ -82,7 +84,7 @@ fx <- runit_all_not_equal_one
 expect_true( fx( 1 ) )
 expect_true( fx( 1:2 ) )
 expect_true( ! fx( 5 ) )
-if (!isArmMacOs) expect_true( is.na( fx( c(NA, 1) ) ) )
+if (!isArm) expect_true( is.na( fx( c(NA, 1) ) ) )
 expect_true( ! fx( c(NA, 5) ) )
 
 
@@ -302,7 +304,47 @@ expect_equal( fx( c(1:10) ), fx( c(1:10) ) )
 
 #    test.sugar.lapply <- function( ){
 fx <- runit_lapply
+expect_equal( fx( 1:10 ), as.list((1:10)^2) )
+
+
+#    test.sugar.lapply.rawfun <- function( ){
+fx <- runit_lapply_rawfun
+expect_equal( fx( 1:10 ), as.list((1:10)^2) )
+
+
+#    test.sugar.lapply.lambda <- function( ){
+fx <- runit_lapply_lambda
+expect_equal( fx( 1:10 ), as.list((1:10)^2) )
+
+
+#    test.sugar.lapply.seq <- function( ){
+fx <- runit_lapply_seq
 expect_equal( fx( 1:10 ), lapply( 1:10, seq_len ) )
+
+
+#    test.sugar.mapply2 <- function( ){
+fx <- runit_mapply2
+expect_equal( fx(1:10, 1:10) , 1:10+1:10 )
+
+
+#    test.sugar.mapply2.lambda <- function( ){
+fx <- runit_mapply2_lambda
+expect_equal( fx(1:10, 1:10) , 1:10+1:10 )
+
+
+#    test.sugar.mapply3.lambda <- function( ){
+fx <- runit_mapply3_lambda
+expect_equal( fx(1:10, 1:10, 1:10) , 1:10+1:10+1:10 )
+
+
+#    test.sugar.mapply2.logical <- function( ){
+fx <- runit_mapply2_logical
+expect_true( fx(1:10, 1:10)  )
+
+
+#    test.sugar.mapply2.list <- function( ){
+fx <- runit_mapply2_list
+expect_equal( fx(1:10, 1:10*2) , mapply(seq, 1:10, 1:10*2) )
 
 
 #    test.sugar.minus <- function( ){
@@ -377,6 +419,11 @@ expect_equal( fx(1:10) , (1:10)^2 )
 
 #    test.sugar.sapply.rawfun <- function( ){
 fx <- runit_sapply_rawfun
+expect_equal( fx(1:10) , (1:10)^2 )
+
+
+#    test.sugar.sapply.lambda <- function( ){
+fx <- runit_sapply_lambda
 expect_equal( fx(1:10) , (1:10)^2 )
 
 
@@ -487,6 +534,13 @@ expect_equal(fx(1:100), list( pos = 96:100, neg = 6:100 ))
 
 #    test.sugar.matrix.outer <- function( ){
 fx <- runit_outer
+x <- 1:2
+y <- 1:5
+expect_equal( fx(x,y) , outer(x,y,"+") )
+
+
+#    test.sugar.matrix.outer.lambda <- function( ){
+fx <- runit_outer_lambda
 x <- 1:2
 y <- 1:5
 expect_equal( fx(x,y) , outer(x,y,"+") )
@@ -1567,8 +1621,8 @@ expect_error(strimws(x[1], "invalid"), info = "strimws -- bad `which` argument")
 ## min/max
 #    test.sugar.min.max <- function() {
 ## min(empty) gives NA for integer, Inf for numeric (#844)
-expect_true(is.na(intmin(integer(0))),    "min(integer(0))")
-if (!isArmMacOs) expect_equal(doublemin(numeric(0)), Inf, info = "min(numeric(0))")
+if (!isArm) expect_true(is.na(intmin(integer(0))),    "min(integer(0))")
+if (!isArm) expect_equal(doublemin(numeric(0)), Inf, info = "min(numeric(0))")
 
 ## max(empty_ gives NA for integer, Inf for numeric (#844)
 expect_true(is.na(intmax(integer(0))),     "max(integer(0))")
