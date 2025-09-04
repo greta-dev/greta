@@ -264,19 +264,23 @@
       v greta conda environment available
       
       * path: '/Users/nick/Library/r-miniconda-arm64/envs/greta-env-tf2/bin/python'
+      * Encountered an error in running:
+      * `conda list -n greta-env-tf2`
+      * `error in running command`
+      * It is possible conda is not installed
       
       -- TensorFlow ------------------------------------------------------------------
       i checking if TensorFlow available
       v TensorFlow (v2.15.1) available
       
       * R path: '/Users/nick_1/Library/R/arm64/4.5/library/tensorflow'
-      * Exists in conda env: TRUE
+      * Exists in conda env:
       
       -- TensorFlow Probability ------------------------------------------------------
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
       
-      * Exists in conda env: TRUE
+      * Exists in conda env:
       
       -- Is greta ready to use? ------------------------------------------------------
       i greta is ready to use!
