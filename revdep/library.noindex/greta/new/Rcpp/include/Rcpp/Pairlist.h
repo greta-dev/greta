@@ -2,7 +2,7 @@
 //
 // Pairlist.h: Rcpp R/C++ interface class library -- pair lists objects (LISTSXP)
 //
-// Copyright (C) 2010 - 2013 Dirk Eddelbuettel and Romain Francois
+// Copyright (C) 2010 - 2025 Dirk Eddelbuettel and Romain Francois
 //
 // This file is part of Rcpp.
 //
@@ -42,16 +42,15 @@ namespace Rcpp{
         Pairlist_Impl(SEXP x){
             Storage::set__(r_cast<LISTSXP>(x)) ;
         }
-        #if defined(HAS_VARIADIC_TEMPLATES) || defined(RCPP_USING_CXX11)
-            template <typename... T>
-            Pairlist_Impl(const T&... args ){
-                Storage::set__(pairlist(args... )) ;
+        template <typename... T>
+        Pairlist_Impl(const T&... args ){
+            Storage::set__(pairlist(args... )) ;
+        }
+
+        void update(SEXP x) {
+            if (TYPEOF(x) != LISTSXP) {
+                Storage::set__(r_cast<LISTSXP>(x));
             }
-        #else
-            #include <Rcpp/generated/Pairlist__ctors.h>
-        #endif
-        void update(SEXP x){
-            SET_TYPEOF( x, LISTSXP ) ;
         }
     } ;
 

@@ -1,10 +1,10 @@
-* using log directory ‘/Users/nick/github/greta-dev/greta/revdep/checks.noindex/runMCMCbtadjust/new/runMCMCbtadjust.Rcheck’
-* using R version 4.4.2 (2024-10-31)
+* using log directory ‘/Users/nick_1/github/greta-dev/greta/revdep/checks.noindex/runMCMCbtadjust/new/runMCMCbtadjust.Rcheck’
+* using R version 4.5.1 (2025-06-13)
 * using platform: aarch64-apple-darwin20
 * R was compiled by
-    Apple clang version 14.0.0 (clang-1400.0.29.202)
-    GNU Fortran (GCC) 12.2.0
-* running under: macOS Sonoma 14.5
+    Apple clang version 16.0.0 (clang-1600.0.26.6)
+    GNU Fortran (GCC) 14.2.0
+* running under: macOS Sequoia 15.6.1
 * using session charset: UTF-8
 * using options ‘--no-manual --no-build-vignettes’
 * checking for file ‘runMCMCbtadjust/DESCRIPTION’ ... OK
@@ -12,7 +12,8 @@
 * this is package ‘runMCMCbtadjust’ version ‘1.1.2’
 * package encoding: UTF-8
 * checking package namespace information ... OK
-* checking package dependencies ... OK
+* checking package dependencies ... INFO
+Package suggested but not available for checking: ‘greta’
 * checking if this is a source package ... OK
 * checking if there is a namespace ... OK
 * checking for executable files ... OK

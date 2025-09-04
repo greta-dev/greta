@@ -3,72 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>A Future for R: Non-Exportable Objects</title>
-<style type="text/css">
-/**
- * Prism.s theme ported from highlight.js's xcode style
- */
-pre code {
-  padding: 1em;
-}
-.token.comment {
-  color: #007400;
-}
-.token.punctuation {
-  color: #999;
-}
-.token.tag,
-.token.selector {
-  color: #aa0d91;
-}
-.token.boolean,
-.token.number,
-.token.constant,
-.token.symbol {
-  color: #1c00cf;
-}
-.token.property,
-.token.attr-name,
-.token.string,
-.token.char,
-.token.builtin {
-  color: #c41a16;
-}
-.token.inserted {
-  background-color: #ccffd8;
-}
-.token.deleted {
-  background-color: #ffebe9;
-}
-.token.operator,
-.token.entity,
-.token.url,
-.language-css .token.string,
-.style .token.string {
-  color: #9a6e3a;
-}
-.token.atrule,
-.token.attr-value,
-.token.keyword {
-  color: #836c28;
-}
-.token.function,
-.token.class-name {
-  color: #DD4A68;
-}
-.token.regex,
-.token.important,
-.token.variable {
-  color: #5c2699;
-}
-.token.important,
-.token.bold {
-  font-weight: bold;
-}
-.token.italic {
-  font-style: italic;
-}
-</style>
+<meta name="generator" content="litedown 0.7">
+<title></title>
 <style type="text/css">
 body {
   font-family: sans-serif;
@@ -76,81 +12,115 @@ body {
   margin: auto;
   padding: 1em;
   line-height: 1.5;
-  box-sizing: border-box;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
 }
-body, .footnotes, code { font-size: .9em; }
+body, .abstract, code, .footnotes, footer, #refs, .caption { font-size: .9em; }
 li li { font-size: .95em; }
-*, *:before, *:after {
-  box-sizing: inherit;
-}
+ul:has(li > input[type="checkbox"]) { list-style: none; padding-left: 1em; }
+*, :before, :after { box-sizing: border-box; }
+a { color: steelblue; }
 pre, img { max-width: 100%; }
-pre, pre:hover {
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-pre code {
-  display: block;
-  overflow-x: auto;
-}
+pre { white-space: pre-wrap; word-break: break-word; }
+pre code { display: block; padding: 1em; overflow-x: auto; }
 code { font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace; }
-:not(pre) > code, code[class] { background-color: #F8F8F8; }
-code.language-undefined, pre > code:not([class]) {
-  background-color: inherit;
-  border: 1px solid #eee;
+:not(pre, th) > code, code[class], div > .caption { background: #f8f8f8; }
+pre > code:is(:not([class]), .language-plain, .language-none, .plain), .box, .figure, .table { background: inherit; border: 1px solid #eee; }
+pre > code {
+  &.message { border-color: #9eeaf9; }
+  &.warning { background: #fff3cd; border-color: #fff3cd; }
+  &.error { background: #f8d7da; border-color: #f8d7da; }
 }
+.fenced-chunk { border-left: 1px solid #666; }
+.code-fence {
+  opacity: .4;
+  border: 1px dashed #666;
+  border-left: 2px solid;
+  &:hover { opacity: inherit; }
+}
+.box, .figure, .table, table { margin: 1em auto; }
+div > .caption { padding: 1px 1em; }
+.figure { p:has(img, svg), pre:has(svg) { text-align: center; } }
+.flex-col { display: flex; justify-content: space-between; }
 table {
-  margin: auto;
-  border-top: 1px solid #666;
+  &:only-child:not(.table > *) { margin: auto; }
+  th, td { padding: 5px; font-variant-numeric: tabular-nums; }
+  thead, tfoot, tr:nth-child(even) { background: whitesmoke; }
+  thead th { border-bottom: 1px solid #ddd; }
+  &:not(.datatable-table) {
+    border-top: 1px solid #666;
+    border-bottom: 1px solid #666;
+  }
 }
-table thead th { border-bottom: 1px solid #ddd; }
-th, td { padding: 5px; }
-thead, tfoot, tr:nth-child(even) { background: #eee; }
 blockquote {
   color: #666;
   margin: 0;
-  padding-left: 1em;
-  border-left: 0.5em solid #eee;
+  padding: 1px 1em;
+  border-left: .5em solid #eee;
 }
 hr, .footnotes::before { border: 1px dashed #ddd; }
 .frontmatter { text-align: center; }
-#TOC .numbered li { list-style: none; }
-#TOC .numbered { padding-left: 0; }
-#TOC .numbered ul { padding-left: 1em; }
-table, .body h2 { border-bottom: 1px solid #666; }
+#TOC {
+  a { text-decoration: none; }
+  ul { list-style: none; padding-left: 1em; }
+  & > ul { padding: 0; }
+  ul ul { border-left: 1px solid lightsteelblue; }
+}
+.body h2 { border-bottom: 1px solid #666; }
 .body .appendix, .appendix ~ h2 { border-bottom-style: dashed; }
-.footnote-ref a::before { content: "["; }
-.footnote-ref a::after { content: "]"; }
-section.footnotes::before {
-  content: "";
-  display: block;
-  max-width: 20em;
+.main-number::after { content: "."; }
+span[class^="ref-number-"] { font-weight: bold; }
+.ref-number-fig::after, .ref-number-tab::after { content: ":"; }
+.cross-ref-chp::before { content: "Chapter "; }
+.cross-ref-sec::before { content: "Section "; }
+.cross-ref-fig::before, .ref-number-fig::before { content: "Figure "; }
+.cross-ref-tab::before, .ref-number-tab::before { content: "Table "; }
+.cross-ref-eqn::before, .MathJax_ref:has(mjx-mtext > mjx-c + mjx-c)::before { content: "Equation "; }
+.abstract, #refs {
+  &::before { display: block; margin: 1em auto; font-weight: bold; }
+}
+.abstract::before { content: "Abstract"; text-align: center; }
+#refs::before { content: "Bibliography"; font-size: 1.5em; }
+.ref-paren-open::before { content: "("; }
+.ref-paren-close::after { content: ")"; }
+.ref-semicolon::after { content: "; "; }
+.ref-and::after { content: " and "; }
+.ref-et-al::after { content: " et al."; font-style: italic; }
+.footnote-ref a {
+  &::before { content: "["; }
+  &::after { content: "]"; }
+}
+section.footnotes {
+  margin-top: 2em;
+  &::before { content: ""; display: block; max-width: 20em; }
+}
+.fade {
+  background: repeating-linear-gradient(135deg, white, white 30px, #ddd 32px, #ddd 32px);
+  opacity: 0.6;
 }
 
 @media print {
-  body {
-    font-size: 12pt;
-    max-width: 100%;
-  }
-  tr, img { page-break-inside: avoid; }
+  body { max-width: 100%; }
+  tr, img { break-inside: avoid; }
 }
 @media only screen and (min-width: 992px) {
-  pre { white-space: pre; }
+  body:not(.pagesjs) pre:has(.line-numbers):not(:hover) { white-space: pre; }
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xiee/utils@1.14.11/css/prism-xcode.min.css">
 <meta name="keywords" content="R, package, vignette, future, promise">
 <meta name="author" content="Henrik Bengtsson">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
 </head>
 <body>
 <div class="frontmatter">
-<div class="title"><h1>A Future for R: Non-Exportable Objects</h1></div>
-<div class="author"><h2></h2></div>
-<div class="date"><h3></h3></div>
 </div>
 <div class="body">
-<h1 id="a-future-for-r-non-exportable-objects">A Future for R: Non-Exportable Objects</h1>
+<h1 id="chp:a-future-for-r-non-exportable-objects">A Future for R: Non-Exportable Objects</h1>
 <p>Certain types of objects are tied to a given R session.  Such objects cannot be saved to file by one R process and then later be reloaded in another R process and expected to work correctly.  If attempted, we will often get an informative error but not always.  For the same reason, these type of objects cannot be exported to another R processes(*) for parallel processing regardless of which parallelization framework we use.  We refer to these type of objects as “non-exportable objects”.</p>
 <p>(*) The exception <em>might be</em> when <em>forked</em> processes are used, i.e. <code>plan(multicore)</code>.  However, such attempts to work around the underlying problem, which is non-exportable objects, should be avoided and considered non-stable.  Moreover, such code will fail to parallelize when using other future backends.</p>
-<h2 id="a-first-example-file-connections">A first example - file connections</h2>
+<h2 id="sec:a-first-example-file-connections">A first example - file connections</h2>
 <p>An example of a non-exportable object is a connection, e.g. a file connection.  For instance, if you create a file connection,</p>
 <pre><code class="language-r">con &lt;- file(&quot;output.log&quot;, open = &quot;wb&quot;)
 cat(&quot;hello &quot;, file = con)
@@ -175,7 +145,7 @@ readLines(&quot;output.log&quot;, warn = FALSE)
 ##   ..- attr(*, &quot;conn_id&quot;)=&lt;externalptr&gt;
 </code></pre>
 <p>which is bound to the main R process and makes no sense to the worker.  Ideally, the R process of the worker would detect this and produce an informative error message, but as seen here, that does not always occur.</p>
-<h2 id="protect-against-non-exportable-objects">Protect against non-exportable objects</h2>
+<h2 id="sec:protect-against-non-exportable-objects">Protect against non-exportable objects</h2>
 <p>To help avoiding exporting non-exportable objects by mistakes, which typically happens because a global variable is non-exportable, the future framework provides a mechanism for automatically detecting such objects.  To enable it, do:</p>
 <pre><code class="language-r">options(future.globals.onReference = &quot;error&quot;)
 f &lt;- future({ cat(&quot;world!&quot;, file = con); flush(con) })
@@ -183,9 +153,9 @@ f &lt;- future({ cat(&quot;world!&quot;, file = con); flush(con) })
 ## ('con' of class 'file') used in the future expression
 </code></pre>
 <p><em>Comment</em>: The <code>future.globals.onReference</code> options is set to <code>&quot;ignore&quot;</code> by default due to the extra overhead <code>&quot;error&quot;</code> introduces, which can be significant for very large nested objects.  Furthermore, some subclasses of external pointers can be exported without causing problems.</p>
-<h2 id="packages-with-non-exportable-objects">Packages with non-exportable objects</h2>
+<h2 id="sec:packages-with-non-exportable-objects">Packages with non-exportable objects</h2>
 <p>The below table and sections provide a few examples of non-exportable R objects that you may run into when trying to parallelize your code, or simply from trying reload objects saved in a previous R session.
-<em>If you identify other cases, please consider <a href="https://github.com/HenrikBengtsson/future/issues/">reporting</a> them so they can be documented here and possibly even be fixed.</em></p>
+<em>If you identify other cases, please consider <a href="https://github.com/futureverse/future/issues/">reporting</a> them so they can be documented here and possibly even be fixed.</em></p>
 <table>
 <thead>
 <tr>
@@ -305,8 +275,8 @@ f &lt;- future({ cat(&quot;world!&quot;, file = con); flush(con) })
 </tbody>
 </table>
 <p>These are discussed in sections ‘False positives - packages with exportable external pointers’ at the very end of this vignette.</p>
-<h3 id="packages-with-connections">Packages with connections</h3>
-<h4 id="package-parallel">Package: parallel</h4>
+<h3 id="sec:packages-with-connections">Packages with connections</h3>
+<h4 id="sec:package-parallel">Package: parallel</h4>
 <pre><code class="language-r">library(future)
 plan(multisession, workers = 2)
 
@@ -324,11 +294,11 @@ y
 ## Error: Detected a non-exportable reference ('externalptr') in one of the globals
 ## ('cl' of class 'SOCKcluster') used in the future expression
 </code></pre>
-<h3 id="packages-that-rely-on-external-pointers">Packages that rely on external pointers</h3>
+<h3 id="sec:packages-that-rely-on-external-pointers">Packages that rely on external pointers</h3>
 <p>If an object carries an <em>external pointer</em>, it is likely that it can only be used in the R session where it was created.  If it is exported to and used in a parallel process, it will likely cause an error there.  As shown above, and in below examples, setting option <code>future.globals.onReference</code> to <code>&quot;error&quot;</code> will make <strong>future</strong> to scan for <em>external pointer</em>:s before launching the future on a parallel worker, and throw an error if one is detected.</p>
 <p>However, there are objects with <em>external pointer</em>:s that can be exported, e.g. <code>data.table</code> objects of the <strong><a href="https://cran.r-project.org/package=data.table">data.table</a></strong> package is one such example.  In other words, the existence of a <em>external pointer</em> is just a suggestion for an object being non-exportable - it is not a sufficient condition.</p>
 <p>Below are some examples of packages who produce non-exportable objects with <em>external pointer</em>:s.</p>
-<h4 id="package-arrow">Package: arrow</h4>
+<h4 id="sec:package-arrow">Package: arrow</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=arrow">arrow</a></strong> package provides efficient in-memory storage of arrays
 and tables.  However, these objects cannot be transferred as-is to a
 parallel worker.</p>
@@ -364,7 +334,7 @@ v &lt;- value(f)
 print(v)
 #&gt; [1] 150   5
 </code></pre>
-<h4 id="package-bigmemory">Package: bigmemory</h4>
+<h4 id="sec:package-bigmemory">Package: bigmemory</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=bigmemory">bigmemory</a></strong> package provides mechanisms for working with very
 large matrices that can be updated in-place, which helps save
 memory. For example,</p>
@@ -418,7 +388,7 @@ value(f)
 #&gt; of the globals ('x' of class 'big.matrix') used in the future
 #&gt; expression
 </code></pre>
-<h4 id="package-cpp11">Package: cpp11</h4>
+<h4 id="sec:package-cpp11">Package: cpp11</h4>
 <p>Another example is <strong><a href="https://cran.r-project.org/package=cpp11">cpp11</a></strong>, which allows us to easily create R functions that are implemented in C++, e.g.</p>
 <pre><code class="language-r">cpp11::cpp_source(code = '
 #include &quot;cpp11/doubles.hpp&quot;
@@ -444,7 +414,7 @@ n
 #&gt; Error in .Call(&quot;_code_1748ff617940b9_my_length&quot;, x, PACKAGE = &quot;code_1748ff617940b9&quot;) :
 #&gt;   &quot;_code_1748ff617940b9_my_length&quot; not available for .Call() for package &quot;code_1748ff617940b9&quot;
 </code></pre>
-<h4 id="package-dbi">Package: DBI</h4>
+<h4 id="sec:package-dbi">Package: DBI</h4>
 <p><strong><a href="https://cran.r-project.org/package=DBI">DBI</a></strong> provides a unified database interface for communication between R and various database engines.  Analogously to regular connections in R, DBIConnection objects can <em>not</em> safely be exported to another R process, e.g.</p>
 <pre><code class="language-r">library(future)
 options(future.globals.onReference = &quot;error&quot;)
@@ -455,7 +425,7 @@ dummy %&lt;-% print(con)
 ## Error: Detected a non-exportable reference ('externalptr') in one of the globals
 ## ('con' of class 'SQLiteConnection') used in the future expression
 </code></pre>
-<h4 id="package-inline">Package: inline</h4>
+<h4 id="sec:package-inline">Package: inline</h4>
 <p>Another example is <strong><a href="https://cran.r-project.org/package=inline">inline</a></strong>, which allows us to easily create R functions that are implemented in C and C++, e.g.</p>
 <pre><code class="language-r">library(inline)
 code &lt;- &quot;
@@ -482,7 +452,7 @@ f &lt;- future(sum_1_to_n(10, 0))
 ## 'DLLHandle') in one of the globals ('sum_1_to_n' of class 'CFunc')
 ## used in the future expression
 </code></pre>
-<h4 id="package-keras">Package: keras</h4>
+<h4 id="sec:package-keras">Package: keras</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=DBI">keras</a></strong> package provides an R interface to
 <a href="https://keras.io/">Keras</a>, which “is a high-level neural networks API
 developed with a focus on enabling fast experimentation”.  The R
@@ -534,7 +504,7 @@ pred &lt;- value(f)
 str(pred)
 ## num [1:128, 1] 0.6937 -0.048 0.2996 -0.0818 1.0673 ...
 </code></pre>
-<h4 id="package-magick">Package: magick</h4>
+<h4 id="sec:package-magick">Package: magick</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=magick">magick</a></strong> package provides an R-level API for <a href="https://imagemagick.org/">ImageMagick</a> to work with images.  When working with this API, the images are represented internally as external pointers of class ‘magick_image’ that cannot be be exported to another R process, e.g.</p>
 <pre><code class="language-r">library(future)
 plan(multisession)
@@ -554,7 +524,7 @@ v &lt;- value(f)
 ## 'magick-image') in one of the globals ('frink' of class 'magick-image')
 ## used in the future expression
 </code></pre>
-<h4 id="package-polars">Package: polars</h4>
+<h4 id="sec:package-polars">Package: polars</h4>
 <p>The <strong><a href="https://rpolars.github.io/">polars</a></strong> package provides objects for performant processing on
 tabular data.  However, these objects are tied to the R process that
 created them. If we attempt to use them in a parallel worker, we end
@@ -575,7 +545,7 @@ v &lt;- value(f)
 <p>This is because the external pointer in the <code>RPolarsDataFrame</code> object
 is erased when transferred to another process, which <strong>polars</strong> (&gt;= 0.15.0)
 detects and gives an informative error message about.</p>
-<h4 id="package-raster">Package: raster</h4>
+<h4 id="sec:package-raster">Package: raster</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=raster">raster</a></strong> package provides methods for working with spatial data, which are held in ‘RasterLayer’ objects.  Not all but some of these objects use an external pointer.  For example,</p>
 <pre><code class="language-r">library(future)
 plan(multisession)
@@ -594,7 +564,7 @@ Error: Detected a non-exportable reference ('externalptr') in one of the
 globals ('s' of class 'RasterLayer') used in the future expression
 </code></pre>
 <p>Note that it is only the RasterLayer object <code>s</code> that carries an external pointer.  If we dig deeper, we find that this is because <code>attr(s@file, &quot;con&quot;)</code> is file connection opened for writing.  This is why <code>s</code> cannot be passed on to an external worker.  In contrast, RasterLayer object <code>r</code> does not have this problem and would be fine to pass on to a worker.</p>
-<h4 id="package-rcpp">Package: Rcpp</h4>
+<h4 id="sec:package-rcpp">Package: Rcpp</h4>
 <p>Similarly to <strong>cpp11</strong>, <strong><a href="https://cran.r-project.org/package=Rcpp">Rcpp</a></strong> can be use to create R functions that are implemented in C++, e.g.</p>
 <pre><code class="language-r">Rcpp::sourceCpp(code = '
 #include &lt;Rcpp.h&gt;
@@ -626,7 +596,7 @@ n %&lt;-% my_length(x)
 ## 'NativeSymbol') in one of the globals ('my_length' of class 'function')
 ## used in the future expression
 </code></pre>
-<h4 id="package-reticulate">Package: reticulate</h4>
+<h4 id="sec:package-reticulate">Package: reticulate</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=reticulate">reticulate</a></strong> package provides methods for creating and calling Python code from within R.  If one attempt to use Python-binding objects from this package, we get errors like:</p>
 <pre><code class="language-r">library(future)
 plan(multisession)
@@ -660,7 +630,7 @@ y %&lt;-% twice(1.2)
 ## Error: Detected a non-exportable reference ('externalptr') in one of the globals
 ## ('twice' of class 'python.builtin.function') used in the future expression
 </code></pre>
-<h4 id="package-rjava">Package: rJava</h4>
+<h4 id="sec:package-rjava">Package: rJava</h4>
 <p>Here is an example that shows how <strong><a href="https://cran.r-project.org/package=rJava">rJava</a></strong> objects cannot be exported to external R processes.</p>
 <pre><code class="language-r">library(future)
 plan(multisession)
@@ -689,7 +659,7 @@ f &lt;- future({
 ## Error: Detected a non-exportable reference ('externalptr') in one of the
 ## globals ('Double' of class 'jclassName') used in the future expression
 </code></pre>
-<h4 id="package-shortread">Package: ShortRead</h4>
+<h4 id="sec:package-shortread">Package: ShortRead</h4>
 <p>The <strong><a href="https://bioconductor.org/packages/ShortRead/">ShortRead</a></strong> package from Bioconductor implements efficient methods for sampling, iterating, and reading FASTQ files.  Some of the helper objects used cannot be saved to file or exported to a parallel worker, because they comprise of connections and other non-exportable objects.</p>
 <p>Here is an example that illustrates how an attempt to use a ‘FastqStreamer’ object created in the main R session fails when used in a parallel worker:</p>
 <pre><code class="language-r">library(future)
@@ -712,7 +682,7 @@ reads %&lt;-% yield(fs)
 ## Error: Detected a non-exportable reference ('externalptr') in one of the
 ## globals ('fs' of class 'FastqStreamer') used in the future expression
 </code></pre>
-<h4 id="package-sparklyr">Package: sparklyr</h4>
+<h4 id="sec:package-sparklyr">Package: sparklyr</h4>
 <pre><code class="language-r">library(future)
 plan(multisession)
 library(sparklyr)
@@ -734,7 +704,7 @@ d %&lt;-% dim(data)
 ## Error: Detected a non-exportable reference ('externalptr') in one of
 ## the globals ('data' of class 'tbl_spark') used in the future expression
 </code></pre>
-<h4 id="package-terra">Package: terra</h4>
+<h4 id="sec:package-terra">Package: terra</h4>
 <pre><code class="language-r">library(future)
 plan(multisession)
 library(terra)
@@ -794,7 +764,7 @@ dr
 [1] 90 95  1
 </code></pre>
 <p>For more details, see <code>help(&quot;wrap&quot;, package = &quot;terra&quot;)</code>.</p>
-<h4 id="package-udpipe">Package: udpipe</h4>
+<h4 id="sec:package-udpipe">Package: udpipe</h4>
 <pre><code class="language-r">library(future)
 plan(multisession)
 library(udpipe)
@@ -812,7 +782,7 @@ x %&lt;-% udpipe_annotate(udmodel, x = &quot;Ik ging op reis en ik nam mee.&quot
 ## globals ('udmodel' of class 'udpipe_model') used in the future expression
 </code></pre>
 <p>Now, it is indeed possible to parallelize <strong><a href="https://cran.r-project.org/package=udpipe">udpipe</a></strong> calls.  For details on how to do this, see the ‘UDPipe Natural Language Processing - Parallel’ vignette that comes with the <strong>udpipe</strong> package.</p>
-<h4 id="package-xgboost">Package: xgboost</h4>
+<h4 id="sec:package-xgboost">Package: xgboost</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=xgboost">xgboost</a></strong> package provides fast gradient-boosting methods.  Some of its data structures use external pointers.  For example,</p>
 <pre><code class="language-r">library(future)
 plan(multisession)
@@ -840,7 +810,7 @@ f &lt;- future(dim(dtrain))
 ## in one of the globals ('dtrain' of class 'xgb.DMatrix') used in the future expression
 </code></pre>
 <p>This is because <code>train</code> itself is an external pointer, i.e. <code>mode(train) == &quot;externalptr&quot;</code>.</p>
-<h4 id="package-xml">Package: XML</h4>
+<h4 id="sec:package-xml">Package: XML</h4>
 <p>Another example is XML objects of the <strong><a href="https://cran.r-project.org/package=XML">XML</a></strong> package, which may
 produce evaluation error, or even cause R to abort if used in another
 R process, e.g.</p>
@@ -925,7 +895,7 @@ f &lt;- future({
 value(f)
 ## [1] &quot;xyz&quot;
 </code></pre>
-<h4 id="package-xml2">Package: xml2</h4>
+<h4 id="sec:package-xml2">Package: xml2</h4>
 <p>Yet another example is XML objects of the <strong><a href="https://cran.r-project.org/package=xml2">xml2</a></strong> package, which
 may produce evaluation errors (or just invalid results depending on
 how they are used), e.g.</p>
@@ -963,8 +933,8 @@ f &lt;- future({
 ## Reconstruct the 'xml_nodeset' object in the main R session
 children &lt;- xml_unserialize(value(f))
 </code></pre>
-<h3 id="packages-with-other-types-of-non-external-objects">Packages with other types of non-external objects</h3>
-<h4 id="package-ncdf4">Package: ncdf4</h4>
+<h3 id="sec:packages-with-other-types-of-non-external-objects">Packages with other types of non-external objects</h3>
+<h4 id="sec:package-ncdf4">Package: ncdf4</h4>
 <p>Package <strong><a href="https://cran.r-project.org/package=ncdf4">ncdf4</a></strong> provides an R API to work with data that live in netCDF files.  For example, we can create a simple netCDF file that holds a variable ‘x’:</p>
 <pre><code class="language-r">library(ncdf4)
 x &lt;- ncvar_def(&quot;x&quot;, units = &quot;count&quot;, dim = list())
@@ -1004,8 +974,8 @@ y &lt;- value(f)
 y
 ## [1] 42
 </code></pre>
-<h3 id="false-positives-packages-with-exportable-external-pointers">False positives - packages with exportable external pointers</h3>
-<h4 id="package-data-table">Package data.table</h4>
+<h3 id="sec:false-positives-packages-with-exportable-external-pointers">False positives - packages with exportable external pointers</h3>
+<h4 id="sec:package-data-table">Package data.table</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=data.table">data.table</a></strong> package creates objects comprising external pointers.  Contrary to above non-exportable examples, such objects can be saved to file and used in another R session, or exported to a parallel worker. This is because <strong>data.table</strong> is capable of restoring these objects to a valid state.  Consider the following example:</p>
 <pre><code class="language-r">library(data.table)
 DT &lt;- data.table(a = 1:3, b = letters[1:3])
@@ -1033,7 +1003,7 @@ print(row)
 #&gt;    a b
 #&gt; 1: 2 b
 </code></pre>
-<h4 id="package-rstan">Package rstan</h4>
+<h4 id="sec:package-rstan">Package rstan</h4>
 <p>The <strong><a href="https://cran.r-project.org/package=rstan">rstan</a></strong> package creates objects comprising external pointers.  Contrary to above non-exportable examples, such objects can be saved to file and used in another R session, or exported to a parallel worker. This is because <strong>rstan</strong> is capable of restoring these objects to a valid state.  Consider the following example from <code>example(&quot;rstan&quot;, package = &quot;rstan&quot;)</code>:</p>
 <pre><code class="language-r">library(rstan)
 
@@ -1082,7 +1052,5 @@ str(e)
 #&gt;   ..$ parameters: chr [1:2] &quot;mu&quot; &quot;lp__&quot;
 </code></pre>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
 </body>
 </html>

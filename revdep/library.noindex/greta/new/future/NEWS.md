@@ -1,3 +1,382 @@
+# Version 1.67.0 [2025-07-29]
+
+This is the fourth rollout out of several towards a near-future major
+release. This has been made possible due to a multi-year effort of
+internal re-designs, work with package maintainers, release, and
+repeat. This release fixes a few more regressions introduced in future
+1.40.0 (2025-04-10).
+
+## Significant Changes
+
+ * Now argument `workers` for `plan(multisession)` defaults to
+   `availableCores(constraints = "connections-16")`. This will make
+   the default for `plan(multisession)` work also on computers with a
+   large number of CPU cores (e.g. 192 and 256 cores) while leaving 16
+   connection slots available for other needs.
+   
+ * Futures now muffle any `packageStartupMessage` conditions produced
+   when pre-loading and pre-attaching packages, e.g. as specified by
+   the `packages` argument or those needed by global objects.
+
+## Performance
+
+ * The pre-validation of the cluster worker allotted to a future when
+   launched was unnecessarily expensive due to a thinko since
+   **future** 1.40.0 (2025-04-10), e.g. it would take ~0.1-0.2 seconds
+   for a multisession future, whereas after the fix it is effectly 0.0
+   seconds.
+
+ * Calling `resolved()` on a lazy `ClusterFuture` would collect the
+   result for the first _resolved_ future in order to free up one
+   worker slot. Now this is only done if all slots are occupied. The
+   net benefit is that lazy cluster futures will be launched faster,
+   unless all workers are busy.
+
+ * Cluster and multisession workers initiate more things when created,
+   e.g. pre-loading of packages and memoization of available
+   cores. Previously, such steps were performed only when the first
+   future was evaluated on a worker.
+
+## Bug Fixes
+
+ * If a multicore future that was terminated abruptly (e.g. via
+   `tools::pskill()` or by the operating system), then it was not
+   detected as such. Instead it resulted in an unexpected error that
+   could not be recovered from. Now it is detected and a
+   `FutureInterruptError` is signaled, which can then be handled and
+   the future may be `reset()`.
+ 
+ * Calls to `resolved()` were not registered by FutureJournal.
+
+ * Future backend factory was created via the calling environment
+   rather than via the namespace environment where it lives.
+ 
+
+# Version 1.58.0 [2025-06-05]
+
+This is the third rollout out of several towards a near-future major
+release that I am really excited about. This has been made possible
+due to a multi-year effort of internal re-designs, work with package
+maintainers, release, and repeat. This release fixes a few
+regressions introduced in future 1.40.0 (2025-04-10), despite passing
+[all unit, regression, and system
+tests](https://www.futureverse.org/quality.html).
+
+## New Features
+
+ * Now futures produce a warning when they detect that the _default_
+   graphics device, as defined by R option `"device"`, is opened by,
+   for instance, a `plot()` call without explicitly opening a graphics
+   device. The reason for this check is that we rarely want to plot to
+   the _default_ graphics device in parallel processing, which
+   typically ends up plotting to a `Rplots.pdf` file that is local to
+   the parallel worker. If that is truly wanted, please open a
+   graphics devices explicitly (e.g. `pdf()` or `png()`) before
+   plotting. Alternatively, explicitly set R option `device` inside
+   the future expression.
+
+## Beta Features
+
+ * Add `makeClusterFuture()` for creating a cluster of stateless
+   parallel workers for processing via the future framework. This
+   requires R (>= 4.4.0) [2024-04-24]. Please make sure to read
+   `help("makeClusterFuture", package = "future")` to learn about
+   potential pitfalls. The plan is to support more corner cases in
+   future releases, and when not possible, add more mechanisms for
+   detecting non-supported cases and given an informative error.
+
+## Bug Fixes
+
+ * Setting `options(warn = 2)` on a parallel worker was ignored -
+   warnings were not escalated to errors on the worker, and was
+   instead relayed as-is in the parent R session, unless `options(warn
+   = 2)` was also set in the parent. Now `options(warn = 2)` on a
+   worker causes warnings to be escalated immediately to errors on the
+   worker, which therefore also terminates the future.
+
+ * `future()` arguments `stdout` and `conditions` were not applied
+   when packages that were specified via argument `packages` were
+   loaded and attached. This prevented us from excluding, for
+   instance, `packageStartupMessage`:s, causing them to be displayed
+   in sequential and multicore processing.
+ 
+ * When the using `cluster` and `multisession` backends, one could, in
+   some cases, end up with warnings on "package may not be available
+   when loading" that are produced by `serialize()`. These type of
+   warnings are now suppressed.
+ 
+ * Now the cluster future backend tries even harder to shut down
+   parallel cluster workers when shutting down the backend. If it
+   fails to communicate with one or more of the parallel workers, it
+   will now close any socket connections that remain open towards such
+   cluster nodes.
+
+ * The built-in checks for added, removed, or modified graphical
+   devices introduced in **future** 1.40.0 (2025-04-10), could produce
+   false positives, complaining about "A future expression must close
+   any opened devices and must not close devices it did not
+   open. Details: 1 devices differ: index=2, before='NA',
+   after=''". The problem was that it did not prune the empty 'after'
+   before the check.
+
+ * The `multicore` backend did not relay `immediateCondition`:s in a
+   near-live fashion, but only when the results of the futures where
+   collected.
+
+ * The `sequential`, `cluster`, `multisession`, and `multicore`
+   backends relayed `immediateCondition`:s, but did not record them
+   properly in the future object.
+
+
+# Version 1.49.0 [2025-05-08]
+
+This is the second rollout out of three-four major updates, which is
+now possible due to a multi-year effort of internal re-designs, work
+with package maintainers, release, and repeat. This release fixes two
+regressions introduced in future 1.40.0 (2025-04-10), despite passing
+[all unit, regression, and system
+tests](https://www.futureverse.org/quality.html) of the Future API
+that we have built up over the years. On the upside, fixing these
+issues led to a greatly improved static-code analyzer for
+automatically finding global variables in future expressions. Also,
+with this release, we can now move on top releasing modern versions of
+future backends **future.callr** and **future.mirai** that support
+interrupting futures and near-live progress updates using the
+**progressr** package. In addition, map-reduce packages such as
+**future.apply**, **furrr**, and **doFuture** can be updated to take
+advantage of early exiting on errors via cancellation of futures.
+
+## New Features
+
+ * `future()` does a better job in identifying global variables in the
+   future expression. This is achieved by the static-code analysis now
+   walks the abstract syntax tree (AST) of the future expression using
+   a strategy that better emulates how the R engine identifies global
+   variables at run-time.
+
+ * Add `cancel()` for canceling one or more futures. By default, it
+   attempts to interrupt any running futures. This replaces the
+   `interrupt()` method introduced in the previous version, which now
+   has been removed.
+ 
+ * Now `print()` for `Future` reports also on the current state of the
+   future, e.g. 'created', 'running', 'finished', and 'interrupted'.
+
+ * Now `print(plan())` reports on the number of created, launched, and
+   finished futures since the future backend was set. It also reports
+   on the total and average runtime of all finished futures thus far.
+
+## Bug Fixes
+
+ * Globals in the environment of an anonymous function were lost since
+   v1.40.0 (2025-04-10). This was partly resolved by updates to the
+   **future** package and partly by updates to the **globals**
+   package. This regression has now been fixed.
+   
+ * Multisession workers stopped inheriting the R package library path
+   of the main R session in v1.40.0 (2025-04-10). This regression has
+   now been fixed.
+
+ * In rare cases, a future backend might fail to launch a future and
+   at the same time fail to handle such errors. That would result in
+   hard-to-understand, obscure errors. In case the future backend does
+   not detect this itself, such errors are now caught by the
+   **future** package and resignaled as informative errors of class
+   `FutureLaunchError`. By always handling launch errors, we assure
+   that futures failing to launch can always be reset and relaunched
+   again, possible on alternative backend.
+   
+ * When a future fails to launch due to issues with the parallel
+   worker, querying it with `value()` produces a
+   `FutureLaunchError`. When this happened for `cluster` or
+   `multisession` futures, `resolved()` would return FALSE and not
+   TRUE as expected. In addition, the `FutureLaunchError` would be
+   lost, resulting in such futures being stuck in an unresolved state,
+   and the `FutureLaunchError` error never being signaled.
+
+ * Shutdown of `cluster` and `multisession` workers could fail if one
+   of the the workers was already terminated, e.g. interrupted or
+   crashed. Now the shutdown of each worker is independent of the
+   others, lowering the risk of leaving stray PSOCK workers behind.
+
+ * The built-in validation that futures do not leave behind stray
+   connections could, in some cases, result in `Error in vapply(after,
+   FUN = as.integer, FUN.VALUE = NA_integer_): values must be length
+   1, but FUN(X[[9]]) result is length 0` when there were such stray
+   connections.
+
+## Deprecated and Defunct
+
+ * `interrupt()` introduced in previous version has been removed.  Use
+   `cancel()` instead. The default for `cancel()` is to interrupt as
+   well. One reason for the change is that the word "interrupt"
+   conveys the _mechanism_, whereas the "cancel" conveys the _intent_,
+   which is the preferred style. Another reason was that `interrupt()`
+   masked ditto of the popular **rlang** package, and vice versa - the
+   choice `cancel()` has fewer name clashes.
+
+
+# Version 1.40.0 [2025-04-10]
+
+This is the first rollout out of three major updates, which is now
+possible due to a multi-year effort of internal re-designs, work with
+package maintainers, release, and repeat. This release comes with a
+large redesign of how future backends are implemented internally. One
+goal is to lower the threshold for implementing exciting, new
+features, that has been on hold for too long. Some of these features
+are available already in this release, and more are to come in
+near-future releases. Another goal is to make it straightforward to
+implement a new backend.
+
+This update is fully backward compatible with previous versions.
+Developers and end-users can expect business as usual. Like all
+releases, this version has been [validated
+thoroughly](https://www.futureverse.org/quality.html) via
+reverse-dependency checks, **future.tests** checks, and more.
+
+## New Features
+
+ * Now `with()` can be used to evaluate R expressions, including
+   futures, using a temporary future plan. For example,
+   `with(plan(multisession), { expr })` evaluates `{ expr }` using
+   multisession futures, before reverting back to plan set previously
+   by the user. To do the same inside a function, set
+   `with(plan(multisession), local = TRUE)`, which uses multisession
+   futures until the function exits.
+
+ * Add `interrupt()`, which interrupts a future, if the parallel
+   backend supports it, otherwise it is silently ignored. It can also
+   be used on a container (i.e. lists, `listenv`:s and environment) of
+   futures. Interrupts are enabled by default for `multicore` and
+   `multisession` futures. Interrupts are disabled by default for
+   `cluster` futures, because there parallel workers may be running on
+   remote machines where the overhead of interrupting such workers
+   might be too large. To override the defaults, specify `plan()`
+   argument `interrupts`, e.g. `plan(cluster, workers = hosts,
+   interrupts = TRUE)`.
+   
+ * Add `reset()`, which resets a future that has completed, failed, or
+   been interrupted. The future is reset back to a lazy, vanilla
+   future that can be relaunched.
+
+ * `value()` on containers gained argument `reduce`, which specifies a
+   function for reducing the values, e.g. ``values(fs, reduce =
+   `+`)``. Optional attribute `init` controls the initial value. Note
+   that attributes must not be set on primitive functions. As a
+   workaround, use `reduce = structure("+", init = 42)`.
+
+ * `value()` on containers gained argument `inorder`, which can be
+   used control whether standard output and conditions are relayed in
+   order of `x`, or as soon as a future in `x` is resolved. It also
+   controls the order of how values are reduced.
+
+ * `value()` gained argument `drop` to turn resolved futures into
+   minimal, invalid light-weight futures after their values have been
+   returned. This reduces the memory use. This is particularly useful
+   when using `reduce` in combination with `inorder = FALSE`. For
+   instance, if you have a list of futures `fs`, and you know that you
+   will not need to query the futures for their values more than once,
+   then it is memory efficient and more performant to use ``v <-
+   value(fs, reduce = `+`, inorder = FALSE, drop = TRUE)``.
+
+ * `value()` on containers cancels non-resolved futures if an error is
+   detected in one of the futures.
+
+ * Add `minifuture()`, which is like `future()`, but with different
+   default arguments resulting in less overhead with the added burden
+   of having to specify globals and packages, not having conditions
+   and standard output relayed, and ignoring random number generation.
+
+ * Printing `plan()` will output details on the future backend, e.g.
+   number of workers, number of free workers, backend settings, and
+   summary of resolved and non-resolved, active futures.
+ 
+ * Interrupted futures are now handled and produce an informative error.
+
+ * Timeout errors triggered by `setTimeLimit()` are now relayed.
+ 
+ * Failures to launch a future is now detected, handled, and relayed
+   as an error with details on why it failed.
+   
+ * Failed workers are automatically detected and relaunched, if
+   supported by the parallel backend. For instance, if a `cluster`
+   worker is interrupted, or crashes for other reasons, it will be
+   relaunched. This works for both local and remote workers.
+
+ * A future must close any connections or graphical devices it opens,
+   and must never close ones that it did not open. Now `value()`
+   produces a warning if such misuse is detected. This may be upgrade
+   to an error in future releases. The default behavior can be
+   controlled via an R option.  Reverse dependency checks spotted one
+   CRAN package, out of 426, that left stray connections behind.
+ 
+ * All parallel backends now prevent nested parallelization, unless
+   explicitly allowed, e.g. settings recognized by
+   `parallelly::availableCores()` or set by the future
+   `plan()`. Previously, this had to be implemented by each backend,
+   but now it's handled automatically by the future framework.
+   
+ * Add new FutureBackend API for writing future backends. Please use
+   with care, because there will be further updates in the next few
+   release cycles.
+
+ * The maximum total size of objects send to and from the worker can
+   now be configured per backend, e.g. `plan(multisession,
+   maxSizeOfObjects = 10e6)` will produce an error if the total size
+   of globals exceeds 10 MB.  
+
+ * Backends `sequential` and `multicore` no longer has a limit on the
+   maximum size of globals, i.e. they now default to `maxSizeOfObjects
+   = +Inf`. Backends `cluster` and `multisession` also default to
+   `maxSizeOfObjects = +Inf`, unless R option `future.globals.maxSize`
+   (sic!) is set.
+   
+## Bug Fixes
+
+ * Now 'interrupt' conditions are captured during the evaluation of
+   the future, and results in the evaluation being terminated with a
+   `FutureInterruptError`. Not all backends manage to catch
+   interrupts, leading to the parallel R workers to terminate,
+   resulting in a regular `FutureError`. Previously, interrupts would
+   result in non-deterministic behavior and errors depending of future
+   backend.
+
+ * Timeout errors triggered by `setTimeLimit()` was likely to render
+   the future and the corresponding worker invalid.
+   
+ * Identified and fixed one reason for why `cluster` and
+   `multisession` futures could result in errors on "Unexpected result
+   (of class 'NULL' != 'FutureResult') retrieved for
+   MultisessionFuture future ... This suggests that the communication
+   with 'RichSOCKnode' #1 on host 'localhost' (R Under development
+   (unstable) (2025-03-23 r88038), platform x86_64-pc-linux-gnu) is
+   out of sync."
+   
+ * Switching plan while having active futures would likely result in
+   the active futures becoming corrupt, resulting in unpredictable
+   errors when querying the future by, for instance, `value()`, but
+   also `resolved()`, which should never produce an error. Now such
+   futures become predictable, interrupted futures.
+
+## Documentation
+
+ * Updated the future topology vignette with information on the
+   CPU-overuse protection error that may occur when using a nested
+   future plan and how to avoid it.
+
+## Cleanup
+
+ * Starting with **future** 1.20.0 (2020-10-30), several low-level
+   functions for creating and working PSOCK and MPI clusters were
+   moved to the **parallelly** package. For backward-compatibility
+   reasons, those functions were kept in **future** as re-exports,
+   e.g. `future::makeClusterPSOCK()` still works, whereas
+   `parallelly::makeClusterPSOCK()` is the preferred use. The
+   long-term goal is to clean out these re-exports. Starting with this
+   release, the **future** package no longer re-exports
+   `autoStopCluster()`, `makeClusterMPI()`, `makeNodePSOCK()`.
+
+
 # Version 1.34.0 [2024-07-29]
 
 ## New Features

@@ -1,7 +1,7 @@
 
 // Language.h: Rcpp R/C++ interface class library -- language objects (calls)
 //
-// Copyright (C) 2010 - 2022 Dirk Eddelbuettel and Romain Francois
+// Copyright (C) 2010 - 2025 Dirk Eddelbuettel and Romain Francois
 //
 // This file is part of Rcpp.
 //
@@ -102,19 +102,15 @@ namespace Rcpp{
          * 0.0 is wrapped as a numeric vector using wrap( const& double )
          * ...
          */
-        #if defined(HAS_VARIADIC_TEMPLATES) || defined(RCPP_USING_CXX11)
-            template <typename... T>
-            Language_Impl(const std::string& symbol, const T&... t) {
-                Storage::set__(pairlist(Rf_install(symbol.c_str()), t...) );
-            }
+        template <typename... T>
+        Language_Impl(const std::string& symbol, const T&... t) {
+            Storage::set__(langlist(Rf_install(symbol.c_str()), t...) );
+        }
 
-            template <typename... T>
-            Language_Impl(const Function& function, const T&... t) {
-                Storage::set__(pairlist(function, t...));
-            }
-        #else
-            #include <Rcpp/generated/Language__ctors.h>
-        #endif
+        template <typename... T>
+        Language_Impl(const Function& function, const T&... t) {
+            Storage::set__(langlist(function, t...));
+        }
 
         /**
          * sets the symbol of the call
@@ -162,8 +158,10 @@ namespace Rcpp{
             return internal::Rcpp_eval_impl( Storage::get__(), env);
         }
 
-        void update( SEXP x){
-            SET_TYPEOF( x, LANGSXP );
+        void update(SEXP x) {
+            if (TYPEOF(x) != LANGSXP) {
+                Storage::set__(r_cast<LANGSXP>(x));
+            }
             SET_TAG( x, R_NilValue );
         }
 
@@ -188,11 +186,7 @@ namespace Rcpp{
     };
 
     template <typename T, typename RESULT_TYPE = SEXP>
-#if __cplusplus < 201103L
-        class unary_call : public std::unary_function<T,RESULT_TYPE> {
-#else
         class unary_call : public std::function<RESULT_TYPE(T)> {
-#endif
     public:
         unary_call( Language call_ ) : call(call_), proxy(call_,1) {}
         unary_call( Language call_, R_xlen_t index ) : call(call_), proxy(call_,index){}
@@ -209,11 +203,7 @@ namespace Rcpp{
     };
 
     template <typename T1, typename T2, typename RESULT_TYPE = SEXP>
-#if __cplusplus < 201103L
-    class binary_call : public std::binary_function<T1,T2,RESULT_TYPE> {
-#else
         class binary_call : public std::function<RESULT_TYPE(T1,T2)> {
-#endif
     public:
         binary_call( Language call_ ) : call(call_), proxy1(call_,1), proxy2(call_,2) {}
         binary_call( Language call_, R_xlen_t index1, R_xlen_t index2 ) : call(call_), proxy1(call_,index1), proxy2(call_,index2){}

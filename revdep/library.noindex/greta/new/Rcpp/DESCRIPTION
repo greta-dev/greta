@@ -1,7 +1,7 @@
 Package: Rcpp
 Title: Seamless R and C++ Integration
-Version: 1.0.13-1
-Date: 2024-11-01
+Version: 1.1.0
+Date: 2025-07-01
 Authors@R: c(person("Dirk", "Eddelbuettel", role = c("aut", "cre"), email = "edd@debian.org",
                     comment = c(ORCID = "0000-0001-6419-907X")),
              person("Romain", "Francois", role = "aut",
@@ -38,18 +38,19 @@ MailingList: rcpp-devel@lists.r-forge.r-project.org
 RoxygenNote: 6.1.1
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2024-11-01 13:27:07 UTC; edd
-Author: Dirk Eddelbuettel [aut, cre] (<https://orcid.org/0000-0001-6419-907X>),
-  Romain Francois [aut] (<https://orcid.org/0000-0002-2444-4226>),
-  JJ Allaire [aut] (<https://orcid.org/0000-0003-0174-9868>),
-  Kevin Ushey [aut] (<https://orcid.org/0000-0003-2880-7407>),
-  Qiang Kou [aut] (<https://orcid.org/0000-0001-6786-5453>),
+Packaged: 2025-07-01 12:58:41 UTC; edd
+Author: Dirk Eddelbuettel [aut, cre] (ORCID:
+    <https://orcid.org/0000-0001-6419-907X>),
+  Romain Francois [aut] (ORCID: <https://orcid.org/0000-0002-2444-4226>),
+  JJ Allaire [aut] (ORCID: <https://orcid.org/0000-0003-0174-9868>),
+  Kevin Ushey [aut] (ORCID: <https://orcid.org/0000-0003-2880-7407>),
+  Qiang Kou [aut] (ORCID: <https://orcid.org/0000-0001-6786-5453>),
   Nathan Russell [aut],
-  Iñaki Ucar [aut] (<https://orcid.org/0000-0001-6403-5550>),
-  Doug Bates [aut] (<https://orcid.org/0000-0001-8316-9503>),
+  Iñaki Ucar [aut] (ORCID: <https://orcid.org/0000-0001-6403-5550>),
+  Doug Bates [aut] (ORCID: <https://orcid.org/0000-0001-8316-9503>),
   John Chambers [aut]
 Maintainer: Dirk Eddelbuettel <edd@debian.org>
 Repository: CRAN
-Date/Publication: 2024-11-02 20:10:02 UTC
-Built: R 4.4.1; aarch64-apple-darwin20; 2024-11-02 21:19:22 UTC; unix
+Date/Publication: 2025-07-02 16:40:02 UTC
+Built: R 4.5.0; aarch64-apple-darwin20; 2025-07-04 07:28:39 UTC; unix
 Archs: Rcpp.so.dSYM
