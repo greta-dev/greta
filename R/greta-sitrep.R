@@ -6,12 +6,12 @@
 #' @param verbosity character. How verbose the output of the situation report.
 #'   Possible options: "minimal" (default), "detailed", and "quiet". "Minimal"
 #'   provides just information in python version, tensorflow version,
-#'   tensorflow proability, and whether greta conda environment is available.
+#'   tensorflow probability, and whether greta conda environment is available.
 #'   "Quiet" presents no information, but prepares greta to be used. "Detailed"
 #'   gives information on the version and path for R, greta, python,
 #'   tensorflow, tensorflow probability, the greta conda environment, and a
 #'   statement on greta usability.
-#' @return Message on greta situation report. See "verbsoity" parameter details
+#' @return Message on greta situation report. See "verbosity" parameter details
 #'   above for more information.
 #' @export
 #'
@@ -63,7 +63,19 @@ detailed_sitrep <- function() {
   check_if_greta_conda_env_available()
   conda_env_path <- greta_conda_env_path()
   cli::cli_ul("path: {.path {conda_env_path}}")
-  conda_modules <- conda_list_env_modules()
+  conda_modules <- tryCatch(
+    expr = conda_list_env_modules(),
+    error = function(e) {
+      cli::cli_ul(
+        c(
+          "Encountered an error in running:",
+          "{.code conda list -n greta-env-tf2}",
+          "x" = "{.code {e$message}}",
+          "It is possible {.pkg conda} is not installed"
+        )
+      )
+    }
+  )
 
   tf_in_conda <- nzchar(grep(
     "^(tensorflow)(\\s|$)",
@@ -102,7 +114,11 @@ quiet_sitrep <- function() {
 }
 
 conda_list_env_modules <- function() {
-  system(paste("conda list -n", "greta-env-tf2"), intern = TRUE)
+  system(
+    paste("conda list -n", "greta-env-tf2"),
+    intern = TRUE,
+    ignore.stderr = TRUE
+  )
 }
 
 
