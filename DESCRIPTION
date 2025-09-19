@@ -44,7 +44,7 @@ Imports:
     parallelly (>= 1.29.0),
     progress (>= 1.2.0),
     R6,
-    reticulate (>= 1.19.0),
+    reticulate (>= 1.43.0),
     rlang,
     tensorflow (>= 2.16.0),
     tools,
