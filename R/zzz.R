@@ -4,6 +4,14 @@ tf <- tfp <- NULL
 .onLoad <- function(libname, pkgname) {
   # nolint
 
+  # resolve issue with .keras directory
+  Sys.setenv(
+    "KERAS_HOME" = normalizePath(
+      tools::R_user_dir("greta", "cache"),
+      mustWork = FALSE
+    )
+  )
+
   # silence TF's CPU instructions message
   Sys.setenv(TF_CPP_MIN_LOG_LEVEL = 2)
 
@@ -42,5 +50,4 @@ tf <- tfp <- NULL
 
   # warn if TF version is bad
   # check_tf_version("startup")
-
 }
