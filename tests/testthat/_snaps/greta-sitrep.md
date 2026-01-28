@@ -246,8 +246,8 @@
     Message
       
       -- R ---------------------------------------------------------------------------
-      * version: 4.5.1
-      * path: '/Library/Frameworks/R.framework/Resources'
+      * version: 4.5.2
+      * path: '/Library/Frameworks/R.framework/Versions/4.5-arm64/Resources'
       
       -- greta -----------------------------------------------------------------------
       * version: 0.5.1
