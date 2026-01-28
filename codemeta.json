@@ -2,25 +2,19 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "identifier": "greta",
-  "description": "Write statistical models in R and fit them by MCMC and optimisation on CPUs and GPUs, using Google 'TensorFlow'. greta lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on. See the website for more information, including tutorials, examples, package documentation, and the greta forum.",
-  "name": "greta: Simple and Scalable Statistical Modelling in R",
-  "relatedLink": ["https://greta-stats.org", "https://CRAN.R-project.org/package=greta"],
+  "description": "Write statistical models in R and fit them by MCMC and optimisation on 'CPUs' and 'GPUs', using Google 'TensorFlow'. 'greta' lets you write your own model like in BUGS, JAGS and Stan, except that you write models right in R, it scales well to massive datasets, and it’s easy to extend and build on. See the website for more information, including tutorials, examples, package documentation, and the 'greta' forum.",
+  "name": "greta: Simple and 'Scalable' Statistical Modelling in R",
+  "relatedLink": "https://greta-stats.org",
   "codeRepository": "https://github.com/greta-dev/greta",
   "issueTracker": "https://github.com/greta-dev/greta/issues",
   "license": "https://spdx.org/licenses/Apache-2.0",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.4.2 (2024-10-31)",
-  "provider": {
-    "@id": "https://cran.r-project.org",
-    "@type": "Organization",
-    "name": "Comprehensive R Archive Network (CRAN)",
-    "url": "https://cran.r-project.org"
-  },
+  "runtimePlatform": "R version 4.5.2 (2025-10-31)",
   "author": [
     {
       "@type": "Person",
@@ -507,10 +501,22 @@
     },
     "8": {
       "@type": "SoftwareApplication",
+      "identifier": "lifecycle",
+      "name": "lifecycle",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=lifecycle"
+    },
+    "9": {
+      "@type": "SoftwareApplication",
       "identifier": "methods",
       "name": "methods"
     },
-    "9": {
+    "10": {
       "@type": "SoftwareApplication",
       "identifier": "parallelly",
       "name": "parallelly",
@@ -523,7 +529,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=parallelly"
     },
-    "10": {
+    "11": {
       "@type": "SoftwareApplication",
       "identifier": "progress",
       "name": "progress",
@@ -536,7 +542,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=progress"
     },
-    "11": {
+    "12": {
       "@type": "SoftwareApplication",
       "identifier": "R6",
       "name": "R6",
@@ -548,11 +554,11 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=R6"
     },
-    "12": {
+    "13": {
       "@type": "SoftwareApplication",
       "identifier": "reticulate",
       "name": "reticulate",
-      "version": ">= 1.19.0",
+      "version": ">= 1.43.0",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -561,7 +567,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=reticulate"
     },
-    "13": {
+    "14": {
       "@type": "SoftwareApplication",
       "identifier": "rlang",
       "name": "rlang",
@@ -573,11 +579,11 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=rlang"
     },
-    "14": {
+    "15": {
       "@type": "SoftwareApplication",
       "identifier": "tensorflow",
       "name": "tensorflow",
-      "version": "== 2.16.0",
+      "version": ">= 2.16.0",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -586,17 +592,17 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=tensorflow"
     },
-    "15": {
+    "16": {
       "@type": "SoftwareApplication",
       "identifier": "tools",
       "name": "tools"
     },
-    "16": {
+    "17": {
       "@type": "SoftwareApplication",
       "identifier": "utils",
       "name": "utils"
     },
-    "17": {
+    "18": {
       "@type": "SoftwareApplication",
       "identifier": "whisker",
       "name": "whisker",
@@ -608,7 +614,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=whisker"
     },
-    "18": {
+    "19": {
       "@type": "SoftwareApplication",
       "identifier": "yesno",
       "name": "yesno",
@@ -622,7 +628,7 @@
     },
     "SystemRequirements": "Python (>= 3.7.0) with header files and shared\n    library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/); TensorFlow\n    Probability (v0.8.0; https://www.tensorflow.org/probability/)"
   },
-  "fileSize": "1625.784KB",
+  "fileSize": "1534.22KB",
   "citation": [
     {
       "@type": "ScholarlyArticle",
@@ -636,7 +642,6 @@
       ],
       "name": "{greta}: simple and scalable statistical modelling in R",
       "identifier": "10.21105/joss.01601",
-      "url": "http://dx.doi.org/10.21105/joss.01601",
       "pagination": "1601",
       "@id": "https://doi.org/10.21105/joss.01601",
       "sameAs": "https://doi.org/10.21105/joss.01601",
@@ -652,7 +657,7 @@
       }
     }
   ],
-  "releaseNotes": "https://github.com/greta-dev/greta/blob/master/NEWS.md",
-  "readme": "https://github.com/greta-dev/greta/blob/master/README.md",
+  "releaseNotes": "https://github.com/greta-dev/greta/blob/main/NEWS.md",
+  "readme": "https://github.com/greta-dev/greta/blob/main/README.md",
   "contIntegration": ["https://github.com/greta-dev/greta/actions", "https://app.codecov.io/gh/greta-dev/greta?branch=master"]
 }
