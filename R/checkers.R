@@ -764,7 +764,7 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
     return(NULL)
   }
 
-  n_cores_detected <- future::availableCores()
+  n_cores_detected <- parallelly::availableCores()
   allowed_n_cores <- seq_len(n_cores_detected)
 
   cores_exceed_available <- !is.null(n_cores) && !n_cores %in% allowed_n_cores
