@@ -755,10 +755,8 @@ check_cum_op <- function(x, call = rlang::caller_env()) {
   }
 }
 
-
-#' @importFrom future availableCores
 check_n_cores <- function(n_cores, samplers, plan_is) {
-  # if the plan is remote, and the user hasn't specificed the number of cores,
+  # if the plan is remote, and the user hasn't specified the number of cores,
   # leave it as all of them
   if (is.null(n_cores) & !plan_is$local) {
     return(NULL)
@@ -779,11 +777,14 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
     n_cores <- NULL
   }
 
-  # if n_cores isn't user-specified, set it so there's no clash between samplers
-  n_cores <- n_cores %||% floor(n_cores_detected / samplers)
+  # # if n_cores isn't user-specified, set it so there's no clash between samplers
+  # n_cores <- n_cores %||% floor(n_cores_detected / samplers)
+  # # make sure there's at least 1
+  # n_cores <- max(n_cores, 1)
 
-  # make sure there's at least 1
-  n_cores <- max(n_cores, 1)
+  # if n_cores isn't specified, make sure it is set to 2 by default
+  # Resolves #796
+  n_cores <- n_cores %||% 2L
 
   as.integer(n_cores)
 }
