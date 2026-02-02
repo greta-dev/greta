@@ -11,8 +11,9 @@
 "greta" was archived in late 2025. This release is a patch update to fix issues
 which led to the archival. They also fix some fundamental a tensorflow updates, 
 and dependency changes in the DESCRIPTION, such as not relying on `==` for 
-versions. The package also now is careful when building the R package so as to 
-not use more than 2 cores.
+versions. 
+
+We now also set the number of cores to 2 by default.
 
 ## revdepcheck results
 
