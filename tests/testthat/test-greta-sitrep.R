@@ -159,9 +159,11 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
   expect_snapshot(
     greta_sitrep(verbosity = "quiet")
   )
+  
   expect_snapshot(
     greta_sitrep(verbosity = "minimal")
   )
+  
   # test it errors when verbosity is not "quiet", "minimal", and "detailed"
   expect_snapshot(
     error = TRUE,
@@ -169,6 +171,19 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
   )
 
   expect_snapshot(
-    greta_sitrep(verbosity = "detailed")
+    greta_sitrep(verbosity = "detailed"),
+    transform = function(x) {
+      # Replace version numbers
+      x <- gsub("version: [0-9.]+", "version: <version>", x)
+      x <- gsub("\\(v[0-9.]+\\)", "(<version>)", x)
+      
+      # Replace file paths
+      x <- gsub("path: '[^']*'", "path: '<path>'", x)
+      x <- gsub("\\* R path: '[^']*'", "* R path: '<path>'", x)
+      x <- gsub("(\\* path: )/[^\\n]+", "\\1<path>", x)
+      x <- gsub("(\\* R path: )/[^\\n]+", "\\1<path>", x)
+      
+      x
+    }
   )
 })

@@ -246,24 +246,24 @@
     Message
       
       -- R ---------------------------------------------------------------------------
-      * version: 4.5.2
-      * path: '/Library/Frameworks/R.framework/Versions/4.5-arm64/Resources'
+      * version: <version>
+      * path: '<path>'
       
       -- greta -----------------------------------------------------------------------
-      * version: 0.5.1
-      * path: '/Users/nick_1/github/greta-dev/greta'
+      * version: <version>
+      * path: '<path>'
       
       -- python ----------------------------------------------------------------------
       i checking if python available
-      v python (v3.11) available
+      v python (<version>) available
       
-      * path: '/Users/nick_1/Library/r-miniconda-arm64'
+      * path: '<path>'
       
       -- greta conda environment -----------------------------------------------------
       i checking if greta conda environment available
       v greta conda environment available
       
-      * path: '/Users/nick/Library/r-miniconda-arm64/envs/greta-env-tf2/bin/python'
+      * path: '<path>'
       * Encountered an error in running:
       * `conda list -n greta-env-tf2`
       * `error in running command`
@@ -271,14 +271,14 @@
       
       -- TensorFlow ------------------------------------------------------------------
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (<version>) available
       
-      * R path: '/Users/nick_1/Library/R/arm64/4.5/library/tensorflow'
+      * R path: '<path>'
       * Exists in conda env:
       
       -- TensorFlow Probability ------------------------------------------------------
       i checking if TensorFlow Probability available
-      v TensorFlow Probability (v0.23.0) available
+      v TensorFlow Probability (<version>) available
       
       * Exists in conda env:
       
