@@ -30,8 +30,8 @@ greta_stash$numerical_messages <- c(
 #' @param warmup number of samples to spend warming up the mcmc sampler (moving
 #'   chains toward the highest density area and tuning sampler hyperparameters).
 #' @param chains number of MCMC chains to run
-#' @param n_cores the maximum number of CPU cores used by each sampler (see
-#'   details).
+#' @param n_cores The maximum number of CPU cores used by each sampler (see
+#'   details). If NULL (default), it sets them to 2 cores.
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations).
 #'   If `pb_update` is less than or equal to `thin`, it will be set
@@ -94,9 +94,9 @@ greta_stash$numerical_messages <- c(
 #'   schedulers.
 #'
 #'   If `n_cores = NULL` and mcmc samplers are being run sequentially, each
-#'   sampler will be allowed to use all CPU cores (possibly to compute multiple
-#'   chains sequentially). If samplers are being run in parallel with the
-#'   `future` package, `n_cores` will be set so that `n_cores *
+#'   sampler will be allowed to use only 2 CPU cores (possibly to compute
+#'   multiple chains sequentially). If samplers are being run in parallel with
+#'   the `future` package, `n_cores` will be set so that `n_cores *
 #'   [future::nbrOfWorkers]` is less than the number
 #'   of CPU cores.
 #'
@@ -109,7 +109,7 @@ greta_stash$numerical_messages <- c(
 #'   memory usage.
 #'
 #' @note to set a seed with MCMC you can use [set.seed()], or
-#'   [tensorflow::set_random_seed()]. They both given identical results. See
+#'   [tensorflow::set_random_seed()]. They both give identical results. See
 #'   examples below.
 #'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
