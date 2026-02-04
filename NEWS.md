@@ -7,6 +7,7 @@
 - Add more options to level of detail in `greta_sitrep()` with "verbosity" argument. There are three levels, "minimal" (default), "detailed", and "quiet". (#612, resolved by #679).
 - Use `.batch_size` instead of `batch_size` internally, to avoid rare name clash errors (#634).
 - Resolve issues with Tensorflow version in DESCRIPTION (no longer can specify == 2.16.0, must be >= 2.16.0).
+- When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.
 - Minor internal changes for handling versions of python modules
 
 # greta 0.5.0

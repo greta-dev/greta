@@ -70,7 +70,7 @@ chains toward the highest density area and tuning sampler hyperparameters).}
 \item{chains}{number of MCMC chains to run}
 
 \item{n_cores}{the maximum number of CPU cores used by each sampler (see
-details).}
+details). If NULL (default), it sets them to 2 cores.}
 
 \item{verbose}{whether to print progress information to the console}
 
@@ -186,9 +186,9 @@ to run chains on a cluster of machines on a local or remote network. See
 schedulers.
 
 If \code{n_cores = NULL} and mcmc samplers are being run sequentially, each
-sampler will be allowed to use all CPU cores (possibly to compute multiple
-chains sequentially). If samplers are being run in parallel with the
-\code{future} package, \code{n_cores} will be set so that \verb{n_cores * [future::nbrOfWorkers]} is less than the number
+sampler will be allowed to use only 2 CPU cores (possibly to compute
+multiple chains sequentially). If samplers are being run in parallel with
+the \code{future} package, \code{n_cores} will be set so that \verb{n_cores * [future::nbrOfWorkers]} is less than the number
 of CPU cores.
 
 After carrying out mcmc on all the model parameters, \code{mcmc()}
@@ -222,7 +222,7 @@ The parameter vector can then be passed to model. See example.
 }
 \note{
 to set a seed with MCMC you can use \code{\link[=set.seed]{set.seed()}}, or
-\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}}. They both given identical results. See
+\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}}. They both give identical results. See
 examples below.
 }
 \examples{

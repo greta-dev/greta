@@ -757,9 +757,9 @@ check_cum_op <- function(x, call = rlang::caller_env()) {
 
 check_n_cores <- function(n_cores, samplers, plan_is) {
   # if the plan is remote, and the user hasn't specified the number of cores,
-  # leave it as all of them
+  # still only use 2
   if (is.null(n_cores) & !plan_is$local) {
-    return(NULL)
+    return(2)
   }
 
   n_cores_detected <- parallelly::availableCores()
@@ -771,10 +771,11 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
 
     cli::cli_warn(
       message = "{n_cores} cores were requested, but only {n_cores_detected} \\
-      are available."
+      are available. Setting number of cores to {n_cores_detected}."
     )
 
-    n_cores <- NULL
+    return(as.integer(n_cores_detected))
+
   }
 
   # # if n_cores isn't user-specified, set it so there's no clash between samplers
@@ -784,9 +785,8 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
 
   # if n_cores isn't specified, make sure it is set to 2 by default
   # Resolves #796
-  n_cores <- n_cores %||% 2L
+  n_cores %||% 2L
 
-  as.integer(n_cores)
 }
 
 check_positive_integer <- function(x, name = "", call = rlang::caller_env()) {
