@@ -628,7 +628,7 @@
     },
     "SystemRequirements": "Python (>= 3.7.0) with header files and shared\n    library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/); TensorFlow\n    Probability (v0.8.0; https://www.tensorflow.org/probability/)"
   },
-  "fileSize": "1534.22KB",
+  "fileSize": "1647.078KB",
   "citation": [
     {
       "@type": "ScholarlyArticle",
