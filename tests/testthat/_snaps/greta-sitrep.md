@@ -119,10 +119,10 @@
       greta_sitrep()
     Message
       i checking if python available
-      v python (v3.11) available
+      v python (v3.10) available
       
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (v2.15.0) available
       
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
@@ -141,7 +141,7 @@
       v python (v3.6) available
       
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (v2.15.0) available
       
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
@@ -192,10 +192,10 @@
       greta_sitrep()
     Message
       i checking if python available
-      v python (v3.11) available
+      v python (v3.10) available
       
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (v2.15.0) available
       
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
@@ -218,10 +218,10 @@
       greta_sitrep(verbosity = "minimal")
     Message
       i checking if python available
-      v python (v3.11) available
+      v python (v3.10) available
       
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (v2.15.0) available
       
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
@@ -238,52 +238,4 @@
     Condition
       Error in `greta_sitrep()`:
       ! `verbosity` must be one of "minimal", "detailed", or "quiet", not "bananas".
-
----
-
-    Code
-      greta_sitrep(verbosity = "detailed")
-    Message
-      
-      -- R ---------------------------------------------------------------------------
-      * version: <version>
-      * path: '<path>'
-      
-      -- greta -----------------------------------------------------------------------
-      * version: <version>
-      * path: '<path>'
-      
-      -- python ----------------------------------------------------------------------
-      i checking if python available
-      v python (<version>) available
-      
-      * path: '<path>'
-      
-      -- greta conda environment -----------------------------------------------------
-      i checking if greta conda environment available
-      v greta conda environment available
-      
-      * path: '<path>'
-      * Encountered an error in running:
-      * `conda list -n greta-env-tf2`
-      * `error in running command`
-      * It is possible conda is not installed
-      
-      -- TensorFlow ------------------------------------------------------------------
-      i checking if TensorFlow available
-      v TensorFlow (<version>) available
-      
-      * R path: '<path>'
-      * Exists in conda env:
-      
-      -- TensorFlow Probability ------------------------------------------------------
-      i checking if TensorFlow Probability available
-      v TensorFlow Probability (<version>) available
-      
-      * Exists in conda env:
-      
-      -- Is greta ready to use? ------------------------------------------------------
-      i greta is ready to use!
-      i Use the following code to list available python modules in `greta-env-tf2`:
-      `system(paste('conda list -n', 'greta-env-tf2'), intern = TRUE)`
 
