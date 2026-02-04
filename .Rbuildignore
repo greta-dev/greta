@@ -55,3 +55,4 @@ LICENSE
 
 # flint files
 ^flint$
+^\.claude$
