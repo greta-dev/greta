@@ -9,6 +9,7 @@
 - Resolve issues with Tensorflow version in DESCRIPTION (no longer can specify == 2.16.0, must be >= 2.16.0).
 - When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.
 - Minor internal changes for handling versions of python modules
+- Added `greta_list_py_modules()` as a function to show the Python packages installed in a specific TF2 environment.
 
 # greta 0.5.0
 
