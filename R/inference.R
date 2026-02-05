@@ -29,7 +29,7 @@ greta_stash$numerical_messages <- c(
 #'   rest are discarded
 #' @param warmup number of samples to spend warming up the mcmc sampler (moving
 #'   chains toward the highest density area and tuning sampler hyperparameters).
-#' @param chains number of MCMC chains to run
+#' @param chains number of MCMC chains to run.
 #' @param n_cores the maximum number of CPU cores used by each sampler (see
 #'   details). If NULL (default), it sets them to 2 cores.
 #' @param verbose whether to print progress information to the console
@@ -94,7 +94,7 @@ greta_stash$numerical_messages <- c(
 #'   schedulers.
 #'
 #'   If `n_cores = NULL` and mcmc samplers are being run sequentially, each
-#'   sampler will be allowed to use only 2 CPU cores (possibly to compute 
+#'   sampler will be allowed to use only 2 CPU cores (possibly to compute
 #'   multiple chains sequentially). If samplers are being run in parallel with
 #'   the `future` package, `n_cores` will be set so that `n_cores *
 #'   [future::nbrOfWorkers]` is less than the number

@@ -7,7 +7,7 @@
 greta_list_py_modules()
 }
 \value{
-matrix/data frame of Python modules that are installed in the greta environment.
+matrix/data frame of Python modules that are installed in the greta environment - showing the name, version, build, and install channel.
 }
 \description{
 List Python modules installed in greta env
