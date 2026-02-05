@@ -15,7 +15,7 @@ mcmc(
   n_samples = 1000,
   thin = 1,
   warmup = 1000,
-  chains = 4,
+  chains = 2,
   n_cores = NULL,
   verbose = TRUE,
   pb_update = 50,
@@ -67,7 +67,7 @@ rest are discarded}
 \item{warmup}{number of samples to spend warming up the mcmc sampler (moving
 chains toward the highest density area and tuning sampler hyperparameters).}
 
-\item{chains}{number of MCMC chains to run}
+\item{chains}{number of MCMC chains to run. Default is 2. We recommend using more chains as this helps improve convergence. However the number of chains specified can increase the CPU load, so we have to set a lower default value.}
 
 \item{n_cores}{the maximum number of CPU cores used by each sampler (see
 details). If NULL (default), it sets them to 2 cores.}
