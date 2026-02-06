@@ -8,10 +8,6 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
 
 # Force limit to 2 cores for CRAN
 Sys.setenv("R_PARALLELLY_AVAILABLE_CORES" = "2")
@@ -19,6 +15,12 @@ Sys.setenv("MC_CORES" = "2")
 Sys.setenv("OMP_THREAD_LIMIT" = "2")
 Sys.setenv("OMP_NUM_THREADS" = "2")
 options(mc.cores = 2)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
 ```
 
 ```{r setup}
