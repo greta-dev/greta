@@ -14,6 +14,7 @@
 LICENSE
 ^cran-comments\.md$
 ^revdep$
+^.keras$
 
 ^logos$
 ^paper$
@@ -54,3 +55,4 @@ LICENSE
 
 # flint files
 ^flint$
+^\.claude$

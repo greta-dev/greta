@@ -2,7 +2,8 @@
 //
 // wrap.cpp: Rcpp R/C++ interface class library -- wrap unit tests
 //
-// Copyright (C) 2013 Dirk Eddelbuettel and Romain Francois
+// Copyright (C) 2013 - 2025  Dirk Eddelbuettel and Romain Francois
+// Copyright (C) 2025         Dirk Eddelbuettel, Romain Francois and Iñaki Ucar
 //
 // This file is part of Rcpp.
 //
@@ -168,13 +169,9 @@ SEXP nonnull_const_char(){
     return wrap(p) ;
 }
 
-#ifdef RCPP_USING_CXX11
-// [[Rcpp::plugins(cpp11)]]
-#endif
-
 // [[Rcpp::export]]
 IntegerVector unordered_map_string_int(){
-    RCPP_UNORDERED_MAP< std::string, int > m ;
+    std::unordered_map< std::string, int > m ;
     m["b"] = 100;
     m["a"] = 200;
     m["c"] = 300;
@@ -183,7 +180,7 @@ IntegerVector unordered_map_string_int(){
 
 // [[Rcpp::export]]
 IntegerVector unordered_map_rcpp_string_int(StringVector v){
-    RCPP_UNORDERED_MAP< String, int > m ;
+    std::unordered_map< String, int > m ;
     m[v[0]] = 200;
     m[v[1]] = 100;
     m[v[2]] = 300;
@@ -192,7 +189,7 @@ IntegerVector unordered_map_rcpp_string_int(StringVector v){
 
 // [[Rcpp::export]]
 LogicalVector unordered_set_rcpp_string(StringVector x) {
-    RCPP_UNORDERED_SET<String> seen;
+    std::unordered_set<String> seen;
     LogicalVector out(x.size());
     for (int i = 0; i < x.size(); i++) {
         out[i] = !seen.insert(x[i]).second;
@@ -202,7 +199,7 @@ LogicalVector unordered_set_rcpp_string(StringVector x) {
 
 // [[Rcpp::export]]
 NumericVector unordered_map_string_double(){
-    RCPP_UNORDERED_MAP<std::string,double> m ;
+    std::unordered_map<std::string,double> m ;
     m["b"] = 100;
     m["a"] = 200;
     m["c"] = 300;
@@ -211,7 +208,7 @@ NumericVector unordered_map_string_double(){
 
 // [[Rcpp::export]]
 LogicalVector unordered_map_string_bool(){
-    RCPP_UNORDERED_MAP<std::string,bool> m ;
+    std::unordered_map<std::string,bool> m ;
     m["b"] = true;
     m["a"] = false;
     m["c"] = true;
@@ -220,7 +217,7 @@ LogicalVector unordered_map_string_bool(){
 
 // [[Rcpp::export]]
 RawVector unordered_map_string_Rbyte(){
-    RCPP_UNORDERED_MAP<std::string,Rbyte> m ;
+    std::unordered_map<std::string,Rbyte> m ;
     m["b"] = (Rbyte)0;
     m["a"] = (Rbyte)1;
     m["c"] = (Rbyte)2;
@@ -229,7 +226,7 @@ RawVector unordered_map_string_Rbyte(){
 
 // [[Rcpp::export]]
 CharacterVector unordered_map_string_string(){
-    RCPP_UNORDERED_MAP<std::string,std::string> m ;
+    std::unordered_map<std::string,std::string> m ;
 	m["b"] = "foo" ;
   	m["a"] = "bar" ;
   	m["c"] = "bling" ;
@@ -238,7 +235,7 @@ CharacterVector unordered_map_string_string(){
 
 // [[Rcpp::export]]
 List unordered_map_string_generic(){
-    RCPP_UNORDERED_MAP< std::string,std::vector<int> > m ;
+    std::unordered_map< std::string,std::vector<int> > m ;
     std::vector<int> b; b.push_back(1); b.push_back(2); m["b"] = b ;
     std::vector<int> a; a.push_back(1); a.push_back(2); a.push_back(2); m["a"] = a;
     std::vector<int> c; c.push_back(1); c.push_back(2); c.push_back(2); c.push_back(2); m["c"] = c;
@@ -303,4 +300,11 @@ SEXP vector_Foo(){
     vec[0] = Foo( 2 ) ;
     vec[1] = Foo( 3 ) ;
     return wrap(vec) ;
+}
+
+// [[Rcpp::plugins(cpp17)]]
+// [[Rcpp::export]]
+SEXP test_wrap_string_view(){
+    std::string_view sv = "test string value" ;
+    return wrap(sv) ;
 }

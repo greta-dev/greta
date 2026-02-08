@@ -1,7 +1,7 @@
 Type: Package
 Package: greta
 Title: Simple and Scalable Statistical Modelling in R
-Version: 0.4.5
+Version: 0.5.0
 Authors@R: c(
     person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0001-8916-5570")),
@@ -28,25 +28,26 @@ Description: Write statistical models in R and fit them by MCMC and
     including tutorials, examples, package documentation, and the greta
     forum.
 License: Apache License 2.0
-URL: https://greta-stats.org
+URL: https://greta-stats.org, https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
-Depends: R (>= 3.1.0)
-Imports: abind, callr, cli (>= 3.0.0), coda, future (>= 1.22.1), glue
+Depends: R (>= 4.1.0)
+Imports: abind, callr, cli (>= 3.4.1), coda, future (>= 1.22.1), glue
         (>= 1.5.1), methods, parallelly (>= 1.29.0), progress (>=
-        1.2.0), R6, reticulate (>= 1.19.0), tensorflow (>= 2.7.0),
-        yesno
-Suggests: bayesplot, covr, cramer, DiagrammeR, DiagrammeRsvg,
+        1.2.0), R6, reticulate (>= 1.19.0), rlang, tensorflow (==
+        2.16.0), tools, utils, whisker, yesno
+Suggests: bayesplot, covr, cramer, DiagrammeR, dplyr, DiagrammeRsvg,
         extraDistr, fields, ggplot2, knitr, lattice, MASS, MCMCpack,
-        mockery, mvtnorm, rmarkdown, rmutil, rsvg, spelling, testthat
-        (>= 3.1.0), tidyverse, truncdist, withr
+        mockery, mvtnorm, purrr, rmarkdown, rmutil, rsvg, spelling,
+        testthat (>= 3.1.0), tibble, tidyr, truncdist, withr,
+        rstudioapi
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
-Language: en-GB
-RoxygenNote: 7.3.1
-SystemRequirements: Python (>= 2.7.0) with header files and shared
-        library; TensorFlow (v1.14; https://www.tensorflow.org/);
-        TensorFlow Probability (v0.7.0;
+Language: en-US
+RoxygenNote: 7.3.2
+SystemRequirements: Python (>= 3.7.0) with header files and shared
+        library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/);
+        TensorFlow Probability (v0.8.0;
         https://www.tensorflow.org/probability/)
 Collate: 'package.R' 'utils.R' 'greta_mcmc_list.R' 'tf_functions.R'
         'overloaded.R' 'node_class.R' 'node_types.R' 'variable.R'
@@ -54,17 +55,18 @@ Collate: 'package.R' 'utils.R' 'greta_mcmc_list.R' 'tf_functions.R'
         'unknowns_class.R' 'greta_array_class.R' 'as_data.R'
         'distribution.R' 'operators.R' 'functions.R' 'transforms.R'
         'structures.R' 'extract_replace_combine.R' 'dag_class.R'
-        'greta_model_class.R' 'progress_bar.R' 'inference_class.R'
-        'samplers.R' 'optimisers.R' 'inference.R'
-        'install_tensorflow.R' 'calculate.R' 'callbacks.R' 'simulate.R'
-        'chol2symm.R' 'install_greta_deps.R' 'conda_greta_env.R'
-        'greta_stash.R' 'greta_create_conda_env.R'
-        'greta_install_miniconda.R' 'greta_install_python_deps.R'
-        'new_install_process.R' 'reinstallers.R' 'checkers.R'
-        'test_if_forked_cluster.R' 'testthat-helpers.R' 'zzz.R'
-        'internals.R'
+        'data-deps-tf-tfp.R' 'greta_model_class.R' 'progress_bar.R'
+        'inference_class.R' 'samplers.R' 'optimisers.R'
+        'optimiser_class.R' 'inference.R' 'install_tensorflow.R'
+        'calculate.R' 'callbacks.R' 'simulate.R' 'chol2symm.R'
+        'install_greta_deps.R' 'conda_greta_env.R' 'greta_stash.R'
+        'greta_create_conda_env.R' 'greta_install_miniconda.R'
+        'greta_install_python_deps.R' 'new_install_process.R'
+        'reinstallers.R' 'checkers.R' 'test_if_forked_cluster.R'
+        'testthat-helpers.R' 'write-logfiles.R' 'zzz.R' 'internals.R'
+LazyData: true
 NeedsCompilation: no
-Packaged: 2024-03-11 06:20:23 UTC; nick
+Packaged: 2024-11-10 00:43:40 UTC; nick
 Author: Nick Golding [aut] (<https://orcid.org/0000-0001-8916-5570>),
   Nicholas Tierney [aut, cre] (<https://orcid.org/0000-0003-1460-8722>),
   Simon Dirmeier [ctb],
@@ -81,5 +83,5 @@ Author: Nick Golding [aut] (<https://orcid.org/0000-0001-8916-5570>),
   Jian Yen [ctb]
 Maintainer: Nicholas Tierney <nicholas.tierney@gmail.com>
 Repository: CRAN
-Date/Publication: 2024-03-11 08:10:02 UTC
-Built: R 4.4.0; ; 2024-04-06 10:05:44 UTC; unix
+Date/Publication: 2024-11-12 06:40:02 UTC
+Built: R 4.5.0; ; 2025-04-01 21:54:52 UTC; unix

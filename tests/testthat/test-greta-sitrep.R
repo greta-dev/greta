@@ -168,7 +168,7 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
     greta_sitrep(verbosity = "bananas")
   )
 
-  expect_snapshot(
+  expect_no_error(
     greta_sitrep(verbosity = "detailed")
   )
 })

@@ -15,7 +15,7 @@ mcmc(
   n_samples = 1000,
   thin = 1,
   warmup = 1000,
-  chains = 4,
+  chains = 2,
   n_cores = NULL,
   verbose = TRUE,
   pb_update = 50,
@@ -67,10 +67,10 @@ rest are discarded}
 \item{warmup}{number of samples to spend warming up the mcmc sampler (moving
 chains toward the highest density area and tuning sampler hyperparameters).}
 
-\item{chains}{number of MCMC chains to run}
+\item{chains}{number of MCMC chains to run. Default is 2. We recommend using more chains as this helps improve convergence. However the number of chains specified can increase the CPU load, so we have to set a lower default value.}
 
 \item{n_cores}{the maximum number of CPU cores used by each sampler (see
-details).}
+details). If NULL (default), it sets them to 2 cores.}
 
 \item{verbose}{whether to print progress information to the console}
 
@@ -186,9 +186,9 @@ to run chains on a cluster of machines on a local or remote network. See
 schedulers.
 
 If \code{n_cores = NULL} and mcmc samplers are being run sequentially, each
-sampler will be allowed to use all CPU cores (possibly to compute multiple
-chains sequentially). If samplers are being run in parallel with the
-\code{future} package, \code{n_cores} will be set so that \verb{n_cores * [future::nbrOfWorkers]} is less than the number
+sampler will be allowed to use only 2 CPU cores (possibly to compute
+multiple chains sequentially). If samplers are being run in parallel with
+the \code{future} package, \code{n_cores} will be set so that \verb{n_cores * [future::nbrOfWorkers]} is less than the number
 of CPU cores.
 
 After carrying out mcmc on all the model parameters, \code{mcmc()}
@@ -222,7 +222,7 @@ The parameter vector can then be passed to model. See example.
 }
 \note{
 to set a seed with MCMC you can use \code{\link[=set.seed]{set.seed()}}, or
-\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}}. They both given identical results. See
+\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}}. They both give identical results. See
 examples below.
 }
 \examples{

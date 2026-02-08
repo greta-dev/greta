@@ -33,15 +33,16 @@ knitr::include_graphics("../man/figures/greta-load-fail.png")
 ## ----install_tensorflow, eval = FALSE, echo = TRUE----------------------------
 #  reticulate::install_miniconda()
 #  reticulate::conda_create(
-#          envname = "greta-env",
-#          python_version = "3.7"
+#          envname = "greta-env-tf2",
+#          python_version = "3.8"
 #        )
-#  reticulate::conda_install(
-#          envname = "greta-env",
-#          packages = c(
-#            "numpy==1.16.4",
-#            "tensorflow-probability==0.7.0",
-#            "tensorflow==1.14.0"
-#          )
-#        )
+#  reticulate::py_install(
+#    packages = c(
+#      'numpy',
+#      'tensorflow',
+#      'tensorflow-probability'
+#    ),
+#    envname = "greta-env-tf2",
+#    pip = TRUE
+#  )
 

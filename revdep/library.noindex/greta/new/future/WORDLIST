@@ -1,4 +1,5 @@
 ALTREP
+AST
 AVAILABLECORES
 AppVeyor
 AsIs
@@ -9,6 +10,7 @@ CFunc
 CMD
 CMRG
 ClusterFuture
+ClusterFutureBackend
 CppMethod
 Ctrl
 DBIConnection
@@ -22,6 +24,8 @@ FQDN
 FastqFile
 FastqStreamer
 FastqStreamerList
+FutureBackend
+FutureBackend
 FutureCondition
 FutureError
 FutureEvaluationCondition
@@ -34,8 +38,8 @@ FutureRegistry
 FutureResult
 FutureStrategy
 FutureStrategyList
-Futureverse
 FutureWarning
+Futureverse
 Globals
 HB
 HPC
@@ -59,11 +63,14 @@ Maechler
 MiB
 MinGW
 MulticoreFuture
+MulticoreFutureBackend
 Multiprocess
 Multisession
 MultisessionFuture
+MultisessionFutureBackend
 MyMachine
 MyParallelFuture
+MyParallelFutureBackend
 NCPUS
 NMF
 NOTEs
@@ -97,6 +104,7 @@ RStudio
 RasterLayer
 Rcpp
 RcppParallel
+Regardlessly
 RegisteredNativeSymbol
 RhpcBLASctl
 RichSOCKcluster
@@ -119,6 +127,7 @@ SOCKnode
 SQLiteConnection
 SUPPORTSMULTICORE
 SequentialFuture
+SequentialFutureBackend
 ShortRead
 Slurm
 SolexaPath
@@ -129,6 +138,7 @@ Topologies
 UDPipe
 UnexpectedFutureResultError
 UniprocessFuture
+Univa
 UseMethod
 VM
 VignetteAuthor
@@ -172,6 +182,7 @@ bc
 bfr
 bigmemory
 bioconductor
+br
 calc
 callr
 captureOutput
@@ -180,10 +191,13 @@ ccd
 cdd
 ce
 cfunction
+checkNumberOfLocalWorkers
 chr
 ci
 cleanEx
 closeAllConnections
+clusterExport
+clusterSetRNGStream
 conditionMessage
 configurating
 conn
@@ -199,6 +213,7 @@ dbConnect
 ddb
 deprecations
 detectCores
+deterministically
 df
 dfn
 difftime
@@ -206,6 +221,7 @@ dir
 doFuture
 doMC
 doSEQ
+dofuture
 dontshow
 dopar
 dr
@@ -241,6 +257,7 @@ futureAssign
 futureCall
 futureOf
 futureSessionInfo
+futureverse
 futurized
 gc
 getExpression
@@ -249,6 +266,7 @@ getNodeSet
 getOption
 getcwd
 getpid
+giga
 ging
 github
 glmnet
@@ -261,6 +279,7 @@ gz
 haha
 halfCores
 hardcoded
+hardwiring
 hexcode
 hostname
 hostnames
@@ -276,6 +295,7 @@ immediatedly
 ing
 inq
 interpretable
+interruptible
 interweaved
 io
 ipc
@@ -289,13 +309,16 @@ keras
 kk
 lang
 lapply
+launchFuture
 libPaths
 libs
 linux
 listenv
 loadNamespace
+localPlan
 lp
 lpdf
+lsf
 macOS
 maechler
 magick
@@ -308,6 +331,7 @@ makePSOCKcluster
 mandelbrot
 maxCores
 maxSize
+maxWorkers
 mc
 mclapply
 md
@@ -317,6 +341,7 @@ memoization
 mget
 mhost
 mingw
+mirai
 mortem
 mpi
 mpid
@@ -328,6 +353,7 @@ myInternalIP
 myip
 myparallel
 mypkg
+na
 nam
 nbrOfFreeWorkers
 nbrOfWorkers
@@ -357,6 +383,7 @@ onMisuse
 onReference
 oo
 oopts
+openlava
 oplan
 os
 packageVersion
@@ -376,6 +403,7 @@ pre
 pred
 prepending
 preprocess
+progressr
 ptr
 purrr
 pwd
@@ -392,11 +420,14 @@ renice
 reproducibility
 resignal
 resignaled
+restartable
 reticulate
 revdepcheck
 rhub
+rlang
 rng
 rnorm
+rollout
 roundtrip
 rpolars
 rscript
@@ -416,6 +447,7 @@ setTimeLimit
 setalloccol
 setosa
 setwd
+sge
 shp
 sig
 simpleError
@@ -442,6 +474,7 @@ subassignments
 subclasses
 suboptimal
 subprocesses
+superseeds
 supportsMulticore
 suppressMessages
 tagnames

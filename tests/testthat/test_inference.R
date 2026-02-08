@@ -198,7 +198,7 @@ test_that("extra_samples works", {
 
   expect_true(inherits(more_draws, "greta_mcmc_list"))
   expect_true(coda::niter(more_draws) == 30)
-  expect_true(coda::nchain(more_draws) == 4)
+  expect_true(coda::nchain(more_draws) == 2)
 })
 
 test_that("trace_batch_size works", {
@@ -221,7 +221,7 @@ test_that("trace_batch_size works", {
 
   expect_true(inherits(more_draws, "greta_mcmc_list"))
   expect_true(coda::niter(more_draws) == 30)
-  expect_true(coda::nchain(more_draws) == 4)
+  expect_true(coda::nchain(more_draws) == 2)
 })
 
 test_that("stashed_samples works", {

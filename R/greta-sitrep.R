@@ -6,12 +6,12 @@
 #' @param verbosity character. How verbose the output of the situation report.
 #'   Possible options: "minimal" (default), "detailed", and "quiet". "Minimal"
 #'   provides just information in python version, tensorflow version,
-#'   tensorflow proability, and whether greta conda environment is available.
+#'   tensorflow probability, and whether greta conda environment is available.
 #'   "Quiet" presents no information, but prepares greta to be used. "Detailed"
 #'   gives information on the version and path for R, greta, python,
 #'   tensorflow, tensorflow probability, the greta conda environment, and a
 #'   statement on greta usability.
-#' @return Message on greta situation report. See "verbsoity" parameter details
+#' @return Message on greta situation report. See "verbosity" parameter details
 #'   above for more information.
 #' @export
 #'
@@ -63,7 +63,8 @@ detailed_sitrep <- function() {
   check_if_greta_conda_env_available()
   conda_env_path <- greta_conda_env_path()
   cli::cli_ul("path: {.path {conda_env_path}}")
-  conda_modules <- conda_list_env_modules()
+
+  conda_modules <- greta_list_py_modules()
 
   tf_in_conda <- nzchar(grep(
     "^(tensorflow)(\\s|$)",
@@ -97,12 +98,75 @@ detailed_sitrep <- function() {
   )
 }
 
+#' List Python modules installed in greta env
+#'
+#' @returns matrix/data frame of Python modules that are installed in the greta environment - showing the name, version, build, and install channel.
+#'
+#' @export
+greta_list_py_modules <- function() {
+  conda_modules <- tryCatch(
+    expr = {
+      # This will find conda whether it's on PATH or installed by reticulate
+      conda_bin <- reticulate::conda_binary()
+
+      system2(
+        conda_bin,
+        args = c("list", "-n", "greta-env-tf2"),
+        stdout = TRUE,
+        stderr = TRUE
+      )
+    },
+    error = function(e) {
+      cli::cli_ul(
+        c(
+          "Encountered an error in running:",
+          "{.code conda list -n greta-env-tf2}",
+          "x" = "{.code {e$message}}",
+          "!" = "conda may not be installed. Try {.code reticulate::install_miniconda()}"
+        )
+      )
+      return(NULL)
+    }
+  )
+
+  conda_modules
+}
+
+conda_modules <- tryCatch(
+  expr = {
+    # This will find conda whether it's on PATH or installed by reticulate
+    conda_bin <- reticulate::conda_binary()
+
+    system2(
+      conda_bin,
+      args = c("list", "-n", "greta-env-tf2"),
+      stdout = TRUE,
+      stderr = TRUE
+    )
+  },
+  error = function(e) {
+    cli::cli_ul(
+      c(
+        "Encountered an error in running:",
+        "{.code conda list -n greta-env-tf2}",
+        "x" = "{.code {e$message}}",
+        "!" = "conda may not be installed. Try {.code reticulate::install_miniconda()}"
+      )
+    )
+    return(NULL)
+  }
+)
+
 quiet_sitrep <- function() {
   suppressMessages(check_greta_ready_to_use())
 }
 
 conda_list_env_modules <- function() {
-  system(paste("conda list -n", "greta-env-tf2"), intern = TRUE)
+  system(
+    paste("conda list -n", "greta-env-tf2"),
+    intern = TRUE,
+    ignore.stderr = TRUE
+  )
 }
 
 
@@ -286,9 +350,7 @@ have_tfp <- function() {
   is_tfp_available <- py_module_available("tensorflow_probability")
 
   if (is_tfp_available) {
-    pkg <- reticulate::import("pkg_resources")
-    tfp_version <- pkg$get_distribution("tensorflow_probability")$version
-    is_tfp_available <- utils::compareVersion("0.15.0", tfp_version) <= 0
+    is_tfp_available <- utils::compareVersion("0.15.0", tfp$`__version__`) <= 0
   }
 
   return(is_tfp_available)

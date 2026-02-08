@@ -755,16 +755,14 @@ check_cum_op <- function(x, call = rlang::caller_env()) {
   }
 }
 
-
-#' @importFrom future availableCores
 check_n_cores <- function(n_cores, samplers, plan_is) {
-  # if the plan is remote, and the user hasn't specificed the number of cores,
-  # leave it as all of them
+  # if the plan is remote, and the user hasn't specified the number of cores,
+  # still only use 2
   if (is.null(n_cores) & !plan_is$local) {
-    return(NULL)
+    return(2L)
   }
 
-  n_cores_detected <- future::availableCores()
+  n_cores_detected <- parallelly::availableCores()
   allowed_n_cores <- seq_len(n_cores_detected)
 
   cores_exceed_available <- !is.null(n_cores) && !n_cores %in% allowed_n_cores
@@ -773,19 +771,20 @@ check_n_cores <- function(n_cores, samplers, plan_is) {
 
     cli::cli_warn(
       message = "{n_cores} cores were requested, but only {n_cores_detected} \\
-      are available."
+      are available. Setting number of cores to {n_cores_detected}."
     )
 
-    n_cores <- NULL
+    return(as.integer(n_cores_detected))
   }
 
-  # if n_cores isn't user-specified, set it so there's no clash between samplers
-  n_cores <- n_cores %||% floor(n_cores_detected / samplers)
+  # # if n_cores isn't user-specified, set it so there's no clash between samplers
+  # n_cores <- n_cores %||% floor(n_cores_detected / samplers)
+  # # make sure there's at least 1
+  # n_cores <- max(n_cores, 1)
 
-  # make sure there's at least 1
-  n_cores <- max(n_cores, 1)
-
-  as.integer(n_cores)
+  # if n_cores isn't specified, make sure it is set to 2 by default
+  # Resolves #796
+  n_cores %||% 2L
 }
 
 check_positive_integer <- function(x, name = "", call = rlang::caller_env()) {

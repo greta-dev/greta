@@ -1,4 +1,4 @@
-# greta (development version)
+# greta 0.5.1
 
 ## Changes
 
@@ -6,6 +6,11 @@
 - Add warmup information to MCMC print method (#652, resolved by #755).
 - Add more options to level of detail in `greta_sitrep()` with "verbosity" argument. There are three levels, "minimal" (default), "detailed", and "quiet". (#612, resolved by #679).
 - Use `.batch_size` instead of `batch_size` internally, to avoid rare name clash errors (#634).
+- Resolve issues with Tensorflow version in DESCRIPTION (no longer can specify == 2.16.0, must be >= 2.16.0).
+- When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.
+- Ensure that `n_cores` arg defaults to 2 cores. Similarly, `chains` defaults to two chains. 
+- Minor internal changes for handling versions of python modules.
+- Added `greta_list_py_modules()` as a function to show the Python packages installed in a specific TF2 environment.
 
 # greta 0.5.0
 
