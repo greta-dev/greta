@@ -9,6 +9,7 @@
 - Resolve issues with Tensorflow version in DESCRIPTION (no longer can specify == 2.16.0, must be >= 2.16.0).
 - When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.
 - Ensure that `n_cores` arg defaults to 2 cores. Similarly, `chains` defaults to two chains. 
+- Cap TensorFlow's internal CPU threadpool inside vignette builds (via `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN's CPU/elapsed timing on vignette rebuild stays under the two-core limit (#796).
 - Minor internal changes for handling versions of python modules.
 - Added `greta_list_py_modules()` as a function to show the Python packages installed in a specific TF2 environment.
 

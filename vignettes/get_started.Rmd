@@ -11,10 +11,9 @@ vignette: >
 
 # Force limit to 2 cores for CRAN
 Sys.setenv("R_PARALLELLY_AVAILABLE_CORES" = "2")
-Sys.setenv("MC_CORES" = "2")
 Sys.setenv("OMP_THREAD_LIMIT" = "2")
-Sys.setenv("OMP_NUM_THREADS" = "2")
-options(mc.cores = 2)
+Sys.setenv("TF_NUM_INTRAOP_THREADS" = "1")
+Sys.setenv("TF_NUM_INTEROP_THREADS" = "1")
 
 knitr::opts_chunk$set(echo = TRUE,
                       eval = greta:::check_tf_version("message"),

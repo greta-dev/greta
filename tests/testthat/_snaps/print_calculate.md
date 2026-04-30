@@ -17,7 +17,7 @@
     Code
       names(x_draws_values)
     Output
-      [1] "11" "12" "13" "14"
+      [1] "11" "12"
 
 ---
 
