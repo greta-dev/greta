@@ -13,8 +13,8 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{reticulate}{\code{\link[reticulate]{py_module_available}}, \code{\link[reticulate]{py_version}}}
+  \item{reticulate}{\code{\link[reticulate:py_module_available]{py_module_available()}}, \code{\link[reticulate:py_version]{py_version()}}}
 
-  \item{tensorflow}{\code{\link[tensorflow]{install_tensorflow}}}
+  \item{tensorflow}{\code{\link[tensorflow:install_tensorflow]{install_tensorflow()}}}
 }}
 

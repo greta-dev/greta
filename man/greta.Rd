@@ -15,10 +15,10 @@ contains lots of linear algebra, and greta models can be run across CPU
 clusters or on GPUs.
 
 See the simple example below, and take a look at the
-\href{https://greta-stats.org}{greta website} for more information
+\href{https://greta-dev.github.io/greta/}{greta website} for more information
 including
-\href{https://greta-stats.org/articles/get_started.html}{tutorials} and
-\href{https://greta-stats.org/articles/example_models.html}{examples}.
+\href{https://greta-dev.github.io/greta/articles/get_started.html}{tutorials} and
+\href{https://greta-dev.github.io/greta/articles/example_models.html}{examples}.
 }
 \examples{
 \dontrun{
@@ -41,7 +41,7 @@ draws <- mcmc(m, n_samples = 100)
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://greta-stats.org}
+  \item \url{https://greta-dev.github.io/greta/}
   \item \url{https://github.com/greta-dev/greta}
   \item Report bugs at \url{https://github.com/greta-dev/greta/issues}
 }
@@ -52,6 +52,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Nicholas Tierney \email{nicholas.tierney@gmail.com} (\href{https://orcid.org/0000-0003-1460-8722}{ORCID})
   \item Nick Golding \email{nick.golding.research@gmail.com} (\href{https://orcid.org/0000-0001-8916-5570}{ORCID})
 }
 
