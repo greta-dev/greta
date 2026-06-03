@@ -10,10 +10,10 @@
 #'   clusters or on GPUs.
 #'
 #'   See the simple example below, and take a look at the
-#'   [greta website](https://greta-stats.org) for more information
+#'   [greta website](https://greta-dev.github.io/greta/) for more information
 #'   including
-#'   [tutorials](https://greta-stats.org/articles/get_started.html) and
-#'   [examples](https://greta-stats.org/articles/example_models.html).
+#'   [tutorials](https://greta-dev.github.io/greta/articles/get_started.html) and
+#'   [examples](https://greta-dev.github.io/greta/articles/example_models.html).
 #'
 #' @importFrom tensorflow tf
 #' @examples
