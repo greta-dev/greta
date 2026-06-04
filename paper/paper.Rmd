@@ -45,7 +45,7 @@ greta is a package for statistical modelling in R [@Rcore] that has three core d
 greta can be used to construct both Bayesian and non-Bayesian statistical models, and perform inference via MCMC or optimisation (for maximum likelihood or maximum *a posteriori* estimation).
 The default MCMC algorithm is Hamiltonian Monte Carlo, which is generally very efficient for Bayesian models with large numbers of parameters or highly-correlated posteriors.
 
-The project website [https://greta-stats.org/](https://greta-stats.org/) hosts a *getting started* guide, worked examples of analyses using greta, a catalogue of example models, documentation, and a user forum.
+The project website [https://greta-dev.github.io/greta/](https://greta-dev.github.io/greta/) hosts a *getting started* guide, worked examples of analyses using greta, a catalogue of example models, documentation, and a user forum.
 
 The remainder of this paper provides an example of custom statistical modelling in greta, discusses the computational implementation of greta and how it can be extended, and highlights features that are planned for inclusion in the package.
 

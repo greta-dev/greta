@@ -14,7 +14,7 @@
 <link href="../../docsearch.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script><meta property="og:title" content="Eight Schools Example Analysis">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://greta-stats.org/logo.png">
+<meta property="og:image" content="https://greta-dev.github.io/greta/logo.png">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -267,7 +267,7 @@ treatment_stddevs &lt;- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)</a></co
 <a href="#bayesian-inference-model" class="anchor"></a>Bayesian inference model</h3>
 <p>Now we have all the prerequisites for building a Hamiltonian Monte Carlo (HMC) to calculate the posterior distribution over the model’s parameters.</p>
 <p>We first define the model by combining the calculated <code>avg_effect</code>, <code>avg_stddev</code> and <code>school_effects_standard</code> variables so that we can sample from them during modelling. The model <code>m</code> we define below contains all our prior distributions and thus represent the combined density of the model.</p>
-<p>It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found <a href="https://greta-stats.org/articles/get_started.html#plotting">here</a>.</p>
+<p>It is recommended that you check your model at this step by plotting the model graph. More information about these plots can be found <a href="https://greta-dev.github.io/greta/articles/get_started.html#plotting">here</a>.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># defining the hierarchical model</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">model</span>(avg_effect, avg_stddev, school_effects_standard)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>m</span></code></pre></div>

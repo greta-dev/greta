@@ -1,108 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://greta-stats.org/index.html</loc>
+    <loc>https://greta-dev.github.io/greta/index.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/as_data.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/as_data.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/calculate.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/calculate.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/chol2symm.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/chol2symm.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/distribution.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/distribution.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/distributions.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/distributions.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/extract-replace-combine.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/extract-replace-combine.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/functions.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/functions.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/greta.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/greta.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/inference.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/inference.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/install_greta_deps.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/install_greta_deps.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/internals.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/internals.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/joint.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/joint.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/mixture.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/mixture.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/model.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/model.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/operators.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/operators.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/optimisers.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/optimisers.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/overloaded.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/overloaded.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/reexports.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/reexports.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/reinstallers.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/reinstallers.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/samplers.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/samplers.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/simulate.greta_model.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/simulate.greta_model.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/stash-notes.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/stash-notes.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/structures.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/structures.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/transforms.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/transforms.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/reference/variable.html</loc>
+    <loc>https://greta-dev.github.io/greta/reference/variable.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/analyses/eight_schools.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/analyses/eight_schools.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/analyses/election_88.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/analyses/election_88.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/example_models.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/example_models.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/faq.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/faq.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/get_started.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/get_started.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/webpages/contribute.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/webpages/contribute.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/webpages/software.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/webpages/software.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/webpages/technical_details.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/webpages/technical_details.html</loc>
   </url>
   <url>
-    <loc>https://greta-stats.org/articles/webpages/why_greta.html</loc>
+    <loc>https://greta-dev.github.io/greta/articles/webpages/why_greta.html</loc>
   </url>
 </urlset>

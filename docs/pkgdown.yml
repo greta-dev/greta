@@ -12,6 +12,6 @@ articles:
   technical_details: webpages/technical_details.html
   why_greta: webpages/why_greta.html
 urls:
-  reference: https://greta-stats.org/reference
-  article: https://greta-stats.org/articles
+  reference: https://greta-dev.github.io/greta/reference
+  article: https://greta-dev.github.io/greta/articles
 
