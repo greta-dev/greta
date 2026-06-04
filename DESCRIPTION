@@ -3,7 +3,7 @@ Package: greta
 Title: Simple and 'Scalable' Statistical Modelling in R
 Version: 0.5.1
 Authors@R: c(
-    person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
+    person("Nick", "Golding", , "nick.golding.research@gmail.com", role = c("aut", "cph"),
            comment = c(ORCID = "0000-0001-8916-5570")),
     person("Nicholas", "Tierney", , "nicholas.tierney@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "https://orcid.org/0000-0003-1460-8722")),
