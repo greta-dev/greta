@@ -132,31 +132,6 @@ greta_list_py_modules <- function() {
   conda_modules
 }
 
-conda_modules <- tryCatch(
-  expr = {
-    # This will find conda whether it's on PATH or installed by reticulate
-    conda_bin <- reticulate::conda_binary()
-
-    system2(
-      conda_bin,
-      args = c("list", "-n", "greta-env-tf2"),
-      stdout = TRUE,
-      stderr = TRUE
-    )
-  },
-  error = function(e) {
-    cli::cli_ul(
-      c(
-        "Encountered an error in running:",
-        "{.code conda list -n greta-env-tf2}",
-        "x" = "{.code {e$message}}",
-        "!" = "conda may not be installed. Try {.code reticulate::install_miniconda()}"
-      )
-    )
-    return(NULL)
-  }
-)
-
 quiet_sitrep <- function() {
   suppressMessages(check_greta_ready_to_use())
 }
