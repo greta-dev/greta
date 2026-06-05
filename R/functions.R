@@ -743,6 +743,48 @@ sweep.greta_array <- function(
 }
 
 # nolint start
+#' @rdname overloaded
+#' @export
+outer <- function(X, Y, FUN = "*", ...) {
+  # nolint end
+  # outer() is not generic in base R; mirror the sweep()/apply() idiom here.
+  # UseMethod() dispatches on the first argument only, so when the greta array is
+  # in `Y` we coerce `X` to make dispatch land on `outer.greta_array` (#582).
+  if (is.greta_array(Y)) {
+    X <- as.greta_array(X)
+  }
+  UseMethod("outer", X)
+}
+
+#' @export
+outer.default <- base::outer
+
+# nolint start
+#' @export
+outer.greta_array <- function(X, Y, FUN = "*", ...) {
+  # nolint end
+  # base::outer()'s FUN == "*" fast path computes as.vector(X) %*% t(as.vector(Y)).
+  # as.vector() collapses a greta array to its (NA) placeholder values, silently
+  # dropping the greta operation. Passing FUN as a function takes the general,
+  # elementwise path, which dispatches correctly on greta arrays (#582).
+  if (is.character(FUN)) {
+    FUN <- match.fun(FUN)
+  }
+  base::outer(X, Y, FUN = FUN, ...)
+}
+
+# nolint start
+#' @rdname overloaded
+#' @export
+`%o%` <- function(X, Y) {
+  # nolint end
+  # base::`%o%` calls base::outer() directly (bypassing the outer() generic
+  # above), so forward to greta's outer() to handle greta arrays in either
+  # argument (#582).
+  outer(X, Y)
+}
+
+# nolint start
 #' @import methods
 #' @importFrom tensorflow %as%
 setClass("greta_array")

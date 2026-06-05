@@ -56,3 +56,4 @@ LICENSE
 # flint files
 ^flint$
 ^\.claude$
+^\.positai$

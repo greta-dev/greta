@@ -16,7 +16,7 @@ more details.}
 nothing - creates a conda environment for a specific python version
 }
 \description{
-This function runs \code{\link[reticulate:conda-tools]{reticulate::conda_create()}} inside
+This function runs \code{\link[reticulate:conda_create]{reticulate::conda_create()}} inside
 \code{\link[callr:r_process_options]{callr::r_process_options()}}, to create the conda environment,
 "greta-env-tf2". This is used within \code{\link[=install_greta_deps]{install_greta_deps()}} as part of
 setting up python dependencies. It uses a version of python that is

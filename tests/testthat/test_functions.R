@@ -158,6 +158,31 @@ test_that("kronecker works with greta and base array arguments", {
   compare_op(base_out, grab(greta_out2))
 })
 
+test_that("outer works with greta arrays and FUN = '*' (#582)", {
+  skip_if_not(check_tf_version())
+
+  x <- randn(5, 5)
+  y <- randn(3, 1)
+  x_greta <- as_data(x)
+  y_greta <- as_data(y)
+
+  base_out <- outer(x, y, FUN = "*")
+
+  greta_out1 <- outer(x, y_greta, FUN = "*")
+  greta_out2 <- outer(x_greta, y, FUN = "*")
+
+  expect_s3_class(greta_out1, "greta_array")
+  expect_s3_class(greta_out2, "greta_array")
+
+  compare_op(base_out, grab(greta_out1))
+  compare_op(base_out, grab(greta_out2))
+})
+
+test_that("outer on base-only arrays is unchanged", {
+  expect_identical(outer(1:3, 1:2), base::outer(1:3, 1:2))
+  expect_identical(outer(1:3, 1:2, FUN = "+"), base::outer(1:3, 1:2, FUN = "+"))
+})
+
 test_that("aperm works as expected", {
   skip_if_not(check_tf_version())
 

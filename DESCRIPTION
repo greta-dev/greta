@@ -3,7 +3,7 @@ Package: greta
 Title: Simple and 'Scalable' Statistical Modelling in R
 Version: 0.5.1
 Authors@R: c(
-    person("Nick", "Golding", , "nick.golding.research@gmail.com", role = "aut",
+    person("Nick", "Golding", , "nick.golding.research@gmail.com", role = c("aut", "cph"),
            comment = c(ORCID = "0000-0001-8916-5570")),
     person("Nicholas", "Tierney", , "nicholas.tierney@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "https://orcid.org/0000-0003-1460-8722")),
@@ -28,7 +28,7 @@ Description: Write statistical models in R and fit them by MCMC and
     including tutorials, examples, package documentation, and the 'greta'
     forum.
 License: Apache License 2.0
-URL: https://greta-stats.org, https://github.com/greta-dev/greta
+URL: https://greta-dev.github.io/greta/, https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
 Depends:
     R (>= 4.1.0)
@@ -84,7 +84,6 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 SystemRequirements: Python (>= 3.7.0) with header files and shared
     library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/); TensorFlow
     Probability (v0.8.0; https://www.tensorflow.org/probability/)
@@ -140,3 +139,4 @@ Collate:
     'internals.R'
     'greta-sitrep.R'
 LazyData: true
+Config/roxygen2/version: 8.0.0

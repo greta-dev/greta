@@ -26,6 +26,15 @@ as.unknowns.matrix <- function(x) {
 }
 
 #' @export
+as.unknowns.numeric <- function(x) {
+  # nolint
+  # bare numeric vectors (those that have lost their `dim`) can reach here,
+  # e.g. when a value crosses the R/Python boundary or `dim<-` is set to NULL;
+  # coerce to an array so dispatch lands on `as.unknowns.array`
+  as.unknowns(as.array(x))
+}
+
+#' @export
 print.unknowns <- function(x, ..., n = 10) {
   # remove 'unknown' class attribute
   x <- unclass(x)

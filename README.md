@@ -6,7 +6,7 @@ greta lets you write your own model like in BUGS, JAGS and Stan, except
 that you write models right in R, it scales well to massive datasets,
 and it’s easy to extend and build on.
 
-### See the [website](https://greta-stats.org/) for more information, including [tutorials](https://greta-stats.org/articles/get_started.html), [examples](https://greta-stats.org/articles/example_models.html), [package documentation](https://greta-stats.org/reference/index.html), and the [greta forum](https://forum.greta-stats.org).
+### See the [website](https://greta-dev.github.io/greta/) for more information, including [tutorials](https://greta-dev.github.io/greta/articles/get_started.html), [examples](https://greta-dev.github.io/greta/articles/example_models.html), [package documentation](https://greta-dev.github.io/greta/reference/index.html), and the [greta forum](https://forum.greta-stats.org).
 
 You can install the current release version of the package from
 CRAN:
