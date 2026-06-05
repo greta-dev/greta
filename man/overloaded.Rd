@@ -12,6 +12,8 @@
 \alias{colSums}
 \alias{rowSums}
 \alias{sweep}
+\alias{outer}
+\alias{\%o\%}
 \alias{backsolve}
 \alias{forwardsolve}
 \alias{apply}
@@ -39,6 +41,10 @@ colSums(x, na.rm = FALSE, dims = 1L)
 rowSums(x, na.rm = FALSE, dims = 1L)
 
 sweep(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
+
+outer(X, Y, FUN = "*", ...)
+
+X \%o\% Y
 
 backsolve(r, x, k = ncol(r), upper.tri = TRUE, transpose = FALSE)
 
@@ -68,7 +74,7 @@ abind(
 diag(x = 1, nrow, ncol)
 }
 \arguments{
-\item{x, y, size, LINPACK, V, na.rm, dims, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, X, INDEX, symmetric, only.values, EISPACK, x1, x2, compact, along, rev.along, new.names, force.array, make.names, use.anon.names, use.first.dimnames, hier.names, use.dnns, nrow, ncol}{arguments as in original documentation}
+\item{x, y, size, LINPACK, V, na.rm, dims, MARGIN, STATS, FUN, check.margin, \dots, r, k, upper.tri, transpose, l, X, Y, INDEX, symmetric, only.values, EISPACK, x1, x2, compact, along, rev.along, new.names, force.array, make.names, use.anon.names, use.first.dimnames, hier.names, use.dnns, nrow, ncol}{arguments as in original documentation}
 }
 \description{
 greta provides a wide range of methods to apply common R

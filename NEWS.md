@@ -2,7 +2,10 @@
 
 ## Changes
 
+- `as.unknowns()` now handles plain numeric vectors (and `dim<-` being set to `NULL`), fixing an `mcmc()` error "no applicable method for 'as.unknowns'" that surfaced when re-building vignettes under R-devel (#582).
 - `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
+- `outer()` (and `%o%`) now works with greta arrays when `FUN = "*"`, instead of silently returning a base array of `NA`s; base R's `"*"` fast path used `as.vector()`, which dropped the greta operation (#582).
+- Reshaping a greta array with `dim<-` now keeps the `?` placeholder display for unknown values instead of showing `NA` (#582).
 - Add warmup information to MCMC print method (#652, resolved by #755).
 - Add more options to level of detail in `greta_sitrep()` with "verbosity" argument. There are three levels, "minimal" (default), "detailed", and "quiet". (#612, resolved by #679).
 - Use `.batch_size` instead of `batch_size` internally, to avoid rare name clash errors (#634).

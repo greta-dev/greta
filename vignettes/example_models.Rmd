@@ -15,9 +15,15 @@ Sys.setenv("OMP_THREAD_LIMIT" = "2")
 Sys.setenv("TF_NUM_INTRAOP_THREADS" = "1")
 Sys.setenv("TF_NUM_INTEROP_THREADS" = "1")
 
+# Only evaluate TensorFlow code off CRAN. reticulate now auto-provisions TF via
+# uv, so `check_tf_version()` alone no longer prevents these chunks running (and
+# installing TF) on CRAN.
+.eval_tf <- identical(tolower(Sys.getenv("NOT_CRAN")), "true") &&
+  greta:::check_tf_version("message")
+
 knitr::opts_chunk$set(comment = NA,
-                      eval = greta:::check_tf_version("message"),
-                      purl = greta:::check_tf_version("message"),
+                      eval = .eval_tf,
+                      purl = .eval_tf,
                       cache = TRUE)
 library(greta)
 ```

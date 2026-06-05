@@ -592,8 +592,13 @@ length.greta_array <- function(x) {
   }
 
   # change the values similarly
-  new_value <- get_node(x)$value()
-  new_value <- array(new_value, dim = dims)
+  old_value <- get_node(x)$value()
+  new_value <- array(old_value, dim = dims)
+  # array() drops the "unknowns" class, so a reshaped variable/operation would
+  # print its placeholders as NA rather than `?`; restore it (#582)
+  if (is.unknowns(old_value)) {
+    new_value <- as.unknowns(new_value)
+  }
 
   unmatch_dim <- !identical(dim(x), dims)
 
