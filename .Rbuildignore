@@ -51,9 +51,12 @@ LICENSE
 ^__autograph*
 ^testlog
 ^data-raw$
+^dev$
 
 
 # flint files
 ^flint$
 ^\.claude$
 ^\.positai$
+^[.]?air[.]toml$
+^\.vscode$
