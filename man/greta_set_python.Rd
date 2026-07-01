@@ -27,13 +27,12 @@ Invisibly, the stored preference (\code{NULL} for \code{greta_reset_python()}).
 }
 \description{
 greta runs on Python (via TensorFlow and TensorFlow Probability). By default
-it uses an environment provisioned automatically by
-\href{https://docs.astral.sh/uv/}{\code{uv}} (through reticulate), which installs a
-compatible Python, TensorFlow, and TensorFlow Probability on first use. These
-helpers let you persistently switch greta to a different Python environment -
-for example a conda environment created by \code{\link[=install_greta_deps]{install_greta_deps()}}, or your own
-Python. \code{greta_reset_python()} clears the stored choice, returning to greta's
-automatic resolution.
+it uses \href{https://docs.astral.sh/uv/}{\code{uv}} (via the reticulate R package) to
+install a compatible Python, TensorFlow, and TensorFlow Probability
+automatically on first use. These helper functions let you persistently switch greta to a different
+Python environment - for example a conda environment created by
+\code{\link[=install_greta_deps]{install_greta_deps()}}, or your own Python. \code{\link[=greta_reset_python]{greta_reset_python()}} clears the
+stored choice, returning to greta's automatic resolution.
 
 Each helper reports what greta will resolve to the next time it loads. The
 choice is stored under \code{\link[tools:R_user_dir]{tools::R_user_dir()}} and applied the next time greta
@@ -46,7 +45,7 @@ preference.
 }
 \examples{
 \dontrun{
-# use the uv-provisioned environment (the default)
+# use the uv-managed environment (the default)
 greta_set_python_uv()
 
 # use the conda environment from install_greta_deps()

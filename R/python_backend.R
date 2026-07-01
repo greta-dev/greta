@@ -1,7 +1,7 @@
 # Python backend resolution for greta.
 #
 # greta can use one of several Python "backends":
-#   * "managed"  - reticulate's managed (uv) environment, which auto-provisions
+#   * "managed"  - reticulate's managed (uv) environment, which auto-installs
 #                  a compatible Python + TensorFlow + TensorFlow Probability.
 #   * a path     - a specific Python (e.g. a conda env or virtualenv) that the
 #                  user wants greta to use.
@@ -116,7 +116,7 @@ greta_python_plan <- function(
 }
 
 # Execute a backend plan: point RETICULATE_PYTHON at the chosen Python, and for
-# the managed backend declare greta's requirements so uv can provision them.
+# the managed backend declare greta's requirements so uv can install them.
 apply_greta_python_plan <- function(plan) {
   switch(
     plan$backend,
@@ -238,10 +238,9 @@ report_pending_python_backend <- function() {
 #'
 #' @description
 #' greta runs on Python (via TensorFlow and TensorFlow Probability). By default
-#' it uses an environment provisioned automatically by
-#' [`uv`](https://docs.astral.sh/uv/) (via the reticulate R package), which
-#' installs a compatible Python, TensorFlow, and TensorFlow Probability on first
-#' use. These helper functions let you persistently switch greta to a different
+#' it uses [`uv`](https://docs.astral.sh/uv/) (via the reticulate R package) to
+#' install a compatible Python, TensorFlow, and TensorFlow Probability
+#' automatically on first use. These helper functions let you persistently switch greta to a different
 #' Python environment - for example a conda environment created by
 #' [install_greta_deps()], or your own Python. [greta_reset_python()] clears the
 #' stored choice, returning to greta's automatic resolution.
@@ -266,7 +265,7 @@ report_pending_python_backend <- function() {
 #' @export
 #' @examples
 #' \dontrun{
-#' # use the uv-provisioned environment (the default)
+#' # use the uv-managed environment (the default)
 #' greta_set_python_uv()
 #'
 #' # use the conda environment from install_greta_deps()
@@ -281,7 +280,7 @@ report_pending_python_backend <- function() {
 greta_set_python_uv <- function() {
   set_greta_python_backend("managed")
   cli::cli_inform(c(
-    "v" = "greta will use the {.pkg uv}-provisioned Python environment."
+    "v" = "greta will use the {.pkg uv}-installed Python environment."
   ))
   report_pending_python_backend()
   invisible("managed")

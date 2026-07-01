@@ -33,9 +33,9 @@ There are five functions:
 \itemize{
 \item \code{\link[=remove_greta_env]{remove_greta_env()}} removes the 'greta-env-tf2' conda environment
 \item \code{\link[=remove_miniconda]{remove_miniconda()}} removes miniconda installation
-\item \code{\link[=remove_reticulate_uv_cache]{remove_reticulate_uv_cache()}} removes reticulate's managed uv cache. Note
-this cache is shared by all R packages that use reticulate's uv (it is not
-greta-specific), and a system-wide uv cache is left untouched.
+\item \code{\link[=remove_reticulate_uv_cache]{remove_reticulate_uv_cache()}} removes reticulate's managed uv cache.
+Note this cache is shared by all R packages that use reticulate's uv (it is
+not greta-specific), and a system-wide uv cache is left untouched.
 \item \code{\link[=reinstall_greta_env]{reinstall_greta_env()}} remove 'greta-env-tf2' and reinstall it
 using \code{\link[=greta_create_conda_env]{greta_create_conda_env()}} (which is used internally).
 \item \code{\link[=reinstall_miniconda]{reinstall_miniconda()}} removes miniconda and reinstalls it using

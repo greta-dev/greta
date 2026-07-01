@@ -104,7 +104,9 @@ print.sampler <- function(x, ...) {
     collapse = ", "
   )
 
-  if (!nzchar(values_text)) values_text <- "None"
+  if (!nzchar(values_text)) {
+    values_text <- "None"
+  }
 
   parameters_text <- glue::glue(
     "
@@ -314,7 +316,6 @@ slice_sampler <- R6Class(
     },
 
     # no additional here tuning
-    tune = function(iterations_completed, total_iterations) {
-    }
+    tune = function(iterations_completed, total_iterations) {}
   )
 )

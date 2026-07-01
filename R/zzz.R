@@ -24,7 +24,7 @@ tf <- tfp <- NULL
   options(greta_tf_float = "float64")
 
   # Resolve which Python backend to use and apply it. By default this is
-  # reticulate's managed (uv) environment, which auto-provisions a compatible
+  # reticulate's managed (uv) environment, which auto-installs a compatible
   # Python + TensorFlow + TensorFlow Probability (see #444). A user-set
   # RETICULATE_PYTHON, a stored greta preference, or an existing greta-env-tf2
   # conda env are respected instead (see R/python_backend.R, #801).

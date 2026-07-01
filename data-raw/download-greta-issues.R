@@ -72,7 +72,9 @@ format_comment <- function(comment) {
 }
 
 format_comments <- function(comments) {
-  if (!is.data.frame(comments) || nrow(comments) == 0) return(NULL)
+  if (!is.data.frame(comments) || nrow(comments) == 0) {
+    return(NULL)
+  }
   comment_text <- map(
     seq_len(nrow(comments)),
     \(i) format_comment(comments[i, ])
@@ -82,8 +84,11 @@ format_comments <- function(comments) {
 }
 
 format_issue_markdown <- function(issue) {
-  body <- if (nchar(trimws(issue$body)) > 0) issue$body else
+  body <- if (nchar(trimws(issue$body)) > 0) {
+    issue$body
+  } else {
     "_No description provided._"
+  }
   comments <- format_comments(issue$comments)
 
   glue(
@@ -121,7 +126,9 @@ download_issue <- function(number, repo, dir) {
       NULL
     }
   )
-  if (is.null(issue)) return(invisible(NULL))
+  if (is.null(issue)) {
+    return(invisible(NULL))
+  }
   writeLines(format_issue_markdown(issue), path)
   invisible(path)
 }
