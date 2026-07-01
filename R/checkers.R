@@ -48,14 +48,12 @@ check_tf_version <- function(
     cli_process_failed()
 
     cli_msg <- c(
-      "x" = "The expected python packages are not available",
-      "i" = "We recommend installing them (in a fresh R session) with:",
-      "{.code install_greta_deps()}",
-      "or",
-      "{.code reinstall_greta_deps()}",
-      "({.strong Note}: Your R session should not have initialised \\
-          Tensorflow yet.)",
-      "i" = "For more information, see {.code ?install_greta_deps}"
+      "x" = "greta could not load Python with TensorFlow and TensorFlow \\
+      Probability.",
+      "i" = "Run {.run greta::greta_sitrep()} to check your installation.",
+      "i" = "For help, including offline or conda installs, see the \\
+      installation vignette ({.vignette greta::installation}), or install a \\
+      conda environment with {.fun install_greta_deps}."
     )
 
     # if there was a problem, append the solution
