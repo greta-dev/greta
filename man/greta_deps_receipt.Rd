@@ -11,7 +11,11 @@ greta_deps_receipt()
 }
 \description{
 To assist with capturing and sharing python dependencies, we provide a way
-to capture the dependencies currently used.
+to capture the dependencies currently used. Unlike \code{\link[=greta_deps_spec]{greta_deps_spec()}},
+the receipt records the versions actually installed and is \strong{not}
+validated against the versions greta supports - so it will faithfully
+report, for example, a TensorFlow version newer than greta's supported
+range.
 }
 \examples{
 \dontrun{

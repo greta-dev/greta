@@ -20,12 +20,12 @@ reinstall_greta_deps(
 }
 \arguments{
 \item{deps}{object created with \code{\link[=greta_deps_spec]{greta_deps_spec()}} where you
-specify python, TF, and TFP versions. By default these are TF 2.15.0,
-TFP 0.23.0, and Python 3.10. These versions must be compatible
-with each other. If they are not, \code{\link[=greta_deps_spec]{greta_deps_spec()}} will error with
-more information and suggestions. See ?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more
-information, and see the data object \code{greta_deps_tf_tfp}
-(`?greta_deps_tf_tfp``).}
+specify python, TF, and TFP versions. By default these are TF 2.15.1,
+TFP 0.23.0, and Python 3.11. \code{\link[=greta_deps_spec]{greta_deps_spec()}} checks that the
+TensorFlow version is one greta supports; compatible TensorFlow
+Probability and Python versions are resolved at install time. See
+?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more information, and the data object
+\code{greta_deps_tf_tfp} for known-good combinations.}
 
 \item{timeout}{maximum time in minutes until the installation for each
 installation component times out and exits. Default is 5 minutes per
@@ -39,25 +39,34 @@ only restarts R during interactive sessions, and only in RStudio.}
 \item{...}{Optional arguments, reserved for future expansion.}
 }
 \description{
-This is a helper function to install Python dependencies needed. By default
-these are TF 2.15.0, TFP 0.23.0, and Python 3.10. These Python modules
-will be installed into a conda environment named "greta-env-tf2".
+This is a helper function to install specified versions of Python
+dependencies needed for greta. By default, greta version >= 0.6.0 now uses
+reticulate's uv-managed Python to automatically identify dependencies. You
+can change over to this new approach with \code{\link[=greta_set_python_uv]{greta_set_python_uv()}}, which is
+now what we recommend. This has changed from where we would previously use
+\code{install_greta_deps()}.
 }
 \details{
-You can specify an environment variable to write a logfile to a specific
-location with \code{GRETA_INSTALLATION_LOG} using
-\code{Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}. Or use
-\code{\link[=greta_set_install_logfile]{greta_set_install_logfile()}} to set the path, e.g.,
-\code{greta_set_install_logfile('path/to/logfile.html')}. By default it uses
-\code{tools::R_user_dir("greta")} as the directory to save a logfile named
-"greta-installation-logfile.html". To see installation notes or errors,
-after installation you can open the logfile with
-\code{\link[=open_greta_install_log]{open_greta_install_log()}}, or you can navigate to the logfile and open
-it in a browser.
+This function, \code{install_greta_deps()}, is an alternative installation
+workflow. The default versions of the python modules are: TensorFlow
+2.15.1, TensorFlow Probability 0.23.0, and Python 3.11. These Python
+modules will be installed into a conda environment named "greta-env-tf2".
 
-By default, if using RStudio, it will now ask you if you want to restart
-the R session. If the session is not interactive, or is not in RStudio,
-it will not restart. You can also override this with \code{restart = TRUE}.
+It can be useful to identify installation notes, warnings, or errors that
+arise during install. You can do this by accessing the logfile with
+\code{\link[=open_greta_install_log]{open_greta_install_log()}}, which opens your logfile in your default web
+browser. The logfile of the installation process is written to a user
+directory, by default to \code{tools::R_user_dir("greta")}, and is named:
+"greta-installation-logfile.html".
+
+You can set the logfile location with \code{\link[=greta_set_install_logfile]{greta_set_install_logfile()}}. E.g.,
+\code{greta_set_install_logfile('path/to/logfile.html')}. You can also specify
+this with an environment variable, \code{GRETA_INSTALLATION_LOG}, e.g.,
+\code{Sys.setenv('GRETA_INSTALLATION_LOG'='path/to/logfile.html')}.
+
+By default, if using RStudio, it will ask you if you want to restart the R
+session. If the session is not interactive, or is not in RStudio, it will
+not restart. You can also override this with \code{restart = TRUE}.
 }
 \note{
 This will automatically install Miniconda (a minimal version of the
@@ -65,13 +74,20 @@ Anaconda scientific software management system), create a 'conda'
 environment for greta named 'greta-env-tf2' with required python and python
 package versions, and forcibly switch over to using that conda environment.
 
+We now recommend using the new default method for installation, which uses
+\href{https://docs.astral.sh/uv/}{uv} (via the reticulate package) to install
+TensorFlow and TensorFlow Probability on first use. To make greta use the "greta-env-tf2" conda environment created
+here instead, use \code{\link[=greta_set_python_conda_env]{greta_set_python_conda_env()}} (or set the
+\code{RETICULATE_PYTHON} environment variable to its Python before loading
+greta). See the "Installing Dependencies" vignette and
+\code{\link[=greta_set_python_path]{greta_set_python_path()}}.
+
 If you don't want to use conda or the "greta-env-tf2" conda environment, you
 can install versions that you like, e.g., using \code{\link[reticulate:py_install]{reticulate::py_install()}}.
 If you want to see which versions of TF, TFP, and Python work with each
 other (at least according to information from tensorflows website), see the
 data \code{greta_deps_tf_tfp}, which is provided with greta. Managing your own
-installation is not always straightforward, so we recommend installing
-the python packages using \code{install_greta_deps()} for most users.
+installation is not always straightforward, so proceed with caution.
 }
 \examples{
 \dontrun{
