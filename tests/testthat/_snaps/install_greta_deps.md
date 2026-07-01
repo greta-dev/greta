@@ -3,7 +3,7 @@
     Code
       install_greta_deps(timeout = 0.001)
     Message
-      i Most users do not need `install_greta_deps()`: greta provisions TensorFlow and TensorFlow Probability automatically (via uv) on first use.
+      i Most users do not need `install_greta_deps()`: greta installs TensorFlow and TensorFlow Probability automatically (via uv) on first use.
       i You can set this with `greta_set_python_uv()`
       i Use `install_greta_deps()` to install a conda environment (e.g. offline, or to pin \ versions), then select it with `greta_set_python_conda_env()`.
       i See the installation vignette: `vignette(greta::installation)`.
