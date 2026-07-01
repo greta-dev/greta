@@ -2,9 +2,17 @@
 
 ## Changes
 
+- greta now resolves its Python environment more flexibly instead of always forcing reticulate's managed (uv) environment: it respects a user-set `RETICULATE_PYTHON`, a stored greta preference, or an existing `greta-env-tf2` conda environment, and otherwise uses the managed (uv) environment (#801).
 - `as.unknowns()` now handles plain numeric vectors (and `dim<-` being set to `NULL`), fixing an `mcmc()` error "no applicable method for 'as.unknowns'" that surfaced when re-building vignettes under R-devel (#582).
+- `greta_deps_receipt()` now records the TensorFlow, TensorFlow Probability, and Python versions that are actually installed without validating them against greta's supported range, so it works even when the installed versions are newer than greta officially supports (such as a TensorFlow 2.15 patch release).
+- `greta_deps_spec()` now only checks that the requested TensorFlow version is one greta supports (TensorFlow 2.16 and later are not supported, as they ship Keras 3); compatible TensorFlow Probability and Python versions are left to uv or conda to resolve rather than being validated against a fixed compatibility table (#675).
+- `greta_remove_all_deps()` removes all of greta's Python dependencies for a clean slate: the `greta-env-tf2` conda environment, miniconda, reticulate's managed uv cache, and any stored greta Python preference.
+- `greta_set_python_uv()`, `greta_set_python_conda_env()`, `greta_set_python_path()`, and `greta_reset_python()` let you choose, persistently, which Python environment greta uses (`greta_reset_python()` returns to automatic resolution), and report what greta will resolve to on its next load; `greta_sitrep()` now reports the resolved backend (#801).
+- `install_greta_deps()` is no longer required for most users, as greta now provisions TensorFlow and TensorFlow Probability automatically via uv on first use; it remains for installing a conda environment (for example, for offline use), which you can then select with `greta_set_python_conda_env()` (#801).
 - `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
 - `outer()` (and `%o%`) now works with greta arrays when `FUN = "*"`, instead of silently returning a base array of `NA`s; base R's `"*"` fast path used `as.vector()`, which dropped the greta operation (#582).
+- `remove_greta_env()` now asks for confirmation before removing the `greta-env-tf2` conda environment, and reports clearly when there is no such environment to remove.
+- `remove_reticulate_uv_cache()` removes reticulate's managed uv cache; note this cache is shared by all reticulate packages and is not greta-specific, and a system-wide uv cache is left untouched.
 - Reshaping a greta array with `dim<-` now keeps the `?` placeholder display for unknown values instead of showing `NA` (#582).
 - Add warmup information to MCMC print method (#652, resolved by #755).
 - Add more options to level of detail in `greta_sitrep()` with "verbosity" argument. There are three levels, "minimal" (default), "detailed", and "quiet". (#612, resolved by #679).

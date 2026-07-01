@@ -739,23 +739,21 @@ other_install_fail_msg <- function(error_passed) {
     message = c(
       "Stopping as installation of {.pkg greta} dependencies failed",
       "An error occured:",
-      "{.code {cat(error_passed)}}",
-      "You can perform the entire installation manually with:",
-      "{.code reticulate::install_miniconda()}",
-      "Then:",
-      "{.code reticulate::conda_create(envname = 'greta-env-tf2', \\
-      python_version = '3.8')}",
-      "Then:",
-      "{.code reticulate::py_install(
-        packages = c(
-          'numpy',
-          'tensorflow',
-          'tensorflow-probability'
-          ),
-        pip = TRUE
-        )}",
-      "Then, restart R, and load {.pkg greta} with: {.code library(greta)}",
-      "If this does not work, lodge an issue on github at:",
+      "{error_passed}",
+      "You can perform the installation manually by doing the following:",
+      "Restarting R, then running:",
+      "{.code Sys.unsetenv('RETICULATE_PYTHON')}",
+      "{.code Sys.setenv(RETICULATE_USE_MANAGED_VENV = 'yes')}",
+      "{.code library(reticulate)}",
+      "{.code py_require(packages = c('tensorflow==2.15.1',
+                              'tensorflow-probability==0.23.0'),
+                 python_version = '3.11')}",
+      "{.code py_require()}",
+      "{.code py_config()}}",
+      "If this does not work, read through
+      installation vignette ({.vignette greta::installation}), or install a \\
+      conda environment with {.fun install_greta_deps}.",
+      "Also feel free to lodge an issue on github at:",
       "{.url https://github.com/greta-dev/greta/issues/new}"
     )
   )
@@ -773,17 +771,19 @@ timeout_install_msg <- function(timeout = 5, py_error = NULL) {
     "{.code reticulate::install_miniconda()}",
     "Then:",
     "{.code reticulate::conda_create(envname = 'greta-env-tf2', \\
-        python_version = '3.8')}",
+        python_version = '3.10')}",
     "Then:",
     "{.code reticulate::py_install(
         packages = c(
           'numpy',
-          'tensorflow',
-          'tensorflow-probability'
+          'tensorflow==2.15.0',
+          'tensorflow-probability==0.23.0'
           ),
+        envname = 'greta-env-tf2',
         pip = TRUE
         )}",
-    "Then, restart R, and load {.pkg greta} with: {.code library(greta)}"
+    "Then select it with {.code greta_set_python_conda_env()}, restart R, \\
+        and load {.pkg greta} with: {.code library(greta)}"
   )
 
   if (nchar(py_error) == 0) {
@@ -798,7 +798,7 @@ timeout_install_msg <- function(timeout = 5, py_error = NULL) {
     msg <- c(
       msg,
       "Additionally, the following error appeared:",
-      "{cat({py_error})}"
+      "{py_error}"
     )
     cli::format_error(
       message = msg
@@ -1013,51 +1013,6 @@ is_mac <- function() {
 
 is_linux <- function() {
   identical(tolower(Sys.info()[["sysname"]]), "linux")
-}
-
-os_name <- function() {
-  os <- c(
-    windows = is_windows(),
-    mac = is_mac(),
-    linux = is_linux()
-  )
-  names(which(os))
-}
-
-# semantic version finder
-closest_version <- function(current, available) {
-  available <- sort(available)
-  not_available <- !(current %in% available)
-
-  current_gt_available <- all(current > available)
-  current_lt_available <- all(current < available)
-  current_btn_available <- any(current > available) && any(current < available)
-
-  pick_largest <- not_available && current_gt_available
-  pick_smallest <- not_available && current_lt_available
-
-  if (pick_largest) {
-    closest <- max(available)
-  }
-
-  if (pick_smallest) {
-    closest <- min(available)
-  }
-
-  if (current_btn_available) {
-    version_gt <- current > available
-    closest <- max(available[version_gt])
-  }
-
-  return(closest)
-}
-
-outside_version_range <- function(provided, range) {
-  version_num <- numeric_version(provided)
-  above_range <- all(version_num > range)
-  below_range <- all(version_num < range)
-  outside_range <- above_range || below_range
-  outside_range
 }
 
 pretty_dim <- function(x) {
