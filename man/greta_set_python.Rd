@@ -29,19 +29,40 @@ Invisibly, the stored preference (\code{NULL} for \code{greta_reset_python()}).
 greta runs on Python (via TensorFlow and TensorFlow Probability). By default
 it uses \href{https://docs.astral.sh/uv/}{\code{uv}} (via the reticulate R package) to
 install a compatible Python, TensorFlow, and TensorFlow Probability
-automatically on first use. These helper functions let you persistently switch greta to a different
-Python environment - for example a conda environment created by
-\code{\link[=install_greta_deps]{install_greta_deps()}}, or your own Python. \code{\link[=greta_reset_python]{greta_reset_python()}} clears the
-stored choice, returning to greta's automatic resolution.
-
-Each helper reports what greta will resolve to the next time it loads. The
-choice is stored under \code{\link[tools:R_user_dir]{tools::R_user_dir()}} and applied the next time greta
-is loaded, so you will need to \strong{restart R} for it to take effect.
+automatically on first use. These helper functions let you persistently
+switch greta to a different Python environment - for example a conda
+environment created by \code{\link[=install_greta_deps]{install_greta_deps()}}, or your own Python.
+\code{\link[=greta_reset_python]{greta_reset_python()}} clears the stored choice, returning to greta's
+automatic resolution.
 }
 \details{
-These set a greta preference; setting the \code{RETICULATE_PYTHON} environment
-variable directly (e.g. in your \code{.Rprofile}) takes precedence over the stored
-preference.
+greta resolves which Python to use, in this order:
+\enumerate{
+\item The \code{RETICULATE_PYTHON} environment variable, if set (usually in
+\verb{~/.Renviron}, your \code{.Rprofile}, or your shell environment). This
+always wins: it takes precedence over any stored preference.
+\item Your stored preference, set with \code{greta_set_python_uv()},
+\code{greta_set_python_conda_env()}, or \code{greta_set_python_path()}.
+\item An auto-detected \code{"greta-env-tf2"} conda environment (created by
+\code{\link[=install_greta_deps]{install_greta_deps()}}) - kept so setups from older greta versions keep
+working after upgrading.
+\item Otherwise, the uv-managed environment (the default as of greta 0.6.0):
+reticulate installs a compatible Python, TensorFlow, and TensorFlow
+Probability automatically on first use. No setup is needed - this happens
+"automagically".
+}
+
+To check which Python greta is currently using, and which it will use
+after a restart, call \code{\link[=greta_sitrep]{greta_sitrep()}}.
+
+If a stored preference appears to be ignored, \code{RETICULATE_PYTHON} is
+usually why: remove it from wherever it is set (for example
+\verb{~/.Renviron}), then restart R. Note that \code{Sys.unsetenv()} within a
+session is not enough, as the choice is applied when greta loads.
+
+Your choice is stored under \code{tools::R_user_dir("greta", "config")} and
+applied the next time greta is loaded, so you will need to \strong{restart R}
+for it to take effect.
 }
 \examples{
 \dontrun{

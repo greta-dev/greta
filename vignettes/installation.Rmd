@@ -77,13 +77,24 @@ greta_sitrep()
 
 # Choosing a different Python environment
 
-greta resolves which Python to use in this order: an explicit
-`RETICULATE_PYTHON`, then a stored greta preference, then an existing
-`greta-env-tf2` conda environment, and otherwise the uv-managed environment.
+greta resolves which Python to use in this order:
+
+1. The `RETICULATE_PYTHON` environment variable, which is usually set in
+`~/.Renviron` or your shell environment.
+2. Stored preference - set with `greta_set_python_uv()`, `greta_set_python_conda_env()`, or `greta_set_python_path()`.
+3. Auto-detected `greta-env-tf2` conda environment - created by `install_greta_deps()`.
+4. The managed uv environment - the default, no setup needed.
 
 If you have upgraded from an older greta that used a `greta-env-tf2` conda
 environment (created by `install_greta_deps()`), greta detects and keeps using
 it, so upgrading does not change your setup.
+
+To see which Python environment greta is using right now — and which it
+will use after you restart R — run:
+
+```{r show-sitrep, eval=FALSE}
+greta_sitrep()
+```
 
 You can switch environments at any time with these helpers, then **restart R**.
 Each one reports what greta will resolve to on its next load:
@@ -99,7 +110,7 @@ greta_set_python_path("/path/to/python")
 greta_reset_python()
 ```
 
-These store your choice (under `tools::R_user_dir("greta")`) so it persists
+These store your choice (under `tools::R_user_dir("greta", "config")`) so it persists
 across sessions.
 
 For finer control, setting the `RETICULATE_PYTHON` environment variable to a
@@ -109,6 +120,12 @@ path (e.g. in your `.Rprofile`) takes precedence over the stored preference:
 Sys.setenv(RETICULATE_PYTHON = "/path/to/your/python")
 library(greta)
 ```
+
+Because `RETICULATE_PYTHON` takes precedence, a stored preference will
+appear to be ignored while it is set. To go back to your stored
+preference, remove `RETICULATE_PYTHON` from wherever it is set (for
+example `~/.Renviron`, which you can open with
+`usethis::edit_r_environ()`), then restart R.
 
 # Advanced: a managed conda environment
 

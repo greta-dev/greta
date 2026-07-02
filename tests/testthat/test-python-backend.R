@@ -1,3 +1,24 @@
+test_that("setters warn when RETICULATE_PYTHON overrides the stored preference", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  # greta_stash is an environment: save, defer-restore, overwrite
+  old <- greta_stash$reticulate_python_at_load
+  withr::defer(greta_stash$reticulate_python_at_load <- old)
+  greta_stash$reticulate_python_at_load <- "/fake/python"
+
+  expect_snapshot(greta_set_python_uv())
+})
+
+test_that("setters do not warn when RETICULATE_PYTHON is unset", {
+  # same setup but stash value <- ""
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  # greta_stash is an environment: save, defer-restore, overwrite
+  old <- greta_stash$reticulate_python_at_load
+  withr::defer(greta_stash$reticulate_python_at_load <- old)
+  greta_stash$reticulate_python_at_load <- ""
+
+  expect_snapshot(greta_set_python_uv())
+})
+
 test_that("greta_python_plan() respects a user-set RETICULATE_PYTHON path", {
   plan <- greta_python_plan(
     reticulate_python = "/usr/bin/python",
@@ -132,6 +153,47 @@ test_that("pending backend report simulates a fresh restart", {
   plan <- suppressMessages(report_pending_python_backend())
   expect_identical(plan$backend, "managed")
   expect_identical(plan$source, "preference")
+})
+
+test_that("detect_greta_conda_python() returns a valid recorded python", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  fake_python <- withr::local_tempfile()
+  file.create(fake_python)
+
+  ensure_greta_config_dir()
+  writeLines(fake_python, greta_conda_record_file())
+
+  expect_equal(detect_greta_conda_python(), fake_python)
+})
+
+test_that("detect_greta_conda_python() drops a stale record", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+
+  ensure_greta_config_dir()
+  writeLines("/no/such/python", greta_conda_record_file())
+
+  result <- detect_greta_conda_python()
+  expect_false(identical(result, "/no/such/python"))
+  expect_false(file.exists(greta_conda_record_file()))
+})
+
+test_that("detect_greta_conda_python() does not error on an empty record file", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+
+  ensure_greta_config_dir()
+  file.create(greta_conda_record_file())
+
+  expect_no_error(detect_greta_conda_python())
+})
+
+test_that("get_greta_python_backend() returns NULL for an empty backend file", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+
+  ensure_greta_config_dir()
+  file.create(greta_python_backend_file())
+
+  expect_no_error(result <- get_greta_python_backend())
+  expect_null(result)
 })
 
 test_that("greta hints are shown once", {
