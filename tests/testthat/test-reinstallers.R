@@ -46,35 +46,29 @@ test_that("greta_remove_all_deps reports honestly when nothing exists", {
     R_USER_CONFIG_DIR = withr::local_tempdir(),
     # R_user_dir("reticulate", "cache") respects this, isolating the uv-cache
     # check without mocking
-    R_USER_CACHE_DIR = withr::local_tempdir()
+    R_USER_CACHE_DIR = "/greta-test/cache"
   )
   local_mocked_bindings(have_greta_conda_env = function(...) FALSE)
   local_mocked_bindings(
-    miniconda_path = function(...) file.path(tempdir(), "no-such-miniconda"),
+    miniconda_path = function(...) "/greta-test/no-such-miniconda",
     .package = "reticulate"
   )
-  expect_snapshot(
-    res <- greta_remove_all_deps(ask = FALSE),
-    transform = scrub_temp_paths
-  )
+  expect_snapshot(res <- greta_remove_all_deps(ask = FALSE))
   expect_false(res)
 })
 
 test_that("greta_remove_all_deps reports removal when something was removed", {
   withr::local_envvar(
     R_USER_CONFIG_DIR = withr::local_tempdir(),
-    R_USER_CACHE_DIR = withr::local_tempdir()
+    R_USER_CACHE_DIR = "/greta-test/cache"
   )
   local_mocked_bindings(have_greta_conda_env = function(...) TRUE)
   local_mocked_bindings(
     conda_remove = function(...) NULL,
-    miniconda_path = function(...) file.path(tempdir(), "no-such-miniconda"),
+    miniconda_path = function(...) "/greta-test/no-such-miniconda",
     .package = "reticulate"
   )
-  expect_snapshot(
-    res <- greta_remove_all_deps(ask = FALSE),
-    transform = scrub_temp_paths
-  )
+  expect_snapshot(res <- greta_remove_all_deps(ask = FALSE))
   expect_true(res)
 })
 
@@ -83,12 +77,11 @@ test_that("greta_remove_all_deps reports removal when something was removed", {
 test_that("destroy_greta_deps reports honestly when nothing exists", {
   local_mocked_bindings(have_greta_conda_env = function(...) FALSE)
   local_mocked_bindings(
-    miniconda_path = function(...) file.path(tempdir(), "no-such-miniconda"),
+    miniconda_path = function(...) "/greta-test/no-such-miniconda",
     .package = "reticulate"
   )
   expect_snapshot(
-    res <- destroy_greta_deps(ask = FALSE),
-    transform = scrub_temp_paths
+    res <- destroy_greta_deps(ask = FALSE)
   )
   expect_false(res)
 })
@@ -96,17 +89,16 @@ test_that("destroy_greta_deps reports honestly when nothing exists", {
 test_that("destroy_greta_deps reports removal when something was removed", {
   withr::local_envvar(
     R_USER_CONFIG_DIR = withr::local_tempdir(),
-    R_USER_CACHE_DIR = withr::local_tempdir()
+    R_USER_CACHE_DIR = "/greta-test/cache"
   )
   local_mocked_bindings(have_greta_conda_env = function(...) TRUE)
   local_mocked_bindings(
     conda_remove = function(...) NULL,
-    miniconda_path = function(...) file.path(tempdir(), "no-such-miniconda"),
+    miniconda_path = function(...) "/greta-test/no-such-miniconda",
     .package = "reticulate"
   )
   expect_snapshot(
-    res <- destroy_greta_deps(ask = FALSE),
-    transform = scrub_temp_paths
+    res <- destroy_greta_deps(ask = FALSE)
   )
   expect_true(res)
 })

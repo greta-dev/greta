@@ -10,11 +10,6 @@ local_python_plan <- function(
   greta_stash$python_backend <- plan
 }
 
-# scrub run- and machine-varying temp paths from snapshot output
-scrub_temp_paths <- function(x) {
-  gsub("/[^ ']*Rtmp[^ ']*", "<temp-path>", x)
-}
-
 # set the seed and flush the graph before running tests
 if (check_tf_version()) {
   tensorflow::tf$compat$v1$reset_default_graph()

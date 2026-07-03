@@ -38,6 +38,11 @@
 #' @param timeout maximum time in minutes until the installation for each
 #'    installation component times out and exits. Default is 5 minutes per
 #'    installation component.
+#'
+#' @param ask Logical; for [reinstall_greta_deps()], whether to ask for
+#'   confirmation before removing the existing greta conda environment.
+#'   Defaults to `interactive()`.
+#'
 #' @param restart character. Restart R after installation? Default is "ask".
 #'  Other options are, "force", and "no". Using "force" will will force a
 #'  restart after installation. Using  "no" will not restart. Note that this

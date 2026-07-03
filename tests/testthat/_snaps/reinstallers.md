@@ -4,9 +4,8 @@
       res <- greta_remove_all_deps(ask = FALSE)
     Message
       i No 'greta-env-tf2' conda environment found.
-      i No miniconda files found at
-      <temp-path>
-      i No reticulate-managed uv cache found at '<temp-path>'.
+      i No miniconda files found at /greta-test/no-such-miniconda
+      i No reticulate-managed uv cache found at '/greta-test/cache/R/reticulate/uv'.
       i If reticulate is using a system uv, its cache is managed by uv itself (e.g. `uv cache clean`); greta does not remove it.
       i Nothing to remove.
       v Cleared any stored greta Python preference.
@@ -18,9 +17,8 @@
     Message
       i removing 'greta-env-tf2' conda environment
       v greta-env-tf2 environment removed!
-      i No miniconda files found at
-      <temp-path>
-      i No reticulate-managed uv cache found at '<temp-path>'.
+      i No miniconda files found at /greta-test/no-such-miniconda
+      i No reticulate-managed uv cache found at '/greta-test/cache/R/reticulate/uv'.
       i If reticulate is using a system uv, its cache is managed by uv itself (e.g. `uv cache clean`); greta does not remove it.
       v Successfully removed the 'greta-env-tf2' conda environment.
       v Cleared any stored greta Python preference.
@@ -32,8 +30,7 @@
       res <- destroy_greta_deps(ask = FALSE)
     Message
       i No 'greta-env-tf2' conda environment found.
-      i No miniconda files found at
-      <temp-path>
+      i No miniconda files found at /greta-test/no-such-miniconda
 
 # destroy_greta_deps reports removal when something was removed
 
@@ -42,7 +39,6 @@
     Message
       i removing 'greta-env-tf2' conda environment
       v greta-env-tf2 environment removed!
-      i No miniconda files found at
-      <temp-path>
+      i No miniconda files found at /greta-test/no-such-miniconda
       v Successfully removed the 'greta-env-tf2' conda environment.
 

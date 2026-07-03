@@ -39,6 +39,10 @@ restart after installation. Using  "no" will not restart. Note that this
 only restarts R during interactive sessions, and only in RStudio.}
 
 \item{...}{Optional arguments, reserved for future expansion.}
+
+\item{ask}{Logical; for \code{\link[=reinstall_greta_deps]{reinstall_greta_deps()}}, whether to ask for
+confirmation before removing the existing greta conda environment.
+Defaults to \code{interactive()}.}
 }
 \description{
 This is a helper function to install specified versions of Python
