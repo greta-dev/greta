@@ -14,7 +14,7 @@ greta_deps_spec(
 \item{tf_version}{character. TensorFlow version, in the format
 major.minor.patch. Default is 2.15.1.}
 
-\item{tfp_version}{Character.Tensorflow probability (TFP) version
+\item{tfp_version}{Character. Tensorflow probability (TFP) version
 major.minor.patch. Default is 0.23.0.}
 
 \item{python_version}{Character. Python version in format major.minor.patch.

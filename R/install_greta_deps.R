@@ -57,11 +57,11 @@
 #'
 #'  We now recommend using the new default method for installation, which uses
 #'  [uv](https://docs.astral.sh/uv/) (via the reticulate package) to install
-#'  TensorFlow and TensorFlow Probability on first use. To make greta use the "greta-env-tf2" conda environment created
-#'  here instead, use [greta_set_python_conda_env()] (or set the
-#'  `RETICULATE_PYTHON` environment variable to its Python before loading
-#'  greta). See the "Installing Dependencies" vignette and
-#'  [greta_set_python_path()].
+#'  TensorFlow and TensorFlow Probability on first use. To make greta use the
+#'  "greta-env-tf2" conda environment created here instead, use
+#'  [greta_set_python_conda_env()] (or set the `RETICULATE_PYTHON` environment
+#'  variable to its Python before loading greta). See the "Installing
+#'  Dependencies" vignette and [greta_set_python_path()].
 #'
 #'  If you don't want to use conda or the "greta-env-tf2" conda environment, you
 #'  can install versions that you like, e.g., using [reticulate::py_install()].
