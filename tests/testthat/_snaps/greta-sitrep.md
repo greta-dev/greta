@@ -91,7 +91,7 @@
       x greta conda environment not available
       
       * backend: "managed (uv) environment"
-      * selected via: RETICULATE_PYTHON environment variable
+      * selected via: default
       i Conda environment not set up, but all dependencies available
       
       greta is ready to use!
@@ -114,7 +114,7 @@
       x greta conda environment not available
       
       * backend: "managed (uv) environment"
-      * selected via: RETICULATE_PYTHON environment variable
+      * selected via: default
       i Conda environment not set up, but all dependencies available
       
       greta is ready to use!
@@ -137,7 +137,7 @@
       x greta conda environment not available
       
       * backend: "managed (uv) environment"
-      * selected via: RETICULATE_PYTHON environment variable
+      * selected via: default
       i Conda environment not set up, but all dependencies available
       
       greta is ready to use!
@@ -160,7 +160,7 @@
       x greta conda environment not available
       
       * backend: "managed (uv) environment"
-      * selected via: RETICULATE_PYTHON environment variable
+      * selected via: default
       i Conda environment not set up, but all dependencies available
       
       greta is ready to use!
@@ -183,7 +183,7 @@
       x greta conda environment not available
       
       * backend: "managed (uv) environment"
-      * selected via: RETICULATE_PYTHON environment variable
+      * selected via: default
       i Conda environment not set up, but all dependencies available
       
       greta is ready to use!

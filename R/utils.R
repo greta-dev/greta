@@ -735,6 +735,10 @@ base_remove_empty_string <- function(string) {
 other_install_fail_msg <- function(error_passed) {
   # drop ""
   error_passed <- base_remove_empty_string(error_passed)
+
+  tf_pin <- greta_deps_default$tf
+  tfp_pin <- greta_deps_default$tfp
+  py_pin <- greta_deps_default$python
   cli::format_error(
     message = c(
       "Stopping as installation of {.pkg greta} dependencies failed",
@@ -745,11 +749,11 @@ other_install_fail_msg <- function(error_passed) {
       "{.code Sys.unsetenv('RETICULATE_PYTHON')}",
       "{.code Sys.setenv(RETICULATE_USE_MANAGED_VENV = 'yes')}",
       "{.code library(reticulate)}",
-      "{.code py_require(packages = c('tensorflow==2.15.1',
-                              'tensorflow-probability==0.23.0'),
-                 python_version = '3.11')}",
+      "{.code py_require(packages = c('tensorflow=={tf_pin}',
+                        'tensorflow-probability=={tfp_pin}'),
+           python_version = '{py_pin}')}",
       "{.code py_require()}",
-      "{.code py_config()}}",
+      "{.code py_config()}",
       "If this does not work, read through
       installation vignette ({.vignette greta::installation}), or install a \\
       conda environment with {.fun install_greta_deps}.",
@@ -760,6 +764,9 @@ other_install_fail_msg <- function(error_passed) {
 }
 
 timeout_install_msg <- function(timeout = 5, py_error = NULL) {
+  tf_pin <- greta_deps_default$tf
+  tfp_pin <- greta_deps_default$tfp
+  py_pin <- greta_deps_default$python
   msg <- c(
     "Stopping as installation of {.pkg greta} dependencies took longer than \\
         {timeout} minutes",
@@ -771,13 +778,13 @@ timeout_install_msg <- function(timeout = 5, py_error = NULL) {
     "{.code reticulate::install_miniconda()}",
     "Then:",
     "{.code reticulate::conda_create(envname = 'greta-env-tf2', \\
-        python_version = '3.10')}",
+        python_version = '{py_pin}')}",
     "Then:",
     "{.code reticulate::py_install(
         packages = c(
           'numpy',
-          'tensorflow==2.15.0',
-          'tensorflow-probability==0.23.0'
+          'tensorflow=={tf_pin}',
+          'tensorflow-probability=={tfp_pin}'
           ),
         envname = 'greta-env-tf2',
         pip = TRUE

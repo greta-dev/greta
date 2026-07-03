@@ -214,9 +214,9 @@ get_current_ideal_deps <- function() {
     ),
     # versions must be at least this version
     ideal = c(
-      "3.8",
-      "2.15.0",
-      "0.23.0"
+      greta_deps_default$python_min,
+      greta_deps_default$tf_min,
+      greta_deps_default$tfp_min
     )
   )
 

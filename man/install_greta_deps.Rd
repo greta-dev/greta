@@ -20,10 +20,11 @@ reinstall_greta_deps(
 }
 \arguments{
 \item{deps}{object created with \code{\link[=greta_deps_spec]{greta_deps_spec()}} where you
-specify python, TF, and TFP versions. By default these are TF 2.15.1,
-TFP 0.23.0, and Python 3.11. \code{\link[=greta_deps_spec]{greta_deps_spec()}} checks that the
-TensorFlow version is one greta supports; compatible TensorFlow
-Probability and Python versions are resolved at install time. See
+specify python, TensorFlow (TF), and TensorFlow Probability (TFP) versions.
+By default these are TF 2.15.1, TFP
+0.23.0, and Python 3.11.
+\code{\link[=greta_deps_spec]{greta_deps_spec()}} checks that the TF version is one greta supports;
+compatible TFP and Python versions are resolved at install time. See
 ?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more information, and the data object
 \code{greta_deps_tf_tfp} for known-good combinations.}
 
@@ -49,8 +50,10 @@ now what we recommend. This has changed from where we would previously use
 \details{
 This function, \code{install_greta_deps()}, is an alternative installation
 workflow. The default versions of the python modules are: TensorFlow
-2.15.1, TensorFlow Probability 0.23.0, and Python 3.11. These Python
-modules will be installed into a conda environment named "greta-env-tf2".
+2.15.1, TensorFlow Probability
+0.23.0, and Python 3.11.
+These Python modules will be installed into a conda environment named
+"greta-env-tf2".
 
 It can be useful to identify installation notes, warnings, or errors that
 arise during install. You can do this by accessing the logfile with

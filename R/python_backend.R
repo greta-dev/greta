@@ -164,8 +164,8 @@ apply_greta_python_plan <- function(plan) {
     plan$backend,
     managed = {
       Sys.setenv("RETICULATE_PYTHON" = "managed")
-      # pins derived from greta's canonical default versions (see
-      # greta_py_require_args()) so they cannot drift from greta_deps_spec()
+      # pins derive from greta_deps_default via greta_py_require_args();
+      # agreement with greta_deps_spec()'s defaults is test-enforced
       py_req <- greta_py_require_args()
       reticulate::py_require(
         packages = py_req$packages,

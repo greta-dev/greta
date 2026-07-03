@@ -48,3 +48,36 @@ test_that("greta_deps_spec leaves TFP and Python to the resolver", {
     "greta_deps_spec"
   )
 })
+
+test_that("version pins agree across spec defaults, uv pins, and TF ceiling", {
+  # the load-bearing check: greta_deps_spec()'s literal formals must match
+  # the canonical versions (drift here is caught at test time, not runtime)
+  spec <- greta_deps_spec()
+  expect_identical(spec$tf_version, greta_deps_default$tf)
+  expect_identical(spec$tfp_version, greta_deps_default$tfp)
+  expect_identical(spec$python_version, greta_deps_default$python)
+
+  # uv pins derive minor-series wildcards from the canonical versions
+  py_req <- greta_py_require_args()
+  tf_minor <- sub("\\.[^.]*$", "", greta_deps_default$tf)
+  tfp_minor <- sub("\\.[^.]*$", "", greta_deps_default$tfp)
+  expect_identical(
+    py_req$packages,
+    c(
+      paste0("tensorflow==", tf_minor, ".*"),
+      paste0("tensorflow_probability==", tfp_minor, ".*")
+    )
+  )
+  expect_identical(py_req$python_version, greta_deps_default$python_range)
+
+  # the default TF version must itself pass the support ceiling
+  expect_no_error(check_greta_tf_supported(greta_deps_spec()))
+
+  # pins must never fall below their own floors
+  expect_true(
+    compareVersion(greta_deps_default$tf, greta_deps_default$tf_min) >= 0
+  )
+  expect_true(
+    compareVersion(greta_deps_default$tfp, greta_deps_default$tfp_min) >= 0
+  )
+})

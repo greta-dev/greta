@@ -11,27 +11,27 @@ greta_deps_spec(
 )
 }
 \arguments{
-\item{tf_version}{Character. Tensorflow (TF) version in format
-major.minor.patch. Default is "2.15.1".}
+\item{tf_version}{character. TensorFlow version, in the format
+major.minor.patch. Default is 2.15.1.}
 
 \item{tfp_version}{Character.Tensorflow probability (TFP) version
-major.minor.patch. Default is "0.23.0".}
+major.minor.patch. Default is 0.23.0.}
 
 \item{python_version}{Character. Python version in format major.minor.patch.
-Default is "3.11".}
+Default is 3.11.}
 }
 \value{
 data frame of valid dependencies
 }
 \description{
 A helper function for specifying versions of Tensorflow (TF), Tensorflow
-Probability (TFP), and Python. Defaulting to 2.15.1, 0.23.0, and 3.11,
-respectively. greta checks that the TensorFlow version is one it supports
-(greta does not support TF 2.16 or later, which ship Keras 3); compatible
-TensorFlow Probability and Python versions are resolved at install time by
-uv (or, for a conda environment, by conda/pip). The \code{greta_deps_tf_tfp}
-dataset lists known-good combinations of TF, TFP, and Python; inspect it
-with \code{View(greta_deps_tf_tfp)}.
+Probability (TFP), and Python. Defaulting to 2.15.1,
+0.23.0, and 3.11, respectively.
+greta checks it supports the TF version (greta does not support TF 2.16 or
+later, which ship Keras 3); compatible TFP and Python versions are resolved
+at install time by uv (or, for a conda environment, by conda/pip). The
+\code{greta_deps_tf_tfp} dataset lists known-good combinations of TF, TFP, and
+Python; inspect it with \code{View(greta_deps_tf_tfp)}.
 }
 \examples{
 greta_deps_spec()

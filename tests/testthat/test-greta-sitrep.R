@@ -101,6 +101,7 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     have_tfp = function(...) TRUE
   )
 
+  local_python_plan()
   expect_snapshot(
     greta_sitrep()
   )
@@ -115,6 +116,7 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
     py_version = function(...) "3.6"
   )
 
+  local_python_plan()
   expect_snapshot(
     greta_sitrep()
   )
@@ -145,6 +147,7 @@ test_that("greta_sitrep warns greta conda env not available", {
     have_greta_conda_env = function(...) FALSE
   )
 
+  local_python_plan()
   expect_snapshot(
     greta_sitrep()
   )
@@ -170,6 +173,7 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
     greta_sitrep(verbosity = "quiet"),
     transform = redact_backend
   )
+  local_python_plan()
   expect_snapshot(
     greta_sitrep(verbosity = "minimal"),
     transform = redact_backend
