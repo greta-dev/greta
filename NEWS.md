@@ -18,6 +18,7 @@
 
 * greta now resolves its Python environment more flexibly instead of always forcing reticulate's managed (uv) environment: it respects a user-set `RETICULATE_PYTHON`, a stored greta preference, or an existing `greta-env-tf2` conda environment, and otherwise uses the managed (uv) environment (#801).
 * Fixed `library(greta)` failing with an error when greta's stored Python preference file exists but is empty (#809).
+* `destroy_greta_deps()`, `greta_remove_all_deps()`, and `reinstall_greta_deps()` ask for confirmation once up front rather than at every step, work non-interactively again, and report what was actually removed (#809).
 * `greta_deps_spec()` now only checks that the requested TensorFlow version is one greta supports (TensorFlow 2.16 and later are not supported, as they ship Keras 3); compatible TensorFlow Probability and Python versions are left to uv or conda to resolve rather than being validated against a fixed compatibility table (#675).
 * `greta_list_py_modules()` shows the Python packages installed in a specific TF2 environment (#801, #809).
 * `greta_remove_all_deps()` removes all of greta's Python dependencies for a clean slate: the `greta-env-tf2` conda environment, miniconda, reticulate's managed uv cache, and any stored greta Python preference (#801, #809).
@@ -25,7 +26,7 @@
 * `greta_sitrep()` now requires Python 3.9 or later (previously 3.8), matching the Python versions greta supports (#809).
 * `install_greta_deps()` now records the location of the `greta-env-tf2` conda environment at install time, so greta auto-detects it in any conda installation, not just reticulate's miniconda (#809).
 * `install_greta_deps()` is no longer required for most users, as greta now installs TensorFlow and TensorFlow Probability automatically via uv on first use; it remains for installing a conda environment (for example, for offline use), which you can then select with `greta_set_python_conda_env()` (#801).
-* `remove_greta_env()` now asks for confirmation before removing the `greta-env-tf2` conda environment, and reports clearly when there is no such environment to remove (#809).
+* `remove_greta_env()`, `remove_miniconda()`, and `remove_reticulate_uv_cache()` ask for confirmation before removing, gain an `ask` argument (default `interactive()`) so they work non-interactively, and invisibly return whether anything was removed (#809).
 * `remove_reticulate_uv_cache()` removes reticulate's managed uv cache; note this cache is shared by all reticulate packages and is not greta-specific, and a system-wide uv cache is left untouched (#801, #809).
 
 # greta 0.5.0
