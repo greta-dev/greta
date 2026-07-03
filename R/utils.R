@@ -1042,3 +1042,12 @@ n_warmup <- function(x) {
   x_info <- attr(x, "model_info")
   x_info$warmup
 }
+
+# consent is implied when ask = FALSE (the caller has already confirmed,
+# or we are in a non-interactive script)
+user_agrees <- function(ask, question) {
+  if (!ask) {
+    return(TRUE)
+  }
+  yesno::yesno(question)
+}

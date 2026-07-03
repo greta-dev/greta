@@ -15,7 +15,8 @@ install_greta_deps(
 reinstall_greta_deps(
   deps = greta_deps_spec(),
   timeout = 5,
-  restart = c("ask", "force", "no")
+  restart = c("ask", "force", "no"),
+  ask = interactive()
 )
 }
 \arguments{

@@ -4,14 +4,17 @@
 \alias{greta_remove_all_deps}
 \title{Remove all greta Python dependencies (nuclear reset)}
 \usage{
-greta_remove_all_deps()
+greta_remove_all_deps(ask = interactive())
+}
+\arguments{
+\item{ask}{Ask for confirmation? Default is \code{interactive()}.}
 }
 \value{
-invisible
+Invisibly, TRUE if anything was removed, otherwise FALSE.
 }
 \description{
-A "nuclear" reset that returns greta to a blank slate. Asking for
-confirmation at each destructive step, it removes:
+A "nuclear" reset that returns greta to a blank slate. Asks once for
+confirmation, it removes:
 \enumerate{
 \item the 'greta-env-tf2' conda environment, with \code{\link[=remove_greta_env]{remove_greta_env()}}
 \item the miniconda installation, with \code{\link[=remove_miniconda]{remove_miniconda()}}

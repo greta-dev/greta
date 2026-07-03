@@ -9,21 +9,23 @@
 \alias{remove_reticulate_uv_cache}
 \title{Helpers to remove, and reinstall python environments and miniconda}
 \usage{
-remove_greta_env()
+remove_greta_env(ask = interactive())
 
-reinstall_greta_env(timeout = 5)
+reinstall_greta_env(timeout = 5, ask = interactive())
 
-remove_miniconda()
+remove_miniconda(ask = interactive())
 
-reinstall_miniconda(timeout = 5)
+reinstall_miniconda(timeout = 5, ask = interactive())
 
-remove_reticulate_uv_cache()
+remove_reticulate_uv_cache(ask = interactive())
 }
 \arguments{
+\item{ask}{Ask for confirmation? Default is \code{interactive()}.}
+
 \item{timeout}{time in minutes to wait until timeout (default is 5 minutes)}
 }
 \value{
-invisible
+Invisibly, TRUE if anything was removed, otherwise FALSE.
 }
 \description{
 This can be useful when debugging greta installation to get to "clean slate".

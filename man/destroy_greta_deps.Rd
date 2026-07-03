@@ -4,16 +4,19 @@
 \alias{destroy_greta_deps}
 \title{Remove greta dependencies and remove miniconda}
 \usage{
-destroy_greta_deps()
+destroy_greta_deps(ask = interactive())
+}
+\arguments{
+\item{ask}{Ask for confirmation? Default is \code{interactive()}.}
 }
 \value{
-nothing
+Invisibly, TRUE if anything was removed, otherwise FALSE.
 }
 \description{
 Sometimes when installing greta you might encounter an error and the best
 thing to do is start from a clean slate. This function does two things:
 \enumerate{
-\item Removes the "greta-tf2-env" with \code{\link[=remove_greta_env]{remove_greta_env()}}
+\item Removes the "greta-env-tf2" with \code{\link[=remove_greta_env]{remove_greta_env()}}
 \item Removes the miniconda installation with \code{\link[=remove_miniconda]{remove_miniconda()}}
 }
 }
