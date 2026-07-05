@@ -545,7 +545,9 @@ sampler <- R6Class(
       )
 
       # get trace of free state and drop the null dimension
-      if (is.null(batch_results$all_states)) {
+      if (
+        is.null(batch_results$all_states) && Sys.getenv("GRETA_DEBUG") == "true"
+      ) {
         ## TODO probably need to remove this?
         browser()
       }
