@@ -46,10 +46,8 @@ jobs:
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
         shell: Rscript {0}
 
-# test-coverage.yaml — replace the "Install greta deps" + "Situation Report" steps (49-57) with:
-
-      ## greta deps are automatically resolved via py_require() (uv) on first use —
-      ## no conda install needed. Keep miniconda only for snapshot tests that check for it.
+      ## greta deps automatically resolved via py_require() (uv) on first use —
+      ## no conda install needed. Keep miniconda for relevant snapshot tests
       - name: Install miniconda
         run: reticulate::install_miniconda()
         shell: Rscript {0}
