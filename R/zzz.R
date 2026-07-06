@@ -23,31 +23,45 @@ tf <- tfp <- NULL
   # default float type
   options(greta_tf_float = "float64")
 
-  # force reticulate manged python environment, for more details, see:
-  # https://github.com/greta-dev/greta/issues/444
-  Sys.setenv("RETICULATE_PYTHON" = "managed")
-
-  reticulate::py_require(
-    packages = c(
-      "tensorflow==2.15.*",
-      "tensorflow_probability==0.23.*"
-    ),
-    python_version = ">=3.9,<=3.11"
-  )
-  ## most tests pass with the latest package versions, but some of the snapshots
-  ## change # need to be reviewed and updated.
-  # reticulate::py_require(c("tensorflow", "tensorflow_probability[tf]"))
+  # Resolve which Python backend to use and apply it. By default this is
+  # reticulate's managed (uv) environment, which auto-installs a compatible
+  # Python + TensorFlow + TensorFlow Probability (see #444). A user-set
+  # RETICULATE_PYTHON, a stored greta preference, or an existing greta-env-tf2
+  # conda env are respected instead (see R/python_backend.R, #801).
+  # RETICULATE_PYTHON as the user set it, captured before apply_greta_python_plan()
+  # overwrites it; pending_python_plan() reads it back to predict the next restart.
+  greta_stash$reticulate_python_at_load <- Sys.getenv("RETICULATE_PYTHON")
+  plan <- greta_python_plan()
+  apply_greta_python_plan(plan)
+  greta_stash$python_backend <- plan
 
   tfp <<- reticulate::import("tensorflow_probability", delay_load = TRUE)
   tf <<- reticulate::import("tensorflow", delay_load = TRUE)
-
-  # if (have_greta_conda_env()) {
-  #   use_greta_conda_env()
-  # }
 
   # silence messages about deprecation etc.
   # disable_tensorflow_logging()
 
   # warn if TF version is bad
   # check_tf_version("startup")
+}
+
+.onAttach <- function(libname, pkgname) {
+  # nolint
+
+  # When greta has auto-detected an existing greta-env-tf2 conda env, let the
+  # user know (once) that they can opt into the managed (uv) environment (#801).
+  if (should_nudge_to_managed()) {
+    packageStartupMessage(
+      cli::format_message(
+        c(
+          "i" = "greta is using your existing {.val greta-env-tf2} conda \\
+            environment.",
+          "i" = "To switch to the {.pkg uv} environment, run \\
+            {.code greta_set_python_uv()}.",
+          ">" = "(This note is only shown once.)"
+        )
+      )
+    )
+    mark_greta_hint_shown("conda_to_managed")
+  }
 }

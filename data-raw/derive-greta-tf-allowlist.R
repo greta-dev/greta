@@ -16,7 +16,7 @@ tf_base <- "https://www.tensorflow.org/api_docs/python/tf"
 tfp_base <- "https://www.tensorflow.org/probability/api_docs/python/tfp"
 
 # Symbols that are not real API endpoints and should be dropped.
-# - dtype shortcuts (tf$float, tf$int, tf$bool) — covered by tf/dtypes
+# - dtype shortcuts (tf$float, tf$int, tf$bool) - covered by tf/dtypes
 # - partial chains ending in a version selector (tf$compat$v)
 tf_drop <- c("float", "int", "bool", "compat$v")
 

@@ -6,35 +6,45 @@
 \alias{reinstall_greta_env}
 \alias{remove_miniconda}
 \alias{reinstall_miniconda}
+\alias{remove_reticulate_uv_cache}
 \title{Helpers to remove, and reinstall python environments and miniconda}
 \usage{
-remove_greta_env()
+remove_greta_env(ask = interactive())
 
-reinstall_greta_env(timeout = 5)
+reinstall_greta_env(timeout = 5, ask = interactive())
 
-remove_miniconda()
+remove_miniconda(ask = interactive())
 
-reinstall_miniconda(timeout = 5)
+reinstall_miniconda(timeout = 5, ask = interactive())
+
+remove_reticulate_uv_cache(ask = interactive())
 }
 \arguments{
+\item{ask}{Ask for confirmation? Default is \code{interactive()}.}
+
 \item{timeout}{time in minutes to wait until timeout (default is 5 minutes)}
 }
 \value{
-invisible
+Invisibly, TRUE if anything was removed, otherwise FALSE.
 }
 \description{
 This can be useful when debugging greta installation to get to "clean slate".
-There are four functions:
+There are five functions:
 }
 \details{
 \itemize{
 \item \code{\link[=remove_greta_env]{remove_greta_env()}} removes the 'greta-env-tf2' conda environment
 \item \code{\link[=remove_miniconda]{remove_miniconda()}} removes miniconda installation
+\item \code{\link[=remove_reticulate_uv_cache]{remove_reticulate_uv_cache()}} removes reticulate's managed uv cache.
+Note this cache is shared by all R packages that use reticulate's uv (it is
+not greta-specific), and a system-wide uv cache is left untouched.
 \item \code{\link[=reinstall_greta_env]{reinstall_greta_env()}} remove 'greta-env-tf2' and reinstall it
 using \code{\link[=greta_create_conda_env]{greta_create_conda_env()}} (which is used internally).
 \item \code{\link[=reinstall_miniconda]{reinstall_miniconda()}} removes miniconda and reinstalls it using
 \code{\link[=greta_install_miniconda]{greta_install_miniconda()}} (which is used internally)
 }
+
+To remove everything at once, see \code{\link[=greta_remove_all_deps]{greta_remove_all_deps()}}.
 }
 \examples{
 \dontrun{
@@ -45,5 +55,5 @@ reinstall_miniconda()
 }
 }
 \seealso{
-\code{\link[=destroy_greta_deps]{destroy_greta_deps()}}
+\code{\link[=destroy_greta_deps]{destroy_greta_deps()}}, \code{\link[=greta_remove_all_deps]{greta_remove_all_deps()}}
 }

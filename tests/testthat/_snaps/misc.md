@@ -4,36 +4,24 @@
       check_tf_version("error")
     Condition
       Error in `check_tf_version()`:
-      ! x The expected python packages are not available
-      i We recommend installing them (in a fresh R session) with:
-      `install_greta_deps()`
-      or
-      `reinstall_greta_deps()`
-      (Note: Your R session should not have initialised Tensorflow yet.)
-      i For more information, see `?install_greta_deps`
+      ! x greta could not load Python with TensorFlow and TensorFlow Probability.
+      i Run `greta::greta_sitrep()` to check your installation.
+      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x The expected python packages are not available
-    i We recommend installing them (in a fresh R session) with:
-    `install_greta_deps()`
-    or
-    `reinstall_greta_deps()`
-    (Note: Your R session should not have initialised Tensorflow yet.)
-    i For more information, see `?install_greta_deps`
+    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    i Run `greta::greta_sitrep()` to check your installation.
+    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
     Code
       check_tf_version("message")
     Message
-      x The expected python packages are not available
-      i We recommend installing them (in a fresh R session) with:
-      `install_greta_deps()`
-      or
-      `reinstall_greta_deps()`
-      (Note: Your R session should not have initialised Tensorflow yet.)
-      i For more information, see `?install_greta_deps`
+      x greta could not load Python with TensorFlow and TensorFlow Probability.
+      i Run `greta::greta_sitrep()` to check your installation.
+      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 # define and mcmc error informatively
 

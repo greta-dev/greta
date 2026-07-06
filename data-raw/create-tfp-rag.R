@@ -35,14 +35,15 @@ store <- ragnar_store_create(
 cli_alert_info("Reading and chunking pages ...")
 chunks_list <- map(
   pages,
-  \(page)
+  \(page) {
     tryCatch(
       page |> read_as_markdown() |> markdown_chunk(),
       error = \(e) {
         cli_alert_danger("Failed {page}: {conditionMessage(e)}")
         NULL
       }
-    ),
+    )
+  },
   .progress = "Ingesting TFP pages"
 ) |>
   compact()

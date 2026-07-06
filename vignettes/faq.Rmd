@@ -25,61 +25,50 @@ knitr::opts_chunk$set(
 
 # How do I install `greta` dependencies?
 
-Before you can fit models with `greta`, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version 1.14.0) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package (version 0.7.0). In the future we will support different versions of Tensorflow and Tensorflow Probability, but currently we need these exact versions.
+Under the hood, `greta` uses Google's [TensorFlow](https://www.tensorflow.org/) and [tensorflow-probability](https://github.com/tensorflow/probability) python packages. For most users there is nothing to install: the first time you use `greta` in a session, it automatically installs a compatible Python, TensorFlow, and TensorFlow Probability via [`uv`](https://docs.astral.sh/uv/). So `library(greta)` followed by your first model usually just works.
 
-To assist with installing these Python packages, `greta` provides an installation helper, `install_greta_deps()`, which installs the exact pythons package versions needed. It also places these inside a "greta-env" conda environment. This isolates these exact python modules from other python installations, so that only `greta` will see them. This helps avoids installation issues, where previously you might update tensorflow on your computer and overwrite the current version needed by `greta`. Using this "greta-env" conda environment means installing other python packages should not be impact the Python packages needed by `greta`.
+If you need a conda environment instead (for example on an offline network), or want to pin specific versions, `greta` provides an installation helper, `install_greta_deps()`, which installs the needed versions into a "greta-env-tf2" conda environment. This isolates these exact python modules from other python installations, so that only `greta` will see them. After running it, point `greta` at the environment with `greta_set_python_conda_env()` and restart R. See the "Installing dependencies" vignette for the full details.
 
-If these python modules aren't yet installed, when `greta` is used, it provides instructions on how to install them for your system. If in doubt follow those. 
-
-The installation process should look something like so:
-
-```{r show-installation-process}
-knitr::include_graphics("../man/figures/greta-install-p1.png")
-```
-
-```{r show-installation-process-2}
-knitr::include_graphics("../man/figures/greta-install-p2.png")
-```
-
-```{r show-installation-process-3, out.width = "60%"}
-knitr::include_graphics("../man/figures/greta-install-p3.png")
-```
 
 # How do I know if `greta` has the right versions of Python dependencies installed?
 
-You can check if `greta` has the right dependencies installed by first running `library(greta)`, then running some `greta` code, such as:
+The most reliable check is `greta_sitrep()` ("situation report"). It prints the
+Python, TensorFlow, and TensorFlow Probability that greta has resolved, which
+environment they came from, and whether greta is ready to use:
 
-```{r run-greta, eval = FALSE}
-normal(0,1)
+```{r sitrep, eval = FALSE, echo = TRUE}
+library(greta)
+greta_sitrep()
 ```
 
-This should look something like the following.
+If everything is in place it reports the versions and tells you greta is ready;
+if something is missing or incompatible it tells you what.
 
-First, `library(greta)` gives you a message about which objects are masked from base R (these only apply to greta arrays, so will not impact other use of functions like `%*%`, `rowMeans`, etc).
+You can also just use greta and watch what happens. Running `library(greta)`
+first prints a message about which objects are masked from base R (these only
+apply to greta arrays, so they don't affect functions like `%*%` or `rowMeans`
+on ordinary R objects). Then run some greta code, such as:
 
-```{r show-library-call}
-knitr::include_graphics("../man/figures/greta-load-library.png")
+```{r run-greta, eval = FALSE, echo = TRUE}
+normal(0, 1)
 ```
 
-Then, when you run some greta code like `normal(0,1)`, Python will be initialised, and it will search for the dependencies it needs (tensorflow, and tensorflow probability)
+The first time you use greta in a session, Python is initialised and greta
+installs or checks its dependencies (TensorFlow and TensorFlow Probability).
+You'll see a short progress message:
 
-```{r show-greta-initialising}
-knitr::include_graphics("../man/figures/greta-load-initialising.png")
+```
+#> ℹ Initialising python and checking dependencies, this may take a moment.
+#> ✔ Initialising python and checking dependencies ... done!
 ```
 
-When that is complete, it will look like so:
-
-```{r show-greta-initialised}
-knitr::include_graphics("../man/figures/greta-load-initialised.png")
-```
-
-If python is not detected, or there is an issue with identifying the right python packages, you might see this error:
-
-```{r show-greta-fail}
-knitr::include_graphics("../man/figures/greta-load-fail.png")
-```
-
-In which case we recommend restarting R, and re-running `install_greta_deps()`. If this does not work there is another installation approach below. 
+After that, your greta code returns as normal. If Python can't be found, or the
+dependencies can't be resolved, greta raises an error describing the problem
+(and reticulate prints the underlying resolver output above it). In that case we
+recommend restarting R and trying again. If the automatic setup can't reach the
+internet, or you need a conda environment, run `install_greta_deps()` and then
+`greta_set_python_conda_env()`. If that does not work there is another
+installation approach below.
 
 # Is there an alternative way to install Python dependencies?
 
@@ -88,27 +77,23 @@ If the previous installation helper did not work, you can try the following:
 ```{r install_tensorflow, eval = FALSE, echo = TRUE}
 reticulate::install_miniconda()
 reticulate::conda_create(
-        envname = "greta-env-tf2",
-        python_version = "3.8"
-      )
+  envname = "greta-env-tf2",
+  python_version = "3.10"
+)
 reticulate::py_install(
   packages = c(
-    'numpy',
-    'tensorflow',
-    'tensorflow-probability'
+    "numpy",
+    "tensorflow==2.15.0",
+    "tensorflow-probability==0.23.0"
   ),
   envname = "greta-env-tf2",
   pip = TRUE
 )
 ```
 
-Which will install the python modules into a conda environment named "greta-env".
+Which will install the python modules into a conda environment named "greta-env-tf2". Point `greta` at it with `greta_set_python_conda_env()` and restart R.
 
 If these instructions do not work for you, please post on the [greta forum](https://forum.greta-stats.org/) and we will respond to you as soon as we can.
-
-# Does greta work on Mac Laptops with an M1 Chip?
-
-We are still working on getting `greta` to work on Mac Laptops with an M1 chip. Current progress can be tracked at [this issue on github](https://github.com/greta-dev/greta/issues/458).
 
 # I get the message: "Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX AVX2"
 

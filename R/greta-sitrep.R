@@ -40,7 +40,7 @@ minimal_sitrep <- function() {
   check_if_tf_available()
   check_if_tfp_available()
   check_if_greta_conda_env_available()
-
+  report_python_backend()
   check_greta_ready_to_use()
 }
 
@@ -54,6 +54,9 @@ detailed_sitrep <- function() {
   cli::cli_h1("{.pkg greta}")
   cli::cli_ul("version: {.val {packageVersion('greta')}}")
   cli::cli_ul("path: {.path {find.package('greta')}}")
+
+  cli::cli_h1("{.pkg greta} Python backend")
+  report_python_backend()
 
   cli::cli_h1("{.pkg python}")
   check_if_python_available()
@@ -104,6 +107,16 @@ detailed_sitrep <- function() {
 #'
 #' @export
 greta_list_py_modules <- function() {
+  # there is nothing to list without the conda env; in the uv workflow this is
+  # the normal case, so return quietly rather than shelling out to conda (which
+  # would exit non-zero and warn)
+  if (!have_greta_conda_env()) {
+    cli::cli_inform(c(
+      "i" = "No {.val greta-env-tf2} conda environment found, so there are no \\
+      conda modules to list."
+    ))
+    return(invisible(NULL))
+  }
   conda_modules <- tryCatch(
     expr = {
       # This will find conda whether it's on PATH or installed by reticulate
@@ -201,9 +214,9 @@ get_current_ideal_deps <- function() {
     ),
     # versions must be at least this version
     ideal = c(
-      "3.8",
-      "2.15.0",
-      "0.23.0"
+      greta_deps_default$python_min,
+      greta_deps_default$tf_min,
+      greta_deps_default$tfp_min
     )
   )
 

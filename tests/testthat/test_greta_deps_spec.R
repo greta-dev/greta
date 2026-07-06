@@ -1,168 +1,83 @@
-test_that("greta python range detection works correctly", {
-  skip_if_not(check_tf_version())
-  # correct ranges
-  expect_snapshot(check_greta_python_range("3.11"))
-  expect_snapshot(check_greta_python_range("3.9"))
-  expect_snapshot(check_greta_python_range("3.3"))
-  expect_snapshot(check_greta_python_range("3.8.2"))
-  expect_snapshot(check_greta_python_range("3.3.3"))
-  # incorrect ranges
-  expect_snapshot(
-    error = TRUE,
-    check_greta_python_range("3.1")
+test_that("greta_deps_receipt records reality without validating", {
+  # a version above greta's supported range must still be captured, since the
+  # receipt describes what is actually installed
+  spec <- with_mocked_bindings(
+    greta_deps_receipt(),
+    version_tf = function() "2.15.1",
+    version_tfp = function() "0.23.0",
+    py_version = function() "3.10"
   )
-  expect_snapshot(
-    error = TRUE,
-    check_greta_python_range("3.12")
-  )
-  expect_snapshot(
-    error = TRUE,
-    check_greta_python_range("2.7")
-  )
-  expect_snapshot(
-    error = TRUE,
-    check_greta_python_range("3.1.1")
-  )
-  expect_snapshot(
-    error = TRUE,
-    check_greta_python_range("3.14")
+  expect_s3_class(spec, "greta_deps_spec")
+  expect_identical(spec$tf_version, "2.15.1")
+})
+
+test_that("greta_deps_receipt errors when deps are not installed", {
+  expect_error(
+    with_mocked_bindings(
+      greta_deps_receipt(),
+      version_tf = function() NULL,
+      version_tfp = function() NULL
+    ),
+    regexp = "not both available"
   )
 })
 
+test_that("greta_deps_spec accepts supported TensorFlow versions", {
+  expect_s3_class(greta_deps_spec(), "greta_deps_spec")
+  expect_s3_class(greta_deps_spec(tf_version = "2.14.0"), "greta_deps_spec")
+  expect_s3_class(greta_deps_spec(tf_version = "2.9.0"), "greta_deps_spec")
+  expect_s3_class(greta_deps_spec(tf_version = "2.15.0"), "greta_deps_spec")
+  expect_s3_class(greta_deps_spec(tf_version = "2.15.1"), "greta_deps_spec")
+})
 
-test_that("greta_deps_spec fails appropriately", {
-  skip_if_not(check_tf_version())
-  # skip on windows as there are small differences in version recommendations
-  skip_on_os(os = "windows")
-  # default
-  expect_snapshot(greta_deps_spec())
-  # some correct ranges
-  expect_snapshot(
-    greta_deps_spec(
-      tf_version = "2.14.0",
-      tfp_version = "0.22.1",
-      python_version = "3.9"
+test_that("greta_deps_spec rejects TensorFlow newer than greta supports", {
+  # TF 2.16+ ships Keras 3, which greta does not support (#675)
+  expect_error(greta_deps_spec(tf_version = "2.16.1"), "supports TensorFlow")
+  expect_error(greta_deps_spec(tf_version = "2.99.0"), "supports TensorFlow")
+})
+
+test_that("greta_deps_spec leaves TFP and Python to the resolver", {
+  # these previously errored against the compatibility matrix; greta now only
+  # bounds TF and lets uv / conda reject incompatible TFP or Python
+  expect_s3_class(
+    greta_deps_spec(tf_version = "2.15.0", tfp_version = "0.6.0"),
+    "greta_deps_spec"
+  )
+  expect_s3_class(
+    greta_deps_spec(python_version = "3.13"),
+    "greta_deps_spec"
+  )
+})
+
+test_that("version pins agree across spec defaults, uv pins, and TF ceiling", {
+  # the load-bearing check: greta_deps_spec()'s literal formals must match
+  # the canonical versions (drift here is caught at test time, not runtime)
+  spec <- greta_deps_spec()
+  expect_identical(spec$tf_version, greta_deps_default$tf)
+  expect_identical(spec$tfp_version, greta_deps_default$tfp)
+  expect_identical(spec$python_version, greta_deps_default$python)
+
+  # uv pins derive minor-series wildcards from the canonical versions
+  py_req <- greta_py_require_args()
+  tf_minor <- sub("\\.[^.]*$", "", greta_deps_default$tf)
+  tfp_minor <- sub("\\.[^.]*$", "", greta_deps_default$tfp)
+  expect_identical(
+    py_req$packages,
+    c(
+      paste0("tensorflow==", tf_minor, ".*"),
+      paste0("tensorflow_probability==", tfp_minor, ".*")
     )
   )
-  expect_snapshot(
-    greta_deps_spec(
-      tf_version = "2.12.0",
-      tfp_version = "0.20.0",
-      python_version = "3.9"
-    )
+  expect_identical(py_req$python_version, greta_deps_default$python_range)
+
+  # the default TF version must itself pass the support ceiling
+  expect_no_error(check_greta_tf_supported(greta_deps_spec()))
+
+  # pins must never fall below their own floors
+  expect_true(
+    compareVersion(greta_deps_default$tf, greta_deps_default$tf_min) >= 0
   )
-  # TF above range
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.16.1",
-      tfp_version = "0.11.0",
-      python_version = "3.8"
-    )
-  )
-  # TF below range
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "1.9.0",
-      tfp_version = "0.11.0",
-      python_version = "3.8"
-    )
-  )
-  # TFP above range
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.15.0",
-      tfp_version = "0.24.0",
-      python_version = "3.10"
-    )
-  )
-  # TFP below range
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.15.0",
-      tfp_version = "0.6.0",
-      python_version = "3.10"
-    )
-  )
-  # Python above range
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.9.1",
-      tfp_version = "0.23.0",
-      python_version = "3.13"
-    )
-  )
-  # Python below range
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.9.1",
-      tfp_version = "0.23.0",
-      python_version = "2.6"
-    )
-  )
-  # Only Python is not valid
-  # TODO - suggest changing python version in error message
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.15.0",
-      tfp_version = "0.23.0",
-      python_version = "3.8"
-    )
-  )
-  # Only TF is not valid
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.15.0",
-      tfp_version = "0.22.0",
-      python_version = "3.10"
-    )
-  )
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.14.0",
-      tfp_version = "0.21.0",
-      python_version = "3.8"
-    )
-  )
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.13.0",
-      tfp_version = "0.20.0",
-      python_version = "3.8"
-    )
-  )
-  # Only TFP is not valid
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.15.0",
-      tfp_version = "0.17.0",
-      python_version = "3.8"
-    )
-  )
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.17.0",
-      tfp_version = "0.23.0",
-      python_version = "3.8"
-    )
-  )
-  expect_snapshot(
-    error = TRUE,
-    greta_deps_spec(
-      tf_version = "2.9.0",
-      tfp_version = "0.17.0",
-      python_version = "3.8"
-    )
+  expect_true(
+    compareVersion(greta_deps_default$tfp, greta_deps_default$tfp_min) >= 0
   )
 })

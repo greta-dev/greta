@@ -46,10 +46,10 @@ jobs:
         run: remotes::install_local(dependencies = TRUE, force = TRUE)
         shell: Rscript {0}
 
-      - name: Install greta deps
-        run: |
-          library(greta)
-          greta::install_greta_deps(timeout = 50)
+      ## greta deps automatically resolved via py_require() (uv) on first use —
+      ## no conda install needed. Keep miniconda for relevant snapshot tests
+      - name: Install miniconda
+        run: reticulate::install_miniconda()
         shell: Rscript {0}
 
       - name: Situation Report on greta install

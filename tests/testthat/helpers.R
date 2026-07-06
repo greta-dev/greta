@@ -1,4 +1,14 @@
 # test functions
+# pin the load-time backend plan so sitrep snapshots are deterministic
+# regardless of machine state or session history
+local_python_plan <- function(
+  plan = new_python_plan("managed", "default"),
+  env = parent.frame()
+) {
+  old <- greta_stash$python_backend
+  withr::defer(greta_stash$python_backend <- old, envir = env)
+  greta_stash$python_backend <- plan
+}
 
 # set the seed and flush the graph before running tests
 if (check_tf_version()) {

@@ -15,7 +15,7 @@ Sys.setenv("OMP_THREAD_LIMIT" = "2")
 Sys.setenv("TF_NUM_INTRAOP_THREADS" = "1")
 Sys.setenv("TF_NUM_INTEROP_THREADS" = "1")
 
-# Only evaluate TensorFlow code off CRAN. reticulate now auto-provisions TF via
+# Only evaluate TensorFlow code off CRAN. reticulate now auto-installs TF via
 # uv, so `check_tf_version()` alone no longer prevents these chunks running (and
 # installing TF) on CRAN.
 .eval_tf <- identical(tolower(Sys.getenv("NOT_CRAN")), "true") &&

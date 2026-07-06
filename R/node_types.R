@@ -476,8 +476,7 @@ distribution_node <- R6Class(
 
     # optional function to reset the flags for target representations whenever a
     # target is changed
-    reset_target_flags = function() {
-    },
+    reset_target_flags = function() {},
 
     # replace the existing target node with a new one
     remove_target = function() {

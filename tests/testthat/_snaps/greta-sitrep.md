@@ -4,36 +4,24 @@
       check_tf_version("error")
     Condition
       Error in `check_tf_version()`:
-      ! x The expected python packages are not available
-      i We recommend installing them (in a fresh R session) with:
-      `install_greta_deps()`
-      or
-      `reinstall_greta_deps()`
-      (Note: Your R session should not have initialised Tensorflow yet.)
-      i For more information, see `?install_greta_deps`
+      ! x greta could not load Python with TensorFlow and TensorFlow Probability.
+      i Run `greta::greta_sitrep()` to check your installation.
+      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x The expected python packages are not available
-    i We recommend installing them (in a fresh R session) with:
-    `install_greta_deps()`
-    or
-    `reinstall_greta_deps()`
-    (Note: Your R session should not have initialised Tensorflow yet.)
-    i For more information, see `?install_greta_deps`
+    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    i Run `greta::greta_sitrep()` to check your installation.
+    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
     Code
       check_tf_version("message")
     Message
-      x The expected python packages are not available
-      i We recommend installing them (in a fresh R session) with:
-      `install_greta_deps()`
-      or
-      `reinstall_greta_deps()`
-      (Note: Your R session should not have initialised Tensorflow yet.)
-      i For more information, see `?install_greta_deps`
+      x greta could not load Python with TensorFlow and TensorFlow Probability.
+      i Run `greta::greta_sitrep()` to check your installation.
+      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 # check_tf_version fails when tfp not available
 
@@ -45,73 +33,45 @@
       
     Condition
       Error in `check_tf_version()`:
-      ! x The expected python packages are not available
-      i We recommend installing them (in a fresh R session) with:
-      `install_greta_deps()`
-      or
-      `reinstall_greta_deps()`
-      (Note: Your R session should not have initialised Tensorflow yet.)
-      i For more information, see `?install_greta_deps`
+      ! x greta could not load Python with TensorFlow and TensorFlow Probability.
+      i Run `greta::greta_sitrep()` to check your installation.
+      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 # greta_sitrep warns when have_python, _tf, or _tfp is FALSE
 
-    x The expected python packages are not available
-    i We recommend installing them (in a fresh R session) with:
-    `install_greta_deps()`
-    or
-    `reinstall_greta_deps()`
-    (Note: Your R session should not have initialised Tensorflow yet.)
-    i For more information, see `?install_greta_deps`
+    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    i Run `greta::greta_sitrep()` to check your installation.
+    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x The expected python packages are not available
-    i We recommend installing them (in a fresh R session) with:
-    `install_greta_deps()`
-    or
-    `reinstall_greta_deps()`
-    (Note: Your R session should not have initialised Tensorflow yet.)
-    i For more information, see `?install_greta_deps`
+    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    i Run `greta::greta_sitrep()` to check your installation.
+    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x The expected python packages are not available
-    i We recommend installing them (in a fresh R session) with:
-    `install_greta_deps()`
-    or
-    `reinstall_greta_deps()`
-    (Note: Your R session should not have initialised Tensorflow yet.)
-    i For more information, see `?install_greta_deps`
+    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    i Run `greta::greta_sitrep()` to check your installation.
+    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x The expected python packages are not available
-    i We recommend installing them (in a fresh R session) with:
-    `install_greta_deps()`
-    or
-    `reinstall_greta_deps()`
-    (Note: Your R session should not have initialised Tensorflow yet.)
-    i For more information, see `?install_greta_deps`
+    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    i Run `greta::greta_sitrep()` to check your installation.
+    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x The expected python packages are not available
-    i We recommend installing them (in a fresh R session) with:
-    `install_greta_deps()`
-    or
-    `reinstall_greta_deps()`
-    (Note: Your R session should not have initialised Tensorflow yet.)
-    i For more information, see `?install_greta_deps`
+    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    i Run `greta::greta_sitrep()` to check your installation.
+    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x The expected python packages are not available
-    i We recommend installing them (in a fresh R session) with:
-    `install_greta_deps()`
-    or
-    `reinstall_greta_deps()`
-    (Note: Your R session should not have initialised Tensorflow yet.)
-    i For more information, see `?install_greta_deps`
+    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    i Run `greta::greta_sitrep()` to check your installation.
+    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
@@ -128,9 +88,13 @@
       v TensorFlow Probability (v0.23.0) available
       
       i checking if greta conda environment available
-      v greta conda environment available
+      x greta conda environment not available
       
-      i greta is ready to use!
+      * backend: "managed (uv) environment"
+      * selected via: default
+      i Conda environment not set up, but all dependencies available
+      
+      greta is ready to use!
 
 # greta_sitrep warns when different versions of python, tf, tfp
 
@@ -147,8 +111,13 @@
       v TensorFlow Probability (v0.23.0) available
       
       i checking if greta conda environment available
-      v greta conda environment available
+      x greta conda environment not available
       
+      * backend: "managed (uv) environment"
+      * selected via: default
+      i Conda environment not set up, but all dependencies available
+      
+      greta is ready to use!
 
 ---
 
@@ -165,8 +134,13 @@
       v TensorFlow Probability (v0.23.0) available
       
       i checking if greta conda environment available
-      v greta conda environment available
+      x greta conda environment not available
       
+      * backend: "managed (uv) environment"
+      * selected via: default
+      i Conda environment not set up, but all dependencies available
+      
+      greta is ready to use!
 
 ---
 
@@ -183,8 +157,13 @@
       v TensorFlow Probability (v0.9.0) available
       
       i checking if greta conda environment available
-      v greta conda environment available
+      x greta conda environment not available
       
+      * backend: "managed (uv) environment"
+      * selected via: default
+      i Conda environment not set up, but all dependencies available
+      
+      greta is ready to use!
 
 # greta_sitrep warns greta conda env not available
 
@@ -203,6 +182,8 @@
       i checking if greta conda environment available
       x greta conda environment not available
       
+      * backend: "managed (uv) environment"
+      * selected via: default
       i Conda environment not set up, but all dependencies available
       
       greta is ready to use!
@@ -227,9 +208,13 @@
       v TensorFlow Probability (v0.23.0) available
       
       i checking if greta conda environment available
-      v greta conda environment available
+      x greta conda environment not available
       
-      i greta is ready to use!
+      * backend: "<backend>"
+      * selected via: <source>
+      i Conda environment not set up, but all dependencies available
+      
+      greta is ready to use!
 
 ---
 

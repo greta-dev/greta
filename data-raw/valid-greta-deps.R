@@ -94,55 +94,32 @@ tf_cpu_deps <- tf_deps |>
 # TFP versions are in https://github.com/greta-dev/greta/issues/638#issuecomment-2268372432
 
 # This is the 0.24.0 release of TensorFlow Probability. It is tested and stable against TensorFlow 2.16.1 and JAX 0.4.25 (cannot use as TF 2.15 uses keras 3 which has breaking changes) (Mar 13, 2024)
-#
 
 tfp_to_tf_compatability <- tibble::tribble(
-  ~tfp_version,
-  ~tf_version,
-  "tfp==0.24.0",
-  "tf==2.16.1",
-  "tfp==0.23.0",
-  "tf==2.15.0",
-  "tfp==0.22.1",
-  "tf==2.14.0",
-  "tfp==0.22.0",
-  "tf==2.14.0",
-  "tfp==0.21.0",
-  "tf==2.13.0",
-  "tfp==0.20.0",
-  "tf==2.12.0",
-  "tfp==0.19.0",
-  "tf==2.11.0",
-  "tfp==0.18.0",
-  "tf==2.10.0",
-  "tfp==0.17.0",
-  "tf==2.9.1",
-  "tfp==0.16.0",
-  "tf==2.8.0",
-  "tfp==0.15.0",
-  "tf==2.7.0",
-  "tfp==0.14.1",
-  "tf==2.6.0",
-  "tfp==0.14.0",
-  "tf==2.6.0",
-  "tfp==0.13.0",
-  "tf==2.5.0",
-  "tfp==0.12.2",
-  "tf==2.4.0",
-  "tfp==0.12.1",
-  "tf==2.4.0",
-  "tfp==0.12.0",
-  "tf==2.4.0",
-  "tfp==0.11.1",
-  "tf==2.3.0",
-  "tfp==0.11.0",
-  "tf==2.3.0",
-  "tfp==0.10.1",
-  "tf==2.2.0",
-  "tfp==0.9.0",
-  "tf==2.1.0",
-  "tfp==0.8.0",
-  "tf==2.0.0"
+  ~tfp_version  , ~tf_version  ,
+  "tfp==0.24.0" , "tf==2.16.1" ,
+  "tfp==0.23.0" , "tf==2.15.1" ,
+  "tfp==0.23.0" , "tf==2.15.0" ,
+  "tfp==0.22.1" , "tf==2.14.0" ,
+  "tfp==0.22.0" , "tf==2.14.0" ,
+  "tfp==0.21.0" , "tf==2.13.0" ,
+  "tfp==0.20.0" , "tf==2.12.0" ,
+  "tfp==0.19.0" , "tf==2.11.0" ,
+  "tfp==0.18.0" , "tf==2.10.0" ,
+  "tfp==0.17.0" , "tf==2.9.1"  ,
+  "tfp==0.16.0" , "tf==2.8.0"  ,
+  "tfp==0.15.0" , "tf==2.7.0"  ,
+  "tfp==0.14.1" , "tf==2.6.0"  ,
+  "tfp==0.14.0" , "tf==2.6.0"  ,
+  "tfp==0.13.0" , "tf==2.5.0"  ,
+  "tfp==0.12.2" , "tf==2.4.0"  ,
+  "tfp==0.12.1" , "tf==2.4.0"  ,
+  "tfp==0.12.0" , "tf==2.4.0"  ,
+  "tfp==0.11.1" , "tf==2.3.0"  ,
+  "tfp==0.11.0" , "tf==2.3.0"  ,
+  "tfp==0.10.1" , "tf==2.2.0"  ,
+  "tfp==0.9.0"  , "tf==2.1.0"  ,
+  "tfp==0.8.0"  , "tf==2.0.0"
 ) |>
   mutate(
     tfp_version = str_remove_all(tfp_version, "tfp=="),
@@ -151,13 +128,15 @@ tfp_to_tf_compatability <- tibble::tribble(
 
 tfp_to_tf_compatability
 
-extra_rows <- tibble(
-  os = c("windows", "linux", "mac"),
-  tf_version = rep("2.9.1", 3),
-  python_version_min = rep("3.7", 3),
-  python_version_max = rep("3.10", 3)
+extra_rows <- tibble::tribble(
+  ~os       , ~tf_version , ~python_version_min , ~python_version_max ,
+  "windows" , "2.9.1"     , "3.7"               , "3.10"              ,
+  "linux"   , "2.9.1"     , "3.7"               , "3.10"              ,
+  "mac"     , "2.9.1"     , "3.7"               , "3.10"              ,
+  "windows" , "2.15.1"    , "3.9"               , "3.11"              ,
+  "linux"   , "2.15.1"    , "3.9"               , "3.11"              ,
+  "mac"     , "2.15.1"    , "3.9"               , "3.11"              ,
 )
-
 
 numeric_version(tf_cpu_deps$tf_version)
 
@@ -165,6 +144,7 @@ numeric_version(tf_cpu_deps$tf_version)
   mutate(tf_version = numeric_version(tf_version)) |>
   arrange(os, desc(tf_version)) |>
   mutate(tf_version = as.character(tf_version))
+
 .deps_tfp <- tfp_to_tf_compatability
 
 remove_before_comma <- function(x) {

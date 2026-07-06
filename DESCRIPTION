@@ -1,7 +1,7 @@
 Type: Package
 Package: greta
 Title: Simple and 'Scalable' Statistical Modelling in R
-Version: 0.5.1
+Version: 0.6.0
 Authors@R: c(
     person("Nick", "Golding", , "nick.golding.research@gmail.com", role = c("aut", "cph"),
            comment = c(ORCID = "0000-0001-8916-5570")),
@@ -125,6 +125,7 @@ Collate:
     'chol2symm.R'
     'install_greta_deps.R'
     'conda_greta_env.R'
+    'python_backend.R'
     'greta_stash.R'
     'greta_create_conda_env.R'
     'greta_install_miniconda.R'

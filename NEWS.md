@@ -1,20 +1,33 @@
-# greta 0.5.1
+# greta 0.6.0
 
 ## Changes
 
-- `as.unknowns()` now handles plain numeric vectors (and `dim<-` being set to `NULL`), fixing an `mcmc()` error "no applicable method for 'as.unknowns'" that surfaced when re-building vignettes under R-devel (#582).
-- `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
-- `outer()` (and `%o%`) now works with greta arrays when `FUN = "*"`, instead of silently returning a base array of `NA`s; base R's `"*"` fast path used `as.vector()`, which dropped the greta operation (#582).
-- Reshaping a greta array with `dim<-` now keeps the `?` placeholder display for unknown values instead of showing `NA` (#582).
-- Add warmup information to MCMC print method (#652, resolved by #755).
-- Add more options to level of detail in `greta_sitrep()` with "verbosity" argument. There are three levels, "minimal" (default), "detailed", and "quiet". (#612, resolved by #679).
-- Use `.batch_size` instead of `batch_size` internally, to avoid rare name clash errors (#634).
-- Resolve issues with Tensorflow version in DESCRIPTION (no longer can specify == 2.16.0, must be >= 2.16.0).
-- When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.
-- Ensure that `n_cores` arg defaults to 2 cores. Similarly, `chains` defaults to two chains. 
-- Cap TensorFlow's internal CPU threadpool inside vignette builds (via `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN's CPU/elapsed timing on vignette rebuild stays under the two-core limit (#796).
-- Minor internal changes for handling versions of python modules.
-- Added `greta_list_py_modules()` as a function to show the Python packages installed in a specific TF2 environment.
+* `as.unknowns()` now handles plain numeric vectors (and `dim<-` being set to `NULL`), fixing an `mcmc()` error "no applicable method for 'as.unknowns'" that surfaced when re-building vignettes under R-devel (#582).
+* `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
+* `outer()` (and `%o%`) now works with greta arrays when `FUN = "*"`, instead of silently returning a base array of `NA`s; base R's `"*"` fast path used `as.vector()`, which dropped the greta operation (#582).
+* Reshaping a greta array with `dim<-` now keeps the `?` placeholder display for unknown values instead of showing `NA` (#582).
+* Add warmup information to MCMC print method (#652, resolved by #755).
+* Add more options to level of detail in `greta_sitrep()` with "verbosity" argument. There are three levels, "minimal" (default), "detailed", and "quiet". (#612, resolved by #679).
+* Use `.batch_size` instead of `batch_size` internally, to avoid rare name clash errors (#634).
+* Resolve issues with Tensorflow version in DESCRIPTION (no longer can specify == 2.16.0, must be >= 2.16.0).
+* When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.
+* Ensure `n_cores` arg defaults to 2 cores, and `chains` defaults to 2 chains.
+* Cap TensorFlow's internal CPU threadpool inside vignette builds (via `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN's CPU/elapsed timing on vignette rebuild stays under the two-core limit (#796).
+
+### Installation and dependencies
+
+* greta now resolves its Python environment more flexibly instead of always forcing reticulate's managed (uv) environment: it respects a user-set `RETICULATE_PYTHON`, a stored greta preference, or an existing `greta-env-tf2` conda environment, and otherwise uses the managed (uv) environment (#801).
+* Fixed `library(greta)` failing with an error when greta's stored Python preference file exists but is empty (#809).
+* `destroy_greta_deps()`, `greta_remove_all_deps()`, and `reinstall_greta_deps()` ask for confirmation once up front rather than at every step, work non-interactively again, and report what was actually removed (#809).
+* `greta_deps_spec()` now only checks that the requested TensorFlow version is one greta supports (TensorFlow 2.16 and later are not supported, as they ship Keras 3); compatible TensorFlow Probability and Python versions are left to uv or conda to resolve rather than being validated against a fixed compatibility table (#675).
+* `greta_list_py_modules()` shows the Python packages installed in a specific TF2 environment (#801, #809).
+* `greta_remove_all_deps()` removes all of greta's Python dependencies for a clean slate: the `greta-env-tf2` conda environment, miniconda, reticulate's managed uv cache, and any stored greta Python preference (#801, #809).
+* `greta_set_python_uv()`, `greta_set_python_conda_env()`, `greta_set_python_path()`, and `greta_reset_python()` let you choose, persistently, which Python environment greta uses; each reports the stored preference, warns if `RETICULATE_PYTHON` takes precedence, and shows what greta will resolve to on its next load; `greta_sitrep()` reports the resolved backend (#801, #809).
+* `greta_sitrep()` now requires Python 3.9 or later (previously 3.8), matching the Python versions greta supports (#809).
+* `install_greta_deps()` now records the location of the `greta-env-tf2` conda environment at install time, so greta auto-detects it in any conda installation, not just reticulate's miniconda (#809).
+* `install_greta_deps()` is no longer required for most users, as greta now installs TensorFlow and TensorFlow Probability automatically via uv on first use; it remains for installing a conda environment (for example, for offline use), which you can then select with `greta_set_python_conda_env()` (#801).
+* `remove_greta_env()`, `remove_miniconda()`, and `remove_reticulate_uv_cache()` ask for confirmation before removing, gain an `ask` argument (default `interactive()`) so they work non-interactively, and invisibly return whether anything was removed (#809).
+* `remove_reticulate_uv_cache()` removes reticulate's managed uv cache; note this cache is shared by all reticulate packages and is not greta-specific, and a system-wide uv cache is left untouched (#801, #809).
 
 # greta 0.5.0
 
@@ -49,18 +62,18 @@ The following optimisers are removed, as they are no longer supported by Tensorf
 This release provides a few improvements to installation in greta. It should now provide more information about installation progress, and be more robust. The intention is, it should _just work_, and if it doesn't, it should fail gracefully with some useful advice on problem solving.
 
 * Added option to restart R + run `library(greta)` after installation (#523).
-* Added installation deps object, `greta_deps_sepc()` to help simplify specifying package versions (#664).
+* Added installation deps object, `greta_deps_spec()` to help simplify specifying package versions (#664).
 * Removed `method` and `conda` arguments from `install_greta_deps()` as they 
   were not used.
 * Removed `manual` argument in `install_greta_deps()`.
 * Added default 5 minute timer to installation processes.
-* Added `greta_deps_receipt()` to list the current main python packages installed (#668).
 * Added checking suite to ensure you are using valid versions of TF, TFP, and Python(#666).
 * Added data `greta_deps_tf_tfp` (#666), which contains valid versions combinations of TF, TFP, and Python.
 * Remove `greta_nodes_install/conda_*()` options as #493 makes them defunct.
 * Added option to write to a single logfile with `greta_set_install_logfile()`, and `write_greta_install_log()`, and `open_greta_install_log()` (#493).
 * Added `destroy_greta_deps()` function to remove miniconda and python conda environment.
 * Improved `write_greta_install_log()` and `open_greta_install_log()` to use `tools::R_user_dir()` to always write to a file location. `open_greta_install_log()` will open one found from an environment variable or go to the default location (#703).
+* `greta_deps_receipt()` records the TensorFlow, TensorFlow Probability, and Python versions that are actually installed without validating them against greta's supported range, so it works even when the installed versions are newer than greta officially supports (such as a TensorFlow 2.15 patch release) (#668).
 
 ## New Print methods
 

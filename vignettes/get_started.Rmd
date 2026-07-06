@@ -15,7 +15,7 @@ Sys.setenv("OMP_THREAD_LIMIT" = "2")
 Sys.setenv("TF_NUM_INTRAOP_THREADS" = "1")
 Sys.setenv("TF_NUM_INTEROP_THREADS" = "1")
 
-# Only evaluate TensorFlow code off CRAN. reticulate now auto-provisions TF via
+# Only evaluate TensorFlow code off CRAN. reticulate now auto-installs TF via
 # uv, so `check_tf_version()` alone no longer prevents these chunks running (and
 # installing TF) on CRAN.
 .eval_tf <- identical(tolower(Sys.getenv("NOT_CRAN")), "true") &&
@@ -47,9 +47,17 @@ You can install the stable version of greta from CRAN:
 install.packages("greta")
 ```
 
-or the development version from GitHub using devtools:
+Or install the development version of `greta` from [r-universe](http://greta-dev.r-universe.dev/):
 
-```{r install_greta_github, eval = FALSE}
+```r
+install.packages("greta", repos = c("https://greta-dev.r-universe.dev", "https://cloud.r-project.org"))
+```
+
+(Note - installing from r-universe is just like installing from CRAN, and should be faster and more convenient than installing from GitHub)
+
+You can also install the development version of `greta` via GitHub:
+
+```r
 devtools::install_github("greta-dev/greta")
 ```
 
@@ -61,11 +69,11 @@ library(greta)
 
 <hr>
 
-### Helper functions to install TensorFlow
+### Installing TensorFlow
 
-Before you can fit models with `greta`, you will also need to have a working installation of Google's [TensorFlow](https://www.tensorflow.org/) python package (version >= 2.0.0) and the [tensorflow-probability](https://github.com/tensorflow/probability) python package (version >= 0.8.0).
+Under the hood, `greta` uses Google's [TensorFlow](https://www.tensorflow.org/) and [tensorflow-probability](https://github.com/tensorflow/probability) python packages. You usually don't need to install anything yourself: the first time you use `greta` in a session, it automatically installs a compatible Python, TensorFlow, and TensorFlow Probability via [`uv`](https://docs.astral.sh/uv/). For most users `library(greta)` followed by your first model just works.
 
-If these python modules aren't yet installed when `greta` is used, it suggests to use `install_greta_deps()` to install the dependencies. We recommend using this function to install dependencies. For more detail on installation, see the vignette "installation".
+If you need a conda environment instead (for example, offline), or want to pin specific versions, see the "Installing dependencies" vignette and `install_greta_deps()`.
 
 <!-- If you want `greta` to run as fast as possible on your computer's CPUs, it would be worth installing python and TensorFlow using Anaconda since they will be automatically configured to use Intel's MKL routines, which provide a 2-8 fold sampling speedup on most models. -->
 

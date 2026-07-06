@@ -26,18 +26,14 @@ install.packages("greta", repos = c("https://greta-dev.r-universe.dev", "https:/
 You can also install the development version of `greta` via GitHub:
 
 ``` r
-devtools::install_github("greta-dev/greta")
+remotes::install_github("greta-dev/greta")
 ```
 
-# Installing Python Dependencies
+# Installing Python dependencies
 
-The `install_greta_deps()` function helps install the Python dependencies (Google's [TensorFlow](https://www.tensorflow.org/) and [tensorflow-probability](https://github.com/tensorflow/probability)). 
+`greta` uses Google's [TensorFlow](https://www.tensorflow.org/) and [tensorflow-probability](https://github.com/tensorflow/probability) Python packages under the hood. For most users there is nothing extra to install: the first time you use `greta` in a session, it automatically installs a compatible Python, TensorFlow, and TensorFlow Probability via [`uv`](https://docs.astral.sh/uv/). So `library(greta)` followed by your first model usually just works.
 
-By default, `install_greta_deps()` installs versions TF 2.15.0, and TFP version 0.23.0, using python 3.10. To change the versions of TF, TFP, or python that you want to use, you specify the `deps` argument of `install_greta_deps()`, which used `greta_deps_spec()`. See `?install_greta_deps()` or `?greta_deps_spec()` for more information.
-
-This helper function, `install_greta_deps()`, installs the exact pythons package versions needed. It also places these inside a conda environment, "greta-env-tf2". This isolates these exact python modules from other python installations, so that only `greta` will see them. This helps avoids installation issues, where previously you might update tensorflow on your computer and overwrite the current version needed by `greta`. Using this "greta-env-tf2" conda environment means installing other python packages should not be impact the Python packages needed by `greta`.
-
-If these python modules aren't yet installed, when `greta` is used, it provides instructions on how to install them for your system. If in doubt follow those. 
+If you need a conda environment instead (for example on an offline network), or want to pin specific versions, use `install_greta_deps()` and then point `greta` at the environment with `greta_set_python_conda_env()`. By default it installs TF 2.15.0, TFP 0.23.0, and Python 3.10; choose versions via its `deps` argument and `greta_deps_spec()`. See the "Installing dependencies" vignette, `?install_greta_deps`, or `?greta_set_python_uv` for more.
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/greta)](https://CRAN.R-project.org/package=greta)

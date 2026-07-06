@@ -5,51 +5,49 @@
 \title{Specify python dependencies for greta}
 \usage{
 greta_deps_spec(
-  tf_version = "2.15.0",
+  tf_version = "2.15.1",
   tfp_version = "0.23.0",
-  python_version = "3.10"
+  python_version = "3.11"
 )
 }
 \arguments{
-\item{tf_version}{Character. Tensorflow (TF) version in format
-major.minor.patch. Default is "2.15.0".}
+\item{tf_version}{character. TensorFlow version, in the format
+major.minor.patch. Default is 2.15.1.}
 
-\item{tfp_version}{Character.Tensorflow probability (TFP) version
-major.minor.patch. Default is "0.23.0".}
+\item{tfp_version}{Character. Tensorflow probability (TFP) version
+major.minor.patch. Default is 0.23.0.}
 
 \item{python_version}{Character. Python version in format major.minor.patch.
-Default is "3.10".}
+Default is 3.11.}
 }
 \value{
 data frame of valid dependencies
 }
 \description{
 A helper function for specifying versions of Tensorflow (TF), Tensorflow
-Probability (TFP), and Python. Defaulting to 2.15.0, 0.23.0, and 3.10,
-respectively. You can specify the version that you want to install, but
-it will check if these are compatible. That is, if you specify versions of
-TF/TFP/Python which do not work with each other, it will error and give
-a suggested version to install. It does this by using a dataset,
-\code{greta_deps_tf_tfp}, to check if the versions of TF, TFP, and Python
-specified are compatible on your operating system. You can inspect
-this  dataset with \code{View(greta_deps_tf_tfp)}.
+Probability (TFP), and Python. Defaulting to 2.15.1,
+0.23.0, and 3.11, respectively.
+greta checks it supports the TF version (greta does not support TF 2.16 or
+later, which ship Keras 3); compatible TFP and Python versions are resolved
+at install time by uv (or, for a conda environment, by conda/pip). The
+\code{greta_deps_tf_tfp} dataset lists known-good combinations of TF, TFP, and
+Python; inspect it with \code{View(greta_deps_tf_tfp)}.
 }
 \examples{
 greta_deps_spec()
+greta_deps_spec(tf_version = "2.15.1")
 greta_deps_spec(tf_version = "2.15.0")
+greta_deps_spec(tf_version = "2.15.1", tfp_version = "0.23.0")
 greta_deps_spec(tf_version = "2.15.0", tfp_version = "0.23.0")
+greta_deps_spec(tf_version = "2.15.1", python_version = "3.10")
 greta_deps_spec(tf_version = "2.15.0", python_version = "3.10")
 greta_deps_spec(
-  tf_version = "2.15.0",
-  tfp_version = "0.23.0",
+  tf_version = "2.14.0",
+  tfp_version = "0.22.1",
   python_version = "3.10"
   )
-# this will fail
+# this will fail: greta does not support TF 2.16+ (Keras 3)
 \dontrun{
-greta_deps_spec(
-  tf_version = "2.11.0",
-  tfp_version = "0.23.0",
-  python_version = "3.10"
-  )
+greta_deps_spec(tf_version = "2.16.0")
   }
 }
