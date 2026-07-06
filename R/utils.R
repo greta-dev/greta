@@ -978,7 +978,7 @@ are_identical <- function(x, y) {
 #' @param x list of things that may contain NULL values
 #'
 #' @return logical
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' is.null(list(NULL, NULL, 1))

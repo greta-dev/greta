@@ -22,3 +22,4 @@ are_null(list(NULL, NULL, NULL))
 are_null(list(1, 2, 3))
 is.null(list(1, 2, 3))
 }
+\keyword{internal}
