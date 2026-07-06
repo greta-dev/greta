@@ -60,3 +60,7 @@ LICENSE
 ^\.positai$
 ^[.]?air[.]toml$
 ^\.vscode$
+^vignettes/precompute\.R$
+\.Rmd\.orig$
+^index\.md$
+_cache/$
