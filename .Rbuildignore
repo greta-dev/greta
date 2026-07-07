@@ -21,7 +21,6 @@ LICENSE
 
 ^_pkgdown\.yml$
 ^docs$
-^inst/pkgdown$
 
 ^vignettes/get_started_cache$
 ^vignettes/example_models_cache$
