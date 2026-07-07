@@ -1,14 +1,23 @@
 url: https://greta-dev.github.io/greta/
 
+development:
+  mode: auto
+
 template:
   bootstrap: 5
+  opengraph:
+    image:
+      src: man/figures/name_icon_on_purple.png
+      alt: "greta"
   bslib:
     primary: "#A379CC"
+    code-bg: "#f4f0f9"
     base_font: {google: "Roboto"}
     heading_font: {google: "Roboto"}
     code_font: {google: "Roboto Mono"}
 
 home:
+  sidebar: false
   title: greta — simple and scalable statistical modelling in R
   description: >
     greta lets you write statistical models interactively in native R code,
@@ -17,9 +26,12 @@ home:
 
 navbar:
   structure:
-    left: [get-started, reference, examples, analyses, more, news, faq]
+    left: [installation, get-started, reference, examples, analyses, more, news, faq]
     right: [search, forum, github]
   components:
+    installation:
+      text: Installation
+      href: articles/installation.html
     get-started:
       text: get started
       href: articles/get_started.html

@@ -785,16 +785,16 @@ Sample size per chain = 1000
    plus standard error of the mean:
 
        Mean      SD  Naive SE Time-series SE
-int  4.2820 0.08077 0.0018062      0.0023762
-coef 0.4144 0.01966 0.0004396      0.0005397
-sd   0.4106 0.02446 0.0005470      0.0006158
+int  4.2814 0.07961 0.0017801      0.0021163
+coef 0.4144 0.01934 0.0004324      0.0004993
+sd   0.4108 0.02442 0.0005460      0.0006635
 
 2. Quantiles for each variable:
 
-       2.5%    25%    50%    75%  97.5%
-int  4.1255 4.2263 4.2787 4.3396 4.4404
-coef 0.3756 0.4014 0.4152 0.4271 0.4532
-sd   0.3656 0.3940 0.4093 0.4258 0.4646
+      2.5%    25%    50%    75%  97.5%
+int  4.130 4.2277 4.2792 4.3361 4.4431
+coef 0.376 0.4018 0.4146 0.4269 0.4527
+sd   0.367 0.3933 0.4100 0.4270 0.4619
 ```
 The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates
 

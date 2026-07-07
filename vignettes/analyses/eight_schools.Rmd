@@ -284,30 +284,30 @@ summary(draws)
 ##    plus standard error of the mean:
 ## 
 ##                                  Mean     SD Naive SE Time-series SE
-## avg_effect                    5.91658 5.6461  0.08927        0.11569
-## avg_stddev                   13.39620 7.1511  0.11307        0.23144
-## school_effects_standard[1,1]  0.66884 0.8102  0.01281        0.01470
-## school_effects_standard[2,1]  0.08247 0.7012  0.01109        0.01228
-## school_effects_standard[3,1] -0.24911 0.8132  0.01286        0.01506
-## school_effects_standard[4,1]  0.03270 0.7142  0.01129        0.01363
-## school_effects_standard[5,1] -0.31739 0.6947  0.01098        0.01228
-## school_effects_standard[6,1] -0.21940 0.7292  0.01153        0.01401
-## school_effects_standard[7,1]  0.50965 0.7164  0.01133        0.01237
-## school_effects_standard[8,1]  0.16808 0.8098  0.01280        0.01458
+## avg_effect                    5.87678 5.4426  0.08606        0.10830
+## avg_stddev                   13.40841 7.0857  0.11203        0.27954
+## school_effects_standard[1,1]  0.67411 0.7820  0.01236        0.01495
+## school_effects_standard[2,1]  0.09282 0.6927  0.01095        0.01316
+## school_effects_standard[3,1] -0.25475 0.8356  0.01321        0.01656
+## school_effects_standard[4,1]  0.03570 0.7181  0.01135        0.01406
+## school_effects_standard[5,1] -0.31800 0.6664  0.01054        0.01285
+## school_effects_standard[6,1] -0.20596 0.7279  0.01151        0.01475
+## school_effects_standard[7,1]  0.51233 0.7026  0.01111        0.01389
+## school_effects_standard[8,1]  0.16901 0.8416  0.01331        0.01527
 ## 
 ## 2. Quantiles for each variable:
 ## 
-##                                 2.5%      25%      50%     75%  97.5%
-## avg_effect                   -5.5199  2.34132  6.01942  9.6705 16.482
-## avg_stddev                    3.9771  8.43228 11.96780 16.6729 31.014
-## school_effects_standard[1,1] -0.9491  0.15690  0.65813  1.1908  2.332
-## school_effects_standard[2,1] -1.3446 -0.35988  0.09282  0.5239  1.485
-## school_effects_standard[3,1] -1.8814 -0.79532 -0.24275  0.2893  1.358
-## school_effects_standard[4,1] -1.3777 -0.42013  0.03024  0.4826  1.481
-## school_effects_standard[5,1] -1.7448 -0.74736 -0.30832  0.1308  1.050
-## school_effects_standard[6,1] -1.6952 -0.67086 -0.20864  0.2521  1.202
-## school_effects_standard[7,1] -0.8683  0.04813  0.50117  0.9712  1.913
-## school_effects_standard[8,1] -1.4092 -0.38398  0.17587  0.7213  1.739
+##                                 2.5%     25%      50%     75%   97.5%
+## avg_effect                   -5.4189  2.3251  6.07327  9.6079 16.2865
+## avg_stddev                    4.1059  8.6478 11.96866 16.6080 30.7303
+## school_effects_standard[1,1] -0.8176  0.1569  0.67572  1.1813  2.2028
+## school_effects_standard[2,1] -1.3271 -0.3637  0.10055  0.5608  1.4417
+## school_effects_standard[3,1] -1.9717 -0.7758 -0.25225  0.2931  1.3550
+## school_effects_standard[4,1] -1.4121 -0.4139  0.03141  0.4949  1.4325
+## school_effects_standard[5,1] -1.7014 -0.7323 -0.31240  0.1113  0.9982
+## school_effects_standard[6,1] -1.6594 -0.6642 -0.21959  0.2563  1.2561
+## school_effects_standard[7,1] -0.8839  0.0685  0.51469  0.9672  1.8789
+## school_effects_standard[8,1] -1.5167 -0.3868  0.15325  0.7181  1.8697
 ```
 
 
@@ -467,7 +467,7 @@ sessionInfo()
 ## locale:
 ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 ## 
-## time zone: Australia/Hobart
+## time zone: Australia/Melbourne
 ## tzcode source: internal
 ## 
 ## attached base packages:

@@ -1,0 +1,121 @@
+// Custom styling to reproduce the classic greta home-page banner and code tint
+// under the Bootstrap 5 pkgdown template.
+
+// Full-width home page. `home: sidebar: false` stops pkgdown generating the
+// sidebar content, but the template still emits an empty <aside class="col-md-3">
+// and keeps <main> at col-md-9 (verified in pkgdown source), so we hide the
+// empty aside and let the content span the full width.
+.template-home {
+  aside {
+    display: none;
+  }
+  main.col-md-9 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+// --- home page hero banner --------------------------------------------------
+#head {
+  // full-bleed: break out of the .container to span the whole viewport width
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+
+  background-color: #b797d7;
+  background-position: 0 45%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.2);
+  margin-bottom: 2rem;
+}
+
+#main-icon {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  min-width: 210px;
+  max-width: 585px;
+  padding: 45px 15px 0;
+}
+
+#main-icon-text {
+  color: #ffffff;
+  font-size: 24px;
+  text-align: center;
+  padding: 0 30px 30px;
+}
+
+// --- three feature bullets ---
+#bullets {
+  padding: 0 15px;
+  font-size: 20px;
+  text-align: center;
+  max-width: 90%;
+  margin: 0 auto 2rem;
+
+  .bullet {
+    color: #8960b3;
+    font-size: 36px;
+    margin-bottom: 0.5rem;
+  }
+
+  .col-md-4 {
+    padding: 25px;
+  }
+}
+
+// --- resource-link panel ---
+#panel1 {
+  background-color: #f7f7f7;
+  box-shadow: 0 0 7px 2px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+  margin: 0 auto 2rem;
+  padding: 1rem 0;
+
+  &.resource,
+  &.resource p,
+  &.resource a {
+    color: #8960b3;
+    font-size: 28px;
+  }
+}
+
+// --- basic example section ---
+#example {
+  max-width: 100%;
+  margin: 0 auto;
+
+  h1,
+  h2 {
+    color: #8960b3;
+  }
+}
+
+// --- navbar brand logo (see pkgdown/templates/navbar.html override) ---
+.navbar-logo {
+  height: 30px;
+  width: auto;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+// --- navbar menu items ------------------------------------------------------
+// Keep the navbar links (docs, get started, …) a neutral grey like a standard
+// menu bar, rather than falling back to the purple link colour.
+.navbar-nav .nav-link {
+  color: rgba(0, 0, 0, 0.65);
+}
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+  color: rgba(0, 0, 0, 0.85);
+}
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.show,
+.navbar-nav .show > .nav-link {
+  color: rgba(0, 0, 0, 0.9);
+}

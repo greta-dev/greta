@@ -319,14 +319,14 @@ summary(as_probs)
 ##    plus standard error of the mean:
 ## 
 ##             Mean       SD  Naive SE Time-series SE
-## prob[1,1] 0.2612 0.014777 2.336e-04      0.0008614
-## prob[2,1] 0.4871 0.006248 9.879e-05      0.0001934
+## prob[1,1] 0.2616 0.014947 2.363e-04      0.0008950
+## prob[2,1] 0.4874 0.006173 9.761e-05      0.0001928
 ## 
 ## 2. Quantiles for each variable:
 ## 
 ##             2.5%    25%    50%    75%  97.5%
-## prob[1,1] 0.2331 0.2511 0.2607 0.2707 0.2917
-## prob[2,1] 0.4748 0.4829 0.4871 0.4914 0.4993
+## prob[1,1] 0.2307 0.2516 0.2616 0.2717 0.2907
+## prob[2,1] 0.4757 0.4831 0.4875 0.4916 0.4997
 ```
 
 # Wrapping up
@@ -356,7 +356,7 @@ sessionInfo()
 ## locale:
 ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 ## 
-## time zone: Australia/Hobart
+## time zone: Australia/Melbourne
 ## tzcode source: internal
 ## 
 ## attached base packages:

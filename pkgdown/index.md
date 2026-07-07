@@ -32,20 +32,15 @@ it's easy to write your own R functions and packages using greta
 
 <div id="panel1" class="resource">
 <div class="container">
-<div class="row">
-<div class="col-md-6">
+<div class="row text-center">
+<div class="col-md-3">
 <span class="fa fa-arrow-circle-right"></span> <a href="articles/get_started.html">get started</a>
 </div>
-<div class="col-md-6">
+<div class="col-md-3">
 <span class="fa fa-file-code"></span> <a href="articles/example_models.html">example models</a>
 </div>
-</div>
-<div class="row">
-<div class="col-md-6">
+<div class="col-md-3">
 <span class="fa fa-book"></span> <a href="reference/index.html">package docs</a>
-</div>
-<div class="col-md-6">
-<span class="fa fa-comments"></span> <a href="https://forum.greta-stats.org">forum</a>
 </div>
 </div>
 </div>
@@ -54,7 +49,7 @@ it's easy to write your own R functions and packages using greta
 <div id="example">
 <div class="container">
 
-## basic example
+## Basic example
 
 Here's a Bayesian linear regression model for the `iris` data using greta:
 
@@ -86,7 +81,11 @@ m <- model(int, coef, sd)
 
 
 ``` r
-draws <- mcmc(m, n_samples = 1000, chains = 4)
+draws <- mcmc(
+  m,
+  n_samples = 1000,
+  chains = 4
+  )
 bayesplot::mcmc_trace(draws)
 ```
 
