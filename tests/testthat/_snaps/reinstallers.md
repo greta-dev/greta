@@ -28,6 +28,11 @@
 
     Code
       res <- destroy_greta_deps(ask = FALSE)
+    Condition
+      Warning:
+      `destroy_greta_deps()` was deprecated in greta 0.6.0.
+      i Please use `greta_remove()` instead.
+      i Use `greta_remove("env")` and `greta_remove("miniconda")`, or `greta_remove()` to also clear the uv cache and stored preference.
     Message
       i No 'greta-env-tf2' conda environment found.
       i No miniconda files found at /greta-test/no-such-miniconda
@@ -36,6 +41,11 @@
 
     Code
       res <- destroy_greta_deps(ask = FALSE)
+    Condition
+      Warning:
+      `destroy_greta_deps()` was deprecated in greta 0.6.0.
+      i Please use `greta_remove()` instead.
+      i Use `greta_remove("env")` and `greta_remove("miniconda")`, or `greta_remove()` to also clear the uv cache and stored preference.
     Message
       i removing 'greta-env-tf2' conda environment
       v greta-env-tf2 environment removed!

@@ -171,11 +171,39 @@ apply_greta_python_plan <- function(plan) {
         packages = py_req$packages,
         python_version = py_req$python_version
       )
+      maybe_enable_uv_offline()
     },
     # "user" and "conda" both point at a specific Python
     Sys.setenv("RETICULATE_PYTHON" = plan$python)
   )
   invisible(plan)
+}
+
+# For the managed backend, auto-enable uv's offline mode when reticulate's uv
+# cache is already populated (#814). greta pins *frozen* ranges for the managed
+# backend (TensorFlow 2.15.*, TensorFlow Probability 0.23.*); TF 2.16+ ships
+# Keras 3, which greta does not support, so no newer match will ever appear.
+# That makes a cache-only resolve safe: uv never needs to reach PyPI once the
+# environment is provisioned, so greta can start on an offline / air-gapped
+# machine. We only touch the reticulate-managed uv cache (the same path used by
+# remove_reticulate_uv_cache()), never a system-wide uv.
+maybe_enable_uv_offline <- function(
+  uv_cache = file.path(tools::R_user_dir("reticulate", "cache"), "uv")
+) {
+  # respect the user: if UV_OFFLINE is already set to anything, leave it alone
+  existing <- Sys.getenv("UV_OFFLINE", unset = NA)
+  if (!is.na(existing)) {
+    return(invisible(FALSE))
+  }
+  # only go offline when the cache is actually populated (both the resolved
+  # Python and the downloaded wheels are present)
+  cache_populated <- dir.exists(file.path(uv_cache, "python")) &&
+    dir.exists(file.path(uv_cache, "cache"))
+  if (cache_populated) {
+    Sys.setenv(UV_OFFLINE = "1")
+    return(invisible(TRUE))
+  }
+  invisible(FALSE)
 }
 
 # --- one-time hints -----------------------------------------------------------
@@ -320,7 +348,11 @@ finish_python_backend_change <- function(stored_msg, value) {
 #'
 #' @param name Name of the conda environment to use. Defaults to
 #'   `"greta-env-tf2"`, the environment created by [install_greta_deps()].
-#' @param path Path to a Python executable.
+#' @param path Path to a Python executable, or to an environment directory (a
+#'   virtualenv or conda prefix) containing one. When given a directory, greta
+#'   looks for `bin/python` (Unix) or `Scripts/python.exe` (Windows) inside it.
+#'   Pointing at a pre-provisioned environment on disk never downloads anything,
+#'   which makes it useful for offline or restricted-network setups.
 #'
 #' @return Invisibly, the stored preference (`NULL` for `greta_reset_python()`).
 #'
@@ -393,16 +425,36 @@ greta_set_python_conda_env <- function(name = "greta-env-tf2") {
 #' @rdname greta_set_python
 #' @export
 greta_set_python_path <- function(path) {
-  if (!file.exists(path)) {
-    cli::cli_abort(
-      "No Python executable found at {.path {path}}."
-    )
-  }
-  set_greta_python_backend(path)
+  python <- resolve_python_path(path)
+  set_greta_python_backend(python)
   finish_python_backend_change(
-    stored_msg = "Stored preference: Python at {.path {path}}.",
-    value = path
+    stored_msg = "Stored preference: Python at {.path {python}}.",
+    value = python
   )
+}
+
+# Resolve a user-supplied path to a Python executable. `path` may be the Python
+# binary itself, or an environment directory (a virtualenv or conda prefix)
+# containing one; in the latter case we look for the platform's usual location.
+# This never runs Python or reaches the network, so it stays fully offline.
+resolve_python_path <- function(path) {
+  # an existing file (not a directory) is taken to be the Python binary itself
+  if (file.exists(path) && !dir.exists(path)) {
+    return(path)
+  }
+  candidate <- if (is_windows()) {
+    file.path(path, "Scripts", "python.exe")
+  } else {
+    file.path(path, "bin", "python")
+  }
+  if (file.exists(candidate)) {
+    return(candidate)
+  }
+  cli::cli_abort(c(
+    "No Python executable found for {.path {path}}.",
+    "i" = "Pass a path to a Python binary, or to an environment directory \\
+      containing {.path bin/python} (or {.path Scripts/python.exe} on Windows)."
+  ))
 }
 
 #' @rdname greta_set_python

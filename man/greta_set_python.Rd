@@ -20,7 +20,11 @@ greta_reset_python()
 \item{name}{Name of the conda environment to use. Defaults to
 \code{"greta-env-tf2"}, the environment created by \code{\link[=install_greta_deps]{install_greta_deps()}}.}
 
-\item{path}{Path to a Python executable.}
+\item{path}{Path to a Python executable, or to an environment directory (a
+virtualenv or conda prefix) containing one. When given a directory, greta
+looks for \code{bin/python} (Unix) or \code{Scripts/python.exe} (Windows) inside it.
+Pointing at a pre-provisioned environment on disk never downloads anything,
+which makes it useful for offline or restricted-network setups.}
 }
 \value{
 Invisibly, the stored preference (\code{NULL} for \code{greta_reset_python()}).

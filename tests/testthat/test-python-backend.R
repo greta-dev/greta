@@ -122,6 +122,60 @@ test_that("greta_set_python_path() errors on a missing path", {
   )
 })
 
+test_that("resolve_python_path() passes through an existing binary", {
+  fake_python <- withr::local_tempfile()
+  file.create(fake_python)
+  expect_identical(resolve_python_path(fake_python), fake_python)
+})
+
+test_that("resolve_python_path() finds bin/python in a unix env dir", {
+  local_mocked_bindings(is_windows = function() FALSE)
+  env_dir <- withr::local_tempdir()
+  dir.create(file.path(env_dir, "bin"))
+  python <- file.path(env_dir, "bin", "python")
+  file.create(python)
+  expect_identical(resolve_python_path(env_dir), python)
+})
+
+test_that("resolve_python_path() finds Scripts/python.exe on windows", {
+  local_mocked_bindings(is_windows = function() TRUE)
+  env_dir <- withr::local_tempdir()
+  dir.create(file.path(env_dir, "Scripts"))
+  python <- file.path(env_dir, "Scripts", "python.exe")
+  file.create(python)
+  expect_identical(resolve_python_path(env_dir), python)
+})
+
+test_that("resolve_python_path() errors when nothing is found", {
+  env_dir <- withr::local_tempdir()
+  expect_error(resolve_python_path(env_dir), "No Python executable")
+})
+
+test_that("maybe_enable_uv_offline() does nothing when the cache is absent", {
+  withr::local_envvar(UV_OFFLINE = NA)
+  uv_cache <- file.path(withr::local_tempdir(), "uv")
+  expect_false(maybe_enable_uv_offline(uv_cache = uv_cache))
+  expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+})
+
+test_that("maybe_enable_uv_offline() enables offline when the cache is populated", {
+  withr::local_envvar(UV_OFFLINE = NA)
+  uv_cache <- file.path(withr::local_tempdir(), "uv")
+  dir.create(file.path(uv_cache, "python"), recursive = TRUE)
+  dir.create(file.path(uv_cache, "cache"), recursive = TRUE)
+  expect_true(maybe_enable_uv_offline(uv_cache = uv_cache))
+  expect_identical(Sys.getenv("UV_OFFLINE"), "1")
+})
+
+test_that("maybe_enable_uv_offline() respects a pre-existing UV_OFFLINE", {
+  withr::local_envvar(UV_OFFLINE = "0")
+  uv_cache <- file.path(withr::local_tempdir(), "uv")
+  dir.create(file.path(uv_cache, "python"), recursive = TRUE)
+  dir.create(file.path(uv_cache, "cache"), recursive = TRUE)
+  expect_false(maybe_enable_uv_offline(uv_cache = uv_cache))
+  expect_identical(Sys.getenv("UV_OFFLINE"), "0")
+})
+
 test_that("a conda-tagged preference resolves to a conda backend", {
   plan <- plan_from_value("conda:/x/y/bin/python", source = "preference")
   expect_identical(plan$backend, "conda")

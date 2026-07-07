@@ -206,14 +206,48 @@ the internet, so a blocked or air-gapped network will stop either approach. If
 your network blocks PyPI but allows conda, the conda route via
 `install_greta_deps()` may work where uv does not.
 
+## Point greta at a pre-provisioned environment on disk
+
 If you have a working Python with TF and TFP installed by some other means (for
-example, provided by your institution), point greta at it directly and restart
-R:
+example, provided by your institution, or copied onto an air-gapped machine),
+point greta straight at it and restart R. These routes only ever *read* what is
+already on disk — they never download anything — so they work with no network at
+all.
+
+`greta_set_python_path()` accepts either a Python binary or an environment
+directory (a virtualenv or conda prefix). Given a directory, greta looks for
+`bin/python` inside it (`Scripts/python.exe` on Windows):
 
 ```{r offline, eval = FALSE}
-# or set RETICULATE_PYTHON
-greta_set_python_path("/path/to/python")
+# point at a specific Python binary
+greta_set_python_path("/opt/python-envs/greta/bin/python")
+
+# or point at the environment directory and let greta find the binary
+greta_set_python_path("/opt/python-envs/greta")
+
+# on Windows, an environment directory works the same way; greta looks for
+# Scripts\\python.exe inside it
+greta_set_python_path("C:/python-envs/greta")
 ```
+
+If your environment is a conda environment, you can instead select it by name
+(this also never downloads anything):
+
+```{r offline-conda, eval = FALSE}
+greta_set_python_conda_env("greta-env-tf2")
+```
+
+Alternatively, set the `RETICULATE_PYTHON` environment variable (for example in
+`~/.Renviron`) to the Python binary, which takes precedence over any stored
+preference.
+
+### Priming the managed (uv) environment for offline use
+
+If you use the default managed (uv) environment, greta starts offline once
+reticulate's uv cache has been populated once (while online). On its next start
+greta detects the populated cache and enables uv's offline mode automatically,
+so it no longer reaches out to PyPI. If you need to override this, set the
+`UV_OFFLINE` environment variable yourself before loading greta.
 
 # Troubleshooting
 
@@ -232,9 +266,12 @@ Installation doesn't always go to plan. Some things to try:
   share on a forum or a [greta GitHub issue](https://github.com/greta-dev/greta/issues).
 
 - **Start from a clean slate.** `reinstall_greta_deps()` removes miniconda and
-  the greta conda environment and installs them again. You can also do the steps
-  manually with `remove_greta_env()`, `remove_miniconda()` (or
-  `destroy_greta_deps()` for both), then `install_greta_deps()`.
+  the greta conda environment and installs them again. To remove things yourself,
+  use `greta_remove()`, which takes a `what` argument: `greta_remove("env")` for
+  the conda environment, `greta_remove("miniconda")` for miniconda,
+  `greta_remove("uv_cache")` for reticulate's uv cache, `greta_remove("preference")`
+  for the stored Python preference, or `greta_remove()` (the default, `"all"`) for
+  everything at once. Then reinstall with `install_greta_deps()`.
 
 - **Check internet access.** Installing dependencies needs a connection, and some
   networks block package downloads. See [Offline or restricted-network
