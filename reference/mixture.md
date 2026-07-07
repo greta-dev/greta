@@ -1,0 +1,90 @@
+# mixtures of probability distributions
+
+`mixture` combines other probability distributions into a single mixture
+distribution, either over a variable, or for fixed data.
+
+## Usage
+
+``` r
+mixture(..., weights, dim = NULL)
+```
+
+## Arguments
+
+- ...:
+
+  variable greta arrays following probability distributions (see
+  [`distributions()`](https://greta-dev.github.io/greta/reference/distributions.md));
+  the component distributions in a mixture distribution.
+
+- weights:
+
+  a column vector or array of mixture weights, which must be positive,
+  but need not sum to one. The first dimension must be the number of
+  distributions, the remaining dimensions must either be 1 or match the
+  distribution dimension.
+
+- dim:
+
+  the dimensions of the greta array to be returned, either a scalar or a
+  vector of positive integers.
+
+## Details
+
+The `weights` are rescaled to sum to one along the first dimension, and
+are then used as the mixing weights of the distribution. I.e. the
+probability density is calculated as a weighted sum of the component
+probability distributions passed in via `\dots`
+
+The component probability distributions must all be either continuous or
+discrete, and must have the same dimensions.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# a scalar variable following a strange bimodal distibution
+weights <- uniform(0, 1, dim = 3)
+a <- mixture(normal(-3, 0.5),
+  normal(3, 0.5),
+  normal(0, 3),
+  weights = weights
+)
+m <- model(a)
+plot(mcmc(m, n_samples = 500))
+
+# simulate a mixture of poisson random variables and try to recover the
+# parameters with a Bayesian model
+x <- c(
+  rpois(800, 3),
+  rpois(200, 10)
+)
+
+weights <- uniform(0, 1, dim = 2)
+rates <- normal(0, 10, truncation = c(0, Inf), dim = 2)
+distribution(x) <- mixture(poisson(rates[1]),
+  poisson(rates[2]),
+  weights = weights
+)
+m <- model(rates)
+draws_rates <- mcmc(m, n_samples = 500)
+
+# check the mixing probabilities after fitting using calculate()
+# (you could also do this within the model)
+normalized_weights <- weights / sum(weights)
+draws_weights <- calculate(normalized_weights, draws_rates)
+
+# get the posterior means
+summary(draws_rates)$statistics[, "Mean"]
+summary(draws_weights)$statistics[, "Mean"]
+
+# weights can also be an array, giving different mixing weights
+# for each observation (first dimension must be number of components)
+dim <- c(5, 4)
+weights <- uniform(0, 1, dim = c(2, dim))
+b <- mixture(normal(1, 1, dim = dim),
+  normal(-1, 1, dim = dim),
+  weights = weights
+)
+} # }
+```

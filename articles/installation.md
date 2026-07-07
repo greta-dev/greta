@@ -1,0 +1,304 @@
+# Installing dependencies
+
+``` r
+
+library(greta)
+#> 
+#> Attaching package: 'greta'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     binomial, cov2cor, poisson
+#> The following objects are masked from 'package:base':
+#> 
+#>     %*%, %o%, apply, backsolve, beta, chol2inv, colMeans, colSums,
+#>     diag, eigen, forwardsolve, gamma, identity, outer, rowMeans,
+#>     rowSums, sweep, tapply
+```
+
+## Why greta needs Python
+
+greta uses Google’s [TensorFlow (TF)](https://www.tensorflow.org/) and
+[TensorFlow Probability
+(TFP)](https://github.com/tensorflow/probability) under the hood to do
+fast, scalable linear algebra and MCMC. TF and TFP are Python packages,
+so greta needs a Python installation with those packages available. This
+is different from how R package dependencies usually work, where CRAN
+builds and manages everything for you.
+
+The good news is that, thanks to recent improvements in reticulate,
+greta now sets this up for you automatically. This vignette explains
+what happens by default, how to choose a different Python environment,
+and how to install dependencies yourself when you need to (for example,
+offline).
+
+## Most users: nothing to install
+
+By default greta installs its Python dependencies automatically using
+[`uv`](https://docs.astral.sh/uv/) (via reticulate). The **first time
+you use greta in a session** – for example when you create a greta array
+or use a distribution – reticulate downloads and sets up a compatible
+Python, TensorFlow, and TensorFlow Probability for you.
+
+So for most users, installation is just:
+
+``` r
+
+# if you haven't already
+install.packages("greta")
+library(greta)
+
+# the first use triggers automatic setup of Python + TF + TFP
+x <- normal(0, 1)
+```
+
+The first call may take a little while as the environment is installed;
+after that it is cached and reused, so subsequent sessions start
+quickly.
+
+You do **not** need to call
+[`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+for this to work — that function is for the conda / offline workflow
+described in [Advanced: a managed conda
+environment](#advanced-a-managed-conda-environment).
+
+## Checking what greta is using
+
+[`greta_sitrep()`](https://greta-dev.github.io/greta/reference/greta_sitrep.md)
+reports the resolved Python backend and the versions in use. It’s the
+first thing to run if you’re unsure what greta has picked up:
+
+``` r
+
+greta_sitrep()
+```
+
+## Choosing a different Python environment
+
+greta resolves which Python to use in this order:
+
+1.  The `RETICULATE_PYTHON` environment variable, which is usually set
+    in `~/.Renviron` or your shell environment.
+2.  Stored preference - set with
+    [`greta_set_python_uv()`](https://greta-dev.github.io/greta/reference/greta_set_python.md),
+    [`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md),
+    or
+    [`greta_set_python_path()`](https://greta-dev.github.io/greta/reference/greta_set_python.md).
+3.  Auto-detected `greta-env-tf2` conda environment - created by
+    [`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md).
+4.  The managed uv environment - the default, no setup needed.
+
+If you have upgraded from an older greta that used a `greta-env-tf2`
+conda environment (created by
+[`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)),
+greta detects and keeps using it. So, upgrading to greta 0.6.0 does not
+change your setup.
+
+To see which Python environment greta is using right now — and which it
+will use after you restart R — run:
+
+``` r
+
+greta_sitrep()
+```
+
+You can switch environments at any time with these helpers, then
+**restart R**. Each one reports what greta will resolve to on its next
+load:
+
+``` r
+
+# use the uv-managed environment
+greta_set_python_uv()
+# use the "greta-env-tf2" conda environment
+greta_set_python_conda_env()
+# use a specific Python
+greta_set_python_path("/path/to/python")
+# clear the choice; resolve automatically
+greta_reset_python()
+```
+
+These store your choice (under `tools::R_user_dir("greta", "config")`)
+so it persists across sessions.
+
+For finer control, setting the `RETICULATE_PYTHON` environment variable
+to a path (e.g. in your `.Rprofile`) takes precedence over the stored
+preference:
+
+``` r
+
+Sys.setenv(RETICULATE_PYTHON = "/path/to/your/python")
+library(greta)
+```
+
+Because `RETICULATE_PYTHON` takes precedence, a stored preference will
+appear to be ignored while it is set. To go back to your stored
+preference, remove `RETICULATE_PYTHON` from wherever it is set (for
+example `~/.Renviron`, which you can open with
+`usethis::edit_r_environ()`), then restart R.
+
+## Advanced: a managed conda environment
+
+The automatic (uv) setup covers most users. You might instead want to
+install into a dedicated conda environment when you:
+
+- are on an offline or restricted network (see [Offline or
+  restricted-network
+  installation](#offline-or-restricted-network-installation)),
+- need a specific, pinned, reproducible set of versions, or
+- are setting up GPU / CUDA support.
+
+[`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+builds a conda environment named `greta-env-tf2`, installing TensorFlow
+and TensorFlow Probability into it. By default it uses TF 2.15.0, TFP
+0.23.0, and Python 3.10:
+
+``` r
+
+install_greta_deps()
+```
+
+Follow any prompts, then **restart R**. To make greta use this
+environment, set it as your preference (then restart R again):
+
+``` r
+
+greta_set_python_conda_env()
+```
+
+Using a conda environment isolates these exact Python modules from other
+Python installations, so only greta sees them. This avoids a class of
+problems where, for example, updating TensorFlow elsewhere on your
+machine would otherwise overwrite the version greta needs.
+
+### Choosing specific versions
+
+[`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+takes a `deps` argument, built with
+[`greta_deps_spec()`](https://greta-dev.github.io/greta/reference/greta_deps_spec.md),
+which lets you choose versions:
+
+``` r
+
+install_greta_deps(
+  greta_deps_spec(
+    tf_version = "2.15.0",
+    tfp_version = "0.23.0",
+    python_version = "3.10"
+  )
+)
+```
+
+If you specify versions of TF, TFP, and Python that are not compatible
+with each other,
+[`greta_deps_spec()`](https://greta-dev.github.io/greta/reference/greta_deps_spec.md)
+errors before installation begins and suggests alternatives. The
+combinations greta knows about are recorded in the `greta_deps_tf_tfp`
+dataset, which we built from
+<https://www.tensorflow.org/install/source#tested_build_configurations>,
+<https://www.tensorflow.org/install/source_windows#tested_build_configurations>,
+and the TFP release notes. Inspect it with:
+
+``` r
+
+View(greta_deps_tf_tfp)
+```
+
+[`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+also takes `timeout` (minutes to wait before a component times out,
+default 5) and `restart` (`"ask"` (default), `"force"`, or `"no"`).
+
+### How `install_greta_deps()` works
+
+For users who want the detail: greta runs the installation in a
+separate, clean R session using [`callr`](https://callr.r-lib.org/), so
+Python and reticulate are not already loaded. This also lets us route
+the large amount of console output into a logfile, which you can open
+with
+[`open_greta_install_log()`](https://greta-dev.github.io/greta/reference/open_greta_install_log.md).
+
+If miniconda isn’t installed, greta installs it (a lightweight Python
+distribution). If the `greta-env-tf2` environment doesn’t exist, greta
+creates it for a Python version compatible with the requested TF and
+TFP, then installs the TF and TFP modules. In interactive RStudio
+sessions it then asks whether to restart R.
+
+## Offline or restricted-network installation
+
+Both the automatic (uv) setup and
+[`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+download packages from the internet, so a blocked or air-gapped network
+will stop either approach. If your network blocks PyPI but allows conda,
+the conda route via
+[`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+may work where uv does not.
+
+If you have a working Python with TF and TFP installed by some other
+means (for example, provided by your institution), point greta at it
+directly and restart R:
+
+``` r
+
+# or set RETICULATE_PYTHON
+greta_set_python_path("/path/to/python")
+```
+
+## Troubleshooting
+
+Installation doesn’t always go to plan. Some things to try:
+
+- **Restart R.** After changing the environment (with
+  [`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+  or any of the `greta_set_python_*()` helpers), you must restart R so
+  greta can connect to the chosen Python.
+
+- **Run
+  [`greta_sitrep()`](https://greta-dev.github.io/greta/reference/greta_sitrep.md).**
+  It reports the resolved backend and the versions of Python, TF, and
+  TFP, which often points straight at the problem.
+
+- **Check the installation logfile.** If you used
+  [`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md),
+  open the logfile with
+  [`open_greta_install_log()`](https://greta-dev.github.io/greta/reference/open_greta_install_log.md)
+  and search it (Ctrl/Cmd+F) for “error” or “warn”. Even when there’s no
+  obvious fix, the logfile is useful to share on a forum or a [greta
+  GitHub issue](https://github.com/greta-dev/greta/issues).
+
+- **Start from a clean slate.**
+  [`reinstall_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+  removes miniconda and the greta conda environment and installs them
+  again. You can also do the steps manually with
+  [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/reinstallers.md),
+  [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
+  (or
+  [`destroy_greta_deps()`](https://greta-dev.github.io/greta/reference/destroy_greta_deps.md)
+  for both), then
+  [`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md).
+
+- **Check internet access.** Installing dependencies needs a connection,
+  and some networks block package downloads. See [Offline or
+  restricted-network
+  installation](#offline-or-restricted-network-installation).
+
+If the helpers don’t work, you can install the Python modules yourself
+into a conda environment:
+
+``` r
+
+reticulate::install_miniconda()
+reticulate::conda_create(
+  envname = "greta-env-tf2",
+  python_version = "3.10"
+)
+reticulate::conda_install(
+  envname = "greta-env-tf2",
+  packages = c(
+    "tensorflow-probability==0.23.0",
+    "tensorflow==2.15.0"
+  )
+)
+```
+
+Then point greta at it with
+[`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
+and restart R.
