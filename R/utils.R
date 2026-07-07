@@ -979,7 +979,7 @@ are_identical <- function(x, y) {
 #'
 #' @return logical
 #' @keywords internal
-#'
+#' @noRd
 #' @examples
 #' is.null(list(NULL, NULL, 1))
 #' are_null(list(NULL, NULL, 1))
