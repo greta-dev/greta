@@ -7,14 +7,43 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
+```{r setup, include = FALSE}
 
+# Force limit to 2 cores for CRAN
+Sys.setenv("R_PARALLELLY_AVAILABLE_CORES" = "2")
+Sys.setenv("OMP_THREAD_LIMIT" = "2")
+Sys.setenv("TF_NUM_INTRAOP_THREADS" = "1")
+Sys.setenv("TF_NUM_INTEROP_THREADS" = "1")
+
+# Only evaluate TensorFlow code off CRAN. reticulate now auto-installs TF via
+# uv, so `check_tf_version()` alone no longer prevents these chunks running (and
+# installing TF) on CRAN.
+.eval_tf <- identical(tolower(Sys.getenv("NOT_CRAN")), "true") &&
+  greta:::check_tf_version("message")
+
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = .eval_tf,
+                      purl = .eval_tf,
+                      cache = FALSE,
+                      comment = NA,
+                      progress = FALSE)
+
+set.seed(2018-07-02)
+
+library(greta)
+
+if (!file.exists("figures"))
+  dir.create("figures")
+
+file.copy("../man/figures/plotlegend.png",
+          "figures/plotlegend.png")
+```
 
 ## Installation
 
 You can install the stable version of greta from CRAN:
 
-
-``` r
+```{r install_greta, eval = FALSE}
 install.packages("greta")
 ```
 
@@ -34,8 +63,7 @@ devtools::install_github("greta-dev/greta")
 
 then load the package
 
-
-``` r
+```{r load}
 library(greta)
 ```
 
@@ -55,8 +83,7 @@ If you need a conda environment instead (for example, offline), or want to pin s
 
 greta's [plotting functionality](#plotting) depends on the [DiagrammeR package](https://rich-iannone.github.io/DiagrammeR/). Because DiagrammeR depends on the [igraph](https://igraph.org/r/) package, which contains a large amount of code that needs to be compiled, DiagrammeR often takes a long time to install. So, DiagrammeR isn’t installed automatically with greta. If you want to plot greta models, you can install igraph and DiagrammeR from CRAN.
 
-
-``` r
+```{r install_diagrammer, eval = FALSE}
 install.packages("igraph")
 install.packages("DiagrammeR")
 ```
@@ -72,98 +99,20 @@ greta lets us build statistical models interactively in R, and then sample from 
 The key difference between greta arrays and numeric data objects is that when you do something to a greta array, greta *doesn't calculate the values* of the new greta array. Instead, it just remembers what operation to do, and works out the size and shape of the result.
 
 For example, we can create a greta array `z` representing some data (a 3x3 matrix of 1s):
-
-``` r
+```{r ones}
 (z <- ones(3, 3))
 ```
-
-```
-greta array <data>
-```
-
-```
-
-```
-
-```
-     [,1] [,2] [,3]
-[1,]    1    1    1
-[2,]    1    1    1
-[3,]    1    1    1
-```
-
-```
-
-```
 we can then create a new greta array `z2` by doing something to `z`:
-
-``` r
+```{r ones_op}
 (z2 <- z + z ^ 2)
-```
-
-```
-greta array <operation>
-```
-
-```
-
-```
-
-```
-     [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
-[3,]  ?    ?    ?  
-```
-
-```
-
 ```
 greta knows the result must also be a 3x3 matrix, but it doesn't try to calculate the results. Instead it treats the new greta array `z2` like a placeholder, for which it will calculate the results later.
 
 Because greta only creates *placeholders* when we're building our model, we can construct models using greta arrays that represent unknown variables. For example, if we create a new greta array `a` representing some unknown values, we can still manipulate it as though it were data:
 
-
-``` r
+```{r variable}
 (a <- variable(dim = c(3, 3)))
-```
-
-```
-greta array <variable>
-```
-
-```
-
-```
-
-```
-     [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
-[3,]  ?    ?    ?  
-```
-
-```
-
-```
-
-``` r
 (a2 <- a + a ^ 2)
-```
-
-```
-greta array <operation>
-```
-
-```
-     [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
-[3,]  ?    ?    ?  
-```
-
-```
-
 ```
 
 This allows us to create a wide range of models, like in the general-purpose modelling languages like BUGS and Stan. But unlike those languages we build greta models interactively in R so get feedback immediately if there's a mistake like a misspelled variable name or if one of our greta arrays has the wrong shape.
@@ -182,8 +131,7 @@ The rest of the vignette explains step-by-step how to build, visualise and fit a
 
 Here's the whole script to specify and fit the model:
 
-
-``` r
+```{r first_model, eval = FALSE}
 library(greta)
 
 # data
@@ -217,8 +165,7 @@ draws <- mcmc(m, n_samples = 1000)
 
 The first section of the script takes the iris data (which is automatically loaded) and converts the two columns we care about into greta arrays:
 
-
-``` r
+```{r data}
 x <- as_data(iris$Petal.Length)
 y <- as_data(iris$Sepal.Length)
 ```
@@ -227,78 +174,20 @@ The greta function `as_data()` converts other R objects into greta arrays. In th
 
 E.g. we can convert the first 5 rows and 4 columns of the iris dataframe, and print the result:
 
-
-``` r
+```{r print_greta_array}
 as_data(iris[1:5, 1:4])
-```
-
-```
-greta array <data>
-```
-
-```
-
-```
-
-```
-     [,1] [,2] [,3] [,4]
-[1,]  5.1  3.5  1.4  0.2
-[2,]  4.9  3.0  1.4  0.2
- [ reached 'max' / getOption("max.print") -- omitted 3 rows ]
-```
-
-```
-
-```
-
-```
-ℹ 10 more values
-Use `print(n = ...)` to see more values
 ```
 
 Whenever `as_data()` converts logical values to greta arrays, it converts them to 1s (for `TRUE`) and 0s (for `FALSE`). E.g. if we first convert the last column of `iris` from a factor into a logical vector, we can see this:
 
-
-``` r
+```{r logical_data}
 (is_setosa <- iris$Species[c(1, 41, 81, 121)] == "setosa")
-```
-
-```
-[1]  TRUE  TRUE FALSE FALSE
-```
-
-``` r
 as_data(is_setosa)
 ```
 
-```
-greta array <data>
-```
-
-```
-
-```
-
-```
-     [,1]
-[1,]    1
-[2,]    1
-[3,]    0
-[4,]    0
-```
-
-```
-
-```
-
 You can also see from this example that greta arrays always consider a vector as either a column vector (the default) or a row vector, and greta arrays always have at least two dimensions:
-
-``` r
+```{r dim}
 dim(as_data(is_setosa))
-```
-
-```
-[1] 4 1
 ```
 
 #### explicit vs. automatic conversion
@@ -309,87 +198,15 @@ For many models, we don't *have* to explicitly convert data to greta arrays, the
 
 greta also provides some convenience functions to generate fixed numeric values. `ones()` and `zeros()` create greta arrays filled with either 1 or zero, and with the specified dimensions:
 
-
-``` r
+```{r structures}
 ones(1, 3)
-```
-
-```
-greta array <data>
-```
-
-```
-
-```
-
-```
-     [,1] [,2] [,3]
-[1,]    1    1    1
-```
-
-```
-
-```
-
-``` r
 zeros(2, 2)
-```
-
-```
-greta array <data>
-```
-
-```
-     [,1] [,2]
-[1,]    0    0
-[2,]    0    0
-```
-
-```
-
 ```
 The `greta_array()` function generalises this to let you create greta arrays with any values, in the same way as R's `array()` function:
 
-
-``` r
+```{r greta_array}
 greta_array(pi, dim = c(2, 2))
-```
-
-```
-greta array <data>
-```
-
-```
-
-```
-
-```
-         [,1]     [,2]
-[1,] 3.141593 3.141593
-[2,] 3.141593 3.141593
-```
-
-```
-
-```
-
-``` r
 greta_array(0:1, dim = c(3, 3))
-```
-
-```
-greta array <data>
-```
-
-```
-     [,1] [,2] [,3]
-[1,]    0    1    0
-[2,]    1    0    1
-[3,]    0    1    0
-```
-
-```
-
 ```
 
 `greta_array()` is just a thin wrapper around `array()`, provided for convenience. A command like `greta_array(<some arguments>)` has exactly the same effect as: `as_data(array<some arguments>)`.
@@ -399,8 +216,7 @@ greta array <data>
 ### Variables and priors
 
 The second section of the script creates three greta arrays to represent the parameters in our model:
-
-``` r
+```{r variables}
 int <- normal(0, 1)
 coef <- normal(0, 3)
 sd <- student(3, 0, 1, truncation = c(0, Inf))
@@ -412,76 +228,21 @@ Each of these is a variable greta array, and each is assumed *a priori* (before 
 
 If we were carrying out a frequentist analysis of this model, we could create variable greta arrays (values we want to learn) without probability distributions using the `variable()` function. E.g. in a frequentist version of the model we could create `int` with:
 
-
-``` r
+```{r int_variable}
 (int <- variable())
-```
-
-```
-greta array <variable>
-```
-
-```
-
-```
-
-```
-     [,1]
-[1,]  ?  
-```
-
-```
-
 ```
 
 `variable()` has three arguments. The first two arguments determine the constraints on this parameter; we left them at their default setting of `lower = -Inf, upper = Inf` meaning the variables can take any value on the real number line. The third argument gives the dimensions of the greta array to return, in this case we left it at its default value of 1x1 (a scalar).
 
 We can create a variable constrained between two values by specifying `lower` and `upper`. So we could have created the positive variable `sd` (the standard deviation of the likelihood) with:
 
-
-``` r
+```{r positive_variable}
 (sd <- variable(lower = 0))
 ```
 
-```
-greta array <variable>
-```
-
-```
-
-```
-
-```
-     [,1]
-[1,]  ?  
-```
-
-```
-
-```
-
 If we had instead wanted a 2x3 array of positive variables we could have created it like this:
-
-``` r
+```{r matrix_variable}
 variable(lower = 0, dim = c(2, 3))
-```
-
-```
-greta array <variable>
-```
-
-```
-
-```
-
-```
-     [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
-```
-
-```
-
 ```
 
 #### variables with probability distributions
@@ -494,26 +255,8 @@ Both `int` and `coef` were given zero-mean normal distributions, which are a com
 
 Some of greta's probability distributions (those that are continuous and univariate) can be specified as truncated distributions. By modifying the `truncation` argument, we can state that the resulting distribution should be truncated between the two truncation bounds. So to create a standard normal distribution truncated between -1 and 1 we can do:
 
-
-``` r
+```{r truncated1}
 (z <- normal(0, 1, truncation = c(-1, 1)))
-```
-
-```
-greta array <variable following a normal distribution>
-```
-
-```
-
-```
-
-```
-     [,1]
-[1,]  ?  
-```
-
-```
-
 ```
 greta will account for this truncation when calculating the density of this distribution; rescaling it to be a valid probability distribution. We can only truncate to within the support of the distribution; e.g. greta will throw an error if we try to truncate a lognormal distribution (which must be positive) to have a lower bound of -1. 
 
@@ -523,46 +266,15 @@ greta will account for this truncation when calculating the density of this dist
 
 The third section of the script uses mathematical operators to combine some of our parameters and data, to calculate the predicted sepal lengths, for a given parameter set:
 
-
-``` r
+```{r linear_predictor}
 mean <- int + coef * x
 ```
 
 Because `int` and `coef` are both scalars, the resulting greta array `mean` has the same dimensions as `x`; a column vector with 150 elements:
 
-
-``` r
+```{r mean}
 dim(mean)
-```
-
-```
-[1] 150   1
-```
-
-``` r
 head(mean)
-```
-
-```
-greta array <operation>
-```
-
-```
-
-```
-
-```
-     [,1]
-[1,]  ?  
-[2,]  ?  
-[3,]  ?  
-[4,]  ?  
-[5,]  ?  
-[6,]  ?  
-```
-
-```
-
 ```
 
 greta arrays can be manipulated using R's standard arithmetic, logical and relational operators; including `+`, `*` and many others. The [`?greta::operators`](https://greta-dev.github.io/greta/reference/operators.html) help file lists the operators that are implemented for greta arrays. You can also use a lot of common R functions for numeric data, such as `sum()`, `log()` and others. the available functions are listed in the [`?greta::functions`](https://greta-dev.github.io/greta/reference/functions.html) helpfile. All of these mathematical manipulations of greta arrays produce 'operation' greta arrays.
@@ -571,124 +283,42 @@ greta arrays can be manipulated using R's standard arithmetic, logical and relat
 
 We can use R's extract and replace syntax (using `[`) on greta arrays, just like with R's vectors, matrices and arrays. E.g. to extract elements from `mean` we can do:
 
-
-``` r
+```{r extract}
 mean[1:3]
-```
-
-```
-greta array <operation>
-```
-
-```
-
-```
-
-```
-     [,1]
-[1,]  ?  
-[2,]  ?  
-[3,]  ?  
-```
-
-```
-
 ```
 
 We can assign values from one greta array to another too. For example, if we wanted to create a matrix that has random normal variables in the first column, but zeros everywhere else, we could do:
 
-
-``` r
+```{r replace}
 z <- zeros(4, 3)
 z[, 1] <- normal(0, 1, dim = 4)
 z
 ```
 
-```
-greta array <operation>
-```
-
-```
-
-```
-
-```
-     [,1] [,2] [,3]
-[1,]  ?   0    0   
-[2,]  ?   0    0   
-[3,]  ?   0    0   
-[4,]  ?   0    0   
-```
-
-```
-
-```
-
-```
-ℹ 2 more values
-Use `print(n = ...)` to see more values
-```
-
 R's subset operator `[` has an argument `drop`, which determines whether to reduce the number of dimensions of a array or matrix when the object has zero elements in that dimension. By default, `drop = TRUE` for R objects, so matrices are automatically converted into vectors (which have dimension `NULL`) if you take out a single column:
 
-
-``` r
+```{r drop}
 z <- matrix(1, nrow = 2, ncol = 2)
 dim(z[, 1])
-```
-
-```
-NULL
-```
-
-``` r
 dim(z[, 1, drop = FALSE])
-```
-
-```
-[1] 2 1
 ```
 
 greta arrays must always have two dimensions, so greta always acts as though `drop = FALSE`: 
 
-
-``` r
+```{r drop_greta}
 z_greta <- as_data(z)
 dim(z_greta[, 1])
-```
-
-```
-[1] 2 1
 ```
 
 #### Functions
 
 We can write our own functions for greta arrays, using the existing operators and functions. For example, we could define the [inverse hyperbolic tangent function](https://en.wikipedia.org/wiki/Inverse_hyperbolic_function#Inverse_hyperbolic_tangent) for greta arrays like this:
 
-
-``` r
+```{r function1}
 atanh <- function (z)
   (log(1 + z) - log(1 - z)) / 2
 
 atanh(z_greta)
-```
-
-```
-greta array <operation>
-```
-
-```
-
-```
-
-```
-     [,1] [,2]
-[1,]  ?    ?  
-[2,]  ?    ?  
-```
-
-```
-
 ```
 
 <hr>
@@ -698,8 +328,7 @@ greta array <operation>
 So far, we have created greta arrays representing the variables in our model (with prior distributions) and created other greta arrays from them and some fixed, *independent* data. To perform statistical inference on this model, we also need to link it to some observed *dependent* data. By comparing the sepal lengths predicted under different parameter values with the observed sepal lengths, we can estimate the most plausible values of those parameters. We do that by defining a likelihood for the observed sepal length data `y`.
 
 By defining a likelihood over observed data, we are stating that these observed data are actually a random sample from some probability distribution, and we're trying to work out the parameters of that distribution. In greta we do that with the `distribution()` assignment function:
-
-``` r
+```{r likelihood}
 distribution(y) <- normal(mean, sd)
 ```
 
@@ -711,11 +340,18 @@ With the syntax `distribution(<lhs>) <- <rhs>`, we are stating that the data gre
 
 Now all of the greta arrays making up the model have been created, we need to combine them and set up the model so that we can sample from it, using `model()`:
 
+```{r hidden_model, echo = FALSE}
+x <- as_data(iris$Petal.Length)
+y <- as_data(iris$Sepal.Length)
+int <- normal(0, 1)
+coef <- normal(0, 3)
+sd <- student(3, 0, 1, truncation = c(0, Inf))
+mean <- int + coef * x
+distribution(y) <- normal(mean, sd)
+```
 
 
-
-
-``` r
+```{r define_model}
 m <- model(int, coef, sd)
 ```
 
@@ -726,11 +362,17 @@ m <- model(int, coef, sd)
 ### Plotting
 
 greta provides a plot function for greta models to help you visualise and check the model before sampling from it.
-
-``` r
+```{r plot, eval = FALSE}
 plot(m)
 ```
-
+```{r plot_hidden, echo = FALSE} 
+gr <- plot(m)
+DiagrammeR::export_graph(attr(gr, "dgr_graph"),
+                         file_name = "figures/full_graph.png",
+                         file_type = "png",
+                         width = 958 * 2,
+                         height = 450 * 2)
+```
 <p><img src="figures/full_graph.png" width="800" /></p>
 
 The greta arrays in your workspace that are used in the model are all represented as nodes (shapes) with names. These are either data (squares; `x` and `y`), variables (large circles;  `int`, `coef`, `sd`) or the results of operations (small circles; `mean`). The operations used to create the operation greta arrays are printed on the arrows from the arrays they were made from.
@@ -744,12 +386,43 @@ The fourth type of node (diamonds) represents probability distributions. These h
 
 For example, a plot of just the prior distribution over `coef` (defined as `coef <- normal(0, 3)`) shows the parameters as data leading into the normal distribution, and a dashed arrow leading out to the distribution's value, the variable `coef`:
 
-
+```{r plot_coef, echo = FALSE}
+coef <- normal(0, 3)
+m_coef <- model(coef)
+gr <- plot(m_coef)
+DiagrammeR::export_graph(attr(gr, "dgr_graph"),
+                         file_name = "figures/coef_graph.png",
+                         file_type = "png",
+                         width = 325 * 2,
+                         height = 123 * 2)
+```
 <p><img src="figures/coef_graph.png" width="500" /></p>
 
 It's the same for the model likelihood, but this time the distribution's parameters are a variable (`sd`) and the result of an operation (`mean`), and the distribution's value is given by data (the observed sepal lengths `y`):
 
+```{r plot_likelihood, echo = FALSE}
+sd <- variable()
+y <- as_data(iris$Sepal.Length)
+mean <- ones(150)
+distribution(y) <- normal(mean, sd)
+m_likelihood <- model(sd)
+gr <- plot(m_likelihood)
+dgr <- attr(gr, "dgr_graph")
+# make the mean look like an operation node
+idx <- which(dgr$nodes_df$label == 'mean\n')
+dgr$nodes_df$shape[idx] <- 'circle'
+dgr$nodes_df$fillcolor[idx] <- 'lightgray'
+dgr$nodes_df$color[idx] <- 'lightgray'
+dgr$nodes_df$width[idx] <- 0.2
+dgr$nodes_df$height[idx] <- 0.2
+dgr$nodes_df <- dgr$nodes_df[c(3, 1, 2, 4), ]
+DiagrammeR::export_graph(dgr,
+                         file_name = "figures/likelihood_graph.png",
+                         file_type = "png",
+                         width = 325 * 2,
+                         height = 105 * 2)
 
+```
 <p><img src="figures/likelihood_graph.png" width="500" /></p>
 
 <hr>
@@ -760,8 +433,7 @@ When defining the model, greta combines all of the distributions together to def
 
 Now we have a greta model that will give us the joint density for a candidate set of values, so we can use that to carry out inference on the model. We do that using an Markov chain Monte Carlo (MCMC) algorithm to sample values of the parameters we're interested in, using the `mcmc()` function:
 
-
-``` r
+```{r mcmc, message = FALSE, results = "hide", progress = FALSE}
 draws <- mcmc(m, n_samples = 1000)
 ```
 
@@ -769,48 +441,18 @@ Here we're using 1000 steps of the static Hamiltonian Monte Carlo (HMC) algorith
 
 `draws` is a `greta_mcmc_list` object, which inherits from the coda R package's `mcmc.list` object. So we can use functions from coda, or one of the many other MCMC software packages that use this format, to plot and summarise the MCMC samples.
 
-
-``` r
+```{r coda_summary}
 summary(draws)
-```
-
-```
-
-Iterations = 1:1000
-Thinning interval = 1 
-Number of chains = 2 
-Sample size per chain = 1000 
-
-1. Empirical mean and standard deviation for each variable,
-   plus standard error of the mean:
-
-       Mean      SD  Naive SE Time-series SE
-int  4.2814 0.07961 0.0017801      0.0021163
-coef 0.4144 0.01934 0.0004324      0.0004993
-sd   0.4108 0.02442 0.0005460      0.0006635
-
-2. Quantiles for each variable:
-
-      2.5%    25%    50%    75%  97.5%
-int  4.130 4.2277 4.2792 4.3361 4.4431
-coef 0.376 0.4018 0.4146 0.4269 0.4527
-sd   0.367 0.3933 0.4100 0.4270 0.4619
 ```
 The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates
 
-
-``` r
+```{r mcmcvis, echo = TRUE, message = FALSE, out.width = c('400px', '400px'), fig.height=4, fig.width=5, fig.show='hold'}
 library (bayesplot)
 # set theme to avoid issues with fonts
 ggplot2::theme_set(ggplot2::theme_bw())
 mcmc_trace(draws, facet_args = list(nrow = 3, ncol = 1))
 mcmc_intervals(draws)
 ```
-
-<div class="figure">
-<img src="get_started-mcmcvis-1.png" alt="plot of chunk mcmcvis" width="400px" /><img src="get_started-mcmcvis-2.png" alt="plot of chunk mcmcvis" width="400px" />
-<p class="caption">plot of chunk mcmcvis</p>
-</div>
 
 If your model is taking a long time whilst in the sampling phase and you want to take a look at the samples. You can stop the sampler (e.g. using the stop button in RStudio) and then retrieve the samples drawn so far, by using `stashed_samples()`. Note that this won't return anything if you stop the model during the warmup phase (since those aren't valid posterior samples) or if the sampler completed successfully.
 

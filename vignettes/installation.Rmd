@@ -43,8 +43,7 @@ dependencies yourself when you need to (for example, offline).
 # Most users: nothing to install
 
 By default greta installs its Python dependencies automatically using
-[`uv`](https://docs.astral.sh/uv/) (via reticulate). The **first time you use
-greta in a session** -- for example when you create a greta array or use a
+[`uv`](https://docs.astral.sh/uv/) (via reticulate). The **first time you use greta in a session** -- for example when you create a greta array or use a
 distribution -- reticulate downloads and sets up a compatible Python,
 TensorFlow, and TensorFlow Probability for you.
 
@@ -87,7 +86,7 @@ greta resolves which Python to use in this order:
 
 If you have upgraded from an older greta that used a `greta-env-tf2` conda
 environment (created by `install_greta_deps()`), greta detects and keeps using
-it, so upgrading does not change your setup.
+it. So, upgrading to greta 0.6.0 does not change your setup.
 
 To see which Python environment greta is using right now — and which it
 will use after you restart R — run:

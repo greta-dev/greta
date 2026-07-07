@@ -1,0 +1,173 @@
+url: https://greta-dev.github.io/greta/
+
+development:
+  mode: auto
+
+template:
+  bootstrap: 5
+  opengraph:
+    image:
+      src: man/figures/name_icon_on_purple.png
+      alt: "greta"
+  bslib:
+    primary: "#A379CC"
+    code-bg: "#f4f0f9"
+    base_font: {google: "Roboto"}
+    heading_font: {google: "Roboto"}
+    code_font: {google: "Roboto Mono"}
+
+home:
+  sidebar: false
+  title: greta — simple and scalable statistical modelling in R
+  description: >
+    greta lets you write statistical models interactively in native R code,
+    then sample from them efficiently using TensorFlow and TensorFlow
+    Probability.
+
+navbar:
+  structure:
+    left: [installation, get-started, reference, examples, analyses, more, news, faq]
+    right: [search, forum, github]
+  components:
+    installation:
+      text: Installation
+      href: articles/installation.html
+    get-started:
+      text: get started
+      href: articles/get_started.html
+    reference:
+      text: docs
+      href: reference/index.html
+    examples:
+      text: examples
+      href: articles/example_models.html
+    analyses:
+      text: analyses
+      menu:
+        - text: eight schools
+          href: articles/analyses/eight_schools.html
+        - text: election 88
+          href: articles/analyses/election_88.html
+    more:
+      text: more
+      menu:
+        - text: why 'greta'?
+          href: articles/webpages/why_greta.html
+        - text: technical details
+          href: articles/webpages/technical_details.html
+        - text: software
+          href: articles/webpages/software.html
+        - text: contribute to greta
+          href: articles/webpages/contribute.html
+    faq:
+      text: FAQ
+      href: articles/faq.html
+    forum:
+      icon: fa-comments
+      href: https://forum.greta-stats.org
+      aria-label: greta forum
+    github:
+      icon: fa-github
+      href: https://github.com/greta-dev/greta
+      aria-label: GitHub
+
+reference:
+  - title: creating greta arrays
+    desc: Create greta arrays representing observed data or fixed values
+    contents:
+      - structures
+      - as_data
+
+  - title: variables & distributions
+    desc: Create variables and assign probability distributions over greta arrays
+    contents:
+      - variable
+      - distributions
+      - distribution
+      - mixture
+      - joint
+  - title: manipulating greta arrays
+    desc: Functions and operations for modifying greta arrays
+    contents:
+      - operators
+      - functions
+      - extract-replace-combine
+      - transforms
+      - overloaded
+
+  - title: modelling
+    desc: Define and visualise models and fit them to data
+    contents:
+      - model
+      - inference
+      - calculate
+      - samplers
+      - optimisers
+
+  - title: extending greta
+    desc: Write R packages that extend or use greta
+    contents:
+      - internals
+  - title: Misc
+    desc: Misc functions to sort through later
+    contents:
+      - greta
+      - greta_notes_tf_num_error
+      - run_optimiser
+      - simulate.greta_model
+      - gpu_cpu
+      - chol2symm
+      - chol.greta_array
+      - as.greta_model
+      - as.unknowns
+      - dim<-.unknowns
+      - dim.node
+      - is.greta_mcmc_list
+      - print.greta_deps_spec
+      - is.greta_array
+      - print.greta_mcmc_list
+      - print.greta_deps_spec
+      - print.greta_mcmc_list
+
+  - title: Installation helpers
+    desc: Functions for managing installation of dependencies
+    contents:
+      - destroy_greta_deps
+      - greta_remove_all_deps
+      - greta_create_conda_env
+      - greta_deps_receipt
+      - greta_deps_spec
+      - greta_sitrep
+      - greta_deps_tf_tfp
+      - greta_install_miniconda
+      - install_greta_deps
+      - greta_list_py_modules
+      - greta_set_install_logfile
+      - write_greta_install_log
+      - open_greta_install_log
+      - greta_set_python_uv
+      - reinstallers
+  # - title: helper functions
+    # desc:
+
+articles:
+  - title: Get started
+    contents:
+      - get_started
+      - installation
+  - title: Examples
+    contents:
+      - example_models
+  - title: Analyses
+    contents:
+      - analyses/eight_schools
+      - analyses/election_88
+  - title: More
+    contents:
+      - webpages/why_greta
+      - webpages/technical_details
+      - webpages/software
+      - webpages/contribute
+  - title: FAQ
+    contents:
+      - faq

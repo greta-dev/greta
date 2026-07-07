@@ -1,0 +1,101 @@
+
+
+<div id="head" style="background-image: url('reference/figures/greta-header.png');">
+<div id="header-content" class="container">
+<div class="row">
+<img id="main-icon" src="reference/figures/main_icon.png" alt="greta" />
+</div>
+<div class="row">
+<p id="main-icon-text">simple and scalable statistical modelling in R</p>
+</div>
+</div>
+</div>
+
+<div id="bullets">
+<div class="container">
+<div class="row">
+<div class="col-md-4">
+<p class="bullet"><b>simple</b></p>
+greta models are written right in R, so there's no need to learn another language like BUGS or Stan
+</div>
+<div class="col-md-4">
+<p class="bullet"><b>scalable</b></p>
+greta uses <a href="https://www.tensorflow.org/">Google TensorFlow</a> so it's fast even on massive datasets, and runs on CPU clusters and GPUs
+</div>
+<div class="col-md-4">
+<p class="bullet"><b>extensible</b></p>
+it's easy to write your own R functions and packages using greta
+</div>
+</div>
+</div>
+</div>
+
+<div id="panel1" class="resource">
+<div class="container">
+<div class="row text-center">
+<div class="col-md-3">
+<span class="fa fa-arrow-circle-right"></span> <a href="articles/get_started.html">get started</a>
+</div>
+<div class="col-md-3">
+<span class="fa fa-file-code"></span> <a href="articles/example_models.html">example models</a>
+</div>
+<div class="col-md-3">
+<span class="fa fa-book"></span> <a href="reference/index.html">package docs</a>
+</div>
+</div>
+</div>
+</div>
+
+<div id="example">
+<div class="container">
+
+## Basic example
+
+Here's a Bayesian linear regression model for the `iris` data using greta:
+
+<div class="row">
+<div class="col-md-6">
+
+
+``` r
+x <- iris$Petal.Length
+y <- iris$Sepal.Length
+```
+
+
+``` r
+library(greta)
+
+int <- normal(0, 5)
+coef <- normal(0, 3)
+sd <- lognormal(0, 3)
+
+mean <- int + coef * x
+distribution(y) <- normal(mean, sd)
+
+m <- model(int, coef, sd)
+```
+
+</div>
+<div class="col-md-6">
+
+
+``` r
+draws <- mcmc(
+  m,
+  n_samples = 1000,
+  chains = 4
+  )
+bayesplot::mcmc_trace(draws)
+```
+
+<div class="figure" style="text-align: center">
+<img src="man/figures/vis-1.png" alt="plot of chunk vis"  />
+<p class="caption">plot of chunk vis</p>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>

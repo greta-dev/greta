@@ -1,0 +1,35 @@
+{{! Override of pkgdown's BS5 navbar.html (pkgdown 2.2.0). }}
+{{! Only change from the stock template: the brand shows the greta wordmark }}
+{{! image (served from pkgdown/assets/) instead of the "greta" text. }}
+{{! Re-sync with pkgdown's own templates/navbar.html when upgrading pkgdown. }}
+{{#navbar}}
+<nav class="navbar navbar-expand-lg fixed-top {{#bg}}bg-{{{.}}}{{/bg}}" {{#type}}data-bs-theme="{{{.}}}"{{/type}} aria-label="{{#translate}}{{site_nav}}{{/translate}}">
+  <div class="container">
+    {{#includes}}{{{before_title}}}{{/includes}}
+    <a class="navbar-brand me-2" href="{{#site}}{{root}}{{/site}}index.html"><img src="{{#site}}{{root}}{{/site}}name_icon_on_white.png" class="navbar-logo" alt="greta"></a>
+
+    <small class="nav-text {{#development}}text-{{version_label}}{{/development}} me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{#development}}{{version_tooltip}}{{/development}}">{{#package}}{{version}}{{/package}}</small>
+
+    {{#includes}}{{{before_navbar}}}{{/includes}}
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="{{#translate}}{{toggle_nav}}{{/translate}}">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar" class="collapse navbar-collapse ms-3">
+      {{#left}}
+      <ul class="navbar-nav me-auto">
+      {{{.}}}
+      </ul>
+      {{/left}}
+
+      {{#right}}
+      <ul class="navbar-nav">
+      {{{.}}}
+      </ul>
+      {{/right}}
+    </div>
+
+    {{#includes}}{{{after_navbar}}}{{/includes}}
+  </div>
+</nav>
+{{/navbar}}
