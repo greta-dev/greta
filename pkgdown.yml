@@ -12,7 +12,7 @@ articles:
   webpages/software: webpages/software.html
   webpages/technical_details: webpages/technical_details.html
   webpages/why_greta: webpages/why_greta.html
-last_built: 2026-07-07T12:59Z
+last_built: 2026-07-07T13:18Z
 urls:
   reference: https://greta-dev.github.io/greta/reference
   article: https://greta-dev.github.io/greta/articles
