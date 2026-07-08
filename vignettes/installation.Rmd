@@ -80,9 +80,11 @@ greta resolves which Python to use in this order:
 
 1. The `RETICULATE_PYTHON` environment variable, which is usually set in
 `~/.Renviron` or your shell environment.
-2. Stored preference - set with `greta_set_python_uv()`, `greta_set_python_conda_env()`, or `greta_set_python_path()`.
+2. Stored preference - set with `greta_set_python()`.
 3. Auto-detected `greta-env-tf2` conda environment - created by `install_greta_deps()`.
-4. The managed uv environment - the default, no setup needed.
+4. The managed (uv) environment - the default, no setup needed. It's an
+isolated Python environment that reticulate creates and manages for you
+using the uv tool, so you don't need to install anything yourself.
 
 If you have upgraded from an older greta that used a `greta-env-tf2` conda
 environment (created by `install_greta_deps()`), greta detects and keeps using
@@ -95,16 +97,16 @@ will use after you restart R — run:
 greta_sitrep()
 ```
 
-You can switch environments at any time with these helpers, then **restart R**.
-Each one reports what greta will resolve to on its next load:
+You can switch environments at any time with `greta_set_python()`, then
+**restart R**. Each call reports what greta will resolve to on its next load:
 
 ```{r greta-set, eval = FALSE}
-# use the uv-managed environment
-greta_set_python_uv()
+# use the managed (uv) environment (the default)
+greta_set_python()
 # use the "greta-env-tf2" conda environment
-greta_set_python_conda_env()
+greta_set_python("conda")
 # use a specific Python
-greta_set_python_path("/path/to/python")
+greta_set_python("path", path = "/path/to/python")
 # clear the choice; resolve automatically
 greta_reset_python()
 ```
@@ -131,8 +133,8 @@ example `~/.Renviron`, which you can open with
 The automatic (uv) setup covers most users. You might instead want to install
 into a dedicated conda environment when you:
 
-- are on an offline or restricted network (see [Offline or restricted-network
-  installation](#offline-or-restricted-network-installation)),
+- are on an offline or restricted network (see [Using greta
+  offline](#using-greta-offline)),
 - need a specific, pinned, reproducible set of versions, or
 - are setting up GPU / CUDA support.
 
@@ -148,7 +150,7 @@ Follow any prompts, then **restart R**. To make greta use this environment, set
 it as your preference (then restart R again):
 
 ```{r use-conda, eval = FALSE}
-greta_set_python_conda_env()
+greta_set_python("conda")
 ```
 
 Using a conda environment isolates these exact Python modules from other Python
@@ -183,6 +185,23 @@ and the TFP release notes. Inspect it with:
 View(greta_deps_tf_tfp)
 ```
 
+To persist a version choice, store it with `greta_set_deps()`. The stored
+versions are then used by both the managed (uv) environment (installed on the
+next load) and `install_greta_deps()` (as its default `deps`):
+
+```{r set-deps, eval = FALSE}
+greta_set_deps(
+  greta_deps_spec(
+    tf_version = "2.14.0",
+    tfp_version = "0.22.1",
+    python_version = "3.10"
+  )
+)
+
+# clear the stored choice and return to greta's defaults
+greta_remove()
+```
+
 `install_greta_deps()` also takes `timeout` (minutes to wait before a component
 times out, default 5) and `restart` (`"ask"` (default), `"force"`, or `"no"`).
 
@@ -199,14 +218,20 @@ it for a Python version compatible with the requested TF and TFP, then installs
 the TF and TFP modules. In interactive RStudio sessions it then asks whether to
 restart R.
 
-# Offline or restricted-network installation
+# Using greta offline
 
 Both the automatic (uv) setup and `install_greta_deps()` download packages from
 the internet, so a blocked or air-gapped network will stop either approach. If
 your network blocks PyPI but allows conda, the conda route via
 `install_greta_deps()` may work where uv does not.
 
-## Point greta at a pre-provisioned environment on disk
+There are three escape routes, in order of robustness: point greta at a Python
+environment that is already on disk, prime the managed (uv) environment once
+while online, or pin dependency versions so an offline environment matches
+what greta expects. `greta_sitrep()` reports whether your current setup is
+ready to start offline.
+
+## Point greta at an already-installed environment on disk
 
 If you have a working Python with TF and TFP installed by some other means (for
 example, provided by your institution, or copied onto an air-gapped machine),
@@ -214,48 +239,88 @@ point greta straight at it and restart R. These routes only ever *read* what is
 already on disk — they never download anything — so they work with no network at
 all.
 
-`greta_set_python_path()` accepts either a Python binary or an environment
-directory (a virtualenv or conda prefix). Given a directory, greta looks for
-`bin/python` inside it (`Scripts/python.exe` on Windows):
+`greta_set_python("path", ...)` accepts either a Python binary or an
+environment directory (a virtualenv or conda prefix). Given a directory, greta
+looks for `bin/python` inside it (`Scripts/python.exe` on Windows):
 
 ```{r offline, eval = FALSE}
 # point at a specific Python binary
-greta_set_python_path("/opt/python-envs/greta/bin/python")
+greta_set_python("path", path = "/opt/python-envs/greta/bin/python")
 
 # or point at the environment directory and let greta find the binary
-greta_set_python_path("/opt/python-envs/greta")
+greta_set_python("path", path = "/opt/python-envs/greta")
 
 # on Windows, an environment directory works the same way; greta looks for
 # Scripts\\python.exe inside it
-greta_set_python_path("C:/python-envs/greta")
+greta_set_python("path", path = "C:/python-envs/greta")
 ```
 
 If your environment is a conda environment, you can instead select it by name
 (this also never downloads anything):
 
 ```{r offline-conda, eval = FALSE}
-greta_set_python_conda_env("greta-env-tf2")
+greta_set_python("conda", name = "greta-env-tf2")
 ```
 
 Alternatively, set the `RETICULATE_PYTHON` environment variable (for example in
 `~/.Renviron`) to the Python binary, which takes precedence over any stored
 preference.
 
-### Priming the managed (uv) environment for offline use
+## Prime the managed (uv) environment while online
 
 If you use the default managed (uv) environment, greta starts offline once
-reticulate's uv cache has been populated once (while online). On its next start
-greta detects the populated cache and enables uv's offline mode automatically,
-so it no longer reaches out to PyPI. If you need to override this, set the
-`UV_OFFLINE` environment variable yourself before loading greta.
+reticulate's uv cache has been populated once (while online): run
+`library(greta)` and use it once (for example `normal(0, 1)`), and you are
+done. On its next start greta detects the populated cache and enables uv's
+offline mode automatically, so it no longer reaches out to PyPI.
+
+You can override this yourself by setting the `UV_OFFLINE` environment
+variable before loading greta; greta never touches a value you have already
+set:
+
+```{r offline-override, eval = FALSE}
+# force offline mode: e.g. before greta detects the cache, or on a machine
+# where you copied the cache over
+Sys.setenv(UV_OFFLINE = "1")
+
+# force uv back online: for example to refresh the environment
+Sys.setenv(UV_OFFLINE = "0")
+```
+
+To make either choice persistent, set `UV_OFFLINE=1` (or `UV_OFFLINE=0`) in
+`~/.Renviron` instead (no `Sys.setenv()` needed there).
+
+## Pin dependency versions
+
+If someone else installs a Python environment for your offline machine, pin
+the versions greta expects with `greta_set_deps()` so the two match (see
+[Choosing specific versions](#choosing-specific-versions)). The stored
+versions are used by both the managed (uv) environment and
+`install_greta_deps()`.
+
+## If the internet drops mid-workflow
+
+If greta errors on first use with a message from uv like `error: Failed to
+fetch` (or, with `UV_OFFLINE=1` set, `Network connectivity is disabled, but
+the requested data wasn't found in the cache`), uv tried to resolve
+dependencies without a working connection. To recover:
+
+1. If greta's environment had already been installed on this machine, force
+   offline mode with `Sys.setenv(UV_OFFLINE = "1")` (or in `~/.Renviron`),
+   then restart R: uv then resolves from its cache without touching the
+   network.
+2. If it had not, reconnect once and use greta (for example `normal(0, 1)`)
+   to prime the environment; after that greta starts offline automatically.
+3. If you cannot reconnect, point greta at an already-installed Python with
+   `greta_set_python("path", path = ...)` as above, and restart R.
 
 # Troubleshooting
 
 Installation doesn't always go to plan. Some things to try:
 
-- **Restart R.** After changing the environment (with `install_greta_deps()` or
-  any of the `greta_set_python_*()` helpers), you must restart R so greta can
-  connect to the chosen Python.
+- **Restart R.** After changing the environment (with `install_greta_deps()`
+  or `greta_set_python()`), you must restart R so greta can connect to the
+  chosen Python.
 
 - **Run `greta_sitrep()`.** It reports the resolved backend and the versions of
   Python, TF, and TFP, which often points straight at the problem.
@@ -274,8 +339,8 @@ Installation doesn't always go to plan. Some things to try:
   everything at once. Then reinstall with `install_greta_deps()`.
 
 - **Check internet access.** Installing dependencies needs a connection, and some
-  networks block package downloads. See [Offline or restricted-network
-  installation](#offline-or-restricted-network-installation).
+  networks block package downloads. See [Using greta
+  offline](#using-greta-offline).
 
 If the helpers don't work, you can install the Python modules yourself into a
 conda environment:
@@ -295,4 +360,4 @@ reticulate::conda_install(
 )
 ```
 
-Then point greta at it with `greta_set_python_conda_env()` and restart R.
+Then point greta at it with `greta_set_python("conda")` and restart R.

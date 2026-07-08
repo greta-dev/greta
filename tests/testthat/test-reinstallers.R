@@ -173,3 +173,18 @@ test_that("greta_remove('preference') clears a stored preference", {
   expect_true(res)
   expect_null(get_greta_python_backend())
 })
+
+test_that("greta_remove('all') clears stored preferences including deps", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  local_mocked_bindings(
+    remove_greta_env_impl = function(...) FALSE,
+    remove_miniconda_impl = function(...) FALSE,
+    remove_reticulate_uv_cache_impl = function(...) FALSE
+  )
+  set_greta_python_backend("managed")
+  suppressMessages(greta_set_deps(greta_deps_spec()))
+
+  suppressMessages(greta_remove(ask = FALSE))
+  expect_null(get_greta_python_backend())
+  expect_null(get_greta_stored_deps())
+})

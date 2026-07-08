@@ -2,8 +2,9 @@
 #'
 #' This is a helper function to install specified versions of Python
 #' dependencies needed for greta. By default, greta version >= 0.6.0 now uses
-#' reticulate's uv-managed Python to automatically identify dependencies. You
-#' can change over to this new approach with [greta_set_python_uv()], which is
+#' reticulate's managed (uv) Python environment to automatically identify
+#' dependencies. You can change over to this new approach with
+#' [greta_set_python()], which is
 #' now what we recommend. This has changed from where we would previously use
 #' `install_greta_deps()`.
 #'
@@ -33,7 +34,9 @@
 #'   [greta_deps_spec()] checks that the TF version is one greta supports;
 #'   compatible TFP and Python versions are resolved at install time. See
 #'   ?[greta_deps_spec()] for more information, and the data object
-#'   `greta_deps_tf_tfp` for known-good combinations.
+#'   `greta_deps_tf_tfp` for known-good combinations. If you have stored a
+#'   preference with [greta_set_deps()], it is used when `deps` is not
+#'   supplied.
 #'
 #' @param timeout maximum time in minutes until the installation for each
 #'    installation component times out and exits. Default is 5 minutes per
@@ -64,9 +67,9 @@
 #'  [uv](https://docs.astral.sh/uv/) (via the reticulate package) to install
 #'  TensorFlow and TensorFlow Probability on first use. To make greta use the
 #'  "greta-env-tf2" conda environment created here instead, use
-#'  [greta_set_python_conda_env()] (or set the `RETICULATE_PYTHON` environment
+#'  `greta_set_python("conda")` (or set the `RETICULATE_PYTHON` environment
 #'  variable to its Python before loading greta). See the "Installing
-#'  Dependencies" vignette and [greta_set_python_path()].
+#'  Dependencies" vignette and [greta_set_python()].
 #'
 #'  If you don't want to use conda or the "greta-env-tf2" conda environment, you
 #'  can install versions that you like, e.g., using [reticulate::py_install()].
@@ -102,6 +105,15 @@ install_greta_deps <- function(
   restart = c("ask", "force", "no"),
   ...
 ) {
+  if (missing(deps)) {
+    stored_deps <- get_greta_stored_deps()
+    if (!is.null(stored_deps)) {
+      cli::cli_inform(c(
+        "i" = "Using dependency versions stored with {.fun greta_set_deps}."
+      ))
+      deps <- stored_deps
+    }
+  }
   check_greta_deps_spec(deps)
 
   restart <- rlang::arg_match(
@@ -113,10 +125,9 @@ install_greta_deps <- function(
     "i" = "Most users do not need {.fun install_greta_deps}: greta installs \\
           TensorFlow and TensorFlow Probability automatically (via {.pkg uv}) \\
           on first use.",
-    "i" = "You can set this with {.fun greta_set_python_uv}",
     "i" = "Use {.fun install_greta_deps} to install a conda environment \\
-          (e.g. offline, or to pin \\ versions), then select it with \\
-          {.fun greta_set_python_conda_env}.",
+          (e.g. offline, or to pin versions), then select it with \\
+          {.code greta_set_python(\"conda\")}.",
     "i" = "See the installation vignette: {.vignette greta::installation}."
   ))
 
@@ -151,7 +162,7 @@ install_greta_deps <- function(
       cli::cli_warn(
         "Could not record the conda environment location; greta may not \\
         auto-detect it. Select it explicitly with \\
-        {.fun greta_set_python_conda_env}."
+        {.code greta_set_python(\"conda\")}."
       )
     }
   )
@@ -332,7 +343,8 @@ new_greta_deps_spec <- function(tf_version, tfp_version, python_version) {
 
 greta_py_require_args <- function(
   tf_version = greta_deps_default$tf,
-  tfp_version = greta_deps_default$tfp
+  tfp_version = greta_deps_default$tfp,
+  python_version = NULL
 ) {
   tf_minor <- sub("\\.[^.]*$", "", tf_version)
   tfp_minor <- sub("\\.[^.]*$", "", tfp_version)
@@ -341,7 +353,7 @@ greta_py_require_args <- function(
       paste0("tensorflow==", tf_minor, ".*"),
       paste0("tensorflow_probability==", tfp_minor, ".*")
     ),
-    python_version = greta_deps_default$python_range
+    python_version = python_version %||% greta_deps_default$python_range
   )
 }
 

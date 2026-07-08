@@ -13,15 +13,17 @@ greta_remove(
 \item{what}{What to remove. One of:
 \itemize{
 \item \code{"all"} (default): the \code{"greta-env-tf2"} conda environment, miniconda,
-reticulate's managed uv cache, and greta's stored Python preference. This
-is a "nuclear" reset that asks once, then removes everything it finds.
+reticulate's uv cache, and greta's stored preferences (the Python
+backend set via \code{\link[=greta_set_python]{greta_set_python()}}, and the dependency versions set
+via \code{\link[=greta_set_deps]{greta_set_deps()}}). This is a "nuclear" reset that asks once, then
+removes everything it finds.
 \item \code{"env"}: the \code{"greta-env-tf2"} conda environment.
 \item \code{"miniconda"}: the miniconda installation.
-\item \code{"uv_cache"}: reticulate's managed uv cache. Note this cache is shared by
+\item \code{"uv_cache"}: reticulate's uv cache. Note this cache is shared by
 all R packages that use reticulate's uv (it is not greta-specific); a
 system-wide uv cache is left untouched.
 \item \code{"preference"}: greta's stored Python backend preference (set via
-\code{\link[=greta_set_python_uv]{greta_set_python_uv()}} and friends).
+\code{\link[=greta_set_python]{greta_set_python()}}).
 }}
 
 \item{ask}{Ask for confirmation? Default is \code{interactive()}.}
@@ -47,5 +49,5 @@ greta_remove("preference")
 }
 }
 \seealso{
-\code{\link[=reinstall_greta_deps]{reinstall_greta_deps()}}, \code{\link[=greta_set_python_uv]{greta_set_python_uv()}}
+\code{\link[=reinstall_greta_deps]{reinstall_greta_deps()}}, \code{\link[=greta_set_python]{greta_set_python()}}
 }

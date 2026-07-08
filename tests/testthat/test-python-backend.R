@@ -5,7 +5,7 @@ test_that("setters warn when RETICULATE_PYTHON overrides the stored preference",
   withr::defer(greta_stash$reticulate_python_at_load <- old)
   greta_stash$reticulate_python_at_load <- "/fake/python"
 
-  expect_snapshot(greta_set_python_uv())
+  expect_snapshot(greta_set_python())
 })
 
 test_that("setters do not warn when RETICULATE_PYTHON is unset", {
@@ -16,7 +16,7 @@ test_that("setters do not warn when RETICULATE_PYTHON is unset", {
   withr::defer(greta_stash$reticulate_python_at_load <- old)
   greta_stash$reticulate_python_at_load <- ""
 
-  expect_snapshot(greta_set_python_uv())
+  expect_snapshot(greta_set_python())
 })
 
 test_that("greta_python_plan() respects a user-set RETICULATE_PYTHON path", {
@@ -94,32 +94,88 @@ test_that("python preference round-trips and clears", {
   expect_null(get_greta_python_backend())
 })
 
-test_that("greta_set_python_uv() / greta_set_python_path() store the preference", {
+test_that("greta_set_python() stores the uv and path preferences", {
   withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
 
-  suppressMessages(greta_set_python_uv())
+  suppressMessages(greta_set_python())
+  expect_equal(get_greta_python_backend(), "managed")
+
+  suppressMessages(greta_set_python("uv"))
   expect_equal(get_greta_python_backend(), "managed")
 
   fake_python <- withr::local_tempfile()
   file.create(fake_python)
-  suppressMessages(greta_set_python_path(fake_python))
+  suppressMessages(greta_set_python("path", path = fake_python))
   expect_equal(get_greta_python_backend(), fake_python)
+})
+
+test_that("greta_set_python('conda') stores a conda-tagged preference", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  seen_name <- NULL
+  local_mocked_bindings(
+    conda_python = function(name) {
+      seen_name <<- name
+      "/envs/greta-env-tf2/bin/python"
+    },
+    .package = "reticulate"
+  )
+
+  suppressMessages(greta_set_python("conda"))
+  expect_equal(seen_name, "greta-env-tf2")
+  expect_equal(
+    get_greta_python_backend(),
+    "conda:/envs/greta-env-tf2/bin/python"
+  )
+
+  suppressMessages(greta_set_python("conda", name = "my-env"))
+  expect_equal(seen_name, "my-env")
 })
 
 test_that("greta_reset_python() clears the stored preference", {
   withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
-  suppressMessages(greta_set_python_uv())
+  suppressMessages(greta_set_python())
   expect_equal(get_greta_python_backend(), "managed")
 
   suppressMessages(greta_reset_python())
   expect_null(get_greta_python_backend())
 })
 
-test_that("greta_set_python_path() errors on a missing path", {
+test_that("greta_set_python('path') errors on a missing path", {
   expect_error(
-    greta_set_python_path("/no/such/python"),
+    greta_set_python("path", path = "/no/such/python"),
     "No Python executable"
   )
+})
+
+test_that("greta_set_python() validates backend/path/name combinations", {
+  expect_error(
+    greta_set_python("uv", path = "/x"),
+    "can only be used"
+  )
+  expect_error(
+    greta_set_python("conda", path = "/x"),
+    "can only be used"
+  )
+  expect_error(
+    greta_set_python("uv", name = "x"),
+    "can only be used"
+  )
+  expect_error(
+    greta_set_python("path", name = "x"),
+    "can only be used"
+  )
+  expect_error(
+    greta_set_python("path"),
+    "must be supplied"
+  )
+})
+
+test_that("greta_set_python() hints when a path is passed as backend", {
+  expect_snapshot(error = TRUE, greta_set_python("/usr/bin/python"))
+})
+
+test_that("greta_set_python() rejects an unknown backend", {
+  expect_error(greta_set_python("virtualenv"), "must be one of")
 })
 
 test_that("resolve_python_path() passes through an existing binary", {
@@ -281,4 +337,88 @@ test_that("should_nudge_to_managed() only fires for an interactive auto-detect",
 
   mark_greta_hint_shown("conda_to_managed")
   expect_false(should_nudge_to_managed(auto, is_interactive = TRUE))
+})
+
+test_that("greta_set_deps() round-trips and clears", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  expect_null(get_greta_stored_deps())
+
+  deps <- greta_deps_spec(
+    tf_version = "2.14.0",
+    tfp_version = "0.22.1",
+    python_version = "3.10"
+  )
+  suppressMessages(greta_set_deps(deps))
+  stored <- get_greta_stored_deps()
+  expect_s3_class(stored, "greta_deps_spec")
+  expect_equal(stored$tf_version, "2.14.0")
+  expect_equal(stored$tfp_version, "0.22.1")
+  expect_equal(stored$python_version, "3.10")
+})
+
+test_that("greta_set_deps() reports what it stored", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  expect_snapshot(greta_set_deps())
+  expect_snapshot(greta_set_deps(NULL))
+})
+
+test_that("greta_set_deps() rejects a deps not built by greta_deps_spec()", {
+  expect_error(
+    greta_set_deps(list(tf_version = "2.15.1")),
+    "greta_deps_spec"
+  )
+})
+
+test_that("get_greta_stored_deps() treats corrupt or invalid files as absent", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  ensure_greta_config_dir()
+
+  writeLines("nonsense", greta_deps_file())
+  expect_null(get_greta_stored_deps())
+
+  writeLines("tf_version=2.15.1", greta_deps_file())
+  expect_null(get_greta_stored_deps())
+
+  writeLines(
+    c("tf_version=2.99.0", "tfp_version=0.23.0", "python_version=3.11"),
+    greta_deps_file()
+  )
+  expect_null(get_greta_stored_deps())
+})
+
+test_that("stored deps versions translate to py_require() arguments", {
+  args <- greta_py_require_args(
+    tf_version = "2.14.0",
+    tfp_version = "0.22.1",
+    python_version = "3.10"
+  )
+  expect_equal(
+    args$packages,
+    c("tensorflow==2.14.*", "tensorflow_probability==0.22.*")
+  )
+  expect_equal(args$python_version, "3.10")
+})
+
+test_that("greta_py_require_args() defaults python_version to greta's range", {
+  args <- greta_py_require_args()
+  expect_equal(args$python_version, greta_deps_default$python_range)
+})
+
+test_that("report_offline_readiness() reports non-managed backends as ready", {
+  plan <- new_python_plan("user", "preference", python = "/opt/py")
+  expect_snapshot(report_offline_readiness(plan = plan))
+})
+
+test_that("report_offline_readiness() reports managed backend states", {
+  uv_cache <- file.path(withr::local_tempdir(), "uv")
+  plan <- new_python_plan("managed", "default")
+
+  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = ""))
+  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = "1"))
+
+  dir.create(file.path(uv_cache, "python"), recursive = TRUE)
+  dir.create(file.path(uv_cache, "cache"), recursive = TRUE)
+  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = ""))
+  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = "1"))
+  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = "0"))
 })

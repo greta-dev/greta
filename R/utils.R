@@ -789,7 +789,7 @@ timeout_install_msg <- function(timeout = 5, py_error = NULL) {
         envname = 'greta-env-tf2',
         pip = TRUE
         )}",
-    "Then select it with {.code greta_set_python_conda_env()}, restart R, \\
+    "Then select it with {.code greta_set_python('conda')}, restart R, \\
         and load {.pkg greta} with: {.code library(greta)}"
   )
 

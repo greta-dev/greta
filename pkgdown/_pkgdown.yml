@@ -144,7 +144,8 @@ reference:
       - greta_set_install_logfile
       - write_greta_install_log
       - open_greta_install_log
-      - greta_set_python_uv
+      - greta_set_python
+      - greta_set_deps
       - deprecated-installers
   # - title: helper functions
     # desc:

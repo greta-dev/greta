@@ -7,8 +7,8 @@
 #                  user wants greta to use.
 #
 # The backend is resolved cheaply at load time (no conda subprocess) by
-# `greta_python_plan()`, and can be set persistently by the `greta_set_python_*()`
-# helpers, which write a small backend file under `R_user_dir("greta")`.
+# `greta_python_plan()`, and can be set persistently by `greta_set_python()`,
+# which writes a small backend file under `R_user_dir("greta")`.
 
 # Location of python backends
 
@@ -122,7 +122,7 @@ new_python_plan <- function(backend, source, python = NULL) {
 
 # RETICULATE_PYTHON and the stored preference share a grammar: the sentinel
 # "managed", a "conda:<path>" tag (only ever written by the stored preference,
-# via greta_set_python_conda_env()), or a plain path to a Python. Interpret any
+# via greta_set_python("conda")), or a plain path to a Python. Interpret any
 # of these into a plan.
 plan_from_value <- function(value, source) {
   if (identical(value, "managed")) {
@@ -136,7 +136,7 @@ plan_from_value <- function(value, source) {
 
 # Decide which Python backend greta should use, in priority order:
 #   1. an explicit RETICULATE_PYTHON (a path, or the sentinel "managed")
-#   2. a stored greta backend (set via the greta_set_python_*() helpers)
+#   2. a stored greta backend (set via greta_set_python())
 #   3. an auto-detected greta-env-tf2 conda env (keeps upgraders working)
 #   4. the managed (uv) environment, as the default
 # Pure given its arguments, so it can be tested without side effects.
@@ -164,14 +164,28 @@ apply_greta_python_plan <- function(plan) {
     plan$backend,
     managed = {
       Sys.setenv("RETICULATE_PYTHON" = "managed")
-      # pins derive from greta_deps_default via greta_py_require_args();
+      # pins derive from greta_deps_default via greta_py_require_args(),
+      # unless the user stored a preference with greta_set_deps();
       # agreement with greta_deps_spec()'s defaults is test-enforced
-      py_req <- greta_py_require_args()
+      stored_deps <- get_greta_stored_deps()
+      py_req <- if (is.null(stored_deps)) {
+        greta_py_require_args()
+      } else {
+        greta_py_require_args(
+          tf_version = stored_deps$tf_version,
+          tfp_version = stored_deps$tfp_version,
+          python_version = stored_deps$python_version
+        )
+      }
       reticulate::py_require(
         packages = py_req$packages,
         python_version = py_req$python_version
       )
-      maybe_enable_uv_offline()
+      # the frozen-pins argument for offline mode (#814) only holds for the
+      # default pins; user-chosen versions may need one online resolve
+      if (is.null(stored_deps)) {
+        maybe_enable_uv_offline()
+      }
     },
     # "user" and "conda" both point at a specific Python
     Sys.setenv("RETICULATE_PYTHON" = plan$python)
@@ -184,7 +198,7 @@ apply_greta_python_plan <- function(plan) {
 # backend (TensorFlow 2.15.*, TensorFlow Probability 0.23.*); TF 2.16+ ships
 # Keras 3, which greta does not support, so no newer match will ever appear.
 # That makes a cache-only resolve safe: uv never needs to reach PyPI once the
-# environment is provisioned, so greta can start on an offline / air-gapped
+# environment is installed, so greta can start on an offline / air-gapped
 # machine. We only touch the reticulate-managed uv cache (the same path used by
 # remove_reticulate_uv_cache()), never a system-wide uv.
 maybe_enable_uv_offline <- function(
@@ -280,10 +294,71 @@ report_python_backend <- function(
   if (identical(plan$source, "auto_detect")) {
     cli::cli_ul(
       "To use the {.pkg uv} environment instead, run \\
-      {.code greta_set_python_uv()}."
+      {.code greta_set_python()}."
     )
   }
 
+  invisible(plan)
+}
+
+# Report whether greta can start without internet access, for greta_sitrep().
+# Only the managed (uv) backend ever downloads anything: the user/conda/path
+# backends point at an environment already on disk. For the managed backend,
+# readiness depends on UV_OFFLINE and on whether reticulate's uv cache is
+# populated (the same check as maybe_enable_uv_offline()).
+report_offline_readiness <- function(
+  plan = greta_stash$python_backend %||% greta_python_plan(),
+  uv_cache = file.path(tools::R_user_dir("reticulate", "cache"), "uv"),
+  uv_offline = Sys.getenv("UV_OFFLINE", unset = "")
+) {
+  if (!identical(plan$backend, "managed")) {
+    cli::cli_alert_success(
+      "offline-ready: this environment is already on disk; greta never \\
+      downloads into it",
+      wrap = TRUE
+    )
+    return(invisible(plan))
+  }
+  cache_populated <- dir.exists(file.path(uv_cache, "python")) &&
+    dir.exists(file.path(uv_cache, "cache"))
+  if (identical(uv_offline, "1") && cache_populated) {
+    cli::cli_alert_success(
+      "offline-ready: {.envvar UV_OFFLINE}=1 is set and the uv cache is \\
+      populated",
+      wrap = TRUE
+    )
+  } else if (identical(uv_offline, "1")) {
+    cli::cli_alert_danger(
+      "{.envvar UV_OFFLINE}=1 is set but the uv cache is not yet populated, \\
+      so the next start may fail to resolve dependencies",
+      wrap = TRUE
+    )
+    cli::cli_inform(c(
+      "i" = "See the installation vignette: {.vignette greta::installation}."
+    ))
+  } else if (identical(uv_offline, "0")) {
+    cli::cli_alert_danger(
+      "will need internet on next start: {.envvar UV_OFFLINE}=0 forces \\
+      online resolution",
+      wrap = TRUE
+    )
+    cli::cli_inform(c(
+      "i" = "See the installation vignette: {.vignette greta::installation}."
+    ))
+  } else if (cache_populated) {
+    cli::cli_alert_success(
+      "offline-ready: uv cache present, offline mode will engage",
+      wrap = TRUE
+    )
+  } else {
+    cli::cli_alert_danger(
+      "will need internet on next start: uv cache not yet populated",
+      wrap = TRUE
+    )
+    cli::cli_inform(c(
+      "i" = "See the installation vignette: {.vignette greta::installation}."
+    ))
+  }
   invisible(plan)
 }
 
@@ -313,13 +388,13 @@ warn_if_reticulate_python_overrides <- function() {
       "i" = "greta resolves Python in this order:",
       " " = "1. {.envvar RETICULATE_PYTHON} - usually set in {.file ~/.Renviron}
          or your shell environment",
-      " " = "2. Stored preference - set with {.fun greta_set_python_uv},
-         {.fun greta_set_python_conda_env}, or {.fun greta_set_python_path}",
+      " " = "2. Stored preference - set with {.fun greta_set_python}",
       " " = "3. Auto-detected {.val greta-env-tf2} conda environment - created
          by {.fun install_greta_deps}",
-      " " = "4. The managed uv environment - the default, no setup needed",
+      " " = "4. The managed (uv) environment - the default, no setup needed",
       "i" = "To use your stored preference, remove {.envvar RETICULATE_PYTHON}
-         from {.file ~/.Renviron} (or wherever it is set), then restart R."
+         from {.file ~/.Renviron} (or wherever it is set), then restart R.",
+      "i" = "See the installation vignette: {.vignette greta::installation}."
     ))
   }
 }
@@ -332,6 +407,81 @@ finish_python_backend_change <- function(stored_msg, value) {
   invisible(value)
 }
 
+# --- internal setter impls ----------------------------------------------------
+#
+# The setting logic lives in these non-exported helpers so that
+# greta_set_python() can dispatch to them per backend without the validation
+# logic and the persistence logic tangling. Each persists a value in the
+# grammar interpreted by plan_from_value().
+
+set_python_uv_impl <- function() {
+  set_greta_python_backend("managed")
+  finish_python_backend_change(
+    stored_msg = "Stored preference: the managed (uv) Python environment.",
+    value = "managed"
+  )
+}
+
+set_python_conda_impl <- function(name = "greta-env-tf2") {
+  python <- reticulate::conda_python(name)
+  # tag the preference as conda so the resolver/report label it as a conda
+  # environment rather than a generic user-specified Python
+  set_greta_python_backend(paste0("conda:", python))
+  finish_python_backend_change(
+    stored_msg = "Stored preference: the conda environment {.val {name}}.",
+    value = python
+  )
+}
+
+set_python_path_impl <- function(path) {
+  python <- resolve_python_path(path)
+  set_greta_python_backend(python)
+  finish_python_backend_change(
+    stored_msg = "Stored preference: Python at {.path {python}}.",
+    value = python
+  )
+}
+
+# validate the backend/path/name combination for greta_set_python():
+# `path` is required iff backend = "path"; `name` is allowed only for
+# backend = "conda"
+check_greta_set_python_args <- function(
+  backend,
+  path,
+  name,
+  call = rlang::caller_env()
+) {
+  if (!identical(backend, "path") && !is.null(path)) {
+    cli::cli_abort(
+      message = c(
+        "{.arg path} can only be used with {.code backend = \"path\"}.",
+        "i" = "Did you mean {.code greta_set_python(\"path\", path = ...)}?"
+      ),
+      call = call
+    )
+  }
+  if (!identical(backend, "conda") && !is.null(name)) {
+    cli::cli_abort(
+      message = c(
+        "{.arg name} can only be used with {.code backend = \"conda\"}.",
+        "i" = "Did you mean {.code greta_set_python(\"conda\", name = ...)}?"
+      ),
+      call = call
+    )
+  }
+  if (identical(backend, "path") && is.null(path)) {
+    cli::cli_abort(
+      message = c(
+        "{.arg path} must be supplied when {.code backend = \"path\"}.",
+        "i" = "Pass a Python binary or an environment directory, e.g. \\
+        {.code greta_set_python(\"path\", path = \"/opt/envs/greta\")}.",
+        "i" = "See the installation vignette: {.vignette greta::installation}."
+      ),
+      call = call
+    )
+  }
+}
+
 # --- user-facing helpers ------------------------------------------------------
 
 #' Choose the Python environment greta uses
@@ -340,19 +490,31 @@ finish_python_backend_change <- function(stored_msg, value) {
 #' greta runs on Python (via TensorFlow and TensorFlow Probability). By default
 #' it uses [`uv`](https://docs.astral.sh/uv/) (via the reticulate R package) to
 #' install a compatible Python, TensorFlow, and TensorFlow Probability
-#' automatically on first use. These helper functions let you persistently
-#' switch greta to a different Python environment - for example a conda
-#' environment created by [install_greta_deps()], or your own Python.
-#' [greta_reset_python()] clears the stored choice, returning to greta's
-#' automatic resolution.
+#' automatically on first use. `greta_set_python()` persistently selects which
+#' Python environment greta uses: the managed (uv) environment, a conda
+#' environment (for example one created by [install_greta_deps()]), or your
+#' own Python. [greta_reset_python()] clears the stored choice, returning to
+#' greta's automatic resolution.
 #'
-#' @param name Name of the conda environment to use. Defaults to
-#'   `"greta-env-tf2"`, the environment created by [install_greta_deps()].
-#' @param path Path to a Python executable, or to an environment directory (a
-#'   virtualenv or conda prefix) containing one. When given a directory, greta
-#'   looks for `bin/python` (Unix) or `Scripts/python.exe` (Windows) inside it.
-#'   Pointing at a pre-provisioned environment on disk never downloads anything,
-#'   which makes it useful for offline or restricted-network setups.
+#' To choose which *versions* of TensorFlow and TensorFlow Probability the
+#' managed (uv) environment installs, see [greta_set_deps()] - dependency
+#' versions are separate from the choice of Python environment.
+#'
+#' @param backend Which Python environment to use. One of:
+#'   - `"uv"` (default): the managed (uv) environment. reticulate installs a
+#'     compatible Python, TensorFlow, and TensorFlow Probability automatically
+#'     on first use.
+#'   - `"conda"`: a conda environment, named by `name`.
+#'   - `"path"`: a specific Python, given by `path`.
+#' @param path Only for `backend = "path"`. Path to a Python executable, or to
+#'   an environment directory (a virtualenv or conda prefix) containing one.
+#'   When given a directory, greta looks for `bin/python` (Unix) or
+#'   `Scripts/python.exe` (Windows) inside it. Pointing at an
+#'   already-installed environment on disk never downloads anything, which
+#'   makes it useful for offline or restricted-network setups.
+#' @param name Only for `backend = "conda"`. Name of the conda environment to
+#'   use. Defaults to `"greta-env-tf2"`, the environment created by
+#'   [install_greta_deps()].
 #'
 #' @return Invisibly, the stored preference (`NULL` for `greta_reset_python()`).
 #'
@@ -362,15 +524,20 @@ finish_python_backend_change <- function(stored_msg, value) {
 #' 1. The `RETICULATE_PYTHON` environment variable, if set (usually in
 #'    `~/.Renviron`, your `.Rprofile`, or your shell environment). This
 #'    always wins: it takes precedence over any stored preference.
-#' 2. Your stored preference, set with `greta_set_python_uv()`,
-#'    `greta_set_python_conda_env()`, or `greta_set_python_path()`.
+#' 2. Your stored preference, set with `greta_set_python()`.
 #' 3. An auto-detected `"greta-env-tf2"` conda environment (created by
 #'    [install_greta_deps()]) - kept so setups from older greta versions keep
 #'    working after upgrading.
-#' 4. Otherwise, the uv-managed environment (the default as of greta 0.6.0):
+#' 4. Otherwise, the managed (uv) environment (the default as of greta 0.6.0):
 #'    reticulate installs a compatible Python, TensorFlow, and TensorFlow
 #'    Probability automatically on first use. No setup is needed - this happens
 #'    "automagically".
+#'
+#' For the managed (uv) environment, greta automatically enables uv's offline
+#' mode once the environment is installed, so it no longer reaches out to
+#' PyPI. Set `UV_OFFLINE=0` yourself to force online resolution (for example,
+#' to refresh the environment), or `UV_OFFLINE=1` to force offline mode -
+#' greta never overrides a value you have already set.
 #'
 #' To check which Python greta is currently using, and which it will use
 #' after a restart, call [greta_sitrep()].
@@ -384,52 +551,51 @@ finish_python_backend_change <- function(stored_msg, value) {
 #' applied the next time greta is loaded, so you will need to **restart R**
 #' for it to take effect.
 #'
+#' @seealso [greta_set_deps()], [greta_sitrep()], [install_greta_deps()],
+#'   [greta_remove()]
 #' @rdname greta_set_python
-#' @aliases greta_set_python
 #' @export
 #' @examples
 #' \dontrun{
-#' # use the uv-managed environment (the default)
-#' greta_set_python_uv()
+#' # use the managed (uv) environment (the default)
+#' greta_set_python()
 #'
 #' # use the conda environment from install_greta_deps()
-#' greta_set_python_conda_env()
+#' greta_set_python("conda")
 #'
-#' # use a specific Python
-#' greta_set_python_path("/path/to/python")
+#' # use a differently-named conda environment
+#' greta_set_python("conda", name = "my-tf-env")
+#'
+#' # use a specific Python binary, or an environment directory
+#' greta_set_python("path", path = "/path/to/python")
+#' greta_set_python("path", path = "/opt/python-envs/greta")
 #'
 #' # clear the stored choice and return to automatic resolution
 #' greta_reset_python()
 #' }
-greta_set_python_uv <- function() {
-  set_greta_python_backend("managed")
-  finish_python_backend_change(
-    stored_msg = "Stored preference: the uv-managed Python environment.",
-    value = "managed"
-  )
-}
-
-#' @rdname greta_set_python
-#' @export
-greta_set_python_conda_env <- function(name = "greta-env-tf2") {
-  python <- reticulate::conda_python(name)
-  # tag the preference as conda so the resolver/report label it as a conda
-  # environment rather than a generic user-specified Python
-  set_greta_python_backend(paste0("conda:", python))
-  finish_python_backend_change(
-    stored_msg = "Stored preference: the conda environment {.val {name}}.",
-    value = python
-  )
-}
-
-#' @rdname greta_set_python
-#' @export
-greta_set_python_path <- function(path) {
-  python <- resolve_python_path(path)
-  set_greta_python_backend(python)
-  finish_python_backend_change(
-    stored_msg = "Stored preference: Python at {.path {python}}.",
-    value = python
+greta_set_python <- function(
+  backend = c("uv", "conda", "path"),
+  path = NULL,
+  name = NULL
+) {
+  backend_choices <- c("uv", "conda", "path")
+  looks_like_path <- rlang::is_string(backend) &&
+    !backend %in% backend_choices &&
+    (grepl("[/\\\\]", backend) || file.exists(backend))
+  if (looks_like_path) {
+    cli::cli_abort(c(
+      "{.arg backend} must be one of {.val uv}, {.val conda}, or {.val path}.",
+      "i" = "To use the Python at {.path {backend}}, run \\
+      {.code greta_set_python(\"path\", path = \"{backend}\")}."
+    ))
+  }
+  backend <- rlang::arg_match(backend, values = backend_choices)
+  check_greta_set_python_args(backend = backend, path = path, name = name)
+  switch(
+    backend,
+    uv = set_python_uv_impl(),
+    conda = set_python_conda_impl(name = name %||% "greta-env-tf2"),
+    path = set_python_path_impl(path = path)
   )
 }
 
@@ -453,7 +619,8 @@ resolve_python_path <- function(path) {
   cli::cli_abort(c(
     "No Python executable found for {.path {path}}.",
     "i" = "Pass a path to a Python binary, or to an environment directory \\
-      containing {.path bin/python} (or {.path Scripts/python.exe} on Windows)."
+      containing {.path bin/python} (or {.path Scripts/python.exe} on Windows).",
+    "i" = "See the installation vignette: {.vignette greta::installation}."
   ))
 }
 
@@ -465,4 +632,123 @@ greta_reset_python <- function() {
     stored_msg = "Cleared stored preference; greta resolves automatically.",
     value = NULL
   )
+}
+
+# --- stored deps preference ---------------------------------------------------
+#
+# Sibling of greta_python_backend_file(): records the user's preferred
+# TensorFlow / TensorFlow Probability / Python versions, as set by
+# greta_set_deps(). Read (a) at load time by apply_greta_python_plan() to feed
+# py_require() for the managed backend, and (b) by install_greta_deps() as its
+# default deps. Validation is delegated to greta_deps_spec(), both when
+# writing and when reading back, so a stored file that no longer passes
+# greta's checks is treated as absent.
+
+greta_deps_file <- function() {
+  file.path(tools::R_user_dir("greta", "config"), "python-deps")
+}
+
+get_greta_stored_deps <- function() {
+  path <- greta_deps_file()
+  if (!file.exists(path)) {
+    return(NULL)
+  }
+  lines <- tryCatch(
+    readLines(path, warn = FALSE),
+    error = function(e) NULL
+  )
+  fields <- c("tf_version", "tfp_version", "python_version")
+  pattern <- paste0("^(", paste(fields, collapse = "|"), ")=")
+  keyed <- grepl(pattern, lines %||% character())
+  values <- sub(pattern, "", lines[keyed])
+  names(values) <- sub("=.*$", "", lines[keyed])
+  if (!all(fields %in% names(values))) {
+    return(NULL)
+  }
+  # re-validate on read: a stale file (e.g. written before a support-ceiling
+  # change) must not crash load; treat it as absent instead
+  tryCatch(
+    greta_deps_spec(
+      tf_version = values[["tf_version"]],
+      tfp_version = values[["tfp_version"]],
+      python_version = values[["python_version"]]
+    ),
+    error = function(e) NULL
+  )
+}
+
+clear_greta_stored_deps <- function() {
+  deps_file <- greta_deps_file()
+  if (file.exists(deps_file)) {
+    unlink(deps_file)
+  }
+  invisible(NULL)
+}
+
+#' Choose the dependency versions greta installs
+#'
+#' @description
+#' Persistently choose which versions of TensorFlow, TensorFlow Probability,
+#' and Python greta uses, independently of *where* they are installed (see
+#' [greta_set_python()] for that). The stored versions are used by:
+#'
+#' - the managed (uv) environment, which installs them automatically on first
+#'   use after a restart, and
+#' - [install_greta_deps()], as its default `deps` argument when building a
+#'   conda environment.
+#'
+#' Most users never need this: greta's defaults (TensorFlow
+#' `r greta_deps_default$tf`, TensorFlow Probability
+#' `r greta_deps_default$tfp`, Python `r greta_deps_default$python`) are the
+#' newest versions greta supports.
+#'
+#' @param deps object created with [greta_deps_spec()], or `NULL` to clear
+#'   the stored choice. [greta_deps_spec()] checks that the TensorFlow version
+#'   is one greta supports.
+#'
+#' @return Invisibly, the stored [greta_deps_spec()] (`NULL` when clearing).
+#'
+#' @details
+#' Your choice is stored under `tools::R_user_dir("greta", "config")` and
+#' applied the next time greta is loaded, so you will need to **restart R**
+#' for it to take effect. Changing versions on the managed (uv) backend may
+#' require internet access on the next load, to download the newly requested
+#' versions.
+#'
+#' @seealso [greta_set_python()], [greta_deps_spec()], [install_greta_deps()]
+#' @export
+#' @examples
+#' \dontrun{
+#' # pin an older TensorFlow for the managed (uv) environment
+#' greta_set_deps(greta_deps_spec(
+#'   tf_version = "2.14.0",
+#'   tfp_version = "0.22.1",
+#'   python_version = "3.10"
+#' ))
+#'
+#' }
+greta_set_deps <- function(deps = greta_deps_spec()) {
+  if (is.null(deps)) {
+    cli::cli_inform(c(
+      "v" = "To clear dependencies, use {.fun greta_remove}"
+    ))
+    return(invisible(FALSE))
+  }
+  check_greta_deps_spec(deps)
+  ensure_greta_config_dir()
+  writeLines(
+    c(
+      paste0("tf_version=", deps$tf_version),
+      paste0("tfp_version=", deps$tfp_version),
+      paste0("python_version=", deps$python_version)
+    ),
+    greta_deps_file()
+  )
+  cli::cli_inform(c(
+    "v" = "Stored dependency versions: TensorFlow {.val {deps$tf_version}}, \\
+    TensorFlow Probability {.val {deps$tfp_version}}, Python \\
+    {.val {deps$python_version}}.",
+    "i" = "Restart R for this to take effect."
+  ))
+  invisible(deps)
 }

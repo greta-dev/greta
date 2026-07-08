@@ -27,7 +27,9 @@ By default these are TF 2.15.1, TFP
 \code{\link[=greta_deps_spec]{greta_deps_spec()}} checks that the TF version is one greta supports;
 compatible TFP and Python versions are resolved at install time. See
 ?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more information, and the data object
-\code{greta_deps_tf_tfp} for known-good combinations.}
+\code{greta_deps_tf_tfp} for known-good combinations. If you have stored a
+preference with \code{\link[=greta_set_deps]{greta_set_deps()}}, it is used when \code{deps} is not
+supplied.}
 
 \item{timeout}{maximum time in minutes until the installation for each
 installation component times out and exits. Default is 5 minutes per
@@ -47,8 +49,9 @@ Defaults to \code{interactive()}.}
 \description{
 This is a helper function to install specified versions of Python
 dependencies needed for greta. By default, greta version >= 0.6.0 now uses
-reticulate's uv-managed Python to automatically identify dependencies. You
-can change over to this new approach with \code{\link[=greta_set_python_uv]{greta_set_python_uv()}}, which is
+reticulate's managed (uv) Python environment to automatically identify
+dependencies. You can change over to this new approach with
+\code{\link[=greta_set_python]{greta_set_python()}}, which is
 now what we recommend. This has changed from where we would previously use
 \code{install_greta_deps()}.
 }
@@ -86,9 +89,9 @@ We now recommend using the new default method for installation, which uses
 \href{https://docs.astral.sh/uv/}{uv} (via the reticulate package) to install
 TensorFlow and TensorFlow Probability on first use. To make greta use the
 "greta-env-tf2" conda environment created here instead, use
-\code{\link[=greta_set_python_conda_env]{greta_set_python_conda_env()}} (or set the \code{RETICULATE_PYTHON} environment
+\code{greta_set_python("conda")} (or set the \code{RETICULATE_PYTHON} environment
 variable to its Python before loading greta). See the "Installing
-Dependencies" vignette and \code{\link[=greta_set_python_path]{greta_set_python_path()}}.
+Dependencies" vignette and \code{\link[=greta_set_python]{greta_set_python()}}.
 
 If you don't want to use conda or the "greta-env-tf2" conda environment, you
 can install versions that you like, e.g., using \code{\link[reticulate:py_install]{reticulate::py_install()}}.

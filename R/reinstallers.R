@@ -62,7 +62,7 @@ remove_miniconda_impl <- function(ask = interactive()) {
   return(invisible(FALSE))
 }
 
-# remove reticulate's managed uv cache (shared by all reticulate packages)
+# remove reticulate's uv cache (shared by all reticulate packages)
 remove_reticulate_uv_cache_impl <- function(ask = interactive()) {
   # only ever touch reticulate's *managed* uv cache; a system-wide uv cache is
   # uv's own to manage (e.g. `uv cache clean`) and is shared beyond reticulate
@@ -81,13 +81,13 @@ remove_reticulate_uv_cache_impl <- function(ask = interactive()) {
   confirmed <- user_agrees(
     ask = ask,
     question = paste0(
-      "Remove reticulate's managed uv cache at ",
+      "Remove reticulate's uv cache at ",
       uv_cache,
       "? This is shared by other R packages that use reticulate's uv."
     )
   )
   if (confirmed) {
-    cli::cli_alert_info("removing reticulate's managed uv cache", wrap = TRUE)
+    cli::cli_alert_info("removing reticulate's uv cache", wrap = TRUE)
     unlink(uv_cache, recursive = TRUE, force = TRUE)
     cli::cli_alert_success("reticulate uv cache removed!", wrap = TRUE)
     return(invisible(TRUE))
@@ -112,14 +112,15 @@ remove_greta_preference_impl <- function() {
 }
 
 # the "nuclear" reset: remove the conda env, miniconda, reticulate's uv cache,
-# and the stored preference. Asks once up front, then removes without prompting.
+# and the stored preferences (Python environment and dependency versions).
+# Asks once up front, then removes without prompting.
 remove_greta_all <- function(ask = interactive()) {
   if (
     !user_agrees(
       ask = ask,
       question = paste0(
         "Remove ALL of greta's Python dependencies (conda env, miniconda, ",
-        "reticulate's uv cache, stored preference)?"
+        "reticulate's uv cache, stored preferences)?"
       )
     )
   ) {
@@ -129,6 +130,7 @@ remove_greta_all <- function(ask = interactive()) {
   mc_removed <- remove_miniconda_impl(ask = FALSE)
   cache_removed <- remove_reticulate_uv_cache_impl(ask = FALSE)
   clear_greta_python_backend()
+  clear_greta_stored_deps()
   removed <- c(
     if (env_removed) "the 'greta-env-tf2' conda environment",
     if (mc_removed) "miniconda",
@@ -139,13 +141,14 @@ remove_greta_all <- function(ask = interactive()) {
   if (anything_removed) {
     cli::cli_inform(c(
       "v" = "Successfully removed {removed}.",
-      "v" = "Cleared any stored greta Python preference.",
-      "i" = "Restart R; greta will reinstall what it needs on next use."
+      "v" = "Cleared any stored greta preferences.",
+      "i" = "Restart R; greta will reinstall what it needs on next use.",
+      "i" = "See the installation vignette: {.vignette greta::installation}."
     ))
   } else {
     cli::cli_inform(c(
       "i" = "Nothing to remove.",
-      "v" = "Cleared any stored greta Python preference."
+      "v" = "Cleared any stored greta preferences."
     ))
   }
   invisible(anything_removed)
@@ -161,19 +164,21 @@ remove_greta_all <- function(ask = interactive()) {
 #'
 #' @param what What to remove. One of:
 #'   - `"all"` (default): the `"greta-env-tf2"` conda environment, miniconda,
-#'     reticulate's managed uv cache, and greta's stored Python preference. This
-#'     is a "nuclear" reset that asks once, then removes everything it finds.
+#'     reticulate's uv cache, and greta's stored preferences (the Python
+#'     backend set via [greta_set_python()], and the dependency versions set
+#'     via [greta_set_deps()]). This is a "nuclear" reset that asks once, then
+#'     removes everything it finds.
 #'   - `"env"`: the `"greta-env-tf2"` conda environment.
 #'   - `"miniconda"`: the miniconda installation.
-#'   - `"uv_cache"`: reticulate's managed uv cache. Note this cache is shared by
+#'   - `"uv_cache"`: reticulate's uv cache. Note this cache is shared by
 #'     all R packages that use reticulate's uv (it is not greta-specific); a
 #'     system-wide uv cache is left untouched.
 #'   - `"preference"`: greta's stored Python backend preference (set via
-#'     [greta_set_python_uv()] and friends).
+#'     [greta_set_python()]).
 #' @param ask Ask for confirmation? Default is `interactive()`.
 #'
 #' @return Invisibly, `TRUE` if anything was removed, otherwise `FALSE`.
-#' @seealso [reinstall_greta_deps()], [greta_set_python_uv()]
+#' @seealso [reinstall_greta_deps()], [greta_set_python()]
 #' @export
 #' @examples
 #' \dontrun{

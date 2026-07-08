@@ -41,6 +41,7 @@ minimal_sitrep <- function() {
   check_if_tfp_available()
   check_if_greta_conda_env_available()
   report_python_backend()
+  report_offline_readiness()
   check_greta_ready_to_use()
 }
 
@@ -57,6 +58,7 @@ detailed_sitrep <- function() {
 
   cli::cli_h1("{.pkg greta} Python backend")
   report_python_backend()
+  report_offline_readiness()
 
   cli::cli_h1("{.pkg python}")
   check_if_python_available()

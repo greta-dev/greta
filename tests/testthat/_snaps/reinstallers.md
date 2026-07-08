@@ -8,7 +8,7 @@
       i No reticulate-managed uv cache found at '/greta-test/cache/R/reticulate/uv'.
       i If reticulate is using a system uv, its cache is managed by uv itself (e.g. `uv cache clean`); greta does not remove it.
       i Nothing to remove.
-      v Cleared any stored greta Python preference.
+      v Cleared any stored greta preferences.
 
 # greta_remove_all_deps reports removal when something was removed
 
@@ -21,8 +21,9 @@
       i No reticulate-managed uv cache found at '/greta-test/cache/R/reticulate/uv'.
       i If reticulate is using a system uv, its cache is managed by uv itself (e.g. `uv cache clean`); greta does not remove it.
       v Successfully removed the 'greta-env-tf2' conda environment.
-      v Cleared any stored greta Python preference.
+      v Cleared any stored greta preferences.
       i Restart R; greta will reinstall what it needs on next use.
+      i See the installation vignette: `vignette(greta::installation)`.
 
 # destroy_greta_deps reports honestly when nothing exists
 

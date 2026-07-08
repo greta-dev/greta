@@ -57,7 +57,7 @@ tf <- tfp <- NULL
           "i" = "greta is using your existing {.val greta-env-tf2} conda \\
             environment.",
           "i" = "To switch to the {.pkg uv} environment, run \\
-            {.code greta_set_python_uv()}.",
+            {.code greta_set_python()}.",
           ">" = "(This note is only shown once.)"
         )
       )

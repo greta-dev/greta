@@ -27,7 +27,9 @@ knitr::opts_chunk$set(
 
 Under the hood, `greta` uses Google's [TensorFlow](https://www.tensorflow.org/) and [tensorflow-probability](https://github.com/tensorflow/probability) python packages. For most users there is nothing to install: the first time you use `greta` in a session, it automatically installs a compatible Python, TensorFlow, and TensorFlow Probability via [`uv`](https://docs.astral.sh/uv/). So `library(greta)` followed by your first model usually just works.
 
-If you need a conda environment instead (for example on an offline network), or want to pin specific versions, `greta` provides an installation helper, `install_greta_deps()`, which installs the needed versions into a "greta-env-tf2" conda environment. This isolates these exact python modules from other python installations, so that only `greta` will see them. After running it, point `greta` at the environment with `greta_set_python_conda_env()` and restart R. See the "Installing dependencies" vignette for the full details.
+If you need a conda environment instead (for example on an offline network), or want to pin specific versions, `greta` provides an installation helper, `install_greta_deps()`, which installs the needed versions into a "greta-env-tf2" conda environment. This isolates these exact python modules from other python installations, so that only `greta` will see them. After running it, point `greta` at the environment with `greta_set_python("conda")` and restart R. See the "Installing dependencies" vignette for the full details.
+
+If you need to use `greta` without internet access, see the "Using greta offline" section of the "Installing dependencies" vignette.
 
 
 # How do I know if `greta` has the right versions of Python dependencies installed?
@@ -67,7 +69,7 @@ dependencies can't be resolved, greta raises an error describing the problem
 (and reticulate prints the underlying resolver output above it). In that case we
 recommend restarting R and trying again. If the automatic setup can't reach the
 internet, or you need a conda environment, run `install_greta_deps()` and then
-`greta_set_python_conda_env()`. If that does not work there is another
+`greta_set_python("conda")`. If that does not work there is another
 installation approach below.
 
 # Is there an alternative way to install Python dependencies?
@@ -91,7 +93,7 @@ reticulate::py_install(
 )
 ```
 
-Which will install the python modules into a conda environment named "greta-env-tf2". Point `greta` at it with `greta_set_python_conda_env()` and restart R.
+Which will install the python modules into a conda environment named "greta-env-tf2". Point `greta` at it with `greta_set_python("conda")` and restart R.
 
 If these instructions do not work for you, please post on the [greta forum](https://forum.greta-stats.org/) and we will respond to you as soon as we can.
 
