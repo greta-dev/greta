@@ -44,6 +44,10 @@
   `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN’s
   CPU/elapsed timing on vignette rebuild stays under the two-core limit
   ([\#796](https://github.com/greta-dev/greta/issues/796)).
+- greta now also caps TensorFlow’s CPU thread pools at 2 when running
+  under `R CMD check` (detected via the `_R_CHECK_LIMIT_CORES_`
+  environment variable), so checks on CRAN machines respect the two-core
+  limit ([\#796](https://github.com/greta-dev/greta/issues/796)).
 
 #### Installation and dependencies
 

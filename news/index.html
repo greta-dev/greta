@@ -68,6 +68,7 @@
 <li>When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.</li>
 <li>Ensure <code>n_cores</code> arg defaults to 2 cores, and <code>chains</code> defaults to 2 chains.</li>
 <li>Cap TensorFlow’s internal CPU threadpool inside vignette builds (via <code>TF_NUM_INTRAOP_THREADS</code> and <code>TF_NUM_INTEROP_THREADS</code>) so CRAN’s CPU/elapsed timing on vignette rebuild stays under the two-core limit (<a href="https://github.com/greta-dev/greta/issues/796" class="external-link">#796</a>).</li>
+<li>greta now also caps TensorFlow’s CPU thread pools at 2 when running under <code>R CMD check</code> (detected via the <code>_R_CHECK_LIMIT_CORES_</code> environment variable), so checks on CRAN machines respect the two-core limit (<a href="https://github.com/greta-dev/greta/issues/796" class="external-link">#796</a>).</li>
 </ul><div class="section level4">
 <h4 id="installation-and-dependencies-0-6-0">Installation and dependencies<a class="anchor" aria-label="anchor" href="#installation-and-dependencies-0-6-0"></a></h4>
 <ul><li>greta now resolves its Python environment more flexibly instead of always forcing reticulate’s managed (uv) environment: it respects a user-set <code>RETICULATE_PYTHON</code>, a stored greta preference, or an existing <code>greta-env-tf2</code> conda environment, and otherwise uses the managed (uv) environment (<a href="https://github.com/greta-dev/greta/issues/801" class="external-link">#801</a>).</li>
