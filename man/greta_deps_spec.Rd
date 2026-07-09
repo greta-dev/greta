@@ -33,6 +33,12 @@ at install time by uv (or, for a conda environment, by conda/pip). The
 \code{greta_deps_tf_tfp} dataset lists known-good combinations of TF, TFP, and
 Python; inspect it with \code{View(greta_deps_tf_tfp)}.
 }
+\details{
+Calling \code{greta_deps_spec()} with no arguments returns greta's current
+default (recommended) versions, and is the supported way to query them -
+for example \code{greta_deps_spec()$tf_version} for the default TensorFlow
+version.
+}
 \examples{
 greta_deps_spec()
 greta_deps_spec(tf_version = "2.15.1")

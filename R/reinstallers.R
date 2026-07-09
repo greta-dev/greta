@@ -1,35 +1,11 @@
-#' Helpers to remove, and reinstall python environments and miniconda
-#'
-#' This can be useful when debugging greta installation to get to "clean slate".
-#' There are five functions:
-#'
-#'   - [remove_greta_env()] removes the 'greta-env-tf2' conda environment
-#'   - [remove_miniconda()] removes miniconda installation
-#'   - [remove_reticulate_uv_cache()] removes reticulate's managed uv cache.
-#' Note this cache is shared by all R packages that use reticulate's uv (it is
-#' not greta-specific), and a system-wide uv cache is left untouched.
-#'   - [reinstall_greta_env()] remove 'greta-env-tf2' and reinstall it
-#' using [greta_create_conda_env()] (which is used internally).
-#'   - [reinstall_miniconda()] removes miniconda and reinstalls it using
-#' [greta_install_miniconda()] (which is used internally)
-#'
-#'   To remove everything at once, see [greta_remove_all_deps()].
-#'
-#' @param ask Ask for confirmation? Default is `interactive()`.
-#'
-#' @return Invisibly, TRUE if anything was removed, otherwise FALSE.
-#' @export
-#' @name reinstallers
-#' @seealso [destroy_greta_deps()], [greta_remove_all_deps()]
-#'
-#' @examples
-#' \dontrun{
-#' remove_greta_env()
-#' remove_miniconda()
-#' reinstall_greta_env()
-#' reinstall_miniconda()
-#' }
-remove_greta_env <- function(ask = interactive()) {
+# --- internal removal helpers -------------------------------------------------
+#
+# The actual removal logic lives in these non-exported helpers so that
+# greta_remove() and the deprecated shims (remove_greta_env() and friends) can
+# share it without duplicating any behaviour.
+
+# remove the 'greta-env-tf2' conda environment (and its stale install record)
+remove_greta_env_impl <- function(ask = interactive()) {
   if (!have_greta_conda_env()) {
     cli::cli_alert_info(
       "No 'greta-env-tf2' conda environment found.",
@@ -59,17 +35,8 @@ remove_greta_env <- function(ask = interactive()) {
   return(invisible(FALSE))
 }
 
-#' @export
-#' @param timeout time in minutes to wait until timeout (default is 5 minutes)
-#' @rdname reinstallers
-reinstall_greta_env <- function(timeout = 5, ask = interactive()) {
-  remove_greta_env(ask = ask)
-  greta_create_conda_env(timeout = timeout)
-}
-
-#' @export
-#' @rdname reinstallers
-remove_miniconda <- function(ask = interactive()) {
+# delete the miniconda installation
+remove_miniconda_impl <- function(ask = interactive()) {
   path_to_miniconda <- reticulate::miniconda_path()
   if (!file.exists(path_to_miniconda)) {
     cli::cli_alert_info(
@@ -95,17 +62,8 @@ remove_miniconda <- function(ask = interactive()) {
   return(invisible(FALSE))
 }
 
-#' @param timeout time in minutes to wait until timeout (default is 5 minutes)
-#' @rdname reinstallers
-#' @export
-reinstall_miniconda <- function(timeout = 5, ask = interactive()) {
-  remove_miniconda(ask = ask)
-  greta_install_miniconda(timeout)
-}
-
-#' @rdname reinstallers
-#' @export
-remove_reticulate_uv_cache <- function(ask = interactive()) {
+# remove reticulate's uv cache (shared by all reticulate packages)
+remove_reticulate_uv_cache_impl <- function(ask = interactive()) {
   # only ever touch reticulate's *managed* uv cache; a system-wide uv cache is
   # uv's own to manage (e.g. `uv cache clean`) and is shared beyond reticulate
   uv_cache <- file.path(tools::R_user_dir("reticulate", "cache"), "uv")
@@ -123,18 +81,152 @@ remove_reticulate_uv_cache <- function(ask = interactive()) {
   confirmed <- user_agrees(
     ask = ask,
     question = paste0(
-      "Remove reticulate's managed uv cache at ",
+      "Remove reticulate's uv cache at ",
       uv_cache,
       "? This is shared by other R packages that use reticulate's uv."
     )
   )
   if (confirmed) {
-    cli::cli_alert_info("removing reticulate's managed uv cache", wrap = TRUE)
+    cli::cli_alert_info("removing reticulate's uv cache", wrap = TRUE)
     unlink(uv_cache, recursive = TRUE, force = TRUE)
     cli::cli_alert_success("reticulate uv cache removed!", wrap = TRUE)
     return(invisible(TRUE))
   }
   invisible(FALSE)
+}
+
+# clear greta's stored Python backend preference and report what happened
+remove_greta_preference_impl <- function() {
+  had_preference <- !is.null(get_greta_python_backend())
+  clear_greta_python_backend()
+  if (had_preference) {
+    cli::cli_inform(c(
+      "v" = "Cleared the stored greta Python preference."
+    ))
+  } else {
+    cli::cli_inform(c(
+      "i" = "No stored greta Python preference to clear."
+    ))
+  }
+  invisible(had_preference)
+}
+
+# clear greta's stored dependency versions (set via greta_set_deps()) and
+# report what happened
+remove_greta_deps_impl <- function() {
+  had_deps <- file.exists(greta_deps_file())
+  clear_greta_stored_deps()
+  if (had_deps) {
+    cli::cli_inform(c(
+      "v" = "Cleared the stored greta dependency versions."
+    ))
+  } else {
+    cli::cli_inform(c(
+      "i" = "No stored greta dependency versions to clear."
+    ))
+  }
+  invisible(had_deps)
+}
+
+# the "nuclear" reset: remove the conda env, miniconda, reticulate's uv cache,
+# and the stored preferences (Python environment and dependency versions).
+# Asks once up front, then removes without prompting.
+remove_greta_all <- function(ask = interactive()) {
+  if (
+    !user_agrees(
+      ask = ask,
+      question = paste0(
+        "Remove ALL of greta's Python dependencies (conda env, miniconda, ",
+        "reticulate's uv cache, stored preferences)?"
+      )
+    )
+  ) {
+    return(invisible(FALSE))
+  }
+  env_removed <- remove_greta_env_impl(ask = FALSE)
+  mc_removed <- remove_miniconda_impl(ask = FALSE)
+  cache_removed <- remove_reticulate_uv_cache_impl(ask = FALSE)
+  clear_greta_python_backend()
+  clear_greta_stored_deps()
+  removed <- c(
+    if (env_removed) "the 'greta-env-tf2' conda environment",
+    if (mc_removed) "miniconda",
+    if (cache_removed) "reticulate's uv cache"
+  )
+  # report honestly: with ask = FALSE, FALSE means "nothing was there"
+  anything_removed <- length(removed) > 0
+  if (anything_removed) {
+    cli::cli_inform(c(
+      "v" = "Successfully removed {removed}.",
+      "v" = "Cleared any stored greta preferences.",
+      "i" = "Restart R; greta will reinstall what it needs on next use.",
+      "i" = "See the installation vignette: {.vignette greta::installation}."
+    ))
+  } else {
+    cli::cli_inform(c(
+      "i" = "Nothing to remove.",
+      "v" = "Cleared any stored greta preferences."
+    ))
+  }
+  invisible(anything_removed)
+}
+
+# --- user-facing removal API --------------------------------------------------
+
+#' Remove greta's Python dependencies
+#'
+#' A single entry point for removing greta's Python bits, which is useful when
+#' debugging a greta installation and you want to get back to a "clean slate".
+#' Use the `what` argument to choose how much to remove.
+#'
+#' @param what What to remove. One of:
+#'   - `"all"` (default): the `"greta-env-tf2"` conda environment, miniconda,
+#'     reticulate's uv cache, and greta's stored preferences (the Python
+#'     backend set via [greta_set_python()], and the dependency versions set
+#'     via [greta_set_deps()]). This is a "nuclear" reset that asks once, then
+#'     removes everything it finds.
+#'   - `"env"`: the `"greta-env-tf2"` conda environment.
+#'   - `"miniconda"`: the miniconda installation.
+#'   - `"uv_cache"`: reticulate's uv cache. Note this cache is shared by
+#'     all R packages that use reticulate's uv (it is not greta-specific); a
+#'     system-wide uv cache is left untouched.
+#'   - `"preference"`: greta's stored Python backend preference (set via
+#'     [greta_set_python()]).
+#'   - `"deps"`: greta's stored dependency versions (set via
+#'     [greta_set_deps()]).
+#' @param ask Ask for confirmation? Default is `interactive()`.
+#'
+#' @return Invisibly, `TRUE` if anything was removed, otherwise `FALSE`.
+#' @seealso [reinstall_greta_deps()], [greta_set_python()]
+#' @export
+#' @examples
+#' \dontrun{
+#' # remove everything (nuclear reset)
+#' greta_remove()
+#'
+#' # remove only the conda environment
+#' greta_remove("env")
+#'
+#' # clear the stored Python preference
+#' greta_remove("preference")
+#'
+#' # clear the stored dependency versions
+#' greta_remove("deps")
+#' }
+greta_remove <- function(
+  what = c("all", "env", "miniconda", "uv_cache", "preference", "deps"),
+  ask = interactive()
+) {
+  what <- match.arg(what)
+  switch(
+    what,
+    all = remove_greta_all(ask = ask),
+    env = remove_greta_env_impl(ask = ask),
+    miniconda = remove_miniconda_impl(ask = ask),
+    uv_cache = remove_reticulate_uv_cache_impl(ask = ask),
+    preference = remove_greta_preference_impl(),
+    deps = remove_greta_deps_impl()
+  )
 }
 
 #' @rdname install_greta_deps
@@ -159,8 +251,8 @@ reinstall_greta_deps <- function(
   ) {
     return(invisible(FALSE))
   }
-  remove_greta_env(ask = FALSE)
-  remove_miniconda(ask = FALSE)
+  remove_greta_env_impl(ask = FALSE)
+  remove_miniconda_impl(ask = FALSE)
   install_greta_deps(
     deps = deps,
     timeout = timeout,
@@ -168,21 +260,94 @@ reinstall_greta_deps <- function(
   )
 }
 
-#' Remove greta dependencies and remove miniconda
+# --- deprecated shims ---------------------------------------------------------
+#
+# These remain exported and fully functional, delegating to the internal
+# helpers so their behaviour is unchanged. They simply warn and point at the
+# consolidated greta_remove() / reinstall_greta_deps() API.
+
+#' Deprecated removal and reinstallation helpers
 #'
-#' Sometimes when installing greta you might encounter an error and the best
-#'   thing to do is start from a clean slate. This function does two things:
-#'   1. Removes the "greta-env-tf2" with [remove_greta_env()]
-#'   2. Removes the miniconda installation with [remove_miniconda()]
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#'
+#' These functions have been consolidated into [greta_remove()] (for removal)
+#' and [reinstall_greta_deps()] (for reinstallation). They remain exported and
+#' functional but will be removed in a future release.
+#'
 #' @param ask Ask for confirmation? Default is `interactive()`.
-#' @return Invisibly, TRUE if anything was removed, otherwise FALSE.
+#' @param timeout time in minutes to wait until timeout (default is 5 minutes).
+#'
+#' @return Invisibly, `TRUE` if anything was removed, otherwise `FALSE`.
+#' @seealso [greta_remove()], [reinstall_greta_deps()]
+#' @keywords internal
+#' @name deprecated-installers
+NULL
+
+#' @rdname deprecated-installers
+#' @export
+remove_greta_env <- function(ask = interactive()) {
+  lifecycle::deprecate_warn(
+    when = "0.6.0",
+    what = "remove_greta_env()",
+    with = "greta_remove()",
+    details = "Use `greta_remove(\"env\")` instead."
+  )
+  remove_greta_env_impl(ask = ask)
+}
+
+#' @rdname deprecated-installers
+#' @export
+remove_miniconda <- function(ask = interactive()) {
+  lifecycle::deprecate_warn(
+    when = "0.6.0",
+    what = "remove_miniconda()",
+    with = "greta_remove()",
+    details = "Use `greta_remove(\"miniconda\")` instead."
+  )
+  remove_miniconda_impl(ask = ask)
+}
+
+#' @rdname deprecated-installers
+#' @export
+remove_reticulate_uv_cache <- function(ask = interactive()) {
+  lifecycle::deprecate_warn(
+    when = "0.6.0",
+    what = "remove_reticulate_uv_cache()",
+    with = "greta_remove()",
+    details = "Use `greta_remove(\"uv_cache\")` instead."
+  )
+  remove_reticulate_uv_cache_impl(ask = ask)
+}
+
+#' @rdname deprecated-installers
+#' @export
+greta_remove_all_deps <- function(ask = interactive()) {
+  lifecycle::deprecate_warn(
+    when = "0.6.0",
+    what = "greta_remove_all_deps()",
+    with = "greta_remove()",
+    details = "Use `greta_remove()` (equivalently `greta_remove(\"all\")`) \\
+    instead."
+  )
+  remove_greta_all(ask = ask)
+}
+
+#' @rdname deprecated-installers
 #' @export
 destroy_greta_deps <- function(ask = interactive()) {
+  lifecycle::deprecate_warn(
+    when = "0.6.0",
+    what = "destroy_greta_deps()",
+    with = "greta_remove()",
+    details = "Use `greta_remove(\"env\")` and `greta_remove(\"miniconda\")`, \\
+    or `greta_remove()` to also clear the uv cache and stored preference."
+  )
   if (!user_agrees(ask = ask, question = "Remove greta env and miniconda?")) {
     return(invisible(FALSE))
   }
-  env_removed <- remove_greta_env(ask = FALSE)
-  mc_removed <- remove_miniconda(ask = FALSE)
+  env_removed <- remove_greta_env_impl(ask = FALSE)
+  mc_removed <- remove_miniconda_impl(ask = FALSE)
   removed <- c(
     if (env_removed) "the 'greta-env-tf2' conda environment",
     if (mc_removed) "miniconda"
@@ -194,64 +359,26 @@ destroy_greta_deps <- function(ask = interactive()) {
   invisible(anything_removed)
 }
 
-#' Remove all greta Python dependencies (nuclear reset)
-#'
-#' A "nuclear" reset that returns greta to a blank slate. Asks once for
-#'   confirmation, it removes:
-#'   1. the 'greta-env-tf2' conda environment, with [remove_greta_env()]
-#'   2. the miniconda installation, with [remove_miniconda()]
-#'   3. reticulate's managed uv cache (if any), with [remove_reticulate_uv_cache()]
-#'   4. greta's stored Python preference (set via [greta_set_python_uv()] and
-#'      friends)
-#'
-#'   This is broader than [destroy_greta_deps()], which only removes the conda
-#'   environment and miniconda. Note that a system-wide uv cache is *not* removed
-#'   (it is managed by uv itself, and shared beyond reticulate). After running
-#'   this, restart R; greta reinstalls what it needs on next use.
-#'
-#' @param ask Ask for confirmation? Default is `interactive()`.
-#'
-#' @return Invisibly, TRUE if anything was removed, otherwise FALSE.
-#' @seealso [reinstallers], [destroy_greta_deps()]
+#' @rdname deprecated-installers
 #' @export
-#' @examples
-#' \dontrun{
-#' greta_remove_all_deps()
-#' }
-greta_remove_all_deps <- function(ask = interactive()) {
-  if (
-    !user_agrees(
-      ask = ask,
-      question = paste0(
-        "Remove ALL of greta's Python dependencies (conda env, miniconda, ",
-        "reticulate's uv cache, stored preference)?"
-      )
-    )
-  ) {
-    return(invisible(FALSE))
-  }
-  env_removed <- remove_greta_env(ask = FALSE)
-  mc_removed <- remove_miniconda(ask = FALSE)
-  cache_removed <- remove_reticulate_uv_cache(ask = FALSE)
-  clear_greta_python_backend()
-  removed <- c(
-    if (env_removed) "the 'greta-env-tf2' conda environment",
-    if (mc_removed) "miniconda",
-    if (cache_removed) "reticulate's uv cache"
+reinstall_greta_env <- function(timeout = 5, ask = interactive()) {
+  lifecycle::deprecate_warn(
+    when = "0.6.0",
+    what = "reinstall_greta_env()",
+    with = "reinstall_greta_deps()"
   )
-  # report honestly: with ask = FALSE, FALSE means "nothing was there"
-  anything_removed <- length(removed) > 0
-  if (anything_removed) {
-    cli::cli_inform(c(
-      "v" = "Successfully removed {removed}.",
-      "v" = "Cleared any stored greta Python preference.",
-      "i" = "Restart R; greta will reinstall what it needs on next use."
-    ))
-  } else {
-    cli::cli_inform(c(
-      "i" = "Nothing to remove.",
-      "v" = "Cleared any stored greta Python preference."
-    ))
-  }
-  invisible(anything_removed)
+  remove_greta_env_impl(ask = ask)
+  greta_create_conda_env(timeout = timeout)
+}
+
+#' @rdname deprecated-installers
+#' @export
+reinstall_miniconda <- function(timeout = 5, ask = interactive()) {
+  lifecycle::deprecate_warn(
+    when = "0.6.0",
+    what = "reinstall_miniconda()",
+    with = "reinstall_greta_deps()"
+  )
+  remove_miniconda_impl(ask = ask)
+  greta_install_miniconda(timeout)
 }

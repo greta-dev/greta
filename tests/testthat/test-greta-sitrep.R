@@ -1,3 +1,10 @@
+# the offline-readiness lines depend on machine state (the uv cache and
+# UV_OFFLINE), so drop them from sitrep snapshots; report_offline_readiness()
+# has its own deterministic tests in test-python-backend.R
+redact_offline_readiness <- function(x) {
+  x[!grepl("offline-ready|will need internet|installation vignette", x)]
+}
+
 test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
   local_mocked_bindings(
     py_module_available = function(...) FALSE,
@@ -103,7 +110,8 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
 
   local_python_plan()
   expect_snapshot(
-    greta_sitrep()
+    greta_sitrep(),
+    transform = redact_offline_readiness
   )
 })
 
@@ -118,7 +126,8 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
 
   local_python_plan()
   expect_snapshot(
-    greta_sitrep()
+    greta_sitrep(),
+    transform = redact_offline_readiness
   )
 
   local_mocked_bindings(
@@ -126,7 +135,8 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
   )
 
   expect_snapshot(
-    greta_sitrep()
+    greta_sitrep(),
+    transform = redact_offline_readiness
   )
 
   local_mocked_bindings(
@@ -134,11 +144,12 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
   )
 
   expect_snapshot(
-    greta_sitrep()
+    greta_sitrep(),
+    transform = redact_offline_readiness
   )
 })
 
-test_that("greta_sitrep warns greta conda env not available", {
+test_that("greta_sitrep reports a missing conda env as unused when managed", {
   skip_if_not(check_tf_version())
   skip_on_ci()
   skip_on_cran()
@@ -149,8 +160,20 @@ test_that("greta_sitrep warns greta conda env not available", {
 
   local_python_plan()
   expect_snapshot(
-    greta_sitrep()
+    greta_sitrep(),
+    transform = redact_offline_readiness
   )
+})
+
+test_that("conda env status keeps the availability check off-managed", {
+  local_mocked_bindings(
+    have_greta_conda_env = function(...) FALSE
+  )
+  plan_managed <- new_python_plan("managed", "default")
+  plan_conda <- new_python_plan("conda", "preference", python = "/envs/py")
+
+  expect_snapshot(report_greta_conda_env_status(plan = plan_managed))
+  expect_snapshot(report_greta_conda_env_status(plan = plan_conda))
 })
 
 
@@ -166,7 +189,7 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
     x <- gsub("selected via: .*", "selected via: <source>", x)
     x <- gsub('backend: ".*"', 'backend: "<backend>"', x)
     x <- gsub("python: .*", "python: <python>", x)
-    x
+    redact_offline_readiness(x)
   }
 
   expect_snapshot(
