@@ -13,6 +13,7 @@
 * When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.
 * Ensure `n_cores` arg defaults to 2 cores, and `chains` defaults to 2 chains.
 * Cap TensorFlow's internal CPU threadpool inside vignette builds (via `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN's CPU/elapsed timing on vignette rebuild stays under the two-core limit (#796).
+* greta now also caps TensorFlow's CPU thread pools at 2 when running under `R CMD check` (detected via the `_R_CHECK_LIMIT_CORES_` environment variable), so checks on CRAN machines respect the two-core limit (#796).
 
 ### Installation and dependencies
 
