@@ -19,10 +19,12 @@ installation helper,
 which installs the needed versions into a “greta-env-tf2” conda
 environment. This isolates these exact python modules from other python
 installations, so that only `greta` will see them. After running it,
-point `greta` at the environment with
-[`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
-and restart R. See the “Installing dependencies” vignette for the full
+point `greta` at the environment with `greta_set_python("conda")` and
+restart R. See the “Installing dependencies” vignette for the full
 details.
+
+If you need to use `greta` without internet access, see the “Using greta
+offline” section of the “Installing dependencies” vignette.
 
 ## How do I know if `greta` has the right versions of Python dependencies installed?
 
@@ -66,9 +68,8 @@ it). In that case we recommend restarting R and trying again. If the
 automatic setup can’t reach the internet, or you need a conda
 environment, run
 [`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
-and then
-[`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md).
-If that does not work there is another installation approach below.
+and then `greta_set_python("conda")`. If that does not work there is
+another installation approach below.
 
 ## Is there an alternative way to install Python dependencies?
 
@@ -80,12 +81,12 @@ following:
 reticulate::install_miniconda()
 reticulate::conda_create(
   envname = "greta-env-tf2",
-  python_version = "3.10"
+  python_version = "3.11"
 )
 reticulate::py_install(
   packages = c(
     "numpy",
-    "tensorflow==2.15.0",
+    "tensorflow==2.15.1",
     "tensorflow-probability==0.23.0"
   ),
   envname = "greta-env-tf2",
@@ -94,8 +95,7 @@ reticulate::py_install(
 ```
 
 Which will install the python modules into a conda environment named
-“greta-env-tf2”. Point `greta` at it with
-[`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
+“greta-env-tf2”. Point `greta` at it with `greta_set_python("conda")`
 and restart R.
 
 If these instructions do not work for you, please post on the [greta

@@ -104,8 +104,11 @@ installs the needed versions into a “greta-env-tf2” conda environment.
 This isolates these exact python modules from other python
 installations, so that only <code>greta</code> will see them. After
 running it, point <code>greta</code> at the environment with
-<code><a href="../reference/greta_set_python.html">greta_set_python_conda_env()</a></code> and restart R. See the
+<code>greta_set_python("conda")</code> and restart R. See the
 “Installing dependencies” vignette for the full details.</p>
+<p>If you need to use <code>greta</code> without internet access, see
+the “Using greta offline” section of the “Installing dependencies”
+vignette.</p>
 </div>
 <div class="section level2">
 <h2 id="how-do-i-know-if-greta-has-the-right-versions-of-python-dependencies-installed">How do I know if <code>greta</code> has the right versions of Python
@@ -138,8 +141,8 @@ describing the problem (and reticulate prints the underlying resolver
 output above it). In that case we recommend restarting R and trying
 again. If the automatic setup can’t reach the internet, or you need a
 conda environment, run <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> and then
-<code><a href="../reference/greta_set_python.html">greta_set_python_conda_env()</a></code>. If that does not work there
-is another installation approach below.</p>
+<code>greta_set_python("conda")</code>. If that does not work there is
+another installation approach below.</p>
 </div>
 <div class="section level2">
 <h2 id="is-there-an-alternative-way-to-install-python-dependencies">Is there an alternative way to install Python dependencies?<a class="anchor" aria-label="anchor" href="#is-there-an-alternative-way-to-install-python-dependencies"></a>
@@ -150,12 +153,12 @@ following:</p>
 <code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/install_miniconda.html" class="external-link">install_miniconda</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/conda-tools.html" class="external-link">conda_create</a></span><span class="op">(</span></span>
 <span>  envname <span class="op">=</span> <span class="st">"greta-env-tf2"</span>,</span>
-<span>  python_version <span class="op">=</span> <span class="st">"3.10"</span></span>
+<span>  python_version <span class="op">=</span> <span class="st">"3.11"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_install.html" class="external-link">py_install</a></span><span class="op">(</span></span>
 <span>  packages <span class="op">=</span> <span class="fu"><a href="../reference/extract-replace-combine.html">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"numpy"</span>,</span>
-<span>    <span class="st">"tensorflow==2.15.0"</span>,</span>
+<span>    <span class="st">"tensorflow==2.15.1"</span>,</span>
 <span>    <span class="st">"tensorflow-probability==0.23.0"</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  envname <span class="op">=</span> <span class="st">"greta-env-tf2"</span>,</span>
@@ -163,7 +166,7 @@ following:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Which will install the python modules into a conda environment named
 “greta-env-tf2”. Point <code>greta</code> at it with
-<code><a href="../reference/greta_set_python.html">greta_set_python_conda_env()</a></code> and restart R.</p>
+<code>greta_set_python("conda")</code> and restart R.</p>
 <p>If these instructions do not work for you, please post on the <a href="https://forum.greta-stats.org/" class="external-link">greta forum</a> and we will
 respond to you as soon as we can.</p>
 </div>
@@ -189,7 +192,7 @@ issue</a>, and might in the future make it easier to resolve.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

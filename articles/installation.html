@@ -100,144 +100,238 @@
 <span><span class="co">#&gt;     %*%, %o%, apply, backsolve, beta, chol2inv, colMeans, colSums,</span></span>
 <span><span class="co">#&gt;     diag, eigen, forwardsolve, gamma, identity, outer, rowMeans,</span></span>
 <span><span class="co">#&gt;     rowSums, sweep, tapply</span></span></code></pre></div>
+<p>The greta R package requires Google’s <a href="">TensorFlow</a> and
+<a href="">TensorFlow Probability</a> python modules in order to work.
+This vignette discusses how to install these.</p>
 <div class="section level2">
-<h2 id="why-greta-needs-python">Why greta needs Python<a class="anchor" aria-label="anchor" href="#why-greta-needs-python"></a>
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<p>greta uses Google’s <a href="https://www.tensorflow.org/" class="external-link">TensorFlow
-(TF)</a> and <a href="https://github.com/tensorflow/probability" class="external-link">TensorFlow Probability
-(TFP)</a> under the hood to do fast, scalable linear algebra and MCMC.
-TF and TFP are Python packages, so greta needs a Python installation
-with those packages available. This is different from how R package
-dependencies usually work, where CRAN builds and manages everything for
-you.</p>
-<p>The good news is that, thanks to recent improvements in reticulate,
-greta now sets this up for you automatically. This vignette explains
-what happens by default, how to choose a different Python environment,
-and how to install dependencies yourself when you need to (for example,
-offline).</p>
-</div>
-<div class="section level2">
-<h2 id="most-users-nothing-to-install">Most users: nothing to install<a class="anchor" aria-label="anchor" href="#most-users-nothing-to-install"></a>
-</h2>
-<p>By default greta installs its Python dependencies automatically using
-<a href="https://docs.astral.sh/uv/" class="external-link"><code>uv</code></a> (via
-reticulate). The <strong>first time you use greta in a session</strong>
-– for example when you create a greta array or use a distribution –
-reticulate downloads and sets up a compatible Python, TensorFlow, and
-TensorFlow Probability for you.</p>
-<p>So for most users, installation is just:</p>
+<p>For almost everyone, installing greta’s python dependencies will now
+happen automatically.</p>
+<p>The first time you use greta, if it doesn’t have the dependencies set
+up, it will automatically install Python, TensorFlow, and TensorFlow
+Probability.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># if you haven't already</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"greta"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://greta-dev.github.io/greta/">greta</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"greta"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># the first use triggers automatic setup of Python + TF + TFP</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://greta-dev.github.io/greta/">greta</a></span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distributions.html">normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>The first call may take a little while as the environment is
-installed; after that it is cached and reused, so subsequent sessions
-start quickly.</p>
-<p>You do <strong>not</strong> need to call
-<code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> for this to work — that function is
-for the conda / offline workflow described in <a href="#advanced-a-managed-conda-environment">Advanced: a managed conda
-environment</a>.</p>
+<p>That’s it. No separate Python install, no conda, nothing else to run
+first.</p>
+<p><strong>What you’ll see:</strong> the first greta array or
+distribution you create in a session triggers a one-off setup step.
+greta prints a short progress message while it downloads and configures
+Python, TensorFlow, and TensorFlow Probability:</p>
+<pre><code><span><span class="co">#&gt; ℹ Initialising python and checking dependencies, this may take a moment.</span></span>
+<span><span class="co">#&gt; ✔ Initialising python and checking dependencies ... done!</span></span></code></pre>
+<p>This requires an internet connection and can take a few minutes,
+depending on your connection speed. It only happens
+<strong>once</strong> – greta caches the result, so every session after
+that starts straight away. If you don’t have internet access at all, see
+<a href="#using-greta-offline">Using greta offline</a> below for
+suggestions.</p>
+<p>In previous (&lt; 0.6.0) versions of greta, you needed to call
+<code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> to install the dependencies. This
+function is still usable, but it is for an alternative, conda-based
+install, and is covered below in <a href="#i-want-the-conda-workflow">I
+want the conda workflow</a>.</p>
+<p>If anything about this doesn’t go to plan, skip to <a href="#troubleshooting">Troubleshooting</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="checking-what-greta-is-using">Checking what greta is using<a class="anchor" aria-label="anchor" href="#checking-what-greta-is-using"></a>
+<h2 id="did-it-work">Did it work?<a class="anchor" aria-label="anchor" href="#did-it-work"></a>
 </h2>
-<p><code><a href="../reference/greta_sitrep.html">greta_sitrep()</a></code> reports the resolved Python backend and
-the versions in use. It’s the first thing to run if you’re unsure what
-greta has picked up:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_sitrep.html">greta_sitrep</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="choosing-a-different-python-environment">Choosing a different Python environment<a class="anchor" aria-label="anchor" href="#choosing-a-different-python-environment"></a>
-</h2>
-<p>greta resolves which Python to use in this order:</p>
-<ol style="list-style-type: decimal">
-<li>The <code>RETICULATE_PYTHON</code> environment variable, which is
-usually set in <code>~/.Renviron</code> or your shell environment.</li>
-<li>Stored preference - set with <code><a href="../reference/greta_set_python.html">greta_set_python_uv()</a></code>,
-<code><a href="../reference/greta_set_python.html">greta_set_python_conda_env()</a></code>, or
-<code><a href="../reference/greta_set_python.html">greta_set_python_path()</a></code>.</li>
-<li>Auto-detected <code>greta-env-tf2</code> conda environment - created
-by <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>.</li>
-<li>The managed uv environment - the default, no setup needed.</li>
-</ol>
-<p>If you have upgraded from an older greta that used a
-<code>greta-env-tf2</code> conda environment (created by
-<code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>), greta detects and keeps using it.
-So, upgrading to greta 0.6.0 does not change your setup.</p>
-<p>To see which Python environment greta is using right now — and which
-it will use after you restart R — run:</p>
+<p>Run <code><a href="../reference/greta_sitrep.html">greta_sitrep()</a></code> (a “situation report”). It’s the
+first thing to run if you’re not sure what greta has picked up, and the
+first thing to include if you ask for help:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_sitrep.html">greta_sitrep</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>You can switch environments at any time with these helpers, then
-<strong>restart R</strong>. Each one reports what greta will resolve to
-on its next load:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># use the uv-managed environment</span></span>
-<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python_uv</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co"># use the "greta-env-tf2" conda environment</span></span>
-<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python_conda_env</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co"># use a specific Python</span></span>
-<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python_path</a></span><span class="op">(</span><span class="st">"/path/to/python"</span><span class="op">)</span></span>
-<span><span class="co"># clear the choice; resolve automatically</span></span>
-<span><span class="fu"><a href="../reference/greta_set_python.html">greta_reset_python</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>These store your choice (under
-<code>tools::R_user_dir("greta", "config")</code>) so it persists across
-sessions.</p>
-<p>For finer control, setting the <code>RETICULATE_PYTHON</code>
-environment variable to a path (e.g. in your <code>.Rprofile</code>)
-takes precedence over the stored preference:</p>
+<p>On a machine that’s ready to go, you’ll see something like this:</p>
+<pre><code><span><span class="co">#&gt; ℹ checking if python available</span></span>
+<span><span class="co">#&gt; ✔ python (v3.11) available</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; ℹ checking if TensorFlow available</span></span>
+<span><span class="co">#&gt; ✔ TensorFlow (v2.15.1) available</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; ℹ checking if TensorFlow Probability available</span></span>
+<span><span class="co">#&gt; ✔ TensorFlow Probability (v0.23.0) available</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; ℹ greta conda environment: not used (managed (uv) environment active)</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; • backend: "managed (uv) environment"</span></span>
+<span><span class="co">#&gt; • selected via: default</span></span>
+<span><span class="co">#&gt; ✔ offline-ready: uv cache present, offline mode will engage</span></span>
+<span><span class="co">#&gt; ℹ All dependencies available; greta is ready to use!</span></span></code></pre>
+<p>The “conda environment: not used” line is expected and fine for most
+users: greta only uses a conda environment in the alternative conda
+workflow, and by default runs on the managed (uv) environment (more on
+that distinction below). The line that matters is the last one:
+<code>greta is ready to use!</code>. If you see something else, or an
+error instead, see <a href="#troubleshooting">Troubleshooting</a>.</p>
+<p>As a final check, fit a tiny model and confirm sampling runs end to
+end:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>RETICULATE_PYTHON <span class="op">=</span> <span class="st">"/path/to/your/python"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://greta-dev.github.io/greta/">greta</a></span><span class="op">)</span></span></code></pre></div>
-<p>Because <code>RETICULATE_PYTHON</code> takes precedence, a stored
-preference will appear to be ignored while it is set. To go back to your
-stored preference, remove <code>RETICULATE_PYTHON</code> from wherever
-it is set (for example <code>~/.Renviron</code>, which you can open with
-<code>usethis::edit_r_environ()</code>), then restart R.</p>
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distributions.html">normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/model.html">model</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/inference.html">mcmc</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span><span class="va">draws</span></span></code></pre></div>
+<p>If that runs without error and returns some draws, greta is fully
+working.</p>
 </div>
 <div class="section level2">
-<h2 id="advanced-a-managed-conda-environment">Advanced: a managed conda environment<a class="anchor" aria-label="anchor" href="#advanced-a-managed-conda-environment"></a>
+<h2 id="how-greta-uses-python">How greta uses Python<a class="anchor" aria-label="anchor" href="#how-greta-uses-python"></a>
 </h2>
-<p>The automatic (uv) setup covers most users. You might instead want to
-install into a dedicated conda environment when you:</p>
+<p>You don’t need to understand this section to use greta – it’s here
+for context, and because it helps make sense of the options further
+down.</p>
+<p>As we said above, greta relies on Google’s <a href="https://www.tensorflow.org/" class="external-link">TensorFlow</a> and <a href="https://github.com/tensorflow/probability" class="external-link">TensorFlow
+Probability</a> to do its fast, scalable linear algebra and MCMC. Those
+are Python packages, so greta needs a working Python installation to
+hand them off to – even though you only ever write R code. This is
+different from most R packages, where CRAN builds and manages every
+dependency for you.</p>
+<p>By default, greta manages this for you using <a href="https://docs.astral.sh/uv/" class="external-link"><code>uv</code></a>, a fast Python
+package installer, via the reticulate package. The first time it’s
+needed, reticulate uses <code>uv</code> to create a private, isolated
+Python environment containing just the packages greta needs (currently
+Python 3.11, TensorFlow 2.15.1, and TensorFlow Probability 0.23.0). It
+lives in its own cache directory, away from any other Python you might
+have – so greta can’t interfere with, or be broken by, Python you use
+for other things.</p>
+<p>For most people, that’s the whole story: install greta, load it, use
+it. The sections below cover the cases where you want something
+different.</p>
+</div>
+<div class="section level2">
+<h2 id="when-the-default-isnt-right">When the default isn’t right<a class="anchor" aria-label="anchor" href="#when-the-default-isnt-right"></a>
+</h2>
+<p>The managed (uv) environment covers most users. Reach for one of
+these instead if:</p>
 <ul>
-<li>are on an offline or restricted network (see <a href="#offline-or-restricted-network-installation">Offline or
-restricted-network installation</a>),</li>
-<li>need a specific, pinned, reproducible set of versions, or</li>
-<li>are setting up GPU / CUDA support.</li>
+<li>you’re offline or on a restricted network – see <a href="#using-greta-offline">Using greta offline</a>,</li>
+<li>you already have a Python, or a TensorFlow install, you want greta
+to use – see <a href="#i-already-have-python-or-tensorflow-installed">I
+already have Python or TensorFlow installed</a>,</li>
+<li>you need specific, pinned versions of TensorFlow, TensorFlow
+Probability, or Python – see <a href="#i-need-specific-dependency-versions">I need specific dependency
+versions</a>, or</li>
+<li>you’d rather have a conda environment than the managed (uv) one –
+see <a href="#i-want-the-conda-workflow">I want the conda
+workflow</a>.</li>
 </ul>
-<p><code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> builds a conda environment named
-<code>greta-env-tf2</code>, installing TensorFlow and TensorFlow
-Probability into it. By default it uses TF 2.15.0, TFP 0.23.0, and
-Python 3.10:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/install_greta_deps.html">install_greta_deps</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Follow any prompts, then <strong>restart R</strong>. To make greta
-use this environment, set it as your preference (then restart R
-again):</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python_conda_env</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Using a conda environment isolates these exact Python modules from
-other Python installations, so only greta sees them. This avoids a class
-of problems where, for example, updating TensorFlow elsewhere on your
-machine would otherwise overwrite the version greta needs.</p>
 <div class="section level3">
-<h3 id="choosing-specific-versions">Choosing specific versions<a class="anchor" aria-label="anchor" href="#choosing-specific-versions"></a>
+<h3 id="using-greta-offline">Using greta offline<a class="anchor" aria-label="anchor" href="#using-greta-offline"></a>
 </h3>
-<p><code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> takes a <code>deps</code> argument,
-built with <code><a href="../reference/greta_deps_spec.html">greta_deps_spec()</a></code>, which lets you choose
-versions:</p>
+<p>Both the default managed (uv) setup and
+<code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> download packages from the internet,
+so a blocked or air-gapped network stops either approach on a machine
+that has never set greta up before. If your network blocks PyPI but
+allows conda, the conda route via <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> may
+work where the managed (uv) one does not.</p>
+<p>There are three escape routes, in order of robustness:</p>
+<ol style="list-style-type: decimal">
+<li>point greta at a Python environment that is already on disk,</li>
+<li>prime the managed (uv) environment once while online, or</li>
+<li>pin dependency versions so an offline environment matches what greta
+expects. <code><a href="../reference/greta_sitrep.html">greta_sitrep()</a></code> reports whether your current setup
+is ready to start offline (see the “offline-ready” line in <a href="#did-it-work">Did it work?</a>).</li>
+</ol>
+<p><strong>Already have a working Python with TF and TFP on
+disk</strong> (for example, provided by your institution, or copied onto
+an air-gapped machine)? Point greta straight at it – see <a href="#i-already-have-python-or-tensorflow-installed">I already have
+Python or TensorFlow installed</a>. This route only ever <em>reads</em>
+what is already there; it never downloads anything, so it works with no
+network at all.</p>
+<div class="section level4">
+<h4 id="prime-the-managed-uv-environment-while-online">Prime the managed (uv) environment while online<a class="anchor" aria-label="anchor" href="#prime-the-managed-uv-environment-while-online"></a>
+</h4>
+<p>If you’re using the default managed (uv) environment, greta can start
+offline once reticulate’s <code>uv</code> cache has been populated once,
+while online: run <code><a href="https://greta-dev.github.io/greta/">library(greta)</a></code> and use greta once (for
+example <code>normal(0, 1)</code>), and you’re done. On its next start,
+greta detects the populated cache and enables <code>uv</code>’s offline
+mode automatically, so it no longer reaches out to PyPI.</p>
+<p>You can override this yourself by setting the <code>UV_OFFLINE</code>
+environment variable before loading greta; greta never touches a value
+you’ve already set:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># force offline mode: e.g. before greta detects the cache, or on a machine</span></span>
+<span><span class="co"># where you copied the cache over</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>UV_OFFLINE <span class="op">=</span> <span class="st">"1"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># force uv back online: for example to refresh the environment</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>UV_OFFLINE <span class="op">=</span> <span class="st">"0"</span><span class="op">)</span></span></code></pre></div>
+<p>To make either choice persistent, set <code>UV_OFFLINE=1</code> (or
+<code>UV_OFFLINE=0</code>) in <code>~/.Renviron</code> instead (no
+<code><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv()</a></code> needed there).</p>
+</div>
+<div class="section level4">
+<h4 id="pin-dependency-versions">Pin dependency versions<a class="anchor" aria-label="anchor" href="#pin-dependency-versions"></a>
+</h4>
+<p>If someone else installs a Python environment for your offline
+machine, pin the versions greta expects with
+<code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code> so the two match (see <a href="#i-need-specific-dependency-versions">I need specific dependency
+versions</a>). The stored versions are used by both the managed (uv)
+environment and <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>. Note that pinning
+<em>non-default</em> versions this way means the managed environment may
+still need one further online resolve even after priming the cache,
+since greta’s offline shortcut is tied to its own default pins.</p>
+<p>If your connection drops partway through – for example greta errors
+on first use with a message from <code>uv</code> like
+<code>error: Failed to fetch</code> (or, with <code>UV_OFFLINE=1</code>
+set,
+<code>Network connectivity is disabled, but the requested data wasn't found in the cache</code>)
+– see <a href="#troubleshooting">Troubleshooting</a>.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="i-already-have-python-or-tensorflow-installed">I already have Python or TensorFlow installed<a class="anchor" aria-label="anchor" href="#i-already-have-python-or-tensorflow-installed"></a>
+</h3>
+<p>If you manage your own Python, point greta at it with
+<code><a href="../reference/greta_set_python.html">greta_set_python()</a></code>, and <strong>restart R</strong>. These
+routes only ever <em>read</em> what is already on disk – they never
+download anything – so they work with no network at all.</p>
+<p><code>greta_set_python("path", ...)</code> accepts either a Python
+binary or an environment directory (a virtualenv or conda prefix). Given
+a directory, greta looks for <code>bin/python</code> inside it
+(<code>Scripts/python.exe</code> on Windows):</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># point at a specific Python binary</span></span>
+<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="st">"path"</span>, path <span class="op">=</span> <span class="st">"/opt/python-envs/greta/bin/python"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># or point at the environment directory and let greta find the binary</span></span>
+<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="st">"path"</span>, path <span class="op">=</span> <span class="st">"/opt/python-envs/greta"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># on Windows, an environment directory works the same way; greta looks for</span></span>
+<span><span class="co"># Scripts\\python.exe inside it</span></span>
+<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="st">"path"</span>, path <span class="op">=</span> <span class="st">"C:/python-envs/greta"</span><span class="op">)</span></span></code></pre></div>
+<p>If your environment is a conda environment, you can instead select it
+by name (this also never downloads anything):</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/install_greta_deps.html">install_greta_deps</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="../reference/greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span></span>
-<span>    tf_version <span class="op">=</span> <span class="st">"2.15.0"</span>,</span>
-<span>    tfp_version <span class="op">=</span> <span class="st">"0.23.0"</span>,</span>
-<span>    python_version <span class="op">=</span> <span class="st">"3.10"</span></span>
-<span>  <span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="st">"conda"</span>, name <span class="op">=</span> <span class="st">"greta-env-tf2"</span><span class="op">)</span></span></code></pre></div>
+<p>Alternatively, set the <code>RETICULATE_PYTHON</code> environment
+variable (for example in <code>~/.Renviron</code>) to the Python binary,
+which takes precedence over any stored preference. See <a href="#advanced-how-greta-chooses-a-python-environment">Advanced: how
+greta chooses a Python environment</a> for the full precedence
+order.</p>
+<p>Either way, the Python you point at needs TensorFlow and TensorFlow
+Probability already installed for greta to work; run
+<code><a href="../reference/greta_sitrep.html">greta_sitrep()</a></code> afterwards to confirm.</p>
+</div>
+<div class="section level3">
+<h3 id="i-need-specific-dependency-versions">I need specific dependency versions<a class="anchor" aria-label="anchor" href="#i-need-specific-dependency-versions"></a>
+</h3>
+<p>Most users never need to think about this: greta’s defaults
+(TensorFlow 2.15.1, TensorFlow Probability 0.23.0, Python 3.11) are the
+newest versions greta supports, and are used automatically. Reach for
+this if you need a different, specific combination – for example to
+match an existing institutional setup, or an offline machine someone
+else provisioned.</p>
+<p>Build a version choice with <code><a href="../reference/greta_deps_spec.html">greta_deps_spec()</a></code>:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span></span>
+<span>  tf_version <span class="op">=</span> <span class="st">"2.15.0"</span>,</span>
+<span>  tfp_version <span class="op">=</span> <span class="st">"0.23.0"</span>,</span>
+<span>  python_version <span class="op">=</span> <span class="st">"3.10"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>If you specify versions of TF, TFP, and Python that are not
 compatible with each other, <code><a href="../reference/greta_deps_spec.html">greta_deps_spec()</a></code> errors before
@@ -246,16 +340,65 @@ knows about are recorded in the <code>greta_deps_tf_tfp</code> dataset,
 which we built from <a href="https://www.tensorflow.org/install/source#tested_build_configurations" class="external-link uri">https://www.tensorflow.org/install/source#tested_build_configurations</a>,
 <a href="https://www.tensorflow.org/install/source_windows#tested_build_configurations" class="external-link uri">https://www.tensorflow.org/install/source_windows#tested_build_configurations</a>,
 and the TFP release notes. Inspect it with:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/View.html" class="external-link">View</a></span><span class="op">(</span><span class="va">greta_deps_tf_tfp</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> also takes <code>timeout</code>
-(minutes to wait before a component times out, default 5) and
-<code>restart</code> (<code>"ask"</code> (default),
-<code>"force"</code>, or <code>"no"</code>).</p>
+<p>To persist a version choice, store it with
+<code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code>. The stored versions are then used by both
+the managed (uv) environment (installed on the next load) and
+<code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> (as its default
+<code>deps</code>):</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_set_deps.html">greta_set_deps</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="../reference/greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span></span>
+<span>    tf_version <span class="op">=</span> <span class="st">"2.14.0"</span>,</span>
+<span>    tfp_version <span class="op">=</span> <span class="st">"0.22.1"</span>,</span>
+<span>    python_version <span class="op">=</span> <span class="st">"3.10"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># clear the stored versions and return to greta's defaults</span></span>
+<span><span class="fu"><a href="../reference/greta_remove.html">greta_remove</a></span><span class="op">(</span><span class="st">"deps"</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code> and <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>
+take effect on the next restart – see <a href="#i-want-the-conda-workflow">I want the conda workflow</a> if
+you’re building a conda environment, or just restart R if you’re using
+the managed (uv) environment.</p>
 </div>
 <div class="section level3">
-<h3 id="how-install_greta_deps-works">How <code>install_greta_deps()</code> works<a class="anchor" aria-label="anchor" href="#how-install_greta_deps-works"></a>
+<h3 id="i-want-the-conda-workflow">I want the conda workflow<a class="anchor" aria-label="anchor" href="#i-want-the-conda-workflow"></a>
 </h3>
+<p>You might want a dedicated conda environment instead of the managed
+(uv) one when you:</p>
+<ul>
+<li>need a specific, pinned, reproducible set of versions (alongside
+<code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code>, above),</li>
+<li>are setting up GPU / CUDA support, or</li>
+<li>are on a network that blocks PyPI but allows conda (see <a href="#using-greta-offline">Using greta offline</a>).</li>
+</ul>
+<p><code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> builds a conda environment named
+<code>greta-env-tf2</code>, installing TensorFlow and TensorFlow
+Probability into it. By default it uses the same versions as the managed
+environment (TensorFlow 2.15.1, TensorFlow Probability 0.23.0, Python
+3.11), or your stored <code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code> choice if you’ve
+made one:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/install_greta_deps.html">install_greta_deps</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Follow any prompts, then <strong>restart R</strong>. To make greta
+use this environment, set it as your preference (then restart R
+again):</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="st">"conda"</span><span class="op">)</span></span></code></pre></div>
+<p>Using a conda environment isolates these exact Python modules from
+other Python installations, so only greta sees them. This avoids a class
+of problems where, for example, updating TensorFlow elsewhere on your
+machine would otherwise overwrite the version greta needs.</p>
+<p><code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> also takes a <code>deps</code>
+argument (built with <code><a href="../reference/greta_deps_spec.html">greta_deps_spec()</a></code> – see <a href="#i-need-specific-dependency-versions">I need specific dependency
+versions</a>), <code>timeout</code> (minutes to wait before a component
+times out, default 5), and <code>restart</code> (<code>"ask"</code>
+(default), <code>"force"</code>, or <code>"no"</code>).</p>
+<div class="section level4">
+<h4 id="how-install_greta_deps-works">How <code>install_greta_deps()</code> works<a class="anchor" aria-label="anchor" href="#how-install_greta_deps-works"></a>
+</h4>
 <p>For users who want the detail: greta runs the installation in a
 separate, clean R session using <a href="https://callr.r-lib.org/" class="external-link"><code>callr</code></a>, so Python and
 reticulate are not already loaded. This also lets us route the large
@@ -268,66 +411,171 @@ requested TF and TFP, then installs the TF and TFP modules. In
 interactive RStudio sessions it then asks whether to restart R.</p>
 </div>
 </div>
+<div class="section level3">
+<h3 id="advanced-how-greta-chooses-a-python-environment">Advanced: how greta chooses a Python environment<a class="anchor" aria-label="anchor" href="#advanced-how-greta-chooses-a-python-environment"></a>
+</h3>
+<p>You don’t need this to use greta day to day – it’s here for when
+you’re customising your setup, or diagnosing why greta picked up a
+Python you weren’t expecting.</p>
+<p>greta resolves which Python to use, in this order:</p>
+<ol style="list-style-type: decimal">
+<li>The <code>RETICULATE_PYTHON</code> environment variable, if set –
+usually in <code>~/.Renviron</code>, your <code>.Rprofile</code>, or
+your shell environment. This always wins: it takes precedence over any
+stored preference.</li>
+<li>Your stored preference, set with
+<code><a href="../reference/greta_set_python.html">greta_set_python()</a></code>.</li>
+<li>An auto-detected <code>greta-env-tf2</code> conda environment,
+created by <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> – kept so setups from older
+greta versions keep working after upgrading. If you’ve upgraded from an
+older greta that used this conda environment, greta detects and keeps
+using it, so upgrading to greta 0.6.0 does not change your setup.</li>
+<li>Otherwise, the managed (uv) environment – the default, no setup
+needed.</li>
+</ol>
+<p>To see which Python environment greta is using right now – and which
+it will use after you restart R – run <code><a href="../reference/greta_sitrep.html">greta_sitrep()</a></code> (see
+<a href="#did-it-work">Did it work?</a>).</p>
+<p>You can switch environments at any time with
+<code><a href="../reference/greta_set_python.html">greta_set_python()</a></code>, then <strong>restart R</strong>. Each
+call reports what greta will resolve to on its next load:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># use the managed (uv) environment (the default)</span></span>
+<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># use the "greta-env-tf2" conda environment</span></span>
+<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="st">"conda"</span><span class="op">)</span></span>
+<span><span class="co"># use a specific Python</span></span>
+<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="st">"path"</span>, path <span class="op">=</span> <span class="st">"/path/to/python"</span><span class="op">)</span></span>
+<span><span class="co"># clear the choice; resolve automatically</span></span>
+<span><span class="fu"><a href="../reference/greta_set_python.html">greta_reset_python</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>These store your choice (under
+<code>tools::R_user_dir("greta", "config")</code>) so it persists across
+sessions.</p>
+<p>For finer control, setting the <code>RETICULATE_PYTHON</code>
+environment variable to a path (e.g. in your <code>.Rprofile</code>)
+takes precedence over the stored preference:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>RETICULATE_PYTHON <span class="op">=</span> <span class="st">"/path/to/your/python"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://greta-dev.github.io/greta/">greta</a></span><span class="op">)</span></span></code></pre></div>
+<p>Because <code>RETICULATE_PYTHON</code> takes precedence, a stored
+preference will appear to be ignored while it is set. To go back to your
+stored preference, remove <code>RETICULATE_PYTHON</code> from wherever
+it is set (for example <code>~/.Renviron</code>, which you can open with
+<code>usethis::edit_r_environ()</code>), then restart R.</p>
+<p>See <code><a href="../reference/greta_set_python.html">?greta_set_python</a></code> for the full argument
+reference.</p>
+</div>
+</div>
 <div class="section level2">
-<h2 id="offline-or-restricted-network-installation">Offline or restricted-network installation<a class="anchor" aria-label="anchor" href="#offline-or-restricted-network-installation"></a>
+<h2 id="starting-over">Starting over<a class="anchor" aria-label="anchor" href="#starting-over"></a>
 </h2>
-<p>Both the automatic (uv) setup and <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>
-download packages from the internet, so a blocked or air-gapped network
-will stop either approach. If your network blocks PyPI but allows conda,
-the conda route via <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> may work where uv
-does not.</p>
-<p>If you have a working Python with TF and TFP installed by some other
-means (for example, provided by your institution), point greta at it
-directly and restart R:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># or set RETICULATE_PYTHON</span></span>
-<span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python_path</a></span><span class="op">(</span><span class="st">"/path/to/python"</span><span class="op">)</span></span></code></pre></div>
+<p>If your setup is in a confusing state and you just want a clean
+slate, use <code><a href="../reference/greta_remove.html">greta_remove()</a></code>. It takes a <code>what</code>
+argument to choose how much to remove:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># everything at once (the default) -- asks for confirmation once, then</span></span>
+<span><span class="co"># removes everything it finds</span></span>
+<span><span class="fu"><a href="../reference/greta_remove.html">greta_remove</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># the "greta-env-tf2" conda environment</span></span>
+<span><span class="fu"><a href="../reference/greta_remove.html">greta_remove</a></span><span class="op">(</span><span class="st">"env"</span><span class="op">)</span></span>
+<span><span class="co"># the miniconda installation</span></span>
+<span><span class="fu"><a href="../reference/greta_remove.html">greta_remove</a></span><span class="op">(</span><span class="st">"miniconda"</span><span class="op">)</span></span>
+<span><span class="co"># reticulate's uv cache</span></span>
+<span><span class="fu"><a href="../reference/greta_remove.html">greta_remove</a></span><span class="op">(</span><span class="st">"uv_cache"</span><span class="op">)</span></span>
+<span><span class="co"># just the stored Python preference (from greta_set_python())</span></span>
+<span><span class="fu"><a href="../reference/greta_remove.html">greta_remove</a></span><span class="op">(</span><span class="st">"preference"</span><span class="op">)</span></span>
+<span><span class="co"># just the stored dependency versions (from greta_set_deps())</span></span>
+<span><span class="fu"><a href="../reference/greta_remove.html">greta_remove</a></span><span class="op">(</span><span class="st">"deps"</span><span class="op">)</span></span></code></pre></div>
+<p>After removing everything, restart R; greta reinstalls what it needs
+the next time you use it (an internet connection is needed again at that
+point, unless you <a href="#prime-the-managed-uv-environment-while-online">prime the managed
+(uv) environment offline</a> or <a href="#i-already-have-python-or-tensorflow-installed">point greta at an
+existing Python</a>).</p>
+<p>If you specifically want to rebuild the <code>greta-env-tf2</code>
+conda environment, <code><a href="../reference/install_greta_deps.html">reinstall_greta_deps()</a></code> removes it and
+miniconda, then reinstalls both in one step.</p>
 </div>
 <div class="section level2">
 <h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
 </h2>
-<p>Installation doesn’t always go to plan. Some things to try:</p>
+<p>Work through these in order. Most problems are one of the first
+two.</p>
+<p><strong>I changed something (ran <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>,
+or called <code><a href="../reference/greta_set_python.html">greta_set_python()</a></code> /
+<code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code>) and greta doesn’t seem to have picked it
+up.</strong></p>
 <ul>
-<li><p><strong>Restart R.</strong> After changing the environment (with
-<code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> or any of the
-<code>greta_set_python_*()</code> helpers), you must restart R so greta
-can connect to the chosen Python.</p></li>
-<li><p><strong>Run <code><a href="../reference/greta_sitrep.html">greta_sitrep()</a></code>.</strong> It reports the
-resolved backend and the versions of Python, TF, and TFP, which often
-points straight at the problem.</p></li>
-<li><p><strong>Check the installation logfile.</strong> If you used
-<code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>, open the logfile with
-<code><a href="../reference/open_greta_install_log.html">open_greta_install_log()</a></code> and search it (Ctrl/Cmd+F) for
-“error” or “warn”. Even when there’s no obvious fix, the logfile is
-useful to share on a forum or a <a href="https://github.com/greta-dev/greta/issues" class="external-link">greta GitHub
-issue</a>.</p></li>
-<li><p><strong>Start from a clean slate.</strong>
-<code><a href="../reference/install_greta_deps.html">reinstall_greta_deps()</a></code> removes miniconda and the greta
-conda environment and installs them again. You can also do the steps
-manually with <code><a href="../reference/reinstallers.html">remove_greta_env()</a></code>,
-<code><a href="../reference/reinstallers.html">remove_miniconda()</a></code> (or <code><a href="../reference/destroy_greta_deps.html">destroy_greta_deps()</a></code>
-for both), then <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>.</p></li>
-<li><p><strong>Check internet access.</strong> Installing dependencies
-needs a connection, and some networks block package downloads. See <a href="#offline-or-restricted-network-installation">Offline or
-restricted-network installation</a>.</p></li>
+<li>Restart R.</li>
+<li>greta resolves its Python backend when the package loads, so a
+change only takes effect on the next fresh session – within the same
+session, greta keeps using whatever it already loaded.</li>
 </ul>
-<p>If the helpers don’t work, you can install the Python modules
-yourself into a conda environment:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<p><strong>I’m not sure what greta is using, or whether it’s
+working.</strong></p>
+<ul>
+<li>Run <code><a href="../reference/greta_sitrep.html">greta_sitrep()</a></code> (see <a href="#did-it-work">Did it
+work?</a>).</li>
+<li>It reports the resolved backend and the versions of Python, TF, and
+TFP, which usually points straight at the problem.</li>
+</ul>
+<p><strong>greta says something like
+<code>error: Failed to fetch</code>, or (with <code>UV_OFFLINE=1</code>
+set)
+<code>Network connectivity is disabled, but the requested data wasn't found in the cache</code>.</strong>
+- <code>uv</code> tried to resolve dependencies without a working
+connection. To recover:</p>
+<ol style="list-style-type: decimal">
+<li>If greta’s environment had already been installed on this machine,
+force offline mode with <code>Sys.setenv(UV_OFFLINE = "1")</code> (or in
+<code>~/.Renviron</code>), then restart R: <code>uv</code> then resolves
+from its cache without touching the network.</li>
+<li>If it had not, reconnect once and use greta (for example
+<code>normal(0, 1)</code>) to prime the environment; after that greta
+starts offline automatically.</li>
+<li>If you cannot reconnect, point greta at an already-installed Python
+– see <a href="#i-already-have-python-or-tensorflow-installed">I already
+have Python or TensorFlow installed</a> – and restart R.</li>
+</ol>
+<p><strong>I used <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> and want to see what
+happened, or it seems to have failed.</strong></p>
+<ul>
+<li>Open the logfile with <code><a href="../reference/open_greta_install_log.html">open_greta_install_log()</a></code> and
+search it (Ctrl/Cmd+F) for “error” or “warn”.</li>
+<li>Even when there’s no obvious fix, the logfile is useful to share on
+a forum or a <a href="https://github.com/greta-dev/greta/issues" class="external-link">greta
+GitHub issue</a>.</li>
+</ul>
+<p><strong>None of the above helped.</strong></p>
+<ul>
+<li>Start from a clean slate – see <a href="#starting-over">Starting
+over</a> – then try <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> again.</li>
+</ul>
+<p><strong>My network blocks package downloads entirely.</strong></p>
+<ul>
+<li>See <a href="#using-greta-offline">Using greta offline</a>.</li>
+</ul>
+<p><strong>The helpers above still don’t work.</strong> As a last
+resort, you can install the Python modules yourself into a conda
+environment:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/install_miniconda.html" class="external-link">install_miniconda</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/conda-tools.html" class="external-link">conda_create</a></span><span class="op">(</span></span>
 <span>  envname <span class="op">=</span> <span class="st">"greta-env-tf2"</span>,</span>
-<span>  python_version <span class="op">=</span> <span class="st">"3.10"</span></span>
+<span>  python_version <span class="op">=</span> <span class="st">"3.11"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/conda-tools.html" class="external-link">conda_install</a></span><span class="op">(</span></span>
 <span>  envname <span class="op">=</span> <span class="st">"greta-env-tf2"</span>,</span>
 <span>  packages <span class="op">=</span> <span class="fu"><a href="../reference/extract-replace-combine.html">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"tensorflow-probability==0.23.0"</span>,</span>
-<span>    <span class="st">"tensorflow==2.15.0"</span></span>
+<span>    <span class="st">"tensorflow==2.15.1"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Then point greta at it with <code><a href="../reference/greta_set_python.html">greta_set_python_conda_env()</a></code>
-and restart R.</p>
+<ul>
+<li><p>Then point greta at it with
+<code>greta_set_python("conda")</code> and restart R.</p></li>
+<li><p>If this still doesn’t work for you, please post on the <a href="https://forum.greta-stats.org/" class="external-link">greta forum</a>, or open a <a href="https://github.com/greta-dev/greta/issues/new" class="external-link">GitHub issue</a>,
+and include your <code><a href="../reference/greta_sitrep.html">greta_sitrep()</a></code> output.</p></li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -340,7 +588,7 @@ and restart R.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

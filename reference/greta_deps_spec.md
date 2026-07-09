@@ -40,6 +40,13 @@ greta_deps_spec(
 
 data frame of valid dependencies
 
+## Details
+
+Calling `greta_deps_spec()` with no arguments returns greta's current
+default (recommended) versions, and is the supported way to query them -
+for example `greta_deps_spec()$tf_version` for the default TensorFlow
+version.
+
 ## Examples
 
 ``` r

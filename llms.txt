@@ -275,10 +275,8 @@ Misc functions to sort through later
 
 Functions for managing installation of dependencies
 
-- [`destroy_greta_deps()`](https://greta-dev.github.io/greta/reference/destroy_greta_deps.md)
-  : Remove greta dependencies and remove miniconda
-- [`greta_remove_all_deps()`](https://greta-dev.github.io/greta/reference/greta_remove_all_deps.md)
-  : Remove all greta Python dependencies (nuclear reset)
+- [`greta_remove()`](https://greta-dev.github.io/greta/reference/greta_remove.md)
+  : Remove greta's Python dependencies
 - [`greta_create_conda_env()`](https://greta-dev.github.io/greta/reference/greta_create_conda_env.md)
   : Create conda environment for greta
 - [`greta_deps_receipt()`](https://greta-dev.github.io/greta/reference/greta_deps_receipt.md)
@@ -302,17 +300,19 @@ Functions for managing installation of dependencies
   : Write greta dependency installation log file
 - [`open_greta_install_log()`](https://greta-dev.github.io/greta/reference/open_greta_install_log.md)
   : Read a greta logfile
-- [`greta_set_python_uv()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
-  [`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
-  [`greta_set_python_path()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
+- [`greta_set_python()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
   [`greta_reset_python()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
   : Choose the Python environment greta uses
-- [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
-  [`reinstall_greta_env()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
-  [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
-  [`reinstall_miniconda()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
-  [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
-  : Helpers to remove, and reinstall python environments and miniconda
+- [`greta_set_deps()`](https://greta-dev.github.io/greta/reference/greta_set_deps.md)
+  : Choose the dependency versions greta installs
+- [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  [`greta_remove_all_deps()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  [`destroy_greta_deps()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  [`reinstall_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  [`reinstall_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  **\[deprecated\]** : Deprecated removal and reinstallation helpers
 
 # Articles
 

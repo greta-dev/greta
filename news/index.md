@@ -53,16 +53,14 @@
   existing `greta-env-tf2` conda environment, and otherwise uses the
   managed (uv) environment
   ([\#801](https://github.com/greta-dev/greta/issues/801)).
+- The managed (uv) backend now works without an internet connection, by
+  enabling uv’s offline mode (via environment variable `UV_OFFLINE`)
+  once reticulate’s uv cache is installed. You can set `UV_OFFLINE=0`
+  (or `=1`) yourself to force online or offline resolution, respectively
+  ([\#814](https://github.com/greta-dev/greta/issues/814)).
 - Fixed [`library(greta)`](https://greta-dev.github.io/greta/) failing
   with an error when greta’s stored Python preference file exists but is
   empty ([\#809](https://github.com/greta-dev/greta/issues/809)).
-- [`destroy_greta_deps()`](https://greta-dev.github.io/greta/reference/destroy_greta_deps.md),
-  [`greta_remove_all_deps()`](https://greta-dev.github.io/greta/reference/greta_remove_all_deps.md),
-  and
-  [`reinstall_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
-  ask for confirmation once up front rather than at every step, work
-  non-interactively again, and report what was actually removed
-  ([\#809](https://github.com/greta-dev/greta/issues/809)).
 - [`greta_deps_spec()`](https://greta-dev.github.io/greta/reference/greta_deps_spec.md)
   now only checks that the requested TensorFlow version is one greta
   supports (TensorFlow 2.16 and later are not supported, as they ship
@@ -74,24 +72,58 @@
   shows the Python packages installed in a specific TF2 environment
   ([\#801](https://github.com/greta-dev/greta/issues/801),
   [\#809](https://github.com/greta-dev/greta/issues/809)).
-- [`greta_remove_all_deps()`](https://greta-dev.github.io/greta/reference/greta_remove_all_deps.md)
-  removes all of greta’s Python dependencies for a clean slate: the
-  `greta-env-tf2` conda environment, miniconda, reticulate’s managed uv
-  cache, and any stored greta Python preference
-  ([\#801](https://github.com/greta-dev/greta/issues/801),
-  [\#809](https://github.com/greta-dev/greta/issues/809)).
-- [`greta_set_python_uv()`](https://greta-dev.github.io/greta/reference/greta_set_python.md),
-  [`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md),
-  [`greta_set_python_path()`](https://greta-dev.github.io/greta/reference/greta_set_python.md),
+- [`greta_remove()`](https://greta-dev.github.io/greta/reference/greta_remove.md)
+  consolidates greta’s Python removal helpers behind a single `what`
+  argument to remove the `greta-env-tf2` conda environment, miniconda,
+  reticulate’s uv cache, the stored Python preference, the stored
+  dependency versions, or all of them. This means
+  [`destroy_greta_deps()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  [`greta_remove_all_deps()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  and
+  [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  are now superceded by
+  [`greta_remove()`](https://greta-dev.github.io/greta/reference/greta_remove.md)
+  ([\#814](https://github.com/greta-dev/greta/issues/814)).
+- [`reinstall_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  and
+  [`reinstall_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  are now deprecated in favour of
+  [`reinstall_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+  ([\#814](https://github.com/greta-dev/greta/issues/814)).
+- [`greta_set_deps()`](https://greta-dev.github.io/greta/reference/greta_set_deps.md)
+  persistently chooses which TensorFlow, TensorFlow Probability, and
+  Python versions greta uses; the managed (uv) environment installs them
+  on next load and
+  [`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+  uses them as its default; clear with `greta_remove("deps")`
+  ([\#817](https://github.com/greta-dev/greta/issues/817)).
+- [`greta_set_python()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
   and
   [`greta_reset_python()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
-  let you choose, persistently, which Python environment greta uses;
-  each reports the stored preference, warns if `RETICULATE_PYTHON` takes
-  precedence, and shows what greta will resolve to on its next load;
-  [`greta_sitrep()`](https://greta-dev.github.io/greta/reference/greta_sitrep.md)
-  reports the resolved backend
+  let you choose, persistently, which Python environment greta uses -
+  the managed (uv) environment (`backend = "uv"`, the default), a conda
+  environment (`backend = "conda"`), or a specific Python
+  (`backend = "path"`); each reports the stored preference, warns if
+  `RETICULATE_PYTHON` takes precedence, and shows what greta will
+  resolve to on its next load
   ([\#801](https://github.com/greta-dev/greta/issues/801),
-  [\#809](https://github.com/greta-dev/greta/issues/809)).
+  [\#809](https://github.com/greta-dev/greta/issues/809),
+  [\#817](https://github.com/greta-dev/greta/issues/817)).
+- `greta_set_python("path", path = ...)` accepts either a Python binary
+  or an environment directory (a virtualenv or conda prefix), looking
+  for `bin/python` (or `Scripts/python.exe` on Windows) inside it, which
+  eases offline and pre-installed setups
+  ([\#814](https://github.com/greta-dev/greta/issues/814)).
+- [`greta_sitrep()`](https://greta-dev.github.io/greta/reference/greta_sitrep.md)
+  now reports the resolved Python backend and whether greta can start
+  offline: for the managed (uv) environment, the `UV_OFFLINE` setting
+  and whether reticulate’s uv cache is populated; a missing conda
+  environment is reported neutrally as “not used” on the managed (uv)
+  backend rather than as a failure
+  ([\#801](https://github.com/greta-dev/greta/issues/801),
+  [\#817](https://github.com/greta-dev/greta/issues/817)).
 - [`greta_sitrep()`](https://greta-dev.github.io/greta/reference/greta_sitrep.md)
   now requires Python 3.9 or later (previously 3.8), matching the Python
   versions greta supports
@@ -105,21 +137,20 @@
   is no longer required for most users, as greta now installs TensorFlow
   and TensorFlow Probability automatically via uv on first use; it
   remains for installing a conda environment (for example, for offline
-  use), which you can then select with
-  [`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
+  use), which you can then select with `greta_set_python("conda")`
   ([\#801](https://github.com/greta-dev/greta/issues/801)).
-- [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/reinstallers.md),
-  [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/reinstallers.md),
+- [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
   and
-  [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
+  [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
   ask for confirmation before removing, gain an `ask` argument (default
   [`interactive()`](https://rdrr.io/r/base/interactive.html)) so they
   work non-interactively, and invisibly return whether anything was
   removed ([\#809](https://github.com/greta-dev/greta/issues/809)).
-- [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
-  removes reticulate’s managed uv cache; note this cache is shared by
-  all reticulate packages and is not greta-specific, and a system-wide
-  uv cache is left untouched
+- [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  removes reticulate’s uv cache; note this cache is shared by all
+  reticulate packages and is not greta-specific, and a system-wide uv
+  cache is left untouched
   ([\#801](https://github.com/greta-dev/greta/issues/801),
   [\#809](https://github.com/greta-dev/greta/issues/809)).
 
@@ -202,7 +233,7 @@ it should fail gracefully with some useful advice on problem solving.
   [`open_greta_install_log()`](https://greta-dev.github.io/greta/reference/open_greta_install_log.md)
   ([\#493](https://github.com/greta-dev/greta/issues/493)).
 - Added
-  [`destroy_greta_deps()`](https://greta-dev.github.io/greta/reference/destroy_greta_deps.md)
+  [`destroy_greta_deps()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
   function to remove miniconda and python conda environment.
 - Improved
   [`write_greta_install_log()`](https://greta-dev.github.io/greta/reference/write_greta_install_log.md)
@@ -440,11 +471,11 @@ CRAN release: 2022-03-15
   internally.
 
 - Adds the
-  [`reinstall_greta_env()`](https://greta-dev.github.io/greta/reference/reinstallers.md),
-  [`reinstall_miniconda()`](https://greta-dev.github.io/greta/reference/reinstallers.md),
-  [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/reinstallers.md),
+  [`reinstall_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  [`reinstall_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
+  [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
   and
-  [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/reinstallers.md)
+  [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
   helper functions for helping installation get to “clean slate”
   ([\#443](https://github.com/greta-dev/greta/issues/443)).
 

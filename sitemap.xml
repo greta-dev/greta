@@ -25,7 +25,7 @@
 <url><loc>https://greta-dev.github.io/greta/reference/calculate.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/chol.greta_array.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/chol2symm.html</loc></url>
-<url><loc>https://greta-dev.github.io/greta/reference/destroy_greta_deps.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta/reference/deprecated-installers.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/dim-set-.unknowns.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/dim.node.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/distribution.html</loc></url>
@@ -40,7 +40,8 @@
 <url><loc>https://greta-dev.github.io/greta/reference/greta_deps_tf_tfp.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/greta_install_miniconda.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/greta_list_py_modules.html</loc></url>
-<url><loc>https://greta-dev.github.io/greta/reference/greta_remove_all_deps.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta/reference/greta_remove.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta/reference/greta_set_deps.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/greta_set_install_logfile.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/greta_set_python.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/greta_sitrep.html</loc></url>
@@ -60,7 +61,6 @@
 <url><loc>https://greta-dev.github.io/greta/reference/print.greta_deps_spec.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/print.greta_mcmc_list.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/reexports.html</loc></url>
-<url><loc>https://greta-dev.github.io/greta/reference/reinstallers.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/run_optimiser.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/samplers.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/reference/simulate.greta_model.html</loc></url>

@@ -2,9 +2,9 @@
 
 This is a helper function to install specified versions of Python
 dependencies needed for greta. By default, greta version \>= 0.6.0 now
-uses reticulate's uv-managed Python to automatically identify
-dependencies. You can change over to this new approach with
-[`greta_set_python_uv()`](https://greta-dev.github.io/greta/reference/greta_set_python.md),
+uses reticulate's managed (uv) Python environment to automatically
+identify dependencies. You can change over to this new approach with
+[`greta_set_python()`](https://greta-dev.github.io/greta/reference/greta_set_python.md),
 which is now what we recommend. This has changed from where we would
 previously use `install_greta_deps()`.
 
@@ -40,7 +40,9 @@ reinstall_greta_deps(
   Python versions are resolved at install time. See
   ?[`greta_deps_spec()`](https://greta-dev.github.io/greta/reference/greta_deps_spec.md)
   for more information, and the data object `greta_deps_tf_tfp` for
-  known-good combinations.
+  known-good combinations. If you have stored a preference with
+  [`greta_set_deps()`](https://greta-dev.github.io/greta/reference/greta_set_deps.md),
+  it is used when `deps` is not supplied.
 
 - timeout:
 
@@ -103,11 +105,10 @@ We now recommend using the new default method for installation, which
 uses [uv](https://docs.astral.sh/uv/) (via the reticulate package) to
 install TensorFlow and TensorFlow Probability on first use. To make
 greta use the "greta-env-tf2" conda environment created here instead,
-use
-[`greta_set_python_conda_env()`](https://greta-dev.github.io/greta/reference/greta_set_python.md)
-(or set the `RETICULATE_PYTHON` environment variable to its Python
-before loading greta). See the "Installing Dependencies" vignette and
-[`greta_set_python_path()`](https://greta-dev.github.io/greta/reference/greta_set_python.md).
+use `greta_set_python("conda")` (or set the `RETICULATE_PYTHON`
+environment variable to its Python before loading greta). See the
+"Installing Dependencies" vignette and
+[`greta_set_python()`](https://greta-dev.github.io/greta/reference/greta_set_python.md).
 
 If you don't want to use conda or the "greta-env-tf2" conda environment,
 you can install versions that you like, e.g., using
