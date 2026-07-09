@@ -42,6 +42,8 @@ check_tf_version <- function(
     )
     cat("\n")
     greta_stash$python_has_been_initialised <- TRUE
+    # cap TF's thread pools if running under R CMD check (#796)
+    limit_tf_cores_under_check()
   }
 
   if (!all(requirements_valid)) {
@@ -74,6 +76,33 @@ check_tf_version <- function(
   invisible(all(requirements_valid))
 }
 
+# CRAN enforces a two-core limit on package checks, and TensorFlow otherwise
+# uses all available cores by default, which can trip the "CPU time X times
+# elapsed time" check (#796). R CMD check signals this limit via the
+# _R_CHECK_LIMIT_CORES_ environment variable, so we cap TF's thread pools
+# when it is set. The call is wrapped in tryCatch because TensorFlow errors
+# if its thread pools are changed after its context has already initialised;
+# in that case we silently leave the pools alone. The threading argument
+# defaults to the delay-loaded tf module's threading config, but is
+# injectable so this can be unit tested without touching TensorFlow.
+limit_tf_cores_under_check <- function(threading = tf$config$threading) {
+  check_cores_env <- Sys.getenv("_R_CHECK_LIMIT_CORES_")
+
+  if (identical(check_cores_env, "") || tolower(check_cores_env) == "false") {
+    return(invisible(FALSE))
+  }
+
+  capped <- tryCatch(
+    {
+      threading$set_intra_op_parallelism_threads(2L)
+      threading$set_inter_op_parallelism_threads(2L)
+      TRUE
+    },
+    error = function(e) FALSE
+  )
+
+  invisible(capped)
+}
 
 # check dimensions of arguments to ops, and return the maximum dimension
 check_dims <- function(..., target_dim = NULL, call = rlang::caller_env()) {
