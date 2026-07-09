@@ -209,27 +209,100 @@ test_that("resolve_python_path() errors when nothing is found", {
 
 test_that("maybe_enable_uv_offline() does nothing when the cache is absent", {
   withr::local_envvar(UV_OFFLINE = NA)
-  uv_cache <- file.path(withr::local_tempdir(), "uv")
-  expect_false(maybe_enable_uv_offline(uv_cache = uv_cache))
+  status <- list(kind = "managed", populated = FALSE)
+  expect_false(maybe_enable_uv_offline(cache_status = status))
   expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
 })
 
 test_that("maybe_enable_uv_offline() enables offline when the cache is populated", {
   withr::local_envvar(UV_OFFLINE = NA)
-  uv_cache <- file.path(withr::local_tempdir(), "uv")
-  dir.create(file.path(uv_cache, "python"), recursive = TRUE)
-  dir.create(file.path(uv_cache, "cache"), recursive = TRUE)
-  expect_true(maybe_enable_uv_offline(uv_cache = uv_cache))
+  status <- list(kind = "managed", populated = TRUE)
+  expect_true(maybe_enable_uv_offline(cache_status = status))
   expect_identical(Sys.getenv("UV_OFFLINE"), "1")
 })
 
 test_that("maybe_enable_uv_offline() respects a pre-existing UV_OFFLINE", {
   withr::local_envvar(UV_OFFLINE = "0")
+  status <- list(kind = "managed", populated = TRUE)
+  expect_false(maybe_enable_uv_offline(cache_status = status))
+  expect_identical(Sys.getenv("UV_OFFLINE"), "0")
+})
+
+test_that("uv cache status: managed layout needs python and cache dirs", {
   uv_cache <- file.path(withr::local_tempdir(), "uv")
+  status <- greta_uv_cache_status(
+    system_uv = NULL,
+    reticulate_uv_cache = uv_cache
+  )
+  expect_identical(status, list(kind = "managed", populated = FALSE))
+
   dir.create(file.path(uv_cache, "python"), recursive = TRUE)
   dir.create(file.path(uv_cache, "cache"), recursive = TRUE)
-  expect_false(maybe_enable_uv_offline(uv_cache = uv_cache))
-  expect_identical(Sys.getenv("UV_OFFLINE"), "0")
+  status <- greta_uv_cache_status(
+    system_uv = NULL,
+    reticulate_uv_cache = uv_cache
+  )
+  expect_identical(status, list(kind = "managed", populated = TRUE))
+})
+
+test_that("uv cache status: UV_CACHE_DIR wins for a system uv", {
+  uv_cache <- withr::local_tempdir()
+  status <- greta_uv_cache_status(
+    system_uv = "/fake/uv",
+    uv_cache_dir_env = uv_cache
+  )
+  # a fresh cache dir (no archive/wheels buckets) is not populated
+  expect_identical(status, list(kind = "system", populated = FALSE))
+
+  dir.create(file.path(uv_cache, "wheels-v6"))
+  status <- greta_uv_cache_status(
+    system_uv = "/fake/uv",
+    uv_cache_dir_env = uv_cache
+  )
+  expect_identical(status, list(kind = "system", populated = TRUE))
+})
+
+test_that("uv cache status: system uv cache located via uv itself", {
+  uv_cache <- withr::local_tempdir()
+  dir.create(file.path(uv_cache, "archive-v0"))
+  local_mocked_bindings(system_uv_cache_dir = function(uv) uv_cache)
+  status <- greta_uv_cache_status(
+    system_uv = "/fake/uv",
+    uv_cache_dir_env = ""
+  )
+  expect_identical(status, list(kind = "system", populated = TRUE))
+})
+
+test_that("uv cache status: undetermined system cache is not populated", {
+  local_mocked_bindings(system_uv_cache_dir = function(uv) NULL)
+  status <- greta_uv_cache_status(
+    system_uv = "/fake/uv",
+    uv_cache_dir_env = ""
+  )
+  expect_identical(status, list(kind = "system", populated = FALSE))
+})
+
+test_that("detect_system_uv() honours RETICULATE_UV and the option", {
+  fake_uv <- withr::local_tempfile()
+  file.create(fake_uv)
+
+  withr::with_envvar(c(RETICULATE_UV = "managed"), {
+    expect_null(detect_system_uv())
+  })
+  withr::with_envvar(c(RETICULATE_UV = fake_uv), {
+    expect_identical(detect_system_uv(), fake_uv)
+  })
+  withr::with_envvar(c(RETICULATE_UV = "/no/such/uv"), {
+    expect_null(detect_system_uv())
+  })
+  withr::with_envvar(c(RETICULATE_UV = NA), {
+    withr::with_options(list(reticulate.uv_binary = "managed"), {
+      expect_null(detect_system_uv())
+    })
+    withr::with_options(list(reticulate.uv_binary = fake_uv), {
+      expect_identical(detect_system_uv(), fake_uv)
+    })
+  })
 })
 
 test_that("a conda-tagged preference resolves to a conda backend", {
@@ -339,7 +412,7 @@ test_that("should_nudge_to_managed() only fires for an interactive auto-detect",
   expect_false(should_nudge_to_managed(auto, is_interactive = TRUE))
 })
 
-test_that("greta_set_deps() round-trips and clears", {
+test_that("greta_set_deps() round-trips through the stored file", {
   withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
   expect_null(get_greta_stored_deps())
 
@@ -359,7 +432,10 @@ test_that("greta_set_deps() round-trips and clears", {
 test_that("greta_set_deps() reports what it stored", {
   withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
   expect_snapshot(greta_set_deps())
-  expect_snapshot(greta_set_deps(NULL))
+})
+
+test_that("greta_set_deps(NULL) errors and points at greta_remove('deps')", {
+  expect_snapshot(error = TRUE, greta_set_deps(NULL))
 })
 
 test_that("greta_set_deps() rejects a deps not built by greta_deps_spec()", {
@@ -410,15 +486,13 @@ test_that("report_offline_readiness() reports non-managed backends as ready", {
 })
 
 test_that("report_offline_readiness() reports managed backend states", {
-  uv_cache <- file.path(withr::local_tempdir(), "uv")
   plan <- new_python_plan("managed", "default")
+  empty <- list(kind = "managed", populated = FALSE)
+  full <- list(kind = "managed", populated = TRUE)
 
-  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = ""))
-  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = "1"))
-
-  dir.create(file.path(uv_cache, "python"), recursive = TRUE)
-  dir.create(file.path(uv_cache, "cache"), recursive = TRUE)
-  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = ""))
-  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = "1"))
-  expect_snapshot(report_offline_readiness(plan, uv_cache, uv_offline = "0"))
+  expect_snapshot(report_offline_readiness(plan, empty, uv_offline = ""))
+  expect_snapshot(report_offline_readiness(plan, empty, uv_offline = "1"))
+  expect_snapshot(report_offline_readiness(plan, full, uv_offline = ""))
+  expect_snapshot(report_offline_readiness(plan, full, uv_offline = "1"))
+  expect_snapshot(report_offline_readiness(plan, full, uv_offline = "0"))
 })

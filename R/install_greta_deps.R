@@ -277,6 +277,11 @@ greta_deps_default <- list(
 #' `greta_deps_tf_tfp` dataset lists known-good combinations of TF, TFP, and
 #' Python; inspect it with `View(greta_deps_tf_tfp)`.
 #'
+#' Calling `greta_deps_spec()` with no arguments returns greta's current
+#' default (recommended) versions, and is the supported way to query them -
+#' for example `greta_deps_spec()$tf_version` for the default TensorFlow
+#' version.
+#'
 #' @param tf_version character. TensorFlow version, in the format
 #'   major.minor.patch. Default is `r greta_deps_default$tf`.
 #' @param tfp_version Character. Tensorflow probability (TFP) version

@@ -111,6 +111,23 @@ remove_greta_preference_impl <- function() {
   invisible(had_preference)
 }
 
+# clear greta's stored dependency versions (set via greta_set_deps()) and
+# report what happened
+remove_greta_deps_impl <- function() {
+  had_deps <- file.exists(greta_deps_file())
+  clear_greta_stored_deps()
+  if (had_deps) {
+    cli::cli_inform(c(
+      "v" = "Cleared the stored greta dependency versions."
+    ))
+  } else {
+    cli::cli_inform(c(
+      "i" = "No stored greta dependency versions to clear."
+    ))
+  }
+  invisible(had_deps)
+}
+
 # the "nuclear" reset: remove the conda env, miniconda, reticulate's uv cache,
 # and the stored preferences (Python environment and dependency versions).
 # Asks once up front, then removes without prompting.
@@ -175,6 +192,8 @@ remove_greta_all <- function(ask = interactive()) {
 #'     system-wide uv cache is left untouched.
 #'   - `"preference"`: greta's stored Python backend preference (set via
 #'     [greta_set_python()]).
+#'   - `"deps"`: greta's stored dependency versions (set via
+#'     [greta_set_deps()]).
 #' @param ask Ask for confirmation? Default is `interactive()`.
 #'
 #' @return Invisibly, `TRUE` if anything was removed, otherwise `FALSE`.
@@ -190,9 +209,12 @@ remove_greta_all <- function(ask = interactive()) {
 #'
 #' # clear the stored Python preference
 #' greta_remove("preference")
+#'
+#' # clear the stored dependency versions
+#' greta_remove("deps")
 #' }
 greta_remove <- function(
-  what = c("all", "env", "miniconda", "uv_cache", "preference"),
+  what = c("all", "env", "miniconda", "uv_cache", "preference", "deps"),
   ask = interactive()
 ) {
   what <- match.arg(what)
@@ -202,7 +224,8 @@ greta_remove <- function(
     env = remove_greta_env_impl(ask = ask),
     miniconda = remove_miniconda_impl(ask = ask),
     uv_cache = remove_reticulate_uv_cache_impl(ask = ask),
-    preference = remove_greta_preference_impl()
+    preference = remove_greta_preference_impl(),
+    deps = remove_greta_deps_impl()
   )
 }
 

@@ -7,12 +7,11 @@
 greta_set_deps(deps = greta_deps_spec())
 }
 \arguments{
-\item{deps}{object created with \code{\link[=greta_deps_spec]{greta_deps_spec()}}, or \code{NULL} to clear
-the stored choice. \code{\link[=greta_deps_spec]{greta_deps_spec()}} checks that the TensorFlow version
-is one greta supports.}
+\item{deps}{object created with \code{\link[=greta_deps_spec]{greta_deps_spec()}}, which checks that the
+TensorFlow version is one greta supports.}
 }
 \value{
-Invisibly, the stored \code{\link[=greta_deps_spec]{greta_deps_spec()}} (\code{NULL} when clearing).
+Invisibly, the stored \code{\link[=greta_deps_spec]{greta_deps_spec()}}.
 }
 \description{
 Persistently choose which versions of TensorFlow, TensorFlow Probability,
@@ -28,8 +27,10 @@ conda environment.
 Most users never need this: greta's defaults (TensorFlow
 2.15.1, TensorFlow Probability
 0.23.0, Python 3.11) are the
-newest versions greta supports. Use \code{greta_set_deps(NULL)} to clear the
-stored choice and return to the defaults.
+newest versions greta supports.
+
+To clear the stored versions and return to the defaults, use
+\code{\link[=greta_remove]{greta_remove()}}\code{("deps")}.
 }
 \details{
 Your choice is stored under \code{tools::R_user_dir("greta", "config")} and
@@ -47,8 +48,8 @@ greta_set_deps(greta_deps_spec(
   python_version = "3.10"
 ))
 
-# clear the stored choice and return to greta's defaults
-greta_set_deps(NULL)
+# clear the stored versions and return to greta's defaults
+greta_remove("deps")
 }
 }
 \seealso{

@@ -193,27 +193,148 @@ apply_greta_python_plan <- function(plan) {
   invisible(plan)
 }
 
-# For the managed backend, auto-enable uv's offline mode when reticulate's uv
-# cache is already populated (#814). greta pins *frozen* ranges for the managed
+# --- uv cache detection ---------------------------------------------------------
+#
+# reticulate only bootstraps its own uv (with the cache redirected to
+# reticulate_cache_dir("uv", ...)) when no usable uv is already installed;
+# with uv on the PATH (or at ~/.local/bin/uv), reticulate uses that system uv
+# and the environment cache lives in uv's own cache directory instead
+# (UV_CACHE_DIR, or the platform default reported by `uv cache dir`). Offline
+# detection must look wherever reticulate's chosen uv actually caches, or the
+# offline start (#814) never engages for system-uv users.
+
+reticulate_uv_cache_dir <- function() {
+  file.path(tools::R_user_dir("reticulate", "cache"), "uv")
+}
+
+# The uv binary reticulate would use when that is NOT reticulate's own
+# bootstrapped uv; NULL means reticulate would use (or install) its managed
+# uv, whose cache location greta then knows without asking. Mirrors the
+# search order in reticulate:::uv_binary(): the RETICULATE_UV environment
+# variable, the reticulate.uv_binary option (both may hold the "managed"
+# sentinel), uv on the PATH, then ~/.local/bin/uv. Never runs uv, so a stale
+# binary reticulate would reject is still reported; the empirical populated
+# check below keeps that safe.
+detect_system_uv <- function() {
+  usable <- function(uv) {
+    length(uv) == 1 && !is.na(uv) && nzchar(uv) && file.exists(uv)
+  }
+  env_uv <- Sys.getenv("RETICULATE_UV", unset = NA)
+  if (!is.na(env_uv)) {
+    if (identical(env_uv, "managed")) {
+      return(NULL)
+    }
+    return(if (usable(env_uv)) env_uv else NULL)
+  }
+  opt_uv <- getOption("reticulate.uv_binary")
+  if (!is.null(opt_uv)) {
+    if (identical(opt_uv, "managed")) {
+      return(NULL)
+    }
+    return(if (usable(opt_uv)) opt_uv else NULL)
+  }
+  path_uv <- unname(Sys.which("uv"))
+  if (usable(path_uv)) {
+    return(path_uv)
+  }
+  local_uv <- path.expand("~/.local/bin/uv")
+  if (usable(local_uv)) {
+    return(local_uv)
+  }
+  NULL
+}
+
+# Ask a system uv where its cache lives (`uv cache dir`), falling back to
+# uv's platform-default locations when uv cannot be asked. NULL when the
+# cache location cannot be determined.
+system_uv_cache_dir <- function(uv) {
+  out <- tryCatch(
+    suppressWarnings(
+      system2(uv, c("cache", "dir"), stdout = TRUE, stderr = FALSE, timeout = 2)
+    ),
+    error = function(e) NULL
+  )
+  ok <- !is.null(out) && is.null(attr(out, "status")) && length(out) >= 1
+  if (ok) {
+    # uv may colourise its output; strip any ANSI escapes
+    cache_dir <- trimws(gsub("\u001b\\[[0-9;]*m", "", out[[1]]))
+    if (nzchar(cache_dir)) {
+      return(cache_dir)
+    }
+  }
+  default_uv_cache_dir()
+}
+
+# uv's platform-default cache locations: $XDG_CACHE_HOME/uv, ~/.cache/uv (uv
+# prefers an existing ~/.cache/uv even on macOS), ~/Library/Caches/uv on
+# macOS, and %LOCALAPPDATA%/uv/cache on Windows. The first that exists, else
+# NULL.
+default_uv_cache_dir <- function() {
+  xdg <- Sys.getenv("XDG_CACHE_HOME", unset = "")
+  local_app_data <- Sys.getenv("LOCALAPPDATA", unset = "")
+  candidates <- c(
+    if (nzchar(xdg)) file.path(xdg, "uv"),
+    path.expand("~/.cache/uv"),
+    if (is_mac()) path.expand("~/Library/Caches/uv"),
+    if (is_windows() && nzchar(local_app_data)) {
+      file.path(local_app_data, "uv", "cache")
+    }
+  )
+  for (candidate in candidates) {
+    if (dir.exists(candidate)) {
+      return(candidate)
+    }
+  }
+  NULL
+}
+
+# Is the uv cache that reticulate's chosen uv would use already populated?
+# Shared by maybe_enable_uv_offline() and report_offline_readiness().
+# Conservative on both layouts: an undetermined or empty cache reports
+# populated = FALSE (never falsely offline-ready).
+#   * managed uv: reticulate pins UV_CACHE_DIR and UV_PYTHON_INSTALL_DIR
+#     under reticulate_cache_dir("uv"), so both subdirectories must exist.
+#   * system uv: UV_CACHE_DIR wins if set, else uv's own cache dir; populated
+#     means it holds real content (archive/wheels/environments buckets - a
+#     fresh cache dir may contain only CACHEDIR.TAG). The interpreter can
+#     live inside the archive bucket, so no separate python check is needed.
+greta_uv_cache_status <- function(
+  system_uv = detect_system_uv(),
+  reticulate_uv_cache = reticulate_uv_cache_dir(),
+  uv_cache_dir_env = Sys.getenv("UV_CACHE_DIR", unset = "")
+) {
+  if (is.null(system_uv)) {
+    populated <- dir.exists(file.path(reticulate_uv_cache, "python")) &&
+      dir.exists(file.path(reticulate_uv_cache, "cache"))
+    return(list(kind = "managed", populated = populated))
+  }
+  cache_dir <- if (nzchar(uv_cache_dir_env)) {
+    uv_cache_dir_env
+  } else {
+    system_uv_cache_dir(system_uv)
+  }
+  if (is.null(cache_dir) || !dir.exists(cache_dir)) {
+    return(list(kind = "system", populated = FALSE))
+  }
+  entries <- list.files(cache_dir)
+  populated <- any(grepl("^(archive|wheels|environments)-", entries))
+  list(kind = "system", populated = populated)
+}
+
+# For the managed backend, auto-enable uv's offline mode when the uv cache is
+# already populated (#814). greta pins *frozen* ranges for the managed
 # backend (TensorFlow 2.15.*, TensorFlow Probability 0.23.*); TF 2.16+ ships
 # Keras 3, which greta does not support, so no newer match will ever appear.
 # That makes a cache-only resolve safe: uv never needs to reach PyPI once the
 # environment is installed, so greta can start on an offline / air-gapped
-# machine. We only touch the reticulate-managed uv cache (the same path used by
-# remove_reticulate_uv_cache()), never a system-wide uv.
-maybe_enable_uv_offline <- function(
-  uv_cache = file.path(tools::R_user_dir("reticulate", "cache"), "uv")
-) {
+# machine.
+maybe_enable_uv_offline <- function(cache_status = greta_uv_cache_status()) {
   # respect the user: if UV_OFFLINE is already set to anything, leave it alone
   existing <- Sys.getenv("UV_OFFLINE", unset = NA)
   if (!is.na(existing)) {
     return(invisible(FALSE))
   }
-  # only go offline when the cache is actually populated (both the resolved
-  # Python and the downloaded wheels are present)
-  cache_populated <- dir.exists(file.path(uv_cache, "python")) &&
-    dir.exists(file.path(uv_cache, "cache"))
-  if (cache_populated) {
+  if (isTRUE(cache_status$populated)) {
     Sys.setenv(UV_OFFLINE = "1")
     return(invisible(TRUE))
   }
@@ -304,11 +425,13 @@ report_python_backend <- function(
 # Report whether greta can start without internet access, for greta_sitrep().
 # Only the managed (uv) backend ever downloads anything: the user/conda/path
 # backends point at an environment already on disk. For the managed backend,
-# readiness depends on UV_OFFLINE and on whether reticulate's uv cache is
-# populated (the same check as maybe_enable_uv_offline()).
+# readiness depends on UV_OFFLINE and on whether the uv cache is populated
+# (the same greta_uv_cache_status() check as maybe_enable_uv_offline()).
 report_offline_readiness <- function(
   plan = greta_stash$python_backend %||% greta_python_plan(),
-  uv_cache = file.path(tools::R_user_dir("reticulate", "cache"), "uv"),
+  cache_status = if (identical(plan$backend, "managed")) {
+    greta_uv_cache_status()
+  },
   uv_offline = Sys.getenv("UV_OFFLINE", unset = "")
 ) {
   if (!identical(plan$backend, "managed")) {
@@ -319,8 +442,7 @@ report_offline_readiness <- function(
     )
     return(invisible(plan))
   }
-  cache_populated <- dir.exists(file.path(uv_cache, "python")) &&
-    dir.exists(file.path(uv_cache, "cache"))
+  cache_populated <- isTRUE(cache_status$populated)
   if (identical(uv_offline, "1") && cache_populated) {
     cli::cli_alert_success(
       "offline-ready: {.envvar UV_OFFLINE}=1 is set and the uv cache is \\
@@ -702,11 +824,13 @@ clear_greta_stored_deps <- function() {
 #' `r greta_deps_default$tfp`, Python `r greta_deps_default$python`) are the
 #' newest versions greta supports.
 #'
-#' @param deps object created with [greta_deps_spec()], or `NULL` to clear
-#'   the stored choice. [greta_deps_spec()] checks that the TensorFlow version
-#'   is one greta supports.
+#' To clear the stored versions and return to the defaults, use
+#' [greta_remove()]`("deps")`.
 #'
-#' @return Invisibly, the stored [greta_deps_spec()] (`NULL` when clearing).
+#' @param deps object created with [greta_deps_spec()], which checks that the
+#'   TensorFlow version is one greta supports.
+#'
+#' @return Invisibly, the stored [greta_deps_spec()].
 #'
 #' @details
 #' Your choice is stored under `tools::R_user_dir("greta", "config")` and
@@ -726,13 +850,16 @@ clear_greta_stored_deps <- function() {
 #'   python_version = "3.10"
 #' ))
 #'
+#' # clear the stored versions and return to greta's defaults
+#' greta_remove("deps")
 #' }
 greta_set_deps <- function(deps = greta_deps_spec()) {
   if (is.null(deps)) {
-    cli::cli_inform(c(
-      "v" = "To clear dependencies, use {.fun greta_remove}"
+    cli::cli_abort(c(
+      "{.arg deps} must be a {.fun greta_deps_spec} object.",
+      "i" = "To clear stored dependency versions, use \\
+      {.code greta_remove(\"deps\")}."
     ))
-    return(invisible(FALSE))
   }
   check_greta_deps_spec(deps)
   ensure_greta_config_dir()

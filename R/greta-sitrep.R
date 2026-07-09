@@ -39,7 +39,7 @@ minimal_sitrep <- function() {
   check_if_python_available()
   check_if_tf_available()
   check_if_tfp_available()
-  check_if_greta_conda_env_available()
+  report_greta_conda_env_status()
   report_python_backend()
   report_offline_readiness()
   check_greta_ready_to_use()
@@ -65,7 +65,7 @@ detailed_sitrep <- function() {
   cli::cli_ul("path: {.path {reticulate::miniconda_path()}}")
 
   cli::cli_h1("{.pkg greta conda environment}")
-  check_if_greta_conda_env_available()
+  report_greta_conda_env_status()
   conda_env_path <- greta_conda_env_path()
   cli::cli_ul("path: {.path {conda_env_path}}")
 
@@ -191,6 +191,22 @@ check_if_greta_conda_env_available <- function() {
   )
 }
 
+# "no conda env" is the healthy, expected state on the managed (uv) backend,
+# so report it there as neutral information rather than as a failure; other
+# backends (and a conda env that does exist) keep the availability check
+report_greta_conda_env_status <- function(
+  plan = greta_stash$python_backend %||% greta_python_plan()
+) {
+  managed <- identical(plan$backend, "managed")
+  if (managed && !have_greta_conda_env()) {
+    cli::cli_alert_info(
+      "greta conda environment: not used (managed (uv) environment active)"
+    )
+    return(invisible(NULL))
+  }
+  check_if_greta_conda_env_available()
+}
+
 software_availability <- function() {
   software_available <- c(
     python = have_python(),
@@ -239,13 +255,24 @@ check_greta_ready_to_use <- function(software_available) {
   deps_avail_not_greta_env <- greta_env_not_available && other_software_ready
   if (deps_avail_not_greta_env) {
     check_tf_version("none")
-    cli::cli_alert_info(
-      c(
-        "i" = "Conda environment not set up, but all dependencies available\n\n",
-        "i" = "{.pkg greta} is ready to use!"
-      ),
-      wrap = TRUE
-    )
+    # on the managed (uv) backend, having no conda env is the expected state
+    # (already reported by report_greta_conda_env_status()), so don't mention
+    # conda again in the verdict
+    plan <- greta_stash$python_backend %||% greta_python_plan()
+    if (identical(plan$backend, "managed")) {
+      cli::cli_alert_info(
+        "All dependencies available; {.pkg greta} is ready to use!",
+        wrap = TRUE
+      )
+    } else {
+      cli::cli_alert_info(
+        c(
+          "i" = "Conda environment not set up, but all dependencies available\n\n",
+          "i" = "{.pkg greta} is ready to use!"
+        ),
+        wrap = TRUE
+      )
+    }
   }
   if (!all(software_available)) {
     check_tf_version("warn")

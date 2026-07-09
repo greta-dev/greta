@@ -87,14 +87,10 @@
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
       
-      i checking if greta conda environment available
-      x greta conda environment not available
-      
+      i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
-      i Conda environment not set up, but all dependencies available
-      
-      greta is ready to use!
+      i All dependencies available; greta is ready to use!
 
 # greta_sitrep warns when different versions of python, tf, tfp
 
@@ -110,14 +106,10 @@
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
       
-      i checking if greta conda environment available
-      x greta conda environment not available
-      
+      i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
-      i Conda environment not set up, but all dependencies available
-      
-      greta is ready to use!
+      i All dependencies available; greta is ready to use!
 
 ---
 
@@ -133,14 +125,10 @@
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
       
-      i checking if greta conda environment available
-      x greta conda environment not available
-      
+      i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
-      i Conda environment not set up, but all dependencies available
-      
-      greta is ready to use!
+      i All dependencies available; greta is ready to use!
 
 ---
 
@@ -156,16 +144,12 @@
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.9.0) available
       
-      i checking if greta conda environment available
-      x greta conda environment not available
-      
+      i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
-      i Conda environment not set up, but all dependencies available
-      
-      greta is ready to use!
+      i All dependencies available; greta is ready to use!
 
-# greta_sitrep warns greta conda env not available
+# greta_sitrep reports a missing conda env as unused when managed
 
     Code
       greta_sitrep()
@@ -179,14 +163,26 @@
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
       
+      i greta conda environment: not used (managed (uv) environment active)
+      * backend: "managed (uv) environment"
+      * selected via: default
+      i All dependencies available; greta is ready to use!
+
+# conda env status keeps the availability check off-managed
+
+    Code
+      report_greta_conda_env_status(plan = plan_managed)
+    Message
+      i greta conda environment: not used (managed (uv) environment active)
+
+---
+
+    Code
+      report_greta_conda_env_status(plan = plan_conda)
+    Message
       i checking if greta conda environment available
       x greta conda environment not available
       
-      * backend: "managed (uv) environment"
-      * selected via: default
-      i Conda environment not set up, but all dependencies available
-      
-      greta is ready to use!
 
 # greta_sitrep works with quiet, minimal, and detailed options
 
@@ -207,14 +203,10 @@
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.23.0) available
       
-      i checking if greta conda environment available
-      x greta conda environment not available
-      
+      i greta conda environment: not used (managed (uv) environment active)
       * backend: "<backend>"
       * selected via: <source>
-      i Conda environment not set up, but all dependencies available
-      
-      greta is ready to use!
+      i All dependencies available; greta is ready to use!
 
 ---
 

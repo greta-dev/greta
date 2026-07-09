@@ -5,7 +5,7 @@
 \title{Remove greta's Python dependencies}
 \usage{
 greta_remove(
-  what = c("all", "env", "miniconda", "uv_cache", "preference"),
+  what = c("all", "env", "miniconda", "uv_cache", "preference", "deps"),
   ask = interactive()
 )
 }
@@ -24,6 +24,8 @@ all R packages that use reticulate's uv (it is not greta-specific); a
 system-wide uv cache is left untouched.
 \item \code{"preference"}: greta's stored Python backend preference (set via
 \code{\link[=greta_set_python]{greta_set_python()}}).
+\item \code{"deps"}: greta's stored dependency versions (set via
+\code{\link[=greta_set_deps]{greta_set_deps()}}).
 }}
 
 \item{ask}{Ask for confirmation? Default is \code{interactive()}.}
@@ -46,6 +48,9 @@ greta_remove("env")
 
 # clear the stored Python preference
 greta_remove("preference")
+
+# clear the stored dependency versions
+greta_remove("deps")
 }
 }
 \seealso{

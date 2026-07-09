@@ -135,6 +135,10 @@ test_that("greta_remove() dispatches to the right internal remover", {
     remove_greta_preference_impl = function(...) {
       calls[["preference"]] <<- "preference"
       invisible(TRUE)
+    },
+    remove_greta_deps_impl = function(...) {
+      calls[["deps"]] <<- "deps"
+      invisible(TRUE)
     }
   )
 
@@ -143,10 +147,11 @@ test_that("greta_remove() dispatches to the right internal remover", {
   greta_remove("miniconda")
   greta_remove("uv_cache")
   greta_remove("preference")
+  greta_remove("deps")
 
   expect_setequal(
     names(calls),
-    c("all", "env", "miniconda", "uv_cache", "preference")
+    c("all", "env", "miniconda", "uv_cache", "preference", "deps")
   )
 })
 
@@ -166,12 +171,30 @@ test_that("greta_remove() rejects an unknown `what`", {
   expect_error(greta_remove("nonsense"), "should be one of")
 })
 
-test_that("greta_remove('preference') clears a stored preference", {
+test_that("greta_remove('preference') clears only the Python preference", {
   withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
   set_greta_python_backend("managed")
+  suppressMessages(greta_set_deps(greta_deps_spec()))
   expect_message(res <- greta_remove("preference"), "Cleared")
   expect_true(res)
   expect_null(get_greta_python_backend())
+  expect_s3_class(get_greta_stored_deps(), "greta_deps_spec")
+})
+
+test_that("greta_remove('deps') clears only the stored dependency versions", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  set_greta_python_backend("managed")
+  suppressMessages(greta_set_deps(greta_deps_spec()))
+  expect_message(res <- greta_remove("deps"), "Cleared")
+  expect_true(res)
+  expect_null(get_greta_stored_deps())
+  expect_equal(get_greta_python_backend(), "managed")
+})
+
+test_that("greta_remove('deps') reports when nothing is stored", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  expect_message(res <- greta_remove("deps"), "No stored")
+  expect_false(res)
 })
 
 test_that("greta_remove('all') clears stored preferences including deps", {

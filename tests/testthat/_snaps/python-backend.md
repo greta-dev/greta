@@ -47,13 +47,14 @@
       v Stored dependency versions: TensorFlow "2.15.1", TensorFlow Probability "0.23.0", Python "3.11".
       i Restart R for this to take effect.
 
----
+# greta_set_deps(NULL) errors and points at greta_remove('deps')
 
     Code
       greta_set_deps(NULL)
-    Message
-      v Cleared stored dependency versions; greta uses its defaults.
-      i Restart R for this to take effect.
+    Condition
+      Error in `greta_set_deps()`:
+      ! `deps` must be a `greta_deps_spec()` object.
+      i To clear stored dependency versions, use `greta_remove("deps")`.
 
 # report_offline_readiness() reports non-managed backends as ready
 
@@ -66,7 +67,7 @@
 # report_offline_readiness() reports managed backend states
 
     Code
-      report_offline_readiness(plan, uv_cache, uv_offline = "")
+      report_offline_readiness(plan, empty, uv_offline = "")
     Message
       x will need internet on next start: uv cache not yet populated
       i See the installation vignette: `vignette(greta::installation)`.
@@ -74,7 +75,7 @@
 ---
 
     Code
-      report_offline_readiness(plan, uv_cache, uv_offline = "1")
+      report_offline_readiness(plan, empty, uv_offline = "1")
     Message
       x `UV_OFFLINE`=1 is set but the uv cache is not yet populated, so the next
       start may fail to resolve dependencies
@@ -83,21 +84,21 @@
 ---
 
     Code
-      report_offline_readiness(plan, uv_cache, uv_offline = "")
+      report_offline_readiness(plan, full, uv_offline = "")
     Message
       v offline-ready: uv cache present, offline mode will engage
 
 ---
 
     Code
-      report_offline_readiness(plan, uv_cache, uv_offline = "1")
+      report_offline_readiness(plan, full, uv_offline = "1")
     Message
       v offline-ready: `UV_OFFLINE`=1 is set and the uv cache is populated
 
 ---
 
     Code
-      report_offline_readiness(plan, uv_cache, uv_offline = "0")
+      report_offline_readiness(plan, full, uv_offline = "0")
     Message
       x will need internet on next start: `UV_OFFLINE`=0 forces online resolution
       i See the installation vignette: `vignette(greta::installation)`.
