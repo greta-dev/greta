@@ -90,6 +90,12 @@
   are now superceded by
   [`greta_remove()`](https://greta-dev.github.io/greta/reference/greta_remove.md)
   ([\#814](https://github.com/greta-dev/greta/issues/814)).
+- [`greta_remove()`](https://greta-dev.github.io/greta/reference/greta_remove.md)
+  no longer leaves a stale, deleted environment active for the rest of
+  the session: it now invalidates greta’s cached Python backend and
+  nudges you to restart R if you try to use greta again without
+  restarting, instead of silently failing or falsely reporting the
+  removed environment as still available.
 - [`reinstall_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
   and
   [`reinstall_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
