@@ -9,6 +9,7 @@ NULL
 # they abort a run
 greta_stash <- new.env()
 greta_stash$python_has_been_initialised <- FALSE
+greta_stash$deps_removed_this_session <- FALSE
 greta_stash$numerical_messages <- c(
   "is not invertible",
   "Cholesky decomposition was not successful"

@@ -39,3 +39,39 @@ test_that("limit_tf_cores_under_check survives TensorFlow errors", {
 
   expect_false(limit_tf_cores_under_check(threading = fake_threading))
 })
+
+test_that("check_tf_version() hints at restarting R after greta_remove() this session", {
+  local_mocked_bindings(
+    have_python = function(...) FALSE,
+    have_tf = function(...) FALSE,
+    have_tfp = function(...) FALSE
+  )
+  old_flag <- greta_stash$deps_removed_this_session
+  old_init <- greta_stash$python_has_been_initialised
+  withr::defer({
+    greta_stash$deps_removed_this_session <- old_flag
+    greta_stash$python_has_been_initialised <- old_init
+  })
+  greta_stash$deps_removed_this_session <- TRUE
+  greta_stash$python_has_been_initialised <- TRUE
+
+  expect_snapshot(check_tf_version("message"))
+})
+
+test_that("check_tf_version() omits the restart hint when nothing was removed", {
+  local_mocked_bindings(
+    have_python = function(...) FALSE,
+    have_tf = function(...) FALSE,
+    have_tfp = function(...) FALSE
+  )
+  old_flag <- greta_stash$deps_removed_this_session
+  old_init <- greta_stash$python_has_been_initialised
+  withr::defer({
+    greta_stash$deps_removed_this_session <- old_flag
+    greta_stash$python_has_been_initialised <- old_init
+  })
+  greta_stash$deps_removed_this_session <- FALSE
+  greta_stash$python_has_been_initialised <- TRUE
+
+  expect_snapshot(check_tf_version("message"))
+})

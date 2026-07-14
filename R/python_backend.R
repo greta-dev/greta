@@ -341,6 +341,36 @@ maybe_enable_uv_offline <- function(cache_status = greta_uv_cache_status()) {
   invisible(FALSE)
 }
 
+# --- session invalidation on removal -------------------------------------------
+#
+# greta_remove() can delete the active Python environment mid-session, while
+# greta_stash$python_backend (frozen at load by .onLoad()) and
+# RETICULATE_PYTHON still point at it. Without invalidating this session
+# state, check_tf_version() and greta_sitrep() would keep confidently
+# reporting an environment that no longer exists, until the user restarts R.
+
+# record that a removal has invalidated the active session's Python setup, so
+# check_tf_version() and .onAttach() can nudge the user to restart R
+flag_greta_deps_removed <- function() {
+  greta_stash$deps_removed_this_session <- TRUE
+  invisible(TRUE)
+}
+
+# drop the frozen backend plan, and unset RETICULATE_PYTHON only when greta
+# (not the user) owns it: a "" or "managed" value captured at load means
+# greta set it itself, while any other value is a real user override that
+# must be left untouched
+invalidate_greta_python_session <- function() {
+  greta_stash$python_backend <- NULL
+  reticulate_python_at_load <- greta_stash$reticulate_python_at_load %||% ""
+  greta_owns_reticulate_python <- reticulate_python_at_load %in%
+    c("", "managed")
+  if (greta_owns_reticulate_python) {
+    Sys.unsetenv("RETICULATE_PYTHON")
+  }
+  invisible(NULL)
+}
+
 # --- one-time hints -----------------------------------------------------------
 
 # A small registry of opt-in hints that have already been shown, so nudges
@@ -374,13 +404,17 @@ mark_greta_hint_shown <- function(hint) {
 }
 
 # Should we nudge the user (once, interactively) that they can switch from an
-# auto-detected conda env to the managed environment? (#801)
+# auto-detected conda env to the managed environment? (#801) Also requires the
+# conda env to still exist on disk, so greta never nudges about (or claims to
+# use) an environment that greta_remove() has since deleted.
 should_nudge_to_managed <- function(
   plan = greta_stash$python_backend,
   is_interactive = interactive()
 ) {
   !is.null(plan) &&
     identical(plan$source, "auto_detect") &&
+    !is.null(plan$python) &&
+    file.exists(plan$python) &&
     is_interactive &&
     !greta_hint_shown("conda_to_managed")
 }
@@ -435,11 +469,23 @@ report_offline_readiness <- function(
   uv_offline = Sys.getenv("UV_OFFLINE", unset = "")
 ) {
   if (!identical(plan$backend, "managed")) {
-    cli::cli_alert_success(
-      "offline-ready: this environment is already on disk; greta never \\
-      downloads into it",
-      wrap = TRUE
-    )
+    python_on_disk <- !is.null(plan$python) && file.exists(plan$python)
+    if (python_on_disk) {
+      cli::cli_alert_success(
+        "offline-ready: this environment is already on disk; greta never \\
+        downloads into it",
+        wrap = TRUE
+      )
+    } else {
+      cli::cli_alert_danger(
+        "the selected Python environment no longer exists on disk (was it \\
+        removed?); restart R to re-resolve it",
+        wrap = TRUE
+      )
+      cli::cli_inform(c(
+        "i" = "See the installation vignette: {.vignette greta::installation}."
+      ))
+    }
     return(invisible(plan))
   }
   cache_populated <- isTRUE(cache_status$populated)

@@ -58,6 +58,17 @@ check_tf_version <- function(
       conda environment with {.fun install_greta_deps}."
     )
 
+    # a removal earlier this session may have deleted the environment greta
+    # is still pointing at; flag that before the generic hints
+    if (isTRUE(greta_stash$deps_removed_this_session)) {
+      cli_msg <- c(
+        "!" = "It looks like you ran {.fun greta_remove} without restarting \\
+        R - greta is still pointing at the environment you removed.",
+        "i" = "Restart R, then try again.",
+        cli_msg
+      )
+    }
+
     # if there was a problem, append the solution
     message_text <- cli::format_message(cli_msg)
     warning_text <- cli::format_warning(cli_msg)

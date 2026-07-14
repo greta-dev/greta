@@ -30,6 +30,8 @@ remove_greta_env_impl <- function(ask = interactive()) {
     # the install-time location record is now stale; remove it too
     unlink(greta_conda_record_file())
     cli::cli_alert_success("greta-env-tf2 environment removed!", wrap = TRUE)
+    flag_greta_deps_removed()
+    invalidate_greta_python_session()
     return(invisible(TRUE))
   }
   return(invisible(FALSE))
@@ -57,6 +59,8 @@ remove_miniconda_impl <- function(ask = interactive()) {
     cli::cli_alert_info("removing 'miniconda' installation", wrap = TRUE)
     unlink(path_to_miniconda, recursive = TRUE)
     cli::cli_alert_success("'miniconda' successfully removed!", wrap = TRUE)
+    flag_greta_deps_removed()
+    invalidate_greta_python_session()
     return(invisible(TRUE))
   }
   return(invisible(FALSE))
@@ -148,6 +152,13 @@ remove_greta_all <- function(ask = interactive()) {
   cache_removed <- remove_reticulate_uv_cache_impl(ask = FALSE)
   clear_greta_python_backend()
   clear_greta_stored_deps()
+  # remove_greta_env_impl()/remove_miniconda_impl() already flag and
+  # invalidate the session when they succeed; repeat here so the nuclear
+  # reset is unconditional regardless of how they are called
+  if (env_removed || mc_removed) {
+    flag_greta_deps_removed()
+    invalidate_greta_python_session()
+  }
   removed <- c(
     if (env_removed) "the 'greta-env-tf2' conda environment",
     if (mc_removed) "miniconda",

@@ -1,6 +1,12 @@
 test_that("check_tf_version works", {
   skip_if_not(check_tf_version())
 
+  # a removal test earlier in the suite may have left this flag set; force it
+  # off so these generic snapshots don't pick up the restart hint
+  old_removed <- greta_stash$deps_removed_this_session
+  withr::defer(greta_stash$deps_removed_this_session <- old_removed)
+  greta_stash$deps_removed_this_session <- FALSE
+
   # record the true version and forge an old version
   true_version <- tf$`__version__`
   tf$`__version__` <- "0.9.0" # nolint

@@ -64,6 +64,15 @@
       v offline-ready: this environment is already on disk; greta never downloads
       into it
 
+# report_offline_readiness() warns when a non-managed python is gone
+
+    Code
+      report_offline_readiness(plan = plan)
+    Message
+      x the selected Python environment no longer exists on disk (was it removed?);
+      restart R to re-resolve it
+      i See the installation vignette: `vignette(greta::installation)`.
+
 # report_offline_readiness() reports managed backend states
 
     Code
