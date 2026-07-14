@@ -15,6 +15,15 @@ test_that("remove_greta_env(ask = FALSE) removes without prompting", {
   ensure_greta_config_dir()
   writeLines("/fake/python", greta_conda_record_file())
 
+  # a successful removal now flags the session and clears the cached
+  # backend; restore both so this test doesn't leak state into later tests
+  old_flag <- greta_stash$deps_removed_this_session
+  old_backend <- greta_stash$python_backend
+  withr::defer({
+    greta_stash$deps_removed_this_session <- old_flag
+    greta_stash$python_backend <- old_backend
+  })
+
   expect_message(
     res <- remove_greta_env(ask = FALSE),
     "environment removed"
@@ -116,6 +125,15 @@ test_that("greta_remove_all_deps reports removal when something was removed", {
     miniconda_path = function(...) "/greta-test/no-such-miniconda",
     .package = "reticulate"
   )
+  # the env removal succeeds here, so restore the flag and cached backend it
+  # flips as a side effect
+  old_flag <- greta_stash$deps_removed_this_session
+  old_backend <- greta_stash$python_backend
+  withr::defer({
+    greta_stash$deps_removed_this_session <- old_flag
+    greta_stash$python_backend <- old_backend
+  })
+
   expect_snapshot(res <- greta_remove_all_deps(ask = FALSE))
   expect_true(res)
 })
@@ -148,6 +166,15 @@ test_that("destroy_greta_deps reports removal when something was removed", {
     miniconda_path = function(...) "/greta-test/no-such-miniconda",
     .package = "reticulate"
   )
+  # the env removal succeeds here, so restore the flag and cached backend it
+  # flips as a side effect
+  old_flag <- greta_stash$deps_removed_this_session
+  old_backend <- greta_stash$python_backend
+  withr::defer({
+    greta_stash$deps_removed_this_session <- old_flag
+    greta_stash$python_backend <- old_backend
+  })
+
   expect_snapshot(
     res <- destroy_greta_deps(ask = FALSE)
   )
