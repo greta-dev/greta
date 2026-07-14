@@ -23,6 +23,49 @@ test_that("remove_greta_env(ask = FALSE) removes without prompting", {
   expect_false(file.exists(greta_conda_record_file()))
 })
 
+test_that("remove_greta_env(ask = FALSE) flags the session and drops the cached backend", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  local_mocked_bindings(have_greta_conda_env = function(...) TRUE)
+  local_mocked_bindings(
+    conda_remove = function(...) NULL,
+    .package = "reticulate"
+  )
+  old_flag <- greta_stash$deps_removed_this_session
+  old_backend <- greta_stash$python_backend
+  withr::defer({
+    greta_stash$deps_removed_this_session <- old_flag
+    greta_stash$python_backend <- old_backend
+  })
+  greta_stash$deps_removed_this_session <- FALSE
+  greta_stash$python_backend <- list(backend = "conda", source = "auto_detect")
+
+  expect_message(remove_greta_env(ask = FALSE), "environment removed")
+  expect_true(greta_stash$deps_removed_this_session)
+  expect_null(greta_stash$python_backend)
+})
+
+test_that("remove_miniconda(ask = FALSE) flags the session and drops the cached backend", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  fake_miniconda <- withr::local_tempdir()
+  local_mocked_bindings(
+    miniconda_path = function(...) fake_miniconda,
+    .package = "reticulate"
+  )
+  old_flag <- greta_stash$deps_removed_this_session
+  old_backend <- greta_stash$python_backend
+  withr::defer({
+    greta_stash$deps_removed_this_session <- old_flag
+    greta_stash$python_backend <- old_backend
+  })
+  greta_stash$deps_removed_this_session <- FALSE
+  greta_stash$python_backend <- list(backend = "managed", source = "default")
+
+  expect_message(remove_miniconda(ask = FALSE), "successfully removed")
+  expect_true(greta_stash$deps_removed_this_session)
+  expect_null(greta_stash$python_backend)
+})
+
 test_that("remove_greta_env returns FALSE when there is no environment", {
   withr::local_options(lifecycle_verbosity = "quiet")
   local_mocked_bindings(have_greta_conda_env = function(...) FALSE)
@@ -210,4 +253,34 @@ test_that("greta_remove('all') clears stored preferences including deps", {
   suppressMessages(greta_remove(ask = FALSE))
   expect_null(get_greta_python_backend())
   expect_null(get_greta_stored_deps())
+})
+
+test_that("greta_remove('all') flags the session when the env or miniconda was removed", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  local_mocked_bindings(
+    remove_greta_env_impl = function(...) TRUE,
+    remove_miniconda_impl = function(...) FALSE,
+    remove_reticulate_uv_cache_impl = function(...) FALSE
+  )
+  old_flag <- greta_stash$deps_removed_this_session
+  withr::defer(greta_stash$deps_removed_this_session <- old_flag)
+  greta_stash$deps_removed_this_session <- FALSE
+
+  suppressMessages(greta_remove(ask = FALSE))
+  expect_true(greta_stash$deps_removed_this_session)
+})
+
+test_that("greta_remove('all') does not flag the session when nothing was removed", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  local_mocked_bindings(
+    remove_greta_env_impl = function(...) FALSE,
+    remove_miniconda_impl = function(...) FALSE,
+    remove_reticulate_uv_cache_impl = function(...) FALSE
+  )
+  old_flag <- greta_stash$deps_removed_this_session
+  withr::defer(greta_stash$deps_removed_this_session <- old_flag)
+  greta_stash$deps_removed_this_session <- FALSE
+
+  suppressMessages(greta_remove(ask = FALSE))
+  expect_false(greta_stash$deps_removed_this_session)
 })

@@ -48,6 +48,23 @@ tf <- tfp <- NULL
 .onAttach <- function(libname, pkgname) {
   # nolint
 
+  # If greta_remove() deleted the active environment earlier this session,
+  # greta is still pointing at it (it was resolved once, at .onLoad()); don't
+  # show the cheery conda-env nudge below, which would be misleading.
+  if (isTRUE(greta_stash$deps_removed_this_session)) {
+    packageStartupMessage(
+      cli::format_message(
+        c(
+          "!" = "It looks like you ran {.fun greta_remove} without \\
+            restarting R - greta is still pointing at the environment you \\
+            removed.",
+          "i" = "Restart R, then try again."
+        )
+      )
+    )
+    return(invisible())
+  }
+
   # When greta has auto-detected an existing greta-env-tf2 conda env, let the
   # user know (once) that they can opt into the managed (uv) environment (#801).
   if (should_nudge_to_managed()) {

@@ -386,6 +386,49 @@ test_that("greta hints are shown once", {
   expect_true(greta_hint_shown("conda_to_managed"))
 })
 
+test_that("flag_greta_deps_removed() sets the session flag", {
+  old <- greta_stash$deps_removed_this_session
+  withr::defer(greta_stash$deps_removed_this_session <- old)
+  greta_stash$deps_removed_this_session <- FALSE
+
+  flag_greta_deps_removed()
+  expect_true(greta_stash$deps_removed_this_session)
+})
+
+test_that("invalidate_greta_python_session() drops the cached backend plan", {
+  old_backend <- greta_stash$python_backend
+  withr::defer(greta_stash$python_backend <- old_backend)
+  greta_stash$python_backend <- list(backend = "conda", source = "auto_detect")
+
+  invalidate_greta_python_session()
+  expect_null(greta_stash$python_backend)
+})
+
+test_that("invalidate_greta_python_session() unsets RETICULATE_PYTHON greta owns", {
+  old_at_load <- greta_stash$reticulate_python_at_load
+  withr::defer(greta_stash$reticulate_python_at_load <- old_at_load)
+
+  withr::local_envvar(RETICULATE_PYTHON = "managed")
+  greta_stash$reticulate_python_at_load <- ""
+  invalidate_greta_python_session()
+  expect_identical(Sys.getenv("RETICULATE_PYTHON", unset = NA), NA_character_)
+
+  withr::local_envvar(RETICULATE_PYTHON = "managed")
+  greta_stash$reticulate_python_at_load <- "managed"
+  invalidate_greta_python_session()
+  expect_identical(Sys.getenv("RETICULATE_PYTHON", unset = NA), NA_character_)
+})
+
+test_that("invalidate_greta_python_session() leaves a user RETICULATE_PYTHON alone", {
+  old_at_load <- greta_stash$reticulate_python_at_load
+  withr::defer(greta_stash$reticulate_python_at_load <- old_at_load)
+
+  withr::local_envvar(RETICULATE_PYTHON = "/opt/my/python")
+  greta_stash$reticulate_python_at_load <- "/opt/my/python"
+  invalidate_greta_python_session()
+  expect_identical(Sys.getenv("RETICULATE_PYTHON"), "/opt/my/python")
+})
+
 test_that("RETICULATE_PYTHON takes precedence over a stored preference (#801)", {
   plan <- greta_python_plan(
     reticulate_python = "managed",
@@ -398,7 +441,9 @@ test_that("RETICULATE_PYTHON takes precedence over a stored preference (#801)", 
 
 test_that("should_nudge_to_managed() only fires for an interactive auto-detect", {
   withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
-  auto <- list(backend = "conda", source = "auto_detect")
+  fake_python <- withr::local_tempfile()
+  file.create(fake_python)
+  auto <- list(backend = "conda", source = "auto_detect", python = fake_python)
 
   expect_true(should_nudge_to_managed(auto, is_interactive = TRUE))
   expect_false(should_nudge_to_managed(auto, is_interactive = FALSE))
@@ -409,6 +454,16 @@ test_that("should_nudge_to_managed() only fires for an interactive auto-detect",
   ))
 
   mark_greta_hint_shown("conda_to_managed")
+  expect_false(should_nudge_to_managed(auto, is_interactive = TRUE))
+})
+
+test_that("should_nudge_to_managed() returns FALSE when the python is gone", {
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  auto <- list(
+    backend = "conda",
+    source = "auto_detect",
+    python = "/no/such/python"
+  )
   expect_false(should_nudge_to_managed(auto, is_interactive = TRUE))
 })
 
@@ -481,7 +536,14 @@ test_that("greta_py_require_args() defaults python_version to greta's range", {
 })
 
 test_that("report_offline_readiness() reports non-managed backends as ready", {
-  plan <- new_python_plan("user", "preference", python = "/opt/py")
+  fake_python <- withr::local_tempfile()
+  file.create(fake_python)
+  plan <- new_python_plan("user", "preference", python = fake_python)
+  expect_snapshot(report_offline_readiness(plan = plan))
+})
+
+test_that("report_offline_readiness() warns when a non-managed python is gone", {
+  plan <- new_python_plan("conda", "auto_detect", python = "/no/such/python")
   expect_snapshot(report_offline_readiness(plan = plan))
 })
 
