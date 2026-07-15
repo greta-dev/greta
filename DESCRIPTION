@@ -26,6 +26,7 @@ Description: Write statistical models in R and fit them by 'MCMC' and
     write models right in R, it scales well to massive datasets, and it’s easy
     to extend and build on.  See the website for more information, including
     tutorials, examples, package documentation, and the 'greta' forum.
+    This work is discussed at Golding (2019) <doi:10.21105/joss.01601>.
 License: Apache License 2.0
 URL: https://greta-dev.github.io/greta/, https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
