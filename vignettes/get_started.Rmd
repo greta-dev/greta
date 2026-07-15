@@ -18,7 +18,7 @@ You can install the stable version of greta from CRAN:
 install.packages("greta")
 ```
 
-Or install the development version of `greta` from [r-universe](http://greta-dev.r-universe.dev/):
+Or install the development version of `greta` from [r-universe](https://greta-dev.r-universe.dev/):
 
 ```r
 install.packages("greta", repos = c("https://greta-dev.r-universe.dev", "https://cloud.r-project.org"))
