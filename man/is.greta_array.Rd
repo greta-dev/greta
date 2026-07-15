@@ -11,6 +11,9 @@ is.greta_array(x, ...)
 
 \item{...}{extra args (currently not used)}
 }
+\value{
+A single logical value.
+}
 \description{
 Is object a greta array?
 }

@@ -9,6 +9,9 @@
 \arguments{
 \item{x}{greta node class}
 }
+\value{
+An integer vector of the node's dimensions.
+}
 \description{
 generic to grab dimensions of nodes
 }

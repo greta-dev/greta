@@ -16,6 +16,11 @@ already have a probability distribution assigned}
 \item{value}{a greta array with a distribution (see
 \code{\link[=distributions]{distributions()}})}
 }
+\value{
+\verb{distribution<-} returns \code{greta_array} (invisibly), the data
+greta array with the distribution assigned. \code{distribution()} returns
+the \code{greta_array} if it has a distribution, or \code{NULL} if it doesn't.
+}
 \description{
 \code{distribution} defines probability distributions over
 observed data, e.g. to set a model likelihood.

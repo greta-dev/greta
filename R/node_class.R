@@ -311,6 +311,7 @@ node <- R6Class(
 
 #' @title generic to grab dimensions of nodes
 #' @param x greta node class
+#' @return An integer vector of the node's dimensions.
 #' @export
 dim.node <- function(x) {
   x$dim

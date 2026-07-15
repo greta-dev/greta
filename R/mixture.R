@@ -24,6 +24,7 @@
 #'   The component probability distributions must all be either continuous or
 #'   discrete, and must have the same dimensions.
 #'
+#' @return A variable `greta_array` following the mixture distribution.
 #' @export
 #' @examples
 #' \dontrun{

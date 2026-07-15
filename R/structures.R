@@ -91,6 +91,7 @@ greta_array.default <- function(data = 0, dim = length(data)) {
 #'
 #' @param ... extra args (currently not used)
 #'
+#' @return A single logical value.
 #' @export
 is.greta_array <- function(x, ...) {
   inherits(x, "greta_array")

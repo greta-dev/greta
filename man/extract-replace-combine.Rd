@@ -30,6 +30,10 @@ not a matrix.}
 
 \item{drop, recursive}{generic arguments that are ignored for greta arrays}
 }
+\value{
+A \code{greta_array}, with elements extracted, replaced, or combined
+as appropriate for the method called.
+}
 \description{
 Generic methods to extract and replace elements of greta arrays,
 or to combine greta arrays.

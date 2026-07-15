@@ -9,6 +9,9 @@ as_data(x)
 \arguments{
 \item{x}{an R object that can be coerced to a greta_array (see details).}
 }
+\value{
+A data \code{greta_array} object.
+}
 \description{
 define an object in an R session as a data greta array for use
 as data in a greta model.

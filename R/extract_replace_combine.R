@@ -56,6 +56,8 @@
 #'   package supports both methods, and will do so based on which version of R
 #'    you are using.
 #'
+#' @return A `greta_array`, with elements extracted, replaced, or combined
+#'   as appropriate for the method called.
 #' @examples
 #' \dontrun{
 #'

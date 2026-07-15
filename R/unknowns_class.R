@@ -1,5 +1,6 @@
 #' @title Create objects of class 'unknowns' to nicely print ? valued arrays
 #' @param x object to convert to "unknowns" class
+#' @return An object of class `unknowns`.
 #' @export
 as.unknowns <- function(x) {
   # nolint
@@ -76,6 +77,7 @@ unknowns <- function(dims = c(1, 1), data = NA_real_) {
 #' @title set dims like on a matrix/array
 #' @param x matrix/array to set values to
 #' @param value values that are  being set set
+#' @return The object `x`, of class `unknowns`, with its dimensions updated.
 #' @export
 `dim<-.unknowns` <- function(x, value) {
   # nolint

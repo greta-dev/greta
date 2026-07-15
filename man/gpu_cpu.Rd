@@ -10,6 +10,9 @@ gpu_only()
 
 cpu_only()
 }
+\value{
+A single character string, \code{"GPU"} or \code{"CPU"}.
+}
 \description{
 These functions set the use of CPU or GPU inside of greta. They
 simply return either "GPU" or "CPU", but in the future may handle more

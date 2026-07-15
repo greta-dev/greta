@@ -119,6 +119,10 @@ distribution}
 
 \item{dimension}{the dimension of a multivariate distribution}
 }
+\value{
+A variable \code{greta_array} following the specified probability
+distribution.
+}
 \description{
 These functions can be used to define random variables in a
 greta model. They return a variable greta array that follows the specified

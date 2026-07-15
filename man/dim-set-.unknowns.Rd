@@ -11,6 +11,9 @@
 
 \item{value}{values that are  being set set}
 }
+\value{
+The object \code{x}, of class \code{unknowns}, with its dimensions updated.
+}
 \description{
 set dims like on a matrix/array
 }

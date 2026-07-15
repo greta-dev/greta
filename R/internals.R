@@ -39,6 +39,8 @@
 #' You can use `attach()` to put a sublist in the search path. E.g.
 #' `attach(.internals$nodes$constructors)` will enable you to call
 #' `op()`, `vble()` and `distrib()` directly.
+#' @return A nested list (`module`) of internal greta functions and R6
+#'   generators.
 NULL
 
 nodes_module <- module(

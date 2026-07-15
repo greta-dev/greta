@@ -37,6 +37,7 @@
 #'   the operations are only carried during sampling, the greta array objects
 #'   have unknown values.
 #'
+#' @return A `greta_array`, the result of applying the operator.
 #' @examples
 #' \dontrun{
 #'

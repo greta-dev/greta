@@ -240,7 +240,7 @@ draws <- mcmc(m, n_samples = 100)
 # add some more samples
 draws <- extra_samples(draws, 200)
 
-#' # initial values can be passed for some or all model variables
+# initial values can be passed for some or all model variables
 draws <- mcmc(m, chains = 1, initial_values = initials(mu = -1))
 
 # if there are multiple chains, a list of initial values should be passed,

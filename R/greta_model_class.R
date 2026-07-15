@@ -112,6 +112,7 @@ model <- function(..., precision = c("double", "single"), compile = TRUE) {
 #' @param x object to convert to greta model
 #' @param ... extra arguments - not used.
 #'
+#' @return A `greta_model` object.
 #' @export
 as.greta_model <- function(x, ...) {
   # nolint

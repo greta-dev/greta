@@ -3,6 +3,9 @@
 \name{operators}
 \alias{operators}
 \title{arithmetic, logical and relational operators for greta arrays}
+\value{
+A \code{greta_array}, the result of applying the operator.
+}
 \description{
 This is a list of currently implemented arithmetic, logical and
 relational operators to combine greta arrays into probabilistic models.

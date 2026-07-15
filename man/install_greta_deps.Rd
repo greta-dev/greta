@@ -46,6 +46,10 @@ only restarts R during interactive sessions, and only in RStudio.}
 confirmation before removing the existing greta conda environment.
 Defaults to \code{interactive()}.}
 }
+\value{
+Invisibly returns \code{NULL}; called for its side effect of
+installing greta's Python dependencies into a conda environment.
+}
 \description{
 This is a helper function to install specified versions of Python
 dependencies needed for greta. By default, greta version >= 0.6.0 now uses

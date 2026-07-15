@@ -26,6 +26,7 @@
 #'   operate on the final dimension, which must have more than 1 element.
 #'   Passing in a scalar value for `dim` therefore results in a row-vector.
 #'
+#' @return A variable `greta_array` satisfying the requested constraints.
 #' @examples
 #' \dontrun{
 #'

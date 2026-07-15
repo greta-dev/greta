@@ -339,6 +339,8 @@ tf_compat_optimiser <- R6Class(
 #' @param self optimiser of class: `tf_optimiser`, `tfp_optimiser`, or
 #'   `tf_compat_optimiser`.
 #'
+#' @return Invisibly returns `NULL`; called for its side effect of running
+#'   the optimiser and updating its internal state.
 #' @export
 run_optimiser <- function(self) {
   UseMethod("run_optimiser")

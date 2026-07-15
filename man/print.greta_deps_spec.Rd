@@ -11,6 +11,10 @@
 
 \item{...}{extra args, not used}
 }
+\value{
+Invisibly returns \code{x}; called for its side effect of printing
+\code{x} as a data frame.
+}
 \description{
 Print method for greta python deps
 }

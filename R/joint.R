@@ -22,6 +22,7 @@
 #'   consider these as a single distribution, e.g. for use with
 #'   `distribution` or `mixture`.
 #'
+#' @return A variable `greta_array` following the joint distribution.
 #' @export
 #' @examples
 #' \dontrun{
