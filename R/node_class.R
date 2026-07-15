@@ -173,9 +173,9 @@ node <- R6Class(
 
     # define this and all descendent objects on TF graph in environment
     define_tf = function(dag) {
-      if (Sys.getenv("GRETA_DEBUG") == "true") {
-        browser()
-      }
+      # if (Sys.getenv("GRETA_DEBUG") == "true") {
+      #   browser()
+      # }
       # if defined already, skip
       if (!self$defined(dag)) {
         # make sure parents are defined
