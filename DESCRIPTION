@@ -20,13 +20,12 @@ Authors@R: c(
     person("Paul", "Teetor", role = "ctb"),
     person("Jian", "Yen", role = "ctb")
   )
-Description: Write statistical models in R and fit them by MCMC and
+Description: Write statistical models in R and fit them by 'MCMC' and
     optimisation on 'CPUs' and 'GPUs', using Google 'TensorFlow'.  'greta' lets
-    you write your own model like in BUGS, JAGS and Stan, except that you
-    write models right in R, it scales well to massive datasets, and it’s
-    easy to extend and build on.  See the website for more information,
-    including tutorials, examples, package documentation, and the 'greta'
-    forum.
+    you write your own model like in 'BUGS', 'JAGS' and 'Stan', except that you
+    write models right in R, it scales well to massive datasets, and it’s easy
+    to extend and build on.  See the website for more information, including
+    tutorials, examples, package documentation, and the 'greta' forum.
 License: Apache License 2.0
 URL: https://greta-dev.github.io/greta/, https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
