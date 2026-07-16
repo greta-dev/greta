@@ -14,7 +14,9 @@ which led to the archival. They also fix some fundamental a tensorflow updates,
 and dependency changes in the DESCRIPTION, such as not relying on `==` for 
 versions. We have also made other various improvements, mostly around having
 improved installation handling of python. We now also set the number of cores 
-to 2 by default.
+to 2 by default. 
+
+We also fixed a NOTE that arose from an empty link (e.g., `[example with no url]()`) in a vignette on a submission yesterday.
 
 ## revdepcheck results
 
