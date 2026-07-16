@@ -18,7 +18,7 @@ You can install the stable version of greta from CRAN:
 install.packages("greta")
 ```
 
-Or install the development version of `greta` from [r-universe](https://greta-dev.r-universe.dev/):
+Or install the development version of `greta` from [r-universe](http://greta-dev.r-universe.dev/):
 
 ```r
 install.packages("greta", repos = c("https://greta-dev.r-universe.dev", "https://cloud.r-project.org"))
@@ -785,16 +785,16 @@ Sample size per chain = 1000
    plus standard error of the mean:
 
        Mean      SD  Naive SE Time-series SE
-int  4.2814 0.07961 0.0017801      0.0021163
-coef 0.4144 0.01934 0.0004324      0.0004993
-sd   0.4108 0.02442 0.0005460      0.0006635
+int  4.2786 0.07782 0.0017400      0.0021746
+coef 0.4150 0.01892 0.0004231      0.0004655
+sd   0.4099 0.02363 0.0005284      0.0006171
 
 2. Quantiles for each variable:
 
-      2.5%    25%    50%    75%  97.5%
-int  4.130 4.2277 4.2792 4.3361 4.4431
-coef 0.376 0.4018 0.4146 0.4269 0.4527
-sd   0.367 0.3933 0.4100 0.4270 0.4619
+       2.5%    25%    50%    75%  97.5%
+int  4.1241 4.2248 4.2773 4.3290 4.4338
+coef 0.3761 0.4028 0.4153 0.4276 0.4517
+sd   0.3670 0.3935 0.4095 0.4248 0.4597
 ```
 The bayesplot package makes some nice plots of the MCMC chain and the parameter estimates
 
