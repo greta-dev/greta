@@ -5,7 +5,7 @@
 #' @description Generic methods to extract and replace elements of greta arrays,
 #'   or to combine greta arrays.
 #'
-#' @section Usage: \preformatted{
+#' @usage
 #' # extract
 #' x[i]
 #' x[i, j, ..., drop = FALSE]
@@ -29,7 +29,6 @@
 #' length(x)
 #' dim(x)
 #' dim(x) <- value
-#' }
 #'
 #' @param x a greta array
 #' @param i,j indices specifying elements to extract or replace

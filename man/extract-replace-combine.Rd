@@ -9,6 +9,31 @@
 \alias{c}
 \alias{rep}
 \title{extract, replace and combine greta arrays}
+\usage{
+# extract
+x[i]
+x[i, j, ..., drop = FALSE]
+head(x, n = 6L, ...)
+tail(x, n = 6L, ...)
+diag(x, nrow, ncol)
+
+# replace
+x[i] <- value
+x[i, j, ...] <- value
+diag(x) <- value
+
+# combine
+cbind(...)
+rbind(...)
+abind(...)
+c(..., recursive = FALSE)
+rep(x, times, ..., recursive = FALSE)
+
+# get and set dimensions
+length(x)
+dim(x)
+dim(x) <- value
+}
 \arguments{
 \item{x}{a greta array}
 
@@ -50,34 +75,6 @@ to print a vector rather than maintain the array structure. The \code{greta}
 package supports both methods, and will do so based on which version of R
 you are using.
 }
-\section{Usage}{
- \preformatted{
-# extract
-x[i]
-x[i, j, ..., drop = FALSE]
-head(x, n = 6L, ...)
-tail(x, n = 6L, ...)
-diag(x, nrow, ncol)
-
-# replace
-x[i] <- value
-x[i, j, ...] <- value
-diag(x) <- value
-
-# combine
-cbind(...)
-rbind(...)
-abind(...)
-c(..., recursive = FALSE)
-rep(x, times, ..., recursive = FALSE)
-
-# get and set dimensions
-length(x)
-dim(x)
-dim(x) <- value
-}
-}
-
 \examples{
 \dontrun{
 
