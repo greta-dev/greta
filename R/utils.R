@@ -856,6 +856,9 @@ create_temp_file <- function(path) {
 #'   complexity. These functions are passed to `compute_options` inside of a few
 #'   functions: [mcmc()], [opt()], and [calculate()].
 #' @return A single character string, `"GPU"` or `"CPU"`.
+#' @examples
+#' gpu_only()
+#' cpu_only()
 #' @export
 gpu_only <- function() {
   "GPU"

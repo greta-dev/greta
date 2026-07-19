@@ -26,6 +26,9 @@ as.mcmc.list.greta_mcmc_list <- function(x, ...) {
 #' @param ... extra args (not currently used)
 #' @returns logical TRUE/FALSE
 #'
+#' @examples
+#' is.greta_mcmc_list(1)
+#'
 #' @export
 is.greta_mcmc_list <- function(x, ...) {
   inherits(x, "greta_mcmc_list")

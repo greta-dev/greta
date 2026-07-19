@@ -17,3 +17,6 @@ A single logical value.
 \description{
 Is object a greta array?
 }
+\examples{
+is.greta_array(1)
+}
