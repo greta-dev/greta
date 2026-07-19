@@ -1,11 +1,27 @@
 #' @name extract-replace-combine
-#' @aliases extract replace cbind rbind c rep
+#' @aliases extract replace
 #' @title extract, replace and combine greta arrays
 #'
 #' @description Generic methods to extract and replace elements of greta arrays,
 #'   or to combine greta arrays.
 #'
-#' @usage
+#' @param x a greta array
+#' @param n a single integer, as in `utils::head()` and
+#'   `utils::tail()`
+#' @param nrow,ncol optional dimensions for the resulting greta array when x is
+#'   not a matrix.
+#' @param value for ``[<-`` a greta array to replace elements, for
+#'   ``dim<-`` either NULL or a numeric vector of dimensions
+#' @param ... either further indices specifying elements to extract or replace
+#'   (`i`, `j` for `[`), or multiple greta arrays to combine (`cbind()`,
+#'   `rbind()` & `c()`), or additional arguments (`rep()`, `head()`, `tail()`).
+#'   Generic arguments such as `drop` and `recursive` are accepted but ignored
+#'   for greta arrays.
+#'
+#' @section Syntax:
+#' These methods can be used with greta arrays as follows:
+#'
+#' ```
 #' # extract
 #' x[i]
 #' x[i, j, ..., drop = FALSE]
@@ -29,20 +45,7 @@
 #' length(x)
 #' dim(x)
 #' dim(x) <- value
-#'
-#' @param x a greta array
-#' @param i,j indices specifying elements to extract or replace
-#' @param n a single integer, as in `utils::head()` and
-#'   `utils::tail()`
-#' @param nrow,ncol optional dimensions for the resulting greta array when x is
-#'   not a matrix.
-#' @param value for ``[<-`` a greta array to replace elements, for
-#'   ``dim<-`` either NULL or a numeric vector of dimensions
-#' @param ... either further indices specifying elements to extract or replace
-#'   (`[`), or multiple greta arrays to combine (`cbind()`,
-#'   `rbind()` & `c()`), or additional arguments (`rep()`,
-#'   `head()`, `tail()`)
-#' @param drop,recursive generic arguments that are ignored for greta arrays
+#' ```
 #'
 #' @details `diag()` can be used to extract or replace the diagonal part of
 #'   a square and two-dimensional greta array, but it cannot be used to create a
@@ -78,6 +81,7 @@
 NULL
 
 # extract syntax for greta_array objects
+#' @rdname extract-replace-combine
 #' @export
 `[.greta_array` <- function(x, ...) {
   # store the full call to mimic on a dummy array, plus the array's dimensions
@@ -163,6 +167,7 @@ NULL
 }
 
 # replace syntax for greta array objects
+#' @rdname extract-replace-combine
 #' @export
 `[<-.greta_array` <- function(x, ..., value) {
   # nolint
@@ -246,6 +251,7 @@ NULL
   )
 }
 
+#' @rdname extract-replace-combine
 #' @export
 cbind.greta_array <- function(...) {
   dots <- list(...)
@@ -278,6 +284,7 @@ cbind.greta_array <- function(...) {
   op("cbind", ..., dim = dims, tf_operation = "tf_cbind")
 }
 
+#' @rdname extract-replace-combine
 #' @export
 rbind.greta_array <- function(...) {
   dots <- list(...)
@@ -486,6 +493,7 @@ abind.greta_array <- function(
   )
 }
 
+#' @rdname extract-replace-combine
 #' @export
 c.greta_array <- function(...) {
   args <- list(...)
@@ -523,6 +531,7 @@ c.greta_array <- function(...) {
   )
 }
 
+#' @rdname extract-replace-combine
 #' @export
 rep.greta_array <- function(x, ...) {
   # get the index
@@ -533,17 +542,20 @@ rep.greta_array <- function(x, ...) {
 }
 
 # get dimensions
+#' @rdname extract-replace-combine
 #' @export
 dim.greta_array <- function(x) {
   as.integer(get_node(x)$dim)
 }
 
+#' @rdname extract-replace-combine
 #' @export
 length.greta_array <- function(x) {
   prod(dim(x))
 }
 
 # reshape greta arrays
+#' @rdname extract-replace-combine
 #' @export
 `dim<-.greta_array` <- function(x, value) {
   # nolint
@@ -632,6 +644,7 @@ length.greta_array <- function(x) {
 
 # head handles matrices differently to arrays, so explicitly handle 2D greta
 # arrays
+#' @rdname extract-replace-combine
 #' @export
 #' @importFrom utils head
 #' @importFrom utils head.matrix
@@ -645,6 +658,7 @@ head.greta_array <- function(x, n = 6L, ...) {
   ans
 }
 
+#' @rdname extract-replace-combine
 #' @export
 #' @importFrom utils tail
 #' @importFrom utils tail.matrix
@@ -670,6 +684,7 @@ diag.default <- function(...) {
   base::diag(...)
 }
 
+#' @rdname extract-replace-combine
 #' @export
 diag.greta_array <- function(x = 1, nrow, ncol) {
   dim <- dim(x)
