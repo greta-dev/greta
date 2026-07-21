@@ -1,0 +1,45 @@
+# software
+
+greta relies on, and was inspired by some pretty incredible pieces of
+software which deserve recognition.
+
+### Google TensorFlow
+
+greta wouldn’t be possible without
+[TensorFlow](https://www.tensorflow.org/), Googles computation engine
+for large-scale machine learning. TensorFlow runs all of greta’s
+calculations, enables distributed computations on multi-core and GPU
+systems, and carries out automatic differentiation efficiently, enabling
+greta to use efficient inference algorithms like Hamiltonian Monte
+Carlo.
+
+### R packages
+
+TensorFlow is implemented in C++ and Python.
+[RStudio’s](https://www.rstudio.com/)
+[reticulate](https://github.com/rstudio/reticulate) and
+[tensorflow](https://rstudio.github.io/tensorflow/) packages provide the
+magic that bring TensorFlow and all things python to R. Under the hood,
+greta also uses Winston Chang’s [R6](https://github.com/wch/R6) object
+system, and greta’s model plotting functionality is made possible by
+[DiagrammeR](http://rich-iannone.github.io/DiagrammeR/).
+
+### MCMC software
+
+The design and scope of greta was inspired by other general-purpose MCMC
+software like [BUGS](http://www.openbugs.net/) and
+[JAGS](http://mcmc-jags.sourceforge.net/) that have enabled researchers
+to focus on modelling, rather than writing code.
+[Stan’s](http://mc-stan.org/) approach of using automatic
+differentiation to enable efficient MCMC was a particularly big
+influence on greta, and the quality and quantity of Stan’s documentation
+and examples are something greta aspires to.
+
+### python packages
+
+The python package [Edward](http://edwardlib.org/) also uses TensorFlow
+as a backend for general-purpose statistical modelling, in a very
+elegant and pythonic way. [GPflow](https://github.com/GPflow/GPflow)
+uses a similar approach for the more specialised area of Gaussian
+process modelling, and was a strong influence on how greta is
+implemented.

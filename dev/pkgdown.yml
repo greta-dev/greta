@@ -1,0 +1,18 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  webpages/contribute: webpages/contribute.html
+  analyses/eight_schools: analyses/eight_schools.html
+  analyses/election_88: analyses/election_88.html
+  example_models: example_models.html
+  faq: faq.html
+  get_started: get_started.html
+  installation: installation.html
+  webpages/software: webpages/software.html
+  webpages/technical_details: webpages/technical_details.html
+  webpages/why_greta: webpages/why_greta.html
+last_built: 2026-07-21T22:30Z
+urls:
+  reference: https://greta-dev.github.io/greta/reference
+  article: https://greta-dev.github.io/greta/articles
