@@ -15,6 +15,9 @@ distribution.}
 or a vector of positive integers. The final dimension of the greta array
 returned will be determined by the number of component distributions}
 }
+\value{
+A variable \code{greta_array} following the joint distribution.
+}
 \description{
 \code{joint} combines univariate probability distributions
 together into a multivariate (and \emph{a priori} independent between

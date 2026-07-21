@@ -407,11 +407,11 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
     lapply(target, check_dependencies_satisfied, fixed_greta_arrays, dag, env)
   }
 
+  # if (Sys.getenv("GRETA_DEBUG") == "true") {
+  #   browser()
+  # }
   # TF1/2 check todo
   # need to wrap this in tf_function I think?
-  if (Sys.getenv("GRETA_DEBUG") == "true") {
-    browser()
-  }
   values <- calculate_target_tensor_list(
     dag = dag,
     fixed_greta_arrays = fixed_greta_arrays,

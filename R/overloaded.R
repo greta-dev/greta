@@ -21,5 +21,7 @@
 #'   To find the original help file for these overloaded functions, search for
 #'   the function, e.g., `?cov2cor` and select the non-greta function.
 #'
+#' @return An object of the same type as the base R equivalent (typically a
+#'   `greta_array`).
 NULL
 # nolint end

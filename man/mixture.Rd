@@ -19,6 +19,9 @@ distribution dimension.}
 \item{dim}{the dimensions of the greta array to be returned, either a scalar
 or a vector of positive integers.}
 }
+\value{
+A variable \code{greta_array} following the mixture distribution.
+}
 \description{
 \code{mixture} combines other probability distributions into a
 single mixture distribution, either over a variable, or for fixed data.

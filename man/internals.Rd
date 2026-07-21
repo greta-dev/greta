@@ -4,6 +4,10 @@
 \alias{internals}
 \alias{.internals}
 \title{internal greta methods}
+\value{
+A nested list (\code{module}) of internal greta functions and R6
+generators.
+}
 \description{
 A list of functions and R6 class objects that can be used to
 develop extensions to greta. Most users will not need to access these

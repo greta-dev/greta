@@ -11,11 +11,11 @@ and it’s easy to extend and build on.
 You can install the current release version of the package from
 CRAN:
 
-``` r
+```r
 install.packages("greta")
 ```
 
-Or install the development version of `greta` from [r-universe](http://greta-dev.r-universe.dev/):
+Or install the development version of `greta` from [r-universe](https://greta-dev.r-universe.dev/):
 
 ```r
 install.packages("greta", repos = c("https://greta-dev.r-universe.dev", "https://cloud.r-project.org"))

@@ -11,6 +11,9 @@ as.greta_model(x, ...)
 
 \item{...}{extra arguments - not used.}
 }
+\value{
+A \code{greta_model} object.
+}
 \description{
 Convert object to a "greta_model" object
 }

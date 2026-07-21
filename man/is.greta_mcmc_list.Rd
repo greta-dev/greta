@@ -17,3 +17,7 @@ logical TRUE/FALSE
 \description{
 Is object a \code{greta_mcmc_list}?
 }
+\examples{
+is.greta_mcmc_list(1)
+
+}

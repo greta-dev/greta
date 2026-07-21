@@ -6,12 +6,16 @@
 \usage{
 greta_notes_tf_num_error()
 }
+\value{
+Invisibly returns \code{NULL}; called for its side effect of printing
+the stored message.
+}
 \description{
 These functions retrieve specific python error messages that might
 come up during greta use.
 }
 \examples{
 \dontrun{
-greta_notes_tf_error()
+greta_notes_tf_num_error()
 }
 }

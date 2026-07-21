@@ -173,9 +173,9 @@ node <- R6Class(
 
     # define this and all descendent objects on TF graph in environment
     define_tf = function(dag) {
-      if (Sys.getenv("GRETA_DEBUG") == "true") {
-        browser()
-      }
+      # if (Sys.getenv("GRETA_DEBUG") == "true") {
+      #   browser()
+      # }
       # if defined already, skip
       if (!self$defined(dag)) {
         # make sure parents are defined
@@ -311,6 +311,7 @@ node <- R6Class(
 
 #' @title generic to grab dimensions of nodes
 #' @param x greta node class
+#' @return An integer vector of the node's dimensions.
 #' @export
 dim.node <- function(x) {
   x$dim

@@ -22,12 +22,14 @@ greta_stash$tf_num_error <- greta_note_msg
 #'   come up during greta use.
 #'
 #' @rdname stash-notes
+#' @return Invisibly returns `NULL`; called for its side effect of printing
+#'   the stored message.
 #' @export
 #' @examples
 #' \dontrun{
-#' greta_notes_tf_error()
+#' greta_notes_tf_num_error()
 #' }
 greta_notes_tf_num_error <- function() {
   # wrap in paste0 to remove list properties
-  cat(paste0(greta_stash$tf_num_error))
+  message(paste0(greta_stash$tf_num_error))
 }

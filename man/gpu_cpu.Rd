@@ -10,9 +10,16 @@ gpu_only()
 
 cpu_only()
 }
+\value{
+A single character string, \code{"GPU"} or \code{"CPU"}.
+}
 \description{
 These functions set the use of CPU or GPU inside of greta. They
 simply return either "GPU" or "CPU", but in the future may handle more
 complexity. These functions are passed to \code{compute_options} inside of a few
 functions: \code{\link[=mcmc]{mcmc()}}, \code{\link[=opt]{opt()}}, and \code{\link[=calculate]{calculate()}}.
+}
+\examples{
+gpu_only()
+cpu_only()
 }

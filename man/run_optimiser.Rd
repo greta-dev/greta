@@ -10,6 +10,10 @@ run_optimiser(self)
 \item{self}{optimiser of class: \code{tf_optimiser}, \code{tfp_optimiser}, or
 \code{tf_compat_optimiser}.}
 }
+\value{
+Invisibly returns \code{NULL}; called for its side effect of running
+the optimiser and updating its internal state.
+}
 \description{
 Should also allow for building other methods in the future
 }

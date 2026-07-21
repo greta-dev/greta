@@ -4,31 +4,65 @@
 \alias{extract-replace-combine}
 \alias{extract}
 \alias{replace}
-\alias{cbind}
-\alias{rbind}
-\alias{c}
-\alias{rep}
+\alias{[.greta_array}
+\alias{[<-.greta_array}
+\alias{cbind.greta_array}
+\alias{rbind.greta_array}
+\alias{c.greta_array}
+\alias{rep.greta_array}
+\alias{dim.greta_array}
+\alias{length.greta_array}
+\alias{dim<-.greta_array}
+\alias{head.greta_array}
+\alias{tail.greta_array}
+\alias{diag.greta_array}
 \title{extract, replace and combine greta arrays}
+\usage{
+\method{[}{greta_array}(x, ...)
+
+\method{[}{greta_array}(x, ...) <- value
+
+\method{cbind}{greta_array}(...)
+
+\method{rbind}{greta_array}(...)
+
+\method{c}{greta_array}(...)
+
+\method{rep}{greta_array}(x, ...)
+
+\method{dim}{greta_array}(x)
+
+\method{length}{greta_array}(x)
+
+\method{dim}{greta_array}(x) <- value
+
+\method{head}{greta_array}(x, n = 6L, ...)
+
+\method{tail}{greta_array}(x, n = 6L, ...)
+
+\method{diag}{greta_array}(x = 1, nrow, ncol)
+}
 \arguments{
 \item{x}{a greta array}
 
-\item{i, j}{indices specifying elements to extract or replace}
+\item{...}{either further indices specifying elements to extract or replace
+(\code{i}, \code{j} for \code{[}), or multiple greta arrays to combine (\code{cbind()},
+\code{rbind()} & \code{c()}), or additional arguments (\code{rep()}, \code{head()}, \code{tail()}).
+Generic arguments such as \code{drop} and \code{recursive} are accepted but ignored
+for greta arrays.}
+
+\item{value}{for \verb{[<-} a greta array to replace elements, for
+\verb{dim<-} either NULL or a numeric vector of dimensions}
 
 \item{n}{a single integer, as in \code{utils::head()} and
 \code{utils::tail()}}
 
 \item{nrow, ncol}{optional dimensions for the resulting greta array when x is
 not a matrix.}
-
-\item{value}{for \verb{[<-} a greta array to replace elements, for
-\verb{dim<-} either NULL or a numeric vector of dimensions}
-
-\item{...}{either further indices specifying elements to extract or replace
-(\code{[}), or multiple greta arrays to combine (\code{cbind()},
-\code{rbind()} & \code{c()}), or additional arguments (\code{rep()},
-\code{head()}, \code{tail()})}
-
-\item{drop, recursive}{generic arguments that are ignored for greta arrays}
+}
+\value{
+A \code{greta_array}, with elements extracted, replaced, or combined
+as appropriate for the method called.
 }
 \description{
 Generic methods to extract and replace elements of greta arrays,
@@ -46,9 +80,11 @@ to print a vector rather than maintain the array structure. The \code{greta}
 package supports both methods, and will do so based on which version of R
 you are using.
 }
-\section{Usage}{
- \preformatted{
-# extract
+\section{Syntax}{
+
+These methods can be used with greta arrays as follows:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# extract
 x[i]
 x[i, j, ..., drop = FALSE]
 head(x, n = 6L, ...)
@@ -71,7 +107,7 @@ rep(x, times, ..., recursive = FALSE)
 length(x)
 dim(x)
 dim(x) <- value
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{

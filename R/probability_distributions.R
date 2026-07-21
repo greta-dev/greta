@@ -1332,6 +1332,8 @@ distribution_classes_module <- module(
 #'   [rethinking::dlkjcorr](https://rdrr.io/github/rmcelreath/rethinking/man/dlkjcorr.html)
 #'   }
 #'
+#' @return A variable `greta_array` following the specified probability
+#'   distribution.
 #' @examples
 #' \dontrun{
 #'

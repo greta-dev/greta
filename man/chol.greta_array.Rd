@@ -18,6 +18,10 @@ result in code that uses \code{chol()} to be slow. Default is TRUE. Can change
 to FALSE, but may encounter issues in
 \url{https://github.com/greta-dev/greta/issues/585}.}
 }
+\value{
+An upper-triangular \code{greta_array} representing the Cholesky
+factor of \code{x}.
+}
 \description{
 Compute the Cholesky Factor of a Matrix
 }

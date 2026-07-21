@@ -549,7 +549,7 @@ sampler <- R6Class(
         is.null(batch_results$all_states) && Sys.getenv("GRETA_DEBUG") == "true"
       ) {
         ## TODO probably need to remove this?
-        browser()
+        # browser()
       }
       free_state_draws <- as.array(batch_results$all_states)
 

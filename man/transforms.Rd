@@ -27,6 +27,9 @@ imultilogit(x)
 \item{x}{a real-valued (i.e. values ranging from -Inf to Inf) greta array to
 transform to a constrained value}
 }
+\value{
+A \code{greta_array} with the transformation applied.
+}
 \description{
 transformations for greta arrays, which may also be used as
 inverse link functions. Also see \link{operators} and \link{functions}.

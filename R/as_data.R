@@ -9,6 +9,7 @@
 #'   Logical elements are always converted to numerics. R objects cannot be
 #'   converted if they contain missing (`NA`) or infinite (`-Inf` or
 #'   `Inf`) values.
+#' @return A data `greta_array` object.
 #' @export
 #' @examples
 #' \dontrun{

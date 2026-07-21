@@ -2,18 +2,18 @@
 
 ## Changes
 
-* `as.unknowns()` now handles plain numeric vectors (and `dim<-` being set to `NULL`), fixing an `mcmc()` error "no applicable method for 'as.unknowns'" that surfaced when re-building vignettes under R-devel (#582).
-* `log.greta_array()` function warns if user uses the `base` arg, as it was unused, (#597).
-* `outer()` (and `%o%`) now works with greta arrays when `FUN = "*"`, instead of silently returning a base array of `NA`s; base R's `"*"` fast path used `as.vector()`, which dropped the greta operation (#582).
-* Reshaping a greta array with `dim<-` now keeps the `?` placeholder display for unknown values instead of showing `NA` (#582).
-* Add warmup information to MCMC print method (#652, resolved by #755).
-* Add more options to level of detail in `greta_sitrep()` with "verbosity" argument. There are three levels, "minimal" (default), "detailed", and "quiet". (#612, resolved by #679).
-* Use `.batch_size` instead of `batch_size` internally, to avoid rare name clash errors (#634).
-* Resolve issues with Tensorflow version in DESCRIPTION (no longer can specify == 2.16.0, must be >= 2.16.0).
-* When the number of cores requested exceeds the number of cores detected, then the number of cores detected will be used.
-* Ensure `n_cores` arg defaults to 2 cores, and `chains` defaults to 2 chains.
-* Cap TensorFlow's internal CPU threadpool inside vignette builds (via `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN's CPU/elapsed timing on vignette rebuild stays under the two-core limit (#796).
+* Add warmup information to the MCMC print method (#652, resolved by #755).
+* Cap TensorFlow's internal CPU threadpool inside vignette builds (via `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN's CPU/elapsed timing on vignette rebuilds stays under the two-core limit (#796).
 * greta now also caps TensorFlow's CPU thread pools at 2 when running under `R CMD check` (detected via the `_R_CHECK_LIMIT_CORES_` environment variable), so checks on CRAN machines respect the two-core limit (#796).
+* Reshaping a greta array with `dim<-` now keeps the `?` placeholder display for unknown values instead of showing `NA` (#582).
+* Resolve issues with the TensorFlow version in DESCRIPTION: greta no longer requires `== 2.16.0` and now accepts `>= 2.16.0`.
+* The `n_cores` argument now defaults to 2 cores and `chains` defaults to 2 chains; when the number of cores requested exceeds the number detected, the number detected is used.
+* Use `.batch_size` instead of `batch_size` internally, to avoid rare name clash errors (#634).
+* `as.unknowns()` now handles plain numeric vectors (and `dim<-` being set to `NULL`), fixing an `mcmc()` error "no applicable method for 'as.unknowns'" that surfaced when re-building vignettes under R-devel (#582).
+* `greta_notes_tf_num_error()` now emits its note with `message()` rather than `cat()`, so it can be silenced with `suppressMessages()` and is written to the message stream.
+* `greta_sitrep()` gains a `verbosity` argument with three levels of detail: "minimal" (default), "detailed", and "quiet" (#612, resolved by #679).
+* `log.greta_array()` now warns when the `base` argument is supplied, as it was being ignored (#597).
+* `outer()` (and `%o%`) now works with greta arrays when `FUN = "*"`, instead of silently returning a base array of `NA`s; base R's `"*"` fast path used `as.vector()`, which dropped the greta operation (#582).
 
 ### Installation and dependencies
 
@@ -22,9 +22,8 @@
 * Fixed `library(greta)` failing with an error when greta's stored Python preference file exists but is empty (#809).
 * `greta_deps_spec()` now only checks that the requested TensorFlow version is one greta supports (TensorFlow 2.16 and later are not supported, as they ship Keras 3); compatible TensorFlow Probability and Python versions are left to uv or conda to resolve rather than being validated against a fixed compatibility table (#675).
 * `greta_list_py_modules()` shows the Python packages installed in a specific TF2 environment (#801, #809).
-* `greta_remove()` consolidates greta's Python removal helpers behind a single `what` argument to remove the `greta-env-tf2` conda environment, miniconda, reticulate's uv cache, the stored Python preference, the stored dependency versions, or all of them. This means `destroy_greta_deps()`, `greta_remove_all_deps()`, `remove_greta_env()`, `remove_miniconda()`, and `remove_reticulate_uv_cache()`, are now superceded by `greta_remove()` (#814).
+* `greta_remove()` consolidates greta's Python removal helpers behind a single `what` argument to remove the `greta-env-tf2` conda environment, miniconda, reticulate's uv cache, the stored Python preference, the stored dependency versions, or all of them. This means `destroy_greta_deps()`, `greta_remove_all_deps()`, `remove_greta_env()`, `remove_miniconda()`, and `remove_reticulate_uv_cache()` are now superseded by `greta_remove()` (#814).
 * `greta_remove()` no longer leaves a stale, deleted environment active for the rest of the session: it now invalidates greta's cached Python backend and nudges you to restart R if you try to use greta again without restarting, instead of silently failing or falsely reporting the removed environment as still available.
-* `reinstall_greta_env()`, and `reinstall_miniconda()` are now deprecated in favour of `reinstall_greta_deps()` (#814).
 * `greta_set_deps()` persistently chooses which TensorFlow, TensorFlow Probability, and Python versions greta uses; the managed (uv) environment installs them on next load and `install_greta_deps()` uses them as its default; clear with `greta_remove("deps")` (#817).
 * `greta_set_python()` and `greta_reset_python()` let you choose, persistently, which Python environment greta uses - the managed (uv) environment (`backend = "uv"`, the default), a conda environment (`backend = "conda"`), or a specific Python (`backend = "path"`); each reports the stored preference, warns if `RETICULATE_PYTHON` takes precedence, and shows what greta will resolve to on its next load (#801, #809, #817).
 * `greta_set_python("path", path = ...)` accepts either a Python binary or an environment directory (a virtualenv or conda prefix), looking for `bin/python` (or `Scripts/python.exe` on Windows) inside it, which eases offline and pre-installed setups (#814).
@@ -32,6 +31,8 @@
 * `greta_sitrep()` now requires Python 3.9 or later (previously 3.8), matching the Python versions greta supports (#809).
 * `install_greta_deps()` now records the location of the `greta-env-tf2` conda environment at install time, so greta auto-detects it in any conda installation, not just reticulate's miniconda (#809).
 * `install_greta_deps()` is no longer required for most users, as greta now installs TensorFlow and TensorFlow Probability automatically via uv on first use; it remains for installing a conda environment (for example, for offline use), which you can then select with `greta_set_python("conda")` (#801).
+* `install_greta_deps()` now restores the `warning.length` option when it exits, instead of leaving its own value in place for the rest of the session.
+* `reinstall_greta_env()` and `reinstall_miniconda()` are now deprecated in favour of `reinstall_greta_deps()` (#814).
 * `remove_greta_env()`, `remove_miniconda()`, and `remove_reticulate_uv_cache()` ask for confirmation before removing, gain an `ask` argument (default `interactive()`) so they work non-interactively, and invisibly return whether anything was removed (#809).
 * `remove_reticulate_uv_cache()` removes reticulate's uv cache; note this cache is shared by all reticulate packages and is not greta-specific, and a system-wide uv cache is left untouched (#801, #809).
 

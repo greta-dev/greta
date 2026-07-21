@@ -10,6 +10,9 @@ chol2symm(x)
 \item{x}{a square, upper triangular matrix representing the Cholesky
 factor of a symmetric, positive definite square matrix}
 }
+\value{
+A symmetric, positive-definite matrix or \code{greta_array}.
+}
 \description{
 Evaluate \verb{t(x) \\\%*\\\% x} efficiently, where \code{x} is the
 (upper-triangular) Cholesky factor of a symmetric, positive definite square

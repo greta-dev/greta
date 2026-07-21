@@ -15,6 +15,9 @@
 #'   or `NULL` if it doesn't. It has no real use-case, but is included for
 #'   completeness
 #'
+#' @return `distribution<-` returns `greta_array` (invisibly), the data
+#'   greta array with the distribution assigned. `distribution()` returns
+#'   the `greta_array` if it has a distribution, or `NULL` if it doesn't.
 #' @export
 #' @examples
 #' \dontrun{

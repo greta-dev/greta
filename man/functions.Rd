@@ -3,6 +3,10 @@
 \name{functions}
 \alias{functions}
 \title{functions for greta arrays}
+\value{
+A \code{greta_array}, with the function applied elementwise or as
+appropriate for the function called.
+}
 \description{
 This is a list of functions (mostly from base R) that are
 currently implemented to transform greta arrays. Also see \link{operators}

@@ -24,6 +24,7 @@
 #'   adding a final column of 0s and then running the softmax function widely
 #'   used in machine learning.
 #'
+#' @return A `greta_array` with the transformation applied.
 #' @examples
 #' \dontrun{
 #'

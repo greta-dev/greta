@@ -81,6 +81,8 @@
 #'
 #' @name install_greta_deps
 #'
+#' @return Invisibly returns `NULL`; called for its side effect of
+#'   installing greta's Python dependencies into a conda environment.
 #' @export
 #'
 #' @examples
@@ -131,8 +133,9 @@ install_greta_deps <- function(
     "i" = "See the installation vignette: {.vignette greta::installation}."
   ))
 
-  # set warning message length
-  options(warning.length = 2000)
+  # set warning message length, restoring the previous value on exit
+  old_options <- options(warning.length = 2000)
+  on.exit(options(old_options), add = TRUE)
 
   # install miniconda if needed
   if (!have_conda()) {
@@ -375,6 +378,8 @@ check_greta_deps_spec <- function(deps, call = rlang::caller_env()) {
 #'
 #' @param x greta python deps
 #' @param ... extra args, not used
+#' @return Invisibly returns `x`; called for its side effect of printing
+#'   `x` as a data frame.
 #' @export
 print.greta_deps_spec <- function(x, ...) {
   print.data.frame(x)

@@ -28,6 +28,9 @@ or a vector of positive integers. See details.}
 correlation matrix (diagonal elements equalling 1, off-diagonal elements
 between -1 and 1).}
 }
+\value{
+A variable \code{greta_array} satisfying the requested constraints.
+}
 \description{
 \code{variable()} creates greta arrays representing unknown
 parameters, to be learned during model fitting. These parameters are not

@@ -105,6 +105,8 @@
 #'   `trigamma()` uses TensorFlow's polygamma function, resulting in lower
 #'   precision than R's equivalent.
 #'
+#' @return A `greta_array`, with the function applied elementwise or as
+#'   appropriate for the function called.
 #' @examples
 #' \dontrun{
 #'
@@ -363,6 +365,8 @@ aperm.greta_array <- function(a, perm = NULL, ...) {
 #'   to FALSE, but may encounter issues in
 #'   \url{https://github.com/greta-dev/greta/issues/585}.
 #'
+#' @return An upper-triangular `greta_array` representing the Cholesky
+#'   factor of `x`.
 #' @export
 chol.greta_array <- function(x, ..., force_cholesky = FALSE) {
   if (!identical(list(), list(...))) {
